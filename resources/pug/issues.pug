@@ -31,6 +31,10 @@ html(lang="en" ng-app="3drepo").ng-scope
 			margin:5px 0;
 		}
 
+		p {
+			margin:5px 0;
+		}
+
 		header {
 			background-color:#808080 !important;
 			height:50px;
@@ -40,7 +44,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 		}
 		table {
 			border-collapse: separate;
-			border-spacing: 10px;
+			border-spacing: 1px;
 			width:100%;
 		}
 
@@ -121,14 +125,12 @@ html(lang="en" ng-app="3drepo").ng-scope
 			float:none;
 		}
 
-		.grey-header {
-			font-size:20px;
-			font-weight:400;
+		.grey {
 			color:#808080;
 		}
 
-		.grey {
-			color:#808080;
+		.info {
+			font-size:14px;
 		}
 
 		h1.titles, h2.titles {
@@ -136,11 +138,11 @@ html(lang="en" ng-app="3drepo").ng-scope
 		}
 
 		h1.titles {
-			font-size:18px;
+			font-size:35px;
 		}
 
 		h2.titles {
-			font-size:35px;
+			font-size:18px;
 		}
 
 		h4.date {
@@ -207,27 +209,21 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 		.container
 			.top-header
-				h1.titles
-					| #{reportValues.modelName}
-					br
-					|  Revision #{reportValues.currentRevision}
-				h2.titles Issues Report
+				h1.titles Issues Report
+				h2.titles
+					| #{reportValues.modelName} - Revision #{reportValues.currentRevision}
 				h4.date #{reportValues.reportDate}
 			each issueTypeIssues, issueType in issues
-				if issueType === "open" && issueTypeIssues.length > 0
-					h2 Open Issues
-				else if issueType === "closed" && issueTypeIssues.length > 0
-					h2 Closed Issues
 
 				each issue in issueTypeIssues.sort((a, b) => { return new Date(b.created).getTime() - new Date(a.created).getTime()  } )
 					h3 #{issue.number} #{issue.name}
-					p.grey #{reportValues.currentUser} (#{reportValues.fullName} - #{reportValues.userCompany})
-						span.right.grey.float-right #{reportValues.issueDate}
+					p.grey.info #{reportValues.currentUser} (#{reportValues.fullName} - #{reportValues.userCompany})
+						span.right.grey.info.float-right #{reportValues.issueDate}
 					.row.screenshot
 						.col.screenshot
 							if issue.viewpoint.screenshotSmall
 							a(href=url(issue.viewpoint.screenshot) target='_blank')
-								img(class="fitImage" src=url(issue.viewpoint.screenshot) style="width:100%; height:400px;")
+								img(class="fitImage" src=url(issue.viewpoint.screenshot) style="width:100%; height:200px;")
 						.col
 								table.details
 									tr
@@ -258,25 +254,31 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 					.row
 						.col.description
-							p Description:
-							span #{issue.desc}
+							p
+								span #{issue.desc}
+							br
 							.activityLog
-								p.grey-header Activity Log
+								h4.grey Activity Log
 								if issue.comments
 									each comment in issue.comments
 											if comment.comment
 												| #{comment.comment}
 												p
-													span.grey #{comment.owner} (#{reportValues.fullName} - #{reportValues.userCompany})
-													span.grey.float-right #{comment.created}
+													span.grey.info #{comment.owner} (#{reportValues.fullName} - #{reportValues.userCompany})
+													span.grey.info.float-right #{comment.created}
 											if comment.action
-												| #{comment.action.propertyText} changed from
-												i #{comment.action.from}
-												| to
-												i #{comment.action.to}
+												p
+													| #{comment.action.propertyText} updated&nbsp;
+													if comment.action.from
+														| from
+														i #{comment.action.from}
+													| to
+													i #{comment.action.to}
+												p
+													span.grey.info #{comment.owner} (#{reportValues.fullName} - #{reportValues.userCompany})
+													span.grey.info.float-right #{comment.created}
+
 
 					hr.break
-
-
 
 

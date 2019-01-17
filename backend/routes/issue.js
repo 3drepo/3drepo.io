@@ -623,16 +623,16 @@ function renderIssuesHTML(req, res, next) {
 
 			if (issues[i].hasOwnProperty("comments")) {
 				for (let j = 0; j < issues[i].comments.length; j++) {
-					issues[i].comments[j].created = formatDate(issues[i].comments[j].created, "hh:mm, Do MMM YYYY");
+					issues[i].comments[j].created = formatDate(issues[i].comments[j].created, "kk:mm Do MMM YYYY");
 					if (issues[i].comments[j].action !== undefined && issues[i].comments[j].action.property === "due_date") {
-						issues[i].comments[j].action.to = formatDate(parseInt(issues[i].comments[j].action.to), "hh:mm, Do MMM YYYY");
-						issues[i].comments[j].action.from = formatDate(parseInt(issues[i].comments[j].action.from), "hh:mm, Do MMM YYYY");
+						issues[i].comments[j].action.to = formatDate(parseInt(issues[i].comments[j].action.to), "kk:mm Do MMM YYYY");
+						issues[i].comments[j].action.from = formatDate(parseInt(issues[i].comments[j].action.from), "kk:mm Do MMM YYYY");
 					}
 				}
 			}
 
-			const issueDueDate = formatDate(issues[i].due_date, "hh:mm, Do MMM YYYY");
-			const issueDate = formatDate(issues[i].created, "hh:mm, Do MMM YYYY");
+			const issueDueDate = formatDate(issues[i].due_date, "kk:mm Do MMM YYYY");
+			const issueDate = formatDate(issues[i].created, "kk:mm Do MMM YYYY");
 			const currentRevision = issues[i].rev_id;
 
 			reportValues.issueDate = issueDate;
