@@ -16,7 +16,7 @@ export const prepareRisk = (risk, jobs = []) => {
 		StatusIconComponent: Icon,
 		statusColor: color,
 		roleColor,
-		level_of_risk: calculateLevelOfRisk(risk.likelihood, risk.consequence)
+		level_of_risk: risk.level_of_risk || calculateLevelOfRisk(risk.likelihood, risk.consequence)
 	};
 };
 

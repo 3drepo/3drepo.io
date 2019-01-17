@@ -30,7 +30,6 @@ export const COLOR = {
 	WARNING_LIGHT: '#ffefef',
 	WARNING: '#ffd5d5',
 	YELLOW: '#ffff36',
-	RED: '#dc143c',
 	MAROON: '#800000',
 	CRIMSON: '#dc143c',
 	DARK_ORANGE: '#ff8c00',

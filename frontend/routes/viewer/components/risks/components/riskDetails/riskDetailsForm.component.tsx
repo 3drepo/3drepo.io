@@ -1,20 +1,25 @@
 import * as React from 'react';
 import * as Yup from 'yup';
-import { pick, get, isEqual, isEmpty, debounce } from 'lodash';
-import { Field, Form, withFormik, connect } from 'formik';
+import { debounce, get, isEmpty, isEqual } from 'lodash';
+import { connect, Field, Form, withFormik } from 'formik';
 import InputLabel from '@material-ui/core/InputLabel';
 
 import {
-	RISK_CATEGORIES,
-	RISK_LIKELIHOODS,
-	RISK_CONSEQUENCES,
 	LEVELS_OF_RISK,
+	RISK_CATEGORIES,
+	RISK_CONSEQUENCES,
+	RISK_LIKELIHOODS,
 	RISK_MITIGATION_STATUSES
 } from '../../../../../../constants/risks';
-import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
-
-import {FieldsRow, StyledTextField, StyledFormControl } from './riskDetails.styles';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
+import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
+import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
+import { FieldsRow, StyledFormControl, StyledTextField } from './riskDetails.styles';
+
+const RiskSchema = Yup.object().shape({
+	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	mitigation_desc: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+});
 
 interface IProps {
 	risk: any;
@@ -215,10 +220,10 @@ export const RiskDetailsForm = withFormik({
 		likelihood: risk.likelihood || 0,
 		consequence: risk.consequence || 0,
 		level_of_risk: risk.level_of_risk || 0
-
 	}),
 	handleSubmit: (values, { props }) => {
 		(props as IProps).onSubmit(values);
 	},
-	enableReinitialize: true
+	enableReinitialize: true,
+	validationSchema: RiskSchema
 })(connect(RiskDetailsFormComponent as any)) as any;
