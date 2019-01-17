@@ -583,26 +583,30 @@ function buildRule(rule) {
 					operation = { $lte: Number(rule.values[i]) };
 					break;
 				case "IN_RANGE":
-					const rangeVal1 = Number(rule.values[i * ruleOperators[rule.operator]]);
-					const rangeVal2 = Number(rule.values[i * ruleOperators[rule.operator] + 1]);
-					const rangeLowerOp = {};
-					rangeLowerOp[fieldName] = { $gte: Math.min(rangeVal1, rangeVal2) };
-					const rangeUpperOp = {};
-					rangeUpperOp[fieldName] = { $lte: Math.max(rangeVal1, rangeVal2) };
+					{
+						const rangeVal1 = Number(rule.values[i * ruleOperators[rule.operator]]);
+						const rangeVal2 = Number(rule.values[i * ruleOperators[rule.operator] + 1]);
+						const rangeLowerOp = {};
+						rangeLowerOp[fieldName] = { $gte: Math.min(rangeVal1, rangeVal2) };
+						const rangeUpperOp = {};
+						rangeUpperOp[fieldName] = { $lte: Math.max(rangeVal1, rangeVal2) };
 
-					operation = undefined;
-					clauses.push({ $and: [rangeLowerOp, rangeUpperOp]});
+						operation = undefined;
+						clauses.push({ $and: [rangeLowerOp, rangeUpperOp]});
+					}
 					break;
 				case "NOT_IN_RANGE":
-					const exRangeVal1 = Number(rule.values[i * ruleOperators[rule.operator]]);
-					const exRangeVal2 = Number(rule.values[i * ruleOperators[rule.operator] + 1]);
-					const exRangeLowerOp = {};
-					exRangeLowerOp[fieldName] = { $lt: Math.min(exRangeVal1, exRangeVal2) };
-					const exRangeUpperOp = {};
-					exRangeUpperOp[fieldName] = { $gt: Math.max(exRangeVal1, exRangeVal2) };
+					{
+						const exRangeVal1 = Number(rule.values[i * ruleOperators[rule.operator]]);
+						const exRangeVal2 = Number(rule.values[i * ruleOperators[rule.operator] + 1]);
+						const exRangeLowerOp = {};
+						exRangeLowerOp[fieldName] = { $lt: Math.min(exRangeVal1, exRangeVal2) };
+						const exRangeUpperOp = {};
+						exRangeUpperOp[fieldName] = { $gt: Math.max(exRangeVal1, exRangeVal2) };
 
-					operation = undefined;
-					clauses.push({ $and: [exRangeLowerOp, exRangeUpperOp]});
+						operation = undefined;
+						clauses.push({ $and: [exRangeLowerOp, exRangeUpperOp]});
+					}
 					break;
 			}
 
