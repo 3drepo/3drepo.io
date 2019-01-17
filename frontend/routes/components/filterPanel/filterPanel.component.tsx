@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
-import { omit, cloneDeep } from 'lodash';
+import { omit } from 'lodash';
 import * as dayjs from 'dayjs';
 
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';

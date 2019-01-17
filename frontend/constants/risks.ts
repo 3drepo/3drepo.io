@@ -5,6 +5,7 @@ import CheckCircle from '@material-ui/icons/CheckCircle';
 import SyncProblem from '@material-ui/icons/SyncProblem';
 
 import { values } from 'lodash';
+import { DATA_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 
 const LEVELS = {
 	VERY_LOW: { value: 0, name: 'Very Low' },
@@ -64,3 +65,26 @@ export const RISK_LEVELS_ICONS = {
 };
 
 export const RISK_LEVELS_COLORS = ['#008000', '#32cd32', '#fffacd', '#ff8c00', '#800000'];
+
+export const RISK_FILTER_DATA_TYPES = {
+	NORMAL: DATA_TYPES.UNDEFINED,
+	QUERY: DATA_TYPES.QUERY
+};
+
+export const RISK_FILTERS = [
+  {
+    label: 'Mitigation Status',
+		key: 'mitigation_status',
+    type: RISK_FILTER_DATA_TYPES.NORMAL
+  },
+  {
+    label: 'Created by',
+		key: 'created_by',
+    type: RISK_FILTER_DATA_TYPES.NORMAL
+  },
+  {
+    label: 'Assigned to',
+		key: 'assigned_to',
+    type: RISK_FILTER_DATA_TYPES.NORMAL
+  }
+];

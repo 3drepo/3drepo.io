@@ -21,7 +21,8 @@ import ArrowBack from '@material-ui/icons/ArrowBack';
 import AddIcon from '@material-ui/icons/Add';
 
 import IconButton from '@material-ui/core/IconButton';
-
+import SearchIcon from '@material-ui/icons/Search';
+import CancelIcon from '@material-ui/icons/Cancel';
 import RiskDetails from './components/riskDetails/riskDetails.container';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewListItem } from '../previewListItem/previewListItem.component';
@@ -29,7 +30,8 @@ import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ListContainer, Summary } from './risks.styles';
 import { prepareRisk } from '../../../../helpers/risks';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
-import { RISK_LEVELS_ICONS, RISK_LEVELS } from '../../../../constants/risks';
+import { RISK_LEVELS_ICONS, RISK_LEVELS, RISK_FILTERS } from '../../../../constants/risks';
+import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 
 interface IProps {
 	teamspace: string;
@@ -40,12 +42,20 @@ interface IProps {
 	isPending?: boolean;
 	activeRiskId?: string;
 	showDetails?: boolean;
+	riskDetails?: any;
+	searchEnabled: boolean;
+	searchQuery: string;
 	fetchRisks: (teamspace, model, revision) => void;
 	setState: (componentState: any) => void;
 	setNewRisk: () => void;
 }
 
-export class Risks extends React.PureComponent<IProps, any> {
+interface IState {
+	riskDetails?: any;
+	selectedFilters: any[];
+}
+
+export class Risks extends React.PureComponent<IProps, IState> {
 	public renderRisksList = renderWhenTrue(() => {
 		const Items = this.props.risks.map((risk, index) => (
 			<PreviewListItem
@@ -86,9 +96,29 @@ export class Risks extends React.PureComponent<IProps, any> {
 		/>
 	));
 
+  public handleFilterChange = (selectedFilters) => {
+	    this.setState({
+	      selectedFilters
+	    });
+	  }
+
+	public renderFilterPanel = renderWhenTrue(() => (
+		<FilterPanel
+			onChange={this.handleFilterChange}
+  		filters={RISK_FILTERS}
+		/>
+	));
+
 	public componentDidMount() {
 		const {teamspace, model, revision} = this.props;
 		this.props.fetchRisks(teamspace, model, revision);
+	}
+
+	public get prepareFilters() {
+		return [];
+	}
+
+	public componentDidUpdate() {
 	}
 
 	public handleRiskFocus = (riskId) => () => {
@@ -118,8 +148,26 @@ export class Risks extends React.PureComponent<IProps, any> {
 		return <ReportProblem />;
 	}
 
+	public handleCloseSearchMode = () =>
+		this.props.setState({
+			searchEnabled: false,
+			searchQuery: ''
+		})
+
+	public handleOpenSearchMode = () =>
+		this.props.setState({
+			searchEnabled: true
+		})
+
+	public getSearchButton = () => {
+		if (this.props.searchEnabled) {
+			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
+		}
+		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
+	}
+
 	public renderActions = () => {
-		return [];
+		return [{ Button: this.getSearchButton }];
 	}
 
 	public render() {
@@ -130,6 +178,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 				actions={this.renderActions()}
 				pending={this.props.isPending}
 			>
+				{this.renderFilterPanel(this.props.searchEnabled)}
 				{this.renderListView(!this.props.showDetails)}
 				{this.renderDetailsView(this.props.showDetails)}
 			</ViewerPanel>
