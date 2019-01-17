@@ -127,7 +127,7 @@ class ImportQueue {
 
 	consumeEventQueue() {
 		if(this.eventCallback) {
-			this.getChannel().then((channel) => {
+			return this.getChannel().then((channel) => {
 				return channel.assertExchange(this.eventExchange, "fanout", {
 					durable: true
 				}).then(() => {
@@ -135,8 +135,6 @@ class ImportQueue {
 				}).then(queue => {
 					return channel.bindQueue(queue.queue, this.eventExchange, "").then(() => {
 						return channel.consume(queue.queue, (rep) => {
-							/*eslint-disable */
-							console.log("[ConsumeEventQueue]: New message found, queue: " , queue.queue);
 							if (this.eventCallback) {
 								this.eventCallback(JSON.parse(rep.content));
 							}
@@ -147,6 +145,8 @@ class ImportQueue {
 			}).catch((err) => {
 				systemLogger.logError("Failed to consume event queue: " + err.message);
 			});
+		} else {
+			return Promise.resolve();
 		}
 	}
 
