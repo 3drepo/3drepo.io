@@ -16,7 +16,7 @@
  */
 
 import { put, takeLatest, select } from 'redux-saga/effects';
-import { keyBy, differenceBy } from 'lodash';
+import { differenceBy } from 'lodash';
 
 import * as API from '../../services/api';
 import { RisksTypes, RisksActions } from './risks.redux';

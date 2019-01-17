@@ -57,7 +57,7 @@ interface IFilter {
 interface ISelectedFilter {
 	value: any;
 	label: string;
-	key: string;
+	relatedField: string;
 	type?: number;
 }
 
@@ -139,7 +139,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		const newSelectedFilter: ISelectedFilter = {
 			label: parent.label,
 			type: parent.type,
-			key: parent.key,
+			relatedField: parent.relatedField,
 			value: {
 				label: child.label,
 				value: child.value
@@ -180,7 +180,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 			return {
 				name: `${filter.label}:${value.label}`,
 				label: filter.label,
-				key: filter.key,
+				relatedField: filter.relatedField,
 				type: filter.type,
 				value
 			};
