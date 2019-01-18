@@ -88,7 +88,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 												</Property>
 											</PropertyWrapper>
 											<Property>
-												<DateTime value={revision.timestamp} format={'hh:mm DD MMM'} />
+												<DateTime value={revision.timestamp} format={'HH:mm DD MMM'} />
 											</Property>
 										</Row>
 										<Description>{revision.desc ? revision.desc : '(no description)'}
