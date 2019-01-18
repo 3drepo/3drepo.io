@@ -30,24 +30,27 @@ const ReportType = {
 
 const riskLevelMapping = ["Very Low", "Low", "Moderate", "High", "Very High"];
 
-const attributes = {
-	"Issues": [
-		{label: "Assigned", field: "assigned_roles"},
-		{label: "Priority", field: "priority"},
-		{label: "Status", field: "status"},
-		{label: "Type", field: "topic_type"},
-		{label: "Due Date", field: "due_date", isDate: true}
-	],
-	"Risks": [
-		{ label: "Safetibase ID", field: "safetibase_id"},
-		{ label: "Associated Activity", field: "associated_activity"},
-		{ label: "Category", field: "category"},
-		{ label: "Risk Likelihood", field: "likelihood", mapping: riskLevelMapping},
-		{ label: "Risk Consequence", field: "consequence", mapping: riskLevelMapping},
-		{ label: "Level of Risk", field: "level_of_risk", mapping: riskLevelMapping},
-		{ label: "Mitigation Status", field: "mitigation_status", default: "Unmitigated"}
-	]
-};
+const attributes = {};
+attributes[ReportType.ISSUES] = [
+	{label: "Assigned", field: "assigned_roles"},
+	{label: "Priority", field: "priority"},
+	{label: "Status", field: "status"},
+	{label: "Type", field: "topic_type"},
+	{label: "Due Date", field: "due_date", isDate: true}
+];
+attributes[ReportType.RISKS] = [
+	{ label: "Safetibase ID", field: "safetibase_id"},
+	{ label: "Associated Activity", field: "associated_activity"},
+	{ label: "Category", field: "category"},
+	{ label: "Risk Likelihood", field: "likelihood", mapping: riskLevelMapping},
+	{ label: "Risk Consequence", field: "consequence", mapping: riskLevelMapping},
+	{ label: "Level of Risk", field: "level_of_risk", mapping: riskLevelMapping},
+	{ label: "Mitigation Status", field: "mitigation_status", default: "Unmitigated"}
+];
+
+const urlQS = {};
+urlQS[ReportType.RISKS] = "riskId";
+urlQS[ReportType.ISSUES] = "issueId";
 
 /**
  *
@@ -109,6 +112,7 @@ class ReportGenerator {
 			newEntry.createdTS = entry.created;
 			newEntry.number = entry.number || "";
 			newEntry.screenshot = entry.viewpoint.screenshot;
+			newEntry.screenshotURL = `${config.getBaseURL()}/viewer/${this.teamspace}/${this.modelID}?${urlQS[this.type]}=${entry._id}`;
 			newEntry.name = entry.name;
 
 			attributes[this.type].forEach((field) => {
