@@ -30,6 +30,8 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 import Check from '@material-ui/icons/Check';
 import DeleteIcon from '@material-ui/icons/Delete';
 
+import { hasPermissions } from '../../../../helpers/permissions';
+import { TooltipButton } from '../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import RiskDetails from './components/riskDetails/riskDetails.container';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -52,6 +54,7 @@ import {
 	IconWrapper
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel, DATA_TYPES } from '../../../components/filterPanel/filterPanel.component';
+import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
 
 interface IProps {
 	teamspace: string;
@@ -66,6 +69,9 @@ interface IProps {
 	searchEnabled: boolean;
 	areShowedPins: boolean;
 	selectedFilters: any[];
+	modelSettings: {
+		permissions: any[];
+	};
 	fetchRisks: (teamspace, model, revision) => void;
 	setState: (componentState: any) => void;
 	setNewRisk: () => void;
@@ -147,6 +153,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 				onItemClick={this.handleRiskFocus(risk)}
 				onArrowClick={this.handleRiskClick(risk)}
 				active={this.props.activeRiskId === risk._id}
+				hasViewPermission={this.hasPermission(VIEW_ISSUE)}
 			/>
 		));
 
@@ -159,13 +166,19 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	public renderDeleteButton = renderWhenTrue(() => {
 		return (
-			<IconButton onClick={this.deleteRisk}>
-					<DeleteIcon />
-			</IconButton>
+			<TooltipButton action={this.deleteRisk} Icon={DeleteIcon} label="Delete risk" />
 		);
 	});
 
 	public renderDisplayedInfo = renderWhenTrue(() => <>{this.state.filteredRisks.length} risks displayed</>);
+
+	public hasPermission = (permission) => {
+		const { modelSettings } = this.props;
+		if (Boolean(modelSettings) && Boolean(modelSettings.permissions)) {
+			return hasPermissions(permission, modelSettings.permissions);
+		}
+		return false;
+	}
 
 	public renderListView = renderWhenTrue(() => (
 			<>
@@ -174,7 +187,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 				</ViewerPanelContent>
 				<ViewerPanelFooter alignItems="center" justify="space-between">
 					<Summary>
-						{this.renderDeleteButton(Boolean(this.props.activeRiskId))}
+						{this.renderDeleteButton(Boolean(this.props.activeRiskId) && this.hasPermission(VIEW_ISSUE))}
 						{this.renderDisplayedInfo(!Boolean(this.props.activeRiskId))}
 					</Summary>
 					<ViewerPanelButton
@@ -182,6 +195,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 						onClick={this.handleAddNewRisk}
 						color="secondary"
 						variant="fab"
+						disabled={!this.hasPermission(CREATE_ISSUE)}
 					>
 						<AddIcon />
 					</ViewerPanelButton>

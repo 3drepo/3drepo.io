@@ -29,7 +29,7 @@ import {
 	RoleIndicator,
 	Container,
 	ThumbnailWrapper,
-	ArrowContainer,
+	ArrowButton,
 	StyledArrowIcon,
 	Name
 } from './previewListItem.styles';
@@ -46,6 +46,7 @@ interface IProps {
 	dueDate?: string;
 	count?: number;
 	active?: boolean;
+	hasViewPermission?: boolean;
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
 }
@@ -56,10 +57,10 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 		return createdDate >= dueDate ? 1 : 0;
 	}
 
-	public renderArrowContainer = renderWhenTrue(() => (
-		<ArrowContainer onClick={this.props.onArrowClick}>
+	public renderArrowButton = renderWhenTrue(() => (
+		<ArrowButton onClick={this.props.onArrowClick}>
 			<StyledArrowIcon />
-		</ArrowContainer>
+		</ArrowButton>
 	));
 
 	public renderNameWithCounter = renderWhenTrue(() => <Name>{`${this.props.count}. ${this.props.name}`}</Name>);
@@ -76,7 +77,8 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 			StatusIconComponent,
 			statusColor,
 			onItemClick,
-			active
+			active,
+			hasViewPermission
 		} = this.props;
 
 		return (
@@ -101,7 +103,7 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 						</Description>
 					</Content>
 				</Container>
-				{this.renderArrowContainer(active)}
+				{this.renderArrowButton(active && hasViewPermission)}
 			</MenuItemContainer>
 		);
 	}
