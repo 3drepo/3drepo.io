@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import MenuItem from '@material-ui/core/MenuItem';
 import ArrowIcon from '@material-ui/icons/ArrowForward';
 import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
 
 import { COLOR } from '../../../../styles/colors';
 
@@ -37,16 +38,24 @@ export const MenuItemContainer = styled(MenuItem)`
   }
 ` as any;
 
-export const ArrowContainer = styled.div`
-  background-color: ${COLOR.PRIMARY_DARK};
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 28px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+export const ArrowButton = styled(Button)`
+  && {
+    background-color: ${COLOR.PRIMARY_DARK};
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 28px;
+    min-width: 28px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+
+    &:hover {
+      background-color: ${COLOR.PRIMARY_LIGHT};
+    }
+  }
 `;
 
 export const StyledArrowIcon = styled(ArrowIcon)`
