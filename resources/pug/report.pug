@@ -257,7 +257,8 @@ html(lang="en" ng-app="3drepo").ng-scope
 														| to
 														i #{comment.action.to}
 												p
-													span.grey.info #{comment.owner} (#{reportData.userInfo[comment.owner].fullName} - #{reportData.userInfo[comment.owner].company})
+													if reportData.userInfo[comment.owner]
+														span.grey.info #{comment.owner} (#{reportData.userInfo[comment.owner].fullName} - #{reportData.userInfo[comment.owner].company})
 													span.grey.info.float-right #{comment.created}
 
 				hr.break

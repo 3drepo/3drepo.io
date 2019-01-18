@@ -159,10 +159,17 @@ class ReportGenerator {
 			if(!this.userInfo[user]) {
 				this.promises.push(
 					User.findByUserName(user).then(username => {
-						this.userInfo[user] = {
-							fullName: username.customData.firstName + " " + username.customData.lastName,
-							company: username.customData.billing.billingInfo.company
-						};
+						if (username) {
+							this.userInfo[user] = {
+								fullName: username.customData.firstName + " " + username.customData.lastName,
+								company: username.customData.billing.billingInfo.company
+							};
+						} else {
+							this.userInfo[user] = {
+								fullName: "Unknown",
+								company: "Unknown"
+							};
+						}
 					})
 				);
 			}
