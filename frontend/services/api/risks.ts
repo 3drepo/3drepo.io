@@ -70,3 +70,13 @@ export const getRisks = (teamspace, modelId, revision?) => {
 	}
 	return api.get(`${teamspace}/${modelId}/risks.json`);
 };
+
+/**
+ * Delete risks
+ * @param teamspace
+ * @param modelId
+ * @param risksIds
+ */
+export const deleteRisks = (teamspace, modelId, risksIds) => {
+	return api.delete(`${teamspace}/${modelId}/risks/?ids=${risksIds}`);
+};

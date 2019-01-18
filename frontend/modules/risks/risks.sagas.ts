@@ -56,6 +56,17 @@ export function* updateRisk({ teamspace, modelId, riskData }) {
 	}
 }
 
+export function* deleteRisks({ teamspace, modelId, risksIds }) {
+	try {
+		const response = yield API.deleteRisks(teamspace, modelId, risksIds);
+		console.log('delete response', response);
+		yield put(RisksActions.deleteRisksSuccess(risksIds));
+		yield put(SnackbarActions.show('Risk deleted'));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('delete', 'risk', error));
+	}
+}
+
 export function* showPins({ filteredRisks }) {
 	try {
 		const risksList = yield select(selectRisks);
@@ -124,6 +135,7 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_RISKS, fetchRisks);
 	yield takeLatest(RisksTypes.SAVE_RISK, saveRisk);
 	yield takeLatest(RisksTypes.UPDATE_RISK, updateRisk);
+	yield takeLatest(RisksTypes.DELETE_RISKS, deleteRisks);
 	yield takeLatest(RisksTypes.SHOW_PINS, showPins);
 	yield takeLatest(RisksTypes.DOWNLOAD_RISKS, downloadRisks);
 	yield takeLatest(RisksTypes.PRINT_RISKS, printRisks);
