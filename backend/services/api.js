@@ -22,8 +22,6 @@
  * @returns
  */
 module.exports.createApp = function () {
-	const config = require("../config");
-	const session = require("./session").session(config);
 	const logger = require("../logger.js");
 	const express = require("express");
 	const compress = require("compression");
@@ -32,6 +30,7 @@ module.exports.createApp = function () {
 	const cors = require("cors");
 	const bodyParser = require("body-parser");
 	const utils = require("../utils");
+	const sessionManager = require("../middlewares/sessionManager");
 
 	// Express app
 	const app = express();
@@ -42,25 +41,7 @@ module.exports.createApp = function () {
 	app.use(logger.startRequest);
 
 	// Configure various middleware
-	app.use((req, res, next) => {
-
-		session(req, res, function(err) {
-			if(err) {
-				// something is wrong with the library or the session (i.e. corrupted json file) itself, log the user out
-				// res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
-
-				req[C.REQ_REPO].logger.logError(`express-session internal error: ${err}`);
-				req[C.REQ_REPO].logger.logError(`express-session internal error: ${JSON.stringify(err)}`);
-				req[C.REQ_REPO].logger.logError(`express-session internal error: ${err.stack}`);
-
-				// responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.AUTH_ERROR, err);
-
-			} else {
-				next();
-			}
-		});
-
-	});
+	app.use(sessionManager);
 
 	app.use(cors({ origin: true, credentials: true }));
 

@@ -142,6 +142,12 @@ schema.statics.findByUserName = function (user) {
 	return this.findOne({ account: "admin" }, { user });
 };
 
+schema.statics.findByAPIKey = async function (key) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	const user = await dbCol.findOne({"customData.APIKey" : key});
+	return user;
+};
+
 schema.statics.findUsersWithoutMembership = function (teamspace, searchString) {
 	return DB.getCollection("admin", "system.users").then(dbCol => {
 		return dbCol
