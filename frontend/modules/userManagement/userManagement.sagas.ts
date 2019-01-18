@@ -38,8 +38,9 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 		const teamspaceDetails = teamspaces.find(({ account }) => account === teamspace) || {};
 		const currentUser = yield select(selectCurrentUser);
 
-		const [users] = yield all([
+		const [users, quota] = yield all([
 			API.fetchUsers(teamspace),
+			API.getQuotaInfo(teamspace),
 			put(JobsActions.fetchJobs(teamspace)),
 			put(JobsActions.fetchJobsColors(teamspace))
 		]);
@@ -47,7 +48,8 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(
 			teamspaceDetails,
 			users.data,
-			currentUser.username
+			currentUser.username,
+			quota.data.collaboratorLimit
 		));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'teamspace details', error));
