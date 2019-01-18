@@ -22,7 +22,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchRisks: ['teamspace', 'modelId', 'revision'],
 	fetchRisksSuccess: ['risks'],
 	setComponentState: ['componentState'],
-	saveRisk: ['teamspace', 'modelId', 'riskData'],
+	saveRisk: ['teamspace', 'model', 'riskData'],
 	updateRisk: ['teamspace', 'modelId', 'riskData'],
 	deleteRisks: ['teamspace', 'modelId', 'risksIds'],
 	deleteRisksSuccess: ['risksIds'],
@@ -76,7 +76,7 @@ export const setNewRisk = (state = INITIAL_STATE) => {
 	const riskNumber = values(state.risksMap).length + 1;
 	const newRisk = {
 		name: `Untitled risk ${riskNumber}`,
-		associated_activity: 0,
+		associated_activity: '',
 		assigned_roles: [],
 		likelihood: 0,
 		consequence: 0,

@@ -16,7 +16,7 @@
  */
 
 import { put, takeLatest, select, all } from 'redux-saga/effects';
-import { differenceBy, pick, get, isEmpty } from 'lodash';
+import { differenceBy, pick, omit, isEmpty } from 'lodash';
 
 import * as API from '../../services/api';
 import { RisksTypes, RisksActions } from './risks.redux';
@@ -38,9 +38,6 @@ export function* fetchRisks({teamspace, modelId, revision}) {
 	}
 }
 
-	/**
-	 * @returns groupData	Object with list of nodes for group creation.
-	 */
 const createGroupData = (name, nodes) => {
 	const groupData = {
 		name,
@@ -65,10 +62,11 @@ const createGroup = async (risk, objectInfo) => {
 
 export function* saveRisk({ teamspace, model, riskData, revision }) {
 	try {
-		const [viewpoint, objectInfo, screenshot] = yield all([
+		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
 			Viewer.getCurrentViewpoint({ teamspace, model }),
 			Viewer.getObjectsStatus({ teamspace, model }),
-			riskData.screenshot || Viewer.getScreenshot()
+			riskData.screenshot || Viewer.getScreenshot(),
+			API.getMyJob(teamspace)
 		]);
 
 		const TreeService = getAngularService('TreeService') as any;
@@ -76,12 +74,10 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 
 		viewpoint.hideIfc = TreeService.getHideIfc();
 
-		riskData.account = teamspace;
-		riskData.model = model;
 		riskData.rev_id = revision;
 
 		if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
-			const [highlightedGroup, hiddenGroup] = yield this.createGroup(riskData, viewpoint, screenshot, objectInfo);
+			const [highlightedGroup, hiddenGroup] = yield createGroup(riskData, objectInfo);
 
 			if (highlightedGroup) {
 				viewpoint.highlighted_group_id = highlightedGroup.data._id;
@@ -95,9 +91,11 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 		viewpoint.screenshot = screenshot.substring(screenshot.indexOf(',') + 1);
 
 		const risk = {
-			...riskData,
+			...omit(riskData, ['author', 'statusColor']),
+			owner: riskData.author,
+			rev_id: revision,
 			objectId: null,
-			creator_role: this.userJob._id,
+			creator_role: userJob.data._id,
 			viewpoint,
 			pickedPos: null,
 			pickedNorm: null,
@@ -315,20 +313,21 @@ export function* renderRisk(risk, filteredRisks, revision) {
 		Viewer.highlightObjects([]);
 		TreeService.clearCurrentlySelected();
 
+		const hasViewpoint = risk.viewpoint;
+		const hasHiddenOrShownGroup = hasViewpoint && (risk.viewpoint.hidden_group_id || risk.viewpoint.shown_group_id);
 		// Reset object visibility
-		if (risk.viewpoint && risk.viewpoint.hideIfc) {
-			TreeService.setHideIfc(risk.viewpoint.hideIfc);
+		if (hasViewpoint) {
+			if (risk.viewpoint.hideIfc) {
+				TreeService.setHideIfc(risk.viewpoint.hideIfc);
+			}
+
+			TreeService.showAllTreeNodes(!hasHiddenOrShownGroup);
 		}
 
-		const hasHiddenOrShownGroup = risk.viewpoint.hidden_group_id || risk.viewpoint.shown_group_id;
-
-		TreeService.showAllTreeNodes(!hasHiddenOrShownGroup);
-
-		const hasViewpoint = risk.viewpoint;
-		const hasViewpointGroup = risk.viewpoint.highlighted_group_id || risk.viewpoint.group_id;
+		const hasViewpointGroup = hasViewpoint && (risk.viewpoint.highlighted_group_id || risk.viewpoint.group_id);
 		const hasGroup = risk.group_id;
 
-		if ((hasViewpoint && hasViewpointGroup) || hasGroup || hasHiddenOrShownGroup) {
+		if (hasViewpointGroup || hasGroup || hasHiddenOrShownGroup) {
 			yield showMultipleGroups(risk, revision);
 		}
 

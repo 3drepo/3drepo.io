@@ -189,7 +189,7 @@ export class Viewer {
 
 	public emit = debounce((event, ...args) => {
 		if (this.callback) {
-			this.emit(event, ...args);
+			this.callback(event, ...args);
 		}
 
 		this.emitter.emit(event, ...args);

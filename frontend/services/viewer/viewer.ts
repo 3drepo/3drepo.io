@@ -164,7 +164,7 @@ export class ViewerService {
 
 	public async getObjectsStatus({ teamspace, model }) {
 		await this.isViewerReady();
-		this.viewer.getObjectsStatus(teamspace, model);
+		return this.viewer.getObjectsStatus(teamspace, model);
 	}
 
 	public async highlightObjects(params) {
