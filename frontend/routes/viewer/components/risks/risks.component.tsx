@@ -21,7 +21,10 @@ import ArrowBack from '@material-ui/icons/ArrowBack';
 import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
+import SkipNextIcon from '@material-ui/icons/SkipNext';
+import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import CancelIcon from '@material-ui/icons/Cancel';
+
 import RiskDetails from './components/riskDetails/riskDetails.container';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewListItem } from '../previewListItem/previewListItem.component';
@@ -220,6 +223,35 @@ export class Risks extends React.PureComponent<IProps, IState> {
 			searchEnabled: true
 		})
 
+	public findActiveRiskIndex = (id) => this.state.filteredRisks.findIndex((risk) => risk._id === id);
+
+	public handlePrevItem = () => {
+		const index = this.findActiveRiskIndex(this.props.activeRiskId);
+		if (index === 0) {
+			this.props.setState({
+				activeRisk: this.state.filteredRisks[this.state.filteredRisks.length - 1]._id
+			});
+		} else {
+			this.props.setState({
+				activeRisk: this.state.filteredRisks[index - 1]._id
+			});
+		}
+	}
+
+	public handleNextItem = () => {
+		const index = this.findActiveRiskIndex(this.props.activeRiskId);
+
+		if (index === this.state.filteredRisks.length - 1) {
+			this.props.setState({
+				activeRisk: this.state.filteredRisks[0]._id
+			});
+		} else {
+			this.props.setState({
+				activeRisk: this.state.filteredRisks[index + 1]._id
+			});
+		}
+	}
+
 	public getSearchButton = () => {
 		if (this.props.searchEnabled) {
 			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
@@ -227,8 +259,25 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
 	}
 
+	public getPrevButton = () => {
+		return <IconButton onClick={this.handlePrevItem}><SkipPreviousIcon /></IconButton>;
+	}
+
+	public getNextButton = () => {
+		return <IconButton onClick={this.handleNextItem}><SkipNextIcon /></IconButton>;
+	}
+
 	public renderActions = () => {
-		return [{ Button: this.getSearchButton }];
+		if (this.props.showDetails) {
+			return [
+				{ Button: this.getPrevButton },
+				{ Button: this.getNextButton }
+			];
+		} else {
+			return [
+				{ Button: this.getSearchButton }
+			];
+		}
 	}
 
 	public render() {
@@ -239,7 +288,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 				actions={this.renderActions()}
 				pending={this.props.isPending}
 			>
-				{this.renderFilterPanel(this.props.searchEnabled)}
+				{this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
 				{this.renderListView(!this.props.showDetails)}
 				{this.renderDetailsView(this.props.showDetails)}
 			</ViewerPanel>
