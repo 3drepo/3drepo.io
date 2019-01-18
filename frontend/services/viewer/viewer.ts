@@ -185,6 +185,28 @@ export class ViewerService {
 		this.viewer.getObjectsStatus(teamspace, model);
 	}
 
+	public async highlightObjects(params) {
+		await this.isViewerReady();
+		this.viewer.highlightObjects(
+			params.account,
+			params.model,
+			params.id ? [params.id] : params.ids,
+			params.zoom,
+			params.colour,
+			params.multi,
+			params.forceReHighlight
+		);
+	}
+
+	public async unhighlightObjects(params) {
+		await this.isViewerReady();
+		this.viewer.unhighlightObjects(
+			params.account,
+			params.model,
+			params.id ? [params.id] : params.ids
+		);
+	}
+
 	public startAreaSelect() {
 		if (this.viewer) {
 			this.viewer.startAreaSelect();

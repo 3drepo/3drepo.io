@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select } from 'redux-saga/effects';
-import { differenceBy } from 'lodash';
+import { put, takeLatest, select, all } from 'redux-saga/effects';
+import { differenceBy, pick, get, isEmpty } from 'lodash';
 
 import * as API from '../../services/api';
 import { RisksTypes, RisksActions } from './risks.redux';
@@ -25,6 +25,8 @@ import { SnackbarActions } from '../snackbar';
 import { selectRisks, selectShowPins, selectActiveRiskId } from './risks.selectors';
 import { Viewer } from '../../services/viewer/viewer';
 import { getRiskPinColor } from '../../helpers/risks';
+import { getAngularService } from '../../helpers/migration';
+import { Cache } from '../../services/cache';
 
 export function* fetchRisks({teamspace, modelId, revision}) {
 	try {
@@ -131,6 +133,99 @@ export function* printRisks({ teamspace, modelId, risksIds }) {
 	}
 }
 
+export function* getRiskGroup(risk, groupId, revision): any {
+	if (!groupId) {
+		return null;
+	}
+
+	const cachedGroup = Cache.get('risk.group', groupId);
+	if (cachedGroup) {
+		return cachedGroup;
+	}
+
+	const { data } = yield API.getGroup(risk.account, risk.model, groupId, revision);
+
+	if (data.hiddenObjects && !risk.viewpoint.group_id) {
+		data.hiddenObjects = null;
+	}
+
+	Cache.add('risk.group', groupId, data);
+	return data;
+}
+
+export function* showMultipleGroups(risk, revision) {
+	const hasViewpointGroups = !isEmpty(pick(risk.viewpoint, [
+		'highlighted_group_id',
+		'hidden_group_id',
+		'shown_group_id'
+	]));
+
+	if (hasViewpointGroups) {
+		const [hiddenGroupData, shownGroupData, highlightedGroupData] = yield all([
+			getRiskGroup(risk, risk.viewpoint.hidden_group_id, revision),
+			getRiskGroup(risk, risk.viewpoint.hidden_group_id, revision),
+			getRiskGroup(risk, risk.viewpoint.shown_group_id, revision)
+		]);
+
+		if (hiddenGroupData) {
+			this.handleHidden(hiddenGroupData.objects);
+		}
+
+		if (shownGroupData) {
+			this.handleShown(shownGroupData.objects);
+		}
+
+		if (highlightedGroupData) {
+			this.handleShown(highlightedGroupData.objects);
+		}
+	} else {
+		const hasViewpointDefaultGroup = risk.viewpoint.group_id;
+		const groupId = hasViewpointDefaultGroup ? risk.viewpoint.group_id : risk.group_id;
+		const groupData = yield getRiskGroup(risk, groupId, revision);
+
+		if (groupData.hiddenObjects && !risk.viewpoint.group_id) {
+			groupData.hiddenObjects = null;
+			Cache.add('risk.group', groupId, groupData);
+		}
+
+		this.handleTree(groupData);
+	}
+}
+
+export function* showRiskDetails({ risk, revision }) {
+	try {
+		const TreeService = getAngularService('TreeService') as any;
+		yield put(RisksActions.showPins());
+
+		// Remove highlight from any multi objects
+		Viewer.highlightObjects([]);
+		TreeService.clearCurrentlySelected();
+
+		// Reset object visibility
+		if (risk.viewpoint && risk.viewpoint.hideIfc) {
+			TreeService.setHideIfc(risk.viewpoint.hideIfc);
+		}
+
+		const hasHiddenOrShownGroup = risk.viewpoint.hidden_group_id || risk.viewpoint.shown_group_id;
+
+		TreeService.showAllTreeNodes(!hasHiddenOrShownGroup);
+
+		const hasViewpoint = risk.viewpoint;
+		const hasViewpointGroup = risk.viewpoint.highlighted_group_id || risk.viewpoint.group_id;
+		const hasGroup = risk.group_id;
+
+		// Show multi objects
+		if ((hasViewpoint && hasViewpointGroup) || hasGroup || hasHiddenOrShownGroup) {
+			yield showMultipleGroups(risk, revision);
+		}
+
+		yield handleShowRisk(risk);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('show', 'risk details', error));
+	}
+
+}
+
 export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_RISKS, fetchRisks);
 	yield takeLatest(RisksTypes.SAVE_RISK, saveRisk);
@@ -139,4 +234,5 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.SHOW_PINS, showPins);
 	yield takeLatest(RisksTypes.DOWNLOAD_RISKS, downloadRisks);
 	yield takeLatest(RisksTypes.PRINT_RISKS, printRisks);
+	// yield takeLatest(RisksTypes.SHOW_RISK_DETAILS, showRiskDetails);
 }

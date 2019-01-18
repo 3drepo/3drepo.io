@@ -15,6 +15,7 @@
  **  along with this program.  If not, see <http=//www.gnu.org/licenses/>.
  **/
 import * as EventEmitter from 'eventemitter3';
+import { debounce } from 'lodash';
 
 declare const Pin;
 declare const UnityUtil;
@@ -233,6 +234,14 @@ export class Viewer {
 		this.emitter.off(event, ...args);
 	}
 
+	public emit = debounce((event, ...args) => {
+		if (this.callback) {
+			this.emit(event, ...args);
+		}
+
+		this.emitter.emit(event, ...args);
+	}, 200);
+
 	public setUnits(units) {
 		this.units = units;
 
@@ -308,7 +317,7 @@ export class Viewer {
 			UnityUtil.onReady().then(() => {
 				this.initialized = true;
 				this.loadingDivText.style.display = 'none';
-				this.callback(Viewer.EVENT.UNITY_READY, {
+				this.emit(Viewer.EVENT.UNITY_READY, {
 					model: this.modelString,
 					name: this.name
 				});
@@ -387,7 +396,7 @@ export class Viewer {
 	public pickPointEvent(pointInfo) {
 
 		// User clicked a mesh
-		this.callback(Viewer.EVENT.PICK_POINT, {
+		this.emit(Viewer.EVENT.PICK_POINT, {
 			id : pointInfo.id,
 			normal : pointInfo.normal,
 			position: pointInfo.position,
@@ -411,12 +420,12 @@ export class Viewer {
 			if (pointInfo.id) {
 				if (pointInfo.pin) {
 					// User clicked a pin
-					this.callback(Viewer.EVENT.CLICK_PIN, {
+					this.emit(Viewer.EVENT.CLICK_PIN, {
 						id: pointInfo.id
 					});
 
 				} else {
-					this.callback(Viewer.EVENT.OBJECT_SELECTED, {
+					this.emit(Viewer.EVENT.OBJECT_SELECTED, {
 						account: pointInfo.database,
 						id: pointInfo.id,
 						model: pointInfo.model,
@@ -424,12 +433,12 @@ export class Viewer {
 					});
 				}
 			} else {
-				this.callback(Viewer.EVENT.BACKGROUND_SELECTED);
+				this.emit(Viewer.EVENT.BACKGROUND_SELECTED);
 				this.emitter.emit(Viewer.EVENT.BACKGROUND_SELECTED);
 			}
 		} else {
 			if (!pointInfo.id) {
-				this.callback(Viewer.EVENT.BACKGROUND_SELECTED_PIN_MODE);
+				this.emit(Viewer.EVENT.BACKGROUND_SELECTED_PIN_MODE);
 				this.emitter.emit(Viewer.EVENT.BACKGROUND_SELECTED_PIN_MODE);
 			}
 		}
@@ -439,9 +448,9 @@ export class Viewer {
 	public objectsSelected(nodes) {
 		if (!this.selectionDisabled && !this.pinDropMode && !this.measureMode) {
 			if (nodes) {
-				this.callback(Viewer.EVENT.MULTI_OBJECTS_SELECTED, {selectedNodes: nodes});
+				this.emit(Viewer.EVENT.MULTI_OBJECTS_SELECTED, {selectedNodes: nodes});
 			} else {
-				this.callback(Viewer.EVENT.BACKGROUND_SELECTED);
+				this.emit(Viewer.EVENT.BACKGROUND_SELECTED);
 			}
 
 		}
@@ -546,13 +555,13 @@ export class Viewer {
 			this.loadingDivText.style.display = 'none';
 			document.body.style.cursor = 'wait';
 
-			this.callback(Viewer.EVENT.START_LOADING);
+			this.emit(Viewer.EVENT.START_LOADING);
 
 			UnityUtil.loadModel(this.account, this.model, this.branch, this.revision);
 			UnityUtil.onLoaded().then((bbox) => {
 					document.body.style.cursor = 'initial';
-					this.callback(Viewer.EVENT.MODEL_LOADED);
-					this.callback(Viewer.EVENT.BBOX_READY, bbox);
+					this.emit(Viewer.EVENT.MODEL_LOADED);
+					this.emit(Viewer.EVENT.BBOX_READY, bbox);
 				}).catch((error) => {
 					document.body.style.cursor = 'initial';
 					if (error !== 'cancel') {
@@ -629,7 +638,7 @@ export class Viewer {
 	*/
 
 	public clipBroadcast(clip) {
-		this.callback(Viewer.EVENT.CLIPPING_PLANE_BROADCAST, clip);
+		this.emit(Viewer.EVENT.CLIPPING_PLANE_BROADCAST, clip);
 	}
 
 	public updateClippingPlanes(clipPlanes: any, account, model) {
@@ -682,12 +691,12 @@ export class Viewer {
 
 			// this.highlightPin(id); This was preventing changing the colour of the pin
 			// Replace with
-			this.callback(Viewer.EVENT.CHANGE_PIN_COLOUR, {
+			this.emit(Viewer.EVENT.CHANGE_PIN_COLOUR, {
 				colours: Pin.pinColours.yellow,
 				id
 			});
 
-			this.callback(Viewer.EVENT.SET_CAMERA, {
+			this.emit(Viewer.EVENT.SET_CAMERA, {
 				account: pin.account,
 				model: pin.model,
 				position : pin.viewpoint.position,
@@ -695,7 +704,7 @@ export class Viewer {
 				view_dir : pin.viewpoint.view_dir
 			});
 
-			this.callback(Viewer.EVENT.UPDATE_CLIPPING_PLANES, {
+			this.emit(Viewer.EVENT.UPDATE_CLIPPING_PLANES, {
 				account: pin.account,
 				clippingPlanes: pin.viewpoint.clippingPlanes,
 				fromClipPanel: false,
