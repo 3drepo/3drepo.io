@@ -58,7 +58,7 @@ const attributes = {
  */
 
 function formatDate(date, printTime = true) {
-	const formatToUse = printTime ? "kk:mm Do MMM YYYY" : "Do MMM YYYY";
+	const formatToUse = printTime ? "Do MMM YYYY kk:mm" : "Do MMM YYYY";
 	return moment(date).format(formatToUse);
 }
 
@@ -130,8 +130,8 @@ class ReportGenerator {
 					comment.owner || usersToQuery.add(comment.owner);
 					comment.created = formatDate(comment.created);
 					if(comment.action && comment.action.property === "due_date") {
-						comment.action.to = formatDate(parseInt(comment.action.to));
-						comment.action.from = formatDate(parseInt(comment.action.from));
+						comment.action.to = formatDate(parseInt(comment.action.to), false);
+						comment.action.from = comment.action.from ? formatDate(parseInt(comment.action.from), false) : undefined;
 					}
 					newEntry.comments.push(comment);
 				});
