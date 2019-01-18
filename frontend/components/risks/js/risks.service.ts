@@ -422,44 +422,6 @@ export class RisksService {
 			levelOfRiskColors[levelOfRisk].pinColor;
 	}
 
-	public showRiskPins() {
-
-		// TODO: This is still inefficent and unclean
-		this.state.allRisks.forEach((risk) => {
-			const show = this.state.risksToShow.find((shownRisk) => {
-				return risk._id === shownRisk._id;
-			});
-
-			// Check that there is a position for the pin
-			const pinPosition = risk.position && risk.position.length;
-
-			if (this.state.risksCardOptions.showPins && show !== undefined && pinPosition) {
-
-				const levelOfRisk = (risk.level_of_risk !== undefined) ? risk.level_of_risk : 4;
-				const isSelectedPin = this.state.selectedRisk &&
-									risk._id === this.state.selectedRisk._id;
-
-				const pinColor = this.getLevelOfRiskColor(levelOfRisk, isSelectedPin);
-
-				this.viewerService.addPin({
-					id: risk._id,
-					type: 'risk',
-					account: risk.account,
-					model: risk.model,
-					pickedPos: risk.position,
-					pickedNorm: risk.norm,
-					colours: pinColor,
-					viewpoint: risk.viewpoint
-				});
-
-			} else {
-				// Remove pin
-				this.viewerService.removePin({ id: risk._id });
-			}
-		});
-
-	}
-
 	/**
 	 * Remove risk pin with given riskId from viewer.
 	 */

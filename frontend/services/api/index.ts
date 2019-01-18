@@ -12,5 +12,6 @@ export * from './billing';
 export * from './notifications';
 export * from './risks';
 export * from './viewer';
+export * from './groups';
 
 export default API;
