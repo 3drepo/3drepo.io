@@ -26,7 +26,6 @@ const Issue = require("../models/issue");
 const utils = require("../utils");
 const multer = require("multer");
 const config = require("../config.js");
-const moment = require("moment");
 const User = require("../models/user");
 const Job = require("../models/job");
 const ModelHelper = require("../models/helper/model");
@@ -551,49 +550,12 @@ function findIssueById(req, res, next) {
 
 }
 
-/**
- *
- * @param {Date} dateToFormat
- * @param {string} formatToUse
- *
- * Format date by providing a date object
- * and required string format.
- */
-
-function formatDate(dateToFormat, formatToUse) {
-	return moment(dateToFormat).format(formatToUse);
-}
-
 function renderIssuesHTML(req, res, next) {
 
 	const place = utils.APIInfo(req);
 	const dbCol = { account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger };
 	let findIssue;
 	const noClean = false;
-
-	/**
-	* Create dynamic Print report values to use in template.
-	**/
-	const reportValues = {};
-	const reportDate = formatDate(new Date(), "Do MMMM YYYY");
-	const documentDate = formatDate(new Date(), "DD_MM_YY_hh_mm_ss");
-	const currentUser = req.session.user.username;
-	reportValues.reportDate = reportDate;
-	reportValues.documentDate = documentDate;
-	reportValues.currentUser = currentUser;
-
-	const modelName = ModelSetting.findById({ account: req.params.account, model: req.params.model }, req.params.model)
-		.then(setting => {
-			reportValues.modelName = setting.name;
-		});
-
-	const usernamePromise = User.findByUserName(req.session.user.username)
-		.then(username => {
-			reportValues.fullName = username.customData.firstName + " " + username.customData.lastName;
-			reportValues.userCompany = username.customData.billing.billingInfo.company;
-		});
-
-	const finaliseValues = Promise.all([modelName, usernamePromise]);
 
 	const projection = {
 		extras: 0,
@@ -615,52 +577,11 @@ function renderIssuesHTML(req, res, next) {
 		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
 	}
 
+	const reportGen = require("../models/report").newIssuesReport(dbCol.account, dbCol.model, req.params.rid);
+
 	findIssue.then(issues => {
-		// Split issues by type
-		const splitIssues = { open: [], closed: [] };
-
-		for (let i = 0; i < issues.length; i++) {
-
-			if (issues[i].hasOwnProperty("comments")) {
-				for (let j = 0; j < issues[i].comments.length; j++) {
-					issues[i].comments[j].created = formatDate(issues[i].comments[j].created, "kk:mm Do MMM YYYY");
-					if (issues[i].comments[j].action !== undefined && issues[i].comments[j].action.property === "due_date") {
-						issues[i].comments[j].action.to = formatDate(parseInt(issues[i].comments[j].action.to), "kk:mm Do MMM YYYY");
-						issues[i].comments[j].action.from = formatDate(parseInt(issues[i].comments[j].action.from), "kk:mm Do MMM YYYY");
-					}
-				}
-			}
-
-			const issueDueDate = formatDate(issues[i].due_date, "kk:mm Do MMM YYYY");
-			const issueDate = formatDate(issues[i].created, "kk:mm Do MMM YYYY");
-			const currentRevision = issues[i].rev_id;
-
-			reportValues.issueDate = issueDate;
-			reportValues.issueDueDate = issueDueDate;
-			reportValues.currentRevision = currentRevision;
-
-			if(issues[i].closed || issues[i].status === "closed") {
-				issues[i].created = new Date(issues[i].created).toString();
-				splitIssues.closed.push(issues[i]);
-			} else {
-				issues[i].created = new Date(issues[i].created).toString();
-				splitIssues.open.push(issues[i]);
-			}
-		}
-
-		finaliseValues.then(()=> {
-			res.render("issues.pug", {
-				issues: splitIssues,
-				reportValues: reportValues,
-				baseURL: config.getBaseURL(),
-				url: function (path) {
-					return config.apiAlgorithm.apiUrl(C.GET_API, path);
-				}
-			});
-		}).catch((err) => {
-			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-
+		reportGen.addEntries(issues);
+		return reportGen.generateReport(res);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
