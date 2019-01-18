@@ -72,6 +72,8 @@ interface IProps {
 	downloadRisks: (teamspace, model) => void;
 	printRisks: (teamspace, model, risksIds) => void;
 	deleteRisks: (teamspace, model, risksIds) => void;
+	setActiveRisk: (risk) => void;
+	showRiskDetails: (risk, revision?) => void;
 }
 
 interface IState {
@@ -99,13 +101,51 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		filteredRisks: []
 	};
 
+	get jobsList() {
+		return [...this.props.jobs, UNASSIGNED_JOB];
+	}
+
+	get filtersValuesMap() {
+		return {
+			[RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS]: this.getFilterValues(RISK_MITIGATION_STATUSES),
+			[RISK_FILTER_RELATED_FIELDS.CREATED_BY]: this.getFilterValues(this.props.jobs),
+			[RISK_FILTER_RELATED_FIELDS.ASSIGNED_ROLES]: this.getFilterValues(this.jobsList)
+		};
+	}
+
+	get filters() {
+		return RISK_FILTERS.map((riskFilter) => {
+			riskFilter.values = this.filtersValuesMap[riskFilter.relatedField];
+			return riskFilter;
+		});
+	}
+
+	get menuActionsMap() {
+		return {
+			[RISKS_ACTIONS_ITEMS.PRINT]: () => {
+				const risksIds = map(this.state.filteredRisks, '_id').join(',');
+				this.props.printRisks(this.props.teamspace, this.props.model, risksIds);
+			},
+			[RISKS_ACTIONS_ITEMS.DOWNLOAD]: () => {
+				this.props.downloadRisks(this.props.teamspace, this.props.model);
+			},
+			[RISKS_ACTIONS_ITEMS.SHOW_PINS]: () => {
+				this.props.setState({ areShowedPins: !this.props.areShowedPins });
+			}
+		};
+	}
+
+	get activeRiskIndex() {
+		return this.state.filteredRisks.findIndex((risk) => risk._id === this.props.activeRiskId);
+	}
+
 	public renderRisksList = renderWhenTrue(() => {
 		const Items = this.state.filteredRisks.map((risk, index) => (
 			<PreviewListItem
 				{...prepareRisk(risk, this.props.jobs)}
 				key={index}
-				onItemClick={this.handleRiskFocus(risk._id)}
-				onArrowClick={this.handleRiskClick()}
+				onItemClick={this.handleRiskFocus(risk)}
+				onArrowClick={this.handleRiskClick(risk)}
 				active={this.props.activeRiskId === risk._id}
 			/>
 		));
@@ -157,12 +197,6 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		/>
 	));
 
-	public componentDidMount() {
-		const {teamspace, model, revision} = this.props;
-		this.props.fetchRisks(teamspace, model, revision);
-		this.setState({filteredRisks: this.filteredRisks});
-	}
-
 	public get filteredRisks() {
 		const filteredRisks = this.props.risks.filter((risk) => {
 			return this.props.selectedFilters.some((filter) => {
@@ -180,6 +214,20 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		return this.props.selectedFilters.length ? filteredRisks : this.props.risks;
   }
 
+	public renderFilterPanel = renderWhenTrue(() => (
+		<FilterPanel
+			onChange={this.handleFilterChange}
+  		filters={this.filters as any}
+			selectedFilters={this.props.selectedFilters}
+		/>
+	));
+
+	public componentDidMount() {
+		const {teamspace, model, revision} = this.props;
+		this.props.fetchRisks(teamspace, model, revision);
+		this.setState({filteredRisks: this.filteredRisks});
+	}
+
 	public componentDidUpdate(prevProps) {
 		const { risks, selectedFilters } = this.props;
 		const risksChanged = prevProps.risks.length !== risks.length;
@@ -196,18 +244,6 @@ export class Risks extends React.PureComponent<IProps, IState> {
     });
   }
 
-	public renderFilterPanel = renderWhenTrue(() => (
-		<FilterPanel
-			onChange={this.handleFilterChange}
-  		filters={this.filters as any}
-			selectedFilters={this.props.selectedFilters}
-		/>
-	));
-
-	get jobsList() {
-		return [...this.props.jobs, UNASSIGNED_JOB];
-	}
-
 	public getFilterValues(property) {
 		return property.map(({value, name}) => {
 			return {
@@ -217,27 +253,12 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public get filtersValuesMap() {
-		return {
-			[RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS]: this.getFilterValues(RISK_MITIGATION_STATUSES),
-			[RISK_FILTER_RELATED_FIELDS.CREATED_BY]: this.getFilterValues(this.props.jobs),
-			[RISK_FILTER_RELATED_FIELDS.ASSIGNED_ROLES]: this.getFilterValues(this.jobsList)
-		};
+	public handleRiskFocus = (risk) => () => {
+		this.props.setActiveRisk(risk);
 	}
 
-	public get filters() {
-		return RISK_FILTERS.map((riskFilter) => {
-			riskFilter.values = this.filtersValuesMap[riskFilter.relatedField];
-			return riskFilter;
-		});
-	}
-
-	public handleRiskFocus = (riskId) => () => {
-		this.props.setState({ activeRisk: riskId, expandDetails: true });
-	}
-
-	public handleRiskClick = () => () => {
-		this.toggleDetails(true);
+	public handleRiskClick = (risk) => () => {
+		this.props.showRiskDetails(risk, this.state.filteredRisks);
 	}
 
 	public handleAddNewRisk = () => {
@@ -273,60 +294,39 @@ export class Risks extends React.PureComponent<IProps, IState> {
 			searchEnabled: true
 		})
 
-	public findActiveRiskIndex = (id) => this.state.filteredRisks.findIndex((risk) => risk._id === id);
-
 	public handlePrevItem = () => {
-		const index = this.findActiveRiskIndex(this.props.activeRiskId);
-		if (index === 0) {
-			this.props.setState({
-				activeRisk: this.state.filteredRisks[this.state.filteredRisks.length - 1]._id
-			});
-		} else {
-			this.props.setState({
-				activeRisk: this.state.filteredRisks[index - 1]._id
-			});
-		}
+		const index = this.activeRiskIndex;
+
+		const prevIndex = index === 0 ? this.state.filteredRisks.length - 1 : index - 1;
+		this.props.showRiskDetails(
+			this.state.filteredRisks[prevIndex],
+			this.state.filteredRisks
+		);
 	}
 
 	public handleNextItem = () => {
-		const index = this.findActiveRiskIndex(this.props.activeRiskId);
+		const index = this.activeRiskIndex;
+		const lastIndex = this.state.filteredRisks.length - 1;
+		const nextIndex = index === lastIndex ? lastIndex : index + 1;
 
-		if (index === this.state.filteredRisks.length - 1) {
-			this.props.setState({
-				activeRisk: this.state.filteredRisks[0]._id
-			});
-		} else {
-			this.props.setState({
-				activeRisk: this.state.filteredRisks[index + 1]._id
-			});
-		}
-	}
-
-	public get menuActionsMap() {
-		return {
-			[RISKS_ACTIONS_ITEMS.PRINT]: () => {
-				const risksIds = map(this.state.filteredRisks, '_id').join(',');
-				this.props.printRisks(this.props.teamspace, this.props.model, risksIds);
-			},
-			[RISKS_ACTIONS_ITEMS.DOWNLOAD]: () => {
-				this.props.downloadRisks(this.props.teamspace, this.props.model);
-			},
-			[RISKS_ACTIONS_ITEMS.SHOW_PINS]: () => {
-				this.props.setState({ areShowedPins: !this.props.areShowedPins });
-			}
-		};
+		this.props.showRiskDetails(
+			this.state.filteredRisks[nextIndex],
+			this.state.filteredRisks
+		);
 	}
 
   public renderActionsMenu = () => (
     <MenuList>
 			{ RISKS_ACTIONS_MENU.map(({name, Icon, label}) => {
-				return (<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
-					<IconWrapper><Icon fontSize={'small'} /></IconWrapper>
-					<StyledItemText>
-						{label}
-						{(name === RISKS_ACTIONS_ITEMS.SHOW_PINS && this.props.areShowedPins) && <Check fontSize={'small'} />}
-					</StyledItemText>
-				</StyledListItem>);
+				return (
+					<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+						<IconWrapper><Icon fontSize={'small'} /></IconWrapper>
+						<StyledItemText>
+							{label}
+							{(name === RISKS_ACTIONS_ITEMS.SHOW_PINS && this.props.areShowedPins) && <Check fontSize={'small'} />}
+						</StyledItemText>
+					</StyledListItem>
+				);
 			})}
 		</MenuList>
   )
@@ -360,16 +360,9 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	public renderActions = () => {
 		if (this.props.showDetails) {
-			return [
-				{ Button: this.getPrevButton },
-				{ Button: this.getNextButton }
-			];
-		} else {
-			return [
-				{ Button: this.getSearchButton },
-				{ Button: this.getMenuButton }
-			];
+			return [{ Button: this.getPrevButton }, { Button: this.getNextButton }];
 		}
+		return [{ Button: this.getSearchButton }, { Button: this.getMenuButton }];
 	}
 
 	public render() {

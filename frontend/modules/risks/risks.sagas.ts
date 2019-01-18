@@ -154,11 +154,15 @@ export function* getRiskGroup(risk, groupId, revision): any {
 }
 
 export function* showMultipleGroups(risk, revision) {
+	const TreeService = getAngularService('TreeService') as any;
+
 	const hasViewpointGroups = !isEmpty(pick(risk.viewpoint, [
 		'highlighted_group_id',
 		'hidden_group_id',
 		'shown_group_id'
 	]));
+
+	let objects = {} as { hidden: any[], shown: any[], objects: any[] };
 
 	if (hasViewpointGroups) {
 		const [hiddenGroupData, shownGroupData, highlightedGroupData] = yield all([
@@ -168,15 +172,15 @@ export function* showMultipleGroups(risk, revision) {
 		]);
 
 		if (hiddenGroupData) {
-			this.handleHidden(hiddenGroupData.objects);
+			objects.hidden = hiddenGroupData.objects;
 		}
 
 		if (shownGroupData) {
-			this.handleShown(shownGroupData.objects);
+			objects.shown = hiddenGroupData.objects;
 		}
 
 		if (highlightedGroupData) {
-			this.handleShown(highlightedGroupData.objects);
+			objects.objects = hiddenGroupData.objects;
 		}
 	} else {
 		const hasViewpointDefaultGroup = risk.viewpoint.group_id;
@@ -188,14 +192,45 @@ export function* showMultipleGroups(risk, revision) {
 			Cache.add('risk.group', groupId, groupData);
 		}
 
-		this.handleTree(groupData);
+		objects = groupData;
+	}
+
+	if (objects.hidden) {
+		TreeService.hideNodesBySharedIds(objects.hidden);
+	}
+
+	if (objects.shown) {
+		TreeService.isolateNodesBySharedIds(objects.shown);
+	}
+
+	if (objects.objects && objects.objects.length > 0) {
+		TreeService.selectedIndex = undefined;
+		yield TreeService.selectNodesBySharedIds(objects.objects);
+		window.dispatchEvent(new Event('resize'));
 	}
 }
 
-export function* showRiskDetails({ risk, revision }) {
+const focusOnRisk = async (risk) => {
+	const { account, model, viewpoint } = risk;
+	if (viewpoint) {
+		if (viewpoint.position && viewpoint.position.length > 0) {
+			Viewer.setCamera({ ...viewpoint, account, model });
+		}
+
+		await Viewer.updateClippingPlanes({
+			clippingPlanes: viewpoint.clippingPlanes,
+			account,
+			model
+		});
+	} else {
+		await Viewer.goToDefaultViewpoint();
+	}
+};
+
+export function* renderRisk(risk, filteredRisks, revision) {
 	try {
 		const TreeService = getAngularService('TreeService') as any;
-		yield put(RisksActions.showPins());
+		yield put(RisksActions.showPins(filteredRisks));
 
 		// Remove highlight from any multi objects
 		Viewer.highlightObjects([]);
@@ -214,16 +249,42 @@ export function* showRiskDetails({ risk, revision }) {
 		const hasViewpointGroup = risk.viewpoint.highlighted_group_id || risk.viewpoint.group_id;
 		const hasGroup = risk.group_id;
 
-		// Show multi objects
 		if ((hasViewpoint && hasViewpointGroup) || hasGroup || hasHiddenOrShownGroup) {
 			yield showMultipleGroups(risk, revision);
 		}
 
-		yield handleShowRisk(risk);
+		yield focusOnRisk(risk);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('show', 'risk details', error));
+		yield put(DialogActions.showErrorDialog('render', 'risk', error));
 	}
+}
 
+export function* setActiveRisk({ risk }) {
+	try {
+		yield all([
+			focusOnRisk(risk),
+			put(RisksActions.setComponentState({ activeRisk: risk._id, expandDetails: true }))
+		]);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'risk as active', error));
+	}
+}
+
+export function* showDetails({ risk, filteredRisks, revision }) {
+	try {
+		const activeRiskId = select(selectActiveRiskId);
+
+		if (activeRiskId !== risk._id) {
+			yield put(RisksActions.setComponentState({ activeRisk: risk._id }));
+		}
+
+		yield all([
+			renderRisk(risk, filteredRisks, revision),
+			put(RisksActions.setComponentState({ showDetails: true }))
+		]);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('display', 'risk details', error));
+	}
 }
 
 export default function* RisksSaga() {
@@ -234,5 +295,6 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.SHOW_PINS, showPins);
 	yield takeLatest(RisksTypes.DOWNLOAD_RISKS, downloadRisks);
 	yield takeLatest(RisksTypes.PRINT_RISKS, printRisks);
-	// yield takeLatest(RisksTypes.SHOW_RISK_DETAILS, showRiskDetails);
+	yield takeLatest(RisksTypes.SET_ACTIVE_RISK, setActiveRisk);
+	yield takeLatest(RisksTypes.SHOW_DETAILS, showDetails);
 }

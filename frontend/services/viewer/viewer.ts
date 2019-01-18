@@ -92,6 +92,11 @@ export class ViewerService {
 		);
 	}
 
+	public async goToDefaultViewpoint() {
+		await this.isViewerReady();
+		return this.viewer.showAll();
+	}
+
 	public removeUnsavedPin() {
 		this.removePin({id: this.newPinId });
 		this.setPin({data: null});
