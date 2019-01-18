@@ -16,6 +16,8 @@
  */
 
 import * as React from 'react';
+import { map } from 'lodash';
+
 import ReportProblem from '@material-ui/icons/ReportProblem';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import AddIcon from '@material-ui/icons/Add';
@@ -24,7 +26,10 @@ import SearchIcon from '@material-ui/icons/Search';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import CancelIcon from '@material-ui/icons/Cancel';
+import MoreIcon from '@material-ui/icons/MoreVert';
+import Check from '@material-ui/icons/Check';
 
+import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import RiskDetails from './components/riskDetails/riskDetails.container';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewListItem } from '../previewListItem/previewListItem.component';
@@ -35,8 +40,16 @@ import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../vie
 import {
 	RISK_FILTERS,
 	RISK_MITIGATION_STATUSES,
-	RISK_FILTER_RELATED_FIELDS
+	RISK_FILTER_RELATED_FIELDS,
+	RISKS_ACTIONS_MENU,
+	RISKS_ACTIONS_ITEMS
 } from '../../../../constants/risks';
+import {
+	MenuList,
+	StyledListItem,
+	StyledItemText,
+	IconWrapper
+} from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel, DATA_TYPES } from '../../../components/filterPanel/filterPanel.component';
 
 interface IProps {
@@ -50,10 +63,13 @@ interface IProps {
 	showDetails?: boolean;
 	riskDetails?: any;
 	searchEnabled: boolean;
+	areShowedPins: boolean;
 	selectedFilters: any[];
 	fetchRisks: (teamspace, model, revision) => void;
 	setState: (componentState: any) => void;
 	setNewRisk: () => void;
+	downloadRisks: (teamspace, model) => void;
+	printRisks: (teamspace, model, risksIds) => void;
 }
 
 interface IState {
@@ -65,6 +81,16 @@ const UNASSIGNED_JOB = {
 	name: 'Unassigned',
 	value: ''
 };
+
+const MenuButton = ({ IconProps, Icon, ...props }) => (
+  <IconButton
+    {...props}
+    aria-label="Show filters menu"
+    aria-haspopup="true"
+  >
+    <MoreIcon {...IconProps} />
+  </IconButton>
+);
 
 export class Risks extends React.PureComponent<IProps, IState> {
 	public state = {
@@ -252,6 +278,47 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public get menuActionsMap() {
+		return {
+			[RISKS_ACTIONS_ITEMS.PRINT]: () => {
+				const risksIds = map(this.state.filteredRisks, '_id').join(',');
+				this.props.printRisks(this.props.teamspace, this.props.model, risksIds);
+			},
+			[RISKS_ACTIONS_ITEMS.DOWNLOAD]: () => {
+				this.props.downloadRisks(this.props.teamspace, this.props.model);
+			},
+			[RISKS_ACTIONS_ITEMS.SHOW_PINS]: () => {
+				this.props.setState({ areShowedPins: !this.props.areShowedPins });
+			}
+		};
+	}
+
+  public renderActionsMenu = () => (
+    <MenuList>
+			{ RISKS_ACTIONS_MENU.map(({name, Icon, label}) => {
+				return (<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+					<IconWrapper><Icon fontSize={'small'} /></IconWrapper>
+					<StyledItemText>
+						{label}
+						{(name === RISKS_ACTIONS_ITEMS.SHOW_PINS && this.props.areShowedPins) && <Check fontSize={'small'} />}
+					</StyledItemText>
+				</StyledListItem>);
+			})}
+		</MenuList>
+  )
+
+	public getMenuButton = () => {
+		return (
+			<ButtonMenu
+				renderButton={MenuButton}
+				renderContent={this.renderActionsMenu}
+				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
+				ButtonProps={{ disabled: false }}
+			/>
+		);
+	}
+
 	public getSearchButton = () => {
 		if (this.props.searchEnabled) {
 			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
@@ -275,7 +342,8 @@ export class Risks extends React.PureComponent<IProps, IState> {
 			];
 		} else {
 			return [
-				{ Button: this.getSearchButton }
+				{ Button: this.getSearchButton },
+				{ Button: this.getMenuButton }
 			];
 		}
 	}

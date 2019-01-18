@@ -99,9 +99,32 @@ export function* showPins({ filteredRisks }) {
 	}
 }
 
+export function* downloadRisks({ teamspace, modelId }) {
+	try {
+		const endpoint = `${teamspace}/${modelId}/risks.json`;
+		const modelName = Viewer.viewer && Viewer.viewer.settings ? Viewer.viewer.settings.name : '';
+		yield API.downloadJSON('risks', modelName, endpoint);
+
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'risk', error));
+	}
+}
+
+export function* printRisks({ teamspace, modelId, risksIds }) {
+	try {
+		const printEndpoint = `${teamspace}/${modelId}/risks.html?ids=${risksIds}`;
+		const printUrl = `${ClientConfig.apiUrls.all[0]}/${printEndpoint}`;
+		window.open(printUrl, '_blank');
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'risk', error));
+	}
+}
+
 export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_RISKS, fetchRisks);
 	yield takeLatest(RisksTypes.SAVE_RISK, saveRisk);
 	yield takeLatest(RisksTypes.UPDATE_RISK, updateRisk);
 	yield takeLatest(RisksTypes.SHOW_PINS, showPins);
+	yield takeLatest(RisksTypes.DOWNLOAD_RISKS, downloadRisks);
+	yield takeLatest(RisksTypes.PRINT_RISKS, printRisks);
 }

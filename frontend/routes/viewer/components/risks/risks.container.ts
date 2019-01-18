@@ -27,7 +27,8 @@ import {
 	selectActiveRiskDetails,
 	selectShowDetails,
 	selectSearchEnabled,
-	selectSelectedFilters
+	selectSelectedFilters,
+	selectShowPins
 } from '../../../../modules/risks';
 import { selectJobsList } from '../../../../modules/jobs';
 import { selectSettings } from '../../../../modules/model';
@@ -38,6 +39,7 @@ const mapStateToProps = createStructuredSelector({
 	jobs: selectJobsList,
 	activeRiskId: selectActiveRiskId,
 	activeRiskDetails: selectActiveRiskDetails,
+	areShowedPins: selectShowPins,
 	showDetails: selectShowDetails,
 	searchEnabled: selectSearchEnabled,
 	setState: RisksActions.setComponentState,
@@ -46,8 +48,10 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchRisks: RisksActions.fetchRisks,
-	setState: RisksActions.setComponentState,
-	setNewRisk: RisksActions.setNewRisk
+	setState: RisksActions.setComponentState
+	setNewRisk: RisksActions.setNewRisk,
+	downloadRisks: RisksActions.downloadRisks,
+	printRisks: RisksActions.printRisks
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Risks);

@@ -26,7 +26,9 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	updateRisk: ['teamspace', 'modelId', 'riskData'],
 	saveRiskSuccess: ['risk'],
 	setNewRisk: [],
-	showPins: ['filteredRisks']
+	showPins: ['filteredRisks'],
+	printRisks: ['teamspace', 'modelId', 'risksIds'],
+	downloadRisks: ['teamspace', 'modelId']
 }, { prefix: 'RISKS_' });
 
 export const INITIAL_STATE = {

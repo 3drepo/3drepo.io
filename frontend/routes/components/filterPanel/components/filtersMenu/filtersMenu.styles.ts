@@ -56,6 +56,12 @@ export const StyledItemText = styled.div`
   align-items: center;
 `;
 
+export const IconWrapper = styled.div`
+  color: ${COLOR.BLACK_60};
+  font-size: 12px;
+  margin-right: 10px;
+`;
+
 export const StyledListItem = styled(ListItem)`
   && {
     padding: 4px 10px;
