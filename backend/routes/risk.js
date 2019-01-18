@@ -250,38 +250,12 @@ function findRiskById(req, res, next) {
 }
 
 function renderRisksHTML(req, res, next) {
-
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
-
-	const projection = {
-		extras: 0,
-		"viewpoint.extras": 0,
-		"viewpoint.scribble": 0,
-		"viewpoint.screenshot.content": 0,
-		"viewpoint.screenshot.resizedContent": 0,
-		"thumbnail.content": 0
-	};
-
-	let ids;
-	let findRisk;
-
-	if (req.query.ids) {
-		ids = req.query.ids.split(",");
-	}
-
-	if (req.params.rid) {
-		findRisk = Risk.findRisksByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, ids);
-	} else {
-		findRisk = Risk.findRisksByModelName(dbCol, req.session.user.username, "master", null, projection, ids);
-	}
-
-	const reportGen = require("../models/report").newRisksReport(dbCol.account, dbCol.model, req.params.rid);
-
-	findRisk.then(risks => {
-		reportGen.addEntries(risks);
-		return reportGen.generateReport(res);
-	}).catch(err => {
+	const account = req.params.account;
+	const model = req.params.model;
+	const rid = req.params.rid;
+	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
+	Risk.getRisksReport(account, model, req.session.user.username, rid, ids, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }

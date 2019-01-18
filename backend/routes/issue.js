@@ -553,36 +553,11 @@ function findIssueById(req, res, next) {
 function renderIssuesHTML(req, res, next) {
 
 	const place = utils.APIInfo(req);
-	const dbCol = { account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger };
-	let findIssue;
-	const noClean = false;
-
-	const projection = {
-		extras: 0,
-		"viewpoints.extras": 0,
-		"viewpoints.scribble": 0,
-		"viewpoints.screenshot.content": 0,
-		"viewpoints.screenshot.resizedContent": 0,
-		"thumbnail.content": 0
-	};
-
-	let ids;
-	if (req.query.ids) {
-		ids = req.query.ids.split(",");
-	}
-
-	if (req.params.rid) {
-		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, noClean, ids);
-	} else {
-		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
-	}
-
-	const reportGen = require("../models/report").newIssuesReport(dbCol.account, dbCol.model, req.params.rid);
-
-	findIssue.then(issues => {
-		reportGen.addEntries(issues);
-		return reportGen.generateReport(res);
-	}).catch(err => {
+	const account = req.params.account;
+	const model = req.params.model;
+	const rid = req.params.rid;
+	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
+	Issue.getIssuesReport(account, model, req.session.user.username, rid, ids, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
