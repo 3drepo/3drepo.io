@@ -43,6 +43,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setState: RisksActions.setComponentState,
 	saveRisk: RisksActions.saveRisk,
 	updateRisk: RisksActions.updateRisk,
+	showNewPin: RisksActions.showNewPin,
 	showScreenshotDialog: DialogActions.showScreenshotDialog
 }, dispatch);
 

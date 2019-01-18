@@ -40,6 +40,7 @@ interface IProps {
 	postComment: (teamspace, modelId, riskId, comment) => void;
 	setState: (componentState) => void;
 	showScreenshotDialog: (options) => void;
+	showNewPin: (risk, pinData) => void;
 }
 
 interface IState {
@@ -131,8 +132,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		this.setCommentData({ screenshot, viewpoint });
 	}
 
-	public handleChangePin = () => {
-
+	public handleChangePin = (pinData) => {
+		this.props.showNewPin(this.props.risk, pinData);
 	}
 
 	public handleSaveButton = () => {

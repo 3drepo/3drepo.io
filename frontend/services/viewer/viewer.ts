@@ -8,12 +8,9 @@ const MODE = {
 
 export class ViewerService {
 	private viewerInstance = null;
-	private mode = MODE.NORMAL;
+	private viewerService = null;
 
-	public pin: any;
-	public pinData: any;
-	public newPinId: string;
-	public currentModel: any;
+	private mode = MODE.NORMAL;
 	public initialised: any;
 
 	get viewer() {
@@ -21,29 +18,15 @@ export class ViewerService {
 			return this.viewerInstance;
 		}
 
-		const angularViewer = getAngularService('ViewerService', this) as any;
-		this.viewerInstance = angularViewer.getViewer();
-		this.initialised = angularViewer.initialised.promise;
+		this.viewerService = getAngularService('ViewerService', this) as any;
+		this.viewerInstance = this.viewerService.getViewer();
+		this.initialised = this.viewerService.initialised.promise;
 
 		return this.viewerInstance;
 	}
 
 	get isPinMode() {
 		return this.mode === MODE.PIN;
-	}
-
-	constructor() {
-		this.newPinId = 'newPinId';
-		this.pinData = null;
-
-		this.currentModel = {
-			model : null,
-			promise : null
-		};
-
-		this.pin = {
-			pinDropMode: false
-		};
 	}
 
 	public async isViewerReady()  {
@@ -74,6 +57,10 @@ export class ViewerService {
 		this.viewer.on(...args);
 	}
 
+	public once(...args) {
+		this.viewer.once(...args);
+	}
+
 	public off(...args) {
 		this.viewer.off(...args);
 	}
@@ -95,11 +82,6 @@ export class ViewerService {
 	public async goToDefaultViewpoint() {
 		await this.isViewerReady();
 		return this.viewer.showAll();
-	}
-
-	public removeUnsavedPin() {
-		this.removePin({id: this.newPinId });
-		this.setPin({data: null});
 	}
 
 	public async changePinColors(params) {
@@ -131,25 +113,20 @@ export class ViewerService {
 	/**
 	 * PIN
 	 */
-
-	public toggleAreaSelect(on: boolean) {
-		if (this.areaSelectMode !== on) {
-			this.areaSelectMode = on;
-			if (on) {
-				Viewer.startAreaSelect();
-			} else {
-				Viewer.stopAreaSelect();
-			}
-			this.determineCursorIcon();
-		}
-	}
-
 	public setPinDropMode(on: boolean) {
-		this.pin.pinDropMode = on;
+		this.viewerService.pin.pinDropMode = on;
 
 		if (on) {
 			MultiSelect.toggleAreaSelect(false);
 		}
+	}
+
+	public setPin(newPinData) {
+		this.viewerService.pinData = newPinData;
+	}
+
+	public getPinData(): any {
+		return this.viewerService.pinData;
 	}
 
 	public async addPin(params) {

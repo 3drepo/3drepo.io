@@ -35,6 +35,7 @@ import {
 	Container
 } from './newCommentForm.styles';
 import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
+import { VIEWER_EVENTS } from '../../../../constants/viewer';
 
 interface IProps {
 	innerRef: any;
@@ -46,13 +47,15 @@ interface IProps {
 	hideScreenshot?: boolean;
 	onSave: (commentData) => void;
 	onTakeScreenshot: (screenshot) => void;
-	onChangePin: () => void;
+	onChangePin: (pin) => void;
 	showScreenshotDialog: (options) => void;
 }
 
 const NewCommentSchema = Yup.object().shape({
 	text: Yup.string().max(220)
 });
+
+const NEW_PIN_ID = 'newPinId';
 
 export class NewCommentForm extends React.PureComponent<IProps, any> {
 	public state = {
@@ -61,6 +64,12 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 
 	get pinColor() {
 		return this.state.isPinActive ? 'secondary' : 'action';
+	}
+
+	public componentWillUnmount() {
+		Viewer.setPinDropMode(false);
+		Measure.setDisabled(false);
+		this.togglePinListeners(false);
 	}
 
 	public handleSave = ({ comment }, { resetForm }) => {
@@ -89,13 +98,42 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 			Viewer.setPinDropMode(true);
 			Measure.deactivateMeasure();
 			Measure.setDisabled(true);
+			this.togglePinListeners(true);
 		} else {
 			Viewer.setPinDropMode(false);
 			Measure.setDisabled(false);
+			this.togglePinListeners(false);
 		}
 
 		this.setState({ isPinActive });
-		// this.props.onChangePin();
+	}
+
+	public togglePinListeners = (enabled: boolean) => {
+		const resolver = enabled ? 'once' : 'off';
+
+		Viewer[resolver](VIEWER_EVENTS.PICK_POINT, this.handlePickPoint);
+	}
+
+	public handlePickPoint = ({ trans, position, normal, selectColour, id }) => {
+		if (id) {
+			return null;
+		}
+
+		if (trans) {
+			position = trans.inverse().multMatrixPnt(position);
+		}
+
+		this.handleChangePin();
+
+		if (this.props.onChangePin) {
+			this.props.onChangePin({
+				id: NEW_PIN_ID,
+				pickedNorm: normal,
+				pickedPos: position,
+				selectedObjectId: id,
+				selectColor: selectColour
+			});
+		}
 	}
 
 	public renderScreenshotButton = renderWhenTrue(() => (
