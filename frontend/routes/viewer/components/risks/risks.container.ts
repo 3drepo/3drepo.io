@@ -52,7 +52,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setNewRisk: RisksActions.setNewRisk,
 	deleteRisks: RisksActions.deleteRisks,
 	downloadRisks: RisksActions.downloadRisks,
-	printRisks: RisksActions.printRisks
+	printRisks: RisksActions.printRisks,
+	setActiveRisk: RisksActions.setActiveRisk,
+	showRiskDetails: RisksActions.showDetails
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Risks);
