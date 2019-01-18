@@ -24,6 +24,8 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	setComponentState: ['componentState'],
 	saveRisk: ['teamspace', 'modelId', 'riskData'],
 	updateRisk: ['teamspace', 'modelId', 'riskData'],
+	deleteRisks: ['teamspace', 'modelId', 'risksIds'],
+	deleteRisksSuccess: ['risksIds'],
 	saveRiskSuccess: ['risk'],
 	setNewRisk: [],
 	showPins: ['filteredRisks'],
@@ -56,6 +58,13 @@ export const saveRiskSuccess = (state = INITIAL_STATE, { risk }) => {
 	return { ...state, risksMap };
 };
 
+export const deleteRisksSuccess = (state = INITIAL_STATE, { risksIds }) => {
+	const risksMap = cloneDeep(state.risksMap);
+	delete risksMap[risksIds];
+
+	return { ...state, risksMap };
+};
+
 export const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
@@ -81,6 +90,7 @@ export const setNewRisk = (state = INITIAL_STATE) => {
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.FETCH_RISKS_SUCCESS]: fetchRisksSuccess,
+	[RisksTypes.DELETE_RISKS_SUCCESS]: deleteRisksSuccess,
 	[RisksTypes.SET_COMPONENT_STATE]: setComponentState,
 	[RisksTypes.SAVE_RISK_SUCCESS]: saveRiskSuccess,
 	[RisksTypes.SET_NEW_RISK]: setNewRisk

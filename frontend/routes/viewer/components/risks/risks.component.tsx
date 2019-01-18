@@ -28,6 +28,7 @@ import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import CancelIcon from '@material-ui/icons/Cancel';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import Check from '@material-ui/icons/Check';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import RiskDetails from './components/riskDetails/riskDetails.container';
@@ -70,6 +71,7 @@ interface IProps {
 	setNewRisk: () => void;
 	downloadRisks: (teamspace, model) => void;
 	printRisks: (teamspace, model, risksIds) => void;
+	deleteRisks: (teamspace, model, risksIds) => void;
 }
 
 interface IState {
@@ -111,24 +113,42 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		return <ListContainer>{Items}</ListContainer>;
 	});
 
+	public deleteRisk = () => {
+		this.props.deleteRisks(this.props.teamspace, this.props.model, this.props.activeRiskId);
+	}
+
+	public renderDeleteButton = renderWhenTrue(() => {
+		return (
+			<IconButton onClick={this.deleteRisk}>
+					<DeleteIcon />
+			</IconButton>
+		);
+	});
+
+	public renderDisplayedInfo = renderWhenTrue(() => <>{this.state.filteredRisks.length} risks displayed</>);
+
 	public renderListView = renderWhenTrue(() => (
-		<>
-			<ViewerPanelContent className="height-catcher">
-				{this.renderRisksList(this.state.filteredRisks.length)}
-			</ViewerPanelContent>
-			<ViewerPanelFooter alignItems="center" justify="space-between">
-				<Summary>{this.state.filteredRisks.length} risks displayed</Summary>
-				<ViewerPanelButton
-					aria-label="Add risk"
-					onClick={this.handleAddNewRisk}
-					color="secondary"
-					variant="fab"
-				>
-					<AddIcon />
-				</ViewerPanelButton>
-			</ViewerPanelFooter>
-		</>
-	));
+			<>
+				<ViewerPanelContent className="height-catcher">
+					{this.renderRisksList(this.state.filteredRisks.length)}
+				</ViewerPanelContent>
+				<ViewerPanelFooter alignItems="center" justify="space-between">
+					<Summary>
+						{this.renderDeleteButton(Boolean(this.props.activeRiskId))}
+						{this.renderDisplayedInfo(!Boolean(this.props.activeRiskId))}
+					</Summary>
+					<ViewerPanelButton
+						aria-label="Add risk"
+						onClick={this.handleAddNewRisk}
+						color="secondary"
+						variant="fab"
+					>
+						<AddIcon />
+					</ViewerPanelButton>
+				</ViewerPanelFooter>
+			</>
+		)
+	);
 
 	public renderDetailsView = renderWhenTrue(() => (
 		<RiskDetails
@@ -239,10 +259,14 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		return <ReportProblem />;
 	}
 
-	public handleCloseSearchMode = () =>
+	public handleCloseSearchMode = () => {
 		this.props.setState({
 			searchEnabled: false
-		})
+		});
+		this.setState({
+			filteredRisks: this.props.risks
+		});
+	}
 
 	public handleOpenSearchMode = () =>
 		this.props.setState({

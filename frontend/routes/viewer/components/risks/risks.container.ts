@@ -48,8 +48,9 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchRisks: RisksActions.fetchRisks,
-	setState: RisksActions.setComponentState
+	setState: RisksActions.setComponentState,
 	setNewRisk: RisksActions.setNewRisk,
+	deleteRisks: RisksActions.deleteRisks,
 	downloadRisks: RisksActions.downloadRisks,
 	printRisks: RisksActions.printRisks
 }, dispatch);
