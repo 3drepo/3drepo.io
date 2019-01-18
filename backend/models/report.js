@@ -25,7 +25,7 @@ const C = require("../constants");
 
 const ReportType = {
 	ISSUES : "Issues",
-	RISKS: "Risk"
+	RISKS: "Risks"
 };
 
 const riskLevelMapping = ["Very Low", "Low", "Moderate", "High", "Very High"];
@@ -114,12 +114,20 @@ class ReportGenerator {
 			attributes[this.type].forEach((field) => {
 				if (entry.hasOwnProperty(field.field)) {
 					const attri = { label: field.label };
-					if(field.mapping) {
-						attri.value = field.mapping[entry[field.field]];
-					} else if (field.isDate) {
-						attri.value = formatDate(entry[field.field], false);
+					const value = entry[field.field];
+
+					if(value === "" || value === undefined || value === null) {
+						attri.value = field.default ? field.default : "Unknown";
 					} else {
-						attri.value =  Array.isArray(entry[field.field]) ? entry[field.field].join(", ") : entry[field.field];
+						if(field.mapping) {
+							attri.value = field.mapping[value];
+						} else if (field.isDate) {
+							attri.value = formatDate(entry[value], false);
+						} else {
+							attri.value =  Array.isArray(entry[field.field]) ?
+								entry[field.field].join(", ") : entry[field.field];
+						}
+
 					}
 					newEntry.attributes.push(attri);
 				}

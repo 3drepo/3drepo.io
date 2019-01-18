@@ -24,10 +24,6 @@ const C = require("../constants");
 const responseCodes = require("../response_codes.js");
 const Risk = require("../models/risk");
 const utils = require("../utils");
-const config = require("../config.js");
-const moment = require("moment");
-const ModelSetting = require("../models/modelSetting");
-const User = require("../models/user");
 
 /**
  * @api {get} /risks/:uid.json Find Risk by ID
@@ -258,25 +254,6 @@ function renderRisksHTML(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
 
-	/**
-	* Create dynamic Print report values to use in template.
-	**/
-	const reportValues = {};
-	const reportDate = moment().format("Do MMMM YYYY");
-	const currentUser = req.session.user.username;
-	reportValues.reportDate = reportDate;
-	reportValues.currentUser = currentUser;
-
-	ModelSetting.findById({ account: req.params.account, model: req.params.model }, req.params.model)
-		.then(setting => {
-			reportValues.modelName = setting.name;
-		});
-	User.findByUserName(req.session.user.username)
-		.then(username => {
-			reportValues.fullName = username.customData.firstName + " " + username.customData.lastName;
-			reportValues.userCompany = username.customData.billing.billingInfo.company;
-		});
-
 	const projection = {
 		extras: 0,
 		"viewpoint.extras": 0,
@@ -299,31 +276,11 @@ function renderRisksHTML(req, res, next) {
 		findRisk = Risk.findRisksByModelName(dbCol, req.session.user.username, "master", null, projection, ids);
 	}
 
+	const reportGen = require("../models/report").newRisksReport(dbCol.account, dbCol.model, req.params.rid);
+
 	findRisk.then(risks => {
-		// Split risks by status
-		const splitRisks = {open : [], closed: []};
-
-		for (let i = 0; i < risks.length; i++) {
-			if (risks[i].closed || risks[i].status === "closed") {
-				risks[i].created = moment(risks[i].created).format("hh:mm, Do MMM YYYY");
-				splitRisks.closed.push(risks[i]);
-			} else {
-				risks[i].created = moment(risks[i].created).format("hh:mm, Do MMM YYYY");
-				splitRisks.open.push(risks[i]);
-			}
-
-			const currentRevision = risks[i].rev_id;
-			reportValues.currentRevision = currentRevision;
-		}
-
-		res.render("risks.pug", {
-			risks : splitRisks,
-			reportValues:reportValues,
-			url: function (path) {
-				return config.apiAlgorithm.apiUrl(C.GET_API, path);
-			}
-		});
-
+		reportGen.addEntries(risks);
+		return reportGen.generateReport(res);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

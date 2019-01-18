@@ -19,6 +19,10 @@ html(lang="en" ng-app="3drepo").ng-scope
 			hr.break {
 				page-break-after: always;
 			}
+
+			report-entry {
+				page-break-inside: avoid;
+			}
 		}
 
 		html, body {
@@ -214,46 +218,47 @@ html(lang="en" ng-app="3drepo").ng-scope
 					| #{reportData.modelName} - Revision #{reportData.rev}
 				h4.date #{reportData.reportDate}
 			each entry in reportData.entries
-				h3 #{entry.number} #{entry.name}
-				p.grey.info #{entry.owner} (#{reportData.userInfo[entry.owner].fullName} - #{reportData.userInfo[entry.owner].company})
-					span.right.grey.info.float-right #{entry.created}
-				.row.screenshot
-					.col.screenshot
-						a(href=url(entry.screenshot) target='_blank')
-							img(class="fitImage" src=url(entry.screenshot) style="width:100%;")
-					.col
-							table.details
-								each attri in entry.attributes
-									tr
-									td
-										strong
-											| #{attri.label}:
-									td
-											span.float-right.status #{attri.value}								
-				.row
-					.col.description
-						br
-						p
-							span #{entry.desc}
-						br
-						if entry.comments.length > 0
-							.activityLog
-								h4.grey Activity Log
-								if entry.comments
-									each comment in entry.comments
-											if comment.comment
-												| #{comment.comment}
-											if comment.action
+				.report-entry
+					h3 #{entry.number} #{entry.name}
+					p.grey.info #{entry.owner} (#{reportData.userInfo[entry.owner].fullName} - #{reportData.userInfo[entry.owner].company})
+						span.right.grey.info.float-right #{entry.created}
+					.row.screenshot
+						.col.screenshot
+							a(href=url(entry.screenshot) target='_blank')
+								img(class="fitImage" src=url(entry.screenshot) style="width:100%;")
+						.col
+								table.details
+									each attri in entry.attributes
+										tr
+										td
+											strong
+												| #{attri.label}:
+										td
+												span.float-right.status #{attri.value}								
+					.row
+						.col.description
+							br
+							p
+								span #{entry.desc}
+							br
+							if entry.comments.length > 0
+								.activityLog
+									h4.grey Activity Log
+									if entry.comments
+										each comment in entry.comments
+												if comment.comment
+													| #{comment.comment}
+												if comment.action
+													p
+														| #{comment.action.propertyText} updated&nbsp;
+														if comment.action.from
+															| from
+															i #{comment.action.from}
+														| to
+														i #{comment.action.to}
 												p
-													| #{comment.action.propertyText} updated&nbsp;
-													if comment.action.from
-														| from
-														i #{comment.action.from}
-													| to
-													i #{comment.action.to}
-											p
-												span.grey.info #{comment.owner} (#{reportData.userInfo[comment.owner].fullName} - #{reportData.userInfo[comment.owner].company})
-												span.grey.info.float-right #{comment.created}
+													span.grey.info #{comment.owner} (#{reportData.userInfo[comment.owner].fullName} - #{reportData.userInfo[comment.owner].company})
+													span.grey.info.float-right #{comment.created}
 
 				hr.break
 
