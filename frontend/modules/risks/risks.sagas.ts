@@ -38,10 +38,90 @@ export function* fetchRisks({teamspace, modelId, revision}) {
 	}
 }
 
-export function* saveRisk({ teamspace, modelId, riskData }) {
+	/**
+	 * @returns groupData	Object with list of nodes for group creation.
+	 */
+const createGroupData = (name, nodes) => {
+	const groupData = {
+		name,
+		color: [255, 0, 0],
+		objects: nodes
+	};
+
+	return nodes.length === 0 ? null : groupData;
+};
+
+const createGroup = async (risk, objectInfo) => {
+	// Create a group of selected objects
+	const highlightedGroupData = createGroupData(risk.name, objectInfo.highlightedNodes);
+	// Create a group of hidden objects
+	const hiddenGroupData = createGroupData(risk.name, objectInfo.hiddenNodes);
+
+	return await all([
+		highlightedGroupData || API.createGroup(risk.account, risk.model, highlightedGroupData),
+		hiddenGroupData || API.createGroup(risk.account, risk.model, hiddenGroupData)
+	]);
+};
+
+export function* saveRisk({ teamspace, model, riskData, revision }) {
 	try {
-		const { data } = yield API.saveRisk(teamspace, modelId, riskData);
-		yield put(RisksActions.saveRiskSuccess(data));
+		const [viewpoint, objectInfo, screenshot] = yield all([
+			Viewer.getCurrentViewpoint({ teamspace, model }),
+			Viewer.getObjectsStatus({ teamspace, model }),
+			riskData.screenshot || Viewer.getScreenshot()
+		]);
+
+		const TreeService = getAngularService('TreeService') as any;
+		const AnalyticService = getAngularService('AnalyticService') as any;
+
+		viewpoint.hideIfc = TreeService.getHideIfc();
+
+		riskData.account = teamspace;
+		riskData.model = model;
+		riskData.rev_id = revision;
+
+		if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
+			const [highlightedGroup, hiddenGroup] = yield this.createGroup(riskData, viewpoint, screenshot, objectInfo);
+
+			if (highlightedGroup) {
+				viewpoint.highlighted_group_id = highlightedGroup.data._id;
+			}
+
+			if (hiddenGroup) {
+				viewpoint.hidden_group_id = hiddenGroup.data._id;
+			}
+		}
+
+		viewpoint.screenshot = screenshot.substring(screenshot.indexOf(',') + 1);
+
+		const risk = {
+			...riskData,
+			objectId: null,
+			creator_role: this.userJob._id,
+			viewpoint,
+			pickedPos: null,
+			pickedNorm: null,
+			scale: 1.0
+		};
+
+		// Pin data
+		const pinData = Viewer.getPinData();
+		if (pinData !== null) {
+			risk.pickedPos = pinData.pickedPos;
+			risk.pickedNorm = pinData.pickedNorm;
+		}
+
+		const { data: savedRisk } = yield API.saveRisk(teamspace, model, risk);
+
+		AnalyticService.sendEvent({
+			eventCategory: 'Risk',
+			eventAction: 'create'
+		});
+
+		yield put(RisksActions.saveRiskSuccess(savedRisk));
+		yield put(RisksActions.showDetails(savedRisk, [], revision));
+		Viewer.setPinDropMode(false);
+
 		yield put(SnackbarActions.show('Risk created'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('save', 'risk', error));
@@ -60,8 +140,7 @@ export function* updateRisk({ teamspace, modelId, riskData }) {
 
 export function* deleteRisks({ teamspace, modelId, risksIds }) {
 	try {
-		const response = yield API.deleteRisks(teamspace, modelId, risksIds);
-		console.log('delete response', response);
+		yield API.deleteRisks(teamspace, modelId, risksIds);
 		yield put(RisksActions.deleteRisksSuccess(risksIds));
 		yield put(SnackbarActions.show('Risk deleted'));
 	} catch (error) {
@@ -287,6 +366,26 @@ export function* showDetails({ risk, filteredRisks, revision }) {
 	}
 }
 
+export function* showNewPin({ risk, pinData }) {
+	try {
+		Viewer.removePin({ id: pinData.id });
+		Viewer.setPin(null);
+
+		const data = {
+			...pinData,
+			account: risk.account,
+			model: risk.model,
+			colours: getRiskPinColor(risk.level_of_risk, true),
+			type: 'risk'
+		};
+
+		Viewer.addPin(data);
+		Viewer.setPin(data);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('display', 'pin', error));
+	}
+}
+
 export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_RISKS, fetchRisks);
 	yield takeLatest(RisksTypes.SAVE_RISK, saveRisk);
@@ -297,4 +396,6 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.PRINT_RISKS, printRisks);
 	yield takeLatest(RisksTypes.SET_ACTIVE_RISK, setActiveRisk);
 	yield takeLatest(RisksTypes.SHOW_DETAILS, showDetails);
+	yield takeLatest(RisksTypes.SHOW_NEW_PIN, showNewPin);
+
 }

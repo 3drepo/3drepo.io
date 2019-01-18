@@ -76,7 +76,7 @@ export class RisksService {
 			this.pin.pinDropMode
 		) {
 
-			this.removeUnsavedPin();
+			// this.removeUnsavedPin();
 
 			const trans = event.value.trans;
 			let position = event.value.position;
@@ -123,53 +123,8 @@ export class RisksService {
 			allJobs: [],
 			modelUserJob: null
 		};
-		this.removeUnsavedPin();
+		// this.removeUnsavedPin();
 	}
-
-	public getRisksAndJobs(account: string, model: string, revision: string) {
-		return Promise.all([
-			this.getUserJobForModel(account, model),
-			this.getRisksData(account, model, revision),
-			this.getTeamspaceJobs(account, model)
-		]);
-	}
-/*
-	public getRisksData(account: string, model: string, revision: string) {
-		return this.getRisks(account, model, revision)
-			.then((risks) => {
-				if (risks) {
-					risks.forEach(this.populateRisk.bind(this));
-					this.state.allRisks = risks;
-
-					const newJobs: any = {};
-					risks.forEach((i) => {
-						if (i.creator_role) {
-							newJobs[i.creator_role] = true;
-						}
-
-						i.assigned_roles.forEach( (r) => newJobs[r] = true);
-					});
-
-					const jobs = Object.keys(newJobs).map( (j) => ({_id : j }));
-					this.addJobsToAllJobs(jobs);
-				} else {
-					throw new Error('Error');
-				}
-
-			});
-
-	} */
-/*
-	public getTeamspaceJobs(account: string, model: string): Promise<any[]> {
-		const url = account + '/jobs';
-
-		return this.apiService.get(url)
-			.then((response) => {
-				this.state.availableJobs = response.data;
-				this.addJobsToAllJobs(response.data);
-				return this.state.availableJobs;
-			});
-	} */
 
 /* 	public addJobsToAllJobs(jobs: any[]) {
 		const newJobs = jobs.filter((r) => !this.state.allJobs.find( (j) => j._id === r._id ));
@@ -371,56 +326,56 @@ export class RisksService {
 		}
 	}
 
-	public calculateLevelOfRisk(likelihood: string, consequence: string): number {
-		let levelOfRisk = 0;
+	// public calculateLevelOfRisk(likelihood: string, consequence: string): number {
+	// 	let levelOfRisk = 0;
 
-		if (likelihood && consequence) {
-			const likelihoodConsequenceScore: number = parseInt(likelihood, 10) + parseInt(consequence, 10);
+	// 	if (likelihood && consequence) {
+	// 		const likelihoodConsequenceScore: number = parseInt(likelihood, 10) + parseInt(consequence, 10);
 
-			if (6 < likelihoodConsequenceScore) {
-				levelOfRisk = 4;
-			} else if (5 < likelihoodConsequenceScore) {
-				levelOfRisk = 3;
-			} else if (2 < likelihoodConsequenceScore) {
-				levelOfRisk = 2;
-			} else if (1 < likelihoodConsequenceScore) {
-				levelOfRisk = 1;
-			} else {
-				levelOfRisk = 0;
-			}
-		}
+	// 		if (6 < likelihoodConsequenceScore) {
+	// 			levelOfRisk = 4;
+	// 		} else if (5 < likelihoodConsequenceScore) {
+	// 			levelOfRisk = 3;
+	// 		} else if (2 < likelihoodConsequenceScore) {
+	// 			levelOfRisk = 2;
+	// 		} else if (1 < likelihoodConsequenceScore) {
+	// 			levelOfRisk = 1;
+	// 		} else {
+	// 			levelOfRisk = 0;
+	// 		}
+	// 	}
 
-		return levelOfRisk;
-	}
+	// 	return levelOfRisk;
+	// }
 
-	public getLevelOfRiskColor(levelOfRisk: number, selected: boolean = false) {
-		const levelOfRiskColors = {
-			4: {
-				pinColor: Pin.pinColours.maroon,
-				selectedColor: Pin.pinColours.red
-			},
-			3: {
-				pinColor: Pin.pinColours.darkOrange,
-				selectedColor: Pin.pinColours.orange
-			},
-			2: {
-				pinColor: Pin.pinColours.lemonChiffon,
-				selectedColor: Pin.pinColours.lightYellow
-			},
-			1: {
-				pinColor: Pin.pinColours.limeGreen,
-				selectedColor: Pin.pinColours.lightGreen
-			},
-			0: {
-				pinColor: Pin.pinColours.green,
-				selectedColor: Pin.pinColours.medSeaGreen
-			}
-		};
+	// public getLevelOfRiskColor(levelOfRisk: number, selected: boolean = false) {
+	// 	const levelOfRiskColors = {
+	// 		4: {
+	// 			pinColor: Pin.pinColours.maroon,
+	// 			selectedColor: Pin.pinColours.red
+	// 		},
+	// 		3: {
+	// 			pinColor: Pin.pinColours.darkOrange,
+	// 			selectedColor: Pin.pinColours.orange
+	// 		},
+	// 		2: {
+	// 			pinColor: Pin.pinColours.lemonChiffon,
+	// 			selectedColor: Pin.pinColours.lightYellow
+	// 		},
+	// 		1: {
+	// 			pinColor: Pin.pinColours.limeGreen,
+	// 			selectedColor: Pin.pinColours.lightGreen
+	// 		},
+	// 		0: {
+	// 			pinColor: Pin.pinColours.green,
+	// 			selectedColor: Pin.pinColours.medSeaGreen
+	// 		}
+	// 	};
 
-		return (selected) ?
-			levelOfRiskColors[levelOfRisk].selectedColor :
-			levelOfRiskColors[levelOfRisk].pinColor;
-	}
+	// 	return (selected) ?
+	// 		levelOfRiskColors[levelOfRisk].selectedColor :
+	// 		levelOfRiskColors[levelOfRisk].pinColor;
+	// }
 
 	/**
 	 * Remove risk pin with given riskId from viewer.
@@ -449,73 +404,6 @@ export class RisksService {
 			this.showRisk(risk, revision);
 		}
 
-	}
-
-	public addRisk(risk) {
-		this.populateRisk(risk);
-		this.state.allRisks.unshift(risk);
-	}
-
-	public updateRisks(risk) {
-
-		this.populateRisk(risk);
-
-		this.state.allRisks.forEach((oldRisk, i) => {
-			const matches = oldRisk._id === risk._id;
-			if (matches) {
-
-				if (risk.status === 'agreed_fully') {
-
-					this.state.allRisks[i].justClosed = true;
-
-					this.$timeout(() => {
-
-						this.state.allRisks[i] = risk;
-
-					}, 4000);
-
-				} else {
-					this.state.allRisks[i] = risk;
-				}
-
-			}
-		});
-	}
-
-	public deleteSelectedRisk(teamspace: string, model: string) {
-		if (this.state.selectedRisk) {
-			return this.deleteRisks(teamspace, model, [this.state.selectedRisk]);
-		} else {
-			return Promise.resolve();
-		}
-	}
-
-	public deleteRisks(teamspace: string, model: string, risks: any) {
-		if (risks.length > 0) {
-			const url = `${teamspace}/${model}/risks/?ids=${risks.map((risk) => risk._id).join(',')}`;
-			return this.apiService.delete(url, undefined)
-				.then((response) => {
-					risks.forEach(this.deleteRiskFromState.bind(this));
-					return response;
-				});
-		} else {
-			return Promise.resolve();
-		}
-	}
-
-	/**
-	 * Remove a risk from the data model
-	 * @param risk the risk to delete
-	 */
-	public deleteRiskFromState(risk: any) {
-		const riskIndex = this.state.allRisks.indexOf(risk);
-		const risksCount = this.state.allRisks.length;
-
-		this.state.allRisks = this.state.allRisks.filter((r) => {
-			return risk._id !== r._id;
-		});
-
-		this.removeRiskPin(risk._id);
 	}
 
 /* 	public populateRisk(risk) {
@@ -617,79 +505,79 @@ export class RisksService {
 		}
 	}
 
-	public showRisk(risk, revision) {
+	// public showRisk(risk, revision) {
 
-		this.showRiskPins();
+	// 	this.showRiskPins();
 
-		// Remove highlight from any multi objects
-		this.viewerService.highlightObjects([]);
-		this.treeService.clearCurrentlySelected();
+	// 	// Remove highlight from any multi objects
+	// 	this.viewerService.highlightObjects([]);
+	// 	this.treeService.clearCurrentlySelected();
 
-		// Reset object visibility
-		if (risk.viewpoint && risk.viewpoint.hasOwnProperty('hideIfc')) {
-			this.treeService.setHideIfc(risk.viewpoint.hideIfc);
-		}
+	// 	// Reset object visibility
+	// 	if (risk.viewpoint && risk.viewpoint.hasOwnProperty('hideIfc')) {
+	// 		this.treeService.setHideIfc(risk.viewpoint.hideIfc);
+	// 	}
 
-		const hasHiddenOrShownGroup = risk.viewpoint.hasOwnProperty('hidden_group_id') ||
-						risk.viewpoint.hasOwnProperty('shown_group_id') ;
+	// 	const hasHiddenOrShownGroup = risk.viewpoint.hasOwnProperty('hidden_group_id') ||
+	// 					risk.viewpoint.hasOwnProperty('shown_group_id') ;
 
-		this.treeService.showAllTreeNodes(!hasHiddenOrShownGroup);
+	// 	this.treeService.showAllTreeNodes(!hasHiddenOrShownGroup);
 
-		// Show multi objects
-		if ((risk.viewpoint && (risk.viewpoint.hasOwnProperty('highlighted_group_id') ||
-						risk.viewpoint.hasOwnProperty('group_id'))) ||
-						risk.hasOwnProperty('group_id') ||
-						hasHiddenOrShownGroup
-		) {
+	// 	// Show multi objects
+	// 	if ((risk.viewpoint && (risk.viewpoint.hasOwnProperty('highlighted_group_id') ||
+	// 					risk.viewpoint.hasOwnProperty('group_id'))) ||
+	// 					risk.hasOwnProperty('group_id') ||
+	// 					hasHiddenOrShownGroup
+	// 	) {
 
-			this.showMultiIds(risk, revision).then(() => {
-				this.handleShowRisk(risk);
-			});
+	// 		this.showMultiIds(risk, revision).then(() => {
+	// 			this.handleShowRisk(risk);
+	// 		});
 
-		} else {
-			this.handleShowRisk(risk);
-		}
+	// 	} else {
+	// 		this.handleShowRisk(risk);
+	// 	}
 
-	}
+	// }
 
-	public handleCameraView(risk) {
-		// Set the camera position
-		const riskData = {
-			position : risk.viewpoint.position,
-			view_dir : risk.viewpoint.view_dir,
-			look_at : risk.viewpoint.look_at,
-			up: risk.viewpoint.up,
-			account: risk.account,
-			model: risk.model
-		};
+	// public handleCameraView(risk) {
+	// 	// Set the camera position
+	// 	const riskData = {
+	// 		position : risk.viewpoint.position,
+	// 		view_dir : risk.viewpoint.view_dir,
+	// 		look_at : risk.viewpoint.look_at,
+	// 		up: risk.viewpoint.up,
+	// 		account: risk.account,
+	// 		model: risk.model
+	// 	};
 
-		this.viewerService.setCamera(riskData);
+	// 	this.viewerService.setCamera(riskData);
 
-	}
+	// }
 
-	public handleShowRisk(risk) {
+	// public handleShowRisk(risk) {
 
-		if (risk && risk.viewpoint ) {
+	// 	if (risk && risk.viewpoint ) {
 
-			if (risk.viewpoint.position && risk.viewpoint.position.length > 0) {
-				this.handleCameraView(risk);
-			}
+	// 		if (risk.viewpoint.position && risk.viewpoint.position.length > 0) {
+	// 			this.handleCameraView(risk);
+	// 		}
 
-			const riskData = {
-				clippingPlanes: risk.viewpoint.clippingPlanes,
-				account: risk.account,
-				model: risk.model
-			};
+	// 		const riskData = {
+	// 			clippingPlanes: risk.viewpoint.clippingPlanes,
+	// 			account: risk.account,
+	// 			model: risk.model
+	// 		};
 
-			this.viewerService.updateClippingPlanes(riskData);
+	// 		this.viewerService.updateClippingPlanes(riskData);
 
-		} else {
-			// This risk does not have a viewpoint, go to default viewpoint
-			this.viewerService.goToExtent();
-		}
-	}
+	// 	} else {
+	// 		// This risk does not have a viewpoint, go to default viewpoint
+	// 		this.viewerService.goToExtent();
+	// 	}
+	// }
 
-	public showMultiIds(risk, revision) {
+/* 	public showMultiIds(risk, revision) {
 
 		const promises = [];
 
@@ -824,9 +712,9 @@ export class RisksService {
 
 		return Promise.all(promises);
 
-	}
+	} */
 
-	public handleHighlights(objects) {
+/* 	public handleHighlights(objects) {
 		this.treeService.selectedIndex = undefined; // To force a watcher reset (if its the same object)
 		this.$timeout(() => {
 		this.treeService.selectNodesBySharedIds(objects)
@@ -858,13 +746,13 @@ export class RisksService {
 			this.handleHighlights(response.data.objects);
 		}
 
-	}
+	} */
 
-	public getThumbnailPath(thumbnailUrl) {
+/* 	public getThumbnailPath(thumbnailUrl) {
 		return this.apiService.getAPIUrl(thumbnailUrl);
-	}
+	} */
 
-	public getRisk(account, model, riskId) {
+/* 	public getRisk(account, model, riskId) {
 
 		const riskUrl = account + '/' + model + '/risks/' + riskId + '.json';
 
@@ -873,9 +761,9 @@ export class RisksService {
 				return res.data;
 			});
 
-	}
+	} */
 
-	public getRisks(account, model, revision) {
+/* 	public getRisks(account, model, revision) {
 
 		let endpoint;
 		if (revision) {
@@ -892,8 +780,8 @@ export class RisksService {
 				}
 				return response.data;
 			});
-	}
-
+	} */
+/*
 	public setPinDropMode(on: boolean) {
 		this.pin.pinDropMode = on;
 		this.viewerService.pin.pinDropMode = on;
@@ -906,7 +794,7 @@ export class RisksService {
 	public removeUnsavedPin() {
 		this.viewerService.removePin({id: this.newPinId });
 		this.viewerService.setPin({data: null});
-	}
+	} */
 
 	/**
 	 * Returns true if model loaded.
