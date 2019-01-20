@@ -29,14 +29,12 @@ import { Panel } from '../../../components/panel/panel.component';
 import { Loader } from '../../../components/loader/loader.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 
-const ViewerPanelTitle = ({title, Icon, renderActions}) => {
-	return (
-		<TitleContainer>
-			<Title> {Icon && <TitleIcon>{Icon}</TitleIcon>} {title} </Title>
-			{renderActions && renderActions()}
-		</TitleContainer>
-	);
-};
+const ViewerPanelTitle = ({title, Icon, renderActions}) => (
+	<TitleContainer>
+		<Title> {Icon && <TitleIcon>{Icon}</TitleIcon>} {title} </Title>
+		{renderActions && renderActions()}
+	</TitleContainer>
+);
 
 interface IProps {
 	title: string;
@@ -60,20 +58,9 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 		</ViewerPanelContent>
 	));
 
-	public getTitle = () => {
-		const { title, Icon, actions } = this.props;
-		return (
-			<ViewerPanelTitle
-				title={title}
-				Icon={Icon}
-				renderActions={() => this.renderTitleActions(actions)}
-			/>
-		);
-	}
-
-	public renderTitleActions = (actions) => (
+	public renderTitleActions = () => (
 		<Actions>
-			{actions.map(({ Button }, index) => (
+			{this.props.actions.map(({ Button }, index) => (
 				<Action key={index}>
 					<Button />
 				</Action>
@@ -81,11 +68,19 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 		</Actions>
 	)
 
+	public renderTitle = () => (
+		<ViewerPanelTitle
+			title={this.props.title}
+			Icon={this.props.Icon}
+			renderActions={this.renderTitleActions}
+		/>
+	)
+
 	public render() {
-		const { children, pending } = this.props;
+		const { pending } = this.props;
 
 		return (
-			<Panel title={this.getTitle()}>
+			<Panel title={this.renderTitle()}>
 				{this.renderLoader(pending)}
 				{this.renderContent(!pending)}
 			</Panel>

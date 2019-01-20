@@ -55,6 +55,7 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel, DATA_TYPES } from '../../../components/filterPanel/filterPanel.component';
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
+import { searchByFilters } from '../../../../helpers/searching';
 
 interface IProps {
 	teamspace: string;
@@ -79,7 +80,7 @@ interface IProps {
 	printRisks: (teamspace, model, risksIds) => void;
 	deleteRisks: (teamspace, model, risksIds) => void;
 	setActiveRisk: (risk) => void;
-	showRiskDetails: (risk, revision?) => void;
+	showRiskDetails: (risk, filteredRisks, revision?) => void;
 }
 
 interface IState {
@@ -145,32 +146,28 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		return this.state.filteredRisks.findIndex((risk) => risk._id === this.props.activeRiskId);
 	}
 
-	public renderRisksList = renderWhenTrue(() => {
-		const Items = this.state.filteredRisks.map((risk, index) => (
-			<PreviewListItem
-				{...prepareRisk(risk, this.props.jobs)}
-				key={index}
-				onItemClick={this.handleRiskFocus(risk)}
-				onArrowClick={this.handleRiskClick(risk)}
-				active={this.props.activeRiskId === risk._id}
-				hasViewPermission={this.hasPermission(VIEW_ISSUE)}
-			/>
-		));
+	get filteredRisks() {
+		const { risks, selectedFilters } = this.props;
+		return searchByFilters(risks, selectedFilters);
+	}
 
-		return <ListContainer>{Items}</ListContainer>;
-	});
+	public componentDidMount() {
+		this.setState({ filteredRisks: this.filteredRisks });
+	}
+
+	public componentDidUpdate(prevProps) {
+		const { risks, selectedFilters } = this.props;
+		const risksChanged = prevProps.risks.length !== risks.length;
+		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
+
+		if (risksChanged || filtersChanged) {
+			this.setState({ filteredRisks: this.filteredRisks });
+		}
+	}
 
 	public deleteRisk = () => {
 		this.props.deleteRisks(this.props.teamspace, this.props.model, this.props.activeRiskId);
 	}
-
-	public renderDeleteButton = renderWhenTrue(() => {
-		return (
-			<TooltipButton action={this.deleteRisk} Icon={DeleteIcon} label="Delete risk" />
-		);
-	});
-
-	public renderDisplayedInfo = renderWhenTrue(() => <>{this.state.filteredRisks.length} risks displayed</>);
 
 	public hasPermission = (permission) => {
 		const { modelSettings } = this.props;
@@ -180,82 +177,8 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		return false;
 	}
 
-	public renderListView = renderWhenTrue(() => (
-			<>
-				<ViewerPanelContent className="height-catcher">
-					{this.renderRisksList(this.state.filteredRisks.length)}
-				</ViewerPanelContent>
-				<ViewerPanelFooter alignItems="center" justify="space-between">
-					<Summary>
-						{this.renderDeleteButton(Boolean(this.props.activeRiskId) && this.hasPermission(VIEW_ISSUE))}
-						{this.renderDisplayedInfo(!Boolean(this.props.activeRiskId))}
-					</Summary>
-					<ViewerPanelButton
-						aria-label="Add risk"
-						onClick={this.handleAddNewRisk}
-						color="secondary"
-						variant="fab"
-						disabled={!this.hasPermission(CREATE_ISSUE)}
-					>
-						<AddIcon />
-					</ViewerPanelButton>
-				</ViewerPanelFooter>
-			</>
-		)
-	);
-
-	public renderDetailsView = renderWhenTrue(() => (
-		<RiskDetails
-			teamspace={this.props.teamspace}
-			model={this.props.model}
-		/>
-	));
-
-	public get filteredRisks() {
-		const filteredRisks = this.props.risks.filter((risk) => {
-			return this.props.selectedFilters.some((filter) => {
-				if (filter.type === DATA_TYPES.UNDEFINED) {
-					return risk[filter.relatedField] && risk[filter.relatedField].includes(filter.value.value) ||
-						risk[filter.relatedField] === filter.value.value;
-				} else if (filter.type === DATA_TYPES.QUERY) {
-					return risk.name.toLowerCase().includes(filter.value.value.toLowerCase()) ||
-						risk.desc.toLowerCase().includes(filter.value.value.toLowerCase());
-				}
-				return false;
-			});
-		});
-
-		return this.props.selectedFilters.length ? filteredRisks : this.props.risks;
-  }
-
-	public renderFilterPanel = renderWhenTrue(() => (
-		<FilterPanel
-			onChange={this.handleFilterChange}
-  		filters={this.filters as any}
-			selectedFilters={this.props.selectedFilters}
-		/>
-	));
-
-	public componentDidMount() {
-		const {teamspace, model, revision} = this.props;
-		this.props.fetchRisks(teamspace, model, revision);
-		this.setState({filteredRisks: this.filteredRisks});
-	}
-
-	public componentDidUpdate(prevProps) {
-		const { risks, selectedFilters } = this.props;
-		const risksChanged = prevProps.risks.length !== risks.length;
-		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
-
-		if (risksChanged || filtersChanged) {
-			this.setState({filteredRisks: this.filteredRisks});
-		}
-	}
-
   public handleFilterChange = (selectedFilters) => {
-	  this.props.setState({
-      selectedFilters
-    });
+	  this.props.setState({ selectedFilters });
   }
 
 	public getFilterValues(property) {
@@ -272,7 +195,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleRiskClick = (risk) => () => {
-		this.props.showRiskDetails(risk, this.state.filteredRisks);
+		this.props.showRiskDetails(risk, this.state.filteredRisks, this.props.revision);
 	}
 
 	public handleAddNewRisk = () => {
@@ -281,17 +204,6 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	public closeDetails = () => {
 		this.toggleDetails(false);
-	}
-
-	public renderTitleIcon = () => {
-		if (this.props.showDetails) {
-			return (
-				<IconButton onClick={this.closeDetails} >
-					<ArrowBack />
-				</IconButton>
-			);
-		}
-		return <ReportProblem />;
 	}
 
 	public handleCloseSearchMode = () => {
@@ -329,33 +241,15 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		);
 	}
 
-  public renderActionsMenu = () => (
-    <MenuList>
-			{ RISKS_ACTIONS_MENU.map(({name, Icon, label}) => {
-				return (
-					<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
-						<IconWrapper><Icon fontSize={'small'} /></IconWrapper>
-						<StyledItemText>
-							{label}
-							{(name === RISKS_ACTIONS_ITEMS.SHOW_PINS && this.props.areShowedPins) && <Check fontSize={'small'} />}
-						</StyledItemText>
-					</StyledListItem>
-				);
-			})}
-		</MenuList>
-  )
-
-	public getMenuButton = () => {
-		return (
-			<ButtonMenu
-				renderButton={MenuButton}
-				renderContent={this.renderActionsMenu}
-				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-				ButtonProps={{ disabled: false }}
-			/>
-		);
-	}
+	public getMenuButton = () => (
+		<ButtonMenu
+			renderButton={MenuButton}
+			renderContent={this.renderActionsMenu}
+			PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+			PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
+			ButtonProps={{ disabled: false }}
+		/>
+	)
 
 	public getSearchButton = () => {
 		if (this.props.searchEnabled) {
@@ -371,6 +265,95 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	public getNextButton = () => {
 		return <IconButton onClick={this.handleNextItem}><SkipNextIcon /></IconButton>;
 	}
+
+	public renderRisksList = renderWhenTrue(() => {
+		const Items = this.state.filteredRisks.map((risk, index) => (
+			<PreviewListItem
+				{...prepareRisk(risk, this.props.jobs)}
+				key={index}
+				onItemClick={this.handleRiskFocus(risk)}
+				onArrowClick={this.handleRiskClick(risk)}
+				active={this.props.activeRiskId === risk._id}
+				hasViewPermission={this.hasPermission(VIEW_ISSUE)}
+			/>
+		));
+
+		return <ListContainer>{Items}</ListContainer>;
+	});
+
+	public renderDeleteButton = renderWhenTrue(() => {
+		return (
+			<TooltipButton action={this.deleteRisk} Icon={DeleteIcon} label="Delete risk" />
+		);
+	});
+
+	public renderDisplayedInfo = renderWhenTrue(() => <>{this.state.filteredRisks.length} risks displayed</>);
+
+	public renderDetailsView = renderWhenTrue(() => (
+		<RiskDetails
+			teamspace={this.props.teamspace}
+			model={this.props.model}
+		/>
+	));
+
+	public renderListView = renderWhenTrue(() => (
+		<>
+			<ViewerPanelContent className="height-catcher">
+				{this.renderRisksList(this.state.filteredRisks.length)}
+			</ViewerPanelContent>
+			<ViewerPanelFooter alignItems="center" justify="space-between">
+				<Summary>
+					{this.renderDeleteButton(Boolean(this.props.activeRiskId) && this.hasPermission(VIEW_ISSUE))}
+					{this.renderDisplayedInfo(!Boolean(this.props.activeRiskId))}
+				</Summary>
+				<ViewerPanelButton
+					aria-label="Add risk"
+					onClick={this.handleAddNewRisk}
+					color="secondary"
+					variant="fab"
+					disabled={!this.hasPermission(CREATE_ISSUE)}
+				>
+					<AddIcon />
+				</ViewerPanelButton>
+			</ViewerPanelFooter>
+		</>
+	)
+	);
+
+	public renderTitleIcon = () => {
+		if (this.props.showDetails) {
+			return (
+				<IconButton onClick={this.closeDetails} >
+					<ArrowBack />
+				</IconButton>
+			);
+		}
+		return <ReportProblem />;
+	}
+
+	public renderFilterPanel = renderWhenTrue(() => (
+		<FilterPanel
+			onChange={this.handleFilterChange}
+			filters={this.filters as any}
+			selectedFilters={this.props.selectedFilters}
+		/>
+	));
+
+	public renderActionsMenu = () => (
+		<MenuList>
+			{RISKS_ACTIONS_MENU.map(({ name, Icon, label }) => {
+				return (
+					<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+						<IconWrapper><Icon fontSize={'small'} /></IconWrapper>
+						<StyledItemText>
+							{label}
+							{(name === RISKS_ACTIONS_ITEMS.SHOW_PINS && this.props.areShowedPins) && <Check fontSize={'small'} />}
+						</StyledItemText>
+					</StyledListItem>
+				);
+			})}
+		</MenuList>
+	)
 
 	public renderActions = () => {
 		if (this.props.showDetails) {

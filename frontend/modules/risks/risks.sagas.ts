@@ -15,20 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select, all } from 'redux-saga/effects';
-import { differenceBy, pick, omit, isEmpty } from 'lodash';
+import { differenceBy, isEmpty, omit, pick } from 'lodash';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import { RisksTypes, RisksActions } from './risks.redux';
+import { getAngularService, history } from '../../helpers/migration';
+import { getRiskPinColor } from '../../helpers/risks';
+import { Cache } from '../../services/cache';
+import { Viewer } from '../../services/viewer/viewer';
+import { PIN_COLORS } from '../../styles';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
-import { selectRisks, selectShowPins, selectActiveRiskId } from './risks.selectors';
-import { Viewer } from '../../services/viewer/viewer';
-import { getRiskPinColor } from '../../helpers/risks';
-import { getAngularService } from '../../helpers/migration';
-import { Cache } from '../../services/cache';
+import { RisksActions, RisksTypes } from './risks.redux';
+import { selectActiveRiskId, selectRisks, selectShowPins } from './risks.selectors';
 
 export function* fetchRisks({teamspace, modelId, revision}) {
+	yield put(RisksActions.togglePendingState(true));
 	try {
 		const {data} = yield API.getRisks(teamspace, modelId, revision);
 		yield put(RisksActions.fetchRisksSuccess(data));
@@ -36,6 +38,7 @@ export function* fetchRisks({teamspace, modelId, revision}) {
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'risks', error));
 	}
+	yield put(RisksActions.togglePendingState(false));
 }
 
 const createGroupData = (name, nodes) => {
@@ -129,6 +132,12 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 export function* updateRisk({ teamspace, modelId, riskData }) {
 	try {
 		const { data } = yield API.updateRisk(teamspace, modelId, riskData);
+
+		const AnalyticService = getAngularService('AnalyticService') as any;
+		yield AnalyticService.sendEvent({
+			eventCategory: 'Risk',
+			eventAction: 'edit'
+		});
 		yield put(RisksActions.saveRiskSuccess(data));
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
@@ -353,7 +362,13 @@ export function* showDetails({ risk, filteredRisks, revision }) {
 		const activeRiskId = select(selectActiveRiskId);
 
 		if (activeRiskId !== risk._id) {
-			yield put(RisksActions.setComponentState({ activeRisk: risk._id }));
+			if (risk.position && risk.position.length > 0 && risk._id) {
+				Viewer.changePinColor({
+					id: risk._id,
+					colours: PIN_COLORS.BLUE
+				});
+			}
+			yield put(RisksActions.setActiveRisk(risk));
 		}
 
 		yield all([

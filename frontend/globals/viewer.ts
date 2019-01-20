@@ -187,13 +187,13 @@ export class Viewer {
 		this.emitter.off(event, ...args);
 	}
 
-	public emit = debounce((event, ...args) => {
+	public emit = (event, ...args) => {
 		if (this.callback) {
 			this.callback(event, ...args);
 		}
 
 		this.emitter.emit(event, ...args);
-	}, 200);
+	}
 
 	public setUnits(units) {
 		this.units = units;
