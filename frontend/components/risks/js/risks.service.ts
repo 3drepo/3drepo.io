@@ -69,38 +69,38 @@ export class RisksService {
 		this.newPinId = 'newRiskPinId';
 	}
 
-	public handlePickPointEvent(event, account, model) {
+	// public handlePickPointEvent(event, account, model) {
 
-		if (
-			event.value.hasOwnProperty('id') &&
-			this.pin.pinDropMode
-		) {
+	// 	if (
+	// 		event.value.hasOwnProperty('id') &&
+	// 		this.pin.pinDropMode
+	// 	) {
 
-			// this.removeUnsavedPin();
+	// 		// this.removeUnsavedPin();
 
-			const trans = event.value.trans;
-			let position = event.value.position;
-			const normal = event.value.normal;
+	// 		const trans = event.value.trans;
+	// 		let position = event.value.position;
+	// 		const normal = event.value.normal;
 
-			if (trans) {
-				position = trans.inverse().multMatrixPnt(position);
-			}
+	// 		if (trans) {
+	// 			position = trans.inverse().multMatrixPnt(position);
+	// 		}
 
-			const data = {
-				account,
-				colours: this.getLevelOfRiskColor(this.levelOfRisk, true),
-				id: this.newPinId,
-				type: 'risk',
-				model,
-				pickedNorm: normal,
-				pickedPos: position,
-				selectedObjectId: event.value.id
-			};
+	// 		const data = {
+	// 			account,
+	// 			colours: this.getLevelOfRiskColor(this.levelOfRisk, true),
+	// 			id: this.newPinId,
+	// 			type: 'risk',
+	// 			model,
+	// 			pickedNorm: normal,
+	// 			pickedPos: position,
+	// 			selectedObjectId: event.value.id
+	// 		};
 
-			this.viewerService.addPin(data);
-			this.viewerService.setPin({data});
-		}
-	}
+	// 		this.viewerService.addPin(data);
+	// 		this.viewerService.setPin({data});
+	// 	}
+	// }
 
 	public reset() {
 		this.groupsCache = {};
@@ -194,77 +194,77 @@ export class RisksService {
 	// 	}
 	// }
 
-	public filterRisks(model: string, risks: any[], chips: IChip[]): any[] {
-		let filters = [];
-		const criteria = this.getCriteria(chips);
+	// public filterRisks(model: string, risks: any[], chips: IChip[]): any[] {
+	// 	let filters = [];
+	// 	const criteria = this.getCriteria(chips);
 
-		if (!criteria.mitigation_status) { // If there is no explicit filter for status dont show closed risks
-									// thats the general criteria for showing risks.
-			filters.push((risk) => risk.mitigation_status !== 'agreed_fully');
-		}
+	// 	if (!criteria.mitigation_status) { // If there is no explicit filter for status dont show closed risks
+	// 								// thats the general criteria for showing risks.
+	// 		filters.push((risk) => risk.mitigation_status !== 'agreed_fully');
+	// 	}
 
-		filters = filters.concat(this.getOrClause(criteria[''], this.handleRiskFilter));
+	// 	filters = filters.concat(this.getOrClause(criteria[''], this.handleRiskFilter));
 
-		filters = filters.concat(this.createFilterByField(criteria, 'associated_activity'));
+	// 	filters = filters.concat(this.createFilterByField(criteria, 'associated_activity'));
 
-		filters = filters.concat(this.createFilterByField(criteria, 'creator_role'));
+	// 	filters = filters.concat(this.createFilterByField(criteria, 'creator_role'));
 
-		filters = filters.concat(this.createFilterByField(criteria, 'mitigation_status'));
+	// 	filters = filters.concat(this.createFilterByField(criteria, 'mitigation_status'));
 
-		filters = filters.concat(this.getOrClause(criteria.assigned_roles, this.filterAssignedRoles));
+	// 	filters = filters.concat(this.getOrClause(criteria.assigned_roles, this.filterAssignedRoles));
 
-		filters = filters.concat(this.createFilterByField(criteria, 'category'));
+	// 	filters = filters.concat(this.createFilterByField(criteria, 'category'));
 
-		filters = filters.concat(this.createFilterByField(criteria, 'likelihood'));
+	// 	filters = filters.concat(this.createFilterByField(criteria, 'likelihood'));
 
-		filters = filters.concat(this.createFilterByField(criteria, 'consequence'));
+	// 	filters = filters.concat(this.createFilterByField(criteria, 'consequence'));
 
-		filters = filters.concat(this.createFilterByField(criteria, 'level_of_risk'));
+	// 	filters = filters.concat(this.createFilterByField(criteria, 'level_of_risk'));
 
-		if (!this.state.risksCardOptions.showSubModelRisks) {
-			filters.push((risk) => risk.model === model);
-		}
+	// 	if (!this.state.risksCardOptions.showSubModelRisks) {
+	// 		filters.push((risk) => risk.model === model);
+	// 	}
 
-		// It filters the risk list by applying every filter to it.
-		const filteredRisks = risks.filter((risk) => filters.every((f) => f(risk)));
-		return filteredRisks;
-	}
+	// 	// It filters the risk list by applying every filter to it.
+	// 	const filteredRisks = risks.filter((risk) => filters.every((f) => f(risk)));
+	// 	return filteredRisks;
+	// }
 
-	public createFilterByField(criteria: any, field: string) {
-		return this.getOrClause(criteria[field], this.filterByField.bind(this, field));
-	}
+	// public createFilterByField(criteria: any, field: string) {
+	// 	return this.getOrClause(criteria[field], this.filterByField.bind(this, field));
+	// }
 
-	public getCriteria(chips: IChip[]): any {
-		const initialValue = {};
+	// public getCriteria(chips: IChip[]): any {
+	// 	const initialValue = {};
 
-		return  chips.reduce((object, currVal) => {
-			if (!object[currVal.type]) {
-				object[currVal.type] = [];
-			}
+	// 	return  chips.reduce((object, currVal) => {
+	// 		if (!object[currVal.type]) {
+	// 			object[currVal.type] = [];
+	// 		}
 
-			object[currVal.type].push(currVal.value);
-			return object;
-		}, initialValue);
-	}
+	// 		object[currVal.type].push(currVal.value);
+	// 		return object;
+	// 	}, initialValue);
+	// }
 
-	/** filters */
+// /* 	/** filters */
 
-	public getAndClause(tags: any[], comparator) {
-		if ((tags || []).length === 0) {
-			return[];
-		}
-		return [(value, index, array) => tags.every( comparator.bind(this, value) )];
-	}
+// 	public getAndClause(tags: any[], comparator) {
+// 		if ((tags || []).length === 0) {
+// 			return[];
+// 		}
+// 		return [(value, index, array) => tags.every( comparator.bind(this, value) )];
+// 	}
 
-	public getOrClause(tags: any[], comparator) {
-		if ((tags || []).length === 0) {
-			return[];
-		}
+// 	public getOrClause(tags: any[], comparator) {
+// 		if ((tags || []).length === 0) {
+// 			return[];
+// 		}
 
-		return [(value, index, array) => tags.some( comparator.bind(this, value) )];
-	}
+// 		return [(value, index, array) => tags.some( comparator.bind(this, value) )];
+// 	} */
 
-	public filterByField(field, risk, tag): boolean {
+/* 	public filterByField(field, risk, tag): boolean {
 		if (Array.isArray(risk[field])) {
 			return risk[field].indexOf(tag) >= 0;
 		}
@@ -277,9 +277,9 @@ export class RisksService {
 			return risk.assigned_roles.length === 0;
 		}
 		return this.filterByField('assigned_roles', risk, tag);
-	}
+	} */
 
-	public handleRiskFilter(risk: any, filterText: string) {
+/* 	public handleRiskFilter(risk: any, filterText: string) {
 		// Required custom filter due to the fact that Angular
 		// does not allow compound OR filters
 
@@ -302,9 +302,9 @@ export class RisksService {
 
 		return false;
 
-	}
+	} */
 
-	public resetSelectedRisk() {
+/* 	public resetSelectedRisk() {
 		this.state.selectedRisk = undefined;
 	}
 
@@ -315,8 +315,8 @@ export class RisksService {
 			return risk._id === this.state.selectedRisk._id;
 		}
 	}
-
-	public setLevelOfRisk(levelOfRisk: any) {
+ */
+/* 	public setLevelOfRisk(levelOfRisk: any) {
 		this.levelOfRisk = parseInt(levelOfRisk, 10);
 		if (!isNaN(this.levelOfRisk)) {
 			this.viewerService.changePinColours({
@@ -324,7 +324,7 @@ export class RisksService {
 				colours: this.getLevelOfRiskColor(this.levelOfRisk, true)
 			});
 		}
-	}
+	} */
 
 	// public calculateLevelOfRisk(likelihood: string, consequence: string): number {
 	// 	let levelOfRisk = 0;

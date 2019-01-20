@@ -32,7 +32,7 @@ interface IProps {
 export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 	public renderDateTime = renderWhenTrue(() => (
 		<Date>
-			<DateTime value={this.props.createdAt} format="hh:mm DD MMM" />
+			<DateTime value={this.props.createdAt} format="HH:mm DD MMM" />
 		</Date>
 	));
 

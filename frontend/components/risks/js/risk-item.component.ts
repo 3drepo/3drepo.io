@@ -561,217 +561,217 @@ class RiskItemController implements ng.IController {
 
 	}
 
-	/**
-	 * Update risk
-	 */
-	public updateRisk() {
-		if (this.data && this.riskData.account && this.riskData.model) {
+	// /**
+	//  * Update risk
+	//  */
+	// public updateRisk() {
+	// 	if (this.data && this.riskData.account && this.riskData.model) {
 
-			// If it's unassigned we can update so that there are no assigned roles
-			if (this.riskData.assigned_roles.indexOf('Unassigned') !== -1) {
-				this.riskData.assigned_roles = [];
-			}
+	// 		// If it's unassigned we can update so that there are no assigned roles
+	// 		if (this.riskData.assigned_roles.indexOf('Unassigned') !== -1) {
+	// 			this.riskData.assigned_roles = [];
+	// 		}
 
-			const updatedRiskData = {
-				safetibase_id: this.riskData.safetibase_id,
-				associated_activity: this.riskData.associated_activity,
-				desc: this.riskData.desc,
-				assigned_roles: this.riskData.assigned_roles,
-				category: this.riskData.category,
-				likelihood: parseInt(this.riskData.likelihood, 10),
-				consequence: parseInt(this.riskData.consequence, 10),
-				level_of_risk: parseInt(this.riskData.level_of_risk, 10),
-				mitigation_status: this.riskData.mitigation_status,
-				mitigation_desc: this.riskData.mitigation_desc
-			};
+	// 		const updatedRiskData = {
+	// 			safetibase_id: this.riskData.safetibase_id,
+	// 			associated_activity: this.riskData.associated_activity,
+	// 			desc: this.riskData.desc,
+	// 			assigned_roles: this.riskData.assigned_roles,
+	// 			category: this.riskData.category,
+	// 			likelihood: parseInt(this.riskData.likelihood, 10),
+	// 			consequence: parseInt(this.riskData.consequence, 10),
+	// 			level_of_risk: parseInt(this.riskData.level_of_risk, 10),
+	// 			mitigation_status: this.riskData.mitigation_status,
+	// 			mitigation_desc: this.riskData.mitigation_desc
+	// 		};
 
-			this.risksService.updateRisk(this.riskData, updatedRiskData)
-				.then((response) => {
-					if (response) {
-						const updatedRisk = response.data;
-						this.risksService.populateRisk(updatedRisk);
-						this.updateSavedRisk(updatedRisk);
+	// 		this.risksService.updateRisk(this.riskData, updatedRiskData)
+	// 			.then((response) => {
+	// 				if (response) {
+	// 					const updatedRisk = response.data;
+	// 					this.risksService.populateRisk(updatedRisk);
+	// 					this.updateSavedRisk(updatedRisk);
 
-						// Update the actual data model
-						this.risksService.updateRisks(this.riskData);
+	// 					// Update the actual data model
+	// 					this.risksService.updateRisks(this.riskData);
 
-						this.saving = false;
-					}
+	// 					this.saving = false;
+	// 				}
 
-				})
-				.catch(this.handleUpdateError.bind(this));
+	// 			})
+	// 			.catch(this.handleUpdateError.bind(this));
 
-			this.analyticService.sendEvent({
-				eventCategory: 'Risk',
-				eventAction: 'edit'
-			});
-		}
+	// 		this.analyticService.sendEvent({
+	// 			eventCategory: 'Risk',
+	// 			eventAction: 'edit'
+	// 		});
+	// 	}
 
-		// This is called so icon and assignment colour changes for new risks.
-		this.risksService.populateRisk(this.riskData);
-	}
+	// 	// This is called so icon and assignment colour changes for new risks.
+	// 	this.risksService.populateRisk(this.riskData);
+	// }
 
-	public handleObjects(viewpoint, objectInfo) {
+	// public handleObjects(viewpoint, objectInfo) {
 
-		// TODO - clean up repeated code below
-		if (this.savedScreenshot !== null) {
+	// 	// TODO - clean up repeated code below
+	// 	if (this.savedScreenshot !== null) {
 
-			if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
-				// Create a group of selected objects
-				return this.createGroup(viewpoint, this.savedScreenshot, objectInfo);
-			} else {
-				return this.doSaveRisk(viewpoint, this.savedScreenshot);
-			}
+	// 		if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
+	// 			// Create a group of selected objects
+	// 			return this.createGroup(viewpoint, this.savedScreenshot, objectInfo);
+	// 		} else {
+	// 			return this.doSaveRisk(viewpoint, this.savedScreenshot);
+	// 		}
 
-		} else {
-			// Get a screen shot if not already created
-			return this.viewerService.getScreenshot().then((screenshot) => {
-					if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
-						return this.createGroup(viewpoint, screenshot, objectInfo);
-					} else {
-						return this.doSaveRisk(viewpoint, screenshot);
-					}
-				});
+	// 	} else {
+	// 		// Get a screen shot if not already created
+	// 		return this.viewerService.getScreenshot().then((screenshot) => {
+	// 				if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
+	// 					return this.createGroup(viewpoint, screenshot, objectInfo);
+	// 				} else {
+	// 					return this.doSaveRisk(viewpoint, screenshot);
+	// 				}
+	// 			});
 
-		}
+	// 	}
 
-	}
+	// }
 
-	/**
-	 * @returns groupData	Object with list of nodes for group creation.
-	 */
-	public createGroupData(nodes) {
-		const groupData = {
-			name: this.riskData.name,
-			color: [255, 0, 0],
-			objects: nodes
-		};
+	// /**
+	//  * @returns groupData	Object with list of nodes for group creation.
+	//  */
+	// public createGroupData(nodes) {
+	// 	const groupData = {
+	// 		name: this.riskData.name,
+	// 		color: [255, 0, 0],
+	// 		objects: nodes
+	// 	};
 
-		return nodes.length === 0 ? null : groupData;
-	}
+	// 	return nodes.length === 0 ? null : groupData;
+	// }
 
-	public createGroup(viewpoint, screenshot, objectInfo) {
+	// public createGroup(viewpoint, screenshot, objectInfo) {
 
-		// Create a group of selected objects
-		const highlightedGroupData = this.createGroupData(objectInfo.highlightedNodes);
+	// 	// Create a group of selected objects
+	// 	const highlightedGroupData = this.createGroupData(objectInfo.highlightedNodes);
 
-		// Create a group of hidden objects
-		const hiddenGroupData = this.createGroupData(objectInfo.hiddenNodes);
+	// 	// Create a group of hidden objects
+	// 	const hiddenGroupData = this.createGroupData(objectInfo.hiddenNodes);
 
-		const promises = [];
+	// 	const promises = [];
 
-		if (highlightedGroupData) {
-			const highlightPromise = this.apiService.post(`${this.account}/${this.model}/groups`, highlightedGroupData)
-				.then((highlightedGroupResponse) => {
-					viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
-				});
-			promises.push(highlightPromise);
-		}
+	// 	if (highlightedGroupData) {
+	// 		const highlightPromise = this.apiService.post(`${this.account}/${this.model}/groups`, highlightedGroupData)
+	// 			.then((highlightedGroupResponse) => {
+	// 				viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
+	// 			});
+	// 		promises.push(highlightPromise);
+	// 	}
 
-		if (hiddenGroupData) {
-			const hiddenPromise = this.apiService.post(`${this.account}/${this.model}/groups`, hiddenGroupData)
-				.then((hiddenGroupResponse) => {
-					viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
-				});
-			promises.push(hiddenPromise);
-		}
+	// 	if (hiddenGroupData) {
+	// 		const hiddenPromise = this.apiService.post(`${this.account}/${this.model}/groups`, hiddenGroupData)
+	// 			.then((hiddenGroupResponse) => {
+	// 				viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
+	// 			});
+	// 		promises.push(hiddenPromise);
+	// 	}
 
-		return Promise.all(promises).then(() => {
-			this.doSaveRisk(viewpoint, screenshot);
-		});
+	// 	return Promise.all(promises).then(() => {
+	// 		this.doSaveRisk(viewpoint, screenshot);
+	// 	});
 
-	}
+	// }
 
-	/**
-	 * Send new risk data to server
-	 * @param viewpoint
-	 * @param screenshot
-	 */
-	public doSaveRisk(viewpoint, screenshot) {
+	// /**
+	//  * Send new risk data to server
+	//  * @param viewpoint
+	//  * @param screenshot
+	//  */
+	// public doSaveRisk(viewpoint, screenshot) {
 
-		// Remove base64 header text from screenshot and add to viewpoint
-		screenshot = screenshot.substring(screenshot.indexOf(',') + 1);
-		viewpoint.screenshot = screenshot;
+	// 	// Remove base64 header text from screenshot and add to viewpoint
+	// 	screenshot = screenshot.substring(screenshot.indexOf(',') + 1);
+	// 	viewpoint.screenshot = screenshot;
 
-		// Save risk
-		const risk = {
-			account: this.account,
-			model: this.model,
-			rev_id: this.revision,
-			objectId: null,
-			creator_role: this.userJob._id,
-			name: this.riskData.name,
-			safetibase_id: this.riskData.safetibase_id,
-			associated_activity: this.riskData.associated_activity,
-			desc: this.riskData.desc,
-			viewpoint,
-			assigned_roles: this.riskData.assigned_roles,
-			category: this.riskData.category,
-			likelihood: parseInt(this.riskData.likelihood, 10),
-			consequence: parseInt(this.riskData.consequence, 10),
-			level_of_risk: parseInt(this.riskData.level_of_risk, 10),
-			mitigation_status: this.riskData.mitigation_status,
-			mitigation_desc: this.riskData.mitigation_desc,
-			pickedPos: null,
-			pickedNorm: null,
-			scale: 1.0
-		};
+	// 	// Save risk
+	// 	const risk = {
+	// 		account: this.account,
+	// 		model: this.model,
+	// 		rev_id: this.revision,
+	// 		objectId: null,
+	// 		creator_role: this.userJob._id,
+	// 		name: this.riskData.name,
+	// 		safetibase_id: this.riskData.safetibase_id,
+	// 		associated_activity: this.riskData.associated_activity,
+	// 		desc: this.riskData.desc,
+	// 		viewpoint,
+	// 		assigned_roles: this.riskData.assigned_roles,
+	// 		category: this.riskData.category,
+	// 		likelihood: parseInt(this.riskData.likelihood, 10),
+	// 		consequence: parseInt(this.riskData.consequence, 10),
+	// 		level_of_risk: parseInt(this.riskData.level_of_risk, 10),
+	// 		mitigation_status: this.riskData.mitigation_status,
+	// 		mitigation_desc: this.riskData.mitigation_desc,
+	// 		pickedPos: null,
+	// 		pickedNorm: null,
+	// 		scale: 1.0
+	// 	};
 
-		// Pin data
-		const pinData = this.viewerService.getPinData();
-		if (pinData !== null) {
-			risk.pickedPos = pinData.pickedPos;
-			risk.pickedNorm = pinData.pickedNorm;
-		}
+	// 	// Pin data
+	// 	const pinData = this.viewerService.getPinData();
+	// 	if (pinData !== null) {
+	// 		risk.pickedPos = pinData.pickedPos;
+	// 		risk.pickedNorm = pinData.pickedNorm;
+	// 	}
 
-		return this.risksService.saveRisk(risk)
-			.then((response) => {
-				this.data = response.data; // So that new changes are registered as updates
-				this.updateSavedRisk(this.data);
-				const responseRisk = response.data;
+	// 	return this.risksService.saveRisk(risk)
+	// 		.then((response) => {
+	// 			this.data = response.data; // So that new changes are registered as updates
+	// 			this.updateSavedRisk(this.data);
+	// 			const responseRisk = response.data;
 
-				// Hide the description input if no description
-				this.pinHidden = true;
+	// 			// Hide the description input if no description
+	// 			this.pinHidden = true;
 
-				// Notify parent of new risk
-				this.risksService.populateRisk(responseRisk);
-				this.riskData = responseRisk;
-				this.risksService.addRisk(this.riskData);
-				this.risksService.setSelectedRisk(this.riskData, true, this.revision);
+	// 			// Notify parent of new risk
+	// 			this.risksService.populateRisk(responseRisk);
+	// 			this.riskData = responseRisk;
+	// 			this.risksService.addRisk(this.riskData);
+	// 			this.risksService.setSelectedRisk(this.riskData, true, this.revision);
 
-				// Hide some actions
-				this.risksService.setPinDropMode(false);
+	// 			// Hide some actions
+	// 			this.risksService.setPinDropMode(false);
 
-				this.submitDisabled = true;
-				this.setContentHeight();
+	// 			this.submitDisabled = true;
+	// 			this.setContentHeight();
 
-				this.startChatEvents();
-				this.saving = false;
+	// 			this.startChatEvents();
+	// 			this.saving = false;
 
-				const riskState = {
-					account: this.account,
-					model: this.model,
-					revision: this.revision,
-					riskId: this.data._id,
-					noSet: true
-				};
+	// 			const riskState = {
+	// 				account: this.account,
+	// 				model: this.model,
+	// 				revision: this.revision,
+	// 				riskId: this.data._id,
+	// 				noSet: true
+	// 			};
 
-				this.disabledReason = this.reasonCommentText;
+	// 			this.disabledReason = this.reasonCommentText;
 
-				this.$state.go(
-					'app.viewer',
-					riskState,
-					{notify: false}
-				);
+	// 			this.$state.go(
+	// 				'app.viewer',
+	// 				riskState,
+	// 				{notify: false}
+	// 			);
 
-				this.analyticService.sendEvent({
-					eventCategory: 'Risk',
-					eventAction: 'create'
-				});
+	// 			this.analyticService.sendEvent({
+	// 				eventCategory: 'Risk',
+	// 				eventAction: 'create'
+	// 			});
 
-			});
+	// 		});
 
-	}
+	// }
 
 	public errorSavingScreenshot(error) {
 		const content = 'Something went wrong saving the screenshot. ' +
@@ -822,61 +822,61 @@ class RiskItemController implements ng.IController {
 		this.setContentHeight();
 	}
 
-	/**
-	 * Set the content height
-	 */
-	public setContentHeight() {
+	// /**
+	//  * Set the content height
+	//  */
+	// public setContentHeight() {
 
-		const newRiskHeight = 410;
-		const descriptionTextHeight = 80;
-		const additionalInfoHeight = 160;
-		const thumbnailHeight = 180;
-		const riskMinHeight = 370;
+	// 	const newRiskHeight = 410;
+	// 	const descriptionTextHeight = 80;
+	// 	const additionalInfoHeight = 160;
+	// 	const thumbnailHeight = 180;
+	// 	const riskMinHeight = 370;
 
-		let height = riskMinHeight;
+	// 	let height = riskMinHeight;
 
-		if (this.data) {
+	// 	if (this.data) {
 
-			// Description text
-			if (this.riskData && this.riskData.hasOwnProperty('desc')) {
-				height += descriptionTextHeight;
-			}
-			// Description thumbnail
-			height += thumbnailHeight;
-			// New comment thumbnail
-			if (this.commentThumbnail) {
-				height += thumbnailHeight;
-			}
+	// 		// Description text
+	// 		if (this.riskData && this.riskData.hasOwnProperty('desc')) {
+	// 			height += descriptionTextHeight;
+	// 		}
+	// 		// Description thumbnail
+	// 		height += thumbnailHeight;
+	// 		// New comment thumbnail
+	// 		if (this.commentThumbnail) {
+	// 			height += thumbnailHeight;
+	// 		}
 
-		} else {
-			height = newRiskHeight;
-			// Description thumbnail
-			if (this.riskData && this.riskData.descriptionThumbnail) {
-				height += thumbnailHeight;
-			}
-		}
+	// 	} else {
+	// 		height = newRiskHeight;
+	// 		// Description thumbnail
+	// 		if (this.riskData && this.riskData.descriptionThumbnail) {
+	// 			height += thumbnailHeight;
+	// 		}
+	// 	}
 
-		height += additionalInfoHeight;
+	// 	height += additionalInfoHeight;
 
-		if (height) {
-			this.contentHeight({height});
-		} else {
-			console.error('Height was trying to be set to falsy value');
-		}
+	// 	if (height) {
+	// 		this.contentHeight({height});
+	// 	} else {
+	// 		console.error('Height was trying to be set to falsy value');
+	// 	}
 
-	}
+	// }
 
-	public onRiskUpdated(risk) {
-		if (risk._id !== this.data._id) {
-			return;
-		}
+	// public onRiskUpdated(risk) {
+	// 	if (risk._id !== this.data._id) {
+	// 		return;
+	// 	}
 
-		this.risksService.populateRisk(risk);
-		this.riskData = risk;
+	// 	this.risksService.populateRisk(risk);
+	// 	this.riskData = risk;
 
-		this.$scope.$apply();
+	// 	this.$scope.$apply();
 
-	}
+	// }
 
 	public startChatEvents() {
 
@@ -890,33 +890,33 @@ class RiskItemController implements ng.IController {
 		}
 	}
 
-	private isRiskDataChanged() {
-		let changed = !this.savedData;
-		if (this.riskData) {
-			const keys = Object.keys(this.riskData);
-			let keyIdx = 0;
+	// private isRiskDataChanged() {
+	// 	let changed = !this.savedData;
+	// 	if (this.riskData) {
+	// 		const keys = Object.keys(this.riskData);
+	// 		let keyIdx = 0;
 
-			while (!changed && keyIdx < keys.length) {
-				if ('[object Array]' === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
-					changed = 0 !== this.riskData[keys[keyIdx]].length &&
-						JSON.stringify(this.riskData[keys[keyIdx]]) !== JSON.stringify(this.savedData[keys[keyIdx]]);
-				} else if ('[object String]' === Object.prototype.toString.call(this.riskData[keys[keyIdx]]) ||
-					'[object Number]' === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
-					changed = this.riskData[keys[keyIdx]] !== this.savedData[keys[keyIdx]];
-				}
-				keyIdx++;
-			}
-		}
+	// 		while (!changed && keyIdx < keys.length) {
+	// 			if ('[object Array]' === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
+	// 				changed = 0 !== this.riskData[keys[keyIdx]].length &&
+	// 					JSON.stringify(this.riskData[keys[keyIdx]]) !== JSON.stringify(this.savedData[keys[keyIdx]]);
+	// 			} else if ('[object String]' === Object.prototype.toString.call(this.riskData[keys[keyIdx]]) ||
+	// 				'[object Number]' === Object.prototype.toString.call(this.riskData[keys[keyIdx]])) {
+	// 				changed = this.riskData[keys[keyIdx]] !== this.savedData[keys[keyIdx]];
+	// 			}
+	// 			keyIdx++;
+	// 		}
+	// 	}
 
-		return changed && this.riskData && this.riskData.name;
-	}
+	// 	return changed && this.riskData && this.riskData.name;
+	// }
 
-	private updateSavedRisk(risk) {
-		if (risk) {
-			this.savedData = Object.assign({}, risk);
-			this.savedData.assigned_roles = Object.assign([], risk.assigned_roles);
-		}
-	}
+	// private updateSavedRisk(risk) {
+	// 	if (risk) {
+	// 		this.savedData = Object.assign({}, risk);
+	// 		this.savedData.assigned_roles = Object.assign([], risk.assigned_roles);
+	// 	}
+	// }
 
 }
 

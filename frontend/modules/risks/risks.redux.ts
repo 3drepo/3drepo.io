@@ -33,7 +33,8 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	downloadRisks: ['teamspace', 'modelId'],
 	showDetails: ['risk', 'filteredRisks', 'revision'],
 	setActiveRisk: ['risk'],
-	showNewPin: ['risk', 'pinData']
+	showNewPin: ['risk', 'pinData'],
+	togglePendingState: ['isPending']
 }, { prefix: 'RISKS_' });
 
 export const INITIAL_STATE = {
@@ -49,6 +50,8 @@ export const INITIAL_STATE = {
 		selectedFilters: []
 	}
 };
+
+export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
 
 export const fetchRisksSuccess = (state = INITIAL_STATE, { risks = [] }) => {
 	const risksMap = keyBy(risks, '_id');
@@ -96,5 +99,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.DELETE_RISKS_SUCCESS]: deleteRisksSuccess,
 	[RisksTypes.SET_COMPONENT_STATE]: setComponentState,
 	[RisksTypes.SAVE_RISK_SUCCESS]: saveRiskSuccess,
-	[RisksTypes.SET_NEW_RISK]: setNewRisk
+	[RisksTypes.SET_NEW_RISK]: setNewRisk,
+	[RisksTypes.TOGGLE_PENDING_STATE]: togglePendingState
 });

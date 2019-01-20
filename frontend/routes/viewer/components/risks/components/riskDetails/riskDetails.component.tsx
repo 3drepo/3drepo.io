@@ -129,15 +129,19 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public handleNewScreenshot = async (screenshot) => {
 		const { teamspace, model } = this.props;
 		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
-		this.setCommentData({ screenshot, viewpoint });
+
+		if (this.isNewRisk) {
+			this.props.setState({ newRisk: {
+				...this.riskData,
+				descriptionThumbnail: screenshot
+			}});
+		} else {
+			this.setCommentData({ screenshot, viewpoint });
+		}
 	}
 
 	public handleChangePin = (pinData) => {
 		this.props.showNewPin(this.props.risk, pinData);
-	}
-
-	public handleSaveButton = () => {
-
 	}
 
 	public renderPreview = renderWhenTrue(() => {

@@ -20,6 +20,7 @@ import { selectCurrentUser, CurrentUserActions } from '../../../modules/currentU
 import { ModelActions, selectSettings, selectIsPending } from '../../../modules/model';
 import { ViewpointsActions } from '../../../modules/viewpoints';
 import { JobsActions } from '../../../modules/jobs';
+import { RisksActions } from '../../../modules/risks';
 
 class ModelController implements ng.IController {
 
@@ -263,6 +264,7 @@ class ModelController implements ng.IController {
 	private loadModelSettings() {
 		dispatch(ModelActions.fetchSettings(this.account, this.model));
 		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
+		dispatch(RisksActions.fetchRisks(this.account, this.model, this.revision));
 	}
 }
 

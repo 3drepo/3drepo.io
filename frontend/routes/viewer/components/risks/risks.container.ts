@@ -28,7 +28,8 @@ import {
 	selectShowDetails,
 	selectSearchEnabled,
 	selectSelectedFilters,
-	selectShowPins
+	selectShowPins,
+	selectIsRisksPending
 } from '../../../../modules/risks';
 import { selectJobsList } from '../../../../modules/jobs';
 import { selectSettings } from '../../../../modules/model';
@@ -43,7 +44,8 @@ const mapStateToProps = createStructuredSelector({
 	showDetails: selectShowDetails,
 	searchEnabled: selectSearchEnabled,
 	setState: RisksActions.setComponentState,
-	selectedFilters: selectSelectedFilters
+	selectedFilters: selectSelectedFilters,
+	isPending: selectIsRisksPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

@@ -84,14 +84,6 @@ export class ViewerService {
 		return this.viewer.showAll();
 	}
 
-	public async changePinColors(params) {
-		await this.isViewerReady();
-		return this.viewer.changePinColours(
-			params.id,
-			params.colours
-		);
-	}
-
 	public async clearHighlights() {
 		await this.isViewerReady();
 		this.viewer.clearHighlights();
@@ -111,7 +103,7 @@ export class ViewerService {
 	}
 
 	/**
-	 * PIN
+	 * Pins
 	 */
 	public setPinDropMode(on: boolean) {
 		this.viewerService.pin.pinDropMode = on;
@@ -146,6 +138,11 @@ export class ViewerService {
 	public async removePin(params) {
 		await this.isViewerReady();
 		this.viewer.removePin(params.id);
+	}
+
+	public async changePinColor({ id, colours }) {
+		await this.isViewerReady();
+		this.viewer.changePinColours(id, colours);
 	}
 
 	/**

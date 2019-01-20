@@ -122,6 +122,10 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					/>
 				)} />
 
+				{this.props.risk.descriptionThumbnail && (
+					<img src={this.props.risk.descriptionThumbnail} />
+				)}
+
 				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="assigned_roles">Risk owner</InputLabel>
