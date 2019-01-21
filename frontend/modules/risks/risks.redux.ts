@@ -35,7 +35,9 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	setActiveRisk: ['risk'],
 	showNewPin: ['risk', 'pinData'],
 	togglePendingState: ['isPending'],
-	toggleShowPins: ['showPins', 'filteredRisks']
+	toggleShowPins: ['showPins', 'filteredRisks'],
+	subscribeOnRiskChanges: ['teamspace', 'modelId'],
+	unsubscribeOnRiskChanges: ['teamspace', 'modelId']
 }, { prefix: 'RISKS_' });
 
 export const INITIAL_STATE = {

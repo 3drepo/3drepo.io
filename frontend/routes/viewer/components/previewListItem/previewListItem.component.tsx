@@ -59,7 +59,7 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 	}
 
 	public renderArrowButton = renderWhenTrue(() => (
-		<ArrowButton onClick={this.props.onArrowClick} disabled={!this.props.modelLoaded}>
+		<ArrowButton onClick={this.props.onArrowClick}>
 			<StyledArrowIcon />
 		</ArrowButton>
 	));

@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { map } from 'lodash';
+import { map, isEqual } from 'lodash';
 
 import ReportProblem from '@material-ui/icons/ReportProblem';
 import ArrowBack from '@material-ui/icons/ArrowBack';
@@ -83,7 +83,9 @@ interface IProps {
 	deleteRisks: (teamspace, model, risksIds) => void;
 	setActiveRisk: (risk) => void;
 	showRiskDetails: (risk, filteredRisks, revision?) => void;
-	toggleShowPins: (showPins: boolean) => void;
+	toggleShowPins: (showPins: boolean, filteredRisks) => void;
+	subscribeOnRiskChanges: (teamspace, modelId) => void;
+	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
 }
 
 interface IState {
@@ -158,11 +160,12 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		this.setState({ filteredRisks: this.filteredRisks });
 		this.toggleRiskPinEvent(true);
+		this.props.subscribeOnRiskChanges(this.props.teamspace, this.props.model);
 	}
 
 	public componentDidUpdate(prevProps) {
 		const { risks, selectedFilters } = this.props;
-		const risksChanged = prevProps.risks.length !== risks.length;
+		const risksChanged = !isEqual(prevProps.risks, risks);
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
 
 		if (risksChanged || filtersChanged) {
@@ -172,6 +175,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	public componentWillUnmount() {
 		this.toggleRiskPinEvent(false);
+		this.props.unsubscribeOnRiskChanges(this.props.teamspace, this.props.model);
 	}
 
 	public toggleRiskPinEvent = (enabled: boolean) => {
