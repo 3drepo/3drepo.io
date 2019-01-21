@@ -56,6 +56,8 @@ import {
 import { FilterPanel, DATA_TYPES } from '../../../components/filterPanel/filterPanel.component';
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
 import { searchByFilters } from '../../../../helpers/searching';
+import { Viewer } from '../../../../services/viewer/viewer';
+import { VIEWER_EVENTS } from '../../../../constants/viewer';
 
 interface IProps {
 	teamspace: string;
@@ -153,6 +155,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		this.setState({ filteredRisks: this.filteredRisks });
+		this.toggleRiskPinEvent(true);
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -162,6 +165,23 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 		if (risksChanged || filtersChanged) {
 			this.setState({ filteredRisks: this.filteredRisks });
+		}
+	}
+
+	public componentWillUnmount() {
+		this.toggleRiskPinEvent(false);
+	}
+
+	public toggleRiskPinEvent = (enabled: boolean) => {
+		const resolver = enabled ? 'on' : 'off';
+		Viewer[resolver](VIEWER_EVENTS.CLICK_PIN, this.handlePinClick);
+	}
+
+	public handlePinClick = ({ id }) => {
+		const relatedRisk = this.state.filteredRisks.find((risk) => risk._id === id);
+
+		if (relatedRisk) {
+			this.props.setActiveRisk(relatedRisk);
 		}
 	}
 

@@ -115,9 +115,9 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		const { teamspace, model, saveRisk, postComment } = this.props;
 		if (this.isNewRisk) {
 			saveRisk(teamspace, model, this.riskData);
-		} else {
+		} /* else {
 			postComment(teamspace, model, this.riskData._id, comment);
-		}
+		} */
 	}
 
 	public setCommentData = (commentData = {}) => {

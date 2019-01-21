@@ -15,6 +15,7 @@ import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { FieldsRow, StyledFormControl, StyledTextField } from './riskDetails.styles';
+import { Image } from '../../../../../components/image';
 
 const RiskSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
@@ -122,9 +123,10 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					/>
 				)} />
 
-				{this.props.risk.descriptionThumbnail && (
-					<img src={this.props.risk.descriptionThumbnail} />
-				)}
+				{this.props.risk.descriptionThumbnail && <Image
+					src={this.props.risk.descriptionThumbnail}
+					enablePreview
+				/>}
 
 				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
