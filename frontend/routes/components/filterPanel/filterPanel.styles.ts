@@ -30,6 +30,7 @@ export const Container = styled.div`
 	flex-direction: column;
 	overflow: hidden;
 	height: ${(props: any) => props.filtersOpen ? '50px' : '100%'};
+	flex: none;
 ` as any;
 
 export const SelectedFilters = styled.div`

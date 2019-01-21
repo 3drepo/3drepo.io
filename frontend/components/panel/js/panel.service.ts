@@ -1,6 +1,4 @@
 import { APIService } from './../../home/js/api.service';
-import { IssuesChatEvents } from '../../chat/js/issues.chat.events';
-import { consolidateStreamedStyles } from 'styled-components';
 
 /**
  *  Copyright (C) 2017 3D Repo Ltd
@@ -100,7 +98,7 @@ export class PanelService {
 			type: 'issues',
 			title: 'Issues',
 			showLiteMode: true,
-			show: false, // issueId || !riskId,
+			show: issueId || !riskId,
 			help: 'List current issues',
 			icon: 'place',
 			menu: [
@@ -290,7 +288,7 @@ export class PanelService {
 			type: 'risks',
 			title: 'SafetiBase',
 			showLiteMode: true,
-			show: true, // Boolean(riskId),
+			show: Boolean(riskId),
 			help: 'Risk register',
 			icon: 'report_problem',
 			minHeight: 560,

@@ -59,7 +59,7 @@ export const Summary = styled(ExpansionPanelSummary).attrs({
 `;
 
 export const CollapsableContent = styled.div`
-	margin: 8px 0 16px 0;
+	margin: 8px 0 16px;
 `;
 
 export const StyledForm = styled(Form)`

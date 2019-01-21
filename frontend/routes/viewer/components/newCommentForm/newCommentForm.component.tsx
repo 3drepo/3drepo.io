@@ -109,7 +109,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 	}
 
 	public togglePinListeners = (enabled: boolean) => {
-		const resolver = enabled ? 'once' : 'off';
+		const resolver = enabled ? 'on' : 'off';
 
 		Viewer[resolver](VIEWER_EVENTS.PICK_POINT, this.handlePickPoint);
 	}
@@ -122,8 +122,6 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 		if (trans) {
 			position = trans.inverse().multMatrixPnt(position);
 		}
-
-		this.handleChangePin();
 
 		if (this.props.onChangePin) {
 			this.props.onChangePin({
