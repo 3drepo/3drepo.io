@@ -161,22 +161,14 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		this.props.subscribeOnRiskChanges(this.props.teamspace, this.props.model);
 		this.toggleRiskPinEvent(true);
-
-		const changes = {} as IState;
-
-		if (this.props.selectedFilters.length) {
-			changes.filteredRisks = this.filteredRisks;
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
-		}
+		this.setState({ filteredRisks: this.filteredRisks });
 	}
 
 	public componentDidUpdate(prevProps) {
 		const { risks, selectedFilters, location, activeRiskId, showDetails } = this.props;
 		const risksChanged = !isEqual(prevProps.risks, risks);
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
+		const showDetailsChanged = showDetails !== prevProps.showDetails;
 
 		const changes = {} as IState;
 
@@ -184,7 +176,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 			changes.filteredRisks = this.filteredRisks;
 		}
 
-		if (location.search && !activeRiskId && (!showDetails && !prevProps.showDetails)) {
+		if (!filtersChanged && location.search && !activeRiskId && (!showDetails && showDetailsChanged)) {
 			const { riskId } = queryString.parse(location.search);
 			if (riskId) {
 				const foundRisk = risks.find((risk) => risk._id === riskId);
