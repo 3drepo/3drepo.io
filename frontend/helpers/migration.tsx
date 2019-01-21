@@ -61,6 +61,11 @@ export const runAngularTimeout = (callback, context?) => {
 /* TODO: This custom hitory should be removed, if angular routes are migrated to react */
 export const history = createBrowserHistory();
 
+export const runAngularViewerTransition = (options) => {
+	const $state = getAngularService('$state', this) as any;
+	$state.go('app.viewer', options, { notify: false });
+};
+
 /* TODO: At the end Router should wrap whole app - not a specific component */
 export const addRouting = (Component) => {
 	return (props) => (

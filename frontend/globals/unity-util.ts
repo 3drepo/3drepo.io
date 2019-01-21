@@ -303,7 +303,6 @@ export class UnityUtil {
 	public static objectStatusBroadcast(nodeInfo) {
 		try {
 			UnityUtil.objectStatusPromises.forEach((promise) => {
-				console.log(nodeInfo);
 				promise.resolve(JSON.parse(nodeInfo));
 			});
 		} catch (error) {

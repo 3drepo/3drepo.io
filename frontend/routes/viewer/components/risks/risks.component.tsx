@@ -16,7 +16,8 @@
  */
 
 import * as React from 'react';
-import { map, isEqual } from 'lodash';
+import * as queryString from 'query-string';
+import { map, isEqual, isEmpty } from 'lodash';
 
 import ReportProblem from '@material-ui/icons/ReportProblem';
 import ArrowBack from '@material-ui/icons/ArrowBack';
@@ -28,10 +29,8 @@ import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import CancelIcon from '@material-ui/icons/Cancel';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import Check from '@material-ui/icons/Check';
-import DeleteIcon from '@material-ui/icons/Delete';
 
 import { hasPermissions } from '../../../../helpers/permissions';
-import { TooltipButton } from '../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import RiskDetails from './components/riskDetails/riskDetails.container';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -60,6 +59,8 @@ import { Viewer } from '../../../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 
 interface IProps {
+	history: any;
+	location: any;
 	teamspace: string;
 	model: any;
 	risks: any[];
@@ -82,6 +83,7 @@ interface IProps {
 	printRisks: (teamspace, model, risksIds) => void;
 	setActiveRisk: (risk, filteredRisks, revision?) => void;
 	showRiskDetails: (risk, filteredRisks, revision?) => void;
+	closeDetails: () => void;
 	toggleShowPins: (showPins: boolean, filteredRisks) => void;
 	subscribeOnRiskChanges: (teamspace, modelId) => void;
 	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
@@ -157,18 +159,44 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		this.setState({ filteredRisks: this.filteredRisks });
-		this.toggleRiskPinEvent(true);
 		this.props.subscribeOnRiskChanges(this.props.teamspace, this.props.model);
+		this.toggleRiskPinEvent(true);
+
+		const changes = {} as IState;
+
+		if (this.props.selectedFilters.length) {
+			changes.filteredRisks = this.filteredRisks;
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { risks, selectedFilters } = this.props;
+		const { risks, selectedFilters, location, activeRiskId, showDetails } = this.props;
 		const risksChanged = !isEqual(prevProps.risks, risks);
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
 
+		const changes = {} as IState;
+
 		if (risksChanged || filtersChanged) {
-			this.setState({ filteredRisks: this.filteredRisks });
+			changes.filteredRisks = this.filteredRisks;
+		}
+
+		if (location.search && !activeRiskId && (!showDetails && !prevProps.showDetails)) {
+			const { riskId } = queryString.parse(location.search);
+			if (riskId) {
+				const foundRisk = risks.find((risk) => risk._id === riskId);
+
+				if (foundRisk) {
+					this.handleShowRiskDetails(foundRisk, changes.filteredRisks)();
+				}
+			}
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
 		}
 	}
 
@@ -211,20 +239,16 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public handleRiskFocus = (risk) => () => {
-		this.props.setActiveRisk(risk, this.state.filteredRisks, this.props.revision);
+	public handleRiskFocus = (risk, filteredRisks?) => () => {
+		this.props.setActiveRisk(risk, filteredRisks || this.state.filteredRisks, this.props.revision);
 	}
 
-	public handleRiskClick = (risk) => () => {
-		this.props.showRiskDetails(risk, this.state.filteredRisks, this.props.revision);
+	public handleShowRiskDetails = (risk, filteredRisks?) => () => {
+		this.props.showRiskDetails(risk, filteredRisks || this.state.filteredRisks, this.props.revision);
 	}
 
 	public handleAddNewRisk = () => {
 		this.props.setNewRisk();
-	}
-
-	public closeDetails = () => {
-		this.toggleDetails(false);
 	}
 
 	public handleCloseSearchMode = () => {
@@ -293,7 +317,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 				{...prepareRisk(risk, this.props.jobs)}
 				key={index}
 				onItemClick={this.handleRiskFocus(risk)}
-				onArrowClick={this.handleRiskClick(risk)}
+				onArrowClick={this.handleShowRiskDetails(risk)}
 				active={this.props.activeRiskId === risk._id}
 				hasViewPermission={this.hasPermission(VIEW_ISSUE)}
 			/>
@@ -303,10 +327,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	});
 
 	public renderDetailsView = renderWhenTrue(() => (
-		<RiskDetails
-			teamspace={this.props.teamspace}
-			model={this.props.model}
-		/>
+		<RiskDetails teamspace={this.props.teamspace} model={this.props.model} />
 	));
 
 	public renderListView = renderWhenTrue(() => (
@@ -335,7 +356,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	public renderTitleIcon = () => {
 		if (this.props.showDetails) {
 			return (
-				<IconButton onClick={this.closeDetails} >
+				<IconButton onClick={this.props.closeDetails} >
 					<ArrowBack />
 				</IconButton>
 			);
@@ -356,10 +377,10 @@ export class Risks extends React.PureComponent<IProps, IState> {
 			{RISKS_ACTIONS_MENU.map(({ name, Icon, label }) => {
 				return (
 					<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
-						<IconWrapper><Icon fontSize={'small'} /></IconWrapper>
+						<IconWrapper><Icon fontSize="small" /></IconWrapper>
 						<StyledItemText>
 							{label}
-							{(name === RISKS_ACTIONS_ITEMS.SHOW_PINS && this.props.showPins) && <Check fontSize={'small'} />}
+							{(name === RISKS_ACTIONS_ITEMS.SHOW_PINS && this.props.showPins) && <Check fontSize="small" />}
 						</StyledItemText>
 					</StyledListItem>
 				);
@@ -387,9 +408,5 @@ export class Risks extends React.PureComponent<IProps, IState> {
 				{this.renderDetailsView(this.props.showDetails)}
 			</ViewerPanel>
 		);
-	}
-
-	private toggleDetails = (showDetails) => {
-		this.props.setState({ showDetails, activeRisk: null });
 	}
 }

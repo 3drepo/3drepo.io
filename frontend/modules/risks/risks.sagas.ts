@@ -19,15 +19,20 @@ import { differenceBy, isEmpty, omit, pick } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import { getAngularService, dispatch } from '../../helpers/migration';
+import { getAngularService, dispatch, history, runAngularViewerTransition } from '../../helpers/migration';
 import { getRiskPinColor } from '../../helpers/risks';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
-import { PIN_COLORS } from '../../styles';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { RisksActions, RisksTypes } from './risks.redux';
-import { selectActiveRiskId, selectRisks, selectShowPins, selectRisksMap } from './risks.selectors';
+import {
+	selectActiveRiskId,
+	selectRisks,
+	selectShowPins,
+	selectRisksMap,
+	selectActiveRiskDetails
+} from './risks.selectors';
 
 export function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));
@@ -363,10 +368,38 @@ export function* setActiveRisk({ risk, filteredRisks, revision }) {
 
 export function* showDetails({ risk, filteredRisks, revision }) {
 	try {
+		runAngularViewerTransition({
+			account: risk.account,
+			model: risk.model,
+			revision,
+			riskId: risk._id,
+			noSet: true
+		});
+
 		yield put(RisksActions.setActiveRisk(risk, filteredRisks, revision));
 		yield put(RisksActions.setComponentState({ showDetails: true }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('display', 'risk details', error));
+	}
+}
+
+export function* closeDetails() {
+	try {
+		const activeRisk = yield select(selectActiveRiskDetails);
+
+		if (activeRisk) {
+			runAngularViewerTransition({
+				account: activeRisk.account,
+				model: activeRisk.model,
+				revision: activeRisk.rev_id,
+				riskId: null,
+				noSet: true
+			});
+		}
+
+		yield put(RisksActions.setComponentState({ activeRisk: null, showDetails: false }));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('close', 'risk details', error));
 	}
 }
 
@@ -430,10 +463,10 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.PRINT_RISKS, printRisks);
 	yield takeLatest(RisksTypes.SET_ACTIVE_RISK, setActiveRisk);
 	yield takeLatest(RisksTypes.SHOW_DETAILS, showDetails);
+	yield takeLatest(RisksTypes.CLOSE_DETAILS, closeDetails);
 	yield takeLatest(RisksTypes.SHOW_NEW_PIN, showNewPin);
 	yield takeLatest(RisksTypes.TOGGLE_SHOW_PINS, toggleShowPins);
 	yield takeLatest(RisksTypes.SUBSCRIBE_ON_RISK_CHANGES, subscribeOnRiskChanges);
 	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_CHANGES, unsubscribeOnRiskChanges);
 	yield takeLatest(RisksTypes.FOCUS_ON_RISK, focusOnRisk);
-
 }
