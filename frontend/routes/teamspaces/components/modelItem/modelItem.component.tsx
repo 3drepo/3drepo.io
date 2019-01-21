@@ -190,7 +190,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 						>
 							{ timestamp && !hovered && !isPending && !actionsMenuOpen &&
 								<Time>
-									<DateTime value={timestamp} format="DD/MM/YYYY hh:mm" />
+									<DateTime value={timestamp} format="DD/MM/YYYY HH:mm" />
 								</Time>
 							}
 							<RowMenu
