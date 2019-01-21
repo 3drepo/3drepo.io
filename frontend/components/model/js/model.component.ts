@@ -38,14 +38,12 @@ class ModelController implements ng.IController {
 		'RevisionsService',
 		'AuthService',
 		'IssuesService',
-		'RisksService',
 		'StateManager',
 		'PanelService',
 		'ViewerService'
 	];
 
 	private issuesCardIndex;
-	private risksCardIndex;
 	private pointerEvents;
 	private account;
 	private model;
@@ -76,7 +74,6 @@ class ModelController implements ng.IController {
 		private RevisionsService,
 		private AuthService,
 		private IssuesService,
-		private RisksService,
 		private StateManager,
 		private PanelService,
 		private ViewerService
@@ -155,15 +152,6 @@ class ModelController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch('vm.riskId', () => {
-			if (this.riskId) {
-				// timeout to make sure event is sent after risk panel card is setup
-				this.$timeout(() => {
-					this.RisksService.state.displayRisk = this.riskId;
-				});
-			}
-		});
-
 		this.$scope.$watch(this.EventService.currentEvent, (event) => {
 
 			this.event = event;
@@ -229,11 +217,6 @@ class ModelController implements ng.IController {
 			// assume issue card shown by default
 			this.PanelService.hidePanelsByType('issues');
 			this.PanelService.showPanelsByType('risks');
-
-			// timeout to make sure event is sent after risk panel card is setup
-			this.$timeout(() => {
-				this.RisksService.state.displayRisk = this.riskId;
-			});
 		}
 
 		this.PanelService.hideSubModels(this.issuesCardIndex, !settings.federate);
