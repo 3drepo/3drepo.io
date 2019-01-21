@@ -53,7 +53,7 @@ import {
 	StyledItemText,
 	IconWrapper
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
-import { FilterPanel, DATA_TYPES } from '../../../components/filterPanel/filterPanel.component';
+import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
 import { searchByFilters } from '../../../../helpers/searching';
 import { Viewer } from '../../../../services/viewer/viewer';
@@ -70,7 +70,7 @@ interface IProps {
 	showDetails?: boolean;
 	riskDetails?: any;
 	searchEnabled: boolean;
-	areShowedPins: boolean;
+	showPins: boolean;
 	selectedFilters: any[];
 	modelSettings: {
 		permissions: any[];
@@ -83,6 +83,7 @@ interface IProps {
 	deleteRisks: (teamspace, model, risksIds) => void;
 	setActiveRisk: (risk) => void;
 	showRiskDetails: (risk, filteredRisks, revision?) => void;
+	toggleShowPins: (showPins: boolean) => void;
 }
 
 interface IState {
@@ -130,17 +131,15 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	}
 
 	get menuActionsMap() {
+		const { printRisks, downloadRisks, toggleShowPins, teamspace, model, showPins } = this.props;
+		const { filteredRisks } = this.state;
 		return {
 			[RISKS_ACTIONS_ITEMS.PRINT]: () => {
-				const risksIds = map(this.state.filteredRisks, '_id').join(',');
-				this.props.printRisks(this.props.teamspace, this.props.model, risksIds);
+				const risksIds = map(filteredRisks, '_id').join(',');
+				printRisks(teamspace, model, risksIds);
 			},
-			[RISKS_ACTIONS_ITEMS.DOWNLOAD]: () => {
-				this.props.downloadRisks(this.props.teamspace, this.props.model);
-			},
-			[RISKS_ACTIONS_ITEMS.SHOW_PINS]: () => {
-				this.props.setState({ areShowedPins: !this.props.areShowedPins });
-			}
+			[RISKS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadRisks(teamspace, model),
+			[RISKS_ACTIONS_ITEMS.SHOW_PINS]: () => toggleShowPins(!showPins, filteredRisks)
 		};
 	}
 
@@ -367,7 +366,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 						<IconWrapper><Icon fontSize={'small'} /></IconWrapper>
 						<StyledItemText>
 							{label}
-							{(name === RISKS_ACTIONS_ITEMS.SHOW_PINS && this.props.areShowedPins) && <Check fontSize={'small'} />}
+							{(name === RISKS_ACTIONS_ITEMS.SHOW_PINS && this.props.showPins) && <Check fontSize={'small'} />}
 						</StyledItemText>
 					</StyledListItem>
 				);

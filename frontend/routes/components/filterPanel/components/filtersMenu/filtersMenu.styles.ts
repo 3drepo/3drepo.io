@@ -66,6 +66,7 @@ export const StyledListItem = styled(ListItem)`
   && {
     padding: 4px 10px;
     height: 30px;
+    min-width: 180px;
   }
 `;
 
