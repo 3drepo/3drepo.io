@@ -119,8 +119,8 @@ class ReportGenerator {
 			newEntry.desc = entry.desc;
 
 			attributes[this.type].forEach((field) => {
+				const attri = { label: field.label };
 				if (entry.hasOwnProperty(field.field)) {
-					const attri = { label: field.label };
 					const value = entry[field.field];
 
 					if(value === "" || value === undefined || value === null) {
@@ -136,6 +136,9 @@ class ReportGenerator {
 						}
 
 					}
+					newEntry.attributes.push(attri);
+				} else if (field.default) {
+					attri.value = field.default;
 					newEntry.attributes.push(attri);
 				}
 			});
