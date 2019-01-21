@@ -89,6 +89,7 @@ interface IProps {
 interface IState {
 	riskDetails?: any;
 	filteredRisks: any[];
+	modelLoaded: boolean;
 }
 
 const UNASSIGNED_JOB = {
@@ -108,7 +109,9 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 
 export class Risks extends React.PureComponent<IProps, IState> {
 	public state = {
-		filteredRisks: []
+		riskDetails: {},
+		filteredRisks: [],
+		modelLoaded: false
 	};
 
 	get jobsList() {

@@ -52,8 +52,12 @@ export const ArrowButton = styled(Button)`
     justify-content: center;
     border-radius: 0;
 
-    &:hover {
+    &:disabled {
       background-color: ${COLOR.PRIMARY_LIGHT};
+    }
+
+    &:hover {
+      background-color: ${COLOR.PRIMARY_MAIN};
     }
   }
 `;
