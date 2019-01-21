@@ -216,6 +216,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 		return (
 			<StyledTextField
+				autoFocus
 				onPaste={this.handlePaste}
 				fullWidth
 				InputProps={{
