@@ -40,7 +40,7 @@ const mapStateToProps = createStructuredSelector({
 	jobs: selectJobsList,
 	activeRiskId: selectActiveRiskId,
 	activeRiskDetails: selectActiveRiskDetails,
-	areShowedPins: selectShowPins,
+	showPins: selectShowPins,
 	showDetails: selectShowDetails,
 	searchEnabled: selectSearchEnabled,
 	setState: RisksActions.setComponentState,
@@ -56,7 +56,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	downloadRisks: RisksActions.downloadRisks,
 	printRisks: RisksActions.printRisks,
 	setActiveRisk: RisksActions.setActiveRisk,
-	showRiskDetails: RisksActions.showDetails
+	showRiskDetails: RisksActions.showDetails,
+	toggleShowPins: RisksActions.toggleShowPins
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Risks);

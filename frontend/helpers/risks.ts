@@ -76,7 +76,7 @@ export const getRiskPinColor = (levelOfRisk: number, selected: boolean = false) 
 		: levelOfRiskColors[levelOfRisk].pinColor;
 };
 
-export const mergeRiskData = (source, data) => {
+export const mergeRiskData = (source, data = source) => {
 	const hasUnassignedRole = !data.assigned_roles;
 
 	return {

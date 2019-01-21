@@ -28,13 +28,14 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	deleteRisksSuccess: ['risksIds'],
 	saveRiskSuccess: ['risk'],
 	setNewRisk: [],
-	showPins: ['filteredRisks'],
+	renderPins: ['filteredRisks'],
 	printRisks: ['teamspace', 'modelId', 'risksIds'],
 	downloadRisks: ['teamspace', 'modelId'],
 	showDetails: ['risk', 'filteredRisks', 'revision'],
 	setActiveRisk: ['risk'],
 	showNewPin: ['risk', 'pinData'],
-	togglePendingState: ['isPending']
+	togglePendingState: ['isPending'],
+	toggleShowPins: ['showPins', 'filteredRisks']
 }, { prefix: 'RISKS_' });
 
 export const INITIAL_STATE = {
