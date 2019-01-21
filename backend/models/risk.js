@@ -383,7 +383,7 @@ risk.getRisksReport = function(account, model, username, rid, ids, res) {
 	const branch = rid ? null : "master";
 
 	const reportGen = require("../models/report").newRisksReport(account, model, rid);
-	return risk.findRisksByModelName(dbCol, username, branch, rid, projection, false, ids).then(risks => {
+	return risk.findRisksByModelName(dbCol, username, branch, rid, projection, ids, false).then(risks => {
 		reportGen.addEntries(risks);
 		return reportGen.generateReport(res);
 	});
