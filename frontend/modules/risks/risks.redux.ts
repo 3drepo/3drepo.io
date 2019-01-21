@@ -30,6 +30,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	printRisks: ['teamspace', 'modelId', 'risksIds'],
 	downloadRisks: ['teamspace', 'modelId'],
 	showDetails: ['risk', 'filteredRisks', 'revision'],
+	closeDetails: [],
 	setActiveRisk: ['risk', 'filteredRisks', 'revision'],
 	showNewPin: ['risk', 'pinData'],
 	togglePendingState: ['isPending'],

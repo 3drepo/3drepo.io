@@ -17,7 +17,8 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../../../helpers/migration';
+import { withRouter } from 'react-router-dom';
+import { connect, addRouting } from '../../../../helpers/migration';
 
 import { Risks } from './risks.component';
 import {
@@ -58,7 +59,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showRiskDetails: RisksActions.showDetails,
 	toggleShowPins: RisksActions.toggleShowPins,
 	subscribeOnRiskChanges: RisksActions.subscribeOnRiskChanges,
-	unsubscribeOnRiskChanges: RisksActions.unsubscribeOnRiskChanges
+	unsubscribeOnRiskChanges: RisksActions.unsubscribeOnRiskChanges,
+	closeDetails: RisksActions.closeDetails
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Risks);
+export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Risks)));
