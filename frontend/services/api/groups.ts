@@ -28,7 +28,7 @@ export const getGroup = (teamspace, modelId, groupId, revision?) => {
 	if (revision) {
 		return api.get(`${teamspace}/${modelId}/groups/revision/${revision}/${groupId}`);
 	}
-	return api.get(`${teamspace}/${modelId}'/groups/revision/master/head/${groupId}`);
+	return api.get(`${teamspace}/${modelId}/groups/revision/master/head/${groupId}`);
 };
 
 /**
@@ -39,5 +39,5 @@ export const getGroup = (teamspace, modelId, groupId, revision?) => {
  * @param revision
  */
 export const createGroup = (teamspace, modelId, group) => {
-	return api.post(`${teamspace}/${modelId}`, group);
+	return api.post(`${teamspace}/${modelId}/groups`, group);
 };

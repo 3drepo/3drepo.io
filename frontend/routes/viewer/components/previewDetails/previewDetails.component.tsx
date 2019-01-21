@@ -93,6 +93,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		if (editable) {
 			props.expanded = true;
 		}
+
 		return props;
 	}
 

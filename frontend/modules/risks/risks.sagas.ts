@@ -27,7 +27,7 @@ import { PIN_COLORS } from '../../styles';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { RisksActions, RisksTypes } from './risks.redux';
-import { selectActiveRiskId, selectRisks, selectShowPins } from './risks.selectors';
+import { selectActiveRiskId, selectRisks, selectShowPins, selectRisksMap } from './risks.selectors';
 
 export function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));
@@ -51,23 +51,33 @@ const createGroupData = (name, nodes) => {
 	return nodes.length === 0 ? null : groupData;
 };
 
-const createGroup = async (risk, objectInfo) => {
+const createGroup = (risk, objectInfo, teamspace, model) => {
 	// Create a group of selected objects
 	const highlightedGroupData = createGroupData(risk.name, objectInfo.highlightedNodes);
 	// Create a group of hidden objects
 	const hiddenGroupData = createGroupData(risk.name, objectInfo.hiddenNodes);
 
-	return await all([
-		highlightedGroupData || API.createGroup(risk.account, risk.model, highlightedGroupData),
-		hiddenGroupData || API.createGroup(risk.account, risk.model, hiddenGroupData)
+	return Promise.all([
+		highlightedGroupData && API.createGroup(teamspace, model, highlightedGroupData),
+		hiddenGroupData && API.createGroup(teamspace, model, hiddenGroupData)
 	]);
+};
+
+const toggleRiskPin = (risk, selected = true) => {
+	if (risk && risk.position && risk.position.length > 0 && risk._id) {
+		Viewer.changePinColor({
+			id: risk._id,
+			colours: getRiskPinColor(risk.level_of_risk, selected)
+		});
+	}
 };
 
 export function* saveRisk({ teamspace, model, riskData, revision }) {
 	try {
+		yield Viewer.setPinDropMode(false);
 		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
 			Viewer.getCurrentViewpoint({ teamspace, model }),
-			Viewer.getObjectsStatus({ teamspace, model }),
+			Viewer.getObjectsStatus(),
 			riskData.screenshot || Viewer.getScreenshot(),
 			API.getMyJob(teamspace)
 		]);
@@ -80,7 +90,7 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 		riskData.rev_id = revision;
 
 		if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
-			const [highlightedGroup, hiddenGroup] = yield createGroup(riskData, objectInfo);
+			const [highlightedGroup, hiddenGroup] = yield createGroup(riskData, objectInfo, teamspace, model);
 
 			if (highlightedGroup) {
 				viewpoint.highlighted_group_id = highlightedGroup.data._id;
@@ -121,8 +131,6 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 
 		yield put(RisksActions.saveRiskSuccess(savedRisk));
 		yield put(RisksActions.showDetails(savedRisk, [], revision));
-		Viewer.setPinDropMode(false);
-
 		yield put(SnackbarActions.show('Risk created'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('save', 'risk', error));
@@ -138,20 +146,12 @@ export function* updateRisk({ teamspace, modelId, riskData }) {
 			eventCategory: 'Risk',
 			eventAction: 'edit'
 		});
+
+		toggleRiskPin(riskData, true);
 		yield put(RisksActions.saveRiskSuccess(data));
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'risk', error));
-	}
-}
-
-export function* deleteRisks({ teamspace, modelId, risksIds }) {
-	try {
-		yield API.deleteRisks(teamspace, modelId, risksIds);
-		yield put(RisksActions.deleteRisksSuccess(risksIds));
-		yield put(SnackbarActions.show('Risk deleted'));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('delete', 'risk', error));
 	}
 }
 
@@ -219,7 +219,7 @@ export function* printRisks({ teamspace, modelId, risksIds }) {
 	}
 }
 
-export function* getRiskGroup(risk, groupId, revision): any {
+const getRiskGroup = async (risk, groupId, revision) => {
 	if (!groupId) {
 		return null;
 	}
@@ -229,7 +229,7 @@ export function* getRiskGroup(risk, groupId, revision): any {
 		return cachedGroup;
 	}
 
-	const { data } = yield API.getGroup(risk.account, risk.model, groupId, revision);
+	const { data } = await API.getGroup(risk.account, risk.model, groupId, revision);
 
 	if (data.hiddenObjects && !risk.viewpoint.group_id) {
 		data.hiddenObjects = null;
@@ -237,9 +237,9 @@ export function* getRiskGroup(risk, groupId, revision): any {
 
 	Cache.add('risk.group', groupId, data);
 	return data;
-}
+};
 
-export function* showMultipleGroups(risk, revision) {
+const showMultipleGroups = async (risk, revision) => {
 	const TreeService = getAngularService('TreeService') as any;
 
 	const hasViewpointGroups = !isEmpty(pick(risk.viewpoint, [
@@ -251,11 +251,11 @@ export function* showMultipleGroups(risk, revision) {
 	let objects = {} as { hidden: any[], shown: any[], objects: any[] };
 
 	if (hasViewpointGroups) {
-		const [hiddenGroupData, shownGroupData, highlightedGroupData] = yield all([
-			getRiskGroup(risk, risk.viewpoint.hidden_group_id, revision),
+		const [highlightedGroupData, shownGroupData, hiddenGroupData] = await Promise.all([
+			getRiskGroup(risk, risk.viewpoint.highlighted_group_id, revision),
 			getRiskGroup(risk, risk.viewpoint.hidden_group_id, revision),
 			getRiskGroup(risk, risk.viewpoint.shown_group_id, revision)
-		]);
+		]) as any;
 
 		if (hiddenGroupData) {
 			objects.hidden = hiddenGroupData.objects;
@@ -266,12 +266,12 @@ export function* showMultipleGroups(risk, revision) {
 		}
 
 		if (highlightedGroupData) {
-			objects.objects = hiddenGroupData.objects;
+			objects.objects = highlightedGroupData.objects;
 		}
 	} else {
 		const hasViewpointDefaultGroup = risk.viewpoint.group_id;
 		const groupId = hasViewpointDefaultGroup ? risk.viewpoint.group_id : risk.group_id;
-		const groupData = yield getRiskGroup(risk, groupId, revision);
+		const groupData = await getRiskGroup(risk, groupId, revision);
 
 		if (groupData.hiddenObjects && !risk.viewpoint.group_id) {
 			groupData.hiddenObjects = null;
@@ -291,32 +291,15 @@ export function* showMultipleGroups(risk, revision) {
 
 	if (objects.objects && objects.objects.length > 0) {
 		TreeService.selectedIndex = undefined;
-		yield TreeService.selectNodesBySharedIds(objects.objects);
+		await TreeService.selectNodesBySharedIds(objects.objects);
 		window.dispatchEvent(new Event('resize'));
-	}
-}
-
-const focusOnRisk = async (risk) => {
-	const { account, model, viewpoint } = risk;
-	if (viewpoint) {
-		if (viewpoint.position && viewpoint.position.length > 0) {
-			Viewer.setCamera({ ...viewpoint, account, model });
-		}
-
-		await Viewer.updateClippingPlanes({
-			clippingPlanes: viewpoint.clippingPlanes,
-			account,
-			model
-		});
-	} else {
-		await Viewer.goToDefaultViewpoint();
 	}
 };
 
-export function* renderRisk(risk, filteredRisks, revision) {
+export function* focusOnRisk({ risk, filteredRisks = [], revision }) {
 	try {
-		const TreeService = getAngularService('TreeService') as any;
 		yield put(RisksActions.renderPins(filteredRisks));
+		const TreeService = getAngularService('TreeService') as any;
 
 		// Remove highlight from any multi objects
 		Viewer.highlightObjects([]);
@@ -324,12 +307,12 @@ export function* renderRisk(risk, filteredRisks, revision) {
 
 		const hasViewpoint = risk.viewpoint;
 		const hasHiddenOrShownGroup = hasViewpoint && (risk.viewpoint.hidden_group_id || risk.viewpoint.shown_group_id);
+
 		// Reset object visibility
 		if (hasViewpoint) {
 			if (risk.viewpoint.hideIfc) {
 				TreeService.setHideIfc(risk.viewpoint.hideIfc);
 			}
-
 			TreeService.showAllTreeNodes(!hasHiddenOrShownGroup);
 		}
 
@@ -340,22 +323,37 @@ export function* renderRisk(risk, filteredRisks, revision) {
 			yield showMultipleGroups(risk, revision);
 		}
 
-		yield focusOnRisk(risk);
+		const { account, model, viewpoint } = risk;
+		if (viewpoint) {
+			if (viewpoint.position && viewpoint.position.length > 0) {
+				Viewer.setCamera({ ...viewpoint, account, model });
+			}
+
+			yield Viewer.updateClippingPlanes({
+				clippingPlanes: viewpoint.clippingPlanes,
+				account,
+				model
+			});
+		} else {
+			yield Viewer.goToDefaultViewpoint();
+		}
+
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('render', 'risk', error));
+		yield put(DialogActions.showErrorDialog('focus', 'risk', error));
 	}
 }
 
-export function* setActiveRisk({ risk }) {
+export function* setActiveRisk({ risk, filteredRisks, revision }) {
 	try {
-		if (risk.position && risk.position.length > 0 && risk._id) {
-			Viewer.changePinColor({
-				id: risk._id,
-				colours: PIN_COLORS.BLUE
-			});
+		const activeRiskId = yield select(selectActiveRiskId);
+		const risksMap = yield select(selectRisksMap);
+
+		if (activeRiskId !== risk._id) {
+			toggleRiskPin(risksMap[activeRiskId], false);
+			toggleRiskPin(risk, true);
 		}
 		yield all([
-			focusOnRisk(risk),
+			put(RisksActions.focusOnRisk({ risk, filteredRisks, revision })),
 			put(RisksActions.setComponentState({ activeRisk: risk._id, expandDetails: true }))
 		]);
 	} catch (error) {
@@ -365,16 +363,8 @@ export function* setActiveRisk({ risk }) {
 
 export function* showDetails({ risk, filteredRisks, revision }) {
 	try {
-		const activeRiskId = select(selectActiveRiskId);
-
-		if (activeRiskId !== risk._id) {
-			yield put(RisksActions.setActiveRisk(risk));
-		}
-
-		yield all([
-			renderRisk(risk, filteredRisks, revision),
-			put(RisksActions.setComponentState({ showDetails: true }))
-		]);
+		yield put(RisksActions.setActiveRisk(risk, filteredRisks, revision));
+		yield put(RisksActions.setComponentState({ showDetails: true }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('display', 'risk details', error));
 	}
@@ -409,19 +399,15 @@ export function* toggleShowPins({ showPins, filteredRisks = [] }) {
 	}
 }
 
-export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
-
 export function* subscribeOnRiskChanges({ teamspace, modelId }) {
 	const ChatService = yield getAngularService('ChatService');
 	const risksNotifications = yield ChatService.getChannel(teamspace, modelId).risks;
 
 	const onUpdated = (updatedRisk) => dispatch(RisksActions.saveRiskSuccess(updatedRisk));
 	const onCreated = (createdRisk) => dispatch(RisksActions.saveRiskSuccess(createdRisk[0]));
-	const onDeleted = (deletedIds) => dispatch(RisksActions.deleteRisksSuccess(deletedIds));
 
 	risksNotifications.subscribeToUpdated(onUpdated, this);
 	risksNotifications.subscribeToCreated(onCreated, this);
-	risksNotifications.subscribeToDeleted(onDeleted, this);
 }
 
 export function* unsubscribeOnRiskChanges({ teamspace, modelId }) {
@@ -430,18 +416,15 @@ export function* unsubscribeOnRiskChanges({ teamspace, modelId }) {
 
 	const onUpdated = (updatedRisk) => dispatch(RisksActions.saveRiskSuccess(updatedRisk));
 	const onCreated = (createdRisk) => dispatch(RisksActions.saveRiskSuccess(createdRisk[0]));
-	const onDeleted = (deletedIds) => dispatch(RisksActions.deleteRisksSuccess(deletedIds));
 
 	risksNotifications.unsubscribeFromUpdated(onUpdated);
 	risksNotifications.unsubscribeFromCreated(onCreated);
-	risksNotifications.unsubscribeFromDeleted(onDeleted);
 }
 
 export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_RISKS, fetchRisks);
 	yield takeLatest(RisksTypes.SAVE_RISK, saveRisk);
 	yield takeLatest(RisksTypes.UPDATE_RISK, updateRisk);
-	yield takeLatest(RisksTypes.DELETE_RISKS, deleteRisks);
 	yield takeLatest(RisksTypes.RENDER_PINS, renderPins);
 	yield takeLatest(RisksTypes.DOWNLOAD_RISKS, downloadRisks);
 	yield takeLatest(RisksTypes.PRINT_RISKS, printRisks);
@@ -451,4 +434,6 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.TOGGLE_SHOW_PINS, toggleShowPins);
 	yield takeLatest(RisksTypes.SUBSCRIBE_ON_RISK_CHANGES, subscribeOnRiskChanges);
 	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_CHANGES, unsubscribeOnRiskChanges);
+	yield takeLatest(RisksTypes.FOCUS_ON_RISK, focusOnRisk);
+
 }

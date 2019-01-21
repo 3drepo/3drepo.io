@@ -44,7 +44,6 @@ interface IProps {
 }
 
 interface IState {
-	risk: any;
 	logs: any[];
 }
 
@@ -55,7 +54,6 @@ const UNASSIGNED_JOB = {
 
 export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public state = {
-		risk: {},
 		logs: []
 	};
 
@@ -151,6 +149,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 		return (
 			<PreviewDetails
+				key={this.riskData._id}
 				{...this.riskData}
 				defaultExpanded={expandDetails}
 				editable={!this.riskData._id}
