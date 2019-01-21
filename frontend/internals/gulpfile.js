@@ -31,7 +31,10 @@ const allCss = [
     '../components/**/**.css',
 ]
 
-const allPug = ['../components/**/**.pug', './../../pug/legal/**.pug'];
+const allPug = [
+  "../components/**/**.pug",
+  "./../../resources/pug/legal/**.pug"
+];
 const icons = '../icons/*';
 
 function exitOnError(error) {

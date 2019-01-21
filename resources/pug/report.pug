@@ -1,0 +1,266 @@
+doctype html
+html(lang="en" ng-app="3drepo").ng-scope
+	base(href="/")
+	script(type="text/javascript", src="/config.js")
+	link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic")
+	//- <-! must add background-color and !important for displaying on a printed web page.
+	style.
+		@media print
+		{
+			button {
+				display:none!important;
+			}
+
+			@page {
+			size: auto;
+			margin: 10;
+			}
+
+			hr.break {
+				page-break-after: always;
+			}
+
+			report-entry {
+				page-break-inside: avoid;
+			}
+		}
+
+		html, body {
+				font-family: Roboto, sans-serif;
+				font-size: 14px;
+				margin:0;
+				-webkit-print-color-adjust: exact !important;
+		}
+
+		h1,h2,h3,h4 {
+			margin:5px 0;
+		}
+
+		p {
+			margin:5px 0;
+		}
+
+		header {
+			background-color:#808080 !important;
+			height:50px;
+			padding:10px;
+			text-align:center;
+			position:relative;
+		}
+		table {
+			border-collapse: separate;
+			border-spacing: 1px;
+			width:100%;
+		}
+
+		.bold {
+			font-weight: bold;
+		}
+
+		.button-group {
+			position:absolute;
+			top:10px;
+			left:0;
+		}
+
+		button {
+			width:140px;
+			border:none;
+			background:#0E2F53;
+			padding:10px;
+			color:#fff;
+			text-transform:uppercase;
+			margin:5px;
+			border-radius:5px;
+		}
+
+		.container {
+			width:760px;
+			margin:0 auto;
+			border-left:2px solid #efefef;
+			border-right:2px solid #efefef;
+			padding:0 20px;
+		}
+
+		.top-header {
+			text-align:center;
+			font-weight:300;
+		}
+
+		.top-header h1, .top-header h2 {
+			font-weight:400;
+		}
+
+		.row {
+			display:flex;
+		}
+
+		.row.screenshot {
+			width:100%;
+		}
+
+		.col {
+			width:100%;
+		}
+
+		.right {
+			text-align:right;
+		}
+
+		.col.description {
+			font-weight:400;
+			display:block;
+		}
+
+		.col.screenshot img {
+			max-width:96%;
+			height:auto;
+		}
+
+		.float-right {
+			float:right;
+		}
+
+		span.float-right {
+			font-weight:400;
+			padding-right:20px;
+		}
+
+		.float-none {
+			float:none;
+		}
+
+		.grey {
+			color:#808080;
+		}
+
+		.info {
+			font-size:12px;
+		}
+
+		h1.titles, h2.titles {
+			font-weight:500;
+		}
+
+		h1.titles {
+			font-size:30px;
+		}
+
+		h2.titles {
+			font-size:16px;
+		}
+
+		h4.date {
+			font-weight:400;
+		}
+
+		i {
+			padding:0px 5px;
+			font-weight:500;
+		}
+
+		.hide {
+			display:none;
+		}
+
+		.wrap {
+			flex-wrap:wrap;
+			height: 400;
+		}
+
+		.fitImage {
+			object-fit:cover;
+		}
+
+	script.
+
+		function printDialog() {
+			const timeStamp =  "#{reportData.reportDate}";
+			const modelName = "#{reportData.modelName}";
+			document.title = `${modelName}_${timeStamp}`;
+			return window.print();
+		}
+
+		function showHide(e) {
+			const panelToHide = document.querySelectorAll(".activityLog");
+			panelToHide.forEach(elem => {
+				elem.classList.toggle('hide');
+				e.srcElement.textContent = elem.classList.contains('hide') ? "SHOW LOG" : "HIDE LOG"
+			})
+		}
+
+		function changeImageSize(e) {
+			const imageDiv = document.querySelectorAll(".row.screenshot");
+			const statusList = document.querySelectorAll("span.float-right.status");
+
+			statusList.forEach(span => {
+				span.classList.toggle("float-none");
+			})
+
+			imageDiv.forEach(elem => {
+				elem.classList.toggle("wrap");
+				e.srcElement.textContent = elem.classList.contains('wrap') ? "SMALL PICTURES" : "LARGE PICTURES";
+			})
+		}
+
+	head
+		header
+			div(class="button-group")
+				button(onclick="printDialog()") Print
+				button(onclick="showHide(event)") Hide Log
+				button(onclick="changeImageSize(event)") Large Pictures
+			img(src=baseURL+"/images/3drepo-logo-white.png" width="120px" style="margin-top: 5px;")
+
+		.container
+			.top-header
+				h1.titles #{reportData.type} Report
+				h2.titles
+					| #{reportData.modelName} - Revision #{reportData.rev}
+				h4.date #{reportData.reportDate}
+			each entry in reportData.entries
+				.report-entry
+					h3 #{entry.number} #{entry.name}
+					p.grey.info #{entry.owner} (#{reportData.userInfo[entry.owner].fullName} - #{reportData.userInfo[entry.owner].company})
+						span.right.grey.info.float-right #{entry.created}
+					.row.screenshot
+						.col.screenshot
+							a(href=entry.screenshotURL target='_blank')
+								img(class="fitImage" src=url(entry.screenshot) style="width:100%;")
+						.col
+								table.details
+									each attri in entry.attributes
+										tr
+										td
+											strong
+												| #{attri.label}:
+										td
+												span.float-right.status #{attri.value}								
+					.row
+						.col.description
+							br
+							p
+								span #{entry.desc}
+							br
+							if entry.comments.length > 0
+								.activityLog
+									h4.grey Activity Log
+									if entry.comments
+										each comment in entry.comments
+												if comment.comment
+													| #{comment.comment}
+												if comment.action
+													p
+														| #{comment.action.propertyText} updated&nbsp;
+														if comment.action.from
+															| from
+															i #{comment.action.from}
+														| to
+														i #{comment.action.to}
+												p
+													if reportData.userInfo[comment.owner]
+														span.grey.info #{comment.owner} (#{reportData.userInfo[comment.owner].fullName} - #{reportData.userInfo[comment.owner].company})
+													span.grey.info.float-right #{comment.created}
+
+				hr.break
+
+

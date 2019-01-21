@@ -368,6 +368,28 @@ risk.deleteRisks = function(dbCol, sessionId, ids) {
 	});
 };
 
+risk.getRisksReport = function(account, model, username, rid, ids, res) {
+	const dbCol = { account, model};
+
+	const projection = {
+		extras: 0,
+		"viewpoints.extras": 0,
+		"viewpoints.scribble": 0,
+		"viewpoints.screenshot.content": 0,
+		"viewpoints.screenshot.resizedContent": 0,
+		"thumbnail.content": 0
+	};
+
+	const branch = rid ? null : "master";
+
+	const reportGen = require("../models/report").newRisksReport(account, model, rid);
+	return risk.findRisksByModelName(dbCol, username, branch, rid, projection, false, ids).then(risks => {
+		reportGen.addEntries(risks);
+		return reportGen.generateReport(res);
+	});
+
+};
+
 risk.findRisksByModelName = function(dbCol, username, branch, revId, projection, ids, noClean = false) {
 	const account = dbCol.account;
 	const model = dbCol.model;
