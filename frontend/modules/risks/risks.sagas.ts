@@ -353,7 +353,7 @@ export function* setActiveRisk({ risk, filteredRisks, revision }) {
 			toggleRiskPin(risk, true);
 		}
 		yield all([
-			put(RisksActions.focusOnRisk({ risk, filteredRisks, revision })),
+			put(RisksActions.focusOnRisk(risk, filteredRisks, revision)),
 			put(RisksActions.setComponentState({ activeRisk: risk._id, expandDetails: true }))
 		]);
 	} catch (error) {

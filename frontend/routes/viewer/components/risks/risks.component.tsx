@@ -80,7 +80,7 @@ interface IProps {
 	setNewRisk: () => void;
 	downloadRisks: (teamspace, model) => void;
 	printRisks: (teamspace, model, risksIds) => void;
-	setActiveRisk: (risk) => void;
+	setActiveRisk: (risk, filteredRisks, revision?) => void;
 	showRiskDetails: (risk, filteredRisks, revision?) => void;
 	toggleShowPins: (showPins: boolean, filteredRisks) => void;
 	subscribeOnRiskChanges: (teamspace, modelId) => void;
@@ -186,7 +186,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		const relatedRisk = this.state.filteredRisks.find((risk) => risk._id === id);
 
 		if (relatedRisk) {
-			this.props.setActiveRisk(relatedRisk);
+			this.handleRiskFocus(relatedRisk)();
 		}
 	}
 
@@ -212,7 +212,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleRiskFocus = (risk) => () => {
-		this.props.setActiveRisk(risk);
+		this.props.setActiveRisk(risk, this.state.filteredRisks, this.props.revision);
 	}
 
 	public handleRiskClick = (risk) => () => {
