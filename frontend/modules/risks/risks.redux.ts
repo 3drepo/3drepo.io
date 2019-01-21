@@ -24,20 +24,19 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	setComponentState: ['componentState'],
 	saveRisk: ['teamspace', 'model', 'riskData'],
 	updateRisk: ['teamspace', 'modelId', 'riskData'],
-	deleteRisks: ['teamspace', 'modelId', 'risksIds'],
-	deleteRisksSuccess: ['risksIds'],
 	saveRiskSuccess: ['risk'],
 	setNewRisk: [],
 	renderPins: ['filteredRisks'],
 	printRisks: ['teamspace', 'modelId', 'risksIds'],
 	downloadRisks: ['teamspace', 'modelId'],
 	showDetails: ['risk', 'filteredRisks', 'revision'],
-	setActiveRisk: ['risk'],
+	setActiveRisk: ['risk', 'filteredRisks', 'revision'],
 	showNewPin: ['risk', 'pinData'],
 	togglePendingState: ['isPending'],
 	toggleShowPins: ['showPins', 'filteredRisks'],
 	subscribeOnRiskChanges: ['teamspace', 'modelId'],
-	unsubscribeOnRiskChanges: ['teamspace', 'modelId']
+	unsubscribeOnRiskChanges: ['teamspace', 'modelId'],
+	focusOnRisk: ['risk', 'filteredRisks', 'revision']
 }, { prefix: 'RISKS_' });
 
 export const INITIAL_STATE = {
@@ -58,20 +57,21 @@ export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ .
 
 export const fetchRisksSuccess = (state = INITIAL_STATE, { risks = [] }) => {
 	const risksMap = keyBy(risks, '_id');
-	return { ...state, risksMap, activeRisk: null, showDetails: false };
+	return {
+		...state, risksMap,
+		componentState: { ...state.componentState, activeRisk: null, showDetails: false }
+	};
 };
 
 export const saveRiskSuccess = (state = INITIAL_STATE, { risk }) => {
 	const risksMap = cloneDeep(state.risksMap);
 	risksMap[risk._id] = risk;
-	return { ...state, risksMap };
-};
 
-export const deleteRisksSuccess = (state = INITIAL_STATE, { risksIds }) => {
-	const risksMap = cloneDeep(state.risksMap);
-	delete risksMap[risksIds];
-
-	return { ...state, risksMap };
+	return {
+		...state,
+		risksMap,
+		componentState: { ...state.componentState, newRisk: {}}
+	};
 };
 
 export const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
@@ -99,7 +99,6 @@ export const setNewRisk = (state = INITIAL_STATE) => {
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.FETCH_RISKS_SUCCESS]: fetchRisksSuccess,
-	[RisksTypes.DELETE_RISKS_SUCCESS]: deleteRisksSuccess,
 	[RisksTypes.SET_COMPONENT_STATE]: setComponentState,
 	[RisksTypes.SAVE_RISK_SUCCESS]: saveRiskSuccess,
 	[RisksTypes.SET_NEW_RISK]: setNewRisk,

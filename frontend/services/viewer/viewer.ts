@@ -159,7 +159,7 @@ export class ViewerService {
 		this.viewer.setMeasureMode(false);
 	}
 
-	public async getObjectsStatus({ teamspace, model }) {
+	public async getObjectsStatus({ teamspace, model } = { teamspace: '', model: '' }) {
 		await this.isViewerReady();
 		return this.viewer.getObjectsStatus(teamspace, model);
 	}

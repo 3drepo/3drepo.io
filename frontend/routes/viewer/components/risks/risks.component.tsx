@@ -80,7 +80,6 @@ interface IProps {
 	setNewRisk: () => void;
 	downloadRisks: (teamspace, model) => void;
 	printRisks: (teamspace, model, risksIds) => void;
-	deleteRisks: (teamspace, model, risksIds) => void;
 	setActiveRisk: (risk) => void;
 	showRiskDetails: (risk, filteredRisks, revision?) => void;
 	toggleShowPins: (showPins: boolean, filteredRisks) => void;
@@ -191,10 +190,6 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public deleteRisk = () => {
-		this.props.deleteRisks(this.props.teamspace, this.props.model, this.props.activeRiskId);
-	}
-
 	public hasPermission = (permission) => {
 		const { modelSettings } = this.props;
 		if (Boolean(modelSettings) && Boolean(modelSettings.permissions)) {
@@ -259,7 +254,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	public handleNextItem = () => {
 		const index = this.activeRiskIndex;
 		const lastIndex = this.state.filteredRisks.length - 1;
-		const nextIndex = index === lastIndex ? lastIndex : index + 1;
+		const nextIndex = index === lastIndex ? 0 : index + 1;
 
 		this.props.showRiskDetails(
 			this.state.filteredRisks[nextIndex],
@@ -307,14 +302,6 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		return <ListContainer>{Items}</ListContainer>;
 	});
 
-	public renderDeleteButton = renderWhenTrue(() => {
-		return (
-			<TooltipButton action={this.deleteRisk} Icon={DeleteIcon} label="Delete risk" />
-		);
-	});
-
-	public renderDisplayedInfo = renderWhenTrue(() => <>{this.state.filteredRisks.length} risks displayed</>);
-
 	public renderDetailsView = renderWhenTrue(() => (
 		<RiskDetails
 			teamspace={this.props.teamspace}
@@ -329,8 +316,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 			</ViewerPanelContent>
 			<ViewerPanelFooter alignItems="center" justify="space-between">
 				<Summary>
-					{this.renderDeleteButton(Boolean(this.props.activeRiskId) && this.hasPermission(VIEW_ISSUE))}
-					{this.renderDisplayedInfo(!Boolean(this.props.activeRiskId))}
+					{this.state.filteredRisks.length} risks displayed
 				</Summary>
 				<ViewerPanelButton
 					aria-label="Add risk"

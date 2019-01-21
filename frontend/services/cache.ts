@@ -28,7 +28,7 @@ class CacheService {
 
 	public get(namespace, id) {
 		const key = this.getKey(namespace, id);
-		return JSON.parse(this.cache[key] || '');
+		return JSON.parse(this.cache[key] || null);
 	}
 
 	public remove(namespace, id) {

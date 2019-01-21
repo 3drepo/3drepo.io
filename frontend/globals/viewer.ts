@@ -449,8 +449,8 @@ export class Viewer {
 		UnityUtil.toggleVisibility(account, model, ids, visibility);
 	}
 
-	public getObjectsStatus(account, model, promise) {
-		return UnityUtil.getObjectsStatus(account, model, promise);
+	public getObjectsStatus(account, model) {
+		return UnityUtil.getObjectsStatus(account, model);
 	}
 
 	public updateSettings(settings) {
