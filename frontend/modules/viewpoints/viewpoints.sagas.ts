@@ -77,7 +77,7 @@ export function* generateViewpointObject(teamspace, modelId, viewName) {
 
 		return generatedObject;
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('generate', 'new viewpoint'));
+		yield put(DialogActions.showErrorDialog('generate', 'viewpoint'));
 	}
 }
 
@@ -88,7 +88,7 @@ export function* createViewpoint({teamspace, modelId, viewpoint}) {
 
 		yield put(ViewpointsActions.createViewpointSuccess(viewpoint));
 	} catch (error) {
-		yield put(DialogActions.showEndpointErrorDialog('create', 'new viewpoint', error));
+		yield put(DialogActions.showEndpointErrorDialog('create', 'viewpoint', error));
 	}
 }
 
@@ -118,13 +118,19 @@ export function* subscribeOnViewpointChanges({ teamspace, modelId }) {
 	const viewsNotifications = yield ChatService.getChannel(teamspace, modelId).views;
 
 	const onUpdated = (updatedView) => dispatch(ViewpointsActions.updateViewpointSuccess(updatedView));
-	const onCreated = (createdView) => dispatch(ViewpointsActions.createViewpointSuccess(createdView));
 	const onDeleted = (deletedView) => {
 		dispatch(ViewpointsActions.showDeleteInfo(deletedView));
 
 		setTimeout(() => {
 			dispatch(ViewpointsActions.deleteViewpointSuccess(deletedView));
 		}, 5000);
+	};
+	const onCreated = (createdView) => {
+		if (createdView.screenshot.thumbnail) {
+			createdView.screenshot.thumbnailUrl = getThumbnailUrl(createdView.screenshot.thumbnail);
+		}
+		dispatch(ViewpointsActions.createViewpointSuccess(createdView));
+
 	};
 
 	viewsNotifications.subscribeToUpdated(onUpdated, this);

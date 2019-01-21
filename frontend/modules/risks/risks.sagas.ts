@@ -19,7 +19,7 @@ import { differenceBy, isEmpty, omit, pick } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import { getAngularService, history } from '../../helpers/migration';
+import { getAngularService, dispatch } from '../../helpers/migration';
 import { getRiskPinColor } from '../../helpers/risks';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
@@ -409,6 +409,34 @@ export function* toggleShowPins({ showPins, filteredRisks = [] }) {
 	}
 }
 
+export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
+
+export function* subscribeOnRiskChanges({ teamspace, modelId }) {
+	const ChatService = yield getAngularService('ChatService');
+	const risksNotifications = yield ChatService.getChannel(teamspace, modelId).risks;
+
+	const onUpdated = (updatedRisk) => dispatch(RisksActions.saveRiskSuccess(updatedRisk));
+	const onCreated = (createdRisk) => dispatch(RisksActions.saveRiskSuccess(createdRisk[0]));
+	const onDeleted = (deletedIds) => dispatch(RisksActions.deleteRisksSuccess(deletedIds));
+
+	risksNotifications.subscribeToUpdated(onUpdated, this);
+	risksNotifications.subscribeToCreated(onCreated, this);
+	risksNotifications.subscribeToDeleted(onDeleted, this);
+}
+
+export function* unsubscribeOnRiskChanges({ teamspace, modelId }) {
+	const ChatService = yield getAngularService('ChatService');
+	const risksNotifications = yield ChatService.getChannel(teamspace, modelId).risks;
+
+	const onUpdated = (updatedRisk) => dispatch(RisksActions.saveRiskSuccess(updatedRisk));
+	const onCreated = (createdRisk) => dispatch(RisksActions.saveRiskSuccess(createdRisk[0]));
+	const onDeleted = (deletedIds) => dispatch(RisksActions.deleteRisksSuccess(deletedIds));
+
+	risksNotifications.unsubscribeFromUpdated(onUpdated);
+	risksNotifications.unsubscribeFromCreated(onCreated);
+	risksNotifications.unsubscribeFromDeleted(onDeleted);
+}
+
 export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_RISKS, fetchRisks);
 	yield takeLatest(RisksTypes.SAVE_RISK, saveRisk);
@@ -421,4 +449,6 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.SHOW_DETAILS, showDetails);
 	yield takeLatest(RisksTypes.SHOW_NEW_PIN, showNewPin);
 	yield takeLatest(RisksTypes.TOGGLE_SHOW_PINS, toggleShowPins);
+	yield takeLatest(RisksTypes.SUBSCRIBE_ON_RISK_CHANGES, subscribeOnRiskChanges);
+	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_CHANGES, unsubscribeOnRiskChanges);
 }
