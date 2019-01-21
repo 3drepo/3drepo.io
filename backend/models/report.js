@@ -45,7 +45,8 @@ attributes[ReportType.RISKS] = [
 	{ label: "Risk Likelihood", field: "likelihood", mapping: riskLevelMapping},
 	{ label: "Risk Consequence", field: "consequence", mapping: riskLevelMapping},
 	{ label: "Level of Risk", field: "level_of_risk", mapping: riskLevelMapping},
-	{ label: "Mitigation Status", field: "mitigation_status", default: "Unmitigated"}
+	{ label: "Mitigation Status", field: "mitigation_status", default: "Unmitigated"},
+	{ label: "Mitigation", field: "mitigation_desc", default: "None"}
 ];
 
 const urlQS = {};
@@ -114,6 +115,8 @@ class ReportGenerator {
 			newEntry.screenshot = entry.viewpoint.screenshot;
 			newEntry.screenshotURL = `${config.getBaseURL()}/viewer/${this.teamspace}/${this.modelID}?${urlQS[this.type]}=${entry._id}`;
 			newEntry.name = entry.name;
+
+			newEntry.desc = entry.desc;
 
 			attributes[this.type].forEach((field) => {
 				if (entry.hasOwnProperty(field.field)) {
