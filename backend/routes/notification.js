@@ -28,7 +28,7 @@ const notification = require("../models/notification");
  * @apiGroup Notification
  */
 
-router.get("/notifications", middlewares.loggedIn, getNotifications, responseCodes.onSuccessfulOperation);
+router.get("/", middlewares.loggedIn, getNotifications, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {get} /notifications/:id Get a notification
@@ -38,7 +38,7 @@ router.get("/notifications", middlewares.loggedIn, getNotifications, responseCod
  * @apiParam {String} id Unique Notification ID
  */
 
-router.get("/notifications/:id", middlewares.loggedIn, getNotification, responseCodes.onSuccessfulOperation);
+router.get("/:id", middlewares.loggedIn, getNotification, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {patch} /notifications/:id Patch a notification
@@ -48,7 +48,7 @@ router.get("/notifications/:id", middlewares.loggedIn, getNotification, response
  * @apiParam {String} id Unique Notification ID
  */
 
-router.patch("/notifications/:id", middlewares.loggedIn, patchNotification, responseCodes.onSuccessfulOperation);
+router.patch("/:id", middlewares.loggedIn, patchNotification, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {delete} /notifications Delete All notification
@@ -56,7 +56,7 @@ router.patch("/notifications/:id", middlewares.loggedIn, patchNotification, resp
  * @apiGroup Notification
  */
 
-router.delete("/notifications", middlewares.loggedIn, deleteAllNotifications, responseCodes.onSuccessfulOperation);
+router.delete("/", middlewares.loggedIn, deleteAllNotifications, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {delete} /notifications/:id Delete a notification
@@ -66,7 +66,7 @@ router.delete("/notifications", middlewares.loggedIn, deleteAllNotifications, re
  * @apiParam id Unique Notification ID
  */
 
-router.delete("/notifications/:id", middlewares.loggedIn, deleteNotification, responseCodes.onSuccessfulOperation);
+router.delete("/:id", middlewares.loggedIn, deleteNotification, responseCodes.onSuccessfulOperation);
 
 /**
  * Gets all notifications for the user.

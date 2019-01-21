@@ -86,7 +86,7 @@ module.exports.createApp = function () {
 	app.use("/", require("../routes/auth"));
 
 	// notifications handler
-	app.use("/me", require("../routes/notification")); // Sho
+	app.use("/notifications", require("../routes/notification"));
 
 	// subscriptions handler
 	app.use("/:account", require("../routes/subscriptions"));

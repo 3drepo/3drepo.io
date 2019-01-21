@@ -25,7 +25,7 @@ const async = require("async");
 describe('Notifications', function() {
 	let server;
 	const agents = {};
-	const NOTIFICATIONS_URL = "/me/notifications";
+	const NOTIFICATIONS_URL = "/notifications";
 
 	const usernames = ["unassignedTeamspace1UserJobA",
 		"viewerTeamspace1Model1JobA",

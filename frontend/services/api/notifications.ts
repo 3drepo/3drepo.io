@@ -23,7 +23,7 @@ import api from './';
  * @returns {*|promise}
  */
 export const getNotifications = (): Promise<any> => {
-	return api.get('me/notifications');
+	return api.get('notifications');
 };
 
 /**
@@ -32,7 +32,7 @@ export const getNotifications = (): Promise<any> => {
  * @returns {*|promise}
  */
 export const patchNotification = (id, data): Promise<any> => {
-	return api.patch(`me/notifications/${id}`, data);
+	return api.patch(`notifications/${id}`, data);
 };
 
 /**
@@ -41,7 +41,7 @@ export const patchNotification = (id, data): Promise<any> => {
  * @returns {*|promise}
  */
 export const getNotification = (id): Promise<any> => {
-	return api.get(`me/notifications/${id}`);
+	return api.get(`notifications/${id}`);
 };
 
 /**
@@ -50,7 +50,7 @@ export const getNotification = (id): Promise<any> => {
  * @returns {*|promise}
  */
 export const deleteNotification = (id): Promise<any> => {
-	return api.delete(`me/notifications/${id}`);
+	return api.delete(`notifications/${id}`);
 };
 
 /**
@@ -59,5 +59,5 @@ export const deleteNotification = (id): Promise<any> => {
  * @returns {*|promise}
  */
 export const deleteAllNotifications = (): Promise<any> => {
-	return api.delete(`me/notifications`);
+	return api.delete(`notifications`);
 };
