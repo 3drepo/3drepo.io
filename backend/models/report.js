@@ -53,6 +53,10 @@ const urlQS = {};
 urlQS[ReportType.RISKS] = "riskId";
 urlQS[ReportType.ISSUES] = "issueId";
 
+const singularLabel = {};
+singularLabel[ReportType.RISKS] = "risk";
+singularLabel[ReportType.ISSUES] = "issue";
+
 /**
  *
  * @param {Date} dateToFormat
@@ -71,6 +75,7 @@ class ReportGenerator {
 		this.userInfo = [];
 		this.promises = [];
 		this.type = type;
+		this.typeSingular = singularLabel[type];
 		this.teamspace = teamspace;
 		this.modelID = model;
 		this.rev = rev || this.getRevisionID(teamspace, model);
