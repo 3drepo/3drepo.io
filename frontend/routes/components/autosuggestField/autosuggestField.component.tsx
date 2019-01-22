@@ -76,10 +76,7 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 	public handleChange = (event, { newValue }) => {
 		if (this.props.onChange) {
 			this.props.onChange({
-				target: {
-					value: newValue,
-					name: this.props.name
-				}
+				target: { value: newValue, name: this.props.name }
 			});
 		}
 		this.setState({ value: newValue });
@@ -126,7 +123,7 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { value, suggestions } = this.state;
-		const { label, onBlur } = this.props;
+		const { label, onBlur, name } = this.props;
 
 		return (
 			<Container>
@@ -140,6 +137,7 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 						inputProps={{
 							label,
 							value,
+							name,
 							onBlur,
 							onChange: this.handleChange,
 							inputRef: (node) => {
