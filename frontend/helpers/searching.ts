@@ -1,7 +1,7 @@
 import { isArray } from 'lodash';
 import { DATA_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 
-const compareStrings = (string1, string2) => {
+export const compareStrings = (string1, string2) => {
 	return (string1 || '').toLowerCase().includes((string2 || '').toLowerCase());
 };
 
