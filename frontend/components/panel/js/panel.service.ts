@@ -391,7 +391,7 @@ export class PanelService {
 			show: false,
 			help: 'List current groups',
 			icon: 'group_work',
-			minHeight: 80,
+			minHeight: 150,
 			fixedHeight: false,
 			menu: [
 				{
@@ -433,11 +433,12 @@ export class PanelService {
 			show: false,
 			help: 'List current viewpoints',
 			icon: 'camera_alt',
-			minHeight: 80,
+			minHeight: 180,
 			fixedHeight: false,
 			options: [
 				{type: 'filter', visible: true}
-			]
+			],
+			isReactComponent: true
 		});
 
 		this.panelCards.left.push({
@@ -501,7 +502,7 @@ export class PanelService {
 			show: false,
 			help: 'Add various GIS data to the view',
 			icon: 'layers',
-			minHeight: 265,
+			minHeight: 185,
 			fixedHeight: false,
 			options: [],
 			isReactComponent: true

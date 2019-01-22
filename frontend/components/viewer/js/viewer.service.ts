@@ -609,6 +609,14 @@ export class ViewerService {
 		return this.heliSpeed;
 	}
 
+	public on(...args) {
+		this.viewer.on(...args);
+	}
+
+	public off(...args) {
+		this.viewer.off(...args);
+	}
+
 	private helicopterSpeedUpdate(value: number) {
 		if (this.account && this.model && Number.isInteger(value)) {
 			this.heliSpeed = value;

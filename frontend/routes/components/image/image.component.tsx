@@ -15,20 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createActions, createReducer } from 'reduxsauce';
+import * as React from 'react';
 
-export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
-	waitForViewer: [],
-	mapInitialise: ['surveyPoints', 'sources'],
-	resetMapSources: ['source'],
-	addMapSource: ['source'],
-	removeMapSource: ['source'],
-	mapStart: [],
-	mapStop: [],
-	getScreenshot: []
-}, { prefix: 'VIEWER_' });
+import { StyledImage } from './image.styles';
 
-export const INITIAL_STATE = {};
+interface IProps {
+	src: string;
+	alt?: string;
+	enablePreview?: boolean;
+	showScreenshotDialog: (config) => void;
+}
 
-export const reducer = createReducer(INITIAL_STATE, {
-});
+export class Image extends React.PureComponent<IProps, any> {
+	public handlePreview = () => {
+		const { src, enablePreview, showScreenshotDialog } = this.props;
+		if (enablePreview && src) {
+			showScreenshotDialog({ sourceImage: src, disabled: true });
+		}
+	}
+
+	public render() {
+		const { src, alt, enablePreview } = this.props;
+		return (
+			<StyledImage
+				src={src}
+				alt={alt}
+				onClick={this.handlePreview}
+				enablePreview={enablePreview}
+			/>
+		);
+	}
+}

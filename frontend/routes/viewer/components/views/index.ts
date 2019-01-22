@@ -15,20 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createActions, createReducer } from 'reduxsauce';
-
-export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
-	waitForViewer: [],
-	mapInitialise: ['surveyPoints', 'sources'],
-	resetMapSources: ['source'],
-	addMapSource: ['source'],
-	removeMapSource: ['source'],
-	mapStart: [],
-	mapStop: [],
-	getScreenshot: []
-}, { prefix: 'VIEWER_' });
-
-export const INITIAL_STATE = {};
-
-export const reducer = createReducer(INITIAL_STATE, {
-});
+export { default as Views } from './views.container';

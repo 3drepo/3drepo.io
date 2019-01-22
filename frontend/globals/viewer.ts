@@ -14,6 +14,7 @@
  **  You should have received a copy of the GNU Affero General Public License
  **  along with this program.  If not, see <http=//www.gnu.org/licenses/>.
  **/
+import * as EventEmitter from 'eventemitter3';
 
 declare const Pin;
 declare const UnityUtil;
@@ -163,6 +164,8 @@ export class Viewer {
 	public callback: any;
 	public errCallback: any;
 
+	private emitter = new EventEmitter();
+
 	constructor(
 		name: string,
 		element: HTMLElement,
@@ -220,6 +223,14 @@ export class Viewer {
 
 		this.unityLoaderScript = document.createElement('script');
 
+	}
+
+	public on = (event, fn, ...args) => {
+		this.emitter.on(event, fn, ...args);
+	}
+
+	public off = (event, ...args) => {
+		this.emitter.off(event, ...args);
 	}
 
 	public setUnits(units) {
@@ -414,10 +425,12 @@ export class Viewer {
 				}
 			} else {
 				this.callback(Viewer.EVENT.BACKGROUND_SELECTED);
+				this.emitter.emit(Viewer.EVENT.BACKGROUND_SELECTED);
 			}
 		} else {
 			if (!pointInfo.id) {
 				this.callback(Viewer.EVENT.BACKGROUND_SELECTED_PIN_MODE);
+				this.emitter.emit(Viewer.EVENT.BACKGROUND_SELECTED_PIN_MODE);
 			}
 		}
 

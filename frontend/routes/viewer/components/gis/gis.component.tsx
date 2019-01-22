@@ -25,7 +25,7 @@ import { Settings } from './components/settings/settings.component';
 
 import IconButton from '@material-ui/core/IconButton';
 import LayersIcon from '@material-ui/icons/Layers';
-import ArrowBack from '@material-ui/icons/ArrowBack';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import List from '@material-ui/core/List';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -45,7 +45,6 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 
 interface IProps {
 	location: any;
-	fetchModelSettings: (teamspace, modelId) => void;
 	fetchModelMaps: (teamspace, modelId) => void;
 	updateModelSettings: (modelData, settings) => void;
 	settings: any;
@@ -77,14 +76,6 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 );
 
 export class Gis extends React.PureComponent<IProps, IState> {
-	public state = {
-		settingsModeActive: true,
-		activeMapIndex: 0,
-		visibleSources: [],
-		pointsExists: false
-	};
-
-	public formRef = React.createRef<any>();
 
 	get surveySettings() {
 		const { settings } = this.props;
@@ -94,15 +85,35 @@ export class Gis extends React.PureComponent<IProps, IState> {
 			angleFromNorth: settings.angleFromNorth || 0
 		};
 	}
+	public state = {
+		settingsModeActive: true,
+		activeMapIndex: 0,
+		visibleSources: [],
+		pointsExists: false
+	};
+
+	public formRef = React.createRef<any>();
+
+	public renderMapLayers = renderWhenTrue(() => {
+		const { mapsProviders } = this.props;
+		const { activeMapIndex } = this.state;
+		const activeMapLayers = mapsProviders.length && mapsProviders[activeMapIndex].layers;
+		return (
+			<ViewerPanelContent className="height-catcher" isPadding={true}>
+				<StyledSelect onChange={this.handleChangeMapProvider} value={activeMapIndex}>
+					{this.renderMapProviders(mapsProviders)}
+				</StyledSelect>
+				{activeMapLayers ? this.renderLayers(activeMapLayers) : null}
+			</ViewerPanelContent>
+		);
+	});
 
 	public componentDidMount() {
 		const { settings, initializeMap } = this.props;
 		const { teamspace, modelId } = this.getDataFromPathname();
 
-		if (this.props.settings._id !== modelId) {
-			this.props.fetchModelSettings(teamspace, modelId);
+		if (this.props.settings._id) {
 			this.props.fetchModelMaps(teamspace, modelId);
-			this.props.resetSources();
 		}
 
 		const pointsExists = !!(settings && settings.surveyPoints && settings.surveyPoints.length);
@@ -113,7 +124,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
-		const { settings, visibleSources, initializeMap, resetSources } = this.props;
+		const { settings, initializeMap, resetSources } = this.props;
 		const changes = {} as any;
 
 		const pointsExists = !!(settings && settings.surveyPoints && settings.surveyPoints.length);
@@ -122,7 +133,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 			changes.pointsExists = pointsExists;
 		}
 
-		if (isEmpty(prevProps.settings) && !isEmpty(settings) || settings !== prevProps.settings) {
+		if (isEmpty(prevProps.settings) && !isEmpty(settings) || settings._id !== prevProps.settings._id) {
 			changes.settingsModeActive = !pointsExists;
 
 			if (pointsExists) {
@@ -157,9 +168,8 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				<IconButton
 					disabled={!this.state.pointsExists}
 					disableRipple={true}
-					onClick={this.handleToggleSettings}
-				>
-					<ArrowBack />
+					onClick={this.handleToggleSettings}>
+						<ArrowBackIcon />
 				</IconButton>
 			);
 		}
@@ -231,20 +241,6 @@ export class Gis extends React.PureComponent<IProps, IState> {
 			</MapLayer>
 		))
 
-	public renderMapLayers = () => {
-		const { mapsProviders } = this.props;
-		const { activeMapIndex } = this.state;
-
-		return (
-			<ViewerPanelContent className="height-catcher">
-				<StyledSelect onChange={this.handleChangeMapProvider} value={activeMapIndex}>
-					{this.renderMapProviders(mapsProviders)}
-				</StyledSelect>
-				{mapsProviders[activeMapIndex].layers && this.renderLayers(mapsProviders[activeMapIndex].layers)}
-			</ViewerPanelContent>
-		);
-	}
-
 	public getSettingsValues = () => {
 		const { settings } = this.props;
 		const values = {} as any;
@@ -278,15 +274,16 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				actions={this.getActions()}
 				pending={this.props.isPending}
 			>
-				{settingsModeActive
-					? <Settings
+				{settingsModeActive && (
+					<Settings
 							values={this.getSettingsValues()}
 							properties={this.getSettingsProperties()}
 							updateModelSettings={this.props.updateModelSettings}
 							getDataFromPathname={this.getDataFromPathname}
 						/>
-					: this.renderMapLayers()
+					)
 				}
+				{this.renderMapLayers(!settingsModeActive)}
 			</ViewerPanel>
 	);
 	}
