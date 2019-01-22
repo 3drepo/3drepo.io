@@ -113,6 +113,13 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		return searchByFilters(items, selectedFilters);
 	}
 
+	get listFooterText() {
+		if (this.state.modelLoaded) {
+			return `${this.state.filteredItems.length} results displayed`;
+		}
+		return 'Model is loading';
+	}
+
 	public componentDidMount() {
 		if (Viewer.viewer.model && !this.state.modelLoaded) {
 			this.setState({ modelLoaded: true });
@@ -254,15 +261,13 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 				{this.renderItemsList(this.state.filteredItems.length)}
 			</ViewerPanelContent>
 			<ViewerPanelFooter alignItems="center" justify="space-between">
-				<Summary>
-					{this.state.filteredItems.length} results displayed
-				</Summary>
+				<Summary>{this.listFooterText}</Summary>
 				<ViewerPanelButton
 					aria-label="Add item"
 					onClick={this.handleAddNewItem}
 					color="secondary"
 					variant="fab"
-					disabled={!this.hasPermission(CREATE_ISSUE)}
+					disabled={!this.hasPermission(CREATE_ISSUE) || !this.state.modelLoaded}
 				>
 					<AddIcon />
 				</ViewerPanelButton>
