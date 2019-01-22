@@ -19,6 +19,7 @@ import * as React from 'react';
 import { Formik, Field } from 'formik';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { Image } from '../../../../../components/image';
 
 import {
 	ViewpointItem,
@@ -53,7 +54,10 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	public renderScreenshotPlaceholder = renderWhenTrue(() => <ThumbnailPlaceholder />);
 
 	public renderScreenshot = (viewpoint) => renderWhenTrue(() => (
-		<Thumbnail src={viewpoint.screenshot.thumbnailUrl} alt={viewpoint.name} />
+		<Image
+			src={viewpoint.screenshot.thumbnailUrl}
+			alt={viewpoint.name}
+		/>
 	))(viewpoint.screenshot.thumbnailUrl)
 
 	public renderViewpointForm = (viewpoint) => renderWhenTrue(() => {
