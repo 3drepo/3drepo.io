@@ -102,7 +102,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	public state = {
 		itemDetails: {},
 		filteredItems: [],
-		modelLoaded: false
+		modelLoaded: true
 	};
 
 	get activeItemIndex() {
@@ -120,6 +120,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		}
 
 		this.toggleRiskPinEvent(true);
+		this.toggleModelLoadedEvent(true);
 		this.setState({ filteredItems: this.filteredItems });
 	}
 
@@ -141,11 +142,21 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public componentWillUnmount() {
 		this.toggleRiskPinEvent(false);
+		this.toggleModelLoadedEvent(false);
 	}
 
 	public toggleRiskPinEvent = (enabled: boolean) => {
 		const resolver = enabled ? 'on' : 'off';
 		Viewer[resolver](VIEWER_EVENTS.CLICK_PIN, this.handlePinClick);
+	}
+
+	public toggleModelLoadedEvent = (enabled: boolean) => {
+		const resolver = enabled ? 'on' : 'off';
+		Viewer[resolver](VIEWER_EVENTS.MODEL_LOADED, this.handleLoadedModel);
+	}
+
+	public handleLoadedModel = () => {
+		this.setState({ modelLoaded: true });
 	}
 
 	public handlePinClick = ({ id }) => {

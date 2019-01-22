@@ -140,7 +140,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 			this.setPreparedRisks();
 		}
 
-		if (risks.length && !filtersChanged && location.search && !activeRiskId && !showDetails) {
+		if (risks.length && !filtersChanged && location.search && !activeRiskId && !prevProps.showDetails && !showDetails) {
 			const { riskId } = queryString.parse(location.search);
 			if (riskId) {
 				const foundRisk = risks.find((risk) => risk._id === riskId);
@@ -225,6 +225,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 				onActiveItem={this.setActiveRisk}
 				onNewItem={this.props.setNewRisk}
 				onShowDetails={this.showRiskDetails}
+				onCloseDetails={this.props.closeDetails}
 
 				renderDetailsView={this.renderDetailsView}
 			/>
