@@ -44,7 +44,11 @@ import {
 	RISK_MITIGATION_STATUSES,
 	RISK_FILTER_RELATED_FIELDS,
 	RISKS_ACTIONS_MENU,
-	RISKS_ACTIONS_ITEMS
+	RISKS_ACTIONS_ITEMS,
+	RISK_CONSEQUENCES,
+	RISK_LIKELIHOODS,
+	RISK_CATEGORIES,
+	LEVELS_OF_RISK
 } from '../../../../constants/risks';
 import {
 	MenuList,
@@ -123,9 +127,13 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	get filtersValuesMap() {
 		return {
+			[RISK_FILTER_RELATED_FIELDS.CATEGORY]: this.getFilterValues(RISK_CATEGORIES),
 			[RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS]: this.getFilterValues(RISK_MITIGATION_STATUSES),
 			[RISK_FILTER_RELATED_FIELDS.CREATED_BY]: this.getFilterValues(this.props.jobs),
-			[RISK_FILTER_RELATED_FIELDS.ASSIGNED_ROLES]: this.getFilterValues(this.jobsList)
+			[RISK_FILTER_RELATED_FIELDS.RISK_OWNER]: this.getFilterValues(this.jobsList),
+			[RISK_FILTER_RELATED_FIELDS.RISK_CONSEQUENCE]: this.getFilterValues(RISK_CONSEQUENCES),
+			[RISK_FILTER_RELATED_FIELDS.RISK_LIKELIHOOD]: this.getFilterValues(RISK_LIKELIHOODS),
+			[RISK_FILTER_RELATED_FIELDS.LEVELS_OF_RISK]: this.getFilterValues(LEVELS_OF_RISK)
 		};
 	}
 

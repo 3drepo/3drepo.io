@@ -78,10 +78,19 @@ export const RISK_FILTER_DATA_TYPES = {
 export const RISK_FILTER_RELATED_FIELDS = {
 	MITIGATION_STATUS: 'mitigation_status',
 	CREATED_BY: 'creator_role',
-	ASSIGNED_ROLES: 'assigned_roles'
+	RISK_OWNER: 'assigned_roles',
+	CATEGORY: 'category',
+	RISK_CONSEQUENCE: 'consequence',
+	RISK_LIKELIHOOD: 'likelihood',
+	LEVELS_OF_RISK: 'level_of_risk'
 };
 
 export const RISK_FILTERS = [
+	{
+		label: 'Category',
+		relatedField: RISK_FILTER_RELATED_FIELDS.CATEGORY,
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
   {
     label: 'Mitigation Status',
 		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS,
@@ -93,10 +102,25 @@ export const RISK_FILTERS = [
     type: RISK_FILTER_DATA_TYPES.NORMAL
   },
   {
-    label: 'Assigned to',
-		relatedField: RISK_FILTER_RELATED_FIELDS.ASSIGNED_ROLES,
+    label: 'Risk owner',
+		relatedField: RISK_FILTER_RELATED_FIELDS.RISK_OWNER,
     type: RISK_FILTER_DATA_TYPES.NORMAL
-  }
+  },
+	{
+		label: 'Risk likelihood',
+		relatedField: RISK_FILTER_RELATED_FIELDS.RISK_LIKELIHOOD,
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
+	{
+		label: 'Risk consequence',
+		relatedField: RISK_FILTER_RELATED_FIELDS.RISK_CONSEQUENCE,
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
+	{
+		label: 'Level of risk',
+		relatedField: RISK_FILTER_RELATED_FIELDS.LEVELS_OF_RISK,
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	}
 ] as any;
 
 export const RISKS_ACTIONS_ITEMS = {
