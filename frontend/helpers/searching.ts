@@ -1,7 +1,8 @@
+import { isArray } from 'lodash';
 import { DATA_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 
-const compareStrings = (string1 = '', string2 = '') => {
-	return string1.toLowerCase().includes(string2.toLowerCase());
+const compareStrings = (string1, string2) => {
+	return (string1 || '').toLowerCase().includes((string2 || '').toLowerCase());
 };
 
 // DEPRECATED
@@ -21,7 +22,8 @@ export const searchByFilters = (items = [], filters = []) => {
 	return items.filter((risk) => {
 		return filters.some((filter) => {
 			if (filter.type === DATA_TYPES.UNDEFINED) {
-				return compareStrings(risk[filter.relatedField], filter.value.value);
+				const values = isArray(risk[filter.relatedField]) ? risk[filter.relatedField] : [risk[filter.relatedField]];
+				return values.every((value) => compareStrings(value, filter.value.value));
 			}
 
 			if (filter.type === DATA_TYPES.QUERY) {
