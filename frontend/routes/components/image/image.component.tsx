@@ -18,8 +18,6 @@
 import * as React from 'react';
 
 import { StyledImage } from './image.styles';
-import { render } from 'react-dom';
-import { renderWhenTrue } from '../../../helpers/rendering';
 
 interface IProps {
 	src: string;
@@ -28,22 +26,7 @@ interface IProps {
 	showScreenshotDialog: (config) => void;
 }
 
-const isDataURI = (source) => source.startsWith('data:');
-
 export class Image extends React.PureComponent<IProps, any> {
-	public renderBase64Image = renderWhenTrue(() => (
-		<></>
-	));
-
-	public renderRegularImage = renderWhenTrue(() => (
-		<StyledImage
-			src={this.props.src}
-			alt={this.props.alt}
-			onClick={this.handlePreview}
-			enablePreview
-		/>
-	));
-
 	public handlePreview = () => {
 		const { src, enablePreview, showScreenshotDialog } = this.props;
 		if (enablePreview && src) {
@@ -52,13 +35,14 @@ export class Image extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const isRegularImage = !isDataURI(this.props.src);
-
+		const { src, alt, enablePreview } = this.props;
 		return (
-			<>
-				{this.renderBase64Image(!isRegularImage)}
-				{this.renderRegularImage(isRegularImage)}
-			</>
+			<StyledImage
+				src={src}
+				alt={alt}
+				onClick={this.handlePreview}
+				enablePreview={enablePreview}
+			/>
 		);
 	}
 }
