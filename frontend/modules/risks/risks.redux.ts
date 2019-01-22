@@ -26,18 +26,18 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	updateRisk: ['teamspace', 'modelId', 'riskData'],
 	saveRiskSuccess: ['risk'],
 	setNewRisk: [],
-	renderPins: ['filteredRisks'],
-	printRisks: ['teamspace', 'modelId', 'risksIds'],
+	renderPins: [],
+	printRisks: ['teamspace', 'modelId'],
 	downloadRisks: ['teamspace', 'modelId', 'risksIds'],
-	showDetails: ['risk', 'filteredRisks', 'revision'],
+	showDetails: ['risk', 'revision'],
 	closeDetails: [],
-	setActiveRisk: ['risk', 'filteredRisks', 'revision'],
+	setActiveRisk: ['risk', 'revision'],
 	showNewPin: ['risk', 'pinData'],
 	togglePendingState: ['isPending'],
-	toggleShowPins: ['showPins', 'filteredRisks'],
+	toggleShowPins: ['showPins'],
 	subscribeOnRiskChanges: ['teamspace', 'modelId'],
 	unsubscribeOnRiskChanges: ['teamspace', 'modelId'],
-	focusOnRisk: ['risk', 'filteredRisks', 'revision'],
+	focusOnRisk: ['risk', 'revision'],
 	updateNewRisk: ['newRisk'],
 	onFiltersChange: ['selectedFilters']
 }, { prefix: 'RISKS/' });
@@ -53,7 +53,8 @@ export const INITIAL_STATE = {
 		newRisk: {},
 		newComment: {},
 		selectedFilters: [],
-		associatedActivities: []
+		associatedActivities: [],
+		filteredRisks: []
 	}
 };
 
@@ -71,7 +72,7 @@ export const fetchRisksSuccess = (state = INITIAL_STATE, { risks = [] }) => {
 
 	return {
 		...state, risksMap,
-		componentState: { ...state.componentState, activeRisk: null, showDetails: false, associatedActivities }
+		componentState: { ...cloneDeep(INITIAL_STATE.componentState) }
 	};
 };
 

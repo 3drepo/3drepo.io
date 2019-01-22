@@ -43,10 +43,6 @@ interface IProps {
 }
 
 export class ViewerPanel extends React.PureComponent<IProps, any> {
-	public static defaultProps = {
-		actions: []
-	};
-
 	public renderContent = renderWhenTrue(() => (
 		<>{this.props.children}</>
 	));

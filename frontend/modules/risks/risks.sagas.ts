@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { differenceBy, isEmpty, omit, pick } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 
 import * as API from '../../services/api';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
@@ -31,7 +31,8 @@ import {
 	selectRisks,
 	selectShowPins,
 	selectRisksMap,
-	selectActiveRiskDetails
+	selectActiveRiskDetails,
+	selectFilteredRisks
 } from './risks.selectors';
 import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentUser } from '../currentUser';
@@ -190,8 +191,9 @@ export function* updateNewRisk({ newRisk }) {
 	}
 }
 
-export function* renderPins({ filteredRisks }) {
+export function* renderPins() {
 	try {
+		const filteredRisks = yield select(selectFilteredRisks);
 		const risksList = yield select(selectRisks);
 		const shouldShowPins = yield select(selectShowPins);
 		const invisibleRisks = risksList.length !== filteredRisks.length
@@ -243,8 +245,10 @@ export function* downloadRisks({ teamspace, modelId, risksIds }) {
 	}
 }
 
-export function* printRisks({ teamspace, modelId, risksIds }) {
+export function* printRisks({ teamspace, modelId }) {
 	try {
+		const filteredRisks = yield select(selectFilteredRisks);
+		const risksIds = map(filteredRisks, '_id').join(',');
 		const printEndpoint = `${teamspace}/${modelId}/risks.html?ids=${risksIds}`;
 		const printUrl = `${ClientConfig.apiUrls.all[0]}/${printEndpoint}`;
 		window.open(printUrl, '_blank');
@@ -330,10 +334,10 @@ const showMultipleGroups = async (risk, revision) => {
 	}
 };
 
-export function* focusOnRisk({ risk, filteredRisks = [], revision }) {
+export function* focusOnRisk({ risk, revision }) {
 	try {
 		yield Viewer.isViewerReady();
-		yield put(RisksActions.renderPins(filteredRisks));
+		yield put(RisksActions.renderPins());
 		const TreeService = getAngularService('TreeService') as any;
 
 		// Remove highlight from any multi objects
@@ -378,7 +382,7 @@ export function* focusOnRisk({ risk, filteredRisks = [], revision }) {
 	}
 }
 
-export function* setActiveRisk({ risk, filteredRisks, revision }) {
+export function* setActiveRisk({ risk, revision }) {
 	try {
 		const activeRiskId = yield select(selectActiveRiskId);
 		const risksMap = yield select(selectRisksMap);
@@ -390,7 +394,7 @@ export function* setActiveRisk({ risk, filteredRisks, revision }) {
 			toggleRiskPin(risk, true);
 		}
 		yield all([
-			put(RisksActions.focusOnRisk(risk, filteredRisks, revision)),
+			put(RisksActions.focusOnRisk(risk, revision)),
 			put(RisksActions.setComponentState({ activeRisk: risk._id, expandDetails: true }))
 		]);
 	} catch (error) {
@@ -398,7 +402,7 @@ export function* setActiveRisk({ risk, filteredRisks, revision }) {
 	}
 }
 
-export function* showDetails({ risk, filteredRisks, revision }) {
+export function* showDetails({ risk, revision }) {
 	try {
 		runAngularViewerTransition({
 			account: risk.account,
@@ -408,7 +412,7 @@ export function* showDetails({ risk, filteredRisks, revision }) {
 			noSet: true
 		});
 
-		yield put(RisksActions.setActiveRisk(risk, filteredRisks, revision));
+		yield put(RisksActions.setActiveRisk(risk, revision));
 		yield put(RisksActions.setComponentState({ showDetails: true }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('display', 'risk details', error));
@@ -455,10 +459,10 @@ export function* showNewPin({ risk, pinData }) {
 	}
 }
 
-export function* toggleShowPins({ showPins, filteredRisks = [] }) {
+export function* toggleShowPins({ showPins }) {
 	try {
 		yield put(RisksActions.setComponentState({ showPins }));
-		yield put(RisksActions.renderPins(filteredRisks));
+		yield put(RisksActions.renderPins());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('toggle', 'pins', error));
 	}

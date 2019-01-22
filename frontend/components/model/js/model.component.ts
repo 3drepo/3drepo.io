@@ -27,6 +27,7 @@ import { GroupsActions } from '../../../modules/groups';
 import { prepareRisk } from '../../../helpers/risks';
 import { searchByFilters } from '../../../helpers/searching';
 import { VIEWER_EVENTS } from '../../../constants/viewer';
+import { IssuesActions } from '../../../modules/issues';
 
 class ModelController implements ng.IController {
 
@@ -280,9 +281,10 @@ class ModelController implements ng.IController {
 
 	private loadModelSettings() {
 		dispatch(ModelActions.fetchSettings(this.account, this.model));
-		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
+		dispatch(IssuesActions.fetchIssues(this.account, this.model, this.revision));
 		dispatch(RisksActions.fetchRisks(this.account, this.model, this.revision));
 		dispatch(GroupsActions.fetchGroups(this.account, this.model, this.revision));
+		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
 	}
 }
 

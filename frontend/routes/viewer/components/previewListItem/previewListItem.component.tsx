@@ -88,7 +88,7 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 	));
 
 	public renderDeleteMessage = renderWhenTrue(() =>
-		<ActionMessage content={`This ${this.props.panelName} has been deleted`} />
+		<ActionMessage content={`This ${this.props.panelName || 'item'} has been deleted`} />
 	);
 
 	public render() {

@@ -98,7 +98,7 @@ export class PanelService {
 			type: 'issues',
 			title: 'Issues',
 			showLiteMode: true,
-			show: issueId || !riskId,
+			show: false, // issueId || !riskId,
 			help: 'List current issues',
 			icon: 'place',
 			menu: [
@@ -289,7 +289,7 @@ export class PanelService {
 			type: 'risks',
 			title: 'SafetiBase',
 			showLiteMode: true,
-			show: Boolean(riskId),
+			show: true, // Boolean(riskId),
 			help: 'Risk register',
 			icon: 'report_problem',
 			minHeight: 260,
