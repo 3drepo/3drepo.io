@@ -163,10 +163,12 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		this.toggleRiskPinEvent(true);
 		this.setState({ filteredRisks: this.filteredRisks });
 
+		if (Viewer.viewer.model && !this.state.modelLoaded) {
+			this.setState({ modelLoaded: true });
+		}
+
 		Viewer.on(VIEWER_EVENTS.MODEL_LOADED, () => {
-			this.setState({
-				modelLoaded: true
-			});
+			this.setState({ modelLoaded: true });
 		});
 	}
 
@@ -201,6 +203,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	public componentWillUnmount() {
 		this.toggleRiskPinEvent(false);
 		this.props.unsubscribeOnRiskChanges(this.props.teamspace, this.props.model);
+		Viewer.off(VIEWER_EVENTS.MODEL_LOADED);
 	}
 
 	public toggleRiskPinEvent = (enabled: boolean) => {
@@ -337,7 +340,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 			<ViewerPanelFooter alignItems="center" justify="space-between">
 				<Summary>
 					{this.state.modelLoaded
-						? `${this.state.filteredRisks.length} risks displayed` : `You can add an issue after model load`}
+						? `${this.state.filteredRisks.length} risks displayed` : `You can add an risk after model load`}
 				</Summary>
 				<ViewerPanelButton
 					aria-label="Add risk"
