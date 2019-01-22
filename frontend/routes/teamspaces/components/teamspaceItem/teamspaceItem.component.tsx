@@ -51,13 +51,13 @@ export const TeamspaceItem = (props: IProps) => {
 		permissions
 	} = props;
 
-	const renderActions = () => renderWhenTrue((
+	const renderActions = () => renderWhenTrue(() => (
 		<TooltipButton
 			{...ROW_ACTIONS.ADD_NEW}
 			label="Add new project"
 			action={onAddProject}
 		/>
-	))(hasPermissions('create_project', permissions));
+	))(hasPermissions('create_project', permissions)) as any;
 
 	return (
 		<TreeList

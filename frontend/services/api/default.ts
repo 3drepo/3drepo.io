@@ -5,6 +5,9 @@ import { getAngularService } from '../../helpers/migration';
 
 axios.defaults.withCredentials = true;
 
+// TODO: X-Socket-Id
+axios.defaults.headers['X-Socket-Id'] = 'test1234';
+
 axios.interceptors.response.use(
 	(response) => response,
 	(error) => {

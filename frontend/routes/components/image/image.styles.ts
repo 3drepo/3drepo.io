@@ -15,20 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createActions, createReducer } from 'reduxsauce';
+import styled, { css } from 'styled-components';
 
-export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
-	waitForViewer: [],
-	mapInitialise: ['surveyPoints', 'sources'],
-	resetMapSources: ['source'],
-	addMapSource: ['source'],
-	removeMapSource: ['source'],
-	mapStart: [],
-	mapStop: [],
-	getScreenshot: []
-}, { prefix: 'VIEWER_' });
+const previewStateStyles = css`
+	cursor: pointer;
+	transition: opacity 200ms ease-in-out;
 
-export const INITIAL_STATE = {};
+	&:hover {
+		opacity: 0.8;
+	}
+`;
 
-export const reducer = createReducer(INITIAL_STATE, {
-});
+export const StyledImage = styled.img`
+	width: 100%;
+	object-fit: cover;
+	${(props: any) => props.enablePreview && previewStateStyles}
+` as any;
