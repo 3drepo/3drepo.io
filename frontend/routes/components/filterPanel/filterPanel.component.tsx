@@ -41,6 +41,7 @@ import {
 	StyledMoreIcon,
 	ButtonWrapper
 } from './filterPanel.styles';
+import { compareStrings } from '../../../helpers/searching';
 
 export const DATA_TYPES = {
 	UNDEFINED: 1,
@@ -88,6 +89,20 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 
 const getSuggestionValue = (suggestion) => suggestion.name;
 
+const mapFiltersToSuggestions = (filters) => {
+	return filters
+		.filter((suggestion) => suggestion.type !== DATA_TYPES.DATE)
+		.map((filter) => filter.values.map((value) => {
+			return {
+				name: `${filter.label}:${value.label}`,
+				label: filter.label,
+				relatedField: filter.relatedField,
+				type: filter.type,
+				value
+			};
+	})).flat();
+};
+
 export class FilterPanel extends React.PureComponent<IProps, IState> {
 	public state = {
 		selectedFilters: [],
@@ -97,11 +112,17 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	};
 
 	private popperNode = null;
+	private filterSuggestions = [];
 
 	public componentDidMount = () => {
-		this.setState({
-			selectedFilters: this.props.selectedFilters
-		});
+		this.setState({ selectedFilters: this.props.selectedFilters });
+		this.filterSuggestions = mapFiltersToSuggestions(this.props.filters);
+	}
+
+	public componentDidUpdate(prevProps) {
+		if (this.props.filters.length !== prevProps.filters.length) {
+			this.filterSuggestions = mapFiltersToSuggestions(this.props.filters);
+		}
 	}
 
   public renderFiltersMenu = () => (
@@ -175,24 +196,15 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		</MenuItem>
 	)
 
-	public mapFiltersToSuggestions = (filters) =>
-		filters.map((filter) => filter.values.map((value) => {
-			return {
-				name: `${filter.label}:${value.label}`,
-				label: filter.label,
-				relatedField: filter.relatedField,
-				type: filter.type,
-				value
-			};
-		})).flat().filter((suggestion) => suggestion.type !== DATA_TYPES.DATE)
-
 	public getSuggestions = (value) => {
 		const inputValue = value.trim().toLowerCase();
 		const inputLength = inputValue.length;
-		const filterSuggestions = this.mapFiltersToSuggestions(this.props.filters);
 
-		return inputLength === 0 ? [] : filterSuggestions.filter((filterSuggestion) =>
-		filterSuggestion.name.toLowerCase().slice(0, inputLength) === inputValue);
+		if (inputLength === 0) {
+			return [];
+		}
+
+		return this.filterSuggestions.filter(({ name }) => compareStrings(name, inputValue));
 	}
 
 	public handlePaste = (event) => {
