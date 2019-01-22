@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import { Form } from 'formik';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CancelIcon from '@material-ui/icons/Cancel';
 import EditIcon from '@material-ui/icons/Edit';
@@ -23,9 +24,9 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuItem from '@material-ui/core/MenuItem';
 import SaveIcon from '@material-ui/icons/Save';
 import TextField from '@material-ui/core/TextField';
-import { Form } from 'formik';
 
 import { COLOR } from '../../../../../../styles/colors';
+import * as ImageStyles from '../../../../../components/image/image.styles';
 
 export const ViewpointItem = styled(MenuItem)`
   && {
@@ -36,6 +37,11 @@ export const ViewpointItem = styled(MenuItem)`
 
   &&:not(:first-child) {
     border-top: 1px solid ${COLOR.BLACK_20};
+  }
+
+  ${ImageStyles.StyledImage} {
+    width: 79px;
+    height: 79px;
   }
 ` as any;
 
@@ -51,11 +57,6 @@ export const IconsGroup = styled.div`
   align-items: center;
   margin-right: 21px;
   flex-direction: column;
-`;
-
-export const Thumbnail = styled.img`
-  width: 79px;
-  height: 79px;
 `;
 
 export const ThumbnailPlaceholder = styled.div`

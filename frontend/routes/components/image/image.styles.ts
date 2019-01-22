@@ -28,5 +28,6 @@ const previewStateStyles = css`
 
 export const StyledImage = styled.img`
 	width: 100%;
+	object-fit: cover;
 	${(props: any) => props.enablePreview && previewStateStyles}
 ` as any;

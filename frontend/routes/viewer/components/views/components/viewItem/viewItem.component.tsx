@@ -24,7 +24,6 @@ import { Image } from '../../../../../components/image';
 import {
 	ViewpointItem,
 	StyledForm,
-	Thumbnail,
 	ThumbnailPlaceholder,
 	IconsGroup,
 	StyledDeleteIcon,
@@ -53,17 +52,24 @@ interface IProps {
 export class ViewItem extends React.PureComponent<IProps, any> {
 	public renderScreenshotPlaceholder = renderWhenTrue(() => <ThumbnailPlaceholder />);
 
-	public renderScreenshot = (viewpoint) => renderWhenTrue(() => (
-		<Image
-			src={viewpoint.screenshot.thumbnailUrl}
-			alt={viewpoint.name}
-		/>
-	))(viewpoint.screenshot.thumbnailUrl)
+	public renderViewpointName = renderWhenTrue(() => (
+		<Name>{this.props.viewpoint.name}</Name>
+	));
 
-	public renderViewpointForm = (viewpoint) => renderWhenTrue(() => {
+	public renderViewpointData = renderWhenTrue(() => (
+		<NameRow>
+			<Name>{this.props.viewpoint.name}</Name>
+			<IconsGroup>
+				<StyledEditIcon color="secondary" onClick={this.props.onOpenEditMode} />
+				<StyledDeleteIcon color="secondary" onClick={this.props.onDelete} />
+			</IconsGroup>
+		</NameRow>
+	));
+
+	public renderViewpointForm = renderWhenTrue(() => {
 		return (
 			<Formik
-				initialValues={{ newName: viewpoint.name }}
+				initialValues={{ newName: this.props.viewpoint.name }}
 				onSubmit={this.props.onSaveEdit}>
 				<StyledForm>
 					<Field name="newName" render={({ field, form }) => (
@@ -84,21 +90,14 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 				</StyledForm>
 			</Formik>
 		);
-	})(this.props.active && this.props.editMode)
+	});
 
-	public renderViewpointName = (viewpoint) => renderWhenTrue(() => (
-		<Name>{viewpoint.name}</Name>
-	))(!this.props.active)
-
-	public renderViewpointData = (viewpoint) => renderWhenTrue(() => (
-		<NameRow>
-			<Name>{viewpoint.name}</Name>
-			<IconsGroup>
-				<StyledEditIcon color="secondary" onClick={this.props.onOpenEditMode} />
-				<StyledDeleteIcon color="secondary" onClick={this.props.onDelete} />
-			</IconsGroup>
-		</NameRow>
-	))(this.props.active && !this.props.editMode)
+	public renderScreenshot = renderWhenTrue(() => (
+		<Image
+			src={this.props.viewpoint.screenshot.thumbnailUrl}
+			alt={this.props.viewpoint.name}
+		/>
+	));
 
 	public render() {
 		const { viewpoint, handleClick, active } = this.props;
@@ -111,9 +110,9 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 
 				{this.renderScreenshot(viewpoint)}
 				{this.renderScreenshotPlaceholder(!viewpoint.screenshot.thumbnailUrl)}
-				{this.renderViewpointForm(viewpoint)}
-				{this.renderViewpointData(viewpoint)}
-				{this.renderViewpointName(viewpoint)}
+				{this.renderViewpointForm(this.props.active && this.props.editMode)}
+				{this.renderViewpointData(this.props.active && !this.props.editMode)}
+				{this.renderViewpointName(!this.props.active)}
 			</ViewpointItem>
 		);
 	}
