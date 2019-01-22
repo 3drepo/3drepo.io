@@ -62,7 +62,7 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 interface IHeaderMenuItem {
 	label: string;
 	enabled?: boolean;
-	Icon?: JSX.Element;
+	Icon?: any;
 	onClick?: (event?) => void;
 }
 
@@ -80,7 +80,7 @@ interface IProps {
 	activeItemId?: string;
 	showDetails?: boolean;
 	itemDetails?: any;
-	Icon?: JSX.Element;
+	Icon?: any;
 	setState: (componentState: any) => void;
 	onNewItem: () => void;
 	onActiveItem: (item) => void;
