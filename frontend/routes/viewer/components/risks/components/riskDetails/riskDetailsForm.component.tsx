@@ -218,17 +218,19 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 }
 
 export const RiskDetailsForm = withFormik({
-	mapPropsToValues: ({ risk }) => ({
-		safetibase_id: risk.safetibase_id || '',
-		associated_activity: risk.associated_activity || '',
-		mitigation_status: risk.mitigation_status || '',
-		mitigation_desc: risk.mitigation_status || '',
-		description: risk.description || '',
-		assigned_roles: get(risk, 'assigned_roles[0]', ''),
-		likelihood: risk.likelihood,
-		consequence: risk.consequence,
-		level_of_risk: risk.level_of_risk
-	}),
+	mapPropsToValues: ({ risk }) => {
+		return ({
+			safetibase_id: risk.safetibase_id || '',
+			associated_activity: risk.associated_activity || '',
+			mitigation_status: risk.mitigation_status || '',
+			mitigation_desc: risk.mitigation_status || '',
+			description: risk.description || '',
+			assigned_roles: get(risk, 'assigned_roles[0]', ''),
+			likelihood: risk.likelihood,
+			consequence: risk.consequence,
+			level_of_risk: risk.level_of_risk
+		});
+	},
 	handleSubmit: (values, { props }) => {
 		(props as IProps).onSubmit(values);
 	},

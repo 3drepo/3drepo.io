@@ -162,6 +162,12 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		this.props.subscribeOnRiskChanges(this.props.teamspace, this.props.model);
 		this.toggleRiskPinEvent(true);
 		this.setState({ filteredRisks: this.filteredRisks });
+
+		Viewer.on(VIEWER_EVENTS.MODEL_LOADED, () => {
+			this.setState({
+				modelLoaded: true
+			});
+		});
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -312,6 +318,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 				onArrowClick={this.handleShowRiskDetails(risk)}
 				active={this.props.activeRiskId === risk._id}
 				hasViewPermission={this.hasPermission(VIEW_ISSUE)}
+				modelLoaded={this.state.modelLoaded}
 			/>
 		));
 
@@ -329,14 +336,15 @@ export class Risks extends React.PureComponent<IProps, IState> {
 			</ViewerPanelContent>
 			<ViewerPanelFooter alignItems="center" justify="space-between">
 				<Summary>
-					{this.state.filteredRisks.length} risks displayed
+					{this.state.modelLoaded
+						? `${this.state.filteredRisks.length} risks displayed` : `You can add an issue after model load`}
 				</Summary>
 				<ViewerPanelButton
 					aria-label="Add risk"
 					onClick={this.handleAddNewRisk}
 					color="secondary"
 					variant="fab"
-					disabled={!this.hasPermission(CREATE_ISSUE)}
+					disabled={!this.hasPermission(CREATE_ISSUE) || !this.state.modelLoaded}
 				>
 					<AddIcon />
 				</ViewerPanelButton>
