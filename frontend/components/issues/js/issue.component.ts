@@ -19,7 +19,6 @@ import { APIService } from '../../home/js/api.service';
 import { AuthService } from '../../home/js/auth.service';
 import { DialogService } from '../../home/js/dialog.service';
 import { IssuesService } from './issues.service';
-import { MeasureService } from '../../measure/js/measure.service';
 import { ChatEvents } from '../../chat/js/chat.events';
 import { IssuesChatEvents } from '../../chat/js/issues.chat.events';
 import { ChatService } from '../../chat/js/chat.service';
@@ -112,7 +111,7 @@ class IssueController implements ng.IController {
 		private authService: AuthService,
 		private analyticService: AnalyticService,
 		private stateManager: StateManagerService,
-		private measureService: MeasureService,
+		private measureService,
 		private viewerService: ViewerService,
 		private treeService: TreeService,
 		private dialogService: DialogService

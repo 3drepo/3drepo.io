@@ -17,7 +17,6 @@
 import { APIService } from '../../home/js/api.service';
 import { AuthService } from '../../home/js/auth.service';
 import { IChip } from '../../panel/js/panel-card-chips-filter.component';
-import { MultiSelectService } from '../../viewer/js/multi-select.service';
 import { PanelService } from '../../panel/js/panel.service';
 import { TreeService } from '../../tree/js/tree.service';
 import { ViewerService } from '../../viewer/js/viewer.service';
@@ -55,7 +54,7 @@ export class IssuesService {
 		private apiService: APIService,
 		private authService: AuthService,
 		private clientConfigService: any,
-		private multiSelectService: MultiSelectService,
+		private multiSelectService,
 		private panelService: PanelService,
 		private treeService: TreeService,
 		private viewerService: ViewerService
