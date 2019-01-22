@@ -16,6 +16,7 @@ import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { FieldsRow, StyledFormControl, StyledTextField } from './riskDetails.styles';
 import { Image } from '../../../../../components/image';
+import { AutosuggestField } from '../../../../../components/autosuggestField/autosuggestField.component';
 
 const RiskSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
@@ -28,6 +29,7 @@ interface IProps {
 	values: any;
 	errors: any;
 	formik: any;
+	associatedActivities: any[];
 	onSubmit: (values) => void;
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
@@ -107,9 +109,10 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					)} />
 
 					<Field name="associated_activity" render={({ field }) => (
-						<StyledTextField
+						<AutosuggestField
 							{...field}
 							label="Associated Activity"
+							suggestions={this.props.associatedActivities}
 						/>
 					)} />
 				</FieldsRow>

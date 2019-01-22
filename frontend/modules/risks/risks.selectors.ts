@@ -85,3 +85,7 @@ export const selectSelectedFilters = createSelector(
 export const selectShowPins = createSelector(
 	selectComponentState, (state) => state.showPins
 );
+
+export const selectAssociatedActivities = createSelector(
+	selectComponentState, (state) => state.associatedActivities
+);

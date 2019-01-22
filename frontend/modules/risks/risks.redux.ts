@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { keyBy, cloneDeep, values } from 'lodash';
+import { keyBy, cloneDeep, values, map } from 'lodash';
 
 export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchRisks: ['teamspace', 'modelId', 'revision'],
@@ -50,7 +50,8 @@ export const INITIAL_STATE = {
 		expandDetails: true,
 		newRisk: {},
 		newComment: {},
-		selectedFilters: []
+		selectedFilters: [],
+		associatedActivities: []
 	}
 };
 
@@ -58,9 +59,17 @@ export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ .
 
 export const fetchRisksSuccess = (state = INITIAL_STATE, { risks = [] }) => {
 	const risksMap = keyBy(risks, '_id');
+
+	const associatedActivities = risks.reduce((activities, risk) => {
+		if (risk.associated_activity && !activities.includes(risk.associated_activity)) {
+			activities.push(risk.associated_activity);
+		}
+		return activities;
+	}, []);
+
 	return {
 		...state, risksMap,
-		componentState: { ...state.componentState, activeRisk: null, showDetails: false }
+		componentState: { ...state.componentState, activeRisk: null, showDetails: false, associatedActivities }
 	};
 };
 

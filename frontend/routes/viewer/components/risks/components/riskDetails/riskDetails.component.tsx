@@ -35,6 +35,7 @@ interface IProps {
 	teamspace: string;
 	model: string;
 	expandDetails: boolean;
+	associatedActivities: any[];
 	saveRisk: (teamspace, modelId, risk) => void;
 	updateRisk: (teamspace, modelId, risk) => void;
 	postComment: (teamspace, modelId, riskId, comment) => void;
@@ -161,6 +162,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					jobs={this.jobsList}
 					onValueChange={this.handleRiskFormSubmit}
 					onSubmit={this.handleRiskFormSubmit}
+					associatedActivities={this.props.associatedActivities}
 				/>
 			</PreviewDetails>
 		);
