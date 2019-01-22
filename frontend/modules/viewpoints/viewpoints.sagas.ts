@@ -117,12 +117,7 @@ export function* subscribeOnViewpointChanges({ teamspace, modelId }) {
 	const viewsNotifications = yield ChatService.getChannel(teamspace, modelId).views;
 
 	const onUpdated = (updatedView) => dispatch(ViewpointsActions.updateViewpointSuccess(updatedView));
-	const onCreated = (createdView) => {
-		if (!createdView.screenshot.thumbnailUrl && createdView.screenshot.thumbnail) {
-			createdView.screenshot.thumbnailUrl = getThumbnailUrl(createdView.screenshot.thumbnail);
-			dispatch(ViewpointsActions.createViewpointSuccess(createdView));
-		}
-	};
+	const onCreated = (createdView) => dispatch(ViewpointsActions.createViewpointSuccess(createdView));
 	const onDeleted = (deletedView) => dispatch(ViewpointsActions.deleteViewpointSuccess(deletedView));
 
 	viewsNotifications.subscribeToUpdated(onUpdated, this);
