@@ -22,6 +22,7 @@ import { Panel } from '../components/panel/panel.component';
 import { ProfileDataForm } from './components/profileDataForm.component';
 import { PasswordChangeForm } from './components/passwordChangeForm.component';
 import { Container } from './profile.styles';
+import { APIKeyForm } from './components/apiKeyForm.component';
 
 interface IProps {
 	currentUser: any;
@@ -32,7 +33,6 @@ interface IProps {
 }
 
 export class Profile extends React.PureComponent<IProps, any> {
-
 	public render() {
 		const { currentUser, onUserDataChange, onAvatarChange, isAvatarPending, onPasswordChange } = this.props;
 
@@ -50,6 +50,7 @@ export class Profile extends React.PureComponent<IProps, any> {
 				<Container>
 					{currentUser.email ? <ProfileDataForm {...profileDataFormProps} /> : null}
 					<PasswordChangeForm {...passwordChangeFormProps} />
+					<APIKeyForm/>
 				</Container>
 			</Panel>
 		);

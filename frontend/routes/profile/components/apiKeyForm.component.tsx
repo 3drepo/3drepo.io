@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
-import { values } from 'lodash';
-import { extendTeamspacesInfo } from './teamspaces.helpers';
+import * as React from 'react';
+import { Formik, Form, Field } from 'formik';
+import * as Yup from 'yup';
+import { omit } from 'lodash';
 
-export const selectTeamspacesDomain = (state) => Object.assign({}, state.teamspaces);
+import {
+	FormContainer,
+	Headline,
+	StyledTextField,
+	FieldsRow,
+	StyledButton
+} from '../profile.styles';
 
-export const selectTeamspaces = createSelector(
-	selectTeamspacesDomain, (state) => values(state.teamspaces)
-);
+interface IState {
+	newPasswordStrengthMessage: string;
+}
 
-export const selectTeamspacesWithAdminAccess = createSelector(
-	selectTeamspaces, (teamspaces) => extendTeamspacesInfo(teamspaces)
-);
+export class APIKeyForm extends React.PureComponent<{}, IState> {
+	public state = {
+		newPasswordStrengthMessage: ''
+	};
 
-export const selectIsPending = createSelector(
-	selectTeamspacesDomain, (state) => state.isPending
-);
+	public render() {
+		return (
+			<div>My api key</div>
+			);
+	}
+}

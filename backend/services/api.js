@@ -81,9 +81,12 @@ module.exports.createApp = function () {
 	});
 
 	app.use("/:account", require("../routes/job"));
+
 	app.use("/", require("../routes/plan"));
 	// auth handler
 	app.use("/", require("../routes/auth"));
+
+	app.use("/me", require("../routes/profile"));
 
 	// notifications handler
 	app.use("/notifications", require("../routes/notification"));

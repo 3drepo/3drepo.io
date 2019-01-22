@@ -47,6 +47,7 @@ const schema = mongoose.Schema({
 		firstName: String,
 		lastName: String,
 		email: String,
+		apiKey: String,
 		mailListOptOut: Boolean,
 		createdAt: Date,
 		inactive: Boolean,

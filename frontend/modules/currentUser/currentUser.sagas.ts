@@ -23,7 +23,6 @@ import { CurrentUserTypes, CurrentUserActions } from './currentUser.redux';
 import { selectCurrentUser } from './currentUser.selectors';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
-import { TeamspacesActions } from '../teamspaces';
 
 export const getAvatarUrl = (username) => API.getAPIUrl(`${username}/avatar?${Date.now()}`);
 
@@ -32,16 +31,15 @@ export function* fetchUser({ username }) {
 		yield put(CurrentUserActions.setPendingState(true));
 		yield put(CurrentUserActions.setAvatarPendingState(true));
 
-		const { data: { accounts, ...currentUser } } = yield call(API.fetchTeamspace, [username]);
+		const { data } = yield call(API.fetchProfile, [username]);
 
 		yield all([
 			put(CurrentUserActions.fetchUserSuccess({
-				...currentUser,
+				...data,
 				username,
 				avatarUrl: getAvatarUrl(username)
 			})),
-			put(TeamspacesActions.setTeamspaces(accounts)),
-			put(CurrentUserActions.setAsInitialised())
+			put(CurrentUserActions.setAsInitialized())
 		]);
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'user data', e));
