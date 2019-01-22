@@ -115,8 +115,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		if (this.isNewRisk) {
 			saveRisk(teamspace, model, this.riskData);
 		} else {
-			const preparedRisk = mergeRiskData(this.riskData);
-			updateRisk(teamspace, model, preparedRisk);
 			// postComment(teamspace, model, this.riskData._id, comment);
 		}
 	}
@@ -170,7 +168,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public renderLogs = renderWhenTrue(() => <LogList items={this.state.logs} />);
 
-	public renderFooter = () => (
+	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center">
 			<NewCommentForm
 				comment={this.props.newComment.comment}
@@ -185,7 +183,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				onSave={this.handleSave}
 			/>
 		</ViewerPanelFooter>
-	)
+	));
 
 	public render() {
 		const { logs } = this.state;
@@ -196,7 +194,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					{this.renderPreview(this.props.risk)}
 					{this.renderLogs(logs.length)}
 				</ViewerPanelContent>
-				{this.renderFooter()}
+				{this.renderFooter(!this.riskData._id)}
 			</Container>
 		);
 	}
