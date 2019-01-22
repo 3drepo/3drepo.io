@@ -16,8 +16,7 @@
  */
 
 import * as React from 'react';
-import * as queryString from 'query-string';
-import { map, isEqual, isEmpty } from 'lodash';
+import { isEqual, isEmpty } from 'lodash';
 
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import AddIcon from '@material-ui/icons/Add';
