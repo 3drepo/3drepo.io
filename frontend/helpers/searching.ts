@@ -14,26 +14,29 @@ export const stringSearch = (superString: string, subString: string) => {
 	return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 };
 
-export const searchByFilters = (items = [], filters = []) => {
+export const searchByFilters = (items = [], filters = [], returnDefaultHidden = false) => {
+	const prefilteredItems = !returnDefaultHidden ? items.filter(({defaultHidden}) => !defaultHidden) : items;
+
 	if (!filters.length) {
-		return items;
+		return prefilteredItems;
 	}
 
-	return items.filter((risk) => {
+	return prefilteredItems.filter((item) => {
 		return filters.some((filter) => {
 			if (filter.type === DATA_TYPES.UNDEFINED) {
-				const values = isArray(risk[filter.relatedField]) ? risk[filter.relatedField] : [risk[filter.relatedField]];
+				const values = isArray(item[filter.relatedField]) ? item[filter.relatedField] : [item[filter.relatedField]];
 				return values.every((value) => {
 					if (typeof value === 'string') {
 						return compareStrings(value, filter.value.value);
-					} else if (typeof value === 'number') {
+					}
+					if (typeof value === 'number') {
 						return value === filter.value.value;
 					}
 				});
 			}
 
 			if (filter.type === DATA_TYPES.QUERY) {
-				return compareStrings(risk.name, filter.value.value) || compareStrings(risk.disc, filter.value.value);
+				return compareStrings(item.name, filter.value.value) || compareStrings(item.disc, filter.value.value);
 			}
 
 			return false;

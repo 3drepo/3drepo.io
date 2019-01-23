@@ -48,7 +48,8 @@ import {
 	RISK_CONSEQUENCES,
 	RISK_LIKELIHOODS,
 	RISK_CATEGORIES,
-	LEVELS_OF_RISK
+	LEVELS_OF_RISK,
+	RISK_LEVELS
 } from '../../../../constants/risks';
 import {
 	MenuList,
@@ -162,7 +163,14 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	get filteredRisks() {
 		const { risks, selectedFilters } = this.props;
-		return searchByFilters(risks, selectedFilters);
+
+		let returnHiddenRisk = false;
+		if (selectedFilters.length) {
+			returnHiddenRisk = selectedFilters
+				.some(({ value: { value }}) => value === RISK_LEVELS.AGREED_FULLY);
+		}
+
+		return searchByFilters(risks, selectedFilters, returnHiddenRisk);
 	}
 
 	public componentDidMount() {

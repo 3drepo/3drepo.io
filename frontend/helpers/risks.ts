@@ -1,6 +1,6 @@
 import { omit, get } from 'lodash';
 import { getAPIUrl } from '../services/api';
-import { RISK_LEVELS_COLORS, RISK_LEVELS_ICONS } from '../constants/risks';
+import { RISK_LEVELS_COLORS, RISK_LEVELS_ICONS, RISK_LEVELS } from '../constants/risks';
 import { PIN_COLORS } from '../styles';
 
 export const prepareRisk = (risk, jobs = []) => {
@@ -11,6 +11,7 @@ export const prepareRisk = (risk, jobs = []) => {
 
 	return {
 		...risk,
+		defaultHidden: risk.mitigation_status === RISK_LEVELS.AGREED_FULLY,
 		description: risk.desc,
 		author: risk.owner,
 		createdDate: risk.created,
