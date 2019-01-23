@@ -223,7 +223,7 @@ export const RiskDetailsForm = withFormik({
 			safetibase_id: risk.safetibase_id || '',
 			associated_activity: risk.associated_activity || '',
 			mitigation_status: risk.mitigation_status || '',
-			mitigation_desc: risk.mitigation_status || '',
+			mitigation_desc: risk.mitigation_desc || '',
 			description: risk.description || '',
 			assigned_roles: get(risk, 'assigned_roles[0]', ''),
 			likelihood: risk.likelihood,
