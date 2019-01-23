@@ -88,29 +88,9 @@ export const setComponentState = (state = INITIAL_STATE, { componentState = {} }
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
-export const setNewRisk = (state = INITIAL_STATE) => {
-	const riskNumber = values(state.risksMap).length + 1;
-	const newRisk = {
-		name: `Untitled risk ${riskNumber}`,
-		associated_activity: '',
-		assigned_roles: [],
-		likelihood: 0,
-		consequence: 0,
-		level_of_risk: 0,
-		mitigation_status: '',
-		viewpoint: {}
-	};
-	return setComponentState(state, { componentState: {
-		showDetails: true,
-		activeRisk: null,
-		newRisk
-	}});
-};
-
 export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.FETCH_RISKS_SUCCESS]: fetchRisksSuccess,
 	[RisksTypes.SET_COMPONENT_STATE]: setComponentState,
 	[RisksTypes.SAVE_RISK_SUCCESS]: saveRiskSuccess,
-	[RisksTypes.SET_NEW_RISK]: setNewRisk,
 	[RisksTypes.TOGGLE_PENDING_STATE]: togglePendingState
 });

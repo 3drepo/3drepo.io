@@ -34,6 +34,7 @@ import {
 	selectActiveRiskDetails
 } from './risks.selectors';
 import { selectJobsList } from '../jobs';
+import { selectCurrentUser } from '../currentUser';
 
 export function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));
@@ -468,6 +469,35 @@ export function* unsubscribeOnRiskChanges({ teamspace, modelId }) {
 	risksNotifications.unsubscribeFromCreated(onCreateEvent);
 }
 
+export function* setNewRisk() {
+	const risks = yield select(selectRisks);
+	const jobs = yield select(selectJobsList);
+	const currentUser = yield select(selectCurrentUser);
+	const riskNumber = risks.length + 1;
+
+	try {
+		const newRisk = prepareRisk({
+			name: `Untitled risk ${riskNumber}`,
+			associated_activity: '',
+			assigned_roles: [],
+			likelihood: 0,
+			consequence: 0,
+			level_of_risk: 0,
+			mitigation_status: '',
+			viewpoint: {},
+			owner: currentUser.username
+		}, jobs);
+
+		yield put(RisksActions.setComponentState({
+			showDetails: true,
+			activeRisk: null,
+			newRisk
+		}));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('prepare', 'new risk', error));
+	}
+}
+
 export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_RISKS, fetchRisks);
 	yield takeLatest(RisksTypes.SAVE_RISK, saveRisk);
@@ -483,4 +513,5 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.SUBSCRIBE_ON_RISK_CHANGES, subscribeOnRiskChanges);
 	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_CHANGES, unsubscribeOnRiskChanges);
 	yield takeLatest(RisksTypes.FOCUS_ON_RISK, focusOnRisk);
+	yield takeLatest(RisksTypes.SET_NEW_RISK, setNewRisk);
 }
