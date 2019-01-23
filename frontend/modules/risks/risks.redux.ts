@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { keyBy, cloneDeep, values, map } from 'lodash';
+import { keyBy, cloneDeep, values } from 'lodash';
 
 export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchRisks: ['teamspace', 'modelId', 'revision'],
