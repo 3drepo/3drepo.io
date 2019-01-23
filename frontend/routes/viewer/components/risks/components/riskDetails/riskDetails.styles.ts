@@ -20,9 +20,6 @@ import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
 
-import * as SelectStyles from '../../../../../components/customTable/components/cellSelect/cellSelect.styles';
-import { COLOR } from '../../../../../../styles';
-
 export const StyledTextField = styled(TextField)``;
 export const StyledFormControl = styled(FormControl)``;
 
@@ -34,9 +31,6 @@ export const Container = styled.div`
   ${StyledFormControl} {
     margin: 8px 0;
   }
-`;
-
-export const ListItem = styled.span`
 `;
 
 export const FieldsRow = styled(Grid)`
