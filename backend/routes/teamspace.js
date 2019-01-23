@@ -18,6 +18,7 @@
 "use strict";
 (function() {
 
+	const _ = require("lodash");
 	const express = require("express");
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require("../response_codes");
@@ -92,7 +93,11 @@
 
 	function getBillingInfo(req, res, next) {
 		User.findByUserName(req.params.account).then(user => {
-			const billingInfo = (user.customData.billing || {}).billingInfo;
+			let billingInfo = (user.customData.billing || {}).billingInfo;
+			if (billingInfo.toBSON) {
+				billingInfo = _.omit(billingInfo.toBSON(), "_id");
+			}
+
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, billingInfo);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
