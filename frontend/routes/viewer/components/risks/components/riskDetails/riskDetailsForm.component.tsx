@@ -188,6 +188,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								items={LEVELS_OF_RISK}
 								inputId="level_of_risk"
 								disabled={true}
+								readOnly
 							/>
 						)} />
 					</StyledFormControl>
@@ -226,6 +227,7 @@ export const RiskDetailsForm = withFormik({
 			mitigation_desc: risk.mitigation_desc || '',
 			description: risk.description || '',
 			assigned_roles: get(risk, 'assigned_roles[0]', ''),
+			category: risk.category || '',
 			likelihood: risk.likelihood,
 			consequence: risk.consequence,
 			level_of_risk: risk.level_of_risk

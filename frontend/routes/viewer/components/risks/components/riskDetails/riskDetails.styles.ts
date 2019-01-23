@@ -20,6 +20,9 @@ import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
 
+import * as SelectStyles from '../../../../../components/customTable/components/cellSelect/cellSelect.styles';
+import { COLOR } from '../../../../../../styles';
+
 export const StyledTextField = styled(TextField)``;
 export const StyledFormControl = styled(FormControl)``;
 
@@ -27,18 +30,26 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
 
-  ${/* sc-selector */ StyledTextField},
-  ${/* sc-selector */ StyledFormControl} {
+  ${StyledTextField},
+  ${StyledFormControl} {
     margin: 8px 0;
-  }`;
+  }
+`;
+
+export const ListItem = styled.span`
+`;
 
 export const FieldsRow = styled(Grid)`
-  ${/* sc-selector */ StyledTextField},
-  ${/* sc-selector */ StyledFormControl} {
+  ${StyledTextField},
+  ${StyledFormControl} {
     flex: 1;
 
     &:nth-child(2n + 1) {
       margin-right: 25px;
     }
+  }
+
+  .select {
+    color: inherit;
   }
 `;
