@@ -33,6 +33,16 @@ export function* fetchPlans() {
 	}
 }
 
+export function* fetchBillingInfo({ teamspace }) {
+	try {
+		const { data: plans } = yield API.getBillingInfo(teamspace);
+
+		return yield put(BillingActions.fetchBillingInfoSuccess(plans));
+	} catch (e) {
+		yield put(DialogActions.showEndpointErrorDialog('fetch', 'billingInfo', e));
+	}
+}
+
 export function* fetchSubscriptions({ teamspace }) {
 	try {
 		const { data: subscriptions } = yield API.getSubscriptions(teamspace);
@@ -63,6 +73,7 @@ export function* fetchBillingData({ teamspace }) {
 		yield put(BillingActions.setPendingState(true));
 
 		yield all([
+			put(BillingActions.fetchBillingInfo(teamspace)),
 			put(BillingActions.fetchPlans()),
 			put(BillingActions.fetchSubscriptions(teamspace))
 		]);
@@ -125,6 +136,7 @@ export default function* BillingSaga() {
 	yield takeLatest(BillingTypes.FETCH_INVOICES, fetchInvoices);
 	yield takeLatest(BillingTypes.FETCH_SUBSCRIPTIONS, fetchSubscriptions);
 	yield takeLatest(BillingTypes.FETCH_BILLING_DATA, fetchBillingData);
+	yield takeLatest(BillingTypes.FETCH_BILLING_INFO, fetchBillingInfo);
 	yield takeLatest(BillingTypes.CHANGE_SUBSCRIPTION, changeSubscription);
 	yield takeLatest(BillingTypes.DOWNLOAD_INVOICE, downloadInvoice);
 }

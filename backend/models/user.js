@@ -145,7 +145,7 @@ schema.statics.findByUserName = function (user) {
 
 schema.statics.findByAPIKey = async function (key) {
 	const dbCol = await DB.getCollection("admin", "system.users");
-	const user = await dbCol.findOne({"customData.APIKey" : key});
+	const user = await dbCol.findOne({"customData.apiKey" : key});
 	return user;
 };
 
