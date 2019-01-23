@@ -318,7 +318,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	public renderRisksList = renderWhenTrue(() => {
 		const Items = this.state.filteredRisks.map((risk, index) => (
 			<PreviewListItem
-				{...prepareRisk(risk, this.props.jobs)}
+				{...risk}
 				key={index}
 				onItemClick={this.handleRiskFocus(risk)}
 				onArrowClick={this.handleShowRiskDetails(risk)}
