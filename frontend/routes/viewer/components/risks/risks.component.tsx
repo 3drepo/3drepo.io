@@ -262,7 +262,8 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	public handleCloseSearchMode = () => {
 		this.props.setState({
-			searchEnabled: false
+			searchEnabled: false,
+			selectedFilters: []
 		});
 		this.setState({
 			filteredRisks: this.props.risks
