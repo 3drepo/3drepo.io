@@ -86,3 +86,9 @@ export const mergeRiskData = (source, data = source) => {
 		desc: data.description
 	};
 };
+
+export const getSortedRisks = (data = []) => {
+	return [...data].sort((first, second) => {
+		return second.created - first.created;
+	});
+};

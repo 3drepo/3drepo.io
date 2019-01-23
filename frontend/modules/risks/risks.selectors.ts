@@ -18,13 +18,13 @@
 import { createSelector } from 'reselect';
 import { values } from 'lodash';
 import { selectJobsList } from '../jobs';
-import { prepareRisk } from '../../helpers/risks';
+import { prepareRisk, getSortedRisks } from '../../helpers/risks';
 import { selectCurrentUser } from '../currentUser';
 
 export const selectRisksDomain = (state) => Object.assign({}, state.risks);
 
 export const selectRisks = createSelector(
-	selectRisksDomain, (state) => values(state.risksMap)
+	selectRisksDomain, (state) => getSortedRisks(values(state.risksMap))
 );
 
 export const selectRisksMap = createSelector(
