@@ -19,8 +19,8 @@ import { differenceBy, isEmpty, omit, pick } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import { getAngularService, dispatch, history, runAngularViewerTransition } from '../../helpers/migration';
-import { getRiskPinColor } from '../../helpers/risks';
+import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
+import { getRiskPinColor, prepareRisk } from '../../helpers/risks';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
@@ -33,12 +33,17 @@ import {
 	selectRisksMap,
 	selectActiveRiskDetails
 } from './risks.selectors';
+import { selectJobsList } from '../jobs';
 
 export function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));
 	try {
 		const {data} = yield API.getRisks(teamspace, modelId, revision);
-		yield put(RisksActions.fetchRisksSuccess(data));
+		const jobs = yield select(selectJobsList);
+
+		const preparedRisks = data.map((risk) => prepareRisk(risk, jobs));
+
+		yield put(RisksActions.fetchRisksSuccess(preparedRisks));
 		yield put(RisksActions.renderPins(data));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'risks', error));
@@ -134,7 +139,9 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 			eventAction: 'create'
 		});
 
-		yield put(RisksActions.saveRiskSuccess(savedRisk));
+		const jobs = yield select(selectJobsList);
+		const preparedRisk = prepareRisk(savedRisk, jobs);
+		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(RisksActions.showDetails(savedRisk, [], revision));
 		yield put(SnackbarActions.show('Risk created'));
 	} catch (error) {
@@ -144,7 +151,7 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 
 export function* updateRisk({ teamspace, modelId, riskData }) {
 	try {
-		const { data } = yield API.updateRisk(teamspace, modelId, riskData);
+		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, riskData);
 
 		const AnalyticService = getAngularService('AnalyticService') as any;
 		yield AnalyticService.sendEvent({
@@ -153,7 +160,9 @@ export function* updateRisk({ teamspace, modelId, riskData }) {
 		});
 
 		toggleRiskPin(riskData, true);
-		yield put(RisksActions.saveRiskSuccess(data));
+		const jobs = yield select(selectJobsList);
+		const preparedRisk = prepareRisk(updatedRisk, jobs);
+		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'risk', error));
@@ -432,26 +441,31 @@ export function* toggleShowPins({ showPins, filteredRisks = [] }) {
 	}
 }
 
+const onUpdateEvent = (updatedRisk) => {
+	const jobs = selectJobsList(getState());
+	dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));
+};
+
+const onCreateEvent = (createdRisk) => {
+	const jobs = selectJobsList(getState());
+	dispatch(RisksActions.saveRiskSuccess(prepareRisk(createdRisk[0], jobs)));
+};
+
+const getRisksChannel = (teamspace, modelId) => {
+	const ChatService = getAngularService('ChatService') as any;
+	return ChatService.getChannel(teamspace, modelId).risks;
+};
+
 export function* subscribeOnRiskChanges({ teamspace, modelId }) {
-	const ChatService = yield getAngularService('ChatService');
-	const risksNotifications = yield ChatService.getChannel(teamspace, modelId).risks;
-
-	const onUpdated = (updatedRisk) => dispatch(RisksActions.saveRiskSuccess(updatedRisk));
-	const onCreated = (createdRisk) => dispatch(RisksActions.saveRiskSuccess(createdRisk[0]));
-
-	risksNotifications.subscribeToUpdated(onUpdated, this);
-	risksNotifications.subscribeToCreated(onCreated, this);
+	const risksNotifications = getRisksChannel(teamspace, modelId);
+	risksNotifications.subscribeToUpdated(onUpdateEvent, this);
+	risksNotifications.subscribeToCreated(onCreateEvent, this);
 }
 
 export function* unsubscribeOnRiskChanges({ teamspace, modelId }) {
-	const ChatService = yield getAngularService('ChatService');
-	const risksNotifications = yield ChatService.getChannel(teamspace, modelId).risks;
-
-	const onUpdated = (updatedRisk) => dispatch(RisksActions.saveRiskSuccess(updatedRisk));
-	const onCreated = (createdRisk) => dispatch(RisksActions.saveRiskSuccess(createdRisk[0]));
-
-	risksNotifications.unsubscribeFromUpdated(onUpdated);
-	risksNotifications.unsubscribeFromCreated(onCreated);
+	const risksNotifications = getRisksChannel(teamspace, modelId);
+	risksNotifications.unsubscribeFromUpdated(onUpdateEvent);
+	risksNotifications.unsubscribeFromCreated(onCreateEvent);
 }
 
 export default function* RisksSaga() {

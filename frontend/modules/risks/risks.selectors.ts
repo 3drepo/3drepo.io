@@ -54,7 +54,7 @@ export const selectActiveRiskDetails = createSelector(
 			...componentState.newRisk,
 			owner: currentUser.username
 		};
-		return prepareRisk(risk, jobsList);
+		return risk;
 	}
 );
 
