@@ -29,16 +29,16 @@ export const Container = styled.div`
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
-	height: ${(props: any) => props.filtersOpen ? '50px' : '100%'};
+	height: ${(props: any) => props.filtersOpen ? '45px' : '100%'};
 	flex: none;
 ` as any;
 
 export const SelectedFilters = styled.div`
   display: flex;
   flex-wrap: wrap;
-	padding: 0 40px 0 8px;
+	padding: 4px 40px 0 8px;
 	overflow: ${(props: any) => props.filtersOpen ? 'hidden' : 'auto'};
-	min-height: ${(props: any) => props.empty ? '0' : '50px'};
+	min-height: ${(props: any) => props.empty ? '0' : '45px'};
 	position: relative;
 	max-height: 240px;
 ` as any;
@@ -101,7 +101,11 @@ export const StyledTextField = styled(TextField)`
 `;
 
 export const StyledChip = styled(Chip)`
-  margin: 8px 3px;
+  && {
+		margin-right: 4px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+	}
 `;
 
 export const FiltersButton = styled(IconButton)`
