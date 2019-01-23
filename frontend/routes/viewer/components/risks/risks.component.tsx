@@ -64,7 +64,6 @@ import { VIEWER_EVENTS } from '../../../../constants/viewer';
 
 interface IProps {
 	history: any;
-	location: any;
 	teamspace: string;
 	model: any;
 	risks: any[];
@@ -181,7 +180,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { risks, selectedFilters, location, activeRiskId, showDetails } = this.props;
+		const { risks, selectedFilters, activeRiskId, showDetails } = this.props;
 		const risksChanged = !isEqual(prevProps.risks, risks);
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
 		const showDetailsChanged = showDetails !== prevProps.showDetails;
@@ -192,7 +191,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 			changes.filteredRisks = this.filteredRisks;
 		}
 
-		if (!filtersChanged && location.search && !activeRiskId && (!showDetails && showDetailsChanged)) {
+		if (!filtersChanged && location.search && !activeRiskId && (!showDetails && !showDetailsChanged)) {
 			const { riskId } = queryString.parse(location.search);
 			if (riskId) {
 				const foundRisk = risks.find((risk) => risk._id === riskId);
