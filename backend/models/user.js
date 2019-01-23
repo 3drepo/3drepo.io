@@ -144,9 +144,25 @@ schema.statics.findByUserName = function (user) {
 };
 
 schema.statics.findByAPIKey = async function (key) {
+	if (!key) {
+		return null;
+	}
+
 	const dbCol = await DB.getCollection("admin", "system.users");
 	const user = await dbCol.findOne({"customData.apiKey" : key});
 	return user;
+};
+
+schema.statics.generateApiKey = async function (username) {
+	const apiKey = crypto.randomBytes(16).toString("hex");
+	const dbCol = await DB.getCollection("admin", "system.users");
+	await dbCol.update({ user: username}, {$set: {"customData.apiKey" : apiKey}});
+	return apiKey;
+};
+
+schema.statics.deleteApiKey = async function (username) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	await dbCol.update({ user: username}, {$unset: {"customData.apiKey" : 1}});
 };
 
 schema.statics.findUsersWithoutMembership = function (teamspace, searchString) {
