@@ -30,11 +30,11 @@ import {
 	RISK_CONSEQUENCES,
 	RISK_LIKELIHOODS,
 	RISK_CATEGORIES,
-	LEVELS_OF_RISK
+	LEVELS_OF_RISK,
+	RISK_LEVELS
 } from '../../../../constants/risks';
 
 import { ReportedItems } from '../reportedItems';
-import { prepareRisk } from '../../../../helpers/risks';
 
 interface IProps {
 	history: any;
@@ -67,21 +67,12 @@ interface IProps {
 	onFiltersChange: (selectedFilters) => void;
 }
 
-interface IState {
-	risks: any[];
-}
-
 const UNASSIGNED_JOB = {
 	name: 'Unassigned',
 	value: ''
 };
 
-export class Risks extends React.PureComponent<IProps, IState> {
-	public state = {
-		filteredRisks: [],
-		risks: []
-	};
-
+export class Risks extends React.PureComponent<IProps, any> {
 	get jobsList() {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
@@ -122,23 +113,21 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		}];
 	}
 
+	get showDefaultHiddenItems() {
+		if (this.props.selectedFilters.length) {
+			return this.props.selectedFilters
+				.some(({ value: { value } }) => value === RISK_LEVELS.AGREED_FULLY);
+		}
+		return false;
+	}
+
 	public componentDidMount() {
 		this.props.subscribeOnRiskChanges(this.props.teamspace, this.props.model);
-
-		if (this.props.risks.length && this.props.jobs.length) {
-			this.setPreparedRisks();
-		}
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { risks, jobs, selectedFilters, activeRiskId, showDetails, revision } = this.props;
-		const risksChanged = risks.length !== prevProps.risks.length;
-		const jobsChanged = jobs.length !== prevProps.jobs.length;
+		const { risks, selectedFilters, activeRiskId, showDetails, revision } = this.props;
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
-
-		if (risksChanged || jobsChanged) {
-			this.setPreparedRisks();
-		}
 
 		if (risks.length && !filtersChanged && location.search && !activeRiskId && !prevProps.showDetails && !showDetails) {
 			const { riskId } = queryString.parse(location.search);
@@ -154,11 +143,6 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	public componentWillUnmount() {
 		this.props.unsubscribeOnRiskChanges(this.props.teamspace, this.props.model);
-	}
-
-	public setPreparedRisks = () => {
-		const risks = this.props.risks.map((risk) => prepareRisk(risk, this.props.jobs));
-		this.setState({ risks });
 	}
 
   public handleFilterChange = (selectedFilters) => {
@@ -211,7 +195,8 @@ export class Risks extends React.PureComponent<IProps, IState> {
 				Icon={ReportProblem}
 				isPending={this.props.isPending}
 
-				items={this.state.risks}
+				items={this.props.risks}
+				showDefaultHiddenItems={this.showDefaultHiddenItems}
 				activeItemId={this.props.activeRiskId}
 				showDetails={this.props.showDetails}
 				permissions={this.props.modelSettings.permissions}

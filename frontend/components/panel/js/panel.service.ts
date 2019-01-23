@@ -289,7 +289,7 @@ export class PanelService {
 			type: 'risks',
 			title: 'SafetiBase',
 			showLiteMode: true,
-			show: true, // Boolean(riskId),
+			show: Boolean(riskId),
 			help: 'Risk register',
 			icon: 'report_problem',
 			minHeight: 260,

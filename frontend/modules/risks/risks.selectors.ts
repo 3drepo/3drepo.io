@@ -43,6 +43,10 @@ export const selectIsRisksPending = createSelector(
 	selectRisksDomain, (state) => state.isPending
 );
 
+export const selectAssociatedActivities = createSelector(
+	selectRisksDomain, (state) => state.associatedActivities
+);
+
 export const selectActiveRiskId = createSelector(
 	selectComponentState, (state) => state.activeRisk
 );
@@ -91,8 +95,4 @@ export const selectFilteredRisks = createSelector(
 
 export const selectShowPins = createSelector(
 	selectComponentState, (state) => state.showPins
-);
-
-export const selectAssociatedActivities = createSelector(
-	selectComponentState, (state) => state.associatedActivities
 );

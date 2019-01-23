@@ -78,7 +78,7 @@ interface IProps {
 	isPending?: boolean;
 	activeItemId?: string;
 	showDetails?: boolean;
-	itemDetails?: any;
+	showDefaultHiddenItems: boolean;
 	Icon?: any;
 	setState: (componentState: any) => void;
 	onNewItem: () => void;
@@ -92,14 +92,12 @@ interface IProps {
 }
 
 interface IState {
-	itemDetails?: any;
 	filteredItems: any[];
 	modelLoaded: boolean;
 }
 
 export class ReportedItems extends React.PureComponent<IProps, IState> {
 	public state = {
-		itemDetails: {},
 		filteredItems: [],
 		modelLoaded: true
 	};
@@ -109,8 +107,8 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	get filteredItems() {
-		const { items, selectedFilters } = this.props;
-		return searchByFilters(items, selectedFilters);
+		const { items, selectedFilters, showDefaultHiddenItems } = this.props;
+		return searchByFilters(items, selectedFilters, showDefaultHiddenItems);
 	}
 
 	get listFooterText() {
@@ -131,13 +129,15 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { items, selectedFilters } = this.props;
+		const { items, selectedFilters, showDefaultHiddenItems, searchEnabled } = this.props;
 		const itemsChanged = !isEqual(prevProps.items, items);
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
+		const showDefaultHiddenItemsChanged = prevProps.showDefaultHiddenItems !== showDefaultHiddenItems;
+		const searchEnabledChange = prevProps.searchEnabled !== searchEnabled;
 
 		const changes = {} as IState;
 
-		if (itemsChanged || filtersChanged) {
+		if (itemsChanged || filtersChanged || showDefaultHiddenItemsChanged || searchEnabledChange) {
 			changes.filteredItems = this.filteredItems;
 		}
 
@@ -341,6 +341,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
+		console.log('RENDER REPORTED ITEMS');
 		return (
 			<ViewerPanel
 				title={this.props.title}

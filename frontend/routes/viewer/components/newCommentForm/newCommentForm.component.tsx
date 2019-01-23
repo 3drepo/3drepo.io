@@ -201,7 +201,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 									disabled={!hideComment && !canComment && (!form.isValid || form.isValidating)}
 									aria-label="Add new comment"
 								>
-									<SaveIcon />
+									<SaveIcon fontSize="small" />
 								</ViewerPanelButton>} />
 						</Actions>
 					</StyledForm>

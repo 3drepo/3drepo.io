@@ -71,7 +71,7 @@ export const fetchRisksSuccess = (state = INITIAL_STATE, { risks = [] }) => {
 	}, []);
 
 	return {
-		...state, risksMap,
+		...state, risksMap, associatedActivities,
 		componentState: { ...cloneDeep(INITIAL_STATE.componentState) }
 	};
 };
