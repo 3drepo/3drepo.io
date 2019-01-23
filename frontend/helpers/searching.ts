@@ -23,7 +23,13 @@ export const searchByFilters = (items = [], filters = []) => {
 		return filters.some((filter) => {
 			if (filter.type === DATA_TYPES.UNDEFINED) {
 				const values = isArray(risk[filter.relatedField]) ? risk[filter.relatedField] : [risk[filter.relatedField]];
-				return values.every((value) => compareStrings(value, filter.value.value));
+				return values.every((value) => {
+					if (typeof value === 'string') {
+						return compareStrings(value, filter.value.value);
+					} else if (typeof value === 'number') {
+						return value === filter.value.value;
+					}
+				});
 			}
 
 			if (filter.type === DATA_TYPES.QUERY) {
