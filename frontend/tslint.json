@@ -20,8 +20,8 @@
                     "public-static-field",
                     "private-static-field",
                     "private-instance-field",
-                    "public-constructor",
                     "private-constructor",
+                    "public-constructor",
                     "public-instance-method",
                     "protected-instance-method",
                     "private-instance-method"

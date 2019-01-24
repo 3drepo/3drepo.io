@@ -16,14 +16,16 @@
  */
 
 import styled from 'styled-components';
-import TextField from '@material-ui/core/TextField';
 import Popper from '@material-ui/core/Popper';
-import { COLOR } from './../../../styles/colors';
+import { COLOR } from '../../../styles/colors';
+import { TextField } from '../textField/textField.component';
 
 export const Container = styled.div``;
 
 export const StyledTextField = styled(TextField)`
-  margin: 8px 0;
+	&& {
+ 		margin: 8px 0;
+	}
 `;
 
 export const SuggestionsList = styled(Popper)`

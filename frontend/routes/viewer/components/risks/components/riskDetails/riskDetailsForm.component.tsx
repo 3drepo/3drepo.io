@@ -27,7 +27,6 @@ interface IProps {
 	risk: any;
 	jobs: any[];
 	values: any;
-	errors: any;
 	formik: any;
 	associatedActivities: any[];
 	onSubmit: (values) => void;
@@ -46,6 +45,10 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	public state = {
 		isSaving: false
 	};
+
+	get isNewRisk() {
+		return !this.props.risk._id;
+	}
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
@@ -91,7 +94,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		});
 	}, 200);
 
-	public handleChangeAndSubmit = (event, ...args) => {
+	public handleChangeAndSubmit = (event) => {
 		event.persist();
 		this.props.handleChange(event);
 		this.props.handleSubmit();
@@ -104,6 +107,8 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					<Field name="safetibase_id" render={({ field }) => (
 						<StyledTextField
 							{...field}
+							requiredConfirm={!this.isNewRisk}
+							validationSchema={RiskSchema}
 							label="GUID"
 						/>
 					)} />
@@ -111,25 +116,30 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					<Field name="associated_activity" render={({ field }) => (
 						<AutosuggestField
 							{...field}
+							requiredConfirm={!this.isNewRisk}
 							label="Associated Activity"
 							suggestions={this.props.associatedActivities}
 						/>
 					)} />
 				</FieldsRow>
 
-				<Field name="description" render={({ field }) => (
+				<Field name="description" render={({ field, form }) => (
 					<StyledTextField
 						{...field}
+						requiredConfirm={!this.isNewRisk}
+						validationSchema={RiskSchema}
 						fullWidth
 						multiline
 						label="Description"
 					/>
 				)} />
 
-				{this.props.risk.descriptionThumbnail && <Image
-					src={this.props.risk.descriptionThumbnail}
-					enablePreview
-				/>}
+				{this.props.risk.descriptionThumbnail && (
+					<Image
+						src={this.props.risk.descriptionThumbnail}
+						enablePreview
+					/>
+				)}
 
 				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
@@ -205,12 +215,15 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					</StyledFormControl>
 				</FieldsRow>
 
-				<Field name="mitigation_desc" render={({ field }) => (
+				<Field name="mitigation_desc" render={({ field, form }) => (
 					<StyledTextField
 						{...field}
+						requiredConfirm={!this.isNewRisk}
 						fullWidth
 						multiline
 						label="Mitigation"
+						error={Boolean(form.errors.mitigation_desc)}
+						helperText={form.errors.mitigation_desc}
 					/>
 				)} />
 			</Form>
