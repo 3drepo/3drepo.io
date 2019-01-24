@@ -18,7 +18,6 @@
 import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
 import MenuItem from '@material-ui/core/MenuItem';
-import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 
 import { Container, SuggestionsList, StyledTextField } from './autosuggestField.styles';
@@ -28,6 +27,7 @@ interface IProps {
 	label: string;
 	value: string;
 	name: string;
+	requiredConfirm?: boolean;
 	onChange: (event) => void;
 	onBlur: (event) => void;
 }
@@ -90,32 +90,30 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 
 	public renderSuggestionsContainer = (options) => (
 		<SuggestionsList
-			anchorEl={this.popperNode}
+			anchorEl={this.inputRef.current}
 			open={Boolean(options.children)}
 			placement="bottom"
 		>
 			<Paper
 				square={true}
 				{...options.containerProps}
-				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
+				style={{ width: this.inputRef.current ? this.inputRef.current.clientWidth : null }}
 			>
 				{options.children}
 			</Paper>
 		</SuggestionsList>
 	)
 
+	public inputRef = React.createRef();
+
 	public renderInputComponent = (inputProps) => {
-		const {inputRef , ref, ...other} = inputProps;
+		const {inputRef, ref, ...other} = inputProps;
 
 		return (
 			<StyledTextField
 				fullWidth
-				InputProps={{
-					inputRef: (node) => {
-						ref(node);
-						inputRef(node);
-					}
-				}}
+				requiredConfirm={this.props.requiredConfirm}
+				inputRef={this.inputRef}
 				{...other}
 			/>
 		);
@@ -127,25 +125,22 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Container>
-					<Autosuggest
-						suggestions={suggestions}
-						onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-						onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-						getSuggestionValue={getSuggestionValue}
-						renderSuggestion={this.renderSuggestion}
-						renderInputComponent={this.renderInputComponent}
-						inputProps={{
-							label,
-							value,
-							name,
-							onBlur,
-							onChange: this.handleChange,
-							inputRef: (node) => {
-								this.popperNode = node;
-							}
-						}}
-						renderSuggestionsContainer={this.renderSuggestionsContainer}
-					/>
+				<Autosuggest
+					suggestions={suggestions}
+					onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+					onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+					getSuggestionValue={getSuggestionValue}
+					renderSuggestion={this.renderSuggestion}
+					renderInputComponent={this.renderInputComponent}
+					inputProps={{
+						label,
+						value,
+						name,
+						onBlur,
+						onChange: this.handleChange
+					}}
+					renderSuggestionsContainer={this.renderSuggestionsContainer}
+				/>
 			</Container>
 		);
 	}

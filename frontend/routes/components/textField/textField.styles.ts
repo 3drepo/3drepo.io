@@ -16,36 +16,21 @@
  */
 
 import styled from 'styled-components';
-import Grid from '@material-ui/core/Grid';
-// import TextField from '@material-ui/core/TextField';
-import FormControl from '@material-ui/core/FormControl';
-
-import { TextField } from '../../../../../components/textField/textField.component';
-
-export const StyledTextField = styled(TextField)``;
-export const StyledFormControl = styled(FormControl)``;
+import IconButton from '@material-ui/core/IconButton';
 
 export const Container = styled.div`
-  display: flex;
-  flex-direction: column;
+	position: relative;
+` as any;
 
-  ${StyledTextField},
-  ${StyledFormControl} {
-    margin: 8px 0;
-  }
+export const ActionsLine = styled.div`
+	position: absolute;
+	bottom: 9px;
+	right: 0;
 `;
 
-export const FieldsRow = styled(Grid)`
-  ${StyledTextField},
-  ${StyledFormControl} {
-    flex: 1;
-
-    &:nth-child(2n + 1) {
-      margin-right: 25px;
-    }
-  }
-
-  .select {
-    color: inherit;
-  }
+export const StyledIconButton = styled(IconButton)`
+	&& {
+		padding: 5px;
+		margin-right: 0;
+	}
 `;
