@@ -115,10 +115,39 @@ export function* uploadAvatar({ file }) {
 	}
 }
 
+export function* generateApiKey() {
+	try {
+		yield put(CurrentUserActions.setPendingState(true));
+		const key = (yield API.generateApiKey()).data;
+
+		yield put(SnackbarActions.show('Api key generated'));
+		yield put(CurrentUserActions.setPendingState(false));
+		yield put(CurrentUserActions.updateUserSuccess(key));
+
+	} catch (e) {
+		yield put(DialogActions.showEndpointErrorDialog('generate', 'api key', e));
+	}
+}
+
+export function* deleteApiKey() {
+	try {
+		yield put(CurrentUserActions.setPendingState(true));
+		yield API.deleteApiKey();
+		yield put(SnackbarActions.show('Api key deleted'));
+		yield put(CurrentUserActions.setPendingState(false));
+		yield put(CurrentUserActions.updateUserSuccess({apiKey: null}));
+
+	} catch (e) {
+		yield put(DialogActions.showEndpointErrorDialog('generate', 'api key', e));
+	}
+}
+
 export default function* teamspaceSaga() {
 	yield takeLatest(CurrentUserTypes.FETCH_USER, fetchUser);
 	yield takeLatest(CurrentUserTypes.FETCH_QUOTA_INFO, fetchQuotaInfo);
 	yield takeLatest(CurrentUserTypes.UPDATE_USER, updateUser);
 	yield takeLatest(CurrentUserTypes.UPDATE_USER_PASSWORD, updateUserPassword);
 	yield takeLatest(CurrentUserTypes.UPLOAD_AVATAR, uploadAvatar);
+	yield takeLatest(CurrentUserTypes.GENERATE_API_KEY, generateApiKey);
+	yield takeLatest(CurrentUserTypes.DELETE_API_KEY, deleteApiKey);
 }

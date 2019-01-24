@@ -28,18 +28,31 @@ import {
 	StyledButton
 } from '../profile.styles';
 
-interface IState {
-	newPasswordStrengthMessage: string;
+interface IProps {
+	apiKey: string;
+	onGenerateApiKey: () => void;
+	onDeleteApiKey: () => void;
 }
 
-export class APIKeyForm extends React.PureComponent<{}, IState> {
-	public state = {
-		newPasswordStrengthMessage: ''
-	};
-
+export class APIKeyForm extends React.PureComponent<IProps> {
 	public render() {
+		const apiKey =  this.props.apiKey;
 		return (
-			<div>My api key</div>
-			);
+			<div>
+				<div>My api key:{apiKey}</div>
+				<button onClick={this.onClickGenerate}> generate</button>
+				<button onClick={this.onClickDelete}> delete</button>
+
+			</div>);
+	}
+
+	private onClickGenerate = (e: React.SyntheticEvent) => {
+		e.stopPropagation();
+		this.props.onGenerateApiKey();
+	}
+
+	private onClickDelete = (e: React.SyntheticEvent) => {
+		e.stopPropagation();
+		this.props.onDeleteApiKey();
 	}
 }

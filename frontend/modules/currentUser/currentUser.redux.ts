@@ -31,6 +31,8 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 	updateButtonText: ['value'],
 	uploadAvatar: ['file'],
 	refreshAvatar: ['avatarUrl'],
+	generateApiKey: [],
+	deleteApiKey: [],
 	setAsInitialized: []
 }, { prefix: 'CURRENT_USER_' });
 

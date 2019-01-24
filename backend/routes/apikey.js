@@ -39,8 +39,14 @@ async function generateApiKey(req, res, next) {
 }
 
 function deleteApiKey(req, res, next) {
-	User.deleteApiKey(req.session.user.username);
-	next();
+	try {
+		User.deleteApiKey(req.session.user.username);
+		req.dataModel = {};
+		next();
+	} catch(err) {
+		responseCodes.respond(utils.APIInfo(req), req, res, next,
+			err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	}
 }
 
 module.exports = router;

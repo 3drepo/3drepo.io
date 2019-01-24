@@ -23,3 +23,11 @@ import api from './';
 export const fetchProfile = () => {
 	return api.get('/me');
 };
+
+export const generateApiKey = () => {
+	return api.post('/apikey');
+};
+
+export const deleteApiKey = () => {
+	return api.delete('/apikey');
+};
