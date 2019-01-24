@@ -26,6 +26,7 @@ import { Formik, Field } from 'formik';
 interface IProps {
 	requiredConfirm?: boolean;
 	validationSchema?: any;
+	onBeforeConfirmChange?: (event) => void;
 }
 
 interface IState {
@@ -72,11 +73,15 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 	}
 
 	public onChange = (field) => (event) => {
-		const { requiredConfirm, onChange } = this.props;
+		const { requiredConfirm, onChange, onBeforeConfirmChange } = this.props;
 
 		if (requiredConfirm) {
 			this.setState({ currentValue: event.target.value });
 			field.onChange(event);
+
+			if (onBeforeConfirmChange) {
+				onBeforeConfirmChange(event);
+			}
 		} else if (onChange) {
 			onChange(event);
 		}
@@ -104,7 +109,7 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 	)
 
 	public render() {
-		const { requiredConfirm, value, onChange, validationSchema, name, ...props } = this.props;
+		const { onBeforeConfirmChange, requiredConfirm, value, onChange, validationSchema, name, ...props } = this.props;
 		const { initialValue, currentValue } = this.state;
 		const shouldRenderActions = this.hasValueChanged;
 

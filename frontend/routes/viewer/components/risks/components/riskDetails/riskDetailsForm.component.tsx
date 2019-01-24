@@ -219,11 +219,10 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					<StyledTextField
 						{...field}
 						requiredConfirm={!this.isNewRisk}
+						validationSchema={RiskSchema}
 						fullWidth
 						multiline
 						label="Mitigation"
-						error={Boolean(form.errors.mitigation_desc)}
-						helperText={form.errors.mitigation_desc}
 					/>
 				)} />
 			</Form>
