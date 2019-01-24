@@ -64,7 +64,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					this.updateLevelOfRisk();
 				}
 
-				debugger;
 				this.autoSave();
 			}
 
