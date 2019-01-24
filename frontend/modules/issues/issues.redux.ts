@@ -21,6 +21,8 @@ import { keyBy } from 'lodash';
 export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	fetchIssues: ['teamspace', 'modelId', 'revision'],
 	fetchIssuesSuccess: ['issues'],
+	fetchIssue: ['teamspace', 'modelId', 'issueId'],
+	fetchIssueSuccess: ['issue'],
 	setComponentState: ['componentState']
 }, { prefix: 'ISSUES_' });
 
@@ -30,7 +32,9 @@ export const INITIAL_STATE = {
 	componentState: {
 		activeIssue: null,
 		showDetails: false,
-		expandDetails: true
+		expandDetails: true,
+		logs: [],
+		isPending: true
 	}
 };
 
@@ -39,11 +43,16 @@ export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues = [] }) => {
 	return {...state, issuesMap, activeIssue: null, showDetails: false};
 };
 
+export const fetchIssueSuccess = (state = INITIAL_STATE, { issue }) => {
+	return {...state };
+};
+
 const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess,
+	[IssuesTypes.FETCH_ISSUE_SUCCESS]: fetchIssueSuccess,
 	[IssuesTypes.SET_COMPONENT_STATE]: setComponentState
 });

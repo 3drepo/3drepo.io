@@ -29,3 +29,13 @@ export const getIssues = (teamspace, modelId, revision?) => {
 	}
 	return api.get(`${teamspace}/${modelId}/issues.json`);
 };
+
+/**
+ * Get issue
+ * @param teamspace
+ * @param modelId
+ * @param issueId
+ */
+export const getIssue = (teamspace, modelId, issueId) => {
+	return api.get(`${teamspace}/${modelId}/issues/${issueId}.json`);
+};

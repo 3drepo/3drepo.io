@@ -33,7 +33,8 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	setState: IssuesActions.setComponentState
+	setState: IssuesActions.setComponentState,
+	fetchIssue: IssuesActions.fetchIssue
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(IssueDetails);

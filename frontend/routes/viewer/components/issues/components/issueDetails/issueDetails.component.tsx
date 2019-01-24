@@ -21,6 +21,7 @@ import { Container } from '../../../risks/components/riskDetails/riskDetails.sty
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
+import { prepareIssue } from '../../../../../../helpers/issues';
 
 interface IProps {
 	jobs: any[];
@@ -29,6 +30,7 @@ interface IProps {
 	model: string;
 	expandDetails: boolean;
 	setState: (componentState) => void;
+	fetchIssue: (teamspace, model, issueId) => void;
 }
 
 const UNASSIGNED_JOB = {
@@ -38,11 +40,19 @@ const UNASSIGNED_JOB = {
 
 export class IssueDetails extends React.PureComponent<IProps, any> {
 	get issueData() {
-		return this.props.issue;
+		return prepareIssue(this.props.issue);
 	}
 
 	get jobsList() {
 		return [...this.props.jobs, UNASSIGNED_JOB];
+	}
+
+	public componentDidUpdate(prevProps) {
+		const { teamspace, model, fetchIssue, issue } = this.props;
+
+		if (!prevProps.issue._id && issue._id) {
+			fetchIssue(teamspace, model, issue._id);
+		}
 	}
 
 	public handleExpandChange = (event, expanded) => {

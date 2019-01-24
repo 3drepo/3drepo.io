@@ -33,7 +33,7 @@ const mapStateToProps = createStructuredSelector({
 	issues: selectIssues,
 	jobs: selectJobs,
 	activeIssueId: selectActiveIssueId,
-	activeRiskDetails: selectActiveIssueDetails,
+	activeIssueDetails: selectActiveIssueDetails,
 	showDetails: selectShowDetails
 });
 

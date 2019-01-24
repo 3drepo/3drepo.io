@@ -16,12 +16,13 @@
  */
 
 import * as React from 'react';
-import * as queryString from 'query-string';
 
-import { map, isEqual } from 'lodash';
+import { map } from 'lodash';
 import AddIcon from '@material-ui/icons/Add';
 import PinDrop from '@material-ui/icons/PinDrop';
 import ArrowBack from '@material-ui/icons/ArrowBack';
+
+import IssueDetails from './components/issueDetails/issueDetails.container';
 
 import { prepareIssue } from '../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -29,7 +30,6 @@ import { PreviewListItem } from '../../components/previewListItem/previewListIte
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { ListContainer, Summary } from '../risks/risks.styles';
-import IssueDetails from './components/issueDetails/issueDetails.container';
 import { IconButton } from '@material-ui/core';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { searchByFilters } from '../../../../helpers/searching';
@@ -52,6 +52,7 @@ interface IProps {
 	modelSettings: {
 		permissions: any[];
 	};
+	activeIssueDetails: any;
 	fetchIssues: (teamspace, model, revision) => void;
 	setState: (componentState: any) => void;
 	setNewIssue: () => void;
@@ -111,35 +112,40 @@ export class Issues extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		// this.props.subscribeOnIssueChanges(this.props.teamspace, this.props.model);
-		this.setState({ filteredIssues: this.filteredIssues });
+		this.props.setState({
+			showDetails: true,
+			activeIssue: 'edc9b060-004d-11e8-af18-d152ffcd64ee'
+		});
+
+		// this.setState({ filteredIssues: this.filteredIssues });
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { issues, selectedFilters, location, activeIssueId, showDetails } = this.props;
-		const issuesChanged = !isEqual(prevProps.issues, issues);
-		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
-		const showDetailsChanged = showDetails !== prevProps.showDetails;
+		// const { issues, selectedFilters, location, activeIssueId, showDetails } = this.props;
+		// const issuesChanged = !isEqual(prevProps.issues, issues);
+		// const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
+		// const showDetailsChanged = showDetails !== prevProps.showDetails;
 
-		const changes = {} as IState;
+		// const changes = {} as IState;
 
-		if (issuesChanged || filtersChanged) {
-			changes.filteredIssues = this.filteredIssues;
-		}
+		// if (issuesChanged || filtersChanged) {
+		// 	changes.filteredIssues = this.filteredIssues;
+		// }
 
-		if (!filtersChanged && location.search && !activeIssueId && (!showDetails && showDetailsChanged)) {
-			const { riskId } = queryString.parse(location.search);
-			if (riskId) {
-				const foundRisk = issues.find((risk) => risk._id === riskId);
+		// if (!filtersChanged && location.search && !activeIssueId && (!showDetails && showDetailsChanged)) {
+		// 	const { riskId } = queryString.parse(location.search);
+		// 	if (riskId) {
+		// 		const foundRisk = issues.find((risk) => risk._id === riskId);
 
-				if (foundRisk) {
-					this.handleShowRiskDetails(foundRisk, changes.filteredIssues)();
-				}
-			}
-		}
+		// 		if (foundRisk) {
+		// 			this.handleShowRiskDetails(foundRisk, changes.filteredIssues)();
+		// 		}
+		// 	}
+		// }
 
-		if (!isEmpty(changes)) {
-			this.setState(changes);
-		}
+		// if (!isEmpty(changes)) {
+		// 	this.setState(changes);
+		// }
 	}
 
 	public componentWillUnmount() {
@@ -192,14 +198,11 @@ export class Issues extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderDetailsView = renderWhenTrue(() => (
-		<IssueDetails {...this.props.issueDetails} />
+		<IssueDetails teamspace={this.props.teamspace} model={this.props.model} />
 	));
 
 	public renderActions = () => {
-		if (this.props.showDetails) {
-			return [{ Button: this.getPrevButton }, { Button: this.getNextButton }];
-		}
-		return [{ Button: this.getSearchButton }, { Button: this.getMenuButton }];
+		return [];
 	}
 
 	public renderTitleIcon = () => {
@@ -229,9 +232,9 @@ export class Issues extends React.PureComponent<IProps, IState> {
 				actions={this.renderActions()}
 				pending={this.props.isPending}
 			>
-				{this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
-				{this.renderListView(!this.props.showDetails)}
-				{this.renderDetailsView(this.props.showDetails)}
+				{/* {this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
+				{this.renderListView(!this.props.showDetails)} */}
+				{this.renderDetailsView(this.props.activeIssueDetails)}
 			</ViewerPanel>
 		);
 	}

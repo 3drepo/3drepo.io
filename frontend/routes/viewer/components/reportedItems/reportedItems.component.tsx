@@ -341,7 +341,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		console.log('RENDER REPORTED ITEMS');
 		return (
 			<ViewerPanel
 				title={this.props.title}

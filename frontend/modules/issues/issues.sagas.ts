@@ -30,6 +30,17 @@ export function* fetchIssues({teamspace, modelId, revision}) {
 	}
 }
 
+export function* fetchIssue({teamspace, modelId, issueId}) {
+	try {
+		const {data} = yield API.getIssue(teamspace, modelId, issueId);
+
+		yield put(IssuesActions.fetchIssueSuccess(data));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('get', 'issue', error));
+	}
+}
+
 export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
+	yield takeLatest(IssuesTypes.FETCH_ISSUE, fetchIssue);
 }
