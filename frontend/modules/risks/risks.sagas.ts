@@ -142,8 +142,8 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(savedRisk, jobs);
-		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(RisksActions.showDetails(savedRisk, [], revision));
+		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(SnackbarActions.show('Risk created'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('save', 'risk', error));

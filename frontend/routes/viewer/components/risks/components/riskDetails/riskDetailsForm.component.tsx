@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
-import { connect, Field, Form, withFormik } from 'formik';
+import { connect, Field, Form, withFormik, Formik } from 'formik';
 import InputLabel from '@material-ui/core/InputLabel';
 
 import {
@@ -52,21 +52,25 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
-		const { values } = this.props;
+		const { values, formik } = this.props;
 		const valuesChanged = !isEqual(prevProps.values, values);
 
-		if (valuesChanged && !this.state.isSaving) {
-			const likelihoodChanged = prevProps.values.likelihood !== values.likelihood;
-			const consequenceChanged = prevProps.values.consequence !== values.consequence;
+		if (formik.dirty) {
+			if (valuesChanged && !this.state.isSaving) {
+				const likelihoodChanged = prevProps.values.likelihood !== values.likelihood;
+				const consequenceChanged = prevProps.values.consequence !== values.consequence;
 
-			if (likelihoodChanged || consequenceChanged) {
-				this.updateLevelOfRisk();
+				if (likelihoodChanged || consequenceChanged) {
+					this.updateLevelOfRisk();
+				}
+
+				debugger;
+				this.autoSave();
 			}
-			this.autoSave();
-		}
 
-		if (valuesChanged && this.state.isSaving) {
-			changes.isSaving = false;
+			if (valuesChanged && this.state.isSaving) {
+				changes.isSaving = false;
+			}
 		}
 
 		if (!isEmpty(changes)) {
@@ -114,11 +118,10 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					)} />
 
 					<Field name="associated_activity" render={({ field }) => (
-						<AutosuggestField
+						<StyledTextField
 							{...field}
 							requiredConfirm={!this.isNewRisk}
 							label="Associated Activity"
-							suggestions={this.props.associatedActivities}
 						/>
 					)} />
 				</FieldsRow>

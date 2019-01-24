@@ -18,6 +18,7 @@
 import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
 import MenuItem from '@material-ui/core/MenuItem';
+import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 
 import { Container, SuggestionsList, StyledTextField } from './autosuggestField.styles';
@@ -27,7 +28,6 @@ interface IProps {
 	label: string;
 	value: string;
 	name: string;
-	requiredConfirm?: boolean;
 	onChange: (event) => void;
 	onBlur: (event) => void;
 }
@@ -45,7 +45,7 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 		value: ''
 	};
 
-	public inputRef = React.createRef() as any;
+	private popperNode = null;
 
 	public componentDidMount() {
 		this.setState({
@@ -90,14 +90,14 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 
 	public renderSuggestionsContainer = (options) => (
 		<SuggestionsList
-			anchorEl={this.inputRef.current}
+			anchorEl={this.popperNode}
 			open={Boolean(options.children)}
 			placement="bottom"
 		>
 			<Paper
 				square={true}
 				{...options.containerProps}
-				style={{ width: this.inputRef.current ? this.inputRef.current.clientWidth : null }}
+				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
 			>
 				{options.children}
 			</Paper>
@@ -105,14 +105,17 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 	)
 
 	public renderInputComponent = (inputProps) => {
-		const {inputRef, ref, ...other} = inputProps;
+		const { inputRef, ref, ...other } = inputProps;
 
 		return (
 			<StyledTextField
 				fullWidth
-				requiredConfirm={this.props.requiredConfirm}
-				inputRef={this.inputRef}
-				onBeforeConfirmChange={(event) => this.onSuggestionsFetchRequested(event.target)}
+				InputProps={{
+					inputRef: (node) => {
+						ref(node);
+						inputRef(node);
+					}
+				}}
 				{...other}
 			/>
 		);
@@ -136,7 +139,10 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 						value,
 						name,
 						onBlur,
-						onChange: this.handleChange
+						onChange: this.handleChange,
+						inputRef: (node) => {
+							this.popperNode = node;
+						}
 					}}
 					renderSuggestionsContainer={this.renderSuggestionsContainer}
 				/>
