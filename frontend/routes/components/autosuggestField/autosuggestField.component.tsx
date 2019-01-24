@@ -45,7 +45,7 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 		value: ''
 	};
 
-	private popperNode = null;
+	public inputRef = React.createRef() as any;
 
 	public componentDidMount() {
 		this.setState({
@@ -104,8 +104,6 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 		</SuggestionsList>
 	)
 
-	public inputRef = React.createRef();
-
 	public renderInputComponent = (inputProps) => {
 		const {inputRef, ref, ...other} = inputProps;
 
@@ -114,6 +112,7 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 				fullWidth
 				requiredConfirm={this.props.requiredConfirm}
 				inputRef={this.inputRef}
+				onBeforeConfirmChange={(event) => this.onSuggestionsFetchRequested(event.target)}
 				{...other}
 			/>
 		);

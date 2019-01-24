@@ -89,7 +89,7 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
 			Viewer.getCurrentViewpoint({ teamspace, model }),
 			Viewer.getObjectsStatus(),
-			riskData.screenshot || Viewer.getScreenshot(),
+			riskData.descriptionThumbnail || Viewer.getScreenshot(),
 			API.getMyJob(teamspace)
 		]);
 
