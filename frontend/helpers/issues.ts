@@ -1,6 +1,6 @@
-import { pick, get } from 'lodash';
+import { get } from 'lodash';
 import { getAPIUrl } from '../services/api';
-import { ISSUE_STATUSES_COLORS, ISSUE_STATUSES_ICONS } from '../constants/issues';
+import { STATUSES_COLORS, STATUSES_ICONS } from '../constants/issues';
 
 export const prepareIssue = (issue, jobs = []) => {
 	const thumbnail = getAPIUrl(issue.thumbnail);
@@ -8,6 +8,7 @@ export const prepareIssue = (issue, jobs = []) => {
 	const roleColor = get(jobs.find((job) => job._id === get(issue.assigned_roles, '[0]')), 'color');
 
 	return {
+		...issue,
 		name: issue.name,
 		description: issue.description,
 		author: issue.owner,
@@ -21,8 +22,8 @@ export const prepareIssue = (issue, jobs = []) => {
 
 export const getStatusIcon = (priority, status) => {
   const statusIcon = {
-    Icon: ISSUE_STATUSES_ICONS[status] || null,
-    color: ISSUE_STATUSES_COLORS[status] || ISSUE_STATUSES_COLORS[priority] || null
+    Icon: STATUSES_ICONS[status] || null,
+    color: STATUSES_COLORS[status] || STATUSES_COLORS[priority] || null
   };
 
   return {...statusIcon};
