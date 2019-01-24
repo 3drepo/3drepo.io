@@ -25,21 +25,38 @@ import {
 	selectIssues,
 	selectActiveIssueId,
 	selectShowDetails,
-	selectActiveIssueDetails
+	selectSearchEnabled,
+	selectSelectedFilters,
+	selectShowPins,
+	selectIsIssuesPending
 } from '../../../../modules/issues';
-import { selectJobs } from '../../../../modules/jobs';
+import { selectJobsList } from '../../../../modules/jobs';
+import { selectSettings } from '../../../../modules/model';
 
 const mapStateToProps = createStructuredSelector({
 	issues: selectIssues,
-	jobs: selectJobs,
+	jobs: selectJobsList,
 	activeIssueId: selectActiveIssueId,
-	activeIssueDetails: selectActiveIssueDetails,
-	showDetails: selectShowDetails
+	showDetails: selectShowDetails,
+	showPins: selectShowPins,
+	searchEnabled: selectSearchEnabled,
+	selectedFilters: selectSelectedFilters,
+	isPending: selectIsIssuesPending,
+	modelSettings: selectSettings
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchIssues: IssuesActions.fetchIssues,
-	setState: IssuesActions.setComponentState
+	setState: IssuesActions.setComponentState,
+	setNewIssue: IssuesActions.setNewIssue,
+	downloadIssues: IssuesActions.downloadIssues,
+	printIssues: IssuesActions.printIssues,
+	setActiveIssue: IssuesActions.setActiveIssue,
+	showIssueDetails: IssuesActions.showDetails,
+	toggleShowPins: IssuesActions.toggleShowPins,
+	subscribeOnIssueChanges: IssuesActions.subscribeOnIssueChanges,
+	unsubscribeOnIssueChanges: IssuesActions.unsubscribeOnIssueChanges,
+	closeDetails: IssuesActions.closeDetails
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Issues);

@@ -44,7 +44,6 @@ const mapStateToProps = createStructuredSelector({
 	showPins: selectShowPins,
 	showDetails: selectShowDetails,
 	searchEnabled: selectSearchEnabled,
-	setState: RisksActions.setComponentState,
 	selectedFilters: selectSelectedFilters,
 	isPending: selectIsRisksPending
 });

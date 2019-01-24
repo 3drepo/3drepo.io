@@ -15,19 +15,42 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 
 import * as API from '../../services/api';
-import { IssuesTypes, IssuesActions } from './issues.redux';
+import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
+import { getIssuePinColor, prepareIssue } from '../../helpers/issues';
+import { Cache } from '../../services/cache';
+import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
+import { SnackbarActions } from '../snackbar';
+import { IssuesTypes, IssuesActions } from './issues.redux';
+import {
+	selectActiveIssueId,
+	selectIssues,
+	selectShowPins,
+	selectIssuesMap,
+	selectActiveIssueDetails,
+	selectFilteredIssues
+} from './issues.selectors';
+import { selectJobsList } from '../jobs';
+import { selectCurrentUser } from '../currentUser';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
+	yield put(IssuesActions.togglePendingState(true));
 	try {
-		const {data} = yield API.getIssues(teamspace, modelId, revision);
-		yield put(IssuesActions.fetchIssuesSuccess(data));
+		const { data } = yield API.getIssues(teamspace, modelId, revision);
+		const jobs = yield select(selectJobsList);
+
+		const preparedIssues = data.map((issue) => prepareIssue(issue, jobs));
+
+		yield put(IssuesActions.fetchIssuesSuccess(preparedIssues));
+		// yield put(IssuesActions.renderPins(data));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'issues', error));
 	}
+	yield put(IssuesActions.togglePendingState(false));
 }
 
 export function* fetchIssue({teamspace, modelId, issueId}) {

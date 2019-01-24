@@ -5,7 +5,7 @@ import AdjustIcon from '@material-ui/icons/Adjust';
 
 export const ISSUE_PANEL_NAME = 'issue';
 
-const STATUSES = {
+export const STATUSES = {
 	OPEN: 'open',
 	IN_PROGRESS: 'in progress',
 	FOR_APPROVAL: 'for approval',

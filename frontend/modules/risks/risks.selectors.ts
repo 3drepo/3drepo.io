@@ -31,10 +31,6 @@ export const selectRisksMap = createSelector(
 	selectRisksDomain, (state) => state.risksMap
 );
 
-export const selectIsPending = createSelector(
-	selectRisksDomain, (state) => state.isPending
-);
-
 export const selectComponentState = createSelector(
 	selectRisksDomain, (state) => state.componentState
 );

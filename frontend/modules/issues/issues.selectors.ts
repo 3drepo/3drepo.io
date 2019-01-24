@@ -17,6 +17,8 @@
 
 import { createSelector } from 'reselect';
 import { values } from 'lodash';
+import { STATUSES } from '../../constants/issues';
+import { searchByFilters } from '../../helpers/searching';
 
 export const selectIssuesDomain = (state) => Object.assign({}, state.issues);
 
@@ -24,7 +26,11 @@ export const selectIssues = createSelector(
 	selectIssuesDomain, (state) => values(state.issuesMap)
 );
 
-export const selectIsPending = createSelector(
+export const selectIssuesMap = createSelector(
+	selectIssuesDomain, (state) => state.issuesMap
+);
+
+export const selectIsIssuesPending = createSelector(
 	selectIssuesDomain, (state) => state.isPending
 );
 
@@ -38,7 +44,7 @@ export const selectActiveIssueId = createSelector(
 
 export const selectActiveIssueDetails = createSelector(
 	selectIssuesDomain, selectComponentState, (state, componentState) => {
-		return state.issuesMap[componentState.activeIssue] || {};
+		return state.issuesMap[componentState.activeIssue] || componentState.newIssue;
 	}
 );
 
@@ -48,4 +54,36 @@ export const selectShowDetails = createSelector(
 
 export const selectExpandDetails = createSelector(
 	selectComponentState, (state) => state.expandDetails
+);
+
+export const selectNewIssueDetails = createSelector(
+	selectComponentState, (state) => state.newIssue
+);
+
+export const selectNewComment = createSelector(
+	selectComponentState, (state) => state.newComment
+);
+
+export const selectSearchEnabled = createSelector(
+	selectComponentState, (state) => state.searchEnabled
+);
+
+export const selectSelectedFilters = createSelector(
+	selectComponentState, (state) => state.selectedFilters
+);
+
+export const selectFilteredIssues = createSelector(
+	selectIssues, selectSelectedFilters, (issues, selectedFilters) => {
+		let returnHiddenIssue = false;
+		if (selectedFilters.length) {
+			returnHiddenIssue = selectedFilters
+				.some(({ value: { value } }) => value === STATUSES.CLOSED);
+		}
+
+		return searchByFilters(issues, selectedFilters, returnHiddenIssue);
+	}
+);
+
+export const selectShowPins = createSelector(
+	selectComponentState, (state) => state.showPins
 );

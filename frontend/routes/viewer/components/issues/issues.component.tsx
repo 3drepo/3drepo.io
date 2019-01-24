@@ -16,23 +16,17 @@
  */
 
 import * as React from 'react';
+import * as queryString from 'query-string';
 
-import { map } from 'lodash';
-import AddIcon from '@material-ui/icons/Add';
+import { map, isEqual } from 'lodash';
 import PinDrop from '@material-ui/icons/PinDrop';
-import ArrowBack from '@material-ui/icons/ArrowBack';
 
 import IssueDetails from './components/issueDetails/issueDetails.container';
 
-import { prepareIssue } from '../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { PreviewListItem } from '../../components/previewListItem/previewListItem.component';
-import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
-import { ListContainer, Summary } from '../risks/risks.styles';
-import { IconButton } from '@material-ui/core';
-import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { searchByFilters } from '../../../../helpers/searching';
+import { ReportedItems } from '../reportedItems';
+import { STATUSES } from '../../../../constants/issues';
 
 interface IProps {
 	history: any;
@@ -57,9 +51,9 @@ interface IProps {
 	setState: (componentState: any) => void;
 	setNewIssue: () => void;
 	downloadIssues: (teamspace, model) => void;
-	printIssues: (teamspace, model, risksIds) => void;
-	setActiveIssue: (risk, filteredIssues, revision?) => void;
-	showIssueDetails: (risk, filteredIssues, revision?) => void;
+	printIssues: (teamspace, model, issuesIds) => void;
+	setActiveIssue: (issue, filteredIssues, revision?) => void;
+	showIssueDetails: (issue, filteredIssues, revision?) => void;
 	closeDetails: () => void;
 	toggleShowPins: (showPins: boolean, filteredIssues) => void;
 	subscribeOnIssueChanges: (teamspace, modelId) => void;
@@ -72,6 +66,11 @@ interface IState {
 	modelLoaded: boolean;
 }
 
+const UNASSIGNED_JOB = {
+	name: 'Unassigned',
+	value: ''
+};
+
 export class Issues extends React.PureComponent<IProps, IState> {
 	public state: IState = {
 		issueDetails: {},
@@ -79,167 +78,110 @@ export class Issues extends React.PureComponent<IProps, IState> {
 		modelLoaded: false
 	};
 
-	get filtersValuesMap() {
-		return {};
+	get jobsList() {
+		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
 	get filters() {
-		const filterValuesMap = this.filtersValuesMap;
 		return [];
 	}
 
-	get menuActionsMap() {
-		const { printIssues, downloadIssues, toggleShowPins, teamspace, model, showPins } = this.props;
-		const { filteredIssues } = this.state;
-		return {
-			[RISKS_ACTIONS_ITEMS.PRINT]: () => {
-				const risksIds = map(filteredIssues, '_id').join(',');
-				printIssues(teamspace, model, risksIds);
-			},
-			[RISKS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadIssues(teamspace, model),
-			[RISKS_ACTIONS_ITEMS.SHOW_PINS]: () => toggleShowPins(!showPins, filteredIssues)
-		};
+	get headerMenuItems() {
+		return [];
 	}
 
-	get activeRiskIndex() {
-		return this.state.filteredIssues.findIndex((risk) => risk._id === this.props.activeIssueId);
-	}
-
-	get filteredIssues() {
-		const { issues, selectedFilters } = this.props;
-		return searchByFilters(issues, selectedFilters);
+	get showDefaultHiddenItems() {
+		if (this.props.selectedFilters.length) {
+			return this.props.selectedFilters
+				.some(({ value: { value } }) => value === STATUSES.CLOSED);
+		}
+		return false;
 	}
 
 	public componentDidMount() {
-		// this.props.subscribeOnIssueChanges(this.props.teamspace, this.props.model);
-		this.props.setState({
-			showDetails: true,
-			activeIssue: 'edc9b060-004d-11e8-af18-d152ffcd64ee'
-		});
-
-		// this.setState({ filteredIssues: this.filteredIssues });
+		// this.props.subscribeOnRiskChanges(this.props.teamspace, this.props.model);
 	}
 
 	public componentDidUpdate(prevProps) {
-		// const { issues, selectedFilters, location, activeIssueId, showDetails } = this.props;
-		// const issuesChanged = !isEqual(prevProps.issues, issues);
-		// const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
-		// const showDetailsChanged = showDetails !== prevProps.showDetails;
+		const { issues, selectedFilters, activeIssueId, showDetails, revision } = this.props;
+		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
 
-		// const changes = {} as IState;
+		if (issues.length && !filtersChanged && location.search && !activeIssueId && !prevProps.showDetails && !showDetails) {
+			const { issueId } = queryString.parse(location.search);
+			if (issueId) {
+				const foundRisk = issues.find((issue) => issue._id === issueId);
 
-		// if (issuesChanged || filtersChanged) {
-		// 	changes.filteredIssues = this.filteredIssues;
-		// }
-
-		// if (!filtersChanged && location.search && !activeIssueId && (!showDetails && showDetailsChanged)) {
-		// 	const { riskId } = queryString.parse(location.search);
-		// 	if (riskId) {
-		// 		const foundRisk = issues.find((risk) => risk._id === riskId);
-
-		// 		if (foundRisk) {
-		// 			this.handleShowRiskDetails(foundRisk, changes.filteredIssues)();
-		// 		}
-		// 	}
-		// }
-
-		// if (!isEmpty(changes)) {
-		// 	this.setState(changes);
-		// }
+				if (foundRisk) {
+					this.props.showIssueDetails(foundRisk, revision);
+				}
+			}
+		}
 	}
 
 	public componentWillUnmount() {
-		// this.props.unsubscribeOnRiskChanges(this.props.teamspace, this.props.model);
+		// this.props.unsubscribeOnIssueChanges(this.props.teamspace, this.props.model);
 	}
 
-	public handleIssueFocus = (issueId) => () => {
-		this.props.setState({ activeIssue: issueId });
+	public handleFilterChange = (selectedFilters) => {
+		this.props.setState({ selectedFilters });
 	}
 
-	public handleIssueClick = () => () => {
-		this.toggleDetails(true);
+	public setActiveIssue = (item) => {
+		this.props.setActiveIssue(item, this.props.revision);
 	}
 
-	public handleAddNewIssue = () => {
-		this.toggleDetails(true);
+	public showIssueDetails = (item) => {
+		this.props.showIssueDetails(item, this.props.revision);
 	}
 
-	public renderIssuesList = renderWhenTrue(() => {
-		const Items = this.props.issues.map((issue, index) => (
-			<PreviewListItem
-				{...prepareIssue(issue, this.props.jobs)}
-				key={index}
-				onItemClick={this.handleIssueFocus(issue._id)}
-				onArrowClick={this.handleIssueClick()}
-				active={this.props.activeIssueId === issue._id}
-			/>
-		));
+	public getFilterValues(property) {
+		return property.map(({ value, name }) => {
+			return {
+				label: name,
+				value
+			};
+		});
+	}
 
-		return <ListContainer>{Items}</ListContainer>;
-	});
+	public handleToggleFilters = (searchEnabled) => {
+		const changes: any = { searchEnabled };
 
-	public renderListView = renderWhenTrue(() => (
-		<>
-			<ViewerPanelContent className="height-catcher">
-				{this.renderIssuesList(Boolean(this.props.issues.length))}
-			</ViewerPanelContent>
-			<ViewerPanelFooter alignItems="center" justify="space-between">
-				<Summary>{this.props.issues.length} issues displayed</Summary>
-				<ViewerPanelButton
-					aria-label="Add issue"
-					onClick={this.handleAddNewIssue}
-					color="secondary"
-					variant="fab"
-				>
-					<AddIcon />
-				</ViewerPanelButton>
-			</ViewerPanelFooter>
-		</>
-	));
+		if (!searchEnabled) {
+			changes.selectedFilters = [];
+		}
+		this.props.setState(changes);
+	}
 
 	public renderDetailsView = renderWhenTrue(() => (
 		<IssueDetails teamspace={this.props.teamspace} model={this.props.model} />
 	));
 
-	public renderActions = () => {
-		return [];
-	}
-
-	public renderTitleIcon = () => {
-		if (this.props.showDetails) {
-			return (
-				<IconButton onClick={this.props.closeDetails} >
-					<ArrowBack />
-				</IconButton>
-			);
-		}
-		return <PinDrop />;
-	}
-
-	public renderFilterPanel = renderWhenTrue(() => (
-		<FilterPanel
-			onChange={this.handleFilterChange}
-			filters={this.filters as any}
-			selectedFilters={this.props.selectedFilters}
-		/>
-	));
-
 	public render() {
 		return (
-			<ViewerPanel
+			<ReportedItems
 				title="Issues"
-				Icon={this.renderTitleIcon()}
-				actions={this.renderActions()}
-				pending={this.props.isPending}
-			>
-				{/* {this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
-				{this.renderListView(!this.props.showDetails)} */}
-				{this.renderDetailsView(this.props.activeIssueDetails)}
-			</ViewerPanel>
-		);
-	}
+				Icon={PinDrop}
+				isPending={this.props.isPending}
 
-	private toggleDetails = (showDetails) => {
-		this.props.setState({ showDetails, activeIssue: null });
+				items={this.props.issues}
+				showDefaultHiddenItems={this.showDefaultHiddenItems}
+				activeItemId={this.props.activeIssueId}
+				showDetails={this.props.showDetails}
+				permissions={this.props.modelSettings.permissions}
+				headerMenuItems={this.headerMenuItems}
+				searchEnabled={this.props.searchEnabled}
+				filters={this.filters}
+				selectedFilters={this.props.selectedFilters}
+
+				onToggleFilters={this.handleToggleFilters}
+				onChangeFilters={this.handleFilterChange}
+				onActiveItem={this.setActiveIssue}
+				onNewItem={this.props.setNewIssue}
+				onShowDetails={this.showIssueDetails}
+				onCloseDetails={this.props.closeDetails}
+
+				renderDetailsView={this.renderDetailsView}
+			/>
+		);
 	}
 }
