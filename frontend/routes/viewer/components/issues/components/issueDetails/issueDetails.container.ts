@@ -18,10 +18,16 @@
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../../../helpers/migration';
-
+import { selectJobsList } from '../../../../../../modules/jobs';
+import {
+	selectActiveIssueDetails
+} from '../../../../../../modules/issues';
 import { IssueDetails } from './issueDetails.component';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	issue: selectActiveIssueDetails,
+	jobs: selectJobsList
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 

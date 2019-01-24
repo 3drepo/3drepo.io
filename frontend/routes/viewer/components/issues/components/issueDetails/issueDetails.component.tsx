@@ -17,21 +17,44 @@
 
 import * as React from 'react';
 import AddIcon from '@material-ui/icons/Add';
-
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { Container } from './issueDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
 
 interface IProps {
-	noop: string; // TODO: Remove sample
+	jobs: any[];
+	issue: any;
 }
 
+const UNASSIGNED_JOB = {
+	name: 'Unassigned',
+	value: ''
+};
+
 export class IssueDetails extends React.PureComponent<IProps, any> {
+	get issueData() {
+		return this.props.issue;
+	}
+
+	get jobsList() {
+		return [...this.props.jobs, UNASSIGNED_JOB];
+	}
+
+	public renderPreview = renderWhenTrue(() => {
+		return (
+			<IssueDetailsForm
+				issue={this.issueData}
+				jobs={this.jobsList}
+			/>
+		);
+	});
+
 	public render() {
 		return (
 			<Container>
 				<ViewerPanelContent className="height-catcher">
-					<IssueDetailsForm />
+					{this.renderPreview(this.props.issue)}
 				</ViewerPanelContent>
 			</Container>
 		);
