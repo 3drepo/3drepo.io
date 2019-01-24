@@ -45,6 +45,17 @@ export const StyledButton = styled(Button)`
 	}
 `;
 
+export const StyledButtonContainer = styled.div`
+	&& {
+		margin-top: 16px;
+		align-self: flex-end;
+	}
+
+	& > button {
+		margin-right: 10px;
+	}
+`;
+
 export const StyledTextField = styled(TextField)``;
 
 export const FieldsRow = styled(Grid)`

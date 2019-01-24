@@ -25,8 +25,10 @@ import {
 	Headline,
 	StyledTextField,
 	FieldsRow,
-	StyledButton
+	StyledButton,
+	StyledButtonContainer
 } from '../profile.styles';
+import { Grid, Button } from '@material-ui/core';
 
 interface IProps {
 	apiKey: string;
@@ -36,14 +38,40 @@ interface IProps {
 
 export class APIKeyForm extends React.PureComponent<IProps> {
 	public render() {
-		const apiKey =  this.props.apiKey;
+		const apiKey =  this.props.apiKey || '';
 		return (
-			<div>
-				<div>My api key:{apiKey}</div>
-				<button onClick={this.onClickGenerate}> generate</button>
-				<button onClick={this.onClickDelete}> delete</button>
-
-			</div>);
+			<Form>
+					<FormContainer container={true} direction="column">
+						<Headline color="primary" variant="subheading">Api Key</Headline>
+						<FieldsRow container={true} wrap="nowrap">
+								<StyledTextField
+									value={apiKey}
+									disabled={true}
+									margin="normal"
+								/>
+						</FieldsRow>
+							<StyledButtonContainer>
+								<Button
+									color="secondary"
+									variant="raised"
+									disabled={false}
+									type="button"
+									onClick={this.onClickGenerate}
+								>
+									Generate
+								</Button>
+								<Button
+									color="secondary"
+									variant="raised"
+									disabled={!apiKey}
+									type="button"
+									onClick={this.onClickDelete}
+								>
+									Delete
+								</Button>
+							</StyledButtonContainer>
+					</FormContainer>
+				</Form>);
 	}
 
 	private onClickGenerate = (e: React.SyntheticEvent) => {
