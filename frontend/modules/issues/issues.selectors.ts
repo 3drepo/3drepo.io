@@ -45,3 +45,7 @@ export const selectActiveIssueDetails = createSelector(
 export const selectShowDetails = createSelector(
 	selectComponentState, (state) => state.showDetails
 );
+
+export const selectExpandDetails = createSelector(
+	selectComponentState, (state) => state.expandDetails
+);

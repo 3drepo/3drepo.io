@@ -16,15 +16,19 @@
  */
 
 import * as React from 'react';
-import AddIcon from '@material-ui/icons/Add';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { Container } from './issueDetails.styles';
+import { Container } from '../../../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
+import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
 
 interface IProps {
 	jobs: any[];
 	issue: any;
+	teamspace: string;
+	model: string;
+	expandDetails: boolean;
+	setState: (componentState) => void;
 }
 
 const UNASSIGNED_JOB = {
@@ -41,12 +45,30 @@ export class IssueDetails extends React.PureComponent<IProps, any> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
+	public handleExpandChange = (event, expanded) => {
+		this.props.setState({ expandDetails: expanded });
+	}
+
+	public handleNameChange = (event, name) => {
+		const newIssue = { ...this.issueData, name };
+		this.props.setState({ newIssue });
+	}
+
 	public renderPreview = renderWhenTrue(() => {
 		return (
-			<IssueDetailsForm
-				issue={this.issueData}
-				jobs={this.jobsList}
-			/>
+			<PreviewDetails
+				key={this.issueData._id}
+				{...this.issueData}
+				defaultExpanded={this.props.expandDetails}
+				editable={!this.issueData._id}
+				onNameChange={this.handleNameChange}
+				onExpandChange={this.handleExpandChange}
+			>
+				<IssueDetailsForm
+					issue={this.issueData}
+					jobs={this.jobsList}
+				/>
+			</PreviewDetails>
 		);
 	});
 

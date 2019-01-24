@@ -5,9 +5,7 @@ import LuxonUtils from '@date-io/luxon';
 import { get } from 'lodash';
 import { Field, Form, withFormik } from 'formik';
 import InputLabel from '@material-ui/core/InputLabel';
-import {
-	FieldsRow, StyledFormControl, StyledTextField
-}	from './../../../risks/components/riskDetails/riskDetails.styles';
+import { FieldsRow, StyledFormControl }	from './../../../risks/components/riskDetails/riskDetails.styles';
 import {
 	ISSUE_STATUSES, ISSUE_PRIORITIES, ISSUE_TOPIC_TYPES
 } from '../../../../../../constants/issues';
@@ -67,7 +65,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, any> {
 						</StyledFormControl>
 					</FieldsRow>
 
-					<FieldsRow container justify="space-between">
+					<FieldsRow container justify="space-between" isHalf={true}>
 						<StyledFormControl>
 							<InputLabel shrink={true} htmlFor="due_date">Due date</InputLabel>
 							<Field name="due_date" render={({ field }) => (

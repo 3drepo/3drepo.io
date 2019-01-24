@@ -29,7 +29,8 @@ export const INITIAL_STATE = {
 	isPending: true,
 	componentState: {
 		activeIssue: null,
-		showDetails: false
+		showDetails: false,
+		expandDetails: true
 	}
 };
 

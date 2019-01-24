@@ -16,9 +16,8 @@
  */
 
 import * as React from 'react';
-import { DatePicker } from 'material-ui-pickers';
 
-import { Container, SuggestionsList, StyledTextField } from './dateField.styles';
+import { Container, StyledDatePicker } from './dateField.styles';
 
 interface IProps {
 	inputId: string;
@@ -66,7 +65,7 @@ export class DateField extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Container>
-				<DatePicker
+				<StyledDatePicker
 					format="DD/MM/YYYY"
 					value={value}
 					onBlur={onBlur}

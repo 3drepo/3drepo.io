@@ -20,15 +20,20 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../../../helpers/migration';
 import { selectJobsList } from '../../../../../../modules/jobs';
 import {
-	selectActiveIssueDetails
+	IssuesActions,
+	selectActiveIssueDetails,
+	selectExpandDetails
 } from '../../../../../../modules/issues';
 import { IssueDetails } from './issueDetails.component';
 
 const mapStateToProps = createStructuredSelector({
 	issue: selectActiveIssueDetails,
-	jobs: selectJobsList
+	jobs: selectJobsList,
+	expandDetails: selectExpandDetails
 });
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	setState: IssuesActions.setComponentState
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(IssueDetails);
