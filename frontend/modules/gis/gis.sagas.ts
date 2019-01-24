@@ -31,7 +31,7 @@ export function* initializeMap({params}) {
 		if (params && params.surveyPoints.length > 0) {
 			convertedParams.surveyPoints[0].position[0] = Number(params.surveyPoints[0].position[0]);
 			convertedParams.surveyPoints[0].position[1] = -Number(params.surveyPoints[0].position[2]);
-			convertedParams.surveyPoints[0].position[2] = -Number(params.surveyPoints[0].position[1]);;
+			convertedParams.surveyPoints[0].position[2] = -Number(params.surveyPoints[0].position[1]);
 			convertedParams.surveyPoints[0].latLong = params.surveyPoints[0].latLong.map((x) => Number(x));
 		}
 		yield put(ViewerActions.mapInitialise(convertedParams));
