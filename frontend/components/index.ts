@@ -60,4 +60,6 @@ import './utils/js/utils.filter';
 import './viewer/js/multi-select.service';
 import './viewer/js/viewer.component';
 import './viewer/js/viewer.service';
+import './viewpoints/js/viewpoints.component';
+import './viewpoints/js/viewpoints.service';
 import './height-setter/js/height-setter.component';

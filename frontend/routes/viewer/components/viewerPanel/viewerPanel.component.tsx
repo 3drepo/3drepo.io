@@ -27,7 +27,6 @@ import {
 } from './viewerPanel.styles';
 import { Panel } from '../../../components/panel/panel.component';
 import { Loader } from '../../../components/loader/loader.component';
-import { renderWhenTrue } from '../../../../helpers/rendering';
 
 const ViewerPanelTitle = ({title, Icon, renderActions}) => {
 	return (
@@ -42,24 +41,11 @@ interface IProps {
 	title: string;
 	Icon?: JSX.Element;
 	actions?: any[];
+	renderFooterContent?: () => JSX.Element | null;
 	pending?: boolean;
 }
 
 export class ViewerPanel extends React.PureComponent<IProps, any> {
-	public static defaultProps = {
-		actions: []
-	};
-
-	public renderContent = renderWhenTrue(() => (
-		<>{this.props.children}</>
-	));
-
-	public renderLoader = renderWhenTrue(() => (
-		<ViewerPanelContent isPadding={true}>
-			<Loader />
-		</ViewerPanelContent>
-	));
-
 	public getTitle = () => {
 		const { title, Icon, actions } = this.props;
 		return (
@@ -81,13 +67,18 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 		</Actions>
 	)
 
+	public renderLoader = () => (
+		<ViewerPanelContent>
+			<Loader />
+		</ViewerPanelContent>
+	)
+
 	public render() {
 		const { children, pending } = this.props;
 
 		return (
 			<Panel title={this.getTitle()}>
-				{this.renderLoader(pending)}
-				{this.renderContent(!pending)}
+				{pending ? this.renderLoader() : children}
 			</Panel>
 		);
 	}

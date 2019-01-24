@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { sumBy, clamp } from 'lodash';
 
 class PanelController implements ng.IController {
 
@@ -170,6 +169,7 @@ class PanelController implements ng.IController {
 		// Get the content item
 		for (let i = 0; i < this.contentItems.length; i++) {
 			if (contentType === this.contentItems[i].type) {
+
 				// Toggle panel show and update number of panels showing count
 				this.contentItems[i].show = !this.contentItems[i].show;
 
@@ -218,26 +218,22 @@ class PanelController implements ng.IController {
 		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
 
 		const spaceUsedInGaps = this.itemGap * ( this.contentItemsShown.length - 1);
-		const availableHeight = this.maxHeightAvailable - spaceUsedInGaps;
+		let availableHeight = this.maxHeightAvailable - spaceUsedInGaps;
 
 		const orderedContentItems = this.contentItemsShown.concat([]).sort((a, b) => {
 			return a.requestedHeight + a.panelToolbarHeight - b.requestedHeight - b.panelTakenHeight;
 		});
 
-		const reservedHeight = sumBy(orderedContentItems, ({ minHeight }) => minHeight || 150);
-		const freeHeight = availableHeight - reservedHeight;
-		const freeHeightPerPanel = freeHeight / orderedContentItems.length;
+		let itemsLeftToCalculateSpace = this.contentItemsShown.length;
 
-		if (freeHeightPerPanel > 0) {
-			orderedContentItems.forEach((item) => {
-				const requiredHeight = item.requestedHeight || item.minHeight;
-				const maxHeight = Math.min(item.minHeight + freeHeightPerPanel, availableHeight);
-				const height = orderedContentItems.length > 1
-					? clamp(requiredHeight, item.minHeight, maxHeight)
-					: clamp(requiredHeight, item.minHeight, availableHeight);
-				item.height = height - item.panelTakenHeight;
-			});
-		}
+		orderedContentItems.forEach((c) => {
+			const takenHeight = c.panelTakenHeight;
+			const spaceDivisions =  availableHeight / itemsLeftToCalculateSpace;
+			itemsLeftToCalculateSpace--;
+			const newHeight = Math.max(Math.min((c.requestedHeight || c.minHeight), spaceDivisions - takenHeight), c.minHeight);
+			c.height = isNaN(newHeight) ? availableHeight : newHeight;
+			availableHeight -= c.height + takenHeight;
+		});
 	}
 
 	/**
