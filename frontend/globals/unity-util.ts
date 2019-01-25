@@ -758,14 +758,14 @@ export class UnityUtil {
 	 * Start map generation
 	 */
 	public static mapStart() {
-		UnityUtil.toUnity('ShowMap', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		UnityUtil.toUnity('ShowMap', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
 	 * Stop map generation
 	 */
 	public static mapStop() {
-		UnityUtil.toUnity('HideMap', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		UnityUtil.toUnity('HideMap', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
@@ -868,7 +868,24 @@ export class UnityUtil {
 		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostname));
 	}
 
-	/**r
+	/**
+	 * Set the default near plane value. This can be use to tweak situations where
+	 * geometry closest to you are being clipped
+	* @param {number[]} value - the closest distance the camera will render. (default is 0.1)
+	 */
+	public static setDefaultNearPlane(value) {
+		UnityUtil.toUnity('DefaultNearPlaneValue', UnityUtil.LoadingState.VIEWER_READY, value);
+	}
+
+	/**
+	 * Set the number of samples to take when determining far plane
+	* @param {number[]} value - the number of samples (per edge) the algorithm should sample
+	 */
+	public static setFarPlaneSampleSize(value) {
+		UnityUtil.toUnity('FarPlaneSampleSize', UnityUtil.LoadingState.VIEWER_READY, value);
+	}
+
+	/**
 	 * Set navigation mode.
 	 * @param {string} navMode - This can be either "HELICOPTER" or "TURNTABLE"
 	 */
@@ -955,6 +972,23 @@ export class UnityUtil {
 		param.visible = visibility;
 		UnityUtil.toUnity('ToggleVisibility', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 
+	}
+
+	/**
+	 * Use bounding sphere to determine far plane (instead of bounding box)
+	 * Switch this one if you find objects far away from you are being clipped
+	 */
+	public static useBoundingSphereFarPlaneAlgorithm() {
+		UnityUtil.toUnity('UseBoundingSphereFarPlaneAlgorithm', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Use bounding box to determine far plane (instead of bounding sphere)
+	 * This is the default algorithm.
+	 * You should only need to call this if you have called useBoundingSphereFarPlaneAlgorithm previously.
+	 */
+	public static useBoundingBoxFarPlaneAlgorithm() {
+		UnityUtil.toUnity('UseBoundingBoxFarPlaneAlgorithm', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**

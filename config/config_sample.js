@@ -80,7 +80,6 @@ module.exports = {
         }
 	},
 
-	invoice_dir: '/tmp',
 	tokenExpiry: {
 		emailVerify: 336,
 		forgotPassword: 24

@@ -22,10 +22,50 @@ const responseCodes = require("../response_codes");
 const middlewares = require("../middlewares/middlewares");
 const notification = require("../models/notification");
 
+/**
+ * @api {get} /notifications Get all notifications
+ * @apiName getNotifications
+ * @apiGroup Notification
+ */
+
 router.get("/notifications", middlewares.loggedIn, getNotifications, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {get} /notifications/:id Get a notification
+ * @apiName getNotification
+ * @apiGroup Notification
+ *
+ * @apiParam {String} id Unique Notification ID
+ */
+
 router.get("/notifications/:id", middlewares.loggedIn, getNotification, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {patch} /notifications/:id Patch a notification
+ * @apiName patchNotification
+ * @apiGroup Notification
+ *
+ * @apiParam {String} id Unique Notification ID
+ */
+
 router.patch("/notifications/:id", middlewares.loggedIn, patchNotification, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {delete} /notifications Delete All notification
+ * @apiName deleteAllNotifications
+ * @apiGroup Notification
+ */
+
 router.delete("/notifications", middlewares.loggedIn, deleteAllNotifications, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {delete} /notifications/:id Delete a notification
+ * @apiName deleteNotification
+ * @apiGroup Notification
+ *
+ * @apiParam id Unique Notification ID
+ */
+
 router.delete("/notifications/:id", middlewares.loggedIn, deleteNotification, responseCodes.onSuccessfulOperation);
 
 /**
@@ -80,9 +120,13 @@ function patchNotification(req, res, next) {
 function deleteNotification(req, res, next) {
 	const username = req.session.user.username;
 	const _id = req.params.id;
-	notification.deleteNotification(username, _id).then(()=> {
-		req.dataModel = Object.assign({_id});
-		next();
+	notification.deleteNotification(username, _id).then(queryRes => {
+		if (queryRes.deletedCount === 0) {
+			throw {resCode: responseCodes.NOTIFICATION_NOT_FOUND};
+		}  else {
+			req.dataModel = Object.assign({_id});
+			next();
+		}
 	}).catch(err => responseCodes.onError(req, res, err));
 }
 

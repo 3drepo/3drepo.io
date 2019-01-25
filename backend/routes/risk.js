@@ -24,28 +24,129 @@ const C = require("../constants");
 const responseCodes = require("../response_codes.js");
 const Risk = require("../models/risk");
 const utils = require("../utils");
-const config = require("../config.js");
+
+/**
+ * @api {get} /risks/:uid.json Find Risk by ID
+ * @apiName findRiskById
+ * @apiGroup Risks
+ *
+ * @apiParam {String} id Risk unique ID.
+ */
 
 router.get("/risks/:uid.json", middlewares.issue.canView, findRiskById);
+
+/**
+ * @api {get} /risks/:uid/thumbnail.png Get Risks Thumbnail
+ * @apiName getThumbnail
+ * @apiGroup Risks
+ *
+ * @apiParam {String} id Risk unique ID.
+ */
+
 router.get("/risks/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
+
+/**
+ * @api {get} /risks.json List All Risks
+ * @apiName listRisks
+ * @apiGroup Risks
+ */
 
 router.get("/risks.json", middlewares.issue.canView, listRisks);
 
+/**
+ * @api {get} /risks/:uid/screenshot.png  Get Risks Screenshot
+ * @apiName getScreenshot
+ * @apiGroup Risks
+ */
+
 router.get("/risks/:uid/screenshot.png", middlewares.issue.canView, getScreenshot);
+
+/**
+ * @api {get} /risks/:uid/screenshotSmall.png  Get Small Risks Screenshot
+ * @apiName getScreenshotSmall
+ * @apiGroup Risks
+ *
+ * @apiParam {String} id Risk unique ID.
+ */
+
 router.get("/risks/:uid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
+
+/**
+ * @api {get} /risks/:rid/risks.json  List all Risks by revision ID
+ * @apiName listRisks
+ * @apiGroup Risks
+ *
+ * @apiParam {String} id Revision unique ID.
+ */
+
 router.get("/revision/:rid/risks.json", middlewares.issue.canView, listRisks);
+
+/**
+ * @api {get} /risks.html  Render all Risks as HTML
+ * @apiName renderRisksHTML
+ * @apiGroup Risks
+ */
 
 router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
 
+/**
+ * @api {get} /risks.html  Render all Risks as HTML by revision ID
+ * @apiName renderRisksHTML
+ * @apiGroup Risks
+ *
+ * @apiParam {String} id Revision unique ID.
+ */
+
 router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHTML);
 
-router.post("/risks.json", middlewares.connectQueue, middlewares.issue.canCreate, storeRisk);
-router.put("/risks/:riskId.json", middlewares.connectQueue, middlewares.issue.canComment, updateRisk);
+/**
+ * @api {post} /risks.json  Store Risks
+ * @apiName storeRisk
+ * @apiGroup Risks
+ *
+ * @apiParam {String} id Revision unique ID.
+ */
 
-router.post("/revision/:rid/risks.json", middlewares.connectQueue, middlewares.issue.canCreate, storeRisk);
-router.put("/revision/:rid/risks/:riskId.json", middlewares.connectQueue, middlewares.issue.canComment, updateRisk);
+router.post("/risks.json", middlewares.issue.canCreate, storeRisk);
 
-router.delete("/risks/", middlewares.connectQueue, middlewares.issue.canCreate, deleteRisks);
+/**
+ * @api {put} /risks/riskId.json  Update risks based on revision
+ * @apiName updateRisk
+ * @apiGroup Risks
+ *
+ * @apiParam {String} riskId.json Risk unique ID.
+ */
+
+router.put("/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
+
+/**
+ * @api {post} /revision/:rid/risks.json  Store risks based on Revision ID
+ * @apiName storeRisk
+ * @apiGroup Risks
+ *
+ * @apiParam {String} rid Revision unique ID.
+ */
+
+router.post("/revision/:rid/risks.json", middlewares.issue.canCreate, storeRisk);
+
+/**
+ * @api {put} /revision/:rid/risks/:riskId.json  Update Risk based on revision ID
+ * @apiName  updateRisk
+ * @apiGroup Risks
+ *
+ * @apiParam {String} rid Revision unique ID.
+ * @apiParam {String} rid Risk unique ID.
+ */
+
+router.put("/revision/:rid/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
+
+/**
+ * @api {delete} /risks/ Delete risks
+ * @apiName deleteRisks
+ * @apiGroup Risks
+ */
+
+router.delete("/risks/", middlewares.issue.canCreate, deleteRisks);
 
 function storeRisk(req, res, next) {
 
@@ -149,54 +250,12 @@ function findRiskById(req, res, next) {
 }
 
 function renderRisksHTML(req, res, next) {
-
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
-
-	const projection = {
-		extras: 0,
-		"viewpoint.extras": 0,
-		"viewpoint.scribble": 0,
-		"viewpoint.screenshot.content": 0,
-		"viewpoint.screenshot.resizedContent": 0,
-		"thumbnail.content": 0
-	};
-
-	let ids;
-	let findRisk;
-
-	if (req.query.ids) {
-		ids = req.query.ids.split(",");
-	}
-
-	if (req.params.rid) {
-		findRisk = Risk.findRisksByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, ids);
-	} else {
-		findRisk = Risk.findRisksByModelName(dbCol, req.session.user.username, "master", null, projection, ids);
-	}
-
-	findRisk.then(risks => {
-		// Split risks by status
-		const splitRisks = {open : [], closed: []};
-
-		for (let i = 0; i < risks.length; i++) {
-			if (risks[i].closed || risks[i].status === "closed") {
-				risks[i].created = new Date(risks[i].created).toString();
-				splitRisks.closed.push(risks[i]);
-			} else {
-				risks[i].created = new Date(risks[i].created).toString();
-				splitRisks.open.push(risks[i]);
-			}
-		}
-
-		res.render("risks.pug", {
-			risks : splitRisks,
-			url: function (path) {
-				return config.apiAlgorithm.apiUrl(C.GET_API, path);
-			}
-		});
-
-	}).catch(err => {
+	const account = req.params.account;
+	const model = req.params.model;
+	const rid = req.params.rid;
+	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
+	Risk.getRisksReport(account, model, req.session.user.username, rid, ids, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }

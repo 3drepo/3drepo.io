@@ -93,7 +93,7 @@ function handleHTTPSRedirect() {
 			if(!req.headers["user-agent"] || isIe) {
 				res.redirect("https://" + req.headers.host + req.url);
 			} else {
-				res.sendFile(__dirname + "/pug/ie6.html");
+				res.sendFile(__dirname + "/resources/ie6.html");
 			}
 		});
 

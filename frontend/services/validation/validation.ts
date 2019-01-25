@@ -25,7 +25,8 @@ export const VALIDATIONS_MESSAGES = {
 	NOT_ALPHANUMERIC: 'Must use alphanumeric characters',
 	DECIMAL: 'Must be a decimal number or integer',
 	INTEGER: 'Must be an integer',
-	USERNAME_CHARS: 'Must use only letters, numbers, hypens or underscores'
+	USERNAME_CHARS: 'Must use only letters, numbers, hypens or underscores',
+	NOT_NUMBER: 'Must be a number'
 };
 
 Yup.addMethod(Yup.string, 'differentThan', differentThan );

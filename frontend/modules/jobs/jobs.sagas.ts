@@ -29,7 +29,7 @@ export function* fetchJobs({ teamspace }) {
 
 		yield put(JobsActions.fetchJobsSuccess(response.data));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('get', 'jobs', error.response));
+		yield put(DialogActions.showEndpointErrorDialog('get', 'jobs', error));
 	}
 }
 
@@ -39,7 +39,7 @@ export function* fetchJobsColors({ teamspace }) {
 
 		yield put(JobsActions.fetchJobsColorsSuccess(response.data));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('get', 'jobs colors', error.response));
+		yield put(DialogActions.showEndpointErrorDialog('get', 'jobs colors', error));
 	}
 }
 
@@ -51,7 +51,7 @@ export function* updateJobColor({ job }) {
 		yield put(JobsActions.updateJobSuccess(job));
 		yield put(SnackbarActions.show('Job color updated'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'job color', error.response));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'job color', error));
 	}
 }
 
@@ -63,7 +63,7 @@ export function* createJob({ job }) {
 		yield put(JobsActions.createJobSuccess(job));
 		yield put(SnackbarActions.show('Job created'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('create', 'job', error.response));
+		yield put(DialogActions.showEndpointErrorDialog('create', 'job', error));
 	}
 }
 
@@ -75,7 +75,7 @@ export function* removeJob({ jobId }) {
 		yield put(JobsActions.removeJobSuccess(jobId));
 		yield put(SnackbarActions.show('Job removed'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('remove', 'job', error.response));
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'job', error));
 	}
 }
 

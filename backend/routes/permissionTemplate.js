@@ -25,9 +25,40 @@
 	const User = require("../models/user");
 	const utils = require("../utils");
 
+	/**
+	 * @api {post} /permission-templates Create a Permission Template
+	 * @apiName createTemplate
+	 * @apiGroup Permission Template
+	 */
+
 	router.post("/permission-templates", middlewares.isAccountAdmin, createTemplate);
+
+	/**
+	 * @api {get} /permission-templates List all Permission Templates
+	 * @apiName listTemplates
+	 * @apiGroup Permission Template
+	 */
+
 	router.get("/permission-templates", middlewares.isAccountAdmin, listTemplates);
+
+	/**
+	 * @api {get} /:model/permission-templates List all Permission Templates based on Model
+	 * @apiName listTemplates
+	 * @apiGroup Permission Template
+	 *
+	 * @apiParam {String} model Model to get permission templates for.
+	 */
+
 	router.get("/:model/permission-templates", middlewares.hasEditPermissionsAccessToModel, listTemplates);
+
+	/**
+	 * @api {delete} /permission-templates/:permissionId Delete permission template
+	 * @apiName deleteTemplate
+	 * @apiGroup Permission Template
+	 *
+	 * @apiParam {String} permissionId Unique Permission ID
+	 */
+
 	router.delete("/permission-templates/:permissionId", middlewares.isAccountAdmin, deleteTemplate);
 
 	function listTemplates(req, res, next) {

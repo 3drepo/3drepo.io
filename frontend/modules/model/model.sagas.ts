@@ -15,38 +15,53 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { cloneDeep } from 'lodash';
+import { put, takeLatest, select } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { getAngularService, dispatch } from './../../helpers/migration';
-import { uploadFileStatuses } from './model.helpers';
+import { uploadFileStatuses, changePositionFormat } from './model.helpers';
 import { DialogActions } from '../dialog';
 import { ModelTypes, ModelActions } from './model.redux';
 import { TeamspacesActions } from '../teamspaces';
 import { SnackbarActions } from './../snackbar';
+import { selectCurrentUser } from '../currentUser';
 
 export function* fetchSettings({ teamspace, modelId }) {
 	try {
 		yield put(ModelActions.setPendingState(true));
-
 		const { data: settings } = yield API.getModelSettings(teamspace, modelId);
+
+		if (settings.surveyPoints && settings.surveyPoints.length) {
+			settings.surveyPoints[0].position = yield changePositionFormat(settings.surveyPoints[0].position);
+		}
 
 		yield put(ModelActions.fetchSettingsSuccess(settings));
 		yield put(ModelActions.setPendingState(false));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('fetch', 'model settings', e.response));
+		yield put(DialogActions.showEndpointErrorDialog('fetch', 'model settings', e));
 	}
 }
 
 export function* updateSettings({ modelData: { teamspace, project, modelId }, settings }) {
 	try {
-		yield API.editModelSettings(teamspace, modelId, settings);
+		const modifiedSettings = cloneDeep(settings);
 
-		yield put(TeamspacesActions.updateModelSuccess(
-			teamspace, modelId, { project, model: modelId, name: settings.name } ));
+		if (modifiedSettings.surveyPoints && settings.surveyPoints.length) {
+			modifiedSettings.surveyPoints[0].position = yield changePositionFormat(modifiedSettings.surveyPoints[0].position);
+		}
+
+		yield API.editModelSettings(teamspace, modelId, modifiedSettings);
+
+		if (project && settings.name) {
+			yield put(
+				TeamspacesActions.updateModelSuccess(teamspace, modelId, { project, model: modelId, name: settings.name } )
+			);
+		}
+		yield put(ModelActions.updateSettingsSuccess(settings));
 		yield put(SnackbarActions.show('Updated model settings'));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('update', 'model settings', e.response));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'model settings', e));
 	}
 }
 
@@ -59,7 +74,7 @@ export function* fetchRevisions({ teamspace, modelId }) {
 		yield put(ModelActions.fetchRevisionsSuccess(revisions));
 		yield put(ModelActions.setPendingState(false));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('fetch', 'model revisions', e.response));
+		yield put(DialogActions.showEndpointErrorDialog('fetch', 'model revisions', e));
 	}
 }
 
@@ -68,12 +83,17 @@ export function* downloadModel({ teamspace, modelId }) {
 		const url = yield API.getAPIUrl(`${teamspace}/${modelId}/download/latest`);
 		window.open(url, '_blank');
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('download', 'model', e.response));
+		yield put(DialogActions.showEndpointErrorDialog('download', 'model', e));
 	}
 }
 
 export function* onModelStatusChanged({ modelData, teamspace, project, modelId, modelName }) {
 	yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, modelData));
+
+	const currentUser = yield select(selectCurrentUser);
+	if (modelData.user !== currentUser.username) {
+		return;
+	}
 
 	if (modelData.status === uploadFileStatuses.ok) {
 		yield put(SnackbarActions.show(`Model ${modelName} uploaded successfully`));
@@ -132,8 +152,18 @@ export function* uploadModelFile({ teamspace, project, modelData, fileData }) {
 			}
 		}
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('upload', 'model', e.response));
+		yield put(DialogActions.showEndpointErrorDialog('upload', 'model', e));
 		yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelData.modelId, uploadFileStatuses.failed));
+	}
+}
+
+export function* fetchMaps({ teamspace, modelId }) {
+	try {
+		const response = yield API.getModelMaps(teamspace, modelId);
+
+		yield put(ModelActions.fetchMapsSuccess(response.data.maps));
+	} catch (e) {
+		yield put(DialogActions.showEndpointErrorDialog('get', 'model maps', e));
 	}
 }
 
@@ -146,4 +176,5 @@ export default function* ModelSaga() {
 	yield takeLatest(ModelTypes.ON_MODEL_STATUS_CHANGED, onModelStatusChanged);
 	yield takeLatest(ModelTypes.SUBSCRIBE_ON_STATUS_CHANGE, subscribeOnStatusChange);
 	yield takeLatest(ModelTypes.UNSUBSCRIBE_ON_STATUS_CHANGE, unsubscribeOnStatusChange);
+	yield takeLatest(ModelTypes.FETCH_MAPS, fetchMaps);
 }

@@ -22,10 +22,9 @@
 "use strict";
 
 const expressSession = require("express-session");
-const FileStore = require("session-file-store")(expressSession);
+const store = require("../handler/db").getSessionStore(expressSession);
 
 module.exports.session = function(config) {
-
 	return expressSession({
 		secret: config.cookie.secret,
 		resave: true,
@@ -37,7 +36,7 @@ module.exports.session = function(config) {
 			path: "/",
 			secure: config.using_ssl
 		},
-		store: new FileStore()
+		store: store
 	});
 };
 

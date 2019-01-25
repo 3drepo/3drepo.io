@@ -25,13 +25,72 @@
 	const Job = require("../models/job");
 	const utils = require("../utils");
 
+	/**
+	 * @api {post} /jobs Create a new job
+	 * @apiName createJob
+	 * @apiGroup Jobs
+	 */
 	router.post("/jobs", middlewares.job.canCreate, createJob);
+
+	/**
+	 * @api {get} /myJob Get user Job
+	 * @apiName getUserJob
+	 * @apiGroup Jobs
+	 */
+
 	router.get("/myJob", middlewares.isTeamspaceMember, getUserJob);
+
+	/**
+	 * @api {put} /jobs/:jobId Update User Job
+	 * @apiName updateJob
+	 * @apiGroup Jobs
+	 * @apiParam {String} jobId Unique Job ID.
+	 */
+
 	router.put("/jobs/:jobId", middlewares.job.canCreate, updateJob);
+
+	/**
+	 * @api {get} /jobs List all Jobs
+	 * @apiName listJobs
+	 * @apiGroup Jobs
+	 */
+
 	router.get("/jobs", middlewares.isTeamspaceMember, listJobs);
+
+	/**
+	 * @api {post} /jobs/:jobId/:user Assign a job to a user
+	 * @apiName addUserToJob
+	 * @apiGroup Jobs
+	 * @apiParam jobId Unique Job ID
+	 * @apiParam {String} user User to assign job to.
+	 */
+
 	router.post("/jobs/:jobId/:user", middlewares.job.canCreate, addUserToJob);
+
+	/**
+	 * @api {delete} /jobs Remove a job from a user
+	 * @apiName removeUserFromJobs
+	 * @apiGroup Jobs
+	 * @apiParam {Object} user User to remove job from.
+	 */
+
 	router.delete("/jobs/unassign/:user", middlewares.job.canDelete, removeUserFromJobs);
+
+	/**
+	 * @api {delete} /jobs/:jobId Delete a job
+	 * @apiName deleteJob
+	 * @apiGroup Jobs
+	 * @apiParam {String} jobId Unique Job ID.
+	 */
+
 	router.delete("/jobs/:jobId", middlewares.job.canDelete, deleteJob);
+
+	/**
+	 * @api {get} /jobs/colors List all Colors
+	 * @apiName listColors
+	 * @apiGroup Jobs
+	 */
+
 	router.get("/jobs/colors", middlewares.isTeamspaceMember, listColors);
 
 	function addUserToJob(req, res, next) {

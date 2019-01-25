@@ -16,7 +16,6 @@
  */
 
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
 import { COLOR } from '../../styles/colors';
 import { Form } from 'formik';
 import Grid from '@material-ui/core/Grid';

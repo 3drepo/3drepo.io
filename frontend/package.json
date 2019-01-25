@@ -7,9 +7,9 @@
     "doc": "docs"
   },
   "scripts": {
-    "build:analyze": "webpack --progress --config ./internals/webpack/webpack.analyze.config.js",
     "watch": "webpack --watch --progress --mode development --config ./internals/webpack/webpack.dev.config.js",
     "build": "webpack --progress --mode production --config ./internals/webpack/webpack.prod.config.js",
+    "build:analyze": "webpack --progress --config ./internals/webpack/webpack.analyze.config.js",
     "wdm": "yarn run wdm:update && yarn run wdm:start",
     "wdm:start": "webdriver-manager start --standalone",
     "wdm:update": "webdriver-manager update --standalone",

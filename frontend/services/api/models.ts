@@ -97,3 +97,12 @@ export const editModelSettings = (teamspace, modelId, settings) => {
 export const getModelRevisions = (teamspace, modelId) => {
 	return api.get(`${teamspace}/${modelId}/revisions.json`);
 };
+
+/**
+ * Get model maps
+ * @param teamspace
+ * @param modelId
+ */
+export const getModelMaps = (teamspace, modelId) => {
+	return api.get(`${teamspace}/${modelId}/maps`);
+};

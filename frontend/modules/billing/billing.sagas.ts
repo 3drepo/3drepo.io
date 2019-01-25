@@ -29,7 +29,7 @@ export function* fetchPlans() {
 
 		return yield put(BillingActions.fetchPlansSuccess(plans));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('fetch', 'plans', e.response));
+		yield put(DialogActions.showEndpointErrorDialog('fetch', 'plans', e));
 	}
 }
 
@@ -41,7 +41,7 @@ export function* fetchSubscriptions({ teamspace }) {
 		);
 	} catch (e) {
 		yield put(
-			DialogActions.showErrorDialog('fetch', 'subscriptions', e.response)
+			DialogActions.showEndpointErrorDialog('fetch', 'subscriptions', e)
 		);
 	}
 }
@@ -54,7 +54,7 @@ export function* fetchInvoices({ teamspace }) {
 		yield put(BillingActions.fetchInvoicesSuccess(invoices));
 	} catch (e) {
 		yield put(BillingActions.setPendingState(false));
-		yield put(DialogActions.showErrorDialog('fetch', 'invoices', e.response));
+		yield put(DialogActions.showEndpointErrorDialog('fetch', 'invoices', e));
 	}
 }
 
@@ -68,7 +68,7 @@ export function* fetchBillingData({ teamspace }) {
 		]);
 	} catch (e) {
 		yield put(BillingActions.setPendingState(false));
-		yield put(DialogActions.showErrorDialog('fetch', 'invoices', e.response));
+		yield put(DialogActions.showEndpointErrorDialog('fetch', 'invoices', e));
 	}
 }
 
@@ -106,7 +106,7 @@ export function* changeSubscription({ teamspace, subscriptionData }) {
 		}
 	} catch (e) {
 		yield put(
-			DialogActions.showErrorDialog('post', 'subscription', e.response)
+			DialogActions.showEndpointErrorDialog('post', 'subscription', e)
 		);
 	}
 }
@@ -116,7 +116,7 @@ export function* downloadInvoice({ teamspace, invoiceNo }) {
 		const url = `${ClientConfig.apiUrls.all[0]}/${teamspace}/invoices/${invoiceNo}.pdf`;
 		window.open(url, '_blank');
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('download', 'invoice', e.response));
+		yield put(DialogActions.showEndpointErrorDialog('download', 'invoice', e));
 	}
 }
 

@@ -18,9 +18,6 @@
 "use strict";
 module.exports.createApp = function (server, serverConfig) {
 
-	// let app = require('express');
-	// var server = require('http').Server(app);
-
 	const config = require("../config");
 	const session = require("./session").session(config);
 
@@ -28,16 +25,16 @@ module.exports.createApp = function (server, serverConfig) {
 	const middlewares = require("../middlewares/middlewares");
 	const systemLogger = logger.systemLogger;
 
-	// console.log(serverConfig);
 	const io = require("socket.io")(server, { path: "/" + serverConfig.subdirectory });
 	const sharedSession = require("express-socket.io-session");
 	const _ = require("lodash");
+
+	const Queue = require("./queue");
 
 	io.use((socket, next) => {
 		if(socket.handshake.query["connect.sid"] && !socket.handshake.headers.cookie) {
 			socket.handshake.headers.cookie = "connect.sid=" + socket.handshake.query["connect.sid"] + "; ";
 		}
-		// console.log(socket.handshake.headers.cookie);
 
 		next();
 	});
@@ -56,33 +53,26 @@ module.exports.createApp = function (server, serverConfig) {
 		});
 	});
 
-	if(!config.cn_queue) {
-		return;
-	}
-
-	middlewares.createQueueInstance().then(queue => {
-
-		initiateSocket(queue);
-
-	}).catch(err => {
-		systemLogger.logError("Chat server - Queue init error - " + err.message);
-	});
+	initiateSocket();
 
 	const userToSocket = {};
 	const credentialErrorEventName = "credentialError";
 	const joinedEventName = "joined";
 
-	function initiateSocket(queue) {
-
-		// consume event queue and fire msg to clients if they have subscribed related event
-		queue.consumeEventMessage(msg => {
+	function subscribeToEventMessages() {
+		Queue.subscribeToEventMessages((msg) => {
+			// consume event queue and fire msg to clients if they have subscribed related event
 			if(msg.event && msg.channel) {
+				/*eslint-disable */
 				// it is to avoid emitter getting its own message
 				const emitter = userToSocket[msg.emitter] && userToSocket[msg.emitter].broadcast || io;
-
 				emitter.to(msg.channel).emit(msg.event, msg.data);
 			}
 		});
+	}
+
+	function initiateSocket() {
+		subscribeToEventMessages();
 
 		// on client connect
 		io.on("connection", socket => {
@@ -96,14 +86,12 @@ module.exports.createApp = function (server, serverConfig) {
 
 				systemLogger.logError("socket connection without credential");
 				socket.emit(credentialErrorEventName, { message: "Connection without credential"});
-				// console.log(socket.handshake);
 
 				return;
 			}
 
 			const username = socket.handshake.session.user.username;
 			const sessionId =  socket.handshake.session.id;
-			// console.log('socket id', socket.client.id);
 			userToSocket[socket.client.id] = socket;
 
 			systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} is in chat`, { username });
@@ -120,12 +108,6 @@ module.exports.createApp = function (server, serverConfig) {
 
 						socket.join(`${data.account}${modelNameSpace}`);
 						socket.emit(joinedEventName, { account: data.account, model: data.model});
-
-						// systemLogger.logInfo(`${username} - ${sessionId} - ${socket.client.id} has joined room ${data.account}${modelNameSpace}`, {
-						// 	username,
-						// 	account: data.account,
-						// 	model: data.model
-						// });
 
 					} else {
 						socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}${modelNameSpace}`});
