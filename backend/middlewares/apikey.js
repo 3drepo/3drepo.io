@@ -40,7 +40,7 @@ const BLACK_LIST = [
 	"POST /forgot-password"
 ];
 
-async function apiKeyCheck(req, res, next) {
+async function apiKeyCheck(req) {
 	if (req.query.key) {
 		const path = getPath(req);
 
@@ -52,7 +52,6 @@ async function apiKeyCheck(req, res, next) {
 		if (user) {
 			req.session = {};
 			req.session.user = { username: user.user, roles: user.roles };
-			next();
 		}
 	}
 }

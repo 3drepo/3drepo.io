@@ -23,6 +23,11 @@ const apiKey = require("./apikey");
 
 module.exports = async (req, res, next) => {
 	await apiKey(req, res, next);
+	if (req.query.key && req.session) {
+		next();
+		return;
+	}
+
 	session(req, res, function(err) {
 		if(err) {
 			// something is wrong with the library or the session (i.e. corrupted json file) itself, log the user out
