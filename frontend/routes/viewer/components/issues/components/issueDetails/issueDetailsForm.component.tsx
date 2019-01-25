@@ -19,6 +19,10 @@ interface IProps {
 	jobs: any[];
 }
 class IssueDetailsFormComponent extends React.PureComponent<IProps, any> {
+	get isNewIssue() {
+		return !this.props.issue._id;
+	}
+
 	public render() {
 		return (
 			<MuiPickersUtilsProvider utils={LuxonUtils}>
@@ -81,6 +85,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, any> {
 					<Field name="description" render={({ field }) => (
 						<StyledTextField
 							{...field}
+							requiredConfirm={!this.isNewIssue}
 							fullWidth
 							multiline
 							label="Description"
