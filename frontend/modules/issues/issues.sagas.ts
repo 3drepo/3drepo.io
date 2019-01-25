@@ -339,13 +339,11 @@ export function* focusOnIssue({ issue, revision }) {
 		const hasHiddenOrShownGroup = hasViewpoint && (issue.viewpoint.hidden_group_id || issue.viewpoint.shown_group_id);
 
 		// Reset object visibility
-		if (hasViewpoint) {
-			if (issue.viewpoint.hideIfc) {
-				TreeService.setHideIfc(issue.viewpoint.hideIfc);
-			}
-			TreeService.showAllTreeNodes(!hasHiddenOrShownGroup);
+		if (hasViewpoint && issue.viewpoint.hideIfc) {
+			TreeService.setHideIfc(issue.viewpoint.hideIfc);
 		}
 
+		TreeService.showAllTreeNodes(!hasHiddenOrShownGroup);
 		const hasViewpointGroup = hasViewpoint && (issue.viewpoint.highlighted_group_id || issue.viewpoint.group_id);
 		const hasGroup = issue.group_id;
 

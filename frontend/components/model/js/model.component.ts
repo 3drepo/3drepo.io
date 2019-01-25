@@ -32,19 +32,15 @@ import { IssuesActions } from '../../../modules/issues';
 class ModelController implements ng.IController {
 
 	public static $inject: string[] = [
-		'$window',
 		'$timeout',
 		'$scope',
 		'$element',
 		'$location',
-		'$compile',
 		'$mdDialog',
 
 		'EventService',
 		'TreeService',
 		'RevisionsService',
-		'AuthService',
-		'IssuesService',
 		'StateManager',
 		'PanelService',
 		'ViewerService'
@@ -69,19 +65,15 @@ class ModelController implements ng.IController {
 	private unsubscribeModelSettingsListener;
 
 	constructor(
-		private $window,
 		private $timeout,
 		private $scope,
 		private $element,
 		private $location,
-		private $compile,
 		private $mdDialog,
 
 		private EventService,
 		private TreeService,
 		private RevisionsService,
-		private AuthService,
-		private IssuesService,
 		private StateManager,
 		private PanelService,
 		private ViewerService
@@ -173,16 +165,6 @@ class ModelController implements ng.IController {
 			if (this.account && this.model) {
 				angular.element(() => {
 					this.setupModelInfo();
-				});
-			}
-		});
-
-		this.$scope.$watch('vm.issueId', () => {
-			if (this.issueId) {
-				// timeout to make sure event is sent after issue panel card is setup
-				// assume issue card shown by default
-				this.$timeout(() => {
-					this.IssuesService.state.displayIssue = this.issueId;
 				});
 			}
 		});

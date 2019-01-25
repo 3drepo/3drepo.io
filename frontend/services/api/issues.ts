@@ -18,19 +18,6 @@
 import api from './';
 
 /**
- * Get issues list
- * @param teamspace
- * @param modelId
- * @param revision
- */
-export const getIssues = (teamspace, modelId, revision?) => {
-	if (revision) {
-		return api.get(`${teamspace}/${modelId}/revision/${revision}/issues.json`);
-	}
-	return api.get(`${teamspace}/${modelId}/issues.json`);
-};
-
-/**
  * Get issue
  * @param teamspace
  * @param modelId
@@ -38,4 +25,50 @@ export const getIssues = (teamspace, modelId, revision?) => {
  */
 export const getIssue = (teamspace, modelId, issueId) => {
 	return api.get(`${teamspace}/${modelId}/issues/${issueId}.json`);
+};
+
+/**
+ * Save issue
+ * @param teamspace
+ * @param modelId
+ * @param issue
+ */
+export const saveIssue = (teamspace, modelId, issue) => {
+	if (issue.pickedPos !== null) {
+		issue.position = issue.pickedPos;
+		issue.norm = issue.pickedNorm;
+	}
+
+	if (issue.rev_id) {
+		return api.post(`${teamspace}/${modelId}/revision/${issue.rev_id}/issues.json`, issue);
+	}
+	return api.post(`${teamspace}/${modelId}/issues.json`, issue);
+};
+
+/**
+ * Update issue
+ * @param teamspace
+ * @param modelId
+ * @param issue
+ */
+export const updateIssue = (teamspace, modelId, issue) => {
+	const mainPath = `${teamspace}/${modelId}`;
+	if (issue.rev_id) {
+		return api.put(`${mainPath}/revision/${issue.rev_id}/issues/${issue._id}.json`, issue);
+	}
+	return api.put(`${mainPath}/issues/${issue._id}.json`, issue);
+};
+
+/**
+ * Get issues list
+ * @param teamspace
+ * @param modelId
+ * @param revision
+ */
+export const getIssues = (teamspace, modelId, revision?) => {
+	const mainPath = `${teamspace}/${modelId}`;
+	if (revision) {
+		return api.get(`${mainPath}/revision/${revision}/issues.json`);
+	}
+	return api.get(`${mainPath}/issues.json`);
 };

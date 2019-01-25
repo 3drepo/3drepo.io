@@ -33,8 +33,7 @@ export class StateManagerService {
 		'CompareService',
 		'PanelService',
 		'TreeService',
-		'ViewerService',
-		'IssuesService'
+		'ViewerService'
 	];
 
 	public state: any;
@@ -60,8 +59,7 @@ export class StateManagerService {
 		private CompareService: any,
 		private PanelService: any,
 		private TreeService: any,
-		private ViewerService: any,
-		private IssuesService: any
+		private ViewerService: any
 	) {
 		this.state = {
 			changing: true
@@ -88,7 +86,6 @@ export class StateManagerService {
 		this.PanelService.reset();
 		this.TreeService.reset();
 		this.ViewerService.reset();
-		this.IssuesService.reset();
 	}
 
 	public setupStateStack() {

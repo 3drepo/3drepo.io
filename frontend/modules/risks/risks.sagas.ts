@@ -348,12 +348,10 @@ export function* focusOnRisk({ risk, revision }) {
 		const hasHiddenOrShownGroup = hasViewpoint && (risk.viewpoint.hidden_group_id || risk.viewpoint.shown_group_id);
 
 		// Reset object visibility
-		if (hasViewpoint) {
-			if (risk.viewpoint.hideIfc) {
-				TreeService.setHideIfc(risk.viewpoint.hideIfc);
-			}
-			TreeService.showAllTreeNodes(!hasHiddenOrShownGroup);
+		if (hasViewpoint && risk.viewpoint.hideIfc) {
+			TreeService.setHideIfc(risk.viewpoint.hideIfc);
 		}
+		TreeService.showAllTreeNodes(!hasHiddenOrShownGroup);
 
 		const hasViewpointGroup = hasViewpoint && (risk.viewpoint.highlighted_group_id || risk.viewpoint.group_id);
 		const hasGroup = risk.group_id;
