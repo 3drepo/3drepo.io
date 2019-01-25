@@ -163,18 +163,20 @@ export const RISKS_ACTIONS_ITEMS = {
 	SHOW_PINS: 'showPins'
 };
 
-export const RISKS_ACTIONS_MENU = {
-	PRINT: {
+export const RISKS_ACTIONS_MENU = [
+	{
+		name: RISKS_ACTIONS_ITEMS.PRINT,
 		label: 'Create Report',
 		Icon: Print
 	},
-	SHOW_PINS: {
-		label:  'Show Pins',
-		Icon: Pins,
-		enabled:  true
+	{
+		name: RISKS_ACTIONS_ITEMS.SHOW_PINS,
+		label: 'Show Pins',
+		Icon: Pins
 	},
-	DOWNLOAD: {
+	{
+		name: RISKS_ACTIONS_ITEMS.DOWNLOAD,
 		label: 'Download JSON',
 		Icon: Download
 	}
-};
+];
