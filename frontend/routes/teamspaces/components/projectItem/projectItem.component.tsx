@@ -99,7 +99,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 
 	public isProjectAdmin = () => hasPermissions('admin_project', this.props.permissions);
 
-	public renderProjectActions = ({ hovered }) => renderWhenTrue((
+	public renderProjectActions = ({ hovered }) => renderWhenTrue(() => (
 		<RowMenu open={hovered} forceOpen={this.state.actionsMenuOpen} toggleForceOpen={this.toggleActionsMenuOpen}>
 			<TooltipButton
 				{...ROW_ACTIONS.EDIT}
@@ -114,7 +114,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 				action={this.props.onRemoveClick}
 			/>
 		</RowMenu>
-	))(this.isProjectAdmin())
+	))(this.isProjectAdmin()) as any
 
 	public render() {
 		const { renderChildItem, name, active } = this.props;

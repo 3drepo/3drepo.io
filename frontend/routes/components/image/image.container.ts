@@ -15,20 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createActions, createReducer } from 'reduxsauce';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { connect } from '../../../helpers/migration';
 
-export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
-	waitForViewer: [],
-	mapInitialise: ['surveyPoints', 'sources'],
-	resetMapSources: ['source'],
-	addMapSource: ['source'],
-	removeMapSource: ['source'],
-	mapStart: [],
-	mapStop: [],
-	getScreenshot: []
-}, { prefix: 'VIEWER_' });
+import { Image } from './image.component';
+import { DialogActions } from '../../../modules/dialog';
 
-export const INITIAL_STATE = {};
+const mapStateToProps = createStructuredSelector({});
 
-export const reducer = createReducer(INITIAL_STATE, {
-});
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	showScreenshotDialog: DialogActions.showScreenshotDialog
+}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(Image);

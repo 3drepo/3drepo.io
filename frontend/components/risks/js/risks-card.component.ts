@@ -14,6 +14,8 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { isEmpty } from 'lodash';
 import { AuthService } from '../../home/js/auth.service';
 import { DialogService } from '../../home/js/dialog.service';
 import { EventService } from '../../home/js/event.service';
@@ -143,7 +145,7 @@ class RisksCardController implements ng.IController {
 	public watchers() {
 
 		this.$scope.$watch('vm.modelSettings', () => {
-			if (this.modelSettings) {
+			if (!isEmpty(this.modelSettings)) {
 
 				this.risksReady.then(() => {
 					this.canAddRisk = this.authService.hasPermission(

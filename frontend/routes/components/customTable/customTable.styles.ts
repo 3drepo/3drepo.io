@@ -39,7 +39,6 @@ export const Cell = styled.div`
 	justify-content: flex-start;
 	align-items: center;
 	padding: ${(props: any) => props.padding || '0 24px'};
-
 	flex: ${flexMemoized};
 	max-width: ${(props: any) => props.flex ? `${props.flex}%` : 'initial'};
 	width: ${(props: any) => props.width || 'auto'};
