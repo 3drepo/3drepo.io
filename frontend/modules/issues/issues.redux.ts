@@ -55,7 +55,7 @@ export const INITIAL_STATE = {
 		filteredRisks: [],
 		showPins: true,
 		logs: [],
-		isPending: true
+		fetchingDetailsIsPending: true
 	}
 };
 
@@ -71,7 +71,7 @@ export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues = [] }) => {
 };
 
 export const fetchIssueSuccess = (state = INITIAL_STATE, { issue }) => {
-	return {...state };
+	return {...state, componentState: { ...state.componentState, logs: issue.comments, fetchingDetailsIsPending: false}}
 };
 
 export const saveIssueSuccess = (state = INITIAL_STATE, { issue }) => {

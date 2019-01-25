@@ -142,10 +142,10 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			statusColor,
 			editable,
 			disableExpanding,
-			renderCollapsable,
-			renderNotCollapsable,
 			willBeUpdated,
-			willBeRemoved
+			willBeRemoved,
+			renderCollapsable,
+			renderNotCollapsable
 		} = this.props;
 
 		const createdAt = !editable ? createdDate : null;

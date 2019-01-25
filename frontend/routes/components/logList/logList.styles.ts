@@ -19,7 +19,6 @@ import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
-  background: ${COLOR.BLACK_20};
   min-height: 55px;
   overflow: auto;
   position: relative;
@@ -35,4 +34,8 @@ export const Container = styled.div`
     overflow: hidden;
     box-shadow: inset 0 4px 7px -4px ${COLOR.BLACK_30};
   }
+`;
+
+export const LoaderContainer = styled.div`
+  padding: 10px;
 `;

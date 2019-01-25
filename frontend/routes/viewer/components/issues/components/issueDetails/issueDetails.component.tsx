@@ -22,6 +22,7 @@ import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../../
 import { IssueDetailsForm } from './issueDetailsForm.component';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
 import { prepareIssue } from '../../../../../../helpers/issues';
+import { LogList } from '../../../../../components/logList/logList.component';
 
 interface IProps {
 	jobs: any[];
@@ -29,8 +30,14 @@ interface IProps {
 	teamspace: string;
 	model: string;
 	expandDetails: boolean;
+	logs: any[];
+	fetchingDetailsIsPending: boolean;
 	setState: (componentState) => void;
 	fetchIssue: (teamspace, model, issueId) => void;
+}
+
+interface IState {
+	logsLoaded: boolean;
 }
 
 const UNASSIGNED_JOB = {
@@ -38,7 +45,11 @@ const UNASSIGNED_JOB = {
 	value: ''
 };
 
-export class IssueDetails extends React.PureComponent<IProps, any> {
+export class IssueDetails extends React.PureComponent<IProps, IState> {
+	public state = {
+		logsLoaded: false
+	};
+
 	get issueData() {
 		return prepareIssue(this.props.issue);
 	}
@@ -64,6 +75,21 @@ export class IssueDetails extends React.PureComponent<IProps, any> {
 		this.props.setState({ newIssue });
 	}
 
+	public renderDetailsForm = () => {
+		return (
+			<IssueDetailsForm
+				issue={this.issueData}
+				jobs={this.jobsList}
+			/>
+		);
+	}
+
+	public renderLogList = () => {
+		return (
+			<LogList items={this.props.logs} isPending={this.props.fetchingDetailsIsPending} />
+		);
+	}
+
 	public renderPreview = renderWhenTrue(() => {
 		return (
 			<PreviewDetails
@@ -73,12 +99,9 @@ export class IssueDetails extends React.PureComponent<IProps, any> {
 				editable={!this.issueData._id}
 				onNameChange={this.handleNameChange}
 				onExpandChange={this.handleExpandChange}
-			>
-				<IssueDetailsForm
-					issue={this.issueData}
-					jobs={this.jobsList}
-				/>
-			</PreviewDetails>
+				renderCollapsable={this.renderDetailsForm}
+				renderNotCollapsable={() => this.renderLogList()}
+			/>
 		);
 	});
 

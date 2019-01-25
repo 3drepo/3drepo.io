@@ -22,14 +22,18 @@ import { selectJobsList } from '../../../../../../modules/jobs';
 import {
 	IssuesActions,
 	selectActiveIssueDetails,
-	selectExpandDetails
+	selectExpandDetails,
+	selectLogs,
+	selectFetchingDetailsIsPending
 } from '../../../../../../modules/issues';
 import { IssueDetails } from './issueDetails.component';
 
 const mapStateToProps = createStructuredSelector({
 	issue: selectActiveIssueDetails,
 	jobs: selectJobsList,
-	expandDetails: selectExpandDetails
+	expandDetails: selectExpandDetails,
+	logs: selectLogs,
+	fetchingDetailsIsPending: selectFetchingDetailsIsPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

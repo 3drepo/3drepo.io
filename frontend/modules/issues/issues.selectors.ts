@@ -87,3 +87,11 @@ export const selectFilteredIssues = createSelector(
 export const selectShowPins = createSelector(
 	selectComponentState, (state) => state.showPins
 );
+
+export const selectLogs = createSelector(
+	selectComponentState, (state) => state.logs
+);
+
+export const selectFetchingDetailsIsPending = createSelector(
+	selectComponentState, (state) => state.fetchingDetailsIsPending
+);

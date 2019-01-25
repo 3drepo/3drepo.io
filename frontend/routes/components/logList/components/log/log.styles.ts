@@ -19,7 +19,6 @@ import styled from 'styled-components';
 import { COLOR } from '../../../../../styles/colors';
 
 export const Container = styled.div`
-  background-color: ${COLOR.WHITE_87};
   padding: 10px;
 `;
 
