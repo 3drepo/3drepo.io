@@ -62,6 +62,7 @@ export function* fetchIssue({teamspace, modelId, issueId}) {
 
 		yield put(IssuesActions.fetchIssueSuccess(data));
 	} catch (error) {
+		yield put(IssuesActions.fetchIssueFailure());
 		yield put(DialogActions.showErrorDialog('get', 'issue', error));
 	}
 	yield put(IssuesActions.toggleDetailsPendingState(false));

@@ -63,6 +63,14 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		fetchIssue(teamspace, model, issue._id);
 	}
 
+	public componentDidUpdate(prevProps) {
+		const { teamspace, model, fetchIssue, issue } = this.props;
+
+		if (issue._id !== prevProps.issue._id) {
+			fetchIssue(teamspace, model, issue._id);
+		}
+	}
+
 	public handleExpandChange = (event, expanded) => {
 		this.props.setState({ expandDetails: expanded });
 	}

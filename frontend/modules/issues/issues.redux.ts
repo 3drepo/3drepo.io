@@ -23,6 +23,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	fetchIssuesSuccess: ['issues'],
 	fetchIssue: ['teamspace', 'modelId', 'issueId'],
 	fetchIssueSuccess: ['issue'],
+	fetchIssueFailure: [],
 	setComponentState: ['componentState'],
 	saveIssue: ['teamspace', 'model', 'issueData'],
 	updateIssue: ['teamspace', 'modelId', 'issueData'],
@@ -89,7 +90,11 @@ export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues = [] }) => {
 };
 
 export const fetchIssueSuccess = (state = INITIAL_STATE, { issue }) => {
-	return {...state, componentState: { ...state.componentState, logs: issue.comments, fetchingDetailsIsPending: false}};
+	return {...state, componentState: { ...state.componentState, logs: issue.comments}};
+};
+
+export const fetchIssueFailure = (state = INITIAL_STATE) => {
+	return {...state, componentState: { ...state.componentState, logs: [] }};
 };
 
 export const saveIssueSuccess = (state = INITIAL_STATE, { issue }) => {
@@ -110,6 +115,7 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess,
 	[IssuesTypes.FETCH_ISSUE_SUCCESS]: fetchIssueSuccess,
+	[IssuesTypes.FETCH_ISSUE_FAILURE]: fetchIssueFailure,
 	[IssuesTypes.SET_COMPONENT_STATE]: setComponentState,
 	[IssuesTypes.SAVE_ISSUE_SUCCESS]: saveIssueSuccess,
 	[IssuesTypes.TOGGLE_PENDING_STATE]: togglePendingState,
