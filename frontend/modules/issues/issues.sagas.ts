@@ -245,7 +245,7 @@ export function* printIssues({ teamspace, modelId }) {
 		const filteredIssues = yield select(selectFilteredIssues);
 		const issuesIds = map(filteredIssues, '_id').join(',');
 		const printEndpoint = `${teamspace}/${modelId}/issues.html?ids=${issuesIds}`;
-		const printUrl = `${ClientConfig.apiUrls.all[0]}/${printEndpoint}`;
+		const printUrl = yield API.getAPIUrl(printEndpoint);
 		window.open(printUrl, '_blank');
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'issue', error));
