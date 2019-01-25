@@ -37,10 +37,13 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	showNewPin: ['issue', 'pinData'],
 	togglePendingState: ['isPending'],
 	toggleDetailsPendingState: ['isPending'],
-	toggleShowPins: ['showPins'],
 	subscribeOnIssueChanges: ['teamspace', 'modelId'],
 	unsubscribeOnIssueChanges: ['teamspace', 'modelId'],
-	focusOnIssue: ['issue', 'revision']
+	focusOnIssue: ['issue', 'revision'],
+	toggleIsImportingBcf: ['isImporting'],
+	toggleSubmodelsIssues: ['showSubmodelIssues'],
+	importBcf: ['teamspace', 'modelId', 'file', 'revision'],
+	exportBcf: ['teamspace', 'modelId']
 }, { prefix: 'ISSUES_' });
 
 export const INITIAL_STATE = {
@@ -56,14 +59,25 @@ export const INITIAL_STATE = {
 		filteredRisks: [],
 		showPins: true,
 		logs: [],
-		fetchingDetailsIsPending: true
+		fetchingDetailsIsPending: true,
+		isImportingBCF: false,
+		showSubmodelIssues: false
 	}
 };
 
 export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
 
-export const toggleDetailsPendingState = (state = INITIAL_STATE, { isPending }) =>
-	({ ...state, componentState: { ...state.componentState,  fetchingDetailsIsPending: isPending } });
+export const toggleDetailsPendingState = (state = INITIAL_STATE, { isPending }) => {
+	return setComponentState(state, { componentState: { fetchingDetailsIsPending: isPending } });
+};
+
+export const toggleIsImportingBcf = (state = INITIAL_STATE, { isImporting }) => {
+	return setComponentState(state, { componentState: { isImportingBCF: isImporting }});
+};
+
+export const toggleSubmodelsIssues = (state = INITIAL_STATE, { showSubmodelIssues }) => {
+	return setComponentState(state, { componentState: { showSubmodelIssues } });
+};
 
 export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues = [] }) => {
 	const issuesMap = keyBy(issues, '_id');
@@ -99,5 +113,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.SET_COMPONENT_STATE]: setComponentState,
 	[IssuesTypes.SAVE_ISSUE_SUCCESS]: saveIssueSuccess,
 	[IssuesTypes.TOGGLE_PENDING_STATE]: togglePendingState,
-	[IssuesTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState
+	[IssuesTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
+	[IssuesTypes.TOGGLE_IS_IMPORTING_BCF]: toggleIsImportingBcf,
+	[IssuesTypes.TOGGLE_SUBMODELS_ISSUES]: toggleSubmodelsIssues
 });

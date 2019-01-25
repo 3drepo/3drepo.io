@@ -24,9 +24,16 @@ import PinDrop from '@material-ui/icons/PinDrop';
 import IssueDetails from './components/issueDetails/issueDetails.container';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { searchByFilters } from '../../../../helpers/searching';
 import { ReportedItems } from '../reportedItems';
-import { STATUSES, ISSUE_FILTERS, ISSUE_FILTER_RELATED_FIELDS, ISSUE_STATUSES, ISSUE_TOPIC_TYPES, ISSUE_PRIORITIES } from '../../../../constants/issues';
+import {
+	STATUSES,
+	ISSUE_FILTERS,
+	ISSUE_FILTER_RELATED_FIELDS,
+	ISSUE_STATUSES,
+	ISSUE_TOPIC_TYPES,
+	ISSUE_PRIORITIES,
+	ISSUES_ACTIONS_MENU
+} from '../../../../constants/issues';
 
 interface IProps {
 	history: any;
@@ -40,8 +47,9 @@ interface IProps {
 	activeIssueId?: string;
 	showDetails?: boolean;
 	issueDetails?: any;
+	isImportingBCF?: boolean;
 	searchEnabled: boolean;
-	showPins: boolean;
+	showSubmodelIssues?: boolean;
 	selectedFilters: any[];
 	modelSettings: {
 		permissions: any[];
@@ -51,13 +59,15 @@ interface IProps {
 	setState: (componentState: any) => void;
 	setNewIssue: () => void;
 	downloadIssues: (teamspace, model) => void;
-	printIssues: (teamspace, model, issuesIds) => void;
-	setActiveIssue: (issue, filteredIssues, revision?) => void;
-	showIssueDetails: (issue, filteredIssues, revision?) => void;
+	printIssues: (teamspace, model) => void;
+	setActiveIssue: (issue, revision?) => void;
+	showIssueDetails: (issue, revision?) => void;
 	closeDetails: () => void;
-	toggleShowPins: (showPins: boolean, filteredIssues) => void;
+	toggleSubmodelsIssues: (showSubmodelIssues: boolean) => void;
 	subscribeOnIssueChanges: (teamspace, modelId) => void;
 	unsubscribeOnIssueChanges: (teamspace, modelId) => void;
+	importBCF: (teamspace, modelId, file, revision) => void;
+	exportBCF: (teamspace, modelId) => void;
 }
 
 interface IState {
@@ -88,7 +98,14 @@ export class Issues extends React.PureComponent<IProps, IState> {
 			[ISSUE_FILTER_RELATED_FIELDS.CREATED_BY]: this.getFilterValues(this.props.jobs),
 			[ISSUE_FILTER_RELATED_FIELDS.ASSIGNED_TO]: this.getFilterValues(this.jobsList),
 			[ISSUE_FILTER_RELATED_FIELDS.PRIORITY]: this.getFilterValues(ISSUE_PRIORITIES),
-			[ISSUE_FILTER_RELATED_FIELDS.TYPE]: this.getFilterValues(ISSUE_TOPIC_TYPES)
+			[ISSUE_FILTER_RELATED_FIELDS.TYPE]: this.getFilterValues(ISSUE_TOPIC_TYPES),
+			[ISSUE_FILTER_RELATED_FIELDS.DUE_DATE]: [{
+				label: 'From',
+				value: new Date()
+			}, {
+				label: 'To',
+				value: new Date()
+			}]
 		};
 	}
 
@@ -101,7 +118,35 @@ export class Issues extends React.PureComponent<IProps, IState> {
 	}
 
 	get headerMenuItems() {
-		return [];
+		const {
+			printIssues,
+			downloadIssues,
+			importBCF,
+			exportBCF,
+			teamspace,
+			model,
+			revision,
+			showSubmodelIssues,
+			toggleSubmodelsIssues
+		} = this.props;
+
+		return [{
+			...ISSUES_ACTIONS_MENU.PRINT,
+			onClick: () => printIssues(teamspace, model)
+		}, , {
+			...ISSUES_ACTIONS_MENU.IMPORT_BCF,
+			onClick: () => importBCF(teamspace, model, {}, revision)
+		}, {
+			...ISSUES_ACTIONS_MENU.EXPORT_BCF,
+			onClick: () => exportBCF(teamspace, model)
+		}, {
+			...ISSUES_ACTIONS_MENU.DOWNLOAD,
+			onClick: () => downloadIssues(teamspace, model)
+		}, {
+			...ISSUES_ACTIONS_MENU.SHOW_SUBMODEL_ISSUES,
+			enabled: showSubmodelIssues,
+			onClick: () => toggleSubmodelsIssues(!showSubmodelIssues)
+		}];
 	}
 
 	get showDefaultHiddenItems() {

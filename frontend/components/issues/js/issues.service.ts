@@ -288,28 +288,6 @@ export class IssuesService {
 	}
 
 	/**
-	* Import bcf
-	*/
-	public importBcf(account, model, revision, file) {
-
-		let bcfUrl = account + '/' + model + '/issues.bcfzip';
-		if (revision) {
-			bcfUrl = account + '/' + model + '/revision/' + revision + '/issues.bcfzip';
-		}
-
-		const formData = new FormData();
-		formData.append('file', file);
-
-		return this.apiService.post(bcfUrl, formData, {'Content-Type': undefined})
-			.then((res) => {
-				if (res.status !== 200) {
-					throw res.data;
-				}
-			});
-
-	}
-
-	/**
 	 * Convert an action comment to readable text
 	 * @param comment
 	 * @returns {string}

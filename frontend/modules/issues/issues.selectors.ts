@@ -95,3 +95,11 @@ export const selectLogs = createSelector(
 export const selectFetchingDetailsIsPending = createSelector(
 	selectComponentState, (state) => state.fetchingDetailsIsPending
 );
+
+export const selectShowSubmodelIssues = createSelector(
+	selectComponentState, (state) => state.showSubmodelIssues
+);
+
+export const selectIsImportingBCF = createSelector(
+	selectComponentState, (state) => state.isImportingBCF
+);

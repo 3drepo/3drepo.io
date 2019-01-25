@@ -47,7 +47,7 @@ export function* fetchIssues({teamspace, modelId, revision}) {
 		const preparedIssues = data.map((issue) => prepareIssue(issue, jobs));
 
 		yield put(IssuesActions.fetchIssuesSuccess(preparedIssues));
-		// yield put(IssuesActions.renderPins(data));
+		yield put(IssuesActions.renderPins(data));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'issues', error));
 	}
@@ -236,19 +236,43 @@ export function* downloadIssues({ teamspace, modelId }) {
 		yield API.downloadJSON('issues', modelName, endpoint);
 
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'issue', error));
+		yield put(DialogActions.showErrorDialog('download', 'json', error));
 	}
+}
+
+export function* exportBcf({ teamspace, modelId }) {
+	try {
+		const filteredIssues = yield select(selectFilteredIssues);
+		const issuesIds = map(filteredIssues, '_id').join(',');
+		const exportUrl = API.getAPIUrl(`${teamspace}/${modelId}/issues.bcfzip?ids=${issuesIds}`);
+		window.open(exportUrl, '_blank');
+
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('export', 'BCF', error));
+	}
+}
+
+export function* importBcf({ teamspace, modelId, file, revision }) {
+	yield put(IssuesActions.toggleIsImportingBcf(true));
+
+	try {
+		yield API.importBCF(teamspace, modelId, file, revision);
+		yield put(IssuesActions.fetchIssues(teamspace, modelId, revision));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('import', 'BCF', error));
+	}
+
+	yield put(IssuesActions.toggleIsImportingBcf(false));
 }
 
 export function* printIssues({ teamspace, modelId }) {
 	try {
 		const filteredIssues = yield select(selectFilteredIssues);
 		const issuesIds = map(filteredIssues, '_id').join(',');
-		const printEndpoint = `${teamspace}/${modelId}/issues.html?ids=${issuesIds}`;
-		const printUrl = yield API.getAPIUrl(printEndpoint);
+		const printUrl = API.getAPIUrl(`${teamspace}/${modelId}/issues.html?ids=${issuesIds}`);
 		window.open(printUrl, '_blank');
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'issue', error));
+		yield put(DialogActions.showErrorDialog('print', 'issue', error));
 	}
 }
 
@@ -526,9 +550,10 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.SHOW_DETAILS, showDetails);
 	yield takeLatest(IssuesTypes.CLOSE_DETAILS, closeDetails);
 	yield takeLatest(IssuesTypes.SHOW_NEW_PIN, showNewPin);
-	yield takeLatest(IssuesTypes.TOGGLE_SHOW_PINS, toggleShowPins);
 	yield takeLatest(IssuesTypes.SUBSCRIBE_ON_ISSUE_CHANGES, subscribeOnIssueChanges);
 	yield takeLatest(IssuesTypes.UNSUBSCRIBE_ON_ISSUE_CHANGES, unsubscribeOnIssueChanges);
 	yield takeLatest(IssuesTypes.FOCUS_ON_ISSUE, focusOnIssue);
 	yield takeLatest(IssuesTypes.SET_NEW_ISSUE, setNewIssue);
+	yield takeLatest(IssuesTypes.EXPORT_BCF, exportBcf);
+	yield takeLatest(IssuesTypes.IMPORT_BCF, importBcf);
 }

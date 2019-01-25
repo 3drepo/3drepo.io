@@ -24,7 +24,7 @@ import { COLOR } from '../../../../../styles/colors';
 export const MenuList = styled(List)`
   background-color: ${COLOR.WHITE};
   width: 100%;
-  min-width: 140px;
+  min-width: 160px;
   max-width: 300px;
   box-shadow: 0 1px 3px 0 ${COLOR.BLACK_20};
   border-radius: 2px;
@@ -40,7 +40,7 @@ export const ChildMenu = styled.div`
   left: 100%;
   top: 0;
   z-index: 1;
-  min-width: 150px;
+  min-width: 160px;
   max-width: 400px;
   width: 100%;
   box-shadow: 1px 1px 3px 0 ${COLOR.BLACK_20};

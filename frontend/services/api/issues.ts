@@ -72,3 +72,22 @@ export const getIssues = (teamspace, modelId, revision?) => {
 	}
 	return api.get(`${mainPath}/issues.json`);
 };
+
+/**
+ * Import BCF
+ * @param teamspace
+ * @param modelId
+ * @param file
+ * @param revision
+ */
+export const importBCF = (teamspace, modelId, file, revision?) => {
+	const mainPath = `${teamspace}/${modelId}`;
+
+	const formData = new FormData();
+	formData.append('file', file);
+
+	if (revision) {
+		return api.post(`${mainPath}/revision/${revision}/issues.json`, formData);
+	}
+	return api.post(`${mainPath}/issues.bcfzip`, formData);
+};

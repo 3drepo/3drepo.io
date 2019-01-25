@@ -102,21 +102,15 @@ export const ISSUE_FILTERS = [
 		label: 'Assigned to',
 		relatedField: ISSUE_FILTER_RELATED_FIELDS.ASSIGNED_TO,
 		type: DATA_TYPES.UNDEFINED
-	}/* ,
+	},
 	{
 		label: 'Date',
 		relatedField: ISSUE_FILTER_RELATED_FIELDS.DUE_DATE,
-		type: DATA_TYPES.UNDEFINED
-	} */
+		type: DATA_TYPES.DATE
+	}
 ] as any;
 
-export const RISKS_ACTIONS_ITEMS = {
-	PRINT: 'print',
-	DOWNLOAD: 'download',
-	SHOW_PINS: 'showViewModule'
-};
-
-export const RISKS_ACTIONS_MENU = {
+export const ISSUES_ACTIONS_MENU = {
 	PRINT: {
 		label: 'Create report',
 		Icon: Print
@@ -133,8 +127,8 @@ export const RISKS_ACTIONS_MENU = {
 		label: 'Download JSON',
 		Icon: Download
 	},
-	SHOW_PINS: {
-		label: 'Show submodel issues',
+	SHOW_SUBMODEL_ISSUES: {
+		label: 'Show sub model issues',
 		Icon: ViewModule
 	}
 };
