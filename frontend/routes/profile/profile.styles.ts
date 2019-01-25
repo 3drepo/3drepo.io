@@ -56,6 +56,17 @@ export const StyledButtonContainer = styled.div`
 	}
 `;
 
+export const DeleteButton = styled(Button)`
+  && {
+    color: rgba(255, 255, 255, 0.87);
+	background-color:  rgba(234, 57, 57, 0.87);
+  }
+
+  &&:hover {
+	background-color:  rgba(234, 57, 57, 1);
+  }
+`;
+
 export const StyledTextField = styled(TextField)``;
 
 export const FieldsRow = styled(Grid)`

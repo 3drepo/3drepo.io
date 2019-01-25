@@ -26,7 +26,8 @@ import {
 	StyledTextField,
 	FieldsRow,
 	StyledButton,
-	StyledButtonContainer
+	StyledButtonContainer,
+	DeleteButton
 } from '../profile.styles';
 import { Grid, Button } from '@material-ui/core';
 
@@ -60,15 +61,14 @@ export class APIKeyForm extends React.PureComponent<IProps> {
 								>
 									Generate
 								</Button>
-								<Button
-									color="secondary"
+								<DeleteButton
 									variant="raised"
 									disabled={!apiKey}
 									type="button"
 									onClick={this.onClickDelete}
 								>
 									Delete
-								</Button>
+								</DeleteButton>
 							</StyledButtonContainer>
 					</FormContainer>
 				</Form>);
