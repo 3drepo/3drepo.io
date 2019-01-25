@@ -55,6 +55,8 @@ export function* fetchIssues({teamspace, modelId, revision}) {
 }
 
 export function* fetchIssue({teamspace, modelId, issueId}) {
+	yield put(IssuesActions.toggleDetailsPendingState(true));
+
 	try {
 		const {data} = yield API.getIssue(teamspace, modelId, issueId);
 
@@ -62,6 +64,7 @@ export function* fetchIssue({teamspace, modelId, issueId}) {
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'issue', error));
 	}
+	yield put(IssuesActions.toggleDetailsPendingState(false));
 }
 
 const createGroupData = (name, nodes) => {

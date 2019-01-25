@@ -71,3 +71,5 @@ export const StyledForm = styled(Form)`
 `;
 
 export const NotCollapsableContent = styled.div``;
+
+export const Content = styled.div``;

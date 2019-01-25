@@ -250,7 +250,7 @@ export function* printRisks({ teamspace, modelId }) {
 		const filteredRisks = yield select(selectFilteredRisks);
 		const risksIds = map(filteredRisks, '_id').join(',');
 		const printEndpoint = `${teamspace}/${modelId}/risks.html?ids=${risksIds}`;
-		const printUrl = `${ClientConfig.apiUrls.all[0]}/${printEndpoint}`;
+		const printUrl = yield API.getAPIUrl(printEndpoint);
 		window.open(printUrl, '_blank');
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'risk', error));

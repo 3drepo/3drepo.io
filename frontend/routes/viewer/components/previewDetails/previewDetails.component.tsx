@@ -28,6 +28,7 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
 import {
+	Content,
 	Container,
 	Collapsable,
 	Details,
@@ -105,9 +106,9 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	));
 
 	public renderNotCollapsable = renderWhenTrue(() => (
-		<>
+		<Content>
 			{this.props.renderNotCollapsable()}
-		</>
+		</Content>
 	));
 
 	get collapsableProps() {

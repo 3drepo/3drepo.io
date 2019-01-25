@@ -197,8 +197,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				editable={!this.riskData._id}
 				onNameChange={this.handleNameChange}
 				onExpandChange={this.handleExpandChange}
-				renderCollapsable={() => this.renderRiskForm()}
 				panelName={RISK_PANEL_NAME}
+				renderCollapsable={this.renderRiskForm}
 			/>
 		);
 	});

@@ -58,12 +58,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
-	public componentDidUpdate(prevProps) {
+	public componentDidMount() {
 		const { teamspace, model, fetchIssue, issue } = this.props;
-
-		if (!prevProps.issue._id && issue._id) {
-			fetchIssue(teamspace, model, issue._id);
-		}
+		fetchIssue(teamspace, model, issue._id);
 	}
 
 	public handleExpandChange = (event, expanded) => {

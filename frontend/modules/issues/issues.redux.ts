@@ -36,6 +36,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	setActiveIssue: ['issue', 'revision'],
 	showNewPin: ['issue', 'pinData'],
 	togglePendingState: ['isPending'],
+	toggleDetailsPendingState: ['isPending'],
 	toggleShowPins: ['showPins'],
 	subscribeOnIssueChanges: ['teamspace', 'modelId'],
 	unsubscribeOnIssueChanges: ['teamspace', 'modelId'],
@@ -61,6 +62,9 @@ export const INITIAL_STATE = {
 
 export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
 
+export const toggleDetailsPendingState = (state = INITIAL_STATE, { isPending }) =>
+	({ ...state, componentState: { ...state.componentState,  fetchingDetailsIsPending: isPending } });
+
 export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues = [] }) => {
 	const issuesMap = keyBy(issues, '_id');
 
@@ -71,7 +75,7 @@ export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues = [] }) => {
 };
 
 export const fetchIssueSuccess = (state = INITIAL_STATE, { issue }) => {
-	return {...state, componentState: { ...state.componentState, logs: issue.comments, fetchingDetailsIsPending: false}}
+	return {...state, componentState: { ...state.componentState, logs: issue.comments, fetchingDetailsIsPending: false}};
 };
 
 export const saveIssueSuccess = (state = INITIAL_STATE, { issue }) => {
@@ -94,5 +98,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUE_SUCCESS]: fetchIssueSuccess,
 	[IssuesTypes.SET_COMPONENT_STATE]: setComponentState,
 	[IssuesTypes.SAVE_ISSUE_SUCCESS]: saveIssueSuccess,
-	[IssuesTypes.TOGGLE_PENDING_STATE]: togglePendingState
+	[IssuesTypes.TOGGLE_PENDING_STATE]: togglePendingState,
+	[IssuesTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState
 });
