@@ -15,10 +15,8 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { dispatch, getState, subscribe } from '../../../helpers/migration';
+import { dispatch, getState } from '../../../helpers/migration';
 import { selectCurrentUser, CurrentUserActions } from '../../../modules/currentUser';
-import { ModelActions, selectSettings } from '../../../modules/model';
-import { ViewpointsActions } from '../../../modules/viewpoints';
 
 class ModelController implements ng.IController {
 
@@ -51,7 +49,7 @@ class ModelController implements ng.IController {
 	private event;
 	private branch;
 	private revision;
-	private settings: any = {};
+	private settings;
 	private issueId;
 	private riskId;
 	private treeMap;
@@ -76,21 +74,7 @@ class ModelController implements ng.IController {
 		private StateManager,
 		private PanelService,
 		private ViewerService
-	) {
-		subscribe(this, this.mapPropsToThis);
-	}
-
-	public mapPropsToThis = (state) => {
-		const settings = selectSettings(state);
-
-		if (settings._id !== this.settings._id) {
-			this.handleSettingsChange(settings);
-		}
-
-		return {
-			settings
-		};
-	}
+	) {}
 
 	public $onInit() {
 		this.issuesCardIndex = this.PanelService.getCardIndex('issues');
@@ -186,8 +170,24 @@ class ModelController implements ng.IController {
 	}
 
 	public setupModelInfo() {
+
 		this.RevisionsService.listAll(this.account, this.model);
-		this.loadModelSettings();
+
+		this.loadModelSettings().then(() => {
+			if (!this.ViewerService.currentModel.model) {
+				if (this.ViewerService.viewer) {
+					this.ViewerService.initViewer().then(() => {
+						this.loadModel();
+					}).catch((err) => {
+						console.error('Failed to load model: ', err);
+					});
+				} else {
+					console.error('Failed to locate viewer');
+				}
+			} else {
+				this.loadModel();
+			}
+		});
 	}
 
 	public setSelectedObjects(selectedObjects) {
@@ -202,20 +202,20 @@ class ModelController implements ng.IController {
 		});
 	}
 
-	private loadModel = () => {
-		return this.ViewerService.loadViewerModel(
+	private loadModel() {
+		this.ViewerService.loadViewerModel(
 			this.account,
 			this.model,
 			this.branch,
 			this.revision
-		).then(() => {
+		).then( () => {
 			// IMPORTANT: only load model settings after it has started loading the model
 			// loadViewerModel can cancel previous model loads which will kill off old unity promises
 			this.ViewerService.updateViewerSettings(this.settings);
 		});
 	}
 
-	private setupViewer(settings) {
+	private setupViewer() {
 		if (this.riskId) {
 			// assume issue card shown by default
 			this.PanelService.hidePanelsByType('issues');
@@ -227,34 +227,30 @@ class ModelController implements ng.IController {
 			});
 		}
 
-		this.PanelService.hideSubModels(this.issuesCardIndex, !settings.federate);
-		return this.TreeService.init(this.account, this.model, this.branch, this.revision, settings)
+		this.PanelService.hideSubModels(this.issuesCardIndex, !this.settings.federate);
+		this.TreeService.init(this.account, this.model, this.branch, this.revision, this.settings)
 			.catch((error) => {
 				console.error('Error initialising tree: ', error);
 			});
 	}
 
-	private handleSettingsChange = async (settings) => {
-		await this.setupViewer(settings);
-		if (!this.ViewerService.currentModel.model) {
-			if (this.ViewerService.viewer) {
-				try {
-					await this.ViewerService.initViewer();
-					this.loadModel();
-				} catch (error) {
-					console.error('Failed to load model: ', error);
-				}
-			} else {
-				console.error('Failed to locate viewer');
-			}
-		} else {
-			this.loadModel();
-		}
-	}
-
 	private loadModelSettings() {
-		dispatch(ModelActions.fetchSettings(this.account, this.model));
-		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
+		return this.ViewerService.getModelInfo(this.account, this.model)
+			.then((response) => {
+				this.settings = response.data;
+				this.setupViewer();
+				return Promise.resolve();
+			})
+			.catch((error) => {
+				console.error(error);
+				// If we are not logged in the
+				// session expired popup takes prescedence
+				if (error.data.message !== 'You are not logged in') {
+					this.handleModelError();
+				}
+
+				return Promise.reject(error);
+			});
 	}
 }
 

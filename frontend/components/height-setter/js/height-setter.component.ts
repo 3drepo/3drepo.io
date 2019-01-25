@@ -60,7 +60,7 @@ class HeightSetterController implements ng.IController, IBindings {
 			this.observer.observe(this.content[0], { attributes: false, childList: true, subtree: false });
 
 			this.removeHeightWatch = this.$scope.$watch(() => this.contentData.height, (newValue) => {
-				this.content.css('max-height', `${newValue}px`);
+				this.content.css('max-height', `${newValue - this.headerHeight}px`);
 			});
 		});
 	}
@@ -69,9 +69,7 @@ class HeightSetterController implements ng.IController, IBindings {
 		return this.content[0].querySelector('.height-catcher').scrollHeight;
 	}
 
-	public $onInit(): void {
-		this.updateHeight();
-	}
+	public $onInit(): void {}
 
 	public updateHeight = () => {
 		this.updateHeightTimeout = this.$timeout(() => {

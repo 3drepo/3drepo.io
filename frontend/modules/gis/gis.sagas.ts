@@ -23,7 +23,18 @@ import { selectVisibleSources } from './gis.selectors';
 
 export function* initializeMap({params}) {
 	try {
-		yield put(ViewerActions.mapInitialise(params));
+		// FIXME: I don't think this should live here. Temporary work around for position point fix
+		// 2 problems here
+		//    - Sometimes the number can be in string format
+		//    - the position is in DirectX notation
+		const convertedParams = JSON.parse(JSON.stringify(params));
+		if (params && params.surveyPoints.length > 0) {
+			convertedParams.surveyPoints[0].position[0] = Number(params.surveyPoints[0].position[0]);
+			convertedParams.surveyPoints[0].position[1] = -Number(params.surveyPoints[0].position[2]);
+			convertedParams.surveyPoints[0].position[2] = -Number(params.surveyPoints[0].position[1]);
+			convertedParams.surveyPoints[0].latLong = params.surveyPoints[0].latLong.map((x) => Number(x));
+		}
+		yield put(ViewerActions.mapInitialise(convertedParams));
 		yield put(GisActions.initializeMapSuccess(true));
 
 	} catch (error) {}

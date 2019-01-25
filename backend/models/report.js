@@ -22,6 +22,7 @@ const ModelSetting = require("./modelSetting");
 const User = require ("./user");
 const config = require("../config");
 const C = require("../constants");
+const Job = require("./job");
 
 const ReportType = {
 	ISSUES : "Issues",
@@ -45,12 +46,17 @@ attributes[ReportType.RISKS] = [
 	{ label: "Risk Likelihood", field: "likelihood", mapping: riskLevelMapping},
 	{ label: "Risk Consequence", field: "consequence", mapping: riskLevelMapping},
 	{ label: "Level of Risk", field: "level_of_risk", mapping: riskLevelMapping},
-	{ label: "Mitigation Status", field: "mitigation_status", default: "Unmitigated"}
+	{ label: "Mitigation Status", field: "mitigation_status", default: "Unmitigated"},
+	{ label: "Mitigation", field: "mitigation_desc", default: "None"}
 ];
 
 const urlQS = {};
 urlQS[ReportType.RISKS] = "riskId";
 urlQS[ReportType.ISSUES] = "issueId";
+
+const singularLabel = {};
+singularLabel[ReportType.RISKS] = "risk";
+singularLabel[ReportType.ISSUES] = "issue";
 
 /**
  *
@@ -67,15 +73,17 @@ function formatDate(date, printTime = true) {
 
 class ReportGenerator {
 	constructor(type, teamspace, model, rev) {
-		this.userInfo = [];
+		this.userFullName = [];
 		this.promises = [];
 		this.type = type;
+		this.typeSingular = singularLabel[type];
 		this.teamspace = teamspace;
 		this.modelID = model;
 		this.rev = rev || this.getRevisionID(teamspace, model);
 		this.reportDate = formatDate(new Date(), false);
 
 		this.getModelName();
+		this.getUsersToJobs();
 	}
 
 	getDBCol() {
@@ -98,6 +106,18 @@ class ReportGenerator {
 		);
 	}
 
+	getUsersToJobs() {
+		this.promises.push(
+			Job.usersWithJob(this.teamspace).then((usersToJob) => {
+				this.userToJob = usersToJob;
+			})
+		);
+	}
+
+	getUserJob(user) {
+		return this.userToJob.hasOwnProperty(user) ? this.userToJob[user] : "Unknown";
+	}
+
 	addEntries(entries) {
 		this.entries = this.entries || [];
 		const usersToQuery = new Set();
@@ -115,9 +135,11 @@ class ReportGenerator {
 			newEntry.screenshotURL = `${config.getBaseURL()}/viewer/${this.teamspace}/${this.modelID}?${urlQS[this.type]}=${entry._id}`;
 			newEntry.name = entry.name;
 
+			newEntry.desc = entry.desc;
+
 			attributes[this.type].forEach((field) => {
+				const attri = { label: field.label };
 				if (entry.hasOwnProperty(field.field)) {
-					const attri = { label: field.label };
 					const value = entry[field.field];
 
 					if(value === "" || value === undefined || value === null) {
@@ -133,6 +155,9 @@ class ReportGenerator {
 						}
 
 					}
+					newEntry.attributes.push(attri);
+				} else if (field.default) {
+					attri.value = field.default;
 					newEntry.attributes.push(attri);
 				}
 			});
@@ -156,19 +181,13 @@ class ReportGenerator {
 
 	addUsersToNameMap(users) {
 		users.forEach((user) => {
-			if(!this.userInfo[user]) {
+			if(!this.userFullName[user]) {
 				this.promises.push(
 					User.findByUserName(user).then(username => {
 						if (username) {
-							this.userInfo[user] = {
-								fullName: username.customData.firstName + " " + username.customData.lastName,
-								company: username.customData.billing.billingInfo.company
-							};
+							this.userFullName[user] = username.customData.firstName + " " + username.customData.lastName;
 						} else {
-							this.userInfo[user] = {
-								fullName: "Unknown",
-								company: "Unknown"
-							};
+							this.userFullName[user] = "Unknown";
 						}
 					})
 				);

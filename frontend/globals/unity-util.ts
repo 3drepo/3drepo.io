@@ -758,14 +758,14 @@ export class UnityUtil {
 	 * Start map generation
 	 */
 	public static mapStart() {
-		UnityUtil.toUnity('ShowMap', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		UnityUtil.toUnity('ShowMap', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
 	 * Stop map generation
 	 */
 	public static mapStop() {
-		UnityUtil.toUnity('HideMap', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		UnityUtil.toUnity('HideMap', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**

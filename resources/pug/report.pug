@@ -220,7 +220,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 			each entry in reportData.entries
 				.report-entry
 					h3 #{entry.number} #{entry.name}
-					p.grey.info #{entry.owner} (#{reportData.userInfo[entry.owner].fullName} - #{reportData.userInfo[entry.owner].company})
+					p.grey.info #{entry.owner} (#{reportData.userFullName[entry.owner]} - #{reportData.getUserJob(entry.owner)})
 						span.right.grey.info.float-right #{entry.created}
 					.row.screenshot
 						.col.screenshot
@@ -234,7 +234,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 											strong
 												| #{attri.label}:
 										td
-												span.float-right.status #{attri.value}								
+												span.float-right.status #{attri.value}
 					.row
 						.col.description
 							br
@@ -257,9 +257,12 @@ html(lang="en" ng-app="3drepo").ng-scope
 														| to
 														i #{comment.action.to}
 												p
-													if reportData.userInfo[comment.owner]
-														span.grey.info #{comment.owner} (#{reportData.userInfo[comment.owner].fullName} - #{reportData.userInfo[comment.owner].company})
+													if reportData.userFullName[comment.owner]
+														span.grey.info #{comment.owner} (#{reportData.userFullName[comment.owner]} - #{reportData.getUserJob(comment.owner)})
 													span.grey.info.float-right #{comment.created}
+					.info
+						br
+						a(href=entry.screenshotURL target='_blank') Click to load #{reportData.typeSingular} in 3D Repo
 
 				hr.break
 

@@ -18,8 +18,10 @@
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 import { Form } from 'formik';
+
+import { COLOR } from '../../../../../../styles';
 
 export const StyledForm = styled(Form)`
   display: flex;
@@ -36,4 +38,35 @@ export const Headline = styled(Typography)`
 
 export const StyledTextField = styled(TextField)`
   width: 100%;
+`;
+
+export const FooterWrapper = styled.div`
+  align-self: flex-end;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
+
+export const StyledSaveButton = styled(IconButton)`
+  && {
+    align-self: flex-end;
+    background-color: ${COLOR.SECONDARY_MAIN};
+    color: ${COLOR.WHITE};
+
+    &:disabled {
+      background-color: ${COLOR.GRAY};
+
+      svg {
+        color: ${COLOR.WHITE};
+      }
+    }
+
+    &:hover {
+      background-color: ${COLOR.SECONDARY_LIGHT};
+
+      svg {
+        color: ${COLOR.WHITE};
+      }
+    }
+  }
 `;
