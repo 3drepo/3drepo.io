@@ -55,7 +55,7 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 	));
 
 	public renderLoader = renderWhenTrue(() => (
-		<ViewerPanelContent isPadding={true}>
+		<ViewerPanelContent className="height-catcher" isPadding={true}>
 			<Loader />
 		</ViewerPanelContent>
 	));
