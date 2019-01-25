@@ -21,21 +21,10 @@ import { GisTypes, GisActions } from './gis.redux';
 import { ViewerActions } from '../viewer';
 import { selectVisibleSources } from './gis.selectors';
 
-export function* initializeMap({params}) {
+export function* initialiseMap({params}) {
 	try {
-		// FIXME: I don't think this should live here. Temporary work around for position point fix
-		// 2 problems here
-		//    - Sometimes the number can be in string format
-		//    - the position is in DirectX notation
-		const convertedParams = JSON.parse(JSON.stringify(params));
-		if (params && params.surveyPoints.length > 0) {
-			convertedParams.surveyPoints[0].position[0] = Number(params.surveyPoints[0].position[0]);
-			convertedParams.surveyPoints[0].position[1] = -Number(params.surveyPoints[0].position[2]);
-			convertedParams.surveyPoints[0].position[2] = -Number(params.surveyPoints[0].position[1]);
-			convertedParams.surveyPoints[0].latLong = params.surveyPoints[0].latLong.map((x) => Number(x));
-		}
-		yield put(ViewerActions.mapInitialise(convertedParams));
-		yield put(GisActions.initializeMapSuccess(true));
+		yield put(ViewerActions.mapInitialise(params));
+		yield put(GisActions.initialiseMapSuccess(true));
 
 	} catch (error) {}
 }
@@ -83,7 +72,7 @@ export function* resetMap() {
 }
 
 export default function* GisSaga() {
-	yield takeLatest(GisTypes.INITIALIZE_MAP, initializeMap);
+	yield takeLatest(GisTypes.INITIALISE_MAP, initialiseMap);
 	yield takeLatest(GisTypes.ADD_SOURCE, addSource);
 	yield takeLatest(GisTypes.REMOVE_SOURCE, removeSource);
 	yield takeLatest(GisTypes.RESET_SOURCES, resetSources);
