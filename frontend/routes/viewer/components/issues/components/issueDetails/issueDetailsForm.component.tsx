@@ -68,13 +68,12 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, any> {
 						</StyledFormControl>
 					</FieldsRow>
 
-					<FieldsRow container justify="space-between" isHalf={true}>
+					<FieldsRow container justify="space-between" flex={0.5}>
 						<StyledFormControl>
-							<InputLabel shrink={true} htmlFor="due_date">Due date</InputLabel>
+							<InputLabel shrink={true}>Due date</InputLabel>
 							<Field name="due_date" render={({ field }) => (
 								<DateField
 									{...field}
-									inputId="due_date"
 								/>
 							)} />
 						</StyledFormControl>

@@ -66,12 +66,10 @@ export class DateField extends React.PureComponent<IProps, IState> {
 		return (
 			<Container>
 				<StyledDatePicker
-					// format="DD/MM/YYYY"
 					value={value}
 					onBlur={onBlur}
 					name={name}
 					onChange={this.handleChange}
-					inputId={inputId}
 				/>
 			</Container>
 		);

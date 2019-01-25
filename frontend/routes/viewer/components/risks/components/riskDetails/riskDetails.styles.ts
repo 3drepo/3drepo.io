@@ -37,7 +37,7 @@ export const Container = styled.div`
 export const FieldsRow = styled(Grid)`
   ${TextFieldStyles.Container},
   ${StyledFormControl} {
-    flex: ${(props: any) => props.isHalf ? 0.5 : 1};
+    flex: ${(props: any) => props.flex ? props.flex : 1};
 
     &:nth-child(2n + 1) {
       margin-right: 25px;
