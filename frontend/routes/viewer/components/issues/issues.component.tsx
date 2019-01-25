@@ -101,10 +101,16 @@ export class Issues extends React.PureComponent<IProps, IState> {
 			[ISSUE_FILTER_RELATED_FIELDS.TYPE]: this.getFilterValues(ISSUE_TOPIC_TYPES),
 			[ISSUE_FILTER_RELATED_FIELDS.DUE_DATE]: [{
 				label: 'From',
-				value: new Date()
+				value: {
+					label: 'From',
+					value: Date.now()
+				}
 			}, {
 				label: 'To',
-				value: new Date()
+				value: {
+					label: 'To',
+					value: Date.now()
+				}
 			}]
 		};
 	}
