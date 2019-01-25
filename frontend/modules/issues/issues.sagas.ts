@@ -20,7 +20,7 @@ import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 
 import * as API from '../../services/api';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
-import { getIssuePinColor, prepareIssue } from '../../helpers/issues';
+import { prepareIssue } from '../../helpers/issues';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
@@ -36,6 +36,7 @@ import {
 } from './issues.selectors';
 import { selectJobsList } from '../jobs';
 import { selectCurrentUser } from '../currentUser';
+import { PIN_COLORS } from '../../styles';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -89,7 +90,7 @@ const toggleIssuePin = (issue, selected = true) => {
 	if (issue && issue.position && issue.position.length > 0 && issue._id) {
 		Viewer.changePinColor({
 			id: issue._id,
-			colours: getIssuePinColor(issue.level_of_issue, selected)
+			colours: selected ? PIN_COLORS.YELLOW : PIN_COLORS.BLUE
 		});
 	}
 };
@@ -189,11 +190,13 @@ export function* renderPins() {
 		const invisibleIssues = issuesList.length !== filteredIssues.length
 			? differenceBy(issuesList, filteredIssues, '_id')
 			: [];
-		const activeIssueId = yield select(selectActiveIssueId);
 
+		const activeIssueId = yield select(selectActiveIssueId);
 		const removePins = (issues) => issues.forEach((issue) => {
 			Viewer.removePin({ id: issue._id });
 		});
+
+		yield removePins(!shouldShowPins ? issuesList : invisibleIssues);
 
 		if (shouldShowPins) {
 			for (let index = 0; index < filteredIssues.length; index++) {
@@ -202,9 +205,8 @@ export function* renderPins() {
 				const pinPosition = issue.position && issue.position.length;
 
 				if (pinPosition) {
-					const levelOfIssue = (issue.level_of_issue !== undefined) ? issue.level_of_issue : 4;
 					const isSelectedPin = activeIssueId && issue._id === activeIssueId;
-					const pinColor = getIssuePinColor(levelOfIssue, isSelectedPin);
+					const pinColor = isSelectedPin ? PIN_COLORS.YELLOW : PIN_COLORS.BLUE;
 
 					yield Viewer.addPin({
 						id: issue._id,
@@ -219,7 +221,6 @@ export function* renderPins() {
 				}
 			}
 		}
-		yield removePins(!shouldShowPins ? issuesList : invisibleIssues);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('show', 'pins', error));
 	}
@@ -436,7 +437,7 @@ export function* showNewPin({ issue, pinData }) {
 			...pinData,
 			account: issue.account,
 			model: issue.model,
-			colours: getIssuePinColor(issue.level_of_issue, true),
+			colours: pinData.selectColour,
 			type: 'issue'
 		};
 
