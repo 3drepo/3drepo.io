@@ -1,9 +1,10 @@
+import { values } from 'lodash';
+
 import NewReleases from '@material-ui/icons/NewReleases';
 import ErrorOutline from '@material-ui/icons/ErrorOutline';
 import ErrorSolid from '@material-ui/icons/Error';
 import CheckCircle from '@material-ui/icons/CheckCircle';
 import SyncProblem from '@material-ui/icons/SyncProblem';
-
 import Print from '@material-ui/icons/Print';
 import Download from '@material-ui/icons/CloudDownload';
 import Pins from '@material-ui/icons/PinDrop';

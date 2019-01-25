@@ -24,7 +24,7 @@ export const FontAwesomeIcon = FontAwesomeIconComponent;
 export const Eraser = (props) => <FontAwesomeIconComponent {...props} icon="eraser" />;
 
 export const Eye = (props) => <FontAwesomeIconComponent {...props} icon="eye" />;
-
 export const Tint = (props) => <FontAwesomeIconComponent {...props} icon="tint" />;
-
 export const HandPaper = (props) => <FontAwesomeIconComponent {...props} icon="hand-paper" />;
+export const SortAmountUp = (props) => <FontAwesomeIconComponent {...props} icon="sort-amount-up" />;
+export const SortAmountDown = (props) => <FontAwesomeIconComponent {...props} icon="sort-amount-down" />;

@@ -292,7 +292,7 @@ const showMultipleGroups = async (issue, revision) => {
 		}
 
 		if (shownGroupData) {
-			objects.shown = hiddenGroupData.objects;
+			objects.shown = shownGroupData.objects;
 		}
 
 		if (highlightedGroupData) {

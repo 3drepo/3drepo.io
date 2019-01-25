@@ -26,7 +26,7 @@ import IssueDetails from './components/issueDetails/issueDetails.container';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { searchByFilters } from '../../../../helpers/searching';
 import { ReportedItems } from '../reportedItems';
-import { STATUSES } from '../../../../constants/issues';
+import { STATUSES, ISSUE_FILTERS, ISSUE_FILTER_RELATED_FIELDS, ISSUE_STATUSES, ISSUE_TOPIC_TYPES, ISSUE_PRIORITIES } from '../../../../constants/issues';
 
 interface IProps {
 	history: any;
@@ -82,8 +82,22 @@ export class Issues extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
+	get filtersValuesMap() {
+		return {
+			[ISSUE_FILTER_RELATED_FIELDS.STATUS]: this.getFilterValues(ISSUE_STATUSES),
+			[ISSUE_FILTER_RELATED_FIELDS.CREATED_BY]: this.getFilterValues(this.props.jobs),
+			[ISSUE_FILTER_RELATED_FIELDS.ASSIGNED_TO]: this.getFilterValues(this.jobsList),
+			[ISSUE_FILTER_RELATED_FIELDS.PRIORITY]: this.getFilterValues(ISSUE_PRIORITIES),
+			[ISSUE_FILTER_RELATED_FIELDS.TYPE]: this.getFilterValues(ISSUE_TOPIC_TYPES)
+		};
+	}
+
 	get filters() {
-		return [];
+		const filterValuesMap = this.filtersValuesMap;
+		return ISSUE_FILTERS.map((issueFilter) => {
+			issueFilter.values = filterValuesMap[issueFilter.relatedField];
+			return issueFilter;
+		});
 	}
 
 	get headerMenuItems() {
@@ -99,7 +113,7 @@ export class Issues extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		// this.props.subscribeOnRiskChanges(this.props.teamspace, this.props.model);
+		this.props.subscribeOnIssueChanges(this.props.teamspace, this.props.model);
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -119,7 +133,7 @@ export class Issues extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
-		// this.props.unsubscribeOnIssueChanges(this.props.teamspace, this.props.model);
+		this.props.unsubscribeOnIssueChanges(this.props.teamspace, this.props.model);
 	}
 
 	public handleFilterChange = (selectedFilters) => {
