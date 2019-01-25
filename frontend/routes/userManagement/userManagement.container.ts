@@ -34,6 +34,7 @@ import {
 	selectCurrentTeamspace as selectDefaultTeamspace,
 	selectCurrentUser
 } from '../../modules/currentUser';
+import { TeamspacesActions } from '../../modules/teamspaces';
 
 const mapStateToProps = createStructuredSelector({
 	defaultTeamspace: selectDefaultTeamspace,
@@ -45,6 +46,7 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
 	onTeamspaceChange: UserManagementActions.fetchTeamspaceDetails
 }, dispatch);
 

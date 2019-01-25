@@ -25,7 +25,7 @@ import { DialogActions } from '../dialog';
 export function* fetchTeamspaces({ username }) {
 	try {
 		yield put(TeamspacesActions.setPendingState(true));
-		const { data: { accounts, ...rest } } = yield API.fetchTeamspace(username);
+		const accounts = (yield API.fetchTeamspace(username)).data.accounts;
 
 		yield put(TeamspacesActions.setTeamspaces(accounts));
 	} catch (e) {
