@@ -22,6 +22,7 @@ const ModelSetting = require("./modelSetting");
 const User = require ("./user");
 const config = require("../config");
 const C = require("../constants");
+const Job = require("./job");
 
 const ReportType = {
 	ISSUES : "Issues",
@@ -72,7 +73,7 @@ function formatDate(date, printTime = true) {
 
 class ReportGenerator {
 	constructor(type, teamspace, model, rev) {
-		this.userInfo = [];
+		this.userFullName = [];
 		this.promises = [];
 		this.type = type;
 		this.typeSingular = singularLabel[type];
@@ -82,6 +83,7 @@ class ReportGenerator {
 		this.reportDate = formatDate(new Date(), false);
 
 		this.getModelName();
+		this.getUsersToJobs();
 	}
 
 	getDBCol() {
@@ -102,6 +104,18 @@ class ReportGenerator {
 				this.rev = entry.tag ? entry.tag : "uploaded at " + formatDate(entry.timestamp);
 			})
 		);
+	}
+
+	getUsersToJobs() {
+		this.promises.push(
+			Job.usersWithJob(this.teamspace).then((usersToJob) => {
+				this.userToJob = usersToJob;
+			})
+		);
+	}
+
+	getUserJob(user) {
+		return this.userToJob.hasOwnProperty(user) ? this.userToJob[user] : "Unknown";
 	}
 
 	addEntries(entries) {
@@ -167,19 +181,13 @@ class ReportGenerator {
 
 	addUsersToNameMap(users) {
 		users.forEach((user) => {
-			if(!this.userInfo[user]) {
+			if(!this.userFullName[user]) {
 				this.promises.push(
 					User.findByUserName(user).then(username => {
 						if (username) {
-							this.userInfo[user] = {
-								fullName: username.customData.firstName + " " + username.customData.lastName,
-								company: username.customData.billing.billingInfo.company
-							};
+							this.userFullName[user] = username.customData.firstName + " " + username.customData.lastName;
 						} else {
-							this.userInfo[user] = {
-								fullName: "Unknown",
-								company: "Unknown"
-							};
+							this.userFullName[user] = "Unknown";
 						}
 					})
 				);
