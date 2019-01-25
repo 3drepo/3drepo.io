@@ -50,7 +50,7 @@ class ImportQueue {
 		this.url = config.cn_queue.host;
 		this.uid = shortid.generate();
 		this.channel = null;
-		this.connect();
+		this.initialised = this.connect();
 	}
 
 	writeFile(fileName, content) {
@@ -98,9 +98,7 @@ class ImportQueue {
 			return conn.createChannel();
 		}).then(channel => {
 			this.channel = channel;
-			return this.subscribeToQueues().then(() => {
-				return channel;
-			});
+			return this.subscribeToQueues().then(() => channel);
 		}).catch((err) => {
 			const message = "Failed to connect to rabbitmq: " + err.message;
 			systemLogger.logError(message);
@@ -115,43 +113,39 @@ class ImportQueue {
 		]);
 	}
 
+	// This should only be called by connect(). Do not ever use else where!
 	consumeCallbackQueue() {
-		return this.getChannel().then((channel) => {
-			return channel.assertQueue(this.callbackQName).then((queue) => {
-				return channel.consume(queue.queue, this.processCallbackMsg.bind(this), { noAck: true });
-			});
+		return this.channel.assertQueue(this.callbackQName).then((queue) => {
+			return this.channel.consume(queue.queue, this.processCallbackMsg.bind(this), { noAck: true });
 		}).catch((err) => {
 			systemLogger.logError("Failed to consume callback queue: " + err.message);
 		});
 	}
 
+	// This should only be called by connect(). Do not ever use else where!
 	consumeEventQueue() {
-		if(this.eventCallback) {
-			return this.getChannel().then((channel) => {
-				return channel.assertExchange(this.eventExchange, "fanout", {
-					durable: true
-				}).then(() => {
-					return channel.assertQueue("", { exclusive: true });
-				}).then(queue => {
-					return channel.bindQueue(queue.queue, this.eventExchange, "").then(() => {
-						return channel.consume(queue.queue, (rep) => {
-							if (this.eventCallback) {
-								this.eventCallback(JSON.parse(rep.content));
-							}
+		return this.channel.assertExchange(this.eventExchange, "fanout", {
+			durable: true
+		}).then(() => {
+			return this.channel.assertQueue("", { exclusive: true });
+		}).then(queue => {
+			return this.channel.bindQueue(queue.queue, this.eventExchange, "").then(() => {
+				return this.channel.consume(queue.queue, (rep) => {
+					if (this.eventCallback) {
+						this.eventCallback(JSON.parse(rep.content));
+					}
 
-						}, { noAck: true });
-					});
-				});
-			}).catch((err) => {
-				systemLogger.logError("Failed to consume event queue: " + err.message);
+				}, { noAck: true });
 			});
-		} else {
-			return Promise.resolve();
-		}
+		}).catch((err) => {
+			systemLogger.logError("Failed to consume event queue: " + err.message);
+		});
 	}
 
 	getChannel() {
-		return this.channel ? Promise.resolve(this.channel) : this.connect();
+		return this.initialised.then(() => {
+			return this.channel ? Promise.resolve(this.channel) : this.connect();
+		});
 	}
 
 	/** *****************************************************************************
@@ -344,11 +338,7 @@ class ImportQueue {
 	}
 
 	subscribeToEventMessages(callback) {
-		const wasUndefined = !this.eventCallback;
 		this.eventCallback = callback;
-		if(wasUndefined) {
-			this.consumeEventQueue();
-		}
 	}
 }
 
