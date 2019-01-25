@@ -74,8 +74,8 @@ export class Settings extends React.PureComponent<IProps, any> {
 				const pointsSettings = {
 					angleFromNorth,
 					surveyPoints: [{
-						position: [axisX, axisY, axisZ],
-						latLong: [latitude, longitude]
+						position: [axisX, axisY, axisZ].map(Number),
+						latLong: [latitude, longitude].map(Number)
 					}]
 				};
 
