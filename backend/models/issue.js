@@ -2071,7 +2071,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath) {
 								}
 
 								let highlightedGroupData;
-								let highlightedObjectsMap;
+								let highlightedObjectsMap = [];
 
 								if (highlightedGroupObject) {
 									highlightedGroupData = createGroupData(highlightedGroupObject);
