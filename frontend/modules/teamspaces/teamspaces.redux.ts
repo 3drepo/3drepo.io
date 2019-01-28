@@ -23,7 +23,7 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	setTeamspaces: ['teamspaces'],
 	setPendingState: ['pendingState'],
 	setModelUploadStatus: ['teamspace', 'project', 'model', 'modelData'],
-
+	setComponentState: ['componentState'],
 	// Projects
 	createProject: ['teamspace', 'projectData'],
 	updateProject: ['teamspace', 'projectName', 'projectData'],
@@ -42,7 +42,10 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 
 export const INITIAL_STATE = {
 	teamspaces: {},
-	isPending: false
+	componentState: {
+		activeTeamspace: '',
+		activeProject: ''
+	}
 };
 
 const setTeamspaces = (state = INITIAL_STATE, action) => {
@@ -136,15 +139,24 @@ const setModelUploadStatus = (state = INITIAL_STATE, action) => {
 	return { ...state, teamspaces };
 };
 
+<<<<<<< HEAD
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return Object.assign({}, state, { isPending: pendingState });
+=======
+const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
+	return { ...state, componentState: { ...state.componentState, ...componentState } };
+>>>>>>> ISSUE #1346 - Remember teamspaces tree state
 };
 
 export const reducer = createReducer({ ...INITIAL_STATE }, {
 	[TeamspacesTypes.SET_TEAMSPACES]: setTeamspaces,
 	[TeamspacesTypes.SET_MODEL_UPLOAD_STATUS]: setModelUploadStatus,
+<<<<<<< HEAD
 	[TeamspacesTypes.SET_PENDING_STATE]: setPendingState,
 
+=======
+	[TeamspacesTypes.SET_COMPONENT_STATE]: setComponentState,
+>>>>>>> ISSUE #1346 - Remember teamspaces tree state
 	// Projects
 	[TeamspacesTypes.UPDATE_PROJECT_SUCCESS]: updateProjectSuccess,
 	[TeamspacesTypes.CREATE_PROJECT_SUCCESS]: createProjectSuccess,

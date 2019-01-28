@@ -23,6 +23,12 @@ import { Container, Headline, Details, Title, IconContainer } from './treeList.s
 import Folder from '@material-ui/icons/Folder';
 import FolderOpen from '@material-ui/icons/FolderOpen';
 
+export const treeLevels = {
+	teamspace: 1,
+	project: 2,
+	model: 3
+};
+
 const HeadlineIcon = ({IconOpened, IconClosed, active, ...iconProps}) => {
 	let Icon = IconClosed || Folder;
 
@@ -61,6 +67,7 @@ interface IProps {
 	renderRoot?: (props) => JSX.Element;
 	renderActions?: (props) => JSX.Element;
 	onRootClick?: (state) => void;
+	setActiveProject?: (projectName) => void;
 }
 
 interface IState {
@@ -71,7 +78,7 @@ interface IState {
 export class TreeList extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
 		items: [],
-		level: 1,
+		level: treeLevels.teamspace,
 		active: false
 	};
 
@@ -91,7 +98,15 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 
 	public handleRootClick = () => {
 		const { active } = this.state;
-		const { items } = this.props;
+		const { items, name, level } = this.props;
+
+		if (level === treeLevels.project) {
+			if (active) {
+				this.props.setActiveProject('');
+			} else {
+				this.props.setActiveProject(name);
+			}
+		}
 
 		if (items.length) {
 			this.setState({ active: !active }, () => {

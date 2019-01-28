@@ -20,7 +20,7 @@ import { groupBy, isEmpty, isEqual } from 'lodash';
 import Label from '@material-ui/icons/Label';
 import LabelOutlined from '@material-ui/icons/LabelOutlined';
 
-import { TreeList } from '../../../components/treeList/treeList.component';
+import { TreeList, treeLevels } from '../../../components/treeList/treeList.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 import { ROW_ACTIONS, MODEL_TYPE, FEDERATION_TYPE  } from '../../teamspaces.contants';
 import { RowMenu } from '../rowMenu/rowMenu.component';
@@ -36,6 +36,7 @@ interface IProps {
 	onEditClick: (event) => void;
 	onRemoveClick: (event) => void;
 	onPermissionsClick: (event) => void;
+	setActiveProject: (projectName) => void;
 }
 
 interface IState {
@@ -122,8 +123,9 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 
 		return (
 			<TreeList
+				setActiveProject={this.props.setActiveProject}
 				name={name}
-				level={2}
+				level={treeLevels.project}
 				items={items}
 				IconProps={ {
 					IconClosed: Label,

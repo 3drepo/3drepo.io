@@ -32,3 +32,15 @@ export const selectTeamspacesWithAdminAccess = createSelector(
 export const selectIsPending = createSelector(
 	selectTeamspacesDomain, (state) => state.isPending
 );
+
+export const selectComponentState = createSelector(
+	selectTeamspacesDomain, (state) => state.componentState
+);
+
+export const selectActiveTeamspace = createSelector(
+	selectComponentState, (state) => state.activeTeamspace
+);
+
+export const selectActiveProject = createSelector(
+	selectComponentState, (state) => state.activeProject
+);
