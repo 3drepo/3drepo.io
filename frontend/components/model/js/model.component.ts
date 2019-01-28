@@ -90,7 +90,6 @@ class ModelController implements ng.IController {
 
 		if (isPendingChanged && settingsChanged && !isPending && !this.modelSettingsLoaded) {
 			this.modelSettingsLoaded = true;
-			console.log('LOAD MODEL', settings._id, settingsChanged, isPendingChanged, isPending);
 			this.handleModelSettingsChange(settings);
 		}
 

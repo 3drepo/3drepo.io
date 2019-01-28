@@ -93,16 +93,6 @@ class ViewerController implements ng.IController {
 				this.ViewerService.handleEvent(event, this.account, this.model);
 			}
 		});
-
-		this.cancelModelWatcher = this.$scope.$watch(() => this.model, (newModel, oldModel) => {
-			if (newModel !== oldModel) {
-				this.cancelPinWatcher();
-				this.cancelEventWatcher();
-				this.ViewerService.diffToolDisableAndClear();
-				this.viewer.reset(); // Remove events watch
-				this.viewer.destroy();
-			}
-		});
 	}
 }
 
