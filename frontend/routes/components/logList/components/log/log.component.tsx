@@ -82,6 +82,7 @@ export class Log extends React.PureComponent<IProps, any> {
 	);
 
 	public render() {
+		console.log('log', this.props);
 		return (
 			<Container>
 				{this.renderSystemMessage(Boolean(this.props.action))}

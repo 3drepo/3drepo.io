@@ -30,6 +30,7 @@ export class LogList extends React.PureComponent<IProps, any> {
 	public renderLogItem = (item, index) => {
 		return <Log key={index} {...item} />;
 	}
+	
 	public renderLoader = () => {
 		return (
 			<LoaderContainer>

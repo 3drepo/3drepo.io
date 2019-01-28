@@ -120,12 +120,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		});
 	}, 200);
 
-	public handleChangeAndSubmit = (event) => {
-		event.persist();
-		this.props.handleChange(event);
-		this.props.handleSubmit();
-	}
-
 	public render() {
 		return (
 			<Form>
@@ -150,7 +144,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					)} />
 				</FieldsRow>
 
-				<Field name="description" render={({ field, form }) => (
+				<Field name="description" render={({ field }) => (
 					<TextField
 						{...field}
 						requiredConfirm={!this.isNewRisk}

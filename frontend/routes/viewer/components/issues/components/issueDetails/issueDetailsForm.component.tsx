@@ -1,9 +1,10 @@
 import * as React from 'react';
+import * as Yup from 'yup';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import LuxonUtils from '@date-io/luxon';
+import { get, isEqual, isEmpty, debounce } from 'lodash';
+import { Field, Form, withFormik, connect } from 'formik';
 
-import { get } from 'lodash';
-import { Field, Form, withFormik } from 'formik';
 import InputLabel from '@material-ui/core/InputLabel';
 import { Image } from '../../../../../components/image';
 import {
@@ -14,14 +15,67 @@ import {
 } from '../../../../../../constants/issues';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { DateField } from '../../../../../components/dateField/dateField.component';
+import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
+
 interface IProps {
 	issue: any;
 	jobs: any[];
+	formik: any;
+	values: any;
+	onSubmit: (values) => void;
+	onValueChange: (event) => void;
+	handleChange: (event) => void;
+	handleSubmit: () => void;
 }
-class IssueDetailsFormComponent extends React.PureComponent<IProps, any> {
+interface IState {
+	isSaving: boolean;
+}
+
+const IssueSchema = Yup.object().shape({
+	desc: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+});
+
+class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
+	public state = {
+		isSaving: false
+	};
+
 	get isNewIssue() {
 		return !this.props.issue._id;
 	}
+
+	public componentDidUpdate(prevProps) {
+		const changes = {} as IState;
+		const { values, formik } = this.props;
+		const valuesChanged = !isEqual(prevProps.values, values);
+
+		if (formik.dirty) {
+			if (valuesChanged && !this.state.isSaving) {
+				this.autoSave();
+			}
+
+			if (valuesChanged && this.state.isSaving) {
+				changes.isSaving = false;
+			}
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
+	}
+
+	public autoSave = debounce(() => {
+		const { formik, handleSubmit } = this.props;
+		if (!formik.isValid) {
+			return;
+		}
+
+		this.setState({ isSaving: true }, () => {
+			formik.setFieldValue();
+			handleSubmit();
+			this.setState({ isSaving: false });
+		});
+	}, 200);
 
 	public render() {
 		return (
@@ -82,13 +136,14 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, any> {
 							)} />
 						</StyledFormControl>
 					</FieldsRow>
-					<Field name="description" render={({ field }) => (
+					<Field name="desc" render={({ field }) => (
 						<StyledTextField
 							{...field}
 							requiredConfirm={!this.isNewIssue}
 							fullWidth
 							multiline
 							label="Description"
+							validationSchema={IssueSchema}
 						/>
 					)} />
 					{this.props.issue.descriptionThumbnail && <Image
@@ -109,9 +164,12 @@ export const IssueDetailsForm = withFormik({
 			topic_type: issue.topic_type || '',
 			assigned_roles: get(issue, 'assigned_roles[0]', ''),
 			due_date: issue.due_date,
-			description: issue.description
+			desc: issue.desc
 		});
 	},
-	handleSubmit: () => {},
-	enableReinitialize: true
-})(IssueDetailsFormComponent as any) as any;
+	handleSubmit: (values, { props }) => {
+		(props as IProps).onSubmit(values);
+	},
+	enableReinitialize: true,
+	validationSchema: IssueSchema
+})(connect(IssueDetailsFormComponent as any)) as any;

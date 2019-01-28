@@ -16,13 +16,16 @@
  */
 
 import * as React from 'react';
+
+import { Viewer } from '../../../../../../services/viewer/viewer';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { Container } from '../../../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
-import { prepareIssue } from '../../../../../../helpers/issues';
+import { prepareIssue, mergeIssueData } from '../../../../../../helpers/issues';
 import { LogList } from '../../../../../components/logList/logList.component';
+import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 
 interface IProps {
 	jobs: any[];
@@ -32,8 +35,13 @@ interface IProps {
 	expandDetails: boolean;
 	logs: any[];
 	fetchingDetailsIsPending: boolean;
+	newComment: any;
 	setState: (componentState) => void;
 	fetchIssue: (teamspace, model, issueId) => void;
+	showNewPin: (issue, pinData) => void;
+	saveIssue: (teamspace, modelId, risk) => void;
+	updateIssue: (teamspace, modelId, risk) => void;
+	postComment: (teamspace, modelId, riskId, comment) => void;
 }
 
 interface IState {
@@ -49,6 +57,12 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public state = {
 		logsLoaded: false
 	};
+
+	public commentRef = React.createRef<any>();
+
+	get isNewIssue() {
+		return !this.props.issue._id;
+	}
 
 	get issueData() {
 		return prepareIssue(this.props.issue);
@@ -80,11 +94,24 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		this.props.setState({ newIssue });
 	}
 
+	public handleIssueFormSubmit = (values) => {
+		const { teamspace, model, updateIssue, setState, jobs } = this.props;
+		const updatedIssue = mergeIssueData(this.issueData, values);
+		console.log('Handle issue form submit', updatedIssue);
+		if (this.isNewIssue) {
+			setState({ newRisk: prepareIssue(updatedIssue, jobs) });
+		} else {
+			updateIssue(teamspace, model, updatedIssue);
+		}
+	}
+
 	public renderDetailsForm = () => {
 		return (
 			<IssueDetailsForm
 				issue={this.issueData}
 				jobs={this.jobsList}
+				onValueChange={this.handleIssueFormSubmit}
+				onSubmit={this.handleIssueFormSubmit}
 			/>
 		);
 	}
@@ -110,12 +137,63 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		);
 	});
 
+	public renderFooter = renderWhenTrue(() => (
+		<ViewerPanelFooter alignItems="center" padding="0">
+			<NewCommentForm
+				comment={this.props.newComment.comment}
+				screenshot={this.props.newComment.screenshot}
+				viewpoint={this.props.newComment.viewpoint}
+				innerRef={this.commentRef}
+				hideComment={false}
+				hideScreenshot={false}
+				hidePin={false}
+				onTakeScreenshot={this.handleNewScreenshot}
+				onChangePin={this.handleChangePin}
+				onSave={this.handleSave}
+			/>
+		</ViewerPanelFooter>
+	));
+
+	public setCommentData = (commentData = {}) => {
+		this.props.setState({ newComment: {
+			...this.props.newComment, ...commentData
+		}});
+	}
+
+	public handleNewScreenshot = async (screenshot) => {
+		const { teamspace, model } = this.props;
+		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
+
+		if (this.isNewIssue) {
+			this.props.setState({ newRisk: {
+				...this.issueData,
+				descriptionThumbnail: screenshot
+			}});
+		} else {
+			this.setCommentData({ screenshot, viewpoint });
+		}
+	}
+
+	public handleChangePin = (pinData) => {
+		this.props.showNewPin(this.props.issue, pinData);
+	}
+
+	public handleSave = (comment) => {
+		const { teamspace, model, saveIssue, postComment, updateIssue } = this.props;
+		if (this.isNewIssue) {
+			saveIssue(teamspace, model, this.issueData);
+		} else {
+			// postComment(teamspace, model, this.issueData._id, comment);
+		}
+	}
+
 	public render() {
 		return (
 			<Container>
-				<ViewerPanelContent className="height-catcher">
+				<ViewerPanelContent className="height-catcher" padding="0">
 					{this.renderPreview(this.props.issue)}
 				</ViewerPanelContent>
+				{this.renderFooter(this.issueData._id)}
 			</Container>
 		);
 	}

@@ -33,19 +33,19 @@ interface IState {
 
 export class DateField extends React.PureComponent<IProps, IState> {
 	public state = {
-		value: ''
+		value: new Date()
 	};
 
 	public componentDidMount() {
 		this.setState({
-			value: this.props.value
+			value: new Date(this.props.value)
 		});
 	}
 
 	public componentDidUpdate(prevProps) {
 		if (!prevProps.value && this.props.value) {
 			this.setState({
-				value: this.props.value
+				value: new Date(this.props.value)
 			});
 		}
 	}
@@ -53,7 +53,7 @@ export class DateField extends React.PureComponent<IProps, IState> {
 	public handleChange = (newDate) => {
 		if (this.props.onChange) {
 			this.props.onChange({
-				target: { value: newDate, name: this.props.name }
+				target: { value: newDate.ts, name: this.props.name }
 			});
 		}
 		this.setState({ value: newDate });
@@ -61,7 +61,7 @@ export class DateField extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { value } = this.state;
-		const { inputId, onBlur, name } = this.props;
+		const { onBlur, name } = this.props;
 
 		return (
 			<Container>

@@ -206,7 +206,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public renderLogs = renderWhenTrue(() => <LogList items={this.state.logs} />);
 
 	public renderFooter = renderWhenTrue(() => (
-		<ViewerPanelFooter alignItems="center">
+		<ViewerPanelFooter alignItems="center" padding="0">
 			<NewCommentForm
 				canComment={this.state.canUpdateRisk}
 				comment={this.props.newComment.comment}
@@ -228,11 +228,11 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Container>
-				<ViewerPanelContent className="height-catcher">
+				<ViewerPanelContent className="height-catcher" padding="0">
 					{this.renderPreview(this.props.risk)}
 					{this.renderLogs(logs.length)}
 				</ViewerPanelContent>
-				{this.renderFooter(!this.riskData._id)}
+				{this.renderFooter(this.riskData._id)}
 			</Container>
 		);
 	}

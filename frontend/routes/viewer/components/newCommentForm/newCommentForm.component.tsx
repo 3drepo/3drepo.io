@@ -198,7 +198,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 									color="secondary"
 									type="submit"
 									mini={true}
-									disabled={!hideComment && !canComment && (!form.isValid || form.isValidating)}
+									// disabled={!hideComment && !canComment && (!form.isValid || form.isValidating)}
 									aria-label="Add new comment"
 								>
 									<SaveIcon fontSize="small" />

@@ -39,12 +39,18 @@ export const Title = styled.div`
 `;
 
 export const TextFieldWrapper = styled.div`
-  padding-top: 15px;
-  padding-bottom: 10px;
+  padding-top: 10px;
 `;
 
 export const StyledTextField = styled(TextField)`
   font-size: 14px;
+
+  && {
+    textarea {
+      padding: 0 16px;
+      box-sizing: border-box;
+    }
+  }
 `;
 
 export const StyledTextFieldContainer = styled(Grid)`
@@ -56,6 +62,7 @@ export const Actions = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0 16px;
 `;
 
 export const ActionsGroup = styled.div`

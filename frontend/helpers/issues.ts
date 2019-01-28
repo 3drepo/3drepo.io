@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 import { getAPIUrl } from '../services/api';
 import { STATUSES_COLORS, STATUSES_ICONS } from '../constants/issues';
 
@@ -27,4 +27,14 @@ export const getStatusIcon = (priority, status) => {
   };
 
   return {...statusIcon};
+};
+
+export const mergeIssueData = (source, data = source) => {
+	const hasUnassignedRole = !data.assigned_roles;
+
+	return {
+		...source,
+		...omit(data, ['assigned_roles', 'description']),
+		assigned_roles: hasUnassignedRole ? [] : [data.assigned_roles]
+	};
 };

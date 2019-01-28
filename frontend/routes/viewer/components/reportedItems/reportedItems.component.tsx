@@ -257,7 +257,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent className="height-catcher">
+			<ViewerPanelContent className="height-catcher" padding="0">
 				{this.renderItemsList(this.state.filteredItems.length)}
 			</ViewerPanelContent>
 			<ViewerPanelFooter alignItems="center" justify="space-between">

@@ -24,7 +24,8 @@ import {
 	selectActiveIssueDetails,
 	selectExpandDetails,
 	selectLogs,
-	selectFetchingDetailsIsPending
+	selectFetchingDetailsIsPending,
+	selectNewComment
 } from '../../../../../../modules/issues';
 import { IssueDetails } from './issueDetails.component';
 
@@ -33,12 +34,16 @@ const mapStateToProps = createStructuredSelector({
 	jobs: selectJobsList,
 	expandDetails: selectExpandDetails,
 	logs: selectLogs,
-	fetchingDetailsIsPending: selectFetchingDetailsIsPending
+	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
+	newComment: selectNewComment
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setState: IssuesActions.setComponentState,
-	fetchIssue: IssuesActions.fetchIssue
+	fetchIssue: IssuesActions.fetchIssue,
+	saveIssue: IssuesActions.saveIssue,
+	updateIssue: IssuesActions.updateIssue,
+	showNewPin: IssuesActions.showNewPin
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(IssueDetails);
