@@ -266,7 +266,7 @@ const showMultipleGroups = async (risk, revision) => {
 	let objects = {} as { hidden: any[], shown: any[], objects: any[] };
 
 	if (hasViewpointGroups) {
-		const [highlightedGroupData, shownGroupData, hiddenGroupData] = await Promise.all([
+		const [highlightedGroupData, hiddenGroupData, shownGroupData] = await Promise.all([
 			getRiskGroup(risk, risk.viewpoint.highlighted_group_id, revision),
 			getRiskGroup(risk, risk.viewpoint.hidden_group_id, revision),
 			getRiskGroup(risk, risk.viewpoint.shown_group_id, revision)
@@ -277,7 +277,7 @@ const showMultipleGroups = async (risk, revision) => {
 		}
 
 		if (shownGroupData) {
-			objects.shown = hiddenGroupData.objects;
+			objects.shown = shownGroupData.objects;
 		}
 
 		if (highlightedGroupData) {
