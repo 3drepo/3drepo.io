@@ -276,7 +276,7 @@ export class Views extends React.PureComponent<IProps, any> {
 	)
 
 	public render() {
-		const { searchEnabled, viewpoints } = this.props;
+		const { searchEnabled, viewpoints, newViewpoint } = this.props;
 		const hasViewpoints = Boolean(viewpoints.length);
 		const { filteredViewpoints } = this.state;
 
@@ -288,10 +288,10 @@ export class Views extends React.PureComponent<IProps, any> {
 				pending={this.props.isPending}
 			>
 				<Container className="height-catcher" innerRef={this.containerRef}>
-					{this.renderEmptyState(!hasViewpoints && !searchEnabled)}
+					{this.renderEmptyState(!hasViewpoints && !searchEnabled && !newViewpoint)}
 					{this.renderSearch(searchEnabled)}
 					{this.renderNotFound(searchEnabled && !filteredViewpoints.length)}
-					{this.renderViewpoints(hasViewpoints)}
+					{this.renderViewpoints(hasViewpoints || this.props.newViewpoint)}
 				</Container>
 				{this.renderFooterContent()}
 			</ViewerPanel>
