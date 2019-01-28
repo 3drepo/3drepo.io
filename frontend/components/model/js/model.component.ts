@@ -17,7 +17,7 @@
 
 import { dispatch, getState, subscribe } from '../../../helpers/migration';
 import { selectCurrentUser, CurrentUserActions } from '../../../modules/currentUser';
-import { ModelActions, selectSettings } from '../../../modules/model';
+import { ModelActions, selectSettings, selectIsPending } from '../../../modules/model';
 import { ViewpointsActions } from '../../../modules/viewpoints';
 
 class ModelController implements ng.IController {
@@ -57,6 +57,8 @@ class ModelController implements ng.IController {
 	private treeMap;
 	private selectedObjects;
 	private initialSelectedObjects;
+	private isPending = false;
+	private modelSettingsLoaded = false;
 
 	constructor(
 		private $window,
@@ -77,19 +79,22 @@ class ModelController implements ng.IController {
 		private PanelService,
 		private ViewerService
 	) {
-		subscribe(this, this.mapPropsToThis);
 	}
 
 	public mapPropsToThis = (state) => {
 		const settings = selectSettings(state);
+		const isPending = selectIsPending(state);
 
-		if (settings._id !== this.settings._id) {
-			this.handleSettingsChange(settings);
+		const isPendingChanged = this.isPending !== isPending;
+		const settingsChanged = this.settings._id !== settings._id;
+
+		if (isPendingChanged && settingsChanged && !isPending && !this.modelSettingsLoaded) {
+			this.modelSettingsLoaded = true;
+			console.log('LOAD MODEL', settings._id, settingsChanged, isPendingChanged, isPending);
+			this.handleModelSettingsChange(settings);
 		}
 
-		return {
-			settings
-		};
+		return { settings, isPending };
 	}
 
 	public $onInit() {
@@ -122,6 +127,8 @@ class ModelController implements ng.IController {
 
 		const username = selectCurrentUser(getState()).username;
 		dispatch(CurrentUserActions.fetchUser(username));
+
+		subscribe(this, this.mapPropsToThis);
 
 		this.watchers();
 	}
@@ -234,13 +241,13 @@ class ModelController implements ng.IController {
 			});
 	}
 
-	private handleSettingsChange = async (settings) => {
+	private handleModelSettingsChange = async (settings) => {
 		await this.setupViewer(settings);
 		if (!this.ViewerService.currentModel.model) {
 			if (this.ViewerService.viewer) {
 				try {
 					await this.ViewerService.initViewer();
-					this.loadModel();
+					await this.loadModel();
 				} catch (error) {
 					console.error('Failed to load model: ', error);
 				}
@@ -248,7 +255,7 @@ class ModelController implements ng.IController {
 				console.error('Failed to locate viewer');
 			}
 		} else {
-			this.loadModel();
+			await this.loadModel();
 		}
 	}
 
@@ -260,13 +267,13 @@ class ModelController implements ng.IController {
 
 export const ModelComponent: ng.IComponentOptions = {
 	bindings: {
-		account:  '=',
-		branch:   '=',
+		account: '=',
+		branch:  '=',
 		issueId: '=',
 		riskId: '=',
-		model:  '=',
+		model: '=',
 		revision: '=',
-		state:    '=',
+		state: '=',
 		isLiteMode: '='
 	},
 	controller: ModelController,
