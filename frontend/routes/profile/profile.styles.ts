@@ -22,6 +22,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { COLOR } from '../../styles';
 
 export const FormContainer = styled(Grid)`
 	padding: 24px;
@@ -58,7 +59,7 @@ export const StyledButtonContainer = styled.div`
 
 export const DeleteButton = styled(Button)`
   && {
-    color: rgba(255, 255, 255, 0.87);
+    color: ${COLOR.WHITE_87};
 	background-color:  rgba(234, 57, 57, 0.87);
   }
 

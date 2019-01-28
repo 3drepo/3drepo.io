@@ -143,11 +143,13 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
+		const {teamspaces, match, onTeamspaceChange} = this.props;
 
-		const teamspacesChanged = !isEqual(this.props.teamspaces, prevProps.teamspaces);
+		const teamspacesChanged = !isEqual(teamspaces, prevProps.teamspaces);
+
 		if (teamspacesChanged) {
-			changes.teamspacesItems = this.props.teamspaces.map(({account}) => ({value: account}));
-			this.props.onTeamspaceChange( this.props.match.params.teamspace);
+			changes.teamspacesItems = teamspaces.map(({account}) => ({value: account}));
+			onTeamspaceChange(match.params.teamspace);
 		}
 
 		if (!isEmpty(changes)) {

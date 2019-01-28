@@ -123,8 +123,8 @@ export function* generateApiKey() {
 		yield put(SnackbarActions.show('Api key generated'));
 		yield put(CurrentUserActions.setPendingState(false));
 		yield put(CurrentUserActions.updateUserSuccess(key));
-
 	} catch (e) {
+		yield put(CurrentUserActions.setPendingState(false));
 		yield put(DialogActions.showEndpointErrorDialog('generate', 'api key', e));
 	}
 }
@@ -138,6 +138,7 @@ export function* deleteApiKey() {
 		yield put(CurrentUserActions.updateUserSuccess({apiKey: null}));
 
 	} catch (e) {
+		yield put(CurrentUserActions.setPendingState(false));
 		yield put(DialogActions.showEndpointErrorDialog('generate', 'api key', e));
 	}
 }
