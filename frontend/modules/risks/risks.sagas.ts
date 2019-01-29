@@ -83,7 +83,7 @@ const toggleRiskPin = (risk, selected = true) => {
 	}
 };
 
-export function* saveRisk({ teamspace, model, riskData, revision }) {
+export function* saveRisk({ teamspace, model, riskData, revision, filteredRisks }) {
 	try {
 		yield Viewer.setPinDropMode(false);
 		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
@@ -142,7 +142,7 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(savedRisk, jobs);
-		yield put(RisksActions.showDetails(savedRisk, [], revision));
+		yield put(RisksActions.showDetails(preparedRisk, [...filteredRisks, preparedRisk], revision));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(SnackbarActions.show('Risk created'));
 	} catch (error) {
@@ -379,7 +379,9 @@ export function* setActiveRisk({ risk, filteredRisks, revision }) {
 		const risksMap = yield select(selectRisksMap);
 
 		if (activeRiskId !== risk._id) {
-			toggleRiskPin(risksMap[activeRiskId], false);
+			if (activeRiskId) {
+				toggleRiskPin(risksMap[activeRiskId], false);
+			}
 			toggleRiskPin(risk, true);
 		}
 		yield all([

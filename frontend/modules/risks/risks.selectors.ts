@@ -18,7 +18,6 @@
 import { createSelector } from 'reselect';
 import { values } from 'lodash';
 import { getSortedRisks } from '../../helpers/risks';
-import { selectCurrentUser } from '../currentUser';
 
 export const selectRisksDomain = (state) => Object.assign({}, state.risks);
 

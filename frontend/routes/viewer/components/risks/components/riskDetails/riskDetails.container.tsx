@@ -42,7 +42,6 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setState: RisksActions.setComponentState,
-	saveRisk: RisksActions.saveRisk,
 	updateRisk: RisksActions.updateRisk,
 	updateNewRisk: RisksActions.updateNewRisk,
 	showNewPin: RisksActions.showNewPin,
