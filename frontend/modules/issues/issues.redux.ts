@@ -44,7 +44,12 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	toggleIsImportingBcf: ['isImporting'],
 	toggleSubmodelsIssues: ['showSubmodelIssues'],
 	importBcf: ['teamspace', 'modelId', 'file', 'revision'],
-	exportBcf: ['teamspace', 'modelId']
+	exportBcf: ['teamspace', 'modelId'],
+	subscribeOnIssueCommentsChanges: ['teamspace', 'modelId', 'issueId'],
+	unsubscribeOnIssueCommentsChanges: ['teamspace', 'modelId', 'issueId'],
+	createCommentSuccess: ['comment'],
+	deleteCommentSuccess: ['comment'],
+	updateCommentSuccess: ['comment']
 }, { prefix: 'ISSUES_' });
 
 export const INITIAL_STATE = {
@@ -112,6 +117,24 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
+export const createCommentSuccess = (state = INITIAL_STATE, { comment }) => {
+	const logs = [...state.componentState.logs, comment];
+	return {...state, componentState: { ...state.componentState, logs }};
+};
+
+export const updateCommentSuccess = (state = INITIAL_STATE, { comment }) => {
+	const logs = cloneDeep(state.componentState.logs);
+	const commentIndex = state.componentState.logs.findIndex((log) => log.guid === comment.guid);
+	logs[commentIndex] = comment;
+	return {...state, componentState: { ...state.componentState, logs }};
+};
+
+export const deleteCommentSuccess = (state = INITIAL_STATE, { comment }) => {
+	const logs = cloneDeep(state.componentState.logs);
+	const updatedlogs = logs.filter((log) => log.guid === comment.guid);
+	return {...state, componentState: { ...state.componentState, logs: updatedlogs }};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess,
 	[IssuesTypes.FETCH_ISSUE_SUCCESS]: fetchIssueSuccess,
@@ -121,5 +144,8 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[IssuesTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
 	[IssuesTypes.TOGGLE_IS_IMPORTING_BCF]: toggleIsImportingBcf,
-	[IssuesTypes.TOGGLE_SUBMODELS_ISSUES]: toggleSubmodelsIssues
+	[IssuesTypes.TOGGLE_SUBMODELS_ISSUES]: toggleSubmodelsIssues,
+	[IssuesTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
+	[IssuesTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
+	[IssuesTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess
 });

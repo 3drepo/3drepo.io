@@ -43,7 +43,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchIssue: IssuesActions.fetchIssue,
 	saveIssue: IssuesActions.saveIssue,
 	updateIssue: IssuesActions.updateIssue,
-	showNewPin: IssuesActions.showNewPin
+	showNewPin: IssuesActions.showNewPin,
+	subscribeOnIssueCommentsChanges: IssuesActions.subscribeOnIssueCommentsChanges
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(IssueDetails);

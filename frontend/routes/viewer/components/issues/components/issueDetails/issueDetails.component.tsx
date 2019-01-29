@@ -39,9 +39,10 @@ interface IProps {
 	setState: (componentState) => void;
 	fetchIssue: (teamspace, model, issueId) => void;
 	showNewPin: (issue, pinData) => void;
-	saveIssue: (teamspace, modelId, risk) => void;
-	updateIssue: (teamspace, modelId, risk) => void;
-	postComment: (teamspace, modelId, riskId, comment) => void;
+	saveIssue: (teamspace, modelId, issue) => void;
+	updateIssue: (teamspace, modelId, issue) => void;
+	postComment: (teamspace, modelId, issueId, comment) => void;
+	subscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 }
 
 interface IState {
@@ -75,6 +76,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		const { teamspace, model, fetchIssue, issue } = this.props;
 		fetchIssue(teamspace, model, issue._id);
+		this.props.subscribeOnIssueCommentsChanges(this.props.teamspace, this.props.model, issue._id);
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -97,7 +99,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public handleIssueFormSubmit = (values) => {
 		const { teamspace, model, updateIssue, setState, jobs } = this.props;
 		const updatedIssue = mergeIssueData(this.issueData, values);
-		console.log('Handle issue form submit', updatedIssue);
+
 		if (this.isNewIssue) {
 			setState({ newRisk: prepareIssue(updatedIssue, jobs) });
 		} else {

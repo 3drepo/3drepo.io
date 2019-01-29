@@ -23,6 +23,7 @@ import {
 } from './log.styles';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { convertActionCommentToText } from '../../../../../helpers/issues';
 
 interface IProps {
 	comment: string;
@@ -58,7 +59,7 @@ export class Log extends React.PureComponent<IProps, any> {
 
 	public renderSystemMessage = renderWhenTrue(
 		<SystemMessage>
-			{this.props.action ? this.props.action.text : null}
+			{ convertActionCommentToText(this.props.action, this.props.owner) }
 			at <DateTime value={this.props.created  as any} format="HH:mm DD MMM" />
 		</SystemMessage>
 	);
@@ -82,7 +83,7 @@ export class Log extends React.PureComponent<IProps, any> {
 	);
 
 	public render() {
-		console.log('log', this.props);
+		console.log('Boolean(this.props.action)',Boolean(this.props.action))
 		return (
 			<Container>
 				{this.renderSystemMessage(Boolean(this.props.action))}

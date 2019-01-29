@@ -509,6 +509,37 @@ export function* unsubscribeOnIssueChanges({ teamspace, modelId }) {
 	issuesNotifications.unsubscribeFromCreated(onCreateEvent);
 }
 
+const getCommentsChannel = (teamspace, modelId, issueId) => {
+	const issuesNotifications = getIssuesChannel(teamspace, modelId);
+	return issuesNotifications.getCommentsChatEvents(issueId);
+};
+
+const onUpdateCommentEvent = (updatedComment) => {
+	dispatch(IssuesActions.updateCommentSuccess(updatedComment));
+};
+
+const onCreateCommentEvent = (createdComment) => {
+	dispatch(IssuesActions.createCommentSuccess(createdComment));
+};
+
+const onDeleteCommentEvent = (deletedComment) => {
+	dispatch(IssuesActions.deleteCommentSuccess(deletedComment));
+};
+
+export function* subscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
+	const commentsNotifications = getCommentsChannel(teamspace, modelId, issueId);
+	commentsNotifications.subscribeToCreated(onCreateCommentEvent, this);
+	commentsNotifications.subscribeToUpdated(onUpdateCommentEvent, this);
+	commentsNotifications.subscribeToDeleted(onDeleteCommentEvent, this);
+}
+
+export function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
+	const commentsNotifications = getCommentsChannel(teamspace, modelId, issueId);
+	commentsNotifications.unsubscribeToCreated(onCreateCommentEvent, this);
+	commentsNotifications.unsubscribeToUpdated(onUpdateCommentEvent, this);
+	commentsNotifications.unsubscribeToDeleted(onDeleteCommentEvent, this);
+}
+
 export function* setNewIssue() {
 	const issues = yield select(selectIssues);
 	const jobs = yield select(selectJobsList);
@@ -556,4 +587,6 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.SET_NEW_ISSUE, setNewIssue);
 	yield takeLatest(IssuesTypes.EXPORT_BCF, exportBcf);
 	yield takeLatest(IssuesTypes.IMPORT_BCF, importBcf);
+	yield takeLatest(IssuesTypes.SUBSCRIBE_ON_ISSUE_COMMENTS_CHANGES, subscribeOnIssueCommentsChanges);
+	yield takeLatest(IssuesTypes.UNSUBSCRIBE_ON_ISSUE_COMMENTS_CHANGES, unsubscribeOnIssueCommentsChanges);
 }
