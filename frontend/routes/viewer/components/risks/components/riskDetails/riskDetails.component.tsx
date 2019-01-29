@@ -39,6 +39,7 @@ interface IProps {
 	saveRisk: (teamspace, modelId, risk) => void;
 	updateRisk: (teamspace, modelId, risk) => void;
 	postComment: (teamspace, modelId, riskId, comment) => void;
+	updateNewRisk: (newRisk) => void;
 	setState: (componentState) => void;
 	showScreenshotDialog: (options) => void;
 	showNewPin: (risk, pinData) => void;
@@ -100,11 +101,11 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleRiskFormSubmit = (values) => {
-		const { teamspace, model, updateRisk, setState, jobs } = this.props;
+		const { teamspace, model, updateRisk, updateNewRisk, jobs } = this.props;
 		const updatedRisk = mergeRiskData(this.riskData, values);
 
 		if (this.isNewRisk) {
-			setState({ newRisk: prepareRisk(updatedRisk, jobs) });
+			updateNewRisk(updatedRisk);
 		} else {
 			updateRisk(teamspace, model, updatedRisk);
 		}

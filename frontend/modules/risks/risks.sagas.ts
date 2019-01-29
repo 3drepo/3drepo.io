@@ -170,6 +170,21 @@ export function* updateRisk({ teamspace, modelId, riskData }) {
 	}
 }
 
+export function* updateNewRisk({ newRisk }) {
+	try {
+		const jobs = yield select(selectJobsList);
+		const preparedRisk = prepareRisk(newRisk, jobs);
+
+		const pinData = yield Viewer.getPinData();
+		if (pinData) {
+			yield put(RisksActions.showNewPin(preparedRisk, pinData));
+		}
+		yield put(RisksActions.setComponentState({ newRisk: preparedRisk }));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'new risk', error));
+	}
+}
+
 export function* renderPins({ filteredRisks }) {
 	try {
 		const risksList = yield select(selectRisks);
@@ -514,4 +529,5 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_CHANGES, unsubscribeOnRiskChanges);
 	yield takeLatest(RisksTypes.FOCUS_ON_RISK, focusOnRisk);
 	yield takeLatest(RisksTypes.SET_NEW_RISK, setNewRisk);
+	yield takeLatest(RisksTypes.UPDATE_NEW_RISK, updateNewRisk);
 }

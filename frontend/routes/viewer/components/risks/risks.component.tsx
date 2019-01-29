@@ -37,7 +37,6 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewListItem } from '../previewListItem/previewListItem.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ListContainer, Summary } from './risks.styles';
-import { prepareRisk } from '../../../../helpers/risks';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import {
 	RISK_FILTERS,
