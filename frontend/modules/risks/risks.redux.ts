@@ -22,7 +22,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchRisks: ['teamspace', 'modelId', 'revision'],
 	fetchRisksSuccess: ['risks'],
 	setComponentState: ['componentState'],
-	saveRisk: ['teamspace', 'model', 'riskData'],
+	saveRisk: ['teamspace', 'model', 'riskData', 'filteredRisks'],
 	updateRisk: ['teamspace', 'modelId', 'riskData'],
 	saveRiskSuccess: ['risk'],
 	setNewRisk: [],

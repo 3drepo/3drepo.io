@@ -90,6 +90,7 @@ interface IProps {
 	toggleShowPins: (showPins: boolean, filteredRisks) => void;
 	subscribeOnRiskChanges: (teamspace, modelId) => void;
 	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
+	saveRisk: (teamspace, modelId, risk, filteredRisks) => void;
 }
 
 interface IState {
@@ -337,8 +338,16 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		return <ListContainer>{Items}</ListContainer>;
 	});
 
+	public handleSaveRisk = (teamspace, model, risk) => {
+		this.props.saveRisk(teamspace, model, risk, this.state.filteredRisks);
+	}
+
 	public renderDetailsView = renderWhenTrue(() => (
-		<RiskDetails teamspace={this.props.teamspace} model={this.props.model} />
+		<RiskDetails
+			teamspace={this.props.teamspace}
+			model={this.props.model}
+			saveRisk={this.handleSaveRisk}
+		/>
 	));
 
 	public renderListView = renderWhenTrue(() => (

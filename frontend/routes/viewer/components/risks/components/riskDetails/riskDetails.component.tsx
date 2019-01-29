@@ -19,7 +19,7 @@ import { isEqual } from 'lodash';
 import * as React from 'react';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { mergeRiskData, prepareRisk } from '../../../../../../helpers/risks';
+import { mergeRiskData } from '../../../../../../helpers/risks';
 import { Viewer } from '../../../../../../services/viewer/viewer';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
@@ -112,7 +112,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSave = (comment) => {
-		const { teamspace, model, saveRisk, postComment, updateRisk } = this.props;
+		const { teamspace, model, saveRisk, postComment } = this.props;
 		if (this.isNewRisk) {
 			saveRisk(teamspace, model, this.riskData);
 		} else {
