@@ -38,7 +38,7 @@ export class DateField extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		this.setState({
-			value: new Date(this.props.value)
+			value: this.props.value ? new Date(this.props.value) : undefined
 		});
 	}
 

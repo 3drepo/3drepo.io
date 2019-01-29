@@ -158,7 +158,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 		/>
 	));
 
-	public renderCommentField = renderWhenTrue(() => (
+	public renderCommentField = renderWhenTrue((
 		<TextFieldWrapper>
 			<Field name="comment" render={({ field }) => (
 				<StyledTextField

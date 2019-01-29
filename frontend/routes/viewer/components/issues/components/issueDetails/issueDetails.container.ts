@@ -19,6 +19,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../../../helpers/migration';
 import { selectJobsList, selectMyJob, JobsActions } from '../../../../../../modules/jobs';
+import { selectCurrentUser } from '../../../../../../modules/currentUser';
 import {
 	IssuesActions,
 	selectActiveIssueDetails,
@@ -27,6 +28,7 @@ import {
 	selectFetchingDetailsIsPending,
 	selectNewComment
 } from '../../../../../../modules/issues';
+import { selectSettings } from '../../../../../../modules/model';
 import { IssueDetails } from './issueDetails.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -36,7 +38,9 @@ const mapStateToProps = createStructuredSelector({
 	logs: selectLogs,
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
 	newComment: selectNewComment,
-	myJob: selectMyJob
+	myJob: selectMyJob,
+	currentUser: selectCurrentUser,
+	settings: selectSettings
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

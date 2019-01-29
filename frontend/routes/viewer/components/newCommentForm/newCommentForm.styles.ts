@@ -38,16 +38,14 @@ export const Title = styled.div`
 	color: ${COLOR.BLACK_20};
 `;
 
-export const TextFieldWrapper = styled.div`
-  padding-top: 10px;
-`;
+export const TextFieldWrapper = styled.div``;
 
 export const StyledTextField = styled(TextField)`
   font-size: 14px;
 
   && {
     textarea {
-      padding: 0 16px;
+      padding: 10px 16px;
       box-sizing: border-box;
     }
   }

@@ -1,6 +1,7 @@
 import { get, omit } from 'lodash';
 import { getAPIUrl } from '../services/api';
 import { STATUSES_COLORS, STATUSES_ICONS } from '../constants/issues';
+import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
 
 export const prepareIssue = (issue, jobs = []) => {
 	const thumbnail = getAPIUrl(issue.thumbnail);
@@ -162,4 +163,35 @@ export const convertActionCommentToText = (action, owner, topicTypes = []) => {
 	// action.text = text;
 
 	return text;
+};
+
+const isOpenIssue = (status) => status !== 'closed';
+
+const userJobMatchesCreator = (userJob, issueData) => {
+	return (userJob._id && issueData.creator_role && userJob._id === issueData.creator_role);
+};
+
+const isIssueViewer = (permissions) => {
+	return permissions && !hasPermissions(PERMISSIONS.COMMENT_ISSUE, permissions);
+};
+
+const canCommentIssue = (permissions) => {
+	return permissions && hasPermissions(PERMISSIONS.COMMENT_ISSUE, permissions);
+};
+
+const isJobOwner = (issueData, userJob, permissions, currentUser) => {
+	return issueData && userJob &&
+		(issueData.owner === currentUser ||
+		userJobMatchesCreator(userJob, issueData)) &&
+		!isIssueViewer(permissions);
+};
+
+export const canComment = (issueData, userJob, permissions, currentUser) => {
+	const isNotClosed = issueData && issueData.status && isOpenIssue(issueData.status);
+	const ableToComment =
+		isAdmin(permissions) ||
+		isJobOwner(issueData, userJob, permissions, currentUser) ||
+		canCommentIssue(permissions);
+
+	return ableToComment && isNotClosed;
 };

@@ -23,7 +23,7 @@ import { Container } from '../../../risks/components/riskDetails/riskDetails.sty
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
-import { prepareIssue, mergeIssueData } from '../../../../../../helpers/issues';
+import { prepareIssue, mergeIssueData, canComment } from '../../../../../../helpers/issues';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 
@@ -37,6 +37,8 @@ interface IProps {
 	fetchingDetailsIsPending: boolean;
 	newComment: any;
 	myJob: any;
+	currentUser: any;
+	settings: any;
 	setState: (componentState) => void;
 	fetchIssue: (teamspace, model, issueId) => void;
 	showNewPin: (issue, pinData) => void;
@@ -77,10 +79,15 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const { teamspace, model, fetchIssue, issue, getMyJob } = this.props;
+		const { teamspace, model, fetchIssue, issue, getMyJob, subscribeOnIssueCommentsChanges } = this.props;
 		fetchIssue(teamspace, model, issue._id);
 		getMyJob(teamspace);
-		this.props.subscribeOnIssueCommentsChanges(this.props.teamspace, this.props.model, issue._id);
+		subscribeOnIssueCommentsChanges(teamspace, model, issue._id);
+	}
+
+	public componentWillUnmount() {
+		const { teamspace, model, issue, unsubscribeOnIssueCommentsChanges } = this.props;
+		unsubscribeOnIssueCommentsChanges(teamspace, model, issue._id);
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -108,6 +115,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			setState({ newRisk: prepareIssue(updatedIssue, jobs) });
 		} else {
 			updateIssue(teamspace, model, updatedIssue);
+			// updateIssue(teamspace, model, updatedIssue);
 		}
 	}
 
@@ -184,12 +192,24 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		this.props.showNewPin(this.props.issue, pinData);
 	}
 
+	public userCanComment = () => {
+		const { myJob, settings, currentUser } = this.props;
+		return canComment(this.issueData, myJob, settings.permissions, currentUser.username);
+	}
+
+	public postComment = async (teamspace, model) => {
+		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
+		this.props.updateIssue(teamspace, model, this.issueData);
+	}
+
 	public handleSave = (comment) => {
 		const { teamspace, model, saveIssue, postComment, updateIssue } = this.props;
+
 		if (this.isNewIssue) {
 			saveIssue(teamspace, model, this.issueData);
 		} else {
-			// postComment(teamspace, model, this.issueData._id, comment);
+			this.postComment(teamspace, model);
+			// updateIssue(teamspace, model, this.issueData);
 		}
 	}
 
