@@ -20,14 +20,14 @@ import { bindActionCreators } from 'redux';
 import { connect, addRouting } from '../../../../helpers/migration';
 import { createStructuredSelector } from 'reselect';
 import { ModelActions, selectSettings, selectIsPending, selectMaps } from './../../../../modules/model';
-import { GisActions, selectIsInitializedMap, selectVisibleSources } from './../../../../modules/gis';
+import { GisActions, selectIsInitialisedMap, selectVisibleSources } from './../../../../modules/gis';
 import { Gis } from './gis.component';
 
 const mapStateToProps = createStructuredSelector({
 	settings: selectSettings,
 	isPending: selectIsPending,
 	mapsProviders: selectMaps,
-	isInitializedMap: selectIsInitializedMap,
+	isInitialisedMap: selectIsInitialisedMap,
 	visibleSources: selectVisibleSources
 });
 
@@ -35,7 +35,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchModelSettings: ModelActions.fetchSettings,
 	fetchModelMaps: ModelActions.fetchMaps,
 	updateModelSettings: ModelActions.updateSettings,
-	initializeMap: GisActions.initializeMap,
+	initialiseMap: GisActions.initialiseMap,
 	addSource: GisActions.addSource,
 	removeSource: GisActions.removeSource,
 	resetSources: GisActions.resetSources,

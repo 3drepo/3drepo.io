@@ -18,8 +18,8 @@
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: GisTypes, Creators: GisActions } = createActions({
-	initializeMap: ['params'],
-	initializeMapSuccess: ['initialized'],
+	initialiseMap: ['params'],
+	initialiseMapSuccess: ['initialised'],
 	addSource: ['source'],
 	addSourceSuccess: ['source'],
 	removeSource: ['source'],
@@ -30,12 +30,12 @@ export const { Types: GisTypes, Creators: GisActions } = createActions({
 }, { prefix: 'GIS_' });
 
 export const INITIAL_STATE = {
-	initialized: false,
+	initialised: false,
 	visibleSources: []
 };
 
-export const initializeMapSuccess = (state = INITIAL_STATE, { initialized }) => {
-	return {...state, initialized };
+export const initialiseMapSuccess = (state = INITIAL_STATE, { initialised }) => {
+	return {...state, initialised };
 };
 
 export const addSourceSuccess = (state = INITIAL_STATE, { source }) => {
@@ -55,7 +55,7 @@ export const resetSourcesSuccess = (state = INITIAL_STATE, {}) => {
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[GisTypes.INITIALIZE_MAP_SUCCESS]: initializeMapSuccess,
+	[GisTypes.INITIALISE_MAP_SUCCESS]: initialiseMapSuccess,
 	[GisTypes.ADD_SOURCE_SUCCESS]: addSourceSuccess,
 	[GisTypes.REMOVE_SOURCE_SUCCESS]: removeSourceSuccess,
 	[GisTypes.RESET_SOURCES_SUCCESS]: resetSourcesSuccess

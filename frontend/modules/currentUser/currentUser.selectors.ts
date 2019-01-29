@@ -31,8 +31,8 @@ export const selectAvatar = createSelector(
 	selectCurrentUser, (state) => state.avatarUrl
 );
 
-export const selectIsInitialized = createSelector(
-	selectCurrentUserDomain, (state) => state.isInitialized
+export const selectIsInitialised = createSelector(
+	selectCurrentUserDomain, (state) => state.isInitialised
 );
 
 export const selectIsPending = createSelector(

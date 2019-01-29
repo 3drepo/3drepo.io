@@ -51,12 +51,12 @@ interface IProps {
 	settings: any;
 	isPending: boolean;
 	mapsProviders: any[];
-	initializeMap: (params, sources?) => void;
+	initialiseMap: (params, sources?) => void;
 	addSource: (source) => void;
 	removeSource: (source) => void;
 	resetSources: () => void;
 	resetMap: () => void;
-	isInitializedMap: boolean;
+	isInitialisedMap: boolean;
 	visibleSources: any[];
 }
 interface IState {
@@ -96,7 +96,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const { settings, initializeMap } = this.props;
+		const { settings, initialiseMap } = this.props;
 		const { teamspace, modelId } = this.getDataFromPathname();
 
 		if (this.props.settings._id !== modelId) {
@@ -107,13 +107,13 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 		const pointsExists = !!(settings && settings.surveyPoints && settings.surveyPoints.length);
 		if (pointsExists) {
-			initializeMap(this.surveySettings);
+			initialiseMap(this.surveySettings);
 			this.setState({ pointsExists });
 		}
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
-		const { settings, visibleSources, initializeMap, resetSources } = this.props;
+		const { settings, initialiseMap, resetSources } = this.props;
 		const changes = {} as any;
 
 		const pointsExists = !!(settings && settings.surveyPoints && settings.surveyPoints.length);
@@ -127,7 +127,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 			if (pointsExists) {
 				resetSources();
-				initializeMap(this.surveySettings);
+				initialiseMap(this.surveySettings);
 			}
 		}
 
