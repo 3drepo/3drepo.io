@@ -18,7 +18,7 @@
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../../../helpers/migration';
-import { selectJobsList } from '../../../../../../modules/jobs';
+import { selectJobsList, selectMyJob, JobsActions } from '../../../../../../modules/jobs';
 import {
 	IssuesActions,
 	selectActiveIssueDetails,
@@ -35,7 +35,8 @@ const mapStateToProps = createStructuredSelector({
 	expandDetails: selectExpandDetails,
 	logs: selectLogs,
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
-	newComment: selectNewComment
+	newComment: selectNewComment,
+	myJob: selectMyJob
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -44,7 +45,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	saveIssue: IssuesActions.saveIssue,
 	updateIssue: IssuesActions.updateIssue,
 	showNewPin: IssuesActions.showNewPin,
-	subscribeOnIssueCommentsChanges: IssuesActions.subscribeOnIssueCommentsChanges
+	subscribeOnIssueCommentsChanges: IssuesActions.subscribeOnIssueCommentsChanges,
+	unsubscribeOnIssueCommentsChanges: IssuesActions.unsubscribeOnIssueCommentsChanges,
+	getMyJob: JobsActions.getMyJob
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(IssueDetails);

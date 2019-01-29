@@ -36,6 +36,7 @@ interface IProps {
 	logs: any[];
 	fetchingDetailsIsPending: boolean;
 	newComment: any;
+	myJob: any;
 	setState: (componentState) => void;
 	fetchIssue: (teamspace, model, issueId) => void;
 	showNewPin: (issue, pinData) => void;
@@ -43,6 +44,8 @@ interface IProps {
 	updateIssue: (teamspace, modelId, issue) => void;
 	postComment: (teamspace, modelId, issueId, comment) => void;
 	subscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
+	unsubscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
+	getMyJob: (teamspace) => void;
 }
 
 interface IState {
@@ -74,8 +77,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const { teamspace, model, fetchIssue, issue } = this.props;
+		const { teamspace, model, fetchIssue, issue, getMyJob } = this.props;
 		fetchIssue(teamspace, model, issue._id);
+		getMyJob(teamspace);
 		this.props.subscribeOnIssueCommentsChanges(this.props.teamspace, this.props.model, issue._id);
 	}
 
