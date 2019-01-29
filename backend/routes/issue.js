@@ -37,6 +37,7 @@ router.get("/issues/:uid.json", middlewares.issue.canView, findIssueById);
 router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 router.get("/issues.json", middlewares.issue.canView, listIssues);
+router.get("/issues.json:swap", middlewares.issue.canView, moveAxis);
 router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
 router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 
