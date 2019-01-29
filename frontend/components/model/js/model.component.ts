@@ -81,7 +81,7 @@ class ModelController implements ng.IController {
 	) {
 	}
 
-	public mapPropsToThis = (state) => {
+	public onModelSettingsChange = (state) => {
 		const settings = selectSettings(state);
 		const isPending = selectIsPending(state);
 
@@ -127,7 +127,7 @@ class ModelController implements ng.IController {
 		const username = selectCurrentUser(getState()).username;
 		dispatch(CurrentUserActions.fetchUser(username));
 
-		subscribe(this, this.mapPropsToThis);
+		subscribe(this, this.onModelSettingsChange);
 
 		this.watchers();
 	}
