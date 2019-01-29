@@ -8,18 +8,24 @@ import Print from '@material-ui/icons/Print';
 import Download from '@material-ui/icons/CloudDownload';
 import Pins from '@material-ui/icons/PinDrop';
 
-import { values } from 'lodash';
 import { DATA_TYPES } from '../routes/components/filterPanel/filterPanel.component';
+import { COLOR, PIN_COLORS } from '../styles';
 
-const LEVELS = {
-	VERY_LOW: { value: 0, name: 'Very Low' },
-	LOW: { value: 1, name: 'Low' },
-	MODERATE: { value: 2, name: 'Moderate' },
-	HIGH: { value: 3, name: 'High' },
-	VERY_HIGHT: { value: 4, name: 'Very High' }
+export const LEVELS = {
+	VERY_LOW: 0,
+	LOW: 1,
+	MODERATE: 2,
+	HIGH: 3,
+	VERY_HIGH: 4
 };
 
-const LEVELS_LIST = values(LEVELS);
+const LEVELS_LIST = [
+	{ value: LEVELS.VERY_LOW, name: 'Very Low' },
+	{ value: LEVELS.LOW, name: 'Low' },
+	{ value: LEVELS.MODERATE, name: 'Moderate' },
+	{ value: LEVELS.HIGH, name: 'High' },
+	{ value: LEVELS.VERY_HIGH, name: 'Very High' }
+];
 
 export const RISK_CATEGORIES = [
 	{ value: 'health_material_effect', name: 'Health - Material effect' },
@@ -68,7 +74,33 @@ export const RISK_LEVELS_ICONS = {
 	[RISK_LEVELS.REJECTED]: SyncProblem
 };
 
-export const RISK_LEVELS_COLORS = ['#008000', '#32cd32', '#fffacd', '#ff8c00', '#800000'];
+export const RISK_LEVELS_COLOURS = {
+	[LEVELS.VERY_LOW]: {
+		color: COLOR.GREEN,
+		pinColor: PIN_COLORS.GREEN,
+		selectedColor: PIN_COLORS.MED_SEA_GREEN
+	},
+	[LEVELS.LOW]: {
+		color: COLOR.LIME_GREEN,
+		pinColor: PIN_COLORS.LIME_GREEN,
+		selectedColor: PIN_COLORS.LIGHT_GREEN
+	},
+	[LEVELS.MODERATE]: {
+		color: COLOR.LEMON_CHIFFON,
+		pinColor: PIN_COLORS.LEMON_CHIFFON,
+		selectedColor: PIN_COLORS.LIGHT_YELLOW
+	},
+	[LEVELS.HIGH]: {
+		color: COLOR.DARK_ORANGE,
+		pinColor: PIN_COLORS.DARK_ORANGE,
+		selectedColor: PIN_COLORS.ORANGE
+	},
+	[LEVELS.VERY_HIGH]: {
+		color: COLOR.MAROON,
+		pinColor: PIN_COLORS.MAROON,
+		selectedColor: PIN_COLORS.RED
+	}
+};
 
 export const RISK_FILTER_DATA_TYPES = {
 	NORMAL: DATA_TYPES.UNDEFINED,

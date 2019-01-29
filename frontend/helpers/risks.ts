@@ -1,7 +1,6 @@
 import { omit, get } from 'lodash';
 import { getAPIUrl } from '../services/api';
-import { RISK_LEVELS_COLORS, RISK_LEVELS_ICONS, RISK_LEVELS } from '../constants/risks';
-import { PIN_COLORS } from '../styles';
+import { RISK_LEVELS_COLOURS, RISK_LEVELS_ICONS, RISK_LEVELS, LEVELS } from '../constants/risks';
 
 export const prepareRisk = (risk, jobs = []) => {
 	const thumbnail = getAPIUrl(risk.thumbnail);
@@ -30,15 +29,15 @@ export const calculateLevelOfRisk = (likelihood: string, consequence: string): n
 		const score: number = parseInt(likelihood, 10) + parseInt(consequence, 10);
 
 		if (6 < score) {
-			levelOfRisk = 4;
+			levelOfRisk = LEVELS.VERY_HIGH;
 		} else if (5 < score) {
-			levelOfRisk = 3;
+			levelOfRisk = LEVELS.HIGH;
 		} else if (2 < score) {
-			levelOfRisk = 2;
+			levelOfRisk = LEVELS.MODERATE;
 		} else if (1 < score) {
-			levelOfRisk = 1;
+			levelOfRisk = LEVELS.LOW;
 		} else {
-			levelOfRisk = 0;
+			levelOfRisk = LEVELS.VERY_LOW;
 		}
 	}
 
@@ -48,33 +47,16 @@ export const calculateLevelOfRisk = (likelihood: string, consequence: string): n
 export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => {
 	const statusIcon = {
 		Icon: RISK_LEVELS_ICONS[mitigationStatus] || null,
-		color: RISK_LEVELS_COLORS[levelOfRisk]
+		color: RISK_LEVELS_COLOURS[levelOfRisk].color
 	};
 
 	return statusIcon;
 };
 
 export const getRiskPinColor = (levelOfRisk: number, selected: boolean = false) => {
-	const levelOfRiskColors = [{
-		pinColor: PIN_COLORS.GREEN,
-		selectedColor: PIN_COLORS.MED_SEA_GREEN
-	}, {
-		pinColor: PIN_COLORS.LIME_GREEN,
-		selectedColor: PIN_COLORS.LIGHT_GREEN
-	}, {
-		pinColor: PIN_COLORS.LEMON_CHIFFON,
-		selectedColor: PIN_COLORS.LIGHT_YELLOW
-	}, {
-		pinColor: PIN_COLORS.DARK_ORANGE,
-		selectedColor: PIN_COLORS.ORANGE
-	}, {
-		pinColor: PIN_COLORS.MAROON,
-		selectedColor: PIN_COLORS.RED
-	}];
-
 	return (selected)
-		? levelOfRiskColors[levelOfRisk].selectedColor
-		: levelOfRiskColors[levelOfRisk].pinColor;
+		? RISK_LEVELS_COLOURS[levelOfRisk].selectedColor
+		: RISK_LEVELS_COLOURS[levelOfRisk].pinColor;
 };
 
 export const mergeRiskData = (source, data = source) => {
