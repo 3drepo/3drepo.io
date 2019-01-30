@@ -78,7 +78,7 @@ interface IProps {
 	onRevisionsClick: () => void;
 	onDownloadClick: () => void;
 	onUploadClick: () => void;
-	setState: (componentState: any) => void;
+	setState: (componentState: IState) => void;
 }
 
 interface IState {
@@ -386,13 +386,17 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					})}
 				onRemoveClick={this.createRemoveProjectHandler(props.name)}
 				active={this.isActiveProject(props.name)}
-				setActiveProject={this.setActiveProject}
+				onRootClick={this.setActiveProject}
 			/>
 		);
 	}
 
-	public setActiveProject = (activeProject) => {
-		this.setState({ activeProject	});
+	public setActiveProject = ({active, name}) => {
+		if (active) {
+			this.setState({ activeProject: name	});
+		} else {
+			this.setState({ activeProject: ''	});
+		}
 	}
 
 	public renderTeamspaces = (teamspaces) => teamspaces.map((teamspace, index) => (

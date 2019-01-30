@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 
-import { TreeList, treeLevels } from '../../../components/treeList/treeList.component';
+import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
 import { MyTeamspaceItem } from '../myTeamspaceItem/myTeamspaceItem.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
@@ -62,7 +62,7 @@ export const TeamspaceItem = (props: IProps) => {
 	return (
 		<TreeList
 			name={account}
-			level={treeLevels.teamspace}
+			level={TREE_LEVELS.TEAMSPACE}
 			items={projects}
 			onRootClick={onToggle}
 			active={active}

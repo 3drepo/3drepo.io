@@ -23,7 +23,7 @@ import { getAngularService, dispatch } from './../../helpers/migration';
 import { uploadFileStatuses } from './model.helpers';
 import { DialogActions } from '../dialog';
 import { ModelTypes, ModelActions } from './model.redux';
-import { TeamspacesActions, selectActiveProject } from '../teamspaces';
+import { TeamspacesActions } from '../teamspaces';
 import { SnackbarActions } from './../snackbar';
 import { selectCurrentUser } from '../currentUser';
 
@@ -42,14 +42,13 @@ export function* fetchSettings({ teamspace, modelId }) {
 export function* updateSettings({ modelData: { teamspace, project, modelId }, settings }) {
 	try {
 		const modifiedSettings = cloneDeep(settings);
-		const activeProject = project || select(selectActiveProject);
 
 		yield API.editModelSettings(teamspace, modelId, modifiedSettings);
 
-		if (activeProject && settings.name) {
+		if (settings.name) {
 			yield put(
 				TeamspacesActions.updateModelSuccess(
-					teamspace, modelId, { project: activeProject, model: modelId, name: settings.name }
+					teamspace, modelId, { project, model: modelId, name: settings.name }
 				)
 			);
 		}
