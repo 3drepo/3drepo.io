@@ -31,7 +31,6 @@
 	 * @apiName getQuotaInfo
 	 * @apiGroup Teamspace
 	 */
-
 	router.get("/quota", middlewares.isAccountAdmin, getQuotaInfo);
 
 	/**
@@ -39,7 +38,6 @@
 	 * @apiName getMemberList
 	 * @apiGroup Teamspace
 	 */
-
 	router.get("/members", middlewares.loggedIn, getMemberList);
 
 	/**
@@ -47,7 +45,6 @@
 	 * @apiName getMemberList
 	 * @apiGroup Teamspace
 	 */
-
 	router.get("/billingInfo", middlewares.isAccountAdmin, getBillingInfo);
 
 	/**

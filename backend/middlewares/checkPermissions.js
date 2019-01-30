@@ -180,4 +180,12 @@ function isAccountAdminHelper(username, account, model) {
 	).then(data => data.granted);
 }
 
-module.exports = { checkPermissions, checkPermissionsHelper, checkMultiplePermissions, hasReadAccessToModelHelper, hasWriteAccessToModelHelper, isAccountAdminHelper};
+module.exports = {
+	checkPermissions,
+	checkPermissionsHelper,
+	checkMultiplePermissions,
+	hasReadAccessToModelHelper,
+	hasWriteAccessToModelHelper,
+	isAccountAdminHelper,
+	validateUserSession
+};

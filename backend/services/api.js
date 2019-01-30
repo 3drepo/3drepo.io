@@ -80,7 +80,7 @@ module.exports.createApp = function () {
 		}
 	});
 
-	app.use("/apikey", require("../routes/apikey"));
+	app.use("/", require("../routes/apikey"));
 
 	app.use("/:account", require("../routes/job"));
 

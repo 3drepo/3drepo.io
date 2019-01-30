@@ -27,7 +27,6 @@ const notification = require("../models/notification");
  * @apiName getNotifications
  * @apiGroup Notification
  */
-
 router.get("/", middlewares.loggedIn, getNotifications, responseCodes.onSuccessfulOperation);
 
 /**
@@ -37,7 +36,6 @@ router.get("/", middlewares.loggedIn, getNotifications, responseCodes.onSuccessf
  *
  * @apiParam {String} id Unique Notification ID
  */
-
 router.get("/:id", middlewares.loggedIn, getNotification, responseCodes.onSuccessfulOperation);
 
 /**
@@ -47,7 +45,6 @@ router.get("/:id", middlewares.loggedIn, getNotification, responseCodes.onSucces
  *
  * @apiParam {String} id Unique Notification ID
  */
-
 router.patch("/:id", middlewares.loggedIn, patchNotification, responseCodes.onSuccessfulOperation);
 
 /**
@@ -55,7 +52,6 @@ router.patch("/:id", middlewares.loggedIn, patchNotification, responseCodes.onSu
  * @apiName deleteAllNotifications
  * @apiGroup Notification
  */
-
 router.delete("/", middlewares.loggedIn, deleteAllNotifications, responseCodes.onSuccessfulOperation);
 
 /**
@@ -65,7 +61,6 @@ router.delete("/", middlewares.loggedIn, deleteAllNotifications, responseCodes.o
  *
  * @apiParam id Unique Notification ID
  */
-
 router.delete("/:id", middlewares.loggedIn, deleteNotification, responseCodes.onSuccessfulOperation);
 
 /**

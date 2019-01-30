@@ -23,9 +23,9 @@ const responseCodes = require("../response_codes");
 const middlewares = require("../middlewares/middlewares");
 const utils = require("../utils");
 
-router.post("/", middlewares.loggedIn, generateApiKey, responseCodes.onSuccessfulOperation);
+router.post("/apikey", middlewares.loggedIn, generateApiKey, responseCodes.onSuccessfulOperation);
 
-router.delete("/", middlewares.loggedIn, deleteApiKey, responseCodes.onSuccessfulOperation);
+router.delete("/apikey", middlewares.loggedIn, deleteApiKey, responseCodes.onSuccessfulOperation);
 
 async function generateApiKey(req, res, next) {
 	try {
