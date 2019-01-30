@@ -507,21 +507,6 @@ groupSchema.methods.clean = function () {
 	return cleaned;
 };
 
-groupSchema.statics.deleteGroup = function (dbCol, id) {
-
-	if ("[object String]" === Object.prototype.toString.call(id)) {
-		id = utils.stringToUUID(id);
-	}
-
-	return Group.findOneAndRemove(dbCol, { _id: id }).then(group => {
-
-		if (!group) {
-			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
-		}
-
-	});
-};
-
 /**
  * Returns true if given rule has:
  * - A field,
