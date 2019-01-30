@@ -28,7 +28,11 @@ module.exports = getWebpackConfig({
   mode: MODES.DEVELOPMENT,
   devtool: 'inline-source-map',
   plugins: [
-    new CleanWebpackPlugin([PATHS.DIST_DIR], { root: PATHS.PROJECT_DIR }),
+    new CleanWebpackPlugin([`${PATHS.DIST_DIR}/three_d_repo.*.js`], {
+      root: PATHS.PROJECT_DIR,
+      watch: true,
+      beforeEmit: true
+    }),
     new LiveReloadPlugin({
       hostname: 'localhost',
       port: '35729',
