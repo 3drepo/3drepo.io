@@ -41,6 +41,28 @@ function insertEventQueue(event, emitter, account, model, extraKeys, data) {
 	return Queue.insertEventMessage(msg);
 }
 
+// Notifications
+function upsertedNotification(session, notification) {
+	const msg = {
+		event : notification.username + "::notificationUpserted",
+		channel : notification.username,
+		emitter : session,
+		data : notification.notification
+	};
+	return Queue.insertEventMessage(msg);
+}
+
+const deletedNotification = function(session, notification) {
+	const msg = {
+		event : notification.username + "::notificationDeleted",
+		channel : notification.username,
+		emitter : session,
+		data : {_id:notification.notification._id}
+	};
+
+	return Queue.insertEventMessage(msg);
+};
+
 // Issues notifications
 function newIssues(emitter, account, model, data) {
 	return insertEventQueue("issue" + eventTypes.CREATED, emitter, account, model, null, data);
@@ -129,5 +151,7 @@ module.exports = {
 	modelStatusChanged,
 	issueChanged,
 	newModel,
-	eventTypes
+	eventTypes,
+	upsertedNotification,
+	deletedNotification
 };

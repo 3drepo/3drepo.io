@@ -21,10 +21,10 @@ import { GisTypes, GisActions } from './gis.redux';
 import { ViewerActions } from '../viewer';
 import { selectVisibleSources } from './gis.selectors';
 
-export function* initializeMap({params}) {
+export function* initialiseMap({params}) {
 	try {
 		yield put(ViewerActions.mapInitialise(params));
-		yield put(GisActions.initializeMapSuccess(true));
+		yield put(GisActions.initialiseMapSuccess(true));
 
 	} catch (error) {}
 }
@@ -72,7 +72,7 @@ export function* resetMap() {
 }
 
 export default function* GisSaga() {
-	yield takeLatest(GisTypes.INITIALIZE_MAP, initializeMap);
+	yield takeLatest(GisTypes.INITIALISE_MAP, initialiseMap);
 	yield takeLatest(GisTypes.ADD_SOURCE, addSource);
 	yield takeLatest(GisTypes.REMOVE_SOURCE, removeSource);
 	yield takeLatest(GisTypes.RESET_SOURCES, resetSources);

@@ -16,17 +16,20 @@
  */
 
 "use strict";
-const hasWriteAccessToModel = require("../middlewares/checkPermissions").hasWriteAccessToModelHelper;
-const job = require("../models/job");
+const { hasWriteAccessToModelHelper, hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
 const modelSettings = require("../models/modelSetting");
+const job = require("./job");
 const utils = require("../utils");
 const uuid = require("node-uuid");
 const db = require("../handler/db");
 const _ = require("lodash");
+const User = require("./user");
 
 const types = {
 	ISSUE_ASSIGNED : "ISSUE_ASSIGNED",
-	ISSUE_CREATED : "ISSUE_CREATED"
+	ISSUE_CREATED : "ISSUE_CREATED",
+	MODEL_UPDATED : "MODEL_UPDATED",
+	MODEL_UPDATED_FAILED : "MODEL_UPDATED_FAILED"
 };
 
 const NOTIFICATIONS_DB = "notifications";
@@ -113,6 +116,11 @@ module.exports = {
 		return this.upsertNotification(username,data,types.ISSUE_ASSIGNED,criteria);
 	},
 
+	insertModelUpdatedNotification: function(username, teamSpace, modelId, revision) {
+		const data = {teamSpace,  modelId, revision};
+		return this.insertNotification(username, types.MODEL_UPDATED, data);
+	},
+
 	removeIssueAssignedNotification:function(username, teamSpace, modelId, issueId) {
 		const criteria = {teamSpace,  modelId, issuesId:{$in: [issueId]}};
 
@@ -172,8 +180,8 @@ module.exports = {
 
 				// For all the users with that assigned job we need
 				// to find those that can modify the model
-				return  Promise.all(
-					users.map(user => hasWriteAccessToModel(user, teamSpace,modelId)
+				return Promise.all(
+					users.map(user => hasWriteAccessToModelHelper(user, teamSpace, modelId)
 						.then(canWrite => ({user, canWrite}))
 					)
 				);
@@ -186,6 +194,52 @@ module.exports = {
 					return fillModelNames(usersNotifications.map(un => un.notification)).then(()=> usersNotifications);
 				});
 			});
+	},
+
+	/**
+	 * This function inserts a modelUpdateNotification for
+	 *
+	 * @param {*} teamSpace
+	 * @param {*} modelId
+	 * @param {*} revision
+	 * @returns {Promise< Array<username:string,notification:Notification> >} It contains the newly created notifications and usernames
+	 *
+	 */
+	insertModelUpdatedNotifications: async function(teamSpace, modelId, revision) {
+		const allUsers = await User.getAllUsersInTeamspace(teamSpace);
+		const users = [];
+		await Promise.all(allUsers.map(async user => {
+			const access = await hasReadAccessToModelHelper(user, teamSpace, modelId);
+			if (access) {
+				users.push(user);
+			}
+		}));
+
+		const notifications = await Promise.all(users.map(async username => {
+			const notification = await this.insertModelUpdatedNotification(username, teamSpace, modelId, revision);
+			return ({username, notification});
+		}));
+
+		await fillModelNames(notifications.map(un => un.notification));
+
+		return notifications;
+	},
+
+	/**
+	 * This function inserts model update failed notifications
+	 *
+	 * @param {*} teamSpace
+	 * @param {*} modelId
+	 * @param {*} user
+	 * @returns {Promise< Array<username:string,notification:Notification> >} It contains the newly created notifications and usernames
+	 *
+	 */
+	insertModelUpdatedFailedNotifications :  async function(teamSpace, modelId,  username, errorMessage) {
+		const data = {teamSpace,  modelId, errorMessage};
+		const notification = await this.insertNotification(username, types.MODEL_UPDATED_FAILED, data);
+		const notifications = [{username, notification}];
+		await fillModelNames([notification]);
+		return notifications;
 	},
 
 	removeAssignedNotifications : function(username, teamSpace, modelId, issue) {

@@ -15,39 +15,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
 import { cloneDeep } from 'lodash';
+import { put, takeLatest, select } from 'redux-saga/effects';
+
 import * as API from '../../services/api';
 import { getAngularService, dispatch } from './../../helpers/migration';
-import { uploadFileStatuses, changePositionFormat } from './model.helpers';
+import { uploadFileStatuses } from './model.helpers';
 import { DialogActions } from '../dialog';
 import { ModelTypes, ModelActions } from './model.redux';
 import { TeamspacesActions } from '../teamspaces';
 import { SnackbarActions } from './../snackbar';
+import { selectCurrentUser } from '../currentUser';
 
 export function* fetchSettings({ teamspace, modelId }) {
 	try {
 		yield put(ModelActions.setPendingState(true));
 		const { data: settings } = yield API.getModelSettings(teamspace, modelId);
 
-		if (settings.surveyPoints && settings.surveyPoints.length) {
-			settings.surveyPoints[0].position = yield changePositionFormat(settings.surveyPoints[0].position);
-		}
-
 		yield put(ModelActions.fetchSettingsSuccess(settings));
 		yield put(ModelActions.setPendingState(false));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('fetch', 'model settings', e));
+		yield put(DialogActions.showEndpointErrorDialog('fetch', 'model settings', e));
 	}
 }
 
 export function* updateSettings({ modelData: { teamspace, project, modelId }, settings }) {
 	try {
 		const modifiedSettings = cloneDeep(settings);
-
-		if (modifiedSettings.surveyPoints && settings.surveyPoints.length) {
-			modifiedSettings.surveyPoints[0].position = yield changePositionFormat(modifiedSettings.surveyPoints[0].position);
-		}
 
 		yield API.editModelSettings(teamspace, modelId, modifiedSettings);
 
@@ -59,7 +53,7 @@ export function* updateSettings({ modelData: { teamspace, project, modelId }, se
 		yield put(ModelActions.updateSettingsSuccess(settings));
 		yield put(SnackbarActions.show('Updated model settings'));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('update', 'model settings', e));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'model settings', e));
 	}
 }
 
@@ -72,7 +66,7 @@ export function* fetchRevisions({ teamspace, modelId }) {
 		yield put(ModelActions.fetchRevisionsSuccess(revisions));
 		yield put(ModelActions.setPendingState(false));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('fetch', 'model revisions', e));
+		yield put(DialogActions.showEndpointErrorDialog('fetch', 'model revisions', e));
 	}
 }
 
@@ -81,12 +75,17 @@ export function* downloadModel({ teamspace, modelId }) {
 		const url = yield API.getAPIUrl(`${teamspace}/${modelId}/download/latest`);
 		window.open(url, '_blank');
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('download', 'model', e));
+		yield put(DialogActions.showEndpointErrorDialog('download', 'model', e));
 	}
 }
 
 export function* onModelStatusChanged({ modelData, teamspace, project, modelId, modelName }) {
 	yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, modelData));
+
+	const currentUser = yield select(selectCurrentUser);
+	if (modelData.user !== currentUser.username) {
+		return;
+	}
 
 	if (modelData.status === uploadFileStatuses.ok) {
 		yield put(SnackbarActions.show(`Model ${modelName} uploaded successfully`));
@@ -145,7 +144,7 @@ export function* uploadModelFile({ teamspace, project, modelData, fileData }) {
 			}
 		}
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('upload', 'model', e));
+		yield put(DialogActions.showEndpointErrorDialog('upload', 'model', e));
 		yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelData.modelId, uploadFileStatuses.failed));
 	}
 }
@@ -156,7 +155,7 @@ export function* fetchMaps({ teamspace, modelId }) {
 
 		yield put(ModelActions.fetchMapsSuccess(response.data.maps));
 	} catch (e) {
-		yield put(DialogActions.showErrorDialog('get', 'model maps', e));
+		yield put(DialogActions.showEndpointErrorDialog('get', 'model maps', e));
 	}
 }
 

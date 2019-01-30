@@ -22,6 +22,7 @@
 	const MongoClient = require("mongodb").MongoClient;
 	const GridFSBucket = require("mongodb").GridFSBucket;
 	const responseCodes = require("../response_codes");
+
 	const connConfig = {
 		autoReconnect: true
 	};
@@ -61,6 +62,7 @@
 		if(Number.isInteger(config.db.timeout)) {
 			connectString += "&socketTimeoutMS=" + config.db.timeout;
 		}
+
 		return connectString;
 	}
 
@@ -159,6 +161,14 @@
 		});
 	}
 
+	function getSessionStore(session) {
+		const MongoDBStore = require("connect-mongodb-session")(session);
+		return new MongoDBStore({
+			uri: getURL("admin"),
+			collection: "sessions"
+		});
+	}
+
 	module.exports = {
 		disconnect,
 		dropCollection,
@@ -170,6 +180,7 @@
 		getFileFromGridFS,
 		_getCollection,
 		listCollections,
+		getSessionStore,
 		runCommand
 	};
 

@@ -30,7 +30,8 @@ interface IDialogConfig {
 
 export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showDialog: ['config'],
-	showErrorDialog: ['method', 'dataType', 'error'],
+	showEndpointErrorDialog: ['method', 'dataType', 'error'],
+	showErrorDialog: ['method', 'dataType', 'message', 'status'],
 	showConfirmDialog: ['config'],
 	hideDialog: [],
 	setPendingState: ['isPending']
@@ -48,7 +49,22 @@ export const showDialog = (state = INITIAL_STATE, action) => {
 	return { ...state, config, data: action.config.data, isOpen: true };
 };
 
-export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, error }) => {
+export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, message, status }) => {
+	const config = {
+		title: 'Error',
+		template: ErrorDialog,
+		data: {
+			method,
+			dataType,
+			status,
+			message
+		}
+	};
+
+	return showDialog(state, {config});
+};
+
+export const showEndpointErrorDialog = (state = INITIAL_STATE, { method, dataType, error }) => {
 	const isImplementationError = !error.response;
 	if (isImplementationError) {
 		console.error(error);
@@ -58,18 +74,10 @@ export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, error
 		return state;
 	}
 
-	const config = {
-		title: 'Error',
-		template: ErrorDialog,
-		data: {
-			method,
-			dataType,
-			status: get(error.response, 'status', 'Implementation error'),
-			message: get(error.response, 'data.message', error.message || '')
-		}
-	};
+	const status = get(error.response, 'status', 'Implementation error');
+	const message = get(error.response, 'data.message', error.message);
 
-	return showDialog(state, {config});
+	return showErrorDialog(state, { method, dataType, message, status});
 };
 
 export const showConfirmDialog = (state = INITIAL_STATE, action) => {
@@ -89,6 +97,7 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.HIDE_DIALOG]: hideDialog,
 	[DialogTypes.SHOW_DIALOG]: showDialog,
 	[DialogTypes.SHOW_ERROR_DIALOG]: showErrorDialog,
+	[DialogTypes.SHOW_ENDPOINT_ERROR_DIALOG]: showEndpointErrorDialog,
 	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
 	[DialogTypes.SET_PENDING_STATE]: setPendingState
 });

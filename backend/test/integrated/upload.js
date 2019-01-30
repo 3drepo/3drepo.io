@@ -97,30 +97,34 @@ describe("Uploading a model", function () {
 				});
 		});
 
-		it("should return error (has a subscription but ran out of space)", function(done) {
-			// user: testing loaded with a valid subscription and a model with 6MB and subscription limit is 8MB
-			const agent2 = request.agent(server);
-			agent2.post("/login")
-				.send({ username: "testing", password: "testing" })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal("testing");
+	});
 
-					if(err) {
-						return done(err);
-					}
+	describe("with not enough quota", function() {
 
-					// create a model
-					const myModel = "testproject";
-					agent2.post(`/testing/${myModel}/upload`)
-						.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
-						.expect(400, function(err, res) {
-							expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
-							done(err);
-						});
-
-				});
+		before(function() {
+			// give some money to this guy
+			return User.findByUserName(username).then(user => {
+				user.customData.billing.subscriptions  = {
+					"discretionary" : {
+		                 		"collaborators" : 2,
+			                 	"data" : 4,
+        	            			"expiryDate" : moment().utc().add(1, "month")
+		                	}
+				};
+				return user.save();
+			});
 		});
 
+
+		it("should return error (has a subscription but ran out of space)", function(done) {
+			agent.post(`/${username}/${modelId}/upload`)
+				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
+					done(err);
+				});
+
+		});
 	});
 
 	describe("with quota", function() {

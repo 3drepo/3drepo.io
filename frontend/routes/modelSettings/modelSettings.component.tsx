@@ -46,6 +46,7 @@ import {
 	BackButton,
 	LoaderContainer
 } from './modelSettings.styles';
+import { convertPositionToOpenGL, convertPositionToDirectX } from '../../helpers/model';
 
 const ModelSettingsSchema = Yup.object().shape({
 	code: Yup.string()
@@ -146,26 +147,27 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 
 		if (prevPoints !== currentPoints && currentPoints.length) {
 			const { axisX, axisY, axisZ, latitude, longitude } = this.state;
-			const [{ latLong, position }] = currentPoints;
+			const [prevLatitude, prevLongitude] = currentPoints[0].latLong.map(Number);
+			const [prevAxisX, prevAxisY, prevAxisZ] = convertPositionToOpenGL(currentPoints[0].position);
 
-			if (axisX !== position[0]) {
-				changes.axisX = position[0];
+			if (axisX !== prevAxisX) {
+				changes.axisX = prevAxisX;
 			}
 
-			if (axisY !== position[1]) {
-				changes.axisY = position[1];
+			if (axisY !== prevAxisY) {
+				changes.axisY = prevAxisY;
 			}
 
-			if (axisZ !== position[2]) {
-				changes.axisZ = position[2];
+			if (axisZ !== prevAxisZ) {
+				changes.axisZ = prevAxisZ;
 			}
 
-			if (latitude !== latLong[0]) {
-				changes.latitude = latLong[0];
+			if (latitude !== prevLatitude) {
+				changes.latitude = prevLatitude;
 			}
 
-			if (longitude !== latLong[1]) {
-				changes.longitude = latLong[1];
+			if (longitude !== prevLongitude) {
+				changes.longitude = prevLongitude;
 			}
 		}
 		return changes;
@@ -189,8 +191,8 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 			type,
 			fourDSequenceTag,
 			surveyPoints: [{
-				position: [ Number(axisX), Number(axisY), Number(axisZ) ],
-				latLong: [ latitude, longitude ]
+				position: convertPositionToDirectX([axisX, axisY, axisZ]),
+				latLong: [latitude, longitude].map(Number)
 			}],
 			topicTypes: types
 		};

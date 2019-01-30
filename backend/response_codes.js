@@ -95,9 +95,8 @@
 		FILE_IMPORT_MAX_NODES_EXCEEDED: { message: "Import failed: Too many objects, consider splitting up the model", status: 400 },
 		FILE_IMPORT_ODA_NOT_SUPPORTED: { message: "DGN import is currently not supported", status: 400 },
 
-		QUEUE_CONN_ERR: { message: "Failed to establish connection to queue", status: 404 },
-		QUEUE_INTERNAL_ERR: { message: "Failed preprocessing for queue dispatch", status: 500 },
-		QUEUE_NO_CONFIG: { message: "Server has no queue configuration", status: 404 },
+		QUEUE_CONN_ERR: { message: "Failed to queue your request. Please try again later.", status: 500},
+		QUEUE_NO_CONFIG: { message: "Server has no queue configuration", status: 500 },
 
 		INVALID_MESH: { message: "Mesh not valid for processing", status: 500 },
 
@@ -116,10 +115,9 @@
 
 		USER_EXISTS: { message: "User already exists", status: 400 },
 		SIGN_UP_PASSWORD_MISSING: { message: "Password is missing", status: 400 },
-		USER_EMAIL_NOT_MATCH: { message: "Incorrect username or email", status: 400 },
 		TOKEN_INVALID: { message: "Token is invalid or expired", status: 400 },
 		ALREADY_VERIFIED: { message: "Already verified", status: 400 },
-		USER_NOT_VERIFIED: { message: "Incorrect username or password", status: 400 },
+		USER_NOT_VERIFIED: { message: "Account not yet verified. Please check your email.", status: 400 },
 		INVALID_CAPTCHA_RES: { message: "Invalid captcha", status: 400 },
 		REGISTER_DISABLE: { message: "Sign up function is disabled", status: 400 },
 		MODEL_EXIST: { message: "Model already exists with that name", status: 400 },
@@ -165,7 +163,6 @@
 		ALREADY_IN_ROLE: { message: "User already assigned with this role", status: 400 },
 
 		EMAIL_EXISTS: { message: "Email already exists", status: 400 },
-		QUEUE_NO_LISTENER: { message: "There is currently no worker listening to the queue, you model import is delayed", status: 400 },
 		COLLABORATOR_LIMIT_EXCEEDED: { message: "You do not have enough quota to add an extra collaborator", status: 400 },
 
 		LICENSE_NO_CHANGE: { message: "You must increase your number of licenses", status: 400 },
@@ -237,6 +234,7 @@
 		TEXTURE_NOT_FOUND: { message: "Texture not found", status: 404 },
 		METADATA_NOT_FOUND: { message: "Metadata not found", status: 404 },
 		SEQ_TAG_NOT_FOUND: {message: "Sequence Tag not set", status: 404},
+		UNKNOWN_PAY_PLAN: { message: "Unknown paypal plan", status: 500},
 
 		JOB_NOT_FOUND:{ message: "Job not found", status: 404},
 		DUP_JOB: {message: "Duplicate job id", status: 400},
@@ -251,7 +249,9 @@
 		ACCOUNT_PERM_EMPTY: { message: "Cannot add empty permissions", status: 404},
 		ADMIN_TEMPLATE_CANNOT_CHANGE: { message: "Admin permission template cannot be changed or deleted", status: 400},
 
-		VAT_CODE_ERROR:{ message: "Error validating VAT number", status: 500}
+		VAT_CODE_ERROR:{ message: "Error validating VAT number", status: 500},
+
+		NOTIFICATION_NOT_FOUND: { message: "Notification not found", status: 404}
 
 	};
 

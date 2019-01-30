@@ -22,6 +22,12 @@ const router = express.Router({mergeParams: true});
 const utils = require("../utils");
 const config = require("../config");
 
+/**
+ * @api {get} /plans List all Plans
+ * @apiName listPlans
+ * @apiGroup Plan
+ */
+
 router.get("/plans", listPlans);
 
 function listPlans(req, res, next) {

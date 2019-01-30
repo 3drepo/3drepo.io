@@ -38,6 +38,7 @@ const Project = require("../project");
 const _ = require("lodash");
 const uuid = require("node-uuid");
 const FileRef = require("../fileRef");
+const notifications = require("../notification");
 
 /** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
@@ -85,8 +86,14 @@ function convertToErrorCode(bouncerErrorCode) {
 	return Object.assign({bouncerErrorCode}, errObj);
 }
 
-function importSuccess(account, model, sharedSpacePath) {
-	setStatus(account, model, "ok").then(setting => {
+function insertModelUpdatedNotificationsLatestReview(account, model) {
+	History.findLatest({account, model},{tag:1}).then(h => {
+		const revision = (!h || !h.tag) ? "" : h.tag;
+		return notifications.insertModelUpdatedNotifications(account, model, revision);
+	}).then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
+}
+function importSuccess(account, model, sharedSpacePath, user) {
+	setStatus(account, model, "ok", user).then(setting => {
 		if (setting) {
 			if (sharedSpacePath) {
 				const files = function(filePath, fileDir, jsonFile) {
@@ -118,7 +125,14 @@ function importSuccess(account, model, sharedSpacePath) {
 				setting.timestamp = new Date();
 			}
 			setting.markModified("errorReason");
-			ChatEvent.modelStatusChanged(null, account, model, setting);
+
+			// hack to add the user field to send to the user
+			const data = Object.assign({user}, JSON.parse(JSON.stringify(setting)));
+			ChatEvent.modelStatusChanged(null, account, model, data);
+
+			// Creates model updated notification.
+			insertModelUpdatedNotificationsLatestReview(account, model);
+
 			setting.save();
 		}
 	}).catch(err => {
@@ -143,9 +157,12 @@ function importFail(account, model, user, errCode, errMsg, sendMail) {
 			setting.timestamp = undefined;
 		}
 		setting.errorReason = convertToErrorCode(errCode);
+
 		setting.markModified("errorReason");
 		setting.save().then(() => {
-			ChatEvent.modelStatusChanged(null, account, model, setting);
+			// hack to add the user field to send to the user
+			const data = Object.assign({user}, JSON.parse(JSON.stringify(setting)));
+			ChatEvent.modelStatusChanged(null, account, model, data);
 		});
 
 		if (!errMsg) {
@@ -162,6 +179,19 @@ function importFail(account, model, user, errCode, errMsg, sendMail) {
 				bouncerErr: errCode
 			});
 		}
+
+		// Creates model updated failed notification.
+		notifications.insertModelUpdatedFailedNotifications(account, model, user, errMsg)
+			.then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
+
+		// In case the error was actually a warning,
+		// the model was imported so we still need to send the model_updated notifications
+		const warningCodes = [7, 10, 15];
+
+		if (warningCodes.includes(errCode)) {
+			insertModelUpdatedNotificationsLatestReview(account, model);
+		}
+
 	}).catch(err => {
 		systemLogger.logError("Failed to invoke importFail:" +  err);
 	});
@@ -171,9 +201,10 @@ function importFail(account, model, user, errCode, errMsg, sendMail) {
  * Create correlation ID, store it in model setting, and return it
  * @param {account} account - User account
  * @param {model} model - Model
+ * @param {user} user - The user who triggered the status
  */
-function setStatus(account, model, status) {
-	ChatEvent.modelStatusChanged(null, account, model, { status: status });
+function setStatus(account, model, status, user) {
+	ChatEvent.modelStatusChanged(null, account, model, { status, user });
 	return ModelSetting.findById({account, model}, model).then(setting => {
 		setting.status = status;
 		systemLogger.logInfo(`Model status changed to ${status}`);
@@ -574,8 +605,9 @@ function uploadFile(req) {
 
 	const account = req.params.account;
 	const model = req.params.model;
+	const user = req.session.user.username;
 
-	ChatEvent.modelStatusChanged(null, account, model, { status: "uploading" });
+	ChatEvent.modelStatusChanged(null, account, model, { status: "uploading", user });
 	// upload model with tag
 	const checkTag = tag => {
 		if(!tag) {
@@ -679,7 +711,7 @@ function _deleteFiles(files) {
  */
 function _handleUpload(correlationId, account, model, username, file, data) {
 
-	importQueue.importFile(
+	return importQueue.importFile(
 		correlationId,
 		file.path,
 		file.originalname,
@@ -697,10 +729,7 @@ function _handleUpload(correlationId, account, model, username, file, data) {
 			username
 		});
 
-	}).catch(err => {
-		systemLogger.logError("Failed to import model:", err);
 	});
-
 }
 
 function importModel(account, model, username, modelSetting, source, data) {
@@ -711,7 +740,7 @@ function importModel(account, model, username, modelSetting, source, data) {
 
 	return modelSetting.save().then(() => {
 		return createCorrelationId(modelSetting).then(correlationId => {
-			return setStatus(account, model, "queued").then(setting => {
+			return setStatus(account, model, "queued", username).then(setting => {
 
 				modelSetting = setting;
 
@@ -730,6 +759,7 @@ function importModel(account, model, username, modelSetting, source, data) {
 		});
 	}).catch(err => {
 		systemLogger.logError("Failed to importModel:", err);
+		return Promise.reject(err);
 	});
 
 }

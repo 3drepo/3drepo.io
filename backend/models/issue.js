@@ -278,8 +278,29 @@ schema.statics.getFederatedModelList = function(_dbColOptions, username, _branch
 	});
 };
 
-schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, revId, projection, noClean, ids, sortBy) {
+schema.statics.getIssuesReport = function(account, model, username, rid, issueIds, res) {
+	const dbCol = { account, model};
 
+	const projection = {
+		extras: 0,
+		"viewpoints.extras": 0,
+		"viewpoints.scribble": 0,
+		"viewpoints.screenshot.content": 0,
+		"viewpoints.screenshot.resizedContent": 0,
+		"thumbnail.content": 0
+	};
+
+	const branch = rid ? null : "master";
+
+	const reportGen = require("../models/report").newIssuesReport(account, model, rid);
+	return Issue.findIssuesByModelName(dbCol, username, branch, rid, projection, false, issueIds).then(issues => {
+		reportGen.addEntries(issues);
+		return reportGen.generateReport(res);
+	});
+
+};
+
+schema.statics.findIssuesByModelName = function(dbColOptions, username, branch, revId, projection, noClean, ids, sortBy) {
 	let issues;
 	const self = this;
 	let filter = {};
@@ -1291,6 +1312,25 @@ schema.methods.getBCFMarkup = function(account, model, unit) {
 			}
 		};
 
+		if (_.get(vp, "clippingPlanes") && vp.clippingPlanes.length > 0) {
+			viewpointXmlObj.VisualizationInfo.ClippingPlanes = {};
+			viewpointXmlObj.VisualizationInfo.ClippingPlanes.ClippingPlane = [];
+			for (let i = 0; i < vp.clippingPlanes.length; i++) {
+				viewpointXmlObj.VisualizationInfo.ClippingPlanes.ClippingPlane.push({
+					Location:{
+						X: -vp.clippingPlanes[i].normal[0] * vp.clippingPlanes[i].distance * scale,
+						Y: vp.clippingPlanes[i].normal[2] * vp.clippingPlanes[i].distance * scale,
+						Z: -vp.clippingPlanes[i].normal[1] * vp.clippingPlanes[i].distance * scale
+					},
+					Direction:{
+						X: vp.clippingPlanes[i].normal[0] * vp.clippingPlanes[i].clipDirection,
+						Y: -vp.clippingPlanes[i].normal[2] * vp.clippingPlanes[i].clipDirection,
+						Z: vp.clippingPlanes[i].normal[1] * vp.clippingPlanes[i].clipDirection
+					}
+				});
+			}
+		}
+
 		if(!_.get(vp, "extras._noPerspective") && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >= 3) {
 
 			viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
@@ -2031,7 +2071,7 @@ schema.statics.importBCF = function(requester, account, model, revId, zipPath) {
 								}
 
 								let highlightedGroupData;
-								let highlightedObjectsMap;
+								let highlightedObjectsMap = [];
 
 								if (highlightedGroupObject) {
 									highlightedGroupData = createGroupData(highlightedGroupObject);
