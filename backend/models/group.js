@@ -406,7 +406,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data) {
 
 	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		const toUpdate = {};
-		const fieldsCanBeUpdated = ["description", "name", "author", "createdAt", "updatedBy", "updatedAt", "objects", "color", "issue_id", "risk_id"];
+		const fieldsCanBeUpdated = ["description", "name", "author", "createdAt", "updatedBy", "updatedAt", "rules", "objects", "color", "issue_id", "risk_id"];
 
 		let typeCorrect = true;
 		fieldsCanBeUpdated.forEach((key) => {
@@ -430,11 +430,13 @@ groupSchema.methods.updateAttrs = function (dbCol, data) {
 			if (Object.keys(toUpdate).length !== 0) {
 				return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
 					return _dbCol.update({ _id: this._id }, { $set: toUpdate }).then(() => {
-						return { _id: utils.uuidToString(this._id) };
+						const updatedGroup = this.clean();
+						return updatedGroup;
 					});
 				});
 			} else {
-				return { _id: utils.uuidToString(this._id) };
+				const updatedGroup = this.clean();
+				return updatedGroup;
 			}
 		} else {
 			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
