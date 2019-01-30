@@ -132,7 +132,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public componentWillUnmount() {
 		this.props.setState({
 			activeTeamspace: this.state.activeTeamspace,
-			activeProject: this.state.activeProject
+			activeProject: this.state.activeProject,
+			teamspacesItems: this.state.teamspacesItems
 		});
 	}
 

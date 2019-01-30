@@ -44,7 +44,8 @@ export const INITIAL_STATE = {
 	teamspaces: {},
 	componentState: {
 		activeTeamspace: '',
-		activeProject: ''
+		activeProject: '',
+		teamspacesItems: []
 	}
 };
 
