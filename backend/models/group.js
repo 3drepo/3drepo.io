@@ -371,6 +371,10 @@ groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId) {
 		});
 
 		return Promise.all(sharedIdConversionPromises).then((sharedIdGroups) => {
+			sharedIdGroups.forEach((group, i) => {
+				sharedIdGroups[i] = clean(group);
+			});
+
 			return sharedIdGroups;
 		});
 	});
@@ -430,12 +434,12 @@ groupSchema.methods.updateAttrs = function (dbCol, data) {
 			if (Object.keys(toUpdate).length !== 0) {
 				return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
 					return _dbCol.update({ _id: this._id }, { $set: toUpdate }).then(() => {
-						const updatedGroup = this.clean();
+						const updatedGroup = clean(this);
 						return updatedGroup;
 					});
 				});
 			} else {
-				const updatedGroup = this.clean();
+				const updatedGroup = clean(this);
 				return updatedGroup;
 			}
 		} else {
@@ -490,8 +494,8 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 	});
 };
 
-groupSchema.methods.clean = function () {
-	const cleaned = this.toObject();
+function clean(groupData) {
+	const cleaned = groupData.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
 	cleaned.risk_id = cleaned.risk_id && utils.uuidToString(cleaned.risk_id);
