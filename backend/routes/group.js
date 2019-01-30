@@ -266,18 +266,10 @@ function listGroups(req, res, next) {
 	}
 
 	groupList.then(groups => {
-
-		groups.forEach((group, i) => {
-			groups[i] = group.clean();
-		});
-
 		responseCodes.respond(place, req, res, next, responseCodes.OK, groups);
-
 	}).catch(err => {
-
 		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-
 	});
 }
 
