@@ -52,11 +52,10 @@ export const saveIssue = (teamspace, modelId, issue) => {
  * @param issue
  */
 export const updateIssue = (teamspace, modelId, issue) => {
-	const mainPath = `${teamspace}/${modelId}`;
 	if (issue.rev_id) {
-		return api.put(`${mainPath}/revision/${issue.rev_id}/issues/${issue._id}.json`, issue);
+		return api.put(`${teamspace}/${modelId}/revision/${issue.rev_id}/issues/${issue._id}.json`, issue);
 	}
-	return api.put(`${mainPath}/issues/${issue._id}.json`, issue);
+	return api.put(`${teamspace}/${modelId}/issues/${issue._id}.json`, issue);
 };
 
 /**

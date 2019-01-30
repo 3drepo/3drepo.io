@@ -27,6 +27,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	setComponentState: ['componentState'],
 	saveIssue: ['teamspace', 'model', 'issueData'],
 	updateIssue: ['teamspace', 'modelId', 'issueData'],
+	postComment: ['teamspace', 'modelId', 'issueData'],
 	saveIssueSuccess: ['issue'],
 	setNewIssue: [],
 	renderPins: [],

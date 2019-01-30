@@ -185,6 +185,15 @@ export function* updateIssue({ teamspace, modelId, issueData }) {
 	}
 }
 
+export function* postComment({ teamspace, modelId, issueData }) {
+	try {
+		const { data } = yield API.updateIssue(teamspace, modelId, issueData);
+		yield put(SnackbarActions.show('Comment added'));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('post', 'comment', error));
+	}
+}
+
 export function* renderPins() {
 	try {
 		const filteredIssues = yield select(selectFilteredIssues);
@@ -574,6 +583,7 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.FETCH_ISSUE, fetchIssue);
 	yield takeLatest(IssuesTypes.SAVE_ISSUE, saveIssue);
 	yield takeLatest(IssuesTypes.UPDATE_ISSUE, updateIssue);
+	yield takeLatest(IssuesTypes.POST_COMMENT, postComment);
 	yield takeLatest(IssuesTypes.RENDER_PINS, renderPins);
 	yield takeLatest(IssuesTypes.DOWNLOAD_ISSUES, downloadIssues);
 	yield takeLatest(IssuesTypes.PRINT_ISSUES, printIssues);

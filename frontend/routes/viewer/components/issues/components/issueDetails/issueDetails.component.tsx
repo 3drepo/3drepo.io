@@ -44,7 +44,7 @@ interface IProps {
 	showNewPin: (issue, pinData) => void;
 	saveIssue: (teamspace, modelId, issue) => void;
 	updateIssue: (teamspace, modelId, issue) => void;
-	postComment: (teamspace, modelId, issueId, comment) => void;
+	postComment: (teamspace, modelId, issueData) => void;
 	subscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	unsubscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	getMyJob: (teamspace) => void;
@@ -110,12 +110,15 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public handleIssueFormSubmit = (values) => {
 		const { teamspace, model, updateIssue, setState, jobs } = this.props;
 		const updatedIssue = mergeIssueData(this.issueData, values);
-
+		console.log('handle from submit')
 		if (this.isNewIssue) {
+			console.log('handle from submit IF')
+
 			setState({ newRisk: prepareIssue(updatedIssue, jobs) });
 		} else {
+			console.log('handle from submit ELSE')
+
 			updateIssue(teamspace, model, updatedIssue);
-			// updateIssue(teamspace, model, updatedIssue);
 		}
 	}
 
@@ -197,19 +200,27 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return canComment(this.issueData, myJob, settings.permissions, currentUser.username);
 	}
 
-	public postComment = async (teamspace, model) => {
+	public postComment = async (teamspace, model, comment) => {
+		console.log('post comment');
 		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
-		this.props.updateIssue(teamspace, model, this.issueData);
+		console.log('post props', this.props.issue);
+		console.log('post data', this.issueData);
+		const issueCommentData = {
+			_id: this.issueData._id,
+			rev_id: this.issueData.rev_id,
+			comment,
+			viewpoint
+		};
+
+		this.props.postComment(teamspace, model, issueCommentData);
 	}
 
 	public handleSave = (comment) => {
-		const { teamspace, model, saveIssue, postComment, updateIssue } = this.props;
-
+		const { teamspace, model, saveIssue } = this.props;
 		if (this.isNewIssue) {
 			saveIssue(teamspace, model, this.issueData);
 		} else {
-			this.postComment(teamspace, model);
-			// updateIssue(teamspace, model, this.issueData);
+			this.postComment(teamspace, model, comment);
 		}
 	}
 

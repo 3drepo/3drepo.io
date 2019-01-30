@@ -78,12 +78,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 	}
 
 	public handleSave = ({ comment }, { resetForm }) => {
-		const viewpoint = {
-			...this.props.viewpoint,
-			screenshot: this.props.screenshot
-		};
-
-		this.props.onSave({ comment, viewpoint });
+		this.props.onSave(comment);
 		resetForm();
 	}
 
