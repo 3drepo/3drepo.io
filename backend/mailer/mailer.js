@@ -19,7 +19,6 @@
 const nodemailer = require("nodemailer");
 const config = require("../config");
 const C = require("../constants");
-const responseCodes = require("../response_codes");
 const getBaseURL = config.getBaseURL;
 let transporter;
 
@@ -35,7 +34,7 @@ function sendEmail(template, to, data, attachments) {
 
 	const mailOptions = {
 		from: config.mail.sender,
-		to: to,
+		to,
 		subject: typeof template.subject === "function" ? template.subject(data) : template.subject,
 		html: template.html(data)
 	};
@@ -74,6 +73,15 @@ function sendNoConsumerAlert() {
 	if(config.contact) {
 		const template = require("./templates/noConsumers");
 		return sendEmail(template, config.contact.email, {domain: config.host});
+	} else{
+		return Promise.reject({ message: "config.contact is not set"});
+	}
+}
+
+function sendQueueFailedEmail(err) {
+	if(config.contact) {
+		const template = require("./templates/queueFailed");
+		return sendEmail(template, config.contact.email, {domain: config.host, err: JSON.stringify(err)});
 	} else{
 		return Promise.reject({ message: "config.contact is not set"});
 	}
@@ -153,17 +161,6 @@ function sendNewUser(data) {
 	}
 }
 
-function sendContactEmail(data) {
-
-	const template = require("./templates/contact");
-
-	if(!config.contact || !config.contact.email) {
-		return Promise.reject(responseCodes.NO_CONTACT_EMAIL);
-	}
-
-	return sendEmail(template, config.contact.email, data);
-}
-
 function sendPaymentFailedEmail(to, data) {
 
 	const template = require("./templates/paymentFailed");
@@ -221,7 +218,6 @@ module.exports = {
 	sendWelcomeUserEmail,
 	sendResetPasswordEmail,
 	sendPaymentReceivedEmail,
-	sendContactEmail,
 	sendPaymentFailedEmail,
 	sendPaymentErrorEmail,
 	sendModelInvitation,
@@ -230,5 +226,6 @@ module.exports = {
 	sendPaymentRefundedEmail,
 	sendImportError,
 	sendNewUser,
-	sendNoConsumerAlert
+	sendNoConsumerAlert,
+	sendQueueFailedEmail
 };

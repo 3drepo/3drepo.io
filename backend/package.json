@@ -27,7 +27,7 @@
     "lint:fix": "eslint --fix ./"
   },
   "dependencies": {
-    "amqplib": "0.4.1",
+    "amqplib": "0.5.3",
     "apidoc": "0.17.7",
     "app-config": "0.1.5",
     "archiver": "1.1.0",

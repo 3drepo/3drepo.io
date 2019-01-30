@@ -158,8 +158,8 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 
 	public onPanelOpen = () => {
 		this.setColor(this.props.value, () => {
-			this.initializeBlockCanvas(this.state.colorHash);
-			this.initializeStripCanvas();
+			this.initialiseBlockCanvas(this.state.colorHash);
+			this.initialiseStripCanvas();
 		});
 	}
 
@@ -175,7 +175,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public initializeBlockCanvas(colorHash): void {
+	public initialiseBlockCanvas(colorHash): void {
 		const blockCanvas = this.blockCanvasRef.current as HTMLCanvasElement;
 		const ctx = blockCanvas.getContext('2d');
 		const width = blockCanvas.width;
@@ -213,7 +213,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		ctx.fillRect(0, 0, width, height);
 	}
 
-	public initializeStripCanvas(): void {
+	public initialiseStripCanvas(): void {
 		const stripCanvas = this.stripCanvasRef.current as HTMLCanvasElement;
 
 		const ctx = stripCanvas.getContext('2d');

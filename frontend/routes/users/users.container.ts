@@ -24,23 +24,18 @@ import { Users } from './users.component';
 import {
 	UserManagementActions,
 	selectUsersSuggestions,
-	selectUsers
+	selectUsers,
+	selectCollaboratorLimit
 } from '../../modules/userManagement';
 
-import {
-	CurrentUserActions,
-	selectCollaboratorLimit,
-	selectCurrentTeamspace
-} from '../../modules/currentUser';
-
 import { selectJobs } from '../../modules/jobs';
+import { TeamspacesActions } from '../../modules/teamspaces';
 
 const mapStateToProps = createStructuredSelector({
 	usersSuggestions: selectUsersSuggestions,
 	users: selectUsers,
 	jobs: selectJobs,
-	limit: selectCollaboratorLimit,
-	teamspace: selectCurrentTeamspace
+	limit: selectCollaboratorLimit
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -50,7 +45,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updatePermissions: UserManagementActions.updatePermissions,
 	onUsersSearch: UserManagementActions.getUsersSuggestions,
 	clearUsersSuggestions: UserManagementActions.clearUsersSuggestions,
-	fetchQuotaInfo: CurrentUserActions.fetchQuotaInfo
+	fetchQuotaInfo: TeamspacesActions.fetchQuotaInfo
 }, dispatch);
 
 export default withRouter(

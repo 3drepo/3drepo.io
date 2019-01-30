@@ -25,7 +25,7 @@ module.exports = (plop) => {
 			templateFile: join(templatesPath, "styles.hbs"),
 		}, {
 			type: "add",
-			path: `${containerDirectory}/pug/{{ dashCase name }}.pug`,
+				path: `${containerDirectory}/resources/pug/{{ dashCase name }}.pug`,
 			templateFile: join(templatesPath, "template.hbs"),
 		}],
 	});

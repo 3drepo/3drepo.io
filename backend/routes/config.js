@@ -135,7 +135,9 @@ router.get("/config.js", function (req, res) {
 	const serializedConfig = serialize(clientConfig);
 
 	res.header("Content-Type", "text/javascript");
-	res.render(path.resolve(__dirname, "./../../pug/config.pug"), {config: serializedConfig});
+	res.render(path.resolve(__dirname, "./../../resources/pug/config.pug"), {
+		config: serializedConfig
+	});
 });
 
 module.exports = router;

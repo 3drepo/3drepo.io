@@ -20,7 +20,7 @@ import { put, takeLatest, select } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { getAngularService, dispatch } from './../../helpers/migration';
-import { uploadFileStatuses, changePositionFormat } from './model.helpers';
+import { uploadFileStatuses } from './model.helpers';
 import { DialogActions } from '../dialog';
 import { ModelTypes, ModelActions } from './model.redux';
 import { TeamspacesActions } from '../teamspaces';
@@ -32,10 +32,6 @@ export function* fetchSettings({ teamspace, modelId }) {
 		yield put(ModelActions.setPendingState(true));
 		const { data: settings } = yield API.getModelSettings(teamspace, modelId);
 
-		if (settings.surveyPoints && settings.surveyPoints.length) {
-			settings.surveyPoints[0].position = yield changePositionFormat(settings.surveyPoints[0].position);
-		}
-
 		yield put(ModelActions.fetchSettingsSuccess(settings));
 		yield put(ModelActions.setPendingState(false));
 	} catch (e) {
@@ -46,10 +42,6 @@ export function* fetchSettings({ teamspace, modelId }) {
 export function* updateSettings({ modelData: { teamspace, project, modelId }, settings }) {
 	try {
 		const modifiedSettings = cloneDeep(settings);
-
-		if (modifiedSettings.surveyPoints && settings.surveyPoints.length) {
-			modifiedSettings.surveyPoints[0].position = yield changePositionFormat(modifiedSettings.surveyPoints[0].position);
-		}
 
 		yield API.editModelSettings(teamspace, modelId, modifiedSettings);
 

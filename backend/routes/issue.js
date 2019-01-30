@@ -26,7 +26,6 @@ const Issue = require("../models/issue");
 const utils = require("../utils");
 const multer = require("multer");
 const config = require("../config.js");
-
 const User = require("../models/user");
 const Job = require("../models/job");
 const ModelHelper = require("../models/helper/model");
@@ -328,7 +327,7 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  * @apiDescription Create a new issue. This is the same endpoint as listIssues, but a post request is required.
  */
 
-router.post("/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.post("/issues.json", middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {put} /issues.json/issueId.json Update an Issue.
@@ -343,7 +342,7 @@ router.post("/issues.json", middlewares.connectQueue, middlewares.issue.canCreat
  *
  */
 
-router.put("/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.put("/issues/:issueId.json", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /issuesId.json Store issue based on revision
@@ -353,7 +352,7 @@ router.put("/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.
  * @apiParam {String} rid Unique Revision ID to store.
  */
 
-router.post("/revision/:rid/issues.json", middlewares.connectQueue, middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
+router.post("/revision/:rid/issues.json", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {put} revision/"rid/issues/:issueId.json Update issue based on revision
@@ -364,7 +363,7 @@ router.post("/revision/:rid/issues.json", middlewares.connectQueue, middlewares.
  * @apiParam {String} issueId Unique Issue ID to update.
  */
 
-router.put("/revision/:rid/issues/:issueId.json", middlewares.connectQueue, middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.put("/revision/:rid/issues/:issueId.json", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 function storeIssue(req, res, next) {
 	const data = req.body;
@@ -554,58 +553,11 @@ function findIssueById(req, res, next) {
 function renderIssuesHTML(req, res, next) {
 
 	const place = utils.APIInfo(req);
-	const dbCol = { account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger };
-	let findIssue;
-	const noClean = false;
-
-	const projection = {
-		extras: 0,
-		"viewpoints.extras": 0,
-		"viewpoints.scribble": 0,
-		"viewpoints.screenshot.content": 0,
-		"viewpoints.screenshot.resizedContent": 0,
-		"thumbnail.content": 0
-	};
-
-	let ids;
-	if (req.query.ids) {
-		ids = req.query.ids.split(",");
-	}
-
-	if (req.params.rid) {
-		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, noClean, ids);
-	} else {
-		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, "master", null, projection, noClean, ids);
-	}
-
-	findIssue.then(issues => {
-		// Split issues by type
-		const splitIssues = { open: [], closed: [] };
-
-		for (let i = 0; i < issues.length; i++) {
-			if (issues[i].hasOwnProperty("comments")) {
-				for (let j = 0; j < issues[i].comments.length; j++) {
-					issues[i].comments[j].created = new Date(issues[i].comments[j].created).toString();
-				}
-			}
-
-			if (issues[i].closed || issues[i].status === "closed") {
-				issues[i].created = new Date(issues[i].created).toString();
-				splitIssues.closed.push(issues[i]);
-			} else {
-				issues[i].created = new Date(issues[i].created).toString();
-				splitIssues.open.push(issues[i]);
-			}
-		}
-
-		res.render("issues.pug", {
-			issues: splitIssues,
-			url: function (path) {
-				return config.apiAlgorithm.apiUrl(C.GET_API, path);
-			}
-		});
-
-	}).catch(err => {
+	const account = req.params.account;
+	const model = req.params.model;
+	const rid = req.params.rid;
+	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
+	Issue.getIssuesReport(account, model, req.session.user.username, rid, ids, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }

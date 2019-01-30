@@ -24,7 +24,7 @@ module.exports = {
 
 	models: {},
 
-	dbManager: null,
+	dbManager: require("../../handler/db"),
 
 	setDB: function(dbManager) {
 		this.dbManager = dbManager;

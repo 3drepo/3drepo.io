@@ -20,7 +20,7 @@ const html = data => `
 	No consumers found in ${data.domain}. Please look into it!
 `;
 
-const subject = "[System] No consumers found in queue";
+const subject = data => `[System][${data.domain}] No consumers found in queue`;
 
 module.exports =  {
 	html: html,

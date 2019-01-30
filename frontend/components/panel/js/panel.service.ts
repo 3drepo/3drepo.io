@@ -107,7 +107,7 @@ export class PanelService {
 				{
 					hidden: false,
 					value: 'print',
-					label: 'Print',
+					label: 'Create Report',
 					selected: false,
 					noToggle: true,
 					icon: 'fa-print'
@@ -299,7 +299,7 @@ export class PanelService {
 				{
 					hidden: false,
 					value: 'print',
-					label: 'Print',
+					label: 'Create Report',
 					selected: false,
 					noToggle: true,
 					icon: 'fa-print'

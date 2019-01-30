@@ -711,7 +711,7 @@ function _deleteFiles(files) {
  */
 function _handleUpload(correlationId, account, model, username, file, data) {
 
-	importQueue.importFile(
+	return importQueue.importFile(
 		correlationId,
 		file.path,
 		file.originalname,
@@ -729,10 +729,7 @@ function _handleUpload(correlationId, account, model, username, file, data) {
 			username
 		});
 
-	}).catch(err => {
-		systemLogger.logError("Failed to import model:", err);
 	});
-
 }
 
 function importModel(account, model, username, modelSetting, source, data) {
@@ -762,6 +759,7 @@ function importModel(account, model, username, modelSetting, source, data) {
 		});
 	}).catch(err => {
 		systemLogger.logError("Failed to importModel:", err);
+		return Promise.reject(err);
 	});
 
 }

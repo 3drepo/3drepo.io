@@ -23,7 +23,7 @@ import { connect, addRouting } from '../../helpers/migration';
 import { Dashboard } from './dashboard.component';
 import {
 	selectCurrentUser,
-	selectIsInitialized,
+	selectIsInitialised,
 	selectIsAvatarPending,
 	selectIsPending,
 	CurrentUserActions
@@ -31,7 +31,7 @@ import {
 
 const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
-	isInitialized: selectIsInitialized,
+	isInitialised: selectIsInitialised,
 	isPending: selectIsPending,
 	isAvatarPending: selectIsAvatarPending
 });

@@ -21,7 +21,6 @@ class CompareController implements ng.IController {
 		'$scope',
 		'$filter',
 		'$q',
-
 		'ViewerService',
 		'RevisionsService',
 		'CompareService',

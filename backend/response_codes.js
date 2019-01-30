@@ -95,9 +95,8 @@
 		FILE_IMPORT_MAX_NODES_EXCEEDED: { message: "Import failed: Too many objects, consider splitting up the model", status: 400 },
 		FILE_IMPORT_ODA_NOT_SUPPORTED: { message: "DGN import is currently not supported", status: 400 },
 
-		QUEUE_CONN_ERR: { message: "Failed to establish connection to queue", status: 404 },
-		QUEUE_INTERNAL_ERR: { message: "Failed preprocessing for queue dispatch", status: 500 },
-		QUEUE_NO_CONFIG: { message: "Server has no queue configuration", status: 404 },
+		QUEUE_CONN_ERR: { message: "Failed to queue your request. Please try again later.", status: 500},
+		QUEUE_NO_CONFIG: { message: "Server has no queue configuration", status: 500 },
 
 		INVALID_MESH: { message: "Mesh not valid for processing", status: 500 },
 
@@ -164,7 +163,6 @@
 		ALREADY_IN_ROLE: { message: "User already assigned with this role", status: 400 },
 
 		EMAIL_EXISTS: { message: "Email already exists", status: 400 },
-		QUEUE_NO_LISTENER: { message: "There is currently no worker listening to the queue, you model import is delayed", status: 400 },
 		COLLABORATOR_LIMIT_EXCEEDED: { message: "You do not have enough quota to add an extra collaborator", status: 400 },
 
 		LICENSE_NO_CHANGE: { message: "You must increase your number of licenses", status: 400 },

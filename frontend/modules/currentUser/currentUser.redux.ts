@@ -31,7 +31,7 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 	updateButtonText: ['value'],
 	uploadAvatar: ['file'],
 	refreshAvatar: ['avatarUrl'],
-	setAsInitialized: []
+	setAsInitialised: []
 }, { prefix: 'TEAMSPACE_' });
 
 export const INITIAL_STATE = {
@@ -40,7 +40,7 @@ export const INITIAL_STATE = {
 		username: ''
 	},
 	isPending: true,
-	isInitialized: false,
+	isInitialised: false,
 	isAvatarPending: true,
 	collaboratorLimit: null
 };
@@ -53,7 +53,7 @@ const setAvatarPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return Object.assign({}, state, { isAvatarPending: pendingState });
 };
 
-const setAsInitialized = (state = INITIAL_STATE) => Object.assign({}, state, { isInitialized: true });
+const setAsInitialised = (state = INITIAL_STATE) => Object.assign({}, state, { isInitialised: true });
 
 const fetchQuotaInfoSuccess = (state = INITIAL_STATE, { quota }) => {
 	return Object.assign({}, state, { ...quota });
@@ -90,5 +90,5 @@ export const reducer = createReducer({ ...INITIAL_STATE }, {
 	[CurrentUserTypes.SET_PENDING_STATE]: setPendingState,
 	[CurrentUserTypes.SET_AVATAR_PENDING_STATE]: setAvatarPendingState,
 	[CurrentUserTypes.REFRESH_AVATAR]: refreshAvatar,
-	[CurrentUserTypes.SET_AS_INITIALIZED]: setAsInitialized
+	[CurrentUserTypes.SET_AS_INITIALISED]: setAsInitialised
 });

@@ -84,7 +84,7 @@ module.exports.createApp = function () {
 		extended: true
 	}));
 
-	app.set("views", "./pug");
+	app.set("views", "./resources/pug");
 	app.set("view_engine", "pug");
 
 	app.use(bodyParser.json({ limit: "50mb" }));

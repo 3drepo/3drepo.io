@@ -20,6 +20,8 @@ import * as Yup from 'yup';
 import { withFormik } from 'formik';
 
 import { schema } from '../../../../../../services/validation';
+import { convertPositionToOpenGL, convertPositionToDirectX } from '../../../../../../helpers/model';
+
 import { SettingsForm } from './../settingsForm/settingsForm.component';
 
 const SettingsSchema = Yup.object().shape({
@@ -49,10 +51,8 @@ export class Settings extends React.PureComponent<IProps, any> {
 		let formValues = {} as any;
 
 		if (settings.surveyPoints && settings.surveyPoints.length) {
-			const [{
-				position: [axisX, axisY, axisZ],
-				latLong: [latitude, longitude]
-			}] = settings.surveyPoints;
+			const [axisX, axisY, axisZ] = convertPositionToOpenGL(settings.surveyPoints[0].position);
+			const [latitude, longitude] = settings.surveyPoints[0].latLong;
 
 			formValues = { axisX, axisY, axisZ, latitude, longitude };
 		}
@@ -72,10 +72,10 @@ export class Settings extends React.PureComponent<IProps, any> {
 			handleSubmit: (values) => {
 				const { angleFromNorth, axisX, axisY, axisZ, latitude, longitude } = values;
 				const pointsSettings = {
-					angleFromNorth,
+					angleFromNorth: Number(angleFromNorth),
 					surveyPoints: [{
-						position: [axisX, axisY, axisZ],
-						latLong: [latitude, longitude]
+						position: convertPositionToDirectX([axisX, axisY, axisZ]),
+						latLong: [latitude, longitude].map(Number)
 					}]
 				};
 

@@ -87,8 +87,7 @@ function listenToQueue(ch, queueName, prefetchCount)
 			if (sendAck)
 				ch.ack(msg);
 			logger.info("sending to reply queue(%s): %s", conf.cn_queue.callback_queue, reply);
-			ch.publish(conf.cn_queue.callback_queue, msg.properties.appId, new Buffer(reply),
-				{correlationId: msg.properties.correlationId, appId: msg.properties.appId});
+			ch.sendToQueue(conf.cn_queue.callback_queue, new Buffer.from(reply), {correlationId: msg.properties.correlationId, appId: msg.properties.appId});
 		});
 	}, {noAck: false, consumerTag : `fakeBouncer${queueName}`});
 }
@@ -104,7 +103,7 @@ function connectQ(callback){
 			conn.createChannel(function(err, ch){
 				channel = ch;
 
-				ch.assertExchange(conf.cn_queue.callback_queue, 'direct', { durable: true });
+				ch.assertQueue(conf.cn_queue.callback_queue, { durable: true });
 				listenToQueue(ch, conf.cn_queue.worker_queue, conf.cn_queue.task_prefetch || 4);
 				listenToQueue(ch, conf.cn_queue.model_queue, conf.cn_queue.model_prefetch || 1);
 

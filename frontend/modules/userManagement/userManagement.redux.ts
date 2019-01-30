@@ -22,7 +22,7 @@ import {PROJECT_ROLES_TYPES} from '../../constants/project-permissions';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
 	fetchTeamspaceDetails: ['teamspace'],
-	fetchTeamspaceDetailsSuccess: ['teamspace', 'users', 'currentUser'],
+	fetchTeamspaceDetailsSuccess: ['teamspace', 'users', 'currentUser', 'collaboratorLimit'],
 	setPendingState: ['isPending'],
 	addUser: ['user'],
 	addUserSuccess: ['user', 'currentUser'],
@@ -107,7 +107,8 @@ export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
 		isPending: false,
 		...pick(teamspace, ['models', 'projects', 'permissions', 'isAdmin', 'fedModels']),
 		selectedTeamspace: teamspace.account,
-		isTeamspaceAdmin: teamspace.isAdmin
+		isTeamspaceAdmin: teamspace.isAdmin,
+		collaboratorLimit: action.collaboratorLimit
 	});
 };
 
