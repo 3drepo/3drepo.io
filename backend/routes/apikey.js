@@ -23,8 +23,18 @@ const responseCodes = require("../response_codes");
 const middlewares = require("../middlewares/middlewares");
 const utils = require("../utils");
 
+/**
+ * @api {post} /apikey Generates an apikey for the logged user
+ * @apiName generateApiKey
+ * @apiGroup Profile
+ * */
 router.post("/apikey", middlewares.loggedIn, generateApiKey, responseCodes.onSuccessfulOperation);
 
+/**
+ * @api {delete} /apikey Deletes the current apikey for the logged user
+ * @apiName deleteApiKey
+ * @apiGroup Profile
+ * */
 router.delete("/apikey", middlewares.loggedIn, deleteApiKey, responseCodes.onSuccessfulOperation);
 
 async function generateApiKey(req, res, next) {

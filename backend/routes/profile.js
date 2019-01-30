@@ -35,6 +35,11 @@ const userToProfile = (user) =>{
 	};
 };
 
+/**
+ * @api {get} /me Gets the profile for the logged user
+ * @apiName getProfile
+ * @apiGroup Profile
+ * */
 router.get("/", middlewares.loggedIn, getProfile, responseCodes.onSuccessfulOperation);
 
 async function getProfile(req, res, next) {

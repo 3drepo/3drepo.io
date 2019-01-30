@@ -33,7 +33,7 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 	refreshAvatar: ['avatarUrl'],
 	generateApiKey: [],
 	deleteApiKey: [],
-	setAsInitialized: []
+	setAsInitialised: []
 }, { prefix: 'CURRENT_USER_' });
 
 export const INITIAL_STATE = {

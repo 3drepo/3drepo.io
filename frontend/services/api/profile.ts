@@ -21,13 +21,13 @@ import api from './';
  * Return logged user profile
  */
 export const fetchProfile = () => {
-	return api.get('/me');
+	return api.get('me');
 };
 
 export const generateApiKey = () => {
-	return api.post('/apikey');
+	return api.post('apikey');
 };
 
 export const deleteApiKey = () => {
-	return api.delete('/apikey');
+	return api.delete('apikey');
 };

@@ -39,7 +39,7 @@ export function* fetchUser({ username }) {
 				username,
 				avatarUrl: getAvatarUrl(username)
 			})),
-			put(CurrentUserActions.setAsInitialized())
+			put(CurrentUserActions.setAsInitialised())
 		]);
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'user data', e));
