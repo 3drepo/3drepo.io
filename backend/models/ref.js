@@ -37,9 +37,13 @@ refSchema.statics.getRefNodes = function(account, model, ids) {
 	return ModelSettings.findById({account}, model).then((settings) => {
 		if(settings.federate) {
 			const filter = {
-				type: "ref",
-				_id: { $in: ids }
+				type: "ref"
 			};
+
+			if (ids && ids.length > 0) {
+				filter._id = { $in: ids };
+			}
+
 			return Ref.find({ account, model }, filter);
 		}
 		return [];
