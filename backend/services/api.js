@@ -30,6 +30,7 @@ module.exports.createApp = function () {
 	const cors = require("cors");
 	const bodyParser = require("body-parser");
 	const utils = require("../utils");
+	const keyAuthentication =  require("../middlewares/keyAuthentication");
 	const sessionManager = require("../middlewares/sessionManager");
 
 	// Express app
@@ -40,8 +41,8 @@ module.exports.createApp = function () {
 	// put logger in req object
 	app.use(logger.startRequest);
 
-	// Configure various middleware
-	app.use(sessionManager);
+	// Session middlewares
+	app.use(keyAuthentication, sessionManager);
 
 	app.use(cors({ origin: true, credentials: true }));
 
@@ -80,15 +81,13 @@ module.exports.createApp = function () {
 		}
 	});
 
-	app.use("/", require("../routes/apikey"));
+	app.use("/", require("../routes/user"));
 
 	app.use("/:account", require("../routes/job"));
 
 	app.use("/", require("../routes/plan"));
-	// auth handler
-	app.use("/", require("../routes/auth"));
 
-	app.use("/me", require("../routes/profile"));
+	app.use("/", require("../routes/auth"));
 
 	// notifications handler
 	app.use("/notifications", require("../routes/notification"));

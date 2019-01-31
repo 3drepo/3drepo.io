@@ -19,11 +19,10 @@
 const C = require("../constants");
 const config = require("../config");
 const session = require("../services/session").session(config);
-const apiKey = require("./apikey");
 
 module.exports = async (req, res, next) => {
-	await apiKey(req, res, next);
-	if (req.query.key && req.session) {
+	// In case other middleware sets the session
+	if (req.session) {
 		next();
 		return;
 	}
@@ -31,14 +30,9 @@ module.exports = async (req, res, next) => {
 	session(req, res, function(err) {
 		if(err) {
 			// something is wrong with the library or the session (i.e. corrupted json file) itself, log the user out
-			// res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
-
 			req[C.REQ_REPO].logger.logError(`express-session internal error: ${err}`);
 			req[C.REQ_REPO].logger.logError(`express-session internal error: ${JSON.stringify(err)}`);
 			req[C.REQ_REPO].logger.logError(`express-session internal error: ${err.stack}`);
-
-			// responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.AUTH_ERROR, err);
-
 		} else {
 			next();
 		}

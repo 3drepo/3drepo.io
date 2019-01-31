@@ -49,11 +49,12 @@ const BLACK_LIST = [
 	"GET /*/quota"
 ];
 
-async function apiKeyCheck(req) {
+async function apiKeyCheck(req, res, next) {
 	if (req.query.key) {
 		const path = getPath(req);
 
 		if  (matchPaths(path, BLACK_LIST)) {
+			next();
 			return;
 		}
 
@@ -63,6 +64,8 @@ async function apiKeyCheck(req) {
 			req.session.user = { username: user.user, roles: user.roles };
 		}
 	}
+
+	next();
 }
 
 module.exports = apiKeyCheck;

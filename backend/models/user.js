@@ -143,6 +143,32 @@ schema.statics.findByUserName = function (user) {
 	return this.findOne({ account: "admin" }, { user });
 };
 
+schema.statics.getProfileByUsername = async function (username) {
+	if (!username) {
+		return null;
+	}
+
+	const dbCol = await DB.getCollection("admin", "system.users");
+	const user = await dbCol.findOne({user: username}, {user: 1,
+		"customData.firstName" : 1,
+		"customData.lastName" : 1,
+		"customData.email" : 1,
+		"customData.avatar" : 1,
+		"customData.apiKey" : 1
+	});
+
+	const customData =  user.customData;
+
+	return 	{
+		username: user.user,
+		firstName: customData.firstName,
+		lastName: customData.lastName,
+		email: customData.email,
+		hasAvatar: !!customData.avatar,
+		apiKey: customData.apiKey
+	};
+};
+
 schema.statics.findByAPIKey = async function (key) {
 	if (!key) {
 		return null;

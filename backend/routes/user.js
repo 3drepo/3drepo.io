@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,25 +17,38 @@
 
 "use strict";
 const express = require("express");
-const User = require("../models/user");
 const router = express.Router({mergeParams: true});
 const responseCodes = require("../response_codes");
 const middlewares = require("../middlewares/middlewares");
+const User =  require("../models/user");
 const utils = require("../utils");
+
+/**
+ * @api {get} /me Gets the profile for the logged user
+ * @apiName getProfile
+ * @apiGroup User
+ * */
+router.get("/me", middlewares.loggedIn, getProfile, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /apikey Generates an apikey for the logged user
  * @apiName generateApiKey
- * @apiGroup Profile
+ * @apiGroup User
  * */
 router.post("/apikey", middlewares.loggedIn, generateApiKey, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {delete} /apikey Deletes the current apikey for the logged user
  * @apiName deleteApiKey
- * @apiGroup Profile
+ * @apiGroup User
  * */
 router.delete("/apikey", middlewares.loggedIn, deleteApiKey, responseCodes.onSuccessfulOperation);
+
+async function getProfile(req, res, next) {
+	const username = req.session.user.username;
+	req.dataModel = await User.getProfileByUsername(username);
+	next();
+}
 
 async function generateApiKey(req, res, next) {
 	try {
