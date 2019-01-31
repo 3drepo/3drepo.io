@@ -36,7 +36,6 @@ interface IPanelCard {
 	minHeight?: number;
 	isReactComponent?: boolean;
 	panelTakenHeight?: number;
-	canExpandToFullHeight?: boolean;
 }
 
 export interface IMenuItem {
@@ -294,7 +293,6 @@ export class PanelService {
 			icon: 'report_problem',
 			minHeight: 260,
 			fixedHeight: false,
-			canExpandToFullHeight: true,
 			menu: [],
 			options: [],
 			add: true,

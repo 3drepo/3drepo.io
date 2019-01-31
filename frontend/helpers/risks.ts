@@ -4,7 +4,7 @@ import { RISK_LEVELS_COLOURS, RISK_LEVELS_ICONS, RISK_LEVELS, LEVELS } from '../
 
 export const prepareRisk = (risk, jobs = []) => {
 	const thumbnail = getAPIUrl(risk.thumbnail);
-	const descriptionThumbnail = risk.viewpoint.screenshot
+	const descriptionThumbnail = risk.viewpoint && risk.viewpoint.screenshot
 		? getAPIUrl(risk.viewpoint.screenshot)
 		: (risk.descriptionThumbnail || '');
 
