@@ -208,6 +208,7 @@ export function* renderPins({ filteredRisks }) {
 					const levelOfRisk = (risk.level_of_risk !== undefined) ? risk.level_of_risk : 4;
 					const isSelectedPin = activeRiskId && risk._id === activeRiskId;
 					const pinColor = getRiskPinColor(levelOfRisk, isSelectedPin);
+					console.log('pinColor', pinColor);
 
 					yield Viewer.addPin({
 						id: risk._id,
