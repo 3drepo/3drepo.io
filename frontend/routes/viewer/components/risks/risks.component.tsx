@@ -61,6 +61,7 @@ import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permission
 import { searchByFilters } from '../../../../helpers/searching';
 import { Viewer } from '../../../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
+import { EmptyStateInfo } from '../views/views.styles';
 
 interface IProps {
 	history: any;
@@ -353,6 +354,8 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	public renderListView = renderWhenTrue(() => (
 		<>
 			<ViewerPanelContent className="height-catcher">
+				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredRisks.length)}
+				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredRisks.length)}
 				{this.renderRisksList(this.state.filteredRisks.length)}
 			</ViewerPanelContent>
 			<ViewerPanelFooter alignItems="center" justify="space-between">
@@ -415,6 +418,14 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		}
 		return [{ Button: this.getSearchButton }, { Button: this.getMenuButton }];
 	}
+
+	public renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>No risks have been created yet</EmptyStateInfo>
+	));
+
+	public renderNotFound = renderWhenTrue(() => (
+		<EmptyStateInfo>No risks matched</EmptyStateInfo>
+	));
 
 	public render() {
 		return (
