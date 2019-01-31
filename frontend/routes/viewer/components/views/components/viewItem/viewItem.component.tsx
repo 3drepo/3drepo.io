@@ -46,7 +46,7 @@ interface IProps {
 	onSaveEdit: (values) => void;
 	onDelete?: (event) => void;
 	onOpenEditMode?: () => void;
-	handleClick?: (viewpoint) => void;
+	onClick?: (viewpoint) => void;
 }
 
 export class ViewItem extends React.PureComponent<IProps, any> {
@@ -100,12 +100,12 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	));
 
 	public render() {
-		const { viewpoint, handleClick, active } = this.props;
+		const { viewpoint, onClick, active } = this.props;
 
 		return (
 			<ViewpointItem
 				disableRipple
-				onClick={handleClick}
+				onClick={onClick}
 				active={Number(active)}>
 
 				{this.renderScreenshot(viewpoint)}

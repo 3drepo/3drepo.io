@@ -114,7 +114,7 @@ export class Views extends React.PureComponent<IProps, any> {
 			<ViewItem
 				key={viewpoint._id}
 				viewpoint={viewpoint}
-				handleClick={this.handleViewpointItemClick(viewpoint)}
+				onClick={this.handleViewpointItemClick(viewpoint)}
 				active={(activeViewpointId === viewpoint._id) as any}
 				editMode={editMode}
 				onCancelEditMode={this.handleCancelEditMode}

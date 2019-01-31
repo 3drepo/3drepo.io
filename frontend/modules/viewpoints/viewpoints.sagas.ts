@@ -37,7 +37,7 @@ export function* fetchViewpoints({ teamspace, modelId }) {
 		yield put(ViewpointsActions.fetchViewpointsSuccess(viewpoints));
 		yield put(ViewpointsActions.setPendingState(false));
 	} catch (e) {
-		yield put(ViewpointsActions.showErrorDialog('get', 'model viewpoints', e.response));
+		yield put(ViewpointsActions.showEndpointErrorDialog('get', 'model viewpoints', e.response));
 	}
 }
 
@@ -77,7 +77,7 @@ export function* generateViewpointObject(teamspace, modelId, viewName) {
 
 		return generatedObject;
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('generate', 'new viewpoint', error));
+		yield put(DialogActions.showErrorDialog('generate', 'new viewpoint'));
 	}
 }
 
@@ -88,7 +88,7 @@ export function* createViewpoint({teamspace, modelId, viewpoint}) {
 
 		yield put(ViewpointsActions.createViewpointSuccess(viewpoint));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('create', 'new viewpoint', error));
+		yield put(DialogActions.showEndpointErrorDialog('create', 'new viewpoint', error));
 	}
 }
 
@@ -100,7 +100,7 @@ export function* updateViewpoint({teamspace, modelId, viewpointId, newName}) {
 		yield put(ViewpointsActions.updateViewpointSuccess(updatedView));
 		yield put(ViewpointsActions.setComponentState({ editMode: false }));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'viewpoint', error));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'viewpoint', error));
 	}
 }
 
@@ -108,7 +108,7 @@ export function* deleteViewpoint({teamspace, modelId, viewpointId}) {
 	try {
 		yield API.deleteModelViewpoint(teamspace, modelId, viewpointId);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('remove', 'viewpoint', error));
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'viewpoint', error));
 	}
 }
 
@@ -164,7 +164,7 @@ export function* showViewpoint({ teamspace, modelId, view }) {
 		}
 	} catch (error) {
 		yield put(ViewpointsActions.setComponentState({ activeViewpointId: null }));
-		yield put(DialogActions.showErrorDialog('show', 'viewpoint', error));
+		yield put(DialogActions.showErrorDialog('show', 'viewpoint'));
 	}
 }
 
@@ -173,7 +173,7 @@ export function* prepareNewViewpoint({teamspace, modelId, viewpointName}) {
 		const newViewpoint = yield generateViewpointObject(teamspace, modelId, viewpointName);
 		yield put(ViewpointsActions.setComponentState({ newViewpoint }));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('prepare', 'new viewpoint', error));
+		yield put(DialogActions.showErrorDialog('prepare', 'new viewpoint'));
 	}
 }
 

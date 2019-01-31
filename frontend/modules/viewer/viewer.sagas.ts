@@ -31,7 +31,7 @@ export function* waitForViewer() {
 		const ViewerService = yield getAngularService('ViewerService') as any;
 		yield ViewerService.initialised.promise;
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('initialise', 'viewer', error));
+		yield put(DialogActions.showErrorDialog('initialise', 'viewer'));
 	}
 }
 
@@ -43,7 +43,7 @@ export function* mapInitialise({surveyPoints, sources = []}) {
 		viewer.mapInitialise(surveyPoints);
 		sources.map(viewer.addMapSource);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('initialise', 'map', error));
+		yield put(DialogActions.showErrorDialog('initialise', 'map'));
 	}
 }
 
@@ -52,7 +52,7 @@ export function* resetMapSources({source}) {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().resetMapSources(source);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('reset', 'map sources', error));
+		yield put(DialogActions.showErrorDialog('reset', 'map sources'));
 	}
 }
 
@@ -61,7 +61,7 @@ export function* addMapSource({source}) {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().addMapSource(source);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('add', 'map source', error));
+		yield put(DialogActions.showErrorDialog('add', 'map source'));
 	}
 }
 
@@ -70,7 +70,7 @@ export function* removeMapSource({source}) {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().removeMapSource(source);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('remove', 'map source', error));
+		yield put(DialogActions.showErrorDialog('remove', 'map source'));
 	}
 }
 
@@ -79,7 +79,7 @@ export function* mapStart() {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().mapStart();
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('start', 'map rendering', error));
+		yield put(DialogActions.showErrorDialog('start', 'map rendering'));
 	}
 }
 
@@ -88,7 +88,7 @@ export function* mapStop() {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().mapStop();
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('stop', 'map rendering', error));
+		yield put(DialogActions.showErrorDialog('stop', 'map rendering'));
 	}
 }
 
@@ -97,7 +97,7 @@ export function* getScreenshot() {
 		yield put(ViewerActions.waitForViewer());
 		return yield new Promise((resolve, reject) => getViewer().getScreenshot({ resolve, reject }));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('get', 'screenshot', error));
+		yield put(DialogActions.showErrorDialog('get', 'screenshot'));
 	}
 }
 
