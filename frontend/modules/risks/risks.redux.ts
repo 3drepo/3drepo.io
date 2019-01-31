@@ -86,6 +86,7 @@ export const saveRiskSuccess = (state = INITIAL_STATE, { risk }) => {
 };
 
 export const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
+	debugger;
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 

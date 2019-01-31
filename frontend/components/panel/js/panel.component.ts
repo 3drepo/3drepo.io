@@ -229,14 +229,18 @@ class PanelController implements ng.IController {
 		const freeHeightPerPanel = freeHeight / orderedContentItems.length;
 
 		if (freeHeightPerPanel > 0) {
-			orderedContentItems.forEach((item) => {
-				const requiredHeight = item.requestedHeight || item.minHeight;
-				const maxHeight = Math.min(item.minHeight + freeHeightPerPanel, availableHeight);
-				const height = orderedContentItems.length > 1
-					? clamp(requiredHeight, item.minHeight, maxHeight)
-					: clamp(requiredHeight, item.minHeight, availableHeight);
-				item.height = height - item.panelTakenHeight;
-			});
+			if (orderedContentItems.length === 1 && orderedContentItems[0].canExpandToFullHeight) {
+				orderedContentItems[0].height = availableHeight;
+			} else {
+				orderedContentItems.forEach((item) => {
+					const requiredHeight = item.requestedHeight || item.minHeight;
+					const maxHeight = Math.min(item.minHeight + freeHeightPerPanel, availableHeight);
+					const height = orderedContentItems.length > 1
+						? clamp(requiredHeight, item.minHeight, maxHeight)
+						: clamp(requiredHeight, item.minHeight, availableHeight);
+					item.height = height - item.panelTakenHeight;
+				});
+			}
 		}
 	}
 

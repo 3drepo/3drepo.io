@@ -4,6 +4,10 @@ import { RISK_LEVELS_COLOURS, RISK_LEVELS_ICONS, RISK_LEVELS, LEVELS } from '../
 
 export const prepareRisk = (risk, jobs = []) => {
 	const thumbnail = getAPIUrl(risk.thumbnail);
+	const descriptionThumbnail = risk.viewpoint.screenshot
+		? getAPIUrl(risk.viewpoint.screenshot)
+		: (risk.descriptionThumbnail || '');
+
 	const levelOfRisk = risk.level_of_risk || calculateLevelOfRisk(risk.likelihood, risk.consequence);
 	const { Icon, color } = getRiskStatus(levelOfRisk, risk.mitigation_status);
 	const roleColor = get(jobs.find((job) => job.name === get(risk.assigned_roles, '[0]')), 'color');
@@ -15,6 +19,7 @@ export const prepareRisk = (risk, jobs = []) => {
 		author: risk.owner,
 		createdDate: risk.created,
 		thumbnail,
+		descriptionThumbnail,
 		StatusIconComponent: Icon,
 		statusColor: color,
 		roleColor,
@@ -64,7 +69,7 @@ export const mergeRiskData = (source, data = source) => {
 
 	return {
 		...source,
-		...omit(data, ['assigned_roles', 'description']),
+		...omit(data, ['assigned_roles', 'description', 'descriptionThumbnail']),
 		assigned_roles: hasUnassignedRole ? [] : [data.assigned_roles],
 		desc: data.description
 	};

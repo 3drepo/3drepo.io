@@ -112,7 +112,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							{...field}
 							requiredConfirm={!this.isNewRisk}
 							validationSchema={RiskSchema}
-							label="GUID"
+							label="SafetiBase ID"
 						/>
 					)} />
 

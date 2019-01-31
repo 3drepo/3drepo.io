@@ -36,6 +36,7 @@ interface IPanelCard {
 	minHeight?: number;
 	isReactComponent?: boolean;
 	panelTakenHeight?: number;
+	canExpandToFullHeight?: boolean;
 }
 
 export interface IMenuItem {
@@ -293,92 +294,9 @@ export class PanelService {
 			icon: 'report_problem',
 			minHeight: 260,
 			fixedHeight: false,
-			menu: [
-				{
-					hidden: false,
-					value: 'print',
-					label: 'Create Report',
-					selected: false,
-					noToggle: true,
-					icon: 'fa-print'
-				},
-				{
-					hidden: false,
-					value: 'showPins',
-					label: 'Show Pins',
-					toggle: true,
-					selected: true,
-					noToggle: false,
-					keepCheckSpace: true
-				},
-				{
-					hidden: false,
-					value: 'downloadJSON',
-					label: 'Download JSON',
-					selected: false,
-					noToggle: true,
-					icon: 'fa-download'
-				},
-				{
-					hidden: false,
-					value: 'mitigation_status',
-					label: 'Mitigation Status',
-					toggle: false,
-					selected: false,
-					firstSelected: false,
-					secondSelected: false,
-					keepCheckSpace: false,
-					toggleFilterChips: true,
-					upperDivider: true,
-					menu: [{
-							hidden: false,
-							value: '',
-							label: 'Unmitigated',
-							toggle: true,
-							stopClose: true
-						}, {
-							hidden: false,
-							value: 'proposed',
-							label: 'Proposed',
-							toggle: true,
-							stopClose: true
-						}, {
-							hidden: false,
-							value: 'agreed_partial',
-							label: 'Agreed (Partial)',
-							toggle: true,
-							stopClose: true
-						}, {
-							hidden: false,
-							value: 'agreed_fully',
-							label: 'Agreed (Fully)',
-							toggle: true,
-							stopClose: true
-						}, {
-							hidden: false,
-							value: 'rejected',
-							label: 'Rejected',
-							toggle: true,
-							stopClose: true
-						}]
-				},
-				{
-					value: 'creator_role', // the whole menu will be replaced once the creators roles are loaded
-					hidden: false,
-					label: 'Created by',
-					toggle: false
-				},
-				{
-					value: 'assigned_roles', // the whole menu will be replaced once the assigned roles are loaded
-					hidden: false,
-					label: 'Assigned to',
-					toggle: false
-				}
-			],
-			options: [
-				{type: 'menu', visible: true},
-				{type: 'chips-filter', visible: true}
-			],
+			canExpandToFullHeight: true,
+			menu: [],
+			options: [],
 			add: true,
 			isReactComponent: true
 		});
@@ -434,9 +352,7 @@ export class PanelService {
 			icon: 'camera_alt',
 			minHeight: 220,
 			fixedHeight: false,
-			options: [
-				{type: 'filter', visible: true}
-			],
+			options: [],
 			isReactComponent: true
 		});
 

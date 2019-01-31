@@ -164,7 +164,7 @@ export const RISKS_ACTIONS_ITEMS = {
 export const RISKS_ACTIONS_MENU = [
 	{
 		name: RISKS_ACTIONS_ITEMS.PRINT,
-		label: 'Create report',
+		label: 'Create Report',
 		Icon: Print
 	},
 	{

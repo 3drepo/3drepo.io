@@ -231,7 +231,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		const relatedRisk = this.state.filteredRisks.find((risk) => risk._id === id);
 
 		if (relatedRisk) {
-			this.handleRiskFocus(relatedRisk)();
+			this.handleShowRiskDetails(relatedRisk)();
 		}
 	}
 
@@ -414,6 +414,9 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	public renderActions = () => {
 		if (this.props.showDetails) {
+			if (!this.props.activeRiskId || this.state.filteredRisks.length < 2) {
+				return [];
+			}
 			return [{ Button: this.getPrevButton }, { Button: this.getNextButton }];
 		}
 		return [{ Button: this.getSearchButton }, { Button: this.getMenuButton }];
