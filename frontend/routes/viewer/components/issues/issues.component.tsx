@@ -54,6 +54,7 @@ interface IProps {
 		permissions: any[];
 	};
 	activeIssueDetails: any;
+	sortOrder: string;
 	fetchIssues: (teamspace, model, revision) => void;
 	setState: (componentState: any) => void;
 	setNewIssue: () => void;
@@ -67,6 +68,7 @@ interface IProps {
 	unsubscribeOnIssueChanges: (teamspace, modelId) => void;
 	importBCF: (teamspace, modelId, file, revision) => void;
 	exportBCF: (teamspace, modelId) => void;
+	toggleSortOrder: () => void;
 }
 
 interface IState {
@@ -151,6 +153,11 @@ export class Issues extends React.PureComponent<IProps, IState> {
 		}, {
 			...ISSUES_ACTIONS_MENU.DOWNLOAD,
 			onClick: () => downloadIssues(teamspace, model)
+		}, {
+			...ISSUES_ACTIONS_MENU.SORT_BY_DATE,
+			onClick: () => {
+				this.props.toggleSortOrder();
+			}
 		}, {
 			...ISSUES_ACTIONS_MENU.SHOW_SUBMODEL_ISSUES,
 			enabled: showSubmodelIssues,
@@ -241,6 +248,7 @@ export class Issues extends React.PureComponent<IProps, IState> {
 				filters={this.filters}
 				selectedFilters={this.props.selectedFilters}
 				isImportingBCF={this.props.isImportingBCF}
+				sortOrder={this.props.sortOrder}
 
 				onToggleFilters={this.handleToggleFilters}
 				onChangeFilters={this.handleFilterChange}

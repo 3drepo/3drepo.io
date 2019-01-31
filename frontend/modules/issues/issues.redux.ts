@@ -50,7 +50,8 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	unsubscribeOnIssueCommentsChanges: ['teamspace', 'modelId', 'issueId'],
 	createCommentSuccess: ['comment'],
 	deleteCommentSuccess: ['comment'],
-	updateCommentSuccess: ['comment']
+	updateCommentSuccess: ['comment'],
+	toggleSortOrder: ['sortOrder']
 }, { prefix: 'ISSUES_' });
 
 export const INITIAL_STATE = {
@@ -68,7 +69,8 @@ export const INITIAL_STATE = {
 		logs: [],
 		fetchingDetailsIsPending: true,
 		isImportingBCF: false,
-		showSubmodelIssues: false
+		showSubmodelIssues: false,
+		sortOrder: 'desc'
 	}
 };
 
@@ -136,6 +138,13 @@ export const deleteCommentSuccess = (state = INITIAL_STATE, { comment }) => {
 	return {...state, componentState: { ...state.componentState, logs: updatedlogs }};
 };
 
+export const toggleSortOrder = (state = INITIAL_STATE) => {
+	return {...state, componentState: {
+		...state.componentState,
+		sortOrder: state.componentState.sortOrder === 'asc' ? 'desc' : 'asc'
+	}};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess,
 	[IssuesTypes.FETCH_ISSUE_SUCCESS]: fetchIssueSuccess,
@@ -148,5 +157,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.TOGGLE_SUBMODELS_ISSUES]: toggleSubmodelsIssues,
 	[IssuesTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
 	[IssuesTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
-	[IssuesTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess
+	[IssuesTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
+	[IssuesTypes.TOGGLE_SORT_ORDER]: toggleSortOrder
 });

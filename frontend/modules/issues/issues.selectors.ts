@@ -103,3 +103,7 @@ export const selectShowSubmodelIssues = createSelector(
 export const selectIsImportingBCF = createSelector(
 	selectComponentState, (state) => state.isImportingBCF
 );
+
+export const selectSortOrder = createSelector(
+	selectComponentState, (state) => state.sortOrder
+);

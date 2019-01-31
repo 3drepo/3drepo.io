@@ -5,6 +5,7 @@ import AdjustIcon from '@material-ui/icons/Adjust';
 import Print from '@material-ui/icons/Print';
 import Download from '@material-ui/icons/CloudDownload';
 import Upload from '@material-ui/icons/CloudUpload';
+import { SortAmountUp, SortAmountDown } from '../routes/components/fontAwesomeIcon';
 
 import ViewModule from '@material-ui/icons/ViewModule';
 
@@ -110,6 +111,10 @@ export const ISSUE_FILTERS = [
 	}
 ] as any;
 
+export const ACTIONS_TYPES = {
+	SORT: 'SORT'
+};
+
 export const ISSUES_ACTIONS_MENU = {
 	PRINT: {
 		label: 'Create report',
@@ -126,6 +131,14 @@ export const ISSUES_ACTIONS_MENU = {
 	DOWNLOAD: {
 		label: 'Download JSON',
 		Icon: Download
+	},
+	SORT_BY_DATE: {
+		label: 'Sort by date',
+		type: ACTIONS_TYPES.SORT,
+		Icon: {
+			ASC: SortAmountUp,
+			DESC: SortAmountDown
+		}
 	},
 	SHOW_SUBMODEL_ISSUES: {
 		label: 'Show sub model issues',

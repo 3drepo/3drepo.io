@@ -30,7 +30,8 @@ import {
 	selectShowPins,
 	selectIsIssuesPending,
 	selectShowSubmodelIssues,
-	selectIsImportingBCF
+	selectIsImportingBCF,
+	selectSortOrder
 } from '../../../../modules/issues';
 import { selectJobsList } from '../../../../modules/jobs';
 import { selectSettings } from '../../../../modules/model';
@@ -46,7 +47,8 @@ const mapStateToProps = createStructuredSelector({
 	isPending: selectIsIssuesPending,
 	modelSettings: selectSettings,
 	showSubmodelIssues: selectShowSubmodelIssues,
-	isImportingBCF: selectIsImportingBCF
+	isImportingBCF: selectIsImportingBCF,
+	sortOrder: selectSortOrder
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -63,7 +65,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	closeDetails: IssuesActions.closeDetails,
 	toggleSubmodelsIssues: IssuesActions.toggleSubmodelsIssues,
 	importBCF: IssuesActions.importBcf,
-	exportBCF: IssuesActions.exportBcf
+	exportBCF: IssuesActions.exportBcf,
+	toggleSortOrder: IssuesActions.toggleSortOrder
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Issues);
