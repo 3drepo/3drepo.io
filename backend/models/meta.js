@@ -82,6 +82,7 @@ Meta.getMetadataFields = function(account, model) {
 
 			return db.getCollection(account, model + ".scene").then((sceneCollection) => {
 				return sceneCollection.mapReduce(
+					/* eslint-disable */
 					function() {
 						for (var key in this.metadata) {
 							emit(key, null);
@@ -93,6 +94,7 @@ Meta.getMetadataFields = function(account, model) {
 					{
 						"out": {inline:1}
 					}
+					/* eslint-enable */
 				).then((uniqueKeys) => {
 					uniqueKeys.forEach((key) => {
 						metaKeys.add(key._id);
