@@ -60,7 +60,6 @@ export class Log extends React.PureComponent<IProps, any> {
 	public renderSystemMessage = renderWhenTrue(
 		<SystemMessage>
 			{convertActionCommentToText(this.props.action, this.props.owner)}
-			at <DateTime value={this.props.created  as any} format="HH:mm DD MMM" />
 		</SystemMessage>
 	);
 

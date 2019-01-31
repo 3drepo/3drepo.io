@@ -50,6 +50,7 @@ interface IProps {
 	onTakeScreenshot: (screenshot) => void;
 	onChangePin: (pin) => void;
 	showScreenshotDialog: (options) => void;
+	canComment: boolean;
 }
 
 const NewCommentSchema = Yup.object().shape({
@@ -153,13 +154,20 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 		/>
 	));
 
+	public get commentPlaceholder() {
+		if (this.props.canComment) {
+			return 'Write your comment here';
+		}
+		return 'You are not able to comment';
+	}
+
 	public renderCommentField = renderWhenTrue((
 		<TextFieldWrapper>
 			<Field name="comment" render={({ field }) => (
 				<StyledTextField
 					{...field}
 					autoFocus={true}
-					placeholder="Write your comment here"
+					placeholder={this.commentPlaceholder}
 					multiline={true}
 					fullWidth={true}
 					InputLabelProps={{ shrink: true }}

@@ -86,29 +86,24 @@ export const convertActionCommentToText = (action, owner, topicTypes = []) => {
 			break;
 
 		case 'assigned_roles':
-
 			propertyName = 'Assigned';
 			from = action.from.toString();
 			to = action.to.toString();
 			break;
 
 		case 'topic_type':
-
 			propertyName = 'Type';
 			if (topicTypes) {
 
 				const fromType = topicTypes.find((topicType) => {
 					return topicType.value === action.from;
 				});
-
 				const toType = topicTypes.find((topicType) => {
 					return topicType.value === action.to;
 				});
-
 				if (from && fromType.label) {
 					from = fromType.label;
 				}
-
 				if (to && toType.label) {
 					to = toType.label;
 				}
@@ -116,12 +111,10 @@ export const convertActionCommentToText = (action, owner, topicTypes = []) => {
 			break;
 
 		case 'desc':
-
 			propertyName = 'Description';
 			break;
 
 		case 'due_date':
-
 			propertyName = 'Due Date';
 			if (action.to) {
 				to = (new Date(parseInt(action.to, 10))).toLocaleDateString();
@@ -136,11 +129,9 @@ export const convertActionCommentToText = (action, owner, topicTypes = []) => {
 			break;
 
 		case 'bcf_import':
-
 			propertyName = 'BCF Import';
 			text = propertyName + ' by ' + owner;
 			break;
-
 		}
 	}
 
@@ -148,20 +139,14 @@ export const convertActionCommentToText = (action, owner, topicTypes = []) => {
 		if (action && !action.from) {
 			from = '(empty)';
 		}
-
 		if (action && !action.to) {
 			to = '(empty)';
 		}
-
 		if (action && !propertyName) {
 			propertyName = '(empty)';
 		}
-
 		text = `${propertyName} updated from ${from} to ${to} by ${owner}`;
 	}
-
-	// action.text = text;
-
 	return text;
 };
 
@@ -185,6 +170,35 @@ const isJobOwner = (issueData, userJob, permissions, currentUser) => {
 		userJobMatchesCreator(userJob, issueData)) &&
 		!isIssueViewer(permissions);
 };
+
+const isAssignedJob = (issueData, userJob, permissions) => {
+	return issueData && userJob &&
+		(userJob._id &&
+			issueData.assigned_roles[0] &&
+			userJob._id === issueData.assigned_roles[0]) &&
+			!isIssueViewer(permissions);
+};
+
+export const canChangeStatusToClosed = (issueData, userJob, permissions, currentUser) => {
+	return canChange(issueData, userJob, permissions, currentUser);
+};
+
+export const canChangeStatus = (issueData, userJob, permissions, currentUser) => {
+	return canChangeStatusToClosed(issueData, userJob, permissions, currentUser) ||
+		isAssignedJob(issueData, userJob, permissions);
+};
+
+export const canChangeBasicProperty = (issueData, userJob, permissions, currentUser) => {
+	return canChange(issueData, userJob, permissions, currentUser) &&
+		canComment(issueData, userJob, permissions, currentUser);
+};
+
+export const canChangeAssigned = (issueData, userJob, permissions, currentUser) => {
+	return isAdmin(permissions) || canChangeBasicProperty(issueData, userJob, permissions, currentUser);
+};
+
+const canChange = (issueData, userJob, permissions, currentUser) =>
+	isAdmin(permissions) || isJobOwner(issueData, userJob, permissions, currentUser));
 
 export const canComment = (issueData, userJob, permissions, currentUser) => {
 	const isNotClosed = issueData && issueData.status && isOpenIssue(issueData.status);

@@ -110,14 +110,10 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public handleIssueFormSubmit = (values) => {
 		const { teamspace, model, updateIssue, setState, jobs } = this.props;
 		const updatedIssue = mergeIssueData(this.issueData, values);
-		console.log('handle from submit')
-		if (this.isNewIssue) {
-			console.log('handle from submit IF')
 
+		if (this.isNewIssue) {
 			setState({ newRisk: prepareIssue(updatedIssue, jobs) });
 		} else {
-			console.log('handle from submit ELSE')
-
 			updateIssue(teamspace, model, updatedIssue);
 		}
 	}
@@ -129,6 +125,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				jobs={this.jobsList}
 				onValueChange={this.handleIssueFormSubmit}
 				onSubmit={this.handleIssueFormSubmit}
+				permissions={this.props.settings.permissions}
+				currentUser={this.props.currentUser}
+				myJob={this.props.myJob}
 			/>
 		);
 	}
@@ -154,6 +153,11 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		);
 	});
 
+	public userCanComment = () => {
+		const { myJob, settings, currentUser } = this.props;
+		return canComment(this.issueData, myJob, settings.permissions, currentUser.username);
+	}
+
 	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center" padding="0">
 			<NewCommentForm
@@ -167,6 +171,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onTakeScreenshot={this.handleNewScreenshot}
 				onChangePin={this.handleChangePin}
 				onSave={this.handleSave}
+				canComment={this.userCanComment()}
 			/>
 		</ViewerPanelFooter>
 	));
@@ -195,16 +200,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		this.props.showNewPin(this.props.issue, pinData);
 	}
 
-	public userCanComment = () => {
-		const { myJob, settings, currentUser } = this.props;
-		return canComment(this.issueData, myJob, settings.permissions, currentUser.username);
-	}
-
 	public postComment = async (teamspace, model, comment) => {
-		console.log('post comment');
 		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
-		console.log('post props', this.props.issue);
-		console.log('post data', this.issueData);
 		const issueCommentData = {
 			_id: this.issueData._id,
 			rev_id: this.issueData.rev_id,

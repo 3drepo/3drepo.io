@@ -156,7 +156,8 @@ export class IssuesService {
 	}
 
 	public canChangeType(issueData, userJob, permissions) {
-		return (this.isAdmin(permissions) || this.isJobOwner(issueData, userJob, permissions)) &&
+		return (
+			this.isAdmin(permissions) || this.isJobOwner(issueData, userJob, permissions)) &&
 			this.canComment(issueData, userJob, permissions);
 	}
 
