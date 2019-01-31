@@ -107,6 +107,7 @@ export function* updateViewpoint({teamspace, modelId, viewpointId, newName}) {
 export function* deleteViewpoint({teamspace, modelId, viewpointId}) {
 	try {
 		yield API.deleteModelViewpoint(teamspace, modelId, viewpointId);
+		yield put(ViewpointsActions.deleteViewpointSuccess(viewpointId));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'viewpoint', error));
 	}
