@@ -198,7 +198,7 @@ export const canChangeAssigned = (issueData, userJob, permissions, currentUser) 
 };
 
 const canChange = (issueData, userJob, permissions, currentUser) =>
-	isAdmin(permissions) || isJobOwner(issueData, userJob, permissions, currentUser));
+	isAdmin(permissions) || isJobOwner(issueData, userJob, permissions, currentUser);
 
 export const canComment = (issueData, userJob, permissions, currentUser) => {
 	const isNotClosed = issueData && issueData.status && isOpenIssue(issueData.status);

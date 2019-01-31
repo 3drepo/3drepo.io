@@ -81,7 +81,6 @@ export const getIssues = (teamspace, modelId, revision?) => {
  */
 export const importBCF = (teamspace, modelId, file, revision?) => {
 	const mainPath = `${teamspace}/${modelId}`;
-
 	const formData = new FormData();
 	formData.append('file', file);
 

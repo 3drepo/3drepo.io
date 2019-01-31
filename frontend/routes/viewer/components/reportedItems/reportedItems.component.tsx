@@ -80,6 +80,7 @@ interface IProps {
 	showDetails?: boolean;
 	showDefaultHiddenItems: boolean;
 	Icon?: any;
+	isImportingBCF?: boolean;
 	setState: (componentState: any) => void;
 	onNewItem: () => void;
 	onActiveItem: (item) => void;
@@ -112,6 +113,9 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	get listFooterText() {
+		if (this.props.isImportingBCF) {
+			return 'Uploading BCF...';
+		}
 		if (this.state.modelLoaded) {
 			return `${this.state.filteredItems.length} results displayed`;
 		}

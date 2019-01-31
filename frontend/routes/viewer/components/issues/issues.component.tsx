@@ -17,12 +17,11 @@
 
 import * as React from 'react';
 import * as queryString from 'query-string';
+// @ts-ignore
+import * as fileDialog from 'file-dialog';
 
-import { map, isEqual } from 'lodash';
 import PinDrop from '@material-ui/icons/PinDrop';
-
 import IssueDetails from './components/issueDetails/issueDetails.container';
-
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ReportedItems } from '../reportedItems';
 import {
@@ -141,7 +140,11 @@ export class Issues extends React.PureComponent<IProps, IState> {
 			onClick: () => printIssues(teamspace, model)
 		}, , {
 			...ISSUES_ACTIONS_MENU.IMPORT_BCF,
-			onClick: () => importBCF(teamspace, model, {}, revision)
+			onClick: () => {
+				fileDialog({ accept: '.zip,.bcfzip,.bcf' }, (files) => {
+					importBCF(teamspace, model, files[0], revision);
+				});
+			}
 		}, {
 			...ISSUES_ACTIONS_MENU.EXPORT_BCF,
 			onClick: () => exportBCF(teamspace, model)
@@ -237,6 +240,7 @@ export class Issues extends React.PureComponent<IProps, IState> {
 				searchEnabled={this.props.searchEnabled}
 				filters={this.filters}
 				selectedFilters={this.props.selectedFilters}
+				isImportingBCF={this.props.isImportingBCF}
 
 				onToggleFilters={this.handleToggleFilters}
 				onChangeFilters={this.handleFilterChange}

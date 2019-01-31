@@ -243,7 +243,6 @@ export function* downloadIssues({ teamspace, modelId }) {
 		const endpoint = `${teamspace}/${modelId}/issues.json`;
 		const modelName = Viewer.viewer && Viewer.viewer.settings ? Viewer.viewer.settings.name : '';
 		yield API.downloadJSON('issues', modelName, endpoint);
-
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('download', 'json', error));
 	}
@@ -255,7 +254,6 @@ export function* exportBcf({ teamspace, modelId }) {
 		const issuesIds = map(filteredIssues, '_id').join(',');
 		const exportUrl = API.getAPIUrl(`${teamspace}/${modelId}/issues.bcfzip?ids=${issuesIds}`);
 		window.open(exportUrl, '_blank');
-
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('export', 'BCF', error));
 	}
@@ -267,6 +265,7 @@ export function* importBcf({ teamspace, modelId, file, revision }) {
 	try {
 		yield API.importBCF(teamspace, modelId, file, revision);
 		yield put(IssuesActions.fetchIssues(teamspace, modelId, revision));
+		yield put(SnackbarActions.show('BCF file uploaded'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('import', 'BCF', error));
 	}
