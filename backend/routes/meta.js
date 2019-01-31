@@ -21,6 +21,7 @@
 	const router = express.Router({ mergeParams: true });
 	const responseCodes = require("../response_codes");
 	const ModelHelpers = require("../models/helper/model");
+	const Meta = require("../models/meta");
 	const middlewares = require("../middlewares/middlewares");
 	const utils = require("../utils");
 	const C = require("../constants");
@@ -28,82 +29,85 @@
 	// Get meta data
 
 	/**
-               * @api {get} /revision/master/head/meta/4DTaskSequence.json  Get All meta data for 4D Sequence Tags
-               * @apiName getAllIdsWith4DSequenceTag
-               * @apiGroup Meta
-               */
-
+	 * @api {get} /:account/:model/revision/master/head/meta/4DTaskSequence.json  Get All meta data for 4D Sequence Tags
+	 * @apiName getAllIdsWith4DSequenceTag
+	 * @apiGroup Meta
+	 */
 	router.get("/revision/master/head/meta/4DTaskSequence.json", middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
 
 	/**
-               * @api {get} /revision/:rev/meta/4DTaskSequence.json  Get All meta data with 4D Sequence Tags by revision
-               * @apiName getAllIdsWith4DSequenceTag
-               * @apiGroup Meta
-               *
-               * @apiParam {String} rev Revision
-               */
-
+	 * @api {get} /:account/:model/revision/:rev/meta/4DTaskSequence.json  Get All meta data with 4D Sequence Tags by revision
+	 * @apiName getAllIdsWith4DSequenceTag
+	 * @apiGroup Meta
+	 *
+	 * @apiParam {String} rev Revision
+	 */
 	router.get("/revision/:rev/meta/4DTaskSequence.json", middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
 
 	/**
-               * @api {get} /revision/master/head/meta/all.json  Get all meta data
-               * @apiName getAllMetadata
-               * @apiGroup Meta
-               */
-
+	 * @api {get} /:account/:model/revision/master/head/meta/all.json  Get all meta data
+	 * @apiName getAllMetadata
+	 * @apiGroup Meta
+	 */
 	router.get("/revision/master/head/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
 
 	/**
-               * @api {get} /revision/:rev/meta/all.json  Get all meta data
-               * @apiName getAllMetadata
-               * @apiGroup Meta
-               *
-               * @apiParam {String} rev Revision to get meta data from
-               */
-
+	 * @api {get} /:account/:model/revision/:rev/meta/all.json  Get all meta data
+	 * @apiName getAllMetadata
+	 * @apiGroup Meta
+	 *
+	 * @apiParam {String} rev Revision to get meta data from
+	 */
 	router.get("/revision/:rev/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
 
 	/**
-               * @api {get} /meta/:id.json  Get meta data
-               * @apiName getMetadata
-               * @apiGroup Meta
-               *
-               * @apiParam id Meta Unique ID
-               */
+	 * @api {get} /:account/:model/meta/keys Get array of metadata fields
+	 * @apiName getMetadataFields
+	 * @apiGroup Meta
+	 */
+	router.get("/meta/keys", middlewares.hasReadAccessToModel, getMetadataFields);
 
+	/**
+	 * @api {get} /:account/:model/meta/:id.json  Get meta data
+	 * @apiName getMetadata
+	 * @apiGroup Meta
+	 *
+	 * @apiParam id Meta Unique ID
+	 */
 	router.get("/meta/:id.json", middlewares.hasReadAccessToModel, getMetadata);
 
 	/**
-               * @api {get} /revision/master/head/meta/findObjsWith/:metaKey.json  Get All ids with the meta data field
-               * @apiName getAllIdsWithMetadataField
-               * @apiGroup Meta
-               *
-               * @apiParam {String} metaKey Unique meta key
-               */
-
+	 * @api {get} /:account/:model/revision/master/head/meta/findObjsWith/:metaKey.json  Get All ids with the meta data field
+	 * @apiName getAllIdsWithMetadataField
+	 * @apiGroup Meta
+	 *
+	 * @apiParam {String} metaKey Unique meta key
+	 */
 	router.get("/revision/master/head/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 
 	/**
-               * @api {get} /revision/:rev/meta/findObjsWith/:metaKey.json  Get all meta data with field based on revision
-               * @apiName getAllIdsWithMetadataField
-               * @apiGroup Meta
-               *
-               * @apiParam {String} rev Revision to get meta data from
-               * @apiParam {String} metaKey Unique meta key
-               */
-
+	 * @api {get} /:account/:model/revision/:rev/meta/findObjsWith/:metaKey.json  Get all meta data with field based on revision
+	 * @apiName getAllIdsWithMetadataField
+	 * @apiGroup Meta
+	 *
+	 * @apiParam {String} rev Revision to get meta data from
+	 * @apiParam {String} metaKey Unique meta key
+	 */
 	router.get("/revision/:rev/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 
 	/**
-               * @api {get} /revision/:rev/meta/findObjsWith/:metaKey.json  Get all meta data with field based on master branch
-               * @apiName getAllIdsWithMetadataField
-               * @apiGroup Meta
-               *
-               * @apiParam {String} rev Revision to get meta data from
-               * @apiParam {String} metaKey Unique meta key
-               */
-
+	 * @api {get} /:account/:model/revision/:rev/meta/findObjsWith/:metaKey.json  Get all meta data with field based on master branch
+	 * @apiName getAllIdsWithMetadataField
+	 * @apiGroup Meta
+	 *
+	 * @apiParam {String} rev Revision to get meta data from
+	 * @apiParam {String} metaKey Unique meta key
+	 */
 	router.get("/revision/master/head/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
+
+	const getDbColOptions = function (req) {
+		return { account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger };
+	};
 
 	function getMetadata(req, res, next) {
 		ModelHelpers.getMetadata(req.params.account, req.params.model, req.params.id)
@@ -162,6 +166,18 @@
 		}
 
 		ModelHelpers.getAllIdsWithMetadataField(req.params.account, req.params.model, branch, req.params.rev, req.params.metaKey)
+			.then(obj => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+			})
+			.catch(err => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			});
+	}
+
+	function getMetadataFields(req, res, next) {
+		const dbCol = getDbColOptions(req);
+
+		Meta.getMetadataFields(dbCol.account, dbCol.model)
 			.then(obj => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 			})

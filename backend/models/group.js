@@ -509,7 +509,7 @@ function clean(groupData) {
 	}
 
 	return cleaned;
-};
+}
 
 /**
  * Returns true if given rule has:
