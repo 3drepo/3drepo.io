@@ -57,7 +57,7 @@ class HeightSetterController implements ng.IController, IBindings {
 			this.content = angular.element(this.container.children()[1]) as any;
 
 			this.content.css('max-height', `${this.contentData.height}px`);
-			this.observer.observe(this.content[0], { attributes: false, childList: true, subtree: false });
+			this.observer.observe(this.content[0], { attributes: false, childList: true, subtree: true });
 
 			this.removeHeightWatch = this.$scope.$watch(() => this.contentData.height, (newValue) => {
 				this.content.css('max-height', `${newValue}px`);
@@ -66,7 +66,10 @@ class HeightSetterController implements ng.IController, IBindings {
 	}
 
 	get contentHeight() {
-		return this.content[0].querySelector('.height-catcher').scrollHeight;
+		const contentContainer = this.content[0].querySelector('.height-catcher');
+		const prevContentHeight = contentContainer.prevSibling && contentContainer.prevSibling.offsetHeight;
+		const footerHeight = contentContainer.nextSibling && contentContainer.nextSibling.offsetHeight;
+		return contentContainer.scrollHeight + (prevContentHeight || 0) + (footerHeight || 0);
 	}
 
 	public $onInit(): void {
