@@ -523,64 +523,49 @@ export class PanelService {
 
 	}
 
+	public convertPoint(point) {
+		return [point[0], point[2], -point[1]];
+	}
+
+	public isPoint(obj) {
+		return Array.isArray(obj) && obj.length === 3;
+	}
+
+	public convertViewpoint(viewpoint) {
+		const keys = Object.keys(viewpoint);
+		const pointsKeys = keys.filter((key) => this.isPoint(viewpoint[key]));
+		pointsKeys.forEach((key) => {
+			viewpoint[key] = this.convertPoint(viewpoint[key]);
+		});
+		return viewpoint;
+	}
+
 	public sortViewpointAxis(data: any[]) {
-		const viewpoints = [];
-		let individualViewpoints = [];
-		const editedViewpoint = [];
-
-		// for (let i = 0; i < data.length; i++) {
-		// 	const indieItems = data[i];
-		// 	for (let j = 0; j < indieItems.length; j++) {
-		// 		const viewpointsInLoop = indieItems[j];
-		// 		for (const key of viewpointsInLoop) {
-		// 			for (let k = 0; k < key.length; k++) {
-		// 				const viewsWithArrays = key[k];
-		// 				console.log('new loop', viewsWithArrays);
-		// 			}
-		// 		}
-		// 	}
-		// }
-		console.log("begin", data);
-
-		data.forEach((item) => {
-			viewpoints.push(item.viewpoint);
-			viewpoints.forEach((singleViewpoint) => {
-				individualViewpoints = Object.entries(singleViewpoint);
-			});
-			for (const key of individualViewpoints) {
-				key.forEach((arrayToSwap, index) => {
-					if (arrayToSwap.length === 3 && Object.prototype.toString.call(arrayToSwap) !== '[object String]') {
-						// console.log('original results', arrayToSwap);
-						arrayToSwap.splice(1, 0, arrayToSwap.splice(2, 1)[0]);
-						arrayToSwap[index] = editedViewpoint.push(arrayToSwap);
-					}
-				});
-			}
+		data.forEach((issue) => {
+			this.convertViewpoint(issue.viewpoint);
 		});
 	}
 
 	/**
 	 * Download server response JSON file from panel menu
 	 *
-	 * @param content The JSON response to download
+	 * @param endpoint The required endpoint to correct JSON response.
 	 * @param fileName Choice of filename : "risks.json", "issues.json", "groups.json"
-	 * @param modelID Model ID to used to obtain model data.
-	 * @param account User account used as param to obtain model data.
 	 */
 
 	public downloadJSON(fileName: string, endpoint: string) {
 		const timestamp = this.$filter('prettyDate')(Date.now(), {showSeconds: false});
 		const modelName = this.viewerService.viewer ? this.viewerService.viewer.settings.name : '';
 		this.apiService.get(endpoint).then((res) => {
-			this.sortViewpointAxis(res.data);
-			const content = JSON.stringify(res.data, null, 2);
-			const a = document.createElement('a');
-			const file = new Blob([content]);
-			a.href = URL.createObjectURL(file);
-			a.download = `${modelName}_${timestamp}_${fileName}.json`;
-			document.body.appendChild(a); // needed for firefox
-			a.click();
-			document.body.removeChild(a);
+		this.sortViewpointAxis(res.data);
+		const content = JSON.stringify(res.data, null, 2);
+		const a = document.createElement('a');
+		const file = new Blob([content]);
+		a.href = URL.createObjectURL(file);
+		a.download = `${modelName}_${timestamp}_${fileName}.json`;
+		document.body.appendChild(a); // needed for firefox
+		a.click();
+		document.body.removeChild(a);
 		});
 	}
 
