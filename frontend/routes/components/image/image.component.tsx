@@ -34,9 +34,8 @@ export class Image extends React.PureComponent<IProps, any> {
 		}
 	}
 
-
 	public render() {
-		const { src, alt } = this.props;
+		const { src, alt, enablePreview } = this.props;
 		return (
 			<StyledImage
 				src={src}

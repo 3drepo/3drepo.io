@@ -14,6 +14,7 @@
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { debounce } from 'lodash';
 
 interface IBindings {
 	[key: string]: any;
@@ -57,7 +58,12 @@ class HeightSetterController implements ng.IController, IBindings {
 			this.content = angular.element(this.container.children()[1]) as any;
 
 			this.content.css('max-height', `${this.contentData.height}px`);
-			this.observer.observe(this.content[0], { attributes: false, childList: true, subtree: true });
+			this.observer.observe(this.content[0], {
+				attributes: false,
+				childList: true,
+				subtree: true,
+				characterData: true
+			});
 
 			this.removeHeightWatch = this.$scope.$watch(() => this.contentData.height, (newValue) => {
 				this.content.css('max-height', `${newValue}px`);
@@ -76,7 +82,7 @@ class HeightSetterController implements ng.IController, IBindings {
 		this.updateHeight();
 	}
 
-	public updateHeight = () => {
+	public updateHeight = debounce(() => {
 		this.updateHeightTimeout = this.$timeout(() => {
 			const requestedHeight = this.contentHeight + this.headerHeight;
 
@@ -86,7 +92,7 @@ class HeightSetterController implements ng.IController, IBindings {
 				height: requestedHeight
 			});
 		});
-	}
+	}, 100);
 
 	public handleElementChange = (mutationsList) => {
 		const shouldUpdateHeight = mutationsList
