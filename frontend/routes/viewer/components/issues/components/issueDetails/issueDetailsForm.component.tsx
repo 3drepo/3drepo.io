@@ -11,7 +11,7 @@ import {
 	FieldsRow, StyledFormControl, StyledTextField
 }	from './../../../risks/components/riskDetails/riskDetails.styles';
 import {
-	ISSUE_STATUSES, ISSUE_PRIORITIES, ISSUE_TOPIC_TYPES
+	ISSUE_STATUSES, ISSUE_PRIORITIES, ISSUE_TOPIC_TYPES, DEFAULT_PROPORTIES
 } from '../../../../../../constants/issues';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { DateField } from '../../../../../components/dateField/dateField.component';
@@ -36,7 +36,7 @@ interface IState {
 }
 
 const IssueSchema = Yup.object().shape({
-	desc: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 
 class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
@@ -147,7 +147,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							)} />
 						</StyledFormControl>
 					</FieldsRow>
-					<Field name="desc" render={({ field }) => (
+					<Field name="description" render={({ field }) => (
 						<StyledTextField
 							{...field}
 							requiredConfirm={!this.isNewIssue}
@@ -171,12 +171,12 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 export const IssueDetailsForm = withFormik({
 	mapPropsToValues: ({ issue }) => {
 		return ({
-			status: issue.status || '',
-			priority: issue.priority || '',
-			topic_type: issue.topic_type || '',
+			status: issue.status || DEFAULT_PROPORTIES.STATUS,
+			priority: issue.priority || DEFAULT_PROPORTIES.PRIORITY,
+			topic_type: issue.topic_type || DEFAULT_PROPORTIES.TOPIC_TYPE,
 			assigned_roles: get(issue, 'assigned_roles[0]', ''),
 			due_date: issue.due_date,
-			desc: issue.desc
+			description: issue.description
 		});
 	},
 	handleSubmit: (values, { props }) => {

@@ -27,6 +27,16 @@ const PRIORITIES = {
 	HIGH: 'high'
 };
 
+const TOPIC_TYPES = {
+	FOR_INFORMATION: 'for_information'
+};
+
+export const DEFAULT_PROPORTIES = {
+	STATUS: STATUSES.OPEN,
+	PRIORITY: PRIORITIES.NONE,
+	TOPIC_TYPE: TOPIC_TYPES.FOR_INFORMATION
+};
+
 export const ISSUE_TOPIC_TYPES = [
 	{ value: 'clash', name: 'Clash' },
 	{ value: 'diff', name: 'Diff' },

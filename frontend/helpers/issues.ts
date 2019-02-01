@@ -12,7 +12,7 @@ export const prepareIssue = (issue, jobs = []) => {
 		...issue,
 		defaultHidden: issue.status === STATUSES.CLOSED,
 		name: issue.name,
-		description: issue.description,
+		description: issue.desc,
 		author: issue.owner,
 		createdDate: issue.created,
 		thumbnail,
@@ -37,11 +37,12 @@ export const mergeIssueData = (source, data = source) => {
 	return {
 		...source,
 		...omit(data, ['assigned_roles', 'description']),
-		assigned_roles: hasUnassignedRole ? [] : [data.assigned_roles]
+		assigned_roles: hasUnassignedRole ? [] : [data.assigned_roles],
+		desc: data.description
 	};
 };
 
-const convertActionValueToText = (value) => {
+const convertActionValueToText = (value = '') => {
 	const actions = {
 		'none': 'None',
 		'low': 'Low',
@@ -181,7 +182,7 @@ const isAssignedJob = (issueData, userJob, permissions) => {
 };
 
 export const canChangeStatusToClosed = (issueData, userJob, permissions, currentUser) => {
-	return canChange(issueData, userJob, permissions, currentUser);
+	return isAdmin(permissions) || isJobOwner(issueData, userJob, permissions, currentUser);
 };
 
 export const canChangeStatus = (issueData, userJob, permissions, currentUser) => {
@@ -190,7 +191,7 @@ export const canChangeStatus = (issueData, userJob, permissions, currentUser) =>
 };
 
 export const canChangeBasicProperty = (issueData, userJob, permissions, currentUser) => {
-	return canChange(issueData, userJob, permissions, currentUser) &&
+	return isAdmin(permissions) || isJobOwner(issueData, userJob, permissions, currentUser) &&
 		canComment(issueData, userJob, permissions, currentUser);
 };
 
@@ -198,11 +199,9 @@ export const canChangeAssigned = (issueData, userJob, permissions, currentUser) 
 	return isAdmin(permissions) || canChangeBasicProperty(issueData, userJob, permissions, currentUser);
 };
 
-const canChange = (issueData, userJob, permissions, currentUser) =>
-	isAdmin(permissions) || isJobOwner(issueData, userJob, permissions, currentUser);
-
 export const canComment = (issueData, userJob, permissions, currentUser) => {
 	const isNotClosed = issueData && issueData.status && isOpenIssue(issueData.status);
+
 	const ableToComment =
 		isAdmin(permissions) ||
 		isJobOwner(issueData, userJob, permissions, currentUser) ||

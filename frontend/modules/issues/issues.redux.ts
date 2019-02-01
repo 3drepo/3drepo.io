@@ -67,7 +67,7 @@ export const INITIAL_STATE = {
 		filteredRisks: [],
 		showPins: true,
 		logs: [],
-		fetchingDetailsIsPending: true,
+		fetchingDetailsIsPending: false,
 		isImportingBCF: false,
 		showSubmodelIssues: false,
 		sortOrder: 'desc'

@@ -80,9 +80,12 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		const { teamspace, model, fetchIssue, issue, getMyJob, subscribeOnIssueCommentsChanges } = this.props;
-		fetchIssue(teamspace, model, issue._id);
+
+		if (issue._id) {
+			fetchIssue(teamspace, model, issue._id);
+			subscribeOnIssueCommentsChanges(teamspace, model, issue._id);
+		}
 		getMyJob(teamspace);
-		subscribeOnIssueCommentsChanges(teamspace, model, issue._id);
 	}
 
 	public componentWillUnmount() {
@@ -132,11 +135,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		);
 	}
 
-	public renderLogList = () => {
-		return (
-			<LogList items={this.props.logs} isPending={this.props.fetchingDetailsIsPending} />
-		);
-	}
+	public renderLogList = renderWhenTrue(() => {
+		return (<LogList items={this.props.logs} isPending={this.props.fetchingDetailsIsPending} />);
+	});
 
 	public renderPreview = renderWhenTrue(() => {
 		return (
@@ -148,7 +149,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onNameChange={this.handleNameChange}
 				onExpandChange={this.handleExpandChange}
 				renderCollapsable={this.renderDetailsForm}
-				renderNotCollapsable={() => this.renderLogList()}
+				renderNotCollapsable={() => this.renderLogList(this.props.logs.length)}
 			/>
 		);
 	});
@@ -158,23 +159,23 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return canComment(this.issueData, myJob, settings.permissions, currentUser.username);
 	}
 
-	public renderFooter = renderWhenTrue(() => (
+	public renderFooter = () => (
 		<ViewerPanelFooter alignItems="center" padding="0">
 			<NewCommentForm
 				comment={this.props.newComment.comment}
 				screenshot={this.props.newComment.screenshot}
 				viewpoint={this.props.newComment.viewpoint}
 				innerRef={this.commentRef}
-				hideComment={false}
+				hideComment={this.isNewIssue}
 				hideScreenshot={false}
 				hidePin={false}
 				onTakeScreenshot={this.handleNewScreenshot}
 				onChangePin={this.handleChangePin}
 				onSave={this.handleSave}
-				canComment={this.userCanComment()}
+				canComment={this.userCanComment}
 			/>
 		</ViewerPanelFooter>
-	));
+	)
 
 	public setCommentData = (commentData = {}) => {
 		this.props.setState({ newComment: {
@@ -227,7 +228,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				<ViewerPanelContent className="height-catcher" padding="0">
 					{this.renderPreview(this.props.issue)}
 				</ViewerPanelContent>
-				{this.renderFooter(this.issueData._id)}
+				{this.renderFooter()}
 			</Container>
 		);
 	}
