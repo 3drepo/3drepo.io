@@ -421,6 +421,11 @@ groupSchema.methods.updateAttrs = function (dbCol, data) {
 					} else if (key === "color") {
 						toUpdate[key] = data[key].map((c) => parseInt(c, 10));
 					} else {
+						if (key === "rules"
+							&& data.rules
+							&& !data.rules.reduce((x, y) => x && isValidRule(y))) {
+							typeCorrect = false;
+						}
 						toUpdate[key] = data[key];
 					}
 				} else {
@@ -459,7 +464,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 
 	return newGroup.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 
-		let typeCorrect = true;
+		let typeCorrect = (!data.objects != !data.rules);
 
 		Object.keys(data).forEach((key) => {
 			if (fieldTypes[key]) {
@@ -469,6 +474,11 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 					} else if (key === "color") {
 						newGroup[key] = data[key].map((c) => parseInt(c, 10));
 					} else {
+						if (key === "rules"
+							&& data.rules
+							&& !data.rules.reduce((x, y) => x && isValidRule(y))) {
+							typeCorrect = false;
+						}
 						newGroup[key] = data[key];
 					}
 				} else {
@@ -479,7 +489,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 		});
 
 		newGroup._id = utils.stringToUUID(uuid.v1());
-		if (typeCorrect && newGroup.objects) {
+		if (typeCorrect) {
 			return newGroup.save().then((savedGroup) => {
 				savedGroup._id = utils.uuidToString(savedGroup._id);
 				if (!data.isIssueGroup && sessionId) {
