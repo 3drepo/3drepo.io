@@ -1,6 +1,6 @@
 import { get, omit } from 'lodash';
 import { getAPIUrl } from '../services/api';
-import { STATUSES_COLORS, STATUSES_ICONS } from '../constants/issues';
+import { STATUSES_COLORS, STATUSES_ICONS, STATUSES } from '../constants/issues';
 import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
 
 export const prepareIssue = (issue, jobs = []) => {
@@ -10,6 +10,7 @@ export const prepareIssue = (issue, jobs = []) => {
 
 	return {
 		...issue,
+		defaultHidden: issue.status === STATUSES.CLOSED,
 		name: issue.name,
 		description: issue.description,
 		author: issue.owner,

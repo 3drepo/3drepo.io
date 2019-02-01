@@ -543,9 +543,9 @@ export function* subscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }
 
 export function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
 	const commentsNotifications = getCommentsChannel(teamspace, modelId, issueId);
-	commentsNotifications.unsubscribeToCreated(onCreateCommentEvent, this);
-	commentsNotifications.unsubscribeToUpdated(onUpdateCommentEvent, this);
-	commentsNotifications.unsubscribeToDeleted(onDeleteCommentEvent, this);
+	commentsNotifications.unsubscribeFromCreated(onCreateCommentEvent, this);
+	commentsNotifications.unsubscribeFromUpdated(onUpdateCommentEvent, this);
+	commentsNotifications.unsubscribeFromDeleted(onDeleteCommentEvent, this);
 }
 
 export function* setNewIssue() {
