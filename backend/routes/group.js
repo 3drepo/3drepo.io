@@ -303,19 +303,15 @@ function createGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	if (req.body.objects) {
-		const create = Group.createGroup(getDbColOptions(req), sessionId, req.body);
+	const create = Group.createGroup(getDbColOptions(req), sessionId, req.body);
 
-		create.then(group => {
+	create.then(group => {
 
-			responseCodes.respond(place, req, res, next, responseCodes.OK, group);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 
-		}).catch(err => {
-			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
-		});
-	} else {
-		responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-	}
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
+	});
 }
 
 /**
