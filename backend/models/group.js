@@ -464,7 +464,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 
 	return newGroup.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 
-		let typeCorrect = (!data.objects != !data.rules);
+		let typeCorrect = (!data.objects !== !data.rules);
 
 		Object.keys(data).forEach((key) => {
 			if (fieldTypes[key]) {
