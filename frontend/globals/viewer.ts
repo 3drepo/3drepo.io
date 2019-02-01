@@ -15,7 +15,6 @@
  **  along with this program.  If not, see <http=//www.gnu.org/licenses/>.
  **/
 import * as EventEmitter from 'eventemitter3';
-import { debounce } from 'lodash';
 
 import { VIEWER_NAV_MODES, VIEWER_MAP_SOURCES, VIEWER_EVENTS, VIEWER_ERRORS } from '../constants/viewer';
 
@@ -497,35 +496,30 @@ export class Viewer {
 		UnityUtil.cancelLoadModel();
 	}
 
-	public loadModel(account, model, branch, revision) {
+	public async loadModel(account, model, branch, revision) {
+		await UnityUtil.onReady();
+		this.initialized = true;
+		this.account = account;
+		this.model = model;
+		this.branch = branch;
+		this.revision = revision;
+		this.loadingDivText.style.display = 'none';
+		document.body.style.cursor = 'wait';
 
-		return UnityUtil.onReady().then(() => {
-			this.initialized = true;
-			this.account = account;
-			this.model = model;
-			this.branch = branch;
-			this.revision = revision;
-			this.loadingDivText.style.display = 'none';
-			document.body.style.cursor = 'wait';
+		this.emit(Viewer.EVENT.START_LOADING);
 
-			this.emit(Viewer.EVENT.START_LOADING);
+		UnityUtil.loadModel(this.account, this.model, this.branch, this.revision);
+		return UnityUtil.onLoaded().then((bbox) => {
+			document.body.style.cursor = 'initial';
 
-			UnityUtil.loadModel(this.account, this.model, this.branch, this.revision);
-			UnityUtil.onLoaded().then((bbox) => {
-					document.body.style.cursor = 'initial';
-					this.emit(Viewer.EVENT.MODEL_LOADED);
-					this.emit(Viewer.EVENT.BBOX_READY, bbox);
-				}).catch((error) => {
-					document.body.style.cursor = 'initial';
-					if (error !== 'cancel') {
-						console.error('Unity error loading model= ', error);
-					}
-				});
-
-			return UnityUtil.onLoading();
-
+			this.emit(Viewer.EVENT.MODEL_LOADED);
+			this.emit(Viewer.EVENT.BBOX_READY, bbox);
+		}).catch((error) => {
+			document.body.style.cursor = 'initial';
+			if (error !== 'cancel') {
+				console.error('Unity error loading model= ', error);
+			}
 		});
-
 	}
 
 	public getCurrentViewpointInfo(account, model) {
