@@ -186,6 +186,184 @@ describe("Groups", function () {
 
 		});
 
+		it("with rules instead of objects should succeed", function(done) {
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assing({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "TestField",
+						operator: "GTE",
+						values: [1]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+						.expect(200 , function(err, res) {
+							expect(res.body.length).to.equal(4);
+							done(err);
+						});
+				}
+
+			], done);
+
+		});
+
+		it("with rules (0 args) should succeed", function(done) {
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assing({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "TestField",
+						operator: "IS_EMPTY",
+						values: []
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+						.expect(200 , function(err, res) {
+							expect(res.body.length).to.equal(5);
+							done(err);
+						});
+				}
+
+			], done);
+
+		});
+
+		it("with rules (2 args) should succeed", function(done) {
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assing({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "TestField",
+						operator: "IN_RANGE",
+						values: [1, 2]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+						.expect(200 , function(err, res) {
+							expect(res.body.length).to.equal(6);
+							done(err);
+						});
+				}
+
+			], done);
+
+		});
+
+		it("with rules (multi args) should succeed", function(done) {
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assing({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "TestField",
+						operator: "EQUALS",
+						values: [1, 2, 3]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+						.expect(200 , function(err, res) {
+							expect(res.body.length).to.equal(7);
+							done(err);
+						});
+				}
+
+			], done);
+
+		});
+
+		it("with rules (multi arg pairs) should succeed", function(done) {
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assing({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "TestField",
+						operator: "NOT_IN_RANGE",
+						values: [1, 2, 3, 4]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+						.expect(200 , function(err, res) {
+							expect(res.body.length).to.equal(8);
+							done(err);
+						});
+				}
+
+			], done);
+
+		});
+
+		it("with multiple rules should succeed", function(done) {
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assing({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "TestField",
+						operator: "NOT_IN_RANGE",
+						values: [3, 4]
+					},{
+						field: "TestField2",
+						operator: "IS_EMPTY",
+						values: []
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+						.expect(200 , function(err, res) {
+							expect(res.body.length).to.equal(9);
+							done(err);
+						});
+				}
+
+			], done);
+
+		});
+
 		it("without color should succeed", function(done) {
 			async.series([
 				function(done) {
@@ -200,7 +378,7 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
 						.expect(200 , function(err, res) {
-							expect(res.body.length).to.equal(4);
+							expect(res.body.length).to.equal(10);
 							done(err);
 						});
 				}
@@ -222,7 +400,7 @@ describe("Groups", function () {
 		});
 
 
-		it("without objects field should fail", function(done) {
+		it("without rules or objects field should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			delete newGroup.objects;
 			agent.post(`/${username}/${model}/groups/`)
@@ -231,6 +409,69 @@ describe("Groups", function () {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
+		});
+
+		it("with rules and objects should fail", function(done) {
+			const newGroup = Object.assing({}, data);
+			newGroup.rules = [{
+				field: "TestField",
+				operator: "GTE",
+				values: [1]
+			}];
+			agent.post(`/${username}/${model}/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+			});
+		});
+
+		it("with insufficient rule args (min. 1) should fail", function(done) {
+			const newGroup = Object.assing({}, data);
+			delete newGroup.objects;
+			newGroup.rules = [{
+				field: "TestField",
+				operator: "GT",
+				values: []
+			}];
+			agent.post(`/${username}/${model}/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+			});
+		});
+
+		it("with insufficient rule args (min. 2) should fail", function(done) {
+			const newGroup = Object.assing({}, data);
+			delete newGroup.objects;
+			newGroup.rules = [{
+				field: "TestField",
+				operator: "NOT_IN_RANGE",
+				values: [1]
+			}];
+			agent.post(`/${username}/${model}/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+			});
+		});
+
+		it("with incorrect multiple (2) of rule args should fail", function(done) {
+			const newGroup = Object.assing({}, data);
+			delete newGroup.objects;
+			newGroup.rules = [{
+				field: "TestField",
+				operator: "NOT_IN_RANGE",
+				values: [1, 2, 3]
+			}];
+			agent.post(`/${username}/${model}/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+			});
 		});
 
 		it("objects with wrong type should fail", function(done) {
@@ -258,7 +499,7 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
 						.expect(200 , function(err, res) {
-							expect(res.body.length).to.equal(5);
+							expect(res.body.length).to.equal(11);
 							done(err);
 						});
 				}
