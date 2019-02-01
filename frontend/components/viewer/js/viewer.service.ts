@@ -33,6 +33,7 @@ export class ViewerService {
 	public newPinId: string;
 	public currentModel: any;
 	public initialised: any;
+	public currentModelInit: any;
 
 	private pinData: any;
 	private viewer: any;
@@ -56,8 +57,7 @@ export class ViewerService {
 		this.viewer = undefined;
 
 		this.currentModel = {
-			model : null,
-			promise : null
+			model : null
 		};
 
 		this.pin = {
@@ -403,21 +403,16 @@ export class ViewerService {
 
 	}
 
-	public loadViewerModel(account, model, branch, revision) {
-
+	public async loadViewerModel(account, model, branch, revision) {
 		if (!account || !model) {
 			console.error('Account, model, branch or revision was not defined!', account, model, branch, revision);
 			return Promise.reject('Account, model, branch or revision was not defined!');
 		} else {
 			this.account = account;
 			this.model = model;
-			this.setHelicopterSpeed();
-			this.currentModel.promise = this.viewer.loadModel(
-				account,
-				model,
-				branch,
-				revision
-			)
+			await this.setHelicopterSpeed();
+
+			return this.viewer.loadModel(account, model, branch, revision)
 				.then(() => {
 					// Set the current model in the viewer
 					this.currentModel.model = model;
@@ -426,7 +421,6 @@ export class ViewerService {
 				.catch((error) => {
 					console.error('Error loading model: ', error);
 				});
-			return this.currentModel.promise;
 		}
 
 	}
@@ -618,9 +612,9 @@ export class ViewerService {
 		}
 	}
 
-	private setHelicopterSpeed() {
+	private async setHelicopterSpeed() {
 		if (this.account && this.model) {
-			this.APIService.get(this.account + '/' + this.model + '/settings/heliSpeed')
+			await this.APIService.get(this.account + '/' + this.model + '/settings/heliSpeed')
 				.then((res) => {
 					this.heliSpeed = res.data.heliSpeed ? res.data.heliSpeed : 1;
 				})

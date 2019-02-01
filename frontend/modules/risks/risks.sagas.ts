@@ -208,7 +208,6 @@ export function* renderPins({ filteredRisks }) {
 					const levelOfRisk = (risk.level_of_risk !== undefined) ? risk.level_of_risk : 4;
 					const isSelectedPin = activeRiskId && risk._id === activeRiskId;
 					const pinColor = getRiskPinColor(levelOfRisk, isSelectedPin);
-
 					yield Viewer.addPin({
 						id: risk._id,
 						type: 'risk',
@@ -328,6 +327,7 @@ const showMultipleGroups = async (risk, revision) => {
 
 export function* focusOnRisk({ risk, filteredRisks = [], revision }) {
 	try {
+		yield Viewer.isViewerReady();
 		yield put(RisksActions.renderPins(filteredRisks));
 		const TreeService = getAngularService('TreeService') as any;
 

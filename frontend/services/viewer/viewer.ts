@@ -8,20 +8,20 @@ const MODE = {
 
 export class ViewerService {
 	private viewerInstance = null;
-	private viewerService = null;
 
 	private mode = MODE.NORMAL;
 	public initialised: any;
+
+	get viewerService() {
+		return getAngularService('ViewerService', this) as any;
+	}
 
 	get viewer() {
 		if (this.viewerInstance) {
 			return this.viewerInstance;
 		}
 
-		this.viewerService = getAngularService('ViewerService', this) as any;
 		this.viewerInstance = this.viewerService.getViewer();
-		this.initialised = this.viewerService.initialised.promise;
-
 		return this.viewerInstance;
 	}
 
@@ -30,7 +30,7 @@ export class ViewerService {
 	}
 
 	public async isViewerReady()  {
-		await this.initialised;
+		await this.viewerService.initialised.promise;
 	}
 
 	public async updateViewerSettings(settings) {
@@ -67,6 +67,7 @@ export class ViewerService {
 
 	public async setCamera(params) {
 		await this.isViewerReady();
+
 		return this.viewer.setCamera(
 			params.position,
 			params.view_dir,
