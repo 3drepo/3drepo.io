@@ -190,7 +190,7 @@ describe("Groups", function () {
 
 			async.series([
 				function(done) {
-					const newGroup = Object.assing({}, data);
+					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
 						field: "TestField",
@@ -219,7 +219,7 @@ describe("Groups", function () {
 
 			async.series([
 				function(done) {
-					const newGroup = Object.assing({}, data);
+					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
 						field: "TestField",
@@ -248,7 +248,7 @@ describe("Groups", function () {
 
 			async.series([
 				function(done) {
-					const newGroup = Object.assing({}, data);
+					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
 						field: "TestField",
@@ -277,7 +277,7 @@ describe("Groups", function () {
 
 			async.series([
 				function(done) {
-					const newGroup = Object.assing({}, data);
+					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
 						field: "TestField",
@@ -306,7 +306,7 @@ describe("Groups", function () {
 
 			async.series([
 				function(done) {
-					const newGroup = Object.assing({}, data);
+					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
 						field: "TestField",
@@ -335,7 +335,7 @@ describe("Groups", function () {
 
 			async.series([
 				function(done) {
-					const newGroup = Object.assing({}, data);
+					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
 						field: "TestField",
@@ -412,7 +412,7 @@ describe("Groups", function () {
 		});
 
 		it("with rules and objects should fail", function(done) {
-			const newGroup = Object.assing({}, data);
+			const newGroup = Object.assign({}, data);
 			newGroup.rules = [{
 				field: "TestField",
 				operator: "GTE",
@@ -427,7 +427,7 @@ describe("Groups", function () {
 		});
 
 		it("with insufficient rule args (min. 1) should fail", function(done) {
-			const newGroup = Object.assing({}, data);
+			const newGroup = Object.assign({}, data);
 			delete newGroup.objects;
 			newGroup.rules = [{
 				field: "TestField",
@@ -443,7 +443,7 @@ describe("Groups", function () {
 		});
 
 		it("with insufficient rule args (min. 2) should fail", function(done) {
-			const newGroup = Object.assing({}, data);
+			const newGroup = Object.assign({}, data);
 			delete newGroup.objects;
 			newGroup.rules = [{
 				field: "TestField",
@@ -459,7 +459,7 @@ describe("Groups", function () {
 		});
 
 		it("with incorrect multiple (2) of rule args should fail", function(done) {
-			const newGroup = Object.assing({}, data);
+			const newGroup = Object.assign({}, data);
 			delete newGroup.objects;
 			newGroup.rules = [{
 				field: "TestField",
