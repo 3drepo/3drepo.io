@@ -476,7 +476,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 					} else {
 						if (key === "rules"
 							&& data.rules
-							&& !data.rules.reduce((x, y) => x && isValidRule(y))) {
+							&& data.rules.map((x) => !isValidRule(x)).reduce((x, y) => x || y)) {
 							typeCorrect = false;
 						}
 						newGroup[key] = data[key];
