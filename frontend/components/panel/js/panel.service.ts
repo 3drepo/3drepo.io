@@ -523,29 +523,6 @@ export class PanelService {
 
 	}
 
-	public convertPoint(point) {
-		return [point[0], point[2], -point[1]];
-	}
-
-	public isPoint(obj) {
-		return Array.isArray(obj) && obj.length === 3;
-	}
-
-	public convertViewpoint(viewpoint) {
-		const keys = Object.keys(viewpoint);
-		const pointsKeys = keys.filter((key) => this.isPoint(viewpoint[key]));
-		pointsKeys.forEach((key) => {
-			viewpoint[key] = this.convertPoint(viewpoint[key]);
-		});
-		return viewpoint;
-	}
-
-	public sortViewpointAxis(data: any[]) {
-		data.forEach((issue) => {
-			this.convertViewpoint(issue.viewpoint);
-		});
-	}
-
 	/**
 	 * Download server response JSON file from panel menu
 	 *
@@ -556,8 +533,7 @@ export class PanelService {
 	public downloadJSON(fileName: string, endpoint: string) {
 		const timestamp = this.$filter('prettyDate')(Date.now(), {showSeconds: false});
 		const modelName = this.viewerService.viewer ? this.viewerService.viewer.settings.name : '';
-		this.apiService.get(endpoint).then((res) => {
-		this.sortViewpointAxis(res.data);
+		this.apiService.get(`${endpoint}&convertCoords=true`).then((res) => {
 		const content = JSON.stringify(res.data, null, 2);
 		const a = document.createElement('a');
 		const file = new Blob([content]);

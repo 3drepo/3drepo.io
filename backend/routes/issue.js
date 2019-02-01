@@ -460,6 +460,28 @@ function updateIssue(req, res, next) {
 	});
 }
 
+
+function convertPoint(point) {
+	return [point[0], point[2], -point[1]];
+}
+
+function convertViewpoint(viewpoint) {
+	const pointsKeys = ['right', 'view_dir', 'look_at', 'position', 'up'];
+	pointsKeys.forEach((key) => {
+		if (viewpoint[key] && viewpoint[key].length === 3){
+			viewpoint[key] = convertPoint(viewpoint[key]);
+		}
+	});
+	return viewpoint;
+}
+
+	
+function sortViewpointAxis(issues) {
+	issues.forEach((issue) => {
+		convertViewpoint(issue.viewpoint);
+	});
+}
+
 function listIssues(req, res, next) {
 
 	let ids;
@@ -489,6 +511,11 @@ function listIssues(req, res, next) {
 	}
 
 	findIssue.then(issues => {
+
+	if (req.query.convertCoords) {
+		sortViewpointAxis(issues);
+	}
+
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
