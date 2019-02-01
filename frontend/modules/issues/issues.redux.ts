@@ -90,15 +90,15 @@ export const toggleSubmodelsIssues = (state = INITIAL_STATE, { showSubmodelIssue
 
 export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues = [] }) => {
 	const issuesMap = keyBy(issues, '_id');
-
 	return {
-		...state, issuesMap,
-		componentState: { ...cloneDeep(INITIAL_STATE.componentState) }
+		...state, issuesMap, componentState: { ...cloneDeep(INITIAL_STATE.componentState) }
 	};
 };
 
 export const fetchIssueSuccess = (state = INITIAL_STATE, { issue }) => {
-	return {...state, componentState: { ...state.componentState, logs: issue.comments}};
+	const issuesMap = cloneDeep(state.issuesMap);
+	issuesMap[issue._id].comments = issue.comments;
+	return {...state, issuesMap, componentState: { ...state.componentState, logs: issue.comments}};
 };
 
 export const fetchIssueFailure = (state = INITIAL_STATE) => {

@@ -54,7 +54,7 @@ interface IProps {
 }
 
 const NewCommentSchema = Yup.object().shape({
-	text: Yup.string().max(220)
+	comment: Yup.string().max(220)
 });
 
 const NEW_PIN_ID = 'newPinId';
@@ -78,9 +78,9 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 		this.togglePinListeners(false);
 	}
 
-	public handleSave = ({ comment }, { resetForm }) => {
-		this.props.onSave(comment);
-		resetForm();
+	public handleSave = (values, form) => {
+		this.props.onSave(values);
+		form.resetForm();
 	}
 
 	public handleNewScreenshot = async () => {
@@ -184,9 +184,10 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 			<Container>
 				<Formik
 					ref={innerRef}
-					initialValues={{ comment, screenshot }}
+					initialValues={{ comment: '', screenshot }}
 					validationSchema={NewCommentSchema}
 					onSubmit={this.handleSave}
+					enableReinitialize={true}
 				>
 					<StyledForm>
 						{this.renderCommentField(!hideComment)}
@@ -201,7 +202,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 									color="secondary"
 									type="submit"
 									mini={true}
-									// disabled={!hideComment && !canComment && (!form.isValid || form.isValidating)}
+									disabled={!hideComment && !canComment && (!form.isValid || form.isValidating)}
 									aria-label="Add new comment"
 								>
 									<SaveIcon fontSize="small" />

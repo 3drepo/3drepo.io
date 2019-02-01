@@ -46,6 +46,13 @@ export function* fetchIssues({teamspace, modelId, revision}) {
 
 		const preparedIssues = data.map((issue) => prepareIssue(issue, jobs));
 
+		yield all(data.map((issue) => {
+			if (issue.commentCount) {
+				return put(IssuesActions.fetchIssue(teamspace, modelId, issue._id));
+			}
+			return;
+		}));
+
 		yield put(IssuesActions.fetchIssuesSuccess(preparedIssues));
 		yield put(IssuesActions.renderPins(data));
 	} catch (error) {
@@ -60,6 +67,13 @@ export function* fetchIssue({teamspace, modelId, issueId}) {
 	try {
 		const {data} = yield API.getIssue(teamspace, modelId, issueId);
 
+		if (data.comments) {
+			data.comments.map((comment) => {
+				if (comment.viewpoint && comment.viewpoint.screenshot) {
+					comment.viewpoint.screenshotPath = API.getAPIUrl(comment.viewpoint.screenshot);
+				}
+			});
+		}
 		yield put(IssuesActions.fetchIssueSuccess(data));
 	} catch (error) {
 		yield put(IssuesActions.fetchIssueFailure());
@@ -187,7 +201,8 @@ export function* updateIssue({ teamspace, modelId, issueData }) {
 
 export function* postComment({ teamspace, modelId, issueData }) {
 	try {
-		const { data } = yield API.updateIssue(teamspace, modelId, issueData);
+		const { data: comment } = yield API.updateIssue(teamspace, modelId, issueData);
+		yield put(IssuesActions.createCommentSuccess(comment));
 		yield put(SnackbarActions.show('Comment added'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('post', 'comment', error));

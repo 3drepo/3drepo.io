@@ -21,7 +21,6 @@ export const searchByFilters = (items = [], filters = [], returnDefaultHidden = 
 	if (!filters.length) {
 		return prefilteredItems;
 	}
-
 	return prefilteredItems.filter((item) => {
 		return values(groupedFilters).every((selectedFilters: any) => {
 				return selectedFilters.some((filter) => {
@@ -41,7 +40,14 @@ export const searchByFilters = (items = [], filters = [], returnDefaultHidden = 
 						});
 					}
 					if (filter.type === DATA_TYPES.QUERY) {
-						return compareStrings(item.name, filter.value.value) || compareStrings(item.desc, filter.value.value);
+						const logFound = item.commentCount ? item.comments.some((log) => {
+							if (log.comment) {
+								return compareStrings(log.comment, filter.value.value);
+							}
+							return false;
+						}) : false;
+
+						return compareStrings(item.name, filter.value.value) || compareStrings(item.desc, filter.value.value) || logFound;
 					}
 				});
 			}

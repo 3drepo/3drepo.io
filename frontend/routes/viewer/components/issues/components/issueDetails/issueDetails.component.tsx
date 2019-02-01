@@ -94,8 +94,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { teamspace, model, fetchIssue, issue } = this.props;
-
+		const { teamspace, model, fetchIssue, issue, logs } = this.props;
 		if (issue._id !== prevProps.issue._id) {
 			fetchIssue(teamspace, model, issue._id);
 		}
@@ -201,24 +200,27 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		this.props.showNewPin(this.props.issue, pinData);
 	}
 
-	public postComment = async (teamspace, model, comment) => {
+	public postComment = async (teamspace, model, {comment, screenshot}) => {
 		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
 		const issueCommentData = {
 			_id: this.issueData._id,
 			rev_id: this.issueData.rev_id,
 			comment,
-			viewpoint
+			viewpoint: {
+				...viewpoint,
+				screenshot
+			}
 		};
 
 		this.props.postComment(teamspace, model, issueCommentData);
 	}
 
-	public handleSave = (comment) => {
+	public handleSave = (formValues) => {
 		const { teamspace, model, saveIssue } = this.props;
 		if (this.isNewIssue) {
 			saveIssue(teamspace, model, this.issueData);
 		} else {
-			this.postComment(teamspace, model, comment);
+			this.postComment(teamspace, model, formValues);
 		}
 	}
 
