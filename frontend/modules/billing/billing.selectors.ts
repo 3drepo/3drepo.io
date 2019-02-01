@@ -29,6 +29,11 @@ export const selectInvoices = createSelector(
 	(state) => state.invoices
 );
 
+export const selectBillingInfo = createSelector(
+	selectBillingDomain,
+	(state) => state.billingInfo
+);
+
 export const selectLicencesInfo = createSelector(selectBillingDomain, (state) => {
 	let numLicences = 0;
 	let pricePerLicense = null;

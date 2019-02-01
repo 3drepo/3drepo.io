@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
-import { values } from 'lodash';
-import { extendTeamspacesInfo } from './teamspaces.helpers';
+import api from './';
 
-export const selectTeamspacesDomain = (state) => Object.assign({}, state.teamspaces);
+/**
+ * Return logged user profile
+ */
+export const fetchProfile = () => {
+	return api.get('me');
+};
 
-export const selectTeamspaces = createSelector(
-	selectTeamspacesDomain, (state) => values(state.teamspaces)
-);
+export const generateApiKey = () => {
+	return api.post('apikey');
+};
 
-export const selectTeamspacesWithAdminAccess = createSelector(
-	selectTeamspaces, (teamspaces) => extendTeamspacesInfo(teamspaces)
-);
-
-export const selectIsPending = createSelector(
-	selectTeamspacesDomain, (state) => state.isPending
-);
+export const deleteApiKey = () => {
+	return api.delete('apikey');
+};

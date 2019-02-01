@@ -22,13 +22,13 @@ import { connect } from '../../helpers/migration';
 import { Subscription } from './subscription.component';
 import {
 	CurrentUserActions,
-	selectBillingInfo,
 	selectCurrentTeamspace,
 	selectSpaceInfo
 } from '../../modules/currentUser';
 import {
 	BillingActions,
 	selectLicencesInfo,
+	selectBillingInfo,
 	selectIsPending
 } from '../../modules/billing';
 

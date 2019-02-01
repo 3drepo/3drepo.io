@@ -107,7 +107,6 @@
    * 	"place":"GET /nabile/subscriptions"
    * }
    */
-
 	router.get("/invoices", middlewares.isAccountAdmin, listInvoices);
 
 	/**
@@ -119,9 +118,7 @@
    * @apiDescription Render a HTML web page of the requested invoice.
    *
    */
-
-	router.get("/invoices/:invoiceNo.html",middlewares.isAccountAdmin,renderInvoice
-	);
+	router.get("/invoices/:invoiceNo.html", middlewares.isAccountAdmin, renderInvoice);
 
 	/**
    * @api {get} /invoices/:invoiceNo.pdf Render invoices as PDF
@@ -132,9 +129,7 @@
    *
    * @apiDescription Render out a PDF version of the requested invocie.
    */
-
-	router.get("/invoices/:invoiceNo.pdf",middlewares.isAccountAdmin,renderInvoicePDF
-	);
+	router.get("/invoices/:invoiceNo.pdf", middlewares.isAccountAdmin, renderInvoicePDF);
 
 	function listInvoices(req, res, next) {
 		const responsePlace = utils.APIInfo(req);

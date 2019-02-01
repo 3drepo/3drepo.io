@@ -99,7 +99,6 @@ router.post("/login", login);
  * }
  *
  */
-
 router.post("/logout", logout);
 
 /**
@@ -136,7 +135,6 @@ router.post("/logout", logout);
  *   }
  *	}
  */
-
 router.get("/login", checkLogin);
 
 /**
@@ -163,7 +161,6 @@ router.get("/login", checkLogin);
  *   "place": "POST /forgotPassword"
  * }
  */
-
 router.post("/forgot-password", forgotPassword);
 
 /**
@@ -195,7 +192,6 @@ router.post("/forgot-password", forgotPassword);
  *   }
  *  }
  */
-
 router.get("/version", printVersion);
 
 /**
@@ -369,7 +365,6 @@ router.get("/version", printVersion);
             ]
         }
  */
-
 router.get("/:account.json", middlewares.loggedIn, listInfo);
 // TODO: divide into different endpoints that makes sense.
 
@@ -392,10 +387,6 @@ router.get("/:account.json", middlewares.loggedIn, listInfo);
  *   "place": "POST /:account/avatar"
  * }
  */
-
-router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
-
-/* NOTE: Duplicate request , Does this need to removed ? */
 router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
 
 /**
@@ -414,7 +405,6 @@ router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
  *  "status":"success"
  * }
  */
-
 router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
 
 /**
@@ -445,7 +435,6 @@ router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
  *   "place": "POST /nabile"
  * }
  */
-
 router.post("/:account", signUp);
 
 /**
@@ -469,7 +458,6 @@ router.post("/:account", signUp);
  *   "place": "POST /niblux/verify"
  * }
  */
-
 router.post("/:account/verify", verify);
 
 /**
@@ -486,7 +474,6 @@ router.post("/:account/verify", verify);
  *  "account":"newAccountUsername"
  * }
  */
-
 router.put("/:account", middlewares.isAccountAdmin, updateUser);
 
 /**
@@ -517,7 +504,6 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
  * 	"place": "PUT /username1/password"
  * 	}
  */
-
 router.put("/:account/password", resetPassword);
 
 function createSession(place, req, res, next, user) {

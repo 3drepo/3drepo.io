@@ -30,7 +30,9 @@ const mapStateToProps = createStructuredSelector({
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onAvatarChange: CurrentUserActions.uploadAvatar,
 	onUserDataChange: CurrentUserActions.updateUser,
-	onPasswordChange: CurrentUserActions.updateUserPassword
+	onPasswordChange: CurrentUserActions.updateUserPassword,
+	onGenerateApiKey: CurrentUserActions.generateApiKey,
+	onDeleteApiKey: CurrentUserActions.deleteApiKey
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Profile);

@@ -96,10 +96,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 
 	public renderDashboardRoute = ({match}) => (
 		<Content>
-			{ !this.props.isInitialised && this.props.isPending
-				? <RoutePlaceholder />
-				: this.renderRoutes(match, this.props.currentUser)
-			}
+			{this.renderRoutes(match, this.props.currentUser)}
 		</Content>
 	)
 

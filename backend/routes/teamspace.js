@@ -18,6 +18,7 @@
 "use strict";
 (function() {
 
+	const _ = require("lodash");
 	const express = require("express");
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require("../response_codes");
@@ -30,16 +31,21 @@
 	 * @apiName getQuotaInfo
 	 * @apiGroup Teamspace
 	 */
-
-	router.get("/quota", middlewares.loggedIn, getQuotaInfo);
+	router.get("/quota", middlewares.isAccountAdmin, getQuotaInfo);
 
 	/**
 	 * @api {get} /members Get Member List
 	 * @apiName getMemberList
 	 * @apiGroup Teamspace
 	 */
-
 	router.get("/members", middlewares.loggedIn, getMemberList);
+
+	/**
+	 * @api {get} /members Get Member List
+	 * @apiName getMemberList
+	 * @apiGroup Teamspace
+	 */
+	router.get("/billingInfo", middlewares.isAccountAdmin, getBillingInfo);
 
 	/**
 	 * @api {delete} /members/:user Remove a team member
@@ -82,25 +88,26 @@
 
 	router.post("/members", middlewares.isAccountAdmin, addTeamMember);
 
-	function getQuotaInfo(req, res, next) {
-
-		User.findByUserName(req.session.user.username).then(user => {
-
-			if(!user) {
-				return Promise.reject(responseCodes.USER_NOT_FOUND);
+	function getBillingInfo(req, res, next) {
+		User.findByUserName(req.params.account).then(user => {
+			let billingInfo = (user.customData.billing || {}).billingInfo;
+			if (billingInfo.toBSON) {
+				billingInfo = _.omit(billingInfo.toBSON(), "_id");
 			}
 
-			if(user.isMemberOfTeamspace(req.params.account)) {
-				return User.getQuotaInfo(req.params.account);
-
-			} else {
-				return Promise.reject(responseCodes.NOT_AUTHORIZED);
-			}
-		}).then(quotaInfo => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, quotaInfo);
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, billingInfo);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
+	}
+
+	function getQuotaInfo(req, res, next) {
+		User.getQuotaInfo(req.params.account)
+			.then(quotaInfo => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, quotaInfo);
+			}).catch(err => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			});
 	}
 
 	function findUsersWithoutMembership(req, res, next) {

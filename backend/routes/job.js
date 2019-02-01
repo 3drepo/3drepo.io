@@ -37,7 +37,6 @@
 	 * @apiName getUserJob
 	 * @apiGroup Jobs
 	 */
-
 	router.get("/myJob", middlewares.isTeamspaceMember, getUserJob);
 
 	/**
@@ -46,7 +45,6 @@
 	 * @apiGroup Jobs
 	 * @apiParam {String} jobId Unique Job ID.
 	 */
-
 	router.put("/jobs/:jobId", middlewares.job.canCreate, updateJob);
 
 	/**
@@ -54,7 +52,6 @@
 	 * @apiName listJobs
 	 * @apiGroup Jobs
 	 */
-
 	router.get("/jobs", middlewares.isTeamspaceMember, listJobs);
 
 	/**
@@ -64,7 +61,6 @@
 	 * @apiParam jobId Unique Job ID
 	 * @apiParam {String} user User to assign job to.
 	 */
-
 	router.post("/jobs/:jobId/:user", middlewares.job.canCreate, addUserToJob);
 
 	/**
@@ -73,7 +69,6 @@
 	 * @apiGroup Jobs
 	 * @apiParam {Object} user User to remove job from.
 	 */
-
 	router.delete("/jobs/unassign/:user", middlewares.job.canDelete, removeUserFromJobs);
 
 	/**
@@ -82,7 +77,6 @@
 	 * @apiGroup Jobs
 	 * @apiParam {String} jobId Unique Job ID.
 	 */
-
 	router.delete("/jobs/:jobId", middlewares.job.canDelete, deleteJob);
 
 	/**
@@ -90,7 +84,6 @@
 	 * @apiName listColors
 	 * @apiGroup Jobs
 	 */
-
 	router.get("/jobs/colors", middlewares.isTeamspaceMember, listColors);
 
 	function addUserToJob(req, res, next) {

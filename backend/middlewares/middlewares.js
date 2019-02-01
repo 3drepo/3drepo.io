@@ -31,6 +31,7 @@
 	const checkMultiplePermissions = require("./checkPermissions").checkMultiplePermissions;
 	const hasReadAccessToModelHelper = require("./checkPermissions").hasReadAccessToModelHelper;
 	const isAccountAdminHelper = require("./checkPermissions").isAccountAdminHelper;
+	const validateUserSession = require("./checkPermissions").validateUserSession;
 
 	const readAccessToModel = [C.PERM_VIEW_MODEL];
 
@@ -71,12 +72,16 @@
 	}
 
 	function isTeamspaceMember(req, res, next) {
-		const teamspace = req.params.account;
-		const user = req.session.user.username;
-		return User.teamspaceMemberCheck(teamspace, user).then(() => {
-			next();
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		return validateUserSession(req).then(() => {
+			const teamspace = req.params.account;
+			const user = req.session.user.username;
+			return User.teamspaceMemberCheck(teamspace, user).then(() => {
+				next();
+			}).catch(err => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			});
+		}).catch((err) => {
+			next(err);
 		});
 	}
 
