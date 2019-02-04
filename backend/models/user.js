@@ -47,6 +47,7 @@ const schema = mongoose.Schema({
 		firstName: String,
 		lastName: String,
 		email: String,
+		apiKey: String,
 		mailListOptOut: Boolean,
 		createdAt: Date,
 		inactive: Boolean,
@@ -140,6 +141,54 @@ schema.statics.authenticate = function (logger, username, password) {
 
 schema.statics.findByUserName = function (user) {
 	return this.findOne({ account: "admin" }, { user });
+};
+
+schema.statics.getProfileByUsername = async function (username) {
+	if (!username) {
+		return null;
+	}
+
+	const dbCol = await DB.getCollection("admin", "system.users");
+	const user = await dbCol.findOne({user: username}, {user: 1,
+		"customData.firstName" : 1,
+		"customData.lastName" : 1,
+		"customData.email" : 1,
+		"customData.avatar" : 1,
+		"customData.apiKey" : 1
+	});
+
+	const customData =  user.customData;
+
+	return 	{
+		username: user.user,
+		firstName: customData.firstName,
+		lastName: customData.lastName,
+		email: customData.email,
+		hasAvatar: !!customData.avatar,
+		apiKey: customData.apiKey
+	};
+};
+
+schema.statics.findByAPIKey = async function (key) {
+	if (!key) {
+		return null;
+	}
+
+	const dbCol = await DB.getCollection("admin", "system.users");
+	const user = await dbCol.findOne({"customData.apiKey" : key});
+	return user;
+};
+
+schema.statics.generateApiKey = async function (username) {
+	const apiKey = crypto.randomBytes(16).toString("hex");
+	const dbCol = await DB.getCollection("admin", "system.users");
+	await dbCol.update({ user: username}, {$set: {"customData.apiKey" : apiKey}});
+	return apiKey;
+};
+
+schema.statics.deleteApiKey = async function (username) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	await dbCol.update({ user: username}, {$unset: {"customData.apiKey" : 1}});
 };
 
 schema.statics.findUsersWithoutMembership = function (teamspace, searchString) {

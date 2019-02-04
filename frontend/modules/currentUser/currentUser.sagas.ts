@@ -23,7 +23,6 @@ import { CurrentUserTypes, CurrentUserActions } from './currentUser.redux';
 import { selectCurrentUser } from './currentUser.selectors';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
-import { TeamspacesActions } from '../teamspaces';
 
 export const getAvatarUrl = (username) => API.getAPIUrl(`${username}/avatar?${Date.now()}`);
 
@@ -32,15 +31,14 @@ export function* fetchUser({ username }) {
 		yield put(CurrentUserActions.setPendingState(true));
 		yield put(CurrentUserActions.setAvatarPendingState(true));
 
-		const { data: { accounts, ...currentUser } } = yield call(API.fetchTeamspace, [username]);
+		const { data } = yield call(API.fetchProfile, [username]);
 
 		yield all([
 			put(CurrentUserActions.fetchUserSuccess({
-				...currentUser,
+				...data,
 				username,
 				avatarUrl: getAvatarUrl(username)
 			})),
-			put(TeamspacesActions.setTeamspaces(accounts)),
 			put(CurrentUserActions.setAsInitialised())
 		]);
 	} catch (e) {
@@ -117,10 +115,40 @@ export function* uploadAvatar({ file }) {
 	}
 }
 
+export function* generateApiKey() {
+	try {
+		yield put(CurrentUserActions.setPendingState(true));
+		const key = (yield API.generateApiKey()).data;
+
+		yield put(SnackbarActions.show('Api key generated'));
+		yield put(CurrentUserActions.setPendingState(false));
+		yield put(CurrentUserActions.updateUserSuccess(key));
+	} catch (e) {
+		yield put(CurrentUserActions.setPendingState(false));
+		yield put(DialogActions.showEndpointErrorDialog('generate', 'api key', e));
+	}
+}
+
+export function* deleteApiKey() {
+	try {
+		yield put(CurrentUserActions.setPendingState(true));
+		yield API.deleteApiKey();
+		yield put(SnackbarActions.show('Api key deleted'));
+		yield put(CurrentUserActions.setPendingState(false));
+		yield put(CurrentUserActions.updateUserSuccess({apiKey: null}));
+
+	} catch (e) {
+		yield put(CurrentUserActions.setPendingState(false));
+		yield put(DialogActions.showEndpointErrorDialog('generate', 'api key', e));
+	}
+}
+
 export default function* teamspaceSaga() {
 	yield takeLatest(CurrentUserTypes.FETCH_USER, fetchUser);
 	yield takeLatest(CurrentUserTypes.FETCH_QUOTA_INFO, fetchQuotaInfo);
 	yield takeLatest(CurrentUserTypes.UPDATE_USER, updateUser);
 	yield takeLatest(CurrentUserTypes.UPDATE_USER_PASSWORD, updateUserPassword);
 	yield takeLatest(CurrentUserTypes.UPLOAD_AVATAR, uploadAvatar);
+	yield takeLatest(CurrentUserTypes.GENERATE_API_KEY, generateApiKey);
+	yield takeLatest(CurrentUserTypes.DELETE_API_KEY, deleteApiKey);
 }

@@ -14,7 +14,6 @@ const Paypal = require("../models/paypal.js");
  * @apiGroup Payment
  * @apiParam id Unique Notification ID
  */
-
 router.post("/paypal/ipn", handleIPN);
 
 /**
@@ -22,7 +21,6 @@ router.post("/paypal/ipn", handleIPN);
  * @apiName executeAgreement
  * @apiGroup Payment
  */
-
 router.post("/paypal/execute", executeAgreement);
 
 function executeAgreement(req, res, next) {

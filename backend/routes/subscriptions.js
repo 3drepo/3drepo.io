@@ -43,7 +43,6 @@ const utils = require("../utils");
  * 	"place":"GET /nabile/subscriptions"
  * }
  */
-
 router.get("/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
 
 /**
@@ -51,7 +50,6 @@ router.get("/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
  * @apiName updateSubscription
  * @apiGroup Subscription
  */
-
 router.post("/subscriptions", middlewares.isAccountAdmin, updateSubscription);
 
 function updateSubscription(req, res, next) {

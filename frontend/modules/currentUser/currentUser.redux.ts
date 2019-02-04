@@ -31,8 +31,10 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 	updateButtonText: ['value'],
 	uploadAvatar: ['file'],
 	refreshAvatar: ['avatarUrl'],
+	generateApiKey: [],
+	deleteApiKey: [],
 	setAsInitialised: []
-}, { prefix: 'TEAMSPACE_' });
+}, { prefix: 'CURRENT_USER_' });
 
 export const INITIAL_STATE = {
 	currentTeamspace: '',

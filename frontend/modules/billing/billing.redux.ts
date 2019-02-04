@@ -20,6 +20,8 @@ import { createActions, createReducer } from 'reduxsauce';
 export const { Types: BillingTypes, Creators: BillingActions } = createActions({
 	fetchPlans: [],
 	fetchPlansSuccess: ['plans'],
+	fetchBillingInfo: ['teamspace'],
+	fetchBillingInfoSuccess: ['billingInfo'],
 	fetchInvoices: ['teamspace'],
 	fetchInvoicesSuccess: ['invoices'],
 	fetchSubscriptions: ['teamspace'],
@@ -34,6 +36,7 @@ export const INITIAL_STATE = {
 	invoices: [],
 	plans: [],
 	subscriptions: [],
+	billingInfo: {},
 	isPending: true
 };
 
@@ -46,6 +49,9 @@ const fetchInvoicesSuccess = (state = INITIAL_STATE, { invoices }) =>
 const fetchSubscriptionsSuccess = (state = INITIAL_STATE, { subscriptions }) =>
 	Object.assign({}, state, { subscriptions, isPending: false });
 
+const fetchBillingInfoSuccess = (state = INITIAL_STATE, { billingInfo }) =>
+	Object.assign({}, state, { billingInfo, isPending: false });
+
 export const setPendingState = (state = INITIAL_STATE, { isPending }) =>
 	Object.assign({}, state, { isPending });
 
@@ -53,5 +59,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[BillingTypes.SET_PENDING_STATE]: setPendingState,
 	[BillingTypes.FETCH_PLANS_SUCCESS]: fetchPlansSuccess,
 	[BillingTypes.FETCH_INVOICES_SUCCESS]: fetchInvoicesSuccess,
-	[BillingTypes.FETCH_SUBSCRIPTIONS_SUCCESS]: fetchSubscriptionsSuccess
+	[BillingTypes.FETCH_SUBSCRIPTIONS_SUCCESS]: fetchSubscriptionsSuccess,
+	[BillingTypes.FETCH_BILLING_INFO_SUCCESS]: fetchBillingInfoSuccess
 });

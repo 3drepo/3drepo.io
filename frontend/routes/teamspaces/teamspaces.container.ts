@@ -20,8 +20,8 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../helpers/migration';
 
 import { Teamspaces } from './teamspaces.component';
-import { selectCurrentTeamspace, selectIsPending } from '../../modules/currentUser';
-import { selectTeamspaces, TeamspacesActions } from '../../modules/teamspaces';
+import { selectCurrentTeamspace } from '../../modules/currentUser';
+import { selectTeamspaces, selectIsPending, TeamspacesActions } from '../../modules/teamspaces';
 import { ModelActions } from './../../modules/model';
 import { DialogActions } from '../../modules/dialog';
 
@@ -40,6 +40,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	createModel: TeamspacesActions.createModel,
 	updateModel: TeamspacesActions.updateModel,
 	removeModel: TeamspacesActions.removeModel,
+	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
 	downloadModel: ModelActions.downloadModel
 }, dispatch);
 

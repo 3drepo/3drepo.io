@@ -22,6 +22,19 @@ import { TeamspacesTypes, TeamspacesActions } from './teamspaces.redux';
 import { SnackbarActions } from '../snackbar';
 import { DialogActions } from '../dialog';
 
+export function* fetchTeamspaces({ username }) {
+	try {
+		yield put(TeamspacesActions.setPendingState(true));
+		const accounts = (yield API.fetchTeamspace(username)).data.accounts;
+
+		yield put(TeamspacesActions.setTeamspaces(accounts));
+	} catch (e) {
+		yield put(DialogActions.showEndpointErrorDialog('fetch', 'team spaces', e));
+	}
+
+	yield put(TeamspacesActions.setPendingState(false));
+}
+
 // Projects
 export function* createProject({ teamspace, projectData }) {
 	try {
@@ -107,6 +120,8 @@ export function* removeModel({ teamspace, modelData }) {
 }
 
 export default function* TeamspacesSaga() {
+	yield takeLatest(TeamspacesTypes.FETCH_TEAMSPACES, fetchTeamspaces);
+
 	// Projects
 	yield takeLatest(TeamspacesTypes.CREATE_PROJECT, createProject);
 	yield takeLatest(TeamspacesTypes.UPDATE_PROJECT, updateProject);
