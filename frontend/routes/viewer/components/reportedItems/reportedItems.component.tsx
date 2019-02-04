@@ -49,6 +49,7 @@ import { Viewer } from '../../../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { ACTIONS_TYPES } from '../../../../constants/issues';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
+import { EmptyStateInfo } from '../views/views.styles';
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
 	<IconButton
@@ -181,7 +182,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		const relatedRisk = this.state.filteredItems.find((item) => item._id === id);
 
 		if (relatedRisk) {
-			this.handleItemFocus(relatedRisk)();
+			this.handleShowRiskDetails(relatedRisk)();
 		}
 	}
 
@@ -270,6 +271,8 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	public renderListView = renderWhenTrue(() => (
 		<>
 			<ViewerPanelContent className="height-catcher" padding="0">
+				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredItems.length)}
+				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredItems.length)}
 				{this.renderItemsList(this.state.filteredItems.length)}
 			</ViewerPanelContent>
 			<ViewerPanelFooter alignItems="center" justify="space-between">
@@ -360,6 +363,14 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 			</>
 		);
 	}
+
+	public renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>No entry have been created yet</EmptyStateInfo>
+	));
+
+	public renderNotFound = renderWhenTrue(() => (
+		<EmptyStateInfo>No entry matched</EmptyStateInfo>
+	));
 
 	public render() {
 		return (
