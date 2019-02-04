@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeLatest, takeEvery } from 'redux-saga/effects';
 import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 
 import * as API from '../../services/api';
@@ -63,7 +63,6 @@ export function* fetchIssues({teamspace, modelId, revision}) {
 
 export function* fetchIssue({teamspace, modelId, issueId}) {
 	yield put(IssuesActions.toggleDetailsPendingState(true));
-
 	try {
 		const {data} = yield API.getIssue(teamspace, modelId, issueId);
 
@@ -609,7 +608,7 @@ export function* setNewIssue() {
 
 export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
-	yield takeLatest(IssuesTypes.FETCH_ISSUE, fetchIssue);
+	yield takeEvery(IssuesTypes.FETCH_ISSUE, fetchIssue);
 	yield takeLatest(IssuesTypes.SAVE_ISSUE, saveIssue);
 	yield takeLatest(IssuesTypes.UPDATE_ISSUE, updateIssue);
 	yield takeLatest(IssuesTypes.POST_COMMENT, postComment);
