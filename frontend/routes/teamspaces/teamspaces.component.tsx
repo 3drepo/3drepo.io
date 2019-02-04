@@ -393,11 +393,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	}
 
 	public setActiveProject = ({active, name}) => {
-		if (active) {
-			this.setState({ activeProject: name	});
-		} else {
-			this.setState({ activeProject: ''	});
-		}
+		this.setState({ activeProject: active ? name : ''	});
 	}
 
 	public renderTeamspaces = (teamspaces) => teamspaces.map((teamspace, index) => (
