@@ -8,7 +8,7 @@ import { Field, Form, withFormik, connect } from 'formik';
 import InputLabel from '@material-ui/core/InputLabel';
 import { Image } from '../../../../../components/image';
 import {
-	FieldsRow, StyledFormControl, StyledTextField
+	FieldsRow, StyledFormControl
 }	from './../../../risks/components/riskDetails/riskDetails.styles';
 import {
 	ISSUE_STATUSES, ISSUE_PRIORITIES, ISSUE_TOPIC_TYPES, DEFAULT_PROPORTIES
@@ -17,6 +17,7 @@ import { CellSelect } from '../../../../../components/customTable/components/cel
 import { DateField } from '../../../../../components/dateField/dateField.component';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { canChangeBasicProperty, canChangeStatus, canChangeAssigned } from '../../../../../../helpers/issues';
+import { TextField } from '../../../../../components/textField/textField.component';
 
 interface IProps {
 	issue: any;
@@ -148,7 +149,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						</StyledFormControl>
 					</FieldsRow>
 					<Field name="description" render={({ field }) => (
-						<StyledTextField
+						<TextField
 							{...field}
 							requiredConfirm={!this.isNewIssue}
 							fullWidth
