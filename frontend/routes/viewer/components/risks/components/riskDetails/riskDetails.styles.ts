@@ -19,9 +19,8 @@ import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
 
-import { TextField } from '../../../../../components/textField/textField.component';
+import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 
-export const StyledTextField = styled(TextField)``;
 export const StyledFormControl = styled(FormControl)``;
 
 export const Container = styled.div`
@@ -29,14 +28,14 @@ export const Container = styled.div`
   flex-direction: column;
   overflow: hidden;
 
-  ${StyledTextField},
+  ${TextFieldStyles.Container},
   ${StyledFormControl} {
     margin: 8px 0;
   }
 `;
 
 export const FieldsRow = styled(Grid)`
-  ${StyledTextField},
+  ${TextFieldStyles.Container},
   ${StyledFormControl} {
     flex: 1;
 
