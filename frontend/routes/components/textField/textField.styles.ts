@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
+import TextField from '@material-ui/core/TextField';
 
 export const Container = styled.div`
 	position: relative;
@@ -32,5 +33,11 @@ export const StyledIconButton = styled(IconButton)`
 	&& {
 		padding: 5px;
 		margin-right: 0;
+	}
+`;
+
+export const StyledTextField = styled(TextField)`
+	&& {
+		margin: 8px 0;
 	}
 `;

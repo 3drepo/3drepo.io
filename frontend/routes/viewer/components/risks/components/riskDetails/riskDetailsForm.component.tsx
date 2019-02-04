@@ -14,9 +14,9 @@ import {
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
-import { FieldsRow, StyledFormControl, StyledTextField } from './riskDetails.styles';
+import { TextField } from '../../../../../components/textField/textField.component';
+import { FieldsRow, StyledFormControl } from './riskDetails.styles';
 import { Image } from '../../../../../components/image';
-import { AutosuggestField } from '../../../../../components/autosuggestField/autosuggestField.component';
 
 const RiskSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
@@ -108,7 +108,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			<Form>
 				<FieldsRow container alignItems="center" justify="space-between">
 					<Field name="safetibase_id" render={({ field }) => (
-						<StyledTextField
+						<TextField
 							{...field}
 							requiredConfirm={!this.isNewRisk}
 							validationSchema={RiskSchema}
@@ -117,7 +117,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					)} />
 
 					<Field name="associated_activity" render={({ field }) => (
-						<StyledTextField
+						<TextField
 							{...field}
 							requiredConfirm={!this.isNewRisk}
 							label="Associated Activity"
@@ -126,7 +126,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				</FieldsRow>
 
 				<Field name="description" render={({ field, form }) => (
-					<StyledTextField
+					<TextField
 						{...field}
 						requiredConfirm={!this.isNewRisk}
 						validationSchema={RiskSchema}
@@ -218,7 +218,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				</FieldsRow>
 
 				<Field name="mitigation_desc" render={({ field, form }) => (
-					<StyledTextField
+					<TextField
 						{...field}
 						requiredConfirm={!this.isNewRisk}
 						validationSchema={RiskSchema}

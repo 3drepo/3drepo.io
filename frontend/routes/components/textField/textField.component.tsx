@@ -16,11 +16,11 @@
  */
 
 import * as React from 'react';
-import MaterialTextField, { TextFieldProps } from '@material-ui/core/TextField';
+import { TextFieldProps } from '@material-ui/core/TextField';
 import SaveIcon from '@material-ui/icons/Save';
 import CancelIcon from '@material-ui/icons/Cancel';
 
-import { Container, ActionsLine, StyledIconButton } from './textField.styles';
+import { Container, ActionsLine, StyledIconButton, StyledTextField } from './textField.styles';
 import { Formik, Field } from 'formik';
 
 interface IProps {
@@ -125,7 +125,7 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 						const fieldValue = requiredConfirm ? currentValue : value;
 
 						return (
-							<MaterialTextField
+							<StyledTextField
 								{...props}
 								{...field}
 								value={fieldValue}
