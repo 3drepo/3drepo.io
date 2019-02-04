@@ -45,6 +45,7 @@ interface IProps {
 	saveIssue: (teamspace, modelId, issue) => void;
 	updateIssue: (teamspace, modelId, issue) => void;
 	postComment: (teamspace, modelId, issueData) => void;
+	removeComment: (teamspace, modelId, issueData) => void;
 	subscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	unsubscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	getMyJob: (teamspace) => void;
@@ -96,6 +97,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps) {
 		const { teamspace, model, fetchIssue, issue, logs } = this.props;
+
 		if (issue._id !== prevProps.issue._id) {
 			fetchIssue(teamspace, model, issue._id);
 		}
@@ -135,9 +137,26 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		);
 	}
 
-	public renderLogList = renderWhenTrue(() => (
-		<LogList items={this.props.logs} isPending={this.props.fetchingDetailsIsPending} />
-	));
+	public removeComment = (index, guid) => {
+		const issueData = {
+			_id: this.issueData._id,
+			rev_id: this.issueData.rev_id,
+			issueNumber: this.issueData.number,
+			commentIndex: index,
+			guid
+		};
+		this.props.removeComment(this.props.teamspace, this.props.model, issueData);
+	}
+
+	public renderLogList = renderWhenTrue(() => {
+		return (
+			<LogList
+				items={this.props.logs}
+				isPending={this.props.fetchingDetailsIsPending}
+				removeLog={this.removeComment}
+				teamspace={this.props.teamspace}
+			/>);
+	});
 
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, logs } = this.props;

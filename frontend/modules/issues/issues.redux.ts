@@ -28,6 +28,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	saveIssue: ['teamspace', 'model', 'issueData'],
 	updateIssue: ['teamspace', 'modelId', 'issueData'],
 	postComment: ['teamspace', 'modelId', 'issueData'],
+	removeComment: ['teamspace', 'modelId', 'issueData'],
 	saveIssueSuccess: ['issue'],
 	setNewIssue: [],
 	renderPins: [],
@@ -49,7 +50,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	subscribeOnIssueCommentsChanges: ['teamspace', 'modelId', 'issueId'],
 	unsubscribeOnIssueCommentsChanges: ['teamspace', 'modelId', 'issueId'],
 	createCommentSuccess: ['comment'],
-	deleteCommentSuccess: ['comment'],
+	deleteCommentSuccess: ['commentGuid'],
 	updateCommentSuccess: ['comment'],
 	toggleSortOrder: ['sortOrder'],
 	updateNewIssue: ['newIssue']
@@ -133,10 +134,10 @@ export const updateCommentSuccess = (state = INITIAL_STATE, { comment }) => {
 	return {...state, componentState: { ...state.componentState, logs }};
 };
 
-export const deleteCommentSuccess = (state = INITIAL_STATE, { comment }) => {
+export const deleteCommentSuccess = (state = INITIAL_STATE, { commentGuid }) => {
 	const logs = cloneDeep(state.componentState.logs);
-	const updatedlogs = logs.filter((log) => log.guid === comment.guid);
-	return {...state, componentState: { ...state.componentState, logs: updatedlogs }};
+	const updatedLogs = logs.filter((log) => log.guid !== commentGuid );
+	return {...state, componentState: { ...state.componentState, logs: updatedLogs }};
 };
 
 export const toggleSortOrder = (state = INITIAL_STATE) => {

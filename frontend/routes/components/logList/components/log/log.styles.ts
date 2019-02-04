@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import { COLOR } from '../../../../../styles/colors';
+import { TooltipButton } from '../../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
 
 export const Container = styled.div`
   padding: 10px;
@@ -77,3 +78,16 @@ export const Screenshot = styled.img`
   bottom: 0;
   left: 0;
 ` as any;
+
+export const MessageContainer = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+`;
+
+export const RemoveButtonWrapper = styled.div`
+  position: absolute;
+  right: 0;
+  top: -10px;
+`;

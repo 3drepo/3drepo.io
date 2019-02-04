@@ -223,6 +223,26 @@ export function* postComment({ teamspace, modelId, issueData }) {
 	}
 }
 
+export function* removeComment({ teamspace, modelId, issueData }) {
+	try {
+		const { issueNumber, commentIndex, _id, rev_id, guid } = issueData;
+		const commentData = {
+			comment: '',
+			number: issueNumber,
+			delete: true,
+			commentIndex,
+			_id,
+			rev_id
+		};
+
+		yield API.updateIssue(teamspace, modelId, commentData);
+		yield put(IssuesActions.deleteCommentSuccess(guid));
+		yield put(SnackbarActions.show('Comment removed'));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('remove', 'comment', error));
+	}
+}
+
 export function* renderPins() {
 	try {
 		const filteredIssues = yield select(selectFilteredIssues);
@@ -563,7 +583,7 @@ const onCreateCommentEvent = (createdComment) => {
 };
 
 const onDeleteCommentEvent = (deletedComment) => {
-	dispatch(IssuesActions.deleteCommentSuccess(deletedComment));
+	dispatch(IssuesActions.deleteCommentSuccess(deletedComment.guid));
 };
 
 export function* subscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
@@ -612,6 +632,7 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.SAVE_ISSUE, saveIssue);
 	yield takeLatest(IssuesTypes.UPDATE_ISSUE, updateIssue);
 	yield takeLatest(IssuesTypes.POST_COMMENT, postComment);
+	yield takeLatest(IssuesTypes.REMOVE_COMMENT, removeComment);
 	yield takeLatest(IssuesTypes.RENDER_PINS, renderPins);
 	yield takeLatest(IssuesTypes.DOWNLOAD_ISSUES, downloadIssues);
 	yield takeLatest(IssuesTypes.PRINT_ISSUES, printIssues);

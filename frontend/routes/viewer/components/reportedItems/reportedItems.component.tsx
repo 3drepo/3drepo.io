@@ -312,9 +312,9 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public renderSortIcon = (Icon) => {
 		if (this.props.sortOrder === 'asc') {
-			return <Icon.ASC /> ;
+			return <Icon.ASC IconProps={{ fontSize: 'small' }} /> ;
 		}
-		return <Icon.DESC /> ;
+		return <Icon.DESC IconProps={{ fontSize: 'small' }} /> ;
 	}
 
 	public renderActionsMenu = () => (

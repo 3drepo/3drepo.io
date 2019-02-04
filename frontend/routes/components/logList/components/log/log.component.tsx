@@ -19,9 +19,18 @@ import * as React from 'react';
 import { DateTime } from '../../../dateTime/dateTime.component';
 import DynamicUsername from '../..//../dynamicUsername/dynamicUsername.container';
 import {
-	Container, UserMessage, SystemMessage, Info, Screenshot, ScreenshotMessage, ScreenshotWrapper
+	Container,
+	UserMessage,
+	SystemMessage,
+	Info,
+	Screenshot,
+	ScreenshotMessage,
+	ScreenshotWrapper,
+	MessageContainer,
+	RemoveButtonWrapper
 } from './log.styles';
-
+import CloseIcon from '@material-ui/icons/Close';
+import { TooltipButton } from '../../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { convertActionCommentToText } from '../../../../../helpers/issues';
 
@@ -34,6 +43,10 @@ interface IProps {
 	companyName: string;
 	userName: string;
 	teamspace: string;
+	guid: string;
+	sealed: boolean;
+	index: number;
+	removeLog: (index, guid) => void;
 }
 
 export class Log extends React.PureComponent<IProps, any> {
@@ -53,8 +66,25 @@ export class Log extends React.PureComponent<IProps, any> {
 		return Boolean(this.props.comment) && !Boolean(this.props.viewpoint.screenshotPath);
 	}
 
+	public removeComment = () => {
+		this.props.removeLog(this.props.index, this.props.guid);
+	}
+
+	public renderRemoveButton = renderWhenTrue(
+		<RemoveButtonWrapper>
+			<TooltipButton
+				label="Remove"
+				action={this.removeComment}
+				Icon={CloseIcon}
+			/>
+		</RemoveButtonWrapper>
+	);
+
 	public renderUserMessage = renderWhenTrue(
-		<UserMessage>{this.props.comment}</UserMessage>
+		<MessageContainer>
+			<UserMessage>{this.props.comment}</UserMessage>
+			{this.renderRemoveButton(!this.props.sealed && !this.props.action)}
+		</MessageContainer>
 	);
 
 	public renderSystemMessage = renderWhenTrue(
