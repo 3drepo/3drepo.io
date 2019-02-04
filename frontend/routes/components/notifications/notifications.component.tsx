@@ -51,6 +51,7 @@ const getSunday = (offset: number = 0) => {
 interface IProps {
 	notifications: INotification[];
 	currentUser: any;
+	drawerOpened: boolean;
 	sendGetNotifications: () => void;
 	confirmSendDeleteAllNotifications: () => void;
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
@@ -58,6 +59,7 @@ interface IProps {
 	sendDeleteNotification: (id: string) => void;
 	deleteNotification: (notification: any) => void;
 	upsertNotification: (notification: any) => void;
+	setDrawerPanelState: (open: boolean) => void;
 }
 
 const NotificationButton = ({ unreadCount, onClick }) => (
@@ -102,7 +104,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 	}
 
 	public toggleDrawer = () => {
-		this.setState({open: !this.state.open });
+		this.props.setDrawerPanelState(!this.props.drawerOpened);
 	}
 
 	public toggleMenu = (e: React.SyntheticEvent) => {
@@ -216,7 +218,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 				<Drawer
 					variant="persistent"
 					anchor="right"
-					open={this.state.open}
+					open={this.props.drawerOpened}
 					onClose={this.toggleDrawer}
 					SlideProps={{unmountOnExit: true}}
 				>

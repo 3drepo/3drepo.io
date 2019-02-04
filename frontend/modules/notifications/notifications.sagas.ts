@@ -75,6 +75,7 @@ export function* sendDeleteAllNotifications() {
 	try {
 		yield put(NotificationsActions.setNotifications([]));
 		yield API.deleteAllNotifications();
+		yield put(NotificationsActions.setDrawerPanelState(false));
 	} catch (error) {
 		yield put(NotificationsActions.setNotifications(notifications));
 		yield put(DialogActions.showEndpointErrorDialog('delete', 'notification', error));
