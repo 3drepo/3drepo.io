@@ -60,8 +60,8 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		<NameRow>
 			<Name>{this.props.viewpoint.name}</Name>
 			<IconsGroup>
-				<StyledEditIcon color="secondary" onClick={this.props.onOpenEditMode} />
-				<StyledDeleteIcon color="secondary" onClick={this.props.onDelete} />
+				<StyledEditIcon onClick={this.props.onOpenEditMode} />
+				<StyledDeleteIcon onClick={this.props.onDelete} />
 			</IconsGroup>
 		</NameRow>
 	));
@@ -82,9 +82,9 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 						/>
 					)} />
 					<IconsGroup>
-						<StyledCancelIcon color="secondary" onClick={this.props.onCancelEditMode} />
+						<StyledCancelIcon onClick={this.props.onCancelEditMode} />
 						<SaveIconButton type="submit" disableRipple={true}>
-							<StyledSaveIcon color="secondary" />
+							<StyledSaveIcon />
 						</SaveIconButton>
 					</IconsGroup>
 				</StyledForm>

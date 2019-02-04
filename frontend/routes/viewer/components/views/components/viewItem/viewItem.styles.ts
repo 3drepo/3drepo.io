@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Form } from 'formik';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CancelIcon from '@material-ui/icons/Cancel';
@@ -27,6 +27,15 @@ import TextField from '@material-ui/core/TextField';
 
 import { COLOR } from '../../../../../../styles/colors';
 import * as ImageStyles from '../../../../../components/image/image.styles';
+import { FONT_WEIGHT } from '../../../../../../styles';
+
+const IconStyles = css`
+  cursor: pointer;
+
+  &:hover {
+    color: ${COLOR.BLACK_40};
+  }
+`;
 
 export const ViewpointItem = styled(MenuItem)`
   && {
@@ -55,8 +64,7 @@ export const StyledForm = styled(Form)`
 export const IconsGroup = styled.div`
   display: flex;
   align-items: center;
-  margin-right: 21px;
-  flex-direction: column;
+  margin-right: 20px;
 `;
 
 export const ThumbnailPlaceholder = styled.div`
@@ -67,54 +75,39 @@ export const ThumbnailPlaceholder = styled.div`
 
 export const StyledDeleteIcon = styled(DeleteIcon)`
   && {
-    cursor: pointer;
-    margin-top: 8px;
-
-    &:hover {
-      color: ${COLOR.BLACK_40};
-    }
+    ${IconStyles}
   }
 `;
 
 export const StyledEditIcon = styled(EditIcon)`
   && {
-    cursor: pointer;
-
-    &:hover {
-      color: ${COLOR.BLACK_40};
-    }
+    ${IconStyles}
+    margin-right: 14px;
   }
 `;
 
 export const NewViewpointName = styled(TextField)`
   && {
     margin-left: 12px;
+    margin-right: 12px;
   }
 `;
 
 export const StyledCancelIcon = styled(CancelIcon)`
   && {
-    cursor: pointer;
-
-    &:hover {
-      color: ${COLOR.BLACK_40};
-    }
+    ${IconStyles}
+    margin-right: 14px;
   }
 `;
 
 export const StyledSaveIcon = styled(SaveIcon)`
   && {
-    cursor: pointer;
-
-    &:hover {
-      color: ${COLOR.BLACK_40};
-    }
+    ${IconStyles}
   }
 `;
 
 export const SaveIconButton = styled(IconButton)`
   && {
-    margin-top: 8px;
     padding: 0;
 
     &:hover {
@@ -132,7 +125,7 @@ export const NameRow = styled.div`
 
 export const Name = styled.h3`
   margin-left: 16px;
-  font-weight: 400;
+  font-weight: ${FONT_WEIGHT.NORMAL};
   font-size: 14px;
   color: ${COLOR.BLACK};
 `;
