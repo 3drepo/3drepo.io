@@ -1,6 +1,8 @@
-const getWebpackConfig = require('./webpack.common.config');
 const LiveReloadPlugin = require('webpack-livereload-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin')
+const getWebpackConfig = require('./webpack.common.config');
 const MODES = require('./tools/modes');
+const PATHS = require('./tools/paths');
 
 const statsOptions = {
   assets: true,
@@ -26,6 +28,11 @@ module.exports = getWebpackConfig({
   mode: MODES.DEVELOPMENT,
   devtool: 'inline-source-map',
   plugins: [
+    new CleanWebpackPlugin([`${PATHS.DIST_DIR}/three_d_repo.*.js`], {
+      root: PATHS.PROJECT_DIR,
+      watch: true,
+      beforeEmit: true
+    }),
     new LiveReloadPlugin({
       hostname: 'localhost',
       port: '35729',

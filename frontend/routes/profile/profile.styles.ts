@@ -22,6 +22,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { COLOR } from '../../styles';
 
 export const FormContainer = styled(Grid)`
 	padding: 24px;
@@ -43,6 +44,28 @@ export const StyledButton = styled(Button)`
 		margin-top: 16px;
 		align-self: flex-end;
 	}
+`;
+
+export const StyledButtonContainer = styled.div`
+	&& {
+		margin-top: 16px;
+		align-self: flex-end;
+	}
+
+	& > button {
+		margin-right: 10px;
+	}
+`;
+
+export const DeleteButton = styled(Button)`
+  && {
+    color: ${COLOR.WHITE_87};
+	background-color:  rgba(234, 57, 57, 0.87);
+  }
+
+  &&:hover {
+	background-color:  rgba(234, 57, 57, 1);
+  }
 `;
 
 export const StyledTextField = styled(TextField)``;

@@ -106,7 +106,7 @@ describe("Chat service", function () {
 							.send({ username: account, password })
 							.expect(200, done);
 					},
-					done => agent.delete("/me/notifications").expect(200, done)
+					done => agent.delete("/notifications").expect(200, done)
 				], done);
 
 			});
@@ -430,7 +430,7 @@ describe("Chat service", function () {
 														.send(issue)
 														.expect(200 , next);
 
-			const deleteAllNotifications  = next => agent2.delete("/me/notifications")
+			const deleteAllNotifications  = next => agent2.delete("/notifications")
 				.expect(200, err => next(err));
 
 			async.waterfall([

@@ -28,6 +28,14 @@ export const getPlans = () => {
  * Get subscriptions
  * @param teamspace
  */
+export const getBillingInfo = (teamspace) => {
+	return api.get(`${teamspace}/billingInfo`);
+};
+
+/**
+ * Get subscriptions
+ * @param teamspace
+ */
 export const getSubscriptions = (teamspace) => {
 	return api.get(`${teamspace}/subscriptions`);
 };

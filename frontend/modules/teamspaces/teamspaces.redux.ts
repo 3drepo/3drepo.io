@@ -19,8 +19,11 @@ import { createActions, createReducer } from 'reduxsauce';
 import { cloneDeep, keyBy } from 'lodash';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
+	fetchTeamspaces: ['username'],
 	setTeamspaces: ['teamspaces'],
+	setPendingState: ['pendingState'],
 	setModelUploadStatus: ['teamspace', 'project', 'model', 'modelData'],
+
 	// Projects
 	createProject: ['teamspace', 'projectData'],
 	updateProject: ['teamspace', 'projectName', 'projectData'],
@@ -38,7 +41,8 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 }, { prefix: 'TEAMSPACES_' });
 
 export const INITIAL_STATE = {
-	teamspaces: {}
+	teamspaces: {},
+	isPending: false
 };
 
 const setTeamspaces = (state = INITIAL_STATE, action) => {
@@ -48,6 +52,7 @@ const setTeamspaces = (state = INITIAL_STATE, action) => {
 
 // Projects
 const updateProjectSuccess = (state = INITIAL_STATE, action) => {
+
 	const teamspaces = cloneDeep(state.teamspaces);
 	const projects = [...state.teamspaces[action.teamspace].projects].map((project) => {
 		if (project.name === action.projectName) {
@@ -131,9 +136,15 @@ const setModelUploadStatus = (state = INITIAL_STATE, action) => {
 	return { ...state, teamspaces };
 };
 
+const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
+	return Object.assign({}, state, { isPending: pendingState });
+};
+
 export const reducer = createReducer({ ...INITIAL_STATE }, {
 	[TeamspacesTypes.SET_TEAMSPACES]: setTeamspaces,
 	[TeamspacesTypes.SET_MODEL_UPLOAD_STATUS]: setModelUploadStatus,
+	[TeamspacesTypes.SET_PENDING_STATE]: setPendingState,
+
 	// Projects
 	[TeamspacesTypes.UPDATE_PROJECT_SUCCESS]: updateProjectSuccess,
 	[TeamspacesTypes.CREATE_PROJECT_SUCCESS]: createProjectSuccess,

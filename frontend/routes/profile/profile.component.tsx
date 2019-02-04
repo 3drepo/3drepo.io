@@ -22,19 +22,22 @@ import { Panel } from '../components/panel/panel.component';
 import { ProfileDataForm } from './components/profileDataForm.component';
 import { PasswordChangeForm } from './components/passwordChangeForm.component';
 import { Container } from './profile.styles';
+import { APIKeyForm } from './components/apiKeyForm.component';
 
 interface IProps {
 	currentUser: any;
 	onPasswordChange: (passwords) => void;
 	onUserDataChange: (userData) => void;
 	onAvatarChange: (file) => void;
+	onGenerateApiKey: () => void;
+	onDeleteApiKey: () => void;
 	isAvatarPending: boolean;
 }
 
 export class Profile extends React.PureComponent<IProps, any> {
-
 	public render() {
-		const { currentUser, onUserDataChange, onAvatarChange, isAvatarPending, onPasswordChange } = this.props;
+		const { currentUser, onUserDataChange, onAvatarChange,
+				isAvatarPending, onPasswordChange, onGenerateApiKey, onDeleteApiKey} = this.props;
 
 		const profileDataFormProps = {
 			isAvatarPending,
@@ -45,11 +48,18 @@ export class Profile extends React.PureComponent<IProps, any> {
 
 		const passwordChangeFormProps = { onPasswordChange } as any;
 
+		const apiKeyProps = {
+			onGenerateApiKey,
+			onDeleteApiKey,
+			...pick(currentUser, 'apiKey')
+		};
+
 		return (
 			<Panel title="Profile">
 				<Container>
 					{currentUser.email ? <ProfileDataForm {...profileDataFormProps} /> : null}
 					<PasswordChangeForm {...passwordChangeFormProps} />
+					<APIKeyForm  {...apiKeyProps}/>
 				</Container>
 			</Panel>
 		);

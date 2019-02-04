@@ -75,7 +75,9 @@ interface IProps {
 	teamspaces: any[];
 	isLoadingTeamspace: boolean;
 	isTeamspaceAdmin: boolean;
+	currentUser: {username: string};
 	onTeamspaceChange: (teamspace) => void;
+	fetchTeamspaces: (username) => void;
 }
 
 interface IState {
@@ -112,9 +114,13 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const { teamspaces, defaultTeamspace, match, history } = this.props;
+		const { teamspaces, defaultTeamspace, match, history, currentUser } = this.props;
 		const { activeTab } = this.state;
 		const selectedTeamspace = match.params.teamspace;
+
+		if (teamspaces.length === 0) {
+			this.props.fetchTeamspaces(currentUser.username);
+		}
 
 		const changes = {
 			teamspacesItems: teamspaces.map(({ account }) => ({ value: account }))
@@ -137,10 +143,13 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
+		const {teamspaces, match, onTeamspaceChange} = this.props;
 
-		const teamspacesChanged = !isEqual(this.props.teamspaces, prevProps.teamspaces);
+		const teamspacesChanged = !isEqual(teamspaces, prevProps.teamspaces);
+
 		if (teamspacesChanged) {
-			changes.teamspacesItems = this.props.teamspaces.map(({account}) => ({value: account}));
+			changes.teamspacesItems = teamspaces.map(({account}) => ({value: account}));
+			onTeamspaceChange(match.params.teamspace);
 		}
 
 		if (!isEmpty(changes)) {

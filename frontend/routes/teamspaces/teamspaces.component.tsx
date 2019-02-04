@@ -58,6 +58,8 @@ interface IProps {
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
 
+	fetchTeamspaces: (username) => void;
+
 	createProject: (teamspace, projectData) => void;
 	updateProject: (teamspace, projectName, projectData) => void;
 	removeProject: (teamspace, projectName) => void;
@@ -92,6 +94,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
+		if (this.props.teamspaces.length === 0 ) {
+			this.props.fetchTeamspaces(this.props.currentTeamspace);
+		}
+
 		const { teamspace } = queryString.parse(this.props.location.search);
 		const lastTeamspace = localStorage.getItem('lastTeamspace');
 

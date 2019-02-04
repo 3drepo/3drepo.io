@@ -6,6 +6,7 @@ export * from './users';
 export * from './teamspace';
 export * from './jobs';
 export * from './projects';
+export * from './profile';
 export * from './models';
 export * from './billing';
 export * from './notifications';

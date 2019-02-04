@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import Select from 'react-select';
-import TextField from '@material-ui/core/TextField';
+import api from './';
 
-import { theme } from '../../../../styles/theme';
+/**
+ * Return logged user profile
+ */
+export const fetchProfile = () => {
+	return api.get('me');
+};
 
-export const StyledSelect = styled(Select)`
-	width: 100%;
-	/* display: flex; */
-`;
+export const generateApiKey = () => {
+	return api.post('apikey');
+};
 
-export const StyledTextField = styled(TextField)`
-	/* width: 100%;
-	display: flex; */
-`;
-
-export const Input = styled.div`
-	width: 100%;
-	display: flex;
-`;
+export const deleteApiKey = () => {
+	return api.delete('apikey');
+};
