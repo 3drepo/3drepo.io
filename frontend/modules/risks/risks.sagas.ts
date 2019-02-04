@@ -199,11 +199,13 @@ export function* renderPins() {
 		const invisibleRisks = risksList.length !== filteredRisks.length
 			? differenceBy(risksList, filteredRisks, '_id')
 			: [] ;
-		const activeRiskId = yield select(selectActiveRiskId);
 
+		const activeRiskId = yield select(selectActiveRiskId);
 		const removePins = (risks) => risks.forEach((risk) => {
 			Viewer.removePin({ id: risk._id });
 		});
+
+		yield removePins(!shouldShowPins ? risksList : invisibleRisks);
 
 		if (shouldShowPins) {
 			for (let index = 0; index < filteredRisks.length; index++) {
@@ -228,7 +230,6 @@ export function* renderPins() {
 				}
 			}
 		}
-		yield removePins(!shouldShowPins ? risksList : invisibleRisks);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('show', 'pins', error));
 	}
@@ -289,7 +290,7 @@ const showMultipleGroups = async (risk, revision) => {
 	let objects = {} as { hidden: any[], shown: any[], objects: any[] };
 
 	if (hasViewpointGroups) {
-		const [highlightedGroupData, hiddenGroupData, shownGroupData] = await Promise.all([
+		const [highlightedGroupData, shownGroupData, hiddenGroupData] = await Promise.all([
 			getRiskGroup(risk, risk.viewpoint.highlighted_group_id, revision),
 			getRiskGroup(risk, risk.viewpoint.hidden_group_id, revision),
 			getRiskGroup(risk, risk.viewpoint.shown_group_id, revision)

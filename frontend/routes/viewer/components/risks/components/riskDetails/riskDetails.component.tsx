@@ -130,7 +130,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleRiskFormSubmit = (values) => {
-		const { teamspace, model, updateRisk, updateNewRisk, jobs } = this.props;
+		const { teamspace, model, updateRisk, updateNewRisk } = this.props;
 		const updatedRisk = mergeRiskData(this.riskData, values);
 
 		if (this.isNewRisk) {
@@ -203,7 +203,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		);
 	});
 
-	public renderLogs = renderWhenTrue(() => <LogList items={this.state.logs} />);
+	public renderLogs = renderWhenTrue(() => <LogList items={this.state.logs} isPending={false} />);
 
 	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center" padding="0">

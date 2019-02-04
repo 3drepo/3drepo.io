@@ -48,6 +48,7 @@ interface IProps {
 	subscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	unsubscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	getMyJob: (teamspace) => void;
+	updateNewIssue: (newIssue) => void;
 }
 
 interface IState {
@@ -110,11 +111,11 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleIssueFormSubmit = (values) => {
-		const { teamspace, model, updateIssue, setState, jobs } = this.props;
+		const { teamspace, model, updateIssue, updateNewIssue } = this.props;
 		const updatedIssue = mergeIssueData(this.issueData, values);
 
 		if (this.isNewIssue) {
-			setState({ newRisk: prepareIssue(updatedIssue, jobs) });
+			updateNewIssue(updatedIssue);
 		} else {
 			updateIssue(teamspace, model, updatedIssue);
 		}
@@ -134,21 +135,23 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		);
 	}
 
-	public renderLogList = renderWhenTrue(() => {
-		return (<LogList items={this.props.logs} isPending={this.props.fetchingDetailsIsPending} />);
-	});
+	public renderLogList = renderWhenTrue(() => (
+		<LogList items={this.props.logs} isPending={this.props.fetchingDetailsIsPending} />
+	));
 
 	public renderPreview = renderWhenTrue(() => {
+		const { expandDetails, logs } = this.props;
+
 		return (
 			<PreviewDetails
 				key={this.issueData._id}
 				{...this.issueData}
-				defaultExpanded={this.props.expandDetails}
+				defaultExpanded={expandDetails}
 				editable={!this.issueData._id}
 				onNameChange={this.handleNameChange}
 				onExpandChange={this.handleExpandChange}
 				renderCollapsable={this.renderDetailsForm}
-				renderNotCollapsable={() => this.renderLogList(this.props.logs.length)}
+				renderNotCollapsable={() => this.renderLogList(logs.length)}
 			/>
 		);
 	});

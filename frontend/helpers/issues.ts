@@ -5,6 +5,9 @@ import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
 
 export const prepareIssue = (issue, jobs = []) => {
 	const thumbnail = getAPIUrl(issue.thumbnail);
+	const descriptionThumbnail = issue.viewpoint && issue.viewpoint.screenshot
+		? getAPIUrl(issue.viewpoint.screenshot)
+		: (issue.descriptionThumbnail || '');
 	const { Icon, color } = this.getStatusIcon(issue.priority, issue.status);
 	const roleColor = get(jobs.find((job) => job._id === get(issue.assigned_roles, '[0]')), 'color');
 
@@ -16,6 +19,7 @@ export const prepareIssue = (issue, jobs = []) => {
 		author: issue.owner,
 		createdDate: issue.created,
 		thumbnail,
+		descriptionThumbnail,
 		StatusIconComponent: Icon,
 		statusColor: color,
 		roleColor
@@ -36,7 +40,7 @@ export const mergeIssueData = (source, data = source) => {
 
 	return {
 		...source,
-		...omit(data, ['assigned_roles', 'description']),
+		...omit(data, ['assigned_roles', 'description', 'descriptionThumbnail']),
 		assigned_roles: hasUnassignedRole ? [] : [data.assigned_roles],
 		desc: data.description
 	};

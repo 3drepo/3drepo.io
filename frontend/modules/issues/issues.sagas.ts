@@ -199,13 +199,28 @@ export function* updateIssue({ teamspace, modelId, issueData }) {
 	}
 }
 
+export function* updateNewIssue({ newIssue }) {
+	try {
+		const jobs = yield select(selectJobsList);
+		const preparedIssue = prepareIssue(newIssue, jobs);
+
+		const pinData = yield Viewer.getPinData();
+		if (pinData) {
+			yield put(IssuesActions.showNewPin(preparedIssue, pinData));
+		}
+		yield put(IssuesActions.setComponentState({ newIssue: preparedIssue }));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'new issue', error));
+	}
+}
+
 export function* postComment({ teamspace, modelId, issueData }) {
 	try {
 		const { data: comment } = yield API.updateIssue(teamspace, modelId, issueData);
 		yield put(IssuesActions.createCommentSuccess(comment));
-		yield put(SnackbarActions.show('Comment added'));
+		yield put(SnackbarActions.show('Issue comment added'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('post', 'comment', error));
+		yield put(DialogActions.showErrorDialog('post', 'issue comment', error));
 	}
 }
 
@@ -378,6 +393,7 @@ const showMultipleGroups = async (issue, revision) => {
 
 export function* focusOnIssue({ issue, revision }) {
 	try {
+		yield Viewer.isViewerReady();
 		yield put(IssuesActions.renderPins());
 		const TreeService = getAngularService('TreeService') as any;
 
@@ -392,8 +408,8 @@ export function* focusOnIssue({ issue, revision }) {
 		if (hasViewpoint && issue.viewpoint.hideIfc) {
 			TreeService.setHideIfc(issue.viewpoint.hideIfc);
 		}
-
 		TreeService.showAllTreeNodes(!hasHiddenOrShownGroup);
+
 		const hasViewpointGroup = hasViewpoint && (issue.viewpoint.highlighted_group_id || issue.viewpoint.group_id);
 		const hasGroup = issue.group_id;
 
@@ -427,7 +443,9 @@ export function* setActiveIssue({ issue, revision }) {
 		const issuesMap = yield select(selectIssuesMap);
 
 		if (activeIssueId !== issue._id) {
-			toggleIssuePin(issuesMap[activeIssueId], false);
+			if (activeIssueId) {
+				toggleIssuePin(issuesMap[activeIssueId], false);
+			}
 			toggleIssuePin(issue, true);
 		}
 		yield all([
@@ -572,10 +590,7 @@ export function* setNewIssue() {
 	try {
 		const newIssue = prepareIssue({
 			name: `Untitled issue ${issueNumber}`,
-			associated_activity: '',
 			assigned_roles: [],
-			likelihood: 0,
-			consequence: 0,
 			level_of_issue: 0,
 			mitigation_status: '',
 			viewpoint: {},
@@ -613,4 +628,6 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.IMPORT_BCF, importBcf);
 	yield takeLatest(IssuesTypes.SUBSCRIBE_ON_ISSUE_COMMENTS_CHANGES, subscribeOnIssueCommentsChanges);
 	yield takeLatest(IssuesTypes.UNSUBSCRIBE_ON_ISSUE_COMMENTS_CHANGES, unsubscribeOnIssueCommentsChanges);
+	yield takeLatest(IssuesTypes.UPDATE_NEW_ISSUE, updateNewIssue);
+
 }
