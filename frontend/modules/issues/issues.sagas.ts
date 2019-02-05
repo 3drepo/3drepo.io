@@ -37,7 +37,7 @@ import {
 import { selectJobsList } from '../jobs';
 import { selectCurrentUser } from '../currentUser';
 import { PIN_COLORS } from '../../styles';
-import { ISSUE_PRIORITIES, PRIORITIES, STATUSES } from '../../constants/issues';
+import { PRIORITIES, STATUSES } from '../../constants/issues';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -523,7 +523,7 @@ export function* showNewPin({ issue, pinData }) {
 			...pinData,
 			account: issue.account,
 			model: issue.model,
-			colours: pinData.selectColour,
+			colours: PIN_COLORS.YELLOW,
 			type: 'issue'
 		};
 
