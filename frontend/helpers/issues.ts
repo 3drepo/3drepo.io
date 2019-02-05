@@ -1,6 +1,6 @@
 import { get, omit } from 'lodash';
 import { getAPIUrl } from '../services/api';
-import { STATUSES_COLOURS, STATUSES_ICONS, STATUSES } from '../constants/issues';
+import { STATUSES_COLOURS, STATUSES_ICONS, STATUSES, ISSUE_TOPIC_TYPES } from '../constants/issues';
 import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
 
 export const prepareIssue = (issue, jobs = []) => {
@@ -69,7 +69,7 @@ const convertActionValueToText = (value = '') => {
 	return actionText;
 };
 
-export const convertActionCommentToText = (action, owner, topicTypes = []) => {
+export const convertActionCommentToText = (action, owner, topicTypes = ISSUE_TOPIC_TYPES) => {
 	let text = '';
 	let from = '';
 	let to = '';
@@ -77,52 +77,51 @@ export const convertActionCommentToText = (action, owner, topicTypes = []) => {
 
 	if (action) {
 		switch (action.property) {
-		case 'priority':
-			propertyName = 'Priority';
-			from = convertActionValueToText(action.from);
-			to = convertActionValueToText(action.to);
-			break;
-		case 'status':
-			propertyName = 'Status';
-			from = convertActionValueToText(action.from);
-			to = convertActionValueToText(action.to);
-			break;
-		case 'assigned_roles':
-			propertyName = 'Assigned';
-			from = action.from.toString();
-			to = action.to.toString();
-			break;
-		case 'topic_type':
-			propertyName = 'Type';
-			if (topicTypes) {
-				const fromType = topicTypes.find((topicType) => topicType.value === action.from);
-				const toType = topicTypes.find((topicType) => topicType.value === action.to);
+			case 'priority':
+				propertyName = 'Priority';
+				from = convertActionValueToText(action.from);
+				to = convertActionValueToText(action.to);
+				break;
+			case 'status':
+				propertyName = 'Status';
+				from = convertActionValueToText(action.from);
+				to = convertActionValueToText(action.to);
+				break;
+			case 'assigned_roles':
+				propertyName = 'Assigned';
+				from = action.from.toString();
+				to = action.to.toString();
+				break;
+			case 'topic_type':
+				propertyName = 'Type';
+				if (topicTypes) {
+					const fromType = topicTypes.find((topicType) => topicType.value === action.from);
+					const toType = topicTypes.find((topicType) => topicType.value === action.to);
 
-				from = fromType.label || '';
-				to = toType.label || '';
-			}
-			break;
-		case 'desc':
-			propertyName = 'Description';
-			break;
-		case 'due_date':
-			propertyName = 'Due Date';
-			if (action.to) {
-				to = (new Date(parseInt(action.to, 10))).toLocaleDateString();
-			}
-			if (action.from) {
-				from = (new Date(parseInt(action.from, 10))).toLocaleDateString();
-			} else {
-				text = propertyName + ' set to ' + (new Date(parseInt(action.to, 10))).toLocaleDateString()
-					+ ' by ' + owner;
-			}
-			break;
+					from = fromType.name || '';
+					to = toType.name || '';
+				}
+				break;
+			case 'desc':
+				propertyName = 'Description';
+				break;
+			case 'due_date':
+				propertyName = 'Due Date';
+				if (action.to) {
+					to = (new Date(parseInt(action.to, 10))).toLocaleDateString();
+				}
+				if (action.from) {
+					from = (new Date(parseInt(action.from, 10))).toLocaleDateString();
+				} else {
+					text = `${propertyName} set to ${(new Date(parseInt(action.to, 10))).toLocaleDateString()} by ${owner}`;
+				}
+				break;
 
-		case 'bcf_import':
-			propertyName = 'BCF Import';
-			text = propertyName + ' by ' + owner;
-			break;
-		}
+			case 'bcf_import':
+				propertyName = 'BCF Import';
+				text = `${propertyName} by ${owner}`;
+				break;
+			}
 	}
 
 	if (0 === text.length) {
