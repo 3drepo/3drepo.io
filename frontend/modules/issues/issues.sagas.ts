@@ -37,6 +37,7 @@ import {
 import { selectJobsList } from '../jobs';
 import { selectCurrentUser } from '../currentUser';
 import { PIN_COLORS } from '../../styles';
+import { ISSUE_PRIORITIES, PRIORITIES, STATUSES } from '../../constants/issues';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -610,8 +611,8 @@ export function* setNewIssue() {
 		const newIssue = prepareIssue({
 			name: `Untitled issue ${issueNumber}`,
 			assigned_roles: [],
-			level_of_issue: 0,
-			mitigation_status: '',
+			status: STATUSES.OPEN,
+			priority: PRIORITIES.NONE,
 			viewpoint: {},
 			owner: currentUser.username
 		}, jobs);

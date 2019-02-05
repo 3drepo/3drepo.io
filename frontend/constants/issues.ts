@@ -20,7 +20,7 @@ export const STATUSES = {
   CLOSED: 'closed'
 };
 
-const PRIORITIES = {
+export const PRIORITIES = {
 	NONE: 'none',
 	LOW: 'low',
 	MEDIUM: 'medium',

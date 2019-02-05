@@ -72,6 +72,13 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 		return;
 	}
 
+	get commentPlaceholder() {
+		if (this.props.canComment) {
+			return 'Write your comment here';
+		}
+		return 'You are not able to comment';
+	}
+
 	public componentWillUnmount() {
 		Viewer.setPinDropMode(false);
 		Measure.setDisabled(false);
@@ -153,13 +160,6 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 			disabled={!this.props.canComment}
 		/>
 	));
-
-	public get commentPlaceholder() {
-		if (this.props.canComment) {
-			return 'Write your comment here';
-		}
-		return 'You are not able to comment';
-	}
 
 	public renderCommentField = renderWhenTrue((
 		<TextFieldWrapper>

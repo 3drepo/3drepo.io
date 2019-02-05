@@ -20,10 +20,10 @@ import * as React from 'react';
 import { Viewer } from '../../../../../../services/viewer/viewer';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { Container } from '../../../risks/components/riskDetails/riskDetails.styles';
-import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
+import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
-import { prepareIssue, mergeIssueData, canComment } from '../../../../../../helpers/issues';
+import { mergeIssueData, canComment } from '../../../../../../helpers/issues';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 
@@ -73,7 +73,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	get issueData() {
-		return prepareIssue(this.props.issue);
+		return this.props.issue;
 	}
 
 	get jobsList() {
