@@ -78,7 +78,7 @@ interface IProps {
 	onRevisionsClick: () => void;
 	onDownloadClick: () => void;
 	onUploadClick: () => void;
-	setState: (componentState: IState) => void;
+	setState: (componentState: any) => void;
 }
 
 interface IState {
@@ -132,8 +132,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public componentWillUnmount() {
 		this.props.setState({
 			activeTeamspace: this.state.activeTeamspace,
-			activeProject: this.state.activeProject,
-			teamspacesItems: this.state.teamspacesItems
+			activeProject: this.state.activeProject
 		});
 	}
 
