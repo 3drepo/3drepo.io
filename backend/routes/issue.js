@@ -530,8 +530,6 @@ function listIssues(req, res, next) {
 
 	findIssue.then(issues => {
 
-	console.log('whats being sent', req.query.convertCoords);
-
 	if (req.query.convertCoords) {
 		changeIssueAxis(issues);
 	}
