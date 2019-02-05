@@ -15,6 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import styled from 'styled-components';
+import { COLOR, FONT_WEIGHT } from '../../../styles';
 
-export const select{{ pascalCase name }}Domain = (state) => Object.assign({}, state.{{ camelCase name }});
+export const Container = styled.div`
+  background: ${COLOR.GRAY_60};
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+`;
+
+export const Message = styled.div`
+  background: ${COLOR.WHITE};
+  font-weight: ${FONT_WEIGHT.NORMAL};
+  color: ${COLOR.BLACK_80};
+  padding: 8px 10px;
+  border-radius: 4px;
+`;

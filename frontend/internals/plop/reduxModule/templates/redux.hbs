@@ -21,7 +21,9 @@ export const { Types: {{ pascalCase name }}Types, Creators: {{ pascalCase name }
 	fetch: [] // TODO: remove this action
 }, { prefix: '{{ constantCase name }}_' });
 
-export const INITIAL_STATE = {};
+export interface I{{pascalCase}}State {}
+
+export const INITIAL_STATE: I{{pascalCase}}State = {};
 
 export const reducer = createReducer(INITIAL_STATE, {
 });

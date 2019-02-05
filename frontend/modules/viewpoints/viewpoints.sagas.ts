@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, all } from 'redux-saga/effects';
+import { put, takeLatest } from 'redux-saga/effects';
 import { getAngularService, dispatch } from '../../helpers/migration';
 import * as API from '../../services/api';
 import { ViewpointsTypes, ViewpointsActions } from './viewpoints.redux';
@@ -119,7 +119,13 @@ export function* subscribeOnViewpointChanges({ teamspace, modelId }) {
 
 	const onUpdated = (updatedView) => dispatch(ViewpointsActions.updateViewpointSuccess(updatedView));
 	const onCreated = (createdView) => dispatch(ViewpointsActions.createViewpointSuccess(createdView));
-	const onDeleted = (deletedView) => dispatch(ViewpointsActions.deleteViewpointSuccess(deletedView));
+	const onDeleted = (deletedView) => {
+		dispatch(ViewpointsActions.showDeleteInfo(deletedView));
+
+		setTimeout(() => {
+			dispatch(ViewpointsActions.deleteViewpointSuccess(deletedView));
+		}, 5000);
+	};
 
 	viewsNotifications.subscribeToUpdated(onUpdated, this);
 	viewsNotifications.subscribeToCreated(onCreated, this);
@@ -141,7 +147,7 @@ export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
 
 export function* showViewpoint({ teamspace, modelId, view }) {
 	try {
-		yield put(ViewpointsActions.setComponentState({ activeViewpointId: view._id }));
+		yield put(ViewpointsActions.setComponentState({ activeViewpoint: view }));
 
 		const ViewerService = yield getAngularService('ViewerService') as any;
 
@@ -164,7 +170,7 @@ export function* showViewpoint({ teamspace, modelId, view }) {
 			}
 		}
 	} catch (error) {
-		yield put(ViewpointsActions.setComponentState({ activeViewpointId: null }));
+		yield put(ViewpointsActions.setComponentState({ activeViewpoint: null }));
 		yield put(DialogActions.showErrorDialog('show', 'viewpoint'));
 	}
 }

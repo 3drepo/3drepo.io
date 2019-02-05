@@ -39,7 +39,7 @@ export const ItemLabelDetail = styled(BaseStyles)`
 
 export const BarIconButton = styled(IconButton)`
   && {
-    color: rgba(255, 255, 255, 0.87)
+    color: rgba(255, 255, 255, 0.87);
   }
 
   &:first-child {

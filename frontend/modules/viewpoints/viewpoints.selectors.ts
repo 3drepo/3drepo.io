@@ -36,7 +36,7 @@ export const selectNewViewpoint = createSelector(
 );
 
 export const selectActiveViewpoint = createSelector(
-	selectComponentState, (state) => state.activeViewpointId
+	selectComponentState, (state) => state.activeViewpoint
 );
 
 export const selectSearchQuery = createSelector(

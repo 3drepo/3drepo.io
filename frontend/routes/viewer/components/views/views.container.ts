@@ -33,7 +33,7 @@ import { Views } from './views.component';
 const mapStateToProps = createStructuredSelector({
 	viewpoints: selectViewpointsList,
 	newViewpoint: selectNewViewpoint,
-	activeViewpointId: selectActiveViewpoint,
+	activeViewpoint: selectActiveViewpoint,
 	isPending: selectIsPending,
 	editMode: selectEditMode,
 	searchQuery: selectSearchQuery,

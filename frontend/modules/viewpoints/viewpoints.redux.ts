@@ -33,12 +33,27 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	showViewpoint: ['teamspace', 'modelId', 'view'],
 	prepareNewViewpoint: ['teamspace', 'modelId', 'viewpointName'],
 	setNewViewpoint: ['newViewpoint'],
-	setActiveViewpoint: ['activeViewpointId'],
+	setActiveViewpoint: ['activeViewpoint'],
 	setSearchQuery: ['searchQuery'],
+	showDeleteInfo: ['viewpointId'],
 	setComponentState: ['componentState']
 }, { prefix: 'VIEWPOINTS_' });
 
-export const INITIAL_STATE = {
+export interface IViewpointsComponentState {
+	activeViewpoint?: number;
+	editMode?: boolean;
+	newViewpoint?: any;
+	searchEnabled?: boolean;
+	searchQuery?: string;
+}
+
+export interface IViewpointsState {
+	isPending: boolean;
+	viewpointsMap: any[];
+	componentState: IViewpointsComponentState;
+}
+
+export const INITIAL_STATE: IViewpointsState = {
 	isPending: true,
 	viewpointsMap: [],
 	componentState: {}
@@ -79,6 +94,13 @@ const deleteViewpointSuccess = (state = INITIAL_STATE, { viewpointId }) => {
 	return { ...state, viewpointsMap };
 };
 
+const showDeleteInfo = (state = INITIAL_STATE, { viewpointId }) => {
+	const viewpointsMap = cloneDeep(state.viewpointsMap);
+	viewpointsMap[viewpointId].willBeRemoved = true;
+
+	return { ...state, viewpointsMap };
+};
+
 const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: {...state.componentState, ...componentState} };
 };
@@ -89,5 +111,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewpointsTypes.CREATE_VIEWPOINT_SUCCESS]: createViewpointSuccess,
 	[ViewpointsTypes.UPDATE_VIEWPOINT_SUCCESS]: updateViewpointSuccess,
 	[ViewpointsTypes.DELETE_VIEWPOINT_SUCCESS]: deleteViewpointSuccess,
+	[ViewpointsTypes.SHOW_DELETE_INFO]: showDeleteInfo,
 	[ViewpointsTypes.SET_COMPONENT_STATE]: setComponentState
 });

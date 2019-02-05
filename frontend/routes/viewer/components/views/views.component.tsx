@@ -31,6 +31,7 @@ import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { ViewsCountInfo, ViewpointsList, EmptyStateInfo, SearchField, Container } from './views.styles';
 import { ViewItem } from './components/viewItem/viewItem.component';
+import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
 
 declare const Viewer: any;
 
@@ -38,7 +39,7 @@ interface IProps {
 	isPending: boolean;
 	viewpoints: any[];
 	newViewpoint: any;
-	activeViewpointId: number;
+	activeViewpoint: any;
 	searchEnabled: boolean;
 	searchQuery: string;
 	editMode: boolean;
@@ -52,7 +53,7 @@ interface IProps {
 	showViewpoint: (teamspace, modelId, view) => void;
 	subscribeOnViewpointChanges: (teamspace, modelId) => void;
 	unsubscribeOnViewpointChanges: (teamspace, modelId) => void;
-	setState: (componentState) => void;
+	setState: (componentState: IViewpointsComponentState) => void;
 }
 
 export class Views extends React.PureComponent<IProps, any> {
@@ -102,29 +103,34 @@ export class Views extends React.PureComponent<IProps, any> {
 			onSaveEdit={this.handleSave}
 			teamspace={this.props.teamspace}
 			modelId={this.props.modelId}
+			onChangeName={this.handleNewViewpointChange}
 		/>
 	));
 
 	public renderViewpoints = renderWhenTrue(() => {
-		const { editMode, teamspace, modelId } = this.props;
+		const { editMode, teamspace, modelId, activeViewpoint } = this.props;
 		const { filteredViewpoints } = this.state;
 
-		const { activeViewpointId } = this.props;
-		const Viewpoints = filteredViewpoints.map((viewpoint) => (
-			<ViewItem
-				key={viewpoint._id}
-				viewpoint={viewpoint}
-				onClick={this.handleViewpointItemClick(viewpoint)}
-				active={(activeViewpointId === viewpoint._id) as any}
-				editMode={editMode}
-				onCancelEditMode={this.handleCancelEditMode}
-				onOpenEditMode={this.handleOpenEditMode}
-				onDelete={this.handleDelete(viewpoint._id)}
-				teamspace={teamspace}
-				modelId={modelId}
-				onSaveEdit={this.handleUpdate(viewpoint._id)}
-			/>
-		));
+		const Viewpoints = filteredViewpoints.map((viewpoint) => {
+			const isActive = Boolean(activeViewpoint && activeViewpoint._id === viewpoint._id);
+			const viewpointData = isActive && editMode ? activeViewpoint : viewpoint;
+			return (
+				<ViewItem
+					key={viewpoint._id}
+					viewpoint={viewpointData}
+					onClick={this.handleViewpointItemClick(viewpoint)}
+					active={isActive}
+					editMode={editMode}
+					onCancelEditMode={this.handleCancelEditMode}
+					onOpenEditMode={this.handleOpenEditMode}
+					onDelete={this.handleDelete(viewpoint._id)}
+					teamspace={teamspace}
+					modelId={modelId}
+					onSaveEdit={this.handleUpdate(viewpoint._id)}
+					onChangeName={this.handleActiveViewpointChange}
+				/>
+			);
+		});
 
 		return (
 			<ViewpointsList>
@@ -152,24 +158,24 @@ export class Views extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
-		const { viewpoints, searchQuery, newViewpoint, setState, activeViewpointId } = this.props;
+		const { viewpoints, searchQuery, newViewpoint, activeViewpoint } = this.props;
 		const viewpointsChanged = !isEqual(prevProps.viewpoints, viewpoints);
 		const searchQueryChanged = prevProps.searchQuery !== searchQuery;
 		if (searchQueryChanged || viewpointsChanged) {
 			this.setFilteredViewpoints(() => {
-				if (!searchQuery && activeViewpointId) {
+				if (!searchQuery && activeViewpoint) {
 					const isSelectedViewpointVisible = prevState.filteredViewpoints.some(({ _id }) => {
-						return _id === activeViewpointId;
+						return _id === activeViewpoint;
 					});
 
 					if (!isSelectedViewpointVisible) {
-						setState({ activeViewpointId: null, editMode: false });
+						this.resetActiveView();
 					}
 				}
 
 				if (newViewpoint) {
 					const containerRef = this.containerRef.current.containerRef;
-					setState({ activeViewpointId: null, editMode: false });
+					this.resetActiveView();
 					this.containerRef.current.containerRef.scrollTo(0, containerRef.scrollHeight + 200);
 				}
 			});
@@ -182,6 +188,18 @@ export class Views extends React.PureComponent<IProps, any> {
 		this.toggleViewerEvents(false);
 	}
 
+	public resetActiveView = () => {
+		this.props.setState({ activeViewpoint: null, editMode: false });
+	}
+
+	public handleActiveViewpointChange = (name) => {
+		this.props.setState({ activeViewpoint: { ...this.props.activeViewpoint, name } });
+	}
+
+	public handleNewViewpointChange = (name) => {
+		this.props.setState({ newViewpoint: { ...this.props.newViewpoint, name }});
+	}
+
 	public handleViewpointItemClick = (viewpoint) => () => {
 		if (!this.props.editMode) {
 			const { teamspace, modelId } = this.props;
@@ -192,7 +210,7 @@ export class Views extends React.PureComponent<IProps, any> {
 	public toggleViewerEvents = (enabled = true) => {
 		const eventHandler = enabled ? 'on' : 'off';
 		this.ViewerService[eventHandler](Viewer.EVENT.BACKGROUND_SELECTED, () => {
-			this.props.setState({ activeViewpointId: null, editMode: false });
+			this.resetActiveView();
 		});
 	}
 
