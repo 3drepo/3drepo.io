@@ -22,7 +22,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchRisks: ['teamspace', 'modelId', 'revision'],
 	fetchRisksSuccess: ['risks'],
 	setComponentState: ['componentState'],
-	saveRisk: ['teamspace', 'model', 'riskData', 'filteredRisks'],
+	saveRisk: ['teamspace', 'model', 'riskData'],
 	updateRisk: ['teamspace', 'modelId', 'riskData'],
 	saveRiskSuccess: ['risk'],
 	setNewRisk: [],
@@ -43,7 +43,24 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	setFilters: ['filters']
 }, { prefix: 'RISKS/' });
 
-export const INITIAL_STATE = {
+export interface IRisksComponentState {
+	showPins: boolean;
+	activeRisk: any;
+	showDetails: boolean;
+	expandDetails: boolean;
+	newRisk: any;
+	newComment: any;
+	selectedFilters: any[];
+	associatedActivities: any[];
+}
+
+export interface IRisksState {
+	risksMap: any;
+	isPending: boolean;
+	componentState: IRisksComponentState;
+}
+
+export const INITIAL_STATE: IRisksState = {
 	risksMap: {},
 	isPending: true,
 	componentState: {
@@ -54,8 +71,7 @@ export const INITIAL_STATE = {
 		newRisk: {},
 		newComment: {},
 		selectedFilters: [],
-		associatedActivities: [],
-		filteredRisks: []
+		associatedActivities: []
 	}
 };
 

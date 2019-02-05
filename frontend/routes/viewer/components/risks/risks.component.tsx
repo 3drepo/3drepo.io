@@ -35,6 +35,7 @@ import {
 } from '../../../../constants/risks';
 
 import { ReportedItems } from '../reportedItems';
+import { IRisksComponentState } from '../../../../modules/risks/risks.redux';
 
 interface IProps {
 	history: any;
@@ -53,7 +54,7 @@ interface IProps {
 		permissions: any[];
 	};
 	fetchRisks: (teamspace, model, revision) => void;
-	setState: (componentState: any) => void;
+	setState: (componentState: IRisksComponentState) => void;
 	setNewRisk: () => void;
 	downloadRisks: (teamspace, model, risksIds) => void;
 	printRisks: (teamspace, model) => void;
@@ -145,10 +146,6 @@ export class Risks extends React.PureComponent<IProps, any> {
 	public componentWillUnmount() {
 		this.props.unsubscribeOnRiskChanges(this.props.teamspace, this.props.model);
 	}
-
-  public handleFilterChange = (selectedFilters) => {
-		this.props.onFiltersChange(selectedFilters);
-  }
 
 	public setActiveRisk = (item) => {
 		this.props.setActiveRisk(item, this.props.revision);
