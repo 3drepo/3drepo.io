@@ -15,6 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import styled, { css } from 'styled-components';
 
-export const select{{ pascalCase name }}Domain = (state) => Object.assign({}, state.{{ camelCase name }});
+const previewStateStyles = css`
+	cursor: pointer;
+	transition: opacity 200ms ease-in-out;
+
+	&:hover {
+		opacity: 0.8;
+	}
+`;
+
+export const StyledImage = styled.img`
+	width: 100%;
+	object-fit: cover;
+	${(props: any) => props.enablePreview && previewStateStyles}
+` as any;

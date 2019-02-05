@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+export {
+	ViewpointsTypes,
+	ViewpointsActions
+} from './viewpoints.redux';
 
-export const select{{ pascalCase name }}Domain = (state) => Object.assign({}, state.{{ camelCase name }});
+export * from './viewpoints.selectors';

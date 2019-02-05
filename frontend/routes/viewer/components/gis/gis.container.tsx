@@ -32,7 +32,6 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchModelSettings: ModelActions.fetchSettings,
 	fetchModelMaps: ModelActions.fetchMaps,
 	updateModelSettings: ModelActions.updateSettings,
 	initialiseMap: GisActions.initialiseMap,

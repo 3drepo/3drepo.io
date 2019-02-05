@@ -19,6 +19,7 @@ import { put, takeLatest } from 'redux-saga/effects';
 import { getAngularService } from '../../helpers/migration';
 
 import { ViewerTypes, ViewerActions } from './viewer.redux';
+import { DialogActions } from '../dialog';
 
 const getViewer = () => {
 	const ViewerService = getAngularService('ViewerService') as any;
@@ -30,7 +31,7 @@ export function* waitForViewer() {
 		const ViewerService = yield getAngularService('ViewerService') as any;
 		yield ViewerService.initialised.promise;
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('initialise', 'viewer'));
 	}
 }
 
@@ -42,7 +43,7 @@ export function* mapInitialise({surveyPoints, sources = []}) {
 		viewer.mapInitialise(surveyPoints);
 		sources.map(viewer.addMapSource);
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('initialise', 'map'));
 	}
 }
 
@@ -51,7 +52,7 @@ export function* resetMapSources({source}) {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().resetMapSources(source);
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('reset', 'map sources'));
 	}
 }
 
@@ -60,7 +61,7 @@ export function* addMapSource({source}) {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().addMapSource(source);
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('add', 'map source'));
 	}
 }
 
@@ -69,7 +70,7 @@ export function* removeMapSource({source}) {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().removeMapSource(source);
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('remove', 'map source'));
 	}
 }
 
@@ -78,7 +79,7 @@ export function* mapStart() {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().mapStart();
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('start', 'map rendering'));
 	}
 }
 
@@ -87,7 +88,16 @@ export function* mapStop() {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().mapStop();
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('stop', 'map rendering'));
+	}
+}
+
+export function* getScreenshot() {
+	try {
+		yield put(ViewerActions.waitForViewer());
+		return yield new Promise((resolve, reject) => getViewer().getScreenshot({ resolve, reject }));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('get', 'screenshot'));
 	}
 }
 
@@ -99,4 +109,5 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.REMOVE_MAP_SOURCE, removeMapSource);
 	yield takeLatest(ViewerTypes.MAP_START, mapStart);
 	yield takeLatest(ViewerTypes.MAP_STOP, mapStop);
+	yield takeLatest(ViewerTypes.GET_SCREENSHOT, getScreenshot);
 }

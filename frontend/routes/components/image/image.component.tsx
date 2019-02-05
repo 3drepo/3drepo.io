@@ -15,6 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import * as React from 'react';
 
-export const select{{ pascalCase name }}Domain = (state) => Object.assign({}, state.{{ camelCase name }});
+import { StyledImage } from './image.styles';
+
+interface IProps {
+	src: string;
+	alt?: string;
+	enablePreview?: boolean;
+	showScreenshotDialog: (config) => void;
+}
+
+export class Image extends React.PureComponent<IProps, any> {
+	public handlePreview = () => {
+		const { src, enablePreview, showScreenshotDialog } = this.props;
+		if (enablePreview && src) {
+			showScreenshotDialog({ sourceImage: src, disabled: true });
+		}
+	}
+
+	public render() {
+		const { src, alt, enablePreview } = this.props;
+		return (
+			<StyledImage
+				src={src}
+				alt={alt}
+				onClick={this.handlePreview}
+				enablePreview={enablePreview}
+			/>
+		);
+	}
+}

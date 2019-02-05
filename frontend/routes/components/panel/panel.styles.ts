@@ -43,6 +43,7 @@ export const Title = styled.div`
   justify-content: flex-start;
   align-items: center;
   padding: 0 16px;
+  position: relative;
 `;
 
 export const Content = styled.div`

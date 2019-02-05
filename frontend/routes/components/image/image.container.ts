@@ -15,6 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { connect } from '../../../helpers/migration';
 
-export const select{{ pascalCase name }}Domain = (state) => Object.assign({}, state.{{ camelCase name }});
+import { Image } from './image.component';
+import { DialogActions } from '../../../modules/dialog';
+
+const mapStateToProps = createStructuredSelector({});
+
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	showScreenshotDialog: DialogActions.showScreenshotDialog
+}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(Image);
