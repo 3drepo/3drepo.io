@@ -465,20 +465,38 @@ function convertPoint(point) {
 	return [point[0], point[2], -point[1]];
 }
 
-function convertViewpoint(viewpoint) {
-	const pointsKeys = ['right', 'view_dir', 'look_at', 'position', 'up'];
-	pointsKeys.forEach((key) => {
-		if (viewpoint[key] && viewpoint[key].length === 3){
-			viewpoint[key] = convertPoint(viewpoint[key]);
+function convertIssuePoints(issue) {
+
+	const rootAxisKeys = ['position', 'norm'];
+	const pointsKeys = ['right', 'view_dir', 'look_at', 'position', 'up', 'clippingPlanes'];
+	
+	const viewpoint = issue.viewpoint;
+
+	rootAxisKeys.forEach((rootKey) => {
+		if (issue[rootKey] && issue[rootKey].length === 3) {
+			issue[rootKey] = convertPoint(issue[rootKey])
 		}
 	});
+
+	pointsKeys.forEach((key) => {
+		if (viewpoint[key] && viewpoint[key].length === 3) {
+			viewpoint[key] = convertPoint(viewpoint[key]);
+		}
+		if (key === 'clippingPlanes') {
+			const clippingPlanes = viewpoint[key];
+			for (const item in clippingPlanes) {
+				clippingPlanes[item].normal = convertPoint(clippingPlanes[item].normal);
+			}
+		}
+	});
+
 	return viewpoint;
 }
 
 	
-function changeAxis(issues) {
+function changeIssueAxis(issues) {
 	issues.forEach((issue) => {
-		convertViewpoint(issue.viewpoint);
+		convertIssuePoints(issue);
 	});
 }
 
@@ -512,8 +530,10 @@ function listIssues(req, res, next) {
 
 	findIssue.then(issues => {
 
+	console.log('whats being sent', req.query.convertCoords);
+
 	if (req.query.convertCoords) {
-		changeAxis(issues);
+		changeIssueAxis(issues);
 	}
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
