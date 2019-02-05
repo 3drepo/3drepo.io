@@ -23,6 +23,7 @@ interface IProps {
 	inputId: string;
 	value: string;
 	name: string;
+	placeholder?: string;
 	onChange: (event) => void;
 	onBlur: (event) => void;
 }
@@ -33,19 +34,19 @@ interface IState {
 
 export class DateField extends React.PureComponent<IProps, IState> {
 	public state = {
-		value: new Date()
+		value: new Date().valueOf()
 	};
 
 	public componentDidMount() {
 		this.setState({
-			value: this.props.value ? new Date(this.props.value) : undefined
+			value: this.props.value ? this.props.value : null
 		});
 	}
 
 	public componentDidUpdate(prevProps) {
 		if (!prevProps.value && this.props.value) {
 			this.setState({
-				value: new Date(this.props.value)
+				value: this.props.value
 			});
 		}
 	}
@@ -53,15 +54,15 @@ export class DateField extends React.PureComponent<IProps, IState> {
 	public handleChange = (newDate) => {
 		if (this.props.onChange) {
 			this.props.onChange({
-				target: { value: newDate.ts, name: this.props.name }
+				target: { value: newDate.valueOf(), name: this.props.name }
 			});
 		}
-		this.setState({ value: newDate });
+		this.setState({ value: newDate.valueOf() });
 	}
 
 	public render() {
 		const { value } = this.state;
-		const { onBlur, name } = this.props;
+		const { onBlur, name, placeholder } = this.props;
 
 		return (
 			<Container>
@@ -70,6 +71,7 @@ export class DateField extends React.PureComponent<IProps, IState> {
 					onBlur={onBlur}
 					name={name}
 					onChange={this.handleChange}
+					placeholder={placeholder}
 				/>
 			</Container>
 		);

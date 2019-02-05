@@ -85,7 +85,7 @@ export const ISSUE_FILTER_RELATED_FIELDS = {
 	CREATED_BY: 'creator_role',
 	ASSIGNED_TO: 'assigned_roles',
 	TYPE: 'topic_type',
-	DUE_DATE: 'due_date'
+	CREATED_DATE: 'created'
 };
 
 export const ISSUE_FILTERS = [
@@ -116,7 +116,7 @@ export const ISSUE_FILTERS = [
 	},
 	{
 		label: 'Date',
-		relatedField: ISSUE_FILTER_RELATED_FIELDS.DUE_DATE,
+		relatedField: ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE,
 		type: DATA_TYPES.DATE
 	}
 ] as any;

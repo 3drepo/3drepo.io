@@ -78,48 +78,33 @@ export const convertActionCommentToText = (action, owner, topicTypes = []) => {
 	if (action) {
 		switch (action.property) {
 		case 'priority':
-
 			propertyName = 'Priority';
 			from = convertActionValueToText(action.from);
 			to = convertActionValueToText(action.to);
 			break;
-
 		case 'status':
-
 			propertyName = 'Status';
 			from = convertActionValueToText(action.from);
 			to = convertActionValueToText(action.to);
 			break;
-
 		case 'assigned_roles':
 			propertyName = 'Assigned';
 			from = action.from.toString();
 			to = action.to.toString();
 			break;
-
 		case 'topic_type':
 			propertyName = 'Type';
 			if (topicTypes) {
+				const fromType = topicTypes.find((topicType) => topicType.value === action.from);
+				const toType = topicTypes.find((topicType) => topicType.value === action.to);
 
-				const fromType = topicTypes.find((topicType) => {
-					return topicType.value === action.from;
-				});
-				const toType = topicTypes.find((topicType) => {
-					return topicType.value === action.to;
-				});
-				if (from && fromType.label) {
-					from = fromType.label;
-				}
-				if (to && toType.label) {
-					to = toType.label;
-				}
+				from = fromType.label || '';
+				to = toType.label || '';
 			}
 			break;
-
 		case 'desc':
 			propertyName = 'Description';
 			break;
-
 		case 'due_date':
 			propertyName = 'Due Date';
 			if (action.to) {
@@ -128,9 +113,8 @@ export const convertActionCommentToText = (action, owner, topicTypes = []) => {
 			if (action.from) {
 				from = (new Date(parseInt(action.from, 10))).toLocaleDateString();
 			} else {
-				text = propertyName + ' set to ' +
-					action.to + ' by ' +
-					owner;
+				text = propertyName + ' set to ' + (new Date(parseInt(action.to, 10))).toLocaleDateString()
+					+ ' by ' + owner;
 			}
 			break;
 

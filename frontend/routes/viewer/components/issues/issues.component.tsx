@@ -101,17 +101,19 @@ export class Issues extends React.PureComponent<IProps, IState> {
 			[ISSUE_FILTER_RELATED_FIELDS.ASSIGNED_TO]: this.getFilterValues(this.jobsList),
 			[ISSUE_FILTER_RELATED_FIELDS.PRIORITY]: this.getFilterValues(ISSUE_PRIORITIES),
 			[ISSUE_FILTER_RELATED_FIELDS.TYPE]: this.getFilterValues(ISSUE_TOPIC_TYPES),
-			[ISSUE_FILTER_RELATED_FIELDS.DUE_DATE]: [{
+			[ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE]: [{
 				label: 'From',
 				value: {
 					label: 'From',
-					value: Date.now()
+					value: 'from',
+					date: null
 				}
 			}, {
 				label: 'To',
 				value: {
 					label: 'To',
-					value: Date.now()
+					value: 'to',
+					date: null
 				}
 			}]
 		};

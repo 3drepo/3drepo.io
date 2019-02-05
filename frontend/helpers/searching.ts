@@ -1,4 +1,4 @@
-import { isArray, groupBy, values, get } from 'lodash';
+import { isArray, groupBy, values } from 'lodash';
 import { DATA_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 
 export const compareStrings = (string1, string2) => {
@@ -48,6 +48,8 @@ export const searchByFilters = (items = [], filters = [], returnDefaultHidden = 
 						}) : false;
 
 						return compareStrings(item.name, filter.value.value) || compareStrings(item.desc, filter.value.value) || logFound;
+					}
+					if (filter.type === DATA_TYPES.DATE) {
 					}
 				});
 			}

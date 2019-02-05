@@ -24,7 +24,7 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 
 interface IProps {
 	author: string;
-	createdAt: string;
+	createdAt: any;
 	StatusIconComponent: any;
 	statusColor: string;
 	extraInfo?: string;

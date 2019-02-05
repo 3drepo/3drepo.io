@@ -174,6 +174,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		};
 
 		if (parent.type === DATA_TYPES.DATE && child.date) {
+			newSelectedFilter.value.date = child.date;
 			this.onSelectDateFilter(newSelectedFilter, child, found);
 		}
 
@@ -185,14 +186,22 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	}
 
 	public onToggleFilter = (parent, child) => {
-		const foundFilter = this.state.selectedFilters.find((filter) =>
-			filter.label === parent.label && filter.value.value === child.value
-		);
+		const foundFilter = this.state.selectedFilters.find((filter) => {
+			if (parent.type !== DATA_TYPES.DATE) {
+				return filter.label === parent.label && filter.value.value === child.value;
+			} else {
+				const foundDate = parent.values.find((item) => {
+					return item.value.value === filter.value.value;
+				});
+				return Boolean(foundDate);
+			}
+		});
+		const found = Boolean(foundFilter);
 
-		if (foundFilter && parent.type !== DATA_TYPES.DATE) {
-			this.onDeselectFilter(foundFilter);
+		if (found && parent.type !== DATA_TYPES.DATE) {
+			this.onDeselectFilter(found);
 		} else {
-			this.onSelectFilter(parent, child, foundFilter);
+			this.onSelectFilter(parent, child, found);
 		}
 	}
 

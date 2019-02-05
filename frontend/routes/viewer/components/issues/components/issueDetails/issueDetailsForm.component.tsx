@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
-import LuxonUtils from '@date-io/luxon';
+import DateFnsUtils from '@date-io/date-fns';
 import { get, isEqual, isEmpty, debounce } from 'lodash';
 import { Field, Form, withFormik, connect } from 'formik';
 
@@ -86,7 +86,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		const { issue, myJob, permissions, currentUser } = this.props;
 
 		return (
-			<MuiPickersUtilsProvider utils={LuxonUtils}>
+			<MuiPickersUtilsProvider utils={DateFnsUtils}>
 				<Form>
 					<FieldsRow container alignItems="center" justify="space-between">
 						<StyledFormControl>
@@ -140,12 +140,15 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					<FieldsRow container justify="space-between" flex={0.5}>
 						<StyledFormControl>
 							<InputLabel shrink={true}>Due date</InputLabel>
-							<Field name="due_date" render={({ field }) => (
-								<DateField
-									{...field}
-									disabled={!canChangeBasicProperty(issue, myJob, permissions, currentUser)}
-								/>
-							)} />
+							<Field name="due_date" render={({ field }) => {
+								return (
+									<DateField
+										{...field}
+										disabled={!canChangeBasicProperty(issue, myJob, permissions, currentUser)}
+										placeholder="Choose a due date"
+									/>
+								);
+							}} />
 						</StyledFormControl>
 					</FieldsRow>
 					<Field name="description" render={({ field }) => (

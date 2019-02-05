@@ -32,6 +32,7 @@
   "author": "3D Repo",
   "license": "AGPL-3.0",
   "dependencies": {
+    "@date-io/date-fns": "1.0.2",
     "@date-io/luxon": "1.0.1",
     "@fortawesome/fontawesome-svg-core": "1.2.10",
     "@fortawesome/free-solid-svg-icons": "5.6.1",
@@ -46,6 +47,7 @@
     "angular-sanitize": "1.6.8",
     "angular-ui-router": "0.4.2",
     "axios": "0.18.0",
+    "date-fns": "2.0.0-alpha.21",
     "dayjs": "1.7.7",
     "eventemitter3": "3.1.0",
     "file-dialog": "^0.0.7",
@@ -55,7 +57,6 @@
     "history": "4.7.1",
     "luxon": "1.10.0",
     "material-design-icons": "3.0.1",
-    "material-ui-pickers": "2.0.5",
     "ngclipboard": "2.0.0",
     "query-string": "6.2.0",
     "ramda": "0.26.1",

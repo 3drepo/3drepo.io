@@ -41,12 +41,12 @@ interface IProps {
 	name: string;
 	description: string;
 	author: string;
-	createdDate: string;
+	createdDate: number;
 	thumbnail: string;
 	roleColor: string;
 	StatusIconComponent: any;
 	statusColor: string;
-	dueDate?: string;
+	due_date?: number;
 	count?: number;
 	active?: boolean;
 	hasViewPermission?: boolean;
@@ -62,8 +62,8 @@ interface IProps {
 
 export class PreviewListItem extends React.PureComponent<IProps, any> {
 	get isExpiredDate() {
-		const { createdDate, dueDate } = this.props;
-		return createdDate >= dueDate ? 1 : 0;
+		const { due_date } = this.props;
+		return new Date().valueOf() >= due_date ? 1 : 0;
 	}
 
 	public renderArrowButton = renderWhenTrue(() => (
