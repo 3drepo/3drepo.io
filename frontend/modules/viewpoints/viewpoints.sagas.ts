@@ -178,7 +178,7 @@ export function* showViewpoint({ teamspace, modelId, view }) {
 export function* prepareNewViewpoint({teamspace, modelId, viewpointName}) {
 	try {
 		const newViewpoint = yield generateViewpointObject(teamspace, modelId, viewpointName);
-		yield put(ViewpointsActions.setComponentState({ newViewpoint }));
+		yield put(ViewpointsActions.setComponentState({ newViewpoint, activeViewpoint: null, editMode: false }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('prepare', 'new viewpoint'));
 	}
