@@ -64,7 +64,7 @@ export const ISSUE_PRIORITIES = [
 	{ value: PRIORITIES.HIGH, name: 'High' }
 ];
 
-export const STATUSES_COLORS = {
+export const STATUSES_COLOURS = {
 	[PRIORITIES.NONE]: '#777777',
 	[PRIORITIES.LOW]: '#4CAF50',
 	[PRIORITIES.MEDIUM]: '#FF9800',
@@ -127,7 +127,7 @@ export const ACTIONS_TYPES = {
 
 export const ISSUES_ACTIONS_MENU = {
 	PRINT: {
-		label: 'Create report',
+		label: 'Create Report',
 		Icon: Print
 	},
 	IMPORT_BCF: {

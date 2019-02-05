@@ -163,14 +163,14 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 		return (
 			<PreviewDetails
-				key={this.issueData._id}
 				{...this.issueData}
+				key={this.issueData._id}
 				defaultExpanded={expandDetails}
 				editable={!this.issueData._id}
 				onNameChange={this.handleNameChange}
 				onExpandChange={this.handleExpandChange}
 				renderCollapsable={this.renderDetailsForm}
-				renderNotCollapsable={() => this.renderLogList(logs.length)}
+				renderNotCollapsable={() => this.renderLogList(!!logs.length)}
 			/>
 		);
 	});
@@ -209,7 +209,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
 
 		if (this.isNewIssue) {
-			this.props.setState({ newRisk: {
+			this.props.setState({ newIssue: {
 				...this.issueData,
 				descriptionThumbnail: screenshot
 			}});

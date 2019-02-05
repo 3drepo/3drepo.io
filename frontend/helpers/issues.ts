@@ -1,6 +1,6 @@
 import { get, omit } from 'lodash';
 import { getAPIUrl } from '../services/api';
-import { STATUSES_COLORS, STATUSES_ICONS, STATUSES } from '../constants/issues';
+import { STATUSES_COLOURS, STATUSES_ICONS, STATUSES } from '../constants/issues';
 import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
 
 export const prepareIssue = (issue, jobs = []) => {
@@ -29,7 +29,7 @@ export const prepareIssue = (issue, jobs = []) => {
 export const getStatusIcon = (priority, status) => {
   const statusIcon = {
     Icon: STATUSES_ICONS[status] || null,
-    color: STATUSES_COLORS[status] || STATUSES_COLORS[priority] || null
+    color: STATUSES_COLOURS[status] || STATUSES_COLOURS[priority] || null
   };
 
   return {...statusIcon};
