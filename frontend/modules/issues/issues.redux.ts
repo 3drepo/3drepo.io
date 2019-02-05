@@ -53,7 +53,8 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	deleteCommentSuccess: ['commentGuid'],
 	updateCommentSuccess: ['comment'],
 	toggleSortOrder: ['sortOrder'],
-	updateNewIssue: ['newIssue']
+	updateNewIssue: ['newIssue'],
+	setFilters: ['filters']
 }, { prefix: 'ISSUES_' });
 
 export const INITIAL_STATE = {

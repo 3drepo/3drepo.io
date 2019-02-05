@@ -69,6 +69,7 @@ interface IProps {
 	importBCF: (teamspace, modelId, file, revision) => void;
 	exportBCF: (teamspace, modelId) => void;
 	toggleSortOrder: () => void;
+	setFilters: (filters) => void;
 }
 
 interface IState {
@@ -198,7 +199,7 @@ export class Issues extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleFilterChange = (selectedFilters) => {
-		this.props.setState({ selectedFilters });
+		this.props.setFilters({ selectedFilters });
 	}
 
 	public setActiveIssue = (item) => {

@@ -55,7 +55,7 @@ export function* fetchIssues({teamspace, modelId, revision}) {
 		}));
 
 		yield put(IssuesActions.fetchIssuesSuccess(preparedIssues));
-		yield put(IssuesActions.renderPins(data));
+		yield put(IssuesActions.renderPins());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'issues', error));
 	}
@@ -627,6 +627,15 @@ export function* setNewIssue() {
 	}
 }
 
+export function* setFilters({ filters }) {
+	try {
+		yield put(IssuesActions.setComponentState({ selectedFilters: filters }));
+		yield put(IssuesActions.renderPins());
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'filters', error));
+	}
+}
+
 export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
 	yield takeEvery(IssuesTypes.FETCH_ISSUE, fetchIssue);
@@ -650,5 +659,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.SUBSCRIBE_ON_ISSUE_COMMENTS_CHANGES, subscribeOnIssueCommentsChanges);
 	yield takeLatest(IssuesTypes.UNSUBSCRIBE_ON_ISSUE_COMMENTS_CHANGES, unsubscribeOnIssueCommentsChanges);
 	yield takeLatest(IssuesTypes.UPDATE_NEW_ISSUE, updateNewIssue);
-
+	yield takeLatest(IssuesTypes.SET_FILTERS, setFilters);
 }

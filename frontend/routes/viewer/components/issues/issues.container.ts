@@ -66,7 +66,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	toggleSubmodelsIssues: IssuesActions.toggleSubmodelsIssues,
 	importBCF: IssuesActions.importBcf,
 	exportBCF: IssuesActions.exportBcf,
-	toggleSortOrder: IssuesActions.toggleSortOrder
+	toggleSortOrder: IssuesActions.toggleSortOrder,
+	setFilters: IssuesActions.setFilters
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Issues);
