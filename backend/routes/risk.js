@@ -227,7 +227,7 @@ function listRisks(req, res, next) {
 	}
 
 	if (req.params.rid) {
-		findRisks = Risk.findRisksByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, null, ids);
+		findRisks = Risk.findRisksByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, ids);
 	} else {
 		findRisks = Risk.findRisksByModelName(dbCol, req.session.user.username, "master", null, projection, ids);
 	}
