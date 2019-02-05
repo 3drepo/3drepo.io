@@ -476,7 +476,7 @@ function convertViewpoint(viewpoint) {
 }
 
 	
-function sortViewpointAxis(issues) {
+function changeAxis(issues) {
 	issues.forEach((issue) => {
 		convertViewpoint(issue.viewpoint);
 	});
@@ -513,7 +513,7 @@ function listIssues(req, res, next) {
 	findIssue.then(issues => {
 
 	if (req.query.convertCoords) {
-		sortViewpointAxis(issues);
+		changeAxis(issues);
 	}
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
