@@ -63,7 +63,8 @@ interface IProps {
 	toggleShowPins: (showPins: boolean) => void;
 	subscribeOnRiskChanges: (teamspace, modelId) => void;
 	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
-	saveRisk: (teamspace, modelId, risk, filteredRisks) => void;
+	saveRisk: (teamspace, modelId, risk) => void;
+	setFilters: (filters) => void;
 	onFiltersChange: (selectedFilters) => void;
 }
 
@@ -175,15 +176,11 @@ export class Risks extends React.PureComponent<IProps, any> {
 		this.props.setState(changes);
 	}
 
-	public handleSaveRisk = (teamspace, model, risk) => {
-		this.props.saveRisk(teamspace, model, risk, this.state.filteredRisks);
-	}
-
 	public renderDetailsView = renderWhenTrue(() => (
 		<RiskDetails
 			teamspace={this.props.teamspace}
 			model={this.props.model}
-			saveRisk={this.handleSaveRisk}
+			saveRisk={this.props.saveRisk}
 		/>
 	));
 
@@ -206,7 +203,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 				selectedFilters={this.props.selectedFilters}
 
 				onToggleFilters={this.handleToggleFilters}
-				onChangeFilters={this.handleFilterChange}
+				onChangeFilters={this.props.setFilters}
 				onActiveItem={this.setActiveRisk}
 				onNewItem={this.props.setNewRisk}
 				onShowDetails={this.showRiskDetails}

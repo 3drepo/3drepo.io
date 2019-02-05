@@ -232,7 +232,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					{this.renderPreview(this.props.risk)}
 					{this.renderLogs(logs.length)}
 				</ViewerPanelContent>
-				{this.renderFooter(this.riskData._id)}
+				{this.renderFooter(!this.riskData._id)}
 			</Container>
 		);
 	}

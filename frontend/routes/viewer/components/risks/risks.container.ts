@@ -61,6 +61,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	unsubscribeOnRiskChanges: RisksActions.unsubscribeOnRiskChanges,
 	closeDetails: RisksActions.closeDetails,
 	saveRisk: RisksActions.saveRisk,
+	setFilters: RisksActions.setFilters
 	onFiltersChange: RisksActions.onFiltersChange
 }, dispatch);
 

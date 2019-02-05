@@ -39,7 +39,8 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	unsubscribeOnRiskChanges: ['teamspace', 'modelId'],
 	focusOnRisk: ['risk', 'revision'],
 	updateNewRisk: ['newRisk'],
-	onFiltersChange: ['selectedFilters']
+	onFiltersChange: ['selectedFilters'],
+	setFilters: ['filters']
 }, { prefix: 'RISKS/' });
 
 export const INITIAL_STATE = {

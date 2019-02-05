@@ -200,10 +200,6 @@ export class Issues extends React.PureComponent<IProps, IState> {
 		this.props.unsubscribeOnIssueChanges(this.props.teamspace, this.props.model);
 	}
 
-	public handleFilterChange = (selectedFilters) => {
-		this.props.setFilters({ selectedFilters });
-	}
-
 	public setActiveIssue = (item) => {
 		this.props.setActiveIssue(item, this.props.revision);
 	}
@@ -254,7 +250,7 @@ export class Issues extends React.PureComponent<IProps, IState> {
 				sortOrder={this.props.sortOrder}
 
 				onToggleFilters={this.handleToggleFilters}
-				onChangeFilters={this.handleFilterChange}
+				onChangeFilters={this.props.setFilters}
 				onActiveItem={this.setActiveIssue}
 				onNewItem={this.props.setNewIssue}
 				onShowDetails={this.showIssueDetails}

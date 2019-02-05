@@ -86,10 +86,11 @@ const toggleRiskPin = (risk, selected = true) => {
 	}
 };
 
-export function* saveRisk({ teamspace, model, riskData, revision, filteredRisks }) {
+export function* saveRisk({ teamspace, model, riskData, revision }) {
 	try {
 		yield Viewer.setPinDropMode(false);
 		const myJob = yield select(selectMyJob);
+		const filteredRisks = yield select(selectFilteredRisks);
 
 		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
 			Viewer.getCurrentViewpoint({ teamspace, model }),
@@ -458,6 +459,15 @@ export function* showNewPin({ risk, pinData }) {
 	}
 }
 
+export function* setFilters({ filters }) {
+	try {
+		yield put(RisksActions.setComponentState({ selectedFilters: filters }));
+		yield put(RisksActions.renderPins());
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'filters', error));
+	}
+}
+
 export function* toggleShowPins({ showPins }) {
 	try {
 		yield put(RisksActions.setComponentState({ showPins }));
@@ -551,5 +561,6 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FOCUS_ON_RISK, focusOnRisk);
 	yield takeLatest(RisksTypes.SET_NEW_RISK, setNewRisk);
 	yield takeLatest(RisksTypes.UPDATE_NEW_RISK, updateNewRisk);
+	yield takeLatest(RisksTypes.SET_FILTERS, setFilters);
 	yield takeLatest(RisksTypes.ON_FILTERS_CHANGE, onFiltersChange);
 }
