@@ -19,7 +19,7 @@ import * as React from 'react';
 import Bookmarks from '@material-ui/icons/Bookmarks';
 import BookmarksOutlined from '@material-ui/icons/BookmarksOutlined';
 
-import { TreeList } from '../../../components/treeList/treeList.component';
+import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -51,7 +51,7 @@ export const ModelDirectoryItem = (props: IProps) => {
 		<TreeList
 			name={name}
 			items={items}
-			level={3}
+			level={TREE_LEVELS.MODEL}
 			renderItem={renderChildItem}
 			active={true}
 			disableShadow={true}
