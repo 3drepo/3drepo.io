@@ -9,7 +9,7 @@ export const prepareIssue = (issue, jobs = []) => {
 		? getAPIUrl(issue.viewpoint.screenshot)
 		: (issue.descriptionThumbnail || '');
 	const { Icon, color } = this.getStatusIcon(issue.priority, issue.status);
-	const roleColor = get(jobs.find((job) => job._id === get(issue.assigned_roles, '[0]')), 'color');
+	const roleColor = get(jobs.find((job) => job.name === get(issue.assigned_roles, '[0]')), 'color');
 
 	return {
 		...issue,
