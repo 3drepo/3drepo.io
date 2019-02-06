@@ -349,7 +349,7 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  * @api {post} /:teamspace/:model/issues.json Create a new issue.
  * @apiName  storeIssue
  * @apiGroup Issues
- * 
+ *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiDescription Create a new issue. This is the same endpoint as listIssues, but a post request is required.
