@@ -25,7 +25,7 @@ import CollapseIcon from '@material-ui/icons/ExpandMore';
 import ExpandIcon from '@material-ui/icons/ChevronRight';
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
-
+import { Highlight } from '../highlight/highlight.component';
 import { ENTER_KEY } from '../../../constants/keys';
 import { FiltersMenu } from './components/filtersMenu/filtersMenu.component';
 import {
@@ -190,9 +190,9 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public renderSuggestion = (suggestion, { isHighlighted }) => (
+	public renderSuggestion = (suggestion, { isHighlighted, query }) => (
 		<MenuItem selected={isHighlighted} component="div">
-			{suggestion.name}
+			<Highlight text={suggestion.name} search={query} />
 		</MenuItem>
 	)
 
@@ -356,6 +356,25 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		</SelectedFilters>
 	)
 
+	public handleKeyUp = () => {
+		const list = document.querySelector('.react-autosuggest__suggestions-list');
+		if (list) {
+			const item = list.querySelector('[aria-selected="true"]') as any;
+			if (item) {
+				list.scrollTo({
+					top: item.offsetTop + item.clientHeight - list.clientHeight,
+					behavior: 'smooth'
+				});
+			}
+		}
+	}
+
+	public handleAutoSuggestMount = (autoSuggestComponent) => {
+		if (autoSuggestComponent && autoSuggestComponent.input) {
+			autoSuggestComponent.input.addEventListener('keyup', this.handleKeyUp);
+		}
+	}
+
 	public render() {
 		const { value, suggestions } = this.state;
 
@@ -365,6 +384,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 				<InputContainer>
 					<Autosuggest
+						ref={this.handleAutoSuggestMount}
 						suggestions={suggestions}
 						onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
 						onSuggestionsClearRequested={this.onSuggestionsClearRequested}
