@@ -20,8 +20,8 @@ import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import ViewList from '@material-ui/icons/ViewList';
 import ExitToApp from '@material-ui/icons/ExitToApp';
-import Description from '@material-ui/icons/Description';
 import Restore from '@material-ui/icons/Restore';
+import ContactSupport from '@material-ui/icons/ContactSupport';
 
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
 import {
@@ -84,8 +84,8 @@ const UserMenuContent = (props) => {
 				onButtonClick={invokeAndClose(props.onTeamspacesClick)}
 			/>
 			<UserMenuButton
-				Icon={Description}
-				label="User manual"
+				Icon={ContactSupport}
+				label="Support"
 				onButtonClick={invokeAndClose(props.openUserManual)}
 			/>
 			<MenuItem>
@@ -127,7 +127,7 @@ export class UserMenu extends React.PureComponent<IProps, any> {
 	}
 
 	public openUserManual() {
-		window.open('http://3drepo.org/models/3drepo-io-user-manual/', '_blank');
+		window.open('http://3drepo.org/support/', '_blank');
 	}
 
 	public renderMenuContent = (props) => {
