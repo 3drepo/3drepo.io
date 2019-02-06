@@ -221,7 +221,7 @@ function listRisks(req, res, next) {
 
 	let ids;
 	let findRisks;
-	
+
 	if (req.query.ids) {
 		ids = req.query.ids.split(",");
 	}

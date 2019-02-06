@@ -460,21 +460,19 @@ function updateIssue(req, res, next) {
 	});
 }
 
-
 function convertPoint(point) {
 	return [point[0], point[2], -point[1]];
 }
 
 function convertIssuePoints(issue) {
 
-	const rootAxisKeys = ['position', 'norm'];
-	const pointsKeys = ['right', 'view_dir', 'look_at', 'position', 'up', 'clippingPlanes'];
-	
+	const rootAxisKeys = ["position", "norm"];
+	const pointsKeys = ["right", "view_dir", "look_at", "position", "up", "clippingPlanes"];
 	const viewpoint = issue.viewpoint;
 
 	rootAxisKeys.forEach((rootKey) => {
 		if (issue[rootKey] && issue[rootKey].length === 3) {
-			issue[rootKey] = convertPoint(issue[rootKey])
+			issue[rootKey] = convertPoint(issue[rootKey]);
 		}
 	});
 
@@ -482,7 +480,7 @@ function convertIssuePoints(issue) {
 		if (viewpoint[key] && viewpoint[key].length === 3) {
 			viewpoint[key] = convertPoint(viewpoint[key]);
 		}
-		if (key === 'clippingPlanes') {
+		if (key === "clippingPlanes") {
 			const clippingPlanes = viewpoint[key];
 			for (const item in clippingPlanes) {
 				clippingPlanes[item].normal = convertPoint(clippingPlanes[item].normal);
@@ -493,7 +491,6 @@ function convertIssuePoints(issue) {
 	return viewpoint;
 }
 
-	
 function changeIssueAxis(issues) {
 	issues.forEach((issue) => {
 		convertIssuePoints(issue);
@@ -529,10 +526,9 @@ function listIssues(req, res, next) {
 	}
 
 	findIssue.then(issues => {
-
-	if (req.query.convertCoords) {
-		changeIssueAxis(issues);
-	}
+		if (req.query.convertCoords) {
+			changeIssueAxis(issues);
+		}
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
 	}).catch(err => {
