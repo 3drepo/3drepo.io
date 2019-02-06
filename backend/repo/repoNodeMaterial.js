@@ -23,7 +23,7 @@ const UUID = require("node-uuid");
 const C = require("../constants");
 
 exports.decode = function(bson, textures) {
-	assert.equal(bson[C.REPO_NODE_LABEL_TYPE], C.REPO_NODE_TYPE_MATERIAL, "Trying to convert " + bson[C.REPO_NODE_LABEL_TYPE] + " to material");
+	assert.strict.equal(bson[C.REPO_NODE_LABEL_TYPE], C.REPO_NODE_TYPE_MATERIAL, "Trying to convert " + bson[C.REPO_NODE_LABEL_TYPE] + " to material");
 
 	// Supported only a single diffuse texture per material at the moment.
 	if (bson[C.REPO_NODE_LABEL_CHILDREN]) {

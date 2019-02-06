@@ -136,7 +136,7 @@ const createBillingAgreement = function(billing, payments, paymentDate) {
 	})
 		.then(billingPlan => {
 
-		// activate plan
+			// activate plan
 			return new Promise((resolve, reject) => {
 				const billingPlanUpdateAttributes = [{
 					"op": "replace",
@@ -164,7 +164,7 @@ const createBillingAgreement = function(billing, payments, paymentDate) {
 		})
 		.then(billingPlan => {
 
-		// create agreement
+			// create agreement
 			return new Promise((resolve, reject) => {
 
 				let desc = "";
@@ -189,10 +189,9 @@ const createBillingAgreement = function(billing, payments, paymentDate) {
 					} else {
 
 						const link = billingAgreement.links.find(_link => _link.rel === "approval_url");
-						const token = url.parse(link.href, true)
-							.query.token;
 
-						// console.log(new Date().getSeconds(), "buySubscription - paypal.createBillingAgreement finished");
+						const token = new url.URL(link.href).searchParams.get("token");
+
 						resolve({
 							url: link.href,
 							paypalPaymentToken: token,
