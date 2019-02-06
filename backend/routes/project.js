@@ -44,20 +44,20 @@
 	 * @apiParam {String} project Project to update
 	 */
 
-	router.put("/:teamspace/projects/:project", middlewares.project.canUpdate, updateProject);
+	router.put("/projects/:project", middlewares.project.canUpdate, updateProject);
 
 	/**
-	 * @api {get} /projects List all projects
+	 * @api {get} /:teamspace/projects List all projects
 	 * @apiName listProjects
 	 * @apiGroup Project
      *
      * @apiParam {String} teamspace Name of the teamspace
 	 */
 
-	router.get("/:teamspace/projects", middlewares.project.canList, listProjects);
+	router.get("/projects", middlewares.project.canList, listProjects);
 
 	/**
-	 * @api {get} /projects/:project List a project
+	 * @api {get} /:teamspace/projects/:project List a project
 	 * @apiName listProject
 	 * @apiGroup Project
 	 *
@@ -65,10 +65,10 @@
 	 * @apiParam {String} project Project to list
 	 */
 
-	router.get("/:teamspace/projects/:project", middlewares.project.canView, listProject);
+	router.get("/projects/:project", middlewares.project.canView, listProject);
 
 	/**
-	 * @api {delete} /projects/:project Delete a project
+	 * @api {delete} /:teamspace/projects/:project Delete a project
 	 * @apiName deleteProject
 	 * @apiGroup Project
 	 *
@@ -76,7 +76,7 @@
 	 * @apiParam {String} project Project to delete
 	 */
 
-	router.delete("/:teamspace/projects/:project", middlewares.project.canDelete, deleteProject);
+	router.delete("/projects/:project", middlewares.project.canDelete, deleteProject);
 
 	function createProject(req, res, next) {
 		Project.createProject(req.params.account, req.body.name, req.session.user.username,  req.session.user.permissions).then(project => {

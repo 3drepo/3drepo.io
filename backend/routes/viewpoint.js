@@ -59,7 +59,7 @@ router.get("/viewpoints/:uid", middlewares.issue.canView, findViewpoint);
  * @apiParam {String} id Unique Viewpoint ID
  */
 
-router.put("/:teamspace/:model/viewpoints/:uid", middlewares.issue.canCreate, updateViewpoint);
+router.put("/viewpoints/:uid", middlewares.issue.canCreate, updateViewpoint);
 
 /**
  * @api {post} /:teamspace/:model/viewpoints/ Create a Viewpoint

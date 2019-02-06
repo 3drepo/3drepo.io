@@ -31,7 +31,7 @@
 	 * @apiName getQuotaInfo
 	 * @apiGroup Teamspace
      *
-     * @apiParam {String} teamspace Teamspace of the model
+     * @apiParam {String} teamspace Name of teamspace
 	 */
 	router.get("/quota", middlewares.isAccountAdmin, getQuotaInfo);
 
@@ -40,7 +40,7 @@
 	 * @apiName getMemberList
 	 * @apiGroup Teamspace
      *
-     * @apiParam {String} teamspace Teamspace of the model
+     * @apiParam {String} teamspace Name of teamspace
 	 */
 	router.get("/members", middlewares.loggedIn, getMemberList);
 
@@ -49,7 +49,7 @@
 	 * @apiName getMemberList
 	 * @apiGroup Teamspace
      *
-     * @apiParam {String} teamspace Teamspace of the model
+     * @apiParam {String} teamspace Name of teamspace
 	 */
 	router.get("/billingInfo", middlewares.isAccountAdmin, getBillingInfo);
 
@@ -58,7 +58,7 @@
 	 * @apiName removeTeamMember
 	 * @apiGroup Teamspace
 	 *
-     * @apiParam {String} teamspace Teamspace of the model
+     * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} user User (Member) to remove
 	 */
 
@@ -79,7 +79,7 @@
 	 * @apiName addTeamMember
 	 * @apiGroup Teamspace
      *
-     * @apiParam {String} teamspace Teamspace of the model
+     * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} searchString Search string required to find team member.
 	 *
 	 * @apiSuccess (200) {Object} Team member profile

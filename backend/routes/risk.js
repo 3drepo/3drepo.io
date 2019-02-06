@@ -30,7 +30,7 @@ const utils = require("../utils");
  * @apiName findRiskById
  * @apiGroup Risks
  *
- * @apiParam {String} teamspace Teamspace of the model
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} id Risk ID.
  */
@@ -42,7 +42,7 @@ router.get("/risks/:uid.json", middlewares.issue.canView, findRiskById);
  * @apiName getThumbnail
  * @apiGroup Risks
  *
- * @apiParam {String} teamspace Teamspace of the model
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} id Risk ID.
  */
@@ -54,7 +54,7 @@ router.get("/risks/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail)
  * @apiName listRisks
  * @apiGroup Risks
  *
- * @apiParam {String} teamspace Teamspace of the model
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  */
 
@@ -65,7 +65,7 @@ router.get("/risks.json", middlewares.issue.canView, listRisks);
  * @apiName getScreenshot
  * @apiGroup Risks
  *
- * @apiParam {String} teamspace Teamspace of the model
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  */
 
@@ -76,7 +76,7 @@ router.get("/risks/:uid/screenshot.png", middlewares.issue.canView, getScreensho
  * @apiName getScreenshotSmall
  * @apiGroup Risks
  *
- * @apiParam {String} teamspace Teamspace of the model
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} id Risk ID.
  */
@@ -88,7 +88,7 @@ router.get("/risks/:uid/screenshotSmall.png", middlewares.issue.canView, getScre
  * @apiName listRisks
  * @apiGroup Risks
  *
- * @apiParam {String} teamspace Teamspace of the model
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} id Revision ID.
  */
@@ -100,7 +100,7 @@ router.get("/revision/:rid/risks.json", middlewares.issue.canView, listRisks);
  * @apiName renderRisksHTML
  * @apiGroup Risks
  *
- * @apiParam {String} teamspace Teamspace of the model
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  */
 
@@ -111,7 +111,7 @@ router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
  * @apiName renderRisksHTML
  * @apiGroup Risks
  *
- * @apiParam {String} teamspace Teamspace of the model
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} rid Revision ID.
  */
@@ -123,7 +123,7 @@ router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHT
  * @apiName storeRisk
  * @apiGroup Risks
  *
- * @apiParam {String} teamspace Teamspace of the model
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} id Revision ID.
  */
@@ -135,7 +135,7 @@ router.post("/risks.json", middlewares.issue.canCreate, storeRisk);
  * @apiName updateRisk
  * @apiGroup Risks
  *
- * @apiParam {String} teamspace Teamspace of the model
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} riskId.json Risk ID.
  */
@@ -147,7 +147,7 @@ router.put("/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
  * @apiName storeRisk
  * @apiGroup Risks
  *
- * @apiParam {String} teamspace Teamspace of the model
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} rid Revision ID.
  */
@@ -159,7 +159,7 @@ router.post("/revision/:rid/risks.json", middlewares.issue.canCreate, storeRisk)
  * @apiName  updateRisk
  * @apiGroup Risks
  *
- * @apiParam {String} teamspace Teamspace of the model
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} rid Revision ID.
  * @apiParam {String} riskId Risk ID.

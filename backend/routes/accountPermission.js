@@ -59,10 +59,10 @@
     *   }
     */
 
-	router.get("/:teamspace/permissions", middlewares.isAccountAdmin, listPermissions);
+	router.get("/permissions", middlewares.isAccountAdmin, listPermissions);
 
 	/**
-    * @api {post} /permissions/ Create a permission
+    * @api {post} /:teamspace/permissions/ Create a permission
     * @apiName createPermission
     * @apiGroup Account Permission
     *
