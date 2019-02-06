@@ -20,9 +20,12 @@ import { FontAwesomeIcon as FontAwesomeIconComponent } from '@fortawesome/react-
 import { IconProps } from '@material-ui/core/Icon';
 import { IconContainer } from './fontAwesomeIcon.styles';
 
+interface IExtendedIconProps extends IconProps {
+	innerRef?: any;
+}
 interface IProps {
 	icon: any;
-	IconProps?: IconProps;
+	IconProps?: IExtendedIconProps;
 }
 
 export default (props: IProps) => (
