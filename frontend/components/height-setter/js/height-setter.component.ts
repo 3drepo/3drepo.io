@@ -73,7 +73,7 @@ class HeightSetterController implements ng.IController, IBindings {
 
 	get contentHeight() {
 		const contentContainer = this.content[0].querySelector('.height-catcher');
-		const prevContentHeight = contentContainer.prevSibling && contentContainer.prevSibling.offsetHeight;
+		const prevContentHeight = contentContainer.previousSibling && contentContainer.previousSibling.offsetHeight;
 		const footerHeight = contentContainer.nextSibling && contentContainer.nextSibling.offsetHeight;
 		return contentContainer.scrollHeight + (prevContentHeight || 0) + (footerHeight || 0);
 	}

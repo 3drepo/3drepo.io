@@ -39,5 +39,9 @@ export const StyledIconButton = styled(IconButton)`
 export const StyledTextField = styled(TextField)`
 	&& {
 		margin: 8px 0;
+
+		textarea {
+			min-height: 17px;
+		}
 	}
 `;
