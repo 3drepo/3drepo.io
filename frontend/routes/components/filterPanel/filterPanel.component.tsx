@@ -147,18 +147,22 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		}, this.handleFiltersChange);
 	}
 
-	public onSelectDateFilter = (dateFilter, child, found) => {
+	public onSelectDateFilter = (dateFilter, child) => {
 		dateFilter.label = child.label;
 		dateFilter.value.label = dayjs(child.date).format('DD/MM/YYYY');
+		const selectedFilterIndex = this.state.selectedFilters.findIndex((filter) => filter.value.value === child.value);
 
-		if (!found) {
+		if (selectedFilterIndex > -1) {
+			this.setState((prevState) => {
+				const newFilters = [...prevState.selectedFilters];
+				newFilters[selectedFilterIndex].label = child.label;
+				newFilters[selectedFilterIndex].value.label = dayjs(child.date).format('DD/MM/YYYY');
+				return newFilters as any;
+			}, this.handleFiltersChange);
+		} else {
 			this.setState((prevState) => ({
 				selectedFilters: [...prevState.selectedFilters, dateFilter]
 			}), this.handleFiltersChange);
-		} else {
-			const selectedFilters = { ...this.state.selectedFilters };
-			selectedFilters[dateFilter.label].value.label = dayjs(child.date).format('DD/MM/YYYY');
-			this.setState({ selectedFilters }, this.handleFiltersChange);
 		}
 	}
 
@@ -175,7 +179,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 		if (parent.type === DATA_TYPES.DATE && child.date) {
 			newSelectedFilter.value.date = child.date;
-			this.onSelectDateFilter(newSelectedFilter, child, found);
+			this.onSelectDateFilter(newSelectedFilter, child);
 		}
 
 		if (!found && parent.type !== DATA_TYPES.DATE) {
@@ -186,22 +190,14 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	}
 
 	public onToggleFilter = (parent, child) => {
-		const foundFilter = this.state.selectedFilters.find((filter) => {
-			if (parent.type !== DATA_TYPES.DATE) {
-				return filter.label === parent.label && filter.value.value === child.value;
-			} else {
-				const foundDate = parent.values.find((item) => {
-					return item.value.value === filter.value.value;
-				});
-				return Boolean(foundDate);
-			}
-		});
-		const found = Boolean(foundFilter);
+		const foundFilter = this.state.selectedFilters.find((filter) =>
+			filter.label === parent.label && filter.value.value === child.value
+		);
 
-		if (found && parent.type !== DATA_TYPES.DATE) {
-			this.onDeselectFilter(found);
+		if (foundFilter && parent.type !== DATA_TYPES.DATE) {
+			this.onDeselectFilter(foundFilter);
 		} else {
-			this.onSelectFilter(parent, child, found);
+			this.onSelectFilter(parent, child, foundFilter);
 		}
 	}
 
@@ -278,6 +274,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleFiltersChange = () => {
+		console.log('Handle change', this.state.selectedFilters);
 		this.props.onChange(this.state.selectedFilters);
 	}
 
