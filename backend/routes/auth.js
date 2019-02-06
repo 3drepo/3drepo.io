@@ -37,6 +37,8 @@ const multer = require("multer");
  * @apiName login
  * @apiGroup Authorisation
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} username Account username
  * @apiParam {String} password User account password
  *
@@ -88,6 +90,8 @@ router.post("/login", login);
  *
  * @apiDescription Logout current user
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} username Account username
  *
  * @apiSuccess (200) {String} username Registered Account Username

@@ -26,9 +26,12 @@ const History = require("../models/history");
 const utils = require("../utils");
 
 /**
- * @api {get} /revisions.json List all revisions
+ * @api {get} /:teamspace/:model/revisions.json List all revisions
  * @apiName listRevisions
  * @apiGroup Revisions
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  *
  * @apiDescription List all revisions for current model.
  *
@@ -50,9 +53,12 @@ const utils = require("../utils");
 router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
 
 /**
- * @api {get} /revisions/:branch.json List all revisions by branch
+ * @api {get} /:teamspace/:model/revisions/:branch.json List all revisions by branch
  * @apiName listRevisionsByBranch
  * @apiGroup Revisions
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} branch.json Branch required to list revisions for.
  *
  * @apiDescription List all revisions using the current branch.
@@ -95,12 +101,14 @@ router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
 router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevisionsByBranch);
 
 /**
- * @api {put} /revisions/:id/tag Update Revision Tag
+ * @api {put} /:teamspace/:model/revisions/:id/tag Update Revision Tag
  * @apiName updateRevisionTag
  * @apiGroup Revisions
  *
  * @apiDescription Update revision tag
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Unique Revision ID
  * @apiParam {String} tag Tag to update
  *

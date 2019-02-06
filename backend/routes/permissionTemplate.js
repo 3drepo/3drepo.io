@@ -26,36 +26,42 @@
 	const utils = require("../utils");
 
 	/**
-	 * @api {post} /permission-templates Create a Permission Template
+	 * @api {post} /:teamspace/permission-templates Create a Permission Template
 	 * @apiName createTemplate
 	 * @apiGroup Permission Template
+     *
+     * @apiParam {String} teamspace Name of teamspace
 	 */
 
 	router.post("/permission-templates", middlewares.isAccountAdmin, createTemplate);
 
 	/**
-	 * @api {get} /permission-templates List all Permission Templates
+	 * @api {get} /:teamspace/permission-templates List all Permission Templates
 	 * @apiName listTemplates
 	 * @apiGroup Permission Template
+     *
+     * @apiParam {String} teamspace Name of teamspace
 	 */
 
 	router.get("/permission-templates", middlewares.isAccountAdmin, listTemplates);
 
 	/**
-	 * @api {get} /:model/permission-templates List all Permission Templates based on Model
+	 * @api {get} /:teamspace/:model/permission-templates List all Permission Templates based on Model
 	 * @apiName listTemplates
 	 * @apiGroup Permission Template
 	 *
-	 * @apiParam {String} model Model to get permission templates for.
+     * @apiParam {String} teamspace Name of teamspace
+	 * @apiParam {String} model Model ID to get permission templates for.
 	 */
 
 	router.get("/:model/permission-templates", middlewares.hasEditPermissionsAccessToModel, listTemplates);
 
 	/**
-	 * @api {delete} /permission-templates/:permissionId Delete permission template
+	 * @api {delete} /:teamspace/permission-templates/:permissionId Delete permission template
 	 * @apiName deleteTemplate
 	 * @apiGroup Permission Template
 	 *
+     * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} permissionId Unique Permission ID
 	 */
 

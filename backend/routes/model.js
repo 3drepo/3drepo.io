@@ -41,17 +41,18 @@ function convertProjectToParam(req, res, next) {
 // Get model info
 
 /**
- * @api {get} /:model.json Get Model Setting
+ * @api {get} /:teamspace/:model.json Get Model Setting
  * @apiName getModelSetting
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {Object} model Model to get settings for.
  */
 
 router.get("/:model.json", middlewares.hasReadAccessToModel, getModelSetting);
 
 /**
- * @api {get} /:model/settings/heliSpeed Get Model Heli Speed
+ * @api {get} /:teamspace/:model/settings/heliSpeed Get Model Heli Speed
  * @apiName getHeliSpeed
  * @apiGroup Model
  *
@@ -61,7 +62,7 @@ router.get("/:model.json", middlewares.hasReadAccessToModel, getModelSetting);
 router.get("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, getHeliSpeed);
 
 /**
- * @api {put} /:model/settings/heliSpeed Update Model Heli Speed
+ * @api {put} /:teamspace/:model/settings/heliSpeed Update Model Heli Speed
  * @apiName updateHeliSpeed
  * @apiGroup Model
  *
@@ -71,7 +72,7 @@ router.get("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, getHe
 router.put("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, updateHeliSpeed);
 
 /**
- * @api {put} /:model/settings/ Update Model Settings
+ * @api {put} /:teamspace/:model/settings/ Update Model Settings
  * @apiName updateSettings
  * @apiGroup Model
  *
@@ -81,7 +82,7 @@ router.put("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, updat
 router.put("/:model/settings", middlewares.hasWriteAccessToModelSettings, updateSettings);
 
 /**
- * @api {post} /:model Create a model
+ * @api {post} /:teamspace/:model Create a model
  * @apiName createModel
  * @apiGroup Model
  */
@@ -91,20 +92,22 @@ router.post("/model",convertProjectToParam,middlewares.canCreateModel,createMode
 // Unity information
 
 /**
- * @api {get} /:model/revision/master/head/unityAssets.json Get Unity Assets based on model
+ * @api {get} /:teamspace/:model/revision/master/head/unityAssets.json Get Unity Assets based on model
  * @apiName getUnityAssets
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} unityAssets.json Model to get Unity Assets for.
  */
 
 router.get("/:model/revision/master/head/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
 
 /**
- * @api {get} /:model/revision/:rev/unityAssets.json Get Unity Assets based on revision and model
+ * @api {get} /:teamspace/:model/revision/:rev/unityAssets.json Get Unity Assets List based on revision and model
  * @apiName getUnityAssets
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get Unity Assets for.
  * @apiParam {String} rev   Revision to get Unity Assets for.
  */
@@ -112,128 +115,143 @@ router.get("/:model/revision/master/head/unityAssets.json", middlewares.hasReadA
 router.get("/:model/revision/:rev/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
 
 /**
- * @api {get} /:model/:uid.json.mpc Get JSON Mpc
+ * @api {get} /:teamspace/:model/:uid.json.mpc Get JSON Mpc
  * @apiName getJsonMpc
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get JSON Mpc for.
- * @apiParam {String} id    Unique id for JSON mpc.
+ * @apiParam {String} id    name of the json.mpc file
  */
 
 router.get("/:model/:uid.json.mpc",  middlewares.hasReadAccessToModel, getJsonMpc);
 
 /**
- * @api {get} /:model/:uid.unity3d Get Unity Bundle
+ * @api {get} /:teamspace/:model/:uid.unity3d Get Unity Bundle
  * @apiName getUnityBundle
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get JSON Mpc for.
- * @apiParam {String} id    Unique id for unity 3D
+ * @apiParam {String} uid name of the unity bundle
  */
 
 router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBundle);
 
 /**
- * @api {put} /:model Update Federated Model
+ * @api {put} /:teamspace/:model Update Federated Model
  * @apiName updateModel
  * @apiGroup Model
  *
- * @apiParam {String} model Federated Model to update
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Federated Model ID to update
  */
 
 router.put("/:model", middlewares.hasEditAccessToFedModel, updateModel);
 
 /**
- * @api {post} /model/permissions Update Multiple Model Permissions
+ * @api {post} /:teamspace/models/permissions Update Multiple Model Permissions
  * @apiName updateMultiplePermissions
  * @apiGroup Model
+ *
+ ** @apiParam {String} teamspace Name of teamspace
  */
 
 router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpleModels, updateMultiplePermissions);
 
 /**
- * @api {post} /:model/permissions Update Model Permissions
+ * @api {post} /:teamspace/:model/permissions Update Model Permissions
  * @apiName updatePermissions
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model Permission to update
  */
 
 router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, updatePermissions);
 
 /**
- * @api {get} /model/permissions Get Multiple Model Permissions
+ * @api {get} /:teamspace/model/permissions Get Multiple Model Permissions
  * @apiName getMultipleModelsPermissions
  * @apiGroup Model
+ *
+ * @apiParam {String} teamspace Name of teamspace
  */
 
 router.get("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpleModels, getMultipleModelsPermissions);
 
 /**
- * @api {get} /:model/permissions Get Single Model Permissions
+ * @api {get} /:teamspace/:model/permissions Get Single Model Permissions
  * @apiName getSingleModelPermissions
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get Permission for.
  */
 
 router.get("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, getSingleModelPermissions);
 
 /**
- * @api {get} /:model/revision/master/head/fulltree.json Get Model Tree
+ * @api {get} /:teamspace/:model/revision/master/head/fulltree.json Get Model Tree
  * @apiName getModelTree
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to use.
  */
 
 router.get("/:model/revision/master/head/fulltree.json", middlewares.hasReadAccessToModel, getModelTree);
 
 /**
- * @api {get} /:model/revision/master/head/tree_path.json Get Model Tree path
+ * @api {get} /:teamspace/:model/revision/master/head/tree_path.json Get Model Tree path
  * @apiName getTreePath
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get tree path for.
  */
 
 router.get("/:model/revision/master/head/tree_path.json", middlewares.hasReadAccessToModel, getTreePath);
 
 /**
- * @api {get} /:model/revision/master/head/idMap.json Get ID Map
+ * @api {get} /:teamspace/:model/revision/master/head/idMap.json Get ID Map
  * @apiName getIdMap
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to Get ID Map for.
  */
 
 router.get("/:model/revision/master/head/idMap.json", middlewares.hasReadAccessToModel, getIdMap);
 
 /**
- * @api {get} /:model/revision/master/head/idToMeshes.json Get ID Map
+ * @api {get} /:teamspace/:model/revision/master/head/idToMeshes.json Get ID Map
  * @apiName getIdToMeshes
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get ID Meshes for.
  */
 
 router.get("/:model/revision/master/head/idToMeshes.json", middlewares.hasReadAccessToModel, getIdToMeshes);
 
 /**
- * @api {get} /:model/revision/master/head/modelProperties.json Get ID Map
+ * @api {get} /:teamspace/:model/revision/master/head/modelProperties.json Get ID Map
  * @apiName getModelProperties
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get properties for.
  */
 
 router.get("/:model/revision/master/head/modelProperties.json", middlewares.hasReadAccessToModel, getModelProperties);
 
 /**
- * @api {get} /:model/revision/:rev/fulltree.json Get ID Map
+ * @api {get} /:teamspace/:model/revision/:rev/fulltree.json Get ID Map
  * @apiName getModelTree
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get Tree for.
  * @apiParam {String} rev   Revision to use.
  */
@@ -241,10 +259,11 @@ router.get("/:model/revision/master/head/modelProperties.json", middlewares.hasR
 router.get("/:model/revision/:rev/fulltree.json", middlewares.hasReadAccessToModel, getModelTree);
 
 /**
- * @api {get} /:model/revision/:rev/tree_path.json Get Tree Path
+ * @api {get} /:teamspace/:model/revision/:rev/tree_path.json Get Tree Path
  * @apiName getTreePath
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get tree path for.
  * @apiParam {String} rev   Revision to use.
  */
@@ -252,10 +271,11 @@ router.get("/:model/revision/:rev/fulltree.json", middlewares.hasReadAccessToMod
 router.get("/:model/revision/:rev/tree_path.json", middlewares.hasReadAccessToModel, getTreePath);
 
 /**
- * @api {get} /:model/revision/:rev/idMap.json Get Tree Path
+ * @api {get} /:teamspace/:model/revision/:rev/idMap.json Get Tree Path
  * @apiName getIdMap
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to ID map for.
  * @apiParam {String} rev   Revision to use.
  */
@@ -263,10 +283,11 @@ router.get("/:model/revision/:rev/tree_path.json", middlewares.hasReadAccessToMo
 router.get("/:model/revision/:rev/idMap.json", middlewares.hasReadAccessToModel, getIdMap);
 
 /**
- * @api {get} /:model/revision/:rev/idToMeshes.json Get ID Meshes
+ * @api {get} /:teamspace/:model/revision/:rev/idToMeshes.json Get ID Meshes
  * @apiName getIdToMeshes
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to use.
  * @apiParam {String} rev   Revision to use.
  */
@@ -274,10 +295,11 @@ router.get("/:model/revision/:rev/idMap.json", middlewares.hasReadAccessToModel,
 router.get("/:model/revision/:rev/idToMeshes.json", middlewares.hasReadAccessToModel, getIdToMeshes);
 
 /**
- * @api {get} /:model/revision/:rev/modelProperties.json Get ID Meshes
+ * @api {get} /:teamspace/:model/revision/:rev/modelProperties.json Get ID Meshes
  * @apiName getModelProperties
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to use.
  * @apiParam {String} rev   Revision to use.
  */
@@ -285,20 +307,22 @@ router.get("/:model/revision/:rev/idToMeshes.json", middlewares.hasReadAccessToM
 router.get("/:model/revision/:rev/modelProperties.json", middlewares.hasReadAccessToModel, getModelProperties);
 
 /**
- * @api {get} /:model/revision/master/head/searchtree.json Search model tree using model as reference.
+ * @api {get} /:teamspace/:model/revision/master/head/searchtree.json Search model tree using model as reference.
  * @apiName searchModelTree
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to use.
  */
 
 router.get("/:model/revision/master/head/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
 
 /**
- * @api {get} /:model/revision/:rev/searchtree.json Search model tree using revision and model to reference.
+ * @api {get} /:teamspace/:model/revision/:rev/searchtree.json Search model tree using revision and model to reference.
  * @apiName searchModelTree
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to use.
  * @apiParam {String} rev   Revision to use.
  */
@@ -306,29 +330,32 @@ router.get("/:model/revision/master/head/searchtree.json", middlewares.hasReadAc
 router.get("/:model/revision/:rev/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
 
 /**
- * @api {delete} /:model Delete Model.
+ * @api {delete} /:teamspace/:model Delete Model.
  * @apiName deleteModel
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to delete.
  */
 
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 
 /**
- * @api {post} /:model/revision/master/head/searchtree.json Upload Model.
+ * @api {post} /:teamspace/:model/revision/master/head/searchtree.json Upload Model.
  * @apiName uploadModel
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to upload.
  */
 router.post("/:model/upload", middlewares.hasUploadAccessToModel, uploadModel);
 
 /**
- * @api {get} /:model/download/latest Upload Model.
+ * @api {get} /:teamspace/:model/download/latest Upload Model.
  * @apiName uploadModel
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to download.
  */
 

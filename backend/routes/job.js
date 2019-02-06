@@ -26,63 +26,79 @@
 	const utils = require("../utils");
 
 	/**
-	 * @api {post} /jobs Create a new job
+	 * @api {post} /:teamspace/jobs Create a new job
 	 * @apiName createJob
 	 * @apiGroup Jobs
+     *
+     * @apiParam {String} teamspace Name of teamspace
 	 */
 	router.post("/jobs", middlewares.job.canCreate, createJob);
 
 	/**
-	 * @api {get} /myJob Get user Job
+	 * @api {get} /:teamspace/myJob Get user Job
 	 * @apiName getUserJob
 	 * @apiGroup Jobs
+     *
+     * @apiParam {String} teamspace Name of teamspace
 	 */
 	router.get("/myJob", middlewares.isTeamspaceMember, getUserJob);
 
 	/**
-	 * @api {put} /jobs/:jobId Update User Job
+	 * @api {put} /:teamspace/jobs/:jobId Update User Job
 	 * @apiName updateJob
 	 * @apiGroup Jobs
+     *
+     * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} jobId Unique Job ID.
 	 */
 	router.put("/jobs/:jobId", middlewares.job.canCreate, updateJob);
 
 	/**
-	 * @api {get} /jobs List all Jobs
+	 * @api {get} /:teamspace/jobs List all Jobs
 	 * @apiName listJobs
 	 * @apiGroup Jobs
+     *
+     * @apiParam {String} teamspace Name of teamspace
 	 */
 	router.get("/jobs", middlewares.isTeamspaceMember, listJobs);
 
 	/**
-	 * @api {post} /jobs/:jobId/:user Assign a job to a user
+	 * @api {post} /:teamspace/jobs/:jobId/:user Assign a job to a user
 	 * @apiName addUserToJob
 	 * @apiGroup Jobs
+     *
+     * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam jobId Unique Job ID
 	 * @apiParam {String} user User to assign job to.
 	 */
 	router.post("/jobs/:jobId/:user", middlewares.job.canCreate, addUserToJob);
 
 	/**
-	 * @api {delete} /jobs Remove a job from a user
+	 * @api {delete} /:teamspace/jobs Remove a job from a user
 	 * @apiName removeUserFromJobs
 	 * @apiGroup Jobs
+     *
+     * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {Object} user User to remove job from.
 	 */
 	router.delete("/jobs/unassign/:user", middlewares.job.canDelete, removeUserFromJobs);
 
 	/**
-	 * @api {delete} /jobs/:jobId Delete a job
+	 * @api {delete} /:teamspace/jobs/:jobId Delete a job
 	 * @apiName deleteJob
 	 * @apiGroup Jobs
+     *
+     * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} jobId Unique Job ID.
 	 */
 	router.delete("/jobs/:jobId", middlewares.job.canDelete, deleteJob);
 
 	/**
-	 * @api {get} /jobs/colors List all Colors
+	 * @api {get} /:teamspace/jobs/colors List all Colors
 	 * @apiName listColors
 	 * @apiGroup Jobs
+     *
+     * @apiParam {String} teamspace Name of teamspace
 	 */
 	router.get("/jobs/colors", middlewares.isTeamspaceMember, listColors);
 

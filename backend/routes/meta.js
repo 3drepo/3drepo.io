@@ -28,80 +28,98 @@
 	// Get meta data
 
 	/**
-               * @api {get} /revision/master/head/meta/4DTaskSequence.json  Get All meta data for 4D Sequence Tags
-               * @apiName getAllIdsWith4DSequenceTag
-               * @apiGroup Meta
-               */
+     * @api {get} /:teamspace/:model/revision/master/head/meta/4DTaskSequence.json  Get All information for 4D Sequence Tags
+     * @apiName getAllIdsWith4DSequenceTag
+     * @apiGroup Meta
+     *
+     * @apiParam {String} teamspace Name of teamspace
+     * @apiParam {String} model Model ID
+     */
 
 	router.get("/revision/master/head/meta/4DTaskSequence.json", middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
 
 	/**
-               * @api {get} /revision/:rev/meta/4DTaskSequence.json  Get All meta data with 4D Sequence Tags by revision
-               * @apiName getAllIdsWith4DSequenceTag
-               * @apiGroup Meta
-               *
-               * @apiParam {String} rev Revision
-               */
+     * @api {get} /:teamspace/:model/revision/:rev/meta/4DTaskSequence.json  Get All information for 4D Sequence Tags by revision
+     * @apiName getAllIdsWith4DSequenceTag
+     * @apiGroup Meta
+     *
+     * @apiParam {String} teamspace Name of teamspace
+     * @apiParam {String} model Model ID
+     * @apiParam {String} rev Revision
+     */
 
 	router.get("/revision/:rev/meta/4DTaskSequence.json", middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
 
 	/**
-               * @api {get} /revision/master/head/meta/all.json  Get all meta data
-               * @apiName getAllMetadata
-               * @apiGroup Meta
-               */
+     * @api {get} /:teamspace/:model/revision/master/head/meta/all.json  Get all meta data
+     * @apiName getAllMetadata
+     * @apiGroup Meta
+     *
+     * @apiParam {String} teamspace Name of teamspace
+     * @apiParam {String} model Model ID
+     */
 
 	router.get("/revision/master/head/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
 
 	/**
-               * @api {get} /revision/:rev/meta/all.json  Get all meta data
-               * @apiName getAllMetadata
-               * @apiGroup Meta
-               *
-               * @apiParam {String} rev Revision to get meta data from
-               */
+     * @api {get} /:teamspace/:model/revision/:rev/meta/all.json  Get all meta data
+     * @apiName getAllMetadata
+     * @apiGroup Meta
+     *
+     * @apiParam {String} teamspace Name of teamspace
+     * @apiParam {String} model Model ID
+     * @apiParam {String} rev Revision to get meta data from
+     */
 
 	router.get("/revision/:rev/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
 
 	/**
-               * @api {get} /meta/:id.json  Get meta data
-               * @apiName getMetadata
-               * @apiGroup Meta
-               *
-               * @apiParam id Meta Unique ID
-               */
+     * @api {get} /:teamspace/:model/meta/:id.json  Get meta data
+     * @apiName getMetadata
+     * @apiGroup Meta
+     *
+     * @apiParam {String} teamspace Name of teamspace
+     * @apiParam {String} model Model ID
+     * @apiParam id Meta Unique ID
+     */
 
 	router.get("/meta/:id.json", middlewares.hasReadAccessToModel, getMetadata);
 
 	/**
-               * @api {get} /revision/master/head/meta/findObjsWith/:metaKey.json  Get All ids with the meta data field
-               * @apiName getAllIdsWithMetadataField
-               * @apiGroup Meta
-               *
-               * @apiParam {String} metaKey Unique meta key
-               */
+     * @api {get} /:teamspace/:model/revision/master/head/meta/findObjsWith/:metaKey.json  Get All ids with the meta data field
+     * @apiName getAllIdsWithMetadataField
+     * @apiGroup Meta
+     *
+     * @apiParam {String} teamspace Name of teamspace
+     * @apiParam {String} model Model ID
+     * @apiParam {String} metaKey Unique meta key
+     */
 
 	router.get("/revision/master/head/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 
 	/**
-               * @api {get} /revision/:rev/meta/findObjsWith/:metaKey.json  Get all meta data with field based on revision
-               * @apiName getAllIdsWithMetadataField
-               * @apiGroup Meta
-               *
-               * @apiParam {String} rev Revision to get meta data from
-               * @apiParam {String} metaKey Unique meta key
-               */
+     * @api {get} /:teamspace/:model/revision/:rev/meta/findObjsWith/:metaKey.json  Get all meta data with field based on revision
+     * @apiName getAllIdsWithMetadataField
+     * @apiGroup Meta
+     *
+     * @apiParam {String} teamspace Name of teamspace
+     * @apiParam {String} model Model ID
+     * @apiParam {String} rev Revision to get meta data from
+     * @apiParam {String} metaKey Unique meta key
+     */
 
 	router.get("/revision/:rev/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 
 	/**
-               * @api {get} /revision/:rev/meta/findObjsWith/:metaKey.json  Get all meta data with field based on master branch
-               * @apiName getAllIdsWithMetadataField
-               * @apiGroup Meta
-               *
-               * @apiParam {String} rev Revision to get meta data from
-               * @apiParam {String} metaKey Unique meta key
-               */
+     * @api {get} /:teamspace/:model/revision/:rev/meta/findObjsWith/:metaKey.json  Get all meta data with field based on master branch
+     * @apiName getAllIdsWithMetadataField
+     * @apiGroup Meta
+     *
+     * @apiParam {String} teamspace Name of teamspace
+     * @apiParam {String} model Model ID
+     * @apiParam {String} rev Revision to get meta data from
+     * @apiParam {String} metaKey metadata field to search for
+     */
 
 	router.get("/revision/master/head/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 

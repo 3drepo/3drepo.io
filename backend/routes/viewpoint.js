@@ -27,43 +27,53 @@ const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
 /**
- * @api {get} /viewpoints List all Viewpoints
+ * @api {get} /:teamspace/:model/viewpoints List all Viewpoints
  * @apiName listViewpoints
  * @apiGroup Viewpoint
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  */
 
 router.get("/viewpoints/", middlewares.issue.canView, listViewpoints);
 
 /**
- * @api {get} /viewpoints/:uid Find a Viewpoint
+ * @api {get} /:teamspace/:model/viewpoints/:uid Find a Viewpoint
  * @apiName findViewpoint
  * @apiGroup Viewpoint
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Unique Viewpoint ID
  */
 
 router.get("/viewpoints/:uid", middlewares.issue.canView, findViewpoint);
 
 /**
- * @api {put} /viewpoints/:uid Update a Viewpoint
+ * @api {put} /:teamspace/:model/viewpoints/:uid Update a Viewpoint
  * @apiName updateViewpoint
  * @apiGroup Viewpoint
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Unique Viewpoint ID
  */
 
-router.put("/viewpoints/:uid", middlewares.issue.canCreate, updateViewpoint);
+router.put("/:teamspace/:model/viewpoints/:uid", middlewares.issue.canCreate, updateViewpoint);
 
 /**
- * @api {post} /viewpoints/ Create a Viewpoint
+ * @api {post} /:teamspace/:model/viewpoints/ Create a Viewpoint
  * @apiName createViewpoint
  * @apiGroup Viewpoint
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  */
 
 router.post("/viewpoints/", middlewares.issue.canCreate, createViewpoint);
 
 /**
- * @api {delete} /viewpoints/:uid Delete a Viewpoint
+ * @api {delete} /:teamspace/:model/viewpoints/:uid Delete a Viewpoint
  * @apiName deleteViewpoint
  * @apiGroup Viewpoint
  */
@@ -71,10 +81,12 @@ router.post("/viewpoints/", middlewares.issue.canCreate, createViewpoint);
 router.delete("/viewpoints/:uid", middlewares.issue.canCreate, deleteViewpoint);
 
 /**
- * @api {get} /viewpoints/:uid Get a Viewpoint Thumbnail
+ * @api {get} /:teamspace/:model/viewpoints/:uid Get a Viewpoint Thumbnail
  * @apiName getViewpointThumbnail
  * @apiGroup Viewpoint
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Unique Viewpoint ID
  */
 

@@ -28,9 +28,11 @@
 	const moment = require("moment");
 
 	/**
-   * @api {get} /invoices List all invoices
+   * @api {get} /:teamspace/invoices List all invoices
    * @apiName listInvoices
    * @apiGroup Invoice
+   *
+   * @apiParam {String} teamspace Name of teamspace
    *
    * @apiDescription List all invoices if available, to current logged in user.
    * @apiSuccess (200) {Object} Invoice Object
@@ -110,7 +112,7 @@
 	router.get("/invoices", middlewares.isAccountAdmin, listInvoices);
 
 	/**
-   * @api {get} /invoices/:invoiceNo.html Render invoices as HTML
+   * @api {get} /:teamspace/invoices/:invoiceNo.html Render invoices as HTML
    * @apiName renderInvoice
    * @apiGroup Invoice
    * @apiParam {String} invoiceNo Invoice number to render.
@@ -121,10 +123,11 @@
 	router.get("/invoices/:invoiceNo.html", middlewares.isAccountAdmin, renderInvoice);
 
 	/**
-   * @api {get} /invoices/:invoiceNo.pdf Render invoices as PDF
+   * @api {get} /:teamspace/invoices/:invoiceNo.pdf Render invoices as PDF
    * @apiName renderInvoicePDF
    * @apiGroup Invoice
    *
+   * @apiParam {String} teamspace Name of teamspace
    * @apiParam invoiceNo.pdf Invoice to render.
    *
    * @apiDescription Render out a PDF version of the requested invocie.

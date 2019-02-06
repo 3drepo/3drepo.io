@@ -26,123 +26,129 @@
 	const _ = require("lodash");
 
 	/**
-               * @api {get} /permissions/ List all permissions
-               * @apiName listPermissions
-               * @apiGroup Account Permission
-               *
-               * @apiDescription List all account level permissions
-               * @apiSuccess (200) {String} user Current user account
-               * @apiSuccess (200) {String[]} permissions Account level permissions
-               *
-               * @apiSuccessExample {json} Success-Response:
-               *  HTTP/1.1 200 OK
-               *   [
-               *      {
-               *        "user": "username",
-               *        "permissions": [
-               *            "teamspace_admin"
-               *        ]
-               *      }
-               *   ]
-               *
-               * @apiError NOT_AUTHORIZED Not Authorized
-               * @apiErrorExample {json} Error-Example
-               * HTTP/1.1 401 Unauthorized
-               *   {
-               *     "message": "Not Authorized",
-               *     "status": 401,
-               *     "code": "NOT_AUTHORIZED",
-               *     "value": 9,
-               *     "place": "GET /permissions"
-               *   }
-               */
+    * @api {get} /:teamspace/permissions/ List all permissions
+    * @apiName listPermissions
+    * @apiGroup Account Permission
+    *
+    * @apiParam {String} teamspace Name of teamspace
+    *
+    * @apiDescription List all account level permissions
+    * @apiSuccess (200) {String} user Current user account
+    * @apiSuccess (200) {String[]} permissions Account level permissions
+    *
+    * @apiSuccessExample {json} Success-Response:
+    *  HTTP/1.1 200 OK
+    *   [
+    *      {
+    *        "user": "username",
+    *        "permissions": [
+    *            "teamspace_admin"
+    *        ]
+    *      }
+    *   ]
+    *
+    * @apiError NOT_AUTHORIZED Not Authorized
+    * @apiErrorExample {json} Error-Example
+    * HTTP/1.1 401 Unauthorized
+    *   {
+    *     "message": "Not Authorized",
+    *     "status": 401,
+    *     "code": "NOT_AUTHORIZED",
+    *     "value": 9,
+    *     "place": "GET /permissions"
+    *   }
+    */
 
-	router.get("/permissions", middlewares.isAccountAdmin, listPermissions);
+	router.get("/:teamspace/permissions", middlewares.isAccountAdmin, listPermissions);
 
 	/**
-               * @api {post} /permissions/ Create a permission
-               * @apiName createPermission
-               * @apiGroup Account Permission
-               *
-               * @apiDescription Create a new account permissions
-               * @apiSuccess (200) {String[]} permissions Account Level Permission types
-               *
-               * @apiSuccessExample {json} Success-Response:
-               *  HTTP/1.1 200 OK
-               *   [
-               *      {
-               *        "user": "username1",
-               *        "permissions": [
-               *            "permission_type"
-               *        ]
-               *      }
-               *   ]
-               *
-               * @apiError Missing or invalid arguments
-               * @apiErrorExample {json} Error-Response
-               * HTTP/1.1 400 Bad Request
-               *   {
-               *     "message": "Missing or invalid arguments",
-               *     "status": 400,
-               *     "code": "INVALID_ARGUMENTS",
-               *     "value": 10,
-               *     "place": "POST /permissions"
-               *   }
-               */
+    * @api {post} /permissions/ Create a permission
+    * @apiName createPermission
+    * @apiGroup Account Permission
+    *
+    * @apiParam {String} teamspace Name of teamspace
+    *
+    * @apiDescription Create a new account permissions
+    * @apiSuccess (200) {String[]} permissions Account Level Permission types
+    *
+    * @apiSuccessExample {json} Success-Response:
+    *  HTTP/1.1 200 OK
+    *   [
+    *      {
+    *        "user": "username1",
+    *        "permissions": [
+    *            "permission_type"
+    *        ]
+    *      }
+    *   ]
+    *
+    * @apiError Missing or invalid arguments
+    * @apiErrorExample {json} Error-Response
+    * HTTP/1.1 400 Bad Request
+    *   {
+    *     "message": "Missing or invalid arguments",
+    *     "status": 400,
+    *     "code": "INVALID_ARGUMENTS",
+    *     "value": 10,
+    *     "place": "POST /permissions"
+    *   }
+    */
 	router.post("/permissions", middlewares.isAccountAdmin, createPermission);
 
 	/**
-               * @api {put} /permissions/:user Update a permission
-               * @apiName updatePermission
-               * @apiGroup Account Permission
-               *
-               * @apiDescription Create a new account level permission for a user.
-               *
-               * @apiParam {String} user User to update
-               * @apiSuccessExample {json} Success-Response
-               *
-               * HTTP/1.1 200 OK
-               * [
-               *    {
-               *     "model": "model_ID",
-               *     "name": "model_name",
-               *     "permissions": [
-               *         {
-               *             "user": "username1"
-               *         },
-               *         {
-               *             "user": "username2"
-               *         }
-               *     ],
-               *     "subModels": []
-               *    }
-               * ]
-               */
+    * @api {put} /:teamspace/permissions/:user Update a permission
+    * @apiName updatePermission
+    * @apiGroup Account Permission
+    *
+    * @apiDescription Create a new account level permission for a user.
+    *
+    * @apiParam {String} teamspace Name of teamspace
+    * @apiParam {String} user User to update
+    * @apiSuccessExample {json} Success-Response
+    *
+    * HTTP/1.1 200 OK
+    * [
+    *    {
+    *     "model": "model_ID",
+    *     "name": "model_name",
+    *     "permissions": [
+    *         {
+    *             "user": "username1"
+    *         },
+    *         {
+    *             "user": "username2"
+    *         }
+    *     ],
+    *     "subModels": []
+    *    }
+    * ]
+    */
 
 	router.put("/permissions/:user", middlewares.isAccountAdmin, updatePermission);
 
 	/**
-               * @api {delete} /permissions/:user Delete a permission
-               * @apiName deletePermission
-               * @apiGroup Account Permission
-               *
-               * @apiParam {String} user User to delete
-               *
-               * @apiDescription Update an existing permission for a teamspace member.
-               *
-               *
-               * @apiError Missing or invalid arguments
-               * @apiErrorExample
-               *
-               * HTTP/1.1 401 Unauth­orized
-               *   {
-               *     "message": "Missing or invalid arguments",
-               *     "status": 401,
-               *     "code": "NOT_AUTHORIZED",
-               *     "value": 9,
-               *     "place": "GET /permissions"
-               *   }
-               */
+    * @api {delete} /:teamspace/permissions/:user Delete a permission
+    * @apiName deletePermission
+    * @apiGroup Account Permission
+    *
+    * @apiParam {String} teamspace Name of teamspace
+    * @apiParam {String} user User to delete
+    *
+    * @apiDescription Update an existing permission for a teamspace member.
+    *
+    *
+    * @apiError Missing or invalid arguments
+    * @apiErrorExample
+    *
+    * HTTP/1.1 401 Unauth­orized
+    *   {
+    *     "message": "Missing or invalid arguments",
+    *     "status": 401,
+    *     "code": "NOT_AUTHORIZED",
+    *     "value": 9,
+    *     "place": "GET /permissions"
+    *   }
+    */
 
 	router.delete("/permissions/:user", middlewares.isAccountAdmin, deletePermission);
 

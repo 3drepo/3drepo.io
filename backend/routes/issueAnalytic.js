@@ -25,12 +25,14 @@
 	const utils = require("../utils");
 
 	/**
-          * @api {get} /issues/analytics.:format Get Issue Analytics
-          * @apiName getIssueAnalytics
-          * @apiGroup Issues Analytics
-		      *
-		      * @apiParam analytics.:format Analytics file to create
-          */
+    * @api {get} /:teamspace/:model/issues/analytics.:format Get Issue Analytics
+    * @apiName getIssueAnalytics
+    * @apiGroup Issues Analytics
+	*
+    * @apiParam {String} teamspace Name of teamspace
+    * @apiParam {String} model Model ID
+	* @apiParam analytics.:format Analytics file to create
+    */
 
 	router.get("/issues/analytics.:format", middlewares.issue.canView, getIssueAnalytics);
 

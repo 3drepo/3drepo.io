@@ -34,11 +34,13 @@ const ModelSetting = require("../models/modelSetting");
 const stringToUUID = utils.stringToUUID;
 
 /**
- * @api {get} /issues/:uid.json Find Issue by ID
+ * @api {get} /:teamspace/:model/issues/:uid.json Find Issue by ID
  * @apiName findIssueById
  * @apiGroup Issues
  *
- * @apiParam {Number} id Issue unique ID.
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {Number} id Issue ID.
  *
  * @apiDescription Find an issue with the requested Issue ID.
  *
@@ -86,10 +88,12 @@ const stringToUUID = utils.stringToUUID;
 router.get("/issues/:uid.json", middlewares.issue.canView, findIssueById);
 
 /**
- * @api {get} /issues/:uid.json Get Issue Thumbnail
+ * @api {get} /:teamspace/:model/issues/:uid.json Get Issue Thumbnail
  * @apiName findIssueById
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {Number} id Issue unique ID.
  *
  * @apiDescription Retrieve thumbnail screenshot image for requested issue.
@@ -101,11 +105,14 @@ router.get("/issues/:uid.json", middlewares.issue.canView, findIssueById);
 router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 /**
- * @api {get} /issues.json Get all Issues
+ * @api {get} /:teamspace/:model/issues.json Get all Issues
  * @apiName listIssues
  * @apiGroup Issues
  *
  * @apiDescription List all available issue for current model.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  *
  * @apiSuccess (200) {Object} Issue Object.
  * @apiSuccessExample {json} Success-Response.
@@ -161,30 +168,38 @@ router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail
 router.get("/issues.json", middlewares.issue.canView, listIssues);
 
 /**
- * @api {get} /issues.bcfzip Get Issues BCF zip file
+ * @api {get} /:teamspace/:model/issues.bcfzip Get Issues BCF zip file
  * @apiName getIssuesBCF
  * @apiGroup Issues
  *
  * @apiDescription Get a downloaded zip file of all Issues BCF.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  */
 
 router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
 
 /**
- * @api {post} /issues.bcfzip Import BCF file
+ * @api {post} /:teamspace/:model/issues.bcfzip Import BCF file
  * @apiName importBCF
  * @apiGroup Issues
  *
  * @apiDescription Upload an Issues BCF file.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  */
 
 router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 
 /**
- * @api {get} /issues.bcfzip Get Issue Screenshot
+ * @api {get} /:teamspace/:model/issues.bcfzip Get Issue Screenshot
  * @apiName getScreenshot
  * @apiGroup Issue.
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Viewpoint unique ID.
  *
  * @apiDescription Get an issue screenshot from viewpoints using a viewpoint ID and issue ID.
@@ -193,10 +208,12 @@ router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 router.get("/issues/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
 
 /**
- * @api {get} /issues/:uid/viewpoints/:vid/screenshotSmall.png Get smaller version of Issue screenshot
+ * @api {get} /:teamspace/:model/issues/:uid/viewpoints/:vid/screenshotSmall.png Get smaller version of Issue screenshot
  * @apiName getScreenshotSmall
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Viewpoint unique ID.
  *
  * @apiSuccess (200) {Object} Issue Screenshot.
@@ -205,10 +222,12 @@ router.get("/issues/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canV
 router.get("/issues/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
 
 /**
- * @api {get} /revision/:rid/issues.json Get all Issues by revision ID
+ * @api {get} /:teamspace/:model/revision/:rid/issues.json Get all Issues by revision ID
  * @apiName listIssues
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Revision unique ID.
  *
  * @apiDescription Get all issues related to specific revision ID.
@@ -263,10 +282,12 @@ router.get("/issues/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue
 router.get("/revision/:rid/issues.json", middlewares.issue.canView, listIssues);
 
 /**
- * @api {get} /revision/:rid/issues.bcfzip Get Issues BCF zip file by revision ID
+ * @api {get} /:teamspace/:model/revision/:rid/issues.bcfzip Get Issues BCF zip file by revision ID
  * @apiName getIssuesBCF
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Revision unique ID.
  *
  * @apiDescription Get Issues BCF export based on revision ID.
@@ -276,10 +297,12 @@ router.get("/revision/:rid/issues.json", middlewares.issue.canView, listIssues);
 router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
 
 /**
- * @api {post} /revision/:rid/issues.bcfzip Post Issues BCF zip file by revision ID
+ * @api {post} /:teamspace/:model/revision/:rid/issues.bcfzip Post Issues BCF zip file by revision ID
  * @apiName getIssuesBCF
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Revision unique ID.
  *
  * @apiDescription Upload Issues BCF file using current revision ID.
@@ -295,12 +318,13 @@ router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesB
 
 router.post("/revision/:rid/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 
-// router.get('/issues/:sid.json', middlewares.issue.canView, listIssuesBySID);
-
 /**
- * @api {get} /issues.html Issues response into as HTML
+ * @api {get} /:teamspace/:model/issues.html Issues response into as HTML
  * @apiName renderIssuesHTML
  * @apiGroup Issues
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  *
  * @apiDescription Render all Issues into a HTML webpage, response is rendered HTML.
  */
@@ -308,10 +332,12 @@ router.post("/revision/:rid/issues.bcfzip", middlewares.issue.canCreate, importB
 router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
 /**
- * @api {get} revision/:rid/issues.html Issues response into as HTML by revision ID
+ * @api {get} /:teamspace/:model/revision/:rid/issues.html Issues response into as HTML by revision ID
  * @apiName  renderIssuesHTML
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Revision unique ID.
  *
  * @apiDescription Render all Issues into a HTML webpage based on current revision ID.
@@ -320,20 +346,24 @@ router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
 /**
- * @api {post} /issues.json Create a new issue.
+ * @api {post} /:teamspace/:model/issues.json Create a new issue.
  * @apiName  storeIssue
  * @apiGroup Issues
- * *
+ * 
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiDescription Create a new issue. This is the same endpoint as listIssues, but a post request is required.
  */
 
 router.post("/issues.json", middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {put} /issues.json/issueId.json Update an Issue.
+ * @api {put} /:teamspace/:model/issues.json/issueId.json Update an Issue.
  * @apiName  updateIssue
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Issue unique ID.
  *
  * @apiDescription Update an issue with an existing Issue ID
@@ -345,20 +375,24 @@ router.post("/issues.json", middlewares.issue.canCreate, storeIssue, middlewares
 router.put("/issues/:issueId.json", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {post} /issuesId.json Store issue based on revision
+ * @api {post} /:teamspace/:model/issuesId.json Store issue based on revision
  * @apiName storeIssue
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} rid Unique Revision ID to store.
  */
 
 router.post("/revision/:rid/issues.json", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {put} revision/"rid/issues/:issueId.json Update issue based on revision
+ * @api {put} /:teamspace/:model/revision/"rid/issues/:issueId.json Update issue based on revision
  * @apiName updateIssue
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} rid Unique Revision ID to update to.
  * @apiParam {String} issueId Unique Issue ID to update.
  */

@@ -27,9 +27,12 @@ const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
 /**
- * @api {get} /groups/revision/master/head/ List model groups
+ * @api {get} /:teamspace/:model/groups/revision/master/head/ List model groups
  * @apiName listGroups
  * @apiGroup Groups
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  *
  * @apiDescription Get all groups for current model.
  *
@@ -52,13 +55,15 @@ const systemLogger = require("../logger.js").systemLogger;
 
 router.get("/groups/revision/master/head/", middlewares.issue.canView, listGroups);
 /**
- * @api {get} /groups/revision/:rid/ List model groups by revision
+ * @api {get} /:teamspace/:model/groups/revision/:rid/ List model groups by revision
  * @apiDescription List all groups using the revision ID
  * @apiName listGroupsByRevision
  * @apiGroup Groups
  *
  * @apiDescription List all groups using based on which revision is currently selected.
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Revision unique ID.
  *
  * @apiSuccess (200) {Object[]} List of all Groups based on Revision ID.
@@ -88,11 +93,13 @@ router.get("/groups/revision/master/head/", middlewares.issue.canView, listGroup
 router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
 
 /**
- * @api {get} /groups/revision/master/head/:uid/ Find group in model
+ * @api {get} /:teamspace/:model/groups/revision/master/head/:uid/ Find group in model
  * @apiDescription Find a group by model using the group ID
  * @apiName findGroup
  * @apiGroup Groups
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Group unique ID.
  *
  * @apiDescription Find a group using it's Group ID
@@ -114,13 +121,15 @@ router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
 
 router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findGroup);
 /**
- * @api {get} /groups/revision/:rid/:uid/ Find group in model by revision
+ * @api {get} /:teamspace/:model/groups/revision/:rid/:uid/ Find group in model by revision
  * @apiName findGroupByRevision
  * @apiDescription Find a group by revision ID and Group ID
  * @apiGroup Groups
  *
  * @apiDescription Find a single group using the unique Group ID and a Revision ID.
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Revision unique ID.
  * @apiParam {String} id Group unique ID.
  *
@@ -174,7 +183,7 @@ router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findG
 router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
 
 /**
- * @api {put} /groups/:uid/ Update group
+ * @api {put} /:teamspace/:model/groups/:uid/ Update group
  * @apiName updateGroup
  * @apiGroup Groups
  *
@@ -188,6 +197,8 @@ router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
  *   "_id":"c5f0fd00-0fab-11e9-bf22-eb8649763304"
  * }
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Group unique ID.
  *
  * @apiError GROUP_NOT_FOUND Group Not Found
@@ -205,10 +216,13 @@ router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
 router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
 
 /**
- * @api {post} /groups/ Create a group
+ * @api {post} /:teamspace/:model/groups/ Create a group
  * @apiName createGroup
  * @apiDescription Add a group to the model.
  * @apiGroup Groups
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  *
  * @apiSuccess (200) {Object} Group Created
  * @apiSuccessExample {json} Success-Response
@@ -232,10 +246,13 @@ router.post("/groups/", middlewares.issue.canCreate, createGroup);
 router.delete("/groups/:id", middlewares.issue.canCreate, deleteGroup);
 
 /**
- * @api {delete} /groups/ Delete groups
+ * @api {delete} /:teamspace/:model/groups/ Delete groups
  * @apiName deleteGroups
  * @apiDescription Delete groups from the model.
  * @apiGroup Groups
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  *
  * @apiDescription Delete single group using unique group ID.
  *

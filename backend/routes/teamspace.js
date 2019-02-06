@@ -27,38 +27,45 @@
 	const utils = require("../utils");
 
 	/**
-	 * @api {get} /quota Get Quota Information
+	 * @api {get} /:teamspace/quota Get Quota Information
 	 * @apiName getQuotaInfo
 	 * @apiGroup Teamspace
+     *
+     * @apiParam {String} teamspace Teamspace of the model
 	 */
 	router.get("/quota", middlewares.isAccountAdmin, getQuotaInfo);
 
 	/**
-	 * @api {get} /members Get Member List
+	 * @api {get} /:teamspace/members Get Member List
 	 * @apiName getMemberList
 	 * @apiGroup Teamspace
+     *
+     * @apiParam {String} teamspace Teamspace of the model
 	 */
 	router.get("/members", middlewares.loggedIn, getMemberList);
 
 	/**
-	 * @api {get} /members Get Member List
+	 * @api {get} /:teamspace/members Get Member List
 	 * @apiName getMemberList
 	 * @apiGroup Teamspace
+     *
+     * @apiParam {String} teamspace Teamspace of the model
 	 */
 	router.get("/billingInfo", middlewares.isAccountAdmin, getBillingInfo);
 
 	/**
-	 * @api {delete} /members/:user Remove a team member
+	 * @api {delete} /:teamspace/members/:user Remove a team member
 	 * @apiName removeTeamMember
 	 * @apiGroup Teamspace
 	 *
+     * @apiParam {String} teamspace Teamspace of the model
 	 * @apiParam {String} user User (Member) to remove
 	 */
 
 	router.delete("/members/:user", middlewares.isAccountAdmin, removeTeamMember);
 
 	/**
-	 * @api {get} /members/search/:searchString Search for a member without a membership
+	 * @api {get} /:teamspace/members/search/:searchString Search for a member without a membership
 	 * @apiName findUsersWithoutMembership
 	 * @apiGroup Teamspace
 	 *
@@ -68,9 +75,11 @@
 	router.get("/members/search/:searchString", middlewares.isAccountAdmin, findUsersWithoutMembership);
 
 	/**
-	 * @api {post} /members Create a Team Member
+	 * @api {post} /:teamspace/members Create a Team Member
 	 * @apiName addTeamMember
 	 * @apiGroup Teamspace
+     *
+     * @apiParam {String} teamspace Teamspace of the model
 	 * @apiParam {String} searchString Search string required to find team member.
 	 *
 	 * @apiSuccess (200) {Object} Team member profile

@@ -26,12 +26,14 @@ const config = require("../config");
 const utils = require("../utils");
 
 /**
- * @api {get} /subscriptions List all subscriptions
+ * @api {get} /:teamspace/subscriptions List all subscriptions
  * @apiName listSubscriptions
  * @apiGroup Subscription
  *
  * @apiDescription List all subscriptions for current user if applicable.
  *
+ *
+ * @apiParam {String} teamspace Teamspace of the model
  * @apiError (401) NOT_AUTHORIZED Not Authorized
  * @apiErrorExample {json} Error-Response
  * HTTP/1.1 401 Not Authorized
@@ -46,9 +48,11 @@ const utils = require("../utils");
 router.get("/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
 
 /**
- * @api {get} /subscriptions Update a subscription
+ * @api {get} /:teamspace/subscriptions Update a subscription
  * @apiName updateSubscription
  * @apiGroup Subscription
+ *
+ * @apiParam {String} teamspace Teamspace of the model
  */
 router.post("/subscriptions", middlewares.isAccountAdmin, updateSubscription);
 

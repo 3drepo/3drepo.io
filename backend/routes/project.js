@@ -26,50 +26,57 @@
 	const utils = require("../utils");
 
 	/**
-	 * @api {post} /projects Create a project
+	 * @api {post} /:teamspace/projects Create a project
 	 * @apiName createProject
 	 * @apiGroup Project
+     *
+     * @apiParam {String} teamspace Name of the teamspace
 	 */
 
 	router.post("/projects", middlewares.project.canCreate, createProject);
 
 	/**
-	 * @api {put} /projects/:project Update a project
+	 * @api {put} /:teamspace/projects/:project Update a project
 	 * @apiName updateProject
 	 * @apiGroup Project
 	 *
+     * @apiParam {String} teamspace Name of the teamspace
 	 * @apiParam {String} project Project to update
 	 */
 
-	router.put("/projects/:project", middlewares.project.canUpdate, updateProject);
+	router.put("/:teamspace/projects/:project", middlewares.project.canUpdate, updateProject);
 
 	/**
 	 * @api {get} /projects List all projects
 	 * @apiName listProjects
 	 * @apiGroup Project
+     *
+     * @apiParam {String} teamspace Name of the teamspace
 	 */
 
-	router.get("/projects", middlewares.project.canList, listProjects);
+	router.get("/:teamspace/projects", middlewares.project.canList, listProjects);
 
 	/**
 	 * @api {get} /projects/:project List a project
 	 * @apiName listProject
 	 * @apiGroup Project
 	 *
+     * @apiParam {String} teamspace Name of the teamspace
 	 * @apiParam {String} project Project to list
 	 */
 
-	router.get("/projects/:project",  middlewares.project.canView, listProject);
+	router.get("/:teamspace/projects/:project", middlewares.project.canView, listProject);
 
 	/**
 	 * @api {delete} /projects/:project Delete a project
 	 * @apiName deleteProject
 	 * @apiGroup Project
 	 *
+     * @apiParam {String} teamspace Name of the teamspace
 	 * @apiParam {String} project Project to delete
 	 */
 
-	router.delete("/projects/:project", middlewares.project.canDelete, deleteProject);
+	router.delete("/:teamspace/projects/:project", middlewares.project.canDelete, deleteProject);
 
 	function createProject(req, res, next) {
 		Project.createProject(req.params.account, req.body.name, req.session.user.username,  req.session.user.permissions).then(project => {
