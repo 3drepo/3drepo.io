@@ -214,7 +214,7 @@ export class UnityUtil {
 
 	}
 
-	public static toUnity(methodName, requireStatus, params) {
+	public static toUnity(methodName, requireStatus, params?) {
 
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
@@ -1043,4 +1043,11 @@ export class UnityUtil {
 		UnityUtil.toUnity('ZoomToHighlightedMeshes', UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
+	public static setRenderingQualityDefault() {
+		UnityUtil.toUnity('SetRenderingQualityDefault', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	public static setRenderingQualityHigh() {
+		UnityUtil.toUnity('SetRenderingQualityHigh', UnityUtil.LoadingState.VIEWER_READY);
+	}
 }
