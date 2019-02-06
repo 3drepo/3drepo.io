@@ -461,7 +461,7 @@ function updateIssue(req, res, next) {
 }
 
 function convertPoint(point) {
-	return [point[0], point[2], -point[1]];
+	return [point[0], point[2], point[1]];
 }
 
 function convertIssuePoints(issue) {
