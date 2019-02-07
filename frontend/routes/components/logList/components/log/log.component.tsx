@@ -32,7 +32,6 @@ import {
 import CloseIcon from '@material-ui/icons/Close';
 import { TooltipButton } from '../../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
-import { convertActionCommentToText } from '../../../../../helpers/issues';
 
 interface IProps {
 	comment: string;
@@ -59,11 +58,11 @@ export class Log extends React.PureComponent<IProps, any> {
 	}
 
 	get isCommentWithScreenshot() {
-		return Boolean(this.props.comment) && Boolean(this.props.viewpoint.screenshotPath);
+		return Boolean(this.props.comment) && this.isScreenshot;
 	}
 
 	get isPlainComment() {
-		return Boolean(this.props.comment) && !Boolean(this.props.viewpoint.screenshotPath);
+		return Boolean(this.props.comment) && !this.isScreenshot && !this.isAction;
 	}
 
 	public removeComment = () => {
@@ -89,7 +88,7 @@ export class Log extends React.PureComponent<IProps, any> {
 
 	public renderSystemMessage = renderWhenTrue(
 		<SystemMessage>
-			{convertActionCommentToText(this.props.action, this.props.owner)}
+			{this.props.comment}
 		</SystemMessage>
 	);
 

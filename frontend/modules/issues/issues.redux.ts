@@ -73,7 +73,8 @@ export const INITIAL_STATE = {
 		fetchingDetailsIsPending: false,
 		isImportingBCF: false,
 		showSubmodelIssues: false,
-		sortOrder: 'desc'
+		sortOrder: 'desc',
+		failedToLoad: false
 	}
 };
 
@@ -101,11 +102,11 @@ export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues = [] }) => {
 export const fetchIssueSuccess = (state = INITIAL_STATE, { issue }) => {
 	const issuesMap = cloneDeep(state.issuesMap);
 	issuesMap[issue._id].comments = issue.comments;
-	return {...state, issuesMap, componentState: { ...state.componentState, logs: issue.comments}};
+	return {...state, issuesMap, componentState: { ...state.componentState, logs: issue.comments, failedToLoad: false }};
 };
 
 export const fetchIssueFailure = (state = INITIAL_STATE) => {
-	return {...state, componentState: { ...state.componentState, logs: [] }};
+	return {...state, componentState: { ...state.componentState, logs: [], failedToLoad: true }};
 };
 
 export const saveIssueSuccess = (state = INITIAL_STATE, { issue }) => {

@@ -107,3 +107,7 @@ export const selectIsImportingBCF = createSelector(
 export const selectSortOrder = createSelector(
 	selectComponentState, (state) => state.sortOrder
 );
+
+export const selectFailedToLoad = createSelector(
+	selectComponentState, (state) => state.failedToLoad
+);

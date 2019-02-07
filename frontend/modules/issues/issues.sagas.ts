@@ -20,7 +20,7 @@ import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 
 import * as API from '../../services/api';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
-import { prepareIssue } from '../../helpers/issues';
+import { prepareIssue, prepareComments } from '../../helpers/issues';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
@@ -47,12 +47,13 @@ export function* fetchIssues({teamspace, modelId, revision}) {
 
 		const preparedIssues = data.map((issue) => prepareIssue(issue, jobs));
 
-		yield all(data.map((issue) => {
-			if (issue.commentCount) {
-				return put(IssuesActions.fetchIssue(teamspace, modelId, issue._id));
-			}
-			return;
-		}));
+		// TODO: fetch comments for filter results
+		// yield all(data.map((issue) => {
+		// 	if (issue.commentCount) {
+		// 		return put(IssuesActions.fetchIssue(teamspace, modelId, issue._id));
+		// 	}
+		// 	return;
+		// }));
 
 		yield put(IssuesActions.fetchIssuesSuccess(preparedIssues));
 		yield put(IssuesActions.renderPins());
@@ -64,16 +65,10 @@ export function* fetchIssues({teamspace, modelId, revision}) {
 
 export function* fetchIssue({teamspace, modelId, issueId}) {
 	yield put(IssuesActions.toggleDetailsPendingState(true));
+
 	try {
 		const {data} = yield API.getIssue(teamspace, modelId, issueId);
-
-		if (data.comments) {
-			data.comments.map((comment) => {
-				if (comment.viewpoint && comment.viewpoint.screenshot) {
-					comment.viewpoint.screenshotPath = API.getAPIUrl(comment.viewpoint.screenshot);
-				}
-			});
-		}
+		data.comments = yield prepareComments(data.comments);
 		yield put(IssuesActions.fetchIssueSuccess(data));
 	} catch (error) {
 		yield put(IssuesActions.fetchIssueFailure());
@@ -638,7 +633,7 @@ export function* setFilters({ filters }) {
 
 export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
-	yield takeEvery(IssuesTypes.FETCH_ISSUE, fetchIssue);
+	yield takeLatest(IssuesTypes.FETCH_ISSUE, fetchIssue);
 	yield takeLatest(IssuesTypes.SAVE_ISSUE, saveIssue);
 	yield takeLatest(IssuesTypes.UPDATE_ISSUE, updateIssue);
 	yield takeLatest(IssuesTypes.POST_COMMENT, postComment);

@@ -31,7 +31,8 @@ import {
 	selectIsIssuesPending,
 	selectShowSubmodelIssues,
 	selectIsImportingBCF,
-	selectSortOrder
+	selectSortOrder,
+	selectFetchingDetailsIsPending
 } from '../../../../modules/issues';
 import { selectJobsList } from '../../../../modules/jobs';
 import { selectSettings } from '../../../../modules/model';
@@ -45,6 +46,7 @@ const mapStateToProps = createStructuredSelector({
 	searchEnabled: selectSearchEnabled,
 	selectedFilters: selectSelectedFilters,
 	isPending: selectIsIssuesPending,
+	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
 	modelSettings: selectSettings,
 	showSubmodelIssues: selectShowSubmodelIssues,
 	isImportingBCF: selectIsImportingBCF,

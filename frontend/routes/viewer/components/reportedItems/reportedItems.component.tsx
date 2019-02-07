@@ -80,6 +80,7 @@ interface IProps {
 	headerMenuItems: IHeaderMenuItem[];
 	revision?: string;
 	isPending?: boolean;
+	fetchingDetailsIsPending?: boolean;
 	activeItemId?: string;
 	showDetails?: boolean;
 	showDefaultHiddenItems: boolean;

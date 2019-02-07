@@ -26,24 +26,121 @@ export const prepareIssue = (issue, jobs = []) => {
 	};
 };
 
-export const getStatusIcon = (priority, status) => {
-  const statusIcon = {
-    Icon: STATUSES_ICONS[status] || null,
-    color: STATUSES_COLOURS[status] || STATUSES_COLOURS[priority] || null
-  };
+export const prepareComments = (comments = []) => {
+	if (!comments.length) {
+		return comments;
+	}
 
-  return {...statusIcon};
+	const preparedComments = comments.map((comment) => {
+		if (comment.action) {
+			comment.comment = convertActionCommentToText(comment, undefined);
+		}
+		if (comment.viewpoint && comment.viewpoint.screenshot) {
+			comment.viewpoint.screenshotPath = getAPIUrl(comment.viewpoint.screenshot);
+		}
+
+		return comment;
+	});
+
+	return preparedComments;
 };
 
-export const mergeIssueData = (source, data = source) => {
-	const hasUnassignedRole = !data.assigned_roles;
+const convertActionCommentToText = (comment, topicTypes) => {
+	let text = '';
 
-	return {
-		...source,
-		...omit(data, ['assigned_roles', 'description', 'descriptionThumbnail']),
-		assigned_roles: hasUnassignedRole ? [] : [data.assigned_roles],
-		desc: data.description
-	};
+	if (comment) {
+		switch (comment.action.property) {
+		case 'priority':
+
+			comment.action.propertyText = 'Priority';
+			comment.action.from = convertActionValueToText(comment.action.from);
+			comment.action.to = convertActionValueToText(comment.action.to);
+			break;
+
+		case 'status':
+
+			comment.action.propertyText = 'Status';
+			comment.action.from = convertActionValueToText(comment.action.from);
+			comment.action.to = convertActionValueToText(comment.action.to);
+			break;
+
+		case 'assigned_roles':
+
+			comment.action.propertyText = 'Assigned';
+			comment.action.from = comment.action.from.toString();
+			comment.action.to = comment.action.to.toString();
+			break;
+
+		case 'topic_type':
+
+			comment.action.propertyText = 'Type';
+			if (topicTypes) {
+
+				const from = topicTypes.find((topicType) => {
+					return topicType.value === comment.action.from;
+				});
+
+				const to = topicTypes.find((topicType) => {
+					return topicType.value === comment.action.to;
+				});
+
+				if (from && from.label) {
+					comment.action.from = from.label;
+				}
+
+				if (to && to.label) {
+					comment.action.to = to.label;
+				}
+			}
+			break;
+
+		case 'desc':
+
+			comment.action.propertyText = 'Description';
+			break;
+
+		case 'due_date':
+
+			comment.action.propertyText = 'Due Date';
+			if (comment.action.to) {
+				comment.action.to = (new Date(parseInt(comment.action.to, 10))).toLocaleDateString();
+			}
+			if (comment.action.from) {
+				comment.action.from = (new Date(parseInt(comment.action.from, 10))).toLocaleDateString();
+			} else {
+				text = comment.action.propertyText + ' set to ' +
+					comment.action.to + ' by ' +
+					comment.owner;
+			}
+			break;
+
+		case 'bcf_import':
+
+			comment.action.propertyText = 'BCF Import';
+			text = comment.action.propertyText + ' by ' + comment.owner;
+			break;
+
+		}
+	}
+
+	if (0 === text.length) {
+		if (!comment.action.from) {
+			comment.action.from = '(empty)';
+		}
+
+		if (!comment.action.to) {
+			comment.action.to = '(empty)';
+		}
+
+		text = comment.action.propertyText + ' updated from ' +
+			comment.action.from + ' to ' +
+			comment.action.to + ' by ' +
+			comment.owner;
+	}
+
+	comment.action.text = text;
+
+	return text;
 };
 
 const convertActionValueToText = (value = '') => {
@@ -69,74 +166,24 @@ const convertActionValueToText = (value = '') => {
 	return actionText;
 };
 
-export const convertActionCommentToText = (action, owner, topicTypes = ISSUE_TOPIC_TYPES) => {
-	let text = '';
-	let from = '';
-	let to = '';
-	let propertyName = '';
+export const getStatusIcon = (priority, status) => {
+  const statusIcon = {
+    Icon: STATUSES_ICONS[status] || null,
+    color: STATUSES_COLOURS[status] || STATUSES_COLOURS[priority] || null
+  };
 
-	if (action) {
-		switch (action.property) {
-			case 'priority':
-				propertyName = 'Priority';
-				from = convertActionValueToText(action.from);
-				to = convertActionValueToText(action.to);
-				break;
-			case 'status':
-				propertyName = 'Status';
-				from = convertActionValueToText(action.from);
-				to = convertActionValueToText(action.to);
-				break;
-			case 'assigned_roles':
-				propertyName = 'Assigned';
-				from = action.from.toString();
-				to = action.to.toString();
-				break;
-			case 'topic_type':
-				propertyName = 'Type';
-				if (topicTypes) {
-					const fromType = topicTypes.find((topicType) => topicType.value === action.from);
-					const toType = topicTypes.find((topicType) => topicType.value === action.to);
+  return {...statusIcon};
+};
 
-					from = fromType.name || '';
-					to = toType.name || '';
-				}
-				break;
-			case 'desc':
-				propertyName = 'Description';
-				break;
-			case 'due_date':
-				propertyName = 'Due Date';
-				if (action.to) {
-					to = (new Date(parseInt(action.to, 10))).toLocaleDateString();
-				}
-				if (action.from) {
-					from = (new Date(parseInt(action.from, 10))).toLocaleDateString();
-				} else {
-					text = `${propertyName} set to ${(new Date(parseInt(action.to, 10))).toLocaleDateString()} by ${owner}`;
-				}
-				break;
+export const mergeIssueData = (source, data = source) => {
+	const hasUnassignedRole = !data.assigned_roles;
 
-			case 'bcf_import':
-				propertyName = 'BCF Import';
-				text = `${propertyName} by ${owner}`;
-				break;
-			}
-	}
-
-	if (0 === text.length) {
-		if (action && !action.from) {
-			from = '(empty)';
-		}
-		if (action && !action.to) {
-			to = '(empty)';
-		}
-		if (action && !propertyName) {
-			propertyName = '(empty)';
-		}
-		text = `${propertyName} updated from ${from} to ${to} by ${owner}`;
-	}
-	return text;
+	return {
+		...source,
+		...omit(data, ['assigned_roles', 'description', 'descriptionThumbnail']),
+		assigned_roles: hasUnassignedRole ? [] : [data.assigned_roles],
+		desc: data.description
+	};
 };
 
 const isOpenIssue = (status) => status !== 'closed';

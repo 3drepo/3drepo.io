@@ -26,7 +26,8 @@ import {
 	selectExpandDetails,
 	selectLogs,
 	selectFetchingDetailsIsPending,
-	selectNewComment
+	selectNewComment,
+	selectFailedToLoad
 } from '../../../../../../modules/issues';
 import { selectSettings } from '../../../../../../modules/model';
 import { IssueDetails } from './issueDetails.component';
@@ -40,7 +41,8 @@ const mapStateToProps = createStructuredSelector({
 	newComment: selectNewComment,
 	myJob: selectMyJob,
 	currentUser: selectCurrentUser,
-	settings: selectSettings
+	settings: selectSettings,
+	failedToLoad: selectFailedToLoad
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

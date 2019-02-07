@@ -274,7 +274,6 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleFiltersChange = () => {
-		console.log('Handle change', this.state.selectedFilters);
 		this.props.onChange(this.state.selectedFilters);
 	}
 

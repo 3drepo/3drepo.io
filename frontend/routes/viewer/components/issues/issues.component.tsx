@@ -43,6 +43,7 @@ interface IProps {
 	jobs: any[];
 	revision?: string;
 	isPending?: boolean;
+	fetchingDetailsIsPending?: boolean;
 	activeIssueId?: string;
 	showDetails?: boolean;
 	issueDetails?: any;
@@ -236,6 +237,7 @@ export class Issues extends React.PureComponent<IProps, IState> {
 				title="Issues"
 				Icon={PinDrop}
 				isPending={this.props.isPending}
+				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
 
 				items={this.props.issues}
 				showDefaultHiddenItems={this.showDefaultHiddenItems}

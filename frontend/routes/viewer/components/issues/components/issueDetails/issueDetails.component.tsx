@@ -26,6 +26,7 @@ import { PreviewDetails } from '../../../previewDetails/previewDetails.component
 import { mergeIssueData, canComment } from '../../../../../../helpers/issues';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
+import { EmptyStateInfo } from '../../../views/views.styles';
 
 interface IProps {
 	jobs: any[];
@@ -39,6 +40,7 @@ interface IProps {
 	myJob: any;
 	currentUser: any;
 	settings: any;
+	failedToLoad: boolean;
 	setState: (componentState) => void;
 	fetchIssue: (teamspace, model, issueId) => void;
 	showNewPin: (issue, pinData) => void;
@@ -180,7 +182,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return canComment(this.issueData, myJob, settings.permissions, currentUser.username);
 	}
 
-	public renderFooter = () => (
+	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center" padding="0">
 			<NewCommentForm
 				comment={this.props.newComment.comment}
@@ -194,7 +196,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				canComment={this.userCanComment}
 			/>
 		</ViewerPanelFooter>
-	)
+	));
 
 	public setCommentData = (commentData = {}) => {
 		this.props.setState({ newComment: {
@@ -244,13 +246,22 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public renderFailedState = renderWhenTrue(() => {
+		return (
+			<EmptyStateInfo>Issue failed to load</EmptyStateInfo>
+		);
+	});
+
 	public render() {
+		const { failedToLoad, issue } = this.props;
+
 		return (
 			<Container>
-				<ViewerPanelContent className="height-catcher" padding="0">
-					{this.renderPreview(this.props.issue)}
+				<ViewerPanelContent className="height-catcher" padding="0" details="1">
+					{this.renderFailedState(failedToLoad)}
+					{this.renderPreview(!failedToLoad && issue)}
 				</ViewerPanelContent>
-				{this.renderFooter()}
+				{this.renderFooter(!failedToLoad)}
 			</Container>
 		);
 	}
