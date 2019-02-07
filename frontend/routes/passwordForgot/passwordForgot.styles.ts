@@ -40,6 +40,7 @@ export const Container = styled(Grid)`
 
 export const Message = styled.div`
   color: ${COLOR.BLACK_60};
+  white-space: pre-line;
 `;
 
 export const StyledButton = styled(Button)`
