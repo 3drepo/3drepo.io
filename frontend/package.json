@@ -63,6 +63,7 @@
     "react-dropzone": "6.0.2",
     "react-google-recaptcha": "1.0.5",
     "react-highlight-words": "0.14.0",
+    "react-image": "2.0.0",
     "react-redux": "5.0.7",
     "react-router": "4.3.1",
     "react-router-dom": "4.3.1",
