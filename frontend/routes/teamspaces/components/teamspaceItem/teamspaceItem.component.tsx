@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 
-import { TreeList } from '../../../components/treeList/treeList.component';
+import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
 import { MyTeamspaceItem } from '../myTeamspaceItem/myTeamspaceItem.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
@@ -51,18 +51,18 @@ export const TeamspaceItem = (props: IProps) => {
 		permissions
 	} = props;
 
-	const renderActions = () => renderWhenTrue((
+	const renderActions = () => renderWhenTrue(() => (
 		<TooltipButton
 			{...ROW_ACTIONS.ADD_NEW}
 			label="Add new project"
 			action={onAddProject}
 		/>
-	))(hasPermissions('create_project', permissions));
+	))(hasPermissions('create_project', permissions)) as any;
 
 	return (
 		<TreeList
 			name={account}
-			level={1}
+			level={TREE_LEVELS.TEAMSPACE}
 			items={projects}
 			onRootClick={onToggle}
 			active={active}

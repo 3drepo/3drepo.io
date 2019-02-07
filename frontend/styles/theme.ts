@@ -113,7 +113,7 @@ export const MuiTheme = createMuiTheme({
 		MuiMenuItem: {
 			root: {
 				fontSize: '14px',
-				color: COLOR.BLACK_60
+				color: theme.colors.BLACK_60
 			}
 		},
 		MuiSnackbarContent: {

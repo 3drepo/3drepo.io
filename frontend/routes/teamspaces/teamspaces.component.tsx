@@ -55,6 +55,8 @@ interface IProps {
 	currentTeamspace: string;
 	teamspaces: any[];
 	isPending: boolean;
+	activeTeamspace: string;
+	activeProject: string;
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
 
@@ -76,10 +78,12 @@ interface IProps {
 	onRevisionsClick: () => void;
 	onDownloadClick: () => void;
 	onUploadClick: () => void;
+	setState: (componentState: any) => void;
 }
 
 interface IState {
 	activeTeamspace: string;
+	activeProject: string;
 	teamspacesItems: any[];
 }
 
@@ -90,6 +94,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	public state = {
 		activeTeamspace: '',
+		activeProject: '',
 		teamspacesItems: []
 	};
 
@@ -98,11 +103,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			this.props.fetchTeamspaces(this.props.currentTeamspace);
 		}
 
-		const { teamspace } = queryString.parse(this.props.location.search);
-		const lastTeamspace = localStorage.getItem('lastTeamspace');
-
 		this.setState({
-			activeTeamspace: lastTeamspace || teamspace || this.props.currentTeamspace,
+			activeTeamspace: this.props.activeTeamspace || this.props.currentTeamspace,
+			activeProject: this.props.activeProject,
 			teamspacesItems: getTeamspacesItems(this.props.teamspaces)
 		});
 	}
@@ -127,10 +130,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
-		if (!this.props.history.location.pathname.startsWith('/viewer')) {
-			localStorage.removeItem('lastTeamspace');
-			localStorage.removeItem('lastProject');
-		}
+		this.props.setState({
+			activeTeamspace: this.state.activeTeamspace,
+			activeProject: this.state.activeProject
+		});
 	}
 
 	public getTeamspaceProjects = (teamspaceName) => {
@@ -296,8 +299,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				this.createRouteHandler(`/viewer/${activeTeamspace}/${props.model}`)(event);
 			});
 
-			localStorage.setItem('lastProject', props.projectName);
-			localStorage.setItem('lastTeamspace', activeTeamspace);
 			const analyticService = getAngularService('AnalyticService') as any;
 			analyticService.sendEvent({ eventCategory: 'Model', eventAction: 'view' });
 		} else {
@@ -359,18 +360,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		/>
 	)
 
-	public isActiveProject = (projectName) => {
-		const queryParams = queryString.parse(this.props.location.search);
-		const { project } = queryParams;
-		const lastProject = localStorage.getItem('lastProject');
-
-		if (project) {
-			return projectName === project;
-		} else if (lastProject) {
-			return projectName === lastProject;
-		}
-		return false;
-	}
+	public isActiveProject = (projectName) => projectName === this.props.activeProject;
 
 	public isActiveTeamspace = (account) => {
 		const { teamspace } = this.props.match.params;
@@ -396,8 +386,13 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					})}
 				onRemoveClick={this.createRemoveProjectHandler(props.name)}
 				active={this.isActiveProject(props.name)}
+				onRootClick={this.setActiveProject}
 			/>
 		);
+	}
+
+	public setActiveProject = ({active, name}) => {
+		this.setState({ activeProject: active ? name : ''	});
 	}
 
 	public renderTeamspaces = (teamspaces) => teamspaces.map((teamspace, index) => (

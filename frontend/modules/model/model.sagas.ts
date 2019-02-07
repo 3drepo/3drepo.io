@@ -45,9 +45,11 @@ export function* updateSettings({ modelData: { teamspace, project, modelId }, se
 
 		yield API.editModelSettings(teamspace, modelId, modifiedSettings);
 
-		if (project && settings.name) {
+		if (settings.name) {
 			yield put(
-				TeamspacesActions.updateModelSuccess(teamspace, modelId, { project, model: modelId, name: settings.name } )
+				TeamspacesActions.updateModelSuccess(
+					teamspace, modelId, { project, model: modelId, name: settings.name }
+				)
 			);
 		}
 		yield put(ModelActions.updateSettingsSuccess(settings));
