@@ -15,7 +15,7 @@ addons:
    sources:
       - mongodb-3.2-precise
 
-    packages:
+   packages:
       - expect-dev   
 
   chrome: stable

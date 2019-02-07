@@ -106,15 +106,11 @@ function createLogger() {
 	// Creates logger which outputs to both the console
 	// and a log file simultaneously
 	// Levels are set separately in the config.
-
-	const logger = winston.createLogger({
+	return new(winston.Logger)({
 		levels: customLevels.levels,
+		colors: customLevels.colors,
 		transports: transports
 	});
-
-	winston.addColors(customLevels.colors);
-
-	return logger;
 }
 
 /**
