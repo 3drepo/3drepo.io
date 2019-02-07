@@ -320,7 +320,7 @@ groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId) {
 		});
 };
 
-groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId) {
+groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, ids) {
 
 	const query = {};
 
@@ -332,6 +332,15 @@ groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId) {
 	// If we want groups that aren't from risks
 	if (queryParams.noRisks) {
 		query.risk_id = { $exists: false };
+	}
+
+	if (ids) {
+		ids.forEach((id, i) => {
+			ids[i] = utils.stringToUUID(id);
+		});
+
+		ids = utils.stringsToUUIDs(ids);
+		return this.find(dbCol, { _id: { "$in": ids } });
 	}
 
 	return this.find(dbCol, query).then(results => {

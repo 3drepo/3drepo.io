@@ -219,12 +219,17 @@ function listRisks(req, res, next) {
 		"thumbnail.content": 0
 	};
 
+	let ids;
 	let findRisks;
 
+	if (req.query.ids) {
+		ids = req.query.ids.split(",");
+	}
+
 	if (req.params.rid) {
-		findRisks = Risk.findRisksByModelName(dbCol, req.session.user.username, null, req.params.rid, projection);
+		findRisks = Risk.findRisksByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, ids);
 	} else {
-		findRisks = Risk.findRisksByModelName(dbCol, req.session.user.username, "master", null, projection);
+		findRisks = Risk.findRisksByModelName(dbCol, req.session.user.username, "master", null, projection, ids);
 	}
 
 	findRisks.then(risks => {
