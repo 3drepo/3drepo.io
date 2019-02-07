@@ -14,6 +14,10 @@ addons:
   apt:
    sources:
       - mongodb-3.2-precise
+
+    packages:
+      - expect-dev   
+
   chrome: stable
   hosts:
     - test.127.0.0.1
@@ -53,7 +57,7 @@ script:
     - yarn wdm:update
     - yarn wdm:start > /dev/null 2>&1 &
     - cd ./../backend
-    - yarn test
+    - unbuffer yarn test
 
 notifications:
     email:
