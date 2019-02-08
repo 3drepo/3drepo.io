@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *	Copyright (C) 2018 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -27,38 +27,45 @@
 	const utils = require("../utils");
 
 	/**
-	 * @api {get} /quota Get Quota Information
+	 * @api {get} /:teamspace/quota Get Quota Information
 	 * @apiName getQuotaInfo
 	 * @apiGroup Teamspace
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 */
 	router.get("/quota", middlewares.isAccountAdmin, getQuotaInfo);
 
 	/**
-	 * @api {get} /members Get Member List
+	 * @api {get} /:teamspace/members Get Member List
 	 * @apiName getMemberList
 	 * @apiGroup Teamspace
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 */
 	router.get("/members", middlewares.loggedIn, getMemberList);
 
 	/**
-	 * @api {get} /members Get Member List
+	 * @api {get} /:teamspace/members Get Member List
 	 * @apiName getMemberList
 	 * @apiGroup Teamspace
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 */
 	router.get("/billingInfo", middlewares.isAccountAdmin, getBillingInfo);
 
 	/**
-	 * @api {delete} /members/:user Remove a team member
+	 * @api {delete} /:teamspace/members/:user Remove a team member
 	 * @apiName removeTeamMember
 	 * @apiGroup Teamspace
 	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} user User (Member) to remove
 	 */
 
 	router.delete("/members/:user", middlewares.isAccountAdmin, removeTeamMember);
 
 	/**
-	 * @api {get} /members/search/:searchString Search for a member without a membership
+	 * @api {get} /:teamspace/members/search/:searchString Search for a member without a membership
 	 * @apiName findUsersWithoutMembership
 	 * @apiGroup Teamspace
 	 *
@@ -68,9 +75,11 @@
 	router.get("/members/search/:searchString", middlewares.isAccountAdmin, findUsersWithoutMembership);
 
 	/**
-	 * @api {post} /members Create a Team Member
+	 * @api {post} /:teamspace/members Create a Team Member
 	 * @apiName addTeamMember
 	 * @apiGroup Teamspace
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} searchString Search string required to find team member.
 	 *
 	 * @apiSuccess (200) {Object} Team member profile
@@ -78,7 +87,7 @@
 	 * @apiError User not found The <code>searchString</code> of the User was not found.
 	 * @apiErrorExample
 	 * {
-	 * 		"message": "User not found",
+	 *		"message": "User not found",
 	 *		"status": 404,
 	 *		"code": "USER_NOT_FOUND",
 	 *		"value": 1,

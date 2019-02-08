@@ -6,21 +6,7 @@ const utils = require("../utils");
 const User = require("../models/user");
 const Paypal = require("../models/paypal.js");
 
-// endpoints for paypal IPN message
-
-/**
- * @api {post} /paypal/ipn Create Paypal IPN message
- * @apiName handleIPN
- * @apiGroup Payment
- * @apiParam id Unique Notification ID
- */
 router.post("/paypal/ipn", handleIPN);
-
-/**
- * @api {post} /paypal/ipn Capture a pre-approve payment
- * @apiName executeAgreement
- * @apiGroup Payment
- */
 router.post("/paypal/execute", executeAgreement);
 
 function executeAgreement(req, res, next) {

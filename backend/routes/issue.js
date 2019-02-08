@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.ap
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.ap
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 "use strict";
 const _ = require("lodash");
@@ -34,11 +34,13 @@ const ModelSetting = require("../models/modelSetting");
 const stringToUUID = utils.stringToUUID;
 
 /**
- * @api {get} /issues/:uid.json Find Issue by ID
+ * @api {get} /:teamspace/:model/issues/:uid.json Find Issue by ID
  * @apiName findIssueById
  * @apiGroup Issues
  *
- * @apiParam {Number} id Issue unique ID.
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {Number} id Issue ID.
  *
  * @apiDescription Find an issue with the requested Issue ID.
  *
@@ -76,9 +78,9 @@ const stringToUUID = utils.stringToUUID;
  * @apiErrorExample
  * HTTP/1.1 404 Not Found
  * {
- *   "place": "GET /issues/issue_ID.json",
- *   "status": 500,
- *   "message": "Issue not found",
+ *	 "place": "GET /issues/issue_ID.json",
+ *	 "status": 500,
+ *	 "message": "Issue not found",
  * }
  *
  */
@@ -86,10 +88,12 @@ const stringToUUID = utils.stringToUUID;
 router.get("/issues/:uid.json", middlewares.issue.canView, findIssueById);
 
 /**
- * @api {get} /issues/:uid.json Get Issue Thumbnail
+ * @api {get} /:teamspace/:model/issues/:uid.json Get Issue Thumbnail
  * @apiName findIssueById
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {Number} id Issue unique ID.
  *
  * @apiDescription Retrieve thumbnail screenshot image for requested issue.
@@ -101,59 +105,62 @@ router.get("/issues/:uid.json", middlewares.issue.canView, findIssueById);
 router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 /**
- * @api {get} /issues.json Get all Issues
+ * @api {get} /:teamspace/:model/issues.json Get all Issues
  * @apiName listIssues
  * @apiGroup Issues
  *
  * @apiDescription List all available issue for current model.
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ *
  * @apiSuccess (200) {Object} Issue Object.
  * @apiSuccessExample {json} Success-Response.
  * HTTP/1.1 200 OK
  * [
- * 	{
- * 		"_id":"ISSUE_ID",
- * 		"creator_role":"Client","scale":1,
- * 		"due_date":1543881600000,
- * 		"priority":"low",
- * 		"desc":"reverse",
- * 		"topic_type":"for_information",
- * 		"status":"for approval",
- * 		"owner":"username",
- * 		"created":1546217360002,
- * 		"name":"Without reverse",
- * 		"number":2,
- * 		"rev_id":"REVISION_ID",
- * 		"__v":0,
- * 		"assigned_roles":["Architect"],
- * 		"viewCount":1,
- * 		"commentCount":0,
- * 		"thumbnail":"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
- * 		"norm":[0,0,0],
- * 		"position":[8341.8056640625,1279.962158203125,-3050.34521484375],
- * 		"typePrefix":"sample",
- * 		"modelCode":"",
- * 		"account":"username",
- * 		"model":"MODEL_ID",
- * 		"viewpoint":
- * 			{
- * 				"near":54.739341735839844,
- * 				"far":27369.669921875,
- * 				"fov":1.0471975803375244,
- * 				"aspect_ratio":1.451704502105713,
- * 				"hideIfc":true,
- * 				"guid":"9279d95e-3aee-49c2-ba45-9d2302044597",
- * 				"_id":"5c296790e5f57704580ca00a",
- * 				"type":"perspective",
- * 				"screenshot":"ACCOUNT/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshot.png",
- * 				"clippingPlanes":[],"right":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],
- * 				"view_dir":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],
- * 				"look_at":[8400.001953125,2339.99951171875,-9599.9990234375],
- * 				"position":[-3360.6259765625,5111.28125,2853.4453125],
- * 				"up":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],
- * 				"screenshotSmall":"nabile/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshotSmall.png"
- * 			}
- * 	}
+ *	{
+ *		"_id":"ISSUE_ID",
+ *		"creator_role":"Client","scale":1,
+ *		"due_date":1543881600000,
+ *		"priority":"low",
+ *		"desc":"reverse",
+ *		"topic_type":"for_information",
+ *		"status":"for approval",
+ *		"owner":"username",
+ *		"created":1546217360002,
+ *		"name":"Without reverse",
+ *		"number":2,
+ *		"rev_id":"REVISION_ID",
+ *		"__v":0,
+ *		"assigned_roles":["Architect"],
+ *		"viewCount":1,
+ *		"commentCount":0,
+ *		"thumbnail":"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
+ *		"norm":[0,0,0],
+ *		"position":[8341.8056640625,1279.962158203125,-3050.34521484375],
+ *		"typePrefix":"sample",
+ *		"modelCode":"",
+ *		"account":"username",
+ *		"model":"MODEL_ID",
+ *		"viewpoint":
+ *			{
+ *				"near":54.739341735839844,
+ *				"far":27369.669921875,
+ *				"fov":1.0471975803375244,
+ *				"aspect_ratio":1.451704502105713,
+ *				"hideIfc":true,
+ *				"guid":"9279d95e-3aee-49c2-ba45-9d2302044597",
+ *				"_id":"5c296790e5f57704580ca00a",
+ *				"type":"perspective",
+ *				"screenshot":"ACCOUNT/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshot.png",
+ *				"clippingPlanes":[],"right":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],
+ *				"view_dir":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],
+ *				"look_at":[8400.001953125,2339.99951171875,-9599.9990234375],
+ *				"position":[-3360.6259765625,5111.28125,2853.4453125],
+ *				"up":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],
+ *				"screenshotSmall":"nabile/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshotSmall.png"
+ *			}
+ *	}
  * ]
  *
  */
@@ -161,30 +168,38 @@ router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail
 router.get("/issues.json", middlewares.issue.canView, listIssues);
 
 /**
- * @api {get} /issues.bcfzip Get Issues BCF zip file
+ * @api {get} /:teamspace/:model/issues.bcfzip Get Issues BCF zip file
  * @apiName getIssuesBCF
  * @apiGroup Issues
  *
  * @apiDescription Get a downloaded zip file of all Issues BCF.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  */
 
 router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
 
 /**
- * @api {post} /issues.bcfzip Import BCF file
+ * @api {post} /:teamspace/:model/issues.bcfzip Import BCF file
  * @apiName importBCF
  * @apiGroup Issues
  *
  * @apiDescription Upload an Issues BCF file.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  */
 
 router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 
 /**
- * @api {get} /issues.bcfzip Get Issue Screenshot
+ * @api {get} /:teamspace/:model/issues.bcfzip Get Issue Screenshot
  * @apiName getScreenshot
  * @apiGroup Issue.
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Viewpoint unique ID.
  *
  * @apiDescription Get an issue screenshot from viewpoints using a viewpoint ID and issue ID.
@@ -193,10 +208,12 @@ router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 router.get("/issues/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
 
 /**
- * @api {get} /issues/:uid/viewpoints/:vid/screenshotSmall.png Get smaller version of Issue screenshot
+ * @api {get} /:teamspace/:model/issues/:uid/viewpoints/:vid/screenshotSmall.png Get smaller version of Issue screenshot
  * @apiName getScreenshotSmall
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Viewpoint unique ID.
  *
  * @apiSuccess (200) {Object} Issue Screenshot.
@@ -205,10 +222,12 @@ router.get("/issues/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canV
 router.get("/issues/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
 
 /**
- * @api {get} /revision/:rid/issues.json Get all Issues by revision ID
+ * @api {get} /:teamspace/:model/revision/:rid/issues.json Get all Issues by revision ID
  * @apiName listIssues
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Revision unique ID.
  *
  * @apiDescription Get all issues related to specific revision ID.
@@ -217,56 +236,58 @@ router.get("/issues/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue
  * @apiSuccessExample {json} Success-Response
  *
  * [
- * 	{
- * 		"_id":"issue_ID",
- * 		"creator_role":"Client",
- * 		"scale":1,
- * 		"due_date":1547424000000,
- * 		"priority":"low",
- * 		"desc":"This is a description",
- * 		"topic_type":"for_information",
- * 		"status":"open","owner":"username",
- * 		"created":1546626949432,
- * 		"name":"An Issue for API",
- * 		"number":3,
- * 		"rev_id":"9cf31c6e-37cc-4625-8cee-270cf731059e",
- * 		"__v":0,
- * 		"assigned_roles":["Architect"],
- * 		"viewCount":1,"commentCount":0,
- * 		"thumbnail":"ACCOUNT/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
- * 		"norm":[],"position":[],
- * 		"typePrefix":"sample",
- * 		"modelCode":"",
- * 		"account":"username",
- * 		"model":"MODEL_ID",
- * 		"viewpoint":
- * 			{
- * 				"near":54.739341735839844,
- * 				"far":27369.669921875,
- * 				"fov":1.0471975803375244,
- * 				"aspect_ratio":2.522167444229126,
- * 				"hideIfc":true,
- * 				"guid":"5afbe23f-8307-42d0-ba77-f031922281ce",
- * 				"_id":"5c2fa785b4af3c45f8f83c60",
- * 				"type":"perspective",
- * 				"screenshot":"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png",
- * 				"clippingPlanes":[],"right":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],
- * 					"view_dir":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],
- * 					"look_at":[8400.001953125,2339.99951171875,-9599.9990234375],
- * 					"position":[-3360.6259765625,5111.28125,2853.4453125],
- * 					"up":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],
- * 					"screenshotSmall"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png"}
- * 	}
+ *	{
+ *		"_id":"issue_ID",
+ *		"creator_role":"Client",
+ *		"scale":1,
+ *		"due_date":1547424000000,
+ *		"priority":"low",
+ *		"desc":"This is a description",
+ *		"topic_type":"for_information",
+ *		"status":"open","owner":"username",
+ *		"created":1546626949432,
+ *		"name":"An Issue for API",
+ *		"number":3,
+ *		"rev_id":"9cf31c6e-37cc-4625-8cee-270cf731059e",
+ *		"__v":0,
+ *		"assigned_roles":["Architect"],
+ *		"viewCount":1,"commentCount":0,
+ *		"thumbnail":"ACCOUNT/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
+ *		"norm":[],"position":[],
+ *		"typePrefix":"sample",
+ *		"modelCode":"",
+ *		"account":"username",
+ *		"model":"MODEL_ID",
+ *		"viewpoint":
+ *			{
+ *				"near":54.739341735839844,
+ *				"far":27369.669921875,
+ *				"fov":1.0471975803375244,
+ *				"aspect_ratio":2.522167444229126,
+ *				"hideIfc":true,
+ *				"guid":"5afbe23f-8307-42d0-ba77-f031922281ce",
+ *				"_id":"5c2fa785b4af3c45f8f83c60",
+ *				"type":"perspective",
+ *				"screenshot":"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png",
+ *				"clippingPlanes":[],"right":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],
+ *					"view_dir":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],
+ *					"look_at":[8400.001953125,2339.99951171875,-9599.9990234375],
+ *					"position":[-3360.6259765625,5111.28125,2853.4453125],
+ *					"up":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],
+ *					"screenshotSmall"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png"}
+ *	}
  * ]
  */
 
 router.get("/revision/:rid/issues.json", middlewares.issue.canView, listIssues);
 
 /**
- * @api {get} /revision/:rid/issues.bcfzip Get Issues BCF zip file by revision ID
+ * @api {get} /:teamspace/:model/revision/:rid/issues.bcfzip Get Issues BCF zip file by revision ID
  * @apiName getIssuesBCF
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Revision unique ID.
  *
  * @apiDescription Get Issues BCF export based on revision ID.
@@ -276,10 +297,12 @@ router.get("/revision/:rid/issues.json", middlewares.issue.canView, listIssues);
 router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
 
 /**
- * @api {post} /revision/:rid/issues.bcfzip Post Issues BCF zip file by revision ID
+ * @api {post} /:teamspace/:model/revision/:rid/issues.bcfzip Post Issues BCF zip file by revision ID
  * @apiName getIssuesBCF
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Revision unique ID.
  *
  * @apiDescription Upload Issues BCF file using current revision ID.
@@ -288,19 +311,20 @@ router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesB
  * @apiSuccessExample {json} Success-Response.
  * HTTP
  * {
- * 	"status":"ok"
+ *	"status":"ok"
  * }
  *
  */
 
 router.post("/revision/:rid/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 
-// router.get('/issues/:sid.json', middlewares.issue.canView, listIssuesBySID);
-
 /**
- * @api {get} /issues.html Issues response into as HTML
+ * @api {get} /:teamspace/:model/issues.html Issues response into as HTML
  * @apiName renderIssuesHTML
  * @apiGroup Issues
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  *
  * @apiDescription Render all Issues into a HTML webpage, response is rendered HTML.
  */
@@ -308,10 +332,12 @@ router.post("/revision/:rid/issues.bcfzip", middlewares.issue.canCreate, importB
 router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
 /**
- * @api {get} revision/:rid/issues.html Issues response into as HTML by revision ID
+ * @api {get} /:teamspace/:model/revision/:rid/issues.html Issues response into as HTML by revision ID
  * @apiName  renderIssuesHTML
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Revision unique ID.
  *
  * @apiDescription Render all Issues into a HTML webpage based on current revision ID.
@@ -320,20 +346,24 @@ router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
 /**
- * @api {post} /issues.json Create a new issue.
+ * @api {post} /:teamspace/:model/issues.json Create a new issue.
  * @apiName  storeIssue
  * @apiGroup Issues
- * *
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiDescription Create a new issue. This is the same endpoint as listIssues, but a post request is required.
  */
 
 router.post("/issues.json", middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {put} /issues.json/issueId.json Update an Issue.
+ * @api {put} /:teamspace/:model/issues.json/issueId.json Update an Issue.
  * @apiName  updateIssue
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Issue unique ID.
  *
  * @apiDescription Update an issue with an existing Issue ID
@@ -345,20 +375,24 @@ router.post("/issues.json", middlewares.issue.canCreate, storeIssue, middlewares
 router.put("/issues/:issueId.json", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {post} /issuesId.json Store issue based on revision
+ * @api {post} /:teamspace/:model/issuesId.json Store issue based on revision
  * @apiName storeIssue
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} rid Unique Revision ID to store.
  */
 
 router.post("/revision/:rid/issues.json", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {put} revision/"rid/issues/:issueId.json Update issue based on revision
+ * @api {put} /:teamspace/:model/revision/"rid/issues/:issueId.json Update issue based on revision
  * @apiName updateIssue
  * @apiGroup Issues
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} rid Unique Revision ID to update to.
  * @apiParam {String} issueId Unique Issue ID to update.
  */
