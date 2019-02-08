@@ -209,30 +209,13 @@ function listRisks(req, res, next) {
 
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
-	const projection = {
-		extras: 0,
-		"comments": 0,
-		"viewpoint.extras": 0,
-		"viewpoint.scribble": 0,
-		"viewpoint.screenshot.content": 0,
-		"viewpoint.screenshot.resizedContent": 0,
-		"thumbnail.content": 0
-	};
 
-	let ids;
-	let findRisks;
+	const branch = req.params.rid ? null : "master";
+	const rid = req.params.rid ? req.params.rid : null;
+	const ids = req.query.ids ? req.query.ids.split(",") : null;
+	const convertCoords = !!req.query.convertCoords;
 
-	if (req.query.ids) {
-		ids = req.query.ids.split(",");
-	}
-
-	if (req.params.rid) {
-		findRisks = Risk.findRisksByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, ids);
-	} else {
-		findRisks = Risk.findRisksByModelName(dbCol, req.session.user.username, "master", null, projection, ids);
-	}
-
-	findRisks.then(risks => {
+	Risk.getRisksList(dbCol, req.session.user.username, branch, rid, ids, convertCoords).then(risks => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risks);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

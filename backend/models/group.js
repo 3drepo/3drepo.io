@@ -335,12 +335,7 @@ groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, id
 	}
 
 	if (ids) {
-		ids.forEach((id, i) => {
-			ids[i] = utils.stringToUUID(id);
-		});
-
-		ids = utils.stringsToUUIDs(ids);
-		return this.find(dbCol, { _id: { "$in": ids } });
+		query._id = {$in: utils.stringsToUUIDs(ids)};
 	}
 
 	return this.find(dbCol, query).then(results => {

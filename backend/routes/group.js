@@ -259,19 +259,13 @@ function listGroups(req, res, next) {
 	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
 
-	let ids;
+	const ids = req.query.ids ? req.query.ids.split(",") : null;
 	let groupList;
 
-	if (req.query.ids) {
-		ids = req.query.ids.split(",");
-	}
-
 	if (req.params.rid) {
-		groupList = Group.listGroups(dbCol, req.query, null, req.params.rid);
-	} else if (req.query.ids) {
-		groupList = Group.listGroups(dbCol, req.query, null, null, ids);
+		groupList = Group.listGroups(dbCol, req.query, null, req.params.rid, ids);
 	} else {
-		groupList = Group.listGroups(dbCol, req.query, "master", null);
+		groupList = Group.listGroups(dbCol, req.query, "master", ids);
 	}
 
 	groupList.then(groups => {

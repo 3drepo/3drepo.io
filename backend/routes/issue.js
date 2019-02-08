@@ -460,76 +460,16 @@ function updateIssue(req, res, next) {
 	});
 }
 
-function convertPoint(point) {
-	return [point[0], point[2], point[1]];
-}
-
-function convertIssuePoints(issue) {
-
-	const rootAxisKeys = ["position", "norm"];
-	const pointsKeys = ["right", "view_dir", "look_at", "position", "up", "clippingPlanes"];
-	const viewpoint = issue.viewpoint;
-
-	rootAxisKeys.forEach((rootKey) => {
-		if (issue[rootKey] && issue[rootKey].length === 3) {
-			issue[rootKey] = convertPoint(issue[rootKey]);
-		}
-	});
-
-	pointsKeys.forEach((key) => {
-		if (viewpoint[key] && viewpoint[key].length === 3) {
-			viewpoint[key] = convertPoint(viewpoint[key]);
-		}
-		if (key === "clippingPlanes") {
-			const clippingPlanes = viewpoint[key];
-			for (const item in clippingPlanes) {
-				clippingPlanes[item].normal = convertPoint(clippingPlanes[item].normal);
-			}
-		}
-	});
-
-	return viewpoint;
-}
-
-function changeIssueAxis(issues) {
-	issues.forEach((issue) => {
-		convertIssuePoints(issue);
-	});
-}
-
 function listIssues(req, res, next) {
-
-	let ids;
-	if (req.query.ids) {
-		ids = req.query.ids.split(",");
-	}
-
 	const place = utils.APIInfo(req);
 	const dbCol = { account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger };
-	const projection = {
-		extras: 0,
-		"comments": 0,
-		"viewpoints.extras": 0,
-		"viewpoints.scribble": 0,
-		"viewpoints.screenshot.content": 0,
-		"viewpoints.screenshot.resizedContent": 0,
-		"thumbnail.content": 0
-	};
 
-	let findIssue;
-	if (req.query.shared_id) {
-		findIssue = Issue.findBySharedId(dbCol, req.query.shared_id, req.query.number);
-	} else if (req.params.rid) {
-		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, null, req.params.rid, projection, null, ids);
-	} else {
-		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, "master", null, projection, null, ids, req.query.sortBy);
-	}
+	const branch = req.params.rid ? null : "master";
+	const rid = req.params.rid ? req.params.rid : null;
+	const ids = req.query.ids ? req.query.ids.split(",") : null;
+	const convertCoords = !!req.query.convertCoords;
 
-	findIssue.then(issues => {
-		if (req.query.convertCoords) {
-			changeIssueAxis(issues);
-		}
-
+	Issue.getIssuesList(dbCol, req.session.user.username, branch, rid, ids, req.query.sortBy, convertCoords).then(issues => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

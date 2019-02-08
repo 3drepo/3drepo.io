@@ -241,6 +241,16 @@ function Utils() {
 		});
 
 	};
+
+	/**
+	 * Convert a WebGL coordinates to Direct X
+	 * @param {Number[]} [x y z] array containing webGL coordinates
+	 * @return {Number[]} a converted array in directX convention
+	 */
+	this.webGLtoDirectX = function(point) {
+		return point.length === 3 ? [point[0], -point[2], point[1]] : [];
+
+	};
 }
 
 module.exports = new Utils();
