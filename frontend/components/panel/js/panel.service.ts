@@ -527,24 +527,22 @@ export class PanelService {
 	/**
 	 * Download server response JSON file from panel menu
 	 *
-	 * @param content The JSON response to download
+	 * @param endpoint The required endpoint to correct JSON response.
 	 * @param fileName Choice of filename : "risks.json", "issues.json", "groups.json"
-	 * @param modelID Model ID to used to obtain model data.
-	 * @param account User account used as param to obtain model data.
 	 */
 
-	public downloadJSON(fileName, endpoint) {
+	public downloadJSON(fileName: string, endpoint: string) {
 		const timestamp = this.$filter('prettyDate')(Date.now(), {showSeconds: false});
 		const modelName = this.viewerService.viewer ? this.viewerService.viewer.settings.name : '';
-		this.apiService.get(endpoint).then((res) => {
-			const content = JSON.stringify(res.data, null, 2);
-			const a = document.createElement('a');
-			const file = new Blob([content]);
-			a.href = URL.createObjectURL(file);
-			a.download = `${modelName}_${timestamp}_${fileName}.json`;
-			document.body.appendChild(a); // needed for firefox
-			a.click();
-			document.body.removeChild(a);
+		this.apiService.get(`${endpoint}&convertCoords=true`).then((res) => {
+		const content = JSON.stringify(res.data, null, 2);
+		const a = document.createElement('a');
+		const file = new Blob([content]);
+		a.href = URL.createObjectURL(file);
+		a.download = `${modelName}_${timestamp}_${fileName}.json`;
+		document.body.appendChild(a); // needed for firefox
+		a.click();
+		document.body.removeChild(a);
 		});
 	}
 

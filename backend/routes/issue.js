@@ -495,30 +495,15 @@ function updateIssue(req, res, next) {
 }
 
 function listIssues(req, res, next) {
-
-	// let params = req.params;
 	const place = utils.APIInfo(req);
 	const dbCol = { account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger };
-	const projection = {
-		extras: 0,
-		"comments": 0,
-		"viewpoints.extras": 0,
-		"viewpoints.scribble": 0,
-		"viewpoints.screenshot.content": 0,
-		"viewpoints.screenshot.resizedContent": 0,
-		"thumbnail.content": 0
-	};
 
-	let findIssue;
-	if (req.query.shared_id) {
-		findIssue = Issue.findBySharedId(dbCol, req.query.shared_id, req.query.number);
-	} else if (req.params.rid) {
-		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, null, req.params.rid, projection);
-	} else {
-		findIssue = Issue.findIssuesByModelName(dbCol, req.session.user.username, "master", null, projection, null, null, req.query.sortBy);
-	}
+	const branch = req.params.rid ? null : "master";
+	const rid = req.params.rid ? req.params.rid : null;
+	const ids = req.query.ids ? req.query.ids.split(",") : null;
+	const convertCoords = !!req.query.convertCoords;
 
-	findIssue.then(issues => {
+	Issue.getIssuesList(dbCol, req.session.user.username, branch, rid, ids, req.query.sortBy, convertCoords).then(issues => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

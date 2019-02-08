@@ -22,6 +22,7 @@ import { ChatEvents } from '../../chat/js/chat.events';
 import { ChatService } from '../../chat/js/chat.service';
 import { TreeService } from '../../tree/js/tree.service';
 import { PanelService } from '../../panel/js/panel.service';
+import { isDate } from 'util';
 
 class GroupsController implements ng.IController {
 	public static $inject: string[] = [
@@ -197,6 +198,11 @@ class GroupsController implements ng.IController {
 
 		this.$scope.$watch('vm.selectedMenuOption',
 			(selectedOption: any) => {
+				const ids = [];
+				this.groupsService.state.groupsToShow.forEach((id) => {
+					ids.push(id._id);
+				});
+
 				if (selectedOption && selectedOption.hasOwnProperty('value')) {
 					switch (selectedOption.value) {
 						case 'overrideAll':
@@ -207,7 +213,7 @@ class GroupsController implements ng.IController {
 							break;
 						case 'downloadJSON':
 							const jsonEndpoint = this.account + '/' + this.model +
-							'/groups/revision/master/head/?noIssues=true&noRisks=true';
+							'/groups/revision/master/head/?noIssues=true&noRisks=true&ids=' + ids.join(',');
 							this.panelService.downloadJSON('groups', jsonEndpoint);
 							break;
 						default:
