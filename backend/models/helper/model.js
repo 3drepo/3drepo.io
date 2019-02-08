@@ -177,7 +177,7 @@ function importFail(account, model, user, errCode, errMsg, sendMail) {
 				err: errMsg,
 				corID: setting.corID,
 				bouncerErr: errCode
-			});
+			}).catch(err => systemLogger.logError(err));
 		}
 
 		// Creates model updated failed notification.
