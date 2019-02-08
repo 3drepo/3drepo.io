@@ -33,7 +33,7 @@ import {
 	selectRisksMap,
 	selectActiveRiskDetails
 } from './risks.selectors';
-import { selectJobsList } from '../jobs';
+import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentUser } from '../currentUser';
 import { searchByFilters } from '../../helpers/searching';
 import { RISK_LEVELS } from '../../constants/risks';
@@ -88,11 +88,13 @@ const toggleRiskPin = (risk, selected = true) => {
 export function* saveRisk({ teamspace, model, riskData, revision, filteredRisks }) {
 	try {
 		yield Viewer.setPinDropMode(false);
+		const myJob = yield select(selectMyJob);
+
 		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
 			Viewer.getCurrentViewpoint({ teamspace, model }),
 			Viewer.getObjectsStatus(),
 			riskData.descriptionThumbnail || Viewer.getScreenshot(),
-			API.getMyJob(teamspace)
+			myJob
 		]);
 
 		const TreeService = getAngularService('TreeService') as any;

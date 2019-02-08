@@ -126,6 +126,7 @@ class ModelController implements ng.IController {
 		const username = selectCurrentUser(getState()).username;
 		dispatch(CurrentUserActions.fetchUser(username));
 		dispatch(JobsActions.fetchJobs(this.account));
+		dispatch(JobsActions.getMyJob(this.account));
 
 		subscribe(this, this.onModelSettingsChange);
 

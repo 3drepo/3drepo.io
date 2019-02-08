@@ -11,7 +11,7 @@ import {
 	RISK_LIKELIHOODS,
 	RISK_MITIGATION_STATUSES
 } from '../../../../../../constants/risks';
-import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
+import { calculateLevelOfRisk, canUpdateRisk } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { TextField } from '../../../../../components/textField/textField.component';
@@ -29,6 +29,9 @@ interface IProps {
 	values: any;
 	formik: any;
 	associatedActivities: any[];
+	permissions: any;
+	currentUser: any;
+	myJob: any;
 	onSubmit: (values) => void;
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
@@ -37,23 +40,41 @@ interface IProps {
 
 interface IState {
 	isSaving: boolean;
+	canUpdateRisk: boolean;
 }
 
 class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	public formRef = React.createRef();
 
 	public state = {
-		isSaving: false
+		isSaving: false,
+		canUpdateRisk: false
 	};
 
 	get isNewRisk() {
 		return !this.props.risk._id;
 	}
 
+	public componentDidMount() {
+		const { risk, currentUser, permissions, myJob } = this.props;
+
+		if (risk && currentUser && permissions && myJob) {
+			this.setState({
+				canUpdateRisk: canUpdateRisk(risk, myJob, permissions, currentUser)
+			});
+		}
+	}
+
 	public componentDidUpdate(prevProps) {
+		const { risk, currentUser, permissions, myJob } = this.props;
 		const changes = {} as IState;
 		const { values, formik } = this.props;
 		const valuesChanged = !isEqual(prevProps.values, values);
+		const permissionsChanged = !isEqual(prevProps.permissions, permissions);
+
+		if (permissionsChanged && risk && currentUser && permissions && myJob) {
+			changes.canUpdateRisk = canUpdateRisk(risk, myJob, permissions, currentUser);
+		}
 
 		if (formik.dirty) {
 			if (valuesChanged && !this.state.isSaving) {
@@ -113,6 +134,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							requiredConfirm={!this.isNewRisk}
 							validationSchema={RiskSchema}
 							label="SafetiBase ID"
+							disabled={!this.state.canUpdateRisk}
 						/>
 					)} />
 
@@ -121,6 +143,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							{...field}
 							requiredConfirm={!this.isNewRisk}
 							label="Associated Activity"
+							disabled={!this.state.canUpdateRisk}
 						/>
 					)} />
 				</FieldsRow>
@@ -133,6 +156,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						fullWidth
 						multiline
 						label="Description"
+						disabled={!this.state.canUpdateRisk}
 					/>
 				)} />
 
@@ -151,6 +175,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								{...field}
 								items={this.props.jobs}
 								inputId="assigned_roles"
+								disabled={!this.state.canUpdateRisk}
 							/>
 						)} />
 					</StyledFormControl>
@@ -162,6 +187,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								{...field}
 								items={RISK_CATEGORIES}
 								inputId="category"
+								disabled={!this.state.canUpdateRisk}
 							/>
 						)} />
 					</StyledFormControl>
@@ -175,6 +201,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								{...field}
 								items={RISK_LIKELIHOODS}
 								inputId="likelihood"
+								disabled={!this.state.canUpdateRisk}
 							/>
 						)} />
 					</StyledFormControl>
@@ -186,6 +213,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								{...field}
 								items={RISK_CONSEQUENCES}
 								inputId="consequence"
+								disabled={!this.state.canUpdateRisk}
 							/>
 						)} />
 					</StyledFormControl>
@@ -212,6 +240,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								{...field}
 								items={RISK_MITIGATION_STATUSES}
 								inputId="mitigation_status"
+								disabled={!this.state.canUpdateRisk}
 							/>
 						)} />
 					</StyledFormControl>
@@ -225,6 +254,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						fullWidth
 						multiline
 						label="Mitigation"
+						disabled={!this.state.canUpdateRisk}
 					/>
 				)} />
 			</Form>

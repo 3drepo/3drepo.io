@@ -79,10 +79,20 @@ export function* removeJob({ jobId }) {
 	}
 }
 
+export function* getMyJob({ teamspace }) {
+	try {
+		const response = yield API.getMyJob(teamspace);
+		yield put(JobsActions.getMyJobSuccess(response.data));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('get', 'my job', error));
+	}
+}
+
 export default function* JobsSaga() {
 	yield takeLatest(JobsTypes.FETCH_JOBS, fetchJobs);
 	yield takeLatest(JobsTypes.FETCH_JOBS_COLORS, fetchJobsColors);
 	yield takeLatest(JobsTypes.CREATE_JOB, createJob);
 	yield takeLatest(JobsTypes.REMOVE_JOB, removeJob);
 	yield takeLatest(JobsTypes.UPDATE_JOB_COLOR, updateJobColor);
+	yield takeLatest(JobsTypes.GET_MY_JOB, getMyJob);
 }

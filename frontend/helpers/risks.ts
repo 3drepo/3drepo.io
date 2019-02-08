@@ -1,6 +1,7 @@
 import { omit, get } from 'lodash';
 import { getAPIUrl } from '../services/api';
 import { RISK_LEVELS_COLOURS, RISK_LEVELS_ICONS, RISK_LEVELS, LEVELS } from '../constants/risks';
+import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
 
 export const prepareRisk = (risk, jobs = []) => {
 	const thumbnail = getAPIUrl(risk.thumbnail);
@@ -79,4 +80,36 @@ export const getSortedRisks = (data = []) => {
 	return [...data].sort((first, second) => {
 		return second.created - first.created;
 	});
+};
+
+const userJobMatchesCreator = (userJob, riskData) => {
+	return (userJob._id && riskData.creator_role && userJob._id === riskData.creator_role);
+};
+
+const isViewer = (permissions) => {
+	return permissions && !hasPermissions(PERMISSIONS.COMMENT_ISSUE, permissions);
+};
+
+const isAssignedJob = (riskData, userJob, permissions) => {
+	return riskData && userJob &&
+		(userJob._id &&
+			riskData.assigned_roles[0] &&
+			userJob._id === riskData.assigned_roles[0]) &&
+			!isViewer(permissions);
+};
+
+const isJobOwner = (riskData, userJob, permissions, currentUser) => {
+	return riskData && userJob &&
+		(riskData.owner === currentUser ||
+		userJobMatchesCreator(userJob, riskData)) &&
+		!isViewer(permissions);
+};
+
+const canChangeStatusToClosed = (riskData, userJob, permissions, currentUser) => {
+	return isAdmin(permissions) || isJobOwner(riskData, userJob, permissions, currentUser);
+};
+
+export const canUpdateRisk = (riskData, userJob, permissions, currentUser) => {
+	return canChangeStatusToClosed(riskData, userJob, permissions, currentUser) ||
+		isAssignedJob(riskData, userJob, permissions);
 };
