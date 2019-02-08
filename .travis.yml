@@ -42,7 +42,7 @@ install:
     - cd ./../frontend
     - yarn install
     - yarn lint
-    - yarn build
+    - yarn build:dev
 
 cache:
   yarn: true
@@ -56,9 +56,6 @@ services:
 script:
     - yarn wdm:update
     - yarn wdm:start > /dev/null 2>&1 &
-    - cd ./../backend
-    - unbuffer yarn test
-
 notifications:
     email:
         recipients:
