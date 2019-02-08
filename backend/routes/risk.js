@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *	Copyright (C) 2018 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.ap
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.ap
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 "use strict";
 
@@ -61,7 +61,7 @@ router.get("/risks/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail)
 router.get("/risks.json", middlewares.issue.canView, listRisks);
 
 /**
- * @api {get} /:teamspace/:model/risks/:uid/screenshot.png  Get Risks Screenshot
+ * @api {get} /:teamspace/:model/risks/:uid/screenshot.png	Get Risks Screenshot
  * @apiName getScreenshot
  * @apiGroup Risks
  *
@@ -84,7 +84,7 @@ router.get("/risks/:uid/screenshot.png", middlewares.issue.canView, getScreensho
 router.get("/risks/:uid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
 
 /**
- * @api {get} /:teamspace/:model/risks/:rid/risks.json  List all Risks by revision ID
+ * @api {get} /:teamspace/:model/risks/:rid/risks.json	List all Risks by revision ID
  * @apiName listRisks
  * @apiGroup Risks
  *
@@ -131,7 +131,7 @@ router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHT
 router.post("/risks.json", middlewares.issue.canCreate, storeRisk);
 
 /**
- * @api {put} /:teamspace/:model/risks/riskId.json  Update risks based on revision
+ * @api {put} /:teamspace/:model/risks/riskId.json	Update risks based on revision
  * @apiName updateRisk
  * @apiGroup Risks
  *
@@ -143,7 +143,7 @@ router.post("/risks.json", middlewares.issue.canCreate, storeRisk);
 router.put("/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
 
 /**
- * @api {post} /:teamspace/:model/revision/:rid/risks.json  Store risks based on Revision ID
+ * @api {post} /:teamspace/:model/revision/:rid/risks.json	Store risks based on Revision ID
  * @apiName storeRisk
  * @apiGroup Risks
  *

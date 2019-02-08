@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2016 3D Repo Ltd
+ *	Copyright (C) 2016 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.ap
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.ap
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -39,14 +39,14 @@ const utils = require("../utils");
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * [
- * 	{
- * 		"_id":"24226282-429a-49a0-8e38-96bc2ff28ef1",
- * 		"author":"username",
- * 		"tag":"sample",
- * 		"timestamp":"2018-12-27T11:02:15.000Z",
- * 		"name":"24226282-429a-49a0-8e38-96bc2ff28ef1",
- * 		"branch":"master"
- * 	}
+ *	{
+ *		"_id":"24226282-429a-49a0-8e38-96bc2ff28ef1",
+ *		"author":"username",
+ *		"tag":"sample",
+ *		"timestamp":"2018-12-27T11:02:15.000Z",
+ *		"name":"24226282-429a-49a0-8e38-96bc2ff28ef1",
+ *		"branch":"master"
+ *	}
  * ]
  */
 
@@ -67,33 +67,33 @@ router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * [
- *   {
- *       "_id": "revision_ID",
- *       "author": "username",
- *       "desc": "For coordination",
- *       "tag": "r3",
- *       "timestamp": "2018-01-16T16:02:54.000Z",
- *       "name": "revision_ID",
- *       "branch": "master"
- *   },
- *   {
- *       "_id": "revision_ID",
- *       "author": "username",
- *       "desc": "Roof access added",
- *       "tag": "r2",
- *       "timestamp": "2018-01-16T15:26:58.000Z",
- *       "name": "revision_ID",
- *       "branch": "master"
- *   },
- *   {
- *       "_id": "revision_ID",
- *       "author": "username",
- *       "desc": "Initial design",
- *       "tag": "r1",
- *       "timestamp": "2018-01-16T15:19:01.000Z",
- *       "name": "revision_ID",
- *       "branch": "master"
- *   }
+ *	 {
+ *		 "_id": "revision_ID",
+ *		 "author": "username",
+ *		 "desc": "For coordination",
+ *		 "tag": "r3",
+ *		 "timestamp": "2018-01-16T16:02:54.000Z",
+ *		 "name": "revision_ID",
+ *		 "branch": "master"
+ *	 },
+ *	 {
+ *		 "_id": "revision_ID",
+ *		 "author": "username",
+ *		 "desc": "Roof access added",
+ *		 "tag": "r2",
+ *		 "timestamp": "2018-01-16T15:26:58.000Z",
+ *		 "name": "revision_ID",
+ *		 "branch": "master"
+ *	 },
+ *	 {
+ *		 "_id": "revision_ID",
+ *		 "author": "username",
+ *		 "desc": "Initial design",
+ *		 "tag": "r1",
+ *		 "timestamp": "2018-01-16T15:19:01.000Z",
+ *		 "name": "revision_ID",
+ *		 "branch": "master"
+ *	 }
  * ]
  *
  */

@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *	Copyright (C) 2017 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -29,8 +29,8 @@
 	 * @api {post} /:teamspace/jobs Create a new job
 	 * @apiName createJob
 	 * @apiGroup Jobs
-     *
-     * @apiParam {String} teamspace Name of teamspace
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 */
 	router.post("/jobs", middlewares.job.canCreate, createJob);
 
@@ -38,8 +38,8 @@
 	 * @api {get} /:teamspace/myJob Get user Job
 	 * @apiName getUserJob
 	 * @apiGroup Jobs
-     *
-     * @apiParam {String} teamspace Name of teamspace
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 */
 	router.get("/myJob", middlewares.isTeamspaceMember, getUserJob);
 
@@ -47,8 +47,8 @@
 	 * @api {put} /:teamspace/jobs/:jobId Update User Job
 	 * @apiName updateJob
 	 * @apiGroup Jobs
-     *
-     * @apiParam {String} teamspace Name of teamspace
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} jobId Unique Job ID.
 	 */
 	router.put("/jobs/:jobId", middlewares.job.canCreate, updateJob);
@@ -57,8 +57,8 @@
 	 * @api {get} /:teamspace/jobs List all Jobs
 	 * @apiName listJobs
 	 * @apiGroup Jobs
-     *
-     * @apiParam {String} teamspace Name of teamspace
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 */
 	router.get("/jobs", middlewares.isTeamspaceMember, listJobs);
 
@@ -66,8 +66,8 @@
 	 * @api {post} /:teamspace/jobs/:jobId/:user Assign a job to a user
 	 * @apiName addUserToJob
 	 * @apiGroup Jobs
-     *
-     * @apiParam {String} teamspace Name of teamspace
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam jobId Unique Job ID
 	 * @apiParam {String} user User to assign job to.
 	 */
@@ -77,8 +77,8 @@
 	 * @api {delete} /:teamspace/jobs Remove a job from a user
 	 * @apiName removeUserFromJobs
 	 * @apiGroup Jobs
-     *
-     * @apiParam {String} teamspace Name of teamspace
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {Object} user User to remove job from.
 	 */
 	router.delete("/jobs/unassign/:user", middlewares.job.canDelete, removeUserFromJobs);
@@ -87,8 +87,8 @@
 	 * @api {delete} /:teamspace/jobs/:jobId Delete a job
 	 * @apiName deleteJob
 	 * @apiGroup Jobs
-     *
-     * @apiParam {String} teamspace Name of teamspace
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} jobId Unique Job ID.
 	 */
 	router.delete("/jobs/:jobId", middlewares.job.canDelete, deleteJob);
@@ -97,8 +97,8 @@
 	 * @api {get} /:teamspace/jobs/colors List all Colors
 	 * @apiName listColors
 	 * @apiGroup Jobs
-     *
-     * @apiParam {String} teamspace Name of teamspace
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 */
 	router.get("/jobs/colors", middlewares.isTeamspaceMember, listColors);
 

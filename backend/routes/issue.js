@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.ap
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.ap
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 "use strict";
 const _ = require("lodash");
@@ -78,9 +78,9 @@ const stringToUUID = utils.stringToUUID;
  * @apiErrorExample
  * HTTP/1.1 404 Not Found
  * {
- *   "place": "GET /issues/issue_ID.json",
- *   "status": 500,
- *   "message": "Issue not found",
+ *	 "place": "GET /issues/issue_ID.json",
+ *	 "status": 500,
+ *	 "message": "Issue not found",
  * }
  *
  */
@@ -118,49 +118,49 @@ router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail
  * @apiSuccessExample {json} Success-Response.
  * HTTP/1.1 200 OK
  * [
- * 	{
- * 		"_id":"ISSUE_ID",
- * 		"creator_role":"Client","scale":1,
- * 		"due_date":1543881600000,
- * 		"priority":"low",
- * 		"desc":"reverse",
- * 		"topic_type":"for_information",
- * 		"status":"for approval",
- * 		"owner":"username",
- * 		"created":1546217360002,
- * 		"name":"Without reverse",
- * 		"number":2,
- * 		"rev_id":"REVISION_ID",
- * 		"__v":0,
- * 		"assigned_roles":["Architect"],
- * 		"viewCount":1,
- * 		"commentCount":0,
- * 		"thumbnail":"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
- * 		"norm":[0,0,0],
- * 		"position":[8341.8056640625,1279.962158203125,-3050.34521484375],
- * 		"typePrefix":"sample",
- * 		"modelCode":"",
- * 		"account":"username",
- * 		"model":"MODEL_ID",
- * 		"viewpoint":
- * 			{
- * 				"near":54.739341735839844,
- * 				"far":27369.669921875,
- * 				"fov":1.0471975803375244,
- * 				"aspect_ratio":1.451704502105713,
- * 				"hideIfc":true,
- * 				"guid":"9279d95e-3aee-49c2-ba45-9d2302044597",
- * 				"_id":"5c296790e5f57704580ca00a",
- * 				"type":"perspective",
- * 				"screenshot":"ACCOUNT/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshot.png",
- * 				"clippingPlanes":[],"right":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],
- * 				"view_dir":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],
- * 				"look_at":[8400.001953125,2339.99951171875,-9599.9990234375],
- * 				"position":[-3360.6259765625,5111.28125,2853.4453125],
- * 				"up":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],
- * 				"screenshotSmall":"nabile/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshotSmall.png"
- * 			}
- * 	}
+ *	{
+ *		"_id":"ISSUE_ID",
+ *		"creator_role":"Client","scale":1,
+ *		"due_date":1543881600000,
+ *		"priority":"low",
+ *		"desc":"reverse",
+ *		"topic_type":"for_information",
+ *		"status":"for approval",
+ *		"owner":"username",
+ *		"created":1546217360002,
+ *		"name":"Without reverse",
+ *		"number":2,
+ *		"rev_id":"REVISION_ID",
+ *		"__v":0,
+ *		"assigned_roles":["Architect"],
+ *		"viewCount":1,
+ *		"commentCount":0,
+ *		"thumbnail":"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
+ *		"norm":[0,0,0],
+ *		"position":[8341.8056640625,1279.962158203125,-3050.34521484375],
+ *		"typePrefix":"sample",
+ *		"modelCode":"",
+ *		"account":"username",
+ *		"model":"MODEL_ID",
+ *		"viewpoint":
+ *			{
+ *				"near":54.739341735839844,
+ *				"far":27369.669921875,
+ *				"fov":1.0471975803375244,
+ *				"aspect_ratio":1.451704502105713,
+ *				"hideIfc":true,
+ *				"guid":"9279d95e-3aee-49c2-ba45-9d2302044597",
+ *				"_id":"5c296790e5f57704580ca00a",
+ *				"type":"perspective",
+ *				"screenshot":"ACCOUNT/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshot.png",
+ *				"clippingPlanes":[],"right":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],
+ *				"view_dir":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],
+ *				"look_at":[8400.001953125,2339.99951171875,-9599.9990234375],
+ *				"position":[-3360.6259765625,5111.28125,2853.4453125],
+ *				"up":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],
+ *				"screenshotSmall":"nabile/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshotSmall.png"
+ *			}
+ *	}
  * ]
  *
  */
@@ -236,46 +236,46 @@ router.get("/issues/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue
  * @apiSuccessExample {json} Success-Response
  *
  * [
- * 	{
- * 		"_id":"issue_ID",
- * 		"creator_role":"Client",
- * 		"scale":1,
- * 		"due_date":1547424000000,
- * 		"priority":"low",
- * 		"desc":"This is a description",
- * 		"topic_type":"for_information",
- * 		"status":"open","owner":"username",
- * 		"created":1546626949432,
- * 		"name":"An Issue for API",
- * 		"number":3,
- * 		"rev_id":"9cf31c6e-37cc-4625-8cee-270cf731059e",
- * 		"__v":0,
- * 		"assigned_roles":["Architect"],
- * 		"viewCount":1,"commentCount":0,
- * 		"thumbnail":"ACCOUNT/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
- * 		"norm":[],"position":[],
- * 		"typePrefix":"sample",
- * 		"modelCode":"",
- * 		"account":"username",
- * 		"model":"MODEL_ID",
- * 		"viewpoint":
- * 			{
- * 				"near":54.739341735839844,
- * 				"far":27369.669921875,
- * 				"fov":1.0471975803375244,
- * 				"aspect_ratio":2.522167444229126,
- * 				"hideIfc":true,
- * 				"guid":"5afbe23f-8307-42d0-ba77-f031922281ce",
- * 				"_id":"5c2fa785b4af3c45f8f83c60",
- * 				"type":"perspective",
- * 				"screenshot":"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png",
- * 				"clippingPlanes":[],"right":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],
- * 					"view_dir":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],
- * 					"look_at":[8400.001953125,2339.99951171875,-9599.9990234375],
- * 					"position":[-3360.6259765625,5111.28125,2853.4453125],
- * 					"up":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],
- * 					"screenshotSmall"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png"}
- * 	}
+ *	{
+ *		"_id":"issue_ID",
+ *		"creator_role":"Client",
+ *		"scale":1,
+ *		"due_date":1547424000000,
+ *		"priority":"low",
+ *		"desc":"This is a description",
+ *		"topic_type":"for_information",
+ *		"status":"open","owner":"username",
+ *		"created":1546626949432,
+ *		"name":"An Issue for API",
+ *		"number":3,
+ *		"rev_id":"9cf31c6e-37cc-4625-8cee-270cf731059e",
+ *		"__v":0,
+ *		"assigned_roles":["Architect"],
+ *		"viewCount":1,"commentCount":0,
+ *		"thumbnail":"ACCOUNT/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
+ *		"norm":[],"position":[],
+ *		"typePrefix":"sample",
+ *		"modelCode":"",
+ *		"account":"username",
+ *		"model":"MODEL_ID",
+ *		"viewpoint":
+ *			{
+ *				"near":54.739341735839844,
+ *				"far":27369.669921875,
+ *				"fov":1.0471975803375244,
+ *				"aspect_ratio":2.522167444229126,
+ *				"hideIfc":true,
+ *				"guid":"5afbe23f-8307-42d0-ba77-f031922281ce",
+ *				"_id":"5c2fa785b4af3c45f8f83c60",
+ *				"type":"perspective",
+ *				"screenshot":"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png",
+ *				"clippingPlanes":[],"right":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],
+ *					"view_dir":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],
+ *					"look_at":[8400.001953125,2339.99951171875,-9599.9990234375],
+ *					"position":[-3360.6259765625,5111.28125,2853.4453125],
+ *					"up":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],
+ *					"screenshotSmall"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png"}
+ *	}
  * ]
  */
 
@@ -311,7 +311,7 @@ router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesB
  * @apiSuccessExample {json} Success-Response.
  * HTTP
  * {
- * 	"status":"ok"
+ *	"status":"ok"
  * }
  *
  */

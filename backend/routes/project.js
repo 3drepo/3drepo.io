@@ -29,8 +29,8 @@
 	 * @api {post} /:teamspace/projects Create a project
 	 * @apiName createProject
 	 * @apiGroup Project
-     *
-     * @apiParam {String} teamspace Name of the teamspace
+	 *
+	 * @apiParam {String} teamspace Name of the teamspace
 	 */
 
 	router.post("/projects", middlewares.project.canCreate, createProject);
@@ -40,7 +40,7 @@
 	 * @apiName updateProject
 	 * @apiGroup Project
 	 *
-     * @apiParam {String} teamspace Name of the teamspace
+	 * @apiParam {String} teamspace Name of the teamspace
 	 * @apiParam {String} project Project to update
 	 */
 
@@ -50,8 +50,8 @@
 	 * @api {get} /:teamspace/projects List all projects
 	 * @apiName listProjects
 	 * @apiGroup Project
-     *
-     * @apiParam {String} teamspace Name of the teamspace
+	 *
+	 * @apiParam {String} teamspace Name of the teamspace
 	 */
 
 	router.get("/projects", middlewares.project.canList, listProjects);
@@ -61,7 +61,7 @@
 	 * @apiName listProject
 	 * @apiGroup Project
 	 *
-     * @apiParam {String} teamspace Name of the teamspace
+	 * @apiParam {String} teamspace Name of the teamspace
 	 * @apiParam {String} project Project to list
 	 */
 
@@ -72,7 +72,7 @@
 	 * @apiName deleteProject
 	 * @apiGroup Project
 	 *
-     * @apiParam {String} teamspace Name of the teamspace
+	 * @apiParam {String} teamspace Name of the teamspace
 	 * @apiParam {String} project Project to delete
 	 */
 

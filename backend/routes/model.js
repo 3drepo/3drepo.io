@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *	Copyright (C) 2018 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 "use strict";
 
@@ -109,7 +109,7 @@ router.get("/:model/revision/master/head/unityAssets.json", middlewares.hasReadA
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get Unity Assets for.
- * @apiParam {String} rev   Revision to get Unity Assets for.
+ * @apiParam {String} rev	Revision to get Unity Assets for.
  */
 
 router.get("/:model/revision/:rev/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
@@ -121,7 +121,7 @@ router.get("/:model/revision/:rev/unityAssets.json", middlewares.hasReadAccessTo
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get JSON Mpc for.
- * @apiParam {String} id    name of the json.mpc file
+ * @apiParam {String} id	name of the json.mpc file
  */
 
 router.get("/:model/:uid.json.mpc",  middlewares.hasReadAccessToModel, getJsonMpc);
@@ -253,7 +253,7 @@ router.get("/:model/revision/master/head/modelProperties.json", middlewares.hasR
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get Tree for.
- * @apiParam {String} rev   Revision to use.
+ * @apiParam {String} rev	Revision to use.
  */
 
 router.get("/:model/revision/:rev/fulltree.json", middlewares.hasReadAccessToModel, getModelTree);
@@ -265,7 +265,7 @@ router.get("/:model/revision/:rev/fulltree.json", middlewares.hasReadAccessToMod
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get tree path for.
- * @apiParam {String} rev   Revision to use.
+ * @apiParam {String} rev	Revision to use.
  */
 
 router.get("/:model/revision/:rev/tree_path.json", middlewares.hasReadAccessToModel, getTreePath);
@@ -277,7 +277,7 @@ router.get("/:model/revision/:rev/tree_path.json", middlewares.hasReadAccessToMo
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to ID map for.
- * @apiParam {String} rev   Revision to use.
+ * @apiParam {String} rev	Revision to use.
  */
 
 router.get("/:model/revision/:rev/idMap.json", middlewares.hasReadAccessToModel, getIdMap);
@@ -289,7 +289,7 @@ router.get("/:model/revision/:rev/idMap.json", middlewares.hasReadAccessToModel,
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to use.
- * @apiParam {String} rev   Revision to use.
+ * @apiParam {String} rev	Revision to use.
  */
 
 router.get("/:model/revision/:rev/idToMeshes.json", middlewares.hasReadAccessToModel, getIdToMeshes);
@@ -301,7 +301,7 @@ router.get("/:model/revision/:rev/idToMeshes.json", middlewares.hasReadAccessToM
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to use.
- * @apiParam {String} rev   Revision to use.
+ * @apiParam {String} rev	Revision to use.
  */
 
 router.get("/:model/revision/:rev/modelProperties.json", middlewares.hasReadAccessToModel, getModelProperties);
@@ -324,7 +324,7 @@ router.get("/:model/revision/master/head/searchtree.json", middlewares.hasReadAc
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to use.
- * @apiParam {String} rev   Revision to use.
+ * @apiParam {String} rev	Revision to use.
  */
 
 router.get("/:model/revision/:rev/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);

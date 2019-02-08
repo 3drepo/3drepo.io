@@ -48,38 +48,38 @@ const multer = require("multer");
  *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
- * 	{
- *   "username": "username1",
- *   "roles": [
- *       {
- *           "role": "team_member",
- *           "db": "database_name"
- *       },
- *       {
- *           "role": "team_member",
- *           "db": "database_name1"
- *       },
- *       {
- *           "role": "team_member",
- *           "db": "database_name2"
- *       }
- *   ],
- *   "flags": {
- *       "termsPrompt": false
- *   }
+ *	{
+ *	 "username": "username1",
+ *	 "roles": [
+ *		 {
+ *			 "role": "team_member",
+ *			 "db": "database_name"
+ *		 },
+ *		 {
+ *			 "role": "team_member",
+ *			 "db": "database_name1"
+ *		 },
+ *		 {
+ *			 "role": "team_member",
+ *			 "db": "database_name2"
+ *		 }
+ *	 ],
+ *	 "flags": {
+ *		 "termsPrompt": false
+ *	 }
  *	}
  *
  * @apiError NotAuthorized User was not authorised.
  * @apiErrorExample {json} Error-Response
  *
  * HTTP/1.1 401 Unauth­orized
- *   {
- *     "message": "Not Authorized",
- *     "status": 401,
- *     "code": "NOT_AUTHORIZED",
- *     "value": 9,
- *     "place": "GET /login"
- *   }
+ *	 {
+ *	   "message": "Not Authorized",
+ *	   "status": 401,
+ *	   "code": "NOT_AUTHORIZED",
+ *	   "value": 9,
+ *	   "place": "GET /login"
+ *	 }
  */
 router.post("/login", login);
 
@@ -99,7 +99,7 @@ router.post("/login", login);
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
- *  "username": "username1"
+ *	"username": "username1"
  * }
  *
  */
@@ -118,25 +118,25 @@ router.post("/logout", logout);
  * @apiSuccess (200) {Object} User profile.
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
- * 	{
- *   "username": "username1",
- *   "roles": [
- *       {
- *           "role": "team_member",
- *           "db": "database_name"
- *       },
- *       {
- *           "role": "team_member",
- *           "db": "database_name1"
- *       },
- *       {
- *           "role": "team_member",
- *           "db": "database_name2"
- *       }
- *   ],
- *   "flags": {
- *       "termsPrompt": false
- *   }
+ *	{
+ *	 "username": "username1",
+ *	 "roles": [
+ *		 {
+ *			 "role": "team_member",
+ *			 "db": "database_name"
+ *		 },
+ *		 {
+ *			 "role": "team_member",
+ *			 "db": "database_name1"
+ *		 },
+ *		 {
+ *			 "role": "team_member",
+ *			 "db": "database_name2"
+ *		 }
+ *	 ],
+ *	 "flags": {
+ *		 "termsPrompt": false
+ *	 }
  *	}
  */
 router.get("/login", checkLogin);
@@ -158,11 +158,11 @@ router.get("/login", checkLogin);
  *
  * HTTP/1.1 400 Bad Request
  * {
- *   "message": "Password is missing",
- *   "status": 400,
- *   "code": "SIGN_UP_PASSWORD_MISSING",
- *   "value": 57,
- *   "place": "POST /forgotPassword"
+ *	 "message": "Password is missing",
+ *	 "status": 400,
+ *	 "code": "SIGN_UP_PASSWORD_MISSING",
+ *	 "value": 57,
+ *	 "place": "POST /forgotPassword"
  * }
  */
 router.post("/forgot-password", forgotPassword);
@@ -179,22 +179,22 @@ router.post("/forgot-password", forgotPassword);
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
- *   "VERSION": "2.20.1",
- *   "unity": {
- *       "current": "2.20.0",
- *       "supported": []
- *    },
- *   "navis": {
- *       "current": "2.16.0",
- *       "supported": [
- *           "2.8.0"
- *       ]
- *   },
- *   "unitydll": {
- *       "current": "2.8.0",
- *       "supported": []
- *   }
- *  }
+ *	 "VERSION": "2.20.1",
+ *	 "unity": {
+ *		 "current": "2.20.0",
+ *		 "supported": []
+ *	  },
+ *	 "navis": {
+ *		 "current": "2.16.0",
+ *		 "supported": [
+ *			 "2.8.0"
+ *		 ]
+ *	 },
+ *	 "unitydll": {
+ *		 "current": "2.8.0",
+ *		 "supported": []
+ *	 }
+ *	}
  */
 router.get("/version", printVersion);
 
@@ -210,164 +210,164 @@ router.get("/version", printVersion);
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
-    "accounts": [
-        {
-            "account": "username1",
-            "projects": [
-                {
-                    "_id": "model_ID",
-                    "name": "Sample_Project",
-                    "__v": 37,
-                    "permissions": [
-                        "create_model",
-                        "create_federation",
-                        "admin_project",
-                        "edit_project",
-                        "delete_project",
-                        "upload_files_all_models",
-                        "edit_federation_all_models",
-                        "create_issue_all_models",
-                        "comment_issue_all_models",
-                        "view_issue_all_models",
-                        "view_model_all_models",
-                        "download_model_all_models",
-                        "change_model_settings_all_models"
-                    ],
-                    "models": [
-                        {
-                            "permissions": [
-                                "change_model_settings",
-                                "upload_files",
-                                "create_issue",
-                                "comment_issue",
-                                "view_issue",
-                                "view_model",
-                                "download_model",
-                                "edit_federation",
-                                "delete_federation",
-                                "delete_model",
-                                "manage_model_permission"
-                            ],
-                            "model": "model_ID_1",
-                            "name": "Model_Name_1",
-                            "status": "ok",
-                            "timestamp": "2018-11-27T09:59:56.470Z"
-                        },
-                        {
-                            "permissions": [
-                                "change_model_settings",
-                                "upload_files",
-                                "create_issue",
-                                "comment_issue",
-                                "view_issue",
-                                "view_model",
-                                "download_model",
-                                "edit_federation",
-                                "delete_federation",
-                                "delete_model",
-                                "manage_model_permission"
-                            ],
-                            "model": "model_ID_2",
-                            "name": "Model_Name_2",
-                            "status": "ok",
-                            "timestamp": "2018-11-27T09:57:19.345Z"
-                        },
-                        {
-                            "permissions": [
-                                "change_model_settings",
-                                "upload_files",
-                                "create_issue",
-                                "comment_issue",
-                                "view_issue",
-                                "view_model",
-                                "download_model",
-                                "edit_federation",
-                                "delete_federation",
-                                "delete_model",
-                                "manage_model_permission"
-                            ],
-                            "model": "model_ID_3",
-                            "name": "Model_Name_3",
-                            "status": "ok",
-                            "timestamp": "2018-11-26T17:19:26.175Z"
-                        },
-                        {
-                            "permissions": [
-                                "change_model_settings",
-                                "upload_files",
-                                "create_issue",
-                                "comment_issue",
-                                "view_issue",
-                                "view_model",
-                                "download_model",
-                                "edit_federation",
-                                "delete_federation",
-                                "delete_model",
-                                "manage_model_permission"
-                            ],
-                            "model": "mode_ID_4",
-                            "name": "Model_Name_4",
-                            "status": "queued",
-                            "timestamp": null
-                        }
-                    ]
-                },
-                {
-                    "_id": "model_ID_3",
-                    "name": "Model_Name_4",
-                    "__v": 2,
-                    "permissions": [
-                        "create_model",
-                        "create_federation",
-                        "admin_project",
-                        "edit_project",
-                        "delete_project",
-                        "upload_files_all_models",
-                        "edit_federation_all_models",
-                        "create_issue_all_models",
-                        "comment_issue_all_models",
-                        "view_issue_all_models",
-                        "view_model_all_models",
-                        "download_model_all_models",
-                        "change_model_settings_all_models"
-                    ],
-                    "models": [
-                        {
-                            "permissions": [
-                                "change_model_settings",
-                                "upload_files",
-                                "create_issue",
-                                "comment_issue",
-                                "view_issue",
-                                "view_model",
-                                "download_model",
-                                "edit_federation",
-                                "delete_federation",
-                                "delete_model",
-                                "manage_model_permission"
-                            ],
-                            "model": "model_ID_5",
-                            "name": "model",
-                            "status": "queued",
-                            "timestamp": "2018-11-22T15:47:57.000Z"
-                        }
-                    ]
-                }
-            ],
-            "models": [],
-            "fedModels": [],
-            "isAdmin": true,
-            "permissions": [
-                "assign_licence",
-                "revoke_licence",
-                "teamspace_admin",
-                "create_project",
-                "create_job",
-                "delete_job",
-                "assign_job",
-                "view_projects"
-            ]
-        }
+	"accounts": [
+		{
+			"account": "username1",
+			"projects": [
+				{
+					"_id": "model_ID",
+					"name": "Sample_Project",
+					"__v": 37,
+					"permissions": [
+						"create_model",
+						"create_federation",
+						"admin_project",
+						"edit_project",
+						"delete_project",
+						"upload_files_all_models",
+						"edit_federation_all_models",
+						"create_issue_all_models",
+						"comment_issue_all_models",
+						"view_issue_all_models",
+						"view_model_all_models",
+						"download_model_all_models",
+						"change_model_settings_all_models"
+					],
+					"models": [
+						{
+							"permissions": [
+								"change_model_settings",
+								"upload_files",
+								"create_issue",
+								"comment_issue",
+								"view_issue",
+								"view_model",
+								"download_model",
+								"edit_federation",
+								"delete_federation",
+								"delete_model",
+								"manage_model_permission"
+							],
+							"model": "model_ID_1",
+							"name": "Model_Name_1",
+							"status": "ok",
+							"timestamp": "2018-11-27T09:59:56.470Z"
+						},
+						{
+							"permissions": [
+								"change_model_settings",
+								"upload_files",
+								"create_issue",
+								"comment_issue",
+								"view_issue",
+								"view_model",
+								"download_model",
+								"edit_federation",
+								"delete_federation",
+								"delete_model",
+								"manage_model_permission"
+							],
+							"model": "model_ID_2",
+							"name": "Model_Name_2",
+							"status": "ok",
+							"timestamp": "2018-11-27T09:57:19.345Z"
+						},
+						{
+							"permissions": [
+								"change_model_settings",
+								"upload_files",
+								"create_issue",
+								"comment_issue",
+								"view_issue",
+								"view_model",
+								"download_model",
+								"edit_federation",
+								"delete_federation",
+								"delete_model",
+								"manage_model_permission"
+							],
+							"model": "model_ID_3",
+							"name": "Model_Name_3",
+							"status": "ok",
+							"timestamp": "2018-11-26T17:19:26.175Z"
+						},
+						{
+							"permissions": [
+								"change_model_settings",
+								"upload_files",
+								"create_issue",
+								"comment_issue",
+								"view_issue",
+								"view_model",
+								"download_model",
+								"edit_federation",
+								"delete_federation",
+								"delete_model",
+								"manage_model_permission"
+							],
+							"model": "mode_ID_4",
+							"name": "Model_Name_4",
+							"status": "queued",
+							"timestamp": null
+						}
+					]
+				},
+				{
+					"_id": "model_ID_3",
+					"name": "Model_Name_4",
+					"__v": 2,
+					"permissions": [
+						"create_model",
+						"create_federation",
+						"admin_project",
+						"edit_project",
+						"delete_project",
+						"upload_files_all_models",
+						"edit_federation_all_models",
+						"create_issue_all_models",
+						"comment_issue_all_models",
+						"view_issue_all_models",
+						"view_model_all_models",
+						"download_model_all_models",
+						"change_model_settings_all_models"
+					],
+					"models": [
+						{
+							"permissions": [
+								"change_model_settings",
+								"upload_files",
+								"create_issue",
+								"comment_issue",
+								"view_issue",
+								"view_model",
+								"download_model",
+								"edit_federation",
+								"delete_federation",
+								"delete_model",
+								"manage_model_permission"
+							],
+							"model": "model_ID_5",
+							"name": "model",
+							"status": "queued",
+							"timestamp": "2018-11-22T15:47:57.000Z"
+						}
+					]
+				}
+			],
+			"models": [],
+			"fedModels": [],
+			"isAdmin": true,
+			"permissions": [
+				"assign_licence",
+				"revoke_licence",
+				"teamspace_admin",
+				"create_project",
+				"create_job",
+				"delete_job",
+				"assign_job",
+				"view_projects"
+			]
+		}
  */
 router.get("/:account.json", middlewares.loggedIn, listInfo);
 // TODO: divide into different endpoints that makes sense.
@@ -385,10 +385,10 @@ router.get("/:account.json", middlewares.loggedIn, listInfo);
  *
  * HTTP/1.1 404 Not Found
  * {
- *   "message": "User does not have an avatar",
- *   "status": 404,
- *   "code": "SIGN_UP_PASSWORD_MISSING",
- *   "place": "POST /:account/avatar"
+ *	 "message": "User does not have an avatar",
+ *	 "status": 404,
+ *	 "code": "SIGN_UP_PASSWORD_MISSING",
+ *	 "place": "POST /:account/avatar"
  * }
  */
 router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
@@ -406,7 +406,7 @@ router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
- *  "status":"success"
+ *	"status":"success"
  * }
  */
 router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
@@ -424,7 +424,7 @@ router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
- *  "account":"newAccountUsername"
+ *	"account":"newAccountUsername"
  * }
  *
  * @apiError SIGN_UP_PASSWORD_MISSING Sign Up Password is missing.
@@ -432,11 +432,11 @@ router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
  *
  * HTTP/1.1 400 Bad Request
  * {
- *   "message": "Password is missing",
- *   "status": 400,
- *   "code": "SIGN_UP_PASSWORD_MISSING",
- *   "value": 57,
- *   "place": "POST /nabile"
+ *	 "message": "Password is missing",
+ *	 "status": 400,
+ *	 "code": "SIGN_UP_PASSWORD_MISSING",
+ *	 "value": 57,
+ *	 "place": "POST /nabile"
  * }
  */
 router.post("/:account", signUp);
@@ -455,11 +455,11 @@ router.post("/:account", signUp);
  *
  * HTTP/1.1 400 Bad Request
  * {
- *   "message": "Already verified",
- *   "status": 400,
- *   "code": "ALREADY_VERIFIED",
- *   "value": 60,
- *   "place": "POST /niblux/verify"
+ *	 "message": "Already verified",
+ *	 "status": 400,
+ *	 "code": "ALREADY_VERIFIED",
+ *	 "value": 60,
+ *	 "place": "POST /niblux/verify"
  * }
  */
 router.post("/:account/verify", verify);
@@ -475,7 +475,7 @@ router.post("/:account/verify", verify);
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
- *  "account":"newAccountUsername"
+ *	"account":"newAccountUsername"
  * }
  */
 router.put("/:account", middlewares.isAccountAdmin, updateUser);
@@ -492,21 +492,21 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
  *
  * @apiSuccess (200) account Account username
  * @apiSuccessExample {json} Success-Response
- *  HTTP/1.1 200 OK
- *  {
- * 	"account":"username1"
- *  }
+ *	HTTP/1.1 200 OK
+ *	{
+ *	"account":"username1"
+ *	}
  *
  * @apiError TOKEN_INVALID Token is invalid or expired.
  * @apiErrorExample {json} Error-Response
  *
  * HTTP/1.1 400 Bad Request
  * {
- * 	"message":"Token is invalid or expired",
- * 	"status":400,"code":"TOKEN_INVALID",
- * 	"value":59,
- * 	"place": "PUT /username1/password"
- * 	}
+ *	"message":"Token is invalid or expired",
+ *	"status":400,"code":"TOKEN_INVALID",
+ *	"value":59,
+ *	"place": "PUT /username1/password"
+ *	}
  */
 router.put("/:account/password", resetPassword);
 

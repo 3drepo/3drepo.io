@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *	Copyright (C) 2014 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -40,16 +40,16 @@ const systemLogger = require("../logger.js").systemLogger;
  * @apiSuccessExample {json} Success-Response
  *
  * HTTP/1.1 200 OK
- * 	{
- * 		"_id":"model_ID",
- * 		"__v":0,
- * 		"name":"Changed",
- * 		"author":"username",
- * 		"createdAt":1536747251756,
- * 		"updatedBy":"username",
- * 		"updatedAt":1536747551043,
- * 		"color":[152,233,75],
- * 		"objects":[]
+ *	{
+ *		"_id":"model_ID",
+ *		"__v":0,
+ *		"name":"Changed",
+ *		"author":"username",
+ *		"createdAt":1536747251756,
+ *		"updatedBy":"username",
+ *		"updatedAt":1536747551043,
+ *		"color":[152,233,75],
+ *		"objects":[]
  * }
  */
 
@@ -109,13 +109,13 @@ router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
  *
  * HTTP/1.1 200 OK
  * {
-    "_id": "group_ID",
-    "color": [
-        121,
-        130,
-        211
-    ],
-    "objects": []
+	"_id": "group_ID",
+	"color": [
+		121,
+		130,
+		211
+	],
+	"objects": []
 }
  */
 
@@ -172,12 +172,12 @@ router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findG
  * @apiErrorExample {json} Error-Response
  *
  * HTTP/1.1 404 Not Found
- *  {
- *    "message": "Group not found",
- *    "status": 404,
- *    "code": "GROUP_NOT_FOUND",
- *    "value": 53,
- *    "place": "PUT /groups/revision"
+ *	{
+ *	  "message": "Group not found",
+ *	  "status": 404,
+ *	  "code": "GROUP_NOT_FOUND",
+ *	  "value": 53,
+ *	  "place": "PUT /groups/revision"
  *	}
  */
 router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
@@ -194,7 +194,7 @@ router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
- *   "_id":"c5f0fd00-0fab-11e9-bf22-eb8649763304"
+ *	 "_id":"c5f0fd00-0fab-11e9-bf22-eb8649763304"
  * }
  *
  * @apiParam {String} teamspace Name of teamspace
@@ -205,12 +205,12 @@ router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
  * @apiErrorExample {json} Error-Response
  *
  * HTTP/1.1 404 Not Found
- *  {
- *    "message": "Group not found",
- *    "status": 404,
- *    "code": "GROUP_NOT_FOUND",
- *    "value": 53,
- *    "place": "PUT /groups/"
+ *	{
+ *	  "message": "Group not found",
+ *	  "status": 404,
+ *	  "code": "GROUP_NOT_FOUND",
+ *	  "value": 53,
+ *	  "place": "PUT /groups/"
  *	}
  */
 router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
@@ -228,15 +228,15 @@ router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
- * 		"__v":0,
- * 		"_id":"efa67a80-0fab-11e9-a0ed-edada3f501fd",
- * 		"name":"Group 1","description":"",
- * 		"author":"username",
- * 		"updatedBy":"username",
- * 		"updatedAt":"2019-01-03T23:03:37.411Z",
- * 		"createdAt":"2019-01-03T23:03:37.411Z",
- * 		"color":[44,50,125],
- * 		"objects":[]
+ *		"__v":0,
+ *		"_id":"efa67a80-0fab-11e9-a0ed-edada3f501fd",
+ *		"name":"Group 1","description":"",
+ *		"author":"username",
+ *		"updatedBy":"username",
+ *		"updatedAt":"2019-01-03T23:03:37.411Z",
+ *		"createdAt":"2019-01-03T23:03:37.411Z",
+ *		"color":[44,50,125],
+ *		"objects":[]
  * }
  */
 
@@ -261,7 +261,7 @@ router.delete("/groups/:id", middlewares.issue.canCreate, deleteGroup);
  *
  * HTTP/1.1 200 OK
  * {
- * 	"status":"success"
+ *	"status":"success"
  * }
  *
  */
