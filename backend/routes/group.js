@@ -265,7 +265,7 @@ function listGroups(req, res, next) {
 	if (req.params.rid) {
 		groupList = Group.listGroups(dbCol, req.query, null, req.params.rid, ids);
 	} else {
-		groupList = Group.listGroups(dbCol, req.query, "master", ids);
+		groupList = Group.listGroups(dbCol, req.query, "master", null, ids);
 	}
 
 	groupList.then(groups => {
