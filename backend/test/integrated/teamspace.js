@@ -19,9 +19,7 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp(
-	{ session: require("express-session")({ secret: "testing"}) }
-);
+const app = require("../../services/api.js").createApp();
 const logger = require("../../logger.js");
 const systemLogger = logger.systemLogger;
 
