@@ -109,14 +109,14 @@ router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
  *
  * HTTP/1.1 200 OK
  * {
-	"_id": "group_ID",
-	"color": [
-		121,
-		130,
-		211
-	],
-	"objects": []
-}
+ * 	"_id": "group_ID",
+ *	"color": [
+ *		121,
+ *		130,
+ *		211
+ *	],
+ *	"objects": []
+ * }
  */
 
 router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findGroup);
