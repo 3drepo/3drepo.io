@@ -341,7 +341,7 @@ router.get("/:model/revision/:rev/searchtree.json", middlewares.hasReadAccessToM
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 
 /**
- * @api {post} /:teamspace/:model/revision/master/head/searchtree.json Upload Model.
+ * @api {post} /:teamspace/upload Upload Model.
  * @apiName uploadModel
  * @apiGroup Model
  *
