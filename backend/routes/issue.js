@@ -15,23 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 "use strict";
-const _ = require("lodash");
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 const middlewares = require("../middlewares/middlewares");
 
 const C = require("../constants");
 const responseCodes = require("../response_codes.js");
+const BCF = require("../models/bcf");
 const Issue = require("../models/issue");
 const utils = require("../utils");
 const multer = require("multer");
 const config = require("../config.js");
-//const User = require("../models/user");
-const Job = require("../models/job");
-const ModelHelper = require("../models/helper/model");
 const ModelSetting = require("../models/modelSetting");
-
-const stringToUUID = utils.stringToUUID;
 
 /**
  * @api {get} /:teamspace/:model/issues/:uid.json Find Issue by ID
@@ -455,10 +450,10 @@ function getIssuesBCF(req, res, next) {
 
 	if (req.params.rid) {
 		// FIXME
-		getBCFZipRS = Issue.getBCFZipReadStream(account, model, req.session.user.username, null, req.params.rid, ids);
+		getBCFZipRS = BCF.getBCFZipReadStream(account, model, req.session.user.username, null, req.params.rid, ids);
 	} else {
 		// FIXME
-		getBCFZipRS = Issue.getBCFZipReadStream(account, model, req.session.user.username, "master", null, ids);
+		getBCFZipRS = BCF.getBCFZipReadStream(account, model, req.session.user.username, "master", null, ids);
 	}
 
 	getBCFZipRS.then(zipRS => {
@@ -549,7 +544,7 @@ function importBCF(req, res, next) {
 			return responseCodes.respond(place, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 		} else {
 			// FIXME
-			Issue.importBCF({ socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username }, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
+			BCF.importBCF({ socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username }, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "ok" });
 			}).catch(error => {
 				responseCodes.respond(place, req, res, next, error, error);

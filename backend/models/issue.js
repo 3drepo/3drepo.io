@@ -75,12 +75,13 @@ const statusEnum = {
 	"CLOSED": C.ISSUE_STATUS_CLOSED
 };
 
-const priorityEnum = {
+// FIXME
+/*const priorityEnum = {
 	"NONE": "none",
 	"LOW": "low",
 	"MEDIUM": "medium",
 	"HIGH": "high"
-};
+};*/
 
 function clean(dbCol, issueToClean) {
 	const idKeys = ["_id", "rev_id", "parent"];
@@ -143,7 +144,7 @@ function clean(dbCol, issueToClean) {
 			}
 
 			if (issueToClean.comments[i].viewpoint) {
-				const commentViewpoint = issueToClean.viewpoints.find((vp) => 
+				const commentViewpoint = issueToClean.viewpoints.find((vp) =>
 					vp.guid === issueToClean.comments[i].viewpoint
 				);
 
@@ -270,11 +271,12 @@ issue.createIssue = function(dbCol, newIssue) {
 	}
 
 	if (newIssue.object_id) {
-		issueAttrPromises.push(
+		// FIXME
+		/*issueAttrPromises.push(
 			GenericObject.getSharedId(dbCol, data.object_id).then((sid) => {
 				newIssue.parent = utils.stringToUUID(sid);
 			})
-		);
+		);*/
 		newIssue.object_id = utils.stringToUUID(newIssue.object_id);
 	}
 
@@ -473,7 +475,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 					fieldsCanBeUpdated.forEach((key) => {
 						if (data[key] !== undefined &&
 							((("[object Object]" === fieldTypes[key] || "[object Array]" === fieldTypes[key]) && data[key] !== oldIssue[key])
-							 || !_.isEqual(oldIssue[key], data[key]))) {
+							|| !_.isEqual(oldIssue[key], data[key]))) {
 							if (null === data[key] || Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 								if ("comment" === key) {
 									if (!oldIssue.comments) {
@@ -803,20 +805,20 @@ issue.getSmallScreenshot = function(dbCol, uid, vid) {
 	}
 
 	return this.findByUID(dbCol, uid, { viewpoints: { $elemMatch: { guid: vid } } }, true)
-		.then((issue) => {
-			if (_.get(issue, "viewpoints[0].screenshot.resizedContent.buffer")) {
-				return issue.viewpoints[0].screenshot.resizedContent.buffer;
-			} else if (!_.get(issue, "viewpoints[0].screenshot.content.buffer")) {
+		.then((foundIssue) => {
+			if (_.get(foundIssue, "viewpoints[0].screenshot.resizedContent.buffer")) {
+				return foundIssue.viewpoints[0].screenshot.resizedContent.buffer;
+			} else if (!_.get(foundIssue, "viewpoints[0].screenshot.content.buffer")) {
 				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 			} else {
-				return utils.resizeAndCropScreenshot(issue.viewpoints[0].screenshot.content.buffer, 365)
+				return utils.resizeAndCropScreenshot(foundIssue.viewpoints[0].screenshot.content.buffer, 365)
 					.then((resized) => {
 						db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
 							_dbCol.update({
 								_id: uid,
 								"viewpoints.guid": vid},
-								{$set: {"viewpoints.$.screenshot.resizedContent": resized}}
-								).catch((err) => {
+								{$set: {"viewpoints.$.screenshot.resizedContent": resized}
+							}).catch((err) => {
 								systemLogger.logError("Error while saving resized screenshot",
 									{
 										issueId: utils.uuidToString(uid),

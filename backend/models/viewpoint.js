@@ -20,6 +20,7 @@
 const utils = require("../utils");
 const uuid = require("node-uuid");
 const responseCodes = require("../response_codes.js");
+const systemLogger = require("../logger.js").systemLogger;
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 
@@ -27,7 +28,6 @@ const view = {};
 
 view.clean = function (dbCol, viewToClean, targetType = "[object String]") {
 	const keys = ["_id", "guid", "highlighted_group_id", "hidden_group_id", "shown_group_id"];
-	const promises = [];
 	let thumbnailPromise;
 
 	viewToClean.account = dbCol.account;
@@ -54,15 +54,13 @@ view.clean = function (dbCol, viewToClean, targetType = "[object String]") {
 			flag: 1
 		};
 
-		//promises.push(
 		thumbnailPromise = utils.resizeAndCropScreenshot(viewToClean.screenshot.content, 120, 120, true).catch((err) => {
-				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-					account: dbCol.account,
-					model: dbCol.model,
-					err
-				});
+			systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+				account: dbCol.account,
+				model: dbCol.model,
+				err
 			});
-		//);
+		});
 	}
 
 	if (viewToClean.screenshot && viewToClean.screenshot.buffer) {
@@ -71,11 +69,8 @@ view.clean = function (dbCol, viewToClean, targetType = "[object String]") {
 			viewToClean.account + "/" + viewToClean.model + "/viewpoints/" + viewToClean._id + "/thumbnail.png";
 	}
 
-	//return Promise.all(promises).then(() => {
 	if (thumbnailPromise) {
 		return thumbnailPromise.then((thumbnail) => {
-			console.log("I'm inside the thumbnail");
-			console.log(thumbnail);
 			return viewToClean;
 		});
 	} else {
