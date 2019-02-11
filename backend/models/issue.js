@@ -479,6 +479,8 @@ issue.updateAttrs = function(dbCol, uid, data) {
 									const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGUID);
 									toUpdate.comments.push(textComment);
 									oldIssue.comments.push(textComment);
+
+									ChatEvent.newComment(data.sessionId, dbCol.account, dbCol.model, oldIssue._id, textComment);
 								} else {
 									if (-1 === ownerPrivilegeAttributes.indexOf(key) || (user.isAdmin || user.hasOwnerJob)) {
 										if ("assigned_roles" === key && oldIssue.status === statusEnum.FOR_APPROVAL) {
@@ -513,6 +515,8 @@ issue.updateAttrs = function(dbCol, uid, data) {
 
 										toUpdate.comments.push(systemComment);
 										oldIssue.comments.push(systemComment);
+
+										ChatEvent.newComment(data.sessionId, dbCol.account, dbCol.model, oldIssue._id, systemComment);
 
 										toUpdate[key] = data[key];
 										oldIssue[key] = data[key];
