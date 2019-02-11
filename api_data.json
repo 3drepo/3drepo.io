@@ -1281,6 +1281,42 @@
   {
     "type": "get",
     "url": "/issues/:uid.json",
+    "title": "Get Issue Thumbnail",
+    "name": "findIssueById",
+    "group": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Issue unique ID.</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Retrieve thumbnail screenshot image for requested issue.</p>",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "optional": false,
+            "field": "200",
+            "description": "<p>{Object} thumbnail Thumbnail Image</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "get",
+    "url": "/issues/:uid.json",
     "title": "Find Issue by ID",
     "name": "findIssueById",
     "group": "Issues",
@@ -1336,42 +1372,6 @@
           "type": "json"
         }
       ]
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "get",
-    "url": "/issues/:uid.json",
-    "title": "Get Issue Thumbnail",
-    "name": "findIssueById",
-    "group": "Issues",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "id",
-            "description": "<p>Issue unique ID.</p>"
-          }
-        ]
-      }
-    },
-    "description": "<p>Retrieve thumbnail screenshot image for requested issue.</p>",
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "optional": false,
-            "field": "200",
-            "description": "<p>{Object} thumbnail Thumbnail Image</p>"
-          }
-        ]
-      }
     },
     "version": "0.0.0",
     "filename": "routes/issue.js",
@@ -1505,37 +1505,6 @@
   },
   {
     "type": "get",
-    "url": "/issues.json",
-    "title": "Get all Issues",
-    "name": "listIssues",
-    "group": "Issues",
-    "description": "<p>List all available issue for current model.</p>",
-    "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "type": "Object",
-            "optional": false,
-            "field": "Issue",
-            "description": "<p>Object.</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response.",
-          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"_id\":\"ISSUE_ID\",\n\t\t\"creator_role\":\"Client\",\"scale\":1,\n\t\t\"due_date\":1543881600000,\n\t\t\"priority\":\"low\",\n\t\t\"desc\":\"reverse\",\n\t\t\"topic_type\":\"for_information\",\n\t\t\"status\":\"for approval\",\n\t\t\"owner\":\"username\",\n\t\t\"created\":1546217360002,\n\t\t\"name\":\"Without reverse\",\n\t\t\"number\":2,\n\t\t\"rev_id\":\"REVISION_ID\",\n\t\t\"__v\":0,\n\t\t\"assigned_roles\":[\"Architect\"],\n\t\t\"viewCount\":1,\n\t\t\"commentCount\":0,\n\t\t\"thumbnail\":\"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png\",\n\t\t\"norm\":[0,0,0],\n\t\t\"position\":[8341.8056640625,1279.962158203125,-3050.34521484375],\n\t\t\"typePrefix\":\"sample\",\n\t\t\"modelCode\":\"\",\n\t\t\"account\":\"username\",\n\t\t\"model\":\"MODEL_ID\",\n\t\t\"viewpoint\":\n\t\t\t{\n\t\t\t\t\"near\":54.739341735839844,\n\t\t\t\t\"far\":27369.669921875,\n\t\t\t\t\"fov\":1.0471975803375244,\n\t\t\t\t\"aspect_ratio\":1.451704502105713,\n\t\t\t\t\"hideIfc\":true,\n\t\t\t\t\"guid\":\"9279d95e-3aee-49c2-ba45-9d2302044597\",\n\t\t\t\t\"_id\":\"5c296790e5f57704580ca00a\",\n\t\t\t\t\"type\":\"perspective\",\n\t\t\t\t\"screenshot\":\"ACCOUNT/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshot.png\",\n\t\t\t\t\"clippingPlanes\":[],\"right\":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],\n\t\t\t\t\"view_dir\":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],\n\t\t\t\t\"look_at\":[8400.001953125,2339.99951171875,-9599.9990234375],\n\t\t\t\t\"position\":[-3360.6259765625,5111.28125,2853.4453125],\n\t\t\t\t\"up\":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],\n\t\t\t\t\"screenshotSmall\":\"nabile/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshotSmall.png\"\n\t\t\t}\n\t}\n]",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "get",
     "url": "/revision/:rid/issues.json",
     "title": "Get all Issues by revision ID",
     "name": "listIssues",
@@ -1570,6 +1539,37 @@
         {
           "title": "Success-Response",
           "content": "\n[\n\t{\n\t\t\"_id\":\"issue_ID\",\n\t\t\"creator_role\":\"Client\",\n\t\t\"scale\":1,\n\t\t\"due_date\":1547424000000,\n\t\t\"priority\":\"low\",\n\t\t\"desc\":\"This is a description\",\n\t\t\"topic_type\":\"for_information\",\n\t\t\"status\":\"open\",\"owner\":\"username\",\n\t\t\"created\":1546626949432,\n\t\t\"name\":\"An Issue for API\",\n\t\t\"number\":3,\n\t\t\"rev_id\":\"9cf31c6e-37cc-4625-8cee-270cf731059e\",\n\t\t\"__v\":0,\n\t\t\"assigned_roles\":[\"Architect\"],\n\t\t\"viewCount\":1,\"commentCount\":0,\n\t\t\"thumbnail\":\"ACCOUNT/MODEL_ID/issues/ISSUE_ID/thumbnail.png\",\n\t\t\"norm\":[],\"position\":[],\n\t\t\"typePrefix\":\"sample\",\n\t\t\"modelCode\":\"\",\n\t\t\"account\":\"username\",\n\t\t\"model\":\"MODEL_ID\",\n\t\t\"viewpoint\":\n\t\t\t{\n\t\t\t\t\"near\":54.739341735839844,\n\t\t\t\t\"far\":27369.669921875,\n\t\t\t\t\"fov\":1.0471975803375244,\n\t\t\t\t\"aspect_ratio\":2.522167444229126,\n\t\t\t\t\"hideIfc\":true,\n\t\t\t\t\"guid\":\"5afbe23f-8307-42d0-ba77-f031922281ce\",\n\t\t\t\t\"_id\":\"5c2fa785b4af3c45f8f83c60\",\n\t\t\t\t\"type\":\"perspective\",\n\t\t\t\t\"screenshot\":\"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png\",\n\t\t\t\t\"clippingPlanes\":[],\"right\":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],\n\t\t\t\t\t\"view_dir\":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],\n\t\t\t\t\t\"look_at\":[8400.001953125,2339.99951171875,-9599.9990234375],\n\t\t\t\t\t\"position\":[-3360.6259765625,5111.28125,2853.4453125],\n\t\t\t\t\t\"up\":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],\n\t\t\t\t\t\"screenshotSmall\"username/MODEL_ID/issues/ISSUE_ID/viewpoints/5afbe23f-8307-42d0-ba77-f031922281ce/screenshot.png\"}\n\t}\n]",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "get",
+    "url": "/issues.json",
+    "title": "Get all Issues",
+    "name": "listIssues",
+    "group": "Issues",
+    "description": "<p>List all available issue for current model.</p>",
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "Issue",
+            "description": "<p>Object.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response.",
+          "content": "HTTP/1.1 200 OK\n[\n\t{\n\t\t\"_id\":\"ISSUE_ID\",\n\t\t\"creator_role\":\"Client\",\"scale\":1,\n\t\t\"due_date\":1543881600000,\n\t\t\"priority\":\"low\",\n\t\t\"desc\":\"reverse\",\n\t\t\"topic_type\":\"for_information\",\n\t\t\"status\":\"for approval\",\n\t\t\"owner\":\"username\",\n\t\t\"created\":1546217360002,\n\t\t\"name\":\"Without reverse\",\n\t\t\"number\":2,\n\t\t\"rev_id\":\"REVISION_ID\",\n\t\t\"__v\":0,\n\t\t\"assigned_roles\":[\"Architect\"],\n\t\t\"viewCount\":1,\n\t\t\"commentCount\":0,\n\t\t\"thumbnail\":\"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png\",\n\t\t\"norm\":[0,0,0],\n\t\t\"position\":[8341.8056640625,1279.962158203125,-3050.34521484375],\n\t\t\"typePrefix\":\"sample\",\n\t\t\"modelCode\":\"\",\n\t\t\"account\":\"username\",\n\t\t\"model\":\"MODEL_ID\",\n\t\t\"viewpoint\":\n\t\t\t{\n\t\t\t\t\"near\":54.739341735839844,\n\t\t\t\t\"far\":27369.669921875,\n\t\t\t\t\"fov\":1.0471975803375244,\n\t\t\t\t\"aspect_ratio\":1.451704502105713,\n\t\t\t\t\"hideIfc\":true,\n\t\t\t\t\"guid\":\"9279d95e-3aee-49c2-ba45-9d2302044597\",\n\t\t\t\t\"_id\":\"5c296790e5f57704580ca00a\",\n\t\t\t\t\"type\":\"perspective\",\n\t\t\t\t\"screenshot\":\"ACCOUNT/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshot.png\",\n\t\t\t\t\"clippingPlanes\":[],\"right\":[0.7270411252975464,1.862645149230957e-8,0.6865938901901245],\n\t\t\t\t\"view_dir\":[0.6777805089950562,-0.15971262753009796,-0.7177084684371948],\n\t\t\t\t\"look_at\":[8400.001953125,2339.99951171875,-9599.9990234375],\n\t\t\t\t\"position\":[-3360.6259765625,5111.28125,2853.4453125],\n\t\t\t\t\"up\":[0.10965770483016968,0.9871635437011719,-0.11611767113208771],\n\t\t\t\t\"screenshotSmall\":\"nabile/MODEL_ID/issues/ISSUE_ID/viewpoints/MODEL_ID/screenshotSmall.png\"\n\t\t\t}\n\t}\n]",
           "type": "json"
         }
       ]
@@ -1843,8 +1843,8 @@
   },
   {
     "type": "get",
-    "url": "/:model/maps/hereadminlabeloverlay/:zoomLevel/:gridx/:gridy.png",
-    "title": "Get Here Admin Label Tile",
+    "url": "/:model/maps/herelabeloverlay/:zoomLevel/:gridx/:gridy.png",
+    "title": "Get Here Label Overlay Tile",
     "name": "getHereAdminLabelOverlayTile",
     "group": "Maps",
     "parameter": {
@@ -1887,8 +1887,8 @@
   },
   {
     "type": "get",
-    "url": "/:model/maps/herelabeloverlay/:zoomLevel/:gridx/:gridy.png",
-    "title": "Get Here Label Overlay Tile",
+    "url": "/:model/maps/hereadminlabeloverlay/:zoomLevel/:gridx/:gridy.png",
+    "title": "Get Here Admin Label Tile",
     "name": "getHereAdminLabelOverlayTile",
     "group": "Maps",
     "parameter": {
@@ -2394,50 +2394,6 @@
   },
   {
     "type": "get",
-    "url": "/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png",
-    "title": "Get Here Traffic Flow",
-    "name": "getHereTrafficTile",
-    "group": "Maps",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model to list maps for</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "zoomLevel",
-            "description": "<p>Map Zoom level</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "of",
-            "description": "<p>tiles along row (x-cordinate)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "Map",
-            "description": "<p>image type (format) to return</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/maps.js",
-    "groupTitle": "Maps"
-  },
-  {
-    "type": "get",
     "url": "/:model/maps/heretraffic/:zoomLevel/:gridx/:gridy.png",
     "title": "Get Here Traffic Tile",
     "name": "getHereTrafficTile",
@@ -2465,6 +2421,50 @@
             "optional": false,
             "field": "number",
             "description": "<p>of tiles along row (x-cordinate)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "Map",
+            "description": "<p>image type (format) to return</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/maps.js",
+    "groupTitle": "Maps"
+  },
+  {
+    "type": "get",
+    "url": "/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png",
+    "title": "Get Here Traffic Flow",
+    "name": "getHereTrafficTile",
+    "group": "Maps",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model to list maps for</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "zoomLevel",
+            "description": "<p>Map Zoom level</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "of",
+            "description": "<p>tiles along row (x-cordinate)</p>"
           },
           {
             "group": "Parameter",
@@ -2656,31 +2656,8 @@
   },
   {
     "type": "get",
-    "url": "/revision/master/head/meta/findObjsWith/:metaKey.json",
-    "title": "Get All ids with the meta data field",
-    "name": "getAllIdsWithMetadataField",
-    "group": "Meta",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "metaKey",
-            "description": "<p>Unique meta key</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/meta.js",
-    "groupTitle": "Meta"
-  },
-  {
-    "type": "get",
     "url": "/revision/:rev/meta/findObjsWith/:metaKey.json",
-    "title": "Get all meta data with field based on master branch",
+    "title": "Get all meta data with field based on revision",
     "name": "getAllIdsWithMetadataField",
     "group": "Meta",
     "parameter": {
@@ -2709,8 +2686,31 @@
   },
   {
     "type": "get",
+    "url": "/revision/master/head/meta/findObjsWith/:metaKey.json",
+    "title": "Get All ids with the meta data field",
+    "name": "getAllIdsWithMetadataField",
+    "group": "Meta",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "metaKey",
+            "description": "<p>Unique meta key</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/meta.js",
+    "groupTitle": "Meta"
+  },
+  {
+    "type": "get",
     "url": "/revision/:rev/meta/findObjsWith/:metaKey.json",
-    "title": "Get all meta data with field based on revision",
+    "title": "Get all meta data with field based on master branch",
     "name": "getAllIdsWithMetadataField",
     "group": "Meta",
     "parameter": {
@@ -2850,29 +2850,6 @@
   },
   {
     "type": "get",
-    "url": "/:model/revision/master/head/idMap.json",
-    "title": "Get ID Map",
-    "name": "getIdMap",
-    "group": "Model",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model to Get ID Map for.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/model.js",
-    "groupTitle": "Model"
-  },
-  {
-    "type": "get",
     "url": "/:model/revision/:rev/idMap.json",
     "title": "Get Tree Path",
     "name": "getIdMap",
@@ -2903,9 +2880,9 @@
   },
   {
     "type": "get",
-    "url": "/:model/revision/master/head/idToMeshes.json",
+    "url": "/:model/revision/master/head/idMap.json",
     "title": "Get ID Map",
-    "name": "getIdToMeshes",
+    "name": "getIdMap",
     "group": "Model",
     "parameter": {
       "fields": {
@@ -2915,7 +2892,7 @@
             "type": "String",
             "optional": false,
             "field": "model",
-            "description": "<p>Model to get ID Meshes for.</p>"
+            "description": "<p>Model to Get ID Map for.</p>"
           }
         ]
       }
@@ -2946,6 +2923,29 @@
             "optional": false,
             "field": "rev",
             "description": "<p>Revision to use.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
+    "url": "/:model/revision/master/head/idToMeshes.json",
+    "title": "Get ID Map",
+    "name": "getIdToMeshes",
+    "group": "Model",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model to get ID Meshes for.</p>"
           }
         ]
       }
@@ -3062,6 +3062,29 @@
   },
   {
     "type": "get",
+    "url": "/:model/revision/master/head/fulltree.json",
+    "title": "Get Model Tree",
+    "name": "getModelTree",
+    "group": "Model",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model to use.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
     "url": "/:model/revision/:rev/fulltree.json",
     "title": "Get ID Map",
     "name": "getModelTree",
@@ -3082,29 +3105,6 @@
             "optional": false,
             "field": "rev",
             "description": "<p>Revision to use.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/model.js",
-    "groupTitle": "Model"
-  },
-  {
-    "type": "get",
-    "url": "/:model/revision/master/head/fulltree.json",
-    "title": "Get Model Tree",
-    "name": "getModelTree",
-    "group": "Model",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model to use.</p>"
           }
         ]
       }
@@ -3284,29 +3284,6 @@
   },
   {
     "type": "get",
-    "url": "/:model/revision/master/head/searchtree.json",
-    "title": "Search model tree using model as reference.",
-    "name": "searchModelTree",
-    "group": "Model",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model to use.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/model.js",
-    "groupTitle": "Model"
-  },
-  {
-    "type": "get",
     "url": "/:model/revision/:rev/searchtree.json",
     "title": "Search model tree using revision and model to reference.",
     "name": "searchModelTree",
@@ -3327,6 +3304,29 @@
             "optional": false,
             "field": "rev",
             "description": "<p>Revision to use.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
+    "url": "/:model/revision/master/head/searchtree.json",
+    "title": "Search model tree using model as reference.",
+    "name": "searchModelTree",
+    "group": "Model",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model to use.</p>"
           }
         ]
       }
@@ -3438,29 +3438,6 @@
     "groupTitle": "Model"
   },
   {
-    "type": "get",
-    "url": "/:model/download/latest",
-    "title": "Upload Model.",
-    "name": "uploadModel",
-    "group": "Model",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model to download.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/model.js",
-    "groupTitle": "Model"
-  },
-  {
     "type": "post",
     "url": "/:model/revision/master/head/searchtree.json",
     "title": "Upload Model.",
@@ -3475,6 +3452,29 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model to upload.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
+    "url": "/:model/download/latest",
+    "title": "Upload Model.",
+    "name": "uploadModel",
+    "group": "Model",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model to download.</p>"
           }
         ]
       }
@@ -3998,6 +3998,16 @@
   {
     "type": "get",
     "url": "/risks.html",
+    "title": "Render all Risks as HTML",
+    "name": "renderRisksHTML",
+    "group": "Risks",
+    "version": "0.0.0",
+    "filename": "routes/risk.js",
+    "groupTitle": "Risks"
+  },
+  {
+    "type": "get",
+    "url": "/risks.html",
     "title": "Render all Risks as HTML by revision ID",
     "name": "renderRisksHTML",
     "group": "Risks",
@@ -4014,16 +4024,6 @@
         ]
       }
     },
-    "version": "0.0.0",
-    "filename": "routes/risk.js",
-    "groupTitle": "Risks"
-  },
-  {
-    "type": "get",
-    "url": "/risks.html",
-    "title": "Render all Risks as HTML",
-    "name": "renderRisksHTML",
-    "group": "Risks",
     "version": "0.0.0",
     "filename": "routes/risk.js",
     "groupTitle": "Risks"
@@ -4076,29 +4076,6 @@
   },
   {
     "type": "put",
-    "url": "/risks/riskId.json",
-    "title": "Update risks based on revision",
-    "name": "updateRisk",
-    "group": "Risks",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "riskId.json",
-            "description": "<p>Risk unique ID.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/risk.js",
-    "groupTitle": "Risks"
-  },
-  {
-    "type": "put",
     "url": "/revision/:rid/risks/:riskId.json",
     "title": "Update Risk based on revision ID",
     "name": "updateRisk",
@@ -4112,6 +4089,29 @@
             "optional": false,
             "field": "rid",
             "description": "<p>Revision unique ID.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/risk.js",
+    "groupTitle": "Risks"
+  },
+  {
+    "type": "put",
+    "url": "/risks/riskId.json",
+    "title": "Update risks based on revision",
+    "name": "updateRisk",
+    "group": "Risks",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "riskId.json",
+            "description": "<p>Risk unique ID.</p>"
           }
         ]
       }
@@ -4250,6 +4250,16 @@
   },
   {
     "type": "get",
+    "url": "/members",
+    "title": "Get Member List",
+    "name": "getMemberList",
+    "group": "Teamspace",
+    "version": "0.0.0",
+    "filename": "routes/teamspace.js",
+    "groupTitle": "Teamspace"
+  },
+  {
+    "type": "get",
     "url": "/quota",
     "title": "Get Quota Information",
     "name": "getQuotaInfo",
@@ -4280,6 +4290,36 @@
     "version": "0.0.0",
     "filename": "routes/teamspace.js",
     "groupTitle": "Teamspace"
+  },
+  {
+    "type": "delete",
+    "url": "/apikey",
+    "title": "Deletes the current apikey for the logged user",
+    "name": "deleteApiKey",
+    "group": "User",
+    "version": "0.0.0",
+    "filename": "routes/user.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "post",
+    "url": "/apikey",
+    "title": "Generates an apikey for the logged user",
+    "name": "generateApiKey",
+    "group": "User",
+    "version": "0.0.0",
+    "filename": "routes/user.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "get",
+    "url": "/me",
+    "title": "Gets the profile for the logged user",
+    "name": "getProfile",
+    "group": "User",
+    "version": "0.0.0",
+    "filename": "routes/user.js",
+    "groupTitle": "User"
   },
   {
     "type": "post",
