@@ -555,6 +555,8 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							toUpdate.comments.push(systemComment);
 							oldIssue.comments.push(systemComment);
 
+							ChatEvent.newComment(data.sessionId, dbCol.account, dbCol.model, oldIssue._id, systemComment);
+
 							toUpdate.status_last_changed = (new Date()).getTime();
 							oldIssue.status_last_changed = toUpdate.status_last_changed;
 
