@@ -54,8 +54,6 @@ services:
   - mongodb
 
 script:
-    - yarn wdm:update
-    - yarn wdm:start > /dev/null 2>&1 &
     - cd ./../backend
     - unbuffer yarn test
 
