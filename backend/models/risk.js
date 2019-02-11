@@ -44,6 +44,7 @@ const fieldTypes = {
 	"desc": "[object String]",
 	"assigned_roles": "[object Array]",
 	"category": "[object String]",
+	"comments": "[object Array]",
 	"likelihood": "[object Number]",
 	"consequence": "[object Number]",
 	"level_of_risk": "[object Number]",
@@ -55,12 +56,14 @@ const fieldTypes = {
 	"name": "[object String]",
 	"createdAt": "[object Number]",
 	"viewpoint": "[object Object]",
+	"viewpoints": "[object Array]",
 	"position": "[object Array]",
 	"norm": "[object Array]"
 };
 
 function clean(dbCol, riskToClean) {
 	const keys = ["_id", "rev_id", "parent"];
+	const commentKeys = ["rev_id", "guid"];
 	const vpKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid"];
 
 	riskToClean.account = dbCol.account;
@@ -83,6 +86,16 @@ function clean(dbCol, riskToClean) {
 			riskToClean.viewpoint.screenshot = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/screenshot.png";
 			riskToClean.viewpoint.screenshotSmall = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/screenshotSmall.png";
 		}
+	}
+
+	if (riskToClean.comments) {
+		riskToClean.comments.forEach((comment, i) => {
+			commentKeys.forEach((key) => {
+				if (riskToClean.comments[i] && riskToClean.comments[i][key]) {
+					riskToClean.comments[i][key] = utils.uuidToString(riskToClean.comments[i][key]);
+				}
+			});
+		});
 	}
 
 	if (riskToClean.thumbnail && riskToClean.thumbnail.flag) {
