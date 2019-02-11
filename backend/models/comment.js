@@ -19,7 +19,7 @@
 const utils = require("../utils");
 
 // TODO Utilise types for type checking
-/*const fieldTypes = {
+/* const fieldTypes = {
 	"action": "[object Object]",
 	"comment": "[object String]",
 	"created": "[object Number]",

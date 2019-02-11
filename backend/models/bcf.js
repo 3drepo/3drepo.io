@@ -20,14 +20,32 @@
 const _ = require("lodash");
 const archiver = require("archiver");
 const moment = require("moment");
+const responseCodes = require("../response_codes.js");
 const systemLogger = require("../logger.js").systemLogger;
 const utils = require("../utils");
 const xml2js = require("xml2js");
 const yauzl = require("yauzl");
 
+const ChatEvent = require("./chatEvent");
 const Group = require("./group");
+const History = require("./history");
 const Issue = require("./issue");
 const ModelSetting = require("./modelSetting");
+
+// TODO duplicated from issue
+const statusEnum = {
+	"OPEN": C.ISSUE_STATUS_OPEN,
+	"IN_PROGRESS": C.ISSUE_STATUS_IN_PROGRESS,
+	"FOR_APPROVAL": C.ISSUE_STATUS_FOR_APPROVAL,
+	"CLOSED": C.ISSUE_STATUS_CLOSED
+};
+
+const priorityEnum = {
+	"NONE": "none",
+	"LOW": "low",
+	"MEDIUM": "medium",
+	"HIGH": "high"
+};
 
 const xmlBuilder = new xml2js.Builder({
 	explicitRoot: false,
@@ -400,15 +418,15 @@ bcf.getBCFZipReadStream = function(account, model, username, branch, revId, ids)
 
 			bcfPromises.push(
 				// FIXME
-				getBCFMarkup(issue, issueAccount, issueModel, _.get(settings, "properties.unit")).then(bcf => {
+				getBCFMarkup(issue, issueAccount, issueModel, _.get(settings, "properties.unit")).then(bcfResult => {
 
-					zip.append(new Buffer.from(bcf.markup, "utf8"), {name: `${utils.uuidToString(issue._id)}/markup.bcf`});
+					zip.append(new Buffer.from(bcfResult.markup, "utf8"), {name: `${utils.uuidToString(issue._id)}/markup.bcf`});
 
-					bcf.viewpoints.forEach(vp => {
+					bcfResult.viewpoints.forEach(vp => {
 						zip.append(new Buffer.from(vp.xml, "utf8"), {name: `${utils.uuidToString(issue._id)}/${vp.filename}`});
 					});
 
-					bcf.snapshots.forEach(snapshot => {
+					bcfResult.snapshots.forEach(snapshot => {
 						zip.append(snapshot.snapshot.buffer, {name: `${utils.uuidToString(issue._id)}/${snapshot.filename}`});
 					});
 
@@ -616,7 +634,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 						const notifications = [];
 
 						savedIssues.forEach(issue => {
-							schema.statics.setGroupIssueId({account, model}, issue, issue._id);
+							Issue.setGroupIssueId({account, model}, issue, issue._id);
 
 							if (issue && issue.clean) {
 								notifications.push(issue.clean(settings.type));
@@ -751,7 +769,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 					xml = _xml;
 
 					issue = Issue.createInstance({account, model});
-					issue._id = stringToUUID(guid);
+					issue._id = utils.stringToUUID(guid);
 					issue.extras = {};
 					issue.rev_id = revId;
 

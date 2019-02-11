@@ -71,6 +71,7 @@ view.clean = function (dbCol, viewToClean, targetType = "[object String]") {
 
 	if (thumbnailPromise) {
 		return thumbnailPromise.then((thumbnail) => {
+			viewToClean.screenshot.thumbnail = thumbnail;
 			return viewToClean;
 		});
 	} else {
