@@ -50,7 +50,6 @@ interface IProps {
 	removeComment: (teamspace, modelId, issueData) => void;
 	subscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	unsubscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
-	getMyJob: (teamspace) => void;
 	updateNewIssue: (newIssue) => void;
 }
 
@@ -89,7 +88,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			fetchIssue(teamspace, model, issue._id);
 			subscribeOnIssueCommentsChanges(teamspace, model, issue._id);
 		}
-		getMyJob(teamspace);
 	}
 
 	public componentWillUnmount() {

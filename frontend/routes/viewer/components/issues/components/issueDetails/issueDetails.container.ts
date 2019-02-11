@@ -55,7 +55,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showNewPin: IssuesActions.showNewPin,
 	subscribeOnIssueCommentsChanges: IssuesActions.subscribeOnIssueCommentsChanges,
 	unsubscribeOnIssueCommentsChanges: IssuesActions.unsubscribeOnIssueCommentsChanges,
-	getMyJob: JobsActions.getMyJob,
 	updateNewIssue: IssuesActions.updateNewIssue
 }, dispatch);
 
