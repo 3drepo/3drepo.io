@@ -18,7 +18,8 @@
 
 const utils = require("../utils");
 
-const fieldTypes = {
+// TODO Utilise types for type checking
+/*const fieldTypes = {
 	"action": "[object Object]",
 	"comment": "[object String]",
 	"created": "[object Number]",
@@ -27,7 +28,7 @@ const fieldTypes = {
 	"rev_id": "[object Object]",
 	"sealed": "[object Boolean]",
 	"viewpoint": "[object Object]"
-};
+};*/
 
 class CommentGenerator {
 	constructor(owner, revId = undefined) {
