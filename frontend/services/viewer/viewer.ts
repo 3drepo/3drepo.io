@@ -33,6 +33,10 @@ export class ViewerService {
 		await this.viewerService.initialised.promise;
 	}
 
+	public async hasModelLoadingStarted() {
+		await this.viewerService.modelLoadingStarted.promise;
+	}
+
 	public async updateViewerSettings(settings) {
 		await this.isViewerReady();
 		return this.viewer.updateSettings(settings);
@@ -123,7 +127,7 @@ export class ViewerService {
 	}
 
 	public async addPin(params) {
-		await this.isViewerReady();
+		await this.hasModelLoadingStarted();
 		return this.viewer.addPin(
 			params.account,
 			params.model,

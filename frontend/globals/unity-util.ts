@@ -707,7 +707,7 @@ export class UnityUtil {
 	 *  @param {string=} branch - ID of the branch (optional)
 	 *  @param {string} revision - ID of revision
 	 */
-	public static loadModel(account, model, branch, revision) {
+	public static loadModel({ account, model, branch, revision, onStart }) {
 		UnityUtil.cancelLoadModel();
 		UnityUtil.reset();
 
@@ -729,8 +729,8 @@ export class UnityUtil {
 		UnityUtil.onLoaded();
 		UnityUtil.toUnity('LoadModel', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
+		onStart();
 		return UnityUtil.onLoading();
-
 	}
 
 	/**

@@ -23,6 +23,14 @@ declare const UnityUtil;
 declare const ClientConfig;
 declare const Module;
 
+interface IViewerConstructor {
+	name: string;
+	container: HTMLElement;
+	onStartModelLoading: () => void;
+	onEvent?: any; // deprecated (use .on instead)
+	onError?: any; // deprecated (use .on instead)
+}
+
 export class Viewer {
 
 	public static NAV_MODES = VIEWER_NAV_MODES;
@@ -113,28 +121,25 @@ export class Viewer {
 	public callback: any;
 	public errCallback: any;
 
+	private onStartModelLoading: any;
 	private emitter = new EventEmitter();
 
-	constructor(
-		name: string,
-		element: HTMLElement,
-		callback: any,
-		errCallback: any
-	) {
+	constructor(config: IViewerConstructor) {
 
 		// If not given the tag by the manager create here
-		this.element = element;
+		this.element = config.container;
+		this.onStartModelLoading = config.onStartModelLoading || (() => {});
 
 		if (!name) {
 			this.name = 'viewer';
 		} else {
-			this.name = name;
+			this.name = config.name;
 		}
 
-		this.callback = callback;
-		this.errCallback = errCallback;
+		this.callback = config.onEvent;
+		this.errCallback = config.onError;
 
-		UnityUtil.init(errCallback);
+		UnityUtil.init(config.onError);
 
 		this.unityLoaderReady = false;
 
@@ -508,7 +513,14 @@ export class Viewer {
 
 		this.emit(Viewer.EVENT.START_LOADING);
 
-		UnityUtil.loadModel(this.account, this.model, this.branch, this.revision);
+		UnityUtil.loadModel({
+			account,
+			model,
+			branch,
+			revision,
+			onStart: this.onStartModelLoading
+		});
+
 		return UnityUtil.onLoaded().then((bbox) => {
 			document.body.style.cursor = 'initial';
 

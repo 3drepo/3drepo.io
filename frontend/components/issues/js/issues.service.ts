@@ -21,6 +21,7 @@ import { PanelService } from '../../panel/js/panel.service';
 import { TreeService } from '../../tree/js/tree.service';
 import { ViewerService } from '../../viewer/js/viewer.service';
 import { stringSearch } from '../../../helpers/searching';
+import { Viewer } from '../../../services/viewer/viewer';
 
 declare const Pin;
 
@@ -94,8 +95,8 @@ export class IssuesService {
 				selectedObjectId: event.value.id
 			};
 
-			this.viewerService.addPin(data);
-			this.viewerService.setPin({data});
+			Viewer.addPin(data);
+			Viewer.setPin({data});
 		}
 	}
 
