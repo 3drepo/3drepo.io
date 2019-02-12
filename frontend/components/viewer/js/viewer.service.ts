@@ -33,6 +33,7 @@ export class ViewerService {
 	public newPinId: string;
 	public currentModel: any;
 	public initialised: any;
+	public modelLoadingStarted: any;
 	public currentModelInit: any;
 
 	private pinData: any;
@@ -65,6 +66,7 @@ export class ViewerService {
 		};
 
 		this.initialised = $q.defer();
+		this.modelLoadingStarted = $q.defer();
 	}
 
 	public getPinData(): any {
@@ -285,7 +287,7 @@ export class ViewerService {
 		});
 	}
 
-	public handleUnityError(message: string, reload: boolean, isUnity: boolean)  {
+	public handleUnityError = (message: string, reload: boolean, isUnity: boolean) =>  {
 
 		let errorType = '3D Repo Error';
 
@@ -346,15 +348,15 @@ export class ViewerService {
 
 		if (this.viewer === undefined) {
 
-			this.viewer = new Viewer(
-				'viewer',
-				document.getElementById('viewer'),
-				this.EventService.send,
-				this.handleUnityError.bind(this)
-			);
+			this.viewer = new Viewer({
+				name: 'viewer',
+				container: document.getElementById('viewer'),
+				onEvent: this.EventService.send,
+				onError: this.handleUnityError,
+				onStartModelLoading: this.handleStartModelLoading
+			});
 
 			this.viewer.setUnity();
-
 		}
 
 		return this.viewer;
@@ -400,7 +402,10 @@ export class ViewerService {
 			.catch((error) => {
 				console.error('Error creating Viewer Directive: ', error);
 			});
+	}
 
+	public handleStartModelLoading = () => {
+		this.modelLoadingStarted.resolve();
 	}
 
 	public async loadViewerModel(account, model, branch, revision) {
