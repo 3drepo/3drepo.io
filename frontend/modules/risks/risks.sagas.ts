@@ -123,7 +123,7 @@ export function* saveRisk({ teamspace, model, riskData, revision, filteredRisks 
 			owner: riskData.author,
 			rev_id: revision,
 			objectId: null,
-			creator_role: userJob.data._id,
+			creator_role: userJob._id,
 			viewpoint,
 			pickedPos: null,
 			pickedNorm: null,
@@ -146,6 +146,7 @@ export function* saveRisk({ teamspace, model, riskData, revision, filteredRisks 
 
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(savedRisk, jobs);
+
 		yield put(RisksActions.showDetails(preparedRisk, [...filteredRisks, preparedRisk], revision));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(SnackbarActions.show('Risk created'));
