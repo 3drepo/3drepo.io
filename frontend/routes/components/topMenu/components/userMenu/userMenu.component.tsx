@@ -21,6 +21,7 @@ import IconButton from '@material-ui/core/IconButton';
 import ViewList from '@material-ui/icons/ViewList';
 import ExitToApp from '@material-ui/icons/ExitToApp';
 import Restore from '@material-ui/icons/Restore';
+import Settings from '@material-ui/icons/Settings';
 import ContactSupport from '@material-ui/icons/ContactSupport';
 
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
@@ -87,6 +88,11 @@ const UserMenuContent = (props) => {
 				Icon={ContactSupport}
 				label="Support"
 				onButtonClick={invokeAndClose(props.openUserManual)}
+			/>
+			<UserMenuButton
+				Icon={Settings}
+				label="Visual Settings"
+				onButtonClick={invokeAndClose(props.showSettingsDialog)}
 			/>
 			<MenuItem>
 				<MenuSwitch
