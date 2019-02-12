@@ -18,7 +18,8 @@
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../../../helpers/migration';
-import { selectJobsList, selectMyJob, JobsActions } from '../../../../../../modules/jobs';
+import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
+import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
 import {
 	IssuesActions,
@@ -55,7 +56,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showNewPin: IssuesActions.showNewPin,
 	subscribeOnIssueCommentsChanges: IssuesActions.subscribeOnIssueCommentsChanges,
 	unsubscribeOnIssueCommentsChanges: IssuesActions.unsubscribeOnIssueCommentsChanges,
-	updateNewIssue: IssuesActions.updateNewIssue
+	updateNewIssue: IssuesActions.updateNewIssue,
+	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(IssueDetails);

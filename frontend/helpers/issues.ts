@@ -2,6 +2,7 @@ import { get, omit } from 'lodash';
 import { getAPIUrl } from '../services/api';
 import { STATUSES_COLOURS, STATUSES_ICONS, STATUSES, ISSUE_TOPIC_TYPES } from '../constants/issues';
 import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
+import { sortByDate } from './sorting';
 
 export const prepareIssue = (issue, jobs = []) => {
 	const thumbnail = getAPIUrl(issue.thumbnail);
@@ -31,18 +32,19 @@ export const prepareComments = (comments = []) => {
 		return comments;
 	}
 
-	const preparedComments = comments.map((comment) => {
-		if (comment.action) {
-			comment.comment = convertActionCommentToText(comment, undefined);
-		}
-		if (comment.viewpoint && comment.viewpoint.screenshot) {
-			comment.viewpoint.screenshotPath = getAPIUrl(comment.viewpoint.screenshot);
-		}
+	const preparedComments = comments.map((comment) => this.prepareComment(comment));
+	return sortByDate(preparedComments, {order: 'desc'});
+};
 
-		return comment;
-	});
+export const prepareComment = (comment) => {
+	if (comment.action) {
+		comment.comment = convertActionCommentToText(comment, undefined);
+	}
+	if (comment.viewpoint && comment.viewpoint.screenshot) {
+		comment.viewpoint.screenshotPath = getAPIUrl(comment.viewpoint.screenshot);
+	}
 
-	return preparedComments;
+	return comment;
 };
 
 const convertActionCommentToText = (comment, topicTypes) => {

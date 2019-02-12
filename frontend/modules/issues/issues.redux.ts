@@ -125,7 +125,12 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 };
 
 export const createCommentSuccess = (state = INITIAL_STATE, { comment }) => {
-	const logs = [...state.componentState.logs, comment];
+	const clonedLogs = cloneDeep(state.componentState.logs);
+	const updatedLogs = clonedLogs.map((log) => {
+		log.sealed = true;
+		return log;
+	});
+	const logs = [comment, ...updatedLogs];
 	return {...state, componentState: { ...state.componentState, logs }};
 };
 

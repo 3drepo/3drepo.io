@@ -26,11 +26,21 @@ interface IProps {
 	isPending: boolean;
 	teamspace: string;
 	removeLog: (index, guid) => void;
+	setCameraOnViewpoint: (viewpoint) => void;
 }
 
 export class LogList extends React.PureComponent<IProps, any> {
 	public renderLogItem = (item, index) => {
-		return <Log key={index} {...item} removeLog={this.props.removeLog} index={index} teamspace={this.props.teamspace} />;
+		return (
+			<Log
+				{...item}
+				key={item.created}
+				removeLog={this.props.removeLog}
+				index={index}
+				teamspace={this.props.teamspace}
+				setCameraOnViewpoint={this.props.setCameraOnViewpoint}
+			/>
+		);
 	}
 
 	public renderLoader = () => {

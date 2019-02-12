@@ -51,6 +51,7 @@ interface IProps {
 	subscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	unsubscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	updateNewIssue: (newIssue) => void;
+	setCameraOnViewpoint: (teamspace, modelId, view) => void;
 }
 
 interface IState {
@@ -82,7 +83,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const { teamspace, model, fetchIssue, issue, getMyJob, subscribeOnIssueCommentsChanges } = this.props;
+		const { teamspace, model, fetchIssue, issue, subscribeOnIssueCommentsChanges } = this.props;
 
 		if (issue._id) {
 			fetchIssue(teamspace, model, issue._id);
@@ -96,7 +97,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { teamspace, model, fetchIssue, issue, logs } = this.props;
+		const { teamspace, model, fetchIssue, issue } = this.props;
 
 		if (issue._id !== prevProps.issue._id) {
 			fetchIssue(teamspace, model, issue._id);
@@ -142,10 +143,14 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			_id: this.issueData._id,
 			rev_id: this.issueData.rev_id,
 			issueNumber: this.issueData.number,
-			commentIndex: index,
+			commentIndex: this.props.logs.length - 1 - index,
 			guid
 		};
 		this.props.removeComment(this.props.teamspace, this.props.model, issueData);
+	}
+
+	public setCameraOnViewpoint = (viewpoint) => {
+		this.props.setCameraOnViewpoint(this.props.teamspace, this.props.model, viewpoint);
 	}
 
 	public renderLogList = renderWhenTrue(() => {
@@ -155,6 +160,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				isPending={this.props.fetchingDetailsIsPending}
 				removeLog={this.removeComment}
 				teamspace={this.props.teamspace}
+				setCameraOnViewpoint={this.setCameraOnViewpoint}
 			/>);
 	});
 
@@ -170,7 +176,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onNameChange={this.handleNameChange}
 				onExpandChange={this.handleExpandChange}
 				renderCollapsable={this.renderDetailsForm}
-				renderNotCollapsable={() => this.renderLogList(!!logs.length)}
+				renderNotCollapsable={() => this.renderLogList(!!logs.length && !this.isNewIssue)}
 			/>
 		);
 	});
@@ -197,9 +203,11 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	));
 
 	public setCommentData = (commentData = {}) => {
-		this.props.setState({ newComment: {
+		const newComment = {
 			...this.props.newComment, ...commentData
-		}});
+		};
+
+		this.props.setState({ newComment });
 	}
 
 	public handleNewScreenshot = async (screenshot) => {

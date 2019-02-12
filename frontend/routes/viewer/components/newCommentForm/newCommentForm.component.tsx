@@ -36,6 +36,7 @@ import {
 } from './newCommentForm.styles';
 import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
+import { Image } from '../../../components/image';
 
 interface IProps {
 	innerRef: any;
@@ -46,11 +47,16 @@ interface IProps {
 	hideComment?: boolean;
 	hidePin?: boolean;
 	hideScreenshot?: boolean;
+	canComment: boolean;
 	onSave: (commentData) => void;
 	onTakeScreenshot: (screenshot) => void;
 	onChangePin: (pin) => void;
 	showScreenshotDialog: (options) => void;
-	canComment: boolean;
+}
+
+interface IState {
+	isPinActive: boolean;
+	newScreenshot: string;
 }
 
 const NewCommentSchema = Yup.object().shape({
@@ -59,9 +65,10 @@ const NewCommentSchema = Yup.object().shape({
 
 const NEW_PIN_ID = 'newPinId';
 
-export class NewCommentForm extends React.PureComponent<IProps, any> {
+export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	public state = {
-		isPinActive: false
+		isPinActive: false,
+		newScreenshot: ''
 	};
 
 	get pinColor() {
@@ -79,6 +86,14 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 		return 'You are not able to comment';
 	}
 
+	public componentDidUpdate = (prevProps) => {
+		if (prevProps.screenshot !== this.props.screenshot) {
+			this.setState({
+				newScreenshot: this.props.screenshot
+			});
+		}
+	}
+
 	public componentWillUnmount() {
 		Viewer.setPinDropMode(false);
 		Measure.setDisabled(false);
@@ -86,8 +101,10 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 	}
 
 	public handleSave = (values, form) => {
+		values.screenshot = values.screenshot.substring(values.screenshot.indexOf(',') + 1);
 		this.props.onSave(values);
 		form.resetForm();
+		this.setState({ newScreenshot: ''});
 	}
 
 	public handleNewScreenshot = async () => {
@@ -161,7 +178,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 		/>
 	));
 
-	public renderCommentField = renderWhenTrue((
+	public renderCommentField = renderWhenTrue(() => (
 		<TextFieldWrapper>
 			<Field name="comment" render={({ field }) => (
 				<StyledTextField
@@ -178,13 +195,18 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 		</TextFieldWrapper>
 	));
 
+	public renderCreatedScreenshot = renderWhenTrue(() =>
+		<Image src={this.state.newScreenshot} className="new-comment" />
+	);
+
 	public render() {
 		const { hideComment, hideScreenshot, hidePin, innerRef, canComment, comment, screenshot } = this.props;
 		return (
 			<Container>
+				{this.renderCreatedScreenshot(Boolean(this.state.newScreenshot))}
 				<Formik
 					ref={innerRef}
-					initialValues={{ comment: '', screenshot }}
+					initialValues={{ comment: '', screenshot: this.state.newScreenshot }}
 					validationSchema={NewCommentSchema}
 					onSubmit={this.handleSave}
 					enableReinitialize={true}
@@ -196,17 +218,18 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 								{this.renderScreenshotButton(!hideScreenshot)}
 								{this.renderPinButton(!hidePin)}
 							</ActionsGroup>
-							<Field render={({ form }) =>
+							<Field render={({ form }) => (
 								<ViewerPanelButton
 									variant="fab"
 									color="secondary"
 									type="submit"
 									mini={true}
-									disabled={!hideComment && !canComment && (!form.isValid || form.isValidating)}
+									disabled={(!hideComment && !canComment && (!form.isValid && !this.state.newScreenshot || form.isValidating))}
 									aria-label="Add new comment"
 								>
 									<SaveIcon fontSize="small" />
-								</ViewerPanelButton>} />
+								</ViewerPanelButton>)}
+							/>
 						</Actions>
 					</StyledForm>
 				</Formik>

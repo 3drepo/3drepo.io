@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, takeLatest, takeEvery } from 'redux-saga/effects';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 
 import * as API from '../../services/api';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
-import { prepareIssue, prepareComments } from '../../helpers/issues';
+import { prepareIssue, prepareComments, prepareComment } from '../../helpers/issues';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
@@ -167,6 +167,7 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(savedIssue, jobs);
+
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(IssuesActions.showDetails(savedIssue, [], revision));
 		yield put(SnackbarActions.show('Issue created'));
@@ -187,6 +188,7 @@ export function* updateIssue({ teamspace, modelId, issueData }) {
 		toggleIssuePin(issueData, true);
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(updatedIssue, jobs);
+
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue updated'));
 	} catch (error) {
@@ -212,7 +214,9 @@ export function* updateNewIssue({ newIssue }) {
 export function* postComment({ teamspace, modelId, issueData }) {
 	try {
 		const { data: comment } = yield API.updateIssue(teamspace, modelId, issueData);
-		yield put(IssuesActions.createCommentSuccess(comment));
+		const preparedComment = yield prepareComment(comment);
+
+		yield put(IssuesActions.createCommentSuccess(preparedComment));
 		yield put(SnackbarActions.show('Issue comment added'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('post', 'issue comment', error));
