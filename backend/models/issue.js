@@ -172,18 +172,17 @@ function clean(dbCol, issueToClean) {
 	return issueToClean;
 }
 
-// TODO Move to viewpoint model
-function toDirectXCoords(issue) {
+function toDirectXCoords(issueData) {
 	const fieldsToConvert = ["position", "norm"];
 	const vpFieldsToConvert = ["right", "view_dir", "look_at", "position", "up"];
 
 	fieldsToConvert.forEach((rootKey) => {
-		if (issue[rootKey]) {
-			issue[rootKey] = utils.webGLtoDirectX(issue[rootKey]);
+		if (issueData[rootKey]) {
+			issueData[rootKey] = utils.webGLtoDirectX(issueData[rootKey]);
 		}
 	});
 
-	const viewpoint = issue.viewpoint;
+	const viewpoint = issueData.viewpoint;
 	vpFieldsToConvert.forEach((key) => {
 		if (viewpoint[key]) {
 			viewpoint[key] = utils.webGLtoDirectX(viewpoint[key]);
