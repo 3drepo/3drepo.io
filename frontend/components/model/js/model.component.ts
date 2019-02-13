@@ -17,10 +17,15 @@
 
 import { dispatch, getState, subscribe } from '../../../helpers/migration';
 import { selectCurrentUser, CurrentUserActions } from '../../../modules/currentUser';
+import { selectRisks, selectSelectedFilters, selectRisksMap } from '../../../modules/risks';
 import { ModelActions, selectSettings, selectIsPending } from '../../../modules/model';
 import { ViewpointsActions } from '../../../modules/viewpoints';
-import { JobsActions } from '../../../modules/jobs';
+import { JobsActions, selectJobs } from '../../../modules/jobs';
 import { RisksActions } from '../../../modules/risks';
+import { prepareRisk } from '../../../helpers/risks';
+import { RISK_LEVELS } from '../../../constants/risks';
+import { searchByFilters } from '../../../helpers/searching';
+import { VIEWER_EVENTS } from '../../../constants/viewer';
 
 class ModelController implements ng.IController {
 
@@ -127,6 +132,18 @@ class ModelController implements ng.IController {
 		dispatch(CurrentUserActions.fetchUser(username));
 		dispatch(JobsActions.fetchJobs(this.account));
 		dispatch(JobsActions.getMyJob(this.account));
+
+		this.ViewerService.on(VIEWER_EVENTS.CLICK_PIN, ({id}) => {
+			const risks = selectRisks(getState());
+			const jobs = selectJobs(getState());
+			const selectedFilters = selectSelectedFilters(getState());
+			const risksMap = selectRisksMap(getState());
+			const preparedRisks = risks.map((risk) => prepareRisk(risk, jobs));
+			const returnHiddenRisk = selectedFilters.some(({ value: { value }}) => value === RISK_LEVELS.AGREED_FULLY);
+			const filteredRisks = searchByFilters(preparedRisks, selectedFilters, returnHiddenRisk);
+
+			dispatch(RisksActions.setActiveRisk(risksMap[id], filteredRisks));
+		});
 
 		subscribe(this, this.onModelSettingsChange);
 
