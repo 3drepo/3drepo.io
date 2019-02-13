@@ -177,7 +177,6 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		this.props.subscribeOnRiskChanges(this.props.teamspace, this.props.model);
-		this.toggleRiskPinEvent(true);
 		this.setState({ filteredRisks: this.filteredRisks });
 
 		if (Viewer.viewer.model && !this.state.modelLoaded) {
@@ -218,22 +217,8 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
-		this.toggleRiskPinEvent(false);
 		this.props.unsubscribeOnRiskChanges(this.props.teamspace, this.props.model);
 		Viewer.off(VIEWER_EVENTS.MODEL_LOADED);
-	}
-
-	public toggleRiskPinEvent = (enabled: boolean) => {
-		const resolver = enabled ? 'on' : 'off';
-		Viewer[resolver](VIEWER_EVENTS.CLICK_PIN, this.handlePinClick);
-	}
-
-	public handlePinClick = ({ id }) => {
-		const relatedRisk = this.state.filteredRisks.find((risk) => risk._id === id);
-
-		if (relatedRisk) {
-			this.handleShowRiskDetails(relatedRisk)();
-		}
 	}
 
 	public hasPermission = (permission) => {
