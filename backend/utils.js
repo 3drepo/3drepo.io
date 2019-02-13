@@ -56,7 +56,9 @@ function Utils() {
 	* @returns {string} uuid - String representation of a UUID
 	*******************************************************************************/
 	this.uuidToString = function(binuuid) {
-		return nodeuuid.unparse(binuuid.buffer);
+		return (!_.isString(binuuid)) ?
+			nodeuuid.unparse(binuuid.buffer) :
+			binuuid;
 	};
 
 	/** *****************************************************************************
