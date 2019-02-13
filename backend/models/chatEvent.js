@@ -16,6 +16,7 @@
  */
 
 "use strict";
+const utils = require("../utils");
 const Queue = require("../services/queue");
 
 const eventTypes = Object.freeze({
