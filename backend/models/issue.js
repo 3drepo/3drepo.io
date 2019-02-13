@@ -31,10 +31,10 @@ const ChatEvent = require("./chatEvent");
 const systemLogger = require("../logger.js").systemLogger;
 const Comment = require("./comment");
 const Group = require("./group");
-const User = require("./user");
 const Job = require("./job");
+const Project = require("./project");
+const User = require("./user");
 const View = require("./viewpoint");
-const ModelHelper = require("./helper/model");
 
 const C = require("../constants");
 
@@ -390,7 +390,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 				return Job.findByUser(dbUser.user, data.requester).then((_job) => {
 					const job = _job ?  _job._id : null;
 					const accountPerm = dbUser.customData.permissions.findByUser(data.requester);
-					const userIsAdmin = ModelHelper.isUserAdmin(
+					const userIsAdmin = Project.isProjectAdmin(
 						dbCol.account,
 						dbCol.model,
 						data.requester
