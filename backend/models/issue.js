@@ -501,7 +501,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 											oldIssue.comments = [];
 										}
 
-										if (!toUpdate.comments && oldIssue.comments && oldIssue.comments.length > 0) {
+										if (!toUpdate.comments) {
 											toUpdate.comments = oldIssue.comments.concat();
 										}
 
