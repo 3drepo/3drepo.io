@@ -51,6 +51,11 @@ export const Content = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+`;
+
+export const ContentWrapper = styled.div`
+  height: 100%;
   overflow: auto;
   white-space: pre-line;
 `;

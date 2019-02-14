@@ -85,7 +85,3 @@ export const ViewerPanelButton = styled(Button)`
 		height: 40px;
 	}
 `;
-
-export const ContentWrapper = styled.div`
-	max-height: 100%;
-`;
