@@ -23,7 +23,8 @@ import {
 	Title,
 	TitleIcon,
 	TitleContainer,
-	ViewerPanelContent
+	ViewerPanelContent,
+	ContentWrapper
 } from './viewerPanel.styles';
 import { Panel } from '../../../components/panel/panel.component';
 import { Loader } from '../../../components/loader/loader.component';
@@ -49,7 +50,7 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 	};
 
 	public renderContent = renderWhenTrue(() => (
-		<>{this.props.children}</>
+		<ContentWrapper>{this.props.children}</ContentWrapper>
 	));
 
 	public renderLoader = renderWhenTrue(() => (
