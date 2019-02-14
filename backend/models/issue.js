@@ -465,7 +465,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 
 					fieldsCanBeUpdated.forEach((key) => {
 						if (data[key] !== undefined &&
-							((("[object Object]" === fieldTypes[key] || "[object Array]" === fieldTypes[key]) && data[key] !== oldIssue[key])
+							(("[object Object]" !== fieldTypes[key] && "[object Array]" !== fieldTypes[key] && data[key] !== oldIssue[key])
 							|| !_.isEqual(oldIssue[key], data[key]))) {
 							if (null === data[key] || Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 								if ("comment" === key) {
