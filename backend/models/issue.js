@@ -571,7 +571,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
 								oldIssue = clean(dbCol, oldIssue);
 								ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, oldIssue);
-								return oldIssue;
+								return (data.comment) ? data :  oldIssue;
 							});
 						});
 					} else {

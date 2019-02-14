@@ -412,7 +412,8 @@ function updateIssue(req, res, next) {
 	const issueId = req.params.issueId;
 
 	return Issue.updateAttrs(dbCol, issueId, data).then((issue) => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, issue);
+		req.dataModel = issue;
+		next();
 	}).catch((err) => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
