@@ -546,4 +546,4 @@ export const GroupsComponent: ng.IComponentOptions = {
 
 export const GroupsComponentModule = angular
 	.module('3drepo')
-	.component('groups', GroupsComponent);
+	.component('groups-old', GroupsComponent);
