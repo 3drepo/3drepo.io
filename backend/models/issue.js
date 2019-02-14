@@ -476,23 +476,23 @@ issue.updateAttrs = function(dbCol, uid, data) {
 									toUpdate.comments = oldIssue.comments.concat();
 
 									const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGUID);
-									if (data.comment.edit && data.comment.commentIndex >= 0 && toUpdate.comments.length > data.comment.commentIndex) {
-										if (!toUpdate.comments[data.comment.commentIndex].sealed) {
-											toUpdate.comments[data.comment.commentIndex] = textComment;
-											oldIssue.comments[data.comment.commentIndex] = textComment;
+									if (data.edit && data.commentIndex >= 0 && toUpdate.comments.length > data.commentIndex) {
+										if (!toUpdate.comments[data.commentIndex].sealed) {
+											toUpdate.comments[data.commentIndex] = textComment;
+											oldIssue.comments[data.commentIndex] = textComment;
 
 											ChatEvent.commentChanged(data.sessionId, dbCol.account, dbCol.model, oldIssue._id, data.comment);
 										} else {
-											data.comment = toUpdate.comments[data.comment.commentIndex];
+											data.comment = toUpdate.comments[data.commentIndex].comment;
 										}
-									} else if (data.comment.delete && data.comment.commentIndex >= 0 && toUpdate.comments.length > data.comment.commentIndex) {
-										if (!toUpdate.comments[data.comment.commentIndex].sealed) {
-											toUpdate.comments.splice(data.comment.commentIndex, 1);
-											oldIssue.comments.splice(data.comment.commentIndex, 1);
+									} else if (data.delete && data.commentIndex >= 0 && toUpdate.comments.length > data.commentIndex) {
+										if (!toUpdate.comments[data.commentIndex].sealed) {
+											toUpdate.comments.splice(data.commentIndex, 1);
+											oldIssue.comments.splice(data.commentIndex, 1);
 
 											ChatEvent.commentDeleted(data.sessionId, dbCol.account, dbCol.model, oldIssue._id, data.comment);
 										} else {
-											data.comment = toUpdate.comments[data.comment.commentIndex];
+											data.comment = toUpdate.comments[data.commentIndex].comment;
 										}
 									} else {
 										toUpdate.comments.forEach((comment) => {
