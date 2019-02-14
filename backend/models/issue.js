@@ -482,7 +482,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 											oldIssue.comments[data.commentIndex] = textComment;
 
 											ChatEvent.commentChanged(data.sessionId, dbCol.account, dbCol.model, oldIssue._id, data.comment);
-										} else {
+										} else if (toUpdate.comments[data.commentIndex].comment) {
 											data.comment = toUpdate.comments[data.commentIndex].comment;
 										}
 									} else if (data.delete && data.commentIndex >= 0 && toUpdate.comments.length > data.commentIndex) {
@@ -491,7 +491,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 											oldIssue.comments.splice(data.commentIndex, 1);
 
 											ChatEvent.commentDeleted(data.sessionId, dbCol.account, dbCol.model, oldIssue._id, data.comment);
-										} else {
+										} else if (toUpdate.comments[data.commentIndex].comment) {
 											data.comment = toUpdate.comments[data.commentIndex].comment;
 										}
 									} else {
