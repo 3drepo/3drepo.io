@@ -476,10 +476,34 @@ issue.updateAttrs = function(dbCol, uid, data) {
 									toUpdate.comments = oldIssue.comments.concat();
 
 									const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGUID);
-									toUpdate.comments.push(textComment);
-									oldIssue.comments.push(textComment);
+									if (data.comment.edit && data.comment.commentIndex >= 0 && toUpdate.comments.length > data.comment.commentIndex) {
+										if (!toUpdate.comments[data.comment.commentIndex].sealed) {
+											toUpdate.comments[data.comment.commentIndex] = textComment;
+											oldIssue.comments[data.comment.commentIndex] = textComment;
 
-									ChatEvent.newComment(data.sessionId, dbCol.account, dbCol.model, oldIssue._id, textComment);
+											ChatEvent.commentChanged(data.sessionId, dbCol.account, dbCol.model, oldIssue._id, data.comment);
+										}
+									} else if (data.comment.delete && data.comment.commentIndex >= 0 && toUpdate.comments.length > data.comment.commentIndex) {
+										if (!toUpdate.comments[data.comment.commentIndex].sealed) {
+											toUpdate.comments.splice(data.comment.commentIndex, 1);
+											oldIssue.comments.splice(data.comment.commentIndex, 1);
+
+											ChatEvent.commentDeleted(data.sessionId, dbCol.account, dbCol.model, oldIssue._id, data.comment);
+										}
+									} else {
+										toUpdate.comments.forEach((comment) => {
+											comment.sealed = true;
+										});
+
+										oldIssue.comments.forEach((comment) => {
+											comment.sealed = true;
+										});
+
+										toUpdate.comments.push(textComment);
+										oldIssue.comments.push(textComment);
+
+										ChatEvent.newComment(data.sessionId, dbCol.account, dbCol.model, oldIssue._id, textComment);
+									}
 								} else {
 									if (-1 === ownerPrivilegeAttributes.indexOf(key) || (user.isAdmin || user.hasOwnerJob)) {
 										if ("assigned_roles" === key && oldIssue.status === statusEnum.FOR_APPROVAL) {
