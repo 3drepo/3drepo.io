@@ -22,3 +22,7 @@ export const selectNotificationsDomain = (state) => Object.assign({}, state.noti
 export const selectNotifications = createSelector(
 	selectNotificationsDomain, (state) => state.notifications
 );
+
+export const selectDrawerOpenState = createSelector(
+	selectNotificationsDomain, (state) => state.drawerOpened
+);
