@@ -482,6 +482,8 @@ issue.updateAttrs = function(dbCol, uid, data) {
 											oldIssue.comments[data.comment.commentIndex] = textComment;
 
 											ChatEvent.commentChanged(data.sessionId, dbCol.account, dbCol.model, oldIssue._id, data.comment);
+										} else {
+											data.comment = toUpdate.comments[data.comment.commentIndex];
 										}
 									} else if (data.comment.delete && data.comment.commentIndex >= 0 && toUpdate.comments.length > data.comment.commentIndex) {
 										if (!toUpdate.comments[data.comment.commentIndex].sealed) {
@@ -489,6 +491,8 @@ issue.updateAttrs = function(dbCol, uid, data) {
 											oldIssue.comments.splice(data.comment.commentIndex, 1);
 
 											ChatEvent.commentDeleted(data.sessionId, dbCol.account, dbCol.model, oldIssue._id, data.comment);
+										} else {
+											data.comment = toUpdate.comments[data.comment.commentIndex];
 										}
 									} else {
 										toUpdate.comments.forEach((comment) => {
@@ -594,11 +598,13 @@ issue.updateAttrs = function(dbCol, uid, data) {
 						return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
 							return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
 								oldIssue = clean(dbCol, oldIssue);
-								if (!data.comment) {
-									ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, oldIssue);
-								}
 
-								return (data.comment) ? data :  oldIssue;
+								if (data.comment) {
+									return data;
+								} else {
+									ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, oldIssue);
+									return oldIssue;
+								}
 							});
 						});
 					} else {
