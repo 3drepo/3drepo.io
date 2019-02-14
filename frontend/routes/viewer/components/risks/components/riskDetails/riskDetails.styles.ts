@@ -48,3 +48,8 @@ export const FieldsRow = styled(Grid)`
     color: inherit;
   }
 `;
+
+export const DescriptionImage = styled.div`
+  max-height: 250px;
+  overflow: hidden;
+`;
