@@ -20,13 +20,14 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { Notifications } from './notifications.component';
-import { NotificationsActions, selectNotifications } from '../../../modules/notifications';
+import { NotificationsActions, selectNotifications, selectDrawerOpenState  } from '../../../modules/notifications';
 import { selectCurrentUser } from '../../../modules/currentUser';
 import { withRouter } from 'react-router';
 
 const mapStateToProps = createStructuredSelector({
 	notifications: selectNotifications,
-	currentUser: selectCurrentUser
+	currentUser: selectCurrentUser,
+	drawerOpened: selectDrawerOpenState
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -36,7 +37,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	confirmSendDeleteAllNotifications: NotificationsActions.confirmSendDeleteAllNotifications,
 	upsertNotification: NotificationsActions.upsertNotification,
 	deleteNotification: NotificationsActions.deleteNotification,
-	showUpdatedFailedError: NotificationsActions.showUpdatedFailedError
+	showUpdatedFailedError: NotificationsActions.showUpdatedFailedError,
+	setDrawerPanelState: NotificationsActions.setDrawerPanelState
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Notifications));

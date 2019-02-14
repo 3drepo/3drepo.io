@@ -27,7 +27,8 @@ export const { Types: NotificationsTypes, Creators: NotificationsActions } = cre
 	upsertNotification: ['notification'],
 	deleteNotification: ['notification'],
 	patchNotification: ['notificationPatch'],
-	showUpdatedFailedError: ['errorMessage']
+	showUpdatedFailedError: ['errorMessage'],
+	setDrawerPanelState: ['drawerOpened']
 }, { prefix: 'NOTIFICATIONS_' });
 
 export const INITIAL_STATE = {
@@ -43,6 +44,8 @@ const sortByTimeStamp = (notifications) => notifications.sort((a, b) => b.timest
 const setSortedNotifications = (state, notifications) => {
 	return { ...state, notifications: sortByTimeStamp(notifications) };
 };
+
+export const setDrawerState = (state = INITIAL_STATE, { drawerOpened }) => ({ ...state, drawerOpened });
 
 export const upsertNotification = (state = INITIAL_STATE, { notification }) => {
 	const index = state.notifications.findIndex((n) => n._id === notification._id);
@@ -75,5 +78,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[NotificationsTypes.SET_NOTIFICATIONS]: setNotifications,
 	[NotificationsTypes.UPSERT_NOTIFICATION]: upsertNotification,
 	[NotificationsTypes.DELETE_NOTIFICATION]: deleteNotification,
-	[NotificationsTypes.PATCH_NOTIFICATION]: patchNotification
+	[NotificationsTypes.PATCH_NOTIFICATION]: patchNotification,
+	[NotificationsTypes.SET_DRAWER_PANEL_STATE] : setDrawerState
 });
