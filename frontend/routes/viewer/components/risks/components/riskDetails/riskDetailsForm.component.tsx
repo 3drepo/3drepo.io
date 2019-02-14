@@ -15,7 +15,7 @@ import { calculateLevelOfRisk, canUpdateRisk } from '../../../../../../helpers/r
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { TextField } from '../../../../../components/textField/textField.component';
-import { FieldsRow, StyledFormControl } from './riskDetails.styles';
+import { FieldsRow, StyledFormControl, DescriptionImage } from './riskDetails.styles';
 import { Image } from '../../../../../components/image';
 
 const RiskSchema = Yup.object().shape({
@@ -161,10 +161,12 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				)} />
 
 				{this.props.risk.descriptionThumbnail && (
-					<Image
-						src={this.props.risk.descriptionThumbnail}
-						enablePreview
-					/>
+					<DescriptionImage>
+						<Image
+							src={this.props.risk.descriptionThumbnail}
+							enablePreview
+						/>
+					</DescriptionImage>
 				)}
 
 				<FieldsRow container alignItems="center" justify="space-between">
