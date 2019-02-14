@@ -247,7 +247,6 @@ describe("Chat service", function () {
 		const comment = {"comment":"abc123456","edit":true,"commentIndex":0};
 
 		socket.on(`${account}::${model}::${issueId}::commentUpdated`, function(resComment) {
-			console.log(resComment);
 			expect(resComment).to.exist;
 			expect(resComment.comment).to.equal(comment.comment);
 			done();
