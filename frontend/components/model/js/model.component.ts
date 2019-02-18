@@ -64,6 +64,7 @@ class ModelController implements ng.IController {
 	private initialSelectedObjects;
 	private isPending = false;
 	private modelSettingsLoaded = false;
+	private unsubscribeModelSettingsListener;
 
 	constructor(
 		private $window,
@@ -92,12 +93,14 @@ class ModelController implements ng.IController {
 		const isPendingChanged = this.isPending !== isPending;
 		const settingsChanged = this.settings._id !== settings._id;
 
+		const changes = { isPending } as any;
 		if (isPendingChanged && settingsChanged && !isPending && !this.modelSettingsLoaded) {
-			this.modelSettingsLoaded = true;
+			changes.settings = settings;
+			changes.modelSettingsLoaded = true;
 			this.handleModelSettingsChange(settings);
 		}
 
-		return { settings, isPending };
+		return changes;
 	}
 
 	public $onInit() {
@@ -117,6 +120,10 @@ class ModelController implements ng.IController {
 		window.addEventListener('beforeunload', refreshHandler);
 
 		this.$scope.$on('$destroy', () => {
+			this.unsubscribeModelSettingsListener();
+			this.modelSettingsLoaded = false;
+			this.settings = {};
+			this.isPending = false;
 			window.removeEventListener('beforeunload', refreshHandler);
 			window.removeEventListener('popstate', popStateHandler);
 		});
@@ -145,7 +152,7 @@ class ModelController implements ng.IController {
 			dispatch(RisksActions.setActiveRisk(risksMap[id], filteredRisks));
 		});
 
-		subscribe(this, this.onModelSettingsChange);
+		this.unsubscribeModelSettingsListener = subscribe(this, this.onModelSettingsChange);
 
 		this.watchers();
 	}

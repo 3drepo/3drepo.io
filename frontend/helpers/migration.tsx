@@ -43,7 +43,7 @@ export const subscribe = (context, selectors: any = {}) => {
 
 	const handlerType = selectors.constructor.name.toLowerCase();
 
-	store.subscribe(() => {
+	return store.subscribe(() => {
 		$timeout(() => {
 			const currentState = store.getState();
 			const dataToBind = invoke(subscribeHandlers, handlerType, currentState) || {};
