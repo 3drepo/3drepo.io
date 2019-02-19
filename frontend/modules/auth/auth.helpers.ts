@@ -1,5 +1,5 @@
 export const verificationMessages = {
-	success: 'Account verified. You may now log into your account.'
+	success: 'Account verified. You may now log into your account.',
 	alreadyVerified: 'Account already verified.'
 };
 
