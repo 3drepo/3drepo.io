@@ -426,7 +426,7 @@ export class IssuesService {
 					pinColor = Pin.pinColours.yellow;
 				}
 
-				this.viewerService.addPin({
+				Viewer.addPin({
 					id: issue._id,
 					account: issue.account,
 					model: issue.model,
@@ -438,7 +438,7 @@ export class IssuesService {
 
 			} else {
 				// Remove pin
-				this.viewerService.removePin({ id: issue._id });
+				Viewer.removePin({ id: issue._id });
 			}
 		});
 
@@ -677,8 +677,7 @@ export class IssuesService {
 			model: issue.model
 		};
 
-		this.viewerService.setCamera(issueData);
-
+		Viewer.setCamera(issueData);
 	}
 
 	public handleShowIssue(issue) {

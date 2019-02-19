@@ -408,6 +408,14 @@ export class ViewerService {
 		this.modelLoadingStarted.resolve();
 	}
 
+	public get isModelLoaded() {
+		return this.viewer.isModelLoaded();
+	}
+
+	public get isCanvasReady() {
+		return this.viewer.isViewerReady();
+	}
+
 	public async loadViewerModel(account, model, branch, revision) {
 		if (!account || !model) {
 			console.error('Account, model, branch or revision was not defined!', account, model, branch, revision);

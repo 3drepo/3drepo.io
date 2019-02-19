@@ -26,7 +26,6 @@ declare const Module;
 interface IViewerConstructor {
 	name: string;
 	container: HTMLElement;
-	onStartModelLoading: () => void;
 	onEvent?: any; // deprecated (use .on instead)
 	onError?: any; // deprecated (use .on instead)
 }
@@ -121,14 +120,12 @@ export class Viewer {
 	public callback: any;
 	public errCallback: any;
 
-	private onStartModelLoading: any;
 	private emitter = new EventEmitter();
 
 	constructor(config: IViewerConstructor) {
 
 		// If not given the tag by the manager create here
 		this.element = config.container;
-		this.onStartModelLoading = config.onStartModelLoading || (() => {});
 
 		if (!name) {
 			this.name = 'viewer';
@@ -501,6 +498,11 @@ export class Viewer {
 		UnityUtil.cancelLoadModel();
 	}
 
+	public async isModelLoaded() {
+		await UnityUtil.onReady();
+		return UnityUtil.onLoaded();
+	}
+
 	public async loadModel(account, model, branch, revision) {
 		await UnityUtil.onReady();
 		this.initialized = true;
@@ -511,17 +513,14 @@ export class Viewer {
 		this.loadingDivText.style.display = 'none';
 		document.body.style.cursor = 'wait';
 
-		this.emit(Viewer.EVENT.START_LOADING);
-
 		UnityUtil.loadModel({
 			account,
 			model,
 			branch,
-			revision,
-			onStart: this.onStartModelLoading
+			revision
 		});
 
-		return UnityUtil.onLoaded().then((bbox) => {
+		UnityUtil.onLoaded().then((bbox) => {
 			document.body.style.cursor = 'initial';
 
 			this.emit(Viewer.EVENT.MODEL_LOADED);
@@ -532,6 +531,8 @@ export class Viewer {
 				console.error('Unity error loading model= ', error);
 			}
 		});
+
+		return UnityUtil.onLoading();
 	}
 
 	public getCurrentViewpointInfo(account, model) {

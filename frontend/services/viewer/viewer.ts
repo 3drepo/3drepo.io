@@ -29,12 +29,12 @@ export class ViewerService {
 		return this.mode === MODE.PIN;
 	}
 
-	public async isViewerReady()  {
+	public async isViewerReady() {
 		await this.viewerService.initialised.promise;
 	}
 
-	public async hasModelLoadingStarted() {
-		await this.viewerService.modelLoadingStarted.promise;
+	public async isModelReady() {
+		await this.viewerService.isModelLoaded;
 	}
 
 	public async updateViewerSettings(settings) {
@@ -70,7 +70,7 @@ export class ViewerService {
 	}
 
 	public async setCamera(params) {
-		await this.isViewerReady();
+		await this.isModelReady();
 
 		return this.viewer.setCamera(
 			params.position,
@@ -118,8 +118,8 @@ export class ViewerService {
 		}
 	}
 
-	public setPin(newPinData) {
-		this.viewerService.pinData = newPinData;
+	public setPin({ data }) {
+		this.viewerService.pinData = data;
 	}
 
 	public getPinData(): any {
@@ -127,7 +127,7 @@ export class ViewerService {
 	}
 
 	public async addPin(params) {
-		await this.hasModelLoadingStarted();
+		await this.isViewerReady();
 		return this.viewer.addPin(
 			params.account,
 			params.model,

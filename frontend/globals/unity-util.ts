@@ -46,6 +46,8 @@ export class UnityUtil {
 
 	public static unityHasErrored = false;
 
+	public static initialLoad = true;
+
 	public static screenshotPromises = [];
 	public static viewpointsPromises = [];
 	public static objectStatusPromises = [];
@@ -111,6 +113,10 @@ export class UnityUtil {
 	 * Cancel the loading of model.
 	 */
 	public static cancelLoadModel() {
+		if (UnityUtil.initialLoad) {
+			return;
+		}
+
 		if (!UnityUtil.loadedFlag && UnityUtil.loadedResolve) {
 			// If the previous model is being loaded but hasn't finished yet
 			UnityUtil.loadedResolve.reject('cancel');
@@ -284,6 +290,7 @@ export class UnityUtil {
 		};
 		UnityUtil.loadedResolve.resolve(res);
 		UnityUtil.loadedFlag = true;
+		UnityUtil.initialLoad = false;
 	}
 
 	public static loading(bboxStr) {
@@ -707,7 +714,7 @@ export class UnityUtil {
 	 *  @param {string=} branch - ID of the branch (optional)
 	 *  @param {string} revision - ID of revision
 	 */
-	public static loadModel({ account, model, branch, revision, onStart }) {
+	public static loadModel({ account, model, branch, revision }) {
 		UnityUtil.cancelLoadModel();
 		UnityUtil.reset();
 
@@ -729,7 +736,6 @@ export class UnityUtil {
 		UnityUtil.onLoaded();
 		UnityUtil.toUnity('LoadModel', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
-		onStart();
 		return UnityUtil.onLoading();
 	}
 
