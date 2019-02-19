@@ -32,6 +32,7 @@ const systemLogger = require("../logger.js").systemLogger;
 const Comment = require("./comment");
 const Group = require("./group");
 const Job = require("./job");
+const Notification = require("./notification");
 const Project = require("./project");
 const User = require("./user");
 const View = require("./viewpoint");
@@ -467,6 +468,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 			return Promise.all([userPermissionsPromise, newViewpointPromise]).then(([user, newViewpoint]) => {
 				if (user.isAdmin || user.hasOwnerJob || user.hasAssignedJob) {
 					const toUpdate = {};
+					const notificationPromises = [];
 					const attributeBlacklist = [
 						"_id",
 						"comments",
@@ -513,12 +515,33 @@ issue.updateAttrs = function(dbCol, uid, data) {
 									oldIssue.comments = updatedComments;
 								} else {
 									if (-1 === ownerPrivilegeAttributes.indexOf(key) || (user.isAdmin || user.hasOwnerJob)) {
-										if ("assigned_roles" === key && oldIssue.status === statusEnum.FOR_APPROVAL) {
-											// force status change to "in progress" if assigned roles during
-											// status is "for approval"
-											forceStatusChange = true;
-											toUpdate.status = statusEnum.IN_PROGRESS;
-											oldIssue.status = statusEnum.IN_PROGRESS;
+										if ("assigned_roles" === key) {
+											if (oldIssue.status === statusEnum.FOR_APPROVAL) {
+												// force status change to "in progress" if assigned roles during
+												// status is "for approval"
+												forceStatusChange = true;
+												toUpdate.status = statusEnum.IN_PROGRESS;
+												oldIssue.status = statusEnum.IN_PROGRESS;
+											}
+
+											if (this.isIssueAssignment(oldIssue, data)) {
+												notificationPromises.push(
+													Notification.removeAssignedNotifications(
+														data.owner,
+														dbCol.account,
+														dbCol.model,
+														oldIssue
+													)
+												);
+												notificationPromises.push(
+													Notification.upsertIssueAssignedNotifications(
+														data.owner,
+														dbCol.account,
+														dbCol.model,
+														data
+													)
+												);
+											}
 										} else if ("due_date" === key) {
 											if (data[key] === null) {
 												data[key] = undefined;
@@ -590,6 +613,17 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							toUpdate.status_last_changed = (new Date()).getTime();
 							oldIssue.status_last_changed = toUpdate.status_last_changed;
 
+							if (oldIssue.status !== "closed" && data.status === "closed") {
+								notificationPromises.push(
+									Notification.removeAssignedNotifications(
+										data.owner,
+										dbCol.account,
+										dbCol.model,
+										oldIssue
+									)
+								);
+							}
+
 							toUpdate.status = data.status;
 							oldIssue.status = data.status;
 						} else {
@@ -602,12 +636,17 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
 								oldIssue = clean(dbCol, oldIssue);
 
-								if (data.comment) {
-									return data;
-								} else {
-									ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, oldIssue._id, oldIssue);
-									return oldIssue;
-								}
+								return Promise.all(notificationPromises).then((notifications) => {
+									notifications = _.flatten(notifications);
+									oldIssue.userNotifications = notifications;
+
+									if (data.comment) {
+										return data;
+									} else {
+										ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, oldIssue._id, oldIssue);
+										return oldIssue;
+									}
+								});
 							});
 						});
 					} else {
@@ -884,7 +923,7 @@ issue.getThumbnail = function(dbCol, uid) {
 };
 
 issue.isIssueBeingClosed = function(oldIssue, newIssue) {
-	return oldIssue &&  oldIssue.status !== "closed" && newIssue.status === "closed";
+	return !!oldIssue && oldIssue.status !== "closed" && newIssue.status === "closed";
 };
 
 issue.isIssueAssignment = function(oldIssue, newIssue) {
