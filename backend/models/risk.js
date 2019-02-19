@@ -390,6 +390,59 @@ risk.getRisksReport = function(account, model, username, rid, ids, res) {
 
 };
 
+function toDirectXCoords(entry) {
+	const fieldsToConvert = ["position", "norm"];
+	const vpFieldsToConvert = ["right", "view_dir", "look_at", "position", "up"];
+
+	fieldsToConvert.forEach((rootKey) => {
+		if (entry[rootKey]) {
+			entry[rootKey] = utils.webGLtoDirectX(entry[rootKey]);
+		}
+	});
+
+	const viewpoint = entry.viewpoint;
+	vpFieldsToConvert.forEach((key) => {
+		if (viewpoint[key]) {
+			viewpoint[key] = utils.webGLtoDirectX(viewpoint[key]);
+		}
+	});
+
+	const clippingPlanes = viewpoint.clippingPlanes;
+	if(clippingPlanes) {
+		for (const item in clippingPlanes) {
+			clippingPlanes[item].normal = utils.webGLtoDirectX(clippingPlanes[item].normal);
+		}
+	}
+}
+
+risk.getRisksList = function(dbColOptions, user, branch, revision, ids, convertCoords) {
+	const projection = {
+		extras: 0,
+		"comments": 0,
+		"viewpoints.extras": 0,
+		"viewpoints.scribble": 0,
+		"viewpoints.screenshot.content": 0,
+		"viewpoints.screenshot.resizedContent": 0,
+		"thumbnail.content": 0
+	};
+
+	return risk.findRisksByModelName(
+		dbColOptions,
+		user,
+		branch,
+		revision,
+		projection,
+		ids,
+		false,
+	).then((risks) => {
+		if(convertCoords) {
+			risks.forEach((entry) => toDirectXCoords(entry));
+
+		}
+		return risks;
+	});
+};
+
 risk.findRisksByModelName = function(dbCol, username, branch, revId, projection, ids, noClean = false) {
 	const account = dbCol.account;
 	const model = dbCol.model;

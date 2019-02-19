@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *	Copyright (C) 2018 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -27,43 +27,53 @@ const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
 /**
- * @api {get} /viewpoints List all Viewpoints
+ * @api {get} /:teamspace/:model/viewpoints List all Viewpoints
  * @apiName listViewpoints
  * @apiGroup Viewpoint
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  */
 
 router.get("/viewpoints/", middlewares.issue.canView, listViewpoints);
 
 /**
- * @api {get} /viewpoints/:uid Find a Viewpoint
+ * @api {get} /:teamspace/:model/viewpoints/:uid Find a Viewpoint
  * @apiName findViewpoint
  * @apiGroup Viewpoint
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Unique Viewpoint ID
  */
 
 router.get("/viewpoints/:uid", middlewares.issue.canView, findViewpoint);
 
 /**
- * @api {put} /viewpoints/:uid Update a Viewpoint
+ * @api {put} /:teamspace/:model/viewpoints/:uid Update a Viewpoint
  * @apiName updateViewpoint
  * @apiGroup Viewpoint
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Unique Viewpoint ID
  */
 
 router.put("/viewpoints/:uid", middlewares.issue.canCreate, updateViewpoint);
 
 /**
- * @api {post} /viewpoints/ Create a Viewpoint
+ * @api {post} /:teamspace/:model/viewpoints/ Create a Viewpoint
  * @apiName createViewpoint
  * @apiGroup Viewpoint
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  */
 
 router.post("/viewpoints/", middlewares.issue.canCreate, createViewpoint);
 
 /**
- * @api {delete} /viewpoints/:uid Delete a Viewpoint
+ * @api {delete} /:teamspace/:model/viewpoints/:uid Delete a Viewpoint
  * @apiName deleteViewpoint
  * @apiGroup Viewpoint
  */
@@ -71,10 +81,12 @@ router.post("/viewpoints/", middlewares.issue.canCreate, createViewpoint);
 router.delete("/viewpoints/:uid", middlewares.issue.canCreate, deleteViewpoint);
 
 /**
- * @api {get} /viewpoints/:uid Get a Viewpoint Thumbnail
+ * @api {get} /:teamspace/:model/viewpoints/:uid Get a Viewpoint Thumbnail
  * @apiName getViewpointThumbnail
  * @apiGroup Viewpoint
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Unique Viewpoint ID
  */
 

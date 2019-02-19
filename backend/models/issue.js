@@ -494,23 +494,61 @@ schema.statics.getBCFZipReadStream = function(account, model, username, branch, 
 	});
 };
 
-schema.statics.findBySharedId = function(dbColOptions, sid, number) {
+function toDirectXCoords(issue) {
+	const fieldsToConvert = ["position", "norm"];
+	const vpFieldsToConvert = ["right", "view_dir", "look_at", "position", "up"];
 
-	const filter = { parent: stringToUUID(sid) };
+	fieldsToConvert.forEach((rootKey) => {
+		if (issue[rootKey]) {
+			issue[rootKey] = utils.webGLtoDirectX(issue[rootKey]);
+		}
+	});
 
-	if(number) {
-		filter.number = number;
+	const viewpoint = issue.viewpoint;
+	vpFieldsToConvert.forEach((key) => {
+		if (viewpoint[key]) {
+			viewpoint[key] = utils.webGLtoDirectX(viewpoint[key]);
+		}
+	});
+
+	const clippingPlanes = viewpoint.clippingPlanes;
+	if(clippingPlanes) {
+		for (const item in clippingPlanes) {
+			clippingPlanes[item].normal = utils.webGLtoDirectX(clippingPlanes[item].normal);
+		}
 	}
 
-	return this._find(dbColOptions, filter).then(issues => {
-		issues.forEach((issue, i) => {
-			if(issue.scribble) {
-				issues[i] = issue.scribble.toString("base64");
-			}
-		});
+	return viewpoint;
+}
 
-		return Promise.resolve(issues);
+schema.statics.getIssuesList = function(dbColOptions, user, branch, revision, ids, sort, convertCoords) {
+
+	const projection = {
+		extras: 0,
+		"comments": 0,
+		"viewpoints.extras": 0,
+		"viewpoints.scribble": 0,
+		"viewpoints.screenshot.content": 0,
+		"viewpoints.screenshot.resizedContent": 0,
+		"thumbnail.content": 0
+	};
+
+	return Issue.findIssuesByModelName(
+		dbColOptions,
+		user,
+		branch,
+		revision,
+		projection,
+		false,
+		ids
+	).then((issues) => {
+		if(convertCoords) {
+			issues.forEach((issue) => toDirectXCoords(issue));
+
+		}
+		return issues;
 	});
+
 };
 
 schema.statics.findByUID = function(dbColOptions, uid, onlyStubs, noClean) {

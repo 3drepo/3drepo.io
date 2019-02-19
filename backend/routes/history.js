@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2016 3D Repo Ltd
+ *	Copyright (C) 2016 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.ap
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.ap
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -26,9 +26,12 @@ const History = require("../models/history");
 const utils = require("../utils");
 
 /**
- * @api {get} /revisions.json List all revisions
+ * @api {get} /:teamspace/:model/revisions.json List all revisions
  * @apiName listRevisions
  * @apiGroup Revisions
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  *
  * @apiDescription List all revisions for current model.
  *
@@ -36,23 +39,26 @@ const utils = require("../utils");
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * [
- * 	{
- * 		"_id":"24226282-429a-49a0-8e38-96bc2ff28ef1",
- * 		"author":"username",
- * 		"tag":"sample",
- * 		"timestamp":"2018-12-27T11:02:15.000Z",
- * 		"name":"24226282-429a-49a0-8e38-96bc2ff28ef1",
- * 		"branch":"master"
- * 	}
+ *	{
+ *		"_id":"24226282-429a-49a0-8e38-96bc2ff28ef1",
+ *		"author":"username",
+ *		"tag":"sample",
+ *		"timestamp":"2018-12-27T11:02:15.000Z",
+ *		"name":"24226282-429a-49a0-8e38-96bc2ff28ef1",
+ *		"branch":"master"
+ *	}
  * ]
  */
 
 router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
 
 /**
- * @api {get} /revisions/:branch.json List all revisions by branch
+ * @api {get} /:teamspace/:model/revisions/:branch.json List all revisions by branch
  * @apiName listRevisionsByBranch
  * @apiGroup Revisions
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} branch.json Branch required to list revisions for.
  *
  * @apiDescription List all revisions using the current branch.
@@ -61,33 +67,33 @@ router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * [
- *   {
- *       "_id": "revision_ID",
- *       "author": "username",
- *       "desc": "For coordination",
- *       "tag": "r3",
- *       "timestamp": "2018-01-16T16:02:54.000Z",
- *       "name": "revision_ID",
- *       "branch": "master"
- *   },
- *   {
- *       "_id": "revision_ID",
- *       "author": "username",
- *       "desc": "Roof access added",
- *       "tag": "r2",
- *       "timestamp": "2018-01-16T15:26:58.000Z",
- *       "name": "revision_ID",
- *       "branch": "master"
- *   },
- *   {
- *       "_id": "revision_ID",
- *       "author": "username",
- *       "desc": "Initial design",
- *       "tag": "r1",
- *       "timestamp": "2018-01-16T15:19:01.000Z",
- *       "name": "revision_ID",
- *       "branch": "master"
- *   }
+ *	 {
+ *		 "_id": "revision_ID",
+ *		 "author": "username",
+ *		 "desc": "For coordination",
+ *		 "tag": "r3",
+ *		 "timestamp": "2018-01-16T16:02:54.000Z",
+ *		 "name": "revision_ID",
+ *		 "branch": "master"
+ *	 },
+ *	 {
+ *		 "_id": "revision_ID",
+ *		 "author": "username",
+ *		 "desc": "Roof access added",
+ *		 "tag": "r2",
+ *		 "timestamp": "2018-01-16T15:26:58.000Z",
+ *		 "name": "revision_ID",
+ *		 "branch": "master"
+ *	 },
+ *	 {
+ *		 "_id": "revision_ID",
+ *		 "author": "username",
+ *		 "desc": "Initial design",
+ *		 "tag": "r1",
+ *		 "timestamp": "2018-01-16T15:19:01.000Z",
+ *		 "name": "revision_ID",
+ *		 "branch": "master"
+ *	 }
  * ]
  *
  */
@@ -95,12 +101,14 @@ router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
 router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevisionsByBranch);
 
 /**
- * @api {put} /revisions/:id/tag Update Revision Tag
+ * @api {put} /:teamspace/:model/revisions/:id/tag Update Revision Tag
  * @apiName updateRevisionTag
  * @apiGroup Revisions
  *
  * @apiDescription Update revision tag
  *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  * @apiParam {String} id Unique Revision ID
  * @apiParam {String} tag Tag to update
  *

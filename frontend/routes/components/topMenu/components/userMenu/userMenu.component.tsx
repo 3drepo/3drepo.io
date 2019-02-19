@@ -45,7 +45,7 @@ const UserButton = ({ IconProps, Icon, ...props }) => (
 	</IconButton>
 );
 
-const UserMenuButton = ({Icon, ...props}) => {
+const UserMenuButton = ({ Icon, ...props }) => {
 	return (
 		<MenuItem button={true} aria-label={props.label} onClick={props.onButtonClick}>
 			<MenuIcon>
@@ -58,7 +58,7 @@ const UserMenuButton = ({Icon, ...props}) => {
 
 const UserMenuContent = (props) => {
 	const hasMemorySettings = Boolean(localStorage.getItem('deviceMemory'));
-	const { currentUser: { username, avatarUrl, firstName, lastName }} = props;
+	const { currentUser: { username, avatarUrl, firstName, lastName } } = props;
 	const name = firstName || lastName ? `${firstName || ''} ${lastName || ''}`.trim() : username;
 
 	const invokeAndClose = (callback) => (...args) => {
@@ -93,17 +93,17 @@ const UserMenuContent = (props) => {
 					checked={props.isLiteMode}
 					onChange={invokeAndClose(props.onLiteModeChange)}
 					color="secondary"
-					inputProps={ {
+					inputProps={{
 						'aria-label': 'Lite mode'
-					} }
+					}}
 				/>
 				<MenuText primary="Lite mode" />
 			</MenuItem>
-			{ hasMemorySettings && <UserMenuButton
+			{hasMemorySettings && <UserMenuButton
 				Icon={Restore}
 				label="Reset Settings"
 				onButtonClick={invokeAndClose(props.resetMemorySettings)}
-			/> }
+			/>}
 			<UserMenuButton
 				Icon={ExitToApp}
 				label="Logout"
@@ -145,12 +145,12 @@ export class UserMenu extends React.PureComponent<IProps, any> {
 			<ButtonMenu
 				renderButton={UserButton}
 				renderContent={this.renderMenuContent}
-				PopoverProps={ {
+				PopoverProps={{
 					anchorOrigin: {
 						vertical: 'top',
 						horizontal: 'right'
 					}
-				} }
+				}}
 			/>
 		);
 	}
