@@ -600,12 +600,12 @@ issue.updateAttrs = function(dbCol, uid, data) {
 					if (typeCorrect && Object.keys(toUpdate).length > 0) {
 						return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
 							return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
-								oldIssue = clean(dbCol, oldIssue);
-
 								if (data.comment) {
 									return data;
 								} else {
 									ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, oldIssue);
+									oldIssue = clean(dbCol, oldIssue);
+
 									return oldIssue;
 								}
 							});
