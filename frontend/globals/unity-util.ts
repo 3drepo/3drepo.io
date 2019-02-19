@@ -715,15 +715,6 @@ export class UnityUtil {
 	 *  @param {string} revision - ID of revision
 	 */
 	public static loadModel(account, model, branch, revision) {
-		UnityUtil.cancelLoadModel();
-		UnityUtil.reset();
-
-		UnityUtil.loadedPromise = null;
-		UnityUtil.loadedResolve = null;
-		UnityUtil.loadingPromise = null;
-		UnityUtil.loadingResolve = null;
-		UnityUtil.loadedFlag  = false;
-
 		const params: any = {
 			database : account,
 			model
@@ -828,6 +819,14 @@ export class UnityUtil {
 	 * Clear the canvas and reset all settings
 	 */
 	public static reset() {
+		UnityUtil.cancelLoadModel();
+		UnityUtil.loadedPromise = null;
+		UnityUtil.loadedResolve = null;
+		UnityUtil.loadingPromise = null;
+		UnityUtil.loadingResolve = null;
+		UnityUtil.loadedFlag = false;
+		UnityUtil.initialLoad = true;
+
 		UnityUtil.disableMeasuringTool();
 		UnityUtil.toUnity('ClearCanvas', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
