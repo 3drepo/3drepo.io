@@ -2,7 +2,7 @@
   "name": "3drepo.io",
   "version": "3.0.0",
   "engines": {
-    "node": "10.15.1"
+    "node": "10.x.x"
   },
   "private": true,
   "scripts": {
@@ -53,7 +53,7 @@
     "node-uuid": "1.4.8",
     "nodemailer": "5.1.1",
     "paypal-rest-sdk": "1.8.1",
-    "pm2": "^3.2.9",
+    "pm2": "3.2.9",
     "pug": "2.0.3",
     "serialize-javascript": "1.6.1",
     "serve-favicon": "2.5.0",
