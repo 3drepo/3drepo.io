@@ -25,8 +25,6 @@
 	const utils = require("../utils");
 	const _ = require("lodash");
 	const ModelSetting = require("./modelSetting");
-	// const systemLogger = require("../logger.js").systemLogger;
-
 	const schema = mongoose.Schema({
 		name: { type: String, unique: true},
 		models: [String],

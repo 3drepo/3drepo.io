@@ -18,9 +18,7 @@
  */
 
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp(
-	{ session: require("express-session")({ secret: "testing"}) }
-);
+const app = require("../../services/api.js").createApp();
 const vat = require("../../models/vat");
 const config = require("../../config");
 

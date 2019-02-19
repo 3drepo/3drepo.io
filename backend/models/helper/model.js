@@ -177,7 +177,7 @@ function importFail(account, model, user, errCode, errMsg, sendMail) {
 				err: errMsg,
 				corID: setting.corID,
 				bouncerErr: errCode
-			});
+			}).catch(err => systemLogger.logError(err));
 		}
 
 		// Creates model updated failed notification.
@@ -598,7 +598,6 @@ function downloadLatest(account, model) {
 }
 
 function uploadFile(req) {
-
 	if (!config.cn_queue) {
 		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
 	}
@@ -657,7 +656,7 @@ function uploadFile(req) {
 
 					if(sizeInMB > space) {
 						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
-						importFail(account, model, responseCodes.SIZE_LIMIT_PAY);
+						importFail(account, model, user, responseCodes.SIZE_LIMIT_PAY);
 					} else {
 						cb(null, true);
 					}

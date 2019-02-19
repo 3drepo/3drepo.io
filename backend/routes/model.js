@@ -341,7 +341,7 @@ router.get("/:model/revision/:rev/searchtree.json", middlewares.hasReadAccessToM
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 
 /**
- * @api {post} /:teamspace/:model/revision/master/head/searchtree.json Upload Model.
+ * @api {post} /:teamspace/upload Upload Model.
  * @apiName uploadModel
  * @apiGroup Model
  *
@@ -515,35 +515,33 @@ function updateModel(req, res, next) {
 	const account = req.params.account;
 	const model = req.params.model;
 
-	let promise = Promise.reject(responseCodes.SUBMODEL_IS_MISSING);
+	let promise = null;
 	let setting;
 
-	if (Object.keys(req.body).length >= 1 && req.body.subModels) {
-		if (Object.prototype.toString.call(req.body.subModels) === "[object Array]") {
-			if (req.body.subModels.length > 0) {
+	if (Object.keys(req.body).length >= 1 && Array.isArray(req.body.subModels)) {
+		if (req.body.subModels.length > 0) {
+			promise = ModelSetting.findById({account}, model).then(_setting => {
 
-				promise = ModelSetting.findById({account}, model).then(_setting => {
+				setting = _setting;
 
-					setting = _setting;
+				if (!setting) {
+					return Promise.reject(responseCodes.MODEL_NOT_FOUND);
+				} else if (!setting.federate) {
+					return Promise.reject(responseCodes.MODEL_IS_NOT_A_FED);
+				} else {
+					return ModelHelpers.createFederatedModel(account, model, req.body.subModels);
+				}
 
-					if (!setting) {
-						return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-					} else if (!setting.federate) {
-						return Promise.reject(responseCodes.MODEL_IS_NOT_A_FED);
-					} else {
-						return ModelHelpers.createFederatedModel(account, model, req.body.subModels);
-					}
-
-				}).then(() => {
-					setting.subModels = req.body.subModels;
-					setting.timestamp = new Date();
-					return setting.save();
-				});
-
-			}
+			}).then(() => {
+				setting.subModels = req.body.subModels;
+				setting.timestamp = new Date();
+				return setting.save();
+			});
 		} else {
-			promise = Promise.reject(responseCodes.INVALID_ARGUMENTS);
+			promise = Promise.reject(responseCodes.SUBMODEL_IS_MISSING);
 		}
+	} else {
+		promise = Promise.reject(responseCodes.INVALID_ARGUMENTS);
 	}
 
 	promise.then(() => {

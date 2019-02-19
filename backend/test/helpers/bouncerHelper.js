@@ -14,9 +14,7 @@ let errorCode = 0;
 
 
 const logger = new (winston.Logger)({
-	transports: [new (winston.transports.Console)({'timestamp': true}),
-	  new (winston.transports.File)({'filename': conf.logLocation? conf.logLocation : "./bouncer_worker.log"})
-	]
+	transports: [new (winston.transports.File)({'filename': conf.logLocation? conf.logLocation : "./bouncer_worker.log"})]
 });
 
 /**
