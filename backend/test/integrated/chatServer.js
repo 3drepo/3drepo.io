@@ -284,7 +284,10 @@ describe("Chat service", function () {
 			function(done) {
 				socket.on(`${account}::${model}::${issueId}::commentCreated`, function(resComment) {
 					expect(resComment).to.exist;
-					expect(resComment.action).to.deep.equal({"property":"priority","from":"low","to":"high"});
+					expect(resComment.action).to.exist;
+					expect(resComment.action.property).to.equal("priority");
+					expect(resComment.action.from).to.equal("low");
+					expect(resComment.action.to).to.equal("high");
 
 					socket.off(`${account}::${model}::${issueId}::commentCreated`);
 					done();
