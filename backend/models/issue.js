@@ -605,7 +605,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 								if (data.comment) {
 									return data;
 								} else {
-									ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, oldIssue);
+									ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, oldIssue._id, oldIssue);
 									return oldIssue;
 								}
 							});
