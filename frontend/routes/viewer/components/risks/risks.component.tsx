@@ -256,9 +256,8 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	public handleCloseSearchMode = () => {
 		this.props.setState({ searchEnabled: false, selectedFilters: [] });
-		this.setState({
-			filteredRisks: this.props.risks
-		});
+		this.handleFilterChange([]);
+		this.setState({ filteredRisks: this.props.risks });
 	}
 
 	public handleOpenSearchMode = () => this.props.setState({ searchEnabled: true });
@@ -342,7 +341,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 			<ViewerPanelContent className="height-catcher">
 				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredRisks.length)}
 				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredRisks.length)}
-				{this.renderRisksList(this.state.filteredRisks.length)}
+				{this.renderRisksList(!!this.state.filteredRisks.length)}
 			</ViewerPanelContent>
 			<ViewerPanelFooter alignItems="center" justify="space-between">
 				<Summary>

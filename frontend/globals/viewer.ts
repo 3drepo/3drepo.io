@@ -490,6 +490,7 @@ export class Viewer {
 		this.setPinDropMode(false);
 		this.loadingDivText.style.display = 'none';
 		this.initialized = false;
+		UnityUtil.initialLoad = true;
 		UnityUtil.reset();
 	}
 

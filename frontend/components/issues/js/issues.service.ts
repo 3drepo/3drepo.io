@@ -96,7 +96,7 @@ export class IssuesService {
 			};
 
 			Viewer.addPin(data);
-			Viewer.setPin({data});
+			Viewer.setPin(data);
 		}
 	}
 

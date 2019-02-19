@@ -118,7 +118,7 @@ export class ViewerService {
 		}
 	}
 
-	public setPin({ data }) {
+	public setPin(data) {
 		this.viewerService.pinData = data;
 	}
 
