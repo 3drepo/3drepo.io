@@ -149,15 +149,17 @@ class ModelController implements ng.IController {
 
 	public onPinClick = ({ id }) => {
 		const currentState = getState();
-		const risks = selectRisks(currentState);
-		const jobs = selectJobs(currentState);
-		const selectedFilters = selectSelectedFilters(currentState);
 		const risksMap = selectRisksMap(currentState);
-		const preparedRisks = risks.map((risk) => prepareRisk(risk, jobs));
-		const returnHiddenRisk = selectedFilters.some(({ value: { value } }) => value === RISK_LEVELS.AGREED_FULLY);
-		const filteredRisks = searchByFilters(preparedRisks, selectedFilters, returnHiddenRisk);
 
-		dispatch(RisksActions.setActiveRisk(risksMap[id], filteredRisks));
+		if (risksMap[id]) {
+			const risks = selectRisks(currentState);
+			const jobs = selectJobs(currentState);
+			const preparedRisks = risks.map((risk) => prepareRisk(risk, jobs));
+			const filteredRisks = searchByFilters(preparedRisks, []);
+
+			dispatch(RisksActions.showDetails(risksMap[id], filteredRisks, this.revision));
+			this.PanelService.showPanelsByType('risks');
+		}
 	}
 
 	public watchers() {
