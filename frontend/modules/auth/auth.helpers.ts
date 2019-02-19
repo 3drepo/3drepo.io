@@ -1,5 +1,5 @@
 export const verificationMessages = {
-	success: 'Account verified. You may now log into your account.',
+	success: 'Account verified. You may now login to your account.',
 	alreadyVerified: 'Account already verified.'
 };
 
@@ -12,5 +12,5 @@ export const forgotPasswordMessages = {
 };
 
 export const changePasswordMessages = {
-	success: 'Your password has been reset. Please log in with your new password.'
+	success: 'Your password has been reset. Please login with your new password.'
 };
