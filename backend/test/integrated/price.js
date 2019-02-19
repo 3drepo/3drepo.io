@@ -19,14 +19,12 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp(
-	{ session: require("express-session")({ secret: "testing"}) }
-);
+const app = require("../../services/api.js").createApp();
 const logger = require("../../logger.js");
 const systemLogger = logger.systemLogger;
 const UserBilling = require("../../models/userBilling");
 const getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
-const helpers = require("./helpers");
+const helpers = require("../helpers/signUp");
 const moment = require("moment-timezone");
 const User = require("../../models/user");
 const url = require("url");

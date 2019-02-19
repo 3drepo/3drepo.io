@@ -19,9 +19,7 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp(
-	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
-);
+const app = require("../../services/api.js").createApp();
 const logger = require("../../logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
@@ -37,7 +35,7 @@ describe("Default permission assignment", function () {
 	const username = "defaultperm";
 	const password = "defaultperm";
 	const email = "test-defaultperm@3drepo.org";
-	const helpers = require("./helpers");
+	const helpers = require("../helpers/signUp");
 
 	before(function(done) {
 		server = app.listen(8080, function () {
