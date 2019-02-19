@@ -1,12 +1,16 @@
 export const verificationMessages = {
-	success: 'Congratulations. You have successfully signed up for 3D Repo. You may now login to you account.',
-	alreadyVerified: 'You have already verified your account successfully. You may now login to your account.'
+	success: 'Account verified. You may now login to your account.',
+	alreadyVerified: 'Account already verified.'
 };
 
 export const forgotPasswordMessages = {
-	success: 'Thank you. You will receive an email shortly with a link to change your password.'
+	success: `A password change request has been sent. You will receive an email
+	shortly with a link to change your password.
+
+
+	If you have not received this, please check your spam folder or ask your email administrator for assistance.`
 };
 
 export const changePasswordMessages = {
-	success: 'Your password has been reset.'
+	success: 'Your password has been reset. Please login with your new password.'
 };

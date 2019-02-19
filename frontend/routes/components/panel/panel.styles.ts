@@ -51,6 +51,7 @@ export const Content = styled.div`
   display: flex;
   flex-direction: column;
   overflow: auto;
+  white-space: pre-line;
 `;
 
 export const LoaderContainer = styled.div`
