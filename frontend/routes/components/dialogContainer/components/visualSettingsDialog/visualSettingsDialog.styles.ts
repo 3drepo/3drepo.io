@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 import { COLOR } from '../../../../../styles';
-import { Button, DialogContent, ListItem, Tooltip } from '@material-ui/core';
+import { Button, DialogContent, ListItem, Tooltip, Input, Tabs, Tab } from '@material-ui/core';
 import * as React from 'react';
 import { TooltipProps } from '@material-ui/core/Tooltip';
 import {omit} from 'lodash';
@@ -58,6 +58,9 @@ export const VisualSettingsDialogContent = styled(DialogContent)`
   width: 325px;
   height: 280px;
   margin-bottom: 68px;
+  && {
+    padding-top: 0;
+  }
   `;
 
 export const FormListItem = styled(ListItem)`
@@ -79,4 +82,25 @@ return React.createElement(Tooltip, props);
     font-size: 12px;
     margin: 0;
   }
+`;
+
+export const ShortInput = styled(Input).attrs({
+inputProps: {className: 'shortInput'}
+})`
+.shortInput {
+  text-align: right;
+  width: 40px;
+}
+`;
+
+export const DialogTabs = styled(Tabs)`
+&& {
+  width: 100%;
+}
+`;
+
+export const DialogTab = styled(Tab)`
+&& {
+  flex-grow: 1;
+}
 `;

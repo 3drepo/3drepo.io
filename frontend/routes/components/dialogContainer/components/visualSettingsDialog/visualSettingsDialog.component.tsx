@@ -22,23 +22,13 @@ import * as Yup from 'yup';
 import { schema } from '../../../../../services/validation';
 import {Tabs, Tab, List,
 		Select, MenuItem, Switch, Input, InputAdornment, Button, Tooltip } from '@material-ui/core';
-import { NeutralActionButton, VisualSettingsButtonsContainer,
-	VisualSettingsDialogContent, FormListItem, ErrorTooltip } from './visualSettingsDialog.styles';
+import { NeutralActionButton, VisualSettingsButtonsContainer, VisualSettingsDialogContent,
+		FormListItem, ErrorTooltip, ShortInput, DialogTabs, DialogTab } from './visualSettingsDialog.styles';
 
 const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
 	memory: schema.integer(16, 2032)
 });
-
-// class Pep extends ErrorTooltip {
-// 	// public componentDidUpdate(prevProps) {
-// 	// 	if (this.props.open !== prevProps.open) {
-// 	// 		this.setState({
-// 	// 			activeMenu: this.props.open
-// 	// 		});
-// 	// 	}
-// 	// }
-// }
 
 const BasicSettings = (props) => {
 	return (
@@ -83,10 +73,9 @@ const AdvancedSettings = (props) => {
 				<Field name="memory" render={ ({ field, form }) => {
 					return (
 					<ErrorTooltip  title={form.errors.memory || ''} placement="bottom-end">
-					<Input
+					<ShortInput
 						error={Boolean(form.errors.memory)}
 						{...field}
-						inputProps={{style: { textAlign : 'right', width: 40}}}
 						endAdornment={<InputAdornment position="end">MB</InputAdornment>}/>
 					</ErrorTooltip>
 					);
@@ -97,10 +86,10 @@ const AdvancedSettings = (props) => {
 				<Field name="nearPlane" render={ ({ field, form }) => {
 					return (
 					<ErrorTooltip title={form.errors.nearPlane || ''} placement="bottom-end">
-					<Input
+					<ShortInput
 						error={Boolean(form.errors.nearPlane)}
 						{...field}
-						inputProps={{style: { textAlign : 'right', width: 40}}}/>
+						/>
 					</ErrorTooltip>
 					);
 				}} />
@@ -153,6 +142,7 @@ const Buttons = (props) => {
 interface IProps {
 	handleResolve: () => void;
 	handleClose: () => void;
+	settings: any;
 }
 
 interface IState {
@@ -173,25 +163,22 @@ export class SettingsDialog extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const {selectedTab} = this.state;
-		const shading = 1;
-		const shadows = 2;
-		const farPlaneAlgorithm = 0;
+		const {settings} = this.props;
 
 		return (
 			<VisualSettingsDialogContent>
-				<Tabs
-					style={{width: '100%'}}
+				<DialogTabs
 					value={selectedTab}
 					indicatorColor="primary"
 					textColor="primary"
 					onChange={this.handleTabChange}
 				>
-					<Tab label="Basic" style={{flexGrow: 1}} />
-					<Tab label="Advanced" style={{flexGrow: 1}}  />
-				</Tabs>
+					<DialogTab label="Basic" />
+					<DialogTab label="Advanced" />
+				</DialogTabs>
 				<Formik
 					validationSchema={SettingsSchema}
-					initialValues={{shading, shadows, farPlaneAlgorithm}}
+					initialValues={settings}
 					onSubmit={this.onSubmit}
 					>
 					<Form>
