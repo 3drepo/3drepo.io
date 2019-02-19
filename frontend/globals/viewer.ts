@@ -513,12 +513,7 @@ export class Viewer {
 		this.loadingDivText.style.display = 'none';
 		document.body.style.cursor = 'wait';
 
-		UnityUtil.loadModel({
-			account,
-			model,
-			branch,
-			revision
-		});
+		UnityUtil.loadModel(account, model, branch, revision);
 
 		UnityUtil.onLoaded().then((bbox) => {
 			document.body.style.cursor = 'initial';

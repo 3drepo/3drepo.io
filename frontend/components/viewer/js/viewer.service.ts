@@ -33,7 +33,6 @@ export class ViewerService {
 	public newPinId: string;
 	public currentModel: any;
 	public initialised: any;
-	public modelLoadingStarted: any;
 	public currentModelInit: any;
 
 	private pinData: any;
@@ -66,7 +65,6 @@ export class ViewerService {
 		};
 
 		this.initialised = $q.defer();
-		this.modelLoadingStarted = $q.defer();
 	}
 
 	public getPinData(): any {
@@ -352,8 +350,7 @@ export class ViewerService {
 				name: 'viewer',
 				container: document.getElementById('viewer'),
 				onEvent: this.EventService.send,
-				onError: this.handleUnityError,
-				onStartModelLoading: this.handleStartModelLoading
+				onError: this.handleUnityError
 			});
 
 			this.viewer.setUnity();
@@ -402,10 +399,6 @@ export class ViewerService {
 			.catch((error) => {
 				console.error('Error creating Viewer Directive: ', error);
 			});
-	}
-
-	public handleStartModelLoading = () => {
-		this.modelLoadingStarted.resolve();
 	}
 
 	public get isModelLoaded() {
