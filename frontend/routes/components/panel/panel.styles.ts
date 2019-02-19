@@ -58,6 +58,8 @@ export const ContentWrapper = styled.div`
   height: 100%;
   overflow: auto;
   white-space: pre-line;
+  display: flex;
+  flex-direction: column;
 `;
 
 export const LoaderContainer = styled.div`

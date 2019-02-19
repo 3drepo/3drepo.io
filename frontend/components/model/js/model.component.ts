@@ -126,6 +126,7 @@ class ModelController implements ng.IController {
 			this.isPending = false;
 			window.removeEventListener('beforeunload', refreshHandler);
 			window.removeEventListener('popstate', popStateHandler);
+			this.ViewerService.off(VIEWER_EVENTS.CLICK_PIN);
 		});
 
 		this.$timeout(() => {
@@ -140,21 +141,23 @@ class ModelController implements ng.IController {
 		dispatch(JobsActions.fetchJobs(this.account));
 		dispatch(JobsActions.getMyJob(this.account));
 
-		this.ViewerService.on(VIEWER_EVENTS.CLICK_PIN, ({id}) => {
-			const risks = selectRisks(getState());
-			const jobs = selectJobs(getState());
-			const selectedFilters = selectSelectedFilters(getState());
-			const risksMap = selectRisksMap(getState());
-			const preparedRisks = risks.map((risk) => prepareRisk(risk, jobs));
-			const returnHiddenRisk = selectedFilters.some(({ value: { value }}) => value === RISK_LEVELS.AGREED_FULLY);
-			const filteredRisks = searchByFilters(preparedRisks, selectedFilters, returnHiddenRisk);
-
-			dispatch(RisksActions.setActiveRisk(risksMap[id], filteredRisks));
-		});
-
+		this.ViewerService.on(VIEWER_EVENTS.CLICK_PIN, this.onPinClick);
 		this.unsubscribeModelSettingsListener = subscribe(this, this.onModelSettingsChange);
 
 		this.watchers();
+	}
+
+	public onPinClick = ({ id }) => {
+		const currentState = getState();
+		const risks = selectRisks(currentState);
+		const jobs = selectJobs(currentState);
+		const selectedFilters = selectSelectedFilters(currentState);
+		const risksMap = selectRisksMap(currentState);
+		const preparedRisks = risks.map((risk) => prepareRisk(risk, jobs));
+		const returnHiddenRisk = selectedFilters.some(({ value: { value } }) => value === RISK_LEVELS.AGREED_FULLY);
+		const filteredRisks = searchByFilters(preparedRisks, selectedFilters, returnHiddenRisk);
+
+		dispatch(RisksActions.setActiveRisk(risksMap[id], filteredRisks));
 	}
 
 	public watchers() {
