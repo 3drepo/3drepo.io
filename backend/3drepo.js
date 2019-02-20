@@ -80,25 +80,25 @@ function setupSSL() {
 }
 
 function createHTTPRedirectService(domain) {
-		const http_app = express();
-		const redirect = express();
+	const http_app = express();
+	const redirect = express();
 
-		// If someone tries to access the site through http redirect to the encrypted site.
-		http_app.use(vhost(domain, redirect));
-		redirect.get("*", function(req, res) {
-			// Do not redirect if user uses IE6 because it doesn"t suppotr TLS 1.2
-			const isIe = req.headers["user-agent"].toLowerCase().indexOf("msie 6") === -1;
-			if(!req.headers["user-agent"] || isIe) {
-				res.redirect("https://" + req.headers.host + req.url);
-			} else {
-				res.sendFile(__dirname + "/resources/ie6.html");
-			}
-		});
+	// If someone tries to access the site through http redirect to the encrypted site.
+	http_app.use(vhost(domain, redirect));
+	redirect.get("*", function(req, res) {
+		// Do not redirect if user uses IE6 because it doesn"t suppotr TLS 1.2
+		const isIe = req.headers["user-agent"].toLowerCase().indexOf("msie 6") === -1;
+		if(!req.headers["user-agent"] || isIe) {
+			res.redirect("https://" + req.headers.host + req.url);
+		} else {
+			res.sendFile(__dirname + "/resources/ie6.html");
+		}
+	});
 
-		// listen on hostname not working on ie6, therefore listen on 0.0.0.0, and use vhost lib instead
-		http.createServer(http_app).listen(config.http_port, "0.0.0.0", function() {
-			systemLogger.logInfo("Starting routing HTTP for " + config.host + " service on port " + config.http_port);
-		});
+	// listen on hostname not working on ie6, therefore listen on 0.0.0.0, and use vhost lib instead
+	http.createServer(http_app).listen(config.http_port, "0.0.0.0", function() {
+		systemLogger.logInfo("Starting routing HTTP for " + config.host + " service on port " + config.http_port);
+	});
 
 }
 
@@ -106,7 +106,7 @@ function handleHTTPSRedirect() {
 	if (config.HTTPSredirect) {
 		createHTTPRedirectService(config.host);
 		config.servers.foreach((server) => {
-			if (server.service === "frontend" && subdomain) {
+			if (server.service === "frontend" && server.subdomain) {
 				createHTTPRedirectService(server.subdomain + "." + config.host);
 			}
 		});
