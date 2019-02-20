@@ -424,6 +424,8 @@ issue.updateAttrs = function(dbCol, uid, data) {
 			let forceStatusChange;
 			let viewpointGUID;
 
+			let newIssue = _.cloneDeep(oldIssue);
+
 			const userPermissionsPromise = User.findByUserName(dbCol.account).then((dbUser) => {
 
 				return Job.findByUser(dbUser.user, data.requester).then((_job) => {
@@ -493,86 +495,84 @@ issue.updateAttrs = function(dbCol, uid, data) {
 					const fieldsCanBeUpdated = Object.keys(fieldTypes).filter(attr => !attributeBlacklist.includes(attr));
 
 					if (newViewpoint) {
-						if (!oldIssue["viewpoints"]) {
-							oldIssue.viewpoints = [];
+						if (!newIssue["viewpoints"]) {
+							newIssue.viewpoints = [];
 						}
 
-						toUpdate.viewpoints = oldIssue.viewpoints.concat();
+						toUpdate.viewpoints = newIssue.viewpoints.concat();
 
 						toUpdate.viewpoints.push(newViewpoint);
-						oldIssue.viewpoints.push(newViewpoint);
+						newIssue.viewpoints.push(newViewpoint);
 					}
 
 					fieldsCanBeUpdated.forEach((key) => {
 						if (data[key] !== undefined &&
-							(("[object Object]" !== fieldTypes[key] && "[object Array]" !== fieldTypes[key] && data[key] !== oldIssue[key])
-							|| !_.isEqual(oldIssue[key], data[key]))) {
+							(("[object Object]" !== fieldTypes[key] && "[object Array]" !== fieldTypes[key] && data[key] !== newIssue[key])
+							|| !_.isEqual(newIssue[key], data[key]))) {
 							if (null === data[key] || Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 								if ("comment" === key) {
-									const updatedComments = updateTextComments(dbCol.account, dbCol.model, oldIssue.comments, data, oldIssue._id, viewpointGUID);
+									const updatedComments = updateTextComments(dbCol.account, dbCol.model, newIssue.comments, data, newIssue._id, viewpointGUID);
 
 									toUpdate.comments = updatedComments;
-									oldIssue.comments = updatedComments;
+									newIssue.comments = updatedComments;
 								} else {
 									if (-1 === ownerPrivilegeAttributes.indexOf(key) || (user.isAdmin || user.hasOwnerJob)) {
-										if ("assigned_roles" === key) {
-											if (oldIssue.status === statusEnum.FOR_APPROVAL) {
-												// force status change to "in progress" if assigned roles during
-												// status is "for approval"
-												forceStatusChange = true;
-												toUpdate.status = statusEnum.IN_PROGRESS;
-												oldIssue.status = statusEnum.IN_PROGRESS;
-											}
-
-											if (this.isIssueAssignment(oldIssue, data)) {
-												notificationPromises.push(
-													Notification.removeAssignedNotifications(
-														data.owner,
-														dbCol.account,
-														dbCol.model,
-														oldIssue
-													)
-												);
-												notificationPromises.push(
-													Notification.upsertIssueAssignedNotifications(
-														data.owner,
-														dbCol.account,
-														dbCol.model,
-														data
-													)
-												);
-											}
+										if ("assigned_roles" === key && newIssue.status === statusEnum.FOR_APPROVAL) {
+											// force status change to "in progress" if assigned roles during
+											// status is "for approval"
+											forceStatusChange = true;
+											toUpdate.status = statusEnum.IN_PROGRESS;
+											newIssue.status = statusEnum.IN_PROGRESS;
 										} else if ("due_date" === key) {
 											if (data[key] === null) {
 												data[key] = undefined;
 											}
 										} else if ("priority" === key) {
 											toUpdate.priority_last_changed = (new Date()).getTime();
-											oldIssue.priority_last_changed = toUpdate.priority_last_changed;
+											newIssue.priority_last_changed = toUpdate.priority_last_changed;
 										}
 
-										if (!oldIssue.comments) {
-											oldIssue.comments = [];
+										if (!newIssue.comments) {
+											newIssue.comments = [];
 										}
 
 										if (!toUpdate.comments) {
-											toUpdate.comments = oldIssue.comments.concat();
+											toUpdate.comments = newIssue.comments.concat();
 										}
 
 										const systemComment = Comment.newSystemComment(
 											data.owner,
 											key,
-											oldIssue[key],
+											newIssue[key],
 											data[key]
 										);
 
 										toUpdate.comments.push(systemComment);
-										oldIssue.comments.push(systemComment);
+										newIssue.comments.push(systemComment);
 
-										ChatEvent.newComment(data.sessionId, dbCol.account, dbCol.model, oldIssue._id, systemComment);
+										ChatEvent.newComment(data.sessionId, dbCol.account, dbCol.model, newIssue._id, systemComment);
 
 										toUpdate[key] = data[key];
-										oldIssue[key] = data[key];
+										newIssue[key] = data[key];
+
+										if ("assigned_roles" === key && this.isIssueAssignment(oldIssue, newIssue)) {
+											notificationPromises.push(
+												Notification.removeAssignedNotifications(
+													data.owner,
+													dbCol.account,
+													dbCol.model,
+													oldIssue
+												)
+											);
+											notificationPromises.push(
+												Notification.upsertIssueAssignedNotifications(
+													data.owner,
+													dbCol.account,
+													dbCol.model,
+													newIssue
+												)
+											);
+										}
 									} else {
 										throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 									}
@@ -583,7 +583,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 						}
 					});
 
-					if (!forceStatusChange && data.hasOwnProperty("status") && data.status !== oldIssue.status) {
+					if (!forceStatusChange && data.hasOwnProperty("status") && data.status !== newIssue.status) {
 						const canChangeStatus = user.isAdmin ||
 							user.hasOwnerJob ||
 							(user.hasAssignedJob && data.status !== statusEnum.CLOSED);
@@ -591,41 +591,41 @@ issue.updateAttrs = function(dbCol, uid, data) {
 						if (canChangeStatus) {
 							// change status to for_approval if assigned roles is changed.
 							if (data.status === statusEnum.FOR_APPROVAL) {
-								toUpdate.assigned_roles = oldIssue.creator_role ? [oldIssue.creator_role] : [];
-								oldIssue.assigned_roles = toUpdate.assigned_roles;
+								toUpdate.assigned_roles = newIssue.creator_role ? [newIssue.creator_role] : [];
+								newIssue.assigned_roles = toUpdate.assigned_roles;
 							}
 
-							if (!oldIssue.comments) {
-								oldIssue.comments = [];
+							if (!newIssue.comments) {
+								newIssue.comments = [];
 							}
 
-							if (!toUpdate.comments && oldIssue.comments && oldIssue.comments.length > 0) {
-								toUpdate.comments = oldIssue.comments.concat();
+							if (!toUpdate.comments && newIssue.comments && newIssue.comments.length > 0) {
+								toUpdate.comments = newIssue.comments.concat();
 							}
 
-							const systemComment = Comment.newSystemComment(data.owner, "status", oldIssue.status, data.status);
+							const systemComment = Comment.newSystemComment(data.owner, "status", newIssue.status, data.status);
 
 							toUpdate.comments.push(systemComment);
-							oldIssue.comments.push(systemComment);
+							newIssue.comments.push(systemComment);
 
-							ChatEvent.newComment(data.sessionId, dbCol.account, dbCol.model, oldIssue._id, systemComment);
+							ChatEvent.newComment(data.sessionId, dbCol.account, dbCol.model, newIssue._id, systemComment);
 
 							toUpdate.status_last_changed = (new Date()).getTime();
-							oldIssue.status_last_changed = toUpdate.status_last_changed;
+							newIssue.status_last_changed = toUpdate.status_last_changed;
 
-							if (oldIssue.status !== "closed" && data.status === "closed") {
+							if (newIssue.status !== "closed" && data.status === "closed") {
 								notificationPromises.push(
 									Notification.removeAssignedNotifications(
 										data.owner,
 										dbCol.account,
 										dbCol.model,
-										oldIssue
+										newIssue
 									)
 								);
 							}
 
 							toUpdate.status = data.status;
-							oldIssue.status = data.status;
+							newIssue.status = data.status;
 						} else {
 							throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 						}
@@ -634,17 +634,19 @@ issue.updateAttrs = function(dbCol, uid, data) {
 					if (typeCorrect && Object.keys(toUpdate).length > 0) {
 						return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
 							return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
-								oldIssue = clean(dbCol, oldIssue);
+								newIssue = clean(dbCol, newIssue);
 
 								return Promise.all(notificationPromises).then((notifications) => {
 									notifications = _.flatten(notifications);
-									oldIssue.userNotifications = notifications;
+									newIssue.userNotifications = notifications;
+									console.log("====== notifications ======");
+									console.log(notifications);
 
 									if (data.comment) {
 										return data;
 									} else {
-										ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, oldIssue._id, oldIssue);
-										return oldIssue;
+										ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, newIssue._id, newIssue);
+										return newIssue;
 									}
 								});
 							});
