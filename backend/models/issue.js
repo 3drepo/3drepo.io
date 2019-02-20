@@ -639,8 +639,6 @@ issue.updateAttrs = function(dbCol, uid, data) {
 								return Promise.all(notificationPromises).then((notifications) => {
 									notifications = _.flatten(notifications);
 									newIssue.userNotifications = notifications;
-									console.log("====== notifications ======");
-									console.log(notifications);
 
 									if (data.comment) {
 										return data;
