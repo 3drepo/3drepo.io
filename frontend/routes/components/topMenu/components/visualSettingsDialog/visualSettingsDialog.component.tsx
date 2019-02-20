@@ -15,15 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Button, InputAdornment, List, MenuItem, Select, Switch } from '@material-ui/core';
+import { Field, Form, Formik } from 'formik';
 import * as React from 'react';
-
-import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { schema } from '../../../../../services/validation';
-import {Tabs, Tab, List,
-		Select, MenuItem, Switch, Input, InputAdornment, Button, Tooltip } from '@material-ui/core';
-import { NeutralActionButton, VisualSettingsButtonsContainer, VisualSettingsDialogContent,
-		FormListItem, ErrorTooltip, ShortInput, DialogTabs, DialogTab } from './visualSettingsDialog.styles';
+import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NeutralActionButton, ShortInput,
+	VisualSettingsButtonsContainer, VisualSettingsDialogContent } from './visualSettingsDialog.styles';
 
 const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
@@ -141,14 +139,14 @@ const Buttons = (props) => {
 interface IProps {
 	handleResolve: () => void;
 	handleClose: () => void;
-	settings: any;
+	visualSettings: any;
 }
 
 interface IState {
 	selectedTab: number;
 }
 
-export class SettingsDialog extends React.PureComponent<IProps, IState> {
+export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 	public state = {
 		selectedTab: 0
 	};
@@ -162,7 +160,7 @@ export class SettingsDialog extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const {selectedTab} = this.state;
-		const {settings} = this.props;
+		const {visualSettings} = this.props;
 
 		return (
 			<VisualSettingsDialogContent>
@@ -177,7 +175,7 @@ export class SettingsDialog extends React.PureComponent<IProps, IState> {
 				</DialogTabs>
 				<Formik
 					validationSchema={SettingsSchema}
-					initialValues={settings}
+					initialValues={visualSettings}
 					onSubmit={this.onSubmit}
 					>
 					<Form>

@@ -33,7 +33,7 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onLogout: AuthActions.logout,
-	showSettingsDialog: DialogActions.showSettingsDialog
+	showDialog: DialogActions.showDialog
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(TopMenu)));

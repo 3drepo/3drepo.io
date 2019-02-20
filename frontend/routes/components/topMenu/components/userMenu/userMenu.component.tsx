@@ -35,6 +35,7 @@ import {
 	UserIcon
 } from './userMenu.styles';
 import { Avatar } from '../../../avatar/avatar.component';
+import { VisualSettingsDialog } from '../visualSettingsDialog/visualSettingsDialog.component';
 
 const UserButton = ({ IconProps, Icon, ...props }) => (
 	<IconButton
@@ -92,7 +93,7 @@ const UserMenuContent = (props) => {
 			<UserMenuButton
 				Icon={Settings}
 				label="Visual Settings"
-				onButtonClick={invokeAndClose(props.showSettingsDialog.bind(null, props.visualSettings))}
+				onButtonClick={invokeAndClose(props.openSettingsDialog)}
 			/>
 			<MenuItem>
 				<MenuSwitch
@@ -125,6 +126,8 @@ interface IProps {
 	onLiteModeChange?: () => void;
 	onLogout?: () => void;
 	onTeamspacesClick?: () => void;
+	showDialog?: (config: any) => void;
+	visualSettings: any;
 }
 
 export class UserMenu extends React.PureComponent<IProps, any> {
@@ -136,14 +139,25 @@ export class UserMenu extends React.PureComponent<IProps, any> {
 		window.open('http://3drepo.org/support/', '_blank');
 	}
 
+	public openSettingsDialog = () => {
+		const {visualSettings} = this.props;
+		this.props.showDialog({
+				title: 'Visual Settings',
+				template: VisualSettingsDialog,
+				data: {visualSettings}
+		});
+	}
+
 	public renderMenuContent = (props) => {
 		const menuContentProps = {
+			...props,
 			...this.props,
 			openUserManual: this.openUserManual,
-			resetMemorySettings: this.resetMemorySettings
+			resetMemorySettings: this.resetMemorySettings,
+			openSettingsDialog: this.openSettingsDialog
 		};
 
-		return <UserMenuContent {...props} {...menuContentProps} />;
+		return <UserMenuContent {...menuContentProps} />;
 	}
 
 	public render() {
