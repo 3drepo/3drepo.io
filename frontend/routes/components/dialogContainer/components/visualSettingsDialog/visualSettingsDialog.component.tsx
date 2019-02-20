@@ -37,24 +37,23 @@ const BasicSettings = (props) => {
 				Shading
 				<Field name="shading" render={ ({ field }) => (
 					<Select {...field}>
-						<MenuItem value={0}>Standard</MenuItem>
-						<MenuItem value={1}>Architectural</MenuItem>
+						<MenuItem value="standard">Standard</MenuItem>
+						<MenuItem value="architectural">Architectural</MenuItem>
 					</Select>)} />
 			</FormListItem>
 			<FormListItem>
 				Shadows
 				<Field name="shadows" render={ ({ field }) => (
 					<Select {...field}>
-						<MenuItem value={0}>None</MenuItem>
-						<MenuItem value={1}>Soft</MenuItem>
-						<MenuItem value={2}>Hard</MenuItem>
+						<MenuItem value="none">None</MenuItem>
+						<MenuItem value="soft">Soft</MenuItem>
+						<MenuItem value="hard">Hard</MenuItem>
 					</Select>)} />
 			</FormListItem>
 			<FormListItem>
 				XRay highlighting
 				<Field name="xray" render={ ({ field }) => (
-					<Switch {...field} color="secondary" inputProps={{ 'aria-label': 'XRay highlighting' }}/>)}
-					/>
+					<Switch {...field} color="secondary" inputProps={{ 'aria-label': 'XRay highlighting' }}/>)}/>
 			</FormListItem>
 		</List>);
 };
@@ -98,8 +97,8 @@ const AdvancedSettings = (props) => {
 				Far plane algorithm
 				<Field name="farPlaneAlgorithm" render={ ({ field }) => (
 					<Select {...field}>
-						<MenuItem value={0}>Bounding box</MenuItem>
-						<MenuItem value={1}>Bounding sphere</MenuItem>
+						<MenuItem value="box">Bounding box</MenuItem>
+						<MenuItem value="sphere">Bounding sphere</MenuItem>
 					</Select>
 				)}/>
 			</FormListItem>

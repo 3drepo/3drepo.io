@@ -25,10 +25,29 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	removeMapSource: ['source'],
 	mapStart: [],
 	mapStop: [],
-	getScreenshot: []
+	getScreenshot: [],
+	updateSettings: ['settings'],
+	saveSettings: ['settings'],
+	loadSettings: []
 }, { prefix: 'VIEWER_' });
 
-export const INITIAL_STATE = {};
+const DEFAULT_SETTINGS = {
+	shading: 'standard',
+	shadows: 'none',
+	xray: true,
+	statistics: false,
+	memory: 2032,
+	nearPlane: 1,
+	farPlaneSamplingPoints: 5,
+	farPlaneAlgorithm: 'box'
+};
+
+export const INITIAL_STATE = {
+	settings: DEFAULT_SETTINGS
+};
+
+const updateSettings = (state = INITIAL_STATE, {settings}) => ({...state, settings});
 
 export const reducer = createReducer(INITIAL_STATE, {
+	[ViewerTypes.UPDATE_SETTINGS] : updateSettings
 });

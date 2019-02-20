@@ -92,7 +92,7 @@ const UserMenuContent = (props) => {
 			<UserMenuButton
 				Icon={Settings}
 				label="Visual Settings"
-				onButtonClick={invokeAndClose(props.showSettingsDialog)}
+				onButtonClick={invokeAndClose(props.showSettingsDialog.bind(null, props.visualSettings))}
 			/>
 			<MenuItem>
 				<MenuSwitch

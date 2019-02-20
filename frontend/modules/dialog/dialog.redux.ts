@@ -37,7 +37,7 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	hideDialog: [],
 	setPendingState: ['isPending'],
 	showScreenshotDialog: ['config'],
-	showSettingsDialog: []
+	showSettingsDialog: ['settings']
 }, { prefix: 'DIALOG_' });
 
 export const INITIAL_STATE = {
@@ -105,8 +105,8 @@ export const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 	return showDialog(state, {config});
 };
 
-export const showSettingsDialog = (state = INITIAL_STATE) => {
-	return showDialog(state, {config: {title: 'Visual Settings', template: SettingsDialog}});
+export const showSettingsDialog = (state = INITIAL_STATE, {settings}) => {
+	return showDialog(state, {config: {title: 'Visual Settings', template: SettingsDialog, data: {settings}}});
 };
 
 export const hideDialog = (state = INITIAL_STATE) => {
