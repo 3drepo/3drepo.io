@@ -79,7 +79,7 @@ function setupSSL() {
 	}
 }
 
-function createHTTPRedirectService(domain) {
+function createHTTPRedirectService(domain, hostNameOnly = true) {
 	const http_app = express();
 	const redirect = express();
 
@@ -95,16 +95,18 @@ function createHTTPRedirectService(domain) {
 		}
 	});
 
-	// listen on hostname not working on ie6, therefore listen on 0.0.0.0, and use vhost lib instead
-	http.createServer(http_app).listen(config.http_port, "0.0.0.0", function() {
-		systemLogger.logInfo("Starting routing HTTP for " + config.host + " service on port " + config.http_port);
-	});
+	if(hostNameOnly) {
+		// listen on hostname not working on ie6, therefore listen on 0.0.0.0, and use vhost lib instead
+		http.createServer(http_app).listen(config.http_port, "0.0.0.0", function() {
+			systemLogger.logInfo("Starting routing HTTP for " + config.host + " service on port " + config.http_port);
+		});
+	}
 
 }
 
 function handleHTTPSRedirect() {
 	if (config.HTTPSredirect) {
-		createHTTPRedirectService(config.host);
+		createHTTPRedirectService(config.host, false);
 		config.servers.forEach((server) => {
 			if (server.service === "frontend" && server.subdomain) {
 				createHTTPRedirectService(server.subdomain + "." + config.host);
