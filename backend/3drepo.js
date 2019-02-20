@@ -105,7 +105,7 @@ function createHTTPRedirectService(domain) {
 function handleHTTPSRedirect() {
 	if (config.HTTPSredirect) {
 		createHTTPRedirectService(config.host);
-		config.servers.foreach((server) => {
+		config.servers.forEach((server) => {
 			if (server.service === "frontend" && server.subdomain) {
 				createHTTPRedirectService(server.subdomain + "." + config.host);
 			}
