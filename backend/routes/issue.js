@@ -157,7 +157,6 @@ router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail
  * ]
  *
  */
-
 router.get("/issues.json", middlewares.issue.canView, listIssues);
 
 /**
@@ -170,7 +169,6 @@ router.get("/issues.json", middlewares.issue.canView, listIssues);
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  */
-
 router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
 
 /**
@@ -183,7 +181,6 @@ router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  */
-
 router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 
 /**
@@ -197,7 +194,6 @@ router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
  *
  * @apiDescription Get an issue screenshot from viewpoints using a viewpoint ID and issue ID.
  */
-
 router.get("/issues/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
 
 /**
@@ -211,7 +207,6 @@ router.get("/issues/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canV
  *
  * @apiSuccess (200) {Object} Issue Screenshot.
  */
-
 router.get("/issues/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
 
 /**
@@ -271,7 +266,6 @@ router.get("/issues/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue
  *	}
  * ]
  */
-
 router.get("/revision/:rid/issues.json", middlewares.issue.canView, listIssues);
 
 /**
@@ -286,7 +280,6 @@ router.get("/revision/:rid/issues.json", middlewares.issue.canView, listIssues);
  * @apiDescription Get Issues BCF export based on revision ID.
  *
  */
-
 router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
 
 /**

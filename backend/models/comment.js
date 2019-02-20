@@ -16,6 +16,7 @@
  */
 "use strict";
 
+const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 
 // TODO Utilise types for type checking
@@ -49,10 +50,14 @@ class CommentGenerator {
 class TextCommentGenerator extends CommentGenerator {
 	constructor(owner, revId, commentText, viewpointGUID) {
 		super(owner, revId);
-		this.comment = commentText;
+		if ("[object String]" === Object.prototype.toString.call(commentText) && commentText.length > 0) {
+			this.comment = commentText;
 
-		if (viewpointGUID) {
-			this.viewpoint = viewpointGUID;
+			if (viewpointGUID) {
+				this.viewpoint = viewpointGUID;
+			}
+		} else {
+			throw responseCodes.ISSUE_COMMENT_NO_TEXT;
 		}
 	}
 }

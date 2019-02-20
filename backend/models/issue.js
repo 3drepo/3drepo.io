@@ -213,7 +213,7 @@ function updateTextComments(account, model, comments, data, issueId, viewpointGU
 
 			ChatEvent.commentChanged(data.sessionId, account, model, issueId, data);
 		} else {
-			return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
+			throw responseCodes.ISSUE_COMMENT_SEALED;
 		}
 	} else if (data.delete && data.commentIndex >= 0 && comments.length > data.commentIndex) {
 		if (!comments[data.commentIndex].sealed) {
@@ -221,8 +221,10 @@ function updateTextComments(account, model, comments, data, issueId, viewpointGU
 
 			ChatEvent.commentDeleted(data.sessionId, account, model, issueId, data);
 		} else {
-			return Promise.reject({ resCode: responseCodes.ISSUE_COMMENT_SEALED });
+			throw responseCodes.ISSUE_COMMENT_SEALED;
 		}
+	} else if ((data.edit || data.delete) && comments.length <= data.commentIndex) {
+		throw responseCodes.ISSUE_COMMENT_INVALID_INDEX;
 	} else {
 		comments.forEach((comment) => {
 			comment.sealed = true;

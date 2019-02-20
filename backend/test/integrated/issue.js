@@ -1295,7 +1295,7 @@ describe("Issues", function () {
 				agent.put(`/${username}/${model}/issues/${issueId}.json`)
 					.send({comment})
 					.expect(400 , function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.MONGOOSE_VALIDATION_ERROR({}).value);
+						expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_NO_TEXT.value);
 						done(err);
 					});
 			});
