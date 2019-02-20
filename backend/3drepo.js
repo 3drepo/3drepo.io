@@ -79,7 +79,6 @@ function setupSSL() {
 	}
 }
 
-
 function handleHTTPSRedirect() {
 	if (config.HTTPSredirect) {
 		const http_app = express();
