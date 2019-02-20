@@ -124,15 +124,18 @@ const Buttons = (props) => {
 			>
 				Cancel
 			</NeutralActionButton>
-			<Button
-				color="secondary"
-				variant="raised"
-				disabled={false}
-				type="submit"
-				onClick={props.onClickSave}
-			>
-				Save
-			</Button>
+			<Field render={ ({ form }) => (
+						<Button
+						color="secondary"
+						variant="raised"
+						disabled={!form.isValid || form.isValidating}
+						type="submit"
+						onClick={props.onClickSave}
+						>
+						Save
+						</Button>
+			)} />
+
 		</VisualSettingsButtonsContainer>);
 };
 
@@ -158,6 +161,7 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 
 	public onSubmit = (values, { resetForm }) => {
 		this.props.updateSettings(values);
+		this.props.handleClose();
 	}
 
 	public render() {
