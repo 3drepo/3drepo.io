@@ -43,10 +43,14 @@ const DEFAULT_SETTINGS = {
 };
 
 export const INITIAL_STATE = {
-	settings: DEFAULT_SETTINGS
+	settings: window.localStorage.getItem('visualSettings') ?
+			JSON.parse(window.localStorage.getItem('visualSettings')) : DEFAULT_SETTINGS
 };
 
-const updateSettings = (state = INITIAL_STATE, {settings}) => ({...state, settings});
+const updateSettings = (state = INITIAL_STATE, {settings}) => {
+	window.localStorage.setItem('visualSettings', JSON.stringify(settings));
+	return {...state, settings};
+};
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerTypes.UPDATE_SETTINGS] : updateSettings

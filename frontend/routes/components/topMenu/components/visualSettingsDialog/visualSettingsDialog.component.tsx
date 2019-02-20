@@ -51,7 +51,7 @@ const BasicSettings = (props) => {
 			<FormListItem>
 				XRay highlighting
 				<Field name="xray" render={ ({ field }) => (
-					<Switch {...field} color="secondary" inputProps={{ 'aria-label': 'XRay highlighting' }}/>)}/>
+					<Switch checked={field.value} {...field} value="true" color="secondary" />)}/>
 			</FormListItem>
 		</List>);
 };
@@ -62,7 +62,7 @@ const AdvancedSettings = (props) => {
 			<FormListItem>
 				Show Statistics
 				<Field name="statistics" render={ ({ field }) => (
-					<Switch {...field} color="secondary" inputProps={{'aria-label': 'Show Statistics'}}/>
+					<Switch checked={field.value} {...field} value="true" color="secondary" />
 				)}/>
 			</FormListItem>
 			<FormListItem>
@@ -139,6 +139,7 @@ const Buttons = (props) => {
 interface IProps {
 	handleResolve: () => void;
 	handleClose: () => void;
+	updateSettings: (settings: any) => void;
 	visualSettings: any;
 }
 
@@ -156,6 +157,7 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public onSubmit = (values, { resetForm }) => {
+		this.props.updateSettings(values);
 	}
 
 	public render() {

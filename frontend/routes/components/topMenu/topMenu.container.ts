@@ -24,7 +24,7 @@ import { TopMenu } from './topMenu.component';
 import { selectCurrentUser } from '../../../modules/currentUser';
 import { AuthActions } from '../../../modules/auth';
 import { DialogActions } from '../../../modules/dialog';
-import { selectSettings } from '../../../modules/viewer';
+import { selectSettings, ViewerActions } from '../../../modules/viewer';
 
 const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
@@ -33,7 +33,8 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onLogout: AuthActions.logout,
-	showDialog: DialogActions.showDialog
+	showDialog: DialogActions.showDialog,
+	updateSettings: ViewerActions.updateSettings
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(TopMenu)));

@@ -127,7 +127,8 @@ interface IProps {
 	onLogout?: () => void;
 	onTeamspacesClick?: () => void;
 	showDialog?: (config: any) => void;
-	visualSettings: any;
+	updateSettings?: (settings: any) => void;
+	visualSettings?: any;
 }
 
 export class UserMenu extends React.PureComponent<IProps, any> {
@@ -140,11 +141,14 @@ export class UserMenu extends React.PureComponent<IProps, any> {
 	}
 
 	public openSettingsDialog = () => {
-		const {visualSettings} = this.props;
+		const {visualSettings, updateSettings} = this.props;
 		this.props.showDialog({
 				title: 'Visual Settings',
 				template: VisualSettingsDialog,
-				data: {visualSettings}
+				data: {
+					visualSettings,
+					updateSettings
+				}
 		});
 	}
 
