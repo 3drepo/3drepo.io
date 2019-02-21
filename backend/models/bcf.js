@@ -535,12 +535,12 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 
 				zipfile.on("end", () => {
 
-					let issueCounter;
+					let issueCounter = 0;
 
-					Issue.count({account, model}).then(count => {
-
-						issueCounter = count;
-
+					Issue.getIssuesList({account, model}, requester.user, branch, revId).then(issuesList => {
+						if (issuesList) {
+							issueCounter = issuesList.length;
+						}
 					}).then(() => {
 
 						return Promise.all(promises);
