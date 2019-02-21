@@ -15,6 +15,9 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { subscribe } from '../../../helpers/migration';
+import { selectShadowSetting } from '../../../modules/viewer';
+
 class ViewerController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -38,6 +41,7 @@ class ViewerController implements ng.IController {
 	private deviceMemory: any;
 	private cancelPinWatcher: any;
 	private cancelEventWatcher: any;
+	private shadowsSetting: string;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -66,6 +70,10 @@ class ViewerController implements ng.IController {
 
 		this.viewer = this.ViewerService.getViewer();
 		this.watchers();
+
+		subscribe(this , {
+			shadowsSetting: selectShadowSetting
+		});
 	}
 
 	public $onDestroy() {
@@ -93,6 +101,8 @@ class ViewerController implements ng.IController {
 				this.ViewerService.handleEvent(event, this.account, this.model);
 			}
 		});
+
+		this.$scope.$watch(() => this.shadowsSetting, this.ViewerService.setShadows);
 	}
 }
 
@@ -102,7 +112,8 @@ export const ViewerComponent: ng.IComponentOptions = {
 			branch: '<',
 			model: '<',
 			revision: '<',
-			deviceMemory: '<'
+			deviceMemory: '<',
+			shadowSetting: '<'
 		},
 		controller: ViewerController,
 		controllerAs: 'vm'

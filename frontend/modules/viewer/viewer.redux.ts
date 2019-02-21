@@ -16,6 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { DEFAULT_SETTINGS } from '../../constants/viewer';
 
 export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	waitForViewer: [],
@@ -30,17 +31,6 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	saveSettings: ['settings'],
 	loadSettings: []
 }, { prefix: 'VIEWER_' });
-
-const DEFAULT_SETTINGS = {
-	shading: 'standard',
-	shadows: 'none',
-	xray: true,
-	statistics: false,
-	memory: 2032,
-	nearPlane: 1,
-	farPlaneSamplingPoints: 5,
-	farPlaneAlgorithm: 'box'
-};
 
 export const INITIAL_STATE = {
 	settings: window.localStorage.getItem('visualSettings') ?

@@ -22,3 +22,7 @@ export const selectViewerDomain = (state) => Object.assign({}, state.viewer);
 export const selectSettings = createSelector(
 	selectViewerDomain, (state) => state.settings
 );
+
+export const selectShadowSetting = createSelector(
+	selectSettings, (state) => state.shadows
+);

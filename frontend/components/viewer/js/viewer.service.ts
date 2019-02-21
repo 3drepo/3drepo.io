@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { UnityUtil } from '../../../globals/unity-util';
+
 declare const Viewer: any;
 
 export class ViewerService {
@@ -41,6 +43,8 @@ export class ViewerService {
 	private model: string;
 	private account: string;
 	private heliSpeed: number = 1;
+
+	private stats: boolean;
 
 	constructor(
 		public $q: ng.IQService,
@@ -608,6 +612,27 @@ export class ViewerService {
 		this.viewer.off(...args);
 	}
 
+	public setShadows(type: string) {
+		switch (type) {
+			case 'soft':
+				UnityUtil.enableSoftShadows();
+				break;
+			case 'hard':
+				UnityUtil.enableHardShadows();
+				break;
+			case 'none':
+				UnityUtil.disableShadows();
+				break;
+		}
+	}
+
+	public setStats(val: boolean) {
+		if (val !== this.stats) {
+			UnityUtil.toggleStats();
+			this.stats =  val;
+		}
+	}
+
 	private helicopterSpeedUpdate(value: number) {
 		if (this.account && this.model && Number.isInteger(value)) {
 			this.heliSpeed = value;
@@ -629,7 +654,6 @@ export class ViewerService {
 			});
 		}
 	}
-
 }
 
 export const ViewerServiceModule = angular

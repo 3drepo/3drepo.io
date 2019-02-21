@@ -187,7 +187,7 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 					<Form>
 						{selectedTab === 0 && <BasicSettings />}
 						{selectedTab === 1 && <AdvancedSettings />}
-						<Buttons onClickCancel={this.props.handleClose}/>
+						<Buttons  onClickCancel={this.props.handleClose}/>
 					</Form>
 				</Formik>
 			</VisualSettingsDialogContent>
