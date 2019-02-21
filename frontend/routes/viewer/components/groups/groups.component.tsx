@@ -25,10 +25,12 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { Container } from './groups.styles';
 import { ListContainer, Summary } from './../risks/risks.styles';
+import { GroupsListItem } from './components/groupsListItem/groupsListItem.component';
 
 interface IProps {
 	isPending?: boolean;
 	showDetails?: boolean;
+	groups: any[];
 	closeDetails: () => void;
 }
 
@@ -47,11 +49,47 @@ export class Groups extends React.PureComponent<IProps, any> {
 	public renderActions = () => {
 		return [];
 	}
+	
+	public componentDidMount = () => {
+		console.log('cdm this.props.groups',this.props.groups);
+	}
+
+	public componentDidUpdate = () => {
+		console.log('cdm this.props.groups',this.props.groups);
+	}
+
+	public selectGroup = (group) => () => {
+		console.log('select group', group)
+	}
+
+	public handleShowGroupDetails = (group) => () => {
+		// this.props.showGroupDetails(group);
+		console.log('show group details', group)
+
+	}
+
+	public renderGroupsList = renderWhenTrue(() => {
+		const Items = this.props.groups.map((group, index) => (
+			<GroupsListItem
+				{...group}
+				key={index}
+				onItemClick={this.selectGroup(group)}
+				onArrowClick={this.handleShowGroupDetails(group)}
+				// active={this.props.activeGroupId === group._id} active przychodzi z BE
+				// hasViewPermission={this.hasPermission(VIEW_ISSUE)}
+				// modelLoaded={this.state.modelLoaded}
+			/>
+		));
+
+		return <ListContainer>{Items}</ListContainer>;
+	});
+
 
 	public renderListView = renderWhenTrue(() => (
 		<>
 			<ViewerPanelContent className="height-catcher">
-				groupsContent
+			{this.renderGroupsList(this.props.groups.length)}
+
 			</ViewerPanelContent>
 			<ViewerPanelFooter alignItems="center" justify="space-between">
 				<Summary>
@@ -72,15 +110,15 @@ export class Groups extends React.PureComponent<IProps, any> {
 	public render() {
 		return (
 			<ViewerPanel
-			title="Groups"
-			Icon={this.renderTitleIcon()}
-			actions={this.renderActions()}
-			pending={this.props.isPending}
-		>
-			{/* {this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
-			{this.renderDetailsView(this.props.showDetails)} */}
-			{this.renderListView(!this.props.showDetails)}
-		</ViewerPanel>
+				title="Groups"
+				Icon={this.renderTitleIcon()}
+				actions={this.renderActions()}
+				pending={this.props.isPending}
+			>
+				{/* {this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
+				{this.renderDetailsView(this.props.showDetails)} */}
+				{this.renderListView(!this.props.showDetails)}
+			</ViewerPanel>
 		);
 	}
 }

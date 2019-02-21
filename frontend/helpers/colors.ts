@@ -29,3 +29,25 @@ export const hexToRgba = (hex, alpha = 1) => {
 	const {red, green, blue} = parseHex(hex);
 	return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 };
+
+export const getRGBA = (color) => {
+	const red = parseInt(color[0], 10);
+	const blue = parseInt(color[1], 10);
+	const green = parseInt(color[2], 10);
+	return `rgba(${red}, ${blue}, ${green}, 1)`;
+}
+
+export const getGroupRGBAColor = (groupColor) => {
+	if (groupColor) {
+		return this.getRGBA(groupColor);
+	}
+	return 'rgba(255, 255, 255, 1)';
+}
+
+export const getRandomColor = () => {
+	return [
+		parseInt((Math.random() * 255).toFixed(0), 10),
+		parseInt((Math.random() * 255).toFixed(0), 10),
+		parseInt((Math.random() * 255).toFixed(0), 10)
+	];
+}

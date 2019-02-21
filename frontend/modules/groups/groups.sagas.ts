@@ -25,11 +25,12 @@ export function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(true));
 	try {
 		const {data} = yield API.getGroups(teamspace, modelId, revision);
-
+		console.log('fetched', data);
 		yield put(GroupsActions.fetchGroupsSuccess(data));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'groups', error));
 	}
+	console.log('changed to false?');
 	yield put(GroupsActions.togglePendingState(false));
 }
 

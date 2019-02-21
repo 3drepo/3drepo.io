@@ -40,4 +40,6 @@ export const fetchGroupsSuccess = (state = INITIAL_STATE, { groups = [] }) => {
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
+	[GroupsTypes.FETCH_GROUPS_SUCCESS]: fetchGroupsSuccess,
+	[GroupsTypes.TOGGLE_PENDING_STATE]: togglePendingState
 });

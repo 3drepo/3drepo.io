@@ -15,16 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import FontAwesomeIconComponent from './fontAwesomeIcon.component';
+import styled from 'styled-components';
 
-export const FontAwesomeIcon = FontAwesomeIconComponent;
+export const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  flex: 1;
+`;
 
-// Before add new icon's component, add required fa icon to library in "services/fontAwesome"
-export const Eraser = (props) => <FontAwesomeIconComponent {...props} icon="eraser" />;
+export const Info = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+`;
 
-export const Eye = (props) => <FontAwesomeIconComponent {...props} icon="eye" />;
+export const AuthorWrapper = styled.div`
+  display: flex;
+`;
 
-export const Tint = (props) => <FontAwesomeIconComponent {...props} icon="tint" />;
-
-export const HandPaper = (props) => <FontAwesomeIconComponent {...props} icon="hand-paper" />;
+export const Actions = styled.div`
+  display: flex;
+`;
