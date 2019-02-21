@@ -16,7 +16,7 @@
  */
 
 import { subscribe } from '../../../helpers/migration';
-import { selectShadowSetting } from '../../../modules/viewer';
+import { selectShadowSetting, selectStatsSetting } from '../../../modules/viewer';
 
 class ViewerController implements ng.IController {
 
@@ -42,6 +42,7 @@ class ViewerController implements ng.IController {
 	private cancelPinWatcher: any;
 	private cancelEventWatcher: any;
 	private shadowsSetting: string;
+	private statsSetting: boolean;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -72,7 +73,8 @@ class ViewerController implements ng.IController {
 		this.watchers();
 
 		subscribe(this , {
-			shadowsSetting: selectShadowSetting
+			shadowsSetting: selectShadowSetting,
+			statsSetting: selectStatsSetting
 		});
 	}
 
@@ -103,6 +105,8 @@ class ViewerController implements ng.IController {
 		});
 
 		this.$scope.$watch(() => this.shadowsSetting, this.ViewerService.setShadows);
+
+		this.$scope.$watch(() => this.statsSetting, this.ViewerService.setStats.bind(this.ViewerService));
 	}
 }
 

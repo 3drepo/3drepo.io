@@ -44,7 +44,7 @@ export class ViewerService {
 	private account: string;
 	private heliSpeed: number = 1;
 
-	private stats: boolean;
+	private stats: boolean = false;
 
 	constructor(
 		public $q: ng.IQService,
@@ -626,7 +626,7 @@ export class ViewerService {
 		}
 	}
 
-	public setStats(val: boolean) {
+	public setStats(val: boolean = false) {
 		if (val !== this.stats) {
 			UnityUtil.toggleStats();
 			this.stats =  val;

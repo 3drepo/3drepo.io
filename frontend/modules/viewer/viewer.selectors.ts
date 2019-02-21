@@ -26,3 +26,7 @@ export const selectSettings = createSelector(
 export const selectShadowSetting = createSelector(
 	selectSettings, (state) => state.shadows
 );
+
+export const selectStatsSetting = createSelector(
+	selectSettings, (state) => state.statistics
+);
