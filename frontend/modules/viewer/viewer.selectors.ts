@@ -38,3 +38,7 @@ export const selectNearPlaneSetting = createSelector(
 export const selectFarPlaneAlgorithm = createSelector(
 	selectSettings, (state) => state.farPlaneAlgorithm
 );
+
+export const selectShadingSetting = createSelector(
+	selectSettings, (state) => state.shading
+);

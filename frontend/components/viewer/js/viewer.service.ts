@@ -649,6 +649,10 @@ export class ViewerService {
 		}
 	}
 
+	public setShading(shading: string) {
+		// Missing shading call;
+	}
+
 	private helicopterSpeedUpdate(value: number) {
 		if (this.account && this.model && Number.isInteger(value)) {
 			this.heliSpeed = value;
