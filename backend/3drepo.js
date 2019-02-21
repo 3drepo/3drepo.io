@@ -81,12 +81,16 @@ function setupSSL() {
 
 function handleHTTPSRedirect() {
 	if (config.HTTPSredirect) {
-
 		const http_app = express();
 		const redirect = express();
 
 		// If someone tries to access the site through http redirect to the encrypted site.
 		http_app.use(vhost(config.host, redirect));
+		config.servers.forEach((server) => {
+			if (server.service === "frontend" && server.subdomain) {
+				http_app.use(vhost(server.subdomain + "." + config.host, redirect));
+			}
+		});
 		redirect.get("*", function(req, res) {
 			// Do not redirect if user uses IE6 because it doesn"t suppotr TLS 1.2
 			const isIe = req.headers["user-agent"].toLowerCase().indexOf("msie 6") === -1;
