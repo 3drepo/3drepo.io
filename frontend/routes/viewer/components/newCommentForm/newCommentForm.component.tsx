@@ -101,8 +101,9 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSave = (values, form) => {
-		values.screenshot = values.screenshot.substring(values.screenshot.indexOf(',') + 1);
-		this.props.onSave(values);
+		const screenshot = this.state.newScreenshot.substring(this.state.newScreenshot.indexOf(',') + 1);
+		const commentValues = { ...values, screenshot };
+		this.props.onSave(commentValues);
 		form.resetForm();
 		this.setState({ newScreenshot: ''});
 	}
@@ -209,7 +210,6 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 					initialValues={{ comment: '', screenshot: this.state.newScreenshot }}
 					validationSchema={NewCommentSchema}
 					onSubmit={this.handleSave}
-					enableReinitialize={true}
 				>
 					<StyledForm>
 						{this.renderCommentField(!hideComment)}
