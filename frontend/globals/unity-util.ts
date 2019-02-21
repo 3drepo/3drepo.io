@@ -886,7 +886,7 @@ export class UnityUtil {
 	/**
 	 * Set the default near plane value. This can be use to tweak situations where
 	 * geometry closest to you are being clipped
-	* @param {number[]} value - the closest distance the camera will render. (default is 0.1)
+	* @param {number} value - the closest distance the camera will render. (default is 0.1)
 	 */
 	public static setDefaultNearPlane(value) {
 		UnityUtil.toUnity('DefaultNearPlaneValue', UnityUtil.LoadingState.VIEWER_READY, value);

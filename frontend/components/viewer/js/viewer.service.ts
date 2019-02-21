@@ -633,6 +633,11 @@ export class ViewerService {
 		}
 	}
 
+	public setNearPlane(nearplane: number) {
+		if (nearplane === undefined) { return; }
+		UnityUtil.setDefaultNearPlane(nearplane);
+	}
+
 	private helicopterSpeedUpdate(value: number) {
 		if (this.account && this.model && Number.isInteger(value)) {
 			this.heliSpeed = value;

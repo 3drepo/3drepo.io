@@ -16,7 +16,7 @@
  */
 
 import { subscribe } from '../../../helpers/migration';
-import { selectShadowSetting, selectStatsSetting } from '../../../modules/viewer';
+import { selectShadowSetting, selectStatsSetting, selectNearPlaneSetting } from '../../../modules/viewer';
 
 class ViewerController implements ng.IController {
 
@@ -43,6 +43,7 @@ class ViewerController implements ng.IController {
 	private cancelEventWatcher: any;
 	private shadowsSetting: string;
 	private statsSetting: boolean;
+	private nearPlaneSetting: number;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -74,7 +75,8 @@ class ViewerController implements ng.IController {
 
 		subscribe(this , {
 			shadowsSetting: selectShadowSetting,
-			statsSetting: selectStatsSetting
+			statsSetting: selectStatsSetting,
+			nearPlaneSetting: selectNearPlaneSetting
 		});
 	}
 
@@ -107,6 +109,8 @@ class ViewerController implements ng.IController {
 		this.$scope.$watch(() => this.shadowsSetting, this.ViewerService.setShadows);
 
 		this.$scope.$watch(() => this.statsSetting, this.ViewerService.setStats.bind(this.ViewerService));
+
+		this.$scope.$watch(() => this.nearPlaneSetting, this.ViewerService.setNearPlane);
 	}
 }
 

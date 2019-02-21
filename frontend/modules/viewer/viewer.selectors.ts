@@ -30,3 +30,7 @@ export const selectShadowSetting = createSelector(
 export const selectStatsSetting = createSelector(
 	selectSettings, (state) => state.statistics
 );
+
+export const selectNearPlaneSetting = createSelector(
+	selectSettings, (state) => state.nearPlane
+);

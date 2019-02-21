@@ -160,6 +160,8 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public onSubmit = (values, { resetForm }) => {
+		values.nearPlane = Number(values.nearPlane);
+		values.memory = Number(values.memory);
 		this.props.updateSettings(values);
 		this.props.handleClose();
 	}
