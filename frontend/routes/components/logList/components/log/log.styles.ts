@@ -93,5 +93,5 @@ export const MessageContainer = styled.div`
 export const RemoveButtonWrapper = styled.div`
   position: absolute;
   right: 0;
-  top: 0;
-`;
+  top: ${(props: any) => props.screenshot ? 0 : '-8px'};
+` as any;

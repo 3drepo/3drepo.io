@@ -71,7 +71,7 @@ export class Log extends React.PureComponent<IProps, any> {
 	}
 
 	public renderRemoveButton = renderWhenTrue(() => (
-		<RemoveButtonWrapper>
+		<RemoveButtonWrapper screenshot={this.isScreenshot}>
 			<TooltipButton
 				label="Remove"
 				action={this.removeComment}
