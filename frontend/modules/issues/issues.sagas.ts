@@ -34,7 +34,7 @@ import {
 	selectActiveIssueDetails,
 	selectFilteredIssues
 } from './issues.selectors';
-import { selectJobsList } from '../jobs';
+import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentUser } from '../currentUser';
 import { PIN_COLORS } from '../../styles';
 import { PRIORITIES, STATUSES } from '../../constants/issues';
@@ -111,11 +111,13 @@ const toggleIssuePin = (issue, selected = true) => {
 export function* saveIssue({ teamspace, model, issueData, revision }) {
 	try {
 		yield Viewer.setPinDropMode(false);
+		const myJob = yield select(selectMyJob);
+
 		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
 			Viewer.getCurrentViewpoint({ teamspace, model }),
 			Viewer.getObjectsStatus(),
 			issueData.screenshot || Viewer.getScreenshot(),
-			API.getMyJob(teamspace)
+			myJob
 		]);
 
 		const TreeService = getAngularService('TreeService') as any;
@@ -144,7 +146,7 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 			owner: issueData.author,
 			rev_id: revision,
 			objectId: null,
-			creator_role: userJob.data._id,
+			creator_role: userJob._id,
 			viewpoint,
 			pickedPos: null,
 			pickedNorm: null,
@@ -168,8 +170,8 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(savedIssue, jobs);
 
-		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(IssuesActions.showDetails(savedIssue, [], revision));
+		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue created'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('save', 'issue', error));
@@ -269,7 +271,7 @@ export function* renderPins() {
 					const isSelectedPin = activeIssueId && issue._id === activeIssueId;
 					const pinColor = isSelectedPin ? PIN_COLORS.YELLOW : PIN_COLORS.BLUE;
 
-					yield Viewer.addPin({
+					Viewer.addPin({
 						id: issue._id,
 						type: 'issue',
 						account: issue.account,

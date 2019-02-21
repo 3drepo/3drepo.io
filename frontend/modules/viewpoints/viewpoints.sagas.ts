@@ -151,10 +151,7 @@ export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
 }
 
 export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
-	try {
-		yield put(ViewpointsActions.setComponentState({ activeViewpoint: view }));
-
-		const ViewerService = yield getAngularService('ViewerService') as any;
+	const ViewerService = yield getAngularService('ViewerService') as any;
 
 	if (view) {
 		if (view.viewpoint) {
@@ -176,7 +173,7 @@ export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
 
 export function* showViewpoint({ teamspace, modelId, view }) {
 	try {
-		yield put(ViewpointsActions.setComponentState({ activeViewpointId: view._id }));
+		yield put(ViewpointsActions.setComponentState({ activeViewpoint: view }));
 		yield put(ViewpointsActions.setCameraOnViewpoint(teamspace, modelId, view));
 	} catch (error) {
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: null }));

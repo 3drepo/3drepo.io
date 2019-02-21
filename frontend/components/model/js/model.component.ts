@@ -17,15 +17,14 @@
 
 import { dispatch, getState, subscribe } from '../../../helpers/migration';
 import { selectCurrentUser, CurrentUserActions } from '../../../modules/currentUser';
-import { selectRisks, selectRisksMap } from '../../../modules/risks';
+import { selectRisksMap } from '../../../modules/risks';
+import { selectIssuesMap } from '../../../modules/issues';
 import { ModelActions, selectSettings, selectIsPending } from '../../../modules/model';
 import { TreeActions } from '../../../modules/tree';
 import { ViewpointsActions } from '../../../modules/viewpoints';
-import { JobsActions, selectJobs } from '../../../modules/jobs';
+import { JobsActions } from '../../../modules/jobs';
 import { RisksActions } from '../../../modules/risks';
 import { GroupsActions } from '../../../modules/groups';
-import { prepareRisk } from '../../../helpers/risks';
-import { searchByFilters } from '../../../helpers/searching';
 import { VIEWER_EVENTS } from '../../../constants/viewer';
 import { IssuesActions } from '../../../modules/issues';
 
@@ -147,15 +146,16 @@ class ModelController implements ng.IController {
 	public onPinClick = ({ id }) => {
 		const currentState = getState();
 		const risksMap = selectRisksMap(currentState);
+		const issuesMap = selectIssuesMap(currentState);
 
 		if (risksMap[id]) {
-			const risks = selectRisks(currentState);
-			const jobs = selectJobs(currentState);
-			const preparedRisks = risks.map((risk) => prepareRisk(risk, jobs));
-			const filteredRisks = searchByFilters(preparedRisks, []);
-
-			dispatch(RisksActions.showDetails(risksMap[id], filteredRisks, this.revision));
+			dispatch(RisksActions.showDetails(risksMap[id], this.revision));
 			this.PanelService.showPanelsByType('risks');
+		}
+
+		if (issuesMap[id]) {
+			dispatch(IssuesActions.showDetails(issuesMap[id], this.revision));
+			this.PanelService.showPanelsByType('issues');
 		}
 	}
 
@@ -170,15 +170,12 @@ class ModelController implements ng.IController {
 		});
 
 		this.$scope.$watch(this.EventService.currentEvent, (event) => {
-
 			this.event = event;
 
 			if (event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 				this.pointerEvents = event.value.on ? 'none' : 'inherit';
 			}
-
 		});
-
 	}
 
 	public handleModelError() {

@@ -18,6 +18,7 @@ import { DateField } from '../../../../../components/dateField/dateField.compone
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { canChangeBasicProperty, canChangeStatus, canChangeAssigned } from '../../../../../../helpers/issues';
 import { TextField } from '../../../../../components/textField/textField.component';
+import { DescriptionImage } from './issueDetails.styles';
 
 interface IProps {
 	issue: any;
@@ -162,10 +163,15 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							validationSchema={IssueSchema}
 						/>
 					)} />
-					{this.props.issue.descriptionThumbnail && <Image
-						src={this.props.issue.descriptionThumbnail}
-						enablePreview
-					/>}
+
+					{this.props.issue.descriptionThumbnail && (
+						<DescriptionImage>
+							<Image
+								src={this.props.issue.descriptionThumbnail}
+								enablePreview
+							/>
+						</DescriptionImage>
+					)}
 				</Form>
 			</MuiPickersUtilsProvider>
 		);

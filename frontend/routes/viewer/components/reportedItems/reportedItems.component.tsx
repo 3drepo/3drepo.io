@@ -136,7 +136,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 			this.setState({ modelLoaded: true });
 		}
 
-		this.toggleRiskPinEvent(true);
 		this.toggleModelLoadedEvent(true);
 		this.setState({ filteredItems: this.filteredItems });
 	}
@@ -161,13 +160,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
-		this.toggleRiskPinEvent(false);
 		this.toggleModelLoadedEvent(false);
-	}
-
-	public toggleRiskPinEvent = (enabled: boolean) => {
-		const resolver = enabled ? 'on' : 'off';
-		Viewer[resolver](VIEWER_EVENTS.CLICK_PIN, this.handlePinClick);
 	}
 
 	public toggleModelLoadedEvent = (enabled: boolean) => {
@@ -177,14 +170,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public handleLoadedModel = () => {
 		this.setState({ modelLoaded: true });
-	}
-
-	public handlePinClick = ({ id }) => {
-		const relatedRisk = this.state.filteredItems.find((item) => item._id === id);
-
-		if (relatedRisk) {
-			this.handleShowRiskDetails(relatedRisk)();
-		}
 	}
 
 	public hasPermission = (permission) => {
@@ -213,6 +198,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public handleCloseSearchMode = () => {
 		this.props.onToggleFilters(false);
+		this.props.onChangeFilters([]);
 		this.setState({
 			filteredItems: this.props.items
 		});

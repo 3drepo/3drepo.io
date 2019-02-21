@@ -62,7 +62,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	closeDetails: RisksActions.closeDetails,
 	saveRisk: RisksActions.saveRisk,
 	setFilters: RisksActions.setFilters
-	onFiltersChange: RisksActions.onFiltersChange
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Risks)));

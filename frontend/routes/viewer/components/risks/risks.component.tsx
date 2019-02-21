@@ -66,7 +66,6 @@ interface IProps {
 	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
 	saveRisk: (teamspace, modelId, risk) => void;
 	setFilters: (filters) => void;
-	onFiltersChange: (selectedFilters) => void;
 }
 
 const UNASSIGNED_JOB = {
