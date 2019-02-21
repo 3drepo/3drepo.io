@@ -54,6 +54,20 @@
 	router.get("/billingInfo", middlewares.isAccountAdmin, getBillingInfo);
 
 	/**
+	* @api {get} /members/:user Get Member details
+	* @apiName getMemberList
+	* @apiGroup Teamspace
+	*/
+	router.get("/members/:user", middlewares.isTeamspaceMember, getTeamMemberInfo);
+
+	/**
+	* @api {get} /members/:user Get Member details
+	* @apiName getMemberList
+	* @apiGroup Teamspace
+	*/
+	router.get("/members/:user", middlewares.isTeamspaceMember, getTeamMemberInfo);
+
+	/**
 	 * @api {delete} /:teamspace/members/:user Remove a team member
 	 * @apiName removeTeamMember
 	 * @apiGroup Teamspace
@@ -125,6 +139,18 @@
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
+	}
+
+	function getTeamMemberInfo(req, res, next) {
+		User.getTeamMemberInfo(
+			req.params.account,
+			req.params.user
+		).then(info => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, info);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+
 	}
 
 	function getMemberList(req, res, next) {

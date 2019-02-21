@@ -73,7 +73,7 @@ export const ViewerPanelFooter = styled(Grid).attrs({
 	padding: 0 16px;
 	border-top: 1px solid ${COLOR.BLACK_20};
 	flex: none;
-	height: 65px;
+	min-height: 65px;
 	font-size: 14px;
 `;
 

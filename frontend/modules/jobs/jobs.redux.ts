@@ -27,12 +27,15 @@ export const { Types: JobsTypes, Creators: JobsActions } = createActions({
 	fetchJobsColorsSuccess: ['colors'],
 	removeJobSuccess: ['jobId'],
 	updateJobColor: ['teamspace', 'job'],
-	updateJobSuccess: ['job']
+	updateJobSuccess: ['job'],
+	getMyJob: ['teamspace'],
+	getMyJobSuccess: ['myJob']
 }, { prefix: 'JOBS_' });
 
 export const INITIAL_STATE = {
 	jobs: [],
-	colors: []
+	colors: [],
+	myJob: {}
 };
 export const fetchJobsSuccess = (state = INITIAL_STATE, { jobs }) => ({ ...state, jobs });
 
@@ -72,10 +75,15 @@ export const removeJobSuccess = (state = INITIAL_STATE, { jobId }) => {
 	return {...state, jobs};
 };
 
+export const getMyJobSuccess = (state = INITIAL_STATE, { myJob }) => {
+	return {...state, myJob};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[JobsTypes.FETCH_JOBS_SUCCESS]: fetchJobsSuccess,
 	[JobsTypes.FETCH_JOBS_COLORS_SUCCESS]: fetchJobsColorsSuccess,
 	[JobsTypes.CREATE_JOB_SUCCESS]: createJobSuccess,
 	[JobsTypes.UPDATE_JOB_SUCCESS]: updateJobSuccess,
-	[JobsTypes.REMOVE_JOB_SUCCESS]: removeJobSuccess
+	[JobsTypes.REMOVE_JOB_SUCCESS]: removeJobSuccess,
+	[JobsTypes.GET_MY_JOB_SUCCESS]: getMyJobSuccess
 });

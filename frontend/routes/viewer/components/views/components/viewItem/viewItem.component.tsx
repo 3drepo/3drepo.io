@@ -78,6 +78,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 						<NewViewpointName
 							{...field}
 							onChange={this.handleNameChange(field)}
+							fullWidth
 							error={Boolean(form.errors.name)}
 							helperText={form.errors.name}
 							label="View name"

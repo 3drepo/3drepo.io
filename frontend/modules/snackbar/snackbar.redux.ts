@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { omit, isString } from 'lodash';
+import { isString } from 'lodash';
 import { SnackbarProps } from '@material-ui/core/Snackbar';
 
 export const { Types: SnackbarTypes, Creators: SnackbarActions } = createActions({
