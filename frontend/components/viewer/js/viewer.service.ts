@@ -638,6 +638,17 @@ export class ViewerService {
 		UnityUtil.setDefaultNearPlane(nearplane);
 	}
 
+	public setFarPlaneAlgorithm(algorithm: string) {
+		switch (algorithm) {
+			case 'box':
+				UnityUtil.useBoundingBoxFarPlaneAlgorithm();
+				break;
+			case 'sphere':
+				UnityUtil.useBoundingSphereFarPlaneAlgorithm();
+				break;
+		}
+	}
+
 	private helicopterSpeedUpdate(value: number) {
 		if (this.account && this.model && Number.isInteger(value)) {
 			this.heliSpeed = value;

@@ -34,3 +34,7 @@ export const selectStatsSetting = createSelector(
 export const selectNearPlaneSetting = createSelector(
 	selectSettings, (state) => state.nearPlane
 );
+
+export const selectFarPlaneAlgorithm = createSelector(
+	selectSettings, (state) => state.farPlaneAlgorithm
+);
