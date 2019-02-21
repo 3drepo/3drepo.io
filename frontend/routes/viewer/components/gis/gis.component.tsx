@@ -167,7 +167,6 @@ export class Gis extends React.PureComponent<IProps, IState> {
 			return (
 				<IconButton
 					disabled={!this.state.pointsExists}
-					disableRipple={true}
 					onClick={this.handleToggleSettings}>
 						<ArrowBackIcon />
 				</IconButton>

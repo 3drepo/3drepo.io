@@ -69,3 +69,7 @@ export const deleteJob = (teamspace, jobId): Promise<any> => {
 export const updateJob = (teamspace, job): Promise<any> => {
 	return api.put(`${teamspace}/jobs/${job._id}`, job);
 };
+
+export const getMyJob = (teamspace): Promise<any> => {
+	return api.get(`${teamspace}/myJob`);
+};

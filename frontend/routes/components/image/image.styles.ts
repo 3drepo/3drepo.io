@@ -16,6 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
+import * as Img from 'react-image';
 
 const previewStateStyles = css`
 	cursor: pointer;
@@ -26,8 +27,11 @@ const previewStateStyles = css`
 	}
 `;
 
-export const StyledImage = styled.img`
+export const Container = styled.div`
+	${(props: any) => props.enablePreview && previewStateStyles}
+` as any;
+
+export const StyledImage = styled(Img)`
 	width: 100%;
 	object-fit: cover;
-	${(props: any) => props.enablePreview && previewStateStyles}
 ` as any;

@@ -22,6 +22,7 @@ import { COLOR } from '../../../../../styles';
 
 export const StyledSelect = styled(Select).attrs({
 	classes: {
+		root: 'select',
 		disabled: 'select--disabled',
 		icon: 'select__icon'
 	}

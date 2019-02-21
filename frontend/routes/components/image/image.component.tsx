@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 
-import { StyledImage } from './image.styles';
+import { Container, StyledImage } from './image.styles';
 
 interface IProps {
 	src: string;
@@ -37,12 +37,9 @@ export class Image extends React.PureComponent<IProps, any> {
 	public render() {
 		const { src, alt, enablePreview } = this.props;
 		return (
-			<StyledImage
-				src={src}
-				alt={alt}
-				onClick={this.handlePreview}
-				enablePreview={enablePreview}
-			/>
+			<Container enablePreview={enablePreview} onClick={this.handlePreview}>
+				<StyledImage src={src} alt={alt} />
+			</Container>
 		);
 	}
 }

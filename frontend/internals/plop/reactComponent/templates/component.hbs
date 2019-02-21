@@ -20,14 +20,13 @@ import * as React from 'react';
 import { Container } from './{{ camelCase name }}.styles';
 
 interface IProps {
-	noop: string; // TODO: Remove sample
+	className: string;
 }
 
 export class {{ pascalCase name }} extends React.PureComponent<IProps, any> {
-
 	public render() {
 		return (
-			<Container>
+			<Container className={this.props.className}>
 				{{ pascalCase name }} component
 			</Container>
 		);
