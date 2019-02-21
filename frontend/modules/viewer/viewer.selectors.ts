@@ -42,3 +42,7 @@ export const selectFarPlaneAlgorithm = createSelector(
 export const selectShadingSetting = createSelector(
 	selectSettings, (state) => state.shading
 );
+
+export const selectXraySetting = createSelector(
+	selectSettings, (state) => state.xray
+);

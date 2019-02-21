@@ -653,6 +653,10 @@ export class ViewerService {
 		// Missing shading call;
 	}
 
+	public setXray(xray: boolean) {
+		// Missing xray call;
+	}
+
 	private helicopterSpeedUpdate(value: number) {
 		if (this.account && this.model && Number.isInteger(value)) {
 			this.heliSpeed = value;

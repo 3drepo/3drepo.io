@@ -17,7 +17,7 @@
 
 import { subscribe } from '../../../helpers/migration';
 import { selectShadowSetting, selectStatsSetting, selectNearPlaneSetting,
-		selectFarPlaneAlgorithm, selectShadingSetting} from '../../../modules/viewer';
+		selectFarPlaneAlgorithm, selectShadingSetting, selectXraySetting} from '../../../modules/viewer';
 
 class ViewerController implements ng.IController {
 
@@ -47,6 +47,7 @@ class ViewerController implements ng.IController {
 	private nearPlaneSetting: number;
 	private farPlaneAlgorithm: string;
 	private shadingSetting: string;
+	private xraySetting: boolean;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -81,7 +82,8 @@ class ViewerController implements ng.IController {
 			statsSetting: selectStatsSetting,
 			nearPlaneSetting: selectNearPlaneSetting,
 			farPlaneAlgorithm: selectFarPlaneAlgorithm,
-			shadingSetting: selectShadingSetting
+			shadingSetting: selectShadingSetting,
+			xraySetting: selectXraySetting
 		});
 	}
 
@@ -120,6 +122,9 @@ class ViewerController implements ng.IController {
 		this.$scope.$watch(() => this.farPlaneAlgorithm, this.ViewerService.setFarPlaneAlgorithm);
 
 		this.$scope.$watch(() => this.shadingSetting, this.ViewerService.setShading);
+
+		this.$scope.$watch(() => this.xraySetting, this.ViewerService.setXray);
+
 	}
 }
 
