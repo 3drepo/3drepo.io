@@ -18,6 +18,7 @@
 import { put, takeLatest } from 'redux-saga/effects';
 import { getAngularService, dispatch } from '../../helpers/migration';
 import * as API from '../../services/api';
+import { Viewer } from '../../services/viewer/viewer';
 import { ViewpointsTypes, ViewpointsActions } from './viewpoints.redux';
 import { DialogActions } from '../dialog';
 import { getScreenshot } from '../viewer/viewer.sagas';
@@ -54,16 +55,10 @@ function defer() {
 export function* generateViewpointObject(teamspace, modelId, viewName) {
 	try {
 		const screenshot = yield getScreenshot();
-		const viewpointDefer = defer();
-
-		const ViewerService = yield getAngularService('ViewerService') as any;
-		yield ViewerService.getCurrentViewpoint({
-			promise: viewpointDefer,
-			account: teamspace,
+		const { clippingPlanes, ...viewpoint } = yield Viewer.getCurrentViewpoint({
+			teamspace,
 			model: modelId
 		});
-
-		const {clippingPlanes, ...viewpoint} = yield viewpointDefer.promise;
 
 		const generatedObject = {
 			name: viewName,
@@ -151,22 +146,20 @@ export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
 }
 
 export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
-	const ViewerService = yield getAngularService('ViewerService') as any;
-
 	if (view) {
 		if (view.viewpoint) {
 			const viewpoint = { ...view.viewpoint, account: teamspace, model: modelId };
-			yield ViewerService.setCamera(viewpoint);
+			yield Viewer.setCamera(viewpoint);
 		}
 
 		if (view.clippingPlanes) {
 			const clipData = {
 				clippingPlanes: view.clippingPlanes,
 				account: teamspace,
-				modelId
+				model: modelId
 			};
 
-			yield ViewerService.updateClippingPlanes(clipData);
+			yield Viewer.updateClippingPlanes(clipData);
 		}
 	}
 }
