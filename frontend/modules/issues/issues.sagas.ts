@@ -47,14 +47,6 @@ export function* fetchIssues({teamspace, modelId, revision}) {
 
 		const preparedIssues = data.map((issue) => prepareIssue(issue, jobs));
 
-		// TODO: fetch comments for filter results
-		// yield all(data.map((issue) => {
-		// 	if (issue.commentCount) {
-		// 		return put(IssuesActions.fetchIssue(teamspace, modelId, issue._id));
-		// 	}
-		// 	return;
-		// }));
-
 		yield put(IssuesActions.fetchIssuesSuccess(preparedIssues));
 		yield put(IssuesActions.renderPins());
 	} catch (error) {
