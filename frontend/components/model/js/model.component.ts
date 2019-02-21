@@ -22,6 +22,7 @@ import { ModelActions, selectSettings, selectIsPending } from '../../../modules/
 import { ViewpointsActions } from '../../../modules/viewpoints';
 import { JobsActions, selectJobs } from '../../../modules/jobs';
 import { RisksActions } from '../../../modules/risks';
+import { GroupsActions } from '../../../modules/groups';
 import { prepareRisk } from '../../../helpers/risks';
 import { RISK_LEVELS } from '../../../constants/risks';
 import { searchByFilters } from '../../../helpers/searching';
@@ -266,6 +267,7 @@ class ModelController implements ng.IController {
 		dispatch(ModelActions.fetchSettings(this.account, this.model));
 		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
 		dispatch(RisksActions.fetchRisks(this.account, this.model, this.revision));
+		dispatch(GroupsActions.fetchGroups(this.account, this.model, this.revision));
 	}
 }
 

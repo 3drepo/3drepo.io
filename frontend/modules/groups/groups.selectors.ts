@@ -16,5 +16,18 @@
  */
 
 import { createSelector } from 'reselect';
+import { values } from 'lodash';
 
 export const selectGroupsDomain = (state) => Object.assign({}, state.groups);
+
+export const selectGroups = createSelector(
+	selectGroupsDomain, (state) => values(state.groupsMap)
+);
+
+export const selectGroupsMap = createSelector(
+	selectGroupsDomain, (state) => state.groupsMap
+);
+
+export const selectIsPending = createSelector(
+	selectGroupsDomain, (state) => state.isPending
+);

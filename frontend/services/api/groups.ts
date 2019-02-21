@@ -18,6 +18,22 @@
 import api from './';
 
 /**
+ * Get groups list
+ * @param teamspace
+ * @param modelId
+ * @param groupId
+ * @param revision
+ */
+
+export const getGroups = (teamspace, modelId, revision?) => {
+	if (revision) {
+		return api.get(`${teamspace}/${modelId}/groups/revision/${revision}/?noIssues=true&noRisks=true`);
+	}
+	return api.get(`${teamspace}/${modelId}/groups/revision/master/head/?noIssues=true&noRisks=true`);
+};
+
+
+/**
  * Get group data
  * @param teamspace
  * @param modelId

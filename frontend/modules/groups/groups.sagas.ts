@@ -19,15 +19,21 @@ import { put, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { GroupsTypes, GroupsActions } from './groups.redux';
+import { DialogActions } from '../dialog';
 
-export function* fetch() {
+export function* fetchGroups({teamspace, modelId, revision}) {
+	yield put(GroupsActions.togglePendingState(true));
 	try {
-		console.log('Groups saga started!');
-	} catch(error) {
-		console.error(error);
+		const {data} = yield API.getGroups(teamspace, modelId, revision);
+
+		yield put(GroupsActions.fetchGroupsSuccess(data));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('get', 'groups', error));
 	}
+	yield put(GroupsActions.togglePendingState(false));
 }
 
+
 export default function* GroupsSaga() {
-	yield takeLatest(GroupsTypes.FETCH, fetch);
+	yield takeLatest(GroupsTypes.FETCH_GROUPS, fetchGroups);
 }

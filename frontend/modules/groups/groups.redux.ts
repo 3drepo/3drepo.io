@@ -16,14 +16,28 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { keyBy, cloneDeep, values } from 'lodash';
 
 export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
-	fetch: [] // TODO: remove this action
+	fetchGroups: ['teamspace', 'modelId', 'revision'],
+	fetchGroupsSuccess: ['groups'],
+	togglePendingState: ['isPending']
 }, { prefix: 'GROUPS_' });
 
 export interface IObjectObjectState {}
 
-export const INITIAL_STATE: IObjectObjectState = {};
+export const INITIAL_STATE: IObjectObjectState = {
+	groupsMap: {},
+	isPending: true,
+};
+
+export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
+
+export const fetchGroupsSuccess = (state = INITIAL_STATE, { groups = [] }) => {
+	const groupsMap = keyBy(groups, '_id');
+
+	return { ...state, groupsMap };
+};
 
 export const reducer = createReducer(INITIAL_STATE, {
 });

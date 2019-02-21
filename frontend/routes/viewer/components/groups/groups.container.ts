@@ -20,9 +20,14 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../helpers/migration';
 
 import { Groups } from './groups.component';
+import { GroupsActions, selectGroupsMap, selectGroups, selectIsPending } from './../../../../modules/groups';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+  groups: selectGroups,
+  isPending: selectIsPending
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Groups);
