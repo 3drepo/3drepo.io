@@ -64,7 +64,7 @@ interface ISelectedFilter {
 }
 
 interface IProps {
-	filters: IFilter[];
+	filters?: IFilter[];
 	onChange: (selectedFilters) => void;
 	selectedFilters: any[];
 	hideFiltersMenu?: boolean;

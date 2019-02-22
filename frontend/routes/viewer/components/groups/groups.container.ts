@@ -29,7 +29,9 @@ import {
   selectShowDetails,
   selectHighlightedGroups,
   selectSearchEnabled,
-  selectSelectedFilters
+  selectSelectedFilters,
+  selectColorOverrides,
+  selectAreAllOverrided
 } from './../../../../modules/groups';
 
 const mapStateToProps = createStructuredSelector({
@@ -40,7 +42,9 @@ const mapStateToProps = createStructuredSelector({
   showDetails: selectShowDetails,
   highlightedGroups: selectHighlightedGroups,
   searchEnabled: selectSearchEnabled,
-  selectedFilters: selectSelectedFilters
+  selectedFilters: selectSelectedFilters,
+  colorOverrides: selectColorOverrides,
+  allOverrided: selectAreAllOverrided
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -48,7 +52,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
   setState: GroupsActions.setComponentState,
 	showGroupDetails: GroupsActions.showDetails,
   closeDetails: GroupsActions.closeDetails,
-  onFiltersChange: GroupsActions.onFiltersChange
+  onFiltersChange: GroupsActions.onFiltersChange,
+  toggleColorOverride: GroupsActions.toggleColorOverride,
+  toggleColorOverrideAll: GroupsActions.toggleColorOverrideAll
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Groups);

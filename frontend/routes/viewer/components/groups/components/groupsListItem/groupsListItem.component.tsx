@@ -29,6 +29,7 @@ import {
 
 import { getGroupRGBAColor } from './../../../../../../helpers/colors';
 import { GROUPS_TYPES } from './../../../../../../helpers/groups';
+import { DEFAULT_OVERRIDE_COLOR } from './../../../../../../constants/groups';
 import { DateTime } from '../../../../../components/dateTime/dateTime.component';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
@@ -44,12 +45,13 @@ interface IProps {
 	type: string;
 	modelLoaded: boolean;
 	highlighted: boolean;
+	overrided: boolean;
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
+	toggleColorOverride: () => void;
 }
 
 const EyeIcon = () => <Eye size="xs" />;
-const TintIcon = () => <Tint size="xs" />;
 
 export class GroupsListItem extends React.PureComponent<IProps, any> {
 	public get groupTypeIcon() {
@@ -59,11 +61,21 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 		return <HandPaper size="xs" />
 	}
 
+	public getTintIcon = () => <Tint size="xs" color={this.getOverridedColor()} />;
+
+	public getOverridedColor = () => {
+		if (this.props.overrided) {
+			return getGroupRGBAColor(this.props.color);
+		} 
+		return DEFAULT_OVERRIDE_COLOR;
+	}
+	
 	public renderArrowButton = renderWhenTrue(() => (
 		<ArrowButton onClick={this.props.onArrowClick} disabled={!this.props.modelLoaded}>
 			<StyledArrowIcon />
 		</ArrowButton>
 	));
+
 
 	public renderActions = renderWhenTrue((
 		<Actions>
@@ -75,8 +87,8 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 			/>
 			<TooltipButton
 				label="Toggle Colour Override"
-				action={() => console.log('toggle colour')}
-				Icon={TintIcon}
+				action={() => this.props.toggleColorOverride()}
+				Icon={() => this.getTintIcon()}
 				disabled={!this.props.modelLoaded}
 			/>
 			<TooltipButton
@@ -95,7 +107,7 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 	public render() {
 		const { author, active, description, name, color, onItemClick, highlighted } = this.props;
 		return (
-			<MenuItemContainer onClick={onItemClick} highlighted={highlighted}>
+			<MenuItemContainer onClick={onItemClick} highlighted={highlighted ? 1 : 0}>
 				<Container>
 					<RoleIndicator color={getGroupRGBAColor(color)} width={`10px`} />
 					<Content>

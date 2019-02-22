@@ -26,6 +26,8 @@ import AddIcon from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import SearchIcon from '@material-ui/icons/Search';
+import Check from '@material-ui/icons/Check';
+
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -34,11 +36,21 @@ import { Viewer } from '../../../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { Container } from './groups.styles';
 import { searchByFilters } from '../../../../helpers/searching';
-
+import { getColorOverrideRGBA } from '../../../../helpers/groups';
+import {
+	GROUPS_ACTIONS_ITEMS,
+	GROUPS_ACTIONS_MENU
+} from '../../../../constants/groups';
 import { ListContainer, Summary } from './../risks/risks.styles';
 import { GroupsListItem } from './components/groupsListItem/groupsListItem.component';
 import { EmptyStateInfo } from '../views/views.styles';
-import { MenuList } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { 
+	MenuList, 	
+	StyledListItem,
+	StyledItemText,
+	IconWrapper 
+} from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+
 interface IProps {
 	isPending?: boolean;
 	showDetails?: boolean;
@@ -47,12 +59,16 @@ interface IProps {
 	highlightedGroups: any;
 	searchEnabled: boolean;
 	selectedFilters: any[];
+	colorOverrides: any;
+	allOverrided: any;
 	setState: (componentState: any) => void;
 	setNewGroup: () => void;
 	showGroupDetails: (group, filteredGroups, revision?) => void;
 	closeDetails: () => void;
 	setActiveGroup: (group, filteredGroups, revision?) => void;
 	saveGroup: (teamspace, modelId, risk, filteredGroups) => void;
+	toggleColorOverride: (group) => void;
+	toggleColorOverrideAll: () => void;
 }
 
 interface IState {
@@ -141,19 +157,28 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return <GroupWork />;
 	}
 
+	get menuActionsMap() {
+		const { toggleColorOverrideAll } = this.props;
+		return {
+			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => toggleColorOverrideAll(),
+			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => { console.log('Delete all') },
+			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => { console.log('download JSON') }
+		};
+	}
+
 	public renderActionsMenu = () => (
 		<MenuList>
-			{/* {RISKS_ACTIONS_MENU.map(({ name, Icon, label }) => {
+			{GROUPS_ACTIONS_MENU.map(({ name, Icon, label }) => {
 				return (
 					<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
 						<IconWrapper><Icon fontSize="small" /></IconWrapper>
 						<StyledItemText>
 							{label}
-							{(name === RISKS_ACTIONS_ITEMS.SHOW_PINS && this.props.showPins) && <Check fontSize="small" />}
+							{(name === GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL && this.props.allOverrided) && <Check fontSize="small" />}
 						</StyledItemText>
 					</StyledListItem>
 				);
-			})} */}
+			})}
 		</MenuList>
 	)
 
@@ -186,6 +211,8 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		// this.props.showGroupDetails(group);
 	}
 
+	public isOverrided = (groupId) => Boolean(this.props.colorOverrides[groupId]);
+
 	public renderGroupsList = renderWhenTrue(() => {
 		const Items = this.state.filteredGroups.map((group, index) => (
 			<GroupsListItem
@@ -197,6 +224,8 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				// hasViewPermission={this.hasPermission(VIEW_ISSUE)}
 				modelLoaded={this.state.modelLoaded}
 				highlighted={Boolean(this.props.highlightedGroups[group._id])}
+				overrided={this.isOverrided(group._id)}
+				toggleColorOverride={() => this.props.toggleColorOverride(group)}
 			/>
 		));
 
@@ -243,14 +272,9 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		})
   }
 
-	get filters() {
-		return [];
-	}
-
 	public renderFilterPanel = renderWhenTrue(() => (
 		<FilterPanel
 			onChange={this.handleFilterChange}
-			filters={this.filters as any}
 			selectedFilters={this.props.selectedFilters}
 			hideFiltersMenu={true}
 		/>

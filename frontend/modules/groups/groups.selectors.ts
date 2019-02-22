@@ -69,3 +69,11 @@ export const selectSearchEnabled = createSelector(
 export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
+
+export const selectColorOverrides = createSelector(
+	selectComponentState, (state) => state.colorOverrides
+);
+
+export const selectAreAllOverrided = createSelector(
+	selectComponentState, (state) => state.overrideAll
+);

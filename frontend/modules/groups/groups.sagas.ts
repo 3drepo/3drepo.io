@@ -15,18 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select, all} from 'redux-saga/effects';
+import { put, takeLatest, takeEvery, select, all} from 'redux-saga/effects';
 import { getAngularService } from '../../helpers/migration';
 
 import * as API from '../../services/api';
 import { GroupsTypes, GroupsActions } from './groups.redux';
 import { DialogActions } from '../dialog';
 import {
-	selectActiveGroupId,
-	selectGroupsMap,
+	selectAreAllOverrided,
+	selectColorOverrides,
 	selectGroups
 } from './groups.selectors';
-import { searchByFilters } from '../../helpers/searching';
 import { Viewer } from '../../services/viewer/viewer';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 
@@ -43,15 +42,6 @@ export function* fetchGroups({teamspace, modelId, revision}) {
 
 export function* setActiveGroup({ group, filteredGroups, revision }) {
 	try {
-		const activeGroupId = yield select(selectActiveGroupId);
-		const groupsMap = yield select(selectGroupsMap);
-
-		// if (activeGroupId !== group._id) {
-		// 	if (activeGroupId) {
-		// 		toggleRiskPin(risksMap[activeRiskId], false);
-		// 	}
-		// 	toggleRiskPin(risk, true);
-		// }
 		yield all([
 			put(GroupsActions.selectGroup(group, filteredGroups, revision)),
 			put(GroupsActions.setComponentState({ activeGroup: group._id }))
@@ -128,6 +118,98 @@ export function* selectGroup({ group }) {
 	}
 }
 
+export function* addColorOverride({ group }) {
+	try {
+		const color = group.color.map((c) => c / 255);
+		const TreeService = getAngularService('TreeService') as any;
+		const treeMap = yield TreeService.getMap();
+
+		if (treeMap) {
+			const nodes = yield TreeService.getNodesFromSharedIds(group.objects);
+
+			if (nodes) {
+				const filteredNodes = nodes.filter((n) => n !== undefined);
+				const meshes = TreeService.getMeshMapFromNodes(filteredNodes);
+				
+				for (const key in meshes) {
+					if (key) {
+						const meshIds = meshes[key].meshes;
+						const pair = key.split('@');
+						const modelAccount = pair[0];
+						const modelId = pair[1];
+						Viewer.overrideMeshColor(modelAccount, modelId, meshIds, color);
+					}
+				}
+				const colorOverride = {
+					models: meshes, color
+				}
+				yield put(GroupsActions.addToOverrided(group._id, colorOverride));
+			}
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('color', 'override', error));
+	}
+}
+
+export function* removeColorOverride({ groupId, overridedGroup }) {
+	try {
+		if (overridedGroup) {
+			for (const key in overridedGroup.models) {
+				if (overridedGroup.models.hasOwnProperty(key)) {
+					const meshIds = overridedGroup.models[key].meshes;
+					const pair = key.split('@');
+					const account = pair[0];
+					const model = pair[1];
+
+					Viewer.resetMeshColor(account, model, meshIds);
+				}
+			}
+			yield put(GroupsActions.removeFromOverrided(groupId));
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('toggle', 'color override', error));
+	}
+}
+
+export function* toggleColorOverride({ group }) {
+	try {
+		const colorOverrides = yield select(selectColorOverrides);
+		const hasColorOverride = colorOverrides[group._id];
+
+		if (!hasColorOverride) {
+			yield put(GroupsActions.addColorOverride(group));
+		} else {
+			const overridedGroup = colorOverrides[group._id];
+			yield put(GroupsActions.removeColorOverride(group._id, overridedGroup));
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('toggle', 'color override', error));
+	}
+}
+
+export function* toggleColorOverrideAll() {
+	try {
+		const allOverrided = yield select(selectAreAllOverrided);
+
+		if (allOverrided) {
+			const colorOverrides = yield select(selectColorOverrides);
+			yield all(
+				Object.keys(colorOverrides).map((groupId) => {
+					return put(GroupsActions.removeColorOverride(groupId, colorOverrides[groupId]))
+				})
+			)
+			yield put(GroupsActions.setComponentState({ overrideAll: false }));
+		} else {
+			const groups = yield select(selectGroups);
+			yield all(groups.map(group => {
+				return put(GroupsActions.addColorOverride(group))
+			}))
+			yield put(GroupsActions.setComponentState({ overrideAll: true }));
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('toggle', 'color override', error));
+	}
+}
 
 export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.FETCH_GROUPS, fetchGroups);
@@ -136,4 +218,8 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.HIGHLIGHT_GROUP, highlightGroup);
 	yield takeLatest(GroupsTypes.DEHIGHLIGHT_GROUP, dehighlightGroup);
 	yield takeLatest(GroupsTypes.CLEAR_SELECTION_HIGHLIGHTS, clearSelectionHighlights);
+	yield takeEvery(GroupsTypes.ADD_COLOR_OVERRIDE, addColorOverride);
+	yield takeEvery(GroupsTypes.REMOVE_COLOR_OVERRIDE, removeColorOverride);
+	yield takeLatest(GroupsTypes.TOGGLE_COLOR_OVERRIDE, toggleColorOverride);
+	yield takeLatest(GroupsTypes.TOGGLE_COLOR_OVERRIDE_ALL, toggleColorOverrideAll);
 }

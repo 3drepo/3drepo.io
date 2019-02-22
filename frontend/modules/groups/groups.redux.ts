@@ -33,7 +33,13 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	removeFromHighlighted: ['groupId'],
 	highlightGroup: ['group'],
 	dehighlightGroup: ['group'],
-	clearSelectionHighlights: []
+	clearSelectionHighlights: [],
+	addColorOverride: ['group'],
+	removeColorOverride: ['groupId', 'overridedGroup'],
+	toggleColorOverride: ['group'],
+	addToOverrided: ['groupId', 'override'],
+	removeFromOverrided: ['groupId'],
+	toggleColorOverrideAll: []
 }, { prefix: 'GROUPS_' });
 
 export const INITIAL_STATE = {
@@ -45,7 +51,9 @@ export const INITIAL_STATE = {
 		showDetails: false,
 		expandDetails: true,
 		newGroup: {},
-		selectedFilters: []
+		selectedFilters: [],
+		colorOverrides: {},
+		overrideAll: false
 	}
 };
 
@@ -72,10 +80,24 @@ export const removeFromHighlighted = (state = INITIAL_STATE, { groupId }) => {
 	return { ...state, 	componentState: { ...state.componentState, highlightedGroups } };
 };
 
+export const addToOverrided = (state = INITIAL_STATE, { groupId, override }) => {
+	const colorOverrides = { ...state.componentState.colorOverrides };
+	colorOverrides[groupId] = override;
+	return { ...state, 	componentState: { ...state.componentState, colorOverrides } };
+};
+
+export const removeFromOverrided = (state = INITIAL_STATE, { groupId }) => {
+	const colorOverrides = { ...state.componentState.colorOverrides };
+	colorOverrides[groupId] = undefined;
+	return { ...state, 	componentState: { ...state.componentState, colorOverrides } };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.FETCH_GROUPS_SUCCESS]: fetchGroupsSuccess,
 	[GroupsTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[GroupsTypes.SET_COMPONENT_STATE]: setComponentState,
 	[GroupsTypes.ADD_TO_HIGHLIGHTED]: addToHighlighted,
 	[GroupsTypes.REMOVE_FROM_HIGHLIGHTED]: removeFromHighlighted,
+	[GroupsTypes.ADD_TO_OVERRIDED]: addToOverrided,
+	[GroupsTypes.REMOVE_FROM_OVERRIDED]: removeFromOverrided,
 });

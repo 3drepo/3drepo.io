@@ -25,3 +25,5 @@ export const GROUPS_ACTIONS_MENU = [
 		Icon: Download
 	}
 ];
+
+export const DEFAULT_OVERRIDE_COLOR = 'rgba(0, 0, 0, 0.54)';
