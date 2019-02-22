@@ -23,8 +23,8 @@ import Bolt from '@material-ui/icons/OfflineBolt';
 import { Eye, Tint, HandPaper } from '../../../../../components/fontAwesomeIcon';
 
 import { Info, AuthorWrapper, Actions, Content, MenuItemContainer } from './groupsListItem.styles';
-import { 
-	Container, RoleIndicator, Description, Name, ArrowButton, StyledArrowIcon 
+import {
+	Container, RoleIndicator, Description, Name, ArrowButton, StyledArrowIcon
 } from './../../../previewListItem/previewListItem.styles';
 
 import { getGroupRGBAColor } from './../../../../../../helpers/colors';
@@ -56,9 +56,9 @@ const EyeIcon = () => <Eye size="xs" />;
 export class GroupsListItem extends React.PureComponent<IProps, any> {
 	public get groupTypeIcon() {
 		if (this.props.type === GROUPS_TYPES.SMART) {
-			return <Bolt />
+			return <Bolt />;
 		}
-		return <HandPaper size="xs" />
+		return <HandPaper size="xs" />;
 	}
 
 	public getTintIcon = () => <Tint size="xs" color={this.getOverridedColor()} />;
@@ -66,16 +66,15 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 	public getOverridedColor = () => {
 		if (this.props.overrided) {
 			return getGroupRGBAColor(this.props.color);
-		} 
+		}
 		return DEFAULT_OVERRIDE_COLOR;
 	}
-	
+
 	public renderArrowButton = renderWhenTrue(() => (
 		<ArrowButton onClick={this.props.onArrowClick} disabled={!this.props.modelLoaded}>
 			<StyledArrowIcon />
 		</ArrowButton>
 	));
-
 
 	public renderActions = renderWhenTrue((
 		<Actions>
@@ -98,11 +97,11 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 				disabled={!this.props.modelLoaded}
 			/>
 		</Actions>
-	))
+	));
 
 	public renderDate = renderWhenTrue((
 		<DateTime value={this.props.createdAt} format="HH:mm DD MMM" />
-	))
+	));
 
 	public render() {
 		const { author, active, description, name, color, onItemClick, highlighted } = this.props;

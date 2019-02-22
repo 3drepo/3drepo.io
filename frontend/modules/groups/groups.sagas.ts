@@ -55,11 +55,9 @@ export function* highlightGroup({ group }) {
 	try {
 		const color = group.color ? group.color.map((c) => c / 255) :
 		Viewer.getDefaultHighlightColor();
-		
 		yield put(GroupsActions.addToHighlighted(group._id));
 
 		const TreeService = getAngularService('TreeService') as any;
-
 		if (group.objects && group.objects.length > 0) {
 			return TreeService.showNodesBySharedIds(group.objects).then(() => {
 				return TreeService.selectNodesBySharedIds(group.objects, color);
@@ -99,7 +97,7 @@ export function* clearSelectionHighlights() {
 
 export function* selectGroup({ group }) {
 	try {
-		const addGroup = MultiSelect.isAccumMode()
+		const addGroup = MultiSelect.isAccumMode();
 		const removeGroup = MultiSelect.isDecumMode();
 		const multiSelect = addGroup || removeGroup;
 
@@ -130,7 +128,7 @@ export function* addColorOverride({ group }) {
 			if (nodes) {
 				const filteredNodes = nodes.filter((n) => n !== undefined);
 				const meshes = TreeService.getMeshMapFromNodes(filteredNodes);
-				
+
 				for (const key in meshes) {
 					if (key) {
 						const meshIds = meshes[key].meshes;
@@ -142,7 +140,7 @@ export function* addColorOverride({ group }) {
 				}
 				const colorOverride = {
 					models: meshes, color
-				}
+				};
 				yield put(GroupsActions.addToOverrided(group._id, colorOverride));
 			}
 		}
@@ -195,15 +193,15 @@ export function* toggleColorOverrideAll() {
 			const colorOverrides = yield select(selectColorOverrides);
 			yield all(
 				Object.keys(colorOverrides).map((groupId) => {
-					return put(GroupsActions.removeColorOverride(groupId, colorOverrides[groupId]))
+					return put(GroupsActions.removeColorOverride(groupId, colorOverrides[groupId]));
 				})
-			)
+			);
 			yield put(GroupsActions.setComponentState({ overrideAll: false }));
 		} else {
 			const groups = yield select(selectGroups);
-			yield all(groups.map(group => {
-				return put(GroupsActions.addColorOverride(group))
-			}))
+			yield all(groups.map((group) => {
+				return put(GroupsActions.addColorOverride(group));
+			}));
 			yield put(GroupsActions.setComponentState({ overrideAll: true }));
 		}
 	} catch (error) {

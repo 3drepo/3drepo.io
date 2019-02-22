@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { keyBy, cloneDeep, values } from 'lodash';
+import { keyBy } from 'lodash';
 
 export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	fetchGroups: ['teamspace', 'modelId', 'revision'],
@@ -99,5 +99,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.ADD_TO_HIGHLIGHTED]: addToHighlighted,
 	[GroupsTypes.REMOVE_FROM_HIGHLIGHTED]: removeFromHighlighted,
 	[GroupsTypes.ADD_TO_OVERRIDED]: addToOverrided,
-	[GroupsTypes.REMOVE_FROM_OVERRIDED]: removeFromOverrided,
+	[GroupsTypes.REMOVE_FROM_OVERRIDED]: removeFromOverrided
 });

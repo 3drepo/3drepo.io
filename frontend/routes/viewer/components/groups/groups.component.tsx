@@ -36,7 +36,6 @@ import { Viewer } from '../../../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { Container } from './groups.styles';
 import { searchByFilters } from '../../../../helpers/searching';
-import { getColorOverrideRGBA } from '../../../../helpers/groups';
 import {
 	GROUPS_ACTIONS_ITEMS,
 	GROUPS_ACTIONS_MENU
@@ -44,11 +43,8 @@ import {
 import { ListContainer, Summary } from './../risks/risks.styles';
 import { GroupsListItem } from './components/groupsListItem/groupsListItem.component';
 import { EmptyStateInfo } from '../views/views.styles';
-import { 
-	MenuList, 	
-	StyledListItem,
-	StyledItemText,
-	IconWrapper 
+import {
+	MenuList, StyledListItem,	StyledItemText, IconWrapper
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 
 interface IProps {
@@ -78,15 +74,14 @@ interface IState {
 }
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
-	  <IconButton
-	    {...props}
-	    aria-label="Show filters menu"
-	    aria-haspopup="true"
-	  >
-	    <MoreIcon {...IconProps} />
-	  </IconButton>
-	);
-	
+  <IconButton
+    {...props}
+    aria-label="Show filters menu"
+    aria-haspopup="true"
+  >
+    <MoreIcon {...IconProps} />
+  </IconButton>
+);
 
 export class Groups extends React.PureComponent<IProps, IState> {
 	public state = {
@@ -138,7 +133,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	public handleOpenSearchMode = () => {
 		this.props.setState({ searchEnabled: true });
 	}
-	
+
 	public getSearchButton = () => {
 		if (this.props.searchEnabled) {
 			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
@@ -266,10 +261,10 @@ export class Groups extends React.PureComponent<IProps, IState> {
   public handleFilterChange = (selectedFilters) => {
 		this.props.setState({
 			selectedFilters
-		})
+		});
 		this.setState({
 			filteredGroups: this.filteredGroups
-		})
+		});
   }
 
 	public renderFilterPanel = renderWhenTrue(() => (

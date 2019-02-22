@@ -48,7 +48,7 @@ export const InputContainer = styled.div`
 	justify-content: flex-end;
 	position: relative;
 	margin: 0;
-	min-height: ${(props: any) => props.menuHidden ? `52px`: '0'};
+	min-height: ${(props: any) => props.menuHidden ? `52px` : '0'};
 
   .react-autosuggest__container {
 		height: 100%;

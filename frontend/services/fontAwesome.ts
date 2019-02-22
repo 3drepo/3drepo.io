@@ -1,9 +1,9 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { 
-  faEraser, 
-  faEye, 
-  faTint,
-  faHandPaper
+import {
+	faEraser,
+	faEye,
+	faTint,
+	faHandPaper
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faEraser);
