@@ -23,6 +23,7 @@ export const Content = styled.div`
   justify-content: space-between;
   min-width: 0;
   flex: 1;
+  padding: 5px 0;
 `;
 
 export const Info = styled.div`
@@ -33,6 +34,7 @@ export const Info = styled.div`
 `;
 
 export const AuthorWrapper = styled.div`
+  align-items: center;
   display: flex;
 `;
 

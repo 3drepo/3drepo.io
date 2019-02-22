@@ -21,25 +21,41 @@ import { keyBy, cloneDeep, values } from 'lodash';
 export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	fetchGroups: ['teamspace', 'modelId', 'revision'],
 	fetchGroupsSuccess: ['groups'],
-	togglePendingState: ['isPending']
+	togglePendingState: ['isPending'],
+	setComponentState: ['componentState'],
+	setActiveGroup: ['group', 'filteredGroups', 'revision'],
+	highlightGroup: ['group', 'filteredGroups', 'revision'],
+	showDetails: ['group', 'filteredGroups', 'revision'],
+	closeDetails: [],
+	setnewGroup: [],
+	updatenewGroup: ['newGroup']
 }, { prefix: 'GROUPS_' });
 
-export interface IObjectObjectState {}
-
-export const INITIAL_STATE: IObjectObjectState = {
+export const INITIAL_STATE = {
 	groupsMap: {},
 	isPending: true,
+	componentState: {
+		activeGroup: null,
+		hihghlightedGroups: {},
+		showDetails: false,
+		expandDetails: true,
+		newGroup: {}
+	}
 };
 
 export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
 
 export const fetchGroupsSuccess = (state = INITIAL_STATE, { groups = [] }) => {
 	const groupsMap = keyBy(groups, '_id');
-
 	return { ...state, groupsMap };
+};
+
+export const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
+	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.FETCH_GROUPS_SUCCESS]: fetchGroupsSuccess,
-	[GroupsTypes.TOGGLE_PENDING_STATE]: togglePendingState
+	[GroupsTypes.TOGGLE_PENDING_STATE]: togglePendingState,
+	[GroupsTypes.SET_COMPONENT_STATE]: setComponentState,
 });

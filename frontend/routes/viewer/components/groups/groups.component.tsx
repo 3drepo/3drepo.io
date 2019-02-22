@@ -23,6 +23,8 @@ import GroupWork from '@material-ui/icons/GroupWork';
 import AddIcon from '@material-ui/icons/Add';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
+import { Viewer } from '../../../../services/viewer/viewer';
+import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { Container } from './groups.styles';
 import { ListContainer, Summary } from './../risks/risks.styles';
 import { GroupsListItem } from './components/groupsListItem/groupsListItem.component';
@@ -31,10 +33,34 @@ interface IProps {
 	isPending?: boolean;
 	showDetails?: boolean;
 	groups: any[];
+	activeGroupId: string;
 	closeDetails: () => void;
+	setActiveGroup: (group, filteredGroups, revision?) => void;
 }
 
-export class Groups extends React.PureComponent<IProps, any> {
+interface IState {
+	modelLoaded: boolean;
+}
+
+export class Groups extends React.PureComponent<IProps, IState> {
+	public state = {
+		modelLoaded: false
+	};
+
+	public componentDidMount() {
+		if (Viewer.viewer.model && !this.state.modelLoaded) {
+			this.setState({ modelLoaded: true });
+		}
+
+		Viewer.on(VIEWER_EVENTS.MODEL_LOADED, () => {
+			this.setState({ modelLoaded: true });
+		});
+	}
+
+	public componentDidUpdate = () => {
+		console.log('cdm this.props.groups',this.props.groups);
+	}
+
 	public renderTitleIcon = () => {
 		if (this.props.showDetails) {
 			return (
@@ -50,16 +76,9 @@ export class Groups extends React.PureComponent<IProps, any> {
 		return [];
 	}
 	
-	public componentDidMount = () => {
-		console.log('cdm this.props.groups',this.props.groups);
-	}
-
-	public componentDidUpdate = () => {
-		console.log('cdm this.props.groups',this.props.groups);
-	}
-
-	public selectGroup = (group) => () => {
-		console.log('select group', group)
+	public setActiveGroup = (group) => () => {
+		console.log('select group', group);
+		this.props.setActiveGroup(group, []);
 	}
 
 	public handleShowGroupDetails = (group) => () => {
@@ -73,11 +92,11 @@ export class Groups extends React.PureComponent<IProps, any> {
 			<GroupsListItem
 				{...group}
 				key={index}
-				onItemClick={this.selectGroup(group)}
+				onItemClick={this.setActiveGroup(group)}
 				onArrowClick={this.handleShowGroupDetails(group)}
-				// active={this.props.activeGroupId === group._id} active przychodzi z BE
+				active={this.props.activeGroupId === group._id}
 				// hasViewPermission={this.hasPermission(VIEW_ISSUE)}
-				// modelLoaded={this.state.modelLoaded}
+				modelLoaded={this.state.modelLoaded}
 			/>
 		));
 
@@ -93,7 +112,7 @@ export class Groups extends React.PureComponent<IProps, any> {
 			</ViewerPanelContent>
 			<ViewerPanelFooter alignItems="center" justify="space-between">
 				<Summary>
-					{`0 groups displayed`}
+					{`${this.props.groups.length} groups displayed`}
 				</Summary>
 				<ViewerPanelButton
 					aria-label="Add group"

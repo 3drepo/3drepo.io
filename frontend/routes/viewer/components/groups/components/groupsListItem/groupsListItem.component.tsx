@@ -18,17 +18,19 @@
 import * as React from 'react';
 import Truncate from 'react-truncate';
 
-import IconButton from '@material-ui/core/IconButton';
 import Delete from '@material-ui/icons/Delete';
 import Bolt from '@material-ui/icons/OfflineBolt';
 import { Eye, Tint, HandPaper } from '../../../../../components/fontAwesomeIcon';
 
 import { Info, AuthorWrapper, Actions, Content } from './groupsListItem.styles';
-import { MenuItemContainer, Container, RoleIndicator, Description, Name } from './../../../previewListItem/previewListItem.styles';
+import { 
+	MenuItemContainer, Container, RoleIndicator, Description, Name, ArrowButton, StyledArrowIcon 
+} from './../../../previewListItem/previewListItem.styles';
 
 import { getGroupRGBAColor } from './../../../../../../helpers/colors';
 import { DateTime } from '../../../../../components/dateTime/dateTime.component';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
 interface IProps {
 	autoh: string;
@@ -39,30 +41,48 @@ interface IProps {
 	active?: boolean;
 	color: string;
 	type: string;
+	modelLoaded: boolean;
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
 }
 
-export class GroupsListItem extends React.PureComponent<IProps, any> {
+const EyeIcon = () => <Eye size="xs" />;
+const TintIcon = () => <Tint size="xs" />;
 
+export class GroupsListItem extends React.PureComponent<IProps, any> {
 	public get groupTypeIcon() {
 		if (this.props.type === 'criteria') {
 			return <Bolt />
 		}
-		return <HandPaper size={'small'} />
+		return <HandPaper size="xs" />
 	}
+
+	public renderArrowButton = renderWhenTrue(() => (
+		<ArrowButton onClick={this.props.onArrowClick} disabled={!this.props.modelLoaded}>
+			<StyledArrowIcon />
+		</ArrowButton>
+	));
 
 	public renderActions = renderWhenTrue((
 		<Actions>
-			<IconButton onClick={() => console.log('show')}>
-				<Eye />
-			</IconButton>
-			<IconButton onClick={() => console.log('colour')}>
-				<Tint />
-			</IconButton>
-			<IconButton onClick={() => console.log('delete')}>
-				<Delete />
-			</IconButton>
+			<TooltipButton
+				label="Isolate"
+				action={() => console.log('isolate')}
+				Icon={EyeIcon}
+				disabled={!this.props.modelLoaded}
+			/>
+			<TooltipButton
+				label="Toggle Colour Override"
+				action={() => console.log('toggle colour')}
+				Icon={TintIcon}
+				disabled={!this.props.modelLoaded}
+			/>
+			<TooltipButton
+				label="Delete"
+				action={() => console.log('Delete')}
+				Icon={Delete}
+				disabled={!this.props.modelLoaded}
+			/>
 		</Actions>
 	))
 
@@ -84,14 +104,15 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 								{this.groupTypeIcon}
 								{author}
 							</AuthorWrapper>
-							{this.renderActions(!active)}
-							{this.renderDate(active)}
+							{this.renderActions(active)}
+							{this.renderDate(!active)}
 						</Info>
 						<Description>
 							<Truncate lines={3}>{description}</Truncate>
 						</Description>
 					</Content>
 				</Container>
+				{this.renderArrowButton(active)}
 			</MenuItemContainer>
 		);
 	}

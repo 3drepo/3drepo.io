@@ -20,14 +20,29 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../helpers/migration';
 
 import { Groups } from './groups.component';
-import { GroupsActions, selectGroupsMap, selectGroups, selectIsPending } from './../../../../modules/groups';
+import { 
+  GroupsActions, 
+  selectGroupsMap, 
+  selectGroups, 
+  selectIsPending,
+  selectActiveGroupId,
+  selectActiveGroupDetails,
+  selectShowDetails
+} from './../../../../modules/groups';
 
 const mapStateToProps = createStructuredSelector({
   groups: selectGroups,
-  isPending: selectIsPending
+  isPending: selectIsPending,
+  activeGroupId: selectActiveGroupId,
+	activeGroupDetails: selectActiveGroupDetails,
+  showDetails: selectShowDetails
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
+  setActiveGroup: GroupsActions.setActiveGroup,
+  setState: GroupsActions.setComponentState,
+	showGroupDetails: GroupsActions.showDetails,
+	closeDetails: GroupsActions.closeDetails
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Groups);

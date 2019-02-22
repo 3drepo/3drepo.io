@@ -31,3 +31,29 @@ export const selectGroupsMap = createSelector(
 export const selectIsPending = createSelector(
 	selectGroupsDomain, (state) => state.isPending
 );
+
+export const selectComponentState = createSelector(
+	selectGroupsDomain, (state) => state.componentState
+);
+
+export const selectActiveGroupId = createSelector(
+	selectComponentState, (state) => state.activeGroup
+);
+
+export const selectActiveGroupDetails = createSelector(
+	selectGroupsDomain, selectComponentState, (state, componentState) => {
+		return state.groupsMap[componentState.activeGroup] || componentState.newGroup;
+	}
+);
+
+export const selectShowDetails = createSelector(
+	selectComponentState, (state) => state.showDetails
+);
+
+export const selectExpandDetails = createSelector(
+	selectComponentState, (state) => state.expandDetails
+);
+
+export const selectNewGroupDetails = createSelector(
+	selectComponentState, (state) => state.newGroup
+);
