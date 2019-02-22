@@ -179,7 +179,6 @@ class PanelController implements ng.IController {
 
 	public onPanelVisibilityChange(index, type) {
 		// Resize any shown panel contents
-		debugger;
 		if (this.contentItems[index].show) {
 			this.contentItemsShown.push(this.contentItems[index]);
 		} else {

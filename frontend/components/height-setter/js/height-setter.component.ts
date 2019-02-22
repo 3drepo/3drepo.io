@@ -111,7 +111,7 @@ class HeightSetterController implements ng.IController, IBindings {
 		this.$timeout.cancel(this.initialTimeout);
 		this.$timeout.cancel(this.updateHeightTimeout);
 
-		if (this.removeHeightWatch) { } {
+		if (this.removeHeightWatch) {
 			this.removeHeightWatch();
 		}
 	}
