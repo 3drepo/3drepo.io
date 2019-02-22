@@ -16,6 +16,23 @@
  */
 
 import styled from 'styled-components';
+import MenuItem from '@material-ui/core/MenuItem';
+import { COLOR } from '../../../../../../styles/colors';
+
+export const MenuItemContainer = styled(MenuItem)`
+  position: relative;
+
+  && {
+    background-color: ${(props: any) => props.highlighted ? COLOR.BLACK_6 : COLOR.WHITE};
+    height: auto;
+    border-bottom: 1px solid ${COLOR.BLACK_6};
+    padding: 0;
+
+    &:hover {
+      background-color: ${(props: any) => props.highlighted ? COLOR.BLACK_20 : COLOR.GRAY};
+    }
+  }
+` as any;
 
 export const Content = styled.div`
   display: flex;

@@ -57,3 +57,7 @@ export const selectExpandDetails = createSelector(
 export const selectNewGroupDetails = createSelector(
 	selectComponentState, (state) => state.newGroup
 );
+
+export const selectHighlightedGroups = createSelector(
+	selectComponentState, (state) => state.highlightedGroups
+);

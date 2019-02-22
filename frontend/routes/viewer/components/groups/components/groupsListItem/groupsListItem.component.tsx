@@ -22,12 +22,13 @@ import Delete from '@material-ui/icons/Delete';
 import Bolt from '@material-ui/icons/OfflineBolt';
 import { Eye, Tint, HandPaper } from '../../../../../components/fontAwesomeIcon';
 
-import { Info, AuthorWrapper, Actions, Content } from './groupsListItem.styles';
+import { Info, AuthorWrapper, Actions, Content, MenuItemContainer } from './groupsListItem.styles';
 import { 
-	MenuItemContainer, Container, RoleIndicator, Description, Name, ArrowButton, StyledArrowIcon 
+	Container, RoleIndicator, Description, Name, ArrowButton, StyledArrowIcon 
 } from './../../../previewListItem/previewListItem.styles';
 
 import { getGroupRGBAColor } from './../../../../../../helpers/colors';
+import { GROUPS_TYPES } from './../../../../../../helpers/groups';
 import { DateTime } from '../../../../../components/dateTime/dateTime.component';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
@@ -42,6 +43,7 @@ interface IProps {
 	color: string;
 	type: string;
 	modelLoaded: boolean;
+	highlighted: boolean;
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
 }
@@ -51,7 +53,7 @@ const TintIcon = () => <Tint size="xs" />;
 
 export class GroupsListItem extends React.PureComponent<IProps, any> {
 	public get groupTypeIcon() {
-		if (this.props.type === 'criteria') {
+		if (this.props.type === GROUPS_TYPES.SMART) {
 			return <Bolt />
 		}
 		return <HandPaper size="xs" />
@@ -91,10 +93,9 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 	))
 
 	public render() {
-		const { author, active, description, name, color, onItemClick } = this.props;
-		console.log('List item', this.props);
+		const { author, active, description, name, color, onItemClick, highlighted } = this.props;
 		return (
-			<MenuItemContainer onClick={onItemClick}>
+			<MenuItemContainer onClick={onItemClick} highlighted={highlighted}>
 				<Container>
 					<RoleIndicator color={getGroupRGBAColor(color)} width={`10px`} />
 					<Content>

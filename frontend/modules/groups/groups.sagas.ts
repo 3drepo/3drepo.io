@@ -16,6 +16,7 @@
  */
 
 import { put, takeLatest, select, all} from 'redux-saga/effects';
+import { getAngularService } from '../../helpers/migration';
 
 import * as API from '../../services/api';
 import { GroupsTypes, GroupsActions } from './groups.redux';
@@ -24,6 +25,8 @@ import {
 	selectActiveGroupId,
 	selectGroupsMap
 } from './groups.selectors';
+import { Viewer } from '../../services/viewer/viewer';
+import { MultiSelect } from '../../services/viewer/multiSelect';
 
 export function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(true));
@@ -50,7 +53,7 @@ export function* setActiveGroup({ group, filteredGroups, revision }) {
 		// 	toggleRiskPin(risk, true);
 		// }
 		yield all([
-			put(GroupsActions.highlightGroup(group, filteredGroups, revision)),
+			put(GroupsActions.selectGroup(group, filteredGroups, revision)),
 			put(GroupsActions.setComponentState({ activeGroup: group._id }))
 		]);
 	} catch (error) {
@@ -58,16 +61,78 @@ export function* setActiveGroup({ group, filteredGroups, revision }) {
 	}
 }
 
-export function* highlightGroup({ group, filteredGroups, revision }) {
+export function* highlightGroup({ group }) {
 	try {
-		console.log('Highlight group')
+		const color = group.color ? group.color.map((c) => c / 255) :
+		Viewer.getDefaultHighlightColor();
+		
+		yield put(GroupsActions.addToHighlighted(group._id));
+
+		const TreeService = getAngularService('TreeService') as any;
+
+		if (group.objects && group.objects.length > 0) {
+			return TreeService.showNodesBySharedIds(group.objects).then(() => {
+				return TreeService.selectNodesBySharedIds(group.objects, color);
+			});
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('higlight', 'group', error));
+	}
+}
+
+export function* dehighlightGroup({ group }) {
+	try {
+		yield put(GroupsActions.removeFromHighlighted(group._id));
+
+		const TreeService = getAngularService('TreeService') as any;
+
+		TreeService.getNodesFromSharedIds(group.objects)
+			.then((nodes) => {
+				TreeService.deselectNodes(nodes).then((meshes) => {
+					// this.setTotalSavedMeshes(group);
+				});
+			});
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('dehiglight', 'group', error));
+	}
+}
+
+export function* clearSelectionHighlights() {
+	try {
+		yield put(GroupsActions.setComponentState({ highlightedGroups: [] }));
+		const TreeService = getAngularService('TreeService') as any;
+		TreeService.clearCurrentlySelected();
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('clear', 'highlighted groups', error));
+	}
+}
+
+export function* selectGroup({ group }) {
+	try {
+		const addGroup = MultiSelect.isAccumMode()
+		const removeGroup = MultiSelect.isDecumMode();
+		const multiSelect = addGroup || removeGroup;
+
+		if (!multiSelect) {
+			yield put(GroupsActions.clearSelectionHighlights());
+		}
+
+		if (removeGroup) {
+			yield put(GroupsActions.dehighlightGroup(group));
+		} else {
+			yield put(GroupsActions.highlightGroup(group));
+
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('select', 'group', error));
 	}
 }
 
 export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.FETCH_GROUPS, fetchGroups);
 	yield takeLatest(GroupsTypes.SET_ACTIVE_GROUP, setActiveGroup);
+	yield takeLatest(GroupsTypes.SELECT_GROUP, selectGroup);
 	yield takeLatest(GroupsTypes.HIGHLIGHT_GROUP, highlightGroup);
+	yield takeLatest(GroupsTypes.DEHIGHLIGHT_GROUP, dehighlightGroup);
+	yield takeLatest(GroupsTypes.CLEAR_SELECTION_HIGHLIGHTS, clearSelectionHighlights);
 }

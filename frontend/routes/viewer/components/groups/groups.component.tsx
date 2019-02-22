@@ -34,6 +34,7 @@ interface IProps {
 	showDetails?: boolean;
 	groups: any[];
 	activeGroupId: string;
+	highlightedGroups: any;
 	closeDetails: () => void;
 	setActiveGroup: (group, filteredGroups, revision?) => void;
 }
@@ -58,7 +59,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate = () => {
-		console.log('cdm this.props.groups',this.props.groups);
 	}
 
 	public renderTitleIcon = () => {
@@ -77,14 +77,11 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 	
 	public setActiveGroup = (group) => () => {
-		console.log('select group', group);
 		this.props.setActiveGroup(group, []);
 	}
 
 	public handleShowGroupDetails = (group) => () => {
 		// this.props.showGroupDetails(group);
-		console.log('show group details', group)
-
 	}
 
 	public renderGroupsList = renderWhenTrue(() => {
@@ -97,6 +94,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				active={this.props.activeGroupId === group._id}
 				// hasViewPermission={this.hasPermission(VIEW_ISSUE)}
 				modelLoaded={this.state.modelLoaded}
+				highlighted={Boolean(this.props.highlightedGroups[group._id])}
 			/>
 		));
 

@@ -202,6 +202,12 @@ export class ViewerService {
 			this.viewer.stopAreaSelect();
 		}
 	}
+
+	public getDefaultHighlightColor() {
+		if (this.viewer) {
+			return this.viewer.getDefaultHighlightColor();
+		}
+	}
 }
 
 export const Viewer = new ViewerService();

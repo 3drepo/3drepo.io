@@ -32,8 +32,8 @@ export const TooltipButton = (props: IProps) => {
 	const iconProps = { color, fontSize: 'small' } as any;
 
 	return (
-		<Tooltip title={label}>
-			<IconButton aria-label={label} onClick={action} disabled={disabled}>
+		<Tooltip title={label} disableFocusListener={disabled}>
+			<IconButton aria-label={label} onClick={action}>
 				<Icon {...iconProps} />
 			</IconButton>
 		</Tooltip>

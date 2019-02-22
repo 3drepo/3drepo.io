@@ -27,7 +27,8 @@ import {
   selectIsPending,
   selectActiveGroupId,
   selectActiveGroupDetails,
-  selectShowDetails
+  selectShowDetails,
+  selectHighlightedGroups
 } from './../../../../modules/groups';
 
 const mapStateToProps = createStructuredSelector({
@@ -35,7 +36,8 @@ const mapStateToProps = createStructuredSelector({
   isPending: selectIsPending,
   activeGroupId: selectActiveGroupId,
 	activeGroupDetails: selectActiveGroupDetails,
-  showDetails: selectShowDetails
+  showDetails: selectShowDetails,
+  highlightedGroups: selectHighlightedGroups
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

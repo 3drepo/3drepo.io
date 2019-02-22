@@ -24,11 +24,16 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	togglePendingState: ['isPending'],
 	setComponentState: ['componentState'],
 	setActiveGroup: ['group', 'filteredGroups', 'revision'],
-	highlightGroup: ['group', 'filteredGroups', 'revision'],
 	showDetails: ['group', 'filteredGroups', 'revision'],
 	closeDetails: [],
 	setnewGroup: [],
-	updatenewGroup: ['newGroup']
+	updateNewGroup: ['newGroup'],
+	selectGroup: ['group'],
+	addToHighlighted: ['groupId'],
+	removeFromHighlighted: ['groupId'],
+	highlightGroup: ['group'],
+	dehighlightGroup: ['group'],
+	clearSelectionHighlights: []
 }, { prefix: 'GROUPS_' });
 
 export const INITIAL_STATE = {
@@ -36,7 +41,7 @@ export const INITIAL_STATE = {
 	isPending: true,
 	componentState: {
 		activeGroup: null,
-		hihghlightedGroups: {},
+		highlightedGroups: {},
 		showDetails: false,
 		expandDetails: true,
 		newGroup: {}
@@ -54,8 +59,22 @@ export const setComponentState = (state = INITIAL_STATE, { componentState = {} }
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
+export const addToHighlighted = (state = INITIAL_STATE, { groupId }) => {
+	const highlightedGroups = { ...state.componentState.highlightedGroups };
+	highlightedGroups[groupId] = true;
+	return { ...state, 	componentState: { ...state.componentState, highlightedGroups } };
+};
+
+export const removeFromHighlighted = (state = INITIAL_STATE, { groupId }) => {
+	const highlightedGroups = { ...state.componentState.highlightedGroups };
+	highlightedGroups[groupId] = false;
+	return { ...state, 	componentState: { ...state.componentState, highlightedGroups } };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.FETCH_GROUPS_SUCCESS]: fetchGroupsSuccess,
 	[GroupsTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[GroupsTypes.SET_COMPONENT_STATE]: setComponentState,
+	[GroupsTypes.ADD_TO_HIGHLIGHTED]: addToHighlighted,
+	[GroupsTypes.REMOVE_FROM_HIGHLIGHTED]: removeFromHighlighted,
 });
