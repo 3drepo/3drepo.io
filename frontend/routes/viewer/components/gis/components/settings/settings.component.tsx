@@ -80,8 +80,7 @@ export class Settings extends React.PureComponent<IProps, any> {
 				};
 
 				const { teamspace, modelId } = this.props.getDataFromPathname();
-				const project = localStorage.getItem('lastProject');
-				const modelData = { teamspace, project, modelId };
+				const modelData = { teamspace, modelId };
 
 				this.props.updateModelSettings(modelData, pointsSettings);
 			},

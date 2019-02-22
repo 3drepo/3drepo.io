@@ -9,9 +9,7 @@ describe("Implied permission::", function () {
 	let server;
 	let agent;
 
-	const app = require("../../services/api.js").createApp(
-		{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
-	);
+	const app = require("../../services/api.js").createApp();
 	const sharedTeamspace = "imsharedTeamspace";
 	const C = require("../../constants");
 	const middlewares = require("../../middlewares/middlewares");
@@ -261,23 +259,6 @@ describe("Implied permission::", function () {
 				.delete(`/${sharedTeamspace}/${modeltoDelete}`)
 				.expect(200 , done);
 		});
-
-		// another way of testing permissions
-		// it('can delete model 2', function(done){
-
-		// 	const req = {
-		// 		session : { user : {username} },
-		// 		params: {
-		// 			account: 'henry',
-		// 			model: modelId
-		// 		}
-		// 	};
-
-		// 	middlewares.hasDeleteAccessToModel(req, null, err => {
-		// 		expect(err).to.exist;
-		// 		done();
-		// 	});
-		// });
 
 	});
 

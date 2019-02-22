@@ -14,6 +14,7 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { isEmpty } from 'lodash';
 import { AuthService } from '../../home/js/auth.service';
 import { DialogService } from '../../home/js/dialog.service';
 import { EventService } from '../../home/js/event.service';
@@ -36,7 +37,8 @@ class IssuesController implements ng.IController {
 		'RevisionsService',
 		'ClientConfigService',
 		'DialogService',
-		'ViewerService'
+		'ViewerService',
+		'PanelService'
 	];
 
 	private model: string;
@@ -84,7 +86,8 @@ class IssuesController implements ng.IController {
 		private revisionsService: RevisionsService,
 		private clientConfigService: any,
 		private dialogService: DialogService,
-		private viewerService: ViewerService
+		private viewerService: ViewerService,
+		private panelService: any
 	) {}
 
 	public $onInit() {
@@ -151,7 +154,7 @@ class IssuesController implements ng.IController {
 		});
 
 		this.$scope.$watch('vm.modelSettings', () => {
-			if (this.modelSettings) {
+			if (!isEmpty(this.modelSettings)) {
 
 				this.issuesReady.then(() => {
 					this.canAddIssue = this.authService.hasPermission(
@@ -197,6 +200,7 @@ class IssuesController implements ng.IController {
 						const iterIssue = this.issuesService.state.allIssues;
 						if (iterIssue[i]._id === event.value.id) {
 							this.editIssue(iterIssue[i]);
+							this.panelService.showPanelsByType('issues');
 							break;
 						}
 					}

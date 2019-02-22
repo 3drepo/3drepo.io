@@ -39,12 +39,11 @@ export class RegisterRequest extends React.PureComponent<any, any> {
 							Thank you for signing up with 3D Repo.
 						</Paragraph>
 						<Paragraph>
-							Check your inbox for an email confirming your account.
-							You must click the link in the email to complete the sign up process.
+							An email has been sent to verify your request.
+							You must click on the link to complete the sign up process.
 						</Paragraph>
 						<Paragraph>
-							If you do not receive an email within a few minutes,
-							check your Spam folder to ensure it was not incorrectly moved.
+							If you have not received this, please check your spam folder or ask your email administrator for assistance.
 						</Paragraph>
 					</Panel>
 				</Grid>

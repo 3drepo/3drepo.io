@@ -19,9 +19,7 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp(
-	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
-);
+const app = require("../../services/api.js").createApp();
 const async = require("async");
 
 describe("Views", function () {

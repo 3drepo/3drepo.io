@@ -26,3 +26,11 @@ export const selectJobs = createSelector(
 export const selectJobsColors = createSelector(
 	selectJobsDomain, (state) => state.colors
 );
+
+export const selectJobsList = createSelector(
+	selectJobs, (jobs) => jobs.map(({ _id: name, color }) => ({ name, color, value: name }))
+);
+
+export const selectMyJob = createSelector(
+	selectJobsDomain, (state) => state.myJob
+);

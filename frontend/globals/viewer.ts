@@ -14,74 +14,31 @@
  **  You should have received a copy of the GNU Affero General Public License
  **  along with this program.  If not, see <http=//www.gnu.org/licenses/>.
  **/
+import * as EventEmitter from 'eventemitter3';
+
+import { VIEWER_NAV_MODES, VIEWER_MAP_SOURCES, VIEWER_EVENTS, VIEWER_ERRORS } from '../constants/viewer';
 
 declare const Pin;
 declare const UnityUtil;
 declare const ClientConfig;
 declare const Module;
 
+interface IViewerConstructor {
+	name: string;
+	container: HTMLElement;
+	onEvent?: any; // deprecated (use .on instead)
+	onError?: any; // deprecated (use .on instead)
+}
+
 export class Viewer {
 
-	public static NAV_MODES = {
-		HELICOPTER: 'HELICOPTER',
-		TURNTABLE: 'TURNTABLE'
-	};
+	public static NAV_MODES = VIEWER_NAV_MODES;
 
-	public static MAP_SOURCES = {
-		OSM: 'OSM',
-		HERE: 'HERE',
-		HERE_AERIAL: 'HERE_AERIAL',
-		HERE_TRAFFIC: 'HERE_TRAFFIC',
-		HERE_TRAFFIC_FLOW: 'HERE_TRAFFIC_FLOW'
-	};
+	public static MAP_SOURCES = VIEWER_MAP_SOURCES;
 
-	public static EVENT = {
-		ADD_PIN: 'VIEWER_ADD_PIN',
-		BACKGROUND_SELECTED: 'VIEWER_BACKGROUND_SELECTED',
-		BACKGROUND_SELECTED_PIN_MODE: 'BACKGROUND_SELECTED_PIN_MODE',
-		BBOX_READY: 'BBOX_READY',
-		CHANGE_PIN_COLOUR: 'VIEWER_CHANGE_PIN_COLOUR',
-		CLEAR_CLIPPING_PLANES: 'VIEWER_CLEAR_CLIPPING_PLANES',
-		CLICK_PIN: 'VIEWER_CLICK_PIN',
-		CLIPPING_PLANE_BROADCAST: 'VIEWER_CLIPPING_PLANE_BROADCAST',
-		CLIPPING_PLANE_READY: 'VIEWER_CLIPPING_PLANE_READY',
-		ENTER_VR: 'VIEWER_EVENT_ENTER_VR',
-		GET_CURRENT_OBJECT_STATUS: 'VIEWER_GET_CURRENT_OBJECT_STATUS',
-		GET_CURRENT_VIEWPOINT: 'VIEWER_GET_CURRENT_VIEWPOINT',
-		GET_SCREENSHOT: 'VIEWER_GET_SCREENSHOT',
-		GO_HOME: 'VIEWER_GO_HOME',
-		HIGHLIGHT_OBJECTS: 'VIEWER_HIGHLIGHT_OBJECTS',
-		INITIALISE: 'VIEWER_EVENT_INITIALISE',
-		LOADED: 'VIEWER_EVENT_LOADED',
-		LOAD_MODEL: 'VIEWER_LOAD_MODEL',
-		LOGO_CLICK: 'VIEWER_LOGO_CLICK',
-		MEASURE_MODE_CLICK_POINT: 'VIEWER_MEASURE_MODE_CLICK_POINT',
-		MODEL_LOADED: 'VIEWER_MODEL_LOADED',
-		MOVE_PIN: 'VIEWER_MOVE_PIN',
-		MOVE_POINT: 'VIEWER_MOVE_POINT',
-		OBJECT_SELECTED: 'VIEWER_OBJECT_SELECTED',
-		MULTI_OBJECTS_SELECTED: 'VIEWER_MULTI_OBJECTS_SELECTED',
-		PICK_POINT: 'VIEWER_PICK_POINT',
-		REGISTER_MOUSE_MOVE_CALLBACK: 'VIEWER_REGISTER_MOUSE_MOVE_CALLBACK',
-		REGISTER_VIEWPOINT_CALLBACK: 'VIEWER_REGISTER_VIEWPOINT_CALLBACK',
-		REMOVE_PIN: 'VIEWER_REMOVE_PIN',
-		RUNTIME_READY: 'VIEWING_RUNTIME_READY',
-		SET_CAMERA: 'VIEWER_SET_CAMERA',
-		SET_NAV_MODE: 'VIEWER_SET_NAV_MODE',
-		SET_PIN_VISIBILITY: 'VIEWER_SET_PIN_VISIBILITY',
-		START_LOADING: 'VIEWING_START_LOADING',
-		SWITCH_FULLSCREEN: 'VIEWER_SWITCH_FULLSCREEN',
-		SWITCH_OBJECT_VISIBILITY: 'VIEWER_SWITCH_OBJECT_VISIBILITY',
-		UNITY_ERROR: 'VIEWER_EVENT_UNITY_ERROR',
-		UNITY_READY: 'VIEWER_EVENT_UNITY_READY',
-		UPDATE_CLIPPING_PLANES: 'VIEWER_UPDATE_CLIPPING_PLANE',
-		VR_READY: 'VIEWER_EVENT_VR_READY',
-		NAV_MODE_CHANGED: 'NAV_MODE_CHANGED'
-	};
+	public static EVENT = VIEWER_EVENTS;
 
-	public ERROR = {
-		PIN_ID_TAKEN : 'VIEWER_PIN_ID_TAKEN'
-	};
+	public ERROR = VIEWER_ERRORS;
 
 	public pins = {};
 
@@ -163,26 +120,23 @@ export class Viewer {
 	public callback: any;
 	public errCallback: any;
 
-	constructor(
-		name: string,
-		element: HTMLElement,
-		callback: any,
-		errCallback: any
-	) {
+	private emitter = new EventEmitter();
+
+	constructor(config: IViewerConstructor) {
 
 		// If not given the tag by the manager create here
-		this.element = element;
+		this.element = config.container;
 
 		if (!name) {
 			this.name = 'viewer';
 		} else {
-			this.name = name;
+			this.name = config.name;
 		}
 
-		this.callback = callback;
-		this.errCallback = errCallback;
+		this.callback = config.onEvent;
+		this.errCallback = config.onError;
 
-		UnityUtil.init(errCallback);
+		UnityUtil.init(config.onError);
 
 		this.unityLoaderReady = false;
 
@@ -220,6 +174,26 @@ export class Viewer {
 
 		this.unityLoaderScript = document.createElement('script');
 
+	}
+
+	public on = (event, fn, ...args) => {
+		this.emitter.on(event, fn, ...args);
+	}
+
+	public once = (event, fn, ...args) => {
+		this.emitter.once(event, fn, ...args);
+	}
+
+	public off = (event, ...args) => {
+		this.emitter.off(event, ...args);
+	}
+
+	public emit = (event, ...args) => {
+		if (this.callback) {
+			this.callback(event, ...args);
+		}
+
+		this.emitter.emit(event, ...args);
 	}
 
 	public setUnits(units) {
@@ -297,7 +271,7 @@ export class Viewer {
 			UnityUtil.onReady().then(() => {
 				this.initialized = true;
 				this.loadingDivText.style.display = 'none';
-				this.callback(Viewer.EVENT.UNITY_READY, {
+				this.emit(Viewer.EVENT.UNITY_READY, {
 					model: this.modelString,
 					name: this.name
 				});
@@ -337,8 +311,8 @@ export class Viewer {
 		UnityUtil.viewer = this;
 	}
 
-	public getScreenshot(promise) {
-		UnityUtil.requestScreenShot(promise);
+	public getScreenshot() {
+		return UnityUtil.requestScreenShot();
 	}
 
 	public diffToolSetAsComparator(account: string, model: string) {
@@ -376,7 +350,7 @@ export class Viewer {
 	public pickPointEvent(pointInfo) {
 
 		// User clicked a mesh
-		this.callback(Viewer.EVENT.PICK_POINT, {
+		this.emit(Viewer.EVENT.PICK_POINT, {
 			id : pointInfo.id,
 			normal : pointInfo.normal,
 			position: pointInfo.position,
@@ -400,12 +374,12 @@ export class Viewer {
 			if (pointInfo.id) {
 				if (pointInfo.pin) {
 					// User clicked a pin
-					this.callback(Viewer.EVENT.CLICK_PIN, {
+					this.emit(Viewer.EVENT.CLICK_PIN, {
 						id: pointInfo.id
 					});
 
 				} else {
-					this.callback(Viewer.EVENT.OBJECT_SELECTED, {
+					this.emit(Viewer.EVENT.OBJECT_SELECTED, {
 						account: pointInfo.database,
 						id: pointInfo.id,
 						model: pointInfo.model,
@@ -413,11 +387,13 @@ export class Viewer {
 					});
 				}
 			} else {
-				this.callback(Viewer.EVENT.BACKGROUND_SELECTED);
+				this.emit(Viewer.EVENT.BACKGROUND_SELECTED);
+				this.emitter.emit(Viewer.EVENT.BACKGROUND_SELECTED);
 			}
 		} else {
 			if (!pointInfo.id) {
-				this.callback(Viewer.EVENT.BACKGROUND_SELECTED_PIN_MODE);
+				this.emit(Viewer.EVENT.BACKGROUND_SELECTED_PIN_MODE);
+				this.emitter.emit(Viewer.EVENT.BACKGROUND_SELECTED_PIN_MODE);
 			}
 		}
 
@@ -426,9 +402,9 @@ export class Viewer {
 	public objectsSelected(nodes) {
 		if (!this.selectionDisabled && !this.pinDropMode && !this.measureMode) {
 			if (nodes) {
-				this.callback(Viewer.EVENT.MULTI_OBJECTS_SELECTED, {selectedNodes: nodes});
+				this.emit(Viewer.EVENT.MULTI_OBJECTS_SELECTED, {selectedNodes: nodes});
 			} else {
-				this.callback(Viewer.EVENT.BACKGROUND_SELECTED);
+				this.emit(Viewer.EVENT.BACKGROUND_SELECTED);
 			}
 
 		}
@@ -474,8 +450,8 @@ export class Viewer {
 		UnityUtil.toggleVisibility(account, model, ids, visibility);
 	}
 
-	public getObjectsStatus(account, model, promise) {
-		UnityUtil.getObjectsStatus(account, model, promise);
+	public getObjectsStatus(account, model) {
+		return UnityUtil.getObjectsStatus(account, model);
 	}
 
 	public updateSettings(settings) {
@@ -522,39 +498,40 @@ export class Viewer {
 		UnityUtil.cancelLoadModel();
 	}
 
-	public loadModel(account, model, branch, revision) {
-
-		return UnityUtil.onReady().then(() => {
-			this.initialized = true;
-			this.account = account;
-			this.model = model;
-			this.branch = branch;
-			this.revision = revision;
-			this.loadingDivText.style.display = 'none';
-			document.body.style.cursor = 'wait';
-
-			this.callback(Viewer.EVENT.START_LOADING);
-
-			UnityUtil.loadModel(this.account, this.model, this.branch, this.revision);
-			UnityUtil.onLoaded().then((bbox) => {
-					document.body.style.cursor = 'initial';
-					this.callback(Viewer.EVENT.MODEL_LOADED);
-					this.callback(Viewer.EVENT.BBOX_READY, bbox);
-				}).catch((error) => {
-					document.body.style.cursor = 'initial';
-					if (error !== 'cancel') {
-						console.error('Unity error loading model= ', error);
-					}
-				});
-
-			return UnityUtil.onLoading();
-
-		});
-
+	public async isModelLoaded() {
+		await UnityUtil.onReady();
+		return UnityUtil.onLoaded();
 	}
 
-	public getCurrentViewpointInfo(account, model, promise) {
-		UnityUtil.requestViewpoint(account, model, promise);
+	public async loadModel(account, model, branch, revision) {
+		await UnityUtil.onReady();
+		this.initialized = true;
+		this.account = account;
+		this.model = model;
+		this.branch = branch;
+		this.revision = revision;
+		this.loadingDivText.style.display = 'none';
+		document.body.style.cursor = 'wait';
+
+		UnityUtil.loadModel(account, model, branch, revision);
+
+		UnityUtil.onLoaded().then((bbox) => {
+			document.body.style.cursor = 'initial';
+
+			this.emit(Viewer.EVENT.MODEL_LOADED);
+			this.emit(Viewer.EVENT.BBOX_READY, bbox);
+		}).catch((error) => {
+			document.body.style.cursor = 'initial';
+			if (error !== 'cancel') {
+				console.error('Unity error loading model= ', error);
+			}
+		});
+
+		return UnityUtil.onLoading();
+	}
+
+	public getCurrentViewpointInfo(account, model) {
+		return UnityUtil.requestViewpoint(account, model);
 	}
 
 	public switchFullScreen(vrDisplay) {
@@ -616,7 +593,7 @@ export class Viewer {
 	*/
 
 	public clipBroadcast(clip) {
-		this.callback(Viewer.EVENT.CLIPPING_PLANE_BROADCAST, clip);
+		this.emit(Viewer.EVENT.CLIPPING_PLANE_BROADCAST, clip);
 	}
 
 	public updateClippingPlanes(clipPlanes: any, account, model) {
@@ -669,12 +646,12 @@ export class Viewer {
 
 			// this.highlightPin(id); This was preventing changing the colour of the pin
 			// Replace with
-			this.callback(Viewer.EVENT.CHANGE_PIN_COLOUR, {
+			this.emit(Viewer.EVENT.CHANGE_PIN_COLOUR, {
 				colours: Pin.pinColours.yellow,
 				id
 			});
 
-			this.callback(Viewer.EVENT.SET_CAMERA, {
+			this.emit(Viewer.EVENT.SET_CAMERA, {
 				account: pin.account,
 				model: pin.model,
 				position : pin.viewpoint.position,
@@ -682,7 +659,7 @@ export class Viewer {
 				view_dir : pin.viewpoint.view_dir
 			});
 
-			this.callback(Viewer.EVENT.UPDATE_CLIPPING_PLANES, {
+			this.emit(Viewer.EVENT.UPDATE_CLIPPING_PLANES, {
 				account: pin.account,
 				clippingPlanes: pin.viewpoint.clippingPlanes,
 				fromClipPanel: false,

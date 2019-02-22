@@ -21,14 +21,20 @@ import { connect } from '../../helpers/migration';
 
 import { Teamspaces } from './teamspaces.component';
 import { selectCurrentTeamspace } from '../../modules/currentUser';
-import { selectTeamspaces, selectIsPending, TeamspacesActions } from '../../modules/teamspaces';
+import { TeamspacesActions,
+	selectIsPending,
+	selectTeamspaces,
+	selectActiveProject,
+	selectActiveTeamspace
+} from '../../modules/teamspaces';
 import { ModelActions } from './../../modules/model';
 import { DialogActions } from '../../modules/dialog';
-
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,
 	teamspaces: selectTeamspaces,
-	isPending: selectIsPending
+	isPending: selectIsPending,
+	activeProject: selectActiveProject,
+	activeTeamspace: selectActiveTeamspace
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -41,7 +47,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateModel: TeamspacesActions.updateModel,
 	removeModel: TeamspacesActions.removeModel,
 	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
-	downloadModel: ModelActions.downloadModel
+	downloadModel: ModelActions.downloadModel,
+	setState: TeamspacesActions.setComponentState
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Teamspaces);

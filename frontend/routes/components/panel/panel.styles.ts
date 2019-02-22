@@ -35,6 +35,7 @@ export const Title = styled.div`
   font-size: 20px;
   font-weight: ${FONT_WEIGHT.NORMAL};
   height: 40px;
+  overflow: hidden;
   min-height: 40px;
   border-radius: 4px 4px 0 0;
   background-color: ${COLOR.PRIMARY_MAIN};
@@ -43,13 +44,22 @@ export const Title = styled.div`
   justify-content: flex-start;
   align-items: center;
   padding: 0 16px;
+  position: relative;
 `;
 
 export const Content = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+`;
+
+export const ContentWrapper = styled.div`
+  height: 100%;
   overflow: auto;
+  white-space: pre-line;
+  display: flex;
+  flex-direction: column;
 `;
 
 export const LoaderContainer = styled.div`

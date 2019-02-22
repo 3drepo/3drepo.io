@@ -23,7 +23,7 @@ const Utils = require("../utils.js");
 
 // -----------------------------------------------------------------------------
 exports.decode = function(bson) {
-	assert.equal(bson[C.REPO_NODE_LABEL_TYPE], C.REPO_NODE_TYPE_CAMERA, "Trying to convert " + bson[C.REPO_NODE_LABEL_TYPE] + " to " + C.REPO_NODE_TYPE_CAMERA);
+	assert.strict.equal(bson[C.REPO_NODE_LABEL_TYPE], C.REPO_NODE_TYPE_CAMERA, "Trying to convert " + bson[C.REPO_NODE_LABEL_TYPE] + " to " + C.REPO_NODE_TYPE_CAMERA);
 
 	// Nothing to process at the moment, so return unmodified
 	return bson;

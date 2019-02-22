@@ -97,6 +97,11 @@ export const MuiTheme = createMuiTheme({
 		MuiDialog: {
 			paper: {
 				background: '#fafafa'
+			},
+			paperFullScreen: {
+				maxWidth: 'calc(100% - 96px)',
+				maxHeight: 'calc(100% - 96px)',
+				borderRadius: '4px'
 			}
 		},
 		MuiSelect: {
@@ -113,7 +118,7 @@ export const MuiTheme = createMuiTheme({
 		MuiMenuItem: {
 			root: {
 				fontSize: '14px',
-				color: COLOR.BLACK_60
+				color: theme.colors.BLACK_60
 			}
 		},
 		MuiSnackbarContent: {

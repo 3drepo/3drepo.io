@@ -57,6 +57,7 @@ describe("Model Settings", function() {
 		it("should update properties", function() {
 
 			const props = {
+				_id: "xmb3ZydpSM",
 				unit: "metre",
 				topicTypes: ["For info", "VR"],
 				code: "09ABC"
@@ -79,7 +80,6 @@ describe("Model Settings", function() {
 
 			modelSetting.updateProperties(props);
 			expect(modelSetting.toObject().properties).to.deep.equal(expectedReturn);
-
 		});
 	});
 

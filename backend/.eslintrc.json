@@ -45,9 +45,6 @@
 		"error",
 		"unix"
 	],
-	"block-scoped-var" : [
-		"error"
-	],
 	"quotes": [
 		"error",
 		"double"

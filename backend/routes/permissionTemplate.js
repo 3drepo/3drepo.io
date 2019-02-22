@@ -1,18 +1,18 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *	Copyright (C) 2017 3D Repo Ltd
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU Affero General Public License as
+ *	published by the Free Software Foundation, either version 3 of the
+ *	License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU Affero General Public License for more details.
  *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	You should have received a copy of the GNU Affero General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -26,36 +26,42 @@
 	const utils = require("../utils");
 
 	/**
-	 * @api {post} /permission-templates Create a Permission Template
+	 * @api {post} /:teamspace/permission-templates Create a Permission Template
 	 * @apiName createTemplate
 	 * @apiGroup Permission Template
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 */
 
 	router.post("/permission-templates", middlewares.isAccountAdmin, createTemplate);
 
 	/**
-	 * @api {get} /permission-templates List all Permission Templates
+	 * @api {get} /:teamspace/permission-templates List all Permission Templates
 	 * @apiName listTemplates
 	 * @apiGroup Permission Template
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 */
 
 	router.get("/permission-templates", middlewares.isAccountAdmin, listTemplates);
 
 	/**
-	 * @api {get} /:model/permission-templates List all Permission Templates based on Model
+	 * @api {get} /:teamspace/:model/permission-templates List all Permission Templates based on Model
 	 * @apiName listTemplates
 	 * @apiGroup Permission Template
 	 *
-	 * @apiParam {String} model Model to get permission templates for.
+	 * @apiParam {String} teamspace Name of teamspace
+	 * @apiParam {String} model Model ID to get permission templates for.
 	 */
 
 	router.get("/:model/permission-templates", middlewares.hasEditPermissionsAccessToModel, listTemplates);
 
 	/**
-	 * @api {delete} /permission-templates/:permissionId Delete permission template
+	 * @api {delete} /:teamspace/permission-templates/:permissionId Delete permission template
 	 * @apiName deleteTemplate
 	 * @apiGroup Permission Template
 	 *
+	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} permissionId Unique Permission ID
 	 */
 

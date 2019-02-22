@@ -33,6 +33,7 @@ export class ViewerService {
 	public newPinId: string;
 	public currentModel: any;
 	public initialised: any;
+	public currentModelInit: any;
 
 	private pinData: any;
 	private viewer: any;
@@ -56,8 +57,7 @@ export class ViewerService {
 		this.viewer = undefined;
 
 		this.currentModel = {
-			model : null,
-			promise : null
+			model : null
 		};
 
 		this.pin = {
@@ -186,15 +186,13 @@ export class ViewerService {
 		});
 	}
 
-	public getCurrentViewpoint(params) {
+	public async getCurrentViewpoint({ account, model, promise }) {
 		if (this.viewer) {
-			// Note the Info suffix
-			this.viewer.getCurrentViewpointInfo(
-				params.account,
-				params.model,
-				params.promise
-			);
+			const viewpoint = await this.viewer.getCurrentViewpointInfo(account, model);
+			return promise.resolve(viewpoint);
 		}
+
+		return promise.resolve({});
 	}
 
 	public addPin(params) {
@@ -220,14 +218,10 @@ export class ViewerService {
 		});
 	}
 
-	public getObjectsStatus(params) {
-		this.initialised.promise.then(() => {
-			this.viewer.getObjectsStatus(
-				params.account,
-				params.model,
-				params.promise
-			);
-		});
+	public async getObjectsStatus({ account = '', model = '', promise }) {
+		await this.initialised.promise;
+		const objectStatus = await this.viewer.getObjectsStatus(account, model);
+		return promise.resolve(objectStatus);
 	}
 
 	public highlightObjects(params)  {
@@ -291,7 +285,7 @@ export class ViewerService {
 		});
 	}
 
-	public handleUnityError(message: string, reload: boolean, isUnity: boolean)  {
+	public handleUnityError = (message: string, reload: boolean, isUnity: boolean) =>  {
 
 		let errorType = '3D Repo Error';
 
@@ -322,12 +316,9 @@ export class ViewerService {
 		}
 	}
 
-	public getScreenshot(promise) {
-		if (promise) {
-			this.initialised.promise.then(() => {
-				this.viewer.getScreenshot(promise);
-			});
-		}
+	public async getScreenshot() {
+		await this.initialised.promise;
+		return this.viewer.getScreenshot();
 	}
 
 	public goToExtent() {
@@ -355,15 +346,14 @@ export class ViewerService {
 
 		if (this.viewer === undefined) {
 
-			this.viewer = new Viewer(
-				'viewer',
-				document.getElementById('viewer'),
-				this.EventService.send,
-				this.handleUnityError.bind(this)
-			);
+			this.viewer = new Viewer({
+				name: 'viewer',
+				container: document.getElementById('viewer'),
+				onEvent: this.EventService.send,
+				onError: this.handleUnityError
+			});
 
 			this.viewer.setUnity();
-
 		}
 
 		return this.viewer;
@@ -409,24 +399,26 @@ export class ViewerService {
 			.catch((error) => {
 				console.error('Error creating Viewer Directive: ', error);
 			});
-
 	}
 
-	public loadViewerModel(account, model, branch, revision) {
+	public get isModelLoaded() {
+		return this.viewer.isModelLoaded();
+	}
 
+	public get isCanvasReady() {
+		return this.viewer.isViewerReady();
+	}
+
+	public async loadViewerModel(account, model, branch, revision) {
 		if (!account || !model) {
 			console.error('Account, model, branch or revision was not defined!', account, model, branch, revision);
 			return Promise.reject('Account, model, branch or revision was not defined!');
 		} else {
 			this.account = account;
 			this.model = model;
-			this.setHelicopterSpeed();
-			this.currentModel.promise = this.viewer.loadModel(
-				account,
-				model,
-				branch,
-				revision
-			)
+			await this.setHelicopterSpeed();
+
+			return this.viewer.loadModel(account, model, branch, revision)
 				.then(() => {
 					// Set the current model in the viewer
 					this.currentModel.model = model;
@@ -435,7 +427,6 @@ export class ViewerService {
 				.catch((error) => {
 					console.error('Error loading model: ', error);
 				});
-			return this.currentModel.promise;
 		}
 
 	}
@@ -609,6 +600,14 @@ export class ViewerService {
 		return this.heliSpeed;
 	}
 
+	public on(...args) {
+		this.viewer.on(...args);
+	}
+
+	public off(...args) {
+		this.viewer.off(...args);
+	}
+
 	private helicopterSpeedUpdate(value: number) {
 		if (this.account && this.model && Number.isInteger(value)) {
 			this.heliSpeed = value;
@@ -619,9 +618,9 @@ export class ViewerService {
 		}
 	}
 
-	private setHelicopterSpeed() {
+	private async setHelicopterSpeed() {
 		if (this.account && this.model) {
-			this.APIService.get(this.account + '/' + this.model + '/settings/heliSpeed')
+			await this.APIService.get(this.account + '/' + this.model + '/settings/heliSpeed')
 				.then((res) => {
 					this.heliSpeed = res.data.heliSpeed ? res.data.heliSpeed : 1;
 				})

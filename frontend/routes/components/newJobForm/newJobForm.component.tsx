@@ -18,7 +18,6 @@
 import * as React from 'react';
 
 import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
 
 import { ColorPicker } from '../colorPicker/colorPicker.component';
 import {

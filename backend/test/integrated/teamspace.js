@@ -19,11 +19,8 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp(
-	{ session: require("express-session")({ secret: "testing"}) }
-);
-const logger = require("../../logger.js");
-const systemLogger = logger.systemLogger;
+const app = require("../../services/api.js").createApp();
+const responseCodes = require("../../response_codes");
 
 describe("Checking Quota Info  ", function() {
 	let server;
@@ -286,6 +283,78 @@ describe("Checking Quota Info  ", function() {
 				.expect(200, function(err, res) {
 					console.log(res.body);
 					expect(res.body).to.deep.equal(user.quota);
+					done(err);
+				});
+		});
+
+		after(function(done) {
+			this.timeout(timeout);
+			agent.post("/logout")
+				.expect(200, done);
+		});
+	});
+
+	describe("Member of a teamspace trying to get other members information", function(done) {
+		const user =  mixedUser4;
+		before(function(done) {
+			this.timeout(timeout);
+			agent.post("/login")
+				.send({username: user.user, password: user.password})
+				.expect(200, done);
+
+		});
+
+		const expectedInfo = {
+			user: mixedUser3.user,
+			firstName: "dflkgjfdgdf",
+			lastName: "lkgjri",
+			company: "flskjdflksdj"
+		};
+
+		it("should pass if the member exists", function(done) {
+			agent.get(`/${mixedUser1.user}/members/${mixedUser3.user}`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(expectedInfo);
+					done(err);
+				});
+		});
+
+		it("should fail if the member doesn't exist", function(done) {
+			agent.get(`/${mixedUser1.user}/members/blah13214315246`)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+					done(err);
+				});
+		});
+
+		it("should fail if the target user is not a member of the teamspace", function(done) {
+			agent.get(`/${mixedUser4.user}/members/${mixedUser1.user}`)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+					done(err);
+				});
+		});
+
+		it("should fail if the target user is not a member of the teamspace", function(done) {
+			agent.get(`/${mixedUser4.user}/members/${mixedUser1.user}`)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+					done(err);
+				});
+		});
+
+		it("should fail if the request user is not a member of the teamspace", function(done) {
+			agent.get(`/${mixedUser3.user}/members/${mixedUser1.user}`)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+					done(err);
+				});
+		});
+
+		it("should fail if the teamspace does not exist", function(done) {
+			agent.get(`/blah30489723985723/members/${mixedUser1.user}`)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 					done(err);
 				});
 		});

@@ -470,7 +470,8 @@ schema.statics.verify = function (username, token, options) {
 	}).then((user) => {
 		const name = user.customData.firstName && user.customData.firstName.length > 0 ?
 			formatPronouns(user.customData.firstName) : user.user;
-		Mailer.sendWelcomeUserEmail(user.customData.email, {user: name});
+		Mailer.sendWelcomeUserEmail(user.customData.email, {user: name})
+			.catch(err => systemLogger.logError(err));
 
 		if (!skipImportToyModel) {
 
@@ -1220,6 +1221,21 @@ schema.statics.teamspaceMemberCheck = function (teamspace, user) {
 
 		if (!userEntry.isMemberOfTeamspace(teamspace)) {
 			return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+		}
+	});
+};
+
+schema.statics.getTeamMemberInfo = function (teamspace, user) {
+	return User.findByUserName(user).then((userEntry) => {
+		if(!userEntry || !userEntry.isMemberOfTeamspace(teamspace)) {
+			return Promise.reject(responseCodes.USER_NOT_FOUND);
+		} else {
+			return {
+				user,
+				firstName: userEntry.customData.firstName,
+				lastName: userEntry.customData.lastName,
+				company: _.get(userEntry.customData, "billing.billingInfo.company", null)
+			};
 		}
 	});
 };

@@ -344,7 +344,7 @@ groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId) {
 		});
 };
 
-groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId) {
+groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, ids) {
 
 	const query = {};
 
@@ -356,6 +356,10 @@ groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId) {
 	// If we want groups that aren't from risks
 	if (queryParams.noRisks) {
 		query.risk_id = { $exists: false };
+	}
+
+	if (ids) {
+		query._id = {$in: utils.stringsToUUIDs(ids)};
 	}
 
 	return this.find(dbCol, query).then(results => {

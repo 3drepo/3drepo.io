@@ -35,23 +35,23 @@ export const INITIAL_STATE = {
 };
 
 export const initialiseMapSuccess = (state = INITIAL_STATE, { initialised }) => {
-	return {...state, initialised };
+	return { ...state, initialised };
 };
 
 export const addSourceSuccess = (state = INITIAL_STATE, { source }) => {
 	const visibleSources = [...state.visibleSources, source];
-	return {...state, visibleSources };
+	return { ...state, visibleSources };
 };
 
 export const removeSourceSuccess = (state = INITIAL_STATE, { source }) => {
 	const visibleSources = state.visibleSources.filter(
 		(visibleSource) => visibleSource !== source);
 
-	return {...state, visibleSources };
+	return { ...state, visibleSources };
 };
 
 export const resetSourcesSuccess = (state = INITIAL_STATE, {}) => {
-	return {...state, visibleSources: [] };
+	return { ...state, visibleSources: [] };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
