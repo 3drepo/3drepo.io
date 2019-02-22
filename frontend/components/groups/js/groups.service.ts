@@ -246,56 +246,56 @@ export class GroupsService {
 	/**
 	 * Return an CSS friendly RGBA color from an array
 	 */
-	public getRGBA(color) {
-		const red = parseInt(color[0], 10);
-		const blue = parseInt(color[1], 10);
-		const green = parseInt(color[2], 10);
-		return `rgba(${red}, ${blue}, ${green}, 1)`;
-	}
+	// public getRGBA(color) {
+	// 	const red = parseInt(color[0], 10);
+	// 	const blue = parseInt(color[1], 10);
+	// 	const green = parseInt(color[2], 10);
+	// 	return `rgba(${red}, ${blue}, ${green}, 1)`;
+	// }
 
 	/**
 	 * Return an CSS friendly RGBA for a given group
 	 */
-	public getGroupRGBAColor(group) {
-		if (group && group.color) {
-			return this.getRGBA(group.color);
-		}
+	// public getGroupRGBAColor(group) {
+	// 	if (group && group.color) {
+	// 		return this.getRGBA(group.color);
+	// 	}
 
-		return 'rgba(255, 255, 255, 1)';
-	}
+	// 	return 'rgba(255, 255, 255, 1)';
+	// }
 
 	/**
 	 * Return a random RGB color array i.e. [255, 255, 255]
 	 */
-	public getRandomColor(): number[] {
-		return [
-			parseInt((Math.random() * 255).toFixed(0), 10),
-			parseInt((Math.random() * 255).toFixed(0), 10),
-			parseInt((Math.random() * 255).toFixed(0), 10)
-		];
-	}
+	// public getRandomColor(): number[] {
+	// 	return [
+	// 		parseInt((Math.random() * 255).toFixed(0), 10),
+	// 		parseInt((Math.random() * 255).toFixed(0), 10),
+	// 		parseInt((Math.random() * 255).toFixed(0), 10)
+	// 	];
+	// }
 
 	/**
 	 * Convert a colour from hex to an RGBA value
 	 */
-	public hexToRGBA(hex: string, alpha?: number) {
+	// public hexToRGBA(hex: string, alpha?: number) {
 
-		alpha = (alpha !== undefined) ? alpha : 1;
+	// 	alpha = (alpha !== undefined) ? alpha : 1;
 
-		// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-		const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-		hex = hex.replace(shorthandRegex, (m, r, g, b) => {
-			return r + r + g + g + b + b;
-		});
+	// 	// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+	// 	const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+	// 	hex = hex.replace(shorthandRegex, (m, r, g, b) => {
+	// 		return r + r + g + g + b + b;
+	// 	});
 
-		const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-		return result ? [
-			parseInt(result[1], 16),
-			parseInt(result[2], 16),
-			parseInt(result[3], 16)
-		] : [];
+	// 	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+	// 	return result ? [
+	// 		parseInt(result[1], 16),
+	// 		parseInt(result[2], 16),
+	// 		parseInt(result[3], 16)
+	// 	] : [];
 
-	}
+	// }
 
 	/**
 	 * Do any cleaning that's necessary for groups in the UI
