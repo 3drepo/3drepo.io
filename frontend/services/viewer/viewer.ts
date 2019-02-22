@@ -208,6 +208,16 @@ export class ViewerService {
 			return this.viewer.getDefaultHighlightColor();
 		}
 	}
+
+	public async overrideMeshColor(account, model, meshIDs, color) {
+		await this.isViewerReady();
+		return this.viewer.overrideMeshColor(account, model, meshIDs, color);
+	}
+
+	public async resetMeshColor(account, model, meshIDs) {
+		await this.isViewerReady();
+		return this.viewer.resetMeshColor(account, model, meshIDs);
+	}
 }
 
 export const Viewer = new ViewerService();
