@@ -47,6 +47,7 @@ interface IProps {
 	setState: (componentState) => void;
 	showScreenshotDialog: (options) => void;
 	showNewPin: (risk, pinData) => void;
+	setCameraOnViewpoint: (teamspace, modelId, view) => void;
 }
 
 interface IState {
@@ -203,7 +204,21 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		);
 	});
 
-	public renderLogs = renderWhenTrue(() => <LogList items={this.state.logs} isPending={false} />);
+	public removeComment = () => {};
+
+	public setCameraOnViewpoint = (viewpoint) => {
+		this.props.setCameraOnViewpoint(this.props.teamspace, this.props.model, viewpoint);
+	}
+
+	public renderLogs = renderWhenTrue(() => (
+		<LogList
+			items={this.state.logs}
+			isPending={false}
+			removeLog={this.removeComment}
+			teamspace={this.props.teamspace}
+			setCameraOnViewpoint={this.setCameraOnViewpoint}
+		/>
+	));
 
 	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center" padding="0">

@@ -31,6 +31,7 @@ import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
 import { selectSettings } from '../../../../../../modules/model';
 import { DialogActions } from '../../../../../../modules/dialog';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
+import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 
 const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
@@ -48,7 +49,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateRisk: RisksActions.updateRisk,
 	updateNewRisk: RisksActions.updateNewRisk,
 	showNewPin: RisksActions.showNewPin,
-	showScreenshotDialog: DialogActions.showScreenshotDialog
+	showScreenshotDialog: DialogActions.showScreenshotDialog,
+	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(RiskDetails);
