@@ -74,8 +74,6 @@ class PanelController implements ng.IController {
 		this.PanelService.reset();
 		this.contentItems = this.PanelService.panelCards[this.position];
 
-		this.visiblePanelsMap = {};
-
 		this.setupShownCards();
 		this.hideLastItemGap();
 
@@ -170,28 +168,30 @@ class PanelController implements ng.IController {
 	public togglePanel(contentType: string) {
 
 		// Get the content item
-		debugger;
-		for (let i = 0; i < this.contentItems.length; i++) {
-			if (contentType === this.contentItems[i].type) {
-				// Toggle panel show and update number of panels showing count
-				this.contentItems[i].show = !this.contentItems[i].show;
+		const contentIndex = this.contentItems.findIndex(({ type }) => type === contentType);
 
-				// Resize any shown panel contents
-				if (this.contentItems[i].show) {
-					this.contentItemsShown.push(this.contentItems[i]);
-				} else {
-					for (let j = (this.contentItemsShown.length - 1); j >= 0; j -= 1) {
-						if (this.contentItemsShown[j].type === contentType) {
-							this.contentItemsShown.splice(j, 1);
-						}
-					}
-					this.contentItems[i].showGap = false;
+		if (contentIndex !== -1) {
+			// Toggle panel show and update number of panels showing count
+			this.contentItems[contentIndex].show = !this.contentItems[contentIndex].show;
+			this.onPanelVisibilityChange(contentIndex, contentType);
+		}
+	}
+
+	public onPanelVisibilityChange(index, type) {
+		// Resize any shown panel contents
+		debugger;
+		if (this.contentItems[index].show) {
+			this.contentItemsShown.push(this.contentItems[index]);
+		} else {
+			for (let j = (this.contentItemsShown.length - 1); j >= 0; j -= 1) {
+				if (this.contentItemsShown[j].type === type) {
+					this.contentItemsShown.splice(j, 1);
 				}
-				break;
 			}
-			this.calculateContentHeights();
+			this.contentItems[index].showGap = false;
 		}
 
+		this.calculateContentHeights();
 		this.hideLastItemGap();
 		this.updatePanelButtons();
 	}
@@ -222,8 +222,6 @@ class PanelController implements ng.IController {
 			return;
 		}
 
-		console.log('=====');
-
 		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
 
 		const spaceUsedInGaps = Math.max(0, this.itemGap * ( this.contentItemsShown.length - 1));
@@ -237,11 +235,6 @@ class PanelController implements ng.IController {
 		const freeHeight = availableHeight - reservedHeight;
 		const freeHeightPerPanel = freeHeight / orderedContentItems.length;
 
-		console.log('AVAILABLEHEIGHT', availableHeight);
-		console.log('GAP', spaceUsedInGaps);
-		console.log('ORDEREDCONTENTITEMS', orderedContentItems);
-		console.log('FREEHEIGHTPERPANEL', freeHeightPerPanel);
-
 		if (freeHeightPerPanel > 0) {
 			orderedContentItems.forEach((item) => {
 				const requiredHeight = item.requestedHeight || item.minHeight;
@@ -250,9 +243,6 @@ class PanelController implements ng.IController {
 					? clamp(requiredHeight, item.minHeight, maxHeight)
 					: clamp(requiredHeight, item.minHeight, availableHeight);
 				item.height = height - item.panelTakenHeight;
-
-				console.log('ITEM', item.type, item.height);
-
 			});
 		}
 	}
