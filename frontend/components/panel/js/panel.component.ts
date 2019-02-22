@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { sumBy, clamp } from 'lodash';
+import { sumBy, clamp, groupBy } from 'lodash';
 
 class PanelController implements ng.IController {
 
@@ -41,6 +41,7 @@ class PanelController implements ng.IController {
 	public position;
 
 	private highlightBackground;
+	private visiblePanelsMap;
 
 	constructor(
 		private $window: ng.IWindowService,
@@ -73,6 +74,8 @@ class PanelController implements ng.IController {
 		this.PanelService.reset();
 		this.contentItems = this.PanelService.panelCards[this.position];
 
+		this.visiblePanelsMap = {};
+
 		this.setupShownCards();
 		this.hideLastItemGap();
 
@@ -87,7 +90,6 @@ class PanelController implements ng.IController {
 	}
 
 	public watchers() {
-
 		this.$scope.$watch('vm.contentItems', (newValue: any, oldValue: any) => {
 			if (newValue && newValue.length) {
 				this.setupShownCards();
@@ -168,6 +170,7 @@ class PanelController implements ng.IController {
 	public togglePanel(contentType: string) {
 
 		// Get the content item
+		debugger;
 		for (let i = 0; i < this.contentItems.length; i++) {
 			if (contentType === this.contentItems[i].type) {
 				// Toggle panel show and update number of panels showing count
@@ -184,9 +187,9 @@ class PanelController implements ng.IController {
 					}
 					this.contentItems[i].showGap = false;
 				}
-				this.calculateContentHeights();
 				break;
 			}
+			this.calculateContentHeights();
 		}
 
 		this.hideLastItemGap();
@@ -215,9 +218,15 @@ class PanelController implements ng.IController {
 	 *  Calculate content heights
 	 */
 	public calculateContentHeights() {
+		if (!this.contentItemsShown.length) {
+			return;
+		}
+
+		console.log('=====');
+
 		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
 
-		const spaceUsedInGaps = this.itemGap * ( this.contentItemsShown.length - 1);
+		const spaceUsedInGaps = Math.max(0, this.itemGap * ( this.contentItemsShown.length - 1));
 		const availableHeight = this.maxHeightAvailable - spaceUsedInGaps;
 
 		const orderedContentItems = this.contentItemsShown.concat([]).sort((a, b) => {
@@ -228,6 +237,11 @@ class PanelController implements ng.IController {
 		const freeHeight = availableHeight - reservedHeight;
 		const freeHeightPerPanel = freeHeight / orderedContentItems.length;
 
+		console.log('AVAILABLEHEIGHT', availableHeight);
+		console.log('GAP', spaceUsedInGaps);
+		console.log('ORDEREDCONTENTITEMS', orderedContentItems);
+		console.log('FREEHEIGHTPERPANEL', freeHeightPerPanel);
+
 		if (freeHeightPerPanel > 0) {
 			orderedContentItems.forEach((item) => {
 				const requiredHeight = item.requestedHeight || item.minHeight;
@@ -236,6 +250,9 @@ class PanelController implements ng.IController {
 					? clamp(requiredHeight, item.minHeight, maxHeight)
 					: clamp(requiredHeight, item.minHeight, availableHeight);
 				item.height = height - item.panelTakenHeight;
+
+				console.log('ITEM', item.type, item.height);
+
 			});
 		}
 	}
