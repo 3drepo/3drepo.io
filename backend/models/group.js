@@ -564,10 +564,10 @@ function buildRule(rule) {
 					operation = rule.values[i];
 					break;
 				case "CONTAINS":
-					operation = { $regex: rule.values[i], $options: "i" };
+					operation = { $regex: new RegExp(utils.sanitizeString(rule.values[i])), $options: "i" };
 					break;
 				case "NOT_CONTAINS":
-					operation = { $regex: "^((?!" + rule.values[i] + ").)*$", $options: "i" };
+					operation = { $regex: new RegExp("^((?!" + utils.sanitizeString(rule.values[i]) + ").)*$"), $options: "i" };
 					break;
 				case "EQUALS":
 					operation = { $eq: Number(rule.values[i]) };
