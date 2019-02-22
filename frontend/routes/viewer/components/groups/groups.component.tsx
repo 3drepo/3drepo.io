@@ -16,39 +16,72 @@
  */
 
 import * as React from 'react';
+import { map, isEqual, isEmpty } from 'lodash';
+
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import IconButton from '@material-ui/core/IconButton';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import GroupWork from '@material-ui/icons/GroupWork';
 import AddIcon from '@material-ui/icons/Add';
+import CancelIcon from '@material-ui/icons/Cancel';
+import MoreIcon from '@material-ui/icons/MoreVert';
+import SearchIcon from '@material-ui/icons/Search';
+import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
+import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { Viewer } from '../../../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { Container } from './groups.styles';
+import { searchByFilters } from '../../../../helpers/searching';
+
 import { ListContainer, Summary } from './../risks/risks.styles';
 import { GroupsListItem } from './components/groupsListItem/groupsListItem.component';
-
+import { EmptyStateInfo } from '../views/views.styles';
+import { MenuList } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 interface IProps {
 	isPending?: boolean;
 	showDetails?: boolean;
 	groups: any[];
 	activeGroupId: string;
 	highlightedGroups: any;
+	searchEnabled: boolean;
+	selectedFilters: any[];
+	setState: (componentState: any) => void;
+	setNewGroup: () => void;
+	showGroupDetails: (group, filteredGroups, revision?) => void;
 	closeDetails: () => void;
 	setActiveGroup: (group, filteredGroups, revision?) => void;
+	saveGroup: (teamspace, modelId, risk, filteredGroups) => void;
 }
 
 interface IState {
+	groupDetails?: any;
 	modelLoaded: boolean;
+	filteredGroups: any[];
 }
+
+const MenuButton = ({ IconProps, Icon, ...props }) => (
+	  <IconButton
+	    {...props}
+	    aria-label="Show filters menu"
+	    aria-haspopup="true"
+	  >
+	    <MoreIcon {...IconProps} />
+	  </IconButton>
+	);
+	
 
 export class Groups extends React.PureComponent<IProps, IState> {
 	public state = {
-		modelLoaded: false
+		groupDetails: {},
+		modelLoaded: false,
+		filteredGroups: []
 	};
 
 	public componentDidMount() {
+		this.setState({ filteredGroups: this.filteredGroups });
+
 		if (Viewer.viewer.model && !this.state.modelLoaded) {
 			this.setState({ modelLoaded: true });
 		}
@@ -58,7 +91,43 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public componentDidUpdate = () => {
+	public componentDidUpdate(prevProps) {
+		const { groups, selectedFilters, activeGroupId, showDetails } = this.props;
+		const groupsChanged = !isEqual(prevProps.groups, groups);
+		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
+
+		const changes = {} as IState;
+
+		if (groupsChanged || filtersChanged) {
+			changes.filteredGroups = this.filteredGroups;
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
+	}
+
+	get filteredGroups() {
+		const { groups, selectedFilters } = this.props;
+		return searchByFilters(groups, selectedFilters, false);
+	}
+
+	public handleCloseSearchMode = () => {
+		this.props.setState({ searchEnabled: false });
+		this.setState({
+			filteredGroups: this.props.groups
+		});
+	}
+
+	public handleOpenSearchMode = () => {
+		this.props.setState({ searchEnabled: true });
+	}
+	
+	public getSearchButton = () => {
+		if (this.props.searchEnabled) {
+			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
+		}
+		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
 	}
 
 	public renderTitleIcon = () => {
@@ -72,9 +141,42 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return <GroupWork />;
 	}
 
+	public renderActionsMenu = () => (
+		<MenuList>
+			{/* {RISKS_ACTIONS_MENU.map(({ name, Icon, label }) => {
+				return (
+					<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+						<IconWrapper><Icon fontSize="small" /></IconWrapper>
+						<StyledItemText>
+							{label}
+							{(name === RISKS_ACTIONS_ITEMS.SHOW_PINS && this.props.showPins) && <Check fontSize="small" />}
+						</StyledItemText>
+					</StyledListItem>
+				);
+			})} */}
+		</MenuList>
+	)
+
+	public getMenuButton = () => (
+		<ButtonMenu
+			renderButton={MenuButton}
+			renderContent={this.renderActionsMenu}
+			PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+			PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
+			ButtonProps={{ disabled: false }}
+		/>
+	)
+
 	public renderActions = () => {
-		return [];
+		if (this.props.showDetails) {
+			if (!this.props.activeGroupId || this.state.filteredGroups.length < 2) {
+				return [];
+			}
+			// return [{ Button: this.getPrevButton }, { Button: this.getNextButton }];
+		}
+		return [{ Button: this.getSearchButton }, { Button: this.getMenuButton }];
 	}
+
 	
 	public setActiveGroup = (group) => () => {
 		this.props.setActiveGroup(group, []);
@@ -85,7 +187,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderGroupsList = renderWhenTrue(() => {
-		const Items = this.props.groups.map((group, index) => (
+		const Items = this.state.filteredGroups.map((group, index) => (
 			<GroupsListItem
 				{...group}
 				key={index}
@@ -101,16 +203,24 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return <ListContainer>{Items}</ListContainer>;
 	});
 
+	public renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>No groups have been created yet</EmptyStateInfo>
+	));
+
+	public renderNotFound = renderWhenTrue(() => (
+		<EmptyStateInfo>No groups matched</EmptyStateInfo>
+	));
 
 	public renderListView = renderWhenTrue(() => (
 		<>
 			<ViewerPanelContent className="height-catcher">
-			{this.renderGroupsList(this.props.groups.length)}
-
+			{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredGroups.length)}
+			{this.renderNotFound(this.props.searchEnabled && !this.state.filteredGroups.length)}
+			{this.renderGroupsList(this.state.filteredGroups.length)}
 			</ViewerPanelContent>
 			<ViewerPanelFooter alignItems="center" justify="space-between">
 				<Summary>
-					{`${this.props.groups.length} groups displayed`}
+					{`${this.state.filteredGroups.length} groups displayed`}
 				</Summary>
 				<ViewerPanelButton
 					aria-label="Add group"
@@ -124,6 +234,28 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	)
 	);
 
+  public handleFilterChange = (selectedFilters) => {
+		this.props.setState({
+			selectedFilters
+		})
+		this.setState({
+			filteredGroups: this.filteredGroups
+		})
+  }
+
+	get filters() {
+		return [];
+	}
+
+	public renderFilterPanel = renderWhenTrue(() => (
+		<FilterPanel
+			onChange={this.handleFilterChange}
+			filters={this.filters as any}
+			selectedFilters={this.props.selectedFilters}
+			hideFiltersMenu={true}
+		/>
+	));
+
 	public render() {
 		return (
 			<ViewerPanel
@@ -132,8 +264,8 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				actions={this.renderActions()}
 				pending={this.props.isPending}
 			>
-				{/* {this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
-				{this.renderDetailsView(this.props.showDetails)} */}
+				{this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
+				{/* {this.renderDetailsView(this.props.showDetails)} */}
 				{this.renderListView(!this.props.showDetails)}
 			</ViewerPanel>
 		);

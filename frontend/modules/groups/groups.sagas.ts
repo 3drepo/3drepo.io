@@ -23,8 +23,10 @@ import { GroupsTypes, GroupsActions } from './groups.redux';
 import { DialogActions } from '../dialog';
 import {
 	selectActiveGroupId,
-	selectGroupsMap
+	selectGroupsMap,
+	selectGroups
 } from './groups.selectors';
+import { searchByFilters } from '../../helpers/searching';
 import { Viewer } from '../../services/viewer/viewer';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 
@@ -41,8 +43,6 @@ export function* fetchGroups({teamspace, modelId, revision}) {
 
 export function* setActiveGroup({ group, filteredGroups, revision }) {
 	try {
-		console.log('Set active group')
-
 		const activeGroupId = yield select(selectActiveGroupId);
 		const groupsMap = yield select(selectGroupsMap);
 
@@ -127,6 +127,7 @@ export function* selectGroup({ group }) {
 		yield put(DialogActions.showErrorDialog('select', 'group', error));
 	}
 }
+
 
 export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.FETCH_GROUPS, fetchGroups);

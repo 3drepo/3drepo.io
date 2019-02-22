@@ -42,6 +42,7 @@ import {
 	ButtonWrapper
 } from './filterPanel.styles';
 import { compareStrings } from '../../../helpers/searching';
+import { renderWhenTrue } from '../../../helpers/rendering';
 
 export const DATA_TYPES = {
 	UNDEFINED: 1,
@@ -66,6 +67,7 @@ interface IProps {
 	filters: IFilter[];
 	onChange: (selectedFilters) => void;
 	selectedFilters: any[];
+	hideFiltersMenu?: boolean;
 }
 
 interface IState {
@@ -375,14 +377,25 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public renderFiltersMenuButton = renderWhenTrue(() => (
+		<ButtonContainer>
+			<ButtonMenu
+				renderButton={MenuButton}
+				renderContent={this.renderFiltersMenu}
+				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
+				ButtonProps={{ disabled: false }}
+			/>
+		</ButtonContainer>
+	));
+
 	public render() {
 		const { value, suggestions } = this.state;
-
 		return (
 			<Container filtersOpen={this.state.selectedFilters.length && this.state.filtersOpen}>
 				{this.renderSelectedFilters()}
 
-				<InputContainer>
+				<InputContainer menuHidden={this.props.hideFiltersMenu}>
 					<Autosuggest
 						ref={this.handleAutoSuggestMount}
 						suggestions={suggestions}
@@ -403,15 +416,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 						renderSuggestionsContainer={this.renderSuggestionsContainer}
 						onSuggestionSelected={this.handleNewFilterSubmit}
 					/>
-					<ButtonContainer>
-						<ButtonMenu
-							renderButton={MenuButton}
-							renderContent={this.renderFiltersMenu}
-							PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-							PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-							ButtonProps={{ disabled: false }}
-						/>
-					</ButtonContainer>
+					{this.renderFiltersMenuButton(!this.props.hideFiltersMenu)}
 				</InputContainer>
 
 			</Container>

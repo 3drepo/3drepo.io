@@ -61,3 +61,11 @@ export const selectNewGroupDetails = createSelector(
 export const selectHighlightedGroups = createSelector(
 	selectComponentState, (state) => state.highlightedGroups
 );
+
+export const selectSearchEnabled = createSelector(
+	selectComponentState, (state) => state.searchEnabled
+);
+
+export const selectSelectedFilters = createSelector(
+	selectComponentState, (state) => state.selectedFilters
+);

@@ -44,7 +44,8 @@ export const INITIAL_STATE = {
 		highlightedGroups: {},
 		showDetails: false,
 		expandDetails: true,
-		newGroup: {}
+		newGroup: {},
+		selectedFilters: []
 	}
 };
 

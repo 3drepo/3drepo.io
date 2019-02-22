@@ -22,13 +22,14 @@ import { connect } from '../../../../helpers/migration';
 import { Groups } from './groups.component';
 import { 
   GroupsActions, 
-  selectGroupsMap, 
   selectGroups, 
   selectIsPending,
   selectActiveGroupId,
   selectActiveGroupDetails,
   selectShowDetails,
-  selectHighlightedGroups
+  selectHighlightedGroups,
+  selectSearchEnabled,
+  selectSelectedFilters
 } from './../../../../modules/groups';
 
 const mapStateToProps = createStructuredSelector({
@@ -37,14 +38,17 @@ const mapStateToProps = createStructuredSelector({
   activeGroupId: selectActiveGroupId,
 	activeGroupDetails: selectActiveGroupDetails,
   showDetails: selectShowDetails,
-  highlightedGroups: selectHighlightedGroups
+  highlightedGroups: selectHighlightedGroups,
+  searchEnabled: selectSearchEnabled,
+  selectedFilters: selectSelectedFilters
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
   setActiveGroup: GroupsActions.setActiveGroup,
   setState: GroupsActions.setComponentState,
 	showGroupDetails: GroupsActions.showDetails,
-	closeDetails: GroupsActions.closeDetails
+  closeDetails: GroupsActions.closeDetails,
+  onFiltersChange: GroupsActions.onFiltersChange
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Groups);
