@@ -21,7 +21,10 @@ import * as React from 'react';
 import * as Yup from 'yup';
 import { schema } from '../../../../../services/validation';
 import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NeutralActionButton, ShortInput,
-	VisualSettingsButtonsContainer, VisualSettingsDialogContent } from './visualSettingsDialog.styles';
+		VisualSettingsButtonsContainer, VisualSettingsDialogContent,
+		NegativeActionButton } from './visualSettingsDialog.styles';
+import { isEqual } from 'lodash';
+import { DEFAULT_SETTINGS } from '../../../../../constants/viewer';
 
 const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
@@ -106,15 +109,17 @@ const AdvancedSettings = (props) => {
 const Buttons = (props) => {
 	return (
 		<VisualSettingsButtonsContainer>
-			<Button
-			color="primary"
-			variant="raised"
-			disabled={true}
-			type="button"
-			onClick={props.onClickReset}
-			>
-				Reset
-			</Button>
+			<Field render={ ({ form }) => (
+			<NegativeActionButton
+				color="primary"
+				variant="raised"
+				disabled={isEqual(form.values, DEFAULT_SETTINGS)}
+				type="button"
+				onClick={() => form.setValues(DEFAULT_SETTINGS)}
+				>
+					Reset
+				</NegativeActionButton>
+			)} />
 			<NeutralActionButton
 				color="primary"
 				variant="raised"
@@ -125,15 +130,14 @@ const Buttons = (props) => {
 				Cancel
 			</NeutralActionButton>
 			<Field render={ ({ form }) => (
-						<Button
+					<Button
 						color="secondary"
 						variant="raised"
-						disabled={!form.isValid || form.isValidating}
 						type="submit"
-						onClick={props.onClickSave}
+						disabled={!form.isValid || form.isValidating}
 						>
 						Save
-						</Button>
+					</Button>
 			)} />
 
 		</VisualSettingsButtonsContainer>);
@@ -148,11 +152,15 @@ interface IProps {
 
 interface IState {
 	selectedTab: number;
+	visualSettings: any;
+	flag: boolean;
 }
 
 export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 	public state = {
-		selectedTab: 0
+		selectedTab: 0,
+		visualSettings: null,
+		flag: false
 	};
 
 	public handleTabChange = (event, selectedTab) => {
@@ -166,9 +174,13 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 		this.props.handleClose();
 	}
 
+	public componentDidMount() {
+		this.setState({visualSettings: this.props.visualSettings});
+	}
+
 	public render() {
 		const {selectedTab} = this.state;
-		const {visualSettings} = this.props;
+		const {visualSettings, handleClose} =  this.props;
 
 		return (
 			<VisualSettingsDialogContent>
@@ -184,12 +196,13 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 				<Formik
 					validationSchema={SettingsSchema}
 					initialValues={visualSettings}
+					enableReinitialize={true}
 					onSubmit={this.onSubmit}
 					>
 					<Form>
 						{selectedTab === 0 && <BasicSettings />}
 						{selectedTab === 1 && <AdvancedSettings />}
-						<Buttons  onClickCancel={this.props.handleClose}/>
+						<Buttons onClickCancel={handleClose} />
 					</Form>
 				</Formik>
 			</VisualSettingsDialogContent>
