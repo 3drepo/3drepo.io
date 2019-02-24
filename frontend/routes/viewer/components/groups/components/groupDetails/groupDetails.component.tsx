@@ -16,13 +16,15 @@
  */
 
 import * as React from 'react';
-
+import SaveIcon from '@material-ui/icons/Save';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
 import { Container } from './groupDetails.styles';
 import { GroupDetailsForm } from './groupDetailsForm.component';
 import { mergeGroupData } from '../../../../../../helpers/groups';
+import { ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
+import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 
 interface IProps {
 	group: any;
@@ -92,7 +94,16 @@ export class GroupDetails extends React.PureComponent<IProps, any> {
 
 	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center">
-			Test
+			<ColorPicker />
+			<ViewerPanelButton
+				variant="fab"
+				color="secondary"
+				type="submit"
+				mini={true}
+				aria-label="Save group"
+			>
+				<SaveIcon />
+			</ViewerPanelButton>
 		</ViewerPanelFooter>
 	));
 
@@ -102,7 +113,7 @@ export class GroupDetails extends React.PureComponent<IProps, any> {
 				<ViewerPanelContent className="height-catcher">
 					{this.renderPreview(this.props.group)}
 				</ViewerPanelContent>
-				{this.renderFooter(!this.groupData._id)}
+				{this.renderFooter(this.groupData._id)}
 			</Container>
 		);
 	}
