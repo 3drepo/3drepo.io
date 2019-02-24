@@ -70,6 +70,7 @@ interface IProps {
 	toggleColorOverrideAll: () => void;
 	deleteGroups: (teamspace, model, groups) => void;
 	showConfirmDialog: (config) => void;
+	isolateGroup: (group) => void;
 }
 
 interface IState {
@@ -243,6 +244,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				overrided={this.isOverrided(group._id)}
 				deleteGroup={this.deleteGroup}
 				toggleColorOverride={() => this.props.toggleColorOverride(group)}
+				isolateGroup={() => this.props.isolateGroup(group)}
 			/>
 		));
 

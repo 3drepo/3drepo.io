@@ -51,6 +51,7 @@ interface IProps {
 	onArrowClick: (event?) => void;
 	toggleColorOverride: () => void;
 	deleteGroup: (groupId) => void;
+	isolateGroup: () => void;
 }
 
 const EyeIcon = () => <Eye size="xs" />;
@@ -82,13 +83,13 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 		<Actions>
 			<TooltipButton
 				label="Isolate"
-				action={() => console.log('isolate')}
+				action={this.props.isolateGroup}
 				Icon={EyeIcon}
 				disabled={!this.props.modelLoaded}
 			/>
 			<TooltipButton
 				label="Toggle Colour Override"
-				action={() => this.props.toggleColorOverride()}
+				action={this.props.toggleColorOverride}
 				Icon={() => this.getTintIcon()}
 				disabled={!this.props.modelLoaded}
 			/>

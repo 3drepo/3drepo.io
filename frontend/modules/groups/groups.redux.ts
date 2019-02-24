@@ -42,7 +42,8 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	removeFromOverrided: ['groupId'],
 	toggleColorOverrideAll: [],
 	deleteGroups: ['teamspace', 'modelId', 'groups'],
-	deleteGroupSuccess: ['groupId']
+	deleteGroupSuccess: ['groupId'],
+	isolateGroup: ['group']
 }, { prefix: 'GROUPS_' });
 
 export const INITIAL_STATE = {

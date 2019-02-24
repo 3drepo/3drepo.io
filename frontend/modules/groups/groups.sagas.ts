@@ -75,12 +75,9 @@ export function* dehighlightGroup({ group }) {
 
 		const TreeService = getAngularService('TreeService') as any;
 
-		TreeService.getNodesFromSharedIds(group.objects)
-			.then((nodes) => {
-				TreeService.deselectNodes(nodes).then((meshes) => {
-					// this.setTotalSavedMeshes(group);
-				});
-			});
+		const nodes = yield TreeService.getNodesFromSharedIds(group.objects);
+		yield TreeService.deselectNodes(nodes);
+		// this.setTotalSavedMeshes(group);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('dehiglight', 'group', error));
 	}
@@ -90,7 +87,7 @@ export function* clearSelectionHighlights() {
 	try {
 		yield put(GroupsActions.setComponentState({ highlightedGroups: [] }));
 		const TreeService = getAngularService('TreeService') as any;
-		TreeService.clearCurrentlySelected();
+		yield TreeService.clearCurrentlySelected();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('clear', 'highlighted groups', error));
 	}
@@ -209,6 +206,7 @@ export function* toggleColorOverrideAll() {
 		yield put(DialogActions.showErrorDialog('toggle', 'color override', error));
 	}
 }
+
 export function* deleteGroups({ teamspace, modelId, groups }) {
 	try {
 		yield API.deleteGroups(teamspace, modelId, groups);
@@ -232,6 +230,16 @@ export function* deleteGroups({ teamspace, modelId, groups }) {
 	}
 }
 
+export function* isolateGroup({ group }) {
+	try {
+		yield put(GroupsActions.clearSelectionHighlights());
+		const TreeService = getAngularService('TreeService') as any;
+		TreeService.isolateNodesBySharedIds(group.objects);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('delete', 'groups', error));
+	}
+}
+
 export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.FETCH_GROUPS, fetchGroups);
 	yield takeLatest(GroupsTypes.SET_ACTIVE_GROUP, setActiveGroup);
@@ -244,4 +252,5 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.TOGGLE_COLOR_OVERRIDE, toggleColorOverride);
 	yield takeLatest(GroupsTypes.TOGGLE_COLOR_OVERRIDE_ALL, toggleColorOverrideAll);
 	yield takeLatest(GroupsTypes.DELETE_GROUPS, deleteGroups);
+	yield takeLatest(GroupsTypes.ISOLATE_GROUP, isolateGroup);
 }
