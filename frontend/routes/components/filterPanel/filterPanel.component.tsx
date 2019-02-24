@@ -113,6 +113,10 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		filtersOpen: false
 	};
 
+	public static defaultProps = {
+		filters: []
+	}
+
 	private popperNode = null;
 	private filterSuggestions = [];
 
