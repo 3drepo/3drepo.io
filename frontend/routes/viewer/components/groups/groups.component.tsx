@@ -171,7 +171,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 						deleteGroups(teamspace, model, allGroups);
 					}
 				});
-			}, 
+			},
 			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadGroups(teamspace, model)
 		};
 	}
@@ -212,7 +212,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return [{ Button: this.getSearchButton }, { Button: this.getMenuButton }];
 	}
 
-	
 	public setActiveGroup = (group) => () => {
 		this.props.setActiveGroup(group, []);
 	}

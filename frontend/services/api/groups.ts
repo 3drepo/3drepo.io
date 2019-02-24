@@ -32,7 +32,6 @@ export const getGroups = (teamspace, modelId, revision?) => {
 	return api.get(`${teamspace}/${modelId}/groups/revision/master/head/?noIssues=true&noRisks=true`);
 };
 
-
 /**
  * Get group data
  * @param teamspace

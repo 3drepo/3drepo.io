@@ -218,12 +218,11 @@ export function* deleteGroups({ teamspace, modelId, groups }) {
 		yield all(groupsToDelete.map((groupId) => {
 			const overridedGroup = colorOverrides[groupId];
 			const group = groupsMap[groupId];
-		
 			return [
 				put(GroupsActions.removeColorOverride(groupId, overridedGroup)),
 				put(GroupsActions.dehighlightGroup(group)),
 				put(GroupsActions.deleteGroupSuccess(groupId))
-			]
+			];
 		}));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('delete', 'groups', error));
