@@ -99,7 +99,7 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 			<TooltipButton
 				label="Toggle Colour Override"
 				action={this.props.toggleColorOverride}
-				Icon={() => this.getTintIcon()}
+				Icon={this.getTintIcon}
 				disabled={!this.props.modelLoaded}
 			/>
 			<TooltipButton

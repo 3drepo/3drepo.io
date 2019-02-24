@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { map, isEqual, isEmpty } from 'lodash';
+import { isEqual, isEmpty } from 'lodash';
 
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import IconButton from '@material-ui/core/IconButton';
@@ -211,6 +211,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			if (!this.props.activeGroupId || this.state.filteredGroups.length < 2) {
 				return [];
 			}
+			return [];
 			// return [{ Button: this.getPrevButton }, { Button: this.getNextButton }];
 		}
 		return [{ Button: this.getSearchButton }, { Button: this.getMenuButton }];

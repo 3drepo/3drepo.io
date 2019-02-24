@@ -1,6 +1,12 @@
 import Print from '@material-ui/icons/Print';
 import Download from '@material-ui/icons/CloudDownload';
 import Delete from '@material-ui/icons/Delete';
+import { COLOR } from '../styles';
+
+export const GROUPS_TYPES = {
+	NORMAL: 'normal',
+	SMART: 'smart'
+};
 
 export const GROUPS_TYPES = {
 	NORMAL: 'normal',
@@ -31,4 +37,4 @@ export const GROUPS_ACTIONS_MENU = [
 	}
 ];
 
-export const DEFAULT_OVERRIDE_COLOR = 'rgba(0, 0, 0, 0.54)';
+export const DEFAULT_OVERRIDE_COLOR = COLOR.BLACK_54;

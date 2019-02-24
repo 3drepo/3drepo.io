@@ -22,6 +22,7 @@ export const COLOR = {
 	BLACK_30: hexToRgba(BLACK, .3),
 	BLACK_40: hexToRgba(BLACK, .4),
 	BLACK_50: hexToRgba(BLACK, .5),
+	BLACK_54: hexToRgba(BLACK, .54),
 	BLACK_60: hexToRgba(BLACK, .6),
 	BLACK_80: hexToRgba(BLACK, .8),
 	BLACK_87: hexToRgba(BLACK, .87),
