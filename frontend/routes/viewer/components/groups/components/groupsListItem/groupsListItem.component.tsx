@@ -27,6 +27,8 @@ import {
 	Container, RoleIndicator, Description, Name, ArrowButton, StyledArrowIcon
 } from './../../../previewListItem/previewListItem.styles';
 
+import { Author } from './../../../previewItemInfo/previewItemInfo.styles';
+
 import { getGroupRGBAColor } from './../../../../../../helpers/colors';
 import { GROUPS_TYPES } from './../../../../../../helpers/groups';
 import { DEFAULT_OVERRIDE_COLOR } from './../../../../../../constants/groups';
@@ -111,13 +113,13 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 		return (
 			<MenuItemContainer onClick={onItemClick} highlighted={highlighted ? 1 : 0}>
 				<Container>
-					<RoleIndicator color={getGroupRGBAColor(color)} width={`10px`} />
+					<RoleIndicator color={getGroupRGBAColor(color)} />
 					<Content>
 						<Name>{name}</Name>
 						<Info>
 							<AuthorWrapper>
 								{this.groupTypeIcon}
-								{author}
+								<Author>{author}</Author>
 							</AuthorWrapper>
 							{this.renderActions(active)}
 							{this.renderDate(!active)}
