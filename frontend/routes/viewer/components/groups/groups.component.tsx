@@ -48,6 +48,9 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 
 interface IProps {
+	teamspace: string;
+	model: any;
+	revision?: string;
 	isPending?: boolean;
 	showDetails?: boolean;
 	groups: any[];
@@ -62,9 +65,11 @@ interface IProps {
 	showGroupDetails: (group, filteredGroups, revision?) => void;
 	closeDetails: () => void;
 	setActiveGroup: (group, filteredGroups, revision?) => void;
-	saveGroup: (teamspace, modelId, risk, filteredGroups) => void;
+	saveGroup: (teamspace, model, group, filteredGroups) => void;
 	toggleColorOverride: (group) => void;
 	toggleColorOverrideAll: () => void;
+	deleteGroups: (teamspace, model, groups) => void;
+	showConfirmDialog: (config) => void;
 }
 
 interface IState {
@@ -91,6 +96,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
+		console.log('DM', this.props);
 		this.setState({ filteredGroups: this.filteredGroups });
 
 		if (Viewer.viewer.model && !this.state.modelLoaded) {
@@ -153,10 +159,19 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	get menuActionsMap() {
-		const { toggleColorOverrideAll } = this.props;
+		const { groups, deleteGroups, toggleColorOverrideAll, teamspace, model } = this.props;
 		return {
 			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => toggleColorOverrideAll(),
-			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => { console.log('Delete all') },
+			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => {
+				this.props.showConfirmDialog({
+					title: 'Delete groups',
+					content: `Delete all groups?`,
+					onConfirm: () => {
+						const allGroups = groups.map((group) => group._id).join(',');
+						deleteGroups(teamspace, model, allGroups);
+					}
+				});
+			}, 
 			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => { console.log('download JSON') }
 		};
 	}
@@ -208,6 +223,12 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public isOverrided = (groupId) => Boolean(this.props.colorOverrides[groupId]);
 
+	public deleteGroup = (groupId) => {
+		console.log('Comp deleteGroup', groupId);
+		const { teamspace, model, deleteGroups } = this.props;
+		deleteGroups(teamspace, model, groupId);
+	}
+
 	public renderGroupsList = renderWhenTrue(() => {
 		const Items = this.state.filteredGroups.map((group, index) => (
 			<GroupsListItem
@@ -220,6 +241,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				modelLoaded={this.state.modelLoaded}
 				highlighted={Boolean(this.props.highlightedGroups[group._id])}
 				overrided={this.isOverrided(group._id)}
+				deleteGroup={this.deleteGroup}
 				toggleColorOverride={() => this.props.toggleColorOverride(group)}
 			/>
 		));

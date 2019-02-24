@@ -35,13 +35,14 @@ import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
 interface IProps {
-	autoh: string;
+	_id: string;
+	autohr: string;
 	name: string;
 	description: string;
 	author: string;
 	createdAt: string;
 	active?: boolean;
-	color: string;
+	color: any[];
 	type: string;
 	modelLoaded: boolean;
 	highlighted: boolean;
@@ -49,6 +50,7 @@ interface IProps {
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
 	toggleColorOverride: () => void;
+	deleteGroup: (groupId) => void;
 }
 
 const EyeIcon = () => <Eye size="xs" />;
@@ -92,7 +94,7 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 			/>
 			<TooltipButton
 				label="Delete"
-				action={() => console.log('Delete')}
+				action={() => this.props.deleteGroup(this.props._id)}
 				Icon={Delete}
 				disabled={!this.props.modelLoaded}
 			/>

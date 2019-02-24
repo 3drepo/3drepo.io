@@ -57,3 +57,13 @@ export const getGroup = (teamspace, modelId, groupId, revision?) => {
 export const createGroup = (teamspace, modelId, group) => {
 	return api.post(`${teamspace}/${modelId}/groups`, group);
 };
+
+/**
+ * Delete groups
+ * @param teamspace
+ * @param modelId
+ * @param groups
+ */
+export const deleteGroups = (teamspace, modelId, groups) => {
+	return api.delete(`${teamspace}/${modelId}/groups/?ids=${groups}`);
+};

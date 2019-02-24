@@ -24,7 +24,8 @@ import { DialogActions } from '../dialog';
 import {
 	selectAreAllOverrided,
 	selectColorOverrides,
-	selectGroups
+	selectGroups,
+	selectGroupsMap
 } from './groups.selectors';
 import { Viewer } from '../../services/viewer/viewer';
 import { MultiSelect } from '../../services/viewer/multiSelect';
@@ -208,6 +209,28 @@ export function* toggleColorOverrideAll() {
 		yield put(DialogActions.showErrorDialog('toggle', 'color override', error));
 	}
 }
+export function* deleteGroups({ teamspace, modelId, groups }) {
+	try {
+		yield API.deleteGroups(teamspace, modelId, groups);
+
+		const groupsToDelete = groups.split(',');
+		const colorOverrides = yield select(selectColorOverrides);
+		const groupsMap = yield select(selectGroupsMap);
+
+		yield all(groupsToDelete.map((groupId) => {
+			const overridedGroup = colorOverrides[groupId];
+			const group = groupsMap[groupId];
+		
+			return [
+				put(GroupsActions.removeColorOverride(groupId, overridedGroup)),
+				put(GroupsActions.dehighlightGroup(group)),
+				put(GroupsActions.deleteGroupSuccess(groupId))
+			]
+		}));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('delete', 'groups', error));
+	}
+}
 
 export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.FETCH_GROUPS, fetchGroups);
@@ -220,4 +243,5 @@ export default function* GroupsSaga() {
 	yield takeEvery(GroupsTypes.REMOVE_COLOR_OVERRIDE, removeColorOverride);
 	yield takeLatest(GroupsTypes.TOGGLE_COLOR_OVERRIDE, toggleColorOverride);
 	yield takeLatest(GroupsTypes.TOGGLE_COLOR_OVERRIDE_ALL, toggleColorOverrideAll);
+	yield takeLatest(GroupsTypes.DELETE_GROUPS, deleteGroups);
 }

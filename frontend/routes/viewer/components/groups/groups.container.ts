@@ -33,6 +33,7 @@ import {
 	selectColorOverrides,
 	selectAreAllOverrided
 } from './../../../../modules/groups';
+import { DialogActions } from '../../../../modules/dialog';
 
 const mapStateToProps = createStructuredSelector({
 	groups: selectGroups,
@@ -54,7 +55,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	closeDetails: GroupsActions.closeDetails,
 	onFiltersChange: GroupsActions.onFiltersChange,
 	toggleColorOverride: GroupsActions.toggleColorOverride,
-	toggleColorOverrideAll: GroupsActions.toggleColorOverrideAll
+	toggleColorOverrideAll: GroupsActions.toggleColorOverrideAll,
+	deleteGroups: GroupsActions.deleteGroups,
+	showConfirmDialog: DialogActions.showConfirmDialog
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Groups);

@@ -17,6 +17,7 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { keyBy } from 'lodash';
+import { dispatch } from '../../helpers/migration';
 
 export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	fetchGroups: ['teamspace', 'modelId', 'revision'],
@@ -39,7 +40,9 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	toggleColorOverride: ['group'],
 	addToOverrided: ['groupId', 'override'],
 	removeFromOverrided: ['groupId'],
-	toggleColorOverrideAll: []
+	toggleColorOverrideAll: [],
+	deleteGroups: ['teamspace', 'modelId', 'groups'],
+	deleteGroupSuccess: ['groupId']
 }, { prefix: 'GROUPS_' });
 
 export const INITIAL_STATE = {
@@ -92,6 +95,12 @@ export const removeFromOverrided = (state = INITIAL_STATE, { groupId }) => {
 	return { ...state, 	componentState: { ...state.componentState, colorOverrides } };
 };
 
+export const deleteGroupSuccess = (state = INITIAL_STATE, { groupId }) => {
+	const groupsMap = { ...state.groupsMap };
+	delete groupsMap[groupId];
+	return { ...state, groupsMap };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.FETCH_GROUPS_SUCCESS]: fetchGroupsSuccess,
 	[GroupsTypes.TOGGLE_PENDING_STATE]: togglePendingState,
@@ -99,5 +108,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.ADD_TO_HIGHLIGHTED]: addToHighlighted,
 	[GroupsTypes.REMOVE_FROM_HIGHLIGHTED]: removeFromHighlighted,
 	[GroupsTypes.ADD_TO_OVERRIDED]: addToOverrided,
-	[GroupsTypes.REMOVE_FROM_OVERRIDED]: removeFromOverrided
+	[GroupsTypes.REMOVE_FROM_OVERRIDED]: removeFromOverrided,
+	[GroupsTypes.DELETE_GROUP_SUCCESS]: deleteGroupSuccess
 });

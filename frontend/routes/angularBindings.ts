@@ -39,4 +39,4 @@ angular
 	.component('gis', wrap(Gis))
 	.component('risks', wrap(Risks, ['teamspace', 'model', 'revision']))
 	.component('views', wrap(Views, ['teamspace', 'modelId']))
-	.component('groups', wrap(Groups));
+	.component('groups', wrap(Groups, ['teamspace', 'model', 'revision']));
