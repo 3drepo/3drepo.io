@@ -29,7 +29,7 @@ export const { Types: NotificationsTypes, Creators: NotificationsActions } = cre
 	patchNotification: ['notificationPatch'],
 	showUpdatedFailedError: ['errorMessage'],
 	setDrawerPanelState: ['drawerOpened']
-}, { prefix: 'NOTIFICATIONS_' });
+}, { prefix: 'NOTIFICATIONS/' });
 
 export const INITIAL_STATE = {
 	notifications: []

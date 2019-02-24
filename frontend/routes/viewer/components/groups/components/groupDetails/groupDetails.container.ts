@@ -17,12 +17,24 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
 
+import { connect } from '../../../../../../helpers/migration';
 import { GroupDetails } from './groupDetails.component';
+import { selectActiveGroupDetails, selectExpandDetails, GroupsActions } from '../../../../../../modules/groups';
+import { selectSettings } from '../../../../../../modules/model';
+import { selectCurrentUser } from '../../../../../../modules/currentUser';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	group: selectActiveGroupDetails,
+	modelSettings: selectSettings,
+	expandDetails: selectExpandDetails,
+	currentUser: selectCurrentUser
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	setState: GroupsActions.setComponentState,
+	updateGroup: GroupsActions.updateRisk,
+	updateNewGroup: GroupsActions.updateNewRisk
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(GroupDetails);

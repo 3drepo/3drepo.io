@@ -62,7 +62,7 @@ export class GroupDetails extends React.PureComponent<IProps, any> {
 		this.props.setState({ expandDetails: expanded });
 	}
 
-	public handleSave = (comment) => {
+	public handleSave = () => {
 		const { teamspace, model, saveGroup } = this.props;
 		saveGroup(teamspace, model, this.groupData);
 	}

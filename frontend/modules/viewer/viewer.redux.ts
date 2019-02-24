@@ -26,7 +26,7 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	mapStart: [],
 	mapStop: [],
 	getScreenshot: []
-}, { prefix: 'VIEWER_' });
+}, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {};
 

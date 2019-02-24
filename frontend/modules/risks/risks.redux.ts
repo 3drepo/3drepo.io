@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { keyBy, cloneDeep, values } from 'lodash';
+import { keyBy, cloneDeep } from 'lodash';
 
 export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchRisks: ['teamspace', 'modelId', 'revision'],
@@ -40,7 +40,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	focusOnRisk: ['risk', 'filteredRisks', 'revision'],
 	updateNewRisk: ['newRisk'],
 	onFiltersChange: ['selectedFilters']
-}, { prefix: 'RISKS_' });
+}, { prefix: 'RISKS/' });
 
 export const INITIAL_STATE = {
 	risksMap: {},

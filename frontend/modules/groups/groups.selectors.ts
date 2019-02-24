@@ -17,6 +17,7 @@
 
 import { createSelector } from 'reselect';
 import { values } from 'lodash';
+import { searchByFilters } from '../../helpers/searching';
 
 export const selectGroupsDomain = (state) => Object.assign({}, state.groups);
 
@@ -68,6 +69,12 @@ export const selectSearchEnabled = createSelector(
 
 export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
+);
+
+export const selectFilteredGroups = createSelector(
+	selectGroups, selectSelectedFilters, (issues, selectedFilters) => {
+		return searchByFilters(issues, selectedFilters);
+	}
 );
 
 export const selectColorOverrides = createSelector(

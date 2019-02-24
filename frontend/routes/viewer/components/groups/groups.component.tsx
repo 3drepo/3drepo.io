@@ -45,6 +45,8 @@ import { EmptyStateInfo } from '../views/views.styles';
 import {
 	MenuList, StyledListItem,	StyledItemText, IconWrapper
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { GroupDetails } from './components/groupDetails';
+import { ListNavigation } from '../listNavigation/listNavigation.component';
 
 interface IProps {
 	teamspace: string;
@@ -61,10 +63,10 @@ interface IProps {
 	allOverrided: any;
 	setState: (componentState: any) => void;
 	setNewGroup: () => void;
-	showGroupDetails: (group, filteredGroups, revision?) => void;
+	showGroupDetails: (group, revision?) => void;
 	closeDetails: () => void;
-	setActiveGroup: (group, filteredGroups, revision?) => void;
-	saveGroup: (teamspace, model, group, filteredGroups) => void;
+	setActiveGroup: (group, revision?) => void;
+	saveGroup: (teamspace, model, group) => void;
 	toggleColorOverride: (group) => void;
 	toggleColorOverrideAll: () => void;
 	deleteGroups: (teamspace, model, groups) => void;
@@ -206,23 +208,41 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		/>
 	)
 
+	public handleNavigationChange = (currentIndex) => {
+		this.props.showGroupDetails(this.state.filteredGroups[currentIndex], this.props.revision);
+	}
+
+	public renderHeaderNavigation = renderWhenTrue(() => {
+		const initialIndex = this.state.filteredGroups.findIndex(({ _id }) => this.props.activeGroupId === _id);
+
+		return (
+			<ListNavigation
+				initialIndex={initialIndex}
+				lastIndex={this.state.filteredGroups.length - 1}
+				onChange={this.handleNavigationChange}
+			/>
+		);
+	});
+
 	public renderActions = () => {
 		if (this.props.showDetails) {
-			if (!this.props.activeGroupId || this.state.filteredGroups.length < 2) {
-				return [];
-			}
-			return [];
-			// return [{ Button: this.getPrevButton }, { Button: this.getNextButton }];
+			return this.renderHeaderNavigation(this.props.activeGroupId && this.state.filteredGroups.length >= 2);
 		}
-		return [{ Button: this.getSearchButton }, { Button: this.getMenuButton }];
+
+		return (
+			<>
+				{this.getSearchButton()}
+				{this.getMenuButton()}
+			</>
+		);
 	}
 
 	public setActiveGroup = (group) => () => {
-		this.props.setActiveGroup(group, []);
+		this.props.setActiveGroup(group);
 	}
 
 	public handleShowGroupDetails = (group) => () => {
-		// this.props.showGroupDetails(group);
+		this.props.showGroupDetails(group, this.props.revision);
 	}
 
 	public isOverrided = (groupId) => Boolean(this.props.colorOverrides[groupId]);
@@ -301,17 +321,29 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		/>
 	));
 
+	public handleSaveGroup = (teamspace, model, group) => {
+		this.props.saveGroup(teamspace, model, group);
+	}
+
+	public renderDetailsView = renderWhenTrue(() => (
+		<GroupDetails
+			teamspace={this.props.teamspace}
+			model={this.props.model}
+			saveGroup={this.props.saveGroup}
+		/>
+	));
+
 	public render() {
 		return (
 			<ViewerPanel
 				title="Groups"
 				Icon={this.renderTitleIcon()}
-				actions={this.renderActions()}
+				renderActions={this.renderActions}
 				pending={this.props.isPending}
 			>
 				{this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
-				{/* {this.renderDetailsView(this.props.showDetails)} */}
 				{this.renderListView(!this.props.showDetails)}
+				{this.renderDetailsView(this.props.showDetails)}
 			</ViewerPanel>
 		);
 	}

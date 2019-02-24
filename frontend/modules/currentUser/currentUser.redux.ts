@@ -34,7 +34,7 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 	generateApiKey: [],
 	deleteApiKey: [],
 	setAsInitialised: []
-}, { prefix: 'CURRENT_USER_' });
+}, { prefix: 'CURRENT_USER/' });
 
 export const INITIAL_STATE = {
 	currentTeamspace: '',

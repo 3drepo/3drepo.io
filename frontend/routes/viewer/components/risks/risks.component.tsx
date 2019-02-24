@@ -62,6 +62,7 @@ import { searchByFilters } from '../../../../helpers/searching';
 import { Viewer } from '../../../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { EmptyStateInfo } from '../views/views.styles';
+import { ListNavigation } from '../listNavigation/listNavigation.component';
 
 interface IProps {
 	history: any;
@@ -397,14 +398,37 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		</MenuList>
 	)
 
+	public handleNavigationChange = (currentIndex) => {
+		this.props.showRiskDetails(
+			this.state.filteredRisks[currentIndex],
+			this.state.filteredRisks,
+			this.props.revision
+		);
+	}
+
+	public renderHeaderNavigation = renderWhenTrue(() => {
+		const initialIndex = this.state.filteredRisks.findIndex(({ _id }) => this.props.activeRiskId === _id);
+
+		return (
+			<ListNavigation
+				initialIndex={initialIndex}
+				lastIndex={this.state.filteredRisks.length - 1}
+				onChange={this.handleNavigationChange}
+			/>
+		);
+	});
+
 	public renderActions = () => {
 		if (this.props.showDetails) {
-			if (!this.props.activeRiskId || this.state.filteredRisks.length < 2) {
-				return [];
-			}
-			return [{ Button: this.getPrevButton }, { Button: this.getNextButton }];
+			return this.renderHeaderNavigation(this.props.activeRiskId && this.state.filteredRisks.length >= 2);
 		}
-		return [{ Button: this.getSearchButton }, { Button: this.getMenuButton }];
+
+		return (
+			<>
+				{this.getSearchButton()}
+				{this.getMenuButton()}
+			</>
+		);
 	}
 
 	public renderEmptyState = renderWhenTrue(() => (
@@ -420,7 +444,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 			<ViewerPanel
 				title="SafetiBase"
 				Icon={this.renderTitleIcon()}
-				actions={this.renderActions()}
+				renderActions={this.renderActions}
 				pending={this.props.isPending}
 			>
 				{this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}

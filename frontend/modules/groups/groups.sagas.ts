@@ -25,24 +25,29 @@ import {
 	selectAreAllOverrided,
 	selectColorOverrides,
 	selectGroups,
-	selectGroupsMap
+	selectGroupsMap,
+	selectFilteredGroups
 } from './groups.selectors';
 import { Viewer } from '../../services/viewer/viewer';
 import { MultiSelect } from '../../services/viewer/multiSelect';
+import { prepareGroup } from '../../helpers/groups';
 
 export function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(true));
 	try {
 		const {data} = yield API.getGroups(teamspace, modelId, revision);
-		yield put(GroupsActions.fetchGroupsSuccess(data));
+		const preparedGroups = data.map(prepareGroup);
+		yield put(GroupsActions.fetchGroupsSuccess(preparedGroups));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'groups', error));
 	}
 	yield put(GroupsActions.togglePendingState(false));
 }
 
-export function* setActiveGroup({ group, filteredGroups, revision }) {
+export function* setActiveGroup({ group, revision }) {
 	try {
+		const filteredGroups = select(selectFilteredGroups);
+
 		yield all([
 			put(GroupsActions.selectGroup(group, filteredGroups, revision)),
 			put(GroupsActions.setComponentState({ activeGroup: group._id }))
@@ -207,6 +212,7 @@ export function* deleteGroups({ teamspace, modelId, groups }) {
 		yield all(groupsToDelete.map((groupId) => {
 			const overridedGroup = colorOverrides[groupId];
 			const group = groupsMap[groupId];
+			
 			return [
 				put(GroupsActions.removeColorOverride(groupId, overridedGroup)),
 				put(GroupsActions.dehighlightGroup(group)),
@@ -239,6 +245,23 @@ export function* downloadGroups({ teamspace, modelId }) {
 	}
 }
 
+export function* showDetails({ group, revision }) {
+	try {
+		yield put(GroupsActions.setActiveGroup(group, revision));
+		yield put(GroupsActions.setComponentState({ showDetails: true }));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('display', 'group details', error));
+	}
+}
+
+export function* closeDetails() {
+	try {
+		yield put(GroupsActions.setComponentState({ activeGroup: null, showDetails: false }));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('close', 'group details', error));
+	}
+}
+
 export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.FETCH_GROUPS, fetchGroups);
 	yield takeLatest(GroupsTypes.SET_ACTIVE_GROUP, setActiveGroup);
@@ -253,4 +276,7 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.DELETE_GROUPS, deleteGroups);
 	yield takeLatest(GroupsTypes.ISOLATE_GROUP, isolateGroup);
 	yield takeLatest(GroupsTypes.DOWNLOAD_GROUPS, downloadGroups);
+	yield takeLatest(GroupsTypes.SHOW_DETAILS, showDetails);
+	yield takeLatest(GroupsTypes.CLOSE_DETAILS, closeDetails);
+
 }

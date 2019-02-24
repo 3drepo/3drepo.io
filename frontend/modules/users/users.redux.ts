@@ -20,7 +20,7 @@ import { createActions, createReducer } from 'reduxsauce';
 export const { Types: UsersTypes, Creators: UsersActions } = createActions({
 	fetchUserDetails: ['teamspace', 'username'],
 	setUserDetailsResponse: ['key', 'response']
-}, { prefix: 'USERS_' });
+}, { prefix: 'USERS/' });
 
 export const INITIAL_STATE = {
 	cachedResponses: {}

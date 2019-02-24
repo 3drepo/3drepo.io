@@ -32,7 +32,7 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	fetchMaps: ['teamspace', 'modelId'],
 	fetchMapsSuccess: ['maps'],
 	updateSettingsSuccess: ['settings']
-}, { prefix: 'MODEL_' });
+}, { prefix: 'MODEL/' });
 
 export const INITIAL_STATE = {
 	settings: {},

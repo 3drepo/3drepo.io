@@ -17,15 +17,14 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { keyBy } from 'lodash';
-import { dispatch } from '../../helpers/migration';
 
 export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	fetchGroups: ['teamspace', 'modelId', 'revision'],
 	fetchGroupsSuccess: ['groups'],
 	togglePendingState: ['isPending'],
 	setComponentState: ['componentState'],
-	setActiveGroup: ['group', 'filteredGroups', 'revision'],
-	showDetails: ['group', 'filteredGroups', 'revision'],
+	setActiveGroup: ['group', 'revision'],
+	showDetails: ['group', 'revision'],
 	closeDetails: [],
 	setNewGroup: [],
 	updateNewGroup: ['newGroup'],
@@ -45,9 +44,26 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	deleteGroupSuccess: ['groupId'],
 	isolateGroup: ['group'],
 	downloadGroups: ['teamspace', 'modelId']
-}, { prefix: 'GROUPS_' });
+}, { prefix: 'GROUPS/' });
 
-export const INITIAL_STATE = {
+export interface IGroupComponentState {
+	activeGroup: any;
+	showDetails: boolean;
+	expandDetails: boolean;
+	newGroup: any;
+	selectedFilters: any[];
+	highlightedGroups: any;
+	colorOverrides: any;
+	overrideAll: boolean;
+}
+
+export interface IGroupState {
+	groupsMap: any;
+	isPending: boolean;
+	componentState: IGroupComponentState;
+}
+
+export const INITIAL_STATE: IGroupState = {
 	groupsMap: {},
 	isPending: true,
 	componentState: {
