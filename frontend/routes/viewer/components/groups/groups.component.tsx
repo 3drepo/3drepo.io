@@ -34,7 +34,6 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { Viewer } from '../../../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
-import { Container } from './groups.styles';
 import { searchByFilters } from '../../../../helpers/searching';
 import {
 	GROUPS_ACTIONS_ITEMS,
@@ -71,6 +70,7 @@ interface IProps {
 	deleteGroups: (teamspace, model, groups) => void;
 	showConfirmDialog: (config) => void;
 	isolateGroup: (group) => void;
+	downloadGroups: (teamspace, model) => void;
 }
 
 interface IState {
@@ -97,7 +97,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-		console.log('DM', this.props);
 		this.setState({ filteredGroups: this.filteredGroups });
 
 		if (Viewer.viewer.model && !this.state.modelLoaded) {
@@ -160,7 +159,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	get menuActionsMap() {
-		const { groups, deleteGroups, toggleColorOverrideAll, teamspace, model } = this.props;
+		const { groups, deleteGroups, toggleColorOverrideAll, teamspace, model, downloadGroups } = this.props;
 		return {
 			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => toggleColorOverrideAll(),
 			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => {
@@ -173,7 +172,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 					}
 				});
 			}, 
-			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => { console.log('download JSON') }
+			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadGroups(teamspace, model)
 		};
 	}
 
@@ -225,7 +224,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	public isOverrided = (groupId) => Boolean(this.props.colorOverrides[groupId]);
 
 	public deleteGroup = (groupId) => {
-		console.log('Comp deleteGroup', groupId);
 		const { teamspace, model, deleteGroups } = this.props;
 		deleteGroups(teamspace, model, groupId);
 	}

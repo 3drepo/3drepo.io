@@ -43,7 +43,8 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	toggleColorOverrideAll: [],
 	deleteGroups: ['teamspace', 'modelId', 'groups'],
 	deleteGroupSuccess: ['groupId'],
-	isolateGroup: ['group']
+	isolateGroup: ['group'],
+	downloadGroups: ['teamspace', 'modelId']
 }, { prefix: 'GROUPS_' });
 
 export const INITIAL_STATE = {

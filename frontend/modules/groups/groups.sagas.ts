@@ -240,6 +240,17 @@ export function* isolateGroup({ group }) {
 	}
 }
 
+export function* downloadGroups({ teamspace, modelId }) {
+	try {
+		const endpoint = `${teamspace}/${modelId}/groups/revision/master/head/?noIssues=true&noRisks=true`;
+		const modelName = Viewer.viewer && Viewer.viewer.settings ? Viewer.viewer.settings.name : '';
+		yield API.downloadJSON('groups', modelName, endpoint);
+
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('download', 'groups', error));
+	}
+}
+
 export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.FETCH_GROUPS, fetchGroups);
 	yield takeLatest(GroupsTypes.SET_ACTIVE_GROUP, setActiveGroup);
@@ -253,4 +264,5 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.TOGGLE_COLOR_OVERRIDE_ALL, toggleColorOverrideAll);
 	yield takeLatest(GroupsTypes.DELETE_GROUPS, deleteGroups);
 	yield takeLatest(GroupsTypes.ISOLATE_GROUP, isolateGroup);
+	yield takeLatest(GroupsTypes.DOWNLOAD_GROUPS, downloadGroups);
 }
