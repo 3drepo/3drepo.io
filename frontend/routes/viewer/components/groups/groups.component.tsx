@@ -131,6 +131,10 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return searchByFilters(groups, selectedFilters, false);
 	}
 
+	get filters() {
+		return [];
+	}
+
 	public handleCloseSearchMode = () => {
 		this.props.setState({ searchEnabled: false });
 		this.setState({
@@ -315,6 +319,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public renderFilterPanel = renderWhenTrue(() => (
 		<FilterPanel
+			filters={this.filters}
 			onChange={this.handleFilterChange}
 			selectedFilters={this.props.selectedFilters}
 			hideMenu={true}
