@@ -109,6 +109,48 @@ describe("Projects", function () {
 			});
 	});
 
+	it("should fail to create project with invalid name(1)", function(done) {
+
+		const project = {
+			name: " "
+		};
+
+		agent.post(`/${username}/projects`)
+			.send(project)
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
+				done(err);
+			});
+	});
+
+	it("should fail to create project with invalid name(2)", function(done) {
+
+		const project = {
+			name: "!?/#&"
+		};
+
+		agent.post(`/${username}/projects`)
+			.send(project)
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
+				done(err);
+			});
+	});
+
+	it("should fail to create project with no name", function(done) {
+
+		const project = {
+			name: ""
+		};
+
+		agent.post(`/${username}/projects`)
+			.send(project)
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.INVALID_PROJECT_NAME.value);
+				done(err);
+			});
+	});
+
 	it("should be able to update project", function(done) {
 
 		const project = {
