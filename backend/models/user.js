@@ -257,11 +257,8 @@ schema.statics.checkEmailAvailableAndValid = function (email, exceptUser) {
 	const emailRegex = /^(['a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,})$/;
 	if(email.match(emailRegex)) {
 
-		let query = { "customData.email": email };
-
-		if (exceptUser) {
-			query = { "customData.email": email, "user": { "$ne": exceptUser } };
-		}
+		const query =  exceptUser ? { "customData.email": email, "user": { "$ne": exceptUser } }
+			: { "customData.email": email };
 
 		return this.count({ account: "admin" }, query).then((count) => {
 			if(count > 0) {
