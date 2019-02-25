@@ -28,6 +28,11 @@ const schema = mongoose.Schema({
 	users: [String]
 });
 
+function validateJobName(job) {
+	const regex = "^[^/?=#+]{0,119}[^/?=#+ ]{1}$";
+	return job && job.match(regex);
+}
+
 schema.statics.addDefaultJobs = function(teamspace) {
 	const promises = [];
 	C.DEFAULT_JOBS.forEach(job => {
@@ -104,7 +109,7 @@ schema.statics.addUserToJob = function(teamspace, user, jobName) {
 };
 
 schema.statics.addJob = function(teamspace, jobData) {
-	if(!jobData._id) {
+	if(!jobData._id || !validateJobName(jobData._id)) {
 		return Promise.reject(responseCodes.JOB_ID_INVALID);
 	}
 	return this.findByJob(teamspace, jobData._id).then(jobFound => {
