@@ -36,7 +36,7 @@ import {
 import { Author } from './../../../previewItemInfo/previewItemInfo.styles';
 
 import { getGroupRGBAColor } from './../../../../../../helpers/colors';
-import { DEFAULT_OVERRIDE_COLOR, GROUPS_TYPES } from './../../../../../../constants/groups';
+import { DEFAULT_OVERRIDE_COLOR } from './../../../../../../constants/groups';
 import { DateTime } from '../../../../../components/dateTime/dateTime.component';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
@@ -53,6 +53,7 @@ interface IProps {
 	modelLoaded: boolean;
 	highlighted: boolean;
 	overrided: boolean;
+	rules: any[];
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
 	toggleColorOverride: () => void;
@@ -64,8 +65,8 @@ const EyeIcon = () => <StyledIcon><Eye /></StyledIcon>;
 
 export class GroupsListItem extends React.PureComponent<IProps, any> {
 	public get groupTypeIcon() {
-		if (this.props.type === GROUPS_TYPES.SMART) {
-			return <Bolt />;
+		if (Boolean(this.props.rules.length)) {
+			return <Bolt fontSize="inherit" />;
 		}
 		return <HandPaper fontSize="inherit" />;
 	}
@@ -117,6 +118,7 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { author, active, description, name, color, onItemClick, highlighted } = this.props;
+
 		return (
 			<MenuItemContainer onClick={onItemClick} highlighted={highlighted ? 1 : 0}>
 				<Container>
@@ -125,7 +127,7 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 						<Name>{name}</Name>
 						<Info>
 							<AuthorWrapper>
-								<StyledIcon>
+								<StyledIcon color={this.getOverridedColor()}>
 									{this.groupTypeIcon}
 								</StyledIcon>
 								<Author>{author}</Author>
