@@ -35,6 +35,11 @@
 		}]
 	});
 
+	function checkProjectNameValid (project) {
+		const regex = "^[^/?=#+]{1,120}$";
+		return project && project.match(regex);
+	}
+
 	schema.pre("save", function checkInvalidName(next) {
 
 		if(C.PROJECT_DEFAULT_ID === this.name) {
@@ -69,21 +74,25 @@
 	});
 
 	schema.statics.createProject = function(account, name, username, userPermissions) {
-		const project = Project.createInstance({account});
-		project.name = name;
+		if(checkProjectNameValid(name)) {
+			const project = Project.createInstance({account});
+			project.name = name;
 
-		if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1) {
-			project.permissions = [{
-				user: username,
-				permissions: [C.PERM_PROJECT_ADMIN]
-			}];
+			if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1) {
+				project.permissions = [{
+					user: username,
+					permissions: [C.PERM_PROJECT_ADMIN]
+				}];
+			}
+
+			return project.save().then(() => {
+				const proj = project.toObject();
+				proj.permissions = C.IMPLIED_PERM[C.PERM_PROJECT_ADMIN].project;
+				return proj;
+			});
+		} else {
+			return Promise.reject(responseCodes.INVALID_PROJECT_NAME);
 		}
-
-		return project.save().then(() => {
-			const proj = project.toObject();
-			proj.permissions = C.IMPLIED_PERM[C.PERM_PROJECT_ADMIN].project;
-			return proj;
-		});
 
 	};
 
@@ -145,11 +154,14 @@
 			});
 		}
 
+		if(data["name"] && !checkProjectNameValid(data["name"])) {
+			return Promise.reject(responseCodes.INVALID_PROJECT_NAME);
+		}
+
 		return check.then(() => {
 
 			Object.keys(data).forEach(key => {
 				if(whitelist.indexOf(key) !== -1) {
-
 					this[key] = data[key];
 				}
 			});
