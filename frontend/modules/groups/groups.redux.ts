@@ -55,6 +55,7 @@ export interface IGroupComponentState {
 	highlightedGroups: any;
 	colorOverrides: any;
 	overrideAll: boolean;
+	totalMeshes: number;
 }
 
 export interface IGroupState {
@@ -74,7 +75,8 @@ export const INITIAL_STATE: IGroupState = {
 		newGroup: {},
 		selectedFilters: [],
 		colorOverrides: {},
-		overrideAll: false
+		overrideAll: false,
+		totalMeshes: 0
 	}
 };
 

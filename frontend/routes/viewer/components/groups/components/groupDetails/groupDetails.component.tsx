@@ -94,7 +94,6 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 	public handleSave = () => {
 		const { teamspace, model, saveGroup } = this.props;
-		console.log('Handle Save', this.groupData);
 		saveGroup(teamspace, model, this.groupData);
 	}
 

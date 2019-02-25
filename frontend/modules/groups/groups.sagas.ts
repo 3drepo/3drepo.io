@@ -44,6 +44,12 @@ export function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(false));
 }
 
+const calculateTotalMeshes = (objectsStatus) => {
+	return objectsStatus.highlightedNodes
+		.map((x) => x.shared_ids.length)
+		.reduce((acc, val) => acc + val);
+};
+
 export function* setActiveGroup({ group, revision }) {
 	try {
 		const filteredGroups = select(selectFilteredGroups);
@@ -52,6 +58,13 @@ export function* setActiveGroup({ group, revision }) {
 			put(GroupsActions.selectGroup(group, filteredGroups, revision)),
 			put(GroupsActions.setComponentState({ activeGroup: group._id }))
 		]);
+
+		const objectsStatus = yield Viewer.getObjectsStatus();
+		if (objectsStatus.highlightedNodes.length) {
+			const totalMeshes = calculateTotalMeshes(objectsStatus);
+			yield put(GroupsActions.setComponentState({ totalMeshes }));
+		}
+
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'group as active', error));
 	}
@@ -111,7 +124,6 @@ export function* selectGroup({ group }) {
 			yield put(GroupsActions.dehighlightGroup(group));
 		} else {
 			yield put(GroupsActions.highlightGroup(group));
-
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'group', error));
@@ -212,7 +224,7 @@ export function* deleteGroups({ teamspace, modelId, groups }) {
 		yield all(groupsToDelete.map((groupId) => {
 			const overridedGroup = colorOverrides[groupId];
 			const group = groupsMap[groupId];
-			
+
 			return [
 				put(GroupsActions.removeColorOverride(groupId, overridedGroup)),
 				put(GroupsActions.dehighlightGroup(group)),

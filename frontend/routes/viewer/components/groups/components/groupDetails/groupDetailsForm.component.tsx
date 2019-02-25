@@ -74,7 +74,6 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		console.log('Form', this.props);
 		const { group: { updatedAt } } = this.props;
 		return (
 			<Form>
