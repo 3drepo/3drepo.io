@@ -343,7 +343,7 @@ schema.statics.createUser = function (logger, username, password, customData, to
 			this.checkEmailAvailableAndValid(customData.email)
 		];
 
-		return validityChecks.then(() => {
+		return Promise.all(validityChecks).then(() => {
 			return ModelFactory.dbManager.getAuthDB().then(adminDB => {
 
 				const cleanedCustomData = {
