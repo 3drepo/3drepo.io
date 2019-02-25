@@ -101,7 +101,7 @@ router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} id Group unique ID.
- * @apiParam {String} ifcguid Query string ifcguid returns IFC GUIDs if true where available.
+ * @apiParam {String} ifcguids Query string ifcguids returns IFC GUIDs if true where available.
  *
  * @apiDescription Find a group using it's Group ID
  *
@@ -133,7 +133,7 @@ router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findG
  * @apiParam {String} model Model ID
  * @apiParam {String} id Revision unique ID.
  * @apiParam {String} id Group unique ID.
- * @apiParam {String} ifcguid Query string ifcguid returns IFC GUIDs if true where available.
+ * @apiParam {String} ifcguids Query string ifcguids returns IFC GUIDs if true where available.
  *
  * @apiSuccess (200) {Object} Group
  * @apiSuccessExample {json} Success-Response
