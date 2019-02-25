@@ -16,5 +16,64 @@
  */
 
 import { createSelector } from 'reselect';
+import { values } from 'lodash';
 
 export const selectGroupsDomain = (state) => Object.assign({}, state.groups);
+
+export const selectGroups = createSelector(
+	selectGroupsDomain, (state) => values(state.groupsMap)
+);
+
+export const selectGroupsMap = createSelector(
+	selectGroupsDomain, (state) => state.groupsMap
+);
+
+export const selectIsPending = createSelector(
+	selectGroupsDomain, (state) => state.isPending
+);
+
+export const selectComponentState = createSelector(
+	selectGroupsDomain, (state) => state.componentState
+);
+
+export const selectActiveGroupId = createSelector(
+	selectComponentState, (state) => state.activeGroup
+);
+
+export const selectActiveGroupDetails = createSelector(
+	selectGroupsDomain, selectComponentState, (state, componentState) => {
+		return state.groupsMap[componentState.activeGroup] || componentState.newGroup;
+	}
+);
+
+export const selectShowDetails = createSelector(
+	selectComponentState, (state) => state.showDetails
+);
+
+export const selectExpandDetails = createSelector(
+	selectComponentState, (state) => state.expandDetails
+);
+
+export const selectNewGroupDetails = createSelector(
+	selectComponentState, (state) => state.newGroup
+);
+
+export const selectHighlightedGroups = createSelector(
+	selectComponentState, (state) => state.highlightedGroups
+);
+
+export const selectSearchEnabled = createSelector(
+	selectComponentState, (state) => state.searchEnabled
+);
+
+export const selectSelectedFilters = createSelector(
+	selectComponentState, (state) => state.selectedFilters
+);
+
+export const selectColorOverrides = createSelector(
+	selectComponentState, (state) => state.colorOverrides
+);
+
+export const selectAreAllOverrided = createSelector(
+	selectComponentState, (state) => state.overrideAll
+);

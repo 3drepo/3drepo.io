@@ -20,9 +20,46 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../helpers/migration';
 
 import { Groups } from './groups.component';
+import {
+	GroupsActions,
+	selectGroups,
+	selectIsPending,
+	selectActiveGroupId,
+	selectActiveGroupDetails,
+	selectShowDetails,
+	selectHighlightedGroups,
+	selectSearchEnabled,
+	selectSelectedFilters,
+	selectColorOverrides,
+	selectAreAllOverrided
+} from './../../../../modules/groups';
+import { DialogActions } from '../../../../modules/dialog';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	groups: selectGroups,
+	isPending: selectIsPending,
+	activeGroupId: selectActiveGroupId,
+	activeGroupDetails: selectActiveGroupDetails,
+	showDetails: selectShowDetails,
+	highlightedGroups: selectHighlightedGroups,
+	searchEnabled: selectSearchEnabled,
+	selectedFilters: selectSelectedFilters,
+	colorOverrides: selectColorOverrides,
+	allOverrided: selectAreAllOverrided
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	setActiveGroup: GroupsActions.setActiveGroup,
+	setState: GroupsActions.setComponentState,
+	showGroupDetails: GroupsActions.showDetails,
+	closeDetails: GroupsActions.closeDetails,
+	onFiltersChange: GroupsActions.onFiltersChange,
+	toggleColorOverride: GroupsActions.toggleColorOverride,
+	toggleColorOverrideAll: GroupsActions.toggleColorOverrideAll,
+	deleteGroups: GroupsActions.deleteGroups,
+	showConfirmDialog: DialogActions.showConfirmDialog,
+	isolateGroup: GroupsActions.isolateGroup,
+	downloadGroups: GroupsActions.downloadGroups
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Groups);

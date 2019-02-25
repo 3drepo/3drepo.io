@@ -42,6 +42,7 @@ import {
 	ButtonWrapper
 } from './filterPanel.styles';
 import { compareStrings } from '../../../helpers/searching';
+import { renderWhenTrue } from '../../../helpers/rendering';
 
 export const DATA_TYPES = {
 	UNDEFINED: 1,
@@ -63,9 +64,10 @@ interface ISelectedFilter {
 }
 
 interface IProps {
-	filters: IFilter[];
+	filters?: IFilter[];
 	onChange: (selectedFilters) => void;
 	selectedFilters: any[];
+	hideMenu?: boolean;
 }
 
 interface IState {
@@ -109,6 +111,10 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		value: '',
 		suggestions: [],
 		filtersOpen: false
+	};
+
+	public static defaultProps = {
+		filters: []
 	};
 
 	private popperNode = null;
@@ -375,14 +381,25 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public renderFiltersMenuButton = renderWhenTrue(() => (
+		<ButtonContainer>
+			<ButtonMenu
+				renderButton={MenuButton}
+				renderContent={this.renderFiltersMenu}
+				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
+				ButtonProps={{ disabled: false }}
+			/>
+		</ButtonContainer>
+	));
+
 	public render() {
 		const { value, suggestions } = this.state;
-
 		return (
 			<Container filtersOpen={this.state.selectedFilters.length && this.state.filtersOpen}>
 				{this.renderSelectedFilters()}
 
-				<InputContainer>
+				<InputContainer menuHidden={this.props.hideMenu}>
 					<Autosuggest
 						ref={this.handleAutoSuggestMount}
 						suggestions={suggestions}
@@ -403,15 +420,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 						renderSuggestionsContainer={this.renderSuggestionsContainer}
 						onSuggestionSelected={this.handleNewFilterSubmit}
 					/>
-					<ButtonContainer>
-						<ButtonMenu
-							renderButton={MenuButton}
-							renderContent={this.renderFiltersMenu}
-							PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-							PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-							ButtonProps={{ disabled: false }}
-						/>
-					</ButtonContainer>
+					{this.renderFiltersMenuButton(!this.props.hideMenu)}
 				</InputContainer>
 
 			</Container>

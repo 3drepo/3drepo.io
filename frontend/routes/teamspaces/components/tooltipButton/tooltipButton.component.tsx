@@ -24,14 +24,15 @@ interface IProps {
 	Icon: React.ComponentType;
 	color?: string;
 	action?: (event) => void;
+	disabled?: boolean;
 }
 
 export const TooltipButton = (props: IProps) => {
-	const { label, action = null, Icon, color = 'inherit' } = props;
+	const { label, action = null, Icon, color = 'inherit', disabled = false } = props;
 	const iconProps = { color, fontSize: 'small' } as any;
 
 	return (
-		<Tooltip title={label}>
+		<Tooltip title={label} disableFocusListener={disabled}>
 			<IconButton aria-label={label} onClick={action}>
 				<Icon {...iconProps} />
 			</IconButton>

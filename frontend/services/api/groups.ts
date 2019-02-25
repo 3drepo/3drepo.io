@@ -18,6 +18,21 @@
 import api from './';
 
 /**
+ * Get groups list
+ * @param teamspace
+ * @param modelId
+ * @param groupId
+ * @param revision
+ */
+
+export const getGroups = (teamspace, modelId, revision?) => {
+	if (revision) {
+		return api.get(`${teamspace}/${modelId}/groups/revision/${revision}/?noIssues=true&noRisks=true`);
+	}
+	return api.get(`${teamspace}/${modelId}/groups/revision/master/head/?noIssues=true&noRisks=true`);
+};
+
+/**
  * Get group data
  * @param teamspace
  * @param modelId
@@ -40,4 +55,14 @@ export const getGroup = (teamspace, modelId, groupId, revision?) => {
  */
 export const createGroup = (teamspace, modelId, group) => {
 	return api.post(`${teamspace}/${modelId}/groups`, group);
+};
+
+/**
+ * Delete groups
+ * @param teamspace
+ * @param modelId
+ * @param groups
+ */
+export const deleteGroups = (teamspace, modelId, groups) => {
+	return api.delete(`${teamspace}/${modelId}/groups/?ids=${groups}`);
 };

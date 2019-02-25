@@ -191,16 +191,29 @@ export class ViewerService {
 		);
 	}
 
-	public startAreaSelect() {
-		if (this.viewer) {
-			this.viewer.startAreaSelect();
-		}
+	public async startAreaSelect() {
+		await this.isViewerReady();
+		this.viewer.startAreaSelect();
 	}
 
-	public stopAreaSelect() {
-		if (this.viewer) {
-			this.viewer.stopAreaSelect();
-		}
+	public async stopAreaSelect() {
+		await this.isViewerReady();
+		this.viewer.stopAreaSelect();
+	}
+
+	public async getDefaultHighlightColor() {
+		await this.isViewerReady();
+		return this.viewer.getDefaultHighlightColor();
+	}
+
+	public async overrideMeshColor(account, model, meshIDs, color) {
+		await this.isViewerReady();
+		this.viewer.overrideMeshColor(account, model, meshIDs, color);
+	}
+
+	public async resetMeshColor(account, model, meshIDs) {
+		await this.isViewerReady();
+		this.viewer.resetMeshColor(account, model, meshIDs);
 	}
 }
 

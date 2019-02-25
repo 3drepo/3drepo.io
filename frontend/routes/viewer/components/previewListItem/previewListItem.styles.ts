@@ -110,5 +110,5 @@ export const RoleIndicator = styled.div`
   border: 1px solid ${(props: any) => props.color ? COLOR.GRAY : COLOR.BLACK_20};
   height: auto;
   margin-right: 7px;
-  width: 5px;
-`;
+  width: ${(props: any) => props.width || `5px`};
+` as any;
