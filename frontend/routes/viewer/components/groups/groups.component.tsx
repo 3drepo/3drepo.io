@@ -27,6 +27,8 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import SearchIcon from '@material-ui/icons/Search';
 import Check from '@material-ui/icons/Check';
+import Bolt from '@material-ui/icons/OfflineBolt';
+import { HandPaper } from '../../../components/fontAwesomeIcon';
 
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
@@ -35,13 +37,16 @@ import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../vie
 import { Viewer } from '../../../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { searchByFilters } from '../../../../helpers/searching';
+import { getGroupRGBAColor } from '../../../../helpers/colors';
 import {
 	GROUPS_ACTIONS_ITEMS,
-	GROUPS_ACTIONS_MENU
+	GROUPS_ACTIONS_MENU,
+	DEFAULT_OVERRIDE_COLOR
 } from '../../../../constants/groups';
 import { ListContainer, Summary } from './../risks/risks.styles';
 import { GroupsListItem } from './components/groupsListItem/groupsListItem.component';
 import { EmptyStateInfo } from '../views/views.styles';
+import { StyledIcon } from '../groups/groups.styles';
 import {
 	MenuList, StyledListItem,	StyledItemText, IconWrapper
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
@@ -55,6 +60,7 @@ interface IProps {
 	isPending?: boolean;
 	showDetails?: boolean;
 	groups: any[];
+	groupsMap: any;
 	activeGroupId: string;
 	highlightedGroups: any;
 	searchEnabled: boolean;
@@ -126,13 +132,37 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	get filteredGroups() {
+	public get filteredGroups() {
 		const { groups, selectedFilters } = this.props;
 		return searchByFilters(groups, selectedFilters, false);
 	}
 
-	get filters() {
+	public get filters() {
 		return [];
+	}
+
+	public get activeGroup() {
+		return this.props.groupsMap[this.props.activeGroupId];
+	}
+
+	public getOverridedColor = (groupId, color) => {
+		const overrided = this.isOverrided(groupId);
+		if (overrided) {
+			return getGroupRGBAColor(color);
+		}
+		return DEFAULT_OVERRIDE_COLOR;
+	}
+
+	public getGroupTypeIcon({_id, color, rules}) {
+		return(
+			<StyledIcon color={this.getOverridedColor(_id, color)}>
+				{
+					Boolean(rules.length) ?
+				<Bolt fontSize="inherit" /> :
+				<HandPaper fontSize="inherit" />
+				}
+			</StyledIcon>
+		);
 	}
 
 	public handleCloseSearchMode = () => {
@@ -267,10 +297,11 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				// hasViewPermission={this.hasPermission(VIEW_ISSUE)}
 				modelLoaded={this.state.modelLoaded}
 				highlighted={Boolean(this.props.highlightedGroups[group._id])}
-				overrided={this.isOverrided(group._id)}
+				overridedColor={this.getOverridedColor(group._id, group.color)}
 				deleteGroup={this.deleteGroup}
 				toggleColorOverride={() => this.props.toggleColorOverride(group)}
 				isolateGroup={() => this.props.isolateGroup(group)}
+				GroupTypeIcon={() => this.getGroupTypeIcon(group)}
 			/>
 		));
 
@@ -335,6 +366,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			teamspace={this.props.teamspace}
 			model={this.props.model}
 			saveGroup={this.props.saveGroup}
+			GroupTypeIconComponent={() => this.getGroupTypeIcon(this.activeGroup)}
 		/>
 	));
 

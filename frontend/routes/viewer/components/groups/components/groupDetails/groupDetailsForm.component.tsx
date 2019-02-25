@@ -4,6 +4,7 @@ import { debounce, isEmpty } from 'lodash';
 import { connect, Field, Form, withFormik, Formik } from 'formik';
 import { TextField } from '../../../../../components/textField/textField.component';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
+import { PreviewItemInfo } from './../../../previewItemInfo/previewItemInfo.component';
 
 const GroupSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
@@ -84,7 +85,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 export const GroupDetailsForm = withFormik({
 	mapPropsToValues: ({ group }) => ({
-		description: group.description || '',
+		description: group.description || ''
 	}),
 	handleSubmit: (values, { props }) => {
 		(props as IProps).onSubmit(values);

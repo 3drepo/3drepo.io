@@ -16,5 +16,11 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from '../../../../styles/colors';
 
 export const Container = styled.div``;
+
+export const StyledIcon = styled.span`
+  color: ${(props) => props.color ? props.color : COLOR.BLACK_60 };
+  font-size: 18px;
+`;

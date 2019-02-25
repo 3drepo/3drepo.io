@@ -31,12 +31,14 @@ import {
 	selectSearchEnabled,
 	selectSelectedFilters,
 	selectColorOverrides,
-	selectAreAllOverrided
+	selectAreAllOverrided,
+	selectGroupsMap
 } from './../../../../modules/groups';
 import { DialogActions } from '../../../../modules/dialog';
 
 const mapStateToProps = createStructuredSelector({
 	groups: selectGroups,
+	groupsMap: selectGroupsMap,
 	isPending: selectIsPending,
 	activeGroupId: selectActiveGroupId,
 	activeGroupDetails: selectActiveGroupDetails,

@@ -52,8 +52,9 @@ interface IProps {
 	type: string;
 	modelLoaded: boolean;
 	highlighted: boolean;
-	overrided: boolean;
+	overridedColor: string;
 	rules: any[];
+	GroupTypeIcon: any;
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
 	toggleColorOverride: () => void;
@@ -64,24 +65,11 @@ interface IProps {
 const EyeIcon = () => <StyledIcon><Eye /></StyledIcon>;
 
 export class GroupsListItem extends React.PureComponent<IProps, any> {
-	public get groupTypeIcon() {
-		if (Boolean(this.props.rules.length)) {
-			return <Bolt fontSize="inherit" />;
-		}
-		return <HandPaper fontSize="inherit" />;
-	}
-
 	public getTintIcon = () => (
-		<StyledIcon color={this.getOverridedColor()}>
+		<StyledIcon color={this.props.overridedColor}>
 			<Tint fontSize="inherit" />
 		</StyledIcon>
 	)
-	public getOverridedColor = () => {
-		if (this.props.overrided) {
-			return getGroupRGBAColor(this.props.color);
-		}
-		return DEFAULT_OVERRIDE_COLOR;
-	}
 
 	public renderArrowButton = renderWhenTrue(() => (
 		<ArrowButton onClick={this.props.onArrowClick} disabled={!this.props.modelLoaded}>
@@ -117,7 +105,7 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 	));
 
 	public render() {
-		const { author, active, description, name, color, onItemClick, highlighted } = this.props;
+		const { author, active, description, name, color, onItemClick, highlighted, GroupTypeIcon } = this.props;
 
 		return (
 			<MenuItemContainer onClick={onItemClick} highlighted={highlighted ? 1 : 0}>
@@ -127,9 +115,7 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 						<Name>{name}</Name>
 						<Info>
 							<AuthorWrapper>
-								<StyledIcon color={this.getOverridedColor()}>
-									{this.groupTypeIcon}
-								</StyledIcon>
+								<GroupTypeIcon />
 								<Author>{author}</Author>
 							</AuthorWrapper>
 							{this.renderActions(active)}

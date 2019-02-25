@@ -34,6 +34,7 @@ interface IProps {
 	myJob: any;
 	currentUser: any;
 	modelSettings: any;
+	GroupTypeIconComponent: any;
 	saveGroup: (teamspace, modelId, risk) => void;
 	updateGroup: (teamspace, modelId, risk) => void;
 	updateNewGroup: (newRisk) => void;
@@ -46,7 +47,8 @@ export class GroupDetails extends React.PureComponent<IProps, any> {
 	}
 
 	get groupData() {
-		return this.props.group;
+		const groupData = { ...this.props.group, createdDate: this.props.group.createdAt };
+		return groupData;
 	}
 
 	public handleGroupFormSubmit = (values) => {
@@ -82,6 +84,7 @@ export class GroupDetails extends React.PureComponent<IProps, any> {
 			editable={!this.groupData._id}
 			onNameChange={this.handleNameChange}
 			onExpandChange={this.handleExpandChange}
+			StatusIconComponent={this.props.GroupTypeIconComponent}
 		>
 			<GroupDetailsForm
 				group={this.groupData}
