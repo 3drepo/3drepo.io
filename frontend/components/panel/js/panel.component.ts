@@ -41,6 +41,7 @@ class PanelController implements ng.IController {
 	public position;
 
 	private highlightBackground;
+	private visiblePanelsMap;
 
 	constructor(
 		private $window: ng.IWindowService,
@@ -87,7 +88,6 @@ class PanelController implements ng.IController {
 	}
 
 	public watchers() {
-
 		this.$scope.$watch('vm.contentItems', (newValue: any, oldValue: any) => {
 			if (newValue && newValue.length) {
 				this.setupShownCards();
@@ -168,27 +168,29 @@ class PanelController implements ng.IController {
 	public togglePanel(contentType: string) {
 
 		// Get the content item
-		for (let i = 0; i < this.contentItems.length; i++) {
-			if (contentType === this.contentItems[i].type) {
-				// Toggle panel show and update number of panels showing count
-				this.contentItems[i].show = !this.contentItems[i].show;
+		const contentIndex = this.contentItems.findIndex(({ type }) => type === contentType);
 
-				// Resize any shown panel contents
-				if (this.contentItems[i].show) {
-					this.contentItemsShown.push(this.contentItems[i]);
-				} else {
-					for (let j = (this.contentItemsShown.length - 1); j >= 0; j -= 1) {
-						if (this.contentItemsShown[j].type === contentType) {
-							this.contentItemsShown.splice(j, 1);
-						}
-					}
-					this.contentItems[i].showGap = false;
+		if (contentIndex !== -1) {
+			// Toggle panel show and update number of panels showing count
+			this.contentItems[contentIndex].show = !this.contentItems[contentIndex].show;
+			this.onPanelVisibilityChange(contentIndex, contentType);
+		}
+	}
+
+	public onPanelVisibilityChange(index, type) {
+		// Resize any shown panel contents
+		if (this.contentItems[index].show) {
+			this.contentItemsShown.push(this.contentItems[index]);
+		} else {
+			for (let j = (this.contentItemsShown.length - 1); j >= 0; j -= 1) {
+				if (this.contentItemsShown[j].type === type) {
+					this.contentItemsShown.splice(j, 1);
 				}
-				this.calculateContentHeights();
-				break;
 			}
+			this.contentItems[index].showGap = false;
 		}
 
+		this.calculateContentHeights();
 		this.hideLastItemGap();
 		this.updatePanelButtons();
 	}
@@ -215,9 +217,13 @@ class PanelController implements ng.IController {
 	 *  Calculate content heights
 	 */
 	public calculateContentHeights() {
+		if (!this.contentItemsShown.length) {
+			return;
+		}
+
 		this.maxHeightAvailable = this.$window.innerHeight - this.panelTopBottomGap - this.bottomButtonGap;
 
-		const spaceUsedInGaps = this.itemGap * ( this.contentItemsShown.length - 1);
+		const spaceUsedInGaps = Math.max(0, this.itemGap * ( this.contentItemsShown.length - 1));
 		const availableHeight = this.maxHeightAvailable - spaceUsedInGaps;
 
 		const orderedContentItems = this.contentItemsShown.concat([]).sort((a, b) => {
