@@ -650,7 +650,14 @@ export class ViewerService {
 	}
 
 	public setShading(shading: string) {
-		// Missing shading call;
+		switch (shading) {
+			case 'standard':
+				UnityUtil.setRenderingQualityDefault();
+				break;
+			case 'architectural':
+				UnityUtil.setRenderingQualityHigh();
+				break;
+		}
 	}
 
 	public setXray(xray: boolean) {
