@@ -67,7 +67,7 @@ interface IProps {
 	filters?: IFilter[];
 	onChange: (selectedFilters) => void;
 	selectedFilters: any[];
-	hideFiltersMenu?: boolean;
+	hideMenu?: boolean;
 }
 
 interface IState {
@@ -399,7 +399,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 			<Container filtersOpen={this.state.selectedFilters.length && this.state.filtersOpen}>
 				{this.renderSelectedFilters()}
 
-				<InputContainer menuHidden={this.props.hideFiltersMenu}>
+				<InputContainer menuHidden={this.props.hideMenu}>
 					<Autosuggest
 						ref={this.handleAutoSuggestMount}
 						suggestions={suggestions}
@@ -420,7 +420,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 						renderSuggestionsContainer={this.renderSuggestionsContainer}
 						onSuggestionSelected={this.handleNewFilterSubmit}
 					/>
-					{this.renderFiltersMenuButton(!this.props.hideFiltersMenu)}
+					{this.renderFiltersMenuButton(!this.props.hideMenu)}
 				</InputContainer>
 
 			</Container>

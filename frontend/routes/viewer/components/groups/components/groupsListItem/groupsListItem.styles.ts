@@ -58,3 +58,8 @@ export const AuthorWrapper = styled.div`
 export const Actions = styled.div`
   display: flex;
 `;
+
+export const StyledIcon = styled.span`
+  color: ${(props) => props.color ? props.color : COLOR.BLACK_60 };
+  font-size: 18px;
+`;

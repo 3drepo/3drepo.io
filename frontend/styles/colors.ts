@@ -2,8 +2,8 @@ import { mapValues } from 'lodash';
 
 import { hexToRgba, hexToPinColor } from '../helpers/colors';
 
-const BLACK = '#00000';
-const WHITE = '#ffffff';
+export const BLACK = '#00000';
+export const WHITE = '#ffffff';
 
 export const COLOR = {
 	PRIMARY_MAIN: '#0c2f54',

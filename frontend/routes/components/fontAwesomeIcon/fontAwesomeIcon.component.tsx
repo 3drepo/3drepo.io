@@ -25,13 +25,11 @@ interface IExtendedIconProps extends IconProps {
 }
 interface IProps {
 	icon: any;
-	size?: any;
-	color?: string;
 	IconProps?: IExtendedIconProps;
 }
 
 export default (props: IProps) => (
 	<IconContainer {...props.IconProps}>
-		<FontAwesomeIconComponent icon={props.icon} size={props.size} color={props.color} />
+		<FontAwesomeIconComponent icon={props.icon} />
 	</IconContainer>
 );

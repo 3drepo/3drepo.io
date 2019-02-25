@@ -22,7 +22,14 @@ import Delete from '@material-ui/icons/Delete';
 import Bolt from '@material-ui/icons/OfflineBolt';
 import { Eye, Tint, HandPaper } from '../../../../../components/fontAwesomeIcon';
 
-import { Info, AuthorWrapper, Actions, Content, MenuItemContainer } from './groupsListItem.styles';
+import {
+	Info,
+	AuthorWrapper,
+	Actions,
+	Content,
+	MenuItemContainer,
+	StyledIcon
+} from './groupsListItem.styles';
 import {
 	Container, RoleIndicator, Description, Name, ArrowButton, StyledArrowIcon
 } from './../../../previewListItem/previewListItem.styles';
@@ -38,7 +45,6 @@ import { TooltipButton } from '../../../../../teamspaces/components/tooltipButto
 
 interface IProps {
 	_id: string;
-	autohr: string;
 	name: string;
 	description: string;
 	author: string;
@@ -56,18 +62,21 @@ interface IProps {
 	isolateGroup: () => void;
 }
 
-const EyeIcon = () => <Eye size="xs" />;
+const EyeIcon = () => <StyledIcon><Eye /></StyledIcon>;
 
 export class GroupsListItem extends React.PureComponent<IProps, any> {
 	public get groupTypeIcon() {
 		if (this.props.type === GROUPS_TYPES.SMART) {
 			return <Bolt />;
 		}
-		return <HandPaper size="xs" />;
+		return <HandPaper fontSize="inherit" />;
 	}
 
-	public getTintIcon = () => <Tint size="xs" color={this.getOverridedColor()} />;
-
+	public getTintIcon = () => (
+		<StyledIcon color={this.getOverridedColor()}>
+			<Tint fontSize="inherit" />
+		</StyledIcon>
+	)
 	public getOverridedColor = () => {
 		if (this.props.overrided) {
 			return getGroupRGBAColor(this.props.color);
@@ -118,7 +127,9 @@ export class GroupsListItem extends React.PureComponent<IProps, any> {
 						<Name>{name}</Name>
 						<Info>
 							<AuthorWrapper>
-								{this.groupTypeIcon}
+								<StyledIcon>
+									{this.groupTypeIcon}
+								</StyledIcon>
 								<Author>{author}</Author>
 							</AuthorWrapper>
 							{this.renderActions(active)}

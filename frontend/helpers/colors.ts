@@ -1,3 +1,5 @@
+import { WHITE } from './../styles/colors';
+
 const parseHex = (hex) => {
 	hex = hex.replace(/^#/, '');
 	if (hex.length === 8) {
@@ -41,7 +43,7 @@ export const getGroupRGBAColor = (groupColor) => {
 	if (groupColor) {
 		return this.getRGBA(groupColor);
 	}
-	return 'rgba(255, 255, 255, 1)';
+	return hexToRgba(WHITE);
 };
 
 export const getRandomColor = () => {

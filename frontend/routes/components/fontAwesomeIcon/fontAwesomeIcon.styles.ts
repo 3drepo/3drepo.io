@@ -29,6 +29,7 @@ export const IconContainer = styled(Icon).attrs({
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		font-size: inherit;
 	}
 
 	svg {

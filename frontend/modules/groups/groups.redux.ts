@@ -27,7 +27,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	setActiveGroup: ['group', 'filteredGroups', 'revision'],
 	showDetails: ['group', 'filteredGroups', 'revision'],
 	closeDetails: [],
-	setnewGroup: [],
+	setNewGroup: [],
 	updateNewGroup: ['newGroup'],
 	selectGroup: ['group'],
 	addToHighlighted: ['groupId'],
@@ -76,25 +76,25 @@ export const setComponentState = (state = INITIAL_STATE, { componentState = {} }
 export const addToHighlighted = (state = INITIAL_STATE, { groupId }) => {
 	const highlightedGroups = { ...state.componentState.highlightedGroups };
 	highlightedGroups[groupId] = true;
-	return { ...state, 	componentState: { ...state.componentState, highlightedGroups } };
+	return { ...state, componentState: { ...state.componentState, highlightedGroups } };
 };
 
 export const removeFromHighlighted = (state = INITIAL_STATE, { groupId }) => {
 	const highlightedGroups = { ...state.componentState.highlightedGroups };
 	highlightedGroups[groupId] = false;
-	return { ...state, 	componentState: { ...state.componentState, highlightedGroups } };
+	return { ...state, componentState: { ...state.componentState, highlightedGroups } };
 };
 
 export const addToOverrided = (state = INITIAL_STATE, { groupId, override }) => {
 	const colorOverrides = { ...state.componentState.colorOverrides };
 	colorOverrides[groupId] = override;
-	return { ...state, 	componentState: { ...state.componentState, colorOverrides } };
+	return { ...state, componentState: { ...state.componentState, colorOverrides } };
 };
 
 export const removeFromOverrided = (state = INITIAL_STATE, { groupId }) => {
 	const colorOverrides = { ...state.componentState.colorOverrides };
 	colorOverrides[groupId] = undefined;
-	return { ...state, 	componentState: { ...state.componentState, colorOverrides } };
+	return { ...state, componentState: { ...state.componentState, colorOverrides } };
 };
 
 export const deleteGroupSuccess = (state = INITIAL_STATE, { groupId }) => {

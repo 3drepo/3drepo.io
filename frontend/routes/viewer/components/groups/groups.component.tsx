@@ -158,20 +158,24 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return <GroupWork />;
 	}
 
+	public handleDeleteGroups = () => {
+		const { groups, deleteGroups, teamspace, model } = this.props;
+
+		this.props.showConfirmDialog({
+			title: 'Delete groups',
+			content: `Delete all groups?`,
+			onConfirm: () => {
+				const allGroups = groups.map((group) => group._id).join(',');
+				deleteGroups(teamspace, model, allGroups);
+			}
+		});
+	}
+
 	get menuActionsMap() {
-		const { groups, deleteGroups, toggleColorOverrideAll, teamspace, model, downloadGroups } = this.props;
+		const { toggleColorOverrideAll, teamspace, model, downloadGroups } = this.props;
 		return {
 			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => toggleColorOverrideAll(),
-			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => {
-				this.props.showConfirmDialog({
-					title: 'Delete groups',
-					content: `Delete all groups?`,
-					onConfirm: () => {
-						const allGroups = groups.map((group) => group._id).join(',');
-						deleteGroups(teamspace, model, allGroups);
-					}
-				});
-			},
+			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => this.handleDeleteGroups(),
 			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadGroups(teamspace, model)
 		};
 	}
@@ -292,7 +296,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		<FilterPanel
 			onChange={this.handleFilterChange}
 			selectedFilters={this.props.selectedFilters}
-			hideFiltersMenu={true}
+			hideMenu={true}
 		/>
 	));
 

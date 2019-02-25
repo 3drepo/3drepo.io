@@ -60,9 +60,8 @@ export function* highlightGroup({ group }) {
 
 		const TreeService = getAngularService('TreeService') as any;
 		if (group.objects && group.objects.length > 0) {
-			return TreeService.showNodesBySharedIds(group.objects).then(() => {
-				return TreeService.selectNodesBySharedIds(group.objects, color);
-			});
+			yield TreeService.showNodesBySharedIds(group.objects);
+			yield TreeService.selectNodesBySharedIds(group.objects, color);
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('higlight', 'group', error));
@@ -125,20 +124,15 @@ export function* addColorOverride({ group }) {
 
 			if (nodes) {
 				const filteredNodes = nodes.filter((n) => n !== undefined);
-				const meshes = TreeService.getMeshMapFromNodes(filteredNodes);
+				const models = yield TreeService.getMeshMapFromNodes(filteredNodes);
 
-				for (const key in meshes) {
-					if (key) {
-						const meshIds = meshes[key].meshes;
-						const pair = key.split('@');
-						const modelAccount = pair[0];
-						const modelId = pair[1];
-						Viewer.overrideMeshColor(modelAccount, modelId, meshIds, color);
-					}
-				}
-				const colorOverride = {
-					models: meshes, color
-				};
+				Object.keys(models).forEach((key) => {
+					const meshIds = models[key].meshes;
+					const [account, model] = key.split('@');
+					Viewer.overrideMeshColor(account, model, meshIds, color);
+				});
+
+				const colorOverride = { models, color };
 				yield put(GroupsActions.addToOverrided(group._id, colorOverride));
 			}
 		}
@@ -150,16 +144,11 @@ export function* addColorOverride({ group }) {
 export function* removeColorOverride({ groupId, overridedGroup }) {
 	try {
 		if (overridedGroup) {
-			for (const key in overridedGroup.models) {
-				if (overridedGroup.models.hasOwnProperty(key)) {
-					const meshIds = overridedGroup.models[key].meshes;
-					const pair = key.split('@');
-					const account = pair[0];
-					const model = pair[1];
-
-					Viewer.resetMeshColor(account, model, meshIds);
-				}
-			}
+			Object.keys(overridedGroup.models).forEach((key) => {
+				const meshIds = overridedGroup.models[key].meshes;
+				const [account, model] = key.split('@');
+				Viewer.resetMeshColor(account, model, meshIds);
+			});
 			yield put(GroupsActions.removeFromOverrided(groupId));
 		}
 	} catch (error) {
