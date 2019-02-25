@@ -29,6 +29,7 @@ import { Container, ColorPickerWrapper, Actions } from './groupDetails.styles';
 import { GroupDetailsForm } from './groupDetailsForm.component';
 import { mergeGroupData } from '../../../../../../helpers/groups';
 import { ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
+import { getGroupRGBAColor } from '../../../../../../helpers/colors';
 
 interface IProps {
 	group: any;
@@ -44,18 +45,39 @@ interface IProps {
 	updateNewGroup: (newRisk) => void;
 	setState: (componentState) => void;
 }
+interface IState {
+	groupColor: string;
+}
 
-export class GroupDetails extends React.PureComponent<IProps, any> {
+export class GroupDetails extends React.PureComponent<IProps, IState> {
+	public state = {
+		groupColor: undefined
+	};
+
+	public componentDidMount() {
+		if (this.props.group.color) {
+			this.setState({
+				groupColor: getGroupRGBAColor(this.props.group.color)
+			});
+		}
+	}
+
 	get isNewGroup() {
 		return !this.props.group._id;
 	}
 
 	get groupData() {
-		const groupData = { ...this.props.group, createdDate: this.props.group.createdAt };
+		const groupData = {
+			...this.props.group,
+			createdDate: this.props.group.createdAt,
+			roleColor: this.state.groupColor
+	};
 		return groupData;
 	}
 
 	public handleGroupFormSubmit = (values) => {
+		console.log('Handle group from Submit', values);
+
 		const { teamspace, model, updateGroup, updateNewGroup } = this.props;
 		const updatedGroup = mergeGroupData(this.groupData, values);
 
@@ -72,6 +94,7 @@ export class GroupDetails extends React.PureComponent<IProps, any> {
 
 	public handleSave = () => {
 		const { teamspace, model, saveGroup } = this.props;
+		console.log('Handle Save', this.groupData);
 		saveGroup(teamspace, model, this.groupData);
 	}
 
@@ -95,15 +118,26 @@ export class GroupDetails extends React.PureComponent<IProps, any> {
 				onValueChange={this.handleGroupFormSubmit}
 				onSubmit={this.handleGroupFormSubmit}
 				currentUser={this.props.currentUser}
+				groupColor={this.state.groupColor}
 			/>
 		</PreviewDetails>
 	));
+
+	public handleColorChange = (color) => {
+		this.setState({
+			groupColor: color
+		});
+	}
 
 	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center">
 			<Actions>
 				<ColorPickerWrapper>
-					<ColorPicker disableUnderline={true} />
+					<ColorPicker
+						disableUnderline={true}
+						value={this.state.groupColor}
+						onChange={this.handleColorChange}
+					/>
 				</ColorPickerWrapper>
 				<IconButton
 					aria-label="Reset to saved selection"

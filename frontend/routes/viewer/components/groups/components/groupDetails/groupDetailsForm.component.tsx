@@ -12,6 +12,7 @@ import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { FieldsRow, StyledFormControl, StyledTextField } from './groupDetails.styles';
 import { SelectField } from '../../../../../components/selectField/selectField.component';
 import { GROUPS_TYPES } from '../../../../../../constants/groups';
+import { getGroupRGBAColor } from '../../../../../../helpers/colors';
 
 const GroupSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
@@ -23,6 +24,7 @@ interface IProps {
 	formik: any;
 	permissions: any;
 	currentUser: any;
+	newColor: string;
 	onSubmit: (values) => void;
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
@@ -45,7 +47,6 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { group } = this.props;
 		const changes = {} as IState;
 
 		if (!isEmpty(changes)) {
@@ -73,13 +74,14 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
+		console.log('Form', this.props);
 		const { group: { updatedAt } } = this.props;
 		return (
 			<Form>
 				<FieldsRow>
 					<StyledTextField
 						label="Number of objects"
-						value={4567}
+						value={0}
 						disabled
 					/>
 					<StyledTextField
@@ -119,7 +121,8 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 export const GroupDetailsForm = withFormik({
 	mapPropsToValues: ({ group }) => ({
 		description: group.description || '',
-		type: group.rules.length ? GROUPS_TYPES.SMART : GROUPS_TYPES.NORMAL
+		type: group.rules.length ? GROUPS_TYPES.SMART : GROUPS_TYPES.NORMAL,
+		color: getGroupRGBAColor(group.color)
 	}),
 	handleSubmit: (values, { props }) => {
 		(props as IProps).onSubmit(values);

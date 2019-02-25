@@ -157,9 +157,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return(
 			<StyledIcon color={this.getOverridedColor(_id, color)}>
 				{
-					Boolean(rules.length) ?
-				<Bolt fontSize="inherit" /> :
-				<HandPaper fontSize="inherit" />
+					Boolean(rules.length) ? <Bolt fontSize="inherit" /> : <HandPaper fontSize="inherit" />
 				}
 			</StyledIcon>
 		);
