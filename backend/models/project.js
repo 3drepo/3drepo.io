@@ -36,7 +36,7 @@
 	});
 
 	function checkProjectNameValid (project) {
-		const regex = "^[^/?=#+]{1,120}$";
+		const regex = "^[^/?=#+]{0,119}[^/?=#+ ]{1}$";
 		return project && project.match(regex);
 	}
 
