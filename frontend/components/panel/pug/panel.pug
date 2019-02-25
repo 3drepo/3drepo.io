@@ -19,6 +19,7 @@ div(ng-show="vm.showPanel")
 
 			height-setter#reactComponent(
 				ng-if="contentItem.isReactComponent && contentItem.show"
+				on-show="vm.onPanelVisibilityChange($index, contentItem.type)"
 				content-data="contentItem"
 				on-height-update="vm.heightRequest(vm.contentItems[$index], height)")
 				gis(ng-if="contentItem.type === 'gis'")

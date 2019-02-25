@@ -25,7 +25,8 @@ interface IBindings {
 
 const bindings: IBindings = {
 	contentData: '<',
-	onHeightUpdate: '&'
+	onHeightUpdate: '&',
+	onShow: '&'
 };
 
 class HeightSetterController implements ng.IController, IBindings {
@@ -37,6 +38,7 @@ class HeightSetterController implements ng.IController, IBindings {
 
 	public contentData;
 	public onHeightUpdate;
+	public onShow;
 	public styles = {} as any;
 
 	private reactElement;
@@ -80,6 +82,7 @@ class HeightSetterController implements ng.IController, IBindings {
 
 	public $onInit(): void {
 		this.updateHeight();
+		this.onShow();
 	}
 
 	public updateHeight = debounce(() => {
