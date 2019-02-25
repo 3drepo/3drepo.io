@@ -1,13 +1,20 @@
 import * as React from 'react';
 import * as Yup from 'yup';
+import * as dayjs from 'dayjs';
+
 import { debounce, isEmpty } from 'lodash';
-import { connect, Field, Form, withFormik, Formik } from 'formik';
+import { connect, Field, Form, withFormik } from 'formik';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+
 import { TextField } from '../../../../../components/textField/textField.component';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
-import { PreviewItemInfo } from './../../../previewItemInfo/previewItemInfo.component';
+import { FieldsRow, StyledFormControl, StyledTextField } from './groupDetails.styles';
+import { SelectField } from '../../../../../components/selectField/selectField.component';
+import { GROUPS_TYPES } from '../../../../../../constants/groups';
 
 const GroupSchema = Yup.object().shape({
-	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 
 interface IProps {
@@ -66,8 +73,34 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
+		const { group: { updatedAt } } = this.props;
 		return (
 			<Form>
+				<FieldsRow>
+					<StyledTextField
+						label="Number of objects"
+						value={4567}
+						disabled
+					/>
+					<StyledTextField
+						label="Last update"
+						value={dayjs(updatedAt).format('DD MMM')}
+						disabled
+					/>
+					<StyledFormControl>
+						<InputLabel>Group type</InputLabel>
+						<Field name="type" render={({ field }) => (
+							<SelectField {...field}>
+								<MenuItem key={'smart'} value={'smart'}>
+									Criteria
+								</MenuItem>
+								<MenuItem key={'normal'} value={'normal'}>
+									Normal
+								</MenuItem>
+							</SelectField>
+						)} />
+					</StyledFormControl>
+				</FieldsRow>
 				<Field name="description" render={({ field, form }) => (
 					<TextField
 						{...field}
@@ -85,7 +118,8 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 export const GroupDetailsForm = withFormik({
 	mapPropsToValues: ({ group }) => ({
-		description: group.description || ''
+		description: group.description || '',
+		type: group.rules.length ? GROUPS_TYPES.SMART : GROUPS_TYPES.NORMAL
 	}),
 	handleSubmit: (values, { props }) => {
 		(props as IProps).onSubmit(values);

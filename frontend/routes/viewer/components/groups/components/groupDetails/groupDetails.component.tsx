@@ -16,15 +16,19 @@
  */
 
 import * as React from 'react';
+import IconButton from '@material-ui/core/IconButton';
 import SaveIcon from '@material-ui/icons/Save';
+import AutorenewIcon from '@material-ui/icons/Autorenew';
+
+import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
+
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
-import { Container } from './groupDetails.styles';
+import { Container, ColorPickerWrapper, Actions } from './groupDetails.styles';
 import { GroupDetailsForm } from './groupDetailsForm.component';
 import { mergeGroupData } from '../../../../../../helpers/groups';
 import { ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
-import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 
 interface IProps {
 	group: any;
@@ -97,7 +101,17 @@ export class GroupDetails extends React.PureComponent<IProps, any> {
 
 	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center">
-			<ColorPicker />
+			<Actions>
+				<ColorPickerWrapper>
+					<ColorPicker disableUnderline={true} />
+				</ColorPickerWrapper>
+				<IconButton
+					aria-label="Reset to saved selection"
+					aria-haspopup="true"
+				>
+					<AutorenewIcon />
+				</IconButton>
+			</Actions>
 			<ViewerPanelButton
 				variant="fab"
 				color="secondary"

@@ -8,11 +8,6 @@ export const GROUPS_TYPES = {
 	SMART: 'smart'
 };
 
-export const GROUPS_TYPES = {
-	NORMAL: 'normal',
-	SMART: 'smart'
-};
-
 export const GROUPS_ACTIONS_ITEMS = {
 	OVERRIDE_ALL: 'overrideAll',
 	DOWNLOAD: 'download',

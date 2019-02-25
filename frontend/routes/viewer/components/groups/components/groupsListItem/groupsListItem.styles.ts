@@ -60,6 +60,6 @@ export const Actions = styled.div`
 `;
 
 export const StyledIcon = styled.span`
-  color: ${(props) => props.color ? props.color : COLOR.BLACK_60 };
+  color: ${(props) => props.color ? props.color : COLOR.BLACK_54 };
   font-size: 18px;
 `;
