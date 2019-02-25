@@ -34,6 +34,7 @@ const ruleOperators = {
 	"IS_EMPTY":	0,
 	"IS_NOT_EMPTY":	0,
 	"IS":		1,
+	"IS_NOT":	1,
 	"CONTAINS":	1,
 	"NOT_CONTAINS":	1,
 	"REGEX":	1,
@@ -564,6 +565,9 @@ function buildRule(rule) {
 					break;
 				case "IS":
 					operation = rule.values[i];
+					break;
+				case "IS_NOT":
+					operation = { $ne: rule.values[i] };
 					break;
 				case "CONTAINS":
 					operation = { $regex: new RegExp(utils.sanitizeString(rule.values[i])), $options: "i" };
