@@ -320,7 +320,7 @@ groupSchema.statics.findByUID = function (dbCol, uid, branch, revId) {
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
-			return getSharedIDs(dbCol, group, branch, revId, false).then((sharedIdObjects) => {
+			return getObjectIds(dbCol, group, branch, revId, false).then((sharedIdObjects) => {
 				group.objects = sharedIdObjects;
 				return group;
 			});
@@ -328,7 +328,7 @@ groupSchema.statics.findByUID = function (dbCol, uid, branch, revId) {
 
 };
 
-groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId) {
+groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId, showIfcGuids = false) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -337,7 +337,7 @@ groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId) {
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
-			return getSharedIDs(dbCol, group, branch, revId, true).then((sharedIdObjects) => {
+			return getObjectIds(dbCol, group, branch, revId, true, showIfcGuids).then((sharedIdObjects) => {
 
 				const returnGroup = { _id: utils.uuidToString(group._id), color: group.color };
 				returnGroup.objects = sharedIdObjects;
@@ -369,7 +369,7 @@ groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, id
 
 		results.forEach(result => {
 			sharedIdConversionPromises.push(
-				getSharedIDs(dbCol, result, branch, revId, true).then((sharedIdObjects) => {
+				getObjectIds(dbCol, result, branch, revId, true).then((sharedIdObjects) => {
 					result.objects = sharedIdObjects;
 					return result;
 				})
@@ -690,8 +690,8 @@ function findModelSharedIDsByQuery(account, model, query, branch, revId) {
 	});
 }
 
-function findSharedIDsByRules(account, model, rules, branch, revId, convertSharedIDsToString) {
-	const sharedIdPromises = [];
+function findObjectIDsByRules(account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
+	const objectIdPromises = [];
 
 	const query = rulesToQuery(rules);
 
@@ -707,52 +707,73 @@ function findSharedIDsByRules(account, model, rules, branch, revId, convertShare
 		const modelsIter = models.values();
 
 		for (const modelID of modelsIter) {
-			const sharedIdsSet = new Set();
+			const objectIdsSet = new Set();
 
-			const sharedIdObject = {};
-			sharedIdObject.account = account;
-			sharedIdObject.model = modelID;
+			const objectId = {};
+			objectId.account = account;
+			objectId.model = modelID;
 
-			const _branch = (model === sharedIdObject.model) ? branch : "master";
-			const _revId = (model === sharedIdObject.model) ? revId : null;
+			const _branch = (model === objectId.model) ? branch : "master";
+			const _revId = (model === objectId.model) ? revId : null;
 
-			sharedIdPromises.push(findModelSharedIDsByQuery(
-				sharedIdObject.account,
-				sharedIdObject.model,
-				query,
-				_branch,
-				_revId
-			).then(sharedIdResults => {
-				for (let j = 0; j < sharedIdResults.length; j++) {
-					if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
-						sharedIdResults[j].shared_id = utils.uuidToString(sharedIdResults[j].shared_id);
+			if (showIfcGuids) {
+				objectIdPromises.push(findObjectsByQuery(
+					objectId.account,
+					objectId.model,
+					query
+				).then(objectIdResults => {
+					for (let j = 0; j < objectIdResults.length; j++) {
+						objectIdsSet.add(objectIdResults[j].metadata["IFC GUID"]);
 					}
-					sharedIdsSet.add(sharedIdResults[j].shared_id);
-				}
 
-				if (sharedIdsSet.size > 0) {
-					sharedIdObject.shared_ids = [];
-					sharedIdsSet.forEach(id => {
-						if (!convertSharedIDsToString) {
-							id = utils.stringToUUID(id);
+					if (objectIdsSet.size > 0) {
+						objectId.ifc_guids = [];
+						objectIdsSet.forEach(id => {
+							objectId.ifc_guids.push(id);
+						});
+					}
+
+					return objectId;
+				}));
+			} else {
+				objectIdPromises.push(findModelSharedIDsByQuery(
+					objectId.account,
+					objectId.model,
+					query,
+					_branch,
+					_revId
+				).then(sharedIdResults => {
+					for (let j = 0; j < sharedIdResults.length; j++) {
+						if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
+							sharedIdResults[j].shared_id = utils.uuidToString(sharedIdResults[j].shared_id);
 						}
-						sharedIdObject.shared_ids.push(id);
-					});
-				}
+						objectIdsSet.add(sharedIdResults[j].shared_id);
+					}
 
-				return sharedIdObject;
-			}));
+					if (objectIdsSet.size > 0) {
+						objectId.shared_ids = [];
+						objectIdsSet.forEach(id => {
+							if (!convertSharedIDsToString) {
+								id = utils.stringToUUID(id);
+							}
+							objectId.shared_ids.push(id);
+						});
+					}
+
+					return objectId;
+				}));
+			}
 		}
 
-		return Promise.all(sharedIdPromises).then(sharedIdObjects => {
-			return sharedIdObjects;
+		return Promise.all(objectIdPromises).then(objectIds => {
+			return objectIds;
 		});
 	});
 }
 
-function getSharedIDs(dbCol, groupData, branch, revId, convertSharedIDsToString) {
+function getObjectIds(dbCol, groupData, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
 	if (groupData.rules && groupData.rules.length > 0) {
-		return findSharedIDsByRules(dbCol.account, dbCol.model, groupData.rules, branch, revId, convertSharedIDsToString);
+		return findObjectIDsByRules(dbCol.account, dbCol.model, groupData.rules, branch, revId, convertSharedIDsToString, showIfcGuids);
 	} else {
 		return groupData.getObjectsArrayAsSharedIDs(dbCol.model, branch, revId, convertSharedIDsToString);
 	}
