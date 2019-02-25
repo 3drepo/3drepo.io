@@ -33,12 +33,10 @@ import {
 import {
 	Container, RoleIndicator, Description, Name, ArrowButton, StyledArrowIcon
 } from './../../../previewListItem/previewListItem.styles';
-
 import { Author } from './../../../previewItemInfo/previewItemInfo.styles';
 
 import { getGroupRGBAColor } from './../../../../../../helpers/colors';
-import { GROUPS_TYPES } from './../../../../../../helpers/groups';
-import { DEFAULT_OVERRIDE_COLOR } from './../../../../../../constants/groups';
+import { DEFAULT_OVERRIDE_COLOR, GROUPS_TYPES } from './../../../../../../constants/groups';
 import { DateTime } from '../../../../../components/dateTime/dateTime.component';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';

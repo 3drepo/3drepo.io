@@ -2,6 +2,11 @@ import Print from '@material-ui/icons/Print';
 import Download from '@material-ui/icons/CloudDownload';
 import Delete from '@material-ui/icons/Delete';
 
+export const GROUPS_TYPES = {
+	NORMAL: 'normal',
+	SMART: 'smart'
+};
+
 export const GROUPS_ACTIONS_ITEMS = {
 	OVERRIDE_ALL: 'overrideAll',
 	DOWNLOAD: 'download',
