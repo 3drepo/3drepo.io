@@ -36,6 +36,7 @@ const ruleOperators = {
 	"IS":		1,
 	"CONTAINS":	1,
 	"NOT_CONTAINS":	1,
+	"REGEX":	1,
 	"EQUALS":	1,
 	"NOT_EQUALS":	1,
 	"GT":		1,
@@ -430,6 +431,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data) {
 							&& !data.rules.reduce((x, y) => x && isValidRule(y))) {
 							typeCorrect = false;
 						}
+
 						toUpdate[key] = data[key];
 					}
 				} else {
@@ -568,6 +570,9 @@ function buildRule(rule) {
 					break;
 				case "NOT_CONTAINS":
 					operation = { $regex: new RegExp("^((?!" + utils.sanitizeString(rule.values[i]) + ").)*$"), $options: "i" };
+					break;
+				case "REGEX":
+					operation = { $regex: new RegExp(rule.values[i]) };
 					break;
 				case "EQUALS":
 					operation = { $eq: Number(rule.values[i]) };
