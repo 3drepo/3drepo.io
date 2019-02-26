@@ -62,7 +62,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	deleteGroups: GroupsActions.deleteGroups,
 	showConfirmDialog: DialogActions.showConfirmDialog,
 	isolateGroup: GroupsActions.isolateGroup,
-	downloadGroups: GroupsActions.downloadGroups
+	downloadGroups: GroupsActions.downloadGroups,
+	selectGroup: GroupsActions.selectGroup
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Groups);

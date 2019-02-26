@@ -79,6 +79,7 @@ interface IProps {
 	showConfirmDialog: (config) => void;
 	isolateGroup: (group) => void;
 	downloadGroups: (teamspace, model) => void;
+	selectGroup: (group) => void;
 }
 
 interface IState {
@@ -378,6 +379,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			teamspace={this.props.teamspace}
 			model={this.props.model}
 			saveGroup={this.props.saveGroup}
+			selectGroup={() => this.props.selectGroup(this.activeGroup)}
 			GroupTypeIconComponent={() => this.getGroupTypeIcon(this.activeGroup)}
 		/>
 	));

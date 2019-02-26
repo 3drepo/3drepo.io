@@ -16,11 +16,11 @@
  */
 
 import * as React from 'react';
-import IconButton from '@material-ui/core/IconButton';
 import SaveIcon from '@material-ui/icons/Save';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
+import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
@@ -43,6 +43,7 @@ interface IProps {
 	createGroup: (teamspace, modelId) => void;
 	updateGroup: (teamspace, modelId, groupId) => void;
 	setState: (componentState) => void;
+	selectGroup: () => void;
 }
 interface IState {
 	groupColor: string;
@@ -135,12 +136,11 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 						onChange={this.handleColorChange}
 					/>
 				</ColorPickerWrapper>
-				<IconButton
-					aria-label="Reset to saved selection"
-					aria-haspopup="true"
-				>
-					<AutorenewIcon />
-				</IconButton>
+				<TooltipButton
+					label="Reset to saved selection"
+					action={this.props.selectGroup}
+					Icon={AutorenewIcon}
+				/>
 			</Actions>
 			<ViewerPanelButton
 				variant="fab"

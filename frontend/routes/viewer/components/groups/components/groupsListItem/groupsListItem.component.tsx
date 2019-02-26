@@ -19,8 +19,7 @@ import * as React from 'react';
 import Truncate from 'react-truncate';
 
 import Delete from '@material-ui/icons/Delete';
-import Bolt from '@material-ui/icons/OfflineBolt';
-import { Eye, Tint, HandPaper } from '../../../../../components/fontAwesomeIcon';
+import { Eye, Tint } from '../../../../../components/fontAwesomeIcon';
 
 import {
 	Info,
@@ -36,7 +35,6 @@ import {
 import { Author } from './../../../previewItemInfo/previewItemInfo.styles';
 
 import { getGroupRGBAColor } from './../../../../../../helpers/colors';
-import { DEFAULT_OVERRIDE_COLOR } from './../../../../../../constants/groups';
 import { DateTime } from '../../../../../components/dateTime/dateTime.component';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
