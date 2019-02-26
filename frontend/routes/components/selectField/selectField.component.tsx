@@ -97,7 +97,7 @@ export class SelectField extends React.PureComponent<any, any> {
 	}
 
 	public render() {
-		const { MenuProps, children, onOpen, ...selectProps } = this.props;
+		const { MenuProps, children, onOpen, className, ...selectProps } = this.props;
 
 		const customMenuProps = {
 			...MenuProps,
@@ -106,7 +106,7 @@ export class SelectField extends React.PureComponent<any, any> {
 		};
 
 		return (
-			<Select {...selectProps} MenuProps={customMenuProps}>
+			<Select className={className} {...selectProps} MenuProps={customMenuProps}>
 				{children}
 			</Select>
 		);

@@ -8,11 +8,12 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import { TextField } from '../../../../../components/textField/textField.component';
-import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { FieldsRow, StyledFormControl, StyledTextField } from './groupDetails.styles';
 import { SelectField } from '../../../../../components/selectField/selectField.component';
 import { GROUPS_TYPES } from '../../../../../../constants/groups';
 import { getGroupRGBAColor } from '../../../../../../helpers/colors';
+import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
+import { CriteriaField } from '../../../../../components/criteriaField/criteriaField.component';
 
 const GroupSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
@@ -112,6 +113,14 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						label="Description"
 					/>
 				)} />
+
+				<Field name="rules" render={({ field }) => (
+					<CriteriaField
+						{...field}
+						label="Criteria"
+						placeholder="Select first criteria"
+					/>
+				)}/>
 			</Form>
 		);
 	}
@@ -121,7 +130,8 @@ export const GroupDetailsForm = withFormik({
 	mapPropsToValues: ({ group }) => ({
 		description: group.description || '',
 		type: group.rules.length ? GROUPS_TYPES.SMART : GROUPS_TYPES.NORMAL,
-		color: getGroupRGBAColor(group.color)
+		color: getGroupRGBAColor(group.color),
+		rules: group.rules
 	}),
 	handleSubmit: (values, { props }) => {
 		(props as IProps).onSubmit(values);
