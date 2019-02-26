@@ -44,8 +44,6 @@ interface IState {
 }
 
 class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
-	public formRef = React.createRef();
-
 	public state = {
 		isSaving: false,
 		canUpdateRisk: false

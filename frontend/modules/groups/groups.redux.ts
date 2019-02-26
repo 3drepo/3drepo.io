@@ -43,7 +43,11 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	deleteGroups: ['teamspace', 'modelId', 'groups'],
 	deleteGroupSuccess: ['groupId'],
 	isolateGroup: ['group'],
-	downloadGroups: ['teamspace', 'modelId']
+	downloadGroups: ['teamspace', 'modelId'],
+	createGroup: ['teamspace', 'modelId', 'group'],
+	createGroupSuccess: ['group'],
+	updateGroup: ['teamspace', 'modelId', 'groupId'],
+	updateGroupSuccess: ['group']
 }, { prefix: 'GROUPS/' });
 
 export interface IGroupComponentState {

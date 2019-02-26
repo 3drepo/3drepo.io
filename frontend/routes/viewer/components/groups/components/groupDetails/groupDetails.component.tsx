@@ -41,9 +41,8 @@ interface IProps {
 	modelSettings: any;
 	GroupTypeIconComponent: any;
 	totalMeshes: number;
-	saveGroup: (teamspace, modelId, risk) => void;
-	updateGroup: (teamspace, modelId, risk) => void;
-	updateNewGroup: (newRisk) => void;
+	saveGroup: (teamspace, modelId, group) => void;
+	updateGroup: (teamspace, modelId, groupId) => void;
 	setState: (componentState) => void;
 }
 interface IState {
@@ -54,6 +53,8 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	public state = {
 		groupColor: undefined
 	};
+
+	public formRef = React.createRef();
 
 	public componentDidMount() {
 		if (this.props.group.color) {
@@ -78,15 +79,14 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 	public handleGroupFormSubmit = (values) => {
 		console.log('Handle group from Submit', values);
-
-		const { teamspace, model, updateGroup, updateNewGroup } = this.props;
+		const { teamspace, model, updateGroup } = this.props;
 		const updatedGroup = mergeGroupData(this.groupData, values);
 
-		if (this.isNewGroup) {
-			updateNewGroup(updatedGroup);
-		} else {
-			updateGroup(teamspace, model, updatedGroup);
-		}
+		// if (this.isNewGroup) {
+		// 	updateNewGroup(updatedGroup);
+		// } else {
+		// 	updateGroup(teamspace, model, updatedGroup);
+		// }
 	}
 
 	public handleExpandChange = (event, expanded) => {
@@ -120,6 +120,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				currentUser={this.props.currentUser}
 				groupColor={this.state.groupColor}
 				totalMeshes={this.props.totalMeshes}
+				ref={this.formRef}
 			/>
 		</PreviewDetails>
 	));
@@ -151,6 +152,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				variant="fab"
 				color="secondary"
 				type="submit"
+				onClick={this.handleGroupFormSubmit}
 				mini={true}
 				aria-label="Save group"
 			>

@@ -38,8 +38,6 @@ interface IState {
 }
 
 class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
-	public formRef = React.createRef();
-
 	public state = {
 		isSaving: false
 	};
@@ -135,7 +133,8 @@ export const GroupDetailsForm = withFormik({
 		rules: group.rules
 	}),
 	handleSubmit: (values, { props }) => {
-		(props as IProps).onSubmit(values);
+		console.log('handleSubmit', values);
+		// (props as IProps).onSubmit(values);
 	},
 	enableReinitialize: true,
 	validationSchema: GroupSchema

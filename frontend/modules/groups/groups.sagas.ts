@@ -279,6 +279,24 @@ export function* closeDetails() {
 	}
 }
 
+export function* createGroup({ teamspace, modelId, group }) {
+	try {
+		console.log('Saga: Create group', teamspace, modelId, group);
+
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('create', 'group', error));
+	}
+}
+
+export function* updateGroup({ teamspace, modelId, group }) {
+	try {
+		console.log('Saga: Update group', teamspace, modelId, group);
+
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'group', error));
+	}
+}
+
 export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.FETCH_GROUPS, fetchGroups);
 	yield takeLatest(GroupsTypes.SET_ACTIVE_GROUP, setActiveGroup);
@@ -295,5 +313,6 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.DOWNLOAD_GROUPS, downloadGroups);
 	yield takeLatest(GroupsTypes.SHOW_DETAILS, showDetails);
 	yield takeLatest(GroupsTypes.CLOSE_DETAILS, closeDetails);
-
+	yield takeLatest(GroupsTypes.CREATE_GROUP, createGroup);
+	yield takeLatest(GroupsTypes.UPDATE_GROUP, updateGroup);
 }
