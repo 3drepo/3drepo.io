@@ -31,11 +31,11 @@ export const StyledTextField = styled(TextField)`
   }
 
   &:nth-of-type(2) {
-    width: 90%
+    width: 80%
   }
 
   && {
-    margin: 1px 6px 0 0;
+    margin: 1px 12px 0 0;
   }
 `;
 

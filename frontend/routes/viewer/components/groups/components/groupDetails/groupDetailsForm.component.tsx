@@ -26,6 +26,7 @@ interface IProps {
 	permissions: any;
 	currentUser: any;
 	newColor: string;
+	totalMeshes: number;
 	onSubmit: (values) => void;
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
@@ -81,7 +82,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				<FieldsRow>
 					<StyledTextField
 						label="Number of objects"
-						value={0}
+						value={this.props.totalMeshes}
 						disabled
 					/>
 					<StyledTextField
@@ -129,7 +130,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 export const GroupDetailsForm = withFormik({
 	mapPropsToValues: ({ group }) => ({
 		description: group.description || '',
-		type: group.rules.length ? GROUPS_TYPES.SMART : GROUPS_TYPES.NORMAL,
+		type: group.rules && group.rules.length ? GROUPS_TYPES.SMART : GROUPS_TYPES.NORMAL,
 		color: getGroupRGBAColor(group.color),
 		rules: group.rules
 	}),

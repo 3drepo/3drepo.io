@@ -20,7 +20,9 @@ import { createStructuredSelector } from 'reselect';
 
 import { connect } from '../../../../../../helpers/migration';
 import { GroupDetails } from './groupDetails.component';
-import { selectActiveGroupDetails, selectExpandDetails, GroupsActions } from '../../../../../../modules/groups';
+import { 
+	selectActiveGroupDetails, selectExpandDetails, selectTotalMeshes, GroupsActions
+} from '../../../../../../modules/groups';
 import { selectSettings } from '../../../../../../modules/model';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
 
@@ -28,7 +30,8 @@ const mapStateToProps = createStructuredSelector({
 	group: selectActiveGroupDetails,
 	modelSettings: selectSettings,
 	expandDetails: selectExpandDetails,
-	currentUser: selectCurrentUser
+	currentUser: selectCurrentUser,
+	totalMeshes: selectTotalMeshes
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

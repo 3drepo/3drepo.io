@@ -84,3 +84,7 @@ export const selectColorOverrides = createSelector(
 export const selectAreAllOverrided = createSelector(
 	selectComponentState, (state) => state.overrideAll
 );
+
+export const selectTotalMeshes = createSelector(
+	selectComponentState, (state) => state.totalMeshes
+);

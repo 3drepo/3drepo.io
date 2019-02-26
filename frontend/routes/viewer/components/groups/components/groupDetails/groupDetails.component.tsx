@@ -40,6 +40,7 @@ interface IProps {
 	currentUser: any;
 	modelSettings: any;
 	GroupTypeIconComponent: any;
+	totalMeshes: number;
 	saveGroup: (teamspace, modelId, risk) => void;
 	updateGroup: (teamspace, modelId, risk) => void;
 	updateNewGroup: (newRisk) => void;
@@ -118,6 +119,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				onSubmit={this.handleGroupFormSubmit}
 				currentUser={this.props.currentUser}
 				groupColor={this.state.groupColor}
+				totalMeshes={this.props.totalMeshes}
 			/>
 		</PreviewDetails>
 	));

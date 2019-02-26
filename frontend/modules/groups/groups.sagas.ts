@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, takeEvery, select, all} from 'redux-saga/effects';
+import { put, takeLatest, takeEvery, select, all, call} from 'redux-saga/effects';
+import { delay } from 'redux-saga';
 import { getAngularService } from '../../helpers/migration';
 
 import * as API from '../../services/api';
@@ -59,12 +60,6 @@ export function* setActiveGroup({ group, revision }) {
 			put(GroupsActions.setComponentState({ activeGroup: group._id }))
 		]);
 
-		const objectsStatus = yield Viewer.getObjectsStatus();
-		if (objectsStatus.highlightedNodes.length) {
-			const totalMeshes = calculateTotalMeshes(objectsStatus);
-			yield put(GroupsActions.setComponentState({ totalMeshes }));
-		}
-
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'group as active', error));
 	}
@@ -76,10 +71,18 @@ export function* highlightGroup({ group }) {
 		Viewer.getDefaultHighlightColor();
 		yield put(GroupsActions.addToHighlighted(group._id));
 
-		const TreeService = getAngularService('TreeService') as any;
 		if (group.objects && group.objects.length > 0) {
+			const TreeService = getAngularService('TreeService') as any;
+
 			yield TreeService.showNodesBySharedIds(group.objects);
 			yield TreeService.selectNodesBySharedIds(group.objects, color);
+			yield call(delay, 0);
+			const objectsStatus = yield Viewer.getObjectsStatus();
+
+			if (objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
+				const totalMeshes = calculateTotalMeshes(objectsStatus);
+				yield put(GroupsActions.setComponentState({ totalMeshes }));
+			}
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('higlight', 'group', error));
@@ -112,6 +115,8 @@ export function* clearSelectionHighlights() {
 
 export function* selectGroup({ group }) {
 	try {
+		yield Viewer.isViewerReady();
+
 		const addGroup = MultiSelect.isAccumMode();
 		const removeGroup = MultiSelect.isDecumMode();
 		const multiSelect = addGroup || removeGroup;
