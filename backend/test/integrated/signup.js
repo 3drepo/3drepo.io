@@ -213,7 +213,7 @@ describe("Sign up", function() {
 
 			}).expect(400, function(err, res) {
 
-				expect(res.body.value).to.equal(responseCodes.SIGN_UP_INVALID_EMAIL.value);
+				expect(res.body.value).to.equal(responseCodes.EMAIL_INVALID.value);
 				done(err);
 			});
 	});
@@ -233,7 +233,7 @@ describe("Sign up", function() {
 
 			}).expect(400, function(err, res) {
 
-				expect(res.body.value).to.equal(responseCodes.SIGN_UP_INVALID_EMAIL.value);
+				expect(res.body.value).to.equal(responseCodes.EMAIL_INVALID.value);
 				done(err);
 			});
 	});
@@ -253,7 +253,7 @@ describe("Sign up", function() {
 
 			}).expect(400, function(err, res) {
 
-				expect(res.body.value).to.equal(responseCodes.SIGN_UP_INVALID_EMAIL.value);
+				expect(res.body.value).to.equal(responseCodes.EMAIL_INVALID.value);
 				done(err);
 			});
 	});
