@@ -20,20 +20,21 @@ import ChipComponent from '@material-ui/core/Chip';
 import IconButtonComponent from '@material-ui/core/IconButton';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import FormControlComponent from '@material-ui/core/FormControl';
+import SaveIcon from '@material-ui/icons/Save';
 
 import ListComponent from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListSubheader from '@material-ui/core/ListSubheader';
+import MenuItemComponent from '@material-ui/core/MenuItem';
 
 import { SelectField as SelectFieldComponent } from '../selectField/selectField.component';
 
-export const Container = styled.div``;
+export const Container = styled.div`
+  margin: 8px 0;
+`;
 
 export const SelectedCriteria = styled.div`
   position: relative;
   min-height: 45px;
-  padding-bottom: 5px;
+  padding: 5px 0;
 `;
 
 export const ChipsContainer = styled.div`
@@ -42,7 +43,6 @@ export const ChipsContainer = styled.div`
 	padding-right: 40px;
 	overflow: hidden;
 	position: relative;
-	max-height: 240px;
 `;
 
 export const Chip = styled(ChipComponent)`
@@ -86,6 +86,7 @@ export const FormContainer = styled.div`
   background-color: #F9F9F9;
   border-top: 1px solid #CFCFCF;
   padding: 12px;
+  padding-bottom: 24px;
 `;
 
 export const CriteriaList = styled(ListComponent)`
@@ -103,4 +104,29 @@ export const Operators = styled.ul`
 
 export const SelectField = styled(SelectFieldComponent)`
   width: 100%;
+`;
+
+export const MenuItem = styled(MenuItemComponent)`
+  && {
+    padding: 4px 10px;
+    height: 30px;
+    min-width: 180px;
+  }
+`;
+
+export const NewCriterionFooter = styled.div`
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+`;
+
+export const PasteContainer = styled.div`
+  width: 100%;
+  align-items: center;
+`;
+
+export const StyledSaveIcon = styled(SaveIcon)`
+	&& {
+		font-size: 20px;
+	}
 `;
