@@ -27,11 +27,17 @@ import {
 	selectColorOverrides,
 	selectGroups,
 	selectGroupsMap,
-	selectFilteredGroups
+	selectFilteredGroups,
+	selectNewGroupDetails,
+	selectActiveGroupDetails
 } from './groups.selectors';
 import { Viewer } from '../../services/viewer/viewer';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { prepareGroup } from '../../helpers/groups';
+import { selectCurrentUser } from '../currentUser';
+import { DEFAULT_OVERRIDE_COLOR } from '../../constants/groups';
+import { getRandomColor } from '../../helpers/colors';
+import { SnackbarActions } from '../snackbar';
 
 export function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(true));
@@ -279,21 +285,94 @@ export function* closeDetails() {
 	}
 }
 
-export function* createGroup({ teamspace, modelId, group }) {
+export function* createGroup({ teamspace, modelId }) {
 	try {
-		console.log('Saga: Create group', teamspace, modelId, group);
+		const currentUser = yield select(selectCurrentUser);
+		const newGroupDetails = yield select(selectNewGroupDetails);
+		const objectsStatus = yield Viewer.getObjectsStatus();
 
+		const date = new Date();
+		const timestamp = date.getTime();
+		const group = {
+			author: currentUser.username,
+			createdAt: timestamp,
+			updatedAt: timestamp,
+			updatedBy: currentUser.username,
+			totalSavedMeshes: 0,
+			objects: [],
+			...newGroupDetails
+		};
+
+		if (objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
+			group.totalSavedMeshes = calculateTotalMeshes(objectsStatus);
+			group.objects = objectsStatus.highlightedNodes;
+		}
+
+		const {data} = yield API.createGroup(teamspace, modelId, group);
+
+		yield put(GroupsActions.updateGroupSuccess({
+			...group,
+			_id: data._id
+		}));
+		yield put(SnackbarActions.show('Group created'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('create', 'group', error));
 	}
 }
 
-export function* updateGroup({ teamspace, modelId, group }) {
+export function* updateGroup({ teamspace, modelId, groupId }) {
 	try {
-		console.log('Saga: Update group', teamspace, modelId, group);
+		const currentUser = yield select(selectCurrentUser);
+		const updatedGroupDetails = yield select(selectNewGroupDetails);
+		const groupDetails = yield select(selectActiveGroupDetails);
+		const objectsStatus = yield Viewer.getObjectsStatus();
+		const date = new Date();
+		const timestamp = date.getTime();
+		const group = {
+			updatedAt: timestamp,
+			updatedBy: currentUser.username,
+			totalSavedMeshes: 0,
+			objects: [],
+			...updatedGroupDetails
+		};
+		if (objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
+			group.totalSavedMeshes = calculateTotalMeshes(objectsStatus);
+			group.objects = objectsStatus.highlightedNodes;
+		}
 
+		const {data} = yield API.updateGroup(teamspace, modelId, groupId, group);
+
+		yield put(GroupsActions.updateGroupSuccess({
+			...group,
+			_id: data._id,
+			author: groupDetails.author,
+			name: groupDetails.name
+		}));
+		yield put(SnackbarActions.show('Group updated'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'group', error));
+	}
+}
+
+export function* setNewGroup() {
+	const groups = yield select(selectGroups);
+	const groupNumber = groups.length + 1;
+
+	try {
+		const newGroup = prepareGroup({
+			name: `Untitled group ${groupNumber}`,
+			color: getRandomColor(),
+			description: '(No description)'
+		});
+
+		yield put(GroupsActions.setComponentState({
+			showDetails: true,
+			activeGroup: null,
+			totalMeshes: 0,
+			newGroup
+		}));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('prepare', 'new risk', error));
 	}
 }
 
@@ -315,4 +394,5 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.CLOSE_DETAILS, closeDetails);
 	yield takeLatest(GroupsTypes.CREATE_GROUP, createGroup);
 	yield takeLatest(GroupsTypes.UPDATE_GROUP, updateGroup);
+	yield takeLatest(GroupsTypes.SET_NEW_GROUP, setNewGroup);
 }

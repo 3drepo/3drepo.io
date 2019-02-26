@@ -21,13 +21,14 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../../../helpers/migration';
 import { GroupDetails } from './groupDetails.component';
 import {
-	selectActiveGroupDetails, selectExpandDetails, selectTotalMeshes, GroupsActions
+	selectActiveGroupDetails, selectExpandDetails, selectTotalMeshes, GroupsActions, selectNewGroupDetails
 } from '../../../../../../modules/groups';
 import { selectSettings } from '../../../../../../modules/model';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
 
 const mapStateToProps = createStructuredSelector({
 	group: selectActiveGroupDetails,
+	newGroup: selectNewGroupDetails,
 	modelSettings: selectSettings,
 	expandDetails: selectExpandDetails,
 	currentUser: selectCurrentUser,

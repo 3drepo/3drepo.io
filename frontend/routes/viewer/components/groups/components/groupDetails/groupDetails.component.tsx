@@ -27,21 +27,20 @@ import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/view
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
 import { Container, ColorPickerWrapper, Actions } from './groupDetails.styles';
 import { GroupDetailsForm } from './groupDetailsForm.component';
-import { mergeGroupData } from '../../../../../../helpers/groups';
 import { ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
-import { getGroupRGBAColor } from '../../../../../../helpers/colors';
+import { getGroupRGBAColor, hexToArray } from '../../../../../../helpers/colors';
 
 interface IProps {
 	group: any;
+	newGroup: any;
 	teamspace: string;
 	model: string;
 	expandDetails: boolean;
-	myJob: any;
 	currentUser: any;
 	modelSettings: any;
 	GroupTypeIconComponent: any;
 	totalMeshes: number;
-	saveGroup: (teamspace, modelId, group) => void;
+	createGroup: (teamspace, modelId) => void;
 	updateGroup: (teamspace, modelId, groupId) => void;
 	setState: (componentState) => void;
 }
@@ -54,12 +53,16 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		groupColor: undefined
 	};
 
-	public formRef = React.createRef();
-
 	public componentDidMount() {
 		if (this.props.group.color) {
 			this.setState({
 				groupColor: getGroupRGBAColor(this.props.group.color)
+			});
+		}
+
+		if (!this.isNewGroup) {
+			this.props.setState({
+				newGroup: { ...this.groupData }
 			});
 		}
 	}
@@ -69,44 +72,34 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	get groupData() {
-		const groupData = {
-			...this.props.group,
-			createdDate: this.props.group.createdAt,
-			roleColor: this.state.groupColor
-	};
-		return groupData;
+		return this.props.group;
 	}
 
-	public handleGroupFormSubmit = (values) => {
-		console.log('Handle group from Submit', values);
-		const { teamspace, model, updateGroup } = this.props;
-		const updatedGroup = mergeGroupData(this.groupData, values);
+	public handleGroupFormSubmit = () => {
+		const { teamspace, model, updateGroup, createGroup } = this.props;
 
-		// if (this.isNewGroup) {
-		// 	updateNewGroup(updatedGroup);
-		// } else {
-		// 	updateGroup(teamspace, model, updatedGroup);
-		// }
+		if (this.isNewGroup) {
+			createGroup(teamspace, model);
+		} else {
+			updateGroup(teamspace, model, this.groupData._id);
+		}
 	}
 
 	public handleExpandChange = (event, expanded) => {
 		this.props.setState({ expandDetails: expanded });
 	}
 
-	public handleSave = () => {
-		const { teamspace, model, saveGroup } = this.props;
-		saveGroup(teamspace, model, this.groupData);
-	}
-
 	public handleNameChange = (event, name) => {
-		const newRisk = { ...this.groupData, name };
-		this.props.setState({ newRisk });
+		const newGroup = { ...this.groupData, name };
+		this.props.setState({ newGroup });
 	}
 
 	public renderPreview = renderWhenTrue(() => (
 		<PreviewDetails
 			key={this.groupData._id}
 			{...this.groupData}
+			createdDate={this.props.group.createdAt}
+			roleColor={this.state.groupColor}
 			defaultExpanded={this.props.expandDetails}
 			editable={!this.groupData._id}
 			onNameChange={this.handleNameChange}
@@ -120,18 +113,19 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				currentUser={this.props.currentUser}
 				groupColor={this.state.groupColor}
 				totalMeshes={this.props.totalMeshes}
-				ref={this.formRef}
+				setState={this.props.setState}
 			/>
 		</PreviewDetails>
 	));
 
 	public handleColorChange = (color) => {
-		this.setState({
-			groupColor: color
+		this.props.setState({
+			newGroup: { ...this.props.newGroup, color: hexToArray(color) }
 		});
+		this.setState({ groupColor: color });
 	}
 
-	public renderFooter = renderWhenTrue(() => (
+	public renderFooter = () => (
 		<ViewerPanelFooter alignItems="center">
 			<Actions>
 				<ColorPickerWrapper>
@@ -159,7 +153,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				<SaveIcon />
 			</ViewerPanelButton>
 		</ViewerPanelFooter>
-	));
+	)
 
 	public render() {
 		return (
@@ -167,7 +161,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				<ViewerPanelContent className="height-catcher">
 					{this.renderPreview(this.props.group)}
 				</ViewerPanelContent>
-				{this.renderFooter(this.groupData._id)}
+				{this.renderFooter()}
 			</Container>
 		);
 	}

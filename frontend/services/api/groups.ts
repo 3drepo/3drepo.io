@@ -50,20 +50,21 @@ export const getGroup = (teamspace, modelId, groupId, revision?) => {
  * Add new group
  * @param teamspace
  * @param modelId
- * @param groupId
+ * @param group
  */
 export const createGroup = (teamspace, modelId, group) => {
 	return api.post(`${teamspace}/${modelId}/groups`, group);
 };
 
 /**
- * Add new group
+ * Update group
  * @param teamspace
  * @param modelId
  * @param groupId
+ * @param group
  */
-export const updateGroup = (teamspace, modelId, groupId) => {
-	return api.put(`${teamspace}/${modelId}/groups/${groupId}`);
+export const updateGroup = (teamspace, modelId, groupId, group) => {
+	return api.put(`${teamspace}/${modelId}/groups/${groupId}`, group);
 };
 
 /**

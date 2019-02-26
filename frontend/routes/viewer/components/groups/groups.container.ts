@@ -53,6 +53,7 @@ const mapStateToProps = createStructuredSelector({
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setActiveGroup: GroupsActions.setActiveGroup,
 	setState: GroupsActions.setComponentState,
+	setNewGroup: GroupsActions.setNewGroup,
 	showGroupDetails: GroupsActions.showDetails,
 	closeDetails: GroupsActions.closeDetails,
 	onFiltersChange: GroupsActions.onFiltersChange,

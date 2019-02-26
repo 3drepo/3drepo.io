@@ -31,6 +31,7 @@ interface IProps {
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
 	handleSubmit: () => void;
+	setState: (componentState) => void;
 }
 
 interface IState {
@@ -73,6 +74,17 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		this.props.handleSubmit();
 	}
 
+	public handleDescriptionChange = (onChange) => (event) => {
+		this.props.setState({
+			newGroup: {
+				...this.props.group,
+				description: event.target.value
+			}
+		});
+
+		onChange(event, event.target.value);
+	}
+
 	public render() {
 		const { group: { updatedAt } } = this.props;
 		return (
@@ -105,11 +117,11 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				<Field name="description" render={({ field, form }) => (
 					<TextField
 						{...field}
-						requiredConfirm={!this.isNewGroup}
 						validationSchema={GroupSchema}
 						fullWidth
 						multiline
 						label="Description"
+						onChange={this.handleDescriptionChange(field.onChange)}
 					/>
 				)} />
 
@@ -133,8 +145,7 @@ export const GroupDetailsForm = withFormik({
 		rules: group.rules
 	}),
 	handleSubmit: (values, { props }) => {
-		console.log('handleSubmit', values);
-		// (props as IProps).onSubmit(values);
+		(props as IProps).onSubmit(values);
 	},
 	enableReinitialize: true,
 	validationSchema: GroupSchema

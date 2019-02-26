@@ -153,7 +153,15 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return DEFAULT_OVERRIDE_COLOR;
 	}
 
-	public getGroupTypeIcon({_id, color, rules}) {
+	public getGroupTypeIcon(group) {
+		if (!group) {
+			return (
+				<StyledIcon><HandPaper fontSize="inherit" /></StyledIcon>
+			);
+		}
+
+		const {_id, color, rules} = group;
+
 		return(
 			<StyledIcon color={this.getOverridedColor(_id, color)}>
 				{
@@ -285,10 +293,10 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderGroupsList = renderWhenTrue(() => {
-		const Items = this.state.filteredGroups.map((group, index) => (
+		const Items = this.state.filteredGroups.map((group = {}, index) => (
 			<GroupsListItem
 				{...group}
-				key={index}
+				key={group._id}
 				onItemClick={this.setActiveGroup(group)}
 				onArrowClick={this.handleShowGroupDetails(group)}
 				active={this.props.activeGroupId === group._id}
@@ -314,6 +322,10 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		<EmptyStateInfo>No groups matched</EmptyStateInfo>
 	));
 
+	public handleAddNewGroup = () => {
+		this.props.setNewGroup();
+	}
+
 	public renderListView = renderWhenTrue(() => (
 		<>
 			<ViewerPanelContent className="height-catcher">
@@ -327,8 +339,10 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				</Summary>
 				<ViewerPanelButton
 					aria-label="Add group"
+					onClick={this.handleAddNewGroup}
 					color="secondary"
 					variant="fab"
+					// disabled={!this.hasPermission(CREATE_ISSUE) || !this.state.modelLoaded}
 				>
 					<AddIcon />
 				</ViewerPanelButton>

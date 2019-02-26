@@ -45,7 +45,6 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	isolateGroup: ['group'],
 	downloadGroups: ['teamspace', 'modelId'],
 	createGroup: ['teamspace', 'modelId', 'group'],
-	createGroupSuccess: ['group'],
 	updateGroup: ['teamspace', 'modelId', 'groupId'],
 	updateGroupSuccess: ['group']
 }, { prefix: 'GROUPS/' });
@@ -55,6 +54,7 @@ export interface IGroupComponentState {
 	showDetails: boolean;
 	expandDetails: boolean;
 	newGroup: any;
+	updatedGroup: any;
 	selectedFilters: any[];
 	highlightedGroups: any;
 	colorOverrides: any;
@@ -77,6 +77,7 @@ export const INITIAL_STATE: IGroupState = {
 		showDetails: false,
 		expandDetails: true,
 		newGroup: {},
+		updatedGroup: {},
 		selectedFilters: [],
 		colorOverrides: {},
 		overrideAll: false,
@@ -119,6 +120,12 @@ export const removeFromOverrided = (state = INITIAL_STATE, { groupId }) => {
 	return { ...state, componentState: { ...state.componentState, colorOverrides } };
 };
 
+export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
+	const groupsMap = { ...state.groupsMap };
+	groupsMap[group._id] = group;
+	return { ...state, groupsMap };
+};
+
 export const deleteGroupSuccess = (state = INITIAL_STATE, { groupId }) => {
 	const groupsMap = { ...state.groupsMap };
 	delete groupsMap[groupId];
@@ -133,5 +140,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.REMOVE_FROM_HIGHLIGHTED]: removeFromHighlighted,
 	[GroupsTypes.ADD_TO_OVERRIDED]: addToOverrided,
 	[GroupsTypes.REMOVE_FROM_OVERRIDED]: removeFromOverrided,
+	[GroupsTypes.UPDATE_GROUP_SUCCESS]: updateGroupSuccess,
 	[GroupsTypes.DELETE_GROUP_SUCCESS]: deleteGroupSuccess
 });
