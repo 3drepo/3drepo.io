@@ -100,6 +100,18 @@ describe("Account permission::", function () {
 
 	});
 
+	it("should not be able to assign permissions of owner", function(done) {
+
+		const permission = { user: username, permissions: ["create_project"]};
+
+		agent.post(`/${username}/permissions`)
+			.send(permission)
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.OWNER_MUST_BE_ADMIN.value);
+				done(err);
+		});
+	});
+
 	it("should not be able to assign permissions without providing a user name", function(done) {
 
 		const permission = { permissions: ["create_project"]};
