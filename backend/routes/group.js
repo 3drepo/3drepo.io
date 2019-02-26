@@ -302,7 +302,7 @@ function findGroup(req, res, next) {
 
 	let groupItem;
 	if (req.params.rid) {
-		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, null, req.params.rid, showifcGuids);
+		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, null, req.params.rid, showIfcGuids);
 	} else {
 		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, "master", null, showIfcGuids);
 	}
