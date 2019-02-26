@@ -298,12 +298,13 @@ function findGroup(req, res, next) {
 
 	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
+	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
 
 	let groupItem;
 	if (req.params.rid) {
-		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, null, req.params.rid, req.query.ifcguids);
+		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, null, req.params.rid, showifcGuids);
 	} else {
-		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, "master", null, req.query.ifcguids);
+		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, "master", null, showIfcGuids);
 	}
 
 	groupItem.then(group => {

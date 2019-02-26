@@ -253,20 +253,20 @@ groupSchema.statics.findIfcGroupByUID = function (dbCol, uid) {
 /**
  * Converts all IFC Guids to shared IDs if applicable and return the objects array.
  */
-groupSchema.methods.getObjectsArrayAsSharedIDs = function (model, branch, revId, convertSharedIDsToString) {
+groupSchema.methods.getObjectsArray = function (model, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
 
-	const sharedIdPromises = [];
+	const objectIdPromises = [];
 
 	for (let i = 0; i < this.objects.length; i++) {
 
-		const sharedIdsSet = new Set();
+		const objectIdsSet = new Set();
 
-		const sharedIdObject = {};
-		sharedIdObject.account = this.objects[i].account;
-		sharedIdObject.model = this.objects[i].model;
+		const objectId = {};
+		objectId.account = this.objects[i].account;
+		objectId.model = this.objects[i].model;
 
-		const _branch = (model === sharedIdObject.model) ? branch : "master";
-		const _revId = (model === sharedIdObject.model) ? revId : null;
+		const _branch = (model === objectId.model) ? branch : "master";
+		const _revId = (model === objectId.model) ? revId : null;
 
 		const ifcGuids = this.objects[i].ifc_guids ? this.objects[i].ifc_guids : [];
 
@@ -275,39 +275,44 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function (model, branch, revId,
 			if ("[object String]" !== Object.prototype.toString.call(sharedId)) {
 				sharedId = utils.uuidToString(sharedId);
 			}
-			sharedIdsSet.add(sharedId);
+			objectIdsSet.add(sharedId);
 		}
 
-		sharedIdPromises.push(Group.ifcGuidsToUUIDs(
-			sharedIdObject.account,
-			sharedIdObject.model,
-			ifcGuids,
-			_branch,
-			_revId
-		).then(sharedIdResults => {
-			for (let j = 0; j < sharedIdResults.length; j++) {
-				if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
-					sharedIdResults[j].shared_id = utils.uuidToString(sharedIdResults[j].shared_id);
-				}
-				sharedIdsSet.add(sharedIdResults[j].shared_id);
-			}
-
-			if (sharedIdsSet.size > 0) {
-				sharedIdObject.shared_ids = [];
-				sharedIdsSet.forEach(id => {
-					if (!convertSharedIDsToString) {
-						id = utils.stringToUUID(id);
+		if (showIfcGuids) {
+			objectId.ifc_guids = ifcGuids;
+			objectIdPromises.push(objectId);
+		} else {
+			objectIdPromises.push(Group.ifcGuidsToUUIDs(
+				objectId.account,
+				objectId.model,
+				ifcGuids,
+				_branch,
+				_revId
+			).then(sharedIdResults => {
+				for (let j = 0; j < sharedIdResults.length; j++) {
+					if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
+						sharedIdResults[j].shared_id = utils.uuidToString(sharedIdResults[j].shared_id);
 					}
-					sharedIdObject.shared_ids.push(id);
-				});
-			}
+					objectIdsSet.add(sharedIdResults[j].shared_id);
+				}
 
-			return sharedIdObject;
-		}));
+				if (objectIdsSet.size > 0) {
+					objectId.shared_ids = [];
+					objectIdsSet.forEach(id => {
+						if (!convertSharedIDsToString) {
+							id = utils.stringToUUID(id);
+						}
+						objectId.shared_ids.push(id);
+					});
+				}
+
+				return objectId;
+			}));
+		}
 	}
 
-	return Promise.all(sharedIdPromises).then(sharedIdObjects => {
-		return sharedIdObjects;
+	return Promise.all(objectIdPromises).then(objectIds => {
+		return objectIds;
 	});
 };
 
@@ -775,7 +780,7 @@ function getObjectIds(dbCol, groupData, branch, revId, convertSharedIDsToString,
 	if (groupData.rules && groupData.rules.length > 0) {
 		return findObjectIDsByRules(dbCol.account, dbCol.model, groupData.rules, branch, revId, convertSharedIDsToString, showIfcGuids);
 	} else {
-		return groupData.getObjectsArrayAsSharedIDs(dbCol.model, branch, revId, convertSharedIDsToString);
+		return groupData.getObjectsArray(dbCol.model, branch, revId, convertSharedIDsToString, showIfcGuids);
 	}
 }
 
