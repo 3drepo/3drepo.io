@@ -1043,11 +1043,32 @@ export class UnityUtil {
 		UnityUtil.toUnity('ZoomToHighlightedMeshes', UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
+	/**
+	 * Sets the render quality to default
+	 */
 	public static setRenderingQualityDefault() {
 		UnityUtil.toUnity('SetRenderingQualityDefault', UnityUtil.LoadingState.VIEWER_READY);
 	}
 
+	/**
+	 * Sets the render quality to high
+	 */
 	public static setRenderingQualityHigh() {
 		UnityUtil.toUnity('SetRenderingQualityHigh', UnityUtil.LoadingState.VIEWER_READY);
 	}
+
+	/**
+	 * Sets the highlighting to show xray
+	 */
+	public static setXRayHighlightOn(): any {
+		UnityUtil.toUnity('SetXRayHighlightOn', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Sets the highlighting to show xray
+	 */
+	public static setXRayHighlightOff(): any {
+		UnityUtil.toUnity('SetXRayHighlightOff', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
 }

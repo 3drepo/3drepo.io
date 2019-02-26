@@ -661,7 +661,11 @@ export class ViewerService {
 	}
 
 	public setXray(xray: boolean) {
-		// Missing xray call;
+		if (xray) {
+			UnityUtil.setXRayHighlightOn();
+		} else {
+			UnityUtil.setXRayHighlightOff();
+		}
 	}
 
 	private helicopterSpeedUpdate(value: number) {
