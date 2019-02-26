@@ -114,7 +114,7 @@
 		VIEW_NOT_FOUND: { message: "Camera viewpoint not found", status: 404 },
 
 		USER_EXISTS: { message: "User already exists", status: 400 },
-		OWNER_MUST_BE_ADMIN: {message: "Cannot alter permissions for teamspace owner", status: 400},
+		OWNER_MUST_BE_ADMIN: {message: "Cannot alter permissions of teamspace owner", status: 400},
 		SIGN_UP_PASSWORD_MISSING: { message: "Password is missing", status: 400 },
 		TOKEN_INVALID: { message: "Token is invalid or expired", status: 400 },
 		ALREADY_VERIFIED: { message: "Already verified", status: 400 },
