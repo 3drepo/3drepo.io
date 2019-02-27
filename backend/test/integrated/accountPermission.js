@@ -59,7 +59,6 @@ describe("Account permission::", function () {
 		agent.post(`/${username}/permissions`)
 			.send({ user: "nonsense", permissions: ["create_project"]})
 			.expect(404, function(err, res) {
-				console.log(res.body);
 				expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
 				done(err);
 			});
@@ -101,6 +100,18 @@ describe("Account permission::", function () {
 	});
 
 	it("should not be able to assign permissions of owner", function(done) {
+
+		const permission = { permissions: ["create_project"]};
+
+		agent.put(`/${username}/permissions/${username}`)
+			.send(permission)
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.OWNER_MUST_BE_ADMIN.value);
+				done(err);
+		});
+	});
+
+	it("should not be able to create permissions of owner", function(done) {
 
 		const permission = { user: username, permissions: ["create_project"]};
 
