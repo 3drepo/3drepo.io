@@ -47,18 +47,21 @@ interface IProps {
 	selectGroup: () => void;
 }
 interface IState {
-	groupColor: string;
+	groupColor: any[];
+	isFormValid: boolean;
 }
 
 export class GroupDetails extends React.PureComponent<IProps, IState> {
 	public state = {
-		groupColor: undefined
+		groupColor: undefined,
+		isFormValid: false
 	};
 
 	public componentDidMount() {
 		if (this.props.group.color) {
+			console.log('DM this.props.group.color',this.props.group.color)
 			this.setState({
-				groupColor: getGroupRGBAColor(this.props.group.color)
+				groupColor: this.props.group.color
 			});
 		}
 
@@ -72,7 +75,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	public componentDidUpdate(prevProps) {
 		if (prevProps.group.color !== this.props.group.color) {
 			this.setState({
-				groupColor: getGroupRGBAColor(this.props.group.color)
+				groupColor: this.props.group.color
 			});
 		}
 	}
@@ -109,7 +112,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			key={this.groupData._id}
 			{...this.groupData}
 			createdDate={this.props.group.createdAt}
-			roleColor={this.state.groupColor}
+			roleColor={getGroupRGBAColor(this.state.groupColor)}
 			defaultExpanded={this.props.expandDetails}
 			editable={!this.groupData._id}
 			onNameChange={this.handleNameChange}
@@ -126,15 +129,21 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				permissions={this.props.modelSettings.permissions}
 				setState={this.props.setState}
 				canUpdate={this.props.canUpdate}
+				setIsFormValid={this.setIsFormValid}
 			/>
 		</PreviewDetails>
 	));
 
 	public handleColorChange = (color) => {
+		const newColor = hexToArray(color);
 		this.props.setState({
-			newGroup: { ...this.props.newGroup, color: hexToArray(color) }
+			newGroup: { ...this.props.newGroup, color: newColor }
 		});
-		this.setState({ groupColor: color });
+		this.setState({ groupColor: newColor });
+	}
+
+	public setIsFormValid = (isFormValid) => {
+		this.setState({ isFormValid });
 	}
 
 	public renderFooter = () => (
@@ -143,7 +152,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				<ColorPickerWrapper>
 					<ColorPicker
 						disableUnderline={true}
-						value={this.state.groupColor}
+						value={getGroupRGBAColor(this.state.groupColor)}
 						onChange={this.handleColorChange}
 					/>
 				</ColorPickerWrapper>
@@ -160,6 +169,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				onClick={this.handleGroupFormSubmit}
 				mini={true}
 				aria-label="Save group"
+				disabled={!this.isNewGroup && !this.state.isFormValid}
 			>
 				<SaveIcon />
 			</ViewerPanelButton>

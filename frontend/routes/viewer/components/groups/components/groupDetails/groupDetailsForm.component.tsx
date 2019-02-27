@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as Yup from 'yup';
 import * as dayjs from 'dayjs';
 
-import { debounce, isEmpty } from 'lodash';
+import { debounce } from 'lodash';
 import { connect, Field, Form, withFormik } from 'formik';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -10,13 +10,13 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { TextField } from '../../../../../components/textField/textField.component';
 import { FieldsRow, StyledFormControl, StyledTextField } from './groupDetails.styles';
 import { SelectField } from '../../../../../components/selectField/selectField.component';
-import { GROUPS_TYPES } from '../../../../../../constants/groups';
-import { getGroupRGBAColor } from '../../../../../../helpers/colors';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CriteriaField } from '../../../../../components/criteriaField/criteriaField.component';
+import { HiddenField } from './hiddenField.component';
 
 const GroupSchema = Yup.object().shape({
-	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	color: Yup.array()
 });
 
 interface IProps {
@@ -27,11 +27,13 @@ interface IProps {
 	newColor: string;
 	totalMeshes: number;
 	canUpdate: boolean;
+	groupColor: any[];
 	onSubmit: (values) => void;
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
 	handleSubmit: () => void;
 	setState: (componentState) => void;
+	setIsFormValid: (isFormValid) => void;
 }
 
 interface IState {
@@ -47,11 +49,17 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		return !this.props.group._id;
 	}
 
-	public componentDidUpdate(prevProps) {
-		const changes = {} as IState;
+	public componentDidMount() {
+		console.log('this.props.group', this.props.group)
+	}
 
-		if (!isEmpty(changes)) {
-			this.setState(changes);
+	public componentDidUpdate(prevProps) {
+		const isFormValid = this.props.formik.isValid && !this.props.formik.isValidating;
+		const prevIsFormValid = prevProps.formik.isValid && !prevProps.formik.isValidating;
+
+		console.log('this.props.formik', this.props.formik);
+		if (!this.isNewGroup && isFormValid !== prevIsFormValid) {
+			this.props.setIsFormValid(isFormValid);
 		}
 	}
 
@@ -86,7 +94,8 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { group: { updatedAt } } = this.props;
+		const { group: { updatedAt }, groupColor } = this.props;
+
 		return (
 			<Form>
 				<FieldsRow>
@@ -104,9 +113,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						<InputLabel>Group type</InputLabel>
 						<Field name="type" render={({ field }) => (
 							<SelectField {...field} disabled={!this.props.canUpdate}>
-								<MenuItem key={'smart'} value={'smart'}>
-									Criteria
-								</MenuItem>
+								<MenuItem key={'smart'} value={'smart'}>Criteria</MenuItem>
 								<MenuItem key={'normal'} value={'normal'}>
 									Normal
 								</MenuItem>
@@ -114,7 +121,13 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						)} />
 					</StyledFormControl>
 				</FieldsRow>
-				<Field name="description" render={({ field, form }) => (
+				<Field name="color" render={({ field }) => (
+					<HiddenField
+						{...field}
+						value={groupColor}
+					/>
+				)} />
+				<Field name="description" render={({ field }) => (
 					<TextField
 						{...field}
 						validationSchema={GroupSchema}
@@ -125,7 +138,6 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						disabled={!this.props.canUpdate}
 					/>
 				)} />
-
 				<Field name="rules" render={({ field }) => (
 					<CriteriaField
 						{...field}
@@ -141,14 +153,15 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 export const GroupDetailsForm = withFormik({
 	mapPropsToValues: ({ group }) => ({
+		name: group.name,
 		description: group.description || '',
-		type: group.rules && group.rules.length ? GROUPS_TYPES.SMART : GROUPS_TYPES.NORMAL,
-		color: getGroupRGBAColor(group.color),
-		rules: group.rules
+		color: group.color,
+		rules: group.rules || []
 	}),
 	handleSubmit: (values, { props }) => {
 		(props as IProps).onSubmit(values);
 	},
 	enableReinitialize: true,
-	validationSchema: GroupSchema
+	validationSchema: GroupSchema,
+	displayName: 'GroupForm'
 })(connect(GroupDetailsFormComponent as any)) as any;
