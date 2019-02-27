@@ -29,7 +29,7 @@ import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 
 const ProjectSchema = Yup.object().shape({
-	name: schema.firstName.max(120),
+	name: Yup.string().required().matches(/^[^/?=#+]{0,119}[^/?=#+ ]{1}$/),
 	teamspace: Yup.string().required()
 });
 
