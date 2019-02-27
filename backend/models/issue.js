@@ -200,18 +200,18 @@ function toDirectXCoords(issueData) {
 	return viewpoint;
 }
 
-function updateTextComments(account, model, comments, data, issueId, viewpointGUID) {
+function updateTextComments(account, model, sessionId, issueId, comments, data, viewpointGuid) {
 	if (!comments) {
 		comments = [];
 	}
 
 	if (data.edit && data.commentIndex >= 0 && comments.length > data.commentIndex) {
 		if (!comments[data.commentIndex].sealed) {
-			const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGUID);
+			const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGuid);
 
 			comments[data.commentIndex] = textComment;
 
-			ChatEvent.commentChanged(data.sessionId, account, model, issueId, data);
+			ChatEvent.commentChanged(sessionId, account, model, issueId, data);
 		} else {
 			throw responseCodes.ISSUE_COMMENT_SEALED;
 		}
@@ -219,7 +219,7 @@ function updateTextComments(account, model, comments, data, issueId, viewpointGU
 		if (!comments[data.commentIndex].sealed) {
 			comments.splice(data.commentIndex, 1);
 
-			ChatEvent.commentDeleted(data.sessionId, account, model, issueId, data);
+			ChatEvent.commentDeleted(sessionId, account, model, issueId, data);
 		} else {
 			throw responseCodes.ISSUE_COMMENT_SEALED;
 		}
@@ -230,12 +230,35 @@ function updateTextComments(account, model, comments, data, issueId, viewpointGU
 			comment.sealed = true;
 		});
 
-		const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGUID);
+		const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGuid);
 
 		comments.push(textComment);
 
-		ChatEvent.newComment(data.sessionId, account, model, issueId, textComment);
+		ChatEvent.newComment(sessionId, account, model, issueId, textComment);
 	}
+
+	return comments;
+}
+
+function updateSystemComments(account, model, sessionId, issueId, comments, owner, property, oldValue, newValue) {
+	if (!comments) {
+		comments = [];
+	}
+
+	comments.forEach((comment) => {
+		comment.sealed = true;
+	});
+
+	const systemComment = Comment.newSystemComment(
+		owner,
+		property,
+		oldValue,
+		newValue
+	);
+
+	comments.push(systemComment);
+
+	ChatEvent.newComment(sessionId, account, model, issueId, systemComment);
 
 	return comments;
 }
@@ -424,7 +447,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 		if (oldIssue) {
 			let typeCorrect = true;
 			let forceStatusChange;
-			let viewpointGUID;
+			let viewpointGuid;
 
 			let newIssue = _.cloneDeep(oldIssue);
 
@@ -460,8 +483,8 @@ issue.updateAttrs = function(dbCol, uid, data) {
 
 			if (data["viewpoint"]) {
 				if (Object.prototype.toString.call(data["viewpoint"]) === fieldTypes["viewpoint"]) {
-					viewpointGUID = utils.generateUUID();
-					data.viewpoint.guid = viewpointGUID;
+					viewpointGuid = utils.generateUUID();
+					data.viewpoint.guid = viewpointGuid;
 
 					newViewpointPromise = View.clean(dbCol, data["viewpoint"], fieldTypes["viewpoint"]);
 				} else {
@@ -513,7 +536,15 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							|| !_.isEqual(newIssue[key], data[key]))) {
 							if (null === data[key] || Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 								if ("comment" === key) {
-									const updatedComments = updateTextComments(dbCol.account, dbCol.model, newIssue.comments, data, newIssue._id, viewpointGUID);
+									const updatedComments = updateTextComments(
+										dbCol.account,
+										dbCol.model,
+										data.sessionId,
+										newIssue._id,
+										newIssue.comments,
+										data,
+										viewpointGuid
+									);
 
 									toUpdate.comments = updatedComments;
 									newIssue.comments = updatedComments;
@@ -534,25 +565,20 @@ issue.updateAttrs = function(dbCol, uid, data) {
 											newIssue.priority_last_changed = toUpdate.priority_last_changed;
 										}
 
-										if (!newIssue.comments) {
-											newIssue.comments = [];
-										}
-
-										if (!toUpdate.comments) {
-											toUpdate.comments = newIssue.comments.concat();
-										}
-
-										const systemComment = Comment.newSystemComment(
+										const updatedComments = updateSystemComments(
+											dbCol.account,
+											dbCol.model,
+											data.sessionId,
+											newIssue._id,
+											newIssue.comments,
 											data.owner,
 											key,
 											newIssue[key],
 											data[key]
 										);
 
-										toUpdate.comments.push(systemComment);
-										newIssue.comments.push(systemComment);
-
-										ChatEvent.newComment(data.sessionId, dbCol.account, dbCol.model, newIssue._id, systemComment);
+										toUpdate.comments = updatedComments;
+										newIssue.comments = updatedComments;
 
 										toUpdate[key] = data[key];
 										newIssue[key] = data[key];
@@ -597,20 +623,20 @@ issue.updateAttrs = function(dbCol, uid, data) {
 								newIssue.assigned_roles = toUpdate.assigned_roles;
 							}
 
-							if (!newIssue.comments) {
-								newIssue.comments = [];
-							}
+							const updatedComments = updateSystemComments(
+								dbCol.account,
+								dbCol.model,
+								data.sessionId,
+								newIssue._id,
+								newIssue.comments,
+								data.owner,
+								"status",
+								newIssue["status"],
+								data["status"]
+							);
 
-							if (!toUpdate.comments && newIssue.comments && newIssue.comments.length > 0) {
-								toUpdate.comments = newIssue.comments.concat();
-							}
-
-							const systemComment = Comment.newSystemComment(data.owner, "status", newIssue.status, data.status);
-
-							toUpdate.comments.push(systemComment);
-							newIssue.comments.push(systemComment);
-
-							ChatEvent.newComment(data.sessionId, dbCol.account, dbCol.model, newIssue._id, systemComment);
+							toUpdate.comments = updatedComments;
+							newIssue.comments = updatedComments;
 
 							toUpdate.status_last_changed = (new Date()).getTime();
 							newIssue.status_last_changed = toUpdate.status_last_changed;
