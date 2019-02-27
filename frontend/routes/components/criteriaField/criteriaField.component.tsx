@@ -29,7 +29,8 @@ import {
 	StyledMoreIcon,
 	SelectedCriteria,
 	FormContainer,
-	MenuItem
+	MenuItem,
+	OptionsList
 } from './criteriaField.styles';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
@@ -188,11 +189,11 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		}];
 
 		return (
-			<>
+			<OptionsList>
 				{options.map(({ label, Component = MenuItem, onClick }, index) => (
 					<Component key={index} onClick={onClick}>{label}</Component>
 				))}
-			</>
+			</OptionsList>
 		);
 	}
 

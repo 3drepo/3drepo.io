@@ -28,6 +28,7 @@ import MenuItemComponent from '@material-ui/core/MenuItem';
 
 import { SelectField as SelectFieldComponent } from '../selectField/selectField.component';
 import { TextField } from '../textField/textField.component';
+import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
   margin: 8px 0;
@@ -53,6 +54,15 @@ export const Chip = styled(ChipComponent)`
     margin-top: 3px;
     margin-bottom: 3px;
 	}
+`;
+
+export const OptionsList = styled(ListComponent)`
+  background-color: ${COLOR.WHITE};
+  width: 100%;
+  min-width: 140px;
+  max-width: 300px;
+  box-shadow: 0 1px 3px 0 ${COLOR.BLACK_20};
+  border-radius: 2px;
 `;
 
 export const ButtonContainer = styled.div`
