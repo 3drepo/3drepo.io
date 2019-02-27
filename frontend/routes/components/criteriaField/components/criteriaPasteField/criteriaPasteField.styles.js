@@ -8,7 +8,6 @@ import { TextField } from '../../../textField/textField.component';
 const pasteIconStyle = css`
   && {
     font-size: 20px;
-    margin-top: 9px;
   }
 `;
 
@@ -18,6 +17,7 @@ export const PasteButton = styled(IconButtonComponent)`
 		height: 28px;
     padding: 4px;
     margin-left: 5px;
+    margin-top: 9px;
 	}
 `;
 
