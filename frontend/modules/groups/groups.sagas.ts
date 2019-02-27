@@ -312,7 +312,7 @@ export function* createGroup({ teamspace, modelId }) {
 		const newGroup = {
 			...group,
 			_id: data._id
-		}
+		};
 		yield put(GroupsActions.updateGroupSuccess(newGroup));
 		yield put(GroupsActions.highlightGroup(newGroup));
 		yield put(GroupsActions.showDetails(newGroup));
@@ -351,7 +351,7 @@ export function* updateGroup({ teamspace, modelId, groupId }) {
 			_id: data._id,
 			author: groupDetails.author,
 			name: groupDetails.name
-		}
+		};
 		yield put(GroupsActions.updateGroupSuccess(updatedGroup));
 		yield put(GroupsActions.highlightGroup(updatedGroup));
 		yield put(SnackbarActions.show('Group updated'));

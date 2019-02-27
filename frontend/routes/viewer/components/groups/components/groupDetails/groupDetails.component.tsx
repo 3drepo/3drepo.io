@@ -40,6 +40,7 @@ interface IProps {
 	modelSettings: any;
 	GroupTypeIconComponent: any;
 	totalMeshes: number;
+	canUpdate: boolean;
 	createGroup: (teamspace, modelId) => void;
 	updateGroup: (teamspace, modelId, groupId) => void;
 	setState: (componentState) => void;
@@ -122,7 +123,9 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				currentUser={this.props.currentUser}
 				groupColor={this.state.groupColor}
 				totalMeshes={this.props.totalMeshes}
+				permissions={this.props.modelSettings.permissions}
 				setState={this.props.setState}
+				canUpdate={this.props.canUpdate}
 			/>
 		</PreviewDetails>
 	));

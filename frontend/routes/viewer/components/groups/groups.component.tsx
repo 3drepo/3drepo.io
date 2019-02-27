@@ -29,6 +29,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import Check from '@material-ui/icons/Check';
 import Bolt from '@material-ui/icons/OfflineBolt';
 import { HandPaper } from '../../../components/fontAwesomeIcon';
+import { CREATE_ISSUE } from '../../../../constants/issue-permissions';
 
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
@@ -52,6 +53,7 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { GroupDetails } from './components/groupDetails';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
+import { hasPermissions, PERMISSIONS } from '../../../../helpers/permissions';
 
 interface IProps {
 	teamspace: string;
@@ -67,6 +69,7 @@ interface IProps {
 	selectedFilters: any[];
 	colorOverrides: any;
 	allOverrided: any;
+	modelSettings: any;
 	setState: (componentState: any) => void;
 	setNewGroup: () => void;
 	showGroupDetails: (group, revision?) => void;
@@ -293,6 +296,13 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		deleteGroups(teamspace, model, groupId);
 	}
 
+	public get canAddOrUpdate() {
+		if (this.props.modelSettings && this.props.modelSettings.permissions) {
+			return hasPermissions(CREATE_ISSUE, this.props.modelSettings.permissions) && this.state.modelLoaded;
+		}
+		return false;
+	}
+
 	public renderGroupsList = renderWhenTrue(() => {
 		const Items = this.state.filteredGroups.map((group = {}, index) => (
 			<GroupsListItem
@@ -301,7 +311,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				onItemClick={this.setActiveGroup(group)}
 				onArrowClick={this.handleShowGroupDetails(group)}
 				active={this.props.activeGroupId === group._id}
-				// hasViewPermission={this.hasPermission(VIEW_ISSUE)}
 				modelLoaded={this.state.modelLoaded}
 				highlighted={Boolean(this.props.highlightedGroups[group._id])}
 				overridedColor={this.getOverridedColor(group._id, group.color)}
@@ -343,7 +352,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 					onClick={this.handleAddNewGroup}
 					color="secondary"
 					variant="fab"
-					// disabled={!this.hasPermission(CREATE_ISSUE) || !this.state.modelLoaded}
+					disabled={!this.canAddOrUpdate}
 				>
 					<AddIcon />
 				</ViewerPanelButton>
@@ -381,6 +390,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			saveGroup={this.props.saveGroup}
 			selectGroup={() => this.props.selectGroup(this.activeGroup)}
 			GroupTypeIconComponent={() => this.getGroupTypeIcon(this.activeGroup)}
+			canUpdate={this.canAddOrUpdate}
 		/>
 	));
 

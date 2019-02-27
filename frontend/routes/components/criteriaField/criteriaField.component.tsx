@@ -43,6 +43,7 @@ interface IProps {
 	value: any[];
 	label?: string;
 	criteria: any;
+	disabled: boolean;
 	onChange: (criteria) => void;
 	onFormChange: (criterion) => void;
 	onChipsClick: (event?) => void;

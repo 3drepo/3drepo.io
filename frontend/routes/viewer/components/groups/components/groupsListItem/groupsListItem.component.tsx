@@ -53,6 +53,7 @@ interface IProps {
 	overridedColor: string;
 	rules: any[];
 	GroupTypeIcon: any;
+	canUpdate: boolean;
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
 	toggleColorOverride: () => void;

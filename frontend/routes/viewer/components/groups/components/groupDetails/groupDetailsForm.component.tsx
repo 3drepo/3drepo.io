@@ -23,10 +23,10 @@ interface IProps {
 	group: any;
 	values: any;
 	formik: any;
-	permissions: any;
 	currentUser: any;
 	newColor: string;
 	totalMeshes: number;
+	canUpdate: boolean;
 	onSubmit: (values) => void;
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
@@ -103,7 +103,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					<StyledFormControl>
 						<InputLabel>Group type</InputLabel>
 						<Field name="type" render={({ field }) => (
-							<SelectField {...field}>
+							<SelectField {...field} disabled={!this.props.canUpdate}>
 								<MenuItem key={'smart'} value={'smart'}>
 									Criteria
 								</MenuItem>
@@ -122,6 +122,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						multiline
 						label="Description"
 						onChange={this.handleDescriptionChange(field.onChange)}
+						disabled={!this.props.canUpdate}
 					/>
 				)} />
 
@@ -130,6 +131,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						{...field}
 						label="Criteria"
 						placeholder="Select first criteria"
+						disabled={!this.props.canUpdate}
 					/>
 				)}/>
 			</Form>
