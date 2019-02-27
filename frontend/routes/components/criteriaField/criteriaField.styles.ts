@@ -15,17 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import ChipComponent from '@material-ui/core/Chip';
 import IconButtonComponent from '@material-ui/core/IconButton';
-import MoreIcon from '@material-ui/icons/MoreVert';
 import FormControlComponent from '@material-ui/core/FormControl';
+import MoreIcon from '@material-ui/icons/MoreVert';
 import SaveIcon from '@material-ui/icons/Save';
+import CloseIcon from '@material-ui/icons/Close';
 
 import ListComponent from '@material-ui/core/List';
 import MenuItemComponent from '@material-ui/core/MenuItem';
 
 import { SelectField as SelectFieldComponent } from '../selectField/selectField.component';
+import { TextField } from '../textField/textField.component';
 
 export const Container = styled.div`
   margin: 8px 0;
@@ -118,15 +120,4 @@ export const NewCriterionFooter = styled.div`
   margin-top: 8px;
   display: flex;
   justify-content: flex-end;
-`;
-
-export const PasteContainer = styled.div`
-  width: 100%;
-  align-items: center;
-`;
-
-export const StyledSaveIcon = styled(SaveIcon)`
-	&& {
-		font-size: 20px;
-	}
 `;

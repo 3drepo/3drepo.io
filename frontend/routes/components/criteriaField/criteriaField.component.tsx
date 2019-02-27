@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+import { uniqBy } from 'lodash';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import InputLabel from '@material-ui/core/InputLabel';
 
@@ -26,16 +27,14 @@ import {
 	ButtonContainer,
 	IconButton,
 	StyledMoreIcon,
-	StyledSaveIcon,
 	SelectedCriteria,
 	FormContainer,
-	MenuItem,
-	PasteContainer
+	MenuItem
 } from './criteriaField.styles';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { NewCriterionForm } from './newCriterionForm.component';
-import { TextField } from '../textField/textField.component';
+import { CriteriaPasteField } from './components/criteriaPasteField/criteriaPasteField.components';
 
 interface IProps {
 	className?: string;
@@ -64,16 +63,22 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 	</IconButton>
 );
 
+const compareCriteria = ({ operator, values = [] }) => `${operator}.${values.join('.')}`;
+
 export class CriteriaField extends React.PureComponent<IProps, IState> {
 	public state = {
 		selectedCriteria: [{
-			label: 'Test criteria basasd asd a'
+			label: 'Test criteria basasd asd a',
+			operator: 'LTE'
 		}, {
-			label: 'Teasdaasd'
+			label: 'Teasdaasd',
+			operator: 'GTE'
 		}, {
-			label: 'Teasdaasd'
+			label: 'Teasdaasd',
+			operator: 'LT'
 		}, {
-			label: 'Teasdaasd'
+			label: 'Teasdaasd',
+			operator: 'LT'
 		}],
 		pasteMode: false
 	};
@@ -103,28 +108,6 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handlePaste = (event) => {
-		event.preventDefault();
-
-		try {
-			const newSelectedCriteria = JSON.parse(event.clipboardData.getData('text'));
-
-			if (!newSelectedCriteria.some(({ label, operator }) => !label || !operator)) {
-				throw new Error();
-			}
-
-			this.togglePasteMode();
-			this.setState((prevState) => ({
-				selectedCriteria: [
-					...prevState.selectedCriteria,
-					...newSelectedCriteria
-				]
-			}), this.handleChange);
-		} catch (error) {
-			console.error('Unsupported criteria format');
-		}
-	}
-
 	public renderCriterion = (criteria, index) => (
 		<Chip
 			key={index}
@@ -135,28 +118,33 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		/>
 	)
 
+	public handlePasteFieldChange = () => {
+		// this.props.onFormChange();
+	}
+
+	public handlePaste = (pastedCriteria) => {
+		this.togglePasteMode();
+		this.setState((prevState) => ({
+			selectedCriteria: uniqBy([
+				...prevState.selectedCriteria,
+				...pastedCriteria
+			], compareCriteria)
+		}), this.handleChange);
+	}
+
 	public renderCriteriaField = renderWhenTrue(() => (
-		<PasteContainer>
-			<TextField
-				onPaste={this.handlePaste}
-				placeholder="Paste criteria here"
-				fullWidth
-				autoFocus
-			/>
-			<IconButton
-					onClick={this.handlePasteSave}
-					aria-label="Save pasted criteria"
-					aria-haspopup="true"
-				>
-				<StyledSaveIcon />
-			</IconButton>
-		</PasteContainer>
+		<CriteriaPasteField
+			name="pasteField"
+			initialValue=""
+			onChange={this.handlePaste}
+			onStateChange={this.handlePasteFieldChange}
+			onCancel={this.togglePasteMode}
+		/>
 	));
 
 	public renderCriteriaChips = renderWhenTrue(() => (
 		<ChipsContainer>
 			{this.state.selectedCriteria.map(this.renderCriterion)}
-			{this.renderCriteriaField(this.state.pasteMode)}
 		</ChipsContainer>
 	));
 
@@ -235,6 +223,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 				<InputLabel shrink>{this.props.label}</InputLabel>
 				<SelectedCriteria>
 					{this.renderCriteriaChips(!!this.state.selectedCriteria.length)}
+					{this.renderCriteriaField(this.state.pasteMode)}
 					{this.renderOptionsMenu(!this.state.pasteMode)}
 				</SelectedCriteria>
 				{this.renderForm()}

@@ -269,8 +269,6 @@ export class Views extends React.PureComponent<IProps, any> {
 
 	public getTitleIcon = () => <PhotoCameraIcon />;
 
-	public getActions = () => [{ Button: this.getSearchButton }];
-
 	public getSearchButton = () => {
 		if (this.props.searchEnabled) {
 			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
@@ -302,7 +300,7 @@ export class Views extends React.PureComponent<IProps, any> {
 			<ViewerPanel
 				title="Views"
 				Icon={this.getTitleIcon()}
-				actions={this.getActions()}
+				renderActions={this.getSearchButton}
 				pending={this.props.isPending}
 			>
 				<Container className="height-catcher" innerRef={this.containerRef}>

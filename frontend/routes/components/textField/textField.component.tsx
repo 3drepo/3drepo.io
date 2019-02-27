@@ -142,8 +142,8 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 								inputRef={this.textFieldRef}
 								fullWidth
 								onChange={this.onChange(field)}
-								error={Boolean(form.errors[name])}
-								helperText={form.errors[name]}
+								error={Boolean(form.errors[name] || props.error)}
+								helperText={form.errors[name] || props.helperText}
 							/>
 						);
 					}} />
