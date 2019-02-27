@@ -69,7 +69,6 @@
 			return this._check(permission.user, permission).then(() => {
 
 				if(this.findByUser(permission.user)) {
-					// return Promise.reject(responseCodes.DUP_ACCOUNT_PERM);
 					return this.update(permission.user, permission);
 				}
 				if(permission.permissions.length === 0) {
