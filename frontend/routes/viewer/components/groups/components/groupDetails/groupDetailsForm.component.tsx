@@ -49,15 +49,10 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		return !this.props.group._id;
 	}
 
-	public componentDidMount() {
-		console.log('this.props.group', this.props.group)
-	}
-
 	public componentDidUpdate(prevProps) {
 		const isFormValid = this.props.formik.isValid && !this.props.formik.isValidating;
 		const prevIsFormValid = prevProps.formik.isValid && !prevProps.formik.isValidating;
 
-		console.log('this.props.formik', this.props.formik);
 		if (!this.isNewGroup && isFormValid !== prevIsFormValid) {
 			this.props.setIsFormValid(isFormValid);
 		}
@@ -114,9 +109,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						<Field name="type" render={({ field }) => (
 							<SelectField {...field} disabled={!this.props.canUpdate}>
 								<MenuItem key={'smart'} value={'smart'}>Criteria</MenuItem>
-								<MenuItem key={'normal'} value={'normal'}>
-									Normal
-								</MenuItem>
+								<MenuItem key={'normal'} value={'normal'}>Normal</MenuItem>
 							</SelectField>
 						)} />
 					</StyledFormControl>
