@@ -66,6 +66,14 @@ class SystemCommentGenerator extends CommentGenerator {
 	constructor(owner, property, from, to) {
 		super(owner);
 
+		if ("[object String]" !== Object.prototype.toString.call(from)) {
+			from = from.toString();
+		}
+
+		if ("[object String]" !== Object.prototype.toString.call(to)) {
+			to = to.toString();
+		}
+
 		this.action = {
 			property,
 			from,
