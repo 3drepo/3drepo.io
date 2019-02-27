@@ -38,6 +38,7 @@ import { prepareGroup } from '../../helpers/groups';
 import { selectCurrentUser } from '../currentUser';
 import { getRandomColor } from '../../helpers/colors';
 import { SnackbarActions } from '../snackbar';
+import { TreeActions } from '../tree';
 
 export function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(true));
@@ -82,6 +83,9 @@ export function* highlightGroup({ group }) {
 
 			yield TreeService.showNodesBySharedIds(group.objects);
 			yield TreeService.selectNodesBySharedIds(group.objects, color);
+			const currentSelectedNodes = yield TreeService.currentSelectedNodes;
+			yield put(TreeActions.setSelectedNodes(currentSelectedNodes));
+
 			yield call(delay, 0);
 			const objectsStatus = yield Viewer.getObjectsStatus();
 
@@ -102,6 +106,7 @@ export function* dehighlightGroup({ group }) {
 		const TreeService = getAngularService('TreeService') as any;
 
 		const nodes = yield TreeService.getNodesFromSharedIds(group.objects);
+
 		yield TreeService.deselectNodes(nodes);
 		// this.setTotalSavedMeshes(group);
 	} catch (error) {
@@ -114,6 +119,7 @@ export function* clearSelectionHighlights() {
 		yield put(GroupsActions.setComponentState({ highlightedGroups: [] }));
 		const TreeService = getAngularService('TreeService') as any;
 		yield TreeService.clearCurrentlySelected();
+		yield put(TreeActions.clearSelectedNodes());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('clear', 'highlighted groups', error));
 	}

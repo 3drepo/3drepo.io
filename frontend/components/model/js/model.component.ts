@@ -19,6 +19,7 @@ import { dispatch, getState, subscribe } from '../../../helpers/migration';
 import { selectCurrentUser, CurrentUserActions } from '../../../modules/currentUser';
 import { selectRisks, selectSelectedFilters, selectRisksMap } from '../../../modules/risks';
 import { ModelActions, selectSettings, selectIsPending } from '../../../modules/model';
+import { TreeActions } from '../../../modules/tree';
 import { ViewpointsActions } from '../../../modules/viewpoints';
 import { JobsActions, selectJobs } from '../../../modules/jobs';
 import { RisksActions } from '../../../modules/risks';
@@ -128,6 +129,7 @@ class ModelController implements ng.IController {
 			window.removeEventListener('beforeunload', refreshHandler);
 			window.removeEventListener('popstate', popStateHandler);
 			this.ViewerService.off(VIEWER_EVENTS.CLICK_PIN);
+			dispatch(TreeActions.stopListenOnSelections());
 		});
 
 		this.$timeout(() => {
@@ -141,6 +143,7 @@ class ModelController implements ng.IController {
 		dispatch(CurrentUserActions.fetchUser(username));
 		dispatch(JobsActions.fetchJobs(this.account));
 		dispatch(JobsActions.getMyJob(this.account));
+		dispatch(TreeActions.startListenOnSelections());
 
 		this.ViewerService.on(VIEWER_EVENTS.CLICK_PIN, this.onPinClick);
 		this.unsubscribeModelSettingsListener = subscribe(this, this.onModelSettingsChange);

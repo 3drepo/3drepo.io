@@ -41,6 +41,7 @@ interface IProps {
 	GroupTypeIconComponent: any;
 	totalMeshes: number;
 	canUpdate: boolean;
+	selectedNodes: any;
 	createGroup: (teamspace, modelId) => void;
 	updateGroup: (teamspace, modelId, groupId) => void;
 	setState: (componentState) => void;
@@ -59,7 +60,6 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		if (this.props.group.color) {
-			console.log('DM this.props.group.color',this.props.group.color)
 			this.setState({
 				groupColor: this.props.group.color
 			});
@@ -130,6 +130,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				setState={this.props.setState}
 				canUpdate={this.props.canUpdate}
 				setIsFormValid={this.setIsFormValid}
+				selectedNodes={this.props.selectedNodes}
 			/>
 		</PreviewDetails>
 	));

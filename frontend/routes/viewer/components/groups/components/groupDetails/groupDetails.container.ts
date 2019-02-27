@@ -25,6 +25,7 @@ import {
 } from '../../../../../../modules/groups';
 import { selectSettings } from '../../../../../../modules/model';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
+import { selectSelectedNodes } from '../../../../../../modules/tree';
 
 const mapStateToProps = createStructuredSelector({
 	group: selectActiveGroupDetails,
@@ -32,7 +33,8 @@ const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	expandDetails: selectExpandDetails,
 	currentUser: selectCurrentUser,
-	totalMeshes: selectTotalMeshes
+	totalMeshes: selectTotalMeshes,
+	selectedNodes: selectSelectedNodes
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

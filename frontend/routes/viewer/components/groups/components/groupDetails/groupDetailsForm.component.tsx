@@ -28,6 +28,7 @@ interface IProps {
 	totalMeshes: number;
 	canUpdate: boolean;
 	groupColor: any[];
+	selectedNodes: any[];
 	onSubmit: (values) => void;
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
@@ -89,7 +90,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { group: { updatedAt }, groupColor } = this.props;
+		const { group: { updatedAt }, groupColor, selectedNodes } = this.props;
 
 		return (
 			<Form>
@@ -120,6 +121,12 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						value={groupColor}
 					/>
 				)} />
+				<Field name="selectedNodes" render={({ field }) => (
+					<HiddenField
+						{...field}
+						value={selectedNodes}
+					/>
+				)} />
 				<Field name="description" render={({ field }) => (
 					<TextField
 						{...field}
@@ -145,11 +152,12 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 }
 
 export const GroupDetailsForm = withFormik({
-	mapPropsToValues: ({ group }) => ({
+	mapPropsToValues: ({ group, selectedNodes }) => ({
 		name: group.name,
 		description: group.description || '',
 		color: group.color,
-		rules: group.rules || []
+		rules: group.rules || [],
+		selectedNodes
 	}),
 	handleSubmit: (values, { props }) => {
 		(props as IProps).onSubmit(values);

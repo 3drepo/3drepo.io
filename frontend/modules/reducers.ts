@@ -17,6 +17,7 @@ import { reducer as viewerReducer } from './viewer/viewer.redux';
 import { reducer as viewpointsReducer } from './viewpoints/viewpoints.redux';
 import { reducer as risksReducer } from './risks/risks.redux';
 import { reducer as groupsReducer } from './groups/groups.redux';
+import { reducer as treeReducer } from './tree/tree.redux';
 // <-- IMPORT MODULE REDUCER -->
 
 export default function createReducer() {
@@ -37,6 +38,7 @@ export default function createReducer() {
 		viewer: viewerReducer,
 		viewpoints: viewpointsReducer,
 		risks: risksReducer,
-		groups: groupsReducer// <-- INJECT MODULE REDUCER -->
+		groups: groupsReducer,
+		tree: treeReducer// <-- INJECT MODULE REDUCER -->
 	});
 }
