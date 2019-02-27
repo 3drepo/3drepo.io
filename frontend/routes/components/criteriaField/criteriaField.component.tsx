@@ -170,7 +170,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 	}
 
 	public clearCriteria = () => {
-
+		this.setState({ selectedCriteria: [] });
 	}
 
 	public renderOptions = () => {
