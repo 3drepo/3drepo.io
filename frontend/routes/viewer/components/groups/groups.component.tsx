@@ -83,6 +83,8 @@ interface IProps {
 	isolateGroup: (group) => void;
 	downloadGroups: (teamspace, model) => void;
 	selectGroup: (group) => void;
+	subscribeOnChanges: (teamspace, modelId) => void;
+	unsubscribeFromChanges: (teamspace, modelId) => void;
 }
 
 interface IState {
@@ -109,6 +111,8 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
+		const { subscribeOnChanges, teamspace, model } = this.props;
+
 		this.setState({ filteredGroups: this.filteredGroups });
 
 		if (Viewer.viewer.model && !this.state.modelLoaded) {
@@ -118,6 +122,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		Viewer.on(VIEWER_EVENTS.MODEL_LOADED, () => {
 			this.setState({ modelLoaded: true });
 		});
+		subscribeOnChanges(teamspace, model);
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -134,6 +139,11 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
+	}
+
+	public componentWillUnmount() {
+		const { teamspace, model, unsubscribeFromChanges } = this.props;
+		unsubscribeFromChanges(teamspace, model);
 	}
 
 	public get filteredGroups() {

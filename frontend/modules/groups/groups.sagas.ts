@@ -18,7 +18,7 @@
 import { put, takeLatest, takeEvery, select, all, call} from 'redux-saga/effects';
 import { delay } from 'redux-saga';
 import {omit} from 'lodash';
-import { getAngularService } from '../../helpers/migration';
+import { getAngularService, dispatch } from '../../helpers/migration';
 
 import * as API from '../../services/api';
 import { GroupsTypes, GroupsActions } from './groups.redux';
@@ -245,7 +245,7 @@ export function* deleteGroups({ teamspace, modelId, groups }) {
 			return [
 				put(GroupsActions.removeColorOverride(groupId, overridedGroup)),
 				put(GroupsActions.dehighlightGroup(group)),
-				put(GroupsActions.deleteGroupSuccess(groupId))
+				// put(GroupsActions.deleteGroupSuccess(groupId))
 			];
 		}));
 	} catch (error) {
@@ -319,7 +319,7 @@ export function* createGroup({ teamspace, modelId }) {
 			...group,
 			_id: data._id
 		};
-		yield put(GroupsActions.updateGroupSuccess(newGroup));
+		// yield put(GroupsActions.updateGroupSuccess(newGroup));
 		yield put(GroupsActions.highlightGroup(newGroup));
 		yield put(GroupsActions.showDetails(newGroup));
 		yield put(SnackbarActions.show('Group created'));
@@ -358,7 +358,7 @@ export function* updateGroup({ teamspace, modelId, groupId }) {
 			author: groupDetails.author,
 			name: groupDetails.name
 		};
-		yield put(GroupsActions.updateGroupSuccess(updatedGroup));
+		// yield put(GroupsActions.updateGroupSuccess(updatedGroup));
 		yield put(GroupsActions.highlightGroup(updatedGroup));
 		yield put(SnackbarActions.show('Group updated'));
 	} catch (error) {
@@ -388,6 +388,36 @@ export function* setNewGroup() {
 	}
 }
 
+const onUpdated = (updatedGroup) => {
+	dispatch(GroupsActions.updateGroupSuccess(updatedGroup));
+};
+
+const onCreated = (createdGroup) => {
+	dispatch(GroupsActions.updateGroupSuccess(createdGroup));
+};
+
+const onDeleted = (deletedGroupId) => {
+	dispatch(GroupsActions.deleteGroupSuccess(deletedGroupId));
+};
+
+export function* subscribeOnChanges({ teamspace, modelId }) {
+	const ChatService = yield getAngularService('ChatService');
+	const groupsNotifications = yield ChatService.getChannel(teamspace, modelId).groups;
+
+	groupsNotifications.subscribeToUpdated(onUpdated, this);
+	groupsNotifications.subscribeToCreated(onCreated, this);
+	groupsNotifications.subscribeToDeleted(onDeleted, this);
+}
+
+export function* unsubscribeFromChanges({ teamspace, modelId }) {
+	const ChatService = yield getAngularService('ChatService');
+	const groupsNotifications = yield ChatService.getChannel(teamspace, modelId).groups;
+
+	groupsNotifications.unsubscribeFromUpdated(onUpdated);
+	groupsNotifications.unsubscribeFromCreated(onCreated);
+	groupsNotifications.unsubscribeFromDeleted(onDeleted);
+}
+
 export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.FETCH_GROUPS, fetchGroups);
 	yield takeLatest(GroupsTypes.SET_ACTIVE_GROUP, setActiveGroup);
@@ -407,4 +437,6 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.CREATE_GROUP, createGroup);
 	yield takeLatest(GroupsTypes.UPDATE_GROUP, updateGroup);
 	yield takeLatest(GroupsTypes.SET_NEW_GROUP, setNewGroup);
+	yield takeLatest(GroupsTypes.SUBSCRIBE_ON_CHANGES, subscribeOnChanges);
+	yield takeLatest(GroupsTypes.UNSUBSCRIBE_FROM_CHANGES, unsubscribeFromChanges);
 }

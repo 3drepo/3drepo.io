@@ -46,7 +46,9 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	downloadGroups: ['teamspace', 'modelId'],
 	createGroup: ['teamspace', 'modelId', 'group'],
 	updateGroup: ['teamspace', 'modelId', 'groupId'],
-	updateGroupSuccess: ['group']
+	updateGroupSuccess: ['group'],
+	subscribeOnChanges: ['teamspace', 'modelId'],
+	unsubscribeFromChanges: ['teamspace', 'modelId']
 }, { prefix: 'GROUPS/' });
 
 export interface IGroupComponentState {
