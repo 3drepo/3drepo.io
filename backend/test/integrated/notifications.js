@@ -15,11 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const request = require("supertest");
-const bouncerHelper = require("./bouncerHelper");
+const bouncerHelper = require("../helpers/bouncerHelper");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp(
-	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
-);
+const app = require("../../services/api.js").createApp();
 const async = require("async");
 
 describe('Notifications', function() {

@@ -19,9 +19,7 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp(
-	{ session: require("express-session")({ secret: "testing",  resave: false,   saveUninitialized: false }) }
-);
+const app = require("../../services/api.js").createApp();
 const logger = require("../../logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
@@ -87,6 +85,24 @@ describe("Job", function () {
 				done(err);
 			});
 
+	});
+
+	it("should not able to create job with invalid name", function(done) {
+		agent.post(`/${username}/jobs`)
+			.send({ _id: " ", color: "000000"})
+			.expect(400 , function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.JOB_ID_INVALID.value);
+				done(err);
+			});
+	});
+
+	it("should not able to create job with no name", function(done) {
+		agent.post(`/${username}/jobs`)
+			.send({ _id: "", color: "000000"})
+			.expect(400 , function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.JOB_ID_INVALID.value);
+				done(err);
+			});
 	});
 
 	it("should able to list the job created", function(done) {

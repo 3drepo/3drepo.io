@@ -7,7 +7,7 @@ const mocha = require("gulp-mocha");
 const path = require("path");
 const abs = path.resolve;
 
-gulp.task("test:integrated", function(){
+gulp.task("test:integrated", function(done){
 
     const envs = env.set({
         NODE_ENV: "test",
@@ -18,19 +18,15 @@ gulp.task("test:integrated", function(){
         .pipe(envs)
         .pipe(mocha({
             reporter: "spec",
+            exit:true,
             timeout: 10000
         }))
-        .once("error", (error) => {
-            console.log(error);
-            process.exit(1);
-        })
-        .once("end", () => {
-            process.exit();
-        });
+        .once("error", (error) => done)
+        .once("_result", () => done());
 
 });
 
-gulp.task("test:unit", function(){
+gulp.task("test:unit", function(done){
 
     env.set({
         NODE_ENV: "test",
@@ -38,38 +34,54 @@ gulp.task("test:unit", function(){
     });
 
     gulp.src(abs("./test/unit/**/*.js"), {read: false})
-        .pipe(mocha({reporter: "spec"}))
-        .once("error", (error) => {
-            console.log(error);
-            process.exit(1);
-        })
-        .once("end", () => {
-            process.exit();
-        });
+        .pipe(mocha({reporter: "spec", exit:true}))
+        .once("error", done)
+        .once("_result", () => done());
 
 });
 
+
+gulp.task("test:unit-one", function(done){
+    if (process.argv.length != 5) {
+        console.log("Error: you need to specify a test file");
+        process.exit(1);
+    }
+
+    env.set({
+        NODE_ENV: "test",
+        NODE_CONFIG_DIR: "../config/"
+    });
+
+    var file = process.argv[4];
+    gulp.src(abs("./test/unit/models/" + file), {read: false})
+        .pipe(mocha({reporter: "spec", exit:true}))
+        .once("error", done)
+        .once("_result",() => done());
+});
+
+
+
+
 gulp.task("test:lint", function(){
     return gulp.src(["./**/*.js","!node_modules/**", "!gulpfile.js", "!doc/**" ])
-        // eslint() attaches the lint output to the "eslint" property 
-        // of the file object so it can be used by other modules. 
+        // eslint() attaches the lint output to the "eslint" property
+        // of the file object so it can be used by other modules.
         .pipe(eslint())
-        // eslint.format() outputs the lint results to the console.  
+        // eslint.format() outputs the lint results to the console.
         .pipe(eslint.format());
 });
 
 gulp.task("test:lint-fix", function(){
     return gulp.src(["./**/*.js","!node_modules/**", "!gulpfile.js", "!doc/**" ])
-        // eslint() attaches the lint output to the "eslint" property 
-        // of the file object so it can be used by other modules. 
+        // eslint() attaches the lint output to the "eslint" property
+        // of the file object so it can be used by other modules.
         .pipe(eslint({fix:true}))
-        // eslint.format() outputs the lint results to the console.  
+        // eslint.format() outputs the lint results to the console.
         .pipe(eslint.format());
 });
 
-gulp.task("test:integrated-one", function() {
+gulp.task("test:integrated-one", function(done) {
     if (process.argv.length === 5) {
-            
         const envs = env.set({
             NODE_ENV: "test",
             NODE_CONFIG_DIR: "../config/"
@@ -82,19 +94,15 @@ gulp.task("test:integrated-one", function() {
             .pipe(envs)
             .pipe(mocha({
                 reporter: "spec",
-                timeout: 10000
+                timeout: 10000,
+                exit:true
             }))
-            .once("error", (error) => {
-                console.log(error);
-                process.exit(1);
-            })
-            .once("end", () => {
-                process.exit();
-            });
+            .once("error", done)
+            .once("_result", () => done());
     } else {
         console.log("Must provide one argument; the file name of the intergrated test");
     }
 });
 
 
-gulp.task("test", ["test:unit", "test:integrated"]);
+gulp.task("test", gulp.series("test:unit", "test:integrated"));

@@ -17,8 +17,15 @@
 
 import { dispatch, getState, subscribe } from '../../../helpers/migration';
 import { selectCurrentUser, CurrentUserActions } from '../../../modules/currentUser';
+import { selectRisks, selectSelectedFilters, selectRisksMap } from '../../../modules/risks';
 import { ModelActions, selectSettings, selectIsPending } from '../../../modules/model';
 import { ViewpointsActions } from '../../../modules/viewpoints';
+import { JobsActions, selectJobs } from '../../../modules/jobs';
+import { RisksActions } from '../../../modules/risks';
+import { prepareRisk } from '../../../helpers/risks';
+import { RISK_LEVELS } from '../../../constants/risks';
+import { searchByFilters } from '../../../helpers/searching';
+import { VIEWER_EVENTS } from '../../../constants/viewer';
 
 class ModelController implements ng.IController {
 
@@ -36,14 +43,12 @@ class ModelController implements ng.IController {
 		'RevisionsService',
 		'AuthService',
 		'IssuesService',
-		'RisksService',
 		'StateManager',
 		'PanelService',
 		'ViewerService'
 	];
 
 	private issuesCardIndex;
-	private risksCardIndex;
 	private pointerEvents;
 	private account;
 	private model;
@@ -75,7 +80,6 @@ class ModelController implements ng.IController {
 		private RevisionsService,
 		private AuthService,
 		private IssuesService,
-		private RisksService,
 		private StateManager,
 		private PanelService,
 		private ViewerService
@@ -122,6 +126,7 @@ class ModelController implements ng.IController {
 			this.isPending = false;
 			window.removeEventListener('beforeunload', refreshHandler);
 			window.removeEventListener('popstate', popStateHandler);
+			this.ViewerService.off(VIEWER_EVENTS.CLICK_PIN);
 		});
 
 		this.$timeout(() => {
@@ -133,10 +138,28 @@ class ModelController implements ng.IController {
 
 		const username = selectCurrentUser(getState()).username;
 		dispatch(CurrentUserActions.fetchUser(username));
+		dispatch(JobsActions.fetchJobs(this.account));
+		dispatch(JobsActions.getMyJob(this.account));
 
+		this.ViewerService.on(VIEWER_EVENTS.CLICK_PIN, this.onPinClick);
 		this.unsubscribeModelSettingsListener = subscribe(this, this.onModelSettingsChange);
 
 		this.watchers();
+	}
+
+	public onPinClick = ({ id }) => {
+		const currentState = getState();
+		const risksMap = selectRisksMap(currentState);
+
+		if (risksMap[id]) {
+			const risks = selectRisks(currentState);
+			const jobs = selectJobs(currentState);
+			const preparedRisks = risks.map((risk) => prepareRisk(risk, jobs));
+			const filteredRisks = searchByFilters(preparedRisks, []);
+
+			dispatch(RisksActions.showDetails(risksMap[id], filteredRisks, this.revision));
+			this.PanelService.showPanelsByType('risks');
+		}
 	}
 
 	public watchers() {
@@ -155,15 +178,6 @@ class ModelController implements ng.IController {
 				// assume issue card shown by default
 				this.$timeout(() => {
 					this.IssuesService.state.displayIssue = this.issueId;
-				});
-			}
-		});
-
-		this.$scope.$watch('vm.riskId', () => {
-			if (this.riskId) {
-				// timeout to make sure event is sent after risk panel card is setup
-				this.$timeout(() => {
-					this.RisksService.state.displayRisk = this.riskId;
 				});
 			}
 		});
@@ -233,11 +247,6 @@ class ModelController implements ng.IController {
 			// assume issue card shown by default
 			this.PanelService.hidePanelsByType('issues');
 			this.PanelService.showPanelsByType('risks');
-
-			// timeout to make sure event is sent after risk panel card is setup
-			this.$timeout(() => {
-				this.RisksService.state.displayRisk = this.riskId;
-			});
 		}
 
 		this.PanelService.hideSubModels(this.issuesCardIndex, !settings.federate);
@@ -268,6 +277,7 @@ class ModelController implements ng.IController {
 	private loadModelSettings() {
 		dispatch(ModelActions.fetchSettings(this.account, this.model));
 		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
+		dispatch(RisksActions.fetchRisks(this.account, this.model, this.revision));
 	}
 }
 

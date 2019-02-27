@@ -20,16 +20,13 @@ const request = require("supertest");
 const chai = require("chai")
 chai.use(require('chai-shallow-deep-equal'));
 const expect = chai.expect;
-const session =  require("express-session")({ secret: "testing"});
 const config = require("../../config");
-const app = require("../../services/api.js").createApp(
-	{ session: config.api_server.session }
-);
+const app = require("../../services/api.js").createApp();
 const async = require("async");
 const http = require("http");
 // let newXhr = require('socket.io-client-cookie');
 const io = require("socket.io-client");
-const bouncerHelper = require("./bouncerHelper");
+const bouncerHelper = require("../helpers/bouncerHelper");
 
 describe("Chat service", function () {
 

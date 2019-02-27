@@ -185,16 +185,20 @@
 
 	function createPermission(req, res, next) {
 		if (Object.keys(req.body).length === 2 && Object.prototype.toString.call(req.body.user) === "[object String]" && Object.prototype.toString.call(req.body.permissions) === "[object Array]") {
-			User.findByUserName(req.params.account)
-				.then(user => {
-					return user.customData.permissions.add(req.body);
-				})
-				.then(permission => {
-					responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
-				})
-				.catch(err => {
-					responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-				});
+			if(req.params.account === req.body.user) {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OWNER_MUST_BE_ADMIN);
+			} else {
+				User.findByUserName(req.params.account)
+					.then(user => {
+						return user.customData.permissions.add(req.body);
+					})
+					.then(permission => {
+						responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
+					})
+					.catch(err => {
+						responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+					});
+			}
 		} else {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 		}
@@ -202,16 +206,20 @@
 
 	function updatePermission(req, res, next) {
 		if (Object.keys(req.body).length === 1 && Object.prototype.toString.call(req.body.permissions) === "[object Array]") {
-			User.findByUserName(req.params.account)
-				.then(user => {
-					return user.customData.permissions.update(req.params.user, req.body);
-				})
-				.then(permission => {
-					responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
-				})
-				.catch(err => {
-					responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-				});
+			if(req.params.account === req.params.user) {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OWNER_MUST_BE_ADMIN);
+			} else {
+				User.findByUserName(req.params.account)
+					.then(user => {
+						return user.customData.permissions.update(req.params.user, req.body);
+					})
+					.then(permission => {
+						responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
+					})
+					.catch(err => {
+						responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+					});
+			}
 		} else {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 		}

@@ -100,7 +100,6 @@ function sendVerifyUserEmail(to, data) {
 }
 
 function sendWelcomeUserEmail(to, data) {
-
 	const template = require("./templates/uponVerified");
 	return sendEmail(template, to, data);
 }

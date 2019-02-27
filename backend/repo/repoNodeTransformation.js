@@ -23,7 +23,7 @@ const UUID = require("node-uuid");
 const C = require("../constants");
 
 exports.decode = function(bson, meshes, cameras) {
-	assert.equal(bson[C.REPO_NODE_LABEL_TYPE], C.REPO_NODE_TYPE_TRANSFORMATION, "Trying to convert " + bson[C.REPO_NODE_LABEL_TYPE] + " to " + C.REPO_NODE_TYPE_TRANSFORMATION);
+	assert.strict.equal(bson[C.REPO_NODE_LABEL_TYPE], C.REPO_NODE_TYPE_TRANSFORMATION, "Trying to convert " + bson[C.REPO_NODE_LABEL_TYPE] + " to " + C.REPO_NODE_TYPE_TRANSFORMATION);
 
 	// ---------------------------------------------------------------------
 	// Meshes & Cameras extraction

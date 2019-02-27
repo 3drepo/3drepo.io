@@ -114,6 +114,7 @@
 		VIEW_NOT_FOUND: { message: "Camera viewpoint not found", status: 404 },
 
 		USER_EXISTS: { message: "User already exists", status: 400 },
+		OWNER_MUST_BE_ADMIN: {message: "Cannot alter permissions of teamspace owner", status: 400},
 		SIGN_UP_PASSWORD_MISSING: { message: "Password is missing", status: 400 },
 		TOKEN_INVALID: { message: "Token is invalid or expired", status: 400 },
 		ALREADY_VERIFIED: { message: "Already verified", status: 400 },
@@ -134,7 +135,7 @@
 		SIZE_LIMIT: { message: "Single file size exceeded system limit", status: 400 },
 		INVALID_PROJECT_NAME: { message: "Invalid project name", status: 400 },
 		INVALID_MODEL_NAME: { message: "Invalid model name", status: 400 },
-		SIGN_UP_INVALID_EMAIL: { message: "Invalid email address", status: 400 },
+		EMAIL_INVALID: { message: "Invalid email address", status: 400 },
 		ALREADY_LOGGED_IN: { message: "You are already logged in", status: 400 },
 
 		VALID_COOKIE: { message: "Your cookie is still valid", status: 200 },

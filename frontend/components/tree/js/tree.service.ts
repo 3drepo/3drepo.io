@@ -61,7 +61,6 @@ export class TreeService {
 		private MultiSelectService
 	) {
 		this.reset();
-
 	}
 
 	public reset() {

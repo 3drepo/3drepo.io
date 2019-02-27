@@ -20,7 +20,7 @@ import * as React from 'react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { ThemeProvider } from 'styled-components';
 import { MuiTheme, theme } from '../../../styles';
-import { Container, Title, Content } from './panel.styles';
+import { Container, Title, Content, ContentWrapper } from './panel.styles';
 
 interface IProps {
 	title?: string | JSX.Element;
@@ -33,7 +33,11 @@ export const Panel = (props: IProps) => (
 		<MuiThemeProvider theme={MuiTheme}>
 			<Container {...props.paperProps}>
 				<Title>{props.title}</Title>
-				<Content>{props.children}</Content>
+				<Content>
+					<ContentWrapper>
+						{props.children}
+					</ContentWrapper>
+				</Content>
 			</Container>
 		</MuiThemeProvider>
 	</ThemeProvider>

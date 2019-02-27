@@ -19,6 +19,7 @@ requireAll(require.context('./css', true, /\.css$/));
 import 'simplebar/dist/simplebar.min.css';
 import 'angular-material/angular-material.min.css';
 import 'font-awesome/css/font-awesome.min.css';
+import './services/fontAwesome';
 
 // TypeScript compiled globals
 import { UnityUtil } from './globals/unity-util';

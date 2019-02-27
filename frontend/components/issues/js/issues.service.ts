@@ -17,11 +17,11 @@
 import { APIService } from '../../home/js/api.service';
 import { AuthService } from '../../home/js/auth.service';
 import { IChip } from '../../panel/js/panel-card-chips-filter.component';
-import { MultiSelectService } from '../../viewer/js/multi-select.service';
 import { PanelService } from '../../panel/js/panel.service';
 import { TreeService } from '../../tree/js/tree.service';
 import { ViewerService } from '../../viewer/js/viewer.service';
 import { stringSearch } from '../../../helpers/searching';
+import { Viewer } from '../../../services/viewer/viewer';
 
 declare const Pin;
 
@@ -55,7 +55,7 @@ export class IssuesService {
 		private apiService: APIService,
 		private authService: AuthService,
 		private clientConfigService: any,
-		private multiSelectService: MultiSelectService,
+		private multiSelectService,
 		private panelService: PanelService,
 		private treeService: TreeService,
 		private viewerService: ViewerService
@@ -95,8 +95,8 @@ export class IssuesService {
 				selectedObjectId: event.value.id
 			};
 
-			this.viewerService.addPin(data);
-			this.viewerService.setPin({data});
+			Viewer.addPin(data);
+			Viewer.setPin(data);
 		}
 	}
 
@@ -426,7 +426,7 @@ export class IssuesService {
 					pinColor = Pin.pinColours.yellow;
 				}
 
-				this.viewerService.addPin({
+				Viewer.addPin({
 					id: issue._id,
 					account: issue.account,
 					model: issue.model,
@@ -438,7 +438,7 @@ export class IssuesService {
 
 			} else {
 				// Remove pin
-				this.viewerService.removePin({ id: issue._id });
+				Viewer.removePin({ id: issue._id });
 			}
 		});
 
@@ -677,8 +677,7 @@ export class IssuesService {
 			model: issue.model
 		};
 
-		this.viewerService.setCamera(issueData);
-
+		Viewer.setCamera(issueData);
 	}
 
 	public handleShowIssue(issue) {
