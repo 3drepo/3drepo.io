@@ -48,8 +48,7 @@ export class APIKeyForm extends React.PureComponent<IProps> {
 							<StyledTextField
 								value={apiKey}
 								inputProps={{
-									readOnly: true,
-									disabled: true
+									readOnly: true
 								}}
 								margin="normal"
 							/>
