@@ -228,9 +228,20 @@ schema.statics.findUsersWithoutMembership = function (teamspace, searchString) {
 };
 
 // case insenstive
-schema.statics.isUserNameTaken = function (username) {
+schema.statics.checkUserNameAvailableAndValid = function (username) {
+
+	if (!this.usernameRegExp.test(username) ||
+		-1 !== C.REPO_BLACKLIST_USERNAME.indexOf(username.toLowerCase())
+	) {
+		return Promise.reject(responseCodes.INVALID_USERNAME);
+	}
+
 	return this.count({ account: "admin" }, {
 		user: new RegExp(`^${username}$`, "i")
+	}).then((count) => {
+		if(count > 0) {
+			return Promise.reject(responseCodes.USER_EXISTS);
+		}
 	});
 };
 
@@ -242,15 +253,22 @@ schema.statics.findByPaypalPaymentToken = function (token) {
 	return this.findOne({ account: "admin" }, { "customData.billing.paypalPaymentToken": token });
 };
 
-schema.statics.isEmailTaken = function (email, exceptUser) {
+schema.statics.checkEmailAvailableAndValid = function (email, exceptUser) {
+	const emailRegex = /^(['a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,})$/;
+	if(email.match(emailRegex)) {
 
-	let query = { "customData.email": email };
+		const query =  exceptUser ? { "customData.email": email, "user": { "$ne": exceptUser } }
+			: { "customData.email": email };
 
-	if (exceptUser) {
-		query = { "customData.email": email, "user": { "$ne": exceptUser } };
+		return this.count({ account: "admin" }, query).then((count) => {
+			if(count > 0) {
+				return Promise.reject(responseCodes.EMAIL_EXISTS);
+			}
+		});
+	} else {
+		return Promise.reject(responseCodes.EMAIL_INVALID);
 	}
 
-	return this.count({ account: "admin" }, query);
 };
 
 schema.statics.findUserByBillingId = function (billingAgreementId) {
@@ -314,120 +332,88 @@ schema.statics.updatePassword = function (logger, username, oldPassword, token, 
 
 schema.statics.usernameRegExp = /^[a-zA-Z][\w]{1,63}$/;
 
-schema.statics.createUser = function (logger, username, password, customData, tokenExpiryTime, skipCheckEmail) {
+schema.statics.createUser = function (logger, username, password, customData, tokenExpiryTime) {
 
 	if (customData) {
-		return ModelFactory.dbManager.getAuthDB().then(adminDB => {
+		const validityChecks = [
+			this.checkUserNameAvailableAndValid(username),
+			this.checkEmailAvailableAndValid(customData.email)
+		];
 
-			const cleanedCustomData = {};
-			let emailRegex = /^(['a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,5})$/;
+		return Promise.all(validityChecks).then(() => {
+			return ModelFactory.dbManager.getAuthDB().then(adminDB => {
 
-			if (config.auth.allowPlusSignInEmail) {
-				emailRegex = /^(['+a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,5})$/;
-			}
+				const cleanedCustomData = {
+					createdAt: new Date(),
+					inactive: true
+				};
 
-			if (!customData.email || !customData.email.match(emailRegex)) {
-				return Promise.reject({ resCode: responseCodes.SIGN_UP_INVALID_EMAIL });
-			}
+				["firstName", "lastName", "email", "mailListOptOut"].forEach(key => {
+					if (customData[key]) {
+						cleanedCustomData[key] = customData[key];
+					}
+				});
 
-			if (!this.usernameRegExp.test(username)) {
-				return Promise.reject({ resCode: responseCodes.INVALID_USERNAME });
-			}
+				const billingInfo = {};
 
-			if (-1 !== C.REPO_BLACKLIST_USERNAME.indexOf(username.toLowerCase())) {
-				return Promise.reject({ resCode: responseCodes.INVALID_USERNAME });
-			}
+				["firstName", "lastName", "countryCode", "company"].forEach(key => {
+					if (customData[key]) {
+						billingInfo[key] = customData[key];
+					}
+				});
 
-			cleanedCustomData.createdAt = new Date();
+				const expiryAt = new Date();
+				expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
 
-			["firstName", "lastName", "email", "mailListOptOut"].forEach(key => {
-				if (customData[key]) {
-					cleanedCustomData[key] = customData[key];
-				}
-			});
+				// default permission
+				cleanedCustomData.permissions = [{
+					user: username,
+					permissions: [C.PERM_TEAMSPACE_ADMIN]
+				}];
 
-			const billingInfo = {};
+				// default templates
+				cleanedCustomData.permissionTemplates = [
+					{
+						_id: C.ADMIN_TEMPLATE,
+						permissions: C.ADMIN_TEMPLATE_PERMISSIONS
+					},
+					{
+						_id: C.VIEWER_TEMPLATE,
+						permissions: C.VIEWER_TEMPLATE_PERMISSIONS
+					},
+					{
+						_id: C.COMMENTER_TEMPLATE,
+						permissions: C.COMMENTER_TEMPLATE_PERMISSIONS
+					},
+					{
+						_id: C.COLLABORATOR_TEMPLATE,
+						permissions: C.COLLABORATOR_TEMPLATE_PERMISSIONS
+					}
+				];
 
-			["firstName", "lastName", "countryCode", "company"].forEach(key => {
-				if (customData[key]) {
-					billingInfo[key] = customData[key];
-				}
-			});
+				cleanedCustomData.emailVerifyToken = {
+					token: crypto.randomBytes(64).toString("hex"),
+					expiredAt: expiryAt
+				};
 
-			const expiryAt = new Date();
-			expiryAt.setHours(expiryAt.getHours() + tokenExpiryTime);
+				const addUserProm = adminDB.addUser(username, password, { customData: cleanedCustomData, roles: [] }).then(() => {
+					return Promise.resolve(cleanedCustomData.emailVerifyToken);
+				}).catch(err => {
+					return Promise.reject({ resCode: utils.mongoErrorToResCode(err) });
+				});
 
-			cleanedCustomData.inactive = true;
-
-			// default permission
-			cleanedCustomData.permissions = [{
-				user: username,
-				permissions: [C.PERM_TEAMSPACE_ADMIN]
-			}];
-
-			// default templates
-			cleanedCustomData.permissionTemplates = [
-				{
-					_id: C.ADMIN_TEMPLATE,
-					permissions: C.ADMIN_TEMPLATE_PERMISSIONS
-				},
-				{
-					_id: C.VIEWER_TEMPLATE,
-					permissions: C.VIEWER_TEMPLATE_PERMISSIONS
-				},
-				{
-					_id: C.COMMENTER_TEMPLATE,
-					permissions: C.COMMENTER_TEMPLATE_PERMISSIONS
-				},
-				{
-					_id: C.COLLABORATOR_TEMPLATE,
-					permissions: C.COLLABORATOR_TEMPLATE_PERMISSIONS
-				}
-			];
-
-			cleanedCustomData.emailVerifyToken = {
-				token: crypto.randomBytes(64).toString("hex"),
-				expiredAt: expiryAt
-			};
-
-			return this.isUserNameTaken(username).then(count => {
-
-				if (count !== 0) {
-					return Promise.reject(responseCodes.USER_EXISTS);
-				}
-
-				let checkEmail = Promise.resolve(0);
-
-				if (!skipCheckEmail) {
-					checkEmail = this.isEmailTaken(customData.email);
-				}
-
-				return checkEmail;
-			}).then(count => {
-
-				if (count === 0) {
-
-					return adminDB.addUser(username, password, { customData: cleanedCustomData, roles: [] }).then(() => {
-						return Promise.resolve(cleanedCustomData.emailVerifyToken);
-					}).catch(err => {
-						return Promise.reject({ resCode: utils.mongoErrorToResCode(err) });
-					});
-
-				} else {
-					return Promise.reject({ resCode: responseCodes.EMAIL_EXISTS });
-				}
-
-			}).then(() => {
-				return this.findByUserName(username);
-			}).then(user => {
-				user.customData.billing.billingInfo.changeBillingAddress(billingInfo);
-				return user.save();
-			}).then(() => {
-				return Promise.resolve(cleanedCustomData.emailVerifyToken);
+				return addUserProm.then(() => {
+					return this.findByUserName(username);
+				}).then(user => {
+					user.customData.billing.billingInfo.changeBillingAddress(billingInfo);
+					return user.save();
+				}).then(() => {
+					return Promise.resolve(cleanedCustomData.emailVerifyToken);
+				});
 			});
 		});
 	} else {
-		return Promise.reject({ resCode: responseCodes.SIGN_UP_INVALID_EMAIL });
+		return Promise.reject({ resCode: responseCodes.EMAIL_INVALID });
 	}
 };
 
@@ -525,12 +511,8 @@ schema.methods.updateInfo = function (updateObj) {
 		return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });
 	}
 
-	return User.isEmailTaken(this.customData.email, this.user).then(count => {
-		if (count === 0) {
-			return this.save();
-		} else {
-			return Promise.reject({ resCode: responseCodes.EMAIL_EXISTS });
-		}
+	return User.checkEmailAvailableAndValid(this.customData.email, this.user).then(() => {
+		return this.save();
 	});
 };
 
