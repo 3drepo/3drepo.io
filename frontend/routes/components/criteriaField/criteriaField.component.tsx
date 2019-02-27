@@ -23,7 +23,6 @@ import InputLabel from '@material-ui/core/InputLabel';
 import {
 	Container,
 	ChipsContainer,
-	Chip,
 	ButtonContainer,
 	IconButton,
 	StyledMoreIcon,
@@ -36,6 +35,7 @@ import { renderWhenTrue } from '../../../helpers/rendering';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { NewCriterionForm } from './newCriterionForm.component';
 import { CriteriaPasteField } from './components/criteriaPasteField/criteriaPasteField.components';
+import { Chip } from '../chip/chip.component';
 
 interface IProps {
 	className?: string;
