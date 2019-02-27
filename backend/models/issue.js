@@ -60,6 +60,7 @@ const fieldTypes = {
 	"priority_last_changed": "[object Number]",
 	"rev_id": "[object Object]",
 	"scale": "[object Number]",
+	"sealed": "[object Boolean]",
 	"status": "[object String]",
 	"status_last_changed": "[object Number]",
 	"topic_type": "[object String]",
@@ -215,6 +216,8 @@ function updateTextComments(account, model, sessionId, issueId, comments, data, 
 		} else {
 			throw responseCodes.ISSUE_COMMENT_SEALED;
 		}
+	} else if (data.sealed && data.commentIndex >= 0 && comments.length > data.commentIndex) {
+		comments[data.commentIndex].sealed = true;
 	} else if (data.delete && data.commentIndex >= 0 && comments.length > data.commentIndex) {
 		if (!comments[data.commentIndex].sealed) {
 			comments.splice(data.commentIndex, 1);
@@ -535,7 +538,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							(("[object Object]" !== fieldTypes[key] && "[object Array]" !== fieldTypes[key] && data[key] !== newIssue[key])
 							|| !_.isEqual(newIssue[key], data[key]))) {
 							if (null === data[key] || Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
-								if ("comment" === key) {
+								if ("comment" === key || "sealed" === key) {
 									const updatedComments = updateTextComments(
 										dbCol.account,
 										dbCol.model,
