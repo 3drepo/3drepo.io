@@ -17,6 +17,7 @@
 
 import { put, takeLatest, takeEvery, select, all, call} from 'redux-saga/effects';
 import { delay } from 'redux-saga';
+import {omit} from 'lodash';
 import { getAngularService } from '../../helpers/migration';
 
 import * as API from '../../services/api';
@@ -35,7 +36,6 @@ import { Viewer } from '../../services/viewer/viewer';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { prepareGroup } from '../../helpers/groups';
 import { selectCurrentUser } from '../currentUser';
-import { DEFAULT_OVERRIDE_COLOR } from '../../constants/groups';
 import { getRandomColor } from '../../helpers/colors';
 import { SnackbarActions } from '../snackbar';
 
@@ -309,11 +309,13 @@ export function* createGroup({ teamspace, modelId }) {
 		}
 
 		const {data} = yield API.createGroup(teamspace, modelId, group);
-
-		yield put(GroupsActions.updateGroupSuccess({
+		const newGroup = {
 			...group,
 			_id: data._id
-		}));
+		}
+		yield put(GroupsActions.updateGroupSuccess(newGroup));
+		yield put(GroupsActions.highlightGroup(newGroup));
+		yield put(GroupsActions.showDetails(newGroup));
 		yield put(SnackbarActions.show('Group created'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('create', 'group', error));
@@ -328,26 +330,30 @@ export function* updateGroup({ teamspace, modelId, groupId }) {
 		const objectsStatus = yield Viewer.getObjectsStatus();
 		const date = new Date();
 		const timestamp = date.getTime();
+		const details = updatedGroupDetails.rules.length ? updatedGroupDetails : omit(updatedGroupDetails, ['rules']);
+
 		const group = {
 			updatedAt: timestamp,
 			updatedBy: currentUser.username,
 			totalSavedMeshes: 0,
 			objects: [],
-			...updatedGroupDetails
+			...details
 		};
+
 		if (objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
 			group.totalSavedMeshes = calculateTotalMeshes(objectsStatus);
 			group.objects = objectsStatus.highlightedNodes;
 		}
 
 		const {data} = yield API.updateGroup(teamspace, modelId, groupId, group);
-
-		yield put(GroupsActions.updateGroupSuccess({
+		const updatedGroup = {
 			...group,
 			_id: data._id,
 			author: groupDetails.author,
 			name: groupDetails.name
-		}));
+		}
+		yield put(GroupsActions.updateGroupSuccess(updatedGroup));
+		yield put(GroupsActions.highlightGroup(updatedGroup));
 		yield put(SnackbarActions.show('Group updated'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'group', error));

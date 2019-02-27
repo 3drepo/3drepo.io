@@ -68,6 +68,14 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public componentDidUpdate(prevProps) {
+		if (prevProps.group.color !== this.props.group.color) {
+			this.setState({
+				groupColor: getGroupRGBAColor(this.props.group.color)
+			});
+		}
+	}
+
 	get isNewGroup() {
 		return !this.props.group._id;
 	}

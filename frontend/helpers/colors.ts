@@ -23,15 +23,11 @@ const parseHex = (hex) => {
 };
 
 export const hexToPinColor = (hex) => {
-	console.log('hex to pin', hex, parseHex(hex));
 	const {red, green, blue} = parseHex(hex);
-	console.log('returned', [red / 255, green / 255, blue / 255]);
-
 	return [red / 255, green / 255, blue / 255];
 };
 
 export const hexToArray = (hex) => {
-	console.log('hex to pin', hex, parseHex(hex));
 	const {red, green, blue} = parseHex(hex);
 	return [red, green, blue];
 };
