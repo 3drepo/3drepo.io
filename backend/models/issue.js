@@ -46,6 +46,7 @@ const fieldTypes = {
 	"assigned_roles": "[object Array]",
 	"commentCount": "[object Number]",
 	"comment": "[object String]",
+	"commentIndex": "[object Number]",
 	"comments": "[object Array]",
 	"created": "[object Number]",
 	"creator_role": "[object String]",
@@ -60,7 +61,6 @@ const fieldTypes = {
 	"priority_last_changed": "[object Number]",
 	"rev_id": "[object Object]",
 	"scale": "[object Number]",
-	"sealed": "[object Boolean]",
 	"status": "[object String]",
 	"status_last_changed": "[object Number]",
 	"topic_type": "[object String]",
@@ -538,7 +538,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							(("[object Object]" !== fieldTypes[key] && "[object Array]" !== fieldTypes[key] && data[key] !== newIssue[key])
 							|| !_.isEqual(newIssue[key], data[key]))) {
 							if (null === data[key] || Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
-								if ("comment" === key || "sealed" === key) {
+								if ("comment" === key || "commentIndex" === key) {
 									const updatedComments = updateTextComments(
 										dbCol.account,
 										dbCol.model,
