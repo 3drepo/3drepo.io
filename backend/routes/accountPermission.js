@@ -206,7 +206,6 @@
 
 	function updatePermission(req, res, next) {
 		if (Object.keys(req.body).length === 1 && Object.prototype.toString.call(req.body.permissions) === "[object Array]") {
-			console.log(req.params.account, req.params.user);
 			if(req.params.account === req.params.user) {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OWNER_MUST_BE_ADMIN);
 			} else {
