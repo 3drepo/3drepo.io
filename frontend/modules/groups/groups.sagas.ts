@@ -418,6 +418,15 @@ export function* unsubscribeFromChanges({ teamspace, modelId }) {
 	groupsNotifications.unsubscribeFromDeleted(onDeleted);
 }
 
+export function* getFieldNames({ teamspace, modelId }) {
+	try {
+		const { data } = yield API.getFieldNames(teamspace, modelId);
+		yield put(GroupsActions.getFieldNamesSuccess(data));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('get', 'field names', error));
+	}
+}
+
 export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.FETCH_GROUPS, fetchGroups);
 	yield takeLatest(GroupsTypes.SET_ACTIVE_GROUP, setActiveGroup);
@@ -439,4 +448,5 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.SET_NEW_GROUP, setNewGroup);
 	yield takeLatest(GroupsTypes.SUBSCRIBE_ON_CHANGES, subscribeOnChanges);
 	yield takeLatest(GroupsTypes.UNSUBSCRIBE_FROM_CHANGES, unsubscribeFromChanges);
+	yield takeLatest(GroupsTypes.GET_FIELD_NAMES, getFieldNames);
 }

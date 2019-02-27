@@ -42,6 +42,7 @@ interface IProps {
 	totalMeshes: number;
 	canUpdate: boolean;
 	selectedNodes: any;
+	fieldNames: any[];
 	createGroup: (teamspace, modelId) => void;
 	updateGroup: (teamspace, modelId, groupId) => void;
 	setState: (componentState) => void;
@@ -131,6 +132,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				canUpdate={this.props.canUpdate}
 				setIsFormValid={this.setIsFormValid}
 				selectedNodes={this.props.selectedNodes}
+				fieldNames={this.props.fieldNames}
 			/>
 		</PreviewDetails>
 	));

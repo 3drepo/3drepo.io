@@ -88,3 +88,7 @@ export const selectAreAllOverrided = createSelector(
 export const selectTotalMeshes = createSelector(
 	selectComponentState, (state) => state.totalMeshes
 );
+
+export const selectFieldNames = createSelector(
+	selectGroupsDomain, (state) => state.fieldNames
+);

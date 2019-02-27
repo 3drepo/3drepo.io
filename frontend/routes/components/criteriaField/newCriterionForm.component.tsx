@@ -8,7 +8,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Label from '@material-ui/core/FormLabel';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+
 import ListSubheader from '@material-ui/core/ListSubheader';
+import { SelectField as CustomSelectField } from '../../components/selectField/selectField.component';
 
 import { TextField } from '../textField/textField.component';
 import {
@@ -30,6 +32,7 @@ const CriterionSchema = Yup.object().shape({
 
 interface IProps {
 	criterion: any;
+	fieldNames: any[];
 	onSubmit: (values) => void;
 }
 
@@ -55,15 +58,22 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 		</CriteriaList>
 	)
 
+	public renderFieldNames = () => 
+		this.props.fieldNames.map((name) => (
+			<MenuItem key={name}>{name}</MenuItem>
+		))
+
 	public render() {
 		return (
 			<Form>
 				<FormControl>
 					<InputLabel shrink>Field</InputLabel>
 					<Field name="field" render={({ field, form }) => (
-						<SelectField
+						<CustomSelectField
 							{...field}
-						/>
+						>
+							{this.renderFieldNames()}
+						</CustomSelectField>
 					)} />
 				</FormControl>
 

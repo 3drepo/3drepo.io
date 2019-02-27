@@ -144,6 +144,7 @@ class ModelController implements ng.IController {
 		dispatch(JobsActions.fetchJobs(this.account));
 		dispatch(JobsActions.getMyJob(this.account));
 		dispatch(TreeActions.startListenOnSelections());
+		dispatch(GroupsActions.getFieldNames(this.account, this.model));
 
 		this.ViewerService.on(VIEWER_EVENTS.CLICK_PIN, this.onPinClick);
 		this.unsubscribeModelSettingsListener = subscribe(this, this.onModelSettingsChange);

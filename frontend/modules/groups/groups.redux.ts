@@ -48,7 +48,9 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	updateGroup: ['teamspace', 'modelId', 'groupId'],
 	updateGroupSuccess: ['group'],
 	subscribeOnChanges: ['teamspace', 'modelId'],
-	unsubscribeFromChanges: ['teamspace', 'modelId']
+	unsubscribeFromChanges: ['teamspace', 'modelId'],
+	getFieldNames: ['teamspace', 'modelId'],
+	getFieldNamesSuccess: ['fieldNames']
 }, { prefix: 'GROUPS/' });
 
 export interface IGroupComponentState {
@@ -68,6 +70,7 @@ export interface IGroupState {
 	groupsMap: any;
 	isPending: boolean;
 	componentState: IGroupComponentState;
+	fieldNames: any[];
 }
 
 export const INITIAL_STATE: IGroupState = {
@@ -84,7 +87,8 @@ export const INITIAL_STATE: IGroupState = {
 		colorOverrides: {},
 		overrideAll: false,
 		totalMeshes: 0
-	}
+	},
+	fieldNames: []
 };
 
 export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
@@ -134,6 +138,10 @@ export const deleteGroupSuccess = (state = INITIAL_STATE, { groupId }) => {
 	return { ...state, groupsMap };
 };
 
+export const getFieldNamesSuccess = (state = INITIAL_STATE, { fieldNames }) => {
+	return { ...state, fieldNames };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.FETCH_GROUPS_SUCCESS]: fetchGroupsSuccess,
 	[GroupsTypes.TOGGLE_PENDING_STATE]: togglePendingState,
@@ -143,5 +151,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.ADD_TO_OVERRIDED]: addToOverrided,
 	[GroupsTypes.REMOVE_FROM_OVERRIDED]: removeFromOverrided,
 	[GroupsTypes.UPDATE_GROUP_SUCCESS]: updateGroupSuccess,
-	[GroupsTypes.DELETE_GROUP_SUCCESS]: deleteGroupSuccess
+	[GroupsTypes.DELETE_GROUP_SUCCESS]: deleteGroupSuccess,
+	[GroupsTypes.GET_FIELD_NAMES_SUCCESS]: getFieldNamesSuccess
 });

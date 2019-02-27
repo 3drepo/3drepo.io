@@ -44,6 +44,7 @@ interface IProps {
 	label?: string;
 	criteria: any;
 	disabled: boolean;
+	fieldNames: any[];
 	onChange: (criteria) => void;
 	onFormChange: (criterion) => void;
 	onChipsClick: (event?) => void;
@@ -214,6 +215,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 			<NewCriterionForm
 				criterion={{}}
 				onSubmit={this.handleAddNew}
+				fieldNames={this.props.fieldNames}
 			/>
 		</FormContainer>
 	)

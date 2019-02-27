@@ -144,6 +144,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						label="Criteria"
 						placeholder="Select first criteria"
 						disabled={!this.props.canUpdate}
+						fieldNames={this.props.fieldNames}
 					/>
 				)}/>
 			</Form>
