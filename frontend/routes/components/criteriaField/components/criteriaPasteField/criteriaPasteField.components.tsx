@@ -6,7 +6,7 @@ import { ENTER_KEY } from '../../../../../constants/keys';
 interface IProps {
 	name?: string;
 	initialValue?: string;
-	onStateChange: (currentValue) => void;
+	setState: (currentValue) => void;
 	onChange: (pastedCriteria) => void;
 	onCancel: () => void;
 }
@@ -71,9 +71,9 @@ export class CriteriaPasteField extends React.PureComponent<IProps, IState> {
 	public handleStateChange = (event) => {
 		const isValidValue = areValidCriteria(event.target.value);
 
-		if (this.props.onStateChange) {
+		if (this.props.setState) {
 			this.setState({ currentValue: event.target.value, isValid: isValidValue}, () => {
-				this.props.onStateChange(this.state.currentValue);
+				this.props.setState(this.state.currentValue);
 			});
 		}
 	}
