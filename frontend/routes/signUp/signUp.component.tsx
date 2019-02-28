@@ -125,8 +125,8 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 	public handleSubmit = (values, form) => {
 		const data = omit(values, 'username', 'emailConfirm', 'passwordConfirm', 'termsAgreed');
 		this.props.onRegister(values.username, data);
-		form.setFieldValue('password', '', false);
-		form.setFieldValue('passwordConfirm', '', false);
+		form.setFieldValue('password', '', true);
+		form.setFieldValue('passwordConfirm', '', true);
 		this.setState({
 			passwordStrengthMessage: ''
 		});
