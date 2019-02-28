@@ -268,10 +268,9 @@ class IssuesListController implements ng.IController {
 		if (this.issuesService.state.issuesToShow.length > 0) {
 			this.toShow = 'list';
 			const buttonSpace = 70;
-			const numOfIssues = this.issuesService.state.issuesToShow.length;
-			const heights = this.issuesService.state.heights.issuesListItemHeight + buttonSpace;
-			const issuesHeight = numOfIssues * heights;
-			this.contentHeight({height: issuesHeight });
+			const issueListsHeight = this.issuesService.state.issuesToShow.length
+				* this.issuesService.state.heights.issuesListItemHeight;
+			this.contentHeight({height: issueListsHeight  + buttonSpace });
 		} else {
 			this.toShow = 'info';
 			this.info = this.filterChips.length > 0 ? 'No results found' : 'There are currently no open issues';

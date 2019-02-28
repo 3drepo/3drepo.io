@@ -45,31 +45,33 @@ export class APIKeyForm extends React.PureComponent<IProps> {
 					<FormContainer container={true} direction="column">
 						<Headline color="primary" variant="subheading">Api Key</Headline>
 						<FieldsRow container={true} wrap="nowrap">
-								<StyledTextField
-									value={apiKey}
-									disabled={true}
-									margin="normal"
-								/>
+							<StyledTextField
+								value={apiKey}
+								inputProps={{
+									readOnly: true
+								}}
+								margin="normal"
+							/>
 						</FieldsRow>
-							<StyledButtonContainer>
-								<Button
-									color="secondary"
-									variant="raised"
-									disabled={false}
-									type="button"
-									onClick={this.onClickGenerate}
-								>
-									Generate
-								</Button>
-								<DeleteButton
-									variant="raised"
-									disabled={!apiKey}
-									type="button"
-									onClick={this.onClickDelete}
-								>
-									Delete
-								</DeleteButton>
-							</StyledButtonContainer>
+						<StyledButtonContainer>
+							<Button
+								color="secondary"
+								variant="raised"
+								disabled={false}
+								type="button"
+								onClick={this.onClickGenerate}
+							>
+								Generate
+							</Button>
+							<DeleteButton
+								variant="raised"
+								disabled={!apiKey}
+								type="button"
+								onClick={this.onClickDelete}
+							>
+								Delete
+							</DeleteButton>
+						</StyledButtonContainer>
 					</FormContainer>
 				</Form>);
 	}
