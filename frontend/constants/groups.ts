@@ -8,6 +8,14 @@ export const GROUPS_TYPES = {
 	SMART: 'smart'
 };
 
+export const GROUPS_TYPES_LIST = [{
+	label: 'Criteria',
+	type: GROUPS_TYPES.SMART
+}, {
+	label: 'Normal',
+	type: GROUPS_TYPES.NORMAL
+}];
+
 export const GROUPS_ACTIONS_ITEMS = {
 	OVERRIDE_ALL: 'overrideAll',
 	DOWNLOAD: 'download',

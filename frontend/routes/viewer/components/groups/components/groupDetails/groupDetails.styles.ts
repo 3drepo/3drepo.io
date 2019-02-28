@@ -17,26 +17,27 @@
 
 import styled from 'styled-components';
 import FormControl from '@material-ui/core/FormControl';
-import TextField from '@material-ui/core/TextField';
+
+import { TextField } from '../../../../../components/textField/textField.component';
+
 export const Container = styled.div``;
 
 export const FieldsRow = styled.div`
   display: flex;
+  align-items: center;
   margin-top: 10px;
 `;
 
 export const StyledTextField = styled(TextField)`
-  &:first-of-type {
-    width: 100%;
-  }
-
-  &:nth-of-type(2) {
-    width: 80%
-  }
+  width: 100%;
 
   && {
-    margin: 1px 12px 0 0;
+    margin: 0 25px 0 0;
   }
+`;
+
+export const LongLabel = styled.div`
+  white-space: nowrap;
 `;
 
 export const StyledFormControl = styled(FormControl)`
@@ -56,3 +57,5 @@ export const Actions = styled.div`
 export const ColorPickerWrapper = styled.div`
   display: inline;
 `;
+
+export const Description = styled(TextField)``;

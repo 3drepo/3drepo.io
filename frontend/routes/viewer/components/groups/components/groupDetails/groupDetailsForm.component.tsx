@@ -1,22 +1,18 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import * as dayjs from 'dayjs';
-
-import { debounce } from 'lodash';
 import { connect, Field, Form, withFormik } from 'formik';
+import { Select } from '@material-ui/core';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import { TextField } from '../../../../../components/textField/textField.component';
-import { FieldsRow, StyledFormControl, StyledTextField } from './groupDetails.styles';
-import { SelectField } from '../../../../../components/selectField/selectField.component';
-import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
-import { CriteriaField } from '../../../../../components/criteriaField/criteriaField.component';
-import { HiddenField } from './hiddenField.component';
-import { GROUPS_TYPES } from '../../../../../../constants/groups';
-import { Select } from '@material-ui/core';
+import { GROUPS_TYPES, GROUPS_TYPES_LIST } from '../../../../../../constants/groups';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
+import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
+import { CriteriaField } from '../../../../../components/criteriaField/criteriaField.component';
+import { FieldsRow, StyledFormControl, StyledTextField, Description, LongLabel } from './groupDetails.styles';
+import { HiddenField } from './hiddenField.component';
 
 const GroupSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
@@ -60,9 +56,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		if (this.props.group && this.props.group.rules && this.props.group.rules.length) {
-			this.setState({
-				selectedType: GROUPS_TYPES.SMART
-			});
+			this.setState({ selectedType: GROUPS_TYPES.SMART });
 		}
 	}
 
@@ -75,28 +69,8 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public autoSave = debounce(() => {
-		const { formik, handleSubmit } = this.props;
-		if (!formik.isValid) {
-			return;
-		}
-
-		this.setState({ isSaving: true }, () => {
-			this.props.formik.setFieldValue();
-			handleSubmit();
-			this.setState({ isSaving: false });
-		});
-	}, 200);
-
-	public handleFieldChange = (onChange) => (event) => {
-		this.props.setState({
-			newGroup: {
-				...this.props.group,
-				[event.target.name]: event.target.value
-			}
-		});
-
-		onChange(event, event.target.value);
+	public handleTypeChange = (event) => {
+		this.setState({ selectedType: event.target.value });
 	}
 
 	public renderRulesField = renderWhenTrue(
@@ -104,7 +78,6 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			<CriteriaField
 				{...field}
 				{...this.props.critieriaFieldState}
-				onChange={this.handleFieldChange(field.onChange)}
 				setState={this.props.setCriteriaState}
 				label="Criteria"
 				placeholder="Select first criteria"
@@ -114,6 +87,16 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		)}/>
 	);
 
+	public componentWillUnmount() {
+		this.props.setState({ newGroup: this.props.values });
+	}
+
+	public renderTypeSelectItems = () => {
+		return GROUPS_TYPES_LIST.map(({ label, type }) => (
+			<MenuItem key={type} value={type}>{label}</MenuItem>
+		));
+	}
+
 	public render() {
 		const { group: { updatedAt }, groupColor, selectedNodes } = this.props;
 
@@ -121,7 +104,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			<Form>
 				<FieldsRow>
 					<StyledTextField
-						label="Number of objects"
+						label={<LongLabel>Number ob objects</LongLabel>}
 						value={this.props.totalMeshes}
 						disabled
 					/>
@@ -132,16 +115,12 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					/>
 					<StyledFormControl>
 						<InputLabel>Group type</InputLabel>
-						<Select disabled={!this.props.canUpdate} value={this.state.selectedType} onChange={(event) => {
-							this.setState({
-								selectedType: event.target.value
-							});
-						}}>
-							<MenuItem key={GROUPS_TYPES.SMART} value={GROUPS_TYPES.SMART}>
-								Criteria
-							</MenuItem>
-							<MenuItem key={GROUPS_TYPES.NORMAL} value={GROUPS_TYPES.NORMAL}>
-								Normal</MenuItem>
+						<Select
+							disabled={!this.props.canUpdate}
+							value={this.state.selectedType}
+							onChange={this.handleTypeChange}
+						>
+							{this.renderTypeSelectItems()}
 						</Select>
 					</StyledFormControl>
 				</FieldsRow>
@@ -152,13 +131,12 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					<HiddenField {...field}	value={selectedNodes} />
 				)} />
 				<Field name="description" render={({ field }) => (
-					<TextField
+					<Description
 						{...field}
 						validationSchema={GroupSchema}
 						fullWidth
 						multiline
 						label="Description"
-						onChange={this.handleFieldChange(field.onChange)}
 						disabled={!this.props.canUpdate}
 					/>
 				)} />
