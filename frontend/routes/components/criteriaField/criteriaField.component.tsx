@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { uniqBy } from 'lodash';
+import { uniqBy, isEqual } from 'lodash';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import InputLabel from '@material-ui/core/InputLabel';
 
@@ -91,8 +91,12 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleDelete = () => {
+	public handleDelete = (criteriaToRemove) => () => {
+		const selectedCriteria = this.state.selectedCriteria.filter((criteria, index) => {
+			return !isEqual(criteria, criteriaToRemove);
+		});
 
+		this.setState({ selectedCriteria });
 	}
 
 	public handleAddNew = () => {
@@ -114,7 +118,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		<Chip
 			key={index}
 			label={criteria.label}
-			onDelete={this.handleDelete}
+			onDelete={this.handleDelete(criteria)}
 			onClick={this.props.onChipsClick}
 			clickable
 		/>

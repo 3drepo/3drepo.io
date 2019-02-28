@@ -32,8 +32,6 @@ const ChipWrapper = ({ children, ...props }) => (
 	<Container {...props}>{children}</Container>
 );
 
-const toggleActive = ({ active }) => ({ active: !active });
-
 export class Chip extends React.PureComponent<ChipProps & IProps, IState> {
 	public state = {
 		active: false
@@ -44,7 +42,7 @@ export class Chip extends React.PureComponent<ChipProps & IProps, IState> {
 		return (
 			<ChipWrapper
 				{...chipProps}
-				active={active}
+				color={active ? 'primary' : chipProps.color}
 				className={className}
 			/>
 		);

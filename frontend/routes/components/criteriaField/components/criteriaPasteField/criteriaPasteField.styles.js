@@ -4,6 +4,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import CloseIcon from '@material-ui/icons/Close';
 
 import { TextField } from '../../../textField/textField.component';
+import * as TextFieldStyles from '../../../textField/textField.styles';
 
 const pasteIconStyle = css`
   && {
@@ -37,4 +38,8 @@ export const PasteContainer = styled.div`
 
 export const PasteField = styled(TextField)`
   flex: 1;
+
+  ${TextFieldStyles.StyledTextField} {
+    margin: 4px 0;
+  }
 `;

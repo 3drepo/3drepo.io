@@ -39,8 +39,5 @@ export const Container = styled.div`
   border-radius: 16px;
   vertical-align: middle;
   justify-content: center;
-  text-decoration: none;
   background-color: #e0e0e0;
-
-  ${(props: any) => props.active ? activeChipsStyles : ''};
 `;

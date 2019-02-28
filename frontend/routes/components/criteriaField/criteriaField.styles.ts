@@ -36,7 +36,7 @@ export const Container = styled.div`
 
 export const SelectedCriteria = styled.div`
   position: relative;
-  min-height: 45px;
+  min-height: 40px;
   padding: 5px 0;
 `;
 
@@ -68,9 +68,11 @@ export const OptionsList = styled(ListComponent)`
 export const ButtonContainer = styled.div`
   position: absolute;
   right: 0;
-  bottom: 3px;
+  bottom: 0;
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
+  height: 32px;
 `;
 
 export const IconButton = styled(IconButtonComponent)`
