@@ -19,17 +19,22 @@
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 
-// TODO Utilise types for type checking
-/* const fieldTypes = {
+const fieldTypes = {
 	"action": "[object Object]",
 	"comment": "[object String]",
+	"consequence": "[object Number]",
 	"created": "[object Number]",
 	"guid": "[object Object]",
+	"from": "[object String]",
+	"likelihood": "[object Number]",
+	"mitigation": "[object String]",
 	"owner": "[object String]",
+	"pinPosition": "[object Array]",
 	"rev_id": "[object Object]",
 	"sealed": "[object Boolean]",
+	"to": "[object String]",
 	"viewpoint": "[object Object]"
-};*/
+};
 
 class CommentGenerator {
 	constructor(owner, revId = undefined) {
@@ -50,7 +55,7 @@ class CommentGenerator {
 class TextCommentGenerator extends CommentGenerator {
 	constructor(owner, revId, commentText, viewpointGUID) {
 		super(owner, revId);
-		if ("[object String]" === Object.prototype.toString.call(commentText) && commentText.length > 0) {
+		if (fieldTypes.comment === Object.prototype.toString.call(commentText) && commentText.length > 0) {
 			this.comment = commentText;
 
 			if (viewpointGUID) {
@@ -66,11 +71,11 @@ class SystemCommentGenerator extends CommentGenerator {
 	constructor(owner, property, from, to) {
 		super(owner);
 
-		if ("[object String]" !== Object.prototype.toString.call(from)) {
+		if (fieldTypes.from !== Object.prototype.toString.call(from)) {
 			from = from.toString();
 		}
 
-		if ("[object String]" !== Object.prototype.toString.call(to)) {
+		if (fieldTypes.to !== Object.prototype.toString.call(to)) {
 			to = to.toString();
 		}
 
@@ -82,7 +87,29 @@ class SystemCommentGenerator extends CommentGenerator {
 	}
 }
 
+class RiskMitigationCommentGenerator extends CommentGenerator {
+	constructor(owner, revId, likelihood, consequence, mitigation, pinPosition) {
+		super(owner, revId);
+
+		likelihood = parseInt(likelihood);
+		consequence = parseInt(consequence);
+
+		if ((isNaN(likelihood) || fieldTypes.likelihood === Object.prototype.toString.call(likelihood)) &&
+			(isNaN(consequence) || fieldTypes.consequence === Object.prototype.toString.call(consequence)) &&
+			(undefined === mitigation || fieldTypes.mitigation === Object.prototype.toString.call(mitigation)) &&
+			(undefined === pinPosition || fieldTypes.pinPosition === Object.prototype.toString.call(pinPosition))) {
+			this.likelihood = (isNaN(likelihood)) ? undefined : likelihood;
+			this.consequence = (isNaN(consequence)) ? undefined : consequence;
+			this.mitigation = mitigation;
+			this.pinPosition = pinPosition;
+		} else {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+	}
+}
+
 module.exports = {
 	newTextComment : (owner, revId, commentText, viewpointGUID) => new TextCommentGenerator(owner, revId, commentText, viewpointGUID),
-	newSystemComment : (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to)
+	newSystemComment : (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to),
+	newRiskMitigationComment : (owner, revId, likelihood, consequence, mitigation, pinPosition) => new RiskMitigationCommentGenerator(owner, revId, likelihood, consequence, mitigation, pinPosition)
 };
