@@ -13,16 +13,10 @@ import {
 	SelectField,
 	FormControl,
 	NewCriterionFooter,
-	CriteriaList,
-	CriterionType,
-	Operators,
-	SearchField,
-	StyledTextField
 } from './criteriaField.styles';
 import { SubmitButton } from '../submitButton/submitButton.component';
 import { CRITERIA_LIST } from '../../../constants/criteria';
 import { VALIDATIONS_MESSAGES } from '../../../services/validation';
-import { compareStrings } from '../../../helpers/searching';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -60,24 +54,12 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 		</MenuItem>
 	)
 
-	public renderOperators = () => (
-		<CriteriaList subheader={<li />}>
-			{CRITERIA_LIST.map(({ name, operators }) => (
-				<CriterionType key={name}>
-					<Operators>
-						<ListSubheader>{name}</ListSubheader>
-						{operators.map(this.renderOperator)}
-					</Operators>
-				</CriterionType>
-			))}
-		</CriteriaList>
-	)
-	public handleSearchFieldChange = (event) => {
-		const query = event.target.value.trim().toLowerCase();
-		this.setState({
-			fieldNames: this.props.fieldNames.filter((name) => compareStrings(name, query))
-		});
-	}
+	public renderOperators = () =>
+		CRITERIA_LIST.map(({ name, operators }) => [
+				(<ListSubheader>{name}</ListSubheader>),
+				operators.map(this.renderOperator)
+			]
+		)
 
 	public renderFieldNames = () =>
 		this.state.fieldNames.map((name) => (
@@ -91,21 +73,12 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 				<FormControl>
 					<InputLabel shrink>Field</InputLabel>
 					<Field name="field" render={({ field, form }) => (
-						<>
-							<CustomSelectField
-								{...field}
-								MenuProps={{ PaperProps: { style: PaperPropsStyle } }}
-							>
-								<SearchField>
-									<StyledTextField
-										autoFocus
-										placeholder="Search field"
-										onChange={this.handleSearchFieldChange}
-									/>
-								</SearchField>
-								{this.renderFieldNames()}
-							</CustomSelectField>
-						</>
+						<CustomSelectField
+							{...field}
+							MenuProps={{ PaperProps: { style: PaperPropsStyle } }}
+						>
+							{this.renderFieldNames()}
+						</CustomSelectField>
 					)} />
 				</FormControl>
 

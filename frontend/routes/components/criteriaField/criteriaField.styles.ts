@@ -133,20 +133,3 @@ export const NewCriterionFooter = styled.div`
   display: flex;
   justify-content: flex-end;
 `;
-
-export const FieldNames = styled.div`
-  position: relative;
-`;
-
-export const StyledTextField = styled(TextField)`
-  width: 100%;
-  && {
-    margin: 10px 0 0 0;
-  }
-`;
-
-export const SearchField = styled(ListSubheader)`
-  && {
-    background-color: ${COLOR.WHITE};
-  }
-`;
