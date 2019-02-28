@@ -50,8 +50,19 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	subscribeOnChanges: ['teamspace', 'modelId'],
 	unsubscribeFromChanges: ['teamspace', 'modelId'],
 	getFieldNames: ['teamspace', 'modelId'],
-	getFieldNamesSuccess: ['fieldNames']
+	getFieldNamesSuccess: ['fieldNames'],
+	setCriteriaFieldState: ['criteriaFieldState']
 }, { prefix: 'GROUPS/' });
+
+export interface ICriteriaFieldState {
+	pastedCriteria: string;
+	isPasteEnabled: boolean;
+	criterionForm: {
+		field: string;
+		operator: string;
+		values: string[] | number[];
+	};
+}
 
 export interface IGroupComponentState {
 	activeGroup: any;
@@ -64,6 +75,7 @@ export interface IGroupComponentState {
 	colorOverrides: any;
 	overrideAll: boolean;
 	totalMeshes: number;
+	criteriaFieldState: ICriteriaFieldState;
 }
 
 export interface IGroupState {
@@ -86,7 +98,16 @@ export const INITIAL_STATE: IGroupState = {
 		selectedFilters: [],
 		colorOverrides: {},
 		overrideAll: false,
-		totalMeshes: 0
+		totalMeshes: 0,
+		criteriaFieldState: {
+			pastedCriteria: '',
+			isPasteEnabled: false,
+			criterionForm: {
+				field: '',
+				operator: '',
+				values: []
+			}
+		}
 	},
 	fieldNames: []
 };
@@ -100,6 +121,16 @@ export const fetchGroupsSuccess = (state = INITIAL_STATE, { groups = [] }) => {
 
 export const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
+};
+
+export const setCriteriaFieldState = (state = INITIAL_STATE, { criteriaFieldState = {} }) => {
+	return setComponentState(state, { componentState: {
+		...state.componentState,
+		criteriaFieldState: {
+			...state.componentState.criteriaFieldState,
+			...criteriaFieldState
+		}
+	}});
 };
 
 export const addToHighlighted = (state = INITIAL_STATE, { groupId }) => {
@@ -152,5 +183,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.REMOVE_FROM_OVERRIDED]: removeFromOverrided,
 	[GroupsTypes.UPDATE_GROUP_SUCCESS]: updateGroupSuccess,
 	[GroupsTypes.DELETE_GROUP_SUCCESS]: deleteGroupSuccess,
-	[GroupsTypes.GET_FIELD_NAMES_SUCCESS]: getFieldNamesSuccess
+	[GroupsTypes.GET_FIELD_NAMES_SUCCESS]: getFieldNamesSuccess,
+	[GroupsTypes.SET_CRITERIA_FIELD_STATE]: setCriteriaFieldState
 });

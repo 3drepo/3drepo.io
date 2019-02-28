@@ -73,7 +73,7 @@ export class CriteriaPasteField extends React.PureComponent<IProps, IState> {
 
 		if (this.props.onStateChange) {
 			this.setState({ currentValue: event.target.value, isValid: isValidValue}, () => {
-				this.props.onStateChange(this.state);
+				this.props.onStateChange(this.state.currentValue);
 			});
 		}
 	}
@@ -84,6 +84,7 @@ export class CriteriaPasteField extends React.PureComponent<IProps, IState> {
 		return (
 			<PasteContainer>
 				<PasteField
+					value={this.props.initialValue}
 					name={this.props.name}
 					onChange={this.handleStateChange}
 					onPaste={this.handleKeyboardPaste}

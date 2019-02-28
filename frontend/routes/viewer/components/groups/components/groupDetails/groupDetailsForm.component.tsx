@@ -16,6 +16,7 @@ import { HiddenField } from './hiddenField.component';
 import { GROUPS_TYPES } from '../../../../../../constants/groups';
 import { Select } from '@material-ui/core';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
 
 const GroupSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
@@ -33,11 +34,12 @@ interface IProps {
 	groupColor: any[];
 	selectedNodes: any[];
 	fieldNames: any[];
+	critieriaFieldState: ICriteriaFieldState;
 	onSubmit: (values) => void;
-	onValueChange: (event) => void;
 	handleChange: (event) => void;
 	handleSubmit: () => void;
 	setState: (componentState) => void;
+	setCriteriaState: (criteriaState) => void;
 	setIsFormValid: (isFormValid) => void;
 }
 
@@ -86,17 +88,11 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		});
 	}, 200);
 
-	public handleChangeAndSubmit = (event) => {
-		event.persist();
-		this.props.handleChange(event);
-		this.props.handleSubmit();
-	}
-
-	public handleDescriptionChange = (onChange) => (event) => {
+	public handleFieldChange = (onChange) => (event) => {
 		this.props.setState({
 			newGroup: {
 				...this.props.group,
-				description: event.target.value
+				[event.target.name]: event.target.value
 			}
 		});
 
@@ -107,6 +103,9 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		<Field name="rules" render={({ field }) => (
 			<CriteriaField
 				{...field}
+				{...this.props.critieriaFieldState}
+				onChange={this.handleFieldChange(field.onChange)}
+				onStateChange={this.props.setCriteriaState}
 				label="Criteria"
 				placeholder="Select first criteria"
 				disabled={!this.props.canUpdate}
@@ -147,16 +146,10 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					</StyledFormControl>
 				</FieldsRow>
 				<Field name="color" render={({ field }) => (
-					<HiddenField
-						{...field}
-						value={groupColor}
-					/>
+					<HiddenField {...field} value={groupColor} />
 				)} />
 				<Field name="selectedNodes" render={({ field }) => (
-					<HiddenField
-						{...field}
-						value={selectedNodes}
-					/>
+					<HiddenField {...field}	value={selectedNodes} />
 				)} />
 				<Field name="description" render={({ field }) => (
 					<TextField
@@ -165,7 +158,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						fullWidth
 						multiline
 						label="Description"
-						onChange={this.handleDescriptionChange(field.onChange)}
+						onChange={this.handleFieldChange(field.onChange)}
 						disabled={!this.props.canUpdate}
 					/>
 				)} />

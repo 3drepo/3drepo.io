@@ -29,6 +29,7 @@ import { Container, ColorPickerWrapper, Actions } from './groupDetails.styles';
 import { GroupDetailsForm } from './groupDetailsForm.component';
 import { ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
 import { getGroupRGBAColor, hexToArray } from '../../../../../../helpers/colors';
+import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
 
 interface IProps {
 	group: any;
@@ -43,9 +44,11 @@ interface IProps {
 	canUpdate: boolean;
 	selectedNodes: any;
 	fieldNames: any[];
+	critieriaFieldState: ICriteriaFieldState;
 	createGroup: (teamspace, modelId) => void;
 	updateGroup: (teamspace, modelId, groupId) => void;
 	setState: (componentState) => void;
+	setCriteriaState: (criteriaState) => void;
 	selectGroup: () => void;
 }
 interface IState {
@@ -133,6 +136,8 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				setIsFormValid={this.setIsFormValid}
 				selectedNodes={this.props.selectedNodes}
 				fieldNames={this.props.fieldNames}
+				critieriaFieldState={this.props.critieriaFieldState}
+				setCriteriaState={this.props.setCriteriaState}
 			/>
 		</PreviewDetails>
 	));

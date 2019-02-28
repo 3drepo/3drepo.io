@@ -18,7 +18,7 @@ export const PasteButton = styled(IconButtonComponent)`
 		height: 28px;
     padding: 4px;
     margin-left: 5px;
-    margin-top: 9px;
+    margin-top: 5px;
 	}
 `;
 

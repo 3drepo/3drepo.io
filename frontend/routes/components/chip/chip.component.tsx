@@ -38,12 +38,13 @@ export class Chip extends React.PureComponent<ChipProps & IProps, IState> {
 	};
 
 	public getWrapperComponent = (chipProps) => {
-		const { className, active } = this.props;
+		const { className, active, onClick } = this.props;
 		return (
 			<ChipWrapper
 				{...chipProps}
 				color={active ? 'primary' : chipProps.color}
 				className={className}
+				onClick={onClick}
 			/>
 		);
 	}

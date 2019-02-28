@@ -36,6 +36,7 @@ import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { NewCriterionForm } from './newCriterionForm.component';
 import { CriteriaPasteField } from './components/criteriaPasteField/criteriaPasteField.components';
 import { Chip } from '../chip/chip.component';
+import { ICriteriaFieldState } from '../../../modules/groups/groups.redux';
 
 interface IProps {
 	className?: string;
@@ -45,14 +46,15 @@ interface IProps {
 	criteria: any;
 	disabled: boolean;
 	fieldNames: any[];
+	isPasteEnabled: boolean;
+	pastedCriteria: string;
 	onChange: (criteria) => void;
-	onFormChange: (criterion) => void;
+	onStateChange: (criteriaState) => void;
 	onChipsClick: (event?) => void;
 }
 
 interface IState {
 	selectedCriteria?: any[];
-	pasteMode?: boolean;
 }
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
@@ -69,38 +71,39 @@ const compareCriteria = ({ operator, values = [] }) => `${operator}.${values.joi
 
 export class CriteriaField extends React.PureComponent<IProps, IState> {
 	public state = {
-		selectedCriteria: [{
-			label: 'Test criteria basasd asd a',
-			operator: 'LTE'
-		}, {
-			label: 'Teasdaasd',
-			operator: 'GTE'
-		}, {
-			label: 'Teasdaasd',
-			operator: 'LT'
-		}, {
-			label: 'Teasdaasd',
-			operator: 'LT'
-		}],
-		pasteMode: false
+		selectedCriteria: []
 	};
 
 	public componentDidMount() {
 		if (this.props.value) {
-			// this.setState({ selectedCriteria: this.props.value });
+			this.setState({ selectedCriteria: this.props.value });
 		}
 	}
-
 	public handleDelete = (criteriaToRemove) => () => {
-		const selectedCriteria = this.state.selectedCriteria.filter((criteria, index) => {
+		const selectedCriteria = this.props.value.filter((criteria, index) => {
 			return !isEqual(criteria, criteriaToRemove);
 		});
 
-		this.setState({ selectedCriteria });
+		this.setState({ selectedCriteria }, this.handleChange);
 	}
 
-	public handleAddNew = () => {
+	public clearCriteria = () => {
+		this.setState({ selectedCriteria: [] }, this.handleChange);
+	}
 
+	public togglePasteMode = () => {
+		this.props.onStateChange(({ isPasteEnabled: !this.props.isPasteEnabled }));
+	}
+
+	public deselectCriterion = () => {
+
+	}
+
+	public handleAddNew = (newCriterion) => {
+		this.setState(
+			({ selectedCriteria }) => ({ selectedCriteria: [...selectedCriteria, newCriterion]}),
+			this.handleChange
+		);
 	}
 
 	public handleChange = () => {
@@ -114,18 +117,8 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public renderCriterion = (criteria, index) => (
-		<Chip
-			key={index}
-			label={criteria.label}
-			onDelete={this.handleDelete(criteria)}
-			onClick={this.props.onChipsClick}
-			clickable
-		/>
-	)
-
-	public handlePasteFieldChange = () => {
-		// this.props.onFormChange();
+	public handlePasteFieldChange = (pastedCriteria) => {
+		this.props.onStateChange({ pastedCriteria });
 	}
 
 	public handlePaste = (pastedCriteria) => {
@@ -138,10 +131,24 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		}), this.handleChange);
 	}
 
+	public handleCriteriaClick = (criteria) => () => {
+		this.props.onChipsClick(criteria);
+	}
+
+	public renderCriterion = (criteria, index) => (
+		<Chip
+			key={index}
+			label={criteria.label}
+			onDelete={this.handleDelete(criteria)}
+			onClick={this.handleCriteriaClick(criteria)}
+			clickable
+		/>
+	)
+
 	public renderCriteriaField = renderWhenTrue(() => (
 		<CriteriaPasteField
 			name="pasteField"
-			initialValue=""
+			initialValue={this.props.pastedCriteria}
 			onChange={this.handlePaste}
 			onStateChange={this.handlePasteFieldChange}
 			onCancel={this.togglePasteMode}
@@ -150,33 +157,17 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 
 	public renderCriteriaChips = renderWhenTrue(() => (
 		<ChipsContainer>
-			{this.state.selectedCriteria.map(this.renderCriterion)}
+			{this.props.value.map(this.renderCriterion)}
 		</ChipsContainer>
 	));
 
 	public renderCopyOption = () => (
-		<CopyToClipboard text={JSON.stringify(this.state.selectedCriteria)}>
+		<CopyToClipboard text={JSON.stringify(this.props.value)}>
 			<MenuItem>
 				Copy filters
 			</MenuItem>
 		</CopyToClipboard>
 	)
-
-	public handlePasteSave = () => {
-
-	}
-
-	public togglePasteMode = () => {
-		this.setState(({ pasteMode }) => ({ pasteMode: !pasteMode }));
-	}
-
-	public deselectCriterion = () => {
-
-	}
-
-	public clearCriteria = () => {
-		this.setState({ selectedCriteria: [] });
-	}
 
 	public renderOptions = () => {
 		const options = [{
@@ -229,9 +220,9 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 			<Container className={this.props.className}>
 				<InputLabel shrink>{this.props.label}</InputLabel>
 				<SelectedCriteria>
-					{this.renderCriteriaChips(!!this.state.selectedCriteria.length)}
-					{this.renderCriteriaField(this.state.pasteMode)}
-					{this.renderOptionsMenu(!this.state.pasteMode)}
+					{this.renderCriteriaChips(!!this.props.value.length)}
+					{this.renderCriteriaField(this.props.isPasteEnabled)}
+					{this.renderOptionsMenu(!this.props.isPasteEnabled)}
 				</SelectedCriteria>
 				{this.renderForm()}
 			</Container>
