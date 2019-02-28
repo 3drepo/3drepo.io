@@ -25,6 +25,14 @@ import { SubmitButton } from '../submitButton/submitButton.component';
 import { CRITERIA_LIST } from '../../../constants/criteria';
 import { VALIDATIONS_MESSAGES } from '../../../services/validation';
 
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const PaperPropsStyle = {
+	maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+	width: 250,
+	transform: 'translate3d(0, 0, 0)'
+};
+
 const CriterionSchema = Yup.object().shape({
 	field: Yup.string().required(),
 	operation: Yup.string().required()
@@ -60,7 +68,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 
 	public renderFieldNames = () => 
 		this.props.fieldNames.map((name) => (
-			<MenuItem key={name}>{name}</MenuItem>
+			<MenuItem key={name} value={name}>{name}</MenuItem>
 		))
 
 	public render() {
@@ -71,6 +79,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 					<Field name="field" render={({ field, form }) => (
 						<CustomSelectField
 							{...field}
+							MenuProps={{ PaperProps: { style: PaperPropsStyle } }}
 						>
 							{this.renderFieldNames()}
 						</CustomSelectField>
