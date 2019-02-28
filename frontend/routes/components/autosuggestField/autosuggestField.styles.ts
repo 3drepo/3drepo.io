@@ -23,9 +23,6 @@ import { TextField } from '../textField/textField.component';
 export const Container = styled.div``;
 
 export const StyledTextField = styled(TextField)`
-	&& {
- 		margin: 8px 0;
-	}
 `;
 
 export const SuggestionsList = styled(Popper)`

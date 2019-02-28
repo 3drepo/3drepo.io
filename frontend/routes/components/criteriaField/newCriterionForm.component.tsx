@@ -9,7 +9,9 @@ import { SelectField as CustomSelectField } from '../../components/selectField/s
 import { TextField } from '../textField/textField.component';
 import { SelectField, FormControl, NewCriterionFooter, OperatorSubheader } from './criteriaField.styles';
 import { SubmitButton } from '../submitButton/submitButton.component';
+import { CriteriaValueField } from './components/criteriaValueField/criteriaValueField.components';
 import { CRITERIA_LIST } from '../../../constants/criteria';
+import { AutosuggestField } from '../autosuggestField/autosuggestField.component';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -29,6 +31,7 @@ interface IProps {
 	values: any;
 	criterion: any;
 	fieldNames: any[];
+	formik: any;
 	setState: (criterionForm) => void;
 	onSubmit: (values) => void;
 }
@@ -47,28 +50,22 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 			]
 		)
 
-	public renderFieldNames = () =>
-		this.props.fieldNames.map((name) => (
-			<MenuItem key={name} value={name}>{name}</MenuItem>
-		)
-	)
-
 	public componentWillUnmount() {
 		this.props.setState(this.props.values);
 	}
 
 	public render() {
+		const { values } = this.props.formik;
+		console.log('formik', values)
 		return (
 			<Form>
 				<FormControl>
 					<InputLabel shrink>Field</InputLabel>
 					<Field name="field" render={({ field }) => (
-						<CustomSelectField
+						<AutosuggestField 
 							{...field}
-							MenuProps={{ PaperProps: { style: PaperPropsStyle } }}
-						>
-							{this.renderFieldNames()}
-						</CustomSelectField>
+							suggestions={this.props.fieldNames}
+						/>
 					)} />
 				</FormControl>
 
@@ -85,15 +82,13 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 				</FormControl>
 
 				<Field name="values" render={({ field }) => (
-					<TextField
-						{...field}
-						label="Value"
-						placeholder="Set value"
-						fullWidth
-						InputLabelProps={{
-							shrink: true
-						}}
-					/>
+					<FormControl>
+						<InputLabel shrink>Value</InputLabel>
+						<CriteriaValueField 
+							{...field}
+							value={field.value}
+						/>
+					</FormControl>
 				)} />
 
 				<NewCriterionFooter>

@@ -18,8 +18,8 @@
 import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
 import MenuItem from '@material-ui/core/MenuItem';
-import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
+import { Highlight } from '../highlight/highlight.component';
 
 import { Container, SuggestionsList, StyledTextField } from './autosuggestField.styles';
 
@@ -82,9 +82,9 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 		this.setState({ value: newValue });
 	}
 
-	public renderSuggestion = (suggestion, { isHighlighted }) => (
+	public renderSuggestion = (suggestion, { isHighlighted, query }) => (
 		<MenuItem selected={isHighlighted} component="div">
-			{suggestion}
+			<Highlight text={suggestion} search={query} />
 		</MenuItem>
 	)
 
@@ -121,6 +121,25 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 		);
 	}
 
+	public handleKeyUp = () => {
+		const list = document.querySelector('.react-autosuggest__suggestions-list');
+		if (list) {
+			const item = list.querySelector('[aria-selected="true"]') as any;
+			if (item) {
+				list.scrollTo({
+					top: item.offsetTop + item.clientHeight - list.clientHeight,
+					behavior: 'smooth'
+				});
+			}
+		}
+	}
+
+	public handleAutoSuggestMount = (autoSuggestComponent) => {
+		if (autoSuggestComponent && autoSuggestComponent.input) {
+			autoSuggestComponent.input.addEventListener('keyup', this.handleKeyUp);
+		}
+	}
+
 	public render() {
 		const { value, suggestions } = this.state;
 		const { label, onBlur, name } = this.props;
@@ -128,6 +147,7 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 		return (
 			<Container>
 				<Autosuggest
+					ref={this.handleAutoSuggestMount}
 					suggestions={suggestions}
 					onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
 					onSuggestionsClearRequested={this.onSuggestionsClearRequested}
