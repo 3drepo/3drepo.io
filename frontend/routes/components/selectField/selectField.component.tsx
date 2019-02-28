@@ -89,8 +89,10 @@ export class SelectField extends React.PureComponent<any, any> {
 	}
 
 	public handleClose = () => {
-		this.menuWrapper.removeEventListener('keypress', this.handleKeyPress);
-		this.menuWrapper.removeEventListener('mousemove', this.handleMouseMove);
+		if (this.menuWrapper) {
+			this.menuWrapper.removeEventListener('keypress', this.handleKeyPress);
+			this.menuWrapper.removeEventListener('mousemove', this.handleMouseMove);
+		}
 		this.menuItems = null;
 		this.menuWrapper = null;
 		this.selectedItem = null;

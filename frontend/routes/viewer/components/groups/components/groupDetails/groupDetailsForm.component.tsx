@@ -13,6 +13,9 @@ import { SelectField } from '../../../../../components/selectField/selectField.c
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CriteriaField } from '../../../../../components/criteriaField/criteriaField.component';
 import { HiddenField } from './hiddenField.component';
+import { GROUPS_TYPES } from '../../../../../../constants/groups';
+import { Select } from '@material-ui/core';
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
 
 const GroupSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
@@ -29,6 +32,7 @@ interface IProps {
 	canUpdate: boolean;
 	groupColor: any[];
 	selectedNodes: any[];
+	fieldNames: any[];
 	onSubmit: (values) => void;
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
@@ -39,15 +43,25 @@ interface IProps {
 
 interface IState {
 	isSaving: boolean;
+	selectedType: string;
 }
 
 class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	public state = {
-		isSaving: false
+		isSaving: false,
+		selectedType: GROUPS_TYPES.SMART
 	};
 
 	get isNewGroup() {
 		return !this.props.group._id;
+	}
+
+	public componentDidMount() {
+		if (this.props.group.rules.length) {
+			this.setState({
+				selectedType: GROUPS_TYPES.SMART
+			});
+		}
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -89,6 +103,18 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		onChange(event, event.target.value);
 	}
 
+	public renderRulesField = renderWhenTrue(
+		<Field name="rules" render={({ field }) => (
+			<CriteriaField
+				{...field}
+				label="Criteria"
+				placeholder="Select first criteria"
+				disabled={!this.props.canUpdate}
+				fieldNames={this.props.fieldNames}
+			/>
+		)}/>
+	);
+
 	public render() {
 		const { group: { updatedAt }, groupColor, selectedNodes } = this.props;
 
@@ -107,12 +133,17 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					/>
 					<StyledFormControl>
 						<InputLabel>Group type</InputLabel>
-						<Field name="type" render={({ field }) => (
-							<SelectField {...field} disabled={!this.props.canUpdate}>
-								<MenuItem key={'smart'} value={'smart'}>Criteria</MenuItem>
-								<MenuItem key={'normal'} value={'normal'}>Normal</MenuItem>
-							</SelectField>
-						)} />
+						<Select disabled={!this.props.canUpdate} value={this.state.selectedType} onChange={(event) => {
+							this.setState({
+								selectedType: event.target.value
+							});
+						}}>
+							<MenuItem key={GROUPS_TYPES.SMART} value={GROUPS_TYPES.SMART}>
+								Criteria
+							</MenuItem>
+							<MenuItem key={GROUPS_TYPES.NORMAL} value={GROUPS_TYPES.NORMAL}>
+								Normal</MenuItem>
+						</Select>
 					</StyledFormControl>
 				</FieldsRow>
 				<Field name="color" render={({ field }) => (
@@ -138,15 +169,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						disabled={!this.props.canUpdate}
 					/>
 				)} />
-				<Field name="rules" render={({ field }) => (
-					<CriteriaField
-						{...field}
-						label="Criteria"
-						placeholder="Select first criteria"
-						disabled={!this.props.canUpdate}
-						fieldNames={this.props.fieldNames}
-					/>
-				)}/>
+				{this.renderRulesField(this.state.selectedType === GROUPS_TYPES.SMART)}
 			</Form>
 		);
 	}

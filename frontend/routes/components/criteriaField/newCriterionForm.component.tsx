@@ -66,7 +66,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 		</CriteriaList>
 	)
 
-	public renderFieldNames = () => 
+	public renderFieldNames = () =>
 		this.props.fieldNames.map((name) => (
 			<MenuItem key={name} value={name}>{name}</MenuItem>
 		))
@@ -89,9 +89,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 				<FormControl>
 					<InputLabel shrink>Operation</InputLabel>
 					<Field name="operator" render={({ field, form }) => (
-						<SelectField
-							{...field}
-						>
+						<SelectField {...field}>
 							{this.renderOperators()}
 						</SelectField>
 					)} />
