@@ -10,7 +10,6 @@ import { TextField } from '../textField/textField.component';
 import { SelectField, FormControl, NewCriterionFooter, OperatorSubheader } from './criteriaField.styles';
 import { SubmitButton } from '../submitButton/submitButton.component';
 import { CRITERIA_LIST } from '../../../constants/criteria';
-import { VALIDATIONS_MESSAGES } from '../../../services/validation';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -23,26 +22,18 @@ const PaperPropsStyle = {
 const CriterionSchema = Yup.object().shape({
 	field: Yup.string().required(),
 	operator: Yup.string().required(),
-	value: Yup.string().required()
+	values: Yup.array()
 });
 
 interface IProps {
+	values: any;
 	criterion: any;
 	fieldNames: any[];
+	setState: (criterionForm) => void;
 	onSubmit: (values) => void;
 }
 
 class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
-	public state = {
-		fieldNames: []
-	};
-
-	public componentDidMount() {
-		this.setState({
-			fieldNames: this.props.fieldNames
-		});
-	}
-
 	public renderOperator = ({ operator, label }) => (
 		<MenuItem key={operator} value={operator}>
 			{label}
@@ -57,17 +48,21 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 		)
 
 	public renderFieldNames = () =>
-		this.state.fieldNames.map((name) => (
+		this.props.fieldNames.map((name) => (
 			<MenuItem key={name} value={name}>{name}</MenuItem>
 		)
 	)
+
+	public componentWillUnmount() {
+		this.props.setState(this.props.values);
+	}
 
 	public render() {
 		return (
 			<Form>
 				<FormControl>
 					<InputLabel shrink>Field</InputLabel>
-					<Field name="field" render={({ field, form }) => (
+					<Field name="field" render={({ field }) => (
 						<CustomSelectField
 							{...field}
 							MenuProps={{ PaperProps: { style: PaperPropsStyle } }}
@@ -79,7 +74,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 
 				<FormControl>
 					<InputLabel shrink>Operation</InputLabel>
-					<Field name="operator" render={({ field, form }) => (
+					<Field name="operator" render={({ field }) => (
 						<SelectField
 							{...field}
 							MenuProps={{ PaperProps: { style: PaperPropsStyle } }}
@@ -89,7 +84,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 					)} />
 				</FormControl>
 
-				<Field name="value" render={({ field }) => (
+				<Field name="values" render={({ field }) => (
 					<TextField
 						{...field}
 						label="Value"
@@ -115,7 +110,7 @@ export const NewCriterionForm = withFormik({
 	mapPropsToValues: ({ criterion }) => ({
 		field: criterion.field,
 		operator: criterion.operator,
-		value: criterion.value
+		values: criterion.values
 	}),
 	handleSubmit: (values, { props }) => {
 		(props as IProps).onSubmit(values);

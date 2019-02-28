@@ -23,7 +23,7 @@ const areValidCriteria = (value) => {
 
 	try {
 		const parsedCriteria = JSON.parse(value);
-		return !parsedCriteria.some(({ label, operator }) => !label || !operator);
+		return !parsedCriteria.some(({ field, operator }) => !field || !operator);
 	} catch (error) {
 		return false;
 	}

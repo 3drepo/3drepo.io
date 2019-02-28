@@ -17,8 +17,7 @@
 
 import * as React from 'react';
 import ChipComponent, { ChipProps } from '@material-ui/core/Chip';
-
-import { Container } from './chip.styles';
+import { ChipWrapper } from './components/chipWrapper.component';
 
 interface IProps {
 	className?: string;
@@ -26,11 +25,8 @@ interface IProps {
 }
 
 interface IState {
+	active?: boolean;
 }
-
-const ChipWrapper = ({ children, ...props }) => (
-	<Container {...props}>{children}</Container>
-);
 
 export class Chip extends React.PureComponent<ChipProps & IProps, IState> {
 	public state = {

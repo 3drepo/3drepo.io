@@ -105,7 +105,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				{...field}
 				{...this.props.critieriaFieldState}
 				onChange={this.handleFieldChange(field.onChange)}
-				onStateChange={this.props.setCriteriaState}
+				setState={this.props.setCriteriaState}
 				label="Criteria"
 				placeholder="Select first criteria"
 				disabled={!this.props.canUpdate}

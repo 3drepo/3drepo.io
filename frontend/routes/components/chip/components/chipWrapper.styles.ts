@@ -15,12 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { COLOR } from '../../../styles';
-
-const activeChipsStyles = css`
-  background-color: ${COLOR.PRIMARY_MAIN};
-`;
+import styled from 'styled-components';
+import { COLOR } from '../../../../styles';
 
 export const Container = styled.div`
   display: flex;
