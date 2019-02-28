@@ -104,7 +104,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			<Form>
 				<FieldsRow>
 					<StyledTextField
-						label={<LongLabel>Number ob objects</LongLabel>}
+						label={<LongLabel>Number of objects</LongLabel>}
 						value={this.props.totalMeshes}
 						disabled
 					/>
