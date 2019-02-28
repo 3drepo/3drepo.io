@@ -122,6 +122,7 @@ export const SelectField = styled(SelectFieldComponent)`
 
 export const MenuItem = styled(MenuItemComponent)`
   && {
+    color: ${COLOR.BLACK_87};
     padding: 4px 10px;
     height: 30px;
     min-width: 180px;
@@ -132,4 +133,15 @@ export const NewCriterionFooter = styled.div`
   margin-top: 8px;
   display: flex;
   justify-content: flex-end;
+`;
+
+export const OperatorSubheader = styled(ListSubheader)`
+  &:not(:first-of-type) {
+    border-top: 1px solid ${COLOR.BLACK_6};
+  }
+
+  && {
+    background-color: ${COLOR.WHITE};
+    color: ${COLOR.BLACK_60}
+  }
 `;

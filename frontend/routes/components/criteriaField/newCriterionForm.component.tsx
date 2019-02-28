@@ -5,15 +5,9 @@ import { Form, Field, withFormik, connect } from 'formik';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import ListSubheader from '@material-ui/core/ListSubheader';
 import { SelectField as CustomSelectField } from '../../components/selectField/selectField.component';
-
 import { TextField } from '../textField/textField.component';
-import {
-	SelectField,
-	FormControl,
-	NewCriterionFooter,
-} from './criteriaField.styles';
+import { SelectField, FormControl, NewCriterionFooter, OperatorSubheader } from './criteriaField.styles';
 import { SubmitButton } from '../submitButton/submitButton.component';
 import { CRITERIA_LIST } from '../../../constants/criteria';
 import { VALIDATIONS_MESSAGES } from '../../../services/validation';
@@ -57,7 +51,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 
 	public renderOperators = () =>
 		CRITERIA_LIST.map(({ name, operators }) => [
-				(<ListSubheader>{name}</ListSubheader>),
+				(<OperatorSubheader>{name}</OperatorSubheader>),
 				operators.map(this.renderOperator)
 			]
 		)
@@ -86,7 +80,10 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 				<FormControl>
 					<InputLabel shrink>Operation</InputLabel>
 					<Field name="operator" render={({ field, form }) => (
-						<SelectField {...field}>
+						<SelectField
+							{...field}
+							MenuProps={{ PaperProps: { style: PaperPropsStyle } }}
+						>
 							{this.renderOperators()}
 						</SelectField>
 					)} />
