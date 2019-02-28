@@ -18,10 +18,10 @@
 import * as React from 'react';
 import { uniqBy, isEqual } from 'lodash';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import InputLabel from '@material-ui/core/InputLabel';
 
 import {
 	Container,
+	InputLabel,
 	ChipsContainer,
 	ButtonContainer,
 	IconButton,
@@ -29,7 +29,8 @@ import {
 	SelectedCriteria,
 	FormContainer,
 	MenuItem,
-	OptionsList
+	OptionsList,
+	Placeholder
 } from './criteriaField.styles';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
@@ -134,6 +135,10 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		this.props.onChipsClick(criteria);
 	}
 
+	public renderPlaceholder = renderWhenTrue(() => (
+		<Placeholder>Add first criterion below</Placeholder>
+	));
+
 	public renderCriterion = (criteria, index) => (
 		<Chip
 			key={index}
@@ -219,6 +224,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 			<Container className={this.props.className}>
 				<InputLabel shrink>{this.props.label}</InputLabel>
 				<SelectedCriteria>
+					{this.renderPlaceholder(!this.props.value.length && !this.props.isPasteEnabled)}
 					{this.renderCriteriaChips(!!this.props.value.length)}
 					{this.renderCriteriaField(this.props.isPasteEnabled)}
 					{this.renderOptionsMenu(!this.props.isPasteEnabled)}

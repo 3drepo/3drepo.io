@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import ChipComponent from '@material-ui/core/Chip';
 import IconButtonComponent from '@material-ui/core/IconButton';
 import FormControlComponent from '@material-ui/core/FormControl';
@@ -36,6 +36,14 @@ export const Container = styled.div`
 export const InputLabel = styled(InputLabelComponent)`
   && {
     font-size: 11px;
+  }
+`;
+
+export const Placeholder = styled.div`
+  && {
+    padding-top: 13px;
+    color: ${COLOR.BLACK_30};
+    font-size: 14px;
   }
 `;
 
