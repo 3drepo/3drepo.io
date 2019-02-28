@@ -5,10 +5,6 @@ import { Form, Field, withFormik, connect } from 'formik';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import Label from '@material-ui/core/FormLabel';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-
 import ListSubheader from '@material-ui/core/ListSubheader';
 import { SelectField as CustomSelectField } from '../../components/selectField/selectField.component';
 
@@ -19,11 +15,14 @@ import {
 	NewCriterionFooter,
 	CriteriaList,
 	CriterionType,
-	Operators
+	Operators,
+	SearchField,
+	StyledTextField
 } from './criteriaField.styles';
 import { SubmitButton } from '../submitButton/submitButton.component';
 import { CRITERIA_LIST } from '../../../constants/criteria';
 import { VALIDATIONS_MESSAGES } from '../../../services/validation';
+import { compareStrings } from '../../../helpers/searching';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -45,7 +44,15 @@ interface IProps {
 }
 
 class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
-	public componentDidMount() {}
+	public state = {
+		fieldNames: []
+	};
+
+	public componentDidMount() {
+		this.setState({
+			fieldNames: this.props.fieldNames
+		});
+	}
 
 	public renderOperator = ({ operator, label }) => (
 		<MenuItem key={operator} value={operator}>
@@ -65,11 +72,18 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 			))}
 		</CriteriaList>
 	)
+	public handleSearchFieldChange = (event) => {
+		const query = event.target.value.trim().toLowerCase();
+		this.setState({
+			fieldNames: this.props.fieldNames.filter((name) => compareStrings(name, query))
+		});
+	}
 
 	public renderFieldNames = () =>
-		this.props.fieldNames.map((name) => (
+		this.state.fieldNames.map((name) => (
 			<MenuItem key={name} value={name}>{name}</MenuItem>
-		))
+		)
+	)
 
 	public render() {
 		return (
@@ -77,12 +91,21 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 				<FormControl>
 					<InputLabel shrink>Field</InputLabel>
 					<Field name="field" render={({ field, form }) => (
-						<CustomSelectField
-							{...field}
-							MenuProps={{ PaperProps: { style: PaperPropsStyle } }}
-						>
-							{this.renderFieldNames()}
-						</CustomSelectField>
+						<>
+							<CustomSelectField
+								{...field}
+								MenuProps={{ PaperProps: { style: PaperPropsStyle } }}
+							>
+								<SearchField>
+									<StyledTextField
+										autoFocus
+										placeholder="Search field"
+										onChange={this.handleSearchFieldChange}
+									/>
+								</SearchField>
+								{this.renderFieldNames()}
+							</CustomSelectField>
+						</>
 					)} />
 				</FormControl>
 

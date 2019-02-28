@@ -57,7 +57,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		if (this.props.group.rules.length) {
+		if (this.props.group && this.props.group.rules && this.props.group.rules.length) {
 			this.setState({
 				selectedType: GROUPS_TYPES.SMART
 			});

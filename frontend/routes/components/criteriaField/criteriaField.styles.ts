@@ -20,14 +20,14 @@ import ChipComponent from '@material-ui/core/Chip';
 import IconButtonComponent from '@material-ui/core/IconButton';
 import FormControlComponent from '@material-ui/core/FormControl';
 import MoreIcon from '@material-ui/icons/MoreVert';
-import SaveIcon from '@material-ui/icons/Save';
-import CloseIcon from '@material-ui/icons/Close';
+import Input from '@material-ui/core/Input';
+import TextField from '@material-ui/core/TextField';
 
 import ListComponent from '@material-ui/core/List';
 import MenuItemComponent from '@material-ui/core/MenuItem';
+import ListSubheader from '@material-ui/core/ListSubheader';
 
 import { SelectField as SelectFieldComponent } from '../selectField/selectField.component';
-import { TextField } from '../textField/textField.component';
 import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
@@ -132,4 +132,21 @@ export const NewCriterionFooter = styled.div`
   margin-top: 8px;
   display: flex;
   justify-content: flex-end;
+`;
+
+export const FieldNames = styled.div`
+  position: relative;
+`;
+
+export const StyledTextField = styled(TextField)`
+  width: 100%;
+  && {
+    margin: 10px 0 0 0;
+  }
+`;
+
+export const SearchField = styled(ListSubheader)`
+  && {
+    background-color: ${COLOR.WHITE};
+  }
 `;
