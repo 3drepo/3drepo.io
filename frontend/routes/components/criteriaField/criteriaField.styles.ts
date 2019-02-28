@@ -20,8 +20,7 @@ import ChipComponent from '@material-ui/core/Chip';
 import IconButtonComponent from '@material-ui/core/IconButton';
 import FormControlComponent from '@material-ui/core/FormControl';
 import MoreIcon from '@material-ui/icons/MoreVert';
-import Input from '@material-ui/core/Input';
-import TextField from '@material-ui/core/TextField';
+import InputLabelComponent from '@material-ui/core/InputLabel';
 
 import ListComponent from '@material-ui/core/List';
 import MenuItemComponent from '@material-ui/core/MenuItem';
@@ -32,6 +31,12 @@ import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
   margin: 8px 0;
+`;
+
+export const InputLabel = styled(InputLabelComponent)`
+  && {
+    font-size: 11px;
+  }
 `;
 
 export const SelectedCriteria = styled.div`
@@ -141,6 +146,8 @@ export const OperatorSubheader = styled(ListSubheader)`
   }
 
   && {
+    outline: none;
+    padding-left: 16px;
     background-color: ${COLOR.WHITE};
     color: ${COLOR.BLACK_60}
   }

@@ -36,7 +36,6 @@ import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { NewCriterionForm } from './newCriterionForm.component';
 import { CriteriaPasteField } from './components/criteriaPasteField/criteriaPasteField.components';
 import { Chip } from '../chip/chip.component';
-import { ICriteriaFieldState } from '../../../modules/groups/groups.redux';
 
 interface IProps {
 	className?: string;
