@@ -538,7 +538,8 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							(("[object Object]" !== fieldTypes[key] && "[object Array]" !== fieldTypes[key] && data[key] !== newIssue[key])
 							|| !_.isEqual(newIssue[key], data[key]))) {
 							if (null === data[key] || Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
-								if ("comment" === key || "commentIndex" === key) {
+								if ("comment" === key ||
+									("commentIndex" === key && -1 === Object.keys(data).indexOf("comment"))) {
 									const updatedComments = updateTextComments(
 										dbCol.account,
 										dbCol.model,
