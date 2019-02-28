@@ -28,7 +28,8 @@ const PaperPropsStyle = {
 
 const CriterionSchema = Yup.object().shape({
 	field: Yup.string().required(),
-	operation: Yup.string().required()
+	operator: Yup.string().required(),
+	value: Yup.string().required()
 });
 
 interface IProps {
