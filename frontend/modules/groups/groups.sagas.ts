@@ -64,7 +64,10 @@ export function* setActiveGroup({ group, revision }) {
 
 		yield all([
 			put(GroupsActions.selectGroup(group, filteredGroups, revision)),
-			put(GroupsActions.setComponentState({ activeGroup: group._id }))
+			put(GroupsActions.setComponentState({
+				activeGroup: group._id,
+				newGroup: group
+			}))
 		]);
 
 	} catch (error) {
@@ -244,7 +247,7 @@ export function* deleteGroups({ teamspace, modelId, groups }) {
 
 			return [
 				put(GroupsActions.removeColorOverride(groupId, overridedGroup)),
-				put(GroupsActions.dehighlightGroup(group)),
+				put(GroupsActions.dehighlightGroup(group))
 				// put(GroupsActions.deleteGroupSuccess(groupId))
 			];
 		}));

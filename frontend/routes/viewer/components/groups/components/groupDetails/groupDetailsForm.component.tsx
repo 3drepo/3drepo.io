@@ -69,6 +69,15 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public handleFieldChange = (onChange) => (event) => {
+		this.props.setState({
+			newGroup: {
+				...this.props.group,
+				[event.target.name]: event.target.value
+			}
+		});
+	}
+
 	public handleTypeChange = (event) => {
 		this.setState({ selectedType: event.target.value });
 	}
@@ -82,6 +91,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			<CriteriaField
 				{...field}
 				{...this.props.critieriaFieldState}
+				onChange={this.handleFieldChange(field.onChange)}
 				onCriterionSelect={this.handleCriterionSelect}
 				setState={this.props.setCriteriaState}
 				label="Criteria"
@@ -91,10 +101,6 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			/>
 		)}/>
 	);
-
-	public componentWillUnmount() {
-		this.props.setState({ newGroup: this.props.values });
-	}
 
 	public renderTypeSelectItems = () => {
 		return GROUPS_TYPES_LIST.map(({ label, type }) => (
@@ -138,6 +144,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				<Field name="description" render={({ field }) => (
 					<Description
 						{...field}
+						onChange={this.handleFieldChange(field.onChange)}
 						validationSchema={GroupSchema}
 						fullWidth
 						multiline

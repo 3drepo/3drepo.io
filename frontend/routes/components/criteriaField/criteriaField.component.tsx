@@ -73,13 +73,6 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 
 const getUniqueId = ({ operator, values = [] }) => `${operator}.${values.join('.')}`;
 
-const getMarkedCriteria = (criteria) => {
-	return criteria.map((criterion) => (
-		...criterion,
-		active: 
-	) );
-};
-
 const emptyCriterion = {
 	field: '',
 	operator: '',
@@ -138,11 +131,15 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleAddNew = (newCriterion) => {
+		const criterionForm = { ...emptyCriterion };
 		this.setState(
-			({ selectedCriteria }) => ({ selectedCriteria: [...selectedCriteria, newCriterion]}),
+			({ selectedCriteria }) => ({
+				selectedCriteria: [...selectedCriteria, newCriterion],
+				criterionForm
+			}),
 			() => {
 				this.handleChange();
-				this.props.setState({ criterionForm: { ...emptyCriterion }});
+				this.props.setState({ criterionForm });
 			}
 		);
 	}
@@ -261,20 +258,16 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		</ButtonContainer>
 	));
 
-	public renderForm = () => {
-		console.log('');
-		return (
-			<FormContainer>
-				<NewCriterionForm
-					key={this.state.selectedCriterion}
-					criterion={this.state.criterionForm}
-					setState={this.handleNewCriterionChange}
-					onSubmit={this.handleAddNew}
-					fieldNames={this.props.fieldNames}
-				/>
-			</FormContainer>
-		);
-	}
+	public renderForm = () => (
+		<FormContainer>
+			<NewCriterionForm
+				criterion={this.state.criterionForm}
+				setState={this.handleNewCriterionChange}
+				onSubmit={this.handleAddNew}
+				fieldNames={this.props.fieldNames}
+			/>
+		</FormContainer>
+	)
 
 	public render() {
 		return (

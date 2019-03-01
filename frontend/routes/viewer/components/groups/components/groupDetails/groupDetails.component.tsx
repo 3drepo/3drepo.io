@@ -177,7 +177,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				onClick={this.handleGroupFormSubmit}
 				mini={true}
 				aria-label="Save group"
-				disabled={!this.isNewGroup && !this.state.isFormValid}
+				disabled={!this.state.isFormValid}
 			>
 				<SaveIcon />
 			</ViewerPanelButton>
@@ -185,6 +185,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	)
 
 	public render() {
+		console.log(this.props.group, !this.state.isFormValid);
 		return (
 			<Container>
 				<ViewerPanelContent className="height-catcher">
