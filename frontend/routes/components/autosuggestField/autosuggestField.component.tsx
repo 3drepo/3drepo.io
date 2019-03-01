@@ -70,9 +70,11 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 	}
 
 	public onSuggestionsFetchRequested = ({ value }) => {
-		this.setState({
-			suggestions: this.getSuggestions(value)
-		});
+		if (this.state.value !== value) {
+			this.setState({
+				suggestions: this.getSuggestions(value)
+			});
+		}
 	}
 
 	public onSuggestionsClearRequested = () => {
