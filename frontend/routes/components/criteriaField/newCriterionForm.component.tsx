@@ -4,11 +4,11 @@ import * as Yup from 'yup';
 import { Form, Field, withFormik, connect } from 'formik';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
+import Button from '@material-ui/core/Button';
 
 import { SelectField, FormControl, NewCriterionFooter, OperatorSubheader } from './criteriaField.styles';
-import { SubmitButton } from '../submitButton/submitButton.component';
 import { CriteriaValueField } from './components/criteriaValueField/criteriaValueField.component';
-import { CRITERIA_LIST, CRITERIA_OPERATORS_TYPES, CRITERIA_DATA_TYPES } from '../../../constants/criteria';
+import { CRITERIA_LIST } from '../../../constants/criteria';
 import { AutosuggestField } from '../autosuggestField/autosuggestField.component';
 
 const ITEM_HEIGHT = 48;
@@ -60,7 +60,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 				<FormControl>
 					<InputLabel shrink>Field</InputLabel>
 					<Field name="field" render={({ field }) => (
-						<AutosuggestField 
+						<AutosuggestField
 							{...field}
 							suggestions={this.props.fieldNames}
 						/>
@@ -81,7 +81,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 
 				<Field name="values" render={({ field }) => (
 					<FormControl>
-						<CriteriaValueField 
+						<CriteriaValueField
 							{...field}
 							value={field.value}
 							selectedOperator={selectedOperator}
@@ -91,7 +91,13 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 
 				<NewCriterionFooter>
 					<Field render={({ form }) => (
-						<SubmitButton disabled={!form.isValid || form.isValidating}>Confirm</SubmitButton>
+						<Button
+							variant="raised"
+							color="secondary"
+							disabled={!form.isValid || form.isValidating}
+						>
+							Confirm
+						</Button>
 					)} />
 				</NewCriterionFooter>
 			</Form>

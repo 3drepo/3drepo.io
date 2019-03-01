@@ -38,6 +38,7 @@ interface IProps {
 	StatusIconComponent: any;
 	statusColor: string;
 	defaultExpanded: boolean;
+	disableExpand: boolean;
 	editable?: boolean;
 	onExpandChange?: (event, expaned: boolean) => void;
 	onNameChange?: (event, name: string) => void;
@@ -84,9 +85,9 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public renderExpandIcon = renderWhenTrue(() => <ExpandMoreIcon />);
 
 	get collapsableProps() {
-		const { editable, defaultExpanded, onExpandChange } = this.props;
+		const { editable, defaultExpanded, disableExpand, onExpandChange } = this.props;
 		const props = {
-			defaultExpanded: editable || defaultExpanded,
+			defaultExpanded: disableExpand || editable || defaultExpanded,
 			onChange: onExpandChange
 		} as any;
 
@@ -106,7 +107,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			children,
 			StatusIconComponent,
 			statusColor,
-			editable
+			editable,
+			disableExpand
 		} = this.props;
 
 		const createdAt = !editable ? createdDate : null;
@@ -114,7 +116,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		return (
 			<Container>
 				<Collapsable {...this.collapsableProps}>
-					<Summary expandIcon={this.renderExpandIcon(!editable)}>
+					<Summary expandIcon={this.renderExpandIcon(disableExpand || !editable)}>
 						<RoleIndicator color={roleColor} />
 						{this.renderNameWithCounter(!editable && count)}
 						{this.renderName(!editable && !count)}
