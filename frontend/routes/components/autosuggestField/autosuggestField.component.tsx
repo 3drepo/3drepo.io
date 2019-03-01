@@ -54,6 +54,12 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public componentDidUpdate(prevProps) {
+		if (this.props.value !== prevProps.value) {
+			this.setState({ value: this.props.value });
+		}
+	}
+
 	public getSuggestions = (value) => {
 		const inputValue = value.trim().toLowerCase();
 		const inputLength = inputValue.length;
@@ -74,12 +80,13 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleChange = (event, { newValue }) => {
-		if (this.props.onChange) {
-			this.props.onChange({
-				target: { value: newValue, name: this.props.name }
-			});
-		}
-		this.setState({ value: newValue });
+		this.setState({ value: newValue }, () => {
+			if (this.props.onChange) {
+				this.props.onChange({
+					target: { value: newValue, name: this.props.name }
+				});
+			}
+		});
 	}
 
 	public renderSuggestion = (suggestion, { isHighlighted, query }) => (

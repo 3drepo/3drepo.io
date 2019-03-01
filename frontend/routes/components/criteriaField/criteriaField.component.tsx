@@ -110,7 +110,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 	public componentDidUpdate(prevProps) {
 		if (this.props.selectedCriterion !== prevProps.selectedCriterion) {
 			const criterionForm = this.state.selectedCriteria.find(this.isCriterionActive);
-			this.setState({ criterionForm });
+			this.setState({ criterionForm: criterionForm || { ...emptyCriterion } });
 		}
 	}
 
@@ -261,17 +261,20 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		</ButtonContainer>
 	));
 
-	public renderForm = () => (
-		<FormContainer>
-			<NewCriterionForm
-				key={this.props.selectedCriterion}
-				criterion={this.props.criterionForm}
-				setState={this.handleNewCriterionChange}
-				onSubmit={this.handleAddNew}
-				fieldNames={this.props.fieldNames}
-			/>
-		</FormContainer>
-	)
+	public renderForm = () => {
+		console.log('');
+		return (
+			<FormContainer>
+				<NewCriterionForm
+					key={this.state.selectedCriterion}
+					criterion={this.state.criterionForm}
+					setState={this.handleNewCriterionChange}
+					onSubmit={this.handleAddNew}
+					fieldNames={this.props.fieldNames}
+				/>
+			</FormContainer>
+		);
+	}
 
 	public render() {
 		return (

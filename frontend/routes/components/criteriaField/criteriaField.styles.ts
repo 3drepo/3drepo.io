@@ -162,6 +162,7 @@ export const OperatorSubheader = styled(ListSubheader)`
   }
 
   && {
+    pointer-events: none;
     outline: none;
     padding-left: 16px;
     background-color: ${COLOR.WHITE};

@@ -32,6 +32,7 @@ interface IProps {
 	formik: any;
 	setState: (criterionForm) => void;
 	onSubmit: (values) => void;
+	handleSubmit: () => void;
 }
 
 class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
@@ -95,6 +96,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 							type="button"
 							variant="raised"
 							color="secondary"
+							onClick={this.props.handleSubmit}
 							disabled={!form.isValid || form.isValidating}
 						>
 							Confirm
@@ -107,11 +109,14 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 }
 
 export const NewCriterionForm = withFormik({
-	mapPropsToValues: ({ criterion }) => ({
-		field: criterion.field,
-		operator: criterion.operator,
-		values: criterion.values
-	}),
+	mapPropsToValues: ({ criterion }) => {
+		console.log('criterion', criterion);
+		return ({
+			field: criterion.field,
+			operator: criterion.operator,
+			values: criterion.values
+		});
+	},
 	handleSubmit: (values, { props }) => {
 		(props as IProps).onSubmit(values);
 	},
