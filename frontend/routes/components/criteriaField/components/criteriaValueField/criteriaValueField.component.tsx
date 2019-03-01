@@ -1,6 +1,15 @@
 import * as React from 'react';
 
-import { RangeInputs, MultipleInputs, RangeInput, AddButton, RemoveButton, MultipleInput, MultipleInputsContainer, NewMultipleInputWrapper } from './criteriaValueField.styles';
+import {
+	RangeInputs,
+	MultipleInputs,
+	RangeInput,
+	AddButton,
+	RemoveButton,
+	MultipleInput,
+	MultipleInputsContainer,
+	NewMultipleInputWrapper
+} from './criteriaValueField.styles';
 import { ENTER_KEY } from '../../../../../constants/keys';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
@@ -27,7 +36,7 @@ interface IState {
 export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 	public state = {
 		value: []
-	}
+	};
 
 	public componentDidUpdate(prevProps) {
 		const { selectedOperator, onChange, name } = this.props;
@@ -35,6 +44,7 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 		if (selectedOperator !== prevProps.selectedOperator) {
 			if (onChange) {
 				onChange({ target: { value: [], name } });
+				this.setState({ value: []	});
 			}
 		}
 	}
@@ -49,7 +59,6 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 
 	public handleMultiValueChange = ({ target: { value: changedValue }}, index) => {
 		const { onChange, name, value } = this.props;
-
 		if (onChange) {
 			const newValue = [...value];
 			newValue[index] = Number(changedValue);
@@ -64,7 +73,7 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 			const newValue = [...value];
 			newValue[newValue.length] = null;
 			onChange({ target: { value: newValue, name } });
-			this.setState({ value: newValue })
+			this.setState({ value: newValue });
 		}
 	}
 
@@ -74,7 +83,7 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 			const newValue = [...value];
 			newValue.splice(index, 1);
 			onChange({ target: { value: newValue, name } });
-			this.setState({ value: newValue })
+			this.setState({ value: newValue });
 		}
 	}
 
@@ -90,30 +99,31 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 
 		return Inputs;
 	}
-		
-	public renderMultipleInputs = renderWhenTrue(() => 
+
+	public renderMultipleInputs = renderWhenTrue(() => (
 		<MultipleInputsContainer>
 			<AddButton>
 				<SmallIconButton
 					tooltip={`Add new input`}
 					onClick={this.addMultipleInput}
 					Icon={AddIcon}
+					disabled={!Boolean(this.state.value.length)}
 				/>
 			</AddButton>
 			<MultipleInputs>
 				{this.renderNewMultipleInputs()}
 			</MultipleInputs>
 		</MultipleInputsContainer>
-	)
+	));
 
-	public renderNewMultipleInput = (index) => (
-		<NewMultipleInputWrapper>
-			<MultipleInput
-				type="number"
-				value={this.props.value[index]}
-				onChange={(event) => this.handleMultiValueChange(event, index)}
-			/>
-			{index !== 0 && 
+	public renderNewMultipleInput = (index) => {
+		return (
+			<NewMultipleInputWrapper key={index}>
+				<MultipleInput
+					type="number"
+					value={this.state.value[index]}
+					onChange={(event) => this.handleMultiValueChange(event, index)}
+				/>
 				<RemoveButton>
 					<SmallIconButton
 						tooltip={`Remove input`}
@@ -121,45 +131,48 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 						Icon={RemoveIcon}
 					/>
 				</RemoveButton>
-			}
-		</NewMultipleInputWrapper>
-	)
+			</NewMultipleInputWrapper>
+		);
+	}
 
-	public renderSingleInput = renderWhenTrue(() =>
+	public renderSingleInput = renderWhenTrue(() => (
 		<Input
 			value={this.props.value}
 			onChange={this.handleSingleValueChange}
 		/>
-	)
+	));
 
-	public renderRangeInputs = renderWhenTrue(() => 
+	public renderRangeInputs = renderWhenTrue(() => (
 		<RangeInputs>
 			<RangeInput
+				key="0"
 				type="number"
-				value={this.props.value[0]}
+				value={this.state.value[0]}
 				onChange={(event) => this.handleMultiValueChange(event, 0)}
 			/>
 			<RangeInput
+				key="1"
 				type="number"
-				value={this.props.value[1]}
+				value={this.state.value[1]}
 				onChange={(event) => this.handleMultiValueChange(event, 1)}
 			/>
 		</RangeInputs>
-	)
+	));
 
-	public renderInitialState = renderWhenTrue(() => 
+	public renderInitialState = renderWhenTrue(() => (
 		<Input
 			placeholder="Set value"
 			disabled
 		/>
-	)
+	));
 
-	public renderRegexInfo = renderWhenTrue(() => 
+	public renderRegexInfo = renderWhenTrue(() =>
 		<i>i</i>
-	)
-	public renderLabel = renderWhenTrue(() => 
+	);
+
+	public renderLabel = renderWhenTrue(() =>
 		<InputLabel shrink>Value</InputLabel>
-	)
+	);
 
 	public render() {
 		const { selectedOperator } = this.props;
@@ -170,7 +183,7 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 			this.renderSingleInput(VALUE_FIELD_MAP[selectedOperator] === VALUE_FIELD_TYPES.SINGLE),
 			this.renderMultipleInputs(VALUE_FIELD_MAP[selectedOperator] === VALUE_FIELD_TYPES.MULTIPLE),
 			this.renderRangeInputs(VALUE_FIELD_MAP[selectedOperator] === VALUE_FIELD_TYPES.RANGE),
-			this.renderRegexInfo(selectedOperator === CRITERIA_OPERATORS_TYPES.REGEX),
+			this.renderRegexInfo(selectedOperator === CRITERIA_OPERATORS_TYPES.REGEX)
 		];
 	}
 }
