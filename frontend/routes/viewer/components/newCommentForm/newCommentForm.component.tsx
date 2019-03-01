@@ -200,7 +200,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 							{...field}
 							items={RISK_LIKELIHOODS}
 							inputId="likelihood"
-							disabled={!this.canComment}
+							disabled={!this.props.canComment}
 						/>
 					)} />
 				</StyledFormControl>
@@ -212,7 +212,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 							{...field}
 							items={RISK_CONSEQUENCES}
 							inputId="consequence"
-							disabled={!this.canComment}
+							disabled={!this.props.canComment}
 						/>
 					)} />
 				</StyledFormControl>
@@ -226,7 +226,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 					fullWidth
 					multiline
 					label="Mitigation"
-					disabled={!this.canComment}
+					disabled={!this.props.canComment}
 				/>
 			)} />
 		</Container>
