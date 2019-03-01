@@ -109,16 +109,14 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 }
 
 export const NewCriterionForm = withFormik({
-	mapPropsToValues: ({ criterion }) => {
-		console.log('criterion', criterion);
-		return ({
-			field: criterion.field,
-			operator: criterion.operator,
-			values: criterion.values
-		});
-	},
-	handleSubmit: (values, { props }) => {
+	mapPropsToValues: ({ criterion }) => ({
+		field: criterion.field,
+		operator: criterion.operator,
+		values: criterion.values
+	}),
+	handleSubmit: (values, { props, resetForm }) => {
 		(props as IProps).onSubmit(values);
+		resetForm();
 	},
 	enableReinitialize: true,
 	validationSchema: CriterionSchema
