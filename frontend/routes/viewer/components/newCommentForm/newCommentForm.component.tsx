@@ -236,13 +236,13 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 			</FieldsRow>
 
 			<Field name="mitigation_desc" render={({ field, form }) => (
-				<TextField
+				<StyledTextField
 					{...field}
-					requiredConfirm={!this.isNewRisk}
-					validationSchema={RiskSchema}
-					fullWidth
-					multiline
-					label="Mitigation"
+					multiline={true}
+					fullWidth={true}
+					InputLabelProps={{ shrink: true }}
+					label="Residual Risk"
+					placeholder="Describe the residual risk"
 					disabled={!this.props.canComment}
 				/>
 			)} />

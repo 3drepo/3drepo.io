@@ -35,7 +35,7 @@ import { TextField } from '../../../../../components/textField/textField.compone
 import { FieldsRow, StyledFormControl, DescriptionImage } from './riskDetails.styles';
 import { Image } from '../../../../../components/image';
 
-const RiskSchema = Yup.object().shape({
+export const RiskSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
 	mitigation_desc: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
