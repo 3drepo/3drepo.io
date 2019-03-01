@@ -24,17 +24,20 @@ interface IProps {
 	Icon: React.ComponentType;
 	color?: string;
 	action?: (event) => void;
+	disabled?: boolean;
 }
 
 export const TooltipButton = (props: IProps) => {
-	const { label, action = null, Icon, color = 'inherit' } = props;
+	const { label, action = null, Icon, color = 'inherit', disabled = false } = props;
 	const iconProps = { color, fontSize: 'small' } as any;
 
 	return (
 		<Tooltip title={label}>
-			<IconButton aria-label={label} onClick={action}>
-				<Icon {...iconProps} />
-			</IconButton>
+			<span>
+				<IconButton aria-label={label} onClick={action} disabled={disabled}>
+					<Icon {...iconProps} />
+				</IconButton>
+			</span>
 		</Tooltip>
 	);
 };
