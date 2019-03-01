@@ -57,6 +57,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 export interface ICriteriaFieldState {
 	pastedCriteria: string;
 	isPasteEnabled: boolean;
+	selectedCriterion: string;
 	criterionForm: {
 		field: string;
 		operator: string;
@@ -102,6 +103,7 @@ export const INITIAL_STATE: IGroupState = {
 		criteriaFieldState: {
 			pastedCriteria: '',
 			isPasteEnabled: false,
+			selectedCriterion: '',
 			criterionForm: {
 				field: '',
 				operator: '',

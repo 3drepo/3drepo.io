@@ -21,7 +21,7 @@ import { ChipWrapper } from './components/chipWrapper.component';
 
 interface IProps {
 	className?: string;
-	active?: string;
+	active?: boolean;
 }
 
 interface IState {
@@ -29,12 +29,9 @@ interface IState {
 }
 
 export class Chip extends React.PureComponent<ChipProps & IProps, IState> {
-	public state = {
-		active: false
-	};
-
 	public getWrapperComponent = (chipProps) => {
 		const { className, active, onClick } = this.props;
+
 		return (
 			<ChipWrapper
 				{...chipProps}

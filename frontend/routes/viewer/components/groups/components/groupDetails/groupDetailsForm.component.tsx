@@ -73,11 +73,16 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		this.setState({ selectedType: event.target.value });
 	}
 
+	public handleCriterionSelect = (criterion) => {
+		this.props.setCriteriaState({ criterionForm: criterion });
+	}
+
 	public renderRulesField = renderWhenTrue(
 		<Field name="rules" render={({ field }) => (
 			<CriteriaField
 				{...field}
 				{...this.props.critieriaFieldState}
+				onCriterionSelect={this.handleCriterionSelect}
 				setState={this.props.setCriteriaState}
 				label="Criteria"
 				placeholder="Select first criteria"

@@ -23,6 +23,7 @@ import {
 	Container,
 	InputLabel,
 	ChipsContainer,
+	ChipsDeselectCatcher,
 	ButtonContainer,
 	IconButton,
 	StyledMoreIcon,
@@ -30,13 +31,13 @@ import {
 	FormContainer,
 	MenuItem,
 	OptionsList,
-	Placeholder
+	Placeholder,
+	Chip
 } from './criteriaField.styles';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { NewCriterionForm } from './newCriterionForm.component';
 import { CriteriaPasteField } from './components/criteriaPasteField/criteriaPasteField.components';
-import { Chip } from '../chip/chip.component';
 
 interface IProps {
 	className?: string;
@@ -48,10 +49,11 @@ interface IProps {
 	fieldNames: any[];
 	isPasteEnabled: boolean;
 	pastedCriteria: string;
+	selectedCriterion: any;
 	criterionForm: any;
 	onChange: (criteria) => void;
 	setState: (criteriaState) => void;
-	onChipsClick: (event?) => void;
+	onCriterionSelect: (event?) => void;
 }
 
 interface IState {
@@ -69,7 +71,14 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 	</IconButton>
 );
 
-const compareCriteria = ({ operator, values = [] }) => `${operator}.${values.join('.')}`;
+const getUniqueId = ({ operator, values = [] }) => `${operator}.${values.join('.')}`;
+
+const getMarkedCriteria = (criteria) => {
+	return criteria.map((criterion) => (
+		...criterion,
+		active: 
+	) );
+};
 
 const emptyCriterion = {
 	field: '',
@@ -84,18 +93,25 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-		const { value, criterionForm } = this.props;
+		const { value, criterionForm, selectedCriterion } = this.props;
 		const changes = {} as IState;
 
 		if (value) {
 			changes.selectedCriteria = value;
 		}
 
-		if (criterionForm) {
+		if (criterionForm && !selectedCriterion) {
 			changes.criterionForm = criterionForm;
 		}
 
 		this.setState(changes);
+	}
+
+	public componentDidUpdate(prevProps) {
+		if (this.props.selectedCriterion !== prevProps.selectedCriterion) {
+			const criterionForm = this.state.selectedCriteria.find(this.isCriterionActive);
+			this.setState({ criterionForm });
+		}
 	}
 
 	public handleDelete = (criteriaToRemove) => () => {
@@ -111,11 +127,14 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 	}
 
 	public togglePasteMode = () => {
-		this.props.setState({ isPasteEnabled: !this.props.isPasteEnabled });
+		this.props.setState({
+			pastedCriteria: '',
+			isPasteEnabled: !this.props.isPasteEnabled
+		});
 	}
 
 	public deselectCriterion = () => {
-
+		this.props.setState({ selectedCriterion: '' });
 	}
 
 	public handleAddNew = (newCriterion) => {
@@ -153,12 +172,17 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 			selectedCriteria: uniqBy([
 				...prevState.selectedCriteria,
 				...pastedCriteria
-			], compareCriteria)
+			], getUniqueId)
 		}), this.handleChange);
 	}
 
 	public handleCriteriaClick = (criteria) => () => {
-		this.props.onChipsClick(criteria);
+		this.props.setState({ selectedCriterion: getUniqueId(criteria) });
+	}
+
+	public isCriterionActive = (criterion) => {
+		const { selectedCriterion } = this.props;
+		return getUniqueId(criterion) === selectedCriterion;
 	}
 
 	public renderPlaceholder = renderWhenTrue(() => (
@@ -168,6 +192,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 	public renderCriterion = (criteria, index) => (
 		<Chip
 			key={index}
+			color={this.isCriterionActive(criteria) ? 'primary' : 'default'}
 			label={criteria.field}
 			onDelete={this.handleDelete(criteria)}
 			onClick={this.handleCriteriaClick(criteria)}
@@ -187,6 +212,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 
 	public renderCriteriaChips = renderWhenTrue(() => (
 		<ChipsContainer>
+			<ChipsDeselectCatcher onClick={this.deselectCriterion} />
 			{this.state.selectedCriteria.map(this.renderCriterion)}
 		</ChipsContainer>
 	));
@@ -238,6 +264,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 	public renderForm = () => (
 		<FormContainer>
 			<NewCriterionForm
+				key={this.props.selectedCriterion}
 				criterion={this.props.criterionForm}
 				setState={this.handleNewCriterionChange}
 				onSubmit={this.handleAddNew}

@@ -61,8 +61,16 @@ export const ChipsContainer = styled.div`
 	position: relative;
 `;
 
+export const ChipsDeselectCatcher = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+`;
+
 export const Chip = styled(ChipComponent)`
   && {
+    z-index: 1;
 		margin-right: 4px;
     margin-top: 3px;
     margin-bottom: 3px;
