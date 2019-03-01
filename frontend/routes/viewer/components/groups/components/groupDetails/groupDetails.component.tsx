@@ -18,6 +18,7 @@
 import * as React from 'react';
 import SaveIcon from '@material-ui/icons/Save';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
+import Button from '@material-ui/core/Button';
 
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
@@ -103,10 +104,6 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleExpandChange = (event, expanded) => {
-		this.props.setState({ expandDetails: expanded });
-	}
-
 	public handleNameChange = (event, name) => {
 		const newGroup = { ...this.groupData, name };
 		this.props.setState({ newGroup });
@@ -164,13 +161,12 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			{...this.groupData}
 			createdDate={this.props.group.createdAt}
 			roleColor={getGroupRGBAColor(this.state.groupColor)}
-			defaultExpanded={this.props.expandDetails}
 			editable={!this.groupData._id}
 			onNameChange={this.handleNameChange}
-			onExpandChange={this.handleExpandChange}
 			StatusIconComponent={this.props.GroupTypeIconComponent}
 			renderCollapsable={this.renderGroupForm}
 			renderNotCollapsable={this.renderRulesField}
+			disableExpanding
 		/>
 	));
 	public handleColorChange = (color) => {
@@ -182,38 +178,42 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public setIsFormValid = (isFormValid) => {
+		debugger;
 		this.setState({ isFormValid });
 	}
 
-	public renderFooter = () => (
-		<ViewerPanelFooter alignItems="center">
-			<Actions>
-				<ColorPickerWrapper>
-					<ColorPicker
-						disableUnderline={true}
-						value={getGroupRGBAColor(this.state.groupColor)}
-						onChange={this.handleColorChange}
+	public renderFooter = () => {
+		console.log('isFormValid', !this.state.isFormValid);
+		return (
+			<ViewerPanelFooter alignItems="center">
+				<Actions>
+					<ColorPickerWrapper>
+						<ColorPicker
+							disableUnderline={true}
+							value={getGroupRGBAColor(this.state.groupColor)}
+							onChange={this.handleColorChange}
+						/>
+					</ColorPickerWrapper>
+					<TooltipButton
+						label="Reset to saved selection"
+						action={this.props.selectGroup}
+						Icon={AutorenewIcon}
 					/>
-				</ColorPickerWrapper>
-				<TooltipButton
-					label="Reset to saved selection"
-					action={this.props.selectGroup}
-					Icon={AutorenewIcon}
-				/>
-			</Actions>
-			<ViewerPanelButton
-				variant="fab"
-				color="secondary"
-				type="submit"
-				onClick={this.handleGroupFormSubmit}
-				mini={true}
-				aria-label="Save group"
-				disabled={!this.state.isFormValid}
-			>
-				<SaveIcon />
-			</ViewerPanelButton>
-		</ViewerPanelFooter>
-	)
+				</Actions>
+				<Button
+					variant="fab"
+					color="secondary"
+					type="submit"
+					onClick={this.handleGroupFormSubmit}
+					mini={true}
+					aria-label="Save group"
+					disabled={!this.state.isFormValid}
+				>
+					<SaveIcon />
+				</Button>
+			</ViewerPanelFooter>
+		);
+	}
 
 	public render() {
 		return (

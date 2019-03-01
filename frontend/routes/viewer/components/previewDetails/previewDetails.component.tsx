@@ -139,7 +139,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		return (
 			<Container>
 				<Collapsable {...this.collapsableProps}>
-					<Summary expandIcon={this.renderExpandIcon(disableExpanding || !editable)}>
+					<Summary expandIcon={this.renderExpandIcon(!disableExpanding && !editable)}>
 						<RoleIndicator color={roleColor} />
 						{this.renderNameWithCounter(!editable && count)}
 						{this.renderName(!editable && !count)}
