@@ -92,6 +92,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 				<NewCriterionFooter>
 					<Field render={({ form }) => (
 						<Button
+							type="button"
 							variant="raised"
 							color="secondary"
 							disabled={!form.isValid || form.isValidating}
