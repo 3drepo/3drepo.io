@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -51,6 +51,7 @@ import { VIEWER_EVENTS } from '../../../../constants/viewer';
 
 interface IProps {
 	innerRef: any;
+	canComment: boolean;
 	comment?: string;
 	screenshot?: string;
 	viewpoint?: any;
@@ -76,7 +77,13 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 	};
 
 	get pinColor() {
-		return this.state.isPinActive ? 'secondary' : 'action';
+		let color;
+
+		if (this.props.canComment) {
+			color = this.state.isPinActive ? 'secondary' : 'action';
+		}
+
+		return color;
 	}
 
 	public componentWillUnmount() {
@@ -152,6 +159,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 			Icon={CameraIcon}
 			label="Take a screenshot"
 			action={this.handleNewScreenshot}
+			disabled={!this.props.canComment}
 		/>
 	));
 
@@ -161,6 +169,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 			color={this.pinColor}
 			label="Add a pin"
 			action={this.handleChangePin}
+			disabled={!this.props.canComment}
 		/>
 	));
 
@@ -175,6 +184,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 					fullWidth={true}
 					InputLabelProps={{ shrink: true }}
 					inputProps={{ rowsMax: 4, maxLength: 220 }}
+					disabled={!this.props.canComment}
 				/>
 			)} />
 		</TextFieldWrapper>
@@ -223,7 +233,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 	));
 
 	public render() {
-		const { hideComment, hideScreenshot, hidePin, showResidualRiskInput, innerRef, comment, screenshot } = this.props;
+		const { hideComment, hideScreenshot, hidePin, showResidualRiskInput, innerRef, canComment, comment, screenshot } = this.props;
 		return (
 			<Container>
 				<Formik
@@ -246,7 +256,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 									color="secondary"
 									type="submit"
 									mini={true}
-									disabled={!hideComment && (!form.isValid || form.isValidating)}
+									disabled={!hideComment && !canComment && (!form.isValid || form.isValidating)}
 									aria-label="Add new comment"
 								>
 									<SaveIcon />
