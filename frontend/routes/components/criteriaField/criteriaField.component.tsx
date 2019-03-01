@@ -35,6 +35,8 @@ import {
 	Chip
 } from './criteriaField.styles';
 import { renderWhenTrue } from '../../../helpers/rendering';
+import { getCriteriaLabel } from '../../../helpers/criteria';
+
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { NewCriterionForm } from './newCriterionForm.component';
 import { CriteriaPasteField } from './components/criteriaPasteField/criteriaPasteField.components';
@@ -190,7 +192,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		<Chip
 			key={index}
 			color={this.isCriterionActive(criteria) ? 'primary' : 'default'}
-			label={criteria.field}
+			label={getCriteriaLabel(criteria)}
 			onDelete={this.handleDelete(criteria)}
 			onClick={this.handleCriteriaClick(criteria)}
 			clickable
