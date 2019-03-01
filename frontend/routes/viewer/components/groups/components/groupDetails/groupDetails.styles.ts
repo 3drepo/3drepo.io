@@ -20,7 +20,10 @@ import FormControl from '@material-ui/core/FormControl';
 
 import { TextField } from '../../../../../components/textField/textField.component';
 
-export const Container = styled.div``;
+export const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
 
 export const FieldsRow = styled.div`
   display: flex;
@@ -58,4 +61,6 @@ export const ColorPickerWrapper = styled.div`
   display: inline;
 `;
 
-export const Description = styled(TextField)``;
+export const Description = styled(TextField)`
+  margin-bottom: -16px;
+`;

@@ -30,12 +30,13 @@ import { SelectField as SelectFieldComponent } from '../selectField/selectField.
 import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
-  margin: 8px 0;
+  padding: -12px;
 `;
 
 export const InputLabel = styled(InputLabelComponent)`
   && {
     font-size: 11px;
+    padding: 0 12px;
   }
 `;
 
@@ -50,7 +51,7 @@ export const Placeholder = styled.div`
 export const SelectedCriteria = styled.div`
   position: relative;
   min-height: 40px;
-  padding: 5px 0;
+  padding: 5px 12px;
 `;
 
 export const ChipsContainer = styled.div`
@@ -88,7 +89,7 @@ export const OptionsList = styled(ListComponent)`
 
 export const ButtonContainer = styled.div`
   position: absolute;
-  right: 0;
+  right: 12px;
   bottom: 0;
   margin-bottom: 8px;
   display: flex;
@@ -120,8 +121,8 @@ export const FormControl = styled(FormControlComponent)`
 export const FormContainer = styled.div`
   background-color: #F9F9F9;
   border-top: 1px solid #CFCFCF;
-  padding: 12px;
-  padding-bottom: 24px;
+  padding: 24px;
+  padding-top: 12px;
 `;
 
 export const CriteriaList = styled(ListComponent)`

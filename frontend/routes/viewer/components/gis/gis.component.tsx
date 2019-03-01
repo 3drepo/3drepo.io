@@ -192,7 +192,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 	public getActions = () => {
 		if (!this.state.settingsModeActive) {
-			return [ { Button: this.getMenuButton } ];
+			return [this.getMenuButton()];
 		}
 		return [];
 	}
@@ -267,7 +267,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 			<ViewerPanel
 				title="GIS"
 				Icon={this.getTitleIcon()}
-				actions={this.getActions()}
+				renderActions={this.getActions}
 				pending={this.props.isPending}
 			>
 				{settingsModeActive && (

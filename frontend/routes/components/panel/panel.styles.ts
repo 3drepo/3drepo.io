@@ -56,8 +56,8 @@ export const Content = styled.div`
 
 export const ContentWrapper = styled.div`
   height: 100%;
-  overflow: hidden;
   white-space: pre-line;
+  overflow: auto;
   display: flex;
   flex-direction: column;
 `;

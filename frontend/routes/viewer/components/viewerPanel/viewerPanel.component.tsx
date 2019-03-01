@@ -18,7 +18,6 @@
 import * as React from 'react';
 
 import {
-	Action,
 	Actions,
 	Title,
 	TitleIcon,

@@ -30,6 +30,7 @@ import { GroupDetailsForm } from './groupDetailsForm.component';
 import { ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
 import { getGroupRGBAColor, hexToArray } from '../../../../../../helpers/colors';
 import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
+import { CriteriaField } from '../../../../../components/criteriaField/criteriaField.component';
 
 interface IProps {
 	group: any;
@@ -111,6 +112,52 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		this.props.setState({ newGroup });
 	}
 
+	public renderGroupForm = () => (
+		<GroupDetailsForm
+			group={this.groupData}
+			onValueChange={this.handleGroupFormSubmit}
+			onSubmit={this.handleGroupFormSubmit}
+			currentUser={this.props.currentUser}
+			groupColor={this.state.groupColor}
+			totalMeshes={this.props.totalMeshes}
+			permissions={this.props.modelSettings.permissions}
+			setState={this.props.setState}
+			canUpdate={this.props.canUpdate}
+			setIsFormValid={this.setIsFormValid}
+			selectedNodes={this.props.selectedNodes}
+			fieldNames={this.props.fieldNames}
+			critieriaFieldState={this.props.critieriaFieldState}
+			setCriteriaState={this.props.setCriteriaState}
+		/>
+	)
+
+	public handleRulesChange = (event) => {
+		this.props.setState({
+			newGroup: {
+				...this.props.group,
+				rules: event.target.value
+			}
+		});
+	}
+
+	public handleCriterionSelect = (criterion) => {
+		this.props.setCriteriaState({ criterionForm: criterion });
+	}
+
+	public renderRulesField = () => renderWhenTrue(() => (
+		<CriteriaField
+			value={this.props.group.rules}
+			{...this.props.critieriaFieldState}
+			onChange={this.handleRulesChange}
+			onCriterionSelect={this.handleCriterionSelect}
+			setState={this.props.setCriteriaState}
+			label="Criteria"
+			placeholder="Select first criteria"
+			disabled={!this.props.canUpdate}
+			fieldNames={this.props.fieldNames}
+		/>
+	))(true/* this.state.selectedType === GROUPS_TYPES.SMART */)
+
 	public renderPreview = renderWhenTrue(() => (
 		<PreviewDetails
 			key={this.groupData._id}
@@ -122,26 +169,10 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			onNameChange={this.handleNameChange}
 			onExpandChange={this.handleExpandChange}
 			StatusIconComponent={this.props.GroupTypeIconComponent}
-		>
-			<GroupDetailsForm
-				group={this.groupData}
-				onValueChange={this.handleGroupFormSubmit}
-				onSubmit={this.handleGroupFormSubmit}
-				currentUser={this.props.currentUser}
-				groupColor={this.state.groupColor}
-				totalMeshes={this.props.totalMeshes}
-				permissions={this.props.modelSettings.permissions}
-				setState={this.props.setState}
-				canUpdate={this.props.canUpdate}
-				setIsFormValid={this.setIsFormValid}
-				selectedNodes={this.props.selectedNodes}
-				fieldNames={this.props.fieldNames}
-				critieriaFieldState={this.props.critieriaFieldState}
-				setCriteriaState={this.props.setCriteriaState}
-			/>
-		</PreviewDetails>
+			renderCollapsable={this.renderGroupForm}
+			renderNotCollapsable={this.renderRulesField}
+		/>
 	));
-
 	public handleColorChange = (color) => {
 		const newColor = hexToArray(color);
 		this.props.setState({
@@ -185,7 +216,6 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	)
 
 	public render() {
-		console.log(this.props.group, !this.state.isFormValid);
 		return (
 			<Container>
 				<ViewerPanelContent className="height-catcher">

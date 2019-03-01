@@ -27,7 +27,15 @@ import { schema } from '../../../../services/validation';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
-import { Container, Collapsable, Details, Summary, CollapsableContent, StyledForm } from './previewDetails.styles';
+import {
+	Container,
+	Collapsable,
+	Details,
+	Summary,
+	CollapsableContent,
+	StyledForm,
+	NotCollapsableContent
+} from './previewDetails.styles';
 
 interface IProps {
 	roleColor: string;
@@ -38,10 +46,12 @@ interface IProps {
 	StatusIconComponent: any;
 	statusColor: string;
 	defaultExpanded: boolean;
-	disableExpand: boolean;
+	disableExpanding: boolean;
 	editable?: boolean;
 	onExpandChange?: (event, expaned: boolean) => void;
 	onNameChange?: (event, name: string) => void;
+	renderCollapsable?: () => JSX.Element[];
+	renderNotCollapsable?: () => JSX.Element[];
 }
 
 const ValidationSchema = Yup.object().shape({
@@ -84,14 +94,26 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 
 	public renderExpandIcon = renderWhenTrue(() => <ExpandMoreIcon />);
 
+	public renderCollapsable = renderWhenTrue(() => (
+		<CollapsableContent>
+			{this.props.renderCollapsable()}
+		</CollapsableContent>
+	));
+
+	public renderNotCollapsable = renderWhenTrue(() => (
+		<>
+			{this.props.renderNotCollapsable()}
+		</>
+	));
+
 	get collapsableProps() {
-		const { editable, defaultExpanded, disableExpand, onExpandChange } = this.props;
+		const { editable, defaultExpanded, disableExpanding, onExpandChange } = this.props;
 		const props = {
-			defaultExpanded: disableExpand || editable || defaultExpanded,
+			defaultExpanded: disableExpanding || editable || defaultExpanded,
 			onChange: onExpandChange
 		} as any;
 
-		if (editable) {
+		if (disableExpanding || editable) {
 			props.expanded = true;
 		}
 
@@ -104,11 +126,12 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			count,
 			author,
 			createdDate,
-			children,
 			StatusIconComponent,
 			statusColor,
 			editable,
-			disableExpand
+			disableExpanding,
+			renderCollapsable,
+			renderNotCollapsable
 		} = this.props;
 
 		const createdAt = !editable ? createdDate : null;
@@ -116,7 +139,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		return (
 			<Container>
 				<Collapsable {...this.collapsableProps}>
-					<Summary expandIcon={this.renderExpandIcon(disableExpand || !editable)}>
+					<Summary expandIcon={this.renderExpandIcon(disableExpanding || !editable)}>
 						<RoleIndicator color={roleColor} />
 						{this.renderNameWithCounter(!editable && count)}
 						{this.renderName(!editable && !count)}
@@ -129,11 +152,12 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 							StatusIconComponent={StatusIconComponent}
 							statusColor={statusColor}
 						/>
-						<CollapsableContent>
-							{children}
-						</CollapsableContent>
+						{this.renderCollapsable(Boolean(renderCollapsable))}
 					</Details>
 				</Collapsable>
+				<NotCollapsableContent>
+					{this.renderNotCollapsable(Boolean(renderNotCollapsable))}
+				</NotCollapsableContent>
 			</Container>
 		);
 	}
