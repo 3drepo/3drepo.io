@@ -1,11 +1,12 @@
 import { CRITERIA_TEMPLATES } from '../constants/criteria';
 
 export const getCriteriaLabel = ({ field, operator, values = [] }) => {
-	let template = CRITERIA_TEMPLATES[operator].replace(/\%field\%/, field);
+	const template = CRITERIA_TEMPLATES[operator].replace(/\%field/, field);
 
-	values.forEach((value) => {
-		template = template.replace(/\%0/, value);
-	});
+	if (template.includes(`%values`)) {
+		const valuesString = values.join(', ');
+		return template.replace(/\%values/, valuesString);
+	}
 
-	return template;
+	return values.reduce((label, value) => label.replace(/\%0/, value), template);
 };
