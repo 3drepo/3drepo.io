@@ -1,19 +1,33 @@
 import styled, { css } from 'styled-components';
-import { SmallIconButton } from '../../../smallIconButon/smallIconButton.component';
+import { Grid, TextField } from '@material-ui/core';
 
-import { Grid, Input } from '@material-ui/core';
+export const RangeInput = styled(TextField)`
+  margin-top: 6px;
+`;
 
+export const SingleInput = styled(TextField)`
+  margin-top: 6px;
+`;
 
-export const RangeInput = styled(Input)``;
-
-export const MultipleInput = styled(Input)`
+export const MultipleInput = styled(TextField)`
   display: block;
-  width: 90%;
+  margin-top: 6px;
+  width: 85%;
+`;
+
+export const InputWrapper = styled(Grid)`
+  display: flex;
+  margin-top: 14px;
+  width: 100%;
+
+  ${SingleInput} {
+    width: 100%;
+	}
 `;
 
 export const RangeInputs = styled(Grid)`
   display: flex;
-  margin-top: 12px;
+  margin-top: 14px;
 
   ${RangeInput} {
 		width: 50%;
@@ -55,5 +69,10 @@ export const NewMultipleInputWrapper = styled.div`
 export const RemoveButton = styled.div`
   position: absolute;
   right: 0;
-  top: 0;
+  top: 8px;
+`;
+
+export const RegexInfoLink = styled.a`
+  margin-top: 20px;
+  text-decoration: none;
 `;

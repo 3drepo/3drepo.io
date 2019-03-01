@@ -8,8 +8,11 @@ import Button from '@material-ui/core/Button';
 
 import { SelectField, FormControl, NewCriterionFooter, OperatorSubheader } from './criteriaField.styles';
 import { CriteriaValueField } from './components/criteriaValueField/criteriaValueField.component';
-import { CRITERIA_LIST } from '../../../constants/criteria';
+import {
+	CRITERIA_LIST, VALUE_FIELD_MAP, VALUE_DATA_TYPES
+} from '../../../constants/criteria';
 import { AutosuggestField } from '../autosuggestField/autosuggestField.component';
+import { schema } from '../../../services/validation';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -22,7 +25,11 @@ const PaperPropsStyle = {
 const CriterionSchema = Yup.object().shape({
 	field: Yup.string().required(),
 	operator: Yup.string().required(),
-	values: Yup.array()
+	values: Yup.array().when('operator', {
+		is: (value) => VALUE_FIELD_MAP[value].dataType === VALUE_DATA_TYPES.NUMBER,
+		then: Yup.array().of(schema.measureNumberDecimal),
+		otherwise: Yup.array().of(Yup.string())
+	})
 });
 
 interface IProps {
@@ -80,14 +87,16 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 					)} />
 				</FormControl>
 
-				<Field name="values" render={({ field }) => (
+				<Field name="values" render={({ field, form }) => (
 					<FormControl>
-						<CriteriaValueField
-							{...field}
-							value={field.value}
-							selectedOperator={selectedOperator}
-						/>
-					</FormControl>
+					<CriteriaValueField
+						{...field}
+						value={field.value}
+						selectedOperator={selectedOperator}
+						error={Boolean(form.errors.values)}
+						helperText={form.errors.values}
+					/>
+				</FormControl>
 				)} />
 
 				<NewCriterionFooter>
@@ -119,5 +128,5 @@ export const NewCriterionForm = withFormik({
 		resetForm();
 	},
 	enableReinitialize: true,
-	validationSchema: CriterionSchema
+	validationSchema: (props) => CriterionSchema
 })(connect(NewCreaterionFormComponent as any)) as any;
