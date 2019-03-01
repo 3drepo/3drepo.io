@@ -208,9 +208,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				screenshot={this.props.newComment.screenshot}
 				viewpoint={this.props.newComment.viewpoint}
 				innerRef={this.commentRef}
-				hideComment={true}
-				hideScreenshot={!this.isNewRisk}
-				hidePin={!this.isNewRisk}
 				showResidualRiskInput={true}
 				onTakeScreenshot={this.handleNewScreenshot}
 				onChangePin={this.handleChangePin}

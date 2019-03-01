@@ -22,6 +22,8 @@ import SaveIcon from '@material-ui/icons/Save';
 import CameraIcon from '@material-ui/icons/AddAPhoto';
 import InputLabel from '@material-ui/core/InputLabel';
 import PinDropIcon from '@material-ui/icons/PinDrop';
+import ReportProblemIcon from '@material-ui/icons/ReportProblem';
+import ShortTextIcon from '@material-ui/icons/ShortText';
 
 import { Viewer } from '../../../../services/viewer/viewer';
 import { Measure } from '../../../../services/viewer/measure';
@@ -73,14 +75,23 @@ const NEW_PIN_ID = 'newPinId';
 
 export class NewCommentForm extends React.PureComponent<IProps, any> {
 	public state = {
-		isPinActive: false
+		isPinActive: false,
+		isResidualRiskInputActive: this.props.showResidualRiskInput
 	};
 
-	get pinColor() {
+	get commentTypeIcon() {
+		return this.state.isResidualRiskInputActive ? ReportProblemIcon : ShortTextIcon;
+	}
+
+	get commentTypeLabel() {
+		return this.state.isResidualRiskInputActive ? "Text Comment" : "Residual Risk";
+	}
+
+	private buttonColor(buttonState) {
 		let color;
 
 		if (this.props.canComment) {
-			color = this.state.isPinActive ? 'secondary' : 'action';
+			color = buttonState ? 'secondary' : 'action';
 		}
 
 		return color;
@@ -109,6 +120,12 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 			sourceImage: Viewer.getScreenshot(),
 			onSave: (screenshot) => onTakeScreenshot(screenshot)
 		});
+	}
+
+	public handleChangeCommentType = () => {
+		const isResidualRiskInputActive = !this.state.isResidualRiskInputActive;
+
+		this.setState({ isResidualRiskInputActive });
 	}
 
 	public handleChangePin = () => {
@@ -166,9 +183,19 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 	public renderPinButton = renderWhenTrue(() => (
 		<TooltipButton
 			Icon={PinDropIcon}
-			color={this.pinColor}
+			color={this.buttonColor(this.state.isPinActive)}
 			label="Add a pin"
 			action={this.handleChangePin}
+			disabled={!this.props.canComment}
+		/>
+	));
+
+	public renderCommentTypeToggle = renderWhenTrue(() => (
+		<TooltipButton
+			Icon={this.commentTypeIcon}
+			color={this.buttonColor(this.state.isResidualRiskInputActive)}
+			label={this.commentTypeLabel}
+			action={this.handleChangeCommentType}
 			disabled={!this.props.canComment}
 		/>
 	));
@@ -243,12 +270,13 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 					onSubmit={this.handleSave}
 				>
 					<StyledForm>
-						{this.renderResidualRiskFields(showResidualRiskInput)}
-						{this.renderCommentField(!hideComment)}
+						{this.renderResidualRiskFields(showResidualRiskInput && this.state.isResidualRiskInputActive)}
+						{this.renderCommentField(!hideComment && (!showResidualRiskInput || !this.state.isResidualRiskInputActive))}
 						<Actions>
 							<ActionsGroup>
 								{this.renderScreenshotButton(!hideScreenshot)}
 								{this.renderPinButton(!hidePin)}
+								{this.renderCommentTypeToggle(!hideComment && showResidualRiskInput)}
 							</ActionsGroup>
 							<Field render={({ form }) =>
 								<ViewerPanelButton
