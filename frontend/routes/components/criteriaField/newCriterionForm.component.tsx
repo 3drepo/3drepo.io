@@ -5,12 +5,10 @@ import { Form, Field, withFormik, connect } from 'formik';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import { SelectField as CustomSelectField } from '../../components/selectField/selectField.component';
-import { TextField } from '../textField/textField.component';
 import { SelectField, FormControl, NewCriterionFooter, OperatorSubheader } from './criteriaField.styles';
 import { SubmitButton } from '../submitButton/submitButton.component';
-import { CriteriaValueField } from './components/criteriaValueField/criteriaValueField.components';
-import { CRITERIA_LIST } from '../../../constants/criteria';
+import { CriteriaValueField } from './components/criteriaValueField/criteriaValueField.component';
+import { CRITERIA_LIST, CRITERIA_OPERATORS_TYPES, CRITERIA_DATA_TYPES } from '../../../constants/criteria';
 import { AutosuggestField } from '../autosuggestField/autosuggestField.component';
 
 const ITEM_HEIGHT = 48;
@@ -55,8 +53,8 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { values } = this.props.formik;
-		console.log('formik', values)
+		const { operator: selectedOperator } = this.props.formik.values;
+
 		return (
 			<Form>
 				<FormControl>
@@ -83,10 +81,10 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 
 				<Field name="values" render={({ field }) => (
 					<FormControl>
-						<InputLabel shrink>Value</InputLabel>
 						<CriteriaValueField 
 							{...field}
 							value={field.value}
+							selectedOperator={selectedOperator}
 						/>
 					</FormControl>
 				)} />
