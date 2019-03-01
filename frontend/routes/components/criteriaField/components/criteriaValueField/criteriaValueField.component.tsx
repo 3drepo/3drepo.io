@@ -45,7 +45,11 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 
 	public getHelperText = (index) => {
 		if (this.props.helperText && this.props.helperText.length) {
-			return this.props.helperText[index];
+			if (typeof this.props.helperText !== 'string')  {
+				return this.props.helperText[index];
+			} else {
+				return this.props.helperText;
+			}
 		}
 		return null;
 	}
@@ -201,21 +205,23 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 	public render() {
 		const { selectedOperator } = this.props;
 
-		return [
-			this.renderInitialState(!VALUE_FIELD_MAP[selectedOperator]),
-			this.renderLabel(
-				VALUE_FIELD_MAP[selectedOperator] && VALUE_FIELD_MAP[selectedOperator].fieldType !== VALUE_FIELD_TYPES.EMPTY
-			),
-			this.renderSingleInput(
-				VALUE_FIELD_MAP[selectedOperator] && VALUE_FIELD_MAP[selectedOperator].fieldType === VALUE_FIELD_TYPES.SINGLE
-			),
-			this.renderMultipleInputs(
-				VALUE_FIELD_MAP[selectedOperator] && VALUE_FIELD_MAP[selectedOperator].fieldType === VALUE_FIELD_TYPES.MULTIPLE
-			),
-			this.renderRangeInputs(
-				VALUE_FIELD_MAP[selectedOperator] && VALUE_FIELD_MAP[selectedOperator].fieldType === VALUE_FIELD_TYPES.RANGE
-			),
-			this.renderRegexInfo(selectedOperator === CRITERIA_OPERATORS_TYPES.REGEX)
-		];
+		return (
+			<>
+				{this.renderInitialState(!VALUE_FIELD_MAP[selectedOperator])}
+				{this.renderLabel(
+					VALUE_FIELD_MAP[selectedOperator] && VALUE_FIELD_MAP[selectedOperator].fieldType !== VALUE_FIELD_TYPES.EMPTY
+				)}
+				{this.renderSingleInput(
+					VALUE_FIELD_MAP[selectedOperator] && VALUE_FIELD_MAP[selectedOperator].fieldType === VALUE_FIELD_TYPES.SINGLE
+				)}
+				{this.renderMultipleInputs(
+					VALUE_FIELD_MAP[selectedOperator] && VALUE_FIELD_MAP[selectedOperator].fieldType === VALUE_FIELD_TYPES.MULTIPLE
+				)}
+				{this.renderRangeInputs(
+					VALUE_FIELD_MAP[selectedOperator] && VALUE_FIELD_MAP[selectedOperator].fieldType === VALUE_FIELD_TYPES.RANGE
+				)}
+				{this.renderRegexInfo(selectedOperator === CRITERIA_OPERATORS_TYPES.REGEX)}
+			</>
+		);
 	}
 }

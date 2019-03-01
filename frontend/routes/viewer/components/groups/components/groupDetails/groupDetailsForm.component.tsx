@@ -110,7 +110,6 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { group: { updatedAt }, groupColor, selectedNodes } = this.props;
-
 		return (
 			<Form>
 				<FieldsRow>

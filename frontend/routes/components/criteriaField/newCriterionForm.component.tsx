@@ -9,7 +9,7 @@ import Button from '@material-ui/core/Button';
 import { SelectField, FormControl, NewCriterionFooter, OperatorSubheader } from './criteriaField.styles';
 import { CriteriaValueField } from './components/criteriaValueField/criteriaValueField.component';
 import {
-	CRITERIA_LIST, VALUE_FIELD_MAP, VALUE_DATA_TYPES
+	CRITERIA_LIST, VALUE_FIELD_MAP, VALUE_DATA_TYPES, VALUE_FIELD_TYPES
 } from '../../../constants/criteria';
 import { AutosuggestField } from '../autosuggestField/autosuggestField.component';
 import { schema } from '../../../services/validation';
@@ -27,8 +27,12 @@ const CriterionSchema = Yup.object().shape({
 	operator: Yup.string().required(),
 	values: Yup.array().when('operator', {
 		is: (value) => VALUE_FIELD_MAP[value].dataType === VALUE_DATA_TYPES.NUMBER,
-		then: Yup.array().of(schema.measureNumberDecimal),
-		otherwise: Yup.array().of(Yup.string())
+		then: Yup.array().of(schema.measureNumberDecimal.nullable()).required('This field is required'),
+		otherwise: Yup.array().of(Yup.string()).when('operator', {
+			is: (value) => VALUE_FIELD_MAP[value].fieldType !== VALUE_FIELD_TYPES.EMPTY,
+			then: Yup.array().required,
+			otherwise: Yup.array()
+		})
 	})
 });
 
@@ -62,6 +66,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { operator: selectedOperator } = this.props.formik.values;
+		console.log('formik', this.props.formik);
 
 		return (
 			<Form>
@@ -89,14 +94,14 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 
 				<Field name="values" render={({ field, form }) => (
 					<FormControl>
-					<CriteriaValueField
-						{...field}
-						value={field.value}
-						selectedOperator={selectedOperator}
-						error={Boolean(form.errors.values)}
-						helperText={form.errors.values}
-					/>
-				</FormControl>
+						<CriteriaValueField
+							{...field}
+							value={field.value}
+							selectedOperator={selectedOperator}
+							error={Boolean(form.errors.values)}
+							helperText={form.errors.values}
+						/>
+					</FormControl>
 				)} />
 
 				<NewCriterionFooter>
