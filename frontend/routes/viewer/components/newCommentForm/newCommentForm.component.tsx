@@ -20,6 +20,7 @@ import * as Yup from 'yup';
 import { Formik, Field, Form } from 'formik';
 import SaveIcon from '@material-ui/icons/Save';
 import CameraIcon from '@material-ui/icons/AddAPhoto';
+import InputLabel from '@material-ui/core/InputLabel';
 import PinDropIcon from '@material-ui/icons/PinDrop';
 
 import { Viewer } from '../../../../services/viewer/viewer';
@@ -34,6 +35,17 @@ import {
 	StyledForm,
 	Container
 } from './newCommentForm.styles';
+import {
+	LEVELS_OF_RISK,
+	RISK_CATEGORIES,
+	RISK_CONSEQUENCES,
+	RISK_LIKELIHOODS,
+	RISK_MITIGATION_STATUSES
+} from '../../../../constants/risks';
+import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
+import { TextField } from '../../../components/textField/textField.component';
+import { FieldsRow, StyledFormControl } from '../risks/components/riskDetails/riskDetails.styles';
+import { RiskSchema } from '../risks/components/riskDetails/riskDetailsForm.component';
 import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 
@@ -45,6 +57,7 @@ interface IProps {
 	hideComment?: boolean;
 	hidePin?: boolean;
 	hideScreenshot?: boolean;
+	showResidualRiskInput?: boolean;
 	onSave: (commentData) => void;
 	onTakeScreenshot: (screenshot) => void;
 	onChangePin: (pin) => void;
@@ -167,8 +180,50 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 		</TextFieldWrapper>
 	));
 
+	public renderResidualRiskFields = renderWhenTrue(() => (
+		<Container>
+			<FieldsRow container alignItems="center" justify="space-between">
+				<StyledFormControl>
+					<InputLabel shrink={true} htmlFor="likelihood">Risk Likelihood</InputLabel>
+					<Field name="likelihood" render={({ field }) => (
+						<CellSelect
+							{...field}
+							items={RISK_LIKELIHOODS}
+							inputId="likelihood"
+							disabled={!this.canComment}
+						/>
+					)} />
+				</StyledFormControl>
+
+				<StyledFormControl>
+					<InputLabel shrink={true} htmlFor="consequence">Risk Consequence</InputLabel>
+					<Field name="consequence" render={({ field }) => (
+						<CellSelect
+							{...field}
+							items={RISK_CONSEQUENCES}
+							inputId="consequence"
+							disabled={!this.canComment}
+						/>
+					)} />
+				</StyledFormControl>
+			</FieldsRow>
+
+			<Field name="mitigation_desc" render={({ field, form }) => (
+				<TextField
+					{...field}
+					requiredConfirm={!this.isNewRisk}
+					validationSchema={RiskSchema}
+					fullWidth
+					multiline
+					label="Mitigation"
+					disabled={!this.canComment}
+				/>
+			)} />
+		</Container>
+	));
+
 	public render() {
-		const { hideComment, hideScreenshot, hidePin, innerRef, comment, screenshot } = this.props;
+		const { hideComment, hideScreenshot, hidePin, showResidualRiskInput, innerRef, comment, screenshot } = this.props;
 		return (
 			<Container>
 				<Formik
@@ -178,6 +233,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 					onSubmit={this.handleSave}
 				>
 					<StyledForm>
+						{this.renderResidualRiskFields(showResidualRiskInput)}
 						{this.renderCommentField(!hideComment)}
 						<Actions>
 							<ActionsGroup>

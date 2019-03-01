@@ -185,6 +185,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				hideComment={true}
 				hideScreenshot={!this.isNewRisk}
 				hidePin={!this.isNewRisk}
+				showResidualRiskInput={true}
 				onTakeScreenshot={this.handleNewScreenshot}
 				onChangePin={this.handleChangePin}
 				onSave={this.handleSave}
@@ -201,7 +202,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					{this.renderPreview(this.props.risk)}
 					{this.renderLogs(logs.length)}
 				</ViewerPanelContent>
-				{this.renderFooter(!this.riskData._id)}
+				{/* this.renderFooter(!this.riskData._id) */}
+				{this.renderFooter(true)}
 			</Container>
 		);
 	}
