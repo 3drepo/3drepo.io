@@ -84,17 +84,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 	}
 
 	get commentTypeLabel() {
-		return this.state.isResidualRiskInputActive ? "Text Comment" : "Residual Risk";
-	}
-
-	private buttonColor(buttonState) {
-		let color;
-
-		if (this.props.canComment) {
-			color = buttonState ? 'secondary' : 'action';
-		}
-
-		return color;
+		return this.state.isResidualRiskInputActive ? 'Text Comment' : 'Residual Risk';
 	}
 
 	public componentWillUnmount() {
@@ -260,7 +250,17 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 	));
 
 	public render() {
-		const { hideComment, hideScreenshot, hidePin, showResidualRiskInput, innerRef, canComment, comment, screenshot } = this.props;
+		const {
+			hideComment,
+			hideScreenshot,
+			hidePin,
+			showResidualRiskInput,
+			innerRef,
+			canComment,
+			comment,
+			screenshot
+		} = this.props;
+
 		return (
 			<Container>
 				<Formik
@@ -294,5 +294,15 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 				</Formik>
 			</Container>
 		);
+	}
+
+	private buttonColor(buttonState) {
+		let color;
+
+		if (this.props.canComment) {
+			color = buttonState ? 'secondary' : 'action';
+		}
+
+		return color;
 	}
 }
