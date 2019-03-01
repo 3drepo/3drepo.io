@@ -18,7 +18,6 @@
 import * as React from 'react';
 import SaveIcon from '@material-ui/icons/Save';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
-import Button from '@material-ui/core/Button';
 
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
@@ -178,12 +177,10 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public setIsFormValid = (isFormValid) => {
-		debugger;
 		this.setState({ isFormValid });
 	}
 
 	public renderFooter = () => {
-		console.log('isFormValid', !this.state.isFormValid);
 		return (
 			<ViewerPanelFooter alignItems="center">
 				<Actions>
@@ -200,7 +197,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 						Icon={AutorenewIcon}
 					/>
 				</Actions>
-				<Button
+				<ViewerPanelButton
 					variant="fab"
 					color="secondary"
 					type="submit"
@@ -210,7 +207,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 					disabled={!this.state.isFormValid}
 				>
 					<SaveIcon />
-				</Button>
+				</ViewerPanelButton>
 			</ViewerPanelFooter>
 		);
 	}
