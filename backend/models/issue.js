@@ -538,20 +538,21 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							(("[object Object]" !== fieldTypes[key] && "[object Array]" !== fieldTypes[key] && data[key] !== newIssue[key])
 							|| !_.isEqual(newIssue[key], data[key]))) {
 							if (null === data[key] || Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
-								if ("comment" === key ||
-									("commentIndex" === key && -1 === Object.keys(data).indexOf("comment"))) {
-									const updatedComments = updateTextComments(
-										dbCol.account,
-										dbCol.model,
-										data.sessionId,
-										newIssue._id,
-										newIssue.comments,
-										data,
-										viewpointGuid
-									);
+								if ("comment" === key || "commentIndex" === key) {
+									if ("commentIndex" !== key || -1 === Object.keys(data).indexOf("comment")) {
+										const updatedComments = updateTextComments(
+											dbCol.account,
+											dbCol.model,
+											data.sessionId,
+											newIssue._id,
+											newIssue.comments,
+											data,
+											viewpointGuid
+										);
 
-									toUpdate.comments = updatedComments;
-									newIssue.comments = updatedComments;
+										toUpdate.comments = updatedComments;
+										newIssue.comments = updatedComments;
+									}
 								} else {
 									if (-1 === ownerPrivilegeAttributes.indexOf(key) || (user.isAdmin || user.hasOwnerJob)) {
 										if ("assigned_roles" === key && newIssue.status === statusEnum.FOR_APPROVAL) {
