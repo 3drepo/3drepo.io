@@ -1,6 +1,9 @@
 import Print from '@material-ui/icons/Print';
 import Download from '@material-ui/icons/CloudDownload';
 import Delete from '@material-ui/icons/Delete';
+import OfflineBolt from '@material-ui/icons/OfflineBolt';
+import { HandPaper } from '../routes/components/fontAwesomeIcon';
+
 import { COLOR } from '../styles';
 
 export const GROUPS_TYPES = {
@@ -15,6 +18,11 @@ export const GROUPS_TYPES_LIST = [{
 	label: 'Normal',
 	type: GROUPS_TYPES.NORMAL
 }];
+
+export const GROUP_TYPES_ICONS = {
+	[GROUPS_TYPES.NORMAL]: HandPaper,
+	[GROUPS_TYPES.SMART]: OfflineBolt
+};
 
 export const GROUPS_ACTIONS_ITEMS = {
 	OVERRIDE_ALL: 'overrideAll',

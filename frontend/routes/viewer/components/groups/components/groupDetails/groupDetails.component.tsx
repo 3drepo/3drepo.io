@@ -28,19 +28,17 @@ import { PreviewDetails } from '../../../previewDetails/previewDetails.component
 import { Container, ColorPickerWrapper, Actions } from './groupDetails.styles';
 import { GroupDetailsForm } from './groupDetailsForm.component';
 import { ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
-import { getGroupRGBAColor, hexToArray } from '../../../../../../helpers/colors';
 import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
 import { CriteriaField } from '../../../../../components/criteriaField/criteriaField.component';
+import { GROUPS_TYPES } from '../../../../../../constants/groups';
 
 interface IProps {
-	group: any;
-	newGroup: any;
+	activeGroup: any;
 	teamspace: string;
 	model: string;
 	expandDetails: boolean;
 	currentUser: any;
 	modelSettings: any;
-	GroupTypeIconComponent: any;
 	totalMeshes: number;
 	canUpdate: boolean;
 	selectedNodes: any;
@@ -53,44 +51,26 @@ interface IProps {
 	selectGroup: () => void;
 }
 interface IState {
-	groupColor: any[];
 	isFormValid: boolean;
 }
 
 export class GroupDetails extends React.PureComponent<IProps, IState> {
 	public state = {
-		groupColor: undefined,
 		isFormValid: false
 	};
 
 	public componentDidMount() {
-		if (this.props.group.color) {
-			this.setState({
-				groupColor: this.props.group.color
-			});
-		}
-
 		if (!this.isNewGroup) {
-			this.props.setState({
-				newGroup: { ...this.groupData }
-			});
-		}
-	}
-
-	public componentDidUpdate(prevProps) {
-		if (prevProps.group.color !== this.props.group.color) {
-			this.setState({
-				groupColor: this.props.group.color
-			});
+			this.props.setState({ newGroup: { ...this.groupData }});
 		}
 	}
 
 	get isNewGroup() {
-		return !this.props.group._id;
+		return !this.props.activeGroup._id;
 	}
 
 	get groupData() {
-		return this.props.group;
+		return this.props.activeGroup;
 	}
 
 	public handleGroupFormSubmit = () => {
@@ -114,7 +94,6 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			onValueChange={this.handleGroupFormSubmit}
 			onSubmit={this.handleGroupFormSubmit}
 			currentUser={this.props.currentUser}
-			groupColor={this.state.groupColor}
 			totalMeshes={this.props.totalMeshes}
 			permissions={this.props.modelSettings.permissions}
 			setState={this.props.setState}
@@ -130,7 +109,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	public handleRulesChange = (event) => {
 		this.props.setState({
 			newGroup: {
-				...this.props.group,
+				...this.groupData,
 				rules: event.target.value
 			}
 		});
@@ -142,7 +121,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 	public renderRulesField = () => renderWhenTrue(() => (
 		<CriteriaField
-			value={this.props.group.rules}
+			value={this.groupData.rules}
 			{...this.props.critieriaFieldState}
 			onChange={this.handleRulesChange}
 			onCriterionSelect={this.handleCriterionSelect}
@@ -152,33 +131,37 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			disabled={!this.props.canUpdate}
 			fieldNames={this.props.fieldNames}
 		/>
-	))(true/* this.state.selectedType === GROUPS_TYPES.SMART */)
+	))(this.groupData.type === GROUPS_TYPES.SMART)
 
 	public renderPreview = renderWhenTrue(() => (
 		<PreviewDetails
 			key={this.groupData._id}
 			{...this.groupData}
-			createdDate={this.props.group.createdAt}
-			roleColor={getGroupRGBAColor(this.state.groupColor)}
+			roleColor={this.groupData.color}
+			createdDate={this.groupData.createdDate}
 			editable={!this.groupData._id}
 			onNameChange={this.handleNameChange}
-			StatusIconComponent={this.props.GroupTypeIconComponent}
 			renderCollapsable={this.renderGroupForm}
 			renderNotCollapsable={this.renderRulesField}
 			disableExpanding
 		/>
 	));
+
 	public handleColorChange = (color) => {
-		const newColor = hexToArray(color);
-		this.props.setState({
-			newGroup: { ...this.props.newGroup, color: newColor }
-		});
-		this.setState({ groupColor: newColor });
+		this.props.setState({ newGroup: { ...this.groupData, color }});
 	}
 
 	public setIsFormValid = (isFormValid) => {
 		this.setState({ isFormValid });
 	}
+
+	public renderResetButton = renderWhenTrue(() => (
+		<TooltipButton
+			label="Reset to saved selection"
+			action={this.props.selectGroup}
+			Icon={AutorenewIcon}
+		/>
+	));
 
 	public renderFooter = () => {
 		return (
@@ -187,15 +170,11 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 					<ColorPickerWrapper>
 						<ColorPicker
 							disableUnderline={true}
-							value={getGroupRGBAColor(this.state.groupColor)}
+							value={this.groupData.color}
 							onChange={this.handleColorChange}
 						/>
 					</ColorPickerWrapper>
-					<TooltipButton
-						label="Reset to saved selection"
-						action={this.props.selectGroup}
-						Icon={AutorenewIcon}
-					/>
+					{this.renderResetButton(!this.isNewGroup)}
 				</Actions>
 				<ViewerPanelButton
 					variant="fab"
@@ -216,7 +195,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		return (
 			<Container>
 				<ViewerPanelContent className="height-catcher">
-					{this.renderPreview(this.props.group)}
+					{this.renderPreview(this.groupData)}
 				</ViewerPanelContent>
 				{this.renderFooter()}
 			</Container>

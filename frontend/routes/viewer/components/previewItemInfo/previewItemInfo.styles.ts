@@ -58,4 +58,5 @@ export const Details = styled.div`
   align-items: center;
   display: flex;
   justify-content: space-between;
+  height: 21px;
 `;

@@ -1,6 +1,6 @@
 import { mapValues } from 'lodash';
 
-import { hexToRgba, hexToPinColor } from '../helpers/colors';
+import { hexToRgba, hexToGLColor } from '../helpers/colors';
 
 export const BLACK = '#00000';
 export const WHITE = '#ffffff';
@@ -59,4 +59,4 @@ export const PIN_COLORS = mapValues({
 	LIGHT_GREEN: COLOR.LIGHT_GREEN,
 	LEMON_CHIFFON: COLOR.LEMON_CHIFFON,
 	LIGHT_YELLOW: COLOR.LIGHT_YELLOW
-}, hexToPinColor);
+}, hexToGLColor);

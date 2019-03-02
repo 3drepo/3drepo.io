@@ -7,10 +7,8 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import { GROUPS_TYPES, GROUPS_TYPES_LIST } from '../../../../../../constants/groups';
-import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
-import { CriteriaField } from '../../../../../components/criteriaField/criteriaField.component';
 import { FieldsRow, StyledFormControl, StyledTextField, Description, LongLabel } from './groupDetails.styles';
 import { HiddenField } from './hiddenField.component';
 
@@ -27,7 +25,6 @@ interface IProps {
 	newColor: string;
 	totalMeshes: number;
 	canUpdate: boolean;
-	groupColor: any[];
 	selectedNodes: any[];
 	fieldNames: any[];
 	critieriaFieldState: ICriteriaFieldState;
@@ -41,23 +38,15 @@ interface IProps {
 
 interface IState {
 	isSaving: boolean;
-	selectedType: string;
 }
 
 class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	public state = {
-		isSaving: false,
-		selectedType: GROUPS_TYPES.SMART
+		isSaving: false
 	};
 
 	get isNewGroup() {
 		return !this.props.group._id;
-	}
-
-	public componentDidMount() {
-		if (this.props.group && this.props.group.rules && this.props.group.rules.length) {
-			this.setState({ selectedType: GROUPS_TYPES.SMART });
-		}
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -76,10 +65,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				[event.target.name]: event.target.value
 			}
 		});
-	}
-
-	public handleTypeChange = (event) => {
-		this.setState({ selectedType: event.target.value });
+		onChange(event);
 	}
 
 	public renderTypeSelectItems = () => {
@@ -89,7 +75,7 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { group: { updatedAt }, groupColor, selectedNodes } = this.props;
+		const { group: { updateDate }, selectedNodes } = this.props;
 		return (
 			<Form>
 				<FieldsRow>
@@ -100,22 +86,24 @@ class GroupDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					/>
 					<StyledTextField
 						label="Last update"
-						value={dayjs(updatedAt).format('DD MMM')}
+						value={dayjs(updateDate).format('DD MMM')}
 						disabled
 					/>
 					<StyledFormControl>
 						<InputLabel>Group type</InputLabel>
-						<Select
-							disabled={!this.props.canUpdate}
-							value={this.state.selectedType}
-							onChange={this.handleTypeChange}
-						>
-							{this.renderTypeSelectItems()}
-						</Select>
+						<Field name="type" render={({ field }) => (
+							<Select
+								{...field}
+								disabled={!this.props.canUpdate}
+								onChange={this.handleFieldChange(field.onChange)}
+							>
+								{this.renderTypeSelectItems()}
+							</Select>
+						)} />
 					</StyledFormControl>
 				</FieldsRow>
 				<Field name="color" render={({ field }) => (
-					<HiddenField {...field} value={groupColor} />
+					<HiddenField {...field} />
 				)} />
 				<Field name="selectedNodes" render={({ field }) => (
 					<HiddenField {...field}	value={selectedNodes} />
@@ -141,6 +129,7 @@ export const GroupDetailsForm = withFormik({
 		name: group.name,
 		description: group.description || '',
 		color: group.color,
+		type: group.type,
 		rules: group.rules || [],
 		selectedNodes
 	}),

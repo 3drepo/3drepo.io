@@ -16,44 +16,42 @@
  */
 
 import * as React from 'react';
-import { isEqual, isEmpty } from 'lodash';
-
-import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { isEmpty, isEqual, stubTrue } from 'lodash';
 import IconButton from '@material-ui/core/IconButton';
-import ArrowBack from '@material-ui/icons/ArrowBack';
-import GroupWork from '@material-ui/icons/GroupWork';
 import AddIcon from '@material-ui/icons/Add';
+import ArrowBack from '@material-ui/icons/ArrowBack';
 import CancelIcon from '@material-ui/icons/Cancel';
+import Check from '@material-ui/icons/Check';
+import GroupWork from '@material-ui/icons/GroupWork';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import SearchIcon from '@material-ui/icons/Search';
-import Check from '@material-ui/icons/Check';
-import Bolt from '@material-ui/icons/OfflineBolt';
-import { HandPaper } from '../../../components/fontAwesomeIcon';
-import { CREATE_ISSUE } from '../../../../constants/issue-permissions';
+import Delete from '@material-ui/icons/Delete';
+import { Eye, Tint } from '../../../components/fontAwesomeIcon';
 
-import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
-import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
-import { renderWhenTrue } from '../../../../helpers/rendering';
-import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
-import { Viewer } from '../../../../services/viewer/viewer';
+import { DEFAULT_OVERRIDE_COLOR, GROUPS_ACTIONS_ITEMS, GROUPS_ACTIONS_MENU } from '../../../../constants/groups';
+import { CREATE_ISSUE } from '../../../../constants/issue-permissions';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
+import { rgbaToHex, hexToRgba } from '../../../../helpers/colors';
+import { hasPermissions } from '../../../../helpers/permissions';
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import { searchByFilters } from '../../../../helpers/searching';
-import { getGroupRGBAColor } from '../../../../helpers/colors';
+import { Viewer } from '../../../../services/viewer/viewer';
+import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import {
-	GROUPS_ACTIONS_ITEMS,
-	GROUPS_ACTIONS_MENU,
-	DEFAULT_OVERRIDE_COLOR
-} from '../../../../constants/groups';
-import { ListContainer, Summary } from './../risks/risks.styles';
-import { GroupsListItem } from './components/groupsListItem/groupsListItem.component';
-import { EmptyStateInfo } from '../views/views.styles';
-import { StyledIcon } from '../groups/groups.styles';
-import {
-	MenuList, StyledListItem,	StyledItemText, IconWrapper
+	IconWrapper,
+	MenuList,
+	StyledItemText,
+	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
-import { GroupDetails } from './components/groupDetails';
+import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
+import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
-import { hasPermissions, PERMISSIONS } from '../../../../helpers/permissions';
+import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
+import { EmptyStateInfo } from '../views/views.styles';
+import { ListContainer, Summary } from './../risks/risks.styles';
+import { GroupDetails } from './components/groupDetails';
+import { GroupListItem, StyledIcon } from './groups.styles';
 
 interface IProps {
 	teamspace: string;
@@ -103,10 +101,16 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
   </IconButton>
 );
 
+const EyeIcon = () => (
+	<StyledIcon color={DEFAULT_OVERRIDE_COLOR}>
+		<Eye />
+	</StyledIcon>
+);
+
 export class Groups extends React.PureComponent<IProps, IState> {
 	public state = {
 		groupDetails: {},
-		modelLoaded: true, //TODO: false
+		modelLoaded: true, // TODO: false
 		filteredGroups: []
 	};
 
@@ -161,35 +165,12 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public getOverridedColor = (groupId, color) => {
 		const overrided = this.isOverrided(groupId);
-		if (overrided) {
-			return getGroupRGBAColor(color);
-		}
-		return DEFAULT_OVERRIDE_COLOR;
-	}
-
-	public getGroupTypeIcon(group) {
-		if (!group) {
-			return (
-				<StyledIcon><HandPaper fontSize="inherit" /></StyledIcon>
-			);
-		}
-
-		const {_id, color, rules} = group;
-
-		return(
-			<StyledIcon color={this.getOverridedColor(_id, color)}>
-				{
-					Boolean(rules && rules.length) ? <Bolt fontSize="inherit" /> : <HandPaper fontSize="inherit" />
-				}
-			</StyledIcon>
-		);
+		return overrided ? hexToRgba(color) : DEFAULT_OVERRIDE_COLOR;
 	}
 
 	public handleCloseSearchMode = () => {
 		this.props.setState({ searchEnabled: false });
-		this.setState({
-			filteredGroups: this.props.groups
-		});
+		this.setState({ filteredGroups: this.props.groups });
 	}
 
 	public handleOpenSearchMode = () => {
@@ -301,11 +282,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public isOverrided = (groupId) => Boolean(this.props.colorOverrides[groupId]);
 
-	public deleteGroup = (groupId) => {
-		const { teamspace, model, deleteGroups } = this.props;
-		deleteGroups(teamspace, model, groupId);
-	}
-
 	public get canAddOrUpdate() {
 		if (this.props.modelSettings && this.props.modelSettings.permissions) {
 			return hasPermissions(CREATE_ISSUE, this.props.modelSettings.permissions) && this.state.modelLoaded;
@@ -313,21 +289,66 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return false;
 	}
 
+	public isHighlighted = (group) => {
+		return Boolean(this.props.highlightedGroups[group._id]);
+	}
+
+	public isActive = (group) => {
+		return this.props.activeGroupId === group._id;
+	}
+
+	public handleGroupDelete = (groupId) => () => {
+		const { teamspace, model, deleteGroups } = this.props;
+		deleteGroups(teamspace, model, groupId);
+	}
+
+	public handleColorOverride = (group) => () => this.props.toggleColorOverride(group);
+
+	public handleGroupIsolate = (group) => () => this.props.isolateGroup(group);
+
+	public renderGroupActions = (group) => () => (
+		<>
+			<TooltipButton
+				label="Isolate"
+				action={this.handleGroupIsolate(group)}
+				Icon={EyeIcon}
+				disabled={!this.state.modelLoaded}
+			/>
+			<TooltipButton
+				label="Toggle Colour Override"
+				action={this.handleColorOverride(group)}
+				Icon={this.renderTintIcon(group)}
+				disabled={!this.state.modelLoaded}
+			/>
+			<TooltipButton
+				label="Delete"
+				action={this.handleGroupDelete(group._id)}
+				Icon={Delete}
+				disabled={!this.state.modelLoaded}
+			/>
+		</>
+	)
+
+	public renderTintIcon = (group) => () => (
+		<StyledIcon color={this.getOverridedColor(group._id, group.color)}>
+			<Tint fontSize="inherit" />
+		</StyledIcon>
+	)
+
 	public renderGroupsList = renderWhenTrue(() => {
-		const Items = this.state.filteredGroups.map((group = {}, index) => (
-			<GroupsListItem
+		const Items = this.state.filteredGroups.map((group) => (
+			<GroupListItem
 				{...group}
 				key={group._id}
+				hideThumbnail
+				highlighted={this.isHighlighted(group)}
+				roleColor={group.color}
 				onItemClick={this.setActiveGroup(group)}
 				onArrowClick={this.handleShowGroupDetails(group)}
-				active={this.props.activeGroupId === group._id}
+				active={this.isActive(group)}
 				modelLoaded={this.state.modelLoaded}
-				highlighted={Boolean(this.props.highlightedGroups[group._id])}
-				overridedColor={this.getOverridedColor(group._id, group.color)}
-				deleteGroup={this.deleteGroup}
-				toggleColorOverride={() => this.props.toggleColorOverride(group)}
-				isolateGroup={() => this.props.isolateGroup(group)}
-				GroupTypeIcon={() => this.getGroupTypeIcon(group)}
+				renderActions={this.renderGroupActions(group)}
+				hasViewPermission={stubTrue}
 			/>
 		));
 
@@ -342,10 +363,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		<EmptyStateInfo>No groups matched</EmptyStateInfo>
 	));
 
-	public handleAddNewGroup = () => {
-		this.props.setNewGroup();
-	}
-
 	public renderListView = renderWhenTrue(() => (
 		<>
 			<ViewerPanelContent className="height-catcher">
@@ -359,7 +376,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				</Summary>
 				<ViewerPanelButton
 					aria-label="Add group"
-					onClick={this.handleAddNewGroup}
+					onClick={this.props.setNewGroup}
 					color="secondary"
 					variant="fab"
 					disabled={!this.canAddOrUpdate}
@@ -372,12 +389,8 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	);
 
   public handleFilterChange = (selectedFilters) => {
-		this.props.setState({
-			selectedFilters
-		});
-		this.setState({
-			filteredGroups: this.filteredGroups
-		});
+		this.props.setState({ selectedFilters });
+		this.setState({ filteredGroups: this.filteredGroups });
   }
 
 	public renderFilterPanel = renderWhenTrue(() => (
@@ -399,7 +412,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			model={this.props.model}
 			saveGroup={this.props.saveGroup}
 			selectGroup={() => this.props.selectGroup(this.activeGroup)}
-			GroupTypeIconComponent={() => this.getGroupTypeIcon(this.activeGroup)}
 			canUpdate={this.canAddOrUpdate}
 		/>
 	));

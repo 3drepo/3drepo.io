@@ -15,12 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { COLOR } from '../../../../styles/colors';
+import { PreviewListItem } from '../previewListItem/previewListItem.component';
 
 export const Container = styled.div``;
 
 export const StyledIcon = styled.span`
   color: ${(props) => props.color ? props.color : COLOR.BLACK_60 };
   font-size: 18px;
+`;
+
+const highlightedGroupStyles = css`
+  background-color: ${COLOR.BLACK_6};
+
+  &:hover {
+    background-color: ${COLOR.BLACK_20};
+  }
+`;
+
+export const GroupListItem = styled(PreviewListItem)`
+  && {
+    height: 73px;
+    ${(props: any) => props.highlighted && highlightedGroupStyles}
+  }
 `;

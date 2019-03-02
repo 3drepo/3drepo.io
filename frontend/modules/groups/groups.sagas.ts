@@ -21,7 +21,7 @@ import {omit} from 'lodash';
 import { getAngularService, dispatch } from '../../helpers/migration';
 
 import * as API from '../../services/api';
-import { GroupsTypes, GroupsActions } from './groups.redux';
+import { GroupsTypes, GroupsActions, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
 import { DialogActions } from '../dialog';
 import {
 	selectAreAllOverrided,
@@ -36,7 +36,7 @@ import { Viewer } from '../../services/viewer/viewer';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { prepareGroup } from '../../helpers/groups';
 import { selectCurrentUser } from '../currentUser';
-import { getRandomColor } from '../../helpers/colors';
+import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { SnackbarActions } from '../snackbar';
 import { TreeActions } from '../tree';
 
@@ -77,7 +77,7 @@ export function* setActiveGroup({ group, revision }) {
 
 export function* highlightGroup({ group }) {
 	try {
-		const color = group.color ? group.color.map((c) => c / 255) :
+		const color = group.color ? hexToGLColor(group.color) :
 		Viewer.getDefaultHighlightColor();
 		yield put(GroupsActions.addToHighlighted(group._id));
 
@@ -152,7 +152,7 @@ export function* selectGroup({ group }) {
 
 export function* addColorOverride({ group }) {
 	try {
-		const color = group.color.map((c) => c / 255);
+		const color = hexToGLColor(group.color);
 		const TreeService = getAngularService('TreeService') as any;
 		const treeMap = yield TreeService.getMap();
 
@@ -280,7 +280,10 @@ export function* downloadGroups({ teamspace, modelId }) {
 export function* showDetails({ group, revision }) {
 	try {
 		yield put(GroupsActions.setActiveGroup(group, revision));
-		yield put(GroupsActions.setComponentState({ showDetails: true }));
+		yield put(GroupsActions.setComponentState({
+			showDetails: true,
+			criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
+		}));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('display', 'group details', error));
 	}
@@ -377,14 +380,16 @@ export function* setNewGroup() {
 		const newGroup = prepareGroup({
 			name: `Untitled group ${groupNumber}`,
 			color: getRandomColor(),
-			description: '(No description)'
+			description: '(No description)',
+			rules: []
 		});
 
 		yield put(GroupsActions.setComponentState({
 			showDetails: true,
 			activeGroup: null,
 			totalMeshes: 0,
-			newGroup
+			newGroup,
+			criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
 		}));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('prepare', 'new risk', error));

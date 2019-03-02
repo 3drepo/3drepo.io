@@ -86,6 +86,17 @@ export interface IGroupState {
 	fieldNames: any[];
 }
 
+export const INITIAL_CRITERIA_FIELD_STATE = {
+	pastedCriteria: '',
+	isPasteEnabled: false,
+	selectedCriterion: '',
+	criterionForm: {
+		field: '',
+		operator: '',
+		values: []
+	}
+};
+
 export const INITIAL_STATE: IGroupState = {
 	groupsMap: {},
 	isPending: true,
@@ -100,16 +111,7 @@ export const INITIAL_STATE: IGroupState = {
 		colorOverrides: {},
 		overrideAll: false,
 		totalMeshes: 0,
-		criteriaFieldState: {
-			pastedCriteria: '',
-			isPasteEnabled: false,
-			selectedCriterion: '',
-			criterionForm: {
-				field: '',
-				operator: '',
-				values: []
-			}
-		}
+		criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
 	},
 	fieldNames: []
 };

@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import FormControl from '@material-ui/core/FormControl';
 
 import { TextField } from '../../../../../components/textField/textField.component';
+import { COLOR } from '../../../../../../styles';
 
 export const Container = styled.div`
   display: flex;
@@ -63,4 +64,9 @@ export const ColorPickerWrapper = styled.div`
 
 export const Description = styled(TextField)`
   margin-bottom: -16px;
+`;
+
+export const StyledIcon = styled.span`
+  color: ${(props) => props.color ? props.color : COLOR.BLACK_54};
+  font-size: 18px;
 `;

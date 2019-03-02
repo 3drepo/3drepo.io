@@ -34,8 +34,7 @@ import { selectCurrentUser } from '../../../../../../modules/currentUser';
 import { selectSelectedNodes } from '../../../../../../modules/tree';
 
 const mapStateToProps = createStructuredSelector({
-	group: selectActiveGroupDetails,
-	newGroup: selectNewGroupDetails,
+	activeGroup: selectActiveGroupDetails,
 	modelSettings: selectSettings,
 	expandDetails: selectExpandDetails,
 	currentUser: selectCurrentUser,

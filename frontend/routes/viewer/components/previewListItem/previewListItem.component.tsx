@@ -31,10 +31,12 @@ import {
 	ThumbnailWrapper,
 	ArrowButton,
 	StyledArrowIcon,
-	Name
+	Name,
+	Actions
 } from './previewListItem.styles';
 
 interface IProps {
+	className?: string;
 	name: string;
 	description: string;
 	author: string;
@@ -47,9 +49,11 @@ interface IProps {
 	count?: number;
 	active?: boolean;
 	hasViewPermission?: boolean;
+	modelLoaded?: boolean;
+	hideThumbnail?: boolean;
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
-	modelLoaded?: boolean;
+	renderActions?: () => JSX.Element[];
 }
 
 export class PreviewListItem extends React.PureComponent<IProps, any> {
@@ -67,28 +71,42 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 	public renderNameWithCounter = renderWhenTrue(() => <Name>{`${this.props.count}. ${this.props.name}`}</Name>);
 	public renderName = renderWhenTrue(() => <Name>{this.props.name}</Name>);
 
+	public renderThumbnail = renderWhenTrue(() => (
+		<ThumbnailWrapper>
+			<Thumbnail src={this.props.thumbnail} />
+		</ThumbnailWrapper>
+	));
+
+	public renderActions = renderWhenTrue(() => (
+		<Actions>
+			{this.props.renderActions()}
+		</Actions>
+	));
+
 	public render() {
 		const {
 			roleColor,
 			count,
 			description,
 			author,
-			createdDate,
-			thumbnail,
+			hideThumbnail,
 			StatusIconComponent,
 			statusColor,
 			onItemClick,
 			active,
-			hasViewPermission
+			hasViewPermission,
+			className,
+			renderActions
 		} = this.props;
 
+		const shouldRenderActions = renderActions && active;
+		const createdDate = !shouldRenderActions ? this.props.createdDate : '';
+
 		return (
-			<MenuItemContainer expired={this.isExpiredDate} onClick={onItemClick}>
+			<MenuItemContainer className={className} expired={this.isExpiredDate} onClick={onItemClick}>
 				<Container>
 					<RoleIndicator color={roleColor} />
-					<ThumbnailWrapper>
-						<Thumbnail src={thumbnail} />
-					</ThumbnailWrapper>
+					{this.renderThumbnail(!hideThumbnail)}
 					<Content>
 						{this.renderNameWithCounter(count)}
 						{this.renderName(!count)}
@@ -100,8 +118,9 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 							createdAt={createdDate}
 						/>
 						<Description>
-							<Truncate lines={3}>{description}</Truncate>
+							<Truncate lines={3}>{description || '(no description)'}</Truncate>
 						</Description>
+						{this.renderActions(renderActions && active)}
 					</Content>
 				</Container>
 				{this.renderArrowButton(active && hasViewPermission)}
