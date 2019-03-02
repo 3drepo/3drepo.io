@@ -157,7 +157,7 @@ router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail
  * ]
  *
  */
-router.get("/issues.json", listIssues);
+router.get("/issues.json", middlewares.issue.canView, listIssues);
 
 /**
  * @api {get} /:teamspace/:model/issues.bcfzip Get Issues BCF zip file
