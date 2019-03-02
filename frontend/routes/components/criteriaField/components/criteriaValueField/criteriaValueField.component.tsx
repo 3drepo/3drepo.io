@@ -19,7 +19,10 @@ import InfoIcon from '@material-ui/icons/InfoOutlined';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import {
-	VALUE_FIELD_MAP, VALUE_FIELD_TYPES, CRITERIA_OPERATORS_TYPES, REGEX_INFO_URL
+	VALUE_FIELD_MAP,
+	VALUE_FIELD_TYPES,
+	CRITERIA_OPERATORS_TYPES,
+	REGEX_INFO_URL
 } from '../../../../../constants/criteria';
 import { InputLabel } from '@material-ui/core';
 import { SmallIconButton } from '../../../smallIconButon/smallIconButton.component';
