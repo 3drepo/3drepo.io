@@ -71,11 +71,11 @@ class SystemCommentGenerator extends CommentGenerator {
 	constructor(owner, property, from, to) {
 		super(owner);
 
-		if (fieldTypes.from !== Object.prototype.toString.call(from)) {
+		if (undefined !== from && fieldTypes.from !== Object.prototype.toString.call(from)) {
 			from = from.toString();
 		}
 
-		if (fieldTypes.to !== Object.prototype.toString.call(to)) {
+		if (undefined !== to && fieldTypes.to !== Object.prototype.toString.call(to)) {
 			to = to.toString();
 		}
 
