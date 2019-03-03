@@ -324,7 +324,6 @@ function findGroup(req, res, next) {
 function createGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
-
 	const create = Group.createGroup(getDbColOptions(req), sessionId, req.body);
 
 	create.then(group => {

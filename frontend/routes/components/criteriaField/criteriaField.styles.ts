@@ -27,10 +27,12 @@ import MenuItemComponent from '@material-ui/core/MenuItem';
 import ListSubheader from '@material-ui/core/ListSubheader';
 
 import { SelectField as SelectFieldComponent } from '../selectField/selectField.component';
-import { COLOR } from '../../../styles';
+import { COLOR, BLACK } from '../../../styles';
+import { hexToRgba } from '../../../helpers/colors';
 
 export const Container = styled.div`
-  padding: -12px;
+  border-top: 1px solid ${COLOR.BLACK_20};
+  padding-top: 8px;
 `;
 
 export const InputLabel = styled(InputLabelComponent)`
@@ -119,8 +121,8 @@ export const FormControl = styled(FormControlComponent)`
 `;
 
 export const FormContainer = styled.div`
-  background-color: #F9F9F9;
-  border-top: 1px solid #CFCFCF;
+  background-color: ${hexToRgba(BLACK, .02)};
+  border-top: 1px solid ${COLOR.BLACK_20};
   padding: 24px;
   padding-top: 12px;
 `;
@@ -128,10 +130,6 @@ export const FormContainer = styled.div`
 export const CriteriaList = styled(ListComponent)`
   max-height: 300px;
   overflow: auto;
-`;
-
-export const CriterionType = styled.li`
-
 `;
 
 export const Operators = styled.ul`

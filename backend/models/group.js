@@ -435,7 +435,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data) {
 					} else {
 						if (key === "rules"
 							&& data.rules
-							&& !data.rules.reduce((x, y) => x && isValidRule(y))) {
+							&& !data.rules.every((isValidRule))) {
 							typeCorrect = false;
 						}
 
@@ -478,7 +478,6 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 	return newGroup.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 
 		let typeCorrect = (!data.objects !== !data.rules);
-
 		Object.keys(data).forEach((key) => {
 			if (fieldTypes[key]) {
 				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
@@ -489,7 +488,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 					} else {
 						if (key === "rules"
 							&& data.rules
-							&& data.rules.map((x) => !isValidRule(x)).reduce((x, y) => x || y)) {
+							&& data.rules.some((x) => !isValidRule(x))) {
 							typeCorrect = false;
 						}
 						newGroup[key] = data[key];
