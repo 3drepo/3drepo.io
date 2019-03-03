@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 
-import { Author, Date, Details, Container, Status } from './previewItemInfo.styles';
+import { Author, Date, Details, Container, Status, Icon } from './previewItemInfo.styles';
 
 import { DateTime } from '../../../components/dateTime/dateTime.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -36,14 +36,23 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 		</Date>
 	));
 
+	public renderStatusIcon = renderWhenTrue(() => {
+		const { StatusIconComponent } = this.props;
+		return (
+			<Icon>
+				<StatusIconComponent color="inherit" fontSize="inherit" />
+			</Icon>
+		);
+	});
+
 	public render() {
 		const { author, createdAt, statusColor, StatusIconComponent } = this.props;
 
-		return (
+		return(
 			<Container>
 				<Details>
 					<Status color={statusColor}>
-						{StatusIconComponent && <StatusIconComponent color="inherit" fontSize="small" />}
+						{this.renderStatusIcon(StatusIconComponent)}
 						<Author>{author}</Author>
 					</Status>
 					{this.renderDateTime(createdAt)}

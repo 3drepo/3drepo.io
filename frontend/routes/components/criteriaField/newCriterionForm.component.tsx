@@ -112,7 +112,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 							onClick={this.props.handleSubmit}
 							disabled={!form.isValid || form.isValidating}
 						>
-							Confirm
+							{this.props.criterion._id ? 'Update' : 'Add'}
 						</Button>
 					)} />
 				</NewCriterionFooter>

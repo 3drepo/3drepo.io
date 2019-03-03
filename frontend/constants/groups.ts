@@ -2,7 +2,7 @@ import Print from '@material-ui/icons/Print';
 import Download from '@material-ui/icons/CloudDownload';
 import Delete from '@material-ui/icons/Delete';
 import OfflineBolt from '@material-ui/icons/OfflineBolt';
-import { HandPaper } from '../routes/components/fontAwesomeIcon';
+import PanTool from '@material-ui/icons/PanTool';
 
 import { COLOR } from '../styles';
 
@@ -20,7 +20,7 @@ export const GROUPS_TYPES_LIST = [{
 }];
 
 export const GROUP_TYPES_ICONS = {
-	[GROUPS_TYPES.NORMAL]: HandPaper,
+	[GROUPS_TYPES.NORMAL]: PanTool,
 	[GROUPS_TYPES.SMART]: OfflineBolt
 };
 

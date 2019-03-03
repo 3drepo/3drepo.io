@@ -26,12 +26,13 @@ import GroupWork from '@material-ui/icons/GroupWork';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import SearchIcon from '@material-ui/icons/Search';
 import Delete from '@material-ui/icons/Delete';
-import { Eye, Tint } from '../../../components/fontAwesomeIcon';
+import InvertColors from '@material-ui/icons/InvertColors';
+import Visibility from '@material-ui/icons/Visibility';
 
 import { DEFAULT_OVERRIDE_COLOR, GROUPS_ACTIONS_ITEMS, GROUPS_ACTIONS_MENU } from '../../../../constants/groups';
 import { CREATE_ISSUE } from '../../../../constants/issue-permissions';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
-import { rgbaToHex, hexToRgba } from '../../../../helpers/colors';
+import { hexToRgba } from '../../../../helpers/colors';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { searchByFilters } from '../../../../helpers/searching';
@@ -101,12 +102,6 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
   </IconButton>
 );
 
-const EyeIcon = () => (
-	<StyledIcon color={DEFAULT_OVERRIDE_COLOR}>
-		<Eye />
-	</StyledIcon>
-);
-
 export class Groups extends React.PureComponent<IProps, IState> {
 	public state = {
 		groupDetails: {},
@@ -130,7 +125,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { groups, selectedFilters, activeGroupId, showDetails } = this.props;
+		const { groups, selectedFilters } = this.props;
 		const groupsChanged = !isEqual(prevProps.groups, groups);
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
 
@@ -311,7 +306,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			<TooltipButton
 				label="Isolate"
 				action={this.handleGroupIsolate(group)}
-				Icon={EyeIcon}
+				Icon={Visibility}
 				disabled={!this.state.modelLoaded}
 			/>
 			<TooltipButton
@@ -331,7 +326,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public renderTintIcon = (group) => () => (
 		<StyledIcon color={this.getOverridedColor(group._id, group.color)}>
-			<Tint fontSize="inherit" />
+			<InvertColors color="inherit" fontSize="inherit" />
 		</StyledIcon>
 	)
 
@@ -341,6 +336,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				{...group}
 				key={group._id}
 				hideThumbnail
+				statusColor={this.getOverridedColor(group._id, group.color)}
 				highlighted={this.isHighlighted(group)}
 				roleColor={group.color}
 				onItemClick={this.setActiveGroup(group)}

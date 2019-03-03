@@ -60,3 +60,8 @@ export const Details = styled.div`
   justify-content: space-between;
   height: 21px;
 `;
+
+export const Icon = styled.div`
+  font-size: 17px;
+  display: flex;
+`;

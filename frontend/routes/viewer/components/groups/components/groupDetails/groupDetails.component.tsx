@@ -134,7 +134,6 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		<PreviewDetails
 			key={this.groupData._id}
 			{...this.groupData}
-			{...this.props.criteriaFieldState}
 			roleColor={this.groupData.color}
 			createdDate={this.groupData.createdDate}
 			editable={!this.groupData._id}
