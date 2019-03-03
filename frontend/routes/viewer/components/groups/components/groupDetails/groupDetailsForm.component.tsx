@@ -1,13 +1,12 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import * as dayjs from 'dayjs';
-import { connect, Field, Form, withFormik, Formik } from 'formik';
+import { Field, Form, Formik } from 'formik';
 import { Select } from '@material-ui/core';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import { GROUPS_TYPES_LIST } from '../../../../../../constants/groups';
-import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
 import { VALIDATIONS_MESSAGES, getValidationErrors } from '../../../../../../services/validation';
 import { FieldsRow, StyledFormControl, StyledTextField, Description, LongLabel } from './groupDetails.styles';
 
@@ -27,6 +26,10 @@ interface IProps {
 }
 
 export class GroupDetailsForm extends React.PureComponent<IProps, any> {
+	public async componentDidMount() {
+		await this.handleValidation(this.props.group);
+	}
+
 	get isNewGroup() {
 		return !this.props.group._id;
 	}

@@ -35,11 +35,12 @@ import {
 	Chip
 } from './criteriaField.styles';
 import { renderWhenTrue } from '../../../helpers/rendering';
-import { getCriteriaLabel } from '../../../helpers/criteria';
+import { getCriteriaLabel, prepareCriterion, getUpdatedCriteria } from '../../../helpers/criteria';
 
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { NewCriterionForm } from './newCriterionForm.component';
 import { CriteriaPasteField } from './components/criteriaPasteField/criteriaPasteField.components';
+import { throws } from 'assert';
 
 interface IProps {
 	className?: string;
@@ -73,8 +74,6 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 	</IconButton>
 );
 
-const getUniqueId = ({ operator, values = [] }) => `${operator}.${values.join('.')}`;
-
 const emptyCriterion = {
 	field: '',
 	operator: '',
@@ -99,20 +98,35 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 			changes.criterionForm = criterionForm;
 		}
 
+		if (selectedCriterion) {
+			changes.criterionForm = this.getSelectedCriterionForm(changes.selectedCriteria);
+		}
+
 		this.setState(changes);
 	}
 
 	public componentDidUpdate(prevProps) {
 		if (this.props.selectedCriterion !== prevProps.selectedCriterion) {
-			const criterionForm = this.state.selectedCriteria.find(this.isCriterionActive);
-			this.setState({ criterionForm: criterionForm || { ...emptyCriterion } });
+			const criterionForm = this.getSelectedCriterionForm(this.state.selectedCriteria);
+			this.setState({ criterionForm });
+		} else if (!isEqual(prevProps.criterionForm, this.props.criterionForm)) {
+			this.setState({ criterionForm: this.props.criterionForm });
 		}
+	}
+
+	public getSelectedCriterionForm(selectedCriteria = []) {
+		const criterionForm = selectedCriteria.find(this.isCriterionActive);
+		return criterionForm || { ...emptyCriterion };
 	}
 
 	public handleDelete = (criteriaToRemove) => () => {
 		const selectedCriteria = this.props.value.filter((criteria) => {
-			return !isEqual(criteria, criteriaToRemove);
+			return criteria._id !== criteriaToRemove._id;
 		});
+
+		if (criteriaToRemove._id === this.props.selectedCriterion) {
+			this.props.setState({ selectedCriterion: '' });
+		}
 
 		this.setState({ selectedCriteria }, this.handleChange);
 	}
@@ -132,16 +146,20 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		this.props.setState({ selectedCriterion: '' });
 	}
 
-	public handleAddNew = (newCriterion) => {
+	public handleCriterionSubmit = (newCriterion) => {
 		const criterionForm = { ...emptyCriterion };
+
 		this.setState(
 			({ selectedCriteria }) => ({
-				selectedCriteria: [...selectedCriteria, newCriterion],
+				selectedCriteria: getUpdatedCriteria(selectedCriteria, newCriterion),
 				criterionForm
 			}),
 			() => {
 				this.handleChange();
-				this.props.setState({ criterionForm });
+				this.props.setState({
+					criterionForm,
+					selectedCriterion: ''
+				});
 			}
 		);
 	}
@@ -170,31 +188,31 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		this.setState((prevState) => ({
 			selectedCriteria: uniqBy([
 				...prevState.selectedCriteria,
-				...pastedCriteria
-			], getUniqueId)
+				...pastedCriteria.map(prepareCriterion)
+			], '_id')
 		}), this.handleChange);
 	}
 
-	public handleCriteriaClick = (criteria) => () => {
-		this.props.setState({ selectedCriterion: getUniqueId(criteria) });
+	public handleCriteriaClick = (criterion) => () => {
+		this.props.setState({ selectedCriterion: criterion._id });
 	}
 
 	public isCriterionActive = (criterion) => {
 		const { selectedCriterion } = this.props;
-		return getUniqueId(criterion) === selectedCriterion;
+		return criterion._id === selectedCriterion;
 	}
 
 	public renderPlaceholder = renderWhenTrue(() => (
 		<Placeholder>{this.props.placeholder}</Placeholder>
 	));
 
-	public renderCriterion = (criteria, index) => (
+	public renderCriterion = (criterion) => (
 		<Chip
-			key={index}
-			color={this.isCriterionActive(criteria) ? 'primary' : 'default'}
-			label={getCriteriaLabel(criteria)}
-			onDelete={this.handleDelete(criteria)}
-			onClick={this.handleCriteriaClick(criteria)}
+			key={criterion._id}
+			color={this.isCriterionActive(criterion) ? 'primary' : 'default'}
+			label={getCriteriaLabel(criterion)}
+			onDelete={this.handleDelete(criterion)}
+			onClick={this.handleCriteriaClick(criterion)}
 			clickable
 		/>
 	)
@@ -265,7 +283,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 			<NewCriterionForm
 				criterion={this.state.criterionForm}
 				setState={this.handleNewCriterionChange}
-				onSubmit={this.handleAddNew}
+				onSubmit={this.handleCriterionSubmit}
 				fieldNames={this.props.fieldNames}
 			/>
 		</FormContainer>
@@ -273,7 +291,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { placeholder, value, label, className, isPasteEnabled } = this.props;
-		console.log('isPasteEnabled', isPasteEnabled);
+
 		return (
 			<Container className={className}>
 				<InputLabel shrink>{label}</InputLabel>

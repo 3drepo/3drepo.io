@@ -66,7 +66,6 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { operator: selectedOperator } = this.props.formik.values;
-		console.log('formik', this.props.formik);
 
 		return (
 			<Form>
@@ -126,7 +125,8 @@ export const NewCriterionForm = withFormik({
 	mapPropsToValues: ({ criterion }) => ({
 		field: criterion.field,
 		operator: criterion.operator,
-		values: criterion.values
+		values: criterion.values,
+		_id: criterion._id
 	}),
 	handleSubmit: (values, { props, resetForm }) => {
 		(props as IProps).onSubmit(values);

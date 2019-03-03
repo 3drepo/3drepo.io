@@ -2,6 +2,7 @@ import { omit, pick } from 'lodash';
 import { GROUPS_TYPES, GROUP_TYPES_ICONS } from '../constants/groups';
 import { COLOR } from '../styles';
 import { getGroupHexColor, hexToArray } from './colors';
+import { prepareCriterion } from './criteria';
 
 export const prepareGroup = (group) => {
 	const isSmartGroup = group.rules && group.rules.length;
@@ -15,7 +16,7 @@ export const prepareGroup = (group) => {
 		StatusIconComponent: GROUP_TYPES_ICONS[type],
 		statusColor: COLOR.BLACK_54,
 		color: getGroupHexColor(group.color),
-		rules: group.rules || [],
+		rules: (group.rules || []).map(prepareCriterion),
 		objects: group.objects || []
 	};
 };
