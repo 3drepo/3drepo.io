@@ -83,9 +83,17 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleNameChange = (event, name) => {
-		const newGroup = { ...this.groupData, name };
-		this.props.setState({ newGroup });
+	public handleFieldChange = (event) => {
+		this.props.setState({
+			newGroup: {
+				...this.groupData,
+				[event.target.name]: event.target.value
+			}
+		});
+	}
+
+	public handleColorChange = (color) => {
+		this.props.setState({ newGroup: { ...this.groupData, color } });
 	}
 
 	public formRef = React.createRef();
@@ -96,24 +104,12 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			onSubmit={this.handleGroupFormSubmit}
 			currentUser={this.props.currentUser}
 			totalMeshes={this.props.totalMeshes}
-			setState={this.props.setState}
 			canUpdate={this.props.canUpdate}
 			setIsFormValid={this.setIsFormValid}
-			selectedNodes={this.props.selectedNodes}
 			fieldNames={this.props.fieldNames}
-			critieriaFieldState={this.props.critieriaFieldState}
-			setCriteriaState={this.props.setCriteriaState}
+			handleChange={this.handleFieldChange}
 		/>
 	)
-
-	public handleRulesChange = (event) => {
-		this.props.setState({
-			newGroup: {
-				...this.groupData,
-				rules: event.target.value
-			}
-		});
-	}
 
 	public handleCriterionSelect = (criterion) => {
 		this.props.setCriteriaState({ criterionForm: criterion });
@@ -121,9 +117,10 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 	public renderRulesField = () => renderWhenTrue(() => (
 		<CriteriaField
+			name="rules"
 			value={this.groupData.rules}
 			{...this.props.critieriaFieldState}
-			onChange={this.handleRulesChange}
+			onChange={this.handleFieldChange}
 			onCriterionSelect={this.handleCriterionSelect}
 			setState={this.props.setCriteriaState}
 			label="Criteria"
@@ -140,29 +137,16 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			roleColor={this.groupData.color}
 			createdDate={this.groupData.createdDate}
 			editable={!this.groupData._id}
-			onNameChange={this.handleNameChange}
+			onNameChange={this.handleFieldChange}
 			renderCollapsable={this.renderGroupForm}
 			renderNotCollapsable={this.renderRulesField}
 			disableExpanding
 		/>
 	));
 
-	public handleColorChange = (color) => {
-		this.props.setState({ newGroup: { ...this.groupData, color }});
-	}
-
 	public setIsFormValid = (isFormValid) => {
-		debugger;
 		this.setState({ isFormValid });
 	}
-
-	public renderResetButton = renderWhenTrue(() => (
-		<TooltipButton
-			label="Reset to saved selection"
-			action={this.props.selectGroup}
-			Icon={AutorenewIcon}
-		/>
-	));
 
 	public renderFooter = () => {
 		return (
@@ -175,7 +159,11 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 							onChange={this.handleColorChange}
 						/>
 					</ColorPickerWrapper>
-					{this.renderResetButton(!this.isNewGroup)}
+					<TooltipButton
+						label="Reset to saved selection"
+						action={this.props.selectGroup}
+						Icon={AutorenewIcon}
+					/>
 				</Actions>
 				<ViewerPanelButton
 					variant="fab"

@@ -6,11 +6,10 @@ import { Select } from '@material-ui/core';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import { GROUPS_TYPES, GROUPS_TYPES_LIST } from '../../../../../../constants/groups';
+import { GROUPS_TYPES_LIST } from '../../../../../../constants/groups';
 import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
 import { VALIDATIONS_MESSAGES, getValidationErrors } from '../../../../../../services/validation';
 import { FieldsRow, StyledFormControl, StyledTextField, Description, LongLabel } from './groupDetails.styles';
-import { HiddenField } from './hiddenField.component';
 
 const GroupSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
@@ -22,35 +21,18 @@ interface IProps {
 	totalMeshes: number;
 	canUpdate: boolean;
 	fieldNames: any[];
-	critieriaFieldState: ICriteriaFieldState;
 	onSubmit: () => void;
 	handleChange: (event) => void;
-	setState: (componentState) => void;
-	setCriteriaState: (criteriaState) => void;
 	setIsFormValid: (isFormValid) => void;
 }
 
-interface IState {
-	isSaving: boolean;
-}
-
-export class GroupDetailsForm extends React.PureComponent<IProps, IState> {
-	public state = {
-		isSaving: false
-	};
-
+export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 	get isNewGroup() {
 		return !this.props.group._id;
 	}
 
 	public handleFieldChange = (onChange) => (event) => {
-		this.props.setState({
-			newGroup: {
-				...this.props.group,
-				[event.target.name]: event.target.value
-			}
-		});
-
+		this.handleFieldChange(event);
 		onChange(event);
 	}
 

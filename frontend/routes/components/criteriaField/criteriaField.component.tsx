@@ -44,9 +44,9 @@ import { CriteriaPasteField } from './components/criteriaPasteField/criteriaPast
 interface IProps {
 	className?: string;
 	name?: string;
+	placeholder?: string;
 	value: any[];
 	label?: string;
-	criteria: any;
 	disabled: boolean;
 	fieldNames: any[];
 	isPasteEnabled: boolean;
@@ -185,7 +185,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderPlaceholder = renderWhenTrue(() => (
-		<Placeholder>Add first criterion below</Placeholder>
+		<Placeholder>{this.props.placeholder}</Placeholder>
 	));
 
 	public renderCriterion = (criteria, index) => (
@@ -272,14 +272,15 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 	)
 
 	public render() {
+		const { placeholder, value, label, className, isPasteEnabled } = this.props;
 		return (
-			<Container className={this.props.className}>
-				<InputLabel shrink>{this.props.label}</InputLabel>
+			<Container className={className}>
+				<InputLabel shrink>{label}</InputLabel>
 				<SelectedCriteria>
-					{this.renderPlaceholder(!this.props.value.length && !this.props.isPasteEnabled)}
-					{this.renderCriteriaChips(!!this.props.value.length)}
-					{this.renderCriteriaField(this.props.isPasteEnabled)}
-					{this.renderOptionsMenu(!this.props.isPasteEnabled)}
+					{this.renderPlaceholder(placeholder && !value.length && !isPasteEnabled)}
+					{this.renderCriteriaChips(!!value.length)}
+					{this.renderCriteriaField(isPasteEnabled)}
+					{this.renderOptionsMenu(!isPasteEnabled)}
 				</SelectedCriteria>
 				{this.renderForm()}
 			</Container>
