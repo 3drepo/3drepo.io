@@ -493,7 +493,13 @@ describe("Implied permission::", function () {
 		it("can view issues", function(done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/issues.json`)
-				.expect(200 , done);
+				.expect(200 , function(err, res) {
+					console.log("DEBUG START");
+					console.log(err);
+					console.log(res);
+					console.log("DEBUG END");
+					done(err);
+				});
 		});
 
 		it("can create issue", function(done) {
