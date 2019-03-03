@@ -768,7 +768,8 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 	if (branch || revId) {
 		historySearch = History.getHistory({account, model}, branch, revId).then((history) => {
 			if (!history) {
-				return Promise.reject(responseCodes.INVALID_TAG_NAME);
+				//return Promise.reject(responseCodes.INVALID_TAG_NAME);
+				return Promise.resolve();
 			} else {
 				return History.find(dbCol, {timestamp: {"$gt": history.timestamp}}, {_id: 1, current: 1})
 					.then((revIds) => {
