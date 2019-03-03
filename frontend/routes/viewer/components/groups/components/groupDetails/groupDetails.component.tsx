@@ -88,14 +88,14 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		this.props.setState({ newGroup });
 	}
 
+	public formRef = React.createRef();
+
 	public renderGroupForm = () => (
 		<GroupDetailsForm
 			group={this.groupData}
-			onValueChange={this.handleGroupFormSubmit}
 			onSubmit={this.handleGroupFormSubmit}
 			currentUser={this.props.currentUser}
 			totalMeshes={this.props.totalMeshes}
-			permissions={this.props.modelSettings.permissions}
 			setState={this.props.setState}
 			canUpdate={this.props.canUpdate}
 			setIsFormValid={this.setIsFormValid}
@@ -152,6 +152,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public setIsFormValid = (isFormValid) => {
+		debugger;
 		this.setState({ isFormValid });
 	}
 

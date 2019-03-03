@@ -17,7 +17,6 @@
 
 import { put, takeLatest, takeEvery, select, all, call} from 'redux-saga/effects';
 import { delay } from 'redux-saga';
-import {omit} from 'lodash';
 import { getAngularService, dispatch } from '../../helpers/migration';
 
 import * as API from '../../services/api';
@@ -34,7 +33,7 @@ import {
 } from './groups.selectors';
 import { Viewer } from '../../services/viewer/viewer';
 import { MultiSelect } from '../../services/viewer/multiSelect';
-import { prepareGroup } from '../../helpers/groups';
+import { prepareGroup, normalizeGroup } from '../../helpers/groups';
 import { selectCurrentUser } from '../currentUser';
 import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { SnackbarActions } from '../snackbar';
@@ -306,82 +305,69 @@ export function* createGroup({ teamspace, modelId }) {
 		const date = new Date();
 		const timestamp = date.getTime();
 		const group = {
-			author: currentUser.username,
+			...normalizeGroup(newGroupDetails),
 			createdAt: timestamp,
 			updatedAt: timestamp,
-			updatedBy: currentUser.username,
-			totalSavedMeshes: 0,
-			objects: [],
-			...newGroupDetails
-		};
+			updatedBy: currentUser.username
+		} as any;
 
-		if (objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
+		if (group.objects && objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
 			group.totalSavedMeshes = calculateTotalMeshes(objectsStatus);
 			group.objects = objectsStatus.highlightedNodes;
 		}
 
 		const {data} = yield API.createGroup(teamspace, modelId, group);
-		const newGroup = {
-			...group,
-			_id: data._id
-		};
-		// yield put(GroupsActions.updateGroupSuccess(newGroup));
-		yield put(GroupsActions.highlightGroup(newGroup));
-		yield put(GroupsActions.showDetails(newGroup));
+		const preparedGroup = prepareGroup(data);
+
+		yield put(GroupsActions.highlightGroup(preparedGroup));
+		yield put(GroupsActions.showDetails(preparedGroup));
 		yield put(SnackbarActions.show('Group created'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('create', 'group', error));
+		yield put(DialogActions.showEndpointErrorDialog('create', 'group', error));
 	}
 }
 
 export function* updateGroup({ teamspace, modelId, groupId }) {
 	try {
 		const currentUser = yield select(selectCurrentUser);
-		const updatedGroupDetails = yield select(selectNewGroupDetails);
 		const groupDetails = yield select(selectActiveGroupDetails);
-		const objectsStatus = yield Viewer.getObjectsStatus();
 		const date = new Date();
 		const timestamp = date.getTime();
-		const details = updatedGroupDetails.rules.length ? updatedGroupDetails : omit(updatedGroupDetails, ['rules']);
 
-		const group = {
+		const groupToSave = {
+			...normalizeGroup(groupDetails),
 			updatedAt: timestamp,
 			updatedBy: currentUser.username,
-			totalSavedMeshes: 0,
-			objects: [],
-			...details
-		};
+			objects: []
+		} as any;
 
+		const objectsStatus = yield Viewer.getObjectsStatus();
 		if (objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
-			group.totalSavedMeshes = calculateTotalMeshes(objectsStatus);
-			group.objects = objectsStatus.highlightedNodes;
+			groupToSave.totalSavedMeshes = calculateTotalMeshes(objectsStatus);
+			groupToSave.objects = objectsStatus.highlightedNodes;
 		}
 
-		const {data} = yield API.updateGroup(teamspace, modelId, groupId, group);
-		const updatedGroup = {
-			...group,
-			_id: data._id,
-			author: groupDetails.author,
-			name: groupDetails.name
-		};
-		// yield put(GroupsActions.updateGroupSuccess(updatedGroup));
-		yield put(GroupsActions.highlightGroup(updatedGroup));
+		const { data } = yield API.updateGroup(teamspace, modelId, groupId, groupToSave);
+		const preparedGroup = prepareGroup(data);
+
+		yield put(GroupsActions.highlightGroup(preparedGroup));
 		yield put(SnackbarActions.show('Group updated'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'group', error));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'group', error));
 	}
 }
 
 export function* setNewGroup() {
+	const currentUser = yield select(selectCurrentUser);
 	const groups = yield select(selectGroups);
 	const groupNumber = groups.length + 1;
 
 	try {
 		const newGroup = prepareGroup({
+			author: currentUser.name,
 			name: `Untitled group ${groupNumber}`,
 			color: getRandomColor(),
-			description: '(No description)',
-			rules: []
+			description: '(No description)'
 		});
 
 		yield put(GroupsActions.setComponentState({
@@ -397,15 +383,15 @@ export function* setNewGroup() {
 }
 
 const onUpdated = (updatedGroup) => {
-	dispatch(GroupsActions.updateGroupSuccess(updatedGroup));
+	dispatch(GroupsActions.updateGroupSuccess(prepareGroup(updatedGroup)));
 };
 
 const onCreated = (createdGroup) => {
-	dispatch(GroupsActions.updateGroupSuccess(createdGroup));
+	dispatch(GroupsActions.updateGroupSuccess(prepareGroup(createdGroup)));
 };
 
 const onDeleted = (deletedGroupId) => {
-	dispatch(GroupsActions.deleteGroupSuccess(deletedGroupId));
+	dispatch(GroupsActions.deleteGroupSuccess(prepareGroup(deletedGroupId)));
 };
 
 export function* subscribeOnChanges({ teamspace, modelId }) {

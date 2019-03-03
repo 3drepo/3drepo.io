@@ -22,9 +22,9 @@ import Hidden from '@material-ui/core/Hidden';
 
 interface IProps {
 	name: string;
-	value: any[];
-	onChange: (event) => void;
-	onBlur: (event) => void;
+	value: any | any[];
+	onChange?: (event) => void;
+	onBlur?: (event) => void;
 }
 
 export class HiddenField extends React.PureComponent<IProps, any> {
