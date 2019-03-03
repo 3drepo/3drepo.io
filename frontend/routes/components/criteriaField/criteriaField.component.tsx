@@ -199,7 +199,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		/>
 	)
 
-	public renderCriteriaField = renderWhenTrue(() => (
+	public renderCriteriaPasteField = renderWhenTrue(() => (
 		<CriteriaPasteField
 			name="pasteField"
 			initialValue={this.props.pastedCriteria}
@@ -273,13 +273,14 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { placeholder, value, label, className, isPasteEnabled } = this.props;
+		console.log('isPasteEnabled', isPasteEnabled);
 		return (
 			<Container className={className}>
 				<InputLabel shrink>{label}</InputLabel>
 				<SelectedCriteria>
 					{this.renderPlaceholder(placeholder && !value.length && !isPasteEnabled)}
 					{this.renderCriteriaChips(!!value.length)}
-					{this.renderCriteriaField(isPasteEnabled)}
+					{this.renderCriteriaPasteField(isPasteEnabled)}
 					{this.renderOptionsMenu(!isPasteEnabled)}
 				</SelectedCriteria>
 				{this.renderForm()}

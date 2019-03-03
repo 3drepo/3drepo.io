@@ -43,7 +43,7 @@ interface IProps {
 	canUpdate: boolean;
 	selectedNodes: any;
 	fieldNames: any[];
-	critieriaFieldState: ICriteriaFieldState;
+	criteriaFieldState: ICriteriaFieldState;
 	createGroup: (teamspace, modelId) => void;
 	updateGroup: (teamspace, modelId, groupId) => void;
 	setState: (componentState) => void;
@@ -115,11 +115,11 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		this.props.setCriteriaState({ criterionForm: criterion });
 	}
 
-	public renderRulesField = () => renderWhenTrue(() => (
+	public renderRulesField = renderWhenTrue(() => (
 		<CriteriaField
 			name="rules"
 			value={this.groupData.rules}
-			{...this.props.critieriaFieldState}
+			{...this.props.criteriaFieldState}
 			onChange={this.handleFieldChange}
 			onCriterionSelect={this.handleCriterionSelect}
 			setState={this.props.setCriteriaState}
@@ -128,18 +128,19 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			disabled={!this.props.canUpdate}
 			fieldNames={this.props.fieldNames}
 		/>
-	))(this.groupData.type === GROUPS_TYPES.SMART)
+	));
 
 	public renderPreview = renderWhenTrue(() => (
 		<PreviewDetails
 			key={this.groupData._id}
 			{...this.groupData}
+			{...this.props.criteriaFieldState}
 			roleColor={this.groupData.color}
 			createdDate={this.groupData.createdDate}
 			editable={!this.groupData._id}
 			onNameChange={this.handleFieldChange}
 			renderCollapsable={this.renderGroupForm}
-			renderNotCollapsable={this.renderRulesField}
+			renderNotCollapsable={() => this.renderRulesField(this.groupData.type === GROUPS_TYPES.SMART)}
 			disableExpanding
 		/>
 	));

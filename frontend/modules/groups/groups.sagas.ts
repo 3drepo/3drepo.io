@@ -364,7 +364,7 @@ export function* setNewGroup() {
 
 	try {
 		const newGroup = prepareGroup({
-			createdBy: currentUser.name,
+			author: currentUser.name,
 			name: `Untitled group ${groupNumber}`,
 			color: getRandomColor(),
 			description: '(No description)'

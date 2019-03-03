@@ -41,7 +41,7 @@ const mapStateToProps = createStructuredSelector({
 	totalMeshes: selectTotalMeshes,
 	selectedNodes: selectSelectedNodes,
 	fieldNames: selectFieldNames,
-	critieriaFieldState: selectCriteriaFieldState
+	criteriaFieldState: selectCriteriaFieldState
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

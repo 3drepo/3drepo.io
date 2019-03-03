@@ -32,7 +32,7 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 	}
 
 	public handleFieldChange = (onChange) => (event) => {
-		this.handleFieldChange(event);
+		this.props.handleChange(event);
 		onChange(event);
 	}
 
