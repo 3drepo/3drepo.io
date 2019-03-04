@@ -176,11 +176,12 @@ groupSchema.methods.getObjectsArrayAsIfcGuids = function (data) {
 		const sharedIdsSet = new Set();
 		const ifcGuidsSet = new Set();
 
-		const sharedIds = data.objects[i].shared_ids ? data.objects[i].shared_ids : [];
+		const objectList = data.objects[i].shared_ids ? data.objects[i].shared_ids : [];
+		const sharedIds = [];
 
-		for (let j = 0; j < sharedIds.length; j++) {
-			if ("[object String]" === Object.prototype.toString.call(sharedIds[j])) {
-				sharedIds[j] = utils.stringToUUID(sharedIds[j]);
+		for (let j = 0; j < objectList.length; j++) {
+			if ("[object String]" === Object.prototype.toString.call(objectList[j])) {
+				sharedIds.push(utils.stringToUUID(objectList[j]));
 			}
 
 			sharedIdsSet.add(utils.uuidToString(sharedIds[j]));
@@ -504,6 +505,8 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 		if (typeCorrect) {
 			return newGroup.save().then((savedGroup) => {
 				savedGroup._id = utils.uuidToString(savedGroup._id);
+
+				savedGroup.objects = data.objects;
 				if (!data.isIssueGroup && sessionId) {
 					ChatEvent.newGroups(sessionId, dbCol.account, model, savedGroup);
 				}
