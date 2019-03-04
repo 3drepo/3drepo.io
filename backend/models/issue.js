@@ -664,7 +664,13 @@ issue.updateAttrs = function(dbCol, uid, data) {
 						}
 					}
 
-					if (typeCorrect && Object.keys(toUpdate).length > 0) {
+					if (!typeCorrect) {
+						return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+					} else if (0 === Object.keys(toUpdate).length) {
+						return (data.comment) ?
+							Promise.resolve(data) :
+							Promise.resolve(oldIssue);
+					} else {
 						return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
 							return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
 								newIssue = clean(dbCol, newIssue);
@@ -682,8 +688,6 @@ issue.updateAttrs = function(dbCol, uid, data) {
 								});
 							});
 						});
-					} else {
-						return Promise.reject(responseCodes.INVALID_ARGUMENTS);
 					}
 				} else {
 					return Promise.reject(responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED);
@@ -768,8 +772,7 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 	if (branch || revId) {
 		historySearch = History.getHistory({account, model}, branch, revId).then((history) => {
 			if (!history) {
-				// return Promise.reject(responseCodes.INVALID_TAG_NAME);
-				return Promise.resolve();
+				return Promise.reject(responseCodes.INVALID_TAG_NAME);
 			} else {
 				return History.find(dbCol, {timestamp: {"$gt": history.timestamp}}, {_id: 1, current: 1})
 					.then((revIds) => {
