@@ -5,8 +5,7 @@ import { getGroupHexColor, hexToArray } from './colors';
 import { prepareCriterion } from './criteria';
 
 export const prepareGroup = (group) => {
-	// const isSmartGroup = group.rules && group.rules.length;
-	const isSmartGroup = true;
+	const isSmartGroup = group.rules && group.rules.length;
 	const type = isSmartGroup ? GROUPS_TYPES.SMART : GROUPS_TYPES.NORMAL;
 
 	return {

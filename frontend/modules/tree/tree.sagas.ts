@@ -19,16 +19,20 @@ import { put, takeLatest, select } from 'redux-saga/effects';
 import { TreeTypes, TreeActions } from './tree.redux';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { dispatch } from '../../helpers/migration';
+import { dispatch, getAngularService } from '../../helpers/migration';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { selectSelectedNodes } from './tree.selectors';
+import { GroupsActions } from '../groups';
 
 export function* startListenOnSelections() {
 	try {
 		const selectedNodes = yield select(selectSelectedNodes);
 		const objectsStatus = yield Viewer.getObjectsStatus();
+		const TreeService = getAngularService('TreeService') as any;
 
 		Viewer.on(VIEWER_EVENTS.OBJECT_SELECTED, (object) => {
+			TreeService.nodesClickedByIds([object.id]);
+
 			const isAccumMode = MultiSelect.isAccumMode();
 			const isDeccumMode = MultiSelect.isDecumMode();
 			const multiSelectMode = isAccumMode || isDeccumMode;
@@ -45,9 +49,16 @@ export function* startListenOnSelections() {
 			}
 		});
 
+		Viewer.on(VIEWER_EVENTS.MULTI_OBJECTS_SELECTED, (object) => {
+			TreeService.nodesClickedBySharedIds(object.selectedNodes);
+		});
+
 		Viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => {
+			TreeService.clearCurrentlySelected();
+
 			if (Object.keys(selectedNodes).length) {
 				dispatch(TreeActions.clearSelectedNodes());
+				dispatch(GroupsActions.clearSelectionHighlights());
 			}
 		});
 	} catch (error) {
@@ -58,6 +69,7 @@ export function* startListenOnSelections() {
 export function* stopListenOnSelections() {
 	try {
 		Viewer.off(VIEWER_EVENTS.OBJECT_SELECTED);
+		Viewer.off(VIEWER_EVENTS.MULTI_OBJECTS_SELECTED);
 		Viewer.off(VIEWER_EVENTS.BACKGROUND_SELECTED);
 	} catch (error) {
 		console.error(error);

@@ -25,10 +25,10 @@ import {
 	selectExpandDetails,
 	selectTotalMeshes,
 	GroupsActions,
-	selectNewGroupDetails,
 	selectFieldNames,
 	selectCriteriaFieldState
 } from '../../../../../../modules/groups';
+import { TreeActions } from '../../../../../../modules/tree';
 import { selectSettings } from '../../../../../../modules/model';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
 import { selectSelectedNodes } from '../../../../../../modules/tree';
@@ -48,7 +48,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setState: GroupsActions.setComponentState,
 	updateGroup: GroupsActions.updateGroup,
 	createGroup: GroupsActions.createGroup,
-	setCriteriaState: GroupsActions.setCriteriaFieldState
+	setCriteriaState: GroupsActions.setCriteriaFieldState,
+	stopListenOnSelections: TreeActions.stopListenOnSelections,
+	startListenOnSelections: TreeActions.startListenOnSelections
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(GroupDetails);

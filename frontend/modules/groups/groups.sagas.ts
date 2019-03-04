@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, takeEvery, select, all, call} from 'redux-saga/effects';
+import { put, takeLatest, takeEvery, select, all, call } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
 import { getAngularService, dispatch } from '../../helpers/migration';
 
