@@ -29,7 +29,8 @@ import {
 	selectGroupsMap,
 	selectFilteredGroups,
 	selectNewGroupDetails,
-	selectActiveGroupDetails
+	selectActiveGroupDetails,
+	selectSelectedFilters
 } from './groups.selectors';
 import { Viewer } from '../../services/viewer/viewer';
 import { MultiSelect } from '../../services/viewer/multiSelect';
@@ -38,6 +39,7 @@ import { selectCurrentUser } from '../currentUser';
 import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { SnackbarActions } from '../snackbar';
 import { TreeActions } from '../tree';
+import { searchByFilters } from '../../helpers/searching';
 
 export function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(true));
@@ -267,10 +269,15 @@ export function* isolateGroup({ group }) {
 
 export function* downloadGroups({ teamspace, modelId }) {
 	try {
-		const endpoint = `${teamspace}/${modelId}/groups/revision/master/head/?noIssues=true&noRisks=true`;
+		const groups = yield select(selectGroups);
+		const filters = yield select(selectSelectedFilters);
+		const filteredGroups = searchByFilters(groups, filters, false);
+		const ids = filteredGroups.map((group) => group._id).join(',');
+		const endpointBase =
+			`${teamspace}/${modelId}/groups/revision/master/head/?noIssues=true&noRisks=true`;
+		const endpoint = ids ? `${endpointBase}&ids=${ids}` : endpointBase;
 		const modelName = Viewer.viewer && Viewer.viewer.settings ? Viewer.viewer.settings.name : '';
-		yield API.downloadJSON('groups', modelName, endpoint);
-
+		yield API.downloadJSON('groups', modelName, `${endpoint}&convertCoords=true`);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('download', 'groups', error));
 	}
