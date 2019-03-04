@@ -151,7 +151,7 @@ function getBCFMarkup(issue, account, model, unit) {
 
 		const commentXmlObj = {
 			"@":{
-				Guid: utils.uuidToString(comment.guid)
+				Guid: utils.uuidToString(comment.guid ? comment.guid : utils.generateUUID())
 			},
 			"Date": moment(comment.created).format(),
 			"Author": comment.owner,
