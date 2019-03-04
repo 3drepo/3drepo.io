@@ -88,7 +88,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		if (!revisions.length) {
 			return `No revisions yet.`;
 		}
-		const lastRevision = revisions[revisions.length - 1];
+		const lastRevision = revisions[0];
 		const info = `Revision ${revisions.length}`;
 		const formatedDate = dayjs(lastRevision.timestamp).format('DD MMM YYYY');
 
