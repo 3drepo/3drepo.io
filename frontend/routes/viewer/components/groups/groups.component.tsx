@@ -105,7 +105,7 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 export class Groups extends React.PureComponent<IProps, IState> {
 	public state = {
 		groupDetails: {},
-		modelLoaded: true, // TODO: false
+		modelLoaded: false,
 		filteredGroups: []
 	};
 
