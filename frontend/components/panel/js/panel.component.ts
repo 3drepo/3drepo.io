@@ -25,7 +25,6 @@ class PanelController implements ng.IController {
 
 		'PanelService',
 		'EventService',
-		'GroupsService',
 		'TreeService'
 	];
 
@@ -50,7 +49,6 @@ class PanelController implements ng.IController {
 
 		private PanelService: any,
 		private EventService: any,
-		private GroupsService: any,
 		private TreeService: any
 	) {}
 
@@ -106,11 +104,6 @@ class PanelController implements ng.IController {
 		this.$scope.$watch(() => this.TreeService.getHideIfc(),
 			(hideIfc) => {
 				this.PanelService.setHideIfc(hideIfc);
-			});
-
-		this.$scope.$watch(() => this.GroupsService.state.overrideAll,
-			(overrideAll) => {
-				this.PanelService.setOverrideAll(overrideAll);
 			});
 	}
 

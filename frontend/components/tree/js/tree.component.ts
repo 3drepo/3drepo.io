@@ -25,8 +25,7 @@ class TreeController implements ng.IController {
 		'TreeService',
 		'EventService',
 		'MultiSelectService',
-		'ViewerService',
-		'GroupsService'
+		'ViewerService'
 	];
 
 	public showProgress: boolean; // in pug
@@ -61,7 +60,6 @@ class TreeController implements ng.IController {
 		private EventService,
 		private MultiSelectService,
 		private ViewerService,
-		private GroupsService
 	) {
 
 		this.promise = null,
