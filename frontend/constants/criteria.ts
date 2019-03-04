@@ -216,7 +216,8 @@ export const VALUE_FIELD_MAP = {
 		dataType: VALUE_DATA_TYPES.NUMBER
 	},
 	[CRITERIA_OPERATORS_TYPES.REGEX]: {
-		fieldType: VALUE_FIELD_TYPES.SINGLE
+		fieldType: VALUE_FIELD_TYPES.SINGLE,
+		dataType: VALUE_DATA_TYPES.TEXT
 	}
 } as any;
 

@@ -39,7 +39,7 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 		onChange(event);
 	}
 
-	public handleValidation = async (values) => {
+	public handleValidation = (values) => {
 		return getValidationErrors(GroupSchema, values)
 			.then(() => {
 				this.props.setIsFormValid(true);

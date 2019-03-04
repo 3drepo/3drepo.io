@@ -33,6 +33,8 @@ interface IProps {
 	selectedOperator: string;
 	error: boolean;
 	helperText: any[];
+	touched: boolean;
+	setTouched: (touched) => void;
 	onChange: (event) => void;
 	onBlur: (event) => void;
 }
@@ -40,6 +42,13 @@ interface IProps {
 interface IState {
 	value: any[];
 }
+
+const INITIAL_VALUE = {
+	[VALUE_FIELD_TYPES.RANGE]: ['', ''],
+	[VALUE_FIELD_TYPES.SINGLE]: [''],
+	[VALUE_FIELD_TYPES.MULTIPLE]: [''],
+	[VALUE_FIELD_TYPES.EMPTY]: ['']
+};
 
 export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 	public state = {
@@ -62,13 +71,19 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 
 		if (selectedOperator !== prevProps.selectedOperator) {
 			if (onChange) {
-				onChange({ target: { value: [], name } });
-				this.setState({ value: []	});
+				const initialValue =
+					VALUE_FIELD_MAP[selectedOperator] && VALUE_FIELD_MAP[selectedOperator].fieldType ?
+					INITIAL_VALUE[VALUE_FIELD_MAP[selectedOperator].fieldType] : [];
+
+				this.props.setTouched({ values: false });
+				onChange({ target: { value: initialValue, name } });
+				this.setState({ value: initialValue	});
 			}
 		}
 	}
 
 	public handleSingleValueChange = ({ target: { value } }) => {
+		this.props.setTouched({ values: true });
 		const { onChange, name } = this.props;
 
 		if (onChange) {
@@ -78,13 +93,21 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 
 	public handleMultiValueChange = (event, index) => {
 		const { target: { value: changedValue }} = event;
-
 		const { onChange, name, value } = this.props;
 		if (onChange) {
 			const newValue = [...value];
 			newValue[index] = changedValue;
+
 			onChange({ target: { value: newValue, name } });
-			this.setState({ value: newValue });
+			this.setState({ value: newValue }, () => {
+				if (VALUE_FIELD_MAP[this.props.selectedOperator].fieldType === VALUE_FIELD_TYPES.RANGE) {
+					if (this.state.value[0] && this.state.value[1]) {
+						this.props.setTouched({ values: true });
+					}
+				} else {
+					this.props.setTouched({ values: true });
+				}
+			});
 		}
 	}
 
@@ -138,13 +161,14 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderNewMultipleInput = (index) => {
+		const helperText = this.props.touched && this.getHelperText(index);
 		return (
 			<NewMultipleInputWrapper key={index}>
 				<MultipleInput
 					value={this.state.value[index]}
 					onChange={(event) => this.handleMultiValueChange(event, index)}
-					helperText={this.getHelperText(index)}
-					error={this.props.error}
+					helperText={helperText}
+					error={helperText}
 				/>
 				<RemoveButton>
 					<SmallIconButton
@@ -162,30 +186,30 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 			<SingleInput
 				value={this.props.value}
 				onChange={this.handleSingleValueChange}
-				helperText={this.getHelperText(0)}
-				error={this.props.error}
+				helperText={this.props.touched && this.getHelperText(0)}
+				error={this.props.touched && this.props.error}
 			/>
 		</InputWrapper>
 	));
 
-	public renderRangeInputs = renderWhenTrue(() => (
-		<RangeInputs>
-			<RangeInput
-				key="0"
-				value={this.state.value[0]}
-				onChange={(event) => this.handleMultiValueChange(event, 0)}
-				helperText={this.getHelperText(0)}
-				error={this.props.error}
-			/>
-			<RangeInput
-				key="1"
-				value={this.state.value[1]}
-				onChange={(event) => this.handleMultiValueChange(event, 1)}
-				helperText={this.getHelperText(1)}
-				error={this.props.error}
-			/>
-		</RangeInputs>
-	));
+	public renderRangeInputs = renderWhenTrue(() => {
+		return (
+			<RangeInputs>
+				<RangeInput
+					value={this.state.value[0]}
+					onChange={(event) => this.handleMultiValueChange(event, 0)}
+					helperText={this.props.touched && this.getHelperText(0)}
+					error={this.props.touched && this.getHelperText(0)}
+				/>
+				<RangeInput
+					value={this.state.value[1]}
+					onChange={(event) => this.handleMultiValueChange(event, 1)}
+					helperText={this.props.touched && this.getHelperText(1)}
+					error={this.props.touched && this.getHelperText(1)}
+				/>
+			</RangeInputs>
+		);
+	});
 
 	public renderInitialState = renderWhenTrue(() => (
 		<SingleInput
@@ -207,7 +231,6 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { selectedOperator } = this.props;
-
 		return (
 			<>
 				{this.renderInitialState(!VALUE_FIELD_MAP[selectedOperator])}

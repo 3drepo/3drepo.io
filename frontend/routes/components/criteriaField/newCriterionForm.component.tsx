@@ -26,13 +26,12 @@ const CriterionSchema = Yup.object().shape({
 	field: Yup.string().required(),
 	operator: Yup.string().required(),
 	values: Yup.array().when('operator', {
-		is: (value) => VALUE_FIELD_MAP[value].dataType === VALUE_DATA_TYPES.NUMBER,
+		is: (value) =>
+		VALUE_FIELD_MAP[value] &&
+		VALUE_FIELD_MAP[value].dataType &&
+		VALUE_FIELD_MAP[value].dataType === VALUE_DATA_TYPES.NUMBER,
 		then: Yup.array().of(schema.measureNumberDecimal.nullable()).required('This field is required'),
-		otherwise: Yup.array().of(Yup.string()).when('operator', {
-			is: (value) => VALUE_FIELD_MAP[value].fieldType !== VALUE_FIELD_TYPES.EMPTY,
-			then: Yup.array().required,
-			otherwise: Yup.array()
-		})
+		otherwise: Yup.array().of(Yup.string()).required('This field is required')
 	})
 });
 
@@ -91,17 +90,21 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 					)} />
 				</FormControl>
 
-				<Field name="values" render={({ field, form }) => (
-					<FormControl>
-						<CriteriaValueField
-							{...field}
-							value={field.value}
-							selectedOperator={selectedOperator}
-							error={Boolean(form.errors.values)}
-							helperText={form.errors.values}
-						/>
-					</FormControl>
-				)} />
+				<Field name="values" render={({ field, form }) => {
+					return (
+						<FormControl>
+							<CriteriaValueField
+								{...field}
+								value={field.value}
+								selectedOperator={selectedOperator}
+								error={Boolean(form.errors.values)}
+								helperText={form.errors.values}
+								touched={form.touched.values}
+								setTouched={form.setTouched}
+							/>
+						</FormControl>
+					);
+				}} />
 
 				<NewCriterionFooter>
 					<Field render={({ form }) => (
@@ -132,6 +135,6 @@ export const NewCriterionForm = withFormik({
 		(props as IProps).onSubmit(values);
 		resetForm();
 	},
-	enableReinitialize: true,
+	enableReinitialize: false,
 	validationSchema: (props) => CriterionSchema
 })(connect(NewCreaterionFormComponent as any)) as any;
