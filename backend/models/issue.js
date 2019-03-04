@@ -783,65 +783,69 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 
 	return ModelSetting.findById(dbCol, dbCol.model).then((settings) => {
 		return historySearch.then((historySearchResults) => {
-			// Only retrieve issues for current and older revisions
-			filter.rev_id = {"$not" : {"$in": historySearchResults.revIds}};
+			if (historySearchResults) {
+				// Only retrieve issues for current and older revisions
+				filter.rev_id = {"$not" : {"$in": historySearchResults.revIds}};
 
-			return db.getCollection(account, model + ".issues").then((_dbCol) => {
-				// Retrieve issues from top level model/federation
-				return _dbCol.find(filter, projection).toArray();
-			}).then((mainIssues) => {
-				mainIssues.forEach((mainIssue) => {
-					mainIssue.typePrefix = (settings.type) ? settings.type : "";
-					mainIssue.modelCode = (settings.properties && settings.properties.code) ?
-						settings.properties.code : "";
-				});
+				return db.getCollection(account, model + ".issues").then((_dbCol) => {
+					// Retrieve issues from top level model/federation
+					return _dbCol.find(filter, projection).toArray();
+				}).then((mainIssues) => {
+					mainIssues.forEach((mainIssue) => {
+						mainIssue.typePrefix = (settings.type) ? settings.type : "";
+						mainIssue.modelCode = (settings.properties && settings.properties.code) ?
+							settings.properties.code : "";
+					});
 
-				// Check submodels
-				return Ref.find(dbCol, {type: "ref", _id: {"$in": historySearchResults.current}}).then((refs) => {
-					const subModelsPromises = [];
+					// Check submodels
+					return Ref.find(dbCol, {type: "ref", _id: {"$in": historySearchResults.current}}).then((refs) => {
+						const subModelsPromises = [];
 
-					refs.forEach((ref) => {
-						const subDbCol = {
-							account: dbCol.account,
-							model: ref.project
-						};
-						subModelsPromises.push(
-							this.findIssuesByModelName(subDbCol, username, "master", null, projection, null, true).then((subIssues) => {
-								subIssues.forEach((subIssue) => {
-									subIssue.origin_account = subDbCol.account;
-									subIssue.origin_model = subDbCol.model;
-								});
-
-								return subIssues;
-							}).catch((err) => {
-								// Skip sub-model errors to allow working sub-models to load
-								systemLogger.logError("Error while retrieving sub-model issues",
-									{
-										subDbCol,
-										err: err
+						refs.forEach((ref) => {
+							const subDbCol = {
+								account: dbCol.account,
+								model: ref.project
+							};
+							subModelsPromises.push(
+								this.findIssuesByModelName(subDbCol, username, "master", null, projection, null, true).then((subIssues) => {
+									subIssues.forEach((subIssue) => {
+										subIssue.origin_account = subDbCol.account;
+										subIssue.origin_model = subDbCol.model;
 									});
-							})
-						);
-					});
 
-					return Promise.all(subModelsPromises).then((subModelsIssues) => {
-						if (subModelsIssues) {
-							subModelsIssues.forEach((subModelIssues) => {
-								if (subModelIssues) {
-									// Skip concat of undefined subModelIssues
-									//  e.g. from error loading sub-model issue
-									mainIssues = mainIssues.concat(subModelIssues);
-								}
-							});
-						}
-						if (!noClean) {
-							mainIssues = mainIssues.map(x => clean(dbCol, x));
-						}
+									return subIssues;
+								}).catch((err) => {
+									// Skip sub-model errors to allow working sub-models to load
+									systemLogger.logError("Error while retrieving sub-model issues",
+										{
+											subDbCol,
+											err: err
+										});
+								})
+							);
+						});
 
-						return mainIssues;
+						return Promise.all(subModelsPromises).then((subModelsIssues) => {
+							if (subModelsIssues) {
+								subModelsIssues.forEach((subModelIssues) => {
+									if (subModelIssues) {
+										// Skip concat of undefined subModelIssues
+										//  e.g. from error loading sub-model issue
+										mainIssues = mainIssues.concat(subModelIssues);
+									}
+								});
+							}
+							if (!noClean) {
+								mainIssues = mainIssues.map(x => clean(dbCol, x));
+							}
+
+							return mainIssues;
+						});
 					});
 				});
-			});
+			} else {
+				return Promise.resolve();
+			}
 		});
 	});
 };
