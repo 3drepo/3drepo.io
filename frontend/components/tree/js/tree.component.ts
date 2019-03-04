@@ -59,7 +59,7 @@ class TreeController implements ng.IController {
 		private TreeService,
 		private EventService,
 		private MultiSelectService,
-		private ViewerService,
+		private ViewerService
 	) {
 
 		this.promise = null,

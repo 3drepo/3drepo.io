@@ -40,7 +40,6 @@ import { getCriteriaLabel, prepareCriterion, getUpdatedCriteria } from '../../..
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { NewCriterionForm } from './newCriterionForm.component';
 import { CriteriaPasteField } from './components/criteriaPasteField/criteriaPasteField.components';
-import { throws } from 'assert';
 
 interface IProps {
 	className?: string;
@@ -234,9 +233,9 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		</ChipsContainer>
 	));
 
-	public renderCopyOption = () => (
+	public renderCopyOption = (props) => (
 		<CopyToClipboard text={JSON.stringify(this.props.value)}>
-			<MenuItem>
+			<MenuItem {...props}>
 				Copy filters
 			</MenuItem>
 		</CopyToClipboard>
