@@ -769,7 +769,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 
 					xml = _xml;
 
-					issue = Issue.createInstance({account, model});
+					issue = {};
 					issue._id = utils.stringToUUID(guid);
 					issue.extras = {};
 					issue.rev_id = revId;
@@ -1150,7 +1150,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 						};
 					}
 
-					return issue;
+					return Issue.createIssue({ account, model }, issue);
 				});
 
 			}
