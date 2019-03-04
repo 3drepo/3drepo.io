@@ -175,213 +175,215 @@ function getBCFMarkup(issue, account, model, unit) {
 	// generate viewpoints
 	let snapshotNo = 0;
 
-	issue.viewpoints.forEach((vp, index) => {
+	if (issue.viewpoints) {
+		issue.viewpoints.forEach((vp, index) => {
 
-		const number = index === 0 ? "" : index;
-		const viewpointFileName = `viewpoint${number}.bcfv`;
-		const snapshotFileName = `snapshot${(snapshotNo === 0 ? "" : snapshotNo)}.png`;
+			const number = index === 0 ? "" : index;
+			const viewpointFileName = `viewpoint${number}.bcfv`;
+			const snapshotFileName = `snapshot${(snapshotNo === 0 ? "" : snapshotNo)}.png`;
 
-		const vpObj = {
-			"@": {
-				"Guid": utils.uuidToString(vp.guid)
-			},
-			"Viewpoint": viewpointFileName,
-			"Snapshot":  null
-		};
+			const vpObj = {
+				"@": {
+					"Guid": utils.uuidToString(vp.guid)
+				},
+				"Viewpoint": viewpointFileName,
+				"Snapshot":  null
+			};
 
-		if(vp.screenshot && vp.screenshot.flag) {
-			vpObj.Snapshot = snapshotFileName;
-			snapshotEntries.push({
-				filename: snapshotFileName,
-				snapshot: vp.screenshot.content
-			});
-			snapshotNo++;
-		}
+			if(vp.screenshot && vp.screenshot.flag) {
+				vpObj.Snapshot = snapshotFileName;
+				snapshotEntries.push({
+					filename: snapshotFileName,
+					snapshot: vp.screenshot.content
+				});
+				snapshotNo++;
+			}
 
-		_.get(vp, "extras.Index") && (vpObj.Index = vp.extras.Index);
+			_.get(vp, "extras.Index") && (vpObj.Index = vp.extras.Index);
 
-		markup.Markup.Viewpoints.push(vpObj);
+			markup.Markup.Viewpoints.push(vpObj);
 
-		const viewpointXmlObj = {
-			VisualizationInfo:{
-				"@":{
-					"Guid": utils.uuidToString(vp.guid),
-					"xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-					"xmlns:xsd": "http://www.w3.org/2001/XMLSchema"
+			const viewpointXmlObj = {
+				VisualizationInfo:{
+					"@":{
+						"Guid": utils.uuidToString(vp.guid),
+						"xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+						"xmlns:xsd": "http://www.w3.org/2001/XMLSchema"
+					}
+				}
+			};
+
+			if (_.get(vp, "clippingPlanes") && vp.clippingPlanes.length > 0) {
+				viewpointXmlObj.VisualizationInfo.ClippingPlanes = {};
+				viewpointXmlObj.VisualizationInfo.ClippingPlanes.ClippingPlane = [];
+				for (let i = 0; i < vp.clippingPlanes.length; i++) {
+					viewpointXmlObj.VisualizationInfo.ClippingPlanes.ClippingPlane.push({
+						Location:{
+							X: -vp.clippingPlanes[i].normal[0] * vp.clippingPlanes[i].distance * scale,
+							Y: vp.clippingPlanes[i].normal[2] * vp.clippingPlanes[i].distance * scale,
+							Z: -vp.clippingPlanes[i].normal[1] * vp.clippingPlanes[i].distance * scale
+						},
+						Direction:{
+							X: vp.clippingPlanes[i].normal[0] * vp.clippingPlanes[i].clipDirection,
+							Y: -vp.clippingPlanes[i].normal[2] * vp.clippingPlanes[i].clipDirection,
+							Z: vp.clippingPlanes[i].normal[1] * vp.clippingPlanes[i].clipDirection
+						}
+					});
 				}
 			}
-		};
 
-		if (_.get(vp, "clippingPlanes") && vp.clippingPlanes.length > 0) {
-			viewpointXmlObj.VisualizationInfo.ClippingPlanes = {};
-			viewpointXmlObj.VisualizationInfo.ClippingPlanes.ClippingPlane = [];
-			for (let i = 0; i < vp.clippingPlanes.length; i++) {
-				viewpointXmlObj.VisualizationInfo.ClippingPlanes.ClippingPlane.push({
-					Location:{
-						X: -vp.clippingPlanes[i].normal[0] * vp.clippingPlanes[i].distance * scale,
-						Y: vp.clippingPlanes[i].normal[2] * vp.clippingPlanes[i].distance * scale,
-						Z: -vp.clippingPlanes[i].normal[1] * vp.clippingPlanes[i].distance * scale
+			if(!_.get(vp, "extras._noPerspective") && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >= 3) {
+
+				viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
+					CameraViewPoint:{
+						X: vp.position[0] * scale,
+						Y: -vp.position[2] * scale,
+						Z: vp.position[1] * scale
 					},
-					Direction:{
-						X: vp.clippingPlanes[i].normal[0] * vp.clippingPlanes[i].clipDirection,
-						Y: -vp.clippingPlanes[i].normal[2] * vp.clippingPlanes[i].clipDirection,
-						Z: vp.clippingPlanes[i].normal[1] * vp.clippingPlanes[i].clipDirection
-					}
-				});
+					CameraDirection:{
+						X: vp.view_dir[0],
+						Y: -vp.view_dir[2],
+						Z: vp.view_dir[1]
+					},
+					CameraUpVector:{
+						X: vp.up[0],
+						Y: -vp.up[2],
+						Z: vp.up[1]
+					},
+					FieldOfView: vp.fov * 180 / Math.PI
+				};
 			}
-		}
 
-		if(!_.get(vp, "extras._noPerspective") && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >= 3) {
+			if (_.get(vp, "extras.Components")) {
+				// TODO: Consider if extras.Components should only be used if groups don't exist
+				// TODO: Could potentially check each sub-property (ViewSetupHints, Selection, etc.
+				viewpointXmlObj.VisualizationInfo.Components = _.get(vp, "extras.Components");
+			}
 
-			viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
-				CameraViewPoint:{
-					X: vp.position[0] * scale,
-					Y: -vp.position[2] * scale,
-					Z: vp.position[1] * scale
-				},
-				CameraDirection:{
-					X: vp.view_dir[0],
-					Y: -vp.view_dir[2],
-					Z: vp.view_dir[1]
-				},
-				CameraUpVector:{
-					X: vp.up[0],
-					Y: -vp.up[2],
-					Z: vp.up[1]
-				},
-				FieldOfView: vp.fov * 180 / Math.PI
-			};
-		}
+			const componentsPromises = [];
 
-		if (_.get(vp, "extras.Components")) {
-			// TODO: Consider if extras.Components should only be used if groups don't exist
-			// TODO: Could potentially check each sub-property (ViewSetupHints, Selection, etc.
-			viewpointXmlObj.VisualizationInfo.Components = _.get(vp, "extras.Components");
-		}
-
-		const componentsPromises = [];
-
-		if (_.get(vp, "highlighted_group_id")) {
-			const highlightedGroupId = _.get(vp, "highlighted_group_id");
-			componentsPromises.push(
-				Group.findIfcGroupByUID({account: account, model: model}, highlightedGroupId).then(group => {
-					if (group && group.objects && group.objects.length > 0) {
-						for (let i = 0; i < group.objects.length; i++) {
-							const groupObject = group.objects[i];
-							if (!viewpointXmlObj.VisualizationInfo.Components) {
-								viewpointXmlObj.VisualizationInfo.Components = {};
-							}
-							if (!viewpointXmlObj.VisualizationInfo.Components.Selection) {
-								viewpointXmlObj.VisualizationInfo.Components.Selection = {};
-								viewpointXmlObj.VisualizationInfo.Components.Selection.Component = [];
-							}
-							for (let j = 0; groupObject.ifc_guids && j < groupObject.ifc_guids.length; j++) {
-								viewpointXmlObj.VisualizationInfo.Components.Selection.Component.push({
-									"@": {
-										IfcGuid: groupObject.ifc_guids[j]
-									},
-									OriginatingSystem: "3D Repo"
-								});
+			if (_.get(vp, "highlighted_group_id")) {
+				const highlightedGroupId = _.get(vp, "highlighted_group_id");
+				componentsPromises.push(
+					Group.findIfcGroupByUID({account: account, model: model}, highlightedGroupId).then(group => {
+						if (group && group.objects && group.objects.length > 0) {
+							for (let i = 0; i < group.objects.length; i++) {
+								const groupObject = group.objects[i];
+								if (!viewpointXmlObj.VisualizationInfo.Components) {
+									viewpointXmlObj.VisualizationInfo.Components = {};
+								}
+								if (!viewpointXmlObj.VisualizationInfo.Components.Selection) {
+									viewpointXmlObj.VisualizationInfo.Components.Selection = {};
+									viewpointXmlObj.VisualizationInfo.Components.Selection.Component = [];
+								}
+								for (let j = 0; groupObject.ifc_guids && j < groupObject.ifc_guids.length; j++) {
+									viewpointXmlObj.VisualizationInfo.Components.Selection.Component.push({
+										"@": {
+											IfcGuid: groupObject.ifc_guids[j]
+										},
+										OriginatingSystem: "3D Repo"
+									});
+								}
 							}
 						}
-					}
-				}).catch(()=> {
-					// catching this error and ignoring - if we can't find the group, we should still export the issue.
-					systemLogger.logInfo("Failed to find group - " + utils.uuidToString(highlightedGroupId));
-				})
-			);
-		}
+					}).catch(()=> {
+						// catching this error and ignoring - if we can't find the group, we should still export the issue.
+						systemLogger.logInfo("Failed to find group - " + utils.uuidToString(highlightedGroupId));
+					})
+				);
+			}
 
-		if (_.get(vp, "hidden_group_id")) {
-			const hiddenGroupId = _.get(vp, "hidden_group_id");
-			componentsPromises.push(
-				Group.findIfcGroupByUID({account: account, model: model}, hiddenGroupId).then(group => {
-					if (group && group.objects && group.objects.length > 0) {
-						for (let i = 0; i < group.objects.length; i++) {
-							const groupObject = group.objects[i];
-							if (!viewpointXmlObj.VisualizationInfo.Components) {
-								viewpointXmlObj.VisualizationInfo.Components = {};
-							}
-							if (!viewpointXmlObj.VisualizationInfo.Components.Visibility) {
-								viewpointXmlObj.VisualizationInfo.Components.Visibility = {
-									"@": {
-										DefaultVisibility: true
-									}
-								};
-								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions = {};
-								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component = [];
-							}
-							for (let j = 0; groupObject.ifc_guids && j < groupObject.ifc_guids.length; j++) {
-								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component.push({
-									"@": {
-										IfcGuid: groupObject.ifc_guids[j]
-									},
-									OriginatingSystem: "3D Repo"
-								});
+			if (_.get(vp, "hidden_group_id")) {
+				const hiddenGroupId = _.get(vp, "hidden_group_id");
+				componentsPromises.push(
+					Group.findIfcGroupByUID({account: account, model: model}, hiddenGroupId).then(group => {
+						if (group && group.objects && group.objects.length > 0) {
+							for (let i = 0; i < group.objects.length; i++) {
+								const groupObject = group.objects[i];
+								if (!viewpointXmlObj.VisualizationInfo.Components) {
+									viewpointXmlObj.VisualizationInfo.Components = {};
+								}
+								if (!viewpointXmlObj.VisualizationInfo.Components.Visibility) {
+									viewpointXmlObj.VisualizationInfo.Components.Visibility = {
+										"@": {
+											DefaultVisibility: true
+										}
+									};
+									viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions = {};
+									viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component = [];
+								}
+								for (let j = 0; groupObject.ifc_guids && j < groupObject.ifc_guids.length; j++) {
+									viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component.push({
+										"@": {
+											IfcGuid: groupObject.ifc_guids[j]
+										},
+										OriginatingSystem: "3D Repo"
+									});
+								}
 							}
 						}
-					}
-				}).catch(()=> {
-					// catching this error and ignoring - if we can't find the group, we should still export the issue.
-					systemLogger.logInfo("Failed to find group - " + utils.uuidToString(hiddenGroupId));
-				})
-			);
-		}
+					}).catch(()=> {
+						// catching this error and ignoring - if we can't find the group, we should still export the issue.
+						systemLogger.logInfo("Failed to find group - " + utils.uuidToString(hiddenGroupId));
+					})
+				);
+			}
 
-		if (_.get(vp, "shown_group_id")) {
-			const shownGroupId = _.get(vp, "shown_group_id");
-			componentsPromises.push(
-				Group.findIfcGroupByUID({account: account, model: model}, shownGroupId).then(group => {
-					if (group && group.objects && group.objects.length > 0) {
-						for (let i = 0; i < group.objects.length; i++) {
-							const groupObject = group.objects[i];
-							if (!viewpointXmlObj.VisualizationInfo.Components) {
-								viewpointXmlObj.VisualizationInfo.Components = {};
-							}
-							if (!viewpointXmlObj.VisualizationInfo.Components.Visibility) {
-								viewpointXmlObj.VisualizationInfo.Components.Visibility = {
-									"@": {
-										DefaultVisibility: false
-									}
-								};
-								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions = {};
-								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component = [];
-							}
-							for (let j = 0; groupObject.ifc_guids && j < groupObject.ifc_guids.length; j++) {
-								viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component.push({
-									"@": {
-										IfcGuid: groupObject.ifc_guids[j]
-									},
-									OriginatingSystem: "3D Repo"
-								});
+			if (_.get(vp, "shown_group_id")) {
+				const shownGroupId = _.get(vp, "shown_group_id");
+				componentsPromises.push(
+					Group.findIfcGroupByUID({account: account, model: model}, shownGroupId).then(group => {
+						if (group && group.objects && group.objects.length > 0) {
+							for (let i = 0; i < group.objects.length; i++) {
+								const groupObject = group.objects[i];
+								if (!viewpointXmlObj.VisualizationInfo.Components) {
+									viewpointXmlObj.VisualizationInfo.Components = {};
+								}
+								if (!viewpointXmlObj.VisualizationInfo.Components.Visibility) {
+									viewpointXmlObj.VisualizationInfo.Components.Visibility = {
+										"@": {
+											DefaultVisibility: false
+										}
+									};
+									viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions = {};
+									viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component = [];
+								}
+								for (let j = 0; groupObject.ifc_guids && j < groupObject.ifc_guids.length; j++) {
+									viewpointXmlObj.VisualizationInfo.Components.Visibility.Exceptions.Component.push({
+										"@": {
+											IfcGuid: groupObject.ifc_guids[j]
+										},
+										OriginatingSystem: "3D Repo"
+									});
+								}
 							}
 						}
-					}
-				}).catch(()=> {
-					// catching this error and ignoring - if we can't find the group, we should still export the issue.
-					systemLogger.logInfo("Failed to find group - " + utils.uuidToString(shownGroupId));
+					}).catch(()=> {
+						// catching this error and ignoring - if we can't find the group, we should still export the issue.
+						systemLogger.logInfo("Failed to find group - " + utils.uuidToString(shownGroupId));
+					})
+				);
+			}
+
+			_.get(vp, "extras.Spaces") && (viewpointXmlObj.VisualizationInfo.Spaces = _.get(vp, "extras.Spaces"));
+			_.get(vp, "extras.SpaceBoundaries") && (viewpointXmlObj.VisualizationInfo.SpaceBoundaries = _.get(vp, "extras.SpaceBoundaries"));
+			_.get(vp, "extras.Openings") && (viewpointXmlObj.VisualizationInfo.Openings = _.get(vp, "extras.Openings"));
+			_.get(vp, "extras.OrthogonalCamera") && (viewpointXmlObj.VisualizationInfo.OrthogonalCamera = _.get(vp, "extras.OrthogonalCamera"));
+			_.get(vp, "extras.Lines") && (viewpointXmlObj.VisualizationInfo.Lines = _.get(vp, "extras.Lines"));
+			_.get(vp, "extras.ClippingPlanes") && (viewpointXmlObj.VisualizationInfo.ClippingPlanes = _.get(vp, "extras.ClippingPlanes"));
+			_.get(vp, "extras.Bitmap") && (viewpointXmlObj.VisualizationInfo.Bitmap = _.get(vp, "extras.Bitmap"));
+
+			viewpointsPromises.push(
+				Promise.all(componentsPromises).then(() => {
+					viewpointEntries.push({
+						filename: viewpointFileName,
+						xml:  xmlBuilder.buildObject(viewpointXmlObj)
+					});
 				})
 			);
-		}
 
-		_.get(vp, "extras.Spaces") && (viewpointXmlObj.VisualizationInfo.Spaces = _.get(vp, "extras.Spaces"));
-		_.get(vp, "extras.SpaceBoundaries") && (viewpointXmlObj.VisualizationInfo.SpaceBoundaries = _.get(vp, "extras.SpaceBoundaries"));
-		_.get(vp, "extras.Openings") && (viewpointXmlObj.VisualizationInfo.Openings = _.get(vp, "extras.Openings"));
-		_.get(vp, "extras.OrthogonalCamera") && (viewpointXmlObj.VisualizationInfo.OrthogonalCamera = _.get(vp, "extras.OrthogonalCamera"));
-		_.get(vp, "extras.Lines") && (viewpointXmlObj.VisualizationInfo.Lines = _.get(vp, "extras.Lines"));
-		_.get(vp, "extras.ClippingPlanes") && (viewpointXmlObj.VisualizationInfo.ClippingPlanes = _.get(vp, "extras.ClippingPlanes"));
-		_.get(vp, "extras.Bitmap") && (viewpointXmlObj.VisualizationInfo.Bitmap = _.get(vp, "extras.Bitmap"));
-
-		viewpointsPromises.push(
-			Promise.all(componentsPromises).then(() => {
-				viewpointEntries.push({
-					filename: viewpointFileName,
-					xml:  xmlBuilder.buildObject(viewpointXmlObj)
-				});
-			})
-		);
-
-	});
+		});
+	}
 
 	return Promise.all(viewpointsPromises).then(() => {
 		return {
@@ -775,7 +777,6 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 					issue.rev_id = revId;
 
 					if(xml.Markup) {
-
 						issue.extras.Header = _.get(xml, "Markup.Header");
 						issue.topic_type = _.get(xml, "Markup.Topic[0].@.TopicType");
 						issue.status = sanitise(_.get(xml, "Markup.Topic[0].@.TopicStatus"), statusEnum);
@@ -801,8 +802,6 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 						issue.extras.BimSnippet = _.get(xml, "Markup.Topic[0].BimSnippet");
 						issue.extras.DocumentReference = _.get(xml, "Markup.Topic[0].DocumentReference");
 						issue.extras.RelatedTopic = _.get(xml, "Markup.Topic[0].RelatedTopic");
-						issue.markModified("extras");
-
 					}
 
 					_.get(xml ,"Markup.Comment") && xml.Markup.Comment.forEach(comment => {
