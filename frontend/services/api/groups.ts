@@ -27,9 +27,9 @@ import api from './';
 
 export const getGroups = (teamspace, modelId, revision?) => {
 	if (revision) {
-		return api.get(`${teamspace}/${modelId}/groups/revision/${revision}/?noIssues=true&noRisks=true&ifcguids=true`);
+		return api.get(`${teamspace}/${modelId}/revision/${revision}/groups/?noIssues=true&noRisks=true&ifcguids=true`);
 	}
-	return api.get(`${teamspace}/${modelId}/groups/revision/master/head/?noIssues=true&noRisks=true&ifcguids=true`);
+	return api.get(`${teamspace}/${modelId}/revision/master/head/groups/?noIssues=true&noRisks=true&ifcguids=true`);
 };
 
 /**
@@ -41,9 +41,9 @@ export const getGroups = (teamspace, modelId, revision?) => {
  */
 export const getGroup = (teamspace, modelId, groupId, revision?) => {
 	if (revision) {
-		return api.get(`${teamspace}/${modelId}/groups/revision/${revision}/${groupId}`);
+		return api.get(`${teamspace}/${modelId}/revision/${revision}/groups/${groupId}`);
 	}
-	return api.get(`${teamspace}/${modelId}/groups/revision/master/head/${groupId}`);
+	return api.get(`${teamspace}/${modelId}/revision/master/head/groups/${groupId}`);
 };
 
 /**

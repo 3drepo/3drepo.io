@@ -715,9 +715,9 @@ export class IssuesService {
 				const hiddenGroupId = issue.viewpoint.hidden_group_id;
 				let hiddenGroupUrl;
 				if (revision) {
-					hiddenGroupUrl = `${issue.account}/${issue.model}/groups/revision/${revision}/${hiddenGroupId}`;
+					hiddenGroupUrl = `${issue.account}/${issue.model}/revision/${revision}/groups/${hiddenGroupId}`;
 				} else {
-					hiddenGroupUrl = `${issue.account}/${issue.model}/groups/revision/master/head/${hiddenGroupId}`;
+					hiddenGroupUrl = `${issue.account}/${issue.model}/revision/master/head/groups/${hiddenGroupId}`;
 				}
 
 				let hiddenPromise;
@@ -746,9 +746,9 @@ export class IssuesService {
 				const shownGroupId = issue.viewpoint.shown_group_id;
 				let shownGroupUrl;
 				if (revision) {
-					shownGroupUrl = issue.account + '/' + issue.model + '/groups/revision/' + revision + '/' + shownGroupId;
+					shownGroupUrl = issue.account + '/' + issue.model + '/revision/' + revision + '/groups/' + shownGroupId;
 				} else {
-					shownGroupUrl = issue.account + '/' + issue.model + '/groups/revision/master/head/' + shownGroupId;
+					shownGroupUrl = issue.account + '/' + issue.model + '/revision/master/head/groups/' + shownGroupId;
 				}
 
 				let shownPromise;
@@ -775,9 +775,9 @@ export class IssuesService {
 				const highlightedGroupId = issue.viewpoint.highlighted_group_id;
 				let highlightedGroupUrl;
 				if (revision) {
-					highlightedGroupUrl = `${issue.account}/${issue.model}/groups/revision/${revision}/${highlightedGroupId}`;
+					highlightedGroupUrl = `${issue.account}/${issue.model}/revision/${revision}/groups/${highlightedGroupId}`;
 				} else {
-					highlightedGroupUrl = `${issue.account}/${issue.model}/groups/revision/master/head/${highlightedGroupId}`;
+					highlightedGroupUrl = `${issue.account}/${issue.model}/revision/master/head/groups/${highlightedGroupId}`;
 				}
 
 				let highlightPromise;
@@ -806,9 +806,9 @@ export class IssuesService {
 			const groupId = hasGroup ? issue.viewpoint.group_id : issue.group_id;
 			let groupUrl;
 			if (revision) {
-				groupUrl = issue.account + '/' + issue.model + '/groups/revision/' + revision + '/' + groupId;
+				groupUrl = issue.account + '/' + issue.model + '/revision/' + revision + '/groups' + groupId;
 			} else {
-				groupUrl = issue.account + '/' + issue.model + '/groups/revision/master/head/' + groupId;
+				groupUrl = issue.account + '/' + issue.model + '/revision/master/head/groups' + groupId;
 			}
 
 			let handleTreePromise;
