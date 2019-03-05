@@ -27,12 +27,24 @@ interface IProps {
 }
 
 export class GroupDetailsForm extends React.PureComponent<IProps, any> {
-	public async componentDidMount() {
-		// await this.props.formik.validate();
-	}
-
 	get isNewGroup() {
 		return !this.props.group._id;
+	}
+
+	public componentDidMount() {
+		this.props.setIsFormValid(this.isNewGroup);
+	}
+
+	public componentDidUpdate({group}) {
+		const { color, description, objects, rules } = this.props.group;
+		const colorChanged = color !== group.color;
+		const descriptionChanged = description !== group.description;
+		const objectsChanged = objects !== group.objects;
+		const rulesChanged = rules !== group.rules;
+		
+		if (colorChanged || descriptionChanged || objectsChanged || rulesChanged) {
+			this.props.setIsFormValid(this.isNewGroup);
+		}
 	}
 
 	public handleFieldChange = (onChange, form) => (event) => {
@@ -52,10 +64,6 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 			.catch(() => {
 				this.props.setIsFormValid(false);
 			});
-	}
-
-	public handleSubmit = () => {
-
 	}
 
 	public renderTypeSelectItems = () => {
@@ -119,17 +127,3 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 		);
 	}
 }
-
-/* export const GroupDetailsForm = withFormik({
-	mapPropsToValues: ({ group }) => ({
-		type: group.type,
-		description: group.description || ''
-	}),
-	handleSubmit: (values, { props }) => {
-		(props as IProps).onSubmit();
-	},
-	validateOnChange: false,
-	validationSchema: GroupSchema
-	// validate: handleValidation
-})(connect(GroupDetailsFormComponent as any)) as any;
- */

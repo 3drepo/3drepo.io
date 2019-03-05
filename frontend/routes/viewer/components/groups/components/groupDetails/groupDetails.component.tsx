@@ -118,10 +118,13 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleColorChange = (color) => {
-		this.props.setState({ newGroup: { ...this.groupData, color } });
+		this.props.setState({
+			newGroup: {
+				...this.groupData, color
+			}
+		});
+		this.setIsFormValid(true);
 	}
-
-	public formRef = React.createRef();
 
 	public renderGroupForm = () => (
 		<GroupDetailsForm
