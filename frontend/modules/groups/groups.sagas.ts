@@ -248,8 +248,8 @@ export function* deleteGroups({ teamspace, modelId, groups }) {
 
 			return [
 				put(GroupsActions.removeColorOverride(groupId, overridedGroup)),
-				put(GroupsActions.dehighlightGroup(group))
-				// put(GroupsActions.deleteGroupSuccess(groupId))
+				put(GroupsActions.dehighlightGroup(group)),
+				put(GroupsActions.deleteGroupsSuccess([groupId]))
 			];
 		}));
 	} catch (error) {
@@ -326,6 +326,7 @@ export function* createGroup({ teamspace, modelId }) {
 		const {data} = yield API.createGroup(teamspace, modelId, group);
 		const preparedGroup = prepareGroup(data);
 
+		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
 		yield put(GroupsActions.highlightGroup(preparedGroup));
 		yield put(GroupsActions.showDetails(preparedGroup));
 		yield put(SnackbarActions.show('Group created'));
@@ -356,7 +357,7 @@ export function* updateGroup({ teamspace, modelId, groupId }) {
 
 		const { data } = yield API.updateGroup(teamspace, modelId, groupId, groupToSave);
 		const preparedGroup = prepareGroup(data);
-
+		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
 		yield put(GroupsActions.highlightGroup(preparedGroup));
 		yield put(SnackbarActions.show('Group updated'));
 	} catch (error) {
@@ -390,15 +391,23 @@ export function* setNewGroup() {
 }
 
 const onUpdated = (updatedGroup) => {
-	dispatch(GroupsActions.updateGroupSuccess(prepareGroup(updatedGroup)));
+	dispatch(GroupsActions.showUpdateInfo(prepareGroup(updatedGroup)));
+
+	setTimeout(() => {
+		dispatch(GroupsActions.updateGroupSuccess(prepareGroup(updatedGroup)));
+	}, 5000);
 };
 
 const onCreated = (createdGroup) => {
 	dispatch(GroupsActions.updateGroupSuccess(prepareGroup(createdGroup)));
 };
 
-const onDeleted = (deletedGroupId) => {
-	dispatch(GroupsActions.deleteGroupSuccess(prepareGroup(deletedGroupId)));
+const onDeleted = (deletedGroupIds) => {
+	dispatch(GroupsActions.showDeleteInfo(deletedGroupIds));
+
+	setTimeout(() => {
+		dispatch(GroupsActions.deleteGroupsSuccess(deletedGroupIds));
+	}, 5000);
 };
 
 export function* subscribeOnChanges({ teamspace, modelId }) {

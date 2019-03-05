@@ -41,11 +41,13 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	removeFromOverrided: ['groupId'],
 	toggleColorOverrideAll: [],
 	deleteGroups: ['teamspace', 'modelId', 'groups'],
-	deleteGroupSuccess: ['groupId'],
+	showDeleteInfo: ['groupIds'],
+	deleteGroupsSuccess: ['groupIds'],
 	isolateGroup: ['group'],
 	downloadGroups: ['teamspace', 'modelId'],
 	createGroup: ['teamspace', 'modelId', 'group'],
 	updateGroup: ['teamspace', 'modelId', 'groupId'],
+	showUpdateInfo: ['group'],
 	updateGroupSuccess: ['group'],
 	subscribeOnChanges: ['teamspace', 'modelId'],
 	unsubscribeFromChanges: ['teamspace', 'modelId'],
@@ -163,18 +165,39 @@ export const removeFromOverrided = (state = INITIAL_STATE, { groupId }) => {
 
 export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
 	const groupsMap = { ...state.groupsMap };
+	const newGroup = { ...state.componentState.newGroup };
 	groupsMap[group._id] = group;
+	groupsMap[group._id].willBeUpdated = false;
 	return { ...state, groupsMap };
 };
 
-export const deleteGroupSuccess = (state = INITIAL_STATE, { groupId }) => {
+export const deleteGroupsSuccess = (state = INITIAL_STATE, { groupIds }) => {
 	const groupsMap = { ...state.groupsMap };
-	delete groupsMap[groupId];
+	groupIds.forEach((groupId) => {
+		delete groupsMap[groupId];
+	});
+
 	return { ...state, groupsMap };
 };
 
 export const getFieldNamesSuccess = (state = INITIAL_STATE, { fieldNames }) => {
 	return { ...state, fieldNames };
+};
+
+export const showUpdateInfo = (state = INITIAL_STATE, { group }) => {
+	const groupsMap = { ...state.groupsMap };
+	groupsMap[group._id].willBeUpdated = true;
+	return { ...state, groupsMap };
+};
+
+export const showDeleteInfo = (state = INITIAL_STATE, { groupIds }) => {
+	const groupsMap = { ...state.groupsMap };
+
+	groupIds.forEach((groupId) => {
+		groupsMap[groupId].willBeRemoved = true;
+	});
+
+	return { ...state, groupsMap };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -186,7 +209,9 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.ADD_TO_OVERRIDED]: addToOverrided,
 	[GroupsTypes.REMOVE_FROM_OVERRIDED]: removeFromOverrided,
 	[GroupsTypes.UPDATE_GROUP_SUCCESS]: updateGroupSuccess,
-	[GroupsTypes.DELETE_GROUP_SUCCESS]: deleteGroupSuccess,
+	[GroupsTypes.DELETE_GROUPS_SUCCESS]: deleteGroupsSuccess,
 	[GroupsTypes.GET_FIELD_NAMES_SUCCESS]: getFieldNamesSuccess,
-	[GroupsTypes.SET_CRITERIA_FIELD_STATE]: setCriteriaFieldState
+	[GroupsTypes.SET_CRITERIA_FIELD_STATE]: setCriteriaFieldState,
+	[GroupsTypes.SHOW_UPDATE_INFO]: showUpdateInfo,
+	[GroupsTypes.SHOW_DELETE_INFO]: showDeleteInfo
 });

@@ -130,7 +130,6 @@ export function* subscribeOnViewpointChanges({ teamspace, modelId }) {
 			createdView.screenshot.thumbnailUrl = getThumbnailUrl(createdView.screenshot.thumbnail);
 		}
 		dispatch(ViewpointsActions.createViewpointSuccess(createdView));
-
 	};
 
 	viewsNotifications.subscribeToUpdated(onUpdated, this);
