@@ -1293,7 +1293,7 @@ describe("Issues", function () {
 				const comment = { comment: "" };
 
 				agent.put(`/${username}/${model}/issues/${issueId}.json`)
-					.send({comment})
+					.send(comment)
 					.expect(400 , function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_NO_TEXT.value);
 						done(err);
