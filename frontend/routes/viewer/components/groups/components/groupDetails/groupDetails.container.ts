@@ -48,9 +48,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setState: GroupsActions.setComponentState,
 	updateGroup: GroupsActions.updateGroup,
 	createGroup: GroupsActions.createGroup,
-	setCriteriaState: GroupsActions.setCriteriaFieldState,
-	stopListenOnSelections: TreeActions.stopListenOnSelections,
-	startListenOnSelections: TreeActions.startListenOnSelections
+	setCriteriaState: GroupsActions.setCriteriaFieldState
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(GroupDetails);

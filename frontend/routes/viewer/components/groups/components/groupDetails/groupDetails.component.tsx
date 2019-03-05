@@ -49,8 +49,6 @@ interface IProps {
 	setState: (componentState) => void;
 	setCriteriaState: (criteriaState) => void;
 	resetToSavedSelection: () => void;
-	startListenOnSelections: () => void;
-	stopListenOnSelections: () => void;
 }
 interface IState {
 	isFormValid: boolean;
@@ -65,14 +63,6 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		if (!this.isNewGroup) {
 			this.props.setState({ newGroup: { ...this.groupData }});
 		}
-
-		if (this.props.activeGroup.type === GROUPS_TYPES.SMART) {
-			this.props.stopListenOnSelections();
-		}
-	}
-
-	public componentWillUnmount() {
-		this.props.startListenOnSelections();
 	}
 
 	get isNewGroup() {
@@ -107,14 +97,6 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				[event.target.name]: event.target.value
 			}
 		});
-
-		if (event.target.name === 'type') {
-			if (event.target.value === GROUPS_TYPES.NORMAL) {
-				this.props.startListenOnSelections();
-			} else {
-				this.props.stopListenOnSelections();
-			}
-		}
 	}
 
 	public handleColorChange = (color) => {

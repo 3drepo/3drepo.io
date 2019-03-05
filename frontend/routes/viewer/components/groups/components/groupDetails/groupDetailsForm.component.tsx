@@ -41,7 +41,7 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 		const descriptionChanged = description !== group.description;
 		const objectsChanged = objects !== group.objects;
 		const rulesChanged = rules !== group.rules;
-		
+
 		if (colorChanged || descriptionChanged || objectsChanged || rulesChanged) {
 			this.props.setIsFormValid(this.isNewGroup);
 		}
