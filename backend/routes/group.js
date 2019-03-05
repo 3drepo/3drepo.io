@@ -230,12 +230,9 @@ router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
- *   "__v":0,
  *   "_id":"efa67a80-0fab-11e9-a0ed-edada3f501fd",
  *   "name":"Group 1","description":"",
  *   "author":"username",
- *   "updatedBy":"username",
- *   "updatedAt":"2019-01-03T23:03:37.411Z",
  *   "createdAt":"2019-01-03T23:03:37.411Z",
  *   "color":[44,50,125],
  *   "objects":[]
@@ -324,7 +321,7 @@ function findGroup(req, res, next) {
 function createGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
-	const create = Group.createGroup(getDbColOptions(req), sessionId, req.body);
+	const create = Group.createGroup(getDbColOptions(req), sessionId, req.body, req.session.user.username);
 
 	create.then(group => {
 

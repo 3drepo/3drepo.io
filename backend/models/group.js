@@ -412,17 +412,19 @@ groupSchema.statics.updateIssueId = function (dbCol, uid, issueId) {
 };
 
 // Group Update with Event
-groupSchema.methods.updateGroup = function (dbCol, sessionId, data) {
-	const update = this.updateAttrs(dbCol, _.cloneDeep(data));
-	ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, _.omit(data, ["focus", "highlighted"]));
-	return update;
+groupSchema.methods.updateGroup = function (dbCol, sessionId, data, user) {
+	return this.updateAttrs(dbCol, _.cloneDeep(data), user).then((savedGroup) => {
+		savedGroup.objects = data.objects;
+		ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, savedGroup);
+		return savedGroup;
+	});
 };
 
-groupSchema.methods.updateAttrs = function (dbCol, data) {
+groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 
 	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		const toUpdate = {};
-		const fieldsCanBeUpdated = ["description", "name", "author", "createdAt", "updatedBy", "updatedAt", "rules", "objects", "color", "issue_id", "risk_id"];
+		const fieldsCanBeUpdated = ["description", "name", "rules", "objects", "color", "issue_id", "risk_id"];
 
 		let typeCorrect = true;
 		fieldsCanBeUpdated.forEach((key) => {
@@ -450,6 +452,8 @@ groupSchema.methods.updateAttrs = function (dbCol, data) {
 
 		if (typeCorrect) {
 			if (Object.keys(toUpdate).length !== 0) {
+				toUpdate.updateBy = user;
+				toUpdate.updatedAt = Date.now();
 				return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
 					return _dbCol.update({ _id: this._id }, { $set: toUpdate }).then(() => {
 						const updatedGroup = clean(this);
@@ -467,7 +471,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data) {
 	});
 };
 
-groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
+groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = "") {
 	const model = dbCol.model;
 
 	const newGroup = this.model("Group").createInstance({
@@ -478,8 +482,11 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 	return newGroup.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 
 		let typeCorrect = (!data.objects !== !data.rules);
-		Object.keys(data).forEach((key) => {
-			if (fieldTypes[key]) {
+
+		const allowedFields = ["description", "name", "objects","rules","color","issue_id","risk_id"];
+
+		allowedFields.forEach((key) => {
+			if (fieldTypes[key] && data.hasOwnProperty(key)) {
 				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 					if (key === "objects" && data.objects) {
 						newGroup.objects = convertedObjects;
@@ -501,6 +508,9 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 		});
 
 		newGroup._id = utils.stringToUUID(uuid.v1());
+		newGroup.author = creator;
+		newGroup.createdAt = Date.now();
+
 		if (typeCorrect) {
 			return newGroup.save().then((savedGroup) => {
 				savedGroup._id = utils.uuidToString(savedGroup._id);
