@@ -34,6 +34,7 @@ import {
 	Name,
 	Actions
 } from './previewListItem.styles';
+import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
 
 interface IProps {
 	className?: string;
@@ -51,6 +52,7 @@ interface IProps {
 	hasViewPermission?: boolean;
 	modelLoaded?: boolean;
 	hideThumbnail?: boolean;
+	willBeRemoved?: boolean;
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
 	renderActions?: () => JSX.Element[];
@@ -83,6 +85,10 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 		</Actions>
 	));
 
+	public renderDeleteMessage = renderWhenTrue(() =>
+		<ActionMessage content="This group has been deleted" />
+	);
+
 	public render() {
 		const {
 			roleColor,
@@ -96,14 +102,21 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 			active,
 			hasViewPermission,
 			className,
-			renderActions
+			renderActions,
+			willBeRemoved
 		} = this.props;
 
 		const shouldRenderActions = renderActions && active;
 		const createdDate = !shouldRenderActions ? this.props.createdDate : '';
 
 		return (
-			<MenuItemContainer className={className} expired={this.isExpiredDate} onClick={onItemClick}>
+			<MenuItemContainer
+				className={className}
+				expired={this.isExpiredDate}
+				onClick={onItemClick}
+				disabled={willBeRemoved}
+			>
+				{this.renderDeleteMessage(willBeRemoved)}
 				<Container>
 					<RoleIndicator color={roleColor} />
 					{this.renderThumbnail(!hideThumbnail)}

@@ -166,17 +166,27 @@ export const removeFromOverrided = (state = INITIAL_STATE, { groupId }) => {
 export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
 	const groupsMap = { ...state.groupsMap };
 	groupsMap[group._id] = group;
-	groupsMap[group._id].willBeUpdated = false;
-	return { ...state, groupsMap };
+
+	if (newGroup) {
+		newGroup.willBeUpdated = false;
+	}
+	return { ...state, groupsMap, componentState: { ...state.componentState, newGroup } };
 };
 
 export const deleteGroupsSuccess = (state = INITIAL_STATE, { groupIds }) => {
 	const groupsMap = { ...state.groupsMap };
+	const newGroup = { ...state.componentState.newGroup };
+
+	if (newGroup) {
+		newGroup.willBeRemoved = false;
+	}
+
 	groupIds.forEach((groupId) => {
+		groupsMap[groupId].willBeRemoved = false;
 		delete groupsMap[groupId];
 	});
 
-	return { ...state, groupsMap };
+	return { ...state, groupsMap, componentState: { ...state.componentState, newGroup } };
 };
 
 export const getFieldNamesSuccess = (state = INITIAL_STATE, { fieldNames }) => {
@@ -184,19 +194,26 @@ export const getFieldNamesSuccess = (state = INITIAL_STATE, { fieldNames }) => {
 };
 
 export const showUpdateInfo = (state = INITIAL_STATE, { group }) => {
-	const groupsMap = { ...state.groupsMap };
-	groupsMap[group._id].willBeUpdated = true;
-	return { ...state, groupsMap };
+	const newGroup = { ...state.componentState.newGroup };
+
+	if (newGroup) {
+		newGroup.willBeUpdated = true;
+	}
+	return { ...state, componentState: { ...state.componentState, newGroup } };
 };
 
 export const showDeleteInfo = (state = INITIAL_STATE, { groupIds }) => {
 	const groupsMap = { ...state.groupsMap };
+	const newGroup = { ...state.componentState.newGroup };
+	if (newGroup) {
+		newGroup.willBeRemoved = true;
+	}
 
 	groupIds.forEach((groupId) => {
 		groupsMap[groupId].willBeRemoved = true;
 	});
 
-	return { ...state, groupsMap };
+	return { ...state, groupsMap, componentState: { ...state.componentState, newGroup } };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {

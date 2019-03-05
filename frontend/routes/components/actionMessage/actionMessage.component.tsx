@@ -17,13 +17,13 @@
 
 import * as React from 'react';
 
-import { Container, Message } from './deleteMessage.styles';
+import { Container, Message } from './actionMessage.styles';
 
 interface IProps {
 	content: string;
 }
 
-export class DeleteMessage extends React.PureComponent<IProps, any> {
+export class ActionMessage extends React.PureComponent<IProps, any> {
 	public render() {
 		return (
 			<Container>

@@ -36,6 +36,7 @@ import {
 	StyledForm,
 	NotCollapsableContent
 } from './previewDetails.styles';
+import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
 
 interface IProps {
 	roleColor: string;
@@ -48,6 +49,8 @@ interface IProps {
 	defaultExpanded: boolean;
 	disableExpanding: boolean;
 	editable?: boolean;
+	willBeRemoved?: boolean;
+	willBeUpdated?: boolean;
 	onExpandChange?: (event, expaned: boolean) => void;
 	onNameChange?: (event, name: string) => void;
 	renderCollapsable?: () => JSX.Element[];
@@ -120,6 +123,14 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		return props;
 	}
 
+	public renderUpdateMessage = renderWhenTrue(() =>
+		<ActionMessage content="This group has been updated by someone else" />
+	);
+
+	public renderDeleteMessage = renderWhenTrue(() =>
+		<ActionMessage content="This group has been deleted" />
+	);
+
 	public render() {
 		const {
 			roleColor,
@@ -131,13 +142,17 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			editable,
 			disableExpanding,
 			renderCollapsable,
-			renderNotCollapsable
+			renderNotCollapsable,
+			willBeUpdated,
+			willBeRemoved
 		} = this.props;
 
 		const createdAt = !editable ? createdDate : null;
 
 		return (
 			<Container>
+				{this.renderUpdateMessage(willBeUpdated)}
+				{this.renderDeleteMessage(willBeRemoved)}
 				<Collapsable {...this.collapsableProps}>
 					<Summary expandIcon={this.renderExpandIcon(!disableExpanding && !editable)}>
 						<RoleIndicator color={roleColor} />

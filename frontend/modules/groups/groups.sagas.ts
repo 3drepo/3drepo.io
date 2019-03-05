@@ -409,6 +409,10 @@ const onDeleted = (deletedGroupIds) => {
 
 	setTimeout(() => {
 		dispatch(GroupsActions.deleteGroupsSuccess(deletedGroupIds));
+		dispatch(GroupsActions.setComponentState({
+			showDetails: false,
+			activeGroup: null
+		}));
 	}, 5000);
 };
 
