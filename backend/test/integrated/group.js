@@ -516,51 +516,7 @@ describe("Groups", function () {
 					done(err);
 				});
 		});
-
-		it("author with wrong type should fail", function(done) {
-			const newGroup = Object.assign({}, data);
-			newGroup.author = true;
-			agent.post(`/${username}/${model}/groups/`)
-				.send(newGroup)
-				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-					done(err);
-				});
-		});
-
-		it("creator with wrong type should fail", function(done) {
-			const newGroup = Object.assign({}, data);
-			newGroup.createdAt = true;
-			agent.post(`/${username}/${model}/groups/`)
-				.send(newGroup)
-				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-					done(err);
-				});
-		});
-
-		it("updatedAt with wrong type should fail", function(done) {
-			const newGroup = Object.assign({}, data);
-			newGroup.updatedAt = true;
-			agent.post(`/${username}/${model}/groups/`)
-				.send(newGroup)
-				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-					done(err);
-				});
-		});
-
-		it("updatedBy with wrong type should fail", function(done) {
-			const newGroup = Object.assign({}, data);
-			newGroup.updatedBy = true;
-			agent.post(`/${username}/${model}/groups/`)
-				.send(newGroup)
-				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-					done(err);
-				});
-		});
-
+i
 		it("issue_id with wrong type should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			newGroup.issue_id = true;
