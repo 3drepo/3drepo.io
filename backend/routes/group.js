@@ -27,7 +27,8 @@ const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
 /**
- * @api {get} /:teamspace/:model/groups/revision/master/head/ List model groups
+ * @apiDeprecated use {get} /:teamspace/:model/revision/master/head/groups instead
+ * @api {get} /:teamspace/:model/groups/revision/master/head
  * @apiName listGroups
  * @apiGroup Groups
  *
@@ -55,7 +56,35 @@ const systemLogger = require("../logger.js").systemLogger;
 router.get("/groups/revision/master/head/", middlewares.issue.canView, listGroups);
 
 /**
- * @api {get} /:teamspace/:model/groups/revision/:rid/ List model groups by revision
+ * @api {get} /:teamspace/:model/revision/master/head/groups/ List model groups
+ * @apiName listGroups
+ * @apiGroup Groups
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ *
+ * @apiDescription Get all groups for current model.
+ *
+ * @apiSuccess (200) {Object[]} List of all Groups
+ * @apiSuccessExample {json} Success-Response
+ *
+ * HTTP/1.1 200 OK
+ * {
+ *   "_id":"model_ID",
+ *   "__v":0,
+ *   "name":"Changed",
+ *   "author":"username",
+ *   "createdAt":1536747251756,
+ *   "updatedBy":"username",
+ *   "updatedAt":1536747551043,
+ *   "color":[152,233,75],
+ *   "objects":[]
+ * }
+ */
+router.get("/revision/master/head/groups", middlewares.issue.canView, listGroups);
+
+/**
+ * @apiDeprecated Use /:teamspace/:model/revision/:rid/groups/ instead
  * @apiDescription List all groups using the revision ID
  * @apiName listGroupsByRevision
  * @apiGroup Groups
@@ -93,6 +122,45 @@ router.get("/groups/revision/master/head/", middlewares.issue.canView, listGroup
 router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
 
 /**
+ * @api {get} /:teamspace/:model/revision/:rid/groups/ List model groups by revision
+ * @apiDescription List all groups using the revision ID
+ * @apiName listGroupsByRevision
+ * @apiGroup Groups
+ *
+ * @apiDescription List all groups using based on which revision is currently selected.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {String} id Revision unique ID.
+ *
+ * @apiSuccess (200) {Object[]} List of all Groups based on Revision ID.
+ * @apiSuccessExample {json} Success-Response
+ *
+ * HTTP/1.1 200 OK
+ * [
+ *   {
+ *     "_id": "model_ID",
+ *     "name": "Group 1",
+ *     "description": "This is test group for revision 2",
+ *     "author": "username",
+ *     "updatedBy": "username",
+ *     "updatedAt": 1546537564888,
+ *     "createdAt": 1546537564888,
+ *     "__v": 0,
+ *     "color": [
+ *       121,
+ *       130,
+ *       211
+ *     ],
+ *     "objects": []
+ *   }
+ * ]
+ */
+
+router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups);
+
+/**
+ * @apiDeprecated /:teamspace/:model/groups/revision/master/head/groups/:uid/
  * @api {get} /:teamspace/:model/groups/revision/master/head/:uid/ Find group in model
  * @apiDescription Find a group by model using the group ID
  * @apiName findGroup
@@ -122,6 +190,36 @@ router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
 router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findGroup);
 
 /**
+ * @api {get} /:teamspace/:model/revision/master/head/groups/:uid/ Find group in model
+ * @apiDescription Find a group by model using the group ID
+ * @apiName findGroup
+ * @apiGroup Groups
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {String} id Group unique ID.
+ * @apiParam {String} ifcguids Query string ifcguids returns IFC GUIDs if true where available.
+ *
+ * @apiDescription Find a group using it's Group ID
+ *
+ * @apiSuccess (200) {Object} Group matching provided ID.
+ * @apiSuccessExample {json} Success-Response
+ *
+ * HTTP/1.1 200 OK
+ * {
+ *   "_id": "group_ID",
+ *   "color": [
+ *     121,
+ *     130,
+ *     211
+ *   ],
+ *   "objects": []
+ * }
+ */
+router.get("/revision/master/head/groups/:uid", middlewares.issue.canView, findGroup);
+
+/**
+ * @apiDeprecated use {get} /:teamspace/:model/revision/:rid/groups/:uid/ instead
  * @api {get} /:teamspace/:model/groups/revision/:rid/:uid/ Find group in model by revision
  * @apiName findGroupByRevision
  * @apiDescription Find a group by revision ID and Group ID
@@ -183,6 +281,69 @@ router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findG
  * }
  */
 router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
+
+/**
+ * @api {get} /:teamspace/:model/revision/:rid/groups/:uid/ Find group in model by revision
+ * @apiName findGroupByRevision
+ * @apiDescription Find a group by revision ID and Group ID
+ * @apiGroup Groups
+ *
+ * @apiDescription Find a single group using the unique Group ID and a Revision ID.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {String} id Revision unique ID.
+ * @apiParam {String} id Group unique ID.
+ * @apiParam {String} ifcguids Query string ifcguids returns IFC GUIDs if true where available.
+ *
+ * @apiSuccess (200) {Object} Group
+ * @apiSuccessExample {json} Success-Response
+ *
+ * HTTP/1.1 200 OK
+ * [
+ *   {
+ *     "_id": "789b2ed0-0f7f-11e9-b909-833ae21f045f",
+ *     "name": "Group 1",
+ *     "description": "This is test group for revision 2",
+ *     "author": "username",
+ *     "updatedBy": "username",
+ *     "updatedAt": 1546553617888,
+ *     "createdAt": 1546537564888,
+ *     "__v": 0,
+ *     "color": [
+ *       121,
+ *       130,
+ *       211
+ *     ],
+ *     "objects": [
+ *       {
+ *         "account": "account_username",
+ *         "model": "6e7d81fb-85c8-4b09-9ad6-6ba099261099",
+ *         "ifc_guids": [],
+ *         "shared_ids": [
+ *           "24fdcf2d-b9eb-4fa2-a614-dfe2532493b3",
+ *           "db18ef69-6d6e-49a0-846e-907346abb39d",
+ *           "c532ff34-6669-4807-b7f3-6a0ffb17b027",
+ *           "fec16ea6-bb7b-4f12-b39b-f06fe6bf041d",
+ *           "3f881fa8-2b7b-443e-920f-396c1c85e903"
+ *         ]
+ *       }
+ *     ]
+ *   }
+ * ]
+ * @apiError GROUP_NOT_FOUND Group Not Found
+ * @apiErrorExample {json} Error-Response
+ *
+ * HTTP/1.1 404 Not Found
+ * {
+ *   "message": "Group not found",
+ *   "status": 404,
+ *   "code": "GROUP_NOT_FOUND",
+ *   "value": 53,
+ *   "place": "PUT /groups/revision"
+ * }
+ */
+router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup);
 
 /**
  * @apiDeprecated Use {put} /:teamspace/:model/revision/:rid/groups/:uid/ instead
@@ -264,8 +425,51 @@ router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, updateGrou
  */
 router.post("/groups/", middlewares.issue.canCreate, createGroup);
 
-router.post("/revision/master/branch/groups/", middlewares.issue.canCreate, createGroup);
-router.post("/revision//:rid/groups/", middlewares.issue.canCreate, createGroup);
+/**
+ * @api {post} /:teamspace/:model/revision/master/head/groups/ Create a group
+ * @apiName createGroup
+ * @apiDescription Add a group to the model, in the perspective of the current revision
+ * @apiGroup Groups
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ *
+ * @apiSuccess (200) {Object} Group Created
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ *   "_id":"efa67a80-0fab-11e9-a0ed-edada3f501fd",
+ *   "name":"Group 1","description":"",
+ *   "author":"username",
+ *   "createdAt":"2019-01-03T23:03:37.411Z",
+ *   "color":[44,50,125],
+ *   "objects":[]
+ * }
+ */
+router.post("/revision/master/head/groups/", middlewares.issue.canCreate, createGroup);
+
+/**
+ * @api {post} /:teamspace/:model/revision/:rid/groups/ Create a group
+ * @apiName createGroup
+ * @apiDescription Add a group to the model, in the perspective of the :rid
+ * @apiGroup Groups
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ *
+ * @apiSuccess (200) {Object} Group Created
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ *   "_id":"efa67a80-0fab-11e9-a0ed-edada3f501fd",
+ *   "name":"Group 1","description":"",
+ *   "author":"username",
+ *   "createdAt":"2019-01-03T23:03:37.411Z",
+ *   "color":[44,50,125],
+ *   "objects":[]
+ * }
+ */
+router.post("/revision/:rid/groups/", middlewares.issue.canCreate, createGroup);
 
 // @deprecated -  use deleteGroups with single id instead.
 router.delete("/groups/:id", middlewares.issue.canCreate, deleteGroup);

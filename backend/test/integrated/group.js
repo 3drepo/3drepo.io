@@ -73,7 +73,7 @@ describe("Groups", function () {
 
 	describe("List all groups", function() {
 		it("using master head revision should succeed", function(done){
-			agent.get(`/${username}/${model}/groups/revision/master/head/`)
+			agent.get(`/${username}/${model}/revision/master/head/groups/`)
 				.expect(200 , function(err, res) {
 					expect(res.body.length).to.equal(4);
 					done(err);
@@ -81,7 +81,7 @@ describe("Groups", function () {
 		});
 
 		it("using revision ID should succeed", function(done){
-			agent.get(`/${username}/${model}/groups/revision/b74ba13b-71db-4fcc-9ff8-7f640aa3dec2/`)
+			agent.get(`/${username}/${model}/revision/b74ba13b-71db-4fcc-9ff8-7f640aa3dec2/groups/`)
 				.expect(200 , function(err, res) {
 					expect(res.body.length).to.equal(4);
 					done(err);
@@ -92,7 +92,7 @@ describe("Groups", function () {
 
 	describe("List all groups (no Issue groups) ", function() {
 		it("using master head revision should succeed", function(done){
-			agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+			agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
 				.expect(200 , function(err, res) {
 					expect(res.body.length).to.equal(2);
 					done(err);
@@ -100,7 +100,7 @@ describe("Groups", function () {
 		});
 
 		it("using revision ID should succeed", function(done){
-			agent.get(`/${username}/${model}/groups/revision/b74ba13b-71db-4fcc-9ff8-7f640aa3dec2/?noIssues=true`)
+			agent.get(`/${username}/${model}/revision/b74ba13b-71db-4fcc-9ff8-7f640aa3dec2/groups/?noIssues=true`)
 				.expect(200 , function(err, res) {
 					expect(res.body.length).to.equal(2);
 					done(err);
@@ -112,7 +112,7 @@ describe("Groups", function () {
 		const groupID = "0e2f7fa0-7ac5-11e8-9567-6b401a084a90";
 
 		it("using master head revision should succeed", function(done){
-			agent.get(`/${username}/${model}/groups/revision/master/head/${groupID}`)
+			agent.get(`/${username}/${model}/revision/master/head/groups/${groupID}`)
 				.expect(200 , function(err, res) {
 					expect(res.body).to.deep.equal(goldenData);
 					done(err);
@@ -120,7 +120,7 @@ describe("Groups", function () {
 		});
 
 		it("with invalid ID should fail", function(done){
-			agent.get(`/${username}/${model}/groups/revision/master/head/invalidSomething`)
+			agent.get(`/${username}/${model}/revision/master/head/groups/invalidSomething`)
 				.expect(404 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.GROUP_NOT_FOUND.value);
 					done(err);
@@ -128,7 +128,7 @@ describe("Groups", function () {
 		});
 
 		it("with invalid revision ID should fail", function(done){
-			agent.get(`/${username}/${model}/groups/revision/f640aa3dec2/${groupID}`)
+			agent.get(`/${username}/${model}/revision/f640aa3dec2/groups/${groupID}`)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
 					done(err);
@@ -136,7 +136,7 @@ describe("Groups", function () {
 		});
 
 		it("with some other teamspace should fail", function(done){
-			agent.get(`/${noAccessUser}/${model}/groups/revision/f640aa3dec2/${groupID}`)
+			agent.get(`/${noAccessUser}/${model}/revision/f640aa3dec2/groups/${groupID}`)
 				.expect(401 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
 					done(err);
@@ -144,7 +144,7 @@ describe("Groups", function () {
 		});
 
 		it("using revision ID should succeed", function(done){
-			agent.get(`/${username}/${model}/groups/revision/b74ba13b-71db-4fcc-9ff8-7f640aa3dec2/${groupID}`)
+			agent.get(`/${username}/${model}/revision/b74ba13b-71db-4fcc-9ff8-7f640aa3dec2/groups/${groupID}`)
 				.expect(200 , function(err, res) {
 					expect(res.body).to.deep.equal(goldenData);
 					done(err);
@@ -173,7 +173,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
 						.expect(200 , function(err, res) {
 							expect(res.body.length).to.equal(3);
 							done(err);
@@ -202,7 +202,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
 						.expect(200 , function(err, res) {
 							expect(res.body.length).to.equal(4);
 							done(err);
@@ -231,7 +231,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
 						.expect(200 , function(err, res) {
 							expect(res.body.length).to.equal(5);
 							done(err);
@@ -260,7 +260,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
 						.expect(200 , function(err, res) {
 							expect(res.body.length).to.equal(6);
 							done(err);
@@ -289,7 +289,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
 						.expect(200 , function(err, res) {
 							expect(res.body.length).to.equal(7);
 							done(err);
@@ -318,7 +318,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
 						.expect(200 , function(err, res) {
 							expect(res.body.length).to.equal(8);
 							done(err);
@@ -351,7 +351,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
 						.expect(200 , function(err, res) {
 							expect(res.body.length).to.equal(9);
 							done(err);
@@ -374,7 +374,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
 						.expect(200 , function(err, res) {
 							expect(res.body.length).to.equal(10);
 							done(err);
@@ -495,7 +495,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
 						.expect(200 , function(err, res) {
 							expect(res.body.length).to.equal(11);
 							done(err);
@@ -540,7 +540,7 @@ describe("Groups", function () {
 						});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/${goldenData._id}`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
 							const expectedData = Object.assign({}, goldenData);
 							expectedData.objects = [];
@@ -574,7 +574,7 @@ describe("Groups", function () {
 						});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/${goldenData._id}`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(404 , function(err, res) {
 							expect(res.body.value).to.equal(responseCodes.GROUP_NOT_FOUND.value);
 							done(err);
@@ -613,7 +613,7 @@ describe("Groups", function () {
 			let idsString = null;
 			async.series([
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
 						.expect(200 , function(err, res) {
 							const ids = res.body.map((group) => group._id);
 							idsString = ids.join();
@@ -627,7 +627,7 @@ describe("Groups", function () {
 						});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/?noIssues=true`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
 						.expect(200 , function(err, res) {
 							expect(res.body.length).to.equal(0);
 							done(err);
