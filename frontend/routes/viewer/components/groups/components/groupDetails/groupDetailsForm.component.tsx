@@ -24,6 +24,7 @@ interface IProps {
 	onSubmit: () => void;
 	handleChange: (event) => void;
 	setIsFormValid: (isFormValid) => void;
+	setIsFormDirty: (isFormDirty) => void;
 }
 
 export class GroupDetailsForm extends React.PureComponent<IProps, any> {
@@ -55,11 +56,12 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 		};
 
 		onChange(event);
+		const isDirty = !isEqual(newValues, form.initialValues);
+		this.props.setIsFormDirty(isDirty);
 		form.validateForm(newValues)
 			.then(() => {
-				const isDirty = !isEqual(newValues, form.initialValues);
 				this.props.handleChange(event);
-				this.props.setIsFormValid(isDirty);
+				this.props.setIsFormValid(true);
 			})
 			.catch(() => {
 				this.props.setIsFormValid(false);

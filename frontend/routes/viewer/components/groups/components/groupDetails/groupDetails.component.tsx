@@ -52,16 +52,20 @@ interface IProps {
 }
 interface IState {
 	isFormValid: boolean;
+	isFormDirty: boolean;
 }
 
 export class GroupDetails extends React.PureComponent<IProps, IState> {
 	public state = {
-		isFormValid: false
+		isFormValid: false,
+		isFormDirty: false
 	};
 
 	public componentDidMount() {
 		if (!this.isNewGroup) {
 			this.props.setState({ newGroup: { ...this.groupData }});
+		} else {
+			this.props.setState({ isFormValid: true });
 		}
 	}
 
@@ -78,6 +82,14 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			return !!this.groupData.rules.length;
 		}
 		return true;
+	}
+
+	get isFormValid() {
+		if (this.isNewGroup) {
+			return this.state.isFormValid;
+		}
+
+		return this.state.isFormDirty && this.state.isFormValid && this.hasValidRules;
 	}
 
 	public handleGroupFormSubmit = () => {
@@ -117,6 +129,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			totalMeshes={this.props.totalMeshes}
 			canUpdate={this.props.canUpdate}
 			setIsFormValid={this.setIsFormValid}
+			setIsFormDirty={this.setIsFormDirty}
 			fieldNames={this.props.fieldNames}
 			handleChange={this.handleFieldChange}
 		/>
@@ -160,6 +173,10 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		this.setState({ isFormValid });
 	}
 
+	public setIsFormDirty = (isFormDirty) => {
+		this.setState({ isFormDirty });
+	}
+
 	public renderFooter = () => {
 		return (
 			<ViewerPanelFooter alignItems="center">
@@ -184,7 +201,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 					onClick={this.handleGroupFormSubmit}
 					mini={true}
 					aria-label="Save group"
-					disabled={!this.state.isFormValid || !this.hasValidRules}
+					disabled={!this.isFormValid}
 				>
 					<SaveIcon />
 				</ViewerPanelButton>
