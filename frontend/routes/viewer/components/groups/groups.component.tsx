@@ -155,7 +155,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	public get activeGroup() {
-		return this.props.groupsMap[this.props.activeGroupId];
+		return this.props.groupsMap[this.props.activeGroupId] || {};
 	}
 
 	public getOverridedColor = (groupId, color) => {
@@ -402,12 +402,16 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		this.props.saveGroup(teamspace, model, group);
 	}
 
+	public handleResetToSavedSelection = () => {
+		this.props.selectGroup(this.activeGroup);
+	}
+
 	public renderDetailsView = renderWhenTrue(() => (
 		<GroupDetails
 			teamspace={this.props.teamspace}
 			model={this.props.model}
 			saveGroup={this.props.saveGroup}
-			selectGroup={() => this.props.selectGroup(this.activeGroup)}
+			resetToSavedSelection={this.handleResetToSavedSelection}
 			canUpdate={this.canAddOrUpdate}
 		/>
 	));

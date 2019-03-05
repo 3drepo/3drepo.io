@@ -48,7 +48,7 @@ interface IProps {
 	updateGroup: (teamspace, modelId, groupId) => void;
 	setState: (componentState) => void;
 	setCriteriaState: (criteriaState) => void;
-	selectGroup: () => void;
+	resetToSavedSelection: () => void;
 	startListenOnSelections: () => void;
 	stopListenOnSelections: () => void;
 }
@@ -81,6 +81,13 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 	get groupData() {
 		return this.props.activeGroup;
+	}
+
+	get hasValidRules() {
+		if (this.groupData.type === GROUPS_TYPES.SMART) {
+			return !!this.groupData.rules.length;
+		}
+		return true;
 	}
 
 	public handleGroupFormSubmit = () => {
@@ -180,7 +187,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 					</ColorPickerWrapper>
 					<TooltipButton
 						label="Reset to saved selection"
-						action={this.props.selectGroup}
+						action={this.props.resetToSavedSelection}
 						Icon={AutorenewIcon}
 					/>
 				</Actions>
@@ -191,7 +198,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 					onClick={this.handleGroupFormSubmit}
 					mini={true}
 					aria-label="Save group"
-					disabled={!this.state.isFormValid}
+					disabled={!this.state.isFormValid || !this.hasValidRules}
 				>
 					<SaveIcon />
 				</ViewerPanelButton>
