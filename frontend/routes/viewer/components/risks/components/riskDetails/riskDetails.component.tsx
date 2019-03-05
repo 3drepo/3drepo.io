@@ -27,6 +27,7 @@ import { PreviewDetails } from '../../../previewDetails/previewDetails.component
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { Container } from './riskDetails.styles';
 import { RiskDetailsForm } from './riskDetailsForm.component';
+import { RISK_PANEL_NAME } from '../../../../../../constants/risks';
 
 interface IProps {
 	jobs: any[];
@@ -172,6 +173,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				onNameChange={this.handleNameChange}
 				onExpandChange={this.handleExpandChange}
 				renderCollapsable={this.renderRiskForm}
+				panelName={RISK_PANEL_NAME}
 			/>
 		);
 	});

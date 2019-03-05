@@ -47,7 +47,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	downloadGroups: ['teamspace', 'modelId'],
 	createGroup: ['teamspace', 'modelId', 'group'],
 	updateGroup: ['teamspace', 'modelId', 'groupId'],
-	showUpdateInfo: ['group'],
+	showUpdateInfo: [],
 	updateGroupSuccess: ['group'],
 	subscribeOnChanges: ['teamspace', 'modelId'],
 	unsubscribeFromChanges: ['teamspace', 'modelId'],
@@ -165,6 +165,8 @@ export const removeFromOverrided = (state = INITIAL_STATE, { groupId }) => {
 
 export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
 	const groupsMap = { ...state.groupsMap };
+	const newGroup = { ...state.componentState.newGroup };
+
 	groupsMap[group._id] = group;
 
 	if (newGroup) {
@@ -193,7 +195,7 @@ export const getFieldNamesSuccess = (state = INITIAL_STATE, { fieldNames }) => {
 	return { ...state, fieldNames };
 };
 
-export const showUpdateInfo = (state = INITIAL_STATE, { group }) => {
+export const showUpdateInfo = (state = INITIAL_STATE, {}) => {
 	const newGroup = { ...state.componentState.newGroup };
 
 	if (newGroup) {

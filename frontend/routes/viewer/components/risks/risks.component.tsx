@@ -48,7 +48,8 @@ import {
 	RISK_LIKELIHOODS,
 	RISK_CATEGORIES,
 	LEVELS_OF_RISK,
-	RISK_LEVELS
+	RISK_LEVELS,
+	RISK_PANEL_NAME
 } from '../../../../constants/risks';
 import {
 	MenuList,
@@ -319,6 +320,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 				active={this.props.activeRiskId === risk._id}
 				hasViewPermission={this.hasPermission(VIEW_ISSUE)}
 				modelLoaded={this.state.modelLoaded}
+				panelName={RISK_PANEL_NAME}
 			/>
 		));
 

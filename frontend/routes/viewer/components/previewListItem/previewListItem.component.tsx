@@ -53,6 +53,7 @@ interface IProps {
 	modelLoaded?: boolean;
 	hideThumbnail?: boolean;
 	willBeRemoved?: boolean;
+	panelName?: string;
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
 	renderActions?: () => JSX.Element[];
@@ -86,7 +87,7 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 	));
 
 	public renderDeleteMessage = renderWhenTrue(() =>
-		<ActionMessage content="This group has been deleted" />
+		<ActionMessage content={`This ${this.props.panelName} has been deleted`} />
 	);
 
 	public render() {

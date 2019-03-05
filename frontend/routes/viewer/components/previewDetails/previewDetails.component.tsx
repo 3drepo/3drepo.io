@@ -51,6 +51,7 @@ interface IProps {
 	editable?: boolean;
 	willBeRemoved?: boolean;
 	willBeUpdated?: boolean;
+	panelName?: string;
 	onExpandChange?: (event, expaned: boolean) => void;
 	onNameChange?: (event, name: string) => void;
 	renderCollapsable?: () => JSX.Element[];
@@ -124,11 +125,11 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	}
 
 	public renderUpdateMessage = renderWhenTrue(() =>
-		<ActionMessage content="This group has been updated by someone else" />
+		<ActionMessage content={`This ${this.props.panelName} has been updated by someone else`} />
 	);
 
 	public renderDeleteMessage = renderWhenTrue(() =>
-		<ActionMessage content="This group has been deleted" />
+		<ActionMessage content={`This ${this.props.panelName} has been deleted by someone else`} />
 	);
 
 	public render() {

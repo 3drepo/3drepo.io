@@ -6,6 +6,8 @@ import PanTool from '@material-ui/icons/PanTool';
 
 import { COLOR } from '../styles';
 
+export const GROUP_PANEL_NAME = 'group';
+
 export const GROUPS_TYPES = {
 	NORMAL: 'normal',
 	SMART: 'smart'

@@ -393,7 +393,7 @@ export function* setNewGroup() {
 }
 
 const onUpdated = (updatedGroup) => {
-	dispatch(GroupsActions.showUpdateInfo(prepareGroup(updatedGroup)));
+	dispatch(GroupsActions.showUpdateInfo());
 
 	setTimeout(() => {
 		dispatch(GroupsActions.updateGroupSuccess(prepareGroup(updatedGroup)));
