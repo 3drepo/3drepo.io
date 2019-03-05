@@ -356,7 +356,9 @@ export function* updateGroup({ teamspace, modelId, groupId }) {
 		}
 
 		const { data } = yield API.updateGroup(teamspace, modelId, groupId, groupToSave);
+
 		const preparedGroup = prepareGroup(data);
+
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
 		yield put(GroupsActions.highlightGroup(preparedGroup));
 		yield put(SnackbarActions.show('Group updated'));
@@ -372,7 +374,7 @@ export function* setNewGroup() {
 
 	try {
 		const newGroup = prepareGroup({
-			author: currentUser.name,
+			author: currentUser.username,
 			name: `Untitled group ${groupNumber}`,
 			color: getRandomColor(),
 			description: '(No description)'

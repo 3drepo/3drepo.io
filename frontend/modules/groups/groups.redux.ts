@@ -165,7 +165,6 @@ export const removeFromOverrided = (state = INITIAL_STATE, { groupId }) => {
 
 export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
 	const groupsMap = { ...state.groupsMap };
-	const newGroup = { ...state.componentState.newGroup };
 	groupsMap[group._id] = group;
 	groupsMap[group._id].willBeUpdated = false;
 	return { ...state, groupsMap };
