@@ -232,9 +232,9 @@ export function* renderPins({ filteredRisks }) {
 	}
 }
 
-export function* downloadRisks({ teamspace, modelId }) {
+export function* downloadRisks({ teamspace, modelId, risksIds }) {
 	try {
-		const endpoint = `${teamspace}/${modelId}/risks.json`;
+		const endpoint = `${teamspace}/${modelId}/risks.json?ids=${risksIds}&convertCoords=1`;
 		const modelName = Viewer.viewer && Viewer.viewer.settings ? Viewer.viewer.settings.name : '';
 		yield API.downloadJSON('risks', modelName, endpoint);
 

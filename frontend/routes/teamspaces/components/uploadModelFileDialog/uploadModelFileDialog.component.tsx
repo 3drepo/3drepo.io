@@ -88,15 +88,15 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		if (!revisions.length) {
 			return `No revisions yet.`;
 		}
-		const lastRevision = revisions[revisions.length - 1];
-		const info = `Revision ${revisions.length}`;
+		const lastRevision = revisions[0];
+		const info = `#Revisions: ${revisions.length}`;
 		const formatedDate = dayjs(lastRevision.timestamp).format('DD MMM YYYY');
 
 		if (lastRevision.tag) {
-			return `${info}: ${ lastRevision.tag } - ${ formatedDate }`;
+			return `${info}, Most Recent: ${ lastRevision.tag } - ${ formatedDate }`;
 		}
 
-		return `${info}: ${formatedDate}`;
+		return `${info}, Most Recent: ${formatedDate}`;
 	}
 
 	public handleFileChange = (onChange) => (event, ...params) => {
