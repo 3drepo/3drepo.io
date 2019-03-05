@@ -516,7 +516,7 @@ describe("Groups", function () {
 					done(err);
 				});
 		});
-i
+
 		it("issue_id with wrong type should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			newGroup.issue_id = true;
