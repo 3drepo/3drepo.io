@@ -412,11 +412,13 @@ groupSchema.statics.updateIssueId = function (dbCol, uid, issueId) {
 };
 
 // Group Update with Event
-groupSchema.methods.updateGroup = function (dbCol, sessionId, data, user) {
+groupSchema.methods.updateGroup = function (dbCol, sessionId, data, user = "", branch = "master", rid = null) {
 	return this.updateAttrs(dbCol, _.cloneDeep(data), user).then((savedGroup) => {
-		savedGroup.objects = data.objects;
-		ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, savedGroup);
-		return savedGroup;
+		return getObjectIds(dbCol, savedGroup, branch, rid, true, false).then((objects) => {
+			savedGroup.objects = objects;
+			ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, savedGroup);
+			return savedGroup;
+		});
 	});
 };
 
@@ -472,7 +474,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 	});
 };
 
-groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = "") {
+groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = "", branch = "master", rid = null) {
 	const model = dbCol.model;
 
 	const newGroup = this.model("Group").createInstance({
@@ -515,13 +517,13 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 		if (typeCorrect) {
 			return newGroup.save().then((savedGroup) => {
 				savedGroup._id = utils.uuidToString(savedGroup._id);
-
-				savedGroup.objects = data.objects;
-				if (!data.isIssueGroup && sessionId) {
-					ChatEvent.newGroups(sessionId, dbCol.account, model, savedGroup);
-				}
-
-				return savedGroup;
+				return getObjectIds(dbCol, savedGroup, branch, rid, true, false).then((objects) => {
+					savedGroup.objects = objects;
+					if (!data.isIssueGroup && sessionId) {
+						ChatEvent.newGroups(sessionId, dbCol.account, model, savedGroup);
+					}
+					return savedGroup;
+				});
 			});
 		} else {
 			return Promise.reject(responseCodes.INVALID_ARGUMENTS);

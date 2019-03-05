@@ -185,6 +185,7 @@ router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findG
 router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
 
 /**
+ * @apiDeprecated Use {put} /:teamspace/:model/revision/:rid/groups/:uid/ instead
  * @api {put} /:teamspace/:model/groups/:uid/ Update group
  * @apiName updateGroup
  * @apiGroup Groups
@@ -218,6 +219,29 @@ router.get("/groups/revision/:rid/:uid", middlewares.issue.canView, findGroup);
 router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
 
 /**
+ * @api {put} /:teamspace/:model/revision/:rid/groups/:uid/
+ * @apiName updateGroup
+ * @apiGroup Groups
+ *
+ * @apiDescription Update a specific group using a unique group ID, in respective of the latest revision
+ *
+ * @apiSuccess (200) {Object} Group Object
+ */
+router.put("/revision/master/head/groups/:uid", middlewares.issue.canCreate, updateGroup);
+
+/**
+ * @api {put} /:teamspace/:model/revision/:rid/groups/:uid/
+ * @apiName updateGroup
+ * @apiGroup Groups
+ *
+ * @apiDescription Update a specific group using a unique group ID, in respective of the specified revision
+ *
+ * @apiSuccess (200) {Object} Group Object
+ */
+router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, updateGroup);
+
+/**
+ * @apiDeprecated use {post} /:teamspace/:model/revision/:rid/groups/ instead
  * @api {post} /:teamspace/:model/groups/ Create a group
  * @apiName createGroup
  * @apiDescription Add a group to the model.
@@ -239,6 +263,9 @@ router.put("/groups/:uid", middlewares.issue.canCreate, updateGroup);
  * }
  */
 router.post("/groups/", middlewares.issue.canCreate, createGroup);
+
+router.post("/revision/master/branch/groups/", middlewares.issue.canCreate, createGroup);
+router.post("/revision//:rid/groups/", middlewares.issue.canCreate, createGroup);
 
 // @deprecated -  use deleteGroups with single id instead.
 router.delete("/groups/:id", middlewares.issue.canCreate, deleteGroup);
@@ -321,7 +348,9 @@ function findGroup(req, res, next) {
 function createGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
-	const create = Group.createGroup(getDbColOptions(req), sessionId, req.body, req.session.user.username);
+	const rid = req.params.rid ? req.params.rid : null;
+	const branch = rid ? null : "master";
+	const create = Group.createGroup(getDbColOptions(req), sessionId, req.body, req.session.user.username, branch, rid);
 
 	create.then(group => {
 
@@ -364,19 +393,15 @@ function updateGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	let groupItem;
-	if (req.params.rid) {
-		groupItem = Group.findByUID(dbCol, req.params.uid, null, req.params.rid);
-	} else {
-		groupItem = Group.findByUID(dbCol, req.params.uid, "master", null);
-	}
-
+	const rid = req.params.rid ? req.params.rid : null;
+	const branch = rid ? null : "master";
+	const groupItem = Group.findByUID(dbCol, req.params.uid, branch, rid);
 	groupItem.then(group => {
 
 		if (!group) {
 			return Promise.reject({ resCode: responseCodes.GROUP_NOT_FOUND });
 		} else {
-			return group.updateGroup(dbCol, sessionId, req.body);
+			return group.updateGroup(dbCol, sessionId, req.body, req.session.user.username, branch, rid);
 		}
 
 	}).then(group => {
