@@ -118,6 +118,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 	public renderGroupForm = () => (
 		<GroupDetailsForm
+			key={this.groupData._id}
 			group={this.groupData}
 			onSubmit={this.handleGroupFormSubmit}
 			currentUser={this.props.currentUser}

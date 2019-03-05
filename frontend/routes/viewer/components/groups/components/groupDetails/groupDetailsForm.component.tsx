@@ -1,13 +1,14 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import * as dayjs from 'dayjs';
-import { Field, Form, Formik } from 'formik';
+import { isEqual } from 'lodash';
+import { Field, Form, Formik, validateYupSchema, withFormik, connect } from 'formik';
 import { Select } from '@material-ui/core';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import { GROUPS_TYPES_LIST } from '../../../../../../constants/groups';
-import { VALIDATIONS_MESSAGES, getValidationErrors } from '../../../../../../services/validation';
+import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { FieldsRow, StyledFormControl, StyledTextField, Description, LongLabel } from './groupDetails.styles';
 
 const GroupSchema = Yup.object().shape({
@@ -27,28 +28,34 @@ interface IProps {
 
 export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 	public async componentDidMount() {
-		await this.handleValidation(this.props.group);
+		// await this.props.formik.validate();
 	}
 
 	get isNewGroup() {
 		return !this.props.group._id;
 	}
 
-	public handleFieldChange = (onChange) => (event) => {
-		this.props.handleChange(event);
+	public handleFieldChange = (onChange, form) => (event) => {
+		event.persist();
+		const newValues = {
+			...form.values,
+			[event.target.name]: event.target.value
+		};
+
 		onChange(event);
+		form.validateForm(newValues)
+			.then(() => {
+				const isDirty = !isEqual(newValues, form.initialValues);
+				this.props.handleChange(event);
+				this.props.setIsFormValid(isDirty);
+			})
+			.catch(() => {
+				this.props.setIsFormValid(false);
+			});
 	}
 
-	public handleValidation = (values) => {
-		return getValidationErrors(GroupSchema, values)
-			.then(() => {
-				this.props.setIsFormValid(true);
-				return {};
-			})
-			.catch((errors) => {
-				this.props.setIsFormValid(false);
-				return errors;
-			});
+	public handleSubmit = () => {
+
 	}
 
 	public renderTypeSelectItems = () => {
@@ -64,9 +71,11 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 		return (
 			<Formik
 				initialValues={initialValues}
+				validateOnBlur={false}
+				validateOnChange={false}
 				validationSchema={GroupSchema}
-				validate={this.handleValidation}
-				onSubmit={this.props.onSubmit}>
+				onSubmit={this.props.onSubmit}
+			>
 				<Form>
 					<FieldsRow>
 						<StyledTextField
@@ -81,12 +90,11 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 						/>
 						<StyledFormControl>
 							<InputLabel>Group type</InputLabel>
-							<Field name="type" render={({ field }) => (
+							<Field name="type" render={({ field, form }) => (
 								<Select
 									{...field}
-									value={type}
 									disabled={!this.props.canUpdate}
-									onChange={this.handleFieldChange(field.onChange)}
+									onChange={this.handleFieldChange(field.onChange, form)}
 								>
 									{this.renderTypeSelectItems()}
 								</Select>
@@ -96,8 +104,7 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 					<Field name="description" render={({ field, form }) => (
 						<Description
 							{...field}
-							value={description}
-							onChange={this.handleFieldChange(field.onChange)}
+							onChange={this.handleFieldChange(field.onChange, form)}
 							validationSchema={GroupSchema}
 							fullWidth
 							multiline
@@ -112,3 +119,17 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 		);
 	}
 }
+
+/* export const GroupDetailsForm = withFormik({
+	mapPropsToValues: ({ group }) => ({
+		type: group.type,
+		description: group.description || ''
+	}),
+	handleSubmit: (values, { props }) => {
+		(props as IProps).onSubmit();
+	},
+	validateOnChange: false,
+	validationSchema: GroupSchema
+	// validate: handleValidation
+})(connect(GroupDetailsFormComponent as any)) as any;
+ */

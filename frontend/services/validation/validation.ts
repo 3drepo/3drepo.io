@@ -96,17 +96,3 @@ export const evaluatePassword = (password: string) => new Promise((resolve) => {
 		});
 	});
 });
-
-export const getValidationErrors = (objectSchema, values) => {
-	return objectSchema.validate(values, { abortEarly: false })
-		.then(() => {
-			return {};
-		})
-		.catch((errorResult) => {
-			const { inner } = errorResult;
-			throw inner.reduce((errors, errorData) => {
-				errors[errorData.path] = errorData.message;
-				return errors;
-			}, {});
-		});
-};

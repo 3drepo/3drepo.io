@@ -13,13 +13,13 @@ const pasteIconStyle = css`
 `;
 
 export const PasteButton = styled(IconButtonComponent)`
-	&& {
-		width: 28px;
-		height: 28px;
+  && {
+    width: 28px;
+    height: 28px;
     padding: 4px;
     margin-left: 5px;
     margin-top: 5px;
-	}
+  }
 `;
 
 export const StyledSaveIcon = styled(SaveIcon)`
