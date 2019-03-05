@@ -446,6 +446,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 				} else {
 					typeCorrect = false;
 				}
+				this[key] = toUpdate[key];
 			}
 
 		});
