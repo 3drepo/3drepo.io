@@ -545,14 +545,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 
 				zipfile.on("end", () => {
 
-					let issueCounter = 0;
-
-					Issue.getIssuesList({account, model}, requester.user, branch, revId).then(issuesList => {
-						if (issuesList) {
-							issueCounter = issuesList.length;
-						}
-					}).then(() => {
-
+					Issue.getIssuesList({account, model}, requester.user, branch, revId).then(() => {
 						return Promise.all(promises);
 
 					}).then(() => {
@@ -575,65 +568,61 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 						});
 
 						issues.forEach(issue => {
+							// System notification of BCF import
+							const currentTS = (new Date()).getTime();
+							const bcfImportNotification = {
+								guid: utils.generateUUID(),
+								created: currentTS,
+								action: {property: "bcf_import"},
+								owner: requester.user
+							};
 							saveIssueProms.push(
-								Issue.findOne({account, model}, { _id: issue._id}).then(matchingIssue => {
-									// System notification of BCF import
-									const timeStamp = (new Date()).getTime();
-									const bcfImportNotification = {
-										guid: utils.generateUUID(),
-										created: timeStamp,
-										action: {property: "bcf_import"},
-										owner: requester.user
-									};
+								Issue.findByUID({account, model}, issue._id, {}, true).then(matchingIssue => {
+									matchingIssue.comments.push(bcfImportNotification);
 
-									if (!matchingIssue) {
-										issue.number = ++issueCounter;
-										// Set system notification of BCF import
-										issue.comments.push(bcfImportNotification);
-										return issue.save();
-									} else {
-										// Set system notification of BCF import
-										matchingIssue.comments.push(bcfImportNotification);
-
-										// Replace following attributes if they do not exist
-										const simpleAttrs = ["priority", "status", "topic_type", "due_date", "desc"];
-										for (const simpleAttrIndex in simpleAttrs) {
-											const simpleAttr = simpleAttrs[simpleAttrIndex];
-											if (undefined !== issue[simpleAttr]
-												&& (undefined === matchingIssue[simpleAttr] || issue[simpleAttr] !== matchingIssue[simpleAttr])) {
-												matchingIssue.comments.push({
-													guid: utils.generateUUID(),
-													created: timeStamp,
-													action: {property: simpleAttr, from: matchingIssue[simpleAttr], to: issue[simpleAttr]},
-													owner: requester.user + "(BCF Import)"
-												});
-												matchingIssue[simpleAttr] = issue[simpleAttr];
-											}
+									// Replace following attributes if they do not exist
+									const simpleAttrs = ["priority", "status", "topic_type", "due_date", "desc"];
+									for (const simpleAttrIndex in simpleAttrs) {
+										const simpleAttr = simpleAttrs[simpleAttrIndex];
+										if (undefined !== issue[simpleAttr]
+											&& (undefined === matchingIssue[simpleAttr] || issue[simpleAttr] !== matchingIssue[simpleAttr])) {
+											matchingIssue.comments.push({
+												guid: utils.generateUUID(),
+												created: currentTS,
+												action: {property: simpleAttr, from: matchingIssue[simpleAttr], to: issue[simpleAttr]},
+												owner: requester.user + "(BCF Import)"
+											});
+											matchingIssue[simpleAttr] = issue[simpleAttr];
 										}
-
-										// Attempt to merge following attributes and sort by created desc
-										const complexAttrs = ["comments", "viewpoints"];
-										for (const complexAttrIndex in complexAttrs) {
-											const complexAttr = complexAttrs[complexAttrIndex];
-											for (let i = 0; i < issue[complexAttr].length; i++) {
-												if (-1 === matchingIssue[complexAttr].findIndex(attr =>
-													utils.uuidToString(attr.guid) === utils.uuidToString(issue[complexAttr][i].guid))) {
-													matchingIssue[complexAttr].push(issue[complexAttr][i]);
-												} else {
-													// TODO: Consider deleting duplicate groups in issue[complexAttr][i]
-													matchingIssue[complexAttr] = issue[complexAttr];
-												}
-											}
-											if (matchingIssue[complexAttr].length > 0 && matchingIssue[complexAttr][0].created) {
-												matchingIssue[complexAttr] = matchingIssue[complexAttr].sort((a, b) => {
-													return a.created > b.created;
-												});
-											}
-										}
-										return Issue.update({account, model}, { _id: issue._id}, matchingIssue).then(() => {
-											return matchingIssue;
-										});
 									}
+
+									// Attempt to merge following attributes and sort by created desc
+									const complexAttrs = ["comments", "viewpoints"];
+									for (const complexAttrIndex in complexAttrs) {
+										const complexAttr = complexAttrs[complexAttrIndex];
+										for (let i = 0; i < issue[complexAttr].length; i++) {
+											if (-1 === matchingIssue[complexAttr].findIndex(attr =>
+												utils.uuidToString(attr.guid) === utils.uuidToString(issue[complexAttr][i].guid))) {
+												matchingIssue[complexAttr].push(issue[complexAttr][i]);
+											} else {
+												// TODO: Consider deleting duplicate groups in issue[complexAttr][i]
+												matchingIssue[complexAttr] = issue[complexAttr];
+											}
+										}
+										if (matchingIssue[complexAttr].length > 0 && matchingIssue[complexAttr][0].created) {
+											matchingIssue[complexAttr] = matchingIssue[complexAttr].sort((a, b) => {
+												return a.created > b.created;
+											});
+										}
+									}
+									return Issue.update({account, model}, { _id: issue._id}, matchingIssue).then(() => {
+										return matchingIssue;
+									});
+								}).catch(() => {
+									issue.comments.push(bcfImportNotification);
+									return Issue.createIssue({account, model}, issue).catch((erra) => {
+										console.log("Caught you!!!", erra);
+									});
 								})
 							);
 						});
@@ -775,7 +764,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 					return Promise.resolve();
 				}
 
-				return parseXmlString(markupBuf.toString("utf8"), {explicitCharkey: 1, attrkey: "@"}).then(_xml => {
+				return parseXmlString(markupBuf.toString("utf8"), { explicitCharkey: 1, attrkey: "@" }).then(_xml => {
 
 					xml = _xml;
 
@@ -786,26 +775,26 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 					issue.rev_id = revId;
 					issue.viewpoints = [];
 
-					if(xml.Markup) {
+					if (xml.Markup) {
 						issue.extras.Header = _.get(xml, "Markup.Header");
 						issue.topic_type = _.get(xml, "Markup.Topic[0].@.TopicType");
 						issue.status = sanitise(_.get(xml, "Markup.Topic[0].@.TopicStatus"), statusEnum);
-						if(!issue.status || issue.status === "") {
+						if (!issue.status || issue.status === "") {
 							issue.status = "open";
 						}
 						issue.extras.ReferenceLink = _.get(xml, "Topic[0].ReferenceLink");
 						issue.name = _.get(xml, "Markup.Topic[0].Title[0]._");
-						issue.priority =  sanitise(_.get(xml, "Markup.Topic[0].Priority[0]._"), priorityEnum);
-						issue.extras.Index =  _.get(xml, "Markup.Topic[0].Index[0]._");
-						issue.extras.Labels =  _.get(xml, "Markup.Topic[0].Labels[0]._");
+						issue.priority = sanitise(_.get(xml, "Markup.Topic[0].Priority[0]._"), priorityEnum);
+						issue.extras.Index = _.get(xml, "Markup.Topic[0].Index[0]._");
+						issue.extras.Labels = _.get(xml, "Markup.Topic[0].Labels[0]._");
 						issue.created = moment(_.get(xml, "Markup.Topic[0].CreationDate[0]._")).format("x");
 						issue.owner = _.get(xml, "Markup.Topic[0].CreationAuthor[0]._");
 						issue.extras.ModifiedDate = _.get(xml, "Markup.Topic[0].ModifiedDate[0]._");
 						issue.extras.ModifiedAuthor = _.get(xml, "Markup.Topic[0].ModifiedAuthor[0]._");
 						if (_.get(xml, "Markup.Topic[0].DueDate[0]._")) {
-							issue.due_date = moment(_.get(xml, "Markup.Topic[0].DueDate[0]._")).format("x");
+							issue.due_date = moment(_.get(xml, "Markup.Topic[0].DueDate[0]._")).valueOf();
 						}
-						if(_.get(xml, "Markup.Topic[0].AssignedTo[0]._")) {
+						if (_.get(xml, "Markup.Topic[0].AssignedTo[0]._")) {
 							issue.assigned_roles = _.get(xml, "Markup.Topic[0].AssignedTo[0]._").split(",");
 						}
 						issue.desc = (_.get(xml, "Markup.Topic[0].Description[0]._")) ? _.get(xml, "Markup.Topic[0].Description[0]._") : "(No Description)";
@@ -814,7 +803,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 						issue.extras.RelatedTopic = _.get(xml, "Markup.Topic[0].RelatedTopic");
 					}
 
-					_.get(xml ,"Markup.Comment") && xml.Markup.Comment.forEach(comment => {
+					_.get(xml, "Markup.Comment") && xml.Markup.Comment.forEach(comment => {
 						const obj = {
 							guid: _.get(comment, "@.Guid") ? utils.stringToUUID(_.get(comment, "@.Guid")) : utils.generateUUID(),
 							created: moment(_.get(comment, "Date[0]._")).format("x"),
@@ -836,12 +825,10 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 				}).then(viewpoints => {
 
 					const vpGuids = Object.keys(viewpoints);
+					const groupPromises = [];
 
 					vpGuids.forEach(vpGuid => {
-
-						const groupPromises = [];
-
-						if(!viewpoints[vpGuid].viewpointXml) {
+						if (!viewpoints[vpGuid].viewpointXml) {
 							return;
 						}
 
@@ -882,11 +869,11 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 							scale = 3.28084;
 						}
 
-						if(_.get(vpXML, "VisualizationInfo.ClippingPlanes")) {
-							const clippingPlanes =	_.get(vpXML, "VisualizationInfo.ClippingPlanes");
+						if (_.get(vpXML, "VisualizationInfo.ClippingPlanes")) {
+							const clippingPlanes = _.get(vpXML, "VisualizationInfo.ClippingPlanes");
 							const planes = [];
-							if(clippingPlanes[0].ClippingPlane) {
-								for(let clipIdx = 0; clipIdx < clippingPlanes[0].ClippingPlane.length; ++clipIdx) {
+							if (clippingPlanes[0].ClippingPlane) {
+								for (let clipIdx = 0; clipIdx < clippingPlanes[0].ClippingPlane.length; ++clipIdx) {
 									const fieldName = "VisualizationInfo.ClippingPlanes[0].ClippingPlane[" + clipIdx + "]";
 									const clip = {};
 									clip.normal = [
@@ -913,7 +900,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 
 						}
 
-						if(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]")) {
+						if (_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]")) {
 							vp.up = [
 								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].X[0]._")),
 								parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].CameraUpVector[0].Z[0]._")),
@@ -999,7 +986,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 									for (let j = 0; j < vpComponents[i].Coloring.length; j++) {
 										for (let k = 0; vpComponents[i].Coloring[j].Color && k < vpComponents[i].Coloring[j].Color.length; k++) {
 											for (let compIdx = 0; vpComponents[i].Coloring[j].Color[k].Component && compIdx < vpComponents[i].Coloring[j].Color[k].Component.length; compIdx++) {
-											// const color = vpComponents[i].Coloring[j].Color[k]["@"].Color; // TODO: colour needs to be preserved at some point in the future
+												// const color = vpComponents[i].Coloring[j].Color[k]["@"].Color; // TODO: colour needs to be preserved at some point in the future
 												let objectModel = model;
 
 												if (settings.federate) {
@@ -1120,43 +1107,34 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 									// TODO: Full ViewSetupHints support -
 									// SpaceVisible should correspond to !hideIfc
 									vp.extras.ViewSetupHints = vpComponents[i].ViewSetupHints;
-									systemLogger.logInfo("ViewSetupHints not fully supported for BCF import!");
 								}
 							}
 						}
+						issue.viewpoints.push(vp);
 
-						return Promise.all(groupPromises).then(() => {
-							if (vp) {
-								issue.viewpoints.push(vp);
-							}
-
-							// take the first screenshot as thumbnail
-							return utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).catch(err => {
-
-								systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-									account,
-									model,
-									issueId: utils.uuidToString(issue._id),
-									viewpointId: vpGuids[0],
-									err: err
-								});
-
-								return Promise.resolve();
-							});
-						});
 					});
 
-					return Promise.resolve();
-				}).then(image => {
-
-					if(image) {
-						issue.thumbnail = {
-							flag: 1,
-							content: image
-						};
-					}
-
-					return Issue.createIssue({ account, model }, issue);
+					return Promise.all(groupPromises).then(() => {
+						// take the first screenshot as thumbnail
+						return utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).then((image) => {
+							if (image) {
+								issue.thumbnail = {
+									flag: 1,
+									content: image
+								};
+							}
+						}).catch(err => {
+							systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+								account,
+								model,
+								issueId: utils.uuidToString(issue._id),
+								viewpointId: vpGuids[0],
+								err: err
+							});
+						});
+					}).then(() => {
+						return issue;
+					});
 				});
 
 			}

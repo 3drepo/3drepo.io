@@ -401,6 +401,8 @@ groupSchema.methods.updateAttrs = function (dbCol, data) {
 					}
 				} else {
 					typeCorrect = false;
+					console.log(key, "Failed type check. value: ", data[key], " type: ", Object.prototype.toString.call(data[key]), " expected: ", fieldTypes[key]);
+					console.trace();
 				}
 			}
 
@@ -417,6 +419,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data) {
 				return { _id: utils.uuidToString(this._id) };
 			}
 		} else {
+			console.log("!!!!!! group1");
 			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
 		}
 
@@ -463,6 +466,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 				return savedGroup;
 			});
 		} else {
+			console.log("!!!!! group2");
 			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
 		}
 	});
