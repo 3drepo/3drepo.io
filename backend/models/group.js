@@ -558,7 +558,7 @@ function isValidRule(rule) {
 	return rule.field && rule.field.length > 0 &&
 		Object.keys(ruleOperators).includes(rule.operator) &&
 		(ruleOperators[rule.operator] === 0 ||
-		(rule.values.length && ruleOperators[rule.operator] <= rule.values.length) &&
+		(rule.values.length && ruleOperators[rule.operator] <= rule.values.length && !rule.values.some((x) => x === "")) &&
 		rule.values.length % ruleOperators[rule.operator] === 0);
 }
 
@@ -568,9 +568,9 @@ function buildRule(rule) {
 
 	if (isValidRule(rule)) {
 		const fieldName = "metadata." + rule.field;
-
-		const clausesCount = rule.values && rule.values.length > 0 && ruleOperators[rule.operator] > 0 ?
-			rule.values.length / ruleOperators[rule.operator] :
+		const operatorPerClause =  ruleOperators[rule.operator];
+		const clausesCount = rule.values && rule.values.length > 0 && operatorPerClause > 0 ?
+			rule.values.length / operatorPerClause :
 			1;
 
 		for (let i = 0; i < clausesCount; i++) {
@@ -618,8 +618,8 @@ function buildRule(rule) {
 					break;
 				case "IN_RANGE":
 					{
-						const rangeVal1 = Number(rule.values[i * ruleOperators[rule.operator]]);
-						const rangeVal2 = Number(rule.values[i * ruleOperators[rule.operator] + 1]);
+						const rangeVal1 = Number(rule.values[i * operatorPerClause]);
+						const rangeVal2 = Number(rule.values[i * operatorPerClause + 1]);
 						const rangeLowerOp = {};
 						rangeLowerOp[fieldName] = { $gte: Math.min(rangeVal1, rangeVal2) };
 						const rangeUpperOp = {};
@@ -631,8 +631,8 @@ function buildRule(rule) {
 					break;
 				case "NOT_IN_RANGE":
 					{
-						const exRangeVal1 = Number(rule.values[i * ruleOperators[rule.operator]]);
-						const exRangeVal2 = Number(rule.values[i * ruleOperators[rule.operator] + 1]);
+						const exRangeVal1 = Number(rule.values[i * operatorPerClause]);
+						const exRangeVal2 = Number(rule.values[i * operatorPerClause + 1]);
 						const exRangeLowerOp = {};
 						exRangeLowerOp[fieldName] = { $lt: Math.min(exRangeVal1, exRangeVal2) };
 						const exRangeUpperOp = {};
@@ -650,6 +650,8 @@ function buildRule(rule) {
 				clauses.push(clause);
 			}
 		}
+	} else {
+		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
 	if (clauses.length > 1) {
