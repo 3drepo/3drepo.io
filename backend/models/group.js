@@ -569,7 +569,7 @@ function buildRule(rule) {
 	if (isValidRule(rule)) {
 		const fieldName = "metadata." + rule.field;
 
-		const clausesCount = (rule.values && rule.values.length > 0) ?
+		const clausesCount = rule.values && rule.values.length > 0 && ruleOperators[rule.operator] > 0 ?
 			rule.values.length / ruleOperators[rule.operator] :
 			1;
 
