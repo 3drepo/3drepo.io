@@ -272,7 +272,7 @@ issue.setGroupIssueId = function(dbCol, data, issueId) {
 		// TODO - Do we need to find group first? Can we just patch?
 		return Group.findByUID(dbCol, utils.uuidToString(group_id), null, utils.uuidToString(data.rev_id)).then((group) => {
 			const issueIdData = {
-				issue_id: issueId
+				issue_id: utils.stringToUUID(issueId)
 			};
 
 			return group.updateAttrs(dbCol, issueIdData);
@@ -330,16 +330,6 @@ issue.createIssue = function(dbCol, newIssue) {
 		newIssue.desc = "(No Description)"; // TODO do we really want this stored?
 	}
 
-	if (newIssue.object_id) {
-		// FIXME
-		/* issueAttrPromises.push(
-			GenericObject.getSharedId(dbCol, data.object_id).then((sid) => {
-				newIssue.parent = utils.stringToUUID(sid);
-			})
-		);*/
-		newIssue.object_id = utils.stringToUUID(newIssue.object_id);
-	}
-
 	if (!newIssue.revId) {
 		branch = "master";
 	}
@@ -390,7 +380,6 @@ issue.createIssue = function(dbCol, newIssue) {
 			}
 		}
 
-		return Promise.resolve();
 	}).then((image) => {
 		if (image) {
 			newIssue.thumbnail = {
@@ -401,7 +390,7 @@ issue.createIssue = function(dbCol, newIssue) {
 
 		return this.setGroupIssueId(dbCol, newIssue, newIssue._id);
 	}).then(() => {
-		newIssue.viewpoints = [newIssue.viewpoint];
+		newIssue.viewpoints = newIssue.viewpoints ? newIssue.viewpoints : [newIssue.viewpoint];
 
 		let typeCorrect = true;
 		Object.keys(newIssue).forEach((key) => {
@@ -423,6 +412,7 @@ issue.createIssue = function(dbCol, newIssue) {
 						}
 
 						if (!newIssue.modelCode) {
+							//FIXME: I don't understand why we write model code into issues - CF
 							newIssue.modelCode = (settings.properties && settings.properties.code) ?
 								settings.properties.code : "";
 						}
@@ -435,6 +425,7 @@ issue.createIssue = function(dbCol, newIssue) {
 				});
 			});
 		} else {
+			console.log("!!!! Type incorrect...");
 			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
 		}
 	});
@@ -666,6 +657,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 				}
 
 				if (!typeCorrect) {
+					console.log("TYPE_INCORRECT 2...");
 					return Promise.reject(responseCodes.INVALID_ARGUMENTS);
 				} else if (0 === Object.keys(toUpdate).length) {
 					return (data.comment) ?

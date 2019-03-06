@@ -29,6 +29,10 @@ const multer = require("multer");
 const config = require("../config.js");
 const ModelSetting = require("../models/modelSetting");
 
+process.on('unhandledRejection', function(reason, p){
+    console.log("Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason);
+});
+
 /**
  * @api {get} /:teamspace/:model/issues/:uid.json Find Issue by ID
  * @apiName findIssueById
