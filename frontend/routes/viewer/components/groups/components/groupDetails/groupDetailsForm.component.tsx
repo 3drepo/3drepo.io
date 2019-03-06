@@ -44,7 +44,11 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 		const rulesChanged = rules !== group.rules;
 
 		if (colorChanged || descriptionChanged || objectsChanged || rulesChanged) {
-			this.props.setIsFormValid(this.isNewGroup);
+			this.props.setIsFormValid(true);
+			this.props.setIsFormDirty(true);
+		} else {
+			this.props.setIsFormValid(false);
+			this.props.setIsFormDirty(false);
 		}
 	}
 
@@ -77,7 +81,6 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 	public render() {
 		const { group: { updateDate, type, description } } = this.props;
 		const initialValues = { type, description };
-
 		return (
 			<Formik
 				initialValues={initialValues}
