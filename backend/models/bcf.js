@@ -783,6 +783,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 					issue.comments = [];
 					issue.extras = {};
 					issue.rev_id = revId;
+					issue.viewpoints = [];
 
 					if(xml.Markup) {
 						issue.extras.Header = _.get(xml, "Markup.Header");
