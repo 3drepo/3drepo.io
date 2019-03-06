@@ -52,8 +52,11 @@ export const getGroup = (teamspace, modelId, groupId, revision?) => {
  * @param modelId
  * @param group
  */
-export const createGroup = (teamspace, modelId, group) => {
-	return api.post(`${teamspace}/${modelId}/groups`, group);
+export const createGroup = (teamspace, modelId, revision, group) => {
+	if (revision) {
+		return api.post(`${teamspace}/${modelId}/revision/${revision}/groups`, group);
+	}
+	return api.post(`${teamspace}/${modelId}/revision/master/head/groups`, group);
 };
 
 /**
@@ -63,8 +66,11 @@ export const createGroup = (teamspace, modelId, group) => {
  * @param groupId
  * @param group
  */
-export const updateGroup = (teamspace, modelId, groupId, group) => {
-	return api.put(`${teamspace}/${modelId}/groups/${groupId}`, group);
+export const updateGroup = (teamspace, modelId, revision, groupId, group) => {
+	if (revision) {
+		return api.put(`${teamspace}/${modelId}/revision/${revision}/groups/${groupId}`, group);
+	}
+	return api.put(`${teamspace}/${modelId}/revision/master/head/groups/${groupId}`, group);
 };
 
 /**

@@ -36,6 +36,7 @@ interface IProps {
 	activeGroup: any;
 	teamspace: string;
 	model: string;
+	revision: string;
 	expandDetails: boolean;
 	currentUser: any;
 	modelSettings: any;
@@ -44,8 +45,8 @@ interface IProps {
 	selectedNodes: any;
 	fieldNames: any[];
 	criteriaFieldState: ICriteriaFieldState;
-	createGroup: (teamspace, modelId) => void;
-	updateGroup: (teamspace, modelId, groupId) => void;
+	createGroup: (teamspace, modelId, revision) => void;
+	updateGroup: (teamspace, modelId, revision, groupId) => void;
 	setState: (componentState) => void;
 	setCriteriaState: (criteriaState) => void;
 	resetToSavedSelection: () => void;
@@ -93,12 +94,12 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleGroupFormSubmit = () => {
-		const { teamspace, model, updateGroup, createGroup } = this.props;
+		const { teamspace, model, revision, updateGroup, createGroup } = this.props;
 
 		if (this.isNewGroup) {
-			createGroup(teamspace, model);
+			createGroup(teamspace, model, revision);
 		} else {
-			updateGroup(teamspace, model, this.groupData._id);
+			updateGroup(teamspace, model, revision, this.groupData._id);
 		}
 	}
 

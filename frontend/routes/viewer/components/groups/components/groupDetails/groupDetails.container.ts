@@ -28,7 +28,6 @@ import {
 	selectFieldNames,
 	selectCriteriaFieldState
 } from '../../../../../../modules/groups';
-import { TreeActions } from '../../../../../../modules/tree';
 import { selectSettings } from '../../../../../../modules/model';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
 import { selectSelectedNodes } from '../../../../../../modules/tree';

@@ -303,7 +303,7 @@ export function* closeDetails() {
 	}
 }
 
-export function* createGroup({ teamspace, modelId }) {
+export function* createGroup({ teamspace, modelId, revision }) {
 	try {
 		const currentUser = yield select(selectCurrentUser);
 		const newGroupDetails = yield select(selectNewGroupDetails);
@@ -323,7 +323,7 @@ export function* createGroup({ teamspace, modelId }) {
 			group.objects = objectsStatus.highlightedNodes;
 		}
 
-		const {data} = yield API.createGroup(teamspace, modelId, group);
+		const {data} = yield API.createGroup(teamspace, modelId, revision, group);
 		const preparedGroup = prepareGroup(data);
 
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
@@ -335,17 +335,12 @@ export function* createGroup({ teamspace, modelId }) {
 	}
 }
 
-export function* updateGroup({ teamspace, modelId, groupId }) {
+export function* updateGroup({ teamspace, modelId, revision, groupId }) {
 	try {
-		const currentUser = yield select(selectCurrentUser);
 		const groupDetails = yield select(selectActiveGroupDetails);
-		const date = new Date();
-		const timestamp = date.getTime();
 
 		const groupToSave = {
 			...normalizeGroup(groupDetails),
-			updatedAt: timestamp,
-			updatedBy: currentUser.username,
 			objects: []
 		} as any;
 
@@ -355,7 +350,7 @@ export function* updateGroup({ teamspace, modelId, groupId }) {
 			groupToSave.objects = objectsStatus.highlightedNodes;
 		}
 
-		const { data } = yield API.updateGroup(teamspace, modelId, groupId, groupToSave);
+		const { data } = yield API.updateGroup(teamspace, modelId, revision, groupId, groupToSave);
 
 		const preparedGroup = prepareGroup(data);
 

@@ -17,7 +17,7 @@
 
 import { dispatch, getState, subscribe } from '../../../helpers/migration';
 import { selectCurrentUser, CurrentUserActions } from '../../../modules/currentUser';
-import { selectRisks, selectSelectedFilters, selectRisksMap } from '../../../modules/risks';
+import { selectRisks, selectRisksMap } from '../../../modules/risks';
 import { ModelActions, selectSettings, selectIsPending } from '../../../modules/model';
 import { TreeActions } from '../../../modules/tree';
 import { ViewpointsActions } from '../../../modules/viewpoints';
@@ -25,7 +25,6 @@ import { JobsActions, selectJobs } from '../../../modules/jobs';
 import { RisksActions } from '../../../modules/risks';
 import { GroupsActions } from '../../../modules/groups';
 import { prepareRisk } from '../../../helpers/risks';
-import { RISK_LEVELS } from '../../../constants/risks';
 import { searchByFilters } from '../../../helpers/searching';
 import { VIEWER_EVENTS } from '../../../constants/viewer';
 

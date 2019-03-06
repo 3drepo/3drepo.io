@@ -29,7 +29,12 @@ import Delete from '@material-ui/icons/Delete';
 import InvertColors from '@material-ui/icons/InvertColors';
 import Visibility from '@material-ui/icons/Visibility';
 
-import { DEFAULT_OVERRIDE_COLOR, GROUPS_ACTIONS_ITEMS, GROUPS_ACTIONS_MENU, GROUP_PANEL_NAME } from '../../../../constants/groups';
+import {
+	DEFAULT_OVERRIDE_COLOR,
+	GROUPS_ACTIONS_ITEMS,
+	GROUPS_ACTIONS_MENU,
+	GROUP_PANEL_NAME
+} from '../../../../constants/groups';
 import { CREATE_ISSUE } from '../../../../constants/issue-permissions';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { hexToRgba } from '../../../../helpers/colors';
@@ -411,6 +416,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		<GroupDetails
 			teamspace={this.props.teamspace}
 			model={this.props.model}
+			revision={this.props.revision}
 			saveGroup={this.props.saveGroup}
 			resetToSavedSelection={this.handleResetToSavedSelection}
 			canUpdate={this.canAddOrUpdate}
