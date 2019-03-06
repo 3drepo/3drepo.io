@@ -61,6 +61,13 @@ const xmlBuilder = new xml2js.Builder({
 
 const bcf = {};
 
+function getIfcGuids(account, model) {
+	return Meta.find({ account, model }, { type: "meta" }, { "metadata.IFC GUID": 1 })
+		.then(ifcGuidResults => {
+			return ifcGuidResults;
+		});
+}
+
 function parseXmlString(xmlString, options) {
 
 	return new Promise((resolve, reject) => {
@@ -504,7 +511,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 			for (let i = 0; settings.subModels && i < settings.subModels.length; i++) {
 				const subModelId = settings.subModels[i].model;
 				ifcToModelMapPromises.push(
-					this.getIfcGuids(account, subModelId).then(ifcGuidResults => {
+					getIfcGuids(account, subModelId).then(ifcGuidResults => {
 						for (let j = 0; j < ifcGuidResults.length; j++) {
 							ifcToModelMap[ifcGuidResults[j].metadata["IFC GUID"]] = subModelId;
 						}
@@ -773,6 +780,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 
 					issue = {};
 					issue._id = utils.stringToUUID(guid);
+					issue.comments = [];
 					issue.extras = {};
 					issue.rev_id = revId;
 
@@ -1115,31 +1123,28 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 							}
 						}
 
-						Promise.all(groupPromises).then(() => {
-							issue.viewpoints.push(vp);
+						return Promise.all(groupPromises).then(() => {
+							if (vp) {
+								issue.viewpoints.push(vp);
+							}
+
+							// take the first screenshot as thumbnail
+							return utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).catch(err => {
+
+								systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+									account,
+									model,
+									issueId: utils.uuidToString(issue._id),
+									viewpointId: vpGuids[0],
+									err: err
+								});
+
+								return Promise.resolve();
+							});
 						});
 					});
 
-					// take the first screenshot as thumbnail
-					if(vpGuids.length > 0) {
-
-						return utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).catch(err => {
-
-							systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-								account,
-								model,
-								issueId: utils.uuidToString(issue._id),
-								viewpointId: vpGuids[0],
-								err: err
-							});
-
-							return Promise.resolve();
-						});
-
-					} else {
-						return Promise.resolve();
-					}
-
+					return Promise.resolve();
 				}).then(image => {
 
 					if(image) {
