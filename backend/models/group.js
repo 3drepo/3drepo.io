@@ -414,7 +414,7 @@ groupSchema.statics.updateIssueId = function (dbCol, uid, issueId) {
 // Group Update with Event
 groupSchema.methods.updateGroup = function (dbCol, sessionId, data, user = "", branch = "master", rid = null) {
 	return this.updateAttrs(dbCol, _.cloneDeep(data), user).then((savedGroup) => {
-		return getObjectIds(dbCol, savedGroup, branch, rid, true, false).then((objects) => {
+		return getObjectIds(dbCol, this, branch, rid, true, false).then((objects) => {
 			savedGroup.objects = objects;
 			ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, savedGroup);
 			return savedGroup;
