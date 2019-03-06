@@ -320,6 +320,8 @@ issue.createIssue = function(dbCol, newIssue) {
 		db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
 			_dbCol.stats().then((stats) => {
 				newIssue.number = (stats) ? stats.count + 1 : 1;
+			}).catch((err) => {
+				newIssue.number = 1;
 			});
 		})
 	);
