@@ -31,6 +31,7 @@ const ChatEvent = require("./chatEvent");
 const Group = require("./group");
 const History = require("./history");
 const Issue = require("./issue");
+const Meta = require("./meta");
 const ModelSetting = require("./modelSetting");
 
 // TODO duplicated from issue
