@@ -778,9 +778,9 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 		});
 	}
 
-	return ModelSetting.findById(dbCol, dbCol.model).then((settings) => {
-		return historySearch.then((historySearchResults) => {
-			if (historySearchResults) {
+	return historySearch.then((historySearchResults) => {
+		if (historySearchResults) {
+			return ModelSetting.findById(dbCol, dbCol.model).then((settings) => {
 				// Only retrieve issues for current and older revisions
 				filter.rev_id = {"$not" : {"$in": historySearchResults.revIds}};
 
@@ -840,10 +840,10 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 						});
 					});
 				});
-			} else {
-				return Promise.resolve();
-			}
-		});
+			});
+		} else {
+			return Promise.resolve([]);
+		}
 	});
 };
 
