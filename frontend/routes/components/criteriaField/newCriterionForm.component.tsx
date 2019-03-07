@@ -12,7 +12,7 @@ import {
 	CRITERIA_LIST, VALUE_FIELD_MAP, VALUE_DATA_TYPES, VALUE_FIELD_TYPES
 } from '../../../constants/criteria';
 import { AutosuggestField } from '../autosuggestField/autosuggestField.component';
-import { schema } from '../../../services/validation';
+import { schema, VALIDATIONS_MESSAGES } from '../../../services/validation';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -30,8 +30,8 @@ const CriterionSchema = Yup.object().shape({
 		VALUE_FIELD_MAP[value] &&
 		VALUE_FIELD_MAP[value].dataType &&
 		VALUE_FIELD_MAP[value].dataType === VALUE_DATA_TYPES.NUMBER,
-		then: Yup.array().of(schema.measureNumberDecimal.nullable()).required('This field is required'),
-		otherwise: Yup.array().of(Yup.string()).required('This field is required')
+		then: Yup.array().of(schema.measureNumberDecimal.nullable()).required(VALIDATIONS_MESSAGES.REQUIRED),
+		otherwise: Yup.array().of(Yup.string()).required(VALIDATIONS_MESSAGES)
 	})
 });
 
@@ -136,5 +136,5 @@ export const NewCriterionForm = withFormik({
 		resetForm();
 	},
 	enableReinitialize: false,
-	validationSchema: (props) => CriterionSchema
+	validationSchema: CriterionSchema
 })(connect(NewCreaterionFormComponent as any)) as any;
