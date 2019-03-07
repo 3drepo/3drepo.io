@@ -116,12 +116,12 @@ export class MultiSelectService {
 			document.getElementById('#canvas').style.cursor = canvasIcon;
 		}
 
-		const groupElements: any = document.getElementsByClassName('groupsList');
+		const groupElements: any = document.getElementsByClassName('groups-list');
 		for (let i = 0; i < groupElements.length; ++i) {
 			groupElements[i].style.cursor = panelIcon;
 		}
 
-		const treeNodeElements: any = document.getElementsByClassName('treeNode');
+		const treeNodeElements: any = document.getElementsByClassName('tree-node');
 		for (let i = 0; i < treeNodeElements.length; ++i) {
 			treeNodeElements[i].style.cursor = panelIcon;
 		}

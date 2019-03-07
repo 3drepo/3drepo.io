@@ -36,6 +36,7 @@ export function* startListenOnSelections() {
 
 		Viewer.on(VIEWER_EVENTS.MULTI_OBJECTS_SELECTED, (object) => {
 			TreeService.nodesClickedBySharedIds(object.selectedNodes);
+			dispatch(TreeActions.getSelectedNodes());
 		});
 
 		Viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => {

@@ -112,7 +112,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		filteredGroups: []
 	};
 
-	public groupsContainerRef = React.createRef();
+	public groupsContainerRef = React.createRef<any>();
 
 	public componentDidMount() {
 		const { subscribeOnChanges, teamspace, model } = this.props;
@@ -377,7 +377,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			/>
 		));
 
-		return <ListContainer ref={this.groupsContainerRef}>{Items}</ListContainer>;
+		return <ListContainer className="groups-list" ref={this.groupsContainerRef}>{Items}</ListContainer>;
 	});
 
 	public renderEmptyState = renderWhenTrue(() => (

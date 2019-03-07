@@ -37,6 +37,7 @@ const highlightedGroupStyles = css`
 
 export const GroupListItem = styled(PreviewListItem)`
   && {
+    cursor: inherit;
     height: 73px;
     ${(props: any) => props.highlighted && highlightedGroupStyles}
   }
