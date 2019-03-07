@@ -412,7 +412,7 @@ issue.createIssue = function(dbCol, newIssue) {
 						}
 
 						if (!newIssue.modelCode) {
-							//FIXME: I don't understand why we write model code into issues - CF
+							// FIXME: I don't understand why we write model code into issues - CF
 							newIssue.modelCode = (settings.properties && settings.properties.code) ?
 								settings.properties.code : "";
 						}
@@ -425,7 +425,6 @@ issue.createIssue = function(dbCol, newIssue) {
 				});
 			});
 		} else {
-			console.log("!!!! Type incorrect...");
 			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
 		}
 	});
@@ -657,7 +656,6 @@ issue.updateAttrs = function(dbCol, uid, data) {
 				}
 
 				if (!typeCorrect) {
-					console.log("TYPE_INCORRECT 2...");
 					return Promise.reject(responseCodes.INVALID_ARGUMENTS);
 				} else if (0 === Object.keys(toUpdate).length) {
 					return (data.comment) ?
