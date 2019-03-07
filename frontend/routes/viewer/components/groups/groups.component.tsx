@@ -183,8 +183,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleCloseSearchMode = () => {
-		this.props.setState({ searchEnabled: false });
-		this.setState({ filteredGroups: this.props.groups });
+		this.props.setState({ searchEnabled: false, selectedFilters: [] });
 	}
 
 	public handleOpenSearchMode = () => {
