@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { keyBy } from 'lodash';
+import { keyBy, omit } from 'lodash';
 
 export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	fetchGroups: ['teamspace', 'modelId', 'revision'],
@@ -34,12 +34,12 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	highlightGroup: ['group'],
 	dehighlightGroup: ['group'],
 	clearSelectionHighlights: [],
-	addColorOverride: ['group'],
-	removeColorOverride: ['groupId', 'overridedGroup'],
+	addColorOverride: ['groups'],
+	removeColorOverride: ['groups'],
 	toggleColorOverride: ['group'],
-	addToOverrided: ['groupId', 'override'],
-	removeFromOverrided: ['groupId'],
-	toggleColorOverrideAll: [],
+	addToOverrided: ['groupsMap'],
+	removeFromOverrided: ['groupsIds'],
+	toggleColorOverrideAll: ['overrideAll'],
 	deleteGroups: ['teamspace', 'modelId', 'groups'],
 	showDeleteInfo: ['groupIds'],
 	deleteGroupsSuccess: ['groupIds'],
@@ -76,7 +76,6 @@ export interface IGroupComponentState {
 	selectedFilters: any[];
 	highlightedGroups: any;
 	colorOverrides: any;
-	overrideAll: boolean;
 	totalMeshes: number;
 	criteriaFieldState: ICriteriaFieldState;
 }
@@ -111,7 +110,6 @@ export const INITIAL_STATE: IGroupState = {
 		updatedGroup: {},
 		selectedFilters: [],
 		colorOverrides: {},
-		overrideAll: false,
 		totalMeshes: 0,
 		criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
 	},
@@ -151,15 +149,16 @@ export const removeFromHighlighted = (state = INITIAL_STATE, { groupId }) => {
 	return { ...state, componentState: { ...state.componentState, highlightedGroups } };
 };
 
-export const addToOverrided = (state = INITIAL_STATE, { groupId, override }) => {
-	const colorOverrides = { ...state.componentState.colorOverrides };
-	colorOverrides[groupId] = override;
+export const addToOverrided = (state = INITIAL_STATE, { groupsMap }) => {
+	const colorOverrides = {
+		...state.componentState.colorOverrides,
+		...groupsMap
+	};
 	return { ...state, componentState: { ...state.componentState, colorOverrides } };
 };
 
-export const removeFromOverrided = (state = INITIAL_STATE, { groupId }) => {
-	const colorOverrides = { ...state.componentState.colorOverrides };
-	colorOverrides[groupId] = undefined;
+export const removeFromOverrided = (state = INITIAL_STATE, { groupsIds }) => {
+	const colorOverrides = omit({ ...state.componentState.colorOverrides }, groupsIds);
 	return { ...state, componentState: { ...state.componentState, colorOverrides } };
 };
 

@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { isEmpty, isEqual, stubTrue } from 'lodash';
+import { isEmpty, isEqual, stubTrue, size } from 'lodash';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import ArrowBack from '@material-ui/icons/ArrowBack';
@@ -27,7 +27,7 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 import SearchIcon from '@material-ui/icons/Search';
 import Delete from '@material-ui/icons/Delete';
 import InvertColors from '@material-ui/icons/InvertColors';
-import Visibility from '@material-ui/icons/Visibility';
+import Visibility from '@material-ui/icons/VisibilityOutlined';
 
 import {
 	DEFAULT_OVERRIDE_COLOR,
@@ -36,7 +36,6 @@ import {
 	GROUP_PANEL_NAME
 } from '../../../../constants/groups';
 import { CREATE_ISSUE } from '../../../../constants/issue-permissions';
-import { ViewerService } from '../../../../components/viewer/js/viewer.service';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { hexToRgba } from '../../../../helpers/colors';
 import { hasPermissions } from '../../../../helpers/permissions';
@@ -73,7 +72,6 @@ interface IProps {
 	searchEnabled: boolean;
 	selectedFilters: any[];
 	colorOverrides: any;
-	allOverrided: any;
 	modelSettings: any;
 	setState: (componentState: any) => void;
 	setNewGroup: () => void;
@@ -82,7 +80,7 @@ interface IProps {
 	setActiveGroup: (group, revision?) => void;
 	saveGroup: (teamspace, model, group) => void;
 	toggleColorOverride: (group) => void;
-	toggleColorOverrideAll: () => void;
+	toggleColorOverrideAll: (overrideAll) => void;
 	deleteGroups: (teamspace, model, groups) => void;
 	showConfirmDialog: (config) => void;
 	isolateGroup: (group) => void;
@@ -93,7 +91,6 @@ interface IProps {
 }
 
 interface IState {
-	groupDetails?: any;
 	modelLoaded: boolean;
 	filteredGroups: any[];
 }
@@ -110,10 +107,11 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 
 export class Groups extends React.PureComponent<IProps, IState> {
 	public state = {
-		groupDetails: {},
 		modelLoaded: false,
 		filteredGroups: []
 	};
+
+	public groupsContainerRef = React.createRef();
 
 	public componentDidMount() {
 		const { subscribeOnChanges, teamspace, model } = this.props;
@@ -128,8 +126,8 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		subscribeOnChanges(teamspace, model);
 	}
 
-	public componentDidUpdate(prevProps) {
-		const { groups, selectedFilters } = this.props;
+	public componentDidUpdate(prevProps, prevState) {
+		const { groups, selectedFilters, activeGroupId } = this.props;
 		const groupsChanged = !isEqual(prevProps.groups, groups);
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
 
@@ -137,6 +135,16 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 		if (groupsChanged || filtersChanged) {
 			changes.filteredGroups = this.filteredGroups;
+		}
+
+		if (filtersChanged && activeGroupId) {
+			const isSelectedGroupVisible = prevState.filteredGroups.some(({ _id }) => {
+				return _id === activeGroupId;
+			});
+
+			if (!isSelectedGroupVisible) {
+				this.resetActiveGroup();
+			}
 		}
 
 		if (!isEmpty(changes)) {
@@ -148,6 +156,29 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		const { teamspace, model, unsubscribeFromChanges } = this.props;
 		unsubscribeFromChanges(teamspace, model);
 		this.toggleViewerEvents(false);
+	}
+
+	get filteredGroups() {
+		const { groups, selectedFilters } = this.props;
+		return searchByFilters(groups, selectedFilters, false);
+	}
+
+	get filters() {
+		return [];
+	}
+
+	get menuActionsMap() {
+		const { toggleColorOverrideAll, teamspace, model, downloadGroups } = this.props;
+		return {
+			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => toggleColorOverrideAll(!this.overridesAllGroups),
+			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => this.handleDeleteGroups(),
+			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadGroups(teamspace, model)
+		};
+	}
+
+	get overridesAllGroups() {
+		const { groups, colorOverrides } = this.props;
+		return groups.length === size(colorOverrides);
 	}
 
 	public resetActiveGroup = () => {
@@ -162,19 +193,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			this.setState({ modelLoaded: true });
 		});
 		Viewer[eventHandler](VIEWER_EVENTS.BACKGROUND_SELECTED, this.resetActiveGroup);
-	}
-
-	public get filteredGroups() {
-		const { groups, selectedFilters } = this.props;
-		return searchByFilters(groups, selectedFilters, false);
-	}
-
-	public get filters() {
-		return [];
-	}
-
-	public get activeGroup() {
-		return this.props.groupsMap[this.props.activeGroupId] || {};
 	}
 
 	public getOverridedColor = (groupId, color) => {
@@ -221,15 +239,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	get menuActionsMap() {
-		const { toggleColorOverrideAll, teamspace, model, downloadGroups } = this.props;
-		return {
-			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => toggleColorOverrideAll(),
-			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => this.handleDeleteGroups(),
-			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadGroups(teamspace, model)
-		};
-	}
-
 	public renderActionsMenu = () => (
 		<MenuList>
 			{GROUPS_ACTIONS_MENU.map(({ name, Icon, label }) => {
@@ -238,7 +247,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 						<IconWrapper><Icon fontSize="small" /></IconWrapper>
 						<StyledItemText>
 							{label}
-							{(name === GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL && this.props.allOverrided) && <Check fontSize="small" />}
+							{(name === GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL && this.overridesAllGroups) && <Check fontSize="small" />}
 						</StyledItemText>
 					</StyledListItem>
 				);
@@ -367,7 +376,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			/>
 		));
 
-		return <ListContainer>{Items}</ListContainer>;
+		return <ListContainer ref={this.groupsContainerRef}>{Items}</ListContainer>;
 	});
 
 	public renderEmptyState = renderWhenTrue(() => (
