@@ -313,8 +313,8 @@ issue.createIssue = function(dbCol, newIssue) {
 		return Promise.reject({ resCode: responseCodes.ISSUE_NO_NAME });
 	}
 
-	newIssue._id = utils.stringToUUID(uuid.v1());
-	newIssue.created = (new Date()).getTime();
+	newIssue._id = utils.stringToUUID(newIssue._id ? newIssue._id : uuid.v1());
+	newIssue.created = parseInt(newIssue.created ? newIssue.created : (new Date()).getTime());
 
 	// Assign issue number
 	issueAttrPromises.push(
@@ -401,6 +401,7 @@ issue.createIssue = function(dbCol, newIssue) {
 		Object.keys(newIssue).forEach((key) => {
 			if (issueAttributes.includes(key)) {
 				if (fieldTypes[key] && newIssue[key] && Object.prototype.toString.call(newIssue[key]) !== fieldTypes[key]) {
+					systemLogger.error(`Type check failed: ${key} is expected to be type ${fieldTypes[key]} but it is `, Object.prototype.toString.call(newIssue[key]));
 					typeCorrect = false;
 				}
 			} else {
@@ -432,6 +433,14 @@ issue.createIssue = function(dbCol, newIssue) {
 		} else {
 			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
 		}
+	});
+};
+
+issue.updateFromBCF = function(dbCol, data) {
+	return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
+		return _dbCol.update({_id: issue._id}, issue).then(() => {
+			return data;
+		});
 	});
 };
 

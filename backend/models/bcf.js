@@ -616,12 +616,14 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 											});
 										}
 									}
-									return Issue.update({account, model}, { _id: issue._id}, matchingIssue).then(() => {
-										return matchingIssue;
-									});
-								}).catch(() => {
-									issue.comments.push(bcfImportNotification);
-									issuesToCreate.push(issue);
+									return Issue.updateFromBCF({account, model}, { _id: issue._id}, matchingIssue);
+								}).catch((error) => {
+									if (error.value === responseCodes.ISSUE_NOT_FOUND.value) {
+										issue.comments.push(bcfImportNotification);
+										issuesToCreate.push(issue);
+									} else {
+										return Promise.reject(error);
+									}
 								})
 							);
 						});
@@ -799,7 +801,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 						issue.priority = sanitise(_.get(xml, "Markup.Topic[0].Priority[0]._"), priorityEnum);
 						issue.extras.Index = _.get(xml, "Markup.Topic[0].Index[0]._");
 						issue.extras.Labels = _.get(xml, "Markup.Topic[0].Labels[0]._");
-						issue.created = moment(_.get(xml, "Markup.Topic[0].CreationDate[0]._")).format("x");
+						issue.created = moment(_.get(xml, "Markup.Topic[0].CreationDate[0]._")).format("x").valueOf();
 						issue.owner = _.get(xml, "Markup.Topic[0].CreationAuthor[0]._");
 						issue.extras.ModifiedDate = _.get(xml, "Markup.Topic[0].ModifiedDate[0]._");
 						issue.extras.ModifiedAuthor = _.get(xml, "Markup.Topic[0].ModifiedAuthor[0]._");
@@ -818,7 +820,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 					_.get(xml, "Markup.Comment") && xml.Markup.Comment.forEach(comment => {
 						const obj = {
 							guid: _.get(comment, "@.Guid") ? utils.stringToUUID(_.get(comment, "@.Guid")) : utils.generateUUID(),
-							created: moment(_.get(comment, "Date[0]._")).format("x"),
+							created: moment(_.get(comment, "Date[0]._")).format("x").valueOf(),
 							owner: _.get(comment, "Author[0]._"),
 							comment: _.get(comment, "Comment[0]._"),
 							sealed: true,
