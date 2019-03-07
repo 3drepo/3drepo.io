@@ -32,23 +32,28 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 		return !this.props.group._id;
 	}
 
+	public formikRef = React.createRef<HTMLElement>() as any;
+
 	public componentDidMount() {
 		this.props.setIsFormValid(this.isNewGroup);
 	}
 
-	public componentDidUpdate({group}) {
-		const { color, description, objects, rules } = this.props.group;
-		const colorChanged = color !== group.color;
-		const descriptionChanged = description !== group.description;
-		const objectsChanged = objects !== group.objects;
-		const rulesChanged = rules !== group.rules;
+	public componentDidUpdate(prevProps) {
+		const { name, description, color, objects, rules, type } = this.props.group;
+		const currentProps = { name, description, color, objects, rules, type };
+		const initialValues = this.formikRef.current.initialValues;
 
-		if (colorChanged || descriptionChanged || objectsChanged || rulesChanged) {
-			this.props.setIsFormValid(true);
-			this.props.setIsFormDirty(true);
-		} else {
+		const rulesChanged = this.props.group.rules && !isEqual(this.props.group.rules, prevProps.group.rules);
+		const colorChanged = !isEqual(this.props.group.color, prevProps.group.color);
+
+		if (isEqual(initialValues, currentProps)) {
 			this.props.setIsFormValid(false);
 			this.props.setIsFormDirty(false);
+		}
+
+		if (rulesChanged || colorChanged) {
+			this.props.setIsFormValid(true);
+			this.props.setIsFormDirty(true);
 		}
 	}
 
@@ -79,8 +84,8 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { group: { updateDate, type, description } } = this.props;
-		const initialValues = { type, description };
+		const { group: { updateDate, type, description, name, color, objects, rules } } = this.props;
+		const initialValues = { type, description, name, color, objects, rules };
 		return (
 			<Formik
 				initialValues={initialValues}
@@ -88,6 +93,7 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 				validateOnChange={false}
 				validationSchema={GroupSchema}
 				onSubmit={this.props.onSubmit}
+				ref={this.formikRef}
 			>
 				<Form>
 					<FieldsRow>

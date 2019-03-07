@@ -62,6 +62,8 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		isFormDirty: false
 	};
 
+	public formRef = React.createRef<HTMLElement>() as any;
+
 	public componentDidMount() {
 		if (!this.isNewGroup) {
 			this.props.setState({ newGroup: { ...this.groupData }});
@@ -95,7 +97,9 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 	public handleGroupFormSubmit = () => {
 		const { teamspace, model, revision, updateGroup, createGroup } = this.props;
+		const { name, description, type, color, rules, objects } = this.groupData;
 
+		this.formRef.current.formikRef.current.resetForm({name, description, type, color, rules, objects});
 		if (this.isNewGroup) {
 			createGroup(teamspace, model, revision);
 		} else {
@@ -123,6 +127,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 	public renderGroupForm = () => (
 		<GroupDetailsForm
+			ref={this.formRef}
 			key={`${this.groupData._id}.${this.groupData.updateDate}`}
 			group={this.groupData}
 			onSubmit={this.handleGroupFormSubmit}
@@ -161,7 +166,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			{...this.groupData}
 			roleColor={this.groupData.color}
 			createdDate={this.groupData.createdDate}
-			editable={!this.groupData._id}
+			editable={true}
 			onNameChange={this.handleFieldChange}
 			renderCollapsable={this.renderGroupForm}
 			renderNotCollapsable={() => this.renderRulesField(this.groupData.type === GROUPS_TYPES.SMART)}
