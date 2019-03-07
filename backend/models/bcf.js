@@ -810,7 +810,10 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 						}
 						if (_.get(xml, "Markup.Topic[0].AssignedTo[0]._")) {
 							issue.assigned_roles = _.get(xml, "Markup.Topic[0].AssignedTo[0]._").split(",");
+						} else {
+							issue.assigned_roles = [];
 						}
+
 						issue.desc = (_.get(xml, "Markup.Topic[0].Description[0]._")) ? _.get(xml, "Markup.Topic[0].Description[0]._") : "(No Description)";
 						issue.extras.BimSnippet = _.get(xml, "Markup.Topic[0].BimSnippet");
 						issue.extras.DocumentReference = _.get(xml, "Markup.Topic[0].DocumentReference");
