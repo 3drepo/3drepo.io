@@ -65,10 +65,7 @@ export function* setActiveGroup({ group, revision }) {
 
 		yield all([
 			put(GroupsActions.selectGroup(group, filteredGroups, revision)),
-			put(GroupsActions.setComponentState({
-				activeGroup: group._id,
-				newGroup: group
-			}))
+			put(GroupsActions.setComponentState({ activeGroup: group ? group._id : null }))
 		]);
 
 	} catch (error) {
@@ -129,7 +126,7 @@ export function* clearSelectionHighlights() {
 	}
 }
 
-export function* selectGroup({ group }) {
+export function* selectGroup({ group = {} }) {
 	try {
 		yield Viewer.isViewerReady();
 
@@ -288,6 +285,7 @@ export function* showDetails({ group, revision }) {
 		yield put(GroupsActions.setActiveGroup(group, revision));
 		yield put(GroupsActions.setComponentState({
 			showDetails: true,
+			newGroup: group,
 			criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
 		}));
 	} catch (error) {
@@ -297,7 +295,7 @@ export function* showDetails({ group, revision }) {
 
 export function* closeDetails() {
 	try {
-		yield put(GroupsActions.setComponentState({ activeGroup: null, showDetails: false }));
+		yield put(GroupsActions.setComponentState({ showDetails: false }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('close', 'group details', error));
 	}

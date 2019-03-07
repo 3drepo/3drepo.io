@@ -36,6 +36,7 @@ import {
 	GROUP_PANEL_NAME
 } from '../../../../constants/groups';
 import { CREATE_ISSUE } from '../../../../constants/issue-permissions';
+import { ViewerService } from '../../../../components/viewer/js/viewer.service';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { hexToRgba } from '../../../../helpers/colors';
 import { hasPermissions } from '../../../../helpers/permissions';
@@ -123,9 +124,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			this.setState({ modelLoaded: true });
 		}
 
-		Viewer.on(VIEWER_EVENTS.MODEL_LOADED, () => {
-			this.setState({ modelLoaded: true });
-		});
+		this.toggleViewerEvents();
 		subscribeOnChanges(teamspace, model);
 	}
 
@@ -148,6 +147,21 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	public componentWillUnmount() {
 		const { teamspace, model, unsubscribeFromChanges } = this.props;
 		unsubscribeFromChanges(teamspace, model);
+		this.toggleViewerEvents(false);
+	}
+
+	public resetActiveGroup = () => {
+		if (!this.props.showDetails) {
+			this.props.setState({ activeGroup: null });
+		}
+	}
+
+	public toggleViewerEvents = (enabled = true) => {
+		const eventHandler = enabled ? 'on' : 'off';
+		Viewer[eventHandler](VIEWER_EVENTS.MODEL_LOADED, () => {
+			this.setState({ modelLoaded: true });
+		});
+		Viewer[eventHandler](VIEWER_EVENTS.BACKGROUND_SELECTED, this.resetActiveGroup);
 	}
 
 	public get filteredGroups() {
