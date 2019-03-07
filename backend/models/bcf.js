@@ -561,6 +561,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 					}).then(issues => {
 
 						const saveIssueProms = [];
+						const issuesToCreate = [];
 
 						// sort issues by date and add number
 						issues = issues.sort((a, b) => {
@@ -620,21 +621,32 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 									});
 								}).catch(() => {
 									issue.comments.push(bcfImportNotification);
-									return Issue.createIssue({account, model}, issue).catch((erra) => {
-										console.log("Caught you!!!", erra);
-									});
+									issuesToCreate.push(issue);
 								})
 							);
 						});
 
-						return Promise.all(saveIssueProms);
+						return Promise.all(saveIssueProms).then((updatedIssues) => {
+							// We need to do this synchronously to ensure the integrity of issue numbers
+							const savedIssues = [] ;
+							const issuesCreatedProm = issuesToCreate.reduce((promise, item) => {
+								return promise.then(() => {
+									return Issue.createIssue({account, model}, item).then((issue) => {
+										savedIssues.push(issue);
+									});
+								});
+							}, Promise.resolve());
+							return issuesCreatedProm.then(() => {
+								return savedIssues.concat(updatedIssues);
+							});
+						});
 
 					}).then(savedIssues => {
 
 						const notifications = [];
 
 						savedIssues.forEach(issue => {
-							Issue.setGroupIssueId({account, model}, issue, issue._id);
+							issue && Issue.setGroupIssueId({account, model}, issue, issue._id);
 
 							if (issue && issue.clean) {
 								notifications.push(issue.clean(settings.type));
