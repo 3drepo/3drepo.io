@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 "use strict";
+
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 const middlewares = require("../middlewares/middlewares");

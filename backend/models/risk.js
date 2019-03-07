@@ -1,5 +1,5 @@
 /**
- *	Copyright (C) 2018 3D Repo Ltd
+ *	Copyright (C) 2019 3D Repo Ltd
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU Affero General Public License as
@@ -29,72 +29,97 @@ const _ = require("lodash");
 const ChatEvent = require("./chatEvent");
 
 const systemLogger = require("../logger.js").systemLogger;
+const Comment = require("./comment");
 const Group = require("./group");
 const Job = require("./job");
 const Project = require("./project");
 const User = require("./user");
+const View = require("./viewpoint");
 
 const C = require("../constants");
 
 const risk = {};
 
 const fieldTypes = {
-	"safetibase_id": "[object String]",
-	"associated_activity": "[object String]",
-	"desc": "[object String]",
+	"_id": "[object Object]",
 	"assigned_roles": "[object Array]",
+	"associated_activity": "[object String]",
 	"category": "[object String]",
+	"comment": "[object String]",
+	"commentIndex": "[object Number]",
 	"comments": "[object Array]",
-	"likelihood": "[object Number]",
 	"consequence": "[object Number]",
-	"level_of_risk": "[object Number]",
-	"mitigation_status": "[object String]",
-	"mitigation_desc": "[object String]",
-	"rev_id": "[object Object]",
-	"thumbnail": "[object Object]",
-	"creator_role": "[object String]",
-	"name": "[object String]",
+	"created": "[object Number]",
 	"createdAt": "[object Number]",
-	"viewpoint": "[object Object]",
-	"viewpoints": "[object Array]",
+	"creator_role": "[object String]",
+	"desc": "[object String]",
+	"level_of_risk": "[object Number]",
+	"likelihood": "[object Number]",
+	"mitigation_desc": "[object String]",
+	"mitigation_status": "[object String]",
+	"name": "[object String]",
+	"norm": "[object Array]",
+	"owner": "[object String]",
 	"position": "[object Array]",
-	"norm": "[object Array]"
+	"rev_id": "[object Object]",
+	"safetibase_id": "[object String]",
+	"thumbnail": "[object Object]",
+	"viewpoint": "[object Object]",
+	"viewpoints": "[object Array]"
 };
 
 function clean(dbCol, riskToClean) {
-	const keys = ["_id", "rev_id", "parent"];
-	const commentKeys = ["rev_id", "guid"];
-	const vpKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid"];
+	const idKeys = ["_id", "rev_id", "parent"];
+	const commentIdKeys = ["rev_id", "guid", "viewpoint"];
+	const vpIdKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid"];
 
 	riskToClean.account = dbCol.account;
 	riskToClean.model = (riskToClean.origin_model) ? riskToClean.origin_model : dbCol.model;
 
-	keys.concat(vpKeys).forEach((key) => {
+	idKeys.concat(vpIdKeys).forEach((key) => {
 		if (riskToClean[key]) {
 			riskToClean[key] = utils.uuidToString(riskToClean[key]);
 		}
 	});
 
-	if (riskToClean.viewpoint) {
-		vpKeys.forEach((key) => {
-			if (riskToClean.viewpoint && riskToClean.viewpoint[key]) {
-				riskToClean.viewpoint[key] = utils.uuidToString(riskToClean.viewpoint[key]);
+	if (riskToClean.viewpoints) {
+		riskToClean.viewpoints.forEach((viewpoint, i) => {
+			vpIdKeys.forEach((key) => {
+				if (riskToClean.viewpoints[i] && riskToClean.viewpoints[i][key]) {
+					riskToClean.viewpoints[i][key] = utils.uuidToString(riskToClean.viewpoints[i][key]);
+				} else {
+					delete riskToClean.viewpoints[i][key];
+				}
+			});
+
+			if (riskToClean.viewpoints[i].screenshot) {
+				riskToClean.viewpoints[i].screenshot = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/viewpoints/" + riskToClean.viewpoints[i].guid + "/screenshot.png";
+				riskToClean.viewpoints[i].screenshotSmall = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/viewpoints/" + riskToClean.viewpoints[i].guid + "/screenshotSmall.png";
+			}
+
+			if (0 === i) {
+				riskToClean.viewpoint = riskToClean.viewpoints[i];
 			}
 		});
-
-		if (riskToClean.viewpoint.screenshot) {
-			riskToClean.viewpoint.screenshot = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/screenshot.png";
-			riskToClean.viewpoint.screenshotSmall = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/screenshotSmall.png";
-		}
 	}
 
 	if (riskToClean.comments) {
 		riskToClean.comments.forEach((comment, i) => {
-			commentKeys.forEach((key) => {
+			commentIdKeys.forEach((key) => {
 				if (riskToClean.comments[i] && riskToClean.comments[i][key]) {
 					riskToClean.comments[i][key] = utils.uuidToString(riskToClean.comments[i][key]);
 				}
 			});
+
+			if (riskToClean.comments[i].viewpoint) {
+				const commentViewpoint = riskToClean.viewpoints.find((vp) =>
+					vp.guid === riskToClean.comments[i].viewpoint
+				);
+
+				if (commentViewpoint) {
+					riskToClean.comments[i].viewpoint = commentViewpoint;
+				}
+			}
 		});
 	}
 
@@ -102,12 +127,135 @@ function clean(dbCol, riskToClean) {
 		riskToClean.thumbnail = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/thumbnail.png";
 	}
 
+	delete riskToClean.viewpoints;
+
 	return riskToClean;
 }
 
-function setGroupRiskId(dbCol, data, riskId) {
+function toDirectXCoords(entry) {
+	const fieldsToConvert = ["position", "norm"];
+	const vpFieldsToConvert = ["right", "view_dir", "look_at", "position", "up"];
+
+	fieldsToConvert.forEach((rootKey) => {
+		if (entry[rootKey]) {
+			entry[rootKey] = utils.webGLtoDirectX(entry[rootKey]);
+		}
+	});
+
+	const viewpoint = entry.viewpoint;
+	vpFieldsToConvert.forEach((key) => {
+		if (viewpoint[key]) {
+			viewpoint[key] = utils.webGLtoDirectX(viewpoint[key]);
+		}
+	});
+
+	const clippingPlanes = viewpoint.clippingPlanes;
+	if(clippingPlanes) {
+		for (const item in clippingPlanes) {
+			clippingPlanes[item].normal = utils.webGLtoDirectX(clippingPlanes[item].normal);
+		}
+	}
+
+	return viewpoint;
+}
+
+function addRiskMitigationComment(account, model, sessionId, riskId, comments, data, viewpointGuid) {
+	if (data.residual && data.likelihood && data.consequence && data.mitigation) {
+		if (!comments) {
+			comments = [];
+		}
+
+		comments.forEach((comment) => {
+			comment.sealed = true;
+		});
+
+		const mitigationComment = Comment.newRiskMitigationComment(
+			owner,
+			data.revId,
+			data.likelihood,
+			data.consequence,
+			data.mitigation,
+			viewpointGuid,
+			data.position
+		);
+
+		comments.push(mitigationComment);
+
+		ChatEvent.newComment(sessionId, account, model, riskId, mitigationComment);
+	}
+
+	return comments;
+}
+
+function updateTextComments(account, model, sessionId, riskId, comments, data, viewpointGuid) {
+	if (!comments) {
+		comments = [];
+	}
+
+	if (data.edit && data.commentIndex >= 0 && comments.length > data.commentIndex) {
+		if (!comments[data.commentIndex].sealed) {
+			const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGuid, data.position);
+
+			comments[data.commentIndex] = textComment;
+
+			ChatEvent.commentChanged(sessionId, account, model, riskId, data);
+		} else {
+			throw responseCodes.ISSUE_COMMENT_SEALED;
+		}
+	} else if (data.sealed && data.commentIndex >= 0 && comments.length > data.commentIndex) {
+		comments[data.commentIndex].sealed = true;
+	} else if (data.delete && data.commentIndex >= 0 && comments.length > data.commentIndex) {
+		if (!comments[data.commentIndex].sealed) {
+			comments.splice(data.commentIndex, 1);
+
+			ChatEvent.commentDeleted(sessionId, account, model, riskId, data);
+		} else {
+			throw responseCodes.ISSUE_COMMENT_SEALED;
+		}
+	} else if ((data.edit || data.delete) && comments.length <= data.commentIndex) {
+		throw responseCodes.ISSUE_COMMENT_INVALID_INDEX;
+	} else {
+		comments.forEach((comment) => {
+			comment.sealed = true;
+		});
+
+		const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGuid);
+
+		comments.push(textComment);
+
+		ChatEvent.newComment(sessionId, account, model, riskId, textComment);
+	}
+
+	return comments;
+}
+
+function addSystemComment(account, model, sessionId, riskId, comments, owner, property, oldValue, newValue) {
+	if (!comments) {
+		comments = [];
+	}
+
+	comments.forEach((comment) => {
+		comment.sealed = true;
+	});
+
+	const systemComment = Comment.newSystemComment(
+		owner,
+		property,
+		oldValue,
+		newValue
+	);
+
+	comments.push(systemComment);
+
+	ChatEvent.newComment(sessionId, account, model, riskId, systemComment);
+
+	return comments;
+}
+
+risk.setGroupRiskId = function(dbCol, data, riskId) {
 
 	const updateGroup = function(group_id) {
+		// TODO - Do we need to find group first? Can we just patch?
 		return Group.findByUID(dbCol, utils.uuidToString(group_id), null, utils.uuidToString(data.rev_id)).then((group) => {
 			const riskIdData = {
 				risk_id: riskId
@@ -134,32 +282,14 @@ function setGroupRiskId(dbCol, data, riskId) {
 	}
 
 	return Promise.all(groupUpdatePromises);
-}
+};
 
 risk.createRisk = function(dbCol, newRisk) {
 	const sessionId = newRisk.sessionId;
-	const riskAttributes = [
-		"_id",
-		"rev_id",
-		"thumbnail",
-		"creator_role",
-		"name",
-		"owner",
-		"created",
-		"safetibase_id",
-		"associated_activity",
-		"desc",
-		"viewpoint",
-		"assigned_roles",
-		"category",
-		"likelihood",
-		"consequence",
-		"level_of_risk",
-		"mitigation_status",
-		"mitigation_desc",
-		"position",
-		"norm"
+	const attributeBlacklist = [
+		"viewpoint"
 	];
+	const riskAttributes = Object.keys(fieldTypes).filter(attr => !attributeBlacklist.includes(attr));
 	const riskAttrPromises = [];
 
 	let branch;
@@ -240,12 +370,14 @@ risk.createRisk = function(dbCol, newRisk) {
 			};
 		}
 
-		return setGroupRiskId(dbCol, newRisk, newRisk._id);
+		return this.setGroupRiskId(dbCol, newRisk, newRisk._id);
 	}).then(() => {
+		newRisk.viewpoints = [newRisk.viewpoint];
+
 		let typeCorrect = true;
 		Object.keys(newRisk).forEach((key) => {
 			if (riskAttributes.includes(key)) {
-				if (fieldTypes[key] && Object.prototype.toString.call(newRisk[key]) !== fieldTypes[key]) {
+				if (fieldTypes[key] && newRisk[key] && Object.prototype.toString.call(newRisk[key]) !== fieldTypes[key]) {
 					typeCorrect = false;
 				}
 			} else {
@@ -278,7 +410,12 @@ risk.updateAttrs = function(dbCol, uid, data) {
 
 	return this.findByUID(dbCol, uid, {}, true).then((oldRisk) => {
 		if (oldRisk) {
-			return User.findByUserName(dbCol.account).then((dbUser) => {
+			let typeCorrect = true;
+			let viewpointGuid;
+
+			let newRisk = _.cloneDeep(oldRisk);
+
+			const userPermissionsPromise = User.findByUserName(dbCol.account).then((dbUser) => {
 
 				return Job.findByUser(dbUser.user, data.requester).then((_job) => {
 					const job = _job ?  _job._id : null;
@@ -293,8 +430,8 @@ risk.updateAttrs = function(dbCol, uid, data) {
 
 						const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 						const isAdmin = projAdmin || tsAdmin;
-						const hasOwnerJob = oldRisk.creator_role === job;
-						const hasAssignedJob = job === oldRisk.assigned_roles[0];
+						const hasOwnerJob = oldIssue.creator_role === job;
+						const hasAssignedJob = job === oldIssue.assigned_roles[0];
 
 						return {
 							isAdmin,
@@ -302,57 +439,143 @@ risk.updateAttrs = function(dbCol, uid, data) {
 							hasAssignedJob
 						};
 
-					}).then((user) => {
-						if (user.isAdmin || user.hasOwnerJob || user.hasAssignedJob) {
-							const toUpdate = {};
-							const fieldsCanBeUpdated = [
-								"safetibase_id",
-								"associated_activity",
-								"desc",
-								"assigned_roles",
-								"category",
-								"likelihood",
-								"consequence",
-								"level_of_risk",
-								"mitigation_status",
-								"mitigation_desc"
-							];
+					});
+				});
+			});
 
-							let typeCorrect = true;
-							fieldsCanBeUpdated.forEach((key) => {
-								if (data[key] !== undefined) {
-									if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
-										toUpdate[key] = data[key];
-										oldRisk[key] = data[key];
-									} else {
-										typeCorrect = false;
-									}
+			let newViewpointPromise;
+
+			if (data["viewpoint"]) {
+				if (Object.prototype.toString.call(data["viewpoint"]) === fieldTypes["viewpoint"]) {
+					viewpointGuid = utils.generateUUID();
+					data.viewpoint.guid = viewpointGuid;
+
+					newViewpointPromise = View.clean(dbCol, data["viewpoint"], fieldTypes["viewpoint"]);
+				} else {
+					typeCorrect = false;
+				}
+			}
+
+			return Promise.all([userPermissionsPromise, newViewpointPromise]).then(([user, newViewpoint]) => {
+				const toUpdate = {};
+				const attributeBlacklist = [
+					"_id",
+					"comments",
+					"created",
+					"creator_role",
+					"name",
+					"norm",
+					"number",
+					"owner",
+					"position",
+					"rev_id",
+					"status",
+					"thumbnail",
+					"viewpoint",
+					"viewpoints"
+				];
+				const ownerPrivilegeAttributes = [];
+				const fieldsCanBeUpdated = Object.keys(fieldTypes).filter(attr => !attributeBlacklist.includes(attr));
+
+				if (newViewpoint) {
+					if (!newRisk["viewpoints"]) {
+						newRisk.viewpoints = [];
+					}
+
+					toUpdate.viewpoints = newRisk.viewpoints.concat();
+
+					toUpdate.viewpoints.push(newViewpoint);
+					newRisk.viewpoints.push(newViewpoint);
+				}
+
+				fieldsCanBeUpdated.forEach((key) => {
+					if (data[key] !== undefined &&
+						(("[object Object]" !== fieldTypes[key] && "[object Array]" !== fieldTypes[key] && data[key] !== newRisk[key])
+						|| !_.isEqual(newRisk[key], data[key]))) {
+						if (null === data[key] || Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
+							if ("comment" === key || "commentIndex" === key) {
+								if ("commentIndex" !== key || -1 === Object.keys(data).indexOf("comment")) {
+									const updatedComments = updateTextComments(
+										dbCol.account,
+										dbCol.model,
+										data.sessionId,
+										newRisk._id,
+										newRisk.comments,
+										data,
+										viewpointGuid
+									);
+
+									toUpdate.comments = updatedComments;
+									newIssue.comments = updatedComments;
 								}
-							});
+							} else if ("residual" === key) {
+								const updatedComments = addRiskMitigationComment(
+									dbCol.account,
+									dbCol.model,
+									data.sessionId,
+									newRisk._id,
+									newRisk.comments,
+									data,
+									viewpointGuid
+								);
 
-							if (typeCorrect) {
-								return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
-									return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
-										oldRisk = clean(dbCol, oldRisk);
-										ChatEvent.riskChanged(sessionId, dbCol.account, dbCol.model, oldRisk);
-										return oldRisk;
-									});
-								});
+								toUpdate.comments = updatedComments;
+								newIssue.comments = updatedComments;
 							} else {
-								return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+								if (-1 === ownerPrivilegeAttributes.indexOf(key) || (user.isAdmin || user.hasOwnerJob)) {
+									const updatedComments = addSystemComment(
+										dbCol.account,
+										dbCol.model,
+										data.sessionId,
+										newRisk._id,
+										newRisk.comments,
+										data.owner,
+										key,
+										newRisk[key],
+										data[key]
+									);
+
+									toUpdate.comments = updatedComments;
+									newIssue.comments = updatedComments;
+
+									toUpdate[key] = data[key];
+									oldRisk[key] = data[key];
+								} else {
+									return Promise.reject(responseCodes.RISK_UPDATE_PERMISSION_DECLINED);
+								}
 							}
 						} else {
-							return Promise.reject(responseCodes.RISK_UPDATE_PERMISSION_DECLINED);
+							typeCorrect = false;
 						}
-					}).catch((err) => {
-						if (err) {
-							return Promise.reject(err);
-						} else {
-							return Promise.reject(responseCodes.RISK_UPDATE_FAILED);
-						}
-					});
-
+					}
 				});
+
+				if (!typeCorrect) {
+					return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+				} else if (0 === Object.keys(toUpdate).length) {
+					return (data.comment) ?
+						Promise.resolve(data) :
+						Promise.resolve(oldRisk);
+				} else {
+					return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
+						return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
+							newRisk = clean(dbCol, newRisk);
+
+							if (data.comment) {
+								return data;
+							} else {
+								ChatEvent.riskChanged(sessionId, dbCol.account, dbCol.model, newRisk);
+								return newRisk;
+							}
+						});
+					});
+				}
+			}).catch((err) => {
+				if (err) {
+					return Promise.reject(err);
+				} else {
+					return Promise.reject(responseCodes.RISK_UPDATE_FAILED);
+				}
 			});
 		} else {
 			return Promise.reject({ resCode: responseCodes.RISK_NOT_FOUND });
@@ -400,33 +623,7 @@ risk.getRisksReport = function(account, model, username, rid, ids, res) {
 		reportGen.addEntries(risks);
 		return reportGen.generateReport(res);
 	});
-
 };
-
-function toDirectXCoords(entry) {
-	const fieldsToConvert = ["position", "norm"];
-	const vpFieldsToConvert = ["right", "view_dir", "look_at", "position", "up"];
-
-	fieldsToConvert.forEach((rootKey) => {
-		if (entry[rootKey]) {
-			entry[rootKey] = utils.webGLtoDirectX(entry[rootKey]);
-		}
-	});
-
-	const viewpoint = entry.viewpoint;
-	vpFieldsToConvert.forEach((key) => {
-		if (viewpoint[key]) {
-			viewpoint[key] = utils.webGLtoDirectX(viewpoint[key]);
-		}
-	});
-
-	const clippingPlanes = viewpoint.clippingPlanes;
-	if(clippingPlanes) {
-		for (const item in clippingPlanes) {
-			clippingPlanes[item].normal = utils.webGLtoDirectX(clippingPlanes[item].normal);
-		}
-	}
-}
 
 risk.getRisksList = function(dbColOptions, user, branch, revision, ids, convertCoords) {
 	const projection = {
@@ -446,11 +643,10 @@ risk.getRisksList = function(dbColOptions, user, branch, revision, ids, convertC
 		revision,
 		projection,
 		ids,
-		false,
+		false
 	).then((risks) => {
-		if(convertCoords) {
+		if (convertCoords) {
 			risks.forEach((entry) => toDirectXCoords(entry));
-
 		}
 		return risks;
 	});
@@ -572,43 +768,57 @@ risk.findByUID = function(dbCol, uid, projection, noClean = false) {
 	});
 };
 
-risk.getScreenshot = function(dbCol, uid) {
+risk.getScreenshot = function(dbCol, uid, vid) {
 
 	if ("[object String]" === Object.prototype.toString.call(uid)) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	return this.findByUID(dbCol, uid, { "viewpoint.screenshot.content": 1 }, true).then((foundRisk) => {
-		if (!_.get(foundRisk, "viewpoint.screenshot.content.buffer")) {
+	if ("[object String]" === Object.prototype.toString.call(vid)) {
+		vid = utils.stringToUUID(vid);
+	}
+
+	return this.findByUID(dbCol, uid, { viewpoints: { $elemMatch: { guid: vid } },
+		"viewpoints.screenshot.resizedContent": 0
+	}, true).then((foundRisk) => {
+		if (!_.get(foundRisk, "viewpoints[0].screenshot.content.buffer")) {
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
-			return foundRisk.viewpoint.screenshot.content.buffer;
+			return foundRisk.viewpoints[0].screenshot.content.buffer;
 		}
 	});
 };
 
-risk.getSmallScreenshot = function(dbCol, uid) {
+risk.getSmallScreenshot = function(dbCol, uid, vid) {
 
 	if ("[object String]" === Object.prototype.toString.call(uid)) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	return this.findByUID(dbCol, uid, { viewpoint: 1 }, true)
+	if ("[object String]" === Object.prototype.toString.call(vid)) {
+		vid = utils.stringToUUID(vid);
+	}
+
+	return this.findByUID(dbCol, uid, { viewpoints: { $elemMatch: { guid: vid } } }, true)
 		.then((foundRisk) => {
-			if (_.get(foundRisk, "viewpoint.screenshot.resizedContent.buffer")) {
-				return foundRisk.viewpoint.screenshot.resizedContent.buffer;
-			} else if (!_.get(foundRisk, "viewpoint.screenshot.content.buffer")) {
+			if (_.get(foundRisk, "viewpoints[0].screenshot.resizedContent.buffer")) {
+				return foundRisk.viewpoints[0].screenshot.resizedContent.buffer;
+			} else if (!_.get(foundRisk, "viewpoints[0].screenshot.content.buffer")) {
 				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 			} else {
-				return utils.resizeAndCropScreenshot(foundRisk.viewpoint.screenshot.content.buffer, 365)
+				return utils.resizeAndCropScreenshot(foundRisk.viewpoints[0].screenshot.content.buffer, 365)
 					.then((resized) => {
 						db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
-							_dbCol.update({ _id: uid },
-								{$set: {"viewpoint.screenshot.resizedContent": resized}}
-							).catch((err) => {
+							_dbCol.update({
+								_id: uid,
+								"viewpoints.guid": vid
+							},{
+								$set: {"viewpoints.$.screenshot.resizedContent": resized}
+							}).catch((err) => {
 								systemLogger.logError("Error while saving resized screenshot",
 									{
 										riskId: utils.uuidToString(uid),
+										viewpointId: utils.uuidToString(vid),
 										err: err
 									});
 							});

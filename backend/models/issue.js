@@ -208,7 +208,7 @@ function updateTextComments(account, model, sessionId, issueId, comments, data, 
 
 	if (data.edit && data.commentIndex >= 0 && comments.length > data.commentIndex) {
 		if (!comments[data.commentIndex].sealed) {
-			const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGuid);
+			const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGuid, data.position);
 
 			comments[data.commentIndex] = textComment;
 
@@ -243,7 +243,7 @@ function updateTextComments(account, model, sessionId, issueId, comments, data, 
 	return comments;
 }
 
-function updateSystemComments(account, model, sessionId, issueId, comments, owner, property, oldValue, newValue) {
+function addSystemComment(account, model, sessionId, issueId, comments, owner, property, oldValue, newValue) {
 	if (!comments) {
 		comments = [];
 	}
@@ -562,7 +562,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 										newIssue.priority_last_changed = toUpdate.priority_last_changed;
 									}
 
-									const updatedComments = updateSystemComments(
+									const updatedComments = addSystemComment(
 										dbCol.account,
 										dbCol.model,
 										data.sessionId,
@@ -620,7 +620,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							newIssue.assigned_roles = toUpdate.assigned_roles;
 						}
 
-						const updatedComments = updateSystemComments(
+						const updatedComments = addSystemComment(
 							dbCol.account,
 							dbCol.model,
 							data.sessionId,
