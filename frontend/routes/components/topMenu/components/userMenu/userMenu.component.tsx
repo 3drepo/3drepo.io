@@ -106,11 +106,6 @@ const UserMenuContent = (props) => {
 				/>
 				<MenuText primary="Lite mode" />
 			</MenuItem>
-			{hasMemorySettings && <UserMenuButton
-				Icon={Restore}
-				label="Reset Settings"
-				onButtonClick={invokeAndClose(props.resetMemorySettings)}
-			/>}
 			<UserMenuButton
 				Icon={ExitToApp}
 				label="Logout"
@@ -132,9 +127,6 @@ interface IProps {
 }
 
 export class UserMenu extends React.PureComponent<IProps, any> {
-	public resetMemorySettings() {
-		localStorage.removeItem('deviceMemory');
-	}
 
 	public openUserManual() {
 		window.open('http://3drepo.org/support/', '_blank');
@@ -157,7 +149,6 @@ export class UserMenu extends React.PureComponent<IProps, any> {
 			...props,
 			...this.props,
 			openUserManual: this.openUserManual,
-			resetMemorySettings: this.resetMemorySettings,
 			openSettingsDialog: this.openSettingsDialog
 		};
 

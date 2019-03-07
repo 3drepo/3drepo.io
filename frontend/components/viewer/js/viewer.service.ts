@@ -16,6 +16,8 @@
  */
 
 import { UnityUtil } from '../../../globals/unity-util';
+import { getState } from '../../../helpers/migration';
+import { selectMemory } from '../../../modules/viewer';
 
 declare const Viewer: any;
 
@@ -363,13 +365,19 @@ export class ViewerService {
 		return this.viewer;
 	}
 
+	public getMemory() {
+		const MAX_MEMORY = 2130706432; // The maximum memory Unity can allocate
+		const assignedMemory = selectMemory(getState()) * 1024 * 1024; // Memory is in Mb.
+		return Math.min(assignedMemory, MAX_MEMORY);
+	}
+
 	public initViewer() {
 		console.debug('Initiating Viewer');
 		if (this.unityInserted() === true) {
 			return this.callInit();
 		} else if (this.viewer) {
 
-			return this.viewer.insertUnityLoader()
+			return this.viewer.insertUnityLoader(this.getMemory())
 				.then(() => { this.callInit(); })
 				.catch((error) => {
 					console.error('Error inserting Unity script: ', error);

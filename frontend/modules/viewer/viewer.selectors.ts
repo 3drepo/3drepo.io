@@ -46,3 +46,7 @@ export const selectShadingSetting = createSelector(
 export const selectXraySetting = createSelector(
 	selectSettings, (state) => state.xray
 );
+
+export const selectMemory = createSelector(
+	selectSettings, (state) => state.memory
+);

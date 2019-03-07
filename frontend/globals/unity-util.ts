@@ -83,8 +83,8 @@ export class UnityUtil {
 
 	}
 
-	public static loadUnity(divId: any, unityJsonPath?: string) {
-		unityJsonPath = unityJsonPath || 'unity/Build/unity.json';
+	public static loadUnity(divId: any, memory: number) {
+		const unityJsonPath = 'unity/Build/unity.json';
 
 		const unitySettings: any = {
 			onProgress: this.onProgress
@@ -95,6 +95,7 @@ export class UnityUtil {
 				window.Module = {};
 			}
 			unitySettings.Module = (window as any).Module;
+			unitySettings.Module.TOTAL_MEMORY = memory;
 			UnityUtil.unityInstance = UnityLoader.instantiate(
 				divId,
 				unityJsonPath,

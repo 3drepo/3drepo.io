@@ -171,6 +171,10 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 		values.nearPlane = Number(values.nearPlane);
 		values.memory = Number(values.memory);
 		this.props.updateSettings(values);
+
+		if (values.memory !== this.props.visualSettings.memory) {
+			location.reload();
+		}
 		this.props.handleClose();
 	}
 

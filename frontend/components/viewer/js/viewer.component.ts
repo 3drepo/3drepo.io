@@ -17,7 +17,7 @@
 
 import { subscribe } from '../../../helpers/migration';
 import { selectShadowSetting, selectStatsSetting, selectNearPlaneSetting,
-		selectFarPlaneAlgorithm, selectShadingSetting, selectXraySetting} from '../../../modules/viewer';
+		selectFarPlaneAlgorithm, selectShadingSetting, selectXraySetting, selectMemory} from '../../../modules/viewer';
 
 class ViewerController implements ng.IController {
 
@@ -48,6 +48,7 @@ class ViewerController implements ng.IController {
 	private farPlaneAlgorithm: string;
 	private shadingSetting: string;
 	private xraySetting: boolean;
+	private memory: number;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -66,13 +67,6 @@ class ViewerController implements ng.IController {
 
 		this.pointerEvents = 'auto';
 		this.measureMode = false;
-
-		if (this.deviceMemory) {
-			const gigabyte = 1073741824;
-			const MAX_MEMORY = 2130706432; // The maximum memory Unity can allocate
-			const assignedMemory = gigabyte * (this.deviceMemory / 2);
-			window.Module.TOTAL_MEMORY = (assignedMemory < MAX_MEMORY) ? assignedMemory : MAX_MEMORY;
-		}
 
 		this.viewer = this.ViewerService.getViewer();
 		this.watchers();
