@@ -170,7 +170,7 @@ function addRiskMitigationComment(account, model, sessionId, riskId, comments, d
 		});
 
 		const mitigationComment = Comment.newRiskMitigationComment(
-			owner,
+			data.owner,
 			data.revId,
 			data.likelihood,
 			data.consequence,
@@ -430,8 +430,8 @@ risk.updateAttrs = function(dbCol, uid, data) {
 
 						const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 						const isAdmin = projAdmin || tsAdmin;
-						const hasOwnerJob = oldIssue.creator_role === job;
-						const hasAssignedJob = job === oldIssue.assigned_roles[0];
+						const hasOwnerJob = oldRisk.creator_role === job;
+						const hasAssignedJob = job === oldRisk.assigned_roles[0];
 
 						return {
 							isAdmin,
@@ -506,7 +506,7 @@ risk.updateAttrs = function(dbCol, uid, data) {
 									);
 
 									toUpdate.comments = updatedComments;
-									newIssue.comments = updatedComments;
+									newRisk.comments = updatedComments;
 								}
 							} else if ("residual" === key) {
 								const updatedComments = addRiskMitigationComment(
@@ -520,7 +520,7 @@ risk.updateAttrs = function(dbCol, uid, data) {
 								);
 
 								toUpdate.comments = updatedComments;
-								newIssue.comments = updatedComments;
+								newRisk.comments = updatedComments;
 							} else {
 								if (-1 === ownerPrivilegeAttributes.indexOf(key) || (user.isAdmin || user.hasOwnerJob)) {
 									const updatedComments = addSystemComment(
@@ -536,7 +536,7 @@ risk.updateAttrs = function(dbCol, uid, data) {
 									);
 
 									toUpdate.comments = updatedComments;
-									newIssue.comments = updatedComments;
+									newRisk.comments = updatedComments;
 
 									toUpdate[key] = data[key];
 									oldRisk[key] = data[key];
