@@ -67,7 +67,8 @@ const fieldTypes = {
 	"thumbnail": "[object Object]",
 	"viewCount": "[object Number]",
 	"viewpoint": "[object Object]",
-	"viewpoints": "[object Array]"
+	"viewpoints": "[object Array]",
+	"extras": "[object Object]"
 };
 
 const statusEnum = {
@@ -332,6 +333,10 @@ issue.createIssue = function(dbCol, newIssue) {
 
 	if (!newIssue.revId) {
 		branch = "master";
+	}
+
+	if(!newIssue.assigned_roles) {
+		newIssue.assigned_roles = [];
 	}
 
 	// Assign rev_id for issue
