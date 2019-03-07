@@ -436,10 +436,10 @@ issue.createIssue = function(dbCol, newIssue) {
 	});
 };
 
-issue.updateFromBCF = function(dbCol, data) {
+issue.updateFromBCF = function(dbCol, id, data) {
 	return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
-		return _dbCol.update({_id: issue._id}, data).then(() => {
-			ChatEvent.issueChanged(data.sessionId, dbCol.account, dbCol.model, data._id, data);
+		return _dbCol.update({_id: utils.stringToUUID(id)}, {$set: data}).then(() => {
+			console.log("Updated: ", data);
 			return data;
 		});
 	});

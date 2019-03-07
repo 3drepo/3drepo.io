@@ -579,23 +579,29 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 							};
 							saveIssueProms.push(
 								Issue.findByUID({account, model}, issue._id, {}, true).then(matchingIssue => {
-									matchingIssue.comments.push(bcfImportNotification);
+									const toChange = {};
+									toChange.comments = matchingIssue.comments;
+									toChange.comments.push(bcfImportNotification);
 
+									console.log("Changing simple attribs..");
 									// Replace following attributes if they do not exist
 									const simpleAttrs = ["priority", "status", "topic_type", "due_date", "desc"];
 									for (const simpleAttrIndex in simpleAttrs) {
 										const simpleAttr = simpleAttrs[simpleAttrIndex];
 										if (undefined !== issue[simpleAttr]
 											&& (undefined === matchingIssue[simpleAttr] || issue[simpleAttr] !== matchingIssue[simpleAttr])) {
-											matchingIssue.comments.push({
+											toChange.comments.push({
 												guid: utils.generateUUID(),
 												created: currentTS,
 												action: {property: simpleAttr, from: matchingIssue[simpleAttr], to: issue[simpleAttr]},
 												owner: requester.user + "(BCF Import)"
 											});
-											matchingIssue[simpleAttr] = issue[simpleAttr];
+											toChange[simpleAttr] = issue[simpleAttr];
 										}
 									}
+
+									console.log(toChange);
+									console.log("Changing complex...");
 
 									// Attempt to merge following attributes and sort by created desc
 									const complexAttrs = ["comments", "viewpoints"];
@@ -605,18 +611,17 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 											if (-1 === matchingIssue[complexAttr].findIndex(attr =>
 												utils.uuidToString(attr.guid) === utils.uuidToString(issue[complexAttr][i].guid))) {
 												matchingIssue[complexAttr].push(issue[complexAttr][i]);
-											} else {
-												// TODO: Consider deleting duplicate groups in issue[complexAttr][i]
-												matchingIssue[complexAttr] = issue[complexAttr];
 											}
 										}
-										if (matchingIssue[complexAttr].length > 0 && matchingIssue[complexAttr][0].created) {
+										if (matchingIssue[complexAttr].length && matchingIssue[complexAttr][0].created) {
 											matchingIssue[complexAttr] = matchingIssue[complexAttr].sort((a, b) => {
 												return a.created > b.created;
 											});
 										}
+										toChange[complexAttr] = matchingIssue[complexAttr];
 									}
-									return Issue.updateFromBCF({account, model}, { _id: issue._id}, matchingIssue);
+									console.log(toChange);
+									return Issue.updateFromBCF({account, model}, matchingIssue._id, toChange);
 								}).catch((error) => {
 									if (error.value === responseCodes.ISSUE_NOT_FOUND.value) {
 										issue.comments.push(bcfImportNotification);
