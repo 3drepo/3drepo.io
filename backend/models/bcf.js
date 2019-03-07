@@ -583,7 +583,6 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 									toChange.comments = matchingIssue.comments;
 									toChange.comments.push(bcfImportNotification);
 
-									console.log("Changing simple attribs..");
 									// Replace following attributes if they do not exist
 									const simpleAttrs = ["priority", "status", "topic_type", "due_date", "desc"];
 									for (const simpleAttrIndex in simpleAttrs) {
@@ -599,9 +598,6 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 											toChange[simpleAttr] = issue[simpleAttr];
 										}
 									}
-
-									console.log(toChange);
-									console.log("Changing complex...");
 
 									// Attempt to merge following attributes and sort by created desc
 									const complexAttrs = ["comments", "viewpoints"];
@@ -620,8 +616,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 										}
 										toChange[complexAttr] = matchingIssue[complexAttr];
 									}
-									console.log(toChange);
-									return Issue.updateFromBCF({account, model}, matchingIssue._id, toChange);
+									return Issue.updateFromBCF({account, model}, matchingIssue, toChange);
 								}).catch((error) => {
 									if (error.value === responseCodes.ISSUE_NOT_FOUND.value) {
 										issue.comments.push(bcfImportNotification);
