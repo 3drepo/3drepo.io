@@ -76,8 +76,8 @@ export function* setActiveGroup({ group, revision }) {
 export function* resetActiveGroup() {
 	try {
 		yield all([
-				put(GroupsActions.setComponentState({ activeGroup: null })),
-				put(GroupsActions.clearSelectionHighlights())
+			put(GroupsActions.setComponentState({ activeGroup: null })),
+			put(GroupsActions.clearSelectionHighlights())
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', ' active group', error));
@@ -453,6 +453,7 @@ export function* getFieldNames({ teamspace, modelId }) {
 export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.FETCH_GROUPS, fetchGroups);
 	yield takeLatest(GroupsTypes.SET_ACTIVE_GROUP, setActiveGroup);
+	yield takeLatest(GroupsTypes.RESET_ACTIVE_GROUP, resetActiveGroup);
 	yield takeLatest(GroupsTypes.SELECT_GROUP, selectGroup);
 	yield takeLatest(GroupsTypes.HIGHLIGHT_GROUP, highlightGroup);
 	yield takeLatest(GroupsTypes.DEHIGHLIGHT_GROUP, dehighlightGroup);

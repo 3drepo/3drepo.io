@@ -85,7 +85,8 @@ interface IProps {
 	showConfirmDialog: (config) => void;
 	isolateGroup: (group) => void;
 	downloadGroups: (teamspace, model) => void;
-	selectGroup: (group) => void;
+	resetToSavedSelection: (groupId) => void;
+	resetActiveGroup: () => void;
 	subscribeOnChanges: (teamspace, modelId) => void;
 	unsubscribeFromChanges: (teamspace, modelId) => void;
 }
@@ -183,7 +184,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public resetActiveGroup = () => {
 		if (!this.props.showDetails) {
-			this.props.setState({ activeGroup: null });
+			this.props.resetActiveGroup();
 		}
 	}
 

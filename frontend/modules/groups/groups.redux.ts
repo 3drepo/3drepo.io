@@ -24,6 +24,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	togglePendingState: ['isPending'],
 	setComponentState: ['componentState'],
 	setActiveGroup: ['group', 'revision'],
+	resetActiveGroup: ['group'],
 	showDetails: ['group', 'revision'],
 	closeDetails: [],
 	setNewGroup: [],
