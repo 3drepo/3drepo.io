@@ -20,10 +20,9 @@ import { createActions, createReducer } from 'reduxsauce';
 export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	startListenOnSelections: [],
 	stopListenOnSelections: [],
-	addSelectedNode: ['objectId'],
-	removeSelectedNode: ['objectId'],
 	clearSelectedNodes: [],
-	setSelectedNodes: ['selectedNodes']
+	getSelectedNodes: [],
+	getSelectedNodesSuccess: ['selectedNodes']
 }, { prefix: 'TREE/' });
 
 export interface IObjectObjectState {
@@ -31,32 +30,18 @@ export interface IObjectObjectState {
 }
 
 export const INITIAL_STATE: IObjectObjectState = {
-	selectedNodes: {}
-};
-
-export const addSelectedNode = (state = INITIAL_STATE, { objectId }) => {
-	const selectedNodes = {...state.selectedNodes};
-	selectedNodes[objectId] = true;
-	return { ...state, selectedNodes };
-};
-
-export const removeSelectedNode = (state = INITIAL_STATE, { objectId }) => {
-	const selectedNodes = {...state.selectedNodes};
-	delete selectedNodes[objectId];
-	return { ...state, selectedNodes };
+	selectedNodes: []
 };
 
 export const clearSelectedNodes = (state = INITIAL_STATE, {}) => {
-	return { ...state, selectedNodes: {} };
+	return { ...state, selectedNodes: [] };
 };
 
-export const setSelectedNodes = (state = INITIAL_STATE, { selectedNodes }) => {
+export const getSelectedNodesSuccess = (state = INITIAL_STATE, { selectedNodes }) => {
 	return { ...state, selectedNodes };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[TreeTypes.ADD_SELECTED_NODE]: addSelectedNode,
-	[TreeTypes.REMOVE_SELECTED_NODE]: removeSelectedNode,
 	[TreeTypes.CLEAR_SELECTED_NODES]: clearSelectedNodes,
-	[TreeTypes.SET_SELECTED_NODES]: setSelectedNodes
+	[TreeTypes.GET_SELECTED_NODES_SUCCESS]: getSelectedNodesSuccess
 });

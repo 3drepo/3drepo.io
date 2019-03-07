@@ -15,38 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select } from 'redux-saga/effects';
+import { put, takeLatest, select, call } from 'redux-saga/effects';
+import { delay } from 'redux-saga';
 import { TreeTypes, TreeActions } from './tree.redux';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { dispatch, getAngularService } from '../../helpers/migration';
-import { MultiSelect } from '../../services/viewer/multiSelect';
 import { selectSelectedNodes } from './tree.selectors';
 import { GroupsActions } from '../groups';
 
 export function* startListenOnSelections() {
 	try {
 		const selectedNodes = yield select(selectSelectedNodes);
-		const objectsStatus = yield Viewer.getObjectsStatus();
 		const TreeService = getAngularService('TreeService') as any;
 
 		Viewer.on(VIEWER_EVENTS.OBJECT_SELECTED, (object) => {
 			TreeService.nodesClickedByIds([object.id]);
-
-			const isAccumMode = MultiSelect.isAccumMode();
-			const isDeccumMode = MultiSelect.isDecumMode();
-			const multiSelectMode = isAccumMode || isDeccumMode;
-
-			if (!multiSelectMode) {
-				dispatch(TreeActions.clearSelectedNodes());
-				dispatch(TreeActions.addSelectedNode(object.id));
-			}
-
-			if (isDeccumMode) {
-				dispatch(TreeActions.removeSelectedNode(object.id));
-			} else if (isAccumMode) {
-				dispatch(TreeActions.addSelectedNode(object.id));
-			}
+			dispatch(TreeActions.getSelectedNodes());
 		});
 
 		Viewer.on(VIEWER_EVENTS.MULTI_OBJECTS_SELECTED, (object) => {
@@ -54,13 +39,24 @@ export function* startListenOnSelections() {
 		});
 
 		Viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => {
-			TreeService.clearCurrentlySelected();
-
 			if (Object.keys(selectedNodes).length) {
 				dispatch(TreeActions.clearSelectedNodes());
 				dispatch(GroupsActions.clearSelectionHighlights());
 			}
 		});
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+export function* getSelectedNodes() {
+	try {
+		yield call(delay, 0);
+		const objectsStatus = yield Viewer.getObjectsStatus();
+
+		if (objectsStatus && objectsStatus.highlightedNodes) {
+			yield put(TreeActions.getSelectedNodesSuccess(objectsStatus.highlightedNodes));
+		}
 	} catch (error) {
 		console.error(error);
 	}
@@ -79,4 +75,5 @@ export function* stopListenOnSelections() {
 export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.START_LISTEN_ON_SELECTIONS, startListenOnSelections);
 	yield takeLatest(TreeTypes.STOP_LISTEN_ON_SELECTIONS, stopListenOnSelections);
+	yield takeLatest(TreeTypes.GET_SELECTED_NODES, getSelectedNodes);
 }

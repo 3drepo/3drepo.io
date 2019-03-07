@@ -22,3 +22,11 @@ export const selectTreeDomain = (state) => Object.assign({}, state.tree);
 export const selectSelectedNodes = createSelector(
 	selectTreeDomain, (state) => state.selectedNodes
 );
+
+export const selectTotalMeshes = createSelector(
+	selectTreeDomain, (state) =>
+		state.selectedNodes.length ?
+			state.selectedNodes
+			.map((x) => x.shared_ids.length)
+			.reduce((acc, val) => acc + val) : 0
+);

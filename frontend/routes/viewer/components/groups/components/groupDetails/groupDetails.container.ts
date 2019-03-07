@@ -23,14 +23,13 @@ import { GroupDetails } from './groupDetails.component';
 import {
 	selectActiveGroupDetails,
 	selectExpandDetails,
-	selectTotalMeshes,
 	GroupsActions,
 	selectFieldNames,
 	selectCriteriaFieldState
 } from '../../../../../../modules/groups';
 import { selectSettings } from '../../../../../../modules/model';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
-import { selectSelectedNodes } from '../../../../../../modules/tree';
+import { selectSelectedNodes, selectTotalMeshes } from '../../../../../../modules/tree';
 
 const mapStateToProps = createStructuredSelector({
 	activeGroup: selectActiveGroupDetails,

@@ -21,6 +21,7 @@ interface IProps {
 	totalMeshes: number;
 	canUpdate: boolean;
 	fieldNames: any[];
+	selectedNodes: any[];
 	onSubmit: () => void;
 	handleChange: (event) => void;
 	setIsFormValid: (isFormValid) => void;
@@ -39,23 +40,29 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { name, description, color, objects, rules, type } = this.props.group;
-		const currentProps = { name, description, color, objects, rules, type };
+		const { name, description, color, rules, type, objects } = this.props.group;
+		const currentProps = { name, description, color, rules, type };
 		const initialValues = this.formikRef.current.initialValues;
 
 		const rulesChanged = this.props.group.rules && !isEqual(this.props.group.rules, prevProps.group.rules);
 		const colorChanged = !isEqual(this.props.group.color, prevProps.group.color);
+		const sharedIdsChanged = this.areSharedIdsChanged(this.props.selectedNodes, objects);
 
 		if (isEqual(initialValues, currentProps)) {
 			this.props.setIsFormValid(false);
 			this.props.setIsFormDirty(false);
 		}
 
-		if (rulesChanged || colorChanged) {
+		if (rulesChanged || colorChanged || sharedIdsChanged) {
 			this.props.setIsFormValid(true);
 			this.props.setIsFormDirty(true);
 		}
 	}
+
+	public areSharedIdsChanged = (selectedNodes, groupObjects) =>
+		selectedNodes.every((selectedNode) =>
+			groupObjects.every((groupObject) =>
+				!isEqual(selectedNode.shared_ids.sort(), groupObject.shared_ids.sort())))
 
 	public handleFieldChange = (onChange, form) => (event) => {
 		event.persist();
@@ -84,8 +91,8 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { group: { updateDate, type, description, name, color, objects, rules } } = this.props;
-		const initialValues = { type, description, name, color, objects, rules };
+		const { group: { updateDate, type, description, name, color, rules } } = this.props;
+		const initialValues = { type, description, name, color, rules };
 		return (
 			<Formik
 				initialValues={initialValues}

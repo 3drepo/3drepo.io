@@ -16,8 +16,7 @@
  */
 
 import { values } from 'lodash';
-import { put, takeLatest, takeEvery, select, all, call } from 'redux-saga/effects';
-import { delay } from 'redux-saga';
+import { put, takeLatest, takeEvery, select, all } from 'redux-saga/effects';
 import { getAngularService, dispatch } from '../../helpers/migration';
 
 import * as API from '../../services/api';
@@ -38,7 +37,7 @@ import { prepareGroup, normalizeGroup } from '../../helpers/groups';
 import { selectCurrentUser } from '../currentUser';
 import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { SnackbarActions } from '../snackbar';
-import { TreeActions } from '../tree';
+import { TreeActions, selectSelectedNodes } from '../tree';
 import { searchByFilters } from '../../helpers/searching';
 
 export function* fetchGroups({teamspace, modelId, revision}) {
@@ -53,8 +52,8 @@ export function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(false));
 }
 
-const calculateTotalMeshes = (objectsStatus) => {
-	return objectsStatus.highlightedNodes
+const calculateTotalMeshes = (selectedNodes) => {
+	return selectedNodes
 		.map((x) => x.shared_ids.length)
 		.reduce((acc, val) => acc + val);
 };
@@ -95,16 +94,7 @@ export function* highlightGroup({ group }) {
 
 			yield TreeService.showNodesBySharedIds(group.objects);
 			yield TreeService.selectNodesBySharedIds(group.objects, color);
-			const currentSelectedNodes = yield TreeService.currentSelectedNodes;
-			yield put(TreeActions.setSelectedNodes(currentSelectedNodes));
-
-			yield call(delay, 0);
-			const objectsStatus = yield Viewer.getObjectsStatus();
-
-			if (objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
-				const totalMeshes = calculateTotalMeshes(objectsStatus);
-				yield put(GroupsActions.setComponentState({ totalMeshes }));
-			}
+			yield put(TreeActions.getSelectedNodes());
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('higlight', 'group', error));
@@ -331,7 +321,7 @@ export function* createGroup({ teamspace, modelId, revision }) {
 		} as any;
 
 		if (group.objects && objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
-			group.totalSavedMeshes = calculateTotalMeshes(objectsStatus);
+			group.totalSavedMeshes = calculateTotalMeshes(objectsStatus.highlightedNodes);
 			group.objects = objectsStatus.highlightedNodes;
 		}
 
@@ -358,14 +348,14 @@ export function* updateGroup({ teamspace, modelId, revision, groupId }) {
 
 		const objectsStatus = yield Viewer.getObjectsStatus();
 		if (objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
-			groupToSave.totalSavedMeshes = calculateTotalMeshes(objectsStatus);
+			groupToSave.totalSavedMeshes = calculateTotalMeshes(objectsStatus.highlightedNodes);
 			groupToSave.objects = objectsStatus.highlightedNodes;
 		}
 
 		const { data } = yield API.updateGroup(teamspace, modelId, revision, groupId, groupToSave);
 
 		const preparedGroup = prepareGroup(data);
-
+		yield put(TreeActions.getSelectedNodes());
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
 		yield put(GroupsActions.highlightGroup(preparedGroup));
 		yield put(SnackbarActions.show('Group updated'));
@@ -395,7 +385,7 @@ export function* setNewGroup() {
 			criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
 		}));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('prepare', 'new risk', error));
+		yield put(DialogActions.showErrorDialog('set', 'new group', error));
 	}
 }
 

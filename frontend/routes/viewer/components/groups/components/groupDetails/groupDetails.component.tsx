@@ -97,9 +97,9 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 	public handleGroupFormSubmit = () => {
 		const { teamspace, model, revision, updateGroup, createGroup } = this.props;
-		const { name, description, type, color, rules, objects } = this.groupData;
+		const { name, description, type, color, rules } = this.groupData;
 
-		this.formRef.current.formikRef.current.resetForm({name, description, type, color, rules, objects});
+		this.formRef.current.formikRef.current.resetForm({name, description, type, color, rules});
 		if (this.isNewGroup) {
 			createGroup(teamspace, model, revision);
 		} else {
@@ -138,6 +138,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			setIsFormDirty={this.setIsFormDirty}
 			fieldNames={this.props.fieldNames}
 			handleChange={this.handleFieldChange}
+			selectedNodes={this.props.selectedNodes}
 		/>
 	)
 
