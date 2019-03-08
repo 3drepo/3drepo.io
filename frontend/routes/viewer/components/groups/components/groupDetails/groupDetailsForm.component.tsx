@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as Yup from 'yup';
 import * as dayjs from 'dayjs';
 import { isEqual } from 'lodash';
-import { Field, Form, Formik, validateYupSchema, withFormik, connect } from 'formik';
+import { Field, Form, Formik } from 'formik';
 import { Select } from '@material-ui/core';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -46,7 +46,8 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 
 		const rulesChanged = this.props.group.rules && !isEqual(this.props.group.rules, prevProps.group.rules);
 		const colorChanged = !isEqual(this.props.group.color, prevProps.group.color);
-		const sharedIdsChanged = this.areSharedIdsChanged(this.props.selectedNodes, objects);
+		const sharedIdsChanged =
+			this.props.selectedNodes.length && this.areSharedIdsChanged(this.props.selectedNodes, objects);
 
 		if (isEqual(initialValues, currentProps)) {
 			this.props.setIsFormValid(false);
@@ -61,10 +62,9 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 
 	public areSharedIdsChanged = (selectedNodes, groupObjects) =>
 		selectedNodes.every((selectedNode) =>
-			groupObjects.every((groupObject) =>
-				!isEqual(
-					selectedNode.shared_ids.length ? selectedNode.shared_ids.sort() : [],
-					groupObject.shared_ids ? groupObject.shared_ids.sort() : []
+			groupObjects.every((groupObject) => !isEqual(
+					selectedNode.shared_ids && selectedNode.shared_ids.length ? selectedNode.shared_ids.sort() : [],
+					groupObject.shared_ids && groupObject.shared_ids.length ? groupObject.shared_ids.sort() : []
 				)
 			)
 		)

@@ -30,7 +30,7 @@ interface IProps {
 	selectedId: string;
 	error: boolean;
 	helperText: any[];
-	touched: boolean;
+	touched: any[];
 	setTouched: (touched) => void;
 	onChange: (event) => void;
 	onBlur: (event) => void;
@@ -79,14 +79,14 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 				changes.value = initialValue;
 			}
 			this.setState(changes, () => {
-				this.props.setTouched({ values: false });
+				this.props.setTouched({ values: Array.from({length: changes.value.length}, () => false) });
 				onChange({ target: { value: changes.value, name } });
 			});
 		}
 	}
 
 	public handleSingleValueChange = ({ target: { value } }) => {
-		this.props.setTouched({ values: true });
+		this.props.setTouched({ values: [true] });
 		const { onChange, name } = this.props;
 
 		if (onChange) {
@@ -101,14 +101,11 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 		newValue[index] = changedValue;
 
 		onChange({ target: { value: newValue, name } });
+
 		this.setState({ value: newValue }, () => {
-			if (VALUE_FIELD_MAP[this.props.selectedOperator].fieldType === VALUE_FIELD_TYPES.RANGE) {
-				if (this.state.value[0] && this.state.value[1]) {
-					this.props.setTouched({ values: true });
-				}
-			} else {
-				this.props.setTouched({ values: true });
-			}
+			const touchedValues = this.props.touched;
+			touchedValues[index] = true;
+			this.props.setTouched({ values: touchedValues });
 		});
 	}
 
@@ -118,7 +115,11 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 			const newValue = [...value];
 			newValue[newValue.length] = '';
 			onChange({ target: { value: newValue, name } });
-			this.setState({ value: newValue });
+			this.setState({ value: newValue }, () => {
+				const touchedValues = this.props.touched;
+				touchedValues[this.props.value.length + 1] = false;
+				this.props.setTouched({ values: touchedValues });
+			});
 		}
 	}
 
@@ -128,7 +129,11 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 			const newValue = [...value];
 			newValue.splice(index, 1);
 			onChange({ target: { value: newValue, name } });
-			this.setState({ value: newValue });
+			this.setState({ value: newValue }, () => {
+				const touchedValues = this.props.touched;
+				touchedValues[index] = false;
+				this.props.setTouched({ values: touchedValues });
+			});
 		}
 	}
 
@@ -162,7 +167,7 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderNewMultipleInput = (index) => {
-		const helperText = this.props.touched && this.getHelperText(index);
+		const helperText = this.props.touched[index] && this.getHelperText(index);
 		return (
 			<NewMultipleInputWrapper key={index}>
 				<MultipleInput
@@ -187,8 +192,8 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 			<SingleInput
 				value={this.props.value}
 				onChange={this.handleSingleValueChange}
-				helperText={this.props.touched && this.getHelperText(0)}
-				error={this.props.touched && this.props.error}
+				helperText={this.props.touched[0] && this.getHelperText(0)}
+				error={this.props.touched[0] && this.props.error}
 			/>
 		</InputWrapper>
 	));
@@ -199,14 +204,14 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 				<RangeInput
 					value={this.state.value[0]}
 					onChange={(event) => this.handleMultiValueChange(event, 0)}
-					helperText={this.props.touched && this.getHelperText(0)}
-					error={this.props.touched && this.getHelperText(0)}
+					helperText={this.props.touched[0] && this.getHelperText(0)}
+					error={this.props.touched[0] && this.getHelperText(0)}
 				/>
 				<RangeInput
 					value={this.state.value[1]}
 					onChange={(event) => this.handleMultiValueChange(event, 1)}
-					helperText={this.props.touched && this.getHelperText(1)}
-					error={this.props.touched && this.getHelperText(1)}
+					helperText={this.props.touched[1] && this.getHelperText(1)}
+					error={this.props.touched[1] && this.getHelperText(1)}
 				/>
 			</RangeInputs>
 		);

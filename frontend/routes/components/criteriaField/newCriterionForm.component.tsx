@@ -116,7 +116,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 								selectedId={selectedId}
 								error={Boolean(form.errors.values)}
 								helperText={form.errors.values}
-								touched={form.touched.values}
+								touched={form.touched.values || []}
 								setTouched={form.setTouched}
 							/>
 						</FormControl>
