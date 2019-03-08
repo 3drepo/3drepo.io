@@ -193,6 +193,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleCriteriaClick = (criterion) => () => {
+		console.log('click chip', criterion);
 		this.props.setState({ selectedCriterion: criterion._id });
 	}
 

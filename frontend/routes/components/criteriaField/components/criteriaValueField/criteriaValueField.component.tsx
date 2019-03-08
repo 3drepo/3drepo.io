@@ -31,6 +31,7 @@ interface IProps {
 	name: string;
 	value: any[];
 	selectedOperator: string;
+	selectedId: string;
 	error: boolean;
 	helperText: any[];
 	touched: boolean;
@@ -67,18 +68,24 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { selectedOperator, onChange, name } = this.props;
+		const { selectedOperator, selectedId, onChange, name, value } = this.props;
+		const operatorChanged = selectedOperator !== prevProps.selectedOperator;
+		const idChanged = selectedId !== prevProps.selectedId;
+		const hasSwitchedToNextCriterion = selectedId && idChanged;
+		const changes = {} as any;
 
-		if (selectedOperator !== prevProps.selectedOperator) {
-			if (onChange) {
-				const initialValue =
-					VALUE_FIELD_MAP[selectedOperator] && VALUE_FIELD_MAP[selectedOperator].fieldType ?
-					INITIAL_VALUE[VALUE_FIELD_MAP[selectedOperator].fieldType] : [];
-
-				this.props.setTouched({ values: false });
-				onChange({ target: { value: initialValue, name } });
-				this.setState({ value: initialValue	});
+		if (operatorChanged) {
+			if (hasSwitchedToNextCriterion) {
+				changes.value = value;
+			} else {
+				const operator = VALUE_FIELD_MAP[selectedOperator];
+				const initialValue = operator && operator.fieldType ? INITIAL_VALUE[operator.fieldType] : [];
+				changes.value = initialValue;
 			}
+			this.setState(changes, () => {
+				this.props.setTouched({ values: false });
+				onChange({ target: { value: changes.value, name } });
+			});
 		}
 	}
 
@@ -94,21 +101,19 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 	public handleMultiValueChange = (event, index) => {
 		const { target: { value: changedValue }} = event;
 		const { onChange, name, value } = this.props;
-		if (onChange) {
-			const newValue = [...value];
-			newValue[index] = changedValue;
+		const newValue = [...value];
+		newValue[index] = changedValue;
 
-			onChange({ target: { value: newValue, name } });
-			this.setState({ value: newValue }, () => {
-				if (VALUE_FIELD_MAP[this.props.selectedOperator].fieldType === VALUE_FIELD_TYPES.RANGE) {
-					if (this.state.value[0] && this.state.value[1]) {
-						this.props.setTouched({ values: true });
-					}
-				} else {
+		onChange({ target: { value: newValue, name } });
+		this.setState({ value: newValue }, () => {
+			if (VALUE_FIELD_MAP[this.props.selectedOperator].fieldType === VALUE_FIELD_TYPES.RANGE) {
+				if (this.state.value[0] && this.state.value[1]) {
 					this.props.setTouched({ values: true });
 				}
-			});
-		}
+			} else {
+				this.props.setTouched({ values: true });
+			}
+		});
 	}
 
 	public addMultipleInput = () => {
@@ -163,7 +168,7 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 	public renderNewMultipleInput = (index) => {
 		const helperText = this.props.touched && this.getHelperText(index);
 		return (
-			<NewMultipleInputWrapper key={index}>
+			<NewMultipleInputWrapper key={Math.random()}>
 				<MultipleInput
 					value={this.state.value[index]}
 					onChange={(event) => this.handleMultiValueChange(event, index)}
@@ -230,6 +235,8 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 	);
 
 	public render() {
+		console.log('render criteria field: props.value', this.props.value)
+		console.log('render criteria field: state.value', this.state.value)
 		const { selectedOperator } = this.props;
 		return (
 			<>

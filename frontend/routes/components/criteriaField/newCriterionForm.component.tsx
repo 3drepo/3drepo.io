@@ -64,7 +64,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { operator: selectedOperator } = this.props.formik.values;
+		const { operator: selectedOperator, _id: selectedId } = this.props.formik.values;
 
 		return (
 			<Form>
@@ -97,6 +97,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 								{...field}
 								value={field.value}
 								selectedOperator={selectedOperator}
+								selectedId={selectedId}
 								error={Boolean(form.errors.values)}
 								helperText={form.errors.values}
 								touched={form.touched.values}
@@ -135,6 +136,6 @@ export const NewCriterionForm = withFormik({
 		(props as IProps).onSubmit(values);
 		resetForm();
 	},
-	enableReinitialize: false,
+	enableReinitialize: true,
 	validationSchema: CriterionSchema
 })(connect(NewCreaterionFormComponent as any)) as any;

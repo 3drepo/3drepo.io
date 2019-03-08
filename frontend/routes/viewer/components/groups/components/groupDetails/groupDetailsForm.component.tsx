@@ -62,7 +62,12 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 	public areSharedIdsChanged = (selectedNodes, groupObjects) =>
 		selectedNodes.every((selectedNode) =>
 			groupObjects.every((groupObject) =>
-				!isEqual(selectedNode.shared_ids.sort(), groupObject.shared_ids.sort())))
+				!isEqual(
+					selectedNode.shared_ids.length ? selectedNode.shared_ids.sort() : [],
+					groupObject.shared_ids ? groupObject.shared_ids.sort() : []
+				)
+			)
+		)
 
 	public handleFieldChange = (onChange, form) => (event) => {
 		event.persist();
