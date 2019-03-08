@@ -197,32 +197,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="likelihood">Risk Likelihood</InputLabel>
-						<Field name="likelihood" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={RISK_LIKELIHOODS}
-								inputId="likelihood"
-								disabled={!this.props.canUpdateRisk}
-							/>
-						)} />
-					</StyledFormControl>
-
-					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="consequence">Risk Consequence</InputLabel>
-						<Field name="consequence" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={RISK_CONSEQUENCES}
-								inputId="consequence"
-								disabled={!this.props.canUpdateRisk}
-							/>
-						)} />
-					</StyledFormControl>
-				</FieldsRow>
-
-				<FieldsRow container alignItems="center" justify="space-between">
-					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="level_of_risk">Level of Risk</InputLabel>
 						<Field name="level_of_risk" render={({ field }) => (
 							<CellSelect
@@ -242,6 +216,32 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								{...field}
 								items={RISK_MITIGATION_STATUSES}
 								inputId="mitigation_status"
+								disabled={!this.props.canUpdateRisk}
+							/>
+						)} />
+					</StyledFormControl>
+				</FieldsRow>
+
+				<FieldsRow container alignItems="center" justify="space-between">
+					<StyledFormControl>
+						<InputLabel shrink={true} htmlFor="likelihood">Risk Likelihood</InputLabel>
+						<Field name="likelihood" render={({ field }) => (
+							<CellSelect
+								{...field}
+								items={RISK_LIKELIHOODS}
+								inputId="likelihood"
+								disabled={!this.props.canUpdateRisk}
+							/>
+						)} />
+					</StyledFormControl>
+
+					<StyledFormControl>
+						<InputLabel shrink={true} htmlFor="consequence">Risk Consequence</InputLabel>
+						<Field name="consequence" render={({ field }) => (
+							<CellSelect
+								{...field}
+								items={RISK_CONSEQUENCES}
+								inputId="consequence"
 								disabled={!this.props.canUpdateRisk}
 							/>
 						)} />
