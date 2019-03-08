@@ -5,14 +5,18 @@ import { Form, Field, withFormik, connect } from 'formik';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
+import InfoIcon from '@material-ui/icons/InfoOutlined';
+import { Tooltip } from '@material-ui/core';
 
 import { SelectField, FormControl, NewCriterionFooter, OperatorSubheader } from './criteriaField.styles';
 import { CriteriaValueField } from './components/criteriaValueField/criteriaValueField.component';
 import {
-	CRITERIA_LIST, VALUE_FIELD_MAP, VALUE_DATA_TYPES, VALUE_FIELD_TYPES
+	CRITERIA_LIST, VALUE_FIELD_MAP, VALUE_DATA_TYPES, REGEX_INFO_URL, CRITERIA_OPERATORS_TYPES, REGEX_INFO_TEXT
 } from '../../../constants/criteria';
 import { AutosuggestField } from '../autosuggestField/autosuggestField.component';
 import { schema, VALIDATIONS_MESSAGES } from '../../../services/validation';
+import { renderWhenTrue } from '../../../helpers/rendering';
+import { RegexInfoLink } from './components/criteriaValueField/criteriaValueField.styles';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -63,6 +67,12 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 		this.props.setState(this.props.values);
 	}
 
+	public renderRegexInfo = renderWhenTrue(() => (
+		<RegexInfoLink href={REGEX_INFO_URL} target="_blank">
+			<Tooltip title={REGEX_INFO_TEXT} placement="right"><InfoIcon color="secondary" /></Tooltip>
+		</RegexInfoLink>
+	));
+
 	public render() {
 		const { operator: selectedOperator, _id: selectedId } = this.props.formik.values;
 
@@ -107,7 +117,8 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 					);
 				}} />
 
-				<NewCriterionFooter>
+				<NewCriterionFooter spaced={selectedOperator === CRITERIA_OPERATORS_TYPES.REGEX}>
+					{this.renderRegexInfo(selectedOperator === CRITERIA_OPERATORS_TYPES.REGEX)}
 					<Field render={({ form }) => (
 						<Button
 							type="button"

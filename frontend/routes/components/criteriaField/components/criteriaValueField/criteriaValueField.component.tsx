@@ -10,19 +10,15 @@ import {
 	MultipleInput,
 	MultipleInputsContainer,
 	NewMultipleInputWrapper,
-	RegexInfoLink,
 	InputWrapper
 } from './criteriaValueField.styles';
 import AddIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveIcon from '@material-ui/icons/RemoveCircleOutline';
-import InfoIcon from '@material-ui/icons/InfoOutlined';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import {
 	VALUE_FIELD_MAP,
-	VALUE_FIELD_TYPES,
-	CRITERIA_OPERATORS_TYPES,
-	REGEX_INFO_URL
+	VALUE_FIELD_TYPES
 } from '../../../../../constants/criteria';
 import { InputLabel } from '@material-ui/core';
 import { SmallIconButton } from '../../../smallIconButon/smallIconButton.component';
@@ -224,20 +220,13 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 		/>
 	));
 
-	public renderRegexInfo = renderWhenTrue(() => (
-		<RegexInfoLink href={REGEX_INFO_URL} target="_blank">
-			<InfoIcon color="secondary" />
-		</RegexInfoLink>
-	));
-
 	public renderLabel = renderWhenTrue(() =>
 		<InputLabel shrink>Value</InputLabel>
 	);
 
 	public render() {
-		console.log('render criteria field: props.value', this.props.value)
-		console.log('render criteria field: state.value', this.state.value)
 		const { selectedOperator } = this.props;
+
 		return (
 			<>
 				{this.renderInitialState(!VALUE_FIELD_MAP[selectedOperator])}
@@ -253,7 +242,6 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 				{this.renderRangeInputs(
 					VALUE_FIELD_MAP[selectedOperator] && VALUE_FIELD_MAP[selectedOperator].fieldType === VALUE_FIELD_TYPES.RANGE
 				)}
-				{this.renderRegexInfo(selectedOperator === CRITERIA_OPERATORS_TYPES.REGEX)}
 			</>
 		);
 	}

@@ -73,6 +73,5 @@ export const RemoveButton = styled.div`
 `;
 
 export const RegexInfoLink = styled.a`
-  margin-top: 20px;
   text-decoration: none;
 `;

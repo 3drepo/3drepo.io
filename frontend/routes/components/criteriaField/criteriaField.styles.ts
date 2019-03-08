@@ -152,8 +152,9 @@ export const MenuItem = styled(MenuItemComponent)`
 export const NewCriterionFooter = styled.div`
   margin-top: 8px;
   display: flex;
-  justify-content: flex-end;
-`;
+  align-items: center;
+  justify-content: ${(props: any) => props.spaced ? 'space-between' : 'flex-end'};
+` as any;
 
 export const OperatorSubheader = styled(ListSubheader)`
   &:not(:first-of-type) {
