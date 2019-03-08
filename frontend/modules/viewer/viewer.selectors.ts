@@ -50,3 +50,7 @@ export const selectXraySetting = createSelector(
 export const selectMemory = createSelector(
 	selectSettings, (state) => state.memory
 );
+
+export const selectFarPlaneSamplingPoints = createSelector(
+	selectSettings, (state) => state.farPlaneSamplingPoints
+);

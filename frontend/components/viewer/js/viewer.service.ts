@@ -646,6 +646,11 @@ export class ViewerService {
 		UnityUtil.setDefaultNearPlane(nearplane);
 	}
 
+	public setFarPlaneSamplingPoints(farplaneSample: number) {
+		if (farplaneSample === undefined) { return; }
+		UnityUtil.setFarPlaneSampleSize(farplaneSample);
+	}
+
 	public setFarPlaneAlgorithm(algorithm: string) {
 		switch (algorithm) {
 			case 'box':

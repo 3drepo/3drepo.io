@@ -29,7 +29,8 @@ import { SelectField } from '../../../selectField/selectField.component';
 
 const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
-	memory: schema.integer(16, 2032)
+	memory: schema.integer(16, 2032),
+	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY)
 });
 
 const BasicSettings = (props) => {
@@ -83,7 +84,7 @@ const AdvancedSettings = (props) => {
 				}} />
 			</FormListItem>
 			<FormListItem>
-				Minimun near plane
+				Minimum near plane
 				<Field name="nearPlane" render={ ({ field, form }) => {
 					return (
 					<ErrorTooltip title={form.errors.nearPlane || ''} placement="bottom-end">
@@ -103,6 +104,20 @@ const AdvancedSettings = (props) => {
 						<MenuItem value="sphere">Bounding sphere</MenuItem>
 					</SelectField>
 				)}/>
+			</FormListItem>
+			<FormListItem>
+				Far plane points
+				<Field name="farPlaneSamplingPoints" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.farPlaneSamplingPoints || ''} placement="bottom-end">
+					<ShortInput
+						disabled={form.values.farPlaneAlgorithm !== 'box'}
+						error={Boolean(form.errors.farPlaneSamplingPoints)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
 			</FormListItem>
 		</List>);
 };
@@ -171,6 +186,8 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 	public onSubmit = (values, { resetForm }) => {
 		values.nearPlane = Number(values.nearPlane);
 		values.memory = Number(values.memory);
+		values.farPlaneSamplingPoints = Number(values.farPlaneSamplingPoints);
+
 		this.props.updateSettings(values);
 
 		if (values.memory !== this.props.visualSettings.memory) {

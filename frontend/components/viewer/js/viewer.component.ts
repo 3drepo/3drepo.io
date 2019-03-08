@@ -17,7 +17,8 @@
 
 import { subscribe } from '../../../helpers/migration';
 import { selectShadowSetting, selectStatsSetting, selectNearPlaneSetting,
-		selectFarPlaneAlgorithm, selectShadingSetting, selectXraySetting, selectMemory} from '../../../modules/viewer';
+		selectFarPlaneAlgorithm, selectShadingSetting, selectXraySetting,
+		selectFarPlaneSamplingPoints} from '../../../modules/viewer';
 
 class ViewerController implements ng.IController {
 
@@ -39,7 +40,6 @@ class ViewerController implements ng.IController {
 	private pointerEvents: string;
 	private measureMode: boolean;
 	private viewer: any;
-	private deviceMemory: any;
 	private cancelPinWatcher: any;
 	private cancelEventWatcher: any;
 	private shadowsSetting: string;
@@ -48,7 +48,7 @@ class ViewerController implements ng.IController {
 	private farPlaneAlgorithm: string;
 	private shadingSetting: string;
 	private xraySetting: boolean;
-	private memory: number;
+	private farPlaneSamplingPoints: number;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -77,7 +77,8 @@ class ViewerController implements ng.IController {
 			nearPlaneSetting: selectNearPlaneSetting,
 			farPlaneAlgorithm: selectFarPlaneAlgorithm,
 			shadingSetting: selectShadingSetting,
-			xraySetting: selectXraySetting
+			xraySetting: selectXraySetting,
+			farPlaneSamplingPoints: selectFarPlaneSamplingPoints
 		});
 	}
 
@@ -119,6 +120,7 @@ class ViewerController implements ng.IController {
 
 		this.$scope.$watch(() => this.xraySetting, this.ViewerService.setXray);
 
+		this.$scope.$watch(() => this.farPlaneSamplingPoints, this.ViewerService.setFarPlaneSamplingPoints);
 	}
 }
 
@@ -128,7 +130,6 @@ export const ViewerComponent: ng.IComponentOptions = {
 			branch: '<',
 			model: '<',
 			revision: '<',
-			deviceMemory: '<',
 			shadowSetting: '<'
 		},
 		controller: ViewerController,
