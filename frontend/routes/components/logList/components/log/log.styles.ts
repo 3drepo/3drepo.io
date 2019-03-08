@@ -23,6 +23,11 @@ export const Container = styled.div`
   padding: 10px;
 `;
 
+export const MitigationMessage = styled.span`
+  display: inline-block;
+  font-size: 12px;
+`;
+
 export const UserMessage = styled.span`
   background-color: ${COLOR.WHITE};
   color: ${COLOR};
@@ -56,6 +61,35 @@ export const Info = styled.div`
   justify-content: space-between;
   margin-top: 8px;
 `;
+
+export const MitigationDetail = styled.div`
+  width: 50%;
+  overflow: hidden;
+  position: relative;
+  margin: 0 0 5px;
+  border-radius: 0 0 2px 2px;
+` as any;
+
+export const MitigationDetailLabel = styled.div`
+  font-size: 10.5px;
+  color: ${COLOR.BLACK_60};
+`;
+
+export const MitigationDetailRow = styled.div`
+  display: flex;
+  padding: 0 6px 0;
+` as any;
+
+export const MitigationWrapper = styled.div`
+  background-color: ${COLOR.WHITE};
+  box-shadow: 0 2px 5px ${COLOR.BLACK_6};
+  color: ${COLOR};
+  width: 100%;
+  overflow: hidden;
+  padding: 6px 0;
+  position: relative;
+  border-radius: 0 0 2px 2px;
+` as any;
 
 export const ScreenshotWrapper = styled.div`
   width: 100%;

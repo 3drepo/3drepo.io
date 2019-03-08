@@ -19,10 +19,28 @@ import * as React from 'react';
 import { DateTime } from '../../../dateTime/dateTime.component';
 import DynamicUsername from '../..//../dynamicUsername/dynamicUsername.container';
 import {
-	Container, UserMessage, SystemMessage, Info, Screenshot, ScreenshotMessage, ScreenshotWrapper
+	Container,
+	UserMessage,
+	SystemMessage,
+	Info,
+	MitigationMessage,
+	MitigationDetail,
+	MitigationDetailLabel,
+	MitigationDetailRow,
+	MitigationWrapper,
+	Screenshot,
+	ScreenshotMessage,
+	ScreenshotWrapper
 } from './log.styles';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
+import {
+	LEVELS_OF_RISK,
+	RISK_CATEGORIES,
+	RISK_CONSEQUENCES,
+	RISK_LIKELIHOODS,
+	RISK_MITIGATION_STATUSES
+} from '../../../../../constants/risks';
 
 interface IProps {
 	comment: string;
@@ -45,12 +63,46 @@ export class Log extends React.PureComponent<IProps, any> {
 	}
 
 	get isCommentWithScreenshot() {
-		return Boolean(this.props.comment) && Boolean(this.props.viewpoint.screenshotPath);
+		return Boolean(this.props.comment) && this.isScreenshot;
 	}
 
 	get isPlainComment() {
-		return Boolean(this.props.comment) && !Boolean(this.props.viewpoint.screenshotPath);
+		return Boolean(this.props.comment) && !this.isScreenshot;
 	}
+
+	get isRiskMitigationComment() {
+		return Boolean(this.props.mitigation) && undefined !== this.props.likelihood && undefined !== this.props.consequence;
+	}
+
+	get riskLikelihood() {
+		return undefined !== this.props.likelihood && RISK_LIKELIHOODS.length > this.props.likelihood ?
+			RISK_LIKELIHOODS[this.props.likelihood].name : "Unassigned";
+	}
+
+	get riskConsequence() {
+		return undefined !== this.props.consequence && RISK_CONSEQUENCES.length > this.props.consequence ?
+			RISK_CONSEQUENCES[this.props.consequence].name : "Unassigned";
+	}
+
+	public renderRiskMitigationMessage = renderWhenTrue(
+		<>
+			<MitigationWrapper withMessage={!!this.props.mitigation}>
+				<MitigationDetailRow>
+					<MitigationDetail>
+						<MitigationDetailLabel>Risk Likelihood</MitigationDetailLabel>
+						{this.props.likelihood && <MitigationMessage>{this.riskLikelihood}</MitigationMessage>}
+					</MitigationDetail>
+					<MitigationDetail>
+						<MitigationDetailLabel>Risk Consequence</MitigationDetailLabel>
+						{this.props.consequence && <MitigationMessage>{this.riskConsequence}</MitigationMessage>}
+					</MitigationDetail>
+				</MitigationDetailRow>
+				<MitigationDetailRow>
+					{this.props.mitigation && <MitigationMessage>{this.props.mitigation}</MitigationMessage>}
+				</MitigationDetailRow>
+			</MitigationWrapper>
+		</>
+	);
 
 	public renderUserMessage = renderWhenTrue(
 		<UserMessage>{this.props.comment}</UserMessage>
@@ -58,8 +110,11 @@ export class Log extends React.PureComponent<IProps, any> {
 
 	public renderSystemMessage = renderWhenTrue(
 		<SystemMessage>
-			{this.props.action ? this.props.action.text : null}
-			at <DateTime value={this.props.created  as any} format="HH:mm DD MMM" />
+			{this.props.action ? this.props.action.text + " " : null}
+			updated {this.props.action && this.props.action.from ? " from " + this.props.action.from + " " : null}
+			{this.props.action && this.props.action.to ? " to " + this.props.action.to + " " : null}
+			{this.props.owner ? " by " + this.props.owner + " " : null}
+			at <DateTime value={this.props.created as any} format="HH:mm DD MMM" />
 		</SystemMessage>
 	);
 
@@ -86,6 +141,7 @@ export class Log extends React.PureComponent<IProps, any> {
 			<Container>
 				{this.renderSystemMessage(Boolean(this.props.action))}
 				{this.renderUserMessage(this.isPlainComment)}
+				{this.renderRiskMitigationMessage(this.isRiskMitigationComment)}
 				{this.renderScreenshotMessage(this.isCommentWithScreenshot)}
 				{this.renderInfo(!this.isAction)}
 			</Container>
