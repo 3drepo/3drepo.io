@@ -116,7 +116,7 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 		const { onChange, name, value } = this.props;
 		if (onChange) {
 			const newValue = [...value];
-			newValue[newValue.length] = null;
+			newValue[newValue.length] = '';
 			onChange({ target: { value: newValue, name } });
 			this.setState({ value: newValue });
 		}
@@ -164,12 +164,12 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 	public renderNewMultipleInput = (index) => {
 		const helperText = this.props.touched && this.getHelperText(index);
 		return (
-			<NewMultipleInputWrapper key={Math.random()}>
+			<NewMultipleInputWrapper key={index}>
 				<MultipleInput
 					value={this.state.value[index]}
 					onChange={(event) => this.handleMultiValueChange(event, index)}
 					helperText={helperText}
-					error={helperText}
+					error={Boolean(helperText)}
 				/>
 				<RemoveButton>
 					<SmallIconButton

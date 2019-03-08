@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as Yup from 'yup';
+import { get } from 'lodash';
 
 import { Form, Field, withFormik, connect } from 'formik';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -29,13 +30,18 @@ const PaperPropsStyle = {
 const CriterionSchema = Yup.object().shape({
 	field: Yup.string().required(),
 	operator: Yup.string().required(),
-	values: Yup.array().when('operator', {
-		is: (value) =>
-		VALUE_FIELD_MAP[value] &&
-		VALUE_FIELD_MAP[value].dataType &&
-		VALUE_FIELD_MAP[value].dataType === VALUE_DATA_TYPES.NUMBER,
-		then: Yup.array().of(schema.measureNumberDecimal.nullable()).required(VALIDATIONS_MESSAGES.REQUIRED),
-		otherwise: Yup.array().of(Yup.string()).required(VALIDATIONS_MESSAGES)
+	values: Yup.array().when('operator', (operator, arraySchema) => {
+		const dataType = get(VALUE_FIELD_MAP[operator], 'dataType');
+
+		if (!dataType) {
+			return arraySchema;
+		}
+
+		if (dataType === VALUE_DATA_TYPES.NUMBER) {
+			return Yup.array().of(schema.measureNumberDecimal.nullable()).required(VALIDATIONS_MESSAGES.REQUIRED);
+		}
+
+		return arraySchema.of(Yup.string().required(VALIDATIONS_MESSAGES.REQUIRED));
 	})
 });
 
