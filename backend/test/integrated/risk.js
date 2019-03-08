@@ -166,7 +166,7 @@ describe("Risks", function () {
 
 				function(done) {
 					agent.get(`/${username}/${model}/risks/${riskId}.json`).expect(200, function(err, res) {
-						expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/risks/${riskId}/screenshot.png`);
+						expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/risks/${riskId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
 						return done(err);
 					});
 				}
