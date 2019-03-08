@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button, InputAdornment, List, MenuItem, Select, Switch } from '@material-ui/core';
+import { Button, InputAdornment, List, MenuItem, Switch } from '@material-ui/core';
 import { Field, Form, Formik } from 'formik';
 import * as React from 'react';
 import * as Yup from 'yup';
@@ -25,6 +25,7 @@ import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NeutralActionButton,
 		NegativeActionButton } from './visualSettingsDialog.styles';
 import { isEqual } from 'lodash';
 import { DEFAULT_SETTINGS } from '../../../../../constants/viewer';
+import { SelectField } from '../../../selectField/selectField.component';
 
 const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
@@ -37,19 +38,19 @@ const BasicSettings = (props) => {
 			<FormListItem>
 				Shading
 				<Field name="shading" render={ ({ field }) => (
-					<Select {...field}>
+					<SelectField {...field}>
 						<MenuItem value="standard">Standard</MenuItem>
 						<MenuItem value="architectural">Architectural</MenuItem>
-					</Select>)} />
+					</SelectField>)} />
 			</FormListItem>
 			<FormListItem>
 				Shadows
 				<Field name="shadows" render={ ({ field }) => (
-					<Select {...field}>
+					<SelectField {...field}>
 						<MenuItem value="none">None</MenuItem>
 						<MenuItem value="soft">Soft</MenuItem>
 						<MenuItem value="hard">Hard</MenuItem>
-					</Select>)} />
+					</SelectField>)} />
 			</FormListItem>
 			<FormListItem>
 				XRay highlighting
@@ -72,7 +73,7 @@ const AdvancedSettings = (props) => {
 				Memory for Unity
 				<Field name="memory" render={ ({ field, form }) => {
 					return (
-					<ErrorTooltip  title={form.errors.memory || ''} placement="bottom-end">
+					<ErrorTooltip title={form.errors.memory || ''} placement="bottom-end">
 					<ShortInput
 						error={Boolean(form.errors.memory)}
 						{...field}
@@ -97,10 +98,10 @@ const AdvancedSettings = (props) => {
 			<FormListItem>
 				Far plane algorithm
 				<Field name="farPlaneAlgorithm" render={ ({ field }) => (
-					<Select {...field}>
+					<SelectField {...field}>
 						<MenuItem value="box">Bounding box</MenuItem>
 						<MenuItem value="sphere">Bounding sphere</MenuItem>
-					</Select>
+					</SelectField>
 				)}/>
 			</FormListItem>
 		</List>);
