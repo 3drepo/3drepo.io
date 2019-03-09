@@ -18,8 +18,8 @@
 import styled from 'styled-components';
 import { Form } from 'formik';
 
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import { IconButton, ExpansionPanelDetails, ExpansionPanelSummary } from '@material-ui/core';
+import { ExpansionPanel, IconButton, ExpansionPanelDetails, ExpansionPanelSummary } from '@material-ui/core';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { COLOR } from './../../../../styles/colors';
 
@@ -33,7 +33,7 @@ export const Collapsable = styled(ExpansionPanel)`
 	&& {
 		box-shadow: none;
 		padding: 0 12px;
-		margin-bottom: 8px;
+		margin-bottom: 0;
 	}
 `;
 
@@ -60,7 +60,7 @@ export const Summary = styled(ExpansionPanelSummary).attrs({
 `;
 
 export const CollapsableContent = styled.div`
-	margin: 8px 0 16px;
+	margin: 8px 0;
 `;
 
 export const StyledForm = styled(Form)`
@@ -86,3 +86,10 @@ export const ToggleButton = styled(IconButton)`
 		padding: 4px;
 	}
 `;
+
+export const ToggleIcon = styled(ExpandMoreIcon)`
+	&& {
+		transition: transform 200ms ease-in-out;
+		transform: ${(props: any) => props.active ? `rotate(180deg)` : `rotate(0deg)`};
+	}
+` as any;
