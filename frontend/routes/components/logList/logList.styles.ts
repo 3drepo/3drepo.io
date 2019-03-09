@@ -20,7 +20,6 @@ import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
   min-height: 55px;
-  overflow: auto;
   position: relative;
 
   &:before {

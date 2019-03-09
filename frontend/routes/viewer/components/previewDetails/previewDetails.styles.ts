@@ -19,14 +19,14 @@ import styled from 'styled-components';
 import { Form } from 'formik';
 
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import { IconButton, ExpansionPanelDetails, ExpansionPanelSummary } from '@material-ui/core';
 
 import { COLOR } from './../../../../styles/colors';
 
 export const Container = styled.div`
 	color: ${COLOR.BLACK_60};
 	background-color: ${COLOR.WHITE};
+	overflow: auto;
 `;
 
 export const Collapsable = styled(ExpansionPanel)`
@@ -54,14 +54,14 @@ export const Summary = styled(ExpansionPanelSummary).attrs({
 		padding: 0;
 
 		.summary-icon {
-			right: -8px;
+			display: none;
 		}
 	}
 `;
 
 export const CollapsableContent = styled.div`
 	margin: 8px 0 16px;
-` as any;
+`;
 
 export const StyledForm = styled(Form)`
 	&& {
@@ -70,6 +70,19 @@ export const StyledForm = styled(Form)`
 	}
 `;
 
+export const Content = styled.div`
+	background-color: ${COLOR.BLACK_6};
+`;
+
 export const NotCollapsableContent = styled.div``;
 
-export const Content = styled.div``;
+export const ToggleButtonContainer = styled.div`
+	display: flex;
+	justify-content: center;
+`;
+
+export const ToggleButton = styled(IconButton)`
+	&& {
+		padding: 4px;
+	}
+`;
