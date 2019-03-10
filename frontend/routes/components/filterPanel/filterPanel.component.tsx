@@ -223,6 +223,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 		try {
 			const newSelectedFilters = JSON.parse(event.clipboardData.getData('text'));
+
 			this.setState((prevState) => ({
 				selectedFilters: [
 					...prevState.selectedFilters,

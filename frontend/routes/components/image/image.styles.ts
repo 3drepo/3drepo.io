@@ -22,7 +22,7 @@ const previewStateStyles = css`
 	cursor: pointer;
 	transition: opacity 200ms ease-in-out;
 
-	&:hover {
+  &:hover {
 		opacity: 0.8;
 	}
 `;

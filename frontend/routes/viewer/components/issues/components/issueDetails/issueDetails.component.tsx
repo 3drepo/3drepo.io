@@ -193,11 +193,12 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				screenshot={this.props.newComment.screenshot}
 				viewpoint={this.props.newComment.viewpoint}
 				innerRef={this.commentRef}
-				hideComment={this.isNewIssue}
 				onTakeScreenshot={this.handleNewScreenshot}
 				onChangePin={this.handleChangePin}
 				onSave={this.handleSave}
 				canComment={this.userCanComment}
+				hideComment={this.isNewIssue}
+				hidePin={!this.isNewIssue}
 			/>
 		</ViewerPanelFooter>
 	));

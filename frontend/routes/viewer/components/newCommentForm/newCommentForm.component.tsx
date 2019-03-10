@@ -47,7 +47,6 @@ interface IProps {
 	hideComment?: boolean;
 	hidePin?: boolean;
 	hideScreenshot?: boolean;
-	canComment: boolean;
 	onSave: (commentData) => void;
 	onTakeScreenshot: (screenshot) => void;
 	onChangePin: (pin) => void;

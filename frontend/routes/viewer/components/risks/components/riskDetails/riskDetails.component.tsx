@@ -175,13 +175,13 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderRiskForm = () => (
-		<RiskDetailsForm
-			canUpdateRisk={this.state.canUpdateRisk}
-			risk={this.riskData}
-			jobs={this.jobsList}
-			onValueChange={this.handleRiskFormSubmit}
-			onSubmit={this.handleRiskFormSubmit}
-			associatedActivities={this.props.associatedActivities}
+			<RiskDetailsForm
+                canUpdateRisk={this.state.canUpdateRisk}
+				risk={this.riskData}
+				jobs={this.jobsList}
+				onValueChange={this.handleRiskFormSubmit}
+				onSubmit={this.handleRiskFormSubmit}
+				associatedActivities={this.props.associatedActivities}
 			permissions={this.props.modelSettings.permissions}
 			currentUser={this.props.currentUser}
 			myJob={this.props.myJob}

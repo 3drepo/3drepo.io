@@ -20,14 +20,13 @@ import * as Yup from 'yup';
 import { Formik, Field } from 'formik';
 
 import { TextField, Typography } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { schema } from '../../../../services/validation';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
 import {
-	Content, Container, Collapsable, Details, Summary, CollapsableContent, ToggleButtonContainer, ToggleButton, ToggleIcon,StyledForm, NotCollapsableContent
+	Content, Container, Collapsable, Details, Summary, CollapsableContent, ToggleButtonContainer, ToggleButton, ToggleIcon, StyledForm, NotCollapsableContent
 } from './previewDetails.styles';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
 
