@@ -501,7 +501,7 @@ export function* closeDetails() {
 			});
 		}
 
-		yield put(IssuesActions.setComponentState({ activeIssue: null, showDetails: false }));
+		yield put(IssuesActions.setComponentState({ showDetails: false }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('close', 'issue details', error));
 	}

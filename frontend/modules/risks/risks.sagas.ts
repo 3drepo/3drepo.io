@@ -429,7 +429,7 @@ export function* closeDetails() {
 			});
 		}
 
-		yield put(RisksActions.setComponentState({ activeRisk: null, showDetails: false }));
+		yield put(RisksActions.setComponentState({ showDetails: false }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('close', 'risk details', error));
 	}

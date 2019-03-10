@@ -112,7 +112,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	));
 
 	public renderExpandIcon = renderWhenTrue(() => (
-		<ToggleIcon active={this.state.expanded} />
+		<ToggleIcon active={Number(this.state.expanded)} />
 	));
 
 	public renderCollapsable = renderWhenTrue(() => (

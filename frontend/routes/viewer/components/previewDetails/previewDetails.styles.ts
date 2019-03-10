@@ -89,7 +89,6 @@ export const ToggleButton = styled(IconButton)`
 
 export const ToggleIcon = styled(ExpandMoreIcon)`
 	&& {
-		transition: transform 200ms ease-in-out;
 		transform: ${(props: any) => props.active ? `rotate(180deg)` : `rotate(0deg)`};
 	}
 ` as any;
