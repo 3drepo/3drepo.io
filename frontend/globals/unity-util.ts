@@ -215,7 +215,6 @@ export class UnityUtil {
 	}
 
 	public static toUnity(methodName, requireStatus, params) {
-
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
@@ -715,6 +714,7 @@ export class UnityUtil {
 	 *  @param {string} revision - ID of revision
 	 */
 	public static loadModel(account, model, branch, revision) {
+		UnityUtil.reset();
 		const params: any = {
 			database : account,
 			model
