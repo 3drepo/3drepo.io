@@ -54,7 +54,8 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	updateCommentSuccess: ['comment'],
 	toggleSortOrder: ['sortOrder'],
 	updateNewIssue: ['newIssue'],
-	setFilters: ['filters']
+	setFilters: ['filters'],
+	showCloseInfo: ['issueId']
 }, { prefix: 'ISSUES_' });
 
 export const INITIAL_STATE = {
@@ -154,6 +155,13 @@ export const toggleSortOrder = (state = INITIAL_STATE) => {
 	}};
 };
 
+const showCloseInfo = (state = INITIAL_STATE, { issueId }) => {
+	const issuesMap = cloneDeep(state.issuesMap);
+	issuesMap[issueId].willBeClosed = true;
+
+	return { ...state, issuesMap };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess,
 	[IssuesTypes.FETCH_ISSUE_SUCCESS]: fetchIssueSuccess,
@@ -167,5 +175,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
 	[IssuesTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
 	[IssuesTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
-	[IssuesTypes.TOGGLE_SORT_ORDER]: toggleSortOrder
+	[IssuesTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
+	[IssuesTypes.SHOW_CLOSE_INFO]: showCloseInfo
 });

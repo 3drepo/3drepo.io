@@ -58,6 +58,7 @@ interface IProps {
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
 	renderActions?: () => JSX.Element[];
+	willBeClosed?: boolean;
 }
 
 export class PreviewListItem extends React.PureComponent<IProps, any> {
@@ -74,6 +75,7 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 
 	public renderNameWithCounter = renderWhenTrue(() => <Name>{`${this.props.count}. ${this.props.name}`}</Name>);
 	public renderName = renderWhenTrue(() => <Name>{this.props.name}</Name>);
+	public renderClosedMessage = renderWhenTrue(() => <ActionMessage content="This issue is now closed" />);
 
 	public renderThumbnail = renderWhenTrue(() => (
 		<ThumbnailWrapper>
@@ -105,7 +107,8 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 			hasViewPermission,
 			className,
 			renderActions,
-			willBeRemoved
+			willBeRemoved,
+			willBeClosed
 		} = this.props;
 
 		const shouldRenderActions = renderActions && active;
@@ -121,6 +124,7 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 			>
 				{this.renderDeleteMessage(willBeRemoved)}
 				<Container>
+					{this.renderClosedMessage(willBeClosed)}
 					<RoleIndicator color={roleColor} />
 					{this.renderThumbnail(!hideThumbnail)}
 					<Content>
