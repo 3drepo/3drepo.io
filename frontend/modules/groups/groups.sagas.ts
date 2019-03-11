@@ -18,6 +18,7 @@
 import { values } from 'lodash';
 import { put, takeLatest, takeEvery, select, all } from 'redux-saga/effects';
 import { getAngularService, dispatch } from '../../helpers/migration';
+import { calculateTotalMeshes } from '../../helpers/tree';
 
 import * as API from '../../services/api';
 import { GroupsTypes, GroupsActions, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
@@ -51,12 +52,6 @@ export function* fetchGroups({teamspace, modelId, revision}) {
 	}
 	yield put(GroupsActions.togglePendingState(false));
 }
-
-const calculateTotalMeshes = (selectedNodes) => {
-	return selectedNodes
-		.map((x) => x.shared_ids.length)
-		.reduce((acc, val) => acc + val);
-};
 
 export function* setActiveGroup({ group, revision }) {
 	try {
@@ -94,7 +89,7 @@ export function* highlightGroup({ group }) {
 
 			yield TreeService.showNodesBySharedIds(group.objects);
 			yield TreeService.selectNodesBySharedIds(group.objects, color);
-			yield put(TreeActions.getSelectedNodes());
+			// yield put(TreeActions.getSelectedNodes());
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('higlight', 'group', error));
@@ -106,11 +101,9 @@ export function* dehighlightGroup({ group }) {
 		yield put(GroupsActions.removeFromHighlighted(group._id));
 
 		const TreeService = getAngularService('TreeService') as any;
-
 		const nodes = yield TreeService.getNodesFromSharedIds(group.objects);
 
 		yield TreeService.deselectNodes(nodes);
-		// this.setTotalSavedMeshes(group);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('dehiglight', 'group', error));
 	}
@@ -286,6 +279,14 @@ export function* downloadGroups({ teamspace, modelId }) {
 
 export function* showDetails({ group, revision }) {
 	try {
+		yield put(GroupsActions.clearSelectionHighlights());
+		const objectsStatus = yield Viewer.getObjectsStatus();
+
+		if (group.objects && objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
+			group.totalSavedMeshes = calculateTotalMeshes(objectsStatus.highlightedNodes);
+			group.objects = objectsStatus.highlightedNodes;
+		}
+
 		yield put(GroupsActions.setActiveGroup(group, revision));
 		yield put(GroupsActions.setComponentState({
 			showDetails: true,
@@ -355,6 +356,8 @@ export function* updateGroup({ teamspace, modelId, revision, groupId }) {
 		const { data } = yield API.updateGroup(teamspace, modelId, revision, groupId, groupToSave);
 
 		const preparedGroup = prepareGroup(data);
+		preparedGroup.totalSavedMeshes = groupToSave.totalSavedMeshes;
+		
 		yield put(TreeActions.getSelectedNodes());
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
 		yield put(GroupsActions.highlightGroup(preparedGroup));

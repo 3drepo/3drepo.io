@@ -17,7 +17,8 @@ export const prepareGroup = (group) => {
 		statusColor: COLOR.BLACK_54,
 		color: getGroupHexColor(group.color),
 		rules: (group.rules || []).map(prepareCriterion),
-		objects: group.objects || []
+		objects: group.objects || [],
+		totalSavedMeshes: group.totalSavedMeshes || 0
 	};
 };
 

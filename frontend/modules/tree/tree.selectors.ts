@@ -16,6 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
+import { calculateTotalMeshes } from '../../helpers/tree';
 
 export const selectTreeDomain = (state) => Object.assign({}, state.tree);
 
@@ -24,9 +25,5 @@ export const selectSelectedNodes = createSelector(
 );
 
 export const selectTotalMeshes = createSelector(
-	selectTreeDomain, (state) =>
-		state.selectedNodes.length ?
-			state.selectedNodes
-			.map((x) => x.shared_ids.length)
-			.reduce((acc, val) => acc + val) : 0
+	selectTreeDomain, (state) => calculateTotalMeshes(state.selectedNodes)
 );

@@ -43,7 +43,6 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 		const { name, description, color, rules, type, objects } = this.props.group;
 		const currentProps = { name, description, color, rules, type };
 		const initialValues = this.formikRef.current.initialValues;
-
 		const rulesChanged = this.props.group.rules && !isEqual(this.props.group.rules, prevProps.group.rules);
 		const colorChanged = !isEqual(this.props.group.color, prevProps.group.color);
 		const sharedIdsChanged =
@@ -54,7 +53,7 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 			this.props.setIsFormDirty(false);
 		}
 
-		if (rulesChanged || colorChanged || sharedIdsChanged) {
+		if (rulesChanged || colorChanged || sharedIdsChanged || !isEqual(initialValues, currentProps)) {
 			this.props.setIsFormValid(true);
 			this.props.setIsFormDirty(true);
 		}
@@ -96,8 +95,9 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { group: { updateDate, type, description, name, color, rules } } = this.props;
+		const { group: { updateDate, type, description, name, color, rules, totalSavedMeshes } } = this.props;
 		const initialValues = { type, description, name, color, rules };
+
 		return (
 			<Formik
 				initialValues={initialValues}
@@ -111,12 +111,12 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 					<FieldsRow>
 						<StyledTextField
 							label={<LongLabel>Number of objects</LongLabel>}
-							value={this.props.totalMeshes}
+							value={totalSavedMeshes || 0}
 							disabled
 						/>
 						<StyledTextField
-							label="Last update"
-							value={dayjs(updateDate).format('DD MMM')}
+							label="Last updated"
+							value={dayjs(updateDate).format('HH:mm DD MMM')}
 							disabled
 						/>
 						<StyledFormControl>

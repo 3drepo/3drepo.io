@@ -172,6 +172,7 @@ export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
 	if (newGroup) {
 		newGroup.willBeUpdated = false;
 		newGroup.objects = group.objects;
+		newGroup.totalSavedMeshes = group.totalSavedMeshes;
 	}
 	return { ...state, groupsMap, componentState: { ...state.componentState, newGroup } };
 };
