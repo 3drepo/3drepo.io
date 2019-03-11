@@ -15,6 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { UnityUtil } from '../../../globals/unity-util';
+import { getState } from '../../../helpers/migration';
+import { selectMemory } from '../../../modules/viewer';
+
 declare const Viewer: any;
 
 export class ViewerService {
@@ -41,6 +45,8 @@ export class ViewerService {
 	private model: string;
 	private account: string;
 	private heliSpeed: number = 1;
+
+	private stats: boolean = false;
 
 	constructor(
 		public $q: ng.IQService,
@@ -359,13 +365,19 @@ export class ViewerService {
 		return this.viewer;
 	}
 
+	public getMemory() {
+		const MAX_MEMORY = 2130706432; // The maximum memory Unity can allocate
+		const assignedMemory = selectMemory(getState()) * 1024 * 1024; // Memory is in Mb.
+		return Math.min(assignedMemory, MAX_MEMORY);
+	}
+
 	public initViewer() {
 		console.debug('Initiating Viewer');
 		if (this.unityInserted() === true) {
 			return this.callInit();
 		} else if (this.viewer) {
 
-			return this.viewer.insertUnityLoader()
+			return this.viewer.insertUnityLoader(this.getMemory())
 				.then(() => { this.callInit(); })
 				.catch((error) => {
 					console.error('Error inserting Unity script: ', error);
@@ -608,6 +620,67 @@ export class ViewerService {
 		this.viewer.off(...args);
 	}
 
+	public setShadows(type: string) {
+		switch (type) {
+			case 'soft':
+				UnityUtil.enableSoftShadows();
+				break;
+			case 'hard':
+				UnityUtil.enableHardShadows();
+				break;
+			case 'none':
+				UnityUtil.disableShadows();
+				break;
+		}
+	}
+
+	public setStats(val: boolean = false) {
+		if (val !== this.stats) {
+			UnityUtil.toggleStats();
+			this.stats =  val;
+		}
+	}
+
+	public setNearPlane(nearplane: number) {
+		if (nearplane === undefined) { return; }
+		UnityUtil.setDefaultNearPlane(nearplane);
+	}
+
+	public setFarPlaneSamplingPoints(farplaneSample: number) {
+		if (farplaneSample === undefined) { return; }
+		UnityUtil.setFarPlaneSampleSize(farplaneSample);
+	}
+
+	public setFarPlaneAlgorithm(algorithm: string) {
+		switch (algorithm) {
+			case 'box':
+				UnityUtil.useBoundingBoxFarPlaneAlgorithm();
+				break;
+			case 'sphere':
+				UnityUtil.useBoundingSphereFarPlaneAlgorithm();
+				break;
+		}
+	}
+
+	public setShading(shading: string) {
+		switch (shading) {
+			case 'standard':
+				UnityUtil.setRenderingQualityDefault();
+				break;
+			case 'architectural':
+				UnityUtil.setRenderingQualityHigh();
+				break;
+		}
+	}
+
+	public setXray(xray: boolean) {
+		if (xray) {
+			UnityUtil.setXRayHighlightOn();
+		} else {
+			UnityUtil.setXRayHighlightOff();
+		}
+	}
+
 	private helicopterSpeedUpdate(value: number) {
 		if (this.account && this.model && Number.isInteger(value)) {
 			this.heliSpeed = value;
@@ -629,7 +702,6 @@ export class ViewerService {
 			});
 		}
 	}
-
 }
 
 export const ViewerServiceModule = angular
