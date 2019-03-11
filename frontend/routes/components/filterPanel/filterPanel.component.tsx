@@ -18,7 +18,7 @@
 import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
 import * as dayjs from 'dayjs';
-import { omit, isNil } from 'lodash';
+import { omit, isNil, uniqBy, pick, keyBy } from 'lodash';
 
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import CollapseIcon from '@material-ui/icons/ExpandMore';
@@ -91,18 +91,25 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 
 const getSuggestionValue = (suggestion) => suggestion.name;
 
-const mapFiltersToSuggestions = (filters) => {
-	return filters
-		.filter((suggestion) => suggestion.type !== DATA_TYPES.DATE)
-		.map((filter) => filter.values.map((value) => {
-			return {
-				name: `${filter.label}:${value.label}`,
-				label: filter.label,
-				relatedField: filter.relatedField,
-				type: filter.type,
-				value
-			};
-	})).flat();
+const mapFiltersToSuggestions = (filters, selectedFilters) => {
+	const selectedFiltersMap = keyBy(selectedFilters, ({ label, value }) => `${label}:${value.label}`);
+	return filters.reduce((suggestions, currentFilter) => {
+		if (currentFilter.type !== DATA_TYPES.DATE) {
+			for (let index = 0; index < currentFilter.values.length; index++) {
+				const value = currentFilter.values[index];
+				const name = `${currentFilter.label}:${value.label}`;
+
+				if (!selectedFiltersMap[name]) {
+					suggestions.push({
+						...pick(currentFilter, ['label', 'relatedField', 'type']),
+						name,
+						value
+					});
+				}
+			}
+		}
+		return suggestions;
+	}, []);
 };
 
 export class FilterPanel extends React.PureComponent<IProps, IState> {
@@ -123,12 +130,20 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount = () => {
 		this.setState({ selectedFilters: this.props.selectedFilters });
-		this.filterSuggestions = mapFiltersToSuggestions(this.props.filters);
+		this.filterSuggestions = mapFiltersToSuggestions(
+			this.props.filters,
+			this.state.selectedFilters
+		);
 	}
 
-	public componentDidUpdate(prevProps) {
-		if (this.props.filters.length !== prevProps.filters.length) {
-			this.filterSuggestions = mapFiltersToSuggestions(this.props.filters);
+	public componentDidUpdate(prevProps, prevState) {
+		const filtersChanged = this.props.filters.length !== prevProps.filters.length;
+		const selectedFiltersChanged = this.state.selectedFilters.length !== prevState.selectedFilters.length;
+		if (filtersChanged || selectedFiltersChanged) {
+			this.filterSuggestions = mapFiltersToSuggestions(
+				this.props.filters,
+				this.state.selectedFilters
+			);
 		}
 	}
 
@@ -208,7 +223,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		</MenuItem>
 	)
 
-	public getSuggestions = (value) => {
+	public getSuggestions = (value, selectedFilters) => {
 		const inputValue = value.trim().toLowerCase();
 		const inputLength = inputValue.length;
 
@@ -226,10 +241,10 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 			const newSelectedFilters = JSON.parse(event.clipboardData.getData('text'));
 
 			this.setState((prevState) => ({
-				selectedFilters: [
+				selectedFilters: uniqBy([
 					...prevState.selectedFilters,
 					...newSelectedFilters
-				]
+				], (filter) => JSON.stringify(filter))
 			}));
 		} catch (error) {
 			console.error('Unsupported filters format');
@@ -346,7 +361,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 	public onSuggestionsFetchRequested = ({ value }) => {
 		this.setState({
-			suggestions: this.getSuggestions(value)
+			suggestions: this.getSuggestions(value, this.state.selectedFilters)
 		});
 	}
 
