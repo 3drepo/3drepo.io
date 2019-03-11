@@ -131,6 +131,9 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		return 'Model is loading';
 	}
 
+	public listViewRef = React.createRef<HTMLElement>();
+	public listContainerRef = React.createRef<HTMLElement>();
+
 	public componentDidMount() {
 		if (Viewer.viewer.model && !this.state.modelLoaded) {
 			this.setState({ modelLoaded: true });
@@ -141,17 +144,22 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { items, selectedFilters, showDefaultHiddenItems, searchEnabled, sortOrder } = this.props;
+		const { items, selectedFilters, showDefaultHiddenItems, searchEnabled, sortOrder, showDetails } = this.props;
 		const itemsChanged = !isEqual(prevProps.items, items);
 		const sortingChanged = prevProps.sortOrder !== sortOrder;
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
 		const showDefaultHiddenItemsChanged = prevProps.showDefaultHiddenItems !== showDefaultHiddenItems;
 		const searchEnabledChange = prevProps.searchEnabled !== searchEnabled;
+		const detailsWasClosed = prevProps.showDetails !== showDetails && !showDetails;
 
 		const changes = {} as IState;
 
 		if (itemsChanged || filtersChanged || showDefaultHiddenItemsChanged || searchEnabledChange || sortingChanged) {
 			changes.filteredItems = this.filteredItems;
+		}
+
+		if (detailsWasClosed) {
+			this.scrollToFocusedItem(changes.filteredItems || this.state.filteredItems);
 		}
 
 		if (!isEmpty(changes)) {
@@ -161,6 +169,20 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public componentWillUnmount() {
 		this.toggleModelLoadedEvent(false);
+	}
+
+	public scrollToFocusedItem = (items) => {
+		this.listViewRef.current.scrollTop = 0;
+		setTimeout(() => {
+			const activeItemIndex = items.findIndex(({ _id }) => _id === this.props.activeItemId);
+			const { offsetTop, offsetHeight } = this.listViewRef.current.children[0].children[activeItemIndex] as HTMLElement;
+			const maxHeight = this.listViewRef.current.offsetHeight;
+			const isNotVisible = offsetTop > maxHeight;
+
+			if (isNotVisible) {
+				this.listViewRef.current.scrollTop = offsetTop + offsetHeight;
+			}
+		});
 	}
 
 	public toggleModelLoadedEvent = (enabled: boolean) => {
@@ -239,7 +261,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderItemsList = renderWhenTrue(() => (
-		<ListContainer>
+		<ListContainer ref={this.listContainerRef}>
 			{this.state.filteredItems.map((item, index) => (
 				<PreviewListItem
 					{...item}
@@ -257,7 +279,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent className="height-catcher" padding="0">
+			<ViewerPanelContent innerRef={this.listViewRef} className="height-catcher" padding="0">
 				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredItems.length)}
 				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredItems.length)}
 				{this.renderItemsList(this.state.filteredItems.length)}
