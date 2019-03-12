@@ -243,10 +243,9 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 
 	public renderOptions = () => {
 		const options = [{
-			label: 'Copy criteria',
 			Component: this.renderCopyOption
 		}, {
-			label: 'Paste criteria',
+			label: 'Paste filters',
 			onClick: this.togglePasteMode
 		}, {
 			label: 'Deselect',

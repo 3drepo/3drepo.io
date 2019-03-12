@@ -79,7 +79,7 @@ export class CriteriaPasteField extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const errorMessage = !this.state.isValid ? 'Unsupported criteria format' : '';
+		const errorMessage = !this.state.isValid ? 'Unsupported filter format' : '';
 
 		return (
 			<PasteContainer>
@@ -89,7 +89,7 @@ export class CriteriaPasteField extends React.PureComponent<IProps, IState> {
 					onChange={this.handleStateChange}
 					onPaste={this.handleKeyboardPaste}
 					onKeyPress={this.handleEnterPress}
-					placeholder="Paste criteria here"
+					placeholder="Paste filters here"
 					fullWidth
 					autoFocus
 					error={!this.state.isValid}
@@ -98,7 +98,7 @@ export class CriteriaPasteField extends React.PureComponent<IProps, IState> {
 				<PasteButton
 					disabled={!this.state.isValid || !this.state.currentValue.length}
 					onClick={this.handlePasteSave}
-					aria-label="Save pasted criteria"
+					aria-label="Save pasted filters"
 				>
 					<StyledSaveIcon />
 				</PasteButton>

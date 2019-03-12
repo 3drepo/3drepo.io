@@ -154,8 +154,8 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			onChange={this.handleFieldChange}
 			onCriterionSelect={this.handleCriterionSelect}
 			setState={this.props.setCriteriaState}
-			label="Criteria"
-			placeholder="Select first criteria"
+			label="Filters"
+			placeholder="Select first filter"
 			disabled={!this.props.canUpdate}
 			fieldNames={this.props.fieldNames}
 		/>

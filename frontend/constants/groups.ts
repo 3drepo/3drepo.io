@@ -5,6 +5,7 @@ import OfflineBolt from '@material-ui/icons/OfflineBolt';
 import PanTool from '@material-ui/icons/PanTool';
 
 import { COLOR } from '../styles';
+import { capitalize } from '../helpers/rendering';
 
 export const GROUP_PANEL_NAME = 'group';
 
@@ -14,10 +15,10 @@ export const GROUPS_TYPES = {
 };
 
 export const GROUPS_TYPES_LIST = [{
-	label: 'Criteria',
+	label: capitalize(GROUPS_TYPES.SMART),
 	type: GROUPS_TYPES.SMART
 }, {
-	label: 'Normal',
+	label: capitalize(GROUPS_TYPES.NORMAL),
 	type: GROUPS_TYPES.NORMAL
 }];
 
