@@ -167,7 +167,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			{...this.groupData}
 			roleColor={this.groupData.color}
 			createdDate={this.groupData.createdDate}
-			editable={true}
+			editable={this.props.canUpdate}
 			onNameChange={this.handleFieldChange}
 			renderCollapsable={this.renderGroupForm}
 			renderNotCollapsable={() => this.renderRulesField(this.groupData.type === GROUPS_TYPES.SMART)}
@@ -191,9 +191,9 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 				<Actions>
 					<ColorPickerWrapper>
 						<ColorPicker
-							disableUnderline={true}
 							value={this.groupData.color}
 							onChange={this.handleColorChange}
+							disabled={!this.props.canUpdate}
 						/>
 					</ColorPickerWrapper>
 					<TooltipButton
@@ -209,7 +209,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 					onClick={this.handleGroupFormSubmit}
 					mini={true}
 					aria-label="Save group"
-					disabled={!this.isFormValid}
+					disabled={!this.isFormValid || !this.props.canUpdate}
 				>
 					<SaveIcon />
 				</ViewerPanelButton>
