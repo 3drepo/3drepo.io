@@ -30,7 +30,7 @@ import { GroupDetailsForm } from './groupDetailsForm.component';
 import { ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
 import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
 import { CriteriaField } from '../../../../../components/criteriaField/criteriaField.component';
-import { GROUPS_TYPES, GROUP_PANEL_NAME } from '../../../../../../constants/groups';
+import { GROUPS_TYPES, GROUP_PANEL_NAME, GROUP_TYPES_ICONS } from '../../../../../../constants/groups';
 
 interface IProps {
 	activeGroup: any;
@@ -173,6 +173,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			renderNotCollapsable={() => this.renderRulesField(this.groupData.type === GROUPS_TYPES.SMART)}
 			disableExpanding
 			panelName={GROUP_PANEL_NAME}
+			StatusIconComponent={GROUP_TYPES_ICONS[this.groupData.type]}
 		/>
 	));
 

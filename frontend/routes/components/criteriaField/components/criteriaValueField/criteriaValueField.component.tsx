@@ -70,7 +70,7 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 		const hasSwitchedToNextCriterion = selectedId && idChanged;
 		const changes = {} as any;
 
-		if (operatorChanged) {
+		if (operatorChanged || idChanged) {
 			if (hasSwitchedToNextCriterion) {
 				changes.value = value;
 			} else {
