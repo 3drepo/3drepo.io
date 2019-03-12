@@ -183,9 +183,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	public resetActiveGroup = () => {
-		if (!this.props.showDetails) {
-			this.props.resetActiveGroup();
-		}
+		this.props.resetActiveGroup();
 	}
 
 	public toggleViewerEvents = (enabled = true) => {

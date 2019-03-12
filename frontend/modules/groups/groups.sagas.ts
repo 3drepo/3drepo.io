@@ -30,7 +30,8 @@ import {
 	selectFilteredGroups,
 	selectNewGroupDetails,
 	selectActiveGroupDetails,
-	selectSelectedFilters
+	selectSelectedFilters,
+	selectShowDetails
 } from './groups.selectors';
 import { Viewer } from '../../services/viewer/viewer';
 import { MultiSelect } from '../../services/viewer/multiSelect';
@@ -38,7 +39,7 @@ import { prepareGroup, normalizeGroup } from '../../helpers/groups';
 import { selectCurrentUser } from '../currentUser';
 import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { SnackbarActions } from '../snackbar';
-import { TreeActions, selectSelectedNodes } from '../tree';
+import { TreeActions } from '../tree';
 import { searchByFilters } from '../../helpers/searching';
 import { GROUPS_TYPES } from '../../constants/groups';
 
@@ -70,8 +71,9 @@ export function* setActiveGroup({ group, revision }) {
 
 export function* resetActiveGroup() {
 	try {
+		const showDetailsEnabled = yield select(selectShowDetails);
 		yield all([
-			put(GroupsActions.setComponentState({ activeGroup: null })),
+			!showDetailsEnabled ? put(GroupsActions.setComponentState({ activeGroup: null })) : null,
 			put(GroupsActions.clearSelectionHighlights())
 		]);
 	} catch (error) {
@@ -288,6 +290,7 @@ export function* showDetails({ group, revision }) {
 			group.objects = objectsStatus.highlightedNodes;
 		}
 
+		yield put(GroupsActions.toggleColorOverride(group));
 		yield put(GroupsActions.setActiveGroup(group, revision));
 		yield put(GroupsActions.setComponentState({
 			showDetails: true,
@@ -301,6 +304,8 @@ export function* showDetails({ group, revision }) {
 
 export function* closeDetails() {
 	try {
+		const activeGroup = yield select(selectActiveGroupDetails);
+		yield put(GroupsActions.toggleColorOverride(activeGroup));
 		yield put(GroupsActions.setComponentState({ showDetails: false }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('close', 'group details', error));
@@ -412,11 +417,11 @@ const onDeleted = (deletedGroupIds) => {
 	dispatch(GroupsActions.showDeleteInfo(deletedGroupIds));
 
 	setTimeout(() => {
-		dispatch(GroupsActions.deleteGroupsSuccess(deletedGroupIds));
 		dispatch(GroupsActions.setComponentState({
 			showDetails: false,
 			activeGroup: null
 		}));
+		dispatch(GroupsActions.deleteGroupsSuccess(deletedGroupIds));
 	}, 5000);
 };
 
