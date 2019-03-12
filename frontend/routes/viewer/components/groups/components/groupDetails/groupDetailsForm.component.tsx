@@ -41,25 +41,18 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 
 	public componentDidUpdate(prevProps) {
 		const { name, description, color, rules, type, objects } = this.props.group;
-		const currentProps = { name, description, color, rules, type };
+		const currentValues = { name, description, color, rules, type };
 		const initialValues = this.formikRef.current.initialValues;
-		const rulesChanged = this.props.group.rules && !isEqual(this.props.group.rules, prevProps.group.rules);
-		const colorChanged = !isEqual(this.props.group.color, prevProps.group.color);
-		const sharedIdsChanged =
-			this.props.selectedNodes.length && this.areSharedIdsChanged(this.props.selectedNodes, objects);
+		const groupChanged = !isEqual(this.props.group, prevProps.group);
 
-		if (isEqual(initialValues, currentProps)) {
-			this.props.setIsFormValid(false);
-			this.props.setIsFormDirty(false);
-		}
+		const sharedIdsChanged = this.areSharedIdsChanged(this.props.selectedNodes, objects);
 
-		if (rulesChanged || colorChanged || sharedIdsChanged || !isEqual(initialValues, currentProps)) {
-			this.props.setIsFormValid(true);
-			this.props.setIsFormDirty(true);
-		}
+		const isFormDirtyAndValid = !isEqual(initialValues, currentValues) && (groupChanged || sharedIdsChanged);
+		this.props.setIsFormValid(isFormDirtyAndValid);
+		this.props.setIsFormDirty(isFormDirtyAndValid);
 	}
 
-	public areSharedIdsChanged = (selectedNodes, groupObjects) =>
+	public areSharedIdsChanged = (selectedNodes = [], groupObjects = []) =>
 		selectedNodes.every((selectedNode) =>
 			groupObjects.every((groupObject) => !isEqual(
 					selectedNode.shared_ids && selectedNode.shared_ids.length ? selectedNode.shared_ids.sort() : [],

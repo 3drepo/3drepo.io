@@ -40,6 +40,7 @@ import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { SnackbarActions } from '../snackbar';
 import { TreeActions, selectSelectedNodes } from '../tree';
 import { searchByFilters } from '../../helpers/searching';
+import { GROUPS_TYPES } from '../../constants/groups';
 
 export function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(true));
@@ -347,17 +348,20 @@ export function* updateGroup({ teamspace, modelId, revision, groupId }) {
 			objects: []
 		} as any;
 
+		const isNormalGroup = groupDetails.type === GROUPS_TYPES.NORMAL;
 		const objectsStatus = yield Viewer.getObjectsStatus();
-		if (objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
+		if (isNormalGroup && objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
 			groupToSave.totalSavedMeshes = calculateTotalMeshes(objectsStatus.highlightedNodes);
 			groupToSave.objects = objectsStatus.highlightedNodes;
 		}
 
 		const { data } = yield API.updateGroup(teamspace, modelId, revision, groupId, groupToSave);
-
 		const preparedGroup = prepareGroup(data);
-		preparedGroup.totalSavedMeshes = groupToSave.totalSavedMeshes;
-		
+
+		if (isNormalGroup) {
+			preparedGroup.totalSavedMeshes = groupToSave.totalSavedMeshes;
+		}
+
 		yield put(TreeActions.getSelectedNodes());
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
 		yield put(GroupsActions.highlightGroup(preparedGroup));
