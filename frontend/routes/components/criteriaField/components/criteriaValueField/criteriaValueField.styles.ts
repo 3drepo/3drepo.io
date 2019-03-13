@@ -6,7 +6,9 @@ export const RangeInput = styled(TextField)`
 `;
 
 export const SingleInput = styled(TextField)`
-  margin-top: 6px;
+  && {
+		margin-top: ${(props) => props.disabled ? '14px' : '6px' };
+  }
 `;
 
 export const MultipleInput = styled(TextField)`
@@ -44,8 +46,8 @@ export const RangeInputs = styled(Grid)`
 
 export const MultipleInputsContainer = styled(Grid)`
   display: flex;
-  margin-top: 12px;
-  position: relative;
+  margin-top: 14px;
+	position: relative;
 `;
 
 export const MultipleInputs = styled(Grid)`
@@ -63,7 +65,6 @@ export const AddButton = styled.div`
 
 export const NewMultipleInputWrapper = styled.div`
   position: relative;
-  margin-bottom: 12px;
 `;
 
 export const RemoveButton = styled.div`

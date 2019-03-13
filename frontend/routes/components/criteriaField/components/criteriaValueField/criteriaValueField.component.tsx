@@ -218,11 +218,14 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 	});
 
 	public renderInitialState = renderWhenTrue(() => (
-		<SingleInput
-			placeholder="Set value"
-			fullWidth
-			disabled
-		/>
+		<>
+			<InputLabel shrink>Value</InputLabel>
+			<SingleInput
+				placeholder="Set value"
+				fullWidth
+				disabled
+			/>
+		</>
 	));
 
 	public renderLabel = renderWhenTrue(() =>

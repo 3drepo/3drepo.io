@@ -158,7 +158,7 @@ export const MenuItem = styled(MenuItemComponent)`
 `;
 
 export const NewCriterionFooter = styled.div`
-  margin-top: 8px;
+  margin-top: 12px;
   display: flex;
   align-items: center;
   justify-content: ${(props: any) => props.spaced ? 'space-between' : 'flex-end'};
