@@ -9,5 +9,3 @@ export const getWindowHeight = () =>
 export const renderWhenTrue = (Component: JSX.Element | (() => JSX.Element)) => (trueStatement) => {
 	return (trueStatement ? result({ Component }, 'Component') : null) as JSX.Element | JSX.Element[];
 };
-
-export const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);

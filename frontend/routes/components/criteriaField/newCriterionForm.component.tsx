@@ -9,10 +9,22 @@ import Button from '@material-ui/core/Button';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import { Tooltip } from '@material-ui/core';
 
-import { SelectField, FormControl, NewCriterionFooter, OperatorSubheader } from './criteriaField.styles';
+import {
+	SelectField,
+	FormControl,
+	NewCriterionFooter,
+	OperatorSubheader,
+	SelectFieldValue
+} from './criteriaField.styles';
 import { CriteriaValueField } from './components/criteriaValueField/criteriaValueField.component';
 import {
-	CRITERIA_LIST, VALUE_FIELD_MAP, VALUE_DATA_TYPES, REGEX_INFO_URL, CRITERIA_OPERATORS_TYPES, REGEX_INFO_TEXT
+	CRITERIA_LIST,
+	VALUE_FIELD_MAP,
+	VALUE_DATA_TYPES,
+	REGEX_INFO_URL,
+	CRITERIA_OPERATORS_TYPES,
+	REGEX_INFO_TEXT,
+	CRITERIA_OPERATORS_LABELS
 } from '../../../constants/criteria';
 import { AutosuggestField } from '../autosuggestField/autosuggestField.component';
 import { schema, VALIDATIONS_MESSAGES } from '../../../services/validation';
@@ -56,21 +68,27 @@ interface IProps {
 }
 
 class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
-	public renderOperator = ({ operator, label }) => (
-		<MenuItem key={operator} value={operator}>
+	public componentWillUnmount() {
+		this.props.setState(this.props.values);
+	}
+
+	public renderOperator = ({ operator = '', label, disabled = false }) => (
+		<MenuItem key={operator} value={operator} disabled={disabled}>
 			{label}
 		</MenuItem>
 	)
 
-	public renderOperators = () =>
-		CRITERIA_LIST.map(({ name, operators }) => [
+	public renderOperators = () => {
+		const operatorsItems = CRITERIA_LIST.map(({ name, operators }) => [
 				(<OperatorSubheader>{name}</OperatorSubheader>),
 				operators.map(this.renderOperator)
 			]
-		)
+		);
 
-	public componentWillUnmount() {
-		this.props.setState(this.props.values);
+		return [
+			this.renderOperator({ label: 'Set operation', disabled: true }),
+			...operatorsItems
+		];
 	}
 
 	public renderRegexInfo = renderWhenTrue(() => (
@@ -78,6 +96,12 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 			<Tooltip title={REGEX_INFO_TEXT} placement="right"><InfoIcon color="secondary" /></Tooltip>
 		</RegexInfoLink>
 	));
+
+	public renderSelectedOperator = (operator) => (
+		<SelectFieldValue placeholder={!operator}>
+			{CRITERIA_OPERATORS_LABELS[operator] || 'Set operation'}
+		</SelectFieldValue>
+	)
 
 	public render() {
 		const { operator: selectedOperator, _id: selectedId } = this.props.formik.values;
@@ -89,6 +113,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 					<Field name="field" render={({ field }) => (
 						<AutosuggestField
 							{...field}
+							placeholder="Set field"
 							suggestions={this.props.fieldNames}
 						/>
 					)} />
@@ -99,6 +124,8 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 					<Field name="operator" render={({ field }) => (
 						<SelectField
 							{...field}
+							renderValue={this.renderSelectedOperator}
+							displayEmpty
 							MenuProps={{ PaperProps: { style: PaperPropsStyle } }}
 						>
 							{this.renderOperators()}

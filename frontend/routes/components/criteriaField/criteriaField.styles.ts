@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import ChipComponent from '@material-ui/core/Chip';
 import IconButtonComponent from '@material-ui/core/IconButton';
 import FormControlComponent from '@material-ui/core/FormControl';
@@ -139,6 +139,14 @@ export const Operators = styled.ul`
 export const SelectField = styled(SelectFieldComponent)`
   width: 100%;
 `;
+
+const emptySelectFieldValueStyle = css`
+  color: ${COLOR.BLACK_87};
+  opacity: 0.42;
+`;
+export const SelectFieldValue = styled.div`
+  ${(props: any) => props.placeholder && emptySelectFieldValueStyle};
+` as any;
 
 export const MenuItem = styled(MenuItemComponent)`
   && {

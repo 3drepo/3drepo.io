@@ -50,7 +50,7 @@ export class SelectField extends React.PureComponent<any, any> {
 		}
 	}
 
-	public handleMouseMove = (event) => {
+	public handleMouseMove = () => {
 		this.blurItem(this.selectedItem);
 	}
 

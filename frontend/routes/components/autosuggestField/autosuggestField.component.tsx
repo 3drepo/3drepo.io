@@ -28,6 +28,7 @@ interface IProps {
 	label: string;
 	value: string;
 	name: string;
+	placeholder?: string;
 	onChange: (event) => void;
 	onBlur: (event) => void;
 }
@@ -151,7 +152,7 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { value, suggestions } = this.state;
-		const { label, onBlur, name } = this.props;
+		const { label, onBlur, name, placeholder } = this.props;
 
 		return (
 			<Container>
@@ -168,6 +169,7 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 						value,
 						name,
 						onBlur,
+						placeholder,
 						onChange: this.handleChange,
 						inputRef: (node) => {
 							this.popperNode = node;
