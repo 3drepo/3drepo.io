@@ -71,6 +71,7 @@ interface IProps {
 	jobs: any[];
 	revision?: string;
 	isPending?: boolean;
+	fetchingDetailsIsPending?: boolean;
 	activeRiskId?: string;
 	showDetails?: boolean;
 	riskDetails?: any;

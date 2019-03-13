@@ -21,6 +21,7 @@ import { all, put, select, takeLatest } from 'redux-saga/effects';
 import * as API from '../../services/api';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
 import { getRiskPinColor, prepareRisk } from '../../helpers/risks';
+import { prepareComments, prepareComment } from '../../helpers/comments';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
@@ -52,6 +53,22 @@ export function* fetchRisks({teamspace, modelId, revision}) {
 		yield put(DialogActions.showErrorDialog('get', 'risks', error));
 	}
 	yield put(RisksActions.togglePendingState(false));
+}
+
+export function* fetchRisk({teamspace, modelId, riskId}) {
+	yield put(RisksActions.toggleDetailsPendingState(true));
+
+	try {
+		const {data} = yield API.getRisk(teamspace, modelId, riskId);
+		const jobs = yield select(selectJobsList);
+		const preparedRisk = prepareRisk(data, jobs);
+		preparedRisk.comments = yield prepareComments(preparedRisk.comments);
+		yield put(RisksActions.fetchRiskSuccess(preparedRisk));
+	} catch (error) {
+		yield put(RisksActions.fetchRiskFailure());
+		yield put(DialogActions.showErrorDialog('get', 'risk', error));
+	}
+	yield put(RisksActions.toggleDetailsPendingState(false));
 }
 
 const createGroupData = (name, nodes) => {
@@ -187,6 +204,37 @@ export function* updateNewRisk({ newRisk }) {
 		yield put(RisksActions.setComponentState({ newRisk: preparedRisk }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'new risk', error));
+	}
+}
+
+export function* postComment({ teamspace, modelId, riskData }) {
+	try {
+		const { data: comment } = yield API.updateRisk(teamspace, modelId, riskData);
+		const preparedComment = yield prepareComment(comment);
+
+		yield put(RisksActions.createCommentSuccess(preparedComment));
+		yield put(SnackbarActions.show('Risk comment added'));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('post', 'risk comment', error));
+	}
+}
+
+export function* removeComment({ teamspace, modelId, riskData }) {
+	try {
+		const { commentIndex, _id, rev_id, guid } = riskData;
+		const commentData = {
+			comment: '',
+			delete: true,
+			commentIndex,
+			_id,
+			rev_id
+		};
+
+		yield API.updateRisk(teamspace, modelId, commentData);
+		yield put(RisksActions.deleteCommentSuccess(guid));
+		yield put(SnackbarActions.show('Comment removed'));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('remove', 'comment', error));
 	}
 }
 
@@ -491,6 +539,37 @@ export function* unsubscribeOnRiskChanges({ teamspace, modelId }) {
 	risksNotifications.unsubscribeFromCreated(onCreateEvent);
 }
 
+const getCommentsChannel = (teamspace, modelId, riskId) => {
+	const risksNotifications = getRisksChannel(teamspace, modelId);
+	return risksNotifications.getCommentsChatEvents(riskId);
+};
+
+const onUpdateCommentEvent = (updatedComment) => {
+	dispatch(RisksActions.updateCommentSuccess(updatedComment));
+};
+
+const onCreateCommentEvent = (createdComment) => {
+	dispatch(RisksActions.createCommentSuccess(createdComment));
+};
+
+const onDeleteCommentEvent = (deletedComment) => {
+	dispatch(RisksActions.deleteCommentSuccess(deletedComment.guid));
+};
+
+export function* subscribeOnRiskCommentsChanges({ teamspace, modelId, riskId }) {
+	const commentsNotifications = getCommentsChannel(teamspace, modelId, riskId);
+	commentsNotifications.subscribeToCreated(onCreateCommentEvent, this);
+	commentsNotifications.subscribeToUpdated(onUpdateCommentEvent, this);
+	commentsNotifications.subscribeToDeleted(onDeleteCommentEvent, this);
+}
+
+export function* unsubscribeOnRiskCommentsChanges({ teamspace, modelId, riskId }) {
+	const commentsNotifications = getCommentsChannel(teamspace, modelId, riskId);
+	commentsNotifications.unsubscribeFromCreated(onCreateCommentEvent, this);
+	commentsNotifications.unsubscribeFromUpdated(onUpdateCommentEvent, this);
+	commentsNotifications.unsubscribeFromDeleted(onDeleteCommentEvent, this);
+}
+
 export function* setNewRisk() {
 	const risks = yield select(selectRisks);
 	const jobs = yield select(selectJobsList);
@@ -533,8 +612,11 @@ export function* onFiltersChange({ selectedFilters }) {
 
 export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_RISKS, fetchRisks);
+	yield takeLatest(RisksTypes.FETCH_RISK, fetchRisk);
 	yield takeLatest(RisksTypes.SAVE_RISK, saveRisk);
 	yield takeLatest(RisksTypes.UPDATE_RISK, updateRisk);
+	yield takeLatest(RisksTypes.POST_COMMENT, postComment);
+	yield takeLatest(RisksTypes.REMOVE_COMMENT, removeComment);
 	yield takeLatest(RisksTypes.RENDER_PINS, renderPins);
 	yield takeLatest(RisksTypes.DOWNLOAD_RISKS, downloadRisks);
 	yield takeLatest(RisksTypes.PRINT_RISKS, printRisks);
@@ -547,6 +629,8 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_CHANGES, unsubscribeOnRiskChanges);
 	yield takeLatest(RisksTypes.FOCUS_ON_RISK, focusOnRisk);
 	yield takeLatest(RisksTypes.SET_NEW_RISK, setNewRisk);
+	yield takeLatest(RisksTypes.SUBSCRIBE_ON_RISK_COMMENTS_CHANGES, subscribeOnRiskCommentsChanges);
+	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_COMMENTS_CHANGES, unsubscribeOnRiskCommentsChanges);
 	yield takeLatest(RisksTypes.UPDATE_NEW_RISK, updateNewRisk);
 	yield takeLatest(RisksTypes.ON_FILTERS_CHANGE, onFiltersChange);
 }

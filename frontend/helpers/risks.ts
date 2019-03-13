@@ -1,6 +1,24 @@
+/**
+ *  Copyright (C) 2019 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import { omit, get } from 'lodash';
 import { getAPIUrl } from '../services/api';
 import { RISK_LEVELS_COLOURS, RISK_LEVELS_ICONS, RISK_LEVELS, LEVELS } from '../constants/risks';
+import { filterRiskMitigationComments } from './comments';
 import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
 
 export const prepareRisk = (risk, jobs = []) => {
@@ -9,7 +27,9 @@ export const prepareRisk = (risk, jobs = []) => {
 		? getAPIUrl(risk.viewpoint.screenshot)
 		: (risk.descriptionThumbnail || '');
 
-	const levelOfRisk = risk.level_of_risk || calculateLevelOfRisk(risk.likelihood, risk.consequence);
+	const minLikelihood = risk.likelihood; // TODO
+	const minConsequence = getMinConsequence(risk.comments) || risk.consequence;
+	const levelOfRisk = risk.level_of_risk || calculateLevelOfRisk(minLikelihood, minConsequence);
 	const { Icon, color } = getRiskStatus(levelOfRisk, risk.mitigation_status);
 	const roleColor = get(jobs.find((job) => job.name === get(risk.assigned_roles, '[0]')), 'color');
 
@@ -24,7 +44,11 @@ export const prepareRisk = (risk, jobs = []) => {
 		StatusIconComponent: Icon,
 		statusColor: color,
 		roleColor,
-		level_of_risk: levelOfRisk
+		level_of_risk: levelOfRisk,
+		min_likelihood: minLikelihood,
+		min_consequence: minConsequence,
+		new_likelihood: minLikelihood,
+		new_consequence: minConsequence
 	};
 };
 
@@ -48,6 +72,13 @@ export const calculateLevelOfRisk = (likelihood: string, consequence: string): n
 	}
 
 	return levelOfRisk;
+};
+
+export const getMinConsequence = (comments: any[]) => {
+	let minValue;
+	console.debug("getMinConsequence");
+	console.debug(filterRiskMitigationComments(comments));
+	return minValue;
 };
 
 export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => {

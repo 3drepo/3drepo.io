@@ -18,15 +18,35 @@
 import * as React from 'react';
 
 import { Log } from './components/log/log.component';
-import { Container } from './logList.styles';
+import { Container, LoaderContainer } from './logList.styles';
+import { Loader } from '../../components/loader/loader.component';
 
 interface IProps {
 	items: any[];
+	isPending: boolean;
+	teamspace: string;
+	removeLog: (index, guid) => void;
 }
 
 export class LogList extends React.PureComponent<IProps, any> {
 	public renderLogItem = (item, index) => {
-		return <Log key={index} {...item} />;
+		return (
+			<Log
+				{...item}
+				key={item.created}
+				removeLog={this.props.removeLog}
+				index={index}
+				teamspace={this.props.teamspace}
+			/>
+		);
+	}
+
+	public renderLoader = () => {
+		return (
+			<LoaderContainer>
+				<Loader size={18} />
+			</LoaderContainer>
+		);
 	}
 
 	public render() {

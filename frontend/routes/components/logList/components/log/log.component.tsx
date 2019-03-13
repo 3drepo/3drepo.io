@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import { DateTime } from '../../../dateTime/dateTime.component';
-import DynamicUsername from '../..//../dynamicUsername/dynamicUsername.container';
+import DynamicUsername from '../../../dynamicUsername/dynamicUsername.container';
 import {
 	Container,
 	UserMessage,
@@ -33,6 +33,7 @@ import {
 	ScreenshotWrapper
 } from './log.styles';
 
+import { isRiskMitigationComment } from '../../../../../helpers/comments';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import {
 	LEVELS_OF_RISK,
@@ -51,6 +52,13 @@ interface IProps {
 	companyName: string;
 	userName: string;
 	teamspace: string;
+	guid: string;
+	sealed: boolean;
+	index: number;
+	removeLog: (index, guid) => void;
+	likelihood: number;
+	consequence: number;
+	mitigation: string;
 }
 
 export class Log extends React.PureComponent<IProps, any> {
@@ -63,15 +71,15 @@ export class Log extends React.PureComponent<IProps, any> {
 	}
 
 	get isCommentWithScreenshot() {
-		return Boolean(this.props.comment) && this.isScreenshot;
+		return this.isScreenshot;
 	}
 
 	get isPlainComment() {
-		return Boolean(this.props.comment) && !this.isScreenshot;
+		return Boolean(this.props.comment) && !this.isScreenshot && !this.isAction;
 	}
 
 	get isRiskMitigationComment() {
-		return Boolean(this.props.mitigation) && undefined !== this.props.likelihood && undefined !== this.props.consequence;
+		return isRiskMitigationComment(this.props.mitigation, this.props.likelihood, this.props.consequence);
 	}
 
 	get riskLikelihood() {
@@ -82,6 +90,10 @@ export class Log extends React.PureComponent<IProps, any> {
 	get riskConsequence() {
 		return undefined !== this.props.consequence && RISK_CONSEQUENCES.length > this.props.consequence ?
 			RISK_CONSEQUENCES[this.props.consequence].name : "Unassigned";
+	}
+
+	public removeComment = () => {
+		this.props.removeLog(this.props.index, this.props.guid);
 	}
 
 	public renderRiskMitigationMessage = renderWhenTrue(
@@ -104,19 +116,15 @@ export class Log extends React.PureComponent<IProps, any> {
 		</>
 	);
 
-	public renderUserMessage = renderWhenTrue(
+	public renderUserMessage = renderWhenTrue(() => (
 		<UserMessage>{this.props.comment}</UserMessage>
-	);
+	));
 
-	public renderSystemMessage = renderWhenTrue(
+	public renderSystemMessage = renderWhenTrue(() => (
 		<SystemMessage>
-			{this.props.action ? this.props.action.text + " " : null}
-			updated {this.props.action && this.props.action.from ? " from " + this.props.action.from + " " : null}
-			{this.props.action && this.props.action.to ? " to " + this.props.action.to + " " : null}
-			{this.props.owner ? " by " + this.props.owner + " " : null}
-			at <DateTime value={this.props.created as any} format="HH:mm DD MMM" />
+			{this.props.comment}
 		</SystemMessage>
-	);
+	));
 
 	public renderScreenshotMessage = renderWhenTrue(
 		<>

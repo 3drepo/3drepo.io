@@ -24,7 +24,10 @@ import {
 	RisksActions,
 	selectActiveRiskDetails,
 	selectExpandDetails,
+	selectLogs,
+	selectFetchingDetailsIsPending,
 	selectNewComment,
+	selectFailedToLoad,
 	selectAssociatedActivities
 } from '../../../../../../modules/risks';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
@@ -38,6 +41,8 @@ const mapStateToProps = createStructuredSelector({
 	risk: selectActiveRiskDetails,
 	newComment: selectNewComment,
 	expandDetails: selectExpandDetails,
+	logs: selectLogs,
+	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
 	associatedActivities: selectAssociatedActivities,
 	myJob: selectMyJob,
 	currentUser: selectCurrentUser
@@ -45,9 +50,14 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setState: RisksActions.setComponentState,
+	fetchRisk: RisksActions.fetchRisk,
 	updateRisk: RisksActions.updateRisk,
+	postComment: RisksActions.postComment,
+	removeComment: RisksActions.removeComment,
 	updateNewRisk: RisksActions.updateNewRisk,
 	showNewPin: RisksActions.showNewPin,
+	subscribeOnRiskCommentsChanges: RisksActions.subscribeOnRiskCommentsChanges,
+	unsubscribeOnRiskCommentsChanges: RisksActions.unsubscribeOnRiskCommentsChanges,
 	showScreenshotDialog: DialogActions.showScreenshotDialog
 }, dispatch);
 

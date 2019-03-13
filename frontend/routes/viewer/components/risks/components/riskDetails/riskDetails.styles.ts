@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
 
+import { COLOR } from '../../../../../../styles/colors';
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 
 export const StyledFormControl = styled(FormControl)``;
@@ -26,6 +27,21 @@ export const StyledFormControl = styled(FormControl)``;
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+
+  ${TextFieldStyles.Container},
+  ${StyledFormControl} {
+    margin: 8px 0;
+  }
+`;
+
+export const MitigationInputContainer = styled.div`
+  border: 1px solid ${COLOR.BLACK_6};
+  border-radius: 10px;
+  box-shadow: 0 2px 5px ${COLOR.BLACK_6};
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
   overflow: hidden;
 
   ${TextFieldStyles.Container},
