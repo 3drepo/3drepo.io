@@ -24,71 +24,71 @@ import List from '@material-ui/core/List';
 import { COLOR } from '../../../../styles/colors';
 
 export const Property = styled.div`
-  color: ${COLOR.BLACK};
-  width: ${(props: any) => props.width ? `${props.width}px` : 'auto'};
+	color: ${COLOR.BLACK};
+	width: ${(props: any) => props.width ? `${props.width}px` : 'auto'};
 ` as any;
 
 export const PropertyWrapper = styled.div`
-  display: flex;
+	display: flex;
 
-  ${Property} {
-    margin-right: 30px;
-  }
+	${Property} {
+		margin-right: 30px;
+	}
 `;
 
 export const Item = styled(ListItem)`
-  display: flex;
-  flex-direction: column;
-  border-bottom: 1px solid ${COLOR.BLACK_20};
+	display: flex;
+	flex-direction: column;
+	border-bottom: 1px solid ${COLOR.BLACK_20};
 
-  && {
-    justify-content: space-between;
-    padding: 22px 30px;
-    background-color: ${(props: any) => props.last ? 'white' : COLOR.BLACK_6};
-    border-bottom: 1px solid ${COLOR.BLACK_20};
-  }
+	&& {
+		justify-content: space-between;
+		padding: 22px 30px;
+		background-color: ${(props: any) => props.last ? 'white' : COLOR.BLACK_6};
+		border-bottom: 1px solid ${COLOR.BLACK_20};
+	}
 
-  ${Property} {
-    font-weight: ${(props: any) => props.last ? '500' : '200'};
-  }
+	${Property} {
+		font-weight: ${(props: any) => props.last ? '500' : '200'};
+	}
 ` as any;
 
 export const Row = styled.div`
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  justify-content: space-between;
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	justify-content: space-between;
 `;
 
 export const Description = styled.div`
-  color: ${COLOR.BLACK_40};
-  align-self: flex-start;
-  margin-top: 10px;
+	color: ${COLOR.BLACK_40};
+	align-self: flex-start;
+	margin-top: 10px;
 `;
 
 export const Message = styled.p`
-  width: 100%;
-  text-align: center;
-  margin: 22px 0 0;
+	width: 100%;
+	text-align: center;
+	margin: 22px 0 0;
 `;
 
 export const StyledDialogActions = styled(DialogActions)`
 	&& {
 		margin: 0;
-    padding: 22px;
+		padding: 22px;
 	}
 `;
 
 export const StyledDialogContent = styled(DialogContent)`
 	&& {
-    min-width: 480px;
+		min-width: 480px;
 		padding: 0;
 	}
 `;
 
 export const StyledList = styled(List)`
 	&& {
-    padding-bottom: 0;
-    padding-top: 0;
+		padding-bottom: 0;
+		padding-top: 0;
 	}
 `;

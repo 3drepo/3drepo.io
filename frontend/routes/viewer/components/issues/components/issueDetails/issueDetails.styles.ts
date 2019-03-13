@@ -20,6 +20,6 @@ import styled from 'styled-components';
 export const Container = styled.div``;
 
 export const DescriptionImage = styled.div`
-  max-height: 250px;
-  overflow: hidden;
+	max-height: 250px;
+	overflow: hidden;
 `;

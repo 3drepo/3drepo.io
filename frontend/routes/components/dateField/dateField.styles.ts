@@ -19,9 +19,9 @@ import styled from 'styled-components';
 import { DatePicker } from 'material-ui-pickers';
 
 export const Container = styled.div`
-  margin-top: 16px;
+	margin-top: 16px;
 `;
 
 export const StyledDatePicker = styled(DatePicker)`
-  width: 100%;
+	width: 100%;
 `;

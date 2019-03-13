@@ -22,7 +22,7 @@ const previewStateStyles = css`
 	cursor: pointer;
 	transition: opacity 200ms ease-in-out;
 
-  &:hover {
+	&:hover {
 		opacity: 0.8;
 	}
 `;
@@ -36,6 +36,6 @@ export const StyledImage = styled(Img)`
 	object-fit: cover;
 
 	.new-comment & {
-    max-height: 150px;
+		max-height: 150px;
 	}
 ` as any;

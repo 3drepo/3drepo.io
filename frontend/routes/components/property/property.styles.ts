@@ -19,16 +19,16 @@ import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 
 export const Wrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 10px;
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 10px;
 `;
 
 export const Name = styled.div`
-  font-size: 10px;
-  color: ${COLOR.BLACK_40};
+	font-size: 10px;
+	color: ${COLOR.BLACK_40};
 `;
 
 export const Value = styled.div`
-  font-size: 16px;
+	font-size: 16px;
 `;

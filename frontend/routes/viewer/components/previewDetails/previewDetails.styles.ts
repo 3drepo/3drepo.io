@@ -65,8 +65,8 @@ export const CollapsableContent = styled.div`
 
 export const StyledForm = styled(Form)`
 	&& {
-	  width: 100%;
-    padding-right: 4px !important;
+		width: 100%;
+		padding-right: 4px !important;
 	}
 `;
 

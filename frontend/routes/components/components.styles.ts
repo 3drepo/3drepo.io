@@ -21,46 +21,46 @@ import { COLOR } from '../../styles';
 import { IconButton, Button } from '@material-ui/core';
 
 const BaseStyles = styled(Grid)`
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
 `;
 
 export const ItemLabel = styled(BaseStyles)`
-  font-size: 14px;
-  color: ${COLOR.BLACK_60};
+	font-size: 14px;
+	color: ${COLOR.BLACK_60};
 `;
 
 export const ItemLabelDetail = styled(BaseStyles)`
-  font-size: 10px;
-  color: ${COLOR.BLACK_40};
-  line-height: 13px;
+	font-size: 10px;
+	color: ${COLOR.BLACK_40};
+	line-height: 13px;
 `;
 
 export const BarIconButton = styled(IconButton)`
-  && {
-    color: rgba(255, 255, 255, 0.87);
-  }
+	&& {
+		color: rgba(255, 255, 255, 0.87);
+	}
 
-  &:first-child {
-    margin-right: -18px;
-  }
+	&:first-child {
+		margin-right: -18px;
+	}
 
-  &:hover {
-    background-color: ${COLOR.WHITE}
-  }
+	&:hover {
+		background-color: ${COLOR.WHITE}
+	}
 `;
 
 export const UserActionButton = styled(Button)`
-  && {
-    color: ${COLOR.WHITE};
-    text-shadow: 0 0 3px ${COLOR.BLACK_20};
-    min-width: 0;
-    min-height: 0;
-    padding: 0;
-  }
+	&& {
+		color: ${COLOR.WHITE};
+		text-shadow: 0 0 3px ${COLOR.BLACK_20};
+		min-width: 0;
+		min-height: 0;
+		padding: 0;
+	}
 
-  &&:hover {
-    background-color: transparent;
-  }
+	&&:hover {
+		background-color: transparent;
+	}
 `;

@@ -20,15 +20,15 @@ import Grid from '@material-ui/core/Grid';
 import Radio from '@material-ui/core/Radio';
 
 export const RadioContainer = styled(Grid)`
-  && {
-    width: 100%;
-  }
+	&& {
+		width: 100%;
+	}
 `;
 
 export const RadioButton = styled(Radio)`
-  && {
-    height: 40px;
-    width: 40px;
-    box-sizing: border-box;
-  }
+	&& {
+		height: 40px;
+		width: 40px;
+		box-sizing: border-box;
+	}
 `;

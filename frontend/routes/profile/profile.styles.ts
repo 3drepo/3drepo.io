@@ -58,14 +58,14 @@ export const StyledButtonContainer = styled.div`
 `;
 
 export const DeleteButton = styled(Button)`
-  && {
-    color: ${COLOR.WHITE_87};
-	background-color:  rgba(234, 57, 57, 0.87);
-  }
+	&& {
+		color: ${COLOR.WHITE_87};
+		background-color:  rgba(234, 57, 57, 0.87);
+	}
 
-  &&:hover {
-	background-color:  rgba(234, 57, 57, 1);
-  }
+	&&:hover {
+		background-color:  rgba(234, 57, 57, 1);
+	}
 `;
 
 export const StyledTextField = styled(TextField)``;
@@ -93,14 +93,14 @@ export const FieldsRow = styled(Grid)`
 export const StyledDropzone = styled(Dropzone)`
 	&& {
 		min-width: 110px;
-    min-height: 110px;
-    margin-right: 24px;
-    height: 110px;
-    width: 110px;
-    margin-top: 24px;
-    box-sizing: border-box;
+		min-height: 110px;
+		margin-right: 24px;
+		height: 110px;
+		width: 110px;
+		margin-top: 24px;
+		box-sizing: border-box;
 		border: 1px solid #dcdcdc;
-    border-radius: 100%;
+		border-radius: 100%;
 		cursor: pointer;
 		overflow: hidden;
 	}

@@ -23,13 +23,13 @@ import FormControl from '@material-ui/core/FormControl';
 import TableCell from '@material-ui/core/TableCell';
 
 export const StyledField = styled(Field)`
-  margin-right: 10px;
+	margin-right: 10px;
 `;
 
 export const SelectWrapper = styled(FormControl)`
-  &&:not(:first-child) {
-    margin-top: 15px;
-  }
+	&&:not(:first-child) {
+		margin-top: 15px;
+	}
 `;
 
 export const FieldWrapper = styled(FormControl)``;
@@ -45,7 +45,7 @@ export const Row = styled.div`
 
 	${FieldWrapper} {
 		margin-right: 10px;
-    width: 100%;
+		width: 100%;
 	}
 
 	${SelectWrapper} {

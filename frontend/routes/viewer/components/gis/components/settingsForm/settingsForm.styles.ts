@@ -22,18 +22,18 @@ import Button from '@material-ui/core/Button';
 import { Form } from 'formik';
 
 export const StyledForm = styled(Form)`
-  display: flex;
-  flex-direction: column;
+	display: flex;
+	flex-direction: column;
 `;
 
 export const Header = styled.div``;
 
 export const Headline = styled(Typography)`
-  && {
-    margin-top: 24px;
-  }
+	&& {
+		margin-top: 24px;
+	}
 `;
 
 export const StyledTextField = styled(TextField)`
-  width: 100%;
+	width: 100%;
 `;

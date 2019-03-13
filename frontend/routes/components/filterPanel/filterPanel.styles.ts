@@ -24,7 +24,7 @@ import IconButton from '@material-ui/core/IconButton';
 import MoreIcon from '@material-ui/icons/MoreVert';
 
 export const Container = styled.div`
-  background-color: ${COLOR.WHITE};
+	background-color: ${COLOR.WHITE};
 	position: relative;
 	display: flex;
 	flex-direction: column;
@@ -34,8 +34,8 @@ export const Container = styled.div`
 ` as any;
 
 export const SelectedFilters = styled.div`
-  display: flex;
-  flex-wrap: wrap;
+	display: flex;
+	flex-wrap: wrap;
 	padding: 4px 40px 0 8px;
 	overflow: ${(props: any) => props.filtersOpen ? 'hidden' : 'auto'};
 	min-height: ${(props: any) => props.empty ? '0' : '45px'};
@@ -44,17 +44,17 @@ export const SelectedFilters = styled.div`
 ` as any;
 
 export const InputContainer = styled.div`
-  display: block;
+	display: block;
 	justify-content: flex-end;
 	position: relative;
 	margin: 0;
 	min-height: ${(props: any) => props.menuHidden ? `52px` : '0'};
 
-  .react-autosuggest__container {
+	.react-autosuggest__container {
 		height: 100%;
-    flex: 1;
-    position: absolute;
-    bottom: 0;
+		flex: 1;
+		position: absolute;
+		bottom: 0;
 		left: 0;
 		right: 0;
 
@@ -68,7 +68,7 @@ export const InputContainer = styled.div`
 				opacity: 1;
 			}
 		}
-  }
+	}
 ` as any;
 
 export const SuggestionsList = styled(Popper)`
@@ -93,7 +93,7 @@ export const SuggestionsList = styled(Popper)`
 	.react-autosuggest__suggestion > div {
 		font-size: 12px;
 		flex: 1;
-  }
+	}
 `;
 
 export const StyledTextField = styled(TextField)`
@@ -102,10 +102,10 @@ export const StyledTextField = styled(TextField)`
 `;
 
 export const StyledChip = styled(Chip)`
-  && {
+	&& {
 		margin-right: 4px;
-    margin-top: 3px;
-    margin-bottom: 3px;
+		margin-top: 3px;
+		margin-bottom: 3px;
 	}
 `;
 
@@ -114,14 +114,14 @@ export const FiltersButton = styled(IconButton)`
 
 	&& {
 		position: absolute;
-    top: 8px;
+		top: 8px;
 		width: 28px;
 		height: 28px;
 		right: 8px;
 
 		svg {
 			bottom: 0;
-	    position: absolute;
+			position: absolute;
 		}
 	}
 `;
@@ -137,7 +137,7 @@ export const StyledIconButton = styled(IconButton)`
 		width: 28px;
 		height: 28px;
 		position: absolute;
-    bottom: 10px;
+		bottom: 10px;
 		right: 10px;
 	}
 `;
@@ -150,6 +150,6 @@ export const StyledMoreIcon = styled(MoreIcon)`
 `;
 
 export const ButtonWrapper = styled.div`
-  position: relative;
+	position: relative;
 	height: 50px;
 `;

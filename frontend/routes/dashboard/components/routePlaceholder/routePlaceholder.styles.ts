@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-  position: relative;
-  padding-top: 100px;
-  height: 300px;
+	position: relative;
+	padding-top: 100px;
+	height: 300px;
 `;

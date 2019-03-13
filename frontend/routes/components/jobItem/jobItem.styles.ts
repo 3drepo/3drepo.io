@@ -22,15 +22,15 @@ import { COLOR } from '../../../styles';
 import { ellipsis } from '../../../styles';
 
 export const Name = styled(Grid)`
-  ${ellipsis('calc(100% - 18px)')};
-  font-size: 14px;
+	${ellipsis('calc(100% - 18px)')};
+	font-size: 14px;
 	color: ${COLOR.BLACK_60};
 `;
 
 export const Color = styled(Grid)`
-  width: 6px;
-  height: 6px;
-  border-radius: 100%;
-  background-color: ${(props) => props.color || COLOR.BLACK_6};
-  margin-right: 12px !important;
+	width: 6px;
+	height: 6px;
+	border-radius: 100%;
+	background-color: ${(props) => props.color || COLOR.BLACK_6};
+	margin-right: 12px !important;
 `;

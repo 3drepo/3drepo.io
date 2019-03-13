@@ -43,7 +43,7 @@ export const StyledTextField = styled(TextField)`
 		textarea {
 			min-height: 17px;
 			padding-right: 56px;
-	        box-sizing: border-box;
+			box-sizing: border-box;
 		}
 	}
 `;

@@ -21,5 +21,5 @@ import { FONT_WEIGHT } from '../../../../styles';
 export const Container = styled.div``;
 
 export const Model = styled.div`
-  font-weight: ${FONT_WEIGHT.BOLD};
+	font-weight: ${FONT_WEIGHT.BOLD};
 `;

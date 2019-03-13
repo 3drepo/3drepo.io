@@ -20,78 +20,78 @@ import { COLOR } from '../../../../../styles/colors';
 import { Image } from '../../../../components/image';
 
 export const Container = styled.div`
-  cursor: ${(props: any) => props.clickable ? 'pointer' : 'default'};
-  padding: 10px;
+	cursor: ${(props: any) => props.clickable ? 'pointer' : 'default'};
+	padding: 10px;
 ` as any;
 
 export const UserMessage = styled.span`
-  background-color: ${COLOR.WHITE};
-  color: ${COLOR.BLACK_60};
-  padding: 6px;
-  box-shadow: 0 2px 5px ${COLOR.BLACK_6};
-  display: inline-block;
-  font-size: 12px;
-  max-width: 82.5%;
+	background-color: ${COLOR.WHITE};
+	color: ${COLOR.BLACK_60};
+	padding: 6px;
+	box-shadow: 0 2px 5px ${COLOR.BLACK_6};
+	display: inline-block;
+	font-size: 12px;
+	max-width: 82.5%;
 `;
 
 export const SystemMessage = styled.span`
-  color: ${COLOR.BLACK_60};
-  padding: 4px 0;
-  display: inline-block;
-  font-size: 12px;
+	color: ${COLOR.BLACK_60};
+	padding: 4px 0;
+	display: inline-block;
+	font-size: 12px;
 `;
 
 export const ScreenshotMessage = styled.span`
-  background-color: ${COLOR.WHITE};
-  padding: 6px;
-  box-shadow: 0 2px 5px ${COLOR.BLACK_6};
-  display: block;
-  font-size: 12px;
-  border-radius: 0 0 2px 2px;
+	background-color: ${COLOR.WHITE};
+	padding: 6px;
+	box-shadow: 0 2px 5px ${COLOR.BLACK_6};
+	display: block;
+	font-size: 12px;
+	border-radius: 0 0 2px 2px;
 `;
 
 export const Info = styled.div`
-  color: ${COLOR.BLACK_40};
-  display: flex;
-  font-size: 11px;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 8px;
+	color: ${COLOR.BLACK_40};
+	display: flex;
+	font-size: 11px;
+	align-items: center;
+	justify-content: space-between;
+	margin-top: 8px;
 `;
 
 export const ScreenshotWrapper = styled.div`
-  width: 100%;
-  padding-top: 42%;
-  overflow: hidden;
-  position: relative;
-  margin: 8px 0 0;
-  border-radius: ${(props: any) => props.withMessage ? '2px 2px 0 0' : '2px'};
+	width: 100%;
+	padding-top: 42%;
+	overflow: hidden;
+	position: relative;
+	margin: 8px 0 0;
+	border-radius: ${(props: any) => props.withMessage ? '2px 2px 0 0' : '2px'};
 ` as any;
 
 export const Screenshot = styled(Image)`
-  img {
-    display: block;
-    max-width: 100%;
-    width: 100%;
-    height: auto;
-    margin: auto;
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-  }
+	img {
+		display: block;
+		max-width: 100%;
+		width: 100%;
+		height: auto;
+		margin: auto;
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+	}
 ` as any;
 
 export const MessageContainer = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  position: relative;
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	position: relative;
 `;
 
 export const RemoveButtonWrapper = styled.div`
-  position: absolute;
-  right: 0;
-  top: ${(props: any) => props.screenshot ? 0 : '-8px'};
+	position: absolute;
+	right: 0;
+	top: ${(props: any) => props.screenshot ? 0 : '-8px'};
 ` as any;

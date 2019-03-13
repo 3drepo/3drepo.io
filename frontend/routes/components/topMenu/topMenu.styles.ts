@@ -19,17 +19,17 @@ import styled from 'styled-components';
 import * as LogoStyles from '../logo/logo.styles';
 
 export const Container = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  position: relative;
-  padding-right: 5px;
-  height: 80px;
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	position: relative;
+	padding-right: 5px;
+	height: 80px;
 
-  ${LogoStyles.Image} {
-    position: absolute;
-    top: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-  }
+	${LogoStyles.Image} {
+		position: absolute;
+		top: 15px;
+		left: 50%;
+		transform: translateX(-50%);
+	}
 `;

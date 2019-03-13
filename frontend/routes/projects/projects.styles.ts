@@ -27,49 +27,49 @@ import * as UserManagementTab from '../components/userManagementTab/userManageme
 const OPTIONS_HEIGHT = '100px';
 
 export const Container = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
 
-  ${UserManagementTab.Content} {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-  }
+	${UserManagementTab.Content} {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+	}
 `;
 
 export const Options = styled(Grid)`
-  width: 100%;
-  padding: 0;
-  min-height: ${OPTIONS_HEIGHT};
+	width: 100%;
+	padding: 0;
+	min-height: ${OPTIONS_HEIGHT};
 
-  & > * {
-    padding: 24px;
-    display: flex;
-    align-items: center;
-  }
+	& > * {
+		padding: 24px;
+		display: flex;
+		align-items: center;
+	}
 
-  ${CellSelect.StyledSelect} {
-    width: 100%;
-  }
+	${CellSelect.StyledSelect} {
+		width: 100%;
+	}
 `;
 
 export const SelectContainer = styled(Grid)`
-  width: 45%;
+	width: 45%;
 `;
 
 export const IconLeft = styled(KeyboardArrowLeft)`
-  margin-left: -8px;
+	margin-left: -8px;
 `;
 
 export const IconRight = styled(KeyboardArrowRight) `
-  margin-right: -8px;
+	margin-right: -8px;
 `;
 
 export const SwitchButton = styled(Button)`
-  && {
-    padding-left: 8px;
-    padding-right: 8px;
-  }
+	&& {
+		padding-left: 8px;
+		padding-right: 8px;
+	}
 `;

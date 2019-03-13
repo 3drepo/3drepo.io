@@ -88,17 +88,17 @@ export const Version = styled(Grid)`
 `;
 
 export const StyledGrid = styled(Grid)`
-  min-width: 400px;
+	min-width: 400px;
 `;
 
 export const StyledFormControl = styled(FormControl)`
-  width: 100%;
+	width: 100%;
 
-  && {
-    margin-top: 16px;
-    margin-bottom: 8px;
-    margin-left: 12px;
-  }
+	&& {
+		margin-top: 16px;
+		margin-bottom: 8px;
+		margin-left: 12px;
+	}
 `;
 
 export const ButtonContainer = styled.div`

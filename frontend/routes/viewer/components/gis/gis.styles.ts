@@ -24,52 +24,52 @@ import MapIcon from '@material-ui/icons/Map';
 import { COLOR } from './../../../../styles/colors';
 
 export const StyledSelect = styled(Select)`
-  margin-bottom: 12px;
+	margin-bottom: 12px;
 
-  && {
-    width: 100%;
+	&& {
+		width: 100%;
 
-    [role="button"] {
-      padding: 16px 0;
-      color: ${COLOR.BLACK};
-    }
-  }
+		[role="button"] {
+			padding: 16px 0;
+			color: ${COLOR.BLACK};
+		}
+	}
 `;
 
 export const StyledMapIcon = styled(MapIcon)`
-  && {
-    color: ${COLOR.BLACK_60};
-  }
+	&& {
+		color: ${COLOR.BLACK_60};
+	}
 `;
 
 export const VisibilityButton = styled(IconButton)`
-  && {
-    color: '${COLOR.BLACK_60}';
-    position: absolute;
-    right: -12px;
-  }
+	&& {
+		color: '${COLOR.BLACK_60}';
+		position: absolute;
+		right: -12px;
+	}
 `;
 
 export const MapLayer = styled.div`
-  width: 100%;
-  display: flex;
-  align-items: center;
-  padding: 12px 0;
-  justify-content: space-between;
-  position: relative;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	padding: 12px 0;
+	justify-content: space-between;
+	position: relative;
 
-  :last-child {
-    padding-bottom: 0;
-  }
+	:last-child {
+		padding-bottom: 0;
+	}
 `;
 
 export const MapNameWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  color: ${COLOR.BLACK_60};
+	display: flex;
+	align-items: center;
+	font-size: 14px;
+	color: ${COLOR.BLACK_60};
 `;
 
 export const MapName = styled.div`
-  margin-left: 24px;
+	margin-left: 24px;
 `;

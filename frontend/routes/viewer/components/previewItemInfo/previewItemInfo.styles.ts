@@ -21,43 +21,43 @@ import Typography from '@material-ui/core/Typography';
 import { COLOR } from '../../../../styles/colors';
 
 export const Container = styled.div`
-  min-width: 0;
-  flex: 1;
-  margin-top: 5px;
+	min-width: 0;
+	flex: 1;
+	margin-top: 5px;
 `;
 
 export const Status = styled.div`
-  display: flex;
-  align-items: center;
-  color: ${(props) => props.color || COLOR.WHITE};
+	display: flex;
+	align-items: center;
+	color: ${(props) => props.color || COLOR.WHITE};
 `;
 
 export const Name = styled(Typography)`
-  margin: 0;
+	margin: 0;
 
-  && {
-    line-height: 1;
-  }
+	&& {
+		line-height: 1;
+	}
 `;
 
 export const Author = styled(Typography)`
-  && {
-    margin-right: 6px;
-    margin-left: 5px;
-    color: ${COLOR.BLACK_60};
-    font-size: 12px;
-  }
+	&& {
+		margin-right: 6px;
+		margin-left: 5px;
+		color: ${COLOR.BLACK_60};
+		font-size: 12px;
+	}
 `;
 
 export const Date = styled.span`
-  font-size: 12px;
-  color: ${COLOR.BLACK_60};
+	font-size: 12px;
+	color: ${COLOR.BLACK_60};
 `;
 
 export const Details = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
   height: 21px;
 `;
 

@@ -19,11 +19,11 @@ import styled from 'styled-components';
 import { COLOR } from '../../../../styles';
 
 export const Container = styled.div`
-  width: 100%;
-  padding-top: 13px;
+	width: 100%;
+	padding-top: 13px;
 `;
 
 export const Subtitle = styled.div`
-  font-size: 12px;
-  color: ${COLOR.BLACK_30};
+	font-size: 12px;
+	color: ${COLOR.BLACK_30};
 `;

@@ -24,52 +24,52 @@ import Button from '@material-ui/core/Button';
 import { COLOR } from '../../../../styles/colors';
 
 export const MenuItemContainer = styled(MenuItem)`
-  position: relative;
+	position: relative;
 
-  && {
-    background-color: ${(props: any) => props.expired ? COLOR.WARNING_LIGHT : COLOR.WHITE};
-    height: 94px;
-    border-bottom: 1px solid ${COLOR.BLACK_6};
-    padding: 0;
+	&& {
+		background-color: ${(props: any) => props.expired ? COLOR.WARNING_LIGHT : COLOR.WHITE};
+		height: 94px;
+		border-bottom: 1px solid ${COLOR.BLACK_6};
+		padding: 0;
 
-    &:hover {
-      background-color: ${(props: any) => props.expired ? COLOR.WARNING : COLOR.GRAY};
-    }
-  }
+		&:hover {
+			background-color: ${(props: any) => props.expired ? COLOR.WARNING : COLOR.GRAY};
+		}
+	}
 ` as any;
 
 export const ArrowButton = styled(Button)`
-  && {
-    background-color: ${COLOR.PRIMARY_DARK};
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 28px;
-    min-width: 28px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0;
+	&& {
+		background-color: ${COLOR.PRIMARY_DARK};
+		position: absolute;
+		right: 0;
+		top: 0;
+		width: 28px;
+		min-width: 28px;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 0;
 
-    &:disabled {
-      background-color: ${COLOR.PRIMARY_LIGHT};
-    }
+		&:disabled {
+			background-color: ${COLOR.PRIMARY_LIGHT};
+		}
 
-    &:hover {
-      background-color: ${COLOR.PRIMARY_MAIN};
-    }
-  }
+		&:hover {
+			background-color: ${COLOR.PRIMARY_MAIN};
+		}
+	}
 `;
 
 export const StyledArrowIcon = styled(ArrowIcon)`
-  color: ${COLOR.WHITE};
+	color: ${COLOR.WHITE};
 `;
 
 export const Name = styled(Typography)`
-  && {
-    line-height: 1;
-  }
+	&& {
+		line-height: 1;
+	}
 `;
 
 export const Container = styled.div`
@@ -77,42 +77,40 @@ export const Container = styled.div`
   height: inherit;
   overflow: hidden;
   flex: 1;
-  box-sizing: border-box;
-  padding: 7px 40px 7px 7px;
-  position: relative;
+  box-sizing: border-box;padding: 7px 40px 7px 7px;position: relative;
 `;
 
 export const Thumbnail = styled.img`
-  background-color: ${COLOR.GRAY};
-  display: block;
-  margin-right: 7px;
-  height: 100%;
-  width: 80px;
-  max-width: 100%;
+	background-color: ${COLOR.GRAY};
+	display: block;
+	margin-right: 7px;
+	height: 100%;
+	width: 80px;
+	max-width: 100%;
 `;
 
 export const ThumbnailWrapper = styled.div`
-  width: auto;
+	width: auto;
 `;
 
 export const Content = styled.div`
-  min-width: 0;
-  flex: 1;
+	min-width: 0;
+	flex: 1;
 `;
 
 export const Description = styled.div`
-  font-size: 11px;
-  line-height: 1.25;
-  margin-top: 3px;
-  color: ${COLOR.BLACK_60};
+	font-size: 11px;
+	line-height: 1.25;
+	margin-top: 3px;
+	color: ${COLOR.BLACK_60};
 `;
 
 export const RoleIndicator = styled.div`
-  background-color: ${(props: any) => props.color || COLOR.WHITE};
-  border: 1px solid ${(props: any) => props.color ? COLOR.GRAY : COLOR.BLACK_20};
-  height: auto;
-  margin-right: 7px;
-  width: ${(props: any) => props.width || `5px`};
+	background-color: ${(props: any) => props.color || COLOR.WHITE};
+	border: 1px solid ${(props: any) => props.color ? COLOR.GRAY : COLOR.BLACK_20};
+	height: auto;
+	margin-right: 7px;
+	width: ${(props: any) => props.width || `5px`};
 ` as any;
 
 export const Actions = styled.div`

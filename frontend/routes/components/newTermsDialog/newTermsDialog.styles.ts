@@ -19,12 +19,12 @@ import styled from 'styled-components';
 import { FONT_WEIGHT, COLOR } from '../../../styles';
 
 export const Container = styled.div`
-  max-width: 500px;
+	max-width: 500px;
 `;
 
 export const Link = styled.a`
-  font-weight: ${FONT_WEIGHT.SEMIBOLD};
-  color: ${COLOR.PRIMARY_MAIN};
-  padding: 0 5px;
-  text-decoration: none;
+	font-weight: ${FONT_WEIGHT.SEMIBOLD};
+	color: ${COLOR.PRIMARY_MAIN};
+	padding: 0 5px;
+	text-decoration: none;
 `;
