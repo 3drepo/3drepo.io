@@ -426,14 +426,17 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 
 	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		const toUpdate = {};
+		const toUnset = {};
 		const fieldsCanBeUpdated = ["description", "name", "rules", "objects", "color", "issue_id", "risk_id"];
 
-		let typeCorrect = true;
-		fieldsCanBeUpdated.forEach((key) => {
+		let typeCorrect = !(data.rules && data.objects);
+		typeCorrect && fieldsCanBeUpdated.forEach((key) => {
 			if (data[key]) {
 				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 					if (key === "objects" && data.objects) {
 						toUpdate.objects = convertedObjects;
+						toUnset.rules = 1;
+						this.rules = undefined;
 					} else if (key === "color") {
 						toUpdate[key] = data[key].map((c) => parseInt(c, 10));
 					} else {
@@ -441,14 +444,16 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 							&& data.rules
 							&& !data.rules.every((isValidRule))) {
 							typeCorrect = false;
+							toUnset.objects = 1;
+							this.objects = undefined;
 						}
 
 						toUpdate[key] = data[key];
 					}
+					this[key] = toUpdate[key];
 				} else {
 					typeCorrect = false;
 				}
-				this[key] = toUpdate[key];
 			}
 
 		});
@@ -458,7 +463,11 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 				toUpdate.updateBy = user;
 				toUpdate.updatedAt = Date.now();
 				return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
-					return _dbCol.update({ _id: this._id }, { $set: toUpdate }).then(() => {
+					const updateBson = {$set: toUpdate};
+					if(toUnset !== {}) {
+						updateBson.$unset = toUnset;
+					}
+					return _dbCol.update({ _id: this._id }, updateBson).then(() => {
 						const updatedGroup = clean(this);
 						return updatedGroup;
 					});
