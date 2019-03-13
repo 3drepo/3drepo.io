@@ -42,7 +42,8 @@ export const COLOR = {
 	RED: '#FF0000',
 	LEMON_CHIFFON: '#fffacd',
 	YELLOW: '#ffff36',
-	LIGHT_YELLOW: '#ffff64'
+	LIGHT_YELLOW: '#ffff64',
+	POMEGRANATE: '#F44336'
 };
 
 export const PIN_COLORS = mapValues({

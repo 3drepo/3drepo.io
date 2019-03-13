@@ -283,13 +283,14 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 				setState={this.handleNewCriterionChange}
 				onSubmit={this.handleCriterionSubmit}
 				fieldNames={this.props.fieldNames}
+				alreadySelectedFilters={this.props.value}
+				selectedCriterion={this.props.selectedCriterion}
 			/>
 		</FormContainer>
 	)
 
 	public render() {
 		const { placeholder, value, label, className, isPasteEnabled } = this.props;
-
 		return (
 			<Container className={className}>
 				<InputLabel shrink>{label}</InputLabel>

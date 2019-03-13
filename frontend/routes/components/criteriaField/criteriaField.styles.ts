@@ -123,7 +123,7 @@ export const FormControl = styled(FormControlComponent)`
 export const FormContainer = styled.div`
   background-color: ${hexToRgba(BLACK, .02)};
   border-top: 1px solid ${COLOR.BLACK_20};
-  padding: 24px;
+  padding: 22px;
   padding-top: 12px;
 `;
 
@@ -176,4 +176,9 @@ export const OperatorSubheader = styled(ListSubheader)`
     background-color: ${COLOR.WHITE};
     color: ${COLOR.BLACK_60}
   }
+`;
+
+export const CustomError = styled.div `
+  color: ${COLOR.POMEGRANATE};
+  font-size: 12px;
 `;

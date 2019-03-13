@@ -14,7 +14,8 @@ import {
 	FormControl,
 	NewCriterionFooter,
 	OperatorSubheader,
-	SelectFieldValue
+	SelectFieldValue,
+	CustomError
 } from './criteriaField.styles';
 import { CriteriaValueField } from './components/criteriaValueField/criteriaValueField.component';
 import {
@@ -62,12 +63,42 @@ interface IProps {
 	criterion: any;
 	fieldNames: any[];
 	formik: any;
+	alreadySelectedFilters: any[];
+	selectedCriterion: string;
 	setState: (criterionForm) => void;
 	onSubmit: (values) => void;
 	handleSubmit: () => void;
 }
 
-class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
+interface IState {
+	filterAlreadyExistsError: boolean;
+}
+
+class NewCreaterionFormComponent extends React.PureComponent<IProps, IState> {
+	public state = {
+		filterAlreadyExistsError: false
+	};
+
+	public componentDidUpdate(prevProps, prevState) {
+		const { field, operator } = this.props.formik.values;
+		const fieldChanged = field !== prevProps.formik.values.field;
+		const operatorChanged = operator !== prevProps.formik.values.operator;
+
+		if (field && operator && (fieldChanged || operatorChanged)) {
+			const filterAlreadyExists =
+				this.props.alreadySelectedFilters.find(
+					(filter) => filter.field === field && filter.operator === operator && this.props.selectedCriterion !== filter._id
+				);
+
+			if (filterAlreadyExists) {
+				this.setState({ filterAlreadyExistsError: true });
+			}
+			if (!filterAlreadyExists && prevState.filterAlreadyExistsError) {
+				this.setState({ filterAlreadyExistsError: false });
+			}
+		}
+	}
+
 	public componentWillUnmount() {
 		this.props.setState(this.props.values);
 	}
@@ -133,22 +164,20 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 					)} />
 				</FormControl>
 
-				<Field name="values" render={({ field, form }) => {
-					return (
-						<FormControl>
-							<CriteriaValueField
-								{...field}
-								value={field.value}
-								selectedOperator={selectedOperator}
-								selectedId={selectedId}
-								error={Boolean(form.errors.values)}
-								helperText={form.errors.values}
-								touched={form.touched.values || []}
-								setTouched={form.setTouched}
-							/>
-						</FormControl>
-					);
-				}} />
+				<Field name="values" render={({ field, form }) => (
+					<FormControl>
+						<CriteriaValueField
+							{...field}
+							value={field.value}
+							selectedOperator={selectedOperator}
+							selectedId={selectedId}
+							error={Boolean(form.errors.values)}
+							helperText={form.errors.values}
+							touched={form.touched.values || []}
+							setTouched={form.setTouched}
+						/>
+					</FormControl>
+				)} />
 
 				<NewCriterionFooter spaced={selectedOperator === CRITERIA_OPERATORS_TYPES.REGEX}>
 					{this.renderRegexInfo(selectedOperator === CRITERIA_OPERATORS_TYPES.REGEX)}
@@ -158,12 +187,13 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, any> {
 							variant="raised"
 							color="secondary"
 							onClick={this.props.handleSubmit}
-							disabled={!form.isValid || form.isValidating}
+							disabled={!form.isValid || form.isValidating || this.state.filterAlreadyExistsError}
 						>
 							{this.props.criterion._id ? 'Update' : 'Add'}
 						</Button>
 					)} />
 				</NewCriterionFooter>
+				{this.state.filterAlreadyExistsError && <CustomError>Filter with this operation is already used</CustomError>}
 			</Form>
 		);
 	}
