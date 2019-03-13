@@ -66,9 +66,8 @@ class HomeController implements ng.IController {
 	private loginMessage;
 	private backgroundImage;
 	private topLogo;
-	private showMemorySelected;
+	private shownMobileDialog;
 	private isLiteMode;
-	private deviceMemory;
 
 	constructor(
 		private $scope,
@@ -136,7 +135,7 @@ class HomeController implements ng.IController {
 
 		this.isLiteMode = this.getLiteModeState();
 		this.handlePotentialMobile();
-		this.showMemorySelected = false;
+		this.shownMobileDialog = false;
 
 		this.watchers();
 
@@ -282,13 +281,9 @@ class HomeController implements ng.IController {
 		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent
 
 		const mobile = screen.width <= 768 || /Mobi/.test(navigator.userAgent);
-		const setMemory = localStorage.getItem('deviceMemory');
 
-		console.debug('Memory limit set to: ', setMemory);
-
-		// We're in mobile, with no memory set
-		// and it's not already in lite mode
-		if (mobile && !setMemory && !this.isLiteMode) {
+		// We're in mobile and it's not already in lite mode
+		if (mobile && !this.isLiteMode) {
 			this.DialogService.showDialog(
 				'lite-dialog.html',
 				this.$scope,
@@ -299,14 +294,6 @@ class HomeController implements ng.IController {
 			);
 			return;
 		}
-
-		if (!this.isLiteMode && mobile && setMemory) {
-			// We're on mobile/tablet and we have a previous
-			// memory setting selected
-			this.deviceMemory = parseInt(setMemory, 10);
-			return;
-		}
-
 	}
 
 	public setLiteMode(onOrOff) {
@@ -316,24 +303,14 @@ class HomeController implements ng.IController {
 
 	public useLiteMode() {
 		this.setLiteMode(true);
+		this.shownMobileDialog = true;
 		this.DialogService.closeDialog();
 	}
 
 	public useNormalMode() {
 		this.setLiteMode(false);
-		this.showMemorySelected = true;
-		this.deviceMemory = 2; // Default for mobile/tablet in normal mode
-	}
-
-	public memorySelected() {
+		this.shownMobileDialog = true;
 		this.DialogService.closeDialog();
-		if (this.deviceMemory === 0) {
-			this.deviceMemory = 2;
-		}
-		localStorage.setItem('deviceMemory', this.deviceMemory);
-		if (this.state.model) {
-			location.reload();
-		}
 	}
 
 	public hasTrailingSlash() {

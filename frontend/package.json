@@ -7,9 +7,9 @@
     "doc": "docs"
   },
   "scripts": {
-    "watch": "webpack --watch --progress --mode development --config ./internals/webpack/webpack.dev.config.js",
-    "build:dev": "webpack --progress --mode development --config ./internals/webpack/webpack.dev.config.js",
-    "build": "webpack --progress --mode production --config ./internals/webpack/webpack.prod.config.js",
+    "watch": "webpack --watch --progress --config ./internals/webpack/webpack.dev.config.js",
+    "build:dev": "webpack --progress --config ./internals/webpack/webpack.dev.config.js",
+    "build": "webpack --progress --config ./internals/webpack/webpack.prod.config.js",
     "build:analyze": "webpack --progress --config ./internals/webpack/webpack.analyze.config.js",
     "wdm": "yarn run wdm:update && yarn run wdm:start",
     "wdm:start": "webdriver-manager start --standalone",
@@ -18,7 +18,7 @@
     "e2e": "yarn run tsc:tests && protractor ./tests/e2e/built/config/config.js && yarn run e2e:ie",
     "e2e:one": "yarn run tsc:tests && yarn run protractor ./tests/e2e/built/config/config.js --specs ",
     "tsc:tests": "tsc --project ./tests",
-    "unity-util": "webpack --config ./internals/webpack/webpack.demo.config.js",
+    "unity-util": "webpack --config ./internals/webpack/webpack.unityutil.config.js",
     "lint:ts": "tslint --config tslint.json --project ./ --exclude tests --format stylish",
     "lint:css": "stylelint ./**/*.styles.ts",
     "lint": "yarn lint:ts && yarn lint:css",
@@ -79,7 +79,7 @@
     "simplebar-react": "0.0.1-beta.3",
     "socket.io-client": "2.0.4",
     "sw-precache": "5.2.0",
-    "yup": "0.26.6",
+    "yup": "0.26.10",
     "zxcvbn": "4.4.2"
   },
   "devDependencies": {

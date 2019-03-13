@@ -13,7 +13,6 @@ module.exports = (options) => {
       path: PATHS.DIST_DIR,
       filename: 'three_d_repo.[hash].js'
     }, options.output),
-
     module: {
       rules: [
         loaders.TSLoader(options),
