@@ -33,7 +33,6 @@ import {
 	ScreenshotWrapper
 } from './log.styles';
 
-import { isRiskMitigationComment } from '../../../../../helpers/comments';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import {
 	LEVELS_OF_RISK,
@@ -56,9 +55,6 @@ interface IProps {
 	sealed: boolean;
 	index: number;
 	removeLog: (index, guid) => void;
-	likelihood: number;
-	consequence: number;
-	mitigation: string;
 }
 
 export class Log extends React.PureComponent<IProps, any> {
@@ -78,43 +74,9 @@ export class Log extends React.PureComponent<IProps, any> {
 		return Boolean(this.props.comment) && !this.isScreenshot && !this.isAction;
 	}
 
-	get isRiskMitigationComment() {
-		return isRiskMitigationComment(this.props.mitigation, this.props.likelihood, this.props.consequence);
-	}
-
-	get riskLikelihood() {
-		return undefined !== this.props.likelihood && RISK_LIKELIHOODS.length > this.props.likelihood ?
-			RISK_LIKELIHOODS[this.props.likelihood].name : "Unassigned";
-	}
-
-	get riskConsequence() {
-		return undefined !== this.props.consequence && RISK_CONSEQUENCES.length > this.props.consequence ?
-			RISK_CONSEQUENCES[this.props.consequence].name : "Unassigned";
-	}
-
 	public removeComment = () => {
 		this.props.removeLog(this.props.index, this.props.guid);
 	}
-
-	public renderRiskMitigationMessage = renderWhenTrue(
-		<>
-			<MitigationWrapper withMessage={!!this.props.mitigation}>
-				<MitigationDetailRow>
-					<MitigationDetail>
-						<MitigationDetailLabel>Risk Likelihood</MitigationDetailLabel>
-						{this.props.likelihood && <MitigationMessage>{this.riskLikelihood}</MitigationMessage>}
-					</MitigationDetail>
-					<MitigationDetail>
-						<MitigationDetailLabel>Risk Consequence</MitigationDetailLabel>
-						{this.props.consequence && <MitigationMessage>{this.riskConsequence}</MitigationMessage>}
-					</MitigationDetail>
-				</MitigationDetailRow>
-				<MitigationDetailRow>
-					{this.props.mitigation && <MitigationMessage>{this.props.mitigation}</MitigationMessage>}
-				</MitigationDetailRow>
-			</MitigationWrapper>
-		</>
-	);
 
 	public renderUserMessage = renderWhenTrue(() => (
 		<UserMessage>{this.props.comment}</UserMessage>
@@ -149,7 +111,6 @@ export class Log extends React.PureComponent<IProps, any> {
 			<Container>
 				{this.renderSystemMessage(Boolean(this.props.action))}
 				{this.renderUserMessage(this.isPlainComment)}
-				{this.renderRiskMitigationMessage(this.isRiskMitigationComment)}
 				{this.renderScreenshotMessage(this.isCommentWithScreenshot)}
 				{this.renderInfo(!this.isAction)}
 			</Container>

@@ -17,8 +17,14 @@
 
 import { omit, get } from 'lodash';
 import { getAPIUrl } from '../services/api';
-import { RISK_LEVELS_COLOURS, RISK_LEVELS_ICONS, RISK_LEVELS, LEVELS } from '../constants/risks';
-import { filterRiskMitigationComments } from './comments';
+import {
+	RISK_CONSEQUENCES,
+	RISK_LIKELIHOODS
+	RISK_LEVELS_COLOURS,
+	RISK_LEVELS_ICONS,
+	RISK_LEVELS,
+	LEVELS
+} from '../constants/risks';
 import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
 
 export const prepareRisk = (risk, jobs = []) => {
@@ -27,11 +33,21 @@ export const prepareRisk = (risk, jobs = []) => {
 		? getAPIUrl(risk.viewpoint.screenshot)
 		: (risk.descriptionThumbnail || '');
 
-	const minLikelihood = risk.likelihood; // TODO
-	const minConsequence = getMinConsequence(risk.comments) || risk.consequence;
-	const levelOfRisk = risk.level_of_risk || calculateLevelOfRisk(minLikelihood, minConsequence);
+	const levelOfRisk = (!isNaN(risk.level_of_risk)) ?
+		risk.level_of_risk : calculateLevelOfRisk(risk.likelihood, risk.consequence);
+	const residualLevelOfRisk = (!isNaN(risk.residual_level_of_risk)) ?
+		risk.residual_level_of_risk : calculateLevelOfRisk(risk.residual_likelihood, risk.residual_consequence);
 	const { Icon, color } = getRiskStatus(levelOfRisk, risk.mitigation_status);
 	const roleColor = get(jobs.find((job) => job.name === get(risk.assigned_roles, '[0]')), 'color');
+	let overallLevelOfRisk;
+
+	if (!isNaN(risk.overall_level_of_risk)) {
+		overallLevelOfRisk = risk.overall_level_of_risk;
+	} else if(!isNaN(residualLevelOfRisk)) {
+		overallLevelOfRisk = residualLevelOfRisk;
+	} else {
+		overallLevelOfRisk = levelOfRisk;
+	}
 
 	return {
 		...risk,
@@ -45,10 +61,8 @@ export const prepareRisk = (risk, jobs = []) => {
 		statusColor: color,
 		roleColor,
 		level_of_risk: levelOfRisk,
-		min_likelihood: minLikelihood,
-		min_consequence: minConsequence,
-		new_likelihood: minLikelihood,
-		new_consequence: minConsequence
+		overall_level_of_risk: overallLevelOfRisk,
+		residual_level_of_risk: residualLevelOfRisk
 	};
 };
 
@@ -74,11 +88,14 @@ export const calculateLevelOfRisk = (likelihood: string, consequence: string): n
 	return levelOfRisk;
 };
 
-export const getMinConsequence = (comments: any[]) => {
-	let minValue;
-	console.debug("getMinConsequence");
-	console.debug(filterRiskMitigationComments(comments));
-	return minValue;
+export const getRiskConsequenceName = (consequence: number) => {
+	const filteredDefinitions = RISK_CONSEQUENCES.filter(def => def.value === consequence);
+	return (filteredDefinitions.length > 0) ? filteredDefinitions[0].name : "(invalid)";
+};
+
+export const getRiskLikelihoodName = (likelihood: number) => {
+	const filteredDefinitions = RISK_LIKELIHOODS.filter(def => def.value === likelihood);
+	return (filteredDefinitions.length > 0) ? filteredDefinitions[0].name : "(invalid)";
 };
 
 export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => {

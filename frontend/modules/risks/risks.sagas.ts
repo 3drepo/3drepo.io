@@ -97,7 +97,7 @@ const toggleRiskPin = (risk, selected = true) => {
 	if (risk && risk.position && risk.position.length > 0 && risk._id) {
 		Viewer.changePinColor({
 			id: risk._id,
-			colours: getRiskPinColor(risk.level_of_risk, selected)
+			colours: getRiskPinColor(risk.overall_level_of_risk, selected)
 		});
 	}
 };
@@ -258,7 +258,7 @@ export function* renderPins({ filteredRisks }) {
 				const pinPosition = risk.position && risk.position.length;
 
 				if (pinPosition) {
-					const levelOfRisk = (risk.level_of_risk !== undefined) ? risk.level_of_risk : 4;
+					const levelOfRisk = (risk.overall_level_of_risk !== undefined) ? risk.overall_level_of_risk : 4;
 					const isSelectedPin = activeRiskId && risk._id === activeRiskId;
 					const pinColor = getRiskPinColor(levelOfRisk, isSelectedPin);
 					Viewer.addPin({
@@ -492,7 +492,7 @@ export function* showNewPin({ risk, pinData }) {
 			...pinData,
 			account: risk.account,
 			model: risk.model,
-			colours: getRiskPinColor(risk.level_of_risk, true),
+			colours: getRiskPinColor(risk.overall_level_of_risk, true),
 			type: 'risk'
 		};
 
@@ -584,6 +584,7 @@ export function* setNewRisk() {
 			likelihood: 0,
 			consequence: 0,
 			level_of_risk: 0,
+			overall_level_of_risk: 0,
 			mitigation_status: '',
 			viewpoint: {},
 			owner: currentUser.username

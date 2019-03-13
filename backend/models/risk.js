@@ -53,7 +53,6 @@ const fieldTypes = {
 	"createdAt": "[object Number]",
 	"creator_role": "[object String]",
 	"desc": "[object String]",
-	"level_of_risk": "[object Number]",
 	"likelihood": "[object Number]",
 	"mitigation_desc": "[object String]",
 	"mitigation_status": "[object String]",
@@ -61,11 +60,22 @@ const fieldTypes = {
 	"norm": "[object Array]",
 	"owner": "[object String]",
 	"position": "[object Array]",
+	"residual_consequence": "[object Number]",
+	"residual_likelihood": "[object Number]",
+	"residual_risk": "[object String]",
 	"rev_id": "[object Object]",
 	"safetibase_id": "[object String]",
 	"thumbnail": "[object Object]",
 	"viewpoint": "[object Object]",
 	"viewpoints": "[object Array]"
+};
+
+const LEVELS = {
+	VERY_LOW: 0,
+	LOW: 1,
+	MODERATE: 2,
+	HIGH: 3,
+	VERY_HIGH: 4
 };
 
 function clean(dbCol, riskToClean) {
@@ -125,6 +135,15 @@ function clean(dbCol, riskToClean) {
 
 	if (riskToClean.thumbnail && riskToClean.thumbnail.flag) {
 		riskToClean.thumbnail = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/thumbnail.png";
+	}
+
+	riskToClean.level_of_risk = calculateLevelOfRisk(riskToClean.likelihood, riskToClean.consequence);
+
+	if (!isNaN(riskToClean.residual_likelihood) && !isNaN(riskToClean.residual_consequence)) {
+		riskToClean.residual_level_of_risk = calculateLevelOfRisk(riskToClean.residual_likelihood, riskToClean.residual_consequence);
+		riskToClean.overall_level_of_risk = riskToClean.residual_level_of_risk;
+	} else {
+		riskToClean.overall_level_of_risk = riskToClean.level_of_risk;
 	}
 
 	delete riskToClean.viewpoints;
@@ -250,6 +269,28 @@ function addSystemComment(account, model, sessionId, riskId, comments, owner, pr
 	ChatEvent.newComment(sessionId, account, model, riskId, systemComment);
 
 	return comments;
+}
+
+function calculateLevelOfRisk(likelihood, consequence) {
+	let levelOfRisk = 0;
+
+	if (!isNaN(likelihood) && !isNaN(consequence)) {
+		const score = likelihood + consequence;
+
+		if (6 < score) {
+			levelOfRisk = LEVELS.VERY_HIGH;
+		} else if (5 < score) {
+			levelOfRisk = LEVELS.HIGH;
+		} else if (2 < score) {
+			levelOfRisk = LEVELS.MODERATE;
+		} else if (1 < score) {
+			levelOfRisk = LEVELS.LOW;
+		} else {
+			levelOfRisk = LEVELS.VERY_LOW;
+		}
+	}
+
+	return levelOfRisk;
 }
 
 risk.setGroupRiskId = function(dbCol, data, riskId) {

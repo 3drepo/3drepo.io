@@ -119,7 +119,6 @@ export const setComponentState = (state = INITIAL_STATE, { componentState = {} }
 };
 
 export const createCommentSuccess = (state = INITIAL_STATE, { comment }) => {
-	console.debug("createCommentSuccess");
 	const clonedLogs = cloneDeep(state.componentState.logs);
 	const updatedLogs = clonedLogs.map((log) => {
 		log.sealed = true;

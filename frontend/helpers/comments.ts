@@ -16,19 +16,8 @@
  */
 
 import { getAPIUrl } from '../services/api';
+import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
-
-export const filterRiskMitigationComments = (comments = []) => {
-	if (!comments.length) {
-		return comments;
-	}
-
-	return comments.filter(comment => isRiskMitigationComment(comment.mitigation, comment.likelihood, comment.consequence));
-};
-
-export const isRiskMitigationComment = (mitigation, likelihood, consequence) => {
-	return Boolean(mitigation) && undefined !== likelihood && undefined !== consequence;
-};
 
 export const prepareComments = (comments = []) => {
 	if (!comments.length) {
@@ -61,6 +50,38 @@ const convertActionCommentToText = (comment, topicTypes) => {
 			case 'category':
 				comment.action.propertyText = 'Category';
 				break;
+			case 'consequence':
+				comment.action.propertyText = 'Consequence';
+				if (comment.action.to) {
+					comment.action.to = getRiskConsequenceName(parseInt(comment.action.to, 10));
+				}
+				if (comment.action.from) {
+					comment.action.from = getRiskConsequenceName(parseInt(comment.action.from, 10));
+				} else {
+					text = comment.action.propertyText + ' set to ' +
+						comment.action.to + ' by ' +
+						comment.owner;
+				}
+				break;
+			case 'likelihood':
+				comment.action.propertyText = 'Likelihood';
+				if (comment.action.to) {
+					comment.action.to = getRiskLikelihoodName(parseInt(comment.action.to, 10));
+				}
+				if (comment.action.from) {
+					comment.action.from = getRiskLikelihoodName(parseInt(comment.action.from, 10));
+				} else {
+					text = comment.action.propertyText + ' set to ' +
+						comment.action.to + ' by ' +
+						comment.owner;
+				}
+				break;
+			case 'mitigation_desc':
+				comment.action.propertyText = 'Mitigation description';
+				text = comment.action.propertyText + ' set to ' +
+					comment.action.to + ' by ' +
+					comment.owner;
+				break;
 			case 'mitigation_status':
 				comment.action.propertyText = 'Mitigation Status';
 				break;
@@ -68,6 +89,41 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				comment.action.propertyText = 'Priority';
 				comment.action.from = convertActionValueToText(comment.action.from);
 				comment.action.to = convertActionValueToText(comment.action.to);
+				break;
+			case 'residual_consequence':
+				comment.action.propertyText = 'Residual consequence';
+				if (comment.action.to) {
+					comment.action.to = getRiskConsequenceName(parseInt(comment.action.to, 10));
+				}
+				if (comment.action.from) {
+					comment.action.from = getRiskConsequenceName(parseInt(comment.action.from, 10));
+				} else {
+					text = comment.action.propertyText + ' set to ' +
+						comment.action.to + ' by ' +
+						comment.owner;
+				}
+				break;
+			case 'residual_likelihood':
+				comment.action.propertyText = 'Residual likelihood';
+				if (comment.action.to) {
+					comment.action.to = getRiskLikelihoodName(parseInt(comment.action.to, 10));
+				}
+				if (comment.action.from) {
+					comment.action.from = getRiskLikelihoodName(parseInt(comment.action.from, 10));
+				} else {
+					text = comment.action.propertyText + ' set to ' +
+						comment.action.to + ' by ' +
+						comment.owner;
+				}
+				break;
+			case 'residual_risk':
+				comment.action.propertyText = 'Residual risk';
+				text = comment.action.propertyText + ' set to ' +
+					comment.action.to + ' by ' +
+					comment.owner;
+				break;
+			case 'likelihood':
+				comment.action.propertyText = 'Likelihood';
 				break;
 			case 'safetibase_id':
 				comment.action.propertyText = 'Safetibase ID';

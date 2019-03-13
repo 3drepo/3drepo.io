@@ -114,7 +114,9 @@ export const RISK_FILTER_RELATED_FIELDS = {
 	CATEGORY: 'category',
 	RISK_CONSEQUENCE: 'consequence',
 	RISK_LIKELIHOOD: 'likelihood',
-	LEVELS_OF_RISK: 'level_of_risk'
+	LEVELS_OF_RISK: 'level_of_risk',
+	RESIDUAL_CONSEQUENCE: 'residual_consequence',
+	RESIDUAL_LIKELIHOOD: 'residual_likelihood'
 };
 
 export const RISK_FILTERS = [
@@ -123,21 +125,21 @@ export const RISK_FILTERS = [
 		relatedField: RISK_FILTER_RELATED_FIELDS.CATEGORY,
 		type: RISK_FILTER_DATA_TYPES.NORMAL
 	},
-  {
-    label: 'Mitigation Status',
+	{
+		label: 'Mitigation Status',
 		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS,
-    type: RISK_FILTER_DATA_TYPES.NORMAL
-  },
-  {
-    label: 'Created by',
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
+	{
+		label: 'Created by',
 		relatedField: RISK_FILTER_RELATED_FIELDS.CREATED_BY,
-    type: RISK_FILTER_DATA_TYPES.NORMAL
-  },
-  {
-    label: 'Risk owner',
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
+	{
+		label: 'Risk owner',
 		relatedField: RISK_FILTER_RELATED_FIELDS.RISK_OWNER,
-    type: RISK_FILTER_DATA_TYPES.NORMAL
-  },
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
 	{
 		label: 'Risk likelihood',
 		relatedField: RISK_FILTER_RELATED_FIELDS.RISK_LIKELIHOOD,
@@ -151,6 +153,16 @@ export const RISK_FILTERS = [
 	{
 		label: 'Level of risk',
 		relatedField: RISK_FILTER_RELATED_FIELDS.LEVELS_OF_RISK,
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
+	{
+		label: 'Residual likelihood',
+		relatedField: RISK_FILTER_RELATED_FIELDS.RESIDUAL_LIKELIHOOD,
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
+	{
+		label: 'Residual consequence',
+		relatedField: RISK_FILTER_RELATED_FIELDS.RESIDUAL_CONSEQUENCE,
 		type: RISK_FILTER_DATA_TYPES.NORMAL
 	}
 ] as any;

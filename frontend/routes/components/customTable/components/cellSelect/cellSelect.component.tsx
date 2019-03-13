@@ -83,8 +83,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 
 		if (this.state.selectedValue !== selectedValue) {
 			this.setState({selectedValue});
-
-			(this.props.onChange || (() => false))(event, selectedValue);
+			this.props.onChange(event, selectedValue);
 		}
 	}
 
