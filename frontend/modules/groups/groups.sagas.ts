@@ -244,7 +244,7 @@ export function* deleteGroups({ teamspace, modelId, groups }) {
 			const group = groupsMap[groupId];
 
 			return [
-				put(GroupsActions.removeColorOverride(groupId, overridedGroup)),
+				put(GroupsActions.removeColorOverride([overridedGroup])),
 				put(GroupsActions.dehighlightGroup(group)),
 				put(GroupsActions.deleteGroupsSuccess([groupId]))
 			];
