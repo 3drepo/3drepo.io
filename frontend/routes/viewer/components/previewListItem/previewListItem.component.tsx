@@ -54,6 +54,7 @@ interface IProps {
 	hideThumbnail?: boolean;
 	willBeRemoved?: boolean;
 	panelName?: string;
+	extraInfo?: string;
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
 	renderActions?: () => JSX.Element[];
@@ -109,6 +110,7 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 
 		const shouldRenderActions = renderActions && active;
 		const createdDate = !shouldRenderActions ? this.props.createdDate : '';
+		const extraInfo = !shouldRenderActions ? this.props.extraInfo : '';
 
 		return (
 			<MenuItemContainer
@@ -130,6 +132,7 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 							StatusIconComponent={StatusIconComponent}
 							statusColor={statusColor}
 							createdAt={createdDate}
+							extraInfo={extraInfo}
 						/>
 						<Description>
 							<Truncate lines={3}>{description || '(no description)'}</Truncate>

@@ -1,5 +1,5 @@
 export const calculateTotalMeshes = (nodes) => {
-	return nodes.length ? nodes
-		.map((x) => x.shared_ids.length)
-		.reduce((acc, val) => acc + val) : 0;
+	return nodes && nodes.length ? nodes
+		.map((node) => node.shared_ids ? node.shared_ids.length : 0)
+		.reduce((acc, val) => acc + val, 0) : 0;
 };

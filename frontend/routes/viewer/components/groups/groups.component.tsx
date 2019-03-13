@@ -58,6 +58,7 @@ import { EmptyStateInfo } from '../views/views.styles';
 import { ListContainer, Summary } from './../risks/risks.styles';
 import { GroupDetails } from './components/groupDetails';
 import { GroupListItem, StyledIcon } from './groups.styles';
+import { calculateTotalMeshes } from '../../../../helpers/tree';
 
 interface IProps {
 	teamspace: string;
@@ -372,6 +373,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				renderActions={this.renderGroupActions(group)}
 				hasViewPermission={stubTrue}
 				panelName={GROUP_PANEL_NAME}
+				extraInfo={`${group.totalSavedMeshes} objects`}
 			/>
 		));
 

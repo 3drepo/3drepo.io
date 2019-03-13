@@ -7,7 +7,7 @@ import { Select } from '@material-ui/core';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import { GROUPS_TYPES_LIST } from '../../../../../../constants/groups';
+import { GROUPS_TYPES_LIST, GROUPS_TYPES } from '../../../../../../constants/groups';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { FieldsRow, StyledFormControl, StyledTextField, Description, LongLabel } from './groupDetails.styles';
 
@@ -44,22 +44,35 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 		const currentValues = { name, description, color, rules, type };
 		const initialValues = this.formikRef.current.initialValues;
 		const groupChanged = !isEqual(this.props.group, prevProps.group);
+		const isNormalGroup = this.props.group.type === GROUPS_TYPES.NORMAL;
+		const sharedIdsChanged = isNormalGroup ? this.areSharedIdsChanged(this.props.selectedNodes, objects) : false;
 
-		const sharedIdsChanged = this.areSharedIdsChanged(this.props.selectedNodes, objects);
-
-		const isFormDirtyAndValid = !isEqual(initialValues, currentValues) && (groupChanged || sharedIdsChanged);
+		const isFormDirtyAndValid = (!isEqual(initialValues, currentValues) && groupChanged) || sharedIdsChanged;
 		this.props.setIsFormValid(isFormDirtyAndValid);
 		this.props.setIsFormDirty(isFormDirtyAndValid);
 	}
 
-	public areSharedIdsChanged = (selectedNodes = [], groupObjects = []) =>
-		selectedNodes.every((selectedNode) =>
+	public areSharedIdsChanged = (selectedNodes = [], groupObjects = []) => {
+		if (!selectedNodes.length && !groupObjects.length) {
+			return false;
+		}
+
+		if (!selectedNodes.length) {
+			return groupObjects.reduce((acc, curr) => acc + curr.shared_ids.length, 0);
+		}
+
+		if (!groupObjects.length) {
+			return selectedNodes.reduce((acc, curr) => acc + curr.shared_ids.length, 0);
+		}
+
+		return selectedNodes.every((selectedNode) =>
 			groupObjects.every((groupObject) => !isEqual(
 					selectedNode.shared_ids && selectedNode.shared_ids.length ? selectedNode.shared_ids.sort() : [],
 					groupObject.shared_ids && groupObject.shared_ids.length ? groupObject.shared_ids.sort() : []
 				)
 			)
-		)
+		);
+	}
 
 	public handleFieldChange = (onChange, form) => (event) => {
 		event.persist();

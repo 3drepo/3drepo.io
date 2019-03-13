@@ -3,6 +3,7 @@ import { GROUPS_TYPES, GROUP_TYPES_ICONS } from '../constants/groups';
 import { COLOR } from '../styles';
 import { getGroupHexColor, hexToArray } from './colors';
 import { prepareCriterion } from './criteria';
+import { calculateTotalMeshes } from './tree';
 
 export const prepareGroup = (group) => {
 	const isSmartGroup = group.rules && group.rules.length;
@@ -18,7 +19,7 @@ export const prepareGroup = (group) => {
 		color: getGroupHexColor(group.color),
 		rules: (group.rules || []).map(prepareCriterion),
 		objects: group.objects || [],
-		totalSavedMeshes: group.totalSavedMeshes || 0
+		totalSavedMeshes: calculateTotalMeshes(group.objects) || 0
 	};
 };
 

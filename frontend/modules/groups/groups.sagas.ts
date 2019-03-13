@@ -92,7 +92,7 @@ export function* highlightGroup({ group }) {
 
 			yield TreeService.showNodesBySharedIds(group.objects);
 			yield TreeService.selectNodesBySharedIds(group.objects, color);
-			// yield put(TreeActions.getSelectedNodes());
+			yield put(TreeActions.getSelectedNodes());
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('higlight', 'group', error));
