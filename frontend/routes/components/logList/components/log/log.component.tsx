@@ -66,7 +66,8 @@ export class Log extends React.PureComponent<IProps, any> {
 		return Boolean(this.props.comment) && !this.isScreenshot && !this.isAction;
 	}
 
-	public removeComment = () => {
+	public removeComment = (event) => {
+		event.stopPropagation();
 		this.props.removeLog(this.props.index, this.props.guid);
 	}
 

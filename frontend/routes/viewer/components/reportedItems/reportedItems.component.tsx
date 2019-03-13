@@ -132,7 +132,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	public listViewRef = React.createRef<HTMLElement>();
-	public listContainerRef = React.createRef<HTMLElement>();
+	public listContainerRef = React.createRef<any>();
 
 	public componentDidMount() {
 		if (Viewer.viewer.model && !this.state.modelLoaded) {
