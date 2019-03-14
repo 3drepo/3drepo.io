@@ -108,7 +108,7 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
 			Viewer.getCurrentViewpoint({ teamspace, model }),
 			Viewer.getObjectsStatus(),
-			issueData.screenshot || Viewer.getScreenshot(),
+			issueData.descriptionThumbnail || Viewer.getScreenshot(),
 			myJob
 		]);
 
