@@ -793,6 +793,10 @@ function findObjectIDsByRules(account, model, rules, branch, revId, convertShare
 					objectId.model,
 					query
 				).then(objectIdResults => {
+					if(!objectIdResults.length) {
+						return undefined;
+					}
+
 					for (let j = 0; j < objectIdResults.length; j++) {
 						objectIdsSet.add(objectIdResults[j].metadata["IFC GUID"]);
 					}
@@ -814,6 +818,11 @@ function findObjectIDsByRules(account, model, rules, branch, revId, convertShare
 					_branch,
 					_revId
 				).then(sharedIdResults => {
+
+					if(!sharedIdResults.length) {
+						return undefined;
+					}
+
 					for (let j = 0; j < sharedIdResults.length; j++) {
 						if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
 							sharedIdResults[j].shared_id = utils.uuidToString(sharedIdResults[j].shared_id);
@@ -837,7 +846,7 @@ function findObjectIDsByRules(account, model, rules, branch, revId, convertShare
 		}
 
 		return Promise.all(objectIdPromises).then(objectIds => {
-			return objectIds;
+			return objectIds.filter((entry) => !!entry);
 		});
 	});
 }
