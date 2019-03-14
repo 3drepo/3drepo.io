@@ -56,7 +56,7 @@ interface IProps {
 	fetchRisks: (teamspace, model, revision) => void;
 	setState: (componentState: IRisksComponentState) => void;
 	setNewRisk: () => void;
-	downloadRisks: (teamspace, model, risksIds) => void;
+	downloadRisks: (teamspace, model) => void;
 	printRisks: (teamspace, model) => void;
 	setActiveRisk: (risk, revision?) => void;
 	showRiskDetails: (risk, revision?) => void;
