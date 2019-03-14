@@ -95,3 +95,9 @@ export const RemoveButtonWrapper = styled.div`
 	right: 0;
 	top: ${(props: any) => props.screenshot ? 0 : '-8px'};
 ` as any;
+
+export const Date = styled.div`
+	width: 100%;
+	text-align: right;
+	font-size: 10px;
+` as any;

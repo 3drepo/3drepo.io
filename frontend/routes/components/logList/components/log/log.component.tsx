@@ -27,7 +27,8 @@ import {
 	ScreenshotMessage,
 	ScreenshotWrapper,
 	MessageContainer,
-	RemoveButtonWrapper
+	RemoveButtonWrapper,
+	Date
 } from './log.styles';
 import CloseIcon from '@material-ui/icons/Close';
 import { TooltipButton } from '../../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
@@ -108,12 +109,18 @@ export class Log extends React.PureComponent<IProps, any> {
 		</>
 	));
 
-	public renderInfo = renderWhenTrue(() => (
-		<Info>
-			{<DynamicUsername teamspace={this.props.teamspace} name={this.props.owner} />}
-			<DateTime value={this.props.created as any} format="HH:mm DD MMM" />
-		</Info>
+	public renderUsername = renderWhenTrue((
+		<DynamicUsername teamspace={this.props.teamspace} name={this.props.owner} />
 	));
+
+	public renderInfo = () => (
+		<Info>
+			{this.renderUsername(!Boolean(this.props.action))}
+			<Date>
+				<DateTime value={this.props.created as any} format="HH:mm DD MMM" />
+			</Date>
+		</Info>
+	)
 
 	public handleSetCameraOnViewpoint = () => {
 		if (this.props.viewpoint) {
@@ -127,7 +134,7 @@ export class Log extends React.PureComponent<IProps, any> {
 				{this.renderSystemMessage(Boolean(this.props.action))}
 				{this.renderUserMessage(this.isPlainComment)}
 				{this.renderScreenshotMessage(this.isScreenshot)}
-				{this.renderInfo(!this.isAction)}
+				{this.renderInfo()}
 			</Container>
 		);
 	}
