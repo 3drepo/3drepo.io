@@ -282,7 +282,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="residual_likelihood">Residual Likelihood</InputLabel>
+						<InputLabel shrink={true} htmlFor="residual_likelihood">Mitigated Likelihood</InputLabel>
 						<Field name="residual_likelihood" render={({ field }) => (
 							<CellSelect
 								{...field}
@@ -294,7 +294,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					</StyledFormControl>
 
 					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="residual_consequence">Residual Consequence</InputLabel>
+						<InputLabel shrink={true} htmlFor="residual_consequence">Mitigated Consequence</InputLabel>
 						<Field name="residual_consequence" render={({ field }) => (
 							<CellSelect
 								{...field}
@@ -308,7 +308,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="residual_level_of_risk">Residual Level of Risk</InputLabel>
+						<InputLabel shrink={true} htmlFor="residual_level_of_risk">Level of Mitigated Risk</InputLabel>
 						<Field name="residual_level_of_risk" render={({ field }) => (
 							<CellSelect
 								{...field}

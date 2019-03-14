@@ -238,7 +238,7 @@ function updateTextComments(account, model, sessionId, riskId, comments, data, v
 			comment.sealed = true;
 		});
 
-		const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGuid);
+		const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGuid, data.position);
 
 		comments.push(textComment);
 
