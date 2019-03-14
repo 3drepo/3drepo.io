@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -60,10 +60,8 @@ export function* fetchRisk({teamspace, modelId, riskId}) {
 
 	try {
 		const {data} = yield API.getRisk(teamspace, modelId, riskId);
-		const jobs = yield select(selectJobsList);
-		const preparedRisk = prepareRisk(data, jobs);
-		preparedRisk.comments = yield prepareComments(preparedRisk.comments);
-		yield put(RisksActions.fetchRiskSuccess(preparedRisk));
+		data.comments = yield prepareComments(data.comments);
+		yield put(RisksActions.fetchRiskSuccess(data));
 	} catch (error) {
 		yield put(RisksActions.fetchRiskFailure());
 		yield put(DialogActions.showErrorDialog('get', 'risk', error));
@@ -75,7 +73,8 @@ const createGroupData = (name, nodes) => {
 	const groupData = {
 		name,
 		color: [255, 0, 0],
-		objects: nodes
+		objects: nodes,
+		isRiskGroup: true
 	};
 
 	return nodes.length === 0 ? null : groupData;
@@ -212,7 +211,8 @@ export function* postComment({ teamspace, modelId, riskData }) {
 		const { data: comment } = yield API.updateRisk(teamspace, modelId, riskData);
 		const preparedComment = yield prepareComment(comment);
 
-		yield put(RisksActions.createCommentSuccess(preparedComment));
+		// This seems to be handled by the chat subscription
+		// yield put(RisksActions.createCommentSuccess(preparedComment));
 		yield put(SnackbarActions.show('Risk comment added'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('post', 'risk comment', error));
@@ -549,7 +549,8 @@ const onUpdateCommentEvent = (updatedComment) => {
 };
 
 const onCreateCommentEvent = (createdComment) => {
-	dispatch(RisksActions.createCommentSuccess(createdComment));
+	const preparedComment = prepareComment(createdComment);
+	dispatch(RisksActions.createCommentSuccess(preparedComment));
 };
 
 const onDeleteCommentEvent = (deletedComment) => {

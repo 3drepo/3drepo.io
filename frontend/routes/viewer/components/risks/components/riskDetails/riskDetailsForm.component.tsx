@@ -146,46 +146,47 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		return (
 			<Form>
 				<FieldsRow container alignItems="center" justify="space-between">
-					<Field name="safetibase_id" render={({ field }) => (
-						<TextField
-							{...field}
-							requiredConfirm={!this.isNewRisk}
-							validationSchema={RiskSchema}
-							label="SafetiBase ID"
-							disabled={!this.props.canUpdateRisk}
-						/>
-					)} />
+					<StyledFormControl>
+						<StyledFormControl>
+							<InputLabel shrink={true} htmlFor="likelihood">Risk Likelihood</InputLabel>
+							<Field name="likelihood" render={({ field }) => (
+								<CellSelect
+									{...field}
+									items={RISK_LIKELIHOODS}
+									inputId="likelihood"
+									disabled={!this.props.canUpdateRisk}
+									readOnly={!this.isNewRisk}
+								/>
+							)} />
+						</StyledFormControl>
 
-					<Field name="associated_activity" render={({ field }) => (
-						<TextField
-							{...field}
-							requiredConfirm={!this.isNewRisk}
-							label="Associated Activity"
-							disabled={!this.props.canUpdateRisk}
-						/>
-					)} />
+						<StyledFormControl>
+							<InputLabel shrink={true} htmlFor="consequence">Risk Consequence</InputLabel>
+							<Field name="consequence" render={({ field }) => (
+								<CellSelect
+									{...field}
+									items={RISK_CONSEQUENCES}
+									inputId="consequence"
+									disabled={!this.props.canUpdateRisk}
+									readOnly={!this.isNewRisk}
+								/>
+							)} />
+						</StyledFormControl>
+					</StyledFormControl>
+
+					<StyledFormControl>
+						<InputLabel shrink={true} htmlFor="level_of_risk">Level of Risk</InputLabel>
+						<Field name="level_of_risk" render={({ field }) => (
+							<CellSelect
+								{...field}
+								items={LEVELS_OF_RISK}
+								inputId="level_of_risk"
+								disabled={true}
+								readOnly
+							/>
+						)} />
+					</StyledFormControl>
 				</FieldsRow>
-
-				<Field name="description" render={({ field, form }) => (
-					<TextField
-						{...field}
-						requiredConfirm={!this.isNewRisk}
-						validationSchema={RiskSchema}
-						fullWidth
-						multiline
-						label="Description"
-						disabled={!this.props.canUpdateRisk}
-					/>
-				)} />
-
-				{this.props.risk.descriptionThumbnail && (
-					<DescriptionImage>
-						<Image
-							src={this.props.risk.descriptionThumbnail}
-							enablePreview
-						/>
-					</DescriptionImage>
-				)}
 
 				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
@@ -214,47 +215,89 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				</FieldsRow>
 
 				<FieldsRow container alignItems="center" justify="space-between">
+					<Field name="associated_activity" render={({ field }) => (
+						<TextField
+							{...field}
+							requiredConfirm={!this.isNewRisk}
+							label="Associated Activity"
+							disabled={!this.props.canUpdateRisk}
+						/>
+					)} />
+
+					<Field name="safetibase_id" render={({ field }) => (
+						<TextField
+							{...field}
+							requiredConfirm={!this.isNewRisk}
+							validationSchema={RiskSchema}
+							label="SafetiBase ID"
+							disabled={!this.props.canUpdateRisk}
+						/>
+					)} />
+				</FieldsRow>
+
+				<Field name="description" render={({ field, form }) => (
+					<TextField
+						{...field}
+						requiredConfirm={!this.isNewRisk}
+						validationSchema={RiskSchema}
+						fullWidth
+						multiline
+						label="Description"
+						disabled={!this.props.canUpdateRisk}
+					/>
+				)} />
+
+				{this.props.risk.descriptionThumbnail && (
+					<DescriptionImage>
+						<Image
+							src={this.props.risk.descriptionThumbnail}
+							enablePreview
+						/>
+					</DescriptionImage>
+				)}
+
+				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="likelihood">Risk Likelihood</InputLabel>
-						<Field name="likelihood" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={RISK_LIKELIHOODS}
-								inputId="likelihood"
-								disabled={!this.props.canUpdateRisk}
-								readOnly={!this.isNewRisk}
-							/>
-						)} />
+						<StyledFormControl>
+							<InputLabel shrink={true} htmlFor="residual_likelihood">Mitigated Likelihood</InputLabel>
+							<Field name="residual_likelihood" render={({ field }) => (
+								<CellSelect
+									{...field}
+									items={RISK_LIKELIHOODS}
+									inputId="residual_likelihood"
+									disabled={!this.props.canUpdateRisk}
+								/>
+							)} />
+						</StyledFormControl>
+
+						<StyledFormControl>
+							<InputLabel shrink={true} htmlFor="residual_consequence">Mitigated Consequence</InputLabel>
+							<Field name="residual_consequence" render={({ field }) => (
+								<CellSelect
+									{...field}
+									items={RISK_CONSEQUENCES}
+									inputId="residual_consequence"
+									disabled={!this.props.canUpdateRisk}
+								/>
+							)} />
+						</StyledFormControl>
 					</StyledFormControl>
 
 					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="consequence">Risk Consequence</InputLabel>
-						<Field name="consequence" render={({ field }) => (
+						<InputLabel shrink={true} htmlFor="residual_level_of_risk">Level of Mitigated Risk</InputLabel>
+						<Field name="residual_level_of_risk" render={({ field }) => (
 							<CellSelect
 								{...field}
-								items={RISK_CONSEQUENCES}
-								inputId="consequence"
-								disabled={!this.props.canUpdateRisk}
-								readOnly={!this.isNewRisk}
+								items={LEVELS_OF_RISK}
+								inputId="residual_level_of_risk"
+								disabled={true}
+								readOnly
 							/>
 						)} />
 					</StyledFormControl>
 				</FieldsRow>
 
 				<FieldsRow container alignItems="center" justify="space-between">
-					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="level_of_risk">Level of Risk</InputLabel>
-						<Field name="level_of_risk" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={LEVELS_OF_RISK}
-								inputId="level_of_risk"
-								disabled={true}
-								readOnly
-							/>
-						)} />
-					</StyledFormControl>
-
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="mitigation_status">Mitigation Status</InputLabel>
 						<Field name="mitigation_status" render={({ field }) => (
@@ -279,47 +322,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						disabled={!this.props.canUpdateRisk}
 					/>
 				)} />
-
-				<FieldsRow container alignItems="center" justify="space-between">
-					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="residual_likelihood">Mitigated Likelihood</InputLabel>
-						<Field name="residual_likelihood" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={RISK_LIKELIHOODS}
-								inputId="residual_likelihood"
-								disabled={!this.props.canUpdateRisk}
-							/>
-						)} />
-					</StyledFormControl>
-
-					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="residual_consequence">Mitigated Consequence</InputLabel>
-						<Field name="residual_consequence" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={RISK_CONSEQUENCES}
-								inputId="residual_consequence"
-								disabled={!this.props.canUpdateRisk}
-							/>
-						)} />
-					</StyledFormControl>
-				</FieldsRow>
-
-				<FieldsRow container alignItems="center" justify="space-between">
-					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="residual_level_of_risk">Level of Mitigated Risk</InputLabel>
-						<Field name="residual_level_of_risk" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={LEVELS_OF_RISK}
-								inputId="residual_level_of_risk"
-								disabled={true}
-								readOnly
-							/>
-						)} />
-					</StyledFormControl>
-				</FieldsRow>
 
 				<Field name="residual_risk" render={({ field, form }) => (
 					<TextField

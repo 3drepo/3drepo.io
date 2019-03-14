@@ -78,9 +78,7 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				break;
 			case 'mitigation_desc':
 				comment.action.propertyText = 'Mitigation description';
-				text = comment.action.propertyText + ' set to ' +
-					comment.action.to + ' by ' +
-					comment.owner;
+				text = comment.action.propertyText + ' updated by ' + comment.owner;
 				break;
 			case 'mitigation_status':
 				comment.action.propertyText = 'Mitigation Status';
@@ -118,9 +116,7 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				break;
 			case 'residual_risk':
 				comment.action.propertyText = 'Residual risk';
-				text = comment.action.propertyText + ' set to ' +
-					comment.action.to + ' by ' +
-					comment.owner;
+				text = comment.action.propertyText + ' updated by ' + comment.owner;
 				break;
 			case 'likelihood':
 				comment.action.propertyText = 'Likelihood';
@@ -160,6 +156,7 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				break;
 			case 'desc':
 				comment.action.propertyText = 'Description';
+				text = comment.action.propertyText + ' updated by ' + comment.owner;
 				break;
 			case 'due_date':
 				comment.action.propertyText = 'Due Date';
