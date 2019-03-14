@@ -464,7 +464,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 				toUpdate.updatedAt = Date.now();
 				return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
 					const updateBson = {$set: toUpdate};
-					if(toUnset !== {}) {
+					if(Object.keys(toUnset).length > 0) {
 						updateBson.$unset = toUnset;
 					}
 					return _dbCol.update({ _id: this._id }, updateBson).then(() => {
