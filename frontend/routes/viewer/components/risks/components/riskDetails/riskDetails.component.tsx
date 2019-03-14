@@ -90,7 +90,16 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const { teamspace, model, risk, currentUser, fetchRisk, modelSettings, myJob, subscribeOnRiskCommentsChanges } = this.props;
+		const {
+			teamspace,
+			model,
+			risk,
+			currentUser,
+			fetchRisk,
+			modelSettings,
+			myJob,
+			subscribeOnRiskCommentsChanges
+		} = this.props;
 		const permissions = modelSettings.permissions;
 
 		if (this.props.risk.comments) {

@@ -144,15 +144,15 @@ const convertActionCommentToText = (comment, topicTypes) => {
 					const from = topicTypes.find((topicType) => {
 						return topicType.value === comment.action.from;
 					});
-					
+
 					const to = topicTypes.find((topicType) => {
 						return topicType.value === comment.action.to;
 					});
-					
+
 					if (from && from.label) {
 						comment.action.from = from.label;
 					}
-					
+
 					if (to && to.label) {
 						comment.action.to = to.label;
 					}
@@ -199,7 +199,7 @@ const convertActionCommentToText = (comment, topicTypes) => {
 	comment.action.text = text;
 
 	return text;
-}
+};
 
 const convertActionValueToText = (value = '') => {
 	const actions = {
@@ -212,14 +212,14 @@ const convertActionValueToText = (value = '') => {
 		'for approval': 'For approval',
 		'closed': 'Closed'
 	};
-	
+
 	let actionText = value;
-	
+
 	value = value.toLowerCase();
-	
+
 	if (actions.hasOwnProperty(value)) {
 		actionText = actions[value];
 	}
-	
+
 	return actionText;
-};;
+};

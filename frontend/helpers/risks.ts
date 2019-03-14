@@ -43,7 +43,7 @@ export const prepareRisk = (risk, jobs = []) => {
 
 	if (!isNaN(risk.overall_level_of_risk)) {
 		overallLevelOfRisk = risk.overall_level_of_risk;
-	} else if(!isNaN(residualLevelOfRisk)) {
+	} else if (!isNaN(residualLevelOfRisk)) {
 		overallLevelOfRisk = residualLevelOfRisk;
 	} else {
 		overallLevelOfRisk = levelOfRisk;
@@ -89,13 +89,13 @@ export const calculateLevelOfRisk = (likelihood: string, consequence: string): n
 };
 
 export const getRiskConsequenceName = (consequence: number) => {
-	const filteredDefinitions = RISK_CONSEQUENCES.filter(def => def.value === consequence);
-	return (filteredDefinitions.length > 0) ? filteredDefinitions[0].name : "(invalid)";
+	const filteredDefinitions = RISK_CONSEQUENCES.filter((def) => def.value === consequence);
+	return (filteredDefinitions.length > 0) ? filteredDefinitions[0].name : '(invalid)';
 };
 
 export const getRiskLikelihoodName = (likelihood: number) => {
-	const filteredDefinitions = RISK_LIKELIHOODS.filter(def => def.value === likelihood);
-	return (filteredDefinitions.length > 0) ? filteredDefinitions[0].name : "(invalid)";
+	const filteredDefinitions = RISK_LIKELIHOODS.filter((def) => def.value === likelihood);
+	return (filteredDefinitions.length > 0) ? filteredDefinitions[0].name : '(invalid)';
 };
 
 export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => {
