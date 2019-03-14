@@ -77,7 +77,7 @@ export const MitigationDetailLabel = styled.div`
 
 export const MitigationDetailRow = styled.div`
   display: flex;
-  padding: 0 6px 0;
+  padding: 0 6px;
 ` as any;
 
 export const MitigationWrapper = styled.div`
