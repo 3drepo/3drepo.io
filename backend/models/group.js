@@ -442,7 +442,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 					} else {
 						if (key === "rules"
 							&& data.rules
-							&& !data.rules.every((isValidRule))) {
+							&& !checkRulesValidity(data.rules)) {
 							typeCorrect = false;
 							toUnset.objects = 1;
 							this.objects = undefined;
@@ -507,7 +507,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 					} else {
 						if (key === "rules"
 							&& data.rules
-							&& data.rules.some((x) => !isValidRule(x))) {
+							&& checkRulesValidity(data.rules)) {
 							typeCorrect = false;
 						}
 						newGroup[key] = data[key];
@@ -555,6 +555,25 @@ function clean(groupData) {
 	}
 
 	return cleaned;
+}
+
+function checkRulesValidity(rules) {
+	const fieldsWithRules = new Set();
+	let valid = rules.length > 0;
+	let it = 0;
+	while (valid && it < rules.length) {
+
+		const rule = rules[it];
+		valid = rule &&
+			isValidRule(rule) &&
+			!fieldsWithRules.has(rule.field) ;
+
+		if (valid) {
+			fieldsWithRules.add(rule.field);
+		}
+		it++;
+	}
+	return valid;
 }
 
 /**
