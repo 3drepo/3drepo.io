@@ -89,10 +89,6 @@ export const toggleIsImportingBcf = (state = INITIAL_STATE, { isImporting }) => 
 	return setComponentState(state, { componentState: { isImportingBCF: isImporting }});
 };
 
-export const toggleSubmodelsIssues = (state = INITIAL_STATE, { showSubmodelIssues }) => {
-	return setComponentState(state, { componentState: { showSubmodelIssues } });
-};
-
 export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues = [] }) => {
 	const issuesMap = keyBy(issues, '_id');
 	return {
@@ -171,7 +167,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[IssuesTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
 	[IssuesTypes.TOGGLE_IS_IMPORTING_BCF]: toggleIsImportingBcf,
-	[IssuesTypes.TOGGLE_SUBMODELS_ISSUES]: toggleSubmodelsIssues,
 	[IssuesTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
 	[IssuesTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
 	[IssuesTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,

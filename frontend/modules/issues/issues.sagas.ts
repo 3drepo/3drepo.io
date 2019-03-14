@@ -636,6 +636,15 @@ export function* setFilters({ filters }) {
 	}
 }
 
+export function* toggleSubmodelsIssues({ showSubmodelIssues }) {
+	try {
+		yield put(IssuesActions.setComponentState({ showSubmodelIssues }));
+		yield put(IssuesActions.renderPins());
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('toggle', 'submodels issues', error));
+	}
+}
+
 export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
 	yield takeLatest(IssuesTypes.FETCH_ISSUE, fetchIssue);
@@ -660,4 +669,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.UNSUBSCRIBE_ON_ISSUE_COMMENTS_CHANGES, unsubscribeOnIssueCommentsChanges);
 	yield takeLatest(IssuesTypes.UPDATE_NEW_ISSUE, updateNewIssue);
 	yield takeLatest(IssuesTypes.SET_FILTERS, setFilters);
+	yield takeLatest(IssuesTypes.TOGGLE_SUBMODELS_ISSUES, toggleSubmodelsIssues);
 }

@@ -172,6 +172,9 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	public scrollToFocusedItem = (items) => {
+		if (!this.listViewRef.current) {
+			return;
+		}
 		this.listViewRef.current.scrollTop = 0;
 		setTimeout(() => {
 			const activeItemIndex = items.findIndex(({ _id }) => _id === this.props.activeItemId);

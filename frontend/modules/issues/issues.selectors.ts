@@ -19,11 +19,28 @@ import { createSelector } from 'reselect';
 import { values } from 'lodash';
 import { STATUSES } from '../../constants/issues';
 import { searchByFilters } from '../../helpers/searching';
+import { selectCurrentModel } from '../model';
 
 export const selectIssuesDomain = (state) => Object.assign({}, state.issues);
 
+export const selectComponentState = createSelector(
+	selectIssuesDomain, (state) => state.componentState
+);
+
+export const selectShowSubmodelIssues = createSelector(
+	selectComponentState, (state) => state.showSubmodelIssues
+);
+
 export const selectIssues = createSelector(
-	selectIssuesDomain, (state) => values(state.issuesMap)
+	selectIssuesDomain, selectCurrentModel, selectShowSubmodelIssues,
+	(state, model, showSubmodelIssues) => {
+		const issues = values(state.issuesMap);
+		const preparedIssues = !showSubmodelIssues
+			? issues.filter((issue) => issue.model === model)
+			: issues;
+
+		return preparedIssues;
+	}
 );
 
 export const selectIssuesMap = createSelector(
@@ -32,10 +49,6 @@ export const selectIssuesMap = createSelector(
 
 export const selectIsIssuesPending = createSelector(
 	selectIssuesDomain, (state) => state.isPending
-);
-
-export const selectComponentState = createSelector(
-	selectIssuesDomain, (state) => state.componentState
 );
 
 export const selectActiveIssueId = createSelector(
@@ -74,11 +87,8 @@ export const selectSelectedFilters = createSelector(
 
 export const selectFilteredIssues = createSelector(
 	selectIssues, selectSelectedFilters, (issues, selectedFilters) => {
-		let returnHiddenIssue = false;
-		if (selectedFilters.length) {
-			returnHiddenIssue = selectedFilters
-				.some(({ value: { value } }) => value === STATUSES.CLOSED);
-		}
+		const returnHiddenIssue = selectedFilters.length && selectedFilters
+			.some(({ value: { value } }) => value === STATUSES.CLOSED);
 
 		return searchByFilters(issues, selectedFilters, returnHiddenIssue);
 	}
@@ -94,10 +104,6 @@ export const selectLogs = createSelector(
 
 export const selectFetchingDetailsIsPending = createSelector(
 	selectComponentState, (state) => state.fetchingDetailsIsPending
-);
-
-export const selectShowSubmodelIssues = createSelector(
-	selectComponentState, (state) => state.showSubmodelIssues
 );
 
 export const selectIsImportingBCF = createSelector(
