@@ -58,11 +58,15 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 		}
 
 		if (!selectedNodes.length) {
-			return groupObjects.reduce((acc, curr) => acc + curr.shared_ids.length, 0);
+			return groupObjects.reduce((acc, curr) => {
+				return curr.shared_ids ? acc + curr.shared_ids.length : 0;
+			}, 0);
 		}
 
 		if (!groupObjects.length) {
-			return selectedNodes.reduce((acc, curr) => acc + curr.shared_ids.length, 0);
+			return selectedNodes.reduce((acc, curr) => {
+				return curr.shared_ids ? acc + curr.shared_ids.length : 0;
+			}	, 0);
 		}
 
 		return selectedNodes.every((selectedNode) =>

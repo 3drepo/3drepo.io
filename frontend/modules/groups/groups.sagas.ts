@@ -365,8 +365,7 @@ export function* updateGroup({ teamspace, modelId, revision, groupId }) {
 		const groupDetails = yield select(selectActiveGroupDetails);
 
 		const groupToSave = {
-			...normalizeGroup(groupDetails),
-			objects: []
+			...normalizeGroup(groupDetails)
 		} as any;
 
 		const isNormalGroup = groupDetails.type === GROUPS_TYPES.NORMAL;
