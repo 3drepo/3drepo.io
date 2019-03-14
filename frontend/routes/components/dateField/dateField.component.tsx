@@ -23,6 +23,7 @@ interface IProps {
 	inputId: string;
 	value: string;
 	name: string;
+	format?: string;
 	placeholder?: string;
 	onChange: (event) => void;
 	onBlur: (event) => void;
@@ -62,7 +63,7 @@ export class DateField extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { value } = this.state;
-		const { onBlur, name, placeholder } = this.props;
+		const { onBlur, name, placeholder, format } = this.props;
 
 		return (
 			<Container>
@@ -72,6 +73,7 @@ export class DateField extends React.PureComponent<IProps, IState> {
 					name={name}
 					onChange={this.handleChange}
 					placeholder={placeholder}
+					format={format}
 				/>
 			</Container>
 		);

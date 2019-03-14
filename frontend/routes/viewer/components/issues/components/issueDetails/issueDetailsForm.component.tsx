@@ -83,6 +83,14 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		});
 	}, 200);
 
+	public getDueDateFormat = (timestamp) => {
+		const formatBase = 'dd MMM';
+		const dueDateYear = new Date(timestamp).getFullYear();
+		const thisYear = new Date().getFullYear();
+		const format = thisYear === dueDateYear ? formatBase : formatBase + ' YYYY';
+		return format;
+	}
+
 	public render() {
 		const { issue, myJob, permissions, currentUser } = this.props;
 
@@ -137,19 +145,16 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							)} />
 						</StyledFormControl>
 					</FieldsRow>
-
 					<FieldsRow container justify="space-between" flex={0.5}>
 						<StyledFormControl>
 							<InputLabel shrink={true}>Due date</InputLabel>
-							<Field name="due_date" render={({ field }) => {
-								return (
-									<DateField
-										{...field}
-										disabled={!canChangeBasicProperty(issue, myJob, permissions, currentUser)}
-										placeholder="Choose a due date"
-									/>
-								);
-							}} />
+							<Field name="due_date" render={({ field }) =>
+								<DateField
+									{...field}
+									format={this.getDueDateFormat(field.value)}
+									disabled={!canChangeBasicProperty(issue, myJob, permissions, currentUser)}
+									placeholder="Choose a due date" />}
+								/>
 						</StyledFormControl>
 					</FieldsRow>
 					<Field name="description" render={({ field }) => (
