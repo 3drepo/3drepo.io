@@ -62,6 +62,11 @@ const fieldTypes = {
 	"risk_id": "[object Object]"
 };
 
+const embeddedObjectFields = {
+	"objects" : ["account", "model", "shared_ids", "ifc_guids"],
+	"rules" : ["field", "operator", "values"]
+};
+
 const groupSchema = Schema({
 	_id: Object,
 	name: String,
@@ -434,7 +439,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 			if (data[key]) {
 				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 					if (key === "objects" && data.objects) {
-						toUpdate.objects = convertedObjects;
+						toUpdate.objects = cleanEmbeddedObject(key, convertedObjects);
 						toUnset.rules = 1;
 						this.rules = undefined;
 					} else if (key === "color") {
@@ -448,7 +453,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 							this.objects = undefined;
 						}
 
-						toUpdate[key] = data[key];
+						toUpdate[key] = cleanEmbeddedObject(key, data[key]);
 					}
 					this[key] = toUpdate[key];
 				} else {
@@ -483,6 +488,22 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 	});
 };
 
+function cleanEmbeddedObject(field, data) {
+	if(embeddedObjectFields[field]) {
+		const filtered =  data.map((entry) => {
+			const cleaned  = {};
+			embeddedObjectFields[field].forEach((allowedField) => {
+				if(entry.hasOwnProperty(allowedField)) {
+					cleaned[allowedField] = entry[allowedField];
+				}
+			});
+			return cleaned;
+		});
+		return filtered;
+	}
+	return data;
+}
+
 groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = "", branch = "master", rid = null) {
 	const model = dbCol.model;
 
@@ -501,16 +522,16 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 			if (fieldTypes[key] && data.hasOwnProperty(key)) {
 				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 					if (key === "objects" && data.objects) {
-						newGroup.objects = convertedObjects;
+						newGroup.objects = cleanEmbeddedObject(key, convertedObjects);
 					} else if (key === "color") {
 						newGroup[key] = data[key].map((c) => parseInt(c, 10));
 					} else {
 						if (key === "rules"
 							&& data.rules
-							&& checkRulesValidity(data.rules)) {
+							&& !checkRulesValidity(data.rules)) {
 							typeCorrect = false;
 						}
-						newGroup[key] = data[key];
+						newGroup[key] = cleanEmbeddedObject(key, data[key]);
 					}
 				} else {
 					typeCorrect = false;
