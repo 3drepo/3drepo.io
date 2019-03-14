@@ -357,6 +357,13 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		</StyledIcon>
 	)
 
+	public renderObjectsNumber = (objectsNumber) => {
+		if (objectsNumber === 1) {
+			return `${objectsNumber} object`;
+		}
+		return `${objectsNumber} objects`;
+	}
+
 	public renderGroupsList = renderWhenTrue(() => {
 		const Items = this.state.filteredGroups.map((group) => (
 			<GroupListItem
@@ -373,7 +380,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				renderActions={this.renderGroupActions(group)}
 				hasViewPermission={stubTrue}
 				panelName={GROUP_PANEL_NAME}
-				extraInfo={`${group.totalSavedMeshes} objects`}
+				extraInfo={this.renderObjectsNumber(group.totalSavedMeshes)}
 			/>
 		));
 
