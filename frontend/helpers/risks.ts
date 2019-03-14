@@ -19,7 +19,7 @@ import { omit, get } from 'lodash';
 import { getAPIUrl } from '../services/api';
 import {
 	RISK_CONSEQUENCES,
-	RISK_LIKELIHOODS
+	RISK_LIKELIHOODS,
 	RISK_LEVELS_COLOURS,
 	RISK_LEVELS_ICONS,
 	RISK_LEVELS,
