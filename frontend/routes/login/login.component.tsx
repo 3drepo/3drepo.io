@@ -129,6 +129,7 @@ export class Login extends React.PureComponent<IProps, IState> {
 										label="Username"
 										placeholder="Type username..."
 										autoComplete="login"
+										autoFocus={true}
 									/>
 								)} />
 								<Field name="password" render={({ field }) => (
