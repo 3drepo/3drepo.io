@@ -145,7 +145,7 @@ export function* selectGroup({ group = {} }) {
 	}
 }
 
-export function* addColorOverride({ groups = [] }) {
+export function* addColorOverride({ groups = [], renderOnly }) {
 	try {
 		const TreeService = getAngularService('TreeService') as any;
 		const overridedToAdd = {};
@@ -175,14 +175,16 @@ export function* addColorOverride({ groups = [] }) {
 				}
 			}
 		}
-		yield put(GroupsActions.addToOverrided(overridedToAdd));
 
+		if (!renderOnly) {
+			yield put(GroupsActions.addToOverrided(overridedToAdd));
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('color', 'override', error));
 	}
 }
 
-export function* removeColorOverride({ groups }) {
+export function* removeColorOverride({ groups, renderOnly = false }) {
 	try {
 		for (let i = 0; i < groups.length; i++) {
 			const group = groups[i];
@@ -194,14 +196,16 @@ export function* removeColorOverride({ groups }) {
 			});
 		}
 
-		const overridedToRemove = groups.map(({ id }) => id);
-		yield put(GroupsActions.removeFromOverrided(overridedToRemove));
+		if (!renderOnly) {
+			const overridedToRemove = groups.map(({ id }) => id);
+			yield put(GroupsActions.removeFromOverrided(overridedToRemove));
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('toggle', 'color override', error));
 	}
 }
 
-export function* toggleColorOverride({ group }) {
+export function* toggleColorOverride({ group, render }) {
 	try {
 		const colorOverrides = yield select(selectColorOverrides);
 		const hasColorOverride = colorOverrides[group._id];
@@ -290,7 +294,12 @@ export function* showDetails({ group, revision }) {
 			group.objects = objectsStatus.highlightedNodes;
 		}
 
-		yield put(GroupsActions.toggleColorOverride(group));
+		const colorOverrides = yield select(selectColorOverrides);
+		const overridedGroup = colorOverrides[group._id];
+		if (overridedGroup) {
+			yield put(GroupsActions.removeColorOverride([overridedGroup], true));
+		}
+
 		yield put(GroupsActions.setActiveGroup(group, revision));
 		yield put(GroupsActions.setComponentState({
 			showDetails: true,
@@ -305,7 +314,14 @@ export function* showDetails({ group, revision }) {
 export function* closeDetails() {
 	try {
 		const activeGroup = yield select(selectActiveGroupDetails);
-		yield put(GroupsActions.toggleColorOverride(activeGroup));
+
+		const colorOverrides = yield select(selectColorOverrides);
+		const overridedGroup = colorOverrides[activeGroup._id];
+		if (overridedGroup) {
+			yield put(GroupsActions.addColorOverride([activeGroup], true));
+		}
+
+		yield put(GroupsActions.highlightGroup(activeGroup));
 		yield put(GroupsActions.setComponentState({ showDetails: false }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('close', 'group details', error));
