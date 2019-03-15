@@ -120,7 +120,8 @@ class ModelController implements ng.IController {
 			window.removeEventListener('beforeunload', refreshHandler);
 			window.removeEventListener('popstate', popStateHandler);
 			this.ViewerService.off(VIEWER_EVENTS.CLICK_PIN);
-			dispatch(TreeActions.stopListenOnSelections());
+            dispatch(TreeActions.stopListenOnSelections());
+			this.resetPanelsStates();
 		});
 
 		this.$timeout(() => {
@@ -263,6 +264,11 @@ class ModelController implements ng.IController {
 		dispatch(RisksActions.fetchRisks(this.account, this.model, this.revision));
 		dispatch(GroupsActions.fetchGroups(this.account, this.model, this.revision));
 		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
+	}
+
+	private resetPanelsStates() {
+		dispatch(IssuesActions.resetComponentState());
+		dispatch(RisksActions.resetComponentState());
 	}
 }
 

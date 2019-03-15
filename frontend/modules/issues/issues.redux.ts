@@ -55,7 +55,8 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	toggleSortOrder: ['sortOrder'],
 	updateNewIssue: ['newIssue'],
 	setFilters: ['filters'],
-	showCloseInfo: ['issueId']
+	showCloseInfo: ['issueId'],
+	resetComponentState: []
 }, { prefix: 'ISSUES_' });
 
 export const INITIAL_STATE = {
@@ -158,6 +159,10 @@ const showCloseInfo = (state = INITIAL_STATE, { issueId }) => {
 	return { ...state, issuesMap };
 };
 
+const resetComponentState = (state = INITIAL_STATE) => {
+	return { ...state, componentState: INITIAL_STATE.componentState };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess,
 	[IssuesTypes.FETCH_ISSUE_SUCCESS]: fetchIssueSuccess,
@@ -171,5 +176,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
 	[IssuesTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
 	[IssuesTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
-	[IssuesTypes.SHOW_CLOSE_INFO]: showCloseInfo
+	[IssuesTypes.SHOW_CLOSE_INFO]: showCloseInfo,
+	[IssuesTypes.RESET_COMPONENT_STATE]: resetComponentState
 });

@@ -39,7 +39,8 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	unsubscribeOnRiskChanges: ['teamspace', 'modelId'],
 	focusOnRisk: ['risk', 'revision'],
 	updateNewRisk: ['newRisk'],
-	setFilters: ['filters']
+	setFilters: ['filters'],
+	resetComponentState: []
 }, { prefix: 'RISKS/' });
 
 export interface IRisksComponentState {
@@ -107,9 +108,14 @@ export const setComponentState = (state = INITIAL_STATE, { componentState = {} }
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
+export const resetComponentState = (state = INITIAL_STATE) => {
+	return { ...state, componentState: INITIAL_STATE.componentState };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.FETCH_RISKS_SUCCESS]: fetchRisksSuccess,
 	[RisksTypes.SET_COMPONENT_STATE]: setComponentState,
 	[RisksTypes.SAVE_RISK_SUCCESS]: saveRiskSuccess,
-	[RisksTypes.TOGGLE_PENDING_STATE]: togglePendingState
+	[RisksTypes.TOGGLE_PENDING_STATE]: togglePendingState,
+	[RisksTypes.RESET_COMPONENT_STATE]: resetComponentState
 });
