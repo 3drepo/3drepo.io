@@ -62,8 +62,8 @@ interface IProps {
 	downloadIssues: (teamspace, model) => void;
 	printIssues: (teamspace, model) => void;
 	setActiveIssue: (issue, revision?) => void;
-	showIssueDetails: (issue, revision?) => void;
-	closeDetails: () => void;
+	showIssueDetails: (teamspace, model, revision, issue) => void;
+	closeDetails: (teamspace, model, revision) => void;
 	toggleSubmodelsIssues: (showSubmodelIssues: boolean) => void;
 	subscribeOnIssueChanges: (teamspace, modelId) => void;
 	unsubscribeOnIssueChanges: (teamspace, modelId) => void;
@@ -182,16 +182,16 @@ export class Issues extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { issues, selectedFilters, activeIssueId, showDetails, revision } = this.props;
+		const { issues, selectedFilters, activeIssueId, showDetails, revision, teamspace, model } = this.props;
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
 
 		if (issues.length && !filtersChanged && location.search && !activeIssueId && !prevProps.showDetails && !showDetails) {
 			const { issueId } = queryString.parse(location.search);
 			if (issueId) {
-				const foundRisk = issues.find((issue) => issue._id === issueId);
+				const foundIssue = issues.find((issue) => issue._id === issueId);
 
-				if (foundRisk) {
-					this.props.showIssueDetails(foundRisk, revision);
+				if (foundIssue) {
+					this.props.showIssueDetails(teamspace, model, revision, foundIssue);
 				}
 			}
 		}
@@ -206,7 +206,13 @@ export class Issues extends React.PureComponent<IProps, IState> {
 	}
 
 	public showIssueDetails = (item) => {
-		this.props.showIssueDetails(item, this.props.revision);
+		const { teamspace, model, revision } = this.props;
+		this.props.showIssueDetails(teamspace, model, revision, item);
+	}
+
+	public closeIssueDetails = () => {
+		const { teamspace, model, revision } = this.props;
+		this.props.closeDetails(teamspace, model, revision);
 	}
 
 	public getFilterValues(property) {
@@ -228,7 +234,11 @@ export class Issues extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderDetailsView = renderWhenTrue(() => (
-		<IssueDetails teamspace={this.props.teamspace} model={this.props.model} />
+		<IssueDetails
+			teamspace={this.props.teamspace}
+			model={this.props.model}
+			revision={this.props.revision}
+		/>
 	));
 
 	public render() {
@@ -256,7 +266,7 @@ export class Issues extends React.PureComponent<IProps, IState> {
 				onActiveItem={this.setActiveIssue}
 				onNewItem={this.props.setNewIssue}
 				onShowDetails={this.showIssueDetails}
-				onCloseDetails={this.props.closeDetails}
+				onCloseDetails={this.closeIssueDetails}
 
 				renderDetailsView={this.renderDetailsView}
 			/>

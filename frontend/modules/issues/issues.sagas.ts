@@ -162,7 +162,7 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(savedIssue, jobs);
 
-		yield put(IssuesActions.showDetails(savedIssue, [], revision));
+		yield put(IssuesActions.showDetails(teamspace, model, revision, savedIssue));
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue created'));
 	} catch (error) {
@@ -470,14 +470,13 @@ export function* setActiveIssue({ issue, revision }) {
 	}
 }
 
-export function* showDetails({ issue, revision }) {
+export function* showDetails({ teamspace, model, revision, issue }) {
 	try {
 		runAngularViewerTransition({
-			account: issue.account,
-			model: issue.model,
+			account: teamspace,
+			model,
 			revision,
-			issueId: issue._id,
-			noSet: true
+			issueId: issue._id
 		});
 
 		yield put(IssuesActions.setActiveIssue(issue, revision));
@@ -487,17 +486,16 @@ export function* showDetails({ issue, revision }) {
 	}
 }
 
-export function* closeDetails() {
+export function* closeDetails({ teamspace, model, revision }) {
 	try {
 		const activeIssue = yield select(selectActiveIssueDetails);
 
 		if (activeIssue) {
 			runAngularViewerTransition({
-				account: activeIssue.account,
-				model: activeIssue.model,
-				revision: activeIssue.rev_id,
-				issueId: null,
-				noSet: true
+				account: teamspace,
+				model,
+				revision,
+				issueId: null
 			});
 		}
 

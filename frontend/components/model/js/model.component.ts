@@ -149,18 +149,17 @@ class ModelController implements ng.IController {
 		const issuesMap = selectIssuesMap(currentState);
 
 		if (risksMap[id]) {
-			dispatch(RisksActions.showDetails(risksMap[id], this.revision));
+			dispatch(RisksActions.showDetails(this.account, this.model, this.revision, risksMap[id]));
 			this.PanelService.showPanelsByType('risks');
 		}
 
 		if (issuesMap[id]) {
-			dispatch(IssuesActions.showDetails(issuesMap[id], this.revision));
+			dispatch(IssuesActions.showDetails(this.account, this.model, this.revision, issuesMap[id]));
 			this.PanelService.showPanelsByType('issues');
 		}
 	}
 
 	public watchers() {
-
 		this.$scope.$watchGroup(['vm.account', 'vm.model'], () => {
 			if (this.account && this.model) {
 				angular.element(() => {

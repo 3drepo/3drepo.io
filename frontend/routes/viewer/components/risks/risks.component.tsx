@@ -59,7 +59,7 @@ interface IProps {
 	downloadRisks: (teamspace, model) => void;
 	printRisks: (teamspace, model) => void;
 	setActiveRisk: (risk, revision?) => void;
-	showRiskDetails: (risk, revision?) => void;
+	showRiskDetails: (teamspace, model, revision, risk) => void;
 	closeDetails: () => void;
 	toggleShowPins: (showPins: boolean) => void;
 	subscribeOnRiskChanges: (teamspace, modelId) => void;
@@ -127,7 +127,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { risks, selectedFilters, activeRiskId, showDetails, revision } = this.props;
+		const { risks, selectedFilters, activeRiskId, showDetails, teamspace, model, revision } = this.props;
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
 
 		if (risks.length && !filtersChanged && location.search && !activeRiskId && !prevProps.showDetails && !showDetails) {
@@ -136,7 +136,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 				const foundRisk = risks.find((risk) => risk._id === riskId);
 
 				if (foundRisk) {
-					this.props.showRiskDetails(foundRisk, revision);
+					this.props.showRiskDetails(teamspace, model, revision, foundRisk);
 				}
 			}
 		}
@@ -151,7 +151,8 @@ export class Risks extends React.PureComponent<IProps, any> {
 	}
 
 	public showRiskDetails = (item) => {
-		this.props.showRiskDetails(item, this.props.revision);
+		const { teamspace, model, revision } = this.props;
+		this.props.showRiskDetails(teamspace, model, revision, item);
 	}
 
 	public getFilterValues(property) {

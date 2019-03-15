@@ -29,7 +29,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	renderPins: [],
 	printRisks: ['teamspace', 'modelId'],
 	downloadRisks: ['teamspace', 'modelId'],
-	showDetails: ['risk', 'revision'],
+	showDetails: ['teamspace', 'model', 'revision', 'risk'],
 	closeDetails: [],
 	setActiveRisk: ['risk', 'revision'],
 	showNewPin: ['risk', 'pinData'],

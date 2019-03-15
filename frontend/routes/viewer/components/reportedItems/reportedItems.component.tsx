@@ -158,7 +158,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 			changes.filteredItems = this.filteredItems;
 		}
 
-		if (detailsWasClosed) {
+		if (detailsWasClosed && this.listViewRef.current && this.props.activeItemId) {
 			this.scrollToFocusedItem(changes.filteredItems || this.state.filteredItems);
 		}
 
@@ -215,7 +215,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleItemFocus = (item) => () => this.props.onActiveItem(item);
-	public handleShowRiskDetails = (item) => () => this.props.onShowDetails(item);
+	public handleShowItemDetails = (item) => () => this.props.onShowDetails(item);
 
 	public handleAddNewItem = () => {
 		this.props.onNewItem();
@@ -270,7 +270,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 					{...item}
 					key={index}
 					onItemClick={this.handleItemFocus(item)}
-					onArrowClick={this.handleShowRiskDetails(item)}
+					onArrowClick={this.handleShowItemDetails(item)}
 					active={this.props.activeItemId === item._id}
 					hasViewPermission={this.hasPermission(VIEW_ISSUE)}
 					modelLoaded={this.state.modelLoaded}

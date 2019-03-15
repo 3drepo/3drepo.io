@@ -145,7 +145,7 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(savedRisk, jobs);
 
-		yield put(RisksActions.showDetails(preparedRisk, [...filteredRisks, preparedRisk], revision));
+		yield put(RisksActions.showDetails(teamspace, model, revision, preparedRisk));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(SnackbarActions.show('Risk created'));
 	} catch (error) {
@@ -401,14 +401,13 @@ export function* setActiveRisk({ risk, revision }) {
 	}
 }
 
-export function* showDetails({ risk, revision }) {
+export function* showDetails({ teamspace, model, revision, risk }) {
 	try {
 		runAngularViewerTransition({
-			account: risk.account,
-			model: risk.model,
+			account: teamspace,
+			model,
 			revision,
-			riskId: risk._id,
-			noSet: true
+			riskId: risk._id
 		});
 
 		yield put(RisksActions.setActiveRisk(risk, revision));

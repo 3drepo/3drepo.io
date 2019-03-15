@@ -33,6 +33,7 @@ interface IProps {
 	issue: any;
 	teamspace: string;
 	model: string;
+	revision: string;
 	expandDetails: boolean;
 	logs: any[];
 	fetchingDetailsIsPending: boolean;
@@ -44,7 +45,7 @@ interface IProps {
 	setState: (componentState) => void;
 	fetchIssue: (teamspace, model, issueId) => void;
 	showNewPin: (issue, pinData) => void;
-	saveIssue: (teamspace, modelId, issue) => void;
+	saveIssue: (teamspace, modelId, issue, revision) => void;
 	updateIssue: (teamspace, modelId, issue) => void;
 	postComment: (teamspace, modelId, issueData) => void;
 	removeComment: (teamspace, modelId, issueData) => void;
@@ -245,9 +246,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSave = (formValues) => {
-		const { teamspace, model, saveIssue } = this.props;
+		const { teamspace, model, saveIssue, revision } = this.props;
 		if (this.isNewIssue) {
-			saveIssue(teamspace, model, this.issueData);
+			saveIssue(teamspace, model, this.issueData, revision);
 		} else {
 			this.postComment(teamspace, model, formValues);
 		}
