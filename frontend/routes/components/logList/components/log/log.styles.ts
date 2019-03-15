@@ -96,7 +96,6 @@ export const MitigationWrapper = styled.div`
 
 export const ScreenshotWrapper = styled.div`
   width: 100%;
-  padding-top: 42%;
   overflow: hidden;
   position: relative;
   margin: 8px 0 0;
@@ -116,4 +115,23 @@ export const Screenshot = styled(Image)`
     bottom: 0;
     left: 0;
   }
+` as any;
+
+export const MessageContainer = styled.div`
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	position: relative;
+`;
+
+export const RemoveButtonWrapper = styled.div`
+	position: absolute;
+	right: 0;
+	top: ${(props: any) => props.screenshot ? 0 : '-8px'};
+` as any;
+
+export const Date = styled.div`
+	width: 100%;
+	text-align: right;
+	font-size: 10px;
 ` as any;

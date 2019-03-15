@@ -211,8 +211,7 @@ export function* postComment({ teamspace, modelId, riskData }) {
 		const { data: comment } = yield API.updateRisk(teamspace, modelId, riskData);
 		const preparedComment = yield prepareComment(comment);
 
-		// This seems to be handled by the chat subscription
-		// yield put(RisksActions.createCommentSuccess(preparedComment));
+		yield put(RisksActions.createCommentSuccess(preparedComment));
 		yield put(SnackbarActions.show('Risk comment added'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('post', 'risk comment', error));

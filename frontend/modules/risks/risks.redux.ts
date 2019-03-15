@@ -124,7 +124,15 @@ export const createCommentSuccess = (state = INITIAL_STATE, { comment }) => {
 		log.sealed = true;
 		return log;
 	});
-	const logs = [comment, ...updatedLogs];
+
+	let logs;
+
+	if (comment.hasOwnProperty('action') || '[object Object]' === Object.prototype.toString.call(comment.viewpoint)) {
+		logs = [comment, ...updatedLogs];
+	} else {
+		logs = updatedLogs;
+	}
+
 	return {...state, componentState: { ...state.componentState, logs }};
 };
 

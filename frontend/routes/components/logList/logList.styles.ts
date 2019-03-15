@@ -21,7 +21,6 @@ import { COLOR } from '../../../styles';
 export const Container = styled.div`
   background: ${COLOR.BLACK_20};
   min-height: 55px;
-  overflow: auto;
   position: relative;
 
   &:before {

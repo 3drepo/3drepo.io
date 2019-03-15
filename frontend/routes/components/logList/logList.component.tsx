@@ -34,7 +34,7 @@ export class LogList extends React.PureComponent<IProps, any> {
 		return (
 			<Log
 				{...item}
-				key={item.guid}
+				key={item.guid + item._id}
 				removeLog={this.props.removeLog}
 				index={index}
 				teamspace={this.props.teamspace}
@@ -54,7 +54,7 @@ export class LogList extends React.PureComponent<IProps, any> {
 	public render() {
 		return (
 			<Container>
-				{this.props.items.map(this.renderLogItem)}
+				{this.props.isPending ? this.renderLoader() : this.props.items.map(this.renderLogItem)}
 			</Container>
 		);
 	}

@@ -30,9 +30,13 @@ import {
 	MitigationWrapper,
 	Screenshot,
 	ScreenshotMessage,
-	ScreenshotWrapper
+	ScreenshotWrapper,
+	MessageContainer,
+	RemoveButtonWrapper,
+	Date
 } from './log.styles';
-
+import CloseIcon from '@material-ui/icons/Close';
+import { TooltipButton } from '../../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import {
 	LEVELS_OF_RISK,
@@ -76,11 +80,25 @@ export class Log extends React.PureComponent<IProps, any> {
 	}
 
 	public removeComment = () => {
+		event.stopPropagation();
 		this.props.removeLog(this.props.index, this.props.guid);
 	}
 
+	public renderRemoveButton = renderWhenTrue(() => (
+		<RemoveButtonWrapper screenshot={this.isScreenshot}>
+			<TooltipButton
+				label="Remove"
+				action={this.removeComment}
+				Icon={CloseIcon}
+			/>
+		</RemoveButtonWrapper>
+	));
+
 	public renderUserMessage = renderWhenTrue(() => (
-		<UserMessage>{this.props.comment}</UserMessage>
+		<MessageContainer>
+			<UserMessage>{this.props.comment}</UserMessage>
+			{this.renderRemoveButton(!this.props.sealed && !this.props.action)}
+		</MessageContainer>
 	));
 
 	public renderSystemMessage = renderWhenTrue(() => (
@@ -89,21 +107,30 @@ export class Log extends React.PureComponent<IProps, any> {
 		</SystemMessage>
 	));
 
-	public renderScreenshotMessage = renderWhenTrue(
+	public renderScreenshotMessage = renderWhenTrue(() => (
 		<>
 			<ScreenshotWrapper withMessage={!!this.props.comment}>
 				{ this.props.viewpoint && this.props.viewpoint.screenshotPath ?
-				<Screenshot src={this.props.viewpoint.screenshotPath} />
+					<>
+						<Screenshot src={this.props.viewpoint.screenshotPath} />
+						{this.renderRemoveButton(!this.props.sealed && !this.props.action)}
+					</>
 				: null }
 			</ScreenshotWrapper>
 			{this.props.comment && <ScreenshotMessage>{this.props.comment}</ScreenshotMessage>}
 		</>
-	);
+	));
 
-	public renderInfo = renderWhenTrue(
+	public renderUsername = renderWhenTrue((
+		<DynamicUsername teamspace={this.props.teamspace} name={this.props.owner} />
+	));
+
+	public renderInfo = () => (
 		<Info>
-			{<DynamicUsername teamspace={this.props.teamspace} name={this.props.owner} />}
-			<DateTime value={this.props.created as any} format="HH:mm DD MMM" />
+			{this.renderUsername(!Boolean(this.props.action))}
+			<Date>
+				<DateTime value={this.props.created as any} format="HH:mm DD MMM" />
+			</Date>
 		</Info>
 	);
 
@@ -119,7 +146,7 @@ export class Log extends React.PureComponent<IProps, any> {
 				{this.renderSystemMessage(Boolean(this.props.action))}
 				{this.renderUserMessage(this.isPlainComment)}
 				{this.renderScreenshotMessage(this.isScreenshot)}
-				{this.renderInfo(!this.isAction)}
+				{this.renderInfo()}
 			</Container>
 		);
 	}

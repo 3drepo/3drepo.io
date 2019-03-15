@@ -50,6 +50,7 @@ import { FieldsRow, StyledFormControl } from '../risks/components/riskDetails/ri
 import { RiskSchema } from '../risks/components/riskDetails/riskDetailsForm.component';
 import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
+import { Image } from '../../../components/image';
 
 interface IProps {
 	innerRef: any;
@@ -67,15 +68,21 @@ interface IProps {
 	showScreenshotDialog: (options) => void;
 }
 
+interface IState {
+	isPinActive: boolean;
+	newScreenshot: string;
+}
+
 const NewCommentSchema = Yup.object().shape({
 	text: Yup.string().max(220)
 });
 
 const NEW_PIN_ID = 'newPinId';
 
-export class NewCommentForm extends React.PureComponent<IProps, any> {
+export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	public state = {
 		isPinActive: false,
+		newScreenshot: '',
 		isResidualRiskInputActive: this.props.showResidualRiskInput
 	};
 
@@ -87,20 +94,33 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 		return this.state.isResidualRiskInputActive ? 'Text Comment' : 'Residual Risk';
 	}
 
+	get commentPlaceholder() {
+		if (this.props.canComment) {
+			return 'Write your comment here';
+		}
+		return 'You are not able to comment';
+	}
+
+	public componentDidUpdate = (prevProps) => {
+		if (prevProps.screenshot !== this.props.screenshot) {
+			this.setState({
+				newScreenshot: this.props.screenshot
+			});
+		}
+	}
+
 	public componentWillUnmount() {
 		Viewer.setPinDropMode(false);
 		Measure.setDisabled(false);
 		this.togglePinListeners(false);
 	}
 
-	public handleSave = ({ comment }, { resetForm }) => {
-		const viewpoint = {
-			...this.props.viewpoint,
-			screenshot: this.props.screenshot
-		};
-
-		this.props.onSave({ comment, viewpoint });
-		resetForm();
+	public handleSave = (values, form) => {
+		const screenshot = this.state.newScreenshot.substring(this.state.newScreenshot.indexOf(',') + 1);
+		const commentValues = { ...values, screenshot };
+		this.props.onSave(commentValues);
+		form.resetForm();
+		this.setState({ newScreenshot: ''});
 	}
 
 	public handleNewScreenshot = async () => {
@@ -196,7 +216,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 				<StyledTextField
 					{...field}
 					autoFocus={true}
-					placeholder="Write your comment here"
+					placeholder={this.commentPlaceholder}
 					multiline={true}
 					fullWidth={true}
 					InputLabelProps={{ shrink: true }}
@@ -206,6 +226,10 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 			)} />
 		</TextFieldWrapper>
 	));
+
+	public renderCreatedScreenshot = renderWhenTrue(() =>
+		<Image src={this.state.newScreenshot} className="new-comment" />
+	);
 
 	public renderResidualRiskFields = renderWhenTrue(() => (
 		<Container>
@@ -263,9 +287,10 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 
 		return (
 			<Container>
+				{this.renderCreatedScreenshot(Boolean(this.state.newScreenshot))}
 				<Formik
 					ref={innerRef}
-					initialValues={{ comment, screenshot }}
+					initialValues={{ comment: '', screenshot: this.state.newScreenshot }}
 					validationSchema={NewCommentSchema}
 					onSubmit={this.handleSave}
 				>
@@ -278,17 +303,18 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 								{this.renderPinButton(!hidePin)}
 								{this.renderCommentTypeToggle(!hideComment && showResidualRiskInput)}
 							</ActionsGroup>
-							<Field render={({ form }) =>
+							<Field render={({ form }) => (
 								<ViewerPanelButton
 									variant="fab"
 									color="secondary"
 									type="submit"
 									mini={true}
-									disabled={!hideComment && !canComment && (!form.isValid || form.isValidating)}
+									disabled={(!hideComment && !canComment && (!form.isValid || form.isValidating))}
 									aria-label="Add new comment"
 								>
 									<SaveIcon />
-								</ViewerPanelButton>} />
+								</ViewerPanelButton>)}
+							/>
 						</Actions>
 					</StyledForm>
 				</Formik>
