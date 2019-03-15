@@ -362,7 +362,7 @@ const showMultipleGroups = async (issue, revision) => {
 	let objects = {} as { hidden: any[], shown: any[], objects: any[] };
 
 	if (hasViewpointGroups) {
-		const [highlightedGroupData, shownGroupData, hiddenGroupData] = await Promise.all([
+		const [highlightedGroupData, hiddenGroupData, shownGroupData] = await Promise.all([
 			getIssueGroup(issue, issue.viewpoint.highlighted_group_id, revision),
 			getIssueGroup(issue, issue.viewpoint.hidden_group_id, revision),
 			getIssueGroup(issue, issue.viewpoint.shown_group_id, revision)
