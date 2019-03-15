@@ -283,7 +283,10 @@ export function* renderPins() {
 
 export function* downloadIssues({ teamspace, modelId }) {
 	try {
-		const endpoint = `${teamspace}/${modelId}/issues.json`;
+		const filteredIssues = yield select(selectFilteredIssues);
+		const issuesIds = map(filteredIssues, '_id').join(',');
+
+		const endpoint = `${teamspace}/${modelId}/issues.json?ids=${issuesIds}&convertCoords=1`;
 		const modelName = Viewer.viewer && Viewer.viewer.settings ? Viewer.viewer.settings.name : '';
 		yield API.downloadJSON('issues', modelName, endpoint);
 	} catch (error) {
