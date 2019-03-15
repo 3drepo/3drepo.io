@@ -32,7 +32,7 @@ import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { TextField } from '../../../../../components/textField/textField.component';
-import { FieldsRow, StyledFormControl, DescriptionImage } from './riskDetails.styles';
+import { FieldsContainer, FieldsRow, StyledFormControl, DescriptionImage } from './riskDetails.styles';
 import { Image } from '../../../../../components/image';
 
 export const RiskSchema = Yup.object().shape({
@@ -146,7 +146,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		return (
 			<Form>
 				<FieldsRow container alignItems="center" justify="space-between">
-					<StyledFormControl>
+					<FieldsContainer>
 						<StyledFormControl>
 							<InputLabel shrink={true} htmlFor="likelihood">Risk Likelihood</InputLabel>
 							<Field name="likelihood" render={({ field }) => (
@@ -172,20 +172,22 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								/>
 							)} />
 						</StyledFormControl>
-					</StyledFormControl>
+					</FieldsContainer>
 
-					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="level_of_risk">Level of Risk</InputLabel>
-						<Field name="level_of_risk" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={LEVELS_OF_RISK}
-								inputId="level_of_risk"
-								disabled={true}
-								readOnly
-							/>
-						)} />
-					</StyledFormControl>
+					<FieldsContainer>
+						<StyledFormControl>
+							<InputLabel shrink={true} htmlFor="level_of_risk">Level of Risk</InputLabel>
+							<Field name="level_of_risk" render={({ field }) => (
+								<CellSelect
+									{...field}
+									items={LEVELS_OF_RISK}
+									inputId="level_of_risk"
+									disabled={true}
+									readOnly
+								/>
+							)} />
+						</StyledFormControl>
+					</FieldsContainer>
 				</FieldsRow>
 
 				<FieldsRow container alignItems="center" justify="space-between">
@@ -257,7 +259,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				)}
 
 				<FieldsRow container alignItems="center" justify="space-between">
-					<StyledFormControl>
+					<FieldsContainer>
 						<StyledFormControl>
 							<InputLabel shrink={true} htmlFor="residual_likelihood">Mitigated Likelihood</InputLabel>
 							<Field name="residual_likelihood" render={({ field }) => (
@@ -281,20 +283,22 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								/>
 							)} />
 						</StyledFormControl>
-					</StyledFormControl>
+					</FieldsContainer>
 
-					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="residual_level_of_risk">Level of Mitigated Risk</InputLabel>
-						<Field name="residual_level_of_risk" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={LEVELS_OF_RISK}
-								inputId="residual_level_of_risk"
-								disabled={true}
-								readOnly
-							/>
-						)} />
-					</StyledFormControl>
+					<FieldsContainer>
+						<StyledFormControl>
+							<InputLabel shrink={true} htmlFor="residual_level_of_risk">Level of Mitigated Risk</InputLabel>
+							<Field name="residual_level_of_risk" render={({ field }) => (
+								<CellSelect
+									{...field}
+									items={LEVELS_OF_RISK}
+									inputId="residual_level_of_risk"
+									disabled={true}
+									readOnly
+								/>
+							)} />
+						</StyledFormControl>
+					</FieldsContainer>
 				</FieldsRow>
 
 				<FieldsRow container alignItems="center" justify="space-between">

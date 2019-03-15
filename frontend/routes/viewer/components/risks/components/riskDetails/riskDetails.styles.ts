@@ -30,13 +30,28 @@ export const Container = styled.div`
 
   ${TextFieldStyles.Container},
   ${StyledFormControl} {
-    margin: 8px 0;
+    margin: 1px 0;
+  }
+`;
+
+export const FieldsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-bottom: auto;
+  overflow: hidden;
+  width: 47%;
+
+  ${TextFieldStyles.Container},
+  ${StyledFormControl} {
+    margin: 5px 0;
+    width: 100%;
   }
 `;
 
 export const FieldsRow = styled(Grid)`
   ${TextFieldStyles.Container},
   ${StyledFormControl} {
+    margin: 1px 0;
     flex: 1;
 
     &:nth-child(2n + 1) {
