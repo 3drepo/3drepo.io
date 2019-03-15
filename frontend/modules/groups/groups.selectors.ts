@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { values } from 'lodash';
+import { size, values } from 'lodash';
 import { searchByFilters } from '../../helpers/searching';
 
 export const selectGroupsDomain = (state) => Object.assign({}, state.groups);
@@ -89,4 +89,8 @@ export const selectFieldNames = createSelector(
 
 export const selectCriteriaFieldState = createSelector(
 	selectComponentState, (state) => state.criteriaFieldState
+);
+
+export const selectIsAllOverrided = createSelector(
+	selectGroupsDomain, (state) => size(state.componentState.colorOverrides) === size(state.groupsMap)
 );

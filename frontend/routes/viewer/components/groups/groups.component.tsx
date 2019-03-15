@@ -180,7 +180,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	get overridesAllGroups() {
 		const { groups, colorOverrides } = this.props;
-		return groups.length === size(colorOverrides);
+		return Boolean(groups.length) && groups.length === size(colorOverrides);
 	}
 
 	public resetActiveGroup = () => {

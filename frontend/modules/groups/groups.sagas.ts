@@ -31,7 +31,8 @@ import {
 	selectNewGroupDetails,
 	selectActiveGroupDetails,
 	selectSelectedFilters,
-	selectShowDetails
+	selectShowDetails,
+	selectIsAllOverrided
 } from './groups.selectors';
 import { Viewer } from '../../services/viewer/viewer';
 import { MultiSelect } from '../../services/viewer/multiSelect';
@@ -247,11 +248,16 @@ export function* deleteGroups({ teamspace, modelId, groups }) {
 			const overridedGroup = colorOverrides[groupId];
 			const group = groupsMap[groupId];
 
-			return [
-				put(GroupsActions.removeColorOverride([overridedGroup])),
+			const actions = [
 				put(GroupsActions.dehighlightGroup(group)),
 				put(GroupsActions.deleteGroupsSuccess([groupId]))
 			];
+
+			if (overridedGroup) {
+				actions.push(put(GroupsActions.removeColorOverride([overridedGroup])));
+			}
+
+			return actions;
 		}));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('delete', 'groups', error));
@@ -330,6 +336,7 @@ export function* closeDetails() {
 
 export function* createGroup({ teamspace, modelId, revision }) {
 	try {
+		const isAllOverrided = yield select(selectIsAllOverrided);
 		const currentUser = yield select(selectCurrentUser);
 		const newGroupDetails = yield select(selectNewGroupDetails);
 		const objectsStatus = yield Viewer.getObjectsStatus();
@@ -349,7 +356,12 @@ export function* createGroup({ teamspace, modelId, revision }) {
 		}
 
 		const {data} = yield API.createGroup(teamspace, modelId, revision, group);
+
 		const preparedGroup = prepareGroup(data);
+
+		if (isAllOverrided) {
+			yield put(GroupsActions.addColorOverride([preparedGroup]));
+		}
 
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
 		yield put(GroupsActions.highlightGroup(preparedGroup));
