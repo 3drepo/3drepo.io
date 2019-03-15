@@ -23,6 +23,9 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { COLOR } from './../../../../styles/colors';
 
+const SUMMARY_HEIGHT = '64px';
+const TOGGLE_BUTTON_HEIGHT = '32px';
+
 export const Container = styled.div`
 	color: ${COLOR.BLACK_60};
 	background-color: ${COLOR.WHITE};
@@ -34,6 +37,7 @@ export const Collapsable = styled(ExpansionPanel)`
 		box-shadow: none;
 		padding: 0 12px;
 		margin-bottom: 0;
+		position: static;
 	}
 `;
 
@@ -41,7 +45,8 @@ export const Details = styled(ExpansionPanelDetails)`
 	&& {
 		display: flex;
 		flex-direction: column;
-		padding: 0 2px;
+		padding: ${SUMMARY_HEIGHT} 2px 0;
+		position: relative;
 	}
 `;
 
@@ -51,7 +56,15 @@ export const Summary = styled(ExpansionPanelSummary).attrs({
 	}
 })`
 	&& {
-		padding: 0;
+		position: absolute;
+    height: ${SUMMARY_HEIGHT};
+    width: 100%;
+    left: 0;
+		top: 40px;
+    box-sizing: border-box;
+		padding: 0 20px;
+		background-color: ${COLOR.WHITE};
+    z-index: 1;
 
 		.summary-icon {
 			display: none;
@@ -74,12 +87,19 @@ export const Content = styled.div`
 	background-color: ${COLOR.BLACK_6};
 `;
 
-export const NotCollapsableContent = styled.div``;
+export const NotCollapsableContent = styled.div`
+`;
 
 export const ToggleButtonContainer = styled.div`
 	display: flex;
 	justify-content: center;
-`;
+	top: auto;
+	background-color: ${COLOR.WHITE};
+	width: 100%;
+	z-index: 2;
+	margin-top: ${(props: any) => props.expanded ? 0 : SUMMARY_HEIGHT};
+	position: static;
+` as any;
 
 export const ToggleButton = styled(IconButton)`
 	&& {

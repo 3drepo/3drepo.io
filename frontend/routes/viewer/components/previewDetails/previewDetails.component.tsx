@@ -26,7 +26,8 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
 import {
-	Content, Container, Collapsable, Details, Summary, CollapsableContent, ToggleButtonContainer, ToggleButton, ToggleIcon, StyledForm, NotCollapsableContent
+	Content, Container, Collapsable, Details, Summary, CollapsableContent, ToggleButtonContainer, ToggleButton, ToggleIcon, StyledForm, NotCollapsableContent,
+	Wrapper
 } from './previewDetails.styles';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
 
@@ -156,29 +157,29 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		return (
 			<Container className={className}>
 				{this.renderUpdateMessage(willBeUpdated)}
-				{this.renderDeleteMessage(willBeRemoved)}
-				<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
-					<Summary expandIcon={this.renderExpandIcon(!disableExpanding && !editable)}>
+				{this.renderDeleteMessage(willBeRemoved)}<Summary expandIcon={this.renderExpandIcon(!disableExpanding && !editable)}>
 						<RoleIndicator color={roleColor} />
 						{this.renderNameWithCounter(!editable && count)}
 						{this.renderName(!editable && !count)}
 						{this.renderNameField(editable)}
 					</Summary>
-					<Details>
-						<PreviewItemInfo
-							author={author}
-							createdAt={createdAt}
-							StatusIconComponent={StatusIconComponent}
-							statusColor={statusColor}
-						/>
-						{this.renderCollapsable(Boolean(renderCollapsable))}
-					</Details>
-				</Collapsable>
-				<ToggleButtonContainer onClick={this.handleToggle}>
-					<ToggleButton>
-						{this.renderExpandIcon(!editable)}
-					</ToggleButton>
-				</ToggleButtonContainer>
+
+					<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
+						<Details>
+							<PreviewItemInfo
+								author={author}
+								createdAt={createdAt}
+								StatusIconComponent={StatusIconComponent}
+								statusColor={statusColor}
+							/>
+							{this.renderCollapsable(Boolean(renderCollapsable))}
+						</Details>
+					</Collapsable>
+					<ToggleButtonContainer onClick={this.handleToggle} expanded={this.state.expanded}>
+						<ToggleButton>
+							{this.renderExpandIcon(!editable)}
+						</ToggleButton>
+					</ToggleButtonContainer>
 				<NotCollapsableContent>
 					{this.renderNotCollapsable(Boolean(renderNotCollapsable))}
 				</NotCollapsableContent>
