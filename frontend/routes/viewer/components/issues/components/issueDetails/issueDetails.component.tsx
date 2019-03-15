@@ -182,7 +182,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		);
 	});
 
-	public userCanComment = () => {
+	public userCanComment() {
 		const { myJob, settings, currentUser } = this.props;
 		return canComment(this.issueData, myJob, settings.permissions, currentUser.username);
 	}
@@ -197,7 +197,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onTakeScreenshot={this.handleNewScreenshot}
 				onChangePin={this.handleChangePin}
 				onSave={this.handleSave}
-				canComment={this.userCanComment}
+				canComment={this.userCanComment()}
 				hideComment={this.isNewIssue}
 				hidePin={!this.isNewIssue}
 			/>

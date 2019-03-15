@@ -90,6 +90,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 			this.setState({
 				newScreenshot: this.props.screenshot
 			});
+			this.props.innerRef.current.setFieldValue('screenshot', this.props.screenshot);
 		}
 	}
 
@@ -100,7 +101,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSave = (values, form) => {
-		const screenshot = this.state.newScreenshot.substring(this.state.newScreenshot.indexOf(',') + 1);
+		const screenshot = values.screenshot.substring(values.screenshot.indexOf(',') + 1);
 		const commentValues = { ...values, screenshot };
 		this.props.onSave(commentValues);
 		form.resetForm();
@@ -200,7 +201,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	);
 
 	public render() {
-		const { hideComment, hideScreenshot, hidePin, innerRef, canComment, comment, screenshot } = this.props;
+		const { hideComment, hideScreenshot, hidePin, innerRef, canComment } = this.props;
 		return (
 			<Container>
 				{this.renderCreatedScreenshot(Boolean(this.state.newScreenshot))}
@@ -223,11 +224,12 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 									color="secondary"
 									type="submit"
 									mini={true}
-									disabled={(!hideComment && !canComment && (!form.isValid && !this.state.newScreenshot || form.isValidating))}
+									disabled={!form.isValid || form.isValidating || !canComment || hideComment}
 									aria-label="Add new comment"
 								>
 									<SaveIcon fontSize="small" />
-								</ViewerPanelButton>)}
+								</ViewerPanelButton>
+								)}
 							/>
 						</Actions>
 					</StyledForm>
