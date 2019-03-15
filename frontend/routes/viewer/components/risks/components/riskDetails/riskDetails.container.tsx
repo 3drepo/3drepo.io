@@ -59,7 +59,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showNewPin: RisksActions.showNewPin,
 	subscribeOnRiskCommentsChanges: RisksActions.subscribeOnRiskCommentsChanges,
 	unsubscribeOnRiskCommentsChanges: RisksActions.unsubscribeOnRiskCommentsChanges,
-	showScreenshotDialog: DialogActions.showScreenshotDialog
+	showScreenshotDialog: DialogActions.showScreenshotDialog,
 	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
 }, dispatch);
 
