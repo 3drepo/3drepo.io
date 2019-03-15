@@ -23,9 +23,12 @@ import { getAngularService, dispatch, getState, runAngularViewerTransition } fro
 import { prepareIssue, prepareComments, prepareComment } from '../../helpers/issues';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
+import { PRIORITIES, STATUSES } from '../../constants/issues';
+import { PIN_COLORS } from '../../styles';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
-import { IssuesTypes, IssuesActions } from './issues.redux';
+import { selectJobsList, selectMyJob } from '../jobs';
+import { selectCurrentUser } from '../currentUser';
 import {
 	selectActiveIssueId,
 	selectIssues,
@@ -34,10 +37,7 @@ import {
 	selectActiveIssueDetails,
 	selectFilteredIssues
 } from './issues.selectors';
-import { selectJobsList, selectMyJob } from '../jobs';
-import { selectCurrentUser } from '../currentUser';
-import { PIN_COLORS } from '../../styles';
-import { PRIORITIES, STATUSES } from '../../constants/issues';
+import { IssuesTypes, IssuesActions } from './issues.redux';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -210,7 +210,7 @@ export function* postComment({ teamspace, modelId, issueData }) {
 		const { data: comment } = yield API.updateIssue(teamspace, modelId, issueData);
 		const preparedComment = yield prepareComment(comment);
 
-		yield put(IssuesActions.createCommentSuccess(preparedComment));
+		yield put(IssuesActions.createCommentSuccess(preparedComment, issueData._id));
 		yield put(SnackbarActions.show('Issue comment added'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('post', 'issue comment', error));
@@ -230,7 +230,7 @@ export function* removeComment({ teamspace, modelId, issueData }) {
 		};
 
 		yield API.updateIssue(teamspace, modelId, commentData);
-		yield put(IssuesActions.deleteCommentSuccess(guid));
+		yield put(IssuesActions.deleteCommentSuccess(guid, issueData._id));
 		yield put(SnackbarActions.show('Comment removed'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('remove', 'comment', error));
@@ -577,15 +577,18 @@ const getCommentsChannel = (teamspace, modelId, issueId) => {
 };
 
 const onUpdateCommentEvent = (updatedComment) => {
-	dispatch(IssuesActions.updateCommentSuccess(updatedComment));
+	const issueId = selectActiveIssueId(getState());
+	dispatch(IssuesActions.updateCommentSuccess(updatedComment, issueId));
 };
 
 const onCreateCommentEvent = (createdComment) => {
-	dispatch(IssuesActions.createCommentSuccess(createdComment));
+	const issueId = selectActiveIssueId(getState());
+	dispatch(IssuesActions.createCommentSuccess(createdComment, issueId));
 };
 
 const onDeleteCommentEvent = (deletedComment) => {
-	dispatch(IssuesActions.deleteCommentSuccess(deletedComment.guid));
+	const issueId = selectActiveIssueId(getState());
+	dispatch(IssuesActions.deleteCommentSuccess(deletedComment.guid, issueId));
 };
 
 export function* subscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {

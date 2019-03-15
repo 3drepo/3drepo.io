@@ -25,7 +25,6 @@ import {
 	IssuesActions,
 	selectActiveIssueDetails,
 	selectExpandDetails,
-	selectLogs,
 	selectFetchingDetailsIsPending,
 	selectNewComment,
 	selectFailedToLoad
@@ -37,7 +36,6 @@ const mapStateToProps = createStructuredSelector({
 	issue: selectActiveIssueDetails,
 	jobs: selectJobsList,
 	expandDetails: selectExpandDetails,
-	logs: selectLogs,
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
 	newComment: selectNewComment,
 	myJob: selectMyJob,

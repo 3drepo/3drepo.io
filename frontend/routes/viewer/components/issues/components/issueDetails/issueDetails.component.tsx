@@ -35,7 +35,6 @@ interface IProps {
 	model: string;
 	revision: string;
 	expandDetails: boolean;
-	logs: any[];
 	fetchingDetailsIsPending: boolean;
 	newComment: any;
 	myJob: any;
@@ -144,7 +143,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			_id: this.issueData._id,
 			rev_id: this.issueData.rev_id,
 			issueNumber: this.issueData.number,
-			commentIndex: this.props.logs.length - 1 - index,
+			commentIndex: this.issueData.comments.length - 1 - index,
 			guid
 		};
 		this.props.removeComment(this.props.teamspace, this.props.model, issueData);
@@ -157,7 +156,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public renderLogList = renderWhenTrue(() => {
 		return (
 			<LogList
-				items={this.props.logs}
+				items={this.issueData.comments}
 				isPending={this.props.fetchingDetailsIsPending}
 				removeLog={this.removeComment}
 				teamspace={this.props.teamspace}
@@ -166,7 +165,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	});
 
 	public renderPreview = renderWhenTrue(() => {
-		const { expandDetails, logs } = this.props;
+		const { expandDetails } = this.props;
+		const { comments } = this.issueData;
 
 		return (
 			<PreviewDetails
@@ -177,7 +177,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onNameChange={this.handleNameChange}
 				onExpandChange={this.handleExpandChange}
 				renderCollapsable={this.renderDetailsForm}
-				renderNotCollapsable={() => this.renderLogList(!!logs.length && !this.isNewIssue)}
+				renderNotCollapsable={() => this.renderLogList(!!comments.length && !this.isNewIssue)}
 			/>
 		);
 	});

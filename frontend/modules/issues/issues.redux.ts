@@ -49,9 +49,9 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	exportBcf: ['teamspace', 'modelId'],
 	subscribeOnIssueCommentsChanges: ['teamspace', 'modelId', 'issueId'],
 	unsubscribeOnIssueCommentsChanges: ['teamspace', 'modelId', 'issueId'],
-	createCommentSuccess: ['comment'],
-	deleteCommentSuccess: ['commentGuid'],
-	updateCommentSuccess: ['comment'],
+	createCommentSuccess: ['comment', 'issueId'],
+	deleteCommentSuccess: ['commentGuid', 'issueId'],
+	updateCommentSuccess: ['comment', 'issueId'],
 	toggleSortOrder: ['sortOrder'],
 	updateNewIssue: ['newIssue'],
 	setFilters: ['filters'],
@@ -71,7 +71,6 @@ export const INITIAL_STATE = {
 		selectedFilters: [],
 		filteredRisks: [],
 		showPins: true,
-		logs: [],
 		fetchingDetailsIsPending: false,
 		isImportingBCF: false,
 		showSubmodelIssues: false,
@@ -100,11 +99,11 @@ export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues = [] }) => {
 export const fetchIssueSuccess = (state = INITIAL_STATE, { issue }) => {
 	const issuesMap = cloneDeep(state.issuesMap);
 	issuesMap[issue._id].comments = issue.comments;
-	return {...state, issuesMap, componentState: { ...state.componentState, logs: issue.comments, failedToLoad: false }};
+	return { ...state, issuesMap, componentState: { ...state.componentState, failedToLoad: false } };
 };
 
 export const fetchIssueFailure = (state = INITIAL_STATE) => {
-	return {...state, componentState: { ...state.componentState, logs: [], failedToLoad: true }};
+	return { ...state, componentState: { ...state.componentState, failedToLoad: true } };
 };
 
 export const saveIssueSuccess = (state = INITIAL_STATE, { issue }) => {
@@ -122,27 +121,29 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
-export const createCommentSuccess = (state = INITIAL_STATE, { comment }) => {
-	const clonedLogs = cloneDeep(state.componentState.logs);
-	const updatedLogs = clonedLogs.map((log) => {
-		log.sealed = true;
-		return log;
-	});
-	const logs = [comment, ...updatedLogs];
-	return {...state, componentState: { ...state.componentState, logs }};
+export const createCommentSuccess = (state = INITIAL_STATE, { comment, issueId }) => {
+	const issuesMap = cloneDeep(state.issuesMap);
+	const issue = issuesMap[issueId];
+	issue.comments = [comment, ...issue.comments.map((log) => ({...log, sealed: true }))];
+	issuesMap[issueId] = issue;
+
+	return { ...state, issuesMap };
 };
 
-export const updateCommentSuccess = (state = INITIAL_STATE, { comment }) => {
-	const logs = cloneDeep(state.componentState.logs);
-	const commentIndex = state.componentState.logs.findIndex((log) => log.guid === comment.guid);
-	logs[commentIndex] = comment;
-	return {...state, componentState: { ...state.componentState, logs }};
+export const updateCommentSuccess = (state = INITIAL_STATE, { comment, issueId }) => {
+	const issuesMap = cloneDeep(state.issuesMap);
+	const commentIndex = issuesMap[issueId].comments.findIndex((log) => log.guid === comment.guid);
+	issuesMap[issueId].comments[commentIndex] = comment;
+
+	return { ...state, issuesMap };
 };
 
-export const deleteCommentSuccess = (state = INITIAL_STATE, { commentGuid }) => {
-	const logs = cloneDeep(state.componentState.logs);
-	const updatedLogs = logs.filter((log) => log.guid !== commentGuid );
-	return {...state, componentState: { ...state.componentState, logs: updatedLogs }};
+export const deleteCommentSuccess = (state = INITIAL_STATE, { commentGuid, issueId }) => {
+	const issuesMap = cloneDeep(state.issuesMap);
+	const updatedComments = issuesMap[issueId].comments.filter((log) => log.guid !== commentGuid);
+	issuesMap[issueId].comments = updatedComments;
+
+	return { ...state, issuesMap };
 };
 
 export const toggleSortOrder = (state = INITIAL_STATE) => {

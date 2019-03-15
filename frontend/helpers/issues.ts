@@ -23,7 +23,8 @@ export const prepareIssue = (issue, jobs = []) => {
 		descriptionThumbnail,
 		StatusIconComponent: Icon,
 		statusColor: color,
-		roleColor
+		roleColor,
+		comments: issue.comments || []
 	};
 };
 
