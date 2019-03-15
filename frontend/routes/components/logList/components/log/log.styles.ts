@@ -17,11 +17,13 @@
 
 import styled from 'styled-components';
 import { COLOR } from '../../../../../styles/colors';
+import { Image } from '../../../../components/image';
 
 export const Container = styled.div`
   background-color: ${COLOR.WHITE_87};
+  cursor: ${(props: any) => props.clickable ? 'pointer' : 'default'};
   padding: 10px;
-`;
+` as any;
 
 export const MitigationMessage = styled.span`
   display: inline-block;
@@ -35,6 +37,7 @@ export const UserMessage = styled.span`
   box-shadow: 0 2px 5px ${COLOR.BLACK_6};
   display: inline-block;
   font-size: 12px;
+  max-width: 82.5%;
 `;
 
 export const SystemMessage = styled.span`
@@ -100,15 +103,17 @@ export const ScreenshotWrapper = styled.div`
   border-radius: ${(props: any) => props.withMessage ? '2px 2px 0 0' : '2px'};
 ` as any;
 
-export const Screenshot = styled.img`
-  display: block;
-  max-width: 100%;
-  width: 100%;
-  height: auto;
-  margin: auto;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+export const Screenshot = styled(Image)`
+  img {
+    display: block;
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+    margin: auto;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
 ` as any;

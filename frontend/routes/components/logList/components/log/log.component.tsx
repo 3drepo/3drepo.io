@@ -55,6 +55,7 @@ interface IProps {
 	sealed: boolean;
 	index: number;
 	removeLog: (index, guid) => void;
+	setCameraOnViewpoint: (viewpoint) => void;
 }
 
 export class Log extends React.PureComponent<IProps, any> {
@@ -106,12 +107,18 @@ export class Log extends React.PureComponent<IProps, any> {
 		</Info>
 	);
 
+	public handleSetCameraOnViewpoint = () => {
+		if (this.props.viewpoint) {
+			this.props.setCameraOnViewpoint({viewpoint: this.props.viewpoint});
+		}
+	}
+
 	public render() {
 		return (
-			<Container>
+			<Container onClick={this.handleSetCameraOnViewpoint} clickable={Boolean(this.props.viewpoint)}>
 				{this.renderSystemMessage(Boolean(this.props.action))}
 				{this.renderUserMessage(this.isPlainComment)}
-				{this.renderScreenshotMessage(this.isCommentWithScreenshot)}
+				{this.renderScreenshotMessage(this.isScreenshot)}
 				{this.renderInfo(!this.isAction)}
 			</Container>
 		);

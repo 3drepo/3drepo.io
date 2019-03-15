@@ -31,6 +31,7 @@ import {
 	selectAssociatedActivities
 } from '../../../../../../modules/risks';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
+import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { selectSettings } from '../../../../../../modules/model';
 import { DialogActions } from '../../../../../../modules/dialog';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
@@ -59,6 +60,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	subscribeOnRiskCommentsChanges: RisksActions.subscribeOnRiskCommentsChanges,
 	unsubscribeOnRiskCommentsChanges: RisksActions.unsubscribeOnRiskCommentsChanges,
 	showScreenshotDialog: DialogActions.showScreenshotDialog
+	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(RiskDetails);

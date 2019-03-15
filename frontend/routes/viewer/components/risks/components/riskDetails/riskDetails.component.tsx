@@ -52,6 +52,7 @@ interface IProps {
 	fetchRisk: (teamspace, model, riskId) => void;
 	showScreenshotDialog: (options) => void;
 	showNewPin: (risk, pinData) => void;
+	setCameraOnViewpoint: (teamspace, modelId, view) => void;
 }
 
 interface IState {
@@ -177,6 +178,10 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		this.props.removeComment(this.props.teamspace, this.props.model, riskData);
 	}
 
+	public setCameraOnViewpoint = (viewpoint) => {
+		this.props.setCameraOnViewpoint(this.props.teamspace, this.props.model, viewpoint);
+	}
+
 	public postComment = async (teamspace, model, {comment, screenshot}) => {
 		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
 
@@ -270,6 +275,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				isPending={this.props.fetchingDetailsIsPending}
 				removeLog={this.removeComment}
 				teamspace={this.props.teamspace}
+				setCameraOnViewpoint={this.setCameraOnViewpoint}
 			/>);
 	});
 

@@ -26,6 +26,7 @@ interface IProps {
 	isPending: boolean;
 	teamspace: string;
 	removeLog: (index, guid) => void;
+	setCameraOnViewpoint: (viewpoint) => void;
 }
 
 export class LogList extends React.PureComponent<IProps, any> {
@@ -33,10 +34,11 @@ export class LogList extends React.PureComponent<IProps, any> {
 		return (
 			<Log
 				{...item}
-				key={item.created}
+				key={item.guid}
 				removeLog={this.props.removeLog}
 				index={index}
 				teamspace={this.props.teamspace}
+				setCameraOnViewpoint={this.props.setCameraOnViewpoint}
 			/>
 		);
 	}
