@@ -445,10 +445,8 @@ function getIssuesBCF(req, res, next) {
 	let getBCFZipRS;
 
 	if (req.params.rid) {
-		// FIXME
 		getBCFZipRS = BCF.getBCFZipReadStream(account, model, req.session.user.username, null, req.params.rid, ids);
 	} else {
-		// FIXME
 		getBCFZipRS = BCF.getBCFZipReadStream(account, model, req.session.user.username, "master", null, ids);
 	}
 
@@ -539,7 +537,6 @@ function importBCF(req, res, next) {
 		} else if (!req.file.size) {
 			return responseCodes.respond(place, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 		} else {
-			// FIXME
 			BCF.importBCF({ socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username }, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
 				responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "ok" });
 			}).catch(error => {

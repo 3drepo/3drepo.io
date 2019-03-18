@@ -45,9 +45,9 @@ view.clean = function (dbCol, viewToClean, targetType = "[object String]") {
 		}
 	});
 
-	// TODO FIXME - Need to unify content/buffer for buffer field name in document
-	// TODO FIXME - Currently, Issues/Risks uses content
-	// TODO FIXME - Currently, Viewpoints uses buffer
+	// FIXME - Need to unify content/buffer for buffer field name in document
+	// FIXME - Currently, Issues/Risks uses content
+	// FIXME - Currently, Viewpoints uses buffer
 	if ("[object String]" === Object.prototype.toString.call(viewToClean.screenshot)) {
 		viewToClean.screenshot = {
 			content: new Buffer.from(viewToClean.screenshot, "base64"),
