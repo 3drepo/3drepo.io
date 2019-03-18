@@ -23,13 +23,18 @@ import { connect, addRouting } from '../../../helpers/migration';
 import { TopMenu } from './topMenu.component';
 import { selectCurrentUser } from '../../../modules/currentUser';
 import { AuthActions } from '../../../modules/auth';
+import { DialogActions } from '../../../modules/dialog';
+import { selectSettings, ViewerActions } from '../../../modules/viewer';
 
 const mapStateToProps = createStructuredSelector({
-	currentUser: selectCurrentUser
+	currentUser: selectCurrentUser,
+	visualSettings: selectSettings
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	onLogout: AuthActions.logout
+	onLogout: AuthActions.logout,
+	showDialog: DialogActions.showDialog,
+	updateSettings: ViewerActions.updateSettings
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(TopMenu)));

@@ -33,9 +33,11 @@ export const TooltipButton = (props: IProps) => {
 
 	return (
 		<Tooltip title={label} disableFocusListener={disabled}>
-			<IconButton aria-label={label} onClick={action}>
-				<Icon {...iconProps} />
-			</IconButton>
+			<span>
+				<IconButton aria-label={label} onClick={action} disabled={disabled}>
+					<Icon {...iconProps} />
+				</IconButton>
+			</span>
 		</Tooltip>
 	);
 };

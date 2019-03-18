@@ -197,12 +197,7 @@ class PanelController implements ng.IController {
 	// *** This method is angular-binded to the panel-cards contained in the panel component ***
 	public heightRequest(contentItem: any, height: number) {
 		contentItem.requestedHeight = height; // Keep a note of the requested height
-		if (height > this.maxHeightAvailable) {
-			contentItem.height = this.maxHeightAvailable; // Prevent excessive requests
-		} else {
-			contentItem.height = height; // Initially set the height to the requested height
-		}
-
+		contentItem.height = height > this.maxHeightAvailable ? this.maxHeightAvailable : height;
 		this.calculateContentHeights();
 	}
 
@@ -230,11 +225,10 @@ class PanelController implements ng.IController {
 		if (freeHeightPerPanel > 0) {
 			orderedContentItems.forEach((item) => {
 				const requiredHeight = item.requestedHeight || item.minHeight;
-				const maxHeight = Math.min(item.minHeight + freeHeightPerPanel, availableHeight);
-				const height = orderedContentItems.length > 1
-					? clamp(requiredHeight, item.minHeight, maxHeight)
-					: clamp(requiredHeight, item.minHeight, availableHeight);
-				item.height = height - item.panelTakenHeight;
+				const maxHeight = Math.min(item.minHeight + freeHeightPerPanel, availableHeight) ;
+				item.height = orderedContentItems.length > 1
+					? clamp(requiredHeight, item.minHeight, maxHeight - item.panelTakenHeight)
+					: clamp(requiredHeight, item.minHeight, availableHeight - item.panelTakenHeight);
 			});
 		}
 	}

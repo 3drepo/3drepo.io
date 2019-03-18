@@ -114,10 +114,6 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 	};
 
 	public reCaptchaWrapperRef = React.createRef<any>();
-	public listRef = React.createRef<any>();
-	public inputRef = React.createRef<any>();
-	public innerRef = React.createRef<any>();
-	public myInnerRef = React.createRef<any>();
 
 	public componentDidMount() {
 		const defaultCountry = clientConfigService.countries.find((country) => country.code === 'GB');
@@ -129,16 +125,11 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 	public handleSubmit = (values, form) => {
 		const data = omit(values, 'username', 'emailConfirm', 'passwordConfirm', 'termsAgreed');
 		this.props.onRegister(values.username, data);
-		this.resetForm(form);
-	}
-
-	public resetForm = (form) => {
-		form.resetForm();
-
+		form.setFieldValue('password', '', true);
+		form.setFieldValue('passwordConfirm', '', true);
 		this.setState({
 			passwordStrengthMessage: ''
 		});
-
 		if (this.reCaptchaWrapperRef.current) {
 			this.reCaptchaWrapperRef.current.reCaptchaRef.current.reset();
 		}

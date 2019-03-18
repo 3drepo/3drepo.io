@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import * as React from 'react';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { mergeRiskData } from '../../../../../../helpers/risks';
+import { canUpdateRisk, mergeRiskData } from '../../../../../../helpers/risks';
 import { Viewer } from '../../../../../../services/viewer/viewer';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
@@ -51,6 +51,7 @@ interface IProps {
 
 interface IState {
 	logs: any[];
+	canUpdateRisk: boolean;
 }
 
 const UNASSIGNED_JOB = {
@@ -60,7 +61,8 @@ const UNASSIGNED_JOB = {
 
 export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public state = {
-		logs: []
+		logs: [],
+		canUpdateRisk: false
 	};
 
 	public commentRef = React.createRef<any>();
@@ -83,8 +85,17 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
+		const { risk, currentUser, modelSettings, myJob } = this.props;
+		const permissions = modelSettings.permissions;
+
 		if (this.props.risk.comments) {
 			this.setLogs();
+		}
+
+		if (risk && currentUser && permissions && myJob) {
+			this.setState({
+				canUpdateRisk: canUpdateRisk(risk, myJob, permissions, currentUser)
+			});
 		}
 	}
 
@@ -92,6 +103,20 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		const logsChanged = !isEqual(this.props.risk.comments, prevProps.risk.comments);
 		if (logsChanged) {
 			this.setLogs();
+		}
+
+		const { risk, currentUser, modelSettings, myJob } = this.props;
+		const permissions = modelSettings.permissions;
+		const changes = {} as IState;
+		const permissionsChanged = !isEqual(prevProps.permissions, permissions);
+		const canUpdate = canUpdateRisk(risk, myJob, permissions, currentUser);
+
+		if (permissionsChanged && risk && currentUser && permissions && myJob && canUpdate !== this.state.canUpdateRisk) {
+			changes.canUpdateRisk = canUpdateRisk(risk, myJob, permissions, currentUser);
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
 		}
 	}
 
@@ -150,6 +175,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public renderRiskForm = () => (
 		<RiskDetailsForm
+			canUpdateRisk={this.state.canUpdateRisk}
 			risk={this.riskData}
 			jobs={this.jobsList}
 			onValueChange={this.handleRiskFormSubmit}
@@ -163,7 +189,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails } = this.props;
-
 		return (
 			<PreviewDetails
 				key={this.riskData._id}
@@ -172,7 +197,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				editable={!this.riskData._id}
 				onNameChange={this.handleNameChange}
 				onExpandChange={this.handleExpandChange}
-				renderCollapsable={this.renderRiskForm}
+				renderCollapsable={() => this.renderRiskForm()}
 				panelName={RISK_PANEL_NAME}
 			/>
 		);
@@ -183,6 +208,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center">
 			<NewCommentForm
+				canComment={this.state.canUpdateRisk}
 				comment={this.props.newComment.comment}
 				screenshot={this.props.newComment.screenshot}
 				viewpoint={this.props.newComment.viewpoint}

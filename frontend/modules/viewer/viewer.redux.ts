@@ -16,6 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { DEFAULT_SETTINGS } from '../../constants/viewer';
 
 export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	waitForViewer: [],
@@ -25,10 +26,22 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	removeMapSource: ['source'],
 	mapStart: [],
 	mapStop: [],
-	getScreenshot: []
-}, { prefix: 'VIEWER/' });
+	getScreenshot: [],
+	updateSettings: ['settings'],
+	saveSettings: ['settings'],
+	loadSettings: []
+}, { prefix: 'VIEWER_' });
 
-export const INITIAL_STATE = {};
+export const INITIAL_STATE = {
+	settings: window.localStorage.getItem('visualSettings') ?
+			JSON.parse(window.localStorage.getItem('visualSettings')) : DEFAULT_SETTINGS
+};
+
+const updateSettings = (state = INITIAL_STATE, {settings}) => {
+	window.localStorage.setItem('visualSettings', JSON.stringify(settings));
+	return {...state, settings};
+};
 
 export const reducer = createReducer(INITIAL_STATE, {
+	[ViewerTypes.UPDATE_SETTINGS] : updateSettings
 });

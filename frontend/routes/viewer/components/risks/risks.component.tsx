@@ -85,7 +85,7 @@ interface IProps {
 	fetchRisks: (teamspace, model, revision) => void;
 	setState: (componentState: any) => void;
 	setNewRisk: () => void;
-	downloadRisks: (teamspace, model) => void;
+	downloadRisks: (teamspace, model, risksIds) => void;
 	printRisks: (teamspace, model, risksIds) => void;
 	setActiveRisk: (risk, filteredRisks, revision?) => void;
 	showRiskDetails: (risk, filteredRisks, revision?) => void;
@@ -151,12 +151,10 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	get menuActionsMap() {
 		const { printRisks, downloadRisks, toggleShowPins, teamspace, model, showPins } = this.props;
 		const { filteredRisks } = this.state;
+		const risksIds = map(filteredRisks, '_id').join(',');
 		return {
-			[RISKS_ACTIONS_ITEMS.PRINT]: () => {
-				const risksIds = map(filteredRisks, '_id').join(',');
-				printRisks(teamspace, model, risksIds);
-			},
-			[RISKS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadRisks(teamspace, model),
+			[RISKS_ACTIONS_ITEMS.PRINT]: () => printRisks(teamspace, model, risksIds),
+			[RISKS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadRisks(teamspace, model, risksIds),
 			[RISKS_ACTIONS_ITEMS.SHOW_PINS]: () => toggleShowPins(!showPins, filteredRisks)
 		};
 	}

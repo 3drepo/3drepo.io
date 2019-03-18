@@ -4,8 +4,9 @@ const MODES = require('./tools/modes');
 
 module.exports = getWebpackConfig({
   mode: MODES.PRODUCTION,
+  entry: {main:'./main.ts', unity: './globals/unity-util.ts'},
   output: {
-    filename: 'three_d_repo.min.js'
+    filename: chunkData => chunkData.chunk.name == 'main'? 'three_d_repo.min.js' : '../unity/unity-util.js'
   },
   plugins: [
     new CopyWebpackPlugin([{ from: 'custom/**', to: '../' }])

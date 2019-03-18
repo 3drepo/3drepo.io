@@ -37,7 +37,7 @@ export function* fetchViewpoints({ teamspace, modelId }) {
 		yield put(ViewpointsActions.fetchViewpointsSuccess(viewpoints));
 		yield put(ViewpointsActions.setPendingState(false));
 	} catch (e) {
-		yield put(ViewpointsActions.showEndpointErrorDialog('get', 'model viewpoints', e.response));
+		yield put(DialogActions.showEndpointErrorDialog('get', 'model viewpoints', e.response));
 	}
 }
 

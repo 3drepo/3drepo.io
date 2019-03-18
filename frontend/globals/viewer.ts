@@ -215,11 +215,11 @@ export class Viewer {
 		this.handle = handle;
 	}
 
-	public insertUnityLoader() {
+	public insertUnityLoader(memory) {
 		return new Promise((resolve, reject) => {
 			this.unityLoaderScript.addEventListener ('load', () => {
 				console.debug('Loaded UnityLoader.js succesfully');
-				UnityUtil.loadUnity(this.divId);
+				UnityUtil.loadUnity(this.divId, memory);
 				resolve();
 			}, false);
 			this.unityLoaderScript.addEventListener ('error', (error) => {

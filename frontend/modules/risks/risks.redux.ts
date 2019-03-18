@@ -28,7 +28,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	setNewRisk: [],
 	renderPins: ['filteredRisks'],
 	printRisks: ['teamspace', 'modelId', 'risksIds'],
-	downloadRisks: ['teamspace', 'modelId'],
+	downloadRisks: ['teamspace', 'modelId', 'risksIds'],
 	showDetails: ['risk', 'filteredRisks', 'revision'],
 	closeDetails: [],
 	setActiveRisk: ['risk', 'filteredRisks', 'revision'],
