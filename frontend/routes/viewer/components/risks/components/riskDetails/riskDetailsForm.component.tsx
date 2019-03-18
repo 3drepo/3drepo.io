@@ -356,9 +356,10 @@ export const RiskDetailsForm = withFormik({
 			likelihood: risk.likelihood,
 			consequence: risk.consequence,
 			level_of_risk: risk.level_of_risk,
-			overall_level_of_risk: risk.overall_level_of_risk,
 			residual_likelihood: risk.residual_likelihood,
 			residual_consequence: risk.residual_consequence,
+			residual_level_of_risk: risk.residual_level_of_risk,
+			overall_level_of_risk: risk.overall_level_of_risk,
 			residual_risk: risk.residual_risk
 		});
 	},
