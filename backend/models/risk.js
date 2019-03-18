@@ -580,7 +580,7 @@ risk.updateAttrs = function(dbCol, uid, data) {
 									newRisk.comments = updatedComments;
 
 									toUpdate[key] = data[key];
-									oldRisk[key] = data[key];
+									newRisk[key] = data[key];
 								} else {
 									return Promise.reject(responseCodes.RISK_UPDATE_PERMISSION_DECLINED);
 								}
