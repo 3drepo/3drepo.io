@@ -57,20 +57,21 @@ export const Summary = styled(ExpansionPanelSummary).attrs({
 })`
 	&& {
 		position: absolute;
-    height: ${SUMMARY_HEIGHT};
-    width: 100%;
-    left: 0;
-		top: 40px;
-    box-sizing: border-box;
+		height: ${SUMMARY_HEIGHT};
+		width: 100%;
+		left: 0;
+		box-sizing: border-box;
 		padding: 0 20px;
 		background-color: ${COLOR.WHITE};
-    z-index: 1;
+		z-index: 1;
 
 		.summary-icon {
 			display: none;
 		}
+
+		box-shadow: ${(props: any) => props.scrolled ? `0 4px 7px -4px ${COLOR.BLACK_30};` : 'none'};
 	}
-`;
+` as any;
 
 export const CollapsableContent = styled.div`
 	margin: 8px 0;

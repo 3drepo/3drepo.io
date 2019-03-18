@@ -124,7 +124,7 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 export const createCommentSuccess = (state = INITIAL_STATE, { comment, issueId }) => {
 	const issuesMap = cloneDeep(state.issuesMap);
 	const issue = issuesMap[issueId];
-	issue.comments = [comment, ...issue.comments.map((log) => ({...log, sealed: true }))];
+	issue.comments = [comment, ...issue.comments.map((log) => ({...log, sealed: true, new: true }))];
 	issuesMap[issueId] = issue;
 
 	return { ...state, issuesMap };

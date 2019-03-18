@@ -56,6 +56,7 @@ interface IProps {
 
 interface IState {
 	logsLoaded: boolean;
+	scrolled: boolean;
 }
 
 const UNASSIGNED_JOB = {
@@ -65,10 +66,12 @@ const UNASSIGNED_JOB = {
 
 export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public state = {
-		logsLoaded: false
+		logsLoaded: false,
+		scrolled: false
 	};
 
 	public commentRef = React.createRef<any>();
+	public panelRef = React.createRef<any>();
 
 	get isNewIssue() {
 		return !this.props.issue._id;
@@ -97,10 +100,20 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { teamspace, model, fetchIssue, issue } = this.props;
+		const { teamspace, model, fetchIssue, issue, logs } = this.props;
 
 		if (issue._id !== prevProps.issue._id) {
 			fetchIssue(teamspace, model, issue._id);
+		}
+
+		if (logs.length > prevProps.logs.length && logs[logs.length - 1].new) {
+			const { height, top } = this.panelRef.current.getBoundingClientRect();
+			const headerHeight = 56;
+
+			this.panelRef.current.scrollTo({
+				top: height - top - headerHeight,
+				behavior: 'smooth'
+			});
 		}
 	}
 
@@ -165,6 +178,19 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			/>);
 	});
 
+	public handlePanelScroll = (e) => {
+		if (e.target.scrollTop > 0 && !this.state.scrolled) {
+			this.setState({
+				scrolled: true
+			});
+		}
+		if (e.target.scrollTop === 0 && this.state.scrolled) {
+			this.setState({
+				scrolled: false
+			});
+		}
+	}
+
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails } = this.props;
 		const { comments } = this.issueData;
@@ -179,6 +205,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onExpandChange={this.handleExpandChange}
 				renderCollapsable={this.renderDetailsForm}
 				renderNotCollapsable={() => this.renderLogList(!!comments.length && !this.isNewIssue)}
+				handleHeaderClick={() => this.setCameraOnViewpoint({viewpoint: this.issueData.viewpoint})}
+				scrolled={this.state.scrolled}
 			/>
 		);
 	});
@@ -266,7 +294,12 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Container>
-				<ViewerPanelContent className="height-catcher" padding="0" details="1">
+				<ViewerPanelContent
+					className="height-catcher"
+					padding="0" details="1"
+					onScroll={this.handlePanelScroll}
+					innerRef={this.panelRef}
+				>
 					{this.renderFailedState(failedToLoad)}
 					{this.renderPreview(!failedToLoad && issue)}
 				</ViewerPanelContent>
