@@ -19,6 +19,7 @@ import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 
 import * as API from '../../services/api';
+import * as Exports from '../../services/export';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
 import { prepareIssue, prepareComments, prepareComment } from '../../helpers/issues';
 import { Cache } from '../../services/cache';
@@ -285,10 +286,7 @@ export function* downloadIssues({ teamspace, modelId }) {
 	try {
 		const filteredIssues = yield select(selectFilteredIssues);
 		const issuesIds = map(filteredIssues, '_id').join(',');
-
-		const endpoint = `${teamspace}/${modelId}/issues.json?ids=${issuesIds}&convertCoords=1`;
-		const modelName = Viewer.viewer && Viewer.viewer.settings ? Viewer.viewer.settings.name : '';
-		yield API.downloadJSON('issues', modelName, endpoint);
+		yield Exports.exportIssuesToJSON(teamspace, modelId, issuesIds);
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('download', 'json', error));
 	}
@@ -296,10 +294,10 @@ export function* downloadIssues({ teamspace, modelId }) {
 
 export function* exportBcf({ teamspace, modelId }) {
 	try {
+
 		const filteredIssues = yield select(selectFilteredIssues);
 		const issuesIds = map(filteredIssues, '_id').join(',');
-		const exportUrl = API.getAPIUrl(`${teamspace}/${modelId}/issues.bcfzip?ids=${issuesIds}`);
-		window.open(exportUrl, '_blank');
+		Exports.exportBCF(teamspace, modelId, issuesIds);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('export', 'BCF', error));
 	}
@@ -323,8 +321,7 @@ export function* printIssues({ teamspace, modelId }) {
 	try {
 		const filteredIssues = yield select(selectFilteredIssues);
 		const issuesIds = map(filteredIssues, '_id').join(',');
-		const printUrl = API.getAPIUrl(`${teamspace}/${modelId}/issues.html?ids=${issuesIds}`);
-		window.open(printUrl, '_blank');
+		Exports.printIssues(teamspace, modelId, issuesIds);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('print', 'issue', error));
 	}

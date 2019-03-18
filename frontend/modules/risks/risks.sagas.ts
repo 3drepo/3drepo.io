@@ -19,6 +19,7 @@ import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 
 import * as API from '../../services/api';
+import * as Exports from '../../services/export';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
 import { getRiskPinColor, prepareRisk } from '../../helpers/risks';
 import { Cache } from '../../services/cache';
@@ -236,10 +237,7 @@ export function* downloadRisks({ teamspace, modelId }) {
 	try {
 		const filteredRisks = yield select(selectFilteredRisks);
 		const risksIds = map(filteredRisks, '_id').join(',');
-
-		const endpoint = `${teamspace}/${modelId}/risks.json?ids=${risksIds}&convertCoords=1`;
-		const modelName = Viewer.viewer && Viewer.viewer.settings ? Viewer.viewer.settings.name : '';
-		yield API.downloadJSON('risks', modelName, endpoint);
+		yield Exports.exportRisksToJSON(teamspace, modelId, risksIds);
 
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'risk', error));
@@ -250,9 +248,7 @@ export function* printRisks({ teamspace, modelId }) {
 	try {
 		const filteredRisks = yield select(selectFilteredRisks);
 		const risksIds = map(filteredRisks, '_id').join(',');
-		const printEndpoint = `${teamspace}/${modelId}/risks.html?ids=${risksIds}`;
-		const printUrl = yield API.getAPIUrl(printEndpoint);
-		window.open(printUrl, '_blank');
+		Exports.printRisks(teamspace, modelId, risksIds);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'risk', error));
 	}
