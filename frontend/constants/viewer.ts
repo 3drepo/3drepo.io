@@ -65,7 +65,7 @@ export const DEFAULT_SETTINGS = {
 	xray: true,
 	statistics: false,
 	memory: 2032,
-	nearPlane: 1,
+	nearPlane: 10,
 	farPlaneSamplingPoints: 5,
 	farPlaneAlgorithm: 'box'
 };
