@@ -63,12 +63,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showConfirmDialog: DialogActions.showConfirmDialog,
 	isolateGroup: GroupsActions.isolateGroup,
 	downloadGroups: GroupsActions.downloadGroups,
-<<<<<<< HEAD
-	selectGroup: GroupsActions.selectGroup,
-=======
 	resetToSavedSelection: GroupsActions.resetToSavedSelection,
 	resetActiveGroup: GroupsActions.resetActiveGroup,
->>>>>>> fef1b4aa9... ISSUE #1387 - Unhighlight selected group
 	subscribeOnChanges: GroupsActions.subscribeOnChanges,
 	unsubscribeFromChanges: GroupsActions.unsubscribeFromChanges
 }, dispatch);
