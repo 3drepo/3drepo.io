@@ -72,6 +72,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public commentRef = React.createRef<any>();
 	public panelRef = React.createRef<any>();
+	public commentsRef = React.createRef<any>();
 
 	get isNewIssue() {
 		return !this.props.issue._id;
@@ -100,20 +101,24 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { teamspace, model, fetchIssue, issue, logs } = this.props;
+		const { teamspace, model, fetchIssue, issue } = this.props;
 
 		if (issue._id !== prevProps.issue._id) {
 			fetchIssue(teamspace, model, issue._id);
 		}
 
-		if (logs.length > prevProps.logs.length && logs[logs.length - 1].new) {
-			const { height, top } = this.panelRef.current.getBoundingClientRect();
-			const headerHeight = 56;
+		if (issue.comments.length > prevProps.issue.comments.length && issue.comments[issue.comments.length - 1].new) {
+			const { top: commentsTop } = this.commentsRef.current.getBoundingClientRect();
+			const panelElements = this.panelRef.current.children[0].children;
+			const detailsDimensions = panelElements[1].getBoundingClientRect();
+			const { height: detailsHeight } = detailsDimensions;
 
-			this.panelRef.current.scrollTo({
-				top: height - top - headerHeight,
-				behavior: 'smooth'
-			});
+			if (commentsTop < 0) {
+				this.panelRef.current.scrollTo({
+					top: detailsHeight - 16,
+					behavior: 'smooth'
+				});
+			}
 		}
 	}
 
@@ -169,6 +174,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public renderLogList = renderWhenTrue(() => {
 		return (
 			<LogList
+				innerRef={this.commentsRef}
 				items={this.issueData.comments}
 				isPending={this.props.fetchingDetailsIsPending}
 				removeLog={this.removeComment}
