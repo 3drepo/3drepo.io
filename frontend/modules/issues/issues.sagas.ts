@@ -50,7 +50,7 @@ export function* fetchIssues({teamspace, modelId, revision}) {
 		yield put(IssuesActions.fetchIssuesSuccess(preparedIssues));
 		yield put(IssuesActions.renderPins());
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('get', 'issues', error));
+		yield put(DialogActions.showEndpointErrorDialog('get', 'issues', error));
 	}
 	yield put(IssuesActions.togglePendingState(false));
 }
@@ -64,7 +64,7 @@ export function* fetchIssue({teamspace, modelId, issueId}) {
 		yield put(IssuesActions.fetchIssueSuccess(data));
 	} catch (error) {
 		yield put(IssuesActions.fetchIssueFailure());
-		yield put(DialogActions.showErrorDialog('get', 'issue', error));
+		yield put(DialogActions.showEndpointErrorDialog('get', 'issue', error));
 	}
 	yield put(IssuesActions.toggleDetailsPendingState(false));
 }
@@ -166,7 +166,7 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue created'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('save', 'issue', error));
+		yield put(DialogActions.showEndpointErrorDialog('save', 'issue', error));
 	}
 }
 
@@ -186,7 +186,7 @@ export function* updateIssue({ teamspace, modelId, issueData }) {
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue updated'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'issue', error));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'issue', error));
 	}
 }
 
@@ -213,7 +213,7 @@ export function* postComment({ teamspace, modelId, issueData }) {
 		yield put(IssuesActions.createCommentSuccess(preparedComment, issueData._id));
 		yield put(SnackbarActions.show('Issue comment added'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('post', 'issue comment', error));
+		yield put(DialogActions.showEndpointErrorDialog('post', 'issue comment', error));
 	}
 }
 
@@ -233,7 +233,7 @@ export function* removeComment({ teamspace, modelId, issueData }) {
 		yield put(IssuesActions.deleteCommentSuccess(guid, issueData._id));
 		yield put(SnackbarActions.show('Comment removed'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('remove', 'comment', error));
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'comment', error));
 	}
 }
 
@@ -290,7 +290,7 @@ export function* downloadIssues({ teamspace, modelId }) {
 		const modelName = Viewer.viewer && Viewer.viewer.settings ? Viewer.viewer.settings.name : '';
 		yield API.downloadJSON('issues', modelName, endpoint);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('download', 'json', error));
+		yield put(DialogActions.showEndpointErrorDialog('download', 'json', error));
 	}
 }
 

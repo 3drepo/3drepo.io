@@ -160,6 +160,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				isPending={this.props.fetchingDetailsIsPending}
 				removeLog={this.removeComment}
 				teamspace={this.props.teamspace}
+				currentUser={this.props.currentUser.username}
 				setCameraOnViewpoint={this.setCameraOnViewpoint}
 			/>);
 	});

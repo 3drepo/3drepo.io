@@ -158,8 +158,9 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 			changes.filteredItems = this.filteredItems;
 		}
 
-		if (detailsWasClosed && this.listViewRef.current && this.props.activeItemId) {
-			this.scrollToFocusedItem(changes.filteredItems || this.state.filteredItems);
+		const filteredItems = changes.filteredItems || this.state.filteredItems;
+		if (detailsWasClosed && this.listViewRef.current && this.props.activeItemId && filteredItems.length) {
+			this.scrollToFocusedItem(filteredItems);
 		}
 
 		if (!isEmpty(changes)) {

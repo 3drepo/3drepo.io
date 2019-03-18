@@ -24,6 +24,7 @@ import { Loader } from '../../components/loader/loader.component';
 interface IProps {
 	items: any[];
 	isPending: boolean;
+	currentUser: string;
 	teamspace: string;
 	removeLog: (index, guid) => void;
 	setCameraOnViewpoint: (viewpoint) => void;
@@ -38,6 +39,7 @@ export class LogList extends React.PureComponent<IProps, any> {
 				removeLog={this.props.removeLog}
 				index={index}
 				teamspace={this.props.teamspace}
+				currentUser={this.props.currentUser}
 				setCameraOnViewpoint={this.props.setCameraOnViewpoint}
 			/>
 		);

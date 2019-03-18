@@ -46,6 +46,7 @@ interface IProps {
 	guid: string;
 	sealed: boolean;
 	index: number;
+	currentUser: string;
 	removeLog: (index, guid) => void;
 	setCameraOnViewpoint: (viewpoint) => void;
 }
@@ -67,6 +68,10 @@ export class Log extends React.PureComponent<IProps, any> {
 		return Boolean(this.props.comment) && !this.isScreenshot && !this.isAction;
 	}
 
+	get isRemovable() {
+		return !this.props.sealed && !this.props.action && this.props.currentUser === this.props.owner;
+	}
+
 	public removeComment = (event) => {
 		event.stopPropagation();
 		this.props.removeLog(this.props.index, this.props.guid);
@@ -85,7 +90,7 @@ export class Log extends React.PureComponent<IProps, any> {
 	public renderUserMessage = renderWhenTrue(() => (
 		<MessageContainer>
 			<UserMessage>{this.props.comment}</UserMessage>
-			{this.renderRemoveButton(!this.props.sealed && !this.props.action)}
+			{this.renderRemoveButton(this.isRemovable)}
 		</MessageContainer>
 	));
 
