@@ -19,3 +19,5 @@ export {
 	ViewerTypes,
 	ViewerActions
 } from './viewer.redux';
+
+export * from './viewer.selectors';

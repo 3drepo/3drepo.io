@@ -52,6 +52,9 @@ export const MuiTheme = createMuiTheme({
 				'&:before': {
 					borderBottomColor: 'rgba(0, 0, 0, .12) !important'
 				}
+			},
+			disabled: {
+				color: 'gainsboro'
 			}
 		},
 		MuiInputBase: {

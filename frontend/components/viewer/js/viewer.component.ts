@@ -15,6 +15,11 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { subscribe } from '../../../helpers/migration';
+import { selectShadowSetting, selectStatsSetting, selectNearPlaneSetting,
+		selectFarPlaneAlgorithm, selectShadingSetting, selectXraySetting,
+		selectFarPlaneSamplingPoints} from '../../../modules/viewer';
+
 class ViewerController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -35,9 +40,15 @@ class ViewerController implements ng.IController {
 	private pointerEvents: string;
 	private measureMode: boolean;
 	private viewer: any;
-	private deviceMemory: any;
 	private cancelPinWatcher: any;
 	private cancelEventWatcher: any;
+	private shadowsSetting: string;
+	private statsSetting: boolean;
+	private nearPlaneSetting: number;
+	private farPlaneAlgorithm: string;
+	private shadingSetting: string;
+	private xraySetting: boolean;
+	private farPlaneSamplingPoints: number;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -57,15 +68,18 @@ class ViewerController implements ng.IController {
 		this.pointerEvents = 'auto';
 		this.measureMode = false;
 
-		if (this.deviceMemory) {
-			const gigabyte = 1073741824;
-			const MAX_MEMORY = 2130706432; // The maximum memory Unity can allocate
-			const assignedMemory = gigabyte * (this.deviceMemory / 2);
-			window.Module.TOTAL_MEMORY = (assignedMemory < MAX_MEMORY) ? assignedMemory : MAX_MEMORY;
-		}
-
 		this.viewer = this.ViewerService.getViewer();
 		this.watchers();
+
+		subscribe(this, {
+			shadowsSetting: selectShadowSetting,
+			statsSetting: selectStatsSetting,
+			nearPlaneSetting: selectNearPlaneSetting,
+			farPlaneAlgorithm: selectFarPlaneAlgorithm,
+			shadingSetting: selectShadingSetting,
+			xraySetting: selectXraySetting,
+			farPlaneSamplingPoints: selectFarPlaneSamplingPoints
+		});
 	}
 
 	public $onDestroy() {
@@ -93,6 +107,20 @@ class ViewerController implements ng.IController {
 				this.ViewerService.handleEvent(event, this.account, this.model);
 			}
 		});
+
+		this.$scope.$watch(() => this.shadowsSetting, this.ViewerService.setShadows);
+
+		this.$scope.$watch(() => this.statsSetting, this.ViewerService.setStats.bind(this.ViewerService));
+
+		this.$scope.$watch(() => this.nearPlaneSetting, this.ViewerService.setNearPlane);
+
+		this.$scope.$watch(() => this.farPlaneAlgorithm, this.ViewerService.setFarPlaneAlgorithm);
+
+		this.$scope.$watch(() => this.shadingSetting, this.ViewerService.setShading);
+
+		this.$scope.$watch(() => this.xraySetting, this.ViewerService.setXray);
+
+		this.$scope.$watch(() => this.farPlaneSamplingPoints, this.ViewerService.setFarPlaneSamplingPoints);
 	}
 }
 
@@ -102,7 +130,7 @@ export const ViewerComponent: ng.IComponentOptions = {
 			branch: '<',
 			model: '<',
 			revision: '<',
-			deviceMemory: '<'
+			shadowSetting: '<'
 		},
 		controller: ViewerController,
 		controllerAs: 'vm'

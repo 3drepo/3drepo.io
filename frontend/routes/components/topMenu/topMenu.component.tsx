@@ -31,6 +31,8 @@ interface IProps {
 	onLiteModeChange?: () => void;
 	onLogout?: () => void;
 	onLogoClick?: () => void;
+	updateSettings?: (settings: any) => void;
+	visualSettings?: any;
 }
 
 export class TopMenu extends React.PureComponent<IProps, any> {

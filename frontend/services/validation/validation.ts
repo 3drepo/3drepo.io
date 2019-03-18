@@ -26,7 +26,9 @@ export const VALIDATIONS_MESSAGES = {
 	DECIMAL: 'Must be a decimal number or integer',
 	INTEGER: 'Must be an integer',
 	USERNAME_CHARS: 'Must use only letters, numbers, hypens or underscores',
-	NOT_NUMBER: 'Must be a number'
+	NOT_NUMBER: 'Must be a number',
+	MUST_BE_GREATER: 'Must be greater than or equal to  ${min}',
+	MUST_BE_LOWER: 'Must be lower than or equal to ${max}'
 };
 
 Yup.addMethod(Yup.string, 'differentThan', differentThan );
@@ -72,7 +74,19 @@ export const schema = {
 		.required(VALIDATIONS_MESSAGES.REQUIRED),
 
 	measureNumberDecimal: Yup.string().matches(/^([+-]?([0-9]*[.])?[0-9]+)$/, VALIDATIONS_MESSAGES.DECIMAL),
-	measureNumberIntegers: Yup.string().matches(/^[+-]?([0-9]*)$/, VALIDATIONS_MESSAGES.INTEGER)
+	measureNumberIntegers: Yup.string().matches(/^[+-]?([0-9]*)$/, VALIDATIONS_MESSAGES.INTEGER),
+
+	number: (min, max) => Yup.number()
+		.typeError(VALIDATIONS_MESSAGES.DECIMAL)
+		.required(VALIDATIONS_MESSAGES.REQUIRED)
+		.min(min, VALIDATIONS_MESSAGES.MUST_BE_GREATER)
+		.max(max, VALIDATIONS_MESSAGES.MUST_BE_LOWER),
+
+	integer: (min, max) => Yup.number().typeError(VALIDATIONS_MESSAGES.INTEGER)
+		.integer(VALIDATIONS_MESSAGES.INTEGER)
+		.required(VALIDATIONS_MESSAGES.REQUIRED)
+		.min(min, VALIDATIONS_MESSAGES.MUST_BE_GREATER)
+		.max(max, VALIDATIONS_MESSAGES.MUST_BE_LOWER)
 };
 
 export const getPasswordStrengthMessage = (score: number) => {

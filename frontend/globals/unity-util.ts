@@ -83,8 +83,8 @@ export class UnityUtil {
 
 	}
 
-	public static loadUnity(divId: any, unityJsonPath?: string) {
-		unityJsonPath = unityJsonPath || 'unity/Build/unity.json';
+	public static loadUnity(divId: any, memory: number) {
+		const unityJsonPath = 'unity/Build/unity.json';
 
 		const unitySettings: any = {
 			onProgress: this.onProgress
@@ -95,6 +95,7 @@ export class UnityUtil {
 				window.Module = {};
 			}
 			unitySettings.Module = (window as any).Module;
+			unitySettings.Module.TOTAL_MEMORY = memory;
 			UnityUtil.unityInstance = UnityLoader.instantiate(
 				divId,
 				unityJsonPath,
@@ -214,7 +215,7 @@ export class UnityUtil {
 
 	}
 
-	public static toUnity(methodName, requireStatus, params) {
+	public static toUnity(methodName, requireStatus, params?) {
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
@@ -886,7 +887,7 @@ export class UnityUtil {
 	/**
 	 * Set the default near plane value. This can be use to tweak situations where
 	 * geometry closest to you are being clipped
-	* @param {number[]} value - the closest distance the camera will render. (default is 0.1)
+	* @param {number} value - the closest distance the camera will render. (default is 0.1)
 	 */
 	public static setDefaultNearPlane(value) {
 		UnityUtil.toUnity('DefaultNearPlaneValue', UnityUtil.LoadingState.VIEWER_READY, value);
@@ -1041,6 +1042,34 @@ export class UnityUtil {
 	 */
 	public static zoomToHighlightedMeshes() {
 		UnityUtil.toUnity('ZoomToHighlightedMeshes', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
+	 * Sets the render quality to default
+	 */
+	public static setRenderingQualityDefault() {
+		UnityUtil.toUnity('SetRenderingQualityDefault', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Sets the render quality to high
+	 */
+	public static setRenderingQualityHigh() {
+		UnityUtil.toUnity('SetRenderingQualityHigh', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Sets the highlighting to show xray
+	 */
+	public static setXRayHighlightOn(): any {
+		UnityUtil.toUnity('SetXRayHighlightOn', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Sets the highlighting to show xray
+	 */
+	public static setXRayHighlightOff(): any {
+		UnityUtil.toUnity('SetXRayHighlightOff', UnityUtil.LoadingState.VIEWER_READY);
 	}
 
 }

@@ -17,8 +17,8 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { get, omit } from 'lodash';
-import { ErrorDialog, ConfirmDialog } from '../../routes/components/dialogContainer/components';
 import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
+import { ErrorDialog, ConfirmDialog } from '../../routes/components/dialogContainer/components';
 
 interface IDialogConfig {
 	title: string;

@@ -58,3 +58,14 @@ export const VIEWER_EVENTS = {
 export const VIEWER_ERRORS = {
 	PIN_ID_TAKEN: 'VIEWER_PIN_ID_TAKEN'
 };
+
+export const DEFAULT_SETTINGS = {
+	shading: 'standard',
+	shadows: 'none',
+	xray: true,
+	statistics: false,
+	memory: 2032,
+	nearPlane: 10,
+	farPlaneSamplingPoints: 5,
+	farPlaneAlgorithm: 'box'
+};

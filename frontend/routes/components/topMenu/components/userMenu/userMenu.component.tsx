@@ -21,6 +21,7 @@ import IconButton from '@material-ui/core/IconButton';
 import ViewList from '@material-ui/icons/ViewList';
 import ExitToApp from '@material-ui/icons/ExitToApp';
 import Restore from '@material-ui/icons/Restore';
+import Settings from '@material-ui/icons/Settings';
 import ContactSupport from '@material-ui/icons/ContactSupport';
 
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
@@ -34,6 +35,7 @@ import {
 	UserIcon
 } from './userMenu.styles';
 import { Avatar } from '../../../avatar/avatar.component';
+import { VisualSettingsDialog } from '../visualSettingsDialog/visualSettingsDialog.component';
 
 const UserButton = ({ IconProps, Icon, ...props }) => (
 	<IconButton
@@ -88,6 +90,11 @@ const UserMenuContent = (props) => {
 				label="Support"
 				onButtonClick={invokeAndClose(props.openUserManual)}
 			/>
+			<UserMenuButton
+				Icon={Settings}
+				label="Visual Settings"
+				onButtonClick={invokeAndClose(props.openSettingsDialog)}
+			/>
 			<MenuItem>
 				<MenuSwitch
 					checked={props.isLiteMode}
@@ -99,11 +106,6 @@ const UserMenuContent = (props) => {
 				/>
 				<MenuText primary="Lite mode" />
 			</MenuItem>
-			{hasMemorySettings && <UserMenuButton
-				Icon={Restore}
-				label="Reset Settings"
-				onButtonClick={invokeAndClose(props.resetMemorySettings)}
-			/>}
 			<UserMenuButton
 				Icon={ExitToApp}
 				label="Logout"
@@ -119,25 +121,38 @@ interface IProps {
 	onLiteModeChange?: () => void;
 	onLogout?: () => void;
 	onTeamspacesClick?: () => void;
+	showDialog?: (config: any) => void;
+	updateSettings?: (settings: any) => void;
+	visualSettings?: any;
 }
 
 export class UserMenu extends React.PureComponent<IProps, any> {
-	public resetMemorySettings() {
-		localStorage.removeItem('deviceMemory');
-	}
 
 	public openUserManual() {
 		window.open('http://3drepo.org/support/', '_blank');
 	}
 
+	public openSettingsDialog = () => {
+		const {visualSettings, updateSettings} = this.props;
+		this.props.showDialog({
+				title: 'Visual Settings',
+				template: VisualSettingsDialog,
+				data: {
+					visualSettings,
+					updateSettings
+				}
+		});
+	}
+
 	public renderMenuContent = (props) => {
 		const menuContentProps = {
+			...props,
 			...this.props,
 			openUserManual: this.openUserManual,
-			resetMemorySettings: this.resetMemorySettings
+			openSettingsDialog: this.openSettingsDialog
 		};
 
-		return <UserMenuContent {...props} {...menuContentProps} />;
+		return <UserMenuContent {...menuContentProps} />;
 	}
 
 	public render() {
