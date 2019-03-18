@@ -357,7 +357,7 @@ groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId, s
 		});
 };
 
-groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, ids) {
+groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, ids, showIfcGuids) {
 
 	const query = {};
 
@@ -380,7 +380,7 @@ groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, id
 
 		results.forEach(result => {
 			sharedIdConversionPromises.push(
-				getObjectIds(dbCol, result, branch, revId, true).then((sharedIdObjects) => {
+				getObjectIds(dbCol, result, branch, revId, true, showIfcGuids).then((sharedIdObjects) => {
 					result.objects = sharedIdObjects;
 					return result;
 				})
