@@ -1,8 +1,9 @@
-import Print from '@material-ui/icons/Print';
 import Download from '@material-ui/icons/CloudDownload';
 import Delete from '@material-ui/icons/Delete';
 import OfflineBolt from '@material-ui/icons/OfflineBolt';
 import PanTool from '@material-ui/icons/PanTool';
+import InvertColors from '@material-ui/icons/InvertColors';
+
 import { capitalize } from 'lodash';
 
 import { COLOR } from '../styles';
@@ -37,7 +38,7 @@ export const GROUPS_ACTIONS_MENU = [
 	{
 		name: GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL,
 		label: 'Override All',
-		Icon: Print
+		Icon: InvertColors
 	},
 	{
 		name: GROUPS_ACTIONS_ITEMS.DELETE_ALL,
