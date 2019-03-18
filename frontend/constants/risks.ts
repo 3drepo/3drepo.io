@@ -114,9 +114,11 @@ export const RISK_FILTER_RELATED_FIELDS = {
 	CATEGORY: 'category',
 	RISK_CONSEQUENCE: 'consequence',
 	RISK_LIKELIHOOD: 'likelihood',
-	LEVELS_OF_RISK: 'level_of_risk',
+	LEVEL_OF_RISK: 'level_of_risk',
 	RESIDUAL_CONSEQUENCE: 'residual_consequence',
-	RESIDUAL_LIKELIHOOD: 'residual_likelihood'
+	RESIDUAL_LIKELIHOOD: 'residual_likelihood',
+	RESIDUAL_LEVEL_OF_RISK: 'residual_level_of_risk',
+	OVERALL_LEVEL_OF_RISK: 'overall_level_of_risk'
 };
 
 export const RISK_FILTERS = [
@@ -152,7 +154,7 @@ export const RISK_FILTERS = [
 	},
 	{
 		label: 'Level of risk',
-		relatedField: RISK_FILTER_RELATED_FIELDS.LEVELS_OF_RISK,
+		relatedField: RISK_FILTER_RELATED_FIELDS.LEVEL_OF_RISK,
 		type: RISK_FILTER_DATA_TYPES.NORMAL
 	},
 	{
@@ -163,6 +165,16 @@ export const RISK_FILTERS = [
 	{
 		label: 'Residual consequence',
 		relatedField: RISK_FILTER_RELATED_FIELDS.RESIDUAL_CONSEQUENCE,
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
+	{
+		label: 'Residual level of risk',
+		relatedField: RISK_FILTER_RELATED_FIELDS.RESIDUAL_LEVEL_OF_RISK,
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
+	{
+		label: 'Overall level of risk',
+		relatedField: RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK,
 		type: RISK_FILTER_DATA_TYPES.NORMAL
 	}
 ] as any;

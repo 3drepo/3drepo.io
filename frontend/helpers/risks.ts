@@ -33,12 +33,14 @@ export const prepareRisk = (risk, jobs = []) => {
 		? getAPIUrl(risk.viewpoint.screenshot)
 		: (risk.descriptionThumbnail || '');
 
+	const residualLikelihood = (!isNaN(risk.residual_likelihood)) ? risk.residual_likelihood : risk.likelihood;
+	const residualConsequence = (!isNaN(risk.residual_consequence)) ? risk.residual_consequence : risk.consequence;
+
 	const levelOfRisk = (!isNaN(risk.level_of_risk)) ?
 		risk.level_of_risk : calculateLevelOfRisk(risk.likelihood, risk.consequence);
 	const residualLevelOfRisk = (!isNaN(risk.residual_level_of_risk)) ?
-		risk.residual_level_of_risk : calculateLevelOfRisk(risk.residual_likelihood, risk.residual_consequence);
-	const { Icon, color } = getRiskStatus(levelOfRisk, risk.mitigation_status);
-	const roleColor = get(jobs.find((job) => job.name === get(risk.assigned_roles, '[0]')), 'color');
+		risk.residual_level_of_risk : calculateLevelOfRisk(residualLikelihood, residualConsequence);
+
 	let overallLevelOfRisk;
 
 	if (!isNaN(risk.overall_level_of_risk)) {
@@ -48,6 +50,9 @@ export const prepareRisk = (risk, jobs = []) => {
 	} else {
 		overallLevelOfRisk = levelOfRisk;
 	}
+
+	const { Icon, color } = getRiskStatus(overallLevelOfRisk, risk.mitigation_status);
+	const roleColor = get(jobs.find((job) => job.name === get(risk.assigned_roles, '[0]')), 'color');
 
 	return {
 		...risk,
@@ -60,6 +65,8 @@ export const prepareRisk = (risk, jobs = []) => {
 		StatusIconComponent: Icon,
 		statusColor: color,
 		roleColor,
+		residual_likelihood: residualLikelihood,
+		residual_consequence: residualConsequence,
 		level_of_risk: levelOfRisk,
 		overall_level_of_risk: overallLevelOfRisk,
 		residual_level_of_risk: residualLevelOfRisk
