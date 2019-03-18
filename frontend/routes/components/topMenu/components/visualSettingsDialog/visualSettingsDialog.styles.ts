@@ -15,60 +15,60 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { COLOR } from '../../../../../styles';
-import { Button, DialogContent, ListItem, Tooltip, Input, Tabs, Tab } from '@material-ui/core';
 import * as React from 'react';
+import { omit } from 'lodash';
+import styled from 'styled-components';
+import { Button, DialogContent, ListItem, Tooltip, Input, Tabs, Tab } from '@material-ui/core';
 import { TooltipProps } from '@material-ui/core/Tooltip';
-import {omit} from 'lodash';
+import { COLOR } from '../../../../../styles';
 
 export const NegativeActionButton = styled(Button)`
-  && {
-    color: ${COLOR.WHITE_87};
-    background-color: ${COLOR.NEGATIVE_87};
-  }
+	&& {
+		color: ${COLOR.WHITE_87};
+		background-color: ${COLOR.NEGATIVE_87};
+	}
 
-  &&:hover {
-    background-color: ${COLOR.NEGATIVE};
-  }
+	&&:hover {
+		background-color: ${COLOR.NEGATIVE};
+	}
 `;
 
 export const NeutralActionButton = styled(Button)`
-  && {
-    color: ${COLOR.BLACK_60};
-    background-color: ${COLOR.TRANSPARENT};
-  }
+	&& {
+		color: ${COLOR.BLACK_60};
+		background-color: ${COLOR.TRANSPARENT};
+	}
 
-  &&:hover {
-    color: ${COLOR.BLACK_80};
-    background-color:  ${COLOR.TRANSPARENT};
-  }
+	&&:hover {
+		color: ${COLOR.BLACK_80};
+		background-color:  ${COLOR.TRANSPARENT};
+	}
 `;
 
 export const VisualSettingsButtonsContainer = styled.div`
-  justify-content: space-evenly;
-  display: flex;
-  width: 100%;
-  position: absolute;
-  bottom: 18px;
-  left: 0;
+	justify-content: space-evenly;
+	display: flex;
+	width: 100%;
+	position: absolute;
+	bottom: 18px;
+	left: 0;
 `;
 
 export const VisualSettingsDialogContent = styled(DialogContent)`
-  width: 335px;
-  height: 280px;
-  margin-bottom: 68px;
-  && {
-    padding-top: 0;
-  }
+	width: 335px;
+	height: 280px;
+	margin-bottom: 68px;
+	&& {
+		padding-top: 0;
+	}
 `;
 
 export const FormListItem = styled(ListItem)`
-  display: flex;
-  && {
-    justify-content: space-between;
-    height: 35px;
-  }
+	display: flex;
+	&& {
+		justify-content: space-between;
+		height: 35px;
+	}
 `;
 
 export const ErrorTooltip = styled((prop: TooltipProps) => {
@@ -76,32 +76,31 @@ export const ErrorTooltip = styled((prop: TooltipProps) => {
 	props.classes = { popper: prop.className, tooltip: 'tooltip' };
 	return React.createElement(Tooltip, props);
 })`
-  .tooltip {
-    background-color: ${COLOR.LIGHT_GRAY};
-    color: ${COLOR.CRIMSON};
-    font-size: 12px;
-    margin: 0;
-  }
+	.tooltip {
+		background-color: ${COLOR.LIGHT_GRAY};
+		color: ${COLOR.CRIMSON};
+		font-size: 12px;
+		margin: 0;
+	}
 `;
-//    color: rgba(200, 0, 0, 0.87);
 
 export const ShortInput = styled(Input).attrs({
 inputProps: {className: 'shortInput'}
 })`
-  .shortInput {
-    text-align: right;
-    width: 40px;
-  }
+	.shortInput {
+		text-align: right;
+		width: 40px;
+	}
 `;
 
 export const DialogTabs = styled(Tabs)`
-  && {
-    width: 100%;
-  }
+	&& {
+		width: 100%;
+	}
 `;
 
 export const DialogTab = styled(Tab)`
-  && {
-    flex-grow: 1;
-  }
+	&& {
+		flex-grow: 1;
+	}
 `;
