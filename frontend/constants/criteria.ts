@@ -221,5 +221,5 @@ export const VALUE_FIELD_MAP = {
 	}
 } as any;
 
-export const REGEX_INFO_URL = 'https://3drepo.com/blog';
+export const REGEX_INFO_URL = 'https://3drepo.com/regex-for-data-validation/';
 export const REGEX_INFO_TEXT = 'More about Regex';
