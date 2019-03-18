@@ -35,7 +35,7 @@ import { RegexInfoLink } from './components/criteriaValueField/criteriaValueFiel
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const PaperPropsStyle = {
-	maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+	maxHeight: ITEM_HEIGHT * 8.5 + ITEM_PADDING_TOP,
 	width: 250,
 	transform: 'translate3d(0, 0, 0)'
 };
