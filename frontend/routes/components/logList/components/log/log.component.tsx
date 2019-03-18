@@ -132,7 +132,7 @@ export class Log extends React.PureComponent<IProps, any> {
 				<DateTime value={this.props.created as any} format="HH:mm DD MMM" />
 			</Date>
 		</Info>
-	);
+	)
 
 	public handleSetCameraOnViewpoint = () => {
 		if (this.props.viewpoint) {
