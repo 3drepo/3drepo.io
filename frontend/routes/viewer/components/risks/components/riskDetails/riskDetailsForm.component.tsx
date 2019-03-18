@@ -32,7 +32,7 @@ import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { TextField } from '../../../../../components/textField/textField.component';
-import { FieldsContainer, FieldsRow, StyledFormControl, DescriptionImage } from './riskDetails.styles';
+import { Container, FieldsContainer, FieldsRow, StyledFormControl, DescriptionImage } from './riskDetails.styles';
 import { Image } from '../../../../../components/image';
 
 export const RiskSchema = Yup.object().shape({
@@ -301,7 +301,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					</FieldsContainer>
 				</FieldsRow>
 
-				<FieldsRow container alignItems="center" justify="space-between">
+				<Container>
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="mitigation_status">Mitigation Status</InputLabel>
 						<Field name="mitigation_status" render={({ field }) => (
@@ -313,7 +313,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							/>
 						)} />
 					</StyledFormControl>
-				</FieldsRow>
+				</Container>
 
 				<Field name="mitigation_desc" render={({ field, form }) => (
 					<TextField
