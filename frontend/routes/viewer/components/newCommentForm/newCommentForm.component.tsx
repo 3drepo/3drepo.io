@@ -71,6 +71,7 @@ interface IProps {
 interface IState {
 	isPinActive: boolean;
 	newScreenshot: string;
+	isResidualRiskInputActive: boolean;
 }
 
 const NewCommentSchema = Yup.object().shape({
