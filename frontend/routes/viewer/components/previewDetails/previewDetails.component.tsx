@@ -18,7 +18,6 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import { Formik, Field } from 'formik';
-
 import { TextField, Typography } from '@material-ui/core';
 
 import { schema } from '../../../../services/validation';

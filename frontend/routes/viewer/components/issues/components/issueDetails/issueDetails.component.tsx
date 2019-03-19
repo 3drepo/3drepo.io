@@ -107,7 +107,10 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			fetchIssue(teamspace, model, issue._id);
 		}
 
-		if (issue.comments.length > prevProps.issue.comments.length && issue.comments[issue.comments.length - 1].new) {
+		if (
+			issue.comments && prevProps.issue.comments &&
+			(issue.comments.length > prevProps.issue.comments.length && issue.comments[issue.comments.length - 1].new)
+		) {
 			const { top: commentsTop } = this.commentsRef.current.getBoundingClientRect();
 			const panelElements = this.panelRef.current.children[0].children;
 			const detailsDimensions = panelElements[1].getBoundingClientRect();
@@ -210,7 +213,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onNameChange={this.handleNameChange}
 				onExpandChange={this.handleExpandChange}
 				renderCollapsable={this.renderDetailsForm}
-				renderNotCollapsable={() => this.renderLogList(!!comments.length && !this.isNewIssue)}
+				renderNotCollapsable={() => this.renderLogList(comments && !!comments.length && !this.isNewIssue)}
 				handleHeaderClick={() => this.setCameraOnViewpoint({viewpoint: this.issueData.viewpoint})}
 				scrolled={this.state.scrolled}
 			/>

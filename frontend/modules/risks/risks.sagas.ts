@@ -63,9 +63,7 @@ const createGroupData = (name, nodes) => {
 };
 
 const createGroup = (risk, objectInfo, teamspace, model) => {
-	// Create a group of selected objects
 	const highlightedGroupData = createGroupData(risk.name, objectInfo.highlightedNodes);
-	// Create a group of hidden objects
 	const hiddenGroupData = createGroupData(risk.name, objectInfo.hiddenNodes);
 
 	return Promise.all([
@@ -87,7 +85,6 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 	try {
 		yield Viewer.setPinDropMode(false);
 		const myJob = yield select(selectMyJob);
-		const filteredRisks = yield select(selectFilteredRisks);
 
 		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
 			Viewer.getCurrentViewpoint({ teamspace, model }),
@@ -129,7 +126,6 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 			scale: 1.0
 		};
 
-		// Pin data
 		const pinData = Viewer.getPinData();
 		if (pinData !== null) {
 			risk.pickedPos = pinData.pickedPos;

@@ -81,9 +81,7 @@ const createGroupData = (name, nodes) => {
 };
 
 const createGroup = (issue, objectInfo, teamspace, model) => {
-	// Create a group of selected objects
 	const highlightedGroupData = createGroupData(issue.name, objectInfo.highlightedNodes);
-	// Create a group of hidden objects
 	const hiddenGroupData = createGroupData(issue.name, objectInfo.hiddenNodes);
 
 	return Promise.all([
@@ -146,7 +144,6 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 			scale: 1.0
 		};
 
-		// Pin data
 		const pinData = Viewer.getPinData();
 		if (pinData !== null) {
 			issue.pickedPos = pinData.pickedPos;
