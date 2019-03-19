@@ -479,6 +479,18 @@ export function* getFieldNames({ teamspace, modelId }) {
 	}
 }
 
+export function* resetToSavedSelection({ groupId }) {
+	const groups = yield select(selectGroupsMap);
+	const activeGroup = yield select(selectActiveGroupDetails);
+	const initialGroupState = groups[groupId] || activeGroup;
+	activeGroup.rules = (groups[groupId] || { rules: [] }).rules;
+
+	yield all([
+		put(GroupsActions.selectGroup(initialGroupState)),
+		put(GroupsActions.setComponentState({ newGroup: activeGroup }))
+	]);
+}
+
 export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.FETCH_GROUPS, fetchGroups);
 	yield takeLatest(GroupsTypes.SET_ACTIVE_GROUP, setActiveGroup);
@@ -502,4 +514,5 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.SUBSCRIBE_ON_CHANGES, subscribeOnChanges);
 	yield takeLatest(GroupsTypes.UNSUBSCRIBE_FROM_CHANGES, unsubscribeFromChanges);
 	yield takeLatest(GroupsTypes.GET_FIELD_NAMES, getFieldNames);
+	yield takeLatest(GroupsTypes.RESET_TO_SAVED_SELECTION, resetToSavedSelection);
 }

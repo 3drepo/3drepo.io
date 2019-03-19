@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -54,7 +54,8 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	unsubscribeFromChanges: ['teamspace', 'modelId'],
 	getFieldNames: ['teamspace', 'modelId'],
 	getFieldNamesSuccess: ['fieldNames'],
-	setCriteriaFieldState: ['criteriaFieldState']
+	setCriteriaFieldState: ['criteriaFieldState'],
+	resetToSavedSelection: ['groupId']
 }, { prefix: 'GROUPS/' });
 
 export interface ICriteriaFieldState {

@@ -64,13 +64,11 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 	};
 
 	get pinColor() {
-		let color;
-
 		if (this.props.canComment) {
-			color = this.state.isPinActive ? 'secondary' : 'action';
+			return this.state.isPinActive ? 'secondary' : 'action';
 		}
 
-		return color;
+		return;
 	}
 
 	public componentWillUnmount() {

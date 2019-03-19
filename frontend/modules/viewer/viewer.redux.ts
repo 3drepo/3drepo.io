@@ -30,7 +30,7 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	updateSettings: ['settings'],
 	saveSettings: ['settings'],
 	loadSettings: []
-}, { prefix: 'VIEWER_' });
+}, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {
 	settings: window.localStorage.getItem('visualSettings') ?
