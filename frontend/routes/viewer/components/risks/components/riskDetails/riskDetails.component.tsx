@@ -217,6 +217,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			removeLog={this.removeComment}
 			teamspace={this.props.teamspace}
 			setCameraOnViewpoint={this.setCameraOnViewpoint}
+			currentUser={this.props.currentUser}
 		/>
 	));
 

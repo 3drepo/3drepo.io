@@ -26,7 +26,7 @@ interface IProps {
 	isPending: boolean;
 	currentUser: string;
 	teamspace: string;
-	innerRef: any;
+	innerRef?: any;
 	removeLog: (index, guid) => void;
 	setCameraOnViewpoint: (viewpoint) => void;
 }
