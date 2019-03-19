@@ -26,6 +26,7 @@ interface IProps {
 	title?: string | JSX.Element;
 	children: any;
 	paperProps?: any;
+	hiddenScrollbars?: boolean;
 }
 
 export const Panel = (props: IProps) => (
@@ -34,7 +35,7 @@ export const Panel = (props: IProps) => (
 			<Container {...props.paperProps}>
 				<Title>{props.title}</Title>
 				<Content>
-					<ContentWrapper>
+					<ContentWrapper hiddenScrollbars={props.hiddenScrollbars}>
 						{props.children}
 					</ContentWrapper>
 				</Content>
