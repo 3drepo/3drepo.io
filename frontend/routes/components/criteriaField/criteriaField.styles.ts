@@ -144,6 +144,7 @@ const emptySelectFieldValueStyle = css`
   color: ${COLOR.BLACK_87};
   opacity: 0.42;
 `;
+
 export const SelectFieldValue = styled.div`
   ${(props: any) => props.placeholder && emptySelectFieldValueStyle};
 ` as any;

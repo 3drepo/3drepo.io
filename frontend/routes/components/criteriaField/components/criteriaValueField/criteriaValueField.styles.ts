@@ -1,20 +1,24 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Grid, TextField } from '@material-ui/core';
 
 export const RangeInput = styled(TextField)`
   margin-top: 6px;
+  margin-bottom: 8px;
 `;
 
 export const SingleInput = styled(TextField)`
   && {
 		margin-top: ${(props) => props.disabled ? '14px' : '6px' };
+    margin-bottom: 8px;
   }
 `;
 
 export const MultipleInput = styled(TextField)`
-  display: block;
-  margin-top: 6px;
-  width: 85%;
+  && {
+    margin-top: 6px;
+    margin-bottom: 8px;
+    width: 85%;
+  }
 `;
 
 export const InputWrapper = styled(Grid)`

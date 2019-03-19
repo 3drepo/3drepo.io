@@ -129,7 +129,7 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderSelectedOperator = (operator) => (
-		<SelectFieldValue placeholder={!operator}>
+		<SelectFieldValue placeholder={Number(!operator)}>
 			{CRITERIA_OPERATORS_LABELS[operator] || 'Set operation'}
 		</SelectFieldValue>
 	)
