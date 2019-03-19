@@ -74,9 +74,9 @@ view.clean = function (dbCol, viewToClean, targetType = "[object String]") {
 			viewToClean.screenshot.thumbnail = thumbnail;
 			return viewToClean;
 		});
-	} else {
-		return viewToClean;
 	}
+
+	return viewToClean;
 };
 
 view.findByUID = function (dbCol, uid, projection, cleanResponse = false) {

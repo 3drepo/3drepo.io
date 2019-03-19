@@ -33,23 +33,19 @@ export const prepareRisk = (risk, jobs = []) => {
 		? getAPIUrl(risk.viewpoint.screenshot)
 		: (risk.descriptionThumbnail || '');
 
-	const residualLikelihood = (!isNaN(risk.residual_likelihood)) ? risk.residual_likelihood : risk.likelihood;
-	const residualConsequence = (!isNaN(risk.residual_consequence)) ? risk.residual_consequence : risk.consequence;
+	const residualLikelihood = getValidNumber(risk.residual_likelihood, risk.likelihood);
+	const residualConsequence = getValidNumber(risk.residual_consequence, risk.consequence);
 
-	const levelOfRisk = (!isNaN(risk.level_of_risk)) ?
-		risk.level_of_risk : calculateLevelOfRisk(risk.likelihood, risk.consequence);
-	const residualLevelOfRisk = (!isNaN(risk.residual_level_of_risk)) ?
-		risk.residual_level_of_risk : calculateLevelOfRisk(residualLikelihood, residualConsequence);
+	const levelOfRisk = getValidNumber(risk.level_of_risk, calculateLevelOfRisk(risk.likelihood, risk.consequence));
+	const residualLevelOfRisk = getValidNumber(
+		risk.residual_level_of_risk,
+		calculateLevelOfRisk(residualLikelihood, residualConsequence)
+	);
 
-	let overallLevelOfRisk;
-
-	if (!isNaN(risk.overall_level_of_risk)) {
-		overallLevelOfRisk = risk.overall_level_of_risk;
-	} else if (!isNaN(residualLevelOfRisk)) {
-		overallLevelOfRisk = residualLevelOfRisk;
-	} else {
-		overallLevelOfRisk = levelOfRisk;
-	}
+	let overallLevelOfRisk = getValidNumber(
+		risk.overall_level_of_risk,
+		getValidNumber(residualLevelOfRisk, levelOfRisk)
+	);
 
 	const { Icon, color } = getRiskStatus(overallLevelOfRisk, risk.mitigation_status);
 	const roleColor = get(jobs.find((job) => job.name === get(risk.assigned_roles, '[0]')), 'color');
@@ -158,6 +154,14 @@ const isJobOwner = (riskData, userJob, permissions, currentUser) => {
 		(riskData.owner === currentUser ||
 		userJobMatchesCreator(userJob, riskData)) &&
 		!isViewer(permissions);
+};
+
+const getValidNumber = (value, defaultValue?) => {
+	if (!isNaN(value)) {
+		return value;
+	}
+
+	return defaultValue;
 };
 
 const canChangeStatusToClosed = (riskData, userJob, permissions, currentUser) => {

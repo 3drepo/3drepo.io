@@ -19,23 +19,23 @@ import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
-  background: ${COLOR.BLACK_20};
-  min-height: 55px;
-  position: relative;
+	background: ${COLOR.BLACK_20};
+	min-height: 55px;
+	position: relative;
 
-  &:before {
-    position: absolute;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    width: 100%;
-    content: '';
-    height: 10px;
-    overflow: hidden;
-    box-shadow: inset 0 4px 7px -4px ${COLOR.BLACK_30};
-  }
+	&:before {
+		position: absolute;
+		top: 0;
+		left: 0;
+		pointer-events: none;
+		width: 100%;
+		content: '';
+		height: 10px;
+		overflow: hidden;
+		box-shadow: inset 0 4px 7px -4px ${COLOR.BLACK_30};
+	}
 `;
 
 export const LoaderContainer = styled.div`
-  padding: 10px;
+	padding: 10px;
 `;

@@ -24,47 +24,47 @@ import * as TextFieldStyles from '../../../../../components/textField/textField.
 export const StyledFormControl = styled(FormControl)``;
 
 export const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 
-  ${TextFieldStyles.Container},
-  ${StyledFormControl} {
-    margin: 1px 0;
-  }
+	${TextFieldStyles.Container},
+	${StyledFormControl} {
+		margin: 1px 0;
+	}
 `;
 
 export const FieldsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-bottom: auto;
-  overflow: hidden;
-  width: 47%;
+	display: flex;
+	flex-direction: column;
+	margin-bottom: auto;
+	overflow: hidden;
+	width: 47%;
 
-  ${TextFieldStyles.Container},
-  ${StyledFormControl} {
-    margin: 5px 0;
-    width: 100%;
-  }
+	${TextFieldStyles.Container},
+	${StyledFormControl} {
+		margin: 5px 0;
+		width: 100%;
+	}
 `;
 
 export const FieldsRow = styled(Grid)`
-  ${TextFieldStyles.Container},
-  ${StyledFormControl} {
-    margin: 1px 0;
-    flex: 1;
+	${TextFieldStyles.Container},
+	${StyledFormControl} {
+		margin: 1px 0;
+		flex: 1;
 
-    &:nth-child(2n + 1) {
-      margin-right: 25px;
-    }
-  }
+		&:nth-child(2n + 1) {
+			margin-right: 25px;
+		}
+	}
 
-  .select {
-    color: inherit;
-  }
+	.select {
+		color: inherit;
+	}
 `;
 
 export const DescriptionImage = styled.div`
-  max-height: 250px;
-  overflow: hidden;
+	max-height: 250px;
+	overflow: hidden;
 `;

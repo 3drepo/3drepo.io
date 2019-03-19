@@ -194,7 +194,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	public renderPinButton = renderWhenTrue(() => (
 		<TooltipButton
 			Icon={PinDropIcon}
-			color={this.buttonColor(this.state.isPinActive)}
+			color={this.getButtonColor(this.state.isPinActive)}
 			label="Add a pin"
 			action={this.handleChangePin}
 			disabled={!this.props.canComment}
@@ -204,7 +204,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	public renderCommentTypeToggle = renderWhenTrue(() => (
 		<TooltipButton
 			Icon={this.commentTypeIcon}
-			color={this.buttonColor(this.state.isResidualRiskInputActive)}
+			color={this.getButtonColor(this.state.isResidualRiskInputActive)}
 			label={this.commentTypeLabel}
 			action={this.handleChangeCommentType}
 			disabled={!this.props.canComment}
@@ -323,7 +323,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		);
 	}
 
-	private buttonColor(buttonState) {
+	private getButtonColor(buttonState) {
 		let color;
 
 		if (this.props.canComment) {

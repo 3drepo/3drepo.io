@@ -620,17 +620,7 @@ describe("Risks", function () {
 							expect(res.body.comments.length).to.equal(1);
 							expect(res.body.comments[0].comment).to.equal(comment.comment);
 							expect(res.body.comments[0].owner).to.equal(username);
-							expect(res.body.comments[0].viewpoint.up).to.deep.equal(comment.viewpoint.up);
-							expect(res.body.comments[0].viewpoint.position).to.deep.equal(comment.viewpoint.position);
-							expect(res.body.comments[0].viewpoint.look_at).to.deep.equal(comment.viewpoint.look_at);
-							expect(res.body.comments[0].viewpoint.view_dir).to.deep.equal(comment.viewpoint.view_dir);
-							expect(res.body.comments[0].viewpoint.right).to.deep.equal(comment.viewpoint.right);
-							expect(res.body.comments[0].viewpoint.unityHeight).to.equal(comment.viewpoint.unityHeight);
-							expect(res.body.comments[0].viewpoint.fov).to.equal(comment.viewpoint.fov);
-							expect(res.body.comments[0].viewpoint.aspect_ratio).to.equal(comment.viewpoint.aspect_ratio);
-							expect(res.body.comments[0].viewpoint.far).to.equal(comment.viewpoint.far);
-							expect(res.body.comments[0].viewpoint.near).to.equal(comment.viewpoint.near);
-							expect(res.body.comments[0].viewpoint.clippingPlanes).to.deep.equal(comment.viewpoint.clippingPlanes);
+							expect(res.body.comments[0].viewpoint).to.deep.equal(comment.viewpoint);
 
 							done(err);
 						});

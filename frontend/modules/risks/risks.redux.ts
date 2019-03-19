@@ -127,7 +127,7 @@ export const createCommentSuccess = (state = INITIAL_STATE, { comment }) => {
 
 	let logs;
 
-	if (comment.hasOwnProperty('action') || '[object Object]' === Object.prototype.toString.call(comment.viewpoint)) {
+	if (comment.action || comment.viewpoint) {
 		logs = [comment, ...updatedLogs];
 	} else {
 		logs = updatedLogs;
