@@ -58,7 +58,6 @@ import { EmptyStateInfo } from '../views/views.styles';
 import { ListContainer, Summary } from './../risks/risks.styles';
 import { GroupDetails } from './components/groupDetails';
 import { GroupListItem, StyledIcon } from './groups.styles';
-import { calculateTotalMeshes } from '../../../../helpers/tree';
 
 interface IProps {
 	teamspace: string;
@@ -218,7 +217,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	public renderTitleIcon = () => {
 		if (this.props.showDetails) {
 			return (
-				<IconButton onClick={this.props.closeDetails} >
+				<IconButton onClick={this.props.closeDetails}>
 					<ArrowBack />
 				</IconButton>
 			);
@@ -439,7 +438,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleResetToSavedSelection = () => {
-		this.props.selectGroup(this.activeGroup);
+		this.props.resetToSavedSelection(this.props.activeGroupId);
 	}
 
 	public renderDetailsView = renderWhenTrue(() => (
