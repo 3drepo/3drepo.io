@@ -525,6 +525,7 @@ schema.statics.getIssuesList = function(dbColOptions, user, branch, revision, id
 
 	const projection = {
 		extras: 0,
+		"comments": 0,
 		"viewpoints.extras": 0,
 		"viewpoints.scribble": 0,
 		"viewpoints.screenshot.content": 0,
