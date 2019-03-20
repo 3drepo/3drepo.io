@@ -322,7 +322,7 @@ groupSchema.methods.getObjectsArray = function (model, branch, revId, convertSha
 	});
 };
 
-groupSchema.statics.findByUID = function (dbCol, uid, branch, revId) {
+groupSchema.statics.findByUID = function (dbCol, uid, branch, revId, convertObjects = true) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -331,10 +331,14 @@ groupSchema.statics.findByUID = function (dbCol, uid, branch, revId) {
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
-			return getObjectIds(dbCol, group, branch, revId, false).then((sharedIdObjects) => {
-				group.objects = sharedIdObjects;
-				return group;
-			});
+			if (convertObjects) {
+				return getObjectIds(dbCol, group, branch, revId, false).then((sharedIdObjects) => {
+					group.objects = sharedIdObjects;
+					return group;
+				});
+			}
+
+			return group;
 		});
 
 };
@@ -732,9 +736,7 @@ function rulesToQuery(rules) {
 function findObjectsByQuery(account, model, query) {
 	const project = { "metadata.IFC GUID": 1, parents: 1 };
 	return db.getCollection(account, model + ".scene").then((dbCol) => {
-		return dbCol.find(query, project).toArray().then((results) => {
-			return results;
-		});
+		return dbCol.find(query, project).toArray();
 	});
 }
 
@@ -748,10 +750,23 @@ function findModelSharedIDsByQuery(account, model, query, branch, revId) {
 					return db.getCollection(account, model + ".scene").then((dbCol) => {
 						const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
 
-						const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parents }, type: "mesh" };
-						const meshProject = { shared_id: 1, _id: 0 };
+						// NOTE: we've seen parents.length >15000 has caused a failure on the database. so I added
+						// a loop to restrict the length of parents per query. This needs to be revisited when
+						// we've done the optimisation for revId
+						const entryPerQuery = 7000;
+						const queryPromise = [];
+						for(let i = 0; i < parents.length; i = i + entryPerQuery) {
+							const endIndex = i + entryPerQuery < parents.length ? i + entryPerQuery : parents.length;
+							const parentsForQuery = parents.slice(i, endIndex);
+							const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parentsForQuery }};
+							const meshProject = { shared_id: 1, _id: 0 };
+							queryPromise.push(dbCol.find(meshQuery, meshProject).toArray());
+						}
 
-						return dbCol.find(meshQuery, meshProject).toArray();
+						return Promise.all(queryPromise).then((res) => {
+							return res.reduce((acc, val) => acc.concat(val), []);
+						});
+
 					});
 				}
 			});

@@ -601,9 +601,8 @@ function updateGroup(req, res, next) {
 
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
-	const groupItem = Group.findByUID(dbCol, req.params.uid, branch, rid);
+	const groupItem = Group.findByUID(dbCol, req.params.uid, branch, rid, false);
 	groupItem.then(group => {
-
 		if (!group) {
 			return Promise.reject({ resCode: responseCodes.GROUP_NOT_FOUND });
 		} else {
