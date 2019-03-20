@@ -19,6 +19,8 @@
 const nodemailer = require("nodemailer");
 const config = require("../config");
 const C = require("../constants");
+const utils = require("../utils");
+// const User = require('../models/user');
 const getBaseURL = config.getBaseURL;
 let transporter;
 
@@ -87,10 +89,16 @@ function sendQueueFailedEmail(err) {
 	}
 }
 
-function sendVerifyUserEmail(to, data) {
+async function sendVerifyUserEmail(to, data) {
+
+	const User = require('../models/user');
 
 	data.url = getURL("verify", {token: data.token, username: data.username, pay: data.pay});
 
+	const user = await User.findByUserName(data.username);
+
+	data.user = utils.ucFirst(user.customData.firstName);
+	
 	if(!data.url) {
 		return rejectNoUrl("verify");
 	}
