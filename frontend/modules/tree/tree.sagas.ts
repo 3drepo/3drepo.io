@@ -20,13 +20,12 @@ import { delay } from 'redux-saga';
 import { TreeTypes, TreeActions } from './tree.redux';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { dispatch, getAngularService } from '../../helpers/migration';
+import { dispatch, getAngularService, getState } from '../../helpers/migration';
 import { selectSelectedNodes } from './tree.selectors';
 import { GroupsActions } from '../groups';
 
 export function* startListenOnSelections() {
 	try {
-		const selectedNodes = yield select(selectSelectedNodes);
 		const TreeService = getAngularService('TreeService') as any;
 
 		Viewer.on(VIEWER_EVENTS.OBJECT_SELECTED, (object) => {
@@ -40,7 +39,8 @@ export function* startListenOnSelections() {
 		});
 
 		Viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => {
-			if (Object.keys(selectedNodes).length) {
+			const selectedNodes = selectSelectedNodes(getState());
+			if (selectedNodes.length) {
 				dispatch(TreeActions.clearSelectedNodes());
 				dispatch(GroupsActions.clearSelectionHighlights());
 			}
