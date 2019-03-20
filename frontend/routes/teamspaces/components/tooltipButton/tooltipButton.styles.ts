@@ -21,6 +21,7 @@ export const StyledIconButton = styled(IconButton)`
   &.panelButton {
     background-color: ${COLOR.REGENT_GRAY};
     box-shadow: 0 3px 3px ${COLOR.BLACK_16};
+    margin-bottom: 20px;
 
     &:hover {
       background-color: ${COLOR.REGENT_GRAY};

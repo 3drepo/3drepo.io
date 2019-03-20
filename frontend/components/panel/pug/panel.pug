@@ -47,17 +47,4 @@ div(ng-show="vm.showPanel")
 		ng-class="{ active : vm.activate }"
 		ng-if="vm.position === 'left'")
 
-		.panelButtonGroup(
-			ng-repeat="contentItem in vm.contentItems"
-			ng-if="!vm.isLiteMode || contentItem.showLiteMode"
-			layout="column"
-			layout-align="start center")
-
-			md-button.md-fab.md-primary.md-mini(
-				id="{{contentItem.type + 'LeftButton'}}"
-				ng-click="vm.togglePanel(contentItem.type)"
-				aria-label="{{contentItem.title}}"
-				style="background-color:{{contentItem.bgColour}}")
-
-				md-icon.angular-material-icons {{contentItem.icon}}
-			label {{contentItem.title}}
+		panels-menu

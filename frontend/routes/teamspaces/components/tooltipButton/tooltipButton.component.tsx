@@ -28,14 +28,15 @@ interface IProps {
 	disabled?: boolean;
 	className?: string;
 	active?: boolean;
+	placement?: string;
 }
 
 export const TooltipButton = (props: IProps) => {
-	const { label, action = null, Icon, color = 'inherit', disabled = false, className, active } = props;
+	const { label, action = null, Icon, color = 'inherit', disabled = false, className, active, placement } = props;
 	const iconProps = { color, fontSize: 'small' } as any;
 
 	return (
-		<Tooltip title={label} disableFocusListener={disabled}>
+		<Tooltip title={label} disableFocusListener={disabled} placement={placement}>
 			<span>
 				<StyledIconButton aria-label={label} onClick={action} disabled={disabled} className={className} active={active}>
 					<Icon {...iconProps} />
