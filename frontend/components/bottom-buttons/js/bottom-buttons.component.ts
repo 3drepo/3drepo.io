@@ -334,4 +334,4 @@ export const BottomButtonsComponent: ng.IComponentOptions = {
 
 export const BottomButtonsComponentModule = angular
 	.module('3drepo')
-	.component('bottomButtons', BottomButtonsComponent);
+	.component('bottomButtonsOld', BottomButtonsComponent);
