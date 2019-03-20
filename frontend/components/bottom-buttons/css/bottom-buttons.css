@@ -1,5 +1,6 @@
 bottom-buttons {
-  display: block;
+  display: flex;
+  justify-content: center;
   position: absolute;
   bottom: 15px;
   left: 0;
@@ -8,10 +9,10 @@ bottom-buttons {
   text-align: center;
 }
 
-@media (max-width: 767px) { 
+@media (max-width: 767px) {
   bottom-buttons #middleButtons {
     display: none;
-  } 
+  }
 }
 
 bottom-buttons #middleButtons {

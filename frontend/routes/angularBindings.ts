@@ -22,6 +22,7 @@ import Gis from './viewer/components/gis/gis.container';
 import Views from './viewer/components/views/views.container';
 import Risks from './viewer/components/risks/risks.container';
 import Groups from './viewer/components/groups/groups.container';
+import Toolbar from './viewer/components/toolbar/toolbar.container';
 
 angular
 	.module('3drepo')
@@ -39,4 +40,5 @@ angular
 	.component('gis', wrap(Gis))
 	.component('risks', wrap(Risks, ['teamspace', 'model', 'revision']))
 	.component('views', wrap(Views, ['teamspace', 'modelId']))
-	.component('groups', wrap(Groups, ['teamspace', 'model', 'revision']));
+	.component('groups', wrap(Groups, ['teamspace', 'model', 'revision']))
+	.component('bottomButtons', wrap(Toolbar));

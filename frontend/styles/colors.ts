@@ -20,6 +20,7 @@ export const COLOR = {
 
 	BLACK,
 	BLACK_6: hexToRgba(BLACK, .06),
+	BLACK_16: hexToRgba(BLACK, .16),
 	BLACK_20: hexToRgba(BLACK, .2),
 	BLACK_30: hexToRgba(BLACK, .3),
 	BLACK_40: hexToRgba(BLACK, .4),
@@ -48,7 +49,9 @@ export const COLOR = {
 	LIGHT_YELLOW: '#ffff64',
 	POMEGRANATE: '#F44336',
 	NEGATIVE: 'rgba(234, 57, 57, 1)',
-	NEGATIVE_87: 'rgba(234, 57, 57, 0.87)'
+	NEGATIVE_87: 'rgba(234, 57, 57, 0.87)',
+	REGENT_GRAY: '#8397AC',
+	SILVER_CHALICE: '#A8A8A8'
 };
 
 export const PIN_COLORS = mapValues({
