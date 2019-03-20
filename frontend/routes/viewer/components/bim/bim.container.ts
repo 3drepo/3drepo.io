@@ -17,7 +17,7 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
+import { connect } from '../../../../helpers/migration';
 
 import { Bim } from './bim.component';
 

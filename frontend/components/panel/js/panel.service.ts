@@ -431,6 +431,7 @@ export class PanelService {
 			icon: 'content_copy',
 			minHeight: 80,
 			fixedHeight: false,
+			isReactComponent: true,
 			options: [
 				{type: 'close', visible: true}
 			]
