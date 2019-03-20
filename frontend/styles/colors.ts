@@ -40,6 +40,7 @@ export const COLOR = {
 	CRIMSON: '#dc143c',
 	DARK_ORANGE: '#f97807',
 	ORANGE: '#fa9034',
+	SUNGLOW: '#FFCA28',
 	GREEN: '#008241',
 	MED_SEA_GREEN: '#2e9863',
 	LIME_GREEN: '#4eb227',
