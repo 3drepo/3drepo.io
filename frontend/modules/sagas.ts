@@ -13,6 +13,8 @@ import gisSaga from './gis/gis.sagas';
 import viewerSaga from './viewer/viewer.sagas';
 import viewpointsSaga from './viewpoints/viewpoints.sagas';
 import risksSaga from './risks/risks.sagas';
+import groupsSaga from './groups/groups.sagas';
+import treeSaga from './tree/tree.sagas';
 // <-- IMPORT MODULE SAGA -->
 
 export default function* rootSaga() {
@@ -30,6 +32,8 @@ export default function* rootSaga() {
 		fork(gisSaga),
 		fork(viewerSaga),
 		fork(risksSaga),
-		fork(viewpointsSaga)// <-- INJECT MODULE SAGA -->
+		fork(viewpointsSaga),
+		fork(groupsSaga),
+		fork(treeSaga)// <-- INJECT MODULE SAGA -->
 	]);
 }

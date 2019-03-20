@@ -27,7 +27,7 @@ export const { Types: GisTypes, Creators: GisActions } = createActions({
 	resetSources: [],
 	resetSourcesSuccess: [],
 	resetMap: []
-}, { prefix: 'GIS_' });
+}, { prefix: 'GIS/' });
 
 export const INITIAL_STATE = {
 	initialised: false,

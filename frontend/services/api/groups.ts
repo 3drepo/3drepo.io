@@ -18,6 +18,21 @@
 import api from './';
 
 /**
+ * Get groups list
+ * @param teamspace
+ * @param modelId
+ * @param groupId
+ * @param revision
+ */
+
+export const getGroups = (teamspace, modelId, revision?) => {
+	if (revision) {
+		return api.get(`${teamspace}/${modelId}/revision/${revision}/groups/?noIssues=true&noRisks=true`);
+	}
+	return api.get(`${teamspace}/${modelId}/revision/master/head/groups/?noIssues=true&noRisks=true`);
+};
+
+/**
  * Get group data
  * @param teamspace
  * @param modelId
@@ -26,18 +41,44 @@ import api from './';
  */
 export const getGroup = (teamspace, modelId, groupId, revision?) => {
 	if (revision) {
-		return api.get(`${teamspace}/${modelId}/groups/revision/${revision}/${groupId}`);
+		return api.get(`${teamspace}/${modelId}/revision/${revision}/groups/${groupId}`);
 	}
-	return api.get(`${teamspace}/${modelId}/groups/revision/master/head/${groupId}`);
+	return api.get(`${teamspace}/${modelId}/revision/master/head/groups/${groupId}`);
 };
 
 /**
  * Add new group
  * @param teamspace
  * @param modelId
- * @param groupId
- * @param revision
+ * @param group
  */
-export const createGroup = (teamspace, modelId, group) => {
-	return api.post(`${teamspace}/${modelId}/groups`, group);
+export const createGroup = (teamspace, modelId, revision, group) => {
+	if (revision) {
+		return api.post(`${teamspace}/${modelId}/revision/${revision}/groups`, group);
+	}
+	return api.post(`${teamspace}/${modelId}/revision/master/head/groups`, group);
+};
+
+/**
+ * Update group
+ * @param teamspace
+ * @param modelId
+ * @param groupId
+ * @param group
+ */
+export const updateGroup = (teamspace, modelId, revision, groupId, group) => {
+	if (revision) {
+		return api.put(`${teamspace}/${modelId}/revision/${revision}/groups/${groupId}`, group);
+	}
+	return api.put(`${teamspace}/${modelId}/revision/master/head/groups/${groupId}`, group);
+};
+
+/**
+ * Delete groups
+ * @param teamspace
+ * @param modelId
+ * @param groups
+ */
+export const deleteGroups = (teamspace, modelId, groups) => {
+	return api.delete(`${teamspace}/${modelId}/groups/?ids=${groups}`);
 };

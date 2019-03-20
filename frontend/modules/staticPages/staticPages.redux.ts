@@ -21,7 +21,7 @@ export const { Types: StaticPagesTypes, Creators: StaticPagesActions } = createA
 	loadTemplate: ['path'],
 	setPendingState: ['isPending'],
 	loadTemplateSuccess: ['path', 'template']
-}, { prefix: 'STATIC_PAGES_' });
+}, { prefix: 'STATIC_PAGES/' });
 
 export const INITIAL_STATE = {
 	templates: {},

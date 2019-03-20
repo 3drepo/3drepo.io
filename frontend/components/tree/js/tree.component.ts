@@ -25,8 +25,7 @@ class TreeController implements ng.IController {
 		'TreeService',
 		'EventService',
 		'MultiSelectService',
-		'ViewerService',
-		'GroupsService'
+		'ViewerService'
 	];
 
 	public showProgress: boolean; // in pug
@@ -60,8 +59,7 @@ class TreeController implements ng.IController {
 		private TreeService,
 		private EventService,
 		private MultiSelectService,
-		private ViewerService,
-		private GroupsService
+		private ViewerService
 	) {
 
 		this.promise = null,
@@ -89,20 +87,6 @@ class TreeController implements ng.IController {
 	}
 
 	public watchers() {
-
-		// TODO: Remove the EventService, just use the ViewerService instead
-		this.$scope.$watch(() => this.EventService.currentEvent(), (event: any) => {
-
-			if (event.type === this.EventService.EVENT.VIEWER.OBJECT_SELECTED) {
-				this.TreeService.nodesClickedByIds([event.value.id]);
-			} else if (event.type === this.EventService.EVENT.VIEWER.MULTI_OBJECTS_SELECTED) {
-				this.TreeService.nodesClickedBySharedIds(event.value.selectedNodes);
-			} else if (event.type === this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED) {
-				this.TreeService.clearCurrentlySelected();
-				this.GroupsService.clearSelectionHighlights();
-			}
-		});
-
 		this.$scope.$watch('vm.filterText', (newValue) => {
 
 			if (newValue !== undefined) {

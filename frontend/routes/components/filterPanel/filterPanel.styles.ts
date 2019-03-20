@@ -48,6 +48,7 @@ export const InputContainer = styled.div`
 	justify-content: flex-end;
 	position: relative;
 	margin: 0;
+	min-height: ${(props: any) => props.menuHidden ? `52px` : '0'};
 
   .react-autosuggest__container {
 		height: 100%;
@@ -68,7 +69,7 @@ export const InputContainer = styled.div`
 			}
 		}
   }
-`;
+` as any;
 
 export const SuggestionsList = styled(Popper)`
 	z-index: 1;

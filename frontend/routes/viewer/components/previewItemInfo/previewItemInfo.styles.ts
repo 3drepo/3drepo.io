@@ -58,4 +58,15 @@ export const Details = styled.div`
   align-items: center;
   display: flex;
   justify-content: space-between;
+  height: 21px;
+`;
+
+export const Icon = styled.div`
+  font-size: 17px;
+  display: flex;
+`;
+
+export const ExtraInfo = styled.span`
+  font-size: 12px;
+  color: ${COLOR.BLACK_60};
 `;

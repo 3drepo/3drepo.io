@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import * as Yup from 'yup';
-import { Formik, Field, Form } from 'formik';
+import { Formik, Field } from 'formik';
 import SaveIcon from '@material-ui/icons/Save';
 import CameraIcon from '@material-ui/icons/AddAPhoto';
 import PinDropIcon from '@material-ui/icons/PinDrop';
@@ -64,13 +64,11 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 	};
 
 	get pinColor() {
-		let color;
-
 		if (this.props.canComment) {
-			color = this.state.isPinActive ? 'secondary' : 'action';
+			return this.state.isPinActive ? 'secondary' : 'action';
 		}
 
-		return color;
+		return;
 	}
 
 	public componentWillUnmount() {

@@ -37,7 +37,7 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	hideDialog: [],
 	setPendingState: ['isPending'],
 	showScreenshotDialog: ['config']
-}, { prefix: 'DIALOG_' });
+}, { prefix: 'DIALOG/' });
 
 export const INITIAL_STATE = {
 	isOpen: false,

@@ -3,6 +3,8 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
 import AdjustIcon from '@material-ui/icons/Adjust';
 
+export const ISSUE_PANEL_NAME = 'issue';
+
 export const ISSUE_STATUS_COLORS = {
 	NONE: '#777',
 	LOW: '#4CAF50',

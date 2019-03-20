@@ -26,8 +26,27 @@ const Schema = mongoose.Schema;
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
 const History = require("./history");
+const Ref = require("./ref");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
+
+const ruleOperators = {
+	"IS_EMPTY":	0,
+	"IS_NOT_EMPTY":	0,
+	"IS":		1,
+	"IS_NOT":	1,
+	"CONTAINS":	1,
+	"NOT_CONTAINS":	1,
+	"REGEX":	1,
+	"EQUALS":	1,
+	"NOT_EQUALS":	1,
+	"GT":		1,
+	"GTE":		1,
+	"LT":		1,
+	"LTE":		1,
+	"IN_RANGE":	2,
+	"NOT_IN_RANGE":	2
+};
 
 const fieldTypes = {
 	"description": "[object String]",
@@ -37,9 +56,15 @@ const fieldTypes = {
 	"updatedBy": "[object String]",
 	"updatedAt": "[object Number]",
 	"objects": "[object Array]",
+	"rules": "[object Array]",
 	"color": "[object Array]",
 	"issue_id": "[object Object]",
 	"risk_id": "[object Object]"
+};
+
+const embeddedObjectFields = {
+	"objects" : ["account", "model", "shared_ids", "ifc_guids"],
+	"rules" : ["field", "operator", "values"]
 };
 
 const groupSchema = Schema({
@@ -56,6 +81,12 @@ const groupSchema = Schema({
 		model: String,
 		shared_ids: [],
 		ifc_guids: [String]
+	}],
+	rules: [{
+		_id: false,
+		field: String,
+		operator: String,
+		values: [String]
 	}],
 	issue_id: Object,
 	risk_id: Object,
@@ -150,11 +181,12 @@ groupSchema.methods.getObjectsArrayAsIfcGuids = function (data) {
 		const sharedIdsSet = new Set();
 		const ifcGuidsSet = new Set();
 
-		const sharedIds = data.objects[i].shared_ids ? data.objects[i].shared_ids : [];
+		const objectList = data.objects[i].shared_ids ? data.objects[i].shared_ids : [];
+		const sharedIds = [];
 
-		for (let j = 0; j < sharedIds.length; j++) {
-			if ("[object String]" === Object.prototype.toString.call(sharedIds[j])) {
-				sharedIds[j] = utils.stringToUUID(sharedIds[j]);
+		for (let j = 0; j < objectList.length; j++) {
+			if ("[object String]" === Object.prototype.toString.call(objectList[j])) {
+				sharedIds.push(utils.stringToUUID(objectList[j]));
 			}
 
 			sharedIdsSet.add(utils.uuidToString(sharedIds[j]));
@@ -227,20 +259,20 @@ groupSchema.statics.findIfcGroupByUID = function (dbCol, uid) {
 /**
  * Converts all IFC Guids to shared IDs if applicable and return the objects array.
  */
-groupSchema.methods.getObjectsArrayAsSharedIDs = function (model, branch, revId, convertSharedIDsToString) {
+groupSchema.methods.getObjectsArray = function (model, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
 
-	const sharedIdPromises = [];
+	const objectIdPromises = [];
 
 	for (let i = 0; i < this.objects.length; i++) {
 
-		const sharedIdsSet = new Set();
+		const objectIdsSet = new Set();
 
-		const sharedIdObject = {};
-		sharedIdObject.account = this.objects[i].account;
-		sharedIdObject.model = this.objects[i].model;
+		const objectId = {};
+		objectId.account = this.objects[i].account;
+		objectId.model = this.objects[i].model;
 
-		const _branch = (model === sharedIdObject.model) ? branch : "master";
-		const _revId = (model === sharedIdObject.model) ? revId : null;
+		const _branch = (model === objectId.model) ? branch : "master";
+		const _revId = (model === objectId.model) ? revId : null;
 
 		const ifcGuids = this.objects[i].ifc_guids ? this.objects[i].ifc_guids : [];
 
@@ -249,43 +281,48 @@ groupSchema.methods.getObjectsArrayAsSharedIDs = function (model, branch, revId,
 			if ("[object String]" !== Object.prototype.toString.call(sharedId)) {
 				sharedId = utils.uuidToString(sharedId);
 			}
-			sharedIdsSet.add(sharedId);
+			objectIdsSet.add(sharedId);
 		}
 
-		sharedIdPromises.push(Group.ifcGuidsToUUIDs(
-			sharedIdObject.account,
-			sharedIdObject.model,
-			ifcGuids,
-			_branch,
-			_revId
-		).then(sharedIdResults => {
-			for (let j = 0; j < sharedIdResults.length; j++) {
-				if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
-					sharedIdResults[j].shared_id = utils.uuidToString(sharedIdResults[j].shared_id);
-				}
-				sharedIdsSet.add(sharedIdResults[j].shared_id);
-			}
-
-			if (sharedIdsSet.size > 0) {
-				sharedIdObject.shared_ids = [];
-				sharedIdsSet.forEach(id => {
-					if (!convertSharedIDsToString) {
-						id = utils.stringToUUID(id);
+		if (showIfcGuids) {
+			objectId.ifc_guids = ifcGuids;
+			objectIdPromises.push(objectId);
+		} else {
+			objectIdPromises.push(Group.ifcGuidsToUUIDs(
+				objectId.account,
+				objectId.model,
+				ifcGuids,
+				_branch,
+				_revId
+			).then(sharedIdResults => {
+				for (let j = 0; j < sharedIdResults.length; j++) {
+					if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
+						sharedIdResults[j].shared_id = utils.uuidToString(sharedIdResults[j].shared_id);
 					}
-					sharedIdObject.shared_ids.push(id);
-				});
-			}
+					objectIdsSet.add(sharedIdResults[j].shared_id);
+				}
 
-			return sharedIdObject;
-		}));
+				if (objectIdsSet.size > 0) {
+					objectId.shared_ids = [];
+					objectIdsSet.forEach(id => {
+						if (!convertSharedIDsToString) {
+							id = utils.stringToUUID(id);
+						}
+						objectId.shared_ids.push(id);
+					});
+				}
+
+				return objectId;
+			}));
+		}
 	}
 
-	return Promise.all(sharedIdPromises).then(sharedIdObjects => {
-		return sharedIdObjects;
+	return Promise.all(objectIdPromises).then(objectIds => {
+		return objectIds;
 	});
 };
 
-groupSchema.statics.findByUID = function (dbCol, uid, branch, revId) {
+groupSchema.statics.findByUID = function (dbCol, uid, branch, revId, convertObjects = true) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -294,15 +331,19 @@ groupSchema.statics.findByUID = function (dbCol, uid, branch, revId) {
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
-			return group.getObjectsArrayAsSharedIDs(dbCol.model, branch, revId, false).then((sharedIdObjects) => {
-				group.objects = sharedIdObjects;
-				return group;
-			});
+			if (convertObjects) {
+				return getObjectIds(dbCol, group, branch, revId, false).then((sharedIdObjects) => {
+					group.objects = sharedIdObjects;
+					return group;
+				});
+			}
+
+			return group;
 		});
 
 };
 
-groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId) {
+groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId, showIfcGuids = false) {
 
 	return this.findOne(dbCol, { _id: utils.stringToUUID(uid) })
 		.then(group => {
@@ -311,7 +352,7 @@ groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId) {
 				return Promise.reject(responseCodes.GROUP_NOT_FOUND);
 			}
 
-			return group.getObjectsArrayAsSharedIDs(dbCol.model, branch, revId, true).then((sharedIdObjects) => {
+			return getObjectIds(dbCol, group, branch, revId, true, showIfcGuids).then((sharedIdObjects) => {
 
 				const returnGroup = { _id: utils.uuidToString(group._id), color: group.color };
 				returnGroup.objects = sharedIdObjects;
@@ -320,7 +361,7 @@ groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId) {
 		});
 };
 
-groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, ids) {
+groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, ids, showIfcGuids) {
 
 	const query = {};
 
@@ -343,7 +384,7 @@ groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, id
 
 		results.forEach(result => {
 			sharedIdConversionPromises.push(
-				result.getObjectsArrayAsSharedIDs(dbCol.model, branch, revId, true).then(sharedIdObjects => {
+				getObjectIds(dbCol, result, branch, revId, true, showIfcGuids).then((sharedIdObjects) => {
 					result.objects = sharedIdObjects;
 					return result;
 				})
@@ -351,6 +392,10 @@ groupSchema.statics.listGroups = function (dbCol, queryParams, branch, revId, id
 		});
 
 		return Promise.all(sharedIdConversionPromises).then((sharedIdGroups) => {
+			sharedIdGroups.forEach((group, i) => {
+				sharedIdGroups[i] = clean(group);
+			});
+
 			return sharedIdGroups;
 		});
 	});
@@ -376,29 +421,45 @@ groupSchema.statics.updateIssueId = function (dbCol, uid, issueId) {
 };
 
 // Group Update with Event
-groupSchema.methods.updateGroup = function (dbCol, sessionId, data) {
-	const update = this.updateAttrs(dbCol, _.cloneDeep(data));
-	ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, _.omit(data, ["focus", "highlighted"]));
-	return update;
+groupSchema.methods.updateGroup = function (dbCol, sessionId, data, user = "", branch = "master", rid = null) {
+	return this.updateAttrs(dbCol, _.cloneDeep(data), user).then((savedGroup) => {
+		return getObjectIds(dbCol, this, branch, rid, true, false).then((objects) => {
+			savedGroup.objects = objects;
+			ChatEvent.groupChanged(sessionId, dbCol.account, dbCol.model, savedGroup);
+			return savedGroup;
+		});
+	});
 };
 
-groupSchema.methods.updateAttrs = function (dbCol, data) {
+groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 
 	return this.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 		const toUpdate = {};
-		const fieldsCanBeUpdated = ["description", "name", "author", "createdAt", "updatedBy", "updatedAt", "objects", "color", "issue_id", "risk_id"];
+		const toUnset = {};
+		const fieldsCanBeUpdated = ["description", "name", "rules", "objects", "color", "issue_id", "risk_id"];
 
-		let typeCorrect = true;
-		fieldsCanBeUpdated.forEach((key) => {
+		let typeCorrect = !(data.rules && data.objects);
+		typeCorrect && fieldsCanBeUpdated.forEach((key) => {
 			if (data[key]) {
 				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 					if (key === "objects" && data.objects) {
-						toUpdate.objects = convertedObjects;
+						toUpdate.objects = cleanEmbeddedObject(key, convertedObjects);
+						toUnset.rules = 1;
+						this.rules = undefined;
 					} else if (key === "color") {
 						toUpdate[key] = data[key].map((c) => parseInt(c, 10));
 					} else {
-						toUpdate[key] = data[key];
+						if (key === "rules"
+							&& data.rules
+							&& !checkRulesValidity(data.rules)) {
+							typeCorrect = false;
+							toUnset.objects = 1;
+							this.objects = undefined;
+						}
+
+						toUpdate[key] = cleanEmbeddedObject(key, data[key]);
 					}
+					this[key] = toUpdate[key];
 				} else {
 					typeCorrect = false;
 				}
@@ -408,13 +469,21 @@ groupSchema.methods.updateAttrs = function (dbCol, data) {
 
 		if (typeCorrect) {
 			if (Object.keys(toUpdate).length !== 0) {
+				toUpdate.updateBy = user;
+				toUpdate.updatedAt = Date.now();
 				return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
-					return _dbCol.update({ _id: this._id }, { $set: toUpdate }).then(() => {
-						return { _id: utils.uuidToString(this._id) };
+					const updateBson = {$set: toUpdate};
+					if(Object.keys(toUnset).length > 0) {
+						updateBson.$unset = toUnset;
+					}
+					return _dbCol.update({ _id: this._id }, updateBson).then(() => {
+						const updatedGroup = clean(this);
+						return updatedGroup;
 					});
 				});
 			} else {
-				return { _id: utils.uuidToString(this._id) };
+				const updatedGroup = clean(this);
+				return updatedGroup;
 			}
 		} else {
 			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
@@ -423,7 +492,23 @@ groupSchema.methods.updateAttrs = function (dbCol, data) {
 	});
 };
 
-groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
+function cleanEmbeddedObject(field, data) {
+	if(embeddedObjectFields[field]) {
+		const filtered =  data.map((entry) => {
+			const cleaned  = {};
+			embeddedObjectFields[field].forEach((allowedField) => {
+				if(entry.hasOwnProperty(allowedField)) {
+					cleaned[allowedField] = entry[allowedField];
+				}
+			});
+			return cleaned;
+		});
+		return filtered;
+	}
+	return data;
+}
+
+groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = "", branch = "master", rid = null) {
 	const model = dbCol.model;
 
 	const newGroup = this.model("Group").createInstance({
@@ -433,17 +518,24 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 
 	return newGroup.getObjectsArrayAsIfcGuids(data, false).then(convertedObjects => {
 
-		let typeCorrect = true;
+		let typeCorrect = (!data.objects !== !data.rules);
 
-		Object.keys(data).forEach((key) => {
-			if (fieldTypes[key]) {
+		const allowedFields = ["description", "name", "objects","rules","color","issue_id","risk_id"];
+
+		allowedFields.forEach((key) => {
+			if (fieldTypes[key] && data.hasOwnProperty(key)) {
 				if (Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 					if (key === "objects" && data.objects) {
-						newGroup.objects = convertedObjects;
+						newGroup.objects = cleanEmbeddedObject(key, convertedObjects);
 					} else if (key === "color") {
 						newGroup[key] = data[key].map((c) => parseInt(c, 10));
 					} else {
-						newGroup[key] = data[key];
+						if (key === "rules"
+							&& data.rules
+							&& !checkRulesValidity(data.rules)) {
+							typeCorrect = false;
+						}
+						newGroup[key] = cleanEmbeddedObject(key, data[key]);
 					}
 				} else {
 					typeCorrect = false;
@@ -453,14 +545,19 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 		});
 
 		newGroup._id = utils.stringToUUID(uuid.v1());
-		if (typeCorrect && newGroup.objects) {
+		newGroup.author = creator;
+		newGroup.createdAt = Date.now();
+
+		if (typeCorrect) {
 			return newGroup.save().then((savedGroup) => {
 				savedGroup._id = utils.uuidToString(savedGroup._id);
-				if (!data.isIssueGroup && sessionId) {
-					ChatEvent.newGroups(sessionId, dbCol.account, model, savedGroup);
-				}
-
-				return savedGroup;
+				return getObjectIds(dbCol, savedGroup, branch, rid, true, false).then((objects) => {
+					savedGroup.objects = objects;
+					if (!data.isIssueGroup && sessionId) {
+						ChatEvent.newGroups(sessionId, dbCol.account, model, savedGroup);
+					}
+					return savedGroup;
+				});
 			});
 		} else {
 			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
@@ -468,8 +565,8 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data) {
 	});
 };
 
-groupSchema.methods.clean = function () {
-	const cleaned = this.toObject();
+function clean(groupData) {
+	const cleaned = groupData.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
 	cleaned.issue_id = cleaned.issue_id && utils.uuidToString(cleaned.issue_id);
 	cleaned.risk_id = cleaned.risk_id && utils.uuidToString(cleaned.risk_id);
@@ -483,22 +580,299 @@ groupSchema.methods.clean = function () {
 	}
 
 	return cleaned;
-};
+}
 
-groupSchema.statics.deleteGroup = function (dbCol, id) {
+function checkRulesValidity(rules) {
+	const fieldsWithRules = new Set();
+	let valid = rules.length > 0;
+	let it = 0;
+	while (valid && it < rules.length) {
 
-	if ("[object String]" === Object.prototype.toString.call(id)) {
-		id = utils.stringToUUID(id);
+		const rule = rules[it];
+		valid = rule &&
+			isValidRule(rule) &&
+			!fieldsWithRules.has(rule.field) ;
+
+		if (valid) {
+			fieldsWithRules.add(rule.field);
+		}
+		it++;
+	}
+	return valid;
+}
+
+/**
+ * Returns true if given rule has:
+ * - A field,
+ * - A supported operator,
+ * - The correct minimum/multiples of values if a value is required
+ */
+function isValidRule(rule) {
+	return rule.field && rule.field.length > 0 &&
+		Object.keys(ruleOperators).includes(rule.operator) &&
+		(ruleOperators[rule.operator] === 0 ||
+		(rule.values.length && ruleOperators[rule.operator] <= rule.values.length && !rule.values.some((x) => x === "")) &&
+		rule.values.length % ruleOperators[rule.operator] === 0);
+}
+
+function buildRule(rule) {
+	const clauses = [];
+	let expression = {};
+
+	if (isValidRule(rule)) {
+		const fieldName = "metadata." + rule.field;
+		const operatorPerClause =  ruleOperators[rule.operator];
+		const clausesCount = rule.values && rule.values.length > 0 && operatorPerClause > 0 ?
+			rule.values.length / operatorPerClause :
+			1;
+
+		for (let i = 0; i < clausesCount; i++) {
+			let operation;
+
+			switch (rule.operator) {
+				case "IS_EMPTY":
+					operation = { $exists: false };
+					break;
+				case "IS_NOT_EMPTY":
+					operation = { $exists: true };
+					break;
+				case "IS":
+					operation = rule.values[i];
+					break;
+				case "IS_NOT":
+					operation = { $ne: rule.values[i] };
+					break;
+				case "CONTAINS":
+					operation = { $regex: new RegExp(utils.sanitizeString(rule.values[i])), $options: "i" };
+					break;
+				case "NOT_CONTAINS":
+					operation = { $regex: new RegExp("^((?!" + utils.sanitizeString(rule.values[i]) + ").)*$"), $options: "i" };
+					break;
+				case "REGEX":
+					operation = { $regex: new RegExp(rule.values[i]) };
+					break;
+				case "EQUALS":
+					operation = { $eq: Number(rule.values[i]) };
+					break;
+				case "NOT_EQUALS":
+					operation = { $ne: Number(rule.values[i]) };
+					break;
+				case "GT":
+					operation = { $gt: Number(rule.values[i]) };
+					break;
+				case "GTE":
+					operation = { $gte: Number(rule.values[i]) };
+					break;
+				case "LT":
+					operation = { $lt: Number(rule.values[i]) };
+					break;
+				case "LTE":
+					operation = { $lte: Number(rule.values[i]) };
+					break;
+				case "IN_RANGE":
+					{
+						const rangeVal1 = Number(rule.values[i * operatorPerClause]);
+						const rangeVal2 = Number(rule.values[i * operatorPerClause + 1]);
+						const rangeLowerOp = {};
+						rangeLowerOp[fieldName] = { $gte: Math.min(rangeVal1, rangeVal2) };
+						const rangeUpperOp = {};
+						rangeUpperOp[fieldName] = { $lte: Math.max(rangeVal1, rangeVal2) };
+
+						operation = undefined;
+						clauses.push({ $and: [rangeLowerOp, rangeUpperOp]});
+					}
+					break;
+				case "NOT_IN_RANGE":
+					{
+						const exRangeVal1 = Number(rule.values[i * operatorPerClause]);
+						const exRangeVal2 = Number(rule.values[i * operatorPerClause + 1]);
+						const exRangeLowerOp = {};
+						exRangeLowerOp[fieldName] = { $lt: Math.min(exRangeVal1, exRangeVal2) };
+						const exRangeUpperOp = {};
+						exRangeUpperOp[fieldName] = { $gt: Math.max(exRangeVal1, exRangeVal2) };
+
+						operation = undefined;
+						clauses.push({ $and: [exRangeLowerOp, exRangeUpperOp]});
+					}
+					break;
+			}
+
+			if (operation) {
+				const clause = {};
+				clause[fieldName] = operation;
+				clauses.push(clause);
+			}
+		}
+	} else {
+		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	return Group.findOneAndRemove(dbCol, { _id: id }).then(group => {
+	if (clauses.length > 1) {
+		expression = { $or: clauses };
+	} else if (clauses.length === 1) {
+		expression = clauses[0];
+	}
 
-		if (!group) {
-			return Promise.reject(responseCodes.GROUP_NOT_FOUND);
+	return expression;
+}
+
+function rulesToQuery(rules) {
+	const query = { type: "meta" };
+	const expressions = [];
+
+	for (let i = 0; i < rules.length; i++) {
+		expressions.push(buildRule(rules[i]));
+	}
+
+	if (expressions.length > 1) {
+		Object.assign(query, { $and: expressions });
+	} else if (expressions.length === 1) {
+		Object.assign(query, expressions[0]);
+	}
+
+	return query;
+}
+
+function findObjectsByQuery(account, model, query) {
+	const project = { "metadata.IFC GUID": 1, parents: 1 };
+	return db.getCollection(account, model + ".scene").then((dbCol) => {
+		return dbCol.find(query, project).toArray();
+	});
+}
+
+function findModelSharedIDsByQuery(account, model, query, branch, revId) {
+	return findObjectsByQuery(account, model, query).then((results) => {
+		if (results && results.length > 0) {
+			return History.getHistory({ account, model }, branch, revId).then((history) => {
+				if (!history) {
+					return Promise.reject(responseCodes.INVALID_TAG_NAME);
+				} else {
+					return db.getCollection(account, model + ".scene").then((dbCol) => {
+						const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
+
+						// NOTE: we've seen parents.length >15000 has caused a failure on the database. so I added
+						// a loop to restrict the length of parents per query. This needs to be revisited when
+						// we've done the optimisation for revId
+						const entryPerQuery = 7000;
+						const queryPromise = [];
+						for(let i = 0; i < parents.length; i = i + entryPerQuery) {
+							const endIndex = i + entryPerQuery < parents.length ? i + entryPerQuery : parents.length;
+							const parentsForQuery = parents.slice(i, endIndex);
+							const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parentsForQuery }};
+							const meshProject = { shared_id: 1, _id: 0 };
+							queryPromise.push(dbCol.find(meshQuery, meshProject).toArray());
+						}
+
+						return Promise.all(queryPromise).then((res) => {
+							return res.reduce((acc, val) => acc.concat(val), []);
+						});
+
+					});
+				}
+			});
+		} else {
+			return Promise.resolve([]);
+		}
+	});
+}
+
+function findObjectIDsByRules(account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
+	const objectIdPromises = [];
+
+	const query = rulesToQuery(rules);
+
+	const models = new Set();
+	models.add(model);
+
+	// Check submodels
+	return Ref.find({account, model}, {type: "ref"}).then((refs) => {
+		refs.forEach((ref) => {
+			models.add(ref.project);
+		});
+
+		const modelsIter = models.values();
+
+		for (const modelID of modelsIter) {
+			const objectIdsSet = new Set();
+
+			const objectId = {};
+			objectId.account = account;
+			objectId.model = modelID;
+
+			const _branch = (model === objectId.model) ? branch : "master";
+			const _revId = (model === objectId.model) ? revId : null;
+
+			if (showIfcGuids) {
+				objectIdPromises.push(findObjectsByQuery(
+					objectId.account,
+					objectId.model,
+					query
+				).then(objectIdResults => {
+					if(!objectIdResults.length) {
+						return undefined;
+					}
+
+					for (let j = 0; j < objectIdResults.length; j++) {
+						objectIdsSet.add(objectIdResults[j].metadata["IFC GUID"]);
+					}
+
+					if (objectIdsSet.size > 0) {
+						objectId.ifc_guids = [];
+						objectIdsSet.forEach(id => {
+							objectId.ifc_guids.push(id);
+						});
+					}
+
+					return objectId;
+				}));
+			} else {
+				objectIdPromises.push(findModelSharedIDsByQuery(
+					objectId.account,
+					objectId.model,
+					query,
+					_branch,
+					_revId
+				).then(sharedIdResults => {
+
+					if(!sharedIdResults.length) {
+						return undefined;
+					}
+
+					for (let j = 0; j < sharedIdResults.length; j++) {
+						if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
+							sharedIdResults[j].shared_id = utils.uuidToString(sharedIdResults[j].shared_id);
+						}
+						objectIdsSet.add(sharedIdResults[j].shared_id);
+					}
+
+					if (objectIdsSet.size > 0) {
+						objectId.shared_ids = [];
+						objectIdsSet.forEach(id => {
+							if (!convertSharedIDsToString) {
+								id = utils.stringToUUID(id);
+							}
+							objectId.shared_ids.push(id);
+						});
+					}
+
+					return objectId;
+				}));
+			}
 		}
 
+		return Promise.all(objectIdPromises).then(objectIds => {
+			return objectIds.filter((entry) => !!entry);
+		});
 	});
-};
+}
+
+function getObjectIds(dbCol, groupData, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
+	if (groupData.rules && groupData.rules.length > 0) {
+		return findObjectIDsByRules(dbCol.account, dbCol.model, groupData.rules, branch, revId, convertSharedIDsToString, showIfcGuids);
+	} else {
+		return groupData.getObjectsArray(dbCol.model, branch, revId, convertSharedIDsToString, showIfcGuids);
+	}
+}
 
 const Group = ModelFactory.createClass(
 	"Group",

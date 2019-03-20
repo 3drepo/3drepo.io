@@ -30,7 +30,7 @@ export const { Types: JobsTypes, Creators: JobsActions } = createActions({
 	updateJobSuccess: ['job'],
 	getMyJob: ['teamspace'],
 	getMyJobSuccess: ['myJob']
-}, { prefix: 'JOBS_' });
+}, { prefix: 'JOBS/' });
 
 export const INITIAL_STATE = {
 	jobs: [],

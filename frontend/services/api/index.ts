@@ -13,5 +13,6 @@ export * from './notifications';
 export * from './risks';
 export * from './viewer';
 export * from './groups';
+export * from './meta';
 
 export default API;

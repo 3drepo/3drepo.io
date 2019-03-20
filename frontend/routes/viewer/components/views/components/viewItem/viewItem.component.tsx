@@ -35,7 +35,7 @@ import {
 	SaveIconButton,
 	StyledSaveIcon
 } from './viewItem.styles';
-import { DeleteMessage } from '../../../../../components/deleteMessage/deleteMessage.component';
+import { ActionMessage } from '../../../../../components/actionMessage/actionMessage.component';
 
 interface IProps {
 	viewpoint: any;
@@ -103,7 +103,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		/>
 	));
 
-	public renderDeleteMessage = renderWhenTrue(() => <DeleteMessage content="This view has been deleted" />);
+	public renderDeleteMessage = renderWhenTrue(() => <ActionMessage content="This view has been deleted" />);
 
 	public handleNameChange = (field) => (event) => {
 		field.onChange(event);

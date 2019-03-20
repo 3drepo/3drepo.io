@@ -18,7 +18,6 @@
 import * as React from 'react';
 
 import {
-	Action,
 	Actions,
 	Title,
 	TitleIcon,
@@ -39,8 +38,8 @@ const ViewerPanelTitle = ({title, Icon, renderActions}) => (
 interface IProps {
 	title: string;
 	Icon?: JSX.Element;
-	actions?: any[];
 	pending?: boolean;
+	renderActions?: () => JSX.Element | JSX.Element[];
 }
 
 export class ViewerPanel extends React.PureComponent<IProps, any> {
@@ -60,11 +59,7 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 
 	public renderTitleActions = () => (
 		<Actions>
-			{this.props.actions.map(({ Button }, index) => (
-				<Action key={index}>
-					<Button />
-				</Action>
-			))}
+			{this.props.renderActions()}
 		</Actions>
 	)
 

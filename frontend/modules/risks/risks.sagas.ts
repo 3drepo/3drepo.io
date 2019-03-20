@@ -71,8 +71,8 @@ const createGroup = (risk, objectInfo, teamspace, model) => {
 	const hiddenGroupData = createGroupData(risk.name, objectInfo.hiddenNodes);
 
 	return Promise.all([
-		highlightedGroupData && API.createGroup(teamspace, model, highlightedGroupData),
-		hiddenGroupData && API.createGroup(teamspace, model, hiddenGroupData)
+		highlightedGroupData && API.createGroup(teamspace, model, risk.rev_id, highlightedGroupData),
+		hiddenGroupData && API.createGroup(teamspace, model, risk.rev_id, hiddenGroupData)
 	]);
 };
 

@@ -27,9 +27,9 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import { COLOR, FONT_WEIGHT } from '../../../styles';
 
 export const ColorSelect = styled(Grid)`
-	cursor: pointer;
+	cursor: ${(props: any) => props.disabled ? 'default' : 'pointer'};
 	border-bottom: 1px solid rgba(0, 0, 0, .12);
-`;
+` as any;
 
 export const Dot = styled(Grid)`
 	width: 16px;

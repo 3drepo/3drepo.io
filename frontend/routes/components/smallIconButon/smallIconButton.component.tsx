@@ -23,17 +23,20 @@ interface IProps {
 	onClick?: (event: React.SyntheticEvent) => void;
 	Icon: React.ComponentType;
 	tooltip: string;
+	disabled?: boolean;
 }
 
 export class SmallIconButton extends React.PureComponent<IProps, any> {
 	public render() {
-		const { Icon, tooltip, onClick } = this.props;
+		const { Icon, tooltip, onClick, disabled = false } = this.props;
 		return (
 			<Tooltip title={tooltip}>
 				<SmallIconButtonStyled
 					component="span"
 					aria-label={tooltip}
-					onClick={onClick}>
+					onClick={onClick}
+					disabled={disabled}
+					>
 					<Icon />
 				</SmallIconButtonStyled>
 			</Tooltip>

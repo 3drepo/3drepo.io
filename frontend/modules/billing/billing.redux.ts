@@ -30,7 +30,7 @@ export const { Types: BillingTypes, Creators: BillingActions } = createActions({
 	changeSubscription: ['teamspace', 'subscriptionData'],
 	downloadInvoice: ['teamspace', 'invoiceNo'],
 	setPendingState: ['isPending']
-}, { prefix: 'BILLING_' });
+}, { prefix: 'BILLING/' });
 
 export const INITIAL_STATE = {
 	invoices: [],

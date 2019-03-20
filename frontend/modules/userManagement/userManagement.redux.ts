@@ -46,7 +46,7 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	updateModelsPermissions: ['modelsWithPermissions', 'permissions'],
 	updateModelsPermissionsPre: ['modelsWithPermissions', 'permissions'],
 	updateModelPermissionsSuccess: ['updatedModels', 'permissions']
-}, { prefix: 'USER_MANAGEMENT_' });
+}, { prefix: 'USER_MANAGEMENT/' });
 
 export const INITIAL_STATE = {
 	selectedTeamspace: null,

@@ -27,6 +27,7 @@ import { PreviewDetails } from '../../../previewDetails/previewDetails.component
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { Container } from './riskDetails.styles';
 import { RiskDetailsForm } from './riskDetailsForm.component';
+import { RISK_PANEL_NAME } from '../../../../../../constants/risks';
 
 interface IProps {
 	jobs: any[];
@@ -108,8 +109,9 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		const permissions = modelSettings.permissions;
 		const changes = {} as IState;
 		const permissionsChanged = !isEqual(prevProps.permissions, permissions);
+		const canUpdate = canUpdateRisk(risk, myJob, permissions, currentUser);
 
-		if (permissionsChanged && risk && currentUser && permissions && myJob) {
+		if (permissionsChanged && risk && currentUser && permissions && myJob && canUpdate !== this.state.canUpdateRisk) {
 			changes.canUpdateRisk = canUpdateRisk(risk, myJob, permissions, currentUser);
 		}
 
@@ -171,9 +173,22 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		this.props.showNewPin(this.props.risk, pinData);
 	}
 
+	public renderRiskForm = () => (
+		<RiskDetailsForm
+			canUpdateRisk={this.state.canUpdateRisk}
+			risk={this.riskData}
+			jobs={this.jobsList}
+			onValueChange={this.handleRiskFormSubmit}
+			onSubmit={this.handleRiskFormSubmit}
+			associatedActivities={this.props.associatedActivities}
+			permissions={this.props.modelSettings.permissions}
+			currentUser={this.props.currentUser}
+			myJob={this.props.myJob}
+		/>
+	)
+
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails } = this.props;
-
 		return (
 			<PreviewDetails
 				key={this.riskData._id}
@@ -182,19 +197,9 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				editable={!this.riskData._id}
 				onNameChange={this.handleNameChange}
 				onExpandChange={this.handleExpandChange}
-			>
-				<RiskDetailsForm
-					canUpdateRisk={this.state.canUpdateRisk}
-					risk={this.riskData}
-					jobs={this.jobsList}
-					onValueChange={this.handleRiskFormSubmit}
-					onSubmit={this.handleRiskFormSubmit}
-					associatedActivities={this.props.associatedActivities}
-					permissions={this.props.modelSettings.permissions}
-					currentUser={this.props.currentUser}
-					myJob={this.props.myJob}
-				/>
-			</PreviewDetails>
+				renderCollapsable={() => this.renderRiskForm()}
+				panelName={RISK_PANEL_NAME}
+			/>
 		);
 	});
 

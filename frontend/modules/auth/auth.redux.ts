@@ -32,7 +32,7 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	verify: ['username', 'token'],
 	setAuthMessage: ['message'],
 	clearAuthMessage: []
-}, { prefix: 'AUTH_' });
+}, { prefix: 'AUTH/' });
 
 export const INITIAL_STATE = {
 	isAuthenticated: null,

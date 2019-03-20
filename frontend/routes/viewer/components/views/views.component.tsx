@@ -25,15 +25,14 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import AddIcon from '@material-ui/icons/Add';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { getAngularService } from '../../../../helpers/migration';
+import { Viewer } from '../../../../services/viewer/viewer';
 
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { ViewsCountInfo, ViewpointsList, EmptyStateInfo, SearchField, Container } from './views.styles';
 import { ViewItem } from './components/viewItem/viewItem.component';
 import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
-
-declare const Viewer: any;
+import { VIEWER_EVENTS } from '../../../../constants/viewer';
 
 interface IProps {
 	isPending: boolean;
@@ -60,8 +59,6 @@ export class Views extends React.PureComponent<IProps, any> {
 	public state = {
 		filteredViewpoints: []
 	};
-
-	public ViewerService = getAngularService('ViewerService', this) as any;
 
 	public containerRef = React.createRef<any>();
 
@@ -209,9 +206,7 @@ export class Views extends React.PureComponent<IProps, any> {
 
 	public toggleViewerEvents = (enabled = true) => {
 		const eventHandler = enabled ? 'on' : 'off';
-		this.ViewerService[eventHandler](Viewer.EVENT.BACKGROUND_SELECTED, () => {
-			this.resetActiveView();
-		});
+		Viewer[eventHandler](VIEWER_EVENTS.BACKGROUND_SELECTED, this.resetActiveView);
 	}
 
 	public handleUpdate = (viewpointId) => (values) => {
@@ -269,8 +264,6 @@ export class Views extends React.PureComponent<IProps, any> {
 
 	public getTitleIcon = () => <PhotoCameraIcon />;
 
-	public getActions = () => [{ Button: this.getSearchButton }];
-
 	public getSearchButton = () => {
 		if (this.props.searchEnabled) {
 			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
@@ -302,7 +295,7 @@ export class Views extends React.PureComponent<IProps, any> {
 			<ViewerPanel
 				title="Views"
 				Icon={this.getTitleIcon()}
-				actions={this.getActions()}
+				renderActions={this.getSearchButton}
 				pending={this.props.isPending}
 			>
 				<Container className="height-catcher" innerRef={this.containerRef}>

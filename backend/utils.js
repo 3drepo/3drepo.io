@@ -82,6 +82,15 @@ function Utils() {
 	};
 
 	/** *****************************************************************************
+	* Sanitise regex patterns in string
+	* @param {string} str - Input string
+	* @returns {string} - Sanitised string
+	*******************************************************************************/
+	this.sanitizeString = function(str) {
+		return str.replace(/(\W)/g, "\\$1");
+	};
+
+	/** *****************************************************************************
 	* Generate a random UUID
 	* @returns {Buffer} - Binary representation of a UUID
 	*******************************************************************************/

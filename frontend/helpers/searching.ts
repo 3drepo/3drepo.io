@@ -41,7 +41,7 @@ export const searchByFilters = (items = [], filters = [], returnDefaultHidden = 
 						});
 					}
 					if (filter.type === DATA_TYPES.QUERY) {
-						return compareStrings(item.name, filter.value.value) || compareStrings(item.disc, filter.value.value);
+						return compareStrings(item.name, filter.value.value) || compareStrings(item.desc, filter.value.value);
 					}
 				});
 			}

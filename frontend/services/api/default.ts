@@ -5,9 +5,6 @@ import { getAngularService } from '../../helpers/migration';
 
 axios.defaults.withCredentials = true;
 
-// TODO: X-Socket-Id
-axios.defaults.headers['X-Socket-Id'] = 'test1234';
-
 axios.interceptors.response.use(
 	(response) => response,
 	(error) => {
@@ -21,6 +18,11 @@ axios.interceptors.response.use(
 		}
 	}
 );
+
+const addSocketIdToHeader = () => {
+	const ChatService = getAngularService('ChatService') as any;
+	axios.defaults.headers['x-socket-id'] = ChatService.socket.id;
+};
 
 const getRequest = (url, ...options) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.GET_API, url));
@@ -56,6 +58,7 @@ export const API = {
 };
 
 export const getAPIUrl = (url: string) => {
+	addSocketIdToHeader();
 	return encodeURI(clientConfigService.apiUrl(clientConfigService.GET_API, url));
 };
 
