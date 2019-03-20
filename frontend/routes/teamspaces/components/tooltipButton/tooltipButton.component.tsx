@@ -17,7 +17,8 @@
 
 import * as React from 'react';
 import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
+
+import { StyledIconButton } from './tooltipButton.styles';
 
 interface IProps {
 	label: string;
@@ -25,18 +26,20 @@ interface IProps {
 	color?: string;
 	action?: (event) => void;
 	disabled?: boolean;
+	className?: string;
+	active?: boolean;
 }
 
 export const TooltipButton = (props: IProps) => {
-	const { label, action = null, Icon, color = 'inherit', disabled = false } = props;
+	const { label, action = null, Icon, color = 'inherit', disabled = false, className, active } = props;
 	const iconProps = { color, fontSize: 'small' } as any;
 
 	return (
 		<Tooltip title={label} disableFocusListener={disabled}>
 			<span>
-				<IconButton aria-label={label} onClick={action} disabled={disabled}>
+				<StyledIconButton aria-label={label} onClick={action} disabled={disabled} className={className} active={active}>
 					<Icon {...iconProps} />
-				</IconButton>
+				</StyledIconButton>
 			</span>
 		</Tooltip>
 	);
