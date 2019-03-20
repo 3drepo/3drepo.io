@@ -21,6 +21,7 @@ import TopMenu from './components/topMenu/topMenu.container';
 import Gis from './viewer/components/gis/gis.container';
 import Views from './viewer/components/views/views.container';
 import Risks from './viewer/components/risks/risks.container';
+import Groups from './viewer/components/groups/groups.container';
 
 angular
 	.module('3drepo')
@@ -37,4 +38,5 @@ angular
 	.component('staticPageViewer', wrap(StaticPageViewer))
 	.component('gis', wrap(Gis))
 	.component('risks', wrap(Risks, ['teamspace', 'model', 'revision']))
-	.component('views', wrap(Views, ['teamspace', 'modelId']));
+	.component('views', wrap(Views, ['teamspace', 'modelId']))
+	.component('groups', wrap(Groups, ['teamspace', 'model', 'revision']));

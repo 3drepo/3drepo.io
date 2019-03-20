@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2018 3D Repo Ltd
+ * Copyright (C) 2018 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -21,6 +21,7 @@
 	const router = express.Router({ mergeParams: true });
 	const responseCodes = require("../response_codes");
 	const ModelHelpers = require("../models/helper/model");
+	const Meta = require("../models/meta");
 	const middlewares = require("../middlewares/middlewares");
 	const utils = require("../utils");
 	const C = require("../constants");
@@ -28,18 +29,17 @@
 	// Get meta data
 
 	/**
-	 * @api {get} /:teamspace/:model/revision/master/head/meta/4DTaskSequence.json	Get All information for 4D Sequence Tags
+	 * @api {get} /:teamspace/:model/revision/master/head/meta/4DTaskSequence.json  Get All meta data for 4D Sequence Tags
 	 * @apiName getAllIdsWith4DSequenceTag
 	 * @apiGroup Meta
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} model Model ID
 	 */
-
 	router.get("/revision/master/head/meta/4DTaskSequence.json", middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
 
 	/**
-	 * @api {get} /:teamspace/:model/revision/:rev/meta/4DTaskSequence.json  Get All information for 4D Sequence Tags by revision
+	 * @api {get} /:teamspace/:model/revision/:rev/meta/4DTaskSequence.json  Get All meta data with 4D Sequence Tags by revision
 	 * @apiName getAllIdsWith4DSequenceTag
 	 * @apiGroup Meta
 	 *
@@ -47,7 +47,6 @@
 	 * @apiParam {String} model Model ID
 	 * @apiParam {String} rev Revision
 	 */
-
 	router.get("/revision/:rev/meta/4DTaskSequence.json", middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
 
 	/**
@@ -58,7 +57,6 @@
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} model Model ID
 	 */
-
 	router.get("/revision/master/head/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
 
 	/**
@@ -70,8 +68,17 @@
 	 * @apiParam {String} model Model ID
 	 * @apiParam {String} rev Revision to get meta data from
 	 */
-
 	router.get("/revision/:rev/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
+
+	/**
+	 * @api {get} /:teamspace/:model/meta/keys Get array of metadata fields
+	 * @apiName getMetadataFields
+	 * @apiGroup Meta
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
+	 * @apiParam {String} model Model ID
+	 */
+	router.get("/meta/keys", middlewares.hasReadAccessToModel, getMetadataFields);
 
 	/**
 	 * @api {get} /:teamspace/:model/meta/:id.json	Get meta data
@@ -82,7 +89,6 @@
 	 * @apiParam {String} model Model ID
 	 * @apiParam id Meta Unique ID
 	 */
-
 	router.get("/meta/:id.json", middlewares.hasReadAccessToModel, getMetadata);
 
 	/**
@@ -94,7 +100,6 @@
 	 * @apiParam {String} model Model ID
 	 * @apiParam {String} metaKey Unique meta key
 	 */
-
 	router.get("/revision/master/head/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 
 	/**
@@ -107,7 +112,6 @@
 	 * @apiParam {String} rev Revision to get meta data from
 	 * @apiParam {String} metaKey Unique meta key
 	 */
-
 	router.get("/revision/:rev/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 
 	/**
@@ -120,8 +124,11 @@
 	 * @apiParam {String} rev Revision to get meta data from
 	 * @apiParam {String} metaKey metadata field to search for
 	 */
-
 	router.get("/revision/master/head/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
+
+	const getDbColOptions = function (req) {
+		return { account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger };
+	};
 
 	function getMetadata(req, res, next) {
 		ModelHelpers.getMetadata(req.params.account, req.params.model, req.params.id)
@@ -180,6 +187,18 @@
 		}
 
 		ModelHelpers.getAllIdsWithMetadataField(req.params.account, req.params.model, branch, req.params.rev, req.params.metaKey)
+			.then(obj => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+			})
+			.catch(err => {
+				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+			});
+	}
+
+	function getMetadataFields(req, res, next) {
+		const dbCol = getDbColOptions(req);
+
+		Meta.getMetadataFields(dbCol.account, dbCol.model)
 			.then(obj => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 			})

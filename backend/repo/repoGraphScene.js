@@ -90,42 +90,42 @@ repoGraphScene.prototype.decode = function(bsonArray) {
 				bson.id = UUID.unparse(idBytes);
 
 				switch(bson[C.REPO_NODE_LABEL_TYPE]) {
-				case C.REPO_NODE_TYPE_TRANSFORMATION :
-					transformations[bson.id] = bson;
-					if (!bson[C.REPO_NODE_LABEL_PARENTS]) {
-						rootNode = bson;
-					}
-					break;
-				case C.REPO_NODE_TYPE_MESH :
-					meshes[bson.id] = bson;
-					scene[C.REPO_SCENE_LABEL_MESHES_COUNT]++;
-					break;
-				case C.REPO_NODE_TYPE_MATERIAL :
-					materials[bson.id] = bson;
-					scene[C.REPO_SCENE_LABEL_MATERIALS_COUNT]++;
-					break;
-				case C.REPO_NODE_TYPE_TEXTURE :
-					textures[bson.id] = bson;
-					scene[C.REPO_SCENE_LABEL_TEXTURES_COUNT]++;
-					break;
-				case C.REPO_NODE_TYPE_CAMERA :
-					cameras[bson.id] = bson;
-					scene[C.REPO_SCENE_LABEL_CAMERAS_COUNT]++;
-					break;
-				case C.REPO_NODE_TYPE_REF:
-					refs[bson.id] = bson;
-					scene[C.REPO_SCENE_LABEL_REF_COUNT]++;
-					break;
-				case C.REPO_NODE_TYPE_META:
-					metas[bson.id] = bson;
-					scene[C.REPO_SCENE_LABEL_METAS_COUNT]++;
-					break;
-				case C.REPO_NODE_TYPE_MAP:
-					maps[bson.id] = bson;
-					scene[C.REPO_SCENE_LABEL_MAPS_COUNT]++;
-					break;
-				default :
-					systemLogger.logError("Unsupported node type found: " + bson[C.REPO_NODE_LABEL_TYPE]);
+					case C.REPO_NODE_TYPE_TRANSFORMATION :
+						transformations[bson.id] = bson;
+						if (!bson[C.REPO_NODE_LABEL_PARENTS]) {
+							rootNode = bson;
+						}
+						break;
+					case C.REPO_NODE_TYPE_MESH :
+						meshes[bson.id] = bson;
+						scene[C.REPO_SCENE_LABEL_MESHES_COUNT]++;
+						break;
+					case C.REPO_NODE_TYPE_MATERIAL :
+						materials[bson.id] = bson;
+						scene[C.REPO_SCENE_LABEL_MATERIALS_COUNT]++;
+						break;
+					case C.REPO_NODE_TYPE_TEXTURE :
+						textures[bson.id] = bson;
+						scene[C.REPO_SCENE_LABEL_TEXTURES_COUNT]++;
+						break;
+					case C.REPO_NODE_TYPE_CAMERA :
+						cameras[bson.id] = bson;
+						scene[C.REPO_SCENE_LABEL_CAMERAS_COUNT]++;
+						break;
+					case C.REPO_NODE_TYPE_REF:
+						refs[bson.id] = bson;
+						scene[C.REPO_SCENE_LABEL_REF_COUNT]++;
+						break;
+					case C.REPO_NODE_TYPE_META:
+						metas[bson.id] = bson;
+						scene[C.REPO_SCENE_LABEL_METAS_COUNT]++;
+						break;
+					case C.REPO_NODE_TYPE_MAP:
+						maps[bson.id] = bson;
+						scene[C.REPO_SCENE_LABEL_MAPS_COUNT]++;
+						break;
+					default :
+						systemLogger.logError("Unsupported node type found: " + bson[C.REPO_NODE_LABEL_TYPE]);
 				}
 
 				const sidBytes = bson[C.REPO_NODE_LABEL_SHARED_ID].buffer;

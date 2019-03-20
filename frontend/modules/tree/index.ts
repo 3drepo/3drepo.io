@@ -15,20 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+export {
+	TreeTypes,
+	TreeActions
+} from './tree.redux';
 
-import { Container, Message } from './deleteMessage.styles';
-
-interface IProps {
-	content: string;
-}
-
-export class DeleteMessage extends React.PureComponent<IProps, any> {
-	public render() {
-		return (
-			<Container>
-				<Message>{this.props.content}</Message>
-			</Container>
-		);
-	}
-}
+export * from './tree.selectors';

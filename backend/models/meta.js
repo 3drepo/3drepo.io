@@ -18,7 +18,9 @@
 "use strict";
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
+const Ref = require("./ref");
 const Schema = mongoose.Schema;
+const db = require("../handler/db");
 const utils = require("../utils");
 
 const schema = Schema({
@@ -50,5 +52,59 @@ const Meta = ModelFactory.createClass(
 		return `${arg.model}.scene`;
 	}
 );
+
+Meta.getMetadataFields = function(account, model) {
+
+	return Ref.getRefNodes(account, model).then((subModelRefs) => {
+		const subModelMetadataFieldsPromises = [];
+
+		subModelRefs.forEach((ref) => {
+			subModelMetadataFieldsPromises.push(
+				this.getMetadataFields(ref.owner, ref.project).catch(() => {
+					// Suppress submodel metadata failure
+					return Promise.resolve();
+				})
+			);
+		});
+
+		return Promise.all(subModelMetadataFieldsPromises).then((subModels) => {
+			const metaKeys = new Set();
+
+			if (subModels) {
+				subModels.forEach((subModelMetadataFields) => {
+					if (subModelMetadataFields) {
+						subModelMetadataFields.forEach((field) => {
+							metaKeys.add(field);
+						});
+					}
+				});
+			}
+
+			return db.getCollection(account, model + ".scene").then((sceneCollection) => {
+				return sceneCollection.mapReduce(
+					/* eslint-disable */
+					function() {
+						for (var key in this.metadata) {
+							emit(key, null);
+						}
+					},
+					function(key, value) {
+						return null;
+					},
+					{
+						"out": {inline:1}
+					}
+					/* eslint-enable */
+				).then((uniqueKeys) => {
+					uniqueKeys.forEach((key) => {
+						metaKeys.add(key._id);
+					});
+
+					return Array.from(metaKeys);
+				});
+			});
+		});
+	});
+};
 
 module.exports = Meta;

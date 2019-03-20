@@ -50,7 +50,7 @@ export class SelectField extends React.PureComponent<any, any> {
 		}
 	}
 
-	public handleMouseMove = (event) => {
+	public handleMouseMove = () => {
 		this.blurItem(this.selectedItem);
 	}
 
@@ -89,15 +89,17 @@ export class SelectField extends React.PureComponent<any, any> {
 	}
 
 	public handleClose = () => {
-		this.menuWrapper.removeEventListener('keypress', this.handleKeyPress);
-		this.menuWrapper.removeEventListener('mousemove', this.handleMouseMove);
+		if (this.menuWrapper) {
+			this.menuWrapper.removeEventListener('keypress', this.handleKeyPress);
+			this.menuWrapper.removeEventListener('mousemove', this.handleMouseMove);
+		}
 		this.menuItems = null;
 		this.menuWrapper = null;
 		this.selectedItem = null;
 	}
 
 	public render() {
-		const { MenuProps, children, onOpen, ...selectProps } = this.props;
+		const { MenuProps, children, onOpen, className, ...selectProps } = this.props;
 
 		const customMenuProps = {
 			...MenuProps,
@@ -106,7 +108,7 @@ export class SelectField extends React.PureComponent<any, any> {
 		};
 
 		return (
-			<Select {...selectProps} MenuProps={customMenuProps}>
+			<Select className={className} {...selectProps} MenuProps={customMenuProps}>
 				{children}
 			</Select>
 		);

@@ -37,7 +37,7 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	setSearchQuery: ['searchQuery'],
 	showDeleteInfo: ['viewpointId'],
 	setComponentState: ['componentState']
-}, { prefix: 'VIEWPOINTS_' });
+}, { prefix: 'VIEWPOINTS/' });
 
 export interface IViewpointsComponentState {
 	activeViewpoint?: number;
