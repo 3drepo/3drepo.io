@@ -49,4 +49,4 @@ angular
 	.component('panelsMenu', wrap(PanelsMenu))
 	.component('closeFocusModeButton', wrap(CloseFocusModeButton))
 	.component('panelButton', wrap(PanelButton, ['onClick', 'label', 'icon', 'active', 'type']))
-	.component('bim', wrap(Views, ['teamspace', 'modelId']));
+	.component('bim', wrap(Bim, ['teamspace', 'modelId']));
