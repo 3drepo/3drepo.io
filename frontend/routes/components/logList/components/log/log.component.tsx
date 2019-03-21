@@ -28,7 +28,6 @@ import {
 	MitigationDetailLabel,
 	MitigationDetailRow,
 	MitigationWrapper,
-	Screenshot,
 	ScreenshotMessage,
 	ScreenshotWrapper,
 	MessageContainer,
@@ -45,6 +44,7 @@ import {
 	RISK_LIKELIHOODS,
 	RISK_MITIGATION_STATUSES
 } from '../../../../../constants/risks';
+import { Image } from '../../../image';
 
 interface IProps {
 	comment: string;
@@ -112,7 +112,7 @@ export class Log extends React.PureComponent<IProps, any> {
 			<ScreenshotWrapper withMessage={!!this.props.comment}>
 				{ this.props.viewpoint && this.props.viewpoint.screenshotPath ?
 					<>
-						<Screenshot src={this.props.viewpoint.screenshotPath} />
+						<Image src={this.props.viewpoint.screenshotPath} enablePreview />
 						{this.renderRemoveButton(!this.props.sealed && !this.props.action)}
 					</>
 				: null }

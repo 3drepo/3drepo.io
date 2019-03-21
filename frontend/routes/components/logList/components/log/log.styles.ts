@@ -102,21 +102,6 @@ export const ScreenshotWrapper = styled.div`
 	border-radius: ${(props: any) => props.withMessage ? '2px 2px 0 0' : '2px'};
 ` as any;
 
-export const Screenshot = styled(Image)`
-	img {
-		display: block;
-		max-width: 100%;
-		width: 100%;
-		height: auto;
-		margin: auto;
-		position: absolute;
-		top: 0;
-		right: 0;
-		bottom: 0;
-		left: 0;
-	}
-` as any;
-
 export const MessageContainer = styled.div`
 	width: 100%;
 	display: flex;
