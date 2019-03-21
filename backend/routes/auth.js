@@ -687,7 +687,7 @@ function signUp(req, res, next) {
 			return Mailer.sendVerifyUserEmail(req.body.email, {
 				token : data.token,
 				email: req.body.email,
-				firstName: req.body.firstName,
+				firstName: utils.ucFirst(req.body.firstName),
 				username: req.params.account,
 				pay: req.body.pay
 			}).catch(err => {
