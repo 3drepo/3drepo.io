@@ -55,7 +55,7 @@ class CommentGenerator {
 class TextCommentGenerator extends CommentGenerator {
 	constructor(owner, revId, commentText, viewpointGuid, pinPosition) {
 		super(owner, revId);
-		if (fieldTypes.comment === Object.prototype.toString.call(commentText) && commentText.length > 0) {
+		if (fieldTypes.comment === Object.prototype.toString.call(commentText)) {
 			this.comment = commentText;
 
 			if (viewpointGuid && fieldTypes.viewpointGuid === Object.prototype.toString.call(viewpointGuid)) {
