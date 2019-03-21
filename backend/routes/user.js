@@ -19,6 +19,7 @@
 const express = require("express");
 const router = express.Router({mergeParams: true});
 const responseCodes = require("../response_codes");
+const onSuccess = responseCodes.onSuccessfulOperation;
 const middlewares = require("../middlewares/middlewares");
 const User =  require("../models/user");
 const utils = require("../utils");
@@ -28,21 +29,27 @@ const utils = require("../utils");
  * @apiName getProfile
  * @apiGroup User
  * */
-router.get("/me", middlewares.loggedIn, getProfile, responseCodes.onSuccessfulOperation);
+router.get("/me", middlewares.loggedIn, getProfile, onSuccess);
 
 /**
  * @api {post} /apikey Generates an apikey for the logged user
  * @apiName generateApiKey
  * @apiGroup User
  * */
-router.post("/apikey", middlewares.loggedIn, generateApiKey, responseCodes.onSuccessfulOperation);
+router.post("/apikey", middlewares.loggedIn, generateApiKey, onSuccess);
 
 /**
  * @api {delete} /apikey Deletes the current apikey for the logged user
  * @apiName deleteApiKey
  * @apiGroup User
  * */
-router.delete("/apikey", middlewares.loggedIn, deleteApiKey, responseCodes.onSuccessfulOperation);
+router.delete("/apikey", middlewares.loggedIn, deleteApiKey, onSuccess);
+
+router.get("/favmeta", middlewares.loggedIn, getFavouriteMetadataTags, onSuccess);
+
+router.post("/favmeta", middlewares.loggedIn, appendFavouriteMetadataTag, onSuccess);
+
+router.delete("/favmeta", middlewares.loggedIn, deleteFavouriteMetadataTag, onSuccess);
 
 async function getProfile(req, res, next) {
 	const username = req.session.user.username;
@@ -70,6 +77,37 @@ function deleteApiKey(req, res, next) {
 		responseCodes.respond(utils.APIInfo(req), req, res, next,
 			err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	}
+}
+
+async function getFavouriteMetadataTags(req, res, next) {
+	const username = req.session.user.username;
+	req.dataModel = await User.getFavouriteMetadataTags(username);
+	next();
+}
+
+async function appendFavouriteMetadataTag(req, res, next) {
+	const username = req.session.user.username;
+	const tag = req.body.tag;
+	if (!tag) {
+		res.status(400);
+		res.end();
+		return;
+	}
+
+	req.dataModel = await User.appendFavouriteMetadataTag(username,tag);
+	next();
+}
+
+async function deleteFavouriteMetadataTag(req, res, next) {
+	const username = req.session.user.username;
+	const tag = req.body.tag;
+	if (!tag) {
+		res.status(400);
+		res.end();
+		return;
+	}
+	req.dataModel = await User.deleteFavouriteMetadataTag(username,tag);
+	next();
 }
 
 module.exports = router;

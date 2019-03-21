@@ -169,6 +169,27 @@ schema.statics.getProfileByUsername = async function (username) {
 	};
 };
 
+schema.statics.getFavouriteMetadataTags = async function (username) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	const userProfile = await dbCol.findOne({user: username}, {user: 1,
+		"customData.favouriteMetadataTags" : 1
+	});
+
+	return _.get(userProfile, "customData.favouriteMetadataTags") || [];
+};
+
+schema.statics.appendFavouriteMetadataTag = async function (username, tag) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	await dbCol.update({user: username}, {$addToSet: { "customData.favouriteMetadataTags" : tag } });
+	return {};
+};
+
+schema.statics.deleteFavouriteMetadataTag = async function (username, tag) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	await dbCol.update({user: username}, {$pull: { "customData.favouriteMetadataTags" : tag } });
+	return {};
+};
+
 schema.statics.findByAPIKey = async function (key) {
 	if (!key) {
 		return null;
