@@ -169,24 +169,24 @@ schema.statics.getProfileByUsername = async function (username) {
 	};
 };
 
-schema.statics.getFavouriteMetadataTags = async function (username) {
+schema.statics.getStarredMetadataTags = async function (username) {
 	const dbCol = await DB.getCollection("admin", "system.users");
 	const userProfile = await dbCol.findOne({user: username}, {user: 1,
-		"customData.favouriteMetadataTags" : 1
+		"customData.StarredMetadataTags" : 1
 	});
 
-	return _.get(userProfile, "customData.favouriteMetadataTags") || [];
+	return _.get(userProfile, "customData.StarredMetadataTags") || [];
 };
 
-schema.statics.appendFavouriteMetadataTag = async function (username, tag) {
+schema.statics.appendStarredMetadataTag = async function (username, tag) {
 	const dbCol = await DB.getCollection("admin", "system.users");
-	await dbCol.update({user: username}, {$addToSet: { "customData.favouriteMetadataTags" : tag } });
+	await dbCol.update({user: username}, {$addToSet: { "customData.StarredMetadataTags" : tag } });
 	return {};
 };
 
-schema.statics.deleteFavouriteMetadataTag = async function (username, tag) {
+schema.statics.deleteStarredMetadataTag = async function (username, tag) {
 	const dbCol = await DB.getCollection("admin", "system.users");
-	await dbCol.update({user: username}, {$pull: { "customData.favouriteMetadataTags" : tag } });
+	await dbCol.update({user: username}, {$pull: { "customData.StarredMetadataTags" : tag } });
 	return {};
 };
 

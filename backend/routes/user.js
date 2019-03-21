@@ -45,11 +45,11 @@ router.post("/apikey", middlewares.loggedIn, generateApiKey, onSuccess);
  * */
 router.delete("/apikey", middlewares.loggedIn, deleteApiKey, onSuccess);
 
-router.get("/favmeta", middlewares.loggedIn, getFavouriteMetadataTags, onSuccess);
+router.get("/starredMeta", middlewares.loggedIn, getStarredMetadataTags, onSuccess);
 
-router.post("/favmeta", middlewares.loggedIn, appendFavouriteMetadataTag, onSuccess);
+router.post("/starredMeta", middlewares.loggedIn, appendStarredMetadataTag, onSuccess);
 
-router.delete("/favmeta", middlewares.loggedIn, deleteFavouriteMetadataTag, onSuccess);
+router.delete("/starredMeta", middlewares.loggedIn, deleteStarredMetadataTag, onSuccess);
 
 async function getProfile(req, res, next) {
 	const username = req.session.user.username;
@@ -79,13 +79,13 @@ function deleteApiKey(req, res, next) {
 	}
 }
 
-async function getFavouriteMetadataTags(req, res, next) {
+async function getStarredMetadataTags(req, res, next) {
 	const username = req.session.user.username;
-	req.dataModel = await User.getFavouriteMetadataTags(username);
+	req.dataModel = await User.getStarredMetadataTags(username);
 	next();
 }
 
-async function appendFavouriteMetadataTag(req, res, next) {
+async function appendStarredMetadataTag(req, res, next) {
 	const username = req.session.user.username;
 	const tag = req.body.tag;
 	if (!tag) {
@@ -94,11 +94,11 @@ async function appendFavouriteMetadataTag(req, res, next) {
 		return;
 	}
 
-	req.dataModel = await User.appendFavouriteMetadataTag(username,tag);
+	req.dataModel = await User.appendStarredMetadataTag(username,tag);
 	next();
 }
 
-async function deleteFavouriteMetadataTag(req, res, next) {
+async function deleteStarredMetadataTag(req, res, next) {
 	const username = req.session.user.username;
 	const tag = req.body.tag;
 	if (!tag) {
@@ -106,7 +106,7 @@ async function deleteFavouriteMetadataTag(req, res, next) {
 		res.end();
 		return;
 	}
-	req.dataModel = await User.deleteFavouriteMetadataTag(username,tag);
+	req.dataModel = await User.deleteStarredMetadataTag(username,tag);
 	next();
 }
 
