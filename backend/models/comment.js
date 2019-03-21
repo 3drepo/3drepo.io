@@ -56,17 +56,21 @@ class TextCommentGenerator extends CommentGenerator {
 	constructor(owner, revId, commentText, viewpointGuid, pinPosition) {
 		super(owner, revId);
 		if (fieldTypes.comment === Object.prototype.toString.call(commentText)) {
-			this.comment = commentText;
+			if (commentText.length > 0 || fieldTypes.viewpointGuid === Object.prototype.toString.call(viewpointGuid)) {
+				this.comment = commentText;
 
-			if (viewpointGuid && fieldTypes.viewpointGuid === Object.prototype.toString.call(viewpointGuid)) {
-				this.viewpoint = viewpointGuid;
-			}
+				if (viewpointGuid) {
+					this.viewpoint = viewpointGuid;
+				}
 
-			if (pinPosition && fieldTypes.pinPosition === Object.prototype.toString.call(pinPosition)) {
-				this.pinPosition = pinPosition;
+				if (pinPosition && fieldTypes.pinPosition === Object.prototype.toString.call(pinPosition)) {
+					this.pinPosition = pinPosition;
+				}
+			} else {
+				throw responseCodes.ISSUE_COMMENT_NO_TEXT;
 			}
 		} else {
-			throw responseCodes.ISSUE_COMMENT_NO_TEXT;
+			throw responseCodes.INVALID_ARGUMENTS;
 		}
 	}
 }
