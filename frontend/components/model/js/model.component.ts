@@ -120,7 +120,7 @@ class ModelController implements ng.IController {
 			window.removeEventListener('beforeunload', refreshHandler);
 			window.removeEventListener('popstate', popStateHandler);
 			this.ViewerService.off(VIEWER_EVENTS.CLICK_PIN);
-            dispatch(TreeActions.stopListenOnSelections());
+			dispatch(TreeActions.stopListenOnSelections());
 			this.resetPanelsStates();
 		});
 

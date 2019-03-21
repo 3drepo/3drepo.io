@@ -53,6 +53,7 @@ interface IProps {
 interface IState {
 	logs: any[];
 	canUpdateRisk: boolean;
+	scrolled: boolean;
 }
 
 const UNASSIGNED_JOB = {
@@ -63,10 +64,12 @@ const UNASSIGNED_JOB = {
 export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public state = {
 		logs: [],
-		canUpdateRisk: false
+		canUpdateRisk: false,
+		scrolled: false
 	};
 
 	public commentRef = React.createRef<any>();
+	public panelRef = React.createRef<any>();
 
 	get isNewRisk() {
 		return !this.props.risk._id;
@@ -174,14 +177,23 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		this.props.showNewPin(this.props.risk, pinData);
 	}
 
+	public handlePanelScroll = (e) => {
+		if (e.target.scrollTop > 0 && !this.state.scrolled) {
+			this.setState({ scrolled: true });
+		}
+		if (e.target.scrollTop === 0 && this.state.scrolled) {
+			this.setState({ scrolled: false });
+		}
+	}
+
 	public renderRiskForm = () => (
-			<RiskDetailsForm
-                canUpdateRisk={this.state.canUpdateRisk}
-				risk={this.riskData}
-				jobs={this.jobsList}
-				onValueChange={this.handleRiskFormSubmit}
-				onSubmit={this.handleRiskFormSubmit}
-				associatedActivities={this.props.associatedActivities}
+		<RiskDetailsForm
+			canUpdateRisk={this.state.canUpdateRisk}
+			risk={this.riskData}
+			jobs={this.jobsList}
+			onValueChange={this.handleRiskFormSubmit}
+			onSubmit={this.handleRiskFormSubmit}
+			associatedActivities={this.props.associatedActivities}
 			permissions={this.props.modelSettings.permissions}
 			currentUser={this.props.currentUser}
 			myJob={this.props.myJob}
@@ -200,6 +212,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				onExpandChange={this.handleExpandChange}
 				panelName={RISK_PANEL_NAME}
 				renderCollapsable={this.renderRiskForm}
+				scrolled={this.state.scrolled}
 			/>
 		);
 	});
@@ -244,7 +257,12 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Container>
-				<ViewerPanelContent className="height-catcher" padding="0">
+				<ViewerPanelContent
+					className="height-catcher"
+					padding="0"
+					onScroll={this.handlePanelScroll}
+					ref={this.panelRef}
+				>
 					{this.renderPreview(this.props.risk)}
 					{this.renderLogs(logs.length)}
 				</ViewerPanelContent>

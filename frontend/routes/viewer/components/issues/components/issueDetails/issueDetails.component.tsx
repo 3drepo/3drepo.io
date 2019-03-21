@@ -189,14 +189,10 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public handlePanelScroll = (e) => {
 		if (e.target.scrollTop > 0 && !this.state.scrolled) {
-			this.setState({
-				scrolled: true
-			});
+			this.setState({ scrolled: true });
 		}
 		if (e.target.scrollTop === 0 && this.state.scrolled) {
-			this.setState({
-				scrolled: false
-			});
+			this.setState({ scrolled: false });
 		}
 	}
 
@@ -305,7 +301,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			<Container>
 				<ViewerPanelContent
 					className="height-catcher"
-					padding="0" details="1"
+					padding="0"
+					details="1"
 					onScroll={this.handlePanelScroll}
 					innerRef={this.panelRef}
 				>

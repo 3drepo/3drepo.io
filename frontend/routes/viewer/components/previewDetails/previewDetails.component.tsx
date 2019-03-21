@@ -21,13 +21,23 @@ import { Formik, Field } from 'formik';
 import { TextField, Typography } from '@material-ui/core';
 
 import { schema } from '../../../../services/validation';
+import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
 import {
-	Content, Container, Collapsable, Details, Summary, CollapsableContent, ToggleButtonContainer, ToggleButton, ToggleIcon, StyledForm, NotCollapsableContent
+	Content,
+	Container,
+	Collapsable,
+	Details,
+	Summary,
+	CollapsableContent,
+	ToggleButtonContainer,
+	ToggleButton,
+	ToggleIcon,
+	StyledForm,
+	NotCollapsableContent
 } from './previewDetails.styles';
-import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
 
 interface IProps {
 	className?: string;
@@ -157,9 +167,13 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 
 		return (
 			<Container className={className}>
-					{this.renderUpdateMessage(willBeUpdated)}
-				{this.renderDeleteMessage(willBeRemoved)}<Summary expandIcon={this.renderExpandIcon(!disableExpanding && !editable)}onClick={handleHeaderClick}
-					scrolled={this.props.scrolled ? 1 : 0}>
+				{this.renderUpdateMessage(willBeUpdated)}
+				{this.renderDeleteMessage(willBeRemoved)}
+				<Summary
+					expandIcon={this.renderExpandIcon(!disableExpanding && !editable)}
+					onClick={handleHeaderClick}
+					scrolled={this.props.scrolled ? 1 : 0}
+				>
 						<RoleIndicator color={roleColor} />
 						{this.renderNameWithCounter(!editable && count)}
 						{this.renderName(!editable && !count)}

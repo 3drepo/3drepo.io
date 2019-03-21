@@ -23,14 +23,14 @@ import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.c
 import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
+import { ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
-import { Container, ColorPickerWrapper, Actions } from './groupDetails.styles';
-import { GroupDetailsForm } from './groupDetailsForm.component';
 import { ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
 import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
 import { CriteriaField } from '../../../../../components/criteriaField/criteriaField.component';
 import { GROUPS_TYPES, GROUP_PANEL_NAME, GROUP_TYPES_ICONS } from '../../../../../../constants/groups';
+import { Container, Content, ColorPickerWrapper, Actions } from './groupDetails.styles';
+import { GroupDetailsForm } from './groupDetailsForm.component';
 
 interface IProps {
 	activeGroup: any;
@@ -54,15 +54,18 @@ interface IProps {
 interface IState {
 	isFormValid: boolean;
 	isFormDirty: boolean;
+	scrolled: boolean;
 }
 
 export class GroupDetails extends React.PureComponent<IProps, IState> {
 	public state = {
 		isFormValid: false,
-		isFormDirty: false
+		isFormDirty: false,
+		scrolled: false
 	};
 
 	public formRef = React.createRef<HTMLElement>() as any;
+	public panelRef = React.createRef<any>();
 
 	public componentDidMount() {
 		if (!this.isNewGroup) {
@@ -146,6 +149,15 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		this.props.setCriteriaState({ criterionForm: criterion });
 	}
 
+	public handlePanelScroll = (e) => {
+		if (e.target.scrollTop > 0 && !this.state.scrolled) {
+			this.setState({ scrolled: true });
+		}
+		if (e.target.scrollTop === 0 && this.state.scrolled) {
+			this.setState({ scrolled: false });
+		}
+	}
+
 	public renderRulesField = renderWhenTrue(() => (
 		<CriteriaField
 			name="rules"
@@ -174,6 +186,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			disableExpanding
 			panelName={GROUP_PANEL_NAME}
 			StatusIconComponent={GROUP_TYPES_ICONS[this.groupData.type]}
+			scrolled={this.state.scrolled}
 		/>
 	));
 
@@ -220,9 +233,14 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	public render() {
 		return (
 			<Container>
-				<ViewerPanelContent className="height-catcher">
+				<Content
+					className="height-catcher"
+					padding="0"
+					onScroll={this.handlePanelScroll}
+					innerRef={this.panelRef}
+				>
 					{this.renderPreview(this.groupData)}
-				</ViewerPanelContent>
+				</Content>
 				{this.renderFooter()}
 			</Container>
 		);
