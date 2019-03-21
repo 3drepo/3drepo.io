@@ -89,7 +89,7 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				comment.action.to = convertActionValueToText(comment.action.to);
 				break;
 			case 'residual_consequence':
-				comment.action.propertyText = 'Residual consequence';
+				comment.action.propertyText = 'Mitigated consequence';
 				if (comment.action.to) {
 					comment.action.to = getRiskConsequenceName(parseInt(comment.action.to, 10));
 				}
@@ -102,7 +102,7 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				}
 				break;
 			case 'residual_likelihood':
-				comment.action.propertyText = 'Residual likelihood';
+				comment.action.propertyText = 'Mitigated likelihood';
 				if (comment.action.to) {
 					comment.action.to = getRiskLikelihoodName(parseInt(comment.action.to, 10));
 				}
