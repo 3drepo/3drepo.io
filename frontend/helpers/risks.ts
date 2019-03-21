@@ -42,7 +42,7 @@ export const prepareRisk = (risk, jobs = []) => {
 		calculateLevelOfRisk(residualLikelihood, residualConsequence)
 	);
 
-	let overallLevelOfRisk = getValidNumber(
+	const overallLevelOfRisk = getValidNumber(
 		risk.overall_level_of_risk,
 		getValidNumber(residualLevelOfRisk, levelOfRisk)
 	);
