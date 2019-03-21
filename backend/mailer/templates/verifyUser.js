@@ -533,9 +533,10 @@ const html = data => `
                     <table align="left" width="100%" border="0" cellpadding="0" cellspacing="0" class="mcnImageContentContainer" style="min-width:100%;">
                         <tbody><tr>
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
-                                
+								
+							
                                     <a href="https://www.3drepo.io">
-										<img align="center" alt="" src="https://gallery.mailchimp.com/fa2aa09169a7d4049287e5bb3/images/5df4a13b-3750-47f7-bcdb-47738d08663a.png" 
+										<img align="center" alt="" src="https://www.dropbox.com/s/okz0a68zu3lm5mu/3D%20Repo%20Logo.png?raw=1" 
 										width="300" style="max-width: 300px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 0%;" class="mcnImage">
                                     </a>                                
                             </td>
@@ -654,7 +655,7 @@ Please click on the button below to verify your email address.</span>
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
                                 
                                     <a href="${data.url}" title="" class="" target="_blank">
-                                        <img align="center" alt="" src="https://gallery.mailchimp.com/fa2aa09169a7d4049287e5bb3/images/738443d2-0191-47d0-a9e1-9b0d4f88a5c8.png" width="564" style="max-width:1200px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
+                                        <img align="center" alt="" src="https://www.dropbox.com/s/qndf1g0foi93ca3/Verify%20email%20address.png?raw=1" width="564" style="max-width:1200px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
                                     </a>
                                 
                             </td>
