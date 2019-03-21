@@ -48,7 +48,7 @@ view.clean = function (dbCol, viewToClean, targetType = "[object String]") {
 	// FIXME - Need to unify content/buffer for buffer field name in document
 	// FIXME - Currently, Issues/Risks uses content
 	// FIXME - Currently, Viewpoints uses buffer
-	if ("[object String]" === Object.prototype.toString.call(viewToClean.screenshot)) {
+	if ("[object String]" === Object.prototype.toString.call(viewToClean.screenshot) && viewToClean.screenshot.length > 0) {
 		viewToClean.screenshot = {
 			content: new Buffer.from(viewToClean.screenshot, "base64"),
 			flag: 1
