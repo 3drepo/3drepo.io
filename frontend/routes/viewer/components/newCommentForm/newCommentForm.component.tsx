@@ -75,7 +75,7 @@ interface IState {
 }
 
 const NewCommentSchema = Yup.object().shape({
-	text: Yup.string().max(220)
+	comment: Yup.string().max(220)
 });
 
 const NEW_PIN_ID = 'newPinId';
@@ -107,6 +107,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 			this.setState({
 				newScreenshot: this.props.screenshot
 			});
+			this.props.innerRef.current.setFieldValue('screenshot', this.props.screenshot);
 		}
 	}
 
@@ -117,11 +118,11 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSave = (values, form) => {
-		const screenshot = this.state.newScreenshot.substring(this.state.newScreenshot.indexOf(',') + 1);
+		const screenshot = values.screenshot.substring(values.screenshot.indexOf(',') + 1);
 		const commentValues = { ...values, screenshot };
 		this.props.onSave(commentValues);
-		form.resetForm();
 		this.setState({ newScreenshot: ''});
+		form.resetForm();
 	}
 
 	public handleNewScreenshot = async () => {
@@ -281,9 +282,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 			hidePin,
 			showResidualRiskInput,
 			innerRef,
-			canComment,
-			comment,
-			screenshot
+			canComment
 		} = this.props;
 
 		return (
@@ -310,11 +309,12 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 									color="secondary"
 									type="submit"
 									mini={true}
-									disabled={(!hideComment && !canComment && (!form.isValid || form.isValidating))}
+									disabled={!hideComment && (!canComment || !form.isValid || form.isValidating)}
 									aria-label="Add new comment"
 								>
-									<SaveIcon />
-								</ViewerPanelButton>)}
+									<SaveIcon fontSize="small" />
+								</ViewerPanelButton>
+								)}
 							/>
 						</Actions>
 					</StyledForm>
