@@ -425,7 +425,7 @@ export class PanelService {
 		this.panelCards.right.push({
 			type: 'docs',
 			title: 'BIM Data',
-			show: false,
+			show: true,
 			showLiteMode: false,
 			help: 'Documents',
 			icon: 'content_copy',
