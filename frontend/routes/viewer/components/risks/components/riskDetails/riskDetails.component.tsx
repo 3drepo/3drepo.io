@@ -87,7 +87,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public setLogs = () => {
-		const logs = this.props.risk.comments;
+		const logs = (this.props.risk.comments) ? this.props.risk.comments : [];
 		this.setState({ logs });
 	}
 
@@ -160,7 +160,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleRiskFormSubmit = (values) => {
-		const { teamspace, model, updateRisk, updateNewRisk, jobs } = this.props;
+		const { teamspace, model, updateRisk, updateNewRisk } = this.props;
 		const updatedRisk = mergeRiskData(this.riskData, values);
 
 		if (this.isNewRisk) {

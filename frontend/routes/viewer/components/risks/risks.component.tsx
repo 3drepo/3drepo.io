@@ -234,9 +234,9 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		return false;
 	}
 
-  public handleFilterChange = (selectedFilters) => {
+	public handleFilterChange = (selectedFilters) => {
 		this.props.onFiltersChange(selectedFilters);
-  }
+	}
 
 	public getFilterValues(property) {
 		return property.map(({value, name}) => {
