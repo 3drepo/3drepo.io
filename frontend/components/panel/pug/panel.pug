@@ -47,4 +47,18 @@ div(ng-show="vm.showPanel")
 		ng-class="{ active : vm.activate }"
 		ng-if="vm.position === 'left'")
 
-		panels-menu
+		//- panels-menu // React component
+
+		.panelButtonGroup(
+			ng-repeat="contentItem in vm.contentItems"
+			ng-if="!vm.isLiteMode || contentItem.showLiteMode"
+			layout="column"
+			layout-align="start center")
+
+			panel-button(
+				on-click="vm.togglePanel"
+				icon="contentItem.icon"
+				label="contentItem.title"
+				type="contentItem.type"
+				active="contentItem.active"
+			)

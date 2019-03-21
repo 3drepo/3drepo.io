@@ -158,8 +158,9 @@ class PanelController implements ng.IController {
 		}
 	}
 
-	public togglePanel(contentType: string) {
-
+	public togglePanel = (contentType: string) => {
+		console.log('toggle', contentType);
+		console.log('toggle this', this);
 		// Get the content item
 		const contentIndex = this.contentItems.findIndex(({ type }) => type === contentType);
 
@@ -191,6 +192,7 @@ class PanelController implements ng.IController {
 	public updatePanelButtons() {
 		for (let i = 0; i < this.contentItems.length; i++) {
 			this.contentItems[i].bgColour = (this.contentItems[i].show) ? this.highlightBackground : '';
+			this.contentItems[i].active = (this.contentItems[i].show);
 		}
 	}
 

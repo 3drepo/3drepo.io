@@ -24,6 +24,7 @@ import Risks from './viewer/components/risks/risks.container';
 import Groups from './viewer/components/groups/groups.container';
 import Toolbar from './viewer/components/toolbar/toolbar.container';
 import PanelsMenu from './viewer/components/panelsMenu/panelsMenu.container';
+import { PanelButton } from './viewer/components/panelButton/panelButton.component';
 
 angular
 	.module('3drepo')
@@ -43,4 +44,5 @@ angular
 	.component('views', wrap(Views, ['teamspace', 'modelId']))
 	.component('groups', wrap(Groups, ['teamspace', 'model', 'revision']))
 	.component('bottomButtons', wrap(Toolbar))
-	.component('panelsMenu', wrap(PanelsMenu));
+	.component('panelsMenu', wrap(PanelsMenu))
+	.component('panelButton', wrap(PanelButton, ['onClick', 'label', 'icon', 'active', 'type']));

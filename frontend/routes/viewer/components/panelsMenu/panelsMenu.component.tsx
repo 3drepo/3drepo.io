@@ -29,25 +29,53 @@ import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tool
 interface IProps {
 }
 
-export class PanelsMenu extends React.PureComponent<IProps, any> {
-	public handleClick = () => {
-		console.log('on click');
+interface IState {
+	activePanels: any;
+}
+
+const PANELS = {
+	ISSUES: 'Issues',
+	RISKS: 'SafetiBase',
+	GROUPS: 'Groups',
+	VIEWS: 'Views',
+	TREE: 'Tree',
+	COMPARE: 'Compare',
+	GIS: 'GIS'
+};
+
+export class PanelsMenu extends React.PureComponent<IProps, IState> {
+	public state = {
+		activePanels: {}
+	};
+
+	public handleClick = (panel) => {
+		this.setState((prevState) => ({
+				activePanels: {...prevState.activePanels, [panel]: !prevState.activePanels[panel]}
+			})
+		);
 	}
 
 	public get toolbarList() {
 		return [
-			{ label: 'Issues', Icon: IssuesIcon, action: this.handleClick },
-			{ label: 'SafetiBase', Icon: RisksIcon, action: this.handleClick },
-			{ label: 'Groups', Icon: GroupsIcon, action: this.handleClick, active: true },
-			{ label: 'Views', Icon: ViewsIcon, action: this.handleClick },
-			{ label: 'Tree', Icon: TreeIcon, action: this.handleClick },
-			{ label: 'Compare', Icon: CompareIcon, action: this.handleClick},
-			{ label: 'GIS', Icon: GisIcon, action: this.handleClick }
+			{ label: PANELS.ISSUES, Icon: IssuesIcon, action: () => this.handleClick(PANELS.ISSUES) },
+			{ label: PANELS.RISKS, Icon: RisksIcon, action: () => this.handleClick(PANELS.RISKS) },
+			{ label: PANELS.GROUPS, Icon: GroupsIcon, action: () => this.handleClick(PANELS.GROUPS) },
+			{ label: PANELS.VIEWS, Icon: ViewsIcon, action: () => this.handleClick(PANELS.VIEWS) },
+			{ label: PANELS.TREE, Icon: TreeIcon, action: () => this.handleClick(PANELS.TREE) },
+			{ label: PANELS.COMPARE, Icon: CompareIcon, action: () => this.handleClick(PANELS.COMPARE)},
+			{ label: PANELS.GIS, Icon: GisIcon, action: () => this.handleClick(PANELS.GIS) }
 		];
 	}
 
-	public renderButtons = () => this.toolbarList.map((buttonProps, index) =>
-		<TooltipButton key={index} className="panelButton" {...buttonProps} placement="right-end" />)
+	public renderButtons = () => this.toolbarList.map((buttonProps, index) => (
+		<TooltipButton
+			{...buttonProps}
+			key={index}
+			className="panelButton"
+			placement="right-end"
+			active={this.state.activePanels[buttonProps.label]}
+		/>)
+		)
 
 	public render() {
 		return (
