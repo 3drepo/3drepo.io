@@ -33,6 +33,7 @@ export const Collapsable = styled(ExpansionPanel)`
 	&& {
 		box-shadow: none;
 		padding: 0 12px;
+		margin-bottom: 8px;
 	}
 `;
 
@@ -68,3 +69,5 @@ export const StyledForm = styled(Form)`
     padding-right: 4px !important;
 	}
 `;
+
+export const NotCollapsableContent = styled.div``;

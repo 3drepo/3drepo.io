@@ -51,7 +51,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	updateCommentSuccess: ['comment'],
 	updateNewRisk: ['newRisk'],
 	onFiltersChange: ['selectedFilters']
-}, { prefix: 'RISKS_' });
+}, { prefix: 'RISKS/' });
 
 export const INITIAL_STATE = {
 	risksMap: {},

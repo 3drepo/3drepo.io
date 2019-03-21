@@ -62,6 +62,7 @@ export const ViewerPanelContent = styled.div`
 	background-color: ${COLOR.WHITE_87};
 	padding: ${(props: any) => props.isPadding ? '24px' : '0'};
 	overflow: auto;
+	position: relative;
 ` as any;
 
 export const ViewerPanelFooter = styled(Grid).attrs({

@@ -38,7 +38,7 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	createModelSuccess: ['teamspace', 'modelData'],
 	updateModelSuccess: ['teamspace', 'modelId', 'modelData'],
 	removeModelSuccess: ['teamspace', 'modelData']
-}, { prefix: 'TEAMSPACES_' });
+}, { prefix: 'TEAMSPACES/' });
 
 export const INITIAL_STATE = {
 	teamspaces: {},

@@ -101,6 +101,7 @@ interface IProps {
 	value?: string;
 	predefinedColors?: string[];
 	onChange?: (color) => void;
+	disabled?: boolean;
 	disableUnderline?: boolean;
 }
 
@@ -117,7 +118,8 @@ interface IState {
 export class ColorPicker extends React.PureComponent<IProps, IState> {
 	public static defaultProps: IProps = {
 		predefinedColors: [],
-		onChange: identity
+		onChange: identity,
+		disabled: false
 	};
 
 	public state: IState = {
@@ -134,9 +136,11 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	public pointerRef = React.createRef<HTMLElement>();
 
 	public handleClick = (event) => {
-		this.setState((state) => ({
-			open: !state.open
-		}));
+		if (!this.props.disabled) {
+			this.setState((state) => ({
+				open: !state.open
+			}));
+		}
 	}
 
 	public handleClose = () => {
@@ -182,9 +186,8 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		const height = blockCanvas.height;
 		const x = 0;
 		const y = 0;
-		const drag = false;
 
-		ctx.rect(0, 0, width, height);
+		ctx.rect(x, y, width, height);
 		this.fillBlockCanvas(colorHash);
 
 		const colorPosition = findColorPositionOnCanvas(blockCanvas, colorHash);
@@ -315,8 +318,8 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {value, predefinedColors} = this.props;
-		const {open, pointerLeft, pointerTop, colorHash, color, hashInput} = this.state;
+		const {value, predefinedColors, disabled} = this.props;
+		const {open, pointerLeft, pointerTop, colorHash, hashInput} = this.state;
 
 		return (
 			<>
@@ -327,10 +330,11 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						direction="row"
 						alignItems="center"
 						justify="flex-start"
+						disabled={disabled}
 					>
 						<Dot item={true} color={value} />
 						<Grid item={true}>
-							<StyledIconButton aria-label="Toggle picker">
+							<StyledIconButton aria-label="Toggle picker" disabled={disabled}>
 								<ArrowDropDown />
 							</StyledIconButton>
 						</Grid>

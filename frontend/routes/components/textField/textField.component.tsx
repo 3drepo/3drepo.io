@@ -24,6 +24,7 @@ import { Container, ActionsLine, StyledIconButton, StyledTextField } from './tex
 import { Formik, Field } from 'formik';
 
 interface IProps {
+	className?: string;
 	requiredConfirm?: boolean;
 	validationSchema?: any;
 	onBeforeConfirmChange?: (event) => void;
@@ -109,7 +110,16 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 	)
 
 	public render() {
-		const { onBeforeConfirmChange, requiredConfirm, value, onChange, validationSchema, name, ...props } = this.props;
+		const {
+			onBeforeConfirmChange,
+			requiredConfirm,
+			value,
+			onChange,
+			validationSchema,
+			name,
+			className,
+			...props
+		} = this.props;
 		const { initialValue, currentValue } = this.state;
 		const shouldRenderActions = this.hasValueChanged;
 
@@ -120,7 +130,7 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 				validationSchema={validationSchema}
 				onSubmit={this.saveChange}
 			>
-				<Container>
+				<Container className={className}>
 					<Field name={name} render={({ field, form }) => {
 						const fieldValue = requiredConfirm ? currentValue : value;
 
@@ -132,8 +142,8 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 								inputRef={this.textFieldRef}
 								fullWidth
 								onChange={this.onChange(field)}
-								error={Boolean(form.errors[name])}
-								helperText={form.errors[name]}
+								error={Boolean(form.errors[name] || props.error)}
+								helperText={form.errors[name] || props.helperText}
 							/>
 						);
 					}} />

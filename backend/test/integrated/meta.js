@@ -180,4 +180,11 @@ describe("Metadata", function () {
 			});
 	});
 
+	it("retrieving metadata fields should succeed", function(done) {
+		agent.get(`/${username}/${model}/meta/keys`)
+			.expect(200, function(err, res) {
+				done(err);
+			});
+	});
+
 });

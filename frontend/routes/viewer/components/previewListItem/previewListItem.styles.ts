@@ -28,7 +28,7 @@ export const MenuItemContainer = styled(MenuItem)`
 
   && {
     background-color: ${(props: any) => props.expired ? COLOR.WARNING_LIGHT : COLOR.WHITE};
-    height: auto;
+    height: 94px;
     border-bottom: 1px solid ${COLOR.BLACK_6};
     padding: 0;
 
@@ -74,10 +74,12 @@ export const Name = styled(Typography)`
 
 export const Container = styled.div`
   display: flex;
-  height: 80px;
+  height: inherit;
   overflow: hidden;
   flex: 1;
+  box-sizing: border-box;
   padding: 7px 40px 7px 7px;
+  position: relative;
 `;
 
 export const Thumbnail = styled.img`
@@ -110,5 +112,14 @@ export const RoleIndicator = styled.div`
   border: 1px solid ${(props: any) => props.color ? COLOR.GRAY : COLOR.BLACK_20};
   height: auto;
   margin-right: 7px;
-  width: 5px;
+  width: ${(props: any) => props.width || `5px`};
+` as any;
+
+export const Actions = styled.div`
+  position: absolute;
+  right: 40px;
+  height: 100%;
+  top: 0;
+  display: flex;
+  align-items: center;
 `;

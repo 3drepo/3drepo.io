@@ -835,8 +835,12 @@ class IssueController implements ng.IController {
 
 		const promises = [];
 
+		const revision = this.revision || 'master/head';
+
+		const requestUrl = `${this.account}/${this.model}/revision/${revision}/groups`;
+
 		if (highlightedGroupData) {
-			const highlightPromise = this.apiService.post(`${this.account}/${this.model}/groups`, highlightedGroupData)
+			const highlightPromise = this.apiService.post(requestUrl, highlightedGroupData)
 				.then((highlightedGroupResponse) => {
 					viewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
 				});
@@ -844,7 +848,7 @@ class IssueController implements ng.IController {
 		}
 
 		if (hiddenGroupData) {
-			const hiddenPromise = this.apiService.post(`${this.account}/${this.model}/groups`, hiddenGroupData)
+			const hiddenPromise = this.apiService.post(requestUrl, hiddenGroupData)
 				.then((hiddenGroupResponse) => {
 					viewpoint.hidden_group_id = hiddenGroupResponse.data._id;
 				});
@@ -979,15 +983,19 @@ class IssueController implements ng.IController {
 
 			const promises = [];
 
+			const revision = this.revision || 'master/head';
+
+			const requestUrl = `${this.account}/${this.model}/revision/${revision}/groups`;
+
 			if (highlightedGroupData) {
-				promises.push(this.apiService.post(this.account + '/' + this.model + '/groups', highlightedGroupData)
+				promises.push(this.apiService.post(requestUrl, highlightedGroupData)
 					.then((highlightedGroupResponse) => {
 						this.commentViewpoint.highlighted_group_id = highlightedGroupResponse.data._id;
 					}));
 			}
 
 			if (hiddenGroupData) {
-				promises.push(this.apiService.post(this.account + '/' + this.model + '/groups', hiddenGroupData)
+				promises.push(this.apiService.post(requestUrl, hiddenGroupData)
 					.then((hiddenGroupResponse) => {
 						this.commentViewpoint.hidden_group_id = hiddenGroupResponse.data._id;
 						this.commentViewpoint.hideIfc = this.treeService.getHideIfc();

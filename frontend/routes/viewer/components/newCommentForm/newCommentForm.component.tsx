@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import * as Yup from 'yup';
-import { Formik, Field, Form } from 'formik';
+import { Formik, Field } from 'formik';
 import SaveIcon from '@material-ui/icons/Save';
 import CameraIcon from '@material-ui/icons/AddAPhoto';
 import InputLabel from '@material-ui/core/InputLabel';

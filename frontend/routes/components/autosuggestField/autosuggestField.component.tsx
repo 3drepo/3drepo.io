@@ -18,8 +18,8 @@
 import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
 import MenuItem from '@material-ui/core/MenuItem';
-import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
+import { Highlight } from '../highlight/highlight.component';
 
 import { Container, SuggestionsList, StyledTextField } from './autosuggestField.styles';
 
@@ -28,6 +28,7 @@ interface IProps {
 	label: string;
 	value: string;
 	name: string;
+	placeholder?: string;
 	onChange: (event) => void;
 	onBlur: (event) => void;
 }
@@ -54,6 +55,12 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public componentDidUpdate(prevProps) {
+		if (this.props.value !== prevProps.value) {
+			this.setState({ value: this.props.value });
+		}
+	}
+
 	public getSuggestions = (value) => {
 		const inputValue = value.trim().toLowerCase();
 		const inputLength = inputValue.length;
@@ -64,9 +71,11 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 	}
 
 	public onSuggestionsFetchRequested = ({ value }) => {
-		this.setState({
-			suggestions: this.getSuggestions(value)
-		});
+		if (this.state.value !== value) {
+			this.setState({
+				suggestions: this.getSuggestions(value)
+			});
+		}
 	}
 
 	public onSuggestionsClearRequested = () => {
@@ -74,17 +83,18 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleChange = (event, { newValue }) => {
-		if (this.props.onChange) {
-			this.props.onChange({
-				target: { value: newValue, name: this.props.name }
-			});
-		}
-		this.setState({ value: newValue });
+		this.setState({ value: newValue }, () => {
+			if (this.props.onChange) {
+				this.props.onChange({
+					target: { value: newValue, name: this.props.name }
+				});
+			}
+		});
 	}
 
-	public renderSuggestion = (suggestion, { isHighlighted }) => (
+	public renderSuggestion = (suggestion, { isHighlighted, query }) => (
 		<MenuItem selected={isHighlighted} component="div">
-			{suggestion}
+			<Highlight text={suggestion} search={query} />
 		</MenuItem>
 	)
 
@@ -121,13 +131,33 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 		);
 	}
 
+	public handleKeyUp = () => {
+		const list = document.querySelector('.react-autosuggest__suggestions-list');
+		if (list) {
+			const item = list.querySelector('[aria-selected="true"]') as any;
+			if (item) {
+				list.scrollTo({
+					top: item.offsetTop + item.clientHeight - list.clientHeight,
+					behavior: 'smooth'
+				});
+			}
+		}
+	}
+
+	public handleAutoSuggestMount = (autoSuggestComponent) => {
+		if (autoSuggestComponent && autoSuggestComponent.input) {
+			autoSuggestComponent.input.addEventListener('keyup', this.handleKeyUp);
+		}
+	}
+
 	public render() {
 		const { value, suggestions } = this.state;
-		const { label, onBlur, name } = this.props;
+		const { label, onBlur, name, placeholder } = this.props;
 
 		return (
 			<Container>
 				<Autosuggest
+					ref={this.handleAutoSuggestMount}
 					suggestions={suggestions}
 					onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
 					onSuggestionsClearRequested={this.onSuggestionsClearRequested}
@@ -139,6 +169,7 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 						value,
 						name,
 						onBlur,
+						placeholder,
 						onChange: this.handleChange,
 						inputRef: (node) => {
 							this.popperNode = node;

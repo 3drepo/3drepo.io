@@ -11,6 +11,8 @@ import Pins from '@material-ui/icons/PinDrop';
 import { DATA_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 import { COLOR, PIN_COLORS } from '../styles';
 
+export const RISK_PANEL_NAME = 'risk';
+
 export const LEVELS = {
 	VERY_LOW: 0,
 	LOW: 1,

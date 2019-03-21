@@ -1,9 +1,9 @@
 import { mapValues } from 'lodash';
 
-import { hexToRgba, hexToPinColor } from '../helpers/colors';
+import { hexToRgba, hexToGLColor } from '../helpers/colors';
 
-const BLACK = '#00000';
-const WHITE = '#ffffff';
+export const BLACK = '#00000';
+export const WHITE = '#ffffff';
 
 export const COLOR = {
 	PRIMARY_MAIN: '#0c2f54',
@@ -24,6 +24,7 @@ export const COLOR = {
 	BLACK_30: hexToRgba(BLACK, .3),
 	BLACK_40: hexToRgba(BLACK, .4),
 	BLACK_50: hexToRgba(BLACK, .5),
+	BLACK_54: hexToRgba(BLACK, .54),
 	BLACK_60: hexToRgba(BLACK, .6),
 	BLACK_80: hexToRgba(BLACK, .8),
 	BLACK_87: hexToRgba(BLACK, .87),
@@ -45,6 +46,7 @@ export const COLOR = {
 	LEMON_CHIFFON: '#f0d92e',
 	YELLOW: '#ffff36',
 	LIGHT_YELLOW: '#edd100',
+	POMEGRANATE: '#F44336',
 	NEGATIVE: 'rgba(234, 57, 57, 1)',
 	NEGATIVE_87: 'rgba(234, 57, 57, 0.87)'
 };
@@ -63,4 +65,4 @@ export const PIN_COLORS = mapValues({
 	LIGHT_GREEN: COLOR.LIGHT_GREEN,
 	LEMON_CHIFFON: COLOR.LEMON_CHIFFON,
 	LIGHT_YELLOW: COLOR.LIGHT_YELLOW
-}, hexToPinColor);
+}, hexToGLColor);

@@ -21,7 +21,7 @@ import { SnackbarProps } from '@material-ui/core/Snackbar';
 
 export const { Types: SnackbarTypes, Creators: SnackbarActions } = createActions({
 	show: ['config']
-}, { prefix: 'SNACKBAR_' });
+}, { prefix: 'SNACKBAR/' });
 
 export const INITIAL_STATE = {
 	snackConfig: {} as SnackbarProps,
