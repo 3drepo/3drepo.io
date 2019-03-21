@@ -88,15 +88,12 @@ function sendQueueFailedEmail(err) {
 	}
 }
 
-async function sendVerifyUserEmail(to, data) {
-
-	const User = require("../models/user");
+function sendVerifyUserEmail(to, data) {
 
 	data.url = getURL("verify", {token: data.token, username: data.username, pay: data.pay});
 
-	const user = await User.findByUserName(data.username);
-
-	data.user = utils.ucFirst(user.customData.firstName);
+	data.user = utils.ucFirst(data.firstName);
+	
 	if(!data.url) {
 		return rejectNoUrl("verify");
 	}
