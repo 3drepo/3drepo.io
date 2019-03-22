@@ -20,6 +20,9 @@ import { getState } from '../../../helpers/migration';
 import { selectMemory } from '../../../modules/viewer';
 
 declare const Viewer: any;
+export const INITIAL_HELICOPTER_SPEED = 1;
+export const MIN_HELICOPTER_SPEED = -99;
+export const MAX_HELICOPTER_SPEED = 99;
 
 export class ViewerService {
 
@@ -44,7 +47,7 @@ export class ViewerService {
 	private Viewer: any;
 	private model: string;
 	private account: string;
-	private heliSpeed: number = 1;
+	private heliSpeed: number = INITIAL_HELICOPTER_SPEED;
 
 	private stats: boolean = false;
 

@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createSelector } from 'reselect';
-import { values } from 'lodash';
 
 export const selectViewerDomain = (state) => Object.assign({}, state.viewer);
 
@@ -53,4 +52,12 @@ export const selectMemory = createSelector(
 
 export const selectFarPlaneSamplingPoints = createSelector(
 	selectSettings, (state) => state.farPlaneSamplingPoints
+);
+
+export const selectNavigationMode = createSelector(
+	selectViewerDomain, (state) => state.navigationMode
+);
+
+export const selectHelicopterSpeed = createSelector(
+	selectViewerDomain, (state) => state.helicopterSpeed
 );

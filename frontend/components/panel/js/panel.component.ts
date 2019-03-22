@@ -159,8 +159,6 @@ class PanelController implements ng.IController {
 	}
 
 	public togglePanel = (contentType: string) => {
-		console.log('toggle', contentType);
-		console.log('toggle this', this);
 		// Get the content item
 		const contentIndex = this.contentItems.findIndex(({ type }) => type === contentType);
 

@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { DEFAULT_SETTINGS } from '../../constants/viewer';
+import { DEFAULT_SETTINGS, VIEWER_NAV_MODES } from '../../constants/viewer';
 
 export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	waitForViewer: [],
@@ -29,12 +29,21 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	getScreenshot: [],
 	updateSettings: ['settings'],
 	saveSettings: ['settings'],
-	loadSettings: []
+	loadSettings: [],
+	setNavigationMode: ['mode'],
+	setNavigationModeSuccess: ['mode'],
+	initialiseToolbar: [],
+	setHelicopterSpeed: ['speed'],
+	resetHelicopterSpeed: [],
+	increaseHelicopterSpeed: [],
+	decreaseHelicopterSpeed: []
 }, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {
 	settings: window.localStorage.getItem('visualSettings') ?
-			JSON.parse(window.localStorage.getItem('visualSettings')) : DEFAULT_SETTINGS
+			JSON.parse(window.localStorage.getItem('visualSettings')) : DEFAULT_SETTINGS,
+	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
+	helicopterSpeed: null
 };
 
 const updateSettings = (state = INITIAL_STATE, {settings}) => {
@@ -42,6 +51,16 @@ const updateSettings = (state = INITIAL_STATE, {settings}) => {
 	return {...state, settings};
 };
 
+const setNavigationModeSuccess = (state = INITIAL_STATE, {mode}) => {
+	return {...state, navigationMode: mode};
+};
+
+const setHelicopterSpeed = (state = INITIAL_STATE, {speed}) => {
+	return {...state, helicopterSpeed: speed};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
-	[ViewerTypes.UPDATE_SETTINGS] : updateSettings
+	[ViewerTypes.UPDATE_SETTINGS] : updateSettings,
+	[ViewerTypes.SET_NAVIGATION_MODE_SUCCESS] : setNavigationModeSuccess,
+	[ViewerTypes.SET_HELICOPTER_SPEED] : setHelicopterSpeed
 });
