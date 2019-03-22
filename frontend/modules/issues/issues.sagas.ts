@@ -80,13 +80,13 @@ const createGroupData = (name, nodes) => {
 	return nodes.length === 0 ? null : groupData;
 };
 
-const createGroup = (issue, objectInfo, teamspace, model) => {
+const createGroup = (issue, objectInfo, teamspace, model, revision) => {
 	const highlightedGroupData = createGroupData(issue.name, objectInfo.highlightedNodes);
 	const hiddenGroupData = createGroupData(issue.name, objectInfo.hiddenNodes);
 
 	return Promise.all([
-		highlightedGroupData && API.createGroup(teamspace, model, highlightedGroupData),
-		hiddenGroupData && API.createGroup(teamspace, model, hiddenGroupData)
+		highlightedGroupData && API.createGroup(teamspace, model, revision, highlightedGroupData),
+		hiddenGroupData && API.createGroup(teamspace, model, revision, hiddenGroupData)
 	]);
 };
 
@@ -119,7 +119,7 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 		issueData.rev_id = revision;
 
 		if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
-			const [highlightedGroup, hiddenGroup] = yield createGroup(issueData, objectInfo, teamspace, model);
+			const [highlightedGroup, hiddenGroup] = yield createGroup(issueData, objectInfo, teamspace, model, revision);
 
 			if (highlightedGroup) {
 				viewpoint.highlighted_group_id = highlightedGroup.data._id;
