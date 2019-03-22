@@ -18,13 +18,25 @@ export const StyledIconButton = styled(IconButton)`
     }
   }
 
-  &.panelButton {
+  &.panelButton, &.toolbarSubButton {
     background-color: ${COLOR.REGENT_GRAY};
     box-shadow: 0 3px 3px ${COLOR.BLACK_16};
     margin-bottom: 20px;
 
     &:hover {
       background-color: ${COLOR.REGENT_GRAY};
+    }
+  }
+
+  &.toolbarSubButton {
+    margin-bottom: 10px;
+  }
+
+  &.toolbarSpecificButton {
+    background-color: ${COLOR.SUNGLOW};
+
+    &:hover {
+      background-color: ${COLOR.SUNGLOW};
     }
   }
 ` as any;

@@ -29,3 +29,12 @@ export const Container = styled.div`
   justify-content: center;
   align-items: center;
 `;
+
+export const ButtonWrapper = styled.div`
+  position: relative;
+`;
+
+export const Submenu = styled.div`
+  position: absolute;
+  bottom: 100%;
+`;

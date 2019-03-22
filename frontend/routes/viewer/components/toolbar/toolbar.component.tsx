@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+import Fade from '@material-ui/core/Fade';
 import HomeIcon from '@material-ui/icons/Home';
 import ClipIcon from '@material-ui/icons/Crop';
 import FocusIcon from '@material-ui/icons/CenterFocusStrong';
@@ -24,39 +25,161 @@ import HideIcon from '@material-ui/icons/VisibilityOff';
 import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
 import MetadataIcon from '@material-ui/icons/Info';
 import TurntableIcon from '@material-ui/icons/Redo';
+
+import IncreaseIcon from '@material-ui/icons/Add';
+import DecreaseIcon from '@material-ui/icons/Remove';
+import ResetIcon from '@material-ui/icons/Replay';
+
 import { Helicopter, Ruler } from '../../../components/fontAwesomeIcon';
 
-import { Container } from './toolbar.styles';
+import { Container, ButtonWrapper, Submenu } from './toolbar.styles';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
+
+import { VIEWER_NAV_MODES } from '../../../../constants/viewer';
+import { renderWhenTrue } from '../../../../helpers/rendering';
+import {
+	INITIAL_HELICOPTER_SPEED, MIN_HELICOPTER_SPEED, MAX_HELICOPTER_SPEED
+} from '../../../../components/viewer/js/viewer.service';
 
 const MeasureIcon = () => <Ruler IconProps={{ className: 'fontSizeSmall' }} />;
 const HelicopterIcon = () => <Helicopter IconProps={{ className: 'fontSizeSmall' }} />;
 
 interface IProps {
+	navigationMode: string;
+	helicopterSpeed: number;
+	setNavigationMode: (mode) => void;
+	initialiseToolbar: () => void;
+	increaseHelicopterSpeed: () => void;
+	decreaseHelicopterSpeed: () => void;
+	resetHelicopterSpeed: () => void;
 }
 
-export class Toolbar extends React.PureComponent<IProps, any> {
+interface IState {
+	activeButton: string;
+	activeSubMenu: string;
+}
+
+export class Toolbar extends React.PureComponent<IProps, IState> {
+	public state = {
+		activeButton: '',
+		activeSubMenu: ''
+	};
+
+	public componentDidMount() {
+		this.props.initialiseToolbar();
+	}
+
 	public onExtentClick = () => {
 		console.log('on click');
 	}
 
+	public onNavigationModeClick = (mode) => {
+		this.props.setNavigationMode(mode);
+		this.setState({
+			activeSubMenu: ''
+		});
+	}
+
+	public handleShowSubmenu = (label) => {
+		this.setState((prevState) => ({
+			activeSubMenu: prevState.activeSubMenu !== label ? label : ''
+		}));
+	}
+
 	public get toolbarList() {
 		return [
-			{ label: 'Extent', Icon: HomeIcon, action: this.onExtentClick },
-			{ label: 'Turntable', Icon: TurntableIcon, action: this.onExtentClick },
-			{ label: 'Helicopter', Icon: HelicopterIcon, action: this.onExtentClick },
-			{ label: 'Show All', Icon: ShowAllIcon, action: this.onExtentClick },
-			{ label: 'Hide', Icon: HideIcon, action: this.onExtentClick },
-			{ label: 'Isolate', Icon: IsolateIcon, action: this.onExtentClick, active: true },
-			{ label: 'Focus', Icon: FocusIcon, action: this.onExtentClick },
-			{ label: 'Clip', Icon: ClipIcon, action: this.onExtentClick },
-			{ label: 'Measure', Icon: MeasureIcon, action: this.onExtentClick },
-			{ label: 'BIM', Icon: MetadataIcon, action: this.onExtentClick }
+			{ label: 'Extent', Icon: HomeIcon, action: this.onExtentClick, show: true },
+			{
+				label: 'Turntable',
+				Icon: TurntableIcon,
+				action: () => this.handleShowSubmenu('Turntable'),
+				show: this.props.navigationMode === VIEWER_NAV_MODES.TURNTABLE,
+				subMenu: [
+					{
+						label: 'Helicopter',
+						Icon: HelicopterIcon,
+						action: () => this.onNavigationModeClick(VIEWER_NAV_MODES.HELICOPTER),
+						show: true
+					}
+				]
+			},
+			{
+				label: 'Helicopter',
+				Icon: HelicopterIcon,
+				action: () => this.handleShowSubmenu('Helicopter'),
+				show: this.props.navigationMode === VIEWER_NAV_MODES.HELICOPTER,
+				subMenu: [
+					{
+						label: `Reset speed to ${INITIAL_HELICOPTER_SPEED}`,
+						Icon: ResetIcon,
+						action: this.props.resetHelicopterSpeed,
+						specificOption: true
+					},
+					{
+						label: `Increase speed to ${this.props.helicopterSpeed + 1}`,
+						Icon: IncreaseIcon,
+						action: this.props.increaseHelicopterSpeed,
+						specificOption: true,
+						disabled: this.props.helicopterSpeed === MAX_HELICOPTER_SPEED
+					},
+					{
+						label: `Decrease speed to ${this.props.helicopterSpeed - 1}`,
+						Icon: DecreaseIcon,
+						action: this.props.decreaseHelicopterSpeed,
+						specificOption: true,
+						disabled: this.props.helicopterSpeed === MIN_HELICOPTER_SPEED
+					},
+					{
+						label: 'Turntable',
+						Icon: TurntableIcon,
+						action: () => this.onNavigationModeClick(VIEWER_NAV_MODES.TURNTABLE)
+					}
+				]
+			},
+			{ label: 'Show All', Icon: ShowAllIcon, action: this.onExtentClick, show: true },
+			{ label: 'Hide', Icon: HideIcon, action: this.onExtentClick, show: true  },
+			{ label: 'Isolate', Icon: IsolateIcon, action: this.onExtentClick, show: true, active: true },
+			{ label: 'Focus', Icon: FocusIcon, action: this.onExtentClick, show: true },
+			{ label: 'Clip', Icon: ClipIcon, action: this.onExtentClick, show: true },
+			{ label: 'Measure', Icon: MeasureIcon, action: this.onExtentClick, show: true },
+			{ label: 'BIM', Icon: MetadataIcon, action: this.onExtentClick, show: true }
 		];
 	}
 
-	public renderButtons = () => this.toolbarList.map((buttonProps, index) =>
-		<TooltipButton key={index} className="toolbarButton" {...buttonProps} />)
+	public renderButtons = () => {
+		return this.toolbarList.map((
+			{label, Icon, action, active = false, show = true, subMenu = []}, index
+			) => renderWhenTrue(() => (
+			<ButtonWrapper key={Math.random()}>
+				<TooltipButton
+					className="toolbarButton"
+					label={label}
+					Icon={Icon}
+					active={active}
+					action={action}
+				/>
+				{this.renderSubmenu(subMenu, label)}
+			</ButtonWrapper>)
+		)(show));
+	}
+
+	public renderSubmenu = (subMenu, label) => renderWhenTrue(() => {
+		const condition = this.state.activeSubMenu === label;
+		return (
+			<Fade in={condition}>
+				<Submenu>{subMenu.map((subButton, subKey) => (
+					<TooltipButton
+						key={subKey}
+						className={`toolbarButton toolbarSubButton ${subButton.specificOption && 'toolbarSpecificButton'}`}
+						label={subButton.label}
+						Icon={subButton.Icon}
+						action={subButton.action}
+						disabled={subButton.disabled} />)
+					)}
+				</Submenu>
+			</Fade>
+		);
+	})(subMenu.length && this.state.activeSubMenu === label)
 
 	public render() {
 		return (
