@@ -29,6 +29,7 @@ export const COLOR = {
 	BLACK_80: hexToRgba(BLACK, .8),
 	BLACK_87: hexToRgba(BLACK, .87),
 
+	DARK_GRAY: '#bfbfbf',
 	GRAY: '#f0f0f0',
 	GRAY_60: 'rgba(189, 189, 189, .6)',
 	LIGHT_GRAY: '#fafafa',
@@ -52,6 +53,7 @@ export const COLOR = {
 };
 
 export const PIN_COLORS = mapValues({
+	DARK_GRAY: COLOR.DARK_GRAY,
 	BLUE: COLOR.PRIMARY_MAIN,
 	YELLOW: COLOR.YELLOW,
 	RED: COLOR.RED,

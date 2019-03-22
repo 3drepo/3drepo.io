@@ -14,6 +14,7 @@ import { COLOR, PIN_COLORS } from '../styles';
 export const RISK_PANEL_NAME = 'risk';
 
 export const LEVELS = {
+	UNSET: -1,
 	VERY_LOW: 0,
 	LOW: 1,
 	MODERATE: 2,
@@ -22,6 +23,7 @@ export const LEVELS = {
 };
 
 const LEVELS_LIST = [
+	{ value: LEVELS.UNSET, name: 'UNSET' },
 	{ value: LEVELS.VERY_LOW, name: 'Very Low' },
 	{ value: LEVELS.LOW, name: 'Low' },
 	{ value: LEVELS.MODERATE, name: 'Moderate' },
@@ -77,6 +79,11 @@ export const RISK_LEVELS_ICONS = {
 };
 
 export const RISK_LEVELS_COLOURS = {
+	[LEVELS.UNSET]: {
+		color: COLOR.DARK_GRAY,
+		pinColor: PIN_COLORS.DARK_GRAY,
+		selectedColor: PIN_COLORS.DARK_GRAY
+	},
 	[LEVELS.VERY_LOW]: {
 		color: COLOR.GREEN,
 		pinColor: PIN_COLORS.GREEN,

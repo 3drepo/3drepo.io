@@ -138,9 +138,9 @@ function clean(dbCol, riskToClean) {
 	}
 
 	riskToClean.level_of_risk = calculateLevelOfRisk(riskToClean.likelihood, riskToClean.consequence);
+	riskToClean.residual_level_of_risk = calculateLevelOfRisk(riskToClean.residual_likelihood, riskToClean.residual_consequence);
 
-	if (!isNaN(riskToClean.residual_likelihood) && !isNaN(riskToClean.residual_consequence)) {
-		riskToClean.residual_level_of_risk = calculateLevelOfRisk(riskToClean.residual_likelihood, riskToClean.residual_consequence);
+	if (0 <= riskToClean.residual_level_of_risk) {
 		riskToClean.overall_level_of_risk = riskToClean.residual_level_of_risk;
 	} else {
 		riskToClean.overall_level_of_risk = riskToClean.level_of_risk;
@@ -272,9 +272,9 @@ function addSystemComment(account, model, sessionId, riskId, comments, owner, pr
 }
 
 function calculateLevelOfRisk(likelihood, consequence) {
-	let levelOfRisk = 0;
+	let levelOfRisk = -1;
 
-	if (!isNaN(likelihood) && !isNaN(consequence)) {
+	if (!isNaN(likelihood) && !isNaN(consequence) && 0 <= likelihood && 0 <= consequence) {
 		const score = likelihood + consequence;
 
 		if (6 < score) {

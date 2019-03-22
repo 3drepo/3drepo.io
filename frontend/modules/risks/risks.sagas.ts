@@ -585,6 +585,9 @@ export function* setNewRisk() {
 			consequence: 0,
 			level_of_risk: 0,
 			overall_level_of_risk: 0,
+			residual_likelihood: -1,
+			residual_consequence: -1,
+			residual_level_of_risk: -1,
 			mitigation_status: '',
 			viewpoint: {},
 			owner: currentUser.username

@@ -85,14 +85,14 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				const consequenceChanged = prevProps.values.consequence !== values.consequence;
 
 				if (likelihoodChanged || consequenceChanged) {
-					this.updateLevelOfRisk();
+					this.updateRiskLevel('likelihood', 'consequence', 'level_of_risk');
 				}
 
 				const residualLikelihoodChanged = prevProps.values.residual_likelihood !== values.residual_likelihood;
 				const residualConsequenceChanged = prevProps.values.residual_consequence !== values.residual_consequence;
 
 				if (residualLikelihoodChanged || residualConsequenceChanged) {
-					this.updateResidualLevelOfRisk();
+					this.updateRiskLevel('residual_likelihood', 'residual_consequence', 'residual_level_of_risk');
 				}
 
 				this.autoSave();
@@ -108,21 +108,19 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public updateLevelOfRisk = () => {
+	public updateRiskLevel = async (likelihoodPath, consequencePath, riskLevelPath) => {
 		const { formik } = this.props;
-		const { likelihood, consequence } = formik.values;
-		const levelOfRisk = calculateLevelOfRisk(likelihood, consequence);
-		formik.setFieldValue('level_of_risk', levelOfRisk);
-	}
-
-	public updateResidualLevelOfRisk = () => {
-		const { formik } = this.props;
-		const { level_of_risk, residual_likelihood, residual_consequence } = formik.values;
-		const residualLevelOfRisk = calculateLevelOfRisk(residual_likelihood, residual_consequence);
-		const overallLevelOfRisk = (undefined !== residual_likelihood && undefined !== residual_consequence) ?
-			residualLevelOfRisk : level_of_risk;
-		formik.setFieldValue('residual_level_of_risk', residualLevelOfRisk);
-		formik.setFieldValue('overall_level_of_risk', overallLevelOfRisk);
+		let levelsOfRisk = {
+			level_of_risk: formik.values.level_of_risk,
+			residual_level_of_risk: formik.values.residual_level_of_risk
+		};
+		levelsOfRisk[riskLevelPath] = calculateLevelOfRisk(formik.values[likelihoodPath], formik.values[consequencePath]);
+		formik.setFieldValue(riskLevelPath, levelsOfRisk[riskLevelPath]);
+		if (0 <= levelsOfRisk.residual_level_of_risk) {
+			formik.setFieldValue('overall_level_of_risk', levelsOfRisk.residual_level_of_risk);
+		} else {
+			formik.setFieldValue('overall_level_of_risk', levelsOfRisk.level_of_risk);
+		}
 	}
 
 	public autoSave = debounce(() => {
