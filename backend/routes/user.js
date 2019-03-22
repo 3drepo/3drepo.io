@@ -45,10 +45,49 @@ router.post("/apikey", middlewares.loggedIn, generateApiKey, onSuccess);
  * */
 router.delete("/apikey", middlewares.loggedIn, deleteApiKey, onSuccess);
 
+/**
+ * @api {get} /starredMeta Gets the starred metadata tags for the logged user
+ * @apiName GetStarredMetadataTags
+ * @apiGroup User
+ * */
 router.get("/starredMeta", middlewares.loggedIn, getStarredMetadataTags, onSuccess);
 
+/**
+ * @api {post} /starredMeta Adds a starred metadata tag for the logged user, if the tag
+ * @apiName StarMetadataTags
+ * @apiGroup User
+ *
+ * @apiParam  {String} tag The tag to be starred
+ * @apiParamExample {json} Input
+ *    {
+ *      "tag": "material"
+ *    }
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *	  {}
+ *
+ * @apiError 400 BadRequest The request was malformed
+ * */
 router.post("/starredMeta", middlewares.loggedIn, appendStarredMetadataTag, onSuccess);
 
+/**
+ * @api {delete} /starredMeta removes a starred metadata tag for the logged user if the tag exists
+ * @apiName UnstarMetadataTags
+ * @apiGroup User
+ *
+ * @apiParam  {String} tag The tag to be starred
+ * @apiParamExample {json} Input
+ *    {
+ *      "tag": "material"
+ *    }
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *	  {}
+ *
+ * @apiError 400 BadRequest The request was malformed
+ * */
 router.delete("/starredMeta", middlewares.loggedIn, deleteStarredMetadataTag, onSuccess);
 
 async function getProfile(req, res, next) {
