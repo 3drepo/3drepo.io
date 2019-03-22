@@ -33,6 +33,7 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	setNavigationMode: ['mode'],
 	setNavigationModeSuccess: ['mode'],
 	initialiseToolbar: [],
+	goToExtent: [],
 	setHelicopterSpeed: ['speed'],
 	resetHelicopterSpeed: [],
 	increaseHelicopterSpeed: [],

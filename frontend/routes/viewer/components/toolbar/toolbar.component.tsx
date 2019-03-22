@@ -47,6 +47,7 @@ const HelicopterIcon = () => <Helicopter IconProps={{ className: 'fontSizeSmall'
 interface IProps {
 	navigationMode: string;
 	helicopterSpeed: number;
+	goToExtent: () => void;
 	setNavigationMode: (mode) => void;
 	initialiseToolbar: () => void;
 	increaseHelicopterSpeed: () => void;
@@ -69,9 +70,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		this.props.initialiseToolbar();
 	}
 
-	public onExtentClick = () => {
-		console.log('on click');
-	}
+	public onClick = () => {};
 
 	public onNavigationModeClick = (mode) => {
 		this.props.setNavigationMode(mode);
@@ -88,7 +87,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 	public get toolbarList() {
 		return [
-			{ label: 'Extent', Icon: HomeIcon, action: this.onExtentClick, show: true },
+			{ label: 'Extent', Icon: HomeIcon, action: this.props.goToExtent, show: true },
 			{
 				label: 'Turntable',
 				Icon: TurntableIcon,
@@ -136,26 +135,25 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 					}
 				]
 			},
-			{ label: 'Show All', Icon: ShowAllIcon, action: this.onExtentClick, show: true },
-			{ label: 'Hide', Icon: HideIcon, action: this.onExtentClick, show: true  },
-			{ label: 'Isolate', Icon: IsolateIcon, action: this.onExtentClick, show: true, active: true },
-			{ label: 'Focus', Icon: FocusIcon, action: this.onExtentClick, show: true },
-			{ label: 'Clip', Icon: ClipIcon, action: this.onExtentClick, show: true },
-			{ label: 'Measure', Icon: MeasureIcon, action: this.onExtentClick, show: true },
-			{ label: 'BIM', Icon: MetadataIcon, action: this.onExtentClick, show: true }
+			{ label: 'Show All', Icon: ShowAllIcon, action: this.onClick, show: true },
+			{ label: 'Hide', Icon: HideIcon, action: this.onClick, show: true  },
+			{ label: 'Isolate', Icon: IsolateIcon, action: this.onClick, show: true },
+			{ label: 'Focus', Icon: FocusIcon, action: this.onClick, show: true },
+			{ label: 'Clip', Icon: ClipIcon, action: this.onClick, show: true },
+			{ label: 'Measure', Icon: MeasureIcon, action: this.onClick, show: true },
+			{ label: 'BIM', Icon: MetadataIcon, action: this.onClick, show: true }
 		];
 	}
 
 	public renderButtons = () => {
 		return this.toolbarList.map((
-			{label, Icon, action, active = false, show = true, subMenu = []}, index
+			{label, Icon, action, show = true, subMenu = []}, index
 			) => renderWhenTrue(() => (
-			<ButtonWrapper key={Math.random()}>
+			<ButtonWrapper key={index}>
 				<TooltipButton
 					className="toolbarButton"
 					label={label}
 					Icon={Icon}
-					active={active}
 					action={action}
 				/>
 				{this.renderSubmenu(subMenu, label)}
