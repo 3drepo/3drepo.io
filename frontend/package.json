@@ -57,6 +57,7 @@
     "history": "4.7.1",
     "luxon": "1.10.0",
     "material-design-icons": "3.0.1",
+    "material-ui-pickers": "2.0.5",
     "ngclipboard": "2.0.0",
     "query-string": "6.2.0",
     "ramda": "0.26.1",

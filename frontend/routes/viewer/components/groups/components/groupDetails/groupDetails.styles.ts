@@ -23,55 +23,55 @@ import { COLOR } from '../../../../../../styles';
 import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
 
 export const Container = styled.div`
-  display: flex;
-  flex-direction: column;
+	display: flex;
+	flex-direction: column;
 `;
 
 export const FieldsRow = styled.div`
-  display: flex;
-  align-items: center;
-  margin-top: 10px;
+	display: flex;
+	align-items: center;
+	margin-top: 10px;
 `;
 
 export const StyledTextField = styled(TextField)`
-  width: 100%;
+	width: 100%;
 
-  && {
-    margin: 0 25px 0 0;
-  }
+	&& {
+		margin: 0 25px 0 0;
+	}
 `;
 
 export const LongLabel = styled.div`
-  white-space: nowrap;
+	white-space: nowrap;
 `;
 
 export const StyledFormControl = styled(FormControl)`
-  width: 100%;
+	width: 100%;
 
-  && {
-    margin: 0;
-  }
+	&& {
+		margin: 0;
+	}
 `;
 
 export const Actions = styled.div`
-  display: flex;
-  width: 100%;
-  align-items: center;
+	display: flex;
+	width: 100%;
+	align-items: center;
 `;
 
 export const ColorPickerWrapper = styled.div`
-  display: inline;
+	display: inline;
 `;
 
 export const Description = styled(TextField)`
-  margin-bottom: -16px;
+	margin-bottom: -16px;
 `;
 
 export const StyledIcon = styled.span`
-  color: ${(props) => props.color ? props.color : COLOR.BLACK_54};
-  font-size: 18px;
+	color: ${(props) => props.color ? props.color : COLOR.BLACK_54};
+	font-size: 18px;
 `;
 
 export const Content = styled(ViewerPanelContent)`
-  flex: 1;
+	flex: 1;
 `;
