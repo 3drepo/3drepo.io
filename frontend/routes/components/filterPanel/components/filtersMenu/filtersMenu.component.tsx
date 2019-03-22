@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { MuiPickersUtilsProvider, DatePicker } from 'material-ui-pickers';
+import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import LuxonUtils from '@date-io/luxon';
 
 import { CopyToClipboard } from 'react-copy-to-clipboard';

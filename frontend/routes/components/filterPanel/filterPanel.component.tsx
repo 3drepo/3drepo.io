@@ -19,12 +19,14 @@ import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
 import * as dayjs from 'dayjs';
 import { omit } from 'lodash';
-
-import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import CollapseIcon from '@material-ui/icons/ExpandMore';
 import ExpandIcon from '@material-ui/icons/ChevronRight';
+
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
+
+import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { Highlight } from '../highlight/highlight.component';
 import { ENTER_KEY } from '../../../constants/keys';
 import { FiltersMenu } from './components/filtersMenu/filtersMenu.component';
@@ -38,7 +40,8 @@ import {
 	FiltersButton,
 	ButtonContainer,
 	StyledIconButton,
-	StyledMoreIcon,
+	MoreIcon,
+	CopyIcon,
 	ButtonWrapper
 } from './filterPanel.styles';
 import { compareStrings } from '../../../helpers/searching';
@@ -77,17 +80,20 @@ interface IState {
 	filtersOpen: boolean;
 }
 
-const MenuButton = ({ IconProps, Icon, ...props }) => (
+const getMenuButton = (InitialIcon) => ({ IconProps, Icon, ...props }) => (
 	<ButtonWrapper>
 	  <StyledIconButton
 	    {...props}
 	    aria-label="Show filters menu"
 	    aria-haspopup="true"
 	  >
-	    <StyledMoreIcon {...IconProps} />
+			<InitialIcon {...IconProps} />
 	  </StyledIconButton>
 	</ButtonWrapper>
 );
+
+const CopyButton = getMenuButton(CopyIcon);
+const MoreButton = getMenuButton(MoreIcon);
 
 const getSuggestionValue = (suggestion) => suggestion.name;
 
@@ -381,10 +387,18 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public renderCopyButton = renderWhenTrue(() => (
+		<CopyToClipboard text={JSON.stringify(this.props.selectedFilters)}>
+			<ButtonContainer>
+				<CopyButton IconProps={{size: 'small'}} />
+			</ButtonContainer>
+		</CopyToClipboard>
+	));
+
 	public renderFiltersMenuButton = renderWhenTrue(() => (
 		<ButtonContainer>
 			<ButtonMenu
-				renderButton={MenuButton}
+				renderButton={MoreButton}
 				renderContent={this.renderFiltersMenu}
 				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
@@ -394,12 +408,13 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	));
 
 	public render() {
-		const { value, suggestions } = this.state;
+		const { value, suggestions, selectedFilters, filtersOpen } = this.state;
+		const { hideMenu, filters } = this.props;
 		return (
-			<Container filtersOpen={this.state.selectedFilters.length && this.state.filtersOpen}>
+			<Container filtersOpen={selectedFilters.length && filtersOpen}>
 				{this.renderSelectedFilters()}
 
-				<InputContainer menuHidden={this.props.hideMenu}>
+				<InputContainer menuHidden={hideMenu}>
 					<Autosuggest
 						ref={this.handleAutoSuggestMount}
 						suggestions={suggestions}
@@ -420,7 +435,8 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 						renderSuggestionsContainer={this.renderSuggestionsContainer}
 						onSuggestionSelected={this.handleNewFilterSubmit}
 					/>
-					{this.renderFiltersMenuButton(!this.props.hideMenu)}
+					{this.renderCopyButton(!hideMenu && !filters.length)}
+					{this.renderFiltersMenuButton(!hideMenu && filters.length)}
 				</InputContainer>
 
 			</Container>

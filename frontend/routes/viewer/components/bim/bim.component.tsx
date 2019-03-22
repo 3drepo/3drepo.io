@@ -16,15 +16,25 @@
  */
 
 import * as React from 'react';
-import CopyFile from '@material-ui/icons/FileCopyOutlined';
+import { IconButton } from '@material-ui/core';
+import InfoIcon from '@material-ui/icons/Info';
+import MoreIcon from '@material-ui/icons/MoreVert';
+import SearchIcon from '@material-ui/icons/Search';
+import CancelIcon from '@material-ui/icons/Cancel';
 
-import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { Container } from './bim.styles';
 import { FilterPanel, ISelectedFilter } from '../../../components/filterPanel/filterPanel.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { IMetaRecord } from '../../../../modules/bim/bim.redux';
 import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '../../../../constants/bim';
-import { MenuList } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import {
+	MenuList,
+	StyledListItem,
+	StyledItemText
+} from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
+import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { Container } from './bim.styles';
+import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 
 interface IProps {
 	className: string;
@@ -32,7 +42,7 @@ interface IProps {
 	model: string;
 	isPending: boolean;
 	metadata: IMetaRecord[];
-	searchEnabled: string;
+	searchEnabled: boolean;
 	showStarred: boolean;
 	selectedFilters: ISelectedFilter[];
 	starredMetadataKeys: string[];
@@ -41,6 +51,16 @@ interface IProps {
 	addMetaRecordToStarred?: (key) => void;
 	removeMetaRecordFromStarred?: (key) => void;
 }
+
+const MenuButton = ({ IconProps, Icon, ...props }) => (
+	<IconButton
+		{...props}
+		aria-label="Show filters menu"
+		aria-haspopup="true"
+	>
+		<MoreIcon {...IconProps} />
+	</IconButton>
+);
 
 export class Bim extends React.PureComponent<IProps, any> {
 	get menuActionsMap() {
@@ -67,6 +87,10 @@ export class Bim extends React.PureComponent<IProps, any> {
 		/>
 	));
 
+	public componentDidUpdate() {
+		console.log(this.props);
+	}
+
 	public render() {
 		return (
 			<ViewerPanel
@@ -81,11 +105,40 @@ export class Bim extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	private getTitleIcon = () => <CopyFile />;
-
-	private renderList = () => {
-		return <Container>Test</Container>;
+	public getSearchButton = () => {
+		if (this.props.searchEnabled) {
+			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
+		}
+		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
 	}
+
+	private handleFilterChange = (selectedFilters) => {
+		this.props.setComponentState({ selectedFilters });
+	}
+
+	private getTitleIcon = () => <InfoIcon />;
+
+	private getMenuButton = () => (
+		<ButtonMenu
+			renderButton={MenuButton}
+			renderContent={this.renderActionsMenu}
+			PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+			PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
+			ButtonProps={{ disabled: false }}
+		/>
+	)
+
+	private handleCloseSearchMode = () => {
+		this.props.setComponentState({ searchEnabled: false, selectedFilters: [] });
+	}
+
+	private handleOpenSearchMode = () => this.props.setComponentState({ searchEnabled: true });
+
+	private renderList = () => (
+		<ViewerPanelContent className="height-catcher">
+			<Container>Test</Container>
+		</ViewerPanelContent>
+	)
 
 	private renderActionsMenu = () => (
 		<MenuList>
@@ -98,16 +151,11 @@ export class Bim extends React.PureComponent<IProps, any> {
 	)
 
 	private renderActions = () => {
-		if (this.props.showDetails) {
-			if (!this.props.activeRiskId || this.state.filteredRisks.length < 2) {
-				return [];
-			}
-			return [{ Button: this.getPrevButton }, { Button: this.getNextButton }];
-		}
-		return [{ Button: this.getSearchButton }, { Button: this.getMenuButton }];
-	}
-
-	private handleFilterChange = (selectedFilters) => {
-		this.props.setComponentState({ selectedFilters });
+		return (
+			<>
+				{this.getSearchButton()}
+				{this.getMenuButton()}
+			</>
+		);
 	}
 }

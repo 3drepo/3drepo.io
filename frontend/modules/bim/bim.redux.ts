@@ -21,7 +21,7 @@ import { ISelectedFilter } from '../../routes/components/filterPanel/filterPanel
 export const { Types: BimTypes, Creators: BimActions } = createActions({
 	fetchMetadata: ['teamspace', 'model'],
 	fetchMetadataSuccess: ['metadata'],
-	setComponentState: ['metadata']
+	setComponentState: ['componentState']
 }, { prefix: 'BIM/' });
 
 export interface IMetaRecord {

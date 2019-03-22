@@ -24,12 +24,14 @@ import {
 	BimActions,
 	selectFilteredMetadata,
 	selectSelectedFilters,
-	selectShowStarred
+	selectShowStarred,
+	selectSearchEnabled
 } from '../../../../modules/bim';
 
 const mapStateToProps = createStructuredSelector({
 	metadata: selectFilteredMetadata,
 	// starredMetadataKeys: selectStarredMetadataKeys,
+	searchEnabled: selectSearchEnabled,
 	selectedFilters: selectSelectedFilters,
 	showStarred: selectShowStarred
 });

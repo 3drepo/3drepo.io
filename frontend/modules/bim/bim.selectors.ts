@@ -33,7 +33,11 @@ export const selectShowStarred = createSelector(
 );
 
 export const selectSelectedFilters = createSelector(
-	selectComponentState, (state) => state.showStarred
+	selectComponentState, (state) => state.selectedFilters
+);
+
+export const selectSearchEnabled = createSelector(
+	selectComponentState, (state) => state.searchEnabled
 );
 
 export const selectFilteredMetadata = createSelector(
