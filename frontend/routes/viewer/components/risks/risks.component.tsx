@@ -344,7 +344,10 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent className="height-catcher">
+			<ViewerPanelContent
+				className="height-catcher"
+				padding="0"
+			>
 				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredRisks.length)}
 				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredRisks.length)}
 				{this.renderRisksList(!!this.state.filteredRisks.length)}
