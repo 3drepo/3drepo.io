@@ -43,6 +43,6 @@ angular
 	.component('risks', wrap(Risks, ['teamspace', 'model', 'revision']))
 	.component('views', wrap(Views, ['teamspace', 'modelId']))
 	.component('groups', wrap(Groups, ['teamspace', 'model', 'revision']))
-	.component('bottomButtons', wrap(Toolbar))
+	.component('bottomButtons', wrap(Toolbar, ['teamspace', 'model']))
 	.component('panelsMenu', wrap(PanelsMenu))
 	.component('panelButton', wrap(PanelButton, ['onClick', 'label', 'icon', 'active', 'type']));

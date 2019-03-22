@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+
 import Fade from '@material-ui/core/Fade';
 import HomeIcon from '@material-ui/icons/Home';
 import ClipIcon from '@material-ui/icons/Crop';
@@ -39,20 +40,22 @@ import { VIEWER_NAV_MODES } from '../../../../constants/viewer';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
 	INITIAL_HELICOPTER_SPEED, MIN_HELICOPTER_SPEED, MAX_HELICOPTER_SPEED
-} from '../../../../components/viewer/js/viewer.service';
+} from '../../../../services/viewer/viewer';
 
 const MeasureIcon = () => <Ruler IconProps={{ className: 'fontSizeSmall' }} />;
 const HelicopterIcon = () => <Helicopter IconProps={{ className: 'fontSizeSmall' }} />;
 
 interface IProps {
+	teamspace: string;
+	model: string;
 	navigationMode: string;
 	helicopterSpeed: number;
 	goToExtent: () => void;
 	setNavigationMode: (mode) => void;
 	initialiseToolbar: () => void;
-	increaseHelicopterSpeed: () => void;
-	decreaseHelicopterSpeed: () => void;
-	resetHelicopterSpeed: () => void;
+	increaseHelicopterSpeed: (teamspace, modelId) => void;
+	decreaseHelicopterSpeed: (teamspace, modelId) => void;
+	resetHelicopterSpeed: (teamspace, modelId, updateDefaultSpeed) => void;
 	showAllNodes: () => void;
 	hideSelectedNodes: () => void;
 	isolateSelectedNodes: () => void;
@@ -114,20 +117,20 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 					{
 						label: `Reset speed to ${INITIAL_HELICOPTER_SPEED}`,
 						Icon: ResetIcon,
-						action: this.props.resetHelicopterSpeed,
+						action: () => this.props.resetHelicopterSpeed(this.props.teamspace, this.props.model, true),
 						specificOption: true
 					},
 					{
 						label: `Increase speed to ${this.props.helicopterSpeed + 1}`,
 						Icon: IncreaseIcon,
-						action: this.props.increaseHelicopterSpeed,
+						action: () => this.props.increaseHelicopterSpeed(this.props.teamspace, this.props.model),
 						specificOption: true,
 						disabled: this.props.helicopterSpeed === MAX_HELICOPTER_SPEED
 					},
 					{
 						label: `Decrease speed to ${this.props.helicopterSpeed - 1}`,
 						Icon: DecreaseIcon,
-						action: this.props.decreaseHelicopterSpeed,
+						action: () => this.props.decreaseHelicopterSpeed(this.props.teamspace, this.props.model),
 						specificOption: true,
 						disabled: this.props.helicopterSpeed === MIN_HELICOPTER_SPEED
 					},
