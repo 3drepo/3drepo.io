@@ -17,6 +17,7 @@
 
 import * as React from 'react';
 import Tooltip from '@material-ui/core/Tooltip';
+import { TooltipProps } from '@material-ui/core/Tooltip';
 
 import { StyledIconButton } from './tooltipButton.styles';
 
@@ -28,7 +29,7 @@ interface IProps {
 	disabled?: boolean;
 	className?: string;
 	active?: boolean;
-	placement?: string;
+	placement?: TooltipProps['placement'];
 }
 
 export const TooltipButton = (props: IProps) => {
@@ -36,7 +37,7 @@ export const TooltipButton = (props: IProps) => {
 	const iconProps = { color, fontSize: 'small' } as any;
 
 	return (
-		<Tooltip title={label} disableFocusListener={disabled} placement={placement}>
+		<Tooltip title={label} disableHoverListener={disabled} placement={placement}>
 			<span>
 				<StyledIconButton aria-label={label} onClick={action} disabled={disabled} className={className} active={active}>
 					<Icon {...iconProps} />

@@ -25,7 +25,7 @@ import Groups from './viewer/components/groups/groups.container';
 import Toolbar from './viewer/components/toolbar/toolbar.container';
 import PanelsMenu from './viewer/components/panelsMenu/panelsMenu.container';
 import { PanelButton } from './viewer/components/panelButton/panelButton.component';
-import { CloseFocusModeButton } from './viewer/components/closeFocusModeButton/closeFocusModeButton.component';
+import CloseFocusModeButton from './viewer/components/closeFocusModeButton/closeFocusModeButton.container';
 
 angular
 	.module('3drepo')
