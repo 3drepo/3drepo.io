@@ -1027,7 +1027,8 @@ const acceptedFormat = [
 	"bvh","irrmesh","irr","q3d","q3s","b3d",
 	"dae","ter","csm","3d","lws","xml","ogex",
 	"ms3d","cob","scn","blend","pk3","ndo",
-	"ifc","xgl","zgl","fbx","assbin", "bim", "dgn"
+	"ifc","xgl","zgl","fbx","assbin", "bim", "dgn",
+	"rvt", "rfa"
 ];
 
 module.exports = {
