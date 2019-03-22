@@ -581,6 +581,9 @@ export function* setNewRisk() {
 			name: `Untitled risk ${riskNumber}`,
 			associated_activity: '',
 			assigned_roles: [],
+			category: '',
+			comments: [],
+			safetibase_id: '',
 			likelihood: 0,
 			consequence: 0,
 			level_of_risk: 0,
@@ -589,6 +592,8 @@ export function* setNewRisk() {
 			residual_consequence: -1,
 			residual_level_of_risk: -1,
 			mitigation_status: '',
+			mitigation_desc: '',
+			residual_risk: '',
 			viewpoint: {},
 			owner: currentUser.username
 		}, jobs);
