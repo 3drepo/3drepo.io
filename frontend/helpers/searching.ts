@@ -14,7 +14,12 @@ export const stringSearch = (superString: string, subString: string) => {
 	return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 };
 
-export const searchByFilters = (items = [], filters = [], returnDefaultHidden = false) => {
+export const searchByFilters = (
+		items = [],
+		filters = [],
+		returnDefaultHidden = false,
+		queryFields = ['name', 'desc']
+	) => {
 	const prefilteredItems = !returnDefaultHidden ? items.filter(({defaultHidden}) => !defaultHidden) : items;
 	const groupedFilters = groupBy(filters, 'relatedField');
 
@@ -41,7 +46,9 @@ export const searchByFilters = (items = [], filters = [], returnDefaultHidden = 
 						});
 					}
 					if (filter.type === DATA_TYPES.QUERY) {
-						return compareStrings(item.name, filter.value.value) || compareStrings(item.desc, filter.value.value);
+						return queryFields.some((field) => {
+							return compareStrings(field, filter.value.value);
+						});
 					}
 				});
 			}

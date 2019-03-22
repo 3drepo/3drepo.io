@@ -23,9 +23,13 @@ import { Container } from './bim.styles';
 import { FilterPanel, ISelectedFilter } from '../../../components/filterPanel/filterPanel.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { IMetaRecord } from '../../../../modules/bim/bim.redux';
+import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '../../../../constants/bim';
+import { MenuList } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 
 interface IProps {
 	className: string;
+	teamspace: string;
+	model: string;
 	isPending: boolean;
 	metadata: IMetaRecord[];
 	searchEnabled: string;
@@ -33,20 +37,24 @@ interface IProps {
 	selectedFilters: ISelectedFilter[];
 	starredMetadataKeys: string[];
 	setComponentState: (componentState) => void;
+	clearStarredMetadata: (teamspace, model) => void;
 	addMetaRecordToStarred?: (key) => void;
 	removeMetaRecordFromStarred?: (key) => void;
 }
 
 export class Bim extends React.PureComponent<IProps, any> {
-	get filters() {
-		return [];
+	get menuActionsMap() {
+		const { clearStarredMetadata, teamspace, model } = this.props;
+		return {
+			[BIM_ACTIONS_ITEMS.CLEAR_STARRED]: () => clearStarredMetadata(teamspace, model)
+		};
 	}
 
 	get metadata() {
 		if (this.props.showStarred) {
-			const tempStarredList = [];
-			return this.props.metadata.filter(() => {
-
+			const tempStarredList = [] as any;
+			return this.props.metadata.filter(({ key }) => {
+				return tempStarredList.includes(key);
 			});
 		}
 		return [];
@@ -55,7 +63,6 @@ export class Bim extends React.PureComponent<IProps, any> {
 	private renderFilterPanel = renderWhenTrue(() => (
 		<FilterPanel
 			onChange={this.handleFilterChange}
-			filters={this.filters as any}
 			selectedFilters={this.props.selectedFilters}
 		/>
 	));
@@ -64,8 +71,8 @@ export class Bim extends React.PureComponent<IProps, any> {
 		return (
 			<ViewerPanel
 				title="BIM"
-				Icon={this.renderTitleIcon()}
-				actions={this.renderActions()}
+				Icon={this.getTitleIcon()}
+				renderActions={this.renderActions}
 				pending={this.props.isPending}
 			>
 				{this.renderFilterPanel(this.props.searchEnabled)}
@@ -74,25 +81,19 @@ export class Bim extends React.PureComponent<IProps, any> {
 		);
 	}
 
+	private getTitleIcon = () => <CopyFile />;
+
 	private renderList = () => {
 		return <Container>Test</Container>;
 	}
 
-	private renderTitleIcon = () => <CopyFile />;
-
 	private renderActionsMenu = () => (
 		<MenuList>
-			{RISKS_ACTIONS_MENU.map(({ name, Icon, label }) => {
-				return (
-					<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
-						<IconWrapper><Icon fontSize="small" /></IconWrapper>
-						<StyledItemText>
-							{label}
-							{(name === RISKS_ACTIONS_ITEMS.SHOW_PINS && this.props.showPins) && <Check fontSize="small" />}
-						</StyledItemText>
-					</StyledListItem>
-				);
-			})}
+			{BIM_ACTIONS_MENU.map(({ name, label }) => (
+				<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+					<StyledItemText>{label}</StyledItemText>
+				</StyledListItem>
+			))}
 		</MenuList>
 	)
 

@@ -38,6 +38,6 @@ export const selectSelectedFilters = createSelector(
 
 export const selectFilteredMetadata = createSelector(
 	selectMetadata, selectSelectedFilters, (metadata, selectedFilters) => {
-		return searchByFilters(metadata, selectedFilters);
+		return searchByFilters(metadata, selectedFilters, false, ['key', 'value']);
 	}
 );
