@@ -17,11 +17,12 @@
 
 import { put, takeLatest, select } from 'redux-saga/effects';
 import { getAngularService } from '../../helpers/migration';
+import * as API from '../../services/api';
 
 import { ViewerTypes, ViewerActions } from './viewer.redux';
 import { DialogActions } from '../dialog';
 import { selectHelicopterSpeed } from './viewer.selectors';
-import { INITIAL_HELICOPTER_SPEED } from '../../components/viewer/js/viewer.service';
+import { Viewer, INITIAL_HELICOPTER_SPEED } from '../../services/viewer/viewer';
 
 export const getViewer = () => {
 	const ViewerService = getAngularService('ViewerService') as any;
@@ -51,10 +52,7 @@ export function* mapInitialise({surveyPoints, sources = []}) {
 
 export function* initialiseToolbar() {
 	try {
-		yield put(ViewerActions.waitForViewer());
-		const ViewerService = yield getAngularService('ViewerService') as any;
-
-		const helicopterSpeed = yield ViewerService.getHeliSpeed();
+		const helicopterSpeed = yield Viewer.getHelicopterSpeed();
 		yield put(ViewerActions.setHelicopterSpeed(helicopterSpeed));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('initialise', 'toolbar'));
@@ -144,9 +142,7 @@ export function* showViewpoint(teamspace, modelId, item) {
 
 export function* goToExtent() {
 	try {
-		yield put(ViewerActions.waitForViewer());
-		const ViewerService = yield getAngularService('ViewerService') as any;
-		yield ViewerService.goToExtent();
+		yield Viewer.goToExtent();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('go', 'to extent'));
 	}
@@ -154,46 +150,44 @@ export function* goToExtent() {
 
 export function* setNavigationMode({mode}) {
 	try {
-		yield put(ViewerActions.waitForViewer());
-		const ViewerService = yield getAngularService('ViewerService') as any;
-		yield ViewerService.setNavMode(mode);
+		yield Viewer.setNavigationMode(mode);
 		yield put(ViewerActions.setNavigationModeSuccess(mode));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'navigation mode'));
 	}
 }
 
-export function* resetHelicopterSpeed() {
+export function* resetHelicopterSpeed({teamspace, modelId, updateDefaultSpeed}) {
 	try {
-		yield put(ViewerActions.waitForViewer());
-		const ViewerService = yield getAngularService('ViewerService') as any;
-		yield ViewerService.helicopterSpeedReset(true);
+		yield Viewer.helicopterSpeedReset();
+		if (updateDefaultSpeed) {
+			yield API.editHelicopterSpeed(teamspace, modelId, INITIAL_HELICOPTER_SPEED);
+		}
 		yield put(ViewerActions.setHelicopterSpeed(INITIAL_HELICOPTER_SPEED));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'helicopter speed'));
 	}
 }
 
-export function* increaseHelicopterSpeed() {
+export function* increaseHelicopterSpeed({teamspace, modelId}) {
 	try {
-		yield put(ViewerActions.waitForViewer());
-		const ViewerService = yield getAngularService('ViewerService') as any;
 		const helicopterSpeed = yield select(selectHelicopterSpeed);
 		const speed = helicopterSpeed + 1;
-		yield ViewerService.helicopterSpeedUp(speed);
+
+		yield Viewer.helicopterSpeedUp();
+		yield API.editHelicopterSpeed(teamspace, modelId, speed);
 		yield put(ViewerActions.setHelicopterSpeed(speed));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('increase', 'helicopter speed'));
 	}
 }
 
-export function* decreaseHelicopterSpeed() {
+export function* decreaseHelicopterSpeed({teamspace, modelId}) {
 	try {
-		yield put(ViewerActions.waitForViewer());
-		const ViewerService = yield getAngularService('ViewerService') as any;
 		const helicopterSpeed = yield select(selectHelicopterSpeed);
 		const speed = helicopterSpeed - 1;
-		yield ViewerService.helicopterSpeedDown(speed);
+		yield Viewer.helicopterSpeedDown();
+		yield API.editHelicopterSpeed(teamspace, modelId, speed);
 		yield put(ViewerActions.setHelicopterSpeed(speed));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('decrease', 'helicopter speed'));

@@ -38,13 +38,11 @@
 			position="right"
 			style="pointer-events:{{vm.pointerEvents}}")
 
-		right-panel(
-			ng-if="!vm.isLiteMode"
-			style="pointer-events:{{vm.pointerEvents}}")
-
 		bottom-buttons(
 			ng-if="!vm.isLiteMode"
-			style="pointer-events:{{vm.pointerEvents}}")
+			style="pointer-events:{{vm.pointerEvents}}"
+			teamspace="vm.account"
+			model="vm.model")
 
 error-dialog(
 	error-message="vm.errorMessage"

@@ -35,9 +35,9 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	initialiseToolbar: [],
 	goToExtent: [],
 	setHelicopterSpeed: ['speed'],
-	resetHelicopterSpeed: [],
-	increaseHelicopterSpeed: [],
-	decreaseHelicopterSpeed: []
+	resetHelicopterSpeed: ['teamspace', 'modelId', 'updateDefaultSpeed'],
+	increaseHelicopterSpeed: ['teamspace', 'modelId'],
+	decreaseHelicopterSpeed: ['teamspace', 'modelId']
 }, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {
