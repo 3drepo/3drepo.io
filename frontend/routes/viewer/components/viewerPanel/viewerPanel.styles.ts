@@ -60,9 +60,8 @@ export const TitleIcon = styled.div`
 
 export const ViewerPanelContent = styled.div`
 	background-color: ${COLOR.WHITE_87};
-	padding: ${(props: any) => props.isPadding ? '24px' : '0'};
+	padding: ${(props: any) => props.padding ? props.padding  : '24px' };
 	overflow: auto;
-	position: relative;
 ` as any;
 
 export const ViewerPanelFooter = styled(Grid).attrs({
