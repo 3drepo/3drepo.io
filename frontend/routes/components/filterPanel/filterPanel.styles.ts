@@ -29,7 +29,7 @@ export const Container = styled.div`
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
-	height: ${(props: any) => props.filtersOpen ? '45px' : '100%'};
+	height: ${(props: any) => props.filtersOpen ? '45px' : 'auto'};
 	flex: none;
 ` as any;
 
