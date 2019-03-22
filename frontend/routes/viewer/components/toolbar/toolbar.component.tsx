@@ -26,6 +26,7 @@ import HideIcon from '@material-ui/icons/VisibilityOff';
 import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
 import MetadataIcon from '@material-ui/icons/Info';
 import TurntableIcon from '@material-ui/icons/Redo';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
 import IncreaseIcon from '@material-ui/icons/Add';
 import DecreaseIcon from '@material-ui/icons/Remove';
@@ -76,6 +77,15 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		this.props.initialiseToolbar();
+	}
+
+	public componentDidUpdate(prevProps) {
+		if (this.props.isFocusMode !== prevProps.isFocusMode) {
+			const uiVisibility = this.props.isFocusMode ? 'hidden' : 'initial';
+
+			document.querySelector('#modelUI').style.visibility = uiVisibility;
+			document.querySelector('#topMenu').style.visibility = uiVisibility;
+		}
 	}
 
 	public onClick = () => {};
@@ -189,11 +199,9 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		return (
-			<Fade in={!this.props.isFocusMode}>
-				<Container>
-					{this.renderButtons()}
-				</Container>
-			</Fade>
+			<Container>
+				{this.renderButtons()}
+			</Container>
 		);
 	}
 }

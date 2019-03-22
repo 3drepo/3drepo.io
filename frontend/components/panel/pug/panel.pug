@@ -1,6 +1,4 @@
 div(ng-show="vm.showPanel")
-	close-focus-mode-button
-
 	div#items(ng-class="{ active : vm.activate }")
 
 		div(ng-repeat="contentItem in vm.contentItems track by contentItem.type")
