@@ -37,14 +37,16 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	setHelicopterSpeed: ['speed'],
 	resetHelicopterSpeed: ['teamspace', 'modelId', 'updateDefaultSpeed'],
 	increaseHelicopterSpeed: ['teamspace', 'modelId'],
-	decreaseHelicopterSpeed: ['teamspace', 'modelId']
+	decreaseHelicopterSpeed: ['teamspace', 'modelId'],
+	setIsFocusMode: ['isFocusMode']
 }, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {
 	settings: window.localStorage.getItem('visualSettings') ?
 			JSON.parse(window.localStorage.getItem('visualSettings')) : DEFAULT_SETTINGS,
 	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
-	helicopterSpeed: null
+	helicopterSpeed: null,
+	isFocusMode: false
 };
 
 const updateSettings = (state = INITIAL_STATE, {settings}) => {
@@ -60,8 +62,13 @@ const setHelicopterSpeed = (state = INITIAL_STATE, {speed}) => {
 	return {...state, helicopterSpeed: speed};
 };
 
+const setIsFocusMode = (state = INITIAL_STATE, {isFocusMode}) => {
+	return {...state, isFocusMode};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerTypes.UPDATE_SETTINGS] : updateSettings,
 	[ViewerTypes.SET_NAVIGATION_MODE_SUCCESS] : setNavigationModeSuccess,
-	[ViewerTypes.SET_HELICOPTER_SPEED] : setHelicopterSpeed
+	[ViewerTypes.SET_HELICOPTER_SPEED] : setHelicopterSpeed,
+	[ViewerTypes.SET_IS_FOCUS_MODE] : setIsFocusMode
 });

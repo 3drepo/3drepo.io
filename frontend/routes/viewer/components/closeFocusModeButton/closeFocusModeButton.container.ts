@@ -19,32 +19,15 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../helpers/migration';
 
-import { Toolbar } from './toolbar.component';
-import {
-	ViewerActions,
-	selectNavigationMode,
-	selectHelicopterSpeed,
-	selectIsFocusMode
-} from '../../../../modules/viewer';
-import { TreeActions } from '../../../../modules/tree';
+import { CloseFocusModeButton } from './closeFocusModeButton.component';
+import { ViewerActions, selectIsFocusMode } from '../../../../modules/viewer';
 
 const mapStateToProps = createStructuredSelector({
-	navigationMode: selectNavigationMode,
-	helicopterSpeed: selectHelicopterSpeed,
 	isFocusMode: selectIsFocusMode
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	initialiseToolbar: ViewerActions.initialiseToolbar,
-	goToExtent: ViewerActions.goToExtent,
-	setNavigationMode: ViewerActions.setNavigationMode,
-	resetHelicopterSpeed: ViewerActions.resetHelicopterSpeed,
-	increaseHelicopterSpeed: ViewerActions.increaseHelicopterSpeed,
-	decreaseHelicopterSpeed: ViewerActions.decreaseHelicopterSpeed,
-	showAllNodes: TreeActions.showAllNodes,
-	hideSelectedNodes: TreeActions.hideSelectedNodes,
-	isolateSelectedNodes: TreeActions.isolateSelectedNodes,
 	setIsFocusMode: ViewerActions.setIsFocusMode
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Toolbar);
+export default connect(mapStateToProps, mapDispatchToProps)(CloseFocusModeButton);
