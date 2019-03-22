@@ -110,7 +110,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 	public updateRiskLevel = async (likelihoodPath, consequencePath, riskLevelPath) => {
 		const { formik } = this.props;
-		let levelsOfRisk = {
+		const levelsOfRisk = {
 			level_of_risk: formik.values.level_of_risk,
 			residual_level_of_risk: formik.values.residual_level_of_risk
 		};
