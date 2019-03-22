@@ -49,6 +49,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	createCommentSuccess: ['comment'],
 	deleteCommentSuccess: ['commentGuid'],
 	updateCommentSuccess: ['comment'],
+	updateLogs: ['logs'],
 	updateNewRisk: ['newRisk'],
 	onFiltersChange: ['selectedFilters']
 }, { prefix: 'RISKS/' });
@@ -149,6 +150,10 @@ export const deleteCommentSuccess = (state = INITIAL_STATE, { commentGuid }) => 
 	return {...state, componentState: { ...state.componentState, logs: updatedLogs }};
 };
 
+export const updateLogs = (state = INITIAL_STATE, { logs }) => {
+	return {...state, componentState: { ...state.componentState, logs }};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.FETCH_RISKS_SUCCESS]: fetchRisksSuccess,
 	[RisksTypes.FETCH_RISK_SUCCESS]: fetchRiskSuccess,
@@ -159,5 +164,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
 	[RisksTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
 	[RisksTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
-	[RisksTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess
+	[RisksTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
+	[RisksTypes.UPDATE_LOGS]: updateLogs
 });

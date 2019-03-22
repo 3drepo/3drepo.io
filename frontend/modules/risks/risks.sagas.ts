@@ -184,6 +184,9 @@ export function* updateRisk({ teamspace, modelId, riskData }) {
 		toggleRiskPin(riskData, true);
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(updatedRisk, jobs);
+		const preparedComments = yield prepareComments(preparedRisk.comments);
+
+		yield put(RisksActions.updateLogs(preparedComments));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {

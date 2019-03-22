@@ -52,10 +52,10 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				break;
 			case 'consequence':
 				comment.action.propertyText = 'Consequence';
-				if (comment.action.to) {
+				if (undefined !== comment.action.to) {
 					comment.action.to = getRiskConsequenceName(parseInt(comment.action.to, 10));
 				}
-				if (comment.action.from) {
+				if (undefined !== comment.action.from) {
 					comment.action.from = getRiskConsequenceName(parseInt(comment.action.from, 10));
 				} else {
 					text = comment.action.propertyText + ' set to ' +
@@ -65,10 +65,10 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				break;
 			case 'likelihood':
 				comment.action.propertyText = 'Likelihood';
-				if (comment.action.to) {
+				if (undefined !== comment.action.to) {
 					comment.action.to = getRiskLikelihoodName(parseInt(comment.action.to, 10));
 				}
-				if (comment.action.from) {
+				if (undefined !== comment.action.from) {
 					comment.action.from = getRiskLikelihoodName(parseInt(comment.action.from, 10));
 				} else {
 					text = comment.action.propertyText + ' set to ' +
@@ -90,10 +90,10 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				break;
 			case 'residual_consequence':
 				comment.action.propertyText = 'Mitigated consequence';
-				if (comment.action.to) {
+				if (undefined !== comment.action.to) {
 					comment.action.to = getRiskConsequenceName(parseInt(comment.action.to, 10));
 				}
-				if (comment.action.from) {
+				if (undefined !== comment.action.from) {
 					comment.action.from = getRiskConsequenceName(parseInt(comment.action.from, 10));
 				} else {
 					text = comment.action.propertyText + ' set to ' +
@@ -103,10 +103,10 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				break;
 			case 'residual_likelihood':
 				comment.action.propertyText = 'Mitigated likelihood';
-				if (comment.action.to) {
+				if (undefined !== comment.action.to) {
 					comment.action.to = getRiskLikelihoodName(parseInt(comment.action.to, 10));
 				}
-				if (comment.action.from) {
+				if (undefined !== comment.action.from) {
 					comment.action.from = getRiskLikelihoodName(parseInt(comment.action.from, 10));
 				} else {
 					text = comment.action.propertyText + ' set to ' +

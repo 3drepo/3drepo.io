@@ -126,19 +126,31 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const logsChanged = !isEqual(this.props.risk.comments, prevProps.risk.comments);
-		if (logsChanged) {
-			this.setLogs();
-		}
-
-		const { teamspace, model, fetchRisk, risk, currentUser, modelSettings, myJob } = this.props;
+		const {
+			teamspace,
+			model,
+			fetchRisk,
+			risk,
+			currentUser,
+			modelSettings,
+			myJob,
+			subscribeOnRiskCommentsChanges
+		} = this.props;
 		const permissions = modelSettings.permissions;
 		const changes = {} as IState;
 		const permissionsChanged = !isEqual(prevProps.permissions, permissions);
 		const canUpdate = canUpdateRisk(risk, myJob, permissions, currentUser);
+		const logsChanged = !isEqual(this.props.risk.comments, prevProps.risk.comments);
 
 		if (risk._id !== prevProps.risk._id) {
 			fetchRisk(teamspace, model, risk._id);
+			if (!prevProps.risk._id) {
+				subscribeOnRiskCommentsChanges(teamspace, model, risk._id);
+			}
+		}
+
+		if (logsChanged) {
+			this.setLogs();
 		}
 
 		if (permissionsChanged && risk && currentUser && permissions && myJob && canUpdate !== this.state.canUpdateRisk) {
