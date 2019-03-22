@@ -285,7 +285,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	});
 
 	public renderFooter = renderWhenTrue(() => (
-		<ViewerPanelFooter alignItems="center">
+		<ViewerPanelFooter alignItems="center" padding="0">
 			<NewCommentForm
 				canComment={this.state.canUpdateRisk}
 				comment={this.props.newComment.comment}

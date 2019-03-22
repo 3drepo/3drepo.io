@@ -71,12 +71,12 @@ export const ViewerPanelFooter = styled(Grid).attrs({
 	wrap: 'nowrap'
 })`
 	background-color: ${COLOR.WHITE};
-	padding: 0 16px;
+	padding: ${(props: any) => props.padding ? props.padding : '0 16px' };
 	border-top: 1px solid ${COLOR.BLACK_20};
 	flex: none;
 	min-height: 65px;
 	font-size: 14px;
-`;
+` as any;
 
 export const ViewerPanelButton = styled(Button)`
 	&& {
