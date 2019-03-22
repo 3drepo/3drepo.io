@@ -21,6 +21,7 @@ import { connect } from '../../../../helpers/migration';
 
 import { Toolbar } from './toolbar.component';
 import { ViewerActions, selectNavigationMode, selectHelicopterSpeed } from '../../../../modules/viewer';
+import { TreeActions } from '../../../../modules/tree';
 
 const mapStateToProps = createStructuredSelector({
 	navigationMode: selectNavigationMode,
@@ -33,7 +34,10 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setNavigationMode: ViewerActions.setNavigationMode,
 	resetHelicopterSpeed: ViewerActions.resetHelicopterSpeed,
 	increaseHelicopterSpeed: ViewerActions.increaseHelicopterSpeed,
-	decreaseHelicopterSpeed: ViewerActions.decreaseHelicopterSpeed
+	decreaseHelicopterSpeed: ViewerActions.decreaseHelicopterSpeed,
+	showAllNodes: TreeActions.showAllNodes,
+	hideSelectedNodes: TreeActions.hideSelectedNodes,
+	isolateSelectedNodes: TreeActions.isolateSelectedNodes
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Toolbar);
