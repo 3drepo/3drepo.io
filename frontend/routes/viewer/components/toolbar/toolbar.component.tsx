@@ -53,6 +53,9 @@ interface IProps {
 	increaseHelicopterSpeed: () => void;
 	decreaseHelicopterSpeed: () => void;
 	resetHelicopterSpeed: () => void;
+	showAllNodes: () => void;
+	hideSelectedNodes: () => void;
+	isolateSelectedNodes: () => void;
 }
 
 interface IState {
@@ -135,9 +138,9 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 					}
 				]
 			},
-			{ label: 'Show All', Icon: ShowAllIcon, action: this.onClick, show: true },
-			{ label: 'Hide', Icon: HideIcon, action: this.onClick, show: true  },
-			{ label: 'Isolate', Icon: IsolateIcon, action: this.onClick, show: true },
+			{ label: 'Show All', Icon: ShowAllIcon, action: this.props.showAllNodes, show: true },
+			{ label: 'Hide', Icon: HideIcon, action: this.props.hideSelectedNodes, show: true  },
+			{ label: 'Isolate', Icon: IsolateIcon, action: this.props.isolateSelectedNodes, show: true },
 			{ label: 'Focus', Icon: FocusIcon, action: this.onClick, show: true },
 			{ label: 'Clip', Icon: ClipIcon, action: this.onClick, show: true },
 			{ label: 'Measure', Icon: MeasureIcon, action: this.onClick, show: true },
