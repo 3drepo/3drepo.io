@@ -29,6 +29,7 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	initialiseToolbar: ViewerActions.initialiseToolbar,
+	goToExtent: ViewerActions.goToExtent,
 	setNavigationMode: ViewerActions.setNavigationMode,
 	resetHelicopterSpeed: ViewerActions.resetHelicopterSpeed,
 	increaseHelicopterSpeed: ViewerActions.increaseHelicopterSpeed,

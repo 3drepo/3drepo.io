@@ -142,6 +142,16 @@ export function* showViewpoint(teamspace, modelId, item) {
 	}
 }
 
+export function* goToExtent() {
+	try {
+		yield put(ViewerActions.waitForViewer());
+		const ViewerService = yield getAngularService('ViewerService') as any;
+		yield ViewerService.goToExtent();
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('go', 'to extent'));
+	}
+}
+
 export function* setNavigationMode({mode}) {
 	try {
 		yield put(ViewerActions.waitForViewer());
@@ -204,4 +214,5 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.RESET_HELICOPTER_SPEED, resetHelicopterSpeed);
 	yield takeLatest(ViewerTypes.INCREASE_HELICOPTER_SPEED, increaseHelicopterSpeed);
 	yield takeLatest(ViewerTypes.DECREASE_HELICOPTER_SPEED, decreaseHelicopterSpeed);
+	yield takeLatest(ViewerTypes.GO_TO_EXTENT, goToExtent);
 }
