@@ -61,3 +61,7 @@ export const selectNavigationMode = createSelector(
 export const selectHelicopterSpeed = createSelector(
 	selectViewerDomain, (state) => state.helicopterSpeed
 );
+
+export const selectIsFocusMode = createSelector(
+	selectViewerDomain, (state) => state.isFocusMode
+);
