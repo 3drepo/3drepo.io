@@ -16,22 +16,43 @@
  */
 
 import * as React from 'react';
+import CopyFile from '@material-ui/icons/FileCopyOutlined';
 
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { Container } from './bim.styles';
-import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
+import { FilterPanel, ISelectedFilter } from '../../../components/filterPanel/filterPanel.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { IMetaRecord } from '../../../../modules/bim/bim.redux';
 
 interface IProps {
 	className: string;
 	isPending: boolean;
+	metadata: IMetaRecord[];
 	searchEnabled: string;
+	showStarred: boolean;
+	selectedFilters: ISelectedFilter[];
+	starredMetadataKeys: string[];
+	setComponentState: (componentState) => void;
+	addMetaRecordToStarred?: (key) => void;
+	removeMetaRecordFromStarred?: (key) => void;
 }
 
 export class Bim extends React.PureComponent<IProps, any> {
-	public renderTitleIcon = () => <ReportProblem />;
+	get filters() {
+		return [];
+	}
 
-	public renderFilterPanel = renderWhenTrue(() => (
+	get metadata() {
+		if (this.props.showStarred) {
+			const tempStarredList = [];
+			return this.props.metadata.filter(() => {
+
+			});
+		}
+		return [];
+	}
+
+	private renderFilterPanel = renderWhenTrue(() => (
 		<FilterPanel
 			onChange={this.handleFilterChange}
 			filters={this.filters as any}
@@ -39,7 +60,27 @@ export class Bim extends React.PureComponent<IProps, any> {
 		/>
 	));
 
-	public renderActionsMenu = () => (
+	public render() {
+		return (
+			<ViewerPanel
+				title="BIM"
+				Icon={this.renderTitleIcon()}
+				actions={this.renderActions()}
+				pending={this.props.isPending}
+			>
+				{this.renderFilterPanel(this.props.searchEnabled)}
+				{this.renderList()}
+			</ViewerPanel>
+		);
+	}
+
+	private renderList = () => {
+		return <Container>Test</Container>;
+	}
+
+	private renderTitleIcon = () => <CopyFile />;
+
+	private renderActionsMenu = () => (
 		<MenuList>
 			{RISKS_ACTIONS_MENU.map(({ name, Icon, label }) => {
 				return (
@@ -55,7 +96,7 @@ export class Bim extends React.PureComponent<IProps, any> {
 		</MenuList>
 	)
 
-	public renderActions = () => {
+	private renderActions = () => {
 		if (this.props.showDetails) {
 			if (!this.props.activeRiskId || this.state.filteredRisks.length < 2) {
 				return [];
@@ -65,22 +106,7 @@ export class Bim extends React.PureComponent<IProps, any> {
 		return [{ Button: this.getSearchButton }, { Button: this.getMenuButton }];
 	}
 
-	public renderList = renderWhenTrue(() => {
-		return null;
-	});
-
-	public render() {
-		console.log('rendered');
-		return (
-			<ViewerPanel
-				title="SafetiBase"
-				Icon={this.renderTitleIcon()}
-				actions={this.renderActions()}
-				pending={this.props.isPending}
-			>
-				{this.renderFilterPanel(this.props.searchEnabled)}
-				{this.renderList(!this.props.showDetails)}
-			</ViewerPanel>
-		);
+	private handleFilterChange = (selectedFilters) => {
+		this.props.setComponentState({ selectedFilters });
 	}
 }

@@ -19,15 +19,19 @@ import { put, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { BimTypes, BimActions } from './bim.redux';
+import { DialogActions } from '../dialog';
+import { prepareMetadata } from '../../helpers/bim';
 
-export function* fetch() {
+export function* fetchMetadata({ teamspace, model }) {
 	try {
-		console.log('Bim saga started!');
-	} catch(error) {
-		console.error(error);
+		const { meta } = yield put(API.getMetadata(teamspace, model));
+
+		yield put(BimActions.fetchMetadataSuccess(prepareMetadata(meta[0].metadata)));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('fetch', 'metadata', error));
 	}
 }
 
 export default function* BimSaga() {
-	yield takeLatest(BimTypes.FETCH, fetch);
+	yield takeLatest(BimTypes.FETCH_METADATA, fetchMetadata);
 }

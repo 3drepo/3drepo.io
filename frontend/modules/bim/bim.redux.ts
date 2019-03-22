@@ -16,14 +16,44 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { ISelectedFilter } from '../../routes/components/filterPanel/filterPanel.component';
 
 export const { Types: BimTypes, Creators: BimActions } = createActions({
-	fetch: [] // TODO: remove this action
-}, { prefix: 'BIM_' });
+	fetchMetadata: ['teamspace', 'model'],
+	fetchMetadataSuccess: ['metadata'],
+	setComponentState: ['metadata']
+}, { prefix: 'BIM/' });
 
-export interface IObjectObjectState {}
+export interface IMetaRecord {
+	key: string;
+	value: string | number | boolean;
+}
 
-export const INITIAL_STATE: IObjectObjectState = {};
+export interface IBimComponentState {
+	selectedFilters: ISelectedFilter[];
+	showStarred?: boolean;
+}
+
+export interface IBimState {
+	metadata: IMetaRecord[];
+	componentState: IBimComponentState;
+}
+
+export const INITIAL_STATE: IBimState = {
+	metadata: [],
+	componentState: {
+		showStarred: false,
+		selectedFilters: []
+	}
+};
+
+const fetchMetadataSuccess = (state = INITIAL_STATE, { metadata}) => ({ ...state, metadata });
+
+const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
+	return { ...state, componentState: { ...state.componentState, ...componentState } };
+};
 
 export const reducer = createReducer(INITIAL_STATE, {
+	[BimTypes.FETCH_METADATA_SUCCESS]: fetchMetadataSuccess,
+	[BimTypes.SET_COMPONENT_STATE]: setComponentState
 });

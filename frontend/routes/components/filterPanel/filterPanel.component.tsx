@@ -50,13 +50,13 @@ export const DATA_TYPES = {
 	QUERY: 3
 };
 
-interface IFilter {
+export interface IFilter {
 	values: any;
 	label: string;
 	type?: number;
 }
 
-interface ISelectedFilter {
+export interface ISelectedFilter {
 	value: any;
 	label: string;
 	relatedField: string;

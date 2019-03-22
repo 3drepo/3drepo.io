@@ -20,9 +20,22 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../helpers/migration';
 
 import { Bim } from './bim.component';
+import {
+	BimActions,
+	selectFilteredMetadata,
+	selectSelectedFilters,
+	selectShowStarred
+} from '../../../../modules/bim';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	metadata: selectFilteredMetadata,
+	// starredMetadataKeys: selectStarredMetadataKeys,
+	selectedFilters: selectSelectedFilters,
+	showStarred: selectShowStarred
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	setComponentState: BimActions.setComponentState
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Bim);

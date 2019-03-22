@@ -16,5 +16,28 @@
  */
 
 import { createSelector } from 'reselect';
+import { searchByFilters } from '../../helpers/searching';
 
 export const selectBimDomain = (state) => Object.assign({}, state.bim);
+
+export const selectMetadata = createSelector(
+	selectBimDomain, (state) => state.metadata
+);
+
+export const selectComponentState = createSelector(
+	selectBimDomain, (state) => state.componentState
+);
+
+export const selectShowStarred = createSelector(
+	selectComponentState, (state) => state.showStarred
+);
+
+export const selectSelectedFilters = createSelector(
+	selectComponentState, (state) => state.showStarred
+);
+
+export const selectFilteredMetadata = createSelector(
+	selectMetadata, selectSelectedFilters, (metadata, selectedFilters) => {
+		return searchByFilters(metadata, selectedFilters);
+	}
+);
