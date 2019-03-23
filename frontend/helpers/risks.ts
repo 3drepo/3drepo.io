@@ -69,11 +69,14 @@ export const prepareRisk = (risk, jobs = []) => {
 	};
 };
 
-export const calculateLevelOfRisk = (likelihood: number, consequence: number): number => {
+export const calculateLevelOfRisk = (likelihood: any, consequence: any): number => {
 	let levelOfRisk = -1;
 
+	likelihood = parseInt(likelihood, 10);
+	consequence = parseInt(consequence, 10);
+
 	if (0 <= likelihood && 0 <= consequence) {
-		const score: number = parseInt(likelihood, 10) + parseInt(consequence, 10);
+		const score: number = likelihood + consequence;
 
 		if (6 < score) {
 			levelOfRisk = LEVELS.VERY_HIGH;

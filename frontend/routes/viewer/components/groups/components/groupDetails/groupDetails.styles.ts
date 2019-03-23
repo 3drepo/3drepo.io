@@ -20,6 +20,7 @@ import FormControl from '@material-ui/core/FormControl';
 
 import { TextField } from '../../../../../components/textField/textField.component';
 import { COLOR } from '../../../../../../styles';
+import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
 
 export const Container = styled.div`
   display: flex;
@@ -69,4 +70,8 @@ export const Description = styled(TextField)`
 export const StyledIcon = styled.span`
   color: ${(props) => props.color ? props.color : COLOR.BLACK_54};
   font-size: 18px;
+`;
+
+export const Content = styled(ViewerPanelContent)`
+	flex: 1;
 `;
