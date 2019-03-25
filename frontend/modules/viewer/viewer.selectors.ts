@@ -65,3 +65,11 @@ export const selectHelicopterSpeed = createSelector(
 export const selectIsFocusMode = createSelector(
 	selectViewerDomain, (state) => state.isFocusMode
 );
+
+export const selectClippingMode = createSelector(
+	selectViewerDomain, (state) => state.clippingMode
+);
+
+export const selectIsClipEdit = createSelector(
+	selectViewerDomain, (state) => state.isClipEdit
+);

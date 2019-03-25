@@ -249,6 +249,26 @@ export class ViewerService {
 		await this.isViewerReady();
 		this.viewer.helicopterSpeedReset();
 	}
+
+	public async startClip(isSingle) {
+		await this.isViewerReady();
+
+		if (isSingle) {
+			this.viewer.startSingleClip();
+		} else {
+			this.viewer.startBoxClip();
+		}
+	}
+
+	public async startClipEdit() {
+		await this.isViewerReady();
+		this.viewer.startClipEdit();
+	}
+
+	public async stopClipEdit() {
+		await this.isViewerReady();
+		this.viewer.stopClipEdit();
+	}
 }
 
 export const Viewer = new ViewerService();

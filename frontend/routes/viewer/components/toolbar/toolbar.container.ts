@@ -24,14 +24,18 @@ import {
 	ViewerActions,
 	selectNavigationMode,
 	selectHelicopterSpeed,
-	selectIsFocusMode
+	selectIsFocusMode,
+	selectClippingMode,
+	selectIsClipEdit
 } from '../../../../modules/viewer';
 import { TreeActions } from '../../../../modules/tree';
 
 const mapStateToProps = createStructuredSelector({
 	navigationMode: selectNavigationMode,
 	helicopterSpeed: selectHelicopterSpeed,
-	isFocusMode: selectIsFocusMode
+	isFocusMode: selectIsFocusMode,
+	clippingMode: selectClippingMode,
+	isClipEdit: selectIsClipEdit
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -44,7 +48,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showAllNodes: TreeActions.showAllNodes,
 	hideSelectedNodes: TreeActions.hideSelectedNodes,
 	isolateSelectedNodes: TreeActions.isolateSelectedNodes,
-	setIsFocusMode: ViewerActions.setIsFocusMode
+	setIsFocusMode: ViewerActions.setIsFocusMode,
+	setClippingMode: ViewerActions.setClippingMode,
+	toggleClipEdit: ViewerActions.toggleClipEdit
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Toolbar);

@@ -32,6 +32,16 @@ export const StyledIconButton = styled(IconButton)`
     margin-bottom: 10px;
   }
 
+  &.toolbarSubButton, &.toolbarButton {
+    height: 40px;
+    width: 40px;
+    font-size: 1rem;
+
+    svg {
+      font-size: 20px;
+    }
+  }
+
   &.toolbarSpecificButton {
     background-color: ${COLOR.SUNGLOW};
 
