@@ -176,15 +176,17 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		if (!this.listViewRef.current) {
 			return;
 		}
+
 		this.listViewRef.current.scrollTop = 0;
 		setTimeout(() => {
 			const activeItemIndex = items.findIndex(({ _id }) => _id === this.props.activeItemId);
-			const { offsetTop, offsetHeight } = this.listViewRef.current.children[0].children[activeItemIndex] as HTMLElement;
+			const { offsetHeight } = this.listViewRef.current.children[0].children[activeItemIndex] as HTMLElement;
+			const position = activeItemIndex * offsetHeight;
 			const maxHeight = this.listViewRef.current.offsetHeight;
-			const isNotVisible = offsetTop > maxHeight;
+			const isNotVisible = position > maxHeight;
 
 			if (isNotVisible) {
-				this.listViewRef.current.scrollTop = offsetTop + offsetHeight;
+				this.listViewRef.current.scrollTop = position;
 			}
 		});
 	}
