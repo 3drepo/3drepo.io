@@ -601,6 +601,11 @@ risk.updateAttrs = function(dbCol, uid, data) {
 							newRisk = clean(dbCol, newRisk);
 
 							if (data.comment) {
+								if (!data.edit && !data.delete &&
+									newRisk.comments && newRisk.comments.length > 0) {
+									return newRisk.comments[newRisk.comments.length - 1];
+								}
+
 								return data;
 							} else {
 								ChatEvent.riskChanged(sessionId, dbCol.account, dbCol.model, newRisk);
