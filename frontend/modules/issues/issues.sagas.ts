@@ -180,6 +180,7 @@ export function* updateIssue({ teamspace, modelId, issueData }) {
 		toggleIssuePin(issueData, true);
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(updatedIssue, jobs);
+		preparedIssue.comments = yield prepareComments(preparedIssue.comments);
 
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue updated'));

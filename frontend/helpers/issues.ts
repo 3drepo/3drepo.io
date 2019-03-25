@@ -1,6 +1,6 @@
 import { get, omit } from 'lodash';
 import { getAPIUrl } from '../services/api';
-import { STATUSES_COLOURS, STATUSES_ICONS, STATUSES, ISSUE_TOPIC_TYPES } from '../constants/issues';
+import { STATUSES_COLOURS, STATUSES_ICONS, STATUSES } from '../constants/issues';
 import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
 import { sortByDate } from './sorting';
 
