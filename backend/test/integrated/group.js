@@ -163,19 +163,21 @@ describe("Groups", function () {
 				}]
 		};
 		it("with valid parameters should succeed", function(done) {
+			let groupId;
 
 			async.series([
 				function(done) {
 					agent.post(`/${username}/${model}/groups/`)
 						.send(data)
 						.expect(200 , function(err, res) {
+							groupId = res.body._id;
 							done(err);
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
+					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.length).to.equal(3);
+							expect(res.body.author).to.equal(username);
 							done(err);
 						});
 				}
@@ -185,6 +187,7 @@ describe("Groups", function () {
 		});
 
 		it("with rules instead of objects should succeed", function(done) {
+			let groupId;
 
 			async.series([
 				function(done) {
@@ -198,13 +201,14 @@ describe("Groups", function () {
 					agent.post(`/${username}/${model}/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
+							groupId = res.body._id;
 							done(err);
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
+					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.length).to.equal(4);
+							expect(res.body.author).to.equal(username);
 							done(err);
 						});
 				}
@@ -214,6 +218,7 @@ describe("Groups", function () {
 		});
 
 		it("with rules (0 args) should succeed", function(done) {
+			let groupId;
 
 			async.series([
 				function(done) {
@@ -227,13 +232,14 @@ describe("Groups", function () {
 					agent.post(`/${username}/${model}/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
+							groupId = res.body._id;
 							done(err);
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
+					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.length).to.equal(5);
+							expect(res.body.author).to.equal(username);
 							done(err);
 						});
 				}
@@ -243,6 +249,7 @@ describe("Groups", function () {
 		});
 
 		it("with rules (2 args) should succeed", function(done) {
+			let groupId;
 
 			async.series([
 				function(done) {
@@ -256,13 +263,14 @@ describe("Groups", function () {
 					agent.post(`/${username}/${model}/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
+							groupId = res.body._id;
 							done(err);
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
+					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.length).to.equal(6);
+							expect(res.body.author).to.equal(username);
 							done(err);
 						});
 				}
@@ -272,6 +280,7 @@ describe("Groups", function () {
 		});
 
 		it("with rules (multi args) should succeed", function(done) {
+			let groupId;
 
 			async.series([
 				function(done) {
@@ -285,13 +294,14 @@ describe("Groups", function () {
 					agent.post(`/${username}/${model}/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
+							groupId = res.body._id;
 							done(err);
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
+					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.length).to.equal(7);
+							expect(res.body.author).to.equal(username);
 							done(err);
 						});
 				}
@@ -301,6 +311,7 @@ describe("Groups", function () {
 		});
 
 		it("with rules (multi arg pairs) should succeed", function(done) {
+			let groupId;
 
 			async.series([
 				function(done) {
@@ -314,13 +325,14 @@ describe("Groups", function () {
 					agent.post(`/${username}/${model}/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
+							groupId = res.body._id;
 							done(err);
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
+					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.length).to.equal(8);
+							expect(res.body.author).to.equal(username);
 							done(err);
 						});
 				}
@@ -330,6 +342,7 @@ describe("Groups", function () {
 		});
 
 		it("with multiple rules should succeed", function(done) {
+			let groupId;
 
 			async.series([
 				function(done) {
@@ -347,13 +360,14 @@ describe("Groups", function () {
 					agent.post(`/${username}/${model}/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
+							groupId = res.body._id;
 							done(err);
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
+					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.length).to.equal(9);
+							expect(res.body.author).to.equal(username);
 							done(err);
 						});
 				}
@@ -363,6 +377,8 @@ describe("Groups", function () {
 		});
 
 		it("without color should succeed", function(done) {
+			let groupId;
+
 			async.series([
 				function(done) {
 					const newGroup = Object.assign({}, data);
@@ -370,13 +386,14 @@ describe("Groups", function () {
 					agent.post(`/${username}/${model}/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
+							groupId = res.body._id;
 							done(err);
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
+					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.length).to.equal(10);
+							expect(res.body.author).to.equal(username);
 							done(err);
 						});
 				}
@@ -484,6 +501,8 @@ describe("Groups", function () {
 		});
 
 		it("object with empty array should succeed", function(done) {
+			let groupId;
+
 			async.series([
 				function(done) {
 					const newGroup = Object.assign({}, data);
@@ -491,13 +510,14 @@ describe("Groups", function () {
 					agent.post(`/${username}/${model}/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
+							groupId = res.body._id;
 							done(err);
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/revision/master/head/groups/?noIssues=true`)
+					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
 						.expect(200 , function(err, res) {
-							expect(res.body.length).to.equal(11);
+							expect(res.body.author).to.equal(username);
 							done(err);
 						});
 				}
