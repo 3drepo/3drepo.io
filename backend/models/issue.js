@@ -202,14 +202,14 @@ function toDirectXCoords(issueData) {
 	return viewpoint;
 }
 
-function updateTextComments(account, model, sessionId, issueId, comments, data, viewpointGuid) {
+function updateTextComments(account, model, sessionId, issueId, comments, data, viewpoint) {
 	if (!comments) {
 		comments = [];
 	}
 
 	if (data.edit && data.commentIndex >= 0 && comments.length > data.commentIndex) {
 		if (!comments[data.commentIndex].sealed) {
-			const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGuid, data.position);
+			const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpoint, data.position);
 
 			comments[data.commentIndex] = textComment;
 
@@ -234,7 +234,7 @@ function updateTextComments(account, model, sessionId, issueId, comments, data, 
 			comment.sealed = true;
 		});
 
-		const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGuid);
+		const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpoint);
 
 		comments.push(textComment);
 
@@ -459,7 +459,6 @@ issue.updateAttrs = function(dbCol, uid, data) {
 		if (oldIssue) {
 			let typeCorrect = true;
 			let forceStatusChange;
-			let viewpointGuid;
 
 			let newIssue = _.cloneDeep(oldIssue);
 
@@ -495,8 +494,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 
 			if (data["viewpoint"]) {
 				if (Object.prototype.toString.call(data["viewpoint"]) === fieldTypes["viewpoint"]) {
-					viewpointGuid = utils.generateUUID();
-					data.viewpoint.guid = viewpointGuid;
+					data.viewpoint.guid = utils.generateUUID();
 
 					newViewpointPromise = View.clean(dbCol, data["viewpoint"], fieldTypes["viewpoint"]);
 				} else {
@@ -555,7 +553,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 										newIssue._id,
 										newIssue.comments,
 										data,
-										viewpointGuid
+										newViewpoint
 									);
 
 									toUpdate.comments = updatedComments;

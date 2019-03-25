@@ -178,7 +178,7 @@ function toDirectXCoords(entry) {
 	return viewpoint;
 }
 
-function addRiskMitigationComment(account, model, sessionId, riskId, comments, data, viewpointGuid) {
+function addRiskMitigationComment(account, model, sessionId, riskId, comments, data, viewpoint) {
 	if (data.residual && data.likelihood && data.consequence && data.mitigation) {
 		if (!comments) {
 			comments = [];
@@ -194,7 +194,7 @@ function addRiskMitigationComment(account, model, sessionId, riskId, comments, d
 			data.likelihood,
 			data.consequence,
 			data.mitigation,
-			viewpointGuid,
+			viewpoint,
 			data.position
 		);
 
@@ -206,14 +206,14 @@ function addRiskMitigationComment(account, model, sessionId, riskId, comments, d
 	return comments;
 }
 
-function updateTextComments(account, model, sessionId, riskId, comments, data, viewpointGuid) {
+function updateTextComments(account, model, sessionId, riskId, comments, data, viewpoint) {
 	if (!comments) {
 		comments = [];
 	}
 
 	if (data.edit && data.commentIndex >= 0 && comments.length > data.commentIndex) {
 		if (!comments[data.commentIndex].sealed) {
-			const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGuid, data.position);
+			const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpoint, data.position);
 
 			comments[data.commentIndex] = textComment;
 
@@ -238,7 +238,7 @@ function updateTextComments(account, model, sessionId, riskId, comments, data, v
 			comment.sealed = true;
 		});
 
-		const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpointGuid, data.position);
+		const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpoint, data.position);
 
 		comments.push(textComment);
 
@@ -452,7 +452,6 @@ risk.updateAttrs = function(dbCol, uid, data) {
 	return this.findByUID(dbCol, uid, {}, true).then((oldRisk) => {
 		if (oldRisk) {
 			let typeCorrect = true;
-			let viewpointGuid;
 
 			let newRisk = _.cloneDeep(oldRisk);
 
@@ -488,8 +487,7 @@ risk.updateAttrs = function(dbCol, uid, data) {
 
 			if (data["viewpoint"]) {
 				if (Object.prototype.toString.call(data["viewpoint"]) === fieldTypes["viewpoint"]) {
-					viewpointGuid = utils.generateUUID();
-					data.viewpoint.guid = viewpointGuid;
+					data.viewpoint.guid = utils.generateUUID();
 
 					newViewpointPromise = View.clean(dbCol, data["viewpoint"], fieldTypes["viewpoint"]);
 				} else {
@@ -543,7 +541,7 @@ risk.updateAttrs = function(dbCol, uid, data) {
 										newRisk._id,
 										newRisk.comments,
 										data,
-										viewpointGuid
+										newViewpoint
 									);
 
 									toUpdate.comments = updatedComments;
@@ -557,7 +555,7 @@ risk.updateAttrs = function(dbCol, uid, data) {
 									newRisk._id,
 									newRisk.comments,
 									data,
-									viewpointGuid
+									newViewpoint
 								);
 
 								toUpdate.comments = updatedComments;
