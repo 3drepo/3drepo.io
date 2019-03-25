@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { DEFAULT_SETTINGS, VIEWER_NAV_MODES } from '../../constants/viewer';
+import { DEFAULT_SETTINGS, VIEWER_NAV_MODES, VIEWER_CLIP_MODES } from '../../constants/viewer';
 
 export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	waitForViewer: [],
@@ -38,15 +38,21 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	resetHelicopterSpeed: ['teamspace', 'modelId', 'updateDefaultSpeed'],
 	increaseHelicopterSpeed: ['teamspace', 'modelId'],
 	decreaseHelicopterSpeed: ['teamspace', 'modelId'],
-	setIsFocusMode: ['isFocusMode']
+	setIsFocusMode: ['isFocusMode'],
+	setClippingMode: ['mode'],
+	setClippingModeSuccess: ['mode'],
+	toggleClipEdit: [],
+	setIsClipEdit: ['isClipEdit']
 }, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {
 	settings: window.localStorage.getItem('visualSettings') ?
 			JSON.parse(window.localStorage.getItem('visualSettings')) : DEFAULT_SETTINGS,
 	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
+	clippingMode: null,
 	helicopterSpeed: null,
-	isFocusMode: false
+	isFocusMode: false,
+	isClipEdit: false
 };
 
 const updateSettings = (state = INITIAL_STATE, {settings}) => {
@@ -58,6 +64,10 @@ const setNavigationModeSuccess = (state = INITIAL_STATE, {mode}) => {
 	return {...state, navigationMode: mode};
 };
 
+const setClippingModeSuccess = (state = INITIAL_STATE, {mode}) => {
+	return {...state, clippingMode: mode, isClipEdit: true};
+};
+
 const setHelicopterSpeed = (state = INITIAL_STATE, {speed}) => {
 	return {...state, helicopterSpeed: speed};
 };
@@ -66,9 +76,15 @@ const setIsFocusMode = (state = INITIAL_STATE, {isFocusMode}) => {
 	return {...state, isFocusMode};
 };
 
+const setIsClipEdit = (state = INITIAL_STATE, {isClipEdit}) => {
+	return {...state, isClipEdit};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerTypes.UPDATE_SETTINGS] : updateSettings,
 	[ViewerTypes.SET_NAVIGATION_MODE_SUCCESS] : setNavigationModeSuccess,
+	[ViewerTypes.SET_CLIPPING_MODE_SUCCESS] : setClippingModeSuccess,
 	[ViewerTypes.SET_HELICOPTER_SPEED] : setHelicopterSpeed,
-	[ViewerTypes.SET_IS_FOCUS_MODE] : setIsFocusMode
+	[ViewerTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,
+	[ViewerTypes.SET_IS_CLIP_EDIT] : setIsClipEdit
 });

@@ -34,10 +34,16 @@ import ResetIcon from '@material-ui/icons/Replay';
 
 import { Helicopter, Ruler } from '../../../components/fontAwesomeIcon';
 
-import { Container, ButtonWrapper, Submenu } from './toolbar.styles';
+import {
+	Container,
+	ButtonWrapper,
+	Submenu,
+	ClipIconWrapper,
+	ClipNumber
+} from './toolbar.styles';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
-import { VIEWER_NAV_MODES } from '../../../../constants/viewer';
+import { VIEWER_NAV_MODES, VIEWER_CLIP_MODES } from '../../../../constants/viewer';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
 	INITIAL_HELICOPTER_SPEED, MIN_HELICOPTER_SPEED, MAX_HELICOPTER_SPEED
@@ -52,8 +58,10 @@ interface IProps {
 	navigationMode: string;
 	helicopterSpeed: number;
 	isFocusMode: boolean;
+	clippingMode: string;
+	isClipEdit: boolean;
 	goToExtent: () => void;
-	setNavigationMode: (mode) => void;
+	setNavigationMode: (navigationMode) => void;
 	initialiseToolbar: () => void;
 	increaseHelicopterSpeed: (teamspace, modelId) => void;
 	decreaseHelicopterSpeed: (teamspace, modelId) => void;
@@ -62,12 +70,21 @@ interface IProps {
 	hideSelectedNodes: () => void;
 	isolateSelectedNodes: () => void;
 	setIsFocusMode: (isFocusMode) => void;
+	setClippingMode: (clippingMode) => void;
+	toggleClipEdit: () => void;
 }
 
 interface IState {
 	activeButton: string;
 	activeSubMenu: string;
 }
+
+const ClipIconWithNumber = ({clipNumber}) => (
+	<ClipIconWrapper>
+		<ClipNumber>{clipNumber}</ClipNumber>
+		<ClipIcon />
+	</ClipIconWrapper>
+);
 
 export class Toolbar extends React.PureComponent<IProps, IState> {
 	public state = {
@@ -88,7 +105,9 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public onClick = () => {};
+	public onClick = () => {
+		console.log('click');
+	}
 
 	public onNavigationModeClick = (mode) => {
 		this.props.setNavigationMode(mode);
@@ -157,7 +176,31 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			{ label: 'Hide', Icon: HideIcon, action: this.props.hideSelectedNodes, show: true  },
 			{ label: 'Isolate', Icon: IsolateIcon, action: this.props.isolateSelectedNodes, show: true },
 			{ label: 'Focus', Icon: FocusIcon, action: () => this.props.setIsFocusMode(true), show: true },
-			{ label: 'Clip', Icon: ClipIcon, action: this.onClick, show: true },
+			{
+				label: 'Clip',
+				Icon: ClipIcon,
+				action: () => this.handleShowSubmenu('Clip'),
+				show: !this.props.clippingMode,
+				subMenu: [
+					{
+						label: 'Start box clip',
+						Icon: () => <ClipIconWithNumber clipNumber={6} />,
+						action: () => this.props.setClippingMode(VIEWER_CLIP_MODES.BOX)
+					},
+					{
+						label: 'Start single clip',
+						Icon: () => <ClipIconWithNumber clipNumber={1} />,
+						action: () => this.props.setClippingMode(VIEWER_CLIP_MODES.SINGLE)
+					}
+				]
+			},
+			{
+				label: 'Clip',
+				Icon: () => <ClipIconWithNumber clipNumber={this.props.clippingMode === VIEWER_CLIP_MODES.SINGLE ? 1 : 6} />,
+				action: () => this.props.toggleClipEdit(),
+				show: this.props.clippingMode,
+				active: this.props.isClipEdit
+			},
 			{ label: 'Measure', Icon: MeasureIcon, action: this.onClick, show: true },
 			{ label: 'BIM', Icon: MetadataIcon, action: this.onClick, show: true }
 		];
@@ -165,7 +208,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 	public renderButtons = () => {
 		return this.toolbarList.map((
-			{label, Icon, action, show = true, subMenu = []}, index
+			{label, Icon, action, show = true, subMenu = [], active = false }, index
 			) => renderWhenTrue(() => (
 			<ButtonWrapper key={index}>
 				<TooltipButton
@@ -173,6 +216,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 					label={label}
 					Icon={Icon}
 					action={action}
+					active={active}
 				/>
 				{this.renderSubmenu(subMenu, label)}
 			</ButtonWrapper>)

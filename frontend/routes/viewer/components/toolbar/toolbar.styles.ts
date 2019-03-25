@@ -38,3 +38,15 @@ export const Submenu = styled.div`
   position: absolute;
   bottom: 100%;
 `;
+
+export const ClipIconWrapper = styled.span`
+  position: relative;
+`;
+
+export const ClipNumber = styled.span`
+  position: absolute;
+  left: 8px;
+  top: 5px;
+  font-size: 9px;
+  font-weight: 900;
+`;

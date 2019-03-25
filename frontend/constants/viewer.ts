@@ -3,6 +3,11 @@ export const VIEWER_NAV_MODES = {
 	TURNTABLE: 'TURNTABLE'
 };
 
+export const VIEWER_CLIP_MODES = {
+	SINGLE: 'SINGLE',
+	BOX: 'BOX'
+};
+
 export const VIEWER_MAP_SOURCES = {
 	OSM: 'OSM',
 	HERE: 'HERE',

@@ -19,7 +19,7 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
   position: absolute;
-  top: 50px;
-  right: 50px;
+  top: 20px;
+  right: 20px;
   z-index: 2;
 `;

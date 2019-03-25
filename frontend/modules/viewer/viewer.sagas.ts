@@ -21,8 +21,9 @@ import * as API from '../../services/api';
 
 import { ViewerTypes, ViewerActions } from './viewer.redux';
 import { DialogActions } from '../dialog';
-import { selectHelicopterSpeed } from './viewer.selectors';
+import { selectHelicopterSpeed, selectIsClipEdit } from './viewer.selectors';
 import { Viewer, INITIAL_HELICOPTER_SPEED } from '../../services/viewer/viewer';
+import { VIEWER_CLIP_MODES } from '../../constants/viewer';
 
 export const getViewer = () => {
 	const ViewerService = getAngularService('ViewerService') as any;
@@ -194,6 +195,31 @@ export function* decreaseHelicopterSpeed({teamspace, modelId}) {
 	}
 }
 
+export function* setClippingMode({mode}) {
+	try {
+		const isSingle = mode === VIEWER_CLIP_MODES.SINGLE;
+		yield Viewer.startClip(isSingle);
+		yield put(ViewerActions.setClippingModeSuccess(mode));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'clipping mode'));
+	}
+}
+
+export function* toggleClipEdit() {
+	try {
+		const isClipEdit = yield select(selectIsClipEdit);
+
+		if (!isClipEdit) {
+			yield Viewer.startClipEdit();
+		} else {
+			yield Viewer.stopClipEdit();
+		}
+
+		yield put(ViewerActions.setIsClipEdit(!isClipEdit));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('toggle', 'clip edit'));
+	}
+}
 export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.WAIT_FOR_VIEWER, waitForViewer);
 	yield takeLatest(ViewerTypes.MAP_INITIALISE, mapInitialise);
@@ -209,4 +235,6 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.INCREASE_HELICOPTER_SPEED, increaseHelicopterSpeed);
 	yield takeLatest(ViewerTypes.DECREASE_HELICOPTER_SPEED, decreaseHelicopterSpeed);
 	yield takeLatest(ViewerTypes.GO_TO_EXTENT, goToExtent);
+	yield takeLatest(ViewerTypes.SET_CLIPPING_MODE, setClippingMode);
+	yield takeLatest(ViewerTypes.TOGGLE_CLIP_EDIT, toggleClipEdit);
 }
