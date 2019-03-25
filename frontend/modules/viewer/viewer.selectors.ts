@@ -73,3 +73,7 @@ export const selectClippingMode = createSelector(
 export const selectIsClipEdit = createSelector(
 	selectViewerDomain, (state) => state.isClipEdit
 );
+
+export const selectClipNumber = createSelector(
+	selectViewerDomain, (state) => state.clipNumber
+);

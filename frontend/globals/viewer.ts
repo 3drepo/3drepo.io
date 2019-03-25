@@ -618,6 +618,7 @@ export class Viewer {
 
 	public numClipPlanesUpdated(nPlanes) {
 		this.numClips = nPlanes;
+		this.emit(Viewer.EVENT.UPDATE_NUM_CLIP, nPlanes);
 	}
 
 	public getNumPlanes() {

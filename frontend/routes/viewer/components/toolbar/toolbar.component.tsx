@@ -48,6 +48,7 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
 	INITIAL_HELICOPTER_SPEED, MIN_HELICOPTER_SPEED, MAX_HELICOPTER_SPEED
 } from '../../../../services/viewer/viewer';
+import { Measure } from '../../../../services/viewer/measure';
 
 const MeasureIcon = () => <Ruler IconProps={{ className: 'fontSizeSmall' }} />;
 const HelicopterIcon = () => <Helicopter IconProps={{ className: 'fontSizeSmall' }} />;
@@ -60,6 +61,7 @@ interface IProps {
 	isFocusMode: boolean;
 	clippingMode: string;
 	isClipEdit: boolean;
+	clipNumber: number;
 	goToExtent: () => void;
 	setNavigationMode: (navigationMode) => void;
 	initialiseToolbar: () => void;
@@ -97,11 +99,18 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
+		console.log('dU', Measure.getIsActive());
 		if (this.props.isFocusMode !== prevProps.isFocusMode) {
 			const uiVisibility = this.props.isFocusMode ? 'hidden' : 'initial';
 
 			document.querySelector('#modelUI').style.visibility = uiVisibility;
 			document.querySelector('#topMenu').style.visibility = uiVisibility;
+		}
+
+		if (!this.props.clippingMode && prevProps.clippingMode) {
+			this.setState({
+				activeSubMenu: ''
+			});
 		}
 	}
 
@@ -196,12 +205,12 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			},
 			{
 				label: 'Clip',
-				Icon: () => <ClipIconWithNumber clipNumber={this.props.clippingMode === VIEWER_CLIP_MODES.SINGLE ? 1 : 6} />,
+				Icon: () =>	<ClipIconWithNumber clipNumber={this.props.clipNumber} />,
 				action: () => this.props.toggleClipEdit(),
-				show: this.props.clippingMode,
+				show: this.props.clippingMode && this.props.clipNumber,
 				active: this.props.isClipEdit
 			},
-			{ label: 'Measure', Icon: MeasureIcon, action: this.onClick, show: true },
+			{ label: 'Measure', Icon: MeasureIcon, action: () => Measure.toggleMeasure(), show: true, active: Measure.getIsActive() },
 			{ label: 'BIM', Icon: MetadataIcon, action: this.onClick, show: true }
 		];
 	}
