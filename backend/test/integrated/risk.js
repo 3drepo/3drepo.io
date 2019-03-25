@@ -89,6 +89,7 @@ describe("Risks", function () {
 		it("should succeed", function(done) {
 
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			const levelOfRisk = (0 === risk.likelihood && 0 === risk.consequence) ? 0 : -1;
 			let riskId;
 
 			async.series([
@@ -96,7 +97,6 @@ describe("Risks", function () {
 					agent.post(`/${username}/${model}/risks.json`)
 						.send(risk)
 						.expect(200, function(err, res) {
-
 							riskId = res.body._id;
 
 							expect(res.body.name).to.equal(risk.name);
@@ -112,7 +112,7 @@ describe("Risks", function () {
 							expect(res.body.category).to.equal(risk.category);
 							expect(res.body.likelihood).to.equal(risk.likelihood);
 							expect(res.body.consequence).to.equal(risk.consequence);
-							expect(res.body.level_of_risk).to.equal(risk.level_of_risk);
+							expect(res.body.level_of_risk).to.equal(levelOfRisk);
 							expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
 							expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
 							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(risk.viewpoint.clippingPlanes);
@@ -137,7 +137,7 @@ describe("Risks", function () {
 						expect(res.body.category).to.equal(risk.category);
 						expect(res.body.likelihood).to.equal(risk.likelihood);
 						expect(res.body.consequence).to.equal(risk.consequence);
-						expect(res.body.level_of_risk).to.equal(risk.level_of_risk);
+						expect(res.body.level_of_risk).to.equal(levelOfRisk);
 						expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
 						expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
 
@@ -414,9 +414,9 @@ describe("Risks", function () {
 
 		it("seal last non system comment when adding system comment", function(done) {
 
-			const risk = Object.assign({"name":"Risk test"}, baseRisk, { topic_type: "ru123"});
+			const risk = Object.assign({"name":"Risk test"}, baseRisk, { associated_activity: "ru123"});
 			let riskId;
-			const data = { topic_type: "abc123"};
+			const data = { associated_activity: "abc123"};
 			async.series([
 				function(done) {
 					agent.post(`/${username}/${model}/risks.json`)
@@ -616,6 +616,9 @@ describe("Risks", function () {
 
 					function(done) {
 						agent.get(`/${username}/${model}/risks/${riskId}.json`).expect(200, function(err , res) {
+							comment.viewpoint.account = username;
+							comment.viewpoint.model = model;
+							comment.viewpoint.guid = res.body.comments[0].viewpoint.guid;
 
 							expect(res.body.comments.length).to.equal(1);
 							expect(res.body.comments[0].comment).to.equal(comment.comment);
