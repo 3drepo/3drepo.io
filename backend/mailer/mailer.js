@@ -19,7 +19,6 @@
 const nodemailer = require("nodemailer");
 const config = require("../config");
 const C = require("../constants");
-const utils = require("../utils");
 const getBaseURL = config.getBaseURL;
 let transporter;
 
