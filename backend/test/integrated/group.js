@@ -571,8 +571,56 @@ describe("Groups", function () {
 				}
 
 			], done);
+		});
 
+		it("updating only the name should succeed", function(done) {
+			const newName = {name: "Updated name"};
 
+			async.series([
+				function(done) {
+					agent.put(`/${username}/${model}/groups/${goldenData._id}`)
+						.send(newName)
+						.expect(200 , function(err, res) {
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
+						.expect(200 , function(err, res) {
+							const expectedData = Object.assign({}, goldenData);
+							expectedData.name = newName;
+							expect(res.body).to.deep.equal(expectedData);
+							expect(res.body.updateBy).to.equal(username);
+							done(err);
+						});
+				}
+
+			], done);
+		});
+
+		it("updating only the color should succeed", function(done) {
+			const newColor = {color: [255,192,203]};
+
+			async.series([
+				function(done) {
+					agent.put(`/${username}/${model}/groups/${goldenData._id}`)
+						.send(newColor)
+						.expect(200 , function(err, res) {
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
+						.expect(200 , function(err, res) {
+							const expectedData = Object.assign({}, goldenData);
+							expectedData.color = newColor;
+							expect(res.body).to.deep.equal(expectedData);
+							expect(res.body.updateBy).to.equal(username);
+							done(err);
+						});
+				}
+
+			], done);
 		});
 
 		it("updating invalid group ID should fail", function(done) {
