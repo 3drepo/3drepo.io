@@ -42,7 +42,8 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	setClippingMode: ['mode'],
 	setClippingModeSuccess: ['mode'],
 	toggleClipEdit: [],
-	setIsClipEdit: ['isClipEdit']
+	setIsClipEdit: ['isClipEdit'],
+	setClipNumber: ['clipNumber']
 }, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {
@@ -52,7 +53,8 @@ export const INITIAL_STATE = {
 	clippingMode: null,
 	helicopterSpeed: null,
 	isFocusMode: false,
-	isClipEdit: false
+	isClipEdit: false,
+	clipNumber: 0
 };
 
 const updateSettings = (state = INITIAL_STATE, {settings}) => {
@@ -80,11 +82,16 @@ const setIsClipEdit = (state = INITIAL_STATE, {isClipEdit}) => {
 	return {...state, isClipEdit};
 };
 
+const setClipNumber = (state = INITIAL_STATE, {clipNumber}) => {
+	return {...state, clipNumber};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerTypes.UPDATE_SETTINGS] : updateSettings,
 	[ViewerTypes.SET_NAVIGATION_MODE_SUCCESS] : setNavigationModeSuccess,
 	[ViewerTypes.SET_CLIPPING_MODE_SUCCESS] : setClippingModeSuccess,
 	[ViewerTypes.SET_HELICOPTER_SPEED] : setHelicopterSpeed,
 	[ViewerTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,
-	[ViewerTypes.SET_IS_CLIP_EDIT] : setIsClipEdit
+	[ViewerTypes.SET_IS_CLIP_EDIT] : setIsClipEdit,
+	[ViewerTypes.SET_CLIP_NUMBER] : setClipNumber
 });

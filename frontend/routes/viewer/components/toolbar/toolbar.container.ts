@@ -26,7 +26,8 @@ import {
 	selectHelicopterSpeed,
 	selectIsFocusMode,
 	selectClippingMode,
-	selectIsClipEdit
+	selectIsClipEdit,
+	selectClipNumber
 } from '../../../../modules/viewer';
 import { TreeActions } from '../../../../modules/tree';
 
@@ -35,7 +36,8 @@ const mapStateToProps = createStructuredSelector({
 	helicopterSpeed: selectHelicopterSpeed,
 	isFocusMode: selectIsFocusMode,
 	clippingMode: selectClippingMode,
-	isClipEdit: selectIsClipEdit
+	isClipEdit: selectIsClipEdit,
+	clipNumber: selectClipNumber
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

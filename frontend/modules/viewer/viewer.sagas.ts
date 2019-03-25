@@ -16,12 +16,14 @@
  */
 
 import { put, takeLatest, select } from 'redux-saga/effects';
-import { getAngularService } from '../../helpers/migration';
+import { getAngularService, dispatch, getState } from '../../helpers/migration';
 import * as API from '../../services/api';
+import { VIEWER_EVENTS } from '../../constants/viewer';
+import { Measure } from '../../services/viewer/measure';
 
 import { ViewerTypes, ViewerActions } from './viewer.redux';
 import { DialogActions } from '../dialog';
-import { selectHelicopterSpeed, selectIsClipEdit } from './viewer.selectors';
+import { selectHelicopterSpeed, selectIsClipEdit, selectClipNumber } from './viewer.selectors';
 import { Viewer, INITIAL_HELICOPTER_SPEED } from '../../services/viewer/viewer';
 import { VIEWER_CLIP_MODES } from '../../constants/viewer';
 
@@ -53,6 +55,19 @@ export function* mapInitialise({surveyPoints, sources = []}) {
 
 export function* initialiseToolbar() {
 	try {
+		Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, (clipNumber) => {
+			const isClipEdit = selectIsClipEdit(getState());
+			const currentClipNumber = selectClipNumber(getState());
+			if (currentClipNumber !== clipNumber) {
+				dispatch(ViewerActions.setClipNumber(clipNumber));
+			}
+
+			if (clipNumber === 0 && isClipEdit) {
+				dispatch(ViewerActions.toggleClipEdit());
+				dispatch(ViewerActions.setClippingMode(null));
+			}
+		});
+
 		const helicopterSpeed = yield Viewer.getHelicopterSpeed();
 		yield put(ViewerActions.setHelicopterSpeed(helicopterSpeed));
 	} catch (error) {
@@ -197,8 +212,10 @@ export function* decreaseHelicopterSpeed({teamspace, modelId}) {
 
 export function* setClippingMode({mode}) {
 	try {
-		const isSingle = mode === VIEWER_CLIP_MODES.SINGLE;
-		yield Viewer.startClip(isSingle);
+		if (mode) {
+			const isSingle = mode === VIEWER_CLIP_MODES.SINGLE;
+			yield Viewer.startClip(isSingle);
+		}
 		yield put(ViewerActions.setClippingModeSuccess(mode));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'clipping mode'));
@@ -220,6 +237,7 @@ export function* toggleClipEdit() {
 		yield put(DialogActions.showErrorDialog('toggle', 'clip edit'));
 	}
 }
+
 export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.WAIT_FOR_VIEWER, waitForViewer);
 	yield takeLatest(ViewerTypes.MAP_INITIALISE, mapInitialise);
