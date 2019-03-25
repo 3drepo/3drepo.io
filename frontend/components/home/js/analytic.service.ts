@@ -90,23 +90,39 @@ export class AnalyticService {
 		})(window, document, "script", "https://www.google-analytics.com/analytics.js", "ga");
 		/* tslint:enable */
 
+		const args = ['create',  this.ClientConfigService.gaTrackId, 'auto', {}];
+
 		if (this.ClientConfigService.userId) {
-			ga('create', this.ClientConfigService.gaTrackId, 'auto', { userId: this.ClientConfigService.userId });
-		} else {
-			ga('create', this.ClientConfigService.gaTrackId, 'auto');
+			args[3] = Object.assign({ userId: this.ClientConfigService.userId}, args[3] );
 		}
+
+		ga.apply(window, args);
+
+		const secondaryArgs =  args.concat([]);
+		secondaryArgs[1] = this.ClientConfigService.secondaryGaTrackId;
+		secondaryArgs[3] = Object.assign({name: 'secondary', allowLinker: true}, args[3]);
+
+		ga.apply(window, secondaryArgs);
+		ga('secondary.require', 'linker');
+		ga('secondary.linker:autoLink', [this.ClientConfigService.secondaryGaDomain]);
 	}
 
 	public isGoogleAnalyticEnabled() {
 		return typeof ga !== 'undefined' && ga !== null;
 	}
 
-	public sendPageView(location) {
+	public sendPageView(location, tracker = '') {
 		if (!this.isGoogleAnalyticEnabled()) {
 			return;
 		}
 
-		ga('send', 'pageview', location.pathname + location.search);
+		tracker = !tracker ? '' : tracker + '.';
+
+		ga(tracker + 'send', 'pageview', location.pathname + location.search);
+	}
+
+	public sendPageViewSecondaryTracker(location) {
+		this.sendPageView(location, 'secondary');
 	}
 
 	public sendEvent(event) {
