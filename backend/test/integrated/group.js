@@ -565,6 +565,7 @@ describe("Groups", function () {
 							const expectedData = Object.assign({}, goldenData);
 							expectedData.objects = [];
 							expect(res.body).to.deep.equal(expectedData);
+							expect(res.body.updateBy).to.equal(username);
 							done(err);
 						});
 				}
