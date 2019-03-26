@@ -1,6 +1,5 @@
 // Components & services
 import './account/js/account-upload.service';
-import './bottom-buttons/js/bottom-buttons.component';
 import './compare/js/compare.component';
 import './compare/js/compare.service';
 import './cookies/js/cookies.component';
@@ -42,7 +41,6 @@ import './payment/js/payment.component';
 import './privacy/js/privacy.component';
 import './revisions/js/revisions.component';
 import './revisions/js/revisions.service';
-import './right-panel/js/right-panel.component';
 import './terms/js/terms.component';
 import './tree/js/tree.component';
 import './tree/js/tree.service';

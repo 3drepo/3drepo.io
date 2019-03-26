@@ -105,9 +105,11 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	public componentDidUpdate(prevProps) {
 		if (this.props.isFocusMode !== prevProps.isFocusMode) {
 			const uiVisibility = this.props.isFocusMode ? 'hidden' : 'initial';
+			const modelUI = document.querySelector('#modelUI') as HTMLElement;
+			const topMenu = document.querySelector('#topMenu') as HTMLElement;
 
-			document.querySelector('#modelUI').style.visibility = uiVisibility;
-			document.querySelector('#topMenu').style.visibility = uiVisibility;
+			modelUI.style.visibility = uiVisibility;
+			topMenu.style.visibility = uiVisibility;
 		}
 
 		if (!this.props.clippingMode && prevProps.clippingMode) {
