@@ -94,7 +94,7 @@ export const VIEWER_TOOLBAR_ITEMS = {
 	SHOW_ALL: 'Show All',
 	HIDE: 'Hide',
 	ISOLATE: 'Isolate',
-	FOCUS: 'Gocus',
+	FOCUS: 'Focus',
 	CLIP: 'Clip',
 	MEASURE: 'Measure',
 	BIM: 'BIM'
