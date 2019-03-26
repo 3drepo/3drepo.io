@@ -38,7 +38,6 @@ export class CloseFocusModeButton extends React.PureComponent<IProps, any> {
 						label={'Close focus mode'}
 						Icon={CloseIcon}
 						action={() => this.props.setIsFocusMode(false)}
-						disabled={!this.props.isFocusMode}
 					/>
 				</Container>
 			</Fade>
