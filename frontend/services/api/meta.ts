@@ -40,7 +40,7 @@ export const getFieldNames = (teamspace, modelId) => {
  * Get starred meta
  */
 export const getStarredMeta = () => {
-	return api.get('/starredMeta');
+	return api.get('starredMeta');
 };
 
 /**
@@ -48,7 +48,7 @@ export const getStarredMeta = () => {
  * @param metaRecordKey
  */
 export const addStarredMeta = (metaRecordKey) => {
-	return api.post('/starredMeta', { tag: metaRecordKey });
+	return api.post('starredMeta', { tag: metaRecordKey });
 };
 
 /**
@@ -56,5 +56,5 @@ export const addStarredMeta = (metaRecordKey) => {
  * @param metaRecordKey
  */
 export const removeStarredMeta = (metaRecordKey) => {
-	return api.delete('/starredMeta', { tag: metaRecordKey });
+	return api.delete('starredMeta', { data: { tag: metaRecordKey } });
 };

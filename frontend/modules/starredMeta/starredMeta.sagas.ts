@@ -23,7 +23,7 @@ import { StarredMetaTypes, StarredMetaActions } from './starredMeta.redux';
 
 export function* fetchStarredMeta() {
 	try {
-		const { data: starredMeta } = yield put(API.getStarredMeta());
+		const { data: starredMeta } = yield API.getStarredMeta();
 		yield put(StarredMetaActions.setStarredMeta(starredMeta));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'starred meta', error));
@@ -32,7 +32,7 @@ export function* fetchStarredMeta() {
 
 export function* addToStarredMeta({ metaRecordKey }) {
 	try {
-		yield put(API.addStarredMeta(metaRecordKey));
+		yield API.addStarredMeta(metaRecordKey);
 		yield put(StarredMetaActions.addToStarredMetaSuccess(metaRecordKey));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('add', 'starred meta', error));
@@ -41,7 +41,7 @@ export function* addToStarredMeta({ metaRecordKey }) {
 
 export function* removeFromStarredMeta({ metaRecordKey }) {
 	try {
-		yield put(API.removeStarredMeta(metaRecordKey));
+		yield API.removeStarredMeta(metaRecordKey);
 		yield put(StarredMetaActions.removeFromStarredMetaSuccess(metaRecordKey));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('add', 'starred meta', error));
@@ -49,7 +49,7 @@ export function* removeFromStarredMeta({ metaRecordKey }) {
 }
 
 export default function* StarredMetaSaga() {
-	yield takeLatest(StarredMetaTypes.FETCH, fetch);
+	yield takeLatest(StarredMetaTypes.FETCH_STARRED_META, fetchStarredMeta);
 	yield takeLatest(StarredMetaTypes.ADD_TO_STARRED_META, addToStarredMeta);
 	yield takeLatest(StarredMetaTypes.REMOVE_FROM_STARRED_META, removeFromStarredMeta);
 }

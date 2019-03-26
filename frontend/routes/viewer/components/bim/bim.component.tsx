@@ -35,7 +35,7 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { Container, EmptyStateInfo, MetaRecord, MetaKey, MetaValue, StarIconWrapper } from './bim.styles';
+import { Container, EmptyStateInfo, MetaRecord, MetaKey, MetaKeyText, MetaValue, StarIconWrapper } from './bim.styles';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 
 interface IProps {
@@ -64,11 +64,11 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 	</IconButton>
 );
 
-const StarIcon = ({ active }) => {
+const StarIcon = ({ active, onClick }) => {
 	const IconComponent = active ? Star : StarBorder;
 	return (
-		<StarIconWrapper active>
-			<IconComponent color="inherit" fontSize="small" />
+		<StarIconWrapper active={active}>
+			<IconComponent onClick={onClick} color="inherit" fontSize="small" />
 		</StarIconWrapper>
 	);
 };
@@ -86,7 +86,7 @@ export class Bim extends React.PureComponent<IProps, any> {
 		if (showStarred) {
 			return metadata.filter(({ key }) => starredMetaMap[key]);
 		}
-		return [];
+		return metadata;
 	}
 
 	private renderFilterPanel = renderWhenTrue(() => (
@@ -155,13 +155,24 @@ export class Bim extends React.PureComponent<IProps, any> {
 		showStarred: Boolean(activeTab)
 	})
 
+	private toggleStarredRecord = (key, isStarred) => () => {
+		if (isStarred) {
+			this.props.removeMetaRecordFromStarred(key);
+		} else {
+			this.props.addMetaRecordToStarred(key);
+		}
+	}
+
 	private renderMetaRecord = ({ key, value }) => {
-		const isStarred = this.props.starredMetaMap[key];
+		const isStarred = Number(Boolean(this.props.starredMetaMap[key]));
 		return (
-			<MetaRecord>
+			<MetaRecord key={key}>
 				<MetaKey>
-					<StarIcon active={isStarred}/>
-					{key}
+					<StarIcon
+						active={isStarred}
+						onClick={this.toggleStarredRecord(key, isStarred)}
+					/>
+					<MetaKeyText>{key}</MetaKeyText>
 				</MetaKey>
 				<MetaValue>{value}</MetaValue>
 			</MetaRecord>

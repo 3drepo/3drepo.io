@@ -25,12 +25,12 @@ import { StarredMetaActions } from '../starredMeta';
 
 export function* fetchMetadata({ teamspace, model, metadataId = '7faf260f-3262-462f-86ed-cd267902ab03' }) {
 	try {
-		const [{ data: meta }] = yield all([
+		const [{ data }] = yield all([
 			API.getMetadata(teamspace, model, metadataId),
-			put(StarredMetaActions.fetchStattedMeta())
+			put(StarredMetaActions.fetchStarredMeta())
 		]);
 
-		yield put(BimActions.fetchMetadataSuccess(prepareMetadata(meta[0].metadata)));
+		yield put(BimActions.fetchMetadataSuccess(prepareMetadata(data.meta[0].metadata)));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'metadata', error));
 	}

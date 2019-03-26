@@ -29,23 +29,34 @@ export const MetaRecord = styled.div`
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+	padding: 4px 0;
 
 	&:nth-child(2n) {
-		background-color: ${COLOR.BLACK_6};	
+		background-color: ${COLOR.BLACK_6};
 	}
 `;
 
 export const MetaKey = styled.div`
-	flex: 50%;
+	width: 50%;
 	display: flex;
 	flex-direction: row;
 	justify-content: flex-start;
+	align-items: center;
+`;
+
+export const MetaKeyText = styled.div`
 	color: ${COLOR.BLACK_60};
+	font-size: 14px;
+	padding-right: 10px;
+	word-break: break-all;
 `;
 
 export const MetaValue = styled.div`
-	flex: 50%;
+	width: 50%;
 	color: ${COLOR.BLACK_87};
+	font-size: 14px;
+	padding-right: 10px;
+	word-break: break-all;
 `;
 
 export const EmptyStateInfo = styled.p`
@@ -61,4 +72,8 @@ export const EmptyStateInfo = styled.p`
 export const StarIconWrapper = styled(Icon)`
 	color: ${(props: any) => props.active ? COLOR.DARK_ORANGE : COLOR.BLACK_20};
 	width: 20px;
+	margin-left: 5px;
+	margin-right: 2px;
+	margin-top: -2px;
+	cursor: pointer;
 ` as any;
