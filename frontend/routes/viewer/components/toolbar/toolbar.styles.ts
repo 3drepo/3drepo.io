@@ -28,7 +28,8 @@ export const Container = styled.div`
   padding: 0 10px;
   justify-content: center;
   align-items: center;
-`;
+  visibility: ${(props: any) => props.visible ? 'visible' : 'hidden'};
+` as any;
 
 export const ButtonWrapper = styled.div`
   position: relative;

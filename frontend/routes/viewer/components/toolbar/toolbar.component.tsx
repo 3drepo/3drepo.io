@@ -48,7 +48,6 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
 	INITIAL_HELICOPTER_SPEED, MIN_HELICOPTER_SPEED, MAX_HELICOPTER_SPEED
 } from '../../../../services/viewer/viewer';
-import { Measure } from '../../../../services/viewer/measure';
 
 const MeasureIcon = () => <Ruler IconProps={{ className: 'fontSizeSmall' }} />;
 const HelicopterIcon = () => <Helicopter IconProps={{ className: 'fontSizeSmall' }} />;
@@ -62,6 +61,8 @@ interface IProps {
 	clippingMode: string;
 	isClipEdit: boolean;
 	clipNumber: number;
+	isMetadataVisible: boolean;
+	measureState: any;
 	goToExtent: () => void;
 	setNavigationMode: (navigationMode) => void;
 	initialiseToolbar: () => void;
@@ -74,6 +75,9 @@ interface IProps {
 	setIsFocusMode: (isFocusMode) => void;
 	setClippingMode: (clippingMode) => void;
 	toggleClipEdit: () => void;
+	toggleMetadata: () => void;
+	toggleMeasure: () => void;
+	deactivateMeasure: () => void;
 }
 
 interface IState {
@@ -99,7 +103,6 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		console.log('dU', Measure.getIsActive());
 		if (this.props.isFocusMode !== prevProps.isFocusMode) {
 			const uiVisibility = this.props.isFocusMode ? 'hidden' : 'initial';
 
@@ -114,8 +117,8 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public onClick = () => {
-		console.log('click');
+	public componentWillUnmount() {
+		this.props.deactivateMeasure();
 	}
 
 	public onNavigationModeClick = (mode) => {
@@ -210,8 +213,20 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				show: this.props.clippingMode && this.props.clipNumber,
 				active: this.props.isClipEdit
 			},
-			{ label: 'Measure', Icon: MeasureIcon, action: () => Measure.toggleMeasure(), show: true, active: Measure.getIsActive() },
-			{ label: 'BIM', Icon: MetadataIcon, action: this.onClick, show: true }
+			{
+				label: 'Measure',
+				Icon: MeasureIcon,
+				action: this.props.toggleMeasure,
+				show: true,
+				active: this.props.measureState.active
+			},
+			{
+				label: 'BIM',
+				Icon: MetadataIcon,
+				action: this.props.toggleMetadata,
+				show: true,
+				active: this.props.isMetadataVisible
+			}
 		];
 	}
 
@@ -252,7 +267,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		return (
-			<Container>
+			<Container visible={!this.props.isFocusMode}>
 				{this.renderButtons()}
 			</Container>
 		);

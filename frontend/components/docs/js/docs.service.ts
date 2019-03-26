@@ -1,3 +1,4 @@
+
 /**
  *  Copyright (C) 2015 3D Repo Ltd
  *
@@ -14,6 +15,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { selectIsMetadataVisible } from '../../../modules/viewer';
+import { getState } from '../../../helpers/migration';
 
 export class DocsService {
 
@@ -40,12 +43,15 @@ export class DocsService {
 		this.docTypeHeight = 50;
 		this.state = {
 			disabled: false,
-			active: false,
 			show: false,
 			updated: false,
 			docs: false,
 			allDocTypesHeight: 0
 		};
+	}
+
+	public get active() {
+		return selectIsMetadataVisible(getState());
 	}
 
 	public getDocs(account, model, metadataId) {
@@ -91,8 +97,7 @@ export class DocsService {
 	}
 
 	public displayDocs(account, model, metadataIds) {
-
-		const canOpenDocs = this.state.active && !this.ViewerService.pin.pinDropMode;
+		const canOpenDocs = this.active && !this.ViewerService.pin.pinDropMode;
 
 		if (canOpenDocs) {
 

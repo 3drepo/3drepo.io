@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createSelector } from 'reselect';
+import { VIEWER_PANELS } from '../../constants/viewer';
 
 export const selectViewerDomain = (state) => Object.assign({}, state.viewer);
 
@@ -76,4 +77,24 @@ export const selectIsClipEdit = createSelector(
 
 export const selectClipNumber = createSelector(
 	selectViewerDomain, (state) => state.clipNumber
+);
+
+export const selectMeasureState = createSelector(
+	selectViewerDomain, (state) => state.measureState
+);
+
+export const selectIsMeasureActive = createSelector(
+	selectMeasureState, (state) => state.active
+);
+
+export const selectIsMeasureDisabled = createSelector(
+	selectMeasureState, (state) => state.disabled
+);
+
+export const selectVisiblePanels = createSelector(
+	selectViewerDomain, (state) => state.visiblePanels
+);
+
+export const selectIsMetadataVisible = createSelector(
+	selectVisiblePanels, (state) => state[VIEWER_PANELS.METADATA]
 );

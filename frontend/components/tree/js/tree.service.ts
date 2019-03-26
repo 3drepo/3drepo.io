@@ -985,7 +985,6 @@ export class TreeService {
 	 * @param node the node to show the metadata for
 	 */
 	public handleMetadata(node: any) {
-
 		if (node && node.meta) {
 			this.DocsService.displayDocs(
 				node.account,

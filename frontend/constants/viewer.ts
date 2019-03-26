@@ -75,3 +75,14 @@ export const DEFAULT_SETTINGS = {
 	farPlaneSamplingPoints: 5,
 	farPlaneAlgorithm: 'box'
 };
+
+export const VIEWER_PANELS = {
+	METADATA: 'metadata',
+	RISKS: 'risks',
+	ISSUES: 'issues',
+	GROUPS: 'groups',
+	VIEWS: 'views',
+	TREE: 'tree',
+	COMPARE: 'compare',
+	GIS: 'gis'
+};

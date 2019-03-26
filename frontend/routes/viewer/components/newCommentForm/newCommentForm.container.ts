@@ -22,11 +22,14 @@ import { connect } from '../../../../helpers/migration';
 import { DialogActions } from '../../../../modules/dialog';
 
 import { NewCommentForm } from './newCommentForm.component';
+import { ViewerActions } from '../../../../modules/viewer';
 
 const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	showScreenshotDialog: DialogActions.showScreenshotDialog
+	showScreenshotDialog: DialogActions.showScreenshotDialog,
+	setMeasureState: ViewerActions.setMeasureState,
+	deactivateMeasure: ViewerActions.deactivateMeasure
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(NewCommentForm);
