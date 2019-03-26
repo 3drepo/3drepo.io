@@ -23,7 +23,6 @@ import CameraIcon from '@material-ui/icons/AddAPhoto';
 import PinDropIcon from '@material-ui/icons/PinDrop';
 
 import { Viewer } from '../../../../services/viewer/viewer';
-import { Measure } from '../../../../services/viewer/measure';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
@@ -50,6 +49,8 @@ interface IProps {
 	onTakeScreenshot: (screenshot) => void;
 	onChangePin: (pin) => void;
 	showScreenshotDialog: (options) => void;
+	setMeasureState: (measureState) => void;
+	deactivateMeasure: () => void;
 }
 
 const NewCommentSchema = Yup.object().shape({
@@ -73,7 +74,7 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 
 	public componentWillUnmount() {
 		Viewer.setPinDropMode(false);
-		Measure.setDisabled(false);
+		this.props.setMeasureState({ disable: false });
 		this.togglePinListeners(false);
 	}
 
@@ -101,12 +102,12 @@ export class NewCommentForm extends React.PureComponent<IProps, any> {
 
 		if (isPinActive) {
 			Viewer.setPinDropMode(true);
-			Measure.deactivateMeasure();
-			Measure.setDisabled(true);
+			this.props.deactivateMeasure();
+			this.props.setMeasureState({ disable: true });
 			this.togglePinListeners(true);
 		} else {
 			Viewer.setPinDropMode(false);
-			Measure.setDisabled(false);
+			this.props.setMeasureState({ disable: false });
 			this.togglePinListeners(false);
 		}
 

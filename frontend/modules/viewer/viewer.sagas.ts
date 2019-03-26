@@ -18,12 +18,14 @@
 import { put, takeLatest, select } from 'redux-saga/effects';
 import { getAngularService, dispatch, getState } from '../../helpers/migration';
 import * as API from '../../services/api';
-import { VIEWER_EVENTS } from '../../constants/viewer';
+import { VIEWER_EVENTS, VIEWER_PANELS } from '../../constants/viewer';
 import { Measure } from '../../services/viewer/measure';
 
 import { ViewerTypes, ViewerActions } from './viewer.redux';
 import { DialogActions } from '../dialog';
-import { selectHelicopterSpeed, selectIsClipEdit, selectClipNumber } from './viewer.selectors';
+import {
+	selectHelicopterSpeed, selectIsClipEdit, selectClipNumber, selectIsMetadataVisible, selectMeasureState
+} from './viewer.selectors';
 import { Viewer, INITIAL_HELICOPTER_SPEED } from '../../services/viewer/viewer';
 import { VIEWER_CLIP_MODES } from '../../constants/viewer';
 
@@ -238,6 +240,53 @@ export function* toggleClipEdit() {
 	}
 }
 
+export function* toggleMetadata() {
+	try {
+		const metadataActive = yield select(selectIsMetadataVisible);
+		const measureState = yield select(selectMeasureState);
+
+		if (measureState.active && !metadataActive) {
+			yield put(ViewerActions.toggleMeasure());
+		}
+
+		const DocsService = getAngularService('DocsService') as any;
+		DocsService.state.show = !metadataActive;
+		yield put(ViewerActions.setPanelVisibility(VIEWER_PANELS.METADATA, !metadataActive));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('toggle', 'metadata'));
+	}
+}
+
+export function* toggleMeasure() {
+	try {
+		const metadataActive = yield select(selectIsMetadataVisible);
+		const measureState = yield select(selectMeasureState);
+
+		if (!measureState.active && metadataActive) {
+			yield put(ViewerActions.toggleMetadata());
+		}
+
+		if (measureState.active) {
+			yield Viewer.disableMeasure();
+		} else {
+			yield Viewer.activateMeasure();
+		}
+
+		yield put(ViewerActions.setMeasureState({active: !measureState.active}));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('toggle', 'measure'));
+	}
+}
+
+export function* deactivateMeasure() {
+	try {
+		yield Viewer.disableMeasure();
+		yield put(ViewerActions.setMeasureState({active: false}));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('deactivate', 'measure'));
+	}
+}
+
 export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.WAIT_FOR_VIEWER, waitForViewer);
 	yield takeLatest(ViewerTypes.MAP_INITIALISE, mapInitialise);
@@ -255,4 +304,7 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.GO_TO_EXTENT, goToExtent);
 	yield takeLatest(ViewerTypes.SET_CLIPPING_MODE, setClippingMode);
 	yield takeLatest(ViewerTypes.TOGGLE_CLIP_EDIT, toggleClipEdit);
+	yield takeLatest(ViewerTypes.TOGGLE_METADATA, toggleMetadata);
+	yield takeLatest(ViewerTypes.TOGGLE_MEASURE, toggleMeasure);
+	yield takeLatest(ViewerTypes.DEACTIVATE_MEASURE, deactivateMeasure);
 }

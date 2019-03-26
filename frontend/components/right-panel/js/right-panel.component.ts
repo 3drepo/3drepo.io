@@ -85,35 +85,12 @@ class RightPanelController implements ng.IController {
 		});
 	}
 
-	public disableOtherModes(setMode) {
-		if (setMode === 'meta') {
-
-			if (this.measureActive) {
-				this.toggleMeasure();
-			}
-
-			if (!this.metaData) {
-				this.toggleAutoMetaData();
-			}
-
-		} else if (setMode === 'measure') {
-
-			if (!this.measureActive) {
-				this.toggleMeasure();
-			}
-
-		}
-	}
-
 	public toggleMeasure() {
-
 		// If not measure mode and metadata enabled
 		if (!this.measureActive && this.metaData) {
 			this.toggleAutoMetaData();
 		}
-
 		Measure.toggleMeasure();
-
 	}
 
 	public toggleAutoMetaData() {
@@ -126,9 +103,7 @@ class RightPanelController implements ng.IController {
 		this.metaBackground = this.metaData ? this.highlightBackground : '';
 		this.DocsService.state.active = this.metaData;
 		this.DocsService.state.show = false;
-
 	}
-
 }
 
 export const RightPanelComponent: ng.IComponentOptions = {

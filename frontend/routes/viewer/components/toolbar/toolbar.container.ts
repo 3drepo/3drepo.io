@@ -27,7 +27,9 @@ import {
 	selectIsFocusMode,
 	selectClippingMode,
 	selectIsClipEdit,
-	selectClipNumber
+	selectClipNumber,
+	selectIsMetadataVisible,
+	selectMeasureState
 } from '../../../../modules/viewer';
 import { TreeActions } from '../../../../modules/tree';
 
@@ -37,7 +39,9 @@ const mapStateToProps = createStructuredSelector({
 	isFocusMode: selectIsFocusMode,
 	clippingMode: selectClippingMode,
 	isClipEdit: selectIsClipEdit,
-	clipNumber: selectClipNumber
+	clipNumber: selectClipNumber,
+	isMetadataVisible: selectIsMetadataVisible,
+	measureState: selectMeasureState
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -52,7 +56,10 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	isolateSelectedNodes: TreeActions.isolateSelectedNodes,
 	setIsFocusMode: ViewerActions.setIsFocusMode,
 	setClippingMode: ViewerActions.setClippingMode,
-	toggleClipEdit: ViewerActions.toggleClipEdit
+	toggleClipEdit: ViewerActions.toggleClipEdit,
+	toggleMetadata: ViewerActions.toggleMetadata,
+	toggleMeasure: ViewerActions.toggleMeasure,
+	deactivateMeasure: ViewerActions.deactivateMeasure
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Toolbar);

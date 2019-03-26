@@ -26,9 +26,6 @@ import TreeIcon from '@material-ui/icons/DeviceHub';
 import { Container } from './panelsMenu.styles';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
-interface IProps {
-}
-
 interface IState {
 	activePanels: any;
 }
@@ -43,7 +40,7 @@ const PANELS = {
 	GIS: 'GIS'
 };
 
-export class PanelsMenu extends React.PureComponent<IProps, IState> {
+export class PanelsMenu extends React.PureComponent<any, IState> {
 	public state = {
 		activePanels: {}
 	};

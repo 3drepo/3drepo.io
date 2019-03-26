@@ -32,12 +32,13 @@ export class CloseFocusModeButton extends React.PureComponent<IProps, any> {
 	public render() {
 		return (
 			<Fade in={this.props.isFocusMode}>
-				<Container>
+				<Container visible={this.props.isFocusMode}>
 					<TooltipButton
 						className="panelButton"
 						label={'Close focus mode'}
 						Icon={CloseIcon}
 						action={() => this.props.setIsFocusMode(false)}
+						disabled={!this.props.isFocusMode}
 					/>
 				</Container>
 			</Fade>
