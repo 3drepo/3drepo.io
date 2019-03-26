@@ -33,6 +33,7 @@ import DecreaseIcon from '@material-ui/icons/Remove';
 import ResetIcon from '@material-ui/icons/Replay';
 
 import { Helicopter, Ruler } from '../../../components/fontAwesomeIcon';
+import { renderWhenTrue } from '../../../../helpers/rendering';
 
 import {
 	Container,
@@ -43,8 +44,7 @@ import {
 } from './toolbar.styles';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
-import { VIEWER_NAV_MODES, VIEWER_CLIP_MODES } from '../../../../constants/viewer';
-import { renderWhenTrue } from '../../../../helpers/rendering';
+import { VIEWER_NAV_MODES, VIEWER_CLIP_MODES, VIEWER_TOOLBAR_ITEMS } from '../../../../constants/viewer';
 import {
 	INITIAL_HELICOPTER_SPEED, MIN_HELICOPTER_SPEED, MAX_HELICOPTER_SPEED
 } from '../../../../services/viewer/viewer';
@@ -144,25 +144,28 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 	public get toolbarList() {
 		return [
-			{ label: 'Extent', Icon: HomeIcon, action: this.props.goToExtent, show: true },
 			{
-				label: 'Turntable',
+				label: VIEWER_TOOLBAR_ITEMS.EXTENT,
+				Icon: HomeIcon,
+				action: this.props.goToExtent
+			},
+			{
+				label: VIEWER_TOOLBAR_ITEMS.TURNTABLE,
 				Icon: TurntableIcon,
-				action: () => this.handleShowSubmenu('Turntable'),
+				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.TURNTABLE),
 				show: this.props.navigationMode === VIEWER_NAV_MODES.TURNTABLE,
 				subMenu: [
 					{
-						label: 'Helicopter',
+						label: VIEWER_TOOLBAR_ITEMS.HELICOPTER,
 						Icon: HelicopterIcon,
-						action: () => this.handleNavigationModeClick(VIEWER_NAV_MODES.HELICOPTER),
-						show: true
+						action: () => this.handleNavigationModeClick(VIEWER_NAV_MODES.HELICOPTER)
 					}
 				]
 			},
 			{
-				label: 'Helicopter',
+				label: VIEWER_TOOLBAR_ITEMS.HELICOPTER,
 				Icon: HelicopterIcon,
-				action: () => this.handleShowSubmenu('Helicopter'),
+				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.HELICOPTER),
 				show: this.props.navigationMode === VIEWER_NAV_MODES.HELICOPTER,
 				subMenu: [
 					{
@@ -186,20 +189,36 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 						disabled: this.props.helicopterSpeed === MIN_HELICOPTER_SPEED
 					},
 					{
-						label: 'Turntable',
+						label: VIEWER_TOOLBAR_ITEMS.TURNTABLE,
 						Icon: TurntableIcon,
 						action: () => this.handleNavigationModeClick(VIEWER_NAV_MODES.TURNTABLE)
 					}
 				]
 			},
-			{ label: 'Show All', Icon: ShowAllIcon, action: this.props.showAllNodes, show: true },
-			{ label: 'Hide', Icon: HideIcon, action: this.props.hideSelectedNodes, show: true  },
-			{ label: 'Isolate', Icon: IsolateIcon, action: this.props.isolateSelectedNodes, show: true },
-			{ label: 'Focus', Icon: FocusIcon, action: () => this.props.setIsFocusMode(true), show: true },
 			{
-				label: 'Clip',
+				label: VIEWER_TOOLBAR_ITEMS.SHOW_ALL,
+				Icon: ShowAllIcon,
+				action: this.props.showAllNodes
+			},
+			{
+				label: VIEWER_TOOLBAR_ITEMS.HIDE,
+				Icon: HideIcon,
+				action: this.props.hideSelectedNodes
+			},
+			{
+				label: VIEWER_TOOLBAR_ITEMS.ISOLATE,
+				Icon: IsolateIcon,
+				action: this.props.isolateSelectedNodes
+			},
+			{
+				label: VIEWER_TOOLBAR_ITEMS.FOCUS,
+				Icon: FocusIcon,
+				action: () => this.props.setIsFocusMode(true)
+			},
+			{
+				label: VIEWER_TOOLBAR_ITEMS.CLIP,
 				Icon: ClipIcon,
-				action: () => this.handleShowSubmenu('Clip'),
+				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.CLIP),
 				show: !this.props.clippingMode,
 				subMenu: [
 					{
@@ -215,24 +234,22 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				]
 			},
 			{
-				label: 'Clip',
+				label: VIEWER_TOOLBAR_ITEMS.CLIP,
 				Icon: () =>	<ClipIconWithNumber clipNumber={this.props.clipNumber} />,
 				action: () => this.props.toggleClipEdit(),
 				show: this.props.clippingMode && this.props.clipNumber,
 				active: this.props.isClipEdit
 			},
 			{
-				label: 'Measure',
+				label: VIEWER_TOOLBAR_ITEMS.MEASURE,
 				Icon: MeasureIcon,
 				action: this.props.toggleMeasure,
-				show: true,
 				active: this.props.measureState.active
 			},
 			{
-				label: 'BIM',
+				label: VIEWER_TOOLBAR_ITEMS.BIM,
 				Icon: MetadataIcon,
 				action: this.props.toggleMetadata,
-				show: true,
 				active: this.props.isMetadataVisible
 			}
 		];

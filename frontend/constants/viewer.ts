@@ -86,3 +86,16 @@ export const VIEWER_PANELS = {
 	COMPARE: 'compare',
 	GIS: 'gis'
 };
+
+export const VIEWER_TOOLBAR_ITEMS = {
+	EXTENT: 'Extent',
+	TURNTABLE: 'Turntable',
+	HELICOPTER: 'Helicopter',
+	SHOW_ALL: 'Show All',
+	HIDE: 'Hide',
+	ISOLATE: 'Isolate',
+	FOCUS: 'Gocus',
+	CLIP: 'Clip',
+	MEASURE: 'Measure',
+	BIM: 'BIM'
+};
