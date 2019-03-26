@@ -42,6 +42,7 @@ describe("Groups", function () {
 			{
 				"account":"groupUser",
 				"model":"4ec71fdd-0450-4b6f-8478-c46633bb66e3",
+				"ifc_guids":[],
 				"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
 			}
 		]
@@ -114,7 +115,8 @@ describe("Groups", function () {
 		it("using master head revision should succeed", function(done){
 			agent.get(`/${username}/${model}/revision/master/head/groups/${groupID}`)
 				.expect(200 , function(err, res) {
-					expect(res.body).to.deep.equal(goldenData);
+					expect(res.body.color).to.deep.equal(goldenData.color);
+					expect(res.body.objects).to.deep.equal(goldenData.objects);
 					done(err);
 				});
 		});
@@ -146,7 +148,8 @@ describe("Groups", function () {
 		it("using revision ID should succeed", function(done){
 			agent.get(`/${username}/${model}/revision/b74ba13b-71db-4fcc-9ff8-7f640aa3dec2/groups/${groupID}`)
 				.expect(200 , function(err, res) {
-					expect(res.body).to.deep.equal(goldenData);
+					expect(res.body.color).to.deep.equal(goldenData.color);
+					expect(res.body.objects).to.deep.equal(goldenData.objects);
 					done(err);
 				});
 		});
@@ -551,10 +554,12 @@ describe("Groups", function () {
 
 	describe("Updating a group ", function() {
 		it("updating only the objects should succeed", function(done) {
+			const newObjects = {objects: []};
+
 			async.series([
 				function(done) {
 					agent.put(`/${username}/${model}/groups/${goldenData._id}`)
-						.send({objects: []})
+						.send(newObjects)
 						.expect(200 , function(err, res) {
 							done(err);
 						});
@@ -562,9 +567,40 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
-							const expectedData = Object.assign({}, goldenData);
-							expectedData.objects = [];
-							expect(res.body).to.deep.equal(expectedData);
+							Object.assign(goldenData, newObjects);
+							expect(res.body.color).to.deep.equal(goldenData.color);
+							expect(res.body.objects).to.deep.equal(goldenData.objects);
+							expect(res.body.updateBy).to.equal(username);
+							done(err);
+						});
+				}
+
+			], done);
+		});
+
+		it("updating rules and removing objects should succeed", function(done) {
+			const newRules = {
+				rules: [{
+					field: "TestField",
+					operator: "GTE",
+					values: [1]
+				}]
+			};
+
+			async.series([
+				function(done) {
+					agent.put(`/${username}/${model}/groups/${goldenData._id}`)
+						.send(newRules)
+						.expect(200 , function(err, res) {
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
+						.expect(200 , function(err, res) {
+							Object.assign(goldenData, newRules);
+							expect(res.body.color).to.deep.equal(goldenData.color);
+							expect(res.body.objects).to.deep.equal(goldenData.objects);
 							expect(res.body.updateBy).to.equal(username);
 							done(err);
 						});
@@ -587,9 +623,9 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
-							const expectedData = Object.assign({}, goldenData);
-							expectedData.name = newName;
-							expect(res.body).to.deep.equal(expectedData);
+							Object.assign(goldenData, newName);
+							expect(res.body.color).to.deep.equal(goldenData.color);
+							expect(res.body.objects).to.deep.equal(goldenData.objects);
 							expect(res.body.updateBy).to.equal(username);
 							done(err);
 						});
@@ -612,9 +648,34 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
-							const expectedData = Object.assign({}, goldenData);
-							expectedData.color = newColor;
-							expect(res.body).to.deep.equal(expectedData);
+							Object.assign(goldenData, newColor);
+							expect(res.body.color).to.deep.equal(goldenData.color);
+							expect(res.body.objects).to.deep.equal(goldenData.objects);
+							expect(res.body.updateBy).to.equal(username);
+							done(err);
+						});
+				}
+
+			], done);
+		});
+
+		it("updating only the description should succeed", function(done) {
+			const newDesc = {description: "new description"};
+
+			async.series([
+				function(done) {
+					agent.put(`/${username}/${model}/groups/${goldenData._id}`)
+						.send(newDesc)
+						.expect(200 , function(err, res) {
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
+						.expect(200 , function(err, res) {
+							Object.assign(goldenData, newDesc);
+							expect(res.body.color).to.deep.equal(goldenData.color);
+							expect(res.body.objects).to.deep.equal(goldenData.objects);
 							expect(res.body.updateBy).to.equal(username);
 							done(err);
 						});

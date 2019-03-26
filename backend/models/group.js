@@ -354,9 +354,8 @@ groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId, s
 
 			return getObjectIds(dbCol, group, branch, revId, true, showIfcGuids).then((sharedIdObjects) => {
 
-				const returnGroup = { _id: utils.uuidToString(group._id), color: group.color };
-				returnGroup.objects = sharedIdObjects;
-				return returnGroup;
+				group.objects = sharedIdObjects;
+				return clean(group);
 			});
 		});
 };
