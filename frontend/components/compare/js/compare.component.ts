@@ -204,4 +204,4 @@ export const CompareComponent: ng.IComponentOptions = {
 
 export const CompareComponentModule = angular
 	.module('3drepo')
-	.component('compare', CompareComponent);
+	.component('compareOld', CompareComponent);

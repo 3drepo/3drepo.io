@@ -68,14 +68,6 @@ div(layout="column", class="md-whiteframe-1dp")
 				filter-text='vm.filterText'
 				selected-menu-option='vm.selectedMenuOption')
 
-			compare(
-				model-settings='vm.modelSettings'
-				on-content-height-request='vm.onContentHeightRequest(height)'
-				account='vm.account'
-				revision='vm.revision'
-				model='vm.model'
-				ng-if="vm.contentData.type === 'compare'")
-
 	// Help icon and tool tip
 	div(ng-if="vm.showHelp")
 		md-button.md-fab.md-mini#helpButton(aria-label="Help")
