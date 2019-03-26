@@ -36,7 +36,8 @@ export class AnalyticService {
 
 		if (this.ClientConfigService &&
 			!this.ClientConfigService.development &&
-			this.ClientConfigService.gaTrackId
+			this.ClientConfigService.ga &&
+			this.ClientConfigService.ga.trackId
 		) {
 			console.debug('Adding Google Analytics and Remarketing');
 			this.insertGA();
@@ -90,7 +91,7 @@ export class AnalyticService {
 		})(window, document, "script", "https://www.google-analytics.com/analytics.js", "ga");
 		/* tslint:enable */
 
-		const args = ['create',  this.ClientConfigService.gaTrackId, 'auto', {}];
+		const args = ['create',  this.ClientConfigService.ga.trackId, 'auto', {}];
 
 		if (this.ClientConfigService.userId) {
 			args[3] = Object.assign({ userId: this.ClientConfigService.userId}, args[3] );
@@ -98,13 +99,13 @@ export class AnalyticService {
 
 		ga.apply(window, args);
 
-		const secondaryArgs =  args.concat([]);
-		secondaryArgs[1] = this.ClientConfigService.secondaryGaTrackId;
-		secondaryArgs[3] = Object.assign({name: 'secondary', allowLinker: true}, args[3]);
+		const refererArgs =  args.concat([]);
+		refererArgs[1] = this.ClientConfigService.ga.refererTrackId;
+		refererArgs[3] = Object.assign({name: 'referer', allowLinker: true}, args[3]);
 
-		ga.apply(window, secondaryArgs);
-		ga('secondary.require', 'linker');
-		ga('secondary.linker:autoLink', [this.ClientConfigService.secondaryGaDomain]);
+		ga.apply(window, refererArgs);
+		ga('referer.require', 'linker');
+		ga('referer.linker:autoLink', [this.ClientConfigService.ga.refererDomain]);
 	}
 
 	public isGoogleAnalyticEnabled() {
@@ -121,8 +122,8 @@ export class AnalyticService {
 		ga(tracker + 'send', 'pageview', location.pathname + location.search);
 	}
 
-	public sendPageViewSecondaryTracker(location) {
-		this.sendPageView(location, 'secondary');
+	public sendPageViewReferer(location) {
+		this.sendPageView(location, 'referer');
 	}
 
 	public sendEvent(event) {
