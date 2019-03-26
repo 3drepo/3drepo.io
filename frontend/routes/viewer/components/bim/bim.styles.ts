@@ -16,5 +16,20 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from '../../../../styles';
 
-export const Container = styled.div``;
+export const Container = styled.div`
+	border-top: 1px solid ${COLOR.BLACK_6};
+	margin-top: -1px;
+`;
+
+export const EmptyStateInfo = styled.p`
+  padding: 14px;
+  font-size: 13px;
+  color: ${COLOR.BLACK_60};
+  background-color: ${COLOR.BLACK_6};
+  margin: 25px;
+  border-radius: 6px;
+  text-align: center;
+`;
+

@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { IconButton } from '@material-ui/core';
+import { IconButton, Tabs, Tab } from '@material-ui/core';
 import InfoIcon from '@material-ui/icons/Info';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import SearchIcon from '@material-ui/icons/Search';
@@ -33,7 +33,7 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { Container } from './bim.styles';
+import { Container, EmptyStateInfo } from './bim.styles';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 
 interface IProps {
@@ -134,11 +134,48 @@ export class Bim extends React.PureComponent<IProps, any> {
 
 	private handleOpenSearchMode = () => this.props.setComponentState({ searchEnabled: true });
 
-	private renderList = () => (
-		<ViewerPanelContent className="height-catcher">
-			<Container>Test</Container>
-		</ViewerPanelContent>
-	)
+	private handleTabChange = (event, activeTab) => this.props.setComponentState({
+		showStarred: Boolean(activeTab),
+	});
+
+	private renderMetaRecord = () => {
+		return (
+			<div>test</div>
+		)
+	}
+
+	private renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>No data</EmptyStateInfo>
+	));
+
+	private renderNotFound = renderWhenTrue(() => (
+		<EmptyStateInfo>No data matched</EmptyStateInfo>
+	));
+
+	private renderList = () => {
+		const { selectedFilters, showStarred } = this.props;
+		const areFiltersActive = !!selectedFilters.length;
+		const hasMetadata = Boolean(this.metadata.length);
+		return (
+			<ViewerPanelContent className="height-catcher">
+				<Tabs
+					indicatorColor="primary"
+					textColor="primary"
+					fullWidth
+					value={Number(showStarred)}
+					onChange={this.handleTabChange}
+				>
+					<Tab label="All" />
+					<Tab label="Starred" />
+				</Tabs>
+				<Container>
+					{this.metadata.map(this.renderMetaRecord)}
+					{this.renderEmptyState(!areFiltersActive && !hasMetadata)}
+					{this.renderNotFound(areFiltersActive && !hasMetadata)}
+				</Container>
+			</ViewerPanelContent>
+		)
+	}
 
 	private renderActionsMenu = () => (
 		<MenuList>
