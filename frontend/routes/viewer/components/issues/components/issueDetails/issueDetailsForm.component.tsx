@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
-import DateFnsUtils from '@date-io/date-fns';
+import DayJsUtils from '@date-io/dayjs';
 import { get, isEqual, isEmpty, debounce } from 'lodash';
 import { Field, Form, withFormik, connect } from 'formik';
 
@@ -84,7 +84,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	}, 200);
 
 	public getDueDateFormat = (timestamp) => {
-		const formatBase = 'dd MMM';
+		const formatBase = 'DD MMM';
 		const dueDateYear = new Date(timestamp).getFullYear();
 		const thisYear = new Date().getFullYear();
 		const format = thisYear === dueDateYear ? formatBase : formatBase + ' YYYY';
@@ -95,7 +95,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		const { issue, myJob, permissions, currentUser } = this.props;
 
 		return (
-			<MuiPickersUtilsProvider utils={DateFnsUtils}>
+			<MuiPickersUtilsProvider utils={DayJsUtils}>
 				<Form>
 					<FieldsRow container alignItems="center" justify="space-between">
 						<StyledFormControl>

@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
-import DateFnsUtils from '@date-io/date-fns';
+import DayJsUtils from '@date-io/dayjs';
 
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
@@ -148,7 +148,7 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		return (
-			<MuiPickersUtilsProvider utils={DateFnsUtils}>
+			<MuiPickersUtilsProvider utils={DayJsUtils}>
 				<MenuList>
 					{this.renderMenuItems(this.props.items)}
 					{this.renderFooter()}
