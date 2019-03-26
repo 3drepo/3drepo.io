@@ -123,8 +123,14 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		this.props.deactivateMeasure();
 	}
 
-	public onNavigationModeClick = (mode) => {
+	public handleNavigationModeClick = (mode) => {
 		this.props.setNavigationMode(mode);
+		this.setState({
+			activeSubMenu: ''
+		});
+	}
+
+	public handleClickAway = () => {
 		this.setState({
 			activeSubMenu: ''
 		});
@@ -148,7 +154,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 					{
 						label: 'Helicopter',
 						Icon: HelicopterIcon,
-						action: () => this.onNavigationModeClick(VIEWER_NAV_MODES.HELICOPTER),
+						action: () => this.handleNavigationModeClick(VIEWER_NAV_MODES.HELICOPTER),
 						show: true
 					}
 				]
@@ -182,7 +188,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 					{
 						label: 'Turntable',
 						Icon: TurntableIcon,
-						action: () => this.onNavigationModeClick(VIEWER_NAV_MODES.TURNTABLE)
+						action: () => this.handleNavigationModeClick(VIEWER_NAV_MODES.TURNTABLE)
 					}
 				]
 			},
@@ -253,16 +259,18 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		const condition = this.state.activeSubMenu === label;
 		return (
 			<Fade in={condition}>
-				<Submenu>{subMenu.map((subButton, subKey) => (
-					<TooltipButton
-						key={subKey}
-						className={`toolbarButton toolbarSubButton ${subButton.specificOption && 'toolbarSpecificButton'}`}
-						label={subButton.label}
-						Icon={subButton.Icon}
-						action={subButton.action}
-						disabled={subButton.disabled} />)
-					)}
-				</Submenu>
+				<ClickAwayListener onClickAway={this.handleClickAway}>
+					<Submenu>{subMenu.map((subButton, subKey) => (
+						<TooltipButton
+							key={subKey}
+							className={`toolbarButton toolbarSubButton ${subButton.specificOption && 'toolbarSpecificButton'}`}
+							label={subButton.label}
+							Icon={subButton.Icon}
+							action={subButton.action}
+							disabled={subButton.disabled} />)
+						)}
+					</Submenu>
+				</ClickAwayListener>
 			</Fade>
 		);
 	})(subMenu.length && this.state.activeSubMenu === label)
