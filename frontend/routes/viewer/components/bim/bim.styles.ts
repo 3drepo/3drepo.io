@@ -16,11 +16,36 @@
  */
 
 import styled from 'styled-components';
+import { Icon } from '@material-ui/core';
 import { COLOR } from '../../../../styles';
 
 export const Container = styled.div`
 	border-top: 1px solid ${COLOR.BLACK_6};
 	margin-top: -1px;
+	overflow: auto;
+`;
+
+export const MetaRecord = styled.div`
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+
+	&:nth-child(2n) {
+		background-color: ${COLOR.BLACK_6};	
+	}
+`;
+
+export const MetaKey = styled.div`
+	flex: 50%;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	color: ${COLOR.BLACK_60};
+`;
+
+export const MetaValue = styled.div`
+	flex: 50%;
+	color: ${COLOR.BLACK_87};
 `;
 
 export const EmptyStateInfo = styled.p`
@@ -33,3 +58,7 @@ export const EmptyStateInfo = styled.p`
   text-align: center;
 `;
 
+export const StarIconWrapper = styled(Icon)`
+	color: ${(props: any) => props.active ? COLOR.DARK_ORANGE : COLOR.BLACK_20};
+	width: 20px;
+` as any;

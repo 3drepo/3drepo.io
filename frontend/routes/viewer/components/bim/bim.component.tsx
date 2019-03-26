@@ -21,6 +21,8 @@ import InfoIcon from '@material-ui/icons/Info';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import SearchIcon from '@material-ui/icons/Search';
 import CancelIcon from '@material-ui/icons/Cancel';
+import Star from '@material-ui/icons/Star';
+import StarBorder from '@material-ui/icons/StarBorder';
 
 import { FilterPanel, ISelectedFilter } from '../../../components/filterPanel/filterPanel.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -33,7 +35,7 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { Container, EmptyStateInfo } from './bim.styles';
+import { Container, EmptyStateInfo, MetaRecord, MetaKey, MetaValue, StarIconWrapper } from './bim.styles';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 
 interface IProps {
@@ -45,7 +47,7 @@ interface IProps {
 	searchEnabled: boolean;
 	showStarred: boolean;
 	selectedFilters: ISelectedFilter[];
-	starredMetadataKeys: string[];
+	starredMetaMap: any;
 	setComponentState: (componentState) => void;
 	clearStarredMetadata: (teamspace, model) => void;
 	addMetaRecordToStarred?: (key) => void;
@@ -62,6 +64,15 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 	</IconButton>
 );
 
+const StarIcon = ({ active }) => {
+	const IconComponent = active ? Star : StarBorder;
+	return (
+		<StarIconWrapper active>
+			<IconComponent color="inherit" fontSize="small" />
+		</StarIconWrapper>
+	);
+};
+
 export class Bim extends React.PureComponent<IProps, any> {
 	get menuActionsMap() {
 		const { clearStarredMetadata, teamspace, model } = this.props;
@@ -71,11 +82,9 @@ export class Bim extends React.PureComponent<IProps, any> {
 	}
 
 	get metadata() {
-		if (this.props.showStarred) {
-			const tempStarredList = [] as any;
-			return this.props.metadata.filter(({ key }) => {
-				return tempStarredList.includes(key);
-			});
+		const { showStarred, metadata, starredMetaMap } = this.props;
+		if (showStarred) {
+			return metadata.filter(({ key }) => starredMetaMap[key]);
 		}
 		return [];
 	}
@@ -87,8 +96,16 @@ export class Bim extends React.PureComponent<IProps, any> {
 		/>
 	));
 
-	public componentDidUpdate() {
-		console.log(this.props);
+	private renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>No data</EmptyStateInfo>
+	));
+
+	private renderNotFound = renderWhenTrue(() => (
+		<EmptyStateInfo>No data matched</EmptyStateInfo>
+	));
+
+	public componentDidMount() {
+		this.props.fetchMetadata(this.props.teamspace, this.props.model);
 	}
 
 	public render() {
@@ -135,22 +152,21 @@ export class Bim extends React.PureComponent<IProps, any> {
 	private handleOpenSearchMode = () => this.props.setComponentState({ searchEnabled: true });
 
 	private handleTabChange = (event, activeTab) => this.props.setComponentState({
-		showStarred: Boolean(activeTab),
-	});
+		showStarred: Boolean(activeTab)
+	})
 
-	private renderMetaRecord = () => {
+	private renderMetaRecord = ({ key, value }) => {
+		const isStarred = this.props.starredMetaMap[key];
 		return (
-			<div>test</div>
-		)
+			<MetaRecord>
+				<MetaKey>
+					<StarIcon active={isStarred}/>
+					{key}
+				</MetaKey>
+				<MetaValue>{value}</MetaValue>
+			</MetaRecord>
+		);
 	}
-
-	private renderEmptyState = renderWhenTrue(() => (
-		<EmptyStateInfo>No data</EmptyStateInfo>
-	));
-
-	private renderNotFound = renderWhenTrue(() => (
-		<EmptyStateInfo>No data matched</EmptyStateInfo>
-	));
 
 	private renderList = () => {
 		const { selectedFilters, showStarred } = this.props;
@@ -174,7 +190,7 @@ export class Bim extends React.PureComponent<IProps, any> {
 					{this.renderNotFound(areFiltersActive && !hasMetadata)}
 				</Container>
 			</ViewerPanelContent>
-		)
+		);
 	}
 
 	private renderActionsMenu = () => (

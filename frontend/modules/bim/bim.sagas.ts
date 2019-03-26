@@ -15,16 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { put, takeLatest, all } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { BimTypes, BimActions } from './bim.redux';
 import { DialogActions } from '../dialog';
 import { prepareMetadata } from '../../helpers/bim';
+import { StarredMetaActions } from '../starredMeta';
 
-export function* fetchMetadata({ teamspace, model }) {
+export function* fetchMetadata({ teamspace, model, metadataId = '7faf260f-3262-462f-86ed-cd267902ab03' }) {
 	try {
-		const { meta } = yield put(API.getMetadata(teamspace, model));
+		const [{ data: meta }] = yield all([
+			API.getMetadata(teamspace, model, metadataId),
+			put(StarredMetaActions.fetchStattedMeta())
+		]);
 
 		yield put(BimActions.fetchMetadataSuccess(prepareMetadata(meta[0].metadata)));
 	} catch (error) {

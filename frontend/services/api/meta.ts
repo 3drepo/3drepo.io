@@ -18,10 +18,43 @@
 import api from './';
 
 /**
+ * Get model metadata
+ * @param teamspace
+ * @param modelId
+ * @param metadataId
+ */
+export const getMetadata = (teamspace, modelId, metadataId) => {
+	return api.get(`${teamspace}/${modelId}/meta/${metadataId}.json`);
+};
+
+/**
  * Get field names
  * @param teamspace
  * @param modelId
  */
 export const getFieldNames = (teamspace, modelId) => {
 	return api.get(`${teamspace}/${modelId}/meta/keys`);
+};
+
+/**
+ * Get starred meta
+ */
+export const getStarredMeta = () => {
+	return api.get('/starredMeta');
+};
+
+/**
+ * Add starred meta
+ * @param metaRecordKey
+ */
+export const addStarredMeta = (metaRecordKey) => {
+	return api.post('/starredMeta', { tag: metaRecordKey });
+};
+
+/**
+ * Remove starred meta
+ * @param metaRecordKey
+ */
+export const removeStarredMeta = (metaRecordKey) => {
+	return api.delete('/starredMeta', { tag: metaRecordKey });
 };

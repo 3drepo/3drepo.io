@@ -28,16 +28,22 @@ import {
 	selectSearchEnabled
 } from '../../../../modules/bim';
 
+import { selectStarredMeta, StarredMetaActions } from '../../../../modules/starredMeta';
+
 const mapStateToProps = createStructuredSelector({
 	metadata: selectFilteredMetadata,
-	// starredMetadataKeys: selectStarredMetadataKeys,
+	starredMetaMap: selectStarredMeta,
 	searchEnabled: selectSearchEnabled,
 	selectedFilters: selectSelectedFilters,
 	showStarred: selectShowStarred
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	setComponentState: BimActions.setComponentState
+	fetchMetadata: BimActions.fetchMetadata,
+	setComponentState: BimActions.setComponentState,
+	clearStarredMetadata: StarredMetaActions.clearStarredMetadata,
+	addMetaRecordToStarred: StarredMetaActions.addToStarredMeta,
+	removeMetaRecordFromStarred: StarredMetaActions.removeFromStarredMeta
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Bim);
