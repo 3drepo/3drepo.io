@@ -34,7 +34,7 @@ export const StyledSelect = styled(Select).attrs({
 	}
 
 	.select__icon {
-		visibility: ${(props) => props.readOnly ? 'hidden' : 'visible'};
+		visibility: ${(props) => props.readOnly ? 'hidden' : 'inherit'};
 	}
 `;
 
