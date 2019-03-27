@@ -52,8 +52,6 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	updateGroupSuccess: ['group'],
 	subscribeOnChanges: ['teamspace', 'modelId'],
 	unsubscribeFromChanges: ['teamspace', 'modelId'],
-	getFieldNames: ['teamspace', 'modelId'],
-	getFieldNamesSuccess: ['fieldNames'],
 	setCriteriaFieldState: ['criteriaFieldState'],
 	resetToSavedSelection: ['groupId'],
 	resetComponentState: []
@@ -195,10 +193,6 @@ export const deleteGroupsSuccess = (state = INITIAL_STATE, { groupIds }) => {
 	return { ...state, groupsMap, componentState: { ...state.componentState, newGroup } };
 };
 
-export const getFieldNamesSuccess = (state = INITIAL_STATE, { fieldNames }) => {
-	return { ...state, fieldNames };
-};
-
 export const showUpdateInfo = (state = INITIAL_STATE, {}) => {
 	const newGroup = { ...state.componentState.newGroup };
 
@@ -236,7 +230,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.REMOVE_FROM_OVERRIDED]: removeFromOverrided,
 	[GroupsTypes.UPDATE_GROUP_SUCCESS]: updateGroupSuccess,
 	[GroupsTypes.DELETE_GROUPS_SUCCESS]: deleteGroupsSuccess,
-	[GroupsTypes.GET_FIELD_NAMES_SUCCESS]: getFieldNamesSuccess,
 	[GroupsTypes.SET_CRITERIA_FIELD_STATE]: setCriteriaFieldState,
 	[GroupsTypes.SHOW_UPDATE_INFO]: showUpdateInfo,
 	[GroupsTypes.RESET_COMPONENT_STATE]: resetComponentState

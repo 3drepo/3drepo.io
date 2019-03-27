@@ -37,6 +37,7 @@ import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component'
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { Container, EmptyStateInfo, MetaRecord, MetaKey, MetaKeyText, MetaValue, StarIconWrapper } from './bim.styles';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
+import { getFilters } from '../../../../helpers/bim';
 
 interface IProps {
 	className: string;
@@ -48,6 +49,7 @@ interface IProps {
 	showStarred: boolean;
 	selectedFilters: ISelectedFilter[];
 	starredMetaMap: any;
+	metaKeys: string[];
 	setComponentState: (componentState) => void;
 	clearStarredMetadata: (teamspace, model) => void;
 	addMetaRecordToStarred?: (key) => void;
@@ -89,8 +91,13 @@ export class Bim extends React.PureComponent<IProps, any> {
 		return metadata;
 	}
 
+	get filters() {
+		return getFilters(this.props.metaKeys);
+	}
+
 	private renderFilterPanel = renderWhenTrue(() => (
 		<FilterPanel
+			filters={this.filters}
 			onChange={this.handleFilterChange}
 			selectedFilters={this.props.selectedFilters}
 		/>
@@ -103,10 +110,6 @@ export class Bim extends React.PureComponent<IProps, any> {
 	private renderNotFound = renderWhenTrue(() => (
 		<EmptyStateInfo>No data matched</EmptyStateInfo>
 	));
-
-	public componentDidMount() {
-		// this.props.fetchMetadata(this.props.teamspace, this.props.model);
-	}
 
 	public render() {
 		return (

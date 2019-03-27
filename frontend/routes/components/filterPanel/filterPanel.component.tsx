@@ -80,7 +80,7 @@ interface IState {
 	filtersOpen: boolean;
 }
 
-const getMenuButton = (InitialIcon) => ({ IconProps, Icon, ...props }) => (
+const getMenuButton = (InitialIcon) => ({ IconProps, Icon, ...props }: { Icon?, IconProps: any }) => (
 	<ButtonWrapper>
 	  <StyledIconButton
 	    {...props}
@@ -97,12 +97,25 @@ const MoreButton = getMenuButton(MoreIcon);
 
 const getSuggestionValue = (suggestion) => suggestion.name;
 
+const getFilterName = (filterLabel, valueLabel) => {
+	const basicName = filterLabel ? `${filterLabel}: ` : '';
+	return `${basicName}${valueLabel}`;
+};
+
+const getSelectedFilterLabel = (filter) => {
+	if (filter.type !== DATA_TYPES.QUERY) {
+		return `${filter.label}: ${filter.value.label}`;
+	}
+
+	return filter.label || filter.value.label;
+};
+
 const mapFiltersToSuggestions = (filters) => {
 	return filters
 		.filter((suggestion) => suggestion.type !== DATA_TYPES.DATE)
 		.map((filter) => filter.values.map((value) => {
 			return {
-				name: `${filter.label}:${value.label}`,
+				name: getFilterName(filter.label, value.label),
 				label: filter.label,
 				relatedField: filter.relatedField,
 				type: filter.type,
@@ -359,7 +372,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 				(filter, index) => (
 					<StyledChip
 						key={index}
-						label={filter.type !== DATA_TYPES.QUERY ? `${filter.label}: ${filter.value.label}` : filter.label}
+						label={getSelectedFilterLabel(filter)}
 						onDelete={() => this.onDeselectFilter(filter)}
 					/>
 				)

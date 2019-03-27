@@ -28,11 +28,11 @@ export const getMetadata = (teamspace, modelId, metadataId) => {
 };
 
 /**
- * Get field names
+ * Get meta keys
  * @param teamspace
  * @param modelId
  */
-export const getFieldNames = (teamspace, modelId) => {
+export const getMetaKeys = (teamspace, modelId) => {
 	return api.get(`${teamspace}/${modelId}/meta/keys`);
 };
 

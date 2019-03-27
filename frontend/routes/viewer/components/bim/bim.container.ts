@@ -29,13 +29,15 @@ import {
 } from '../../../../modules/bim';
 
 import { selectStarredMeta, StarredMetaActions } from '../../../../modules/starredMeta';
+import { selectMetaKeys } from '../../../../modules/model';
 
 const mapStateToProps = createStructuredSelector({
 	metadata: selectFilteredMetadata,
 	starredMetaMap: selectStarredMeta,
 	searchEnabled: selectSearchEnabled,
 	selectedFilters: selectSelectedFilters,
-	showStarred: selectShowStarred
+	showStarred: selectShowStarred,
+	metaKeys: selectMetaKeys
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

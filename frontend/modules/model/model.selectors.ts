@@ -38,3 +38,7 @@ export const selectUploadStatus = createSelector(
 export const selectMaps = createSelector(
 	selectModelDomain, (state) => state.maps
 );
+
+export const selectMetaKeys = createSelector(
+	selectModelDomain, (state) => state.metaKeys
+);
