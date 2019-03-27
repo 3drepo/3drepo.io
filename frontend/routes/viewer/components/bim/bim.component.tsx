@@ -21,8 +21,6 @@ import InfoIcon from '@material-ui/icons/Info';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import SearchIcon from '@material-ui/icons/Search';
 import CancelIcon from '@material-ui/icons/Cancel';
-import Star from '@material-ui/icons/Star';
-import StarBorder from '@material-ui/icons/StarBorder';
 
 import { FilterPanel, ISelectedFilter } from '../../../components/filterPanel/filterPanel.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -35,9 +33,10 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { Container, EmptyStateInfo, MetaRecord, MetaKey, MetaKeyText, MetaValue, StarIconWrapper } from './bim.styles';
+import { Container, EmptyStateInfo } from './bim.styles';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import { getFilters } from '../../../../helpers/bim';
+import { MetaRecord } from './components/metaRecord/metaRecord.component';
 
 interface IProps {
 	className: string;
@@ -65,15 +64,6 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 		<MoreIcon {...IconProps} />
 	</IconButton>
 );
-
-const StarIcon = ({ active, onClick }) => {
-	const IconComponent = active ? Star : StarBorder;
-	return (
-		<StarIconWrapper active={active}>
-			<IconComponent onClick={onClick} color="inherit" fontSize="small" />
-		</StarIconWrapper>
-	);
-};
 
 export class Bim extends React.PureComponent<IProps, any> {
 	get menuActionsMap() {
@@ -167,18 +157,16 @@ export class Bim extends React.PureComponent<IProps, any> {
 	}
 
 	private renderMetaRecord = ({ key, value }) => {
-		const isStarred = Number(Boolean(this.props.starredMetaMap[key]));
+		const isStarred = Boolean(this.props.starredMetaMap[key]);
+
 		return (
-			<MetaRecord key={key}>
-				<MetaKey>
-					<StarIcon
-						active={isStarred}
-						onClick={this.toggleStarredRecord(key, isStarred)}
-					/>
-					<MetaKeyText>{key}</MetaKeyText>
-				</MetaKey>
-				<MetaValue>{value}</MetaValue>
-			</MetaRecord>
+			<MetaRecord
+				onStarClick={this.toggleStarredRecord(key, isStarred)}
+				value={value}
+				name={key}
+				key={key}
+				starred={isStarred}
+			/>
 		);
 	}
 
@@ -199,7 +187,7 @@ export class Bim extends React.PureComponent<IProps, any> {
 					<Tab label="Starred" />
 				</Tabs>
 				<Container>
-					{this.metadata.map(this.renderMetaRecord)}
+					{this.metadata.map((meta) => this.renderMetaRecord(meta))}
 					{this.renderEmptyState(!areFiltersActive && !hasMetadata)}
 					{this.renderNotFound(areFiltersActive && !hasMetadata)}
 				</Container>

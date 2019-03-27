@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select, call } from 'redux-saga/effects';
+import { put, takeLatest, call } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
 import { TreeTypes, TreeActions } from './tree.redux';
 import { Viewer } from '../../services/viewer/viewer';

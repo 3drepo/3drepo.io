@@ -16,47 +16,12 @@
  */
 
 import styled from 'styled-components';
-import { Icon } from '@material-ui/core';
 import { COLOR } from '../../../../styles';
 
 export const Container = styled.div`
 	border-top: 1px solid ${COLOR.BLACK_6};
 	margin-top: -1px;
 	overflow: auto;
-`;
-
-export const MetaRecord = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	padding: 4px 0;
-
-	&:nth-child(2n) {
-		background-color: ${COLOR.BLACK_6};
-	}
-`;
-
-export const MetaKey = styled.div`
-	width: 50%;
-	display: flex;
-	flex-direction: row;
-	justify-content: flex-start;
-	align-items: center;
-`;
-
-export const MetaKeyText = styled.div`
-	color: ${COLOR.BLACK_60};
-	font-size: 14px;
-	padding-right: 10px;
-	word-break: break-all;
-`;
-
-export const MetaValue = styled.div`
-	width: 50%;
-	color: ${COLOR.BLACK_87};
-	font-size: 14px;
-	padding-right: 10px;
-	word-break: break-all;
 `;
 
 export const EmptyStateInfo = styled.p`
@@ -68,12 +33,3 @@ export const EmptyStateInfo = styled.p`
   border-radius: 6px;
   text-align: center;
 `;
-
-export const StarIconWrapper = styled(Icon)`
-	color: ${(props: any) => props.active ? COLOR.DARK_ORANGE : COLOR.BLACK_20};
-	width: 20px;
-	margin-left: 5px;
-	margin-right: 2px;
-	margin-top: -2px;
-	cursor: pointer;
-` as any;

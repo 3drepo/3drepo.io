@@ -20,6 +20,7 @@ import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { StarredMetaTypes, StarredMetaActions } from './starredMeta.redux';
+import { SnackbarActions } from '../snackbar';
 
 export function* fetchStarredMeta() {
 	try {
@@ -34,6 +35,7 @@ export function* addToStarredMeta({ metaRecordKey }) {
 	try {
 		yield API.addStarredMeta(metaRecordKey);
 		yield put(StarredMetaActions.addToStarredMetaSuccess(metaRecordKey));
+		yield put(SnackbarActions.show(`Meta key ${metaRecordKey} added to starred`));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('add', 'starred meta', error));
 	}
@@ -43,8 +45,9 @@ export function* removeFromStarredMeta({ metaRecordKey }) {
 	try {
 		yield API.removeStarredMeta(metaRecordKey);
 		yield put(StarredMetaActions.removeFromStarredMetaSuccess(metaRecordKey));
+		yield put(SnackbarActions.show(`Meta key ${metaRecordKey} removed from starred`));
 	} catch (error) {
-		yield put(DialogActions.showEndpointErrorDialog('add', 'starred meta', error));
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'starred meta', error));
 	}
 }
 

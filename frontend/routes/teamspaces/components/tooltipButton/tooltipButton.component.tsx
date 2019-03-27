@@ -39,7 +39,8 @@ export const TooltipButton = (props: IProps) => {
 	return (
 		<Tooltip title={label} disableHoverListener={disabled} placement={placement}>
 			<span>
-				<StyledIconButton aria-label={label} onClick={action} disabled={disabled} className={className} active={active}>
+				<StyledIconButton
+					aria-label={label} onClick={action} disabled={disabled} className={className} active={Number(active)}>
 					<Icon {...iconProps} />
 				</StyledIconButton>
 			</span>
