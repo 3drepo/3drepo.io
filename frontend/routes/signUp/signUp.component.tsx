@@ -162,7 +162,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 				wrap="nowrap">
 				<Link to="/login"><Logo /></Link>
 				<StyledGrid item xs={9} sm={6} md={6} lg={6} xl={2}>
-					<Panel title="Sign up">
+					<Panel title="Sign up" hiddenScrollbars={true}>
 						<Headline>Creating a 3D Repo account is free</Headline>
 						<Formik
 							initialValues={RegistrationInitialValues}
