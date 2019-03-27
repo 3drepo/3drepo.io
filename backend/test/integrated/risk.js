@@ -58,7 +58,6 @@ describe("Risks", function () {
 		"category":"other issue",
 		"likelihood":0,
 		"consequence":0,
-		"level_of_risk":0,
 		"mitigation_status":"proposed",
 		"mitigation_desc":"Task123"
 	};
@@ -90,6 +89,7 @@ describe("Risks", function () {
 		it("should succeed", function(done) {
 
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
+			const levelOfRisk = (0 === risk.likelihood && 0 === risk.consequence) ? 0 : -1;
 			let riskId;
 
 			async.series([
@@ -97,7 +97,6 @@ describe("Risks", function () {
 					agent.post(`/${username}/${model}/risks.json`)
 						.send(risk)
 						.expect(200, function(err, res) {
-
 							riskId = res.body._id;
 
 							expect(res.body.name).to.equal(risk.name);
@@ -113,9 +112,10 @@ describe("Risks", function () {
 							expect(res.body.category).to.equal(risk.category);
 							expect(res.body.likelihood).to.equal(risk.likelihood);
 							expect(res.body.consequence).to.equal(risk.consequence);
-							expect(res.body.level_of_risk).to.equal(risk.level_of_risk);
+							expect(res.body.level_of_risk).to.equal(levelOfRisk);
 							expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
 							expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
+							expect(res.body.viewpoint.clippingPlanes).to.deep.equal(risk.viewpoint.clippingPlanes);
 
 							return done(err);
 						});
@@ -137,7 +137,7 @@ describe("Risks", function () {
 						expect(res.body.category).to.equal(risk.category);
 						expect(res.body.likelihood).to.equal(risk.likelihood);
 						expect(res.body.consequence).to.equal(risk.consequence);
-						expect(res.body.level_of_risk).to.equal(risk.level_of_risk);
+						expect(res.body.level_of_risk).to.equal(levelOfRisk);
 						expect(res.body.mitigation_status).to.equal(risk.mitigation_status);
 						expect(res.body.mitigation_desc).to.equal(risk.mitigation_desc);
 
@@ -166,7 +166,7 @@ describe("Risks", function () {
 
 				function(done) {
 					agent.get(`/${username}/${model}/risks/${riskId}.json`).expect(200, function(err, res) {
-						expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/risks/${riskId}/screenshot.png`);
+						expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/risks/${riskId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
 						return done(err);
 					});
 				}
@@ -224,7 +224,6 @@ describe("Risks", function () {
 
 			const risk = Object.assign({
 				"name":"Risk test",
-				"norm": [0.9999999319099296, 0.00006146719401852714, -0.000363870746590937],
 				"position": [33.167440465643935, 12.46054749529149, -46.997271893235435]
 			}, baseRisk);
 
@@ -254,7 +253,7 @@ describe("Risks", function () {
 
 		it("change safetibase_id should succeed", function(done) {
 
-			const risk = Object.assign({"name":"Issue test"}, baseRisk);
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
 			const safetibaseId = { safetibase_id: "another_id" };
@@ -285,7 +284,7 @@ describe("Risks", function () {
 
 		it("change associated_activity should succeed", function(done) {
 
-			const risk = Object.assign({"name":"Issue test"}, baseRisk);
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
 			const associatedActivity = { associated_activity: "cleaning and maintenance" };
@@ -316,7 +315,7 @@ describe("Risks", function () {
 
 		it("change description should succeed", function(done) {
 
-			const risk = Object.assign({"name":"Issue test"}, baseRisk);
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
 			const description = { desc: "new description" };
@@ -347,7 +346,7 @@ describe("Risks", function () {
 
 		it("change assigned_roles should succeed", function(done) {
 
-			const risk = Object.assign({"name":"Issue test"}, baseRisk);
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
 			const assignedRoles = { assigned_roles: ["jobC"] };
@@ -376,9 +375,9 @@ describe("Risks", function () {
 			], done);
 		});
 
-		it("change category should succeed", function(done) {
+		it("change category should succeed and create system comment", function(done) {
 
-			const risk = Object.assign({"name":"Issue test"}, baseRisk);
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
 			const category = { category: "environmental issue" };
@@ -401,6 +400,47 @@ describe("Risks", function () {
 					agent.get(`/${username}/${model}/risks/${riskId}.json`)
 						.expect(200, function(err, res) {
 							expect(res.body.category = category.category);
+							expect(res.body.comments[0].action).to.deep.equal({
+								property: "category",
+								from: baseRisk.category,
+								to: category.category
+							});
+							expect(res.body.comments[0].owner).to.equal(username);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("seal last non system comment when adding system comment", function(done) {
+
+			const risk = Object.assign({"name":"Risk test"}, baseRisk, { associated_activity: "ru123"});
+			let riskId;
+			const data = { associated_activity: "abc123"};
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks.json`)
+						.send(risk)
+						.expect(200 , function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+
+						});
+				},
+				function(done) {
+					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+						.send({ comment : "hello world"})
+						.expect(200 , done);
+				},
+				function(done) {
+					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+						.send(data)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}.json`)
+						.expect(200, function(err, res) {
+							expect(res.body.comments[0].sealed).to.equal(true);
 							done(err);
 						});
 				}
@@ -409,7 +449,7 @@ describe("Risks", function () {
 
 		it("change likelihood should succeed", function(done) {
 
-			const risk = Object.assign({"name":"Issue test"}, baseRisk);
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
 			const likelihood = { likelihood: 0 };
@@ -440,7 +480,7 @@ describe("Risks", function () {
 
 		it("change consequence should succeed", function(done) {
 
-			const risk = Object.assign({"name":"Issue test"}, baseRisk);
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
 			const consequence = { consequence: 0 };
@@ -471,7 +511,7 @@ describe("Risks", function () {
 
 		it("change mitigation status should succeed", function(done) {
 
-			const risk = Object.assign({"name":"Issue test"}, baseRisk);
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
 			const mitigationStatus = { mitigation_status: "approved" };
@@ -502,7 +542,7 @@ describe("Risks", function () {
 
 		it("change mitigation should succeed", function(done) {
 
-			const risk = Object.assign({"name":"Issue test"}, baseRisk);
+			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			let riskId;
 
 			const mitigation = { mitigation_desc: "Done ABC" };
@@ -529,6 +569,129 @@ describe("Risks", function () {
 						});
 				}
 			], done);
+		});
+
+		describe("and then commenting", function() {
+
+			let riskId;
+
+			before(function(done) {
+
+				const risk = Object.assign({"name":"Risk test"}, baseRisk);
+
+				agent.post(`/${username}/${model}/risks.json`)
+					.send(risk)
+					.expect(200 , function(err, res) {
+						riskId = res.body._id;
+						done(err);
+					});
+
+			});
+
+			it("should succeed", function(done) {
+
+				const comment = {
+					comment: "hello world",
+					"viewpoint":{
+						"up":[0,1,0],
+						"position":[38,38 ,125.08011914810137],
+						"look_at":[0,0,-163.08011914810137],
+						"view_dir":[0,0,-1],
+						"right":[1,0,0],
+						"unityHeight ":3.537606904422707,
+						"fov":2.1124830653010416,
+						"aspect_ratio":0.8750189337327384,
+						"far":276.75612077194506 ,
+						"near":76.42411012233212,
+						"clippingPlanes":[]
+					}
+				};
+
+				async.series([
+					function(done) {
+						agent.put(`/${username}/${model}/risks/${riskId}.json`)
+							.send(comment)
+							.expect(200 , done);
+					},
+
+					function(done) {
+						agent.get(`/${username}/${model}/risks/${riskId}.json`).expect(200, function(err , res) {
+							comment.viewpoint.account = username;
+							comment.viewpoint.model = model;
+							comment.viewpoint.guid = res.body.comments[0].viewpoint.guid;
+
+							expect(res.body.comments.length).to.equal(1);
+							expect(res.body.comments[0].comment).to.equal(comment.comment);
+							expect(res.body.comments[0].owner).to.equal(username);
+							expect(res.body.comments[0].viewpoint).to.deep.equal(comment.viewpoint);
+
+							done(err);
+						});
+					}
+				], done);
+
+			});
+
+			it("should succeed if editing an existing comment", function(done) {
+
+				const comment = { comment: "hello world 2", commentIndex: 0, edit: true };
+
+				async.series([
+					function(done) {
+						agent.put(`/${username}/${model}/risks/${riskId}.json`)
+							.send(comment)
+							.expect(200 , done);
+					},
+
+					function(done) {
+						agent.get(`/${username}/${model}/risks/${riskId}.json`).expect(200, function(err , res) {
+
+							expect(res.body.comments.length).to.equal(1);
+							expect(res.body.comments[0].comment).to.equal(comment.comment);
+							expect(res.body.comments[0].owner).to.equal(username);
+
+							done(err);
+						});
+					}
+				], done);
+
+			});
+
+			it("should fail if comment is empty", function(done) {
+
+				const comment = { comment: "" };
+
+				agent.put(`/${username}/${model}/risks/${riskId}.json`)
+					.send(comment)
+					.expect(400 , function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_NO_TEXT.value);
+						done(err);
+					});
+			});
+
+			it("should succeed if removing an existing comment", function(done) {
+
+				const comment = { commentIndex: 0, delete: true };
+
+				agent.put(`/${username}/${model}/risks/${riskId}.json`)
+					.send(comment)
+					.expect(200 , function(err, res) {
+						done(err);
+					});
+			});
+
+			it("should fail if invalid risk ID is given", function(done) {
+
+				const invalidId = "00000000-0000-0000-0000-000000000000";
+				const comment = { comment: "hello world" };
+
+				agent.put(`/${username}/${model}/risks/${invalidId}.json`)
+					.send(comment)
+					.expect(404 , function(err, res) {
+						done(err);
+					});
+			});
+
 		});
 	});
 });

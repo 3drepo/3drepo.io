@@ -18,6 +18,7 @@
 import { put, takeLatest } from 'redux-saga/effects';
 import { getAngularService, dispatch } from '../../helpers/migration';
 import * as API from '../../services/api';
+import { Viewer } from '../../services/viewer/viewer';
 import { ViewpointsTypes, ViewpointsActions } from './viewpoints.redux';
 import { DialogActions } from '../dialog';
 import { getScreenshot } from '../viewer/viewer.sagas';
@@ -150,30 +151,29 @@ export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
 	viewsNotifications.unsubscribeFromDeleted(onDeleted);
 }
 
+export function* setCameraOnViewpoint({ teamspace, modelId, view }) {
+	if (view) {
+		if (view.viewpoint) {
+			const viewpoint = { ...view.viewpoint, account: teamspace, model: modelId };
+			yield Viewer.setCamera(viewpoint);
+		}
+
+		if (view.clippingPlanes) {
+			const clipData = {
+				clippingPlanes: view.clippingPlanes,
+				account: teamspace,
+				model: modelId
+			};
+
+			yield Viewer.updateClippingPlanes(clipData);
+		}
+	}
+}
+
 export function* showViewpoint({ teamspace, modelId, view }) {
 	try {
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: view }));
-
-		const ViewerService = yield getAngularService('ViewerService') as any;
-
-		if (view) {
-			if (view.viewpoint) {
-				view.viewpoint.account = teamspace;
-				view.viewpoint.model = modelId;
-
-				yield ViewerService.setCamera(view.viewpoint);
-			}
-
-			if (view.clippingPlanes) {
-				const clipData = {
-					clippingPlanes: view.clippingPlanes,
-					account: teamspace,
-					modelId
-				};
-
-				yield ViewerService.updateClippingPlanes(clipData);
-			}
-		}
+		yield put(ViewpointsActions.setCameraOnViewpoint(teamspace, modelId, view));
 	} catch (error) {
 		yield put(ViewpointsActions.setComponentState({ activeViewpoint: null }));
 		yield put(DialogActions.showErrorDialog('show', 'viewpoint'));
@@ -195,6 +195,7 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.UPDATE_VIEWPOINT, updateViewpoint);
 	yield takeLatest(ViewpointsTypes.DELETE_VIEWPOINT, deleteViewpoint);
 	yield takeLatest(ViewpointsTypes.SHOW_VIEWPOINT, showViewpoint);
+	yield takeLatest(ViewpointsTypes.SET_CAMERA_ON_VIEWPOINT, setCameraOnViewpoint);
 	yield takeLatest(ViewpointsTypes.SUBSCRIBE_ON_VIEWPOINT_CHANGES, subscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.UNSUBSCRIBE_ON_VIEWPOINT_CHANGES, unsubscribeOnViewpointChanges);
 	yield takeLatest(ViewpointsTypes.PREPARE_NEW_VIEWPOINT, prepareNewViewpoint);

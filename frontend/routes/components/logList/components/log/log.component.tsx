@@ -17,12 +17,22 @@
 
 import * as React from 'react';
 import { DateTime } from '../../../dateTime/dateTime.component';
-import DynamicUsername from '../..//../dynamicUsername/dynamicUsername.container';
+import DynamicUsername from '../../../dynamicUsername/dynamicUsername.container';
 import {
-	Container, UserMessage, SystemMessage, Info, Screenshot, ScreenshotMessage, ScreenshotWrapper
+	Container,
+	UserMessage,
+	SystemMessage,
+	Info,
+	ScreenshotMessage,
+	ScreenshotWrapper,
+	MessageContainer,
+	RemoveButtonWrapper,
+	Date
 } from './log.styles';
-
+import CloseIcon from '@material-ui/icons/Close';
+import { TooltipButton } from '../../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { Image } from '../../../image';
 
 interface IProps {
 	comment: string;
@@ -33,6 +43,11 @@ interface IProps {
 	companyName: string;
 	userName: string;
 	teamspace: string;
+	guid: string;
+	sealed: boolean;
+	index: number;
+	removeLog: (index, guid) => void;
+	setCameraOnViewpoint: (viewpoint) => void;
 }
 
 export class Log extends React.PureComponent<IProps, any> {
@@ -45,49 +60,81 @@ export class Log extends React.PureComponent<IProps, any> {
 	}
 
 	get isCommentWithScreenshot() {
-		return Boolean(this.props.comment) && Boolean(this.props.viewpoint.screenshotPath);
+		return this.isScreenshot;
 	}
 
 	get isPlainComment() {
-		return Boolean(this.props.comment) && !Boolean(this.props.viewpoint.screenshotPath);
+		return Boolean(this.props.comment) && !this.isScreenshot && !this.isAction;
 	}
 
-	public renderUserMessage = renderWhenTrue(
-		<UserMessage>{this.props.comment}</UserMessage>
-	);
+	public removeComment = () => {
+		event.stopPropagation();
+		this.props.removeLog(this.props.index, this.props.guid);
+	}
 
-	public renderSystemMessage = renderWhenTrue(
+	public renderRemoveButton = renderWhenTrue(() => (
+		<RemoveButtonWrapper screenshot={this.isScreenshot}>
+			<TooltipButton
+				label="Remove"
+				action={this.removeComment}
+				Icon={CloseIcon}
+			/>
+		</RemoveButtonWrapper>
+	));
+
+	public renderUserMessage = renderWhenTrue(() => (
+		<MessageContainer>
+			<UserMessage>{this.props.comment}</UserMessage>
+			{this.renderRemoveButton(!this.props.sealed && !this.props.action)}
+		</MessageContainer>
+	));
+
+	public renderSystemMessage = renderWhenTrue(() => (
 		<SystemMessage>
-			{this.props.action ? this.props.action.text : null}
-			at <DateTime value={this.props.created  as any} format="HH:mm DD MMM" />
+			{this.props.comment}
 		</SystemMessage>
-	);
+	));
 
-	public renderScreenshotMessage = renderWhenTrue(
+	public renderScreenshotMessage = renderWhenTrue(() => (
 		<>
 			<ScreenshotWrapper withMessage={!!this.props.comment}>
 				{ this.props.viewpoint && this.props.viewpoint.screenshotPath ?
-				<Screenshot src={this.props.viewpoint.screenshotPath} />
+					<>
+						<Image src={this.props.viewpoint.screenshotPath} enablePreview />
+						{this.renderRemoveButton(!this.props.sealed && !this.props.action)}
+					</>
 				: null }
 			</ScreenshotWrapper>
 			{this.props.comment && <ScreenshotMessage>{this.props.comment}</ScreenshotMessage>}
 		</>
-	);
+	));
 
-	public renderInfo = renderWhenTrue(
+	public renderUsername = renderWhenTrue((
+		<DynamicUsername teamspace={this.props.teamspace} name={this.props.owner} />
+	));
+
+	public renderInfo = () => (
 		<Info>
-			{<DynamicUsername teamspace={this.props.teamspace} name={this.props.owner} />}
-			<DateTime value={this.props.created as any} format="HH:mm DD MMM" />
+			{this.renderUsername(!Boolean(this.props.action))}
+			<Date>
+				<DateTime value={this.props.created as any} format="HH:mm DD MMM" />
+			</Date>
 		</Info>
-	);
+	)
+
+	public handleSetCameraOnViewpoint = () => {
+		if (this.props.viewpoint) {
+			this.props.setCameraOnViewpoint({viewpoint: this.props.viewpoint});
+		}
+	}
 
 	public render() {
 		return (
-			<Container>
+			<Container onClick={this.handleSetCameraOnViewpoint} clickable={Boolean(this.props.viewpoint)}>
 				{this.renderSystemMessage(Boolean(this.props.action))}
 				{this.renderUserMessage(this.isPlainComment)}
-				{this.renderScreenshotMessage(this.isCommentWithScreenshot)}
-				{this.renderInfo(!this.isAction)}
+				{this.renderScreenshotMessage(this.isScreenshot)}
+				{this.renderInfo()}
 			</Container>
 		);
 	}

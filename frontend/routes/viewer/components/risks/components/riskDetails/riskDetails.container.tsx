@@ -24,10 +24,14 @@ import {
 	RisksActions,
 	selectActiveRiskDetails,
 	selectExpandDetails,
+	selectLogs,
+	selectFetchingDetailsIsPending,
 	selectNewComment,
+	selectFailedToLoad,
 	selectAssociatedActivities
 } from '../../../../../../modules/risks';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
+import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { selectSettings } from '../../../../../../modules/model';
 import { DialogActions } from '../../../../../../modules/dialog';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
@@ -38,17 +42,26 @@ const mapStateToProps = createStructuredSelector({
 	risk: selectActiveRiskDetails,
 	newComment: selectNewComment,
 	expandDetails: selectExpandDetails,
+	logs: selectLogs,
+	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
 	associatedActivities: selectAssociatedActivities,
 	myJob: selectMyJob,
-	currentUser: selectCurrentUser
+	currentUser: selectCurrentUser,
+	failedToLoad: selectFailedToLoad
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setState: RisksActions.setComponentState,
+	fetchRisk: RisksActions.fetchRisk,
 	updateRisk: RisksActions.updateRisk,
+	postComment: RisksActions.postComment,
+	removeComment: RisksActions.removeComment,
 	updateNewRisk: RisksActions.updateNewRisk,
 	showNewPin: RisksActions.showNewPin,
-	showScreenshotDialog: DialogActions.showScreenshotDialog
+	subscribeOnRiskCommentsChanges: RisksActions.subscribeOnRiskCommentsChanges,
+	unsubscribeOnRiskCommentsChanges: RisksActions.unsubscribeOnRiskCommentsChanges,
+	showScreenshotDialog: DialogActions.showScreenshotDialog,
+	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(RiskDetails);

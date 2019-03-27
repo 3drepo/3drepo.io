@@ -32,12 +32,13 @@ import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { TextField } from '../../../../../components/textField/textField.component';
-import { FieldsRow, StyledFormControl, DescriptionImage } from './riskDetails.styles';
+import { Container, FieldsContainer, FieldsRow, StyledFormControl, DescriptionImage } from './riskDetails.styles';
 import { Image } from '../../../../../components/image';
 
-const RiskSchema = Yup.object().shape({
+export const RiskSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
-	mitigation_desc: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+	mitigation_desc: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	residual_risk: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 
 interface IProps {
@@ -84,7 +85,14 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				const consequenceChanged = prevProps.values.consequence !== values.consequence;
 
 				if (likelihoodChanged || consequenceChanged) {
-					this.updateLevelOfRisk();
+					this.updateRiskLevel('likelihood', 'consequence', 'level_of_risk');
+				}
+
+				const residualLikelihoodChanged = prevProps.values.residual_likelihood !== values.residual_likelihood;
+				const residualConsequenceChanged = prevProps.values.residual_consequence !== values.residual_consequence;
+
+				if (residualLikelihoodChanged || residualConsequenceChanged) {
+					this.updateRiskLevel('residual_likelihood', 'residual_consequence', 'residual_level_of_risk');
 				}
 
 				this.autoSave();
@@ -100,11 +108,19 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public updateLevelOfRisk = () => {
+	public updateRiskLevel = async (likelihoodPath, consequencePath, riskLevelPath) => {
 		const { formik } = this.props;
-		const { likelihood, consequence } = formik.values;
-		const levelOfRisk = calculateLevelOfRisk(likelihood, consequence);
-		formik.setFieldValue('level_of_risk', levelOfRisk);
+		const levelsOfRisk = {
+			level_of_risk: formik.values.level_of_risk,
+			residual_level_of_risk: formik.values.residual_level_of_risk
+		};
+		levelsOfRisk[riskLevelPath] = calculateLevelOfRisk(formik.values[likelihoodPath], formik.values[consequencePath]);
+		formik.setFieldValue(riskLevelPath, levelsOfRisk[riskLevelPath]);
+		if (0 <= levelsOfRisk.residual_level_of_risk) {
+			formik.setFieldValue('overall_level_of_risk', levelsOfRisk.residual_level_of_risk);
+		} else {
+			formik.setFieldValue('overall_level_of_risk', levelsOfRisk.level_of_risk);
+		}
 	}
 
 	public autoSave = debounce(() => {
@@ -129,48 +145,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	public render() {
 		return (
 			<Form>
-				<FieldsRow container alignItems="center" justify="space-between">
-					<Field name="safetibase_id" render={({ field }) => (
-						<TextField
-							{...field}
-							requiredConfirm={!this.isNewRisk}
-							validationSchema={RiskSchema}
-							label="SafetiBase ID"
-							disabled={!this.props.canUpdateRisk}
-						/>
-					)} />
-
-					<Field name="associated_activity" render={({ field }) => (
-						<TextField
-							{...field}
-							requiredConfirm={!this.isNewRisk}
-							label="Associated Activity"
-							disabled={!this.props.canUpdateRisk}
-						/>
-					)} />
-				</FieldsRow>
-
-				<Field name="description" render={({ field, form }) => (
-					<TextField
-						{...field}
-						requiredConfirm={!this.isNewRisk}
-						validationSchema={RiskSchema}
-						fullWidth
-						multiline
-						label="Description"
-						disabled={!this.props.canUpdateRisk}
-					/>
-				)} />
-
-				{this.props.risk.descriptionThumbnail && (
-					<DescriptionImage>
-						<Image
-							src={this.props.risk.descriptionThumbnail}
-							enablePreview
-						/>
-					</DescriptionImage>
-				)}
-
 				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="assigned_roles">Risk owner</InputLabel>
@@ -198,45 +172,105 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				</FieldsRow>
 
 				<FieldsRow container alignItems="center" justify="space-between">
-					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="likelihood">Risk Likelihood</InputLabel>
-						<Field name="likelihood" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={RISK_LIKELIHOODS}
-								inputId="likelihood"
-								disabled={!this.props.canUpdateRisk}
-							/>
-						)} />
-					</StyledFormControl>
+					<Field name="associated_activity" render={({ field }) => (
+						<TextField
+							{...field}
+							requiredConfirm={!this.isNewRisk}
+							label="Associated Activity"
+							disabled={!this.props.canUpdateRisk}
+						/>
+					)} />
 
-					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="consequence">Risk Consequence</InputLabel>
-						<Field name="consequence" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={RISK_CONSEQUENCES}
-								inputId="consequence"
-								disabled={!this.props.canUpdateRisk}
-							/>
-						)} />
-					</StyledFormControl>
+					<Field name="safetibase_id" render={({ field }) => (
+						<TextField
+							{...field}
+							requiredConfirm={!this.isNewRisk}
+							validationSchema={RiskSchema}
+							label="SafetiBase ID"
+							disabled={!this.props.canUpdateRisk}
+						/>
+					)} />
 				</FieldsRow>
 
-				<FieldsRow container alignItems="center" justify="space-between">
-					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="level_of_risk">Level of Risk</InputLabel>
-						<Field name="level_of_risk" render={({ field }) => (
-							<CellSelect
-								{...field}
-								items={LEVELS_OF_RISK}
-								inputId="level_of_risk"
-								disabled={true}
-								readOnly
-							/>
-						)} />
-					</StyledFormControl>
+				<Field name="description" render={({ field, form }) => (
+					<TextField
+						{...field}
+						requiredConfirm={!this.isNewRisk}
+						validationSchema={RiskSchema}
+						fullWidth
+						multiline
+						label="Description"
+						disabled={!this.props.canUpdateRisk}
+					/>
+				)} />
 
+				{this.props.risk.descriptionThumbnail && (
+					<DescriptionImage>
+						<Image
+							src={this.props.risk.descriptionThumbnail}
+							enablePreview
+						/>
+					</DescriptionImage>
+				)}
+
+				<FieldsRow container alignItems="center" justify="space-between">
+					<FieldsContainer>
+						<StyledFormControl>
+							<InputLabel shrink={true} htmlFor="likelihood">Risk Likelihood</InputLabel>
+							<Field name="likelihood" render={({ field }) => (
+								<CellSelect
+									{...field}
+									items={RISK_LIKELIHOODS}
+									inputId="likelihood"
+									disabled={!this.props.canUpdateRisk}
+									readOnly={!this.isNewRisk}
+								/>
+							)} />
+						</StyledFormControl>
+
+						<StyledFormControl>
+							<InputLabel shrink={true} htmlFor="consequence">Risk Consequence</InputLabel>
+							<Field name="consequence" render={({ field }) => (
+								<CellSelect
+									{...field}
+									items={RISK_CONSEQUENCES}
+									inputId="consequence"
+									disabled={!this.props.canUpdateRisk}
+									readOnly={!this.isNewRisk}
+								/>
+							)} />
+						</StyledFormControl>
+					</FieldsContainer>
+
+					<FieldsContainer>
+						<StyledFormControl>
+							<InputLabel shrink={true} htmlFor="level_of_risk">Level of Risk</InputLabel>
+							<Field name="level_of_risk" render={({ field }) => (
+								<CellSelect
+									{...field}
+									items={LEVELS_OF_RISK}
+									inputId="level_of_risk"
+									disabled={true}
+									readOnly
+								/>
+							)} />
+						</StyledFormControl>
+					</FieldsContainer>
+				</FieldsRow>
+
+				<Field name="mitigation_desc" render={({ field, form }) => (
+					<TextField
+						{...field}
+						requiredConfirm={!this.isNewRisk}
+						validationSchema={RiskSchema}
+						fullWidth
+						multiline
+						label="Mitigation"
+						disabled={!this.props.canUpdateRisk}
+					/>
+				)} />
+
+				<Container>
 					<StyledFormControl>
 						<InputLabel shrink={true} htmlFor="mitigation_status">Mitigation Status</InputLabel>
 						<Field name="mitigation_status" render={({ field }) => (
@@ -248,16 +282,59 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							/>
 						)} />
 					</StyledFormControl>
+				</Container>
+
+				<FieldsRow container alignItems="center" justify="space-between">
+					<FieldsContainer>
+						<StyledFormControl>
+							<InputLabel shrink={true} htmlFor="residual_likelihood">Mitigated Likelihood</InputLabel>
+							<Field name="residual_likelihood" render={({ field }) => (
+								<CellSelect
+									{...field}
+									items={RISK_LIKELIHOODS}
+									inputId="residual_likelihood"
+									disabled={!this.props.canUpdateRisk}
+								/>
+							)} />
+						</StyledFormControl>
+
+						<StyledFormControl>
+							<InputLabel shrink={true} htmlFor="residual_consequence">Mitigated Consequence</InputLabel>
+							<Field name="residual_consequence" render={({ field }) => (
+								<CellSelect
+									{...field}
+									items={RISK_CONSEQUENCES}
+									inputId="residual_consequence"
+									disabled={!this.props.canUpdateRisk}
+								/>
+							)} />
+						</StyledFormControl>
+					</FieldsContainer>
+
+					<FieldsContainer>
+						<StyledFormControl>
+							<InputLabel shrink={true} htmlFor="residual_level_of_risk">Level of Mitigated Risk</InputLabel>
+							<Field name="residual_level_of_risk" render={({ field }) => (
+								<CellSelect
+									{...field}
+									items={LEVELS_OF_RISK}
+									inputId="residual_level_of_risk"
+									disabled={true}
+									readOnly
+								/>
+							)} />
+						</StyledFormControl>
+					</FieldsContainer>
 				</FieldsRow>
 
-				<Field name="mitigation_desc" render={({ field, form }) => (
+				<Field name="residual_risk" render={({ field, form }) => (
 					<TextField
 						{...field}
 						requiredConfirm={!this.isNewRisk}
 						validationSchema={RiskSchema}
 						fullWidth
 						multiline
-						label="Mitigation"
+						label="Residual Risk"
 						disabled={!this.props.canUpdateRisk}
 					/>
 				)} />
@@ -278,7 +355,12 @@ export const RiskDetailsForm = withFormik({
 			category: risk.category || '',
 			likelihood: risk.likelihood,
 			consequence: risk.consequence,
-			level_of_risk: risk.level_of_risk
+			level_of_risk: risk.level_of_risk,
+			residual_likelihood: risk.residual_likelihood,
+			residual_consequence: risk.residual_consequence,
+			residual_level_of_risk: risk.residual_level_of_risk,
+			overall_level_of_risk: risk.overall_level_of_risk,
+			residual_risk: risk.residual_risk
 		});
 	},
 	handleSubmit: (values, { props }) => {

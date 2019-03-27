@@ -18,21 +18,43 @@
 import * as React from 'react';
 
 import { Log } from './components/log/log.component';
-import { Container } from './logList.styles';
+import { Container, LoaderContainer } from './logList.styles';
+import { Loader } from '../../components/loader/loader.component';
 
 interface IProps {
 	items: any[];
+	isPending: boolean;
+	teamspace: string;
+	removeLog: (index, guid) => void;
+	setCameraOnViewpoint: (viewpoint) => void;
 }
 
 export class LogList extends React.PureComponent<IProps, any> {
 	public renderLogItem = (item, index) => {
-		return <Log key={index} {...item} />;
+		return (
+			<Log
+				{...item}
+				key={item.guid + item._id}
+				removeLog={this.props.removeLog}
+				index={index}
+				teamspace={this.props.teamspace}
+				setCameraOnViewpoint={this.props.setCameraOnViewpoint}
+			/>
+		);
+	}
+
+	public renderLoader = () => {
+		return (
+			<LoaderContainer>
+				<Loader size={18} />
+			</LoaderContainer>
+		);
 	}
 
 	public render() {
 		return (
 			<Container>
-				{this.props.items.map(this.renderLogItem)}
+				{this.props.isPending ? this.renderLoader() : this.props.items.map(this.renderLogItem)}
 			</Container>
 		);
 	}

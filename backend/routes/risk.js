@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.ap
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.ap
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 "use strict";
 
@@ -34,7 +34,6 @@ const utils = require("../utils");
  * @apiParam {String} model Model ID
  * @apiParam {String} id Risk ID.
  */
-
 router.get("/risks/:uid.json", middlewares.issue.canView, findRiskById);
 
 /**
@@ -46,7 +45,6 @@ router.get("/risks/:uid.json", middlewares.issue.canView, findRiskById);
  * @apiParam {String} model Model ID
  * @apiParam {String} id Risk ID.
  */
-
 router.get("/risks/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 /**
@@ -57,7 +55,6 @@ router.get("/risks/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail)
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  */
-
 router.get("/risks.json", middlewares.issue.canView, listRisks);
 
 /**
@@ -68,8 +65,7 @@ router.get("/risks.json", middlewares.issue.canView, listRisks);
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  */
-
-router.get("/risks/:uid/screenshot.png", middlewares.issue.canView, getScreenshot);
+router.get("/risks/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
 
 /**
  * @api {get} /:teamspace/:model/risks/:uid/screenshotSmall.png  Get Small Risks Screenshot
@@ -80,8 +76,7 @@ router.get("/risks/:uid/screenshot.png", middlewares.issue.canView, getScreensho
  * @apiParam {String} model Model ID
  * @apiParam {String} id Risk ID.
  */
-
-router.get("/risks/:uid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
+router.get("/risks/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
 
 /**
  * @api {get} /:teamspace/:model/risks/:rid/risks.json	List all Risks by revision ID
@@ -92,7 +87,6 @@ router.get("/risks/:uid/screenshotSmall.png", middlewares.issue.canView, getScre
  * @apiParam {String} model Model ID
  * @apiParam {String} id Revision ID.
  */
-
 router.get("/revision/:rid/risks.json", middlewares.issue.canView, listRisks);
 
 /**
@@ -103,7 +97,6 @@ router.get("/revision/:rid/risks.json", middlewares.issue.canView, listRisks);
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  */
-
 router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
 
 /**
@@ -115,7 +108,6 @@ router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
  * @apiParam {String} model Model ID
  * @apiParam {String} rid Revision ID.
  */
-
 router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHTML);
 
 /**
@@ -127,7 +119,6 @@ router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHT
  * @apiParam {String} model Model ID
  * @apiParam {String} id Revision ID.
  */
-
 router.post("/risks.json", middlewares.issue.canCreate, storeRisk);
 
 /**
@@ -139,7 +130,6 @@ router.post("/risks.json", middlewares.issue.canCreate, storeRisk);
  * @apiParam {String} model Model ID
  * @apiParam {String} riskId.json Risk ID.
  */
-
 router.put("/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
 
 /**
@@ -151,7 +141,6 @@ router.put("/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
  * @apiParam {String} model Model ID
  * @apiParam {String} rid Revision ID.
  */
-
 router.post("/revision/:rid/risks.json", middlewares.issue.canCreate, storeRisk);
 
 /**
@@ -164,7 +153,6 @@ router.post("/revision/:rid/risks.json", middlewares.issue.canCreate, storeRisk)
  * @apiParam {String} rid Revision ID.
  * @apiParam {String} riskId Risk ID.
  */
-
 router.put("/revision/:rid/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
 
 /**
@@ -172,11 +160,9 @@ router.put("/revision/:rid/risks/:riskId.json", middlewares.issue.canComment, up
  * @apiName deleteRisks
  * @apiGroup Risks
  */
-
 router.delete("/risks/", middlewares.issue.canCreate, deleteRisks);
 
 function storeRisk(req, res, next) {
-
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 	const data = req.body;
@@ -193,7 +179,6 @@ function storeRisk(req, res, next) {
 }
 
 function updateRisk(req, res, next) {
-
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 	const data = req.body;
@@ -246,11 +231,9 @@ function listRisks(req, res, next) {
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
-
 }
 
 function findRiskById(req, res, next) {
-
 	const params = req.params;
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
@@ -260,7 +243,6 @@ function findRiskById(req, res, next) {
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
-
 }
 
 function renderRisksHTML(req, res, next) {
@@ -275,33 +257,28 @@ function renderRisksHTML(req, res, next) {
 }
 
 function getScreenshot(req, res, next) {
-
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 
-	Risk.getScreenshot(dbCol, req.params.uid).then(buffer => {
+	Risk.getScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});
-
 }
 
 function getScreenshotSmall(req, res, next) {
-
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 
-	Risk.getSmallScreenshot(dbCol, req.params.uid).then(buffer => {
+	Risk.getSmallScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});
-
 }
 
 function getThumbnail(req, res, next) {
-
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 
@@ -310,7 +287,6 @@ function getThumbnail(req, res, next) {
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});
-
 }
 
 module.exports = router;
