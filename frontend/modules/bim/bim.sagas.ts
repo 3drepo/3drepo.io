@@ -25,6 +25,8 @@ import { prepareMetadata } from '../../helpers/bim';
 import { getAngularService } from '../../helpers/migration';
 
 export function* fetchMetadata({ teamspace, model, metadataId }) {
+	yield put(BimActions.setIsPending(true));
+
 	try {
 		const { data } = yield API.getMetadata(teamspace, model, metadataId);
 		const DocsService = getAngularService('DocsService') as any;
@@ -35,6 +37,8 @@ export function* fetchMetadata({ teamspace, model, metadataId }) {
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'metadata', error));
 	}
+
+	yield put(BimActions.setIsPending(false));
 }
 
 export default function* BimSaga() {

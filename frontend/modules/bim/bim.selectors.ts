@@ -24,6 +24,10 @@ export const selectMetadata = createSelector(
 	selectBimDomain, (state) => state.metadata
 );
 
+export const selectIsPending = createSelector(
+	selectBimDomain, (state) => state.isPending
+);
+
 export const selectComponentState = createSelector(
 	selectBimDomain, (state) => state.componentState
 );

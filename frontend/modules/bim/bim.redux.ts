@@ -21,6 +21,7 @@ import { ISelectedFilter } from '../../routes/components/filterPanel/filterPanel
 export const { Types: BimTypes, Creators: BimActions } = createActions({
 	fetchMetadata: ['teamspace', 'model', 'metadataId'],
 	fetchMetadataSuccess: ['metadata'],
+	setIsPending: ['isPending'],
 	setComponentState: ['componentState']
 }, { prefix: 'BIM/' });
 
@@ -36,11 +37,13 @@ export interface IBimComponentState {
 
 export interface IBimState {
 	metadata: IMetaRecord[];
+	isPending: boolean;
 	componentState: IBimComponentState;
 }
 
 export const INITIAL_STATE: IBimState = {
 	metadata: [],
+	isPending: false,
 	componentState: {
 		showStarred: false,
 		selectedFilters: []
@@ -49,11 +52,14 @@ export const INITIAL_STATE: IBimState = {
 
 const fetchMetadataSuccess = (state = INITIAL_STATE, { metadata}) => ({ ...state, metadata });
 
+const setIsPending = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
+
 const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[BimTypes.FETCH_METADATA_SUCCESS]: fetchMetadataSuccess,
-	[BimTypes.SET_COMPONENT_STATE]: setComponentState
+	[BimTypes.SET_COMPONENT_STATE]: setComponentState,
+	[BimTypes.SET_IS_PENDING]: setIsPending
 });
