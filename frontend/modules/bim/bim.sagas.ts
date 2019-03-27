@@ -16,6 +16,7 @@
  */
 
 import { put, takeLatest, all } from 'redux-saga/effects';
+import { sortBy } from 'lodash';
 
 import * as API from '../../services/api';
 import { BimTypes, BimActions } from './bim.redux';
@@ -33,7 +34,8 @@ export function* fetchMetadata({ teamspace, model, metadataId }) {
 		const DocsService = getAngularService('DocsService') as any;
 		DocsService.displayDocs(teamspace, model, metadataId);
 
-		yield put(BimActions.fetchMetadataSuccess(prepareMetadata(data.meta[0].metadata)));
+		const sortedData = sortBy(prepareMetadata(data.meta[0].metadata), 'key');
+		yield put(BimActions.fetchMetadataSuccess(sortedData));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'metadata', error));
 	}
