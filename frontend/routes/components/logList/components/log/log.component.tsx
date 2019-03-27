@@ -23,11 +23,6 @@ import {
 	UserMessage,
 	SystemMessage,
 	Info,
-	MitigationMessage,
-	MitigationDetail,
-	MitigationDetailLabel,
-	MitigationDetailRow,
-	MitigationWrapper,
 	ScreenshotMessage,
 	ScreenshotWrapper,
 	MessageContainer,
@@ -37,13 +32,6 @@ import {
 import CloseIcon from '@material-ui/icons/Close';
 import { TooltipButton } from '../../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
-import {
-	LEVELS_OF_RISK,
-	RISK_CATEGORIES,
-	RISK_CONSEQUENCES,
-	RISK_LIKELIHOODS,
-	RISK_MITIGATION_STATUSES
-} from '../../../../../constants/risks';
 import { Image } from '../../../image';
 
 interface IProps {
