@@ -432,9 +432,7 @@ export class PanelService {
 			minHeight: 80,
 			fixedHeight: false,
 			isReactComponent: true,
-			options: [
-				{type: 'close', visible: true}
-			]
+			options: []
 		});
 
 	}

@@ -82,13 +82,13 @@ interface IState {
 
 const getMenuButton = (InitialIcon) => ({ IconProps, Icon, ...props }: { Icon?, IconProps: any }) => (
 	<ButtonWrapper>
-	  <StyledIconButton
-	    {...props}
-	    aria-label="Show filters menu"
-	    aria-haspopup="true"
-	  >
+		<StyledIconButton
+			{...props}
+			aria-label="Show filters menu"
+			aria-haspopup="true"
+		>
 			<InitialIcon {...IconProps} />
-	  </StyledIconButton>
+		</StyledIconButton>
 	</ButtonWrapper>
 );
 
