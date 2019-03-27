@@ -40,5 +40,5 @@ export const MODEL_ROLES_LIST = [
 		key: MODEL_ROLES_TYPES.UNASSIGNED,
 		label: 'Unassigned',
 		tooltip: MODEL_ROLES_DESC.UNASSIGNED
-	},
+	}
 ];
