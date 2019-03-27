@@ -34,7 +34,7 @@ const html = data => `
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>*|MC:SUBJECT|*</title>
-        
+
     <style type="text/css">
 		p{
 			margin:10px 0;
@@ -533,12 +533,12 @@ const html = data => `
                     <table align="left" width="100%" border="0" cellpadding="0" cellspacing="0" class="mcnImageContentContainer" style="min-width:100%;">
                         <tbody><tr>
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
-								
-							
+
+
                                     <a href="https://www.3drepo.io">
-										<img align="center" alt="" src="https://www.dropbox.com/s/okz0a68zu3lm5mu/3D%20Repo%20Logo.png?raw=1" 
+										<img align="center" alt="" src="https://www.dropbox.com/s/okz0a68zu3lm5mu/3D%20Repo%20Logo.png?raw=1"
 										width="300" style="max-width: 300px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 0%;" class="mcnImage">
-                                    </a>                                
+                                    </a>
                             </td>
                         </tr>
                     </tbody></table>
@@ -561,7 +561,7 @@ const html = data => `
                                     <table align="center" border="0" cellspacing="0" cellpadding="0" width="600" style="width:600px;">
                                     <tr>
                                     <td align="center" valign="top" width="600" style="width:600px;">
-                                    <![endif]-->																	
+                                    <![endif]-->
                                     <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" class="templateContainer">
                                         <tr>
                                             <td valign="top" class="bodyContainer"><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
@@ -572,22 +572,22 @@ const html = data => `
 				<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
 				<tr>
 				<![endif]-->
-			    
+
 				<!--[if mso]>
 				<td valign="top" width="600" style="width:600px;">
 				<![endif]-->
                 <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
                     <tbody><tr>
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
-                        
-                            <span style="font-size:18px"><strong><span style="color:#808080"><span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif">Hello ${data.user},</span></span></strong></span>
+
+                            <span style="font-size:18px"><strong><span style="color:#808080"><span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif">Hello ${data.firstName},</span></span></strong></span>
                         </td>
                     </tr>
                 </tbody></table>
 				<!--[if mso]>
 				</td>
 				<![endif]-->
-                
+
 				<!--[if mso]>
 				</tr>
 				</table>
@@ -603,15 +603,15 @@ const html = data => `
 				<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
 				<tr>
 				<![endif]-->
-			    
+
 				<!--[if mso]>
 				<td valign="top" width="600" style="width:600px;">
 				<![endif]-->
                 <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
                     <tbody><tr>
-                        
+
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
-                        
+
                             <span style="font-size:15px">Thank you for signing up to 3D Repo!<br>
 Please click on the button below to verify your email address.</span>
                         </td>
@@ -620,7 +620,7 @@ Please click on the button below to verify your email address.</span>
 				<!--[if mso]>
 				</td>
 				<![endif]-->
-                
+
 				<!--[if mso]>
 				</tr>
 				</table>
@@ -639,7 +639,7 @@ Please click on the button below to verify your email address.</span>
                         </td>
                     </tr>
                 </tbody></table>
-<!--            
+<!--
                 <td class="mcnDividerBlockInner" style="padding: 18px;">
                 <hr class="mcnDividerContent" style="border-bottom-color:none; border-left-color:none; border-right-color:none; border-bottom-width:0; border-left-width:0; border-right-width:0; margin-top:0; margin-right:0; margin-bottom:0; margin-left:0;" />
 -->
@@ -653,11 +653,11 @@ Please click on the button below to verify your email address.</span>
                     <table align="left" width="100%" border="0" cellpadding="0" cellspacing="0" class="mcnImageContentContainer" style="min-width:100%;">
                         <tbody><tr>
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
-                                
+
                                     <a href="${data.url}" title="" class="" target="_blank">
                                         <img align="center" alt="" src="https://www.dropbox.com/s/qndf1g0foi93ca3/Verify%20email%20address.png?raw=1" width="564" style="max-width:1200px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
                                     </a>
-                                
+
                             </td>
                         </tr>
                     </tbody></table>
@@ -675,7 +675,7 @@ Please click on the button below to verify your email address.</span>
                         </td>
                     </tr>
                 </tbody></table>
-<!--            
+<!--
                 <td class="mcnDividerBlockInner" style="padding: 18px;">
                 <hr class="mcnDividerContent" style="border-bottom-color:none; border-left-color:none; border-right-color:none; border-bottom-width:0; border-left-width:0; border-right-width:0; margin-top:0; margin-right:0; margin-bottom:0; margin-left:0;" />
 -->
@@ -690,15 +690,15 @@ Please click on the button below to verify your email address.</span>
 				<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
 				<tr>
 				<![endif]-->
-			    
+
 				<!--[if mso]>
 				<td valign="top" width="600" style="width:600px;">
 				<![endif]-->
                 <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
                     <tbody><tr>
-                        
+
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
-                        
+
                             <span style="font-size:15px">By verifying your email address you are agreeing to 3D Repo's <a href="https://www.3drepo.io/terms" target="_blank"><span style="color:#3452ff">Terms of Service</span></a><br>
 For any queries please contact our support team at <a href="mailto:support@3drepo.org?subject=Support%20Query" target="_blank"><span style="color:#3452ff">support@3drepo.org</span></a></span>
                         </td>
@@ -707,7 +707,7 @@ For any queries please contact our support team at <a href="mailto:support@3drep
 				<!--[if mso]>
 				</td>
 				<![endif]-->
-                
+
 				<!--[if mso]>
 				</tr>
 				</table>
@@ -723,15 +723,15 @@ For any queries please contact our support team at <a href="mailto:support@3drep
 				<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
 				<tr>
 				<![endif]-->
-			    
+
 				<!--[if mso]>
 				<td valign="top" width="600" style="width:600px;">
 				<![endif]-->
                 <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
                     <tbody><tr>
-                        
+
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
-                        
+
                             <span style="font-size:15px"><span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif">All the best,</span></span>
                         </td>
                     </tr>
@@ -739,7 +739,7 @@ For any queries please contact our support team at <a href="mailto:support@3drep
 				<!--[if mso]>
 				</td>
 				<![endif]-->
-                
+
 				<!--[if mso]>
 				</tr>
 				</table>
@@ -755,15 +755,15 @@ For any queries please contact our support team at <a href="mailto:support@3drep
 				<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
 				<tr>
 				<![endif]-->
-			    
+
 				<!--[if mso]>
 				<td valign="top" width="600" style="width:600px;">
 				<![endif]-->
                 <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
                     <tbody><tr>
-                        
+
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
-                        
+
                             <span style="font-size:15px">3D Repo Team</span>
                         </td>
                     </tr>
@@ -771,7 +771,7 @@ For any queries please contact our support team at <a href="mailto:support@3drep
 				<!--[if mso]>
 				</td>
 				<![endif]-->
-                
+
 				<!--[if mso]>
 				</tr>
 				</table>
@@ -815,12 +815,12 @@ For any queries please contact our support team at <a href="mailto:support@3drep
                                     <table align="center" border="0" cellspacing="0" cellpadding="0">
                                     <tr>
                                     <![endif]-->
-                                    
+
                                         <!--[if mso]>
                                         <td align="center" valign="top">
                                         <![endif]-->
-                                        
-                                        
+
+
                                             <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;">
                                                 <tbody><tr>
                                                     <td valign="top" style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer">
@@ -829,12 +829,12 @@ For any queries please contact our support team at <a href="mailto:support@3drep
                                                                 <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;">
                                                                     <table align="left" border="0" cellpadding="0" cellspacing="0" width="">
                                                                         <tbody><tr>
-                                                                            
+
                                                                                 <td align="center" valign="middle" width="24" class="mcnFollowIconContent">
                                                                                     <a href="https://twitter.com/3drepo" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/gray-twitter-48.png" style="display:block;" height="24" width="24" class=""></a>
                                                                                 </td>
-                                                                            
-                                                                            
+
+
                                                                         </tr>
                                                                     </tbody></table>
                                                                 </td>
@@ -843,16 +843,16 @@ For any queries please contact our support team at <a href="mailto:support@3drep
                                                     </td>
                                                 </tr>
                                             </tbody></table>
-                                        
+
                                         <!--[if mso]>
                                         </td>
                                         <![endif]-->
-                                    
+
                                         <!--[if mso]>
                                         <td align="center" valign="top">
                                         <![endif]-->
-                                        
-                                        
+
+
                                             <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;">
                                                 <tbody><tr>
                                                     <td valign="top" style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer">
@@ -861,12 +861,12 @@ For any queries please contact our support team at <a href="mailto:support@3drep
                                                                 <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;">
                                                                     <table align="left" border="0" cellpadding="0" cellspacing="0" width="">
                                                                         <tbody><tr>
-                                                                            
+
                                                                                 <td align="center" valign="middle" width="24" class="mcnFollowIconContent">
                                                                                     <a href="https://en-gb.facebook.com/3DRepo/" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/gray-facebook-48.png" style="display:block;" height="24" width="24" class=""></a>
                                                                                 </td>
-                                                                            
-                                                                            
+
+
                                                                         </tr>
                                                                     </tbody></table>
                                                                 </td>
@@ -875,16 +875,16 @@ For any queries please contact our support team at <a href="mailto:support@3drep
                                                     </td>
                                                 </tr>
                                             </tbody></table>
-                                        
+
                                         <!--[if mso]>
                                         </td>
                                         <![endif]-->
-                                    
+
                                         <!--[if mso]>
                                         <td align="center" valign="top">
                                         <![endif]-->
-                                        
-                                        
+
+
                                             <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;">
                                                 <tbody><tr>
                                                     <td valign="top" style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer">
@@ -893,12 +893,12 @@ For any queries please contact our support team at <a href="mailto:support@3drep
                                                                 <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;">
                                                                     <table align="left" border="0" cellpadding="0" cellspacing="0" width="">
                                                                         <tbody><tr>
-                                                                            
+
                                                                                 <td align="center" valign="middle" width="24" class="mcnFollowIconContent">
                                                                                     <a href="https://www.linkedin.com/company/3d-repo" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/gray-linkedin-48.png" style="display:block;" height="24" width="24" class=""></a>
                                                                                 </td>
-                                                                            
-                                                                            
+
+
                                                                         </tr>
                                                                     </tbody></table>
                                                                 </td>
@@ -907,16 +907,16 @@ For any queries please contact our support team at <a href="mailto:support@3drep
                                                     </td>
                                                 </tr>
                                             </tbody></table>
-                                        
+
                                         <!--[if mso]>
                                         </td>
                                         <![endif]-->
-                                    
+
                                         <!--[if mso]>
                                         <td align="center" valign="top">
                                         <![endif]-->
-                                        
-                                        
+
+
                                             <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;">
                                                 <tbody><tr>
                                                     <td valign="top" style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer">
@@ -925,12 +925,12 @@ For any queries please contact our support team at <a href="mailto:support@3drep
                                                                 <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;">
                                                                     <table align="left" border="0" cellpadding="0" cellspacing="0" width="">
                                                                         <tbody><tr>
-                                                                            
+
                                                                                 <td align="center" valign="middle" width="24" class="mcnFollowIconContent">
                                                                                     <a href="https://github.com/3drepo" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/gray-github-48.png" style="display:block;" height="24" width="24" class=""></a>
                                                                                 </td>
-                                                                            
-                                                                            
+
+
                                                                         </tr>
                                                                     </tbody></table>
                                                                 </td>
@@ -939,16 +939,16 @@ For any queries please contact our support team at <a href="mailto:support@3drep
                                                     </td>
                                                 </tr>
                                             </tbody></table>
-                                        
+
                                         <!--[if mso]>
                                         </td>
                                         <![endif]-->
-                                    
+
                                         <!--[if mso]>
                                         <td align="center" valign="top">
                                         <![endif]-->
-                                        
-                                        
+
+
                                             <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;">
                                                 <tbody><tr>
                                                     <td valign="top" style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer">
@@ -957,12 +957,12 @@ For any queries please contact our support team at <a href="mailto:support@3drep
                                                                 <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;">
                                                                     <table align="left" border="0" cellpadding="0" cellspacing="0" width="">
                                                                         <tbody><tr>
-                                                                            
+
                                                                                 <td align="center" valign="middle" width="24" class="mcnFollowIconContent">
                                                                                     <a href="https://www.youtube.com/channel/UC9ofPaxxyQy0jPEB9YlNpuA" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/gray-youtube-48.png" style="display:block;" height="24" width="24" class=""></a>
                                                                                 </td>
-                                                                            
-                                                                            
+
+
                                                                         </tr>
                                                                     </tbody></table>
                                                                 </td>
@@ -971,16 +971,16 @@ For any queries please contact our support team at <a href="mailto:support@3drep
                                                     </td>
                                                 </tr>
                                             </tbody></table>
-                                        
+
                                         <!--[if mso]>
                                         </td>
                                         <![endif]-->
-                                    
+
                                         <!--[if mso]>
                                         <td align="center" valign="top">
                                         <![endif]-->
-                                        
-                                        
+
+
                                             <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;">
                                                 <tbody><tr>
                                                     <td valign="top" style="padding-right:0; padding-bottom:9px;" class="mcnFollowContentItemContainer">
@@ -989,12 +989,12 @@ For any queries please contact our support team at <a href="mailto:support@3drep
                                                                 <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;">
                                                                     <table align="left" border="0" cellpadding="0" cellspacing="0" width="">
                                                                         <tbody><tr>
-                                                                            
+
                                                                                 <td align="center" valign="middle" width="24" class="mcnFollowIconContent">
                                                                                     <a href="http://www.3drepo.org" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/gray-link-48.png" style="display:block;" height="24" width="24" class=""></a>
                                                                                 </td>
-                                                                            
-                                                                            
+
+
                                                                         </tr>
                                                                     </tbody></table>
                                                                 </td>
@@ -1003,11 +1003,11 @@ For any queries please contact our support team at <a href="mailto:support@3drep
                                                     </td>
                                                 </tr>
                                             </tbody></table>
-                                        
+
                                         <!--[if mso]>
                                         </td>
                                         <![endif]-->
-                                    
+
                                     <!--[if mso]>
                                     </tr>
                                     </table>
@@ -1033,15 +1033,15 @@ For any queries please contact our support team at <a href="mailto:support@3drep
 				<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
 				<tr>
 				<![endif]-->
-			    
+
 				<!--[if mso]>
 				<td valign="top" width="600" style="width:600px;">
 				<![endif]-->
                 <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
                     <tbody><tr>
-                        
+
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
-                        
+
                             <span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif"><span style="color:#696969"><em>Copyright © 2019 3D Repo, All rights reserved.</em><br>
 <br>
 <strong>Our mailing address is:</strong><br>
@@ -1055,7 +1055,7 @@ United Kingdom</span></span>
 				<!--[if mso]>
 				</td>
 				<![endif]-->
-                
+
 				<!--[if mso]>
 				</tr>
 				</table>

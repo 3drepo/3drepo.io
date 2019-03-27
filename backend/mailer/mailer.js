@@ -91,8 +91,6 @@ function sendVerifyUserEmail(to, data) {
 
 	data.url = getURL("verify", {token: data.token, username: data.username, pay: data.pay});
 
-	data.user = data.firstName;
-
 	if(!data.url) {
 		return rejectNoUrl("verify");
 	}
