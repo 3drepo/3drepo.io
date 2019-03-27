@@ -184,6 +184,13 @@ schema.statics.appendStarredMetadataTag = async function (username, tag) {
 	return {};
 };
 
+schema.statics.setStarredMetadataTags = async function (username, tags) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	tags = _.uniq(tags);
+	await dbCol.update({user: username}, {$set: { "customData.StarredMetadataTags" : tags}});
+	return {};
+};
+
 schema.statics.deleteStarredMetadataTag = async function (username, tag) {
 	const dbCol = await DB.getCollection("admin", "system.users");
 	await dbCol.update({user: username}, {$pull: { "customData.StarredMetadataTags" : tag } });

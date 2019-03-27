@@ -23,6 +23,7 @@ const onSuccess = responseCodes.onSuccessfulOperation;
 const middlewares = require("../middlewares/middlewares");
 const User =  require("../models/user");
 const utils = require("../utils");
+const { isString, isArray } = require("lodash");
 
 /**
  * @api {get} /me Gets the profile for the logged user
@@ -53,7 +54,7 @@ router.delete("/apikey", middlewares.loggedIn, deleteApiKey, onSuccess);
 router.get("/starredMeta", middlewares.loggedIn, getStarredMetadataTags, onSuccess);
 
 /**
- * @api {post} /starredMeta Adds a starred metadata tag for the logged user, if the tag
+ * @api {post} /starredMeta Adds a starred metadata tag for the logged user
  * @apiName StarMetadataTags
  * @apiGroup User
  *
@@ -70,6 +71,26 @@ router.get("/starredMeta", middlewares.loggedIn, getStarredMetadataTags, onSucce
  * @apiError 400 BadRequest The request was malformed
  * */
 router.post("/starredMeta", middlewares.loggedIn, appendStarredMetadataTag, onSuccess);
+
+/**
+ * @api {put} /starredMeta Sets the whole starred metadata tag for the logged user
+ * @apiName SetMetadataTags
+ * @apiGroup User
+ *
+ * @apiParam  [String]  An array of tags to be starred
+ * @apiParamExample {json} Input
+ *    [
+ *    	"material",
+ * 	  	"color"
+ * 	  ]
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *	  {}
+ *
+ * @apiError 400 BadRequest The request was malformed
+ * */
+router.put("/starredMeta", middlewares.loggedIn, replaceStarredMetadataTags, onSuccess);
 
 /**
  * @api {delete} /starredMeta removes a starred metadata tag for the logged user if the tag exists
@@ -134,6 +155,20 @@ async function appendStarredMetadataTag(req, res, next) {
 	}
 
 	req.dataModel = await User.appendStarredMetadataTag(username,tag);
+	next();
+}
+
+async function replaceStarredMetadataTags(req, res, next) {
+	const username = req.session.user.username;
+	const tags = req.body;
+
+	if (!isArray(tags) || !tags.every(isString)) {
+		res.status(400);
+		res.end();
+		return;
+	}
+
+	req.dataModel = await User.setStarredMetadataTags(username,tags);
 	next();
 }
 

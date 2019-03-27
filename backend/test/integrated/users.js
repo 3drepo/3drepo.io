@@ -138,6 +138,40 @@ describe('User ', () => {
 				});
 		});
 
+
+		it ("should set the tags when send a whole array of tags", done => {
+			async.series([
+				next => teamSpace1.put(FAVOURITE_URL)
+					.send(tags)
+					.expect(200, function(err, res) {
+						next(err);
+					}),
+				next => teamSpace1.get(FAVOURITE_URL)
+					.expect(200, function(err, res) {
+						const favourites = res.body;
+						expect(favourites).to.be.an("array");
+						expect(favourites.sort()).to.eql( tags.sort());
+						next(err);
+					})
+			], done);
+		})
+
+
+		it ("should set the tags empty when send a an empty array of tags", done => {
+			async.series([
+				next => teamSpace1.put(FAVOURITE_URL)
+					.send([])
+					.expect(200, function(err, res) {
+						next(err);
+					}),
+				next => teamSpace1.get(FAVOURITE_URL)
+					.expect(200, function(err, res) {
+						expect(res.body).to.be.an("array").and.to.have.length(0, 'Should have an empty array as favourites metadata tags');
+						next(err);
+					})
+			], done);
+		})
+
 		it("should fail with 400 when sending bad data", done => {
 			teamSpace1.post(FAVOURITE_URL)
 				.send({})
