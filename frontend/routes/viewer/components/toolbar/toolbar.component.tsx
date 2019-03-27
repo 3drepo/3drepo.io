@@ -76,8 +76,8 @@ interface IProps {
 	setIsFocusMode: (isFocusMode) => void;
 	setClippingMode: (clippingMode) => void;
 	toggleClipEdit: () => void;
-	toggleMetadata: () => void;
-	toggleMeasure: () => void;
+	setMetadataVisibility: (visible) => void;
+	setMeasureVisibility: (visible) => void;
 	deactivateMeasure: () => void;
 }
 
@@ -98,50 +98,6 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		activeButton: '',
 		activeSubMenu: ''
 	};
-
-	public componentDidMount() {
-		this.props.initialiseToolbar();
-	}
-
-	public componentDidUpdate(prevProps) {
-		if (this.props.isFocusMode !== prevProps.isFocusMode) {
-			const uiVisibility = this.props.isFocusMode ? 'hidden' : 'initial';
-			const modelUI = document.querySelector('#modelUI') as HTMLElement;
-			const topMenu = document.querySelector('#topMenu') as HTMLElement;
-
-			modelUI.style.visibility = uiVisibility;
-			topMenu.style.visibility = uiVisibility;
-		}
-
-		if (!this.props.clippingMode && prevProps.clippingMode) {
-			this.setState({
-				activeSubMenu: ''
-			});
-		}
-	}
-
-	public componentWillUnmount() {
-		this.props.deactivateMeasure();
-	}
-
-	public handleNavigationModeClick = (mode) => {
-		this.props.setNavigationMode(mode);
-		this.setState({
-			activeSubMenu: ''
-		});
-	}
-
-	public handleClickAway = () => {
-		this.setState({
-			activeSubMenu: ''
-		});
-	}
-
-	public handleShowSubmenu = (label) => {
-		this.setState((prevState) => ({
-			activeSubMenu: prevState.activeSubMenu !== label ? label : ''
-		}));
-	}
 
 	public get toolbarList() {
 		return [
@@ -244,16 +200,62 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			{
 				label: VIEWER_TOOLBAR_ITEMS.MEASURE,
 				Icon: MeasureIcon,
-				action: this.props.toggleMeasure,
+				action: this.toggleMeasure,
 				active: this.props.measureState.active
 			},
 			{
 				label: VIEWER_TOOLBAR_ITEMS.BIM,
 				Icon: MetadataIcon,
-				action: this.props.toggleMetadata,
+				action: this.toggleMetadataPanel,
 				active: this.props.isMetadataVisible
 			}
 		];
+	}
+
+	public renderSubmenuDot = renderWhenTrue(() => (
+		<SubmenuDot />
+	));
+
+	public componentDidMount() {
+		this.props.initialiseToolbar();
+	}
+
+	public componentDidUpdate(prevProps) {
+		if (this.props.isFocusMode !== prevProps.isFocusMode) {
+			const uiVisibility = this.props.isFocusMode ? 'hidden' : 'initial';
+			const modelUI = document.querySelector('#modelUI') as HTMLElement;
+			const topMenu = document.querySelector('#topMenu') as HTMLElement;
+
+			modelUI.style.visibility = uiVisibility;
+			topMenu.style.visibility = uiVisibility;
+		}
+
+		if (!this.props.clippingMode && prevProps.clippingMode) {
+			this.setState({ activeSubMenu: '' });
+		}
+	}
+
+	public componentWillUnmount() {
+		this.props.deactivateMeasure();
+	}
+
+	public handleNavigationModeClick = (mode) => {
+		this.props.setNavigationMode(mode);
+		this.setState({
+			activeSubMenu: ''
+		});
+	}
+
+	public handleClickAway = () => {
+		this.setState({
+			activeSubMenu: ''
+		});
+	}
+
+	public handleShowSubmenu = (label) => {
+		this.setState((prevState) => ({
+			activeSubMenu: prevState.activeSubMenu !== label ? label : ''
+		}));
 	}
 
 	public renderButtons = () => {
@@ -273,10 +275,6 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			</ButtonWrapper>)
 		)(show));
 	}
-
-	public renderSubmenuDot = renderWhenTrue(() => (
-		<SubmenuDot />
-	));
 
 	public renderSubmenu = (subMenu, label) => renderWhenTrue(() => {
 		const condition = this.state.activeSubMenu === label;
@@ -304,5 +302,15 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				{this.renderButtons()}
 			</Container>
 		);
+	}
+
+	private toggleMetadataPanel = () => {
+		const { isMetadataVisible, setMetadataVisibility } = this.props;
+		setMetadataVisibility(!isMetadataVisible);
+	}
+
+	private toggleMeasure = () => {
+		const { measureState, setMeasureVisibility } = this.props;
+		setMeasureVisibility(!measureState.active);
 	}
 }

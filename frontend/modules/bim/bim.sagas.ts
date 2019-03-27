@@ -29,8 +29,8 @@ export function* fetchMetadata({ teamspace, model, metadataId }) {
 
 	try {
 		const { data } = yield API.getMetadata(teamspace, model, metadataId);
-		const DocsService = getAngularService('DocsService') as any;
-		DocsService.displayDocs(teamspace, model, metadataId);
+		const PanelService = getAngularService('PanelService') as any;
+		PanelService.showPanelsByType('docs');
 
 		const sortedData = sortBy(prepareMetadata(data.meta[0].metadata), 'key');
 		yield put(BimActions.fetchMetadataSuccess(sortedData));

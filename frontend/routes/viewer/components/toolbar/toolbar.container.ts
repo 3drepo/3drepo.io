@@ -57,8 +57,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setIsFocusMode: ViewerActions.setIsFocusMode,
 	setClippingMode: ViewerActions.setClippingMode,
 	toggleClipEdit: ViewerActions.toggleClipEdit,
-	toggleMetadata: ViewerActions.toggleMetadata,
-	toggleMeasure: ViewerActions.toggleMeasure,
+	setMetadataVisibility: ViewerActions.setMetadataVisibility,
+	setMeasureVisibility: ViewerActions.setMeasureVisibility,
 	deactivateMeasure: ViewerActions.deactivateMeasure
 }, dispatch);
 

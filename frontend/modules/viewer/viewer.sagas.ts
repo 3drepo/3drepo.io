@@ -19,12 +19,15 @@ import { put, takeLatest, select } from 'redux-saga/effects';
 import { getAngularService, dispatch, getState } from '../../helpers/migration';
 import * as API from '../../services/api';
 import { VIEWER_EVENTS, VIEWER_PANELS } from '../../constants/viewer';
-import { Measure } from '../../services/viewer/measure';
 
 import { ViewerTypes, ViewerActions } from './viewer.redux';
 import { DialogActions } from '../dialog';
 import {
-	selectHelicopterSpeed, selectIsClipEdit, selectClipNumber, selectIsMetadataVisible, selectMeasureState
+	selectHelicopterSpeed,
+	selectIsClipEdit,
+	selectClipNumber,
+	selectIsMetadataVisible,
+	selectMeasureState
 } from './viewer.selectors';
 import { Viewer, INITIAL_HELICOPTER_SPEED } from '../../services/viewer/viewer';
 import { VIEWER_CLIP_MODES } from '../../constants/viewer';
@@ -240,47 +243,42 @@ export function* toggleClipEdit() {
 	}
 }
 
-export function* toggleMetadata() {
+export function* setMetadataVisibility({ visible }) {
 	try {
-		const metadataActive = yield select(selectIsMetadataVisible);
-		const measureState = yield select(selectMeasureState);
-
-		if (measureState.active && !metadataActive) {
-			yield put(ViewerActions.toggleMeasure());
-		}
-
 		const PanelService = getAngularService('PanelService') as any;
 
-		if (!metadataActive) {
+		if (visible) {
+			const measureState = yield select(selectMeasureState);
+			if (measureState.active) {
+				yield put(ViewerActions.setMeasureVisibility(false));
+			}
 			PanelService.showPanelsByType('docs');
 		} else {
 			PanelService.hidePanelsByType('docs');
 		}
 
-		yield put(ViewerActions.setPanelVisibility(VIEWER_PANELS.METADATA, !metadataActive));
+		yield put(ViewerActions.setPanelVisibility(VIEWER_PANELS.METADATA, visible));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('toggle', 'metadata'));
+		yield put(DialogActions.showErrorDialog('set', 'metadata visibility'));
 	}
 }
 
-export function* toggleMeasure() {
+export function* setMeasureVisibility({ visible }) {
 	try {
-		const metadataActive = yield select(selectIsMetadataVisible);
-		const measureState = yield select(selectMeasureState);
+		if (visible) {
+			const metadataActive = yield select(selectIsMetadataVisible);
+			if (metadataActive) {
+				yield put(ViewerActions.setMetadataVisibility(false));
+			}
 
-		if (!measureState.active && metadataActive) {
-			yield put(ViewerActions.toggleMetadata());
-		}
-
-		if (measureState.active) {
-			yield Viewer.disableMeasure();
-		} else {
 			yield Viewer.activateMeasure();
+		} else {
+			yield Viewer.disableMeasure();
 		}
 
-		yield put(ViewerActions.setMeasureState({active: !measureState.active}));
+		yield put(ViewerActions.setMeasureState({ active: visible }));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('toggle', 'measure'));
+		yield put(DialogActions.showErrorDialog('set', 'measure visibility'));
 	}
 }
 
@@ -310,7 +308,7 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.GO_TO_EXTENT, goToExtent);
 	yield takeLatest(ViewerTypes.SET_CLIPPING_MODE, setClippingMode);
 	yield takeLatest(ViewerTypes.TOGGLE_CLIP_EDIT, toggleClipEdit);
-	yield takeLatest(ViewerTypes.TOGGLE_METADATA, toggleMetadata);
-	yield takeLatest(ViewerTypes.TOGGLE_MEASURE, toggleMeasure);
+	yield takeLatest(ViewerTypes.SET_METADATA_VISIBILITY, setMetadataVisibility);
+	yield takeLatest(ViewerTypes.SET_MEASURE_VISIBILITY, setMeasureVisibility);
 	yield takeLatest(ViewerTypes.DEACTIVATE_MEASURE, deactivateMeasure);
 }

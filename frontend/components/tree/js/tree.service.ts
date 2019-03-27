@@ -17,6 +17,7 @@
 
 import { dispatch } from '../../../helpers/migration';
 import { BimActions } from '../../../modules/bim';
+import { ViewerActions } from '../../../modules/viewer';
 
 export class TreeService {
 
@@ -24,7 +25,6 @@ export class TreeService {
 		'$q',
 		'APIService',
 		'ViewerService',
-		'DocsService',
 		'MultiSelectService'
 	];
 
@@ -60,7 +60,6 @@ export class TreeService {
 		private $q: ng.IQService,
 		private APIService,
 		private ViewerService,
-		private DocsService,
 		private MultiSelectService
 	) {
 		this.reset();
@@ -791,7 +790,7 @@ export class TreeService {
 	public clearCurrentlySelected() {
 
 		this.ViewerService.clearHighlights();
-		this.DocsService.closeDocs();
+		dispatch(ViewerActions.setMetadataVisibility(false));
 
 		const visitedNodes = {};
 

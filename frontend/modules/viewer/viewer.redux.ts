@@ -45,8 +45,8 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	toggleClipEdit: [],
 	setIsClipEdit: ['isClipEdit'],
 	setClipNumber: ['clipNumber'],
-	toggleMetadata: [],
-	toggleMeasure: [],
+	setMetadataVisibility: ['visible'],
+	setMeasureVisibility: ['visible'],
 	setMeasureState: ['measureState'],
 	setPanelVisibility: ['panelName', 'isVisible'],
 	deactivateMeasure: []
