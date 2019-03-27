@@ -24,7 +24,8 @@ export const { Types: StarredMetaTypes, Creators: StarredMetaActions } = createA
 	addToStarredMeta: ['metaRecordKey'],
 	removeFromStarredMeta: ['metaRecordKey'],
 	addToStarredMetaSuccess: ['metaRecord'],
-	removeFromStarredMetaSuccess: ['metaRecord']
+	removeFromStarredMetaSuccess: ['metaRecord'],
+	clearStarredMeta: []
 }, { prefix: 'STARRED_META/' });
 
 export interface IStarredMetaState {

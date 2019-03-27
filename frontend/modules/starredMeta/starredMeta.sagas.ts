@@ -48,8 +48,18 @@ export function* removeFromStarredMeta({ metaRecordKey }) {
 	}
 }
 
+export function* clearStarredMeta() {
+	try {
+		yield API.overrideStarredMeta([]);
+		yield put(StarredMetaActions.setStarredMeta([]));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('override', 'starred meta', error));
+	}
+}
+
 export default function* StarredMetaSaga() {
 	yield takeLatest(StarredMetaTypes.FETCH_STARRED_META, fetchStarredMeta);
 	yield takeLatest(StarredMetaTypes.ADD_TO_STARRED_META, addToStarredMeta);
 	yield takeLatest(StarredMetaTypes.REMOVE_FROM_STARRED_META, removeFromStarredMeta);
+	yield takeLatest(StarredMetaTypes.CLEAR_STARRED_META, clearStarredMeta);
 }

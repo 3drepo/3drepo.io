@@ -55,7 +55,7 @@ export const DATA_TYPES = {
 
 export interface IFilter {
 	values: any;
-	label: string;
+	label?: string;
 	type?: number;
 }
 

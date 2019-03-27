@@ -43,7 +43,7 @@ const mapStateToProps = createStructuredSelector({
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchMetadata: BimActions.fetchMetadata,
 	setComponentState: BimActions.setComponentState,
-	clearStarredMetadata: StarredMetaActions.clearStarredMetadata,
+	clearStarredMetadata: StarredMetaActions.clearStarredMeta,
 	addMetaRecordToStarred: StarredMetaActions.addToStarredMeta,
 	removeMetaRecordFromStarred: StarredMetaActions.removeFromStarredMeta
 }, dispatch);

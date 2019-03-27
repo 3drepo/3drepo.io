@@ -58,3 +58,11 @@ export const addStarredMeta = (metaRecordKey) => {
 export const removeStarredMeta = (metaRecordKey) => {
 	return api.delete('starredMeta', { data: { tag: metaRecordKey } });
 };
+
+/**
+ * Override starred meta
+ * @param starredMeta
+ */
+export const overrideStarredMeta = (starredMeta) => {
+	return api.put('starredMeta', starredMeta);
+};
