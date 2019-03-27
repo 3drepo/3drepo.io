@@ -38,5 +38,5 @@ export const sortByProperty = (property: any) => {
 		} else {
 			return a[property].localeCompare(b[property]);
 		}
-	}
-}
+	};
+};
