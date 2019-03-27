@@ -149,8 +149,7 @@ async function appendStarredMetadataTag(req, res, next) {
 	const username = req.session.user.username;
 	const tag = req.body.tag;
 	if (!tag) {
-		res.status(400);
-		res.end();
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 		return;
 	}
 
@@ -163,8 +162,7 @@ async function replaceStarredMetadataTags(req, res, next) {
 	const tags = req.body;
 
 	if (!isArray(tags) || !tags.every(isString)) {
-		res.status(400);
-		res.end();
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 		return;
 	}
 
@@ -176,8 +174,7 @@ async function deleteStarredMetadataTag(req, res, next) {
 	const username = req.session.user.username;
 	const tag = req.body.tag;
 	if (!tag) {
-		res.status(400);
-		res.end();
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 		return;
 	}
 	req.dataModel = await User.deleteStarredMetadataTag(username,tag);
