@@ -16,6 +16,7 @@
  */
 
 import api from './';
+import { Cache } from '../cache';
 
 /**
  * Get model metadata

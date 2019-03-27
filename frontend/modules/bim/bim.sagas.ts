@@ -15,22 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, all } from 'redux-saga/effects';
+import { put, takeLatest } from 'redux-saga/effects';
 import { sortBy } from 'lodash';
 
 import * as API from '../../services/api';
 import { BimTypes, BimActions } from './bim.redux';
 import { DialogActions } from '../dialog';
 import { prepareMetadata } from '../../helpers/bim';
-import { StarredMetaActions } from '../starredMeta';
 import { getAngularService } from '../../helpers/migration';
 
 export function* fetchMetadata({ teamspace, model, metadataId }) {
 	try {
-		const [{ data }] = yield all([
-			API.getMetadata(teamspace, model, metadataId),
-			put(StarredMetaActions.fetchStarredMeta())
-		]);
+		const { data } = yield API.getMetadata(teamspace, model, metadataId);
 		const DocsService = getAngularService('DocsService') as any;
 		DocsService.displayDocs(teamspace, model, metadataId);
 

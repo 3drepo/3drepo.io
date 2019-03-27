@@ -27,6 +27,7 @@ import { GroupsActions } from '../../../modules/groups';
 import { prepareRisk } from '../../../helpers/risks';
 import { searchByFilters } from '../../../helpers/searching';
 import { VIEWER_EVENTS } from '../../../constants/viewer';
+import { StarredMetaActions } from '../../../modules/starredMeta';
 
 class ModelController implements ng.IController {
 
@@ -282,6 +283,7 @@ class ModelController implements ng.IController {
 		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
 		dispatch(RisksActions.fetchRisks(this.account, this.model, this.revision));
 		dispatch(GroupsActions.fetchGroups(this.account, this.model, this.revision));
+		dispatch(StarredMetaActions.fetchStarredMeta());
 	}
 }
 
