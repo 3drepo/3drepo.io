@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { COLOR } from '../../../../styles';
+import { COLOR, WHITE } from '../../../../styles';
 
 export const Container = styled.div`
   background-color: ${COLOR.REGENT_GRAY};
@@ -24,24 +24,19 @@ export const Container = styled.div`
   border-radius: 22px;
   box-shadow: 0 3px 3px ${COLOR.BLACK_16};
   display: flex;
-  height: 38px;
+  height: 40px;
   padding: 0 10px;
   justify-content: center;
   align-items: center;
   visibility: ${(props: any) => props.visible ? 'visible' : 'hidden'};
   position: absolute;
-  bottom: 45px;
+  bottom: 35px;
   left: 50%;
   transform: translateX(-50%);
 ` as any;
 
 export const ButtonWrapper = styled.div`
   position: relative;
-`;
-
-export const Submenu = styled.div`
-  position: absolute;
-  bottom: 100%;
 `;
 
 export const ClipIconWrapper = styled.span`
@@ -54,4 +49,24 @@ export const ClipNumber = styled.span`
   top: 5px;
   font-size: 9px;
   font-weight: 900;
+`;
+
+export const Submenu = styled.div`
+  position: absolute;
+  bottom: 100%;
+`;
+
+export const SubmenuDot = styled.i`
+  &::before {
+    content: '\\25CF';
+    font-size: 8px;
+    color: ${COLOR.WHITE};
+    width: 100%;
+    position: absolute;
+    font-style: normal;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+  }
 `;

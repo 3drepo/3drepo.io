@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { dispatch } from '../../../helpers/migration';
+import { BimActions } from '../../../modules/bim';
+
 export class TreeService {
 
 	public static $inject: string[] = [
@@ -121,7 +124,7 @@ export class TreeService {
 		this.treeMap = null;
 		branch = branch ? branch : 'master';
 
-		// revision = revision ? revision : "head";
+		// revision = revision ? revision : 'head';
 
 		if (!revision) {
 			this.baseURL = account + '/' + model + '/revision/master/head/';
@@ -986,13 +989,8 @@ export class TreeService {
 	 */
 	public handleMetadata(node: any) {
 		if (node && node.meta) {
-			this.DocsService.displayDocs(
-				node.account,
-				node.model || node.project,
-				node.meta
-			);
+			dispatch(BimActions.fetchMetadata(node.account, node.model || node.project, node.meta));
 		}
-
 	}
 
 	/**

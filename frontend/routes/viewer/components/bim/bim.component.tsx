@@ -105,7 +105,7 @@ export class Bim extends React.PureComponent<IProps, any> {
 	));
 
 	public componentDidMount() {
-		this.props.fetchMetadata(this.props.teamspace, this.props.model);
+		// this.props.fetchMetadata(this.props.teamspace, this.props.model);
 	}
 
 	public render() {

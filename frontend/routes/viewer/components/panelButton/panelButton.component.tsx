@@ -25,6 +25,7 @@ import ViewsIcon from '@material-ui/icons/PhotoCamera';
 import TreeIcon from '@material-ui/icons/DeviceHub';
 
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
+import { runAngularTimeout } from '../../../../helpers/migration';
 
 const IconsMap = {
 	place: IssuesIcon,
@@ -46,7 +47,7 @@ export const PanelButton = (props) => {
 			className="panelButton"
 			placement="right-end"
 			active={active}
-			action={() => onClick(type)}
+			action={() => runAngularTimeout(() => onClick(type))}
 		/>
 	);
 };

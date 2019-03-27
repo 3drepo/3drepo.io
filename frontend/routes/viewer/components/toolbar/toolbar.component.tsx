@@ -38,9 +38,10 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
 	Container,
 	ButtonWrapper,
-	Submenu,
 	ClipIconWrapper,
-	ClipNumber
+	ClipNumber,
+	Submenu,
+	SubmenuDot
 } from './toolbar.styles';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
@@ -267,10 +268,15 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 					action={action}
 					active={active}
 				/>
+				{this.renderSubmenuDot(subMenu.length)}
 				{this.renderSubmenu(subMenu, label)}
 			</ButtonWrapper>)
 		)(show));
 	}
+
+	public renderSubmenuDot = renderWhenTrue(() => (
+		<SubmenuDot />
+	));
 
 	public renderSubmenu = (subMenu, label) => renderWhenTrue(() => {
 		const condition = this.state.activeSubMenu === label;

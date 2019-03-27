@@ -249,8 +249,14 @@ export function* toggleMetadata() {
 			yield put(ViewerActions.toggleMeasure());
 		}
 
-		const DocsService = getAngularService('DocsService') as any;
-		DocsService.state.show = !metadataActive;
+		const PanelService = getAngularService('PanelService') as any;
+
+		if (!metadataActive) {
+			PanelService.showPanelsByType('docs');
+		} else {
+			PanelService.hidePanelsByType('docs');
+		}
+
 		yield put(ViewerActions.setPanelVisibility(VIEWER_PANELS.METADATA, !metadataActive));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('toggle', 'metadata'));

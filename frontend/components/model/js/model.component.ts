@@ -118,7 +118,6 @@ class ModelController implements ng.IController {
 
 		// listen for user clicking the back button
 		window.addEventListener('popstate', popStateHandler);
-		//window.addEventListener('beforeunload', refreshHandler);
 
 		this.$scope.$on('$destroy', () => {
 			this.unsubscribeModelSettingsListener();

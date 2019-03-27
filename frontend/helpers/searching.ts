@@ -47,7 +47,6 @@ export const searchByFilters = (
 					}
 					if (filter.type === DATA_TYPES.QUERY) {
 						return queryFields.some((field) => {
-							debugger;
 							return compareStrings(item[field], filter.value.value);
 						});
 					}

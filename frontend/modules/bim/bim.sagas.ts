@@ -22,13 +22,16 @@ import { BimTypes, BimActions } from './bim.redux';
 import { DialogActions } from '../dialog';
 import { prepareMetadata } from '../../helpers/bim';
 import { StarredMetaActions } from '../starredMeta';
+import { getAngularService } from '../../helpers/migration';
 
-export function* fetchMetadata({ teamspace, model, metadataId = '7faf260f-3262-462f-86ed-cd267902ab03' }) {
+export function* fetchMetadata({ teamspace, model, metadataId }) {
 	try {
 		const [{ data }] = yield all([
 			API.getMetadata(teamspace, model, metadataId),
 			put(StarredMetaActions.fetchStarredMeta())
 		]);
+		const DocsService = getAngularService('DocsService') as any;
+		DocsService.displayDocs(teamspace, model, metadataId);
 
 		yield put(BimActions.fetchMetadataSuccess(prepareMetadata(data.meta[0].metadata)));
 	} catch (error) {

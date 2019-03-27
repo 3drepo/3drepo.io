@@ -3,7 +3,6 @@ import './account/js/account-upload.service';
 import './compare/js/compare.component';
 import './compare/js/compare.service';
 import './cookies/js/cookies.component';
-import './docs/js/docs.component';
 import './docs/js/docs.service';
 import './home/js/analytic.service';
 import './home/js/api.service';
