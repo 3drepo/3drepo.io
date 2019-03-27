@@ -42,6 +42,7 @@ interface IProps {
 	myJob: any;
 	currentUser: any;
 	modelSettings: any;
+	failedToLoad: boolean;
 	saveRisk: (teamspace, modelId, risk) => void;
 	updateRisk: (teamspace, modelId, risk) => void;
 	postComment: (teamspace, modelId, riskData) => void;
@@ -314,6 +315,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	));
 
 	public render() {
+		const { failedToLoad } = this.props;
 		const { logs } = this.state;
 
 		return (
@@ -326,7 +328,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					{this.renderPreview(this.props.risk)}
 					{this.renderLogs(logs.length)}
 				</ViewerPanelContent>
-				{this.renderFooter(true)}
+				{this.renderFooter(!failedToLoad)}
 			</Container>
 		);
 	}

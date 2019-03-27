@@ -46,7 +46,8 @@ const mapStateToProps = createStructuredSelector({
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
 	associatedActivities: selectAssociatedActivities,
 	myJob: selectMyJob,
-	currentUser: selectCurrentUser
+	currentUser: selectCurrentUser,
+	failedToLoad: selectFailedToLoad
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
