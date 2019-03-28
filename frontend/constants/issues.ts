@@ -39,14 +39,14 @@ export const DEFAULT_PROPORTIES = {
 
 export const ISSUE_TOPIC_TYPES = [
 	{ value: 'clash', name: 'Clash' },
+	{ value: 'constructibility', name: 'Constructibility' },
+	{ value: 'design', name: 'Design' },
 	{ value: 'diff', name: 'Diff' },
+	{ value: 'for_information', name: 'For information' },
+	{ value: 'gis', name: 'GIS' },
+	{ value: 'hs', name: 'H&S' },
 	{ value: 'rfi', name: 'RFI' },
 	{ value: 'risk', name: 'Risk' },
-	{ value: 'hs', name: 'H&S' },
-	{ value: 'design', name: 'Design' },
-	{ value: 'constructibility', name: 'Constructibility' },
-	{ value: 'gis', name: 'GIS' },
-	{ value: 'for_information', name: 'For information' },
 	{ value: 'vr', name: 'VR' }
 ];
 
