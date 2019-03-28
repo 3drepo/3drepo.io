@@ -20,8 +20,8 @@ import * as React from 'react';
 import Fade from '@material-ui/core/Fade';
 import CloseIcon from '@material-ui/icons/Close';
 
-import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Container } from './closeFocusModeButton.styles';
+import { Button } from '../../components/panelButton/panelButton.styles';
 
 interface IProps {
 	isFocusMode: boolean;
@@ -33,8 +33,7 @@ export class CloseFocusModeButton extends React.PureComponent<IProps, any> {
 		return (
 			<Fade in={this.props.isFocusMode}>
 				<Container visible={this.props.isFocusMode}>
-					<TooltipButton
-						className="panelButton"
+					<Button
 						label="Close focus mode"
 						Icon={CloseIcon}
 						action={() => this.props.setIsFocusMode(false)}

@@ -97,7 +97,6 @@ panel #buttons .panelButtonGroup label {
 
 #leftPanel {
   left: 0;
-  pointer-events: none;
 }
 #leftPanel #items {
   right: 0;
@@ -108,13 +107,17 @@ panel #buttons .panelButtonGroup label {
 
 #rightPanel {
   right: 0;
-  pointer-events: none;
 }
 #rightPanel #items {
   left: 0;
 }
 #rightPanel #buttons {
   right: 0;
+}
+
+#leftPanel, #rightPanel {
+  top: 70px;
+  pointer-events: none;
 }
 
 /** Panel Card ********************************************************************************************************/
@@ -286,7 +289,7 @@ panel-card-option-pin md-icon {
 }
 
 .leftButtons {
-  margin-left: 20px;
+  margin-left: 23px;
 }
 
 
