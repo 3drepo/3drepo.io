@@ -493,7 +493,7 @@ describe("Implied permission::", function () {
 		it("can view issues", function(done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/issues.json`)
-				.expect(200 , done);
+				.expect(200, done);
 		});
 
 		it("can create issue", function(done) {
@@ -502,14 +502,14 @@ describe("Implied permission::", function () {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/issues.json`)
 				.send(issue)
-				.expect(200 , done);
+				.expect(200, done);
 
 		});
 
 		it("cannot view issues in other model", function(done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/issues.json`)
-				.expect(401 , done);
+				.expect(401, done);
 		});
 
 		it("cannot create issue in other model", function(done) {
@@ -518,7 +518,7 @@ describe("Implied permission::", function () {
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/issues.json`)
 				.send(issue)
-				.expect(401 , done);
+				.expect(401, done);
 
 		});
 

@@ -15,44 +15,48 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEmpty, isEqual } from 'lodash';
 import * as React from 'react';
 
-import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { canUpdateRisk, mergeRiskData } from '../../../../../../helpers/risks';
 import { Viewer } from '../../../../../../services/viewer/viewer';
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { Container } from './riskDetails.styles';
+import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
+import { RiskDetailsForm } from './riskDetailsForm.component';
+import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
+import { mergeRiskData, canComment } from '../../../../../../helpers/risks';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
-import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
-import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
-import { Container } from './riskDetails.styles';
-import { RiskDetailsForm } from './riskDetailsForm.component';
-import { RISK_PANEL_NAME } from '../../../../../../constants/risks';
+import { EmptyStateInfo } from '../../../views/views.styles';
 
 interface IProps {
 	jobs: any[];
 	risk: any;
-	newComment: any;
 	teamspace: string;
 	model: string;
+	revision: string;
 	expandDetails: boolean;
+	fetchingDetailsIsPending: boolean;
+	newComment: any;
 	associatedActivities: any[];
 	myJob: any;
 	currentUser: any;
 	modelSettings: any;
+	failedToLoad: boolean;
+	setState: (componentState) => void;
+	fetchRisk: (teamspace, model, riskId) => void;
+	showNewPin: (risk, pinData) => void;
 	saveRisk: (teamspace, modelId, risk) => void;
 	updateRisk: (teamspace, modelId, risk) => void;
-	postComment: (teamspace, modelId, riskId, comment) => void;
+	postComment: (teamspace, modelId, riskData) => void;
+	removeComment: (teamspace, modelId, riskData) => void;
+	subscribeOnRiskCommentsChanges: (teamspace, modelId, riskId) => void;
+	unsubscribeOnRiskCommentsChanges: (teamspace, modelId, riskId) => void;
 	updateNewRisk: (newRisk) => void;
-	setState: (componentState) => void;
-	showScreenshotDialog: (options) => void;
-	showNewPin: (risk, pinData) => void;
 	setCameraOnViewpoint: (teamspace, modelId, view) => void;
 }
 
 interface IState {
-	logs: any[];
-	canUpdateRisk: boolean;
+	logsLoaded: boolean;
 	scrolled: boolean;
 }
 
@@ -63,13 +67,13 @@ const UNASSIGNED_JOB = {
 
 export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public state = {
-		logs: [],
-		canUpdateRisk: false,
+		logsLoaded: false,
 		scrolled: false
 	};
 
 	public commentRef = React.createRef<any>();
 	public panelRef = React.createRef<any>();
+	public commentsRef = React.createRef<any>();
 
 	get isNewRisk() {
 		return !this.props.risk._id;
@@ -83,44 +87,42 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
-	public setLogs = () => {
-		const logs = this.props.risk.comments;
-		this.setState({ logs });
+	public componentDidMount() {
+		const { teamspace, model, fetchRisk, risk, subscribeOnRiskCommentsChanges } = this.props;
+
+		if (risk._id) {
+			fetchRisk(teamspace, model, risk._id);
+			subscribeOnRiskCommentsChanges(teamspace, model, risk._id);
+		}
 	}
 
-	public componentDidMount() {
-		const { risk, currentUser, modelSettings, myJob } = this.props;
-		const permissions = modelSettings.permissions;
-
-		if (this.props.risk.comments) {
-			this.setLogs();
-		}
-
-		if (risk && currentUser && permissions && myJob) {
-			this.setState({
-				canUpdateRisk: canUpdateRisk(risk, myJob, permissions, currentUser)
-			});
-		}
+	public componentWillUnmount() {
+		const { teamspace, model, risk, unsubscribeOnRiskCommentsChanges } = this.props;
+		unsubscribeOnRiskCommentsChanges(teamspace, model, risk._id);
 	}
 
 	public componentDidUpdate(prevProps) {
-		const logsChanged = !isEqual(this.props.risk.comments, prevProps.risk.comments);
-		if (logsChanged) {
-			this.setLogs();
+		const { teamspace, model, fetchRisk, risk } = this.props;
+
+		if (risk._id !== prevProps.risk._id) {
+			fetchRisk(teamspace, model, risk._id);
 		}
 
-		const { risk, currentUser, modelSettings, myJob } = this.props;
-		const permissions = modelSettings.permissions;
-		const changes = {} as IState;
-		const permissionsChanged = !isEqual(prevProps.permissions, permissions);
-		const canUpdate = canUpdateRisk(risk, myJob, permissions, currentUser);
+		if (
+			risk.comments && prevProps.risk.comments &&
+			(risk.comments.length > prevProps.risk.comments.length && risk.comments[risk.comments.length - 1].new)
+		) {
+			const { top: commentsTop } = this.commentsRef.current.getBoundingClientRect();
+			const panelElements = this.panelRef.current.children[0].children;
+			const detailsDimensions = panelElements[1].getBoundingClientRect();
+			const { height: detailsHeight } = detailsDimensions;
 
-		if (permissionsChanged && risk && currentUser && permissions && myJob && canUpdate !== this.state.canUpdateRisk) {
-			changes.canUpdateRisk = canUpdateRisk(risk, myJob, permissions, currentUser);
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
+			if (commentsTop < 0) {
+				this.panelRef.current.scrollTo({
+					top: detailsHeight - 16,
+					behavior: 'smooth'
+				});
+			}
 		}
 	}
 
@@ -144,19 +146,104 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleSave = (comment) => {
-		const { teamspace, model, saveRisk, postComment } = this.props;
-		if (this.isNewRisk) {
-			saveRisk(teamspace, model, this.riskData);
-		} else {
-			// postComment(teamspace, model, this.riskData._id, comment);
+	public renderDetailsForm = () => {
+		return (
+			<RiskDetailsForm
+				risk={this.riskData}
+				jobs={this.jobsList}
+				onValueChange={this.handleRiskFormSubmit}
+				onSubmit={this.handleRiskFormSubmit}
+				permissions={this.props.modelSettings.permissions}
+				currentUser={this.props.currentUser}
+				myJob={this.props.myJob}
+			/>
+		);
+	}
+
+	public removeComment = (index, guid) => {
+		const riskData = {
+			_id: this.riskData._id,
+			rev_id: this.riskData.rev_id,
+			commentIndex: this.props.logs.length - 1 - index,
+			guid
+		};
+		this.props.removeComment(this.props.teamspace, this.props.model, riskData);
+	}
+
+	public setCameraOnViewpoint = (viewpoint) => {
+		this.props.setCameraOnViewpoint(this.props.teamspace, this.props.model, viewpoint);
+	}
+
+	public renderLogList = renderWhenTrue(() => {
+		return (
+			<LogList
+				innerRef={this.commentsRef}
+				items={this.riskData.comments}
+				isPending={this.props.fetchingDetailsIsPending}
+				removeLog={this.removeComment}
+				teamspace={this.props.teamspace}
+				currentUser={this.props.currentUser.username}
+				setCameraOnViewpoint={this.setCameraOnViewpoint}
+			/>);
+	});
+
+	public handlePanelScroll = (e) => {
+		if (e.target.scrollTop > 0 && !this.state.scrolled) {
+			this.setState({ scrolled: true });
+		}
+		if (e.target.scrollTop === 0 && this.state.scrolled) {
+			this.setState({ scrolled: false });
 		}
 	}
 
+	public renderPreview = renderWhenTrue(() => {
+		const { expandDetails } = this.props;
+		const { comments } = this.riskData;
+
+		return (
+			<PreviewDetails
+				{...this.riskData}
+				key={this.riskData._id}
+				defaultExpanded={expandDetails}
+				editable={!this.riskData._id}
+				onNameChange={this.handleNameChange}
+				onExpandChange={this.handleExpandChange}
+				renderCollapsable={this.renderDetailsForm}
+				renderNotCollapsable={() => this.renderLogList(comments && !!comments.length && !this.isNewRisk)}
+				handleHeaderClick={() => this.setCameraOnViewpoint({viewpoint: this.riskData.viewpoint})}
+				scrolled={this.state.scrolled}
+			/>
+		);
+	});
+
+	public userCanComment() {
+		const { myJob, modelSettings, currentUser } = this.props;
+		return canComment(this.riskData, myJob, modelSettings.permissions, currentUser.username);
+	}
+
+	public renderFooter = renderWhenTrue(() => (
+		<ViewerPanelFooter alignItems="center" padding="0">
+			<NewCommentForm
+				comment={this.props.newComment.comment}
+				screenshot={this.props.newComment.screenshot}
+				viewpoint={this.props.newComment.viewpoint}
+				innerRef={this.commentRef}
+				onTakeScreenshot={this.handleNewScreenshot}
+				onChangePin={this.handleChangePin}
+				onSave={this.handleSave}
+				canComment={this.userCanComment()}
+				hideComment={this.isNewRisk}
+				hidePin={!this.isNewRisk}
+			/>
+		</ViewerPanelFooter>
+	));
+
 	public setCommentData = (commentData = {}) => {
-		this.props.setState({ newComment: {
+		const newComment = {
 			...this.props.newComment, ...commentData
-		}});
+		};
+
+		this.props.setState({ newComment });
 	}
 
 	public handleNewScreenshot = async (screenshot) => {
@@ -177,96 +264,61 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		this.props.showNewPin(this.props.risk, pinData);
 	}
 
-	public handlePanelScroll = (e) => {
-		if (e.target.scrollTop > 0 && !this.state.scrolled) {
-			this.setState({ scrolled: true });
+	public postComment = async (teamspace, model, {comment, screenshot}) => {
+		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
+
+		const pinData = await Viewer.getPinData();
+		let position;
+
+		if (pinData) {
+			position = pinData.pickedPos;
 		}
-		if (e.target.scrollTop === 0 && this.state.scrolled) {
-			this.setState({ scrolled: false });
+
+		const riskCommentData = {
+			_id: this.riskData._id,
+			rev_id: this.riskData.rev_id,
+			comment,
+			position,
+			viewpoint: {
+				...viewpoint,
+				screenshot
+			}
+		};
+
+		this.props.postComment(teamspace, model, riskCommentData);
+	}
+
+	public handleSave = (formValues) => {
+		const { teamspace, model, saveRisk, revision } = this.props;
+		if (this.isNewRisk) {
+			saveRisk(teamspace, model, this.riskData, revision);
+		} else {
+			this.postComment(teamspace, model, formValues);
 		}
 	}
 
-	public renderRiskForm = () => (
-		<RiskDetailsForm
-			canUpdateRisk={this.state.canUpdateRisk}
-			risk={this.riskData}
-			jobs={this.jobsList}
-			onValueChange={this.handleRiskFormSubmit}
-			onSubmit={this.handleRiskFormSubmit}
-			associatedActivities={this.props.associatedActivities}
-			permissions={this.props.modelSettings.permissions}
-			currentUser={this.props.currentUser}
-			myJob={this.props.myJob}
-		/>
-	)
-
-	public renderPreview = renderWhenTrue(() => {
-		const { expandDetails } = this.props;
+	public renderFailedState = renderWhenTrue(() => {
 		return (
-			<PreviewDetails
-				key={this.riskData._id}
-				{...this.riskData}
-				defaultExpanded={expandDetails}
-				editable={!this.riskData._id}
-				onNameChange={this.handleNameChange}
-				onExpandChange={this.handleExpandChange}
-				panelName={RISK_PANEL_NAME}
-				renderCollapsable={this.renderRiskForm}
-				scrolled={this.state.scrolled}
-			/>
+			<EmptyStateInfo>Risk failed to load</EmptyStateInfo>
 		);
 	});
 
-	public removeComment = () => {};
-
-	public setCameraOnViewpoint = (viewpoint) => {
-		this.props.setCameraOnViewpoint(this.props.teamspace, this.props.model, viewpoint);
-	}
-
-	public renderLogs = renderWhenTrue(() => (
-		<LogList
-			items={this.state.logs}
-			isPending={false}
-			removeLog={this.removeComment}
-			teamspace={this.props.teamspace}
-			setCameraOnViewpoint={this.setCameraOnViewpoint}
-			currentUser={this.props.currentUser}
-		/>
-	));
-
-	public renderFooter = renderWhenTrue(() => (
-		<ViewerPanelFooter alignItems="center" padding="0">
-			<NewCommentForm
-				canComment={this.state.canUpdateRisk}
-				comment={this.props.newComment.comment}
-				screenshot={this.props.newComment.screenshot}
-				viewpoint={this.props.newComment.viewpoint}
-				innerRef={this.commentRef}
-				hideComment={true}
-				hideScreenshot={!this.isNewRisk}
-				hidePin={!this.isNewRisk}
-				onTakeScreenshot={this.handleNewScreenshot}
-				onChangePin={this.handleChangePin}
-				onSave={this.handleSave}
-			/>
-		</ViewerPanelFooter>
-	));
-
 	public render() {
-		const { logs } = this.state;
+		const { failedToLoad, risk } = this.props;
 
 		return (
 			<Container>
 				<ViewerPanelContent
 					className="height-catcher"
 					padding="0"
+					details="1"
 					onScroll={this.handlePanelScroll}
-					ref={this.panelRef}
+					innerRef={this.panelRef}
 				>
-					{this.renderPreview(this.props.risk)}
-					{this.renderLogs(logs.length)}
+					{this.renderFailedState(failedToLoad)}
+					{this.renderPreview(!failedToLoad && risk)}
 				</ViewerPanelContent>
-				{this.renderFooter(!this.riskData._id)}
+				{this.renderFooter(!failedToLoad)}
 			</Container>
 		);
 	}

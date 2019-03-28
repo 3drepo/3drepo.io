@@ -19,6 +19,7 @@ import { ChatService } from './chat.service';
 import { ChatEvents } from './chat.events';
 import { ModelChatEvents } from './models.chat.events';
 import { IssuesChatEvents } from './issues.chat.events';
+import { RisksChatEvents } from './risks.chat.events';
 import { NotificationsChatEvents } from './notifications.chat.events';
 
 export class ChatChannel {
@@ -30,7 +31,7 @@ export class ChatChannel {
 	/**
 	 * This property contains the object to suscribe to the risks and comments for the risks notification events
 	 */
-	public risks: ChatEvents;
+	public risks: RisksChatEvents;
 
 	/**
 	 * This property contains the object to suscribe to the groups notification events
@@ -58,7 +59,7 @@ export class ChatChannel {
 	constructor(private chatService: ChatService, private account: string, private modelStr: string) {
 		this.groups = new ChatEvents(this, 'group');
 		this.issues = new IssuesChatEvents(this);
-		this.risks = new ChatEvents(this, 'risk');
+		this.risks = new RisksChatEvents(this);
 		this.model = new ModelChatEvents(this);
 		this.views = new ChatEvents(this, 'view');
 		this.notifications = new NotificationsChatEvents(this);

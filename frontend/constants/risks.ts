@@ -15,6 +15,7 @@ import { COLOR, PIN_COLORS } from '../styles';
 export const RISK_PANEL_NAME = 'risk';
 
 export const LEVELS = {
+	UNSET: -1,
 	VERY_LOW: 0,
 	LOW: 1,
 	MODERATE: 2,
@@ -23,6 +24,7 @@ export const LEVELS = {
 };
 
 const LEVELS_LIST = [
+	{ value: LEVELS.UNSET, name: 'UNSET' },
 	{ value: LEVELS.VERY_LOW, name: 'Very Low' },
 	{ value: LEVELS.LOW, name: 'Low' },
 	{ value: LEVELS.MODERATE, name: 'Moderate' },
@@ -78,6 +80,11 @@ export const RISK_LEVELS_ICONS = {
 };
 
 export const RISK_LEVELS_COLOURS = {
+	[LEVELS.UNSET]: {
+		color: COLOR.DARK_GRAY,
+		pinColor: PIN_COLORS.DARK_GRAY,
+		selectedColor: PIN_COLORS.DARK_GRAY
+	},
 	[LEVELS.VERY_LOW]: {
 		color: COLOR.GREEN,
 		pinColor: PIN_COLORS.GREEN,
@@ -117,7 +124,11 @@ export const RISK_FILTER_RELATED_FIELDS = {
 	CATEGORY: 'category',
 	RISK_CONSEQUENCE: 'consequence',
 	RISK_LIKELIHOOD: 'likelihood',
-	LEVELS_OF_RISK: 'level_of_risk'
+	LEVEL_OF_RISK: 'level_of_risk',
+	RESIDUAL_CONSEQUENCE: 'residual_consequence',
+	RESIDUAL_LIKELIHOOD: 'residual_likelihood',
+	RESIDUAL_LEVEL_OF_RISK: 'residual_level_of_risk',
+	OVERALL_LEVEL_OF_RISK: 'overall_level_of_risk'
 };
 
 export const RISK_FILTERS = [
@@ -126,21 +137,21 @@ export const RISK_FILTERS = [
 		relatedField: RISK_FILTER_RELATED_FIELDS.CATEGORY,
 		type: RISK_FILTER_DATA_TYPES.NORMAL
 	},
-  {
-    label: 'Mitigation Status',
+	{
+		label: 'Mitigation Status',
 		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS,
-    type: RISK_FILTER_DATA_TYPES.NORMAL
-  },
-  {
-    label: 'Created by',
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
+	{
+		label: 'Created by',
 		relatedField: RISK_FILTER_RELATED_FIELDS.CREATED_BY,
-    type: RISK_FILTER_DATA_TYPES.NORMAL
-  },
-  {
-    label: 'Risk owner',
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
+	{
+		label: 'Risk owner',
 		relatedField: RISK_FILTER_RELATED_FIELDS.RISK_OWNER,
-    type: RISK_FILTER_DATA_TYPES.NORMAL
-  },
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
 	{
 		label: 'Risk likelihood',
 		relatedField: RISK_FILTER_RELATED_FIELDS.RISK_LIKELIHOOD,
@@ -153,7 +164,27 @@ export const RISK_FILTERS = [
 	},
 	{
 		label: 'Level of risk',
-		relatedField: RISK_FILTER_RELATED_FIELDS.LEVELS_OF_RISK,
+		relatedField: RISK_FILTER_RELATED_FIELDS.LEVEL_OF_RISK,
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
+	{
+		label: 'Residual likelihood',
+		relatedField: RISK_FILTER_RELATED_FIELDS.RESIDUAL_LIKELIHOOD,
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
+	{
+		label: 'Residual consequence',
+		relatedField: RISK_FILTER_RELATED_FIELDS.RESIDUAL_CONSEQUENCE,
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
+	{
+		label: 'Residual level of risk',
+		relatedField: RISK_FILTER_RELATED_FIELDS.RESIDUAL_LEVEL_OF_RISK,
+		type: RISK_FILTER_DATA_TYPES.NORMAL
+	},
+	{
+		label: 'Overall level of risk',
+		relatedField: RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK,
 		type: RISK_FILTER_DATA_TYPES.NORMAL
 	}
 ] as any;

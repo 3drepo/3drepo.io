@@ -39,28 +39,32 @@ import { IRisksComponentState } from '../../../../modules/risks/risks.redux';
 
 interface IProps {
 	history: any;
+	location: any;
 	teamspace: string;
 	model: any;
 	risks: any[];
 	jobs: any[];
 	revision?: string;
 	isPending?: boolean;
+	fetchingDetailsIsPending?: boolean;
 	activeRiskId?: string;
 	showDetails?: boolean;
+	riskDetails?: any;
 	searchEnabled: boolean;
 	showPins: boolean;
 	selectedFilters: any[];
 	modelSettings: {
 		permissions: any[];
 	};
+	activeRiskDetails: any;
 	fetchRisks: (teamspace, model, revision) => void;
-	setState: (componentState: IRisksComponentState) => void;
+	setState: (componentState: any) => void;
 	setNewRisk: () => void;
 	downloadRisks: (teamspace, model) => void;
 	printRisks: (teamspace, model) => void;
 	setActiveRisk: (risk, revision?) => void;
 	showRiskDetails: (teamspace, model, revision, risk) => void;
-	closeDetails: () => void;
+	closeDetails: (teamspace, model, revision) => void;
 	toggleShowPins: (showPins: boolean) => void;
 	subscribeOnRiskChanges: (teamspace, modelId) => void;
 	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
@@ -68,12 +72,24 @@ interface IProps {
 	setFilters: (filters) => void;
 }
 
+interface IState {
+	riskDetails?: any;
+	filteredRisks: any[];
+	modelLoaded: boolean;
+}
+
 const UNASSIGNED_JOB = {
 	name: 'Unassigned',
 	value: ''
 };
 
-export class Risks extends React.PureComponent<IProps, any> {
+export class Risks extends React.PureComponent<IProps, IState> {
+	public state: IState = {
+		riskDetails: {},
+		filteredRisks: [],
+		modelLoaded: false
+	};
+
 	get jobsList() {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
@@ -86,7 +102,11 @@ export class Risks extends React.PureComponent<IProps, any> {
 			[RISK_FILTER_RELATED_FIELDS.RISK_OWNER]: this.getFilterValues(this.jobsList),
 			[RISK_FILTER_RELATED_FIELDS.RISK_CONSEQUENCE]: this.getFilterValues(RISK_CONSEQUENCES),
 			[RISK_FILTER_RELATED_FIELDS.RISK_LIKELIHOOD]: this.getFilterValues(RISK_LIKELIHOODS),
-			[RISK_FILTER_RELATED_FIELDS.LEVELS_OF_RISK]: this.getFilterValues(LEVELS_OF_RISK)
+			[RISK_FILTER_RELATED_FIELDS.RESIDUAL_CONSEQUENCE]: this.getFilterValues(RISK_CONSEQUENCES),
+			[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LIKELIHOOD]: this.getFilterValues(RISK_LIKELIHOODS),
+			[RISK_FILTER_RELATED_FIELDS.LEVEL_OF_RISK]: this.getFilterValues(LEVELS_OF_RISK),
+			[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LEVEL_OF_RISK]: this.getFilterValues(LEVELS_OF_RISK),
+			[RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK]: this.getFilterValues(LEVELS_OF_RISK)
 		};
 	}
 
@@ -155,6 +175,11 @@ export class Risks extends React.PureComponent<IProps, any> {
 		this.props.showRiskDetails(teamspace, model, revision, item);
 	}
 
+	public closeRiskDetails = () => {
+		const { teamspace, model, revision } = this.props;
+		this.props.closeDetails(teamspace, model, revision);
+	}
+
 	public getFilterValues(property) {
 		return property.map(({value, name}) => {
 			return {
@@ -204,7 +229,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 				onActiveItem={this.setActiveRisk}
 				onNewItem={this.props.setNewRisk}
 				onShowDetails={this.showRiskDetails}
-				onCloseDetails={this.props.closeDetails}
+				onCloseDetails={this.closeRiskDetails}
 
 				renderDetailsView={this.renderDetailsView}
 			/>

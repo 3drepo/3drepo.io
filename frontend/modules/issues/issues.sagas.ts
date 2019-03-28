@@ -21,7 +21,8 @@ import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
-import { prepareIssue, prepareComments, prepareComment } from '../../helpers/issues';
+import { prepareIssue } from '../../helpers/issues';
+import { prepareComments, prepareComment } from '../../helpers/comments';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
 import { PRIORITIES, STATUSES } from '../../constants/issues';
@@ -74,7 +75,8 @@ const createGroupData = (name, nodes) => {
 	const groupData = {
 		name,
 		color: [255, 0, 0],
-		objects: nodes
+		objects: nodes,
+		isIssueGroup: true
 	};
 
 	return nodes.length === 0 ? null : groupData;

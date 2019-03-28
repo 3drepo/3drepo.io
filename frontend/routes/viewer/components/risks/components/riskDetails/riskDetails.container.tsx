@@ -18,37 +18,46 @@
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../../../helpers/migration';
-
-import { RiskDetails } from './riskDetails.component';
+import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
+import { ViewpointsActions } from '../../../../../../modules/viewpoints';
+import { selectCurrentUser } from '../../../../../../modules/currentUser';
 import {
 	RisksActions,
 	selectActiveRiskDetails,
 	selectExpandDetails,
+	selectFetchingDetailsIsPending,
 	selectNewComment,
+	selectFailedToLoad,
 	selectAssociatedActivities
 } from '../../../../../../modules/risks';
-import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
 import { selectSettings } from '../../../../../../modules/model';
+import { RiskDetails } from './riskDetails.component';
 import { DialogActions } from '../../../../../../modules/dialog';
-import { selectCurrentUser } from '../../../../../../modules/currentUser';
-import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 
 const mapStateToProps = createStructuredSelector({
-	modelSettings: selectSettings,
-	jobs: selectJobsList,
 	risk: selectActiveRiskDetails,
-	newComment: selectNewComment,
+	jobs: selectJobsList,
 	expandDetails: selectExpandDetails,
+	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
+	newComment: selectNewComment,
 	associatedActivities: selectAssociatedActivities,
 	myJob: selectMyJob,
-	currentUser: selectCurrentUser
+	currentUser: selectCurrentUser,
+	modelSettings: selectSettings,
+	failedToLoad: selectFailedToLoad
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setState: RisksActions.setComponentState,
+	fetchRisk: RisksActions.fetchRisk,
+	saveRisk: RisksActions.saveRisk,
 	updateRisk: RisksActions.updateRisk,
-	updateNewRisk: RisksActions.updateNewRisk,
+	postComment: RisksActions.postComment,
+	removeComment: RisksActions.removeComment,
 	showNewPin: RisksActions.showNewPin,
+	subscribeOnRiskCommentsChanges: RisksActions.subscribeOnRiskCommentsChanges,
+	unsubscribeOnRiskCommentsChanges: RisksActions.unsubscribeOnRiskCommentsChanges,
+	updateNewRisk: RisksActions.updateNewRisk,
 	showScreenshotDialog: DialogActions.showScreenshotDialog,
 	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
 }, dispatch);

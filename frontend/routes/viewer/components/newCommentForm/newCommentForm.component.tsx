@@ -20,7 +20,10 @@ import * as Yup from 'yup';
 import { Formik, Field } from 'formik';
 import SaveIcon from '@material-ui/icons/Save';
 import CameraIcon from '@material-ui/icons/AddAPhoto';
+import InputLabel from '@material-ui/core/InputLabel';
 import PinDropIcon from '@material-ui/icons/PinDrop';
+import ReportProblemIcon from '@material-ui/icons/ReportProblem';
+import ShortTextIcon from '@material-ui/icons/ShortText';
 
 import { Viewer } from '../../../../services/viewer/viewer';
 import { Measure } from '../../../../services/viewer/measure';
@@ -34,6 +37,17 @@ import {
 	StyledForm,
 	Container
 } from './newCommentForm.styles';
+import {
+	LEVELS_OF_RISK,
+	RISK_CATEGORIES,
+	RISK_CONSEQUENCES,
+	RISK_LIKELIHOODS,
+	RISK_MITIGATION_STATUSES
+} from '../../../../constants/risks';
+import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
+import { TextField } from '../../../components/textField/textField.component';
+import { FieldsRow, StyledFormControl } from '../risks/components/riskDetails/riskDetails.styles';
+import { RiskSchema } from '../risks/components/riskDetails/riskDetailsForm.component';
 import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { Image } from '../../../components/image';
@@ -47,6 +61,7 @@ interface IProps {
 	hideComment?: boolean;
 	hidePin?: boolean;
 	hideScreenshot?: boolean;
+	showResidualRiskInput?: boolean;
 	onSave: (commentData) => void;
 	onTakeScreenshot: (screenshot) => void;
 	onChangePin: (pin) => void;
@@ -56,6 +71,7 @@ interface IProps {
 interface IState {
 	isPinActive: boolean;
 	newScreenshot: string;
+	isResidualRiskInputActive: boolean;
 }
 
 const NewCommentSchema = Yup.object().shape({
@@ -67,15 +83,16 @@ const NEW_PIN_ID = 'newPinId';
 export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	public state = {
 		isPinActive: false,
-		newScreenshot: ''
+		newScreenshot: '',
+		isResidualRiskInputActive: this.props.showResidualRiskInput
 	};
 
-	get pinColor() {
-		if (this.props.canComment) {
-			return this.state.isPinActive ? 'secondary' : 'action';
-		}
+	get commentTypeIcon() {
+		return this.state.isResidualRiskInputActive ? ReportProblemIcon : ShortTextIcon;
+	}
 
-		return;
+	get commentTypeLabel() {
+		return this.state.isResidualRiskInputActive ? 'Text Comment' : 'Residual Risk';
 	}
 
 	get commentPlaceholder() {
@@ -104,8 +121,8 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		const screenshot = values.screenshot.substring(values.screenshot.indexOf(',') + 1);
 		const commentValues = { ...values, screenshot };
 		this.props.onSave(commentValues);
-		form.resetForm();
 		this.setState({ newScreenshot: ''});
+		form.resetForm();
 	}
 
 	public handleNewScreenshot = async () => {
@@ -115,6 +132,12 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 			sourceImage: Viewer.getScreenshot(),
 			onSave: (screenshot) => onTakeScreenshot(screenshot)
 		});
+	}
+
+	public handleChangeCommentType = () => {
+		const isResidualRiskInputActive = !this.state.isResidualRiskInputActive;
+
+		this.setState({ isResidualRiskInputActive });
 	}
 
 	public handleChangePin = () => {
@@ -172,9 +195,19 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	public renderPinButton = renderWhenTrue(() => (
 		<TooltipButton
 			Icon={PinDropIcon}
-			color={this.pinColor}
+			color={this.getButtonColor(this.state.isPinActive)}
 			label="Add a pin"
 			action={this.handleChangePin}
+			disabled={!this.props.canComment}
+		/>
+	));
+
+	public renderCommentTypeToggle = renderWhenTrue(() => (
+		<TooltipButton
+			Icon={this.commentTypeIcon}
+			color={this.getButtonColor(this.state.isResidualRiskInputActive)}
+			label={this.commentTypeLabel}
+			action={this.handleChangeCommentType}
 			disabled={!this.props.canComment}
 		/>
 	));
@@ -200,8 +233,58 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		<Image src={this.state.newScreenshot} className="new-comment" />
 	);
 
+	public renderResidualRiskFields = renderWhenTrue(() => (
+		<Container>
+			<FieldsRow container alignItems="center" justify="space-between">
+				<StyledFormControl>
+					<InputLabel shrink={true} htmlFor="likelihood">Risk Likelihood</InputLabel>
+					<Field name="likelihood" render={({ field }) => (
+						<CellSelect
+							{...field}
+							items={RISK_LIKELIHOODS}
+							inputId="likelihood"
+							disabled={!this.props.canComment}
+						/>
+					)} />
+				</StyledFormControl>
+
+				<StyledFormControl>
+					<InputLabel shrink={true} htmlFor="consequence">Risk Consequence</InputLabel>
+					<Field name="consequence" render={({ field }) => (
+						<CellSelect
+							{...field}
+							items={RISK_CONSEQUENCES}
+							inputId="consequence"
+							disabled={!this.props.canComment}
+						/>
+					)} />
+				</StyledFormControl>
+			</FieldsRow>
+
+			<Field name="mitigation_desc" render={({ field, form }) => (
+				<StyledTextField
+					{...field}
+					multiline={true}
+					fullWidth={true}
+					InputLabelProps={{ shrink: true }}
+					label="Residual Risk"
+					placeholder="Describe the residual risk"
+					disabled={!this.props.canComment}
+				/>
+			)} />
+		</Container>
+	));
+
 	public render() {
-		const { hideComment, hideScreenshot, hidePin, innerRef, canComment } = this.props;
+		const {
+			hideComment,
+			hideScreenshot,
+			hidePin,
+			showResidualRiskInput,
+			innerRef,
+			canComment
+		} = this.props;
+
 		return (
 			<Container>
 				{this.renderCreatedScreenshot(Boolean(this.state.newScreenshot))}
@@ -212,11 +295,13 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 					onSubmit={this.handleSave}
 				>
 					<StyledForm>
-						{this.renderCommentField(!hideComment)}
+						{this.renderResidualRiskFields(showResidualRiskInput && this.state.isResidualRiskInputActive)}
+						{this.renderCommentField(!hideComment && (!showResidualRiskInput || !this.state.isResidualRiskInputActive))}
 						<Actions>
 							<ActionsGroup>
 								{this.renderScreenshotButton(!hideScreenshot)}
 								{this.renderPinButton(!hidePin)}
+								{this.renderCommentTypeToggle(!hideComment && showResidualRiskInput)}
 							</ActionsGroup>
 							<Field render={({ form }) => (
 								<ViewerPanelButton
@@ -224,7 +309,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 									color="secondary"
 									type="submit"
 									mini={true}
-									disabled={false}
+									disabled={!hideComment && (!canComment || !form.isValid || form.isValidating)}
 									aria-label="Add new comment"
 								>
 									<SaveIcon fontSize="small" />
@@ -236,5 +321,15 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 				</Formik>
 			</Container>
 		);
+	}
+
+	private getButtonColor(buttonState) {
+		let color;
+
+		if (this.props.canComment) {
+			color = buttonState ? 'secondary' : 'action';
+		}
+
+		return color;
 	}
 }

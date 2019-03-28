@@ -33,6 +33,7 @@ import {
 import CloseIcon from '@material-ui/icons/Close';
 import { TooltipButton } from '../../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { Image } from '../../../image';
 
 interface IProps {
 	comment: string;

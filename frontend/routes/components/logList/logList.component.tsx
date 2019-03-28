@@ -36,7 +36,7 @@ export class LogList extends React.PureComponent<IProps, any> {
 		return (
 			<Log
 				{...item}
-				key={item.created}
+				key={item.guid + item._id}
 				removeLog={this.props.removeLog}
 				index={index}
 				teamspace={this.props.teamspace}
