@@ -16,6 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { sortByField } from '../../helpers/sorting';
 
 export const { Types: JobsTypes, Creators: JobsActions } = createActions({
 	fetchJobs: ['teamspace'],
@@ -37,7 +38,10 @@ export const INITIAL_STATE = {
 	colors: [],
 	myJob: {}
 };
-export const fetchJobsSuccess = (state = INITIAL_STATE, { jobs }) => ({ ...state, jobs });
+export const fetchJobsSuccess = (state = INITIAL_STATE, { jobs }) => {
+	jobs = sortByField([...jobs], { order: 'asc', config: { field: '_id' } });
+	return{ ...state, jobs };
+}
 
 export const fetchJobsColorsSuccess = (state = INITIAL_STATE, { colors }) => ({ ...state, colors });
 
