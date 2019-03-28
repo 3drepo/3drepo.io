@@ -24,8 +24,8 @@ import GisIcon from '@material-ui/icons/Layers';
 import ViewsIcon from '@material-ui/icons/PhotoCamera';
 import TreeIcon from '@material-ui/icons/DeviceHub';
 
-import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { runAngularTimeout } from '../../../../helpers/migration';
+import { Button } from './panelButton.styles';
 
 const IconsMap = {
 	place: IssuesIcon,
@@ -41,10 +41,9 @@ export const PanelButton = (props) => {
 	const { active, icon, label, onClick, type } = props;
 
 	return (
-		<TooltipButton
+		<Button
 			label={label}
 			Icon={IconsMap[icon]}
-			className="panelButton"
 			placement="right-end"
 			active={active}
 			action={() => runAngularTimeout(() => onClick(type))}

@@ -18,7 +18,6 @@
 import * as React from 'react';
 import Tooltip from '@material-ui/core/Tooltip';
 import { TooltipProps } from '@material-ui/core/Tooltip';
-
 import { StyledIconButton } from './tooltipButton.styles';
 
 interface IProps {
@@ -49,7 +48,11 @@ export const TooltipButton = (props: IProps) => {
 		<Tooltip title={label} disableHoverListener={disabled} placement={placement}>
 			<span>
 				<StyledIconButton
-					aria-label={label} onClick={action} disabled={disabled} className={className} active={Number(active)}>
+					aria-label={label}
+					onClick={action}
+					disabled={disabled}
+					className={className}
+					active={Number(active)}>
 					<Icon {...iconProps} />
 				</StyledIconButton>
 			</span>

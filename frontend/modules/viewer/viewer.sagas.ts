@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select } from 'redux-saga/effects';
-import { getAngularService, dispatch, getState } from '../../helpers/migration';
+import { put, select, takeLatest, takeEvery } from 'redux-saga/effects';
+import { getAngularService, dispatch } from '../../helpers/migration';
 import * as API from '../../services/api';
 import { VIEWER_EVENTS, VIEWER_PANELS } from '../../constants/viewer';
 
@@ -27,7 +27,8 @@ import {
 	selectIsClipEdit,
 	selectClipNumber,
 	selectIsMetadataVisible,
-	selectMeasureState
+	selectMeasureState,
+	selectClippingMode
 } from './viewer.selectors';
 import { Viewer, INITIAL_HELICOPTER_SPEED } from '../../services/viewer/viewer';
 import { VIEWER_CLIP_MODES } from '../../constants/viewer';
@@ -58,25 +59,51 @@ export function* mapInitialise({surveyPoints, sources = []}) {
 	}
 }
 
+const updateClipStateCallback = (clipNumber) => {
+	dispatch(ViewerActions.updateClipState(clipNumber));
+};
+
 export function* initialiseToolbar() {
 	try {
-		Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, (clipNumber) => {
-			const isClipEdit = selectIsClipEdit(getState());
-			const currentClipNumber = selectClipNumber(getState());
-			if (currentClipNumber !== clipNumber) {
-				dispatch(ViewerActions.setClipNumber(clipNumber));
-			}
-
-			if (clipNumber === 0 && isClipEdit) {
-				dispatch(ViewerActions.toggleClipEdit());
-				dispatch(ViewerActions.setClippingMode(null));
-			}
-		});
-
+		yield put(ViewerActions.startListenOnNumClip());
 		const helicopterSpeed = yield Viewer.getHelicopterSpeed();
 		yield put(ViewerActions.setHelicopterSpeed(helicopterSpeed));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('initialise', 'toolbar'));
+	}
+}
+
+export function* startListenOnNumClip() {
+	try {
+		Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('start listen on', 'num clip'));
+	}
+}
+
+export function* stopListenOnNumClip() {
+	try {
+		Viewer.off(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('stop listen on', 'num clip'));
+	}
+}
+
+export function* updateClipState({clipNumber}) {
+	try {
+		const isClipEdit = yield select(selectIsClipEdit);
+		const currentClipNumber = yield select(selectClipNumber);
+
+		if (currentClipNumber !== clipNumber) {
+			yield put(ViewerActions.setClipNumber(clipNumber));
+		}
+
+		if (clipNumber === 0 && isClipEdit) {
+			yield put(ViewerActions.setClipEdit(false));
+			yield put(ViewerActions.setClippingMode(null));
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'clip state'));
 	}
 }
 
@@ -227,17 +254,14 @@ export function* setClippingMode({mode}) {
 	}
 }
 
-export function* toggleClipEdit() {
+export function* setClipEdit({isClipEdit}) {
 	try {
-		const isClipEdit = yield select(selectIsClipEdit);
-
-		if (!isClipEdit) {
+		if (isClipEdit) {
 			yield Viewer.startClipEdit();
 		} else {
 			yield Viewer.stopClipEdit();
 		}
-
-		yield put(ViewerActions.setIsClipEdit(!isClipEdit));
+		yield put(ViewerActions.setClipEditSuccess(isClipEdit));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('toggle', 'clip edit'));
 	}
@@ -307,8 +331,11 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.DECREASE_HELICOPTER_SPEED, decreaseHelicopterSpeed);
 	yield takeLatest(ViewerTypes.GO_TO_EXTENT, goToExtent);
 	yield takeLatest(ViewerTypes.SET_CLIPPING_MODE, setClippingMode);
-	yield takeLatest(ViewerTypes.TOGGLE_CLIP_EDIT, toggleClipEdit);
 	yield takeLatest(ViewerTypes.SET_METADATA_VISIBILITY, setMetadataVisibility);
 	yield takeLatest(ViewerTypes.SET_MEASURE_VISIBILITY, setMeasureVisibility);
 	yield takeLatest(ViewerTypes.DEACTIVATE_MEASURE, deactivateMeasure);
+	yield takeLatest(ViewerTypes.UPDATE_CLIP_STATE, updateClipState);
+	yield takeLatest(ViewerTypes.SET_CLIP_EDIT, setClipEdit);
+	yield takeLatest(ViewerTypes.START_LISTEN_ON_NUM_CLIP, startListenOnNumClip);
+	yield takeLatest(ViewerTypes.STOP_LISTEN_ON_NUM_CLIP, stopListenOnNumClip);
 }

@@ -26,13 +26,14 @@ import HideIcon from '@material-ui/icons/VisibilityOff';
 import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
 import MetadataIcon from '@material-ui/icons/Info';
 import TurntableIcon from '@material-ui/icons/Redo';
+import MeasureIcon from '@material-ui/icons/Straighten';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
 import IncreaseIcon from '@material-ui/icons/Add';
 import DecreaseIcon from '@material-ui/icons/Remove';
 import ResetIcon from '@material-ui/icons/Replay';
 
-import { Helicopter, Ruler } from '../../../components/fontAwesomeIcon';
+import { Helicopter } from '../../../components/fontAwesomeIcon';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 
 import {
@@ -41,16 +42,15 @@ import {
 	ClipIconWrapper,
 	ClipNumber,
 	Submenu,
-	SubmenuDot
+	SubmenuDot,
+	ToolbarButton
 } from './toolbar.styles';
-import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
 import { VIEWER_NAV_MODES, VIEWER_CLIP_MODES, VIEWER_TOOLBAR_ITEMS } from '../../../../constants/viewer';
 import {
 	INITIAL_HELICOPTER_SPEED, MIN_HELICOPTER_SPEED, MAX_HELICOPTER_SPEED
 } from '../../../../services/viewer/viewer';
 
-const MeasureIcon = () => <Ruler IconProps={{ className: 'fontSizeSmall' }} />;
 const HelicopterIcon = () => <Helicopter IconProps={{ className: 'fontSizeSmall' }} />;
 
 interface IProps {
@@ -75,10 +75,11 @@ interface IProps {
 	isolateSelectedNodes: () => void;
 	setIsFocusMode: (isFocusMode) => void;
 	setClippingMode: (clippingMode) => void;
-	toggleClipEdit: () => void;
+	setClipEdit: (isClipEdit) => void;
 	setMetadataVisibility: (visible) => void;
 	setMeasureVisibility: (visible) => void;
 	deactivateMeasure: () => void;
+	stopListenOnNumClip: () => void;
 }
 
 interface IState {
@@ -193,7 +194,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			{
 				label: VIEWER_TOOLBAR_ITEMS.CLIP,
 				Icon: () =>	<ClipIconWithNumber clipNumber={this.props.clipNumber} />,
-				action: () => this.props.toggleClipEdit(),
+				action: this.handleClipEdit,
 				show: this.props.clippingMode && this.props.clipNumber,
 				active: this.props.isClipEdit
 			},
@@ -218,6 +219,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		this.props.initialiseToolbar();
+		this.props.stopListenOnNumClip();
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -263,8 +265,8 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			{label, Icon, action, show = true, subMenu = [], active = false }, index
 			) => renderWhenTrue(() => (
 			<ButtonWrapper key={index}>
-				<TooltipButton
-					className="toolbarButton"
+				<ToolbarButton
+					variant="primary"
 					label={label}
 					Icon={Icon}
 					action={action}
@@ -282,9 +284,10 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			<Fade in={condition}>
 				<ClickAwayListener onClickAway={this.handleClickAway}>
 					<Submenu>{subMenu.map((subButton, subKey) => (
-						<TooltipButton
+						<ToolbarButton
 							key={subKey}
-							className={`toolbarButton toolbarSubButton ${subButton.specificOption && 'toolbarSpecificButton'}`}
+							variant="secondary"
+							coloured={subButton.specificOption ? 1 : 0}
 							label={subButton.label}
 							Icon={subButton.Icon}
 							action={subButton.action}
@@ -302,6 +305,10 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				{this.renderButtons()}
 			</Container>
 		);
+	}
+
+	private handleClipEdit = () => {
+		this.props.setClipEdit(!this.props.isClipEdit);
 	}
 
 	private toggleMetadataPanel = () => {

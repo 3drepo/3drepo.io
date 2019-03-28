@@ -56,10 +56,11 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	isolateSelectedNodes: TreeActions.isolateSelectedNodes,
 	setIsFocusMode: ViewerActions.setIsFocusMode,
 	setClippingMode: ViewerActions.setClippingMode,
-	toggleClipEdit: ViewerActions.toggleClipEdit,
+	setClipEdit: ViewerActions.setClipEdit,
 	setMetadataVisibility: ViewerActions.setMetadataVisibility,
 	setMeasureVisibility: ViewerActions.setMeasureVisibility,
-	deactivateMeasure: ViewerActions.deactivateMeasure
+	deactivateMeasure: ViewerActions.deactivateMeasure,
+	stopListenOnNumClip: ViewerActions.stopListenOnNumClip
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Toolbar);

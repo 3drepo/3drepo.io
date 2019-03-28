@@ -16,5 +16,20 @@
  */
 
 import styled from 'styled-components';
+import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
+import { COLOR } from '../../../../styles';
 
-export const Container = styled.div``;
+export const setStyle = (statement, trueValue, falseValue) => statement ? trueValue : falseValue;
+
+export const Button = styled(TooltipButton)`
+  && {
+    background-color: ${(props: any) => props.active ? COLOR.PRIMARY_MAIN : COLOR.REGENT_GRAY};
+    color: ${COLOR.WHITE};
+    box-shadow: 0 3px 3px ${COLOR.BLACK_16};
+		margin-bottom: 20px;
+
+    &:hover {
+      background-color: ${(props: any) => props.active ? COLOR.PRIMARY_MAIN : COLOR.REGENT_GRAY};
+    }
+  }
+`;

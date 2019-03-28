@@ -42,14 +42,17 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	setIsFocusMode: ['isFocusMode'],
 	setClippingMode: ['mode'],
 	setClippingModeSuccess: ['mode'],
-	toggleClipEdit: [],
-	setIsClipEdit: ['isClipEdit'],
+	setClipEdit: ['isClipEdit'],
+	setClipEditSuccess: ['isClipEdit'],
 	setClipNumber: ['clipNumber'],
 	setMetadataVisibility: ['visible'],
 	setMeasureVisibility: ['visible'],
 	setMeasureState: ['measureState'],
 	setPanelVisibility: ['panelName', 'isVisible'],
-	deactivateMeasure: []
+	deactivateMeasure: [],
+	updateClipState: ['clipNumber'],
+	startListenOnNumClip: [],
+	stopListenOnNumClip: []
 }, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {
@@ -72,36 +75,36 @@ export const INITIAL_STATE = {
 
 const updateSettings = (state = INITIAL_STATE, {settings}) => {
 	window.localStorage.setItem('visualSettings', JSON.stringify(settings));
-	return {...state, settings};
+	return { ...state, settings };
 };
 
 const setNavigationModeSuccess = (state = INITIAL_STATE, {mode}) => {
-	return {...state, navigationMode: mode};
+	return { ...state, navigationMode: mode };
 };
 
 const setClippingModeSuccess = (state = INITIAL_STATE, {mode}) => {
-	return {...state, clippingMode: mode, isClipEdit: true};
+	return { ...state, clippingMode: mode, isClipEdit: true };
 };
 
 const setHelicopterSpeed = (state = INITIAL_STATE, {speed}) => {
-	return {...state, helicopterSpeed: speed};
+	return { ...state, helicopterSpeed: speed };
 };
 
 const setIsFocusMode = (state = INITIAL_STATE, {isFocusMode}) => {
-	return {...state, isFocusMode};
+	return { ...state, isFocusMode };
 };
 
-const setIsClipEdit = (state = INITIAL_STATE, {isClipEdit}) => {
-	return {...state, isClipEdit};
+const setClipEditSuccess = (state = INITIAL_STATE, {isClipEdit}) => {
+	return { ...state, isClipEdit };
 };
 
 const setClipNumber = (state = INITIAL_STATE, {clipNumber}) => {
-	return {...state, clipNumber};
+	return { ...state, clipNumber };
 };
 
 const setPanelVisibility = (state = INITIAL_STATE, {panelName, isVisible}) => {
 	const visiblePanels = cloneDeep(state.visiblePanels);
-	return {...state, visiblePanels: {...visiblePanels, [panelName]: isVisible}};
+	return { ...state, visiblePanels: {...visiblePanels, [panelName]: isVisible} };
 };
 
 export const setMeasureState = (state = INITIAL_STATE, { measureState = {} }) => {
@@ -114,7 +117,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerTypes.SET_CLIPPING_MODE_SUCCESS] : setClippingModeSuccess,
 	[ViewerTypes.SET_HELICOPTER_SPEED] : setHelicopterSpeed,
 	[ViewerTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,
-	[ViewerTypes.SET_IS_CLIP_EDIT] : setIsClipEdit,
+	[ViewerTypes.SET_CLIP_EDIT_SUCCESS] : setClipEditSuccess,
 	[ViewerTypes.SET_CLIP_NUMBER] : setClipNumber,
 	[ViewerTypes.SET_PANEL_VISIBILITY] : setPanelVisibility,
 	[ViewerTypes.SET_MEASURE_STATE] : setMeasureState

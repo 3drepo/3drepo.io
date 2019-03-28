@@ -16,57 +16,81 @@
  */
 
 import styled from 'styled-components';
-import { COLOR, WHITE } from '../../../../styles';
+import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
+
+import { COLOR, WHITE, FONT_WEIGHT } from '../../../../styles';
 
 export const Container = styled.div`
-  background-color: ${COLOR.REGENT_GRAY};
-  border: 1px solid ${COLOR.SILVER_CHALICE};
-  border-radius: 22px;
-  box-shadow: 0 3px 3px ${COLOR.BLACK_16};
-  display: flex;
-  height: 40px;
-  padding: 0 10px;
-  justify-content: center;
-  align-items: center;
-  visibility: ${(props: any) => props.visible ? 'visible' : 'hidden'};
-  position: absolute;
-  bottom: 35px;
-  left: 50%;
-  transform: translateX(-50%);
+	background-color: ${COLOR.REGENT_GRAY};
+	border: 1px solid ${COLOR.SILVER_CHALICE};
+	border-radius: 22px;
+	box-shadow: 0 3px 3px ${COLOR.BLACK_16};
+	display: flex;
+	height: 40px;
+	padding: 0 10px;
+	justify-content: center;
+	align-items: center;
+	visibility: ${(props: any) => props.visible ? 'visible' : 'hidden'};
+	position: absolute;
+	bottom: 35px;
+	left: 50%;
+	transform: translateX(-50%);
 ` as any;
 
 export const ButtonWrapper = styled.div`
-  position: relative;
+	position: relative;
 `;
 
 export const ClipIconWrapper = styled.span`
-  position: relative;
+	position: relative;
 `;
 
 export const ClipNumber = styled.span`
-  position: absolute;
-  left: 8px;
-  top: 5px;
-  font-size: 9px;
-  font-weight: 900;
+	position: absolute;
+	left: 8px;
+	top: 5px;
+	font-size: 9px;
+	font-weight: ${FONT_WEIGHT.BOLD};
 `;
 
 export const Submenu = styled.div`
-  position: absolute;
-  bottom: 100%;
+	position: absolute;
+	bottom: 100%;
 `;
 
 export const SubmenuDot = styled.i`
-  &::before {
-    content: '\\25CF';
-    font-size: 8px;
-    color: ${COLOR.WHITE};
-    width: 100%;
-    position: absolute;
-    font-style: normal;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-  }
+	&::before {
+		content: '\\25CF';
+		font-size: 8px;
+		color: ${COLOR.WHITE};
+		width: 100%;
+		position: absolute;
+		font-style: normal;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		text-align: center;
+	}
 `;
+
+export const ToolbarButton = styled(TooltipButton)`
+	&& {
+		height: 40px;
+		width: 40px;
+		font-size: 1rem;
+		padding: 10px;
+
+		svg {
+			font-size: 20px;
+		}
+
+		background-color: ${(props: any) => props.coloured ? COLOR.SUNGLOW : COLOR.REGENT_GRAY};
+		color: ${(props: any) => props.active && props.variant === 'primary' ? COLOR.SUNGLOW : COLOR.WHITE};
+		box-shadow: ${(props: any) => props.variant === 'secondary' ? `0 3px 3px ${COLOR.BLACK_16}` : 'none'};
+		margin-bottom: ${(props: any) => props.variant === 'secondary' ? `10px` : '0'};
+
+		&:hover {
+			background-color: ${(props: any) => props.coloured ? COLOR.SUNGLOW : COLOR.REGENT_GRAY};
+		}
+	}
+` as any;

@@ -18,10 +18,10 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 2;
-  visibility: ${(props: any) => props.visible ? 'visible' : 'hidden'};
-  pointer-events: ${(props: any) => props.visible ? 'inherit' : 'none'};
+	position: absolute;
+	top: 20px;
+	right: 20px;
+	z-index: 2;
+	visibility: ${(props: any) => props.visible ? 'visible' : 'hidden'};
+	pointer-events: ${(props: any) => props.visible ? 'inherit' : 'none'};
 ` as any;

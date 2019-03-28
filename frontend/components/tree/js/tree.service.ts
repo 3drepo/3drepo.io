@@ -123,8 +123,6 @@ export class TreeService {
 		this.treeMap = null;
 		branch = branch ? branch : 'master';
 
-		// revision = revision ? revision : 'head';
-
 		if (!revision) {
 			this.baseURL = account + '/' + model + '/revision/master/head/';
 		} else {

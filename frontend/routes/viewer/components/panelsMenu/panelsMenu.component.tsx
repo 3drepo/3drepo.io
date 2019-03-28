@@ -45,34 +45,17 @@ export class PanelsMenu extends React.PureComponent<any, IState> {
 		activePanels: {}
 	};
 
-	public handleClick = (panel) => {
-		this.setState((prevState) => ({
-				activePanels: {...prevState.activePanels, [panel]: !prevState.activePanels[panel]}
-			})
-		);
-	}
-
 	public get toolbarList() {
 		return [
-			{ label: PANELS.ISSUES, Icon: IssuesIcon, action: () => this.handleClick(PANELS.ISSUES) },
-			{ label: PANELS.RISKS, Icon: RisksIcon, action: () => this.handleClick(PANELS.RISKS) },
-			{ label: PANELS.GROUPS, Icon: GroupsIcon, action: () => this.handleClick(PANELS.GROUPS) },
-			{ label: PANELS.VIEWS, Icon: ViewsIcon, action: () => this.handleClick(PANELS.VIEWS) },
-			{ label: PANELS.TREE, Icon: TreeIcon, action: () => this.handleClick(PANELS.TREE) },
-			{ label: PANELS.COMPARE, Icon: CompareIcon, action: () => this.handleClick(PANELS.COMPARE)},
-			{ label: PANELS.GIS, Icon: GisIcon, action: () => this.handleClick(PANELS.GIS) }
+			{ label: PANELS.ISSUES, Icon: IssuesIcon, action: () => this.togglePanel(PANELS.ISSUES) },
+			{ label: PANELS.RISKS, Icon: RisksIcon, action: () => this.togglePanel(PANELS.RISKS) },
+			{ label: PANELS.GROUPS, Icon: GroupsIcon, action: () => this.togglePanel(PANELS.GROUPS) },
+			{ label: PANELS.VIEWS, Icon: ViewsIcon, action: () => this.togglePanel(PANELS.VIEWS) },
+			{ label: PANELS.TREE, Icon: TreeIcon, action: () => this.togglePanel(PANELS.TREE) },
+			{ label: PANELS.COMPARE, Icon: CompareIcon, action: () => this.togglePanel(PANELS.COMPARE)},
+			{ label: PANELS.GIS, Icon: GisIcon, action: () => this.togglePanel(PANELS.GIS) }
 		];
 	}
-
-	public renderButtons = () => this.toolbarList.map((buttonProps, index) => (
-		<TooltipButton
-			{...buttonProps}
-			key={index}
-			className="panelButton"
-			placement="right-end"
-			active={this.state.activePanels[buttonProps.label]}
-		/>)
-		)
 
 	public render() {
 		return (
@@ -81,4 +64,22 @@ export class PanelsMenu extends React.PureComponent<any, IState> {
 			</Container>
 		);
 	}
+
+	private renderButtons = () => this.toolbarList.map((buttonProps, index) => (
+		<TooltipButton
+			{...buttonProps}
+			key={index}
+			className="panelButton"
+			placement="right-end"
+			active={this.state.activePanels[buttonProps.label]}
+		/>)
+	)
+
+	private togglePanel = (panel) => {
+		this.setState((prevState) => ({
+				activePanels: {...prevState.activePanels, [panel]: !prevState.activePanels[panel]}
+			})
+		);
+	}
+
 }

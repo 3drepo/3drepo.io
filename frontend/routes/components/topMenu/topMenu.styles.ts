@@ -40,7 +40,7 @@ export const BackIcon = styled(InputIcon)`
 	&& {
 		color: ${COLOR.WHITE};
 		font-size: 26px;
-    filter: drop-shadow(0 0 2px ${COLOR.BLACK_30});
-    transform: rotate(180deg);
+		filter: drop-shadow(0 0 2px ${COLOR.BLACK_30});
+		transform: rotate(180deg);
 	}
 `;

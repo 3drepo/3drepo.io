@@ -1,59 +1,21 @@
+/**
+ *  Copyright (C) 2017 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
-import { COLOR } from '../../../../styles';
 
-export const StyledIconButton = styled(IconButton)`
-  &.panelButton {
-    background-color: ${(props: any) => props.active ? COLOR.PRIMARY_MAIN : COLOR.REGENT_GRAY};
-    color: ${COLOR.WHITE};
-
-    &:hover {
-      background-color: ${(props: any) => props.active ? COLOR.PRIMARY_MAIN : COLOR.REGENT_GRAY};
-    }
-  }
-
-	&.toolbarButton {
-    background-color: ${COLOR.REGENT_GRAY};
-    color: ${(props: any) => props.active ? COLOR.SUNGLOW : COLOR.WHITE};
-    padding: 10px;
-
-    &:hover {
-      background-color: ${COLOR.REGENT_GRAY};
-    }
-  }
-
-  &.panelButton, &.toolbarSubButton {
-    box-shadow: 0 3px 3px ${COLOR.BLACK_16};
-    margin-bottom: 20px;
-  }
-
-  &.toolbarSubButton {
-    margin-bottom: 10px;
-
-    &:hover {
-      background-color: ${COLOR.REGENT_GRAY};
-    }
-  }
-
-  &.toolbarSubButton, &.toolbarButton {
-    height: 40px;
-    width: 40px;
-    font-size: 1rem;
-
-    svg {
-      font-size: 20px;
-    }
-  }
-
-  &.toolbarSpecificButton {
-    background-color: ${COLOR.SUNGLOW};
-
-    &:hover {
-      background-color: ${COLOR.SUNGLOW};
-    }
-  }
-
-  &:hover {
-    cursor: pointer;
-  }
-` as any;
+export const StyledIconButton = styled(IconButton)`` as any;

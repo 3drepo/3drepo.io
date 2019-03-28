@@ -25,5 +25,4 @@ export const Eraser = (props) => <FontAwesomeIconComponent {...props} icon="eras
 export const Eye = (props) => <FontAwesomeIconComponent {...props} icon="eye" />;
 export const Tint = (props) => <FontAwesomeIconComponent {...props} icon="tint" />;
 export const HandPaper = (props) => <FontAwesomeIconComponent {...props} icon="hand-paper" />;
-export const Ruler = (props) => <FontAwesomeIconComponent {...props} icon="ruler-horizontal" />;
 export const Helicopter = (props) => <FontAwesomeIconComponent {...props} icon="helicopter" />;
