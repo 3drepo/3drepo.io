@@ -26,7 +26,8 @@ import {
 	selectSelectedFilters,
 	selectShowStarred,
 	selectSearchEnabled,
-	selectIsPending
+	selectIsPending,
+	selectActiveMeta
 } from '../../../../modules/bim';
 
 import { selectStarredMeta, StarredMetaActions } from '../../../../modules/starredMeta';
@@ -39,7 +40,8 @@ const mapStateToProps = createStructuredSelector({
 	selectedFilters: selectSelectedFilters,
 	showStarred: selectShowStarred,
 	metaKeys: selectMetaKeys,
-	isPending: selectIsPending
+	isPending: selectIsPending,
+	activeMeta: selectActiveMeta
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

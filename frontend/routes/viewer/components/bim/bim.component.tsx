@@ -42,6 +42,7 @@ interface IProps {
 	className: string;
 	teamspace: string;
 	model: string;
+	activeMeta: string;
 	isPending: boolean;
 	metadata: IMetaRecord[];
 	searchEnabled: boolean;
@@ -49,6 +50,7 @@ interface IProps {
 	selectedFilters: ISelectedFilter[];
 	starredMetaMap: any;
 	metaKeys: string[];
+	fetchMetadata: (teamspace, model, meta) => void;
 	setComponentState: (componentState) => void;
 	clearStarredMetadata: (teamspace, model) => void;
 	addMetaRecordToStarred?: (key) => void;
@@ -101,6 +103,16 @@ export class Bim extends React.PureComponent<IProps, any> {
 		<EmptyStateInfo>No data matched</EmptyStateInfo>
 	));
 
+	public componentDidMount() {
+		this.handleLoadingMetadata();
+	}
+
+	public componentDidUpdate(prevProps) {
+		if (prevProps.activeMeta !== this.props.activeMeta) {
+			this.handleLoadingMetadata();
+		}
+	}
+
 	public render() {
 		return (
 			<ViewerPanel
@@ -120,6 +132,13 @@ export class Bim extends React.PureComponent<IProps, any> {
 			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
 		}
 		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
+	}
+
+	private handleLoadingMetadata = () => {
+		const { teamspace, model, activeMeta, fetchMetadata } = this.props;
+		if (activeMeta) {
+			fetchMetadata(teamspace, model, activeMeta);
+		}
 	}
 
 	private handleFilterChange = (selectedFilters) => {

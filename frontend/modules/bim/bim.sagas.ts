@@ -22,16 +22,12 @@ import * as API from '../../services/api';
 import { BimTypes, BimActions } from './bim.redux';
 import { DialogActions } from '../dialog';
 import { prepareMetadata } from '../../helpers/bim';
-import { getAngularService } from '../../helpers/migration';
 
 export function* fetchMetadata({ teamspace, model, metadataId }) {
 	yield put(BimActions.setIsPending(true));
 
 	try {
 		const { data } = yield API.getMetadata(teamspace, model, metadataId);
-		const PanelService = getAngularService('PanelService') as any;
-		PanelService.showPanelsByType('docs');
-
 		const sortedData = sortBy(prepareMetadata(data.meta[0].metadata), 'key');
 		yield put(BimActions.fetchMetadataSuccess(sortedData));
 	} catch (error) {

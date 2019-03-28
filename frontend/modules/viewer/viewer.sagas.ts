@@ -26,8 +26,7 @@ import {
 	selectHelicopterSpeed,
 	selectIsClipEdit,
 	selectClipNumber,
-	selectIsMetadataVisible,
-	selectClippingMode
+	selectIsMetadataVisible
 } from './viewer.selectors';
 import { Viewer, INITIAL_HELICOPTER_SPEED } from '../../services/viewer/viewer';
 import { VIEWER_CLIP_MODES } from '../../constants/viewer';

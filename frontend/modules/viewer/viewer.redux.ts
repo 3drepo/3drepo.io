@@ -63,10 +63,6 @@ export const INITIAL_STATE = {
 	isFocusMode: false,
 	isClipEdit: false,
 	clipNumber: 0,
-	measureState: {
-		active: false,
-		disabled: false
-	},
 	visiblePanels: {
 		[VIEWER_PANELS.METADATA]: false
 	}

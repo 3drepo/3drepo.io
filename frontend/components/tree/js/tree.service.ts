@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { dispatch } from '../../../helpers/migration';
-import { BimActions } from '../../../modules/bim';
-import { ViewerActions } from '../../../modules/viewer';
+import { values } from 'lodash';
+import { dispatch, getState } from '../../../helpers/migration';
+import { BimActions, selectIsActive, selectActiveMeta } from '../../../modules/bim';
+import { ViewerActions, selectIsMetadataVisible } from '../../../modules/viewer';
 
 export class TreeService {
 
@@ -782,21 +782,31 @@ export class TreeService {
 		}
 	}
 
+	public get lastActiveMeta() {
+		return selectActiveMeta(getState());
+	}
+
 	/**
 	 * Unselect all selected items and clear the array
 	 */
 	public clearCurrentlySelected() {
 
 		this.ViewerService.clearHighlights();
-		dispatch(ViewerActions.setMetadataVisibility(false));
 
 		const visitedNodes = {};
 
-		for (const id in this.currentSelectedNodes) {
+		const lastActiveMeta = this.lastActiveMeta;
+		const selectedNodesList = values(this.currentSelectedNodes);
 
-			if (!id || visitedNodes[id]) { continue; }
+		for (let index = 0; index < selectedNodesList.length; index++) {
+			const currentNode = selectedNodesList[index];
+			const id = currentNode._id;
 
-			const currentNode = this.currentSelectedNodes[id];
+			if (visitedNodes[id]) { continue; }
+
+			if (currentNode.meta.includes(lastActiveMeta)) {
+				dispatch(BimActions.setActiveMeta(null));
+			}
 
 			currentNode.selected = this.SELECTION_STATES.unselected;
 
@@ -810,7 +820,7 @@ export class TreeService {
 					break;
 				}
 				visitedNodes[parentId] = true;
-				this.getNodeById(parentId).selected =  this.SELECTION_STATES.unselected;
+				this.getNodeById(parentId).selected = this.SELECTION_STATES.unselected;
 			}
 
 			visitedNodes[currentNode._id] = true;
@@ -898,7 +908,6 @@ export class TreeService {
 		}
 
 		return this.onReady().then(() => {
-
 			const highlightMap = this.getMeshMapFromNodes(actionNodes);
 
 			for (const key in highlightMap) {
@@ -986,7 +995,7 @@ export class TreeService {
 	 */
 	public handleMetadata(node: any) {
 		if (node && node.meta) {
-			dispatch(BimActions.fetchMetadata(node.account, node.model || node.project, node.meta));
+			dispatch(BimActions.setActiveMeta(node.meta[0]));
 		}
 	}
 

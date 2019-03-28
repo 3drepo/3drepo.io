@@ -32,6 +32,14 @@ export const selectComponentState = createSelector(
 	selectBimDomain, (state) => state.componentState
 );
 
+export const selectIsActive = createSelector(
+	selectBimDomain, (state) => state.isActive
+);
+
+export const selectActiveMeta = createSelector(
+	selectBimDomain, (state) => state.activeMeta
+);
+
 export const selectShowStarred = createSelector(
 	selectComponentState, (state) => state.showStarred
 );

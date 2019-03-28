@@ -63,7 +63,9 @@ interface IProps {
 	isClipEdit: boolean;
 	clipNumber: number;
 	isMetadataVisible: boolean;
+	isMetadataActive: boolean;
 	isMeasureActive: boolean;
+	isMeasureDisabled: boolean;
 	goToExtent: () => void;
 	setNavigationMode: (navigationMode) => void;
 	initialiseToolbar: () => void;
@@ -77,8 +79,8 @@ interface IProps {
 	setClippingMode: (clippingMode) => void;
 	setClipEdit: (isClipEdit) => void;
 	setMetadataVisibility: (visible) => void;
+	setMetadataActive: (isActive) => void;
 	setMeasureVisibility: (visible) => void;
-	deactivateMeasure: () => void;
 	stopListenOnNumClip: () => void;
 }
 
@@ -237,21 +239,17 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
-		this.props.deactivateMeasure();
+		this.props.setMeasureVisibility(false);
 		this.props.stopListenOnNumClip();
 	}
 
 	public handleNavigationModeClick = (mode) => {
 		this.props.setNavigationMode(mode);
-		this.setState({
-			activeSubMenu: ''
-		});
+		this.setState({ activeSubMenu: '' });
 	}
 
 	public handleClickAway = () => {
-		this.setState({
-			activeSubMenu: ''
-		});
+		this.setState({ activeSubMenu: '' });
 	}
 
 	public handleShowSubmenu = (label) => {
@@ -312,7 +310,8 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	}
 
 	private toggleMetadataPanel = () => {
-		const { isMetadataVisible, setMetadataVisibility } = this.props;
+		const { isMetadataVisible, isMetadataActive, setMetadataVisibility, setMetadataActive } = this.props;
+		setMetadataActive(!isMetadataActive);
 		setMetadataVisibility(!isMetadataVisible);
 	}
 

@@ -30,8 +30,15 @@ import {
 	selectClipNumber,
 	selectIsMetadataVisible
 } from '../../../../modules/viewer';
+
 import { TreeActions } from '../../../../modules/tree';
-import { selectIsMeasureActive } from '../../../../modules/measure';
+
+import {
+	MeasureActions,
+	selectIsMeasureActive,
+	selectIsMeasureDisabled
+} from '../../../../modules/measure';
+import { BimActions, selectIsActive } from '../../../../modules/bim';
 
 const mapStateToProps = createStructuredSelector({
 	navigationMode: selectNavigationMode,
@@ -41,7 +48,9 @@ const mapStateToProps = createStructuredSelector({
 	isClipEdit: selectIsClipEdit,
 	clipNumber: selectClipNumber,
 	isMetadataVisible: selectIsMetadataVisible,
-	isMeasureActive: selectIsMeasureActive
+	isMetadataActive: selectIsActive,
+	isMeasureActive: selectIsMeasureActive,
+	isMeasureDisabled: selectIsMeasureDisabled
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -58,8 +67,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setClippingMode: ViewerActions.setClippingMode,
 	setClipEdit: ViewerActions.setClipEdit,
 	setMetadataVisibility: ViewerActions.setMetadataVisibility,
+	setMetadataActive: BimActions.setIsActive,
 	setMeasureVisibility: ViewerActions.setMeasureVisibility,
-	deactivateMeasure: ViewerActions.deactivateMeasure,
 	stopListenOnNumClip: ViewerActions.stopListenOnNumClip
 }, dispatch);
 

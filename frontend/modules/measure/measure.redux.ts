@@ -20,7 +20,7 @@ import { createActions, createReducer } from 'reduxsauce';
 export const { Types: MeasureTypes, Creators: MeasureActions } = createActions({
 	activateMeasure: [],
 	deactivateMeasure: [],
-	setMeasureActive: [],
+	setMeasureActive: ['isActive'],
 	setDisabled: ['isDisabled'],
 	setActiveSuccess: ['isActive'],
 	setDisabledSuccess: ['isDisabled']

@@ -45,7 +45,7 @@ export function* deactivateMeasure() {
 
 export function* setMeasureActive({ isActive }) {
 	try {
-		if (!isActive) {
+		if (isActive) {
 			yield put(MeasureActions.activateMeasure());
 		} else {
 			yield put(MeasureActions.deactivateMeasure());

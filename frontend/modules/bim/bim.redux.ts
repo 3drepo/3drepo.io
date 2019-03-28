@@ -22,7 +22,9 @@ export const { Types: BimTypes, Creators: BimActions } = createActions({
 	fetchMetadata: ['teamspace', 'model', 'metadataId'],
 	fetchMetadataSuccess: ['metadata'],
 	setIsPending: ['isPending'],
-	setComponentState: ['componentState']
+	setIsActive: ['isActive'],
+	setComponentState: ['componentState'],
+	setActiveMeta: ['activeMeta']
 }, { prefix: 'BIM/' });
 
 export interface IMetaRecord {
@@ -37,12 +39,16 @@ export interface IBimComponentState {
 
 export interface IBimState {
 	metadata: IMetaRecord[];
+	activeMeta: string;
 	isPending: boolean;
+	isActive: boolean;
 	componentState: IBimComponentState;
 }
 
 export const INITIAL_STATE: IBimState = {
 	metadata: [],
+	activeMeta: null,
+	isActive: false,
 	isPending: false,
 	componentState: {
 		showStarred: false,
@@ -54,6 +60,16 @@ const fetchMetadataSuccess = (state = INITIAL_STATE, { metadata}) => ({ ...state
 
 const setIsPending = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
 
+const setActiveMeta = (state = INITIAL_STATE, { activeMeta }) => {
+	const updatedState =  { ...state, activeMeta };
+	if (!activeMeta) {
+		updatedState.metadata = [];
+	}
+	return updatedState;
+};
+
+const setIsActive = (state = INITIAL_STATE, { isActive }) => ({ ...state, isActive });
+
 const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
@@ -61,5 +77,7 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 export const reducer = createReducer(INITIAL_STATE, {
 	[BimTypes.FETCH_METADATA_SUCCESS]: fetchMetadataSuccess,
 	[BimTypes.SET_COMPONENT_STATE]: setComponentState,
-	[BimTypes.SET_IS_PENDING]: setIsPending
+	[BimTypes.SET_IS_PENDING]: setIsPending,
+	[BimTypes.SET_IS_ACTIVE]: setIsActive,
+	[BimTypes.SET_ACTIVE_META]: setActiveMeta
 });
