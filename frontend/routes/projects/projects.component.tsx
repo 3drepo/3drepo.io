@@ -28,6 +28,7 @@ import { ProjectsPermissions } from '../projectsPermissions';
 import { ModelsPermissions } from '../modelsPermissions';
 import { Container, Options, SelectContainer, SwitchButton, IconLeft, IconRight } from './projects.styles';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+import { sortByField } from '../../helpers/sorting';
 
 export const PERMISSIONS_VIEWS = {
 	PROJECTS: 0,
@@ -105,8 +106,9 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		const {projects, location} = this.props;
 		const state = {
-			projectsItems: getProjectsItems(projects)
+			projectsItems: sortByField([...getProjectsItems(projects)], { order: 'asc', config: { field: 'value' } })
 		} as any;
+
 		const queryParams = queryString.parse(location.search);
 
 		const project = projects.find(({ name }) => name === queryParams.project);
@@ -117,7 +119,6 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		} else {
 			state.selectedProject = '';
 		}
-
 		this.setState(state);
 	}
 
