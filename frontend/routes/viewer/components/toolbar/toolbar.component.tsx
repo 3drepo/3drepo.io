@@ -219,7 +219,6 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		this.props.initialiseToolbar();
-		this.props.stopListenOnNumClip();
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -239,6 +238,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 	public componentWillUnmount() {
 		this.props.deactivateMeasure();
+		this.props.stopListenOnNumClip();
 	}
 
 	public handleNavigationModeClick = (mode) => {
