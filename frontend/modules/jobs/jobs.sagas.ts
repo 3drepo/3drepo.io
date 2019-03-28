@@ -23,12 +23,11 @@ import { DialogActions } from '../dialog';
 import { selectCurrentTeamspace } from '../userManagement/userManagement.selectors';
 import { JobsTypes, JobsActions } from './jobs.redux';
 import { SnackbarActions } from '../snackbar';
-import { sortByField } from '../../helpers/sorting';
 
 export function* fetchJobs({ teamspace }) {
 	try {
 		const response = yield API.getJobs(teamspace);
-		yield put(JobsActions.fetchJobsSuccess(sortByField([...response.data], { order: 'asc', config: { field: '_id' } })));
+		yield put(JobsActions.fetchJobsSuccess(response.data));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'jobs', error));
 	}
@@ -37,7 +36,6 @@ export function* fetchJobs({ teamspace }) {
 export function* fetchJobsColors({ teamspace }) {
 	try {
 		const response = yield API.getJobsColors(teamspace);
-
 		yield put(JobsActions.fetchJobsColorsSuccess(response.data));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'jobs colors', error));
