@@ -20,6 +20,8 @@ import { reducer as groupsReducer } from './groups/groups.redux';
 import { reducer as treeReducer } from './tree/tree.redux';
 import { reducer as bimReducer } from './bim/bim.redux';
 import { reducer as starredMetaReducer } from './starredMeta/starredMeta.redux';
+import { reducer as measureReducer } from './measure/measure.redux';
+
 // <-- IMPORT MODULE REDUCER -->
 
 export default function createReducer() {
@@ -43,6 +45,7 @@ export default function createReducer() {
 		groups: groupsReducer,
 		tree: treeReducer,
 		bim: bimReducer,
-		starredMeta: starredMetaReducer// <-- INJECT MODULE REDUCER -->
+		starredMeta: starredMetaReducer,
+		measure: measureReducer// <-- INJECT MODULE REDUCER -->
 	});
 }

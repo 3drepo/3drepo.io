@@ -65,7 +65,7 @@ interface IProps {
 	onTakeScreenshot: (screenshot) => void;
 	onChangePin: (pin) => void;
 	showScreenshotDialog: (options) => void;
-	setMeasureState: (measureState) => void;
+	setDisabled: (isDisabled) => void;
 	deactivateMeasure: () => void;
 }
 
@@ -114,7 +114,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 
 	public componentWillUnmount() {
 		Viewer.setPinDropMode(false);
-		this.props.setMeasureState({ disable: false });
+		this.props.setDisabled(false);
 		this.togglePinListeners(false);
 	}
 
@@ -147,11 +147,11 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		if (isPinActive) {
 			Viewer.setPinDropMode(true);
 			this.props.deactivateMeasure();
-			this.props.setMeasureState({ disable: true });
+			this.props.setDisabled(true);
 			this.togglePinListeners(true);
 		} else {
 			Viewer.setPinDropMode(false);
-			this.props.setMeasureState({ disable: false });
+			this.props.setDisabled(false);
 			this.togglePinListeners(false);
 		}
 

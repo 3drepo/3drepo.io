@@ -63,7 +63,7 @@ interface IProps {
 	isClipEdit: boolean;
 	clipNumber: number;
 	isMetadataVisible: boolean;
-	measureState: any;
+	isMeasureActive: boolean;
 	goToExtent: () => void;
 	setNavigationMode: (navigationMode) => void;
 	initialiseToolbar: () => void;
@@ -202,7 +202,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				label: VIEWER_TOOLBAR_ITEMS.MEASURE,
 				Icon: MeasureIcon,
 				action: this.toggleMeasure,
-				active: this.props.measureState.active
+				active: this.props.isMeasureActive
 			},
 			{
 				label: VIEWER_TOOLBAR_ITEMS.BIM,
@@ -317,7 +317,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	}
 
 	private toggleMeasure = () => {
-		const { measureState, setMeasureVisibility } = this.props;
-		setMeasureVisibility(!measureState.active);
+		const { isMeasureActive, setMeasureVisibility } = this.props;
+		setMeasureVisibility(!isMeasureActive);
 	}
 }

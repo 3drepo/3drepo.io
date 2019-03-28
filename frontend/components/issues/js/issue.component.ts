@@ -27,6 +27,7 @@ import { TreeService } from '../../tree/js/tree.service';
 import { ViewerService } from '../../viewer/js/viewer.service';
 import { dispatch } from '../../../helpers/migration';
 import { DialogActions } from '../../../modules/dialog';
+import { MeasureActions } from '../../../modules/measure';
 
 class IssueController implements ng.IController {
 
@@ -45,7 +46,6 @@ class IssueController implements ng.IController {
 		'AuthService',
 		'AnalyticService',
 		'StateManager',
-		'MeasureService',
 		'ViewerService',
 		'TreeService',
 		'DialogService'
@@ -111,7 +111,6 @@ class IssueController implements ng.IController {
 		private authService: AuthService,
 		private analyticService: AnalyticService,
 		private stateManager: StateManagerService,
-		private measureService,
 		private viewerService: ViewerService,
 		private treeService: TreeService,
 		private dialogService: DialogService
@@ -221,7 +220,7 @@ class IssueController implements ng.IController {
 		// Get out of pin drop mode
 
 		this.issuesService.setPinDropMode(false);
-		this.measureService.setDisabled(false);
+		dispatch(MeasureActions.setDisabled(false));
 		this.clearPin = true;
 
 		// unsubscribe on destroy
@@ -658,11 +657,11 @@ class IssueController implements ng.IController {
 
 			if (selected) {
 				this.issuesService.setPinDropMode(true);
-				this.measureService.deactivateMeasure();
-				this.measureService.setDisabled(true);
+				dispatch(MeasureActions.deactivateMeasure());
+				dispatch(MeasureActions.setDisabled(true));
 			} else {
 				this.issuesService.setPinDropMode(false);
-				this.measureService.setDisabled(false);
+				dispatch(MeasureActions.setDisabled(false));
 			}
 			break;
 

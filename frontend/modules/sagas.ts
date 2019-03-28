@@ -17,6 +17,7 @@ import groupsSaga from './groups/groups.sagas';
 import treeSaga from './tree/tree.sagas';
 import bimSaga from './bim/bim.sagas';
 import starredMetaSaga from './starredMeta/starredMeta.sagas';
+import measureSaga from './measure/measure.sagas';
 // <-- IMPORT MODULE SAGA -->
 
 export default function* rootSaga() {
@@ -38,6 +39,7 @@ export default function* rootSaga() {
 		fork(groupsSaga),
 		fork(treeSaga),
 		fork(bimSaga),
-		fork(starredMetaSaga)// <-- INJECT MODULE SAGA -->
+		fork(starredMetaSaga),
+		fork(measureSaga)// <-- INJECT MODULE SAGA -->
 	]);
 }

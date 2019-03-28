@@ -15,8 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Measure } from '../../../services/viewer/measure';
+import { createSelector } from 'reselect';
 
-export const MeasureServiceModule = angular
-	.module('3drepo')
-	.service('MeasureService', () => Measure);
+export const selectMeasureDomain = (state) => Object.assign({}, state.measure);
+
+export const selectIsMeasureActive = createSelector(
+	selectMeasureDomain, (state) => state.isActive
+);
+
+export const selectIsMeasureDisabled = createSelector(
+	selectMeasureDomain, (state) => state.isDisabled
+);

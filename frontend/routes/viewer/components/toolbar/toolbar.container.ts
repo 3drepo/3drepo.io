@@ -28,10 +28,10 @@ import {
 	selectClippingMode,
 	selectIsClipEdit,
 	selectClipNumber,
-	selectIsMetadataVisible,
-	selectMeasureState
+	selectIsMetadataVisible
 } from '../../../../modules/viewer';
 import { TreeActions } from '../../../../modules/tree';
+import { selectIsMeasureActive } from '../../../../modules/measure';
 
 const mapStateToProps = createStructuredSelector({
 	navigationMode: selectNavigationMode,
@@ -41,7 +41,7 @@ const mapStateToProps = createStructuredSelector({
 	isClipEdit: selectIsClipEdit,
 	clipNumber: selectClipNumber,
 	isMetadataVisible: selectIsMetadataVisible,
-	measureState: selectMeasureState
+	isMeasureActive: selectIsMeasureActive
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

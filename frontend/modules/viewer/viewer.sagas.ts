@@ -27,11 +27,11 @@ import {
 	selectIsClipEdit,
 	selectClipNumber,
 	selectIsMetadataVisible,
-	selectMeasureState,
 	selectClippingMode
 } from './viewer.selectors';
 import { Viewer, INITIAL_HELICOPTER_SPEED } from '../../services/viewer/viewer';
 import { VIEWER_CLIP_MODES } from '../../constants/viewer';
+import { selectIsMeasureActive, MeasureActions } from '../measure';
 
 export const getViewer = () => {
 	const ViewerService = getAngularService('ViewerService') as any;
@@ -272,8 +272,8 @@ export function* setMetadataVisibility({ visible }) {
 		const PanelService = getAngularService('PanelService') as any;
 
 		if (visible) {
-			const measureState = yield select(selectMeasureState);
-			if (measureState.active) {
+			const isMeasureActive = yield select(selectIsMeasureActive);
+			if (isMeasureActive) {
 				yield put(ViewerActions.setMeasureVisibility(false));
 			}
 			PanelService.showPanelsByType('docs');
@@ -289,29 +289,14 @@ export function* setMetadataVisibility({ visible }) {
 
 export function* setMeasureVisibility({ visible }) {
 	try {
-		if (visible) {
-			const metadataActive = yield select(selectIsMetadataVisible);
-			if (metadataActive) {
-				yield put(ViewerActions.setMetadataVisibility(false));
-			}
-
-			yield Viewer.activateMeasure();
-		} else {
-			yield Viewer.disableMeasure();
+		const metadataActive = yield select(selectIsMetadataVisible);
+		if (visible && metadataActive) {
+			yield put(ViewerActions.setMetadataVisibility(false));
 		}
 
-		yield put(ViewerActions.setMeasureState({ active: visible }));
+		yield put(MeasureActions.setMeasureActive(visible));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'measure visibility'));
-	}
-}
-
-export function* deactivateMeasure() {
-	try {
-		yield Viewer.disableMeasure();
-		yield put(ViewerActions.setMeasureState({active: false}));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('deactivate', 'measure'));
 	}
 }
 
@@ -333,7 +318,6 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.SET_CLIPPING_MODE, setClippingMode);
 	yield takeLatest(ViewerTypes.SET_METADATA_VISIBILITY, setMetadataVisibility);
 	yield takeLatest(ViewerTypes.SET_MEASURE_VISIBILITY, setMeasureVisibility);
-	yield takeLatest(ViewerTypes.DEACTIVATE_MEASURE, deactivateMeasure);
 	yield takeLatest(ViewerTypes.UPDATE_CLIP_STATE, updateClipState);
 	yield takeLatest(ViewerTypes.SET_CLIP_EDIT, setClipEdit);
 	yield takeLatest(ViewerTypes.START_LISTEN_ON_NUM_CLIP, startListenOnNumClip);

@@ -22,7 +22,6 @@ import './issues/js/issue.component';
 import './issues/js/issues.component';
 import './issues/js/issues-list.component';
 import './issues/js/issues.service';
-import './measure/js/measure.service';
 import './model/js/model.component';
 import './chat/js/chat.service';
 import './panel/js/panel-card.component';

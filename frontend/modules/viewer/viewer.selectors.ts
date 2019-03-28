@@ -79,18 +79,6 @@ export const selectClipNumber = createSelector(
 	selectViewerDomain, (state) => state.clipNumber
 );
 
-export const selectMeasureState = createSelector(
-	selectViewerDomain, (state) => state.measureState
-);
-
-export const selectIsMeasureActive = createSelector(
-	selectMeasureState, (state) => state.active
-);
-
-export const selectIsMeasureDisabled = createSelector(
-	selectMeasureState, (state) => state.disabled
-);
-
 export const selectVisiblePanels = createSelector(
 	selectViewerDomain, (state) => state.visiblePanels
 );

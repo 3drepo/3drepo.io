@@ -15,21 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { connect } from '../../../../helpers/migration';
+export {
+	MeasureTypes,
+	MeasureActions
+} from './measure.redux';
 
-import { DialogActions } from '../../../../modules/dialog';
-
-import { NewCommentForm } from './newCommentForm.component';
-import { MeasureActions } from '../../../../modules/measure';
-
-const mapStateToProps = createStructuredSelector({});
-
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	showScreenshotDialog: DialogActions.showScreenshotDialog,
-	setDisabled: MeasureActions.setDisabled,
-	deactivateMeasure: MeasureActions.deactivateMeasure
-}, dispatch);
-
-export default connect(mapStateToProps, mapDispatchToProps)(NewCommentForm);
+export * from './measure.selectors';
