@@ -36,17 +36,25 @@ interface IProps {
 	teamspace: string;
 	model: string;
 	expandDetails: boolean;
+	logs: any[];
+	fetchingDetailsIsPending: boolean;
 	associatedActivities: any[];
 	myJob: any;
 	currentUser: any;
 	modelSettings: any;
+	failedToLoad: boolean;
 	saveRisk: (teamspace, modelId, risk) => void;
 	updateRisk: (teamspace, modelId, risk) => void;
-	postComment: (teamspace, modelId, riskId, comment) => void;
+	postComment: (teamspace, modelId, riskData) => void;
+	removeComment: (teamspace, modelId, riskData) => void;
+	subscribeOnRiskCommentsChanges: (teamspace, modelId, riskId) => void;
+	unsubscribeOnRiskCommentsChanges: (teamspace, modelId, riskId) => void;
 	updateNewRisk: (newRisk) => void;
 	setState: (componentState) => void;
+	fetchRisk: (teamspace, model, riskId) => void;
 	showScreenshotDialog: (options) => void;
 	showNewPin: (risk, pinData) => void;
+	setCameraOnViewpoint: (teamspace, modelId, view) => void;
 }
 
 interface IState {
@@ -80,16 +88,30 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public setLogs = () => {
-		const logs = this.props.risk.comments;
+		const logs = (this.props.risk.comments) ? this.props.risk.comments : [];
 		this.setState({ logs });
 	}
 
 	public componentDidMount() {
-		const { risk, currentUser, modelSettings, myJob } = this.props;
+		const {
+			teamspace,
+			model,
+			risk,
+			currentUser,
+			fetchRisk,
+			modelSettings,
+			myJob,
+			subscribeOnRiskCommentsChanges
+		} = this.props;
 		const permissions = modelSettings.permissions;
 
 		if (this.props.risk.comments) {
 			this.setLogs();
+		}
+
+		if (risk._id) {
+			fetchRisk(teamspace, model, risk._id);
+			subscribeOnRiskCommentsChanges(teamspace, model, risk._id);
 		}
 
 		if (risk && currentUser && permissions && myJob) {
@@ -99,17 +121,38 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public componentDidUpdate(prevProps) {
-		const logsChanged = !isEqual(this.props.risk.comments, prevProps.risk.comments);
-		if (logsChanged) {
-			this.setLogs();
-		}
+	public componentWillUnmount() {
+		const { teamspace, model, risk, unsubscribeOnRiskCommentsChanges } = this.props;
+		unsubscribeOnRiskCommentsChanges(teamspace, model, risk._id);
+	}
 
-		const { risk, currentUser, modelSettings, myJob } = this.props;
+	public componentDidUpdate(prevProps) {
+		const {
+			teamspace,
+			model,
+			fetchRisk,
+			risk,
+			currentUser,
+			modelSettings,
+			myJob,
+			subscribeOnRiskCommentsChanges
+		} = this.props;
 		const permissions = modelSettings.permissions;
 		const changes = {} as IState;
 		const permissionsChanged = !isEqual(prevProps.permissions, permissions);
 		const canUpdate = canUpdateRisk(risk, myJob, permissions, currentUser);
+		const logsChanged = !isEqual(this.props.risk.comments, prevProps.risk.comments);
+
+		if (risk._id !== prevProps.risk._id) {
+			fetchRisk(teamspace, model, risk._id);
+			if (!prevProps.risk._id) {
+				subscribeOnRiskCommentsChanges(teamspace, model, risk._id);
+			}
+		}
+
+		if (logsChanged) {
+			this.setLogs();
+		}
 
 		if (permissionsChanged && risk && currentUser && permissions && myJob && canUpdate !== this.state.canUpdateRisk) {
 			changes.canUpdateRisk = canUpdateRisk(risk, myJob, permissions, currentUser);
@@ -130,7 +173,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleRiskFormSubmit = (values) => {
-		const { teamspace, model, updateRisk, updateNewRisk, jobs } = this.props;
+		const { teamspace, model, updateRisk, updateNewRisk } = this.props;
 		const updatedRisk = mergeRiskData(this.riskData, values);
 
 		if (this.isNewRisk) {
@@ -140,19 +183,59 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleSave = (comment) => {
-		const { teamspace, model, saveRisk, postComment } = this.props;
+	public removeComment = (index, guid) => {
+		const riskData = {
+			_id: this.riskData._id,
+			rev_id: this.riskData.rev_id,
+			commentIndex: this.props.logs.length - 1 - index,
+			guid
+		};
+		this.props.removeComment(this.props.teamspace, this.props.model, riskData);
+	}
+
+	public setCameraOnViewpoint = (viewpoint) => {
+		this.props.setCameraOnViewpoint(this.props.teamspace, this.props.model, viewpoint);
+	}
+
+	public postComment = async (teamspace, model, {comment, screenshot}) => {
+		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
+
+		const pinData = await Viewer.getPinData();
+		let position;
+
+		if (pinData) {
+			position = pinData.pickedPos;
+		}
+
+		const riskCommentData = {
+			_id: this.riskData._id,
+			rev_id: this.riskData.rev_id,
+			comment,
+			position,
+			viewpoint: {
+				...viewpoint,
+				screenshot
+			}
+		};
+
+		this.props.postComment(teamspace, model, riskCommentData);
+	}
+
+	public handleSave = (formValues) => {
+		const { teamspace, model, saveRisk } = this.props;
 		if (this.isNewRisk) {
 			saveRisk(teamspace, model, this.riskData);
 		} else {
-			// postComment(teamspace, model, this.riskData._id, comment);
+			this.postComment(teamspace, model, formValues);
 		}
 	}
 
 	public setCommentData = (commentData = {}) => {
-		this.props.setState({ newComment: {
+		const newComment = {
 			...this.props.newComment, ...commentData
-		}});
+		};
+
+		this.props.setState({ newComment });
 	}
 
 	public handleNewScreenshot = async (screenshot) => {
@@ -203,19 +286,27 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		);
 	});
 
-	public renderLogs = renderWhenTrue(() => <LogList items={this.state.logs} />);
+	public renderLogs = renderWhenTrue(() => {
+		return (
+			<LogList
+				items={this.props.logs}
+				isPending={this.props.fetchingDetailsIsPending}
+				removeLog={this.removeComment}
+				teamspace={this.props.teamspace}
+				setCameraOnViewpoint={this.setCameraOnViewpoint}
+			/>);
+	});
 
 	public renderFooter = renderWhenTrue(() => (
-		<ViewerPanelFooter alignItems="center">
+		<ViewerPanelFooter alignItems="center" padding="0">
 			<NewCommentForm
 				canComment={this.state.canUpdateRisk}
 				comment={this.props.newComment.comment}
 				screenshot={this.props.newComment.screenshot}
 				viewpoint={this.props.newComment.viewpoint}
 				innerRef={this.commentRef}
-				hideComment={true}
-				hideScreenshot={!this.isNewRisk}
-				hidePin={!this.isNewRisk}
+				hideComment={!this.riskData._id}
+				hidePin={this.riskData._id}
 				onTakeScreenshot={this.handleNewScreenshot}
 				onChangePin={this.handleChangePin}
 				onSave={this.handleSave}
@@ -224,15 +315,20 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	));
 
 	public render() {
+		const { failedToLoad } = this.props;
 		const { logs } = this.state;
 
 		return (
 			<Container>
-				<ViewerPanelContent className="height-catcher">
+				<ViewerPanelContent
+					className="height-catcher"
+					padding="0"
+					details="1"
+				>
 					{this.renderPreview(this.props.risk)}
 					{this.renderLogs(logs.length)}
 				</ViewerPanelContent>
-				{this.renderFooter(!this.riskData._id)}
+				{this.renderFooter(!failedToLoad)}
 			</Container>
 		);
 	}

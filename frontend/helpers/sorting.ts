@@ -23,3 +23,11 @@ export const sortByField = (data = [], options: {order: any, config: any}) => {
 		options.order
 	);
 };
+
+export const sortByDate = (data = [], options: {order: any}) => {
+	return orderBy(
+		data,
+		(item) => new Date(item.created),
+		options.order
+	);
+};

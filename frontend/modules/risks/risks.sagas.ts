@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,7 @@ import { all, put, select, takeLatest } from 'redux-saga/effects';
 import * as API from '../../services/api';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
 import { getRiskPinColor, prepareRisk } from '../../helpers/risks';
+import { prepareComments, prepareComment } from '../../helpers/comments';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
@@ -54,11 +55,26 @@ export function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(false));
 }
 
+export function* fetchRisk({teamspace, modelId, riskId}) {
+	yield put(RisksActions.toggleDetailsPendingState(true));
+
+	try {
+		const {data} = yield API.getRisk(teamspace, modelId, riskId);
+		data.comments = yield prepareComments(data.comments);
+		yield put(RisksActions.fetchRiskSuccess(data));
+	} catch (error) {
+		yield put(RisksActions.fetchRiskFailure());
+		yield put(DialogActions.showErrorDialog('get', 'risk', error));
+	}
+	yield put(RisksActions.toggleDetailsPendingState(false));
+}
+
 const createGroupData = (name, nodes) => {
 	const groupData = {
 		name,
 		color: [255, 0, 0],
-		objects: nodes
+		objects: nodes,
+		isRiskGroup: true
 	};
 
 	return nodes.length === 0 ? null : groupData;
@@ -80,7 +96,7 @@ const toggleRiskPin = (risk, selected = true) => {
 	if (risk && risk.position && risk.position.length > 0 && risk._id) {
 		Viewer.changePinColor({
 			id: risk._id,
-			colours: getRiskPinColor(risk.level_of_risk, selected)
+			colours: getRiskPinColor(risk.overall_level_of_risk, selected)
 		});
 	}
 };
@@ -168,6 +184,9 @@ export function* updateRisk({ teamspace, modelId, riskData }) {
 		toggleRiskPin(riskData, true);
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(updatedRisk, jobs);
+		const preparedComments = yield prepareComments(preparedRisk.comments);
+
+		yield put(RisksActions.updateLogs(preparedComments));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
@@ -187,6 +206,37 @@ export function* updateNewRisk({ newRisk }) {
 		yield put(RisksActions.setComponentState({ newRisk: preparedRisk }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'new risk', error));
+	}
+}
+
+export function* postComment({ teamspace, modelId, riskData }) {
+	try {
+		const { data: comment } = yield API.updateRisk(teamspace, modelId, riskData);
+		const preparedComment = yield prepareComment(comment);
+
+		yield put(RisksActions.createCommentSuccess(preparedComment));
+		yield put(SnackbarActions.show('Risk comment added'));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('post', 'risk comment', error));
+	}
+}
+
+export function* removeComment({ teamspace, modelId, riskData }) {
+	try {
+		const { commentIndex, _id, rev_id, guid } = riskData;
+		const commentData = {
+			comment: '',
+			delete: true,
+			commentIndex,
+			_id,
+			rev_id
+		};
+
+		yield API.updateRisk(teamspace, modelId, commentData);
+		yield put(RisksActions.deleteCommentSuccess(guid));
+		yield put(SnackbarActions.show('Comment removed'));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('remove', 'comment', error));
 	}
 }
 
@@ -210,7 +260,7 @@ export function* renderPins({ filteredRisks }) {
 				const pinPosition = risk.position && risk.position.length;
 
 				if (pinPosition) {
-					const levelOfRisk = (risk.level_of_risk !== undefined) ? risk.level_of_risk : 4;
+					const levelOfRisk = (risk.overall_level_of_risk !== undefined) ? risk.overall_level_of_risk : 4;
 					const isSelectedPin = activeRiskId && risk._id === activeRiskId;
 					const pinColor = getRiskPinColor(levelOfRisk, isSelectedPin);
 					Viewer.addPin({
@@ -444,7 +494,7 @@ export function* showNewPin({ risk, pinData }) {
 			...pinData,
 			account: risk.account,
 			model: risk.model,
-			colours: getRiskPinColor(risk.level_of_risk, true),
+			colours: getRiskPinColor(risk.overall_level_of_risk, true),
 			type: 'risk'
 		};
 
@@ -491,6 +541,38 @@ export function* unsubscribeOnRiskChanges({ teamspace, modelId }) {
 	risksNotifications.unsubscribeFromCreated(onCreateEvent);
 }
 
+const getCommentsChannel = (teamspace, modelId, riskId) => {
+	const risksNotifications = getRisksChannel(teamspace, modelId);
+	return risksNotifications.getCommentsChatEvents(riskId);
+};
+
+const onUpdateCommentEvent = (updatedComment) => {
+	dispatch(RisksActions.updateCommentSuccess(updatedComment));
+};
+
+const onCreateCommentEvent = (createdComment) => {
+	const preparedComment = prepareComment(createdComment);
+	dispatch(RisksActions.createCommentSuccess(preparedComment));
+};
+
+const onDeleteCommentEvent = (deletedComment) => {
+	dispatch(RisksActions.deleteCommentSuccess(deletedComment.guid));
+};
+
+export function* subscribeOnRiskCommentsChanges({ teamspace, modelId, riskId }) {
+	const commentsNotifications = getCommentsChannel(teamspace, modelId, riskId);
+	commentsNotifications.subscribeToCreated(onCreateCommentEvent, this);
+	commentsNotifications.subscribeToUpdated(onUpdateCommentEvent, this);
+	commentsNotifications.subscribeToDeleted(onDeleteCommentEvent, this);
+}
+
+export function* unsubscribeOnRiskCommentsChanges({ teamspace, modelId, riskId }) {
+	const commentsNotifications = getCommentsChannel(teamspace, modelId, riskId);
+	commentsNotifications.unsubscribeFromCreated(onCreateCommentEvent, this);
+	commentsNotifications.unsubscribeFromUpdated(onUpdateCommentEvent, this);
+	commentsNotifications.unsubscribeFromDeleted(onDeleteCommentEvent, this);
+}
+
 export function* setNewRisk() {
 	const risks = yield select(selectRisks);
 	const jobs = yield select(selectJobsList);
@@ -502,10 +584,19 @@ export function* setNewRisk() {
 			name: `Untitled risk ${riskNumber}`,
 			associated_activity: '',
 			assigned_roles: [],
+			category: '',
+			comments: [],
+			safetibase_id: '',
 			likelihood: 0,
 			consequence: 0,
 			level_of_risk: 0,
+			overall_level_of_risk: 0,
+			residual_likelihood: -1,
+			residual_consequence: -1,
+			residual_level_of_risk: -1,
 			mitigation_status: '',
+			mitigation_desc: '',
+			residual_risk: '',
 			viewpoint: {},
 			owner: currentUser.username
 		}, jobs);
@@ -533,8 +624,11 @@ export function* onFiltersChange({ selectedFilters }) {
 
 export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_RISKS, fetchRisks);
+	yield takeLatest(RisksTypes.FETCH_RISK, fetchRisk);
 	yield takeLatest(RisksTypes.SAVE_RISK, saveRisk);
 	yield takeLatest(RisksTypes.UPDATE_RISK, updateRisk);
+	yield takeLatest(RisksTypes.POST_COMMENT, postComment);
+	yield takeLatest(RisksTypes.REMOVE_COMMENT, removeComment);
 	yield takeLatest(RisksTypes.RENDER_PINS, renderPins);
 	yield takeLatest(RisksTypes.DOWNLOAD_RISKS, downloadRisks);
 	yield takeLatest(RisksTypes.PRINT_RISKS, printRisks);
@@ -547,6 +641,8 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_CHANGES, unsubscribeOnRiskChanges);
 	yield takeLatest(RisksTypes.FOCUS_ON_RISK, focusOnRisk);
 	yield takeLatest(RisksTypes.SET_NEW_RISK, setNewRisk);
+	yield takeLatest(RisksTypes.SUBSCRIBE_ON_RISK_COMMENTS_CHANGES, subscribeOnRiskCommentsChanges);
+	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_COMMENTS_CHANGES, unsubscribeOnRiskCommentsChanges);
 	yield takeLatest(RisksTypes.UPDATE_NEW_RISK, updateNewRisk);
 	yield takeLatest(RisksTypes.ON_FILTERS_CHANGE, onFiltersChange);
 }

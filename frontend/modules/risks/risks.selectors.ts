@@ -79,6 +79,18 @@ export const selectShowPins = createSelector(
 	selectComponentState, (state) => state.showPins
 );
 
+export const selectLogs = createSelector(
+	selectComponentState, (state) => state.logs
+);
+
+export const selectFetchingDetailsIsPending = createSelector(
+	selectComponentState, (state) => state.fetchingDetailsIsPending
+);
+
+export const selectFailedToLoad = createSelector(
+	selectComponentState, (state) => state.failedToLoad
+);
+
 export const selectAssociatedActivities = createSelector(
 	selectComponentState, (state) => state.associatedActivities
 );

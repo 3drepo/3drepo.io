@@ -73,6 +73,7 @@ interface IProps {
 	jobs: any[];
 	revision?: string;
 	isPending?: boolean;
+	fetchingDetailsIsPending?: boolean;
 	activeRiskId?: string;
 	showDetails?: boolean;
 	riskDetails?: any;
@@ -137,7 +138,11 @@ export class Risks extends React.PureComponent<IProps, IState> {
 			[RISK_FILTER_RELATED_FIELDS.RISK_OWNER]: this.getFilterValues(this.jobsList),
 			[RISK_FILTER_RELATED_FIELDS.RISK_CONSEQUENCE]: this.getFilterValues(RISK_CONSEQUENCES),
 			[RISK_FILTER_RELATED_FIELDS.RISK_LIKELIHOOD]: this.getFilterValues(RISK_LIKELIHOODS),
-			[RISK_FILTER_RELATED_FIELDS.LEVELS_OF_RISK]: this.getFilterValues(LEVELS_OF_RISK)
+			[RISK_FILTER_RELATED_FIELDS.RESIDUAL_CONSEQUENCE]: this.getFilterValues(RISK_CONSEQUENCES),
+			[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LIKELIHOOD]: this.getFilterValues(RISK_LIKELIHOODS),
+			[RISK_FILTER_RELATED_FIELDS.LEVEL_OF_RISK]: this.getFilterValues(LEVELS_OF_RISK),
+			[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LEVEL_OF_RISK]: this.getFilterValues(LEVELS_OF_RISK),
+			[RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK]: this.getFilterValues(LEVELS_OF_RISK)
 		};
 	}
 
@@ -229,9 +234,9 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		return false;
 	}
 
-  public handleFilterChange = (selectedFilters) => {
+	public handleFilterChange = (selectedFilters) => {
 		this.props.onFiltersChange(selectedFilters);
-  }
+	}
 
 	public getFilterValues(property) {
 		return property.map(({value, name}) => {
@@ -339,7 +344,10 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent className="height-catcher">
+			<ViewerPanelContent
+				className="height-catcher"
+				padding="0"
+			>
 				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredRisks.length)}
 				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredRisks.length)}
 				{this.renderRisksList(!!this.state.filteredRisks.length)}
