@@ -38,12 +38,6 @@ interface IState {
 }
 
 export class CellSelect extends React.PureComponent<IProps, IState> {
-	public menuWrapper;
-	public menuItems;
-	public query = '';
-	public searchTimeout;
-	public selectedItem;
-
 	public static defaultProps = {
 		value: '',
 		items: [],
@@ -90,56 +84,6 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 		if (this.state.selectedValue !== selectedValue) {
 			this.setState({selectedValue});
 			this.props.onChange(event, selectedValue);
-		}
-	}
-
-	public findMenuItem = (pressedKey) => {
-		return this.menuItems.find((item) => {
-			return item.innerText.toLowerCase().startsWith(pressedKey.toLowerCase());
-		});
-	}
-
-	public focusOnItem = (selectedItem) => {
-		selectedItem.focus();
-		selectedItem.style.backgroundColor = MuiTheme.palette.action.hover;
-		selectedItem.tabindex = 0;
-
-		const scrollTop = selectedItem.offsetTop;
-		this.menuWrapper.scrollTop = scrollTop;
-		this.selectedItem = selectedItem;
-	}
-
-	public blurItem = (selectedItem) => {
-		if (selectedItem) {
-			selectedItem.style.backgroundColor = '';
-			selectedItem = null;
-		}
-	}
-
-	public handleKeyPress = (event) => {
-		clearTimeout(this.searchTimeout);
-		this.blurItem(this.selectedItem);
-
-		const { key: pressedKey } = event;
-		if (pressedKey.length === 1) {
-			this.query += pressedKey;
-
-			const currentItem = this.menuWrapper.querySelector('[tabindex="0"]');
-			const selectedItem = this.findMenuItem(this.query);
-
-			if (selectedItem) {
-				event.preventDefault();
-
-				if (currentItem) {
-					currentItem.tabindex = -1;
-				}
-
-				this.focusOnItem(selectedItem);
-			}
-
-			this.searchTimeout = setTimeout(() => {
-				this.query = '';
-			}, 220);
 		}
 	}
 
