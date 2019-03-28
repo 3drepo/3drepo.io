@@ -24,6 +24,8 @@ import { dispatch, getAngularService, getState } from '../../helpers/migration';
 import { selectSelectedNodes } from './tree.selectors';
 import { GroupsActions } from '../groups';
 import { DialogActions } from '../dialog';
+import { calculateTotalMeshes } from '../../helpers/tree';
+import { BimActions } from '../bim';
 
 export function* startListenOnSelections() {
 	try {
@@ -41,7 +43,6 @@ export function* startListenOnSelections() {
 
 		Viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => {
 			const selectedNodes = selectSelectedNodes(getState());
-
 			if (selectedNodes.length) {
 				dispatch(TreeActions.clearSelectedNodes());
 				dispatch(GroupsActions.clearSelectionHighlights());
@@ -59,6 +60,13 @@ export function* getSelectedNodes() {
 
 		if (objectsStatus && objectsStatus.highlightedNodes) {
 			yield put(TreeActions.getSelectedNodesSuccess(objectsStatus.highlightedNodes));
+			const totalMeshes = calculateTotalMeshes(objectsStatus.highlightedNodes);
+
+			if (!totalMeshes) {
+				dispatch(TreeActions.clearSelectedNodes());
+				dispatch(GroupsActions.clearSelectionHighlights());
+				dispatch(BimActions.setActiveMeta(null));
+			}
 		}
 	} catch (error) {
 		console.error(error);
