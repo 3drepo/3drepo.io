@@ -106,7 +106,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		const {projects, location} = this.props;
 		const state = {
-			projectsItems: sortByField([...getProjectsItems(projects)], { order: 'asc', config: { field: 'value' } })
+			projectsItems: getProjectsItems(projects)
 		} as any;
 
 		const queryParams = queryString.parse(location.search);
