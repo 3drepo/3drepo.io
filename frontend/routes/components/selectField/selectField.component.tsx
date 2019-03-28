@@ -17,10 +17,10 @@
 
 import * as React from 'react';
 
-import Select from '@material-ui/core/Select';
+import Select, { SelectProps } from '@material-ui/core/Select';
 import { MuiTheme } from '../../../styles/theme';
 
-export class SelectField extends React.PureComponent<any, any> {
+export class SelectField extends React.PureComponent<SelectProps, any> {
 	public menuWrapper;
 	public menuItems;
 	public query = '';
@@ -99,7 +99,7 @@ export class SelectField extends React.PureComponent<any, any> {
 	}
 
 	public render() {
-		const { MenuProps, children, onOpen, className, ...selectProps } = this.props;
+		const { MenuProps, children, onOpen, className, classes, ...selectProps } = this.props;
 
 		const customMenuProps = {
 			...MenuProps,
@@ -108,7 +108,7 @@ export class SelectField extends React.PureComponent<any, any> {
 		};
 
 		return (
-			<Select className={className} {...selectProps} MenuProps={customMenuProps}>
+			<Select classes={classes} className={className} {...selectProps} MenuProps={customMenuProps}>
 				{children}
 			</Select>
 		);
