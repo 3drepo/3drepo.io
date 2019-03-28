@@ -40,8 +40,12 @@ export function* startListenOnSelections() {
 		});
 
 		Viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => {
-			dispatch(TreeActions.clearSelectedNodes());
-			dispatch(GroupsActions.clearSelectionHighlights());
+			const selectedNodes = selectSelectedNodes(getState());
+
+			if (selectedNodes.length) {
+				dispatch(TreeActions.clearSelectedNodes());
+				dispatch(GroupsActions.clearSelectionHighlights());
+			}
 		});
 	} catch (error) {
 		console.error(error);
@@ -50,7 +54,7 @@ export function* startListenOnSelections() {
 
 export function* getSelectedNodes() {
 	try {
-		yield call(delay, 0);
+		yield call(delay, 100);
 		const objectsStatus = yield Viewer.getObjectsStatus();
 
 		if (objectsStatus && objectsStatus.highlightedNodes) {

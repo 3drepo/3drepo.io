@@ -92,7 +92,7 @@ const getMenuButton = (InitialIcon) => ({ IconProps, Icon, ...props }: { Icon?, 
 	</ButtonWrapper>
 );
 
-const CopyButton = getMenuButton(CopyIcon);
+const CopyButton = getMenuButton(CopyIcon) as any;
 const MoreButton = getMenuButton(MoreIcon);
 
 const getSuggestionValue = (suggestion) => suggestion.name;
@@ -403,7 +403,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	public renderCopyButton = renderWhenTrue(() => (
 		<CopyToClipboard text={JSON.stringify(this.props.selectedFilters)}>
 			<ButtonContainer>
-				<CopyButton IconProps={{size: 'small'}} />
+				<CopyButton IconProps={{size: 'small'}} disabled={!this.props.selectedFilters.length} />
 			</ButtonContainer>
 		</CopyToClipboard>
 	));
@@ -420,9 +420,15 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		</ButtonContainer>
 	));
 
+	public get onlyCopyButton() {
+		const onlyQueryFilters = this.props.filters.every((filter) => filter.type === DATA_TYPES.QUERY);
+		return onlyQueryFilters;
+	}
+
 	public render() {
 		const { value, suggestions, selectedFilters, filtersOpen } = this.state;
 		const { hideMenu, filters } = this.props;
+
 		return (
 			<Container filtersOpen={selectedFilters.length && filtersOpen}>
 				{this.renderSelectedFilters()}
@@ -448,8 +454,8 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 						renderSuggestionsContainer={this.renderSuggestionsContainer}
 						onSuggestionSelected={this.handleNewFilterSubmit}
 					/>
-					{this.renderCopyButton(!hideMenu && !filters.length)}
-					{this.renderFiltersMenuButton(!hideMenu && filters.length)}
+					{this.renderCopyButton((!hideMenu && !filters.length) || this.onlyCopyButton)}
+					{this.renderFiltersMenuButton(!hideMenu && filters.length && !this.onlyCopyButton)}
 				</InputContainer>
 
 			</Container>

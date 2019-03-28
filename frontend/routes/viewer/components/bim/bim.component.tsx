@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+import { isEmpty } from 'lodash';
 import { IconButton, Tabs, Tab } from '@material-ui/core';
 import InfoIcon from '@material-ui/icons/Info';
 import MoreIcon from '@material-ui/icons/MoreVert';
@@ -55,6 +56,7 @@ interface IProps {
 	clearStarredMetadata: (teamspace, model) => void;
 	addMetaRecordToStarred?: (key) => void;
 	removeMetaRecordFromStarred?: (key) => void;
+	showConfirmDialog: (config) => void;
 }
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
@@ -71,7 +73,19 @@ export class Bim extends React.PureComponent<IProps, any> {
 	get menuActionsMap() {
 		const { clearStarredMetadata, teamspace, model } = this.props;
 		return {
-			[BIM_ACTIONS_ITEMS.CLEAR_STARRED]: () => clearStarredMetadata(teamspace, model)
+			[BIM_ACTIONS_ITEMS.CLEAR_STARRED]: () => {
+				this.setState({
+					shouldCloseButtonMenu: true
+				}, () => {
+					this.props.showConfirmDialog({
+						title: 'Clear starred',
+						content: `Are you sure you want to clear your Starred items?`,
+						onConfirm: () => {
+							clearStarredMetadata(teamspace, model);
+						}
+					});
+				});
+			}
 		};
 	}
 
@@ -153,7 +167,7 @@ export class Bim extends React.PureComponent<IProps, any> {
 			renderContent={this.renderActionsMenu}
 			PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 			PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-			ButtonProps={{ disabled: false }}
+			ButtonProps={{ disabled: isEmpty(this.props.starredMetaMap) }}
 		/>
 	)
 
@@ -214,15 +228,20 @@ export class Bim extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	private renderActionsMenu = () => (
-		<MenuList>
-			{BIM_ACTIONS_MENU.map(({ name, label }) => (
-				<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
-					<StyledItemText>{label}</StyledItemText>
-				</StyledListItem>
-			))}
-		</MenuList>
-	)
+	private renderActionsMenu = (menu) =>  {
+		return(
+			<MenuList>
+				{BIM_ACTIONS_MENU.map(({ name, label }) => (
+					<StyledListItem key={name} button onClick={(e) => {
+						menu.close(e);
+						this.menuActionsMap[name]();
+					}}>
+						<StyledItemText>{label}</StyledItemText>
+					</StyledListItem>
+				))}
+			</MenuList>
+		);
+	}
 
 	private renderActions = () => {
 		return (
