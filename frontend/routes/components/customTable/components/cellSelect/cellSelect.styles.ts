@@ -16,11 +16,11 @@
  */
 
 import styled from 'styled-components';
-import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import { COLOR } from '../../../../../styles';
+import { SelectField } from '../../../selectField/selectField.component';
 
-export const StyledSelect = styled(Select).attrs({
+export const StyledSelect = styled(SelectField).attrs({
 	classes: {
 		root: 'select',
 		disabled: 'select--disabled',
