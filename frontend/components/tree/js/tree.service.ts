@@ -16,8 +16,8 @@
  */
 import { values } from 'lodash';
 import { dispatch, getState } from '../../../helpers/migration';
-import { BimActions, selectIsActive, selectActiveMeta } from '../../../modules/bim';
-import { ViewerActions, selectIsMetadataVisible } from '../../../modules/viewer';
+import { BimActions, selectActiveMeta, selectIsActive } from '../../../modules/bim';
+import { ViewerActions } from '../../../modules/viewer';
 
 export class TreeService {
 
@@ -782,7 +782,11 @@ export class TreeService {
 		}
 	}
 
-	public get lastActiveMeta() {
+	private get isMetadataActive() {
+		return selectIsActive(getState());
+	}
+
+	private get lastActiveMeta() {
 		return selectActiveMeta(getState());
 	}
 
@@ -790,13 +794,14 @@ export class TreeService {
 	 * Unselect all selected items and clear the array
 	 */
 	public clearCurrentlySelected() {
-
 		this.ViewerService.clearHighlights();
 
 		const visitedNodes = {};
 
 		const lastActiveMeta = this.lastActiveMeta;
 		const selectedNodesList = values(this.currentSelectedNodes);
+
+		dispatch(ViewerActions.setMetadataVisibility(false));
 
 		for (let index = 0; index < selectedNodesList.length; index++) {
 			const currentNode = selectedNodesList[index];
@@ -995,6 +1000,9 @@ export class TreeService {
 	 */
 	public handleMetadata(node: any) {
 		if (node && node.meta) {
+			if (this.isMetadataActive) {
+				dispatch(ViewerActions.setMetadataVisibility(true));
+			}
 			dispatch(BimActions.setActiveMeta(node.meta[0]));
 		}
 	}

@@ -19,7 +19,7 @@ panel  {
   display: block;
   position: absolute;
   pointer-events: inherit;
-  top: 30px;
+  top: 70px;
   width: 470px;
   z-index: 2;
 }
@@ -28,10 +28,6 @@ panel #items {
   position: absolute;
   width: 380px;
   pointer-events: inherit;
-}
-
-panel #items #reactComponent {
-
 }
 
 panel {
@@ -73,7 +69,7 @@ panel #docsPanel #panelCardContainer {
 
 panel #buttons {
   position: absolute;
-  top: 50px;
+  top: 10px;
   pointer-events: inherit;
 }
 panel #buttons .panelButtonGroup {
@@ -116,7 +112,6 @@ panel #buttons .panelButtonGroup label {
 }
 
 #leftPanel, #rightPanel {
-  top: 70px;
   pointer-events: none;
 }
 

@@ -30,7 +30,8 @@ import {
 } from './viewer.selectors';
 import { Viewer, INITIAL_HELICOPTER_SPEED } from '../../services/viewer/viewer';
 import { VIEWER_CLIP_MODES } from '../../constants/viewer';
-import { selectIsMeasureActive, MeasureActions } from '../measure';
+import { MeasureActions } from '../measure';
+import { BimActions } from '../bim';
 
 export const getViewer = () => {
 	const ViewerService = getAngularService('ViewerService') as any;
@@ -271,10 +272,6 @@ export function* setMetadataVisibility({ visible }) {
 		const PanelService = getAngularService('PanelService') as any;
 
 		if (visible) {
-			const isMeasureActive = yield select(selectIsMeasureActive);
-			if (isMeasureActive) {
-				yield put(ViewerActions.setMeasureVisibility(false));
-			}
 			PanelService.showPanelsByType('docs');
 		} else {
 			PanelService.hidePanelsByType('docs');
@@ -291,6 +288,7 @@ export function* setMeasureVisibility({ visible }) {
 		const metadataActive = yield select(selectIsMetadataVisible);
 		if (visible && metadataActive) {
 			yield put(ViewerActions.setMetadataVisibility(false));
+			yield put(BimActions.setIsActive(false));
 		}
 
 		yield put(MeasureActions.setMeasureActive(visible));

@@ -117,17 +117,7 @@ export class Bim extends React.PureComponent<IProps, any> {
 		<EmptyStateInfo>No data matched</EmptyStateInfo>
 	));
 
-	public componentDidMount() {
-		this.handleLoadingMetadata();
-	}
-
-	public componentDidUpdate(prevProps) {
-		if (prevProps.activeMeta !== this.props.activeMeta) {
-			this.handleLoadingMetadata();
-		}
-	}
-
-	public render() {
+	private renderPanel = renderWhenTrue(() => {
 		return (
 			<ViewerPanel
 				title="BIM"
@@ -139,6 +129,21 @@ export class Bim extends React.PureComponent<IProps, any> {
 				{this.renderList()}
 			</ViewerPanel>
 		);
+	});
+
+	public componentDidMount() {
+		this.handleLoadingMetadata();
+	}
+
+	public componentDidUpdate(prevProps) {
+		if (prevProps.activeMeta !== this.props.activeMeta) {
+			this.handleLoadingMetadata();
+		}
+	}
+
+	public render() {
+		const { isPending, activeMeta } = this.props;
+		return this.renderPanel(!isPending && activeMeta);
 	}
 
 	public getSearchButton = () => {

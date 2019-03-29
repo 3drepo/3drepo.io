@@ -210,7 +210,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				label: VIEWER_TOOLBAR_ITEMS.BIM,
 				Icon: MetadataIcon,
 				action: this.toggleMetadataPanel,
-				active: this.props.isMetadataVisible
+				active: this.props.isMetadataActive
 			}
 		];
 	}
@@ -310,9 +310,19 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	}
 
 	private toggleMetadataPanel = () => {
-		const { isMetadataVisible, isMetadataActive, setMetadataVisibility, setMetadataActive } = this.props;
+		const {
+			isMetadataActive,
+			setMetadataVisibility,
+			setMetadataActive,
+			setMeasureVisibility
+		} = this.props;
 		setMetadataActive(!isMetadataActive);
-		setMetadataVisibility(!isMetadataVisible);
+
+		if (isMetadataActive) {
+			setMetadataVisibility(false);
+		} else {
+			setMeasureVisibility(false);
+		}
 	}
 
 	private toggleMeasure = () => {
