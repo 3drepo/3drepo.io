@@ -14,9 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { values } from 'lodash';
 import { dispatch, getState } from '../../../helpers/migration';
-import { BimActions, selectIsActive } from '../../../modules/bim';
+import { BimActions, selectIsActive, selectActiveMeta } from '../../../modules/bim';
 import { ViewerActions } from '../../../modules/viewer';
 
 export class TreeService {
@@ -793,7 +792,6 @@ export class TreeService {
 		this.ViewerService.clearHighlights();
 
 		const visitedNodes = {};
-		const selectedNodesList = values(this.currentSelectedNodes);
 
 		dispatch(ViewerActions.setMetadataVisibility(false));
 		dispatch(BimActions.setActiveMeta(null));
@@ -880,6 +878,12 @@ export class TreeService {
 		}
 
 		if (removeGroup) {
+			const activeMeta = selectActiveMeta(getState());
+			const shouldClear = nodes.some(({ meta }) => meta.includes(activeMeta));
+
+			if (shouldClear) {
+				this.clearCurrentlySelected();
+			}
 			this.deselectNodes(nodes);
 		} else {
 			this.selectNodes(nodes, skipExpand);
