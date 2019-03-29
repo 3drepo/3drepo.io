@@ -28,7 +28,6 @@ import { ProjectsPermissions } from '../projectsPermissions';
 import { ModelsPermissions } from '../modelsPermissions';
 import { Container, Options, SelectContainer, SwitchButton, IconLeft, IconRight } from './projects.styles';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
-import { sortByField } from '../../helpers/sorting';
 
 export const PERMISSIONS_VIEWS = {
 	PROJECTS: 0,
