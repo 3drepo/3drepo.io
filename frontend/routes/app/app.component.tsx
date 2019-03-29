@@ -21,6 +21,7 @@ import { DialogContainer } from '../components/dialogContainer';
 import { SnackbarContainer } from '../components/snackbarContainer';
 import { clientConfigService } from '../../services/clientConfig';
 import { isStaticRoute } from '../../services/staticPages';
+import LiveChat from 'react-livechat';
 
 interface IProps {
 	location: any;
@@ -29,6 +30,7 @@ interface IProps {
 	hasActiveSession: boolean;
 	authenticate: () => void;
 	logout: () => void;
+	currentUser: any;
 }
 
 interface IState {
@@ -111,6 +113,21 @@ export class App extends React.PureComponent<IProps, IState> {
 				this.setState({ referrer: DEFAULT_REDIRECT });
 			});
 		}
+
+		if (isAuthenticated) {
+			// @ts-ignore
+			window.LC_API = window.LC_API || {};
+			// @ts-ignore
+			window.LC_API.on_after_load = () => {
+				const {firstName, lastName, email } = this.props.currentUser;
+				const name = `${firstName || ''} ${lastName || ''}`.trim();
+				// @ts-ignore
+				window.LC_API.set_visitor_name(name);
+				// @ts-ignore
+				window.LC_API.set_visitor_email(email);
+			};
+
+		}
 	}
 
 	public toggleAutoLogout = (shouldStart = true) => {
@@ -161,6 +178,7 @@ export class App extends React.PureComponent<IProps, IState> {
 			<>
 				<DialogContainer />
 				<SnackbarContainer />
+				<LiveChat license={10338577} />
 			</>
 		);
 	}

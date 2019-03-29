@@ -22,10 +22,12 @@ import { connect, addRouting } from '../../helpers/migration';
 
 import { App } from './app.component';
 import { AuthActions, selectIsAuthenticated, selectActiveSession } from '../../modules/auth';
+import { selectCurrentUser } from '../../modules/currentUser';
 
 const mapStateToProps = createStructuredSelector({
 	isAuthenticated: selectIsAuthenticated,
-	hasActiveSession: selectActiveSession
+	hasActiveSession: selectActiveSession,
+	currentUser: selectCurrentUser
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
