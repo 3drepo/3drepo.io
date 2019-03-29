@@ -75,21 +75,39 @@ const groupSchema = Schema({
 	createdAt: Date,
 	updatedAt: Date,
 	updatedBy: String,
-	objects: [{
-		_id: false,
-		account: String,
-		model: String,
-		shared_ids: [],
-		ifc_guids: [String]
-	}],
-	rules: [{
-		_id: false,
-		field: String,
-		operator: String,
-		values: [String]
-	}],
-	issue_id: Object,
-	risk_id: Object,
+	objects: {
+		type: [{
+			_id: false,
+			account: String,
+			model: String,
+			shared_ids: {
+				type: [],
+				required: false
+			},
+			ifc_guids: {
+				type: [String],
+				required: false
+			}
+		}],
+		required: false
+	},
+	rules: {
+		type: [{
+			_id: false,
+			field: String,
+			operator: String,
+			values: []
+		}],
+		required: false
+	},
+	issue_id: {
+		type: Object,
+		required: false
+	},
+	risk_id: {
+		type: Object,
+		required: false
+	},
 	color: [Number]
 });
 
@@ -468,7 +486,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 
 		if (typeCorrect) {
 			if (Object.keys(toUpdate).length !== 0) {
-				toUpdate.updateBy = user;
+				toUpdate.updatedBy = user;
 				toUpdate.updatedAt = Date.now();
 				return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
 					const updateBson = {$set: toUpdate};
@@ -577,6 +595,16 @@ function clean(groupData) {
 	if (Date.prototype.isPrototypeOf(cleaned.updatedAt)) {
 		cleaned.updatedAt = cleaned.updatedAt.getTime();
 	}
+
+	if (cleaned.rules && 0 === cleaned.rules.length) {
+		delete cleaned.rules;
+	}
+
+	if (cleaned.rules && cleaned.objects && 0 === cleaned.objects.length) {
+		delete cleaned.objects;
+	}
+
+	delete cleaned.__v;
 
 	return cleaned;
 }

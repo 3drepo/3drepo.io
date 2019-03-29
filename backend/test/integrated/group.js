@@ -37,7 +37,10 @@ describe("Groups", function () {
 
 	const goldenData = {
 		"_id":"0e2f7fa0-7ac5-11e8-9567-6b401a084a90",
+		"author": "groupUser",
 		"color":[98,126,184],
+		"createdAt": 1530184737380,
+		"name": "Group 2",
 		"objects":[
 			{
 				"account":"groupUser",
@@ -45,7 +48,9 @@ describe("Groups", function () {
 				"ifc_guids":[],
 				"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
 			}
-		]
+		],
+		"updatedAt": 1530184737380,
+		"updatedBy": "groupUser"
 	};
 
 
@@ -115,8 +120,7 @@ describe("Groups", function () {
 		it("using master head revision should succeed", function(done){
 			agent.get(`/${username}/${model}/revision/master/head/groups/${groupID}`)
 				.expect(200 , function(err, res) {
-					expect(res.body.color).to.deep.equal(goldenData.color);
-					expect(res.body.objects).to.deep.equal(goldenData.objects);
+					expect(res.body).to.deep.equal(goldenData);
 					done(err);
 				});
 		});
@@ -148,8 +152,7 @@ describe("Groups", function () {
 		it("using revision ID should succeed", function(done){
 			agent.get(`/${username}/${model}/revision/b74ba13b-71db-4fcc-9ff8-7f640aa3dec2/groups/${groupID}`)
 				.expect(200 , function(err, res) {
-					expect(res.body.color).to.deep.equal(goldenData.color);
-					expect(res.body.objects).to.deep.equal(goldenData.objects);
+					expect(res.body).to.deep.equal(goldenData);
 					done(err);
 				});
 		});
@@ -568,9 +571,8 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
 							Object.assign(goldenData, newObjects);
-							expect(res.body.color).to.deep.equal(goldenData.color);
-							expect(res.body.objects).to.deep.equal(goldenData.objects);
-							expect(res.body.updateBy).to.equal(username);
+							goldenData.updatedAt = res.body.updatedAt;
+							expect(res.body).to.deep.equal(goldenData);
 							done(err);
 						});
 				}
@@ -599,9 +601,9 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
 							Object.assign(goldenData, newRules);
-							expect(res.body.color).to.deep.equal(goldenData.color);
-							expect(res.body.objects).to.deep.equal(goldenData.objects);
-							expect(res.body.updateBy).to.equal(username);
+							delete goldenData.objects;
+							goldenData.updatedAt = res.body.updatedAt;
+							expect(res.body).to.deep.equal(goldenData);
 							done(err);
 						});
 				}
@@ -624,9 +626,8 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
 							Object.assign(goldenData, newName);
-							expect(res.body.color).to.deep.equal(goldenData.color);
-							expect(res.body.objects).to.deep.equal(goldenData.objects);
-							expect(res.body.updateBy).to.equal(username);
+							goldenData.updatedAt = res.body.updatedAt;
+							expect(res.body).to.deep.equal(goldenData);
 							done(err);
 						});
 				}
@@ -649,9 +650,8 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
 							Object.assign(goldenData, newColor);
-							expect(res.body.color).to.deep.equal(goldenData.color);
-							expect(res.body.objects).to.deep.equal(goldenData.objects);
-							expect(res.body.updateBy).to.equal(username);
+							goldenData.updatedAt = res.body.updatedAt;
+							expect(res.body).to.deep.equal(goldenData);
 							done(err);
 						});
 				}
@@ -674,9 +674,8 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
 							Object.assign(goldenData, newDesc);
-							expect(res.body.color).to.deep.equal(goldenData.color);
-							expect(res.body.objects).to.deep.equal(goldenData.objects);
-							expect(res.body.updateBy).to.equal(username);
+							goldenData.updatedAt = res.body.updatedAt;
+							expect(res.body).to.deep.equal(goldenData);
 							done(err);
 						});
 				}
