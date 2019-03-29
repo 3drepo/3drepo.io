@@ -23,7 +23,7 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	setModelType: ['modelType'],
 	setCompareDisabled: ['isCompareDisabled'],
 	setModelVisibility: ['isModelVisible'],
-	fetch: []
+	getCompareModels: ['settings', 'revision']
 }, { prefix: 'COMPARE/' });
 
 export interface ICompareState {
