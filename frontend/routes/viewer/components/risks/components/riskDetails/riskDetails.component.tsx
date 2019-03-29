@@ -45,7 +45,7 @@ interface IProps {
 	setState: (componentState) => void;
 	fetchRisk: (teamspace, model, riskId) => void;
 	showNewPin: (risk, pinData) => void;
-	saveRisk: (teamspace, modelId, risk) => void;
+	saveRisk: (teamspace, modelId, risk, revision) => void;
 	updateRisk: (teamspace, modelId, risk) => void;
 	postComment: (teamspace, modelId, riskData) => void;
 	removeComment: (teamspace, modelId, riskData) => void;
@@ -164,7 +164,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		const riskData = {
 			_id: this.riskData._id,
 			rev_id: this.riskData.rev_id,
-			commentIndex: this.props.logs.length - 1 - index,
+			commentIndex: this.riskData.comments.length - 1 - index,
 			guid
 		};
 		this.props.removeComment(this.props.teamspace, this.props.model, riskData);
