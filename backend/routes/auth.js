@@ -731,7 +731,8 @@ function forgotPassword(req, res, next) {
 				return Mailer.sendResetPasswordEmail(data.email, {
 					token : data.token,
 					email: data.email,
-					username: data.username
+					username: data.username,
+					firstName:data.firstName
 				}).catch(err => {
 					// catch email error instead of returning to client
 					req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);
