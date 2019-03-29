@@ -269,6 +269,7 @@ class ModelController implements ng.IController {
 	private resetPanelsStates() {
 		dispatch(IssuesActions.resetComponentState());
 		dispatch(RisksActions.resetComponentState());
+		dispatch(GroupsActions.resetComponentState());
 	}
 }
 

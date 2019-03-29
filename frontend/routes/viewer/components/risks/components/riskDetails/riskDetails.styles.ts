@@ -27,6 +27,10 @@ export const Container = styled.div`
 	flex-direction: column;
 	overflow: hidden;
 
+	${TextFieldStyles.StyledTextField} {
+		margin: 1px 0;
+	}
+
 	${TextFieldStyles.Container},
 	${StyledFormControl} {
 		margin: 1px 0;
@@ -48,6 +52,10 @@ export const FieldsContainer = styled.div`
 `;
 
 export const FieldsRow = styled(Grid)`
+	${TextFieldStyles.StyledTextField} {
+		margin: 1px 0;
+	}
+
 	${TextFieldStyles.Container},
 	${StyledFormControl} {
 		flex: ${(props: any) => props.flex ? props.flex : 1};

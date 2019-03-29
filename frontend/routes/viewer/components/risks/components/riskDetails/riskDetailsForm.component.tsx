@@ -184,17 +184,19 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					)} />
 				</FieldsRow>
 
-				<Field name="description" render={({ field }) => (
-					<TextField
-						{...field}
-						requiredConfirm={!this.isNewRisk}
-						validationSchema={RiskSchema}
-						fullWidth
-						multiline
-						label="Description"
-						disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
-					/>
-				)} />
+				<Container>
+					<Field name="description" render={({ field }) => (
+						<TextField
+							{...field}
+							requiredConfirm={!this.isNewRisk}
+							validationSchema={RiskSchema}
+							fullWidth
+							multiline
+							label="Description"
+							disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
+						/>
+					)} />
+				</Container>
 
 				{this.props.risk.descriptionThumbnail && (
 					<DescriptionImage>
@@ -250,17 +252,19 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					</FieldsContainer>
 				</FieldsRow>
 
-				<Field name="mitigation_desc" render={({ field, form }) => (
-					<TextField
-						{...field}
-						requiredConfirm={!this.isNewRisk}
-						validationSchema={RiskSchema}
-						fullWidth
-						multiline
-						label="Mitigation"
-						disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
-					/>
-				)} />
+				<Container>
+					<Field name="mitigation_desc" render={({ field, form }) => (
+						<TextField
+							{...field}
+							requiredConfirm={!this.isNewRisk}
+							validationSchema={RiskSchema}
+							fullWidth
+							multiline
+							label="Mitigation"
+							disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
+						/>
+					)} />
+				</Container>
 
 				<Container>
 					<StyledFormControl>
@@ -319,17 +323,19 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					</FieldsContainer>
 				</FieldsRow>
 
-				<Field name="residual_risk" render={({ field, form }) => (
-					<TextField
-						{...field}
-						requiredConfirm={!this.isNewRisk}
-						validationSchema={RiskSchema}
-						fullWidth
-						multiline
-						label="Residual Risk"
-						disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
-					/>
-				)} />
+				<Container>
+					<Field name="residual_risk" render={({ field, form }) => (
+						<TextField
+							{...field}
+							requiredConfirm={!this.isNewRisk}
+							validationSchema={RiskSchema}
+							fullWidth
+							multiline
+							label="Residual Risk"
+							disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
+						/>
+					)} />
+				</Container>
 			</Form>
 		);
 	}
