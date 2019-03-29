@@ -178,7 +178,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
 							done(err);
@@ -209,7 +209,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
 							done(err);
@@ -240,7 +240,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
 							done(err);
@@ -271,7 +271,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
 							done(err);
@@ -302,7 +302,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
 							done(err);
@@ -333,7 +333,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
 							done(err);
@@ -368,7 +368,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
 							done(err);
@@ -394,7 +394,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
 							done(err);
@@ -518,7 +518,7 @@ describe("Groups", function () {
 					});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/groups/revision/master/head/${groupId}`)
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
 							done(err);
