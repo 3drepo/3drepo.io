@@ -16,6 +16,7 @@
  */
 
 "use strict";
+const utils = require("../utils");
 const Queue = require("../services/queue");
 
 const eventTypes = Object.freeze({
@@ -74,15 +75,15 @@ function issueChanged(emitter, account, model, issueId, data) {
 
 // comments notifications
 function newComment(emitter, account, model, issueId, data) {
-	return insertEventQueue("comment" + eventTypes.CREATED, emitter, account, model, [issueId], data);
+	return insertEventQueue("comment" + eventTypes.CREATED, emitter, account, model, [utils.uuidToString(issueId)], data);
 }
 
 function commentChanged(emitter, account, model, issueId, data) {
-	return insertEventQueue("comment" + eventTypes.UPDATED, emitter, account, model, [issueId], data);
+	return insertEventQueue("comment" + eventTypes.UPDATED, emitter, account, model, [utils.uuidToString(issueId)], data);
 }
 
 function commentDeleted(emitter, account, model, issueId, data) {
-	return insertEventQueue("comment" + eventTypes.DELETED, emitter, account, model, [issueId], data);
+	return insertEventQueue("comment" + eventTypes.DELETED, emitter, account, model, [utils.uuidToString(issueId)], data);
 }
 
 function modelStatusChanged(emitter, account, model, data) {

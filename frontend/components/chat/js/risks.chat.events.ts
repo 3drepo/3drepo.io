@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,27 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { COLOR } from '../../../styles';
+import { ChatEvents } from './chat.events';
+import { ChatChannel } from './chat.channel';
 
-export const Container = styled.div`
-	background: ${COLOR.BLACK_20};
-	min-height: 55px;
-	position: relative;
+export class RisksChatEvents extends ChatEvents {
+	private comments: { [id: string]: ChatEvents};
 
-	&:before {
-		position: absolute;
-		top: 0;
-		left: 0;
-		pointer-events: none;
-		width: 100%;
-		content: '';
-		height: 10px;
-		overflow: hidden;
-		box-shadow: inset 0 4px 7px -4px ${COLOR.BLACK_30};
+	constructor(protected channel: ChatChannel) {
+		super(channel, 'risk');
+		this.comments = {};
 	}
-`;
 
-export const LoaderContainer = styled.div`
-	padding: 10px;
-`;
+	public getCommentsChatEvents(id: string): ChatEvents {
+		if (!this.comments[id]) {
+			this.comments[id] =  new ChatEvents(this.channel, 'comment', id);
+		}
+
+		return this.comments[id];
+	}
+
+}

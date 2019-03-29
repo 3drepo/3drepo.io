@@ -249,6 +249,14 @@
 		return this.permissions.find(perm => perm.user === username);
 	};
 
+	schema.statics.isProjectAdmin = async function(account, model, user) {
+		const projection = { "permissions": { "$elemMatch": { user: user } }};
+		const project = await Project.findOne({account}, {models: model}, projection);
+		const hasProjectPermissions = project && project.permissions.length > 0;
+
+		return hasProjectPermissions && project.permissions[0].permissions.includes(C.PERM_PROJECT_ADMIN);
+	};
+
 	const Project = ModelFactory.createClass(
 		"Project",
 		schema,

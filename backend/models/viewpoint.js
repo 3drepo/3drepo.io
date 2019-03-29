@@ -20,22 +20,48 @@
 const utils = require("../utils");
 const uuid = require("node-uuid");
 const responseCodes = require("../response_codes.js");
+const systemLogger = require("../logger.js").systemLogger;
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 
 const view = {};
 
-function clean(dbCol, viewToClean) {
-	const keys = ["_id"];
+view.clean = function (dbCol, viewToClean, targetType = "[object String]") {
+	const keys = ["_id", "guid", "highlighted_group_id", "hidden_group_id", "shown_group_id"];
+	let thumbnailPromise;
 
 	viewToClean.account = dbCol.account;
 	viewToClean.model = dbCol.model;
 
 	keys.forEach((key) => {
-		if (viewToClean[key]) {
-			viewToClean[key] = utils.uuidToString(viewToClean[key]);
+		if (viewToClean[key] && "[object String]" === targetType) {
+			if ("[object Object]" === Object.prototype.toString.call(viewToClean[key])) {
+				viewToClean[key] = utils.uuidToString(viewToClean[key]);
+			}
+		} else if (viewToClean[key] && "[object Object]" === targetType) {
+			if ("[object String]" === Object.prototype.toString.call(viewToClean[key])) {
+				viewToClean[key] = utils.stringToUUID(viewToClean[key]);
+			}
 		}
 	});
+
+	// FIXME - Need to unify content/buffer for buffer field name in document
+	// FIXME - Currently, Issues/Risks uses content
+	// FIXME - Currently, Viewpoints uses buffer
+	if ("[object String]" === Object.prototype.toString.call(viewToClean.screenshot) && viewToClean.screenshot.length > 0) {
+		viewToClean.screenshot = {
+			content: new Buffer.from(viewToClean.screenshot, "base64"),
+			flag: 1
+		};
+
+		thumbnailPromise = utils.resizeAndCropScreenshot(viewToClean.screenshot.content, 120, 120, true).catch((err) => {
+			systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+				account: dbCol.account,
+				model: dbCol.model,
+				err
+			});
+		});
+	}
 
 	if (viewToClean.screenshot && viewToClean.screenshot.buffer) {
 		delete viewToClean.screenshot.buffer;
@@ -43,8 +69,15 @@ function clean(dbCol, viewToClean) {
 			viewToClean.account + "/" + viewToClean.model + "/viewpoints/" + viewToClean._id + "/thumbnail.png";
 	}
 
+	if (thumbnailPromise) {
+		return thumbnailPromise.then((thumbnail) => {
+			viewToClean.screenshot.thumbnail = thumbnail;
+			return viewToClean;
+		});
+	}
+
 	return viewToClean;
-}
+};
 
 view.findByUID = function (dbCol, uid, projection, cleanResponse = false) {
 
@@ -56,7 +89,7 @@ view.findByUID = function (dbCol, uid, projection, cleanResponse = false) {
 			}
 
 			if (cleanResponse) {
-				clean(dbCol, vp);
+				this.clean(dbCol, vp);
 			}
 
 			return vp;
@@ -69,7 +102,7 @@ view.listViewpoints = function (dbCol) {
 	return db.getCollection(dbCol.account, dbCol.model + ".views").then(_dbCol => {
 		return _dbCol.find().toArray().then(results => {
 			results.forEach((result) => {
-				clean(dbCol, result);
+				this.clean(dbCol, result);
 			});
 			return results;
 		});
@@ -145,7 +178,7 @@ view.createViewpoint = function (dbCol, sessionId, data) {
 			return _dbCol.insert(newViewpoint).then(() => {
 				return this.updateAttrs(dbCol, id, data).then((result) => {
 					data._id = id;
-					ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, clean(dbCol, data));
+					ChatEvent.viewpointsCreated(sessionId, dbCol.account, dbCol.model, this.clean(dbCol, data));
 					return result;
 				}).catch((err) => {
 					// remove the recently saved new view as update attributes failed

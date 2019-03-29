@@ -60,9 +60,8 @@ export const TitleIcon = styled.div`
 
 export const ViewerPanelContent = styled.div`
 	background-color: ${COLOR.WHITE_87};
-	padding: ${(props: any) => props.isPadding ? '24px' : '0'};
+	padding: ${(props: any) => props.padding ? props.padding  : '24px' };
 	overflow: auto;
-	position: relative;
 ` as any;
 
 export const ViewerPanelFooter = styled(Grid).attrs({
@@ -71,12 +70,12 @@ export const ViewerPanelFooter = styled(Grid).attrs({
 	wrap: 'nowrap'
 })`
 	background-color: ${COLOR.WHITE};
-	padding: 0 16px;
+	padding: ${(props: any) => props.padding ? props.padding : '0 16px' };
 	border-top: 1px solid ${COLOR.BLACK_20};
 	flex: none;
 	min-height: 65px;
 	font-size: 14px;
-`;
+` as any;
 
 export const ViewerPanelButton = styled(Button)`
 	&& {

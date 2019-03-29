@@ -31,6 +31,7 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	subscribeOnViewpointChanges: ['teamspace', 'modelId'],
 	unsubscribeOnViewpointChanges: ['teamspace', 'modelId'],
 	showViewpoint: ['teamspace', 'modelId', 'view'],
+	setCameraOnViewpoint: ['teamspace', 'modelId', 'view'],
 	prepareNewViewpoint: ['teamspace', 'modelId', 'viewpointName'],
 	setNewViewpoint: ['newViewpoint'],
 	setActiveViewpoint: ['activeViewpoint'],

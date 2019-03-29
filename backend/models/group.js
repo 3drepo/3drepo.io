@@ -552,7 +552,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 				savedGroup._id = utils.uuidToString(savedGroup._id);
 				return getObjectIds(dbCol, savedGroup, branch, rid, true, false).then((objects) => {
 					savedGroup.objects = objects;
-					if (!data.isIssueGroup && sessionId) {
+					if (!data.isIssueGroup && !data.isRiskGroup && sessionId) {
 						ChatEvent.newGroups(sessionId, dbCol.account, model, savedGroup);
 					}
 					return savedGroup;

@@ -24,13 +24,13 @@ import TextField from '@material-ui/core/TextField';
 import { COLOR } from '../../../../styles';
 
 export const Container = styled.div`
-  background-color: ${COLOR.WHITE};
-  width: 100%;
-  min-height: inherit;
+	background-color: ${COLOR.WHITE};
+	width: 100%;
+	min-height: inherit;
 `;
 
 export const StyledForm = styled(Form)`
-  min-height: inherit;
+	min-height: inherit;
 `;
 
 export const Title = styled.div`
@@ -38,13 +38,17 @@ export const Title = styled.div`
 	color: ${COLOR.BLACK_20};
 `;
 
-export const TextFieldWrapper = styled.div`
-  padding-top: 15px;
-  padding-bottom: 10px;
-`;
+export const TextFieldWrapper = styled.div``;
 
 export const StyledTextField = styled(TextField)`
-  font-size: 14px;
+	font-size: 14px;
+
+	&& {
+		textarea {
+			padding: 10px 16px;
+			box-sizing: border-box;
+		}
+	}
 `;
 
 export const StyledTextFieldContainer = styled(Grid)`
@@ -53,11 +57,12 @@ export const StyledTextFieldContainer = styled(Grid)`
 
 export const Actions = styled.div`
 	min-height: inherit;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 16px;
 `;
 
 export const ActionsGroup = styled.div`
-  display: flex;
+	display: flex;
 `;

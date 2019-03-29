@@ -23,14 +23,14 @@ import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.c
 import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
+import { ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
-import { Container, ColorPickerWrapper, Actions } from './groupDetails.styles';
-import { GroupDetailsForm } from './groupDetailsForm.component';
 import { ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
 import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
 import { CriteriaField } from '../../../../../components/criteriaField/criteriaField.component';
 import { GROUPS_TYPES, GROUP_PANEL_NAME, GROUP_TYPES_ICONS } from '../../../../../../constants/groups';
+import { Container, Content, ColorPickerWrapper, Actions } from './groupDetails.styles';
+import { GroupDetailsForm } from './groupDetailsForm.component';
 
 interface IProps {
 	activeGroup: any;
@@ -220,9 +220,12 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	public render() {
 		return (
 			<Container>
-				<ViewerPanelContent className="height-catcher">
+				<Content
+					className="height-catcher"
+					padding="0"
+				>
 					{this.renderPreview(this.groupData)}
-				</ViewerPanelContent>
+				</Content>
 				{this.renderFooter()}
 			</Container>
 		);

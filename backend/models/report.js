@@ -46,8 +46,12 @@ attributes[ReportType.RISKS] = [
 	{ label: "Risk Likelihood", field: "likelihood", mapping: riskLevelMapping},
 	{ label: "Risk Consequence", field: "consequence", mapping: riskLevelMapping},
 	{ label: "Level of Risk", field: "level_of_risk", mapping: riskLevelMapping},
+	{ label: "Mitigated Likelihood", field: "residual_likelihood", mapping: riskLevelMapping},
+	{ label: "Mitigated Consequence", field: "residual_consequence", mapping: riskLevelMapping},
+	{ label: "Level of Mitigated Risk", field: "residual_level_of_risk", mapping: riskLevelMapping},
 	{ label: "Mitigation Status", field: "mitigation_status", default: "Unmitigated"},
-	{ label: "Mitigation", field: "mitigation_desc", default: "None"}
+	{ label: "Mitigation", field: "mitigation_desc", default: "None"},
+	{ label: "Residual Risk", field: "residual_risk", default: "None"}
 ];
 
 const urlQS = {};
@@ -166,10 +170,19 @@ class ReportGenerator {
 				entry.comments.forEach((comment) => {
 					comment.owner || usersToQuery.add(comment.owner);
 					comment.created = formatDate(comment.created);
-					if(comment.action && comment.action.property === "due_date") {
-						comment.action.to = formatDate(parseInt(comment.action.to), false);
-						comment.action.from = comment.action.from ? formatDate(parseInt(comment.action.from), false) : undefined;
+					if(comment.action) {
+						if(comment.action.property === "due_date") {
+							comment.action.to = formatDate(parseInt(comment.action.to), false);
+							comment.action.from = comment.action.from ? formatDate(parseInt(comment.action.from), false) : undefined;
+						}
+						if(!comment.action.propertyText) {
+							comment.action.propertyText = this.getPropertyLabel(comment.action.property);
+						}
+						if(!comment.action.to || comment.action.to === "") {
+							comment.action.to = "(empty)";
+						}
 					}
+
 					newEntry.comments.push(comment);
 				});
 			}
@@ -193,6 +206,11 @@ class ReportGenerator {
 				);
 			}
 		});
+	}
+
+	getPropertyLabel(property) {
+		const found = attributes[this.type].find((entry) => property === entry.field);
+		return found ? found.label : property;
 	}
 
 	generateReport(res) {
