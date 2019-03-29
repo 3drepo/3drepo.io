@@ -656,7 +656,7 @@ Please click on the button below to reset your password.</span>
                                 
                                 <!-- buttonImage -->
                                     <a href="${data.url}" title="" class="" target="_blank">
-                                        <img align="center" alt="" src="https://www.dropbox.com/s/0qpa7btl7gpuua5/Reset%20Your%20Password.png?raw=1" width="564" style="max-width:1200px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
+                                        <img align="center" alt="" src="https://www.dropbox.com/s/0qpa7btl7gpuua5/Reset%20Your%20Password.png?raw=1" width="400" style="max-width:400px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
                                     </a>
                                 
                             </td>
@@ -700,7 +700,7 @@ Please click on the button below to reset your password.</span>
                         
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
                         
-                            <span style="font-size:15px">If you did not request a password reset, please ignore this email and let us know by emailing <a href="mailto:support@3drepo.org?subject=Support%20Query" target="_blank"><span
+                            <span style="font-size:15px">If you did not request a password reset, please ignore this email and contact us at <a href="mailto:support@3drepo.org?subject=Support%20Query" target="_blank"><span
                                     style="color:#3452ff">support@3drepo.org</span></a>.<br>
 This password reset is only valid for 24 hours.</span>
                         </td>
