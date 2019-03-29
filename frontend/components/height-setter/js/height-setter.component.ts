@@ -56,6 +56,10 @@ class HeightSetterController implements ng.IController, IBindings {
 		this.initialTimeout = this.$timeout(() => {
 			this.reactElement = this.$element.children().children();
 			this.container = this.reactElement.children();
+			if (!this.container.length) {
+				return;
+			}
+
 			this.headerHeight = this.container.children()[0].clientHeight;
 			this.content = angular.element(this.container.children()[1]) as any;
 
@@ -74,6 +78,9 @@ class HeightSetterController implements ng.IController, IBindings {
 	}
 
 	get contentHeight() {
+		if (!this.content) {
+			return 0;
+		}
 		const contentContainer = this.content[0].querySelector('.height-catcher');
 		const prevContentHeight = contentContainer.previousSibling && contentContainer.previousSibling.offsetHeight;
 		const footerHeight = contentContainer.nextSibling && contentContainer.nextSibling.offsetHeight;
@@ -95,7 +102,7 @@ class HeightSetterController implements ng.IController, IBindings {
 				height: requestedHeight
 			});
 		});
-	}, 100);
+	}, 100, { leading: true });
 
 	public handleElementChange = (mutationsList) => {
 		const shouldUpdateHeight = mutationsList

@@ -16,7 +16,7 @@
  */
 import { values } from 'lodash';
 import { dispatch, getState } from '../../../helpers/migration';
-import { BimActions, selectActiveMeta, selectIsActive } from '../../../modules/bim';
+import { BimActions, selectIsActive } from '../../../modules/bim';
 import { ViewerActions } from '../../../modules/viewer';
 
 export class TreeService {
@@ -786,10 +786,6 @@ export class TreeService {
 		return selectIsActive(getState());
 	}
 
-	private get lastActiveMeta() {
-		return selectActiveMeta(getState());
-	}
-
 	/**
 	 * Unselect all selected items and clear the array
 	 */
@@ -797,22 +793,14 @@ export class TreeService {
 		this.ViewerService.clearHighlights();
 
 		const visitedNodes = {};
-
-		const lastActiveMeta = this.lastActiveMeta;
 		const selectedNodesList = values(this.currentSelectedNodes);
 
 		dispatch(ViewerActions.setMetadataVisibility(false));
+		dispatch(BimActions.setActiveMeta(null));
 
-		for (let index = 0; index < selectedNodesList.length; index++) {
-			const currentNode = selectedNodesList[index];
-			const id = currentNode._id;
-
-			if (visitedNodes[id]) { continue; }
-
-			if (currentNode.meta.includes(lastActiveMeta)) {
-				dispatch(BimActions.setActiveMeta(null));
-			}
-
+		for (const id in this.currentSelectedNodes) {
+			if (!id || visitedNodes[id]) { continue; }
+			const currentNode = this.currentSelectedNodes[id];
 			currentNode.selected = this.SELECTION_STATES.unselected;
 
 			// Skip over any parent that has been visited
@@ -1002,8 +990,8 @@ export class TreeService {
 		if (node && node.meta) {
 			if (this.isMetadataActive) {
 				dispatch(ViewerActions.setMetadataVisibility(true));
+				dispatch(BimActions.setActiveMeta(node.meta[0]));
 			}
-			dispatch(BimActions.setActiveMeta(node.meta[0]));
 		}
 	}
 
