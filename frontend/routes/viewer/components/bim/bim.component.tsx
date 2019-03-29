@@ -35,8 +35,8 @@ import {
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { Container, EmptyStateInfo } from './bim.styles';
-import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import { getFilters } from '../../../../helpers/bim';
+import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import { MetaRecord } from './components/metaRecord/metaRecord.component';
 
 interface IProps {

@@ -36,7 +36,6 @@ import RiskDetails from './components/riskDetails/riskDetails.container';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewListItem } from '../previewListItem/previewListItem.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { ListContainer, Summary } from './risks.styles';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import {
 	RISK_FILTERS,
@@ -64,6 +63,7 @@ import { Viewer } from '../../../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { EmptyStateInfo } from '../views/views.styles';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
+import { ListContainer, Summary } from './risks.styles';
 
 interface IProps {
 	history: any;
@@ -344,10 +344,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent
-				className="height-catcher"
-				padding="0"
-			>
+			<ViewerPanelContent className="height-catcher">
 				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredRisks.length)}
 				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredRisks.length)}
 				{this.renderRisksList(!!this.state.filteredRisks.length)}

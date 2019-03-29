@@ -320,11 +320,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Container>
-				<ViewerPanelContent
-					className="height-catcher"
-					padding="0"
-					details="1"
-				>
+				<ViewerPanelContent className="height-catcher">
 					{this.renderPreview(this.props.risk)}
 					{this.renderLogs(logs.length)}
 				</ViewerPanelContent>
