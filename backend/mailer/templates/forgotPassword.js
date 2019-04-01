@@ -17,22 +17,6 @@
 
 "use strict";
 
-let timeOfDay = "";
-
-const checkTimeOfDay = () => {
-	const date = new Date();
-	const currentHour = date.getHours();
-	if (currentHour < 12) {
-		timeOfDay = "Good Morning";
-	} else if (currentHour < 18) {
-		timeOfDay = "Good Afternoon";
-	} else {
-		timeOfDay = "Good Evening";
-	}
-};
-
-checkTimeOfDay();
-
 const html = data => `
 
 <!doctype html>
@@ -594,7 +578,7 @@ const html = data => `
 
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
 
-                            <span style="font-size:18px"><strong><span style="color:#808080"><span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif">${timeOfDay} ${data.firstName},</span></span></strong></span>
+                            <span style="font-size:18px"><strong><span style="color:#808080"><span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif">Hi ${data.firstName},</span></span></strong></span>
                         </td>
                     </tr>
                 </tbody></table>
