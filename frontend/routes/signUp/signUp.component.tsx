@@ -113,6 +113,8 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 		countries: []
 	};
 
+	public form: any = React.createRef();
+
 	public reCaptchaWrapperRef = React.createRef<any>();
 
 	public componentDidMount() {
@@ -122,11 +124,16 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 		this.setState({ countries });
 	}
 
+	public componentDidUpdate(prevProps: IProps) {
+		if (prevProps.isPending !== this.props.isPending && !this.props.isPending) {
+			this.form.current.setFieldValue('password', '', true);
+			this.form.current.setFieldValue('passwordConfirm', '', true);
+		}
+	}
+
 	public handleSubmit = (values, form) => {
 		const data = omit(values, 'username', 'emailConfirm', 'passwordConfirm', 'termsAgreed');
 		this.props.onRegister(values.username, data);
-		form.setFieldValue('password', '', true);
-		form.setFieldValue('passwordConfirm', '', true);
 		this.setState({
 			passwordStrengthMessage: ''
 		});
@@ -154,6 +161,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 		))
 
 	public render() {
+		const {isPending} = this.props;
 		return (
 			<Container
 				container
@@ -162,14 +170,15 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 				wrap="nowrap">
 				<Link to="/login"><Logo /></Link>
 				<StyledGrid item xs={9} sm={6} md={6} lg={6} xl={2}>
-					<Panel title="Sign up">
+					<Panel title="Sign up" hiddenScrollbars={true}>
 						<Headline>Creating a 3D Repo account is free</Headline>
 						<Formik
 							initialValues={RegistrationInitialValues}
 							onSubmit={this.handleSubmit}
 							validationSchema={RegistrationSchema}
+							ref={this.form}
 						>
-							<Form>
+							<Form >
 								<Field name="username" render={({ field, form }) => (
 									<StyledTextField
 										{...DEFAULT_INPUT_PROPS}
@@ -177,6 +186,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										error={Boolean(form.touched.username && form.errors.username)}
 										helperText={form.touched.username && (form.errors.username || '')}
 										label="Username"
+										disabled={isPending}
 										fullWidth={true}
 									/>
 								)} />
@@ -189,6 +199,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											helperText={form.touched.password && (form.errors.password || '')}
 											label={`Password${this.state.passwordStrengthMessage}`}
 											type="password"
+											disabled={isPending}
 											onChange={this.handlePasswordChange(field.onChange)}
 										/>
 									)} />
@@ -200,6 +211,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											helperText={form.touched.passwordConfirm && (form.errors.passwordConfirm || '')}
 											label="Password confirmation"
 											type="password"
+											disabled={isPending}
 											onChange={this.handlePasswordChange(field.onChange)}
 										/>
 									)} />
@@ -212,6 +224,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											error={Boolean(form.touched.firstName && form.errors.firstName)}
 											helperText={form.touched.firstName && (form.errors.firstName || '')}
 											label="First name"
+											disabled={isPending}
 										/>
 									)} />
 									<Field name="lastName" render={({ field, form }) => (
@@ -221,6 +234,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											error={Boolean(form.touched.lastName && form.errors.lastName)}
 											helperText={form.touched.lastName && (form.errors.lastName || '')}
 											label="Last name"
+											disabled={isPending}
 										/>
 									)} />
 								</FieldsRow>
@@ -232,6 +246,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											error={Boolean(form.touched.email && form.errors.email)}
 											helperText={form.touched.email && (form.errors.email || '')}
 											label="Email"
+											disabled={isPending}
 										/>
 									)} />
 									<Field name="emailConfirm" render={({ field, form }) => (
@@ -241,6 +256,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											error={Boolean(form.touched.emailConfirm && form.errors.emailConfirm)}
 											helperText={form.touched.emailConfirm && (form.errors.emailConfirm || '')}
 											label="Confirm email"
+											disabled={isPending}
 										/>
 									)} />
 								</FieldsRow>
@@ -250,6 +266,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											{...field}
 											label="Company"
 											margin="normal"
+											disabled={isPending}
 										/>
 									)} />
 									<StyledFormControl>
@@ -257,7 +274,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										<Field name="countryCode" render={({ field }) => (
 											<SelectField
 												{...field}
-												MenuProps={{ PaperProps: {style: PaperPropsStyle}}}
+												MenuProps={{ PaperProps: {style: PaperPropsStyle}, disabled: isPending}}
 											>
 												{this.renderCountries()}
 											</SelectField>
@@ -280,6 +297,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											value={field.value ? '1' : '0'}
 											control={<Checkbox color="secondary" checked={field.value} />}
 											label="Sign up for the latest news and tutorials!"
+											disabled={isPending}
 										/>
 									)}
 								/>
@@ -287,6 +305,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										<FormControlLabel
 											{...field}
 											value={field.value ? '1' : '0'}
+											disabled={isPending}
 											control={<Checkbox color="secondary" checked={field.value} />}
 											label="I agree to the Terms & Conditions and I have read the Privacy policy and the Cookies policy."
 										/>
@@ -295,7 +314,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 								<ButtonContainer>
 									<Field render={({ form }) => (
 										<SubmitButton
-											pending={false}
+											pending={isPending}
 											disabled={!form.isValid || form.isValidating}
 										>
 											Sign up
