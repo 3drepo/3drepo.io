@@ -55,7 +55,8 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	getFieldNames: ['teamspace', 'modelId'],
 	getFieldNamesSuccess: ['fieldNames'],
 	setCriteriaFieldState: ['criteriaFieldState'],
-	resetToSavedSelection: ['groupId']
+	resetToSavedSelection: ['groupId'],
+	resetComponentState: []
 }, { prefix: 'GROUPS/' });
 
 export interface ICriteriaFieldState {
@@ -221,6 +222,10 @@ export const showDeleteInfo = (state = INITIAL_STATE, { groupIds }) => {
 	return { ...state, groupsMap, componentState: { ...state.componentState, newGroup } };
 };
 
+const resetComponentState = (state = INITIAL_STATE) => {
+	return { ...state, componentState: INITIAL_STATE.componentState };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.FETCH_GROUPS_SUCCESS]: fetchGroupsSuccess,
 	[GroupsTypes.TOGGLE_PENDING_STATE]: togglePendingState,
@@ -234,5 +239,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.GET_FIELD_NAMES_SUCCESS]: getFieldNamesSuccess,
 	[GroupsTypes.SET_CRITERIA_FIELD_STATE]: setCriteriaFieldState,
 	[GroupsTypes.SHOW_UPDATE_INFO]: showUpdateInfo,
-	[GroupsTypes.SHOW_DELETE_INFO]: showDeleteInfo
+	[GroupsTypes.RESET_COMPONENT_STATE]: resetComponentState
 });
