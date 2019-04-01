@@ -58,7 +58,6 @@ export class Compare extends React.PureComponent<IProps, IState> {
 	));
 
 	public handleCompare = () => {
-		console.log('Compare');
 	}
 
 	public render() {

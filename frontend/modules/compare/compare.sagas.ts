@@ -40,11 +40,7 @@ const nextRevision = (revisions = [], revision) => {
 
 export function* getCompareModels({settings, revision}) {
 	try {
-		console.log('settings', settings);
-		console.log('revision', revision);
-
 		const revisions = yield select(selectRevisions);
-		console.log('revisions', revisions);
 		if (!revision.length) {
 			return null;
 		}
