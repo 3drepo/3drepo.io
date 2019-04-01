@@ -20,9 +20,11 @@ import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import CompareIcon from '@material-ui/icons/Compare';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import { Container, TabContent } from './compare.styles';
 import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { CompareDiff } from './components/compareDiff';
+import { CompareClash } from './components/compareClash';
+import { Container, TabContent } from './compare.styles';
 
 const DIFF_TAB = 'DIFF';
 const CLASH_TAB = 'CLASH';
@@ -45,20 +47,13 @@ export class Compare extends React.PureComponent<IProps, IState> {
 		activeTab: DIFF_TAB
 	};
 
-	public handleChange = (event, activeTab) => {
-		this.setState({activeTab});
-	}
-
-	public renderDiffTab = renderWhenTrue(() => (
-		<div>diff content</div>
+	private renderDiffTab = renderWhenTrue(() => (
+		<CompareDiff />
 	));
 
-	public renderClashTab = renderWhenTrue(() => (
-		<div>clash content</div>
+	private renderClashTab = renderWhenTrue(() => (
+		<CompareClash />
 	));
-
-	public handleCompare = () => {
-	}
 
 	public render() {
 		return (
@@ -71,7 +66,7 @@ export class Compare extends React.PureComponent<IProps, IState> {
 				<ViewerPanelContent className="height-catcher">
 					<Tabs
 						value={this.state.activeTab}
-						indicatorColor="primary"
+						indicatorColor="secondary"
 						textColor="primary"
 						fullWidth={true}
 						onChange={this.handleChange}
@@ -97,5 +92,12 @@ export class Compare extends React.PureComponent<IProps, IState> {
 				</ViewerPanelFooter>
 			</ViewerPanel>
 		);
+	}
+
+	private handleChange = (event, activeTab) => {
+		this.setState({activeTab});
+	}
+
+	private handleCompare = () => {
 	}
 }
