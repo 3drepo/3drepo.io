@@ -17,9 +17,14 @@ export const MODEL_ROLES_DESC = {
 
 export const MODEL_ROLES_LIST = [
 	{
-		key: MODEL_ROLES_TYPES.ADMINISTRATOR,
-		label: 'Admin',
-		tooltip: MODEL_ROLES_DESC.ADMINISTRATOR
+		key: MODEL_ROLES_TYPES.UNASSIGNED,
+		label: 'Unassigned',
+		tooltip: MODEL_ROLES_DESC.UNASSIGNED
+	},
+	{
+		key: MODEL_ROLES_TYPES.VIEWER,
+		label: 'Viewer',
+		tooltip: MODEL_ROLES_DESC.VIEWER
 	},
 	{
 		key: MODEL_ROLES_TYPES.COMMENTER,
@@ -32,13 +37,8 @@ export const MODEL_ROLES_LIST = [
 		tooltip: MODEL_ROLES_DESC.COLLABORATOR
 	},
 	{
-		key: MODEL_ROLES_TYPES.VIEWER,
-		label: 'Viewer',
-		tooltip: MODEL_ROLES_DESC.VIEWER
-	},
-	{
-		key: MODEL_ROLES_TYPES.UNASSIGNED,
-		label: 'Unassigned',
-		tooltip: MODEL_ROLES_DESC.UNASSIGNED
+		key: MODEL_ROLES_TYPES.ADMINISTRATOR,
+		label: 'Admin',
+		tooltip: MODEL_ROLES_DESC.ADMINISTRATOR
 	}
 ];
