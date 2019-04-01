@@ -129,6 +129,7 @@ class ModelController implements ng.IController {
 			window.removeEventListener('popstate', popStateHandler);
 			this.ViewerService.off(VIEWER_EVENTS.CLICK_PIN);
 			dispatch(TreeActions.stopListenOnSelections());
+			dispatch(GroupsActions.resetComponentState());
 		});
 
 		this.$timeout(() => {
