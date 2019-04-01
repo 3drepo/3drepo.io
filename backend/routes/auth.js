@@ -683,14 +683,13 @@ function signUp(req, res, next) {
 				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
 				return Promise.resolve(err);
 			});
-
 			// send verification email
 			return Mailer.sendVerifyUserEmail(req.body.email, {
 				token : data.token,
 				email: req.body.email,
+				firstName: utils.ucFirst(req.body.firstName),
 				username: req.params.account,
 				pay: req.body.pay
-
 			}).catch(err => {
 				// catch email error instead of returning to client
 				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
