@@ -22,9 +22,12 @@ import { CompareClashItem } from '../compareClashItem/compareClashItem.component
 
 interface IProps {
 	className: string;
+	selectedItemsMap: any[];
+	setComponentState: (state) => void;
 }
 
 const modelsMock = [{
+	_id: '123',
 	name: 'Model name',
 	revisions: [{
 		name: 'Rev EEE'
@@ -32,6 +35,7 @@ const modelsMock = [{
 		name: 'Rev FFF'
 	}]
 }, {
+	_id: '3456',
 	name: 'Model name 2 with a veerrrrrry long name',
 	revisions: [{
 		name: 'Rev AAA'
@@ -47,11 +51,39 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 		);
 	}
 
+	private handleComparingTypeChange = (modelProps) => () => {
+	}
+
+	private handleRevisionChange = (modelProps) => () => {
+	}
+
+	private handleItemSelect = (modelProps) => (event, selected) => {
+		const { selectedItemsMap, setComponentState } = this.props;
+		setComponentState({
+			clashSelected: {
+				...selectedItemsMap,
+				[modelProps._id]: selected
+			}
+		});
+	}
+
 	private renderList = () => {
 		return modelsMock.map(this.renderListItem);
 	}
 
-	private renderListItem = (modelProps, index) => {
-		return <CompareClashItem key={index} {...modelProps} />;
+	private renderListItem = (modelProps) => {
+		const { selectedItemsMap } = this.props;
+		const isSelected = selectedItemsMap[modelProps._id];
+		return (
+			<CompareClashItem
+				key={modelProps._id}
+				name={modelProps.name}
+				revisions={modelProps.revisions}
+				selected={isSelected}
+				onSelectionChange={this.handleItemSelect(modelProps)}
+				onRevisionChange={this.handleRevisionChange(modelProps)}
+				onComparingTypeChange={this.handleComparingTypeChange(modelProps)}
+			/>
+		);
 	}
 }

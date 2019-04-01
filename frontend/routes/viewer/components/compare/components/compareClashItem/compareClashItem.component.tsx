@@ -21,6 +21,7 @@ import { Checkbox, MenuItem } from '@material-ui/core';
 
 import { TARGET_MODEL_TYPE, BASE_MODEL_TYPE } from '../../../../../../constants/compare';
 import { Container, ClashTypeSwitch, ClashSettings, SelectField, Name, Model } from './compareClashItem.styles';
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
 
 enum ComparingType {
 	TARGET_MODEL_TYPE,
@@ -33,8 +34,7 @@ interface IProps {
 	revisions: any[];
 	comparingType: string;
 	selected?: boolean;
-	onSelect: () => void;
-	onDeselect: () => void;
+	onSelectionChange: (event) => void;
 	onRevisionChange: () => void;
 	onComparingTypeChange: () => void;
 }
@@ -44,6 +44,15 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 		selected: false,
 		comparingType: BASE_MODEL_TYPE
 	};
+
+	private renderTypeSwitch = renderWhenTrue(() => {
+		const { comparingType } = this.props;
+		return (
+			<ClashTypeSwitch value={comparingType}>
+				{capitalize(comparingType)}
+			</ClashTypeSwitch>
+		);
+	});
 
 	public render() {
 		const { selected } = this.props;
@@ -56,23 +65,23 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 	}
 
 	private renderCheckbox = () => {
-		const { onSelect, onDeselect } = this.props;
+		const { onSelectionChange } = this.props;
 		return (
 			<Checkbox
 				color="primary"
-				onSelect={onSelect}
+				onChange={onSelectionChange}
 			/>
 		);
 	}
 
 	private renderData = () => {
-		const { name } = this.props;
+		const { name, selected } = this.props;
 		return (
 			<Model>
 				<Name>{name}</Name>
 				<ClashSettings>
 					{this.renderRevisions()}
-					{this.renderTypeSwitch()}
+					{this.renderTypeSwitch(selected)}
 				</ClashSettings>
 			</Model>
 		);
@@ -90,15 +99,6 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 					<MenuItem key={index} value={name}>{name}</MenuItem>
 				))}
 			</SelectField>
-		);
-	}
-
-	private renderTypeSwitch = () => {
-		const { comparingType } = this.props;
-		return (
-			<ClashTypeSwitch value={comparingType}>
-				{capitalize(comparingType)}
-			</ClashTypeSwitch>
 		);
 	}
 }

@@ -33,11 +33,7 @@ interface IProps {
 	setComponentState: (state) => void;
 }
 
-interface IState {
-	activeTab: string;
-}
-
-export class Compare extends React.PureComponent<IProps, IState> {
+export class Compare extends React.PureComponent<IProps, any> {
 	get isDiffTabActive() {
 		return this.props.activeTab === DIFF_COMPARE_TYPE;
 	}

@@ -20,9 +20,14 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../../../helpers/migration';
 
 import { CompareClash } from './compareClash.component';
+import { CompareActions, selectClashSelected } from '../../../../../../modules/compare';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	selectedItemsMap: selectClashSelected
+});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	setComponentState: CompareActions.setComponentState
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(CompareClash);
