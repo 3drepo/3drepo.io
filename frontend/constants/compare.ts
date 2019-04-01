@@ -24,3 +24,61 @@ export const COMPARE_TABS = {
 	DIFF: '3d diff',
 	CLASH: 'Instant clash'
 };
+
+export const modelsMock = [
+	{
+		_id: 1,
+		name: 'Lego_House_Structure',
+		revisions: [{
+			_id: 101,
+			name: 'r2',
+			timestamp: '2018-01-16T15:58:10.000Z'
+		}]
+	},
+	{
+		_id: 2,
+		name: 'Lego_House_Landscape',
+		revisions: [{
+			_id: 102,
+			timestamp: '2018-01-16T15:19:52.000Z'
+		}]
+	},
+	{
+		_id: 3,
+		name: 'Lego_House_Architecture',
+		revisions: [{
+			_id: 103,
+			name: 'r3',
+			timestamp: '2018-01-16T16:02:54.000Z'
+		}, {
+			_id: 104,
+			name: 'r2',
+			timestamp: '2018-01-16T15:26:58.000Z'
+		}, {
+			_id: 105,
+			name: 'r1',
+			timestamp: '2018-01-16T15:19:01.000Z'
+		}]
+	},
+	{
+		_id: 4,
+		name: 'Model name',
+		revisions: [{
+			_id: 106,
+			name: 'Rev EEE',
+			timestamp: '2018-01-18T15:26:58.000Z'
+		}, {
+			_id: 107,
+			name: 'Rev FFF',
+			timestamp: '2018-01-18T15:34:02.000Z'
+		}]
+	}, {
+		_id: 5,
+		name: 'Model name 2 with a veerrrrrry long name',
+		revisions: [{
+			_id: 108,
+			name: 'Rev AAA',
+			timestamp: '2018-01-24T10:00:00.000Z'
+		}]
+	}
+];

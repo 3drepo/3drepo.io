@@ -22,6 +22,7 @@ import { Checkbox, MenuItem } from '@material-ui/core';
 import { TARGET_MODEL_TYPE, BASE_MODEL_TYPE } from '../../../../../../constants/compare';
 import { Container, ClashTypeSwitch, ClashSettings, SelectField, Name, Model } from './compareClashItem.styles';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { RevisionsSelect } from '../revisionsSelect/revisionsSelect.component';
 
 enum ComparingType {
 	TARGET_MODEL_TYPE,
@@ -55,9 +56,9 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 	});
 
 	public render() {
-		const { selected } = this.props;
+		const { className, selected } = this.props;
 		return (
-			<Container className={this.props.className}	disabled={!selected}>
+			<Container className={className}	disabled={!selected}>
 				{this.renderCheckbox()}
 				{this.renderData()}
 			</Container>
@@ -90,15 +91,10 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 	private renderRevisions = () => {
 		const { revisions, selected } = this.props;
 		return (
-			<SelectField
-				value={revisions[0].name}
-				readOnly={revisions.length < 2}
-				disabled={!selected}
-			>
-				{revisions.map(({ name, index }) => (
-					<MenuItem key={index} value={name}>{name}</MenuItem>
-				))}
-			</SelectField>
+			<RevisionsSelect
+				revisions={revisions}
+				selected={selected}
+			/>
 		);
 	}
 }

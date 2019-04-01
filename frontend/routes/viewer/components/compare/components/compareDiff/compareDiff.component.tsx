@@ -16,92 +16,54 @@
  */
 
 import * as React from 'react';
-import { CompareItem } from './components/compareItem.component';
+import { CompareDiffItem } from '../compareDiffItem/compareDiffItem.component';
 import { Container } from './compareDiff.styles';
+import { modelsMock } from '../../../../../../constants/compare';
 
 interface IProps {
 	className: string;
+	selectedItemsMap: any[];
+	setComponentState: (state) => void;
 }
 
-interface IState {
-	className: string;
-}
-
-const mockedCompareModels = [
-	{
-		_id: 1,
-		name: 'Lego_House_Structure',
-		revisions: [
-			{
-			desc: 'Coordinated design',
-			tag: 'r2',
-			timestamp: '2018-01-16T15:58:10.000Z'
-			}
-		]
-	},
-	{
-		_id: 2,
-		name: 'Lego_House_Landscape',
-		revisions: [
-			{
-				desc: 'Existing tree',
-				timestamp: '2018-01-16T15:19:52.000Z'
-			}
-		]
-	},
-	{
-		_id: 3,
-		name: 'Lego_House_Architecture',
-		revisions: [
-			{
-				desc: 'For coordination',
-				tag: 'r3',
-				timestamp: '2018-01-16T16:02:54.000Z'
-			},
-			{
-				desc: 'Roof access added',
-				tag: 'r2',
-				timestamp: '2018-01-16T15:26:58.000Z'
-			},
-			{
-				desc: 'Initial design',
-				tag: 'r1',
-				timestamp: '2018-01-16T15:19:01.000Z'
-			}
-		]
-	}
-];
-
-export class CompareDiff extends React.PureComponent<IProps, IState> {
-	public handleRevisionChange = () => {
-		console.log('handle rev change');
-	}
-
-	public handleModelSelect = () => {
-		console.log('handle select');
-	}
-
-	public handleModelDeselect = () => {
-		console.log('handle deselect');
-	}
-
-	public renderCompareModels = () => mockedCompareModels.map((model) => (
-		<CompareItem
-			key={model._id}
-			selected={true}
-			onRevisionChange={this.handleRevisionChange}
-			name={model.name}
-			revisions={model.revisions}
-			onSelect={this.handleModelSelect}
-			onDeselect={this.handleModelDeselect}
-		/>
-	))
-
+export class CompareDiff extends React.PureComponent<IProps, any> {
 	public render() {
 		return (
 			<Container className={this.props.className}>
-				{this.renderCompareModels()}
+				{this.renderList()}
 			</Container>
 		);
+	}
+
+	private handleRevisionChange = (modelProps) => () => {
+	}
+
+	private handleItemSelect = (modelProps) => (event, selected) => {
+		const { selectedItemsMap, setComponentState } = this.props;
+		setComponentState({
+			diffSelected: {
+				...selectedItemsMap,
+				[modelProps._id]: selected
+			}
+		});
+	}
+
+	private renderListItem = (modelProps) => {
+		const { selectedItemsMap } = this.props;
+		const isSelected = selectedItemsMap[modelProps._id];
+		return (
+			<CompareDiffItem
+				key={modelProps._id}
+				name={modelProps.name}
+				revisions={modelProps.revisions}
+				selected={isSelected}
+				onSelectionChange={this.handleItemSelect(modelProps)}
+				onRevisionChange={this.handleRevisionChange(modelProps)}
+			/>
+		);
+	}
+
+	private renderList = () => {
+		return modelsMock.map(this.renderListItem);
 	}
 }

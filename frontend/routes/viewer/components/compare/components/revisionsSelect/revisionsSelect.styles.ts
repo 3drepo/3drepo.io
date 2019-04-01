@@ -16,34 +16,36 @@
  */
 
 import styled from 'styled-components';
-import { COLOR } from '../../../../../../../styles';
+import { SelectField as SelectFieldComponent } from '../../../../../components/selectField/selectField.component';
+import { MenuItem as MenuItemComponent } from '@material-ui/core';
 
-export const Container = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid ${COLOR.GRAY};
+export const Container = styled.div``;
+
+export const SelectField = styled(SelectFieldComponent)`
+  && {
+    min-width: 80px;
+  }
+
+	&&:before {
+		border-bottom: none !important;
+	}
 `;
 
-export const ModelData = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-left: 10px;
+export const MenuItem = styled(MenuItemComponent)`
+  && {
+    min-width: 200px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+  }
 `;
 
 export const Name = styled.div`
-  color: #4D4D4D;
-  font-size: 14px;
-  margin-bottom: 10px;
-`;
-
-export const CurrentRevision = styled.div`
   color: #757575;
   font-size: 14px;
 `;
 
-export const Revisions = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+export const Date = styled.div`
+  color: #B4B4B4;
+  font-size: 14px;
 `;

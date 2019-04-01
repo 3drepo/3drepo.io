@@ -19,28 +19,13 @@ import * as React from 'react';
 
 import { Container } from './compareClash.styles';
 import { CompareClashItem } from '../compareClashItem/compareClashItem.component';
+import { modelsMock } from '../../../../../../constants/compare';
 
 interface IProps {
 	className: string;
 	selectedItemsMap: any[];
 	setComponentState: (state) => void;
 }
-
-const modelsMock = [{
-	_id: '123',
-	name: 'Model name',
-	revisions: [{
-		name: 'Rev EEE'
-	}, {
-		name: 'Rev FFF'
-	}]
-}, {
-	_id: '3456',
-	name: 'Model name 2 with a veerrrrrry long name',
-	revisions: [{
-		name: 'Rev AAA'
-	}]
-}];
 
 export class CompareClash extends React.PureComponent<IProps, any> {
 	public render() {
