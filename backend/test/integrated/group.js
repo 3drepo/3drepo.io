@@ -553,6 +553,123 @@ describe("Groups", function () {
 					done(err);
 				});
 		});
+
+		it("group with both rules and objects should fail", function(done) {
+			const newGroup = Object.assign({}, data);
+			newGroup.objects = [{
+				"account":"groupUser",
+				"model":"4ec71fdd-0450-4b6f-8478-c46633bb66e3",
+				"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
+			}];
+			newGroup.rules = [{
+				field: "TestField",
+				operator: "GTE",
+				values: [1]
+			}];
+
+			agent.post(`/${username}/${model}/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("non string value for a string rule should fail", function(done) {
+			const newGroup = Object.assign({}, data);
+			newGroup.rules = [{
+				field: "TestField",
+				operator: "CONTAINS",
+				values: [1]
+			}];
+
+			agent.post(`/${username}/${model}/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("no values for a rule that requires them should fail", function(done) {
+			const newGroup = Object.assign({}, data);
+			newGroup.rules = [{
+				field: "TestField",
+				operator: "REGEX",
+				values: []
+			}];
+
+			agent.post(`/${username}/${model}/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("incorrect number of values for rule should fail", function(done) {
+			const newGroup = Object.assign({}, data);
+			newGroup.rules = [{
+				field: "TestField",
+				operator: "IN_RANGE",
+				values: [2]
+			}];
+
+			agent.post(`/${username}/${model}/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("incorrect mulitples of value for rule should fail", function(done) {
+			const newGroup = Object.assign({}, data);
+			newGroup.rules = [{
+				field: "TestField",
+				operator: "NOT_IN_RANGE",
+				values: [2, 3, 4]
+			}];
+
+			agent.post(`/${username}/${model}/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("string value for number rule should fail", function(done) {
+			const newGroup = Object.assign({}, data);
+			newGroup.rules = [{
+				field: "TestField",
+				operator: "EQUALS",
+				values: ["one"]
+			}];
+
+			agent.post(`/${username}/${model}/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("rule with undefined operator should fail", function(done) {
+			const newGroup = Object.assign({}, data);
+			newGroup.rules = [{
+				field: "TestField",
+				operator: "BAD_OP",
+				values: ["abc"]
+			}];
+
+			agent.post(`/${username}/${model}/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
 	});
 
 	describe("Updating a group ", function() {
@@ -681,6 +798,30 @@ describe("Groups", function () {
 				}
 
 			], done);
+		});
+
+		it("updating with both rules and objects should fail", function(done) {
+			const badUpdate = {
+				"objects":[
+					{
+						"account":"groupUser",
+						"model":"4ec71fdd-0450-4b6f-8478-c46633bb66e3",
+						"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}
+				],
+				"rules":[{
+					field: "TestField",
+					operator: "GTE",
+					values: [1]
+				}]
+			};
+
+			agent.put(`/${username}/${model}/groups/${goldenData._id}`)
+				.send(badUpdate)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
 		});
 
 		it("updating invalid group ID should fail", function(done) {
