@@ -16,6 +16,23 @@
  */
 
 "use strict";
+
+let timeOfDay = "";
+
+const checkTimeOfDay = () => {
+	const date = new Date();
+	const currentHour = date.getHours();
+	if (currentHour < 12) {
+		timeOfDay = "Good Morning";
+	} else if (currentHour < 18) {
+		timeOfDay = "Good Afternoon";
+	} else {
+		timeOfDay = "Good Evening";
+	}
+};
+
+checkTimeOfDay();
+
 const html = data => `
 
 <!doctype html>
@@ -33,7 +50,7 @@ const html = data => `
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>*|MC:SUBJECT|*</title>
+        <title>3D Repo Password Reset</title>
 
     <style type="text/css">
 		p{
@@ -508,9 +525,6 @@ const html = data => `
 
 }</style></head>
     <body>
-        <!--*|IF:MC_PREVIEW_TEXT|*-->
-        <!--[if !gte mso 9]><!----><span class="mcnPreviewText" style="display:none; font-size:0px; line-height:0px; max-height:0px; max-width:0px; opacity:0; overflow:hidden; visibility:hidden; mso-hide:all;">*|MC_PREVIEW_TEXT|*</span><!--<![endif]-->
-        <!--*|END:IF|*-->
         <center>
             <table align="center" border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="bodyTable">
                 <tr>
@@ -580,7 +594,7 @@ const html = data => `
 
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
 
-                            <span style="font-size:18px"><strong><span style="color:#808080"><span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif">Hello ${data.firstName},</span></span></strong></span>
+                            <span style="font-size:18px"><strong><span style="color:#808080"><span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif">${timeOfDay} ${data.firstName},</span></span></strong></span>
                         </td>
                     </tr>
                 </tbody></table>
@@ -612,8 +626,8 @@ const html = data => `
                         
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
                         
-                            <span style="font-size:15px">You recently requested to reset your password, for your 3D Repo account.<br>
-Please click on the button below to reset your password.</span>
+                            <span style="font-size:15px">We received a request to reset your password, for username <strong>${data.username}</strong>.<br>
+Use the link below to set up a new password for your account.</span>
                         </td>
                     </tr>
                 </tbody></table>
@@ -701,7 +715,7 @@ Please click on the button below to reset your password.</span>
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
                         
                             <span style="font-size:15px">If you did not request a password reset, please ignore this email and contact us at <a href="mailto:support@3drepo.org?subject=Support%20Query" target="_blank"><span
-                                    style="color:#3452ff">support@3drepo.org</span></a>.<br>
+                                    style="color:#3452ff">support@3drepo.org</span></a> so we can make sure no else is trying to access your account.<br><br>
 This password reset is only valid for 24 hours.</span>
                         </td>
                     </tr>
