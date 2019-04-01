@@ -20,17 +20,24 @@ import * as React from 'react';
 import { Container } from './compareClash.styles';
 import { CompareClashItem } from '../compareClashItem/compareClashItem.component';
 import { modelsMock } from '../../../../../../constants/compare';
+import { CompareFilters } from '../compareFilters/compareFilters.component';
 
 interface IProps {
 	className: string;
 	selectedItemsMap: any[];
+	selectedFilters: any[];
 	setComponentState: (state) => void;
 }
 
 export class CompareClash extends React.PureComponent<IProps, any> {
+  public handleFilterChange = (selectedFilters) => {
+		this.props.setComponentState({ selectedFilters });
+  }
+
 	public render() {
 		return (
 			<Container className={this.props.className}>
+				{this.renderFilterPanel()}
 				{this.renderList()}
 			</Container>
 		);
@@ -42,10 +49,28 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 	private handleRevisionChange = (modelProps) => () => {
 	}
 
+	private renderFilterPanel = () => (
+		<CompareFilters
+			onCheckboxChange={this.handleAllItemsSelect}
+			onFilterChange={this.handleFilterChange}
+			selectedFilters={this.props.selectedFilters}
+		/>
+	)
+
 	private handleItemSelect = (modelProps) => (event, selected) => {
 		const { selectedItemsMap, setComponentState } = this.props;
 		setComponentState({
 			clashSelected: {
+				...selectedItemsMap,
+				[modelProps._id]: selected
+			}
+		});
+	}
+
+	private handleAllItemsSelect = (modelProps) => (event, selected) => {
+		const { selectedItemsMap, setComponentState } = this.props;
+		setComponentState({
+			diffSelected: {
 				...selectedItemsMap,
 				[modelProps._id]: selected
 			}

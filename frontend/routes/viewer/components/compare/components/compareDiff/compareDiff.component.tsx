@@ -16,29 +16,56 @@
  */
 
 import * as React from 'react';
+import Checkbox from '@material-ui/core/Checkbox';
 import { CompareDiffItem } from '../compareDiffItem/compareDiffItem.component';
+import { CompareFilters } from '../compareFilters/compareFilters.component';
 import { Container } from './compareDiff.styles';
 import { modelsMock } from '../../../../../../constants/compare';
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
 
 interface IProps {
 	className: string;
 	selectedItemsMap: any[];
+	selectedFilters: any[];
 	setComponentState: (state) => void;
 }
 
 export class CompareDiff extends React.PureComponent<IProps, any> {
+  public handleFilterChange = (selectedFilters) => {
+		this.props.setComponentState({ selectedFilters });
+  }
+
 	public render() {
 		return (
 			<Container className={this.props.className}>
+				{this.renderFilterPanel()}
 				{this.renderList()}
 			</Container>
 		);
 	}
 
+	private renderFilterPanel = () => (
+		<CompareFilters
+			onCheckboxChange={this.handleAllItemsSelect}
+			onFilterChange={this.handleFilterChange}
+			selectedFilters={this.props.selectedFilters}
+		/>
+	)
+
 	private handleRevisionChange = (modelProps) => () => {
 	}
 
 	private handleItemSelect = (modelProps) => (event, selected) => {
+		const { selectedItemsMap, setComponentState } = this.props;
+		setComponentState({
+			diffSelected: {
+				...selectedItemsMap,
+				[modelProps._id]: selected
+			}
+		});
+	}
+
+	private handleAllItemsSelect = (modelProps) => (event, selected) => {
 		const { selectedItemsMap, setComponentState } = this.props;
 		setComponentState({
 			diffSelected: {

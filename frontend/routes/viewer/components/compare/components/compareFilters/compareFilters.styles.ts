@@ -16,7 +16,35 @@
  */
 
 import styled from 'styled-components';
+import { Checkbox as CheckboxComponent } from '@material-ui/core';
 import { FilterPanel as FilterPanelComponent } from '../../../../../components/filterPanel/filterPanel.component';
 import { COLOR } from '../../../../../../styles';
 
-export const Container = styled.div``;
+export const FilterPanel = styled(FilterPanelComponent)`
+  && {
+    flex: 1;
+    border-bottom: 1px solid ${COLOR.BLACK_20};
+
+    .react-autosuggest__container {
+      input {
+        padding: 10px 14px 10px 48px;
+      }
+    }
+  }
+`;
+
+export const FilterContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  position: relative;
+`;
+
+export const Checkbox = styled(CheckboxComponent)`
+  && {
+    position: absolute;
+    left: 0;
+    bottom: 4px;
+    z-index: 1;
+  }
+`;

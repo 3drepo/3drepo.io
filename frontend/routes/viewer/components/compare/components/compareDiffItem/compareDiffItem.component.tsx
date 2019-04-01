@@ -16,7 +16,6 @@
  */
 
 import * as React from 'react';
-import * as dayjs from 'dayjs';
 
 import { ArrowsAltH } from '../../../../../components/fontAwesomeIcon';
 import Checkbox from '@material-ui/core/Checkbox';
