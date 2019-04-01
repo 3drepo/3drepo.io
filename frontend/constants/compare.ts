@@ -19,3 +19,8 @@ export const MODEL_TYPES = {
 	[BASE_MODEL_TYPE]: BASE_MODEL_TYPE,
 	[TARGET_MODEL_TYPE]: TARGET_MODEL_TYPE
 };
+
+export const COMPARE_TABS = {
+	DIFF: '3d diff',
+	CLASH: 'Instant clash'
+};

@@ -16,26 +16,21 @@
  */
 
 import * as React from 'react';
-import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import CompareIcon from '@material-ui/icons/Compare';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
+import { Tab } from '@material-ui/core';
+
+import { DIFF_COMPARE_TYPE, COMPARE_TABS, CLASH_COMPARE_TYPE } from '../../../../constants/compare';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { CompareDiff } from './components/compareDiff';
 import { CompareClash } from './components/compareClash';
-import { Container, TabContent } from './compare.styles';
-
-const DIFF_TAB = 'DIFF';
-const CLASH_TAB = 'CLASH';
-
-const COMPARE_TABS = {
-	DIFF: '3d diff',
-	CLASH: 'Instant clash'
-};
+import { Tabs, TabContent } from './compare.styles';
 
 interface IProps {
 	className: string;
+	activeTab: string;
+	setComponentState: (state) => void;
 }
 
 interface IState {
@@ -43,9 +38,9 @@ interface IState {
 }
 
 export class Compare extends React.PureComponent<IProps, IState> {
-	public state = {
-		activeTab: DIFF_TAB
-	};
+	get isDiffTabActive() {
+		return this.props.activeTab === DIFF_COMPARE_TYPE;
+	}
 
 	private renderDiffTab = renderWhenTrue(() => (
 		<CompareDiff />
@@ -56,6 +51,7 @@ export class Compare extends React.PureComponent<IProps, IState> {
 	));
 
 	public render() {
+		const { activeTab } = this.props;
 		return (
 			<ViewerPanel
 				title="Compare"
@@ -65,18 +61,18 @@ export class Compare extends React.PureComponent<IProps, IState> {
 			>
 				<ViewerPanelContent className="height-catcher">
 					<Tabs
-						value={this.state.activeTab}
+						value={activeTab}
 						indicatorColor="secondary"
 						textColor="primary"
 						fullWidth={true}
 						onChange={this.handleChange}
 					>
-						<Tab label={COMPARE_TABS.DIFF} value={DIFF_TAB} disabled={false} />
-						<Tab label={COMPARE_TABS.CLASH} value={CLASH_TAB} disabled={false} />
+						<Tab label={COMPARE_TABS.DIFF} value={DIFF_COMPARE_TYPE} disabled={false} />
+						<Tab label={COMPARE_TABS.CLASH} value={CLASH_COMPARE_TYPE} disabled={false} />
 					</Tabs>
 					<TabContent>
-						{this.renderDiffTab(this.state.activeTab === DIFF_TAB)}
-						{this.renderClashTab(this.state.activeTab === CLASH_TAB)}
+						{this.renderDiffTab(this.isDiffTabActive)}
+						{this.renderClashTab(!this.isDiffTabActive)}
 					</TabContent>
 				</ViewerPanelContent>
 				<ViewerPanelFooter alignItems="center" justify="space-between">
@@ -95,7 +91,7 @@ export class Compare extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleChange = (event, activeTab) => {
-		this.setState({activeTab});
+		this.props.setComponentState({ activeTab });
 	}
 
 	private handleCompare = () => {

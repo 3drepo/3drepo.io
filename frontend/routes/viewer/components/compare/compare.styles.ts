@@ -16,9 +16,15 @@
  */
 
 import styled from 'styled-components';
+import { Tabs as TabsComponent } from '@material-ui/core';
+
 import { COLOR } from '../../../../styles';
 
 export const Container = styled.div``;
+
+export const Tabs = styled(TabsComponent)`
+	border-bottom: 1px solid ${COLOR.BLACK_20};
+`;
 
 export const TabContent = styled.div`
 	background-color: ${COLOR.WHITE};

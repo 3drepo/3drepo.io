@@ -79,9 +79,13 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 	}
 
 	private renderRevisions = () => {
-		const { revisions } = this.props;
+		const { revisions, selected } = this.props;
 		return (
-			<SelectField value={revisions[0].name} disabled={revisions.length < 2}>
+			<SelectField
+				value={revisions[0].name}
+				readOnly={revisions.length < 2}
+				disabled={!selected}
+			>
 				{revisions.map(({ name, index }) => (
 					<MenuItem key={index} value={name}>{name}</MenuItem>
 				))}

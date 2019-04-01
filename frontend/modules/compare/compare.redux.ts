@@ -16,6 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { ISelectedFilter } from '../../routes/components/filterPanel/filterPanel.component';
 import { COMPARE_TYPES, MODEL_TYPES, DIFF_COMPARE_TYPE, BASE_MODEL_TYPE } from '../../constants/compare';
 
 export const { Types: CompareTypes, Creators: CompareActions } = createActions({
@@ -23,8 +24,16 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	setModelType: ['modelType'],
 	setCompareDisabled: ['isCompareDisabled'],
 	setModelVisibility: ['isModelVisible'],
-	getCompareModels: ['settings', 'revision']
+	getCompareModels: ['settings', 'revision'],
+	setComponentState: ['componentState']
 }, { prefix: 'COMPARE/' });
+
+export interface ICompareComponentState {
+	activeTab: string;
+	selectedFilters: ISelectedFilter[];
+	diffSelected: {};
+	clashSelected: {};
+}
 
 export interface ICompareState {
 	baseModels: any[];
@@ -35,6 +44,7 @@ export interface ICompareState {
 	isComparePending: boolean;
 	isCompareDisabled: boolean;
 	isModelVisible: boolean;
+	componentState: ICompareComponentState;
 }
 
 export const INITIAL_STATE: ICompareState = {
@@ -45,7 +55,13 @@ export const INITIAL_STATE: ICompareState = {
 	isFederation: false,
 	isComparePending: false,
 	isCompareDisabled: false,
-	isModelVisible: false
+	isModelVisible: false,
+	componentState: {
+		activeTab: DIFF_COMPARE_TYPE,
+		selectedFilters: [],
+		diffSelected: {},
+		clashSelected: {}
+	}
 };
 
 const setCompareType = (state = INITIAL_STATE, {compareType}) => {
@@ -64,9 +80,14 @@ const setModelVisibility = (state = INITIAL_STATE, {isModelVisible}) => {
 	return {...state, isModelVisible};
 };
 
+export const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
+	return { ...state, componentState: { ...state.componentState, ...componentState } };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[CompareTypes.SET_COMPARE_TYPE] : setCompareType,
 	[CompareTypes.SET_MODEL_TYPE] : setModelType,
 	[CompareTypes.SET_COMPARE_DISABLED] : setCompareDisabled,
-	[CompareTypes.SET_MODEL_VISIBILITY] : setModelVisibility
+	[CompareTypes.SET_MODEL_VISIBILITY] : setModelVisibility,
+	[CompareTypes.SET_COMPONENT_STATE]: setComponentState
 });

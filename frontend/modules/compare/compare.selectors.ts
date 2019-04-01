@@ -50,3 +50,23 @@ export const selectIsCompareDisabled = createSelector(
 export const selectIsModelVisible = createSelector(
 	selectCompareDomain, (state) => state.isModelVisible
 );
+
+const selectComponentState = createSelector(
+	selectCompareDomain, (state) => state.componentState
+);
+
+export const selectSelectedFilters = createSelector(
+	selectComponentState, (state) => state.selectedFilters
+);
+
+export const selectActiveTab = createSelector(
+	selectComponentState, (state) => state.activeTab
+);
+
+export const selectDiffSelected = createSelector(
+	selectComponentState, (state) => state.diffSelected
+);
+
+export const selectClashSelected = createSelector(
+	selectComponentState, (state) => state.clashSelected
+);
