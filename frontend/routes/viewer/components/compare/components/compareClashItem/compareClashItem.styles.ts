@@ -33,7 +33,7 @@ interface IClashTypeSwitch {
 export const Container = styled.div<IContainer>`
 	display: flex;
 	align-items: center;
-	border-bottom: 1px solid ${COLOR.BLACK_20};
+	border-bottom: 1px solid ${COLOR.BLACK_6};
 	height: 80px;
 	padding-right: 30px;
 `;
@@ -48,7 +48,6 @@ export const Model = styled.div`
 export const Name = styled.div`
 	font-size: 14px;
 	color: ${COLOR.BLACK_80};
-	font-weight: ${FONT_WEIGHT.BOLD};
 `;
 
 export const SelectField = styled(SelectFieldComponent)`

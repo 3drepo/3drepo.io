@@ -16,8 +16,9 @@
  */
 
 import styled from 'styled-components';
-import { SelectField as SelectFieldComponent } from '../../../../../components/selectField/selectField.component';
 import { MenuItem as MenuItemComponent } from '@material-ui/core';
+import { DateTime } from '../../../../../components/dateTime/dateTime.component';
+import { SelectField as SelectFieldComponent } from '../../../../../components/selectField/selectField.component';
 
 export const Container = styled.div``;
 
@@ -45,7 +46,7 @@ export const Name = styled.div`
   font-size: 14px;
 `;
 
-export const Date = styled.div`
+export const Date = styled(DateTime)`
   color: #B4B4B4;
   font-size: 14px;
 `;

@@ -60,5 +60,5 @@ export class RevisionsSelect extends React.PureComponent<IProps, any> {
 	}
 
 	private renderName = (name) => (<Name>{name || '(no name)'}</Name>);
-	private renderDate = (timestamp) => (<Date>{dayjs(timestamp).format('DD MMM YYYY')}</Date>);
+	private renderDate = (timestamp) => (<Date value={timestamp} format="DD MMM YYYY" />);
 }

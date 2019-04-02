@@ -23,7 +23,6 @@ import { COLOR } from '../../../../../../styles';
 export const FilterPanel = styled(FilterPanelComponent)`
   && {
     flex: 1;
-    border-bottom: 1px solid ${COLOR.BLACK_20};
 
     .react-autosuggest__container {
       input {

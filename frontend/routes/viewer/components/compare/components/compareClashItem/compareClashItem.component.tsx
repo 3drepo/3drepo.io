@@ -37,7 +37,7 @@ interface IProps {
 	selected?: boolean;
 	onSelectionChange: (event) => void;
 	onRevisionChange: () => void;
-	onComparingTypeChange: () => void;
+	onComparingTypeChange: (type) => void;
 }
 
 export class CompareClashItem extends React.PureComponent<IProps, any> {
@@ -49,7 +49,10 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 	private renderTypeSwitch = renderWhenTrue(() => {
 		const { comparingType } = this.props;
 		return (
-			<ClashTypeSwitch value={comparingType}>
+			<ClashTypeSwitch
+				value={comparingType}
+				onClick={this.handleComparingTypeChange}
+			>
 				{capitalize(comparingType)}
 			</ClashTypeSwitch>
 		);
@@ -63,6 +66,14 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 				{this.renderData()}
 			</Container>
 		);
+	}
+
+	private handleComparingTypeChange = () => {
+		const { comparingType } = this.props;
+		if (comparingType === BASE_MODEL_TYPE) {
+			return TARGET_MODEL_TYPE;
+		}
+		return BASE_MODEL_TYPE;
 	}
 
 	private renderCheckbox = () => {

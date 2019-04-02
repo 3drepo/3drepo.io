@@ -33,7 +33,7 @@ interface ICurrentRevision {
 export const Container = styled.div<IContainer>`
   display: flex;
   align-items: center;
-  border-bottom: 1px solid ${COLOR.BLACK_20};
+  border-bottom: 1px solid ${COLOR.BLACK_6};
 	height: 80px;
 	padding-right: 30px;
 `;
@@ -45,13 +45,13 @@ export const ModelData = styled.div`
 `;
 
 export const Name = styled.div<IName>`
-  color: ${(props) => props.disabled ? '#B4B4B4' : '#4D4D4D'};
+  color: ${(props) => props.disabled ? COLOR.BLACK_20 : COLOR.BLACK_80};
   font-size: 14px;
   margin-bottom: 10px;
 `;
 
 export const CurrentRevision = styled.div<ICurrentRevision>`
-  color: ${(props) => props.disabled ? '#B4B4B4' : '#757575'};
+  color: ${(props) => props.disabled ? COLOR.BLACK_20 : '#757575'};
   font-size: 14px;
 `;
 
