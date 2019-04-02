@@ -600,10 +600,6 @@ function clean(groupData) {
 		delete cleaned.rules;
 	}
 
-	if (cleaned.rules && cleaned.objects && 0 === cleaned.objects.length) {
-		delete cleaned.objects;
-	}
-
 	delete cleaned.__v;
 
 	return cleaned;

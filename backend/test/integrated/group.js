@@ -414,7 +414,6 @@ describe("Groups", function () {
 			agent.post(`/${username}/${model}/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
-					console.log(res.body);
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
@@ -718,7 +717,6 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
 							Object.assign(goldenData, newRules);
-							delete goldenData.objects;
 							goldenData.updatedAt = res.body.updatedAt;
 							expect(res.body).to.deep.equal(goldenData);
 							done(err);
