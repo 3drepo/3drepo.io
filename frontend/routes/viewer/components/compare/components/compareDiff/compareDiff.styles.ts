@@ -16,7 +16,17 @@
  */
 
 import styled from 'styled-components';
-import { FilterPanel as FilterPanelComponent } from '../../../../../components/filterPanel/filterPanel.component';
-import { COLOR } from '../../../../../../styles';
 
-export const Container = styled.div``;
+export const Container = styled.div`
+  height: inherit;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  width: 100%;
+`;
+
+export const List = styled.ul`
+  overflow: auto;
+	padding: 0;
+	margin: 0;
+`;

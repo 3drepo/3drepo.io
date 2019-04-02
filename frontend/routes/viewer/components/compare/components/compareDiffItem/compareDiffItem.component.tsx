@@ -88,7 +88,7 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 				<Name disabled={!selected}>{name}</Name>
 				<Revisions>
 					<CurrentRevision disabled={!selected}>{this.currentRevisionName}</CurrentRevision>
-					{this.renderRevisionsSettings(this.props.selected)}
+					{this.renderRevisionsSettings(this.props.selected && this.props.revisions.length > 1)}
 				</Revisions>
 			</ModelData>
 		);

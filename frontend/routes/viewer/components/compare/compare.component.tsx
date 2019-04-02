@@ -61,7 +61,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 				renderActions={() => []}
 				pending={false}
 			>
-				<ViewerPanelContent className="height-catcher">
+				<ViewerPanelContent className="height-catcher" scrollDisabled={true}>
 					<Tabs
 						value={activeTab}
 						indicatorColor="secondary"

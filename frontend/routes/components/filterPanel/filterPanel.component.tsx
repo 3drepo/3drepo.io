@@ -40,9 +40,15 @@ import {
 	FiltersButton,
 	ButtonContainer,
 	StyledIconButton,
+<<<<<<< HEAD
 	MoreIcon,
 	CopyIcon,
 	ButtonWrapper
+=======
+	StyledMoreIcon,
+	ButtonWrapper,
+	Chips
+>>>>>>> 8878e3892... ISSUE #1439 - Add empty states & smake list scrollable
 } from './filterPanel.styles';
 import { compareStrings } from '../../../helpers/searching';
 import { renderWhenTrue } from '../../../helpers/rendering';
@@ -427,15 +433,19 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 				filtersOpen={selectedFilters.length && filtersOpen}
 			>
 				{selectedFilters.length ? this.renderFilterButton() : null}
-
-				{selectedFilters.map((filter, index) => (
-					<StyledChip
-						key={index}
-						color={index === removableFilterIndex ? 'primary' : 'default'}
-						label={getSelectedFilterLabel(filter)}
-						onDelete={() => this.onDeselectFilter(filter)}
-					/>
-				))}
+				<Chips>
+					{selectedFilters.map(
+						(filter, index) => (
+							<StyledChip
+								key={index}
+								color={index === removableFilterIndex ? 'primary' : 'default'}
+								label={getSelectedFilterLabel(filter)}
+								onDelete={() => this.onDeselectFilter(filter)}
+							/>
+						)
+					)
+					}
+				</Chips>
 			</SelectedFilters>
 		);
 	}

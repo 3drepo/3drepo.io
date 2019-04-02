@@ -18,9 +18,10 @@
 import * as React from 'react';
 
 import { CompareClashItem } from '../compareClashItem/compareClashItem.component';
-import { modelsMock } from '../../../../../../constants/compare';
 import { CompareFilters } from '../compareFilters/compareFilters.component';
 import { Container, List } from './compareClash.styles';
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { EmptyStateInfo } from '../../../views/views.styles';
 
 interface IProps {
 	className: string;
@@ -36,11 +37,22 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 		this.props.setComponentState({ selectedFilters });
   }
 
+	public renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>No models matched</EmptyStateInfo>
+	));
+
+	public renderList = renderWhenTrue(() => (
+		<List>
+			{this.props.compareModels.map(this.renderListItem)}
+		</List>
+	));
+
 	public render() {
 		return (
 			<Container className={this.props.className}>
 				{this.renderFilterPanel()}
-				{this.renderList()}
+				{this.renderEmptyState(!this.props.compareModels.length)}
+				{this.renderList(this.props.compareModels.length)}
 			</Container>
 		);
 	}
@@ -80,14 +92,6 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 		}, {});
 
 		setComponentState({ clashSelected });
-	}
-
-	private renderList = () => {
-		return (
-			<List>
-				{this.props.compareModels.map(this.renderListItem)}
-			</List>
-		);
 	}
 
 	private renderListItem = (modelProps) => {

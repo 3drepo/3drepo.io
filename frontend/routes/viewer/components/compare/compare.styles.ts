@@ -20,14 +20,16 @@ import { Tabs as TabsComponent } from '@material-ui/core';
 
 import { COLOR } from '../../../../styles';
 
-export const Container = styled.div``;
-
 export const Tabs = styled(TabsComponent)`
 	border-bottom: 1px solid ${COLOR.BLACK_20};
+	flex-shrink: 0;
 `;
 
 export const TabContent = styled.div`
 	background-color: ${COLOR.WHITE};
 	flex: 1;
 	position: relative;
+	overflow: hidden;
+	display: flex;
+	height: inherit;
 `;

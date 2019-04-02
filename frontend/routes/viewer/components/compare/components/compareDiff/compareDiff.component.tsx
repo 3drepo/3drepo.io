@@ -18,7 +18,9 @@
 import * as React from 'react';
 import { CompareDiffItem } from '../compareDiffItem/compareDiffItem.component';
 import { CompareFilters } from '../compareFilters/compareFilters.component';
-import { Container } from './compareDiff.styles';
+import { Container, List } from './compareDiff.styles';
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { EmptyStateInfo } from '../../../views/views.styles';
 
 interface IProps {
 	className: string;
@@ -34,11 +36,22 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 		this.props.setComponentState({ selectedFilters });
   }
 
+	public renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>No models matched</EmptyStateInfo>
+	));
+
+	public renderList = renderWhenTrue(() => (
+		<List>
+			{this.props.compareModels.map(this.renderListItem)}
+		</List>
+	));
+
 	public render() {
 		return (
 			<Container className={this.props.className}>
 				{this.renderFilterPanel()}
-				{this.renderList()}
+				{this.renderEmptyState(!this.props.compareModels.length)}
+				{this.renderList(this.props.compareModels.length)}
 			</Container>
 		);
 	}
@@ -90,9 +103,5 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 				onRevisionChange={this.handleRevisionChange(modelProps)}
 			/>
 		);
-	}
-
-	private renderList = () => {
-		return this.props.compareModels.map(this.renderListItem);
 	}
 }

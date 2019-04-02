@@ -24,6 +24,11 @@ interface IViewerPanelFooter {
 	padding?: string;
 }
 
+interface IViewerPanelContent {
+	isPadding?: boolean;
+	scrollDisabled?: boolean;
+}
+
 export const TitleContainer = styled.div`
 	display: flex;
 	justify-content: space-between;
@@ -63,13 +68,15 @@ export const TitleIcon = styled.div`
 	justify-content: center;
 `;
 
-export const ViewerPanelContent = styled.div`
+export const ViewerPanelContent = styled.div<IViewerPanelContent>`
 	background-color: ${COLOR.WHITE_87};
-	overflow: auto;
-`;
+	padding: ${(props) => props.isPadding ? '24px' : '0'};
 
-export const LoaderContainer = styled(ViewerPanelContent)`
-	padding: 24px;
+	overflow: ${(props) => props.scrollDisabled ? 'hidden' : 'auto'};
+	display: ${(props) => props.scrollDisabled ? 'flex' : 'block'};
+	flex-direction: ${(props) => props.scrollDisabled ? 'column' : 'unset'};
+
+	position: relative;
 `;
 
 export const ViewerPanelFooter = styled(Grid).attrs({
