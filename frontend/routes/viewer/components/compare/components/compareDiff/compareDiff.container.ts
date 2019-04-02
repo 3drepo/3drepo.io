@@ -20,7 +20,11 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../../../helpers/migration';
 
 import { CompareDiff } from './compareDiff.component';
-import { CompareActions, selectDiffSelected, selectSelectedFilters } from '../../../../../../modules/compare';
+import {
+	CompareActions,
+	selectDiffSelected,
+	selectSelectedFilters
+} from '../../../../../../modules/compare';
 
 const mapStateToProps = createStructuredSelector({
 	selectedItemsMap: selectDiffSelected,

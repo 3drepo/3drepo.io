@@ -21,60 +21,12 @@ import * as API from '../../services/api';
 import { CompareTypes, CompareActions } from './compare.redux';
 import { selectRevisions } from '../model';
 import { selectIsFederation } from './compare.selectors';
-
-const nextRevision = (revisions = [], revision) => {
-	if (!revision) {
-		return revisions[0];
-	}
-
-	const len = revisions.length;
-	const index = revisions.findIndex((r) => r._id === revision);
-
-	const lastRev = index + 1 === len;
-	if (lastRev) {
-		return revisions[index];
-	}
-
-	return revisions[index + 1];
-};
+import { modelsMock } from '../../constants/compare';
 
 export function* getCompareModels({settings, revision}) {
 	try {
 		const revisions = yield select(selectRevisions);
-		if (!revision.length) {
-			return null;
-		}
-
-		const isFederation = yield select(selectIsFederation);
-		const baseRevision = isFederation ?
-			revisions.find((rev) => rev.tag === revision || rev._id === revision ) || revisions[0] :
-			revisions[0];
-
-		const targetRevision = nextRevision(revisions, baseRevision.name);
-
-		const RevisionsService = yield getAngularService('RevisionsService') as any;
-		const baseTimestamp = RevisionsService.revisionDateFilter(baseRevision.timestamp);
-		const targetTimestamp = RevisionsService.revisionDateFilter(targetRevision.timestamp);
-
-		return {
-			account: settings.account,
-			model: settings.model,
-			name: settings.name,
-			revisions,
-			baseRevision: baseRevision.name,
-			baseRevisionTag: baseRevision.tag || baseTimestamp || baseRevision.name,
-			targetRevision: {
-				diff: {
-					name: targetRevision.name,
-					tag: targetRevision.tag || targetTimestamp || targetRevision.name
-				},
-				clash: {
-					name: baseRevision.name,
-					tag: baseRevision.tag || baseTimestamp || baseRevision.name
-				}
-			},
-			visible: true
-		};
+		yield put(CompareActions.setComponentState({compareModels: modelsMock}));
 	} catch (error) {
 		console.error(error);
 	}

@@ -16,6 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
+import { searchByFilters } from '../../helpers/searching';
 
 export const selectCompareDomain = (state) => Object.assign({}, state.compare);
 
@@ -69,4 +70,8 @@ export const selectDiffSelected = createSelector(
 
 export const selectClashSelected = createSelector(
 	selectComponentState, (state) => state.clashSelected
+);
+
+export const selectCompareModels = createSelector(
+	selectComponentState, (state) => searchByFilters(state.compareModels, state.selectedFilters)
 );

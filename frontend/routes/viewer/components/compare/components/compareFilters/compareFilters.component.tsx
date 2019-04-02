@@ -43,6 +43,7 @@ export class CompareFilters extends React.PureComponent<IProps, any> {
 					selectedFilters={selectedFilters}
 					hideMenu={true}
 					placeholder={'Search'}
+					autoFocus={false}
 				/>
 			</FilterContainer>
 		);

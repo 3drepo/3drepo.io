@@ -33,6 +33,7 @@ export interface ICompareComponentState {
 	selectedFilters: ISelectedFilter[];
 	diffSelected: {};
 	clashSelected: {};
+	compareModels: [];
 }
 
 export interface ICompareState {
@@ -64,7 +65,8 @@ export const INITIAL_STATE: ICompareState = {
 		},
 		clashSelected: {
 			3: true
-		}
+		},
+		compareModels: []
 	}
 };
 

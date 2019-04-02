@@ -16,17 +16,15 @@
  */
 
 import * as React from 'react';
-import Checkbox from '@material-ui/core/Checkbox';
 import { CompareDiffItem } from '../compareDiffItem/compareDiffItem.component';
 import { CompareFilters } from '../compareFilters/compareFilters.component';
 import { Container } from './compareDiff.styles';
-import { modelsMock } from '../../../../../../constants/compare';
-import { renderWhenTrue } from '../../../../../../helpers/rendering';
 
 interface IProps {
 	className: string;
 	selectedItemsMap: any[];
 	selectedFilters: any[];
+	compareModels: any[];
 	setComponentState: (state) => void;
 }
 
@@ -93,6 +91,6 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 	}
 
 	private renderList = () => {
-		return modelsMock.map(this.renderListItem);
+		return this.props.compareModels.map(this.renderListItem);
 	}
 }

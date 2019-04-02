@@ -30,7 +30,9 @@ import { Tabs, TabContent } from './compare.styles';
 interface IProps {
 	className: string;
 	activeTab: string;
+	compareModels: any[];
 	setComponentState: (state) => void;
+	getCompareModels: (settings, revision) => void;
 }
 
 export class Compare extends React.PureComponent<IProps, any> {
@@ -39,12 +41,16 @@ export class Compare extends React.PureComponent<IProps, any> {
 	}
 
 	private renderDiffTab = renderWhenTrue(() => (
-		<CompareDiff />
+		<CompareDiff compareModels={this.props.compareModels} />
 	));
 
 	private renderClashTab = renderWhenTrue(() => (
-		<CompareClash />
+		<CompareClash compareModels={this.props.compareModels} />
 	));
+
+  public componentDidMount() {
+		this.props.getCompareModels({}, '');
+  }
 
 	public render() {
 		const { activeTab } = this.props;

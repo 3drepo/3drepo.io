@@ -26,6 +26,7 @@ interface IProps {
 	className: string;
 	selectedItemsMap: any[];
 	selectedFilters: any[];
+	compareModels: any[];
 	setComponentState: (state) => void;
 }
 
@@ -82,7 +83,7 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 	private renderList = () => {
 		return (
 			<List>
-				{modelsMock.map(this.renderListItem)}
+				{this.props.compareModels.map(this.renderListItem)}
 			</List>
 		);
 	}
