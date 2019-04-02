@@ -266,8 +266,10 @@ config.auth.captcha = coalesce(config.auth.captcha, false);
 config.auth.register = coalesce(config.auth.register,true);
 
 // paypal
-config.paypal = coalesce(config.paypal, {});
-config.paypal.validateIPN = coalesce(config.paypal.validateIPN, true);
+config.paypal = coalesce(config.paypal, null);
+if(config.paypal) {
+	config.paypal.validateIPN = coalesce(config.paypal.validateIPN, true);
+}
 
 // upload size limit
 config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);

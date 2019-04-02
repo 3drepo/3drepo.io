@@ -18,6 +18,8 @@
 import { createSelector } from 'reselect';
 import { values } from 'lodash';
 import { getSortedRisks } from '../../helpers/risks';
+import { searchByFilters } from '../../helpers/searching';
+import { RISK_LEVELS } from '../../constants/risks';
 
 export const selectRisksDomain = (state) => Object.assign({}, state.risks);
 
@@ -73,6 +75,18 @@ export const selectSearchEnabled = createSelector(
 
 export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
+);
+
+export const selectFilteredRisks = createSelector(
+	selectRisks, selectSelectedFilters, (risks, selectedFilters) => {
+		let returnHiddenRisk = false;
+		if (selectedFilters.length) {
+			returnHiddenRisk = selectedFilters
+				.some(({ value: { value } }) => value === RISK_LEVELS.AGREED_FULLY);
+		}
+
+		return searchByFilters(risks, selectedFilters, returnHiddenRisk);
+	}
 );
 
 export const selectShowPins = createSelector(

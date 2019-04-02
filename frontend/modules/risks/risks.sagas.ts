@@ -32,7 +32,8 @@ import {
 	selectRisks,
 	selectShowPins,
 	selectRisksMap,
-	selectActiveRiskDetails
+	selectActiveRiskDetails,
+	selectFilteredRisks
 } from './risks.selectors';
 import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentUser } from '../currentUser';
@@ -188,6 +189,11 @@ export function* updateRisk({ teamspace, modelId, riskData }) {
 
 		yield put(RisksActions.updateLogs(preparedComments));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
+
+		// FIXME: Fetching filteredRisks will not be necessary on the latest of ISSUE_1272
+		const filteredRisks = yield select(selectFilteredRisks);
+		yield put(RisksActions.renderPins(filteredRisks));
+
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'risk', error));
