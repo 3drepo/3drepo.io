@@ -25,6 +25,7 @@ import { getRiskPinColor, prepareRisk } from '../../helpers/risks';
 import { prepareComments, prepareComment } from '../../helpers/comments';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
+import { RISK_LEVELS } from '../../constants/risks';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { selectJobsList, selectMyJob } from '../jobs';
@@ -44,7 +45,9 @@ export function* fetchRisks({teamspace, modelId, revision}) {
 	try {
 		const {data} = yield API.getRisks(teamspace, modelId, revision);
 		const jobs = yield select(selectJobsList);
+
 		const preparedRisks = data.map((risk) => prepareRisk(risk, jobs));
+
 		yield put(RisksActions.fetchRisksSuccess(preparedRisks));
 		yield put(RisksActions.renderPins());
 	} catch (error) {
@@ -78,13 +81,13 @@ const createGroupData = (name, nodes) => {
 	return nodes.length === 0 ? null : groupData;
 };
 
-const createGroup = (risk, objectInfo, teamspace, model) => {
+const createGroup = (risk, objectInfo, teamspace, model, revision) => {
 	const highlightedGroupData = createGroupData(risk.name, objectInfo.highlightedNodes);
 	const hiddenGroupData = createGroupData(risk.name, objectInfo.hiddenNodes);
 
 	return Promise.all([
-		highlightedGroupData && API.createGroup(teamspace, model, risk.rev_id, highlightedGroupData),
-		hiddenGroupData && API.createGroup(teamspace, model, risk.rev_id, hiddenGroupData)
+		highlightedGroupData && API.createGroup(teamspace, model, revision, highlightedGroupData),
+		hiddenGroupData && API.createGroup(teamspace, model, revision, hiddenGroupData)
 	]);
 };
 
@@ -117,7 +120,7 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 		riskData.rev_id = revision;
 
 		if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
-			const [highlightedGroup, hiddenGroup] = yield createGroup(riskData, objectInfo, teamspace, model);
+			const [highlightedGroup, hiddenGroup] = yield createGroup(riskData, objectInfo, teamspace, model, revision);
 
 			if (highlightedGroup) {
 				viewpoint.highlighted_group_id = highlightedGroup.data._id;
@@ -169,7 +172,6 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 export function* updateRisk({ teamspace, modelId, riskData }) {
 	try {
 		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, riskData);
-
 		const AnalyticService = getAngularService('AnalyticService') as any;
 		yield AnalyticService.sendEvent({
 			eventCategory: 'Risk',
@@ -179,9 +181,8 @@ export function* updateRisk({ teamspace, modelId, riskData }) {
 		toggleRiskPin(riskData, true);
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(updatedRisk, jobs);
-		const preparedComments = yield prepareComments(preparedRisk.comments);
+		preparedRisk.comments = yield prepareComments(preparedRisk.comments);
 
-		yield put(RisksActions.updateLogs(preparedComments));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(RisksActions.renderPins());
 		yield put(SnackbarActions.show('Risk updated'));
@@ -210,7 +211,7 @@ export function* postComment({ teamspace, modelId, riskData }) {
 		const { data: comment } = yield API.updateRisk(teamspace, modelId, riskData);
 		const preparedComment = yield prepareComment(comment);
 
-		yield put(RisksActions.createCommentSuccess(preparedComment));
+		yield put(RisksActions.createCommentSuccess(preparedComment, riskData._id));
 		yield put(SnackbarActions.show('Risk comment added'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('post', 'risk comment', error));
@@ -285,7 +286,6 @@ export function* downloadRisks({ teamspace, modelId }) {
 		const filteredRisks = yield select(selectFilteredRisks);
 		const risksIds = map(filteredRisks, '_id').join(',');
 		yield Exports.exportRisksToJSON(teamspace, modelId, risksIds);
-
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'risk', error));
 	}
@@ -460,15 +460,15 @@ export function* showDetails({ teamspace, model, revision, risk }) {
 	}
 }
 
-export function* closeDetails() {
+export function* closeDetails({ teamspace, model, revision }) {
 	try {
 		const activeRisk = yield select(selectActiveRiskDetails);
 
 		if (activeRisk) {
 			runAngularViewerTransition({
-				account: activeRisk.account,
-				model: activeRisk.model,
-				revision: activeRisk.rev_id,
+				account: teamspace,
+				model,
+				revision,
 				riskId: null,
 				noSet: true
 			});
@@ -500,15 +500,6 @@ export function* showNewPin({ risk, pinData }) {
 	}
 }
 
-export function* setFilters({ filters }) {
-	try {
-		yield put(RisksActions.setComponentState({ selectedFilters: filters }));
-		yield put(RisksActions.renderPins());
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'filters', error));
-	}
-}
-
 export function* toggleShowPins({ showPins }) {
 	try {
 		yield put(RisksActions.setComponentState({ showPins }));
@@ -520,7 +511,14 @@ export function* toggleShowPins({ showPins }) {
 
 const onUpdateEvent = (updatedRisk) => {
 	const jobs = selectJobsList(getState());
-	dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));
+	if (updatedRisk.status === RISK_LEVELS.AGREED_FULLY) {
+		dispatch(RisksActions.showCloseInfo(updatedRisk._id));
+		setTimeout(() => {
+			dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));
+		}, 5000);
+	} else {
+		dispatch(RisksActions.saveRiskSuccess(prepareRisk(updatedRisk, jobs)));
+	}
 };
 
 const onCreateEvent = (createdRisk) => {
@@ -551,16 +549,19 @@ const getCommentsChannel = (teamspace, modelId, riskId) => {
 };
 
 const onUpdateCommentEvent = (updatedComment) => {
-	dispatch(RisksActions.updateCommentSuccess(updatedComment));
+	const riskId = selectActiveRiskId(getState());
+	dispatch(RisksActions.updateCommentSuccess(updatedComment, riskId));
 };
 
 const onCreateCommentEvent = (createdComment) => {
 	const preparedComment = prepareComment(createdComment);
-	dispatch(RisksActions.createCommentSuccess(preparedComment));
+	const riskId = selectActiveRiskId(getState());
+	dispatch(RisksActions.createCommentSuccess(preparedComment, riskId));
 };
 
 const onDeleteCommentEvent = (deletedComment) => {
-	dispatch(RisksActions.deleteCommentSuccess(deletedComment.guid));
+	const riskId = selectActiveRiskId(getState());
+	dispatch(RisksActions.deleteCommentSuccess(deletedComment.guid, riskId));
 };
 
 export function* subscribeOnRiskCommentsChanges({ teamspace, modelId, riskId }) {
@@ -612,6 +613,15 @@ export function* setNewRisk() {
 		}));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('prepare', 'new risk', error));
+	}
+}
+
+export function* setFilters({ filters }) {
+	try {
+		yield put(RisksActions.setComponentState({ selectedFilters: filters }));
+		yield put(RisksActions.renderPins());
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'filters', error));
 	}
 }
 

@@ -115,11 +115,11 @@ export const fetchRisksSuccess = (state = INITIAL_STATE, { risks = [] }) => {
 export const fetchRiskSuccess = (state = INITIAL_STATE, { risk }) => {
 	const risksMap = cloneDeep(state.risksMap);
 	risksMap[risk._id].comments = risk.comments;
-	return {...state, risksMap, componentState: { ...state.componentState, logs: risk.comments, failedToLoad: false }};
+	return { ...state, risksMap, componentState: { ...state.componentState, failedToLoad: false } };
 };
 
 export const fetchRiskFailure = (state = INITIAL_STATE) => {
-	return {...state, componentState: { ...state.componentState, logs: [], failedToLoad: true }};
+	return { ...state, componentState: { ...state.componentState, failedToLoad: true } };
 };
 
 export const saveRiskSuccess = (state = INITIAL_STATE, { risk }) => {
@@ -164,6 +164,13 @@ export const deleteCommentSuccess = (state = INITIAL_STATE, { commentGuid, riskI
 	const risksMap = cloneDeep(state.risksMap);
 	const updatedComments = risksMap[riskId].comments.filter((log) => log.guid !== commentGuid );
 	risksMap[riskId].comments = updatedComments;
+
+	return { ...state, risksMap };
+};
+
+const showCloseInfo = (state = INITIAL_STATE, { riskId }) => {
+	const risksMap = cloneDeep(state.risksMap);
+	risksMap[riskId].willBeClosed = true;
 
 	return { ...state, risksMap };
 };

@@ -79,11 +79,8 @@ export const selectSelectedFilters = createSelector(
 
 export const selectFilteredRisks = createSelector(
 	selectRisks, selectSelectedFilters, (risks, selectedFilters) => {
-		let returnHiddenRisk = false;
-		if (selectedFilters.length) {
-			returnHiddenRisk = selectedFilters
-				.some(({ value: { value } }) => value === RISK_LEVELS.AGREED_FULLY);
-		}
+		const returnHiddenRisk = selectedFilters.length && selectedFilters
+			.some(({ value: { value } }) => value === RISK_LEVELS.AGREED_FULLY);
 
 		return searchByFilters(risks, selectedFilters, returnHiddenRisk);
 	}
@@ -91,10 +88,6 @@ export const selectFilteredRisks = createSelector(
 
 export const selectShowPins = createSelector(
 	selectComponentState, (state) => state.showPins
-);
-
-export const selectLogs = createSelector(
-	selectComponentState, (state) => state.logs
 );
 
 export const selectFetchingDetailsIsPending = createSelector(
