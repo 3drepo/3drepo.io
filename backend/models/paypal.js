@@ -31,11 +31,13 @@ const Mailer = require("../mailer/mailer");
 const IPN = require("./ipn");
 const Invoice = require("./invoice");
 
-paypal.configure({
-	"mode": config.paypal.mode, // sandbox or live
-	"client_id": config.paypal.client_id,
-	"client_secret": config.paypal.client_secret
-});
+if(config.paypal) {
+	paypal.configure({
+		"mode": config.paypal.mode, // sandbox or live
+		"client_id": config.paypal.client_id,
+		"client_secret": config.paypal.client_secret
+	});
+}
 
 const updateBillingAddress = function (billingAgreementId, billingAddress) {
 
