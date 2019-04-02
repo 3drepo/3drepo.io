@@ -27,6 +27,7 @@ interface IProps {
 	selectedItemsMap: any[];
 	selectedFilters: any[];
 	compareModels: any[];
+	isAllSelected: boolean;
 	setComponentState: (state) => void;
 }
 
@@ -57,6 +58,7 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 			onCheckboxChange={this.handleAllItemsSelect}
 			onFilterChange={this.handleFilterChange}
 			selectedFilters={this.props.selectedFilters}
+			allSelected={this.props.isAllSelected}
 		/>
 	)
 
@@ -70,14 +72,14 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 		});
 	}
 
-	private handleAllItemsSelect = (modelProps) => (event, selected) => {
-		const { selectedItemsMap, setComponentState } = this.props;
-		setComponentState({
-			clashSelected: {
-				...selectedItemsMap,
-				[modelProps._id]: selected
-			}
-		});
+	private handleAllItemsSelect = (event, selected) => {
+		const { setComponentState, compareModels } = this.props;
+		const clashSelected = compareModels.reduce((map, obj) => {
+			map[obj._id] = selected;
+			return map;
+		}, {});
+
+		setComponentState({ clashSelected });
 	}
 
 	private renderList = () => {

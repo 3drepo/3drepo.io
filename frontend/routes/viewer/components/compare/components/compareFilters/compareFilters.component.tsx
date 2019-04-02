@@ -19,21 +19,24 @@ import * as React from 'react';
 import { Checkbox, FilterContainer, FilterPanel } from './compareFilters.styles';
 
 interface IProps {
+	allSelected: boolean;
 	selectedFilters: any[];
-	onCheckboxChange: (modelProps) => void;
+	onCheckboxChange: (event, selected) => void;
 	onFilterChange: (selectedFilters) => void;
 }
 
 export class CompareFilters extends React.PureComponent<IProps, any> {
 	public static defaultProps = {
+		allSelected: false,
 		selected: false
 	};
 
 	public render() {
-		const { selectedFilters, onCheckboxChange, onFilterChange } = this.props;
+		const { allSelected, selectedFilters, onCheckboxChange, onFilterChange } = this.props;
 		return (
 			<FilterContainer>
 				<Checkbox
+					checked={allSelected}
 					color="primary"
 					onChange={onCheckboxChange}
 				/>

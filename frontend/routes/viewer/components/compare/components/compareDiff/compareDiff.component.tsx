@@ -25,6 +25,7 @@ interface IProps {
 	selectedItemsMap: any[];
 	selectedFilters: any[];
 	compareModels: any[];
+	isAllSelected: boolean;
 	setComponentState: (state) => void;
 }
 
@@ -47,6 +48,7 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 			onCheckboxChange={this.handleAllItemsSelect}
 			onFilterChange={this.handleFilterChange}
 			selectedFilters={this.props.selectedFilters}
+			allSelected={this.props.isAllSelected}
 		/>
 	)
 
@@ -63,14 +65,14 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 		});
 	}
 
-	private handleAllItemsSelect = (modelProps) => (event, selected) => {
-		const { selectedItemsMap, setComponentState } = this.props;
-		setComponentState({
-			diffSelected: {
-				...selectedItemsMap,
-				[modelProps._id]: selected
-			}
-		});
+	private handleAllItemsSelect = (event, selected) => {
+		const { setComponentState, compareModels } = this.props;
+		const diffSelected = compareModels.reduce((map, obj) => {
+			map[obj._id] = selected;
+			return map;
+		}, {});
+
+		setComponentState({ diffSelected });
 	}
 
 	private renderListItem = (modelProps) => {
