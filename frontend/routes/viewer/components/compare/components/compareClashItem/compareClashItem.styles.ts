@@ -18,8 +18,9 @@
 import styled from 'styled-components';
 import { ButtonBase } from '@material-ui/core';
 
-import { COLOR } from '../../../../../../styles';
+import { COLOR, BLACK } from '../../../../../../styles';
 import { TARGET_MODEL_TYPE } from '../../../../../../constants/compare';
+import * as RevisionSelectStyles from '../revisionsSelect/revisionsSelect.styles';
 
 interface IContainer {
 	disabled?: boolean;
@@ -39,6 +40,10 @@ export const Container = styled.li<IContainer>`
 	border-bottom: 1px solid ${COLOR.BLACK_6};
 	height: 80px;
 	padding-right: 30px;
+
+	${RevisionSelectStyles.Name} {
+		color: ${(props) => props.disabled ? COLOR.BLACK_20 : COLOR.BLACK_60 };
+	}
 `;
 
 export const Model = styled.div`

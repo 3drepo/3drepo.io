@@ -91,7 +91,7 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 		const { name, selected } = this.props;
 		return (
 			<Model>
-				<Name>{name}</Name>
+				<Name disabled={!selected}>{name}</Name>
 				<ClashSettings>
 					{this.renderRevisions()}
 					{this.renderTypeSwitch(selected)}

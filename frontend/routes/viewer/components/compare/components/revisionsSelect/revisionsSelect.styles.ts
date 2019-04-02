@@ -17,41 +17,40 @@
 
 import styled from 'styled-components';
 import { MenuItem as MenuItemComponent } from '@material-ui/core';
-import { DateTime } from '../../../../../components/dateTime/dateTime.component';
 import { SelectField as SelectFieldComponent } from '../../../../../components/selectField/selectField.component';
 import { COLOR } from '../../../../../../styles';
 
 export const Container = styled.div``;
 
 export const SelectField = styled(SelectFieldComponent)`
-  && {
-    min-width: 80px;
-  }
+	&& {
+		min-width: 80px;
+	}
 
 	&&:before {
 		border-bottom: none !important;
 	}
 
-  svg {
-    opacity: ${(props) => props.disabled || props.readOnly ? 0 : 1};
-  }
+	svg {
+		opacity: ${(props) => props.disabled || props.readOnly ? 0 : 1};
+	}
 `;
 
 export const MenuItem = styled(MenuItemComponent)`
-  && {
-    min-width: 200px;
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-  }
+	&& {
+		min-width: 200px;
+		display: flex;
+		justify-content: space-between;
+		font-size: 14px;
+	}
 `;
 
 export const Name = styled.div`
-  color: #757575;
-  font-size: 14px;
+	color: ${COLOR.BLACK_60};
+	font-size: 14px;
 `;
 
 export const Date = styled.div`
-  color: ${COLOR.BLACK_20};
-  font-size: 14px;
+	color: ${COLOR.BLACK_20};
+	font-size: 14px;
 `;
