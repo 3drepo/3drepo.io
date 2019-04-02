@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import { MenuItem as MenuItemComponent } from '@material-ui/core';
 import { DateTime } from '../../../../../components/dateTime/dateTime.component';
 import { SelectField as SelectFieldComponent } from '../../../../../components/selectField/selectField.component';
+import { COLOR } from '../../../../../../styles';
 
 export const Container = styled.div``;
 
@@ -30,6 +31,10 @@ export const SelectField = styled(SelectFieldComponent)`
 	&&:before {
 		border-bottom: none !important;
 	}
+
+  svg {
+    opacity: ${(props) => props.disabled || props.readOnly ? 0 : 1};
+  }
 `;
 
 export const MenuItem = styled(MenuItemComponent)`
@@ -46,7 +51,7 @@ export const Name = styled.div`
   font-size: 14px;
 `;
 
-export const Date = styled(DateTime)`
-  color: #B4B4B4;
+export const Date = styled.div`
+  color: ${COLOR.BLACK_20};
   font-size: 14px;
 `;

@@ -17,10 +17,10 @@
 
 import * as React from 'react';
 
-import { Container } from './compareClash.styles';
 import { CompareClashItem } from '../compareClashItem/compareClashItem.component';
 import { modelsMock } from '../../../../../../constants/compare';
 import { CompareFilters } from '../compareFilters/compareFilters.component';
+import { Container, List } from './compareClash.styles';
 
 interface IProps {
 	className: string;
@@ -44,9 +44,11 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 	}
 
 	private handleComparingTypeChange = (modelProps) => () => {
+		console.log('Type of', modelProps.name, 'changed');
 	}
 
 	private handleRevisionChange = (modelProps) => () => {
+		console.log('Revision of', modelProps.name, 'changed');
 	}
 
 	private renderFilterPanel = () => (
@@ -70,7 +72,7 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 	private handleAllItemsSelect = (modelProps) => (event, selected) => {
 		const { selectedItemsMap, setComponentState } = this.props;
 		setComponentState({
-			diffSelected: {
+			clashSelected: {
 				...selectedItemsMap,
 				[modelProps._id]: selected
 			}
@@ -78,7 +80,11 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 	}
 
 	private renderList = () => {
-		return modelsMock.map(this.renderListItem);
+		return (
+			<List>
+				{modelsMock.map(this.renderListItem)}
+			</List>
+		);
 	}
 
 	private renderListItem = (modelProps) => {
@@ -89,6 +95,8 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 				key={modelProps._id}
 				name={modelProps.name}
 				revisions={modelProps.revisions}
+				baseRevision={modelProps.baseRevision}
+				currentRevision={modelProps.currentRevision}
 				selected={isSelected}
 				onSelectionChange={this.handleItemSelect(modelProps)}
 				onRevisionChange={this.handleRevisionChange(modelProps)}

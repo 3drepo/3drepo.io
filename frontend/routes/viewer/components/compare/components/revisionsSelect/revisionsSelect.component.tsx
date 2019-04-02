@@ -16,49 +16,75 @@
  */
 
 import * as React from 'react';
-import * as dayjs from 'dayjs';
+import { keyBy, memoize } from 'lodash';
 
-import { SelectField, MenuItem, Name, Date } from './revisionsSelect.styles';
+import { DateTime } from '../../../../../components/dateTime/dateTime.component';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { SelectField, MenuItem, Name, Date } from './revisionsSelect.styles';
 
 interface IProps {
 	revisions: any[];
-	selected?: boolean;
+	value: string;
+	defaultValue?: string;
+	onChange: (revisionId) => void;
+	disabled?: boolean;
 }
 
 export class RevisionsSelect extends React.PureComponent<IProps, any> {
 	public static defaultProps = {
-		selected: false
+		disabled: false
 	};
 
-	private renderSelect = renderWhenTrue(() => (
-		<SelectField
-			value={this.props.revisions[0].name}
-			readOnly={this.props.revisions.length < 2}
-			disabled={!this.props.selected}
-			renderValue={() => this.renderName(this.props.revisions[0].name)}
-		>
-			{this.props.revisions.map(({ name, timestamp, _id }) => (
-				<MenuItem key={_id} value={_id}>
-					{this.renderName(name)}
-					{this.renderDate(timestamp)}
-				</MenuItem>
-			))}
-		</SelectField>
-	));
+	get defaultValue() {
+		const { defaultValue, revisions } = this.props;
+		return defaultValue || revisions[0]._id;
+	}
 
-	private renderDefaultRevision = renderWhenTrue(() => this.renderName(this.props.revisions[0].name));
+	get revisionsMap() {
+		return keyBy(this.props.revisions, '_id');
+	}
+
+	get value() {
+		const { value } = this.props;
+		return this.revisionsMap[value || this.defaultValue].name;
+	}
+
+	private renderSelect = renderWhenTrue(() => {
+		const { revisions, disabled, value, defaultValue, onChange } = this.props;
+
+		return (
+			<SelectField
+				value={value || defaultValue}
+				readOnly={revisions.length < 2}
+				disabled={disabled}
+				renderValue={this.renderValue}
+				onChange={onChange}
+			>
+				{revisions.map(({ name, timestamp, _id }) => (
+					<MenuItem key={_id} value={_id}>
+						{this.renderName(name)}
+						{this.renderDate(timestamp)}
+					</MenuItem>
+				))}
+			</SelectField>
+		);
+	});
+
+	private renderDefaultValue = renderWhenTrue(() => this.renderName(this.revisionsMap[this.defaultValue].name));
 
 	public render() {
 		const { revisions } = this.props;
 		return (
 			<>
 				{this.renderSelect(revisions.length > 1)}
-				{this.renderDefaultRevision(revisions.length === 1)}
+				{this.renderDefaultValue(revisions.length === 1)}
 			</>
 		);
 	}
 
+	private renderValue = () => this.renderName(this.value);
+
 	private renderName = (name) => (<Name>{name || '(no name)'}</Name>);
-	private renderDate = (timestamp) => (<Date value={timestamp} format="DD MMM YYYY" />);
+
+	private renderDate = (timestamp) => (<Date><DateTime value={timestamp} format="DD MMM YYYY" /></Date>);
 }

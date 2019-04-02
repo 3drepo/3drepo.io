@@ -20,22 +20,19 @@ import { capitalize } from 'lodash';
 import { Checkbox, MenuItem } from '@material-ui/core';
 
 import { TARGET_MODEL_TYPE, BASE_MODEL_TYPE } from '../../../../../../constants/compare';
-import { Container, ClashTypeSwitch, ClashSettings, SelectField, Name, Model } from './compareClashItem.styles';
+import { Container, ClashTypeSwitch, ClashSettings, Name, Model } from './compareClashItem.styles';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { RevisionsSelect } from '../revisionsSelect/revisionsSelect.component';
-
-enum ComparingType {
-	TARGET_MODEL_TYPE,
-	BASE_MODEL_TYPE
-}
 
 interface IProps {
 	className?: string;
 	name: string;
+	baseRevision: string;
+	currentRevision: string;
 	revisions: any[];
 	comparingType: string;
 	selected?: boolean;
-	onSelectionChange: (event) => void;
+	onSelectionChange: (event, selected) => void;
 	onRevisionChange: () => void;
 	onComparingTypeChange: (type) => void;
 }
@@ -45,6 +42,10 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 		selected: false,
 		comparingType: BASE_MODEL_TYPE
 	};
+
+	get isTargetItem() {
+		return this.props.comparingType === TARGET_MODEL_TYPE;
+	}
 
 	private renderTypeSwitch = renderWhenTrue(() => {
 		const { comparingType } = this.props;
@@ -69,17 +70,17 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 	}
 
 	private handleComparingTypeChange = () => {
-		const { comparingType } = this.props;
-		if (comparingType === BASE_MODEL_TYPE) {
-			return TARGET_MODEL_TYPE;
+		if (this.isTargetItem) {
+			return BASE_MODEL_TYPE;
 		}
-		return BASE_MODEL_TYPE;
+		return TARGET_MODEL_TYPE;
 	}
 
 	private renderCheckbox = () => {
-		const { onSelectionChange } = this.props;
+		const { onSelectionChange, selected } = this.props;
 		return (
 			<Checkbox
+				checked={selected}
 				color="primary"
 				onChange={onSelectionChange}
 			/>
@@ -100,11 +101,14 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 	}
 
 	private renderRevisions = () => {
-		const { revisions, selected } = this.props;
+		const { revisions, selected, baseRevision, currentRevision, onRevisionChange } = this.props;
 		return (
 			<RevisionsSelect
+				defaultValue={baseRevision}
+				value={currentRevision}
 				revisions={revisions}
-				selected={selected}
+				disabled={!selected || !this.isTargetItem}
+				onChange={onRevisionChange}
 			/>
 		);
 	}

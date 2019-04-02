@@ -29,6 +29,8 @@ export const modelsMock = [
 	{
 		_id: 1,
 		name: 'Lego_House_Structure',
+		currentRevision: 101,
+		baseRevision: 101,
 		revisions: [{
 			_id: 101,
 			name: 'r2',
@@ -38,6 +40,8 @@ export const modelsMock = [
 	{
 		_id: 2,
 		name: 'Lego_House_Landscape',
+		currentRevision: 102,
+		baseRevision: 102,
 		revisions: [{
 			_id: 102,
 			timestamp: '2018-01-16T15:19:52.000Z'
@@ -46,6 +50,8 @@ export const modelsMock = [
 	{
 		_id: 3,
 		name: 'Lego_House_Architecture',
+		currentRevision: 104,
+		baseRevision: 104,
 		revisions: [{
 			_id: 103,
 			name: 'r3',
@@ -63,6 +69,8 @@ export const modelsMock = [
 	{
 		_id: 4,
 		name: 'Model name',
+		currentRevision: 106,
+		baseRevision: 106,
 		revisions: [{
 			_id: 106,
 			name: 'Rev EEE',
@@ -75,6 +83,8 @@ export const modelsMock = [
 	}, {
 		_id: 5,
 		name: 'Model name 2 with a veerrrrrry long name',
+		currentRevision: 108,
+		baseRevision: 108,
 		revisions: [{
 			_id: 108,
 			name: 'Rev AAA',

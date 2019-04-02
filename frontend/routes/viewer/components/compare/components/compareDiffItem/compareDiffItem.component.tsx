@@ -26,9 +26,11 @@ import { renderWhenTrue } from '../../../../../../helpers/rendering';
 interface IProps {
 	className?: string;
 	name: string;
+	baseRevision: string;
+	currentRevision: string;
 	revisions: any[];
 	selected?: boolean;
-	onSelectionChange: (event) => void;
+	onSelectionChange: (event, selected) => void;
 	onRevisionChange: () => void;
 }
 
@@ -48,8 +50,11 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 		<>
 			<ArrowsAltH />
 			<RevisionsSelect
+				defaultValue={this.props.baseRevision}
+				value={this.props.currentRevision}
 				revisions={this.props.revisions}
-				selected={this.props.selected}
+				disabled={!this.props.selected}
+				onChange={this.props.onRevisionChange}
 			/>
 		</>
 	));
@@ -66,9 +71,10 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 	}
 
 	private renderCheckbox = () => {
-		const { onSelectionChange } = this.props;
+		const { onSelectionChange, selected } = this.props;
 		return (
 			<Checkbox
+				checked={selected}
 				color="primary"
 				onChange={onSelectionChange}
 			/>

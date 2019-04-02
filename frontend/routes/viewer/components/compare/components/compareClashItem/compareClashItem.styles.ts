@@ -18,19 +18,22 @@
 import styled from 'styled-components';
 import { ButtonBase } from '@material-ui/core';
 
-import { FONT_WEIGHT, COLOR } from '../../../../../../styles';
+import { COLOR } from '../../../../../../styles';
 import { TARGET_MODEL_TYPE } from '../../../../../../constants/compare';
-import { SelectField as SelectFieldComponent } from '../../../../../components/selectField/selectField.component';
 
 interface IContainer {
-	disabled: boolean;
+	disabled?: boolean;
+}
+
+interface IName {
+	disabled?: boolean;
 }
 
 interface IClashTypeSwitch {
 	value: string;
 }
 
-export const Container = styled.div<IContainer>`
+export const Container = styled.li<IContainer>`
 	display: flex;
 	align-items: center;
 	border-bottom: 1px solid ${COLOR.BLACK_6};
@@ -45,15 +48,9 @@ export const Model = styled.div`
 	width: 100%;
 `;
 
-export const Name = styled.div`
+export const Name = styled.div<IName>`
 	font-size: 14px;
-	color: ${COLOR.BLACK_80};
-`;
-
-export const SelectField = styled(SelectFieldComponent)`
-	&&:before {
-		border-bottom: none !important;
-	}
+	color: ${(props) => props.disabled ? COLOR.BLACK_20 : COLOR.BLACK_80};
 `;
 
 export const ClashSettings = styled.div`
@@ -61,7 +58,7 @@ export const ClashSettings = styled.div`
 	align-items: center;
 	justify-content: space-between;
 	height: 20px;
-	margin-top: 10px;
+	margin-top: 6px;
 `;
 
 export const ClashTypeSwitch = styled(ButtonBase)<IClashTypeSwitch>`

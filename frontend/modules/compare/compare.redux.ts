@@ -59,8 +59,12 @@ export const INITIAL_STATE: ICompareState = {
 	componentState: {
 		activeTab: DIFF_COMPARE_TYPE,
 		selectedFilters: [],
-		diffSelected: {},
-		clashSelected: {}
+		diffSelected: {
+			3: true
+		},
+		clashSelected: {
+			3: true
+		}
 	}
 };
 
