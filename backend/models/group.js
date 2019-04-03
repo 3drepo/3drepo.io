@@ -715,7 +715,7 @@ function buildRule(rule) {
 						exRangeUpperOp[fieldName] = { $gt: Math.max(exRangeVal1, exRangeVal2) };
 
 						operation = undefined;
-						clauses.push({ $and: [exRangeLowerOp, exRangeUpperOp]});
+						clauses.push({ $or: [exRangeLowerOp, exRangeUpperOp]});
 					}
 					break;
 			}
