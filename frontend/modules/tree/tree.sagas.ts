@@ -39,11 +39,8 @@ export function* startListenOnSelections() {
 		});
 
 		Viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => {
-			const selectedNodes = selectSelectedNodes(getState());
-			if (selectedNodes.length) {
-				dispatch(TreeActions.clearSelectedNodes());
-				dispatch(GroupsActions.clearSelectionHighlights());
-			}
+			dispatch(TreeActions.clearSelectedNodes());
+			dispatch(GroupsActions.clearSelectionHighlights());
 		});
 	} catch (error) {
 		console.error(error);
