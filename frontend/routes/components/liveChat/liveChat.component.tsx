@@ -18,7 +18,6 @@ import * as React from 'react';
 
 import ReactLiveChat from 'react-livechat';
 import { clientConfigService } from '../../../services/clientConfig';
-import { renderWhenTrue } from '../../../helpers/rendering';
 
 interface IProps {
 	currentUser: any;
@@ -39,7 +38,6 @@ export class LiveChat extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps) {
-
 		// @ts-ignore
 		window.LC_API = window.LC_API || {};
 		// @ts-ignore
@@ -53,7 +51,7 @@ export class LiveChat extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const haveLicense = clientConfigService.liveChatLicense !== 0;
-		return renderWhenTrue(<ReactLiveChat license={clientConfigService.liveChatLicense} />)(haveLicense);
+		const haveLicense: boolean = clientConfigService.liveChatLicense !== 0;
+		return (<>{haveLicense && <ReactLiveChat license={clientConfigService.liveChatLicense} />}</>);
 	}
 }
