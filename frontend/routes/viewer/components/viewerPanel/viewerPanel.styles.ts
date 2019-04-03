@@ -25,6 +25,7 @@ export const TitleContainer = styled.div`
 	justify-content: space-between;
 	margin: 0 -16px;
 	width: calc(100% + 32px);
+	height: inherit;
 
 	button {
 		color: ${COLOR.WHITE};

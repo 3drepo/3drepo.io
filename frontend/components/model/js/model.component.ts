@@ -28,6 +28,7 @@ import { prepareRisk } from '../../../helpers/risks';
 import { searchByFilters } from '../../../helpers/searching';
 import { VIEWER_EVENTS } from '../../../constants/viewer';
 import { StarredMetaActions } from '../../../modules/starredMeta';
+import { BimActions } from '../../../modules/bim';
 
 class ModelController implements ng.IController {
 
@@ -130,6 +131,7 @@ class ModelController implements ng.IController {
 			this.ViewerService.off(VIEWER_EVENTS.CLICK_PIN);
 			dispatch(TreeActions.stopListenOnSelections());
 			dispatch(GroupsActions.resetComponentState());
+			dispatch(BimActions.setIsActive(false));
 		});
 
 		this.$timeout(() => {

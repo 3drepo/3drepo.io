@@ -63,7 +63,11 @@ class HeightSetterController implements ng.IController, IBindings {
 			this.headerHeight = this.container.children()[0].clientHeight;
 			this.content = angular.element(this.container.children()[1]) as any;
 
-			this.content.css('max-height', `${this.contentData.height}px`);
+			const omittedElement = this.reactElement[0].querySelector('.height-catcher-omitted');
+			const omittedHeight = omittedElement ? omittedElement.clientHeight : 0;
+
+			this.content.css('max-height', `${this.contentData.height - omittedHeight}px`);
+
 			this.observer.observe(this.content[0], {
 				attributes: false,
 				childList: true,
@@ -72,7 +76,7 @@ class HeightSetterController implements ng.IController, IBindings {
 			});
 
 			this.removeHeightWatch = this.$scope.$watch(() => this.contentData.height, (newValue) => {
-				this.content.css('max-height', `${newValue}px`);
+				this.content.css('max-height', `${newValue - omittedHeight}px`);
 			});
 		});
 	}
