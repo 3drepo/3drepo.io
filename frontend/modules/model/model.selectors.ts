@@ -50,3 +50,7 @@ export const selectMetaKeys = createSelector(
 export const selectMetaKeysExist = createSelector(
 	selectModelDomain, (state) => Boolean(state.metaKeys.length)
 );
+
+export const selectIsFederation = createSelector(
+	selectSettings, (state) =>  Boolean(state.federate)
+);

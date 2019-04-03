@@ -16,17 +16,58 @@
  */
 
 import { put, takeLatest, select } from 'redux-saga/effects';
-import { getAngularService } from '../../helpers/migration';
-import * as API from '../../services/api';
 import { CompareTypes, CompareActions } from './compare.redux';
-import { selectRevisions } from '../model';
-import { selectIsFederation } from './compare.selectors';
+import { selectRevisions, selectIsFederation, selectSettings, ModelTypes } from '../model';
+import { } from './compare.selectors';
 import { modelsMock } from '../../constants/compare';
 import { DialogActions } from '../dialog';
 
-export function* getCompareModels({ settings, revision }) {
+const getNextRevisionId = (revisions, revision) => {
+
+	if (!revision) {
+		return revisions[0];
+	}
+
+	const len = revisions.length;
+	const index = revisions.findIndex((r) => r._id === revision);
+
+	const lastRev = index + 1 === len;
+	if (lastRev) {
+		return revisions[index];
+	}
+
+	return revisions[index + 1]._id;
+};
+
+export function* getCompareModelData() {
 	try {
+		const [, , currentRevision] = window.location.pathname.replace('/viewer/', '').split('/');
 		const revisions = yield select(selectRevisions);
+		const isFederation = yield select(selectIsFederation);
+		const settings = yield select(selectSettings);
+
+		const baseRevision = isFederation ? revisions[0] :
+		revisions.find((rev) => rev.tag === currentRevision || rev._id === currentRevision ) || revisions[0];
+
+		const targetRevisionId = getNextRevisionId(revisions, currentRevision);
+
+		return {
+			_id: settings._id,
+			name: settings.name,
+			baseRevision,
+			targetDiffRevision: targetRevisionId,
+			targetClashRevision: baseRevision._id
+		};
+
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+export function* getCompareModels() {
+	try {
+		const settings = yield select(selectSettings);
+		yield put(CompareActions.getCompareModelData());
 		yield put(CompareActions.setComponentState({compareModels: modelsMock}));
 	} catch (error) {
 		console.error(error);
@@ -42,6 +83,7 @@ export function* onRenderingTypeChange({ renderingType }) {
 }
 
 export default function* CompareSaga() {
-	yield takeLatest(CompareTypes.GET_COMPARE_MODELS, getCompareModels);
+	yield takeLatest(ModelTypes.FETCH_SETTINGS_SUCCESS, getCompareModels);
 	yield takeLatest(CompareTypes.ON_RENDERING_TYPE_CHANGE, onRenderingTypeChange);
+	yield takeLatest(CompareTypes.GET_COMPARE_MODEL_DATA, getCompareModelData);
 }

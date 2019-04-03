@@ -264,6 +264,8 @@ class ModelController implements ng.IController {
 		dispatch(ModelActions.fetchMetaKeys(this.account, this.model));
 		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
 		dispatch(IssuesActions.fetchIssues(this.account, this.model, this.revision));
+		dispatch(ModelActions.fetchRevisions(this.account, this.model));
+		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
 		dispatch(RisksActions.fetchRisks(this.account, this.model, this.revision));
 		dispatch(GroupsActions.fetchGroups(this.account, this.model, this.revision));
 		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));

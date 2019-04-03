@@ -27,7 +27,8 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	setModelVisibility: ['isModelVisible'],
 	getCompareModels: ['settings', 'revision'],
 	setComponentState: ['componentState'],
-	onRenderingTypeChange: ['renderingType']
+	onRenderingTypeChange: ['renderingType'],
+	getCompareModelData: []
 }, { prefix: 'COMPARE/' });
 
 export interface ICompareComponentState {
@@ -42,7 +43,6 @@ export interface ICompareComponentState {
 export interface ICompareState {
 	baseModels: any[];
 	targetModels: any[];
-	isFederation: boolean;
 	isComparePending: boolean;
 	isCompareDisabled: boolean;
 	isModelVisible: boolean;
@@ -52,7 +52,6 @@ export interface ICompareState {
 export const INITIAL_STATE: ICompareState = {
 	baseModels: [],
 	targetModels: [],
-	isFederation: false,
 	isComparePending: false,
 	isCompareDisabled: false,
 	isModelVisible: false,
