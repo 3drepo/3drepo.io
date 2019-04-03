@@ -185,7 +185,7 @@ export function* updateIssue({ teamspace, modelId, issueData }) {
 		preparedIssue.comments = yield prepareComments(preparedIssue.comments);
 
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
-		yield put(RisksActions.renderPins());
+		yield put(IssuesActions.renderPins());
 		yield put(SnackbarActions.show('Issue updated'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'issue', error));
