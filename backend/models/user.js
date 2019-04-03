@@ -550,11 +550,11 @@ schema.statics.getForgotPasswordToken = function (userNameOrEmail) {
 		// set token only if username is found.
 		if (user) {
 			user.customData.resetPasswordToken = resetPasswordToken;
-
 			resetPasswordUserInfo = {
 				token: resetPasswordToken.token,
 				email: user.customData.email,
-				username: user.user
+				username: user.user,
+				firstName:user.customData.firstName
 			};
 
 			return updateUser(user.user, { $set: { "customData.resetPasswordToken": resetPasswordToken } });
