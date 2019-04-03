@@ -20,16 +20,23 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../helpers/migration';
 
 import { Compare } from './compare.component';
-import { CompareActions, selectActiveTab, selectCompareModels } from '../../../../modules/compare';
+import {
+	CompareActions,
+	selectActiveTab,
+	selectCompareModels,
+	selectRenderingType
+} from '../../../../modules/compare';
 
 const mapStateToProps = createStructuredSelector({
 	activeTab: selectActiveTab,
-	compareModels: selectCompareModels
+	compareModels: selectCompareModels,
+	renderingType: selectRenderingType
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setComponentState: CompareActions.setComponentState,
-	getCompareModels: CompareActions.getCompareModels
+	getCompareModels: CompareActions.getCompareModels,
+	onRenderingTypeChange: CompareActions.onRenderingTypeChange
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Compare);

@@ -19,18 +19,35 @@ import * as React from 'react';
 import CompareIcon from '@material-ui/icons/Compare';
 import { Tab } from '@material-ui/core';
 
-import { DIFF_COMPARE_TYPE, COMPARE_TABS, CLASH_COMPARE_TYPE } from '../../../../constants/compare';
+import {
+	DIFF_COMPARE_TYPE,
+	COMPARE_TABS,
+	CLASH_COMPARE_TYPE,
+	RENDERING_TYPES,
+	RENDERING_TYPES_LIST
+} from '../../../../constants/compare';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
+import { ViewerPanelContent, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { CompareDiff } from './components/compareDiff';
 import { CompareClash } from './components/compareClash';
-import { Tabs, TabContent } from './compare.styles';
+import {
+	Tabs,
+	TabContent,
+	SliderContainer,
+	Slider,
+	SliderLabels,
+	SliderLabel,
+	SliderWrapper,
+	ViewerPanelFooter
+} from './compare.styles';
 
 interface IProps {
 	className: string;
 	activeTab: string;
+	renderingType: number;
 	compareModels: any[];
+	onRenderingTypeChange: (renderingType) => void;
 	setComponentState: (state) => void;
 	getCompareModels: (settings, revision) => void;
 }
@@ -78,6 +95,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 					</TabContent>
 				</ViewerPanelContent>
 				<ViewerPanelFooter alignItems="center" justify="space-between">
+					{this.renderSlider()}
 					<ViewerPanelButton
 						aria-label="Compare"
 						onClick={this.handleCompare}
@@ -92,10 +110,42 @@ export class Compare extends React.PureComponent<IProps, any> {
 		);
 	}
 
+	private handleRenderingTypeClick = (type) => () => {
+		this.props.onRenderingTypeChange(type);
+	}
+
+	private handleRenderingTypeChange = (event, type) => {
+		this.props.onRenderingTypeChange(type);
+	}
+
 	private handleChange = (event, activeTab) => {
 		this.props.setComponentState({ activeTab });
 	}
 
 	private handleCompare = () => {
+	}
+
+	private renderSlider = () => {
+		const { renderingType } = this.props;
+		return (
+			<SliderContainer>
+				<SliderWrapper>
+					<Slider
+						value={renderingType}
+						min={RENDERING_TYPES.BASE}
+						max={RENDERING_TYPES.TARGET}
+						step={1}
+						onChange={this.handleRenderingTypeChange}
+					/>
+				</SliderWrapper>
+				<SliderLabels>
+					{RENDERING_TYPES_LIST.map(({ type, label }) => (
+						<SliderLabel onClick={this.handleRenderingTypeClick(type)}>
+							{label}
+						</SliderLabel>
+					))}
+				</SliderLabels>
+			</SliderContainer>
+		);
 	}
 }

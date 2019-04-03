@@ -22,8 +22,9 @@ import { CompareTypes, CompareActions } from './compare.redux';
 import { selectRevisions } from '../model';
 import { selectIsFederation } from './compare.selectors';
 import { modelsMock } from '../../constants/compare';
+import { DialogActions } from '../dialog';
 
-export function* getCompareModels({settings, revision}) {
+export function* getCompareModels({ settings, revision }) {
 	try {
 		const revisions = yield select(selectRevisions);
 		yield put(CompareActions.setComponentState({compareModels: modelsMock}));
@@ -32,6 +33,15 @@ export function* getCompareModels({settings, revision}) {
 	}
 }
 
+export function* onRenderingTypeChange({ renderingType }) {
+	try {
+		yield put(CompareActions.setComponentState({ renderingType }));
+	} catch (error) {
+		DialogActions.showErrorDialog('change', 'rendering type');
+	}
+}
+
 export default function* CompareSaga() {
 	yield takeLatest(CompareTypes.GET_COMPARE_MODELS, getCompareModels);
+	yield takeLatest(CompareTypes.ON_RENDERING_TYPE_CHANGE, onRenderingTypeChange);
 }

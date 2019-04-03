@@ -29,14 +29,6 @@ export const selectTargetModels = createSelector(
 	selectCompareDomain, (state) => state.targetModels
 );
 
-export const selectCompareType = createSelector(
-	selectCompareDomain, (state) => state.compareType
-);
-
-export const selectModelType = createSelector(
-	selectCompareDomain, (state) => state.modelType
-);
-
 export const selectIsFederation = createSelector(
 	selectCompareDomain, (state) => state.isFederation
 );
@@ -88,4 +80,8 @@ export const selectIsAllDiffSelected = createSelector(
 
 export const selectIsAllClashSelected = createSelector(
 	selectComponentState, (state) => isAllSelected(state.compareModels, state.clashSelected)
+);
+
+export const selectRenderingType = createSelector(
+	selectComponentState, (state) => state.renderingType
 );

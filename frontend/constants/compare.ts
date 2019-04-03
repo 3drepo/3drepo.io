@@ -25,6 +25,27 @@ export const COMPARE_TABS = {
 	CLASH: 'Instant clash'
 };
 
+export const RENDERING_TYPES = {
+	BASE: 1,
+	COMPARE: 2,
+	TARGET: 3
+};
+
+export const RENDERING_TYPES_LIST = [
+	{
+		type: RENDERING_TYPES.BASE,
+		label: 'Base'
+	},
+	{
+		type: RENDERING_TYPES.COMPARE,
+		label: 'Compare'
+	},
+	{
+		type: RENDERING_TYPES.TARGET,
+		label: 'Base'
+	}
+];
+
 export const modelsMock = [
 	{
 		_id: 1,

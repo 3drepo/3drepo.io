@@ -17,6 +17,9 @@
 
 import styled from 'styled-components';
 import { Tabs as TabsComponent } from '@material-ui/core';
+import SliderComponent from '@material-ui/lab/Slider';
+
+import { ViewerPanelFooter as ViewerPanelFooterComponent } from '../viewerPanel/viewerPanel.styles';
 
 import { COLOR } from '../../../../styles';
 
@@ -32,4 +35,45 @@ export const TabContent = styled.div`
 	overflow: hidden;
 	display: flex;
 	height: inherit;
+`;
+
+export const ViewerPanelFooter = styled(ViewerPanelFooterComponent)`
+	overflow: hidden;
+`;
+
+export const SliderContainer = styled.div`
+	display: flex;
+	padding: 10px 40px 0 0;
+	height: 64px;
+	flex: 1;
+	flex-direction: column;
+	justify-content: center;
+	box-sizing: border-box;
+`;
+
+export const SliderWrapper = styled.div`
+	padding-left: 15px;
+`;
+
+export const Slider = styled(SliderComponent).attrs({
+	classes: {
+		track: 'slider__track'
+	}
+})`
+	.slider__track {
+		background: ${COLOR.BLACK_20};
+    opacity: 1;
+	}
+`;
+
+export const SliderLabels = styled.div`
+	display: flex;
+	justify-content: space-between;
+	margin-top: 8px;
+	padding-left: 13px;
+`;
+
+export const SliderLabel = styled.div`
+	color: ${COLOR.BLACK_40};
+	cursor: pointer;
 `;
