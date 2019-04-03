@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { isEqual } from 'lodash';
+import { isEqual, values } from 'lodash';
 import { searchByFilters } from '../../helpers/searching';
 
 export const selectCompareDomain = (state) => Object.assign({}, state.compare);
@@ -29,8 +29,12 @@ export const selectTargetModels = createSelector(
 	selectCompareDomain, (state) => state.targetModels
 );
 
-export const selectIsFederation = createSelector(
-	selectCompareDomain, (state) => state.isFederation
+export const selectCompareType = createSelector(
+	selectCompareDomain, (state) => state.compareType
+);
+
+export const selectModelType = createSelector(
+	selectCompareDomain, (state) => state.modelType
 );
 
 export const selectIsComparePending = createSelector(
@@ -71,7 +75,7 @@ export const selectCompareModels = createSelector(
 
 const isAllSelected = (allModels, selectedModelsMap) => isEqual(
 	allModels.length,
-	Object.values(selectedModelsMap).filter((selectedModel) => selectedModel).length
+	values(selectedModelsMap).filter((selectedModel) => selectedModel).length
 );
 
 export const selectIsAllDiffSelected = createSelector(

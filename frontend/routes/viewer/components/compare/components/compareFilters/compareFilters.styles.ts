@@ -18,7 +18,6 @@
 import styled from 'styled-components';
 import { Checkbox as CheckboxComponent } from '@material-ui/core';
 import { FilterPanel as FilterPanelComponent } from '../../../../../components/filterPanel/filterPanel.component';
-import { COLOR } from '../../../../../../styles';
 
 export const FilterPanel = styled(FilterPanelComponent)`
   && {
@@ -26,7 +25,7 @@ export const FilterPanel = styled(FilterPanelComponent)`
 
     .react-autosuggest__container {
       input {
-        padding: 10px 14px 10px 48px;
+        padding: 10px 14px 12px 48px;
       }
     }
   }
@@ -43,7 +42,7 @@ export const Checkbox = styled(CheckboxComponent)`
   && {
     position: absolute;
     left: 0;
-    bottom: 4px;
+    bottom: 2px;
     z-index: 1;
   }
 `;

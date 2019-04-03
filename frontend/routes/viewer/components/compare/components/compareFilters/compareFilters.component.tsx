@@ -42,6 +42,7 @@ export class CompareFilters extends React.PureComponent<IProps, any> {
 				/>
 				<FilterPanel
 					filters={[]}
+					className="compare"
 					onChange={onFilterChange}
 					selectedFilters={selectedFilters}
 					hideMenu={true}

@@ -37,6 +37,10 @@ interface IInputContainer {
 	menuHidden: boolean;
 }
 
+interface IChips {
+	filtersOpen: boolean;
+}
+
 export const Container = styled.div<IContainer>`
   background-color: ${COLOR.WHITE};
 	position: relative;
@@ -50,7 +54,7 @@ export const Container = styled.div<IContainer>`
 export const SelectedFilters = styled.div<ISelectedFilters>`
   display: flex;
   flex-wrap: wrap;
-	padding: 4px 40px 0 8px;
+	padding: ${(props) => props.empty ? '0 40px 0 8px' : '4px 40px 0 8px'};
 	overflow: ${(props) => props.filtersOpen ? 'hidden' : 'auto'};
 	min-height: ${(props) => props.empty ? '0' : '45px'};
 	position: relative;
@@ -113,6 +117,10 @@ export const SuggestionsList = styled(Popper)`
 export const StyledTextField = styled(TextField)`
 	font-size: 14px;
 	margin-bottom: 12px;
+
+	&& {
+		height: 100%;
+	}
 `;
 
 export const StyledChip = styled(Chip)`
@@ -175,6 +183,10 @@ export const ButtonWrapper = styled.div`
 	height: 50px;
 `;
 
-export const Chips = styled.div`
+export const Chips = styled.div<IChips>`
   position: relative;
+
+	&.compare {
+		margin-left: ${(props) => props.filtersOpen ? '38px' : '0'};
+	}
 `;
