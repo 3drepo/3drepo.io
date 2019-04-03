@@ -639,6 +639,7 @@ function isValidRule(rule) {
 }
 
 function buildRule(rule) {
+	const notOperators = ["IS_NOT", "NOT_CONTAINS", "NOT_EQUALS", "NOT_IN_RANGE"];
 	const clauses = [];
 	let expression = {};
 
@@ -730,7 +731,9 @@ function buildRule(rule) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	if (clauses.length > 1) {
+	if (clauses.length > 1 && notOperators.includes(rule.operator)) {
+		expression = { $and: clauses };
+	} else if (clauses.length > 1) {
 		expression = { $or: clauses };
 	} else if (clauses.length === 1) {
 		expression = clauses[0];

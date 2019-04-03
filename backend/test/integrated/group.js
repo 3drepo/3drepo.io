@@ -790,6 +790,36 @@ describe("Groups", function () {
 			], done);
 		});
 
+		it("with multi value IS rule should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "IFC Type",
+						operator: "IS",
+						values: ["IfcStairFlight", "IfcSlab"]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(117);
+							done(err);
+						});
+				}
+			], done);
+		});
+
 		it("with IS_NOT rule should succeed", function(done) {
 			let groupId;
 
@@ -814,6 +844,36 @@ describe("Groups", function () {
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
 							expect(res.body.objects[0].shared_ids.length).to.equal(156);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with multi value IS_NOT rule should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "Workset",
+						operator: "IS_NOT",
+						values: ["Revit Link", "Envelope"]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(71);
 							done(err);
 						});
 				}
@@ -860,6 +920,36 @@ describe("Groups", function () {
 			], done);
 		});
 
+		it("with multi value CONTAINS rule should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "Reference",
+						operator: "CONTAINS",
+						values: ["Flue", "Panel"]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(116);
+							done(err);
+						});
+				}
+			], done);
+		});
+
 		it("with NOT_CONTAINS rule should succeed", function(done) {
 			let groupId;
 
@@ -884,6 +974,36 @@ describe("Groups", function () {
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
 							expect(res.body.objects[0].shared_ids.length).to.equal(1073);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with multi value NOT_CONTAINS rule should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "Type",
+						operator: "NOT_CONTAINS",
+						values: ["Mast", "Infill", "Concept"]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(459);
 							done(err);
 						});
 				}
@@ -936,6 +1056,36 @@ describe("Groups", function () {
 			], done);
 		});
 
+		it("with multi value REGEX rule should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "Family",
+						operator: "REGEX",
+						values: ["Concept.*Door.*", ".*mm$"]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(368);
+							done(err);
+						});
+				}
+			], done);
+		});
+
 		it("with EQUALS rule should succeed", function(done) {
 			let groupId;
 
@@ -959,6 +1109,41 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							const expectedSharedIds = [ 'a667d2e8-dbe5-42cd-baf9-b570921dcd78' ];
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with multi value EQUALS rule should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "Volume",
+						operator: "EQUALS",
+						values: [0.28757, 0.194819]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							const expectedSharedIds = [
+								'17bcab65-d5cf-4f8c-9bdf-9349ef30d8fe',
+								'41d4cfe3-717b-463b-9f49-f89d7315cc11',
+								'a667d2e8-dbe5-42cd-baf9-b570921dcd78'
+							];
 							expect(res.body.author).to.equal(username);
 							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
 							done(err);
@@ -997,6 +1182,36 @@ describe("Groups", function () {
 			], done);
 		});
 
+		it("with multi value NOT_EQUALS rule should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "Sill Height",
+						operator: "NOT_EQUALS",
+						values: [0, 2700, 900]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(947);
+							done(err);
+						});
+				}
+			], done);
+		});
+
 		it("with GT rule should succeed", function(done) {
 			let groupId;
 
@@ -1008,6 +1223,46 @@ describe("Groups", function () {
 						field: "Area",
 						operator: "GT",
 						values: [500]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							const expectedSharedIds = [
+								'99579903-b5e7-485d-8c44-09ab25cab0dc',
+								'13d63580-4dd8-4a10-b841-1c588e5faa9f',
+								'51b795b7-4790-4376-ad5c-6eaf7fa28fc8',
+								'c4271f23-970d-498a-b778-a94dec376a5d',
+								'ccd7d618-b0de-4517-8ad0-ed597c7de3df',
+								'03d0e634-d37e-4765-a06c-d0636136e1db',
+								'120fb04f-b051-4e0d-8252-00833df5cc43',
+								'0c541b2b-ffb2-4171-b8a2-cc6a019e5909'
+							];
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with multi value GT rule should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "Area",
+						operator: "GT",
+						values: [500, 600]
 					}];
 					agent.post(`/${username}/${model}/groups/`)
 						.send(newGroup)
@@ -1083,6 +1338,52 @@ describe("Groups", function () {
 			], done);
 		});
 
+		it("with multi value GTE rule should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "Mark",
+						operator: "GTE",
+						values: [750, 800]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							const expectedSharedIds = [
+								'39f85d38-14b8-4eca-b89d-75ad019caca0',
+								'4d9899cc-303a-453c-a2a5-3a4c8f08529f',
+								'6c64bc3d-6b6d-464f-b354-659eb5b8275e',
+								'35df7c93-29e7-477b-8ecd-239963fbd878',
+								'0c919791-8e51-49d0-9302-5f199f730058',
+								'a2a18ff2-bf59-4056-85d3-b1f20f2b89df',
+								'f06b77de-2fe1-404d-a395-1eeb75d2412a',
+								'ca03296a-7195-4c3a-ae94-78ec76e0ba95',
+								'c905acbb-231a-4f47-ac5f-f266aa1f87a0',
+								'e3b1b0b9-6f27-4e2d-a80f-ce62dcdc67b0',
+								'97f6c222-4328-4123-bdfd-7357f88ce6b3',
+								'662de408-f2b6-40e6-a515-eaa7c2440492',
+								'600ae205-3d28-4246-b958-c59b9738ca20',
+								'7609aaaa-7c39-4685-bc13-3e4a7fbcdf3e'
+							];
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							done(err);
+						});
+				}
+			], done);
+		});
+
 		it("with LT rule should succeed", function(done) {
 			let groupId;
 
@@ -1113,6 +1414,36 @@ describe("Groups", function () {
 			], done);
 		});
 
+		it("with multi value LT rule should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "Mark",
+						operator: "LT",
+						values: [180, 200]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(31);
+							done(err);
+						});
+				}
+			], done);
+		});
+
 		it("with LTE rule should succeed", function(done) {
 			let groupId;
 
@@ -1124,6 +1455,46 @@ describe("Groups", function () {
 						field: "Thermal Performance",
 						operator: "LTE",
 						values: [0.5]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							const expectedSharedIds = [
+								'99579903-b5e7-485d-8c44-09ab25cab0dc',
+								'13d63580-4dd8-4a10-b841-1c588e5faa9f',
+								'51b795b7-4790-4376-ad5c-6eaf7fa28fc8',
+								'c4271f23-970d-498a-b778-a94dec376a5d',
+								'ccd7d618-b0de-4517-8ad0-ed597c7de3df',
+								'03d0e634-d37e-4765-a06c-d0636136e1db',
+								'120fb04f-b051-4e0d-8252-00833df5cc43',
+								'0c541b2b-ffb2-4171-b8a2-cc6a019e5909'
+							];
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(99);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with multi value LTE rule should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "Thermal Performance",
+						operator: "LTE",
+						values: [0.5, 1]
 					}];
 					agent.post(`/${username}/${model}/groups/`)
 						.send(newGroup)
@@ -1183,6 +1554,36 @@ describe("Groups", function () {
 			], done);
 		});
 
+		it("with multi value IN_RANGE rule should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "Head Height",
+						operator: "IN_RANGE",
+						values: [4520, 4530, 200, 3000]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(175);
+							done(err);
+						});
+				}
+			], done);
+		});
+
 		it("with NOT_IN_RANGE rule should succeed", function(done) {
 			let groupId;
 
@@ -1209,6 +1610,41 @@ describe("Groups", function () {
 								'13d63580-4dd8-4a10-b841-1c588e5faa9f',
 								'ccd7d618-b0de-4517-8ad0-ed597c7de3df',
 								'03d0e634-d37e-4765-a06c-d0636136e1db',
+								'120fb04f-b051-4e0d-8252-00833df5cc43'
+							];
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with multi value NOT_IN_RANGE rule should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "Area",
+						operator: "NOT_IN_RANGE",
+						values: [0, 1000, 1000, 1650]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							const expectedSharedIds = [
+								'13d63580-4dd8-4a10-b841-1c588e5faa9f',
+								'ccd7d618-b0de-4517-8ad0-ed597c7de3df',
 								'120fb04f-b051-4e0d-8252-00833df5cc43'
 							];
 							expect(res.body.author).to.equal(username);
