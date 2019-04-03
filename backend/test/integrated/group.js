@@ -1654,6 +1654,43 @@ describe("Groups", function () {
 				}
 			], done);
 		});
+
+		it("with multi value multi rules should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						field: "Area",
+						operator: "NOT_IN_RANGE",
+						values: [0, 1000, 1000, 1650]
+					},{
+						field: "Perimeter",
+						operator: "LT",
+						values: [238000]
+					}];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							const expectedSharedIds = [
+								'13d63580-4dd8-4a10-b841-1c588e5faa9f'
+							];
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids).to.deep.equal(expectedSharedIds);
+							done(err);
+						});
+				}
+			], done);
+		});
 	});
 
 	describe("Updating a group ", function() {
