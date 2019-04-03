@@ -45,7 +45,6 @@ describe("Groups", function () {
 			{
 				"account":"groupUser",
 				"model":"4ec71fdd-0450-4b6f-8478-c46633bb66e3",
-				"ifc_guids":[],
 				"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
 			}
 		],

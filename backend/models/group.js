@@ -188,7 +188,6 @@ groupSchema.statics.isIfcGuid = function (value) {
  * Converts all shared IDs to IFC Guids if applicable and return the objects array.
  */
 groupSchema.methods.getObjectsArrayAsIfcGuids = function (data) {
-
 	const ifcGuidPromises = [];
 
 	if (!data) {
@@ -285,7 +284,6 @@ groupSchema.statics.findIfcGroupByUID = function (dbCol, uid) {
  * Converts all IFC Guids to shared IDs if applicable and return the objects array.
  */
 groupSchema.methods.getObjectsArray = function (model, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
-
 	const objectIdPromises = [];
 
 	for (let i = 0; i < this.objects.length; i++) {
@@ -605,6 +603,15 @@ function clean(groupData) {
 
 	if (cleaned.rules && 0 === cleaned.rules.length) {
 		delete cleaned.rules;
+	}
+
+	for (let i = 0; cleaned.objects && i < cleaned.objects.length; i++) {
+		if (cleaned.objects[i].ifc_guids && 0 === cleaned.objects[i].ifc_guids.length) {
+			delete cleaned.objects[i].ifc_guids;
+		}
+		if (cleaned.objects[i].shared_ids && 0 === cleaned.objects[i].shared_ids.length) {
+			delete cleaned.objects[i].shared_ids;
+		}
 	}
 
 	delete cleaned.__v;
