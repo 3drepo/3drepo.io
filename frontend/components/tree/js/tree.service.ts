@@ -879,10 +879,11 @@ export class TreeService {
 
 		if (removeGroup) {
 			const activeMeta = selectActiveMeta(getState());
-			const shouldClear = nodes.some(({ meta }) => meta.includes(activeMeta));
+			const shouldCloseMeta = nodes.some(({ meta }) => meta.includes(activeMeta));
 
-			if (shouldClear) {
-				this.clearCurrentlySelected();
+			if (shouldCloseMeta) {
+				dispatch(ViewerActions.setMetadataVisibility(false));
+				dispatch(BimActions.setActiveMeta(null));
 			}
 			this.deselectNodes(nodes);
 		} else {
