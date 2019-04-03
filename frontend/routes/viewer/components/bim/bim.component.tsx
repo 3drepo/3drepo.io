@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import { isEmpty } from 'lodash';
-import { IconButton, Tabs, Tab } from '@material-ui/core';
+import { IconButton, Tab } from '@material-ui/core';
 import InfoIcon from '@material-ui/icons/Info';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import SearchIcon from '@material-ui/icons/Search';
@@ -34,10 +34,10 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { Container, EmptyStateInfo } from './bim.styles';
 import { getFilters } from '../../../../helpers/bim';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import { MetaRecord } from './components/metaRecord/metaRecord.component';
+import { Container, EmptyStateInfo, Tabs } from './bim.styles';
 
 interface IProps {
 	className: string;
@@ -117,33 +117,19 @@ export class Bim extends React.PureComponent<IProps, any> {
 		<EmptyStateInfo>No data matched</EmptyStateInfo>
 	));
 
-	private renderPanel = renderWhenTrue(() => {
+	public render() {
+		const { isPending, searchEnabled } = this.props;
 		return (
 			<ViewerPanel
 				title="BIM"
 				Icon={this.getTitleIcon()}
 				renderActions={this.renderActions}
-				pending={this.props.isPending}
+				pending={isPending}
 			>
-				{this.renderFilterPanel(this.props.searchEnabled)}
+				{this.renderFilterPanel(searchEnabled)}
 				{this.renderList()}
 			</ViewerPanel>
 		);
-	});
-
-	public componentDidMount() {
-		this.handleLoadingMetadata();
-	}
-
-	public componentDidUpdate(prevProps) {
-		if (prevProps.activeMeta !== this.props.activeMeta) {
-			this.handleLoadingMetadata();
-		}
-	}
-
-	public render() {
-		const { isPending, activeMeta } = this.props;
-		return this.renderPanel(!isPending && activeMeta);
 	}
 
 	public getSearchButton = () => {
@@ -151,13 +137,6 @@ export class Bim extends React.PureComponent<IProps, any> {
 			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
 		}
 		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
-	}
-
-	private handleLoadingMetadata = () => {
-		const { teamspace, model, activeMeta, fetchMetadata } = this.props;
-		if (activeMeta) {
-			fetchMetadata(teamspace, model, activeMeta);
-		}
 	}
 
 	private handleFilterChange = (selectedFilters) => {
@@ -213,23 +192,26 @@ export class Bim extends React.PureComponent<IProps, any> {
 		const areFiltersActive = !!selectedFilters.length;
 		const hasMetadata = Boolean(this.metadata.length);
 		return (
-			<ViewerPanelContent className="height-catcher">
-				<Tabs
-					indicatorColor="primary"
-					textColor="primary"
-					fullWidth
-					value={Number(showStarred)}
-					onChange={this.handleTabChange}
-				>
-					<Tab label="All" />
-					<Tab label="Starred" />
-				</Tabs>
-				<Container>
-					{this.metadata.map((meta) => this.renderMetaRecord(meta))}
-					{this.renderEmptyState(!areFiltersActive && !hasMetadata)}
-					{this.renderNotFound(areFiltersActive && !hasMetadata)}
-				</Container>
-			</ViewerPanelContent>
+				<>
+					<Tabs
+						className="height-catcher-omitted"
+						indicatorColor="primary"
+						textColor="primary"
+						fullWidth
+						value={Number(showStarred)}
+						onChange={this.handleTabChange}
+					>
+						<Tab label="All" />
+						<Tab label="Starred" />
+					</Tabs>
+					<ViewerPanelContent className="height-catcher">
+						<Container>
+							{this.metadata.map((meta) => this.renderMetaRecord(meta))}
+							{this.renderEmptyState(!areFiltersActive && !hasMetadata)}
+							{this.renderNotFound(areFiltersActive && !hasMetadata)}
+						</Container>
+					</ViewerPanelContent>
+			</>
 		);
 	}
 

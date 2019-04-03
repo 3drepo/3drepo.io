@@ -62,7 +62,6 @@ interface IProps {
 	clippingMode: string;
 	isClipEdit: boolean;
 	clipNumber: number;
-	isMetadataVisible: boolean;
 	isMetadataActive: boolean;
 	isMeasureActive: boolean;
 	isMeasureDisabled: boolean;

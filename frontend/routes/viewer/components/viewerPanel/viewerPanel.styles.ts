@@ -61,7 +61,11 @@ export const TitleIcon = styled.div`
 export const ViewerPanelContent = styled.div`
 	background-color: ${COLOR.WHITE_87};
 	overflow: auto;
-` as any;
+`;
+
+export const LoaderContainer = styled(ViewerPanelContent)`
+	padding: 24px;
+`;
 
 export const ViewerPanelFooter = styled(Grid).attrs({
 	direction: 'row',

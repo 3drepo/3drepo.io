@@ -994,8 +994,8 @@ export class TreeService {
 	public handleMetadata(node: any) {
 		if (node && node.meta) {
 			if (this.isMetadataActive) {
+				dispatch(BimActions.fetchMetadata(node.account, node.model || node.project, node.meta[0]));
 				dispatch(ViewerActions.setMetadataVisibility(true));
-				dispatch(BimActions.setActiveMeta(node.meta[0]));
 			}
 		}
 	}

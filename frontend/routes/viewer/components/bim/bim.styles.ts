@@ -16,11 +16,11 @@
  */
 
 import styled from 'styled-components';
+import { Tabs as TabsComponent } from '@material-ui/core';
+
 import { COLOR } from '../../../../styles';
 
 export const Container = styled.div`
-	border-top: 1px solid ${COLOR.BLACK_6};
-	margin-top: -1px;
 	overflow: auto;
 `;
 
@@ -32,4 +32,11 @@ export const EmptyStateInfo = styled.p`
 	margin: 25px;
 	border-radius: 6px;
 	text-align: center;
+`;
+
+export const Tabs = styled(TabsComponent)`
+	&& {
+		background: ${COLOR.WHITE_87};
+		border-bottom: 1px solid ${COLOR.BLACK_6};
+	}
 `;

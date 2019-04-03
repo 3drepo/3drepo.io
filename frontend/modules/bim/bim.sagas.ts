@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { put, takeLatest, select } from 'redux-saga/effects';
 import { sortBy } from 'lodash';
 
 import * as API from '../../services/api';
@@ -30,6 +30,8 @@ export function* fetchMetadata({ teamspace, model, metadataId }) {
 		const { data } = yield API.getMetadata(teamspace, model, metadataId);
 		const sortedData = sortBy(prepareMetadata(data.meta[0].metadata), 'key');
 		yield put(BimActions.fetchMetadataSuccess(sortedData));
+		yield put(BimActions.setActiveMeta(metadataId));
+
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'metadata', error));
 	}

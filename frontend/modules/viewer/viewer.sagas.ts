@@ -269,14 +269,6 @@ export function* setClipEdit({isClipEdit}) {
 
 export function* setMetadataVisibility({ visible }) {
 	try {
-		const PanelService = getAngularService('PanelService') as any;
-
-		if (visible) {
-			PanelService.showPanelsByType('docs');
-		} else {
-			PanelService.hidePanelsByType('docs');
-		}
-
 		yield put(ViewerActions.setPanelVisibility(VIEWER_PANELS.METADATA, visible));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'metadata visibility'));

@@ -40,8 +40,14 @@ div(ng-show="vm.showPanel")
 					model="vm.model"
 					revision="vm.revision"
 				)
+
+			height-setter#reactComponent(
+				ng-if="contentItem.type === 'docs' && vm.isMetadataVisible"
+				on-show="vm.onPanelVisibilityChange($index, contentItem.type)"
+				content-data="contentItem"
+				on-height-update="vm.heightRequest(vm.contentItems[$index], height)")
 				bim(
-					ng-if="contentItem.type === 'docs'"
+					ng-if="vm.isMetadataVisible"
 					teamspace="vm.account"
 					model="vm.model"
 				)
