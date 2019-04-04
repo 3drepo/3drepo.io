@@ -19,7 +19,7 @@ import { put, takeLatest, select, all } from 'redux-saga/effects';
 import { CompareTypes, CompareActions } from './compare.redux';
 import { selectRevisions, selectIsFederation, selectSettings, ModelTypes } from '../model';
 import { selectSortType, selectSortOrder } from './compare.selectors';
-import { modelsMock } from '../../constants/compare';
+import { modelsMock, COMPARE_TABS, COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE } from '../../constants/compare';
 import { DialogActions } from '../dialog';
 import { Viewer } from '../../services/viewer/viewer';
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
@@ -46,8 +46,9 @@ export function* getCompareModelData({ isFederation, settings }) {
 		const revisions = yield select(selectRevisions);
 		const [, , currentRevisionTag] = window.location.pathname.replace('/viewer/', '').split('/');
 
-		const baseRevision = isFederation ? revisions[0] :
-		revisions.find((rev) => rev.tag === currentRevisionTag || rev._id === currentRevisionTag ) || revisions[0];
+		const baseRevision = isFederation
+			? revisions[0]
+			: revisions.find((rev) => rev.tag === currentRevisionTag || rev._id === currentRevisionTag ) || revisions[0];
 
 		const targetRevision = getNextRevision(revisions, currentRevisionTag);
 		const currentRevision =
@@ -127,10 +128,27 @@ export function* setSortType({ sortType }) {
 	}
 }
 
+export function* setActiveTab({ activeTab }) {
+	try {
+		const currentSortType = yield select(selectSortType);
+
+		const componentStateUpdate = { activeTab } as any;
+		if (activeTab === DIFF_COMPARE_TYPE && currentSortType === COMPARE_SORT_TYPES.TYPE) {
+			componentStateUpdate.sortType = COMPARE_SORT_TYPES.NAME;
+			componentStateUpdate.sortOrder = SORT_ORDER_TYPES.ASCENDING;
+		}
+		yield put(CompareActions.setComponentState(componentStateUpdate));
+	} catch (error) {
+		DialogActions.showErrorDialog('set', 'sort type');
+	}
+}
+
 export default function* CompareSaga() {
 	yield takeLatest(ModelTypes.FETCH_SETTINGS_SUCCESS, getCompareModels);
 	yield takeLatest(CompareTypes.ON_RENDERING_TYPE_CHANGE, onRenderingTypeChange);
 	yield takeLatest(CompareTypes.GET_COMPARE_MODEL_DATA, getCompareModelData);
 	yield takeLatest(CompareTypes.GET_MODEL_INFO, getModelInfo);
 	yield takeLatest(CompareTypes.SET_SORT_TYPE, setSortType);
+	yield takeLatest(CompareTypes.SET_ACTIVE_TAB, setActiveTab);
+
 }

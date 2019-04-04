@@ -41,6 +41,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setComponentState: CompareActions.setComponentState,
 	getCompareModels: CompareActions.getCompareModels,
 	onRenderingTypeChange: CompareActions.onRenderingTypeChange,
+	onTabChange: CompareActions.setActiveTab,
 	setSortType: CompareActions.setSortType
 }, dispatch);
 

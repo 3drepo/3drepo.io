@@ -16,10 +16,14 @@
  */
 
 import { createSelector } from 'reselect';
-import { isEqual, values } from 'lodash';
+import { isEqual, values, orderBy } from 'lodash';
 import { searchByFilters } from '../../helpers/searching';
 
 export const selectCompareDomain = (state) => Object.assign({}, state.compare);
+
+const selectComponentState = createSelector(
+	selectCompareDomain, (state) => state.componentState
+);
 
 export const selectBaseModels = createSelector(
 	selectCompareDomain, (state) => state.baseModels
@@ -49,10 +53,6 @@ export const selectIsModelVisible = createSelector(
 	selectCompareDomain, (state) => state.isModelVisible
 );
 
-const selectComponentState = createSelector(
-	selectCompareDomain, (state) => state.componentState
-);
-
 export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
@@ -69,8 +69,22 @@ export const selectClashSelected = createSelector(
 	selectComponentState, (state) => state.clashSelected
 );
 
+export const selectSortOrder = createSelector(
+	selectComponentState, (state) => state.sortOrder
+);
+
+export const selectSortType = createSelector(
+	selectComponentState, (state) => state.sortType
+);
+
 export const selectCompareModels = createSelector(
-	selectComponentState, (state) => searchByFilters(state.compareModels, state.selectedFilters)
+	selectComponentState, selectSortType, selectSortOrder, (state, sortType, sortOrder) => {
+		return orderBy(
+			searchByFilters(state.compareModels, state.selectedFilters),
+			[sortType],
+			[sortOrder]
+		);
+	}
 );
 
 const isAllSelected = (allModels, selectedModelsMap) => isEqual(
@@ -88,12 +102,4 @@ export const selectIsAllClashSelected = createSelector(
 
 export const selectRenderingType = createSelector(
 	selectComponentState, (state) => state.renderingType
-);
-
-export const selectSortOrder = createSelector(
-	selectComponentState, (state) => state.sortOrder
-);
-
-export const selectSortType = createSelector(
-	selectComponentState, (state) => state.sortType
 );

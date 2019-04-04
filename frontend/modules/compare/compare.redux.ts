@@ -31,7 +31,8 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	onRenderingTypeChange: ['renderingType'],
 	getCompareModelData: ['isFederation', 'settings'],
 	getModelInfo: ['model'],
-	setSortType: ['sortType']
+	setSortType: ['sortType'],
+	setActiveTab: ['activeTab']
 }, { prefix: 'COMPARE/' });
 
 export interface ICompareComponentState {
@@ -66,12 +67,8 @@ export const INITIAL_STATE: ICompareState = {
 		activeTab: DIFF_COMPARE_TYPE,
 		selectedFilters: [],
 		renderingType: RENDERING_TYPES.COMPARE,
-		diffSelected: {
-			3: true
-		},
-		clashSelected: {
-			3: true
-		},
+		diffSelected: {},
+		clashSelected: {},
 		compareModels: []
 	}
 };

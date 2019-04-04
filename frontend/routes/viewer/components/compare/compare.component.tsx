@@ -66,6 +66,7 @@ interface IProps {
 	sortType: string;
 	sortOrder: string;
 	setSortType: (sortType) => void;
+	onTabChange: (activeTab) => void;
 	onRenderingTypeChange: (renderingType) => void;
 	setComponentState: (state) => void;
 	getCompareModels: (settings, revision) => void;
@@ -87,25 +88,19 @@ export class Compare extends React.PureComponent<IProps, any> {
 	}
 
 	get headerMenuItems() {
-		const {
-			printIssues,
-			downloadIssues,
-			importBCF,
-			exportBCF,
-			teamspace,
-			model,
-			revision,
-			showSubmodelIssues,
-			toggleSubmodelsIssues
-		} = this.props;
-
-		return [{
+		const menuItems = [{
 			...COMPARE_ACTIONS_MENU.SORT_BY_NAME,
 			onClick: this.handleSortClick(COMPARE_SORT_TYPES.NAME)
-		}, {
-			...COMPARE_ACTIONS_MENU.SORT_BY_TYPE,
-			onClick: this.handleSortClick(COMPARE_SORT_TYPES.TYPE)
 		}];
+
+		if (!this.isDiffTabActive) {
+			menuItems.push({
+				...COMPARE_ACTIONS_MENU.SORT_BY_TYPE,
+				onClick: this.handleSortClick(COMPARE_SORT_TYPES.TYPE)
+			});
+		}
+
+		return menuItems;
 	}
 
 	private renderDiffTab = renderWhenTrue(() => (
@@ -208,7 +203,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 	}
 
 	private handleChange = (event, activeTab) => {
-		this.props.setComponentState({ activeTab });
+		this.props.onTabChange(activeTab);
 	}
 
 	private handleCompare = () => {
