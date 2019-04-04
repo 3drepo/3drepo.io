@@ -395,7 +395,6 @@
 
 		const meta = { place, httpCode: resCode.status };
 
-		let length;
 		// Prepare error response
 		if (resCode.value) {
 			const responseObject = _.extend({}, extraInfo, {
