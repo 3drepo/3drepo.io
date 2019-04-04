@@ -89,3 +89,11 @@ export const selectIsAllClashSelected = createSelector(
 export const selectRenderingType = createSelector(
 	selectComponentState, (state) => state.renderingType
 );
+
+export const selectSortOrder = createSelector(
+	selectComponentState, (state) => state.sortOrder
+);
+
+export const selectSortType = createSelector(
+	selectComponentState, (state) => state.sortType
+);

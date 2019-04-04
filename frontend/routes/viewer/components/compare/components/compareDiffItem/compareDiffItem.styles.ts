@@ -60,6 +60,7 @@ export const Revisions = styled.div`
   justify-content: space-between;
   width: 100%;
   height: 20px;
-  margin-top: 5px;
   align-items: center;
+  overflow: hidden;
+  margin-top: 6px;
 `;

@@ -16,12 +16,21 @@
  */
 
 import styled from 'styled-components';
-import { Tabs as TabsComponent } from '@material-ui/core';
+import { Tabs as TabsComponent, List } from '@material-ui/core';
 import SliderComponent from '@material-ui/lab/Slider';
 
 import { ViewerPanelFooter as ViewerPanelFooterComponent } from '../viewerPanel/viewerPanel.styles';
 
 import { COLOR } from '../../../../styles';
+
+export const MenuList = styled(List)`
+  background-color: ${COLOR.WHITE};
+  width: 100%;
+  min-width: 140px;
+  max-width: 300px;
+  box-shadow: 0 1px 3px 0 ${COLOR.BLACK_20};
+  border-radius: 2px;
+`;
 
 export const Tabs = styled(TabsComponent)`
 	border-bottom: 1px solid ${COLOR.BLACK_20};

@@ -17,7 +17,12 @@
 
 import styled from 'styled-components';
 import Popover from '@material-ui/core/Popover';
+import { COLOR } from '../../../styles';
 
 export const Container = styled.div``;
 
-export const StyledPopover = styled(Popover)``;
+export const StyledPopover = styled(Popover)`
+	&& {
+		box-shadow: 0 0 2px ${COLOR.BLACK_20};
+	}
+`;

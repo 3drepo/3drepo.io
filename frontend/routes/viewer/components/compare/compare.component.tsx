@@ -17,16 +17,29 @@
 
 import * as React from 'react';
 import CompareIcon from '@material-ui/icons/Compare';
-import { Tab } from '@material-ui/core';
+import MoreIcon from '@material-ui/icons/MoreVert';
+import CheckIcon from '@material-ui/icons/Check';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
+
+import { Tab, IconButton } from '@material-ui/core';
 
 import {
 	DIFF_COMPARE_TYPE,
 	COMPARE_TABS,
 	CLASH_COMPARE_TYPE,
 	RENDERING_TYPES,
-	RENDERING_TYPES_LIST
+	RENDERING_TYPES_LIST,
+	COMPARE_ACTIONS_MENU,
+	COMPARE_SORT_TYPES
 } from '../../../../constants/compare';
+import {
+	StyledListItem,
+	IconWrapper,
+	StyledItemText
+} from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { CompareDiff } from './components/compareDiff';
@@ -39,22 +52,60 @@ import {
 	SliderLabels,
 	SliderLabel,
 	SliderWrapper,
-	ViewerPanelFooter
+	ViewerPanelFooter,
+	MenuList
 } from './compare.styles';
+import { SORT_ORDER_TYPES } from '../../../../constants/sorting';
+import { SortAmountUp, SortAmountDown } from '../../../components/fontAwesomeIcon';
 
 interface IProps {
 	className: string;
 	activeTab: string;
 	renderingType: number;
 	compareModels: any[];
+	sortType: string;
+	sortOrder: string;
+	setSortType: (sortType) => void;
 	onRenderingTypeChange: (renderingType) => void;
 	setComponentState: (state) => void;
 	getCompareModels: (settings, revision) => void;
 }
 
+const MenuButton = ({ IconProps, Icon, ...props }) => (
+	<IconButton
+		{...props}
+		aria-label="Show filters menu"
+		aria-haspopup="true"
+	>
+		<MoreIcon {...IconProps} />
+	</IconButton>
+);
+
 export class Compare extends React.PureComponent<IProps, any> {
 	get isDiffTabActive() {
 		return this.props.activeTab === DIFF_COMPARE_TYPE;
+	}
+
+	get headerMenuItems() {
+		const {
+			printIssues,
+			downloadIssues,
+			importBCF,
+			exportBCF,
+			teamspace,
+			model,
+			revision,
+			showSubmodelIssues,
+			toggleSubmodelsIssues
+		} = this.props;
+
+		return [{
+			...COMPARE_ACTIONS_MENU.SORT_BY_NAME,
+			onClick: this.handleSortClick(COMPARE_SORT_TYPES.NAME)
+		}, {
+			...COMPARE_ACTIONS_MENU.SORT_BY_TYPE,
+			onClick: this.handleSortClick(COMPARE_SORT_TYPES.TYPE)
+		}];
 	}
 
 	private renderDiffTab = renderWhenTrue(() => (
@@ -75,7 +126,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 			<ViewerPanel
 				title="Compare"
 				Icon={<CompareIcon/>}
-				renderActions={() => []}
+				renderActions={this.renderHeaderButtons}
 				pending={false}
 			>
 				<ViewerPanelContent className="height-catcher" scrollDisabled={true}>
@@ -109,6 +160,44 @@ export class Compare extends React.PureComponent<IProps, any> {
 			</ViewerPanel>
 		);
 	}
+
+	private renderHeaderButtons = () => {
+		return (
+			<ButtonMenu
+				renderButton={MenuButton}
+				renderContent={this.renderMenu}
+				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
+				ButtonProps={{ disabled: false }}
+			/>
+		);
+	}
+
+	private renderMenu = () => {
+		const { sortOrder } = this.props;
+		return (
+			<MenuList>
+				{this.headerMenuItems.map(({ label, onClick, sortType }, index) => {
+					const isEnabled = this.props.sortType === sortType;
+					const isAscending = !isEnabled || sortOrder === SORT_ORDER_TYPES.ASCENDING;
+					return (
+						<StyledListItem key={index} button onClick={onClick}>
+							<IconWrapper>
+								{isAscending && <SortAmountUp fontSize="small" />}
+								{!isAscending && <SortAmountDown fontSize="small" />}
+							</IconWrapper>
+							<StyledItemText>
+								{label}
+								{sortType === this.props.sortType && <CheckIcon fontSize="small" />}
+							</StyledItemText>
+						</StyledListItem>
+					);
+				})}
+			</MenuList>
+		);
+	}
+
+	private handleSortClick = (sortType) => () => this.props.setSortType(sortType);
 
 	private handleRenderingTypeClick = (type) => () => {
 		this.props.onRenderingTypeChange(type);
@@ -147,5 +236,4 @@ export class Compare extends React.PureComponent<IProps, any> {
 				</SliderLabels>
 			</SliderContainer>
 		);
-	}
-}
+	}}

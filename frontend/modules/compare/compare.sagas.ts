@@ -18,10 +18,11 @@
 import { put, takeLatest, select, all } from 'redux-saga/effects';
 import { CompareTypes, CompareActions } from './compare.redux';
 import { selectRevisions, selectIsFederation, selectSettings, ModelTypes } from '../model';
-import { } from './compare.selectors';
+import { selectSortType, selectSortOrder } from './compare.selectors';
 import { modelsMock } from '../../constants/compare';
 import { DialogActions } from '../dialog';
 import { Viewer } from '../../services/viewer/viewer';
+import { SORT_ORDER_TYPES } from '../../constants/sorting';
 
 const getNextRevision = (revisions, revision) => {
 
@@ -101,9 +102,35 @@ export function* onRenderingTypeChange({ renderingType }) {
 	}
 }
 
+export function* setSortType({ sortType }) {
+	try {
+		const currentSortType = yield select(selectSortType);
+		const currentSortOrder = yield select(selectSortOrder);
+
+		const sortSettings = {
+			sortType: currentSortType,
+			sortOrder: currentSortOrder
+		};
+
+		if (currentSortType !== sortType) {
+			sortSettings.sortType = sortType;
+			sortSettings.sortOrder = SORT_ORDER_TYPES.ASCENDING;
+		} else {
+			sortSettings.sortOrder = currentSortOrder === SORT_ORDER_TYPES.ASCENDING
+				? SORT_ORDER_TYPES.DESCENDING
+				: SORT_ORDER_TYPES.ASCENDING;
+		}
+
+		yield put(CompareActions.setComponentState(sortSettings));
+	} catch (error) {
+		DialogActions.showErrorDialog('set', 'sort type');
+	}
+}
+
 export default function* CompareSaga() {
 	yield takeLatest(ModelTypes.FETCH_SETTINGS_SUCCESS, getCompareModels);
 	yield takeLatest(CompareTypes.ON_RENDERING_TYPE_CHANGE, onRenderingTypeChange);
 	yield takeLatest(CompareTypes.GET_COMPARE_MODEL_DATA, getCompareModelData);
 	yield takeLatest(CompareTypes.GET_MODEL_INFO, getModelInfo);
+	yield takeLatest(CompareTypes.SET_SORT_TYPE, setSortType);
 }

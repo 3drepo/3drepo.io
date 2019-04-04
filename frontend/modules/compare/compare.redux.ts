@@ -18,7 +18,8 @@
 import { createActions, createReducer } from 'reduxsauce';
 
 import { ISelectedFilter } from '../../routes/components/filterPanel/filterPanel.component';
-import { DIFF_COMPARE_TYPE, RENDERING_TYPES } from '../../constants/compare';
+import { DIFF_COMPARE_TYPE, RENDERING_TYPES, COMPARE_SORT_TYPES } from '../../constants/compare';
+import { SORT_ORDER_TYPES } from '../../constants/sorting';
 
 export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	setCompareType: ['compareType'],
@@ -29,10 +30,13 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	setComponentState: ['componentState'],
 	onRenderingTypeChange: ['renderingType'],
 	getCompareModelData: ['isFederation', 'settings'],
-	getModelInfo: ['model']
+	getModelInfo: ['model'],
+	setSortType: ['sortType']
 }, { prefix: 'COMPARE/' });
 
 export interface ICompareComponentState {
+	sortType: string;
+	sortOrder: string;
 	activeTab: string;
 	selectedFilters: ISelectedFilter[];
 	diffSelected: {};
@@ -57,6 +61,8 @@ export const INITIAL_STATE: ICompareState = {
 	isCompareDisabled: false,
 	isModelVisible: false,
 	componentState: {
+		sortType: COMPARE_SORT_TYPES.NAME,
+		sortOrder: SORT_ORDER_TYPES.ASCENDING,
 		activeTab: DIFF_COMPARE_TYPE,
 		selectedFilters: [],
 		renderingType: RENDERING_TYPES.COMPARE,

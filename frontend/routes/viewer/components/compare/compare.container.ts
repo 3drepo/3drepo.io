@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -24,19 +24,24 @@ import {
 	CompareActions,
 	selectActiveTab,
 	selectCompareModels,
-	selectRenderingType
+	selectRenderingType,
+	selectSortType,
+	selectSortOrder
 } from '../../../../modules/compare';
 
 const mapStateToProps = createStructuredSelector({
 	activeTab: selectActiveTab,
 	compareModels: selectCompareModels,
-	renderingType: selectRenderingType
+	renderingType: selectRenderingType,
+	sortType: selectSortType,
+	sortOrder: selectSortOrder
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setComponentState: CompareActions.setComponentState,
 	getCompareModels: CompareActions.getCompareModels,
-	onRenderingTypeChange: CompareActions.onRenderingTypeChange
+	onRenderingTypeChange: CompareActions.onRenderingTypeChange,
+	setSortType: CompareActions.setSortType
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Compare);

@@ -113,3 +113,21 @@ export const modelsMock = [
 		}]
 	}
 ];
+
+export const COMPARE_SORT_TYPES = {
+	NAME: 'name',
+	TYPE: 'type'
+};
+
+export const COMPARE_ACTIONS_MENU = {
+	SORT_BY_NAME: {
+		name: 'sort-name',
+		label: 'Sort by name',
+		sortType: COMPARE_SORT_TYPES.NAME
+	},
+	SORT_BY_TYPE: {
+		name: 'sort-type',
+		label: 'Sort by type',
+		sortType: COMPARE_SORT_TYPES.TYPE
+	}
+};
