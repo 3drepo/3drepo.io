@@ -44,7 +44,7 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 	}
 
 	public getRevisionName = (id) =>
-		this.props.revisions[id].name || '(no name)'
+		this.props.revisions[id].tag || '(no name)'
 
 	public renderRevisionsSettings = renderWhenTrue(() => (
 		<>

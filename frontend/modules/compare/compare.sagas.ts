@@ -15,14 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select } from 'redux-saga/effects';
+import { put, takeLatest, select, all } from 'redux-saga/effects';
 import { CompareTypes, CompareActions } from './compare.redux';
 import { selectRevisions, selectIsFederation, selectSettings, ModelTypes } from '../model';
 import { } from './compare.selectors';
 import { modelsMock } from '../../constants/compare';
 import { DialogActions } from '../dialog';
+import { Viewer } from '../../services/viewer/viewer';
 
-const getNextRevisionId = (revisions, revision) => {
+const getNextRevision = (revisions, revision) => {
 
 	if (!revision) {
 		return revisions[0];
@@ -36,29 +37,45 @@ const getNextRevisionId = (revisions, revision) => {
 		return revisions[index];
 	}
 
-	return revisions[index + 1]._id;
+	return revisions[index + 1];
 };
 
-export function* getCompareModelData() {
+export function* getCompareModelData({ isFederation, settings }) {
 	try {
-		const [, , currentRevision] = window.location.pathname.replace('/viewer/', '').split('/');
 		const revisions = yield select(selectRevisions);
-		const isFederation = yield select(selectIsFederation);
-		const settings = yield select(selectSettings);
+		const [, , currentRevisionTag] = window.location.pathname.replace('/viewer/', '').split('/');
 
 		const baseRevision = isFederation ? revisions[0] :
-		revisions.find((rev) => rev.tag === currentRevision || rev._id === currentRevision ) || revisions[0];
+		revisions.find((rev) => rev.tag === currentRevisionTag || rev._id === currentRevisionTag ) || revisions[0];
 
-		const targetRevisionId = getNextRevisionId(revisions, currentRevision);
+		const targetRevision = getNextRevision(revisions, currentRevisionTag);
+		const currentRevision =
+			currentRevisionTag ? revisions.find((revision) => revision.tag === currentRevisionTag) : revisions[0];
 
-		return {
+		const model = {
 			_id: settings._id,
 			name: settings.name,
-			baseRevision,
-			targetDiffRevision: targetRevisionId,
-			targetClashRevision: baseRevision._id
+			baseRevision: baseRevision._id,
+			currentRevision: currentRevision._id,
+			targetDiffRevision: targetRevision._id,
+			targetClashRevision: baseRevision._id,
+			revisions
 		};
 
+		if (!isFederation) {
+			yield put(CompareActions.setComponentState({ compareModels: [model] }));
+		} else {
+			yield put(CompareActions.setComponentState({ compareModels: [model] })); // TODO: generate for subModels
+		}
+
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+export function* getModelInfo(model) {
+	try {
+		return yield Viewer.getModelInfo(model);
 	} catch (error) {
 		console.error(error);
 	}
@@ -66,9 +83,11 @@ export function* getCompareModelData() {
 
 export function* getCompareModels() {
 	try {
+		const isFederation = yield select(selectIsFederation);
 		const settings = yield select(selectSettings);
-		yield put(CompareActions.getCompareModelData());
-		yield put(CompareActions.setComponentState({compareModels: modelsMock}));
+
+		yield put(CompareActions.getCompareModelData(isFederation, settings));
+
 	} catch (error) {
 		console.error(error);
 	}
@@ -86,4 +105,5 @@ export default function* CompareSaga() {
 	yield takeLatest(ModelTypes.FETCH_SETTINGS_SUCCESS, getCompareModels);
 	yield takeLatest(CompareTypes.ON_RENDERING_TYPE_CHANGE, onRenderingTypeChange);
 	yield takeLatest(CompareTypes.GET_COMPARE_MODEL_DATA, getCompareModelData);
+	yield takeLatest(CompareTypes.GET_MODEL_INFO, getModelInfo);
 }

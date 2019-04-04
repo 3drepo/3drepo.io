@@ -28,7 +28,8 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	getCompareModels: ['settings', 'revision'],
 	setComponentState: ['componentState'],
 	onRenderingTypeChange: ['renderingType'],
-	getCompareModelData: []
+	getCompareModelData: ['isFederation', 'settings'],
+	getModelInfo: ['model']
 }, { prefix: 'COMPARE/' });
 
 export interface ICompareComponentState {

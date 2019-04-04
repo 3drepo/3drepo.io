@@ -102,6 +102,7 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 
 	private renderRevisions = () => {
 		const { revisions, selected, baseRevision, currentRevision, onRevisionChange } = this.props;
+
 		return (
 			<RevisionsSelect
 				defaultValue={baseRevision}

@@ -47,7 +47,6 @@ export const ModelData = styled.div`
 export const Name = styled.div<IName>`
   color: ${(props) => props.disabled ? COLOR.BLACK_20 : COLOR.BLACK_80};
   font-size: 14px;
-  margin-bottom: 10px;
 `;
 
 export const CurrentRevision = styled.div<ICurrentRevision>`
@@ -61,5 +60,6 @@ export const Revisions = styled.div`
   justify-content: space-between;
   width: 100%;
   height: 20px;
+  margin-top: 5px;
   align-items: center;
 `;

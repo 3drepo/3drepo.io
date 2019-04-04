@@ -46,7 +46,7 @@ export class RevisionsSelect extends React.PureComponent<IProps, any> {
 
 	get value() {
 		const { value } = this.props;
-		return this.revisionsMap[value || this.defaultValue].name;
+		return this.revisionsMap[value || this.defaultValue].tag;
 	}
 
 	private renderSelect = renderWhenTrue(() => {
@@ -60,9 +60,9 @@ export class RevisionsSelect extends React.PureComponent<IProps, any> {
 				renderValue={this.renderValue}
 				onChange={onChange}
 			>
-				{revisions.map(({ name, timestamp, _id }) => (
+				{revisions.map(({ tag, timestamp, _id }) => (
 					<MenuItem key={_id} value={_id}>
-						{this.renderName(name)}
+						{this.renderName(tag)}
 						{this.renderDate(timestamp)}
 					</MenuItem>
 				))}
@@ -70,7 +70,7 @@ export class RevisionsSelect extends React.PureComponent<IProps, any> {
 		);
 	});
 
-	private renderDefaultValue = renderWhenTrue(() => this.renderName(this.revisionsMap[this.defaultValue].name));
+	private renderDefaultValue = renderWhenTrue(() => this.renderName(this.revisionsMap[this.defaultValue].tag));
 
 	public render() {
 		const { revisions } = this.props;

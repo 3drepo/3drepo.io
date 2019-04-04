@@ -261,6 +261,11 @@ export class ViewerService {
 		await this.isViewerReady();
 		this.viewer.stopClipEdit();
 	}
+
+	public async getModelInfo({database, model}) {
+		await this.isViewerReady();
+		this.viewer.getModelInfo(database, model);
+	}
 }
 
 export const Viewer = new ViewerService();
