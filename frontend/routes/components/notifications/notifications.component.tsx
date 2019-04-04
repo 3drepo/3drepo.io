@@ -167,12 +167,12 @@ export class Notifications extends React.PureComponent<IProps, any> {
 				<MenuItem
 						onClick={this.markAllRead}
 					>
-						Mark all read
+						Mark all as read
 					</MenuItem>
 					<MenuItem
 						onClick={this.markAllUnread}
 					>
-						Mark all unread
+						Mark all as unread
 					</MenuItem>
 					<MenuItem
 						onClick={this.deleteAllNotifications}
