@@ -55,7 +55,7 @@ const setTeamspaces = (state = INITIAL_STATE, action) => {
 	const accounts = Object.keys(teamspaces);
 
 	accounts.map((user) => {
-		return teamspaces[user].projects = sortByField([...teamspaces[user].projects],
+		return teamspaces[user].projects = sortByField(teamspaces[user].projects,
 			{ order: 'asc', config: { field: 'name' } });
 	});
 

@@ -107,7 +107,7 @@ export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
 		users,
 		isPending: false,
 		...pick(teamspace, ['models', 'permissions', 'isAdmin', 'fedModels']),
-		projects: sortByField([...teamspace.projects], { order: 'asc', config: { field: 'name' } }),
+		projects: sortByField(teamspace.projects, { order: 'asc', config: { field: 'name' } }),
 		selectedTeamspace: teamspace.account,
 		isTeamspaceAdmin: teamspace.isAdmin,
 		collaboratorLimit: action.collaboratorLimit
