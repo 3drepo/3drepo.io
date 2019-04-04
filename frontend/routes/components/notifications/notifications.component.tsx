@@ -112,6 +112,20 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		return false;
 	}
 
+	public markAllRead = (e: React.SyntheticEvent) => {
+		this.toggleMenu(e);
+		this.props.notifications.forEach((notification) => {
+			this.props.sendUpdateNotificationRead(notification._id, true);
+		});
+	}
+
+	public markAllUnread = (e: React.SyntheticEvent) => {
+		this.toggleMenu(e);
+		this.props.notifications.forEach((notification) => {
+			this.props.sendUpdateNotificationRead(notification._id, false);
+		});
+	}
+
 	public deleteAllNotifications = (e: React.SyntheticEvent) => {
 		this.toggleMenu(e);
 		this.props.confirmSendDeleteAllNotifications();
@@ -150,6 +164,16 @@ export class Notifications extends React.PureComponent<IProps, any> {
 					open={!!this.state.menuElement}
 					onClose={this.toggleMenu}
 				>
+				<MenuItem
+						onClick={this.markAllRead}
+					>
+						Mark all read
+					</MenuItem>
+					<MenuItem
+						onClick={this.markAllUnread}
+					>
+						Mark all unread
+					</MenuItem>
 					<MenuItem
 						onClick={this.deleteAllNotifications}
 						disabled={!this.props.notifications.length}
