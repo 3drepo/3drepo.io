@@ -4,7 +4,7 @@ import uuid
 from pymongo import MongoClient
 import re
 import bson
-import time
+import random
 import StringIO
 
 def cleanFileName(fileName):
@@ -17,12 +17,13 @@ def cleanFileName(fileName):
 
 def genFileDir(fileName, dirLevels):
     directory = ''
+    minChunkLen = 4
     nameChunkLen = len(fileName) / dirLevels
-    if nameChunkLen < 1:
-        nameChunkLen = 1
+    if nameChunkLen < minChunkLen:
+        nameChunkLen = minChunkLen
     for i in range(dirLevels):
         chunkStart = (i * nameChunkLen) % len(fileName)
-        fileNameHash = hash(fileName[chunkStart : chunkStart + nameChunkLen] + time.ctime())
+        fileNameHash = hash(fileName[chunkStart : chunkStart + nameChunkLen] + str(random.random()))
         directory += str(fileNameHash & 255) + '/'
     return directory
 
