@@ -4,6 +4,7 @@ import uuid
 from pymongo import MongoClient
 import re
 import bson
+import time
 import StringIO
 
 def cleanFileName(fileName):
@@ -16,11 +17,13 @@ def cleanFileName(fileName):
 
 def genFileDir(fileName, dirLevels):
     directory = ''
-    fileNameHash = hash(fileName)
-    while dirLevels > 0:
+    nameChunkLen = len(fileName) / dirLevels
+    if nameChunkLen < 1:
+        nameChunkLen = 1
+    for i in range(dirLevels):
+        chunkStart = (i * nameChunkLen) % len(fileName)
+        fileNameHash = hash(fileName[chunkStart : chunkStart + nameChunkLen] + time.ctime())
         directory += str(fileNameHash & 255) + '/'
-        fileNameHash = fileNameHash >> 8
-        dirLevels -= 1
     return directory
 
 if len(sys.argv) < 4:
@@ -77,7 +80,8 @@ for database in db.database_names():
                     bsonData['link'] = fileLink
                     bsonData['type'] = "fs"
                     bsonData['size'] = entry.length
-                    bsonData['compression'] = compression # snappy / none
+                    if compression:
+                        bsonData['compression'] = compression # snappy / none
 
                     if dryRun:
                         print( "\t\t Writing: " + str(bsonData))
