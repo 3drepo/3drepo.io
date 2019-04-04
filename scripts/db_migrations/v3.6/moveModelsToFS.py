@@ -58,7 +58,7 @@ dirLevels = 2
 ##### Connect to the Database #####
 db = MongoClient(connString)
 for database in db.database_names():
-    if database == "asdf" and database != "admin" and database != "local":
+    if database != "admin" and database != "local":
         db = MongoClient(connString)[database]
         print("--database:" + database)
 
