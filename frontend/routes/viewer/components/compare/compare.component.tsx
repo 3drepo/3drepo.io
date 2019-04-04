@@ -111,10 +111,6 @@ export class Compare extends React.PureComponent<IProps, any> {
 		<CompareClash compareModels={this.props.compareModels} />
 	));
 
-  public componentDidMount() {
-		this.props.getCompareModels({}, '');
-  }
-
 	public render() {
 		const { activeTab } = this.props;
 		return (
