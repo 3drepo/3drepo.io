@@ -22,6 +22,8 @@ import { DIFF_COMPARE_TYPE, RENDERING_TYPES, COMPARE_SORT_TYPES } from '../../co
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
 
 export const { Types: CompareTypes, Creators: CompareActions } = createActions({
+	toggleCompare: [],
+	setIsActive: ['isActive'],
 	setCompareType: ['compareType'],
 	setModelType: ['modelType'],
 	setCompareDisabled: ['isCompareDisabled'],
@@ -51,6 +53,7 @@ export interface ICompareState {
 	baseModels: any[];
 	targetModels: any[];
 	isComparePending: boolean;
+	isCompareActive: boolean;
 	isCompareDisabled: boolean;
 	isModelVisible: boolean;
 	componentState: ICompareComponentState;
@@ -60,6 +63,7 @@ export const INITIAL_STATE: ICompareState = {
 	baseModels: [],
 	targetModels: [],
 	isComparePending: false,
+	isCompareActive: false,
 	isCompareDisabled: false,
 	isModelVisible: false,
 	componentState: {
@@ -83,6 +87,10 @@ const setModelType = (state = INITIAL_STATE, {modelType}) => {
 	return { ...state, modelType };
 };
 
+const setIsActive = (state = INITIAL_STATE, { isActive }) => {
+	return { ...state, isCompareActive: isActive };
+};
+
 const setCompareDisabled = (state = INITIAL_STATE, {isCompareDisabled}) => {
 	return { ...state, isCompareDisabled };
 };
@@ -100,5 +108,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[CompareTypes.SET_MODEL_TYPE] : setModelType,
 	[CompareTypes.SET_COMPARE_DISABLED] : setCompareDisabled,
 	[CompareTypes.SET_MODEL_VISIBILITY] : setModelVisibility,
-	[CompareTypes.SET_COMPONENT_STATE]: setComponentState
+	[CompareTypes.SET_COMPONENT_STATE]: setComponentState,
+	[CompareTypes.SET_IS_ACTIVE]: setIsActive
 });

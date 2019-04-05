@@ -26,7 +26,8 @@ import {
 	selectCompareModels,
 	selectRenderingType,
 	selectSortType,
-	selectSortOrder
+	selectSortOrder,
+	selectIsCompareActive
 } from '../../../../modules/compare';
 
 const mapStateToProps = createStructuredSelector({
@@ -34,10 +35,12 @@ const mapStateToProps = createStructuredSelector({
 	compareModels: selectCompareModels,
 	renderingType: selectRenderingType,
 	sortType: selectSortType,
-	sortOrder: selectSortOrder
+	sortOrder: selectSortOrder,
+	isActive: selectIsCompareActive
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	toggleCompare: CompareActions.toggleCompare,
 	setComponentState: CompareActions.setComponentState,
 	getCompareModels: CompareActions.getCompareModels,
 	onRenderingTypeChange: CompareActions.onRenderingTypeChange,

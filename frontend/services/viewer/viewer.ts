@@ -165,6 +165,48 @@ export class ViewerService {
 		this.viewer.setMeasureMode(false);
 	}
 
+	/**
+	 * Compare
+	 */
+
+	public diffToolSetAsComparator(teamspace: string, model: string) {
+		this.viewer.diffToolSetAsComparator(teamspace, model);
+	}
+
+	public diffToolLoadComparator(teamspace: string, model: string, revision: string) {
+		return this.viewer.diffToolLoadComparator(teamspace, model, revision);
+	}
+
+	public async diffToolEnableWithClashMode() {
+		await this.isViewerReady();
+		return this.viewer.diffToolEnableWithClashMode();
+	}
+
+	public async diffToolEnableWithDiffMode() {
+		await this.isViewerReady();
+		return this.viewer.diffToolEnableWithDiffMode();
+	}
+
+	public diffToolDisableAndClear = async () => {
+		await this.isViewerReady();
+		return this.viewer.diffToolDisableAndClear();
+	}
+
+	public diffToolShowBaseModel = async () => {
+		await this.isViewerReady();
+		return this.viewer.diffToolShowBaseModel();
+	}
+
+	public diffToolShowComparatorModel = async () => {
+		await this.isViewerReady();
+		return this.viewer.diffToolShowComparatorModel();
+	}
+
+	public diffToolDiffView = async () => {
+		await this.isViewerReady();
+		return this.viewer.diffToolDiffView();
+	}
+
 	public async getObjectsStatus({ teamspace, model } = { teamspace: '', model: '' }) {
 		await this.isViewerReady();
 		return this.viewer.getObjectsStatus(teamspace, model);

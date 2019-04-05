@@ -263,7 +263,7 @@ export class CompareService {
 			});
 	}
 
-	public changeCompareState(newCompareState: string) {
+/* 	public changeCompareState(newCompareState: string) {
 
 		this.state.compareState = newCompareState;
 
@@ -281,11 +281,11 @@ export class CompareService {
 			break;
 		}
 
-	}
+	} */
 
-	public prettyTimestamp(timestamp: string) {
+/* 	public prettyTimestamp(timestamp: string) {
 		return this.$filter('prettyDate')(timestamp, {showSeconds: false});
-	}
+	} */
 
 	public canCompare() {
 		const loaded = !!this.ViewerService.currentModel.model;

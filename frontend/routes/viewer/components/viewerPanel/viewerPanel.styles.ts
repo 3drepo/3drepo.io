@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { COLOR } from '../../../../styles/colors';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -92,11 +92,22 @@ export const ViewerPanelFooter = styled(Grid).attrs({
 	font-size: 14px;
 `;
 
-export const ViewerPanelButton = styled(Button)`
+interface IViewerPanelButton {
+	active?: number;
+}
+
+export const ViewerPanelButton = styled(Button)<IViewerPanelButton>`
 	&& {
 		flex: none;
 		margin-right: -3px;
 		width: 40px;
 		height: 40px;
+		${({ active }) => active ? css`
+			background-color: #ff9800;
+			&:hover {
+				background-color: ${COLOR.DARK_ORANGE};
+			}
+		` : ''
+		}
 	}
 `;

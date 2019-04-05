@@ -16,23 +16,25 @@
  */
 
 import { put, takeLatest, select, all, takeEvery } from 'redux-saga/effects';
+import { cond, matches } from 'lodash';
+
 import { CompareTypes, CompareActions } from './compare.redux';
 import { selectRevisions, selectIsFederation, selectSettings, ModelTypes } from '../model';
-import { selectSortType, selectSortOrder } from './compare.selectors';
-import { COMPARE_TABS, COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE } from '../../constants/compare';
+import { selectSortType, selectSortOrder, selectIsCompareActive } from './compare.selectors';
+import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES } from '../../constants/compare';
 import { DialogActions } from '../dialog';
 import { Viewer } from '../../services/viewer/viewer';
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
 import { selectCompareModels } from './compare.selectors';
 import * as API from '../../services/api';
 
-const getNextRevision = (revisions, revision) => {
-	if (!revision) {
+const getNextRevision = (revisions, currentRevision) => {
+	if (!currentRevision) {
 		return revisions[0];
 	}
 
 	const len = revisions.length;
-	const index = revisions.findIndex((r) => r._id === revision);
+	const index = revisions.findIndex((r) => r._id === currentRevision);
 
 	const lastRev = index + 1 === len;
 	if (lastRev) {
@@ -102,8 +104,15 @@ export function* getCompareModels() {
 	}
 }
 
+const handleRenderingTypeChange = cond([
+	[matches(RENDERING_TYPES.BASE), Viewer.diffToolShowBaseModel],
+	[matches(RENDERING_TYPES.COMPARE), Viewer.diffToolDiffView],
+	[matches(RENDERING_TYPES.TARGET), Viewer.diffToolShowComparatorModel]
+]);
+
 export function* onRenderingTypeChange({ renderingType }) {
 	try {
+		handleRenderingTypeChange(renderingType);
 		yield put(CompareActions.setComponentState({ renderingType }));
 	} catch (error) {
 		DialogActions.showErrorDialog('change', 'rendering type');
@@ -138,20 +147,65 @@ export function* setSortType({ sortType }) {
 export function* setActiveTab({ activeTab }) {
 	try {
 		const currentSortType = yield select(selectSortType);
-
 		const componentStateUpdate = { activeTab } as any;
-		if (activeTab === DIFF_COMPARE_TYPE && currentSortType === COMPARE_SORT_TYPES.TYPE) {
-			componentStateUpdate.sortType = COMPARE_SORT_TYPES.NAME;
-			componentStateUpdate.sortOrder = SORT_ORDER_TYPES.ASCENDING;
+
+		if (activeTab === DIFF_COMPARE_TYPE) {
+			if (currentSortType === COMPARE_SORT_TYPES.TYPE) {
+				componentStateUpdate.sortType = COMPARE_SORT_TYPES.NAME;
+				componentStateUpdate.sortOrder = SORT_ORDER_TYPES.ASCENDING;
+			}
+
+			Viewer.diffToolEnableWithDiffMode();
+		} else {
+
 		}
+
+		handleRenderingTypeChange(RENDERING_TYPES.COMPARE);
 		yield put(CompareActions.setComponentState(componentStateUpdate));
 	} catch (error) {
 		DialogActions.showErrorDialog('set', 'sort type');
 	}
 }
 
+/* 	public disableComparison(); {
+
+	this.state.compareEnabled = false;
+	this.state.canChangeCompareState = false;
+	this.state.compareState = '';
+	this.ViewerService.diffToolDisableAndClear();
+
+}
+
+	public enableComparison(); {
+
+	this.state.canChangeCompareState = false;
+	this.changeCompareState('compare');
+
+	if (this.state.isFed) {
+		this.startComparisonFed(this.state.mode === 'diff');
+	} else {
+		this.diffModel();
+	}
+
+} */
+
+export function* toggleCompare() {
+	try {
+		const isActive = yield select(selectIsCompareActive);
+		if (isActive) {
+			// this.disableComparison();
+		} else {
+			// this.enableComparison();
+		}
+		yield put(CompareActions.setIsActive(!isActive));
+	} catch (error) {
+		DialogActions.showErrorDialog('start', 'comparing');
+	}
+}
+
 export default function* CompareSaga() {
 	yield takeLatest(ModelTypes.FETCH_SETTINGS_SUCCESS, getCompareModels);
+	yield takeLatest(CompareTypes.TOGGLE_COMPARE, toggleCompare);
 	yield takeLatest(CompareTypes.ON_RENDERING_TYPE_CHANGE, onRenderingTypeChange);
 	yield takeLatest(CompareTypes.GET_COMPARE_MODEL_DATA, getCompareModelData);
 	yield takeLatest(CompareTypes.SET_SORT_TYPE, setSortType);

@@ -49,6 +49,10 @@ export const selectIsCompareDisabled = createSelector(
 	selectCompareDomain, (state) => state.isCompareDisabled
 );
 
+export const selectIsCompareActive = createSelector(
+	selectCompareDomain, (state) => state.isCompareActive
+);
+
 export const selectIsModelVisible = createSelector(
 	selectCompareDomain, (state) => state.isModelVisible
 );

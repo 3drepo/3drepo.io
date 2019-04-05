@@ -65,6 +65,8 @@ interface IProps {
 	compareModels: any[];
 	sortType: string;
 	sortOrder: string;
+	isActive: boolean;
+	toggleCompare: () => void;
 	setSortType: (sortType) => void;
 	onTabChange: (activeTab) => void;
 	onRenderingTypeChange: (renderingType) => void;
@@ -111,7 +113,8 @@ export class Compare extends React.PureComponent<IProps, any> {
 	));
 
 	public render() {
-		const { activeTab } = this.props;
+		const { activeTab, isActive, toggleCompare } = this.props;
+
 		return (
 			<ViewerPanel
 				title="Compare"
@@ -139,10 +142,11 @@ export class Compare extends React.PureComponent<IProps, any> {
 					{this.renderSlider()}
 					<ViewerPanelButton
 						aria-label="Compare"
-						onClick={this.handleCompare}
+						onClick={toggleCompare}
 						color="secondary"
 						variant="fab"
 						disabled={false}
+						active={Number(isActive)}
 					>
 						<CompareIcon />
 					</ViewerPanelButton>
@@ -201,11 +205,8 @@ export class Compare extends React.PureComponent<IProps, any> {
 		this.props.onTabChange(activeTab);
 	}
 
-	private handleCompare = () => {
-	}
-
 	private renderSlider = () => {
-		const { renderingType } = this.props;
+		const { renderingType  } = this.props;
 		return (
 			<SliderContainer>
 				<SliderWrapper>
