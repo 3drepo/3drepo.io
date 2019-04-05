@@ -69,6 +69,10 @@ function StateManagerRun(
 		}
 
 		AnalyticService.sendPageView(location);
+
+		if (location.href.indexOf('sign-up') !== -1 || location.href.indexOf('register-request') !== -1) {
+			AnalyticService.sendPageViewReferer(location);
+		}
 	});
 
 	$rootScope.$on('$stateChangeStart', (event, toState, toParams) => {
