@@ -26,8 +26,8 @@ import { renderWhenTrue } from '../../../../../../helpers/rendering';
 interface IProps {
 	className?: string;
 	name: string;
-	baseRevision: string;
-	currentRevision: string;
+	baseRevision: any;
+	currentRevision: any;
 	revisions: any[];
 	selected?: boolean;
 	onSelectionChange: (event, selected) => void;
@@ -50,8 +50,8 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 		<>
 			<ArrowsAltH />
 			<RevisionsSelect
-				defaultValue={this.props.baseRevision}
-				value={this.props.currentRevision}
+				defaultValue={this.props.baseRevision._id}
+				value={this.props.currentRevision._id}
 				revisions={this.props.revisions}
 				disabled={!this.props.selected}
 				onChange={this.props.onRevisionChange}

@@ -27,8 +27,8 @@ import { RevisionsSelect } from '../revisionsSelect/revisionsSelect.component';
 interface IProps {
 	className?: string;
 	name: string;
-	baseRevision: string;
-	currentRevision: string;
+	baseRevision: any;
+	currentRevision: any;
 	revisions: any[];
 	comparingType: string;
 	selected?: boolean;
@@ -105,8 +105,8 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 
 		return (
 			<RevisionsSelect
-				defaultValue={baseRevision}
-				value={currentRevision}
+				defaultValue={baseRevision._id}
+				value={currentRevision._id}
 				revisions={revisions}
 				disabled={!selected || !this.isTargetItem}
 				onChange={onRevisionChange}

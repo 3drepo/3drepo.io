@@ -66,6 +66,7 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 	)
 
 	private handleRevisionChange = (modelProps) => () => {
+		console.log('Type of', modelProps.name, 'changed');
 	}
 
 	private handleItemSelect = (modelProps) => (event, selected) => {

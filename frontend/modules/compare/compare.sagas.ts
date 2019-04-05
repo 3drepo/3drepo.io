@@ -20,7 +20,9 @@ import { cond, matches } from 'lodash';
 
 import { CompareTypes, CompareActions } from './compare.redux';
 import { selectRevisions, selectIsFederation, selectSettings, ModelTypes } from '../model';
-import { selectSortType, selectSortOrder, selectIsCompareActive, selectActiveTab, selectTargetModels } from './compare.selectors';
+import {
+	selectSortType, selectSortOrder, selectIsCompareActive, selectActiveTab, selectTargetModels
+} from './compare.selectors';
 import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES } from '../../constants/compare';
 import { DialogActions } from '../dialog';
 import { Viewer } from '../../services/viewer/viewer';
@@ -58,10 +60,10 @@ const createCompareModel = (id, name, isFederation, revisions) => {
 	return {
 		_id: id,
 		name,
-		baseRevision: baseRevision._id,
-		currentRevision: currentRevision._id,
-		targetDiffRevision: targetRevision._id,
-		targetClashRevision: baseRevision._id,
+		baseRevision,
+		currentRevision,
+		targetDiffRevision: targetRevision,
+		targetClashRevision: baseRevision,
 		revisions
 	};
 };

@@ -30,7 +30,15 @@ interface IProps {
 	disabled?: boolean;
 }
 
-export class RevisionsSelect extends React.PureComponent<IProps, any> {
+interface IState {
+	value: string;
+}
+
+export class RevisionsSelect extends React.PureComponent<IProps, IState> {
+	public state = {
+		value: null
+	};
+
 	public static defaultProps = {
 		disabled: false
 	};
@@ -45,20 +53,19 @@ export class RevisionsSelect extends React.PureComponent<IProps, any> {
 	}
 
 	get value() {
-		const { value } = this.props;
-		return this.revisionsMap[value || this.defaultValue].tag;
+		return this.revisionsMap[this.state.value].tag;
 	}
 
 	private renderSelect = renderWhenTrue(() => {
-		const { revisions, disabled, value, defaultValue, onChange } = this.props;
+		const { revisions, disabled } = this.props;
 
 		return (
 			<SelectField
-				value={value || defaultValue}
+				value={this.state.value}
 				readOnly={revisions.length < 2}
 				disabled={disabled}
 				renderValue={this.renderValue}
-				onChange={onChange}
+				onChange={this.handleChange}
 			>
 				{revisions.map(({ tag, timestamp, _id }) => (
 					<MenuItem key={_id} value={_id}>
@@ -72,6 +79,12 @@ export class RevisionsSelect extends React.PureComponent<IProps, any> {
 
 	private renderDefaultValue = renderWhenTrue(() => this.renderName(this.revisionsMap[this.defaultValue].tag));
 
+	public componentDidMount() {
+		this.setState({
+			value: this.props.value || this.props.defaultValue
+		});
+	}
+
 	public render() {
 		const { revisions } = this.props;
 		return (
@@ -80,6 +93,12 @@ export class RevisionsSelect extends React.PureComponent<IProps, any> {
 				{this.renderDefaultValue(revisions.length === 1)}
 			</>
 		);
+	}
+
+	private handleChange = (e) => {
+		this.setState({
+			value: e.target.value
+		});
 	}
 
 	private renderValue = () => this.renderName(this.value);

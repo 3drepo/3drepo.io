@@ -42,7 +42,7 @@ export const RENDERING_TYPES_LIST = [
 	},
 	{
 		type: RENDERING_TYPES.TARGET,
-		label: 'Base'
+		label: 'Target'
 	}
 ];
 
