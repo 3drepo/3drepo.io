@@ -79,6 +79,16 @@ export const INITIAL_STATE = {
 	}
 };
 
+const updateIssueProps = (issuesMap, issueId, props = {}) => {
+	return {
+		...issuesMap,
+		[issueId]: {
+			...issuesMap[issueId],
+			...props
+		}
+	};
+};
+
 export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
 
 export const toggleDetailsPendingState = (state = INITIAL_STATE, { isPending }) => {
@@ -92,13 +102,13 @@ export const toggleIsImportingBcf = (state = INITIAL_STATE, { isImporting }) => 
 export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues = [] }) => {
 	const issuesMap = keyBy(issues, '_id');
 	return {
-		...state, issuesMap, componentState: { ...cloneDeep(INITIAL_STATE.componentState) }
+		...state, issuesMap, componentState: { ...INITIAL_STATE.componentState }
 	};
 };
 
 export const fetchIssueSuccess = (state = INITIAL_STATE, { issue }) => {
-	const issuesMap = cloneDeep(state.issuesMap);
-	issuesMap[issue._id].comments = issue.comments;
+	const issuesMap = updateIssueProps(state.issuesMap, issue._id, { comments: issue.comments });
+
 	return { ...state, issuesMap, componentState: { ...state.componentState, failedToLoad: false } };
 };
 
@@ -122,10 +132,8 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 };
 
 export const createCommentSuccess = (state = INITIAL_STATE, { comment, issueId }) => {
-	const issuesMap = cloneDeep(state.issuesMap);
-	const issue = issuesMap[issueId];
-	issue.comments = [comment, ...issue.comments.map((log) => ({...log, sealed: true, new: true }))];
-	issuesMap[issueId] = issue;
+	const comments = [comment, ...state.issuesMap[issueId].comments.map((log) => ({ ...log, sealed: true, new: true }))];
+	const issuesMap = updateIssueProps(state.issuesMap, issueId, { comments });
 
 	return { ...state, issuesMap };
 };
@@ -139,24 +147,23 @@ export const updateCommentSuccess = (state = INITIAL_STATE, { comment, issueId }
 };
 
 export const deleteCommentSuccess = (state = INITIAL_STATE, { commentGuid, issueId }) => {
-	const issuesMap = cloneDeep(state.issuesMap);
-	const updatedComments = issuesMap[issueId].comments.filter((log) => log.guid !== commentGuid);
-	issuesMap[issueId].comments = updatedComments;
+	const comments = state.issuesMap[issueId].comments.filter((log) => log.guid !== commentGuid);
+	const issuesMap = updateIssueProps(state.issuesMap, issueId, { comments });
 
 	return { ...state, issuesMap };
 };
 
 export const toggleSortOrder = (state = INITIAL_STATE) => {
-	return {...state, componentState: {
-		...state.componentState,
-		sortOrder: state.componentState.sortOrder === 'asc' ? 'desc' : 'asc'
-	}};
+	return {
+		...state, componentState: {
+			...state.componentState,
+			sortOrder: state.componentState.sortOrder === 'asc' ? 'desc' : 'asc'
+		}
+	};
 };
 
 const showCloseInfo = (state = INITIAL_STATE, { issueId }) => {
-	const issuesMap = cloneDeep(state.issuesMap);
-	issuesMap[issueId].willBeClosed = true;
-
+	const issuesMap = updateIssueProps(state.issuesMap, issueId, { willBeClosed: true });
 	return { ...state, issuesMap };
 };
 
