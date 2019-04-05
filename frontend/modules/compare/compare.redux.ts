@@ -34,7 +34,8 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	getCompareModelData: ['isFederation', 'settings'],
 	getModelInfo: ['model'],
 	setSortType: ['sortType'],
-	setActiveTab: ['activeTab']
+	setActiveTab: ['activeTab'],
+	setIsPending: ['isPending']
 }, { prefix: 'COMPARE/' });
 
 export interface ICompareComponentState {
@@ -91,6 +92,10 @@ const setIsActive = (state = INITIAL_STATE, { isActive }) => {
 	return { ...state, isCompareActive: isActive };
 };
 
+const setIsPending = (state = INITIAL_STATE, { isPending }) => {
+	return { ...state, isComparePending: isPending };
+};
+
 const setCompareDisabled = (state = INITIAL_STATE, {isCompareDisabled}) => {
 	return { ...state, isCompareDisabled };
 };
@@ -109,5 +114,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[CompareTypes.SET_COMPARE_DISABLED] : setCompareDisabled,
 	[CompareTypes.SET_MODEL_VISIBILITY] : setModelVisibility,
 	[CompareTypes.SET_COMPONENT_STATE]: setComponentState,
-	[CompareTypes.SET_IS_ACTIVE]: setIsActive
+	[CompareTypes.SET_IS_ACTIVE]: setIsActive,
+	[CompareTypes.SET_IS_PENDING]: setIsPending
 });

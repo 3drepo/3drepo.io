@@ -290,7 +290,7 @@ export class ViewerService {
 			this.viewer.showHiddenByDefaultObjects();
 		});
 	}
-
+/*
 	public handleUnityError = (message: string, reload: boolean, isUnity: boolean) =>  {
 
 		let errorType = '3D Repo Error';
@@ -308,7 +308,7 @@ export class ViewerService {
 				console.error('Unity errored and user canceled reload', message);
 			});
 
-	}
+	} */
 
 	public getModelInfo(account: string, model: string)  {
 		const url = account + '/' + model + '.json';

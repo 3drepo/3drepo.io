@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select, all, takeEvery } from 'redux-saga/effects';
+import { put, takeLatest, select, all, takeEvery, call } from 'redux-saga/effects';
 import { cond, matches } from 'lodash';
 
 import { CompareTypes, CompareActions } from './compare.redux';
 import { selectRevisions, selectIsFederation, selectSettings, ModelTypes } from '../model';
-import { selectSortType, selectSortOrder, selectIsCompareActive } from './compare.selectors';
+import { selectSortType, selectSortOrder, selectIsCompareActive, selectActiveTab, selectTargetModels } from './compare.selectors';
 import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES } from '../../constants/compare';
 import { DialogActions } from '../dialog';
 import { Viewer } from '../../services/viewer/viewer';
@@ -47,8 +47,9 @@ const getNextRevision = (revisions, currentRevision) => {
 const createCompareModel = (id, name, isFederation, revisions) => {
 	const [, , currentRevisionTag] = window.location.pathname.replace('/viewer/', '').split('/');
 
-	const baseRevision = isFederation ? revisions[0] :
-	revisions.find((rev) => rev.tag === currentRevisionTag || rev._id === currentRevisionTag ) || revisions[0];
+	const baseRevision = isFederation
+		? revisions[0]
+		: revisions.find((rev) => rev.tag === currentRevisionTag || rev._id === currentRevisionTag ) || revisions[0];
 
 	const targetRevision = getNextRevision(revisions, currentRevisionTag);
 	const currentRevision =
@@ -65,7 +66,7 @@ const createCompareModel = (id, name, isFederation, revisions) => {
 	};
 };
 
-export function* getCompareModelData({ isFederation, settings }) {
+function* getCompareModelData({ isFederation, settings }) {
 	try {
 		const revisions = yield select(selectRevisions);
 
@@ -81,7 +82,7 @@ export function* getCompareModelData({ isFederation, settings }) {
 	}
 }
 
-export function* getModelInfo({ model }) {
+function* getModelInfo({ model }) {
 	try {
 		const { data: revisions } = yield API.getModelRevisions(model.database, model.model);
 		const modelInfo = yield Viewer.getModelInfo(model);
@@ -93,7 +94,7 @@ export function* getModelInfo({ model }) {
 	}
 }
 
-export function* getCompareModels() {
+function* getCompareModels() {
 	try {
 		const isFederation = yield select(selectIsFederation);
 		const settings = yield select(selectSettings);
@@ -110,16 +111,16 @@ const handleRenderingTypeChange = cond([
 	[matches(RENDERING_TYPES.TARGET), Viewer.diffToolShowComparatorModel]
 ]);
 
-export function* onRenderingTypeChange({ renderingType }) {
+function* onRenderingTypeChange({ renderingType }) {
 	try {
 		handleRenderingTypeChange(renderingType);
 		yield put(CompareActions.setComponentState({ renderingType }));
 	} catch (error) {
-		DialogActions.showErrorDialog('change', 'rendering type');
+		yield put(DialogActions.showErrorDialog('change', 'rendering type', error.message));
 	}
 }
 
-export function* setSortType({ sortType }) {
+function* setSortType({ sortType }) {
 	try {
 		const currentSortType = yield select(selectSortType);
 		const currentSortOrder = yield select(selectSortOrder);
@@ -140,11 +141,44 @@ export function* setSortType({ sortType }) {
 
 		yield put(CompareActions.setComponentState(sortSettings));
 	} catch (error) {
-		DialogActions.showErrorDialog('set', 'sort type');
+		yield put(DialogActions.showErrorDialog('set', 'sort type', error.message));
 	}
 }
 
-export function* setActiveTab({ activeTab }) {
+function* setProperViewerCompareMode() {
+	try {
+		const activeTab = yield select(selectActiveTab);
+		const isFederation = yield select(selectIsFederation);
+
+		if (activeTab === DIFF_COMPARE_TYPE) {
+			Viewer.diffToolEnableWithDiffMode();
+		} else if (isFederation) {
+			Viewer.diffToolEnableWithClashMode();
+		} else {
+			Viewer.diffToolShowBaseModel();
+		}
+
+		handleRenderingTypeChange(RENDERING_TYPES.COMPARE);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('setup', 'diff tool mode', error.message));
+	}
+}
+
+function* handleLoadedModels() {
+	try {
+		yield all([
+			put(CompareActions.setIsActive(true)),
+			put(CompareActions.setIsPending(true))
+		]);
+
+		yield call(setProperViewerCompareMode);
+
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('handle', 'loaded models', error.message));
+	}
+}
+
+function* setActiveTab({ activeTab }) {
 	try {
 		const currentSortType = yield select(selectSortType);
 		const componentStateUpdate = { activeTab } as any;
@@ -154,52 +188,78 @@ export function* setActiveTab({ activeTab }) {
 				componentStateUpdate.sortType = COMPARE_SORT_TYPES.NAME;
 				componentStateUpdate.sortOrder = SORT_ORDER_TYPES.ASCENDING;
 			}
-
-			Viewer.diffToolEnableWithDiffMode();
-		} else {
-
 		}
-
-		handleRenderingTypeChange(RENDERING_TYPES.COMPARE);
 		yield put(CompareActions.setComponentState(componentStateUpdate));
 	} catch (error) {
-		DialogActions.showErrorDialog('set', 'sort type');
+		yield put(DialogActions.showErrorDialog('set', 'sort type', error.message));
 	}
 }
 
-/* 	public disableComparison(); {
+function* startComparisonOfFederation() {
+	const activeTab = yield select(selectActiveTab);
+	/* TO DO */
+	/* yield this.loadModels(isDiffMode); */
 
-	this.state.compareEnabled = false;
-	this.state.canChangeCompareState = false;
-	this.state.compareState = '';
-	this.ViewerService.diffToolDisableAndClear();
-
-}
-
-	public enableComparison(); {
-
-	this.state.canChangeCompareState = false;
-	this.changeCompareState('compare');
-
-	if (this.state.isFed) {
-		this.startComparisonFed(this.state.mode === 'diff');
+	if (activeTab === DIFF_COMPARE_TYPE) {
+		Viewer.diffToolEnableWithDiffMode();
 	} else {
-		this.diffModel();
+		Viewer.diffToolEnableWithClashMode();
 	}
 
-} */
+	yield call(handleLoadedModels);
+}
 
-export function* toggleCompare() {
+function* startComparisonOfModel() {
+	yield put(CompareActions.setIsPending(true));
+
+	const targetModels = yield select(selectTargetModels);
+	const { account, model, targetRevision } = targetModels;
+
+	try {
+		yield Viewer.diffToolLoadComparator(account, model, targetRevision.diff.name);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('load', 'comparator', error.message));
+	}
+
+	yield call(handleLoadedModels);
+}
+
+function* startCompare() {
+	try {
+		const isFederation = yield select(selectIsFederation);
+		yield put(CompareActions.onRenderingTypeChange(RENDERING_TYPES.COMPARE));
+
+		if (isFederation) {
+			yield call(startComparisonOfFederation);
+		} else {
+			yield call(startComparisonOfModel);
+		}
+
+		yield put(CompareActions.setIsActive(true));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('start', 'comparison', error.message));
+	}
+}
+
+function* stopCompare() {
+	try {
+		yield put(CompareActions.setIsActive(false));
+		Viewer.diffToolDisableAndClear();
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('stop', 'comparison', error.message));
+	}
+}
+
+function* toggleCompare() {
 	try {
 		const isActive = yield select(selectIsCompareActive);
 		if (isActive) {
-			// this.disableComparison();
+			yield call(stopCompare);
 		} else {
-			// this.enableComparison();
+			yield call(startCompare);
 		}
-		yield put(CompareActions.setIsActive(!isActive));
 	} catch (error) {
-		DialogActions.showErrorDialog('start', 'comparing');
+		yield put(DialogActions.showErrorDialog('toggle', 'comparison', error.message));
 	}
 }
 

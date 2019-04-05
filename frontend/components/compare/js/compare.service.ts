@@ -25,7 +25,7 @@ interface ICompareState {
 	compareEnabled: boolean;
 	ready: Promise<any>;
 	isFed?: boolean;
-	compareState?: string;
+	compareState?: string; // => renderingType
 	canChangeCompareState?: boolean;
 }
 
@@ -300,23 +300,6 @@ export class CompareService {
 		this.useSetModeComparison();
 	}
 
-	public useSetModeComparison() {
-		if (this.state.compareEnabled) {
-			if (this.state.mode === 'diff') {
-				this.ViewerService.diffToolEnableWithDiffMode();
-				this.changeCompareState('compare');
-			} else if (this.state.mode === 'clash') {
-				if (this.state.isFed) {
-					this.ViewerService.diffToolEnabledWithClashMode();
-				} else {
-					this.ViewerService.diffToolShowBaseModel();
-				}
-
-				this.changeCompareState('compare');
-			}
-		}
-	}
-
 	public loadModels(isDiffMode: boolean) {
 		const allModels = [];
 
@@ -358,22 +341,22 @@ export class CompareService {
 		return Promise.all(allModels);
 	}
 
-	public getButtonColor() {
+/* 	public getButtonColor() {
 		if (!this.canCompare()) {
 			return '';
 		} else {
 			return this.state.compareEnabled ? '#FF9800' : 'rgb(6,86,60)';
 		}
-	}
+	} */
 
-	public compare() {
+/* 	public compare() {
 		if (this.state.compareEnabled) {
 			this.disableComparison();
 		} else {
 			this.enableComparison();
 		}
 
-	}
+	} */
 
 	public compareInNewMode(mode) {
 		this.setMode(mode);
@@ -389,7 +372,7 @@ export class CompareService {
 
 	}
 
-	public enableComparison() {
+/* 	public enableComparison() {
 
 		this.state.canChangeCompareState = false;
 		this.changeCompareState('compare');
@@ -400,7 +383,7 @@ export class CompareService {
 			this.diffModel();
 		}
 
-	}
+	} */
 
 	public diffModel() {
 		this.state.loadingComparison = true;
