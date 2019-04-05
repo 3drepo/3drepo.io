@@ -514,7 +514,6 @@ issue.updateAttrs = function(dbCol, uid, data) {
 					"norm",
 					"number",
 					"owner",
-					"position",
 					"rev_id",
 					"status",
 					"thumbnail",
