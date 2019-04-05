@@ -1008,6 +1008,59 @@ function getMetadata(account, model, id) {
 
 }
 
+function isUserAdmin(account, model, user) {
+	const projection = { "permissions": { "$elemMatch": { user: user } }};
+	// find the project this model belongs to
+	return Project.findOne({account}, {models: model}, projection).then(project => {
+		// It either has no permissions, or it has one entry (the user) due to the project in the query
+		return Promise.resolve(
+			project  // This model belongs to a project
+			&& project.permissions.length > 0 // This user has project level permissions in the project
+			&& project.permissions[0].permissions.indexOf(C.PERM_PROJECT_ADMIN) > -1 // This user is an admin of the project
+		);
+	});
+}
+
+async function getSubModelRevisions(account, model, user, branch, rev) {
+	const history = await History.getHistory({ account, model }, branch, rev);
+
+	if(!history) {
+		return Promise.reject(responseCodes.INVALID_TAG_NAME);
+	}
+
+	const refNodes = await Ref.getRefNodes(account, model, history.current);
+	const modelIds = refNodes.map((refNode) => refNode.project);
+	const results = {};
+
+	const param = {};
+	param[account] = modelIds;
+
+	const promises = [];
+
+	const projection = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1};
+	modelIds.forEach((modelId) => {
+		results[modelId] = {};
+		promises.push(History.listByBranch({account, model: modelId}, null, projection).then((revisions) => {
+			console.log(modelId, revisions);
+			revisions = History.clean(revisions);
+
+			revisions.forEach(function(revision) {
+				revision.branch = history.branch || C.MASTER_BRANCH_NAME;
+			});
+			results[modelId].revisions = revisions;
+		}));
+	});
+
+	promises.push(ModelSetting.getModelsName(param).then((modelNameResult) => {
+		const lookUp = modelNameResult[account];
+		modelIds.forEach((modelId) => {
+			results[modelId].name = lookUp[modelId];
+		});
+	}));
+
+	return Promise.all(promises).then(() => results);
+}
+
 const fileNameRegExp = /[ *"/\\[\]:;|=,<>$]/g;
 const acceptedFormat = [
 	"x","obj","3ds","md3","md2","ply",
@@ -1040,6 +1093,7 @@ module.exports = {
 	getAllMetadata,
 	getAllIdsWith4DSequenceTag,
 	getAllIdsWithMetadataField,
+	getSubModelRevisions,
 	setStatus,
 	importSuccess,
 	importFail
