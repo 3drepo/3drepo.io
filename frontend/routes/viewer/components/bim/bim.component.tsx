@@ -79,7 +79,7 @@ export class Bim extends React.PureComponent<IProps, any> {
 				}, () => {
 					this.props.showConfirmDialog({
 						title: 'Clear starred',
-						content: `Are you sure you want to clear your Starred items?`,
+						content: `Are you sure you want to clear your starred items?`,
 						onConfirm: () => {
 							clearStarredMetadata(teamspace, model);
 						}
