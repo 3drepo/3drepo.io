@@ -15,17 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select, all } from 'redux-saga/effects';
+import { put, takeLatest, select, all, takeEvery } from 'redux-saga/effects';
 import { CompareTypes, CompareActions } from './compare.redux';
 import { selectRevisions, selectIsFederation, selectSettings, ModelTypes } from '../model';
 import { selectSortType, selectSortOrder } from './compare.selectors';
-import { modelsMock, COMPARE_TABS, COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE } from '../../constants/compare';
+import { COMPARE_TABS, COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE } from '../../constants/compare';
 import { DialogActions } from '../dialog';
 import { Viewer } from '../../services/viewer/viewer';
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
+import { selectCompareModels } from './compare.selectors';
+import * as API from '../../services/api';
 
 const getNextRevision = (revisions, revision) => {
-
 	if (!revision) {
 		return revisions[0];
 	}
@@ -41,33 +42,36 @@ const getNextRevision = (revisions, revision) => {
 	return revisions[index + 1];
 };
 
+const createCompareModel = (id, name, isFederation, revisions) => {
+	const [, , currentRevisionTag] = window.location.pathname.replace('/viewer/', '').split('/');
+
+	const baseRevision = isFederation ? revisions[0] :
+	revisions.find((rev) => rev.tag === currentRevisionTag || rev._id === currentRevisionTag ) || revisions[0];
+
+	const targetRevision = getNextRevision(revisions, currentRevisionTag);
+	const currentRevision =
+		currentRevisionTag ? revisions.find((revision) => revision.tag === currentRevisionTag) : revisions[0];
+
+	return {
+		_id: id,
+		name,
+		baseRevision: baseRevision._id,
+		currentRevision: currentRevision._id,
+		targetDiffRevision: targetRevision._id,
+		targetClashRevision: baseRevision._id,
+		revisions
+	};
+};
+
 export function* getCompareModelData({ isFederation, settings }) {
 	try {
 		const revisions = yield select(selectRevisions);
-		const [, , currentRevisionTag] = window.location.pathname.replace('/viewer/', '').split('/');
-
-		const baseRevision = isFederation
-			? revisions[0]
-			: revisions.find((rev) => rev.tag === currentRevisionTag || rev._id === currentRevisionTag ) || revisions[0];
-
-		const targetRevision = getNextRevision(revisions, currentRevisionTag);
-		const currentRevision =
-			currentRevisionTag ? revisions.find((revision) => revision.tag === currentRevisionTag) : revisions[0];
-
-		const model = {
-			_id: settings._id,
-			name: settings.name,
-			baseRevision: baseRevision._id,
-			currentRevision: currentRevision._id,
-			targetDiffRevision: targetRevision._id,
-			targetClashRevision: baseRevision._id,
-			revisions
-		};
 
 		if (!isFederation) {
+			const model = createCompareModel( settings._id, settings.name, isFederation, revisions);
 			yield put(CompareActions.setComponentState({ compareModels: [model] }));
 		} else {
-			yield put(CompareActions.setComponentState({ compareModels: [model] })); // TODO: generate for subModels
+			yield all(settings.subModels.map((subModel) => put(CompareActions.getModelInfo(subModel))));
 		}
 
 	} catch (error) {
@@ -75,9 +79,13 @@ export function* getCompareModelData({ isFederation, settings }) {
 	}
 }
 
-export function* getModelInfo(model) {
+export function* getModelInfo({ model }) {
 	try {
-		return yield Viewer.getModelInfo(model);
+		const { data: revisions } = yield API.getModelRevisions(model.database, model.model);
+		const modelInfo = yield Viewer.getModelInfo(model);
+		const models = yield select(selectCompareModels);
+		const newModel = createCompareModel( modelInfo._id, modelInfo.name, modelInfo.federate, revisions);
+		yield put(CompareActions.setComponentState({ compareModels: [...models, newModel] }));
 	} catch (error) {
 		console.error(error);
 	}
@@ -89,7 +97,6 @@ export function* getCompareModels() {
 		const settings = yield select(selectSettings);
 
 		yield put(CompareActions.getCompareModelData(isFederation, settings));
-
 	} catch (error) {
 		console.error(error);
 	}
@@ -147,8 +154,7 @@ export default function* CompareSaga() {
 	yield takeLatest(ModelTypes.FETCH_SETTINGS_SUCCESS, getCompareModels);
 	yield takeLatest(CompareTypes.ON_RENDERING_TYPE_CHANGE, onRenderingTypeChange);
 	yield takeLatest(CompareTypes.GET_COMPARE_MODEL_DATA, getCompareModelData);
-	yield takeLatest(CompareTypes.GET_MODEL_INFO, getModelInfo);
 	yield takeLatest(CompareTypes.SET_SORT_TYPE, setSortType);
 	yield takeLatest(CompareTypes.SET_ACTIVE_TAB, setActiveTab);
-
+	yield takeEvery(CompareTypes.GET_MODEL_INFO, getModelInfo);
 }

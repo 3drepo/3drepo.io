@@ -103,3 +103,7 @@ export const selectIsAllClashSelected = createSelector(
 export const selectRenderingType = createSelector(
 	selectComponentState, (state) => state.renderingType
 );
+
+export const selectIsPending = createSelector(
+	selectComponentState, (state) => state.isPending
+);

@@ -264,7 +264,9 @@ export class ViewerService {
 
 	public async getModelInfo({database, model}) {
 		await this.isViewerReady();
-		this.viewer.getModelInfo(database, model);
+		return this.viewerService.getModelInfo(database, model).then((response) => {
+			return response.data;
+		});
 	}
 }
 

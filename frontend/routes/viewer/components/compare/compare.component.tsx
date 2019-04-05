@@ -69,7 +69,6 @@ interface IProps {
 	onTabChange: (activeTab) => void;
 	onRenderingTypeChange: (renderingType) => void;
 	setComponentState: (state) => void;
-	getCompareModels: (settings, revision) => void;
 }
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
@@ -219,8 +218,8 @@ export class Compare extends React.PureComponent<IProps, any> {
 					/>
 				</SliderWrapper>
 				<SliderLabels>
-					{RENDERING_TYPES_LIST.map(({ type, label }) => (
-						<SliderLabel onClick={this.handleRenderingTypeClick(type)}>
+					{RENDERING_TYPES_LIST.map(({ type, label }, index) => (
+						<SliderLabel key={index} onClick={this.handleRenderingTypeClick(type)}>
 							{label}
 						</SliderLabel>
 					))}

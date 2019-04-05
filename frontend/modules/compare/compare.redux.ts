@@ -44,6 +44,7 @@ export interface ICompareComponentState {
 	clashSelected: {};
 	compareModels: [];
 	renderingType: number;
+	isPending: boolean;
 }
 
 export interface ICompareState {
@@ -69,7 +70,8 @@ export const INITIAL_STATE: ICompareState = {
 		renderingType: RENDERING_TYPES.COMPARE,
 		diffSelected: {},
 		clashSelected: {},
-		compareModels: []
+		compareModels: [],
+		isPending: true
 	}
 };
 
