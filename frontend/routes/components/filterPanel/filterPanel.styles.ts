@@ -190,3 +190,20 @@ export const Chips = styled.div<IChips>`
 		margin-left: ${(props) => props.filtersOpen ? '38px' : '0'};
 	}
 `;
+
+export const Placeholder = styled.div`
+  position: absolute;
+	left: 48px;
+	color: ${COLOR.BLACK_60};
+	font-size: 14px;
+	top: 50%;
+	transform: translateY(-50%);
+	user-select: none;
+	cursor: text;
+	display: flex;
+	align-items: center;
+`;
+
+export const PlaceholderText = styled.span`
+	margin-left: 4px;
+`;

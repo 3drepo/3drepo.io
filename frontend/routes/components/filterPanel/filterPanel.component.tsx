@@ -25,8 +25,8 @@ import ExpandIcon from '@material-ui/icons/ChevronRight';
 
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
-
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
+import SearchIcon from '@material-ui/icons/Search';
 import { Highlight } from '../highlight/highlight.component';
 import { ENTER_KEY, BACKSPACE } from '../../../constants/keys';
 import { FiltersMenu } from './components/filtersMenu/filtersMenu.component';
@@ -43,7 +43,9 @@ import {
 	MoreIcon,
 	CopyIcon,
 	ButtonWrapper,
-	Chips
+	Chips,
+	Placeholder,
+	PlaceholderText
 } from './filterPanel.styles';
 import { compareStrings } from '../../../helpers/searching';
 import { renderWhenTrue } from '../../../helpers/rendering';
@@ -72,7 +74,6 @@ interface IProps {
 	onChange: (selectedFilters) => void;
 	selectedFilters: any[];
 	hideMenu?: boolean;
-	placeholder?: string;
 	className?: string;
 	autoFocus?: boolean;
 }
@@ -148,12 +149,12 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 	public static defaultProps = {
 		filters: [],
-		placeholder: 'Filter',
 		autoFocus: true
 	};
 
 	private popperNode = null;
 	private filterSuggestions = [];
+	private input = null;
 
 	public componentDidMount = () => {
 		this.setState({ selectedFilters: this.props.selectedFilters });
@@ -460,6 +461,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 	public handleAutoSuggestMount = (autoSuggestComponent) => {
 		if (autoSuggestComponent && autoSuggestComponent.input) {
+			this.input = autoSuggestComponent.input;
 			autoSuggestComponent.input.addEventListener('keyup', this.handleKeyUp);
 		}
 	}
@@ -488,6 +490,14 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		const onlyQueryFilters = this.props.filters.every((filter) => filter.type === DATA_TYPES.QUERY);
 		return onlyQueryFilters;
 	}
+	public renderPlaceholder = renderWhenTrue(() => (
+		<Placeholder onClick={this.handlePlaceholderClick}>
+			<SearchIcon />
+			<PlaceholderText>
+				Search
+			</PlaceholderText>
+		</Placeholder>
+	));
 
 	public render() {
 		const { value, suggestions, selectedFilters, filtersOpen } = this.state;
@@ -507,7 +517,6 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 						renderSuggestion={this.renderSuggestion}
 						renderInputComponent={this.renderInputComponent}
 						inputProps={{
-							placeholder: this.props.placeholder,
 							value,
 							onChange: this.onSearchChange,
 							onKeyPress: this.onSearchSubmit,
@@ -521,9 +530,14 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 					/>
 					{this.renderCopyButton((!hideMenu && !filters.length) || this.onlyCopyButton)}
 					{this.renderFiltersMenuButton(!hideMenu && filters.length && !this.onlyCopyButton)}
+					{this.renderPlaceholder(!Boolean(value))}
 				</InputContainer>
 
 			</Container>
 		);
+	}
+
+	private handlePlaceholderClick = () => {
+		this.input.focus();
 	}
 }
