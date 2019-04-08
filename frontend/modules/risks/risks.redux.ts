@@ -150,9 +150,9 @@ export const createCommentSuccess = (state = INITIAL_STATE, { comment, riskId })
 	let comments;
 
 	if (comment.action || comment.viewpoint) {
-		comments = [comment, ...state.issuesMap[issueId].comments.map((log) => ({ ...log, sealed: true, new: true }))];
+		comments = [comment, ...state.risksMap[riskId].comments.map((log) => ({ ...log, sealed: true, new: true }))];
 	} else {
-		comments = [...state.issuesMap[issueId].comments.map((log) => ({ ...log, sealed: true, new: true }))];
+		comments = [...state.risksMap[riskId].comments.map((log) => ({ ...log, sealed: true, new: true }))];
 	}
 
 	const risksMap = updateRiskProps(state.risksMap, riskId, { comments });
