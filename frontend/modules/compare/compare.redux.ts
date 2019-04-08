@@ -42,8 +42,7 @@ export interface ICompareComponentState {
 	sortOrder: string;
 	activeTab: string;
 	selectedFilters: ISelectedFilter[];
-	diffSelected: {};
-	clashSelected: {};
+	selectedModelsMap: {};
 	compareModels: [];
 	renderingType: number;
 	isPending: boolean;
@@ -72,8 +71,7 @@ export const INITIAL_STATE: ICompareState = {
 		activeTab: DIFF_COMPARE_TYPE,
 		selectedFilters: [],
 		renderingType: RENDERING_TYPES.COMPARE,
-		diffSelected: {},
-		clashSelected: {},
+		selectedModelsMap: {},
 		compareModels: [],
 		isPending: true
 	}

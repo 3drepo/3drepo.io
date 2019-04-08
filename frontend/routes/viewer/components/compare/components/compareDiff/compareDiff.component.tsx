@@ -72,7 +72,7 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 	private handleItemSelect = (modelProps) => (event, selected) => {
 		const { selectedItemsMap, setComponentState } = this.props;
 		setComponentState({
-			diffSelected: {
+			selectedModelsMap: {
 				...selectedItemsMap,
 				[modelProps._id]: selected
 			}
@@ -81,12 +81,12 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 
 	private handleAllItemsSelect = (event, selected) => {
 		const { setComponentState, compareModels } = this.props;
-		const diffSelected = compareModels.reduce((map, obj) => {
+		const selectedModelsMap = compareModels.reduce((map, obj) => {
 			map[obj._id] = selected;
 			return map;
 		}, {});
 
-		setComponentState({ diffSelected });
+		setComponentState({ selectedModelsMap });
 	}
 
 	private renderListItem = (modelProps) => {

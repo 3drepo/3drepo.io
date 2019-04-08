@@ -21,7 +21,7 @@ import { cond, matches } from 'lodash';
 import { CompareTypes, CompareActions } from './compare.redux';
 import { selectRevisions, selectIsFederation, selectSettings, ModelTypes } from '../model';
 import {
-	selectSortType, selectSortOrder, selectIsCompareActive, selectActiveTab, selectTargetModels
+	selectSortType, selectSortOrder, selectIsCompareActive, selectActiveTab, selectTargetModels, selectBaseModels
 } from './compare.selectors';
 import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES } from '../../constants/compare';
 import { DialogActions } from '../dialog';
@@ -46,7 +46,7 @@ const getNextRevision = (revisions, currentRevision) => {
 	return revisions[index + 1];
 };
 
-const createCompareModel = (modelId, name, isFederation, revisions, currentRevision?) => {
+const prepareModelToCompare = (modelId, name, isFederation, revisions, currentRevision?) => {
 	const baseRevision = isFederation
 		? revisions[0]
 		: revisions.find((rev) => rev.tag === currentRevision || rev._id === currentRevision ) || revisions[0];
@@ -72,18 +72,18 @@ function* getCompareModelData({ isFederation, settings }) {
 		const revisions = yield select(selectRevisions);
 		const [teamspace, , currentRevision] = window.location.pathname.replace('/viewer/', '').split('/');
 		if (!isFederation) {
-			const model = createCompareModel(settings._id, settings.name, isFederation, revisions, currentRevision);
+			const model = prepareModelToCompare(settings._id, settings.name, isFederation, revisions, currentRevision);
 			yield put(CompareActions.setComponentState({ compareModels: [model] }));
 		} else {
 			const { data: submodelsRevisionsMap } = yield API.getSubModelsRevisions(teamspace, settings._id, currentRevision);
 			const compareModels = settings.subModels.map(({ model }) => {
 				const subModelData = submodelsRevisionsMap[model];
-				return createCompareModel(model, subModelData.name, false, subModelData.revisions);
+				return prepareModelToCompare(model, subModelData.name, false, subModelData.revisions);
 			});
 			yield put(CompareActions.setComponentState({ compareModels }));
 		}
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('get', 'model data', error.message));
 	}
 }
 
@@ -94,7 +94,7 @@ function* getCompareModels() {
 
 		yield put(CompareActions.getCompareModelData(isFederation, settings));
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('get', 'models to compare', error.message));
 	}
 }
 
@@ -189,11 +189,44 @@ function* setActiveTab({ activeTab }) {
 }
 
 function* startComparisonOfFederation() {
+	yield put(CompareActions.setIsPending(true));
+	const compareModels = yield select(selectCompareModels);
+	const targetModelsMap = yield select(selectTargetModels);
+	const baseModelsMap = yield select(selectBaseModels);
 	const activeTab = yield select(selectActiveTab);
+	const isDiff = activeTab === DIFF_COMPARE_TYPE;
+
+	const modelsToLoad = [];
+
+	for (let index = 0; index < compareModels.length; index++) {
+		const model = compareModels[index];
+
+		if (model && model.visible) {
+			const sharedRevisionModel = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision[mode].name);
+			const canReuseModel = sharedRevisionModel && !sharedRevisionModel.visible;
+
+			if (canReuseModel) {
+				// TODO
+				// this.changeModelVisibility(sharedRevisionModel.account + ':' + sharedRevisionModel.name, true);
+				Viewer.diffToolSetAsComparator(
+					model.account,
+					model.model
+				);
+			} else {
+				const revision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
+				const modelPromise = Viewer.diffToolLoadComparator(
+					model.account,
+					model.model,
+					revision
+				);
+				modelsToLoad.push(modelPromise);
+			}
+		}
+	}
 	/* TO DO */
 	/* yield this.loadModels(isDiffMode); */
 
-	if (activeTab === DIFF_COMPARE_TYPE) {
+	if (isDiff) {
 		Viewer.diffToolEnableWithDiffMode();
 	} else {
 		Viewer.diffToolEnableWithClashMode();

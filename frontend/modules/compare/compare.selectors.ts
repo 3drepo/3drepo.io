@@ -65,12 +65,8 @@ export const selectActiveTab = createSelector(
 	selectComponentState, (state) => state.activeTab
 );
 
-export const selectDiffSelected = createSelector(
-	selectComponentState, (state) => state.diffSelected
-);
-
-export const selectClashSelected = createSelector(
-	selectComponentState, (state) => state.clashSelected
+export const selectSelectedModelsMap = createSelector(
+	selectComponentState, (state) => state.selectedModelsMap
 );
 
 export const selectSortOrder = createSelector(
@@ -96,12 +92,9 @@ const isAllSelected = (allModels, selectedModelsMap) => isEqual(
 	values(selectedModelsMap).filter((selectedModel) => selectedModel).length
 );
 
-export const selectIsAllDiffSelected = createSelector(
-	selectComponentState, (state) => isAllSelected(state.compareModels, state.diffSelected)
-);
-
-export const selectIsAllClashSelected = createSelector(
-	selectComponentState, (state) => isAllSelected(state.compareModels, state.clashSelected)
+export const selectIsAllSelected = createSelector(
+	selectCompareModels, selectSelectedModelsMap,
+	(compareModels, selectedModelsMap) => isAllSelected(compareModels, selectedModelsMap)
 );
 
 export const selectRenderingType = createSelector(

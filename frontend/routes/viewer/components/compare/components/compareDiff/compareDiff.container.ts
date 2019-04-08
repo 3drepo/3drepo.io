@@ -22,15 +22,15 @@ import { connect } from '../../../../../../helpers/migration';
 import { CompareDiff } from './compareDiff.component';
 import {
 	CompareActions,
-	selectDiffSelected,
 	selectSelectedFilters,
-	selectIsAllDiffSelected
+	selectIsAllSelected,
+	selectSelectedModelsMap
 } from '../../../../../../modules/compare';
 
 const mapStateToProps = createStructuredSelector({
-	selectedItemsMap: selectDiffSelected,
+	selectedItemsMap: selectSelectedModelsMap,
 	selectedFilters: selectSelectedFilters,
-	isAllSelected: selectIsAllDiffSelected
+	isAllSelected: selectIsAllSelected
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

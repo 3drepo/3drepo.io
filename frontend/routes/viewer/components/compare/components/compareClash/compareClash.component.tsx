@@ -77,7 +77,7 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 	private handleItemSelect = (modelProps) => (event, selected) => {
 		const { selectedItemsMap, setComponentState } = this.props;
 		setComponentState({
-			clashSelected: {
+			selectedModelsMap: {
 				...selectedItemsMap,
 				[modelProps._id]: selected
 			}
@@ -86,12 +86,12 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 
 	private handleAllItemsSelect = (event, selected) => {
 		const { setComponentState, compareModels } = this.props;
-		const clashSelected = compareModels.reduce((map, obj) => {
+		const selectedModelsMap = compareModels.reduce((map, obj) => {
 			map[obj._id] = selected;
 			return map;
 		}, {});
 
-		setComponentState({ clashSelected });
+		setComponentState({ selectedModelsMap });
 	}
 
 	private renderListItem = (modelProps) => {
