@@ -32,7 +32,6 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	setComponentState: ['componentState'],
 	onRenderingTypeChange: ['renderingType'],
 	getCompareModelData: ['isFederation', 'settings'],
-	getModelInfo: ['model'],
 	setSortType: ['sortType'],
 	setActiveTab: ['activeTab'],
 	setIsPending: ['isPending']

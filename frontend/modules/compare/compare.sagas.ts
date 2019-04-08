@@ -46,22 +46,21 @@ const getNextRevision = (revisions, currentRevision) => {
 	return revisions[index + 1];
 };
 
-const createCompareModel = (id, name, isFederation, revisions) => {
-	const [, , currentRevisionTag] = window.location.pathname.replace('/viewer/', '').split('/');
-
+const createCompareModel = (modelId, name, isFederation, revisions, currentRevision?) => {
 	const baseRevision = isFederation
 		? revisions[0]
-		: revisions.find((rev) => rev.tag === currentRevisionTag || rev._id === currentRevisionTag ) || revisions[0];
+		: revisions.find((rev) => rev.tag === currentRevision || rev._id === currentRevision ) || revisions[0];
 
-	const targetRevision = getNextRevision(revisions, currentRevisionTag);
-	const currentRevision =
-		currentRevisionTag ? revisions.find((revision) => revision.tag === currentRevisionTag) : revisions[0];
+	const targetRevision = getNextRevision(revisions, currentRevision);
+	const revisionData = currentRevision
+		? revisions.find((revision) => revision.tag === currentRevision)
+		: revisions[0];
 
 	return {
-		_id: id,
+		_id: modelId,
 		name,
 		baseRevision,
-		currentRevision,
+		currentRevision: revisionData,
 		targetDiffRevision: targetRevision,
 		targetClashRevision: baseRevision,
 		revisions
@@ -71,26 +70,18 @@ const createCompareModel = (id, name, isFederation, revisions) => {
 function* getCompareModelData({ isFederation, settings }) {
 	try {
 		const revisions = yield select(selectRevisions);
-
+		const [teamspace, , currentRevision] = window.location.pathname.replace('/viewer/', '').split('/');
 		if (!isFederation) {
-			const model = createCompareModel( settings._id, settings.name, isFederation, revisions);
+			const model = createCompareModel(settings._id, settings.name, isFederation, revisions, currentRevision);
 			yield put(CompareActions.setComponentState({ compareModels: [model] }));
 		} else {
-			yield all(settings.subModels.map((subModel) => put(CompareActions.getModelInfo(subModel))));
+			const { data: submodelsRevisionsMap } = yield API.getSubModelsRevisions(teamspace, settings._id, currentRevision);
+			const compareModels = settings.subModels.map(({ model }) => {
+				const subModelData = submodelsRevisionsMap[model];
+				return createCompareModel(model, subModelData.name, false, subModelData.revisions);
+			});
+			yield put(CompareActions.setComponentState({ compareModels }));
 		}
-
-	} catch (error) {
-		console.error(error);
-	}
-}
-
-function* getModelInfo({ model }) {
-	try {
-		const { data: revisions } = yield API.getModelRevisions(model.database, model.model);
-		const modelInfo = yield Viewer.getModelInfo(model);
-		const models = yield select(selectCompareModels);
-		const newModel = createCompareModel( modelInfo._id, modelInfo.name, modelInfo.federate, revisions);
-		yield put(CompareActions.setComponentState({ compareModels: [...models, newModel] }));
 	} catch (error) {
 		console.error(error);
 	}
@@ -272,5 +263,4 @@ export default function* CompareSaga() {
 	yield takeLatest(CompareTypes.GET_COMPARE_MODEL_DATA, getCompareModelData);
 	yield takeLatest(CompareTypes.SET_SORT_TYPE, setSortType);
 	yield takeLatest(CompareTypes.SET_ACTIVE_TAB, setActiveTab);
-	yield takeEvery(CompareTypes.GET_MODEL_INFO, getModelInfo);
 }

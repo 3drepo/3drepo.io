@@ -99,6 +99,19 @@ export const getModelRevisions = (teamspace, modelId) => {
 };
 
 /**
+ * Get sub-models revisions
+ * @param teamspace
+ * @param modelId
+ * @param revision
+ */
+export const getSubModelsRevisions = (teamspace, modelId, revision) => {
+	if (!revision) {
+		return api.get(`${teamspace}/${modelId}/revision/master/head/subModelRevisions`);
+	}
+	return api.get(`${teamspace}/${modelId}/revision/${revision}/subModelRevisions`);
+};
+
+/**
  * Get model maps
  * @param teamspace
  * @param modelId
