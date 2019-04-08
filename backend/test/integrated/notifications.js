@@ -39,6 +39,8 @@ describe('Notifications', function() {
 	const password = "password";
 	const account = "teamSpace1";
 	const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
+	const model2 = "00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5";
+
 
 	const baseIssue = {
 		"status": "open",
@@ -115,7 +117,7 @@ describe('Notifications', function() {
 	describe("of type assign issue", function() {
 		let issuesId = [];
 
-		const updateIssue = (modelId, issue , id, next) =>
+		const updateIssue = (modelId, issue , id) => next =>
 			agents.teamSpace1.put(`/${account}/${modelId}/issues/${id}.json`)
 				.send(issue)
 				.expect(200 , function(err, res) {
@@ -134,7 +136,7 @@ describe('Notifications', function() {
 							issuesId.push(res.body._id);
 							next(err, res.body._id);
 						}),
-				updateIssue.bind(this, modelId, issueAssignJobA)
+				(id, next) => { updateIssue(modelId, issueAssignJobA, id)(next);}
 				], done);
 		}
 
@@ -292,14 +294,14 @@ describe('Notifications', function() {
 			const issueID2 = issuesId[1];
 
 			async.waterfall([
-				updateIssue.bind(this, model, issue, issueID1),
+				updateIssue(model, issue, issueID1),
 				fetchNotification(agents.adminTeamspace1JobA),
 				(notifications, next) => {
 					expect(notifications).to.be.an("array").and.to.have.length(1);
 					expect(notifications[0].issuesId.sort()).to.be.an("array").and.to.eql( [issueID2]);
 					next();
 				},
-				updateIssue.bind(this, model, issueJobA, issueID1),
+				updateIssue(model, issueJobA, issueID1),
 				fetchNotification(agents.adminTeamspace1JobA),
 				(notifications, next) => {
 					expect(notifications).to.be.an("array").and.to.have.length(1);
@@ -315,7 +317,7 @@ describe('Notifications', function() {
 			const issueId = issuesId.pop();
 
 			async.waterfall([
-				updateIssue.bind(this, model,issue, issueId),
+				updateIssue(model,issue, issueId),
 				fetchNotification(agents.adminTeamspace1JobA),
 				(notifications, next) => {
 					expect(notifications).to.be.an("array").and.to.have.length(1);
@@ -330,7 +332,7 @@ describe('Notifications', function() {
 			const issueId = issuesId.pop();
 
 			async.waterfall([
-				updateIssue.bind(this, model,issue, issueId),
+				updateIssue(model,issue, issueId),
 				fetchNotification(agents.adminTeamspace1JobA),
 				(notifications, next) => {
 					expect(notifications).to.be.an("array").and.to.have.length(0);
@@ -340,8 +342,6 @@ describe('Notifications', function() {
 		})
 
 		it("should add a second notification if an issue has been assign in another model", done => {
-			const model2 = "00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5";
-
 			async.waterfall([
 				assignIssue(model, "Assign issue model1"),
 				fetchNotification(agents.adminTeamspace1JobA),
@@ -368,6 +368,33 @@ describe('Notifications', function() {
 
 			], done)
 		})
+
+		it("should be able to mark all notifications as read with one api call" , done => {
+			const user = agents.adminTeamspace1JobA;
+
+			async.waterfall([
+				fetchNotification(user),
+				(notifications,next) => {
+					expect(notifications).to.be.an("array").and.to.have.length(2);
+					expect(notifications.map(n => n.read)).to.deep.eq([false, false]);
+					next();
+				},
+				next => {
+					user.patch(NOTIFICATIONS_URL)
+					.send({read:true})
+					.expect(200, function(err, res) {
+						fetchNotification(user)(next);
+					})
+				},(notifications,next) => {
+					expect(notifications).to.be.an("array").and.to.have.length(2);
+					expect(notifications.map(n => n.read)).to.deep.eq([true, true]);
+					next();
+				},
+			], done);
+
+		});
+
+
 
 		it("should be created when a new issue has being created with a JobA assigned directly", done => {
 			const issue = Object.assign({"name": "New notification for jobA " }, baseIssue);
