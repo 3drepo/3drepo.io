@@ -55,6 +55,7 @@ interface IProps {
 	sendGetNotifications: () => void;
 	confirmSendDeleteAllNotifications: () => void;
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
+	sendUpdateAllNotificationsRead: (read: boolean) => void;
 	showUpdatedFailedError: (errorMessage: string) => void;
 	sendDeleteNotification: (id: string) => void;
 	deleteNotification: (notification: any) => void;
@@ -112,17 +113,10 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		return false;
 	}
 
-	public markAllRead = (e: React.SyntheticEvent) => {
+	public markAllNotifications = (read) => (e: React.SyntheticEvent) => {
 		this.toggleMenu(e);
 		this.props.notifications.forEach((notification) => {
-			this.props.sendUpdateNotificationRead(notification._id, true);
-		});
-	}
-
-	public markAllUnread = (e: React.SyntheticEvent) => {
-		this.toggleMenu(e);
-		this.props.notifications.forEach((notification) => {
-			this.props.sendUpdateNotificationRead(notification._id, false);
+			this.props.sendUpdateAllNotificationsRead(read);
 		});
 	}
 
@@ -165,12 +159,12 @@ export class Notifications extends React.PureComponent<IProps, any> {
 					onClose={this.toggleMenu}
 				>
 				<MenuItem
-						onClick={this.markAllRead}
+						onClick={this.markAllNotifications(true)}
 					>
 						Mark all as read
 					</MenuItem>
 					<MenuItem
-						onClick={this.markAllUnread}
+						onClick={this.markAllNotifications(false)}
 					>
 						Mark all as unread
 					</MenuItem>
