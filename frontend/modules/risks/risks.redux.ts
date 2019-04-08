@@ -122,7 +122,7 @@ export const fetchRisksSuccess = (state = INITIAL_STATE, { risks = [] }) => {
 };
 
 export const fetchRiskSuccess = (state = INITIAL_STATE, { risk }) => {
-	const risksMap = updateRiskProps(state.risksMap risk._id, { comments: risk.comments });
+	const risksMap = updateRiskProps(state.risksMap, risk._id, { comments: risk.comments });
 
 	return { ...state, risksMap, componentState: { ...state.componentState, failedToLoad: false } };
 };
