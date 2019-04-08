@@ -542,7 +542,9 @@ export class Viewer {
 				// this.viewer.mozRequestFullScreen({
 				// 	vrDisplay,
 				// });
-			} else if (this.viewer.webkitRequestFullscreen) {
+			// @ts-ignore
+		} else if (this.viewer.webkitRequestFullscreen) {
+				// @ts-ignore
 				this.viewer.webkitRequestFullscreen();
 			}
 
@@ -551,7 +553,10 @@ export class Viewer {
 			// if (document.mozCancelFullScreen) {
 			// 	document.mozCancelFullScreen();
 			// } else
+
+			// @ts-ignore
 			if (document.webkitCancelFullScreen) {
+				// @ts-ignore
 				document.webkitCancelFullScreen();
 			}
 
