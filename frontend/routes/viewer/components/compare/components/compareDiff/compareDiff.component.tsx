@@ -98,6 +98,7 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 				name={modelProps.name}
 				baseRevision={modelProps.baseRevision}
 				currentRevision={modelProps.currentRevision}
+				targetDiffRevision={modelProps.targetDiffRevision}
 				revisions={modelProps.revisions}
 				selected={isSelected}
 				onSelectionChange={this.handleItemSelect(modelProps)}

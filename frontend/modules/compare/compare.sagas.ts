@@ -36,10 +36,9 @@ const getNextRevision = (revisions, currentRevision) => {
 		return revisions[0];
 	}
 
-	const len = revisions.length;
 	const index = revisions.findIndex((r) => r._id === currentRevision);
+	const lastRev = index + 1 === revisions.length;
 
-	const lastRev = index + 1 === len;
 	if (lastRev) {
 		return revisions[index];
 	}
@@ -72,6 +71,7 @@ function* getCompareModelData({ isFederation, settings }) {
 	try {
 		const revisions = yield select(selectRevisions);
 		const [teamspace, , currentRevision] = window.location.pathname.replace('/viewer/', '').split('/');
+
 		if (!isFederation) {
 			const model = prepareModelToCompare(settings._id, settings.name, isFederation, revisions, currentRevision);
 			yield put(CompareActions.setComponentState({ compareModels: [model] }));

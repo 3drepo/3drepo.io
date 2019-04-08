@@ -28,6 +28,7 @@ interface IProps {
 	name: string;
 	baseRevision: any;
 	currentRevision: any;
+	targetDiffRevision: any;
 	revisions: any[];
 	selected?: boolean;
 	onSelectionChange: (event, selected) => void;
@@ -51,7 +52,7 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 			<ArrowsAltH />
 			<RevisionsSelect
 				defaultValue={this.props.baseRevision._id}
-				value={this.props.currentRevision._id}
+				value={this.props.targetDiffRevision._id}
 				revisions={this.props.revisions}
 				disabled={!this.props.selected}
 				onChange={this.props.onRevisionChange}
@@ -61,7 +62,6 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { className, selected } = this.props;
-
 		return (
 			<Container className={className} disabled={!selected}>
 				{this.renderCheckbox()}

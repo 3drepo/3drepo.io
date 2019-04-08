@@ -22,6 +22,7 @@ import { CompareFilters } from '../compareFilters/compareFilters.component';
 import { Container, List } from './compareClash.styles';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { EmptyStateInfo } from '../../../views/views.styles';
+import { BASE_MODEL_TYPE, TARGET_MODEL_TYPE } from '../../../../../../constants/compare';
 
 interface IProps {
 	className: string;
@@ -29,6 +30,7 @@ interface IProps {
 	selectedFilters: any[];
 	compareModels: any[];
 	isAllSelected: boolean;
+	targetModels: any;
 	setComponentState: (state) => void;
 }
 
@@ -57,8 +59,12 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	private handleComparingTypeChange = (modelProps) => () => {
-		console.log('Type of', modelProps.name, 'changed');
+	private handleModelTypeChange = (modelProps) => (type) => {
+		const targetModels = {
+			...this.props.targetModels,
+			[modelProps.baseRevision._id]: type === TARGET_MODEL_TYPE
+		};
+		this.props.setComponentState({ targetModels });
 	}
 
 	private handleRevisionChange = (modelProps) => () => {
@@ -105,9 +111,10 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 				baseRevision={modelProps.baseRevision}
 				currentRevision={modelProps.currentRevision}
 				selected={isSelected}
+				isTarget={this.props.targetModels[modelProps.baseRevision._id]}
 				onSelectionChange={this.handleItemSelect(modelProps)}
 				onRevisionChange={this.handleRevisionChange(modelProps)}
-				onComparingTypeChange={this.handleComparingTypeChange(modelProps)}
+				onModelTypeChange={this.handleModelTypeChange(modelProps)}
 			/>
 		);
 	}

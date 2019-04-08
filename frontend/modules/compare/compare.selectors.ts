@@ -25,14 +25,6 @@ const selectComponentState = createSelector(
 	selectCompareDomain, (state) => state.componentState
 );
 
-export const selectBaseModels = createSelector(
-	selectCompareDomain, (state) => state.baseModels
-);
-
-export const selectTargetModels = createSelector(
-	selectCompareDomain, (state) => state.targetModels
-);
-
 export const selectCompareType = createSelector(
 	selectCompareDomain, (state) => state.compareType
 );
@@ -113,4 +105,8 @@ export const selectRenderingType = createSelector(
 
 export const selectIsPending = createSelector(
 	selectComponentState, (state) => state.isPending
+);
+
+export const selectTargetModels = createSelector(
+	selectComponentState, (state) => state.targetModels
 );

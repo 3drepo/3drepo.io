@@ -30,11 +30,11 @@ interface IProps {
 	baseRevision: any;
 	currentRevision: any;
 	revisions: any[];
-	comparingType: string;
+	isTarget: boolean;
 	selected?: boolean;
 	onSelectionChange: (event, selected) => void;
 	onRevisionChange: () => void;
-	onComparingTypeChange: (type) => void;
+	onModelTypeChange: (type) => void;
 }
 
 export class CompareClashItem extends React.PureComponent<IProps, any> {
@@ -43,18 +43,17 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 		comparingType: BASE_MODEL_TYPE
 	};
 
-	get isTargetItem() {
-		return this.props.comparingType === TARGET_MODEL_TYPE;
+	get modelType() {
+		return this.props.isTarget ? TARGET_MODEL_TYPE : BASE_MODEL_TYPE;
 	}
 
 	private renderTypeSwitch = renderWhenTrue(() => {
-		const { comparingType } = this.props;
 		return (
 			<ClashTypeSwitch
-				value={comparingType}
-				onClick={this.handleComparingTypeChange}
+				value={this.modelType}
+				onClick={this.handleModelTypeChange}
 			>
-				{capitalize(comparingType)}
+				{capitalize(this.modelType)}
 			</ClashTypeSwitch>
 		);
 	});
@@ -69,11 +68,12 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	private handleComparingTypeChange = () => {
-		if (this.isTargetItem) {
-			return BASE_MODEL_TYPE;
+	private handleModelTypeChange = () => {
+		if (this.props.isTarget) {
+			this.props.onModelTypeChange(BASE_MODEL_TYPE);
+			return;
 		}
-		return TARGET_MODEL_TYPE;
+		this.props.onModelTypeChange(TARGET_MODEL_TYPE);
 	}
 
 	private renderCheckbox = () => {
@@ -108,7 +108,7 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 				defaultValue={baseRevision._id}
 				value={currentRevision._id}
 				revisions={revisions}
-				disabled={!selected || !this.isTargetItem}
+				disabled={!selected || !this.props.isTarget}
 				onChange={onRevisionChange}
 			/>
 		);

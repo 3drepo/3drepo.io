@@ -46,11 +46,10 @@ export interface ICompareComponentState {
 	compareModels: [];
 	renderingType: number;
 	isPending: boolean;
+	targetModels: {};
 }
 
 export interface ICompareState {
-	baseModels: any[];
-	targetModels: any[];
 	isComparePending: boolean;
 	isCompareActive: boolean;
 	isCompareDisabled: boolean;
@@ -59,8 +58,6 @@ export interface ICompareState {
 }
 
 export const INITIAL_STATE: ICompareState = {
-	baseModels: [],
-	targetModels: [],
 	isComparePending: false,
 	isCompareActive: false,
 	isCompareDisabled: false,
@@ -73,7 +70,8 @@ export const INITIAL_STATE: ICompareState = {
 		renderingType: RENDERING_TYPES.COMPARE,
 		selectedModelsMap: {},
 		compareModels: [],
-		isPending: true
+		isPending: true,
+		targetModels: {}
 	}
 };
 
