@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, takeLatest, takeEvery } from 'redux-saga/effects';
+import { put, select, takeLatest } from 'redux-saga/effects';
 import { getAngularService, dispatch } from '../../helpers/migration';
 import * as API from '../../services/api';
-import { VIEWER_EVENTS, VIEWER_PANELS } from '../../constants/viewer';
+import { VIEWER_EVENTS, VIEWER_PANELS, INITIAL_HELICOPTER_SPEED } from '../../constants/viewer';
 
 import { ViewerTypes, ViewerActions } from './viewer.redux';
 import { DialogActions } from '../dialog';
@@ -28,7 +28,7 @@ import {
 	selectClipNumber,
 	selectIsMetadataVisible
 } from './viewer.selectors';
-import { Viewer, INITIAL_HELICOPTER_SPEED } from '../../services/viewer/viewer';
+import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_CLIP_MODES } from '../../constants/viewer';
 import { MeasureActions } from '../measure';
 import { BimActions } from '../bim';
