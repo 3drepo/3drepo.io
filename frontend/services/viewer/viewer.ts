@@ -1,19 +1,11 @@
 import { getAngularService } from '../../helpers/migration';
 import { MultiSelect } from './multiSelect';
-
-const MODE = {
-	NORMAL: 'NORMAL',
-	PIN: 'PIN'
-};
-
-export const INITIAL_HELICOPTER_SPEED = 1;
-export const MIN_HELICOPTER_SPEED = -99;
-export const MAX_HELICOPTER_SPEED = 99;
+import { INITIAL_HELICOPTER_SPEED, VIEWER_PIN_MODE } from '../../constants/viewer';
 
 export class ViewerService {
 	private viewerInstance = null;
 
-	private mode = MODE.NORMAL;
+	private mode = VIEWER_PIN_MODE.NORMAL;
 	public initialised: any;
 	public helicopterSpeed = INITIAL_HELICOPTER_SPEED;
 
@@ -31,7 +23,7 @@ export class ViewerService {
 	}
 
 	get isPinMode() {
-		return this.mode === MODE.PIN;
+		return this.mode === VIEWER_PIN_MODE.PIN;
 	}
 
 	public async isViewerReady() {

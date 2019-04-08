@@ -100,3 +100,12 @@ export const VIEWER_TOOLBAR_ITEMS = {
 	MEASURE: 'Measure',
 	BIM: 'BIM'
 };
+
+export const INITIAL_HELICOPTER_SPEED = 1;
+export const MIN_HELICOPTER_SPEED = -99;
+export const MAX_HELICOPTER_SPEED = 99;
+
+export const VIEWER_PIN_MODE = {
+	NORMAL: 'NORMAL',
+	PIN: 'PIN'
+};

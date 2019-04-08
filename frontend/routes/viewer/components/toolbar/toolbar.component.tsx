@@ -46,10 +46,14 @@ import {
 	ToolbarButton
 } from './toolbar.styles';
 
-import { VIEWER_NAV_MODES, VIEWER_CLIP_MODES, VIEWER_TOOLBAR_ITEMS } from '../../../../constants/viewer';
 import {
-	INITIAL_HELICOPTER_SPEED, MIN_HELICOPTER_SPEED, MAX_HELICOPTER_SPEED
-} from '../../../../services/viewer/viewer';
+	VIEWER_NAV_MODES,
+	VIEWER_CLIP_MODES,
+	VIEWER_TOOLBAR_ITEMS,
+	INITIAL_HELICOPTER_SPEED,
+	MAX_HELICOPTER_SPEED,
+	MIN_HELICOPTER_SPEED
+} from '../../../../constants/viewer';
 
 const HelicopterIcon = () => <Helicopter IconProps={{ className: 'fontSizeSmall' }} />;
 
