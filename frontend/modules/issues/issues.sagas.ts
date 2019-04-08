@@ -580,8 +580,9 @@ const onUpdateCommentEvent = (updatedComment) => {
 };
 
 const onCreateCommentEvent = (createdComment) => {
+	const preparedComment = prepareComment(createdComment);
 	const issueId = selectActiveIssueId(getState());
-	dispatch(IssuesActions.createCommentSuccess(createdComment, issueId));
+	dispatch(IssuesActions.createCommentSuccess(preparedComment, issueId));
 };
 
 const onDeleteCommentEvent = (deletedComment) => {
