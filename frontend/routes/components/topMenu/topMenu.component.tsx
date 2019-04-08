@@ -19,23 +19,31 @@ import * as React from 'react';
 import { MuiThemeProvider } from '@material-ui/core';
 
 import { MuiTheme } from '../../../styles';
-import { Container } from './topMenu.styles';
+import { Container, BackIcon } from './topMenu.styles';
 import { UserMenu } from './components/userMenu/userMenu.component';
 import { Logo } from '../logo/logo.component';
 import Notifications from '../notifications/notifications.container';
+import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
+import { runAngularTimeout } from '../../../helpers/migration';
 
 interface IProps {
 	currentUser: any;
 	isLiteMode?: boolean;
 	logoUrl?: string;
+	history: any;
+	visualSettings?: any;
 	onLiteModeChange?: () => void;
 	onLogout?: () => void;
 	onLogoClick?: () => void;
 	updateSettings?: (settings: any) => void;
-	visualSettings?: any;
 }
 
 export class TopMenu extends React.PureComponent<IProps, any> {
+	public handleBackToTeamspaces = () => [
+		runAngularTimeout(() => {
+			this.props.history.push('/dashboard/teamspaces');
+		})
+	]
 	public render() {
 		const { logoUrl, onLogoClick, ...userMenuProps } = this.props;
 
@@ -43,6 +51,12 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 			<MuiThemeProvider theme={MuiTheme}>
 				<Container>
 					<Logo onClick={onLogoClick} />
+
+					<TooltipButton
+						label="Back to teamspaces"
+						Icon={BackIcon}
+						action={this.handleBackToTeamspaces}
+					/>
 					<Notifications />
 					<UserMenu
 						{...userMenuProps}

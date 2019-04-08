@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { sumBy, clamp } from 'lodash';
+import { selectIsMetadataVisible } from '../../../modules/viewer';
+import { subscribe } from '../../../helpers/migration';
 
 class PanelController implements ng.IController {
 
@@ -38,9 +40,11 @@ class PanelController implements ng.IController {
 	public panelToolbarHeight;
 	public contentItemsShown: any[];
 	public position;
+	public isMetadataVisible;
 
 	private highlightBackground;
 	private visiblePanelsMap;
+	private unsubscribeStore;
 
 	constructor(
 		private $window: ng.IWindowService,
@@ -50,7 +54,16 @@ class PanelController implements ng.IController {
 		private PanelService: any,
 		private EventService: any,
 		private TreeService: any
-	) {}
+	) {
+		this.unsubscribeStore = subscribe(this, (state) => {
+			const isMetadataVisible = selectIsMetadataVisible(state);
+			const changes = {} as any;
+			if (isMetadataVisible !== this.isMetadataVisible) {
+				changes.isMetadataVisible = isMetadataVisible;
+			}
+			return changes;
+		});
+	}
 
 	public $onInit() {
 
@@ -77,12 +90,12 @@ class PanelController implements ng.IController {
 
 		// Setup watchers for this component
 		this.watchers();
-
 	}
 
 	public $onDestroy() {
 		this.PanelService.reset();
 		this.contentItems = [];
+		this.unsubscribeStore();
 	}
 
 	public watchers() {
@@ -158,8 +171,7 @@ class PanelController implements ng.IController {
 		}
 	}
 
-	public togglePanel(contentType: string) {
-
+	public togglePanel = (contentType: string) => {
 		// Get the content item
 		const contentIndex = this.contentItems.findIndex(({ type }) => type === contentType);
 
@@ -191,6 +203,7 @@ class PanelController implements ng.IController {
 	public updatePanelButtons() {
 		for (let i = 0; i < this.contentItems.length; i++) {
 			this.contentItems[i].bgColour = (this.contentItems[i].show) ? this.highlightBackground : '';
+			this.contentItems[i].active = (this.contentItems[i].show);
 		}
 	}
 

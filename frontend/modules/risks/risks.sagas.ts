@@ -474,7 +474,6 @@ export function* showDetails({ risk, filteredRisks, revision }) {
 export function* closeDetails() {
 	try {
 		const activeRisk = yield select(selectActiveRiskDetails);
-
 		if (activeRisk) {
 			runAngularViewerTransition({
 				account: activeRisk.account,

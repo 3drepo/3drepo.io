@@ -3,10 +3,12 @@ import {
 	faEraser,
 	faEye,
 	faTint,
-	faHandPaper
+	faHandPaper,
+	faHelicopter
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faEraser);
 library.add(faEye);
 library.add(faTint);
 library.add(faHandPaper);
+library.add(faHelicopter);

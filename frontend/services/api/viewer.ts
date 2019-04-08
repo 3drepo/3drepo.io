@@ -38,3 +38,13 @@ export const downloadJSON = (panelName, modelName, endpoint) => {
 		document.body.removeChild(a);
 	});
 };
+
+/**
+ * Edit helicopter speed
+ * @param teamspace
+ * @param modelId
+ * @param speed
+ */
+export const editHelicopterSpeed = (teamspace, modelId, speed) => {
+	return api.put(`${teamspace}/${modelId}/settings/heliSpeed`, {heliSpeed: speed});
+};

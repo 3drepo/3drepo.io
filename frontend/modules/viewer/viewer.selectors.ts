@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createSelector } from 'reselect';
-import { values } from 'lodash';
+import { VIEWER_PANELS } from '../../constants/viewer';
+import * as Bim from '../bim';
 
 export const selectViewerDomain = (state) => Object.assign({}, state.viewer);
 
@@ -53,4 +54,37 @@ export const selectMemory = createSelector(
 
 export const selectFarPlaneSamplingPoints = createSelector(
 	selectSettings, (state) => state.farPlaneSamplingPoints
+);
+
+export const selectNavigationMode = createSelector(
+	selectViewerDomain, (state) => state.navigationMode
+);
+
+export const selectHelicopterSpeed = createSelector(
+	selectViewerDomain, (state) => state.helicopterSpeed
+);
+
+export const selectIsFocusMode = createSelector(
+	selectViewerDomain, (state) => state.isFocusMode
+);
+
+export const selectClippingMode = createSelector(
+	selectViewerDomain, (state) => state.clippingMode
+);
+
+export const selectIsClipEdit = createSelector(
+	selectViewerDomain, (state) => state.isClipEdit
+);
+
+export const selectClipNumber = createSelector(
+	selectViewerDomain, (state) => state.clipNumber
+);
+
+export const selectVisiblePanels = createSelector(
+	selectViewerDomain, (state) => state.visiblePanels
+);
+
+export const selectIsMetadataVisible = createSelector(
+	selectVisiblePanels, Bim.selectIsPending,
+	(state, isPending) => state[VIEWER_PANELS.METADATA] && !isPending
 );

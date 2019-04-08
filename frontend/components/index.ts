@@ -1,11 +1,8 @@
 // Components & services
 import './account/js/account-upload.service';
-import './bottom-buttons/js/bottom-buttons.component';
 import './compare/js/compare.component';
 import './compare/js/compare.service';
 import './cookies/js/cookies.component';
-import './docs/js/docs.component';
-import './docs/js/docs.service';
 import './home/js/analytic.service';
 import './home/js/api.service';
 import './home/js/auth.interceptor';
@@ -25,7 +22,6 @@ import './issues/js/issue.component';
 import './issues/js/issues.component';
 import './issues/js/issues-list.component';
 import './issues/js/issues.service';
-import './measure/js/measure.service';
 import './model/js/model.component';
 import './chat/js/chat.service';
 import './panel/js/panel-card.component';
@@ -42,7 +38,6 @@ import './payment/js/payment.component';
 import './privacy/js/privacy.component';
 import './revisions/js/revisions.component';
 import './revisions/js/revisions.service';
-import './right-panel/js/right-panel.component';
 import './terms/js/terms.component';
 import './tree/js/tree.component';
 import './tree/js/tree.service';

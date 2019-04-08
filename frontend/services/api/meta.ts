@@ -16,12 +16,54 @@
  */
 
 import api from './';
+import { Cache } from '../cache';
 
 /**
- * Get field names
+ * Get model metadata
+ * @param teamspace
+ * @param modelId
+ * @param metadataId
+ */
+export const getMetadata = (teamspace, modelId, metadataId) => {
+	return api.get(`${teamspace}/${modelId}/meta/${metadataId}.json`);
+};
+
+/**
+ * Get meta keys
  * @param teamspace
  * @param modelId
  */
-export const getFieldNames = (teamspace, modelId) => {
+export const getMetaKeys = (teamspace, modelId) => {
 	return api.get(`${teamspace}/${modelId}/meta/keys`);
+};
+
+/**
+ * Get starred meta
+ */
+export const getStarredMeta = () => {
+	return api.get('starredMeta');
+};
+
+/**
+ * Add starred meta
+ * @param metaRecordKey
+ */
+export const addStarredMeta = (metaRecordKey) => {
+	return api.post('starredMeta', { tag: metaRecordKey });
+};
+
+/**
+ * Remove starred meta
+ * @param metaRecordKey
+ */
+export const removeStarredMeta = (metaRecordKey) => {
+	return api.delete('starredMeta', { data: { tag: metaRecordKey } });
+};
+
+/**
+ * Override starred meta
+ * @param starredMeta
+ */
+export const overrideStarredMeta = (starredMeta) => {
+	return api.put('starredMeta', starredMeta);
 };

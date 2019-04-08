@@ -27,6 +27,8 @@ import { GroupsActions } from '../../../modules/groups';
 import { prepareRisk } from '../../../helpers/risks';
 import { searchByFilters } from '../../../helpers/searching';
 import { VIEWER_EVENTS } from '../../../constants/viewer';
+import { StarredMetaActions } from '../../../modules/starredMeta';
+import { BimActions } from '../../../modules/bim';
 
 class ModelController implements ng.IController {
 
@@ -118,7 +120,6 @@ class ModelController implements ng.IController {
 
 		// listen for user clicking the back button
 		window.addEventListener('popstate', popStateHandler);
-		window.addEventListener('beforeunload', refreshHandler);
 
 		this.$scope.$on('$destroy', () => {
 			this.unsubscribeModelSettingsListener();
@@ -130,6 +131,7 @@ class ModelController implements ng.IController {
 			this.ViewerService.off(VIEWER_EVENTS.CLICK_PIN);
 			dispatch(TreeActions.stopListenOnSelections());
 			dispatch(GroupsActions.resetComponentState());
+			dispatch(BimActions.setIsActive(false));
 		});
 
 		this.$timeout(() => {
@@ -144,7 +146,6 @@ class ModelController implements ng.IController {
 		dispatch(JobsActions.fetchJobs(this.account));
 		dispatch(JobsActions.getMyJob(this.account));
 		dispatch(TreeActions.startListenOnSelections());
-		dispatch(GroupsActions.getFieldNames(this.account, this.model));
 
 		this.ViewerService.on(VIEWER_EVENTS.CLICK_PIN, this.onPinClick);
 		this.unsubscribeModelSettingsListener = subscribe(this, this.onModelSettingsChange);
@@ -284,6 +285,7 @@ class ModelController implements ng.IController {
 		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
 		dispatch(RisksActions.fetchRisks(this.account, this.model, this.revision));
 		dispatch(GroupsActions.fetchGroups(this.account, this.model, this.revision));
+		dispatch(StarredMetaActions.fetchStarredMeta());
 	}
 }
 

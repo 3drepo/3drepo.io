@@ -41,7 +41,7 @@ export const NotificationsList = styled(List)`
 export const NotificationsIcon = styled(Notifications)`
 	&& {
 		color: ${COLOR.WHITE};
-		font-size: 35px;
+		font-size: 24px;
 		filter: drop-shadow(0 0 2px ${COLOR.BLACK_30});
 	}
 `;

@@ -19,7 +19,7 @@ import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	fetchSettings: ['teamspace', 'modelId'],
-	fetchSettingsSuccess: ['settings'],
+	fetchSettingsSuccess: ['settings', 'metaKeys'],
 	updateSettings: ['modelData', 'settings'],
 	fetchRevisions: ['teamspace', 'modelId'],
 	fetchRevisionsSuccess: ['revisions'],
@@ -31,11 +31,13 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	unsubscribeOnStatusChange: ['teamspace', 'project', 'modelData'],
 	fetchMaps: ['teamspace', 'modelId'],
 	fetchMapsSuccess: ['maps'],
-	updateSettingsSuccess: ['settings']
+	updateSettingsSuccess: ['settings'],
+	getMetaKeys: ['teamspace', 'modelId']
 }, { prefix: 'MODEL/' });
 
 export const INITIAL_STATE = {
 	settings: {},
+	metaKeys: [],
 	revisions: [],
 	isPending: true,
 	maps: []
@@ -45,8 +47,8 @@ const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return { ...state, isPending: pendingState };
 };
 
-const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
-	return { ...state, settings };
+const fetchSettingsSuccess = (state = INITIAL_STATE, { settings, metaKeys }) => {
+	return { ...state, settings, metaKeys };
 };
 
 const fetchRevisionsSuccess = (state = INITIAL_STATE, { revisions }) => {

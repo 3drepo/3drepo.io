@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, all, select, take } from 'redux-saga/effects';
+import { put, takeLatest, all, select } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { BillingTypes, BillingActions, selectLicencesInfo, dialogMessages } from './index';

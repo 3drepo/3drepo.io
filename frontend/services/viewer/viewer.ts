@@ -1,16 +1,13 @@
 import { getAngularService } from '../../helpers/migration';
 import { MultiSelect } from './multiSelect';
-
-const MODE = {
-	NORMAL: 'NORMAL',
-	PIN: 'PIN'
-};
+import { INITIAL_HELICOPTER_SPEED, VIEWER_PIN_MODE } from '../../constants/viewer';
 
 export class ViewerService {
 	private viewerInstance = null;
 
-	private mode = MODE.NORMAL;
+	private mode = VIEWER_PIN_MODE.NORMAL;
 	public initialised: any;
+	public helicopterSpeed = INITIAL_HELICOPTER_SPEED;
 
 	get viewerService() {
 		return getAngularService('ViewerService', this) as any;
@@ -26,7 +23,7 @@ export class ViewerService {
 	}
 
 	get isPinMode() {
-		return this.mode === MODE.PIN;
+		return this.mode === VIEWER_PIN_MODE.PIN;
 	}
 
 	public async isViewerReady() {
@@ -126,6 +123,10 @@ export class ViewerService {
 		return this.viewerService.pinData;
 	}
 
+	public getHelicopterSpeed(): number {
+		return this.helicopterSpeed;
+	}
+
 	public async addPin(params) {
 		await this.isViewerReady();
 		return this.viewer.addPin(
@@ -214,6 +215,51 @@ export class ViewerService {
 	public async resetMeshColor(account, model, meshIDs) {
 		await this.isViewerReady();
 		this.viewer.resetMeshColor(account, model, meshIDs);
+	}
+
+	public async goToExtent() {
+		await this.isViewerReady();
+		this.viewer.showAll();
+	}
+
+	public async setNavigationMode(mode) {
+		await this.isViewerReady();
+		this.viewer.setNavMode(mode);
+	}
+
+	public async helicopterSpeedDown() {
+		await this.isViewerReady();
+		this.viewer.helicopterSpeedDown();
+	}
+
+	public async helicopterSpeedUp() {
+		await this.isViewerReady();
+		this.viewer.helicopterSpeedUp();
+	}
+
+	public async helicopterSpeedReset() {
+		await this.isViewerReady();
+		this.viewer.helicopterSpeedReset();
+	}
+
+	public async startClip(isSingle) {
+		await this.isViewerReady();
+
+		if (isSingle) {
+			this.viewer.startSingleClip();
+		} else {
+			this.viewer.startBoxClip();
+		}
+	}
+
+	public async startClipEdit() {
+		await this.isViewerReady();
+		this.viewer.startClipEdit();
+	}
+
+	public async stopClipEdit() {
+		await this.isViewerReady();
+		this.viewer.stopClipEdit();
 	}
 }
 

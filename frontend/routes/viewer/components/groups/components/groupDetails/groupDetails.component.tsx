@@ -220,10 +220,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	public render() {
 		return (
 			<Container>
-				<Content
-					className="height-catcher"
-					padding="0"
-				>
+				<Content className="height-catcher">
 					{this.renderPreview(this.groupData)}
 				</Content>
 				{this.renderFooter()}
