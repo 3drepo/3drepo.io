@@ -402,7 +402,7 @@ export class CompareService {
 			});
 	}
 
-	public startComparisonFed(isDiffMode: boolean) {
+/* 	public startComparisonFed(isDiffMode: boolean) {
 
 		this.loadModels(isDiffMode).then(() => {
 			if (isDiffMode) {
@@ -416,7 +416,7 @@ export class CompareService {
 			console.error(error);
 		});
 
-	}
+	} */
 
 	public toggleModelVisibility(model) {
 		model.visible = !model.visible;
@@ -428,7 +428,7 @@ export class CompareService {
 			this.changeModelVisibility(model.account + ':' + model.name, model.visible);
 		});
 	}
-
+/*
 	private changeModelVisibility(nodeName: string, visible: boolean) {
 		const tree = this.TreeService.getAllNodes();
 		if (tree.children) {
@@ -442,7 +442,7 @@ export class CompareService {
 				}
 			});
 		}
-	}
+	} */
 
 }
 

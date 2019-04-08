@@ -21,7 +21,7 @@ import { cond, matches } from 'lodash';
 import { CompareTypes, CompareActions } from './compare.redux';
 import { selectRevisions, selectIsFederation, selectSettings, ModelTypes } from '../model';
 import {
-	selectSortType, selectSortOrder, selectIsCompareActive, selectActiveTab, selectTargetModels, selectBaseModels
+	selectSortType, selectSortOrder, selectIsCompareActive, selectActiveTab, selectTargetModels, selectBaseModels, selectSelectedModelsMap, selectTargetModelsList, selectBaseModelsList
 } from './compare.selectors';
 import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES } from '../../constants/compare';
 import { DialogActions } from '../dialog';
@@ -29,6 +29,7 @@ import { Viewer } from '../../services/viewer/viewer';
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
 import { selectCompareModels } from './compare.selectors';
 import * as API from '../../services/api';
+import { getAngularService } from '../../helpers/migration';
 
 const getNextRevision = (revisions, currentRevision) => {
 	if (!currentRevision) {
@@ -188,43 +189,58 @@ function* setActiveTab({ activeTab }) {
 	}
 }
 
+function* changeModelNodesVisibility(nodeName: string, visible: boolean) {
+	const TreeService = getAngularService('TreeService') as any;
+	const tree = TreeService.getAllNodes();
+	if (tree.children) {
+		for (let index = 0; index < tree.children.length; index++) {
+			const node = tree.children[index];
+			if (node.name === nodeName) {
+				if (visible) {
+					TreeService.showTreeNodes([node]);
+				} else {
+					TreeService.hideTreeNodes([node]);
+				}
+			}
+		}
+	}
+}
+
 function* startComparisonOfFederation() {
 	yield put(CompareActions.setIsPending(true));
-	const compareModels = yield select(selectCompareModels);
-	const targetModelsMap = yield select(selectTargetModels);
-	const baseModelsMap = yield select(selectBaseModels);
+	const targetModels = yield select(selectTargetModelsList);
+	const baseModels = yield select(selectBaseModelsList);
+	const selectedModels = yield select(selectSelectedModelsMap);
 	const activeTab = yield select(selectActiveTab);
 	const isDiff = activeTab === DIFF_COMPARE_TYPE;
 
 	const modelsToLoad = [];
+	for (let index = 0; index < targetModels.length; index++) {
+		const model = targetModels[index];
+		if (model && selectedModels[model._id]) {
+			const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
+			const sharedRevisionModel = baseModels.find(({ baseRevision }) => baseRevision.name === targetRevision.name);
+			const isAlreadyLoaded = sharedRevisionModel && !sharedRevisionModel.visible;
 
-	for (let index = 0; index < compareModels.length; index++) {
-		const model = compareModels[index];
-
-		if (model && model.visible) {
-			const sharedRevisionModel = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision[mode].name);
-			const canReuseModel = sharedRevisionModel && !sharedRevisionModel.visible;
-
-			if (canReuseModel) {
-				// TODO
-				// this.changeModelVisibility(sharedRevisionModel.account + ':' + sharedRevisionModel.name, true);
+			if (isAlreadyLoaded) {
+				const { account, name } = sharedRevisionModel;
+				yield call(changeModelNodesVisibility, `${account}:${name}`, true);
 				Viewer.diffToolSetAsComparator(
 					model.account,
 					model.model
 				);
 			} else {
-				const revision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
 				const modelPromise = Viewer.diffToolLoadComparator(
 					model.account,
 					model.model,
-					revision
+					targetRevision.name
 				);
 				modelsToLoad.push(modelPromise);
 			}
 		}
 	}
-	/* TO DO */
-	/* yield this.loadModels(isDiffMode); */
+
+	yield all(modelsToLoad);
 
 	if (isDiff) {
 		Viewer.diffToolEnableWithDiffMode();
@@ -237,12 +253,14 @@ function* startComparisonOfFederation() {
 
 function* startComparisonOfModel() {
 	yield put(CompareActions.setIsPending(true));
+	const activeTab = yield select(selectActiveTab);
+	const isDiff = activeTab === DIFF_COMPARE_TYPE;
 
 	const targetModels = yield select(selectTargetModels);
-	const { account, model, targetRevision } = targetModels;
-
+	const { account, model } = targetModels[0];
+	const revision = isDiff ? targetModels[0].targetDiffRevision : targetModels[0].targetClashRevision;
 	try {
-		yield Viewer.diffToolLoadComparator(account, model, targetRevision.diff.name);
+		yield Viewer.diffToolLoadComparator(account, model, revision.name);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('load', 'comparator', error.message));
 	}

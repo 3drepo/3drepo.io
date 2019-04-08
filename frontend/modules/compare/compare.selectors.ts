@@ -87,6 +87,16 @@ export const selectCompareModels = createSelector(
 	}
 );
 
+export const selectTargetModelsList = createSelector(
+	selectCompareModels, selectTargetModels,
+	(models, targetModelsMap) => models.filter(({ _id }) => targetModelsMap[_id])
+);
+
+export const selectBaseModelsList = createSelector(
+	selectCompareModels, selectTargetModels,
+	(models, baseModelsMap) => models.filter(({ _id }) => !baseModelsMap[_id])
+);
+
 const isAllSelected = (allModels, selectedModelsMap) => isEqual(
 	allModels.length,
 	values(selectedModelsMap).filter((selectedModel) => selectedModel).length
