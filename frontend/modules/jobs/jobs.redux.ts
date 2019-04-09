@@ -37,6 +37,7 @@ export const INITIAL_STATE = {
 	colors: [],
 	myJob: {}
 };
+
 export const fetchJobsSuccess = (state = INITIAL_STATE, { jobs }) => ({ ...state, jobs });
 
 export const fetchJobsColorsSuccess = (state = INITIAL_STATE, { colors }) => ({ ...state, colors });

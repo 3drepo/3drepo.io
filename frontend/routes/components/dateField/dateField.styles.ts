@@ -15,4 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { default as Viewer } from './viewer.container';
+import styled from 'styled-components';
+import { DatePicker } from 'material-ui-pickers';
+
+export const Container = styled.div`
+	margin-top: 16px;
+`;
+
+export const StyledDatePicker = styled(DatePicker)`
+	width: 100%;
+`;

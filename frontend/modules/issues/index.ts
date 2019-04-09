@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+export {
+	IssuesTypes,
+	IssuesActions
+} from './issues.redux';
 
-export const Container = styled.div``;
+export * from './issues.selectors';

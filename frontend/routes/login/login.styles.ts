@@ -25,71 +25,71 @@ import * as PanelStyles from '../components/panel/panel.styles';
 const CONTENT_PADDING = 20;
 
 export const Container = styled(Grid)`
-  && {
-    height: 100%;
-    padding-top: 30px;
-  }
+	&& {
+		height: 100%;
+		padding-top: 30px;
+	}
 
-  ${PanelStyles.Container} {
-    margin-top: 30px;
-  }
+	${PanelStyles.Container} {
+		margin-top: 30px;
+	}
 
-  ${PanelStyles.Content} {
-    padding: ${CONTENT_PADDING}px;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
+	${PanelStyles.Content} {
+		padding: ${CONTENT_PADDING}px;
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
 `;
 
 export const Headline = styled.h3`
-  color: ${COLOR.BLACK_60};
-  font-weight: ${FONT_WEIGHT.NORMAL};
-  margin-top: 10px;
+	color: ${COLOR.BLACK_60};
+	font-weight: ${FONT_WEIGHT.NORMAL};
+	margin-top: 10px;
 `;
 
 export const StyledButton: any = styled(Button)`
-  && {
-    padding: 0 5px;
-    margin: 0;
-    min-width: auto;
-  }
+	&& {
+		padding: 0 5px;
+		margin: 0;
+		min-width: auto;
+	}
 `;
 
 export const LoginButtons = styled(Grid)`
-  && {
-    padding: 10px 0;
-    padding-bottom: 25px;
-  }
+	&& {
+		padding: 10px 0;
+		padding-bottom: 25px;
+	}
 
-  ${StyledButton} {
-    margin-left: -5px;
-  }
+	${StyledButton} {
+		margin-left: -5px;
+	}
 `;
 
 export const UserNotice = styled.span`
-  color: ${COLOR.BLACK_60};
-  margin: 10px 0;
+	color: ${COLOR.BLACK_60};
+	margin: 10px 0;
 `;
 
 export const FooterContainer = styled(Grid)`
-  && {
-    border-top: 1px solid ${COLOR.BLACK_6};
-    margin-left: -${CONTENT_PADDING}px;
-    width: calc(100% + ${CONTENT_PADDING * 2}px);
-    padding: ${(CONTENT_PADDING / 2)}px ${CONTENT_PADDING}px;
-    padding-right: ${CONTENT_PADDING - 5}px;
-    margin-bottom: -${CONTENT_PADDING}px;
-    font-size: 14px;
+	&& {
+		border-top: 1px solid ${COLOR.BLACK_6};
+		margin-left: -${CONTENT_PADDING}px;
+		width: calc(100% + ${CONTENT_PADDING * 2}px);
+		padding: ${(CONTENT_PADDING / 2)}px ${CONTENT_PADDING}px;
+		padding-right: ${CONTENT_PADDING - 5}px;
+		margin-bottom: -${CONTENT_PADDING}px;
+		font-size: 14px;
 
-    ${StyledButton} {
-      margin-left: 5px;
-      color: ${COLOR.BLACK_60};
-    }
-  }
+		${StyledButton} {
+			margin-left: 5px;
+			color: ${COLOR.BLACK_60};
+		}
+	}
 `;
 
 export const Version = styled(Grid)`
-  &&, && ${StyledButton} {
-    color: ${COLOR.BLACK_30};
-  }
+	&&, && ${StyledButton} {
+		color: ${COLOR.BLACK_30};
+	}
 `;

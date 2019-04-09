@@ -18,27 +18,29 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import { Formik, Field } from 'formik';
-
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { TextField, Typography } from '@material-ui/core';
 
 import { schema } from '../../../../services/validation';
+import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
 import {
+	Content,
 	Container,
 	Collapsable,
 	Details,
 	Summary,
 	CollapsableContent,
+	ToggleButtonContainer,
+	ToggleButton,
+	ToggleIcon,
 	StyledForm,
 	NotCollapsableContent
 } from './previewDetails.styles';
-import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
 
 interface IProps {
+	className?: string;
 	roleColor: string;
 	name: string;
 	count: number;
@@ -52,10 +54,12 @@ interface IProps {
 	willBeRemoved?: boolean;
 	willBeUpdated?: boolean;
 	panelName?: string;
+	scrolled?: boolean;
+	handleHeaderClick?: (event) => void;
 	onExpandChange?: (event, expaned: boolean) => void;
 	onNameChange?: (event, name: string) => void;
-	renderCollapsable?: () => JSX.Element[];
-	renderNotCollapsable?: () => JSX.Element[];
+	renderCollapsable?: () => JSX.Element | JSX.Element[];
+	renderNotCollapsable?: () => JSX.Element | JSX.Element[];
 }
 
 const ValidationSchema = Yup.object().shape({
@@ -63,9 +67,30 @@ const ValidationSchema = Yup.object().shape({
 });
 
 export class PreviewDetails extends React.PureComponent<IProps, any> {
+	public state = {
+		expanded: false
+	};
+
+	public componentDidMount() {
+		const { editable, defaultExpanded } = this.props;
+		this.setState({
+			defaultExpanded: editable || defaultExpanded,
+			expanded: editable || defaultExpanded
+		});
+	}
+
 	public handleNameChange = (field) => (event) => {
 		field.onChange(event);
 		this.props.onNameChange(event, event.target.value);
+	}
+
+	public handleToggle = (event) => {
+		event.persist();
+		this.setState(({ expanded }) => ({ expanded: !expanded }), () => {
+			if (this.props.onExpandChange) {
+				this.props.onExpandChange(event, this.state.expanded);
+			}
+		});
 	}
 
 	public renderNameWithCounter = renderWhenTrue(() =>
@@ -96,7 +121,9 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		</Formik>
 	));
 
-	public renderExpandIcon = renderWhenTrue(() => <ExpandMoreIcon />);
+	public renderExpandIcon = renderWhenTrue(() => (
+		<ToggleIcon active={Number(this.state.expanded)} />
+	));
 
 	public renderCollapsable = renderWhenTrue(() => (
 		<CollapsableContent>
@@ -105,24 +132,10 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	));
 
 	public renderNotCollapsable = renderWhenTrue(() => (
-		<>
+		<Content>
 			{this.props.renderNotCollapsable()}
-		</>
+		</Content>
 	));
-
-	get collapsableProps() {
-		const { editable, defaultExpanded, disableExpanding, onExpandChange } = this.props;
-		const props = {
-			defaultExpanded: disableExpanding || editable || defaultExpanded,
-			onChange: onExpandChange
-		} as any;
-
-		if (disableExpanding || editable) {
-			props.expanded = true;
-		}
-
-		return props;
-	}
 
 	public renderUpdateMessage = renderWhenTrue(() =>
 		<ActionMessage content={`This ${this.props.panelName} has been updated by someone else`} />
@@ -134,6 +147,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const {
+			className,
 			roleColor,
 			count,
 			author,
@@ -142,25 +156,31 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			statusColor,
 			editable,
 			disableExpanding,
+			willBeUpdated,
+			willBeRemoved,
 			renderCollapsable,
 			renderNotCollapsable,
-			willBeUpdated,
-			willBeRemoved
+			handleHeaderClick
 		} = this.props;
 
 		const createdAt = !editable ? createdDate : null;
 
 		return (
-			<Container>
+			<Container className={className}>
 				{this.renderUpdateMessage(willBeUpdated)}
 				{this.renderDeleteMessage(willBeRemoved)}
-				<Collapsable {...this.collapsableProps}>
-					<Summary expandIcon={this.renderExpandIcon(!disableExpanding && !editable)}>
+				<Summary
+					expandIcon={this.renderExpandIcon(!disableExpanding && !editable)}
+					onClick={handleHeaderClick}
+					scrolled={this.props.scrolled ? 1 : 0}
+				>
 						<RoleIndicator color={roleColor} />
 						{this.renderNameWithCounter(!editable && count)}
 						{this.renderName(!editable && !count)}
 						{this.renderNameField(editable)}
 					</Summary>
+
+				<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
 					<Details>
 						<PreviewItemInfo
 							author={author}
@@ -171,6 +191,11 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 						{this.renderCollapsable(Boolean(renderCollapsable))}
 					</Details>
 				</Collapsable>
+				<ToggleButtonContainer onClick={this.handleToggle} expanded={this.state.expanded}>
+					<ToggleButton>
+						{this.renderExpandIcon(!editable)}
+					</ToggleButton>
+				</ToggleButtonContainer>
 				<NotCollapsableContent>
 					{this.renderNotCollapsable(Boolean(renderNotCollapsable))}
 				</NotCollapsableContent>

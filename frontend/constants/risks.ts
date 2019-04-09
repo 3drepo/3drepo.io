@@ -1,9 +1,10 @@
+import { values } from 'lodash';
+
 import NewReleases from '@material-ui/icons/NewReleases';
 import ErrorOutline from '@material-ui/icons/ErrorOutline';
 import ErrorSolid from '@material-ui/icons/Error';
 import CheckCircle from '@material-ui/icons/CheckCircle';
 import SyncProblem from '@material-ui/icons/SyncProblem';
-
 import Print from '@material-ui/icons/Print';
 import Download from '@material-ui/icons/CloudDownload';
 import Pins from '@material-ui/icons/PinDrop';
@@ -188,26 +189,18 @@ export const RISK_FILTERS = [
 	}
 ] as any;
 
-export const RISKS_ACTIONS_ITEMS = {
-	PRINT: 'print',
-	DOWNLOAD: 'download',
-	SHOW_PINS: 'showPins'
-};
-
-export const RISKS_ACTIONS_MENU = [
-	{
-		name: RISKS_ACTIONS_ITEMS.PRINT,
+export const RISKS_ACTIONS_MENU = {
+	PRINT: {
 		label: 'Create Report',
 		Icon: Print
 	},
-	{
-		name: RISKS_ACTIONS_ITEMS.SHOW_PINS,
-		label: 'Show Pins',
-		Icon: Pins
+	SHOW_PINS: {
+		label:  'Show Pins',
+		Icon: Pins,
+		enabled:  true
 	},
-	{
-		name: RISKS_ACTIONS_ITEMS.DOWNLOAD,
+	DOWNLOAD: {
 		label: 'Download JSON',
 		Icon: Download
 	}
-];
+};

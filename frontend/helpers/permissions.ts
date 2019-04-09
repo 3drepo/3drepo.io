@@ -3,7 +3,7 @@ export const PERMISSIONS = {
 	COMMENT_ISSUE: 'comment_issue'
 };
 
-export const hasPermissions = (requiredPerm = '', permissions) => {
+export const hasPermissions = (requiredPerm = '', permissions = []) => {
 	if (!requiredPerm) {
 		return true;
 	}

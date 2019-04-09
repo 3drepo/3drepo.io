@@ -31,16 +31,16 @@ export const selectRisksMap = createSelector(
 	selectRisksDomain, (state) => state.risksMap
 );
 
-export const selectIsPending = createSelector(
-	selectRisksDomain, (state) => state.isPending
-);
-
 export const selectComponentState = createSelector(
 	selectRisksDomain, (state) => state.componentState
 );
 
 export const selectIsRisksPending = createSelector(
 	selectRisksDomain, (state) => state.isPending
+);
+
+export const selectAssociatedActivities = createSelector(
+	selectRisksDomain, (state) => state.associatedActivities
 );
 
 export const selectActiveRiskId = createSelector(
@@ -79,11 +79,8 @@ export const selectSelectedFilters = createSelector(
 
 export const selectFilteredRisks = createSelector(
 	selectRisks, selectSelectedFilters, (risks, selectedFilters) => {
-		let returnHiddenRisk = false;
-		if (selectedFilters.length) {
-			returnHiddenRisk = selectedFilters
-				.some(({ value: { value } }) => value === RISK_LEVELS.AGREED_FULLY);
-		}
+		const returnHiddenRisk = selectedFilters.length && selectedFilters
+			.some(({ value: { value } }) => value === RISK_LEVELS.AGREED_FULLY);
 
 		return searchByFilters(risks, selectedFilters, returnHiddenRisk);
 	}
@@ -93,18 +90,10 @@ export const selectShowPins = createSelector(
 	selectComponentState, (state) => state.showPins
 );
 
-export const selectLogs = createSelector(
-	selectComponentState, (state) => state.logs
-);
-
 export const selectFetchingDetailsIsPending = createSelector(
 	selectComponentState, (state) => state.fetchingDetailsIsPending
 );
 
 export const selectFailedToLoad = createSelector(
 	selectComponentState, (state) => state.failedToLoad
-);
-
-export const selectAssociatedActivities = createSelector(
-	selectComponentState, (state) => state.associatedActivities
 );

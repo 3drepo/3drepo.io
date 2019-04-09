@@ -22,13 +22,13 @@ import { COLOR } from '../../../styles/colors';
 export const Container = styled.div``;
 
 export const Username = styled(Typography)`
-  padding: 2px;
+	padding: 2px;
 
-  && {
-    display: inline-block;
-    color: ${COLOR.BLACK_40};
-    font-size: 11px;
-  }
+	&& {
+		display: inline-block;
+		color: ${COLOR.BLACK_40};
+		font-size: 11px;
+	}
 `;
 
 export const TooltipText = styled.div``;

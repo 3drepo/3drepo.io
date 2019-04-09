@@ -17,35 +17,31 @@
 
 import { dispatch, getState, subscribe } from '../../../helpers/migration';
 import { selectCurrentUser, CurrentUserActions } from '../../../modules/currentUser';
-import { selectRisks, selectRisksMap } from '../../../modules/risks';
+import { selectRisksMap } from '../../../modules/risks';
+import { selectIssuesMap } from '../../../modules/issues';
 import { ModelActions, selectSettings, selectIsPending } from '../../../modules/model';
 import { TreeActions } from '../../../modules/tree';
 import { ViewpointsActions } from '../../../modules/viewpoints';
-import { JobsActions, selectJobs } from '../../../modules/jobs';
+import { JobsActions } from '../../../modules/jobs';
 import { RisksActions } from '../../../modules/risks';
 import { GroupsActions } from '../../../modules/groups';
-import { prepareRisk } from '../../../helpers/risks';
-import { searchByFilters } from '../../../helpers/searching';
 import { VIEWER_EVENTS } from '../../../constants/viewer';
 import { StarredMetaActions } from '../../../modules/starredMeta';
 import { BimActions } from '../../../modules/bim';
+import { IssuesActions } from '../../../modules/issues';
 
 class ModelController implements ng.IController {
 
 	public static $inject: string[] = [
-		'$window',
 		'$timeout',
 		'$scope',
 		'$element',
 		'$location',
-		'$compile',
 		'$mdDialog',
 
 		'EventService',
 		'TreeService',
 		'RevisionsService',
-		'AuthService',
-		'IssuesService',
 		'StateManager',
 		'PanelService',
 		'ViewerService'
@@ -70,19 +66,15 @@ class ModelController implements ng.IController {
 	private unsubscribeModelSettingsListener;
 
 	constructor(
-		private $window,
 		private $timeout,
 		private $scope,
 		private $element,
 		private $location,
-		private $compile,
 		private $mdDialog,
 
 		private EventService,
 		private TreeService,
 		private RevisionsService,
-		private AuthService,
-		private IssuesService,
 		private StateManager,
 		private PanelService,
 		private ViewerService
@@ -130,7 +122,7 @@ class ModelController implements ng.IController {
 			window.removeEventListener('popstate', popStateHandler);
 			this.ViewerService.off(VIEWER_EVENTS.CLICK_PIN);
 			dispatch(TreeActions.stopListenOnSelections());
-			dispatch(GroupsActions.resetComponentState());
+			this.resetPanelsStates();
 			dispatch(BimActions.setIsActive(false));
 		});
 
@@ -156,20 +148,20 @@ class ModelController implements ng.IController {
 	public onPinClick = ({ id }) => {
 		const currentState = getState();
 		const risksMap = selectRisksMap(currentState);
+		const issuesMap = selectIssuesMap(currentState);
 
 		if (risksMap[id]) {
-			const risks = selectRisks(currentState);
-			const jobs = selectJobs(currentState);
-			const preparedRisks = risks.map((risk) => prepareRisk(risk, jobs));
-			const filteredRisks = searchByFilters(preparedRisks, []);
-
-			dispatch(RisksActions.showDetails(risksMap[id], filteredRisks, this.revision));
+			dispatch(RisksActions.showDetails(this.account, this.model, this.revision, risksMap[id]));
 			this.PanelService.showPanelsByType('risks');
+		}
+
+		if (issuesMap[id]) {
+			dispatch(IssuesActions.showDetails(this.account, this.model, this.revision, issuesMap[id]));
+			this.PanelService.showPanelsByType('issues');
 		}
 	}
 
 	public watchers() {
-
 		this.$scope.$watchGroup(['vm.account', 'vm.model'], () => {
 			if (this.account && this.model) {
 				angular.element(() => {
@@ -178,26 +170,13 @@ class ModelController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch('vm.issueId', () => {
-			if (this.issueId) {
-				// timeout to make sure event is sent after issue panel card is setup
-				// assume issue card shown by default
-				this.$timeout(() => {
-					this.IssuesService.state.displayIssue = this.issueId;
-				});
-			}
-		});
-
 		this.$scope.$watch(this.EventService.currentEvent, (event) => {
-
 			this.event = event;
 
 			if (event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
 				this.pointerEvents = event.value.on ? 'none' : 'inherit';
 			}
-
 		});
-
 	}
 
 	public handleModelError() {
@@ -282,10 +261,17 @@ class ModelController implements ng.IController {
 
 	private loadModelSettings() {
 		dispatch(ModelActions.fetchSettings(this.account, this.model));
-		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
+		dispatch(IssuesActions.fetchIssues(this.account, this.model, this.revision));
 		dispatch(RisksActions.fetchRisks(this.account, this.model, this.revision));
 		dispatch(GroupsActions.fetchGroups(this.account, this.model, this.revision));
+		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
 		dispatch(StarredMetaActions.fetchStarredMeta());
+	}
+
+	private resetPanelsStates() {
+		dispatch(IssuesActions.resetComponentState());
+		dispatch(RisksActions.resetComponentState());
+		dispatch(GroupsActions.resetComponentState());
 	}
 }
 

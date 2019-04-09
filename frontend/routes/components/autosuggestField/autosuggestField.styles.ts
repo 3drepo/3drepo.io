@@ -20,12 +20,11 @@ import Popper from '@material-ui/core/Popper';
 import { COLOR } from '../../../styles/colors';
 import { TextField } from '../textField/textField.component';
 
-export const Container = styled.div`
-`;
+export const Container = styled.div``;
 
 export const StyledTextField = styled(TextField)`
 	&& {
-    margin: 8px 0 -8px;
+		margin: 8px 0;
 	}
 `;
 
@@ -51,5 +50,5 @@ export const SuggestionsList = styled(Popper)`
 	.react-autosuggest__suggestion > div {
 		font-size: 12px;
 		flex: 1;
-  }
+	}
 `;

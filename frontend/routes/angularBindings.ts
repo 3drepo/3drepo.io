@@ -27,6 +27,7 @@ import PanelsMenu from './viewer/components/panelsMenu/panelsMenu.container';
 import { PanelButton } from './viewer/components/panelButton/panelButton.component';
 import CloseFocusModeButton from './viewer/components/closeFocusModeButton/closeFocusModeButton.container';
 import Bim from './viewer/components/bim/bim.container';
+import Issues from './viewer/components/issues/issues.container';
 
 angular
 	.module('3drepo')
@@ -49,4 +50,5 @@ angular
 	.component('panelsMenu', wrap(PanelsMenu))
 	.component('closeFocusModeButton', wrap(CloseFocusModeButton))
 	.component('panelButton', wrap(PanelButton, ['onClick', 'label', 'icon', 'active', 'type']))
-	.component('bim', wrap(Bim, ['teamspace', 'model']));
+	.component('bim', wrap(Bim, ['teamspace', 'model']))
+	.component('issues', wrap(Issues, ['teamspace', 'model', 'revision']));

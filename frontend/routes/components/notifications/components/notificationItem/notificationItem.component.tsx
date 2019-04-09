@@ -118,12 +118,16 @@ export class NotificationItem extends React.PureComponent<IProps, IState> {
 			return;
 		}
 
-		const {teamSpace, modelId, _id: notificationId, history} = this.props;
+		const {teamSpace, modelId, history, issuesId} = this.props;
 		let pathname = `/viewer/${teamSpace}/${modelId}`;
 		let search = '';
 
 		if (this.props.type === TYPES.ISSUE_ASSIGNED) {
-			search = `?notificationId=${notificationId}`;
+			const issueId = issuesId && issuesId.length && issuesId[0];
+
+			if (issueId) {
+				search = `?issueId=${issueId}`;
+			}
 		}
 
 		if (this.props.type === TYPES.MODEL_UPDATED && this.props.revision) {

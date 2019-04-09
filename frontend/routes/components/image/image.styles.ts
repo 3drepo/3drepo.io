@@ -35,4 +35,8 @@ export const Container = styled.div`
 export const StyledImage = styled(Img)`
 	width: 100%;
 	object-fit: cover;
+
+	.new-comment & {
+		max-height: 150px;
+	}
 ` as any;

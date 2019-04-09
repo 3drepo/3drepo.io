@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { omit, get } from 'lodash';
+import { get, omit } from 'lodash';
 import { getAPIUrl } from '../services/api';
 import {
 	RISK_CONSEQUENCES,
@@ -65,7 +65,8 @@ export const prepareRisk = (risk, jobs = []) => {
 		residual_consequence: residualConsequence,
 		level_of_risk: levelOfRisk,
 		overall_level_of_risk: overallLevelOfRisk,
-		residual_level_of_risk: residualLevelOfRisk
+		residual_level_of_risk: residualLevelOfRisk,
+		comments: risk.comments || []
 	};
 };
 
@@ -144,12 +145,8 @@ const isViewer = (permissions) => {
 	return permissions && !hasPermissions(PERMISSIONS.COMMENT_ISSUE, permissions);
 };
 
-const isAssignedJob = (riskData, userJob, permissions) => {
-	return riskData && userJob &&
-		(userJob._id &&
-			riskData.assigned_roles[0] &&
-			userJob._id === riskData.assigned_roles[0]) &&
-			!isViewer(permissions);
+const canCommentRisk = (permissions) => {
+	return permissions && hasPermissions(PERMISSIONS.COMMENT_ISSUE, permissions);
 };
 
 const isJobOwner = (riskData, userJob, permissions, currentUser) => {
@@ -157,6 +154,14 @@ const isJobOwner = (riskData, userJob, permissions, currentUser) => {
 		(riskData.owner === currentUser ||
 		userJobMatchesCreator(userJob, riskData)) &&
 		!isViewer(permissions);
+};
+
+const isAssignedJob = (riskData, userJob, permissions) => {
+	return riskData && userJob &&
+		(userJob._id &&
+			riskData.assigned_roles[0] &&
+			userJob._id === riskData.assigned_roles[0]) &&
+			!isViewer(permissions);
 };
 
 const getValidNumber = (value, defaultValue?) => {
@@ -171,7 +176,25 @@ const canChangeStatusToClosed = (riskData, userJob, permissions, currentUser) =>
 	return isAdmin(permissions) || isJobOwner(riskData, userJob, permissions, currentUser);
 };
 
-export const canUpdateRisk = (riskData, userJob, permissions, currentUser) => {
+export const canChangeStatus = (riskData, userJob, permissions, currentUser) => {
 	return canChangeStatusToClosed(riskData, userJob, permissions, currentUser) ||
 		isAssignedJob(riskData, userJob, permissions);
+};
+
+export const canChangeBasicProperty = (riskData, userJob, permissions, currentUser) => {
+	return isAdmin(permissions) || isJobOwner(riskData, userJob, permissions, currentUser) &&
+		canComment(riskData, userJob, permissions, currentUser);
+};
+
+export const canChangeAssigned = (riskData, userJob, permissions, currentUser) => {
+	return isAdmin(permissions) || canChangeBasicProperty(riskData, userJob, permissions, currentUser);
+};
+
+export const canComment = (riskData, userJob, permissions, currentUser) => {
+	const ableToComment =
+		isAdmin(permissions) ||
+		isJobOwner(riskData, userJob, permissions, currentUser) ||
+		canCommentRisk(permissions);
+
+	return ableToComment;
 };

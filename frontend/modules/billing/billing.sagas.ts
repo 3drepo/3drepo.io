@@ -124,7 +124,7 @@ export function* changeSubscription({ teamspace, subscriptionData }) {
 
 export function* downloadInvoice({ teamspace, invoiceNo }) {
 	try {
-		const url = `${ClientConfig.apiUrls.all[0]}/${teamspace}/invoices/${invoiceNo}.pdf`;
+		const url = yield API.getAPIUrl(`${teamspace}/invoices/${invoiceNo}.pdf`);
 		window.open(url, '_blank');
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('download', 'invoice', e));

@@ -20,6 +20,7 @@ import { IconButton } from '@material-ui/core';
 
 export const SmallIconButtonStyled = styled(IconButton)`
 	&& {
-	width: 10px;
-	height: 10px;
-}`;
+		width: 10px;
+		height: 10px;
+	}
+`;

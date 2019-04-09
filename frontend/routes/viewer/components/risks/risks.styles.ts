@@ -19,12 +19,12 @@ import styled from 'styled-components';
 import { COLOR } from '../../../../styles';
 
 export const ListContainer = styled.ul`
-  height: 100%;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
+	height: 100%;
+	padding: 0;
+	margin: 0;
+	cursor: pointer;
 `;
 
 export const Summary = styled.div`
-  color: ${COLOR.BLACK_40};
+	color: ${COLOR.BLACK_40};
 `;

@@ -66,7 +66,7 @@ export const GridColumn = styled(Grid)`
 `;
 
 export const StyledForm = styled(Form)`
-  padding: 24px;
+	padding: 24px;
 	box-sizing: border-box;
 	overflow: scroll;
 `;

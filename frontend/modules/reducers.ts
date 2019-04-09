@@ -21,7 +21,7 @@ import { reducer as treeReducer } from './tree/tree.redux';
 import { reducer as bimReducer } from './bim/bim.redux';
 import { reducer as starredMetaReducer } from './starredMeta/starredMeta.redux';
 import { reducer as measureReducer } from './measure/measure.redux';
-
+import { reducer as issuesReducer } from './issues/issues.redux';
 // <-- IMPORT MODULE REDUCER -->
 
 export default function createReducer() {
@@ -46,6 +46,7 @@ export default function createReducer() {
 		tree: treeReducer,
 		bim: bimReducer,
 		starredMeta: starredMetaReducer,
-		measure: measureReducer// <-- INJECT MODULE REDUCER -->
+		measure: measureReducer,
+		issues: issuesReducer// <-- INJECT MODULE REDUCER -->
 	});
 }

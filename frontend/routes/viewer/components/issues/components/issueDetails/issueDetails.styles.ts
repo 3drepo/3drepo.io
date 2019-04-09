@@ -15,21 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import styled from 'styled-components';
 
-import { Container } from './viewer.styles';
+export const Container = styled.div``;
 
-interface IProps {
-	noop: string; // TODO: Remove sample
-}
-
-export class Viewer extends React.PureComponent<IProps, any> {
-
-	public render() {
-		return (
-			<Container>
-				Viewer component
-			</Container>
-		);
-	}
-}
+export const DescriptionImage = styled.div`
+	max-height: 250px;
+	overflow: hidden;
+`;

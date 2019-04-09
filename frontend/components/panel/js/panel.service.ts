@@ -281,7 +281,8 @@ export class PanelService {
 					visible: true
 				}
 			],
-			add: true
+			add: true,
+			isReactComponent: true
 		});
 
 		this.panelCards.left.push({

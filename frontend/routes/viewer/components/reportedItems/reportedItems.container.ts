@@ -17,12 +17,12 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
+import { connect } from '../../../../helpers/migration';
 
-import { Viewer } from './viewer.component';
+import { ReportedItems } from './reportedItems.component';
 
 const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Viewer);
+export default connect(mapStateToProps, mapDispatchToProps)(ReportedItems);
