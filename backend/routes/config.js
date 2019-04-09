@@ -35,7 +35,7 @@ function createClientConfig(serverConfig, req) {
 		"uistate": {},
 		"structure": pluginStructure,
 		"frontendPug": [],
-		"gaTrackId": config.gaTrackId,
+		"ga" : config.ga,
 		"development" : config.development,
 		"googleConversionId": config.googleConversionId,
 		"userNotice" : config.userNotice,

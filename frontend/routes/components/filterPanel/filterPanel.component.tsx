@@ -19,12 +19,14 @@ import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
 import * as dayjs from 'dayjs';
 import { omit, isNil, uniqBy, pick, keyBy } from 'lodash';
-
-import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import CollapseIcon from '@material-ui/icons/ExpandMore';
 import ExpandIcon from '@material-ui/icons/ChevronRight';
+
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
+
+import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { Highlight } from '../highlight/highlight.component';
 import { ENTER_KEY, BACKSPACE } from '../../../constants/keys';
 import { FiltersMenu } from './components/filtersMenu/filtersMenu.component';
@@ -38,7 +40,8 @@ import {
 	FiltersButton,
 	ButtonContainer,
 	StyledIconButton,
-	StyledMoreIcon,
+	MoreIcon,
+	CopyIcon,
 	ButtonWrapper
 } from './filterPanel.styles';
 import { compareStrings } from '../../../helpers/searching';
@@ -50,13 +53,13 @@ export const DATA_TYPES = {
 	QUERY: 3
 };
 
-interface IFilter {
+export interface IFilter {
 	values: any;
-	label: string;
+	label?: string;
 	type?: number;
 }
 
-interface ISelectedFilter {
+export interface ISelectedFilter {
 	value: any;
 	label: string;
 	relatedField: string;
@@ -77,19 +80,35 @@ interface IState {
 	filtersOpen: boolean;
 }
 
-const MenuButton = ({ IconProps, Icon, ...props }) => (
+const getMenuButton = (InitialIcon) => ({ IconProps, Icon, ...props }: { Icon?, IconProps: any }) => (
 	<ButtonWrapper>
-	  <StyledIconButton
-	    {...props}
-	    aria-label="Show filters menu"
-	    aria-haspopup="true"
-	  >
-	    <StyledMoreIcon {...IconProps} />
-	  </StyledIconButton>
+		<StyledIconButton
+			{...props}
+			aria-label="Show filters menu"
+			aria-haspopup="true"
+		>
+			<InitialIcon {...IconProps} />
+		</StyledIconButton>
 	</ButtonWrapper>
 );
 
+const CopyButton = getMenuButton(CopyIcon) as any;
+const MoreButton = getMenuButton(MoreIcon);
+
 const getSuggestionValue = (suggestion) => suggestion.name;
+
+const getFilterName = (filterLabel, valueLabel) => {
+	const basicName = filterLabel ? `${filterLabel}: ` : '';
+	return `${basicName}${valueLabel}`;
+};
+
+const getSelectedFilterLabel = (filter) => {
+	if (filter.type !== DATA_TYPES.QUERY) {
+		return `${filter.label}: ${filter.value.label}`;
+	}
+
+	return filter.label || filter.value.label;
+};
 
 const mapFiltersToSuggestions = (filters, selectedFilters) => {
 	const selectedFiltersMap = keyBy(selectedFilters, ({ label, value }) => `${label}:${value.label}`);
@@ -101,8 +120,10 @@ const mapFiltersToSuggestions = (filters, selectedFilters) => {
 
 				if (!selectedFiltersMap[name]) {
 					suggestions.push({
-						...pick(currentFilter, ['label', 'relatedField', 'type']),
-						name,
+						name: getFilterName(currentFilter.label, value.label),
+						label: currentFilter.label,
+						relatedField: currentFilter.relatedField,
+						type: currentFilter.type,
 						value
 					});
 				}
@@ -406,7 +427,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 					<StyledChip
 						key={index}
 						color={index === removableFilterIndex ? 'primary' : 'default'}
-						label={filter.type !== DATA_TYPES.QUERY ? `${filter.label}: ${filter.value.label}` : filter.label}
+						label={getSelectedFilterLabel(filter)}
 						onDelete={() => this.onDeselectFilter(filter)}
 					/>
 				))}
@@ -433,10 +454,18 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public renderCopyButton = renderWhenTrue(() => (
+		<CopyToClipboard text={JSON.stringify(this.props.selectedFilters)}>
+			<ButtonContainer>
+				<CopyButton IconProps={{size: 'small'}} disabled={!this.props.selectedFilters.length} />
+			</ButtonContainer>
+		</CopyToClipboard>
+	));
+
 	public renderFiltersMenuButton = renderWhenTrue(() => (
 		<ButtonContainer>
 			<ButtonMenu
-				renderButton={MenuButton}
+				renderButton={MoreButton}
 				renderContent={this.renderFiltersMenu}
 				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
@@ -445,13 +474,20 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		</ButtonContainer>
 	));
 
+	public get onlyCopyButton() {
+		const onlyQueryFilters = this.props.filters.every((filter) => filter.type === DATA_TYPES.QUERY);
+		return onlyQueryFilters;
+	}
+
 	public render() {
-		const { value, suggestions } = this.state;
+		const { value, suggestions, selectedFilters, filtersOpen } = this.state;
+		const { hideMenu, filters } = this.props;
+
 		return (
-			<Container filtersOpen={this.state.selectedFilters.length && this.state.filtersOpen}>
+			<Container filtersOpen={selectedFilters.length && filtersOpen}>
 				{this.renderSelectedFilters()}
 
-				<InputContainer menuHidden={this.props.hideMenu}>
+				<InputContainer menuHidden={hideMenu}>
 					<Autosuggest
 						ref={this.handleAutoSuggestMount}
 						suggestions={suggestions}
@@ -473,7 +509,8 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 						renderSuggestionsContainer={this.renderSuggestionsContainer}
 						onSuggestionSelected={this.handleNewFilterSubmit}
 					/>
-					{this.renderFiltersMenuButton(!this.props.hideMenu)}
+					{this.renderCopyButton((!hideMenu && !filters.length) || this.onlyCopyButton)}
+					{this.renderFiltersMenuButton(!hideMenu && filters.length && !this.onlyCopyButton)}
 				</InputContainer>
 
 			</Container>

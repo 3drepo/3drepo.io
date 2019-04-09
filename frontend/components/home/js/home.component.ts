@@ -40,7 +40,6 @@ class HomeController implements ng.IController {
 		'APIService',
 		'ClientConfigService',
 		'SWService',
-		'AnalyticService',
 		'ViewerService',
 		'TemplateService',
 		'DialogService'
@@ -89,7 +88,6 @@ class HomeController implements ng.IController {
 		private APIService,
 		private ClientConfigService,
 		private SWService,
-		private AnalyticService,
 		private ViewerService,
 		private TemplateService,
 		private DialogService
@@ -103,10 +101,7 @@ class HomeController implements ng.IController {
 	public $onInit() {
 
 		this.handlePaths();
-
 		this.setLoginPage();
-
-		this.AnalyticService.init();
 		this.SWService.init();
 
 		// Pages to not attempt a interval triggered logout from

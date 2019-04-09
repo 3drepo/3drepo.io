@@ -22,7 +22,7 @@ import {
 	Title,
 	TitleIcon,
 	TitleContainer,
-	ViewerPanelContent
+	LoaderContainer
 } from './viewerPanel.styles';
 import { Panel } from '../../../components/panel/panel.component';
 import { Loader } from '../../../components/loader/loader.component';
@@ -48,9 +48,9 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 	));
 
 	public renderLoader = renderWhenTrue(() => (
-		<ViewerPanelContent className="height-catcher">
+		<LoaderContainer className="height-catcher">
 			<Loader />
-		</ViewerPanelContent>
+		</LoaderContainer>
 	));
 
 	public renderTitleActions = () => (

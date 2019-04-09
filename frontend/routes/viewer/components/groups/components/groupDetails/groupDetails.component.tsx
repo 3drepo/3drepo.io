@@ -235,7 +235,6 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			<Container>
 				<Content
 					className="height-catcher"
-					padding="0"
 					onScroll={this.handlePanelScroll}
 					innerRef={this.panelRef}
 				>

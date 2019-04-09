@@ -19,29 +19,26 @@ import * as React from 'react';
 import { isEmpty, includes } from 'lodash';
 
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { Settings } from './components/settings/settings.component';
 
-import IconButton from '@material-ui/core/IconButton';
+import { MenuItem, ListItem, IconButton, List } from '@material-ui/core';
 import LayersIcon from '@material-ui/icons/Layers';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import MoreIcon from '@material-ui/icons/MoreVert';
-import List from '@material-ui/core/List';
-import MenuItem from '@material-ui/core/MenuItem';
-import ListItem from '@material-ui/core/ListItem';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
 	StyledSelect,
 	MapLayer,
 	MapName,
 	MapNameWrapper,
 	StyledMapIcon,
-	VisibilityButton
+	VisibilityButton,
+	MapLayers
 } from './gis.styles';
-import { renderWhenTrue } from '../../../../helpers/rendering';
 
 interface IProps {
 	location: any;
@@ -96,12 +93,12 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		const { activeMapIndex } = this.state;
 		const activeMapLayers = mapsProviders.length && mapsProviders[activeMapIndex].layers;
 		return (
-			<ViewerPanelContent className="height-catcher">
+			<MapLayers className="height-catcher">
 				<StyledSelect onChange={this.handleChangeMapProvider} value={activeMapIndex}>
 					{this.renderMapProviders(mapsProviders)}
 				</StyledSelect>
 				{activeMapLayers ? this.renderLayers(activeMapLayers) : null}
-			</ViewerPanelContent>
+			</MapLayers>
 		);
 	});
 

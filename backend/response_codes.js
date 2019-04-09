@@ -393,7 +393,8 @@
 
 		}
 
-		let length;
+		const meta = { place, httpCode: resCode.status };
+
 		// Prepare error response
 		if (resCode.value) {
 			const responseObject = _.extend({}, extraInfo, {
@@ -403,11 +404,11 @@
 				value: resCode.value
 			});
 
-			length = JSON.stringify(responseObject)
+			meta.contentLength = JSON.stringify(responseObject)
 				.length;
 			req[C.REQ_REPO].logger.logError(
-				JSON.stringify(responseObject),
-				{ httpCode: resCode.status, contentLength: length }
+				resCode.code + " (" + resCode.value + ")",
+				meta
 			);
 
 			res.status(resCode.status)
@@ -429,7 +430,7 @@
 				}
 
 				// res.setHeader("Content-Length", extraInfo.length);
-				length = extraInfo.length;
+				meta.contentLength = extraInfo.length;
 
 				res.write(extraInfo, "binary");
 				res.flush();
@@ -437,14 +438,14 @@
 
 			} else {
 
-				length = typeof extraInfo === "string" ? extraInfo.length : JSON.stringify(extraInfo)
+				meta.contentLength = typeof extraInfo === "string" ? extraInfo.length : JSON.stringify(extraInfo)
 					.length;
 				res.status(resCode.status)
 					.send(extraInfo);
 			}
 
 			// log bandwidth and http status code
-			req[C.REQ_REPO].logger.logInfo("Responded with " + resCode.status, { httpCode: resCode.status, contentLength: length });
+			req[C.REQ_REPO].logger.logInfo(resCode.code, meta);
 		}
 
 		// next();

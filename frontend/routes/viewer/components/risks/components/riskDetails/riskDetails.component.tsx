@@ -310,8 +310,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			<Container>
 				<ViewerPanelContent
 					className="height-catcher"
-					padding="0"
-					details="1"
 					onScroll={this.handlePanelScroll}
 					innerRef={this.panelRef}
 				>

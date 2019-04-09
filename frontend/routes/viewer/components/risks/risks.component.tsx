@@ -36,6 +36,7 @@ import {
 
 import { ReportedItems } from '../reportedItems';
 import { IRisksComponentState } from '../../../../modules/risks/risks.redux';
+import { ListContainer, Summary } from './risks.styles';
 
 interface IProps {
 	history: any;

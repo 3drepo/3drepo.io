@@ -463,7 +463,6 @@ export function* showDetails({ teamspace, model, revision, risk }) {
 export function* closeDetails({ teamspace, model, revision }) {
 	try {
 		const activeRisk = yield select(selectActiveRiskDetails);
-
 		if (activeRisk) {
 			runAngularViewerTransition({
 				account: teamspace,

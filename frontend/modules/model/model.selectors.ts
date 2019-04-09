@@ -42,3 +42,7 @@ export const selectMaps = createSelector(
 export const selectCurrentModel = createSelector(
 	selectSettings, (state) => state.model
 );
+
+export const selectMetaKeys = createSelector(
+	selectModelDomain, (state) => state.metaKeys
+);

@@ -16,7 +16,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { put, takeLatest, select } from 'redux-saga/effects';
+import { put, takeLatest, select, all } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { getAngularService, dispatch } from './../../helpers/migration';
@@ -30,9 +30,12 @@ import { selectCurrentUser } from '../currentUser';
 export function* fetchSettings({ teamspace, modelId }) {
 	try {
 		yield put(ModelActions.setPendingState(true));
-		const { data: settings } = yield API.getModelSettings(teamspace, modelId);
+		const [{ data: settings }, { data: metaKeys }] = yield all([
+			API.getModelSettings(teamspace, modelId),
+			API.getMetaKeys(teamspace, modelId)
+		]);
 
-		yield put(ModelActions.fetchSettingsSuccess(settings));
+		yield put(ModelActions.fetchSettingsSuccess(settings, metaKeys));
 		yield put(ModelActions.setPendingState(false));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'model settings', e));

@@ -43,4 +43,12 @@ export const IconContainer = styled(Icon).attrs({
 	&.primary {
 		color: ${MuiTheme.palette.primary.main}
 	}
+
+	&.fontSizeSmall {
+		font-size: 20px;
+
+		svg {
+			width: 1em;
+		}
+	}
 `;

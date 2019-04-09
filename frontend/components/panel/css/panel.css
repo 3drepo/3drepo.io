@@ -19,7 +19,7 @@ panel  {
   display: block;
   position: absolute;
   pointer-events: inherit;
-  top: 30px;
+  top: 70px;
   width: 470px;
   z-index: 2;
 }
@@ -28,10 +28,6 @@ panel #items {
   position: absolute;
   width: 380px;
   pointer-events: inherit;
-}
-
-panel #items #reactComponent {
-  
 }
 
 panel {
@@ -73,7 +69,7 @@ panel #docsPanel #panelCardContainer {
 
 panel #buttons {
   position: absolute;
-  top: 50px;
+  top: 10px;
   pointer-events: inherit;
 }
 panel #buttons .panelButtonGroup {
@@ -97,7 +93,6 @@ panel #buttons .panelButtonGroup label {
 
 #leftPanel {
   left: 0;
-  pointer-events: none;
 }
 #leftPanel #items {
   right: 0;
@@ -108,13 +103,16 @@ panel #buttons .panelButtonGroup label {
 
 #rightPanel {
   right: 0;
-  pointer-events: none;
 }
 #rightPanel #items {
   left: 0;
 }
 #rightPanel #buttons {
   right: 0;
+}
+
+#leftPanel, #rightPanel {
+  pointer-events: none;
 }
 
 /** Panel Card ********************************************************************************************************/
@@ -286,7 +284,7 @@ panel-card-option-pin md-icon {
 }
 
 .leftButtons {
-  margin-left: 5px;
+  margin-left: 23px;
 }
 
 

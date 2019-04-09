@@ -18,6 +18,9 @@ import { reducer as viewpointsReducer } from './viewpoints/viewpoints.redux';
 import { reducer as risksReducer } from './risks/risks.redux';
 import { reducer as groupsReducer } from './groups/groups.redux';
 import { reducer as treeReducer } from './tree/tree.redux';
+import { reducer as bimReducer } from './bim/bim.redux';
+import { reducer as starredMetaReducer } from './starredMeta/starredMeta.redux';
+import { reducer as measureReducer } from './measure/measure.redux';
 import { reducer as issuesReducer } from './issues/issues.redux';
 // <-- IMPORT MODULE REDUCER -->
 
@@ -41,6 +44,9 @@ export default function createReducer() {
 		risks: risksReducer,
 		groups: groupsReducer,
 		tree: treeReducer,
+		bim: bimReducer,
+		starredMeta: starredMetaReducer,
+		measure: measureReducer,
 		issues: issuesReducer// <-- INJECT MODULE REDUCER -->
 	});
 }

@@ -29,7 +29,7 @@ import * as AvatarStyles from '../../../avatar/avatar.styles';
 export const UserIcon = styled(AccountCircle)`
 	&& {
 		color: ${COLOR.WHITE};
-		font-size: 45px;
+		font-size: 28px;
 		filter: drop-shadow(0 0 2px ${COLOR.BLACK_30});
 	}
 `;

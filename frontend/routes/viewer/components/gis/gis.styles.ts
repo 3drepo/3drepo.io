@@ -21,6 +21,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Select from '@material-ui/core/Select';
 import MapIcon from '@material-ui/icons/Map';
 
+import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import { COLOR } from './../../../../styles/colors';
 
 export const StyledSelect = styled(Select)`
@@ -72,4 +73,8 @@ export const MapNameWrapper = styled.div`
 
 export const MapName = styled.div`
 	margin-left: 24px;
+`;
+
+export const MapLayers = styled(ViewerPanelContent)`
+  padding: 24px;
 `;
