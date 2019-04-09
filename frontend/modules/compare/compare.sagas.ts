@@ -217,10 +217,12 @@ function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
 		const targetClashModels = yield select(selectTargetClashModels);
 		const componentState = {} as ICompareComponentState;
 
-		componentState.targetDiffModels = {
-			...targetDiffModels,
-				[modelId]: isTarget
+		if (!isTypeChange) {
+			componentState.targetDiffModels = {
+				...targetDiffModels,
+					[modelId]: isTarget
 			};
+		}
 		componentState.targetClashModels = {
 			...targetClashModels,
 			[modelId]: isTypeChange ? isTarget : false
