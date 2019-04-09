@@ -105,11 +105,15 @@ export class Compare extends React.PureComponent<IProps, any> {
 	}
 
 	private renderDiffTab = renderWhenTrue(() => (
-		<CompareDiff compareModels={this.props.compareModels} />
+		<CompareDiff
+			compareModels={this.props.compareModels}
+		/>
 	));
 
 	private renderClashTab = renderWhenTrue(() => (
-		<CompareClash compareModels={this.props.compareModels} />
+		<CompareClash
+			compareModels={this.props.compareModels}
+		/>
 	));
 
 	public render() {

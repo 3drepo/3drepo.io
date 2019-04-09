@@ -25,9 +25,10 @@ import { SelectField, MenuItem, Name, Date } from './revisionsSelect.styles';
 interface IProps {
 	revisions: any[];
 	value: string;
+	baseRevision?: string;
 	defaultValue?: string;
-	onChange: (revisionId) => void;
 	disabled?: boolean;
+	onChange: (revisionId) => void;
 }
 
 interface IState {
@@ -68,7 +69,7 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 				onChange={this.handleChange}
 			>
 				{revisions.map(({ tag, timestamp, _id }) => (
-					<MenuItem key={_id} value={_id}>
+					<MenuItem key={_id} value={_id} disabled={this.props.baseRevision === _id}>
 						{this.renderName(tag)}
 						{this.renderDate(timestamp)}
 					</MenuItem>
@@ -98,6 +99,8 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 	private handleChange = (e) => {
 		this.setState({
 			value: e.target.value
+		}, () => {
+			this.props.onChange(e.target.value);
 		});
 	}
 

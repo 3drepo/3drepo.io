@@ -23,6 +23,7 @@ import { Container, List } from './compareClash.styles';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { EmptyStateInfo } from '../../../views/views.styles';
 import { BASE_MODEL_TYPE, TARGET_MODEL_TYPE } from '../../../../../../constants/compare';
+import { ICompareComponentState } from '../../../../../../modules/compare/compare.redux';
 
 interface IProps {
 	className: string;
@@ -31,6 +32,7 @@ interface IProps {
 	compareModels: any[];
 	isAllSelected: boolean;
 	targetModels: any;
+	setTargetModel: (modelId, isTarget, isTypeChange?) => void;
 	setComponentState: (state) => void;
 }
 
@@ -60,15 +62,11 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 	}
 
 	private handleModelTypeChange = (modelProps) => (type) => {
-		const targetModels = {
-			...this.props.targetModels,
-			[modelProps.baseRevision._id]: type === TARGET_MODEL_TYPE
-		};
-		this.props.setComponentState({ targetModels });
+		this.props.setTargetModel(modelProps._id, type === TARGET_MODEL_TYPE, true);
 	}
 
 	private handleRevisionChange = (modelProps) => () => {
-		console.log('Revision of', modelProps.name, 'changed');
+		console.log('Revision of', modelProps, 'changed');
 	}
 
 	private renderFilterPanel = () => (
@@ -81,7 +79,9 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 	)
 
 	private handleItemSelect = (modelProps) => (event, selected) => {
-		const { selectedItemsMap, setComponentState } = this.props;
+		const { selectedItemsMap, setComponentState, setTargetModel } = this.props;
+
+		setTargetModel(modelProps._id, selected);
 		setComponentState({
 			selectedModelsMap: {
 				...selectedItemsMap,
@@ -92,17 +92,25 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 
 	private handleAllItemsSelect = (event, selected) => {
 		const { setComponentState, compareModels } = this.props;
-		const selectedModelsMap = compareModels.reduce((map, obj) => {
+		const newComponentState = {} as ICompareComponentState;
+
+		newComponentState.selectedModelsMap = compareModels.reduce((map, obj) => {
 			map[obj._id] = selected;
 			return map;
 		}, {});
 
-		setComponentState({ selectedModelsMap });
+		newComponentState.targetDiffModels = newComponentState.selectedModelsMap;
+		if (!selected) {
+			newComponentState.targetClashModels = newComponentState.selectedModelsMap;
+		}
+
+		setComponentState(newComponentState);
 	}
 
 	private renderListItem = (modelProps) => {
 		const { selectedItemsMap } = this.props;
 		const isSelected = selectedItemsMap[modelProps._id];
+
 		return (
 			<CompareClashItem
 				key={modelProps._id}
@@ -111,7 +119,7 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 				baseRevision={modelProps.baseRevision}
 				currentRevision={modelProps.currentRevision}
 				selected={isSelected}
-				isTarget={this.props.targetModels[modelProps.baseRevision._id]}
+				isTarget={this.props.targetModels[modelProps._id]}
 				onSelectionChange={this.handleItemSelect(modelProps)}
 				onRevisionChange={this.handleRevisionChange(modelProps)}
 				onModelTypeChange={this.handleModelTypeChange(modelProps)}

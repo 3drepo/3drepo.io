@@ -24,17 +24,20 @@ import {
 	CompareActions,
 	selectSelectedFilters,
 	selectIsAllSelected,
-	selectSelectedModelsMap
+	selectSelectedModelsMap,
+	selectTargetClashModels
 } from '../../../../../../modules/compare';
 
 const mapStateToProps = createStructuredSelector({
 	selectedItemsMap: selectSelectedModelsMap,
 	selectedFilters: selectSelectedFilters,
-	isAllSelected: selectIsAllSelected
+	isAllSelected: selectIsAllSelected,
+	targetModels: selectTargetClashModels
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	setComponentState: CompareActions.setComponentState
+	setComponentState: CompareActions.setComponentState,
+	setTargetModel: CompareActions.setTargetModel
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(CompareClash);

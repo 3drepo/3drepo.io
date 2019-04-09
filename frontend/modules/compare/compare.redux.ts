@@ -34,7 +34,8 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	getCompareModelData: ['isFederation', 'settings'],
 	setSortType: ['sortType'],
 	setActiveTab: ['activeTab'],
-	setIsPending: ['isPending']
+	setIsPending: ['isPending'],
+	setTargetModel: ['modelId', 'isTarget', 'isTypeChange']
 }, { prefix: 'COMPARE/' });
 
 export interface ICompareComponentState {
@@ -46,7 +47,8 @@ export interface ICompareComponentState {
 	compareModels: [];
 	renderingType: number;
 	isPending: boolean;
-	targetModels: {};
+	targetClashModels: {};
+	targetDiffModels: {};
 }
 
 export interface ICompareState {
@@ -71,7 +73,8 @@ export const INITIAL_STATE: ICompareState = {
 		selectedModelsMap: {},
 		compareModels: [],
 		isPending: true,
-		targetModels: {}
+		targetClashModels: {},
+		targetDiffModels: {}
 	}
 };
 

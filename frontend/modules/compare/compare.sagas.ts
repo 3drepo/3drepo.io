@@ -15,13 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select, all, takeEvery, call } from 'redux-saga/effects';
+import { put, takeLatest, select, all, take, call } from 'redux-saga/effects';
 import { cond, matches } from 'lodash';
 
-import { CompareTypes, CompareActions } from './compare.redux';
+import { CompareTypes, CompareActions, ICompareComponentState } from './compare.redux';
 import { selectRevisions, selectIsFederation, selectSettings, ModelTypes } from '../model';
 import {
-	selectSortType, selectSortOrder, selectIsCompareActive, selectActiveTab, selectTargetModels, selectBaseModels, selectSelectedModelsMap, selectTargetModelsList, selectBaseModelsList
+	selectSortType,
+	selectSortOrder,
+	selectIsCompareActive,
+	selectActiveTab,
+	selectBaseModels,
+	selectSelectedModelsMap,
+	selectTargetDiffModelsList,
+	selectTargetClashModelsList,
+	selectBaseModelsList,
+	selectTargetClashModels,
+	selectTargetDiffModels
 } from './compare.selectors';
 import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES } from '../../constants/compare';
 import { DialogActions } from '../dialog';
@@ -36,7 +46,7 @@ const getNextRevision = (revisions, currentRevision) => {
 		return revisions[0];
 	}
 
-	const index = revisions.findIndex((r) => r._id === currentRevision);
+	const index = revisions.findIndex((r) => r._id === currentRevision._id);
 	const lastRev = index + 1 === revisions.length;
 
 	if (lastRev) {
@@ -46,18 +56,19 @@ const getNextRevision = (revisions, currentRevision) => {
 	return revisions[index + 1];
 };
 
-const prepareModelToCompare = (modelId, name, isFederation, revisions, currentRevision?) => {
+const prepareModelToCompare = (teamspace, modelId, name, isFederation, revisions, currentRevision?) => {
 	const baseRevision = isFederation
 		? revisions[0]
 		: revisions.find((rev) => rev.tag === currentRevision || rev._id === currentRevision ) || revisions[0];
 
-	const targetRevision = getNextRevision(revisions, currentRevision);
+	const targetRevision = getNextRevision(revisions, baseRevision);
 	const revisionData = currentRevision
 		? revisions.find((revision) => revision.tag === currentRevision)
 		: revisions[0];
 
 	return {
 		_id: modelId,
+		teamspace,
 		name,
 		baseRevision,
 		currentRevision: revisionData,
@@ -73,15 +84,26 @@ function* getCompareModelData({ isFederation, settings }) {
 		const [teamspace, , currentRevision] = window.location.pathname.replace('/viewer/', '').split('/');
 
 		if (!isFederation) {
-			const model = prepareModelToCompare(settings._id, settings.name, isFederation, revisions, currentRevision);
+			const model =
+				prepareModelToCompare(teamspace, settings._id, settings.name, isFederation, revisions, currentRevision);
 			yield put(CompareActions.setComponentState({ compareModels: [model] }));
 		} else {
 			const { data: submodelsRevisionsMap } = yield API.getSubModelsRevisions(teamspace, settings._id, currentRevision);
 			const compareModels = settings.subModels.map(({ model }) => {
 				const subModelData = submodelsRevisionsMap[model];
-				return prepareModelToCompare(model, subModelData.name, false, subModelData.revisions);
+				return prepareModelToCompare(teamspace, model, subModelData.name, false, subModelData.revisions);
 			});
-			yield put(CompareActions.setComponentState({ compareModels }));
+
+			const selectedModelsMap = compareModels.reduce((map, model) => {
+				map[model._id] = true;
+				return map;
+			}, {});
+
+			yield put(CompareActions.setComponentState({
+				compareModels,
+				selectedModelsMap,
+				targetDiffModels: selectedModelsMap
+			}));
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'model data', error.message));
@@ -189,6 +211,27 @@ function* setActiveTab({ activeTab }) {
 	}
 }
 
+function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
+	try {
+		const targetDiffModels = yield select(selectTargetDiffModels);
+		const targetClashModels = yield select(selectTargetClashModels);
+		const componentState = {} as ICompareComponentState;
+
+		componentState.targetDiffModels = {
+			...targetDiffModels,
+				[modelId]: isTarget
+			};
+		componentState.targetClashModels = {
+			...targetClashModels,
+			[modelId]: isTypeChange ? isTarget : false
+		};
+
+		yield put(CompareActions.setComponentState(componentState));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'target model', error.message));
+	}
+}
+
 function* changeModelNodesVisibility(nodeName: string, visible: boolean) {
 	const TreeService = getAngularService('TreeService') as any;
 	const tree = TreeService.getAllNodes();
@@ -208,11 +251,12 @@ function* changeModelNodesVisibility(nodeName: string, visible: boolean) {
 
 function* startComparisonOfFederation() {
 	yield put(CompareActions.setIsPending(true));
-	const targetModels = yield select(selectTargetModelsList);
-	const baseModels = yield select(selectBaseModelsList);
-	const selectedModels = yield select(selectSelectedModelsMap);
 	const activeTab = yield select(selectActiveTab);
 	const isDiff = activeTab === DIFF_COMPARE_TYPE;
+
+	const targetModels = isDiff ? yield select(selectTargetDiffModelsList) : yield select(selectTargetClashModelsList);
+	const baseModels = yield select(selectBaseModelsList);
+	const selectedModels = yield select(selectSelectedModelsMap);
 
 	const modelsToLoad = [];
 	for (let index = 0; index < targetModels.length; index++) {
@@ -226,13 +270,13 @@ function* startComparisonOfFederation() {
 				const { account, name } = sharedRevisionModel;
 				yield call(changeModelNodesVisibility, `${account}:${name}`, true);
 				Viewer.diffToolSetAsComparator(
-					model.account,
-					model.model
+					model.teamspace,
+					model._id
 				);
 			} else {
 				const modelPromise = Viewer.diffToolLoadComparator(
-					model.account,
-					model.model,
+					model.teamspace,
+					model._id,
 					targetRevision.name
 				);
 				modelsToLoad.push(modelPromise);
@@ -314,4 +358,5 @@ export default function* CompareSaga() {
 	yield takeLatest(CompareTypes.GET_COMPARE_MODEL_DATA, getCompareModelData);
 	yield takeLatest(CompareTypes.SET_SORT_TYPE, setSortType);
 	yield takeLatest(CompareTypes.SET_ACTIVE_TAB, setActiveTab);
+	yield takeLatest(CompareTypes.SET_TARGET_MODEL, setTargetModel);
 }

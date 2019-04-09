@@ -21,6 +21,7 @@ import { CompareFilters } from '../compareFilters/compareFilters.component';
 import { Container, List } from './compareDiff.styles';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { EmptyStateInfo } from '../../../views/views.styles';
+import { ICompareComponentState } from '../../../../../../modules/compare/compare.redux';
 
 interface IProps {
 	className: string;
@@ -28,6 +29,8 @@ interface IProps {
 	selectedFilters: any[];
 	compareModels: any[];
 	isAllSelected: boolean;
+	targetModels: any;
+	setTargetModel: (modelId, isTarget) => void;
 	setComponentState: (state) => void;
 }
 
@@ -65,12 +68,13 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 		/>
 	)
 
-	private handleRevisionChange = (modelProps) => () => {
-		console.log('Type of', modelProps.name, 'changed');
+	private handleRevisionChange = (modelProps) => (id) => {
 	}
 
 	private handleItemSelect = (modelProps) => (event, selected) => {
-		const { selectedItemsMap, setComponentState } = this.props;
+		const { selectedItemsMap, setComponentState, setTargetModel } = this.props;
+
+		setTargetModel(modelProps._id, selected);
 		setComponentState({
 			selectedModelsMap: {
 				...selectedItemsMap,
@@ -81,12 +85,19 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 
 	private handleAllItemsSelect = (event, selected) => {
 		const { setComponentState, compareModels } = this.props;
-		const selectedModelsMap = compareModels.reduce((map, obj) => {
+		const newComponentState = {} as ICompareComponentState;
+
+		newComponentState.selectedModelsMap = compareModels.reduce((map, obj) => {
 			map[obj._id] = selected;
 			return map;
 		}, {});
 
-		setComponentState({ selectedModelsMap });
+		newComponentState.targetDiffModels = newComponentState.selectedModelsMap;
+		if (!selected) {
+			newComponentState.targetClashModels = newComponentState.selectedModelsMap;
+		}
+
+		setComponentState(newComponentState);
 	}
 
 	private renderListItem = (modelProps) => {

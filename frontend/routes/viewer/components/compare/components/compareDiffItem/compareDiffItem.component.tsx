@@ -32,7 +32,7 @@ interface IProps {
 	revisions: any[];
 	selected?: boolean;
 	onSelectionChange: (event, selected) => void;
-	onRevisionChange: () => void;
+	onRevisionChange: (modelProps) => void;
 }
 
 export class CompareDiffItem extends React.PureComponent<IProps, any> {
@@ -51,6 +51,7 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 		<>
 			<ArrowsAltH />
 			<RevisionsSelect
+				baseRevision={this.props.baseRevision._id}
 				defaultValue={this.props.baseRevision._id}
 				value={this.props.targetDiffRevision._id}
 				revisions={this.props.revisions}

@@ -79,14 +79,32 @@ export const selectCompareModels = createSelector(
 	}
 );
 
-export const selectTargetModelsList = createSelector(
-	selectCompareModels, selectTargetModels,
-	(models, targetModelsMap) => models.filter(({ _id }) => targetModelsMap[_id])
+export const selectTargetClashModels = createSelector(
+	selectComponentState, (state) => state.targetClashModels
+);
+
+export const selectTargetDiffModels = createSelector(
+	selectComponentState, (state) => state.targetDiffModels
+);
+
+export const selectTargetClashModelsList = createSelector(
+	selectCompareModels, selectTargetClashModels,
+	(models, targetClashModelsMap) => models.filter(({ _id }) => targetClashModelsMap[_id])
+);
+
+export const selectBaseClashModelsList = createSelector(
+	selectCompareModels, selectTargetClashModels,
+	(models, targetClashModelsMap) => models.filter(({ _id }) => !targetClashModelsMap[_id])
+);
+
+export const selectTargetDiffModelsList = createSelector(
+	selectCompareModels, selectTargetDiffModels,
+	(models, targetDiffModelsMap) => models.filter(({ _id }) => targetDiffModelsMap[_id])
 );
 
 export const selectBaseModelsList = createSelector(
-	selectCompareModels, selectTargetModels,
-	(models, baseModelsMap) => models.filter(({ _id }) => !baseModelsMap[_id])
+	selectCompareModels, selectTargetDiffModels,
+	(models, targetDiffModels) => models.filter(({ _id }) => !targetDiffModels[_id])
 );
 
 const isAllSelected = (allModels, selectedModelsMap) => isEqual(
@@ -105,8 +123,4 @@ export const selectRenderingType = createSelector(
 
 export const selectIsPending = createSelector(
 	selectComponentState, (state) => state.isPending
-);
-
-export const selectTargetModels = createSelector(
-	selectComponentState, (state) => state.targetModels
 );
