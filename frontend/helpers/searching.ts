@@ -50,7 +50,7 @@ export const searchByFilters = (
 
 			if (filterType === DATA_TYPES.QUERY) {
 				return selectedFilters.some((filter) => {
-					const logFound = item.commentCount ? item.comments.some(({ comment }) => {
+					const logFound = item.comments.length ? item.comments.some(({ comment }) => {
 						if (comment) {
 							return compareStrings(comment, filter.value.value);
 						}

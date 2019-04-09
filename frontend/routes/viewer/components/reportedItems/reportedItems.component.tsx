@@ -285,7 +285,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent innerRef={this.listViewRef} className="height-catcher" padding="0">
+			<ViewerPanelContent innerRef={this.listViewRef} className="height-catcher">
 				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredItems.length)}
 				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredItems.length)}
 				{this.renderItemsList(this.state.filteredItems.length)}
