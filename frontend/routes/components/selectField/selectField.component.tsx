@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -99,7 +99,7 @@ export class SelectField extends React.PureComponent<SelectProps, any> {
 	}
 
 	public render() {
-		const { MenuProps, children, onOpen, className, classes, ...selectProps } = this.props;
+		const { MenuProps, children, onOpen, className, ...selectProps } = this.props;
 
 		const customMenuProps = {
 			...MenuProps,
@@ -108,7 +108,7 @@ export class SelectField extends React.PureComponent<SelectProps, any> {
 		};
 
 		return (
-			<Select classes={classes} className={className} {...selectProps} MenuProps={customMenuProps}>
+			<Select className={className} {...selectProps} MenuProps={customMenuProps}>
 				{children}
 			</Select>
 		);
