@@ -46,3 +46,7 @@ export const selectCurrentModel = createSelector(
 export const selectMetaKeys = createSelector(
 	selectModelDomain, (state) => state.metaKeys
 );
+
+export const selectMetaKeysExist = createSelector(
+	selectModelDomain, (state) => Boolean(state.metaKeys.length)
+);

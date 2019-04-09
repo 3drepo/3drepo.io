@@ -69,6 +69,7 @@ interface IProps {
 	isMetadataActive: boolean;
 	isMeasureActive: boolean;
 	isMeasureDisabled: boolean;
+	metaKeysExist: boolean;
 	goToExtent: () => void;
 	setNavigationMode: (navigationMode) => void;
 	initialiseToolbar: () => void;
@@ -213,7 +214,8 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				label: VIEWER_TOOLBAR_ITEMS.BIM,
 				Icon: MetadataIcon,
 				action: this.toggleMetadataPanel,
-				active: this.props.isMetadataActive
+				active: this.props.isMetadataActive,
+				disabled: !this.props.metaKeysExist
 			}
 		];
 	}
@@ -263,7 +265,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 	public renderButtons = () => {
 		return this.toolbarList.map((
-			{label, Icon, action, show = true, subMenu = [], active = false }, index
+			{label, Icon, action, show = true, subMenu = [], active = false, disabled = false }, index
 			) => renderWhenTrue(() => (
 			<ButtonWrapper key={index}>
 				<ToolbarButton
@@ -272,6 +274,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 					Icon={Icon}
 					action={action}
 					active={active}
+					disabled={disabled}
 				/>
 				{this.renderSubmenuDot(subMenu.length)}
 				{this.renderSubmenu(subMenu, label)}
