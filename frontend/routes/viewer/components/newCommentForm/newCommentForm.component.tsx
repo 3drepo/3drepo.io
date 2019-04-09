@@ -26,7 +26,6 @@ import ReportProblemIcon from '@material-ui/icons/ReportProblem';
 import ShortTextIcon from '@material-ui/icons/ShortText';
 
 import { Viewer } from '../../../../services/viewer/viewer';
-import { Measure } from '../../../../services/viewer/measure';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
@@ -66,6 +65,8 @@ interface IProps {
 	onTakeScreenshot: (screenshot) => void;
 	onChangePin: (pin) => void;
 	showScreenshotDialog: (options) => void;
+	setDisabled: (isDisabled) => void;
+	deactivateMeasure: () => void;
 }
 
 interface IState {
@@ -113,7 +114,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 
 	public componentWillUnmount() {
 		Viewer.setPinDropMode(false);
-		Measure.setDisabled(false);
+		this.props.setDisabled(false);
 		this.togglePinListeners(false);
 	}
 
@@ -145,12 +146,12 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 
 		if (isPinActive) {
 			Viewer.setPinDropMode(true);
-			Measure.deactivateMeasure();
-			Measure.setDisabled(true);
+			this.props.deactivateMeasure();
+			this.props.setDisabled(true);
 			this.togglePinListeners(true);
 		} else {
 			Viewer.setPinDropMode(false);
-			Measure.setDisabled(false);
+			this.props.setDisabled(false);
 			this.togglePinListeners(false);
 		}
 

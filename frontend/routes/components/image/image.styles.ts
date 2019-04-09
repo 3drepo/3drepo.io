@@ -29,9 +29,14 @@ const previewStateStyles = css`
 
 export const Container = styled.div`
 	${(props: any) => props.enablePreview && previewStateStyles}
+	display: ${(props: any) => props.enablePreview ? 'block' : 'flex'};
 ` as any;
 
 export const StyledImage = styled(Img)`
 	width: 100%;
 	object-fit: cover;
+
+	.new-comment & {
+		max-height: 150px;
+	}
 ` as any;

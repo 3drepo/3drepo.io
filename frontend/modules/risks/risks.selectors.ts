@@ -18,6 +18,8 @@
 import { createSelector } from 'reselect';
 import { values } from 'lodash';
 import { getSortedRisks } from '../../helpers/risks';
+import { searchByFilters } from '../../helpers/searching';
+import { RISK_LEVELS } from '../../constants/risks';
 
 export const selectRisksDomain = (state) => Object.assign({}, state.risks);
 
@@ -29,16 +31,16 @@ export const selectRisksMap = createSelector(
 	selectRisksDomain, (state) => state.risksMap
 );
 
-export const selectIsPending = createSelector(
-	selectRisksDomain, (state) => state.isPending
-);
-
 export const selectComponentState = createSelector(
 	selectRisksDomain, (state) => state.componentState
 );
 
 export const selectIsRisksPending = createSelector(
 	selectRisksDomain, (state) => state.isPending
+);
+
+export const selectAssociatedActivities = createSelector(
+	selectRisksDomain, (state) => state.associatedActivities
 );
 
 export const selectActiveRiskId = createSelector(
@@ -75,12 +77,17 @@ export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
 
-export const selectShowPins = createSelector(
-	selectComponentState, (state) => state.showPins
+export const selectFilteredRisks = createSelector(
+	selectRisks, selectSelectedFilters, (risks, selectedFilters) => {
+		const returnHiddenRisk = selectedFilters.length && selectedFilters
+			.some(({ value: { value } }) => value === RISK_LEVELS.AGREED_FULLY);
+
+		return searchByFilters(risks, selectedFilters, returnHiddenRisk);
+	}
 );
 
-export const selectLogs = createSelector(
-	selectComponentState, (state) => state.logs
+export const selectShowPins = createSelector(
+	selectComponentState, (state) => state.showPins
 );
 
 export const selectFetchingDetailsIsPending = createSelector(
@@ -89,8 +96,4 @@ export const selectFetchingDetailsIsPending = createSelector(
 
 export const selectFailedToLoad = createSelector(
 	selectComponentState, (state) => state.failedToLoad
-);
-
-export const selectAssociatedActivities = createSelector(
-	selectComponentState, (state) => state.associatedActivities
 );

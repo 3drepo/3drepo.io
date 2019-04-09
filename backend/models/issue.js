@@ -686,6 +686,10 @@ issue.updateAttrs = function(dbCol, uid, data) {
 								newIssue.userNotifications = notifications;
 
 								if (data.comment) {
+									if (!data.edit && !data.delete &&
+										newIssue.comments && newIssue.comments.length > 0) {
+										return newIssue.comments[newIssue.comments.length - 1];
+									}
 									return data;
 								} else {
 									ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, newIssue._id, newIssue);

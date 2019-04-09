@@ -14,6 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { dispatch, getState } from '../../../helpers/migration';
+import { BimActions, selectIsActive, selectActiveMeta } from '../../../modules/bim';
+import { ViewerActions } from '../../../modules/viewer';
 
 export class TreeService {
 
@@ -21,7 +24,6 @@ export class TreeService {
 		'$q',
 		'APIService',
 		'ViewerService',
-		'DocsService',
 		'MultiSelectService'
 	];
 
@@ -57,7 +59,6 @@ export class TreeService {
 		private $q: ng.IQService,
 		private APIService,
 		private ViewerService,
-		private DocsService,
 		private MultiSelectService
 	) {
 		this.reset();
@@ -120,8 +121,6 @@ export class TreeService {
 	public init(account: string, model: string, branch: string, revision: string, setting: any) {
 		this.treeMap = null;
 		branch = branch ? branch : 'master';
-
-		// revision = revision ? revision : "head";
 
 		if (!revision) {
 			this.baseURL = account + '/' + model + '/revision/master/head/';
@@ -782,22 +781,24 @@ export class TreeService {
 		}
 	}
 
+	private get isMetadataActive() {
+		return selectIsActive(getState());
+	}
+
 	/**
 	 * Unselect all selected items and clear the array
 	 */
 	public clearCurrentlySelected() {
-
 		this.ViewerService.clearHighlights();
-		this.DocsService.closeDocs();
 
 		const visitedNodes = {};
 
+		dispatch(ViewerActions.setMetadataVisibility(false));
+		dispatch(BimActions.setActiveMeta(null));
+
 		for (const id in this.currentSelectedNodes) {
-
 			if (!id || visitedNodes[id]) { continue; }
-
 			const currentNode = this.currentSelectedNodes[id];
-
 			currentNode.selected = this.SELECTION_STATES.unselected;
 
 			// Skip over any parent that has been visited
@@ -810,7 +811,7 @@ export class TreeService {
 					break;
 				}
 				visitedNodes[parentId] = true;
-				this.getNodeById(parentId).selected =  this.SELECTION_STATES.unselected;
+				this.getNodeById(parentId).selected = this.SELECTION_STATES.unselected;
 			}
 
 			visitedNodes[currentNode._id] = true;
@@ -877,6 +878,13 @@ export class TreeService {
 		}
 
 		if (removeGroup) {
+			const activeMeta = selectActiveMeta(getState());
+			const shouldCloseMeta = nodes.some(({ meta }) => meta.includes(activeMeta));
+
+			if (shouldCloseMeta) {
+				dispatch(ViewerActions.setMetadataVisibility(false));
+				dispatch(BimActions.setActiveMeta(null));
+			}
 			this.deselectNodes(nodes);
 		} else {
 			this.selectNodes(nodes, skipExpand);
@@ -898,7 +906,6 @@ export class TreeService {
 		}
 
 		return this.onReady().then(() => {
-
 			const highlightMap = this.getMeshMapFromNodes(actionNodes);
 
 			for (const key in highlightMap) {
@@ -985,15 +992,12 @@ export class TreeService {
 	 * @param node the node to show the metadata for
 	 */
 	public handleMetadata(node: any) {
-
 		if (node && node.meta) {
-			this.DocsService.displayDocs(
-				node.account,
-				node.model || node.project,
-				node.meta
-			);
+			if (this.isMetadataActive) {
+				dispatch(BimActions.fetchMetadata(node.account, node.model || node.project, node.meta[0]));
+				dispatch(ViewerActions.setMetadataVisibility(true));
+			}
 		}
-
 	}
 
 	/**

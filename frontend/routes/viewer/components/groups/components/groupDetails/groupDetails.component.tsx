@@ -54,15 +54,18 @@ interface IProps {
 interface IState {
 	isFormValid: boolean;
 	isFormDirty: boolean;
+	scrolled: boolean;
 }
 
 export class GroupDetails extends React.PureComponent<IProps, IState> {
 	public state = {
 		isFormValid: false,
-		isFormDirty: false
+		isFormDirty: false,
+		scrolled: false
 	};
 
 	public formRef = React.createRef<HTMLElement>() as any;
+	public panelRef = React.createRef<any>();
 
 	public componentDidMount() {
 		if (!this.isNewGroup) {
@@ -146,6 +149,15 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		this.props.setCriteriaState({ criterionForm: criterion });
 	}
 
+	public handlePanelScroll = (e) => {
+		if (e.target.scrollTop > 0 && !this.state.scrolled) {
+			this.setState({ scrolled: true });
+		}
+		if (e.target.scrollTop === 0 && this.state.scrolled) {
+			this.setState({ scrolled: false });
+		}
+	}
+
 	public renderRulesField = renderWhenTrue(() => (
 		<CriteriaField
 			name="rules"
@@ -174,6 +186,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			disableExpanding
 			panelName={GROUP_PANEL_NAME}
 			StatusIconComponent={GROUP_TYPES_ICONS[this.groupData.type]}
+			scrolled={this.state.scrolled}
 		/>
 	));
 
@@ -222,7 +235,8 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			<Container>
 				<Content
 					className="height-catcher"
-					padding="0"
+					onScroll={this.handlePanelScroll}
+					innerRef={this.panelRef}
 				>
 					{this.renderPreview(this.groupData)}
 				</Content>

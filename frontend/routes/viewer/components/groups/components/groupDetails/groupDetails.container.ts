@@ -21,13 +21,12 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../../../helpers/migration';
 import { GroupDetails } from './groupDetails.component';
 import {
+	GroupsActions,
 	selectActiveGroupDetails,
 	selectExpandDetails,
-	GroupsActions,
-	selectFieldNames,
 	selectCriteriaFieldState
 } from '../../../../../../modules/groups';
-import { selectSettings } from '../../../../../../modules/model';
+import { selectSettings, selectMetaKeys } from '../../../../../../modules/model';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
 import { selectSelectedNodes, selectTotalMeshes } from '../../../../../../modules/tree';
 
@@ -38,7 +37,7 @@ const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
 	totalMeshes: selectTotalMeshes,
 	selectedNodes: selectSelectedNodes,
-	fieldNames: selectFieldNames,
+	fieldNames: selectMetaKeys,
 	criteriaFieldState: selectCriteriaFieldState
 });
 

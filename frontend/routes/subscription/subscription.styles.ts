@@ -28,7 +28,7 @@ import { Form } from 'formik';
 import { COLOR } from '../../styles';
 
 export const Container = styled.div`
-  height: 100%;
+	height: 100%;
 `;
 
 export const StyledTextField = styled(TextField)``;
@@ -40,75 +40,75 @@ export const StyledSelectItem = styled(MenuItem)``;
 export const StyledInputLabel = styled(InputLabel)``;
 
 export const StyledFormControl = styled(FormControl)`
-  width: 100%;
+	width: 100%;
 
-  && {
-    margin-top: 16px;
-    margin-bottom: 8px;
-  }
+	&& {
+		margin-top: 16px;
+		margin-bottom: 8px;
+	}
 `;
 
 export const StyledButton = styled(Button)`
-  && {
-    margin-left: 14px;
-  }
+	&& {
+		margin-left: 14px;
+	}
 `;
 
 export const FormContainer = styled(Grid)`
-  && {
-    padding: 24px;
-    background-color: rgb(250, 250, 250);
-    height: 100%;
-    justify-content: space-between;
-  }
+	&& {
+		padding: 24px;
+		background-color: rgb(250, 250, 250);
+		height: 100%;
+		justify-content: space-between;
+	}
 `;
 
 export const FieldsColumn = styled.div``;
 
 export const FieldsRow = styled(Grid)`
-  overflow: auto;
+	overflow: auto;
 
-  ${StyledTextField} {
-    width: 100%;
-  }
+	${StyledTextField} {
+		width: 100%;
+	}
 
-  > ${/* sc-selector */ StyledTextField}:nth-child(1) {
-    margin-right: 12px;
-  }
+	> ${/* sc-selector */ StyledTextField}:nth-child(1) {
+		margin-right: 12px;
+	}
 
-  ${/* sc-selector */ FieldsColumn}:nth-child(2n) {
-    margin-left: 12px;
-  }
+	${/* sc-selector */ FieldsColumn}:nth-child(2n) {
+		margin-left: 12px;
+	}
 
-  ${/* sc-selector */ FieldsColumn}:nth-child(2n + 1) {
-    margin-right: 12px;
-  }
+	${/* sc-selector */ FieldsColumn}:nth-child(2n + 1) {
+		margin-right: 12px;
+	}
 `;
 
 export const FormFooter = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 32px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 32px;
 `;
 
 export const ConfirmContainer = styled.div`
-  display: flex;
-  align-items: center;
+	display: flex;
+	align-items: center;
 `;
 
 export const FormInfoContainer = styled.div``;
 
 export const FormInfo = styled.p`
-  margin: 0 0 5px;
-  font-size: 12px;
-  color: ${COLOR.BLACK_40};
+	margin: 0 0 5px;
+	font-size: 12px;
+	color: ${COLOR.BLACK_40};
 `;
 
 export const PayPalLogo = styled.img`
-  height: 20px;
+	height: 20px;
 `;
 
 export const StyledForm = styled(Form)`
-  height: 100%;
+	height: 100%;
 `;

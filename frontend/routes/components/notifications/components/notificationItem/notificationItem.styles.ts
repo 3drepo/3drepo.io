@@ -1,19 +1,19 @@
 import styled from 'styled-components';
-import Paper, { PaperProps } from '@material-ui/core/Paper';
+import Paper from '@material-ui/core/Paper';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 import { COLOR } from '../../../../../styles';
 
 export const Item = styled(ListItem)`
-  && {
-    padding: 6px;
-  }
+	&& {
+		padding: 6px;
+	}
 `;
 
 export const Container = styled(Paper)`
-  background-color: ${(props: any) => props.read ? 'transparent' : COLOR.WHITE};
-  margin: 3px;
+	background-color: ${(props: any) => props.read ? 'transparent' : COLOR.WHITE};
+	margin: 3px;
 `;
 
 export const ItemText = styled(ListItemText)`

@@ -3,6 +3,11 @@ export const VIEWER_NAV_MODES = {
 	TURNTABLE: 'TURNTABLE'
 };
 
+export const VIEWER_CLIP_MODES = {
+	SINGLE: 'SINGLE',
+	BOX: 'BOX'
+};
+
 export const VIEWER_MAP_SOURCES = {
 	OSM: 'OSM',
 	HERE: 'HERE',
@@ -52,7 +57,9 @@ export const VIEWER_EVENTS = {
 	UNITY_READY: 'VIEWER_EVENT_UNITY_READY',
 	UPDATE_CLIPPING_PLANES: 'VIEWER_UPDATE_CLIPPING_PLANE',
 	VR_READY: 'VIEWER_EVENT_VR_READY',
-	NAV_MODE_CHANGED: 'NAV_MODE_CHANGED'
+	NAV_MODE_CHANGED: 'NAV_MODE_CHANGED',
+	UPDATE_NUM_CLIP: 'VIEWER_UPDATE_NUM_CLIP',
+	TOGGLE_PANEL: 'VIEWER_TOGGLE_PANEL'
 };
 
 export const VIEWER_ERRORS = {
@@ -68,4 +75,37 @@ export const DEFAULT_SETTINGS = {
 	nearPlane: 10,
 	farPlaneSamplingPoints: 5,
 	farPlaneAlgorithm: 'box'
+};
+
+export const VIEWER_PANELS = {
+	METADATA: 'metadata',
+	RISKS: 'risks',
+	ISSUES: 'issues',
+	GROUPS: 'groups',
+	VIEWS: 'views',
+	TREE: 'tree',
+	COMPARE: 'compare',
+	GIS: 'gis'
+};
+
+export const VIEWER_TOOLBAR_ITEMS = {
+	EXTENT: 'Extent',
+	TURNTABLE: 'Turntable',
+	HELICOPTER: 'Helicopter',
+	SHOW_ALL: 'Show All',
+	HIDE: 'Hide',
+	ISOLATE: 'Isolate',
+	FOCUS: 'Focus',
+	CLIP: 'Clip',
+	MEASURE: 'Measure',
+	BIM: 'BIM'
+};
+
+export const INITIAL_HELICOPTER_SPEED = 1;
+export const MIN_HELICOPTER_SPEED = -99;
+export const MAX_HELICOPTER_SPEED = 99;
+
+export const VIEWER_PIN_MODE = {
+	NORMAL: 'NORMAL',
+	PIN: 'PIN'
 };

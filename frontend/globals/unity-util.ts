@@ -83,8 +83,9 @@ export class UnityUtil {
 
 	}
 
-	public static loadUnity(divId: any, memory: number) {
-		const unityJsonPath = 'unity/Build/unity.json';
+	public static loadUnity(divId: any, unityConfig?: string, memory?: number) {
+		const unityJsonPath = unityConfig || 'unity/Build/unity.json';
+		memory = memory || 2130706432;
 
 		const unitySettings: any = {
 			onProgress: this.onProgress

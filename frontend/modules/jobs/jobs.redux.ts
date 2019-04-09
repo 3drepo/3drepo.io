@@ -38,9 +38,10 @@ export const INITIAL_STATE = {
 	colors: [],
 	myJob: {}
 };
+
 export const fetchJobsSuccess = (state = INITIAL_STATE, { jobs }) => {
 	jobs = sortByField([...jobs], { order: 'asc', config: { field: '_id' } });
-	return{...state, jobs };
+	return { ...state, jobs };
 };
 
 export const fetchJobsColorsSuccess = (state = INITIAL_STATE, { colors }) => ({ ...state, colors });

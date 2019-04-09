@@ -25,34 +25,52 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchRiskSuccess: ['risk'],
 	fetchRiskFailure: [],
 	setComponentState: ['componentState'],
-	saveRisk: ['teamspace', 'model', 'riskData', 'filteredRisks'],
+	saveRisk: ['teamspace', 'model', 'riskData', 'revision'],
 	updateRisk: ['teamspace', 'modelId', 'riskData'],
 	postComment: ['teamspace', 'modelId', 'riskData'],
 	removeComment: ['teamspace', 'modelId', 'riskData'],
 	saveRiskSuccess: ['risk'],
 	setNewRisk: [],
-	renderPins: ['filteredRisks'],
-	printRisks: ['teamspace', 'modelId', 'risksIds'],
-	downloadRisks: ['teamspace', 'modelId', 'risksIds'],
-	showDetails: ['risk', 'filteredRisks', 'revision'],
-	closeDetails: [],
-	setActiveRisk: ['risk', 'filteredRisks', 'revision'],
+	renderPins: [],
+	printRisks: ['teamspace', 'modelId'],
+	downloadRisks: ['teamspace', 'modelId'],
+	showDetails: ['teamspace', 'model', 'revision', 'risk'],
+	closeDetails: ['teamspace', 'model', 'revision'],
+	setActiveRisk: ['risk', 'revision'],
 	showNewPin: ['risk', 'pinData'],
 	togglePendingState: ['isPending'],
 	toggleDetailsPendingState: ['isPending'],
-	toggleShowPins: ['showPins', 'filteredRisks'],
 	subscribeOnRiskChanges: ['teamspace', 'modelId'],
 	unsubscribeOnRiskChanges: ['teamspace', 'modelId'],
-	focusOnRisk: ['risk', 'filteredRisks', 'revision'],
+	focusOnRisk: ['risk', 'revision'],
+	toggleShowPins: ['showPins'],
 	subscribeOnRiskCommentsChanges: ['teamspace', 'modelId', 'riskId'],
 	unsubscribeOnRiskCommentsChanges: ['teamspace', 'modelId', 'riskId'],
-	createCommentSuccess: ['comment'],
-	deleteCommentSuccess: ['commentGuid'],
-	updateCommentSuccess: ['comment'],
-	updateLogs: ['logs'],
+	createCommentSuccess: ['comment', 'riskId'],
+	deleteCommentSuccess: ['commentGuid', 'riskId'],
+	updateCommentSuccess: ['comment', 'riskId'],
 	updateNewRisk: ['newRisk'],
-	onFiltersChange: ['selectedFilters']
+	setFilters: ['filters'],
+	showCloseInfo: ['riskId'],
+	resetComponentState: []
 }, { prefix: 'RISKS/' });
+
+export interface IRisksComponentState {
+	showPins: boolean;
+	activeRisk: any;
+	showDetails: boolean;
+	expandDetails: boolean;
+	newRisk: any;
+	newComment: any;
+	selectedFilters: any[];
+	associatedActivities: any[];
+}
+
+export interface IRisksState {
+	risksMap: any;
+	isPending: boolean;
+	componentState: IRisksComponentState;
+}
 
 export const INITIAL_STATE = {
 	risksMap: {},
@@ -64,12 +82,22 @@ export const INITIAL_STATE = {
 		newRisk: {},
 		newComment: {},
 		selectedFilters: [],
+		filteredRisks: [],
 		showPins: true,
-		logs: [],
 		fetchingDetailsIsPending: false,
 		associatedActivities: [],
 		failedToLoad: false
 	}
+};
+
+const updateRiskProps = (risksMap, riskId, props = {}) => {
+	return {
+		...risksMap,
+		[riskId]: {
+			...risksMap[riskId],
+			...props
+		}
+	};
 };
 
 export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
@@ -89,19 +117,18 @@ export const fetchRisksSuccess = (state = INITIAL_STATE, { risks = [] }) => {
 	}, []);
 
 	return {
-		...state, risksMap,
-		componentState: { ...state.componentState, activeRisk: null, showDetails: false, associatedActivities }
+		...state, risksMap, associatedActivities, componentState: { ...INITIAL_STATE.componentState }
 	};
 };
 
 export const fetchRiskSuccess = (state = INITIAL_STATE, { risk }) => {
-	const risksMap = cloneDeep(state.risksMap);
-	risksMap[risk._id].comments = risk.comments;
-	return {...state, risksMap, componentState: { ...state.componentState, logs: risk.comments, failedToLoad: false }};
+	const risksMap = updateRiskProps(state.risksMap, risk._id, { comments: risk.comments });
+
+	return { ...state, risksMap, componentState: { ...state.componentState, failedToLoad: false } };
 };
 
 export const fetchRiskFailure = (state = INITIAL_STATE) => {
-	return {...state, componentState: { ...state.componentState, logs: [], failedToLoad: true }};
+	return { ...state, componentState: { ...state.componentState, failedToLoad: true } };
 };
 
 export const saveRiskSuccess = (state = INITIAL_STATE, { risk }) => {
@@ -119,39 +146,42 @@ export const setComponentState = (state = INITIAL_STATE, { componentState = {} }
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
-export const createCommentSuccess = (state = INITIAL_STATE, { comment }) => {
-	const clonedLogs = cloneDeep(state.componentState.logs);
-	const updatedLogs = clonedLogs.map((log) => {
-		log.sealed = true;
-		return log;
-	});
-
-	let logs;
+export const createCommentSuccess = (state = INITIAL_STATE, { comment, riskId }) => {
+	let comments;
 
 	if (comment.action || comment.viewpoint) {
-		logs = [comment, ...updatedLogs];
+		comments = [comment, ...state.risksMap[riskId].comments.map((log) => ({ ...log, sealed: true, new: true }))];
 	} else {
-		logs = updatedLogs;
+		comments = [...state.risksMap[riskId].comments.map((log) => ({ ...log, sealed: true, new: true }))];
 	}
 
-	return {...state, componentState: { ...state.componentState, logs }};
+	const risksMap = updateRiskProps(state.risksMap, riskId, { comments });
+
+	return { ...state, risksMap };
 };
 
-export const updateCommentSuccess = (state = INITIAL_STATE, { comment }) => {
-	const logs = cloneDeep(state.componentState.logs);
-	const commentIndex = state.componentState.logs.findIndex((log) => log.guid === comment.guid);
-	logs[commentIndex] = comment;
-	return {...state, componentState: { ...state.componentState, logs }};
+export const updateCommentSuccess = (state = INITIAL_STATE, { comment, riskId }) => {
+	const risksMap = cloneDeep(state.risksMap);
+	const commentIndex = risksMap[riskId].comments.findIndex((log) => log.guid === comment.guid);
+	risksMap[riskId].comments[commentIndex] = comment;
+
+	return { ...state, risksMap };
 };
 
-export const deleteCommentSuccess = (state = INITIAL_STATE, { commentGuid }) => {
-	const logs = cloneDeep(state.componentState.logs);
-	const updatedLogs = logs.filter((log) => log.guid !== commentGuid );
-	return {...state, componentState: { ...state.componentState, logs: updatedLogs }};
+export const deleteCommentSuccess = (state = INITIAL_STATE, { commentGuid, riskId }) => {
+	const comments = state.risksMap[riskId].comments.filter((log) => log.guid !== commentGuid);
+	const risksMap = updateRiskProps(state.risksMap, riskId, { comments });
+
+	return { ...state, risksMap };
 };
 
-export const updateLogs = (state = INITIAL_STATE, { logs }) => {
-	return {...state, componentState: { ...state.componentState, logs }};
+const showCloseInfo = (state = INITIAL_STATE, { riskId }) => {
+	const risksMap = updateRiskProps(state.risksMap, riskId, { willBeClosed: true });
+	return { ...state, risksMap };
+};
+
+export const resetComponentState = (state = INITIAL_STATE) => {
+	return { ...state, componentState: INITIAL_STATE.componentState };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -161,9 +191,9 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.SET_COMPONENT_STATE]: setComponentState,
 	[RisksTypes.SAVE_RISK_SUCCESS]: saveRiskSuccess,
 	[RisksTypes.TOGGLE_PENDING_STATE]: togglePendingState,
+	[RisksTypes.RESET_COMPONENT_STATE]: resetComponentState,
 	[RisksTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
 	[RisksTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
 	[RisksTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
-	[RisksTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
-	[RisksTypes.UPDATE_LOGS]: updateLogs
+	[RisksTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess
 });

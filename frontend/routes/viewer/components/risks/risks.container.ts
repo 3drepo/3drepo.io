@@ -45,7 +45,6 @@ const mapStateToProps = createStructuredSelector({
 	showPins: selectShowPins,
 	showDetails: selectShowDetails,
 	searchEnabled: selectSearchEnabled,
-	setState: RisksActions.setComponentState,
 	selectedFilters: selectSelectedFilters,
 	isPending: selectIsRisksPending,
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending
@@ -64,7 +63,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	unsubscribeOnRiskChanges: RisksActions.unsubscribeOnRiskChanges,
 	closeDetails: RisksActions.closeDetails,
 	saveRisk: RisksActions.saveRisk,
-	onFiltersChange: RisksActions.onFiltersChange
+	setFilters: RisksActions.setFilters
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Risks)));

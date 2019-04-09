@@ -55,16 +55,10 @@ function defer() {
 export function* generateViewpointObject(teamspace, modelId, viewName) {
 	try {
 		const screenshot = yield getScreenshot();
-		const viewpointDefer = defer();
-
-		const ViewerService = yield getAngularService('ViewerService') as any;
-		yield ViewerService.getCurrentViewpoint({
-			promise: viewpointDefer,
-			account: teamspace,
+		const { clippingPlanes, ...viewpoint } = yield Viewer.getCurrentViewpoint({
+			teamspace,
 			model: modelId
 		});
-
-		const {clippingPlanes, ...viewpoint} = yield viewpointDefer.promise;
 
 		const generatedObject = {
 			name: viewName,
