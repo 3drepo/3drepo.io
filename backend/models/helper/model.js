@@ -1041,7 +1041,6 @@ async function getSubModelRevisions(account, model, user, branch, rev) {
 	modelIds.forEach((modelId) => {
 		results[modelId] = {};
 		promises.push(History.listByBranch({account, model: modelId}, null, projection).then((revisions) => {
-			console.log(modelId, revisions);
 			revisions = History.clean(revisions);
 
 			revisions.forEach(function(revision) {
