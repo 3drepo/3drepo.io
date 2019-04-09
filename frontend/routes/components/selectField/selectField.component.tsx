@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,10 +17,10 @@
 
 import * as React from 'react';
 
-import Select from '@material-ui/core/Select';
+import Select, { SelectProps } from '@material-ui/core/Select';
 import { MuiTheme } from '../../../styles/theme';
 
-export class SelectField extends React.PureComponent<any, any> {
+export class SelectField extends React.PureComponent<SelectProps, any> {
 	public menuWrapper;
 	public menuItems;
 	public query = '';

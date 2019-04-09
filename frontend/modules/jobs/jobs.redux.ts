@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,6 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { sortByField } from '../../helpers/sorting';
 
 export const { Types: JobsTypes, Creators: JobsActions } = createActions({
 	fetchJobs: ['teamspace'],
@@ -38,7 +39,10 @@ export const INITIAL_STATE = {
 	myJob: {}
 };
 
-export const fetchJobsSuccess = (state = INITIAL_STATE, { jobs }) => ({ ...state, jobs });
+export const fetchJobsSuccess = (state = INITIAL_STATE, { jobs }) => {
+	jobs = sortByField([...jobs], { order: 'asc', config: { field: '_id' } });
+	return { ...state, jobs };
+};
 
 export const fetchJobsColorsSuccess = (state = INITIAL_STATE, { colors }) => ({ ...state, colors });
 

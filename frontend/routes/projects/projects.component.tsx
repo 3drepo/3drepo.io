@@ -107,6 +107,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		const state = {
 			projectsItems: getProjectsItems(projects)
 		} as any;
+
 		const queryParams = queryString.parse(location.search);
 
 		const project = projects.find(({ name }) => name === queryParams.project);
@@ -117,7 +118,6 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		} else {
 			state.selectedProject = '';
 		}
-
 		this.setState(state);
 	}
 
