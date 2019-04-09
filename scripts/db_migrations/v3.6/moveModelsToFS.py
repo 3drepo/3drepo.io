@@ -92,7 +92,7 @@ for database in db.database_names():
                         if not os.path.exists(os.path.dirname(filePath)):
                             os.makedirs(os.path.dirname(filePath))
                         file = open(filePath,'wb')
-                        file.write(StringIO.StringIO(entry.read()).read())
+                        file.write(StringIO.StringIO(entry.read()).getvalue())
                         file.close()
                         targetCol = colName + ".ref"
                         db[targetCol].save(bsonData)
