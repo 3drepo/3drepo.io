@@ -65,7 +65,8 @@ export const prepareRisk = (risk, jobs = []) => {
 		residual_consequence: residualConsequence,
 		level_of_risk: levelOfRisk,
 		overall_level_of_risk: overallLevelOfRisk,
-		residual_level_of_risk: residualLevelOfRisk
+		residual_level_of_risk: residualLevelOfRisk,
+		comments: risk.comments || []
 	};
 };
 

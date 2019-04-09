@@ -40,5 +40,5 @@ export const StyledTextField = styled(TextField)`
 `;
 
 export const Container = styled(ViewerPanelContent)`
-  padding: 24px;
+	padding: 24px;
 `;

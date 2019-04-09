@@ -76,5 +76,5 @@ export const MapName = styled.div`
 `;
 
 export const MapLayers = styled(ViewerPanelContent)`
-  padding: 24px;
+	padding: 24px;
 `;
