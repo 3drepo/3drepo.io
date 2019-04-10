@@ -84,7 +84,7 @@ function* getCompareModelData({ isFederation, settings }) {
 		if (!isFederation) {
 			const model =
 				prepareModelToCompare(teamspace, settings._id, settings.name, isFederation, revisions, currentRevision);
-			yield put(CompareActions.setComponentState({ compareModels: [model] }));
+			yield put(CompareActions.setComponentState({ compareModels: [model], isPending: false }));
 		} else {
 			const { data: submodelsRevisionsMap } = yield API.getSubModelsRevisions(teamspace, settings._id, currentRevision);
 			const compareModels = settings.subModels.map(({ model }) => {

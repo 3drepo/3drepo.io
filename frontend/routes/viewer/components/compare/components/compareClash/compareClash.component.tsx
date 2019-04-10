@@ -32,7 +32,6 @@ interface IProps {
 	compareModels: any[];
 	isAllSelected: boolean;
 	targetModels: any;
-	isPending: boolean;
 	setTargetModel: (modelId, isTarget, isTypeChange?) => void;
 	setComponentState: (state) => void;
 }
@@ -41,10 +40,6 @@ export class CompareClash extends React.PureComponent<IProps, any> {
   public handleFilterChange = (selectedFilters) => {
 		this.props.setComponentState({ selectedFilters });
   }
-
-	public renderPendingState = renderWhenTrue(() => (
-		<EmptyStateInfo>Loading models</EmptyStateInfo>
-	));
 
 	public renderEmptyState = renderWhenTrue(() => (
 		<EmptyStateInfo>No models matched</EmptyStateInfo>
@@ -60,8 +55,7 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 		return (
 			<Container className={this.props.className}>
 				{this.renderFilterPanel()}
-				{this.renderPendingState(this.props.isPending)}
-				{this.renderEmptyState(!this.props.compareModels.length && !this.props.isPending)}
+				{this.renderEmptyState(!this.props.compareModels.length)}
 				{this.renderList(this.props.compareModels.length)}
 			</Container>
 		);

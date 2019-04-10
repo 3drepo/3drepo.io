@@ -67,6 +67,7 @@ interface IProps {
 	sortOrder: string;
 	isActive: boolean;
 	isPending: boolean;
+	isFederation: boolean;
 	toggleCompare: () => void;
 	setSortType: (sortType) => void;
 	onTabChange: (activeTab) => void;
@@ -108,14 +109,12 @@ export class Compare extends React.PureComponent<IProps, any> {
 	private renderDiffTab = renderWhenTrue(() => (
 		<CompareDiff
 			compareModels={this.props.compareModels}
-			isPending={this.props.isPending}
 		/>
 	));
 
 	private renderClashTab = renderWhenTrue(() => (
 		<CompareClash
 			compareModels={this.props.compareModels}
-			isPending={this.props.isPending}
 		/>
 	));
 
@@ -127,7 +126,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 				title="Compare"
 				Icon={<CompareIcon/>}
 				renderActions={this.renderHeaderButtons}
-				pending={false}
+				pending={this.props.isPending}
 			>
 				<ViewerPanelContent className="height-catcher" scrollDisabled={true}>
 					<Tabs
@@ -138,7 +137,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 						onChange={this.handleChange}
 					>
 						<Tab label={COMPARE_TABS.DIFF} value={DIFF_COMPARE_TYPE} disabled={false} />
-						<Tab label={COMPARE_TABS.CLASH} value={CLASH_COMPARE_TYPE} disabled={false} />
+						<Tab label={COMPARE_TABS.CLASH} value={CLASH_COMPARE_TYPE} disabled={!this.props.isFederation} />
 					</Tabs>
 					<TabContent>
 						{this.renderDiffTab(this.isDiffTabActive)}
