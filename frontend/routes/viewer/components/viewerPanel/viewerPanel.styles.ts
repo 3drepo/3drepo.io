@@ -29,6 +29,10 @@ interface IViewerPanelContent {
 	scrollDisabled?: boolean;
 }
 
+interface IViewerPanelButton {
+	active?: number;
+}
+
 export const TitleContainer = styled.div`
 	display: flex;
 	justify-content: space-between;
@@ -79,6 +83,10 @@ export const ViewerPanelContent = styled.div<IViewerPanelContent>`
 	position: relative;
 `;
 
+export const LoaderContainer = styled(ViewerPanelContent)`
+	padding: 24px;
+`;
+
 export const ViewerPanelFooter = styled(Grid).attrs({
 	direction: 'row',
 	container: true,
@@ -91,10 +99,6 @@ export const ViewerPanelFooter = styled(Grid).attrs({
 	min-height: 65px;
 	font-size: 14px;
 `;
-
-interface IViewerPanelButton {
-	active?: number;
-}
 
 export const ViewerPanelButton = styled(Button)<IViewerPanelButton>`
 	&& {

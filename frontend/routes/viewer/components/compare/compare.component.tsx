@@ -19,8 +19,6 @@ import * as React from 'react';
 import CompareIcon from '@material-ui/icons/Compare';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import CheckIcon from '@material-ui/icons/Check';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
 
 import { Tab, IconButton } from '@material-ui/core';
 

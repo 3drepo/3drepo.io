@@ -490,6 +490,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		const onlyQueryFilters = this.props.filters.every((filter) => filter.type === DATA_TYPES.QUERY);
 		return onlyQueryFilters;
 	}
+
 	public renderPlaceholder = renderWhenTrue(() => (
 		<Placeholder onClick={this.handlePlaceholderClick}>
 			<SearchIcon />

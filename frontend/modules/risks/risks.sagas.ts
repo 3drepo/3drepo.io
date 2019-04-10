@@ -49,15 +49,13 @@ export function* fetchRisks({teamspace, modelId, revision}) {
 		const jobs = yield select(selectJobsList);
 
 		const preparedRisks = data.map((risk) => prepareRisk(risk, jobs));
-		yield put(RisksActions.fetchRisksSuccess(preparedRisks));
-		yield put(RisksActions.togglePendingState(false));
-		const filteredRisks = searchByFilters(preparedRisks, [], false);
 
 		yield put(RisksActions.fetchRisksSuccess(preparedRisks));
 		yield put(RisksActions.renderPins());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'risks', error));
 	}
+	yield put(RisksActions.togglePendingState(false));
 }
 
 export function* fetchRisk({teamspace, modelId, riskId}) {
