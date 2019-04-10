@@ -587,6 +587,14 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 	});
 };
 
+function cleanArray(obj, prop) {
+	if (obj[prop] && 0 === obj[prop].length) {
+		delete obj[prop];
+	}
+
+	return obj;
+}
+
 function clean(groupData) {
 	const cleaned = groupData.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
@@ -601,18 +609,14 @@ function clean(groupData) {
 		cleaned.updatedAt = cleaned.updatedAt.getTime();
 	}
 
-	if (cleaned.rules && 0 === cleaned.rules.length) {
-		delete cleaned.rules;
-	}
+	cleanArray(cleaned, "rules");
 
 	for (let i = 0; cleaned.objects && i < cleaned.objects.length; i++) {
-		if (cleaned.objects[i].ifc_guids && 0 === cleaned.objects[i].ifc_guids.length) {
-			delete cleaned.objects[i].ifc_guids;
-		}
-		if (cleaned.objects[i].shared_ids && 0 === cleaned.objects[i].shared_ids.length) {
-			delete cleaned.objects[i].shared_ids;
-		}
+		cleanArray(cleaned.objects[i], "ifc_guids");
+		cleanArray(cleaned.objects[i], "shared_ids");
 	}
+
+	cleaned.objects = cleaned.objects.filter(obj => obj.ifc_guids || obj.shared_ids);
 
 	delete cleaned.__v;
 
