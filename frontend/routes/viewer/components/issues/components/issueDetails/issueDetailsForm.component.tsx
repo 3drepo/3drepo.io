@@ -174,6 +174,9 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									placeholder="Choose a due date" />}
 								/>
 						</StyledFormControl>
+						<StyledFormControl>
+							Pin stuff
+						</StyledFormControl>
 					</FieldsRow>
 					<Field name="description" render={({ field }) => (
 						<TextField

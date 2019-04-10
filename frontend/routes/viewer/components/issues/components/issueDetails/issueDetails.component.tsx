@@ -27,6 +27,7 @@ import { mergeIssueData, canComment } from '../../../../../../helpers/issues';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 import { EmptyStateInfo } from '../../../views/views.styles';
+import { timingSafeEqual } from 'crypto';
 
 interface IProps {
 	jobs: any[];
@@ -231,9 +232,11 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onTakeScreenshot={this.handleNewScreenshot}
 				onChangePin={this.handleChangePin}
 				onSave={this.handleSave}
+				onPositionSave={this.onPositionSave}
 				canComment={this.userCanComment()}
 				hideComment={this.isNewIssue}
-				hidePin={!this.isNewIssue}
+				pinId={this.props.issue._id}
+				hidePin={false}
 			/>
 		</ViewerPanelFooter>
 	));
@@ -285,6 +288,13 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			saveIssue(teamspace, model, this.issueData, revision);
 		} else {
 			this.postComment(teamspace, model, formValues);
+		}
+	}
+
+	public onPositionSave = (position) => {
+		if (this.props.issue) {
+			const { teamspace, model, issue } = this.props;
+			this.props.updateIssue(teamspace, model, {...issue, position});
 		}
 	}
 

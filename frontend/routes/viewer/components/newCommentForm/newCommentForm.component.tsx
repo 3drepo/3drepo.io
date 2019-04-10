@@ -55,12 +55,14 @@ interface IProps {
 	innerRef: any;
 	canComment: boolean;
 	comment?: string;
+	pinId?: string;
 	screenshot?: string;
 	viewpoint?: any;
 	hideComment?: boolean;
 	hidePin?: boolean;
 	hideScreenshot?: boolean;
 	showResidualRiskInput?: boolean;
+	onPositionSave?: (position) => void;
 	onSave: (commentData) => void;
 	onTakeScreenshot: (screenshot) => void;
 	onChangePin: (pin) => void;
@@ -153,6 +155,8 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 			Viewer.setPinDropMode(false);
 			this.props.setDisabled(false);
 			this.togglePinListeners(false);
+
+			this.props.onPositionSave(Viewer.getPinData().pickedPos);
 		}
 
 		this.setState({ isPinActive });
@@ -175,7 +179,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 
 		if (this.props.onChangePin) {
 			this.props.onChangePin({
-				id: NEW_PIN_ID,
+				id: this.props.pinId || NEW_PIN_ID,
 				pickedNorm: normal,
 				pickedPos: position,
 				selectedObjectId: id,

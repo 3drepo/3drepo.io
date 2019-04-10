@@ -149,6 +149,7 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 		if (pinData !== null) {
 			risk.pickedPos = pinData.pickedPos;
 			risk.pickedNorm = pinData.pickedNorm;
+			Viewer.setPin(null);
 		}
 
 		const { data: savedRisk } = yield API.saveRisk(teamspace, model, risk);

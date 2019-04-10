@@ -150,6 +150,7 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 		if (pinData !== null) {
 			issue.pickedPos = pinData.pickedPos;
 			issue.pickedNorm = pinData.pickedNorm;
+			Viewer.setPin(null);
 		}
 
 		const { data: savedIssue } = yield API.saveIssue(teamspace, model, issue);
