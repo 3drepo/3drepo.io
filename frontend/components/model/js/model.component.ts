@@ -29,6 +29,7 @@ import { VIEWER_EVENTS } from '../../../constants/viewer';
 import { StarredMetaActions } from '../../../modules/starredMeta';
 import { BimActions } from '../../../modules/bim';
 import { IssuesActions } from '../../../modules/issues';
+import { ViewerActions } from '../../../modules/viewer';
 
 class ModelController implements ng.IController {
 
@@ -138,6 +139,7 @@ class ModelController implements ng.IController {
 		dispatch(JobsActions.fetchJobs(this.account));
 		dispatch(JobsActions.getMyJob(this.account));
 		dispatch(TreeActions.startListenOnSelections());
+		dispatch(ViewerActions.startListenOnModelLoaded());
 
 		this.ViewerService.on(VIEWER_EVENTS.CLICK_PIN, this.onPinClick);
 		this.unsubscribeModelSettingsListener = subscribe(this, this.onModelSettingsChange);
@@ -262,10 +264,8 @@ class ModelController implements ng.IController {
 	private loadModelSettings() {
 		dispatch(ModelActions.fetchSettings(this.account, this.model));
 		dispatch(ModelActions.fetchMetaKeys(this.account, this.model));
-		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
-		dispatch(IssuesActions.fetchIssues(this.account, this.model, this.revision));
 		dispatch(ModelActions.fetchRevisions(this.account, this.model));
-		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
+		dispatch(IssuesActions.fetchIssues(this.account, this.model, this.revision));
 		dispatch(RisksActions.fetchRisks(this.account, this.model, this.revision));
 		dispatch(GroupsActions.fetchGroups(this.account, this.model, this.revision));
 		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));

@@ -31,6 +31,7 @@ import {
 	selectIsPending
 } from '../../../../modules/compare';
 import { selectIsFederation } from '../../../../modules/model';
+import { selectIsModelLoaded } from '../../../../modules/viewer';
 
 const mapStateToProps = createStructuredSelector({
 	activeTab: selectActiveTab,
@@ -40,7 +41,8 @@ const mapStateToProps = createStructuredSelector({
 	sortOrder: selectSortOrder,
 	isActive: selectIsCompareActive,
 	isPending: selectIsPending,
-	isFederation: selectIsFederation
+	isFederation: selectIsFederation,
+	isModelLoaded: selectIsModelLoaded
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

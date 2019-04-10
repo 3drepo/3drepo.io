@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { keyBy, memoize } from 'lodash';
+import { keyBy } from 'lodash';
 
 import { DateTime } from '../../../../../components/dateTime/dateTime.component';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
@@ -90,7 +90,7 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 		const { revisions } = this.props;
 		return (
 			<>
-				{this.renderSelect(revisions.length > 1)}
+				{this.renderSelect(revisions.length > 1 && this.state.value)}
 				{this.renderDefaultValue(revisions.length === 1)}
 			</>
 		);

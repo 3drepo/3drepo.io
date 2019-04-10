@@ -73,6 +73,26 @@ export function* initialiseToolbar() {
 	}
 }
 
+const setIsModelLoaded = () => {
+	dispatch(ViewerActions.setIsModelLoaded(true));
+};
+
+export function* startListenOnModelLoaded() {
+	try {
+		Viewer.on(VIEWER_EVENTS.MODEL_LOADED, setIsModelLoaded);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('start listen on', 'model loaded'));
+	}
+}
+
+export function* stopListenOnModelLoaded() {
+	try {
+		Viewer.off(VIEWER_EVENTS.MODEL_LOADED, setIsModelLoaded);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('stop listen on', 'model loaded'));
+	}
+}
+
 export function* startListenOnNumClip() {
 	try {
 		Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
@@ -311,4 +331,6 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.SET_CLIP_EDIT, setClipEdit);
 	yield takeLatest(ViewerTypes.START_LISTEN_ON_NUM_CLIP, startListenOnNumClip);
 	yield takeLatest(ViewerTypes.STOP_LISTEN_ON_NUM_CLIP, stopListenOnNumClip);
+	yield takeLatest(ViewerTypes.START_LISTEN_ON_MODEL_LOADED, startListenOnModelLoaded);
+	yield takeLatest(ViewerTypes.STOP_LISTEN_ON_MODEL_LOADED, stopListenOnModelLoaded);
 }

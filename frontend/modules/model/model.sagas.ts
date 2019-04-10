@@ -19,7 +19,7 @@ import { cloneDeep } from 'lodash';
 import { put, takeLatest, select } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import { getAngularService, dispatch, runAngularTimeout } from './../../helpers/migration';
+import { getAngularService, dispatch } from './../../helpers/migration';
 import { uploadFileStatuses } from './model.helpers';
 import { DialogActions } from '../dialog';
 import { ModelTypes, ModelActions } from './model.redux';

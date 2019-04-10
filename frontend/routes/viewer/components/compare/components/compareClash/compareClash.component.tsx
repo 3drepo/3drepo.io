@@ -65,9 +65,7 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 		this.props.setTargetModel(modelProps._id, type === TARGET_MODEL_TYPE, true);
 	}
 
-	private handleRevisionChange = (modelProps) => () => {
-		console.log('Revision of', modelProps, 'changed');
-	}
+	private handleRevisionChange = (modelProps) => () => {};
 
 	private renderFilterPanel = () => (
 		<CompareFilters

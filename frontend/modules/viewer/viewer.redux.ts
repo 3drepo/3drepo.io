@@ -51,7 +51,10 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	deactivateMeasure: [],
 	updateClipState: ['clipNumber'],
 	startListenOnNumClip: [],
-	stopListenOnNumClip: []
+	stopListenOnNumClip: [],
+	setIsModelLoaded: ['isModelLoaded'],
+	startListenOnModelLoaded: [],
+	stopListenOnModelLoaded: []
 }, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {
@@ -65,7 +68,8 @@ export const INITIAL_STATE = {
 	clipNumber: 0,
 	visiblePanels: {
 		[VIEWER_PANELS.METADATA]: false
-	}
+	},
+	isModelLoaded: false
 };
 
 const updateSettings = (state = INITIAL_STATE, {settings}) => {
@@ -102,6 +106,10 @@ const setPanelVisibility = (state = INITIAL_STATE, {panelName, isVisible}) => {
 	return { ...state, visiblePanels: {...visiblePanels, [panelName]: isVisible} };
 };
 
+const setIsModelLoaded = (state = INITIAL_STATE, {isModelLoaded}) => {
+	return { ...state, isModelLoaded };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerTypes.UPDATE_SETTINGS] : updateSettings,
 	[ViewerTypes.SET_NAVIGATION_MODE_SUCCESS] : setNavigationModeSuccess,
@@ -110,5 +118,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,
 	[ViewerTypes.SET_CLIP_EDIT_SUCCESS] : setClipEditSuccess,
 	[ViewerTypes.SET_CLIP_NUMBER] : setClipNumber,
-	[ViewerTypes.SET_PANEL_VISIBILITY] : setPanelVisibility
+	[ViewerTypes.SET_PANEL_VISIBILITY] : setPanelVisibility,
+	[ViewerTypes.SET_IS_MODEL_LOADED] : setIsModelLoaded
 });
