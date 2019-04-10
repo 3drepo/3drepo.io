@@ -16,7 +16,7 @@
  */
 
 import { put, takeLatest, select, all, take, call } from 'redux-saga/effects';
-import { cond, matches } from 'lodash';
+import { cond } from 'lodash';
 
 import { CompareTypes, CompareActions, ICompareComponentState } from './compare.redux';
 import { selectRevisions, selectIsFederation, selectSettings, ModelTypes } from '../model';
@@ -25,10 +25,7 @@ import {
 	selectSortOrder,
 	selectIsCompareActive,
 	selectActiveTab,
-	selectBaseModels,
 	selectSelectedModelsMap,
-	selectTargetDiffModelsList,
-	selectTargetClashModelsList,
 	selectBaseModelsList,
 	selectTargetClashModels,
 	selectTargetDiffModels,
@@ -102,7 +99,8 @@ function* getCompareModelData({ isFederation, settings }) {
 
 			yield put(CompareActions.setComponentState({
 				compareModels,
-				selectedModelsMap,
+				selectedDiffModelsMap: selectedModelsMap,
+				selectedClashModelsMap: selectedModelsMap,
 				targetDiffModels: selectedModelsMap
 			}));
 		}
@@ -122,10 +120,12 @@ function* getCompareModels() {
 	}
 }
 
+const equalsType = (destinationType) => (sourceType) => sourceType === destinationType;
+
 const handleRenderingTypeChange = cond([
-	[matches(RENDERING_TYPES.BASE), Viewer.diffToolShowBaseModel],
-	[matches(RENDERING_TYPES.COMPARE), Viewer.diffToolDiffView],
-	[matches(RENDERING_TYPES.TARGET), Viewer.diffToolShowComparatorModel]
+	[equalsType(RENDERING_TYPES.BASE), Viewer.diffToolShowBaseModel],
+	[equalsType(RENDERING_TYPES.COMPARE), Viewer.diffToolDiffView],
+	[equalsType(RENDERING_TYPES.TARGET), Viewer.diffToolShowComparatorModel]
 ]);
 
 function* onRenderingTypeChange({ renderingType }) {
@@ -253,58 +253,53 @@ function changeModelNodesVisibility(nodeName: string, visible: boolean) {
 }
 
 function* startComparisonOfFederation() {
-	try {
-		yield put(CompareActions.setIsPending(true));
-		const activeTab = yield select(selectActiveTab);
-		const isDiff = activeTab === DIFF_COMPARE_TYPE;
+	yield put(CompareActions.setIsPending(true));
+	const activeTab = yield select(selectActiveTab);
+	const isDiff = activeTab === DIFF_COMPARE_TYPE;
 
-		const targetModels = yield select(selectTargetModelsList);
-		const baseModels = yield select(selectBaseModelsList);
-		const selectedModels = yield select(selectSelectedModelsMap);
+	const targetModels = yield select(selectTargetModelsList);
+	const baseModels = yield select(selectBaseModelsList);
+	const selectedModels = yield select(selectSelectedModelsMap);
 
-		baseModels.forEach((model) => {
-			changeModelNodesVisibility(model.account + ':' + model.name, true);
-		});
+	baseModels.forEach((model) => {
+		changeModelNodesVisibility(model.teamspace + ':' + model.name, true);
+	});
 
-		const modelsToLoad = [];
-		for (let index = 0; index < targetModels.length; index++) {
-			const model = targetModels[index];
-			if (model && selectedModels[model._id]) {
-				const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
-				const sharedRevisionModel = baseModels.find(({ baseRevision }) => baseRevision.name === targetRevision.name);
-				const isAlreadyLoaded = sharedRevisionModel && selectedModels[sharedRevisionModel];
+	const modelsToLoad = [];
+	for (let index = 0; index < targetModels.length; index++) {
+		const model = targetModels[index];
+		if (model && selectedModels[model._id]) {
+			const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
+			const sharedRevisionModel = baseModels.find(({ baseRevision }) => baseRevision.name === targetRevision.name);
+			const canReuseModel = sharedRevisionModel && selectedModels[sharedRevisionModel];
 
-				if (isAlreadyLoaded) {
-					const { account, name } = sharedRevisionModel;
-					changeModelNodesVisibility(`${account}:${name}`, true);
-					Viewer.diffToolSetAsComparator(
-						model.teamspace,
-						model._id
-					);
-				} else {
-					const modelPromise = Viewer.diffToolLoadComparator(
-						model.teamspace,
-						model._id,
-						targetRevision.name
-					);
-					modelsToLoad.push(modelPromise);
-				}
+			if (canReuseModel) {
+				const { teamspace, name } = sharedRevisionModel;
+				changeModelNodesVisibility(`${teamspace}:${name}`, true);
+				Viewer.diffToolSetAsComparator(
+					model.teamspace,
+					model._id
+				);
+			} else {
+				const modelPromise = Viewer.diffToolLoadComparator(
+					model.teamspace,
+					model._id,
+					targetRevision.name
+				);
+				modelsToLoad.push(modelPromise);
 			}
 		}
-
-		yield all(modelsToLoad);
-
-		if (isDiff) {
-			Viewer.diffToolEnableWithDiffMode();
-		} else {
-			Viewer.diffToolEnableWithClashMode();
-		}
-
-		yield call(handleLoadedModels);
-
-	} catch (error) {
-		debugger;
 	}
+
+	yield all(modelsToLoad);
+
+	if (isDiff) {
+		Viewer.diffToolEnableWithDiffMode();
+	} else {
+		Viewer.diffToolEnableWithClashMode();
+	}
+
+	yield call(handleLoadedModels);
 }
 
 function* startComparisonOfModel() {

@@ -179,7 +179,6 @@ export class ViewerService {
 
 	public async diffToolEnableWithClashMode() {
 		await this.isViewerReady();
-		debugger;
 		return this.viewer.diffToolEnableWithClashMode();
 	}
 
