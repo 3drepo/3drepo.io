@@ -39,7 +39,8 @@ function createClientConfig(serverConfig, req) {
 		"development" : config.development,
 		"googleConversionId": config.googleConversionId,
 		"userNotice" : config.userNotice,
-		"customLogins" : config.customLogins
+		"customLogins" : config.customLogins,
+		"liveChatLicense" : config.liveChatLicense
 	};
 
 	if (config.hasOwnProperty("captcha_client_key")) {

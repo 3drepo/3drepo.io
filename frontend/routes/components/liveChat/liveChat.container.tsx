@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { withRouter } from 'react-router';
-import { connect, addRouting } from '../../helpers/migration';
+import { connect } from '../../../helpers/migration';
 
-import { App } from './app.component';
-import { AuthActions, selectIsAuthenticated, selectActiveSession } from '../../modules/auth';
-import { selectCurrentUser } from '../../modules/currentUser';
+import { LiveChat } from './liveChat.component';
+import { selectIsAuthenticated } from '../../../modules/auth';
+import { selectCurrentUser } from '../../../modules/currentUser';
 
 const mapStateToProps = createStructuredSelector({
 	isAuthenticated: selectIsAuthenticated,
-	hasActiveSession: selectActiveSession,
 	currentUser: selectCurrentUser
 });
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	authenticate: AuthActions.authenticate,
-	logout: AuthActions.logout
-}, dispatch);
-
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(App)));
+export default connect(mapStateToProps, null)(LiveChat);

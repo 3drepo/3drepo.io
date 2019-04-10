@@ -21,6 +21,7 @@ import { DialogContainer } from '../components/dialogContainer';
 import { SnackbarContainer } from '../components/snackbarContainer';
 import { clientConfigService } from '../../services/clientConfig';
 import { isStaticRoute } from '../../services/staticPages';
+import { LiveChat } from '../components/liveChat';
 
 interface IProps {
 	location: any;
@@ -29,6 +30,7 @@ interface IProps {
 	hasActiveSession: boolean;
 	authenticate: () => void;
 	logout: () => void;
+	currentUser: any;
 }
 
 interface IState {
@@ -161,6 +163,7 @@ export class App extends React.PureComponent<IProps, IState> {
 			<>
 				<DialogContainer />
 				<SnackbarContainer />
+				<LiveChat/>
 			</>
 		);
 	}
