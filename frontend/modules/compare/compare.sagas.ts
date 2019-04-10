@@ -182,20 +182,6 @@ function* setProperViewerCompareMode() {
 	}
 }
 
-function* handleLoadedModels() {
-	try {
-		yield all([
-			put(CompareActions.setIsActive(true)),
-			put(CompareActions.setIsPending(true))
-		]);
-
-		yield call(setProperViewerCompareMode);
-
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('handle', 'loaded models', error.message));
-	}
-}
-
 function* setActiveTab({ activeTab }) {
 	try {
 		const currentSortType = yield select(selectSortType);
@@ -299,29 +285,22 @@ function* startComparisonOfFederation() {
 	} else {
 		Viewer.diffToolEnableWithClashMode();
 	}
-
-	yield call(handleLoadedModels);
 }
 
 function* startComparisonOfModel() {
-	yield put(CompareActions.setIsPending(true));
 	const activeTab = yield select(selectActiveTab);
 	const isDiff = activeTab === DIFF_COMPARE_TYPE;
 
 	const targetModels = yield select(selectTargetModelsList);
 	const { account, model } = targetModels[0];
 	const revision = isDiff ? targetModels[0].targetDiffRevision : targetModels[0].targetClashRevision;
-	try {
-		yield Viewer.diffToolLoadComparator(account, model, revision.name);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('load', 'comparator', error.message));
-	}
-
-	yield call(handleLoadedModels);
+	yield Viewer.diffToolLoadComparator(account, model, revision.name);
 }
 
 function* startCompare() {
 	try {
+		yield put(CompareActions.setIsActive(true));
+		yield put(CompareActions.setIsPending(true));
 		const isFederation = yield select(selectIsFederation);
 		yield put(CompareActions.onRenderingTypeChange(RENDERING_TYPES.COMPARE));
 
@@ -331,8 +310,10 @@ function* startCompare() {
 			yield call(startComparisonOfModel);
 		}
 
-		yield put(CompareActions.setIsActive(true));
+		yield call(setProperViewerCompareMode);
 	} catch (error) {
+		yield put(CompareActions.setIsActive(false));
+		yield put(CompareActions.setIsPending(false));
 		yield put(DialogActions.showErrorDialog('start', 'comparison', error.message));
 	}
 }
@@ -341,6 +322,7 @@ function* stopCompare() {
 	try {
 		yield put(CompareActions.setIsActive(false));
 		Viewer.diffToolDisableAndClear();
+		handleRenderingTypeChange(RENDERING_TYPES.COMPARE);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('stop', 'comparison', error.message));
 	}

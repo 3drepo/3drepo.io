@@ -212,7 +212,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 	}
 
 	private renderSlider = () => {
-		const { renderingType  } = this.props;
+		const { renderingType, isActive} = this.props;
 		return (
 			<SliderContainer>
 				<SliderWrapper>
@@ -222,6 +222,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 						max={RENDERING_TYPES.TARGET}
 						step={1}
 						onChange={this.handleRenderingTypeChange}
+						disabled={!isActive}
 					/>
 				</SliderWrapper>
 				<SliderLabels>

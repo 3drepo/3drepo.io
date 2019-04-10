@@ -85,4 +85,8 @@ export const SliderLabels = styled.div`
 export const SliderLabel = styled.div`
 	color: ${COLOR.BLACK_40};
 	cursor: pointer;
+
+	&:first-child, &:last-child {
+		width: 40px;
+	}
 `;
