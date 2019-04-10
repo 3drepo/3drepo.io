@@ -94,6 +94,12 @@ module.exports = {
 		);
 	},
 
+	updateAllNotifications: function(username, data) {
+		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) =>
+			collection.update({}, { $set: data }, {multi: true})
+		);
+	},
+
 	upsertNotification: function(username, data, type, criteria) {
 		return getNotification(username, type, criteria).then(notifications => {
 			if (notifications.length === 0) {

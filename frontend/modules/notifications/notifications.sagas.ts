@@ -53,6 +53,15 @@ export function* sendUpdateNotificationRead({ notificationId, read }) {
 	}
 }
 
+export function* sendUpdateAllNotificationsRead({ read }) {
+	try {
+		yield put(NotificationsActions.patchAllNotifications({read}));
+		yield API.patchAllNotifications({read});
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('update', 'notification', error));
+	}
+}
+
 export function* sendDeleteNotification({ notificationId }) {
 	const notifications = yield select(selectNotifications);
 	const notification = yield getNotificationById(notifications, notificationId);
@@ -99,6 +108,7 @@ export function* showUpdatedFailedError({ errorMessage }) {
 export default function* NotificationsSaga() {
 	yield takeLatest(NotificationsTypes.SEND_GET_NOTIFICATIONS, sendGetNotifications);
 	yield takeLatest(NotificationsTypes.SEND_UPDATE_NOTIFICATION_READ, sendUpdateNotificationRead);
+	yield takeLatest(NotificationsTypes.SEND_UPDATE_ALL_NOTIFICATIONS_READ, sendUpdateAllNotificationsRead);
 	yield takeLatest(NotificationsTypes.SEND_DELETE_NOTIFICATION, sendDeleteNotification);
 	yield takeLatest(NotificationsTypes.SEND_DELETE_ALL_NOTIFICATIONS, sendDeleteAllNotifications);
 	yield takeLatest(NotificationsTypes.CONFIRM_SEND_DELETE_ALL_NOTIFICATIONS, confirmSendDeleteAllNotifications);

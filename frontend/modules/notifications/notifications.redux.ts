@@ -27,8 +27,10 @@ export const { Types: NotificationsTypes, Creators: NotificationsActions } = cre
 	upsertNotification: ['notification'],
 	deleteNotification: ['notification'],
 	patchNotification: ['notificationPatch'],
+	patchAllNotifications: ['notificationPatch'],
 	showUpdatedFailedError: ['errorMessage'],
-	setDrawerPanelState: ['drawerOpened']
+	setDrawerPanelState: ['drawerOpened'],
+	sendUpdateAllNotificationsRead: ['read']
 }, { prefix: 'NOTIFICATIONS/' });
 
 export const INITIAL_STATE = {
@@ -74,10 +76,15 @@ export const patchNotification = (state = INITIAL_STATE, { notificationPatch }) 
 	return setSortedNotifications(state, updatedNotifications);
 };
 
+export const patchAllNotifications = (state = INITIAL_STATE, { notificationPatch }) => {
+	return setSortedNotifications(state, state.notifications.map( (n) => ({ ...n, ...notificationPatch})));
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[NotificationsTypes.SET_NOTIFICATIONS]: setNotifications,
 	[NotificationsTypes.UPSERT_NOTIFICATION]: upsertNotification,
 	[NotificationsTypes.DELETE_NOTIFICATION]: deleteNotification,
 	[NotificationsTypes.PATCH_NOTIFICATION]: patchNotification,
-	[NotificationsTypes.SET_DRAWER_PANEL_STATE] : setDrawerState
+	[NotificationsTypes.SET_DRAWER_PANEL_STATE] : setDrawerState,
+	[NotificationsTypes.PATCH_ALL_NOTIFICATIONS] : patchAllNotifications
 });
