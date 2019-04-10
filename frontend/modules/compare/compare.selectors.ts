@@ -18,6 +18,7 @@
 import { createSelector } from 'reselect';
 import { isEqual, values, orderBy } from 'lodash';
 import { searchByFilters } from '../../helpers/searching';
+import { DIFF_COMPARE_TYPE } from '../../constants/compare';
 
 export const selectCompareDomain = (state) => Object.assign({}, state.compare);
 
@@ -87,24 +88,22 @@ export const selectTargetDiffModels = createSelector(
 	selectComponentState, (state) => state.targetDiffModels
 );
 
-export const selectTargetClashModelsList = createSelector(
-	selectCompareModels, selectTargetClashModels,
-	(models, targetClashModelsMap) => models.filter(({ _id }) => targetClashModelsMap[_id])
-);
-
-export const selectBaseClashModelsList = createSelector(
-	selectCompareModels, selectTargetClashModels,
-	(models, targetClashModelsMap) => models.filter(({ _id }) => !targetClashModelsMap[_id])
-);
-
-export const selectTargetDiffModelsList = createSelector(
-	selectCompareModels, selectTargetDiffModels,
-	(models, targetDiffModelsMap) => models.filter(({ _id }) => targetDiffModelsMap[_id])
+export const selectTargetModelsList = createSelector(
+	selectCompareModels, selectActiveTab, selectTargetClashModels, selectTargetDiffModels,
+	(models, activeTab, targetClashModelsMap, targetDiffModelsMap) => {
+		const isDiff = activeTab === DIFF_COMPARE_TYPE;
+		const targetModelsMap = isDiff ? targetDiffModelsMap : targetClashModelsMap;
+		return models.filter(({ _id }) => targetModelsMap[_id]);
+	}
 );
 
 export const selectBaseModelsList = createSelector(
-	selectCompareModels, selectTargetDiffModels,
-	(models, targetDiffModels) => models.filter(({ _id }) => !targetDiffModels[_id])
+	selectCompareModels, selectActiveTab, selectTargetClashModels, selectTargetDiffModels,
+	(models, activeTab, targetClashModelsMap, targetDiffModelsMap) => {
+		const isDiff = activeTab === DIFF_COMPARE_TYPE;
+		const targetModelsMap = isDiff ? targetDiffModelsMap : targetClashModelsMap;
+		return models.filter(({ _id }) => !targetModelsMap[_id]);
+	}
 );
 
 const isAllSelected = (allModels, selectedModelsMap) => isEqual(

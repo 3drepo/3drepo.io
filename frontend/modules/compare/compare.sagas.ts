@@ -31,7 +31,8 @@ import {
 	selectTargetClashModelsList,
 	selectBaseModelsList,
 	selectTargetClashModels,
-	selectTargetDiffModels
+	selectTargetDiffModels,
+	selectTargetModelsList
 } from './compare.selectors';
 import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES } from '../../constants/compare';
 import { DialogActions } from '../dialog';
@@ -256,7 +257,7 @@ function* startComparisonOfFederation() {
 	const activeTab = yield select(selectActiveTab);
 	const isDiff = activeTab === DIFF_COMPARE_TYPE;
 
-	const targetModels = isDiff ? yield select(selectTargetDiffModelsList) : yield select(selectTargetClashModelsList);
+	const targetModels = yield select(selectTargetModelsList);
 	const baseModels = yield select(selectBaseModelsList);
 	const selectedModels = yield select(selectSelectedModelsMap);
 
@@ -266,7 +267,7 @@ function* startComparisonOfFederation() {
 		if (model && selectedModels[model._id]) {
 			const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
 			const sharedRevisionModel = baseModels.find(({ baseRevision }) => baseRevision.name === targetRevision.name);
-			const isAlreadyLoaded = sharedRevisionModel && !sharedRevisionModel.visible;
+			const isAlreadyLoaded = sharedRevisionModel && selectedModels[sharedRevisionModel];
 
 			if (isAlreadyLoaded) {
 				const { account, name } = sharedRevisionModel;
@@ -302,7 +303,7 @@ function* startComparisonOfModel() {
 	const activeTab = yield select(selectActiveTab);
 	const isDiff = activeTab === DIFF_COMPARE_TYPE;
 
-	const targetModels = yield select(selectTargetModels);
+	const targetModels = yield select(selectTargetModelsList);
 	const { account, model } = targetModels[0];
 	const revision = isDiff ? targetModels[0].targetDiffRevision : targetModels[0].targetClashRevision;
 	try {
