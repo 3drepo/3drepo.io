@@ -18,7 +18,7 @@
 import { createSelector } from 'reselect';
 import { isEqual, values, orderBy } from 'lodash';
 import { searchByFilters } from '../../helpers/searching';
-import { DIFF_COMPARE_TYPE } from '../../constants/compare';
+import { DIFF_COMPARE_TYPE, COMPARE_SORT_TYPES } from '../../constants/compare';
 
 export const selectCompareDomain = (state) => Object.assign({}, state.compare);
 
@@ -74,17 +74,6 @@ export const selectSortType = createSelector(
 	selectComponentState, (state) => state.sortType
 );
 
-export const selectCompareModels = createSelector(
-	selectComponentState, selectSortType, selectSortOrder,
-	(state, sortType, sortOrder) => {
-		return orderBy(
-			searchByFilters(state.compareModels, state.selectedFilters),
-			[sortType],
-			[sortOrder]
-		);
-	}
-);
-
 export const selectTargetClashModels = createSelector(
 	selectComponentState, (state) => state.targetClashModels
 );
@@ -93,13 +82,35 @@ export const selectTargetDiffModels = createSelector(
 	selectComponentState, (state) => state.targetDiffModels
 );
 
-export const selectTargetModelsList = createSelector(
-	selectCompareModels, selectActiveTab, selectTargetClashModels, selectTargetDiffModels,
-	(models, activeTab, targetClashModelsMap, targetDiffModelsMap) => {
+export const selectTargetModels = createSelector(
+	selectActiveTab, selectTargetClashModels, selectTargetDiffModels,
+	(activeTab, targetClashModelsMap, targetDiffModelsMap) => {
 		const isDiff = activeTab === DIFF_COMPARE_TYPE;
-		const targetModelsMap = isDiff ? targetDiffModelsMap : targetClashModelsMap;
-		return models.filter(({ _id }) => targetModelsMap[_id]);
+		return isDiff ? targetDiffModelsMap : targetClashModelsMap;
 	}
+);
+
+const getSortValue = (field, targetModels) => (model) => {
+	if (field === COMPARE_SORT_TYPES.TYPE) {
+		return !!targetModels[model._id];
+	}
+	return model[field];
+};
+
+export const selectCompareModels = createSelector(
+	selectComponentState, selectSortType, selectSortOrder, selectTargetModels,
+	(state, sortType, sortOrder, targetModelsMap) => {
+		return orderBy(
+			searchByFilters(state.compareModels, state.selectedFilters),
+			[getSortValue(sortType, targetModelsMap)],
+			[sortOrder]
+		);
+	}
+);
+
+export const selectTargetModelsList = createSelector(
+	selectCompareModels, selectTargetModels,
+	(models, targetModelsMap) => models.filter(({ _id }) => targetModelsMap[_id])
 );
 
 export const selectBaseModelsList = createSelector(

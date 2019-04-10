@@ -300,64 +300,6 @@ export class CompareService {
 		this.useSetModeComparison();
 	}
 
-	public loadModels(isDiffMode: boolean) {
-		const allModels = [];
-
-		this.state.loadingComparison = true;
-		this.setBaseModelVisibility();
-
-		const mode = isDiffMode ? 'diff' : 'clash';
-		this.state.targetModels.forEach((model) => {
-
-			if (model &&  model.visible) {
-				const sharedRevisionModel = this.state.baseModels.find((b) => b.baseRevision === model.targetRevision[mode].name );
-				const canReuseModel = sharedRevisionModel && !sharedRevisionModel.visible;
-				let loadModel;
-
-				if (canReuseModel) {
-					this.changeModelVisibility(sharedRevisionModel.account + ':' + sharedRevisionModel.name, true);
-					this.ViewerService.diffToolSetAsComparator(
-						model.account,
-						model.model,
-						model.targetRevision[mode].name
-					);
-
-				} else {
-					loadModel = this.ViewerService.diffToolLoadComparator(
-						model.account,
-						model.model,
-						model.targetRevision[mode].name
-					)
-						.catch((error) => {
-							console.error(error);
-						});
-
-				}
-				allModels.push(loadModel);
-			}
-
-		});
-
-		return Promise.all(allModels);
-	}
-
-/* 	public getButtonColor() {
-		if (!this.canCompare()) {
-			return '';
-		} else {
-			return this.state.compareEnabled ? '#FF9800' : 'rgb(6,86,60)';
-		}
-	} */
-
-/* 	public compare() {
-		if (this.state.compareEnabled) {
-			this.disableComparison();
-		} else {
-			this.enableComparison();
-		}
-
-	} */
-
 	public compareInNewMode(mode) {
 		this.setMode(mode);
 		this.disableComparison();
@@ -371,19 +313,6 @@ export class CompareService {
 		this.ViewerService.diffToolDisableAndClear();
 
 	}
-
-/* 	public enableComparison() {
-
-		this.state.canChangeCompareState = false;
-		this.changeCompareState('compare');
-
-		if (this.state.isFed) {
-			this.startComparisonFed(this.state.mode === 'diff');
-		} else {
-			this.diffModel();
-		}
-
-	} */
 
 	public diffModel() {
 		this.state.loadingComparison = true;
