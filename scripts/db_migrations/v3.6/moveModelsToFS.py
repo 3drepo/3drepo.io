@@ -63,7 +63,7 @@ for database in db.database_names():
         print("--database:" + database)
 
 ##### Get a model ID and find entries #####
-        for setting in db.settings.find(no_cursor_timeout=False):
+        for setting in db.settings.find(no_cursor_timeout=True):
             modelId = setting.get('_id')
             print("\t--model: " +  modelId)
             for colPrefix in [".history",".stash.json_mpc", ".stash.unity3d" ]:
