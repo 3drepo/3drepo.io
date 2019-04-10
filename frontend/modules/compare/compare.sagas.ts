@@ -235,7 +235,7 @@ function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
 	}
 }
 
-function* changeModelNodesVisibility(nodeName: string, visible: boolean) {
+function changeModelNodesVisibility(nodeName: string, visible: boolean) {
 	const TreeService = getAngularService('TreeService') as any;
 	const tree = TreeService.getAllNodes();
 	if (tree.children) {
@@ -253,49 +253,58 @@ function* changeModelNodesVisibility(nodeName: string, visible: boolean) {
 }
 
 function* startComparisonOfFederation() {
-	yield put(CompareActions.setIsPending(true));
-	const activeTab = yield select(selectActiveTab);
-	const isDiff = activeTab === DIFF_COMPARE_TYPE;
+	try {
+		yield put(CompareActions.setIsPending(true));
+		const activeTab = yield select(selectActiveTab);
+		const isDiff = activeTab === DIFF_COMPARE_TYPE;
 
-	const targetModels = yield select(selectTargetModelsList);
-	const baseModels = yield select(selectBaseModelsList);
-	const selectedModels = yield select(selectSelectedModelsMap);
+		const targetModels = yield select(selectTargetModelsList);
+		const baseModels = yield select(selectBaseModelsList);
+		const selectedModels = yield select(selectSelectedModelsMap);
 
-	const modelsToLoad = [];
-	for (let index = 0; index < targetModels.length; index++) {
-		const model = targetModels[index];
-		if (model && selectedModels[model._id]) {
-			const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
-			const sharedRevisionModel = baseModels.find(({ baseRevision }) => baseRevision.name === targetRevision.name);
-			const isAlreadyLoaded = sharedRevisionModel && selectedModels[sharedRevisionModel];
+		baseModels.forEach((model) => {
+			changeModelNodesVisibility(model.account + ':' + model.name, true);
+		});
 
-			if (isAlreadyLoaded) {
-				const { account, name } = sharedRevisionModel;
-				yield call(changeModelNodesVisibility, `${account}:${name}`, true);
-				Viewer.diffToolSetAsComparator(
-					model.teamspace,
-					model._id
-				);
-			} else {
-				const modelPromise = Viewer.diffToolLoadComparator(
-					model.teamspace,
-					model._id,
-					targetRevision.name
-				);
-				modelsToLoad.push(modelPromise);
+		const modelsToLoad = [];
+		for (let index = 0; index < targetModels.length; index++) {
+			const model = targetModels[index];
+			if (model && selectedModels[model._id]) {
+				const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
+				const sharedRevisionModel = baseModels.find(({ baseRevision }) => baseRevision.name === targetRevision.name);
+				const isAlreadyLoaded = sharedRevisionModel && selectedModels[sharedRevisionModel];
+
+				if (isAlreadyLoaded) {
+					const { account, name } = sharedRevisionModel;
+					changeModelNodesVisibility(`${account}:${name}`, true);
+					Viewer.diffToolSetAsComparator(
+						model.teamspace,
+						model._id
+					);
+				} else {
+					const modelPromise = Viewer.diffToolLoadComparator(
+						model.teamspace,
+						model._id,
+						targetRevision.name
+					);
+					modelsToLoad.push(modelPromise);
+				}
 			}
 		}
+
+		yield all(modelsToLoad);
+
+		if (isDiff) {
+			Viewer.diffToolEnableWithDiffMode();
+		} else {
+			Viewer.diffToolEnableWithClashMode();
+		}
+
+		yield call(handleLoadedModels);
+
+	} catch (error) {
+		debugger;
 	}
-
-	yield all(modelsToLoad);
-
-	if (isDiff) {
-		Viewer.diffToolEnableWithDiffMode();
-	} else {
-		Viewer.diffToolEnableWithClashMode();
-	}
-
-	yield call(handleLoadedModels);
 }
 
 function* startComparisonOfModel() {

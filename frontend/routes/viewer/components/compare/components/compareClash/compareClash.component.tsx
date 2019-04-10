@@ -83,7 +83,7 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 
 		setTargetModel(modelProps._id, selected);
 		setComponentState({
-			selectedModelsMap: {
+			selectedClashModelsMap: {
 				...selectedItemsMap,
 				[modelProps._id]: selected
 			}
@@ -94,14 +94,14 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 		const { setComponentState, compareModels } = this.props;
 		const newComponentState = {} as ICompareComponentState;
 
-		newComponentState.selectedModelsMap = compareModels.reduce((map, obj) => {
+		newComponentState.selectedClashModelsMap = compareModels.reduce((map, obj) => {
 			map[obj._id] = selected;
 			return map;
 		}, {});
 
-		newComponentState.targetDiffModels = newComponentState.selectedModelsMap;
+		newComponentState.targetDiffModels = newComponentState.selectedClashModelsMap;
 		if (!selected) {
-			newComponentState.targetClashModels = newComponentState.selectedModelsMap;
+			newComponentState.targetClashModels = newComponentState.selectedClashModelsMap;
 		}
 
 		setComponentState(newComponentState);

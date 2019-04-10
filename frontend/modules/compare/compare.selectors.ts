@@ -59,7 +59,11 @@ export const selectActiveTab = createSelector(
 );
 
 export const selectSelectedModelsMap = createSelector(
-	selectComponentState, (state) => state.selectedModelsMap
+	selectComponentState, selectActiveTab, (state, activeTab) => {
+		const isDiff = activeTab === DIFF_COMPARE_TYPE;
+		const selectedModelsMap = isDiff ? state.selectedDiffModelsMap : state.selectedClashModelsMap;
+		return selectedModelsMap;
+	}
 );
 
 export const selectSortOrder = createSelector(
@@ -71,7 +75,8 @@ export const selectSortType = createSelector(
 );
 
 export const selectCompareModels = createSelector(
-	selectComponentState, selectSortType, selectSortOrder, (state, sortType, sortOrder) => {
+	selectComponentState, selectSortType, selectSortOrder,
+	(state, sortType, sortOrder) => {
 		return orderBy(
 			searchByFilters(state.compareModels, state.selectedFilters),
 			[sortType],
@@ -98,11 +103,9 @@ export const selectTargetModelsList = createSelector(
 );
 
 export const selectBaseModelsList = createSelector(
-	selectCompareModels, selectActiveTab, selectTargetClashModels, selectTargetDiffModels,
-	(models, activeTab, targetClashModelsMap, targetDiffModelsMap) => {
-		const isDiff = activeTab === DIFF_COMPARE_TYPE;
-		const targetModelsMap = isDiff ? targetDiffModelsMap : targetClashModelsMap;
-		return models.filter(({ _id }) => !targetModelsMap[_id]);
+	selectCompareModels, selectSelectedModelsMap,
+	(models, selectedModelsMap) => {
+		return models.filter(({ _id }) => selectedModelsMap[_id]);
 	}
 );
 
