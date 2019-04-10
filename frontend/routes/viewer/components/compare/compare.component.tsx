@@ -66,6 +66,7 @@ interface IProps {
 	sortType: string;
 	sortOrder: string;
 	isActive: boolean;
+	isPending: boolean;
 	toggleCompare: () => void;
 	setSortType: (sortType) => void;
 	onTabChange: (activeTab) => void;
@@ -107,12 +108,14 @@ export class Compare extends React.PureComponent<IProps, any> {
 	private renderDiffTab = renderWhenTrue(() => (
 		<CompareDiff
 			compareModels={this.props.compareModels}
+			isPending={this.props.isPending}
 		/>
 	));
 
 	private renderClashTab = renderWhenTrue(() => (
 		<CompareClash
 			compareModels={this.props.compareModels}
+			isPending={this.props.isPending}
 		/>
 	));
 

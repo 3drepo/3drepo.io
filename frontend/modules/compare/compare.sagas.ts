@@ -101,7 +101,8 @@ function* getCompareModelData({ isFederation, settings }) {
 				compareModels,
 				selectedDiffModelsMap: selectedModelsMap,
 				selectedClashModelsMap: selectedModelsMap,
-				targetDiffModels: selectedModelsMap
+				targetDiffModels: selectedModelsMap,
+				isPending: false
 			}));
 		}
 	} catch (error) {
