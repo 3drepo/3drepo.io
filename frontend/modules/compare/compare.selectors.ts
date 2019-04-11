@@ -22,7 +22,7 @@ import { DIFF_COMPARE_TYPE, COMPARE_SORT_TYPES } from '../../constants/compare';
 
 export const selectCompareDomain = (state) => Object.assign({}, state.compare);
 
-const selectComponentState = createSelector(
+export const selectComponentState = createSelector(
 	selectCompareDomain, (state) => state.componentState
 );
 

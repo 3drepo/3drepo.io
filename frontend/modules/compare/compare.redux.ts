@@ -30,6 +30,7 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	setModelVisibility: ['isModelVisible'],
 	getCompareModels: ['settings', 'revision'],
 	setComponentState: ['componentState'],
+	setComponentStateSuccess: ['componentState'],
 	onRenderingTypeChange: ['renderingType'],
 	getCompareModelData: ['isFederation', 'settings'],
 	setSortType: ['sortType'],
@@ -104,7 +105,7 @@ const setModelVisibility = (state = INITIAL_STATE, {isModelVisible}) => {
 	return { ...state, isModelVisible };
 };
 
-export const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
+export const setComponentStateSuccess = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
@@ -113,7 +114,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[CompareTypes.SET_MODEL_TYPE] : setModelType,
 	[CompareTypes.SET_COMPARE_DISABLED] : setCompareDisabled,
 	[CompareTypes.SET_MODEL_VISIBILITY] : setModelVisibility,
-	[CompareTypes.SET_COMPONENT_STATE]: setComponentState,
+	[CompareTypes.SET_COMPONENT_STATE_SUCCESS]: setComponentStateSuccess,
 	[CompareTypes.SET_IS_ACTIVE]: setIsActive,
 	[CompareTypes.SET_IS_PENDING]: setIsPending
 });

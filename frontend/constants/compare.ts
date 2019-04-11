@@ -131,3 +131,11 @@ export const COMPARE_ACTIONS_MENU = {
 		sortType: COMPARE_SORT_TYPES.TYPE
 	}
 };
+
+export const VULNERABLE_PROPS = [
+	'activeTab',
+	'selectedDiffModelsMap',
+	'selectedClashModelsMap',
+	'targetClashModels',
+	'targetDiffModels'
+];

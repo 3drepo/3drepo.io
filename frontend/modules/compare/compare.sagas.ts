@@ -15,11 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select, all, take, call } from 'redux-saga/effects';
-import { cond } from 'lodash';
+import { put, takeLatest, select, all, call } from 'redux-saga/effects';
+import { cond, isEqual, curry, keys, intersection } from 'lodash';
 
 import { CompareTypes, CompareActions, ICompareComponentState } from './compare.redux';
 import { selectRevisions, selectIsFederation, selectSettings, ModelTypes } from '../model';
+import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES, VULNERABLE_PROPS } from '../../constants/compare';
+import { DialogActions } from '../dialog';
+import { Viewer } from '../../services/viewer/viewer';
+import { SORT_ORDER_TYPES } from '../../constants/sorting';
+import * as API from '../../services/api';
+import { getAngularService } from '../../helpers/migration';
 import {
 	selectSortType,
 	selectSortOrder,
@@ -29,15 +35,9 @@ import {
 	selectBaseModelsList,
 	selectTargetClashModels,
 	selectTargetDiffModels,
-	selectTargetModelsList
+	selectTargetModelsList,
+	selectComponentState
 } from './compare.selectors';
-import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES } from '../../constants/compare';
-import { DialogActions } from '../dialog';
-import { Viewer } from '../../services/viewer/viewer';
-import { SORT_ORDER_TYPES } from '../../constants/sorting';
-import { selectCompareModels } from './compare.selectors';
-import * as API from '../../services/api';
-import { getAngularService } from '../../helpers/migration';
 
 const getNextRevision = (revisions, currentRevision) => {
 	if (!currentRevision) {
@@ -121,12 +121,12 @@ function* getCompareModels() {
 	}
 }
 
-const equalsType = (destinationType) => (sourceType) => sourceType === destinationType;
+const equals = curry(isEqual);
 
 const handleRenderingTypeChange = cond([
-	[equalsType(RENDERING_TYPES.BASE), Viewer.diffToolShowBaseModel],
-	[equalsType(RENDERING_TYPES.COMPARE), Viewer.diffToolDiffView],
-	[equalsType(RENDERING_TYPES.TARGET), Viewer.diffToolShowComparatorModel]
+	[equals(RENDERING_TYPES.BASE), Viewer.diffToolShowBaseModel],
+	[equals(RENDERING_TYPES.COMPARE), Viewer.diffToolDiffView],
+	[equals(RENDERING_TYPES.TARGET), Viewer.diffToolShowComparatorModel]
 ]);
 
 function* onRenderingTypeChange({ renderingType }) {
@@ -299,10 +299,10 @@ function* startComparisonOfModel() {
 
 function* startCompare() {
 	try {
+		yield put(CompareActions.onRenderingTypeChange(RENDERING_TYPES.COMPARE));
 		yield put(CompareActions.setIsActive(true));
 		yield put(CompareActions.setIsPending(true));
 		const isFederation = yield select(selectIsFederation);
-		yield put(CompareActions.onRenderingTypeChange(RENDERING_TYPES.COMPARE));
 
 		if (isFederation) {
 			yield call(startComparisonOfFederation);
@@ -321,8 +321,8 @@ function* startCompare() {
 function* stopCompare() {
 	try {
 		yield put(CompareActions.setIsActive(false));
-		Viewer.diffToolDisableAndClear();
 		handleRenderingTypeChange(RENDERING_TYPES.COMPARE);
+		Viewer.diffToolDisableAndClear();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('stop', 'comparison', error.message));
 	}
@@ -341,6 +341,20 @@ function* toggleCompare() {
 	}
 }
 
+function* setComponentState({ componentState }) {
+	try {
+		const isCompareActive = yield select(selectIsCompareActive);
+		const shouldStopCompare = Boolean(intersection(keys(componentState), VULNERABLE_PROPS).length);
+		if (isCompareActive && shouldStopCompare) {
+			yield call(stopCompare);
+		}
+
+		yield put(CompareActions.setComponentStateSuccess(componentState));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'component state', error.message));
+	}
+}
+
 export default function* CompareSaga() {
 	yield takeLatest(ModelTypes.FETCH_SETTINGS_SUCCESS, getCompareModels);
 	yield takeLatest(CompareTypes.TOGGLE_COMPARE, toggleCompare);
@@ -349,4 +363,5 @@ export default function* CompareSaga() {
 	yield takeLatest(CompareTypes.SET_SORT_TYPE, setSortType);
 	yield takeLatest(CompareTypes.SET_ACTIVE_TAB, setActiveTab);
 	yield takeLatest(CompareTypes.SET_TARGET_MODEL, setTargetModel);
+	yield takeLatest(CompareTypes.SET_COMPONENT_STATE, setComponentState);
 }
