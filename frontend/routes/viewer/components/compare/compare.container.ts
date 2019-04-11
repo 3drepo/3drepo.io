@@ -29,7 +29,8 @@ import {
 	selectSortOrder,
 	selectIsCompareActive,
 	selectIsPending,
-	selectIsCompareButtonDisabled
+	selectIsCompareButtonDisabled,
+	selectSelectedModelsMap
 } from '../../../../modules/compare';
 import { selectIsFederation } from '../../../../modules/model';
 import { selectIsModelLoaded } from '../../../../modules/viewer';
@@ -44,7 +45,8 @@ const mapStateToProps = createStructuredSelector({
 	isPending: selectIsPending,
 	isFederation: selectIsFederation,
 	isModelLoaded: selectIsModelLoaded,
-	compareDisabled: selectIsCompareButtonDisabled
+	compareDisabled: selectIsCompareButtonDisabled,
+	selectedItemsMap: selectSelectedModelsMap
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -52,7 +54,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setComponentState: CompareActions.setComponentState,
 	onRenderingTypeChange: CompareActions.onRenderingTypeChange,
 	onTabChange: CompareActions.setActiveTab,
-	setSortType: CompareActions.setSortType
+	setSortType: CompareActions.setSortType,
+	setTargetModel: CompareActions.setTargetModel,
+	setTargetRevision: CompareActions.setTargetRevision
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Compare);

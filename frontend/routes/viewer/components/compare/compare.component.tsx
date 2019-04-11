@@ -55,6 +55,7 @@ import {
 } from './compare.styles';
 import { SORT_ORDER_TYPES } from '../../../../constants/sorting';
 import { SortAmountUp, SortAmountDown } from '../../../components/fontAwesomeIcon';
+import { ICompareComponentState } from '../../../../modules/compare/compare.redux';
 
 interface IProps {
 	className: string;
@@ -68,11 +69,14 @@ interface IProps {
 	isFederation: boolean;
 	isModelLoaded: boolean;
 	compareDisabled: boolean;
+	selectedItemsMap: any[];
 	toggleCompare: () => void;
 	setSortType: (sortType) => void;
 	onTabChange: (activeTab) => void;
 	onRenderingTypeChange: (renderingType) => void;
+	setTargetModel: (modelId, isTarget, isTypeChange?) => void;
 	setComponentState: (state) => void;
+	setTargetRevision: (modelId, targetRevision) => void;
 }
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
@@ -106,12 +110,21 @@ export class Compare extends React.PureComponent<IProps, any> {
 		return menuItems;
 	}
 
+	get tabProps() {
+		return {
+			className: 'height-catcher',
+			compareModels: this.props.compareModels,
+			handleItemSelect: this.handleItemSelect,
+			handleAllItemsSelect: this.handleAllItemsSelect
+		};
+	}
+
 	private renderDiffTab = renderWhenTrue(() => (
-		<CompareDiff className="height-catcher" compareModels={this.props.compareModels} />
+		<CompareDiff {...this.tabProps} />
 	));
 
 	private renderClashTab = renderWhenTrue(() => (
-		<CompareClash className="height-catcher" compareModels={this.props.compareModels} />
+		<CompareClash {...this.tabProps} />
 	));
 
 	public render() {
@@ -196,6 +209,36 @@ export class Compare extends React.PureComponent<IProps, any> {
 				})}
 			</MenuList>
 		);
+	}
+
+	private handleItemSelect = (modelProps) => (event, selected) => {
+		const { selectedItemsMap, setComponentState, setTargetModel } = this.props;
+		const changedMap = this.isDiffTabActive ? 'selectedDiffModelsMap' : 'selectedClashModelsMap';
+		setTargetModel(modelProps._id, selected);
+		setComponentState({
+			[changedMap]: {
+				...selectedItemsMap,
+				[modelProps._id]: selected
+			}
+		});
+	}
+
+	private handleAllItemsSelect = (event, selected) => {
+		const { setComponentState, compareModels } = this.props;
+		const newComponentState = {} as ICompareComponentState;
+		const changedMap = this.isDiffTabActive ? 'selectedDiffModelsMap' : 'selectedClashModelsMap';
+
+		newComponentState[changedMap] = compareModels.reduce((map, obj) => {
+			map[obj._id] = selected;
+			return map;
+		}, {});
+
+		newComponentState.targetDiffModels = newComponentState[changedMap];
+		if (!selected) {
+			newComponentState.targetClashModels = newComponentState[changedMap];
+		}
+
+		setComponentState(newComponentState);
 	}
 
 	private handleSortClick = (sortType) => () => this.props.setSortType(sortType);

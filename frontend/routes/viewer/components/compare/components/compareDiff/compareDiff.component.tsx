@@ -21,7 +21,6 @@ import { CompareFilters } from '../compareFilters/compareFilters.component';
 import { Container, List } from './compareDiff.styles';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { EmptyStateInfo } from '../../../views/views.styles';
-import { ICompareComponentState } from '../../../../../../modules/compare/compare.redux';
 
 interface IProps {
 	className: string;
@@ -33,6 +32,8 @@ interface IProps {
 	setTargetModel: (modelId, isTarget) => void;
 	setComponentState: (state) => void;
 	setTargetRevision: (modelId, targetRevision) => void;
+	handleAllItemsSelect: () => void;
+	handleItemSelect: (modelProps) => void;
 }
 
 export class CompareDiff extends React.PureComponent<IProps, any> {
@@ -62,7 +63,7 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 
 	private renderFilterPanel = () => (
 		<CompareFilters
-			onCheckboxChange={this.handleAllItemsSelect}
+			onCheckboxChange={this.props.handleAllItemsSelect}
 			onFilterChange={this.handleFilterChange}
 			selectedFilters={this.props.selectedFilters}
 			allSelected={this.props.isAllSelected}
@@ -71,35 +72,6 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 
 	private handleRevisionChange = (modelProps) => (revision) => {
 		this.props.setTargetRevision(modelProps._id, revision);
-	}
-
-	private handleItemSelect = (modelProps) => (event, selected) => {
-		const { selectedItemsMap, setComponentState, setTargetModel } = this.props;
-
-		setTargetModel(modelProps._id, selected);
-		setComponentState({
-			selectedDiffModelsMap: {
-				...selectedItemsMap,
-				[modelProps._id]: selected
-			}
-		});
-	}
-
-	private handleAllItemsSelect = (event, selected) => {
-		const { setComponentState, compareModels } = this.props;
-		const newComponentState = {} as ICompareComponentState;
-
-		newComponentState.selectedDiffModelsMap = compareModels.reduce((map, obj) => {
-			map[obj._id] = selected;
-			return map;
-		}, {});
-
-		newComponentState.targetDiffModels = newComponentState.selectedDiffModelsMap;
-		if (!selected) {
-			newComponentState.targetClashModels = newComponentState.selectedDiffModelsMap;
-		}
-
-		setComponentState(newComponentState);
 	}
 
 	private renderListItem = (modelProps) => {
@@ -114,7 +86,7 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 				targetDiffRevision={modelProps.targetDiffRevision}
 				revisions={modelProps.revisions}
 				selected={isSelected}
-				onSelectionChange={this.handleItemSelect(modelProps)}
+				onSelectionChange={this.props.handleItemSelect(modelProps)}
 				onRevisionChange={this.handleRevisionChange(modelProps)}
 			/>
 		);
