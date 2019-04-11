@@ -106,15 +106,11 @@ export class Compare extends React.PureComponent<IProps, any> {
 	}
 
 	private renderDiffTab = renderWhenTrue(() => (
-		<CompareDiff
-			compareModels={this.props.compareModels}
-		/>
+		<CompareDiff className="height-catcher" compareModels={this.props.compareModels} />
 	));
 
 	private renderClashTab = renderWhenTrue(() => (
-		<CompareClash
-			compareModels={this.props.compareModels}
-		/>
+		<CompareClash className="height-catcher" compareModels={this.props.compareModels} />
 	));
 
 	public render() {
@@ -127,13 +123,14 @@ export class Compare extends React.PureComponent<IProps, any> {
 				renderActions={this.renderHeaderButtons}
 				pending={this.props.isPending}
 			>
-				<ViewerPanelContent className="height-catcher" scrollDisabled={true}>
+				<ViewerPanelContent scrollDisabled={true}>
 					<Tabs
 						value={activeTab}
 						indicatorColor="secondary"
 						textColor="primary"
 						fullWidth={true}
 						onChange={this.handleChange}
+						className="height-catcher--partial"
 					>
 						<Tab label={COMPARE_TABS.DIFF} value={DIFF_COMPARE_TYPE} disabled={false} />
 						<Tab label={COMPARE_TABS.CLASH} value={CLASH_COMPARE_TYPE} disabled={!this.props.isFederation} />
@@ -143,7 +140,11 @@ export class Compare extends React.PureComponent<IProps, any> {
 						{this.renderClashTab(!this.isDiffTabActive)}
 					</TabContent>
 				</ViewerPanelContent>
-				<ViewerPanelFooter alignItems="center" justify="space-between">
+				<ViewerPanelFooter
+					className="height-catcher--partial"
+					alignItems="center"
+					justify="space-between"
+				>
 					{this.renderSlider()}
 					<ViewerPanelButton
 						aria-label="Compare"

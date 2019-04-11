@@ -74,12 +74,9 @@ export const TitleIcon = styled.div`
 
 export const ViewerPanelContent = styled.div<IViewerPanelContent>`
 	background-color: ${COLOR.WHITE_87};
-	padding: ${(props) => props.isPadding ? '24px' : '0'};
-
 	overflow: ${(props) => props.scrollDisabled ? 'hidden' : 'auto'};
 	display: ${(props) => props.scrollDisabled ? 'flex' : 'block'};
 	flex-direction: ${(props) => props.scrollDisabled ? 'column' : 'unset'};
-
 	position: relative;
 `;
 
