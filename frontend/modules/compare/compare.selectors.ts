@@ -50,6 +50,10 @@ export const selectIsModelVisible = createSelector(
 	selectCompareDomain, (state) => state.isModelVisible
 );
 
+export const selectCompareModels = createSelector(
+	selectComponentState, (state) => state.compareModels
+);
+
 export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
@@ -97,11 +101,11 @@ const getSortValue = (field, targetModels) => (model) => {
 	return model[field];
 };
 
-export const selectCompareModels = createSelector(
-	selectComponentState, selectSortType, selectSortOrder, selectTargetModels,
-	(state, sortType, sortOrder, targetModelsMap) => {
+export const selectFilteredCompareModels = createSelector(
+	selectCompareModels, selectSelectedFilters, selectSortType, selectSortOrder, selectTargetModels,
+	(compareModels, selectedFilters, sortType, sortOrder, targetModelsMap) => {
 		return orderBy(
-			searchByFilters(state.compareModels, state.selectedFilters),
+			searchByFilters(compareModels, selectedFilters),
 			[getSortValue(sortType, targetModelsMap)],
 			[sortOrder]
 		);

@@ -23,7 +23,7 @@ import { Compare } from './compare.component';
 import {
 	CompareActions,
 	selectActiveTab,
-	selectCompareModels,
+	selectFilteredCompareModels,
 	selectRenderingType,
 	selectSortType,
 	selectSortOrder,
@@ -35,7 +35,7 @@ import { selectIsModelLoaded } from '../../../../modules/viewer';
 
 const mapStateToProps = createStructuredSelector({
 	activeTab: selectActiveTab,
-	compareModels: selectCompareModels,
+	compareModels: selectFilteredCompareModels,
 	renderingType: selectRenderingType,
 	sortType: selectSortType,
 	sortOrder: selectSortOrder,

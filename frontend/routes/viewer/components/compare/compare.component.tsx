@@ -200,7 +200,9 @@ export class Compare extends React.PureComponent<IProps, any> {
 	private handleSortClick = (sortType) => () => this.props.setSortType(sortType);
 
 	private handleRenderingTypeClick = (type) => () => {
-		this.props.onRenderingTypeChange(type);
+		if (this.props.isActive) {
+			this.props.onRenderingTypeChange(type);
+		}
 	}
 
 	private handleRenderingTypeChange = (event, type) => {

@@ -36,7 +36,8 @@ import {
 	selectTargetClashModels,
 	selectTargetDiffModels,
 	selectTargetModelsList,
-	selectComponentState
+	selectComponentState,
+	selectCompareModels
 } from './compare.selectors';
 
 const getNextRevision = (revisions, currentRevision) => {
@@ -246,10 +247,11 @@ function* startComparisonOfFederation() {
 
 	const targetModels = yield select(selectTargetModelsList);
 	const baseModels = yield select(selectBaseModelsList);
+	const compareModels = yield select(selectCompareModels);
 	const selectedModels = yield select(selectSelectedModelsMap);
 
-	baseModels.forEach((model) => {
-		changeModelNodesVisibility(model.teamspace + ':' + model.name, true);
+	compareModels.forEach((model) => {
+		changeModelNodesVisibility(model.teamspace + ':' + model.name, selectedModels[model._id]);
 	});
 
 	const modelsToLoad = [];
