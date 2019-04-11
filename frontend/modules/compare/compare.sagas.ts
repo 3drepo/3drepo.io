@@ -290,13 +290,11 @@ function* startComparisonOfFederation() {
 }
 
 function* startComparisonOfModel() {
-	const activeTab = yield select(selectActiveTab);
-	const isDiff = activeTab === DIFF_COMPARE_TYPE;
-
 	const targetModels = yield select(selectTargetModelsList);
-	const { account, model } = targetModels[0];
-	const revision = isDiff ? targetModels[0].targetDiffRevision : targetModels[0].targetClashRevision;
-	yield Viewer.diffToolLoadComparator(account, model, revision.name);
+	const { teamspace, _id } = targetModels[0];
+	const revision = targetModels[0].targetDiffRevision;
+
+	yield Viewer.diffToolLoadComparator(teamspace, _id, revision.name);
 }
 
 function* startCompare() {
@@ -311,13 +309,13 @@ function* startCompare() {
 		} else {
 			yield call(startComparisonOfModel);
 		}
-
 		yield call(setProperViewerCompareMode);
 	} catch (error) {
 		yield put(CompareActions.setIsActive(false));
 		yield put(CompareActions.setIsPending(false));
 		yield put(DialogActions.showErrorDialog('start', 'comparison', error.message));
 	}
+	yield put(CompareActions.setCompareDisabled(false));
 }
 
 function* stopCompare() {
@@ -336,6 +334,7 @@ function* toggleCompare() {
 		if (isActive) {
 			yield call(stopCompare);
 		} else {
+			yield put(CompareActions.setCompareDisabled(true));
 			yield call(startCompare);
 		}
 	} catch (error) {

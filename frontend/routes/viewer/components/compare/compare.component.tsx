@@ -67,6 +67,7 @@ interface IProps {
 	isPending: boolean;
 	isFederation: boolean;
 	isModelLoaded: boolean;
+	compareDisabled: boolean;
 	toggleCompare: () => void;
 	setSortType: (sortType) => void;
 	onTabChange: (activeTab) => void;
@@ -114,7 +115,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 	));
 
 	public render() {
-		const { activeTab, isActive, toggleCompare } = this.props;
+		const { activeTab, isActive, toggleCompare, compareDisabled } = this.props;
 
 		return (
 			<ViewerPanel
@@ -151,7 +152,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 						onClick={toggleCompare}
 						color="secondary"
 						variant="fab"
-						disabled={!this.props.isModelLoaded}
+						disabled={compareDisabled}
 						active={Number(isActive)}
 					>
 						<CompareIcon />

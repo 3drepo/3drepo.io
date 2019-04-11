@@ -16,9 +16,10 @@
  */
 
 import { createSelector } from 'reselect';
-import { isEqual, values, orderBy } from 'lodash';
+import { isEqual, values, orderBy, size } from 'lodash';
 import { searchByFilters } from '../../helpers/searching';
 import { DIFF_COMPARE_TYPE, COMPARE_SORT_TYPES } from '../../constants/compare';
+import { selectIsModelLoaded } from '../viewer';
 
 export const selectCompareDomain = (state) => Object.assign({}, state.compare);
 
@@ -140,4 +141,17 @@ export const selectRenderingType = createSelector(
 
 export const selectIsPending = createSelector(
 	selectComponentState, (state) => state.isPending
+);
+
+export const selectIsCompareButtonDisabled = createSelector(
+	selectSelectedModelsMap, selectIsCompareDisabled, selectIsModelLoaded,
+	(selectedModelsMap, isCompareDisabled, isModelLoaded) => {
+		const areSelectedModels = values(selectedModelsMap).filter((selectedModel) => selectedModel).length;
+		console.log('areSelectedModels', areSelectedModels)
+		console.log('isCompareDisabled', isCompareDisabled)
+		console.log('isModelLoaded', isModelLoaded)
+		console.log('- - - - -');
+
+		return !areSelectedModels || isCompareDisabled || !isModelLoaded;
+	}
 );
