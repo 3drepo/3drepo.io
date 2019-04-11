@@ -18,15 +18,15 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-  height: inherit;
-  display: flex;
-  overflow: hidden;
-  flex-direction: column;
-  width: 100%;
+	height: inherit;
+	display: flex;
+	overflow: hidden;
+	flex-direction: column;
+	width: 100%;
 `;
 
 export const List = styled.ul`
-  overflow: auto;
+	overflow: auto;
 	padding: 0;
 	margin: 0;
 `;

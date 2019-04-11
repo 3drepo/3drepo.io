@@ -68,10 +68,10 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 				renderValue={this.renderValue}
 				onChange={this.handleChange}
 			>
-				{revisions.map(({ tag, timestamp, _id }) => (
-					<MenuItem key={_id} value={_id} disabled={this.props.baseRevision === _id}>
-						{this.renderName(tag)}
-						{this.renderDate(timestamp)}
+				{revisions.map((revision) => (
+					<MenuItem key={revision._id} value={revision} disabled={this.props.baseRevision === revision._id}>
+						{this.renderName(revision.tag)}
+						{this.renderDate(revision.timestamp)}
 					</MenuItem>
 				))}
 			</SelectField>
@@ -86,6 +86,14 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public componentDidUpdate(prevProps) {
+		if (prevProps.value !== this.props.value) {
+			this.setState({
+				value: this.props.value || this.props.defaultValue
+			});
+		}
+	}
+
 	public render() {
 		const { revisions } = this.props;
 		return (
@@ -98,7 +106,7 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 
 	private handleChange = (e) => {
 		this.setState({
-			value: e.target.value
+			value: e.target.value._id
 		}, () => {
 			this.props.onChange(e.target.value);
 		});

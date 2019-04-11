@@ -202,20 +202,32 @@ function* setActiveTab({ activeTab }) {
 
 function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
 	try {
+		const activeTab = yield select(selectActiveTab);
+		const isDiff = activeTab === DIFF_COMPARE_TYPE;
+
 		const targetDiffModels = yield select(selectTargetDiffModels);
 		const targetClashModels = yield select(selectTargetClashModels);
 		const componentState = {} as ICompareComponentState;
+		const compareModels = yield select(selectCompareModels);
 
-		if (!isTypeChange) {
+		if (isDiff) {
 			componentState.targetDiffModels = {
 				...targetDiffModels,
 					[modelId]: isTarget
 			};
 		}
-		componentState.targetClashModels = {
-			...targetClashModels,
-			[modelId]: isTypeChange ? isTarget : false
-		};
+
+		if (!isTarget) {
+			const { baseRevision } = compareModels.find((model) => model._id === modelId);
+			yield put(CompareActions.setTargetRevision(modelId, baseRevision));
+		}
+
+		if (!isDiff) {
+			componentState.targetClashModels = {
+				...targetClashModels,
+				[modelId]: isTypeChange ? isTarget : false
+			};
+		}
 
 		yield put(CompareActions.setComponentState(componentState));
 	} catch (error) {
@@ -356,6 +368,17 @@ function* setComponentState({ componentState }) {
 	}
 }
 
+function* setTargetRevision({ modelId, targetRevision }) {
+	try {
+		const componentState = yield select(selectComponentState);
+		const modelIndex = componentState.compareModels.findIndex((model) => model._id === modelId);
+		componentState.compareModels[modelIndex].targetClashRevision = targetRevision;
+		yield put(CompareActions.setComponentState(componentState));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'target revision', error.message));
+	}
+}
+
 export default function* CompareSaga() {
 	yield takeLatest(ModelTypes.FETCH_SETTINGS_SUCCESS, getCompareModels);
 	yield takeLatest(CompareTypes.TOGGLE_COMPARE, toggleCompare);
@@ -365,4 +388,5 @@ export default function* CompareSaga() {
 	yield takeLatest(CompareTypes.SET_ACTIVE_TAB, setActiveTab);
 	yield takeLatest(CompareTypes.SET_TARGET_MODEL, setTargetModel);
 	yield takeLatest(CompareTypes.SET_COMPONENT_STATE, setComponentState);
+	yield takeLatest(CompareTypes.SET_TARGET_REVISION, setTargetRevision);
 }

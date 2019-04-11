@@ -31,36 +31,36 @@ interface ICurrentRevision {
 }
 
 export const Container = styled.div<IContainer>`
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid ${COLOR.BLACK_6};
+	display: flex;
+	align-items: center;
+	border-bottom: 1px solid ${COLOR.BLACK_6};
 	height: 80px;
 	padding-right: 30px;
 `;
 
 export const ModelData = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
 `;
 
 export const Name = styled.div<IName>`
-  color: ${(props) => props.disabled ? COLOR.BLACK_20 : COLOR.BLACK_80};
-  font-size: 14px;
+	color: ${(props) => props.disabled ? COLOR.BLACK_20 : COLOR.BLACK_80};
+	font-size: 14px;
 `;
 
 export const CurrentRevision = styled.div<ICurrentRevision>`
-  color: ${(props) => props.disabled ? COLOR.BLACK_20 : '#757575'};
-  font-size: 14px;
+	color: ${(props) => props.disabled ? COLOR.BLACK_20 : '#757575'};
+	font-size: 14px;
 `;
 
 export const Revisions = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  width: 100%;
-  height: 20px;
-  align-items: center;
-  overflow: hidden;
-  margin-top: 6px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 100%;
+	height: 20px;
+	align-items: center;
+	overflow: hidden;
+	margin-top: 6px;
 `;

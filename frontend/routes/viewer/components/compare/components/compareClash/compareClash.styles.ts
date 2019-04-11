@@ -19,10 +19,10 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
 	height: inherit;
-  display: flex;
-  overflow: hidden;
-  flex-direction: column;
-  width: 100%;
+	display: flex;
+	overflow: hidden;
+	flex-direction: column;
+	width: 100%;
 `;
 
 export const List = styled.ul`

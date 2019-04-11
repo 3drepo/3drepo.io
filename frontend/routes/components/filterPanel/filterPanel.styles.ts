@@ -42,7 +42,7 @@ interface IChips {
 }
 
 export const Container = styled.div<IContainer>`
-  background-color: ${COLOR.WHITE};
+	background-color: ${COLOR.WHITE};
 	position: relative;
 	display: flex;
 	flex-direction: column;
@@ -52,8 +52,8 @@ export const Container = styled.div<IContainer>`
 `;
 
 export const SelectedFilters = styled.div<ISelectedFilters>`
-  display: flex;
-  flex-wrap: wrap;
+	display: flex;
+	flex-wrap: wrap;
 	padding: ${(props) => props.empty ? '0 40px 0 8px' : '4px 40px 0 8px'};
 	overflow: ${(props) => props.filtersOpen ? 'hidden' : 'auto'};
 	min-height: ${(props) => props.empty ? '0' : '45px'};
@@ -62,7 +62,7 @@ export const SelectedFilters = styled.div<ISelectedFilters>`
 `;
 
 export const InputContainer = styled.div<IInputContainer>`
-  display: block;
+	display: block;
 	justify-content: flex-end;
 	position: relative;
 	margin: 0;
@@ -86,7 +86,7 @@ export const InputContainer = styled.div<IInputContainer>`
 				opacity: 1;
 			}
 		}
-  }
+	}
 `;
 
 export const SuggestionsList = styled(Popper)`
@@ -184,7 +184,7 @@ export const ButtonWrapper = styled.div`
 `;
 
 export const Chips = styled.div<IChips>`
-  position: relative;
+	position: relative;
 
 	&.compare {
 		margin-left: ${(props) => props.filtersOpen ? '38px' : '0'};
@@ -192,7 +192,7 @@ export const Chips = styled.div<IChips>`
 `;
 
 export const Placeholder = styled.div`
-  position: absolute;
+	position: absolute;
 	left: 48px;
 	color: ${COLOR.BLACK_60};
 	font-size: 14px;

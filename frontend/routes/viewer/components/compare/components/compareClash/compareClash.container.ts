@@ -37,7 +37,8 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setComponentState: CompareActions.setComponentState,
-	setTargetModel: CompareActions.setTargetModel
+	setTargetModel: CompareActions.setTargetModel,
+	setTargetRevision: CompareActions.setTargetRevision
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(CompareClash);

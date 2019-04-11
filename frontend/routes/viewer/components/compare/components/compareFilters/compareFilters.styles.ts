@@ -20,29 +20,29 @@ import { Checkbox as CheckboxComponent } from '@material-ui/core';
 import { FilterPanel as FilterPanelComponent } from '../../../../../components/filterPanel/filterPanel.component';
 
 export const FilterPanel = styled(FilterPanelComponent)`
-  && {
-    flex: 1;
+	&& {
+		flex: 1;
 
-    .react-autosuggest__container {
-      input {
-        padding: 10px 14px 12px 48px;
-      }
-    }
-  }
+		.react-autosuggest__container {
+			input {
+				padding: 10px 14px 12px 48px;
+			}
+		}
+	}
 `;
 
 export const FilterContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex: 1;
-  position: relative;
+	display: flex;
+	flex-direction: row;
+	flex: 1;
+	position: relative;
 `;
 
 export const Checkbox = styled(CheckboxComponent)`
-  && {
-    position: absolute;
-    left: 0;
-    bottom: 2px;
-    z-index: 1;
-  }
+	&& {
+		position: absolute;
+		left: 0;
+		bottom: 2px;
+		z-index: 1;
+	}
 `;

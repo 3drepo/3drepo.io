@@ -34,6 +34,7 @@ interface IProps {
 	targetModels: any;
 	setTargetModel: (modelId, isTarget, isTypeChange?) => void;
 	setComponentState: (state) => void;
+	setTargetRevision: (modelId, targetRevision) => void;
 }
 
 export class CompareClash extends React.PureComponent<IProps, any> {
@@ -65,7 +66,9 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 		this.props.setTargetModel(modelProps._id, type === TARGET_MODEL_TYPE, true);
 	}
 
-	private handleRevisionChange = (modelProps) => () => {};
+	private handleRevisionChange = (modelProps) => (revision) => {
+		this.props.setTargetRevision(modelProps._id, revision);
+	}
 
 	private renderFilterPanel = () => (
 		<CompareFilters
@@ -115,7 +118,7 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 				name={modelProps.name}
 				revisions={modelProps.revisions}
 				baseRevision={modelProps.baseRevision}
-				currentRevision={modelProps.currentRevision}
+				currentRevision={modelProps.targetClashRevision}
 				selected={isSelected}
 				isTarget={this.props.targetModels[modelProps._id]}
 				onSelectionChange={this.handleItemSelect(modelProps)}

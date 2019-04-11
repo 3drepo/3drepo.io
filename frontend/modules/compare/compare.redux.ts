@@ -36,7 +36,8 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	setSortType: ['sortType'],
 	setActiveTab: ['activeTab'],
 	setIsPending: ['isPending'],
-	setTargetModel: ['modelId', 'isTarget', 'isTypeChange']
+	setTargetModel: ['modelId', 'isTarget', 'isTypeChange'],
+	setTargetRevision: ['modelId', 'targetRevision']
 }, { prefix: 'COMPARE/' });
 
 export interface ICompareComponentState {

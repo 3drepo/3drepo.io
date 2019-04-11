@@ -32,6 +32,7 @@ interface IProps {
 	targetModels: any;
 	setTargetModel: (modelId, isTarget) => void;
 	setComponentState: (state) => void;
+	setTargetRevision: (modelId, targetRevision) => void;
 }
 
 export class CompareDiff extends React.PureComponent<IProps, any> {
@@ -68,7 +69,8 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 		/>
 	)
 
-	private handleRevisionChange = (modelProps) => (id) => {
+	private handleRevisionChange = (modelProps) => (revision) => {
+		this.props.setTargetRevision(modelProps._id, revision);
 	}
 
 	private handleItemSelect = (modelProps) => (event, selected) => {
