@@ -17,8 +17,8 @@
 
 "use strict";
 const DB = require("../handler/db");
-// const ExternalServices = require("../handler/externalServices");
-// const ResponseCodes = require("../response_codes");
+const ExternalServices = require("../handler/externalServices");
+const ResponseCodes = require("../response_codes");
 
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
@@ -29,27 +29,29 @@ gridFSMapping[ORIGINAL_FILE_REF_EXT] = ".history";
 gridFSMapping[UNITY_BUNDLE_REF_EXT] = ".stash.unity3d";
 gridFSMapping[JSON_FILE_REF_EXT] = ".stash.json_mpc";
 
-/*
- * function getRefEntry(account, collection, fileName) {
+function getRefEntry(account, collection, fileName) {
 	return DB.getCollection(account, collection).then((col) => {
 		return col ? col.findOne({_id: fileName}) : Promise.reject(ResponseCodes.NO_FILE_FOUND);
 	});
-}*/
+}
 
 function fetchFile(account, model, ext, fileName) {
+	/*
 	const fileArr = fileName.split("/");
 	const fullFileName = fileArr.length > 1 ? `/${account}/${model}/revision/${fileName}` :  `/${account}/${model}/${fileName}`;
 	return DB.getFileFromGridFS(account, model + gridFSMapping[ext], fullFileName);
-	/*
+	*/
+	const collection = model + ext;
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
 		return ExternalServices.getFile(entry.type, entry.link);
-	});*/
+	});
 }
 
 function fetchFileStream(account, model, ext, fileName, imposeModelRoute = true) {
+	/*
 	let fullFileName = fileName;
 	if(imposeModelRoute) {
 		const fileArr = fileName.split("/");
@@ -58,19 +60,21 @@ function fetchFileStream(account, model, ext, fileName, imposeModelRoute = true)
 	return DB.getFileStreamFromGridFS(account, model + gridFSMapping[ext], fullFileName).then((fileInfo) => {
 		return {readStream: fileInfo.stream, size: fileInfo.size};
 	});
-	/*
+	*/
+	const collection = model + ext;
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
 		return { readStream: ExternalServices.getFileStream(entry.type, entry.link), size: entry.size };
-	}); */
+	});
 }
 
-function removeAllFiles(/* account, collection*/) {
-
+function removeAllFiles(account, collection) {
+	/*
 	return Promise.resolve();
-/*	return DB.getCollection(account, collection).then((col) => {
+	*/
+	return DB.getCollection(account, collection).then((col) => {
 		if (col) {
 			const query = [
 				{
@@ -87,7 +91,7 @@ function removeAllFiles(/* account, collection*/) {
 				return Promise.all(delPromises);
 			});
 		}
-	});*/
+	});
 }
 
 const FileRef = {};

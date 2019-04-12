@@ -24,7 +24,7 @@ const https = require("https");
 
 class S3Handler {
 	constructor() {
-		if (config.s3 &&
+		if (AWS.config && config.s3 &&
 			config.s3.accessKey &&
 			config.s3.secretKey &&
 			config.s3.bucketName &&

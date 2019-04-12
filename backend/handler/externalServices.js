@@ -16,7 +16,8 @@
  */
 
 "use strict";
-const S3Handler = require("./s3");
+const FSHandler = require("./fs");
+// const S3Handler = require("./s3");
 const ResponseCodes = require("../response_codes");
 const SystemLogger = require("../logger.js").systemLogger;
 
@@ -24,8 +25,10 @@ const ExternalServices = {};
 
 ExternalServices.getFileStream = (type, key) => {
 	switch(type) {
+		case "fs" :
+			return FSHandler.getFileStream(key);
 		case "s3" :
-			return S3Handler.getFileStream(key);
+			// return S3Handler.getFileStream(key);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
@@ -34,8 +37,10 @@ ExternalServices.getFileStream = (type, key) => {
 
 ExternalServices.getFile = (type, key) => {
 	switch(type) {
+		case "fs" :
+			return FSHandler.getFile(key);
 		case "s3" :
-			return S3Handler.getFile(key);
+			// return S3Handler.getFile(key);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
@@ -44,8 +49,10 @@ ExternalServices.getFile = (type, key) => {
 
 ExternalServices.removeFiles = (type, keys) => {
 	switch(type) {
+		case "fs" :
+			return FSHandler.removeFiles(keys);
 		case "s3" :
-			return S3Handler.removeFiles(keys);
+			// return S3Handler.removeFiles(keys);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);

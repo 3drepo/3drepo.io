@@ -56,6 +56,9 @@ module.exports = {
 		username: 'adminUser',
 		password: 'some_secure_password'
 	},
+	fs: {
+		path: '/path/to/repo/data/dir/'
+	},
 	// ssl: {
 	// 	key: "my_key.pem",
 	// 	cert:"my_server.crt",
