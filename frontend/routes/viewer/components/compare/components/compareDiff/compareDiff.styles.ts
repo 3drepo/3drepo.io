@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from '../../../../../../styles';
 
 export const Container = styled.div`
 	height: inherit;

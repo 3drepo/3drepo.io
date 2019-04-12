@@ -30,7 +30,8 @@ import {
 	selectIsCompareActive,
 	selectIsPending,
 	selectIsCompareButtonDisabled,
-	selectSelectedModelsMap
+	selectSelectedModelsMap,
+	selectIsCompareProcessed
 } from '../../../../modules/compare';
 import { selectIsFederation } from '../../../../modules/model';
 import { selectIsModelLoaded } from '../../../../modules/viewer';
@@ -46,7 +47,8 @@ const mapStateToProps = createStructuredSelector({
 	isFederation: selectIsFederation,
 	isModelLoaded: selectIsModelLoaded,
 	compareDisabled: selectIsCompareButtonDisabled,
-	selectedItemsMap: selectSelectedModelsMap
+	selectedItemsMap: selectSelectedModelsMap,
+	isCompareProcessed: selectIsCompareProcessed
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

@@ -29,6 +29,8 @@ interface IProps {
 	compareModels: any[];
 	isAllSelected: boolean;
 	targetModels: any;
+	isCompareProcessed: boolean;
+	renderComparisonLoader: () => void;
 	setTargetModel: (modelId, isTarget) => void;
 	setComponentState: (state) => void;
 	setTargetRevision: (modelId, targetRevision) => void;
@@ -52,11 +54,14 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 	));
 
 	public render() {
+		const { className, renderComparisonLoader, compareModels } = this.props;
+
 		return (
-			<Container className={this.props.className}>
+			<Container className={className}>
+				{renderComparisonLoader()}
 				{this.renderFilterPanel()}
-				{this.renderEmptyState(!this.props.compareModels.length)}
-				{this.renderList(this.props.compareModels.length)}
+				{this.renderEmptyState(!compareModels.length)}
+				{this.renderList(compareModels.length)}
 			</Container>
 		);
 	}

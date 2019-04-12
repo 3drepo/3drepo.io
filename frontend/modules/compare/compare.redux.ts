@@ -26,7 +26,7 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	setIsActive: ['isActive'],
 	setCompareType: ['compareType'],
 	setModelType: ['modelType'],
-	setCompareDisabled: ['isCompareDisabled'],
+	setCompareProcessed: ['isCompareProcessed'],
 	setModelVisibility: ['isModelVisible'],
 	getCompareModels: ['settings', 'revision'],
 	setComponentState: ['componentState'],
@@ -57,7 +57,7 @@ export interface ICompareComponentState {
 export interface ICompareState {
 	isComparePending: boolean;
 	isCompareActive: boolean;
-	isCompareDisabled: boolean;
+	isCompareProcessed: boolean;
 	isModelVisible: boolean;
 	componentState: ICompareComponentState;
 }
@@ -65,7 +65,7 @@ export interface ICompareState {
 export const INITIAL_STATE: ICompareState = {
 	isComparePending: false,
 	isCompareActive: false,
-	isCompareDisabled: false,
+	isCompareProcessed: false,
 	isModelVisible: false,
 	componentState: {
 		sortType: COMPARE_SORT_TYPES.NAME,
@@ -98,8 +98,8 @@ const setIsPending = (state = INITIAL_STATE, { isPending }) => {
 	return { ...state, isComparePending: isPending };
 };
 
-const setCompareDisabled = (state = INITIAL_STATE, {isCompareDisabled}) => {
-	return { ...state, isCompareDisabled };
+const setCompareProcessed = (state = INITIAL_STATE, {isCompareProcessed}) => {
+	return { ...state, isCompareProcessed };
 };
 
 const setModelVisibility = (state = INITIAL_STATE, {isModelVisible}) => {
@@ -113,7 +113,7 @@ export const setComponentStateSuccess = (state = INITIAL_STATE, { componentState
 export const reducer = createReducer(INITIAL_STATE, {
 	[CompareTypes.SET_COMPARE_TYPE] : setCompareType,
 	[CompareTypes.SET_MODEL_TYPE] : setModelType,
-	[CompareTypes.SET_COMPARE_DISABLED] : setCompareDisabled,
+	[CompareTypes.SET_COMPARE_PROCESSED] : setCompareProcessed,
 	[CompareTypes.SET_MODEL_VISIBILITY] : setModelVisibility,
 	[CompareTypes.SET_COMPONENT_STATE_SUCCESS]: setComponentStateSuccess,
 	[CompareTypes.SET_IS_ACTIVE]: setIsActive,

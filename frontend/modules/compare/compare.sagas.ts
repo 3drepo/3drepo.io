@@ -327,7 +327,7 @@ function* startCompare() {
 		yield put(CompareActions.setIsPending(false));
 		yield put(DialogActions.showErrorDialog('start', 'comparison', error.message));
 	}
-	yield put(CompareActions.setCompareDisabled(false));
+	yield put(CompareActions.setCompareProcessed(false));
 }
 
 function* stopCompare() {
@@ -346,7 +346,7 @@ function* toggleCompare() {
 		if (isActive) {
 			yield call(stopCompare);
 		} else {
-			yield put(CompareActions.setCompareDisabled(true));
+			yield put(CompareActions.setCompareProcessed(true));
 			yield call(startCompare);
 		}
 	} catch (error) {

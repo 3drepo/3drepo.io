@@ -51,11 +51,13 @@ import {
 	SliderLabel,
 	SliderWrapper,
 	ViewerPanelFooter,
-	MenuList
+	MenuList,
+	ComparisonLoader
 } from './compare.styles';
 import { SORT_ORDER_TYPES } from '../../../../constants/sorting';
 import { SortAmountUp, SortAmountDown } from '../../../components/fontAwesomeIcon';
 import { ICompareComponentState } from '../../../../modules/compare/compare.redux';
+import { Loader } from '../../../components/loader/loader.component';
 
 interface IProps {
 	className: string;
@@ -70,6 +72,7 @@ interface IProps {
 	isModelLoaded: boolean;
 	compareDisabled: boolean;
 	selectedItemsMap: any[];
+	isCompareProcessed: boolean;
 	toggleCompare: () => void;
 	setSortType: (sortType) => void;
 	onTabChange: (activeTab) => void;
@@ -115,9 +118,16 @@ export class Compare extends React.PureComponent<IProps, any> {
 			className: 'height-catcher',
 			compareModels: this.props.compareModels,
 			handleItemSelect: this.handleItemSelect,
-			handleAllItemsSelect: this.handleAllItemsSelect
+			handleAllItemsSelect: this.handleAllItemsSelect,
+			renderComparisonLoader: () => this.renderComparisonLoader(this.props.isCompareProcessed)
 		};
 	}
+
+	public renderComparisonLoader = renderWhenTrue(() => (
+		<ComparisonLoader>
+			<Loader content="Loading comparison" />
+		</ComparisonLoader>
+	));
 
 	private renderDiffTab = renderWhenTrue(() => (
 		<CompareDiff {...this.tabProps} />
@@ -128,7 +138,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 	));
 
 	public render() {
-		const { activeTab, isActive, toggleCompare, compareDisabled } = this.props;
+		const { activeTab, isActive, toggleCompare, compareDisabled, isCompareProcessed, isFederation } = this.props;
 
 		return (
 			<ViewerPanel
@@ -146,8 +156,8 @@ export class Compare extends React.PureComponent<IProps, any> {
 						onChange={this.handleChange}
 						className="height-catcher--partial"
 					>
-						<Tab label={COMPARE_TABS.DIFF} value={DIFF_COMPARE_TYPE} disabled={false} />
-						<Tab label={COMPARE_TABS.CLASH} value={CLASH_COMPARE_TYPE} disabled={!this.props.isFederation} />
+						<Tab label={COMPARE_TABS.DIFF} value={DIFF_COMPARE_TYPE} disabled={isCompareProcessed} />
+						<Tab label={COMPARE_TABS.CLASH} value={CLASH_COMPARE_TYPE} disabled={!isFederation || isCompareProcessed} />
 					</Tabs>
 					<TabContent>
 						{this.renderDiffTab(this.isDiffTabActive)}
@@ -175,41 +185,36 @@ export class Compare extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	private renderHeaderButtons = () => {
-		return (
-			<ButtonMenu
-				renderButton={MenuButton}
-				renderContent={this.renderMenu}
-				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-				ButtonProps={{ disabled: false }}
-			/>
-		);
-	}
+	private renderHeaderButtons = () => (
+		<ButtonMenu
+			renderButton={MenuButton}
+			renderContent={this.renderMenu}
+			PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+			PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
+			ButtonProps={{ disabled: this.props.isCompareProcessed }}
+		/>
+	)
 
-	private renderMenu = () => {
-		const { sortOrder } = this.props;
-		return (
-			<MenuList>
-				{this.headerMenuItems.map(({ label, onClick, sortType }, index) => {
-					const isEnabled = this.props.sortType === sortType;
-					const isAscending = !isEnabled || sortOrder === SORT_ORDER_TYPES.ASCENDING;
-					return (
-						<StyledListItem key={index} button onClick={onClick}>
-							<IconWrapper>
-								{isAscending && <SortAmountUp fontSize="small" />}
-								{!isAscending && <SortAmountDown fontSize="small" />}
-							</IconWrapper>
-							<StyledItemText>
-								{label}
-								{sortType === this.props.sortType && <CheckIcon fontSize="small" />}
-							</StyledItemText>
-						</StyledListItem>
-					);
-				})}
-			</MenuList>
-		);
-	}
+	private renderMenu = () => (
+		<MenuList>
+			{this.headerMenuItems.map(({ label, onClick, sortType }, index) => {
+				const isEnabled = this.props.sortType === sortType;
+				const isAscending = !isEnabled || this.props.sortOrder === SORT_ORDER_TYPES.ASCENDING;
+				return (
+					<StyledListItem key={index} button onClick={onClick}>
+						<IconWrapper>
+							{isAscending && <SortAmountUp fontSize="small" />}
+							{!isAscending && <SortAmountDown fontSize="small" />}
+						</IconWrapper>
+						<StyledItemText>
+							{label}
+							{sortType === this.props.sortType && <CheckIcon fontSize="small" />}
+						</StyledItemText>
+					</StyledListItem>
+				);
+			})}
+		</MenuList>
+	)
 
 	private handleItemSelect = (modelProps) => (event, selected) => {
 		const { selectedItemsMap, setComponentState, setTargetModel } = this.props;
@@ -258,7 +263,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 	}
 
 	private renderSlider = () => {
-		const { renderingType, isActive} = this.props;
+		const { renderingType, isActive, isCompareProcessed } = this.props;
 		return (
 			<SliderContainer>
 				<SliderWrapper>
@@ -268,7 +273,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 						max={RENDERING_TYPES.TARGET}
 						step={1}
 						onChange={this.handleRenderingTypeChange}
-						disabled={!isActive}
+						disabled={!isActive || isCompareProcessed}
 					/>
 				</SliderWrapper>
 				<SliderLabels>

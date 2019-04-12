@@ -39,8 +39,8 @@ export const selectIsComparePending = createSelector(
 	selectCompareDomain, (state) => state.isComparePending
 );
 
-export const selectIsCompareDisabled = createSelector(
-	selectCompareDomain, (state) => state.isCompareDisabled
+export const selectIsCompareProcessed = createSelector(
+	selectCompareDomain, (state) => state.isCompareProcessed
 );
 
 export const selectIsCompareActive = createSelector(
@@ -144,9 +144,9 @@ export const selectIsPending = createSelector(
 );
 
 export const selectIsCompareButtonDisabled = createSelector(
-	selectSelectedModelsMap, selectIsCompareDisabled, selectIsModelLoaded,
-	(selectedModelsMap, isCompareDisabled, isModelLoaded) => {
+	selectSelectedModelsMap, selectIsCompareProcessed, selectIsModelLoaded,
+	(selectedModelsMap, isCompareProcessed, isModelLoaded) => {
 		const areSelectedModels = values(selectedModelsMap).filter((selectedModel) => selectedModel).length;
-		return !areSelectedModels || isCompareDisabled || !isModelLoaded;
+		return !areSelectedModels || isCompareProcessed || !isModelLoaded;
 	}
 );
