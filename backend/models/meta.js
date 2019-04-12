@@ -22,6 +22,7 @@ const Ref = require("./ref");
 const Schema = mongoose.Schema;
 const db = require("../handler/db");
 const utils = require("../utils");
+const systemLogger = require( "../logger").systemLogger;
 
 const schema = Schema({
 	_id: Object,
@@ -91,7 +92,9 @@ Meta.getMetadataFields = function(account, model) {
 						return null;
 					},
 					{
-						"out": {inline:1}
+						"out": {inline:1},
+						"query" : {type: "meta"},
+						"limit": 10000
 					}
 					/* eslint-enable */
 				).then((uniqueKeys) => {
@@ -101,8 +104,9 @@ Meta.getMetadataFields = function(account, model) {
 
 					return Array.from(metaKeys);
 				});
-			}).catch(() => {
+			}).catch((err) => {
 				// We may fail to get the scene collection if the collection doesn't exist yet.
+				systemLogger.logError("Failed to fetch metaKeys: ", err);
 				return Array.from(metaKeys);
 			});
 		});
