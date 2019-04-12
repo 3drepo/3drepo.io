@@ -35,7 +35,7 @@ interface IProps {
 	setComponentState: (state) => void;
 	setTargetRevision: (modelId, targetRevision) => void;
 	handleAllItemsSelect: () => void;
-	handleItemSelect: (modelProps) => void;
+	handleItemSelect: (modelProps) => (event, selected) => void;
 }
 
 export class CompareClash extends React.PureComponent<IProps, any> {

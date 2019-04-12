@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import { capitalize } from 'lodash';
-import { Checkbox, MenuItem } from '@material-ui/core';
+import { Checkbox } from '@material-ui/core';
 
 import { TARGET_MODEL_TYPE, BASE_MODEL_TYPE } from '../../../../../../constants/compare';
 import { Container, ClashTypeSwitch, ClashSettings, Name, Model } from './compareClashItem.styles';
@@ -33,7 +33,7 @@ interface IProps {
 	isTarget: boolean;
 	selected?: boolean;
 	onSelectionChange: (event, selected) => void;
-	onRevisionChange: () => void;
+	onRevisionChange: (revision) => void;
 	onModelTypeChange: (type) => void;
 }
 
