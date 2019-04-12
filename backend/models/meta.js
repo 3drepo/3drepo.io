@@ -62,7 +62,6 @@ Meta.getMetadataFields = function(account, model) {
 			subModelMetadataFieldsPromises.push(
 				this.getMetadataFields(ref.owner, ref.project).catch(() => {
 					// Suppress submodel metadata failure
-					return Promise.resolve();
 				})
 			);
 		});
@@ -102,6 +101,9 @@ Meta.getMetadataFields = function(account, model) {
 
 					return Array.from(metaKeys);
 				});
+			}).catch(() => {
+				// We may fail to get the scene collection if the collection doesn't exist yet.
+				return Array.from(metaKeys);
 			});
 		});
 	});
