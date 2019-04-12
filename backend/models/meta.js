@@ -22,7 +22,7 @@ const Ref = require("./ref");
 const Schema = mongoose.Schema;
 const db = require("../handler/db");
 const utils = require("../utils");
-const systemLogger = require( "../logger").systemLogger;
+const systemLogger = require("../logger").systemLogger;
 
 const schema = Schema({
 	_id: Object,
