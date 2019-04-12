@@ -45,7 +45,7 @@ export const PanelButton = (props) => {
 			label={label}
 			Icon={IconsMap[icon]}
 			placement="right-end"
-			active={active}
+			active={Boolean(active)}
 			action={() => runAngularTimeout(() => onClick(type))}
 		/>
 	);
