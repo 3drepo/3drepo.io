@@ -16,9 +16,10 @@
  */
 import styled from 'styled-components';
 
-import { ListItem, List} from '@material-ui/core';
+import { ListItem, List } from '@material-ui/core';
 import Notifications from '@material-ui/icons/Notifications';
 import { COLOR } from '../../../styles';
+import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.component';
 
 export const NotificationsPanelItem = styled(ListItem)`
 	&& {
@@ -44,4 +45,8 @@ export const NotificationsIcon = styled(Notifications)`
 		font-size: 24px;
 		filter: drop-shadow(0 0 2px ${COLOR.BLACK_30});
 	}
+`;
+
+export const NotificationWeekHeader = styled(NotificationsPanelHeader)`
+	padding-bottom: 0;
 `;

@@ -205,7 +205,7 @@ export class Bim extends React.PureComponent<IProps, any> {
 						<Tab label="Starred" />
 					</Tabs>
 					<ViewerPanelContent className="height-catcher">
-						<Container>
+						<Container className="height-catcher">
 							{this.metadata.map((meta) => this.renderMetaRecord(meta))}
 							{this.renderEmptyState(!areFiltersActive && !hasMetadata)}
 							{this.renderNotFound(areFiltersActive && !hasMetadata)}

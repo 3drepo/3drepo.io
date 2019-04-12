@@ -19,12 +19,12 @@ import * as React from 'react';
 import { MuiThemeProvider } from '@material-ui/core';
 
 import { MuiTheme } from '../../../styles';
-import { Container, BackIcon } from './topMenu.styles';
 import { UserMenu } from './components/userMenu/userMenu.component';
 import { Logo } from '../logo/logo.component';
 import Notifications from '../notifications/notifications.container';
 import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { runAngularTimeout } from '../../../helpers/migration';
+import { Container, BackIcon } from './topMenu.styles';
 
 interface IProps {
 	currentUser: any;

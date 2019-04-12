@@ -33,7 +33,8 @@ import { INotification } from './components/notificationItem/notificationItem.co
 import { NotificationEmptyItem } from './components/emptyItem/emptyItem.component';
 import { NotificationsPanel } from './components/panel/panel.component';
 import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.component';
-import { NotificationsList, NotificationsIcon } from './notifications.styles';
+import { NotificationsList, NotificationsIcon, NotificationWeekHeader } from './notifications.styles';
+import { renderWhenTrue } from '../../../helpers/rendering';
 
 /**
  * Gets the date of the sunday thats away from the offset .
@@ -74,9 +75,6 @@ const NotificationButton = ({ unreadCount, onClick }) => (
 	</IconButton>
 );
 
-// Note: tried to use styled components and didnt worked.
-const NotificationWeekHeader = (props) => <NotificationsPanelHeader {...props} style={{paddingBottom: 0 }} />;
-
 export class Notifications extends React.PureComponent<IProps, any> {
 	public state = {
 		hasThisWeekNot: false,
@@ -88,7 +86,50 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		menuElement: null
 	};
 
-	public chatService = getAngularService('ChatService') as any;
+	private chatService = getAngularService('ChatService') as any;
+
+	get today() {
+		return simpleDate(new Date());
+	}
+
+	get hasNotifications() {
+		return this.props.notifications.length > 0;
+	}
+
+	private renderEmptyState = renderWhenTrue(() => <NotificationEmptyItem />);
+
+	private renderList = renderWhenTrue(() => {
+		const { hasThisWeekNot, groupedByTeamspace, hasLastWeekNot, hasOlderNot } = this.state;
+		return (
+			<>
+				<NotificationsPanelHeader />
+				{hasThisWeekNot && <NotificationWeekHeader labelLeft="This week" labelRight={this.today} />}
+				{this.renderNotificationsPanel(groupedByTeamspace.thisWeek)}
+				{this.renderLastWeekNotifications(hasLastWeekNot)}
+				{this.renderOlderNotifications(hasOlderNot)}
+			</>
+		);
+	});
+
+	private renderLastWeekNotifications = renderWhenTrue(() => (
+		<>
+			<NotificationWeekHeader
+				labelLeft="Last week"
+				labelRight={!this.state.hasThisWeekNot ? this.today : ''}
+			/>
+			{this.renderNotificationsPanel(this.state.groupedByTeamspace.lastWeek)}
+		</>
+	));
+
+	private renderOlderNotifications = renderWhenTrue(() => (
+		<>
+			<NotificationWeekHeader
+				labelLeft="more than two weeks ago"
+				labelRight={!this.state.hasThisWeekNot && !this.state.hasLastWeekNot ? this.today : ''}
+			/>
+			{this.renderNotificationsPanel(this.state.groupedByTeamspace.older)}
+		</>
+	));
 
 	public componentDidMount() {
 		this.props.sendGetNotifications();
@@ -136,20 +177,57 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		return notifications.filter((n) => n.timestamp > prevSunday && n.timestamp < lastSunday );
 	}
 
-	public moreThanTwoWeeksAgoNotifications = (notifications) => {
+	public componentDidUpdate(prevProps: IProps) {
+		if (prevProps.notifications !== this.props.notifications) {
+			const unreadCount =  this.props.notifications.filter((n) => !n.read).length;
+			const groupedByTeamspace = { thisWeek: [], lastWeek: [], older: []};
+
+			const thisWeek = this.thisWeeksNotifications(this.props.notifications);
+			const lastWeek = this.lastWeeksNotifications(this.props.notifications);
+			const older = this.moreThanTwoWeeksAgoNotifications(this.props.notifications);
+
+			groupedByTeamspace.thisWeek = this.groupByTeamSpace(thisWeek);
+			groupedByTeamspace.lastWeek = this.groupByTeamSpace(lastWeek);
+			groupedByTeamspace.older = this.groupByTeamSpace(older);
+
+			const hasThisWeekNot = thisWeek.length > 0 ;
+			const hasLastWeekNot = lastWeek.length > 0;
+			const hasOlderNot = older.length > 0;
+			this.setState({unreadCount, groupedByTeamspace, hasThisWeekNot, hasLastWeekNot, hasOlderNot });
+		}
+	}
+
+	public render() {
+		const { unreadCount } = this.state;
+		return (
+			<>
+				<NotificationButton onClick={this.toggleDrawer} unreadCount={unreadCount}  />
+				<Drawer
+					variant="persistent"
+					anchor="right"
+					open={this.props.drawerOpened}
+					onClose={this.toggleDrawer}
+					SlideProps={{unmountOnExit: true}}
+				>
+					<NotificationsList subheader={this.renderNotificationsHeader()}>
+						{this.renderEmptyState(!this.hasNotifications)}
+						{this.renderList(this.hasNotifications)}
+					</NotificationsList>
+				</Drawer>
+			</>
+		);
+	}
+
+	private moreThanTwoWeeksAgoNotifications = (notifications) => {
 		const prevSunday = getSunday(-1).getTime();
 		return notifications.filter((n) => n.timestamp < prevSunday );
 	}
 
-	public groupByTeamSpace = (notifications) => {
+	private groupByTeamSpace = (notifications) => {
 		return toArray(groupBy(sortBy(notifications, 'teamSpace'), 'teamSpace'));
 	}
 
-	public hasNotifications = () => {
-		return this.props.notifications.length > 0;
-	}
-
-	public renderRightContent = () => (
+	private renderRightContent = () => (
 		<>
 			<BarIconButton aria-label="Menu" onClick={this.toggleMenu}>
 				<MoreVert />
@@ -182,7 +260,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		</>
 	)
 
-	public renderNotificationsHeader = () => (
+	private renderNotificationsHeader = () => (
 		<ListSubheaderToolbar rightContent={this.renderRightContent()}>
 			<Typography variant="title" color="inherit">
 				Notifications
@@ -190,27 +268,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		</ListSubheaderToolbar>
 	)
 
-	public componentDidUpdate(prevProps: IProps) {
-		if (prevProps.notifications !== this.props.notifications) {
-			const unreadCount =  this.props.notifications.filter((n) => !n.read).length;
-			const groupedByTeamspace = { thisWeek: [], lastWeek: [], older: []};
-
-			const thisWeek = this.thisWeeksNotifications(this.props.notifications);
-			const lastWeek = this.lastWeeksNotifications(this.props.notifications);
-			const older = this.moreThanTwoWeeksAgoNotifications(this.props.notifications);
-
-			groupedByTeamspace.thisWeek = this.groupByTeamSpace(thisWeek);
-			groupedByTeamspace.lastWeek = this.groupByTeamSpace(lastWeek);
-			groupedByTeamspace.older = this.groupByTeamSpace(older);
-
-			const hasThisWeekNot = thisWeek.length > 0 ;
-			const hasLastWeekNot = lastWeek.length > 0;
-			const hasOlderNot = older.length > 0;
-			this.setState({unreadCount, groupedByTeamspace, hasThisWeekNot, hasLastWeekNot, hasOlderNot });
-		}
-	}
-
-	public renderNotificationsPanel = (data) => {
+	private renderNotificationsPanel = (data) => {
 		return data.map((notifications) => (
 			<NotificationsPanel
 				key={`${notifications[0].teamSpace}`}
@@ -220,58 +278,5 @@ export class Notifications extends React.PureComponent<IProps, any> {
 				closePanel={this.toggleDrawer}
 			/>
 		));
-	}
-
-	public render() {
-		const {unreadCount, groupedByTeamspace, hasThisWeekNot, hasLastWeekNot, hasOlderNot} = this.state;
-		const {notifications} = this.props;
-
-		// Secondary color is used to make the badge disappear
-		const today = simpleDate(new Date());
-		const hasNotifications = notifications.length > 0;
-
-		return (
-			<>
-				<NotificationButton onClick={this.toggleDrawer} unreadCount={unreadCount}  />
-				<Drawer
-					variant="persistent"
-					anchor="right"
-					open={this.props.drawerOpened}
-					onClose={this.toggleDrawer}
-					SlideProps={{unmountOnExit: true}}
-				>
-					<NotificationsList subheader={this.renderNotificationsHeader()}>
-						{!hasNotifications &&
-							<NotificationEmptyItem/>}
-						{hasNotifications &&
-							<>
-								<NotificationsPanelHeader />
-								{hasThisWeekNot && <NotificationWeekHeader labelLeft="This week" labelRight={today}/>}
-								{this.renderNotificationsPanel(groupedByTeamspace.thisWeek)}
-
-								{
-									hasLastWeekNot && (
-										<NotificationWeekHeader
-											labelLeft="Last week"
-											labelRight={!hasThisWeekNot ? today : ''}
-										/>
-									)								}
-								{this.renderNotificationsPanel(groupedByTeamspace.lastWeek)}
-
-								{
-									hasOlderNot && (
-										<NotificationWeekHeader
-											labelLeft="more than two weeks ago"
-											labelRight={!hasThisWeekNot && !hasLastWeekNot ? today : ''}
-										/>
-									)
-								}
-								{this.renderNotificationsPanel(groupedByTeamspace.older)}
-							</>
-						}
-					</NotificationsList>
-				</Drawer>
-			</>
-		);
 	}
 }

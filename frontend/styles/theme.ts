@@ -195,8 +195,8 @@ export const MuiTheme = createMuiTheme({
 			badge: {
 				width: 20,
 				height: 20,
-				top: 1,
-				right: -4,
+				top: -6,
+				right: -6,
 				pointerEvents: 'none'
 			},
 			colorPrimary: {
