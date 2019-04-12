@@ -60,7 +60,7 @@ class FSHandler {
 	}
 
 	testFilesystem() {
-		return fs.readdir(this.getFullPath(""), (err, files) => {
+		return fs.readdir(this.getFullPath(""), (err) => {
 			if (err) {
 				systemLogger.logError("failed to connect to filesystem: ", err);
 				throw new Error("Filesystem connection failed");

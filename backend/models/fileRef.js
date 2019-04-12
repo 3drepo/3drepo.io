@@ -19,6 +19,7 @@
 const DB = require("../handler/db");
 const ExternalServices = require("../handler/externalServices");
 const ResponseCodes = require("../response_codes");
+const systemLogger = require("../logger.js").systemLogger;
 
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
@@ -64,6 +65,9 @@ function fetchFileStream(account, model, ext, fileName, imposeModelRoute = true)
 	const collection = model + ext;
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
+			if (imposeModelRoute) {
+				systemLogger.logInfo("imposeModelRoute: ", imposeModelRoute);
+			}
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
 		return { readStream: ExternalServices.getFileStream(entry.type, entry.link), size: entry.size };
