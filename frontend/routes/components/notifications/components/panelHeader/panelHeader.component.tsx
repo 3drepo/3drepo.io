@@ -28,9 +28,9 @@ interface IProps {
 
 export class NotificationsPanelHeader extends React.PureComponent<IProps, any> {
 	public render() {
-		const { labelLeft, labelRight, style, className } = this.props;
+		const { labelLeft, labelRight, className } = this.props;
 		return (
-			<NotificationsPanelItem className={className} style={style}>
+			<NotificationsPanelItem className={className}>
 				<NotificationsPanelHeaderContainer>
 					<ItemLabel>
 						{labelLeft}
