@@ -20,7 +20,7 @@ import CompareIcon from '@material-ui/icons/Compare';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import CheckIcon from '@material-ui/icons/Check';
 
-import { Tab, IconButton } from '@material-ui/core';
+import { IconButton, Tab } from '@material-ui/core';
 
 import {
 	DIFF_COMPARE_TYPE,
@@ -58,6 +58,7 @@ import { SORT_ORDER_TYPES } from '../../../../constants/sorting';
 import { SortAmountUp, SortAmountDown } from '../../../components/fontAwesomeIcon';
 import { ICompareComponentState } from '../../../../modules/compare/compare.redux';
 import { Loader } from '../../../components/loader/loader.component';
+import Tooltip from '@material-ui/core/Tooltip';
 
 interface IProps {
 	className: string;
@@ -129,13 +130,24 @@ export class Compare extends React.PureComponent<IProps, any> {
 		</ComparisonLoader>
 	));
 
-	private renderDiffTab = renderWhenTrue(() => (
+	private renderDiffContent = renderWhenTrue(() => (
 		<CompareDiff {...this.tabProps} />
 	));
 
-	private renderClashTab = renderWhenTrue(() => (
+	private renderClashContent = renderWhenTrue(() => (
 		<CompareClash {...this.tabProps} />
 	));
+
+	public renderClashTabLabel = () => {
+		if (this.props.isFederation) {
+			return COMPARE_TABS.CLASH;
+		}
+		return (
+			<Tooltip title="Only available in federations">
+				<span>{COMPARE_TABS.CLASH}</span>
+			</Tooltip>
+		);
+	}
 
 	public render() {
 		const { activeTab, isActive, toggleCompare, compareDisabled, isCompareProcessed, isFederation } = this.props;
@@ -157,11 +169,16 @@ export class Compare extends React.PureComponent<IProps, any> {
 						className="height-catcher--partial"
 					>
 						<Tab label={COMPARE_TABS.DIFF} value={DIFF_COMPARE_TYPE} disabled={isCompareProcessed} />
-						<Tab label={COMPARE_TABS.CLASH} value={CLASH_COMPARE_TYPE} disabled={!isFederation || isCompareProcessed} />
+						<Tab
+							style={{ pointerEvents: 'auto' }}
+							label={this.renderClashTabLabel()}
+							value={CLASH_COMPARE_TYPE}
+							disabled={!isFederation || isCompareProcessed}
+						/>
 					</Tabs>
 					<TabContent>
-						{this.renderDiffTab(this.isDiffTabActive)}
-						{this.renderClashTab(!this.isDiffTabActive)}
+						{this.renderDiffContent(this.isDiffTabActive)}
+						{this.renderClashContent(!this.isDiffTabActive)}
 					</TabContent>
 				</ViewerPanelContent>
 				<ViewerPanelFooter
@@ -278,7 +295,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 				</SliderWrapper>
 				<SliderLabels>
 					{RENDERING_TYPES_LIST.map(({ type, label }, index) => (
-						<SliderLabel key={index} onClick={this.handleRenderingTypeClick(type)}>
+						<SliderLabel key={index} onClick={this.handleRenderingTypeClick(type)} disabled={!isActive || isCompareProcessed}>
 							{label}
 						</SliderLabel>
 					))}

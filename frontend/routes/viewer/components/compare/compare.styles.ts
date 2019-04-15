@@ -23,6 +23,10 @@ import { ViewerPanelFooter as ViewerPanelFooterComponent } from '../viewerPanel/
 
 import { COLOR } from '../../../../styles';
 
+interface ISliderLabel {
+	disabled?: boolean;
+}
+
 export const MenuList = styled(List)`
 	background-color: ${COLOR.WHITE};
 	width: 100%;
@@ -70,7 +74,7 @@ export const Slider = styled(SliderComponent).attrs({
 	}
 })`
 	.slider__track {
-		background: ${COLOR.BLACK_20};
+		background: ${COLOR.BLACK_60};
 		opacity: 1;
 	}
 `;
@@ -82,8 +86,8 @@ export const SliderLabels = styled.div`
 	padding-left: 13px;
 `;
 
-export const SliderLabel = styled.div`
-	color: ${COLOR.BLACK_40};
+export const SliderLabel = styled.div<ISliderLabel>`
+	color: ${((props) => props.disabled ? COLOR.BLACK_40 : COLOR.BLACK_60)};
 	cursor: pointer;
 
 	&:first-child, &:last-child {
