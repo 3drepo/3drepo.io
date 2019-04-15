@@ -252,6 +252,13 @@ function changeModelNodesVisibility(nodeName: string, visible: boolean) {
 	}
 }
 
+function setModelsNodesVisibility(models, isVisible = true) {
+	for (let index = 0; index < models.length; index++) {
+		const model = models[index];
+		changeModelNodesVisibility(`${model.teamspace}:${model.name}`, isVisible);
+	}
+}
+
 function* startComparisonOfFederation() {
 	yield put(CompareActions.setIsPending(true));
 	const activeTab = yield select(selectActiveTab);
@@ -262,9 +269,8 @@ function* startComparisonOfFederation() {
 	const compareModels = yield select(selectCompareModels);
 	const selectedModels = yield select(selectSelectedModelsMap);
 
-	compareModels.forEach((model) => {
-		changeModelNodesVisibility(model.teamspace + ':' + model.name, selectedModels[model._id]);
-	});
+	setModelsNodesVisibility(compareModels, false);
+	setModelsNodesVisibility(baseModels);
 
 	const modelsToLoad = [];
 	for (let index = 0; index < targetModels.length; index++) {

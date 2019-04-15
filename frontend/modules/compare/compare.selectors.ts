@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { isEqual, values, orderBy, size } from 'lodash';
+import { isEqual, values, orderBy, omitBy, keys } from 'lodash';
 import { searchByFilters } from '../../helpers/searching';
 import { DIFF_COMPARE_TYPE, COMPARE_SORT_TYPES } from '../../constants/compare';
 import { selectIsModelLoaded } from '../viewer';
@@ -87,10 +87,13 @@ export const selectTargetDiffModels = createSelector(
 	selectComponentState, (state) => state.targetDiffModels
 );
 
+export const selectIsDiff = createSelector(
+	selectActiveTab, (activeTab) => (activeTab === DIFF_COMPARE_TYPE)
+);
+
 export const selectTargetModels = createSelector(
-	selectActiveTab, selectTargetClashModels, selectTargetDiffModels,
-	(activeTab, targetClashModelsMap, targetDiffModelsMap) => {
-		const isDiff = activeTab === DIFF_COMPARE_TYPE;
+	selectIsDiff, selectTargetClashModels, selectTargetDiffModels,
+	(isDiff, targetClashModelsMap, targetDiffModelsMap) => {
 		return isDiff ? targetDiffModelsMap : targetClashModelsMap;
 	}
 );
@@ -119,9 +122,15 @@ export const selectTargetModelsList = createSelector(
 );
 
 export const selectBaseModelsList = createSelector(
-	selectCompareModels, selectSelectedModelsMap,
-	(models, selectedModelsMap) => {
-		return models.filter(({ _id }) => selectedModelsMap[_id]);
+	selectCompareModels, selectSelectedModelsMap, selectIsDiff, selectTargetModels,
+	(models, selectedModelsMap, isDiff, targetModelsMap) => {
+		let baseModels = selectedModelsMap;
+
+		if (!isDiff) {
+			baseModels = omitBy(baseModels, (value, key) => targetModelsMap[key]);
+		}
+
+		return models.filter(({ _id }) => baseModels[_id]);
 	}
 );
 
