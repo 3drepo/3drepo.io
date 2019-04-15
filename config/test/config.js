@@ -77,17 +77,20 @@ module.exports = {
 	},
 	s3: {
 		accessKey: process.env.S3_ACCESS_KEY,
-        secretKey: process.env.S3_SECRET_KEY,
-        region: "eu-west-2",
+		secretKey: process.env.S3_SECRET_KEY,
+		region: "eu-west-2",
 		bucketName: "3drepo-travis"
+	},
+	fs: {
+		path: './tmp/'
 	},
 	tokenExpiry: {
 		emailVerify: 336,
 		forgotPassword: 24
 	},
 	unitySettings: {
-        TOTAL_MEMORY: 2130706432 / 10,
-    },
+        	TOTAL_MEMORY: 2130706432 / 10,
+	},
 	auth: {
 		captcha: false,
 		register: true
