@@ -42,12 +42,7 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 	};
 
 	public get currentRevisionName() {
-		return this.getRevisionName(0);
-	}
-
-	public getRevisionName = (id) => {
-		const revision = this.props.revisions[id];
-		return revision.tag || dayjs(revision.timestamp).format('DD/MM/YYYY');
+		return this.props.baseRevision.tag || dayjs(this.props.baseRevision.timestamp).format('DD/MM/YYYY');
 	}
 
 	public renderRevisionsSettings = renderWhenTrue(() => (
