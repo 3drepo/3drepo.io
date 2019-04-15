@@ -37,12 +37,16 @@ export class PinButton extends React.PureComponent<IProps, any> {
 	};
 
 	public onClickButton = (e) => {
-		this.handleChangePin();
+		const active = !this.state.active;
+		this.handleChangePin(active);
+		this.setState({ active });
 	}
 
-	public handleChangePin = () => {
-		const active = !this.state.active;
+	public componentWillUnmount = () => {
+		this.togglePinListeners(false);
+	}
 
+	public handleChangePin = (active) => {
 		if (active) {
 			Viewer.setPinDropMode(true);
 			this.props.deactivateMeasure();
@@ -55,8 +59,6 @@ export class PinButton extends React.PureComponent<IProps, any> {
 
 			this.props.onSave(Viewer.getPinData().pickedPos);
 		}
-
-		this.setState({ active });
 	}
 
 	public togglePinListeners = (enabled: boolean) => {

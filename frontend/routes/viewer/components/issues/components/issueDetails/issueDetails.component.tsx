@@ -239,10 +239,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onSave={this.handleSave}
 				canComment={this.userCanComment()}
 				hideComment={this.isNewIssue}
-				onChangePin={this.handleChangePin}
-				onPositionSave={this.onPositionSave}
-				pinId={this.props.issue._id}
-				hidePin={false}
 			/>
 		</ViewerPanelFooter>
 	));
@@ -298,7 +294,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public onPositionSave = (position) => {
-		if (this.props.issue) {
+		if (this.props.issue._id) {
 			const { teamspace, model, issue } = this.props;
 			this.props.updateIssue(teamspace, model, {...issue, position});
 		}

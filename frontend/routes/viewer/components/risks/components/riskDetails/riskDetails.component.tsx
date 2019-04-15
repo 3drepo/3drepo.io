@@ -146,6 +146,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	// onSavePin: (position) => void;
+
 	public renderDetailsForm = () => {
 		return (
 			<RiskDetailsForm
@@ -156,7 +158,11 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				permissions={this.props.modelSettings.permissions}
 				currentUser={this.props.currentUser}
 				myJob={this.props.myJob}
-			/>
+				onChangePin={this.handleChangePin}
+				onSavePin={this.onPositionSave}
+				pinId={this.riskData._id}
+				hasPin={this.riskData.position && this.riskData.position.length}
+				/>
 		);
 	}
 
@@ -229,11 +235,9 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				viewpoint={this.props.newComment.viewpoint}
 				innerRef={this.commentRef}
 				onTakeScreenshot={this.handleNewScreenshot}
-				onChangePin={this.handleChangePin}
 				onSave={this.handleSave}
 				canComment={this.userCanComment()}
 				hideComment={this.isNewRisk}
-				hidePin={!this.isNewRisk}
 			/>
 		</ViewerPanelFooter>
 	));
@@ -294,6 +298,13 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			saveRisk(teamspace, model, this.riskData, revision);
 		} else {
 			this.postComment(teamspace, model, formValues);
+		}
+	}
+
+	public onPositionSave = (position) => {
+		if (this.props.risk._id) {
+			const { teamspace, model, risk, saveRisk, revision } = this.props;
+			saveRisk(teamspace, model, {...risk, position}, revision);
 		}
 	}
 

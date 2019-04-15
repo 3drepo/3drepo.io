@@ -35,6 +35,7 @@ import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { canChangeBasicProperty, canChangeStatus, canChangeAssigned } from '../../../../../../helpers/risks';
 import { TextField } from '../../../../../components/textField/textField.component';
 import { Container, FieldsContainer, FieldsRow, StyledFormControl, DescriptionImage } from './riskDetails.styles';
+import PinButton from '../../../pinButton/pinButton.container';
 
 interface IProps {
 	risk: any;
@@ -49,6 +50,10 @@ interface IProps {
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
 	handleSubmit: () => void;
+	onSavePin: (position) => void;
+	onChangePin: (pin) => void;
+	pinId?: string;
+	hasPin: boolean;
 }
 
 interface IState {
@@ -248,6 +253,13 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									readOnly
 								/>
 							)} />
+						</StyledFormControl>
+						<StyledFormControl>
+							<PinButton onChange={this.props.onChangePin}
+									onSave={this.props.onSavePin}
+									pinId={this.props.pinId}
+									hasPin={this.props.hasPin}
+									/>
 						</StyledFormControl>
 					</FieldsContainer>
 				</FieldsRow>
