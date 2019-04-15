@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+import * as dayjs from 'dayjs';
 
 import { ArrowsAltH } from '../../../../../components/fontAwesomeIcon';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -44,8 +45,10 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 		return this.getRevisionName(0);
 	}
 
-	public getRevisionName = (id) =>
-		this.props.revisions[id].tag || '(no name)'
+	public getRevisionName = (id) => {
+		const revision = this.props.revisions[id];
+		return revision.tag || dayjs(revision.timestamp).format('DD/MM/YYYY');
+	}
 
 	public renderRevisionsSettings = renderWhenTrue(() => (
 		<>

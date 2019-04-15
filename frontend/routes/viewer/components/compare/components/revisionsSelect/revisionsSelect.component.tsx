@@ -17,6 +17,7 @@
 
 import * as React from 'react';
 import { keyBy } from 'lodash';
+import * as dayjs from 'dayjs';
 
 import { DateTime } from '../../../../../components/dateTime/dateTime.component';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
@@ -55,6 +56,10 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 
 	get value() {
 		return this.revisionsMap[this.state.value].tag;
+	}
+
+	get timestamp() {
+		return dayjs(this.revisionsMap[this.state.value].timestamp).format('DD/MM/YYYY');
 	}
 
 	private renderSelect = renderWhenTrue(() => {
@@ -96,6 +101,7 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { revisions } = this.props;
+
 		return (
 			<>
 				{this.renderSelect(revisions.length > 1 && this.state.value)}
@@ -114,7 +120,7 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 
 	private renderValue = () => this.renderName(this.value);
 
-	private renderName = (name) => (<Name>{name || '(no name)'}</Name>);
+	private renderName = (name) => (<Name>{name || this.timestamp}</Name>);
 
 	private renderDate = (timestamp) => (<Date><DateTime value={timestamp} format="DD MMM YYYY" /></Date>);
 }
