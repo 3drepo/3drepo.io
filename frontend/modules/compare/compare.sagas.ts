@@ -363,8 +363,12 @@ function* toggleCompare() {
 function* setComponentState({ componentState }) {
 	try {
 		const isCompareActive = yield select(selectIsCompareActive);
+		const activeTab = yield select(selectActiveTab);
+
 		const shouldStopCompare = Boolean(intersection(keys(componentState), VULNERABLE_PROPS).length);
-		if (isCompareActive && shouldStopCompare) {
+		const isTheSameTab = componentState.activeTab ? componentState.activeTab === activeTab : false;
+
+		if (isCompareActive && shouldStopCompare && !isTheSameTab) {
 			yield call(stopCompare);
 		}
 
