@@ -147,6 +147,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderDetailsForm = () => {
+		const {issue} = this.props;
+
 		return (
 			<IssueDetailsForm
 				issue={this.issueData}
@@ -156,6 +158,10 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				permissions={this.props.settings.permissions}
 				currentUser={this.props.currentUser}
 				myJob={this.props.myJob}
+				onChangePin={this.handleChangePin}
+				onSavePin={this.onPositionSave}
+				pinId={issue._id}
+				hasPin={issue.position && issue.position.length}
 			/>
 		);
 	}
@@ -230,11 +236,11 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				viewpoint={this.props.newComment.viewpoint}
 				innerRef={this.commentRef}
 				onTakeScreenshot={this.handleNewScreenshot}
-				onChangePin={this.handleChangePin}
 				onSave={this.handleSave}
-				onPositionSave={this.onPositionSave}
 				canComment={this.userCanComment()}
 				hideComment={this.isNewIssue}
+				onChangePin={this.handleChangePin}
+				onPositionSave={this.onPositionSave}
 				pinId={this.props.issue._id}
 				hidePin={false}
 			/>
