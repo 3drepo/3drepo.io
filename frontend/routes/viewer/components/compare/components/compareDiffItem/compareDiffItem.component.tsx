@@ -21,7 +21,7 @@ import * as dayjs from 'dayjs';
 import { ArrowsAltH } from '../../../../../components/fontAwesomeIcon';
 import Checkbox from '@material-ui/core/Checkbox';
 import { RevisionsSelect } from '../revisionsSelect/revisionsSelect.component';
-import { Container, ModelData, Name, Revisions, CurrentRevision } from './compareDiffItem.styles';
+import { Container, ModelData, Name, Revisions, CurrentRevision, CompareIconWrapper } from './compareDiffItem.styles';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 
 interface IProps {
@@ -52,7 +52,9 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 
 	public renderRevisionsSettings = renderWhenTrue(() => (
 		<>
-			<ArrowsAltH />
+			<CompareIconWrapper>
+				<ArrowsAltH />
+			</CompareIconWrapper>
 			<RevisionsSelect
 				baseRevision={this.props.baseRevision._id}
 				defaultValue={this.props.baseRevision._id}

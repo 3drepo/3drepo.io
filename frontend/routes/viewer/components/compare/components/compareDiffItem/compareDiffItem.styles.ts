@@ -64,3 +64,9 @@ export const Revisions = styled.div`
 	overflow: hidden;
 	margin-top: 6px;
 `;
+
+export const CompareIconWrapper = styled.div`
+	position: absolute;
+	left: calc(50% - 8px);
+	transform: translateX(-50%);
+`;

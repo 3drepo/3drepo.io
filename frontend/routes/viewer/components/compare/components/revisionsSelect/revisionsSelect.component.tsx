@@ -59,7 +59,9 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 	}
 
 	get timestamp() {
-		return dayjs(this.revisionsMap[this.state.value].timestamp).format('DD/MM/YYYY');
+		if (this.state.value) {
+			return dayjs(this.revisionsMap[this.state.value].timestamp).format('DD/MM/YYYY');
+		}
 	}
 
 	private renderSelect = renderWhenTrue(() => {
