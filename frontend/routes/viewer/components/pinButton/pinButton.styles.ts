@@ -40,11 +40,22 @@ export const PinIcon = styled(Place).attrs({
 
 export const LabelButton = styled(Button)`
 	&& {
-		width: 90px;
+		width: 76px;
 		text-transform: none;
+		padding: 0;
+		min-height: 26px;
+		border-radius: 28px;
+		color: #fafafa;
+		background-color: rgba(0, 0, 0, 0.26);
+	}
+
+	&&:hover {
+		background-color: rgba(0, 0, 0, 0.36);
 	}
 `;
 
 export const Container = styled.span`
-
+	display: flex;
+	align-items: center;
+	height: 100%
 `;

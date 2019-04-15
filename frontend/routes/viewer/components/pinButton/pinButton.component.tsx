@@ -56,8 +56,12 @@ export class PinButton extends React.PureComponent<IProps, any> {
 			Viewer.setPinDropMode(false);
 			this.props.setDisabled(false);
 			this.togglePinListeners(false);
+			const pinData = Viewer.getPinData();
 
-			this.props.onSave(Viewer.getPinData().pickedPos);
+			if (pinData) {
+				this.props.onSave(pinData.pickedPos);
+			}
+
 		}
 	}
 
