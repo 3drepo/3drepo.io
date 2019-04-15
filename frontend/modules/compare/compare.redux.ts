@@ -37,7 +37,9 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	setActiveTab: ['activeTab'],
 	setIsPending: ['isPending'],
 	setTargetModel: ['modelId', 'isTarget', 'isTypeChange'],
-	setTargetRevision: ['modelId', 'targetRevision']
+	setTargetRevision: ['modelId', 'targetRevision'],
+	resetComponentState: [],
+	resetComponentStateSuccess: []
 }, { prefix: 'COMPARE/' });
 
 export interface ICompareComponentState {
@@ -110,6 +112,8 @@ export const setComponentStateSuccess = (state = INITIAL_STATE, { componentState
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
+export const resetComponentStateSuccess = () => INITIAL_STATE;
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[CompareTypes.SET_COMPARE_TYPE] : setCompareType,
 	[CompareTypes.SET_MODEL_TYPE] : setModelType,
@@ -117,5 +121,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[CompareTypes.SET_MODEL_VISIBILITY] : setModelVisibility,
 	[CompareTypes.SET_COMPONENT_STATE_SUCCESS]: setComponentStateSuccess,
 	[CompareTypes.SET_IS_ACTIVE]: setIsActive,
-	[CompareTypes.SET_IS_PENDING]: setIsPending
+	[CompareTypes.SET_IS_PENDING]: setIsPending,
+	[CompareTypes.RESET_COMPONENT_STATE_SUCCESS]: resetComponentStateSuccess
 });

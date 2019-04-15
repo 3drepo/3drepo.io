@@ -374,6 +374,16 @@ function* setComponentState({ componentState }) {
 	}
 }
 
+function* resetComponentState() {
+	try {
+		Viewer.diffToolShowBaseModel();
+		Viewer.diffToolDisableAndClear();
+		yield put(CompareActions.resetComponentStateSuccess());
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('reset', 'component state', error.message));
+	}
+}
+
 function* setTargetRevision({ modelId, targetRevision }) {
 	try {
 		const componentState = yield select(selectComponentState);
@@ -394,5 +404,6 @@ export default function* CompareSaga() {
 	yield takeLatest(CompareTypes.SET_ACTIVE_TAB, setActiveTab);
 	yield takeLatest(CompareTypes.SET_TARGET_MODEL, setTargetModel);
 	yield takeLatest(CompareTypes.SET_COMPONENT_STATE, setComponentState);
+	yield takeLatest(CompareTypes.RESET_COMPONENT_STATE, resetComponentState);
 	yield takeLatest(CompareTypes.SET_TARGET_REVISION, setTargetRevision);
 }

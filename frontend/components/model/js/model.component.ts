@@ -30,6 +30,7 @@ import { StarredMetaActions } from '../../../modules/starredMeta';
 import { BimActions } from '../../../modules/bim';
 import { IssuesActions } from '../../../modules/issues';
 import { ViewerActions } from '../../../modules/viewer';
+import { CompareActions } from '../../../modules/compare';
 
 class ModelController implements ng.IController {
 
@@ -277,6 +278,7 @@ class ModelController implements ng.IController {
 		dispatch(IssuesActions.resetComponentState());
 		dispatch(RisksActions.resetComponentState());
 		dispatch(GroupsActions.resetComponentState());
+		dispatch(CompareActions.resetComponentState());
 	}
 }
 
