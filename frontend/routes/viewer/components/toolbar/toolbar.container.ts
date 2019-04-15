@@ -34,11 +34,11 @@ import {
 import { TreeActions } from '../../../../modules/tree';
 
 import {
-	MeasureActions,
 	selectIsMeasureActive,
 	selectIsMeasureDisabled
 } from '../../../../modules/measure';
 import { BimActions, selectIsActive } from '../../../../modules/bim';
+import { selectMetaKeysExist } from '../../../../modules/model';
 
 const mapStateToProps = createStructuredSelector({
 	navigationMode: selectNavigationMode,
@@ -50,7 +50,8 @@ const mapStateToProps = createStructuredSelector({
 	isMetadataVisible: selectIsMetadataVisible,
 	isMetadataActive: selectIsActive,
 	isMeasureActive: selectIsMeasureActive,
-	isMeasureDisabled: selectIsMeasureDisabled
+	isMeasureDisabled: selectIsMeasureDisabled,
+	metaKeysExist: selectMetaKeysExist
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

@@ -32,7 +32,8 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	fetchMaps: ['teamspace', 'modelId'],
 	fetchMapsSuccess: ['maps'],
 	updateSettingsSuccess: ['settings'],
-	getMetaKeys: ['teamspace', 'modelId']
+	fetchMetaKeys: ['teamspace', 'modelId'],
+	fetchMetaKeysSuccess: ['metaKeys']
 }, { prefix: 'MODEL/' });
 
 export const INITIAL_STATE = {
@@ -47,8 +48,12 @@ const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return { ...state, isPending: pendingState };
 };
 
-const fetchSettingsSuccess = (state = INITIAL_STATE, { settings, metaKeys }) => {
-	return { ...state, settings, metaKeys };
+const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
+	return { ...state, settings };
+};
+
+const fetchMetaKeysSuccess = (state = INITIAL_STATE, { metaKeys }) => {
+	return { ...state, metaKeys };
 };
 
 const fetchRevisionsSuccess = (state = INITIAL_STATE, { revisions }) => {
@@ -64,6 +69,7 @@ const updateSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
+	[ModelTypes.FETCH_META_KEYS_SUCCESS]: fetchMetaKeysSuccess,
 	[ModelTypes.FETCH_SETTINGS_SUCCESS]: fetchSettingsSuccess,
 	[ModelTypes.FETCH_REVISIONS_SUCCESS]: fetchRevisionsSuccess,
 	[ModelTypes.SET_PENDING_STATE]: setPendingState,
