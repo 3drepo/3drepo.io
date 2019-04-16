@@ -177,6 +177,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 	public getMenuButton = () => 	(
 		<ButtonMenu
+			key={0}
 			renderButton={MenuButton}
 			renderContent={this.renderMenuContent}
 			PopoverProps={{
