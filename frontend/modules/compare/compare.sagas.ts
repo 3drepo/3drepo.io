@@ -275,10 +275,11 @@ function* startComparisonOfFederation() {
 	const modelsToLoad = [];
 	for (let index = 0; index < targetModels.length; index++) {
 		const model = targetModels[index];
+
 		if (model && selectedModels[model._id]) {
 			const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
-			const sharedRevisionModel = baseModels.find(({ baseRevision }) => baseRevision.name === targetRevision.name);
-			const canReuseModel = sharedRevisionModel && selectedModels[sharedRevisionModel];
+			const sharedRevisionModel = compareModels.find(({ baseRevision }) => baseRevision.name === targetRevision.name);
+			const canReuseModel = sharedRevisionModel && selectedModels[sharedRevisionModel._id];
 
 			if (canReuseModel) {
 				const { teamspace, name } = sharedRevisionModel;
