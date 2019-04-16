@@ -82,7 +82,7 @@ module.exports = {
 		bucketName: "3drepo-travis"
 	},
 	fs: {
-		path: '../submodule/tests/'
+		path: './submodule/tests/backend/files/'
 	},
 	tokenExpiry: {
 		emailVerify: 336,
