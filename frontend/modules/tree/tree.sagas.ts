@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, call } from 'redux-saga/effects';
+import { put, takeLatest, call, select } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
 import { TreeTypes, TreeActions } from './tree.redux';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { dispatch, getAngularService, getState } from '../../helpers/migration';
-import { selectSelectedNodes } from './tree.selectors';
+import { selectSelectedNodes, selectIfcSpacesHidden } from './tree.selectors';
 import { GroupsActions } from '../groups';
 import { DialogActions } from '../dialog';
 import { calculateTotalMeshes } from '../../helpers/tree';
@@ -101,7 +101,8 @@ export function* isolateSelectedNodes() {
 
 export function* hideIfcSpaces() {
 	try {
-		console.log('Hide IFC spaces');
+		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
+		yield put(TreeActions.setIfcSpacesHidden(!ifcSpacesHidden));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('hide', 'IFC spaces'));
 	}

@@ -78,6 +78,7 @@ export interface IGroupComponentState {
 	totalMeshes: number;
 	criteriaFieldState: ICriteriaFieldState;
 	allOverridden: boolean;
+	searchEnabled: boolean;
 }
 
 export interface IGroupState {
@@ -112,7 +113,8 @@ export const INITIAL_STATE: IGroupState = {
 		selectedFilters: [],
 		totalMeshes: 0,
 		criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE,
-		allOverridden: false
+		allOverridden: false,
+		searchEnabled: false
 	},
 	colorOverrides: [],
 	fieldNames: []
