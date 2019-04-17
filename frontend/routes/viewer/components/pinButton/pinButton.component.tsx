@@ -19,6 +19,7 @@ import * as React from 'react';
 import { PinIcon, LabelButton, Container } from './pinButton.styles';
 import { Viewer } from '../../../../services/viewer/viewer';
 import { VIEWER_EVENTS, NEW_PIN_ID } from '../../../../constants/viewer';
+import { PIN_COLORS } from '../../../../styles';
 
 interface IProps {
 	onChange: (pin) => void;
@@ -31,7 +32,8 @@ interface IProps {
 
 export class PinButton extends React.PureComponent<IProps, any> {
 	public state = {
-		active: false
+		active: false,
+		wasPinDropped: false
 	};
 
 	public onClickButton = (e) => {
@@ -44,12 +46,15 @@ export class PinButton extends React.PureComponent<IProps, any> {
 		this.togglePinListeners(false);
 	}
 
+	public getPinId = () => this.props.pinId || NEW_PIN_ID;
+
 	public handleChangePin = (active) => {
 		if (active) {
 			Viewer.setPinDropMode(true);
 			this.props.deactivateMeasure();
 			this.props.setDisabled(true);
 			this.togglePinListeners(true);
+			Viewer.changePinColor({ id: this.getPinId(), colours: PIN_COLORS.SUNGLOW });
 		} else {
 			Viewer.setPinDropMode(false);
 			this.props.setDisabled(false);
@@ -57,6 +62,7 @@ export class PinButton extends React.PureComponent<IProps, any> {
 			const pinData = Viewer.getPinData();
 
 			if (pinData) {
+				Viewer.changePinColor({ id: this.getPinId(), colours: PIN_COLORS.YELLOW });
 				this.props.onSave(pinData.pickedPos);
 			}
 
@@ -73,13 +79,15 @@ export class PinButton extends React.PureComponent<IProps, any> {
 			return null;
 		}
 
+		this.setState({wasPinDropped: true});
+
 		if (trans) {
 			position = trans.inverse().multMatrixPnt(position);
 		}
 
 		if (this.props.onChange) {
 			this.props.onChange({
-				id: this.props.pinId || NEW_PIN_ID,
+				id: this.getPinId(),
 				pickedNorm: normal,
 				pickedPos: position,
 				selectedObjectId: id,
@@ -89,7 +97,8 @@ export class PinButton extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const editMsg = !this.props.hasPin ? 'Add pin' : 'Edit pin';
+		const wasPinDropped = this.state.wasPinDropped || this.props.hasPin;
+		const editMsg = !wasPinDropped ? 'Add pin' : 'Edit pin';
 		const pinLabel =  this.state.active ? 'Save pin' :  editMsg;
 
 		return (

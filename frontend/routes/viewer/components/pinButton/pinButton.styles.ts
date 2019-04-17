@@ -28,11 +28,11 @@ export const PinIcon = styled(Place).attrs({
 })`
 	&& {
 		&.secondary {
-			color: ${COLOR.RED};
+			color: ${COLOR.SUNGLOW};
 		}
 
 		&.primary {
-			color: ${COLOR.GREEN};
+			color: ${COLOR.BLACK_54};
 		}
 
 	}
