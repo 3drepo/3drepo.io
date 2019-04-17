@@ -16,15 +16,16 @@
  */
 
 import styled, { css } from 'styled-components';
-import ChipComponent from '@material-ui/core/Chip';
-import IconButtonComponent from '@material-ui/core/IconButton';
-import FormControlComponent from '@material-ui/core/FormControl';
+import {
+	Chip as ChipComponent,
+	IconButton as IconButtonComponent,
+	FormControl as FormControlComponent,
+	InputLabel as InputLabelComponent,
+	List as ListComponent,
+	MenuItem as MenuItemComponent,
+	ListSubheader
+} from '@material-ui/core';
 import MoreIcon from '@material-ui/icons/MoreVert';
-import InputLabelComponent from '@material-ui/core/InputLabel';
-
-import ListComponent from '@material-ui/core/List';
-import MenuItemComponent from '@material-ui/core/MenuItem';
-import ListSubheader from '@material-ui/core/ListSubheader';
 
 import { SelectField as SelectFieldComponent } from '../selectField/selectField.component';
 import { COLOR } from '../../../styles';

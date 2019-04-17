@@ -16,14 +16,10 @@
  */
 
 import * as React from 'react';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import Radio from '@material-ui/core/Radio';
-import Tooltip from '@material-ui/core/Tooltip';
-import Grid from '@material-ui/core/Grid';
+import { Grid, Tooltip } from '@material-ui/core';
 
 import { RadioContainer, RadioButton } from './tableHeadingRadio.styles';
 import { SortLabel } from '../tableHeading/tableHeading.styles';
-import { SORT_ORDER_TYPES } from '../../../../../constants/sorting';
 
 interface IProps {
 	label: string;

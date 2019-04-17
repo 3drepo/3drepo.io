@@ -16,9 +16,7 @@
  */
 
 import styled from 'styled-components';
-import MenuItem from '@material-ui/core/MenuItem';
-import MenuList from '@material-ui/core/MenuList';
-import TextField from '@material-ui/core/TextField';
+import { MenuItem, MenuList, TextField } from '@material-ui/core';
 
 import { COLOR } from '../../../../styles/colors';
 

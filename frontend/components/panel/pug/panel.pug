@@ -50,6 +50,12 @@ div(ng-show="vm.showPanel")
 					model="vm.model"
 					revision="vm.revision"
 				)
+				tree(
+					ng-if="contentItem.type === 'tree'"
+					teamspace="vm.account"
+					model="vm.model"
+					revision="vm.revision"
+				)
 
 			height-setter#reactComponent(
 				ng-if="contentItem.type === 'docs' && vm.isMetadataVisible"

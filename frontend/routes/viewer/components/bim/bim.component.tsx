@@ -19,7 +19,6 @@ import * as React from 'react';
 import { isEmpty } from 'lodash';
 import { IconButton, Tab } from '@material-ui/core';
 import InfoIcon from '@material-ui/icons/Info';
-import MoreIcon from '@material-ui/icons/MoreVert';
 import SearchIcon from '@material-ui/icons/Search';
 import CancelIcon from '@material-ui/icons/Cancel';
 
@@ -38,6 +37,7 @@ import { getFilters } from '../../../../helpers/bim';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import { MetaRecord } from './components/metaRecord/metaRecord.component';
 import { Container, EmptyStateInfo, Tabs } from './bim.styles';
+import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 
 interface IProps {
 	className: string;
@@ -59,15 +59,7 @@ interface IProps {
 	showConfirmDialog: (config) => void;
 }
 
-const MenuButton = ({ IconProps, Icon, ...props }) => (
-	<IconButton
-		{...props}
-		aria-label="Show filters menu"
-		aria-haspopup="true"
-	>
-		<MoreIcon {...IconProps} />
-	</IconButton>
-);
+const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show BIM menu" {...props} />;
 
 export class Bim extends React.PureComponent<IProps, any> {
 	get menuActionsMap() {

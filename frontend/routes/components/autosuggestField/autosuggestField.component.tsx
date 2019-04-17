@@ -17,8 +17,7 @@
 
 import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
-import MenuItem from '@material-ui/core/MenuItem';
-import Paper from '@material-ui/core/Paper';
+import { MenuItem, Paper } from '@material-ui/core';
 import { Highlight } from '../highlight/highlight.component';
 
 import { Container, SuggestionsList, StyledTextField } from './autosuggestField.styles';
