@@ -39,6 +39,7 @@ import {
 	selectFilteredRisks
 } from './risks.selectors';
 import { RisksActions, RisksTypes } from './risks.redux';
+import { NEW_PIN_ID } from '../../constants/viewer';
 
 export function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));
@@ -103,6 +104,7 @@ const toggleRiskPin = (risk, selected = true) => {
 export function* saveRisk({ teamspace, model, riskData, revision }) {
 	try {
 		yield Viewer.setPinDropMode(false);
+
 		const myJob = yield select(selectMyJob);
 
 		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
@@ -252,6 +254,7 @@ export function* renderPins() {
 			Viewer.removePin({ id: risk._id });
 		});
 
+		yield Viewer.removePin({ id: NEW_PIN_ID });
 		yield removePins(!shouldShowPins ? risksList : invisibleRisks);
 
 		if (shouldShowPins) {
@@ -464,6 +467,8 @@ export function* showDetails({ teamspace, model, revision, risk }) {
 export function* closeDetails({ teamspace, model, revision }) {
 	try {
 		const activeRisk = yield select(selectActiveRiskDetails);
+		yield Viewer.removePin({ id: NEW_PIN_ID });
+
 		if (activeRisk) {
 			runAngularViewerTransition({
 				account: teamspace,

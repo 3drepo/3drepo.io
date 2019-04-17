@@ -40,6 +40,7 @@ import {
 	selectFilteredIssues
 } from './issues.selectors';
 import { IssuesTypes, IssuesActions } from './issues.redux';
+import { NEW_PIN_ID } from '../../constants/viewer';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -279,6 +280,8 @@ export function* renderPins() {
 				}
 			}
 		}
+
+		yield Viewer.removePin({ id: NEW_PIN_ID });
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('show', 'pins', error));
 	}
@@ -491,6 +494,7 @@ export function* showDetails({ teamspace, model, revision, issue }) {
 export function* closeDetails({ teamspace, model, revision }) {
 	try {
 		const activeIssue = yield select(selectActiveIssueDetails);
+		yield Viewer.removePin({ id: NEW_PIN_ID });
 
 		if (activeIssue) {
 			runAngularViewerTransition({
@@ -516,7 +520,7 @@ export function* showNewPin({ issue, pinData }) {
 			...pinData,
 			account: issue.account,
 			model: issue.model,
-			colours: PIN_COLORS.YELLOW,
+			colours: PIN_COLORS.SUNGLOW,
 			type: 'issue'
 		};
 

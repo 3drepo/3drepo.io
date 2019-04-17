@@ -18,9 +18,7 @@
 import * as React from 'react';
 import { PinIcon, LabelButton, Container } from './pinButton.styles';
 import { Viewer } from '../../../../services/viewer/viewer';
-import { VIEWER_EVENTS } from '../../../../constants/viewer';
-
-const NEW_PIN_ID = 'newPinId';
+import { VIEWER_EVENTS, NEW_PIN_ID } from '../../../../constants/viewer';
 
 interface IProps {
 	onChange: (pin) => void;
