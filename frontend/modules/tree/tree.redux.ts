@@ -25,7 +25,8 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	getSelectedNodesSuccess: ['selectedNodes'],
 	showAllNodes: [],
 	hideSelectedNodes: [],
-	isolateSelectedNodes: []
+	isolateSelectedNodes: [],
+	hideIfcSpaces: []
 }, { prefix: 'TREE/' });
 
 export interface IObjectObjectState {

@@ -19,23 +19,40 @@ import * as React from 'react';
 import TreeIcon from '@material-ui/icons/DeviceHub';
 import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
+import Check from '@material-ui/icons/Check';
 import IconButton from '@material-ui/core/IconButton';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import {
-	MenuList
+	IconWrapper,
+	MenuList,
+	StyledItemText,
+	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { Container } from './tree.styles';
+import { TREE_ACTIONS_MENU, TREE_ACTIONS_ITEMS } from '../../../../constants/tree';
 
 interface IProps {
 	className: string;
+	showAllNodes: () => void;
+	isolateSelectedNodes: () => void;
+	hideIfcSpaces: () => void;
 }
 
 const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show tree menu" {...props} />;
 
 export class Tree extends React.PureComponent<IProps, any> {
+	get menuActionsMap() {
+		const { showAllNodes, isolateSelectedNodes, hideIfcSpaces } = this.props;
+		return {
+			[TREE_ACTIONS_ITEMS.SHOW_ALL]: showAllNodes,
+			[TREE_ACTIONS_ITEMS.ISOLATE_SELECTED]: isolateSelectedNodes,
+			[TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES]: hideIfcSpaces
+		};
+	}
+
 	public getSearchButton = () => {
 		const searchEnabled = false;
 		if (searchEnabled) {
@@ -46,6 +63,15 @@ export class Tree extends React.PureComponent<IProps, any> {
 
 	public renderActionsMenu = () => (
 		<MenuList>
+			{TREE_ACTIONS_MENU.map(( {name, Icon, label }) => (
+				<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+					<IconWrapper><Icon fontSize="small" /></IconWrapper>
+					<StyledItemText>
+						{label}
+						{(name === TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES) && <Check fontSize="small" />}
+					</StyledItemText>
+				</StyledListItem>
+			))}
 		</MenuList>
 	)
 

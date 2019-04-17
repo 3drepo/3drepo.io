@@ -99,6 +99,14 @@ export function* isolateSelectedNodes() {
 	}
 }
 
+export function* hideIfcSpaces() {
+	try {
+		console.log('Hide IFC spaces');
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('hide', 'IFC spaces'));
+	}
+}
+
 export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.START_LISTEN_ON_SELECTIONS, startListenOnSelections);
 	yield takeLatest(TreeTypes.STOP_LISTEN_ON_SELECTIONS, stopListenOnSelections);
@@ -106,4 +114,5 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.SHOW_ALL_NODES, showAllNodes);
 	yield takeLatest(TreeTypes.HIDE_SELECTED_NODES, hideSelectedNodes);
 	yield takeLatest(TreeTypes.ISOLATE_SELECTED_NODES, isolateSelectedNodes);
+	yield takeLatest(TreeTypes.HIDE_IFC_SPACES, hideIfcSpaces);
 }
