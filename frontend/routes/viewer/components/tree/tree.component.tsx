@@ -33,9 +33,15 @@ import {
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { Container } from './tree.styles';
 import { TREE_ACTIONS_MENU, TREE_ACTIONS_ITEMS } from '../../../../constants/tree';
+import { renderWhenTrue } from '../../../../helpers/rendering';
+import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 
 interface IProps {
 	className: string;
+	selectedFilters: any[];
+	searchEnabled: boolean;
+	ifcSpacesHidden: boolean;
+	setState: (componentState: any) => void;
 	showAllNodes: () => void;
 	isolateSelectedNodes: () => void;
 	hideIfcSpaces: () => void;
@@ -44,6 +50,11 @@ interface IProps {
 const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show tree menu" {...props} />;
 
 export class Tree extends React.PureComponent<IProps, any> {
+	public static defaultProps = {
+		selectedFilters: [],
+		searchEnabled: true
+	};
+
 	get menuActionsMap() {
 		const { showAllNodes, isolateSelectedNodes, hideIfcSpaces } = this.props;
 		return {
@@ -53,12 +64,37 @@ export class Tree extends React.PureComponent<IProps, any> {
 		};
 	}
 
+	get filters() {
+		return [];
+	}
+
+	public renderFilterPanel = renderWhenTrue(() => (
+		<FilterPanel
+			filters={this.filters}
+			onChange={this.handleFilterChange}
+			selectedFilters={this.props.selectedFilters}
+			hideMenu={true}
+		/>
+	));
+
+	public handleFilterChange = (selectedFilters) => {
+		this.props.setState({ selectedFilters });
+		// this.setState({ filteredObjects: this.filteredObjects });
+  }
+
+	public handleCloseSearchMode = () => {
+		this.props.setState({ searchEnabled: false, selectedFilters: [] });
+	}
+
+	public handleOpenSearchMode = () => {
+		this.props.setState({ searchEnabled: true });
+	}
+
 	public getSearchButton = () => {
-		const searchEnabled = false;
-		if (searchEnabled) {
-			return <IconButton onClick={() => {}}><CancelIcon /></IconButton>;
+		if (this.props.searchEnabled) {
+			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
 		}
-		return <IconButton onClick={() => {}}><SearchIcon /></IconButton>;
+		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
 	}
 
 	public renderActionsMenu = () => (
@@ -68,7 +104,7 @@ export class Tree extends React.PureComponent<IProps, any> {
 					<IconWrapper><Icon fontSize="small" /></IconWrapper>
 					<StyledItemText>
 						{label}
-						{(name === TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES) && <Check fontSize="small" />}
+						{(name === TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES && this.props.ifcSpacesHidden) && <Check fontSize="small" />}
 					</StyledItemText>
 				</StyledListItem>
 			))}
@@ -100,6 +136,7 @@ export class Tree extends React.PureComponent<IProps, any> {
 				renderActions={this.renderActions}
 				pending={false}
 			>
+			{this.renderFilterPanel(this.props.searchEnabled)}
 			Tree
 		</ViewerPanel>
 		);

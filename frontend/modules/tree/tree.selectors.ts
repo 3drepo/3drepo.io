@@ -27,3 +27,19 @@ export const selectSelectedNodes = createSelector(
 export const selectTotalMeshes = createSelector(
 	selectTreeDomain, (state) => calculateTotalMeshes(state.selectedNodes)
 );
+
+export const selectComponentState = createSelector(
+	selectTreeDomain, (state) => state.componentState
+);
+
+export const selectSelectedFilters = createSelector(
+	selectComponentState, (state) => state.selectedFilters
+);
+
+export const selectSearchEnabled = createSelector(
+	selectComponentState, (state) => state.searchEnabled
+);
+
+export const selectIfcSpacesHidden = createSelector(
+	selectComponentState, (state) => state.ifcSpacesHidden
+);
