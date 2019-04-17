@@ -15,16 +15,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// tslint:disable-next-line
+const TreeWorker = require('./tree.worker');
 import { put, takeLatest, call, select } from 'redux-saga/effects';
+
 import { delay } from 'redux-saga';
+
 import { TreeTypes, TreeActions } from './tree.redux';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { dispatch, getAngularService, getState } from '../../helpers/migration';
-import { selectSelectedNodes, selectIfcSpacesHidden } from './tree.selectors';
 import { GroupsActions } from '../groups';
 import { DialogActions } from '../dialog';
-import { calculateTotalMeshes } from '../../helpers/tree';
+import { selectSelectedNodes, selectIfcSpacesHidden } from './tree.selectors';
+
+debugger;
+const getWorker = (worker = new TreeWorker(), onResponse) => {
+	worker.addEventListener('message', (e) => {
+		const data = JSON.parse(e.data);
+		onResponse(data.result);
+	}, false);
+
+	worker.addEventListener('messageerror', (e) => {
+		__DEBUG__ && console.error('Worker error', e); // eslint-disable-line
+	}, false);
+
+	return worker;
+};
+
+const worker = getWorker(new TreeWorker(), () => {
+	debugger;
+});
+
+worker.postMessage({ data: 'bla bla'});
 
 export function* startListenOnSelections() {
 	try {

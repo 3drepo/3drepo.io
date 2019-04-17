@@ -82,6 +82,7 @@
     "simplebar-react": "0.0.1-beta.3",
     "socket.io-client": "2.0.4",
     "sw-precache": "5.2.0",
+    "worker-loader": "^2.0.0",
     "yup": "0.26.10",
     "zxcvbn": "4.4.2"
   },

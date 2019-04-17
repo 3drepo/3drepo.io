@@ -114,7 +114,7 @@ export const INITIAL_STATE: IGroupState = {
 		colorOverrides: {},
 		totalMeshes: 0,
 		criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE,
-		searchEnabled: false;
+		searchEnabled: false
 	},
 	fieldNames: []
 };
