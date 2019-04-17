@@ -399,4 +399,4 @@ export const TreeComponent: ng.IComponentOptions = {
 
 export const TreeComponentModule = angular
 	.module('3drepo')
-	.component('tree', TreeComponent);
+	.component('treeOld', TreeComponent);

@@ -20,10 +20,7 @@ import { Form } from 'formik';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CancelIcon from '@material-ui/icons/Cancel';
 import EditIcon from '@material-ui/icons/Edit';
-import IconButton from '@material-ui/core/IconButton';
-import MenuItem from '@material-ui/core/MenuItem';
-import SaveIcon from '@material-ui/icons/Save';
-import TextField from '@material-ui/core/TextField';
+import { IconButton, MenuItem, SaveIcon, TextField } from '@material-ui/core';
 
 import { COLOR } from '../../../../../../styles/colors';
 import * as ImageStyles from '../../../../../components/image/image.styles';

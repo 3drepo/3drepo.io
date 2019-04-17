@@ -16,11 +16,9 @@
  */
 
 import * as React from 'react';
-import { matchesProperty, cond, orderBy, pick, values, stubTrue, isEqual, isEmpty } from 'lodash';
 import SimpleBar from 'simplebar-react';
-import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
-import Checkbox from '@material-ui/core/Checkbox';
+import { matchesProperty, cond, orderBy, pick, values, stubTrue, isEqual, isEmpty } from 'lodash';
+import { Tooltip, IconButton, Checkbox } from '@material-ui/core';
 
 import { SORT_ORDER_TYPES } from '../../../constants/sorting';
 import { sortByName, sortByJob } from '../../../helpers/sorting';

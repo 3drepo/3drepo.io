@@ -22,10 +22,7 @@ import ArrowBack from '@material-ui/icons/ArrowBack';
 import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
-import SkipNextIcon from '@material-ui/icons/SkipNext';
-import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import CancelIcon from '@material-ui/icons/Cancel';
-import MoreIcon from '@material-ui/icons/MoreVert';
 import Check from '@material-ui/icons/Check';
 
 import { hasPermissions } from '../../../../helpers/permissions';
@@ -41,6 +38,7 @@ import {
 	StyledItemText,
 	IconWrapper
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
 import { searchByFilters } from '../../../../helpers/searching';
@@ -51,15 +49,7 @@ import { ACTIONS_TYPES } from '../../../../constants/issues';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
 import { EmptyStateInfo } from '../views/views.styles';
 
-const MenuButton = ({ IconProps, Icon, ...props }) => (
-	<IconButton
-		{...props}
-		aria-label="Show filters menu"
-		aria-haspopup="true"
-	>
-		<MoreIcon {...IconProps} />
-	</IconButton>
-);
+const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show filters menu" {...props} />;
 
 interface IHeaderMenuItem {
 	label: string;

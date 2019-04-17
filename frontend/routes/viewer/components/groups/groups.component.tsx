@@ -23,7 +23,6 @@ import ArrowBack from '@material-ui/icons/ArrowBack';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
 import GroupWork from '@material-ui/icons/GroupWork';
-import MoreIcon from '@material-ui/icons/MoreVert';
 import SearchIcon from '@material-ui/icons/Search';
 import Delete from '@material-ui/icons/Delete';
 import InvertColors from '@material-ui/icons/InvertColors';
@@ -58,6 +57,7 @@ import { EmptyStateInfo } from '../views/views.styles';
 import { ListContainer, Summary } from './../risks/risks.styles';
 import { GroupDetails } from './components/groupDetails';
 import { GroupListItem, StyledIcon } from './groups.styles';
+import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 
 interface IProps {
 	teamspace: string;
@@ -96,15 +96,7 @@ interface IState {
 	filteredGroups: any[];
 }
 
-const MenuButton = ({ IconProps, Icon, ...props }) => (
-  <IconButton
-    {...props}
-    aria-label="Show filters menu"
-    aria-haspopup="true"
-  >
-    <MoreIcon {...IconProps} />
-  </IconButton>
-);
+const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show groups menu" {...props} />;
 
 export class Groups extends React.PureComponent<IProps, IState> {
 	public state = {

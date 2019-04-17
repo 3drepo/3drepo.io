@@ -18,11 +18,8 @@
 import * as React from 'react';
 import { snakeCase } from 'lodash';
 
-import Input from '@material-ui/core/Input';
-import Chip from '@material-ui/core/Chip';
-
+import { Input, Chip } from '@material-ui/core';
 import { ENTER_KEY } from '../../../constants/keys';
-
 import { ChipsGrid, ChipsContainer } from './chips.styles';
 
 interface IProps {

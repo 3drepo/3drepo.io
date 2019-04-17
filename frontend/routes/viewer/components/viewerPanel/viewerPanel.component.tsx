@@ -53,17 +53,17 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 		</LoaderContainer>
 	));
 
-	public renderTitleActions = () => (
+	public renderTitleActions = renderWhenTrue(() => (
 		<Actions>
-			{this.props.renderActions()}
+		{this.props.renderActions()}
 		</Actions>
-	)
+	));
 
 	public renderTitle = () => (
 		<ViewerPanelTitle
 			title={this.props.title}
 			Icon={this.props.Icon}
-			renderActions={this.renderTitleActions}
+			renderActions={() => this.renderTitleActions(this.props.renderActions)}
 		/>
 	)
 

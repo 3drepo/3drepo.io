@@ -25,10 +25,9 @@ import { Settings } from './components/settings/settings.component';
 import { MenuItem, ListItem, IconButton, List } from '@material-ui/core';
 import LayersIcon from '@material-ui/icons/Layers';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import MoreIcon from '@material-ui/icons/MoreVert';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
-
+import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
 	StyledSelect,
@@ -62,15 +61,7 @@ interface IState {
 	pointsExists: boolean;
 }
 
-const MenuButton = ({ IconProps, Icon, ...props }) => (
-	<IconButton
-		{...props}
-		aria-label="Show GIS menu"
-		aria-haspopup="true"
-	>
-		<MoreIcon {...IconProps} />
-	</IconButton>
-);
+const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show GIS menu" {...props} />;
 
 export class Gis extends React.PureComponent<IProps, IState> {
 	get surveySettings() {
