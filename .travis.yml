@@ -31,6 +31,8 @@ before_install:
     - cd tests
     - git checkout $test_ver
     - git status
+    - pwd
+    - ls -R
     - cd backend && mongorestore
     - cd ../../../
     - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
