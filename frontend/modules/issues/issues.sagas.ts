@@ -610,12 +610,17 @@ export function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId
 }
 
 export function* setNewIssue() {
+	const activeIssue = yield select(selectActiveIssueDetails);
 	const issues = yield select(selectIssues);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
 	const issueNumber = issues.length + 1;
 
 	try {
+		if (activeIssue) {
+			toggleIssuePin(activeIssue, false);
+		}
+
 		const newIssue = prepareIssue({
 			name: `Untitled issue ${issueNumber}`,
 			assigned_roles: [],
