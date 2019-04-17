@@ -20,9 +20,14 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../helpers/migration';
 
 import { Tree } from './tree.component';
+import { TreeActions } from '../../../../modules/tree';
 
 const mapStateToProps = createStructuredSelector({});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	showAllNodes: TreeActions.showAllNodes,
+	isolateSelectedNodes: TreeActions.isolateSelectedNodes,
+	hideIfcSpaces: TreeActions.hideIfcSpaces
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Tree);
