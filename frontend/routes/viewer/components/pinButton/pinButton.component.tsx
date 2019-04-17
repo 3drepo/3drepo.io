@@ -62,7 +62,7 @@ export class PinButton extends React.PureComponent<IProps, any> {
 			const pinData = Viewer.getPinData();
 
 			if (pinData) {
-				Viewer.changePinColor({ id: this.getPinId(), colours: PIN_COLORS.YELLOW });
+				// Viewer.changePinColor({ id: this.getPinId(), colours: PIN_COLORS.YELLOW });
 				this.props.onSave(pinData.pickedPos);
 			}
 

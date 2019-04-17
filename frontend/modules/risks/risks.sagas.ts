@@ -40,6 +40,7 @@ import {
 } from './risks.selectors';
 import { RisksActions, RisksTypes } from './risks.redux';
 import { NEW_PIN_ID } from '../../constants/viewer';
+import { PIN_COLORS } from '../../styles';
 
 export function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));
@@ -494,7 +495,7 @@ export function* showNewPin({ risk, pinData }) {
 			...pinData,
 			account: risk.account,
 			model: risk.model,
-			colours: getRiskPinColor(risk.overall_level_of_risk, true),
+			colours: PIN_COLORS.SUNGLOW,
 			type: 'risk'
 		};
 

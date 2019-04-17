@@ -303,8 +303,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public onPositionSave = (position) => {
 		if (this.props.risk._id) {
-			const { teamspace, model, risk, saveRisk, revision } = this.props;
-			saveRisk(teamspace, model, {...risk, position}, revision);
+			const { teamspace, model, risk, updateRisk } = this.props;
+			updateRisk(teamspace, model, {...risk, position});
 		}
 	}
 
