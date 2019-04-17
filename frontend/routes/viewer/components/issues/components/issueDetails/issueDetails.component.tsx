@@ -217,7 +217,11 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onExpandChange={this.handleExpandChange}
 				renderCollapsable={this.renderDetailsForm}
 				renderNotCollapsable={() => this.renderLogList(comments && !!comments.length && !this.isNewIssue)}
-				handleHeaderClick={() => this.setCameraOnViewpoint({viewpoint: this.issueData.viewpoint})}
+				handleHeaderClick={() => {
+					if (this.issueData._id) { // if its a new issue it shouldnt go to the viewpoint
+						this.setCameraOnViewpoint({viewpoint: this.issueData.viewpoint});
+					}
+				}}
 				scrolled={this.state.scrolled}
 			/>
 		);
