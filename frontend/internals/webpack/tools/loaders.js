@@ -97,6 +97,18 @@ const PugLoader = {
   ]
 };
 
+const WorkerLoader = {
+  test: /\.worker\.ts$/,
+  exclude: /node_modules/,
+  use: [{
+    loader: 'worker-loader',
+    options: {
+      inline: true,
+      name: '[name].[hash].js'
+    }
+  }]
+}
+
 module.exports = {
   TSLoader,
   LodashTSLoader,
@@ -105,5 +117,6 @@ module.exports = {
   FontLoader,
   ImageLoader,
   HTMLLoader,
-  PugLoader
+  PugLoader,
+  WorkerLoader
 };

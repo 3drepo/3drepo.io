@@ -22,7 +22,8 @@ module.exports = (options) => {
         loaders.FontLoader,
         loaders.ImageLoader,
         loaders.HTMLLoader,
-        loaders.PugLoader
+        loaders.PugLoader,
+        loaders.WorkerLoader
       ],
     },
 
