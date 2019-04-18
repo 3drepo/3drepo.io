@@ -20,7 +20,8 @@ import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 
-export const StyledFormControl = styled(FormControl)``;
+export const StyledFormControl = styled(FormControl)`
+`;
 
 export const Container = styled.div`
 	display: flex;

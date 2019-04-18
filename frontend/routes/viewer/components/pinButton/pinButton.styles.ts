@@ -57,5 +57,6 @@ export const LabelButton = styled(Button)`
 export const Container = styled.span`
 	display: flex;
 	align-items: center;
-	height: 100%
+	height: 100%;
+	min-height:40px;
 `;
