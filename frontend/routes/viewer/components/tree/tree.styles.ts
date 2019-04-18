@@ -18,3 +18,8 @@
 import styled from 'styled-components';
 
 export const Container = styled.div``;
+
+export const TreeNodes = styled.ul`
+  margin: 0;
+  padding: 0;
+`;
