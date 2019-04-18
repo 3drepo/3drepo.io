@@ -16,7 +16,7 @@
  */
 
 // tslint:disable-next-line
-const TreeWorker = require('./tree.worker');
+const TreeWorker = require('worker-loader?inline!./tree.worker');
 import { put, takeLatest, call, select } from 'redux-saga/effects';
 
 import { delay } from 'redux-saga';
@@ -29,26 +29,32 @@ import { GroupsActions } from '../groups';
 import { DialogActions } from '../dialog';
 import { selectSelectedNodes, selectIfcSpacesHidden } from './tree.selectors';
 
-const getWorker = (worker = new TreeWorker(), onResponse) => {
+const setupWorker = (worker, onResponse) => {
 	worker.addEventListener('message', (e) => {
 		const data = JSON.parse(e.data);
 		onResponse(data.result);
 	}, false);
 
 	worker.addEventListener('messageerror', (e) => {
-		__DEBUG__ && console.error('Worker error', e); // eslint-disable-line
+		// tslint:disable-next-line
+		console.error('TWorker error', e);
 	}, false);
 
 	return worker;
 };
 
-const worker = getWorker(new TreeWorker(), (response) => {
-	console.log('on response? ', response.data);
+const treeWorker = new TreeWorker();
 
-	dispatch(TreeActions.setTreeNodesList(response.data));
-});
+export function* fetchTreeData() {
+	try {
+		const worker = setupWorker(treeWorker, (result) => {
+			dispatch(TreeActions.setTreeNodesList(result.data));
+		});
+		worker.postMessage({ data: 'test' });
+	} catch (error) {
 
-worker.postMessage({ data: 'bla bla'});
+	}
+}
 
 export function* startListenOnSelections() {
 	try {
