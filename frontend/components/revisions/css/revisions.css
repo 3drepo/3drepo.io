@@ -6,19 +6,18 @@ revisions {
     color: white;
     text-shadow: 1px 1px#666666;
     font-size: 14px;
-    width: 250px;
     top: 60px;
     left: 50%;
+    transform: translateX(-50%);
     font-weight: bold;
-    margin-left: -125px;
     text-align: center;
 }
 
-@media (max-width: 767px) {
-    revisions {
-        top: 10px;
-        left: 45%;
-    }
+.revisions-header {
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .revisions-dropdown .angular-material-icons {
@@ -30,12 +29,13 @@ revisions {
     outline: none;
     margin-top: 10px;
     background-color: #8397AC;
-    border-radius: 12px;
+    border-radius: 25px;
     box-shadow: 0 3px 3px rgba(0,0,0,0.16);
-    padding: 6px;
+    padding: 6px 12px;
     font-weight: 400;
     font-size: 14px;
     text-shadow: none;
+    white-space: nowrap;
 }
 
 .revisionsDialog h3 {
