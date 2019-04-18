@@ -29,7 +29,6 @@ import { GroupsActions } from '../groups';
 import { DialogActions } from '../dialog';
 import { selectSelectedNodes, selectIfcSpacesHidden } from './tree.selectors';
 
-debugger;
 const getWorker = (worker = new TreeWorker(), onResponse) => {
 	worker.addEventListener('message', (e) => {
 		const data = JSON.parse(e.data);
@@ -43,8 +42,10 @@ const getWorker = (worker = new TreeWorker(), onResponse) => {
 	return worker;
 };
 
-const worker = getWorker(new TreeWorker(), () => {
-	debugger;
+const worker = getWorker(new TreeWorker(), (response) => {
+	console.log('on response? ', response.data);
+
+	dispatch(TreeActions.setTreeNodesList(response.data));
 });
 
 worker.postMessage({ data: 'bla bla'});

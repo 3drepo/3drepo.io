@@ -46,12 +46,12 @@ interface IProps {
 	isFederation?: boolean;
 }
 
-const CollapseButton = ({ Icon, onClick, collapsed, hasChildren, type }) => (
+const CollapseButton = ({ Icon, onClick, collapsed, hasChildren, nodeType }) => (
 	<StyledCollapseButton
 		onClick={onClick}
 		collapsed={collapsed}
 		hasChildren={hasChildren}
-		type={type}>
+		nodeType={nodeType}>
 		<Icon size="small" />
 	</StyledCollapseButton>
 );
@@ -91,7 +91,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		const { collapsed, hasChildren } = this.props;
 		return (
 			<CollapseButton
-				type={this.type}
+				nodeType={this.type}
 				collapsed={collapsed}
 				hasChildren={hasChildren}
 				Icon={collapsed && hasChildren ? AddIcon : RemoveIcon}
@@ -139,7 +139,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 
 		return (
 			<Container
-				type={this.type}
+				nodeType={this.type}
 				collapsable={hasChildren}
 				selected={selected}
 				highlighted={highlighted}
@@ -148,7 +148,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 			>
 				<NameWrapper>
 					{this.renderCollapseButton(!isFederation)}
-					<Name type={this.type}>{name}</Name>
+					<Name nodeType={this.type}>{name}</Name>
 				</NameWrapper>
 				{this.renderModelActions(this.isExpandedModelInFederation)}
 				{this.renderHighlightedObjectActions(this.isHightlightedObject)}

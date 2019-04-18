@@ -25,7 +25,7 @@ import {
 } from '../../../../../../constants/tree';
 
 interface IContainer {
-	type: string;
+	nodeType: string;
 	collapsable: boolean;
 	selected: boolean;
 	highlighted: boolean;
@@ -34,10 +34,11 @@ interface IContainer {
 }
 
 interface IName {
-	type: string;
+	nodeType: string;
 }
 
 interface ICollapseButton {
+	nodeType?: string;
 	hasChildren: boolean;
 	collapsed: boolean;
 }
@@ -54,24 +55,24 @@ const getBackgroundColor = (props) => cond([
 				return COLOR.WHITE;
 			}
 		]
-	])(props.type);
+	])(props.nodeType);
 
 const getBoxShadow = (props) => {
-	if (!props.collapsed && isEqual(TREE_ITEM_MODEL_TYPE, props.type)) {
+	if (!props.collapsed && isEqual(TREE_ITEM_MODEL_TYPE, props.nodeType)) {
 		return `inset 0px -12px 12px -10px ${COLOR.BLACK_20}`;
 	} else if (props.highlighted) {
-		return `inset 0px 0px 0px 1.5px #757575`;
+		return `inset 0px 0px 0px 1px #757575`;
 	}
 	return 'none';
 };
 
 export const Container = styled.li<IContainer>`
-	cursor: ${(props) => isEqual(TREE_ITEM_FEDERATION_TYPE, props.type) ? 'default' : 'pointer'};
-	border-bottom: 1px solid ${COLOR.DARK_GRAY};
+	cursor: ${(props) => isEqual(TREE_ITEM_FEDERATION_TYPE, props.nodeType) ? 'default' : 'pointer'};
+	border-bottom: ${(props) => props.highlighted ? 'none' : `1px solid ${COLOR.DARK_GRAY}`};
 	background-color: ${(props) => getBackgroundColor(props)};
 	padding-left: ${(props) => props.level > 1 ? `${props.level * 12}px` : '42px'};
-	padding-top: ${(props) => isEqual(TREE_ITEM_OBJECT_TYPE, props.type) ? '2px' : '6px'};
-	padding-bottom: ${(props) => isEqual(TREE_ITEM_OBJECT_TYPE, props.type) ? '2px' : '6px'};
+	padding-top: ${(props) => isEqual(TREE_ITEM_OBJECT_TYPE, props.nodeType) ? '2px' : '6px'};
+	padding-bottom: ${(props) => isEqual(TREE_ITEM_OBJECT_TYPE, props.nodeType) ? '2px' : '6px'};
 	min-height: 40px;
 	padding-right: 12px;
 	box-shadow: ${(props) => getBoxShadow(props)};
@@ -82,13 +83,13 @@ export const Container = styled.li<IContainer>`
 
 export const Name = styled.div<IName>`
 	align-self: center;
-	font-size: ${(props) => isEqual(TREE_ITEM_OBJECT_TYPE, props.type) ? '13px' : '16px'};
+	font-size: ${(props) => isEqual(TREE_ITEM_OBJECT_TYPE, props.nodeType) ? '13px' : '16px'};
 	margin-left: 12px;
 `;
 
 const getButtonBackgroundColor = (props) => {
 	if (props.hasChildren) {
-		if (isEqual(TREE_ITEM_OBJECT_TYPE, props.type)) {
+		if (isEqual(TREE_ITEM_OBJECT_TYPE, props.nodeType)) {
 			return COLOR.PRIMARY_DARK;
 		} else {
 			return COLOR.BLACK_60;
