@@ -64,7 +64,7 @@ module.exports = {
 	},
 	js_debug_level: 'debug',
 	logfile: {
-		silent: false,
+		silent: true,
 		filename: './3drepo.log',
 		console_level: 'info',
 		file_level: 'debug'
