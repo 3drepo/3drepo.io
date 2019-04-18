@@ -23,10 +23,11 @@ import { Container } from './riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { RiskDetailsForm } from './riskDetailsForm.component';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
-import { mergeRiskData, canComment } from '../../../../../../helpers/risks';
+import { mergeRiskData, canComment, getRiskPinColor } from '../../../../../../helpers/risks';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 import { EmptyStateInfo } from '../../../views/views.styles';
+import { NEW_PIN_ID } from '../../../../../../constants/viewer';
 
 interface IProps {
 	jobs: any[];
@@ -302,9 +303,13 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public onPositionSave = (position) => {
-		if (this.props.risk._id) {
-			const { teamspace, model, risk, updateRisk } = this.props;
+		const { teamspace, model, risk, updateRisk } = this.props;
+
+		if (risk._id) {
 			updateRisk(teamspace, model, {...risk, position});
+		} else {
+			const colours = getRiskPinColor(risk.overall_level_of_risk, true);
+			Viewer.changePinColor({ id: NEW_PIN_ID, colours});
 		}
 	}
 

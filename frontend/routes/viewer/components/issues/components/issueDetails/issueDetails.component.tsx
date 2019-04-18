@@ -28,6 +28,8 @@ import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 import { EmptyStateInfo } from '../../../views/views.styles';
 import { timingSafeEqual } from 'crypto';
+import { NEW_PIN_ID } from '../../../../../../constants/viewer';
+import { PIN_COLORS } from '../../../../../../styles';
 
 interface IProps {
 	jobs: any[];
@@ -301,6 +303,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		if (this.props.issue._id) {
 			const { teamspace, model, issue } = this.props;
 			this.props.updateIssue(teamspace, model, {...issue, position});
+		} else {
+			Viewer.changePinColor({ id: NEW_PIN_ID, colours: PIN_COLORS.YELLOW });
 		}
 	}
 
