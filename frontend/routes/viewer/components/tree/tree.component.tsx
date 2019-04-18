@@ -32,7 +32,7 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { Container, TreeNodes } from './tree.styles';
-import { TREE_ACTIONS_MENU, TREE_ACTIONS_ITEMS } from '../../../../constants/tree';
+import { TREE_ACTIONS_MENU, TREE_ACTIONS_ITEMS, mockedTreeFlatList } from '../../../../constants/tree';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { TreeNode } from './components/treeNode/treeNode.component';
@@ -42,6 +42,7 @@ interface IProps {
 	selectedFilters: any[];
 	searchEnabled: boolean;
 	ifcSpacesHidden: boolean;
+	treeNodesList: any[];
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
 	isolateSelectedNodes: () => void;
@@ -140,117 +141,20 @@ export class Tree extends React.PureComponent<IProps, any> {
 				{this.renderFilterPanel(this.props.searchEnabled)}
 				<ViewerPanelContent className="height-catcher">
 					<TreeNodes>
-						<TreeNode
-							id={'fghjk-ertyui-cvbnm'}
-							name={'Federation name'}
-							level={1}
-							isFederation={true}
-						/>
-						<TreeNode
-							id={'asdfgh-xcvbnm-rtyuo'}
-							name={'Model A - Revision AA'}
-							level={2}
-							isModel={true}
-							hasChildren={true}
-							collapsed={false}
-						/>
-						<TreeNode
-							id={'cvbnm-dfghjk-qwerty'}
-							name={'Object name'}
-							level={3}
-							hasChildren={true}
-							collapsed={true}
-							selected={true}
-						/>
-						<TreeNode
-							id={'iuytr-mnhgfc-rthbvcd'}
-							name={'Object some name'}
-							level={4}
-							hasChildren={true}
-							collapsed={true}
-						/>
-						<TreeNode
-							id={'xerfs-kjhgfd-rtyuhg'}
-							name={'Object other name'}
-							level={4}
-							hasChildren={true}
-							collapsed={false}
-						/>
-						<TreeNode
-							id={'edcfg-iuytr-zxcvbh'}
-							name={'Object name 3drepo'}
-							level={5}
-						/>
-						<TreeNode
-							id={'lkjhg-asdfgh-edcfty'}
-							name={'Object name 4drepo'}
-							level={5}
-						/>
-						<TreeNode
-							id={'mnbv-lkjhg-poiuyt'}
-							name={'Object lowest 5drepo'}
-							level={5}
-						/>
-						<TreeNode
-							id={'dfgfg-lkjhg-gfffh'}
-							name={'Object lowest 6drepo'}
-							level={5}
-						/>
-						<TreeNode
-							id={'ujgfe-zxcvb-kjhgf'}
-							name={'Object child 2'}
-							level={4}
-							collapsed={false}
-							hasChildren={true}
-							selected={true}
-						/>
-						<TreeNode
-							id={'fhgdfh-asdfgh-edcfty'}
-							name={'Object object'}
-							level={5}
-							collapsed={true}
-							hasChildren={true}
-						/>
-						<TreeNode
-							id={'mnbv-ityit-poiuyt'}
-							name={'Object hello'}
-							level={5}
-							collapsed={false}
-							hasChildren={true}
-							selected={true}
-						/>
-						<TreeNode
-							id={'dfhdfh-asdfgh-edcfty'}
-							name={'Object lowest 1'}
-							level={6}
-							highlighted={true}
-						/>
-						<TreeNode
-							id={'mnbv-ityit-gdfg'}
-							name={'Object lowest 2'}
-							level={6}
-						/>
-						<TreeNode
-							id={'bnmgm-ityit-poiuyt'}
-							name={'Object lowest 3'}
-							level={6}
-						/>
-						<TreeNode
-							id={'asdfgh-xcvbnm-rtyuo'}
-							name={'Model B - Revision AA'}
-							level={2}
-							isModel={true}
-							hasChildren={true}
-							collapsed={true}
-						/>
-						<TreeNode
-							id={'asdfgh-xcvbnm-rtyuo'}
-							name={'Model C - Revision BBB'}
-							level={2}
-							isModel={true}
-							hasChildren={true}
-							collapsed={true}
-						/>
+						{this.props.treeNodesList.map((treeNode) => (
+							<TreeNode
+								key={treeNode._id}
+								id={treeNode._id}
+								name={treeNode.data.name}
+								level={treeNode.level}
+								isFederation={treeNode.isFederation}
+								isModel={treeNode.isModel}
+								hasChildren={treeNode.hasChildren}
+								selected={treeNode.selected}
+								highlighted={treeNode.highlighted}
+								collapsed={treeNode.collapsed}
+							/>
+						))}
 					</TreeNodes>
 				</ViewerPanelContent>
 			</ViewerPanel>

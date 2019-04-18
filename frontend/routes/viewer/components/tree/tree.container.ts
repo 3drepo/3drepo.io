@@ -23,13 +23,15 @@ import { Tree } from './tree.component';
 import { TreeActions, selectIfcSpacesHidden } from '../../../../modules/tree';
 import {
 	selectSearchEnabled,
-	selectSelectedFilters
+	selectSelectedFilters,
+	selectTreeNodesList
 } from '../../../../modules/tree';
 
 const mapStateToProps = createStructuredSelector({
 	searchEnabled: selectSearchEnabled,
 	selectedFilters: selectSelectedFilters,
-	ifcSpacesHidden: selectIfcSpacesHidden
+	ifcSpacesHidden: selectIfcSpacesHidden,
+	treeNodesList: selectTreeNodesList
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

@@ -43,3 +43,7 @@ export const selectSearchEnabled = createSelector(
 export const selectIfcSpacesHidden = createSelector(
 	selectComponentState, (state) => state.ifcSpacesHidden
 );
+
+export const selectTreeNodesList = createSelector(
+	selectComponentState, (state) => state.treeNodesList
+);

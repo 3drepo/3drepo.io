@@ -36,50 +36,203 @@ const TREE_ITEMS_TYPES = {
 	[TREE_ITEM_OBJECT_TYPE]: TREE_ITEM_OBJECT_TYPE
 };
 
-const mockedTreeFlatList = [
+export const mockedTreeFlatList = [
 	{
-		_id: "eb467231-7806-4546-bd42-4e5a330761e4", // FEDERATION
+		_id: "fghjk-ertyui-cvbnm", // FEDERATION
+		index: 0,
 		level: 1,
 		parentIndex: null,
 		parentId: null,
 		data: {
-			name: ""
-		}
+			name: 'Federation name'
+		},
+		isFederation: true
 	},
 	{
-		_id: "eb467231-7806-4546-bd42-4e5a330761e4", // SUBMODEL 1
+		_id: "asdfgh-xcvbnm-rtyuo", // SUBMODEL 1
+		index: 1,
 		level: 2,
 		parentIndex: 0,
-		parentId: "eb467231-7806-4546-bd42-4e5a330761e4",
+		parentId: "fghjk-ertyui-cvbnm",
 		data: {
-				// data that node already have, without children
-		}
+			name: 'Model A - Revision AA'
+		},
+		hasChildren: true,
+		isModel: true,
+		collapsed: false
 	},
 	{
-		_id: "3d249196-92b8-403d-a463-b4f6cfa52dd3", // SUBMODEL's 1 CHILD
+		_id: "cvbnm-dfghjk-qwerty",
+		index: 2,
 		level: 3,
 		parentIndex: 1,
-		parentId: "eb467231-7806-4546-bd42-4e5a330761e4",
+		parentId: "asdfgh-xcvbnm-rtyuo",
 		data: {
-				// data that node already have, without children
+			name: 'Object name'
+		},
+		hasChildren: true,
+		collapsed: true,
+		selected: true
+	},
+	{
+		_id: "iuytr-mnhgfc-rthbvcd",
+		index: 3,
+		level: 4,
+		parentIndex: 2,
+		parentId: "cvbnm-dfghjk-qwerty",
+		data: {
+			name: 'Object some name'
+		},
+		hasChildren: true,
+		collapsed: true
+	},
+	{
+		_id: "xerfs-kjhgfd-rtyuhg",
+		index: 4,
+		level: 4,
+		parentIndex: 2,
+		parentId: "cvbnm-dfghjk-qwerty",
+		data: {
+			name: 'Object name 3drepos parent'
+		},
+		hasChildren: true,
+		collapsed: false
+	},
+	{
+		_id: "edcfg-iuytr-zxcvbh",
+		index: 5,
+		level: 5,
+		parentIndex: 4,
+		parentId: "xerfs-kjhgfd-rtyuhg",
+		data: {
+			name: 'Object name 3drepo'
 		}
 	},
 	{
-		_id: "0849c580-b515-46fa-a6dd-3c5dea0e2d4a", // SUBMODEL 2
-		level: 2,
-		parentIndex: 0,
-		parentId: "eb467231-7806-4546-bd42-4e5a330761e4",
+		_id: "lkjhg-asdfgh-edcfty",
+		index: 6,
+		level: 5,
+		parentIndex: 4,
+		parentId: "xerfs-kjhgfd-rtyuhg",
 		data: {
-				// data that node already have, without children
+			name: 'Object name 4drepo'
 		}
 	},
 	{
-		_id: "898cf64b-64a3-4173-a530-ab6600df5558", // SUBMODEL 3
+		_id: "mnbv-lkjhg-poiuyt",
+		index: 7,
+		level: 5,
+		parentIndex: 4,
+		parentId: "xerfs-kjhgfd-rtyuhg",
+		data: {
+			name: 'Object name 5drepo'
+		}
+	},
+	{
+		_id: "dfgfg-lkjhg-gfffh",
+		index: 8,
+		level: 5,
+		parentIndex: 4,
+		parentId: "xerfs-kjhgfd-rtyuhg",
+		data: {
+			name: 'Object name 6drepo'
+		}
+	},
+	{
+		_id: "ujgfe-zxcvb-kjhgf",
+		index: 9,
+		level: 4,
+		parentIndex: 2,
+		parentId: "cvbnm-dfghjk-qwerty",
+		data: {
+			name: 'Object child 2'
+		},
+		hasChildren: true,
+		collapsed: false,
+		selected: true
+	},
+	{
+		_id: "hgdfh-asdfgh-edcfty",
+		index: 10,
+		level: 5,
+		parentIndex: 9,
+		parentId: "cvbnm-dfghjk-qwerty",
+		data: {
+			name: 'Object object'
+		},
+		hasChildren: true,
+		collapsed: true
+	},
+	{
+		_id: "mnbv-ityit-poiuyt",
+		index: 11,
+		level: 5,
+		parentIndex: 9,
+		parentId: "cvbnm-dfghjk-qwerty",
+		data: {
+			name: 'Object hello'
+		},
+		hasChildren: true,
+		collapsed: false,
+		selected: true
+	},
+	{
+		_id: "dfhdfh-asdfgh-edcfty",
+		index: 12,
+		level: 6,
+		parentIndex: 11,
+		parentId: "mnbv-ityit-poiuyt",
+		data: {
+			name: 'Object lowest 1'
+		},
+		highlighted: true
+	},
+	{
+		_id: "mnbv-ityit-gdfg",
+		index: 13,
+		level: 6,
+		parentIndex: 11,
+		parentId: "mnbv-ityit-poiuyt",
+		data: {
+			name: 'Object lowest 2'
+		},
+		highlighted: true
+	},
+	{
+		_id: "bnmgm-ityit-poiuy",
+		index: 14,
+		level: 6,
+		parentIndex: 11,
+		parentId: "mnbv-ityit-poiuyt",
+		data: {
+			name: 'Object lowest 3'
+		},
+		highlighted: true
+	},
+	{
+		_id: "gdfgdfg-xcvbnm-rtyuo", // SUBMODEL 2
+		index: 15,
 		level: 2,
 		parentIndex: 0,
-		parentId: "eb467231-7806-4546-bd42-4e5a330761e4",
+		parentId: "fghjk-ertyui-cvbnm",
 		data: {
-				// data that node already have, without children
-		}
+			name: 'Model B - Revision AA'
+		},
+		hasChildren: true,
+		isModel: true,
+		collapsed: true
+	},
+	{
+		_id: "nfgnfn-xcvbnm-rtyuo", // SUBMODEL 3
+		index: 16,
+		level: 2,
+		parentIndex: 0,
+		parentId: "fghjk-ertyui-cvbnm",
+		data: {
+			name: 'Model C- Revision BB'
+		},
+		hasChildren: true,
+		isModel: true,
+		collapsed: true
 	}
 ];
