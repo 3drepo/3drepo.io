@@ -15,5 +15,6 @@ export * from './viewer';
 export * from './groups';
 export * from './meta';
 export * from './issues';
+export * from './tree';
 
 export default API;

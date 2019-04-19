@@ -17,17 +17,20 @@
 
 // tslint:disable-next-line
 const TreeWorker = require('worker-loader?inline!./tree.worker');
-import { put, takeLatest, call, select } from 'redux-saga/effects';
 import { keyBy, mapValues } from 'lodash';
+import { put, takeLatest, call, select, take, all } from 'redux-saga/effects';
+
 import { delay } from 'redux-saga';
 
-import { TreeTypes, TreeActions } from './tree.redux';
+import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { dispatch, getAngularService, getState } from '../../helpers/migration';
 import { GroupsActions } from '../groups';
 import { DialogActions } from '../dialog';
 import { selectSelectedNodes, selectIfcSpacesHidden } from './tree.selectors';
+import { TreeTypes, TreeActions } from './tree.redux';
+import { selectSettings, ModelActions, ModelTypes } from '../model';
 
 const setupWorker = (worker, onResponse) => {
 	worker.addEventListener('message', (e) => {
@@ -45,16 +48,30 @@ const setupWorker = (worker, onResponse) => {
 
 const treeWorker = new TreeWorker();
 
-export function* fetchTreeData() {
+export function* fetchFullTree({ teamspace, modelId, revision }) {
 	try {
+		const { data: fullTree } = yield API.getFullTree(teamspace, modelId, revision);
+		yield take(ModelTypes.FETCH_SETTINGS_SUCCESS);
+
+		const dataToProcessed = { mainTree: fullTree.mainTree.nodes };
+		const modelSettings = yield select(selectSettings);
+		dataToProcessed.mainTree.name = modelSettings.name;
+		dataToProcessed.mainTree.isFederation = modelSettings.federate;
+
+		if (fullTree.subTrees) {
+			const subTreesRequests = fullTree.subTrees.map(({ url }) => API.default.get(url));
+			const subTreesResponse = yield all(subTreesRequests);
+			dataToProcessed.mainTree.children = subTreesResponse.map(({ data }) => data.mainTree.nodes);
+		}
+
 		const worker = setupWorker(treeWorker, (result) => {
 			const nodesIndexesMap = mapValues(keyBy(result.data, '_id'), (node) => node.index);
 			dispatch(TreeActions.setTreeNodesList(result.data));
 			dispatch(TreeActions.setComponentState({ nodesIndexesMap }));
 		});
-		worker.postMessage({ data: 'test' });
+		worker.postMessage(dataToProcessed);
 	} catch (error) {
-
+		yield put(DialogActions.showErrorDialog('fetch', 'full tree'));
 	}
 }
 
@@ -141,7 +158,7 @@ export function* hideIfcSpaces() {
 }
 
 export default function* TreeSaga() {
-	yield takeLatest(TreeTypes.FETCH_TREE_DATA, fetchTreeData);
+	yield takeLatest(TreeTypes.FETCH_FULL_TREE, fetchFullTree);
 	yield takeLatest(TreeTypes.START_LISTEN_ON_SELECTIONS, startListenOnSelections);
 	yield takeLatest(TreeTypes.STOP_LISTEN_ON_SELECTIONS, stopListenOnSelections);
 	yield takeLatest(TreeTypes.GET_SELECTED_NODES, getSelectedNodes);
