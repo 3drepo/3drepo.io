@@ -18,6 +18,7 @@
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: TreeTypes, Creators: TreeActions } = createActions({
+	fetchTreeData: [],
 	startListenOnSelections: [],
 	stopListenOnSelections: [],
 	clearSelectedNodes: [],
