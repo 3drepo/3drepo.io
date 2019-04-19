@@ -18,7 +18,7 @@
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: TreeTypes, Creators: TreeActions } = createActions({
-	fetchTreeData: [],
+	fetchFullTree: ['teamspace', 'modelId', 'revision'],
 	startListenOnSelections: [],
 	stopListenOnSelections: [],
 	clearSelectedNodes: [],

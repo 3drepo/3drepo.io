@@ -240,10 +240,10 @@ class ModelController implements ng.IController {
 		}
 
 		this.PanelService.hideSubModels(this.issuesCardIndex, !settings.federate);
-		return this.TreeService.init(this.account, this.model, this.branch, this.revision, settings)
+/* 		return this.TreeService.init(this.account, this.model, this.branch, this.revision, settings)
 			.catch((error) => {
 				console.error('Error initialising tree: ', error);
-			});
+			}); */
 	}
 
 	private handleModelSettingsChange = async (settings) => {
@@ -268,7 +268,7 @@ class ModelController implements ng.IController {
 		dispatch(ModelActions.fetchSettings(this.account, this.model));
 		dispatch(ModelActions.fetchMetaKeys(this.account, this.model));
 		dispatch(ModelActions.waitForSettingsAndFetchRevisions(this.account, this.model));
-		dispatch(TreeActions.fetchTreeData(this.account, this.model));
+		dispatch(TreeActions.fetchFullTree(this.account, this.model, this.revision));
 		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
 		dispatch(IssuesActions.fetchIssues(this.account, this.model, this.revision));
 		dispatch(RisksActions.fetchRisks(this.account, this.model, this.revision));

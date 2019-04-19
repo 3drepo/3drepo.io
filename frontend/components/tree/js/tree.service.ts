@@ -121,14 +121,14 @@ export class TreeService {
 	public init(account: string, model: string, branch: string, revision: string, setting: any) {
 		this.treeMap = null;
 		branch = branch ? branch : 'master';
-
+/* 
 		if (!revision) {
 			this.baseURL = account + '/' + model + '/revision/master/head/';
 		} else {
 			this.baseURL = account + '/' + model + '/revision/' + revision + '/';
 		}
 
-		const url = this.baseURL + 'fulltree.json';
+		const url = this.baseURL + 'fulltree.json'; */
 
 		const meshesAndTrees = [
 			this.getIdToMeshes(),
