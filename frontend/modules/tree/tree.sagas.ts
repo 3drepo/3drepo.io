@@ -139,6 +139,7 @@ export function* hideIfcSpaces() {
 }
 
 export default function* TreeSaga() {
+	yield takeLatest(TreeTypes.FETCH_TREE_DATA, fetchTreeData);
 	yield takeLatest(TreeTypes.START_LISTEN_ON_SELECTIONS, startListenOnSelections);
 	yield takeLatest(TreeTypes.STOP_LISTEN_ON_SELECTIONS, stopListenOnSelections);
 	yield takeLatest(TreeTypes.GET_SELECTED_NODES, getSelectedNodes);
