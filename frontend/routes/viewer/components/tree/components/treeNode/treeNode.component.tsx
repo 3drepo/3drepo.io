@@ -23,7 +23,7 @@ import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpIcon from '@material-ui/icons/KeyboardArrowUp';
 
-import { Container, Name, NameWrapper, Actions, StyledCollapseButton } from './treeNode.styles';
+import { Container, Name, NameWrapper, Actions, StyledExpandableButton } from './treeNode.styles';
 import {
 	TREE_ITEM_FEDERATION_TYPE,
 	TREE_ITEM_MODEL_TYPE,
@@ -31,29 +31,32 @@ import {
 } from '../../../../../../constants/tree';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
-
 interface IProps {
 	id: string;
 	name: string;
+	index: number;
 	level: number;
+	parentId?: number;
 	parentIndex?: number;
 	visible?: boolean;
 	selected?: boolean;
 	highlighted?: boolean;
-	collapsed?: boolean;
+	expanded?: boolean;
 	hasChildren?: boolean;
 	isModel?: boolean;
 	isFederation?: boolean;
+	collapseNode?: (id) => void;
+	expandNode?: (id) => void;
 }
 
-const CollapseButton = ({ Icon, onClick, collapsed, hasChildren, nodeType }) => (
-	<StyledCollapseButton
+const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
+	<StyledExpandableButton
 		onClick={onClick}
-		collapsed={collapsed}
+		expanded={expanded}
 		hasChildren={hasChildren}
 		nodeType={nodeType}>
 		<Icon size="small" />
-	</StyledCollapseButton>
+	</StyledExpandableButton>
 );
 
 export class TreeNode extends React.PureComponent<IProps, any> {
@@ -61,7 +64,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		visible: false,
 		selected: false,
 		highlighted: false,
-		collapsed: false,
+		expanded: false,
 		hasChildren: false,
 		isFederation: false,
 		isModel: false
@@ -77,25 +80,25 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	}
 
 	public expandNode = () => {
-		console.log('open')
+		this.props.expandNode(this.props.id);
 	}
 
 	public collapseNode = () => {
 		if (this.props.hasChildren) {
-			console.log('close')
+			this.props.collapseNode(this.props.id);
 		}
 		return;
 	}
 
-	public renderCollapseButton = renderWhenTrue(() => {
-		const { collapsed, hasChildren } = this.props;
+	public rendereExpandableButton = renderWhenTrue(() => {
+		const { expanded, hasChildren } = this.props;
 		return (
 			<CollapseButton
 				nodeType={this.type}
-				collapsed={collapsed}
+				expanded={expanded}
 				hasChildren={hasChildren}
-				Icon={collapsed && hasChildren ? AddIcon : RemoveIcon}
-				onClick={collapsed && hasChildren ? this.expandNode : this.collapseNode}
+				Icon={!expanded && hasChildren ? AddIcon : RemoveIcon}
+				onClick={!expanded && hasChildren ? this.expandNode : this.collapseNode}
 			/>
 		);
 	});
@@ -127,7 +130,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	));
 
 	public get isExpandedModelInFederation() {
-		return this.type === TREE_ITEM_MODEL_TYPE && this.props.level === 2 && !this.props.collapsed;
+		return this.type === TREE_ITEM_MODEL_TYPE && this.props.level === 2 && this.props.expanded;
 	}
 
 	public get isHightlightedObject() {
@@ -135,19 +138,19 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { name, highlighted, collapsed, hasChildren, selected, isFederation, level } = this.props;
+		const { name, highlighted, expanded, hasChildren, selected, isFederation, level } = this.props;
 
 		return (
 			<Container
 				nodeType={this.type}
-				collapsable={hasChildren}
+				expandable={hasChildren}
 				selected={selected}
 				highlighted={highlighted}
-				collapsed={collapsed}
+				expanded={expanded}
 				level={level}
 			>
 				<NameWrapper>
-					{this.renderCollapseButton(!isFederation)}
+					{this.rendereExpandableButton(!isFederation)}
 					<Name nodeType={this.type}>{name}</Name>
 				</NameWrapper>
 				{this.renderModelActions(this.isExpandedModelInFederation)}

@@ -43,10 +43,13 @@ interface IProps {
 	searchEnabled: boolean;
 	ifcSpacesHidden: boolean;
 	treeNodesList: any[];
+	expandedNodesMap: any;
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
 	isolateSelectedNodes: () => void;
 	hideIfcSpaces: () => void;
+	expandNode: (id) => void;
+	collapseNode: (id) => void;
 }
 
 const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show tree menu" {...props} />;
@@ -130,7 +133,16 @@ export class Tree extends React.PureComponent<IProps, any> {
 		</>
 	)
 
+	public expandNode = (id) => {
+		this.props.expandNode(id);
+	}
+
+	public collapseNode = (id) => {
+		this.props.collapseNode(id);
+	}
+
 	public render() {
+		const { treeNodesList, expandedNodesMap, searchEnabled } = this.props;
 		return (
 			<ViewerPanel
 				title="Tree"
@@ -138,23 +150,38 @@ export class Tree extends React.PureComponent<IProps, any> {
 				renderActions={this.renderActions}
 				pending={false}
 			>
-				{this.renderFilterPanel(this.props.searchEnabled)}
+				{this.renderFilterPanel(searchEnabled)}
 				<ViewerPanelContent className="height-catcher">
 					<TreeNodes>
-						{this.props.treeNodesList.map((treeNode) => (
-							<TreeNode
-								key={treeNode._id}
-								id={treeNode._id}
-								name={treeNode.data.name}
-								level={treeNode.level}
-								isFederation={treeNode.isFederation}
-								isModel={treeNode.isModel}
-								hasChildren={treeNode.hasChildren}
-								selected={treeNode.selected}
-								highlighted={treeNode.highlighted}
-								collapsed={treeNode.collapsed}
-							/>
-						))}
+						{treeNodesList.map((treeNode) => {
+							const isFirstLevel = treeNode.level === 1;
+							const isSecondLevel = treeNode.level === 2;
+
+							if (isFirstLevel || isSecondLevel || expandedNodesMap[treeNode.parentId]) {
+								return (
+									<TreeNode
+										key={treeNode._id}
+										id={treeNode._id}
+										name={treeNode.name}
+										index={treeNode.index}
+										level={treeNode.level}
+										isFederation={treeNode.isFederation}
+										isModel={
+											(isFirstLevel && !treeNode.isFederation) ||
+											(isSecondLevel && treeNodesList[treeNode.parentIndex].isFederation)
+										}
+										hasChildren={treeNode.hasChildren}
+										selected={treeNode.selected}
+										highlighted={treeNode.highlighted}
+										parentIndex={treeNode.parentIndex}
+										parentId={treeNode.parentId}
+										expandNode={this.expandNode}
+										collapseNode={this.collapseNode}
+										expanded={expandedNodesMap[treeNode._id]}
+									/>
+								);
+							}
+						})}
 					</TreeNodes>
 				</ViewerPanelContent>
 			</ViewerPanel>

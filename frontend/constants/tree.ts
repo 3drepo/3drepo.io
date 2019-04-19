@@ -43,9 +43,7 @@ export const mockedTreeFlatList = [
 		level: 1,
 		parentIndex: null,
 		parentId: null,
-		data: {
-			name: 'Federation name'
-		},
+		name: 'Federation name',
 		isFederation: true
 	},
 	{
@@ -54,12 +52,9 @@ export const mockedTreeFlatList = [
 		level: 2,
 		parentIndex: 0,
 		parentId: "fghjk-ertyui-cvbnm",
-		data: {
-			name: 'Model A - Revision AA'
-		},
+		name: 'Model A - Revision AA',
 		hasChildren: true,
-		isModel: true,
-		collapsed: false
+		childrenNumber: 13
 	},
 	{
 		_id: "cvbnm-dfghjk-qwerty",
@@ -67,12 +62,9 @@ export const mockedTreeFlatList = [
 		level: 3,
 		parentIndex: 1,
 		parentId: "asdfgh-xcvbnm-rtyuo",
-		data: {
-			name: 'Object name'
-		},
+		name: 'Object name',
 		hasChildren: true,
-		collapsed: true,
-		selected: true
+		childrenNumber: 3
 	},
 	{
 		_id: "iuytr-mnhgfc-rthbvcd",
@@ -80,11 +72,9 @@ export const mockedTreeFlatList = [
 		level: 4,
 		parentIndex: 2,
 		parentId: "cvbnm-dfghjk-qwerty",
-		data: {
-			name: 'Object some name'
-		},
+		name: 'Object some name',
 		hasChildren: true,
-		collapsed: true
+		childrenNumber: 0
 	},
 	{
 		_id: "xerfs-kjhgfd-rtyuhg",
@@ -92,11 +82,9 @@ export const mockedTreeFlatList = [
 		level: 4,
 		parentIndex: 2,
 		parentId: "cvbnm-dfghjk-qwerty",
-		data: {
-			name: 'Object name 3drepos parent'
-		},
+		name: 'Object name 3drepos parent',
 		hasChildren: true,
-		collapsed: false
+		childrenNumber: 4
 	},
 	{
 		_id: "edcfg-iuytr-zxcvbh",
@@ -104,9 +92,7 @@ export const mockedTreeFlatList = [
 		level: 5,
 		parentIndex: 4,
 		parentId: "xerfs-kjhgfd-rtyuhg",
-		data: {
-			name: 'Object name 3drepo'
-		}
+		name: 'Object name 3drepo'
 	},
 	{
 		_id: "lkjhg-asdfgh-edcfty",
@@ -114,9 +100,7 @@ export const mockedTreeFlatList = [
 		level: 5,
 		parentIndex: 4,
 		parentId: "xerfs-kjhgfd-rtyuhg",
-		data: {
-			name: 'Object name 4drepo'
-		}
+		name: 'Object name 4drepo',
 	},
 	{
 		_id: "mnbv-lkjhg-poiuyt",
@@ -124,9 +108,7 @@ export const mockedTreeFlatList = [
 		level: 5,
 		parentIndex: 4,
 		parentId: "xerfs-kjhgfd-rtyuhg",
-		data: {
-			name: 'Object name 5drepo'
-		}
+		name: 'Object name 5drepo'
 	},
 	{
 		_id: "dfgfg-lkjhg-gfffh",
@@ -134,9 +116,7 @@ export const mockedTreeFlatList = [
 		level: 5,
 		parentIndex: 4,
 		parentId: "xerfs-kjhgfd-rtyuhg",
-		data: {
-			name: 'Object name 6drepo'
-		}
+		name: 'Object name 6drepo'
 	},
 	{
 		_id: "ujgfe-zxcvb-kjhgf",
@@ -144,37 +124,28 @@ export const mockedTreeFlatList = [
 		level: 4,
 		parentIndex: 2,
 		parentId: "cvbnm-dfghjk-qwerty",
-		data: {
-			name: 'Object child 2'
-		},
+		name: 'Object child 2',
 		hasChildren: true,
-		collapsed: false,
-		selected: true
+		childrenNumber: 2
 	},
 	{
 		_id: "hgdfh-asdfgh-edcfty",
 		index: 10,
 		level: 5,
 		parentIndex: 9,
-		parentId: "cvbnm-dfghjk-qwerty",
-		data: {
-			name: 'Object object'
-		},
-		hasChildren: true,
-		collapsed: true
+		parentId: "ujgfe-zxcvb-kjhgf",
+		name: 'Object object',
+		hasChildren: true
 	},
 	{
 		_id: "mnbv-ityit-poiuyt",
 		index: 11,
 		level: 5,
 		parentIndex: 9,
-		parentId: "cvbnm-dfghjk-qwerty",
-		data: {
-			name: 'Object hello'
-		},
+		parentId: "ujgfe-zxcvb-kjhgf",
+		name: 'Object hello',
 		hasChildren: true,
-		collapsed: false,
-		selected: true
+		childrenNumber: 3
 	},
 	{
 		_id: "dfhdfh-asdfgh-edcfty",
@@ -182,10 +153,7 @@ export const mockedTreeFlatList = [
 		level: 6,
 		parentIndex: 11,
 		parentId: "mnbv-ityit-poiuyt",
-		data: {
-			name: 'Object lowest 1'
-		},
-		highlighted: true
+		name: 'Object lowest 1'
 	},
 	{
 		_id: "mnbv-ityit-gdfg",
@@ -193,10 +161,7 @@ export const mockedTreeFlatList = [
 		level: 6,
 		parentIndex: 11,
 		parentId: "mnbv-ityit-poiuyt",
-		data: {
-			name: 'Object lowest 2'
-		},
-		highlighted: true
+		name: 'Object lowest 2'
 	},
 	{
 		_id: "bnmgm-ityit-poiuy",
@@ -204,10 +169,7 @@ export const mockedTreeFlatList = [
 		level: 6,
 		parentIndex: 11,
 		parentId: "mnbv-ityit-poiuyt",
-		data: {
-			name: 'Object lowest 3'
-		},
-		highlighted: true
+		name: 'Object lowest 3'
 	},
 	{
 		_id: "gdfgdfg-xcvbnm-rtyuo", // SUBMODEL 2
@@ -215,12 +177,8 @@ export const mockedTreeFlatList = [
 		level: 2,
 		parentIndex: 0,
 		parentId: "fghjk-ertyui-cvbnm",
-		data: {
-			name: 'Model B - Revision AA'
-		},
-		hasChildren: true,
-		isModel: true,
-		collapsed: true
+		name: 'Model B - Revision AA',
+		hasChildren: false
 	},
 	{
 		_id: "nfgnfn-xcvbnm-rtyuo", // SUBMODEL 3
@@ -228,11 +186,7 @@ export const mockedTreeFlatList = [
 		level: 2,
 		parentIndex: 0,
 		parentId: "fghjk-ertyui-cvbnm",
-		data: {
-			name: 'Model C- Revision BB'
-		},
-		hasChildren: true,
-		isModel: true,
-		collapsed: true
+		name: 'Model C - Revision BB',
+		hasChildren: false
 	}
 ];

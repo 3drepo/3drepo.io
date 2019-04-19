@@ -31,7 +31,9 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	setComponentState: ['componentState'],
 	resetComponentState: [],
 	setIfcSpacesHidden: ['ifcSpacesHidden'],
-	setTreeNodesList: ['treeNodesList']
+	setTreeNodesList: ['treeNodesList'],
+	expandNode: ['id'],
+	collapseNode: ['id']
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
@@ -42,6 +44,8 @@ export interface ITreeComponentState {
 	visibleNodesMap: any;
 	highlightedNodesMap: any;
 	selectedNodesMap: any;
+	expandedNodesMap: any;
+	nodesIndexesMap: any;
 }
 export interface ITreeState {
 	selectedNodes: any;
@@ -57,7 +61,9 @@ export const INITIAL_STATE: ITreeState = {
 		treeNodesList: [],
 		visibleNodesMap: {},
 		highlightedNodesMap: {},
-		selectedNodesMap: {}
+		selectedNodesMap: {},
+		expandedNodesMap: {},
+		nodesIndexesMap: {}
 	}
 };
 
@@ -81,6 +87,29 @@ export const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) =
 	return { ...state, componentState: { ...state.componentState, ifcSpacesHidden } };
 };
 
+export const expandNode = (state = INITIAL_STATE, { id }) => {
+	const expandedNodesMap = { ...state.componentState.expandedNodesMap };
+	expandedNodesMap[id] = true;
+
+	return { ...state, componentState: { ...state.componentState, expandedNodesMap } };
+};
+
+export const collapseNode = (state = INITIAL_STATE, { id }) => {
+	const expandedNodesMap = { ...state.componentState.expandedNodesMap };
+	const treeNodesList = { ...state.componentState.treeNodesList };
+	const nodesIndexesMap = { ...state.componentState.nodesIndexesMap };
+	const nodeIndex = nodesIndexesMap[id];
+	const node = treeNodesList[nodeIndex];
+
+	for (let i = nodeIndex; i <= node.childrenNumber + 1; i++) {
+		if (treeNodesList[i].hasChildren) {
+			expandedNodesMap[treeNodesList[i]._id] = false;
+		}
+	}
+
+	return { ...state, componentState: { ...state.componentState, expandedNodesMap } };
+};
+
 const resetComponentState = (state = INITIAL_STATE) => {
 	return { ...state, componentState: INITIAL_STATE.componentState };
 };
@@ -91,5 +120,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.SET_COMPONENT_STATE]: setComponentState,
 	[TreeTypes.RESET_COMPONENT_STATE]: resetComponentState,
 	[TreeTypes.SET_IFC_SPACES_HIDDEN]: setIfcSpacesHidden,
-	[TreeTypes.SET_TREE_NODES_LIST]: setTreeNodesList
+	[TreeTypes.SET_TREE_NODES_LIST]: setTreeNodesList,
+	[TreeTypes.EXPAND_NODE]: expandNode,
+	[TreeTypes.COLLAPSE_NODE]: collapseNode
 });

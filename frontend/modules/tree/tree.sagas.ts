@@ -18,7 +18,7 @@
 // tslint:disable-next-line
 const TreeWorker = require('worker-loader?inline!./tree.worker');
 import { put, takeLatest, call, select } from 'redux-saga/effects';
-
+import { keyBy, mapValues } from 'lodash';
 import { delay } from 'redux-saga';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -48,7 +48,9 @@ const treeWorker = new TreeWorker();
 export function* fetchTreeData() {
 	try {
 		const worker = setupWorker(treeWorker, (result) => {
+			const nodesIndexesMap = mapValues(keyBy(result.data, '_id'), (node) => node.index);
 			dispatch(TreeActions.setTreeNodesList(result.data));
+			dispatch(TreeActions.setComponentState({ nodesIndexesMap }));
 		});
 		worker.postMessage({ data: 'test' });
 	} catch (error) {
