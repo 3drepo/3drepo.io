@@ -101,10 +101,14 @@ export const collapseNode = (state = INITIAL_STATE, { id }) => {
 	const nodeIndex = nodesIndexesMap[id];
 	const node = treeNodesList[nodeIndex];
 
-	for (let i = nodeIndex; i <= node.childrenNumber + 1; i++) {
-		if (treeNodesList[i].hasChildren) {
-			expandedNodesMap[treeNodesList[i]._id] = false;
+	if (node.childrenNumber) {
+		for (let i = nodeIndex; i < nodeIndex + node.childrenNumber; i++) {
+			if (expandedNodesMap[treeNodesList[i]._id]) {
+				expandedNodesMap[treeNodesList[i]._id] = false;
+			}
 		}
+	} else {
+		expandedNodesMap[id] = false;
 	}
 
 	return { ...state, componentState: { ...state.componentState, expandedNodesMap } };
