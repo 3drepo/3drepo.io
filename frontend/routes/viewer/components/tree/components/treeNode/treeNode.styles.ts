@@ -26,10 +26,10 @@ import {
 
 interface IContainer {
 	nodeType: string;
-	collapsable: boolean;
+	expandable: boolean;
 	selected: boolean;
 	highlighted: boolean;
-	collapsed: boolean;
+	expanded: boolean;
 	level: number;
 }
 
@@ -37,10 +37,10 @@ interface IName {
 	nodeType: string;
 }
 
-interface ICollapseButton {
+interface IExpandableButton {
 	nodeType?: string;
 	hasChildren: boolean;
-	collapsed: boolean;
+	expanded: boolean;
 }
 
 const getBackgroundColor = (props) => cond([
@@ -58,7 +58,7 @@ const getBackgroundColor = (props) => cond([
 	])(props.nodeType);
 
 const getBoxShadow = (props) => {
-	if (!props.collapsed && isEqual(TREE_ITEM_MODEL_TYPE, props.nodeType)) {
+	if (props.expanded && isEqual(TREE_ITEM_MODEL_TYPE, props.nodeType)) {
 		return `inset 0px -12px 12px -10px ${COLOR.BLACK_20}`;
 	} else if (props.highlighted) {
 		return `inset 0px 0px 0px 1px #757575`;
@@ -98,7 +98,7 @@ const getButtonBackgroundColor = (props) => {
 	return 'transparent';
 };
 
-export const StyledCollapseButton = styled.button<ICollapseButton>`
+export const StyledExpandableButton = styled.button<IExpandableButton>`
     background-color: ${(props) => getButtonBackgroundColor(props)};
     border-radius: 3px;
     color: ${(props) => props.hasChildren ? COLOR.WHITE : COLOR.PRIMARY_DARK};

@@ -47,3 +47,11 @@ export const selectIfcSpacesHidden = createSelector(
 export const selectTreeNodesList = createSelector(
 	selectComponentState, (state) => state.treeNodesList
 );
+
+export const selectExpandedNodesMap = createSelector(
+	selectComponentState, (state) => state.expandedNodesMap
+);
+
+export const selectNodesIndexesMap = createSelector(
+	selectComponentState, (state) => state.nodesIndexesMap
+);
