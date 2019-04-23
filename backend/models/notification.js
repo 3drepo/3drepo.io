@@ -133,10 +133,10 @@ module.exports = {
 		return this.insertNotification(username, types.MODEL_UPDATED, data);
 	},
 
-	removeIssueAssignedNotification:function(username, teamSpace, modelId, issueId) {
+	removeIssueFromNotification: function(username, teamSpace, modelId, issueId, issueType) {
 		const criteria = {teamSpace,  modelId, issuesId:{$in: [issueId]}};
 
-		return getNotification(username, types.ISSUE_ASSIGNED, criteria).then(notifications => {
+		return getNotification(username, issueType, criteria).then(notifications => {
 			if (notifications.length === 0) {
 				return null;
 			} else {
@@ -271,13 +271,42 @@ module.exports = {
 			})
 			.then((users) => {
 				return Promise.all(
-					users.map(u => this.removeIssueAssignedNotification(u, teamSpace, modelId, utils.objectIdToString(issue._id)).then(n =>
+					users.map(u => this.removeIssueFromNotification(u, teamSpace, modelId, utils.objectIdToString(issue._id), types.ISSUE_ASSIGNED).then(n =>
 						Object.assign({username:u}, n))))
 					.then(notifications => notifications.reduce((a,c) => ! c.notification ? a : a.concat(c), []))
 					.then(usersNotifications => {
 						return fillModelNames(usersNotifications.map(un => un.notification)).then(()=> usersNotifications);
 					});
 			});
+	},
+
+	removeClosedNotifications: async function (username, teamSpace, modelId, issue) {
+		if (!issue) {
+			return Promise.resolve([]);
+		}
+
+		const assignedRoles = await this.findAssignedJobs(issue);
+
+		const issueType = types.ISSUE_CLOSED;
+
+		const matchedUsers = await job.findUsersWithJobs(teamSpace, [...assignedRoles]);
+
+		// Leave out the current user , closing the issue.
+		const users = matchedUsers.filter(m => m !== username);
+
+		// Filter the notifications, for each user to delete.
+		const filterRolesToNotifications = await Promise.all(
+			users.map(u => {
+				return this.removeIssueFromNotification(u, teamSpace, modelId, utils.objectIdToString(issue._id), issueType)
+					.then((n) => {
+						return Object.assign({ username: u }, n);
+					});
+			})).then(notifications => notifications.reduce((a, c) => !c.notification ? a : a.concat(c), []));
+
+		// Fill model names for the deleted, issues/notifications.
+		const modelNameClosedNotifications = await fillModelNames(filterRolesToNotifications.map(un => un.notification)).then(() => filterRolesToNotifications);
+
+		return modelNameClosedNotifications;
 	},
 
 	upsertIssueClosedNotifications: async function (username, teamSpace, modelId, issue) {
