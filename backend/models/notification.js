@@ -27,7 +27,7 @@ const User = require("./user");
 
 const types = {
 	ISSUE_ASSIGNED : "ISSUE_ASSIGNED",
-	ISSUE_CREATED : "ISSUE_CREATED",
+	ISSUE_CLOSED: "ISSUE_CLOSED",
 	MODEL_UPDATED : "MODEL_UPDATED",
 	MODEL_UPDATED_FAILED : "MODEL_UPDATED_FAILED"
 };
@@ -116,7 +116,13 @@ module.exports = {
 		});
 	},
 
-	upsertIssueAssignedtNotification: function(username, teamSpace, modelId, issueId) {
+	upsertIssueClosedNotification: function (username, teamSpace, modelId, issueId) {
+		const criteria = { teamSpace, modelId };
+		const data = { issuesId: [issueId] };
+		return this.upsertNotification(username, data, types.ISSUE_CLOSED, criteria);
+	},
+
+	upsertIssueAssignedNotification: function(username, teamSpace, modelId, issueId) {
 		const criteria = {teamSpace,  modelId};
 		const data = {issuesId: [issueId] };
 		return this.upsertNotification(username,data,types.ISSUE_ASSIGNED,criteria);
@@ -195,7 +201,7 @@ module.exports = {
 			.then((users) => {
 				const assignedUsers = users.filter(u => u.canWrite).map(u=> u.user);
 				return Promise.all(
-					assignedUsers.map(u => this.upsertIssueAssignedtNotification(u, teamSpace, modelId, issue._id).then(n=>({username:u, notification:n})))
+					assignedUsers.map(u => this.upsertIssueAssignedNotification(u, teamSpace, modelId, issue._id).then(n=>({username:u, notification:n})))
 				).then(usersNotifications => {
 					return fillModelNames(usersNotifications.map(un => un.notification)).then(()=> usersNotifications);
 				});
@@ -272,6 +278,56 @@ module.exports = {
 						return fillModelNames(usersNotifications.map(un => un.notification)).then(()=> usersNotifications);
 					});
 			});
+	},
+
+	upsertIssueClosedNotifications: async function (username, teamSpace, modelId, issue) {
+		const comments = issue.comments;
+		const rolesKey = "assigned_roles";
+		const assignedRoles = new Set();
+
+		// Add the user who created the issue.
+		assignedRoles.add(issue.creator_role);
+
+		// Add current assigned role.
+		assignedRoles.add(issue.assigned_roles[0]);
+
+		for (const item in comments) {
+			const actionProperty = comments[item].action;
+			// Check for additional roles that have been assigned using the issue comments.
+
+			if (actionProperty && actionProperty.property === rolesKey) {
+				assignedRoles.add(actionProperty.from);
+			}
+		}
+
+		const matchedUsers = await job.findUsersWithJobs(teamSpace, [...assignedRoles]);
+
+		const users = [];
+		const getUserPromises = [];
+
+		for(const user of matchedUsers) {
+			if(user !== username) {
+				getUserPromises.push(hasWriteAccessToModelHelper(user, teamSpace, modelId).then((canWrite) => {
+					const authUsers = { user, canWrite };
+					if (authUsers.canWrite) {
+						users.push(authUsers.user);
+					}
+				}));
+			}
+		}
+
+		await Promise.all(getUserPromises);
+
+		const userNotifications = await Promise.all(users.map(u => {
+			return this.upsertIssueClosedNotification(u, teamSpace, modelId,  issue._id)
+				.then((n) => {
+					return ({ username: u, notification: n });
+				});
+		}));
+
+		const notifiWithModelNames = await fillModelNames(userNotifications.map(un => un.notification)).then(() => userNotifications);
+
+		return notifiWithModelNames;
 	},
 
 	/**
