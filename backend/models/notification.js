@@ -70,6 +70,29 @@ const getNotification = (username, type, criteria) =>
 	db.getCollection(NOTIFICATIONS_DB, username)
 		.then((collection) => collection.find(Object.assign({type},  criteria)).toArray());
 
+const getHistoricAssignedRoles = (issue) => {
+	const comments = issue.comments;
+	const rolesKey = "assigned_roles";
+	const assignedRoles = new Set();
+
+	// Add the user who created the issue.
+	assignedRoles.add(issue.creator_role);
+
+	// Add current assigned role.
+	assignedRoles.add(issue.assigned_roles[0]);
+
+	for (const item in comments) {
+		const actionProperty = comments[item].action;
+		// Check for additional roles that have been assigned using the issue comments.
+
+		if (actionProperty && actionProperty.property === rolesKey) {
+			assignedRoles.add(actionProperty.from);
+		}
+	}
+
+	return assignedRoles;
+};
+
 module.exports = {
 	types,
 
@@ -285,8 +308,7 @@ module.exports = {
 			return Promise.resolve([]);
 		}
 
-		const assignedRoles = await this.findAssignedJobs(issue);
-
+		const assignedRoles = getHistoricAssignedRoles(issue);
 		const issueType = types.ISSUE_CLOSED;
 
 		const matchedUsers = await job.findUsersWithJobs(teamSpace, [...assignedRoles]);
@@ -310,25 +332,7 @@ module.exports = {
 	},
 
 	upsertIssueClosedNotifications: async function (username, teamSpace, modelId, issue) {
-		const comments = issue.comments;
-		const rolesKey = "assigned_roles";
-		const assignedRoles = new Set();
-
-		// Add the user who created the issue.
-		assignedRoles.add(issue.creator_role);
-
-		// Add current assigned role.
-		assignedRoles.add(issue.assigned_roles[0]);
-
-		for (const item in comments) {
-			const actionProperty = comments[item].action;
-			// Check for additional roles that have been assigned using the issue comments.
-
-			if (actionProperty && actionProperty.property === rolesKey) {
-				assignedRoles.add(actionProperty.from);
-			}
-		}
-
+		const assignedRoles = getHistoricAssignedRoles(issue);
 		const matchedUsers = await job.findUsersWithJobs(teamSpace, [...assignedRoles]);
 
 		const users = [];

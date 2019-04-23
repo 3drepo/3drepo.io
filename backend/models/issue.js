@@ -448,7 +448,6 @@ issue.updateFromBCF = function(dbCol, issueToUpdate, changeSet) {
 };
 
 issue.updateAttrs = function(dbCol, uid, data) {
-
 	const sessionId = data.sessionId;
 
 	if ("[object String]" === Object.prototype.toString.call(uid)) {
@@ -653,9 +652,20 @@ issue.updateAttrs = function(dbCol, uid, data) {
 						toUpdate.status_last_changed = (new Date()).getTime();
 						newIssue.status_last_changed = toUpdate.status_last_changed;
 
-						if (newIssue.status !== "closed" && data.status === "closed") {
+						toUpdate.status = data.status;
+						newIssue.status = data.status;
+
+						if (this.isIssueBeingClosed(oldIssue, newIssue)) {
 							notificationPromises.push(
 								Notification.removeAssignedNotifications(
+									data.owner,
+									dbCol.account,
+									dbCol.model,
+									oldIssue
+								)
+							);
+							notificationPromises.push(
+								Notification.upsertIssueClosedNotifications(
 									data.owner,
 									dbCol.account,
 									dbCol.model,
@@ -664,8 +674,16 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							);
 						}
 
-						toUpdate.status = data.status;
-						newIssue.status = data.status;
+						if (this.isIssueBeingReopened(oldIssue, newIssue)) {
+							notificationPromises.push(
+								Notification.removeClosedNotifications(
+									data.owner,
+									dbCol.account,
+									dbCol.model,
+									newIssue
+								)
+							);
+						}
 					} else {
 						throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 					}
@@ -971,6 +989,10 @@ issue.getThumbnail = function(dbCol, uid) {
 
 issue.isIssueBeingClosed = function(oldIssue, newIssue) {
 	return !!oldIssue && oldIssue.status !== "closed" && newIssue.status === "closed";
+};
+
+issue.isIssueBeingReopened = function (oldIssue, newIssue) {
+	return oldIssue && oldIssue.status === "closed" && newIssue.status !== "closed";
 };
 
 issue.isIssueAssignment = function(oldIssue, newIssue) {

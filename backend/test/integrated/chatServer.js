@@ -79,7 +79,6 @@ describe("Chat service", function () {
 	};
 
 	const updateIssue = (agent, id, partialIssue) => next => {
-		console.log("PARTIAL ISSUE", partialIssue);
 			return agent.put(`/${account}/${model}/issues/${id}.json`)
 				.send(partialIssue)
 				.expect(200 , function(err, res) {
@@ -189,146 +188,146 @@ describe("Chat service", function () {
 		});
 	});
 
-	// it("subscribe new issue chat event should succeed", function(done) {
+	it("subscribe new issue chat event should succeed", function(done) {
 
-	// 	// other users post an issue
-	// 	const issue = Object.assign({"name":"Issue test"}, baseIssue);
+		// other users post an issue
+		const issue = Object.assign({"name":"Issue test"}, baseIssue);
 
-	// 	socket.on(`${account}::${model}::issueCreated`, function(issues) {
-	// 		socket.off(`${account}::${model}::issueCreated`);
+		socket.on(`${account}::${model}::issueCreated`, function(issues) {
+			socket.off(`${account}::${model}::issueCreated`);
 
-	// 		expect(issues[0]).to.exist;
-	// 		expect(issues[0].name).to.equal(issue.name);
-	// 		expect(issues[0].scale).to.equal(issue.scale);
-	// 		expect(issues[0].status).to.equal(issue.status);
-	// 		expect(issues[0].topic_type).to.equal(issue.topic_type);
-	// 		expect(issues[0].priority).to.equal(issue.priority);
-	// 		expect(issues[0].creator_role).to.equal(issue.creator_role);
-	// 		expect(issues[0].assigned_roles).to.deep.equal(issue.assigned_roles);
-	// 		expect(issues[0].viewpoint.up).to.deep.equal(issue.viewpoint.up);
-	// 		expect(issues[0].viewpoint.position).to.deep.equal(issue.viewpoint.position);
-	// 		expect(issues[0].viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
-	// 		expect(issues[0].viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
-	// 		expect(issues[0].viewpoint.right).to.deep.equal(issue.viewpoint.right);
-	// 		expect(issues[0].viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
-	// 		expect(issues[0].viewpoint.fov).to.equal(issue.viewpoint.fov);
-	// 		expect(issues[0].viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
-	// 		expect(issues[0].viewpoint.far).to.equal(issue.viewpoint.far);
-	// 		expect(issues[0].viewpoint.near).to.equal(issue.viewpoint.near);
-	// 		expect(issues[0].viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
-	// 		issueId = issues[0]._id;
+			expect(issues[0]).to.exist;
+			expect(issues[0].name).to.equal(issue.name);
+			expect(issues[0].scale).to.equal(issue.scale);
+			expect(issues[0].status).to.equal(issue.status);
+			expect(issues[0].topic_type).to.equal(issue.topic_type);
+			expect(issues[0].priority).to.equal(issue.priority);
+			expect(issues[0].creator_role).to.equal(issue.creator_role);
+			expect(issues[0].assigned_roles).to.deep.equal(issue.assigned_roles);
+			expect(issues[0].viewpoint.up).to.deep.equal(issue.viewpoint.up);
+			expect(issues[0].viewpoint.position).to.deep.equal(issue.viewpoint.position);
+			expect(issues[0].viewpoint.look_at).to.deep.equal(issue.viewpoint.look_at);
+			expect(issues[0].viewpoint.view_dir).to.deep.equal(issue.viewpoint.view_dir);
+			expect(issues[0].viewpoint.right).to.deep.equal(issue.viewpoint.right);
+			expect(issues[0].viewpoint.unityHeight).to.equal(issue.viewpoint.unityHeight);
+			expect(issues[0].viewpoint.fov).to.equal(issue.viewpoint.fov);
+			expect(issues[0].viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
+			expect(issues[0].viewpoint.far).to.equal(issue.viewpoint.far);
+			expect(issues[0].viewpoint.near).to.equal(issue.viewpoint.near);
+			expect(issues[0].viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
+			issueId = issues[0]._id;
 
 
-	// 		done();
-	// 	});
+			done();
+		});
 
-	// 	teamSpace1Agent.post(`/${account}/${model}/issues.json`)
-	// 		.send(issue)
-	// 		.expect(200 , function(err, res) {
-	// 			expect(err).to.not.exist;
-	// 		});
+		teamSpace1Agent.post(`/${account}/${model}/issues.json`)
+			.send(issue)
+			.expect(200 , function(err, res) {
+				expect(err).to.not.exist;
+			});
 
-	// 	socket.on("credentialError", function(err) {
-	// 		done(err);
-	// 	});
-	// });
+		socket.on("credentialError", function(err) {
+			done(err);
+		});
+	});
 
-	// it("subscribe new comment chat event should succeed", function(done) {
-	// 	const comment = {"comment":"abc123","viewpoint":{"up":[0,1,0],"position":[38,38,125.08011914810137],"look_at":[0,0,-1],"view_dir":[0,0,-1],"right":[1,0,0],"unityHeight":3.598903890627168,"fov":2.127137068283407,"aspect_ratio":0.8810888191084674,"far":244.15656512260063,"near":60.08161739445468,"clippingPlanes":[]}};
+	it("subscribe new comment chat event should succeed", function(done) {
+		const comment = {"comment":"abc123","viewpoint":{"up":[0,1,0],"position":[38,38,125.08011914810137],"look_at":[0,0,-1],"view_dir":[0,0,-1],"right":[1,0,0],"unityHeight":3.598903890627168,"fov":2.127137068283407,"aspect_ratio":0.8810888191084674,"far":244.15656512260063,"near":60.08161739445468,"clippingPlanes":[]}};
 
-	// 	socket.on(`${account}::${model}::${issueId}::commentCreated`, function(resComment) {
-	// 		expect(resComment).to.exist;
-	// 		expect(resComment.comment).to.equal(comment.comment);
-	// 		expect(resComment.viewpoint.up).to.deep.equal(comment.viewpoint.up);
-	// 		expect(resComment.viewpoint.position).to.deep.equal(comment.viewpoint.position);
-	// 		expect(resComment.viewpoint.look_at).to.deep.equal(comment.viewpoint.look_at);
-	// 		expect(resComment.viewpoint.view_dir).to.deep.equal(comment.viewpoint.view_dir);
-	// 		expect(resComment.viewpoint.right).to.deep.equal(comment.viewpoint.right);
-	// 		expect(resComment.viewpoint.unityHeight).to.equal(comment.viewpoint.unityHeight);
-	// 		expect(resComment.viewpoint.fov).to.equal(comment.viewpoint.fov);
-	// 		expect(resComment.viewpoint.aspect_ratio).to.equal(comment.viewpoint.aspect_ratio);
-	// 		expect(resComment.viewpoint.far).to.equal(comment.viewpoint.far);
-	// 		expect(resComment.viewpoint.near).to.equal(comment.viewpoint.near);
-	// 		expect(resComment.viewpoint.clippingPlanes).to.deep.equal(comment.viewpoint.clippingPlanes);
+		socket.on(`${account}::${model}::${issueId}::commentCreated`, function(resComment) {
+			expect(resComment).to.exist;
+			expect(resComment.comment).to.equal(comment.comment);
+			expect(resComment.viewpoint.up).to.deep.equal(comment.viewpoint.up);
+			expect(resComment.viewpoint.position).to.deep.equal(comment.viewpoint.position);
+			expect(resComment.viewpoint.look_at).to.deep.equal(comment.viewpoint.look_at);
+			expect(resComment.viewpoint.view_dir).to.deep.equal(comment.viewpoint.view_dir);
+			expect(resComment.viewpoint.right).to.deep.equal(comment.viewpoint.right);
+			expect(resComment.viewpoint.unityHeight).to.equal(comment.viewpoint.unityHeight);
+			expect(resComment.viewpoint.fov).to.equal(comment.viewpoint.fov);
+			expect(resComment.viewpoint.aspect_ratio).to.equal(comment.viewpoint.aspect_ratio);
+			expect(resComment.viewpoint.far).to.equal(comment.viewpoint.far);
+			expect(resComment.viewpoint.near).to.equal(comment.viewpoint.near);
+			expect(resComment.viewpoint.clippingPlanes).to.deep.equal(comment.viewpoint.clippingPlanes);
 
-	// 		done();
-	// 	});
+			done();
+		});
 
-	// 	// console.log('issueId2', issueId);
-	// 	teamSpace1Agent.put(`/${account}/${model}/issues/${issueId}.json`)
-	// 		.send(comment)
-	// 		.expect(200 , function(err, res) {
-	// 			expect(err).to.not.exist;
-	// 		});
-	// });
+		// console.log('issueId2', issueId);
+		teamSpace1Agent.put(`/${account}/${model}/issues/${issueId}.json`)
+			.send(comment)
+			.expect(200 , function(err, res) {
+				expect(err).to.not.exist;
+			});
+	});
 
-	// it("subscribe comment changed chat event should succeed", function(done) {
-	// 	const comment = {"comment":"abc123456","edit":true,"commentIndex":0};
+	it("subscribe comment changed chat event should succeed", function(done) {
+		const comment = {"comment":"abc123456","edit":true,"commentIndex":0};
 
-	// 	socket.on(`${account}::${model}::${issueId}::commentUpdated`, function(resComment) {
-	// 		expect(resComment).to.exist;
-	// 		expect(resComment.comment).to.equal(comment.comment);
-	// 		done();
-	// 	});
+		socket.on(`${account}::${model}::${issueId}::commentUpdated`, function(resComment) {
+			expect(resComment).to.exist;
+			expect(resComment.comment).to.equal(comment.comment);
+			done();
+		});
 
-	// 	teamSpace1Agent.put(`/${account}/${model}/issues/${issueId}.json`)
-	// 		.send(comment)
-	// 		.expect(200 , function(err, res) {
-	// 			expect(err).to.not.exist;
-	// 		});
-	// });
+		teamSpace1Agent.put(`/${account}/${model}/issues/${issueId}.json`)
+			.send(comment)
+			.expect(200 , function(err, res) {
+				expect(err).to.not.exist;
+			});
+	});
 
-	// it("subscribe comment deleted chat event should succeed", function(done) {
-	// 	const comment = {"comment":"","delete":true,"commentIndex":0};
+	it("subscribe comment deleted chat event should succeed", function(done) {
+		const comment = {"comment":"","delete":true,"commentIndex":0};
 
-	// 	socket.on(`${account}::${model}::${issueId}::commentDeleted`, function(resComment) {
-	// 		expect(resComment).to.exist;
-	// 		done();
-	// 	});
+		socket.on(`${account}::${model}::${issueId}::commentDeleted`, function(resComment) {
+			expect(resComment).to.exist;
+			done();
+		});
 
-	// 	teamSpace1Agent.put(`/${account}/${model}/issues/${issueId}.json`)
-	// 		.send(comment)
-	// 		.expect(200 , function(err, res) {
-	// 			expect(err).to.not.exist;
-	// 		});
-	// });
+		teamSpace1Agent.put(`/${account}/${model}/issues/${issueId}.json`)
+			.send(comment)
+			.expect(200 , function(err, res) {
+				expect(err).to.not.exist;
+			});
+	});
 
-	// it("subscribe issue change should succeed", function(done) {
+	it("subscribe issue change should succeed", function(done) {
 
-	// 	const status = {"priority":"high"}
+		const status = {"priority":"high"}
 
-	// 	socket.off(`${account}::${model}::${issueId}::commentCreated`);
+		socket.off(`${account}::${model}::${issueId}::commentCreated`);
 
-	// 	async.parallel([
-	// 		function(done) {
-	// 			socket.on(`${account}::${model}::${issueId}::commentCreated`, function(resComment) {
-	// 				expect(resComment).to.exist;
-	// 				expect(resComment.action).to.exist;
-	// 				expect(resComment.action.property).to.equal("priority");
-	// 				expect(resComment.action.from).to.equal("low");
-	// 				expect(resComment.action.to).to.equal("high");
+		async.parallel([
+			function(done) {
+				socket.on(`${account}::${model}::${issueId}::commentCreated`, function(resComment) {
+					expect(resComment).to.exist;
+					expect(resComment.action).to.exist;
+					expect(resComment.action.property).to.equal("priority");
+					expect(resComment.action.from).to.equal("low");
+					expect(resComment.action.to).to.equal("high");
 
-	// 				socket.off(`${account}::${model}::${issueId}::commentCreated`);
-	// 				done();
-	// 			});
-	// 		},
-	// 		function(done) {
-	// 			socket.on(`${account}::${model}::issueUpdated`, function(issue) {
-	// 				expect(issue).to.exist;
-	// 				expect(issue.priority).to.equal("high");
+					socket.off(`${account}::${model}::${issueId}::commentCreated`);
+					done();
+				});
+			},
+			function(done) {
+				socket.on(`${account}::${model}::issueUpdated`, function(issue) {
+					expect(issue).to.exist;
+					expect(issue.priority).to.equal("high");
 
-	// 				socket.off(`${account}::${model}::issueUpdated`);
-	// 				done();
-	// 			});
-	// 		}
-	// 	], done);
+					socket.off(`${account}::${model}::issueUpdated`);
+					done();
+				});
+			}
+		], done);
 
-	// 	teamSpace1Agent.put(`/${account}/${model}/issues/${issueId}.json`)
-	// 		.send({"priority":"high"})
-	// 		.expect(200 , function(err, res) {
-	// 			expect(err).to.not.exist;
-	// 		});
-	// });
+		teamSpace1Agent.put(`/${account}/${model}/issues/${issueId}.json`)
+			.send({"priority":"high"})
+			.expect(200 , function(err, res) {
+				expect(err).to.not.exist;
+			});
+	});
 
 	describe("with notifications", function() {
 		let notificationId = "";
