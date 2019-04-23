@@ -58,10 +58,27 @@ export function* fetchFullTree({ teamspace, modelId, revision }) {
 		dataToProcessed.mainTree.name = modelSettings.name;
 		dataToProcessed.mainTree.isFederation = modelSettings.federate;
 
-		if (fullTree.subTrees) {
-			const subTreesRequests = fullTree.subTrees.map(({ url }) => API.default.get(url));
-			const subTreesResponse = yield all(subTreesRequests);
-			dataToProcessed.mainTree.children = subTreesResponse.map(({ data }) => data.mainTree.nodes);
+		const subTreesData = fullTree.subTrees.length
+			? yield all(fullTree.subTrees.map(({ url }) => API.default.get(url)))
+			: [];
+
+		for (let index = 0; index < dataToProcessed.mainTree.children.length; index++) {
+			const child = dataToProcessed.mainTree.children[index];
+			const [modelTeamspace, model] = child.name.split(':');
+			const subModel = modelSettings.subModels.find((m) => m.model === model);
+
+			if (subModel) {
+				child.name = [modelTeamspace, subModel.name].join(':');
+			}
+
+			if (subModel && child.children && child.children[0]) {
+				child.children[0].name = subModel.name;
+			}
+
+			if (fullTree.subTrees.length) {
+				const subTree = subTreesData.find(({ data }) => data.mainTree.nodes.project === model);
+				child.children[0].children = [subTree.data.mainTree.nodes];
+			}
 		}
 
 		const worker = setupWorker(treeWorker, (result) => {
