@@ -53,33 +53,15 @@ export function* fetchFullTree({ teamspace, modelId, revision }) {
 		const { data: fullTree } = yield API.getFullTree(teamspace, modelId, revision);
 		yield take(ModelTypes.FETCH_SETTINGS_SUCCESS);
 
-		const dataToProcessed = { mainTree: fullTree.mainTree.nodes };
+		const dataToProcessed = { mainTree: fullTree.mainTree.nodes, subTrees: [], subModels: [] };
 		const modelSettings = yield select(selectSettings);
 		dataToProcessed.mainTree.name = modelSettings.name;
 		dataToProcessed.mainTree.isFederation = modelSettings.federate;
-
-		const subTreesData = fullTree.subTrees.length
+		dataToProcessed.subModels = modelSettings.subModels;
+		dataToProcessed.subTrees = (fullTree.subTrees.length
 			? yield all(fullTree.subTrees.map(({ url }) => API.default.get(url)))
-			: [];
-
-		for (let index = 0; index < dataToProcessed.mainTree.children.length; index++) {
-			const child = dataToProcessed.mainTree.children[index];
-			const [modelTeamspace, model] = child.name.split(':');
-			const subModel = modelSettings.subModels.find((m) => m.model === model);
-
-			if (subModel) {
-				child.name = [modelTeamspace, subModel.name].join(':');
-			}
-
-			if (subModel && child.children && child.children[0]) {
-				child.children[0].name = subModel.name;
-			}
-
-			if (fullTree.subTrees.length) {
-				const subTree = subTreesData.find(({ data }) => data.mainTree.nodes.project === model);
-				child.children[0].children = [subTree.data.mainTree.nodes];
-			}
-		}
+			: []
+		).map(({ data }) => data.mainTree);
 
 		const worker = setupWorker(treeWorker, (result) => {
 			const nodesIndexesMap = mapValues(keyBy(result.data, '_id'), (node) => node.index);
@@ -88,7 +70,7 @@ export function* fetchFullTree({ teamspace, modelId, revision }) {
 		});
 		worker.postMessage(dataToProcessed);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('fetch', 'full tree'));
+		yield put(DialogActions.showErrorDialog('fetch', 'full tree', error));
 	}
 }
 

@@ -44,10 +44,30 @@ const getFlattenNested = (tree, level = 1, currentIndex = 0, parentIndex = null,
 };
 
 self.addEventListener('message', ({ data }) => {
-	const { mainTree } = data;
+	const { mainTree, subTrees, subModels } = data;
+
+	for (let index = 0; index < mainTree.children.length; index++) {
+		const child = mainTree.children[index];
+		const [modelTeamspace, model] = child.name.split(':');
+		const subModel = subModels.find((m) => m.model === model);
+
+		if (subModel) {
+			child.name = [modelTeamspace, subModel.name].join(':');
+		}
+
+		if (subModel && child.children && child.children[0]) {
+			child.children[0].name = subModel.name;
+		}
+
+		if (subTrees.length) {
+			const subTree = subTrees.find(({ nodes }) => nodes.project === model);
+			child.children[0].children = [subTree.nodes];
+		}
+	}
+
 	console.time('TREE PROCESSING');
 	const nodesList = getFlattenNested(mainTree);
 	const result = { data: nodesList };
 	console.timeEnd('TREE PROCESSING');
-  self.postMessage(JSON.stringify({ result }));
+ self.postMessage(JSON.stringify({ result }));
 }, false);
