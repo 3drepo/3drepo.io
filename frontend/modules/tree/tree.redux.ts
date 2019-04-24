@@ -33,7 +33,14 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	setIfcSpacesHidden: ['ifcSpacesHidden'],
 	setTreeNodesList: ['treeNodesList'],
 	expandNode: ['id'],
-	collapseNode: ['id']
+	collapseNode: ['id'],
+	selectNode: ['id'],
+	deselectNode: ['id'],
+	addToSelected: ['id'],
+	addGroupToSelected: ['fromIndex', 'toIndex'],
+	removeGroupFromSelected: ['fromIndex', 'toIndex'],
+	removeFromSelected: ['id'],
+	removeAllSelected: []
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
@@ -41,8 +48,7 @@ export interface ITreeComponentState {
 	searchEnabled: boolean;
 	ifcSpacesHidden: boolean;
 	treeNodesList: any[];
-	visibleNodesMap: any;
-	highlightedNodesMap: any;
+	hiddenNodesMap: any;
 	selectedNodesMap: any;
 	expandedNodesMap: any;
 	nodesIndexesMap: any;
@@ -59,8 +65,7 @@ export const INITIAL_STATE: ITreeState = {
 		searchEnabled: false,
 		ifcSpacesHidden: true,
 		treeNodesList: [],
-		visibleNodesMap: {},
-		highlightedNodesMap: {},
+		hiddenNodesMap: {},
 		selectedNodesMap: {},
 		expandedNodesMap: {},
 		nodesIndexesMap: {}
@@ -118,6 +123,60 @@ const resetComponentState = (state = INITIAL_STATE) => {
 	return { ...state, componentState: INITIAL_STATE.componentState };
 };
 
+export const addToSelected = (state = INITIAL_STATE, { id }) => {
+	const selectedNodesMap = { ...state.componentState.selectedNodesMap };
+	selectedNodesMap[id] = true;
+	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };
+};
+
+export const addGroupToSelected = (state = INITIAL_STATE, { fromIndex, toIndex }) => {
+	const selectedNodesMap = { ...state.componentState.selectedNodesMap };
+	const treeNodesList = { ...state.componentState.treeNodesList };
+
+	for (let i = fromIndex; i < toIndex; i++) {
+		const nodeId = treeNodesList[i]._id;
+		selectedNodesMap[nodeId] = true;
+	}
+	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };
+};
+
+export const removeGroupFromSelected = (state = INITIAL_STATE, { fromIndex, toIndex }) => {
+	const selectedNodesMap = { ...state.componentState.selectedNodesMap };
+	const treeNodesList = { ...state.componentState.treeNodesList };
+
+	for (let i = fromIndex; i < toIndex; i++) {
+		const nodeId = treeNodesList[i]._id;
+		selectedNodesMap[nodeId] = false;
+	}
+	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };
+};
+
+// export const addToHighlighted = (state = INITIAL_STATE, { id }) => {
+// 	const highlightedNodesMap = { ...state.componentState.highlightedNodesMap };
+// 	highlightedNodesMap[id] = true;
+// 	return { ...state, componentState: { ...state.componentState, highlightedNodesMap } };
+// };
+
+export const removeFromSelected = (state = INITIAL_STATE, { id }) => {
+	const selectedNodesMap = { ...state.componentState.selectedNodesMap };
+	selectedNodesMap[id] = false;
+	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };
+};
+
+// export const removeFromHighlighted = (state = INITIAL_STATE, { id }) => {
+// 	const highlightedNodesMap = { ...state.componentState.highlightedNodesMap };
+// 	highlightedNodesMap[id] = false;
+// 	return { ...state, componentState: { ...state.componentState, highlightedNodesMap } };
+// };
+
+export const removeAllSelected = (state = INITIAL_STATE) => {
+	return { ...state, componentState: { ...state.componentState, selectedNodesMap: {} } };
+};
+
+// export const removeAllHighlighted = (state = INITIAL_STATE) => {
+// 	return { ...state, componentState: { ...state.componentState, highlightedNodesMap: {} } };
+// };
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.CLEAR_SELECTED_NODES]: clearSelectedNodes,
 	[TreeTypes.GET_SELECTED_NODES_SUCCESS]: getSelectedNodesSuccess,
@@ -126,5 +185,13 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.SET_IFC_SPACES_HIDDEN]: setIfcSpacesHidden,
 	[TreeTypes.SET_TREE_NODES_LIST]: setTreeNodesList,
 	[TreeTypes.EXPAND_NODE]: expandNode,
-	[TreeTypes.COLLAPSE_NODE]: collapseNode
+	[TreeTypes.COLLAPSE_NODE]: collapseNode,
+	[TreeTypes.ADD_TO_SELECTED]: addToSelected,
+	// [TreeTypes.ADD_TO_HIGHLIGHTED]: addToHighlighted,
+	[TreeTypes.REMOVE_FROM_SELECTED]: removeFromSelected,
+	// [TreeTypes.REMOVE_FROM_HIGHLIGHTED]: removeFromHighlighted,
+	[TreeTypes.REMOVE_ALL_SELECTED]: removeAllSelected,
+	// [TreeTypes.REMOVE_ALL_HIGHLIGHTED]: removeAllHighlighted,
+	[TreeTypes.ADD_GROUP_TO_SELECTED]: addGroupToSelected,
+	[TreeTypes.REMOVE_GROUP_FROM_SELECTED]: removeGroupFromSelected
 });

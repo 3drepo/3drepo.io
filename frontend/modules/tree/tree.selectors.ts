@@ -52,6 +52,14 @@ export const selectExpandedNodesMap = createSelector(
 	selectComponentState, (state) => state.expandedNodesMap
 );
 
+export const selectSelectedNodesMap = createSelector(
+	selectComponentState, (state) => state.selectedNodesMap
+);
+
+export const selectHiddenNodesMap = createSelector(
+	selectComponentState, (state) => state.hiddenNodesMap
+);
+
 export const selectNodesIndexesMap = createSelector(
 	selectComponentState, (state) => state.nodesIndexesMap
 );

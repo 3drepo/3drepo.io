@@ -28,9 +28,16 @@ import { VIEWER_EVENTS } from '../../constants/viewer';
 import { dispatch, getAngularService, getState } from '../../helpers/migration';
 import { GroupsActions } from '../groups';
 import { DialogActions } from '../dialog';
-import { selectSelectedNodes, selectIfcSpacesHidden } from './tree.selectors';
+import {
+	selectSelectedNodes,
+	selectIfcSpacesHidden,
+	selectNodesIndexesMap,
+	selectSelectedNodesMap,
+	selectTreeNodesList
+} from './tree.selectors';
 import { TreeTypes, TreeActions } from './tree.redux';
 import { selectSettings, ModelActions, ModelTypes } from '../model';
+import { MultiSelect } from '../../services/viewer/multiSelect';
 
 const setupWorker = (worker, onResponse) => {
 	worker.addEventListener('message', (e) => {
@@ -64,7 +71,11 @@ export function* fetchFullTree({ teamspace, modelId, revision }) {
 		).map(({ data }) => data.mainTree);
 
 		const worker = setupWorker(treeWorker, (result) => {
-			const nodesIndexesMap = mapValues(keyBy(result.data, '_id'), (node) => node.index);
+			const nodesIndexesMap = result.data.reduce((map, node, index) => {
+				map[node._id] = index;
+				return map;
+			}, {});
+
 			dispatch(TreeActions.setTreeNodesList(result.data));
 			dispatch(TreeActions.setComponentState({ nodesIndexesMap }));
 		});
@@ -156,6 +167,43 @@ export function* hideIfcSpaces() {
 	}
 }
 
+export function* selectNode({ id }) {
+	try {
+		const accumMode = MultiSelect.isAccumMode();
+		const decumMode = MultiSelect.isDecumMode();
+
+		const selectedNodesMap = yield select(selectSelectedNodesMap);
+		const nodesIndexesMap = yield select(selectNodesIndexesMap);
+		const treeNodesList = yield select(selectTreeNodesList);
+		const nodeIndex = nodesIndexesMap[id];
+		const node = treeNodesList[nodeIndex];
+
+		if (!node.hasChildren) {
+			yield put(TreeActions.addToSelected(id));
+
+			if (accumMode) {
+				yield put(TreeActions.addToSelected(id));
+			} else if (decumMode) {
+				yield put(TreeActions.removeFromSelected(id));
+			} else {
+				yield put(TreeActions.removeAllSelected());
+				yield put(TreeActions.addToSelected(id));
+			}
+		} else {
+			if (accumMode) {
+				yield put(TreeActions.addGroupToSelected(nodeIndex, node.childrenNumber + nodeIndex));
+			} else if (decumMode) {
+				yield put(TreeActions.removeGroupFromSelected(nodeIndex, node.childrenNumber + nodeIndex));
+			} else {
+				yield put(TreeActions.removeAllSelected());
+				yield put(TreeActions.addGroupToSelected(nodeIndex, node.childrenNumber + nodeIndex));
+			}
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('select', 'node'));
+	}
+}
+
 export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.FETCH_FULL_TREE, fetchFullTree);
 	yield takeLatest(TreeTypes.START_LISTEN_ON_SELECTIONS, startListenOnSelections);
@@ -165,4 +213,5 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.HIDE_SELECTED_NODES, hideSelectedNodes);
 	yield takeLatest(TreeTypes.ISOLATE_SELECTED_NODES, isolateSelectedNodes);
 	yield takeLatest(TreeTypes.HIDE_IFC_SPACES, hideIfcSpaces);
+	yield takeLatest(TreeTypes.SELECT_NODE, selectNode);
 }

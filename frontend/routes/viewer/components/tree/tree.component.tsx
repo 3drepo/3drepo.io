@@ -32,7 +32,7 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { Container, TreeNodes } from './tree.styles';
-import { TREE_ACTIONS_MENU, TREE_ACTIONS_ITEMS, mockedTreeFlatList } from '../../../../constants/tree';
+import { TREE_ACTIONS_MENU, TREE_ACTIONS_ITEMS } from '../../../../constants/tree';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { TreeNode } from './components/treeNode/treeNode.component';
@@ -44,12 +44,16 @@ interface IProps {
 	ifcSpacesHidden: boolean;
 	treeNodesList: any[];
 	expandedNodesMap: any;
+	selectedNodesMap: any;
+	hiddenNodesMap: any;
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
 	isolateSelectedNodes: () => void;
 	hideIfcSpaces: () => void;
 	expandNode: (id) => void;
 	collapseNode: (id) => void;
+	selectNode: (id) => void;
+	deselectNode: (id) => void;
 }
 
 const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show tree menu" {...props} />;
@@ -133,16 +137,27 @@ export class Tree extends React.PureComponent<IProps, any> {
 		</>
 	)
 
-	public expandNode = (id) => {
-		this.props.expandNode(id);
+	public selectNode = (id) => {
+		this.props.selectNode(id);
 	}
 
-	public collapseNode = (id) => {
-		this.props.collapseNode(id);
+	public deselectNode = (id) => {
+		this.props.deselectNode(id);
+	}
+
+	public isHighlighted = (treeNode) => {
+		if (!treeNode.hasChildren) {
+			return this.props.selectedNodesMap[treeNode._id] && !this.props.hiddenNodesMap[treeNode._id];
+		} else {
+			return false;
+		}
 	}
 
 	public render() {
-		const { treeNodesList, expandedNodesMap, searchEnabled } = this.props;
+		const {
+			treeNodesList, expandedNodesMap, searchEnabled, expandNode, collapseNode, selectedNodesMap
+		} = this.props;
+
 		return (
 			<ViewerPanel
 				title="Tree"
@@ -171,12 +186,14 @@ export class Tree extends React.PureComponent<IProps, any> {
 											(isSecondLevel && treeNodesList[treeNode.parentIndex].isFederation)
 										}
 										hasChildren={treeNode.hasChildren}
-										selected={treeNode.selected}
-										highlighted={treeNode.highlighted}
+										selected={selectedNodesMap[treeNode._id]}
+										highlighted={this.isHighlighted(treeNode)}
 										parentIndex={treeNode.parentIndex}
 										parentId={treeNode.parentId}
-										expandNode={this.expandNode}
-										collapseNode={this.collapseNode}
+										expandNode={expandNode}
+										collapseNode={collapseNode}
+										selectNode={this.selectNode}
+										deselectNode={this.deselectNode}
 										expanded={expandedNodesMap[treeNode._id]}
 									/>
 								);

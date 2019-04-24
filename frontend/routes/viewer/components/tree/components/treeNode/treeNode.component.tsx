@@ -47,6 +47,8 @@ interface IProps {
 	isFederation?: boolean;
 	collapseNode?: (id) => void;
 	expandNode?: (id) => void;
+	selectNode?: (id) => void;
+	deselectNode?: (id) => void;
 }
 
 const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
@@ -79,11 +81,14 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		return TREE_ITEM_OBJECT_TYPE;
 	}
 
-	public expandNode = () => {
+	public expandNode = (event) => {
+		event.stopPropagation();
 		this.props.expandNode(this.props.id);
 	}
 
-	public collapseNode = () => {
+	public collapseNode = (event) => {
+		event.stopPropagation();
+
 		if (this.props.hasChildren) {
 			this.props.collapseNode(this.props.id);
 		}
@@ -137,6 +142,10 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		return this.type === TREE_ITEM_OBJECT_TYPE && this.props.highlighted;
 	}
 
+	public handleNodeClick = () => {
+		this.props.selectNode(this.props.id);
+	}
+
 	public render() {
 		const { name, highlighted, expanded, hasChildren, selected, isFederation, level } = this.props;
 
@@ -148,6 +157,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 				highlighted={highlighted}
 				expanded={expanded}
 				level={level}
+				onClick={this.handleNodeClick}
 			>
 				<NameWrapper>
 					{this.rendereExpandableButton(!isFederation)}

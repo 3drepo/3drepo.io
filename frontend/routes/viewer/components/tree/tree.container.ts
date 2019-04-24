@@ -20,7 +20,14 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../helpers/migration';
 
 import { Tree } from './tree.component';
-import { TreeActions, selectIfcSpacesHidden, selectExpandedNodesMap } from '../../../../modules/tree';
+import {
+	TreeActions,
+	selectSelectedNodes,
+	selectIfcSpacesHidden,
+	selectExpandedNodesMap,
+	selectSelectedNodesMap,
+	selectHiddenNodesMap
+} from '../../../../modules/tree';
 import {
 	selectSearchEnabled,
 	selectSelectedFilters,
@@ -32,7 +39,9 @@ const mapStateToProps = createStructuredSelector({
 	selectedFilters: selectSelectedFilters,
 	ifcSpacesHidden: selectIfcSpacesHidden,
 	treeNodesList: selectTreeNodesList,
-	expandedNodesMap: selectExpandedNodesMap
+	expandedNodesMap: selectExpandedNodesMap,
+	selectedNodesMap: selectSelectedNodesMap,
+	hiddenNodesMap: selectHiddenNodesMap
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -41,7 +50,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	hideIfcSpaces: TreeActions.hideIfcSpaces,
 	setState: TreeActions.setComponentState,
 	expandNode: TreeActions.expandNode,
-	collapseNode: TreeActions.collapseNode
+	collapseNode: TreeActions.collapseNode,
+	selectNode: TreeActions.selectNode,
+	deselectNode: TreeActions.deselectNode
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Tree);
