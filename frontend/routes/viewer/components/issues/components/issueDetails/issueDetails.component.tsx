@@ -220,7 +220,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				renderCollapsable={this.renderDetailsForm}
 				renderNotCollapsable={() => this.renderLogList(comments && !!comments.length && !this.isNewIssue)}
 				handleHeaderClick={() => {
-					if (this.issueData._id) { // if its a new issue it shouldnt go to the viewpoint
+					if (!this.isNewIssue) { // if its a new issue it shouldnt go to the viewpoint
 						this.setCameraOnViewpoint({viewpoint: this.issueData.viewpoint});
 					}
 				}}
@@ -300,7 +300,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public onPositionSave = (position) => {
-		if (this.props.issue._id) {
+		if (!this.isNewIssue) {
 			const { teamspace, model, issue } = this.props;
 			this.props.updateIssue(teamspace, model, {...issue, position});
 		} else {

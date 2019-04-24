@@ -259,7 +259,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									onSave={this.props.onSavePin}
 									pinId={this.props.pinId}
 									hasPin={this.props.hasPin}
-									/>
+								/>
 						</StyledFormControl>
 					</FieldsContainer>
 				</FieldsRow>

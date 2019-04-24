@@ -147,8 +147,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	// onSavePin: (position) => void;
-
 	public renderDetailsForm = () => {
 		return (
 			<RiskDetailsForm
@@ -163,7 +161,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				onSavePin={this.onPositionSave}
 				pinId={this.riskData._id}
 				hasPin={this.riskData.position && this.riskData.position.length}
-				/>
+			/>
 		);
 	}
 

@@ -16,10 +16,10 @@
  */
 
 import * as React from 'react';
-import { PinIcon, LabelButton, Container } from './pinButton.styles';
 import { Viewer } from '../../../../services/viewer/viewer';
 import { VIEWER_EVENTS, NEW_PIN_ID } from '../../../../constants/viewer';
 import { PIN_COLORS } from '../../../../styles';
+import { PinIcon, LabelButton, Container } from './pinButton.styles';
 
 interface IProps {
 	onChange: (pin) => void;
@@ -104,6 +104,7 @@ export class PinButton extends React.PureComponent<IProps, any> {
 				<Container>
 					<PinIcon color={this.state.active ? 'secondary' : 'primary'}/>
 					<LabelButton onClick={this.onClickButton}>{pinLabel}</LabelButton>
-				</Container>);
+				</Container>
+				);
 	}
 }

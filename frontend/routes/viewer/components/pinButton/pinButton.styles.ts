@@ -45,7 +45,7 @@ export const LabelButton = styled(Button)`
 		padding: 0;
 		min-height: 26px;
 		border-radius: 28px;
-		color: #fafafa;
+		color: ${COLOR.LIGHT_GRAY};
 		background-color: rgba(0, 0, 0, 0.26);
 	}
 
