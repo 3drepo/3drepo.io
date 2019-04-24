@@ -246,6 +246,11 @@ html(lang="en" ng-app="3drepo").ng-scope
 									h4.grey Activity Log
 									if entry.comments
 										each comment in entry.comments
+												if comment.screenshot
+													.row.screenshot
+														.col.screenshot
+															img(class="fitImage" src=url(comment.screenshot) style="width:100%;")
+														.col
 												if comment.comment
 													| #{comment.comment}
 												if comment.action

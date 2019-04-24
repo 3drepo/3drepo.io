@@ -170,6 +170,9 @@ class ReportGenerator {
 				entry.comments.forEach((comment) => {
 					comment.owner || usersToQuery.add(comment.owner);
 					comment.created = formatDate(comment.created);
+					if (comment.viewpoint && comment.viewpoint.screenshot) {
+						comment.screenshot = comment.viewpoint.screenshot;
+					}
 					if(comment.action) {
 						if(comment.action.property === "due_date") {
 							comment.action.to = formatDate(parseInt(comment.action.to), false);
