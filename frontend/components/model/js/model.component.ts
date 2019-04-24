@@ -285,8 +285,7 @@ export const ModelComponent: ng.IComponentOptions = {
 		riskId: '=',
 		model: '=',
 		revision: '=',
-		state: '=',
-		isLiteMode: '='
+		state: '='
 	},
 	controller: ModelController,
 	controllerAs: 'vm',

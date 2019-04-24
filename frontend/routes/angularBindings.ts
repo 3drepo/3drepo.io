@@ -33,7 +33,7 @@ angular
 	.module('3drepo')
 	.component('app', wrap(App))
 	.component('dashboard', wrap(Dashboard))
-	.component('topMenu', wrap(TopMenu, ['isLiteMode', 'logoUrl', 'onLiteModeChange', 'onLogoClick']))
+	.component('topMenu', wrap(TopMenu, ['logoUrl', 'onLogoClick']))
 	.component('modelSettings', wrap(ModelSettings))
 	.component('login', wrap(Login, ['headlineText']))
 	.component('passwordForgot', wrap(PasswordForgot))
