@@ -47,7 +47,6 @@ export interface ITreeComponentState {
 	selectedFilters: any[];
 	searchEnabled: boolean;
 	ifcSpacesHidden: boolean;
-	treeNodesList: any[];
 	hiddenNodesMap: any;
 	selectedNodesMap: any;
 	expandedNodesMap: any;
@@ -55,16 +54,17 @@ export interface ITreeComponentState {
 }
 export interface ITreeState {
 	selectedNodes: any;
+	treeNodesList: any[];
 	componentState: ITreeComponentState;
 }
 
 export const INITIAL_STATE: ITreeState = {
 	selectedNodes: [],
+	treeNodesList: [],
 	componentState: {
 		selectedFilters: [],
 		searchEnabled: false,
 		ifcSpacesHidden: true,
-		treeNodesList: [],
 		hiddenNodesMap: {},
 		selectedNodesMap: {},
 		expandedNodesMap: {},
@@ -81,7 +81,7 @@ export const getSelectedNodesSuccess = (state = INITIAL_STATE, { selectedNodes }
 };
 
 export const setTreeNodesList = (state = INITIAL_STATE, { treeNodesList }) => {
-	return { ...state, componentState: { ...state.componentState, treeNodesList } };
+	return { ...state, treeNodesList };
 };
 
 export const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
@@ -101,15 +101,13 @@ export const expandNode = (state = INITIAL_STATE, { id }) => {
 
 export const collapseNode = (state = INITIAL_STATE, { id }) => {
 	const expandedNodesMap = { ...state.componentState.expandedNodesMap };
-	const treeNodesList = { ...state.componentState.treeNodesList };
-	const nodesIndexesMap = { ...state.componentState.nodesIndexesMap };
-	const nodeIndex = nodesIndexesMap[id];
-	const node = treeNodesList[nodeIndex];
+	const nodeIndex = state.componentState.nodesIndexesMap[id];
+	const node = state.treeNodesList[nodeIndex];
 
 	if (node.childrenNumber) {
 		for (let i = nodeIndex; i < nodeIndex + node.childrenNumber; i++) {
-			if (expandedNodesMap[treeNodesList[i]._id]) {
-				expandedNodesMap[treeNodesList[i]._id] = false;
+			if (expandedNodesMap[state.treeNodesList[i]._id]) {
+				expandedNodesMap[state.treeNodesList[i]._id] = false;
 			}
 		}
 	} else {
@@ -131,10 +129,9 @@ export const addToSelected = (state = INITIAL_STATE, { id }) => {
 
 export const addGroupToSelected = (state = INITIAL_STATE, { fromIndex, toIndex }) => {
 	const selectedNodesMap = { ...state.componentState.selectedNodesMap };
-	const treeNodesList = { ...state.componentState.treeNodesList };
 
 	for (let i = fromIndex; i < toIndex; i++) {
-		const nodeId = treeNodesList[i]._id;
+		const nodeId = state.treeNodesList[i]._id;
 		selectedNodesMap[nodeId] = true;
 	}
 	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };
@@ -142,10 +139,9 @@ export const addGroupToSelected = (state = INITIAL_STATE, { fromIndex, toIndex }
 
 export const removeGroupFromSelected = (state = INITIAL_STATE, { fromIndex, toIndex }) => {
 	const selectedNodesMap = { ...state.componentState.selectedNodesMap };
-	const treeNodesList = { ...state.componentState.treeNodesList };
 
 	for (let i = fromIndex; i < toIndex; i++) {
-		const nodeId = treeNodesList[i]._id;
+		const nodeId = state.treeNodesList[i]._id;
 		selectedNodesMap[nodeId] = false;
 	}
 	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };

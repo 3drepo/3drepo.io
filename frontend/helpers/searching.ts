@@ -21,11 +21,12 @@ export const searchByFilters = (
 		queryFields = ['name', 'desc']
 	) => {
 	const prefilteredItems = !returnDefaultHidden ? items.filter(({defaultHidden}) => !defaultHidden) : items;
-	const groupedFilters = groupBy(filters, 'relatedField');
 
 	if (!filters.length) {
 		return prefilteredItems;
 	}
+
+	const groupedFilters = groupBy(filters, 'relatedField');
 	return prefilteredItems.filter((item) => {
 		const filteringResults: any = map(groupedFilters, (selectedFilters: any) => {
 			const filterType = get(selectedFilters[0], 'type', DATA_TYPES.UNDEFINED);

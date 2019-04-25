@@ -23,7 +23,7 @@ import Check from '@material-ui/icons/Check';
 import IconButton from '@material-ui/core/IconButton';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
+import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import {
 	IconWrapper,
 	MenuList,
@@ -156,8 +156,15 @@ export class Tree extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const {
-			treeNodesList, expandedNodesMap, searchEnabled, expandNode, collapseNode, selectedNodesMap, nodesIndexesMap
+			treeNodesList,
+			expandedNodesMap,
+			searchEnabled,
+			selectedNodesMap,
+			nodesIndexesMap,
+			selectedFilters
 		} = this.props;
+
+		const isSearchActive = searchEnabled && selectedFilters.length;
 
 		return (
 			<ViewerPanel
@@ -173,6 +180,10 @@ export class Tree extends React.PureComponent<IProps, any> {
 							const isFirstLevel = treeNode.level === 1;
 							const isSecondLevel = treeNode.level === 2;
 							const parentIndex = nodesIndexesMap[treeNode.parentId];
+							const isFederation = treeNode.isFederation;
+							const isModel = (isFirstLevel && !treeNode.isFederation) ||
+								(isSecondLevel && treeNodesList[parentIndex].isFederation);
+							const isSearchResult = selectedFilters.length && !isFederation && !isModel;
 
 							if (isFirstLevel || isSecondLevel || expandedNodesMap[treeNode.parentId]) {
 								return (
@@ -183,6 +194,7 @@ export class Tree extends React.PureComponent<IProps, any> {
 											(isFirstLevel && !treeNode.isFederation) ||
 											(isSecondLevel && treeNodesList[parentIndex].isFederation)
 										}
+										isSearchResult={isSearchActive}
 										selected={selectedNodesMap[treeNode._id]}
 										highlighted={this.isHighlighted(treeNode)}
 										parentIndex={parentIndex}
