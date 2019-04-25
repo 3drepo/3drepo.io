@@ -71,21 +71,25 @@ export const Container = styled.li<IContainer>`
 	cursor: ${(props) => isEqual(TREE_ITEM_FEDERATION_TYPE, props.nodeType) ? 'default' : 'pointer'};
 	border-bottom: ${(props) => props.highlighted ? 'none' : `1px solid ${COLOR.DARK_GRAY}`};
 	background-color: ${(props) => getBackgroundColor(props)};
-	padding-left: ${(props) => props.level > 1 ? `${props.level * 12}px` : '42px'};
-	padding-top: ${(props) => isEqual(TREE_ITEM_OBJECT_TYPE, props.nodeType) ? '2px' : '6px'};
-	padding-bottom: ${(props) => isEqual(TREE_ITEM_OBJECT_TYPE, props.nodeType) ? '2px' : '6px'};
-	min-height: 40px;
+	padding-left: ${(props) => props.level > 1 ? `${props.level * 10}px` : '38px'};
+	padding-top: 2px;
+	padding-bottom:2px;
 	padding-right: 12px;
 	box-shadow: ${(props) => getBoxShadow(props)};
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	height: 40px;
 `;
 
 export const Name = styled.div<IName>`
 	align-self: center;
-	font-size: ${(props) => isEqual(TREE_ITEM_OBJECT_TYPE, props.nodeType) ? '13px' : '16px'};
+	font-size: 13px;
 	margin-left: 12px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 260px;
 `;
 
 const getButtonBackgroundColor = (props) => {

@@ -169,6 +169,7 @@ export function* selectNode({ id }) {
 
 		const selectedNodesMap = yield select(selectSelectedNodesMap);
 		const nodesIndexesMap = yield select(selectNodesIndexesMap);
+
 		const treeNodesList = yield select(selectTreeNodesList);
 		const nodeIndex = nodesIndexesMap[id];
 		const node = treeNodesList[nodeIndex];
@@ -186,12 +187,12 @@ export function* selectNode({ id }) {
 			}
 		} else {
 			if (accumMode) {
-				yield put(TreeActions.addGroupToSelected(nodeIndex, node.childrenNumber + nodeIndex));
+				yield put(TreeActions.addGroupToSelected(nodeIndex, node.childrenNumber + nodeIndex + 1));
 			} else if (decumMode) {
-				yield put(TreeActions.removeGroupFromSelected(nodeIndex, node.childrenNumber + nodeIndex));
+				yield put(TreeActions.removeGroupFromSelected(nodeIndex, node.childrenNumber + nodeIndex + 1));
 			} else {
 				yield put(TreeActions.removeAllSelected());
-				yield put(TreeActions.addGroupToSelected(nodeIndex, node.childrenNumber + nodeIndex));
+				yield put(TreeActions.addGroupToSelected(nodeIndex, node.childrenNumber + nodeIndex + 1));
 			}
 		}
 	} catch (error) {
