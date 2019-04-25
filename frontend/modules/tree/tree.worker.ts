@@ -1,4 +1,4 @@
-import { omit, flattenDeep } from 'lodash';
+import { omit, flattenDeep, sumBy } from 'lodash';
 
 interface IRow {
 	_id: string;
@@ -21,26 +21,35 @@ const getFlattenNested = (tree, level = 1, currentIndex = 0, parentIndex = null,
 		parentIndex,
 		parentId,
 		hasChildren: Boolean(tree.children),
-		childrenNumber: tree.children ? tree.children.length : 0,
+		childrenNumber: 0,
 		data: omit(tree, ['children'])
 	};
 
 	const dataToFlatten = [] as any;
+	let dataMap = {};
 
 	if (tree.children) {
 		for (let index = 0; index < tree.children.length; index++) {
 			const subTree = tree.children[index];
 			const prevSubTreeChildren = index > 0 ? (tree.children[index - 1].children || []) : [] ;
 			const childIndex = index + prevSubTreeChildren.length;
-			const subTreeData = getFlattenNested(subTree, level + 1, childIndex, currentIndex, tree._id);
-			rowData.childrenNumber += subTreeData.length;
-			dataToFlatten.push(subTreeData);
+
+			const flattenNestedData = getFlattenNested(subTree, level + 1, childIndex, currentIndex, tree._id);
+			rowData.childrenNumber += flattenNestedData.childrenNumber;
+			dataToFlatten.push(flattenNestedData.data);
+			dataMap = {
+				[rowData._id]: currentIndex,
+				...flattenNestedData.map
+			};
 		}
 	}
 
 	dataToFlatten.unshift(rowData);
 
-	return flattenDeep(dataToFlatten);
+	const data = flattenDeep(dataToFlatten);
+	const childrenNumber = data.length;
+
+	return { data, map: dataMap, childrenNumber };
 };
 
 self.addEventListener('message', ({ data }) => {
@@ -66,8 +75,10 @@ self.addEventListener('message', ({ data }) => {
 	}
 
 	console.time('TREE PROCESSING');
-	const nodesList = getFlattenNested(mainTree);
-	const result = { data: nodesList };
+	const { data: nodesList, map: nodesIndexesMap } = getFlattenNested(mainTree);
+	const result = {
+		data: { nodesList, nodesIndexesMap }
+	};
 	console.timeEnd('TREE PROCESSING');
  self.postMessage(JSON.stringify({ result }));
 }, false);

@@ -45,6 +45,7 @@ interface IProps {
 	hasChildren?: boolean;
 	isModel?: boolean;
 	isFederation?: boolean;
+	childrenNumber?: number;
 	collapseNode?: (id) => void;
 	expandNode?: (id) => void;
 	selectNode?: (id) => void;
@@ -68,6 +69,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		highlighted: false,
 		expanded: false,
 		hasChildren: false,
+		childrenNumber: 0,
 		isFederation: false,
 		isModel: false
 	};
@@ -147,7 +149,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { name, highlighted, expanded, hasChildren, selected, isFederation, level } = this.props;
+		const { name, highlighted, expanded, hasChildren, selected, isFederation, level, childrenNumber } = this.props;
 
 		return (
 			<Container
@@ -161,7 +163,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 			>
 				<NameWrapper>
 					{this.rendereExpandableButton(!isFederation)}
-					<Name nodeType={this.type}>{name}</Name>
+					<Name nodeType={this.type}>{childrenNumber} {name}</Name>
 				</NameWrapper>
 				{this.renderModelActions(this.isExpandedModelInFederation)}
 				{this.renderHighlightedObjectActions(this.isHightlightedObject)}
