@@ -185,6 +185,7 @@ export class Tree extends React.PureComponent<IProps, any> {
 											(isFirstLevel && !treeNode.isFederation) ||
 											(isSecondLevel && treeNodesList[treeNode.parentIndex].isFederation)
 										}
+										childrenNumber={treeNode.childrenNumber}
 										hasChildren={treeNode.hasChildren}
 										selected={selectedNodesMap[treeNode._id]}
 										highlighted={this.isHighlighted(treeNode)}
