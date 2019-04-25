@@ -83,7 +83,7 @@ module.exports = {
 	},
 	fs: {
 //		path: '/home/travis/build/3drepo/3drepo.io/submodules/tests/backend/files/'
-		path: __dirname + '../../submodule/tests/backend/files/'
+		path: path.resolve(__dirname, '../../submodule/tests/backend/files/')
 	},
 	tokenExpiry: {
 		emailVerify: 336,
