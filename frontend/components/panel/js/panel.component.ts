@@ -281,7 +281,6 @@ export const PanelComponent: ng.IComponentOptions = {
 		branch:   '=',
 		model:  '=',
 		modelSettings: '=',
-		isLiteMode: '=',
 		position: '@',
 		revision: '=',
 		selectedObjects: '=',

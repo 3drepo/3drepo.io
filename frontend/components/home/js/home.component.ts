@@ -65,8 +65,6 @@ class HomeController implements ng.IController {
 	private loginMessage;
 	private backgroundImage;
 	private topLogo;
-	private shownMobileDialog;
-	private isLiteMode;
 
 	constructor(
 		private $scope,
@@ -128,10 +126,6 @@ class HomeController implements ng.IController {
 		this.legalDisplays.push({title: 'Pricing', path: 'http://3drepo.org/pricing'});
 		this.legalDisplays.push({title: 'Contact', path: 'http://3drepo.org/contact/'});
 
-		this.isLiteMode = this.getLiteModeState();
-		this.handlePotentialMobile();
-		this.shownMobileDialog = false;
-
 		this.watchers();
 
 		/**
@@ -190,20 +184,6 @@ class HomeController implements ng.IController {
 
 			}
 		}, true);
-
-	}
-
-	public getLiteModeState() {
-		const stored = localStorage.getItem('liteMode');
-		if (stored !== undefined && stored !== null) {
-			if (stored === 'false') {
-				return false;
-			} else if (stored === 'true') {
-				return true;
-			}
-		}
-
-		return false; // Default
 
 	}
 
@@ -270,44 +250,6 @@ class HomeController implements ng.IController {
 		});
 	}
 
-	public handlePotentialMobile() {
-
-		// Regex test is as recommended by Mozilla:
-		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent
-
-		const mobile = screen.width <= 768 || /Mobi/.test(navigator.userAgent);
-
-		// We're in mobile and it's not already in lite mode
-		if (mobile && !this.isLiteMode) {
-			this.DialogService.showDialog(
-				'lite-dialog.html',
-				this.$scope,
-				event,
-				false,
-				null,
-				false
-			);
-			return;
-		}
-	}
-
-	public setLiteMode(onOrOff) {
-		this.isLiteMode = onOrOff;
-		localStorage.setItem('liteMode', onOrOff);
-	}
-
-	public useLiteMode() {
-		this.setLiteMode(true);
-		this.shownMobileDialog = true;
-		this.DialogService.closeDialog();
-	}
-
-	public useNormalMode() {
-		this.setLiteMode(false);
-		this.shownMobileDialog = true;
-		this.DialogService.closeDialog();
-	}
-
 	public hasTrailingSlash() {
 		// Check if we have a trailing slash in our URL
 		const absUrl = this.$location.absUrl();
@@ -332,13 +274,6 @@ class HomeController implements ng.IController {
 
 	public legalDisplay(event, display) {
 		this.$window.open('/' + display.value);
-	}
-
-	public onLiteModeChange = () => {
-		this.$timeout(() => {
-			this.setLiteMode(!this.isLiteMode);
-			location.reload();
-		});
 	}
 }
 

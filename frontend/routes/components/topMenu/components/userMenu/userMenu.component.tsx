@@ -93,17 +93,6 @@ const UserMenuContent = (props) => {
 				label="Visual Settings"
 				onButtonClick={invokeAndClose(props.openSettingsDialog)}
 			/>
-			<MenuItem>
-				<MenuSwitch
-					checked={props.isLiteMode}
-					onChange={invokeAndClose(props.onLiteModeChange)}
-					color="secondary"
-					inputProps={{
-						'aria-label': 'Lite mode'
-					}}
-				/>
-				<MenuText primary="Lite mode" />
-			</MenuItem>
 			<UserMenuButton
 				Icon={ExitToApp}
 				label="Logout"
@@ -115,8 +104,6 @@ const UserMenuContent = (props) => {
 
 interface IProps {
 	currentUser: any;
-	isLiteMode?: boolean;
-	onLiteModeChange?: () => void;
 	onLogout?: () => void;
 	onTeamspacesClick?: () => void;
 	showDialog?: (config: any) => void;
