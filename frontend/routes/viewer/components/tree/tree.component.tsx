@@ -183,18 +183,17 @@ export class Tree extends React.PureComponent<IProps, any> {
 							const isFederation = treeNode.isFederation;
 							const isModel = (isFirstLevel && !treeNode.isFederation) ||
 								(isSecondLevel && treeNodesList[parentIndex].isFederation);
-							const isSearchResult = selectedFilters.length && !isFederation && !isModel;
 
-							if (isFirstLevel || isSecondLevel || expandedNodesMap[treeNode.parentId]) {
+							const isSearchResult = isSearchActive && !isFederation && !isModel;
+							const isRegularNode = !isSearchActive && (isFirstLevel || isSecondLevel || expandedNodesMap[treeNode.parentId]);
+
+							if (isSearchResult || isRegularNode) {
 								return (
 									<TreeNode
 										key={treeNode._id}
 										data={treeNode}
-										isModel={
-											(isFirstLevel && !treeNode.isFederation) ||
-											(isSecondLevel && treeNodesList[parentIndex].isFederation)
-										}
-										isSearchResult={isSearchActive}
+										isModel={isModel}
+										isSearchResult={isSearchResult}
 										selected={selectedNodesMap[treeNode._id]}
 										highlighted={this.isHighlighted(treeNode)}
 										parentIndex={parentIndex}
