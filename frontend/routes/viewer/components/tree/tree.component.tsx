@@ -35,7 +35,7 @@ import { Container, TreeNodes } from './tree.styles';
 import { TREE_ACTIONS_MENU, TREE_ACTIONS_ITEMS } from '../../../../constants/tree';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
-import { TreeNode } from './components/treeNode/treeNode.component';
+import TreeNode from './components/treeNode/treeNode.container';
 
 interface IProps {
 	className: string;
@@ -178,25 +178,14 @@ export class Tree extends React.PureComponent<IProps, any> {
 								return (
 									<TreeNode
 										key={treeNode._id}
-										id={treeNode._id}
-										name={treeNode.name}
-										index={treeNode.index}
-										level={treeNode.level}
-										isFederation={treeNode.isFederation}
+										data={treeNode}
 										isModel={
 											(isFirstLevel && !treeNode.isFederation) ||
 											(isSecondLevel && treeNodesList[parentIndex].isFederation)
 										}
-										childrenNumber={treeNode.childrenNumber}
-										hasChildren={treeNode.hasChildren}
 										selected={selectedNodesMap[treeNode._id]}
 										highlighted={this.isHighlighted(treeNode)}
 										parentIndex={parentIndex}
-										parentId={treeNode.parentId}
-										expandNode={expandNode}
-										collapseNode={collapseNode}
-										selectNode={this.selectNode}
-										deselectNode={this.deselectNode}
 										expanded={expandedNodesMap[treeNode._id]}
 									/>
 								);

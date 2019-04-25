@@ -32,20 +32,15 @@ import {
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
 interface IProps {
-	id: string;
-	name: string;
-	index: number;
-	level: number;
+	data: any;
+	settings: any;
 	parentId?: number;
 	parentIndex?: number;
 	visible?: boolean;
 	selected?: boolean;
 	highlighted?: boolean;
 	expanded?: boolean;
-	hasChildren?: boolean;
 	isModel?: boolean;
-	isFederation?: boolean;
-	childrenNumber?: number;
 	collapseNode?: (id) => void;
 	expandNode?: (id) => void;
 	selectNode?: (id) => void;
@@ -74,8 +69,12 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		isModel: false
 	};
 
+	get node() {
+		return this.props.data;
+	}
+
 	get type() {
-		if (this.props.isFederation) {
+		if (this.node.isFederation) {
 			return TREE_ITEM_FEDERATION_TYPE;
 		} else if (this.props.isModel) {
 			return TREE_ITEM_MODEL_TYPE;
@@ -85,27 +84,34 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 
 	public expandNode = (event) => {
 		event.stopPropagation();
-		this.props.expandNode(this.props.id);
+		this.props.expandNode(this.node._id);
 	}
 
 	public collapseNode = (event) => {
 		event.stopPropagation();
 
-		if (this.props.hasChildren) {
-			this.props.collapseNode(this.props.id);
+		if (this.node.hasChildren) {
+			this.props.collapseNode(this.node._id);
 		}
 		return;
 	}
 
+	public handleOpenModelClick = () => {
+		const [teamspace, name] = this.node.name.split(':');
+		const {model} = this.props.settings.subModels.find((subModel) => subModel.name === name);
+
+		window.open(`${window.location.origin}/viewer/${teamspace}/${model}`);
+	}
+
 	public rendereExpandableButton = renderWhenTrue(() => {
-		const { expanded, hasChildren } = this.props;
+		const { expanded } = this.props;
 		return (
 			<CollapseButton
 				nodeType={this.type}
 				expanded={expanded}
-				hasChildren={hasChildren}
-				Icon={!expanded && hasChildren ? AddIcon : RemoveIcon}
-				onClick={!expanded && hasChildren ? this.expandNode : this.collapseNode}
+				hasChildren={this.node.hasChildren}
+				Icon={!expanded && this.node.hasChildren ? AddIcon : RemoveIcon}
+				onClick={!expanded && this.node.hasChildren ? this.expandNode : this.collapseNode}
 			/>
 		);
 	});
@@ -115,6 +121,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 			<SmallIconButton
 				Icon={OpenInNewIcon}
 				tooltip="Open model in new tab"
+				onClick={this.handleOpenModelClick}
 			/>
 		</Actions>
 	));
@@ -137,7 +144,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	));
 
 	public get isExpandedModelInFederation() {
-		return this.type === TREE_ITEM_MODEL_TYPE && this.props.level === 2 && this.props.expanded;
+		return this.type === TREE_ITEM_MODEL_TYPE && this.node.level === 2 && this.props.expanded;
 	}
 
 	public get isHightlightedObject() {
@@ -145,25 +152,25 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	}
 
 	public handleNodeClick = () => {
-		this.props.selectNode(this.props.id);
+		this.props.selectNode(this.node._id);
 	}
 
 	public render() {
-		const { name, highlighted, expanded, hasChildren, selected, isFederation, level, childrenNumber } = this.props;
+		const { highlighted, expanded, selected } = this.props;
 
 		return (
 			<Container
 				nodeType={this.type}
-				expandable={hasChildren}
+				expandable={this.node.hasChildren}
 				selected={selected}
 				highlighted={highlighted}
 				expanded={expanded}
-				level={level}
+				level={this.node.level}
 				onClick={this.handleNodeClick}
 			>
 				<NameWrapper>
-					{this.rendereExpandableButton(!isFederation)}
-					<Name nodeType={this.type}>{childrenNumber} {name}</Name>
+					{this.rendereExpandableButton(!this.node.isFederation)}
+					<Name nodeType={this.type}>{this.node.childrenNumber} {this.node.name}</Name>
 				</NameWrapper>
 				{this.renderModelActions(this.isExpandedModelInFederation)}
 				{this.renderHighlightedObjectActions(this.isHightlightedObject)}
