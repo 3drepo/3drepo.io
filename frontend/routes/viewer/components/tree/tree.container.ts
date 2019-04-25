@@ -22,11 +22,11 @@ import { connect } from '../../../../helpers/migration';
 import { Tree } from './tree.component';
 import {
 	TreeActions,
-	selectSelectedNodes,
 	selectIfcSpacesHidden,
 	selectExpandedNodesMap,
 	selectSelectedNodesMap,
-	selectHiddenNodesMap
+	selectHiddenNodesMap,
+	selectNodesIndexesMap
 } from '../../../../modules/tree';
 import {
 	selectSearchEnabled,
@@ -41,7 +41,8 @@ const mapStateToProps = createStructuredSelector({
 	treeNodesList: selectTreeNodesList,
 	expandedNodesMap: selectExpandedNodesMap,
 	selectedNodesMap: selectSelectedNodesMap,
-	hiddenNodesMap: selectHiddenNodesMap
+	hiddenNodesMap: selectHiddenNodesMap,
+	nodesIndexesMap: selectNodesIndexesMap
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

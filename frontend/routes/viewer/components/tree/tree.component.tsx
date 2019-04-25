@@ -45,6 +45,7 @@ interface IProps {
 	treeNodesList: any[];
 	expandedNodesMap: any;
 	selectedNodesMap: any;
+	nodesIndexesMap: any;
 	hiddenNodesMap: any;
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
@@ -155,7 +156,7 @@ export class Tree extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const {
-			treeNodesList, expandedNodesMap, searchEnabled, expandNode, collapseNode, selectedNodesMap
+			treeNodesList, expandedNodesMap, searchEnabled, expandNode, collapseNode, selectedNodesMap, nodesIndexesMap
 		} = this.props;
 
 		return (
@@ -171,6 +172,7 @@ export class Tree extends React.PureComponent<IProps, any> {
 						{treeNodesList.map((treeNode) => {
 							const isFirstLevel = treeNode.level === 1;
 							const isSecondLevel = treeNode.level === 2;
+							const parentIndex = nodesIndexesMap[treeNode.parentId];
 
 							if (isFirstLevel || isSecondLevel || expandedNodesMap[treeNode.parentId]) {
 								return (
@@ -183,13 +185,13 @@ export class Tree extends React.PureComponent<IProps, any> {
 										isFederation={treeNode.isFederation}
 										isModel={
 											(isFirstLevel && !treeNode.isFederation) ||
-											(isSecondLevel && treeNodesList[treeNode.parentIndex].isFederation)
+											(isSecondLevel && treeNodesList[parentIndex].isFederation)
 										}
 										childrenNumber={treeNode.childrenNumber}
 										hasChildren={treeNode.hasChildren}
 										selected={selectedNodesMap[treeNode._id]}
 										highlighted={this.isHighlighted(treeNode)}
-										parentIndex={treeNode.parentIndex}
+										parentIndex={parentIndex}
 										parentId={treeNode.parentId}
 										expandNode={expandNode}
 										collapseNode={collapseNode}

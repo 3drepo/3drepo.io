@@ -17,7 +17,6 @@
 
 // tslint:disable-next-line
 const TreeWorker = require('worker-loader?inline!./tree.worker');
-import { keyBy, mapValues } from 'lodash';
 import { put, takeLatest, call, select, take, all } from 'redux-saga/effects';
 
 import { delay } from 'redux-saga';
@@ -36,7 +35,7 @@ import {
 	selectTreeNodesList
 } from './tree.selectors';
 import { TreeTypes, TreeActions } from './tree.redux';
-import { selectSettings, ModelActions, ModelTypes } from '../model';
+import { selectSettings, ModelTypes } from '../model';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 
 const setupWorker = (worker, onResponse) => {
@@ -72,8 +71,8 @@ export function* fetchFullTree({ teamspace, modelId, revision }) {
 
 		const worker = setupWorker(treeWorker, (result) => {
 			const { nodesList, nodesIndexesMap } = result.data;
-			dispatch(TreeActions.setTreeNodesList(nodesList));
 			dispatch(TreeActions.setComponentState({ nodesIndexesMap }));
+			dispatch(TreeActions.setTreeNodesList(nodesList));
 		});
 		worker.postMessage(dataToProcessed);
 	} catch (error) {
