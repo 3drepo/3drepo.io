@@ -19,6 +19,7 @@
 
 const config = require("../config.js");
 const fs = require("fs");
+const path = require("path");
 const systemLogger = require("../logger.js").systemLogger;
 
 class FSHandler {
@@ -53,7 +54,7 @@ class FSHandler {
 
 	getFullPath(key) {
 		if (config.fs && config.fs.path) {
-			return config.fs.path + key;
+			return path.resolve(config.fs.path, key);
 		} else {
 			throw new Error("Filesystem is not configured");
 		}
