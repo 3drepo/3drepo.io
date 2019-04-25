@@ -82,7 +82,7 @@ FileRef.getOriginalFile = function(account, model, fileName) {
 };
 
 FileRef.getTotalOrgFileSize = function(account, model) {
-	return DB.getCollection(account, model, ORIGINAL_FILE_REF_EXT).then((col) => {
+	return DB.getCollection(account, model + ORIGINAL_FILE_REF_EXT).then((col) => {
 		let totalSize = 0;
 		if(col) {
 			return col.find({},{size : 1}).toArray().then((res) => {
