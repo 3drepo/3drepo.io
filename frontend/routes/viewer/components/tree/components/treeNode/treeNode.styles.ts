@@ -67,15 +67,26 @@ const getBoxShadow = (props) => {
 	return 'none';
 };
 
+const getButtonBackgroundColor = (props) => {
+	if (props.hasChildren) {
+		if (isEqual(TREE_ITEM_OBJECT_TYPE, props.nodeType)) {
+			return COLOR.PRIMARY_DARK;
+		} else {
+			return COLOR.BLACK_60;
+		}
+	}
+	return 'transparent';
+};
+
 export const Container = styled.li<IContainer>`
 	cursor: ${(props) => isEqual(TREE_ITEM_FEDERATION_TYPE, props.nodeType) ? 'default' : 'pointer'};
 	border-bottom: ${(props) => props.highlighted ? 'none' : `1px solid ${COLOR.DARK_GRAY}`};
-	background-color: ${(props) => getBackgroundColor(props)};
-	padding-left: ${(props) => props.level > 1 ? `${props.level * 10}px` : '38px'};
+	background-color: ${getBackgroundColor};
+	padding-left: ${(props) => props.level > 1 ? props.level * 10 : 38}px;
 	padding-top: 2px;
 	padding-bottom:2px;
 	padding-right: 12px;
-	box-shadow: ${(props) => getBoxShadow(props)};
+	box-shadow: ${getBoxShadow};
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -92,19 +103,8 @@ export const Name = styled.div<IName>`
 	max-width: 260px;
 `;
 
-const getButtonBackgroundColor = (props) => {
-	if (props.hasChildren) {
-		if (isEqual(TREE_ITEM_OBJECT_TYPE, props.nodeType)) {
-			return COLOR.PRIMARY_DARK;
-		} else {
-			return COLOR.BLACK_60;
-		}
-	}
-	return 'transparent';
-};
-
 export const StyledExpandableButton = styled.button<IExpandableButton>`
-    background-color: ${(props) => getButtonBackgroundColor(props)};
+    background-color: ${getButtonBackgroundColor};
     border-radius: 3px;
     color: ${(props) => props.hasChildren ? COLOR.WHITE : COLOR.PRIMARY_DARK};
 		border: none;

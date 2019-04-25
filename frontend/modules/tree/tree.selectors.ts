@@ -17,6 +17,7 @@
 
 import { createSelector } from 'reselect';
 import { calculateTotalMeshes } from '../../helpers/tree';
+import { searchByFilters } from '../../helpers/searching';
 
 export const selectTreeDomain = (state) => Object.assign({}, state.tree);
 
@@ -24,8 +25,12 @@ export const selectSelectedNodes = createSelector(
 	selectTreeDomain, (state) => state.selectedNodes
 );
 
+export const selectTreeNodesList = createSelector(
+	selectTreeDomain, (state) => state.treeNodesList
+);
+
 export const selectTotalMeshes = createSelector(
-	selectTreeDomain, (state) => calculateTotalMeshes(state.selectedNodes)
+	selectSelectedNodes, (selectedNodes) => calculateTotalMeshes(selectedNodes)
 );
 
 export const selectComponentState = createSelector(
@@ -36,16 +41,21 @@ export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
 
+export const selectFilteredNodesList = createSelector(
+	selectTreeNodesList, selectSelectedFilters, (nodes, selectedFilters) => {
+		if (!selectedFilters.length) {
+			return nodes;
+		}
+		return searchByFilters(nodes, selectedFilters, true);
+	}
+);
+
 export const selectSearchEnabled = createSelector(
 	selectComponentState, (state) => state.searchEnabled
 );
 
 export const selectIfcSpacesHidden = createSelector(
 	selectComponentState, (state) => state.ifcSpacesHidden
-);
-
-export const selectTreeNodesList = createSelector(
-	selectComponentState, (state) => state.treeNodesList
 );
 
 export const selectExpandedNodesMap = createSelector(
