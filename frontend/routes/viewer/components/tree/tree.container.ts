@@ -29,7 +29,8 @@ import {
 	selectNodesIndexesMap,
 	selectFilteredNodesList,
 	selectSearchEnabled,
-	selectSelectedFilters
+	selectSelectedFilters,
+	selectIsPending
 } from '../../../../modules/tree';
 
 const mapStateToProps = createStructuredSelector({
@@ -40,7 +41,8 @@ const mapStateToProps = createStructuredSelector({
 	expandedNodesMap: selectExpandedNodesMap,
 	selectedNodesMap: selectSelectedNodesMap,
 	hiddenNodesMap: selectHiddenNodesMap,
-	nodesIndexesMap: selectNodesIndexesMap
+	nodesIndexesMap: selectNodesIndexesMap,
+	isPending: selectIsPending
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
