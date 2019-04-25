@@ -52,7 +52,7 @@ class FSHandler {
 		});
 	}
 
-	getFullPath(key) {
+	getFullPath(key = "") {
 		if (config.fs && config.fs.path) {
 			return path.resolve(config.fs.path, key);
 		} else {
@@ -61,10 +61,11 @@ class FSHandler {
 	}
 
 	testFilesystem() {
-		return fs.readdir(this.getFullPath(""), (err) => {
+		return fs.readdir(this.getFullPath(), (err) => {
 			if (err) {
-				systemLogger.logError("failed to connect to filesystem: ", err);
-				throw new Error("Filesystem connection failed");
+				const errMsg = "Failed to connect to filesystem at " + this.getFullPath();
+				systemLogger.logError(errMsg," : ", err);
+				throw new Error(errMsg);
 			}
 		});
 	}
