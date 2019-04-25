@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { cond, matches, isEqual } from 'lodash';
+import { cond, matches, isEqual, constant, stubTrue, memoize } from 'lodash';
 import { COLOR } from '../../../../../../styles';
 import {
 	TREE_ITEM_FEDERATION_TYPE,
@@ -44,14 +44,13 @@ interface IExpandableButton {
 }
 
 const getBackgroundColor = (props) => cond([
-		[matches(TREE_ITEM_FEDERATION_TYPE), () => COLOR.GRAY_60],
-		[matches(TREE_ITEM_MODEL_TYPE), () => COLOR.GRAY],
+		[matches(TREE_ITEM_FEDERATION_TYPE), constant(COLOR.GRAY_60)],
+		[matches(TREE_ITEM_MODEL_TYPE), constant(COLOR.GRAY)],
 		[matches(TREE_ITEM_OBJECT_TYPE), () => {
 				if (props.highlighted) {
 					return '#D8E6FF';
 				} else if (props.selected) {
 					return '#F4F8FF';
-
 				}
 				return COLOR.WHITE;
 			}
@@ -78,11 +77,17 @@ const getButtonBackgroundColor = (props) => {
 	return 'transparent';
 };
 
+const getPaddingLeft = cond([
+	[matches({ level: 0 }), constant(0)],
+	[matches({ level: 1 }), constant(38)],
+	[stubTrue, ({ level }) => level * 10]
+]);
+
 export const Container = styled.li<IContainer>`
 	cursor: ${(props) => isEqual(TREE_ITEM_FEDERATION_TYPE, props.nodeType) ? 'default' : 'pointer'};
 	border-bottom: ${(props) => props.highlighted ? 'none' : `1px solid ${COLOR.DARK_GRAY}`};
 	background-color: ${getBackgroundColor};
-	padding-left: ${(props) => props.level > 1 ? props.level * 10 : 38}px;
+	padding-left: ${getPaddingLeft}px;
 	padding-top: 2px;
 	padding-bottom:2px;
 	padding-right: 12px;

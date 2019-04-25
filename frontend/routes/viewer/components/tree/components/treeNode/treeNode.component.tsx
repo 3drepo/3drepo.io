@@ -41,6 +41,7 @@ interface IProps {
 	highlighted?: boolean;
 	expanded?: boolean;
 	isModel?: boolean;
+	isSearchResult?: boolean;
 	collapseNode?: (id) => void;
 	expandNode?: (id) => void;
 	selectNode?: (id) => void;
@@ -58,16 +59,6 @@ const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
 );
 
 export class TreeNode extends React.PureComponent<IProps, any> {
-	public static defaultProps = {
-		visible: false,
-		selected: false,
-		highlighted: false,
-		expanded: false,
-		hasChildren: false,
-		childrenNumber: 0,
-		isFederation: false,
-		isModel: false
-	};
 
 	get node() {
 		return this.props.data;
@@ -82,28 +73,32 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		return TREE_ITEM_OBJECT_TYPE;
 	}
 
-	public expandNode = (event) => {
-		event.stopPropagation();
-		this.props.expandNode(this.node._id);
-	}
-
-	public collapseNode = (event) => {
-		event.stopPropagation();
-
-		if (this.node.hasChildren) {
-			this.props.collapseNode(this.node._id);
+	get level() {
+		if (this.props.isSearchResult) {
+			return 0;
 		}
-		return;
+		return this.node.level;
 	}
 
-	public handleOpenModelClick = () => {
-		const [teamspace, name] = this.node.name.split(':');
-		const {model} = this.props.settings.subModels.find((subModel) => subModel.name === name);
-
-		window.open(`${window.location.origin}/viewer/${teamspace}/${model}`);
+	get isExpandedModelInFederation() {
+		return this.type === TREE_ITEM_MODEL_TYPE && this.level === 2 && this.props.expanded;
 	}
 
-	public rendereExpandableButton = renderWhenTrue(() => {
+	get isHightlightedObject() {
+		return this.type === TREE_ITEM_OBJECT_TYPE && this.props.highlighted;
+	}
+	public static defaultProps = {
+		visible: false,
+		selected: false,
+		highlighted: false,
+		expanded: false,
+		hasChildren: false,
+		childrenNumber: 0,
+		isFederation: false,
+		isModel: false
+	};
+
+	private renderExpandableButton = renderWhenTrue(() => {
 		const { expanded } = this.props;
 		return (
 			<CollapseButton
@@ -116,7 +111,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		);
 	});
 
-	public renderModelActions = renderWhenTrue(() => (
+	private renderModelActions = renderWhenTrue(() => (
 		<Actions>
 			<SmallIconButton
 				Icon={OpenInNewIcon}
@@ -126,7 +121,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		</Actions>
 	));
 
-	public renderHighlightedObjectActions = renderWhenTrue(() => (
+	private renderHighlightedObjectActions = renderWhenTrue(() => (
 		<Actions>
 			<SmallIconButton
 				Icon={UpIcon}
@@ -143,38 +138,55 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		</Actions>
 	));
 
-	public get isExpandedModelInFederation() {
-		return this.type === TREE_ITEM_MODEL_TYPE && this.node.level === 2 && this.props.expanded;
-	}
-
-	public get isHightlightedObject() {
-		return this.type === TREE_ITEM_OBJECT_TYPE && this.props.highlighted;
-	}
-
-	public handleNodeClick = () => {
-		this.props.selectNode(this.node._id);
-	}
-
 	public render() {
-		const { highlighted, expanded, selected } = this.props;
+		const { highlighted, expanded, selected, isSearchResult } = this.props;
 
 		return (
 			<Container
 				nodeType={this.type}
 				expandable={this.node.hasChildren}
-				selected={selected}
-				highlighted={highlighted}
-				expanded={expanded}
-				level={this.node.level}
+				selected={!isSearchResult && selected}
+				highlighted={!isSearchResult && highlighted}
+				expanded={isSearchResult && expanded}
+				level={this.level}
 				onClick={this.handleNodeClick}
 			>
-				<NameWrapper>
-					{this.rendereExpandableButton(!this.node.isFederation)}
-					<Name nodeType={this.type}>{this.node.childrenNumber} {this.node.name}</Name>
-				</NameWrapper>
+				{this.renderName()}
 				{this.renderModelActions(this.isExpandedModelInFederation)}
 				{this.renderHighlightedObjectActions(this.isHightlightedObject)}
 			</Container>
 		);
 	}
+
+	private expandNode = (event) => {
+		event.stopPropagation();
+		this.props.expandNode(this.node._id);
+	}
+
+	private collapseNode = (event) => {
+		event.stopPropagation();
+
+		if (this.node.hasChildren) {
+			this.props.collapseNode(this.node._id);
+		}
+		return;
+	}
+
+	private handleOpenModelClick = () => {
+		const [teamspace, name] = this.node.name.split(':');
+		const {model} = this.props.settings.subModels.find((subModel) => subModel.name === name);
+
+		window.open(`${window.location.origin}/viewer/${teamspace}/${model}`);
+	}
+
+	private handleNodeClick = () => {
+		this.props.selectNode(this.node._id);
+	}
+
+	private renderName = () => (
+		<NameWrapper>
+			{this.renderExpandableButton(!this.node.isFederation && !this.props.isSearchResult)}
+			<Name nodeType={this.type}>{this.node.childrenNumber} {this.node.name}</Name>
+		</NameWrapper>
+	)
 }
