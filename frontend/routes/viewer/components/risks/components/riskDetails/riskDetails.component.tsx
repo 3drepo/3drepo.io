@@ -215,7 +215,11 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				onExpandChange={this.handleExpandChange}
 				renderCollapsable={this.renderDetailsForm}
 				renderNotCollapsable={() => this.renderLogList(comments && !!comments.length && !this.isNewRisk)}
-				handleHeaderClick={() => this.setCameraOnViewpoint({viewpoint: this.riskData.viewpoint})}
+				handleHeaderClick={() => {
+					if (!this.isNewRisk) { // if its a new issue it shouldnt go to the viewpoint
+						this.setCameraOnViewpoint({viewpoint: this.riskData.viewpoint});
+					}
+				}}
 				scrolled={this.state.scrolled}
 			/>
 		);
