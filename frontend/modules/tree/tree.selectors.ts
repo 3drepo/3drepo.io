@@ -29,6 +29,10 @@ export const selectTreeNodesList = createSelector(
 	selectTreeDomain, (state) => state.treeNodesList
 );
 
+export const selectIsPending = createSelector(
+	selectTreeDomain, (state) => state.isPending
+);
+
 export const selectTotalMeshes = createSelector(
 	selectSelectedNodes, (selectedNodes) => calculateTotalMeshes(selectedNodes)
 );

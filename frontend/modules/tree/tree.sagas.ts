@@ -55,6 +55,8 @@ const setupWorker = (worker, onResponse) => {
 const treeWorker = new TreeWorker();
 
 export function* fetchFullTree({ teamspace, modelId, revision }) {
+	yield put(TreeActions.setIsPending(true));
+
 	try {
 		const { data: fullTree } = yield API.getFullTree(teamspace, modelId, revision);
 		yield take(ModelTypes.FETCH_SETTINGS_SUCCESS);
@@ -68,7 +70,7 @@ export function* fetchFullTree({ teamspace, modelId, revision }) {
 			? yield all(fullTree.subTrees.map(({ url }) => API.default.get(url)))
 			: [];
 		dataToProcessed.subTrees = subTreesData.map(({ data }) => data.mainTree);
-
+		console.log('FETCH SUBTREESS', subTreesData);
 		const worker = setupWorker(treeWorker, (result) => {
 			const { nodesList, nodesIndexesMap } = result.data;
 			dispatch(TreeActions.setComponentState({ nodesIndexesMap }));
@@ -78,6 +80,8 @@ export function* fetchFullTree({ teamspace, modelId, revision }) {
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'full tree', error));
 	}
+
+	yield put(TreeActions.setIsPending(false));
 }
 
 export function* startListenOnSelections() {

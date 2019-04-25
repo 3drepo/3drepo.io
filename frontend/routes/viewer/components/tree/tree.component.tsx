@@ -36,6 +36,7 @@ import { TREE_ACTIONS_MENU, TREE_ACTIONS_ITEMS } from '../../../../constants/tre
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import TreeNode from './components/treeNode/treeNode.container';
+import { EmptyStateInfo } from '../views/views.styles';
 
 interface IProps {
 	className: string;
@@ -47,6 +48,7 @@ interface IProps {
 	selectedNodesMap: any;
 	nodesIndexesMap: any;
 	hiddenNodesMap: any;
+	isPending?: boolean;
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
 	isolateSelectedNodes: () => void;
@@ -60,10 +62,6 @@ interface IProps {
 const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show tree menu" {...props} />;
 
 export class Tree extends React.PureComponent<IProps, any> {
-	public static defaultProps = {
-		selectedFilters: [],
-		searchEnabled: true
-	};
 
 	get menuActionsMap() {
 		const { showAllNodes, isolateSelectedNodes, hideIfcSpaces } = this.props;
@@ -87,6 +85,19 @@ export class Tree extends React.PureComponent<IProps, any> {
 		/>
 	));
 
+	public static defaultProps = {
+		selectedFilters: [],
+		searchEnabled: true
+	};
+
+	private renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>No entry have been created yet</EmptyStateInfo>
+	));
+
+	private renderNotFound = renderWhenTrue(() => (
+		<EmptyStateInfo>No nodes matched</EmptyStateInfo>
+	));
+
 	public handleFilterChange = (selectedFilters) => {
 		this.props.setState({ selectedFilters });
 		// this.setState({ filteredObjects: this.filteredObjects });
@@ -106,20 +117,6 @@ export class Tree extends React.PureComponent<IProps, any> {
 		}
 		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
 	}
-
-	public renderActionsMenu = () => (
-		<MenuList>
-			{TREE_ACTIONS_MENU.map(( {name, Icon, label }) => (
-				<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
-					<IconWrapper><Icon fontSize="small" /></IconWrapper>
-					<StyledItemText>
-						{label}
-						{(name === TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES && this.props.ifcSpacesHidden) && <Check fontSize="small" />}
-					</StyledItemText>
-				</StyledListItem>
-			))}
-		</MenuList>
-	)
 
 	public getMenuButton = () => (
 		<ButtonMenu
@@ -154,7 +151,7 @@ export class Tree extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public render() {
+	public renderNodesList = renderWhenTrue(() => {
 		const {
 			treeNodesList,
 			expandedNodesMap,
@@ -165,46 +162,68 @@ export class Tree extends React.PureComponent<IProps, any> {
 		} = this.props;
 
 		const isSearchActive = searchEnabled && selectedFilters.length;
+		return (
+			<TreeNodes>
+				{treeNodesList.map((treeNode) => {
+					const isFirstLevel = treeNode.level === 1;
+					const isSecondLevel = treeNode.level === 2;
+					const parentIndex = nodesIndexesMap[treeNode.parentId];
+					const isFederation = treeNode.isFederation;
+					const isModel = (isFirstLevel && !treeNode.isFederation) ||
+						(isSecondLevel && treeNodesList[parentIndex].isFederation);
+
+					const isSearchResult = isSearchActive && !isFederation && !isModel;
+					const isRegularNode = !isSearchActive && (isFirstLevel || isSecondLevel || expandedNodesMap[treeNode.parentId]);
+
+					if (isSearchResult || isRegularNode) {
+						return (
+							<TreeNode
+								key={treeNode._id}
+								data={treeNode}
+								isModel={isModel}
+								isSearchResult={isSearchResult}
+								selected={selectedNodesMap[treeNode._id]}
+								highlighted={this.isHighlighted(treeNode)}
+								parentIndex={parentIndex}
+								expanded={expandedNodesMap[treeNode._id]}
+							/>
+						);
+					}
+				})}
+			</TreeNodes>
+		);
+	});
+
+	public render() {
+		const { searchEnabled, treeNodesList, isPending } = this.props;
 
 		return (
 			<ViewerPanel
 				title="Tree"
 				Icon={<TreeIcon/>}
 				renderActions={this.renderActions}
-				pending={false}
+				pending={isPending}
 			>
 				{this.renderFilterPanel(searchEnabled)}
 				<ViewerPanelContent className="height-catcher">
-					<TreeNodes>
-						{treeNodesList.map((treeNode) => {
-							const isFirstLevel = treeNode.level === 1;
-							const isSecondLevel = treeNode.level === 2;
-							const parentIndex = nodesIndexesMap[treeNode.parentId];
-							const isFederation = treeNode.isFederation;
-							const isModel = (isFirstLevel && !treeNode.isFederation) ||
-								(isSecondLevel && treeNodesList[parentIndex].isFederation);
-
-							const isSearchResult = isSearchActive && !isFederation && !isModel;
-							const isRegularNode = !isSearchActive && (isFirstLevel || isSecondLevel || expandedNodesMap[treeNode.parentId]);
-
-							if (isSearchResult || isRegularNode) {
-								return (
-									<TreeNode
-										key={treeNode._id}
-										data={treeNode}
-										isModel={isModel}
-										isSearchResult={isSearchResult}
-										selected={selectedNodesMap[treeNode._id]}
-										highlighted={this.isHighlighted(treeNode)}
-										parentIndex={parentIndex}
-										expanded={expandedNodesMap[treeNode._id]}
-									/>
-								);
-							}
-						})}
-					</TreeNodes>
+					{this.renderNodesList(!!treeNodesList.length)}
+					{this.renderNotFound(!treeNodesList.length)}
 				</ViewerPanelContent>
 			</ViewerPanel>
 		);
 	}
+
+	private renderActionsMenu = () => (
+		<MenuList>
+			{TREE_ACTIONS_MENU.map(( {name, Icon, label }) => (
+				<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+					<IconWrapper><Icon fontSize="small" /></IconWrapper>
+					<StyledItemText>
+						{label}
+						{(name === TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES && this.props.ifcSpacesHidden) && <Check fontSize="small" />}
+					</StyledItemText>
+				</StyledListItem>
+			))}
+		</MenuList>
+	)
 }

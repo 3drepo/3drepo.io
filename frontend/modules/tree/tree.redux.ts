@@ -40,7 +40,8 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	addGroupToSelected: ['fromIndex', 'toIndex'],
 	removeGroupFromSelected: ['fromIndex', 'toIndex'],
 	removeFromSelected: ['id'],
-	removeAllSelected: []
+	removeAllSelected: [],
+	setIsPending: ['isPending']
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
@@ -56,11 +57,13 @@ export interface ITreeState {
 	selectedNodes: any;
 	treeNodesList: any[];
 	componentState: ITreeComponentState;
+	isPending?: boolean;
 }
 
 export const INITIAL_STATE: ITreeState = {
 	selectedNodes: [],
 	treeNodesList: [],
+	isPending: false,
 	componentState: {
 		selectedFilters: [],
 		searchEnabled: false,
@@ -72,34 +75,36 @@ export const INITIAL_STATE: ITreeState = {
 	}
 };
 
-export const clearSelectedNodes = (state = INITIAL_STATE, {}) => {
+const clearSelectedNodes = (state = INITIAL_STATE, {}) => {
 	return { ...state, selectedNodes: [] };
 };
 
-export const getSelectedNodesSuccess = (state = INITIAL_STATE, { selectedNodes }) => {
+const getSelectedNodesSuccess = (state = INITIAL_STATE, { selectedNodes }) => {
 	return { ...state, selectedNodes };
 };
 
-export const setTreeNodesList = (state = INITIAL_STATE, { treeNodesList }) => {
+const setTreeNodesList = (state = INITIAL_STATE, { treeNodesList }) => {
 	return { ...state, treeNodesList };
 };
 
-export const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
+const setIsPending = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
+
+const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
-export const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) => {
+const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) => {
 	return { ...state, componentState: { ...state.componentState, ifcSpacesHidden } };
 };
 
-export const expandNode = (state = INITIAL_STATE, { id }) => {
+const expandNode = (state = INITIAL_STATE, { id }) => {
 	const expandedNodesMap = { ...state.componentState.expandedNodesMap };
 	expandedNodesMap[id] = true;
 
 	return { ...state, componentState: { ...state.componentState, expandedNodesMap } };
 };
 
-export const collapseNode = (state = INITIAL_STATE, { id }) => {
+const collapseNode = (state = INITIAL_STATE, { id }) => {
 	const expandedNodesMap = { ...state.componentState.expandedNodesMap };
 	const nodeIndex = state.componentState.nodesIndexesMap[id];
 	const node = state.treeNodesList[nodeIndex];
@@ -121,13 +126,13 @@ const resetComponentState = (state = INITIAL_STATE) => {
 	return { ...state, componentState: INITIAL_STATE.componentState };
 };
 
-export const addToSelected = (state = INITIAL_STATE, { id }) => {
+const addToSelected = (state = INITIAL_STATE, { id }) => {
 	const selectedNodesMap = { ...state.componentState.selectedNodesMap };
 	selectedNodesMap[id] = true;
 	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };
 };
 
-export const addGroupToSelected = (state = INITIAL_STATE, { fromIndex, toIndex }) => {
+const addGroupToSelected = (state = INITIAL_STATE, { fromIndex, toIndex }) => {
 	const selectedNodesMap = { ...state.componentState.selectedNodesMap };
 
 	for (let i = fromIndex; i < toIndex; i++) {
@@ -137,7 +142,7 @@ export const addGroupToSelected = (state = INITIAL_STATE, { fromIndex, toIndex }
 	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };
 };
 
-export const removeGroupFromSelected = (state = INITIAL_STATE, { fromIndex, toIndex }) => {
+const removeGroupFromSelected = (state = INITIAL_STATE, { fromIndex, toIndex }) => {
 	const selectedNodesMap = { ...state.componentState.selectedNodesMap };
 
 	for (let i = fromIndex; i < toIndex; i++) {
@@ -147,29 +152,29 @@ export const removeGroupFromSelected = (state = INITIAL_STATE, { fromIndex, toIn
 	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };
 };
 
-// export const addToHighlighted = (state = INITIAL_STATE, { id }) => {
+// const addToHighlighted = (state = INITIAL_STATE, { id }) => {
 // 	const highlightedNodesMap = { ...state.componentState.highlightedNodesMap };
 // 	highlightedNodesMap[id] = true;
 // 	return { ...state, componentState: { ...state.componentState, highlightedNodesMap } };
 // };
 
-export const removeFromSelected = (state = INITIAL_STATE, { id }) => {
+const removeFromSelected = (state = INITIAL_STATE, { id }) => {
 	const selectedNodesMap = { ...state.componentState.selectedNodesMap };
 	selectedNodesMap[id] = false;
 	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };
 };
 
-// export const removeFromHighlighted = (state = INITIAL_STATE, { id }) => {
+// const removeFromHighlighted = (state = INITIAL_STATE, { id }) => {
 // 	const highlightedNodesMap = { ...state.componentState.highlightedNodesMap };
 // 	highlightedNodesMap[id] = false;
 // 	return { ...state, componentState: { ...state.componentState, highlightedNodesMap } };
 // };
 
-export const removeAllSelected = (state = INITIAL_STATE) => {
+const removeAllSelected = (state = INITIAL_STATE) => {
 	return { ...state, componentState: { ...state.componentState, selectedNodesMap: {} } };
 };
 
-// export const removeAllHighlighted = (state = INITIAL_STATE) => {
+// const removeAllHighlighted = (state = INITIAL_STATE) => {
 // 	return { ...state, componentState: { ...state.componentState, highlightedNodesMap: {} } };
 // };
 
@@ -177,6 +182,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.CLEAR_SELECTED_NODES]: clearSelectedNodes,
 	[TreeTypes.GET_SELECTED_NODES_SUCCESS]: getSelectedNodesSuccess,
 	[TreeTypes.SET_COMPONENT_STATE]: setComponentState,
+	[TreeTypes.SET_IS_PENDING]: setIsPending,
 	[TreeTypes.RESET_COMPONENT_STATE]: resetComponentState,
 	[TreeTypes.SET_IFC_SPACES_HIDDEN]: setIfcSpacesHidden,
 	[TreeTypes.SET_TREE_NODES_LIST]: setTreeNodesList,
