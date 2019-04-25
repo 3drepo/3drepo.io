@@ -4,7 +4,6 @@ interface IRow {
 	_id: string;
 	name: string;
 	level: number;
-	parentIndex: number;
 	parentId: number;
 	hasChildren: boolean;
 	childrenNumber: number;
@@ -12,13 +11,12 @@ interface IRow {
 	isFederation: boolean;
 }
 
-const getFlattenNested = (tree, level = 1, currentIndex = 0, parentIndex = null, parentId = null) => {
+const getFlattenNested = (tree, level = 1, parentId = null) => {
 	const rowData: IRow = {
 		_id: tree._id,
 		isFederation: tree.isFederation,
 		name: tree.name,
 		level,
-		parentIndex,
 		parentId,
 		hasChildren: Boolean(tree.children),
 		childrenNumber: 0,
@@ -26,35 +24,27 @@ const getFlattenNested = (tree, level = 1, currentIndex = 0, parentIndex = null,
 	};
 
 	const dataToFlatten = [] as any;
-	let dataMap = {};
 
 	if (tree.children) {
 		for (let index = 0; index < tree.children.length; index++) {
 			const subTree = tree.children[index];
-			const prevSubTreeChildren = index > 0 ? (tree.children[index - 1].children || []) : [] ;
-			const childIndex = index + prevSubTreeChildren.length;
 
-			const flattenNestedData = getFlattenNested(subTree, level + 1, childIndex, currentIndex, tree._id);
-			rowData.childrenNumber += flattenNestedData.childrenNumber;
-			dataToFlatten.push(flattenNestedData.data);
-			dataMap = {
-				[rowData._id]: currentIndex,
-				...flattenNestedData.map
-			};
+			const { data: nestedData, childrenNumber } = getFlattenNested(subTree, level + 1, tree._id);
+			rowData.childrenNumber += childrenNumber;
+			dataToFlatten.push(nestedData);
 		}
 	}
 
 	dataToFlatten.unshift(rowData);
 
 	const data = flattenDeep(dataToFlatten);
-	const childrenNumber = data.length;
-
-	return { data, map: dataMap, childrenNumber };
+	return { data, childrenNumber: data.length };
 };
 
 self.addEventListener('message', ({ data }) => {
 	const { mainTree, subTrees, subModels } = data;
 
+	console.time('TREE PRE-PROCESSING');
 	for (let index = 0; index < mainTree.children.length; index++) {
 		const child = mainTree.children[index];
 		const [modelTeamspace, model] = child.name.split(':');
@@ -73,12 +63,17 @@ self.addEventListener('message', ({ data }) => {
 			child.children[0].children = [subTree.nodes];
 		}
 	}
+	console.timeEnd('TREE PRE-PROCESSING');
 
 	console.time('TREE PROCESSING');
-	const { data: nodesList, map: nodesIndexesMap } = getFlattenNested(mainTree);
-	const result = {
-		data: { nodesList, nodesIndexesMap }
-	};
+	const { data: nodesList } = getFlattenNested(mainTree);
+	const nodesIndexesMap = nodesList.reduce((indiecesMap, node: IRow, index) => {
+		indiecesMap[node._id] = index;
+		return indiecesMap;
+	}, {});
+	const result = { data: { nodesList, nodesIndexesMap }};
 	console.timeEnd('TREE PROCESSING');
- self.postMessage(JSON.stringify({ result }));
+
+	// @ts-ignore
+	self.postMessage(JSON.stringify({ result }));
 }, false);
