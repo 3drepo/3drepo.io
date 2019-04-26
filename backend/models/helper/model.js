@@ -77,8 +77,9 @@ function convertToErrorCode(bouncerErrorCode) {
 		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION,
 		responseCodes.FILE_IMPORT_MAX_NODES_EXCEEDED,
 		responseCodes.FILE_IMPORT_ODA_NOT_SUPPORTED,
-		responseCodes.FILE_IMPORT_NO_3D_VIEW
-
+		responseCodes.FILE_IMPORT_NO_3D_VIEW,
+		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
+		responseCodes.FILE_IMPORT_TIMED_OUT
 	];
 
 	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ?

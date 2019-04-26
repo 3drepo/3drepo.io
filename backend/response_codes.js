@@ -95,6 +95,7 @@
 		FILE_IMPORT_MAX_NODES_EXCEEDED: { message: "Import failed: Too many objects, consider splitting up the model", status: 400 },
 		FILE_IMPORT_ODA_NOT_SUPPORTED: { message: "DGN/RVT import is currently not supported", status: 400 },
 		FILE_IMPORT_NO_3D_VIEW: { message: "Cannot find a 3D View within the model.", status: 400 },
+		FILE_IMPORT_TIMED_OUT: { message: "Process timed out. Consider splitting up the model", status: 500 },
 
 		QUEUE_CONN_ERR: { message: "Failed to queue your request. Please try again later.", status: 500},
 		QUEUE_NO_CONFIG: { message: "Server has no queue configuration", status: 500 },
