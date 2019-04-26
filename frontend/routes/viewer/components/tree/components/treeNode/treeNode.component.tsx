@@ -32,6 +32,7 @@ import {
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
 interface IProps {
+	style: any;
 	data: any;
 	settings: any;
 	parentId?: number;
@@ -59,7 +60,6 @@ const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
 );
 
 export class TreeNode extends React.PureComponent<IProps, any> {
-
 	get node() {
 		return this.props.data;
 	}
@@ -139,10 +139,11 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	));
 
 	public render() {
-		const { highlighted, expanded, selected, isSearchResult } = this.props;
+		const { highlighted, expanded, selected, isSearchResult, style } = this.props;
 
 		return (
 			<Container
+				style={style}
 				nodeType={this.type}
 				expandable={this.node.hasChildren}
 				selected={!isSearchResult && selected}

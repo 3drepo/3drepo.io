@@ -87,15 +87,13 @@ export const Container = styled.li<IContainer>`
 	cursor: ${(props) => isEqual(TREE_ITEM_FEDERATION_TYPE, props.nodeType) ? 'default' : 'pointer'};
 	border-bottom: ${(props) => props.highlighted ? 'none' : `1px solid ${COLOR.DARK_GRAY}`};
 	background-color: ${getBackgroundColor};
-	padding-left: ${getPaddingLeft}px;
-	padding-top: 2px;
-	padding-bottom:2px;
-	padding-right: 12px;
+	padding: 2px 12px 2px ${getPaddingLeft}px;
 	box-shadow: ${getBoxShadow};
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	height: 40px;
+	box-sizing: border-box;
 `;
 
 export const Name = styled.div<IName>`
