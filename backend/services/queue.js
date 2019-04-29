@@ -261,7 +261,7 @@ class ImportQueue {
 	_dispatchWork(corID, msg, isModelImport) {
 		return this.getChannel().then((channel) => {
 			const queueName = isModelImport ? this.modelQName : this.workerQName;
-			return channel.assertQueue(queueName, { durable: true }).then(info => {
+			return channel.assertQueue(queueName, { durable: true }).then(() => {
 				return channel.sendToQueue(queueName,
 					new Buffer.from(msg), {
 						correlationId: corID,
