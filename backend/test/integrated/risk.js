@@ -509,6 +509,38 @@ describe("Risks", function () {
 			], done);
 		});
 
+		it("change pin should succeed", function(done) {
+
+			const risk = {...baseRisk, "name":"Risk test", position:[3,2,1]};
+			let riskId;
+
+			const pin = { position: [1,3,0] };
+
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/risks.json`)
+						.send(risk)
+						.expect(200, function(err, res) {
+							riskId = res.body._id;
+							return done(err);
+						});
+				},
+				function(done) {
+					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+						.send(pin)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/risks/${riskId}.json`)
+						.expect(200, function(err, res) {
+							expect(res.body.position).to.deep.equal(pin.position);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+
 		it("change mitigation status should succeed", function(done) {
 
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);

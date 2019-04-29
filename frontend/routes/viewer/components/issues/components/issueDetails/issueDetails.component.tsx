@@ -27,6 +27,9 @@ import { mergeIssueData, canComment } from '../../../../../../helpers/issues';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 import { EmptyStateInfo } from '../../../views/views.styles';
+import { timingSafeEqual } from 'crypto';
+import { NEW_PIN_ID } from '../../../../../../constants/viewer';
+import { PIN_COLORS } from '../../../../../../styles';
 
 interface IProps {
 	jobs: any[];
@@ -146,6 +149,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderDetailsForm = () => {
+		const {issue} = this.props;
+
 		return (
 			<IssueDetailsForm
 				issue={this.issueData}
@@ -155,6 +160,10 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				permissions={this.props.settings.permissions}
 				currentUser={this.props.currentUser}
 				myJob={this.props.myJob}
+				onChangePin={this.handleChangePin}
+				onSavePin={this.onPositionSave}
+				pinId={issue._id}
+				hasPin={issue.position && issue.position.length}
 			/>
 		);
 	}
@@ -210,7 +219,11 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onExpandChange={this.handleExpandChange}
 				renderCollapsable={this.renderDetailsForm}
 				renderNotCollapsable={() => this.renderLogList(comments && !!comments.length && !this.isNewIssue)}
-				handleHeaderClick={() => this.setCameraOnViewpoint({viewpoint: this.issueData.viewpoint})}
+				handleHeaderClick={() => {
+					if (!this.isNewIssue) { // if its a new issue it shouldnt go to the viewpoint
+						this.setCameraOnViewpoint({viewpoint: this.issueData.viewpoint});
+					}
+				}}
 				scrolled={this.state.scrolled}
 			/>
 		);
@@ -229,11 +242,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				viewpoint={this.props.newComment.viewpoint}
 				innerRef={this.commentRef}
 				onTakeScreenshot={this.handleNewScreenshot}
-				onChangePin={this.handleChangePin}
 				onSave={this.handleSave}
 				canComment={this.userCanComment()}
 				hideComment={this.isNewIssue}
-				hidePin={!this.isNewIssue}
 			/>
 		</ViewerPanelFooter>
 	));
@@ -285,6 +296,15 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			saveIssue(teamspace, model, this.issueData, revision);
 		} else {
 			this.postComment(teamspace, model, formValues);
+		}
+	}
+
+	public onPositionSave = (position) => {
+		if (!this.isNewIssue) {
+			const { teamspace, model, issue } = this.props;
+			this.props.updateIssue(teamspace, model, {...issue, position});
+		} else {
+			Viewer.changePinColor({ id: NEW_PIN_ID, colours: PIN_COLORS.YELLOW });
 		}
 	}
 

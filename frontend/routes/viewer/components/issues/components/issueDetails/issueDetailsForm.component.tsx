@@ -36,6 +36,7 @@ import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { canChangeBasicProperty, canChangeStatus, canChangeAssigned } from '../../../../../../helpers/issues';
 import { TextField } from '../../../../../components/textField/textField.component';
 import { DescriptionImage } from './issueDetails.styles';
+import PinButton from '../../../pinButton/pinButton.container';
 
 interface IProps {
 	issue: any;
@@ -49,6 +50,10 @@ interface IProps {
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
 	handleSubmit: () => void;
+	onSavePin: (position) => void;
+	onChangePin: (pin) => void;
+	pinId?: string;
+	hasPin: boolean;
 }
 
 interface IState {
@@ -173,6 +178,13 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									disabled={!canChangeBasicProperty(issue, myJob, permissions, currentUser)}
 									placeholder="Choose a due date" />}
 								/>
+						</StyledFormControl>
+						<StyledFormControl>
+							<PinButton onChange={this.props.onChangePin}
+									onSave={this.props.onSavePin}
+									pinId={this.props.pinId}
+									hasPin={this.props.hasPin}
+									/>
 						</StyledFormControl>
 					</FieldsRow>
 					<Field name="description" render={({ field }) => (

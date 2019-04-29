@@ -71,6 +71,7 @@ interface IProps {
 	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
 	saveRisk: (teamspace, modelId, risk) => void;
 	setFilters: (filters) => void;
+	renderPins: () => void;
 }
 
 interface IState {
@@ -179,6 +180,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 	public closeRiskDetails = () => {
 		const { teamspace, model, revision } = this.props;
 		this.props.closeDetails(teamspace, model, revision);
+		this.props.renderPins();
 	}
 
 	public getFilterValues(property) {
