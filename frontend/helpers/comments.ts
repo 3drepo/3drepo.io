@@ -20,7 +20,7 @@ import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
 
 export const prepareComments = (comments = []) => {
-	comments = comments.filter((c) => c.action.property !== 'extras');
+	comments = comments.filter((c) => !c.action || c.action.property !== 'extras');
 
 	if (!comments.length) {
 		return comments;

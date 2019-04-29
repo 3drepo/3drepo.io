@@ -79,9 +79,9 @@ const statusEnum = {
 };
 
 function clean(dbCol, issueToClean) {
-	const idKeys = ["_id", "rev_id", "parent"];
+	const idKeys = ["_id", "rev_id", "parent", "group_id"];
 	const commentIdKeys = ["rev_id", "guid", "viewpoint"];
-	const vpIdKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid"];
+	const vpIdKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid", "group_id"];
 
 	// TODO - Remove this unnecessary mapping after frontend migration
 	// If frontend needs it, frontend can do the translation!!!
@@ -541,7 +541,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 				fieldsCanBeUpdated.forEach((key) => {
 					if (data[key] !== undefined &&
 						(("[object Object]" !== fieldTypes[key] && "[object Array]" !== fieldTypes[key] && data[key] !== newIssue[key])
-						|| !_.isEqual(newIssue[key], data[key]))) {
+						|| (!_.isEqual(newIssue[key], data[key])))) {
 						if (null === data[key] || Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
 							if ("comment" === key || "commentIndex" === key) {
 								if ("commentIndex" !== key || -1 === Object.keys(data).indexOf("comment")) {
@@ -575,20 +575,22 @@ issue.updateAttrs = function(dbCol, uid, data) {
 										newIssue.priority_last_changed = toUpdate.priority_last_changed;
 									}
 
-									const updatedComments = addSystemComment(
-										dbCol.account,
-										dbCol.model,
-										data.sessionId,
-										newIssue._id,
-										newIssue.comments,
-										data.owner,
-										key,
-										newIssue[key],
-										data[key]
-									);
+									if(key !== "extras") {
+										const updatedComments = addSystemComment(
+											dbCol.account,
+											dbCol.model,
+											data.sessionId,
+											newIssue._id,
+											newIssue.comments,
+											data.owner,
+											key,
+											newIssue[key],
+											data[key]
+										);
 
-									toUpdate.comments = updatedComments;
-									newIssue.comments = updatedComments;
+										toUpdate.comments = updatedComments;
+										newIssue.comments = updatedComments;
+									}
 
 									toUpdate[key] = data[key];
 									newIssue[key] = data[key];
