@@ -319,12 +319,12 @@ class ImportQueue {
 		if ("processing" === resData.status) {
 			ModelHelper.setStatus(resDatabase, resProject, "processing", resUser);
 		} else {
-			const softFails = [7,10,15];
-
-			if (resErrorCode === 0 || softFails.includes(resErrorCode)) {
+			if (resErrorCode === 0) {
 				ModelHelper.importSuccess(resDatabase, resProject, this.sharedSpacePath, resUser);
 			} else {
-				ModelHelper.importFail(resDatabase, resProject, resUser, resErrorCode, resErrorMessage, true);
+				const softFails = [7,10,15];
+
+				ModelHelper.importFail(resDatabase, resProject, resUser, resErrorCode, resErrorMessage, !softFails.includes(resErrorCode));
 			}
 		}
 	}
