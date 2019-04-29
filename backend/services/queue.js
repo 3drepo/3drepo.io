@@ -319,7 +319,9 @@ class ImportQueue {
 		if ("processing" === resData.status) {
 			ModelHelper.setStatus(resDatabase, resProject, "processing", resUser);
 		} else {
-			if (resErrorCode === 0) {
+			const softFails = [7,10,15];
+
+			if (resErrorCode === 0 || softFails.includes(resErrorCode)) {
 				ModelHelper.importSuccess(resDatabase, resProject, this.sharedSpacePath, resUser);
 			} else {
 				ModelHelper.importFail(resDatabase, resProject, resUser, resErrorCode, resErrorMessage, true);
