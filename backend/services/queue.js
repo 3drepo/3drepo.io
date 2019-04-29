@@ -262,16 +262,6 @@ class ImportQueue {
 		return this.getChannel().then((channel) => {
 			const queueName = isModelImport ? this.modelQName : this.workerQName;
 			return channel.assertQueue(queueName, { durable: true }).then(info => {
-
-				if (info.consumerCount <= 0) {
-					systemLogger.logInfo("No consumer in queue. Sending email alert...");
-
-					Mailer.sendNoConsumerAlert().then(() => {
-						systemLogger.logInfo("Email sent.");
-					}).catch((err) => {
-						systemLogger.logError("Failed to send email: " + err.message);
-					});
-				}
 				return channel.sendToQueue(queueName,
 					new Buffer.from(msg), {
 						correlationId: corID,
