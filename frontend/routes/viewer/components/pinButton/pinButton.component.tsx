@@ -46,7 +46,7 @@ export class PinButton extends React.PureComponent<IProps, any> {
 		this.togglePinListeners(false);
 	}
 
-	public getPinId = () => this.props.pinId || NEW_PIN_ID;
+	public getPinId = () =>  this.props.hasPin ? this.props.pinId : NEW_PIN_ID;
 
 	public handleChangePin = (active) => {
 		if (active) {
