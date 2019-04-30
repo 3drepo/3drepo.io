@@ -69,15 +69,6 @@ function getURL(urlName, params) {
 	return getBaseURL() + C.MAIL_URLS[urlName](params);
 }
 
-function sendNoConsumerAlert() {
-	if(config.contact) {
-		const template = require("./templates/noConsumers");
-		return sendEmail(template, config.contact.email, {domain: config.host});
-	} else{
-		return Promise.reject({ message: "config.contact is not set"});
-	}
-}
-
 function sendQueueFailedEmail(err) {
 	if(config.contact) {
 		const template = require("./templates/queueFailed");
@@ -225,6 +216,5 @@ module.exports = {
 	sendPaymentRefundedEmail,
 	sendImportError,
 	sendNewUser,
-	sendNoConsumerAlert,
 	sendQueueFailedEmail
 };
