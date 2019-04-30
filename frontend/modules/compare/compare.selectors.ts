@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { isEqual, values, orderBy, omitBy, keys } from 'lodash';
+import { isEqual, values, orderBy, omitBy, size } from 'lodash';
 import { searchByFilters } from '../../helpers/searching';
 import { DIFF_COMPARE_TYPE, COMPARE_SORT_TYPES } from '../../constants/compare';
 import { selectIsModelLoaded } from '../viewer';
@@ -81,6 +81,13 @@ export const selectSortType = createSelector(
 
 export const selectTargetClashModels = createSelector(
 	selectComponentState, (state) => state.targetClashModels
+);
+
+export const selectIsAnyTargetClashModel = createSelector(
+	selectTargetClashModels, (targetClashModels) => {
+		const allTargetAreFalse = values(targetClashModels).every((model) => !model);
+		return !allTargetAreFalse;
+	}
 );
 
 export const selectTargetDiffModels = createSelector(

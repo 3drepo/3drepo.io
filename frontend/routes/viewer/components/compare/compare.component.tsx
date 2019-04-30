@@ -74,6 +74,7 @@ interface IProps {
 	compareDisabled: boolean;
 	selectedItemsMap: any[];
 	isCompareProcessed: boolean;
+	isAnyTargetClashModel: boolean;
 	toggleCompare: () => void;
 	setSortType: (sortType) => void;
 	onTabChange: (activeTab) => void;
@@ -150,7 +151,9 @@ export class Compare extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { activeTab, isActive, toggleCompare, compareDisabled, isCompareProcessed, isFederation } = this.props;
+		const {
+			activeTab, isActive, toggleCompare, compareDisabled, isCompareProcessed, isFederation, isAnyTargetClashModel
+		} = this.props;
 
 		return (
 			<ViewerPanel
@@ -192,7 +195,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 						onClick={toggleCompare}
 						color="secondary"
 						variant="fab"
-						disabled={compareDisabled}
+						disabled={compareDisabled || (!this.isDiffTabActive && !isAnyTargetClashModel)}
 						active={Number(isActive)}
 					>
 						<CompareIcon />

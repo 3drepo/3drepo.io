@@ -58,12 +58,6 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 		return this.revisionsMap[this.state.value].tag;
 	}
 
-	get timestamp() {
-		if (this.state.value) {
-			return dayjs(this.revisionsMap[this.state.value].timestamp).format('DD/MM/YYYY');
-		}
-	}
-
 	private renderSelect = renderWhenTrue(() => {
 		const { revisions, disabled } = this.props;
 
@@ -77,7 +71,7 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 			>
 				{revisions.map((revision) => (
 					<MenuItem key={revision._id} value={revision} disabled={this.props.baseRevision === revision._id}>
-						{this.renderName(revision.tag)}
+						{this.renderName(revision)}
 						{this.renderDate(revision.timestamp)}
 					</MenuItem>
 				))}
@@ -85,7 +79,7 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 		);
 	});
 
-	private renderDefaultValue = renderWhenTrue(() => this.renderName(this.revisionsMap[this.defaultValue].tag));
+	private renderDefaultValue = renderWhenTrue(() => this.renderName(this.revisionsMap[this.defaultValue]));
 
 	public componentDidMount() {
 		this.setState({
@@ -120,9 +114,9 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	private renderValue = () => this.renderName(this.value);
+	private renderValue = () => (<Name>{this.value}</Name>);
 
-	private renderName = (name) => (<Name>{name || this.timestamp}</Name>);
+	private renderName = (revision) => (<Name>{revision.tag || dayjs(revision.timestamp).format('DD/MM/YYYY')}</Name>);
 
 	private renderDate = (timestamp) => (<Date><DateTime value={timestamp} format="DD MMM YYYY" /></Date>);
 }
