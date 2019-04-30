@@ -83,16 +83,6 @@ function clean(dbCol, issueToClean) {
 	const commentIdKeys = ["rev_id", "guid", "viewpoint"];
 	const vpIdKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid", "group_id"];
 
-	// TODO - Remove this unnecessary mapping after frontend migration
-	// If frontend needs it, frontend can do the translation!!!
-	const propertyTextMapping = {
-		"priority": "Priority",
-		"status": "Status",
-		"assigned_roles": "Assigned",
-		"topic_type": "Type",
-		"desc": "Description"
-	};
-
 	issueToClean.account = dbCol.account;
 	issueToClean.model = (issueToClean.origin_model) ? issueToClean.origin_model : dbCol.model;
 
@@ -130,13 +120,6 @@ function clean(dbCol, issueToClean) {
 					issueToClean.comments[i][key] = utils.uuidToString(issueToClean.comments[i][key]);
 				}
 			});
-
-			// TODO - Remove unnecessary return of propertyText after frontend migration
-			if (issueToClean.comments[i].action) {
-				issueToClean.comments[i].action.propertyText =
-					propertyTextMapping[issueToClean.comments[i].action.property] ||
-					issueToClean.comments[i].action.property;
-			}
 
 			if (issueToClean.comments[i].viewpoint) {
 				const commentViewpoint = issueToClean.viewpoints.find((vp) =>
