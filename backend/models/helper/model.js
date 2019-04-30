@@ -46,46 +46,47 @@ const notifications = require("../notification");
  * otherwise FILE_IMPORT_UNKNOWN_ERR is returned.
  * @param {errCode} - error code referenced in error_codes.h
  *******************************************************************************/
-function convertToErrorCode(bouncerErrorCode) {
+function translateBouncerErrCode(bouncerErrorCode) {
 	// These error codes correspond to the error messages to 3drepobouncer
 	// refer to bouncer/repo/error_codes.h for what they are.
+
 	const bouncerErrToWebErr = [
-		responseCodes.OK,
-		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
-		responseCodes.NOT_AUTHORIZED,
-		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
-		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
-		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
-		responseCodes.FILE_IMPORT_STASH_GEN_FAILED,
-		responseCodes.FILE_IMPORT_MISSING_TEXTURES,
-		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
-		responseCodes.REPOERR_FED_GEN_FAIL,
-		responseCodes.FILE_IMPORT_MISSING_NODES,
-		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
-		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
-		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
-		responseCodes.FILE_IMPORT_BUNDLE_GEN_FAILED,
-		responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES,
-		responseCodes.FILE_IMPORT_PROCESS_ERR,
-		responseCodes.FILE_IMPORT_NO_MESHES,
-		responseCodes.FILE_IMPORT_BAD_EXT,
-		responseCodes.FILE_IMPORT_PROCESS_ERR,
-		responseCodes.FILE_IMPORT_PROCESS_ERR,
-		responseCodes.FILE_IMPORT_PROCESS_ERR,
-		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_BIM,
-		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_FBX,
-		responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION,
-		responseCodes.FILE_IMPORT_MAX_NODES_EXCEEDED,
-		responseCodes.FILE_IMPORT_ODA_NOT_SUPPORTED,
-		responseCodes.FILE_IMPORT_NO_3D_VIEW,
-		responseCodes.FILE_IMPORT_UNKNOWN_ERR,
-		responseCodes.FILE_IMPORT_TIMED_OUT
+		{ res: responseCodes.OK, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.NOT_AUTHORIZED, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_STASH_GEN_FAILED, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_MISSING_TEXTURES, softFail: true, userErr: true},
+		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.REPOERR_FED_GEN_FAIL, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_MISSING_NODES, softFail: true, userErr: true},
+		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_BUNDLE_GEN_FAILED, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES, softFail: true, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_NO_MESHES, softFail: false, userErr: true},
+		{ res: responseCodes.FILE_IMPORT_BAD_EXT, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_BIM, softFail: false, userErr: true},
+		{ res: responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_FBX, softFail: false, userErr: true},
+		{ res: responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION, softFail: false, userErr: true},
+		{ res: responseCodes.FILE_IMPORT_MAX_NODES_EXCEEDED, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_ODA_NOT_SUPPORTED, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_NO_3D_VIEW, softFail: false, userErr: true},
+		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_TIMED_OUT, softFail: false, userErr: false}
 	];
 
 	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ?
-		bouncerErrToWebErr[bouncerErrorCode] : responseCodes.FILE_IMPORT_UNKNOWN_ERR;
-
-	return Object.assign({bouncerErrorCode}, errObj);
+		bouncerErrToWebErr[bouncerErrorCode] : { res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, userErr: false};
+	errObj.res.bouncerErrorCode = bouncerErrorCode;
+	return errObj;
 }
 
 function insertModelUpdatedNotificationsLatestReview(account, model) {
@@ -149,16 +150,17 @@ function importSuccess(account, model, sharedSpacePath, user) {
  * @param {user} - user who initiated the request
  * @param {errCode} errCode - Defined bouncer error code or IO response code
  * @param {errMsg} errMsg - Verbose error message (errCode.message will be used if undefined)
- * @param {sendMail} sendMail - Boolean to determine if a notification E-mail will be sent
  */
-function importFail(account, model, user, errCode, errMsg, sendMail) {
+function importFail(account, model, user, errCode, errMsg) {
 	ModelSetting.findById({account, model}, model).then(setting => {
 		// mark model failed
 		setting.status = "failed";
 		if(setting.type === "toy" || setting.type === "sample") {
 			setting.timestamp = undefined;
 		}
-		setting.errorReason = convertToErrorCode(errCode);
+
+		const translatedError = translateBouncerErrCode(errCode);
+		setting.errorReason = translatedError.res;
 
 		setting.markModified("errorReason");
 		setting.save().then(() => {
@@ -171,7 +173,7 @@ function importFail(account, model, user, errCode, errMsg, sendMail) {
 			errMsg = setting.errorReason.message;
 		}
 
-		if (sendMail) {
+		if (!translatedError.userErr) {
 			Mailer.sendImportError({
 				account,
 				model,
@@ -188,9 +190,7 @@ function importFail(account, model, user, errCode, errMsg, sendMail) {
 
 		// In case the error was actually a warning,
 		// the model was imported so we still need to send the model_updated notifications
-		const warningCodes = [7, 10, 15];
-
-		if (warningCodes.includes(errCode)) {
+		if (translatedError.softFail) {
 			insertModelUpdatedNotificationsLatestReview(account, model);
 		}
 

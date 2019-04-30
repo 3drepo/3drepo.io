@@ -40,6 +40,7 @@ import {
 	selectFilteredIssues
 } from './issues.selectors';
 import { IssuesTypes, IssuesActions } from './issues.redux';
+import { NEW_PIN_ID } from '../../constants/viewer';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -150,6 +151,7 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 		if (pinData !== null) {
 			issue.pickedPos = pinData.pickedPos;
 			issue.pickedNorm = pinData.pickedNorm;
+			Viewer.setPin(null);
 		}
 
 		const { data: savedIssue } = yield API.saveIssue(teamspace, model, issue);
@@ -278,6 +280,8 @@ export function* renderPins() {
 				}
 			}
 		}
+
+		yield Viewer.removePin({ id: NEW_PIN_ID });
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('show', 'pins', error));
 	}
@@ -490,6 +494,7 @@ export function* showDetails({ teamspace, model, revision, issue }) {
 export function* closeDetails({ teamspace, model, revision }) {
 	try {
 		const activeIssue = yield select(selectActiveIssueDetails);
+		yield Viewer.removePin({ id: NEW_PIN_ID });
 
 		if (activeIssue) {
 			runAngularViewerTransition({
@@ -515,7 +520,7 @@ export function* showNewPin({ issue, pinData }) {
 			...pinData,
 			account: issue.account,
 			model: issue.model,
-			colours: PIN_COLORS.YELLOW,
+			colours: PIN_COLORS.SUNGLOW,
 			type: 'issue'
 		};
 
@@ -605,12 +610,17 @@ export function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId
 }
 
 export function* setNewIssue() {
+	const activeIssue = yield select(selectActiveIssueDetails);
 	const issues = yield select(selectIssues);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
 	const issueNumber = issues.length + 1;
 
 	try {
+		if (activeIssue) {
+			toggleIssuePin(activeIssue, false);
+		}
+
 		const newIssue = prepareIssue({
 			name: `Untitled issue ${issueNumber}`,
 			assigned_roles: [],

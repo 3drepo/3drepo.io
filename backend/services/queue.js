@@ -261,17 +261,7 @@ class ImportQueue {
 	_dispatchWork(corID, msg, isModelImport) {
 		return this.getChannel().then((channel) => {
 			const queueName = isModelImport ? this.modelQName : this.workerQName;
-			return channel.assertQueue(queueName, { durable: true }).then(info => {
-
-				if (info.consumerCount <= 0) {
-					systemLogger.logInfo("No consumer in queue. Sending email alert...");
-
-					Mailer.sendNoConsumerAlert().then(() => {
-						systemLogger.logInfo("Email sent.");
-					}).catch((err) => {
-						systemLogger.logError("Failed to send email: " + err.message);
-					});
-				}
+			return channel.assertQueue(queueName, { durable: true }).then(() => {
 				return channel.sendToQueue(queueName,
 					new Buffer.from(msg), {
 						correlationId: corID,
@@ -332,7 +322,7 @@ class ImportQueue {
 			if (resErrorCode === 0) {
 				ModelHelper.importSuccess(resDatabase, resProject, this.sharedSpacePath, resUser);
 			} else {
-				ModelHelper.importFail(resDatabase, resProject, resUser, resErrorCode, resErrorMessage, true);
+				ModelHelper.importFail(resDatabase, resProject, resUser, resErrorCode, resErrorMessage);
 			}
 		}
 	}

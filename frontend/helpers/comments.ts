@@ -20,6 +20,8 @@ import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
 
 export const prepareComments = (comments = []) => {
+	comments = comments.filter((c) => !c.action || c.action.property !== 'extras');
+
 	if (!comments.length) {
 		return comments;
 	}
@@ -175,22 +177,23 @@ const convertActionCommentToText = (comment, topicTypes) => {
 				comment.action.propertyText = 'BCF Import';
 				text = comment.action.propertyText + ' by ' + comment.owner;
 				break;
+			case 'position' :
+				// In this case is not needed to be specific of the value that changed
+				comment.action.to = comment.action.from = null;
+				comment.action.propertyText = 'Pin';
+				break;
 		}
 	}
 
 	if (0 === text.length) {
-		if (!comment.action.from) {
-			comment.action.from = '(empty)';
+		if (!comment.action.from || !comment.action.to) {
+			text = comment.action.propertyText + ' updated by ' + comment.owner;
+		} else {
+			text = comment.action.propertyText + ' updated from ' +
+				comment.action.from + ' to ' +
+				comment.action.to + ' by ' +
+				comment.owner;
 		}
-
-		if (!comment.action.to) {
-			comment.action.to = '(empty)';
-		}
-
-		text = comment.action.propertyText + ' updated from ' +
-			comment.action.from + ' to ' +
-			comment.action.to + ' by ' +
-			comment.owner;
 	}
 
 	comment.action.text = text;

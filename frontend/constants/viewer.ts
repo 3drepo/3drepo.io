@@ -104,6 +104,7 @@ export const VIEWER_TOOLBAR_ITEMS = {
 export const INITIAL_HELICOPTER_SPEED = 1;
 export const MIN_HELICOPTER_SPEED = -99;
 export const MAX_HELICOPTER_SPEED = 99;
+export const NEW_PIN_ID = 'newPinId';
 
 export const VIEWER_PIN_MODE = {
 	NORMAL: 'NORMAL',

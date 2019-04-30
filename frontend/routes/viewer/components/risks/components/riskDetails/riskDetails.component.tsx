@@ -23,10 +23,11 @@ import { Container } from './riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { RiskDetailsForm } from './riskDetailsForm.component';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
-import { mergeRiskData, canComment } from '../../../../../../helpers/risks';
+import { mergeRiskData, canComment, getRiskPinColor } from '../../../../../../helpers/risks';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 import { EmptyStateInfo } from '../../../views/views.styles';
+import { NEW_PIN_ID } from '../../../../../../constants/viewer';
 
 interface IProps {
 	jobs: any[];
@@ -156,6 +157,10 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				permissions={this.props.modelSettings.permissions}
 				currentUser={this.props.currentUser}
 				myJob={this.props.myJob}
+				onChangePin={this.handleChangePin}
+				onSavePin={this.onPositionSave}
+				pinId={this.riskData._id}
+				hasPin={this.riskData.position && this.riskData.position.length}
 			/>
 		);
 	}
@@ -210,7 +215,11 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				onExpandChange={this.handleExpandChange}
 				renderCollapsable={this.renderDetailsForm}
 				renderNotCollapsable={() => this.renderLogList(comments && !!comments.length && !this.isNewRisk)}
-				handleHeaderClick={() => this.setCameraOnViewpoint({viewpoint: this.riskData.viewpoint})}
+				handleHeaderClick={() => {
+					if (!this.isNewRisk) { // if its a new issue it shouldnt go to the viewpoint
+						this.setCameraOnViewpoint({viewpoint: this.riskData.viewpoint});
+					}
+				}}
 				scrolled={this.state.scrolled}
 			/>
 		);
@@ -229,11 +238,9 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				viewpoint={this.props.newComment.viewpoint}
 				innerRef={this.commentRef}
 				onTakeScreenshot={this.handleNewScreenshot}
-				onChangePin={this.handleChangePin}
 				onSave={this.handleSave}
 				canComment={this.userCanComment()}
 				hideComment={this.isNewRisk}
-				hidePin={!this.isNewRisk}
 			/>
 		</ViewerPanelFooter>
 	));
@@ -294,6 +301,17 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			saveRisk(teamspace, model, this.riskData, revision);
 		} else {
 			this.postComment(teamspace, model, formValues);
+		}
+	}
+
+	public onPositionSave = (position) => {
+		const { teamspace, model, risk, updateRisk } = this.props;
+
+		if (risk._id) {
+			updateRisk(teamspace, model, {...risk, position});
+		} else {
+			const colours = getRiskPinColor(risk.overall_level_of_risk, true);
+			Viewer.changePinColor({ id: NEW_PIN_ID, colours});
 		}
 	}
 

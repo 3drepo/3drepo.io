@@ -51,7 +51,7 @@ export class LiveChat extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const haveLicense: boolean = clientConfigService.liveChatLicense !== 0;
+		const haveLicense: boolean = Boolean(clientConfigService.liveChatLicense);
 		return (<>{haveLicense && <ReactLiveChat license={clientConfigService.liveChatLicense} />}</>);
 	}
 }
