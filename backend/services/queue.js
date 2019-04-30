@@ -322,9 +322,7 @@ class ImportQueue {
 			if (resErrorCode === 0) {
 				ModelHelper.importSuccess(resDatabase, resProject, this.sharedSpacePath, resUser);
 			} else {
-				const softFails = [7,10,15];
-
-				ModelHelper.importFail(resDatabase, resProject, resUser, resErrorCode, resErrorMessage, !softFails.includes(resErrorCode));
+				ModelHelper.importFail(resDatabase, resProject, resUser, resErrorCode, resErrorMessage);
 			}
 		}
 	}
