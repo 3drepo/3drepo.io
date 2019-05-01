@@ -94,7 +94,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	}
 
 	public renderNameWithCounter = renderWhenTrue(() =>
-		<Typography>{`${this.props.count}. ${this.props.name}`}</Typography>
+		<Typography>{`${this.props.number || this.props.count}. ${this.props.name}`}</Typography>
 	);
 
 	public renderName = renderWhenTrue(() => <Typography>{this.props.name}</Typography>);
@@ -149,6 +149,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		const {
 			className,
 			roleColor,
+			// tslint:disable-next-line
+			number,
 			count,
 			author,
 			createdDate,
@@ -175,8 +177,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 					scrolled={this.props.scrolled ? 1 : 0}
 				>
 						<RoleIndicator color={roleColor} />
-						{this.renderNameWithCounter(!editable && count)}
-						{this.renderName(!editable && !count)}
+						{this.renderNameWithCounter(!editable && number || count)}
+						{this.renderName(!editable && !(number || count))}
 						{this.renderNameField(editable)}
 					</Summary>
 

@@ -48,6 +48,7 @@ interface IProps {
 	statusColor: string;
 	due_date?: number;
 	count?: number;
+	number?: number;
 	active?: boolean;
 	hasViewPermission?: boolean;
 	modelLoaded?: boolean;
@@ -73,7 +74,8 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 		</ArrowButton>
 	));
 
-	public renderNameWithCounter = renderWhenTrue(() => <Name>{`${this.props.count}. ${this.props.name}`}</Name>);
+	public renderNameWithCounter = renderWhenTrue(() =>
+		<Name>{`${this.props.number || this.props.count} ${this.props.name}`}</Name>);
 	public renderName = renderWhenTrue(() => <Name>{this.props.name}</Name>);
 	public renderClosedMessage = renderWhenTrue(() => <ActionMessage content="This issue is now closed" />);
 
@@ -97,6 +99,8 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 		const {
 			roleColor,
 			count,
+			// tslint:disable-next-line
+			number,
 			description,
 			author,
 			hideThumbnail,
@@ -128,8 +132,8 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 					<RoleIndicator color={roleColor} />
 					{this.renderThumbnail(!hideThumbnail)}
 					<Content>
-						{this.renderNameWithCounter(count)}
-						{this.renderName(!count)}
+						{this.renderNameWithCounter(number || count)}
+						{this.renderName(!(number || count))}
 
 						<PreviewItemInfo
 							author={author}
