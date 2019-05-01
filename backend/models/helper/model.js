@@ -78,8 +78,9 @@ function translateBouncerErrCode(bouncerErrorCode) {
 		{ res: responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION, softFail: false, userErr: true},
 		{ res: responseCodes.FILE_IMPORT_MAX_NODES_EXCEEDED, softFail: false, userErr: false},
 		{ res: responseCodes.FILE_IMPORT_ODA_NOT_SUPPORTED, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_NO_3D_VIEW, softFail: false, userErr: true}
-
+		{ res: responseCodes.FILE_IMPORT_NO_3D_VIEW, softFail: false, userErr: true},
+		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_TIMED_OUT, softFail: false, userErr: false}
 	];
 
 	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ?
