@@ -24,42 +24,42 @@ const SystemLogger = require("../logger.js").systemLogger;
 
 const ExternalServices = {};
 
-ExternalServices.getFileStream = (type, key) => {
+ExternalServices.getFileStream = (account, collection, type, key) => {
 	switch(type) {
 		case "fs" :
 			return FSHandler.getFileStream(key);
 		case "s3" :
 			return S3Handler.getFileStream(key);
 		case "gridfs" :
-			return GridFSHandler.getFileStream(key);
+			return GridFSHandler.getFileStream(account, collection, key);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
 			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
 	}
 };
 
-ExternalServices.getFile = (type, key) => {
+ExternalServices.getFile = (account, collection, type, key) => {
 	switch(type) {
 		case "fs" :
 			return FSHandler.getFile(key);
 		case "s3" :
 			return S3Handler.getFile(key);
 		case "gridfs" :
-			return GridFSHandler.getFile(key);
+			return GridFSHandler.getFile(account, collection, key);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
 			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
 	}
 };
 
-ExternalServices.removeFiles = (type, keys) => {
+ExternalServices.removeFiles = (account, collection, type, keys) => {
 	switch(type) {
 		case "fs" :
 			return FSHandler.removeFiles(keys);
 		case "s3" :
 			return S3Handler.removeFiles(keys);
 		case "gridfs" :
-			return GridFSHandler.removeFiles(keys);
+			return GridFSHandler.removeFiles(account, collection, keys);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
 			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);

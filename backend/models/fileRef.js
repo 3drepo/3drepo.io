@@ -37,7 +37,7 @@ function fetchFile(account, model, ext, fileName) {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
-		return ExternalServices.getFile(entry.type, entry.link);
+		return ExternalServices.getFile(account, collection, entry.type, entry.link);
 	});
 }
 
@@ -50,7 +50,7 @@ function fetchFileStream(account, model, ext, fileName, imposeModelRoute = true)
 			}
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
-		return { readStream: ExternalServices.getFileStream(entry.type, entry.link), size: entry.size };
+		return { readStream: ExternalServices.getFileStream(account, collection, entry.type, entry.link), size: entry.size };
 	});
 }
 
@@ -67,7 +67,7 @@ function removeAllFiles(account, collection) {
 			return col.aggregate(query).toArray().then((results) => {
 				const delPromises = [];
 				results.forEach((entry) => {
-					delPromises.push(ExternalServices.removeFiles(entry._id, entry.links));
+					delPromises.push(ExternalServices.removeFiles(account, collection, entry._id, entry.links));
 				});
 				return Promise.all(delPromises);
 			});
