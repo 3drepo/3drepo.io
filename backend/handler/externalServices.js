@@ -34,7 +34,7 @@ ExternalServices.getFileStream = (type, key) => {
 			return GridFSHandler.getFileStream(key);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
-			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
+			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
 	}
 };
 
@@ -48,7 +48,7 @@ ExternalServices.getFile = (type, key) => {
 			return GridFSHandler.getFile(key);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
-			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
+			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
 	}
 };
 
@@ -62,7 +62,7 @@ ExternalServices.removeFiles = (type, keys) => {
 			return GridFSHandler.removeFiles(keys);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
-			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
+			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
 	}
 };
 
