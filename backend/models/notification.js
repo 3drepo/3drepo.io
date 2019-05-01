@@ -107,7 +107,7 @@ const fillModelNames = function(fullNotifications) {
 	// this handles then  the fullNotifications areW
 	// in the form of [{user, notification},{user, notification}...]
 	// or [notification, notification...]
-	if (fullNotifications.length && fullNotifications[0].user && fullNotifications[0].notification) {
+	if (fullNotifications.length && fullNotifications[0].notification) {
 		notifications = fullNotifications.map(n => n.notification);
 	} else {
 		notifications = fullNotifications;
