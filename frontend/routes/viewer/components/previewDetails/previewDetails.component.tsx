@@ -43,7 +43,7 @@ interface IProps {
 	className?: string;
 	roleColor: string;
 	name: string;
-	count: number;
+	number: number;
 	author: string;
 	createdDate: string;
 	StatusIconComponent: any;
@@ -94,7 +94,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	}
 
 	public renderNameWithCounter = renderWhenTrue(() =>
-		<Typography>{`${this.props.number || this.props.count}. ${this.props.name}`}</Typography>
+		<Typography>{`${this.props.number}. ${this.props.name}`}</Typography>
 	);
 
 	public renderName = renderWhenTrue(() => <Typography>{this.props.name}</Typography>);
@@ -151,7 +151,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			roleColor,
 			// tslint:disable-next-line
 			number,
-			count,
 			author,
 			createdDate,
 			StatusIconComponent,
@@ -177,8 +176,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 					scrolled={this.props.scrolled ? 1 : 0}
 				>
 						<RoleIndicator color={roleColor} />
-						{this.renderNameWithCounter(!editable && number || count)}
-						{this.renderName(!editable && !(number || count))}
+						{this.renderNameWithCounter(!editable && number)}
+						{this.renderName(!editable && !number)}
 						{this.renderNameField(editable)}
 					</Summary>
 
