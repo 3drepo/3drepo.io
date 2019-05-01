@@ -27,7 +27,7 @@ def genFileDir(fileName, dirLevels):
         directory += str(fileNameHash & 255) + '/'
     return directory
 
-if len(sys.argv) < 4:
+if len(sys.argv) <= 5:
     print("Not enough arguments.")
     print("moveModelsToFS.py <mongoURL> <mongoPort> <userName> <password> <localFolder>")
     sys.exit(0)
@@ -51,6 +51,7 @@ connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongo
 
 ##### Enable dry run to not commit to the database #####
 dryRun = True
+overwrite = True #if there is already an entry for the filename: True = Overwrite regardless, False = Use existing entry
 
 ##### Number of directory levels to use #####
 dirLevels = 2
@@ -68,6 +69,7 @@ for database in db.database_names():
             print("\t--model: " +  modelId)
             for colPrefix in [".history",".stash.json_mpc", ".stash.unity3d" ]:
                 colName = modelId + colPrefix
+                targetCol = colName + ".ref"
                 print("\t\t--stash: " +  colName)
                 fs = gridfs.GridFS(db, colName)
                 for entry in fs.find({"filename":{"$not": re.compile("unityAssets.json$")}}):
@@ -76,6 +78,11 @@ for database in db.database_names():
                     fileLink = directory + fileId
                     filePath = localFolder + '/' + fileLink
 ##### Create Reference BSON #####
+                    if not overwrite:
+                        if db[targetCol].find_one({"_id" : cleanFileName(entry.filename), "type": "fs"}) != None:
+                            print("\t\t Found entry for " + cleanFileName(entry.filename) + ", skipping...");
+                            continue
+
                     bsonData = {}
                     bsonData['_id'] = cleanFileName(entry.filename)
                     bsonData['link'] = fileLink
@@ -94,5 +101,4 @@ for database in db.database_names():
                         file = open(filePath,'wb')
                         file.write(StringIO.StringIO(entry.read()).getvalue())
                         file.close()
-                        targetCol = colName + ".ref"
                         db[targetCol].save(bsonData)
