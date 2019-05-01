@@ -29,6 +29,7 @@ connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongo
 
 ##### Enable dry run to not commit to the database #####
 dryRun = True
+overwrite = True #if there is already an entry for the filename: True = Overwrite regardless, False = Use existing entry
 
 ##### Connect to the Database #####
 db = MongoClient(connString)
@@ -46,7 +47,11 @@ for database in db.database_names():
                 print("\t\t--stash: " +  colName)
                 fs = gridfs.GridFS(db, colName)
                 for entry in fs.find({"filename":{"$not": re.compile("unityAssets.json$")}}):
-##### Create Reference BSON #####
+#### Create Reference BSON #####
+                    if not overwrite:
+                        if db[targetCol].find_one({"_id" : cleanFileName(entry.filename), "type": "fs"}) != None:
+                            print("\t\t Found entry for " + cleanFileName(entry.filename) + ", skipping...");
+                            continue
                     filename = cleanFileName(entry.filename)
                     bsonData = {}
                     bsonData['_id'] = filename
