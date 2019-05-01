@@ -82,7 +82,6 @@ module.exports = {
 		bucketName: "3drepo-travis"
 	},
 	fs: {
-//		path: '/home/travis/build/3drepo/3drepo.io/submodules/tests/backend/files/'
 		path: require("path").resolve(__dirname, '../../submodules/tests/backend/files/')
 	},
 	tokenExpiry: {
