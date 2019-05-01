@@ -475,7 +475,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 
 			let newViewpointPromise;
 
-			if (data["viewpoint"]) {
+			if (data["viewpoint"] && !data["viewpoint"].guid) {
 				if (Object.prototype.toString.call(data["viewpoint"]) === fieldTypes["viewpoint"]) {
 					data.viewpoint.guid = utils.generateUUID();
 
