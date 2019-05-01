@@ -25,7 +25,6 @@ interface IPanelCards {
 interface IPanelCard {
 	type: string;
 	title: string;
-	showLiteMode: boolean;
 	show: boolean;
 	help: string;
 	icon: string;
@@ -97,7 +96,6 @@ export class PanelService {
 		this.panelCards.left.push({
 			type: 'issues',
 			title: 'Issues',
-			showLiteMode: true,
 			show: issueId || !riskId,
 			help: 'List current issues',
 			icon: 'place',
@@ -288,7 +286,6 @@ export class PanelService {
 		this.panelCards.left.push({
 			type: 'risks',
 			title: 'SafetiBase',
-			showLiteMode: true,
 			show: Boolean(riskId),
 			help: 'Risk register',
 			icon: 'report_problem',
@@ -303,7 +300,6 @@ export class PanelService {
 		this.panelCards.left.push({
 			type: 'groups',
 			title: 'Groups',
-			showLiteMode: true,
 			show: false,
 			help: 'List current groups',
 			icon: 'group_work',
@@ -346,7 +342,6 @@ export class PanelService {
 		this.panelCards.left.push({
 			type: 'viewpoints',
 			title: 'Views',
-			showLiteMode: true,
 			show: false,
 			help: 'List current viewpoints',
 			icon: 'camera_alt',
@@ -359,7 +354,6 @@ export class PanelService {
 		this.panelCards.left.push({
 			type: 'tree',
 			title: 'Tree',
-			showLiteMode: true,
 			show: false,
 			help: 'Model elements shown in a tree structure',
 			icon: 'device_hub',
@@ -401,7 +395,6 @@ export class PanelService {
 		this.panelCards.left.push({
 			type: 'compare',
 			title: 'Compare',
-			showLiteMode: false,
 			show: false,
 			help: 'Show clashes and differences between models',
 			icon: 'compare',
@@ -413,7 +406,6 @@ export class PanelService {
 		this.panelCards.left.push({
 			type: 'gis',
 			title: 'GIS',
-			showLiteMode: false,
 			show: false,
 			help: 'Add various GIS data to the view',
 			icon: 'layers',
@@ -427,7 +419,6 @@ export class PanelService {
 			type: 'docs',
 			title: 'BIM Data',
 			show: false,
-			showLiteMode: false,
 			help: 'Documents',
 			icon: 'content_copy',
 			minHeight: 80,

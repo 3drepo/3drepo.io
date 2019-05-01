@@ -64,7 +64,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 		}
 
 		button {
-			width:140px;
+			min-width:140px;
 			border:none;
 			background:#0E2F53;
 			padding:10px;
@@ -181,12 +181,12 @@ html(lang="en" ng-app="3drepo").ng-scope
 			return window.print();
 		}
 
-		function showHide(e) {
-			const panelToHide = document.querySelectorAll(".activityLog");
+		function showHideElements(e, selector, label) {
+			const panelToHide = document.querySelectorAll(selector);
 			panelToHide.forEach(elem => {
-				elem.classList.toggle('hide');
-				e.srcElement.textContent = elem.classList.contains('hide') ? "SHOW LOG" : "HIDE LOG"
-			})
+					elem.classList.toggle('hide');
+					e.srcElement.textContent = ( elem.classList.contains('hide') ? "SHOW " : "HIDE " )+ label
+				});
 		}
 
 		function changeImageSize(e) {
@@ -207,8 +207,9 @@ html(lang="en" ng-app="3drepo").ng-scope
 		header
 			div(class="button-group")
 				button(onclick="printDialog()") Print
-				button(onclick="showHide(event)") Hide Log
+				button(onclick="showHideElements(event, '.activityLog', 'Log')") Hide Log
 				button(onclick="changeImageSize(event)") Large Pictures
+				button(onclick="showHideElements(event, '.activityLog .row.screenshot', 'Log Pictures' )") Hide Log Pictures
 			img(src=baseURL+"/images/3drepo-logo-white.png" width="120px" style="margin-top: 5px;")
 
 		.container
@@ -246,6 +247,11 @@ html(lang="en" ng-app="3drepo").ng-scope
 									h4.grey Activity Log
 									if entry.comments
 										each comment in entry.comments
+												if comment.screenshot
+													.row.screenshot
+														.col.screenshot
+															img(class="fitImage" src=url(comment.screenshot) style="width:100%;")
+														.col
 												if comment.comment
 													| #{comment.comment}
 												if comment.action

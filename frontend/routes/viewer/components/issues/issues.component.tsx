@@ -71,6 +71,7 @@ interface IProps {
 	exportBCF: (teamspace, modelId) => void;
 	toggleSortOrder: () => void;
 	setFilters: (filters) => void;
+	renderPins: () => void;
 }
 
 interface IState {
@@ -213,6 +214,7 @@ export class Issues extends React.PureComponent<IProps, IState> {
 	public closeIssueDetails = () => {
 		const { teamspace, model, revision } = this.props;
 		this.props.closeDetails(teamspace, model, revision);
+		this.props.renderPins();
 	}
 
 	public getFilterValues(property) {

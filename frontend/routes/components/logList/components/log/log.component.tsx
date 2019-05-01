@@ -61,10 +61,6 @@ export class Log extends React.PureComponent<IProps, any> {
 		return Boolean(this.props.action);
 	}
 
-	get isCommentWithScreenshot() {
-		return this.isScreenshot;
-	}
-
 	get isPlainComment() {
 		return Boolean(this.props.comment) && !this.isScreenshot && !this.isAction;
 	}

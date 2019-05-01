@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,14 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-"use strict";
-const html = data => `
-	No consumers found in ${data.domain}. Please look into it!
-`;
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { connect } from '../../../../helpers/migration';
+import { MeasureActions } from '../../../../modules/measure';
+import { PinButton } from './pinButton.component';
 
-const subject = data => `[System][${data.domain}] No consumers found in queue`;
+const mapStateToProps = createStructuredSelector({});
 
-module.exports =  {
-	html: html,
-	subject: subject
-};
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	setDisabled: MeasureActions.setDisabled,
+	deactivateMeasure: MeasureActions.deactivateMeasure
+}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(PinButton);

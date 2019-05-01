@@ -8,7 +8,7 @@ div.homeContainer(
 	viewer(
 		id="viewer"
 		flex="none"
-		ng-if="!vm.isLiteMode && !vm.isLegalPage"
+		ng-if="!vm.isLegalPage"
 		node="node"
 		account="vm.$state.params.teamspace"
 		model="vm.$state.params.modelId"
@@ -20,8 +20,6 @@ div.homeContainer(
 	.homeHolder(layout="column" flex ng-if="!vm.isLegalPage")
 		top-menu(
 			ng-if="vm.isAuthenticated"
-			is-lite-mode="vm.isLiteMode"
-			on-lite-mode-change="vm.onLiteModeChange"
 			on-logout="vm.logout"
 			on-logo-click="vm.home"
 			id="topMenu"

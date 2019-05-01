@@ -28,11 +28,9 @@ import { runAngularTimeout } from '../../../helpers/migration';
 
 interface IProps {
 	currentUser: any;
-	isLiteMode?: boolean;
 	logoUrl?: string;
 	history: any;
 	visualSettings?: any;
-	onLiteModeChange?: () => void;
 	onLogout?: () => void;
 	onLogoClick?: () => void;
 	updateSettings?: (settings: any) => void;
