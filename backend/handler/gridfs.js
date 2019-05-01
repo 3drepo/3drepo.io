@@ -17,24 +17,30 @@
 
 "use strict";
 
-const responseCodes = require("../response_codes");
+const DB = require("./db");
 
-// Stub for future implementation
 class GridFSHandler {
 	constructor() {
 
 	}
 
-	getFileStream() {
-		return Promise.reject(responseCodes.UNSUPPORTED_STORAGE_TYPE);
+	cleanColName(col) {
+		return col.endsWith(".ref") ? col.slice(0, -4) : col;
 	}
 
-	getFile() {
-		return Promise.reject(responseCodes.UNSUPPORTED_STORAGE_TYPE);
+	getFileStream(account, col, file) {
+		return DB.getFileStreamFromGridFS(account, this.cleanColName(col), file).then((fileInfo) => {
+			return fileInfo.stream;
+		});
+	}
+
+	getFile(account, col, file) {
+		return DB.getFileFromGridFS(account, this.cleanColName(col), file);
 	}
 
 	removeFiles() {
-		return Promise.reject(responseCodes.UNSUPPORTED_STORAGE_TYPE);
+		// No need to remove anything - we will be dropping the collection
+		return Promise.resolve();
 	}
 
 }

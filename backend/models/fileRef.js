@@ -50,7 +50,9 @@ function fetchFileStream(account, model, ext, fileName, imposeModelRoute = true)
 			}
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
-		return { readStream: ExternalServices.getFileStream(account, collection, entry.type, entry.link), size: entry.size };
+		return ExternalServices.getFileStream(account, collection, entry.type, entry.link).then((stream) => {
+			return {readStream: stream, size: entry.size };
+		});
 	});
 }
 
