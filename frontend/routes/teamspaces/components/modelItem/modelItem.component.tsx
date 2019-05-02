@@ -170,13 +170,16 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 		const isFederation = Boolean(subModels);
 		const actions = isFederation ? this.federationActions : this.modelActions;
 		const isPending = isPendingStatus(status);
+		const showLink = !!timestamp;
 
 		return(
 				<Container onMouseEnter={this.createHoverHandler(true)} onMouseLeave={this.createHoverHandler(false)}>
 					<Grid container={true} direction="row" alignItems="center" justify="space-between" wrap="nowrap">
 						<Grid container={true} justify="space-between" wrap="nowrap" alignItems="center">
 							{ isPending
-								? <><Name>{name}</Name> {this.renderPendingStatus(status)}</>
+								? ( showLink
+									? <><LinkedName onClick={onModelItemClick}>{name}</LinkedName> {this.renderPendingStatus(status)}</>
+									: <><Name>{name}</Name>{this.renderPendingStatus(status)}</>)
 								: <LinkedName onClick={onModelItemClick}>{name}</LinkedName>
 							}
 						</Grid>
