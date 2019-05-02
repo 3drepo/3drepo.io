@@ -209,7 +209,7 @@ function updateTextComments(account, model, sessionId, issueId, comments, data, 
 
 	if (data.edit && data.commentIndex >= 0 && comments.length > data.commentIndex) {
 		if (!comments[data.commentIndex].sealed) {
-			const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpoint, data.position);
+			const textComment = Comment.newTextComment(data.requester, data.revId, data.comment, viewpoint, data.position);
 
 			comments[data.commentIndex] = textComment;
 
@@ -234,7 +234,7 @@ function updateTextComments(account, model, sessionId, issueId, comments, data, 
 			comment.sealed = true;
 		});
 
-		const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpoint);
+		const textComment = Comment.newTextComment(data.requester, data.revId, data.comment, viewpoint);
 
 		comments.push(textComment);
 
@@ -581,7 +581,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 											data.sessionId,
 											newIssue._id,
 											newIssue.comments,
-											data.owner,
+											data.requester,
 											key,
 											newIssue[key],
 											data[key]
@@ -597,7 +597,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 									if ("assigned_roles" === key && this.isIssueAssignment(oldIssue, newIssue)) {
 										notificationPromises.push(
 											Notification.removeAssignedNotifications(
-												data.owner,
+												data.requester,
 												dbCol.account,
 												dbCol.model,
 												oldIssue
@@ -605,7 +605,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 										);
 										notificationPromises.push(
 											Notification.upsertIssueAssignedNotifications(
-												data.owner,
+												data.requester,
 												dbCol.account,
 												dbCol.model,
 												newIssue
@@ -640,7 +640,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							data.sessionId,
 							newIssue._id,
 							newIssue.comments,
-							data.owner,
+							data.requester,
 							"status",
 							newIssue["status"],
 							data["status"]
@@ -658,7 +658,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 						if (this.isIssueBeingClosed(oldIssue, newIssue)) {
 							notificationPromises.push(
 								Notification.removeAssignedNotifications(
-									data.owner,
+									data.requester,
 									dbCol.account,
 									dbCol.model,
 									oldIssue
@@ -666,7 +666,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							);
 							notificationPromises.push(
 								Notification.upsertIssueClosedNotifications(
-									data.owner,
+									data.requester,
 									dbCol.account,
 									dbCol.model,
 									newIssue
@@ -677,7 +677,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 						if (this.isIssueBeingReopened(oldIssue, newIssue)) {
 							notificationPromises.push(
 								Notification.removeClosedNotifications(
-									data.owner,
+									data.requester,
 									dbCol.account,
 									dbCol.model,
 									newIssue

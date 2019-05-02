@@ -232,7 +232,7 @@ module.exports = {
 	 * When someone (username) asigns an issue to a new role this function should be
 	 * called to create the new notification for every user that has that role or update the one that already exist, except
 	 * for the user that is assigning it
-	 * @param {string} username The username of the user that is actually asigning the issue
+	 * @param {string} username The username of the user that is logged in
 	 * @param {string} teamSpace The teamspace corresponding to the model of the issue
 	 * @param {string} modelId The model of the issue
 	 * @param {Issue} issue The issue in shich the assignation is happening
