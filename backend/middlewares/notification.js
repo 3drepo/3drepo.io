@@ -20,7 +20,7 @@ const issues = require("../models/issue");
 const _ = require("lodash");
 
 module.exports = {
-	onUpdateIssue: function(req, res, next) {
+	onUpdateIssue: function (req, res, next) {
 		const username = req.session.user.username;
 		const teamspace = req.params.account;
 		const modelId = req.params.model;
@@ -35,8 +35,21 @@ module.exports = {
 		}
 
 		if (issues.isIssueBeingClosed(oldIssue, issue)) {
-			notification.removeAssignedNotifications(username, teamspace, modelId, oldIssue).
-				then((notifications) => {
+			Promise.all([
+				notification.removeAssignedNotifications(username, teamspace, modelId, oldIssue),
+				notification.upsertIssueClosedNotifications(username, teamspace, modelId, issue)
+			]).then((notifications) => {
+				notifications = _.flatten(notifications);
+				req.userNotifications = notifications;
+				next();
+			});
+			return;
+		}
+
+		if (issues.isIssueBeingReopened(oldIssue, issue)) {
+			notification.removeClosedNotifications(username, teamspace, modelId, issue)
+				.then((notifications) => {
+					notifications = _.flatten(notifications);
 					req.userNotifications = notifications;
 					next();
 				});

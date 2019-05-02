@@ -44,6 +44,7 @@ export interface INotification {
 
 const TYPES = {
 	ISSUE_ASSIGNED : 'ISSUE_ASSIGNED',
+	ISSUE_CLOSED : 'ISSUE_CLOSED',
 	MODEL_UPDATED : 'MODEL_UPDATED',
 	MODEL_UPDATED_FAILED : 'MODEL_UPDATED_FAILED'
 };
@@ -88,6 +89,7 @@ const NotificationItemText = (props) => {
 
 const getIcon = (notification) => {
 	switch (notification.type) {
+		case TYPES.ISSUE_CLOSED:
 		case TYPES.ISSUE_ASSIGNED:
 			return (<Place/>);
 		case TYPES.MODEL_UPDATED:
@@ -104,6 +106,8 @@ const getDetails = (notification: IProps) => {
 			return !notification.revision ? 'New revision uploaded' : `Revision ${notification.revision} uploaded`;
 		case TYPES.MODEL_UPDATED_FAILED:
 			return 'New revision failed to import';
+		case TYPES.ISSUE_CLOSED:
+			return notification.issuesId.length <= 1 ? 'Issue has been closed' : `${notification.issuesId.length} closed issues`;
 	}
 };
 
@@ -121,6 +125,10 @@ export class NotificationItem extends React.PureComponent<IProps, IState> {
 		const {teamSpace, modelId, history, issuesId} = this.props;
 		let pathname = `/viewer/${teamSpace}/${modelId}`;
 		let search = '';
+
+		if (this.props.type === TYPES.ISSUE_CLOSED) {
+			// search = `?notificationId=${notificationId}`;
+		}
 
 		if (this.props.type === TYPES.ISSUE_ASSIGNED) {
 			const issueId = issuesId && issuesId.length && issuesId[0];

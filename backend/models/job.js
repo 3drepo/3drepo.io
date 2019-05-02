@@ -73,6 +73,11 @@ schema.methods.removeUserFromJob = function(user) {
 	return this.save();
 };
 
+schema.statics.findUsersWithJobs = function (teamspace, jobs) {
+	return this.find({ account: teamspace }, { _id: { $in: jobs } })
+		.then(items => items.reduce((users, jobitem) => users.concat(jobitem.users),[]));
+};
+
 schema.statics.findByJob = function(teamspace, job) {
 	return this.findOne({account: teamspace}, {_id: job});
 

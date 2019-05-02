@@ -209,7 +209,7 @@ function updateTextComments(account, model, sessionId, issueId, comments, data, 
 
 	if (data.edit && data.commentIndex >= 0 && comments.length > data.commentIndex) {
 		if (!comments[data.commentIndex].sealed) {
-			const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpoint, data.position);
+			const textComment = Comment.newTextComment(data.requester, data.revId, data.comment, viewpoint, data.position);
 
 			comments[data.commentIndex] = textComment;
 
@@ -234,7 +234,7 @@ function updateTextComments(account, model, sessionId, issueId, comments, data, 
 			comment.sealed = true;
 		});
 
-		const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpoint);
+		const textComment = Comment.newTextComment(data.requester, data.revId, data.comment, viewpoint);
 
 		comments.push(textComment);
 
@@ -448,7 +448,6 @@ issue.updateFromBCF = function(dbCol, issueToUpdate, changeSet) {
 };
 
 issue.updateAttrs = function(dbCol, uid, data) {
-
 	const sessionId = data.sessionId;
 
 	if ("[object String]" === Object.prototype.toString.call(uid)) {
@@ -582,7 +581,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 											data.sessionId,
 											newIssue._id,
 											newIssue.comments,
-											data.owner,
+											data.requester,
 											key,
 											newIssue[key],
 											data[key]
@@ -598,7 +597,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 									if ("assigned_roles" === key && this.isIssueAssignment(oldIssue, newIssue)) {
 										notificationPromises.push(
 											Notification.removeAssignedNotifications(
-												data.owner,
+												data.requester,
 												dbCol.account,
 												dbCol.model,
 												oldIssue
@@ -606,7 +605,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 										);
 										notificationPromises.push(
 											Notification.upsertIssueAssignedNotifications(
-												data.owner,
+												data.requester,
 												dbCol.account,
 												dbCol.model,
 												newIssue
@@ -641,7 +640,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							data.sessionId,
 							newIssue._id,
 							newIssue.comments,
-							data.owner,
+							data.requester,
 							"status",
 							newIssue["status"],
 							data["status"]
@@ -653,10 +652,21 @@ issue.updateAttrs = function(dbCol, uid, data) {
 						toUpdate.status_last_changed = (new Date()).getTime();
 						newIssue.status_last_changed = toUpdate.status_last_changed;
 
-						if (newIssue.status !== "closed" && data.status === "closed") {
+						toUpdate.status = data.status;
+						newIssue.status = data.status;
+
+						if (this.isIssueBeingClosed(oldIssue, newIssue)) {
 							notificationPromises.push(
 								Notification.removeAssignedNotifications(
-									data.owner,
+									data.requester,
+									dbCol.account,
+									dbCol.model,
+									oldIssue
+								)
+							);
+							notificationPromises.push(
+								Notification.upsertIssueClosedNotifications(
+									data.requester,
 									dbCol.account,
 									dbCol.model,
 									newIssue
@@ -664,8 +674,16 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							);
 						}
 
-						toUpdate.status = data.status;
-						newIssue.status = data.status;
+						if (this.isIssueBeingReopened(oldIssue, newIssue)) {
+							notificationPromises.push(
+								Notification.removeClosedNotifications(
+									data.requester,
+									dbCol.account,
+									dbCol.model,
+									newIssue
+								)
+							);
+						}
 					} else {
 						throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 					}
@@ -971,6 +989,10 @@ issue.getThumbnail = function(dbCol, uid) {
 
 issue.isIssueBeingClosed = function(oldIssue, newIssue) {
 	return !!oldIssue && oldIssue.status !== "closed" && newIssue.status === "closed";
+};
+
+issue.isIssueBeingReopened = function (oldIssue, newIssue) {
+	return oldIssue && oldIssue.status === "closed" && newIssue.status !== "closed";
 };
 
 issue.isIssueAssignment = function(oldIssue, newIssue) {
