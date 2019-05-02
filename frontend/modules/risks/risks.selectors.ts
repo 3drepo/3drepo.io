@@ -17,14 +17,13 @@
 
 import { createSelector } from 'reselect';
 import { values } from 'lodash';
-import { getSortedRisks } from '../../helpers/risks';
 import { searchByFilters } from '../../helpers/searching';
 import { RISK_LEVELS } from '../../constants/risks';
 
 export const selectRisksDomain = (state) => Object.assign({}, state.risks);
 
 export const selectRisks = createSelector(
-	selectRisksDomain, (state) => getSortedRisks(values(state.risksMap))
+	selectRisksDomain, (state) => values(state.risksMap)
 );
 
 export const selectRisksMap = createSelector(
@@ -92,6 +91,10 @@ export const selectShowPins = createSelector(
 
 export const selectFetchingDetailsIsPending = createSelector(
 	selectComponentState, (state) => state.fetchingDetailsIsPending
+);
+
+export const selectSortOrder = createSelector(
+	selectComponentState, (state) => state.sortOrder
 );
 
 export const selectFailedToLoad = createSelector(

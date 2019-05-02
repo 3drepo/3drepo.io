@@ -58,6 +58,7 @@ interface IProps {
 		permissions: any[];
 	};
 	activeRiskDetails: any;
+	sortOrder: string;
 	fetchRisks: (teamspace, model, revision) => void;
 	setState: (componentState: any) => void;
 	setNewRisk: () => void;
@@ -70,6 +71,7 @@ interface IProps {
 	subscribeOnRiskChanges: (teamspace, modelId) => void;
 	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
 	saveRisk: (teamspace, modelId, risk) => void;
+	toggleSortOrder: () => void;
 	setFilters: (filters) => void;
 	renderPins: () => void;
 }
@@ -133,6 +135,11 @@ export class Risks extends React.PureComponent<IProps, IState> {
 		}, {
 			...RISKS_ACTIONS_MENU.DOWNLOAD,
 			onClick: () => downloadRisks(teamspace, model)
+		}, {
+			...RISKS_ACTIONS_MENU.SORT_BY_DATE,
+			onClick: () => {
+				this.props.toggleSortOrder();
+			}
 		}];
 	}
 
@@ -226,6 +233,7 @@ export class Risks extends React.PureComponent<IProps, IState> {
 				searchEnabled={this.props.searchEnabled}
 				filters={this.filters}
 				selectedFilters={this.props.selectedFilters}
+				sortOrder={this.props.sortOrder}
 
 				onToggleFilters={this.handleToggleFilters}
 				onChangeFilters={this.props.setFilters}

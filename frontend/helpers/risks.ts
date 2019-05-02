@@ -26,6 +26,7 @@ import {
 	LEVELS
 } from '../constants/risks';
 import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
+import { sortByDate } from './sorting';
 
 export const prepareRisk = (risk, jobs = []) => {
 	const thumbnail = getAPIUrl(risk.thumbnail);
@@ -129,12 +130,6 @@ export const mergeRiskData = (source, data = source) => {
 		assigned_roles: hasUnassignedRole ? [] : [data.assigned_roles],
 		desc: data.description
 	};
-};
-
-export const getSortedRisks = (data = []) => {
-	return [...data].sort((first, second) => {
-		return second.created - first.created;
-	});
 };
 
 const userJobMatchesCreator = (userJob, riskData) => {
