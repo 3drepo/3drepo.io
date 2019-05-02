@@ -260,8 +260,9 @@ html(lang="en" ng-app="3drepo").ng-scope
 														if comment.action.from
 															| from
 															i #{comment.action.from}
-														| to
-														i #{comment.action.to}
+														if comment.action.to
+															| to
+															i #{comment.action.to}
 												p
 													if reportData.userFullName[comment.owner]
 														span.grey.info #{comment.owner} (#{reportData.userFullName[comment.owner]} - #{reportData.getUserJob(comment.owner)})

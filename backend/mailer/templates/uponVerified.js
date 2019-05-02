@@ -531,7 +531,7 @@ const html = data => `
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
 
 
-                                        <img align="center" alt="" src="https://www.dropbox.com/s/ncq7d6tqhd0ozip/3D%20Repo%20Logo.png?raw=1" width="360" style="max-width: 360px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 0%;" class="mcnImage">
+                                        <img align="center" alt="" src="https://3drepo.com/wp-content/uploads/email/3D%20Repo%20Logo.png" width="360" style="max-width: 360px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 0%;" class="mcnImage">
 
 
                             </td>
@@ -661,7 +661,7 @@ const html = data => `
 
 
 
-                        <img alt="" src="https://www.dropbox.com/s/2njbarvrfxtwtbb/Guides.jpg?raw=1" width="264" style="max-width: 791px; border-radius: 0%;" class="mcnImage">
+                        <img alt="" src="https://3drepo.com/wp-content/uploads/email/Guides.jpg" width="264" style="max-width: 791px; border-radius: 0%;" class="mcnImage">
 
 
 
@@ -695,7 +695,7 @@ const html = data => `
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
 
                                     <a href="http://3drepo.org/support/#User_Guides" title="User Guides" class="" target="_blank">
-                                        <img align="center" alt="" src="https://www.dropbox.com/s/hjqlpjes4wfsogw/User%20Guides.png?raw=1" width="564" style="max-width: 1200px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 1%;" class="mcnImage">
+                                        <img align="center" alt="" src="https://3drepo.com/wp-content/uploads/email/User%20Guides.png" width="564" style="max-width: 1200px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 1%;" class="mcnImage">
                                     </a>
 
                             </td>
@@ -754,7 +754,7 @@ const html = data => `
                     <td class="mcnCaptionLeftImageContent" align="center" valign="top">
 
 
-                        <img alt="" src="https://www.dropbox.com/s/dxw7oe9jhpafrmd/Video%20Tutorials.jpg?raw=1" width="264" style="max-width:656px;" class="mcnImage">
+                        <img alt="" src="https://3drepo.com/wp-content/uploads/email/Video%20Tutorials.jpg" width="264" style="max-width:656px;" class="mcnImage">
 
 
                     </td>
@@ -806,7 +806,7 @@ const html = data => `
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
 
                                     <a href="http://3drepo.org/support/#Video_Tutorials" title="Video tutorials" class="" target="_blank">
-                                        <img align="center" alt="" src="https://www.dropbox.com/s/pz691gi8x1lspjb/Video%20Tutorials.png?raw=1" width="564" style="max-width:1200px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
+                                        <img align="center" alt="" src="https://3drepo.com/wp-content/uploads/email/Video%20Tutorials.png" width="564" style="max-width:1200px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
                                     </a>
 
                             </td>

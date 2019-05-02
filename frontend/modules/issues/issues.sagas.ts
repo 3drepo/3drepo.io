@@ -614,7 +614,6 @@ export function* setNewIssue() {
 	const issues = yield select(selectIssues);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
-	const issueNumber = issues.length + 1;
 
 	try {
 		if (activeIssue) {
@@ -622,7 +621,7 @@ export function* setNewIssue() {
 		}
 
 		const newIssue = prepareIssue({
-			name: `Untitled issue ${issueNumber}`,
+			name: 'Untitled Issue',
 			assigned_roles: [],
 			status: STATUSES.OPEN,
 			priority: PRIORITIES.NONE,

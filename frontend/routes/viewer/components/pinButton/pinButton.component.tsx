@@ -63,6 +63,7 @@ export class PinButton extends React.PureComponent<IProps, any> {
 
 			if (pinData) {
 				this.props.onSave(pinData.pickedPos);
+				Viewer.setPin(null);
 			}
 
 		}

@@ -585,7 +585,7 @@ const html = data => `
 				<!--[if mso]>
 				</td>
 				<![endif]-->
-                
+
 				<!--[if mso]>
 				</tr>
 				</table>
@@ -601,15 +601,15 @@ const html = data => `
 				<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
 				<tr>
 				<![endif]-->
-			    
+
 				<!--[if mso]>
 				<td valign="top" width="600" style="width:600px;">
 				<![endif]-->
                 <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
                     <tbody><tr>
-                        
+
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
-                        
+
                             <span style="font-size:15px">We received a request to reset your password, for username <strong>${data.username}</strong>.<br>
 Use the link below to set up a new password for your account.</span>
                         </td>
@@ -618,7 +618,7 @@ Use the link below to set up a new password for your account.</span>
 				<!--[if mso]>
 				</td>
 				<![endif]-->
-                
+
 				<!--[if mso]>
 				</tr>
 				</table>
@@ -637,7 +637,7 @@ Use the link below to set up a new password for your account.</span>
                         </td>
                     </tr>
                 </tbody></table>
-<!--            
+<!--
                 <td class="mcnDividerBlockInner" style="padding: 18px;">
                 <hr class="mcnDividerContent" style="border-bottom-color:none; border-left-color:none; border-right-color:none; border-bottom-width:0; border-left-width:0; border-right-width:0; margin-top:0; margin-right:0; margin-bottom:0; margin-left:0;" />
 -->
@@ -651,12 +651,12 @@ Use the link below to set up a new password for your account.</span>
                     <table align="left" width="100%" border="0" cellpadding="0" cellspacing="0" class="mcnImageContentContainer" style="min-width:100%;">
                         <tbody><tr>
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
-                                
+
                                 <!-- buttonImage -->
                                     <a href="${data.url}" title="" class="" target="_blank">
-                                        <img align="center" alt="" src="https://www.dropbox.com/s/0qpa7btl7gpuua5/Reset%20Your%20Password.png?raw=1" width="400" style="max-width:400px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
+                                        <img align="center" alt="" src="https://3drepo.com/wp-content/uploads/email/Reset%20Your%20Password.png" width="400" style="max-width:400px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
                                     </a>
-                                
+
                             </td>
                         </tr>
                     </tbody></table>
@@ -674,7 +674,7 @@ Use the link below to set up a new password for your account.</span>
                         </td>
                     </tr>
                 </tbody></table>
-<!--            
+<!--
                 <td class="mcnDividerBlockInner" style="padding: 18px;">
                 <hr class="mcnDividerContent" style="border-bottom-color:none; border-left-color:none; border-right-color:none; border-bottom-width:0; border-left-width:0; border-right-width:0; margin-top:0; margin-right:0; margin-bottom:0; margin-left:0;" />
 -->
@@ -689,15 +689,15 @@ Use the link below to set up a new password for your account.</span>
 				<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
 				<tr>
 				<![endif]-->
-			    
+
 				<!--[if mso]>
 				<td valign="top" width="600" style="width:600px;">
 				<![endif]-->
                 <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
                     <tbody><tr>
-                        
+
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
-                        
+
                             <span style="font-size:15px">If you did not request a password reset, please ignore this email and contact us at <a href="mailto:support@3drepo.org?subject=Support%20Query" target="_blank"><span
                                     style="color:#3452ff">support@3drepo.org</span></a> so we can make sure no else is trying to access your account.<br><br>
 This password reset is only valid for 24 hours.</span>
@@ -707,7 +707,7 @@ This password reset is only valid for 24 hours.</span>
 				<!--[if mso]>
 				</td>
 				<![endif]-->
-                
+
 				<!--[if mso]>
 				</tr>
 				</table>
@@ -723,15 +723,15 @@ This password reset is only valid for 24 hours.</span>
 				<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
 				<tr>
 				<![endif]-->
-			    
+
 				<!--[if mso]>
 				<td valign="top" width="600" style="width:600px;">
 				<![endif]-->
                 <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
                     <tbody><tr>
-                        
+
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
-                        
+
                             <span style="font-size:15px"><span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif">All the best,</span></span>
                         </td>
                     </tr>
@@ -739,7 +739,7 @@ This password reset is only valid for 24 hours.</span>
 				<!--[if mso]>
 				</td>
 				<![endif]-->
-                
+
 				<!--[if mso]>
 				</tr>
 				</table>
@@ -755,15 +755,15 @@ This password reset is only valid for 24 hours.</span>
 				<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
 				<tr>
 				<![endif]-->
-			    
+
 				<!--[if mso]>
 				<td valign="top" width="600" style="width:600px;">
 				<![endif]-->
                 <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
                     <tbody><tr>
-                        
+
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
-                        
+
                             <span style="font-size:15px">3D Repo Team</span>
                         </td>
                     </tr>
@@ -771,7 +771,7 @@ This password reset is only valid for 24 hours.</span>
 				<!--[if mso]>
 				</td>
 				<![endif]-->
-                
+
 				<!--[if mso]>
 				</tr>
 				</table>
@@ -815,12 +815,12 @@ This password reset is only valid for 24 hours.</span>
                                     <table align="center" border="0" cellspacing="0" cellpadding="0">
                                     <tr>
                                     <![endif]-->
-                                    
+
                                         <!--[if mso]>
                                         <td align="center" valign="top">
                                         <![endif]-->
-                                        
-                                        
+
+
                                             <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;">
                                                 <tbody><tr>
                                                     <td valign="top" style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer">
@@ -829,12 +829,12 @@ This password reset is only valid for 24 hours.</span>
                                                                 <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;">
                                                                     <table align="left" border="0" cellpadding="0" cellspacing="0" width="">
                                                                         <tbody><tr>
-                                                                            
+
                                                                                 <td align="center" valign="middle" width="24" class="mcnFollowIconContent">
                                                                                     <a href="https://twitter.com/3drepo" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/gray-twitter-48.png" style="display:block;" height="24" width="24" class=""></a>
                                                                                 </td>
-                                                                            
-                                                                            
+
+
                                                                         </tr>
                                                                     </tbody></table>
                                                                 </td>
@@ -843,16 +843,16 @@ This password reset is only valid for 24 hours.</span>
                                                     </td>
                                                 </tr>
                                             </tbody></table>
-                                        
+
                                         <!--[if mso]>
                                         </td>
                                         <![endif]-->
-                                    
+
                                         <!--[if mso]>
                                         <td align="center" valign="top">
                                         <![endif]-->
-                                        
-                                        
+
+
                                             <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;">
                                                 <tbody><tr>
                                                     <td valign="top" style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer">
@@ -861,12 +861,12 @@ This password reset is only valid for 24 hours.</span>
                                                                 <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;">
                                                                     <table align="left" border="0" cellpadding="0" cellspacing="0" width="">
                                                                         <tbody><tr>
-                                                                            
+
                                                                                 <td align="center" valign="middle" width="24" class="mcnFollowIconContent">
                                                                                     <a href="https://en-gb.facebook.com/3DRepo/" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/gray-facebook-48.png" style="display:block;" height="24" width="24" class=""></a>
                                                                                 </td>
-                                                                            
-                                                                            
+
+
                                                                         </tr>
                                                                     </tbody></table>
                                                                 </td>
@@ -875,16 +875,16 @@ This password reset is only valid for 24 hours.</span>
                                                     </td>
                                                 </tr>
                                             </tbody></table>
-                                        
+
                                         <!--[if mso]>
                                         </td>
                                         <![endif]-->
-                                    
+
                                         <!--[if mso]>
                                         <td align="center" valign="top">
                                         <![endif]-->
-                                        
-                                        
+
+
                                             <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;">
                                                 <tbody><tr>
                                                     <td valign="top" style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer">
@@ -893,12 +893,12 @@ This password reset is only valid for 24 hours.</span>
                                                                 <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;">
                                                                     <table align="left" border="0" cellpadding="0" cellspacing="0" width="">
                                                                         <tbody><tr>
-                                                                            
+
                                                                                 <td align="center" valign="middle" width="24" class="mcnFollowIconContent">
                                                                                     <a href="https://www.linkedin.com/company/3d-repo" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/gray-linkedin-48.png" style="display:block;" height="24" width="24" class=""></a>
                                                                                 </td>
-                                                                            
-                                                                            
+
+
                                                                         </tr>
                                                                     </tbody></table>
                                                                 </td>
@@ -907,16 +907,16 @@ This password reset is only valid for 24 hours.</span>
                                                     </td>
                                                 </tr>
                                             </tbody></table>
-                                        
+
                                         <!--[if mso]>
                                         </td>
                                         <![endif]-->
-                                    
+
                                         <!--[if mso]>
                                         <td align="center" valign="top">
                                         <![endif]-->
-                                        
-                                        
+
+
                                             <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;">
                                                 <tbody><tr>
                                                     <td valign="top" style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer">
@@ -925,12 +925,12 @@ This password reset is only valid for 24 hours.</span>
                                                                 <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;">
                                                                     <table align="left" border="0" cellpadding="0" cellspacing="0" width="">
                                                                         <tbody><tr>
-                                                                            
+
                                                                                 <td align="center" valign="middle" width="24" class="mcnFollowIconContent">
                                                                                     <a href="https://github.com/3drepo" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/gray-github-48.png" style="display:block;" height="24" width="24" class=""></a>
                                                                                 </td>
-                                                                            
-                                                                            
+
+
                                                                         </tr>
                                                                     </tbody></table>
                                                                 </td>
@@ -939,16 +939,16 @@ This password reset is only valid for 24 hours.</span>
                                                     </td>
                                                 </tr>
                                             </tbody></table>
-                                        
+
                                         <!--[if mso]>
                                         </td>
                                         <![endif]-->
-                                    
+
                                         <!--[if mso]>
                                         <td align="center" valign="top">
                                         <![endif]-->
-                                        
-                                        
+
+
                                             <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;">
                                                 <tbody><tr>
                                                     <td valign="top" style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer">
@@ -957,12 +957,12 @@ This password reset is only valid for 24 hours.</span>
                                                                 <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;">
                                                                     <table align="left" border="0" cellpadding="0" cellspacing="0" width="">
                                                                         <tbody><tr>
-                                                                            
+
                                                                                 <td align="center" valign="middle" width="24" class="mcnFollowIconContent">
                                                                                     <a href="https://www.youtube.com/channel/UC9ofPaxxyQy0jPEB9YlNpuA" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/gray-youtube-48.png" style="display:block;" height="24" width="24" class=""></a>
                                                                                 </td>
-                                                                            
-                                                                            
+
+
                                                                         </tr>
                                                                     </tbody></table>
                                                                 </td>
@@ -971,16 +971,16 @@ This password reset is only valid for 24 hours.</span>
                                                     </td>
                                                 </tr>
                                             </tbody></table>
-                                        
+
                                         <!--[if mso]>
                                         </td>
                                         <![endif]-->
-                                    
+
                                         <!--[if mso]>
                                         <td align="center" valign="top">
                                         <![endif]-->
-                                        
-                                        
+
+
                                             <table align="left" border="0" cellpadding="0" cellspacing="0" style="display:inline;">
                                                 <tbody><tr>
                                                     <td valign="top" style="padding-right:0; padding-bottom:9px;" class="mcnFollowContentItemContainer">
@@ -989,12 +989,12 @@ This password reset is only valid for 24 hours.</span>
                                                                 <td align="left" valign="middle" style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;">
                                                                     <table align="left" border="0" cellpadding="0" cellspacing="0" width="">
                                                                         <tbody><tr>
-                                                                            
+
                                                                                 <td align="center" valign="middle" width="24" class="mcnFollowIconContent">
                                                                                     <a href="http://www.3drepo.org" target="_blank"><img src="https://cdn-images.mailchimp.com/icons/social-block-v2/gray-link-48.png" style="display:block;" height="24" width="24" class=""></a>
                                                                                 </td>
-                                                                            
-                                                                            
+
+
                                                                         </tr>
                                                                     </tbody></table>
                                                                 </td>
@@ -1003,11 +1003,11 @@ This password reset is only valid for 24 hours.</span>
                                                     </td>
                                                 </tr>
                                             </tbody></table>
-                                        
+
                                         <!--[if mso]>
                                         </td>
                                         <![endif]-->
-                                    
+
                                     <!--[if mso]>
                                     </tr>
                                     </table>
@@ -1033,15 +1033,15 @@ This password reset is only valid for 24 hours.</span>
 				<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
 				<tr>
 				<![endif]-->
-			    
+
 				<!--[if mso]>
 				<td valign="top" width="600" style="width:600px;">
 				<![endif]-->
                 <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
                     <tbody><tr>
-                        
+
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
-                        
+
                             <span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif"><span style="color:#696969"><em>Copyright © 2019 3D Repo, All rights reserved.</em><br>
 <br>
 <strong>Our mailing address is:</strong><br>
@@ -1055,7 +1055,7 @@ United Kingdom</span></span>
 				<!--[if mso]>
 				</td>
 				<![endif]-->
-                
+
 				<!--[if mso]>
 				</tr>
 				</table>

@@ -648,8 +648,6 @@ describe("Risks", function () {
 
 					function(done) {
 						agent.get(`/${username}/${model}/risks/${riskId}.json`).expect(200, function(err , res) {
-							comment.viewpoint.account = username;
-							comment.viewpoint.model = model;
 							comment.viewpoint.guid = res.body.comments[0].viewpoint.guid;
 
 							expect(res.body.comments.length).to.equal(1);

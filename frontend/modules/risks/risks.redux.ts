@@ -49,6 +49,7 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	createCommentSuccess: ['comment', 'riskId'],
 	deleteCommentSuccess: ['commentGuid', 'riskId'],
 	updateCommentSuccess: ['comment', 'riskId'],
+	toggleSortOrder: ['sortOrder'],
 	updateNewRisk: ['newRisk'],
 	setFilters: ['filters'],
 	showCloseInfo: ['riskId'],
@@ -86,6 +87,7 @@ export const INITIAL_STATE = {
 		showPins: true,
 		fetchingDetailsIsPending: false,
 		associatedActivities: [],
+		sortOrder: 'desc',
 		failedToLoad: false
 	}
 };
@@ -175,6 +177,15 @@ export const deleteCommentSuccess = (state = INITIAL_STATE, { commentGuid, riskI
 	return { ...state, risksMap };
 };
 
+export const toggleSortOrder = (state = INITIAL_STATE) => {
+	return {
+		...state, componentState: {
+			...state.componentState,
+			sortOrder: state.componentState.sortOrder === 'asc' ? 'desc' : 'asc'
+		}
+	};
+};
+
 const showCloseInfo = (state = INITIAL_STATE, { riskId }) => {
 	const risksMap = updateRiskProps(state.risksMap, riskId, { willBeClosed: true });
 	return { ...state, risksMap };
@@ -195,5 +206,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
 	[RisksTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
 	[RisksTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
-	[RisksTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess
+	[RisksTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
+	[RisksTypes.TOGGLE_SORT_ORDER]: toggleSortOrder
 });

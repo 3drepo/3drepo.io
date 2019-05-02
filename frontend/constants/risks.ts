@@ -8,6 +8,7 @@ import SyncProblem from '@material-ui/icons/SyncProblem';
 import Print from '@material-ui/icons/Print';
 import Download from '@material-ui/icons/CloudDownload';
 import Pins from '@material-ui/icons/PinDrop';
+import { SortAmountUp, SortAmountDown } from '../routes/components/fontAwesomeIcon';
 
 import { DATA_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 import { COLOR, PIN_COLORS } from '../styles';
@@ -189,6 +190,10 @@ export const RISK_FILTERS = [
 	}
 ] as any;
 
+export const ACTIONS_TYPES = {
+	SORT: 'SORT'
+};
+
 export const RISKS_ACTIONS_MENU = {
 	PRINT: {
 		label: 'Create Report',
@@ -202,5 +207,13 @@ export const RISKS_ACTIONS_MENU = {
 	DOWNLOAD: {
 		label: 'Download JSON',
 		Icon: Download
+	},
+	SORT_BY_DATE: {
+		label: 'Sort by date',
+		type: ACTIONS_TYPES.SORT,
+		Icon: {
+			ASC: SortAmountUp,
+			DESC: SortAmountDown
+		}
 	}
 };
