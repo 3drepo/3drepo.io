@@ -63,7 +63,7 @@ view.clean = function (dbCol, viewToClean, targetType = "[object String]") {
 	if (viewToClean.screenshot && viewToClean.screenshot.buffer) {
 		delete viewToClean.screenshot.buffer;
 		viewToClean.screenshot.thumbnail =
-			viewToClean.account + "/" + viewToClean.model + "/viewpoints/" + viewToClean._id + "/thumbnail.png";
+			dbCol.account + "/" + dbCol.model + "/viewpoints/" + viewToClean._id + "/thumbnail.png";
 	}
 
 	if (thumbnailPromise) {
