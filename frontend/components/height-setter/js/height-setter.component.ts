@@ -114,7 +114,7 @@ class HeightSetterController implements ng.IController, IBindings {
 				contentItem: this.contentData,
 				height: requestedHeight
 			});
-		});
+		}, 250);
 	}, 100, { leading: true });
 
 	public handleElementChange = (mutationsList) => {
