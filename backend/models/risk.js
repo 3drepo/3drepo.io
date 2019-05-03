@@ -749,7 +749,7 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 							model: ref.project
 						};
 						subModelsPromises.push(
-							this.findRisksByModelName(subDbCol, username, "master", null, projection, null, true).then((subRisks) => {
+							this.findRisksByModelName(subDbCol, username, "master", null, projection, ids, true).then((subRisks) => {
 								subRisks.forEach((subRisk) => {
 									subRisk.origin_account = subDbCol.account;
 									subRisk.origin_model = subDbCol.model;
