@@ -69,7 +69,7 @@ class HeightSetterController implements ng.IController, IBindings {
 			this.content.css('max-height', `${this.contentData.height - omittedHeight}px`);
 
 			this.observer.observe(this.content[0], {
-				attributes: false,
+				attributes: true,
 				childList: true,
 				subtree: true,
 				characterData: true
@@ -114,7 +114,7 @@ class HeightSetterController implements ng.IController, IBindings {
 				contentItem: this.contentData,
 				height: requestedHeight
 			});
-		});
+		}, 250);
 	}, 100, { leading: true });
 
 	public handleElementChange = (mutationsList) => {
