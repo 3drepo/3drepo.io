@@ -599,7 +599,7 @@ risk.updateAttrs = function(dbCol, uid, data) {
 						return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
 							newRisk = clean(dbCol, newRisk);
 
-							if (data.comment) {
+							if (data.hasOwnProperty("comment")) {
 								if (!data.edit && !data.delete &&
 									newRisk.comments && newRisk.comments.length > 0) {
 									return newRisk.comments[newRisk.comments.length - 1];
