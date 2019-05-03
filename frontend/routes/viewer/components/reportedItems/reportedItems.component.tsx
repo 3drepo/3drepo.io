@@ -380,7 +380,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderEmptyState = renderWhenTrue(() => (
-		<EmptyStateInfo>No entry have been created yet</EmptyStateInfo>
+		<EmptyStateInfo>No entries have been created yet</EmptyStateInfo>
 	));
 
 	public renderNotFound = renderWhenTrue(() => (
