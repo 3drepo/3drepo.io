@@ -182,7 +182,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 			const activeItemIndex = items.findIndex(({ _id }) => _id === this.props.activeItemId);
 			const { offsetHeight } = this.listViewRef.current.children[0].children[activeItemIndex] as HTMLElement;
 			const position = activeItemIndex * offsetHeight;
-			const maxHeight = this.listViewRef.current.offsetHeight;
+			const maxHeight = this.listViewRef.current ? this.listViewRef.current.offsetHeight : 0;
 			const isNotVisible = position > maxHeight;
 
 			if (isNotVisible) {
