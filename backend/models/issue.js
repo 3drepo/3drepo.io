@@ -687,7 +687,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 								notifications = _.flatten(notifications);
 								newIssue.userNotifications = notifications;
 
-								if (data.comment) {
+								if (data.hasOwnProperty("comment")) {
 									if (!data.edit && !data.delete &&
 										newIssue.comments && newIssue.comments.length > 0) {
 										return newIssue.comments[newIssue.comments.length - 1];
