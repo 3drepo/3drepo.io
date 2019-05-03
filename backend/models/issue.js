@@ -817,7 +817,7 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 								model: ref.project
 							};
 							subModelsPromises.push(
-								this.findIssuesByModelName(subDbCol, username, "master", null, projection, null, true).then((subIssues) => {
+								this.findIssuesByModelName(subDbCol, username, "master", null, projection, ids, true).then((subIssues) => {
 									subIssues.forEach((subIssue) => {
 										subIssue.origin_account = subDbCol.account;
 										subIssue.origin_model = subDbCol.model;
