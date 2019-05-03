@@ -26,7 +26,7 @@ export const searchByFilters = (
 	if (!filters.length) {
 		return prefilteredItems;
 	}
-	const res = prefilteredItems.filter((item) => {
+	return prefilteredItems.filter((item) => {
 		const filteringResults: any = map(groupedFilters, (selectedFilters: any) => {
 			const filterType = get(selectedFilters[0], 'type', DATA_TYPES.UNDEFINED);
 
@@ -84,6 +84,4 @@ export const searchByFilters = (
 
 		return filteringResults.every((result) => result);
 	});
-	console.log(res);
-	return res;
 };
