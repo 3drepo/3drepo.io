@@ -86,9 +86,18 @@ class HeightSetterController implements ng.IController, IBindings {
 			return 0;
 		}
 		const contentContainer = this.content[0].querySelector('.height-catcher');
-		const prevContentHeight = contentContainer.previousSibling && contentContainer.previousSibling.offsetHeight;
-		const footerHeight = contentContainer.nextSibling && contentContainer.nextSibling.offsetHeight;
-		return contentContainer.scrollHeight + (prevContentHeight || 0) + (footerHeight || 0);
+		let sibCheck = contentContainer.previousSibling;
+		let extraHeight = 0;
+		while (sibCheck) {
+			extraHeight += sibCheck.offsetHeight;
+			sibCheck = sibCheck.previousSibling;
+		}
+		sibCheck = contentContainer.nextSibling;
+		while (sibCheck) {
+			extraHeight += sibCheck.offsetHeight;
+			sibCheck = sibCheck.nextSibling;
+		}
+		return contentContainer.scrollHeight + extraHeight;
 	}
 
 	public $onInit(): void {
