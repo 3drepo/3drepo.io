@@ -23,7 +23,9 @@
     "lint:css": "stylelint ./**/*.styles.ts",
     "lint": "yarn lint:ts && yarn lint:css",
     "lint:fix": "yarn lint:ts --fix",
-    "docs": "typedoc --out ./docs ./components --options ./internals/typedoc.js --logger none"
+    "docs": "typedoc --out ./docs ./components --options ./internals/typedoc.js --logger none",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "keywords": [
     "3drepo",
@@ -81,7 +83,8 @@
     "socket.io-client": "2.0.4",
     "sw-precache": "5.2.0",
     "yup": "0.26.10",
-    "zxcvbn": "4.4.2"
+    "zxcvbn": "4.4.2",
+    "snyk": "^1.161.1"
   },
   "devDependencies": {
     "@types/angular": "1.6.39",
@@ -131,5 +134,6 @@
   "resolutions": {
     "react": "16.4.2",
     "react-dom": "16.4.2"
-  }
+  },
+  "snyk": true
 }
