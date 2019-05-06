@@ -29,3 +29,5 @@ export const TREE_ACTIONS_MENU = [
 export const TREE_ITEM_FEDERATION_TYPE = 'FEDERATION';
 export const TREE_ITEM_MODEL_TYPE = 'MODEL';
 export const TREE_ITEM_OBJECT_TYPE = 'OBJECT';
+
+export const TREE_ITEM_SIZE = 40;

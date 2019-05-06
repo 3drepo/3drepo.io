@@ -41,7 +41,6 @@ interface IProps {
 	selected?: boolean;
 	highlighted?: boolean;
 	expanded?: boolean;
-	isModel?: boolean;
 	isSearchResult?: boolean;
 	collapseNode?: (id) => void;
 	expandNode?: (id) => void;
@@ -67,7 +66,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	get type() {
 		if (this.node.isFederation) {
 			return TREE_ITEM_FEDERATION_TYPE;
-		} else if (this.props.isModel) {
+		} else if (this.node.isModel) {
 			return TREE_ITEM_MODEL_TYPE;
 		}
 		return TREE_ITEM_OBJECT_TYPE;
@@ -87,15 +86,14 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	get isHightlightedObject() {
 		return this.type === TREE_ITEM_OBJECT_TYPE && this.props.highlighted;
 	}
+
 	public static defaultProps = {
 		visible: false,
 		selected: false,
 		highlighted: false,
 		expanded: false,
 		hasChildren: false,
-		childrenNumber: 0,
-		isFederation: false,
-		isModel: false
+		childrenNumber: 0
 	};
 
 	private renderExpandableButton = renderWhenTrue(() => {

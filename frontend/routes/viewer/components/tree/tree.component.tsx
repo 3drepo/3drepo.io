@@ -36,7 +36,7 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { Container, TreeNodes } from './tree.styles';
-import { TREE_ACTIONS_MENU, TREE_ACTIONS_ITEMS } from '../../../../constants/tree';
+import { TREE_ACTIONS_MENU, TREE_ACTIONS_ITEMS, TREE_ITEM_SIZE } from '../../../../constants/tree';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import TreeNode from './components/treeNode/treeNode.container';
@@ -57,8 +57,6 @@ interface IProps {
 	showAllNodes: () => void;
 	isolateSelectedNodes: () => void;
 	hideIfcSpaces: () => void;
-	selectNode: (id) => void;
-	deselectNode: (id) => void;
 }
 
 const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show tree menu" {...props} />;
@@ -77,7 +75,7 @@ export class Tree extends React.PureComponent<IProps, any> {
 		return [];
 	}
 
-	public nodeListRef = React.createRef();
+	public nodeListRef = React.createRef() as any;
 
 	public renderFilterPanel = renderWhenTrue(() => (
 		<FilterPanel
@@ -89,34 +87,22 @@ export class Tree extends React.PureComponent<IProps, any> {
 	));
 
 	public renderNodesList = renderWhenTrue(() => {
-		const { expandedNodesMap, treeNodesList, nodesIndexesMap } = this.props;
-		const size = 4 + values(expandedNodesMap).length;
-
-		const getRowHeight = ({ index }) => {
-			let isVisible = true;
-			const parentNodeId = treeNodesList[index].parentId;
-
-			if (parentNodeId) {
-				const parentNodeIndex = nodesIndexesMap[parentNodeId];
-				const parentNode = treeNodesList[parentNodeIndex];
-				isVisible = expandedNodesMap[parentNodeId] || parentNode.level === 1;
-			}
-
-			return isVisible ? 40 : 0;
-		};
+		const { treeNodesList } = this.props;
+		const size = treeNodesList.length;
 
 		return (
-			<TreeNodes style={{ height: 40 * size}}>
+			<TreeNodes style={{ height: TREE_ITEM_SIZE * size}}>
 				<AutoSizer>
 					{({ width, height }) => (
 						<List
+							treeNodesList={treeNodesList}
 							className="height-catcher"
 							ref={this.nodeListRef}
 							overscanRowCount={50}
 							height={height}
 							width={width}
-							rowCount={treeNodesList.length}
-							rowHeight={getRowHeight}
+							rowCount={size}
+							rowHeight={() => TREE_ITEM_SIZE}
 							rowRenderer={this.renderTreeNode}
 						/>
 					)}
@@ -136,10 +122,8 @@ export class Tree extends React.PureComponent<IProps, any> {
 
 	public componentDidUpdate(prevProps: IProps) {
 		if (prevProps.expandedNodesMap !== this.props.expandedNodesMap) {
-			console.log('UPDATE!');
 			this.nodeListRef.current.recomputeRowHeights();
 			this.nodeListRef.current.forceUpdateGrid();
-
 		}
 	}
 
@@ -164,7 +148,6 @@ export class Tree extends React.PureComponent<IProps, any> {
 
 	private handleFilterChange = (selectedFilters) => {
 		this.props.setState({ selectedFilters });
-		// this.setState({ filteredObjects: this.filteredObjects });
   }
 
 	private handleCloseSearchMode = () => {
@@ -192,14 +175,6 @@ export class Tree extends React.PureComponent<IProps, any> {
 		/>
 	)
 
-	private selectNode = (id) => {
-		this.props.selectNode(id);
-	}
-
-	private deselectNode = (id) => {
-		this.props.deselectNode(id);
-	}
-
 	private isHighlighted = (treeNode) => {
 		const { selectedNodesMap, hiddenNodesMap } = this.props;
 		return !treeNode.hasChildren && selectedNodesMap[treeNode._id] && !hiddenNodesMap[treeNode._id];
@@ -216,39 +191,22 @@ export class Tree extends React.PureComponent<IProps, any> {
 		const {
 			treeNodesList,
 			expandedNodesMap,
-			searchEnabled,
-			selectedNodesMap,
-			nodesIndexesMap,
-			selectedFilters
+			selectedNodesMap
 		} = this.props;
 
-		const isSearchActive = searchEnabled && selectedFilters.length;
 		const treeNode = treeNodesList[index];
-		const isFirstLevel = treeNode.level === 1;
-		const isSecondLevel = treeNode.level === 2;
-		const parentIndex = nodesIndexesMap[treeNode.parentId];
-		const isFederation = treeNode.isFederation;
-		const isModel = (isFirstLevel && !treeNode.isFederation) ||
-			(isSecondLevel && treeNodesList[parentIndex].isFederation);
-
-		const isSearchResult = isSearchActive && !isFederation && !isModel;
-		const isRegularNode = !isSearchActive && (isFirstLevel || isSecondLevel || expandedNodesMap[treeNode.parentId]);
-
-		if (isSearchResult || isRegularNode) {
-			return (
-				<TreeNode
-					style={style}
-					key={key}
-					data={treeNode}
-					isModel={isModel}
-					isSearchResult={isSearchResult}
-					selected={selectedNodesMap[treeNode._id]}
-					highlighted={this.isHighlighted(treeNode)}
-					parentIndex={parentIndex}
-					expanded={expandedNodesMap[treeNode._id]}
-				/>
-			);
-		}
+		return (
+			<TreeNode
+				style={style}
+				key={key}
+				data={treeNode}
+				isSearchResult={treeNode.isSearchResult}
+				selected={selectedNodesMap[treeNode._id]}
+				highlighted={this.isHighlighted(treeNode)}
+				parentIndex={treeNode.parentIndex}
+				expanded={expandedNodesMap[treeNode._id]}
+			/>
+		);
 	}
 
 	private renderActionsMenu = () => (
