@@ -21,7 +21,8 @@ import { COLOR } from '../../../../../../styles';
 import {
 	TREE_ITEM_FEDERATION_TYPE,
 	TREE_ITEM_MODEL_TYPE,
-	TREE_ITEM_OBJECT_TYPE
+	TREE_ITEM_OBJECT_TYPE,
+	TREE_ITEM_SIZE
 } from '../../../../../../constants/tree';
 
 interface IContainer {
@@ -92,7 +93,7 @@ export const Container = styled.li<IContainer>`
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	height: 40px;
+	height: ${TREE_ITEM_SIZE}px;
 	box-sizing: border-box;
 `;
 
@@ -103,32 +104,33 @@ export const Name = styled.div<IName>`
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	max-width: 260px;
 `;
 
 export const StyledExpandableButton = styled.button<IExpandableButton>`
-    background-color: ${getButtonBackgroundColor};
-    border-radius: 3px;
-    color: ${(props) => props.hasChildren ? COLOR.WHITE : COLOR.PRIMARY_DARK};
-		border: none;
-    width: 18px;
-    height: 18px;
-    display: flex;
-    margin: 0;
-    padding: 0;
-    justify-content: center;
+	background-color: ${getButtonBackgroundColor};
+	border-radius: 3px;
+	color: ${(props) => props.hasChildren ? COLOR.WHITE : COLOR.PRIMARY_DARK};
+	border: none;
+	width: 18px;
+	height: 18px;
+	display: flex;
+	margin: 0;
+	padding: 0;
+	flex: none;
+	justify-content: center;
 
-		&:focus {
-			outline: none;
-		}
+	&:focus {
+		outline: none;
+	}
 
-		svg {
-			font-size: 16px;
-		}
+	svg {
+		font-size: 16px;
+	}
 `;
 
 export const NameWrapper = styled.div`
 	display: flex;
+	overflow: hidden;
 `;
 
 export const Actions = styled.div`

@@ -8,13 +8,19 @@ interface IRow {
 	hasChildren: boolean;
 	childrenNumber: number;
 	data: any;
-	isFederation: boolean;
+	isFederation?: boolean;
+	isModel?: boolean;
 }
+
+const isModelNode = (level, isFederation, hasFederationAsParent?) => {
+	return (level === 1 && !isFederation) || (level === 2 && hasFederationAsParent);
+};
 
 const getFlattenNested = (tree, level = 1, parentId = null) => {
 	const rowData: IRow = {
 		_id: tree._id,
 		isFederation: tree.isFederation,
+		isModel: tree.isModel || isModelNode(level, tree.isFederation),
 		name: tree.name,
 		level,
 		parentId,
@@ -28,7 +34,7 @@ const getFlattenNested = (tree, level = 1, parentId = null) => {
 	if (tree.children) {
 		for (let index = 0; index < tree.children.length; index++) {
 			const subTree = tree.children[index];
-
+			subTree.isModel = isModelNode(level + 1, subTree.isFederation, tree.isFederation);
 			const { data: nestedData, childrenNumber } = getFlattenNested(subTree, level + 1, tree._id);
 			rowData.childrenNumber += childrenNumber;
 			dataToFlatten.push(nestedData);

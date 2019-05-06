@@ -77,3 +77,29 @@ export const selectHiddenNodesMap = createSelector(
 export const selectNodesIndexesMap = createSelector(
 	selectComponentState, (state) => state.nodesIndexesMap
 );
+
+export const selectVisibleTreeNodesList = createSelector(
+	[
+		selectFilteredNodesList, selectNodesIndexesMap, selectSelectedFilters,
+		selectExpandedNodesMap, selectSearchEnabled
+	],
+	(treeNodesList, nodesIndexesMap, selectedFilters, expandedNodesMap, searchEnabled) => {
+		const visibleNodes = [];
+
+		for (let index = 0; index < treeNodesList.length; index++) {
+			const treeNode = treeNodesList[index];
+			const isSearchActive = searchEnabled && selectedFilters.length;
+			const isFirstLevel = treeNode.level === 1;
+			const isSecondLevel = treeNode.level === 2;
+
+			treeNode.parentIndex = nodesIndexesMap[treeNode.parentId];
+			treeNode.isSearchResult = isSearchActive && !treeNode.isFederation && !treeNode.isModel;
+			treeNode.isRegularNode = !isSearchActive && (isFirstLevel || isSecondLevel || expandedNodesMap[treeNode.parentId]);
+			if (treeNode.isSearchResult || treeNode.isRegularNode) {
+				visibleNodes.push(treeNode);
+			}
+		}
+
+		return visibleNodes;
+	}
+);

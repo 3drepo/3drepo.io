@@ -27,17 +27,17 @@ import {
 	selectSelectedNodesMap,
 	selectHiddenNodesMap,
 	selectNodesIndexesMap,
-	selectFilteredNodesList,
 	selectSearchEnabled,
 	selectSelectedFilters,
-	selectIsPending
+	selectIsPending,
+	selectVisibleTreeNodesList
 } from '../../../../modules/tree';
 
 const mapStateToProps = createStructuredSelector({
 	searchEnabled: selectSearchEnabled,
 	selectedFilters: selectSelectedFilters,
 	ifcSpacesHidden: selectIfcSpacesHidden,
-	treeNodesList: selectFilteredNodesList,
+	treeNodesList: selectVisibleTreeNodesList,
 	expandedNodesMap: selectExpandedNodesMap,
 	selectedNodesMap: selectSelectedNodesMap,
 	hiddenNodesMap: selectHiddenNodesMap,
