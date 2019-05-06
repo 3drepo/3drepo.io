@@ -184,8 +184,8 @@ export class Tree extends React.PureComponent<IProps, any> {
 	)
 
 	private isHighlighted = (treeNode) => {
-		const { selectedNodesMap, hiddenNodesMap } = this.props;
-		return !treeNode.hasChildren && selectedNodesMap[treeNode._id] && !hiddenNodesMap[treeNode._id];
+		const { nodesSelectionMap, nodesVisibilityMap } = this.props;
+		return !treeNode.hasChildren && nodesSelectionMap[treeNode._id] && nodesVisibilityMap[treeNode._id];
 	}
 
 	private renderActions = () => (
@@ -199,7 +199,7 @@ export class Tree extends React.PureComponent<IProps, any> {
 		const {
 			treeNodesList,
 			expandedNodesMap,
-			selectedNodesMap
+			nodesSelectionMap
 		} = this.props;
 
 		const treeNode = treeNodesList[index];
@@ -209,7 +209,7 @@ export class Tree extends React.PureComponent<IProps, any> {
 				key={key}
 				data={treeNode}
 				isSearchResult={treeNode.isSearchResult}
-				selected={selectedNodesMap[treeNode._id]}
+				selected={nodesSelectionMap[treeNode._id]}
 				highlighted={this.isHighlighted(treeNode)}
 				parentIndex={treeNode.parentIndex}
 				expanded={expandedNodesMap[treeNode._id]}
