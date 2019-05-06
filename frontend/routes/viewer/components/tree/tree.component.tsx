@@ -49,9 +49,9 @@ interface IProps {
 	ifcSpacesHidden: boolean;
 	treeNodesList: any[];
 	expandedNodesMap: any;
-	selectedNodesMap: any;
+	nodesSelectionMap: any;
+	nodesVisibilityMap: any;
 	nodesIndexesMap: any;
-	hiddenNodesMap: any;
 	isPending?: boolean;
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
@@ -144,6 +144,14 @@ export class Tree extends React.PureComponent<IProps, any> {
 				</ViewerPanelContent>
 			</ViewerPanel>
 		);
+	}
+
+	public selectNode = (id) => {
+		this.props.selectNode(id);
+	}
+
+	public deselectNode = (id) => {
+		this.props.deselectNode(id);
 	}
 
 	private handleFilterChange = (selectedFilters) => {

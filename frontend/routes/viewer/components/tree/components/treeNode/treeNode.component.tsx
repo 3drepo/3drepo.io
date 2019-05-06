@@ -18,7 +18,8 @@
 import * as React from 'react';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
-import ShowIcon from '@material-ui/icons/Visibility';
+import VisibleIcon from '@material-ui/icons/Visibility';
+import InvisibleIcon from '@material-ui/icons/VisibilityOffOutlined';
 import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpIcon from '@material-ui/icons/KeyboardArrowUp';
@@ -27,7 +28,8 @@ import { Container, Name, NameWrapper, Actions, StyledExpandableButton } from '.
 import {
 	TREE_ITEM_FEDERATION_TYPE,
 	TREE_ITEM_MODEL_TYPE,
-	TREE_ITEM_OBJECT_TYPE
+	TREE_ITEM_OBJECT_TYPE,
+	VISIBILITY_STATES
 } from '../../../../../../constants/tree';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
@@ -37,11 +39,12 @@ interface IProps {
 	settings: any;
 	parentId?: number;
 	parentIndex?: number;
-	visible?: boolean;
 	selected?: boolean;
 	highlighted?: boolean;
 	expanded?: boolean;
 	isSearchResult?: boolean;
+	visibilityMap: any;
+	selectionMap: any;
 	collapseNode?: (id) => void;
 	expandNode?: (id) => void;
 	selectNode?: (id) => void;
@@ -57,6 +60,8 @@ const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
 		<Icon size="small" />
 	</StyledExpandableButton>
 );
+
+const ParentOfVisibleIcon = () => <VisibleIcon color="error" />;
 
 export class TreeNode extends React.PureComponent<IProps, any> {
 	get node() {
@@ -119,22 +124,37 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		</Actions>
 	));
 
-	private renderHighlightedObjectActions = renderWhenTrue(() => (
+	private renderActions = renderWhenTrue(() => (
 		<Actions>
 			<SmallIconButton
 				Icon={UpIcon}
 				tooltip="Go to top"
+				onClick={this.goToTop}
 			/>
 			<SmallIconButton
 				Icon={IsolateIcon}
 				tooltip="Isolate"
+				onClick={this.isolateNode}
 			/>
 			<SmallIconButton
-				Icon={ShowIcon}
+				Icon={this.getVisibilityIcon(this.props.visibilityMap[this.node._id])}
 				tooltip="Show/Hide"
+				onClick={this.toggleShowNode}
 			/>
 		</Actions>
 	));
+
+	public getVisibilityIcon(visibility) {
+		if (visibility === VISIBILITY_STATES.VISIBLE) {
+			return VisibleIcon;
+		} else if (visibility === VISIBILITY_STATES.INVISIBLE) {
+			return InvisibleIcon;
+		} else if (visibility === VISIBILITY_STATES.PARENT_OF_VISIBLE) {
+			return ParentOfVisibleIcon;
+		}
+
+		return VisibleIcon;
+	}
 
 	public render() {
 		const { highlighted, expanded, selected, isSearchResult, style } = this.props;
@@ -152,7 +172,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 			>
 				{this.renderName()}
 				{this.renderModelActions(this.isExpandedModelInFederation)}
-				{this.renderHighlightedObjectActions(this.isHightlightedObject)}
+				{this.renderActions(!this.node.isFederation && !this.isExpandedModelInFederation)}
 			</Container>
 		);
 	}
@@ -169,6 +189,21 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 			this.props.collapseNode(this.node._id);
 		}
 		return;
+	}
+
+	private isolateNode = (event) => {
+		event.stopPropagation();
+		console.log('isolate node', this.node._id);
+	}
+
+	private toggleShowNode = (event) => {
+		event.stopPropagation();
+		console.log('toggle show node', this.node._id);
+	}
+
+	private goToTop = (event) => {
+		event.stopPropagation();
+		console.log('Go to top');
 	}
 
 	private handleOpenModelClick = () => {

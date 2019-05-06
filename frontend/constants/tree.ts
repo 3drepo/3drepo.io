@@ -26,8 +26,25 @@ export const TREE_ACTIONS_MENU = [
 	}
 ];
 
+export const TREE_ITEM_SIZE = 40;
+
 export const TREE_ITEM_FEDERATION_TYPE = 'FEDERATION';
 export const TREE_ITEM_MODEL_TYPE = 'MODEL';
 export const TREE_ITEM_OBJECT_TYPE = 'OBJECT';
 
-export const TREE_ITEM_SIZE = 40;
+export const VISIBILITY_STATES = {
+	VISIBLE: 'VISIBLE',
+	INVISIBLE: 'INVISIBLE',
+	PARENT_OF_VISIBLE: 'PARENT_OF_VISIBLE'
+};
+
+export const SELECTION_STATES = {
+	SELECTED: 'SELECTED',
+	UNSELECTED: 'UNSELECTED',
+	PARENT_OF_UNSELECTED: 'PARENT_OF_UNSELECTED'
+};
+
+export const NODE_TYPES = {
+	MESH: 'mesh',
+	TRANSFORMATION: 'transformation'
+};

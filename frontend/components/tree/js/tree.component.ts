@@ -214,6 +214,8 @@ class TreeController implements ng.IController {
 
 	public toggleTreeNode($event, node) {
 		$event.stopPropagation();
+		console.log('NG comp toggleTreeNode', node);
+
 		if (this.TreeService.VISIBILITY_STATES.invisible === node.toggleState ) {
 			this.TreeService.showTreeNodes([node]);
 		} else {
@@ -224,6 +226,7 @@ class TreeController implements ng.IController {
 	}
 
 	public selectAndCentreNode(node: any) {
+		console.log('NG comp selectAndCentreNode', node);
 		if (node.toggleState !== this.TreeService.VISIBILITY_STATES.invisible) {
 			this.$timeout(() => {
 				this.ViewerService.zoomToHighlightedMeshes();
@@ -282,6 +285,8 @@ class TreeController implements ng.IController {
 	 */
 	public ignoreSelection($event: any, node: any): boolean {
 		const doubleClick = $event.detail > 1;
+		console.log('NG comp ignoreSelection doubleClick', node, doubleClick);
+
 		return doubleClick || node.toggleState === this.TreeService.VISIBILITY_STATES.invisible;
 	}
 
@@ -291,6 +296,7 @@ class TreeController implements ng.IController {
 	 * @param node
 	 */
 	public selectNode($event: any, node: any) {
+		console.log('NG comp selectNode', node);
 
 		if (this.ignoreSelection($event, node)) {
 			return;

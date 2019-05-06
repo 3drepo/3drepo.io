@@ -1,4 +1,5 @@
 import { omit, flattenDeep, sumBy } from 'lodash';
+import { VISIBILITY_STATES, SELECTION_STATES } from '../../constants/tree';
 
 interface IRow {
 	_id: string;
@@ -73,11 +74,23 @@ self.addEventListener('message', ({ data }) => {
 
 	console.time('TREE PROCESSING');
 	const { data: nodesList } = getFlattenNested(mainTree);
-	const nodesIndexesMap = nodesList.reduce((indiecesMap, node: IRow, index) => {
-		indiecesMap[node._id] = index;
-		return indiecesMap;
-	}, {});
-	const result = { data: { nodesList, nodesIndexesMap }};
+	const auxiliaryMaps = nodesList.reduce((maps, node: IRow, index) => {
+		maps.indiecesMap[node._id] = index;
+		maps.initialVisibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
+		maps.initialSelectionMap[node._id] = SELECTION_STATES.UNSELECTED;
+		return maps;
+	}, {
+		indiecesMap: {},
+		initialVisibilityMap: {},
+		initialSelectionMap: {}
+	} as any);
+
+	const {
+		indiecesMap: nodesIndexesMap,
+		initialVisibilityMap,
+		initialSelectionMap
+	} = auxiliaryMaps;
+	const result = { data: { nodesList, nodesIndexesMap, initialVisibilityMap, initialSelectionMap }};
 	console.timeEnd('TREE PROCESSING');
 
 	// @ts-ignore

@@ -48,25 +48,25 @@ div(layout="column", class="md-whiteframe-1dp")
 				selected-objects='vm.selectedObjects'
 				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})')
 
-			//- tree(
-			//- 	ng-if="vm.contentData.type === 'tree'"
-			//- 	show-add='vm.showAdd'
-			//- 	show='vm.contentData.show'
-			//- 	on-content-height-request='vm.onContentHeightRequest(height)'
-			//- 	on-show-item='vm.showItem()'
-			//- 	hide-item='vm.hideSelectedItem'
-			//- 	show-edit='vm.showEdit'
-			//- 	account='vm.account'
-			//- 	model='vm.model'
-			//- 	branch='vm.branch'
-			//- 	model-settings='vm.modelSettings'
-			//- 	revision='vm.revision'
+			tree-old(
+				ng-if="vm.contentData.type === 'treeOld'"
+				show-add='vm.showAdd'
+				show='vm.contentData.show'
+				on-content-height-request='vm.onContentHeightRequest(height)'
+				on-show-item='vm.showItem()'
+				hide-item='vm.hideSelectedItem'
+				show-edit='vm.showEdit'
+				account='vm.account'
+				model='vm.model'
+				branch='vm.branch'
+				model-settings='vm.modelSettings'
+				revision='vm.revision'
 
-			//- 	selected-objects='vm.selectedObjects'
-			//- 	set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
-			//- 	show-filter="vm.showFilter"
-			//- 	filter-text='vm.filterText'
-			//- 	selected-menu-option='vm.selectedMenuOption')
+				selected-objects='vm.selectedObjects'
+				set-initial-selected-objects='vm.setInitialSelectedObjects({selectedObjects: selectedObjects})'
+				show-filter="vm.showFilter"
+				filter-text='vm.filterText'
+				selected-menu-option='vm.selectedMenuOption')
 
 	// Help icon and tool tip
 	div(ng-if="vm.showHelp")
