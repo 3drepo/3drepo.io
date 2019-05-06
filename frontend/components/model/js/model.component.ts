@@ -239,10 +239,10 @@ class ModelController implements ng.IController {
 		}
 
 		this.PanelService.hideSubModels(this.issuesCardIndex, !settings.federate);
-/* 		return this.TreeService.init(this.account, this.model, this.branch, this.revision, settings)
+ 		return this.TreeService.init(this.account, this.model, this.branch, this.revision, settings)
 			.catch((error) => {
 				console.error('Error initialising tree: ', error);
-			}); */
+			});
 	}
 
 	private handleModelSettingsChange = async (settings) => {

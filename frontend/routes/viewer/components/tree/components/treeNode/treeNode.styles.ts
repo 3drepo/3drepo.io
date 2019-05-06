@@ -104,6 +104,7 @@ export const Name = styled.div<IName>`
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	max-width: 180px;
 `;
 
 export const StyledExpandableButton = styled.button<IExpandableButton>`

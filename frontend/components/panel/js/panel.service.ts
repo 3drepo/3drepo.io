@@ -394,6 +394,48 @@ export class PanelService {
 		});
 
 		this.panelCards.left.push({
+			type: 'treeOld',
+			title: 'Tree Old',
+			showLiteMode: true,
+			show: true,
+			help: 'Model elements shown in a tree structure',
+			icon: 'device_hub',
+			minHeight: 80,
+			fixedHeight: false,
+			menu: [
+				{
+					hidden: false,
+					value: 'showAll',
+					label: 'Show All',
+					selected: false,
+					noToggle: true,
+					icon: 'fa-eye'
+				},
+				{
+					hidden: false,
+					value: 'isolate',
+					label: 'Isolate Selected',
+					selected: false,
+					noToggle: true,
+					icon: 'fa-scissors'
+				},
+				{
+					hidden: false,
+					value: 'hideIfc',
+					label: 'Hide IFC spaces',
+					selected: true,
+					toggle: true,
+					keepCheckSpace: true,
+					icon: 'fa-home'
+				}
+			],
+			options: [
+				{type: 'menu', visible: true},
+				{type: 'filter', visible: true}
+			],
+		});
+
+		this.panelCards.left.push({
 			type: 'compare',
 			title: 'Compare',
 			show: false,

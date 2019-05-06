@@ -1,31 +1,31 @@
-tree .virtualRepeatInfiniteScroll {
+tree-old .virtualRepeatInfiniteScroll {
   overflow-y: auto;
   overflow-x: hidden;
   height: 100%;
 }
 
-tree .virtualRepeatInfiniteScroll .vertical-container {
+tree-old .virtualRepeatInfiniteScroll .vertical-container {
   height: 100%;
   width: 100%;
 }
 
-tree .virtualRepeatInfiniteScroll .repeated-item {
+tree-old .virtualRepeatInfiniteScroll .repeated-item {
   cursor: default;
   padding: 0 0;
   min-height: 1px;
 }
 
-tree span {
+tree-old span {
   outline: none;
   margin: 0;
 }
-tree span .fa {
+tree-old span .fa {
   color: #5C6BC0;
   font-size: 14px;
   padding: 0 2px 0 0;
 }
 
-tree .treeNodes p {
+tree-old .treeNodes p {
   outline: none;
   word-break: break-all;
   word-wrap: break-word;
@@ -33,7 +33,7 @@ tree .treeNodes p {
   font-size: 13px;
 }
 
-tree .treeNode {
+tree-old .treeNode {
   cursor: pointer;
   outline: none;
   height: 45px;
@@ -42,17 +42,17 @@ tree .treeNode {
   overflow: hidden;
 }
 
-tree .treeNode:hover {
+tree-old .treeNode:hover {
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
 }
-tree .treeNodeSelected {
+tree-old .treeNodeSelected {
   background:  rgba(150, 172, 227, 0.58);
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
 }
 
-tree .treeNodeParentOfUnselected {
+tree-old .treeNodeParentOfUnselected {
   background:  rgba(189, 207, 253, 0.37);
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
@@ -68,51 +68,51 @@ tree md-checkbox {
   font-weight: normal;
 }
 
-tree .treeButtonDisabled {
+tree-old .treeButtonDisabled {
   color: #CCCCCC !important;
 }
 
-tree .expandButton {
+tree-old .expandButton {
   margin-left: 0 !important;
 }
 
-tree .noAccessButton {
+tree-old .noAccessButton {
   margin-left: 0 !important;
   opacity: 0.5;
 }
-tree .noAccessName {
+tree-old .noAccessName {
   opacity: 0.5;
 }
-tree .noAccessName:hover {
+tree-old .noAccessName:hover {
   cursor: default !important;
 }
 
-tree .toggleButton {
+tree-old .toggleButton {
   margin-right: 0 !important;
 }
 
-tree .visible {
+tree-old .visible {
   color: #0c2f54;
 }
 
-tree .invisible {
+tree-old .invisible {
   color: #999 !important;
 }
 
-tree .parentOfInvisible {
+tree-old .parentOfInvisible {
   color: #6788ab !important;
 }
 
 /** Tree filter list **************************************************************************************************/
-tree .filterNode {
+tree-old .filterNode {
   height: 41px;
   cursor: pointer !important;
 }
 
-tree .filterNode div {
+tree-old .filterNode div {
   height: 100%;
 }
 
-tree .filterListNodeName {
+tree-old .filterListNodeName {
   margin-left: 15px !important;
 }

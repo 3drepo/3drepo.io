@@ -17,6 +17,8 @@
 import { dispatch, getState } from '../../../helpers/migration';
 import { BimActions, selectIsActive, selectActiveMeta } from '../../../modules/bim';
 import { ViewerActions } from '../../../modules/viewer';
+import { TreeActions } from '../../../modules/tree';
+import { VISIBILITY_STATES } from '../../../constants/tree';
 
 export class TreeService {
 
@@ -121,14 +123,14 @@ export class TreeService {
 	public init(account: string, model: string, branch: string, revision: string, setting: any) {
 		this.treeMap = null;
 		branch = branch ? branch : 'master';
-/* 
+
 		if (!revision) {
 			this.baseURL = account + '/' + model + '/revision/master/head/';
 		} else {
 			this.baseURL = account + '/' + model + '/revision/' + revision + '/';
 		}
 
-		const url = this.baseURL + 'fulltree.json'; */
+		const url = this.baseURL + 'fulltree.json';
 
 		const meshesAndTrees = [
 			this.getIdToMeshes(),
@@ -575,25 +577,23 @@ export class TreeService {
 	 * @param node	Node to update.
 	 */
 	public updateParentVisibility(node: any) {
-
 		const nodes = [node];
+
 
 		while (nodes.length > 0) {
 			const currentNode = nodes.pop();
-
 			// Store the state before it's potentially changed
 			// by updateParentVisibility
 			const priorToggleState = currentNode.toggleState;
-
 			this.updateParentVisibilityByChildren(currentNode);
 
 			if (priorToggleState !== currentNode.toggleState || this.isLeafNode(currentNode)) {
 				const path = this.getPath(currentNode._id);
-
 				if (path && path.length > 1) {
 					// Fast forward up path for parentOfInvisible state
 					if (this.VISIBILITY_STATES.parentOfInvisible === currentNode.toggleState) {
 						for (let i = path.length - 2; i >= 0; i--) {
+
 							const parentNode = this.getNodeById(path[i]);
 							parentNode.toggleState = this.VISIBILITY_STATES.parentOfInvisible;
 						}
@@ -612,7 +612,6 @@ export class TreeService {
 	 * @param nodeId the id of the node to toggle
 	 */
 	public toggleNodeExpansion(event: any, nodeId: string) {
-
 		if (event) {
 			event.stopPropagation();
 		}
@@ -634,7 +633,6 @@ export class TreeService {
 	 */
 	public getPath(objectID: string) {
 		let path;
-
 		if (this.idToPath[objectID]) {
 			// If the Object ID is on the main tree then use that path
 			path = this.idToPath[objectID].split('__');
@@ -657,6 +655,10 @@ export class TreeService {
 	 */
 	public hideTreeNodes(nodes: any[]) {
 		this.setTreeNodeStatus(nodes, this.VISIBILITY_STATES.invisible);
+
+		const nodesIds = nodes.map(({ _id }) => _id);
+		dispatch(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.INVISIBLE));
+
 		this.updateModelVisibility();
 	}
 
@@ -666,6 +668,10 @@ export class TreeService {
 	 */
 	public showTreeNodes(nodes: any[]) {
 		this.setTreeNodeStatus(nodes, this.VISIBILITY_STATES.visible);
+
+		const nodesIds = nodes.map(({ _id }) => _id);
+		dispatch(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.VISIBLE));
+
 		this.updateModelVisibility();
 	}
 
@@ -674,6 +680,10 @@ export class TreeService {
 	 */
 	public hideAllTreeNodes(updateModel) {
 		this.setTreeNodeStatus([this.allNodes], this.VISIBILITY_STATES.invisible);
+
+		const nodesIds = this.allNodes.map(({ _id }) => _id);
+		dispatch(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.INVISIBLE));
+
 		if (updateModel) {
 			this.updateModelVisibility();
 		}
@@ -684,6 +694,9 @@ export class TreeService {
 	 */
 	public showAllTreeNodes(updateModel) {
 		this.setTreeNodeStatus([this.allNodes], this.VISIBILITY_STATES.visible);
+
+		const nodesIds = this.allNodes.map(({ _id }) => _id);
+		dispatch(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.VISIBLE));
 
 		// It's not always necessary to update the model
 		// say we are resetting the state to then show/hide specific nodes
@@ -708,7 +721,6 @@ export class TreeService {
 	 * Isolate selected objects by hiding all other objects.
 	 */
 	public isolateSelected() {
-
 		const selectedNodes = this.getCurrentSelectedNodesAsArray();
 
 		// Hide all
@@ -936,7 +948,6 @@ export class TreeService {
 	 * @param colour the colour array for selection in the viewer
 	 */
 	public selectNodes(nodes: any[], skipExpand?: boolean, colour?: number[]): any {
-
 		if (!nodes || nodes.length === 0) {
 			return Promise.resolve('No nodes specified');
 		}
@@ -1101,7 +1112,6 @@ export class TreeService {
 	 * @param objects an array of objects with shared_id properties
 	 */
 	public isolateNodesBySharedIds(objects) {
-
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
 				this.setCurrentSelectedNodesFromArray(nodes);
@@ -1371,6 +1381,7 @@ export class TreeService {
 		if (nodes.length && visibility === this.VISIBILITY_STATES.invisible) {
 			this.deselectNodes(nodes);
 		}
+
 		nodes.forEach((node) => {
 			if (node && (this.VISIBILITY_STATES.parentOfInvisible === visibility || visibility !== node.toggleState)) {
 				let children = [];
@@ -1428,9 +1439,7 @@ export class TreeService {
 	 * @param node	Node to toggle visibility. All children will also be toggled.
 	 */
 	private updateModelVisibility() {
-
 		return this.onReady().then(() => {
-
 			if (this.meshesToUpdate.size > 0) {
 				const hidden = {};
 				const shown = {};

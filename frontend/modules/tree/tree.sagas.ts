@@ -32,11 +32,14 @@ import {
 	selectIfcSpacesHidden,
 	selectNodesIndexesMap,
 	selectSelectedNodesMap,
-	selectTreeNodesList
+	selectTreeNodesList,
+	selectNodesVisibilityMap,
+	selectNodesSelectionMap
 } from './tree.selectors';
 import { TreeTypes, TreeActions } from './tree.redux';
 import { selectSettings, ModelTypes } from '../model';
 import { MultiSelect } from '../../services/viewer/multiSelect';
+import { VISIBILITY_STATES, NODE_TYPES } from '../../constants/tree';
 
 const setupWorker = (worker, onResponse) => {
 	worker.addEventListener('message', (e) => {
@@ -70,10 +73,12 @@ export function* fetchFullTree({ teamspace, modelId, revision }) {
 			? yield all(fullTree.subTrees.map(({ url }) => API.default.get(url)))
 			: [];
 		dataToProcessed.subTrees = subTreesData.map(({ data }) => data.mainTree);
-		console.log('FETCH SUBTREESS', subTreesData);
+
 		const worker = setupWorker(treeWorker, (result) => {
-			const { nodesList, nodesIndexesMap } = result.data;
-			dispatch(TreeActions.setComponentState({ nodesIndexesMap }));
+			const {
+				nodesList, nodesIndexesMap, initialVisibilityMap: nodesVisibilityMap, initialSelectionMap: nodesSelectionMap
+			} = result.data;
+			dispatch(TreeActions.setComponentState({ nodesIndexesMap, nodesVisibilityMap, nodesSelectionMap }));
 			dispatch(TreeActions.setTreeNodesList(nodesList));
 		});
 		worker.postMessage(dataToProcessed);
@@ -202,6 +207,79 @@ export function* selectNode({ id }) {
 	}
 }
 
+// nodes = ['id-1', 'id-2' ...]
+export function* setTreeNodesVisibility({ nodes, visibility }) {
+	try {
+		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
+		const nodesSelectionMap = yield select(selectNodesSelectionMap);
+		const nodesIndexesMap = yield select(selectNodesIndexesMap);
+		const treeNodesList = yield select(selectTreeNodesList);
+
+		const TreeService = getAngularService('TreeService') as any;
+
+		if (nodes.length && visibility === VISIBILITY_STATES.INVISIBLE) {
+			// TreeService.deselectNodes(nodes);
+		}
+
+		const newVisibilityMap = {};
+
+		for (let nodeLoopIndex = 0; nodeLoopIndex < nodes.length ; nodeLoopIndex++) {
+
+			const nodeId = nodes[nodeLoopIndex];
+			const nodeIndex = nodesIndexesMap[nodeId];
+			const node = treeNodesList[nodeIndex];
+
+			if (node && (visibility === VISIBILITY_STATES.PARENT_OF_VISIBLE || visibility !== nodesVisibilityMap[nodeId])) {
+				const parentNode = node;
+
+				if (node.type === NODE_TYPES.MESH) {
+					// this.meshesToUpdate.add(node);
+				}
+
+				if (node.hasChildren) {
+					for (let childIndex = nodeIndex; childIndex <= nodeIndex + node.childrenNumber; childIndex++) {
+						const child = treeNodesList[childIndex];
+						if (visibility === VISIBILITY_STATES.VISIBLE) {
+							newVisibilityMap[child._id] = VISIBILITY_STATES.VISIBLE;
+						} else {
+							// TreeService.setNodeSelection(child, this.SELECTION_STATES.unselected);
+							newVisibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
+						}
+					}
+				}
+				yield put(TreeActions.setComponentState({nodesVisibilityMap: newVisibilityMap}));
+				console.log('newVisibilityMap', newVisibilityMap);
+				yield put(TreeActions.updateParentVisibility(parentNode));
+			}
+		}
+
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'tree node visibility'));
+	}
+}
+
+export function* updateParentVisibility({ parentNode }) {
+	try {
+		const nodesIndexesMap = yield select(selectNodesIndexesMap);
+		const treeNodesList = yield select(selectTreeNodesList);
+		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
+
+		let currentNode = parentNode;
+		const nodes = [parentNode];
+
+		console.log('Saga updateParentVisibility', parentNode);
+		for (let i = parentNode.level; i > 1; i--) {
+			const newParentIndex = nodesIndexesMap[currentNode.parentId];
+			const newParentNode = treeNodesList[newParentIndex];
+			currentNode = newParentNode;
+			nodes.push(currentNode);
+		}
+		console.log('Saga updateParentVisibility parent nodes', nodes);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'parent node visibility'));
+	}
+}
+
 export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.FETCH_FULL_TREE, fetchFullTree);
 	yield takeLatest(TreeTypes.START_LISTEN_ON_SELECTIONS, startListenOnSelections);
@@ -212,4 +290,6 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.ISOLATE_SELECTED_NODES, isolateSelectedNodes);
 	yield takeLatest(TreeTypes.HIDE_IFC_SPACES, hideIfcSpaces);
 	yield takeLatest(TreeTypes.SELECT_NODE, selectNode);
+	yield takeLatest(TreeTypes.SET_TREE_NODES_VISIBILITY, setTreeNodesVisibility);
+	yield takeLatest(TreeTypes.UPDATE_PARENT_VISIBILITY, updateParentVisibility);
 }

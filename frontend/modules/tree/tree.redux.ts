@@ -41,15 +41,17 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	removeGroupFromSelected: ['fromIndex', 'toIndex'],
 	removeFromSelected: ['id'],
 	removeAllSelected: [],
-	setIsPending: ['isPending']
+	setIsPending: ['isPending'],
+	setTreeNodesVisibility: ['nodes', 'visibility'],
+	updateParentVisibility: ['parentNode']
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
 	selectedFilters: any[];
 	searchEnabled: boolean;
 	ifcSpacesHidden: boolean;
-	hiddenNodesMap: any;
-	selectedNodesMap: any;
+	nodesVisibilityMap: any;
+	nodesSelectionMap: any;
 	expandedNodesMap: any;
 	nodesIndexesMap: any;
 }
@@ -68,8 +70,8 @@ export const INITIAL_STATE: ITreeState = {
 		selectedFilters: [],
 		searchEnabled: false,
 		ifcSpacesHidden: true,
-		hiddenNodesMap: {},
-		selectedNodesMap: {},
+		nodesVisibilityMap: {},
+		nodesSelectionMap: {},
 		expandedNodesMap: {},
 		nodesIndexesMap: {}
 	}
