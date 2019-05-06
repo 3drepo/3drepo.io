@@ -75,6 +75,7 @@ interface IProps {
 	selectedItemsMap: any[];
 	isCompareProcessed: boolean;
 	isAnyTargetClashModel: boolean;
+	revision?: string;
 	toggleCompare: () => void;
 	setSortType: (sortType) => void;
 	onTabChange: (activeTab) => void;
@@ -82,6 +83,7 @@ interface IProps {
 	setTargetModel: (modelId, isTarget, isTypeChange?) => void;
 	setComponentState: (state) => void;
 	setTargetRevision: (modelId, targetRevision) => void;
+	getCompareModels: (revision) => void;
 }
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
@@ -124,7 +126,6 @@ export class Compare extends React.PureComponent<IProps, any> {
 			renderComparisonLoader: () => this.renderComparisonLoader(this.props.isCompareProcessed)
 		};
 	}
-
 	public renderComparisonLoader = renderWhenTrue(() => (
 		<ComparisonLoader>
 			<Loader content="Loading comparison" />
@@ -139,6 +140,10 @@ export class Compare extends React.PureComponent<IProps, any> {
 		<CompareClash {...this.tabProps} />
 	));
 
+	public componentDidMount() {
+		this.props.getCompareModels(this.props.revision);
+	}
+
 	public renderClashTabLabel = () => {
 		if (this.props.isFederation) {
 			return COMPARE_TABS.CLASH;
@@ -152,7 +157,14 @@ export class Compare extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const {
-			activeTab, isActive, toggleCompare, compareDisabled, isCompareProcessed, isFederation, isAnyTargetClashModel
+			activeTab,
+			isActive,
+			toggleCompare,
+			compareDisabled,
+			isCompareProcessed,
+			isFederation,
+			isAnyTargetClashModel,
+			revision
 		} = this.props;
 
 		return (

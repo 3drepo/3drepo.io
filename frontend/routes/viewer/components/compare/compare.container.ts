@@ -60,7 +60,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onTabChange: CompareActions.setActiveTab,
 	setSortType: CompareActions.setSortType,
 	setTargetModel: CompareActions.setTargetModel,
-	setTargetRevision: CompareActions.setTargetRevision
+	setTargetRevision: CompareActions.setTargetRevision,
+	getCompareModels: CompareActions.getCompareModels
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Compare);

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select, all, call } from 'redux-saga/effects';
+import { put, takeLatest, select, all, call, take } from 'redux-saga/effects';
 import { cond, isEqual, curry, keys, intersection } from 'lodash';
 
 import { CompareTypes, CompareActions, ICompareComponentState } from './compare.redux';
@@ -77,17 +77,18 @@ const prepareModelToCompare = (teamspace, modelId, name, isFederation, revisions
 	};
 };
 
-function* getCompareModelData({ isFederation, settings }) {
+function* getCompareModelData({ isFederation, revision }) {
 	try {
+		const settings = yield select(selectSettings);
 		const revisions = yield select(selectRevisions);
-		const [teamspace, , currentRevision] = window.location.pathname.replace('/viewer/', '').split('/');
+		const teamspace = settings.account;
 
 		if (!isFederation) {
 			const model =
-				prepareModelToCompare(teamspace, settings._id, settings.name, isFederation, revisions, currentRevision);
+				prepareModelToCompare(teamspace, settings._id, settings.name, isFederation, revisions, revision);
 			yield put(CompareActions.setComponentState({ compareModels: [model], isPending: false }));
 		} else {
-			const { data: submodelsRevisionsMap } = yield API.getSubModelsRevisions(teamspace, settings._id, currentRevision);
+			const { data: submodelsRevisionsMap } = yield API.getSubModelsRevisions(teamspace, settings._id, revision);
 			const compareModels = settings.subModels.map(({ model }) => {
 				const subModelData = submodelsRevisionsMap[model];
 				return prepareModelToCompare(teamspace, model, subModelData.name, false, subModelData.revisions);
@@ -111,12 +112,15 @@ function* getCompareModelData({ isFederation, settings }) {
 	}
 }
 
-function* getCompareModels() {
+function* getCompareModels({revision}) {
 	try {
-		const isFederation = yield select(selectIsFederation);
 		const settings = yield select(selectSettings);
+		if (!settings) {
+			yield take(ModelTypes.FETCH_SETTINGS_SUCCESS);
+		}
+		const isFederation = yield select(selectIsFederation);
 
-		yield put(CompareActions.getCompareModelData(isFederation, settings));
+		yield put(CompareActions.getCompareModelData(isFederation, revision));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'models to compare', error.message));
 	}
@@ -401,7 +405,7 @@ function* setTargetRevision({ modelId, targetRevision }) {
 }
 
 export default function* CompareSaga() {
-	yield takeLatest(ModelTypes.FETCH_SETTINGS_SUCCESS, getCompareModels);
+	yield takeLatest(CompareTypes.GET_COMPARE_MODELS, getCompareModels);
 	yield takeLatest(CompareTypes.TOGGLE_COMPARE, toggleCompare);
 	yield takeLatest(CompareTypes.ON_RENDERING_TYPE_CHANGE, onRenderingTypeChange);
 	yield takeLatest(CompareTypes.GET_COMPARE_MODEL_DATA, getCompareModelData);
