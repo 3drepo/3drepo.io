@@ -63,7 +63,7 @@ export interface ITreeState {
 export const INITIAL_STATE: ITreeState = {
 	selectedNodes: [],
 	treeNodesList: [],
-	isPending: false,
+	isPending: true,
 	componentState: {
 		selectedFilters: [],
 		searchEnabled: false,
