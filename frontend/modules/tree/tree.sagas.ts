@@ -18,9 +18,8 @@
 // tslint:disable-next-line
 const TreeWorker = require('worker-loader?inline!./tree.worker');
 import { put, takeLatest, call, select, take, all } from 'redux-saga/effects';
-import { cloneDeep } from 'lodash';
-
 import { delay } from 'redux-saga';
+import { pick, uniq, flatten, values, cloneDeep } from 'lodash';
 
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
@@ -35,12 +34,13 @@ import {
 	selectNodesVisibilityMap,
 	selectNodesSelectionMap,
 	selectNumberOfInvisibleChildrenMap,
-	selectTreeNodesList
+	selectTreeNodesList,
+	selectNodesBySharedIdsMap
 } from './tree.selectors';
 import { TreeTypes, TreeActions } from './tree.redux';
 import { selectSettings, ModelTypes } from '../model';
 import { MultiSelect } from '../../services/viewer/multiSelect';
-import { VISIBILITY_STATES, NODE_TYPES } from '../../constants/tree';
+import { VISIBILITY_STATES, NODE_TYPES, SELECTION_STATES } from '../../constants/tree';
 import { selectActiveMeta, BimActions } from '../bim';
 import { ViewerActions } from '../viewer';
 
@@ -52,7 +52,7 @@ const setupWorker = (worker, onResponse) => {
 
 	worker.addEventListener('messageerror', (e) => {
 		// tslint:disable-next-line
-		console.error('TWorker error', e);
+		console.error('Worker error', e);
 	}, false);
 
 	return worker;
@@ -63,8 +63,37 @@ const treeWorker = new TreeWorker();
 function* getNodesByIds(nodesIds) {
 	const treeNodesList = yield select(selectTreeNodesList);
 	const nodesIndexesMap = yield select(selectNodesIndexesMap);
-
 	return nodesIds.map((nodeId) => treeNodesList[nodesIndexesMap[nodeId]]);
+}
+
+function* getNodesIdsFromSharedIds(objects: any) {
+	if (!objects || !objects.length) {
+		return [];
+	}
+	const nodesBySharedIds = yield select(selectNodesBySharedIdsMap);
+
+	const objectsSharedIds = objects.map(({ shared_ids }) => shared_ids);
+	const sharedIds = flatten(objectsSharedIds) as string[];
+	const nodesIdsBySharedIds = values(pick(nodesBySharedIds, sharedIds));
+	return uniq(nodesIdsBySharedIds);
+}
+
+function* clearCurrentlySelected() {
+	yield all([
+		put(ViewerActions.clearHighlights()),
+		put(ViewerActions.setMetadataVisibility(false)),
+		put(BimActions.setActiveMeta(null))
+	]);
+
+	// TODO: Rewrite when selection map will contain only selected nodes
+	const nodesSelectionMap = yield select(selectNodesSelectionMap);
+	for (const id in nodesSelectionMap) {
+		if (nodesSelectionMap[id] === SELECTION_STATES.UNSELECTED) {
+			continue;
+		}
+		nodesSelectionMap[id] = SELECTION_STATES.UNSELECTED;
+	}
+	yield put(TreeActions.setNodesSelectionMap(nodesSelectionMap));
 }
 
 export function* fetchFullTree({ teamspace, modelId, revision }) {
@@ -85,10 +114,8 @@ export function* fetchFullTree({ teamspace, modelId, revision }) {
 		dataToProcessed.subTrees = subTreesData.map(({ data }) => data.mainTree);
 
 		const worker = setupWorker(treeWorker, (result) => {
-			const {
-				nodesList, nodesIndexesMap, initialVisibilityMap: nodesVisibilityMap, initialSelectionMap: nodesSelectionMap
-			} = result.data;
-			dispatch(TreeActions.setComponentState({ nodesIndexesMap, nodesVisibilityMap, nodesSelectionMap }));
+			const { nodesList, ...auxiliaryMaps } = result.data;
+			dispatch(TreeActions.setAuxiliaryMaps(auxiliaryMaps));
 			dispatch(TreeActions.setTreeNodesList(nodesList));
 		});
 		worker.postMessage(dataToProcessed);
@@ -101,16 +128,12 @@ export function* fetchFullTree({ teamspace, modelId, revision }) {
 
 export function* startListenOnSelections() {
 	try {
-		const TreeService = getAngularService('TreeService') as any;
-
 		Viewer.on(VIEWER_EVENTS.OBJECT_SELECTED, (object) => {
 			dispatch(TreeActions.handleNodesClick([object.id]));
-			dispatch(TreeActions.getSelectedNodes());
 		});
 
 		Viewer.on(VIEWER_EVENTS.MULTI_OBJECTS_SELECTED, (object) => {
-			TreeService.nodesClickedBySharedIds(object.selectedNodes);
-			dispatch(TreeActions.getSelectedNodes());
+			dispatch(TreeActions.handleNodesClickBySharedIds(object.selectedNodes));
 		});
 
 		Viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => {
@@ -132,7 +155,7 @@ export function* stopListenOnSelections() {
 	}
 }
 
-export function* handleNodesClick({ nodesIds, skipExpand }) {
+export function* handleNodesClick({ nodesIds = [], skipExpand = false }) {
 	const TreeService = getAngularService('TreeService') as any;
 	const nodes = yield getNodesByIds(nodesIds);
 
@@ -142,7 +165,7 @@ export function* handleNodesClick({ nodesIds, skipExpand }) {
 
 	if (!multi) {
 		// If it is not multiselect mode, remove all highlights
-		TreeService.clearCurrentlySelected();
+		yield clearCurrentlySelected();
 	}
 
 	if (removeGroup) {
@@ -150,59 +173,24 @@ export function* handleNodesClick({ nodesIds, skipExpand }) {
 		const shouldCloseMeta = nodes.some(({ data: { meta } }) => meta.includes(activeMeta));
 
 		if (shouldCloseMeta) {
-			yield put(ViewerActions.setMetadataVisibility(false));
-			yield put(BimActions.setActiveMeta(null));
+			yield all([
+				put(ViewerActions.setMetadataVisibility(false)),
+				put(BimActions.setActiveMeta(null))
+			]);
 		}
+		// TODO
 		TreeService.deselectNodes(nodes);
 	} else {
+		// TODO
 		TreeService.selectNodes(nodes, skipExpand);
 	}
+
+	yield TreeActions.getSelectedNodes();
 }
 
-	/**
-	 * Select a series of nodes by an array of shared IDs (rather than unique IDs)
-	 * @param objects	Nodes to select
-	 */
-	public nodesClickedBySharedIds(objects: any[]); {
-
-	return this.getNodesFromSharedIds(objects)
-		.then((nodes) => {
-			return this.nodesClicked(nodes);
-		})
-		.catch((error) => {
-			console.error(error);
-		});
-}
-
-/**
- * Get a series of nodes with unique ID bu a series of objects that contain a shared_id
- * @param objects the array of shared id objects
- */
-function* getNodesFromSharedIds(objects: any) {
-	if (!objects || objects.length === 0) {
-		return Promise.resolve([]);
-	}
-
-	const nodes = [];
-
-	for (let i = 0; i < objects.length; i++) {
-		for (let j = 0; objects[i].shared_ids && j < objects[i].shared_ids.length; j++) {
-			const objUid = this.treeMap.sharedIdToUid[objects[i].shared_ids[j]];
-			const node = this.getNodeById(objUid);
-			if (node) {
-				nodes.push(node);
-			}
-		}
-		if (objects[i].shared_id) {
-			const objUid = this.treeMap.sharedIdToUid[objects[i].shared_id];
-			const node = this.getNodeById(objUid);
-			if (node) {
-				nodes.push(node);
-			}
-		}
-	}
-
-	return nodes;
+export function* handleNodesClickBySharedIds({ nodesIds }) {
+	const nodes = yield getNodesIdsFromSharedIds(nodesIds);
+	yield put(TreeActions.handleNodesClick(nodes));
 }
 
 export function* getSelectedNodes() {
@@ -396,4 +384,5 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.SET_TREE_NODES_VISIBILITY, setTreeNodesVisibility);
 	yield takeLatest(TreeTypes.UPDATE_PARENT_VISIBILITY, updateParentVisibility);
 	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK, handleNodesClick);
+	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK_BY_SHARED_IDS, handleNodesClickBySharedIds);
 }

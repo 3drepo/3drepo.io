@@ -330,6 +330,14 @@ export function* setMeasureVisibility({ visible }) {
 	}
 }
 
+export function* clearHighlights() {
+	try {
+		yield Viewer.clearHighlights();
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('clear', 'highlights'));
+	}
+}
+
 export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.WAIT_FOR_VIEWER, waitForViewer);
 	yield takeLatest(ViewerTypes.MAP_INITIALISE, mapInitialise);
@@ -355,4 +363,5 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.STOP_LISTEN_ON_NUM_CLIP, stopListenOnNumClip);
 	yield takeLatest(ViewerTypes.START_LISTEN_ON_MODEL_LOADED, startListenOnModelLoaded);
 	yield takeLatest(ViewerTypes.STOP_LISTEN_ON_MODEL_LOADED, stopListenOnModelLoaded);
+	yield takeLatest(ViewerTypes.CLEAR_HIGHLIGHTS, clearHighlights);
 }

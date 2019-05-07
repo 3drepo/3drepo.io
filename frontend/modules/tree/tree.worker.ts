@@ -1,7 +1,7 @@
 import { omit, flattenDeep, sumBy } from 'lodash';
 import { VISIBILITY_STATES, SELECTION_STATES } from '../../constants/tree';
 
-interface IRow {
+interface INode {
 	_id: string;
 	name: string;
 	level: number;
@@ -11,6 +11,7 @@ interface IRow {
 	data: any;
 	isFederation?: boolean;
 	isModel?: boolean;
+	shared_ids?: string[];
 }
 
 const isModelNode = (level, isFederation, hasFederationAsParent?) => {
@@ -18,7 +19,7 @@ const isModelNode = (level, isFederation, hasFederationAsParent?) => {
 };
 
 const getFlattenNested = (tree, level = 1, parentId = null) => {
-	const rowData: IRow = {
+	const rowData: INode = {
 		_id: tree._id,
 		isFederation: tree.isFederation,
 		isModel: tree.isModel || isModelNode(level, tree.isFederation),
@@ -27,7 +28,10 @@ const getFlattenNested = (tree, level = 1, parentId = null) => {
 		parentId,
 		hasChildren: Boolean(tree.children),
 		childrenNumber: 0,
-		data: omit(tree, ['children'])
+		data: {
+			...omit(tree, ['children']),
+			shared_ids: tree.shared_id ? [tree.shared_id] : tree.shared_ids
+		}
 	};
 
 	const dataToFlatten = [] as any;
@@ -46,6 +50,28 @@ const getFlattenNested = (tree, level = 1, parentId = null) => {
 
 	const data = flattenDeep(dataToFlatten);
 	return { data, childrenNumber: data.length };
+};
+
+const getAuxiliaryMaps = (nodesList) => {
+	const initialState = {
+		nodesIndexesMap: {},
+		nodesVisibilityMap: {},
+		nodesSelectionMap: {},
+		nodesBySharedIdsMap: {}
+	} as any;
+
+	return nodesList.reduce((maps, node: INode, index) => {
+		maps.nodesIndexesMap[node._id] = index;
+		maps.nodesVisibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
+		maps.nodesSelectionMap[node._id] = SELECTION_STATES.UNSELECTED;
+
+		for (let sharedIndex = 0; sharedIndex < node.data.shared_ids.length; sharedIndex++) {
+			const sharedId = node.data.shared_ids[sharedIndex];
+			maps.nodesBySharedIdsMap[sharedId] = node._id;
+		}
+
+		return maps;
+	}, initialState);
 };
 
 self.addEventListener('message', ({ data }) => {
@@ -74,23 +100,8 @@ self.addEventListener('message', ({ data }) => {
 
 	console.time('TREE PROCESSING');
 	const { data: nodesList } = getFlattenNested(mainTree);
-	const auxiliaryMaps = nodesList.reduce((maps, node: IRow, index) => {
-		maps.indiecesMap[node._id] = index;
-		maps.initialVisibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
-		maps.initialSelectionMap[node._id] = SELECTION_STATES.UNSELECTED;
-		return maps;
-	}, {
-		indiecesMap: {},
-		initialVisibilityMap: {},
-		initialSelectionMap: {}
-	} as any);
-
-	const {
-		indiecesMap: nodesIndexesMap,
-		initialVisibilityMap,
-		initialSelectionMap
-	} = auxiliaryMaps;
-	const result = { data: { nodesList, nodesIndexesMap, initialVisibilityMap, initialSelectionMap }};
+	const auxiliaryMaps = getAuxiliaryMaps(nodesList);
+	const result = { data: { nodesList, ...auxiliaryMaps }};
 	console.timeEnd('TREE PROCESSING');
 
 	// @ts-ignore

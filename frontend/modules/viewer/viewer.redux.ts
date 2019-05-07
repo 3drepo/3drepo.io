@@ -55,7 +55,8 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	stopListenOnNumClip: [],
 	setIsModelLoaded: ['isModelLoaded'],
 	startListenOnModelLoaded: [],
-	stopListenOnModelLoaded: []
+	stopListenOnModelLoaded: [],
+	clearHighlights: []
 }, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {
