@@ -43,7 +43,8 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	removeAllSelected: [],
 	setIsPending: ['isPending'],
 	setTreeNodesVisibility: ['nodes', 'visibility'],
-	updateParentVisibility: ['parentNode']
+	updateParentVisibility: ['parentNode'],
+	handleNodesClick: ['nodesIds']
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {

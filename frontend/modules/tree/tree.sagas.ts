@@ -32,16 +32,17 @@ import {
 	selectSelectedNodes,
 	selectIfcSpacesHidden,
 	selectNodesIndexesMap,
-	selectSelectedNodesMap,
-	selectTreeNodesList,
 	selectNodesVisibilityMap,
 	selectNodesSelectionMap,
-	selectNumberOfInvisibleChildrenMap
+	selectNumberOfInvisibleChildrenMap,
+	selectTreeNodesList
 } from './tree.selectors';
 import { TreeTypes, TreeActions } from './tree.redux';
 import { selectSettings, ModelTypes } from '../model';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { VISIBILITY_STATES, NODE_TYPES } from '../../constants/tree';
+import { selectActiveMeta, BimActions } from '../bim';
+import { ViewerActions } from '../viewer';
 
 const setupWorker = (worker, onResponse) => {
 	worker.addEventListener('message', (e) => {
@@ -58,6 +59,13 @@ const setupWorker = (worker, onResponse) => {
 };
 
 const treeWorker = new TreeWorker();
+
+function* getNodesByIds(nodesIds) {
+	const treeNodesList = yield select(selectTreeNodesList);
+	const nodesIndexesMap = yield select(selectNodesIndexesMap);
+
+	return nodesIds.map((nodeId) => treeNodesList[nodesIndexesMap[nodeId]]);
+}
 
 export function* fetchFullTree({ teamspace, modelId, revision }) {
 	yield put(TreeActions.setIsPending(true));
@@ -96,7 +104,7 @@ export function* startListenOnSelections() {
 		const TreeService = getAngularService('TreeService') as any;
 
 		Viewer.on(VIEWER_EVENTS.OBJECT_SELECTED, (object) => {
-			TreeService.nodesClickedByIds([object.id]);
+			dispatch(TreeActions.handleNodesClick([object.id]));
 			dispatch(TreeActions.getSelectedNodes());
 		});
 
@@ -114,6 +122,43 @@ export function* startListenOnSelections() {
 	}
 }
 
+export function* stopListenOnSelections() {
+	try {
+		Viewer.off(VIEWER_EVENTS.OBJECT_SELECTED);
+		Viewer.off(VIEWER_EVENTS.MULTI_OBJECTS_SELECTED);
+		Viewer.off(VIEWER_EVENTS.BACKGROUND_SELECTED);
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+export function* handleNodesClick({ nodesIds, skipExpand }) {
+	const TreeService = getAngularService('TreeService') as any;
+	const nodes = yield getNodesByIds(nodesIds);
+
+	const addGroup = MultiSelect.isAccumMode();
+	const removeGroup = MultiSelect.isDecumMode();
+	const multi = addGroup || removeGroup;
+
+	if (!multi) {
+		// If it is not multiselect mode, remove all highlights
+		TreeService.clearCurrentlySelected();
+	}
+
+	if (removeGroup) {
+		const activeMeta = yield select(selectActiveMeta);
+		const shouldCloseMeta = nodes.some(({ data: { meta } }) => meta.includes(activeMeta));
+
+		if (shouldCloseMeta) {
+			yield put(ViewerActions.setMetadataVisibility(false));
+			yield put(BimActions.setActiveMeta(null));
+		}
+		TreeService.deselectNodes(nodes);
+	} else {
+		TreeService.selectNodes(nodes, skipExpand);
+	}
+}
+
 export function* getSelectedNodes() {
 	try {
 		yield call(delay, 100);
@@ -122,16 +167,6 @@ export function* getSelectedNodes() {
 		if (objectsStatus && objectsStatus.highlightedNodes) {
 			yield put(TreeActions.getSelectedNodesSuccess(objectsStatus.highlightedNodes));
 		}
-	} catch (error) {
-		console.error(error);
-	}
-}
-
-export function* stopListenOnSelections() {
-	try {
-		Viewer.off(VIEWER_EVENTS.OBJECT_SELECTED);
-		Viewer.off(VIEWER_EVENTS.MULTI_OBJECTS_SELECTED);
-		Viewer.off(VIEWER_EVENTS.BACKGROUND_SELECTED);
 	} catch (error) {
 		console.error(error);
 	}
@@ -290,7 +325,6 @@ export function* updateParentVisibility({ parentNode }) {
 		let currentNode = parentNode;
 		const nodes = [parentNode];
 
-
 		for (let i = parentNode.level; i > 1; i--) {
 			const newParentIndex = nodesIndexesMap[currentNode.parentId];
 			const newParentNode = treeNodesList[newParentIndex];
@@ -315,4 +349,5 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.SELECT_NODE, selectNode);
 	yield takeLatest(TreeTypes.SET_TREE_NODES_VISIBILITY, setTreeNodesVisibility);
 	yield takeLatest(TreeTypes.UPDATE_PARENT_VISIBILITY, updateParentVisibility);
+	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK, handleNodesClick);
 }
