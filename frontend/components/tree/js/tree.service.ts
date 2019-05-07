@@ -124,6 +124,7 @@ export class TreeService {
 		this.treeMap = null;
 		branch = branch ? branch : 'master';
 
+/*
 		if (!revision) {
 			this.baseURL = account + '/' + model + '/revision/master/head/';
 		} else {
@@ -233,7 +234,7 @@ export class TreeService {
 			});
 	}
 
-	public handleIdToPath(mainTree, subTrees, subTreesById) {
+/* 	public handleIdToPath(mainTree, subTrees, subTreesById) {
 		return this.getIdToPath()
 				.then((idToPath) => {
 
@@ -284,9 +285,9 @@ export class TreeService {
 					this.reset();
 				});
 
-	}
+	} */
 
-	public getIdToPath() {
+/* 	public getIdToPath() {
 
 		const url = this.baseURL + 'tree_path.json';
 		return this.APIService.get(url, {
@@ -298,8 +299,8 @@ export class TreeService {
 				return response.data;
 			});
 
-	}
-
+	} */
+/*
 	public handleSubTree(subtree: any, mainTree: any, subTreesById: any, awaitedSubTrees: any[]) {
 
 		const treeId = subtree._id;
@@ -349,9 +350,9 @@ export class TreeService {
 
 		}
 
-	}
+	} */
 
-	public attachStatus(res: any, tree: any, idToObjRef: any) {
+/* 	public attachStatus(res: any, tree: any, idToObjRef: any) {
 		if (res.status === 401) {
 			tree.status = 'NO_ACCESS';
 		}
@@ -363,9 +364,9 @@ export class TreeService {
 		if (tree.status) {
 			idToObjRef[tree._id].status = tree.status;
 		}
-	}
+	} */
 
-	public search(searchString: string, revision: string) {
+/* 	public search(searchString: string, revision: string) {
 		let url;
 		if (!revision) {
 			url = `${this.baseURL}searchtree.json?searchString=${searchString}`;
@@ -373,9 +374,9 @@ export class TreeService {
 			url = `${this.baseURL}searchtree.json?searchString=${searchString}&rev=${revision}`;
 		}
 		return this.APIService.get(url);
-	}
+	} */
 
-	public genMap(leaf: any, items: any) {
+/* 	public genMap(leaf: any, items: any) {
 
 		const leafId = leaf._id;
 		const sharedId = leaf.shared_id;
@@ -396,9 +397,9 @@ export class TreeService {
 
 		return items;
 
-	}
+	} */
 
-	public getMap() {
+/* 	public getMap() {
 
 		// only do this once!
 		if (!this.generatedMaps) {
@@ -416,7 +417,7 @@ export class TreeService {
 
 		return this.treeMapReady.promise;
 
-	}
+	} */
 
 	public getCurrentSelectedNodesAsArray() {
 		return Object.keys(this.currentSelectedNodes).map((key) => this.currentSelectedNodes[key]);
@@ -578,7 +579,6 @@ export class TreeService {
 	 */
 	public updateParentVisibility(node: any) {
 		const nodes = [node];
-
 
 		while (nodes.length > 0) {
 			const currentNode = nodes.pop();
@@ -1083,14 +1083,14 @@ export class TreeService {
 	 * Select a series of nodes by an array of uniqueIDs
 	 * @param ids ids to click
 	 */
-	public nodesClickedByIds( ids: string[]) {
+/* 	public nodesClickedByIds( ids: string[]) {
 		return this.onReady().then(() => {
 			const nodes = ids.map((id) => this.getNodeById(id));
 			return this.nodesClicked(nodes);
 		}).catch((error) => {
 			console.error(error);
 		});
-	}
+	} */
 
 	/**
 	 * Select a series of nodes by an array of shared IDs (rather than unique IDs)
