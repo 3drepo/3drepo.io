@@ -159,6 +159,52 @@ export function* handleNodesClick({ nodesIds, skipExpand }) {
 	}
 }
 
+	/**
+	 * Select a series of nodes by an array of shared IDs (rather than unique IDs)
+	 * @param objects	Nodes to select
+	 */
+	public nodesClickedBySharedIds(objects: any[]); {
+
+	return this.getNodesFromSharedIds(objects)
+		.then((nodes) => {
+			return this.nodesClicked(nodes);
+		})
+		.catch((error) => {
+			console.error(error);
+		});
+}
+
+/**
+ * Get a series of nodes with unique ID bu a series of objects that contain a shared_id
+ * @param objects the array of shared id objects
+ */
+function* getNodesFromSharedIds(objects: any) {
+	if (!objects || objects.length === 0) {
+		return Promise.resolve([]);
+	}
+
+	const nodes = [];
+
+	for (let i = 0; i < objects.length; i++) {
+		for (let j = 0; objects[i].shared_ids && j < objects[i].shared_ids.length; j++) {
+			const objUid = this.treeMap.sharedIdToUid[objects[i].shared_ids[j]];
+			const node = this.getNodeById(objUid);
+			if (node) {
+				nodes.push(node);
+			}
+		}
+		if (objects[i].shared_id) {
+			const objUid = this.treeMap.sharedIdToUid[objects[i].shared_id];
+			const node = this.getNodeById(objUid);
+			if (node) {
+				nodes.push(node);
+			}
+		}
+	}
+
+	return nodes;
+}
+
 export function* getSelectedNodes() {
 	try {
 		yield call(delay, 100);
