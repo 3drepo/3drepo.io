@@ -41,6 +41,22 @@ export const selectComponentState = createSelector(
 	selectTreeDomain, (state) => state.componentState
 );
 
+export const selectNodesSelectionMap = createSelector(
+	selectTreeDomain, (state) => state.nodesSelectionMap
+);
+
+export const selectNodesVisibilityMap = createSelector(
+	selectTreeDomain, (state) => state.nodesVisibilityMap
+);
+
+export const selectNodesIndexesMap = createSelector(
+	selectTreeDomain, (state) => state.nodesIndexesMap
+);
+
+export const selectNodesBySharedIdsMap = createSelector(
+	selectTreeDomain, (state) => state.nodesBySharedIdsMap
+);
+
 export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
@@ -64,18 +80,6 @@ export const selectIfcSpacesHidden = createSelector(
 
 export const selectExpandedNodesMap = createSelector(
 	selectComponentState, (state) => state.expandedNodesMap
-);
-
-export const selectNodesSelectionMap = createSelector(
-	selectComponentState, (state) => state.nodesSelectionMap
-);
-
-export const selectNodesVisibilityMap = createSelector(
-	selectComponentState, (state) => state.nodesVisibilityMap
-);
-
-export const selectNodesIndexesMap = createSelector(
-	selectComponentState, (state) => state.nodesIndexesMap
 );
 
 export const selectNumberOfInvisibleChildrenMap = createSelector(

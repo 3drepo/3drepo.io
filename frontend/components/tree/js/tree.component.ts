@@ -72,7 +72,7 @@ class TreeController implements ng.IController {
 		this.showNodes = true;
 		this.nodes = [];
 		this.showTree = true;
-		this.TreeService.clearCurrentlySelected();
+		// this.TreeService.clearCurrentlySelected();
 		this.viewerSelectedObject = null;
 		this.showProgress = true;
 		this.progressInfo = 'Loading full tree structure';
@@ -335,7 +335,7 @@ class TreeController implements ng.IController {
 
 		if (!multi) {
 			this.nodes.forEach((n) => n.selected = this.TreeService.SELECTION_STATES.unselected);
-			this.TreeService.clearCurrentlySelected();
+			// this.TreeService.clearCurrentlySelected();
 		}
 
 		if (removeGroup) {

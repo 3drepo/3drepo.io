@@ -44,38 +44,44 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	setIsPending: ['isPending'],
 	setTreeNodesVisibility: ['nodes', 'visibility'],
 	updateParentVisibility: ['parentNode'],
-	handleNodesClick: ['nodesIds']
+	handleNodesClick: ['nodesIds', 'skipExpand'],
+	handleNodesClickBySharedIds: ['nodesIds'],
+	setAuxiliaryMaps: ['auxiliaryMaps'],
+	setNodesSelectionMap: ['nodesSelectionMap']
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
 	selectedFilters: any[];
 	searchEnabled: boolean;
 	ifcSpacesHidden: boolean;
-	nodesVisibilityMap: any;
-	nodesSelectionMap: any;
 	expandedNodesMap: any;
-	nodesIndexesMap: any;
 	numberOfInvisibleChildrenMap: any;
 }
+
 export interface ITreeState {
 	selectedNodes: any;
 	treeNodesList: any[];
 	componentState: ITreeComponentState;
 	isPending?: boolean;
+	nodesVisibilityMap: any;
+	nodesSelectionMap: any;
+	nodesIndexesMap: any;
+	nodesBySharedIdsMap: any;
 }
 
 export const INITIAL_STATE: ITreeState = {
 	selectedNodes: [],
 	treeNodesList: [],
 	isPending: true,
+	nodesVisibilityMap: {},
+	nodesSelectionMap: {},
+	nodesIndexesMap: {},
+	nodesBySharedIdsMap: {},
 	componentState: {
 		selectedFilters: [],
 		searchEnabled: false,
 		ifcSpacesHidden: true,
-		nodesVisibilityMap: {},
-		nodesSelectionMap: {},
 		expandedNodesMap: {},
-		nodesIndexesMap: {},
 		numberOfInvisibleChildrenMap: {}
 	}
 };
@@ -102,6 +108,14 @@ const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) => {
 	return { ...state, componentState: { ...state.componentState, ifcSpacesHidden } };
 };
 
+const setNodesSelectionMap = (state = INITIAL_STATE, { nodesSelectionMap }) => {
+	return { ...state, nodesSelectionMap };
+};
+
+const setAuxiliaryMaps = (state = INITIAL_STATE, { auxiliaryMaps }) => {
+	return { ...state, ...auxiliaryMaps };
+};
+
 const expandNode = (state = INITIAL_STATE, { id }) => {
 	const expandedNodesMap = { ...state.componentState.expandedNodesMap };
 	expandedNodesMap[id] = true;
@@ -111,7 +125,7 @@ const expandNode = (state = INITIAL_STATE, { id }) => {
 
 const collapseNode = (state = INITIAL_STATE, { id }) => {
 	const expandedNodesMap = { ...state.componentState.expandedNodesMap };
-	const nodeIndex = state.componentState.nodesIndexesMap[id];
+	const nodeIndex = state.nodesIndexesMap[id];
 	const node = state.treeNodesList[nodeIndex];
 
 	if (node.childrenNumber) {
@@ -200,5 +214,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.REMOVE_ALL_SELECTED]: removeAllSelected,
 	// [TreeTypes.REMOVE_ALL_HIGHLIGHTED]: removeAllHighlighted,
 	[TreeTypes.ADD_GROUP_TO_SELECTED]: addGroupToSelected,
-	[TreeTypes.REMOVE_GROUP_FROM_SELECTED]: removeGroupFromSelected
+	[TreeTypes.REMOVE_GROUP_FROM_SELECTED]: removeGroupFromSelected,
+	[TreeTypes.SET_NODES_SELECTION_MAP]: setNodesSelectionMap,
+	[TreeTypes.SET_AUXILIARY_MAPS]: setAuxiliaryMaps
 });

@@ -124,7 +124,6 @@ export class TreeService {
 		this.treeMap = null;
 		branch = branch ? branch : 'master';
 
-/*
 		if (!revision) {
 			this.baseURL = account + '/' + model + '/revision/master/head/';
 		} else {
@@ -153,7 +152,6 @@ export class TreeService {
 			.catch((error) => {
 				console.error('Error resolving tree(s): ', error);
 			});
-
 	}
 
 	public getIdToMeshes() {
@@ -234,7 +232,7 @@ export class TreeService {
 			});
 	}
 
-/* 	public handleIdToPath(mainTree, subTrees, subTreesById) {
+	public handleIdToPath(mainTree, subTrees, subTreesById) {
 		return this.getIdToPath()
 				.then((idToPath) => {
 
@@ -285,9 +283,9 @@ export class TreeService {
 					this.reset();
 				});
 
-	} */
+	}
 
-/* 	public getIdToPath() {
+	public getIdToPath() {
 
 		const url = this.baseURL + 'tree_path.json';
 		return this.APIService.get(url, {
@@ -299,8 +297,8 @@ export class TreeService {
 				return response.data;
 			});
 
-	} */
-/*
+	}
+
 	public handleSubTree(subtree: any, mainTree: any, subTreesById: any, awaitedSubTrees: any[]) {
 
 		const treeId = subtree._id;
@@ -350,9 +348,9 @@ export class TreeService {
 
 		}
 
-	} */
+	}
 
-/* 	public attachStatus(res: any, tree: any, idToObjRef: any) {
+	public attachStatus(res: any, tree: any, idToObjRef: any) {
 		if (res.status === 401) {
 			tree.status = 'NO_ACCESS';
 		}
@@ -364,7 +362,7 @@ export class TreeService {
 		if (tree.status) {
 			idToObjRef[tree._id].status = tree.status;
 		}
-	} */
+	}
 
 /* 	public search(searchString: string, revision: string) {
 		let url;
@@ -376,7 +374,7 @@ export class TreeService {
 		return this.APIService.get(url);
 	} */
 
-/* 	public genMap(leaf: any, items: any) {
+	public genMap(leaf: any, items: any) {
 
 		const leafId = leaf._id;
 		const sharedId = leaf.shared_id;
@@ -397,9 +395,9 @@ export class TreeService {
 
 		return items;
 
-	} */
+	}
 
-/* 	public getMap() {
+	public getMap() {
 
 		// only do this once!
 		if (!this.generatedMaps) {
@@ -417,7 +415,7 @@ export class TreeService {
 
 		return this.treeMapReady.promise;
 
-	} */
+	}
 
 	public getCurrentSelectedNodesAsArray() {
 		return Object.keys(this.currentSelectedNodes).map((key) => this.currentSelectedNodes[key]);
@@ -800,7 +798,7 @@ export class TreeService {
 	/**
 	 * Unselect all selected items and clear the array
 	 */
-	public clearCurrentlySelected() {
+/* 	public clearCurrentlySelected() {
 		this.ViewerService.clearHighlights();
 
 		const visitedNodes = {};
@@ -830,7 +828,7 @@ export class TreeService {
 		}
 
 		this.currentSelectedNodes = {};
-	}
+	} */
 
 	/**
 	 * Set selection status of node.
@@ -879,14 +877,14 @@ export class TreeService {
 		});
 	}
 
-	public nodesClicked(nodes: any[], skipExpand?: boolean) {
+/* 	public nodesClicked(nodes: any[], skipExpand?: boolean) {
 		const addGroup = this.MultiSelectService.isAccumMode();
 		const removeGroup = this.MultiSelectService.isDecumMode();
 		const multi = addGroup || removeGroup;
 
 		if (!multi) {
 			// If it is not multiselect mode, remove all highlights
-			this.clearCurrentlySelected();
+			// this.clearCurrentlySelected();
 		}
 
 		if (removeGroup) {
@@ -901,7 +899,7 @@ export class TreeService {
 		} else {
 			this.selectNodes(nodes, skipExpand);
 		}
-	}
+	} */
 
 	/**
 	 * Deselect a nodes in the tree.
@@ -1015,7 +1013,7 @@ export class TreeService {
 	 * Get a series of nodes with unique ID bu a series of objects that contain a shared_id
 	 * @param objects the array of shared id objects
 	 */
-	public getNodesFromSharedIds(objects: any) {
+/* 	public getNodesFromSharedIds(objects: any) {
 		if (!objects || objects.length === 0) {
 			return Promise.resolve([]);
 		}
@@ -1043,7 +1041,7 @@ export class TreeService {
 
 			return nodes;
 		});
-	}
+	} */
 
 	/**
 	 * Show a series of nodes by an array of shared IDs (rather than unique IDs)
