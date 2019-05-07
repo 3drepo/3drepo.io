@@ -72,7 +72,7 @@ describe("Notifications", function() {
 	};
 
 	const updateIssue = (modelId, issue , id) => next => {
-		return agents.teamSpace1.put(`/${account}/${modelId}/issues/${id}.json`)
+		return agents.teamSpace1.patch(`/${account}/${modelId}/issues/${id}.json`)
 			.send(issue)
 			.expect(200 , function(err, res) {
 				next(err);
