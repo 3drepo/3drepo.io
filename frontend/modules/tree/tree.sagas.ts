@@ -232,8 +232,6 @@ export function* setTreeNodesVisibility({ nodes, visibility }) {
 			const node = treeNodesList[nodeIndex];
 
 			if (node && (visibility === VISIBILITY_STATES.PARENT_OF_VISIBLE || visibility !== nodesVisibilityMap[nodeId])) {
-				const parentNode = node;
-
 				if (node.type === NODE_TYPES.MESH) {
 					// this.meshesToUpdate.add(node);
 				}
@@ -262,12 +260,9 @@ export function* setTreeNodesVisibility({ nodes, visibility }) {
 						const newParentIndex = nodesIndexesMap[currentNode.parentId];
 						const newParentNode = treeNodesList[newParentIndex];
 						currentNode = newParentNode;
-						console.log('newParentNode', newParentNode.name, newParentNode);
-						console.log('newParentNode invisible children', node.childrenNumber + i);
 						newNumberOfInvisibleChildrenMap[currentNode._id] = node.childrenNumber + i;
 
 						if (currentNode.childrenNumber > newNumberOfInvisibleChildrenMap[currentNode._id]) {
-							console.log('parent of invisible!')
 							newVisibilityMap[currentNode._id] = VISIBILITY_STATES.PARENT_OF_VISIBLE;
 						}
 						parents.push(currentNode);
@@ -278,9 +273,6 @@ export function* setTreeNodesVisibility({ nodes, visibility }) {
 					nodesVisibilityMap: newVisibilityMap,
 					numberOfInvisibleChildrenMap: newNumberOfInvisibleChildrenMap
 				}));
-
-				// console.log('newVisibilityMap', newVisibilityMap);
-				// yield put(TreeActions.updateParentVisibility(parentNode));
 			}
 		}
 
@@ -298,14 +290,14 @@ export function* updateParentVisibility({ parentNode }) {
 		let currentNode = parentNode;
 		const nodes = [parentNode];
 
-		console.log('Saga updateParentVisibility', parentNode);
+
 		for (let i = parentNode.level; i > 1; i--) {
 			const newParentIndex = nodesIndexesMap[currentNode.parentId];
 			const newParentNode = treeNodesList[newParentIndex];
 			currentNode = newParentNode;
 			nodes.push(currentNode);
 		}
-		console.log('Saga updateParentVisibility parent nodes', nodes);
+
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'parent node visibility'));
 	}
