@@ -101,9 +101,9 @@ function* getCompareModelData({ isFederation, revision }) {
 
 			yield put(CompareActions.setComponentState({
 				compareModels,
-				selectedDiffModelsMap: selectedModelsMap,
-				selectedClashModelsMap: selectedModelsMap,
-				targetDiffModels: selectedModelsMap,
+				selectedDiffModelsMap: {...selectedModelsMap},
+				selectedClashModelsMap: {...selectedModelsMap},
+				targetDiffModels: {...selectedModelsMap},
 				isPending: false
 			}));
 		}
