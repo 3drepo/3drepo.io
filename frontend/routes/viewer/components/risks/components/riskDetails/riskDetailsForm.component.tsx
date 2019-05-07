@@ -139,6 +139,8 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { risk, myJob, permissions, currentUser } = this.props;
+		const newRisk = !risk._id;
+		const canEditBasicProperty = newRisk || canChangeBasicProperty(risk, myJob, permissions, currentUser);
 
 		return (
 			<Form>
@@ -150,7 +152,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								{...field}
 								items={this.props.jobs}
 								inputId="assigned_roles"
-								disabled={!canChangeAssigned(risk, myJob, permissions, currentUser)}
+								disabled={!(newRisk || canChangeAssigned(risk, myJob, permissions, currentUser))}
 							/>
 						)} />
 					</StyledFormControl>
@@ -162,7 +164,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								{...field}
 								items={RISK_CATEGORIES}
 								inputId="category"
-								disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
+								disabled={!canEditBasicProperty}
 							/>
 						)} />
 					</StyledFormControl>
@@ -174,7 +176,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							{...field}
 							requiredConfirm={!this.isNewRisk}
 							label="Associated Activity"
-							disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
+							disabled={!canEditBasicProperty}
 						/>
 					)} />
 
@@ -184,7 +186,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							requiredConfirm={!this.isNewRisk}
 							validationSchema={RiskSchema}
 							label="SafetiBase ID"
-							disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
+							disabled={!canEditBasicProperty}
 						/>
 					)} />
 				</FieldsRow>
@@ -198,7 +200,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							fullWidth
 							multiline
 							label="Description"
-							disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
+							disabled={!canEditBasicProperty}
 						/>
 					)} />
 				</Container>
@@ -221,7 +223,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									{...field}
 									items={RISK_LIKELIHOODS}
 									inputId="likelihood"
-									disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
+									disabled={!canEditBasicProperty}
 									readOnly={!this.isNewRisk}
 								/>
 							)} />
@@ -234,7 +236,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									{...field}
 									items={RISK_CONSEQUENCES}
 									inputId="consequence"
-									disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
+									disabled={!canEditBasicProperty}
 									readOnly={!this.isNewRisk}
 								/>
 							)} />
@@ -273,7 +275,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							fullWidth
 							multiline
 							label="Mitigation"
-							disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
+							disabled={!canEditBasicProperty}
 						/>
 					)} />
 				</Container>
@@ -286,7 +288,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								{...field}
 								items={RISK_MITIGATION_STATUSES}
 								inputId="mitigation_status"
-								disabled={!canChangeStatus(risk, myJob, permissions, currentUser)}
+								disabled={!(newRisk || canChangeStatus(risk, myJob, permissions, currentUser))}
 							/>
 						)} />
 					</StyledFormControl>
@@ -301,7 +303,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									{...field}
 									items={RISK_LIKELIHOODS}
 									inputId="residual_likelihood"
-									disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
+									disabled={!canEditBasicProperty}
 								/>
 							)} />
 						</StyledFormControl>
@@ -313,7 +315,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									{...field}
 									items={RISK_CONSEQUENCES}
 									inputId="residual_consequence"
-									disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
+									disabled={!canEditBasicProperty}
 								/>
 							)} />
 						</StyledFormControl>
@@ -344,7 +346,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							fullWidth
 							multiline
 							label="Residual Risk"
-							disabled={!canChangeBasicProperty(risk, myJob, permissions, currentUser)}
+							disabled={!canEditBasicProperty}
 						/>
 					)} />
 				</Container>
