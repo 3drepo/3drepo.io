@@ -78,6 +78,10 @@ export const selectNodesIndexesMap = createSelector(
 	selectComponentState, (state) => state.nodesIndexesMap
 );
 
+export const selectNumberOfInvisibleChildrenMap = createSelector(
+	selectComponentState, (state) => state.numberOfInvisibleChildrenMap
+);
+
 export const selectVisibleTreeNodesList = createSelector(
 	[
 		selectFilteredNodesList, selectNodesIndexesMap, selectSelectedFilters,

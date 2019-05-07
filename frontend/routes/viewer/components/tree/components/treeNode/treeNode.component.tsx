@@ -18,8 +18,8 @@
 import * as React from 'react';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
-import VisibleIcon from '@material-ui/icons/Visibility';
-import InvisibleIcon from '@material-ui/icons/VisibilityOffOutlined';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpIcon from '@material-ui/icons/KeyboardArrowUp';
@@ -61,7 +61,9 @@ const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
 	</StyledExpandableButton>
 );
 
-const ParentOfVisibleIcon = () => <VisibleIcon color="error" />;
+const ParentOfVisibleIcon = () => <VisibilityIcon color="disabled" />;
+const VisibleIcon = () => <VisibilityIcon color="primary" />;
+const InvisibleIcon = () => <VisibilityOffIcon color="action" />;
 
 export class TreeNode extends React.PureComponent<IProps, any> {
 	get node() {
@@ -147,13 +149,11 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	public getVisibilityIcon(visibility) {
 		if (visibility === VISIBILITY_STATES.VISIBLE) {
 			return VisibleIcon;
-		} else if (visibility === VISIBILITY_STATES.INVISIBLE) {
-			return InvisibleIcon;
 		} else if (visibility === VISIBILITY_STATES.PARENT_OF_VISIBLE) {
 			return ParentOfVisibleIcon;
 		}
 
-		return VisibleIcon;
+		return InvisibleIcon;
 	}
 
 	public render() {

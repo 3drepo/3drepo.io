@@ -18,6 +18,7 @@
 // tslint:disable-next-line
 const TreeWorker = require('worker-loader?inline!./tree.worker');
 import { put, takeLatest, call, select, take, all } from 'redux-saga/effects';
+import { cloneDeep } from 'lodash';
 
 import { delay } from 'redux-saga';
 
@@ -34,7 +35,8 @@ import {
 	selectSelectedNodesMap,
 	selectTreeNodesList,
 	selectNodesVisibilityMap,
-	selectNodesSelectionMap
+	selectNodesSelectionMap,
+	selectNumberOfInvisibleChildrenMap
 } from './tree.selectors';
 import { TreeTypes, TreeActions } from './tree.redux';
 import { selectSettings, ModelTypes } from '../model';
@@ -207,13 +209,13 @@ export function* selectNode({ id }) {
 	}
 }
 
-// nodes = ['id-1', 'id-2' ...]
 export function* setTreeNodesVisibility({ nodes, visibility }) {
 	try {
 		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
 		const nodesSelectionMap = yield select(selectNodesSelectionMap);
 		const nodesIndexesMap = yield select(selectNodesIndexesMap);
 		const treeNodesList = yield select(selectTreeNodesList);
+		const numberOfInvisibleChildrenMap = yield select(selectNumberOfInvisibleChildrenMap);
 
 		const TreeService = getAngularService('TreeService') as any;
 
@@ -221,10 +223,10 @@ export function* setTreeNodesVisibility({ nodes, visibility }) {
 			// TreeService.deselectNodes(nodes);
 		}
 
-		const newVisibilityMap = {};
+		const newVisibilityMap = cloneDeep(nodesVisibilityMap);
+		const newNumberOfInvisibleChildrenMap = cloneDeep(numberOfInvisibleChildrenMap);
 
 		for (let nodeLoopIndex = 0; nodeLoopIndex < nodes.length ; nodeLoopIndex++) {
-
 			const nodeId = nodes[nodeLoopIndex];
 			const nodeIndex = nodesIndexesMap[nodeId];
 			const node = treeNodesList[nodeIndex];
@@ -246,10 +248,39 @@ export function* setTreeNodesVisibility({ nodes, visibility }) {
 							newVisibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
 						}
 					}
+
+					if (visibility === VISIBILITY_STATES.INVISIBLE) {
+						newNumberOfInvisibleChildrenMap[node._id] = node.childrenNumber;
+					} else {
+						newNumberOfInvisibleChildrenMap[node._id] = 0;
+					}
+
+					let currentNode = node;
+					const parents = [];
+
+					for (let i = currentNode.level - 1; i > 0; i--) {
+						const newParentIndex = nodesIndexesMap[currentNode.parentId];
+						const newParentNode = treeNodesList[newParentIndex];
+						currentNode = newParentNode;
+						console.log('newParentNode', newParentNode.name, newParentNode);
+						console.log('newParentNode invisible children', node.childrenNumber + i);
+						newNumberOfInvisibleChildrenMap[currentNode._id] = node.childrenNumber + i;
+
+						if (currentNode.childrenNumber > newNumberOfInvisibleChildrenMap[currentNode._id]) {
+							console.log('parent of invisible!')
+							newVisibilityMap[currentNode._id] = VISIBILITY_STATES.PARENT_OF_VISIBLE;
+						}
+						parents.push(currentNode);
+					}
 				}
-				yield put(TreeActions.setComponentState({nodesVisibilityMap: newVisibilityMap}));
-				console.log('newVisibilityMap', newVisibilityMap);
-				yield put(TreeActions.updateParentVisibility(parentNode));
+
+				yield put(TreeActions.setComponentState({
+					nodesVisibilityMap: newVisibilityMap,
+					numberOfInvisibleChildrenMap: newNumberOfInvisibleChildrenMap
+				}));
+
+				// console.log('newVisibilityMap', newVisibilityMap);
+				// yield put(TreeActions.updateParentVisibility(parentNode));
 			}
 		}
 
