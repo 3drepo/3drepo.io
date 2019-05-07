@@ -54,6 +54,7 @@ export interface ITreeComponentState {
 	nodesSelectionMap: any;
 	expandedNodesMap: any;
 	nodesIndexesMap: any;
+	numberOfInvisibleChildrenMap: any;
 }
 export interface ITreeState {
 	selectedNodes: any;
@@ -73,7 +74,8 @@ export const INITIAL_STATE: ITreeState = {
 		nodesVisibilityMap: {},
 		nodesSelectionMap: {},
 		expandedNodesMap: {},
-		nodesIndexesMap: {}
+		nodesIndexesMap: {},
+		numberOfInvisibleChildrenMap: {}
 	}
 };
 
