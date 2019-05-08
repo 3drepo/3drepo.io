@@ -37,6 +37,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public state = {
 		color: COLOR.RED,
 		brushSize: 5,
+		brushColor: COLOR.RED,
 		sourceImage: ''
 	};
 
@@ -85,8 +86,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public setBrushMode = () => {
 		this.canvasContext.globalCompositeOperation = 'source-over';
-		this.canvasContext.strokeStyle = this.state.color;
+		this.canvasContext.strokeStyle = this.state.brushColor;
 		this.canvasContext.lineWidth = this.state.brushSize;
+
+		this.setState({ color: this.state.brushColor });
 	}
 
 	public setEraseMode = () => {
@@ -144,7 +147,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleColorChange = (color) => {
-		this.setState({color}, this.setBrushMode);
+		this.setState({ color, brushColor: color }, this.setBrushMode);
 	}
 
 	public handleBrushSizeChange = (event) => {
@@ -209,7 +212,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		<Tools
 			innerRef={this.toolsRef}
 			size={this.state.brushSize}
-			color={this.state.color}
+			color={this.state.brushColor}
 			onDrawClick={this.setBrushMode}
 			onEraseClick={this.setEraseMode}
 			onClearClick={this.clearCanvas}

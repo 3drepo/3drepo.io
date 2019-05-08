@@ -83,10 +83,6 @@ export const selectTotalMeshes = createSelector(
 	selectComponentState, (state) => state.totalMeshes
 );
 
-export const selectFieldNames = createSelector(
-	selectGroupsDomain, (state) => state.fieldNames
-);
-
 export const selectCriteriaFieldState = createSelector(
 	selectComponentState, (state) => state.criteriaFieldState
 );

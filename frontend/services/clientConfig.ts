@@ -21,6 +21,7 @@ export class ClientConfigService {
 	// tslint:disable-next-line
 	public captcha_client_key;
 	public legalTemplates;
+	public liveChatLicense;
 	private apiUrls;
 	private apiAlgorithm;
 	private MAP_API;

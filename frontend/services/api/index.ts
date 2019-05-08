@@ -14,5 +14,6 @@ export * from './risks';
 export * from './viewer';
 export * from './groups';
 export * from './meta';
+export * from './issues';
 
 export default API;

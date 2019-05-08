@@ -19,6 +19,7 @@ import {createActions, createReducer} from 'reduxsauce';
 import {pick, get, omit} from 'lodash';
 import {TEAMSPACE_PERMISSIONS} from '../../constants/teamspace-permissions';
 import {PROJECT_ROLES_TYPES} from '../../constants/project-permissions';
+import { sortByField } from '../../helpers/sorting';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
 	fetchTeamspaceDetails: ['teamspace'],
@@ -105,7 +106,8 @@ export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
 	return Object.assign({}, INITIAL_STATE, {
 		users,
 		isPending: false,
-		...pick(teamspace, ['models', 'projects', 'permissions', 'isAdmin', 'fedModels']),
+		...pick(teamspace, ['models', 'permissions', 'isAdmin', 'fedModels']),
+		projects: sortByField(teamspace.projects, { order: 'asc', config: { field: 'name' } }),
 		selectedTeamspace: teamspace.account,
 		isTeamspaceAdmin: teamspace.isAdmin,
 		collaboratorLimit: action.collaboratorLimit

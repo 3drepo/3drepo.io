@@ -39,7 +39,6 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		url: '/viewer/:teamspace/:modelId/:revision?issueId&riskId&notificationId',
 		template: `
 			<model
-				is-lite-mode="vm.isLiteMode"
 				account="vm.$state.params.teamspace"
 				model="vm.$state.params.modelId"
 				branch="vm.$state.params.branch"

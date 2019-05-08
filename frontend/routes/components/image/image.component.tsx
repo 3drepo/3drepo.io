@@ -21,6 +21,7 @@ import { Container, StyledImage } from './image.styles';
 
 interface IProps {
 	src: string;
+	className: string;
 	alt?: string;
 	enablePreview?: boolean;
 	showScreenshotDialog: (config) => void;
@@ -35,9 +36,10 @@ export class Image extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { src, alt, enablePreview } = this.props;
+		const { src, alt, enablePreview, className } = this.props;
+
 		return (
-			<Container enablePreview={enablePreview} onClick={this.handlePreview}>
+			<Container className={className} enablePreview={enablePreview} onClick={this.handlePreview}>
 				<StyledImage src={src} alt={alt} />
 			</Container>
 		);

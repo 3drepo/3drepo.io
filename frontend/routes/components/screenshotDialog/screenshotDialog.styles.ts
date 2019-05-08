@@ -18,32 +18,32 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-  height: 100%;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+	height: 100%;
+	width: 100%;
+	position: relative;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 `;
 
 export const HiddenCanvas = styled.canvas`
-  position: absolute;
-  z-index: -1;
+	position: absolute;
+	z-index: -1;
 `;
 
 export const Canvas = styled.canvas`
-  position: absolute;
-  z-index: 2;
+	position: absolute;
+	z-index: 2;
 `;
 
 export const BackgroundImage = styled.img`
-  width: 100%;
-  text-align: center;
-  margin: auto;
-  padding: 0;
-  position: absolute;
-  bottom: 0;
-  top: 0;
-  user-select: none;
+	width: 100%;
+	text-align: center;
+	margin: auto;
+	padding: 0;
+	position: absolute;
+	bottom: 0;
+	top: 0;
+	user-select: none;
 `;

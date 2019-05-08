@@ -45,7 +45,6 @@ module.exports.DEFAULT_PLUGIN_STRUCTURE = {
 				"issues",
 				"risks",
 				"clip",
-				"bottom-buttons",
 				"docs",
 				"utils",
 				"groups",

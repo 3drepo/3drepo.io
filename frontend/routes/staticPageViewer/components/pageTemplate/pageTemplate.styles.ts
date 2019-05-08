@@ -22,33 +22,33 @@ import { FONT_WEIGHT } from '../../../../styles/fonts';
 export const Container = styled.div``;
 
 export const Header = styled.header`
-  background-color: rgb(12,47,84);
-  color: rgba(255,255,255,0.87);
-  height: 64px;
-  display: flex;
-  align-items: center;
-  position: relative;
-  padding: 0 16px;
+	background-color: rgb(12,47,84);
+	color: rgba(255,255,255,0.87);
+	height: 64px;
+	display: flex;
+	align-items: center;
+	position: relative;
+	padding: 0 16px;
 `;
 
 export const Logo = styled.img`
-  object-fit: contain;
-  width: 150px;
-  position: absolute;
-  transform: translateX(-50%);
-  left: 50%;
+	object-fit: contain;
+	width: 150px;
+	position: absolute;
+	transform: translateX(-50%);
+	left: 50%;
 `;
 
 export const Title = styled.h2`
-  margin: 0;
-  font-weight: ${FONT_WEIGHT.NORMAL};
-  font-size: 20px;
+	margin: 0;
+	font-weight: ${FONT_WEIGHT.NORMAL};
+	font-size: 20px;
 `;
 
 export const Content = styled.div`
-  padding: 10px 50px;
-  overflow: auto;
-  height: calc(100vh - 80px);
-  color: ${COLOR.BLACK_80};
-  background-color: rgb(250,250,250);
+	padding: 10px 50px;
+	overflow: auto;
+	height: calc(100vh - 80px);
+	color: ${COLOR.BLACK_80};
+	background-color: rgb(250,250,250);
 `;

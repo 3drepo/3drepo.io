@@ -29,6 +29,7 @@ import {
 	selectEditMode
 } from './../../../../modules/viewpoints';
 import { Views } from './views.component';
+import { selectIsCommenter } from '../../../../modules/model/permissions.selectors';
 
 const mapStateToProps = createStructuredSelector({
 	viewpoints: selectViewpointsList,
@@ -37,7 +38,8 @@ const mapStateToProps = createStructuredSelector({
 	isPending: selectIsPending,
 	editMode: selectEditMode,
 	searchQuery: selectSearchQuery,
-	searchEnabled: selectSearchEnabled
+	searchEnabled: selectSearchEnabled,
+	isCommenter: selectIsCommenter
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

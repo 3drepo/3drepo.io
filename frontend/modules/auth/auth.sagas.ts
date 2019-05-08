@@ -23,7 +23,6 @@ import { CurrentUserActions } from '../currentUser';
 import { getAvatarUrl } from '../currentUser/currentUser.sagas';
 import { DialogActions } from '../dialog';
 import { AuthActions, AuthTypes } from './auth.redux';
-import { SnackbarActions } from '../snackbar';
 import { verificationMessages, forgotPasswordMessages, changePasswordMessages } from './auth.helpers';
 
 export function* login({ username, password }) {

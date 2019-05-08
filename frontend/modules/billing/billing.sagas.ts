@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, all, select, take } from 'redux-saga/effects';
+import { put, takeLatest, all, select } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { BillingTypes, BillingActions, selectLicencesInfo, dialogMessages } from './index';
@@ -124,7 +124,7 @@ export function* changeSubscription({ teamspace, subscriptionData }) {
 
 export function* downloadInvoice({ teamspace, invoiceNo }) {
 	try {
-		const url = `${ClientConfig.apiUrls.all[0]}/${teamspace}/invoices/${invoiceNo}.pdf`;
+		const url = yield API.getAPIUrl(`${teamspace}/invoices/${invoiceNo}.pdf`);
 		window.open(url, '_blank');
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('download', 'invoice', e));

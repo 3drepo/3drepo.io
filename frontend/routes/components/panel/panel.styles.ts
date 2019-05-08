@@ -21,50 +21,49 @@ import Paper from '@material-ui/core/Paper';
 import { FONT_WEIGHT, COLOR } from '../../../styles';
 
 export const Container = styled(Paper)`
-  && {
-    background: #fafafa;
-    height: ${(props: any) => props.height || 'auto'};
-    width: ${(props: any) => props.width || 'auto'};
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
+	&& {
+		background: #fafafa;
+		height: ${(props: any) => props.height || 'auto'};
+		width: ${(props: any) => props.width || 'auto'};
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
 `;
 
 export const Title = styled.div`
-  font-size: 20px;
-  font-weight: ${FONT_WEIGHT.NORMAL};
-  height: 40px;
-  overflow: hidden;
-  min-height: 40px;
-  border-radius: 4px 4px 0 0;
-  background-color: ${COLOR.PRIMARY_MAIN};
-  color: rgba(255,255,255,0.87);
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 0 16px;
-  position: relative;
+	font-size: 20px;
+	font-weight: ${FONT_WEIGHT.NORMAL};
+	height: 40px;
+	overflow: hidden;
+	min-height: 40px;
+	border-radius: 4px 4px 0 0;
+	background-color: ${COLOR.PRIMARY_MAIN};
+	color: rgba(255,255,255,0.87);
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	padding: 0 16px;
+	position: relative;
 `;
 
 export const Content = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 `;
 
 export const ContentWrapper = styled.div`
-  height: 100%;
-  white-space: pre-line;
-  overflow: ${(props: any) => props.hiddenScrollbars ? 'hidden' : 'auto'};
-  display: flex;
-  flex-direction: column;
-` as any;
+	height: 100%;
+	white-space: pre-line;
+	overflow: ${(props: any) => props.hiddenScrollbars ? 'hidden' : 'auto'};display: flex;
+	flex-direction: column;
+`as any;
 
 export const LoaderContainer = styled.div`
-  position: relative;
-  padding-top: 100px;
-  display: flex;
-  justify-content: center;
+	position: relative;
+	padding-top: 100px;
+	display: flex;
+	justify-content: center;
 `;

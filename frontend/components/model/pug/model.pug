@@ -4,11 +4,12 @@
 	#project-viewport-container.row(tabindex="0", tdr-focus="true")
 
 	measure(
-		ng-if="!vm.isLiteMode"
 		id='measure-tool'
 	 	account='vm.account'
 		model='vm.model'
 		settings='vm.settings')
+
+	close-focus-mode-button
 
 	#modelUI
 		revisions(
@@ -18,7 +19,6 @@
 			revision="vm.revision")
 
 		panel#leftPanel(
-			is-lite-mode="vm.isLiteMode"
 			account="vm.account"
 			model="vm.model"
 			branch="vm.branch"
@@ -30,7 +30,6 @@
 			set-initial-selected-objects="vm.setInitialSelectedObjects({selectedObjects: selectedObjects})")
 
 		panel#rightPanel(
-			ng-if="!vm.isLiteMode"
 			account="vm.account"
 			model="vm.model"
 			branch="vm.branch"
@@ -38,13 +37,10 @@
 			position="right"
 			style="pointer-events:{{vm.pointerEvents}}")
 
-		right-panel(
-			ng-if="!vm.isLiteMode"
-			style="pointer-events:{{vm.pointerEvents}}")
-
-		bottom-buttons(
-			ng-if="!vm.isLiteMode"
-			style="pointer-events:{{vm.pointerEvents}}")
+		toolbar(
+			style="pointer-events:{{vm.pointerEvents}}"
+			teamspace="vm.account"
+			model="vm.model")
 
 error-dialog(
 	error-message="vm.errorMessage"

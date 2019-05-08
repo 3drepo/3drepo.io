@@ -18,10 +18,10 @@
 import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
-
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 
-export const StyledFormControl = styled(FormControl)``;
+export const StyledFormControl = styled(FormControl)`
+`;
 
 export const Container = styled.div`
 	display: flex;
@@ -59,8 +59,8 @@ export const FieldsRow = styled(Grid)`
 
 	${TextFieldStyles.Container},
 	${StyledFormControl} {
+		flex: ${(props: any) => props.flex ? props.flex : 1};
 		margin: 1px 0;
-		flex: 1;
 
 		&:nth-child(2n + 1) {
 			margin-right: 25px;
@@ -70,7 +70,7 @@ export const FieldsRow = styled(Grid)`
 	.select {
 		color: inherit;
 	}
-`;
+` as any;
 
 export const DescriptionImage = styled.div`
 	max-height: 250px;

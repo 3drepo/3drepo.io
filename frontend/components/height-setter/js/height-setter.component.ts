@@ -56,28 +56,48 @@ class HeightSetterController implements ng.IController, IBindings {
 		this.initialTimeout = this.$timeout(() => {
 			this.reactElement = this.$element.children().children();
 			this.container = this.reactElement.children();
+			if (!this.container.length) {
+				return;
+			}
+
 			this.headerHeight = this.container.children()[0].clientHeight;
 			this.content = angular.element(this.container.children()[1]) as any;
 
-			this.content.css('max-height', `${this.contentData.height}px`);
+			const omittedElement = this.reactElement[0].querySelector('.height-catcher-omitted');
+			const paddingHeight = 8;
+			const omittedHeight = omittedElement ? omittedElement.clientHeight - paddingHeight : 0;
+			this.content.css('max-height', `${this.contentData.height - omittedHeight}px`);
+
 			this.observer.observe(this.content[0], {
-				attributes: false,
+				attributes: true,
 				childList: true,
 				subtree: true,
 				characterData: true
 			});
 
 			this.removeHeightWatch = this.$scope.$watch(() => this.contentData.height, (newValue) => {
-				this.content.css('max-height', `${newValue}px`);
+				this.content.css('max-height', `${newValue - omittedHeight}px`);
 			});
 		});
 	}
 
 	get contentHeight() {
+		if (!this.content) {
+			return 0;
+		}
 		const contentContainer = this.content[0].querySelector('.height-catcher');
-		const prevContentHeight = contentContainer.previousSibling && contentContainer.previousSibling.offsetHeight;
-		const footerHeight = contentContainer.nextSibling && contentContainer.nextSibling.offsetHeight;
-		return contentContainer.scrollHeight + (prevContentHeight || 0) + (footerHeight || 0);
+		let sibCheck = contentContainer.previousSibling;
+		let extraHeight = 0;
+		while (sibCheck) {
+			extraHeight += sibCheck.offsetHeight;
+			sibCheck = sibCheck.previousSibling;
+		}
+		sibCheck = contentContainer.nextSibling;
+		while (sibCheck) {
+			extraHeight += sibCheck.offsetHeight;
+			sibCheck = sibCheck.nextSibling;
+		}
+		return contentContainer.scrollHeight + extraHeight;
 	}
 
 	public $onInit(): void {
@@ -94,8 +114,8 @@ class HeightSetterController implements ng.IController, IBindings {
 				contentItem: this.contentData,
 				height: requestedHeight
 			});
-		});
-	}, 100);
+		}, 250);
+	}, 100, { leading: true });
 
 	public handleElementChange = (mutationsList) => {
 		const shouldUpdateHeight = mutationsList

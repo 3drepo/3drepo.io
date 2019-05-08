@@ -20,11 +20,16 @@ import { COLOR } from '../../../../styles/colors';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 
+interface IViewerPanelFooter {
+	padding?: string;
+}
+
 export const TitleContainer = styled.div`
 	display: flex;
 	justify-content: space-between;
 	margin: 0 -16px;
 	width: calc(100% + 32px);
+	height: inherit;
 
 	button {
 		color: ${COLOR.WHITE};
@@ -60,22 +65,25 @@ export const TitleIcon = styled.div`
 
 export const ViewerPanelContent = styled.div`
 	background-color: ${COLOR.WHITE_87};
-	padding: ${(props: any) => props.padding ? props.padding  : '24px' };
 	overflow: auto;
-` as any;
+`;
+
+export const LoaderContainer = styled(ViewerPanelContent)`
+	padding: 24px;
+`;
 
 export const ViewerPanelFooter = styled(Grid).attrs({
 	direction: 'row',
 	container: true,
 	wrap: 'nowrap'
-})`
+})<IViewerPanelFooter>`
 	background-color: ${COLOR.WHITE};
-	padding: ${(props: any) => props.padding ? props.padding : '0 16px' };
+	padding: ${(props) => props.padding ? props.padding : '0 16px' };
 	border-top: 1px solid ${COLOR.BLACK_20};
 	flex: none;
 	min-height: 65px;
 	font-size: 14px;
-` as any;
+`;
 
 export const ViewerPanelButton = styled(Button)`
 	&& {

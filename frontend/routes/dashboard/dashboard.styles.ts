@@ -21,45 +21,45 @@ import * as PanelStyles from '../components/panel/panel.styles';
 import { media } from '../../styles';
 
 export const Container = styled(Grid)`
-  && {
-    padding: 30px 50px 60px;
-    height: 100%;
-    overflow: hidden;
-    max-height: 100%;
-    flex-wrap: nowrap;
-    position: absolute;
+	&& {
+		padding: 30px 50px 60px;
+		height: 100%;
+		overflow: hidden;
+		max-height: 100%;
+		flex-wrap: nowrap;
+		position: absolute;
 
-    ${media.tablet`
-      height: auto;
-      padding: 30px 30px 60px 30px;
-      flex-direction: column;
-    `}
-  }
+		${media.tablet`
+			height: auto;
+			padding: 30px 30px 60px 30px;
+			flex-direction: column;
+		`}
+	}
 `;
 
 export const Sidebar = styled(Grid)`
-  && {
-    margin-right: 50px;
+	&& {
+		margin-right: 50px;
 
-    ${media.tablet`
-      margin-right: 0;
-      margin-bottom: 30px;
+		${media.tablet`
+			margin-right: 0;
+			margin-bottom: 30px;
 
-      & > * {
-        width: 100%;
-      }
-    `}
-  }
+			& > * {
+				width: 100%;
+			}
+		`}
+	}
 `;
 
 export const Content = styled(Grid)`
-  && {
-    flex: 1;
-    overflow: hidden;
-    filter: drop-shadow(0 2px 1px rgba(0,0,0,0.25));
-  }
+	&& {
+		flex: 1;
+		overflow: hidden;
+		filter: drop-shadow(0 2px 1px rgba(0,0,0,0.25));
+	}
 
-  ${PanelStyles.Container} {
-    box-shadow: none;
-  }
+	${PanelStyles.Container} {
+		box-shadow: none;
+	}
 `;

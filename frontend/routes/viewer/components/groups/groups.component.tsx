@@ -396,10 +396,10 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent className="height-catcher" padding="0">
-			{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredGroups.length)}
-			{this.renderNotFound(this.props.searchEnabled && !this.state.filteredGroups.length)}
-			{this.renderGroupsList(this.state.filteredGroups.length)}
+			<ViewerPanelContent className="height-catcher">
+				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredGroups.length)}
+				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredGroups.length)}
+				{this.renderGroupsList(this.state.filteredGroups.length)}
 			</ViewerPanelContent>
 			<ViewerPanelFooter alignItems="center" justify="space-between">
 				<Summary>

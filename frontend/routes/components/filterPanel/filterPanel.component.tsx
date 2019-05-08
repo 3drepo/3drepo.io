@@ -18,15 +18,17 @@
 import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
 import * as dayjs from 'dayjs';
-import { omit } from 'lodash';
-
-import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
+import { omit, isNil, uniqBy, pick, keyBy } from 'lodash';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import CollapseIcon from '@material-ui/icons/ExpandMore';
 import ExpandIcon from '@material-ui/icons/ChevronRight';
+
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
+
+import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { Highlight } from '../highlight/highlight.component';
-import { ENTER_KEY } from '../../../constants/keys';
+import { ENTER_KEY, BACKSPACE } from '../../../constants/keys';
 import { FiltersMenu } from './components/filtersMenu/filtersMenu.component';
 import {
 	Container,
@@ -38,7 +40,8 @@ import {
 	FiltersButton,
 	ButtonContainer,
 	StyledIconButton,
-	StyledMoreIcon,
+	MoreIcon,
+	CopyIcon,
 	ButtonWrapper
 } from './filterPanel.styles';
 import { compareStrings } from '../../../helpers/searching';
@@ -50,13 +53,13 @@ export const DATA_TYPES = {
 	QUERY: 3
 };
 
-interface IFilter {
+export interface IFilter {
 	values: any;
-	label: string;
+	label?: string;
 	type?: number;
 }
 
-interface ISelectedFilter {
+export interface ISelectedFilter {
 	value: any;
 	label: string;
 	relatedField: string;
@@ -77,32 +80,57 @@ interface IState {
 	filtersOpen: boolean;
 }
 
-const MenuButton = ({ IconProps, Icon, ...props }) => (
+const getMenuButton = (InitialIcon) => ({ IconProps, Icon, ...props }: { Icon?, IconProps: any }) => (
 	<ButtonWrapper>
-	  <StyledIconButton
-	    {...props}
-	    aria-label="Show filters menu"
-	    aria-haspopup="true"
-	  >
-	    <StyledMoreIcon {...IconProps} />
-	  </StyledIconButton>
+		<StyledIconButton
+			{...props}
+			aria-label="Show filters menu"
+			aria-haspopup="true"
+		>
+			<InitialIcon {...IconProps} />
+		</StyledIconButton>
 	</ButtonWrapper>
 );
 
+const CopyButton = getMenuButton(CopyIcon) as any;
+const MoreButton = getMenuButton(MoreIcon);
+
 const getSuggestionValue = (suggestion) => suggestion.name;
 
-const mapFiltersToSuggestions = (filters) => {
-	return filters
-		.filter((suggestion) => suggestion.type !== DATA_TYPES.DATE)
-		.map((filter) => filter.values.map((value) => {
-			return {
-				name: `${filter.label}:${value.label}`,
-				label: filter.label,
-				relatedField: filter.relatedField,
-				type: filter.type,
-				value
-			};
-	})).flat();
+const getFilterName = (filterLabel, valueLabel) => {
+	const basicName = filterLabel ? `${filterLabel}: ` : '';
+	return `${basicName}${valueLabel}`;
+};
+
+const getSelectedFilterLabel = (filter) => {
+	if (filter.type !== DATA_TYPES.QUERY) {
+		return `${filter.label}: ${filter.value.label}`;
+	}
+
+	return filter.label || filter.value.label;
+};
+
+const mapFiltersToSuggestions = (filters, selectedFilters) => {
+	const selectedFiltersMap = keyBy(selectedFilters, ({ label, value }) => `${label}:${value.label}`);
+	return filters.reduce((suggestions, currentFilter) => {
+		if (currentFilter.type !== DATA_TYPES.DATE) {
+			for (let index = 0; index < currentFilter.values.length; index++) {
+				const value = currentFilter.values[index];
+				const name = `${currentFilter.label}:${value.label}`;
+
+				if (!selectedFiltersMap[name]) {
+					suggestions.push({
+						name: getFilterName(currentFilter.label, value.label),
+						label: currentFilter.label,
+						relatedField: currentFilter.relatedField,
+						type: currentFilter.type,
+						value
+					});
+				}
+			}
+		}
+		return suggestions;
+	}, []);
 };
 
 export class FilterPanel extends React.PureComponent<IProps, IState> {
@@ -110,7 +138,8 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		selectedFilters: [],
 		value: '',
 		suggestions: [],
-		filtersOpen: false
+		filtersOpen: false,
+		removableFilterIndex: null
 	};
 
 	public static defaultProps = {
@@ -122,12 +151,20 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount = () => {
 		this.setState({ selectedFilters: this.props.selectedFilters });
-		this.filterSuggestions = mapFiltersToSuggestions(this.props.filters);
+		this.filterSuggestions = mapFiltersToSuggestions(
+			this.props.filters,
+			this.state.selectedFilters
+		);
 	}
 
-	public componentDidUpdate(prevProps) {
-		if (this.props.filters.length !== prevProps.filters.length) {
-			this.filterSuggestions = mapFiltersToSuggestions(this.props.filters);
+	public componentDidUpdate(prevProps, prevState) {
+		const filtersChanged = this.props.filters.length !== prevProps.filters.length;
+		const selectedFiltersChanged = this.state.selectedFilters.length !== prevState.selectedFilters.length;
+		if (filtersChanged || selectedFiltersChanged) {
+			this.filterSuggestions = mapFiltersToSuggestions(
+				this.props.filters,
+				this.state.selectedFilters
+			);
 		}
 	}
 
@@ -147,18 +184,22 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		}, this.handleFiltersChange);
 	}
 
-	public onSelectDateFilter = (dateFilter, child, found) => {
+	public onSelectDateFilter = (dateFilter, child) => {
 		dateFilter.label = child.label;
 		dateFilter.value.label = dayjs(child.date).format('DD/MM/YYYY');
+		const selectedFilterIndex = this.state.selectedFilters.findIndex((filter) => filter.value.value === child.value);
 
-		if (!found) {
+		if (selectedFilterIndex > -1) {
+			this.setState((prevState) => {
+				const newFilters = [...prevState.selectedFilters];
+				newFilters[selectedFilterIndex].label = child.label;
+				newFilters[selectedFilterIndex].value.label = dayjs(child.date).format('DD/MM/YYYY');
+				return newFilters as any;
+			}, this.handleFiltersChange);
+		} else {
 			this.setState((prevState) => ({
 				selectedFilters: [...prevState.selectedFilters, dateFilter]
 			}), this.handleFiltersChange);
-		} else {
-			const selectedFilters = { ...this.state.selectedFilters };
-			selectedFilters[dateFilter.label].value.label = dayjs(child.date).format('DD/MM/YYYY');
-			this.setState({ selectedFilters }, this.handleFiltersChange);
 		}
 	}
 
@@ -174,7 +215,8 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		};
 
 		if (parent.type === DATA_TYPES.DATE && child.date) {
-			this.onSelectDateFilter(newSelectedFilter, child, found);
+			newSelectedFilter.value.date = child.date;
+			this.onSelectDateFilter(newSelectedFilter, child);
 		}
 
 		if (!found && parent.type !== DATA_TYPES.DATE) {
@@ -202,7 +244,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		</MenuItem>
 	)
 
-	public getSuggestions = (value) => {
+	public getSuggestions = (value, selectedFilters) => {
 		const inputValue = value.trim().toLowerCase();
 		const inputLength = inputValue.length;
 
@@ -218,11 +260,12 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 		try {
 			const newSelectedFilters = JSON.parse(event.clipboardData.getData('text'));
+
 			this.setState((prevState) => ({
-				selectedFilters: [
+				selectedFilters: uniqBy([
 					...prevState.selectedFilters,
 					...newSelectedFilters
-				]
+				], (filter) => JSON.stringify(filter))
 			}));
 		} catch (error) {
 			console.error('Unsupported filters format');
@@ -270,6 +313,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 	public handleFiltersChange = () => {
 		this.props.onChange(this.state.selectedFilters);
+		this.resetRemovableFilterIndex();
 	}
 
 	public onSearchSubmit = (event) => {
@@ -287,6 +331,34 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 				selectedFilters: [...prevState.selectedFilters, newFilter],
 				value: ''
 			}), this.handleFiltersChange);
+		}
+	}
+
+	public resetRemovableFilterIndex = () => {
+		this.setState({ removableFilterIndex: null } as any);
+	}
+
+	public onBackspaceClick = (event) => {
+		if (event.key === BACKSPACE) {
+			const changes = {
+				removableFilterIndex: null
+			} as any;
+
+			if (!event.target.value.length) {
+				if (!isNil(this.state.removableFilterIndex)) {
+					changes.selectedFilters = [...this.state.selectedFilters],
+					changes.selectedFilters.pop();
+					changes.removableFilterIndex = changes.selectedFilters.length - 1;
+					this.setState(changes, () => {
+						this.props.onChange(this.state.selectedFilters);
+					});
+				} else {
+					changes.removableFilterIndex = this.state.selectedFilters.length - 1;
+					this.setState(changes);
+				}
+			}
+		} else if (!event.target.value.length) {
+			this.resetRemovableFilterIndex();
 		}
 	}
 
@@ -310,7 +382,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 	public onSuggestionsFetchRequested = ({ value }) => {
 		this.setState({
-			suggestions: this.getSuggestions(value)
+			suggestions: this.getSuggestions(value, this.state.selectedFilters)
 		});
 	}
 
@@ -342,25 +414,26 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public renderSelectedFilters = () => (
-		<SelectedFilters
-			empty={!this.state.selectedFilters.length}
-			filtersOpen={this.state.selectedFilters.length && this.state.filtersOpen}
-		>
-			{this.state.selectedFilters.length ? this.renderFilterButton() : null}
+	public renderSelectedFilters = () => {
+		const { selectedFilters, filtersOpen, removableFilterIndex } = this.state;
+		return (
+			<SelectedFilters
+				empty={!selectedFilters.length}
+				filtersOpen={selectedFilters.length && filtersOpen}
+			>
+				{selectedFilters.length ? this.renderFilterButton() : null}
 
-			{this.state.selectedFilters.map(
-				(filter, index) => (
+				{selectedFilters.map((filter, index) => (
 					<StyledChip
 						key={index}
-						label={filter.type !== DATA_TYPES.QUERY ? `${filter.label}: ${filter.value.label}` : filter.label}
+						color={index === removableFilterIndex ? 'primary' : 'default'}
+						label={getSelectedFilterLabel(filter)}
 						onDelete={() => this.onDeselectFilter(filter)}
 					/>
-				)
-			)
-			}
-		</SelectedFilters>
-	)
+				))}
+			</SelectedFilters>
+		);
+	}
 
 	public handleKeyUp = () => {
 		const list = document.querySelector('.react-autosuggest__suggestions-list');
@@ -381,10 +454,18 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public renderCopyButton = renderWhenTrue(() => (
+		<CopyToClipboard text={JSON.stringify(this.props.selectedFilters)}>
+			<ButtonContainer>
+				<CopyButton IconProps={{size: 'small'}} disabled={!this.props.selectedFilters.length} />
+			</ButtonContainer>
+		</CopyToClipboard>
+	));
+
 	public renderFiltersMenuButton = renderWhenTrue(() => (
 		<ButtonContainer>
 			<ButtonMenu
-				renderButton={MenuButton}
+				renderButton={MoreButton}
 				renderContent={this.renderFiltersMenu}
 				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
@@ -393,13 +474,20 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		</ButtonContainer>
 	));
 
+	public get onlyCopyButton() {
+		const onlyQueryFilters = this.props.filters.every((filter) => filter.type === DATA_TYPES.QUERY);
+		return onlyQueryFilters;
+	}
+
 	public render() {
-		const { value, suggestions } = this.state;
+		const { value, suggestions, selectedFilters, filtersOpen } = this.state;
+		const { hideMenu, filters } = this.props;
+
 		return (
-			<Container filtersOpen={this.state.selectedFilters.length && this.state.filtersOpen}>
+			<Container filtersOpen={selectedFilters.length && filtersOpen}>
 				{this.renderSelectedFilters()}
 
-				<InputContainer menuHidden={this.props.hideMenu}>
+				<InputContainer menuHidden={hideMenu}>
 					<Autosuggest
 						ref={this.handleAutoSuggestMount}
 						suggestions={suggestions}
@@ -413,6 +501,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 							value,
 							onChange: this.onSearchChange,
 							onKeyPress: this.onSearchSubmit,
+							onKeyDown: this.onBackspaceClick,
 							inputRef: (node) => {
 								this.popperNode = node;
 							}
@@ -420,7 +509,8 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 						renderSuggestionsContainer={this.renderSuggestionsContainer}
 						onSuggestionSelected={this.handleNewFilterSubmit}
 					/>
-					{this.renderFiltersMenuButton(!this.props.hideMenu)}
+					{this.renderCopyButton((!hideMenu && !filters.length) || this.onlyCopyButton)}
+					{this.renderFiltersMenuButton(!hideMenu && filters.length && !this.onlyCopyButton)}
 				</InputContainer>
 
 			</Container>

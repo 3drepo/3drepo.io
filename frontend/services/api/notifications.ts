@@ -36,6 +36,15 @@ export const patchNotification = (id, data): Promise<any> => {
 };
 
 /**
+ * Patch all notifications
+ *
+ * @returns {*|promise}
+ */
+export const patchAllNotifications = (data): Promise<any> => {
+	return api.patch(`notifications`, data);
+};
+
+/**
  * Get a particular notification
  *
  * @returns {*|promise}

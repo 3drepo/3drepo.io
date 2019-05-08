@@ -401,6 +401,36 @@ describe("Issues", function () {
 			], done);
 		});
 
+		it("change pin position  should succeed", function(done) {
+			const issue = {...baseIssue,"name":"Issue test", position:[0,1,2]};
+			let issueId;
+			const position = { position: [1,-1,9] };
+			async.series([
+				function(done) {
+					agent.post(`/${username}/${model}/issues.json`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							return done(err);
+
+						});
+				},
+				function(done) {
+					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+						.send(position)
+						.expect(200, done);
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/issues/${issueId}.json`)
+						.expect(200, function(err, res) {
+							expect(res.body.position).to.deep.equal(position.position);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+
 		it("change status should succeed and create system comment", function(done) {
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue, { status: "open"});
@@ -427,7 +457,6 @@ describe("Issues", function () {
 							expect(res.body.status === status.status);
 							expect(res.body.comments[0].action).to.deep.equal({
 								property: "status",
-								propertyText: "Status",
 								from: "open",
 								to: "in progress"
 							});
@@ -464,7 +493,6 @@ describe("Issues", function () {
 							expect(res.body.topic_type === data.topic_type);
 							expect(res.body.comments[0].action).to.deep.equal({
 								property: "topic_type",
-								propertyText: "Type",
 								from: "ru123",
 								to: "abc123"
 							});
@@ -501,7 +529,6 @@ describe("Issues", function () {
 							expect(res.body.assigned_roles).to.deep.equal(data.assigned_roles);
 							expect(res.body.comments[0].action).to.deep.equal({
 								property: "assigned_roles",
-								propertyText: "Assigned",
 								from: "jobA",
 								to: "jobB"
 							});
@@ -1088,48 +1115,6 @@ describe("Issues", function () {
 				], done);
 			});
 		});
-
-		// it('change or commenting should fail if status is closed', function(done){
-
-		// 	let issue = Object.assign({"name":"Issue test"}, baseIssue, {status: 'closed'});
-		// 	let issueId;
-
-		// 	async.series([
-		// 		function(done){
-		// 			agent.post(`/${username}/${model}/issues.json`)
-		// 			.send(issue)
-		// 			.expect(200 , function(err, res){
-		// 				issueId = res.body._id;
-		// 				return done(err);
-
-		// 			});
-		// 		},
-		// 		function(done){
-		// 			agent.put(`/${username}/${model}/issues/${issueId}.json`)
-		// 			.send({ desc: 'desc'})
-		// 			.expect(400, function(err, res){
-		// 				expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
-		// 				done(err);
-		// 			});
-		// 		},
-		// 		function(done){
-		// 			agent.put(`/${username}/${model}/issues/${issueId}.json`)
-		// 			.send({ topic_type: 'desc'})
-		// 			.expect(400, function(err, res){
-		// 				expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
-		// 				done(err);
-		// 			});
-		// 		},
-		// 		function(done){
-		// 			agent.put(`/${username}/${model}/issues/${issueId}.json`)
-		// 			.send({ priority: 'high'})
-		// 			.expect(400, function(err, res){
-		// 				expect(res.body.value).to.equal(responseCodes.ISSUE_CLOSED_ALREADY.value);
-		// 				done(err);
-		// 			});
-		// 		},
-		// 	], done);
-		// });
 
 		describe("and then sealing a comment", function() {
 

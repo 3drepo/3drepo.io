@@ -20,20 +20,20 @@ import Grid from '@material-ui/core/Grid';
 import { COLOR } from '../../../styles';
 
 const BaseStyles = styled(Grid)`
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  width: 100%;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	width: 100%;
 `;
 
 export const Name = styled(BaseStyles)`
-  color: ${COLOR.BLACK_60};
+	color: ${COLOR.BLACK_60};
 	font-size: 14px;
-  line-height: 20px;
+	line-height: 20px;
 `;
 
 export const Detail = styled(BaseStyles)`
-  font-size: 10px;
-  color: ${COLOR.BLACK_40};
-  line-height: 13px;
+	font-size: 10px;
+	color: ${COLOR.BLACK_40};
+	line-height: 13px;
 `;

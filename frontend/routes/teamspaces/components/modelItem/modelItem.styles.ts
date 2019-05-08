@@ -24,69 +24,69 @@ import * as RowMenu from '../rowMenu/rowMenu.styles';
 const MODEL_HOVER_COLOR = COLOR.GRAY;
 
 export const Container = styled.div`
-  padding-left: 112px;
-  padding-right: 13px;
-  font-size: 14px;
-  font-weight: ${FONT_WEIGHT.SEMIBOLD};
-  color: ${COLOR.BLACK_60};
-  transition: background 200ms ease-in-out;
+	padding-left: 112px;
+	padding-right: 13px;
+	font-size: 14px;
+	font-weight: ${FONT_WEIGHT.SEMIBOLD};
+	color: ${COLOR.BLACK_60};
+	transition: background 200ms ease-in-out;
 
-  ${RowMenu.StyledGrow} {
-    position: absolute;
-    box-shadow: -10px 0 26px -6px transparent;
-    right: 45px;
-    width: auto;
-    transition: background 200ms ease-in-out;
-  }
+	${RowMenu.StyledGrow} {
+		position: absolute;
+		box-shadow: -10px 0 26px -6px transparent;
+		right: 45px;
+		width: auto;
+		transition: background 200ms ease-in-out;
+	}
 
-  &:hover,
-  &:hover ${RowMenu.StyledGrow} {
-    background: ${MODEL_HOVER_COLOR};
-    box-shadow: -10px 0 20px -6px ${MODEL_HOVER_COLOR};
-  }
+	&:hover,
+	&:hover ${RowMenu.StyledGrow} {
+		background: ${MODEL_HOVER_COLOR};
+		box-shadow: -10px 0 20px -6px ${MODEL_HOVER_COLOR};
+	}
 `;
 
 export const SubmodelsList = styled.div`
-  color: ${COLOR.BLACK_30};
-  font-weight: ${FONT_WEIGHT.NORMAL};
-  padding-right: 30px;
-  line-height: 25px;
-  padding-bottom: 10px;
-  font-size: 12px;
-  margin-top: -10px;
+	color: ${COLOR.BLACK_30};
+	font-weight: ${FONT_WEIGHT.NORMAL};
+	padding-right: 30px;
+	line-height: 25px;
+	padding-bottom: 10px;
+	font-size: 12px;
+	margin-top: -10px;
 `;
 
 export const Time = styled.div`
-  color: ${COLOR.BLACK_40};
-  font-weight: ${FONT_WEIGHT.NORMAL};
-  margin-right: 8px;
-  font-size: 12px;
+	color: ${COLOR.BLACK_40};
+	font-weight: ${FONT_WEIGHT.NORMAL};
+	margin-right: 8px;
+	font-size: 12px;
 `;
 
 export const LinkedName = styled.span`
-  cursor: pointer;
+	cursor: pointer;
 
-  &:hover {
-    text-decoration: underline;
-  }
-  width: 100%;
+	&:hover {
+		text-decoration: underline;
+	}
+	width: 100%;
 `;
 
 export const Name = styled.span`
-  color: ${COLOR.BLACK_40};
-  width: 100%;
+	color: ${COLOR.BLACK_40};
+	width: 100%;
 `;
 
 export const Status = styled.span`
-  align-items: center;
-  justify-content: flex-end;
-  display: flex;
-  width: 100%;
-  font-weight: 400;
-  color: ${COLOR.BLACK_40};
-  font-size: 12px;
+	align-items: center;
+	justify-content: flex-end;
+	display: flex;
+	width: 100%;
+	font-weight: 400;
+	color: ${COLOR.BLACK_40};
+	font-size: 12px;
 `;
 
 export const TimeWrapper = styled(Grid)`
-  max-width: ${(props: any) => props.pending ? '48px' : '150px'};
+	max-width: ${(props: any) => props.pending ? '48px' : '150px'};
 ` as any;

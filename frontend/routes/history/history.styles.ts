@@ -18,6 +18,6 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-  height: 100%;
-  background-color: rgb(250, 250, 250);
+	height: 100%;
+	background-color: rgb(250, 250, 250);
 `;

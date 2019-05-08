@@ -19,7 +19,7 @@ import styled from 'styled-components';
 import { FONT_WEIGHT } from '../../../styles';
 
 export const Mark = styled.mark`
-  color: #06563c;
-  font-weight: ${FONT_WEIGHT.SEMIBOLD};
-  background: none;
+	color: #06563c;
+	font-weight: ${FONT_WEIGHT.SEMIBOLD};
+	background: none;
 `;

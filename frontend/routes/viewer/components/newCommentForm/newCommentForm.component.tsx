@@ -26,7 +26,6 @@ import ReportProblemIcon from '@material-ui/icons/ReportProblem';
 import ShortTextIcon from '@material-ui/icons/ShortText';
 
 import { Viewer } from '../../../../services/viewer/viewer';
-import { Measure } from '../../../../services/viewer/measure';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
@@ -59,13 +58,13 @@ interface IProps {
 	screenshot?: string;
 	viewpoint?: any;
 	hideComment?: boolean;
-	hidePin?: boolean;
 	hideScreenshot?: boolean;
 	showResidualRiskInput?: boolean;
 	onSave: (commentData) => void;
 	onTakeScreenshot: (screenshot) => void;
-	onChangePin: (pin) => void;
 	showScreenshotDialog: (options) => void;
+	setDisabled: (isDisabled) => void;
+	deactivateMeasure: () => void;
 }
 
 interface IState {
@@ -77,8 +76,6 @@ interface IState {
 const NewCommentSchema = Yup.object().shape({
 	comment: Yup.string().max(220)
 });
-
-const NEW_PIN_ID = 'newPinId';
 
 export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	public state = {
@@ -113,8 +110,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 
 	public componentWillUnmount() {
 		Viewer.setPinDropMode(false);
-		Measure.setDisabled(false);
-		this.togglePinListeners(false);
+		this.props.setDisabled(false);
 	}
 
 	public handleSave = (values, form) => {
@@ -140,64 +136,11 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		this.setState({ isResidualRiskInputActive });
 	}
 
-	public handleChangePin = () => {
-		const isPinActive = !this.state.isPinActive;
-
-		if (isPinActive) {
-			Viewer.setPinDropMode(true);
-			Measure.deactivateMeasure();
-			Measure.setDisabled(true);
-			this.togglePinListeners(true);
-		} else {
-			Viewer.setPinDropMode(false);
-			Measure.setDisabled(false);
-			this.togglePinListeners(false);
-		}
-
-		this.setState({ isPinActive });
-	}
-
-	public togglePinListeners = (enabled: boolean) => {
-		const resolver = enabled ? 'on' : 'off';
-
-		Viewer[resolver](VIEWER_EVENTS.PICK_POINT, this.handlePickPoint);
-	}
-
-	public handlePickPoint = ({ trans, position, normal, selectColour, id }) => {
-		if (id) {
-			return null;
-		}
-
-		if (trans) {
-			position = trans.inverse().multMatrixPnt(position);
-		}
-
-		if (this.props.onChangePin) {
-			this.props.onChangePin({
-				id: NEW_PIN_ID,
-				pickedNorm: normal,
-				pickedPos: position,
-				selectedObjectId: id,
-				selectColor: selectColour
-			});
-		}
-	}
-
 	public renderScreenshotButton = renderWhenTrue(() => (
 		<TooltipButton
 			Icon={CameraIcon}
 			label="Take a screenshot"
 			action={this.handleNewScreenshot}
-			disabled={!this.props.canComment}
-		/>
-	));
-
-	public renderPinButton = renderWhenTrue(() => (
-		<TooltipButton
-			Icon={PinDropIcon}
-			color={this.getButtonColor(this.state.isPinActive)}
-			label="Add a pin"
-			action={this.handleChangePin}
 			disabled={!this.props.canComment}
 		/>
 	));
@@ -279,7 +222,6 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		const {
 			hideComment,
 			hideScreenshot,
-			hidePin,
 			showResidualRiskInput,
 			innerRef,
 			canComment
@@ -300,7 +242,6 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 						<Actions>
 							<ActionsGroup>
 								{this.renderScreenshotButton(!hideScreenshot)}
-								{this.renderPinButton(!hidePin)}
 								{this.renderCommentTypeToggle(!hideComment && showResidualRiskInput)}
 							</ActionsGroup>
 							<Field render={({ form }) => (

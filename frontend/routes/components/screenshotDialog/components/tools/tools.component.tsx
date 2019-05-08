@@ -105,8 +105,8 @@ export class Tools extends React.PureComponent<IProps, any> {
 				<TooltipButton
 					label="Erase"
 					color={this.getToolColor(TOOL_TYPES.ERASER)}
-					action={this.handleToolClick(TOOL_TYPES.BRUSH, onEraseClick)}
-					Icon={Eraser}
+					action={this.handleToolClick(TOOL_TYPES.ERASER, onEraseClick)}
+					Icon={(props) => <Eraser IconProps={props} />}
 				/>
 				<TooltipButton label="Clear" action={onClearClick} Icon={ClearIcon} />
 				<OptionsDivider />

@@ -126,16 +126,14 @@ repoLogger.prototype.logMessage = function (type, msg, meta) {
 		.getTime();
 	const timeDiff = currentTime - this.startTime;
 
-	const metadata = Object.assign({}, meta, {
-		uid: this.uid
-	});
+	const metadata = Object.assign({}, meta);
 
 	this.session && this.session.user && (metadata.username = this.session.user.username);
 	this.req && this.req.method && (metadata.method = this.req.method);
 	this.req && this.req.originalUrl && (metadata.url = this.req.originalUrl);
 
 	this.logger.log(type, (new Date())
-		.toString() + "\t" + this.uid + "\t" + msg + " [" + timeDiff + " ms]", metadata);
+		.toISOString() + "\t" + this.uid + "\t" + msg + " [" + timeDiff + " ms]", metadata);
 };
 
 /**

@@ -22,7 +22,10 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	stopListenOnSelections: [],
 	clearSelectedNodes: [],
 	getSelectedNodes: [],
-	getSelectedNodesSuccess: ['selectedNodes']
+	getSelectedNodesSuccess: ['selectedNodes'],
+	showAllNodes: [],
+	hideSelectedNodes: [],
+	isolateSelectedNodes: []
 }, { prefix: 'TREE/' });
 
 export interface IObjectObjectState {

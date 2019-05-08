@@ -19,14 +19,14 @@ import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 
 export const Image = styled.img`
-  width: 150px;
+	width: 150px;
 	pointer-events: inherit;
 	outline: none;
 	user-select: none;
-  filter: drop-shadow(0 0 1px ${COLOR.BLACK_50});
+	filter: drop-shadow(0 0 1px ${COLOR.BLACK_50});
 
-  &:hover {
-    cursor: pointer;
-	  user-select: none;
-  }
+	&:hover {
+		cursor: pointer;
+		user-select: none;
+	}
 `;

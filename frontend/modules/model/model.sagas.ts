@@ -39,6 +39,15 @@ export function* fetchSettings({ teamspace, modelId }) {
 	}
 }
 
+export function* fetchMetaKeys({ teamspace, modelId }) {
+	try {
+		const { data: metaKeys } = yield API.getMetaKeys(teamspace, modelId);
+		yield put(ModelActions.fetchMetaKeysSuccess(metaKeys));
+	} catch (e) {
+		yield put(DialogActions.showEndpointErrorDialog('fetch', 'meta keys', e));
+	}
+}
+
 export function* updateSettings({ modelData: { teamspace, project, modelId }, settings }) {
 	try {
 		const modifiedSettings = cloneDeep(settings);
@@ -163,6 +172,7 @@ export function* fetchMaps({ teamspace, modelId }) {
 
 export default function* ModelSaga() {
 	yield takeLatest(ModelTypes.FETCH_SETTINGS, fetchSettings);
+	yield takeLatest(ModelTypes.FETCH_META_KEYS, fetchMetaKeys);
 	yield takeLatest(ModelTypes.UPDATE_SETTINGS, updateSettings);
 	yield takeLatest(ModelTypes.FETCH_REVISIONS, fetchRevisions);
 	yield takeLatest(ModelTypes.DOWNLOAD_MODEL, downloadModel);

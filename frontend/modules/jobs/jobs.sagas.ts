@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -26,7 +26,6 @@ import { SnackbarActions } from '../snackbar';
 export function* fetchJobs({ teamspace }) {
 	try {
 		const response = yield API.getJobs(teamspace);
-
 		yield put(JobsActions.fetchJobsSuccess(response.data));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'jobs', error));
@@ -36,7 +35,6 @@ export function* fetchJobs({ teamspace }) {
 export function* fetchJobsColors({ teamspace }) {
 	try {
 		const response = yield API.getJobsColors(teamspace);
-
 		yield put(JobsActions.fetchJobsColorsSuccess(response.data));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'jobs colors', error));

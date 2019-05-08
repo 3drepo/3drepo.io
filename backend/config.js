@@ -16,7 +16,6 @@
  */
 
 "use strict";
-
 const VERSION = require("./VERSION.json").VERSION;
 
 const config = require("app-config").config;
@@ -303,5 +302,7 @@ config.getBaseURL = function (useNonPublicPort) {
 
 // avatar size limit
 config.avatarSizeLimit = coalesce(config.avatarSizeLimit, 1048576);
+
+config.liveChatLicense = config.liveChatLicense || 0;
 
 module.exports = config;

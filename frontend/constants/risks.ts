@@ -1,12 +1,14 @@
+import { values } from 'lodash';
+
 import NewReleases from '@material-ui/icons/NewReleases';
 import ErrorOutline from '@material-ui/icons/ErrorOutline';
 import ErrorSolid from '@material-ui/icons/Error';
 import CheckCircle from '@material-ui/icons/CheckCircle';
 import SyncProblem from '@material-ui/icons/SyncProblem';
-
 import Print from '@material-ui/icons/Print';
 import Download from '@material-ui/icons/CloudDownload';
 import Pins from '@material-ui/icons/PinDrop';
+import { SortAmountUp, SortAmountDown } from '../routes/components/fontAwesomeIcon';
 
 import { DATA_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 import { COLOR, PIN_COLORS } from '../styles';
@@ -32,6 +34,8 @@ const LEVELS_LIST = [
 ];
 
 export const RISK_CATEGORIES = [
+	{ value: 'commercial', name: 'Commercial Issue' },
+	{ value: 'environmental', name: 'Environmental Issue' },
 	{ value: 'health_material_effect', name: 'Health - Material effect' },
 	{ value: 'health_mechanical_effect', name: 'Health - Mechanical effect' },
 	{ value: 'safety_fall', name: 'Safety Issue - Fall' },
@@ -40,8 +44,6 @@ export const RISK_CATEGORIES = [
 	{ value: 'safety_handling', name: 'Safety Issue - Handling' },
 	{ value: 'safety_struck', name: 'Safety Issue - Struck' },
 	{ value: 'safety_public', name: 'Safety Issue - Public' },
-	{ value: 'environmental', name: 'Environmental Issue' },
-	{ value: 'commercial', name: 'Commercial Issue' },
 	{ value: 'social', name: 'Social Issue' },
 	{ value: 'other', name: 'Other Issue' },
 	{ value: 'unknown', name: 'UNKNOWN' },
@@ -188,26 +190,30 @@ export const RISK_FILTERS = [
 	}
 ] as any;
 
-export const RISKS_ACTIONS_ITEMS = {
-	PRINT: 'print',
-	DOWNLOAD: 'download',
-	SHOW_PINS: 'showPins'
+export const ACTIONS_TYPES = {
+	SORT: 'SORT'
 };
 
-export const RISKS_ACTIONS_MENU = [
-	{
-		name: RISKS_ACTIONS_ITEMS.PRINT,
+export const RISKS_ACTIONS_MENU = {
+	PRINT: {
 		label: 'Create Report',
 		Icon: Print
 	},
-	{
-		name: RISKS_ACTIONS_ITEMS.SHOW_PINS,
-		label: 'Show Pins',
-		Icon: Pins
+	SHOW_PINS: {
+		label:  'Show Pins',
+		Icon: Pins,
+		enabled:  true
 	},
-	{
-		name: RISKS_ACTIONS_ITEMS.DOWNLOAD,
+	DOWNLOAD: {
 		label: 'Download JSON',
 		Icon: Download
+	},
+	SORT_BY_DATE: {
+		label: 'Sort by date',
+		type: ACTIONS_TYPES.SORT,
+		Icon: {
+			ASC: SortAmountUp,
+			DESC: SortAmountDown
+		}
 	}
-];
+};

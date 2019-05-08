@@ -24,7 +24,7 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 
 interface IProps {
 	author: string;
-	createdAt: string;
+	createdAt: any;
 	StatusIconComponent: any;
 	statusColor: string;
 	extraInfo?: string;
@@ -33,7 +33,7 @@ interface IProps {
 export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 	public renderDateTime = renderWhenTrue(() => (
 		<Date>
-			<DateTime value={this.props.createdAt} format="HH:mm DD MMM" />
+			<DateTime value={this.props.createdAt} format="DD MMM YYYY" />
 		</Date>
 	));
 

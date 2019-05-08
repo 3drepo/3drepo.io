@@ -26,13 +26,15 @@ const async = require("async");
 const http = require("http");
 // let newXhr = require('socket.io-client-cookie');
 const io = require("socket.io-client");
+const { deleteNotifications, filterByIssueAssigned, filterByIssueClosed } = require("../helpers/notifications");
 const bouncerHelper = require("../helpers/bouncerHelper");
+const debounce = require("lodash").debounce;
 
 describe("Chat service", function () {
 
 	let server;
 	let agent;
-	let agent2;
+	let teamSpace1Agent;
 	let issueId;
 
 
@@ -66,6 +68,24 @@ describe("Chat service", function () {
 		"assigned_roles":[]
 	};
 
+
+	const createIssue = (agent, partialIssue) => next => {
+		const issue = Object.assign(baseIssue, partialIssue);
+		agent.post(`/${account}/${model}/issues.json`)
+			.send(issue)
+			.expect(200 , function(err, res) {
+				if (next) next(err, res.body)
+			});
+	};
+
+	const updateIssue = (agent, id, partialIssue) => next => {
+			return agent.put(`/${account}/${model}/issues/${id}.json`)
+				.send(partialIssue)
+				.expect(200 , function(err, res) {
+						if (next) next(err);
+					});
+		};
+
 	let connectSid;
 
 	before(function(done) {
@@ -98,8 +118,8 @@ describe("Chat service", function () {
 							});
 					},
 					function(done) {
-						agent2 = request.agent(server);
-						agent2.post("/login")
+						teamSpace1Agent = request.agent(server);
+						teamSpace1Agent.post("/login")
 							.send({ username: account, password })
 							.expect(200, done);
 					},
@@ -127,6 +147,7 @@ describe("Chat service", function () {
 		socket = io(config.chat_server.chat_host, {path: "/" + config.chat_server.subdirectory, extraHeaders:{
 			Cookie: `connect.sid=${connectSid}; `
 		}});
+
 		socket.on("connect", function(data) {
 
 			socket.emit("join", {account, model});
@@ -200,7 +221,7 @@ describe("Chat service", function () {
 			done();
 		});
 
-		agent2.post(`/${account}/${model}/issues.json`)
+		teamSpace1Agent.post(`/${account}/${model}/issues.json`)
 			.send(issue)
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
@@ -233,7 +254,7 @@ describe("Chat service", function () {
 		});
 
 		// console.log('issueId2', issueId);
-		agent2.put(`/${account}/${model}/issues/${issueId}.json`)
+		teamSpace1Agent.put(`/${account}/${model}/issues/${issueId}.json`)
 			.send(comment)
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
@@ -249,7 +270,7 @@ describe("Chat service", function () {
 			done();
 		});
 
-		agent2.put(`/${account}/${model}/issues/${issueId}.json`)
+		teamSpace1Agent.put(`/${account}/${model}/issues/${issueId}.json`)
 			.send(comment)
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
@@ -264,7 +285,7 @@ describe("Chat service", function () {
 			done();
 		});
 
-		agent2.put(`/${account}/${model}/issues/${issueId}.json`)
+		teamSpace1Agent.put(`/${account}/${model}/issues/${issueId}.json`)
 			.send(comment)
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
@@ -301,7 +322,7 @@ describe("Chat service", function () {
 			}
 		], done);
 
-		agent2.put(`/${account}/${model}/issues/${issueId}.json`)
+		teamSpace1Agent.put(`/${account}/${model}/issues/${issueId}.json`)
 			.send({"priority":"high"})
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
@@ -311,205 +332,234 @@ describe("Chat service", function () {
 	describe("with notifications", function() {
 		let notificationId = "";
 		let issueId2 = null;
+		const notificationUpsertEvent = `${username}::notificationUpserted`;
+		const notificationDeleteEvent = `${username}::notificationDeleted`;
+		const jobAIssue = {"name": 'notification issue' , "assigned_roles":["jobA"]};
 
-		it("should receive a new notification event when a notification has been created", done => {
-			socket.on(`${username}::notificationUpserted`, function(notification) {
-				socket.off(`${username}::notificationUpserted`);
+		const testForChatEvent =  (eventTrigger, eventName, onEventReceived) => done => {
+			const events = [];
 
-				expect(notification).to.exist;
-
-				expect(notification).to.shallowDeepEqual({type:"ISSUE_ASSIGNED",teamSpace: account, modelId: model, read: false});
-				expect(notification.issuesId).to.be.an('array').that.includes(issueId);
-
-				notificationId =  notification._id;
-
+			const eventDone = () => {
+				socket.off(eventName);
 				done();
+			}
+
+			socket.on(eventName, eventData => {
+				events.push(eventData);
+				onEventReceived(events, eventDone);
 			});
 
-			agent2.put(`/${account}/${model}/issues/${issueId}.json`)
-			.send({"assigned_roles":["jobA"]})
-			.expect(200 , function(err, res) {
-				if (err) {done(err);}
-			});
+			eventTrigger();
+		};
 
-		});
 
-		it("should receive an upsert event when another issue of the same model has been assigned to the user", done => {
-			// TODO: finish me
-			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+		describe("of issue assigned type", () => {
 
-			socket.on(`${username}::notificationUpserted`, function(notification) {
-				socket.off(`${username}::notificationUpserted`);
+			before(done => { deleteNotifications(agent)(done); });
 
-				expect(notification).to.exist;
-
-				expect(notification).to.shallowDeepEqual({type:"ISSUE_ASSIGNED",
-															teamSpace: account,
-															modelId: model,
-															read: false,
-															_id: notificationId});
-
-				expect(notification.issuesId).to.be.an('array').to.deep.equal([issueId, issueId2]);
-				done();
-			});
-
-			const createIssue =  issue => next => agent2.post(`/${account}/${model}/issues.json`)
-														.send(issue)
-														.expect(200 , next);
-
-			const assignJoBA = (res, next) => {
-				agent2.put(`/${account}/${model}/issues/${res._id}.json`)
-					.send({assigned_roles : ["jobA"]})
-					.expect(200 , function(err, res) {
-						next(err);
-					});
-			};
-
-			async.waterfall([
-				createIssue(issue),
-				(res, next) => {
-					issueId2 = res.body._id;
-					next(null, res.body);
+			it("should receive a new notification event when a issue has been created",
+				testForChatEvent(() => {
+					createIssue(teamSpace1Agent, jobAIssue)((err, iss) => issueId = iss._id);
 				},
-				assignJoBA,
-			]);
-		});
+				notificationUpsertEvent,
+				(notifications, done) => {
+					expect(notifications[0], 'Should have receive a ISSUE_ASSIGNED').to
+						.shallowDeepEqual({
+							type:"ISSUE_ASSIGNED",
+							teamSpace: account,
+							modelId: model,
+							read: false,
+							issuesId:[issueId]
+						});
+					done();
+				}));
 
-		it("should receive an upsert notification when an issue associated with a notification(which has multiple issues) has been closed", done => {
+			it("should receive an upsert event when another issue of the same model has been assigned to the user",
+				testForChatEvent(() => {
+					createIssue(teamSpace1Agent, jobAIssue)((err, iss) => issueId2 = iss._id);
+				},
+				notificationUpsertEvent,
+				(notifications, done) => {
+					const notification = notifications[0];
+					expect(notification, 'Should have receive a ISSUE_ASSIGNED').to
+						.shallowDeepEqual({
+							type:"ISSUE_ASSIGNED",
+							teamSpace: account,
+							modelId: model,
+							read: false,
+						});
 
-			socket.on(`${username}::notificationUpserted`, function(notification) {
-				socket.off(`${username}::notificationUpserted`);
+					expect(notification.issuesId.sort()).to.eql([issueId, issueId2].sort(), "The notification should have both issues");
+					notificationId = notification._id;
+					done();
+				}));
 
-				expect(notification).to.exist;
-				expect(notification).to.shallowDeepEqual({_id: notificationId});
-				expect(notification.issuesId).to.be.an('array').to.deep.equal([issueId]);
+			it("should receive an upsert notification when an issue associated with a notification(which has multiple issues) has been closed",
+			testForChatEvent(() => {
+					updateIssue(teamSpace1Agent,issueId2 ,{status:'closed'})();
+				},
+				notificationUpsertEvent,
+				debounce((notifications, done) => {
+					const notification =  filterByIssueAssigned(notifications)[0];
+					expect(notification.issuesId).to.eql([issueId], "The notification should have the first issue");
+					done();
+				}, 200)
+			));
 
-				done();
-			});
-
-			agent2.put(`/${account}/${model}/issues/${issueId2}.json`)
-					.send({status : "closed"})
-					.expect(200 , function(err, res) {
-						if (err) done(err);
-					});
-		});
-
-		it("should receive a delete notification event when the last issue with the notification has been closed", done => {
-			socket.on(`${username}::notificationDeleted`, function(notification) {
-				socket.off(`${username}::notificationDeleted`);
-				expect(notification).to.shallowDeepEqual({_id: notificationId});
-
-				done();
-			});
-
-			agent2.put(`/${account}/${model}/issues/${issueId}.json`)
-					.send({status : "closed"})
-					.expect(200 , function(err, res) {
-						if (err) done(err);
-					});
-		});
-
-
-		it("should receive an upsert event when a new issue has being created ", done => {
-			const eventName = `${username}::notificationUpserted`;
-
-			// TODO: finish me
-			const issue = Object.assign({}, baseIssue, {"name":"Issue test", assigned_roles : ["jobA"]});
-
-			socket.on(eventName, function(notification) {
-				socket.off(eventName);
-
-				expect(notification).to.shallowDeepEqual({type:"ISSUE_ASSIGNED",
-															teamSpace: account,
-															modelId: model,
-															read: false});
-				done();
-			});
-
-			const createIssue =  issue => next => agent2.post(`/${account}/${model}/issues.json`)
-														.send(issue)
-														.expect(200 , next);
-
-			const deleteAllNotifications  = next => agent2.delete("/notifications")
-				.expect(200, err => next(err));
-
-			async.waterfall([
-				deleteAllNotifications,
-				createIssue(issue)
-			]);
-		});
-
-		it("should receive a model uploaded notification if a model has been uploaded", done => {
-			const eventName = `${username}::notificationUpserted`;
-			socket.on(eventName, function(notification) {
-				socket.off(eventName);
-				expect(notification).to.exist;
-
-				expect(notification.type).to.equals("MODEL_UPDATED");
-
-				bouncerHelper.stopBouncerWorker();
-				done();
-			});
-
-			async.series([bouncerHelper.startBouncerWorker,
-				next => agent2.post(`/${account}/${model}/upload`)
-					.field("tag", "onetag")
-					.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
-					.expect(200, function(err, res) {
-						next(err);
-					})
-				])
-		}).timeout('60s');
-
-		it("should receive a model FAILED uploaded notification if a model uploaded had failed", done => {
-			const eventName = `${username}::notificationUpserted`;
-
-			socket.on(eventName, function(notification) {
-				socket.off(eventName);
-				expect(notification).to.exist;
-
-				expect(notification.type).to.equals("MODEL_UPDATED_FAILED");
-
-				bouncerHelper.stopBouncerWorker();
-				done();
-			});
-
-			async.series([next => bouncerHelper.startBouncerWorker(next, 1),
-				next => agent.post(`/${account}/${model}/upload`)
-					.field("tag", "onetag")
-					.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
-					.expect(200, function(err, res) {
-						next(err);
-					})
-				])
-		}).timeout('60s');
-
-		it("should receive a model FAILED uploaded notification and a model updated notification if a model uploaded had been uploaded with a warning type of error", done => {
-			const eventName = `${username}::notificationUpserted`;
-			const receivedNotifications = [];
-
-			socket.on(eventName, function(notification) {
-				receivedNotifications.push(notification);
-
-				if (receivedNotifications.length == 2){
-					socket.off(eventName);
-					const types = receivedNotifications.map(n => n.type).sort();
-					expect(types).to.deep.equal([ "MODEL_UPDATED","MODEL_UPDATED_FAILED"]);
-					bouncerHelper.stopBouncerWorker();
+			it("should receive a delete notification event when the last issue with the notification has been closed",
+				testForChatEvent(() => {
+					updateIssue(teamSpace1Agent,issueId ,{status:'closed'})();
+				},
+				notificationDeleteEvent,
+				(notifications, done) => {
+					expect(notifications).to.have.length(1,"Should have a delete notification for an issue assigned");
+					expect(notifications[0]._id).to.equal(notificationId);
 					done();
 				}
-			});
+			));
+		});
 
-			async.series([next => bouncerHelper.startBouncerWorker(next, 7),
-				next => agent.post(`/${account}/${model}/upload`)
-					.field("tag", "onetag")
-					.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
-					.expect(200, function(err, res) {
-						next(err);
-					})
-				])
-		}).timeout('30s');
+		describe("of closed issue type", () => {
+			before(done => async.waterfall([
+				deleteNotifications(agent),
+				createIssue(teamSpace1Agent, jobAIssue),
+				(iss,next) => { issueId = iss._id; next();},
+				createIssue(teamSpace1Agent, jobAIssue),
+				(iss,next) => { issueId2 = iss._id; next();},
+			], () => done()));
 
+			it("should receive a new notification event when a issue has been closed",
+				testForChatEvent(() => {
+					updateIssue(teamSpace1Agent,issueId ,{status:'closed'})();
+				},
+				notificationUpsertEvent,
+				debounce((notifications, done) => {
+					notifications =  filterByIssueClosed(notifications);
+					expect(notifications).to.have.length(1,'Should have receive a ISSUE_CLOSED');
+					expect(notifications[0].issuesId).to.eql([issueId]);
+					notificationId = notifications[0]._id;
+					done();
+				},200))
+			);
+
+			it("should receive a upsert notification event when a another issue has been closed, with the two issues in the issues_id property set",
+				testForChatEvent(
+					() => {
+						updateIssue(teamSpace1Agent,issueId2 ,{status:'closed'})();
+					},
+					notificationUpsertEvent,
+					debounce((notifications, done) => {
+						notifications =  filterByIssueClosed(notifications);
+						expect(notifications).to.have.length(1,'Should have receive a ISSUE_CLOSED');
+						expect(notifications[0].issuesId.sort()).to.eql([issueId, issueId2].sort());
+						done();
+					},200)
+				)
+			);
+
+			it("should receive a upsert notification event when a another issue has been 'unclosed', with the one issues in the issues_id property set",
+				testForChatEvent(
+					() => {
+						updateIssue(teamSpace1Agent,issueId2 ,{status:'open'})();
+					},
+					notificationUpsertEvent,
+					debounce((notifications, done) => {
+						notifications =  filterByIssueClosed(notifications);
+						expect(notifications).to.have.length(1,'Should have receive a ISSUE_CLOSED');
+						expect(notifications[0].issuesId).to.eql([issueId]);
+						done();
+					},200)
+				)
+			);
+
+			it("should receive a delete notification event when a both issues has been 'unclosed'",
+				testForChatEvent(
+					() => {
+						updateIssue(teamSpace1Agent,issueId ,{status:'open'})();
+					},
+					notificationDeleteEvent,
+					debounce((notifications, done) => {
+						expect(notifications[0]._id).to.eql(notificationId);
+						done();
+					},200)
+				)
+			);
+
+		});
+
+		describe("of model type", () => {
+
+			it("should receive a model uploaded notification if a model has been uploaded", done => {
+				const eventName = `${username}::notificationUpserted`;
+				socket.on(eventName, function(notification) {
+					socket.off(eventName);
+					expect(notification).to.exist;
+
+					expect(notification.type).to.equals("MODEL_UPDATED");
+
+					bouncerHelper.stopBouncerWorker();
+					done();
+				});
+
+				async.series([bouncerHelper.startBouncerWorker,
+					next => teamSpace1Agent.post(`/${account}/${model}/upload`)
+						.field("tag", "onetag")
+						.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+						.expect(200, function(err, res) {
+							next(err);
+						})
+					])
+			}).timeout('60s');
+
+			it("should receive a model FAILED uploaded notification if a model uploaded had failed", done => {
+				const eventName = `${username}::notificationUpserted`;
+
+				socket.on(eventName, function(notification) {
+					socket.off(eventName);
+					expect(notification).to.exist;
+
+					expect(notification.type).to.equals("MODEL_UPDATED_FAILED");
+
+					bouncerHelper.stopBouncerWorker();
+					done();
+				});
+
+				async.series([next => bouncerHelper.startBouncerWorker(next, 1),
+					next => agent.post(`/${account}/${model}/upload`)
+						.field("tag", "onetag")
+						.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+						.expect(200, function(err, res) {
+							next(err);
+						})
+					])
+			}).timeout('60s');
+
+			it("should receive a model FAILED uploaded notification and a model updated notification if a model uploaded had been uploaded with a warning type of error", done => {
+				const eventName = `${username}::notificationUpserted`;
+				const receivedNotifications = [];
+
+				socket.on(eventName, function(notification) {
+					receivedNotifications.push(notification);
+
+					if (receivedNotifications.length == 2){
+						socket.off(eventName);
+						const types = receivedNotifications.map(n => n.type).sort();
+						expect(types).to.deep.equal([ "MODEL_UPDATED","MODEL_UPDATED_FAILED"]);
+						bouncerHelper.stopBouncerWorker();
+						done();
+					}
+				});
+
+				async.series([next => bouncerHelper.startBouncerWorker(next, 7),
+					next => agent.post(`/${account}/${model}/upload`)
+						.field("tag", "onetag")
+						.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+						.expect(200, function(err, res) {
+							next(err);
+						})
+					])
+			}).timeout('30s');
+		});
 
 	});
 

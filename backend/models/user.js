@@ -169,6 +169,34 @@ schema.statics.getProfileByUsername = async function (username) {
 	};
 };
 
+schema.statics.getStarredMetadataTags = async function (username) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	const userProfile = await dbCol.findOne({user: username}, {user: 1,
+		"customData.StarredMetadataTags" : 1
+	});
+
+	return _.get(userProfile, "customData.StarredMetadataTags") || [];
+};
+
+schema.statics.appendStarredMetadataTag = async function (username, tag) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	await dbCol.update({user: username}, {$addToSet: { "customData.StarredMetadataTags" : tag } });
+	return {};
+};
+
+schema.statics.setStarredMetadataTags = async function (username, tags) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	tags = _.uniq(tags);
+	await dbCol.update({user: username}, {$set: { "customData.StarredMetadataTags" : tags}});
+	return {};
+};
+
+schema.statics.deleteStarredMetadataTag = async function (username, tag) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	await dbCol.update({user: username}, {$pull: { "customData.StarredMetadataTags" : tag } });
+	return {};
+};
+
 schema.statics.findByAPIKey = async function (key) {
 	if (!key) {
 		return null;
@@ -550,11 +578,11 @@ schema.statics.getForgotPasswordToken = function (userNameOrEmail) {
 		// set token only if username is found.
 		if (user) {
 			user.customData.resetPasswordToken = resetPasswordToken;
-
 			resetPasswordUserInfo = {
 				token: resetPasswordToken.token,
 				email: user.customData.email,
-				username: user.user
+				username: user.user,
+				firstName:user.customData.firstName
 			};
 
 			return updateUser(user.user, { $set: { "customData.resetPasswordToken": resetPasswordToken } });

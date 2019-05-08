@@ -23,58 +23,58 @@ import TextField from '@material-ui/core/TextField';
 import { COLOR } from '../../../../styles/colors';
 
 export const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  overflow: auto;
+	display: flex;
+	flex-direction: column;
+	overflow: auto;
 `;
 
 export const ViewsCountInfo = styled.p`
-  color: ${COLOR.BLACK_40};
-  text-align: left;
-  height: 100%;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  width: 100%;
+	color: ${COLOR.BLACK_40};
+	text-align: left;
+	height: 100%;
+	margin: 0;
+	display: flex;
+	align-items: center;
+	width: 100%;
 `;
 
 export const ViewpointsList = styled(MenuList)`
-  && {
-    padding: 0;
-    height: auto;
-    max-height: 70vh;
-  }
+	&& {
+		padding: 0;
+		height: auto;
+		max-height: 70vh;
+	}
 `;
 
 export const ViewpointItem = styled(MenuItem)`
-  && {
-    height: 80px;
-    padding: 8px;
-    background-color: ${(props: any) => props.active ? `${COLOR.BLACK_6}` : 'initial'};
-  }
+	&& {
+		height: 80px;
+		padding: 8px;
+		background-color: ${(props: any) => props.active ? `${COLOR.BLACK_6}` : 'initial'};
+	}
 
-  &&:not(:first-child) {
-    border-top: 1px solid ${COLOR.BLACK_20};
-  }
+	&&:not(:first-child) {
+		border-top: 1px solid ${COLOR.BLACK_20};
+	}
 ` as any;
 
 export const EmptyStateInfo = styled.p`
-  padding: 14px;
-  font-size: 13px;
-  color: ${COLOR.BLACK_60};
-  background-color: ${COLOR.BLACK_6};
-  margin: 25px;
-  border-radius: 6px;
-  text-align: center;
+	padding: 14px;
+	font-size: 13px;
+	color: ${COLOR.BLACK_60};
+	background-color: ${COLOR.BLACK_6};
+	margin: 25px;
+	border-radius: 6px;
+	text-align: center;
 `;
 
 export const NewItemWrapper = styled.div`
-  display: flex;
-  flex: 1;
+	display: flex;
+	flex: 1;
 `;
 
 export const SearchField = styled(TextField)`
-  && {
-    flex: none;
-  }
+	&& {
+		flex: none;
+	}
 `;

@@ -17,6 +17,7 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { cloneDeep, keyBy } from 'lodash';
+import { sortByField } from '../../helpers/sorting';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetchTeamspaces: ['username'],
@@ -51,6 +52,13 @@ export const INITIAL_STATE = {
 
 const setTeamspaces = (state = INITIAL_STATE, action) => {
 	const teamspaces = keyBy(action.teamspaces, 'account');
+	const accounts = Object.keys(teamspaces);
+
+	accounts.map((user) => {
+		return teamspaces[user].projects = sortByField(teamspaces[user].projects,
+			{ order: 'asc', config: { field: 'name' } });
+	});
+
 	return Object.assign({}, state, {teamspaces});
 };
 

@@ -48,6 +48,14 @@ router.get("/:id", middlewares.loggedIn, getNotification, responseCodes.onSucces
 router.patch("/:id", middlewares.loggedIn, patchNotification, responseCodes.onSuccessfulOperation);
 
 /**
+ * @api {patch} /notifications Patch all the user notifications
+ * @apiName patchNotification
+ * @apiGroup Notification
+ *
+ */
+router.patch("/", middlewares.loggedIn, patchAllNotifications, responseCodes.onSuccessfulOperation);
+
+/**
  * @api {delete} /notifications Delete All notification
  * @apiName deleteAllNotifications
  * @apiGroup Notification
@@ -103,6 +111,20 @@ function patchNotification(req, res, next) {
 	const data = req.body;
 	notification.updateNotification(username, _id, data).then(()=> {
 		req.dataModel = Object.assign({_id}, data);
+		next();
+	}).catch(err => responseCodes.onError(req, res, err));
+}
+
+/**
+ * Patches all notifications.
+ * Uses logged username as the collection name.
+ * Uses req.body as the partial notification
+ */
+function patchAllNotifications(req, res, next) {
+	const username = req.session.user.username;
+	const data = req.body;
+	notification.updateAllNotifications(username, data).then(()=> {
+		req.dataModel = data;
 		next();
 	}).catch(err => responseCodes.onError(req, res, err));
 }

@@ -54,6 +54,10 @@ attributes[ReportType.RISKS] = [
 	{ label: "Residual Risk", field: "residual_risk", default: "None"}
 ];
 
+const hiddenAttributes = [
+	{label: "Pin", field: "position"}
+];
+
 const urlQS = {};
 urlQS[ReportType.RISKS] = "riskId";
 urlQS[ReportType.ISSUES] = "issueId";
@@ -170,6 +174,9 @@ class ReportGenerator {
 				entry.comments.forEach((comment) => {
 					comment.owner || usersToQuery.add(comment.owner);
 					comment.created = formatDate(comment.created);
+					if (comment.viewpoint && comment.viewpoint.screenshot) {
+						comment.screenshot = comment.viewpoint.screenshot;
+					}
 					if(comment.action) {
 						if(comment.action.property === "due_date") {
 							comment.action.to = formatDate(parseInt(comment.action.to), false);
@@ -178,7 +185,9 @@ class ReportGenerator {
 						if(!comment.action.propertyText) {
 							comment.action.propertyText = this.getPropertyLabel(comment.action.property);
 						}
-						if(!comment.action.to || comment.action.to === "") {
+						if(comment.action.property === "position") {
+							comment.action.to = comment.action.from = "";
+						} else if(!comment.action.to || comment.action.to === "") {
 							comment.action.to = "(empty)";
 						}
 					}
@@ -209,7 +218,8 @@ class ReportGenerator {
 	}
 
 	getPropertyLabel(property) {
-		const found = attributes[this.type].find((entry) => property === entry.field);
+		const found = attributes[this.type].find((entry) => property === entry.field) ||
+			hiddenAttributes.find((entry) => property === entry.field);
 		return found ? found.label : property;
 	}
 

@@ -398,7 +398,6 @@ function updateIssue(req, res, next) {
 	const dbCol = { account: req.params.account, model: req.params.model };
 	const data = req.body;
 
-	data.owner = req.session.user.username;
 	data.requester = req.session.user.username;
 	data.revId = req.params.rid;
 	data.sessionId = req.headers[C.HEADER_SOCKET_ID];

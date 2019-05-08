@@ -17,10 +17,11 @@
 
 import * as React from 'react';
 import * as Yup from 'yup';
-import { debounce, get, isEmpty, isEqual } from 'lodash';
-import { connect, Field, Form, withFormik, Formik } from 'formik';
-import InputLabel from '@material-ui/core/InputLabel';
+import { get, isEqual, isEmpty, debounce } from 'lodash';
+import { Field, Form, withFormik, connect } from 'formik';
 
+import InputLabel from '@material-ui/core/InputLabel';
+import { Image } from '../../../../../components/image';
 import {
 	LEVELS_OF_RISK,
 	RISK_CATEGORIES,
@@ -29,24 +30,18 @@ import {
 	RISK_MITIGATION_STATUSES
 } from '../../../../../../constants/risks';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
-import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
+import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
+import { canChangeBasicProperty, canChangeStatus, canChangeAssigned } from '../../../../../../helpers/risks';
 import { TextField } from '../../../../../components/textField/textField.component';
 import { Container, FieldsContainer, FieldsRow, StyledFormControl, DescriptionImage } from './riskDetails.styles';
-import { Image } from '../../../../../components/image';
-
-export const RiskSchema = Yup.object().shape({
-	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
-	mitigation_desc: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
-	residual_risk: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
-});
+import PinButton from '../../../pinButton/pinButton.container';
 
 interface IProps {
-	canUpdateRisk: boolean;
 	risk: any;
 	jobs: any[];
-	values: any;
 	formik: any;
+	values: any;
 	associatedActivities: any[];
 	permissions: any;
 	currentUser: any;
@@ -55,17 +50,23 @@ interface IProps {
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
 	handleSubmit: () => void;
+	onSavePin: (position) => void;
+	onChangePin: (pin) => void;
+	pinId?: string;
+	hasPin: boolean;
 }
 
 interface IState {
 	isSaving: boolean;
 }
 
-class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
-	public static defaultProps = {
-		canUpdateRisk: false
-	};
+export const RiskSchema = Yup.object().shape({
+	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	mitigation_desc: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	residual_risk: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+});
 
+class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	public state = {
 		isSaving: false
 	};
@@ -130,19 +131,18 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		}
 
 		this.setState({ isSaving: true }, () => {
-			this.props.formik.setFieldValue();
+			formik.setFieldValue();
 			handleSubmit();
 			this.setState({ isSaving: false });
 		});
 	}, 200);
 
-	public handleChangeAndSubmit = (event) => {
-		event.persist();
-		this.props.handleChange(event);
-		this.props.handleSubmit();
-	}
-
 	public render() {
+		const { risk, myJob, permissions, currentUser } = this.props;
+		const newRisk = !risk._id;
+		const canEditBasicProperty = newRisk || canChangeBasicProperty(risk, myJob, permissions, currentUser);
+		const canEditRiskStatus = newRisk || canChangeStatus(risk, myJob, permissions, currentUser);
+
 		return (
 			<Form>
 				<FieldsRow container alignItems="center" justify="space-between">
@@ -153,7 +153,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								{...field}
 								items={this.props.jobs}
 								inputId="assigned_roles"
-								disabled={!this.props.canUpdateRisk}
+								disabled={!(newRisk || canChangeAssigned(risk, myJob, permissions, currentUser))}
 							/>
 						)} />
 					</StyledFormControl>
@@ -165,7 +165,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								{...field}
 								items={RISK_CATEGORIES}
 								inputId="category"
-								disabled={!this.props.canUpdateRisk}
+								disabled={!canEditBasicProperty}
 							/>
 						)} />
 					</StyledFormControl>
@@ -177,7 +177,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							{...field}
 							requiredConfirm={!this.isNewRisk}
 							label="Associated Activity"
-							disabled={!this.props.canUpdateRisk}
+							disabled={!canEditBasicProperty}
 						/>
 					)} />
 
@@ -187,13 +187,13 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							requiredConfirm={!this.isNewRisk}
 							validationSchema={RiskSchema}
 							label="SafetiBase ID"
-							disabled={!this.props.canUpdateRisk}
+							disabled={!canEditBasicProperty}
 						/>
 					)} />
 				</FieldsRow>
 
 				<Container>
-					<Field name="description" render={({ field, form }) => (
+					<Field name="description" render={({ field }) => (
 						<TextField
 							{...field}
 							requiredConfirm={!this.isNewRisk}
@@ -201,7 +201,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							fullWidth
 							multiline
 							label="Description"
-							disabled={!this.props.canUpdateRisk}
+							disabled={!canEditBasicProperty}
 						/>
 					)} />
 				</Container>
@@ -224,7 +224,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									{...field}
 									items={RISK_LIKELIHOODS}
 									inputId="likelihood"
-									disabled={!this.props.canUpdateRisk}
+									disabled={!canEditBasicProperty}
 									readOnly={!this.isNewRisk}
 								/>
 							)} />
@@ -237,7 +237,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									{...field}
 									items={RISK_CONSEQUENCES}
 									inputId="consequence"
-									disabled={!this.props.canUpdateRisk}
+									disabled={!canEditBasicProperty}
 									readOnly={!this.isNewRisk}
 								/>
 							)} />
@@ -257,6 +257,14 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								/>
 							)} />
 						</StyledFormControl>
+						<StyledFormControl>
+							<PinButton onChange={this.props.onChangePin}
+								onSave={this.props.onSavePin}
+								disabled={!this.isNewRisk && !canEditBasicProperty}
+								pinId={this.props.pinId}
+								hasPin={this.props.hasPin}
+							/>
+						</StyledFormControl>
 					</FieldsContainer>
 				</FieldsRow>
 
@@ -269,7 +277,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							fullWidth
 							multiline
 							label="Mitigation"
-							disabled={!this.props.canUpdateRisk}
+							disabled={!canEditBasicProperty}
 						/>
 					)} />
 				</Container>
@@ -282,7 +290,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								{...field}
 								items={RISK_MITIGATION_STATUSES}
 								inputId="mitigation_status"
-								disabled={!this.props.canUpdateRisk}
+								disabled={!canEditRiskStatus}
 							/>
 						)} />
 					</StyledFormControl>
@@ -297,7 +305,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									{...field}
 									items={RISK_LIKELIHOODS}
 									inputId="residual_likelihood"
-									disabled={!this.props.canUpdateRisk}
+									disabled={!canEditRiskStatus}
 								/>
 							)} />
 						</StyledFormControl>
@@ -309,7 +317,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									{...field}
 									items={RISK_CONSEQUENCES}
 									inputId="residual_consequence"
-									disabled={!this.props.canUpdateRisk}
+									disabled={!canEditRiskStatus}
 								/>
 							)} />
 						</StyledFormControl>
@@ -340,7 +348,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							fullWidth
 							multiline
 							label="Residual Risk"
-							disabled={!this.props.canUpdateRisk}
+							disabled={!canEditBasicProperty}
 						/>
 					)} />
 				</Container>

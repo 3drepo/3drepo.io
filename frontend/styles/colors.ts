@@ -20,7 +20,10 @@ export const COLOR = {
 
 	BLACK,
 	BLACK_6: hexToRgba(BLACK, .06),
+	BLACK_12: hexToRgba(BLACK, .12),
+	BLACK_16: hexToRgba(BLACK, .16),
 	BLACK_20: hexToRgba(BLACK, .2),
+	BLACK_26: hexToRgba(BLACK, .26),
 	BLACK_30: hexToRgba(BLACK, .3),
 	BLACK_40: hexToRgba(BLACK, .4),
 	BLACK_50: hexToRgba(BLACK, .5),
@@ -39,6 +42,7 @@ export const COLOR = {
 	CRIMSON: '#dc143c',
 	DARK_ORANGE: '#f97807',
 	ORANGE: '#fa9034',
+	SUNGLOW: '#ffca28',
 	GREEN: '#008241',
 	MED_SEA_GREEN: '#2e9863',
 	LIME_GREEN: '#4eb227',
@@ -49,7 +53,9 @@ export const COLOR = {
 	LIGHT_YELLOW: '#edd100',
 	POMEGRANATE: '#F44336',
 	NEGATIVE: 'rgba(234, 57, 57, 1)',
-	NEGATIVE_87: 'rgba(234, 57, 57, 0.87)'
+	NEGATIVE_87: 'rgba(234, 57, 57, 0.87)',
+	REGENT_GRAY: '#8397AC',
+	SILVER_CHALICE: '#A8A8A8'
 };
 
 export const PIN_COLORS = mapValues({
@@ -66,5 +72,6 @@ export const PIN_COLORS = mapValues({
 	LIME_GREEN: COLOR.LIME_GREEN,
 	LIGHT_GREEN: COLOR.LIGHT_GREEN,
 	LEMON_CHIFFON: COLOR.LEMON_CHIFFON,
-	LIGHT_YELLOW: COLOR.LIGHT_YELLOW
+	LIGHT_YELLOW: COLOR.LIGHT_YELLOW,
+	SUNGLOW: COLOR.SUNGLOW
 }, hexToGLColor);

@@ -31,6 +31,7 @@ import {
 	selectSelectedFilters,
 	selectShowPins,
 	selectIsRisksPending,
+	selectSortOrder,
 	selectFetchingDetailsIsPending
 } from '../../../../modules/risks';
 import { selectJobsList } from '../../../../modules/jobs';
@@ -45,10 +46,10 @@ const mapStateToProps = createStructuredSelector({
 	showPins: selectShowPins,
 	showDetails: selectShowDetails,
 	searchEnabled: selectSearchEnabled,
-	setState: RisksActions.setComponentState,
 	selectedFilters: selectSelectedFilters,
 	isPending: selectIsRisksPending,
-	fetchingDetailsIsPending: selectFetchingDetailsIsPending
+	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
+	sortOrder: selectSortOrder
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -64,7 +65,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	unsubscribeOnRiskChanges: RisksActions.unsubscribeOnRiskChanges,
 	closeDetails: RisksActions.closeDetails,
 	saveRisk: RisksActions.saveRisk,
-	onFiltersChange: RisksActions.onFiltersChange
+	toggleSortOrder: RisksActions.toggleSortOrder,
+	setFilters: RisksActions.setFilters,
+	renderPins: RisksActions.renderPins
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Risks)));

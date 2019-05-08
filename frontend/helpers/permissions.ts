@@ -1,9 +1,10 @@
 export const PERMISSIONS = {
 	MANAGE_MODEL_PERMISSION: 'manage_model_permission',
-	COMMENT_ISSUE: 'comment_issue'
+	COMMENT_ISSUE: 'comment_issue',
+	VIEW_ISSUE: 'view_issue'
 };
 
-export const hasPermissions = (requiredPerm = '', permissions) => {
+export const hasPermissions = (requiredPerm = '', permissions = []) => {
 	if (!requiredPerm) {
 		return true;
 	}

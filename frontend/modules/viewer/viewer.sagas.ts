@@ -15,11 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
-import { getAngularService } from '../../helpers/migration';
+import { put, select, takeLatest } from 'redux-saga/effects';
+import { getAngularService, dispatch } from '../../helpers/migration';
+import * as API from '../../services/api';
+import { VIEWER_EVENTS, VIEWER_PANELS, INITIAL_HELICOPTER_SPEED } from '../../constants/viewer';
 
 import { ViewerTypes, ViewerActions } from './viewer.redux';
 import { DialogActions } from '../dialog';
+import {
+	selectHelicopterSpeed,
+	selectIsClipEdit,
+	selectClipNumber,
+	selectIsMetadataVisible
+} from './viewer.selectors';
+import { Viewer } from '../../services/viewer/viewer';
+import { VIEWER_CLIP_MODES } from '../../constants/viewer';
+import { MeasureActions } from '../measure';
+import { BimActions } from '../bim';
 
 export const getViewer = () => {
 	const ViewerService = getAngularService('ViewerService') as any;
@@ -44,6 +56,54 @@ export function* mapInitialise({surveyPoints, sources = []}) {
 		sources.map(viewer.addMapSource);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('initialise', 'map'));
+	}
+}
+
+const updateClipStateCallback = (clipNumber) => {
+	dispatch(ViewerActions.updateClipState(clipNumber));
+};
+
+export function* initialiseToolbar() {
+	try {
+		yield put(ViewerActions.startListenOnNumClip());
+		const helicopterSpeed = yield Viewer.getHelicopterSpeed();
+		yield put(ViewerActions.setHelicopterSpeed(helicopterSpeed));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('initialise', 'toolbar'));
+	}
+}
+
+export function* startListenOnNumClip() {
+	try {
+		Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('start listen on', 'num clip'));
+	}
+}
+
+export function* stopListenOnNumClip() {
+	try {
+		Viewer.off(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('stop listen on', 'num clip'));
+	}
+}
+
+export function* updateClipState({clipNumber}) {
+	try {
+		const isClipEdit = yield select(selectIsClipEdit);
+		const currentClipNumber = yield select(selectClipNumber);
+
+		if (currentClipNumber !== clipNumber) {
+			yield put(ViewerActions.setClipNumber(clipNumber));
+		}
+
+		if (clipNumber === 0 && isClipEdit) {
+			yield put(ViewerActions.setClipEdit(false));
+			yield put(ViewerActions.setClippingMode(null));
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('update', 'clip state'));
 	}
 }
 
@@ -128,6 +188,107 @@ export function* showViewpoint(teamspace, modelId, item) {
 	}
 }
 
+export function* goToExtent() {
+	try {
+		yield Viewer.goToExtent();
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('go', 'to extent'));
+	}
+}
+
+export function* setNavigationMode({mode}) {
+	try {
+		yield Viewer.setNavigationMode(mode);
+		yield put(ViewerActions.setNavigationModeSuccess(mode));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'navigation mode'));
+	}
+}
+
+export function* resetHelicopterSpeed({teamspace, modelId, updateDefaultSpeed}) {
+	try {
+		yield Viewer.helicopterSpeedReset();
+		if (updateDefaultSpeed) {
+			yield API.editHelicopterSpeed(teamspace, modelId, INITIAL_HELICOPTER_SPEED);
+		}
+		yield put(ViewerActions.setHelicopterSpeed(INITIAL_HELICOPTER_SPEED));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('reset', 'helicopter speed'));
+	}
+}
+
+export function* increaseHelicopterSpeed({teamspace, modelId}) {
+	try {
+		const helicopterSpeed = yield select(selectHelicopterSpeed);
+		const speed = helicopterSpeed + 1;
+
+		yield Viewer.helicopterSpeedUp();
+		yield API.editHelicopterSpeed(teamspace, modelId, speed);
+		yield put(ViewerActions.setHelicopterSpeed(speed));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('increase', 'helicopter speed'));
+	}
+}
+
+export function* decreaseHelicopterSpeed({teamspace, modelId}) {
+	try {
+		const helicopterSpeed = yield select(selectHelicopterSpeed);
+		const speed = helicopterSpeed - 1;
+		yield Viewer.helicopterSpeedDown();
+		yield API.editHelicopterSpeed(teamspace, modelId, speed);
+		yield put(ViewerActions.setHelicopterSpeed(speed));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('decrease', 'helicopter speed'));
+	}
+}
+
+export function* setClippingMode({mode}) {
+	try {
+		if (mode) {
+			const isSingle = mode === VIEWER_CLIP_MODES.SINGLE;
+			yield Viewer.startClip(isSingle);
+		}
+		yield put(ViewerActions.setClippingModeSuccess(mode));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'clipping mode'));
+	}
+}
+
+export function* setClipEdit({isClipEdit}) {
+	try {
+		if (isClipEdit) {
+			yield Viewer.startClipEdit();
+		} else {
+			yield Viewer.stopClipEdit();
+		}
+		yield put(ViewerActions.setClipEditSuccess(isClipEdit));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('toggle', 'clip edit'));
+	}
+}
+
+export function* setMetadataVisibility({ visible }) {
+	try {
+		yield put(ViewerActions.setPanelVisibility(VIEWER_PANELS.METADATA, visible));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'metadata visibility'));
+	}
+}
+
+export function* setMeasureVisibility({ visible }) {
+	try {
+		const metadataActive = yield select(selectIsMetadataVisible);
+		if (visible && metadataActive) {
+			yield put(ViewerActions.setMetadataVisibility(false));
+			yield put(BimActions.setIsActive(false));
+		}
+
+		yield put(MeasureActions.setMeasureActive(visible));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'measure visibility'));
+	}
+}
+
 export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.WAIT_FOR_VIEWER, waitForViewer);
 	yield takeLatest(ViewerTypes.MAP_INITIALISE, mapInitialise);
@@ -137,4 +298,17 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.MAP_START, mapStart);
 	yield takeLatest(ViewerTypes.MAP_STOP, mapStop);
 	yield takeLatest(ViewerTypes.GET_SCREENSHOT, getScreenshot);
+	yield takeLatest(ViewerTypes.INITIALISE_TOOLBAR, initialiseToolbar);
+	yield takeLatest(ViewerTypes.SET_NAVIGATION_MODE, setNavigationMode);
+	yield takeLatest(ViewerTypes.RESET_HELICOPTER_SPEED, resetHelicopterSpeed);
+	yield takeLatest(ViewerTypes.INCREASE_HELICOPTER_SPEED, increaseHelicopterSpeed);
+	yield takeLatest(ViewerTypes.DECREASE_HELICOPTER_SPEED, decreaseHelicopterSpeed);
+	yield takeLatest(ViewerTypes.GO_TO_EXTENT, goToExtent);
+	yield takeLatest(ViewerTypes.SET_CLIPPING_MODE, setClippingMode);
+	yield takeLatest(ViewerTypes.SET_METADATA_VISIBILITY, setMetadataVisibility);
+	yield takeLatest(ViewerTypes.SET_MEASURE_VISIBILITY, setMeasureVisibility);
+	yield takeLatest(ViewerTypes.UPDATE_CLIP_STATE, updateClipState);
+	yield takeLatest(ViewerTypes.SET_CLIP_EDIT, setClipEdit);
+	yield takeLatest(ViewerTypes.START_LISTEN_ON_NUM_CLIP, startListenOnNumClip);
+	yield takeLatest(ViewerTypes.STOP_LISTEN_ON_NUM_CLIP, stopListenOnNumClip);
 }

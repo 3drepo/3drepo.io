@@ -16,8 +16,8 @@
  */
 
 import * as React from 'react';
-import { MuiPickersUtilsProvider, DatePicker } from 'material-ui-pickers';
-import LuxonUtils from '@date-io/luxon';
+import { MuiPickersUtilsProvider } from 'material-ui-pickers';
+import DayJsUtils from '@date-io/dayjs';
 
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
@@ -51,22 +51,16 @@ interface IState {
 	activeItem: any;
 	from: any;
 	to: any;
-	selectedDate: any;
 }
 
 export class FiltersMenu extends React.PureComponent<IProps, IState> {
 	public state = {
 		activeItem: null,
-		from: new Date(),
-		to: new Date(),
-		selectedDate: new Date()
+		from: null,
+		to: null
 	};
 
 	public parentRef = React.createRef<HTMLElement>();
-
-	public componentDidMount() {
-		const dateFilter = this.props.items.find((filter) => filter.type === DATA_TYPES.DATE);
-	}
 
 	public showSubMenu = (e) => {
 		this.setState({ activeItem: e });
@@ -95,7 +89,7 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 
 	public onDateChange = (item, subItem) => (value) => {
 		this.setState({ [subItem.value]: value } as any, () => {
-			subItem.date = value;
+			subItem.date = value.valueOf();
 			this.props.onToggleFilter(item, subItem);
 		});
 	}
@@ -111,7 +105,8 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 					{subItem.label}
 					{item.type === DATA_TYPES.DATE &&
 						<StyledDatePicker
-							value={this.state[subItem.value]}
+							value={subItem.value.value ? this.state[subItem.value.value] : null}
+							placeholder="Select date"
 							onChange={this.onDateChange(item, subItem.value)}
 						/>
 					}
@@ -151,13 +146,9 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 		</MenuFooter>
 	)
 
-	public handleDateChange = (date) => {
-		this.setState({ selectedDate: date });
-	}
-
 	public render() {
 		return (
-			<MuiPickersUtilsProvider utils={LuxonUtils}>
+			<MuiPickersUtilsProvider utils={DayJsUtils}>
 				<MenuList>
 					{this.renderMenuItems(this.props.items)}
 					{this.renderFooter()}

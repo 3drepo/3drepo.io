@@ -21,21 +21,21 @@ import { COLOR } from '../../../styles';
 
 export const Container = styled.div``;
 
-const BaseStyles = styled(Grid) `
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  width: 100%;
+const BaseStyles = styled(Grid)`
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	width: 100%;
 `;
 
-export const Name = styled(BaseStyles) `
-  color: ${COLOR.BLACK_60};
+export const Name = styled(BaseStyles)`
+	color: ${COLOR.BLACK_60};
 	font-size: 14px;
-  line-height: 20px;
+	line-height: 20px;
 `;
 
-export const Detail = styled(BaseStyles) `
-  font-size: 10px;
-  color: ${COLOR.BLACK_40};
-  line-height: 13px;
+export const Detail = styled(BaseStyles)`
+	font-size: 10px;
+	color: ${COLOR.BLACK_40};
+	line-height: 13px;
 `;

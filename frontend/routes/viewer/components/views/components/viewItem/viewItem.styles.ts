@@ -30,102 +30,102 @@ import * as ImageStyles from '../../../../../components/image/image.styles';
 import { FONT_WEIGHT } from '../../../../../../styles';
 
 const IconStyles = css`
-  cursor: pointer;
+	cursor: pointer;
 
-  &:hover {
-    color: ${COLOR.BLACK_40};
-  }
+	&:hover {
+		color: ${COLOR.BLACK_40};
+	}
 `;
 
 export const ViewpointItem = styled(MenuItem)`
-  && {
-    height: 80px;
-    padding: 8px;
-    background-color: ${(props: any) => props.active ? `${COLOR.BLACK_6}` : 'initial'};
-  }
+	&& {
+		height: 80px;
+		padding: 8px;
+		background-color: ${(props: any) => props.active ? `${COLOR.BLACK_6}` : 'initial'};
+	}
 
-  &&:not(:first-child) {
-    border-top: 1px solid ${COLOR.BLACK_20};
-  }
+	&&:not(:first-child) {
+		border-top: 1px solid ${COLOR.BLACK_20};
+	}
 
-  ${ImageStyles.StyledImage} {
-    width: 79px;
-    height: 79px;
-  }
+	${ImageStyles.StyledImage} {
+		width: 79px;
+		height: 79px;
+	}
 ` as any;
 
 export const StyledForm = styled(Form)`
-  display: flex;
-  align-items: center;
-  flex: 1;
-  justify-content: space-between;
+	display: flex;
+	align-items: center;
+	flex: 1;
+	justify-content: space-between;
 `;
 
 export const IconsGroup = styled.div`
-  display: flex;
-  align-items: center;
-  margin-right: 20px;
+	display: flex;
+	align-items: center;
+	margin-right: 20px;
 `;
 
 export const ThumbnailPlaceholder = styled.div`
-  width: 79px;
-  height: 79px;
-  border: 1px solid ${COLOR.BLACK_20};
+	width: 79px;
+	height: 79px;
+	border: 1px solid ${COLOR.BLACK_20};
 `;
 
 export const StyledDeleteIcon = styled(DeleteIcon)`
-  && {
-    ${IconStyles}
-  }
+	&& {
+		${IconStyles}
+	}
 `;
 
 export const StyledEditIcon = styled(EditIcon)`
-  && {
-    ${IconStyles}
-    margin-right: 14px;
-  }
+	&& {
+		${IconStyles}
+		margin-right: 14px;
+	}
 `;
 
 export const NewViewpointName = styled(TextField)`
-  && {
-    margin-left: 12px;
-    margin-right: 12px;
-  }
+	&& {
+		margin-left: 12px;
+		margin-right: 12px;
+	}
 `;
 
 export const StyledCancelIcon = styled(CancelIcon)`
-  && {
-    ${IconStyles}
-    margin-right: 14px;
-  }
+	&& {
+		${IconStyles}
+		margin-right: 14px;
+	}
 `;
 
 export const StyledSaveIcon = styled(SaveIcon)`
-  && {
-    ${IconStyles}
-  }
+	&& {
+		${IconStyles}
+	}
 `;
 
 export const SaveIconButton = styled(IconButton)`
-  && {
-    padding: 0;
+	&& {
+		padding: 0;
 
-    &:hover {
-      background-color: transparent;
-    }
-  }
+		&:hover {
+			background-color: transparent;
+		}
+	}
 `;
 
 export const NameRow = styled.div`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 `;
 
 export const Name = styled.h3`
-  margin-left: 16px;
-  font-weight: ${FONT_WEIGHT.NORMAL};
-  font-size: 14px;
-  color: ${COLOR.BLACK};
+	margin-left: 16px;
+	font-weight: ${FONT_WEIGHT.NORMAL};
+	font-size: 14px;
+	color: ${COLOR.BLACK};
 `;

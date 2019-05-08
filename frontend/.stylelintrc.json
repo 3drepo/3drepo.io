@@ -14,6 +14,7 @@
     "shorthand-property-no-redundant-values": true,
     "max-empty-lines": 1,
     "length-zero-no-unit": true,
-    "unit-case": "lower"
+    "unit-case": "lower",
+    "indentation": "tab"
   }
 }

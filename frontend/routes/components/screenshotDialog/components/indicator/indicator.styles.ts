@@ -19,15 +19,15 @@ import styled from 'styled-components';
 import { COLOR } from '../../../../../styles';
 
 export const StyledIndicator = styled.div`
-  border-radius: 100%;
-  width: ${(props: any) => props.size}px;
-  height: ${(props: any) => props.size}px;
-  color: ${(props: any) => props.color || COLOR.WHITE};
-  border: 2px solid currentColor;
-  opacity: .8;
-  position: absolute;
-  z-index: 2;
-  left: 0;
-  top: 0;
-  pointer-events: none;
+	border-radius: 100%;
+	width: ${(props: any) => props.size}px;
+	height: ${(props: any) => props.size}px;
+	color: ${(props: any) => props.color || COLOR.WHITE};
+	border: 2px solid currentColor;
+	opacity: .8;
+	position: absolute;
+	z-index: 2;
+	left: 0;
+	top: 0;
+	pointer-events: none;
 ` as any;

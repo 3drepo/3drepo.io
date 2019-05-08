@@ -36,7 +36,8 @@ export class AnalyticService {
 
 		if (this.ClientConfigService &&
 			!this.ClientConfigService.development &&
-			this.ClientConfigService.gaTrackId
+			this.ClientConfigService.ga &&
+			this.ClientConfigService.ga.trackId
 		) {
 			console.debug('Adding Google Analytics and Remarketing');
 			this.insertGA();
@@ -90,23 +91,39 @@ export class AnalyticService {
 		})(window, document, "script", "https://www.google-analytics.com/analytics.js", "ga");
 		/* tslint:enable */
 
+		const args = ['create',  this.ClientConfigService.ga.trackId, 'auto', {}];
+
 		if (this.ClientConfigService.userId) {
-			ga('create', this.ClientConfigService.gaTrackId, 'auto', { userId: this.ClientConfigService.userId });
-		} else {
-			ga('create', this.ClientConfigService.gaTrackId, 'auto');
+			args[3] = Object.assign({ userId: this.ClientConfigService.userId}, args[3] );
 		}
+
+		ga.apply(window, args);
+
+		const refererArgs =  args.concat([]);
+		refererArgs[1] = this.ClientConfigService.ga.refererTrackId;
+		refererArgs[3] = Object.assign({name: 'referer', allowLinker: true}, args[3]);
+
+		ga.apply(window, refererArgs);
+		ga('referer.require', 'linker');
+		ga('referer.linker:autoLink', [this.ClientConfigService.ga.refererDomain]);
 	}
 
 	public isGoogleAnalyticEnabled() {
 		return typeof ga !== 'undefined' && ga !== null;
 	}
 
-	public sendPageView(location) {
+	public sendPageView(location, tracker = '') {
 		if (!this.isGoogleAnalyticEnabled()) {
 			return;
 		}
 
-		ga('send', 'pageview', location.pathname + location.search);
+		tracker = !tracker ? '' : tracker + '.';
+
+		ga(tracker + 'send', 'pageview', location.pathname + location.search);
+	}
+
+	public sendPageViewReferer(location) {
+		this.sendPageView(location, 'referer');
 	}
 
 	public sendEvent(event) {

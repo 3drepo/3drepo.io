@@ -48,14 +48,14 @@ export const Paragraph = styled.p`
 `;
 
 export const StyledButton = styled(Button)`
-  && {
-    margin-left: -5px;
-    padding: 0 8px;
-  }
+	&& {
+		margin-left: -5px;
+		padding: 0 8px;
+	}
 ` as any;
 
 export const Buttons = styled(Grid)`
-  && {
-    margin-top: 10px;
-  }
+	&& {
+		margin-top: 10px;
+	}
 `;

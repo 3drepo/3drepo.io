@@ -19,9 +19,9 @@ import styled from 'styled-components';
 import { COLOR } from '../../../../../styles';
 
 export const LoaderContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  padding: 2rem 0;
-  background: #fafafa;
+	display: flex;
+	justify-content: center;
+	padding: 2rem 0;
+	background: #fafafa;
 	color: ${COLOR.BLACK_40};
 `;

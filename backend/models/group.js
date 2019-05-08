@@ -48,6 +48,13 @@ const ruleOperators = {
 	"NOT_IN_RANGE":	2
 };
 
+const notOperators = [
+	"IS_NOT",
+	"NOT_CONTAINS",
+	"NOT_EQUALS",
+	"NOT_IN_RANGE"
+];
+
 const fieldTypes = {
 	"description": "[object String]",
 	"name": "[object String]",
@@ -75,21 +82,39 @@ const groupSchema = Schema({
 	createdAt: Date,
 	updatedAt: Date,
 	updatedBy: String,
-	objects: [{
-		_id: false,
-		account: String,
-		model: String,
-		shared_ids: [],
-		ifc_guids: [String]
-	}],
-	rules: [{
-		_id: false,
-		field: String,
-		operator: String,
-		values: [String]
-	}],
-	issue_id: Object,
-	risk_id: Object,
+	objects: {
+		type: [{
+			_id: false,
+			account: String,
+			model: String,
+			shared_ids: {
+				type: [],
+				required: false
+			},
+			ifc_guids: {
+				type: [String],
+				required: false
+			}
+		}],
+		required: false
+	},
+	rules: {
+		type: [{
+			_id: false,
+			field: String,
+			operator: String,
+			values: []
+		}],
+		required: false
+	},
+	issue_id: {
+		type: Object,
+		required: false
+	},
+	risk_id: {
+		type: Object,
+		required: false
+	},
 	color: [Number]
 });
 
@@ -163,7 +188,6 @@ groupSchema.statics.isIfcGuid = function (value) {
  * Converts all shared IDs to IFC Guids if applicable and return the objects array.
  */
 groupSchema.methods.getObjectsArrayAsIfcGuids = function (data) {
-
 	const ifcGuidPromises = [];
 
 	if (!data) {
@@ -260,7 +284,6 @@ groupSchema.statics.findIfcGroupByUID = function (dbCol, uid) {
  * Converts all IFC Guids to shared IDs if applicable and return the objects array.
  */
 groupSchema.methods.getObjectsArray = function (model, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
-
 	const objectIdPromises = [];
 
 	for (let i = 0; i < this.objects.length; i++) {
@@ -354,9 +377,8 @@ groupSchema.statics.findByUIDSerialised = function (dbCol, uid, branch, revId, s
 
 			return getObjectIds(dbCol, group, branch, revId, true, showIfcGuids).then((sharedIdObjects) => {
 
-				const returnGroup = { _id: utils.uuidToString(group._id), color: group.color };
-				returnGroup.objects = sharedIdObjects;
-				return returnGroup;
+				group.objects = sharedIdObjects;
+				return clean(group);
 			});
 		});
 };
@@ -469,7 +491,7 @@ groupSchema.methods.updateAttrs = function (dbCol, data, user) {
 
 		if (typeCorrect) {
 			if (Object.keys(toUpdate).length !== 0) {
-				toUpdate.updateBy = user;
+				toUpdate.updatedBy = user;
 				toUpdate.updatedAt = Date.now();
 				return db.getCollection(dbCol.account, dbCol.model + ".groups").then(_dbCol => {
 					const updateBson = {$set: toUpdate};
@@ -565,6 +587,14 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 	});
 };
 
+function cleanArray(obj, prop) {
+	if (obj[prop] && 0 === obj[prop].length) {
+		delete obj[prop];
+	}
+
+	return obj;
+}
+
 function clean(groupData) {
 	const cleaned = groupData.toObject();
 	cleaned._id = utils.uuidToString(cleaned._id);
@@ -578,6 +608,17 @@ function clean(groupData) {
 	if (Date.prototype.isPrototypeOf(cleaned.updatedAt)) {
 		cleaned.updatedAt = cleaned.updatedAt.getTime();
 	}
+
+	cleanArray(cleaned, "rules");
+
+	for (let i = 0; cleaned.objects && i < cleaned.objects.length; i++) {
+		cleanArray(cleaned.objects[i], "ifc_guids");
+		cleanArray(cleaned.objects[i], "shared_ids");
+	}
+
+	cleaned.objects = cleaned.objects.filter(obj => obj.ifc_guids || obj.shared_ids);
+
+	delete cleaned.__v;
 
 	return cleaned;
 }
@@ -692,7 +733,7 @@ function buildRule(rule) {
 						exRangeUpperOp[fieldName] = { $gt: Math.max(exRangeVal1, exRangeVal2) };
 
 						operation = undefined;
-						clauses.push({ $and: [exRangeLowerOp, exRangeUpperOp]});
+						clauses.push({ $or: [exRangeLowerOp, exRangeUpperOp]});
 					}
 					break;
 			}
@@ -708,7 +749,11 @@ function buildRule(rule) {
 	}
 
 	if (clauses.length > 1) {
-		expression = { $or: clauses };
+		if (notOperators.includes(rule.operator)) {
+			expression = { $and: clauses };
+		} else {
+			expression = { $or: clauses };
+		}
 	} else if (clauses.length === 1) {
 		expression = clauses[0];
 	}

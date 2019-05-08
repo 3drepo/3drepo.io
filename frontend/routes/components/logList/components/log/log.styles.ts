@@ -20,7 +20,6 @@ import { COLOR } from '../../../../../styles/colors';
 import { Image } from '../../../../components/image';
 
 export const Container = styled.div`
-	background-color: ${COLOR.WHITE_87};
 	cursor: ${(props: any) => props.clickable ? 'pointer' : 'default'};
 	padding: 10px;
 ` as any;
@@ -32,7 +31,7 @@ export const MitigationMessage = styled.span`
 
 export const UserMessage = styled.span`
 	background-color: ${COLOR.WHITE};
-	color: ${COLOR};
+	color: ${COLOR.BLACK_60};
 	padding: 6px;
 	box-shadow: 0 2px 5px ${COLOR.BLACK_6};
 	display: inline-block;
@@ -96,10 +95,26 @@ export const MitigationWrapper = styled.div`
 
 export const ScreenshotWrapper = styled.div`
 	width: 100%;
+	padding-top: 42%;
 	overflow: hidden;
 	position: relative;
 	margin: 8px 0 0;
 	border-radius: ${(props: any) => props.withMessage ? '2px 2px 0 0' : '2px'};
+` as any;
+
+export const Screenshot = styled(Image)`
+	img {
+		display: block;
+		max-width: 100%;
+		width: 100%;
+		height: auto;
+		margin: auto;
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+	}
 ` as any;
 
 export const MessageContainer = styled.div`

@@ -41,13 +41,13 @@ interface IProps {
 	name: string;
 	description: string;
 	author: string;
-	createdDate: string;
+	createdDate: number;
 	thumbnail: string;
 	roleColor: string;
 	StatusIconComponent: any;
 	statusColor: string;
-	dueDate?: string;
-	count?: number;
+	due_date?: number;
+	number?: number;
 	active?: boolean;
 	hasViewPermission?: boolean;
 	modelLoaded?: boolean;
@@ -58,12 +58,13 @@ interface IProps {
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
 	renderActions?: () => JSX.Element[];
+	willBeClosed?: boolean;
 }
 
 export class PreviewListItem extends React.PureComponent<IProps, any> {
 	get isExpiredDate() {
-		const { createdDate, dueDate } = this.props;
-		return createdDate >= dueDate ? 1 : 0;
+		const { due_date } = this.props;
+		return new Date().valueOf() >= due_date ? 1 : 0;
 	}
 
 	public renderArrowButton = renderWhenTrue(() => (
@@ -72,8 +73,10 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 		</ArrowButton>
 	));
 
-	public renderNameWithCounter = renderWhenTrue(() => <Name>{`${this.props.count}. ${this.props.name}`}</Name>);
+	public renderNameWithCounter = renderWhenTrue(() =>
+		<Name>{`${this.props.number} ${this.props.name}`}</Name>);
 	public renderName = renderWhenTrue(() => <Name>{this.props.name}</Name>);
+	public renderClosedMessage = renderWhenTrue(() => <ActionMessage content="This issue is now closed" />);
 
 	public renderThumbnail = renderWhenTrue(() => (
 		<ThumbnailWrapper>
@@ -88,13 +91,14 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 	));
 
 	public renderDeleteMessage = renderWhenTrue(() =>
-		<ActionMessage content={`This ${this.props.panelName} has been deleted`} />
+		<ActionMessage content={`This ${this.props.panelName || 'item'} has been deleted`} />
 	);
 
 	public render() {
 		const {
 			roleColor,
-			count,
+			// tslint:disable-next-line
+			number,
 			description,
 			author,
 			hideThumbnail,
@@ -105,7 +109,8 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 			hasViewPermission,
 			className,
 			renderActions,
-			willBeRemoved
+			willBeRemoved,
+			willBeClosed
 		} = this.props;
 
 		const shouldRenderActions = renderActions && active;
@@ -121,11 +126,12 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 			>
 				{this.renderDeleteMessage(willBeRemoved)}
 				<Container>
+					{this.renderClosedMessage(willBeClosed)}
 					<RoleIndicator color={roleColor} />
 					{this.renderThumbnail(!hideThumbnail)}
 					<Content>
-						{this.renderNameWithCounter(count)}
-						{this.renderName(!count)}
+						{this.renderNameWithCounter(number)}
+						{this.renderName(!(number))}
 
 						<PreviewItemInfo
 							author={author}

@@ -24,7 +24,9 @@ import { Loader } from '../../components/loader/loader.component';
 interface IProps {
 	items: any[];
 	isPending: boolean;
+	currentUser: string;
 	teamspace: string;
+	innerRef?: any;
 	removeLog: (index, guid) => void;
 	setCameraOnViewpoint: (viewpoint) => void;
 }
@@ -38,6 +40,7 @@ export class LogList extends React.PureComponent<IProps, any> {
 				removeLog={this.props.removeLog}
 				index={index}
 				teamspace={this.props.teamspace}
+				currentUser={this.props.currentUser}
 				setCameraOnViewpoint={this.props.setCameraOnViewpoint}
 			/>
 		);
@@ -53,7 +56,7 @@ export class LogList extends React.PureComponent<IProps, any> {
 
 	public render() {
 		return (
-			<Container>
+			<Container innerRef={this.props.innerRef}>
 				{this.props.isPending ? this.renderLoader() : this.props.items.map(this.renderLogItem)}
 			</Container>
 		);

@@ -95,6 +95,7 @@
 		FILE_IMPORT_MAX_NODES_EXCEEDED: { message: "Import failed: Too many objects, consider splitting up the model", status: 400 },
 		FILE_IMPORT_ODA_NOT_SUPPORTED: { message: "DGN/RVT import is currently not supported", status: 400 },
 		FILE_IMPORT_NO_3D_VIEW: { message: "Cannot find a 3D View within the model.", status: 400 },
+		FILE_IMPORT_TIMED_OUT: { message: "Process timed out. Consider splitting up the model", status: 500 },
 
 		QUEUE_CONN_ERR: { message: "Failed to queue your request. Please try again later.", status: 500},
 		QUEUE_NO_CONFIG: { message: "Server has no queue configuration", status: 500 },
@@ -393,7 +394,8 @@
 
 		}
 
-		let length;
+		const meta = { place, httpCode: resCode.status };
+
 		// Prepare error response
 		if (resCode.value) {
 			const responseObject = _.extend({}, extraInfo, {
@@ -403,11 +405,11 @@
 				value: resCode.value
 			});
 
-			length = JSON.stringify(responseObject)
+			meta.contentLength = JSON.stringify(responseObject)
 				.length;
 			req[C.REQ_REPO].logger.logError(
-				JSON.stringify(responseObject),
-				{ httpCode: resCode.status, contentLength: length }
+				resCode.code + " (" + resCode.value + ")",
+				meta
 			);
 
 			res.status(resCode.status)
@@ -429,7 +431,7 @@
 				}
 
 				// res.setHeader("Content-Length", extraInfo.length);
-				length = extraInfo.length;
+				meta.contentLength = extraInfo.length;
 
 				res.write(extraInfo, "binary");
 				res.flush();
@@ -437,14 +439,14 @@
 
 			} else {
 
-				length = typeof extraInfo === "string" ? extraInfo.length : JSON.stringify(extraInfo)
+				meta.contentLength = typeof extraInfo === "string" ? extraInfo.length : JSON.stringify(extraInfo)
 					.length;
 				res.status(resCode.status)
 					.send(extraInfo);
 			}
 
 			// log bandwidth and http status code
-			req[C.REQ_REPO].logger.logInfo("Responded with " + resCode.status, { httpCode: resCode.status, contentLength: length });
+			req[C.REQ_REPO].logger.logInfo(resCode.code, meta);
 		}
 
 		// next();

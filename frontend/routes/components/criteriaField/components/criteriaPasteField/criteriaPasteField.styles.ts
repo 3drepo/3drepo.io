@@ -7,39 +7,39 @@ import { TextField } from '../../../textField/textField.component';
 import * as TextFieldStyles from '../../../textField/textField.styles';
 
 const pasteIconStyle = css`
-  && {
-    font-size: 20px;
-  }
+	&& {
+		font-size: 20px;
+	}
 `;
 
 export const PasteButton = styled(IconButtonComponent)`
-  && {
-    width: 28px;
-    height: 28px;
-    padding: 4px;
-    margin-left: 5px;
-    margin-top: 5px;
-  }
+	&& {
+		width: 28px;
+		height: 28px;
+		padding: 4px;
+		margin-left: 5px;
+		margin-top: 5px;
+	}
 `;
 
 export const StyledSaveIcon = styled(SaveIcon)`
-  ${pasteIconStyle}
+	${pasteIconStyle}
 `;
 
 export const StyledCloseIcon = styled(CloseIcon)`
-  ${pasteIconStyle}
+	${pasteIconStyle}
 `;
 
 export const PasteContainer = styled.div`
-  width: 100%;
-  align-items: flex-start;
-  display: flex;
+	width: 100%;
+	align-items: flex-start;
+	display: flex;
 `;
 
 export const PasteField = styled(TextField)`
-  flex: 1;
+	flex: 1;
 
-  ${TextFieldStyles.StyledTextField} {
-    margin: 4px 0;
-  }
+	${TextFieldStyles.StyledTextField} {
+		margin: 4px 0;
+	}
 `;

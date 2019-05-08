@@ -16,7 +16,8 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { DEFAULT_SETTINGS } from '../../constants/viewer';
+import { cloneDeep } from 'lodash';
+import { DEFAULT_SETTINGS, VIEWER_NAV_MODES, VIEWER_CLIP_MODES, VIEWER_PANELS } from '../../constants/viewer';
 
 export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	waitForViewer: [],
@@ -29,19 +30,85 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	getScreenshot: [],
 	updateSettings: ['settings'],
 	saveSettings: ['settings'],
-	loadSettings: []
+	loadSettings: [],
+	setNavigationMode: ['mode'],
+	setNavigationModeSuccess: ['mode'],
+	initialiseToolbar: [],
+	goToExtent: [],
+	setHelicopterSpeed: ['speed'],
+	resetHelicopterSpeed: ['teamspace', 'modelId', 'updateDefaultSpeed'],
+	increaseHelicopterSpeed: ['teamspace', 'modelId'],
+	decreaseHelicopterSpeed: ['teamspace', 'modelId'],
+	setIsFocusMode: ['isFocusMode'],
+	setClippingMode: ['mode'],
+	setClippingModeSuccess: ['mode'],
+	setClipEdit: ['isClipEdit'],
+	setClipEditSuccess: ['isClipEdit'],
+	setClipNumber: ['clipNumber'],
+	setMetadataVisibility: ['visible'],
+	setMeasureVisibility: ['visible'],
+	setPanelVisibility: ['panelName', 'isVisible'],
+	deactivateMeasure: [],
+	updateClipState: ['clipNumber'],
+	startListenOnNumClip: [],
+	stopListenOnNumClip: []
 }, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {
 	settings: window.localStorage.getItem('visualSettings') ?
-			JSON.parse(window.localStorage.getItem('visualSettings')) : DEFAULT_SETTINGS
+			JSON.parse(window.localStorage.getItem('visualSettings')) : DEFAULT_SETTINGS,
+	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
+	clippingMode: null,
+	helicopterSpeed: null,
+	isFocusMode: false,
+	isClipEdit: false,
+	clipNumber: 0,
+	visiblePanels: {
+		[VIEWER_PANELS.METADATA]: false
+	}
 };
 
 const updateSettings = (state = INITIAL_STATE, {settings}) => {
 	window.localStorage.setItem('visualSettings', JSON.stringify(settings));
-	return {...state, settings};
+	return { ...state, settings };
+};
+
+const setNavigationModeSuccess = (state = INITIAL_STATE, {mode}) => {
+	return { ...state, navigationMode: mode };
+};
+
+const setClippingModeSuccess = (state = INITIAL_STATE, {mode}) => {
+	return { ...state, clippingMode: mode, isClipEdit: true };
+};
+
+const setHelicopterSpeed = (state = INITIAL_STATE, {speed}) => {
+	return { ...state, helicopterSpeed: speed };
+};
+
+const setIsFocusMode = (state = INITIAL_STATE, {isFocusMode}) => {
+	return { ...state, isFocusMode };
+};
+
+const setClipEditSuccess = (state = INITIAL_STATE, {isClipEdit}) => {
+	return { ...state, isClipEdit };
+};
+
+const setClipNumber = (state = INITIAL_STATE, {clipNumber}) => {
+	return { ...state, clipNumber };
+};
+
+const setPanelVisibility = (state = INITIAL_STATE, {panelName, isVisible}) => {
+	const visiblePanels = cloneDeep(state.visiblePanels);
+	return { ...state, visiblePanels: {...visiblePanels, [panelName]: isVisible} };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[ViewerTypes.UPDATE_SETTINGS] : updateSettings
+	[ViewerTypes.UPDATE_SETTINGS] : updateSettings,
+	[ViewerTypes.SET_NAVIGATION_MODE_SUCCESS] : setNavigationModeSuccess,
+	[ViewerTypes.SET_CLIPPING_MODE_SUCCESS] : setClippingModeSuccess,
+	[ViewerTypes.SET_HELICOPTER_SPEED] : setHelicopterSpeed,
+	[ViewerTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,
+	[ViewerTypes.SET_CLIP_EDIT_SUCCESS] : setClipEditSuccess,
+	[ViewerTypes.SET_CLIP_NUMBER] : setClipNumber,
+	[ViewerTypes.SET_PANEL_VISIBILITY] : setPanelVisibility
 });

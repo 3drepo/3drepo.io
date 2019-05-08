@@ -20,14 +20,14 @@ import Grid from '@material-ui/core/Grid';
 import Grow from '@material-ui/core/Grow';
 
 export const StyledGrid = styled(Grid)`
-  && {
-    width: auto;
-    position: relative;
-  }
+	&& {
+		width: auto;
+		position: relative;
+	}
 `;
 
 export const StyledGrow = styled(Grow)`
-  && {
-    transform-origin: right;
-  }
+	&& {
+		transform-origin: right;
+	}
 `;

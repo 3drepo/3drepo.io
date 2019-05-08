@@ -30,9 +30,6 @@ view.clean = function (dbCol, viewToClean, targetType = "[object String]") {
 	const keys = ["_id", "guid", "highlighted_group_id", "hidden_group_id", "shown_group_id"];
 	let thumbnailPromise;
 
-	viewToClean.account = dbCol.account;
-	viewToClean.model = dbCol.model;
-
 	keys.forEach((key) => {
 		if (viewToClean[key] && "[object String]" === targetType) {
 			if ("[object Object]" === Object.prototype.toString.call(viewToClean[key])) {
@@ -66,7 +63,7 @@ view.clean = function (dbCol, viewToClean, targetType = "[object String]") {
 	if (viewToClean.screenshot && viewToClean.screenshot.buffer) {
 		delete viewToClean.screenshot.buffer;
 		viewToClean.screenshot.thumbnail =
-			viewToClean.account + "/" + viewToClean.model + "/viewpoints/" + viewToClean._id + "/thumbnail.png";
+			dbCol.account + "/" + dbCol.model + "/viewpoints/" + viewToClean._id + "/thumbnail.png";
 	}
 
 	if (thumbnailPromise) {

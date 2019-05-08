@@ -23,48 +23,48 @@ import { COLOR } from '../../../../../styles';
 import * as ColorPickerStyles from '../../../../components/colorPicker/colorPicker.styles';
 
 export const StyledButton = styled(Button)`
-  && {
-    padding: 8px;
-  }
+	&& {
+		padding: 8px;
+	}
 
-  &:last-child {
-    margin-left: 8px;
-  }
+	&:last-child {
+		margin-left: 8px;
+	}
 `;
 
 export const ToolsContainer = styled.div`
-  position: absolute;
-  z-index: 3;
-  bottom: 35px;
-  left: 50%;
-  transform: translate(-50%, 0);
-  display: flex;
-  align-items: center;
-  background: ${COLOR.WHITE_87};
-  padding: 5px 10px 5px 20px;
-  box-shadow: 0 0 10px ${COLOR.BLACK_20};
-  border-radius: 4px;
-  transition: opacity 200ms ease-in-out;
+	position: absolute;
+	z-index: 3;
+	bottom: 35px;
+	left: 50%;
+	transform: translate(-50%, 0);
+	display: flex;
+	align-items: center;
+	background: ${COLOR.WHITE_87};
+	padding: 5px 10px 5px 20px;
+	box-shadow: 0 0 10px ${COLOR.BLACK_20};
+	border-radius: 4px;
+	transition: opacity 200ms ease-in-out;
 
-  ${ColorPickerStyles.ColorSelect} {
-    border-bottom: none;
-    width: 60px;
-  }
+	${ColorPickerStyles.ColorSelect} {
+		border-bottom: none;
+		width: 60px;
+	}
 
-  &[disabled] {
-    padding-left: 10px;
+	&[disabled] {
+		padding-left: 10px;
 
-    ${StyledButton} {
-      margin-left: 0;
-    }
-  }
+		${StyledButton} {
+			margin-left: 0;
+		}
+	}
 ` as any;
 
 export const OptionsDivider = styled(Divider)`
-  && {
-    margin: 0 12px;
-    height: 48px;
-    width: 1px;
-    opacity: 0.5;
-  }
+	&& {
+		margin: 0 12px;
+		height: 48px;
+		width: 1px;
+		opacity: 0.5;
+	}
 `;

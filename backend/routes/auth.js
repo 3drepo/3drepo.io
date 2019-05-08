@@ -683,14 +683,13 @@ function signUp(req, res, next) {
 				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
 				return Promise.resolve(err);
 			});
-
 			// send verification email
 			return Mailer.sendVerifyUserEmail(req.body.email, {
 				token : data.token,
 				email: req.body.email,
+				firstName: utils.ucFirst(req.body.firstName),
 				username: req.params.account,
 				pay: req.body.pay
-
 			}).catch(err => {
 				// catch email error instead of returning to client
 				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
@@ -731,7 +730,8 @@ function forgotPassword(req, res, next) {
 				return Mailer.sendResetPasswordEmail(data.email, {
 					token : data.token,
 					email: data.email,
-					username: data.username
+					username: data.username,
+					firstName:data.firstName
 				}).catch(err => {
 					// catch email error instead of returning to client
 					req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);

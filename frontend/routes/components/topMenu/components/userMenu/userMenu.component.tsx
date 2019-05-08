@@ -20,7 +20,6 @@ import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import ViewList from '@material-ui/icons/ViewList';
 import ExitToApp from '@material-ui/icons/ExitToApp';
-import Restore from '@material-ui/icons/Restore';
 import Settings from '@material-ui/icons/Settings';
 import ContactSupport from '@material-ui/icons/ContactSupport';
 
@@ -43,7 +42,7 @@ const UserButton = ({ IconProps, Icon, ...props }) => (
 		aria-label="Toggle user menu"
 		aria-haspopup="true"
 	>
-		<UserIcon {...IconProps} />
+		<UserIcon {...IconProps} size="small" />
 	</IconButton>
 );
 
@@ -59,7 +58,6 @@ const UserMenuButton = ({ Icon, ...props }) => {
 };
 
 const UserMenuContent = (props) => {
-	const hasMemorySettings = Boolean(localStorage.getItem('deviceMemory'));
 	const { currentUser: { username, avatarUrl, firstName, lastName } } = props;
 	const name = firstName || lastName ? `${firstName || ''} ${lastName || ''}`.trim() : username;
 
@@ -95,17 +93,6 @@ const UserMenuContent = (props) => {
 				label="Visual Settings"
 				onButtonClick={invokeAndClose(props.openSettingsDialog)}
 			/>
-			<MenuItem>
-				<MenuSwitch
-					checked={props.isLiteMode}
-					onChange={invokeAndClose(props.onLiteModeChange)}
-					color="secondary"
-					inputProps={{
-						'aria-label': 'Lite mode'
-					}}
-				/>
-				<MenuText primary="Lite mode" />
-			</MenuItem>
 			<UserMenuButton
 				Icon={ExitToApp}
 				label="Logout"
@@ -117,8 +104,6 @@ const UserMenuContent = (props) => {
 
 interface IProps {
 	currentUser: any;
-	isLiteMode?: boolean;
-	onLiteModeChange?: () => void;
 	onLogout?: () => void;
 	onTeamspacesClick?: () => void;
 	showDialog?: (config: any) => void;

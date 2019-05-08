@@ -22,23 +22,23 @@ import { PreviewListItem } from '../previewListItem/previewListItem.component';
 export const Container = styled.div``;
 
 export const StyledIcon = styled.span`
-  color: ${(props) => props.color ? props.color : COLOR.BLACK_60 };
-  font-size: 18px;
-  display: flex;
+	color: ${(props) => props.color ? props.color : COLOR.BLACK_60 };
+	font-size: 18px;
+	display: flex;
 `;
 
 const highlightedGroupStyles = css`
-  background-color: ${COLOR.BLACK_6};
+	background-color: ${COLOR.BLACK_6};
 
-  &:hover {
-    background-color: ${COLOR.BLACK_20};
-  }
+	&:hover {
+		background-color: ${COLOR.BLACK_20};
+	}
 `;
 
 export const GroupListItem = styled(PreviewListItem)`
-  && {
-    cursor: inherit;
-    height: 73px;
-    ${(props: any) => props.highlighted && highlightedGroupStyles}
-  }
+	&& {
+		cursor: inherit;
+		height: 73px;
+		${(props: any) => props.highlighted && highlightedGroupStyles}
+	}
 `;

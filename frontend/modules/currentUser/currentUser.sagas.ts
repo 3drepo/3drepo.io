@@ -95,7 +95,6 @@ export function* uploadAvatar({ file }) {
 		const {username} = yield select(selectCurrentUser);
 
 		const formData = new FormData();
-		const size = file.size;
 		const maxSizeUser = '1 MB';
 		const maxSize = 1024 * 1024; // 1 MB
 		if (file.size < maxSize) {

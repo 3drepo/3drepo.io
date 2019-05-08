@@ -22,35 +22,35 @@ import Button from '@material-ui/core/Button';
 import { COLOR } from '../../../../styles';
 
 export const ModelName = styled.h3`
-  margin: 0 0 24px;
-  color: ${COLOR.BLACK_60};
+	margin: 0 0 24px;
+	color: ${COLOR.BLACK_60};
 `;
 
 export const ModelInfo = styled.p`
-  color: ${COLOR.BLACK_40};
-  margin: 0;
-  font-size: 14px;
+	color: ${COLOR.BLACK_40};
+	margin: 0;
+	font-size: 14px;
 `;
 
 export const HiddenFileInput = styled.input`
-  visibility: hidden;
-  width: 0;
+	visibility: hidden;
+	width: 0;
 `;
 
 export const FileLabel = styled.label`
- && {
-    margin: 0 4px 0 0;
-  }
+	&& {
+		margin: 0 4px 0 0;
+	}
 `;
 
 export const StyledDialogActions = styled(DialogActions)`
-  && {
-    margin: 0;
-  }
+	&& {
+		margin: 0;
+	}
 `;
 
 export const CancelButton = styled(Button)`
-  && {
-    margin: 0 4px 0 0;
-  }
+	&& {
+		margin: 0 4px 0 0;
+	}
 `;

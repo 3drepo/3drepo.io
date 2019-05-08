@@ -4,10 +4,13 @@ const MODES = require('./tools/modes');
 
 module.exports = {
 	mode: MODES.PRODUCTION,
-	entry: './globals/unity-util.ts',
+	entry: './globals/unity-util-external.ts',
 	output: {
 		path: resolve(__dirname, '../../../public/unity/'),
 		filename: 'unity-util.js'
+	},
+	resolve: {
+		extensions: ['.ts', '.js', '.json']
 	},
 	module: {
 		rules: [

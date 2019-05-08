@@ -18,8 +18,8 @@
 import * as React from 'react';
 import { Field } from 'formik';
 
-import { ViewerPanelFooter, ViewerPanelContent, ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
-import { StyledForm, Header, Headline, StyledTextField } from './settingsForm.styles';
+import { ViewerPanelFooter, ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
+import { StyledForm, Header, Headline, StyledTextField, Container } from './settingsForm.styles';
 
 import SaveIcon from '@material-ui/icons/Save';
 
@@ -33,7 +33,7 @@ export const SettingsForm = (props) => {
 
 	return (
 		<StyledForm>
-			<ViewerPanelContent className="height-catcher" isPadding={true}>
+			<Container className="height-catcher">
 				<Header>
 					To visualize map tiles match GIS point with project base point
 				</Header>
@@ -98,7 +98,7 @@ export const SettingsForm = (props) => {
 						label={unit ? `z (${unit})` : 'z'}
 					/>
 				)} />
-			</ViewerPanelContent>
+			</Container>
 			<ViewerPanelFooter alignItems="center" justify="flex-end">
 				<Field render={({ form }) => (
 					<ViewerPanelButton

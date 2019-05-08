@@ -219,7 +219,7 @@ export class Viewer {
 		return new Promise((resolve, reject) => {
 			this.unityLoaderScript.addEventListener ('load', () => {
 				console.debug('Loaded UnityLoader.js succesfully');
-				UnityUtil.loadUnity(this.divId, memory);
+				UnityUtil.loadUnity(this.divId, undefined, memory);
 				resolve();
 			}, false);
 			this.unityLoaderScript.addEventListener ('error', (error) => {
@@ -542,7 +542,9 @@ export class Viewer {
 				// this.viewer.mozRequestFullScreen({
 				// 	vrDisplay,
 				// });
-			} else if (this.viewer.webkitRequestFullscreen) {
+			// @ts-ignore
+		} else if (this.viewer.webkitRequestFullscreen) {
+				// @ts-ignore
 				this.viewer.webkitRequestFullscreen();
 			}
 
@@ -551,7 +553,10 @@ export class Viewer {
 			// if (document.mozCancelFullScreen) {
 			// 	document.mozCancelFullScreen();
 			// } else
+
+			// @ts-ignore
 			if (document.webkitCancelFullScreen) {
+				// @ts-ignore
 				document.webkitCancelFullScreen();
 			}
 
@@ -618,6 +623,7 @@ export class Viewer {
 
 	public numClipPlanesUpdated(nPlanes) {
 		this.numClips = nPlanes;
+		this.emit(Viewer.EVENT.UPDATE_NUM_CLIP, nPlanes);
 	}
 
 	public getNumPlanes() {
