@@ -126,8 +126,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 						error={Boolean(form.errors.name)}
 						helperText={form.errors.name}
 						inputProps={
-							{maxLength: 120}
-						}
+							{maxLength: 120}}
 					/>
 				)} />
 			</StyledForm>
