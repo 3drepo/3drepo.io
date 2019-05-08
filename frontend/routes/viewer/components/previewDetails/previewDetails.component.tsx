@@ -93,11 +93,21 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		});
 	}
 
-	public renderNameWithCounter = renderWhenTrue(() =>
-		<Typography>{`${this.props.number}. ${this.props.name}`}</Typography>
-	);
+	public renderNameWithCounter = renderWhenTrue(() => (
+		<Typography
+			paragraph={true}
+		>
+			{`${this.props.number}. ${this.props.name}`}
+		</Typography>
+	));
 
-	public renderName = renderWhenTrue(() => <Typography>{this.props.name}</Typography>);
+	public renderName = renderWhenTrue(() => (
+		<Typography
+			paragraph={true}
+		>
+			{this.props.name}
+		</Typography>
+	));
 
 	public renderNameField = renderWhenTrue(() => (
 		<Formik
@@ -115,6 +125,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 						onChange={this.handleNameChange(field)}
 						error={Boolean(form.errors.name)}
 						helperText={form.errors.name}
+						inputProps={
+							{maxLength: 120}}
 					/>
 				)} />
 			</StyledForm>

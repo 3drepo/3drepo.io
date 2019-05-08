@@ -15,17 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { connect } from '../../../../helpers/migration';
-import { MeasureActions } from '../../../../modules/measure';
-import { PinButton } from './pinButton.component';
+import { selectSettings } from './model.selectors';
+import { createSelector } from 'reselect';
+import { isAdmin, hasPermissions, PERMISSIONS } from '../../helpers/permissions';
 
-const mapStateToProps = createStructuredSelector({});
+export const selectPermissions = createSelector(
+	selectSettings, (state) => state.permissions
+);
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	disableMeasure: MeasureActions.setDisabled,
-	deactivateMeasure: MeasureActions.deactivateMeasure
-}, dispatch);
+export const selectIsAdmin = createSelector(
+	selectPermissions, (permissions) => isAdmin(permissions)
+);
 
-export default connect(mapStateToProps, mapDispatchToProps)(PinButton);
+export const selectIsCommenter =  createSelector(
+	selectPermissions, selectIsAdmin, (permissions, hasAdminPermissions) =>
+		hasPermissions(PERMISSIONS.COMMENT_ISSUE, permissions) || hasAdminPermissions
+);

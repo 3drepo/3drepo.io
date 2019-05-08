@@ -43,6 +43,7 @@ interface IProps {
 	editMode: boolean;
 	teamspace: string;
 	modelId: string;
+	isCommenter: boolean;
 	onCancelEditMode: () => void;
 	onSaveEdit: (values) => void;
 	onDelete?: (event) => void;
@@ -61,10 +62,12 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	public renderViewpointData = renderWhenTrue(() => (
 		<NameRow>
 			<Name>{this.props.viewpoint.name}</Name>
-			<IconsGroup>
-				<StyledEditIcon onClick={this.props.onOpenEditMode} />
-				<StyledDeleteIcon onClick={this.props.onDelete} />
-			</IconsGroup>
+			{this.props.isCommenter &&
+				<IconsGroup>
+					<StyledEditIcon onClick={this.props.onOpenEditMode} />
+					<StyledDeleteIcon onClick={this.props.onDelete} />
+				</IconsGroup>
+			}
 		</NameRow>
 	));
 

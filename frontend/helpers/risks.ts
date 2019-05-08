@@ -154,7 +154,7 @@ const isJobOwner = (riskData, userJob, permissions, currentUser) => {
 const isAssignedJob = (riskData, userJob, permissions) => {
 	return riskData && userJob &&
 		(userJob._id &&
-			riskData.assigned_roles[0] &&
+			riskData.assigned_roles && riskData.assigned_roles.length &&
 			userJob._id === riskData.assigned_roles[0]) &&
 			!isViewer(permissions);
 };
