@@ -115,6 +115,9 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 						onChange={this.handleNameChange(field)}
 						error={Boolean(form.errors.name)}
 						helperText={form.errors.name}
+						inputProps={
+    						{maxLength: 50}
+						}
 					/>
 				)} />
 			</StyledForm>
