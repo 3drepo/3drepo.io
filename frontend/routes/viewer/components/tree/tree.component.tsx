@@ -209,8 +209,8 @@ export class Tree extends React.PureComponent<IProps, any> {
 				key={key}
 				data={treeNode}
 				isSearchResult={treeNode.isSearchResult}
-				selected={nodesSelectionMap[treeNode._id]}
-				highlighted={this.isHighlighted(treeNode)}
+				// selected={nodesSelectionMap[treeNode._id]}
+				// highlighted={this.isHighlighted(treeNode)}
 				parentIndex={treeNode.parentIndex}
 				expanded={expandedNodesMap[treeNode._id]}
 			/>

@@ -284,6 +284,7 @@ function* selectNode({ id }) {
 
 function* setTreeNodesVisibility({ nodes, visibility }) {
 	try {
+		console.log('setTreeNodesVisibility', nodes, visibility);
 		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
 		const nodesSelectionMap = yield select(selectNodesSelectionMap);
 		const nodesIndexesMap = yield select(selectNodesIndexesMap);
@@ -336,14 +337,18 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 						newNumberOfInvisibleChildrenMap[currentNode._id] = node.childrenNumber + i;
 
 						if (currentNode.childrenNumber > newNumberOfInvisibleChildrenMap[currentNode._id]) {
+							console.log('Set Parent of invisible!');
 							newVisibilityMap[currentNode._id] = VISIBILITY_STATES.PARENT_OF_VISIBLE;
 						}
 						parents.push(currentNode);
 					}
 				}
 
+				yield put(TreeActions.setAuxiliaryMaps({
+					nodesVisibilityMap: newVisibilityMap
+				}));
+
 				yield put(TreeActions.setComponentState({
-					nodesVisibilityMap: newVisibilityMap,
 					numberOfInvisibleChildrenMap: newNumberOfInvisibleChildrenMap
 				}));
 			}
