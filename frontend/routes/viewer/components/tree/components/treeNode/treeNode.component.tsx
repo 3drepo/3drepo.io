@@ -158,7 +158,6 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { highlighted, expanded, selected, isSearchResult, style } = this.props;
-		console.log('visibilityMap', this.props.visibilityMap);
 		return (
 			<Container
 				style={style}
