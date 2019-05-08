@@ -93,21 +93,21 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		});
 	}
 
-	public renderNameWithCounter = renderWhenTrue(() =>
+	public renderNameWithCounter = renderWhenTrue(() => (
 		<Typography
 			paragraph={true}
 		>
 			{`${this.props.number}. ${this.props.name}`}
 		</Typography>
-	);
+	));
 
-	public renderName = renderWhenTrue(() =>
+	public renderName = renderWhenTrue(() => (
 		<Typography
 			paragraph={true}
 		>
 			{this.props.name}
 		</Typography>
-	);
+	));
 
 	public renderNameField = renderWhenTrue(() => (
 		<Formik
