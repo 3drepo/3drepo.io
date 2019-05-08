@@ -739,51 +739,11 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 						settings.properties.code : "";
 				});
 
-				// Check submodels
-				return Ref.find(dbCol, {type: "ref", _id: {"$in": historySearchResults.current}}).then((refs) => {
-					const subModelsPromises = [];
+				if (!noClean) {
+					mainRisks = mainRisks.map(r => clean(dbCol, r));
+				}
 
-					refs.forEach((ref) => {
-						const subDbCol = {
-							account: dbCol.account,
-							model: ref.project
-						};
-						subModelsPromises.push(
-							this.findRisksByModelName(subDbCol, username, "master", null, projection, ids, true).then((subRisks) => {
-								subRisks.forEach((subRisk) => {
-									subRisk.origin_account = subDbCol.account;
-									subRisk.origin_model = subDbCol.model;
-								});
-
-								return subRisks;
-							}).catch((err) => {
-								// Skip sub-model errors to allow working sub-models to load
-								systemLogger.logError("Error while retrieving sub-model risks",
-									{
-										subDbCol,
-										err: err
-									});
-							})
-						);
-					});
-
-					return Promise.all(subModelsPromises).then((subModelsRisks) => {
-						if (subModelsRisks) {
-							subModelsRisks.forEach((subModelRisks) => {
-								if (subModelRisks) {
-									// Skip concat of undefined subModelRisks
-									//  e.g. from error loading sub-model risk
-									mainRisks = mainRisks.concat(subModelRisks);
-								}
-							});
-						}
-						if (!noClean) {
-							mainRisks = mainRisks.map(r => clean(dbCol, r));
-						}
-
-						return mainRisks;
-					});
-				});
+				return mainRisks;
 			});
 		});
 	});
