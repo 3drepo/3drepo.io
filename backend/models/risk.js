@@ -23,7 +23,6 @@ const db = require("../handler/db");
 
 const ModelSetting = require("./modelSetting");
 const History = require("./history");
-const Ref = require("./ref");
 const _ = require("lodash");
 
 const ChatEvent = require("./chatEvent");

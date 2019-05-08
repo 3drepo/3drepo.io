@@ -141,6 +141,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		const { risk, myJob, permissions, currentUser } = this.props;
 		const newRisk = !risk._id;
 		const canEditBasicProperty = newRisk || canChangeBasicProperty(risk, myJob, permissions, currentUser);
+		const canEditRiskStatus = newRisk || canChangeStatus(risk, myJob, permissions, currentUser);
 
 		return (
 			<Form>
@@ -288,7 +289,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								{...field}
 								items={RISK_MITIGATION_STATUSES}
 								inputId="mitigation_status"
-								disabled={!(newRisk || canChangeStatus(risk, myJob, permissions, currentUser))}
+								disabled={!canEditRiskStatus}
 							/>
 						)} />
 					</StyledFormControl>
@@ -303,7 +304,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									{...field}
 									items={RISK_LIKELIHOODS}
 									inputId="residual_likelihood"
-									disabled={!canEditBasicProperty}
+									disabled={!canEditRiskStatus}
 								/>
 							)} />
 						</StyledFormControl>
@@ -315,7 +316,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									{...field}
 									items={RISK_CONSEQUENCES}
 									inputId="residual_consequence"
-									disabled={!canEditBasicProperty}
+									disabled={!canEditRiskStatus}
 								/>
 							)} />
 						</StyledFormControl>
