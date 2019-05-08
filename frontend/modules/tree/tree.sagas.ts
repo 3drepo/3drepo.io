@@ -326,22 +326,28 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 					} else {
 						newNumberOfInvisibleChildrenMap[node._id] = 0;
 					}
-
-					let currentNode = node;
-					const parents = [];
-
-					for (let i = currentNode.level - 1; i > 0; i--) {
-						const newParentIndex = nodesIndexesMap[currentNode.parentId];
-						const newParentNode = treeNodesList[newParentIndex];
-						currentNode = newParentNode;
-						newNumberOfInvisibleChildrenMap[currentNode._id] = node.childrenNumber + i;
-
-						if (currentNode.childrenNumber > newNumberOfInvisibleChildrenMap[currentNode._id]) {
-							console.log('Set Parent of invisible!');
-							newVisibilityMap[currentNode._id] = VISIBILITY_STATES.PARENT_OF_VISIBLE;
-						}
-						parents.push(currentNode);
+				} else {
+					if (visibility === VISIBILITY_STATES.VISIBLE) {
+						newVisibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
+					} else {
+						// TreeService.setNodeSelection(child, this.SELECTION_STATES.unselected);
+						newVisibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
 					}
+				}
+
+				let currentNode = node;
+				const parents = [];
+
+				for (let i = currentNode.level - 1; i > 0; i--) {
+					const newParentIndex = nodesIndexesMap[currentNode.parentId];
+					const newParentNode = treeNodesList[newParentIndex];
+					currentNode = newParentNode;
+					newNumberOfInvisibleChildrenMap[currentNode._id] = node.childrenNumber + i;
+
+					if (currentNode.childrenNumber > newNumberOfInvisibleChildrenMap[currentNode._id]) {
+						newVisibilityMap[currentNode._id] = VISIBILITY_STATES.PARENT_OF_VISIBLE;
+					}
+					parents.push(currentNode);
 				}
 
 				yield put(TreeActions.setAuxiliaryMaps({
