@@ -96,7 +96,7 @@ function* clearCurrentlySelected() {
 	yield put(TreeActions.setNodesSelectionMap(nodesSelectionMap));
 }
 
-export function* fetchFullTree({ teamspace, modelId, revision }) {
+function* fetchFullTree({ teamspace, modelId, revision }) {
 	yield put(TreeActions.setIsPending(true));
 
 	try {
@@ -126,26 +126,21 @@ export function* fetchFullTree({ teamspace, modelId, revision }) {
 	yield put(TreeActions.setIsPending(false));
 }
 
-export function* startListenOnSelections() {
-	try {
-		Viewer.on(VIEWER_EVENTS.OBJECT_SELECTED, (object) => {
-			dispatch(TreeActions.handleNodesClick([object.id]));
-		});
+function* startListenOnSelections() {
+	Viewer.on(VIEWER_EVENTS.OBJECT_SELECTED, (object) => {
+		dispatch(TreeActions.handleNodesClick([object.id]));
+	});
 
-		Viewer.on(VIEWER_EVENTS.MULTI_OBJECTS_SELECTED, (object) => {
-			dispatch(TreeActions.handleNodesClickBySharedIds(object.selectedNodes));
-		});
+	Viewer.on(VIEWER_EVENTS.MULTI_OBJECTS_SELECTED, (object) => {
+		dispatch(TreeActions.handleNodesClickBySharedIds(object.selectedNodes));
+	});
 
-		Viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => {
-			dispatch(TreeActions.clearSelectedNodes());
-			dispatch(GroupsActions.clearSelectionHighlights());
-		});
-	} catch (error) {
-		console.error(error);
-	}
+	Viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => {
+		dispatch(TreeActions.handleBackgroundClick());
+	});
 }
 
-export function* stopListenOnSelections() {
+function* stopListenOnSelections() {
 	try {
 		Viewer.off(VIEWER_EVENTS.OBJECT_SELECTED);
 		Viewer.off(VIEWER_EVENTS.MULTI_OBJECTS_SELECTED);
@@ -155,16 +150,25 @@ export function* stopListenOnSelections() {
 	}
 }
 
-export function* handleNodesClick({ nodesIds = [], skipExpand = false }) {
+function* handleBackgroundClick() {
+	const selectedNodes = yield select(selectSelectedNodes);
+	if (selectedNodes.length) {
+		yield all([
+			put(TreeActions.clearSelectedNodes()),
+			put(GroupsActions.clearSelectionHighlights())
+		]);
+	}
+}
+
+function* handleNodesClick({ nodesIds = [], skipExpand = false }) {
 	const TreeService = getAngularService('TreeService') as any;
 	const nodes = yield getNodesByIds(nodesIds);
 
 	const addGroup = MultiSelect.isAccumMode();
 	const removeGroup = MultiSelect.isDecumMode();
-	const multi = addGroup || removeGroup;
+	const isMultiSelectMode = addGroup || removeGroup;
 
-	if (!multi) {
-		// If it is not multiselect mode, remove all highlights
+	if (!isMultiSelectMode) {
 		yield clearCurrentlySelected();
 	}
 
@@ -188,12 +192,12 @@ export function* handleNodesClick({ nodesIds = [], skipExpand = false }) {
 	yield TreeActions.getSelectedNodes();
 }
 
-export function* handleNodesClickBySharedIds({ nodesIds }) {
+function* handleNodesClickBySharedIds({ nodesIds }) {
 	const nodes = yield getNodesIdsFromSharedIds(nodesIds);
 	yield put(TreeActions.handleNodesClick(nodes));
 }
 
-export function* getSelectedNodes() {
+function* getSelectedNodes() {
 	try {
 		yield call(delay, 100);
 		const objectsStatus = yield Viewer.getObjectsStatus();
@@ -206,7 +210,7 @@ export function* getSelectedNodes() {
 	}
 }
 
-export function* showAllNodes() {
+function* showAllNodes() {
 	try {
 		const TreeService = getAngularService('TreeService') as any;
 		yield TreeService.showAllTreeNodes(true);
@@ -215,7 +219,7 @@ export function* showAllNodes() {
 	}
 }
 
-export function* hideSelectedNodes() {
+function* hideSelectedNodes() {
 	try {
 		const TreeService = getAngularService('TreeService') as any;
 		yield TreeService.hideSelected();
@@ -224,7 +228,7 @@ export function* hideSelectedNodes() {
 	}
 }
 
-export function* isolateSelectedNodes() {
+function* isolateSelectedNodes() {
 	try {
 		const TreeService = getAngularService('TreeService') as any;
 		yield TreeService.isolateSelected();
@@ -233,7 +237,7 @@ export function* isolateSelectedNodes() {
 	}
 }
 
-export function* hideIfcSpaces() {
+function* hideIfcSpaces() {
 	try {
 		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 		yield put(TreeActions.setIfcSpacesHidden(!ifcSpacesHidden));
@@ -242,7 +246,7 @@ export function* hideIfcSpaces() {
 	}
 }
 
-export function* selectNode({ id }) {
+function* selectNode({ id }) {
 	try {
 		const accumMode = MultiSelect.isAccumMode();
 		const decumMode = MultiSelect.isDecumMode();
@@ -278,7 +282,7 @@ export function* selectNode({ id }) {
 	}
 }
 
-export function* setTreeNodesVisibility({ nodes, visibility }) {
+function* setTreeNodesVisibility({ nodes, visibility }) {
 	try {
 		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
 		const nodesSelectionMap = yield select(selectNodesSelectionMap);
@@ -350,7 +354,7 @@ export function* setTreeNodesVisibility({ nodes, visibility }) {
 	}
 }
 
-export function* updateParentVisibility({ parentNode }) {
+function* updateParentVisibility({ parentNode }) {
 	try {
 		const nodesIndexesMap = yield select(selectNodesIndexesMap);
 		const treeNodesList = yield select(selectTreeNodesList);
@@ -385,4 +389,5 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.UPDATE_PARENT_VISIBILITY, updateParentVisibility);
 	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK, handleNodesClick);
 	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK_BY_SHARED_IDS, handleNodesClickBySharedIds);
+	yield takeLatest(TreeTypes.HANDLE_BACKGROUND_CLICK, handleBackgroundClick);
 }
