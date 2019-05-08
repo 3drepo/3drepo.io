@@ -46,6 +46,7 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	updateParentVisibility: ['parentNode'],
 	handleNodesClick: ['nodesIds', 'skipExpand'],
 	handleNodesClickBySharedIds: ['nodesIds'],
+	handleBackgroundClick: [],
 	setAuxiliaryMaps: ['auxiliaryMaps'],
 	setNodesSelectionMap: ['nodesSelectionMap']
 }, { prefix: 'TREE/' });
