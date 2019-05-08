@@ -24,7 +24,7 @@ import { PinButton } from './pinButton.component';
 const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	setDisabled: MeasureActions.setDisabled,
+	disableMeasure: MeasureActions.setDisabled,
 	deactivateMeasure: MeasureActions.deactivateMeasure
 }, dispatch);
 
