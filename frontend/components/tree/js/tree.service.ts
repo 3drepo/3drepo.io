@@ -648,14 +648,12 @@ export class TreeService {
 	}
 
 	/**
-	 * Hide a collection of nodes.
-	 * @param nodes	Array of nodes to be hidden.
+	 * Migrated: hideTreeNodes
 	 */
 	public hideTreeNodes(nodes: any[]) {
 		this.setTreeNodeStatus(nodes, this.VISIBILITY_STATES.invisible);
 
-		const nodesIds = nodes.map(({ _id }) => _id);
-		dispatch(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.INVISIBLE));
+		dispatch(TreeActions.hideSelectedNodes());
 
 		this.updateModelVisibility();
 	}
@@ -674,7 +672,7 @@ export class TreeService {
 	}
 
 	/**
-	 * Hide all tree nodes.
+	 * Migrated: merged with isolateSelectedNodes
 	 */
 	public hideAllTreeNodes(updateModel) {
 		this.setTreeNodeStatus([this.allNodes], this.VISIBILITY_STATES.invisible);
@@ -688,13 +686,12 @@ export class TreeService {
 	}
 
 	/**
-	 * Show all tree nodes.
+	 * Migrated: showAllNodes
 	 */
 	public showAllTreeNodes(updateModel) {
 		this.setTreeNodeStatus([this.allNodes], this.VISIBILITY_STATES.visible);
 
-		const nodesIds = this.allNodes.map(({ _id }) => _id);
-		dispatch(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.VISIBLE));
+		dispatch(TreeActions.showAllNodes(true));
 
 		// It's not always necessary to update the model
 		// say we are resetting the state to then show/hide specific nodes
@@ -704,10 +701,9 @@ export class TreeService {
 	}
 
 	/**
-	 * Hide selected objects
+	 * Migrated: hideSelectedNodes
 	 */
 	public hideSelected() {
-
 		const selected = this.getCurrentSelectedNodesAsArray();
 		if (selected && selected.length) {
 			this.hideTreeNodes(selected);
@@ -716,7 +712,7 @@ export class TreeService {
 	}
 
 	/**
-	 * Isolate selected objects by hiding all other objects.
+	 * Migrated: isolateSelectedNodes
 	 */
 	public isolateSelected() {
 		const selectedNodes = this.getCurrentSelectedNodesAsArray();
@@ -791,14 +787,17 @@ export class TreeService {
 		}
 	}
 
+/**
+* MIGRATED: selector
+*/
 	private get isMetadataActive() {
 		return selectIsActive(getState());
 	}
 
 	/**
-	 * Unselect all selected items and clear the array
+	 * MIGRATED: clearCurrentlySelected
 	 */
-/* 	public clearCurrentlySelected() {
+	public clearCurrentlySelected() {
 		this.ViewerService.clearHighlights();
 
 		const visitedNodes = {};
@@ -828,7 +827,7 @@ export class TreeService {
 		}
 
 		this.currentSelectedNodes = {};
-	} */
+	}
 
 	/**
 	 * Set selection status of node.
@@ -877,14 +876,17 @@ export class TreeService {
 		});
 	}
 
-/* 	public nodesClicked(nodes: any[], skipExpand?: boolean) {
+	/**
+	* MIGRATED: handleNodesClick
+	*/
+	public nodesClicked(nodes: any[], skipExpand?: boolean) {
 		const addGroup = this.MultiSelectService.isAccumMode();
 		const removeGroup = this.MultiSelectService.isDecumMode();
 		const multi = addGroup || removeGroup;
 
 		if (!multi) {
 			// If it is not multiselect mode, remove all highlights
-			// this.clearCurrentlySelected();
+			this.clearCurrentlySelected();
 		}
 
 		if (removeGroup) {
@@ -899,7 +901,7 @@ export class TreeService {
 		} else {
 			this.selectNodes(nodes, skipExpand);
 		}
-	} */
+	}
 
 	/**
 	 * Deselect a nodes in the tree.
@@ -997,8 +999,7 @@ export class TreeService {
 	}
 
 	/**
-	 * Show metadata in the metadata panel if necessary
-	 * @param node the node to show the metadata for
+	 * Migrated: handleMetadata
 	 */
 	public handleMetadata(node: any) {
 		if (node && node.meta) {
@@ -1009,11 +1010,10 @@ export class TreeService {
 		}
 	}
 
-	/**
-	 * Get a series of nodes with unique ID bu a series of objects that contain a shared_id
-	 * @param objects the array of shared id objects
-	 */
-/* 	public getNodesFromSharedIds(objects: any) {
+/**
+* MIGRATED
+*/
+	public getNodesFromSharedIds(objects: any) {
 		if (!objects || objects.length === 0) {
 			return Promise.resolve([]);
 		}
@@ -1041,11 +1041,10 @@ export class TreeService {
 
 			return nodes;
 		});
-	} */
+	}
 
 	/**
-	 * Show a series of nodes by an array of shared IDs (rather than unique IDs)
-	 * @param objects	Nodes to show
+	 * Migrated: showNodesBySharedIds
 	 */
 	public showNodesBySharedIds(objects: any[]) {
 
@@ -1077,23 +1076,21 @@ export class TreeService {
 			});
 	}
 
-	/**
-	 * Select a series of nodes by an array of uniqueIDs
-	 * @param ids ids to click
-	 */
-/* 	public nodesClickedByIds( ids: string[]) {
+/**
+ * MIGRATED
+ */
+	public nodesClickedByIds( ids: string[]) {
 		return this.onReady().then(() => {
 			const nodes = ids.map((id) => this.getNodeById(id));
 			return this.nodesClicked(nodes);
 		}).catch((error) => {
 			console.error(error);
 		});
-	} */
+	}
 
-	/**
-	 * Select a series of nodes by an array of shared IDs (rather than unique IDs)
-	 * @param objects	Nodes to select
-	 */
+/**
+ * MIGRATED
+ */
 	public nodesClickedBySharedIds(objects: any[]) {
 
 		return this.getNodesFromSharedIds(objects)

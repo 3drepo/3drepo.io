@@ -65,7 +65,7 @@ export class Tree extends React.PureComponent<IProps, any> {
 	get menuActionsMap() {
 		const { showAllNodes, isolateSelectedNodes, hideIfcSpaces } = this.props;
 		return {
-			[TREE_ACTIONS_ITEMS.SHOW_ALL]: showAllNodes,
+			[TREE_ACTIONS_ITEMS.SHOW_ALL]: this.handleShowAllNodes,
 			[TREE_ACTIONS_ITEMS.ISOLATE_SELECTED]: isolateSelectedNodes,
 			[TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES]: hideIfcSpaces
 		};
@@ -139,8 +139,8 @@ export class Tree extends React.PureComponent<IProps, any> {
 			>
 				{this.renderFilterPanel(searchEnabled)}
 				<ViewerPanelContent className="height-catcher">
-					{this.renderNodesList(!!treeNodesList.length)}
-					{this.renderNotFound(!treeNodesList.length)}
+					{this.renderNodesList(!isPending && !!treeNodesList.length)}
+					{this.renderNotFound(!isPending && !treeNodesList.length)}
 				</ViewerPanelContent>
 			</ViewerPanel>
 		);
@@ -152,6 +152,10 @@ export class Tree extends React.PureComponent<IProps, any> {
 
 	public deselectNode = (id) => {
 		this.props.deselectNode(id);
+	}
+
+	private handleShowAllNodes = () => {
+		this.props.showAllNodes(true);
 	}
 
 	private handleFilterChange = (selectedFilters) => {
