@@ -605,9 +605,7 @@ export class TreeService {
 	}
 
 	/**
-	 * Toggle a node to expand or collapse it
-	 * @param event the click event
-	 * @param nodeId the id of the node to toggle
+	 * TO REMOME
 	 */
 	public toggleNodeExpansion(event: any, nodeId: string) {
 		if (event) {
@@ -625,9 +623,7 @@ export class TreeService {
 	}
 
 	/**
-	 * Return a normalised path fo ra given object ID
-	 * This will fix paths for federations.
-	 * @param objectID the id of the node to get a path for
+	 * TO REMOME
 	 */
 	public getPath(objectID: string) {
 		let path;
@@ -659,8 +655,7 @@ export class TreeService {
 	}
 
 	/**
-	 * Show a collection of nodes.
-	 * @param nodes	Array of nodes to be shown.
+	 * MIGRATED: showTreeNodes
 	 */
 	public showTreeNodes(nodes: any[]) {
 		this.setTreeNodeStatus(nodes, this.VISIBILITY_STATES.visible);
@@ -1059,16 +1054,12 @@ export class TreeService {
 	}
 
 	/**
-	 * Select a series of nodes by an array of shared IDs (rather than unique IDs)
-	 * @param objects	Nodes to select
-	 * @param multi	Is multi select enabled
-	 * @param colour the colour to highlight
-	 * @param forceReHighlight force a rehighlighting to a new colour (overrides toggle)
-	 */
+	 * Migrated: selectNodesBySharedIds
+	*/
 	public selectNodesBySharedIds(objects: any[],  colour?: number[]) {
-
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
+
 				return this.selectNodes(nodes, false, colour);
 			})
 			.catch((error) => {
@@ -1077,7 +1068,7 @@ export class TreeService {
 	}
 
 /**
- * MIGRATED
+ * MIGRATED: handleNodesClick
  */
 	public nodesClickedByIds( ids: string[]) {
 		return this.onReady().then(() => {
@@ -1089,7 +1080,7 @@ export class TreeService {
 	}
 
 /**
- * MIGRATED
+ * MIGRATED: handleNodesClickBySharedIds
  */
 	public nodesClickedBySharedIds(objects: any[]) {
 
@@ -1103,9 +1094,8 @@ export class TreeService {
 	}
 
 	/**
-	 * Isolate selected objects by their shared IDs
-	 * @param objects an array of objects with shared_id properties
-	 */
+	 * Migrated: isolateNodesBySharedIds
+	*/
 	public isolateNodesBySharedIds(objects) {
 		return this.getNodesFromSharedIds(objects)
 			.then((nodes) => {
@@ -1121,8 +1111,7 @@ export class TreeService {
 	}
 
 	/**
-	 * Hide series of nodes by an array of shared IDs (rather than unique IDs)
-	 * @param objects objects to hide
+	 * Migrated: hideNodesBySharedIds
 	 */
 	public hideNodesBySharedIds(objects: any[]) {
 
@@ -1205,16 +1194,14 @@ export class TreeService {
 	}
 
 	/**
-	 * @returns	Collection of all nodes.
+	 * Migrated: selector
 	 */
 	public getAllNodes() {
 		return this.allNodes;
 	}
 
 	/**
-	 * Given a node expand the UI tree to that node and select it
-	 * @param path the path array to traverse down
-	 * @param level the level to start expanding at (generally the root node)
+	 * To remove
 	 */
 	private expandToNode(nodeToExpand: any) {
 		const path = nodeToExpand ?  this.getPath(nodeToExpand._id) : undefined;
@@ -1249,9 +1236,8 @@ export class TreeService {
 
 	}
 
-		/**
-	* Collapse a given tree node in the UI
-	* @param nodeToCollapse the node to collapse
+	/**
+	* TO REMOVE
 	*/
 	private collapseTreeNode(nodeToCollapse: any) {
 
@@ -1274,8 +1260,7 @@ export class TreeService {
 	}
 
 	/**
-	 * Expand a given tree node in the UI
-	 * @param nodeToExpand the path array to traverse down
+	 * TO REMOVE
 	 */
 	private expandTreeNode(nodeToExpand: any, collapseChildren?: boolean, exemptChild?: any) {
 
@@ -1314,10 +1299,7 @@ export class TreeService {
 	}
 
 	/**
-	 *  Return the array, sanitised - switching any hidden children to
-	 *  it's parent node.
-	 *  @param an array of nodes
-	 *  @return an array of nodes where any hidden node would be replaced by its parents
+	 *  TO REMOVE
 	 */
 	private sanitiseNodeArray(nodes: any[]) {
 		return nodes.map((node) => {

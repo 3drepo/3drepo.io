@@ -49,7 +49,10 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	handleBackgroundClick: [],
 	setAuxiliaryMaps: ['auxiliaryMaps'],
 	setNodesSelectionMap: ['nodesSelectionMap'],
-	showNodesBySharedIds: ['objects']
+	showNodesBySharedIds: ['objects'],
+	selectNodesBySharedIds: ['objects', 'colour'],
+	isolateNodesBySharedIds: ['objects'],
+	hideNodesBySharedIds: ['objects']
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
