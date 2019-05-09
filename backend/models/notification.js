@@ -216,7 +216,7 @@ module.exports = {
 
 	updateAllNotifications: async function(username, data) {
 		const notifications = await db.getCollection(NOTIFICATIONS_DB, username);
-		notifications.update({}, { $set: data }, {multi: true});
+		await notifications.update({}, { $set: data }, {multi: true});
 	},
 
 	/**
@@ -224,7 +224,7 @@ module.exports = {
 	 */
 	deleteAllNotifications: async function(username) {
 		const notifications = await db.getCollection(NOTIFICATIONS_DB, username);
-		notifications.deleteMany({});
+		await notifications.deleteMany({});
 	},
 
 	/**
