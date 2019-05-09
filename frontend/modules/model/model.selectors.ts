@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector, createSelectorCreator } from 'reselect';
 
 export const selectModelDomain = (state) => Object.assign({}, state.model);
 
@@ -49,4 +49,12 @@ export const selectMetaKeys = createSelector(
 
 export const selectMetaKeysExist = createSelector(
 	selectModelDomain, (state) => Boolean(state.metaKeys.length)
+);
+
+export const selectSettingsProperties = createSelector(
+	selectSettings, (state) => state.properties
+);
+
+export const selectTopicTypes = createSelector(
+	selectSettingsProperties, (state) => state.topicTypes
 );

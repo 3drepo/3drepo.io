@@ -29,7 +29,7 @@ import {
 	selectNewComment,
 	selectFailedToLoad
 } from '../../../../../../modules/issues';
-import { selectSettings } from '../../../../../../modules/model';
+import { selectSettings, selectTopicTypes } from '../../../../../../modules/model';
 import { IssueDetails } from './issueDetails.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -41,6 +41,7 @@ const mapStateToProps = createStructuredSelector({
 	myJob: selectMyJob,
 	currentUser: selectCurrentUser,
 	settings: selectSettings,
+	topicTypes: selectTopicTypes,
 	failedToLoad: selectFailedToLoad
 });
 

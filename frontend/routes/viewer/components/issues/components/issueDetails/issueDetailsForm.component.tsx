@@ -219,11 +219,11 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 }
 
 export const IssueDetailsForm = withFormik({
-	mapPropsToValues: ({ issue }) => {
+	mapPropsToValues: ({ issue, topicTypes }) => {
 		return ({
-			status: issue.status || DEFAULT_PROPERTIES.STATUS,
-			priority: issue.priority || DEFAULT_PROPERTIES.PRIORITY,
-			topic_type: issue.topic_type || DEFAULT_PROPERTIES.TOPIC_TYPE,
+			status: issue.status,
+			priority: issue.priority,
+			topic_type: issue.topic_type,
 			assigned_roles: get(issue, 'assigned_roles[0]', ''),
 			due_date: issue.due_date,
 			description: issue.description

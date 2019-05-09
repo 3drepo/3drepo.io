@@ -37,7 +37,7 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 }, { prefix: 'MODEL/' });
 
 export const INITIAL_STATE = {
-	settings: {},
+	settings: {properties: {topicTypes: []}},
 	metaKeys: [],
 	revisions: [],
 	isPending: true,

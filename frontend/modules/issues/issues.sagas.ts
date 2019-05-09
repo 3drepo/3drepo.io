@@ -25,7 +25,7 @@ import { prepareIssue } from '../../helpers/issues';
 import { prepareComments, prepareComment } from '../../helpers/comments';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
-import { PRIORITIES, STATUSES } from '../../constants/issues';
+import { PRIORITIES, STATUSES, DEFAULT_PROPERTIES } from '../../constants/issues';
 import { PIN_COLORS } from '../../styles';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
@@ -41,6 +41,7 @@ import {
 } from './issues.selectors';
 import { IssuesTypes, IssuesActions } from './issues.redux';
 import { NEW_PIN_ID } from '../../constants/viewer';
+import { selectTopicTypes } from '../model';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -614,6 +615,10 @@ export function* setNewIssue() {
 	const issues = yield select(selectIssues);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
+	const topicTypes: any[] = yield select(selectTopicTypes);
+
+	const topicType =  topicTypes.find((t) => t.value ===  DEFAULT_PROPERTIES.TOPIC_TYPE) ?
+						DEFAULT_PROPERTIES.TOPIC_TYPE : topicTypes[0].value;
 
 	try {
 		if (activeIssue) {
@@ -625,6 +630,7 @@ export function* setNewIssue() {
 			assigned_roles: [],
 			status: STATUSES.OPEN,
 			priority: PRIORITIES.NONE,
+			topic_type: topicType,
 			viewpoint: {},
 			owner: currentUser.username
 		}, jobs);
