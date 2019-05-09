@@ -1,4 +1,4 @@
-import { omit, flattenDeep, sumBy } from 'lodash';
+import { omit, flattenDeep } from 'lodash';
 import { VISIBILITY_STATES, SELECTION_STATES } from '../../constants/tree';
 
 interface INode {
@@ -74,8 +74,20 @@ const getAuxiliaryMaps = (nodesList) => {
 	}, initialState);
 };
 
+const getMeshesByModelId = (modelsWithMeshes) => {
+	const meshesByModelId = {};
+	for (let index = 0; index < modelsWithMeshes.length; index++) {
+		const modelWithMeshes = modelsWithMeshes[index];
+		const { account: teamspace, model: modelId } = modelWithMeshes;
+		delete modelWithMeshes.account;
+		delete modelWithMeshes.model;
+		meshesByModelId[`${teamspace}@${modelId}`] = modelWithMeshes;
+	}
+	return meshesByModelId;
+};
+
 self.addEventListener('message', ({ data }) => {
-	const { mainTree, subTrees, subModels } = data;
+	const { mainTree, subTrees, subModels, modelsWithMeshes } = data;
 
 	console.time('TREE PRE-PROCESSING');
 	for (let index = 0; index < mainTree.children.length; index++) {
@@ -100,8 +112,9 @@ self.addEventListener('message', ({ data }) => {
 
 	console.time('TREE PROCESSING');
 	const { data: nodesList } = getFlattenNested(mainTree);
+	const meshesByModelId = getMeshesByModelId(modelsWithMeshes);
 	const auxiliaryMaps = getAuxiliaryMaps(nodesList);
-	const result = { data: { nodesList, ...auxiliaryMaps }};
+	const result = { data: { nodesList, meshesByModelId, ...auxiliaryMaps }};
 	console.timeEnd('TREE PROCESSING');
 
 	// @ts-ignore

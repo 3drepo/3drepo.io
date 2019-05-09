@@ -80,6 +80,10 @@ export const selectNodesBySharedIdsMap = createSelector(
 	selectTreeDomain, (state) => state.nodesBySharedIdsMap
 );
 
+export const selectMeshesByModelId = createSelector(
+	selectTreeDomain, (state) => state.meshesByModelId
+);
+
 export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
