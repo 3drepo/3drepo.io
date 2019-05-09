@@ -28,12 +28,13 @@ import {
 	FieldsRow, StyledFormControl
 }	from './../../../risks/components/riskDetails/riskDetails.styles';
 import {
-	ISSUE_STATUSES, ISSUE_PRIORITIES, ISSUE_TOPIC_TYPES, DEFAULT_PROPORTIES
+	ISSUE_STATUSES, ISSUE_PRIORITIES, DEFAULT_PROPERTIES
 } from '../../../../../../constants/issues';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { DateField } from '../../../../../components/dateField/dateField.component';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { canChangeBasicProperty, canChangeStatus, canChangeAssigned } from '../../../../../../helpers/issues';
+import { convertLabelsToNames } from '../../../../../../helpers/model';
 import { TextField } from '../../../../../components/textField/textField.component';
 import { DescriptionImage } from './issueDetails.styles';
 import PinButton from '../../../pinButton/pinButton.container';
@@ -44,6 +45,7 @@ interface IProps {
 	formik: any;
 	values: any;
 	permissions: any;
+	topicTypes: any;
 	currentUser: any;
 	myJob: any;
 	onSubmit: (values) => void;
@@ -115,7 +117,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { issue, myJob, permissions, currentUser } = this.props;
+		const { issue, myJob, permissions, topicTypes, currentUser } = this.props;
 		const newIssue = !issue._id;
 		const canEditBasicProperty = newIssue || canChangeBasicProperty(issue, myJob, permissions, currentUser);
 
@@ -163,7 +165,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							<Field name="topic_type" render={({ field }) => (
 								<CellSelect
 									{...field}
-									items={ISSUE_TOPIC_TYPES}
+									items={convertLabelsToNames(topicTypes)}
 									inputId="topic_type"
 									disabled={!canEditBasicProperty}
 								/>
@@ -219,9 +221,9 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 export const IssueDetailsForm = withFormik({
 	mapPropsToValues: ({ issue }) => {
 		return ({
-			status: issue.status || DEFAULT_PROPORTIES.STATUS,
-			priority: issue.priority || DEFAULT_PROPORTIES.PRIORITY,
-			topic_type: issue.topic_type || DEFAULT_PROPORTIES.TOPIC_TYPE,
+			status: issue.status || DEFAULT_PROPERTIES.STATUS,
+			priority: issue.priority || DEFAULT_PROPERTIES.PRIORITY,
+			topic_type: issue.topic_type || DEFAULT_PROPERTIES.TOPIC_TYPE,
 			assigned_roles: get(issue, 'assigned_roles[0]', ''),
 			due_date: issue.due_date,
 			description: issue.description

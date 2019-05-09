@@ -158,6 +158,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onValueChange={this.handleIssueFormSubmit}
 				onSubmit={this.handleIssueFormSubmit}
 				permissions={this.props.settings.permissions}
+				topicTypes={this.props.settings.properties.topicTypes}
 				currentUser={this.props.currentUser}
 				myJob={this.props.myJob}
 				onChangePin={this.handleChangePin}
