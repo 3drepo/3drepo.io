@@ -40,6 +40,7 @@ import {
 	selectSelectedNodesIds,
 	selectUnselectedNodesIds
 } from './tree.selectors';
+
 import { TreeTypes, TreeActions } from './tree.redux';
 import { selectSettings, ModelTypes } from '../model';
 import { MultiSelect } from '../../services/viewer/multiSelect';
@@ -195,9 +196,11 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false }) {
 			]);
 		}
 		// TODO
+		// console.log('TODO should deselect nodes');
 		TreeService.deselectNodes(nodes);
 	} else {
 		// TODO
+		// console.log('TODO should select nodes');
 		TreeService.selectNodes(nodes, skipExpand);
 	}
 
@@ -341,10 +344,10 @@ function* selectNode({ id }) {
 
 function* selectNodes({ nodes = [], skipExpand = false, colour }) {
 	try {
-		
+
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes'));
-		
+
 	}
 }
 
@@ -359,7 +362,6 @@ function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], col
 
 function* setTreeNodesVisibility({ nodes, visibility }) {
 	try {
-		console.log('setTreeNodesVisibility', nodes, visibility);
 		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
 		const nodesSelectionMap = yield select(selectNodesSelectionMap);
 		const nodesIndexesMap = yield select(selectNodesIndexesMap);
@@ -370,27 +372,38 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 
 		if (nodes.length && visibility === VISIBILITY_STATES.INVISIBLE) {
 			// TreeService.deselectNodes(nodes);
+			// console.log('TODO should deselect nodes');
 		}
 
 		const newVisibilityMap = cloneDeep(nodesVisibilityMap);
 		const newNumberOfInvisibleChildrenMap = cloneDeep(numberOfInvisibleChildrenMap);
 
 		for (let nodeLoopIndex = 0; nodeLoopIndex < nodes.length ; nodeLoopIndex++) {
+
 			const nodeId = nodes[nodeLoopIndex];
 			const nodeIndex = nodesIndexesMap[nodeId];
 			const node = treeNodesList[nodeIndex];
+			const meshesToUpdate = [];
 
 			if (node && (visibility === VISIBILITY_STATES.PARENT_OF_VISIBLE || visibility !== nodesVisibilityMap[nodeId])) {
-				if (node.type === NODE_TYPES.MESH) {
-					// this.meshesToUpdate.add(node);
+
+				if (node.data.type === NODE_TYPES.MESH) {
+					meshesToUpdate.push(node);
 				}
 
 				if (node.hasChildren) {
 					for (let childIndex = nodeIndex; childIndex <= nodeIndex + node.childrenNumber; childIndex++) {
 						const child = treeNodesList[childIndex];
+
+						if (child.data.type === NODE_TYPES.MESH && nodesVisibilityMap[child._id] !== visibility) {
+							meshesToUpdate.push(child);
+						}
+
 						if (visibility === VISIBILITY_STATES.VISIBLE) {
+
 							newVisibilityMap[child._id] = VISIBILITY_STATES.VISIBLE;
 						} else {
+							// TODO
 							// TreeService.setNodeSelection(child, this.SELECTION_STATES.unselected);
 							newVisibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
 						}
@@ -405,6 +418,7 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 					if (visibility === VISIBILITY_STATES.VISIBLE) {
 						newVisibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
 					} else {
+						// TODO
 						// TreeService.setNodeSelection(child, this.SELECTION_STATES.unselected);
 						newVisibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
 					}
@@ -421,7 +435,12 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 
 					if (currentNode.childrenNumber > newNumberOfInvisibleChildrenMap[currentNode._id]) {
 						newVisibilityMap[currentNode._id] = VISIBILITY_STATES.PARENT_OF_VISIBLE;
+					} else {
+						// newVisibilityMap[currentNode._id] = VISIBILITY_STATES.VISIBLE;
+						// ???
 					}
+
+					// if == 0 to set parent as INVISIBLE
 					parents.push(currentNode);
 				}
 
@@ -432,6 +451,8 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 				yield put(TreeActions.setComponentState({
 					numberOfInvisibleChildrenMap: newNumberOfInvisibleChildrenMap
 				}));
+
+				yield put(TreeActions.updateMeshesVisibility(meshesToUpdate));
 			}
 		}
 
@@ -440,23 +461,53 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 	}
 }
 
-function* updateParentVisibility({ parentNode }) {
+function* updateMeshesVisibility({ meshes }) {
 	try {
-		const nodesIndexesMap = yield select(selectNodesIndexesMap);
-		const treeNodesList = yield select(selectTreeNodesList);
+		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
+		const hiddenMeshes = [];
+		const shownMeshes = [];
 
-		let currentNode = parentNode;
-		const nodes = [parentNode];
-
-		for (let i = parentNode.level; i > 1; i--) {
-			const newParentIndex = nodesIndexesMap[currentNode.parentId];
-			const newParentNode = treeNodesList[newParentIndex];
-			currentNode = newParentNode;
-			nodes.push(currentNode);
+		for (let i = 0; i < meshes.length; i++) {
+			const mesh = meshes[i];
+			if (nodesVisibilityMap[mesh._id] === VISIBILITY_STATES.INVISIBLE) {
+				hiddenMeshes.push(mesh);
+			} else {
+				shownMeshes.push(mesh);
+			}
 		}
-
+		yield put(TreeActions.handleMeshesVisibility(hiddenMeshes, false));
+		yield put(TreeActions.handleMeshesVisibility(shownMeshes, true));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'parent node visibility'));
+		yield put(DialogActions.showErrorDialog('update', 'meshes visibility'));
+	}
+}
+
+function* handleMeshesVisibility({ meshes, visibility }) {
+	try {
+		const objectIds = {};
+		const alreadyProcessed = {};
+
+		for (let index = 0; index < meshes.length; index++) {
+			const node = meshes[index];
+			const { account, model, project } = node.data;
+			const key = account + '@' + (model || project);
+			if (!objectIds[key]) {
+				objectIds[key] = [];
+			}
+
+			objectIds[key].push(node._id);
+			if (!alreadyProcessed[key]) {
+				yield Viewer.switchObjectVisibility(
+						account,
+						model || project,
+						objectIds[key],
+						visibility
+				);
+				alreadyProcessed[key] = node;
+			}
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('handle', 'meshes visibility'));
 	}
 }
 
@@ -481,7 +532,7 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.HIDE_IFC_SPACES, hideIfcSpaces);
 	yield takeLatest(TreeTypes.SELECT_NODE, selectNode);
 	yield takeLatest(TreeTypes.SET_TREE_NODES_VISIBILITY, setTreeNodesVisibility);
-	yield takeLatest(TreeTypes.UPDATE_PARENT_VISIBILITY, updateParentVisibility);
+	yield takeLatest(TreeTypes.UPDATE_MESHES_VISIBILITY, updateMeshesVisibility);
 	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK, handleNodesClick);
 	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK_BY_SHARED_IDS, handleNodesClickBySharedIds);
 	yield takeLatest(TreeTypes.HANDLE_BACKGROUND_CLICK, handleBackgroundClick);
@@ -489,4 +540,5 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.SELECT_NODES_BY_SHARED_IDS, selectNodesBySharedIds);
 	yield takeLatest(TreeTypes.ISOLATE_NODES_BY_SHARED_IDS, isolateNodesBySharedIds);
 	yield takeLatest(TreeTypes.HIDE_NODES_BY_SHARED_IDS, hideNodesBySharedIds);
+	yield takeLatest(TreeTypes.HANDLE_MESHES_VISIBILITY, handleMeshesVisibility);
 }

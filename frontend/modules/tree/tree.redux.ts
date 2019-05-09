@@ -43,7 +43,8 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	removeAllSelected: [],
 	setIsPending: ['isPending'],
 	setTreeNodesVisibility: ['nodes', 'visibility'],
-	updateParentVisibility: ['parentNode'],
+	updateMeshesVisibility: ['meshes'],
+	handleMeshesVisibility: ['meshes', 'visibility'],
 	handleNodesClick: ['nodesIds', 'skipExpand'],
 	handleNodesClickBySharedIds: ['nodesIds'],
 	handleBackgroundClick: [],
@@ -178,31 +179,15 @@ const removeGroupFromSelected = (state = INITIAL_STATE, { fromIndex, toIndex }) 
 	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };
 };
 
-// const addToHighlighted = (state = INITIAL_STATE, { id }) => {
-// 	const highlightedNodesMap = { ...state.componentState.highlightedNodesMap };
-// 	highlightedNodesMap[id] = true;
-// 	return { ...state, componentState: { ...state.componentState, highlightedNodesMap } };
-// };
-
 const removeFromSelected = (state = INITIAL_STATE, { id }) => {
 	const selectedNodesMap = { ...state.componentState.selectedNodesMap };
 	selectedNodesMap[id] = false;
 	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };
 };
 
-// const removeFromHighlighted = (state = INITIAL_STATE, { id }) => {
-// 	const highlightedNodesMap = { ...state.componentState.highlightedNodesMap };
-// 	highlightedNodesMap[id] = false;
-// 	return { ...state, componentState: { ...state.componentState, highlightedNodesMap } };
-// };
-
 const removeAllSelected = (state = INITIAL_STATE) => {
 	return { ...state, componentState: { ...state.componentState, selectedNodesMap: {} } };
 };
-
-// const removeAllHighlighted = (state = INITIAL_STATE) => {
-// 	return { ...state, componentState: { ...state.componentState, highlightedNodesMap: {} } };
-// };
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.CLEAR_SELECTED_NODES]: clearSelectedNodes,
@@ -215,11 +200,8 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.EXPAND_NODE]: expandNode,
 	[TreeTypes.COLLAPSE_NODE]: collapseNode,
 	[TreeTypes.ADD_TO_SELECTED]: addToSelected,
-	// [TreeTypes.ADD_TO_HIGHLIGHTED]: addToHighlighted,
 	[TreeTypes.REMOVE_FROM_SELECTED]: removeFromSelected,
-	// [TreeTypes.REMOVE_FROM_HIGHLIGHTED]: removeFromHighlighted,
 	[TreeTypes.REMOVE_ALL_SELECTED]: removeAllSelected,
-	// [TreeTypes.REMOVE_ALL_HIGHLIGHTED]: removeAllHighlighted,
 	[TreeTypes.ADD_GROUP_TO_SELECTED]: addGroupToSelected,
 	[TreeTypes.REMOVE_GROUP_FROM_SELECTED]: removeGroupFromSelected,
 	[TreeTypes.SET_NODES_SELECTION_MAP]: setNodesSelectionMap,

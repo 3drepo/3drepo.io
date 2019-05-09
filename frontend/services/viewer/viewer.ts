@@ -305,6 +305,11 @@ export class ViewerService {
 			return response.data;
 		});
 	}
+
+	public async switchObjectVisibility(teamspace, modelId, objectIds, visibility) {
+		await this.isViewerReady();
+		this.viewer.switchObjectVisibility(teamspace, modelId, objectIds, visibility);
+	}
 }
 
 export const Viewer = new ViewerService();
