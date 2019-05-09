@@ -651,7 +651,8 @@ export class TreeService {
 
 		dispatch(TreeActions.hideSelectedNodes());
 
-		this.updateModelVisibility();
+		// this.updateModelVisibility();
+		// action handleMeshesVisibility
 	}
 
 	/**
@@ -663,7 +664,8 @@ export class TreeService {
 		const nodesIds = nodes.map(({ _id }) => _id);
 		dispatch(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.VISIBLE));
 
-		this.updateModelVisibility();
+		// this.updateModelVisibility();
+		// action handleMeshesVisibility
 	}
 
 	/**
@@ -676,7 +678,8 @@ export class TreeService {
 		dispatch(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.INVISIBLE));
 
 		if (updateModel) {
-			this.updateModelVisibility();
+			// this.updateModelVisibility();
+			// action handleMeshesVisibility
 		}
 	}
 
@@ -691,7 +694,8 @@ export class TreeService {
 		// It's not always necessary to update the model
 		// say we are resetting the state to then show/hide specific nodes
 		if (updateModel) {
-			this.updateModelVisibility();
+			// this.updateModelVisibility();
+			// action handleMeshesVisibility
 		}
 	}
 
@@ -745,7 +749,6 @@ export class TreeService {
 	public handleVisibility(clickedIds: any, visible: boolean) {
 
 		const objectIds = {};
-
 		for (const id in clickedIds) {
 			if (id) {
 				const account = clickedIds[id].account;
@@ -1422,9 +1425,6 @@ export class TreeService {
 				const shown = {};
 
 				this.meshesToUpdate.forEach((meshNode) => {
-					const model = meshNode.model || meshNode.project;
-					const key = meshNode.account + '@' + model;
-
 					if (meshNode.toggleState === this.VISIBILITY_STATES.invisible) {
 						hidden[meshNode._id] = meshNode;
 					} else {
