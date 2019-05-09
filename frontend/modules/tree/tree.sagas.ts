@@ -104,12 +104,12 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 	yield put(TreeActions.setIsPending(true));
 
 	try {
+		yield take(ModelTypes.FETCH_SETTINGS_SUCCESS);
+
 		const [{ data: fullTree }, { data: modelsWithMeshes }] = yield all([
 			API.getFullTree(teamspace, modelId, revision),
 			API.getIdToMeshesMap(teamspace, modelId, revision)
 		]);
-
-		yield take(ModelTypes.FETCH_SETTINGS_SUCCESS);
 
 		const dataToProcessed = {
 			mainTree: fullTree.mainTree.nodes,
@@ -269,6 +269,7 @@ function* hideNodesBySharedIds({ objects = [] }) {
 function* hideTreeNodes(nodesIds = []) {
 	try {
 		if (nodesIds.length) {
+			// TODO: pass proper nodesIds
 			yield put(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.INVISIBLE));
 
 			// TODO
@@ -437,7 +438,6 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 						newVisibilityMap[currentNode._id] = VISIBILITY_STATES.PARENT_OF_VISIBLE;
 					} else {
 						// newVisibilityMap[currentNode._id] = VISIBILITY_STATES.VISIBLE;
-						// ???
 					}
 
 					// if == 0 to set parent as INVISIBLE
@@ -475,6 +475,7 @@ function* updateMeshesVisibility({ meshes }) {
 				shownMeshes.push(mesh);
 			}
 		}
+
 		yield put(TreeActions.handleMeshesVisibility(hiddenMeshes, false));
 		yield put(TreeActions.handleMeshesVisibility(shownMeshes, true));
 	} catch (error) {
@@ -484,6 +485,8 @@ function* updateMeshesVisibility({ meshes }) {
 
 function* handleMeshesVisibility({ meshes, visibility }) {
 	try {
+		console.log('handleMeshesVisibility r');
+
 		const objectIds = {};
 		const alreadyProcessed = {};
 
@@ -496,6 +499,8 @@ function* handleMeshesVisibility({ meshes, visibility }) {
 			}
 
 			objectIds[key].push(node._id);
+			console.log('switchObjectVisibility')
+
 			if (!alreadyProcessed[key]) {
 				yield Viewer.switchObjectVisibility(
 						account,
