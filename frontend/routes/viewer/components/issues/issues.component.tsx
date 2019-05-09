@@ -22,7 +22,6 @@ import * as fileDialog from 'file-dialog';
 
 import PinDrop from '@material-ui/icons/PinDrop';
 import IssueDetails from './components/issueDetails/issueDetails.container';
-import { convertLabelsToNames } from '../../../../helpers/model';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ReportedItems } from '../reportedItems';
 import {
@@ -105,9 +104,7 @@ export class Issues extends React.PureComponent<IProps, IState> {
 			[ISSUE_FILTER_RELATED_FIELDS.CREATED_BY]: this.getFilterValues(this.props.jobs),
 			[ISSUE_FILTER_RELATED_FIELDS.ASSIGNED_TO]: this.getFilterValues(this.jobsList),
 			[ISSUE_FILTER_RELATED_FIELDS.PRIORITY]: this.getFilterValues(ISSUE_PRIORITIES),
-			[ISSUE_FILTER_RELATED_FIELDS.TYPE]: this.getFilterValues(
-				convertLabelsToNames(this.props.modelSettings.properties.topicTypes)
-			),
+			[ISSUE_FILTER_RELATED_FIELDS.TYPE]: this.getFilterValues(this.props.modelSettings.properties.topicTypes),
 			[ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE]: [{
 				label: 'From',
 				value: {

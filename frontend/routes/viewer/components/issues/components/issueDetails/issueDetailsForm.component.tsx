@@ -34,7 +34,6 @@ import { CellSelect } from '../../../../../components/customTable/components/cel
 import { DateField } from '../../../../../components/dateField/dateField.component';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { canChangeBasicProperty, canChangeStatus, canChangeAssigned } from '../../../../../../helpers/issues';
-import { convertLabelsToNames } from '../../../../../../helpers/model';
 import { TextField } from '../../../../../components/textField/textField.component';
 import { DescriptionImage } from './issueDetails.styles';
 import PinButton from '../../../pinButton/pinButton.container';
@@ -165,7 +164,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							<Field name="topic_type" render={({ field }) => (
 								<CellSelect
 									{...field}
-									items={convertLabelsToNames(topicTypes)}
+									items={topicTypes}
 									inputId="topic_type"
 									disabled={!canEditBasicProperty}
 								/>
