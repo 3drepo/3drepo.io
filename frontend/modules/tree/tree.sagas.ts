@@ -245,21 +245,26 @@ function* showTreeNodes(nodesIds = [], shouldUpdateModel = true) {
 }
 
 function* hideSelectedNodes() {
-	try {
-		const selectedNodesIds = yield select(selectSelectedNodesIds);
-		yield hideTreeNodes(selectedNodesIds);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('hide', 'selected nodes'));
-	}
+	const selectedNodesIds = yield select(selectSelectedNodesIds);
+	yield hideTreeNodes(selectedNodesIds);
+}
+
+function* hideNodesBySharedIds({ objects = [] }) {
+	const nodesIds = yield getNodesIdsFromSharedIds(objects);
+	yield hideTreeNodes(nodesIds);
 }
 
 function* hideTreeNodes(nodesIds = []) {
-	if (nodesIds.length) {
-		yield put(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.INVISIBLE));
+	try {
+		if (nodesIds.length) {
+			yield put(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.INVISIBLE));
 
-		// TODO
-		const TreeService = getAngularService('TreeService') as any;
-		TreeService.updateModelVisibility();
+			// TODO
+			const TreeService = getAngularService('TreeService') as any;
+			TreeService.updateModelVisibility();
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('hide', 'nodes'));
 	}
 }
 
@@ -273,6 +278,11 @@ function* isolateSelectedNodes() {
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('isolate', 'selected nodes'));
 	}
+}
+
+function* isolateNodesBySharedIds({ objects = []}) {
+	yield put(TreeActions.selectNodesBySharedIds(objects));
+	yield put(TreeActions.isolateSelected());
 }
 
 function* hideIfcSpaces() {
@@ -459,4 +469,7 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK_BY_SHARED_IDS, handleNodesClickBySharedIds);
 	yield takeLatest(TreeTypes.HANDLE_BACKGROUND_CLICK, handleBackgroundClick);
 	yield takeLatest(TreeTypes.SHOW_NODES_BY_SHARED_IDS, showNodesBySharedIds);
+	yield takeLatest(TreeTypes.SELECT_NODES_BY_SHARED_IDS, selectNodesBySharedIds);
+	yield takeLatest(TreeTypes.ISOLATE_NODES_BY_SHARED_IDS, isolateNodesBySharedIds);
+	yield takeLatest(TreeTypes.HIDE_NODES_BY_SHARED_IDS, hideNodesBySharedIds);
 }
