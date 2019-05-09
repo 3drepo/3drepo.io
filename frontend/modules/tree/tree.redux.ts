@@ -52,7 +52,7 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	showNodesBySharedIds: ['objects'],
 	selectNodesBySharedIds: ['objects', 'colour'],
 	isolateNodesBySharedIds: ['objects'],
-	hideNodesBySharedIds: ['objects']
+	hideNodesBySharedIds: ['objects'],
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
@@ -72,6 +72,7 @@ export interface ITreeState {
 	nodesSelectionMap: any;
 	nodesIndexesMap: any;
 	nodesBySharedIdsMap: any;
+	meshesByModelId: any;
 }
 
 export const INITIAL_STATE: ITreeState = {
@@ -82,6 +83,7 @@ export const INITIAL_STATE: ITreeState = {
 	nodesSelectionMap: {},
 	nodesIndexesMap: {},
 	nodesBySharedIdsMap: {},
+	meshesByModelId: {},
 	componentState: {
 		selectedFilters: [],
 		searchEnabled: false,

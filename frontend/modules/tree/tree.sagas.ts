@@ -103,10 +103,19 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 	yield put(TreeActions.setIsPending(true));
 
 	try {
-		const { data: fullTree } = yield API.getFullTree(teamspace, modelId, revision);
+		const [{ data: fullTree }, { data: modelsWithMeshes }] = yield all([
+			API.getFullTree(teamspace, modelId, revision),
+			API.getIdToMeshesMap(teamspace, modelId, revision)
+		]);
+
 		yield take(ModelTypes.FETCH_SETTINGS_SUCCESS);
 
-		const dataToProcessed = { mainTree: fullTree.mainTree.nodes, subTrees: [], subModels: [] };
+		const dataToProcessed = {
+			mainTree: fullTree.mainTree.nodes,
+			subTrees: [],
+			subModels: [],
+			modelsWithMeshes: modelsWithMeshes.subModels
+		};
 		const modelSettings = yield select(selectSettings);
 		dataToProcessed.mainTree.name = modelSettings.name;
 		dataToProcessed.mainTree.isFederation = modelSettings.federate;
@@ -330,6 +339,15 @@ function* selectNode({ id }) {
 	}
 }
 
+function* selectNodes({ nodes = [], skipExpand = false, colour }) {
+	try {
+		
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('select', 'nodes'));
+		
+	}
+}
+
 function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], colour?: number[]}) {
 	const nodesIds = yield getNodesIdsFromSharedIds(objects);
 	const nodes = yield getNodesByIds(nodesIds);
@@ -426,7 +444,6 @@ function* updateParentVisibility({ parentNode }) {
 	try {
 		const nodesIndexesMap = yield select(selectNodesIndexesMap);
 		const treeNodesList = yield select(selectTreeNodesList);
-		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
 
 		let currentNode = parentNode;
 		const nodes = [parentNode];
