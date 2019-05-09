@@ -16,7 +16,6 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { convertLabelsToNames } from '../../helpers/model';
 import { sortByField } from '../../helpers/sorting';
 
 export const { Types: ModelTypes, Creators: ModelActions } = createActions({
@@ -53,7 +52,7 @@ const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
 	if (settings && settings.properties && settings.properties.topicTypes) {
 		settings.properties.topicTypes = sortByField(
-			convertLabelsToNames(settings.properties.topicTypes),
+			settings.properties.topicTypes,
 			{ order: 'asc', config: { field: 'label' } }
 		);
 	}
