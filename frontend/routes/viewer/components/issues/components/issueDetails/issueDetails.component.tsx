@@ -33,6 +33,7 @@ import { PIN_COLORS } from '../../../../../../styles';
 
 interface IProps {
 	jobs: any[];
+	topicTypes: any[];
 	issue: any;
 	teamspace: string;
 	model: string;
@@ -158,6 +159,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onValueChange={this.handleIssueFormSubmit}
 				onSubmit={this.handleIssueFormSubmit}
 				permissions={this.props.settings.permissions}
+				topicTypes={this.props.topicTypes}
 				currentUser={this.props.currentUser}
 				myJob={this.props.myJob}
 				onChangePin={this.handleChangePin}

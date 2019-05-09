@@ -108,19 +108,20 @@ class ViewerController implements ng.IController {
 			}
 		});
 
-		this.$scope.$watch(() => this.shadowsSetting, this.ViewerService.setShadows);
+		this.$scope.$watch(() => this.shadowsSetting, this.ViewerService.setShadows.bind(this.ViewerService));
 
 		this.$scope.$watch(() => this.statsSetting, this.ViewerService.setStats.bind(this.ViewerService));
 
-		this.$scope.$watch(() => this.nearPlaneSetting, this.ViewerService.setNearPlane);
+		this.$scope.$watch(() => this.nearPlaneSetting, this.ViewerService.setNearPlane.bind(this.ViewerService));
 
-		this.$scope.$watch(() => this.farPlaneAlgorithm, this.ViewerService.setFarPlaneAlgorithm);
+		this.$scope.$watch(() => this.farPlaneAlgorithm, this.ViewerService.setFarPlaneAlgorithm.bind(this.ViewerService));
 
-		this.$scope.$watch(() => this.shadingSetting, this.ViewerService.setShading);
+		this.$scope.$watch(() => this.shadingSetting, this.ViewerService.setShading.bind(this.ViewerService) );
 
-		this.$scope.$watch(() => this.xraySetting, this.ViewerService.setXray);
+		this.$scope.$watch(() => this.xraySetting, this.ViewerService.setXray.bind(this.ViewerService));
 
-		this.$scope.$watch(() => this.farPlaneSamplingPoints, this.ViewerService.setFarPlaneSamplingPoints);
+		this.$scope.$watch(() => this.farPlaneSamplingPoints,
+			this.ViewerService.setFarPlaneSamplingPoints.bind(this.ViewerService));
 	}
 }
 

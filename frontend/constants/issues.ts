@@ -17,7 +17,7 @@ export const STATUSES = {
 	OPEN: 'open',
 	IN_PROGRESS: 'in progress',
 	FOR_APPROVAL: 'for approval',
-  CLOSED: 'closed'
+	CLOSED: 'closed'
 };
 
 export const PRIORITIES = {
@@ -27,28 +27,17 @@ export const PRIORITIES = {
 	HIGH: 'high'
 };
 
+// FIXME: first item should be taken in topicTypes should be taken
+// for default value
 const TOPIC_TYPES = {
 	FOR_INFORMATION: 'for_information'
 };
 
-export const DEFAULT_PROPORTIES = {
+export const DEFAULT_PROPERTIES = {
 	STATUS: STATUSES.OPEN,
 	PRIORITY: PRIORITIES.NONE,
 	TOPIC_TYPE: TOPIC_TYPES.FOR_INFORMATION
 };
-
-export const ISSUE_TOPIC_TYPES = [
-	{ value: 'clash', name: 'Clash' },
-	{ value: 'constructibility', name: 'Constructibility' },
-	{ value: 'design', name: 'Design' },
-	{ value: 'diff', name: 'Diff' },
-	{ value: 'for_information', name: 'For information' },
-	{ value: 'gis', name: 'GIS' },
-	{ value: 'hs', name: 'H&S' },
-	{ value: 'rfi', name: 'RFI' },
-	{ value: 'risk', name: 'Risk' },
-	{ value: 'vr', name: 'VR' }
-];
 
 export const ISSUE_STATUSES = [
 	{ value: STATUSES.OPEN, name: 'Open' },
