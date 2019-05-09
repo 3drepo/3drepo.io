@@ -19,12 +19,12 @@
 const TreeWorker = require('worker-loader?inline!./tree.worker');
 import { put, takeLatest, call, select, take, all } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
-import { pick, uniq, flatten, values, cloneDeep } from 'lodash';
+import { pick, uniq, flatten, values, cloneDeep, pickBy } from 'lodash';
 
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { dispatch, getAngularService, getState } from '../../helpers/migration';
+import { dispatch, getAngularService } from '../../helpers/migration';
 import { GroupsActions } from '../groups';
 import { DialogActions } from '../dialog';
 import {
@@ -35,13 +35,16 @@ import {
 	selectNodesSelectionMap,
 	selectNumberOfInvisibleChildrenMap,
 	selectTreeNodesList,
-	selectNodesBySharedIdsMap
+	selectNodesBySharedIdsMap,
+	selectTreeNodesIds,
+	selectSelectedNodesIds,
+	selectUnselectedNodesIds
 } from './tree.selectors';
 import { TreeTypes, TreeActions } from './tree.redux';
 import { selectSettings, ModelTypes } from '../model';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { VISIBILITY_STATES, NODE_TYPES, SELECTION_STATES } from '../../constants/tree';
-import { selectActiveMeta, BimActions } from '../bim';
+import { selectActiveMeta, BimActions, selectIsActive } from '../bim';
 import { ViewerActions } from '../viewer';
 
 const setupWorker = (worker, onResponse) => {
@@ -66,8 +69,8 @@ function* getNodesByIds(nodesIds) {
 	return nodesIds.map((nodeId) => treeNodesList[nodesIndexesMap[nodeId]]);
 }
 
-function* getNodesIdsFromSharedIds(objects: any) {
-	if (!objects || !objects.length) {
+function* getNodesIdsFromSharedIds(objects = []) {
+	if (!objects.length) {
 		return [];
 	}
 	const nodesBySharedIds = yield select(selectNodesBySharedIdsMap);
@@ -199,6 +202,7 @@ function* handleNodesClickBySharedIds({ nodesIds }) {
 
 function* getSelectedNodes() {
 	try {
+		// TODO: We need to remove this delay and check if calling of viewer method is necessary
 		yield call(delay, 100);
 		const objectsStatus = yield Viewer.getObjectsStatus();
 
@@ -210,28 +214,62 @@ function* getSelectedNodes() {
 	}
 }
 
-function* showAllNodes() {
+function* showAllNodes({ shouldUpdateModel = false }) {
 	try {
-		const TreeService = getAngularService('TreeService') as any;
-		yield TreeService.showAllTreeNodes(true);
+		const nodesIds = yield select(selectTreeNodesIds);
+		yield showTreeNodes(nodesIds, shouldUpdateModel);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('show', 'all nodes'));
 	}
 }
 
+function* showNodesBySharedIds({ objects = [] }) {
+	const nodesIds = yield getNodesIdsFromSharedIds(objects);
+	yield showTreeNodes(nodesIds);
+}
+
+function* showTreeNodes(nodesIds = [], shouldUpdateModel = true) {
+	try {
+		if (nodesIds.length) {
+			yield put(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.VISIBLE));
+
+			if (shouldUpdateModel) {
+				// TODO
+				const TreeService = getAngularService('TreeService') as any;
+				TreeService.updateModelVisibility();
+			}
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('show', 'nodes'));
+	}
+}
+
 function* hideSelectedNodes() {
 	try {
-		const TreeService = getAngularService('TreeService') as any;
-		yield TreeService.hideSelected();
+		const selectedNodesIds = yield select(selectSelectedNodesIds);
+		yield hideTreeNodes(selectedNodesIds);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('hide', 'selected nodes'));
 	}
 }
 
+function* hideTreeNodes(nodesIds = []) {
+	if (nodesIds.length) {
+		yield put(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.INVISIBLE));
+
+		// TODO
+		const TreeService = getAngularService('TreeService') as any;
+		TreeService.updateModelVisibility();
+	}
+}
+
 function* isolateSelectedNodes() {
 	try {
-		const TreeService = getAngularService('TreeService') as any;
-		yield TreeService.isolateSelected();
+		const selectedNodesIds = yield select(selectSelectedNodesIds);
+		const unselectedNodesIds = yield select(selectUnselectedNodesIds);
+
+		yield hideTreeNodes(unselectedNodesIds);
+		yield showTreeNodes(selectedNodesIds);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('isolate', 'selected nodes'));
 	}
@@ -280,6 +318,15 @@ function* selectNode({ id }) {
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'node'));
 	}
+}
+
+function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], colour?: number[]}) {
+	const nodesIds = yield getNodesIdsFromSharedIds(objects);
+	const nodes = yield getNodesByIds(nodesIds);
+
+	// TODO
+	const TreeService = getAngularService('TreeService') as any;
+	TreeService.selectNodes(nodes, false, colour);
 }
 
 function* setTreeNodesVisibility({ nodes, visibility }) {
@@ -386,6 +433,16 @@ function* updateParentVisibility({ parentNode }) {
 	}
 }
 
+function* handleMetadata(node: any) {
+	const isMetadataActive = select(selectIsActive);
+	if (node && node.meta) {
+		if (isMetadataActive) {
+			yield put(BimActions.fetchMetadata(node.account, node.model || node.project, node.meta[0]));
+			yield put(ViewerActions.setMetadataVisibility(true));
+		}
+	}
+}
+
 export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.FETCH_FULL_TREE, fetchFullTree);
 	yield takeLatest(TreeTypes.START_LISTEN_ON_SELECTIONS, startListenOnSelections);
@@ -401,4 +458,5 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK, handleNodesClick);
 	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK_BY_SHARED_IDS, handleNodesClickBySharedIds);
 	yield takeLatest(TreeTypes.HANDLE_BACKGROUND_CLICK, handleBackgroundClick);
+	yield takeLatest(TreeTypes.SHOW_NODES_BY_SHARED_IDS, showNodesBySharedIds);
 }

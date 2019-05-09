@@ -16,8 +16,11 @@
  */
 
 import { createSelector } from 'reselect';
+import { pickBy, keys } from 'lodash';
+
 import { calculateTotalMeshes } from '../../helpers/tree';
 import { searchByFilters } from '../../helpers/searching';
+import { SELECTION_STATES } from '../../constants/tree';
 
 export const selectTreeDomain = (state) => Object.assign({}, state.tree);
 
@@ -27,6 +30,10 @@ export const selectSelectedNodes = createSelector(
 
 export const selectTreeNodesList = createSelector(
 	selectTreeDomain, (state) => state.treeNodesList
+);
+
+export const selectTreeNodesIds = createSelector(
+	selectTreeNodesList, (treeNodesList) => treeNodesList.map(({ _id }) => _id)
 );
 
 export const selectIsPending = createSelector(
@@ -43,6 +50,22 @@ export const selectComponentState = createSelector(
 
 export const selectNodesSelectionMap = createSelector(
 	selectTreeDomain, (state) => state.nodesSelectionMap
+);
+
+export const selectSelectedNodesIds = createSelector(
+	selectNodesSelectionMap, (nodesSelectionMap) => {
+		return keys(pickBy(nodesSelectionMap, (selectionState) => {
+			return selectionState === SELECTION_STATES.SELECTED;
+		}));
+	}
+);
+
+export const selectUnselectedNodesIds = createSelector(
+	selectNodesSelectionMap, (nodesSelectionMap) => {
+		return keys(pickBy(nodesSelectionMap, (selectionState) => {
+			return selectionState === SELECTION_STATES.UNSELECTED;
+		}));
+	}
 );
 
 export const selectNodesVisibilityMap = createSelector(

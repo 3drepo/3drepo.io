@@ -24,7 +24,7 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	clearSelectedNodes: [],
 	getSelectedNodes: [],
 	getSelectedNodesSuccess: ['selectedNodes'],
-	showAllNodes: [],
+	showAllNodes: ['shouldUpdateModel'],
 	hideSelectedNodes: [],
 	isolateSelectedNodes: [],
 	hideIfcSpaces: [],
@@ -48,7 +48,8 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	handleNodesClickBySharedIds: ['nodesIds'],
 	handleBackgroundClick: [],
 	setAuxiliaryMaps: ['auxiliaryMaps'],
-	setNodesSelectionMap: ['nodesSelectionMap']
+	setNodesSelectionMap: ['nodesSelectionMap'],
+	showNodesBySharedIds: ['objects']
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
