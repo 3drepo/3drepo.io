@@ -35,7 +35,7 @@ import {
 	selectFetchingDetailsIsPending
 } from '../../../../modules/issues';
 import { selectJobsList } from '../../../../modules/jobs';
-import { selectSettings } from '../../../../modules/model';
+import { selectSettings, selectTopicTypes } from '../../../../modules/model';
 import { renderPins } from '../../../../modules/risks/risks.sagas';
 
 const mapStateToProps = createStructuredSelector({
@@ -51,7 +51,8 @@ const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	showSubmodelIssues: selectShowSubmodelIssues,
 	isImportingBCF: selectIsImportingBCF,
-	sortOrder: selectSortOrder
+	sortOrder: selectSortOrder,
+	topicTypes: selectTopicTypes
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
