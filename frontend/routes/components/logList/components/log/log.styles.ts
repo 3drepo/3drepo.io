@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { COLOR } from '../../../../../styles/colors';
 import { Image } from '../../../../components/image';
+import { LinkableField } from '../../../linkableField/linkableField.component';
 
 export const Container = styled.div`
 	cursor: ${(props: any) => props.clickable ? 'pointer' : 'default'};
@@ -29,7 +30,7 @@ export const MitigationMessage = styled.span`
 	font-size: 12px;
 `;
 
-export const UserMessage = styled.span`
+export const UserMessage = styled(LinkableField)`
 	background-color: ${COLOR.WHITE};
 	color: ${COLOR.BLACK_60};
 	padding: 6px;
