@@ -51,11 +51,11 @@ export const saveRisk = (teamspace, modelId, risk) => {
  * @param modelId
  * @param risk
  */
-export const updateRisk = (teamspace, modelId, risk) => {
+export const updateRisk = (teamspace, modelId, id, revId, risk) => {
 	if (risk.rev_id) {
-		return api.put(`${teamspace}/${modelId}/revision/${risk.rev_id}/risks/${risk._id}.json`, risk);
+		return api.patch(`${teamspace}/${modelId}/revision/${revId}/risks/${id}.json`, risk);
 	}
-	return api.put(`${teamspace}/${modelId}/risks/${risk._id}.json`, risk);
+	return api.patch(`${teamspace}/${modelId}/risks/${id}.json`, risk);
 };
 
 /**

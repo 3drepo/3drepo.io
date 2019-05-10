@@ -122,7 +122,7 @@ router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHT
 router.post("/risks.json", middlewares.issue.canCreate, storeRisk);
 
 /**
- * @api {put} /:teamspace/:model/risks/riskId.json	Update risks based on revision
+ * @api {patch} /:teamspace/:model/risks/riskId.json	Update risks based on revision
  * @apiName updateRisk
  * @apiGroup Risks
  *
@@ -130,7 +130,7 @@ router.post("/risks.json", middlewares.issue.canCreate, storeRisk);
  * @apiParam {String} model Model ID
  * @apiParam {String} riskId.json Risk ID.
  */
-router.put("/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
+router.patch("/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
 
 /**
  * @api {post} /:teamspace/:model/revision/:rid/risks.json	Store risks based on Revision ID
@@ -144,7 +144,7 @@ router.put("/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
 router.post("/revision/:rid/risks.json", middlewares.issue.canCreate, storeRisk);
 
 /**
- * @api {put} /:teamspace/:model/revision/:rid/risks/:riskId.json  Update Risk based on revision ID
+ * @api {patch} /:teamspace/:model/revision/:rid/risks/:riskId.json  Update Risk based on revision ID
  * @apiName  updateRisk
  * @apiGroup Risks
  *
@@ -153,7 +153,7 @@ router.post("/revision/:rid/risks.json", middlewares.issue.canCreate, storeRisk)
  * @apiParam {String} rid Revision ID.
  * @apiParam {String} riskId Risk ID.
  */
-router.put("/revision/:rid/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
+router.patch("/revision/:rid/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
 
 /**
  * @api {delete} /:teamspace/:model/risks/ Delete risks

@@ -54,31 +54,6 @@ export const getStatusIcon = (priority, status) => {
   return {...statusIcon};
 };
 
-export const mergeIssueData = (source, data = source) => {
-	const hasUnassignedRole = !data.assigned_roles;
-
-	return {
-		...source,
-		...omit(data, ['assigned_roles', 'description', 'descriptionThumbnail']),
-		assigned_roles: hasUnassignedRole ? [] : [data.assigned_roles],
-		desc: data.description
-	};
-};
-
-export const diffIssueData =  ( vals, data ) => {
-	return Object.keys(vals).reduce((acc, key) => {
-		if (vals[key] !== data[key] && !Array.isArray(data[key])) {
-			acc[key] = vals[key];
-		}
-
-		if (Array.isArray(data[key]) && data[key][0] !== vals[key]) { // for assigned_roles type fields
-			acc[key] = vals[key] ? [vals[key]] : [];
-		}
-
-		return acc;
-	}, {});
-};
-
 const isOpenIssue = (status) => status !== 'closed';
 
 const userJobMatchesCreator = (userJob, issueData) => {

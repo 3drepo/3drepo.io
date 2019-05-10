@@ -175,7 +175,7 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 
 export function* updateIssue({ teamspace, modelId, issueData }) {
 	try {
-		const { rev_id, _id} = yield select(selectActiveIssueDetails);
+		const { _id, rev_id } = yield select(selectActiveIssueDetails);
 		const { data: updatedIssue } = yield API.updateIssue(teamspace, modelId, _id, rev_id, issueData );
 		const AnalyticService = getAngularService('AnalyticService') as any;
 		yield AnalyticService.sendEvent({
