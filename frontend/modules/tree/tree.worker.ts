@@ -28,6 +28,7 @@ const getTransformedNodeData = (node) => ({
 	name: node.name,
 	type: node.type,
 	teamspace: node.account,
+	meta: node.meta,
 	model: node.model || node.project,
 	shared_ids: node.shared_id ? [node.shared_id] : node.shared_ids,
 });
