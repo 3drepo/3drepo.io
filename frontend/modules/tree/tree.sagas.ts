@@ -38,7 +38,8 @@ import {
 	selectNodesBySharedIdsMap,
 	selectTreeNodesIds,
 	selectSelectedNodesIds,
-	selectUnselectedNodesIds
+	selectUnselectedNodesIds,
+	selectMeshesByModelId
 } from './tree.selectors';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -80,6 +81,52 @@ function* getNodesIdsFromSharedIds(objects = []) {
 	const sharedIds = flatten(objectsSharedIds) as string[];
 	const nodesIdsBySharedIds = values(pick(nodesBySharedIds, sharedIds));
 	return uniq(nodesIdsBySharedIds);
+}
+
+function* getMeshesByNodes(nodes = []) {
+	if (!nodes.length) {
+		return [];
+	}
+
+	const treeNodesList = yield select(selectTreeNodesList);
+	const nodesIndexesMap = yield select(selectNodesIndexesMap);
+	const idToMeshes = yield select(selectMeshesByModelId);
+	const meshesByNodes = {};
+
+	const stack = nodes;
+	while (stack.length > 0) {
+		const node = stack.pop();
+
+		if (!meshesByNodes[node.namespacedId]) {
+			meshesByNodes[node.namespacedId] = {
+				modelId: node.model,
+				teamspace: node.teamspace,
+				meshes: []
+			};
+		}
+
+		// Check top level and then check if sub model of fed
+		let meshes = node.type === NODE_TYPES.MESH
+			? [node._id]
+			: idToMeshes[node._id];
+
+		if (!meshes && idToMeshes[node.namespacedId]) {
+			meshes = idToMeshes[node.namespacedId][node._id];
+		}
+
+		if (meshes) {
+			meshesByNodes[node.namespacedId].meshes.push(...meshes);
+		} else if (node.hasChildren) {
+			// This should only happen in federations.
+			// Traverse down the tree to find submodel nodes
+			const nodeIndex = nodesIndexesMap[node._id];
+			for (let childIndex = nodeIndex; childIndex <= nodeIndex + node.childrenNumber; childIndex++) {
+				stack.push(treeNodesList[childIndex]);
+			}
+		}
+	}
+
+	return Object.values(meshesByNodes);
 }
 
 function* clearCurrentlySelected() {
@@ -199,9 +246,7 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false }) {
 		// console.log('TODO should deselect nodes');
 		TreeService.deselectNodes(nodes);
 	} else {
-		// TODO
-		// console.log('TODO should select nodes');
-		TreeService.selectNodes(nodes, skipExpand);
+		yield put(TreeActions.selectNodes(nodesIds, skipExpand));
 	}
 
 	yield TreeActions.getSelectedNodes();
@@ -343,22 +388,62 @@ function* selectNode({ id }) {
 	}
 }
 
-function* selectNodes({ nodes = [], skipExpand = false, colour }) {
+function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
+	console.time('SELECT NODES');
 	try {
+		const nodes = yield getNodesByIds(nodesIds);
+		if (nodes.length === 0) {
+			return Promise.resolve('No nodes specified');
+		}
 
+		const TreeService = getAngularService('TreeService') as any;
+
+		for (let i = 0; i < nodes.length; i++) {
+			// TODO
+			TreeService.setNodeSelection(nodes[i], TreeService.SELECTION_STATES.selected);
+		}
+
+		const lastNode = nodes[nodes.length - 1];
+		yield handleMetadata(lastNode);
+
+		if (!skipExpand) {
+			// TODO
+			TreeService.expandToNode(lastNode);
+		}
+		// TODO
+		const meshesByNodes = yield getMeshesByNodes(nodes);
+		const nodesSelectionMap = select(selectNodesSelectionMap);
+
+		for (let index = 0; index < meshesByNodes.length; index++) {
+			const { meshes, teamspace, modelId } = meshesByNodes[index];
+			// TODO: Uncomment when setNodeSelection will be migrated
+
+			// const filterdMeshes = meshes.filter((mesh) => {
+			// 	return nodesSelectionMap[mesh] === SELECTION_STATES.SELECTED;
+			// });
+			if (meshes.length > 0) {
+				// Separately highlight the children
+				// but only for multipart meshes
+				Viewer.highlightObjects({
+					account: teamspace,
+					ids: meshes, // filterdMeshes,
+					colour,
+					model: modelId,
+					multi: true,
+					source: 'tree',
+					forceReHighlight: true
+				});
+			}
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes'));
-
 	}
+	console.timeEnd('SELECT NODES');
 }
 
 function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], colour?: number[]}) {
 	const nodesIds = yield getNodesIdsFromSharedIds(objects);
-	const nodes = yield getNodesByIds(nodesIds);
-
-	// TODO
-	const TreeService = getAngularService('TreeService') as any;
-	TreeService.selectNodes(nodes, false, colour);
+	yield put(TreeActions.selectNodes(nodesIds, false, colour));
 }
 
 function* setTreeNodesVisibility({ nodes, visibility }) {
@@ -388,7 +473,7 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 
 			if (node && (visibility === VISIBILITY_STATES.PARENT_OF_VISIBLE || visibility !== nodesVisibilityMap[nodeId])) {
 
-				if (node.data.type === NODE_TYPES.MESH) {
+				if (node.type === NODE_TYPES.MESH) {
 					meshesToUpdate.push(node);
 				}
 
@@ -485,30 +570,29 @@ function* updateMeshesVisibility({ meshes }) {
 
 function* handleMeshesVisibility({ meshes, visibility }) {
 	try {
-		console.log('handleMeshesVisibility r');
+		console.log('handleMeshesVisibility');
 
 		const objectIds = {};
 		const alreadyProcessed = {};
 
 		for (let index = 0; index < meshes.length; index++) {
 			const node = meshes[index];
-			const { account, model, project } = node.data;
-			const key = account + '@' + (model || project);
-			if (!objectIds[key]) {
-				objectIds[key] = [];
+			const { namespacedId, _id, teamspace, model } = node;
+			if (!objectIds[namespacedId]) {
+				objectIds[namespacedId] = [];
 			}
 
-			objectIds[key].push(node._id);
+			objectIds[namespacedId].push(_id);
 			console.log('switchObjectVisibility')
 
-			if (!alreadyProcessed[key]) {
+			if (!alreadyProcessed[namespacedId]) {
 				yield Viewer.switchObjectVisibility(
-						account,
-						model || project,
-						objectIds[key],
-						visibility
+					teamspace,
+					model,
+					objectIds[namespacedId],
+					visibility
 				);
-				alreadyProcessed[key] = node;
+				alreadyProcessed[namespacedId] = node;
 			}
 		}
 	} catch (error) {
@@ -542,6 +626,7 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK_BY_SHARED_IDS, handleNodesClickBySharedIds);
 	yield takeLatest(TreeTypes.HANDLE_BACKGROUND_CLICK, handleBackgroundClick);
 	yield takeLatest(TreeTypes.SHOW_NODES_BY_SHARED_IDS, showNodesBySharedIds);
+	yield takeLatest(TreeTypes.SELECT_NODES, selectNodes);
 	yield takeLatest(TreeTypes.SELECT_NODES_BY_SHARED_IDS, selectNodesBySharedIds);
 	yield takeLatest(TreeTypes.ISOLATE_NODES_BY_SHARED_IDS, isolateNodesBySharedIds);
 	yield takeLatest(TreeTypes.HIDE_NODES_BY_SHARED_IDS, hideNodesBySharedIds);

@@ -51,6 +51,7 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	setAuxiliaryMaps: ['auxiliaryMaps'],
 	setNodesSelectionMap: ['nodesSelectionMap'],
 	showNodesBySharedIds: ['objects'],
+	selectNodes: ['nodesIds', 'skipExpand', 'colour'],
 	selectNodesBySharedIds: ['objects', 'colour'],
 	isolateNodesBySharedIds: ['objects'],
 	hideNodesBySharedIds: ['objects'],

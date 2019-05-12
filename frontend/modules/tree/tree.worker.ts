@@ -1,14 +1,14 @@
-import { omit, flattenDeep } from 'lodash';
+import { flattenDeep } from 'lodash';
 import { VISIBILITY_STATES, SELECTION_STATES } from '../../constants/tree';
 
 interface INode {
 	_id: string;
+	namespacedId: string;
 	name: string;
 	level: number;
 	parentId: number;
 	hasChildren: boolean;
 	childrenNumber: number;
-	data: any;
 	isFederation?: boolean;
 	isModel?: boolean;
 	shared_ids?: string[];
@@ -18,20 +18,30 @@ const isModelNode = (level, isFederation, hasFederationAsParent?) => {
 	return (level === 1 && !isFederation) || (level === 2 && hasFederationAsParent);
 };
 
+const getNamespacedId = (node) => {
+	const { account, model, project } = node;
+	return `${account}@${model || project}`;
+};
+
+const getTransformedNodeData = (node) => ({
+	_id: node._id,
+	name: node.name,
+	type: node.type,
+	teamspace: node.account,
+	model: node.model || node.project,
+	shared_ids: node.shared_id ? [node.shared_id] : node.shared_ids,
+});
+
 const getFlattenNested = (tree, level = 1, parentId = null) => {
 	const rowData: INode = {
-		_id: tree._id,
+		...getTransformedNodeData(tree),
+		namespacedId: getNamespacedId(tree),
 		isFederation: tree.isFederation,
 		isModel: tree.isModel || isModelNode(level, tree.isFederation),
-		name: tree.name,
 		level,
 		parentId,
 		hasChildren: Boolean(tree.children),
-		childrenNumber: 0,
-		data: {
-			...omit(tree, ['children']),
-			shared_ids: tree.shared_id ? [tree.shared_id] : tree.shared_ids
-		}
+		childrenNumber: 0
 	};
 
 	const dataToFlatten = [] as any;
@@ -65,8 +75,8 @@ const getAuxiliaryMaps = (nodesList) => {
 		maps.nodesVisibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
 		maps.nodesSelectionMap[node._id] = SELECTION_STATES.UNSELECTED;
 
-		for (let sharedIndex = 0; sharedIndex < node.data.shared_ids.length; sharedIndex++) {
-			const sharedId = node.data.shared_ids[sharedIndex];
+		for (let sharedIndex = 0; sharedIndex < node.shared_ids.length; sharedIndex++) {
+			const sharedId = node.shared_ids[sharedIndex];
 			maps.nodesBySharedIdsMap[sharedId] = node._id;
 		}
 
@@ -78,10 +88,10 @@ const getMeshesByModelId = (modelsWithMeshes) => {
 	const meshesByModelId = {};
 	for (let index = 0; index < modelsWithMeshes.length; index++) {
 		const modelWithMeshes = modelsWithMeshes[index];
-		const { account: teamspace, model: modelId } = modelWithMeshes;
+		const { account, model: modelId } = modelWithMeshes;
 		delete modelWithMeshes.account;
 		delete modelWithMeshes.model;
-		meshesByModelId[`${teamspace}@${modelId}`] = modelWithMeshes;
+		meshesByModelId[`${account}@${modelId}`] = modelWithMeshes;
 	}
 	return meshesByModelId;
 };

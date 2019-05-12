@@ -146,14 +146,6 @@ export class Tree extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	public selectNode = (id) => {
-		this.props.selectNode(id);
-	}
-
-	public deselectNode = (id) => {
-		this.props.deselectNode(id);
-	}
-
 	private handleShowAllNodes = () => {
 		this.props.showAllNodes(true);
 	}
