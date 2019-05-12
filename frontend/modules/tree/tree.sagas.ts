@@ -39,7 +39,8 @@ import {
 	selectTreeNodesIds,
 	selectSelectedNodesIds,
 	selectUnselectedNodesIds,
-	selectMeshesByModelId
+	selectMeshesByModelId,
+	selectExpandedNodesMap
 } from './tree.selectors';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -127,6 +128,56 @@ function* getMeshesByNodes(nodes = []) {
 	}
 
 	return values(meshesByNodes);
+}
+
+function* expandToNode(nodeId: string) {
+	if (nodeId) {
+		const treeNodesList = yield select(selectTreeNodesList);
+		const nodesIndexesMap = yield select(selectNodesIndexesMap);
+		const expandedNodesMap = yield select(selectExpandedNodesMap);
+
+		let { parentId: nextParentId } = treeNodesList[nodesIndexesMap[nodeId]] || { parentId: null };
+		expandedNodesMap[nodeId] = true;
+
+		while (nextParentId) {
+			const { parentId, _id } = treeNodesList[nodesIndexesMap[nextParentId]];
+			expandedNodesMap[_id] = true;
+			nextParentId = parentId;
+		}
+
+		yield put(TreeActions.setComponentState({ expandedNodesMap }));
+	}
+}
+
+function* setNodeSelection(node: any, selection: any) {
+	const nodesSelectionMap = yield select(selectNodesSelectionMap);
+	const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
+
+	let nodes = [node];
+	const shouldSelect = selection === SELECTION_STATES.SELECTED;
+	while (nodes.length) {
+		const currentNode = nodes.pop();
+		const currentVisibility = nodesVisibilityMap[currentNode._id];
+
+		if (currentVisibility !== VISIBILITY_STATES.INVISIBLE) {
+			if (!shouldSelect) {
+				nodesSelectionMap[currentNode._id] = SELECTION_STATES.UNSELECTED;
+			} else if (currentVisibility === this.VISIBILITY_STATES.parentOfInvisible) {
+				// TODO ^^^^^^^^^
+				nodesSelectionMap[currentNode._id] = SELECTION_STATES.PARENT_OF_UNSELECTED;
+			} else {
+				nodesSelectionMap[currentNode._id] = SELECTION_STATES.SELECTED;
+			}
+
+			if (currentNode.children && currentNode.children.length) {
+				nodes = nodes.concat(currentNode.children);
+			}
+		}
+	}
+
+	this.setSelectionOnParentNodes(node, selection);
+
+	yield put(TreeActions.setNodesSelectionMap(nodesSelectionMap));
 }
 
 function* clearCurrentlySelected() {
@@ -407,10 +458,9 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 		yield handleMetadata(lastNode);
 
 		if (!skipExpand) {
-			// TODO
-			TreeService.expandToNode(lastNode);
+			yield expandToNode(lastNode._id);
 		}
-		// TODO
+
 		const meshesByNodes = yield getMeshesByNodes(nodes);
 		const nodesSelectionMap = select(selectNodesSelectionMap);
 
@@ -601,12 +651,10 @@ function* handleMeshesVisibility({ meshes, visibility }) {
 }
 
 function* handleMetadata(node: any) {
-	const isMetadataActive = select(selectIsActive);
-	if (node && node.meta) {
-		if (isMetadataActive) {
-			yield put(BimActions.fetchMetadata(node.teamspace, node.model, node.meta[0]));
-			yield put(ViewerActions.setMetadataVisibility(true));
-		}
+	const isMetadataActive = yield select(selectIsActive);
+	if (node && node.meta && isMetadataActive) {
+		yield put(BimActions.fetchMetadata(node.teamspace, node.model, node.meta[0]));
+		yield put(ViewerActions.setMetadataVisibility(true));
 	}
 }
 

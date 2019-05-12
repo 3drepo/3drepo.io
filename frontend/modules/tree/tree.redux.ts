@@ -54,7 +54,7 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	selectNodes: ['nodesIds', 'skipExpand', 'colour'],
 	selectNodesBySharedIds: ['objects', 'colour'],
 	isolateNodesBySharedIds: ['objects'],
-	hideNodesBySharedIds: ['objects'],
+	hideNodesBySharedIds: ['objects']
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
@@ -125,11 +125,14 @@ const setAuxiliaryMaps = (state = INITIAL_STATE, { auxiliaryMaps }) => {
 	return { ...state, ...auxiliaryMaps };
 };
 
+const setExpanedNodesMap = (state = INITIAL_STATE, { expandedNodesMap }) => {
+	return { ...state, componentState: { ...state.componentState, expandedNodesMap } };
+};
+
 const expandNode = (state = INITIAL_STATE, { id }) => {
 	const expandedNodesMap = { ...state.componentState.expandedNodesMap };
 	expandedNodesMap[id] = true;
-
-	return { ...state, componentState: { ...state.componentState, expandedNodesMap } };
+	return setExpanedNodesMap(state, { expandedNodesMap });
 };
 
 const collapseNode = (state = INITIAL_STATE, { id }) => {
@@ -147,7 +150,7 @@ const collapseNode = (state = INITIAL_STATE, { id }) => {
 		expandedNodesMap[id] = false;
 	}
 
-	return { ...state, componentState: { ...state.componentState, expandedNodesMap } };
+	return setExpanedNodesMap(state, { expandedNodesMap });
 };
 
 const resetComponentState = (state = INITIAL_STATE) => {
