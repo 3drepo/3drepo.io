@@ -87,7 +87,7 @@ export class Tree extends React.PureComponent<IProps, any> {
 	));
 
 	public renderNodesList = renderWhenTrue(() => {
-		const { treeNodesList } = this.props;
+		const { treeNodesList, expandedNodesMap } = this.props;
 		const size = treeNodesList.length;
 
 		return (
@@ -96,6 +96,7 @@ export class Tree extends React.PureComponent<IProps, any> {
 					{({ width, height }) => (
 						<List
 							treeNodesList={treeNodesList}
+							expandedNodesMap={expandedNodesMap}
 							className="height-catcher"
 							ref={this.nodeListRef}
 							overscanRowCount={50}
