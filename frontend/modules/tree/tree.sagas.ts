@@ -19,7 +19,7 @@
 const TreeWorker = require('worker-loader?inline!./tree.worker');
 import { put, takeLatest, call, select, take, all } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
-import { pick, uniq, flatten, values, cloneDeep, pickBy } from 'lodash';
+import { pick, uniq, flatten, values, cloneDeep } from 'lodash';
 
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
@@ -126,7 +126,7 @@ function* getMeshesByNodes(nodes = []) {
 		}
 	}
 
-	return Object.values(meshesByNodes);
+	return values(meshesByNodes);
 }
 
 function* clearCurrentlySelected() {
@@ -604,7 +604,7 @@ function* handleMetadata(node: any) {
 	const isMetadataActive = select(selectIsActive);
 	if (node && node.meta) {
 		if (isMetadataActive) {
-			yield put(BimActions.fetchMetadata(node.account, node.model || node.project, node.meta[0]));
+			yield put(BimActions.fetchMetadata(node.teamspace, node.model, node.meta[0]));
 			yield put(ViewerActions.setMetadataVisibility(true));
 		}
 	}
