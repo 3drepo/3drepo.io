@@ -54,7 +54,8 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	selectNodes: ['nodesIds', 'skipExpand', 'colour'],
 	selectNodesBySharedIds: ['objects', 'colour'],
 	isolateNodesBySharedIds: ['objects'],
-	hideNodesBySharedIds: ['objects']
+	hideNodesBySharedIds: ['objects'],
+	isolateNode: ['id']
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
