@@ -513,6 +513,7 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 		}
 
 		const newVisibilityMap = cloneDeep(nodesVisibilityMap);
+
 		const newNumberOfInvisibleChildrenMap = cloneDeep(numberOfInvisibleChildrenMap);
 
 		for (let nodeLoopIndex = 0; nodeLoopIndex < nodes.length ; nodeLoopIndex++) {
@@ -532,7 +533,7 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 					for (let childIndex = nodeIndex; childIndex <= nodeIndex + node.childrenNumber; childIndex++) {
 						const child = treeNodesList[childIndex];
 
-						if (child.data.type === NODE_TYPES.MESH && nodesVisibilityMap[child._id] !== visibility) {
+						if (child.type === NODE_TYPES.MESH && nodesVisibilityMap[child._id] !== visibility) {
 							meshesToUpdate.push(child);
 						}
 
@@ -571,6 +572,7 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 					if (currentNode.childrenNumber > newNumberOfInvisibleChildrenMap[currentNode._id]) {
 						newVisibilityMap[currentNode._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
 					} else {
+
 						// newVisibilityMap[currentNode._id] = VISIBILITY_STATES.VISIBLE;
 					}
 
@@ -581,6 +583,7 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 				yield put(TreeActions.setAuxiliaryMaps({
 					nodesVisibilityMap: newVisibilityMap
 				}));
+
 
 				yield put(TreeActions.setComponentState({
 					numberOfInvisibleChildrenMap: newNumberOfInvisibleChildrenMap
@@ -619,8 +622,6 @@ function* updateMeshesVisibility({ meshes }) {
 
 function* handleMeshesVisibility({ meshes, visibility }) {
 	try {
-		console.log('handleMeshesVisibility');
-
 		const objectIds = {};
 		const alreadyProcessed = {};
 
@@ -632,7 +633,6 @@ function* handleMeshesVisibility({ meshes, visibility }) {
 			}
 
 			objectIds[namespacedId].push(_id);
-			console.log('switchObjectVisibility')
 
 			if (!alreadyProcessed[namespacedId]) {
 				yield Viewer.switchObjectVisibility(

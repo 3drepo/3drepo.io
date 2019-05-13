@@ -49,6 +49,7 @@ interface IProps {
 	expandNode?: (id) => void;
 	selectNode?: (id) => void;
 	deselectNode?: (id) => void;
+	setTreeNodesVisibility?: (id, visibility) => void;
 }
 
 const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
@@ -197,7 +198,9 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 
 	private toggleShowNode = (event) => {
 		event.stopPropagation();
-		console.log('toggle show node', this.node._id);
+		const visibility = this.props.visibilityMap[this.node._id] === VISIBILITY_STATES.INVISIBLE ?
+			VISIBILITY_STATES.VISIBLE :  VISIBILITY_STATES.INVISIBLE;
+		this.props.setTreeNodesVisibility([this.node._id], visibility);
 	}
 
 	private goToTop = (event) => {
@@ -219,7 +222,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	private renderName = () => (
 		<NameWrapper>
 			{this.renderExpandableButton(!this.node.isFederation && !this.props.isSearchResult)}
-			<Name nodeType={this.type}>{this.node.childrenNumber} {this.node.name}</Name>
+			<Name nodeType={this.type}>{this.node.name}</Name>
 		</NameWrapper>
 	)
 }
