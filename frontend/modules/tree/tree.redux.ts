@@ -42,7 +42,7 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	removeFromSelected: ['id'],
 	removeAllSelected: [],
 	setIsPending: ['isPending'],
-	setTreeNodesVisibility: ['nodes', 'visibility'],
+	setTreeNodesVisibility: ['nodesIds', 'visibility'],
 	updateMeshesVisibility: ['meshes'],
 	handleMeshesVisibility: ['meshes', 'visibility'],
 	handleNodesClick: ['nodesIds', 'skipExpand'],
@@ -53,6 +53,7 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	showNodesBySharedIds: ['objects'],
 	selectNodes: ['nodesIds', 'skipExpand', 'colour'],
 	selectNodesBySharedIds: ['objects', 'colour'],
+	deselectNodes: ['nodesIds'],
 	isolateNodesBySharedIds: ['objects'],
 	hideNodesBySharedIds: ['objects'],
 	isolateNode: ['id']
