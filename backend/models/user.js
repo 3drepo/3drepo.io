@@ -1139,6 +1139,8 @@ schema.methods.addTeamMember = function (user, job, permissions) {
 					const promises = [];
 					if (job) {
 						promises.push(Job.addUserToJob(this.user, user, job));
+					} else {
+						return Promise.reject(responseCodes.USER_NOT_ASSIGNED_JOB);
 					}
 					if (permissions && permissions.length) {
 						promises.push(this.customData.permissions.add({user, permissions}));

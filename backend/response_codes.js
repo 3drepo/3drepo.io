@@ -178,6 +178,7 @@
 		SUBSCRIPTION_NOT_ASSIGNED: { message: "This subscription is not assigned to any user", status: 400 },
 		USER_IN_COLLABORATOR_LIST: { message: "This user is currently in collaborator list of a model", status: 400 },
 		SUBSCRIPTION_CANNOT_REMOVE_SELF: { message: "You cannot remove yourself", status: 400 },
+		USER_NOT_ASSIGNED_JOB: { message: "Job must be assigned to user", status: 400 },
 
 		PAYMENT_TOKEN_ERROR: { message: "Payment token is invalid", status: 400 },
 		EXECUTE_AGREEMENT_ERROR: { message: "Failed to get payment from PayPal", status: 400 },
