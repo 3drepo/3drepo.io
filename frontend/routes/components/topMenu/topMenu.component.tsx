@@ -37,11 +37,6 @@ interface IProps {
 }
 
 export class TopMenu extends React.PureComponent<IProps, any> {
-	public handleBackToTeamspaces = () => [
-		runAngularTimeout(() => {
-			this.props.history.push('/dashboard/teamspaces');
-		})
-	]
 	public render() {
 		const { logoUrl, onLogoClick, ...userMenuProps } = this.props;
 
@@ -53,7 +48,7 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 					<TooltipButton
 						label="Back to teamspaces"
 						Icon={BackIcon}
-						action={this.handleBackToTeamspaces}
+						action={this.props.onLogoClick}
 					/>
 					<Notifications />
 					<UserMenu

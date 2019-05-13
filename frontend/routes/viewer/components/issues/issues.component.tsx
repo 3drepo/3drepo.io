@@ -29,7 +29,6 @@ import {
 	ISSUE_FILTERS,
 	ISSUE_FILTER_RELATED_FIELDS,
 	ISSUE_STATUSES,
-	ISSUE_TOPIC_TYPES,
 	ISSUE_PRIORITIES,
 	ISSUES_ACTIONS_MENU
 } from '../../../../constants/issues';
@@ -37,6 +36,7 @@ import {
 interface IProps {
 	history: any;
 	location: any;
+	topicTypes: any[];
 	teamspace: string;
 	model: any;
 	issues: any[];
@@ -53,6 +53,9 @@ interface IProps {
 	selectedFilters: any[];
 	modelSettings: {
 		permissions: any[];
+		properties: {
+			topicTypes: any[];
+		}
 	};
 	activeIssueDetails: any;
 	sortOrder: string;
@@ -90,7 +93,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 			[ISSUE_FILTER_RELATED_FIELDS.CREATED_BY]: this.getFilterValues(this.props.jobs),
 			[ISSUE_FILTER_RELATED_FIELDS.ASSIGNED_TO]: this.getFilterValues(this.jobsList),
 			[ISSUE_FILTER_RELATED_FIELDS.PRIORITY]: this.getFilterValues(ISSUE_PRIORITIES),
-			[ISSUE_FILTER_RELATED_FIELDS.TYPE]: this.getFilterValues(ISSUE_TOPIC_TYPES),
+			[ISSUE_FILTER_RELATED_FIELDS.TYPE]: this.getFilterValues(this.props.topicTypes),
 			[ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE]: [{
 				label: 'From',
 				value: {
@@ -206,9 +209,9 @@ export class Issues extends React.PureComponent<IProps, any> {
 	}
 
 	public getFilterValues(property) {
-		return property.map(({ value, name }) => {
+		return property.map(({ value, name, label }) => {
 			return {
-				label: name,
+				label: name || label,
 				value
 			};
 		});

@@ -16,6 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { sortByField } from '../../helpers/sorting';
 
 export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	fetchSettings: ['teamspace', 'modelId'],
@@ -38,7 +39,7 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 }, { prefix: 'MODEL/' });
 
 export const INITIAL_STATE = {
-	settings: {},
+	settings: {properties: {topicTypes: []}},
 	metaKeys: [],
 	revisions: [],
 	isPending: true,
@@ -50,6 +51,12 @@ const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 };
 
 const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
+	if (settings && settings.properties && settings.properties.topicTypes) {
+		settings.properties.topicTypes = sortByField(
+			settings.properties.topicTypes,
+			{ order: 'asc', config: { field: 'label' } }
+		);
+	}
 	return { ...state, settings };
 };
 

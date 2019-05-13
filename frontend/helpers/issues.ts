@@ -89,7 +89,7 @@ const isJobOwner = (issueData, userJob, permissions, currentUser) => {
 const isAssignedJob = (issueData, userJob, permissions) => {
 	return issueData && userJob &&
 		(userJob._id &&
-			issueData.assigned_roles[0] &&
+			issueData.assigned_roles && issueData.assigned_roles.length &&
 			userJob._id === issueData.assigned_roles[0]) &&
 			!isIssueViewer(permissions);
 };

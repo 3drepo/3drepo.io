@@ -15,11 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const negatePositionYZ = (position = []) => {
-	const [x, y, z] = position.map(Number);
-	return [x, -z, -y];
-};
+import { selectSettings } from './model.selectors';
+import { createSelector } from 'reselect';
+import { isAdmin, hasPermissions, PERMISSIONS } from '../../helpers/permissions';
 
-export const convertPositionToOpenGL = negatePositionYZ;
+export const selectPermissions = createSelector(
+	selectSettings, (state) => state.permissions
+);
 
-export const convertPositionToDirectX = negatePositionYZ;
+export const selectIsAdmin = createSelector(
+	selectPermissions, (permissions) => isAdmin(permissions)
+);
+
+export const selectIsCommenter =  createSelector(
+	selectPermissions, selectIsAdmin, (permissions, hasAdminPermissions) =>
+		hasPermissions(PERMISSIONS.COMMENT_ISSUE, permissions) || hasAdminPermissions
+);

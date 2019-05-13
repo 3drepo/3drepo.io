@@ -503,6 +503,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 					"viewpoints"
 				];
 				const ownerPrivilegeAttributes = [
+					"position",
 					"desc",
 					"due_date",
 					"priority"
