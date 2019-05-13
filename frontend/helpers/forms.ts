@@ -34,7 +34,8 @@ export const diffData =  ( vals, data ) => {
 			acc[key] = vals[key];
 		}
 
-		if (Array.isArray(data[key]) && data[key][0] !== vals[key]) { // for assigned_roles type fields
+		// for assigned_roles type fields
+		if (Array.isArray(data[key]) && data[key][0] !== vals[key] && (data[key][0] || vals[key])) {
 			acc[key] = vals[key] ? [vals[key]] : [];
 		}
 
