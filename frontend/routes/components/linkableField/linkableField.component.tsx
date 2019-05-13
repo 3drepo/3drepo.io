@@ -18,37 +18,38 @@
 import * as React from 'react';
 
 interface IProps {
-	children: any;
+	children: string;
 	className?: string;
 }
 
 // tslint:disable-next-line:max-line-length
-const urlRegex = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,10}(:[0-9]{1,5})?(\/.*)?$/;
+const urlRegex = /(http|https):\/\/\S+/ig;
 
-const anchorItem = (separator) => (item, key) => {
-	if (urlRegex.test(item)) {
-		return (<span key={'url' + key}><a  href={item} target="_blank" rel="noopener">{item}</a>{separator}</span>);
-	}
-	return (<span key={'url' + key}>{item}{separator}</span>);
+const anchorUrl = (url) => {
+	return (<a href={url} target="_blank" rel="noopener">{url}</a>);
 };
 
 export class LinkableField extends React.PureComponent<IProps, null> {
 	public linkedText = (): React.ReactNode => {
-		let children: string[] = [];
-		const nodes = [];
+		let match = urlRegex.exec(this.props.children);
+		let lastIndex = 0;
+		const res = [];
 
-		if (Array.isArray(this.props.children)) {
-			children = this.props.children;
-		} else {
-			children = [this.props.children];
+		while (match) {
+			if (lastIndex !== match.index) {
+				res.push(this.props.children.substring(lastIndex, match.index));
+			}
+
+			res.push(anchorUrl(match[0]));
+			lastIndex = match.index + match[0].length;
+			match = urlRegex.exec(this.props.children);
 		}
 
-		return children.map((text) => text.split(' ').map((item, index) => {
-			if (item.indexOf('\n') !== -1) {
-				return item.split('\n').map(anchorItem('\n'));
-			}
-			return anchorItem(' ')(item, index);
-		}));
+		if (lastIndex === 0) {
+			return this.props.children;
+		}
+
+		return res;
 	}
 
 	public render() {
