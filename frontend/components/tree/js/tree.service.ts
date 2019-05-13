@@ -902,8 +902,7 @@ export class TreeService {
 	}
 
 	/**
-	 * Deselect a nodes in the tree.
-	 * @param nodes	Node to select.
+	 * MIGRATED: deselectNodes
 	 */
 	public deselectNodes(nodes: any[]) {
 		nodes = this.sanitiseNodeArray(nodes);
@@ -941,9 +940,7 @@ export class TreeService {
 	}
 
 	/**
-	 * Select nodes in the tree.
-	 * @param nodes	Nodes to select.
-	 * @param colour the colour array for selection in the viewer
+	 * MIGRATED: selectNodes
 	 */
 	public selectNodes(nodes: any[], skipExpand?: boolean, colour?: number[]): any {
 		if (!nodes || nodes.length === 0) {

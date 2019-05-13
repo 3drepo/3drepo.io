@@ -215,7 +215,6 @@ function* clearCurrentlySelected() {
 		put(BimActions.setActiveMeta(null))
 	]);
 
-	// TODO: Rewrite when selection map will contain only selected nodes
 	const nodesSelectionMap = yield select(selectNodesSelectionMap);
 	for (const id in nodesSelectionMap) {
 		if (nodesSelectionMap[id] === SELECTION_STATES.UNSELECTED) {
@@ -290,13 +289,14 @@ function* stopListenOnSelections() {
 }
 
 function* handleBackgroundClick() {
-	const selectedNodes = yield select(selectSelectedNodes);
-	if (selectedNodes.length) {
+	const selectedNodesIds = yield select(selectSelectedNodesIds);
+	if (selectedNodesIds.length) {
 		yield all([
-			put(TreeActions.clearSelectedNodes()),
+			clearCurrentlySelected(),
 			put(GroupsActions.clearSelectionHighlights())
 		]);
 	}
+	return false;
 }
 
 function* handleNodesClick({ nodesIds = [], skipExpand = false }) {
@@ -503,7 +503,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 		}
 
 		for (let i = 0; i < nodes.length; i++) {
-			// yield setNodeSelection(nodes[i], SELECTION_STATES.SELECTED);
+			yield setNodeSelection(nodes[i], SELECTION_STATES.SELECTED);
 		}
 
 		const lastNode = nodes[nodes.length - 1];
@@ -550,7 +550,7 @@ function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], col
 
 function* setTreeNodesVisibility({ nodesIds, visibility }) {
 	try {
-		console.log('nodes', nodes);
+		console.log('nodes', nodesIds);
 		console.log('visibility', visibility);
 
 		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
@@ -591,7 +591,7 @@ function* setTreeNodesVisibility({ nodesIds, visibility }) {
 
 							newVisibilityMap[child._id] = VISIBILITY_STATES.VISIBLE;
 						} else {
-							// yield setNodeSelection(child, SELECTION_STATES.UNSELECTED);
+							yield setNodeSelection(child, SELECTION_STATES.UNSELECTED);
 							newVisibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
 						}
 					}

@@ -92,8 +92,14 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		return this.type === TREE_ITEM_MODEL_TYPE && this.level === 2 && this.props.expanded;
 	}
 
-	get isHightlightedObject() {
-		return this.type === TREE_ITEM_OBJECT_TYPE && this.props.highlighted;
+	get isSelected() {
+		return this.props.selectionMap[this.node._id];
+	}
+
+	get isHightlighted() {
+		const { selectionMap, visibilityMap } = this.props;
+		const { hasChildren, _id } = this.node;
+		return !hasChildren && selectionMap[_id] && visibilityMap[_id];
 	}
 
 	public static defaultProps = {
@@ -159,14 +165,14 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { highlighted, expanded, selected, isSearchResult, style } = this.props;
+		const { expanded, isSearchResult, style } = this.props;
 		return (
 			<Container
 				style={style}
 				nodeType={this.type}
 				expandable={this.node.hasChildren}
-				selected={!isSearchResult && selected}
-				highlighted={!isSearchResult && highlighted}
+				selected={!isSearchResult && this.isSelected}
+				highlighted={!isSearchResult && this.isHightlighted}
 				expanded={isSearchResult && expanded}
 				level={this.level}
 				onClick={this.handleNodeClick}
