@@ -195,7 +195,7 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 						<SaveButton
 							variant="contained"
 							color="secondary"
-							disabled={!this.state.name}
+							disabled={!this.state.name || !this.state.job || this.state.job.length === 0}
 							aria-label="Save"
 							onClick={this.handleSave}>
 							+ Add user
