@@ -25,8 +25,8 @@ interface IProps {
 // tslint:disable-next-line:max-line-length
 const urlRegex = /(http|https):\/\/\S+/ig;
 
-const anchorUrl = (url) => {
-	return (<a href={url} target="_blank" rel="noopener">{url}</a>);
+const anchorUrl = (url, key) => {
+	return (<a key={key} href={url} target="_blank" rel="noopener">{url}</a>);
 };
 
 export class LinkableField extends React.PureComponent<IProps, null> {
@@ -40,7 +40,7 @@ export class LinkableField extends React.PureComponent<IProps, null> {
 				res.push(this.props.children.substring(lastIndex, match.index));
 			}
 
-			res.push(anchorUrl(match[0]));
+			res.push(anchorUrl(match[0], match.index));
 			lastIndex = match.index + match[0].length;
 			match = urlRegex.exec(this.props.children);
 		}
