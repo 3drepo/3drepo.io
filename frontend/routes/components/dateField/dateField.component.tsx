@@ -23,6 +23,7 @@ interface IProps {
 	inputId: string;
 	value: string;
 	name: string;
+	disabled?: boolean;
 	format?: string;
 	placeholder?: string;
 	onChange: (event) => void;
@@ -63,11 +64,12 @@ export class DateField extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { value } = this.state;
-		const { onBlur, name, placeholder, format } = this.props;
+		const { onBlur, name, placeholder, format, disabled } = this.props;
 
 		return (
 			<Container>
 				<StyledDatePicker
+					disabled={disabled}
 					value={value}
 					onBlur={onBlur}
 					name={name}

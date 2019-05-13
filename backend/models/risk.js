@@ -23,7 +23,6 @@ const db = require("../handler/db");
 
 const ModelSetting = require("./modelSetting");
 const History = require("./history");
-const Ref = require("./ref");
 const _ = require("lodash");
 
 const ChatEvent = require("./chatEvent");
@@ -599,7 +598,7 @@ risk.updateAttrs = function(dbCol, uid, data) {
 						return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
 							newRisk = clean(dbCol, newRisk);
 
-							if (data.comment) {
+							if (data.hasOwnProperty("comment")) {
 								if (!data.edit && !data.delete &&
 									newRisk.comments && newRisk.comments.length > 0) {
 									return newRisk.comments[newRisk.comments.length - 1];
@@ -739,51 +738,11 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 						settings.properties.code : "";
 				});
 
-				// Check submodels
-				return Ref.find(dbCol, {type: "ref", _id: {"$in": historySearchResults.current}}).then((refs) => {
-					const subModelsPromises = [];
+				if (!noClean) {
+					mainRisks = mainRisks.map(r => clean(dbCol, r));
+				}
 
-					refs.forEach((ref) => {
-						const subDbCol = {
-							account: dbCol.account,
-							model: ref.project
-						};
-						subModelsPromises.push(
-							this.findRisksByModelName(subDbCol, username, "master", null, projection, null, true).then((subRisks) => {
-								subRisks.forEach((subRisk) => {
-									subRisk.origin_account = subDbCol.account;
-									subRisk.origin_model = subDbCol.model;
-								});
-
-								return subRisks;
-							}).catch((err) => {
-								// Skip sub-model errors to allow working sub-models to load
-								systemLogger.logError("Error while retrieving sub-model risks",
-									{
-										subDbCol,
-										err: err
-									});
-							})
-						);
-					});
-
-					return Promise.all(subModelsPromises).then((subModelsRisks) => {
-						if (subModelsRisks) {
-							subModelsRisks.forEach((subModelRisks) => {
-								if (subModelRisks) {
-									// Skip concat of undefined subModelRisks
-									//  e.g. from error loading sub-model risk
-									mainRisks = mainRisks.concat(subModelRisks);
-								}
-							});
-						}
-						if (!noClean) {
-							mainRisks = mainRisks.map(r => clean(dbCol, r));
-						}
-
-						return mainRisks;
-					});
-				});
+				return mainRisks;
 			});
 		});
 	});

@@ -151,7 +151,7 @@ function getBCFMarkup(issue, account, model, unit) {
 	_.get(issue, "extras.RelatedTopic") && (markup.Markup.Topic.RelatedTopic = _.get(issue, "extras.RelatedTopic"));
 
 	// add comments
-	issue.comments.forEach(comment => {
+	issue.comments && issue.comments.forEach(comment => {
 
 		if(isSystemComment(comment)) {
 			return;

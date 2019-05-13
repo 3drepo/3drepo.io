@@ -23,7 +23,8 @@ import { COLOR } from '../../../../styles';
 export const PinIcon = styled(Place).attrs({
 	classes: {
 		colorSecondary: 'secondary',
-		colorPrimary: 'primary'
+		colorPrimary: 'primary',
+		colorDisabled: 'disabled'
 	}
 })`
 	&& {
@@ -35,10 +36,17 @@ export const PinIcon = styled(Place).attrs({
 			color: ${COLOR.BLACK_54};
 		}
 
+		&.disabled {
+			color: ${COLOR.BLACK_12};
+		}
 	}
 `;
 
-export const LabelButton = styled(Button)`
+export const LabelButton = styled(Button).attrs({
+	classes: {
+		disabled: 'disabled'
+	}
+})`
 	&& {
 		width: 76px;
 		text-transform: none;
@@ -46,7 +54,12 @@ export const LabelButton = styled(Button)`
 		min-height: 26px;
 		border-radius: 28px;
 		color: ${COLOR.LIGHT_GRAY};
-		background-color: rgba(0, 0, 0, 0.26);
+		background-color:  ${COLOR.BLACK_26};
+
+		&.disabled {
+			background-color: ${COLOR.BLACK_12};
+			color: ${COLOR.BLACK_26};
+		}
 	}
 
 	&&:hover {

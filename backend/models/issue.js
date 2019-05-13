@@ -83,16 +83,6 @@ function clean(dbCol, issueToClean) {
 	const commentIdKeys = ["rev_id", "guid", "viewpoint"];
 	const vpIdKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid", "group_id"];
 
-	// TODO - Remove this unnecessary mapping after frontend migration
-	// If frontend needs it, frontend can do the translation!!!
-	const propertyTextMapping = {
-		"priority": "Priority",
-		"status": "Status",
-		"assigned_roles": "Assigned",
-		"topic_type": "Type",
-		"desc": "Description"
-	};
-
 	issueToClean.account = dbCol.account;
 	issueToClean.model = (issueToClean.origin_model) ? issueToClean.origin_model : dbCol.model;
 
@@ -130,13 +120,6 @@ function clean(dbCol, issueToClean) {
 					issueToClean.comments[i][key] = utils.uuidToString(issueToClean.comments[i][key]);
 				}
 			});
-
-			// TODO - Remove unnecessary return of propertyText after frontend migration
-			if (issueToClean.comments[i].action) {
-				issueToClean.comments[i].action.propertyText =
-					propertyTextMapping[issueToClean.comments[i].action.property] ||
-					issueToClean.comments[i].action.property;
-			}
 
 			if (issueToClean.comments[i].viewpoint) {
 				const commentViewpoint = issueToClean.viewpoints.find((vp) =>
@@ -209,7 +192,7 @@ function updateTextComments(account, model, sessionId, issueId, comments, data, 
 
 	if (data.edit && data.commentIndex >= 0 && comments.length > data.commentIndex) {
 		if (!comments[data.commentIndex].sealed) {
-			const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpoint, data.position);
+			const textComment = Comment.newTextComment(data.requester, data.revId, data.comment, viewpoint, data.position);
 
 			comments[data.commentIndex] = textComment;
 
@@ -234,7 +217,7 @@ function updateTextComments(account, model, sessionId, issueId, comments, data, 
 			comment.sealed = true;
 		});
 
-		const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpoint);
+		const textComment = Comment.newTextComment(data.requester, data.revId, data.comment, viewpoint);
 
 		comments.push(textComment);
 
@@ -448,7 +431,6 @@ issue.updateFromBCF = function(dbCol, issueToUpdate, changeSet) {
 };
 
 issue.updateAttrs = function(dbCol, uid, data) {
-
 	const sessionId = data.sessionId;
 
 	if ("[object String]" === Object.prototype.toString.call(uid)) {
@@ -492,7 +474,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 
 			let newViewpointPromise;
 
-			if (data["viewpoint"]) {
+			if (data["viewpoint"] && !data["viewpoint"].guid) {
 				if (Object.prototype.toString.call(data["viewpoint"]) === fieldTypes["viewpoint"]) {
 					data.viewpoint.guid = utils.generateUUID();
 
@@ -521,6 +503,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 					"viewpoints"
 				];
 				const ownerPrivilegeAttributes = [
+					"position",
 					"desc",
 					"due_date",
 					"priority"
@@ -582,7 +565,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 											data.sessionId,
 											newIssue._id,
 											newIssue.comments,
-											data.owner,
+											data.requester,
 											key,
 											newIssue[key],
 											data[key]
@@ -598,7 +581,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 									if ("assigned_roles" === key && this.isIssueAssignment(oldIssue, newIssue)) {
 										notificationPromises.push(
 											Notification.removeAssignedNotifications(
-												data.owner,
+												data.requester,
 												dbCol.account,
 												dbCol.model,
 												oldIssue
@@ -606,7 +589,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 										);
 										notificationPromises.push(
 											Notification.upsertIssueAssignedNotifications(
-												data.owner,
+												data.requester,
 												dbCol.account,
 												dbCol.model,
 												newIssue
@@ -641,7 +624,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							data.sessionId,
 							newIssue._id,
 							newIssue.comments,
-							data.owner,
+							data.requester,
 							"status",
 							newIssue["status"],
 							data["status"]
@@ -653,10 +636,21 @@ issue.updateAttrs = function(dbCol, uid, data) {
 						toUpdate.status_last_changed = (new Date()).getTime();
 						newIssue.status_last_changed = toUpdate.status_last_changed;
 
-						if (newIssue.status !== "closed" && data.status === "closed") {
+						toUpdate.status = data.status;
+						newIssue.status = data.status;
+
+						if (this.isIssueBeingClosed(oldIssue, newIssue)) {
 							notificationPromises.push(
 								Notification.removeAssignedNotifications(
-									data.owner,
+									data.requester,
+									dbCol.account,
+									dbCol.model,
+									oldIssue
+								)
+							);
+							notificationPromises.push(
+								Notification.upsertIssueClosedNotifications(
+									data.requester,
 									dbCol.account,
 									dbCol.model,
 									newIssue
@@ -664,8 +658,16 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							);
 						}
 
-						toUpdate.status = data.status;
-						newIssue.status = data.status;
+						if (this.isIssueBeingReopened(oldIssue, newIssue)) {
+							notificationPromises.push(
+								Notification.removeClosedNotifications(
+									data.requester,
+									dbCol.account,
+									dbCol.model,
+									newIssue
+								)
+							);
+						}
 					} else {
 						throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 					}
@@ -686,7 +688,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 								notifications = _.flatten(notifications);
 								newIssue.userNotifications = notifications;
 
-								if (data.comment) {
+								if (data.hasOwnProperty("comment")) {
 									if (!data.edit && !data.delete &&
 										newIssue.comments && newIssue.comments.length > 0) {
 										return newIssue.comments[newIssue.comments.length - 1];
@@ -816,7 +818,7 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 								model: ref.project
 							};
 							subModelsPromises.push(
-								this.findIssuesByModelName(subDbCol, username, "master", null, projection, null, true).then((subIssues) => {
+								this.findIssuesByModelName(subDbCol, username, "master", null, projection, ids, true).then((subIssues) => {
 									subIssues.forEach((subIssue) => {
 										subIssue.origin_account = subDbCol.account;
 										subIssue.origin_model = subDbCol.model;
@@ -971,6 +973,10 @@ issue.getThumbnail = function(dbCol, uid) {
 
 issue.isIssueBeingClosed = function(oldIssue, newIssue) {
 	return !!oldIssue && oldIssue.status !== "closed" && newIssue.status === "closed";
+};
+
+issue.isIssueBeingReopened = function (oldIssue, newIssue) {
+	return oldIssue && oldIssue.status === "closed" && newIssue.status !== "closed";
 };
 
 issue.isIssueAssignment = function(oldIssue, newIssue) {

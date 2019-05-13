@@ -42,6 +42,7 @@ interface IProps {
 	searchEnabled: boolean;
 	searchQuery: string;
 	editMode: boolean;
+	isCommenter: boolean;
 	teamspace: string;
 	modelId: string;
 	fetchViewpoints: (teamspace, modelId) => void;
@@ -93,6 +94,7 @@ export class Views extends React.PureComponent<IProps, any> {
 
 	public renderNewViewpoint = renderWhenTrue(() => (
 		<ViewItem
+			isCommenter={this.props.isCommenter}
 			viewpoint={this.props.newViewpoint}
 			active={true}
 			editMode={true}
@@ -116,6 +118,7 @@ export class Views extends React.PureComponent<IProps, any> {
 					key={viewpoint._id}
 					viewpoint={viewpointData}
 					onClick={this.handleViewpointItemClick(viewpoint)}
+					isCommenter={this.props.isCommenter}
 					active={isActive}
 					editMode={editMode}
 					onCancelEditMode={this.handleCancelEditMode}
@@ -277,7 +280,7 @@ export class Views extends React.PureComponent<IProps, any> {
 			<ViewerPanelButton
 				aria-label="Add view"
 				onClick={this.handleAddViewpoint}
-				disabled={!!this.props.newViewpoint}
+				disabled={!!this.props.newViewpoint || !this.props.isCommenter}
 				color="secondary"
 				variant="fab"
 			>

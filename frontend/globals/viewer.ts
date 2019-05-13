@@ -780,4 +780,52 @@ export class Viewer {
 		UnityUtil.helicopterSpeedReset();
 	}
 
+	public enableSoftShadows() {
+		UnityUtil.enableSoftShadows();
+	}
+
+	public enableHardShadows() {
+		UnityUtil.enableHardShadows();
+	}
+
+	public disableShadows() {
+		UnityUtil.disableShadows();
+	}
+
+	public toggleStats() {
+		UnityUtil.toggleStats();
+	}
+
+	public setDefaultNearPlane(nearplane: number) {
+		UnityUtil.setDefaultNearPlane(nearplane);
+	}
+
+	public setFarPlaneSampleSize(farplaneSample: number) {
+		UnityUtil.setFarPlaneSampleSize(farplaneSample);
+	}
+
+	public setRenderingQualityDefault() {
+		UnityUtil.setRenderingQualityDefault();
+	}
+
+	public setRenderingQualityHigh() {
+		UnityUtil.setRenderingQualityHigh();
+	}
+
+	public setXRayHighlightOn() {
+		UnityUtil.setXRayHighlightOn();
+	}
+
+	public setXRayHighlightOff() {
+		UnityUtil.setXRayHighlightOff();
+	}
+
+	public useBoundingBoxFarPlaneAlgorithm() {
+		UnityUtil.useBoundingBoxFarPlaneAlgorithm();
+	}
+
+	public useBoundingSphereFarPlaneAlgorithm() {
+		UnityUtil.useBoundingSphereFarPlaneAlgorithm();
+	}
+
 }

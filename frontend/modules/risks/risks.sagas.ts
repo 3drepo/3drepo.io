@@ -588,11 +588,10 @@ export function* setNewRisk() {
 	const risks = yield select(selectRisks);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
-	const riskNumber = risks.length + 1;
 
 	try {
 		const newRisk = prepareRisk({
-			name: `Untitled risk ${riskNumber}`,
+			name: 'Untitled risk',
 			associated_activity: '',
 			assigned_roles: [],
 			category: '',

@@ -25,8 +25,9 @@ interface IProps {
 	onChange: (pin) => void;
 	onSave: (position) => void;
 	hasPin: boolean;
+	disabled?: boolean;
 	pinId?: string;
-	setDisabled: (isDisabled) => void;
+	disableMeasure: (isDisabled) => void;
 	deactivateMeasure: () => void;
 }
 
@@ -52,17 +53,18 @@ export class PinButton extends React.PureComponent<IProps, any> {
 		if (active) {
 			Viewer.setPinDropMode(true);
 			this.props.deactivateMeasure();
-			this.props.setDisabled(true);
+			this.props.disableMeasure(true);
 			this.togglePinListeners(true);
 			Viewer.changePinColor({ id: this.getPinId(), colours: PIN_COLORS.SUNGLOW });
 		} else {
 			Viewer.setPinDropMode(false);
-			this.props.setDisabled(false);
+			this.props.disableMeasure(false);
 			this.togglePinListeners(false);
 			const pinData = Viewer.getPinData();
 
 			if (pinData) {
 				this.props.onSave(pinData.pickedPos);
+				Viewer.setPin(null);
 			}
 
 		}
@@ -96,14 +98,17 @@ export class PinButton extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
+		const { disabled } = this.props;
 		const wasPinDropped = this.state.wasPinDropped || this.props.hasPin;
 		const editMsg = !wasPinDropped ? 'Add pin' : 'Edit pin';
 		const pinLabel =  this.state.active ? 'Save pin' :  editMsg;
+		const pinIConColor = disabled ? 'disabled' :
+							this.state.active && !disabled ? 'secondary' : 'primary';
 
 		return (
 				<Container>
-					<PinIcon color={this.state.active ? 'secondary' : 'primary'}/>
-					<LabelButton onClick={this.onClickButton}>{pinLabel}</LabelButton>
+					<PinIcon color={pinIConColor}/>
+					<LabelButton disabled={disabled} onClick={this.onClickButton}>{pinLabel}</LabelButton>
 				</Container>
 				);
 	}

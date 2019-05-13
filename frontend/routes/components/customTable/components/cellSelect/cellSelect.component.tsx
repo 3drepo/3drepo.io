@@ -30,6 +30,7 @@ interface IProps {
 	disabled?: boolean;
 	disabledPlaceholder?: boolean;
 	inputId?: string;
+	labelName?: string;
 	onChange: (event, selectedValue: string) => void;
 }
 
@@ -61,6 +62,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderOptions = (items, TemplateComponent) => {
+		const labelName =  this.props.labelName || 'name';
 		return items.map((item, index) => {
 			return (
 				<Item
@@ -71,7 +73,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 					{
 						TemplateComponent ?
 							(<TemplateComponent {...item}/>) :
-							item.name || item.value
+							item[labelName] || item.value
 					}
 				</Item>
 			);

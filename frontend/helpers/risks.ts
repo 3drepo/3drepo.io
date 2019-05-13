@@ -26,6 +26,7 @@ import {
 	LEVELS
 } from '../constants/risks';
 import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
+import { sortByDate } from './sorting';
 
 export const prepareRisk = (risk, jobs = []) => {
 	const thumbnail = getAPIUrl(risk.thumbnail);
@@ -131,12 +132,6 @@ export const mergeRiskData = (source, data = source) => {
 	};
 };
 
-export const getSortedRisks = (data = []) => {
-	return [...data].sort((first, second) => {
-		return second.created - first.created;
-	});
-};
-
 const userJobMatchesCreator = (userJob, riskData) => {
 	return (userJob._id && riskData.creator_role && userJob._id === riskData.creator_role);
 };
@@ -159,7 +154,7 @@ const isJobOwner = (riskData, userJob, permissions, currentUser) => {
 const isAssignedJob = (riskData, userJob, permissions) => {
 	return riskData && userJob &&
 		(userJob._id &&
-			riskData.assigned_roles[0] &&
+			riskData.assigned_roles && riskData.assigned_roles.length &&
 			userJob._id === riskData.assigned_roles[0]) &&
 			!isViewer(permissions);
 };

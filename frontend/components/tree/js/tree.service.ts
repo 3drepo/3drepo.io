@@ -879,7 +879,7 @@ export class TreeService {
 
 		if (removeGroup) {
 			const activeMeta = selectActiveMeta(getState());
-			const shouldCloseMeta = nodes.some(({ meta }) => meta.includes(activeMeta));
+			const shouldCloseMeta = nodes.some(({ meta }) => meta && meta.includes(activeMeta));
 
 			if (shouldCloseMeta) {
 				dispatch(ViewerActions.setMetadataVisibility(false));

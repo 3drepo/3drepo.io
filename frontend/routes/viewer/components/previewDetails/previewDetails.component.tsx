@@ -43,7 +43,7 @@ interface IProps {
 	className?: string;
 	roleColor: string;
 	name: string;
-	count: number;
+	number: number;
 	author: string;
 	createdDate: string;
 	StatusIconComponent: any;
@@ -93,11 +93,21 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		});
 	}
 
-	public renderNameWithCounter = renderWhenTrue(() =>
-		<Typography>{`${this.props.count}. ${this.props.name}`}</Typography>
-	);
+	public renderNameWithCounter = renderWhenTrue(() => (
+		<Typography
+			paragraph={true}
+		>
+			{`${this.props.number}. ${this.props.name}`}
+		</Typography>
+	));
 
-	public renderName = renderWhenTrue(() => <Typography>{this.props.name}</Typography>);
+	public renderName = renderWhenTrue(() => (
+		<Typography
+			paragraph={true}
+		>
+			{this.props.name}
+		</Typography>
+	));
 
 	public renderNameField = renderWhenTrue(() => (
 		<Formik
@@ -115,6 +125,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 						onChange={this.handleNameChange(field)}
 						error={Boolean(form.errors.name)}
 						helperText={form.errors.name}
+						inputProps={
+							{maxLength: 120}}
 					/>
 				)} />
 			</StyledForm>
@@ -149,7 +161,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		const {
 			className,
 			roleColor,
-			count,
+			// tslint:disable-next-line
+			number,
 			author,
 			createdDate,
 			StatusIconComponent,
@@ -175,8 +188,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 					scrolled={this.props.scrolled ? 1 : 0}
 				>
 						<RoleIndicator color={roleColor} />
-						{this.renderNameWithCounter(!editable && count)}
-						{this.renderName(!editable && !count)}
+						{this.renderNameWithCounter(!editable && number)}
+						{this.renderName(!editable && !number)}
 						{this.renderNameField(editable)}
 					</Summary>
 

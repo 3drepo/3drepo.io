@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UnityUtil } from '../../../globals/unity-util';
 import { getState } from '../../../helpers/migration';
 import { selectMemory } from '../../../modules/viewer';
 
@@ -619,41 +618,41 @@ export class ViewerService {
 	public setShadows(type: string) {
 		switch (type) {
 			case 'soft':
-				UnityUtil.enableSoftShadows();
+				this.viewer.enableSoftShadows();
 				break;
 			case 'hard':
-				UnityUtil.enableHardShadows();
+				this.viewer.enableHardShadows();
 				break;
 			case 'none':
-				UnityUtil.disableShadows();
+				this.viewer.disableShadows();
 				break;
 		}
 	}
 
 	public setStats(val: boolean = false) {
 		if (val !== this.stats) {
-			UnityUtil.toggleStats();
+			this.viewer.toggleStats();
 			this.stats =  val;
 		}
 	}
 
 	public setNearPlane(nearplane: number) {
 		if (nearplane === undefined) { return; }
-		UnityUtil.setDefaultNearPlane(nearplane);
+		this.viewer.setDefaultNearPlane(nearplane);
 	}
 
 	public setFarPlaneSamplingPoints(farplaneSample: number) {
 		if (farplaneSample === undefined) { return; }
-		UnityUtil.setFarPlaneSampleSize(farplaneSample);
+		this.viewer.setFarPlaneSampleSize(farplaneSample);
 	}
 
 	public setFarPlaneAlgorithm(algorithm: string) {
 		switch (algorithm) {
 			case 'box':
-				UnityUtil.useBoundingBoxFarPlaneAlgorithm();
+				this.viewer.useBoundingBoxFarPlaneAlgorithm();
 				break;
 			case 'sphere':
-				UnityUtil.useBoundingSphereFarPlaneAlgorithm();
+				this.viewer.useBoundingSphereFarPlaneAlgorithm();
 				break;
 		}
 	}
@@ -661,19 +660,19 @@ export class ViewerService {
 	public setShading(shading: string) {
 		switch (shading) {
 			case 'standard':
-				UnityUtil.setRenderingQualityDefault();
+				this.viewer.setRenderingQualityDefault();
 				break;
 			case 'architectural':
-				UnityUtil.setRenderingQualityHigh();
+				this.viewer.setRenderingQualityHigh();
 				break;
 		}
 	}
 
 	public setXray(xray: boolean) {
 		if (xray) {
-			UnityUtil.setXRayHighlightOn();
+			this.viewer.setXRayHighlightOn();
 		} else {
-			UnityUtil.setXRayHighlightOff();
+			this.viewer.setXRayHighlightOff();
 		}
 	}
 

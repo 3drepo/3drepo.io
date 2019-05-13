@@ -31,6 +31,7 @@ import {
 	selectSelectedFilters,
 	selectShowPins,
 	selectIsRisksPending,
+	selectSortOrder,
 	selectFetchingDetailsIsPending
 } from '../../../../modules/risks';
 import { selectJobsList } from '../../../../modules/jobs';
@@ -47,7 +48,8 @@ const mapStateToProps = createStructuredSelector({
 	searchEnabled: selectSearchEnabled,
 	selectedFilters: selectSelectedFilters,
 	isPending: selectIsRisksPending,
-	fetchingDetailsIsPending: selectFetchingDetailsIsPending
+	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
+	sortOrder: selectSortOrder
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -63,6 +65,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	unsubscribeOnRiskChanges: RisksActions.unsubscribeOnRiskChanges,
 	closeDetails: RisksActions.closeDetails,
 	saveRisk: RisksActions.saveRisk,
+	toggleSortOrder: RisksActions.toggleSortOrder,
 	setFilters: RisksActions.setFilters,
 	renderPins: RisksActions.renderPins
 }, dispatch);
