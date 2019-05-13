@@ -28,8 +28,8 @@ password = sys.argv[4]
 connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongoPort + "/"
 
 ##### Enable dry run to not commit to the database #####
-dryRun = True
-overwrite = True #if there is already an entry for the filename: True = Overwrite regardless, False = Use existing entry
+dryRun = False
+overwrite = False #if there is already an entry for the filename: True = Overwrite regardless, False = Use existing entry
 
 ##### Connect to the Database #####
 db = MongoClient(connString)
@@ -44,12 +44,13 @@ for database in db.database_names():
             print("\t--model: " +  modelId)
             for colPrefix in [".history",".stash.json_mpc", ".stash.unity3d" ]:
                 colName = modelId + colPrefix
+                targetCol = colName + ".ref"
                 print("\t\t--stash: " +  colName)
                 fs = gridfs.GridFS(db, colName)
                 for entry in fs.find({"filename":{"$not": re.compile("unityAssets.json$")}}):
 #### Create Reference BSON #####
                     if not overwrite:
-                        if db[targetCol].find_one({"_id" : cleanFileName(entry.filename), "type": "fs"}) != None:
+                        if db[targetCol].find_one({"_id" : cleanFileName(entry.filename), "type": "gridfs"}) != None:
                             print("\t\t Found entry for " + cleanFileName(entry.filename) + ", skipping...");
                             continue
                     filename = cleanFileName(entry.filename)
@@ -59,10 +60,8 @@ for database in db.database_names():
                     bsonData['type'] = "gridfs"
                     bsonData['size'] = entry.length
 
-                    if dryRun:
-                        print( "\t\t Writing: " + str(bsonData))
-                    else:
+                    if not dryRun:
 ##### Upload to FS and insert BSON #####
                         fs.put(entry.read(), filename=filename);
-                        targetCol = colName + ".ref"
                         db[targetCol].save(bsonData)
+                    entry.close()
