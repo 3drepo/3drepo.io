@@ -22,9 +22,8 @@ export const mergeData = (source, data = source) => {
 
 	return {
 		...source,
-		...omit(data, ['assigned_roles', 'description', 'descriptionThumbnail']),
-		assigned_roles: hasUnassignedRole ? [] : [data.assigned_roles],
-		desc: data.description
+		...omit(data, ['assigned_roles',  'descriptionThumbnail']),
+		assigned_roles: hasUnassignedRole ? [] : [data.assigned_roles]
 	};
 };
 
