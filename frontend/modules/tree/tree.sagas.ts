@@ -170,6 +170,7 @@ function* setNodeSelection(node: any, selection: any) {
 				nodesSelectionMap[currentNode._id] = SELECTION_STATES.SELECTED;
 			}
 
+			// set child nodes selection
 			if (currentNode.hasChildren) {
 				const nodeIndex = nodesIndexesMap[node._id];
 				for (let childIndex = nodeIndex; childIndex <= nodeIndex + currentNode.childrenNumber; childIndex++) {
@@ -179,7 +180,30 @@ function* setNodeSelection(node: any, selection: any) {
 		}
 	}
 
-	this.setSelectionOnParentNodes(node, selection);
+	// Set parent nodes selection
+	let currentNode = node;
+	for (let i = currentNode.level - 1; i > 0; i--) {
+		const parentNodeIndex = nodesIndexesMap[currentNode.parentId];
+		const parentNode = treeNodesList[parentNodeIndex];
+
+		let hasChildrenWithDifferentState = false;
+		for (let childIndex = parentNodeIndex; childIndex <= parentNodeIndex + parentNode.childrenNumber; childIndex++) {
+			const childNode = treeNodesList[childIndex];
+			const hasSameState = nodesSelectionMap[childNode._id] === selection;
+			if (!hasSameState) {
+				hasChildrenWithDifferentState = true;
+				break;
+			}
+		}
+
+		if (hasChildrenWithDifferentState) {
+			nodesSelectionMap[parentNode._id] = SELECTION_STATES.PARENT_OF_UNSELECTED;
+		} else {
+			nodesSelectionMap[parentNode._id] = selection;
+		}
+
+		currentNode = parentNode;
+	}
 
 	yield put(TreeActions.setNodesSelectionMap(nodesSelectionMap));
 }
@@ -276,7 +300,6 @@ function* handleBackgroundClick() {
 }
 
 function* handleNodesClick({ nodesIds = [], skipExpand = false }) {
-	const TreeService = getAngularService('TreeService') as any;
 	const nodes = yield getNodesByIds(nodesIds);
 
 	const addGroup = MultiSelect.isAccumMode();
@@ -289,17 +312,14 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false }) {
 
 	if (removeGroup) {
 		const activeMeta = yield select(selectActiveMeta);
-		const shouldCloseMeta = nodes.some(({ data: { meta } }) => meta.includes(activeMeta));
-
+		const shouldCloseMeta = nodes.some(({ meta }) => meta.includes(activeMeta));
 		if (shouldCloseMeta) {
 			yield all([
 				put(ViewerActions.setMetadataVisibility(false)),
-				put(BimActions.setActiveMeta(null))
+				put(BimActions.setActiveMeta(null)),
 			]);
 		}
-		// TODO
-		// console.log('TODO should deselect nodes');
-		TreeService.deselectNodes(nodes);
+		yield put(TreeActions.deselectNodes(nodesIds));
 	} else {
 		yield put(TreeActions.selectNodes(nodesIds, skipExpand));
 	}
@@ -331,7 +351,7 @@ function* showAllNodes({ shouldUpdateModel = false }) {
 		const nodesIds = yield select(selectTreeNodesIds);
 		yield showTreeNodes(nodesIds, shouldUpdateModel);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('show', 'all nodes'));
+		yield put(DialogActions.showErrorDialog('show', 'all nodes', error));
 	}
 }
 
@@ -352,7 +372,7 @@ function* showTreeNodes(nodesIds = [], shouldUpdateModel = true) {
 			}
 		}
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('show', 'nodes'));
+		yield put(DialogActions.showErrorDialog('show', 'nodes', error));
 	}
 }
 
@@ -377,7 +397,7 @@ function* hideTreeNodes(nodesIds = []) {
 			TreeService.updateModelVisibility();
 		}
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('hide', 'nodes'));
+		yield put(DialogActions.showErrorDialog('hide', 'nodes', error));
 	}
 }
 
@@ -389,7 +409,7 @@ function* isolateSelectedNodes() {
 		yield hideTreeNodes(unselectedNodesIds);
 		yield showTreeNodes(selectedNodesIds);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('isolate', 'selected nodes'));
+		yield put(DialogActions.showErrorDialog('isolate', 'selected nodes', error));
 	}
 }
 
@@ -409,7 +429,7 @@ function* hideIfcSpaces() {
 		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 		yield put(TreeActions.setIfcSpacesHidden(!ifcSpacesHidden));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('hide', 'IFC spaces'));
+		yield put(DialogActions.showErrorDialog('hide', 'IFC spaces', error));
 	}
 }
 
@@ -418,7 +438,6 @@ function* selectNode({ id }) {
 		const accumMode = MultiSelect.isAccumMode();
 		const decumMode = MultiSelect.isDecumMode();
 		const nodesIndexesMap = yield select(selectNodesIndexesMap);
-
 		const treeNodesList = yield select(selectTreeNodesList);
 		const nodeIndex = nodesIndexesMap[id];
 		const node = treeNodesList[nodeIndex];
@@ -445,7 +464,33 @@ function* selectNode({ id }) {
 			}
 		}
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('select', 'node'));
+		yield put(DialogActions.showErrorDialog('select', 'node', error));
+	}
+}
+
+function* deselectNodes({ nodesIds = [] }) {
+	try {
+		const nodesSelectionMap = yield select(selectNodesSelectionMap);
+		const nodes = yield getNodesByIds(nodesIds);
+		const actionNodes = [];
+		for (let i = 0; i < nodes.length; i++) {
+			if (nodesSelectionMap[nodes[i]._id] !== SELECTION_STATES.UNSELECTED) {
+				yield setNodeSelection(nodes[i], SELECTION_STATES.UNSELECTED);
+				actionNodes.push(nodes[i]);
+			}
+		}
+
+		const meshesByNodes = yield getMeshesByNodes(actionNodes);
+		for (let index = 0; index < meshesByNodes.length; index++) {
+			const { meshes, teamspace, modelId } = meshesByNodes[index];
+			Viewer.unhighlightObjects({
+				account: teamspace,
+				model: modelId,
+				ids: meshes
+			});
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('deselect', 'node', error));
 	}
 }
 
@@ -469,7 +514,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 		}
 
 		const meshesByNodes = yield getMeshesByNodes(nodes);
-		const nodesSelectionMap = select(selectNodesSelectionMap);
+		const nodesSelectionMap = yield select(selectNodesSelectionMap);
 
 		for (let index = 0; index < meshesByNodes.length; index++) {
 			const { meshes, teamspace, modelId } = meshesByNodes[index];
@@ -493,7 +538,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 			}
 		}
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('select', 'nodes'));
+		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
 	}
 	console.timeEnd('SELECT NODES');
 }
@@ -503,31 +548,27 @@ function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], col
 	yield put(TreeActions.selectNodes(nodesIds, false, colour));
 }
 
-function* setTreeNodesVisibility({ nodes, visibility }) {
+function* setTreeNodesVisibility({ nodesIds, visibility }) {
 	try {
 		console.log('nodes', nodes);
 		console.log('visibility', visibility);
 
 		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
-		const nodesSelectionMap = yield select(selectNodesSelectionMap);
 		const nodesIndexesMap = yield select(selectNodesIndexesMap);
 		const treeNodesList = yield select(selectTreeNodesList);
 		const numberOfInvisibleChildrenMap = yield select(selectNumberOfInvisibleChildrenMap);
 
-		const TreeService = getAngularService('TreeService') as any;
-
-		if (nodes.length && visibility === VISIBILITY_STATES.INVISIBLE) {
-			// TreeService.deselectNodes(nodes);
-			// console.log('TODO should deselect nodes');
+		if (nodesIds.length && visibility === VISIBILITY_STATES.INVISIBLE) {
+			yield put(TreeActions.deselectNodes(nodesIds));
 		}
 
 		const newVisibilityMap = cloneDeep(nodesVisibilityMap);
 
 		const newNumberOfInvisibleChildrenMap = cloneDeep(numberOfInvisibleChildrenMap);
 
-		for (let nodeLoopIndex = 0; nodeLoopIndex < nodes.length ; nodeLoopIndex++) {
+		for (let nodeLoopIndex = 0; nodeLoopIndex < nodesIds.length ; nodeLoopIndex++) {
 
-			const nodeId = nodes[nodeLoopIndex];
+			const nodeId = nodesIds[nodeLoopIndex];
 			const nodeIndex = nodesIndexesMap[nodeId];
 			const node = treeNodesList[nodeIndex];
 			const meshesToUpdate = [];
@@ -601,9 +642,8 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 				yield put(TreeActions.updateMeshesVisibility(meshesToUpdate));
 			}
 		}
-
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set', 'tree node visibility'));
+		yield put(DialogActions.showErrorDialog('set', 'tree node visibility', error));
 	}
 }
 
@@ -625,7 +665,7 @@ function* updateMeshesVisibility({ meshes }) {
 		yield put(TreeActions.handleMeshesVisibility(hiddenMeshes, false));
 		yield put(TreeActions.handleMeshesVisibility(shownMeshes, true));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'meshes visibility'));
+		yield put(DialogActions.showErrorDialog('update', 'meshes visibility', error));
 	}
 }
 
@@ -654,7 +694,7 @@ function* handleMeshesVisibility({ meshes, visibility }) {
 			}
 		}
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('handle', 'meshes visibility'));
+		yield put(DialogActions.showErrorDialog('handle', 'meshes visibility', error));
 	}
 }
 
@@ -684,6 +724,7 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.SHOW_NODES_BY_SHARED_IDS, showNodesBySharedIds);
 	yield takeLatest(TreeTypes.SELECT_NODES, selectNodes);
 	yield takeLatest(TreeTypes.SELECT_NODES_BY_SHARED_IDS, selectNodesBySharedIds);
+	yield takeLatest(TreeTypes.DESELECT_NODES, deselectNodes);
 	yield takeLatest(TreeTypes.ISOLATE_NODES_BY_SHARED_IDS, isolateNodesBySharedIds);
 	yield takeLatest(TreeTypes.HIDE_NODES_BY_SHARED_IDS, hideNodesBySharedIds);
 	yield takeLatest(TreeTypes.HANDLE_MESHES_VISIBILITY, handleMeshesVisibility);
