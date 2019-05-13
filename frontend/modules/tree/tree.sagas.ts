@@ -395,7 +395,13 @@ function* isolateSelectedNodes() {
 
 function* isolateNodesBySharedIds({ objects = []}) {
 	yield put(TreeActions.selectNodesBySharedIds(objects));
-	yield put(TreeActions.isolateSelected());
+	yield put(TreeActions.isolateSelectedNodes());
+}
+
+function* isolateNode({ id }) {
+	const [ node ] = yield getNodesByIds([id]);
+
+	yield put(TreeActions.isolateNodesBySharedIds(node.shared_ids));
 }
 
 function* hideIfcSpaces() {
@@ -452,7 +458,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 		}
 
 		for (let i = 0; i < nodes.length; i++) {
-			yield setNodeSelection(nodes[i], SELECTION_STATES.SELECTED);
+			// yield setNodeSelection(nodes[i], SELECTION_STATES.SELECTED);
 		}
 
 		const lastNode = nodes[nodes.length - 1];
@@ -499,6 +505,9 @@ function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], col
 
 function* setTreeNodesVisibility({ nodes, visibility }) {
 	try {
+		console.log('nodes', nodes);
+		console.log('visibility', visibility);
+
 		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
 		const nodesSelectionMap = yield select(selectNodesSelectionMap);
 		const nodesIndexesMap = yield select(selectNodesIndexesMap);
@@ -541,7 +550,7 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 
 							newVisibilityMap[child._id] = VISIBILITY_STATES.VISIBLE;
 						} else {
-							yield setNodeSelection(child, SELECTION_STATES.UNSELECTED);
+							// yield setNodeSelection(child, SELECTION_STATES.UNSELECTED);
 							newVisibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
 						}
 					}
@@ -678,4 +687,5 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.ISOLATE_NODES_BY_SHARED_IDS, isolateNodesBySharedIds);
 	yield takeLatest(TreeTypes.HIDE_NODES_BY_SHARED_IDS, hideNodesBySharedIds);
 	yield takeLatest(TreeTypes.HANDLE_MESHES_VISIBILITY, handleMeshesVisibility);
+	yield takeLatest(TreeTypes.ISOLATE_NODE, isolateNode);
 }

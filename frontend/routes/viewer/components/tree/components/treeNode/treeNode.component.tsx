@@ -50,6 +50,7 @@ interface IProps {
 	selectNode?: (id) => void;
 	deselectNode?: (id) => void;
 	setTreeNodesVisibility?: (id, visibility) => void;
+	isolateNode?: (id) => void;
 }
 
 const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
@@ -150,7 +151,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	public getVisibilityIcon(visibility) {
 		if (visibility === VISIBILITY_STATES.VISIBLE) {
 			return VisibleIcon;
-		} else if (visibility === VISIBILITY_STATES.PARENT_OF_VISIBLE) {
+		} else if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
 			return ParentOfVisibleIcon;
 		}
 
@@ -193,7 +194,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 
 	private isolateNode = (event) => {
 		event.stopPropagation();
-		console.log('isolate node', this.node._id);
+		this.props.isolateNode(this.node._id);
 	}
 
 	private toggleShowNode = (event) => {
