@@ -152,8 +152,10 @@ function* expandToNode(nodeId: string) {
 function* setNodeSelection(node: any, selection: any) {
 	const nodesSelectionMap = yield select(selectNodesSelectionMap);
 	const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
+	const nodesIndexesMap = yield select(selectNodesIndexesMap);
+	const treeNodesList = yield select(selectTreeNodesList);
 
-	let nodes = [node];
+	const nodes = [node];
 	const shouldSelect = selection === SELECTION_STATES.SELECTED;
 	while (nodes.length) {
 		const currentNode = nodes.pop();
@@ -162,15 +164,17 @@ function* setNodeSelection(node: any, selection: any) {
 		if (currentVisibility !== VISIBILITY_STATES.INVISIBLE) {
 			if (!shouldSelect) {
 				nodesSelectionMap[currentNode._id] = SELECTION_STATES.UNSELECTED;
-			} else if (currentVisibility === this.VISIBILITY_STATES.parentOfInvisible) {
-				// TODO ^^^^^^^^^
+			} else if (currentVisibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
 				nodesSelectionMap[currentNode._id] = SELECTION_STATES.PARENT_OF_UNSELECTED;
 			} else {
 				nodesSelectionMap[currentNode._id] = SELECTION_STATES.SELECTED;
 			}
 
-			if (currentNode.children && currentNode.children.length) {
-				nodes = nodes.concat(currentNode.children);
+			if (currentNode.hasChildren) {
+				const nodeIndex = nodesIndexesMap[node._id];
+				for (let childIndex = nodeIndex; childIndex <= nodeIndex + currentNode.childrenNumber; childIndex++) {
+					nodes.push(treeNodesList[childIndex]);
+				}
 			}
 		}
 	}
@@ -447,11 +451,8 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 			return Promise.resolve('No nodes specified');
 		}
 
-		const TreeService = getAngularService('TreeService') as any;
-
 		for (let i = 0; i < nodes.length; i++) {
-			// TODO
-			TreeService.setNodeSelection(nodes[i], TreeService.SELECTION_STATES.selected);
+			yield setNodeSelection(nodes[i], SELECTION_STATES.SELECTED);
 		}
 
 		const lastNode = nodes[nodes.length - 1];
@@ -466,17 +467,17 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 
 		for (let index = 0; index < meshesByNodes.length; index++) {
 			const { meshes, teamspace, modelId } = meshesByNodes[index];
-			// TODO: Uncomment when setNodeSelection will be migrated
 
-			// const filterdMeshes = meshes.filter((mesh) => {
-			// 	return nodesSelectionMap[mesh] === SELECTION_STATES.SELECTED;
-			// });
+			const filterdMeshes = meshes.filter((mesh) => {
+				return nodesSelectionMap[mesh] === SELECTION_STATES.SELECTED;
+			});
+
 			if (meshes.length > 0) {
 				// Separately highlight the children
 				// but only for multipart meshes
 				Viewer.highlightObjects({
 					account: teamspace,
-					ids: meshes, // filterdMeshes,
+					ids: filterdMeshes,
 					colour,
 					model: modelId,
 					multi: true,
@@ -521,7 +522,7 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 			const node = treeNodesList[nodeIndex];
 			const meshesToUpdate = [];
 
-			if (node && (visibility === VISIBILITY_STATES.PARENT_OF_VISIBLE || visibility !== nodesVisibilityMap[nodeId])) {
+			if (node && (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE || visibility !== nodesVisibilityMap[nodeId])) {
 
 				if (node.type === NODE_TYPES.MESH) {
 					meshesToUpdate.push(node);
@@ -539,8 +540,7 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 
 							newVisibilityMap[child._id] = VISIBILITY_STATES.VISIBLE;
 						} else {
-							// TODO
-							// TreeService.setNodeSelection(child, this.SELECTION_STATES.unselected);
+							yield setNodeSelection(child, SELECTION_STATES.UNSELECTED);
 							newVisibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
 						}
 					}
@@ -550,15 +550,14 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 					} else {
 						newNumberOfInvisibleChildrenMap[node._id] = 0;
 					}
-				} else {
+				} /* else {
 					if (visibility === VISIBILITY_STATES.VISIBLE) {
 						newVisibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
 					} else {
-						// TODO
-						// TreeService.setNodeSelection(child, this.SELECTION_STATES.unselected);
+						yield setNodeSelection(child, SELECTION_STATES.UNSELECTED);
 						newVisibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
 					}
-				}
+				} */
 
 				let currentNode = node;
 				const parents = [];
@@ -570,7 +569,7 @@ function* setTreeNodesVisibility({ nodes, visibility }) {
 					newNumberOfInvisibleChildrenMap[currentNode._id] = node.childrenNumber + i;
 
 					if (currentNode.childrenNumber > newNumberOfInvisibleChildrenMap[currentNode._id]) {
-						newVisibilityMap[currentNode._id] = VISIBILITY_STATES.PARENT_OF_VISIBLE;
+						newVisibilityMap[currentNode._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
 					} else {
 						// newVisibilityMap[currentNode._id] = VISIBILITY_STATES.VISIBLE;
 					}
