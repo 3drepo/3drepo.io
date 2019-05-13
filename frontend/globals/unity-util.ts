@@ -830,6 +830,7 @@ export class UnityUtil {
 		UnityUtil.initialLoad = true;
 
 		UnityUtil.disableMeasuringTool();
+		UnityUtil.diffToolDisableAndClear();
 		UnityUtil.toUnity('ClearCanvas', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
