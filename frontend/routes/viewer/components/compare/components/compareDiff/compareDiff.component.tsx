@@ -39,9 +39,9 @@ interface IProps {
 }
 
 export class CompareDiff extends React.PureComponent<IProps, any> {
-  public handleFilterChange = (selectedFilters) => {
+	public handleFilterChange = (selectedFilters) => {
 		this.props.setComponentState({ selectedFilters });
-  }
+	}
 
 	public renderEmptyState = renderWhenTrue(() => (
 		<EmptyStateInfo>No models matched</EmptyStateInfo>
