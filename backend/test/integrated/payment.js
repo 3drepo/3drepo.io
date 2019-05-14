@@ -704,7 +704,7 @@ describe("Enrolling to a subscription", function () {
 
 			it("to a user without job should fail", function(done) {
 				agent.post(`/${username}/members`)
-					.send({user: username5, job: job5})
+					.send({user: username5})
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_JOB.value);
 						done(err);
