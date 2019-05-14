@@ -28,6 +28,7 @@ import ChangeHistory from '@material-ui/icons/ChangeHistory';
 import { FONT_WEIGHT } from '../../../../../styles';
 import { SmallIconButton } from '../../../../components/smallIconButon/smallIconButton.component';
 import { Item, Container, ItemText, ItemSecondaryAction } from './notificationItem.styles';
+import notificationsContainer from '../../notifications.container';
 
 export interface INotification {
 	_id: string;
@@ -38,6 +39,7 @@ export interface INotification {
 	modelName: string;
 	issuesId?: string[];
 	revision?: string;
+	revisions?: string[];
 	timestamp: number;
 	errorMessage?: string;
 }
@@ -103,7 +105,19 @@ const getDetails = (notification: IProps) => {
 		case TYPES.ISSUE_ASSIGNED:
 			return `${notification.issuesId.length} assigned issues `;
 		case TYPES.MODEL_UPDATED:
-			return !notification.revision ? 'New revision uploaded' : `Revision ${notification.revision} uploaded`;
+			if (notification.revision && !notification.revisions ||
+				(!notification.revision && notification.revisions && notification.revisions.length === 1)
+				) {
+				const revision =  notification.revision || notification.revisions[0];
+				return `Revision ${revision} uploaded`;
+			}
+
+			if (notification.revisions && notification.revisions.length) {
+				const revisionsCount = notification.revisions.length + (notification.revision ? 1 : 0);
+				return `${revisionsCount} revisions has been uploaded`;
+			}
+
+			return 'New revision uploaded';
 		case TYPES.MODEL_UPDATED_FAILED:
 			return 'New revision failed to import';
 		case TYPES.ISSUE_CLOSED:

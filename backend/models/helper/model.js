@@ -92,7 +92,7 @@ function translateBouncerErrCode(bouncerErrorCode) {
 function insertModelUpdatedNotificationsLatestReview(account, model) {
 	History.findLatest({account, model},{tag:1}).then(h => {
 		const revision = (!h || !h.tag) ? "" : h.tag;
-		return notifications.insertModelUpdatedNotifications(account, model, revision);
+		return notifications.upsertModelUpdatedNotifications(account, model, revision);
 	}).then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
 }
 function importSuccess(account, model, sharedSpacePath, user) {
