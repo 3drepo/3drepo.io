@@ -193,7 +193,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				</FieldsRow>
 
 				<Container>
-					<Field name="description" render={({ field }) => (
+					<Field name="desc" render={({ field }) => (
 						<TextField
 							{...field}
 							requiredConfirm={!this.isNewRisk}
@@ -364,7 +364,7 @@ export const RiskDetailsForm = withFormik({
 			associated_activity: risk.associated_activity || '',
 			mitigation_status: risk.mitigation_status || '',
 			mitigation_desc: risk.mitigation_desc || '',
-			description: risk.description || '',
+			desc: risk.desc || '',
 			assigned_roles: get(risk, 'assigned_roles[0]', ''),
 			category: risk.category || '',
 			likelihood: risk.likelihood,

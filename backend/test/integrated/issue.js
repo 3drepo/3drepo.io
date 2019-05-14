@@ -272,7 +272,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+					agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 						.send(status)
 						.expect(200, done);
 				},
@@ -302,7 +302,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+					agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 						.send(status)
 						.expect(200, function(err, res) {
 						// Invalid status is now allowed to accommodate for BCF import
@@ -330,7 +330,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+					agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 						.send(priority)
 						.expect(200, done);
 				},
@@ -360,7 +360,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+					agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 						.send(priority)
 						.expect(200, function(err, res) {
 						// Invalid priority is now allowed to accommodate for BCF import
@@ -387,7 +387,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+					agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 						.send(topic_type)
 						.expect(200, done);
 				},
@@ -416,7 +416,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+					agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 						.send(position)
 						.expect(200, done);
 				},
@@ -447,7 +447,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+					agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 						.send(status)
 						.expect(200, done);
 				},
@@ -483,7 +483,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+					agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 						.send(data)
 						.expect(200, done);
 				},
@@ -519,7 +519,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+					agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 						.send(data)
 						.expect(200, done);
 				},
@@ -555,12 +555,12 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+					agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 						.send({ comment : "hello world"})
 						.expect(200 , done);
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+					agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 						.send(data)
 						.expect(200, done);
 				},
@@ -597,7 +597,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+					agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 						.send(updateData)
 						.expect(200, done);
 				},
@@ -640,7 +640,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+					agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 						.send(updateData)
 						.expect(200, done);
 				},
@@ -683,7 +683,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+					agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 						.send(updateData)
 						.expect(200, done);
 				},
@@ -716,7 +716,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/issues/${issueId}.json`)
+					agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 						.send(desc)
 						.expect(200, done);
 				},
@@ -774,7 +774,7 @@ describe("Issues", function () {
 				const updateData = {
 					"priority": "high"
 				};
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send(updateData)
 					.expect(400, function(err, res) {
 						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
@@ -788,7 +788,7 @@ describe("Issues", function () {
 				const updateData = {
 					"status": "in progress"
 				};
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send(updateData)
 					.expect(200, function(err, res) {
 						expect(res.body.value);
@@ -802,7 +802,7 @@ describe("Issues", function () {
 				const updateData = {
 					"status": "closed"
 				};
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send(updateData)
 					.expect(400, function(err, res) {
 						done(err);
@@ -815,7 +815,7 @@ describe("Issues", function () {
 				const updateData = {
 					"topic_type": "For VR"
 				};
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send(updateData)
 					.expect(200, function(err, res) {
 						done(err);
@@ -828,7 +828,7 @@ describe("Issues", function () {
 				const updateData = {
 					"assigned_roles": ["jobA"]
 				};
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send(updateData)
 					.expect(200, function(err, res) {
 						done(err);
@@ -883,7 +883,7 @@ describe("Issues", function () {
 				const updateData = {
 					"priority": "high"
 				};
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send(updateData)
 					.expect(400, function(err, res) {
 						expect(res.body.value === responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED.value);
@@ -897,7 +897,7 @@ describe("Issues", function () {
 				const updateDataProgress = {
 					"status": "in progress"
 				};
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send(updateDataProgress)
 					.expect(400, function(err, res) {
 						expect(res.body.value);
@@ -911,7 +911,7 @@ describe("Issues", function () {
 				const updateDataClosed = {
 					"status": "closed"
 				};
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send(updateDataClosed)
 					.expect(400, function(err, res) {
 						done(err);
@@ -924,7 +924,7 @@ describe("Issues", function () {
 				const updateData = {
 					"topic_type": "For VR"
 				};
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send(updateData)
 					.expect(200, function(err, res) {
 						done(err);
@@ -937,7 +937,7 @@ describe("Issues", function () {
 				const updateData = {
 					"assigned_roles": ["jobA"]
 				};
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send(updateData)
 					.expect(200, function(err, res) {
 						done(err);
@@ -991,7 +991,7 @@ describe("Issues", function () {
 
 				async.series([
 					function(done) {
-						agent.put(`/${username}/${model}/issues/${issueId}.json`)
+						agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 							.send(close)
 							.expect(200, done);
 					}
@@ -1045,7 +1045,7 @@ describe("Issues", function () {
 
 				async.series([
 					function(done) {
-						agent.put(`/${username}/${model}/issues/${issueId}.json`)
+						agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 							.send(close)
 							.expect(200, done);
 					}
@@ -1104,7 +1104,7 @@ describe("Issues", function () {
 
 				async.series([
 					function(done) {
-						agent.put(`/${username}/${model}/issues/${issueId}.json`)
+						agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 							.send(close)
 							.expect(400, function(err, res) {
 
@@ -1152,7 +1152,7 @@ describe("Issues", function () {
 							}
 						};
 
-						agent.put(`/${username}/${model}/issues/${issueId}.json`)
+						agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 							.send(comment)
 							.expect(200 , done);
 
@@ -1162,7 +1162,7 @@ describe("Issues", function () {
 			});
 
 			it("should succeed", function(done) {
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send({sealed: true, commentIndex: 0})
 					.expect(200, function(err, res) {
 						done(err);
@@ -1170,7 +1170,7 @@ describe("Issues", function () {
 			});
 
 			it("should fail if editing a sealed comment", function(done) {
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send({comment: "abcd", commentIndex: 0, edit: true})
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
@@ -1218,7 +1218,7 @@ describe("Issues", function () {
 
 				async.series([
 					function(done) {
-						agent.put(`/${username}/${model}/issues/${issueId}.json`)
+						agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 							.send(comment)
 							.expect(200 , done);
 					},
@@ -1254,7 +1254,7 @@ describe("Issues", function () {
 
 				async.series([
 					function(done) {
-						agent.put(`/${username}/${model}/issues/${issueId}.json`)
+						agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 							.send(comment)
 							.expect(200 , done);
 					},
@@ -1277,7 +1277,7 @@ describe("Issues", function () {
 
 				const comment = { comment: "" };
 
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send(comment)
 					.expect(400 , function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_NO_TEXT.value);
@@ -1289,7 +1289,7 @@ describe("Issues", function () {
 
 				const comment = { commentIndex: 0, delete: true };
 
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send(comment)
 					.expect(200 , function(err, res) {
 						done(err);
@@ -1301,7 +1301,7 @@ describe("Issues", function () {
 				const invalidId = "00000000-0000-0000-0000-000000000000";
 				const comment = { comment: "hello world" };
 
-				agent.put(`/${username}/${model}/issues/${invalidId}.json`)
+				agent.patch(`/${username}/${model}/issues/${invalidId}.json`)
 					.send(comment)
 					.expect(404 , function(err, res) {
 						done(err);
@@ -1331,7 +1331,7 @@ describe("Issues", function () {
 						// add an comment
 						const comment = { comment: "hello world" };
 
-						agent.put(`/${username}/${model}/issues/${issueId}.json`)
+						agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 							.send(comment)
 							.expect(200 , function(err, res) {
 								done(err);
@@ -1344,7 +1344,7 @@ describe("Issues", function () {
 
 				const close = { status: "closed" };
 
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send(close)
 					.expect(200 , function(err, res) {
 
@@ -1356,7 +1356,7 @@ describe("Issues", function () {
 			// it('should fail if adding a comment', function(done){
 			// 	let comment = { comment: 'hello world' };
 
-			// 	agent.put(`/${username}/${model}/issues/${issueId}.json`)
+			// 	agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 			// 	.send(comment)
 			// 	.expect(400 , function(err, res){
 
@@ -1369,7 +1369,7 @@ describe("Issues", function () {
 			// it('should fail if removing a comment', function(done){
 			// 	let comment = { commentIndex: 0, delete: true };
 
-			// 	agent.put(`/${username}/${model}/issues/${issueId}.json`)
+			// 	agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 			// 	.send(comment)
 			// 	.expect(400 , function(err, res){
 
@@ -1382,7 +1382,7 @@ describe("Issues", function () {
 			// it('should fail if editing a comment', function(done){
 			// 	let comment = { comment: 'hello world 2', commentIndex: 0, edit: true };
 
-			// 	agent.put(`/${username}/${model}/issues/${issueId}.json`)
+			// 	agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 			// 	.send(comment)
 			// 	.expect(400 , function(err, res){
 
@@ -1396,7 +1396,7 @@ describe("Issues", function () {
 
 				const open = {  status: "open" };
 
-				agent.put(`/${username}/${model}/issues/${issueId}.json`)
+				agent.patch(`/${username}/${model}/issues/${issueId}.json`)
 					.send(open)
 					.expect(200 , function(err, res) {
 						done(err);
@@ -1409,7 +1409,7 @@ describe("Issues", function () {
 				const invalidId = "00000000-0000-0000-0000-000000000000";
 				const close = { status: "closed" };
 
-				agent.put(`/${username}/${model}/issues/${invalidId}.json`)
+				agent.patch(`/${username}/${model}/issues/${invalidId}.json`)
 					.send(close)
 					.expect(404 , function(err, res) {
 						done(err);
