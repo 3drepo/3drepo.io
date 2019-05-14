@@ -56,7 +56,7 @@ const getNextRevision = (revisions, currentRevision) => {
 };
 
 const prepareModelToCompare = (teamspace, modelId, name, isFederation, revisions, currentRevision?) => {
-	const baseRevision = isFederation
+	const baseRevision = isFederation || !currentRevision
 		? revisions[0]
 		: revisions.find((rev) => rev.tag === currentRevision || rev._id === currentRevision ) || revisions[0];
 
