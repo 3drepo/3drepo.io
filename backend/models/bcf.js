@@ -406,7 +406,7 @@ bcf.getBCFZipReadStream = function(account, model, username, branch, revId, ids)
 
 	const zip = archiver.create("zip");
 
-	zip.append(new Buffer.from(getModelBCF(model), "utf8"), {name: "model.bcf"})
+	zip.append(new Buffer.from(getProjectExtension(model), "utf8"), {name: "project.bcfp"})
 		.append(new Buffer.from(getBCFVersion(), "utf8"), {name: "bcf.version"});
 
 	const projection = {};
@@ -453,16 +453,13 @@ bcf.getBCFZipReadStream = function(account, model, username, branch, revId, ids)
 };
 
 function getBCFVersion() {
-	return `
-		<?xml version="1.0" encoding="UTF-8"?>
+	return `<?xml version="1.0" encoding="UTF-8"?>
 		<Version VersionId="2.1" xsi:noNamespaceSchemaLocation="version.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-			<DetailedVersion>2.1</DetailedVersion>
-		</Version>
-	`;
+		<DetailedVersion>2.1</DetailedVersion>
+		</Version>`;
 }
 
-function getModelBCF(modelId) {
-
+function getProjectExtension(modelId) {
 	const model = {
 		ProjectExtension:{
 			"@" : {
@@ -473,9 +470,7 @@ function getModelBCF(modelId) {
 				"@": { "ProjectId": modelId },
 				"Name": modelId
 			},
-			"ExtensionSchema": {
-
-			}
+			"ExtensionSchema": {}
 		}
 	};
 
