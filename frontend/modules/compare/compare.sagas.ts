@@ -395,10 +395,15 @@ function* resetComponentState() {
 
 function* setTargetRevision({ modelId, targetRevision }) {
 	try {
+		const isCompareActive = yield select(selectIsCompareActive);
 		const componentState = yield select(selectComponentState);
 		const modelIndex = componentState.compareModels.findIndex((model) => model._id === modelId);
 		componentState.compareModels[modelIndex].targetClashRevision = targetRevision;
 		yield put(CompareActions.setComponentState(componentState));
+
+		if (isCompareActive) {
+			yield call(stopCompare);
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'target revision', error.message));
 	}
