@@ -54,6 +54,10 @@ describe("Enrolling to a subscription", function () {
 	const username4 = "metaTest";
 	const job4 = "Architect";
 
+	const username5 = "jobless_user";
+	const password5 = "jobless_user";
+	const email5 = "test3drepo_jobless@mailinator.com";
+
 	const email = "test3drepo_payment@mailinator.com";
 	const billingId = "I-000000000000";
 
@@ -100,6 +104,14 @@ describe("Enrolling to a subscription", function () {
 									done(err);
 								});
 						}
+					});
+				},
+
+				function(done) {
+					helpers.signUpAndLogin({
+						server, request, agent, expect, User, systemLogger,
+						username: username5, password: password5, email: email5,
+						done
 					});
 				}
 
@@ -686,6 +698,15 @@ describe("Enrolling to a subscription", function () {
 					.send({user: username4, job: job4})
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.LICENCE_LIMIT_REACHED.value);
+						done(err);
+					});
+			});
+
+			it("to a user without job should fail", function(done) {
+				agent.post(`/${username}/members`)
+					.send({user: username5, job: job5})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_JOB.value);
 						done(err);
 					});
 			});
