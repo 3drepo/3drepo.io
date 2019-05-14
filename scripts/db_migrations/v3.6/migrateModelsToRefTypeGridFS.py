@@ -28,7 +28,7 @@ password = sys.argv[4]
 connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongoPort + "/"
 
 ##### Enable dry run to not commit to the database #####
-dryRun = False
+dryRun = True
 overwrite = False #if there is already an entry for the filename: True = Overwrite regardless, False = Use existing entry
 
 ##### Connect to the Database #####
