@@ -44,12 +44,15 @@ describe("Enrolling to a subscription", function () {
 	const username2 = "payment_user2";
 	const password2 = "payment_user2";
 	const email2 = "test3drepo_payment2@mailinator.com";
+	const job2 = "Client";
 
 	const username3 = "payment_user3";
 	const password3 = "payment_user3";
 	const email3 = "test3drepo_payment3@mailinator.com";
+	const job3 = "Architect";
 
 	const username4 = "metaTest";
+	const job4 = "Architect";
 
 	const email = "test3drepo_payment@mailinator.com";
 	const billingId = "I-000000000000";
@@ -655,7 +658,7 @@ describe("Enrolling to a subscription", function () {
 
 			it("to an existing user should succeed", function(done) {
 				agent.post(`/${username}/members`)
-					.send({user: username2})
+					.send({user: username2, job: job2})
 					.expect(200, function(err, res) {
 						done(err);
 					});
@@ -663,7 +666,7 @@ describe("Enrolling to a subscription", function () {
 
 			it("to an user assigned to another license should fail", function(done) {
 				agent.post(`/${username}/members`)
-					.send({user: username2})
+					.send({user: username2, job: job2})
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.USER_ALREADY_ASSIGNED.value);
 						done(err);
@@ -672,7 +675,7 @@ describe("Enrolling to a subscription", function () {
 
 			it("to another (3rd) user should succeed", function(done) {
 				agent.post(`/${username}/members`)
-					.send({user: username3})
+					.send({user: username3, job: job3})
 					.expect(200, function(err, res) {
 						done(err);
 					});
@@ -680,7 +683,7 @@ describe("Enrolling to a subscription", function () {
 
 			it("to another (4th) user should fail", function(done) {
 				agent.post(`/${username}/members`)
-					.send({user: username4})
+					.send({user: username4, job: job4})
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.LICENCE_LIMIT_REACHED.value);
 						done(err);
