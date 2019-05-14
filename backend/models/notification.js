@@ -39,8 +39,13 @@ const generateNotification = function(type, data) {
 	return Object.assign({_id:utils.stringToUUID(uuid.v1()), read:false, type, timestamp}, data);
 };
 
-const unionArrayMerger = function(objValue, srcValue) {
+// if opts.duplicates == true then array values can contain duplicates.
+const unionArrayMerger = opts => (objValue, srcValue) => {
 	if (_.isArray(objValue)) {
+		if (opts && opts.duplicates) {
+			return objValue.concat(srcValue);
+		}
+
 		return _.uniq(objValue.concat(srcValue));
 	}
 };
@@ -75,7 +80,7 @@ const updateNotification = (username, _id, data) => {
 	);
 };
 
-const upsertNotification = async (username, data, type, criteria) => {
+const upsertNotification = async (username, data, type, criteria, opts) => {
 	const notifications = await getNotification(username, type, criteria);
 	if (notifications.length === 0) {
 		return await insertNotification(username, type, Object.assign(criteria, data));
@@ -83,7 +88,8 @@ const upsertNotification = async (username, data, type, criteria) => {
 
 	const n = notifications[0];
 	const timestamp = (new Date()).getTime();
-	const mergedData = {..._.mergeWith(n, data, unionArrayMerger), read:false,timestamp};
+
+	const mergedData = {..._.mergeWith(n, data, unionArrayMerger(opts)), read:false,timestamp};
 
 	await updateNotification(username, n._id, mergedData);
 	const notification = {...n, ...mergedData};
@@ -166,7 +172,7 @@ const upsertIssueAssignedNotification = (username, teamSpace, modelId, issueId) 
 const upsertModelUpdatedNotification = (username, teamSpace, modelId, revision) => {
 	const criteria = {teamSpace,  modelId};
 	const data = {revisions: [revision]};
-	return upsertNotification(username, data, types.MODEL_UPDATED, criteria);
+	return upsertNotification(username, data, types.MODEL_UPDATED, criteria, {duplicates: true});
 };
 
 const removeIssueFromNotification = (username, teamSpace, modelId, issueId, issueType) => {
