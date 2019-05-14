@@ -160,39 +160,39 @@ const resetComponentState = (state = INITIAL_STATE) => {
 };
 
 const addToSelected = (state = INITIAL_STATE, { id }) => {
-	const selectedNodesMap = { ...state.componentState.selectedNodesMap };
-	selectedNodesMap[id] = true;
-	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };
+	const nodesSelectionMap = { ...state.nodesSelectionMap };
+	nodesSelectionMap[id] = true;
+	return { ...state, nodesSelectionMap };
 };
 
 const addGroupToSelected = (state = INITIAL_STATE, { fromIndex, toIndex }) => {
-	const selectedNodesMap = { ...state.componentState.selectedNodesMap };
+	const nodesSelectionMap = { ...state.nodesSelectionMap };
 
 	for (let i = fromIndex; i < toIndex; i++) {
 		const nodeId = state.treeNodesList[i]._id;
-		selectedNodesMap[nodeId] = true;
+		nodesSelectionMap[nodeId] = true;
 	}
-	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };
+	return { ...state, nodesSelectionMap };
 };
 
 const removeGroupFromSelected = (state = INITIAL_STATE, { fromIndex, toIndex }) => {
-	const selectedNodesMap = { ...state.componentState.selectedNodesMap };
+	const nodesSelectionMap = { ...state.nodesSelectionMap };
 
 	for (let i = fromIndex; i < toIndex; i++) {
 		const nodeId = state.treeNodesList[i]._id;
-		selectedNodesMap[nodeId] = false;
+		nodesSelectionMap[nodeId] = false;
 	}
-	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };
+	return { ...state, nodesSelectionMap };
 };
 
 const removeFromSelected = (state = INITIAL_STATE, { id }) => {
-	const selectedNodesMap = { ...state.componentState.selectedNodesMap };
-	selectedNodesMap[id] = false;
-	return { ...state, componentState: { ...state.componentState, selectedNodesMap } };
+	const nodesSelectionMap = { ...state.nodesSelectionMap };
+	nodesSelectionMap[id] = false;
+	return { ...state, nodesSelectionMap };
 };
 
 const removeAllSelected = (state = INITIAL_STATE) => {
-	return { ...state, componentState: { ...state.componentState, selectedNodesMap: {} } };
+	return { ...state, nodesSelectionMap: {} };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
