@@ -55,7 +55,7 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 	}
 
 	get value() {
-		return this.revisionsMap[this.state.value].tag;
+		return this.getRevisionName(this.revisionsMap[this.state.value]);
 	}
 
 	private renderSelect = renderWhenTrue(() => {
@@ -114,9 +114,13 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	private getRevisionName = (revision) => {
+		return revision.tag || dayjs(revision.timestamp).format('DD/MM/YYYY');
+	}
+
 	private renderValue = () => (<Name>{this.value}</Name>);
 
-	private renderName = (revision) => (<Name>{revision.tag || dayjs(revision.timestamp).format('DD/MM/YYYY')}</Name>);
+	private renderName = (revision) => (<Name>{this.getRevisionName(revision)}</Name>);
 
 	private renderDate = (timestamp) => (<Date><DateTime value={timestamp} format="DD MMM YYYY" /></Date>);
 }
