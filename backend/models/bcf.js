@@ -119,33 +119,32 @@ function getBCFMarkup(issue, account, model, unit) {
 				"@" : {
 					"Guid": utils.uuidToString(issue._id),
 					"TopicStatus": issue.status ? issue.status : (issue.closed ? "closed" : "open")
-				},
-				"Title": issue.name,
-				"Priority": issue.priority,
-				"CreationDate": moment(issue.created).format(),
-				"CreationAuthor": issue.owner,
-				"Description": issue.desc
+				}
 			},
 			"Comment": [],
 			"Viewpoints": []
 		}
 	};
 
+	issue.topic_type && (markup.Markup.Topic["@"].TopicType = issue.topic_type);
+
+	_.get(issue, "extras.Header") && (markup.Markup.Header = _.get(issue, "extras.Header"));
+	_.get(issue, "extras.ReferenceLink") && (markup.Markup.Topic.ReferenceLink = _.get(issue, "extras.ReferenceLink"));
+	_.get(issue, "name") && markup.Markup.Topic.Title = _.get(issue, "name");
+	_.get(issue, "priority") && markup.Markup.Topic.Priority = _.get(issue, "priority");
+	_.get(issue, "extras.Index") && (markup.Markup.Topic.Index = _.get(issue, "extras.Index"));
+	_.get(issue, "extras.Labels") && (markup.Markup.Topic.Labels = _.get(issue, "extras.Labels"));
+	_.get(issue, "created") && markup.Markup.Topic.CreationDate = moment(issue.created).format();
+	_.get(issue, "owner") && markup.Markup.Topic.CreationAuthor = _.get(issue, "owner");
+	_.get(issue, "extras.ModifiedDate") && (markup.Markup.Topic.ModifiedDate = _.get(issue, "extras.ModifiedDate"));
+	_.get(issue, "extras.ModifiedAuthor") && (markup.Markup.Topic.ModifiedAuthor = _.get(issue, "extras.ModifiedAuthor"));
 	if (_.get(issue, "due_date")) {
 		markup.Markup.Topic.DueDate = moment(_.get(issue, "due_date")).format();
 	} else if (_.get(issue, "extras.DueDate")) {
 		markup.Markup.Topic.DueDate = _.get(issue, "extras.DueDate"); // For backwards compatibility
 	}
-
-	issue.topic_type && (markup.Markup.Topic["@"].TopicType = issue.topic_type);
-
-	_.get(issue, "extras.Header") && (markup.Markup.Header = _.get(issue, "extras.Header"));
-	_.get(issue, "extras.ReferenceLink") && (markup.Markup.Topic.ReferenceLink = _.get(issue, "extras.ReferenceLink"));
-	_.get(issue, "extras.Index") && (markup.Markup.Topic.Index = _.get(issue, "extras.Index"));
-	_.get(issue, "extras.Labels") && (markup.Markup.Topic.Labels = _.get(issue, "extras.Labels"));
-	_.get(issue, "extras.ModifiedDate") && (markup.Markup.Topic.ModifiedDate = _.get(issue, "extras.ModifiedDate"));
-	_.get(issue, "extras.ModifiedAuthor") && (markup.Markup.Topic.ModifiedAuthor = _.get(issue, "extras.ModifiedAuthor"));
 	_.get(issue, "extras.AssignedTo") && (markup.Markup.Topic.AssignedTo = issue.assigned_roles.toString());
+	_.get(issue, "desc") && markup.Markup.Topic.Description = _.get(issue, "desc");
 	_.get(issue, "extras.BimSnippet") && (markup.Markup.Topic.BimSnippet = _.get(issue, "extras.BimSnippet"));
 	_.get(issue, "extras.DocumentReference") && (markup.Markup.Topic.DocumentReference = _.get(issue, "extras.DocumentReference"));
 	_.get(issue, "extras.RelatedTopic") && (markup.Markup.Topic.RelatedTopic = _.get(issue, "extras.RelatedTopic"));
