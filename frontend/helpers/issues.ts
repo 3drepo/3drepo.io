@@ -54,17 +54,6 @@ export const getStatusIcon = (priority, status) => {
   return {...statusIcon};
 };
 
-export const mergeIssueData = (source, data = source) => {
-	const hasUnassignedRole = !data.assigned_roles;
-
-	return {
-		...source,
-		...omit(data, ['assigned_roles', 'description', 'descriptionThumbnail']),
-		assigned_roles: hasUnassignedRole ? [] : [data.assigned_roles],
-		desc: data.description
-	};
-};
-
 const isOpenIssue = (status) => status !== 'closed';
 
 const userJobMatchesCreator = (userJob, issueData) => {

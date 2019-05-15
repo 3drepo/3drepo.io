@@ -121,17 +121,6 @@ export const getRiskPinColor = (levelOfRisk: number, selected: boolean = false) 
 		: RISK_LEVELS_COLOURS[levelOfRisk].pinColor;
 };
 
-export const mergeRiskData = (source, data = source) => {
-	const hasUnassignedRole = !data.assigned_roles;
-
-	return {
-		...source,
-		...omit(data, ['assigned_roles', 'description', 'descriptionThumbnail']),
-		assigned_roles: hasUnassignedRole ? [] : [data.assigned_roles],
-		desc: data.description
-	};
-};
-
 const userJobMatchesCreator = (userJob, riskData) => {
 	return (userJob._id && riskData.creator_role && userJob._id === riskData.creator_role);
 };

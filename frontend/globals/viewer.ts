@@ -819,4 +819,13 @@ export class Viewer {
 	public setXRayHighlightOff() {
 		UnityUtil.setXRayHighlightOff();
 	}
+
+	public useBoundingBoxFarPlaneAlgorithm() {
+		UnityUtil.useBoundingBoxFarPlaneAlgorithm();
+	}
+
+	public useBoundingSphereFarPlaneAlgorithm() {
+		UnityUtil.useBoundingSphereFarPlaneAlgorithm();
+	}
+
 }

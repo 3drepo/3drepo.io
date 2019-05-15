@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { Icon } from '@material-ui/core';
 import { COLOR } from '../../../../../../styles';
+import { LinkableField } from '../../../../../components/linkableField/linkableField.component';
 
 export const Container = styled.div`
 	display: flex;
@@ -45,7 +46,7 @@ export const MetaKeyText = styled.div`
 	word-break: break-all;
 `;
 
-export const MetaValue = styled.div`
+export const MetaValue = styled(LinkableField)`
 	width: 50%;
 	color: ${COLOR.BLACK_87};
 	font-size: 14px;

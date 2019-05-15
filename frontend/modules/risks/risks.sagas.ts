@@ -175,7 +175,8 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 
 export function* updateRisk({ teamspace, modelId, riskData }) {
 	try {
-		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, riskData);
+		const { _id, rev_id } = yield select(selectActiveRiskDetails);
+		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
 		const AnalyticService = getAngularService('AnalyticService') as any;
 		yield AnalyticService.sendEvent({
 			eventCategory: 'Risk',
@@ -212,7 +213,8 @@ export function* updateNewRisk({ newRisk }) {
 
 export function* postComment({ teamspace, modelId, riskData }) {
 	try {
-		const { data: comment } = yield API.updateRisk(teamspace, modelId, riskData);
+		const { _id, rev_id } = yield select(selectActiveRiskDetails);
+		const { data: comment } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
 		const preparedComment = yield prepareComment(comment);
 
 		yield put(RisksActions.createCommentSuccess(preparedComment, riskData._id));
@@ -233,7 +235,7 @@ export function* removeComment({ teamspace, modelId, riskData }) {
 			rev_id
 		};
 
-		yield API.updateRisk(teamspace, modelId, commentData);
+		yield API.updateRisk(teamspace, modelId, _id, rev_id, commentData);
 		yield put(RisksActions.deleteCommentSuccess(guid));
 		yield put(SnackbarActions.show('Comment removed'));
 	} catch (error) {

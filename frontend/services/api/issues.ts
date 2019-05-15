@@ -49,13 +49,15 @@ export const saveIssue = (teamspace, modelId, issue) => {
  * Update issue
  * @param teamspace
  * @param modelId
+ * @param id
+ * @param revId
  * @param issue
  */
-export const updateIssue = (teamspace, modelId, issue) => {
+export const updateIssue = (teamspace, modelId, id, revId, issue) => {
 	if (issue.rev_id) {
-		return api.put(`${teamspace}/${modelId}/revision/${issue.rev_id}/issues/${issue._id}.json`, issue);
+		return api.patch(`${teamspace}/${modelId}/revision/${revId}/issues/${id}.json`, issue);
 	}
-	return api.put(`${teamspace}/${modelId}/issues/${issue._id}.json`, issue);
+	return api.patch(`${teamspace}/${modelId}/issues/${id}.json`, issue);
 };
 
 /**
