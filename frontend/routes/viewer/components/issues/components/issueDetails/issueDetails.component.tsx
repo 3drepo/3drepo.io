@@ -281,7 +281,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
 		const issueCommentData = {
 			_id: this.issueData._id,
-			rev_id: this.issueData.rev_id,
 			comment,
 			viewpoint: {
 				...viewpoint,

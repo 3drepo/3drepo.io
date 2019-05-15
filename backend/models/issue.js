@@ -192,7 +192,7 @@ function updateTextComments(account, model, sessionId, issueId, comments, data, 
 
 	if (data.edit && data.commentIndex >= 0 && comments.length > data.commentIndex) {
 		if (!comments[data.commentIndex].sealed) {
-			const textComment = Comment.newTextComment(data.requester, data.revId, data.comment, viewpoint, data.position);
+			const textComment = Comment.newTextComment(data.requester, data.comment, viewpoint, data.position);
 
 			comments[data.commentIndex] = textComment;
 
@@ -217,7 +217,7 @@ function updateTextComments(account, model, sessionId, issueId, comments, data, 
 			comment.sealed = true;
 		});
 
-		const textComment = Comment.newTextComment(data.requester, data.revId, data.comment, viewpoint);
+		const textComment = Comment.newTextComment(data.requester, data.comment, viewpoint);
 
 		comments.push(textComment);
 
@@ -969,6 +969,34 @@ issue.getThumbnail = function(dbCol, uid) {
 			return foundIssue.thumbnail.content.buffer;
 		}
 	});
+};
+
+issue.addComment = async function(account, model, issueId, user, data) {
+	// 1. Fetch comments
+	const _id = utils.stringToUUID(issueId) ;
+	const issues = await db.getCollection(account, model + ".issues");
+	const issuesRes = await issues.find({ _id }, {comments: 1}).toArray();
+	if (issuesRes.length === 0) {
+		throw { resCode: responseCodes.ISSUE_NOT_FOUND };
+	}
+
+	// 2. Seal every comment
+	const comments = issuesRes[0].comments;
+	comments.forEach(c => c.sealed = true);
+
+	// 3. Create the comment
+	const viewpoint = await View.clean({account, model}, data["viewpoint"], fieldTypes["viewpoint"]);
+	viewpoint.guid = utils.generateUUID();
+	const comment = Comment.newTextComment(user, data.comment, viewpoint);
+
+	// 4. Append the new comment
+	comments.push(comment);
+
+	// 5. Update the issue.
+	await issues.update({ _id }, {$set : {comments}, $push: { viewpoints: viewpoint }});
+
+	// 6. Return the new comment.
+	return {...comment, viewpoint};
 };
 
 issue.isIssueBeingClosed = function(oldIssue, newIssue) {

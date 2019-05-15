@@ -214,7 +214,7 @@ export function* updateNewIssue({ newIssue }) {
 export function* postComment({ teamspace, modelId, issueData }) {
 	try {
 		const { rev_id, _id} = yield select(selectActiveIssueDetails);
-		const { data: comment } = yield API.updateIssue(teamspace, modelId, _id, rev_id, issueData);
+		const { data: comment } = yield API.addIssueComment(teamspace, modelId, _id, issueData);
 		const preparedComment = yield prepareComment(comment);
 
 		yield put(IssuesActions.createCommentSuccess(preparedComment, issueData._id));

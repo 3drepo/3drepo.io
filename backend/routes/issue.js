@@ -379,6 +379,8 @@ router.post("/revision/:rid/issues", middlewares.issue.canCreate, storeIssue, re
  */
 router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
+router.post("/issues/:issueId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
+
 function storeIssue(req, res, next) {
 	const data = req.body;
 	data.owner = req.session.user.username;
@@ -575,6 +577,19 @@ function getThumbnail(req, res, next) {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
+	});
+}
+
+function addComment(req, res, next) {
+	const user = req.session.user.username;
+	const data =  req.body;
+	const {account, model, issueId} = req.params;
+
+	Issue.addComment(account, model, issueId, user, data).then(comment => {
+		req.dataModel = comment;
+		next();
+	}).catch(err => {
+		responseCodes.onError(req, res, err);
 	});
 }
 

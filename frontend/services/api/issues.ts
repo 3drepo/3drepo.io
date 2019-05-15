@@ -74,6 +74,10 @@ export const getIssues = (teamspace, modelId, revision?) => {
 	return api.get(`${mainPath}/issues`);
 };
 
+export const addIssueComment = (teamspace, modelId, id, comment) => {
+	return api.post(`${teamspace}/${modelId}/issues/${id}.json/comments`, comment);
+};
+
 /**
  * Import BCF
  * @param teamspace
