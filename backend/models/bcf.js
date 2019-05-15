@@ -462,7 +462,9 @@ function getBCFVersion() {
 		</Version>`;
 }
 
-function getProjectExtension(modelId) {
+/*
+ * Project Extension not used
+ * function getProjectExtension(modelId) {
 	const model = {
 		ProjectExtension:{
 			"@" : {
@@ -478,7 +480,7 @@ function getProjectExtension(modelId) {
 	};
 
 	return xmlBuilder.buildObject(model);
-}
+}*/
 
 bcf.importBCF = function(requester, account, model, revId, zipPath) {
 	let settings;
