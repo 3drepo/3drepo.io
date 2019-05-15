@@ -130,12 +130,12 @@ function getBCFMarkup(issue, account, model, unit) {
 
 	_.get(issue, "extras.Header") && (markup.Markup.Header = _.get(issue, "extras.Header"));
 	_.get(issue, "extras.ReferenceLink") && (markup.Markup.Topic.ReferenceLink = _.get(issue, "extras.ReferenceLink"));
-	_.get(issue, "name") && markup.Markup.Topic.Title = _.get(issue, "name");
-	_.get(issue, "priority") && markup.Markup.Topic.Priority = _.get(issue, "priority");
+	_.get(issue, "name") && (markup.Markup.Topic.Title = _.get(issue, "name"));
+	_.get(issue, "priority") && (markup.Markup.Topic.Priority = _.get(issue, "priority"));
 	_.get(issue, "extras.Index") && (markup.Markup.Topic.Index = _.get(issue, "extras.Index"));
 	_.get(issue, "extras.Labels") && (markup.Markup.Topic.Labels = _.get(issue, "extras.Labels"));
-	_.get(issue, "created") && markup.Markup.Topic.CreationDate = moment(issue.created).format();
-	_.get(issue, "owner") && markup.Markup.Topic.CreationAuthor = _.get(issue, "owner");
+	_.get(issue, "created") && (markup.Markup.Topic.CreationDate = moment(issue.created).format());
+	_.get(issue, "owner") && (markup.Markup.Topic.CreationAuthor = _.get(issue, "owner"));
 	_.get(issue, "extras.ModifiedDate") && (markup.Markup.Topic.ModifiedDate = _.get(issue, "extras.ModifiedDate"));
 	_.get(issue, "extras.ModifiedAuthor") && (markup.Markup.Topic.ModifiedAuthor = _.get(issue, "extras.ModifiedAuthor"));
 	if (_.get(issue, "due_date")) {
@@ -144,7 +144,7 @@ function getBCFMarkup(issue, account, model, unit) {
 		markup.Markup.Topic.DueDate = _.get(issue, "extras.DueDate"); // For backwards compatibility
 	}
 	_.get(issue, "extras.AssignedTo") && (markup.Markup.Topic.AssignedTo = issue.assigned_roles.toString());
-	_.get(issue, "desc") && markup.Markup.Topic.Description = _.get(issue, "desc");
+	_.get(issue, "desc") && (markup.Markup.Topic.Description = _.get(issue, "desc"));
 	_.get(issue, "extras.BimSnippet") && (markup.Markup.Topic.BimSnippet = _.get(issue, "extras.BimSnippet"));
 	_.get(issue, "extras.DocumentReference") && (markup.Markup.Topic.DocumentReference = _.get(issue, "extras.DocumentReference"));
 	_.get(issue, "extras.RelatedTopic") && (markup.Markup.Topic.RelatedTopic = _.get(issue, "extras.RelatedTopic"));
@@ -220,51 +220,14 @@ function getBCFMarkup(issue, account, model, unit) {
 				}
 			};
 
-			if (_.get(vp, "clippingPlanes") && vp.clippingPlanes.length > 0) {
-				viewpointXmlObj.VisualizationInfo.ClippingPlanes = {};
-				viewpointXmlObj.VisualizationInfo.ClippingPlanes.ClippingPlane = [];
-				for (let i = 0; i < vp.clippingPlanes.length; i++) {
-					viewpointXmlObj.VisualizationInfo.ClippingPlanes.ClippingPlane.push({
-						Location:{
-							X: -vp.clippingPlanes[i].normal[0] * vp.clippingPlanes[i].distance * scale,
-							Y: vp.clippingPlanes[i].normal[2] * vp.clippingPlanes[i].distance * scale,
-							Z: -vp.clippingPlanes[i].normal[1] * vp.clippingPlanes[i].distance * scale
-						},
-						Direction:{
-							X: vp.clippingPlanes[i].normal[0] * vp.clippingPlanes[i].clipDirection,
-							Y: -vp.clippingPlanes[i].normal[2] * vp.clippingPlanes[i].clipDirection,
-							Z: vp.clippingPlanes[i].normal[1] * vp.clippingPlanes[i].clipDirection
-						}
-					});
-				}
-			}
-
-			if(!_.get(vp, "extras._noPerspective") && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >= 3) {
-
-				viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
-					CameraViewPoint:{
-						X: vp.position[0] * scale,
-						Y: -vp.position[2] * scale,
-						Z: vp.position[1] * scale
-					},
-					CameraDirection:{
-						X: vp.view_dir[0],
-						Y: -vp.view_dir[2],
-						Z: vp.view_dir[1]
-					},
-					CameraUpVector:{
-						X: vp.up[0],
-						Y: -vp.up[2],
-						Z: vp.up[1]
-					},
-					FieldOfView: vp.fov * 180 / Math.PI
-				};
-			}
-
 			if (_.get(vp, "extras.Components")) {
 				// TODO: Consider if extras.Components should only be used if groups don't exist
 				// TODO: Could potentially check each sub-property (ViewSetupHints, Selection, etc.
 				viewpointXmlObj.VisualizationInfo.Components = _.get(vp, "extras.Components");
+
+				_.get(vp, "extras.Spaces") && (viewpointXmlObj.VisualizationInfo.Components.SpacesVisible = _.get(vp, "extras.Spaces"));
+				_.get(vp, "extras.SpaceBoundaries") && (viewpointXmlObj.VisualizationInfo.Components.SpaceBoundariesVisible = _.get(vp, "extras.SpaceBoundaries"));
+				_.get(vp, "extras.Openings") && (viewpointXmlObj.VisualizationInfo.Components.OpeningsVisible = _.get(vp, "extras.Openings"));
 			}
 
 			const componentsPromises = [];
@@ -372,16 +335,56 @@ function getBCFMarkup(issue, account, model, unit) {
 				);
 			}
 
-			_.get(vp, "extras.Spaces") && (viewpointXmlObj.VisualizationInfo.Spaces = _.get(vp, "extras.Spaces"));
-			_.get(vp, "extras.SpaceBoundaries") && (viewpointXmlObj.VisualizationInfo.SpaceBoundaries = _.get(vp, "extras.SpaceBoundaries"));
-			_.get(vp, "extras.Openings") && (viewpointXmlObj.VisualizationInfo.Openings = _.get(vp, "extras.Openings"));
-			_.get(vp, "extras.OrthogonalCamera") && (viewpointXmlObj.VisualizationInfo.OrthogonalCamera = _.get(vp, "extras.OrthogonalCamera"));
-			_.get(vp, "extras.Lines") && (viewpointXmlObj.VisualizationInfo.Lines = _.get(vp, "extras.Lines"));
-			_.get(vp, "extras.ClippingPlanes") && (viewpointXmlObj.VisualizationInfo.ClippingPlanes = _.get(vp, "extras.ClippingPlanes"));
-			_.get(vp, "extras.Bitmap") && (viewpointXmlObj.VisualizationInfo.Bitmap = _.get(vp, "extras.Bitmap"));
-
 			viewpointsPromises.push(
 				Promise.all(componentsPromises).then(() => {
+					_.get(vp, "extras.OrthogonalCamera") && (viewpointXmlObj.VisualizationInfo.OrthogonalCamera = _.get(vp, "extras.OrthogonalCamera"));
+					if(!_.get(vp, "extras._noPerspective") && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >= 3) {
+
+						viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
+							CameraViewPoint:{
+								X: vp.position[0] * scale,
+								Y: -vp.position[2] * scale,
+								Z: vp.position[1] * scale
+							},
+							CameraDirection:{
+								X: vp.view_dir[0],
+								Y: -vp.view_dir[2],
+								Z: vp.view_dir[1]
+							},
+							CameraUpVector:{
+								X: vp.up[0],
+								Y: -vp.up[2],
+								Z: vp.up[1]
+							},
+							FieldOfView: vp.fov * 180 / Math.PI
+						};
+					}
+
+					_.get(vp, "extras.Lines") && (viewpointXmlObj.VisualizationInfo.Lines = _.get(vp, "extras.Lines"));
+
+					if (_.get(vp, "clippingPlanes") && vp.clippingPlanes.length > 0) {
+						viewpointXmlObj.VisualizationInfo.ClippingPlanes = {};
+						viewpointXmlObj.VisualizationInfo.ClippingPlanes.ClippingPlane = [];
+						for (let i = 0; i < vp.clippingPlanes.length; i++) {
+							viewpointXmlObj.VisualizationInfo.ClippingPlanes.ClippingPlane.push({
+								Location:{
+									X: -vp.clippingPlanes[i].normal[0] * vp.clippingPlanes[i].distance * scale,
+									Y: vp.clippingPlanes[i].normal[2] * vp.clippingPlanes[i].distance * scale,
+									Z: -vp.clippingPlanes[i].normal[1] * vp.clippingPlanes[i].distance * scale
+								},
+								Direction:{
+									X: vp.clippingPlanes[i].normal[0] * vp.clippingPlanes[i].clipDirection,
+									Y: -vp.clippingPlanes[i].normal[2] * vp.clippingPlanes[i].clipDirection,
+									Z: vp.clippingPlanes[i].normal[1] * vp.clippingPlanes[i].clipDirection
+								}
+							});
+						}
+					} else if (_.get(vp, "extras.ClippingPlanes")) {
+						viewpointXmlObj.VisualizationInfo.ClippingPlanes = _.get(vp, "extras.ClippingPlanes");
+					}
+
+					_.get(vp, "extras.Bitmap") && (viewpointXmlObj.VisualizationInfo.Bitmap = _.get(vp, "extras.Bitmap"));
+
 					viewpointEntries.push({
 						filename: viewpointFileName,
 						xml:  xmlBuilder.buildObject(viewpointXmlObj)
