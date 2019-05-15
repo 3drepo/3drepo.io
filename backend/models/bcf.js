@@ -408,8 +408,9 @@ bcf.getBCFZipReadStream = function(account, model, username, branch, revId, ids)
 
 	const zip = archiver.create("zip");
 
-	zip.append(new Buffer.from(getProjectExtension(model), "utf8"), {name: "project.bcfp"})
-		.append(new Buffer.from(getBCFVersion(), "utf8"), {name: "bcf.version"});
+	// Optional project extensions not currently utilised
+	// zip.append(new Buffer.from(getProjectExtension(model), "utf8"), {name: "project.bcfp"})
+	zip.append(new Buffer.from(getBCFVersion(), "utf8"), {name: "bcf.version"});
 
 	const projection = {};
 	const noClean = true;
