@@ -59,9 +59,17 @@ interface IProps {
 	hideIfcSpaces: () => void;
 }
 
+interface IState {
+	scrollToIndex: number;
+}
+
 const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show tree menu" {...props} />;
 
-export class Tree extends React.PureComponent<IProps, any> {
+export class Tree extends React.PureComponent<IProps, IState> {
+	public state = {
+		scrollToIndex: undefined
+	};
+
 	get menuActionsMap() {
 		const { isolateSelectedNodes, hideIfcSpaces } = this.props;
 		return {
@@ -89,9 +97,13 @@ export class Tree extends React.PureComponent<IProps, any> {
 	public renderNodesList = renderWhenTrue(() => {
 		const { treeNodesList, expandedNodesMap } = this.props;
 		const size = treeNodesList.length;
+		const maxHeight = 842;
+
+		const treeHeight = TREE_ITEM_SIZE * size;
+		const treeNodesHeight = treeHeight > maxHeight ?	maxHeight : treeHeight;
 
 		return (
-			<TreeNodes style={{ height: TREE_ITEM_SIZE * size}}>
+			<TreeNodes style={{ height: treeNodesHeight }}>
 				<AutoSizer>
 					{({ width, height }) => (
 						<List
@@ -103,8 +115,9 @@ export class Tree extends React.PureComponent<IProps, any> {
 							height={height}
 							width={width}
 							rowCount={size}
-							rowHeight={() => TREE_ITEM_SIZE}
-							rowRenderer={this.renderTreeNode}
+							rowHeight={TREE_ITEM_SIZE}
+							rowRenderer={(props) => this.renderTreeNode(props)}
+							scrollToIndex={this.state.scrollToIndex}
 						/>
 					)}
 				</AutoSizer>
@@ -130,7 +143,6 @@ export class Tree extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { searchEnabled, treeNodesList, isPending } = this.props;
-
 		return (
 			<ViewerPanel
 				title="Tree"
@@ -187,7 +199,7 @@ export class Tree extends React.PureComponent<IProps, any> {
 		</>
 	)
 
-	private renderTreeNode = ({ index, style, key }) => {
+	private renderTreeNode = ({ index, style, key, isScrolling, isVisible }) => {
 		const {
 			treeNodesList,
 			expandedNodesMap,
@@ -202,6 +214,7 @@ export class Tree extends React.PureComponent<IProps, any> {
 				isSearchResult={treeNode.isSearchResult}
 				parentIndex={treeNode.parentIndex}
 				expanded={expandedNodesMap[treeNode._id]}
+				scrollToTop={(parentIndex) => this.scrollToParent(parentIndex)}
 			/>
 		);
 	}
@@ -219,4 +232,10 @@ export class Tree extends React.PureComponent<IProps, any> {
 			))}
 		</MenuList>
 	)
+
+	private scrollToParent = (parentIndex) => {
+		this.setState({
+			scrollToIndex: parentIndex
+		});
+	}
 }
