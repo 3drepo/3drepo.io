@@ -63,7 +63,7 @@ const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show tree menu" {.
 
 export class Tree extends React.PureComponent<IProps, any> {
 	get menuActionsMap() {
-		const { showAllNodes, isolateSelectedNodes, hideIfcSpaces } = this.props;
+		const { isolateSelectedNodes, hideIfcSpaces } = this.props;
 		return {
 			[TREE_ACTIONS_ITEMS.SHOW_ALL]: this.handleShowAllNodes,
 			[TREE_ACTIONS_ITEMS.ISOLATE_SELECTED]: isolateSelectedNodes,
@@ -180,11 +180,6 @@ export class Tree extends React.PureComponent<IProps, any> {
 		/>
 	)
 
-	private isHighlighted = (treeNode) => {
-		const { nodesSelectionMap, nodesVisibilityMap } = this.props;
-		return !treeNode.hasChildren && nodesSelectionMap[treeNode._id] && nodesVisibilityMap[treeNode._id];
-	}
-
 	private renderActions = () => (
 		<>
 			{this.renderSearchButton()}
@@ -196,7 +191,6 @@ export class Tree extends React.PureComponent<IProps, any> {
 		const {
 			treeNodesList,
 			expandedNodesMap,
-			nodesSelectionMap
 		} = this.props;
 
 		const treeNode = treeNodesList[index];
@@ -206,8 +200,6 @@ export class Tree extends React.PureComponent<IProps, any> {
 				key={key}
 				data={treeNode}
 				isSearchResult={treeNode.isSearchResult}
-				// selected={nodesSelectionMap[treeNode._id]}
-				// highlighted={this.isHighlighted(treeNode)}
 				parentIndex={treeNode.parentIndex}
 				expanded={expandedNodesMap[treeNode._id]}
 			/>
