@@ -17,8 +17,7 @@
 
 import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
-import * as dayjs from 'dayjs';
-import { omit, isNil, uniqBy, pick, keyBy } from 'lodash';
+import { omit, isNil, uniqBy, keyBy } from 'lodash';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import CollapseIcon from '@material-ui/icons/ExpandMore';
 import ExpandIcon from '@material-ui/icons/ChevronRight';
@@ -49,6 +48,7 @@ import {
 } from './filterPanel.styles';
 import { compareStrings } from '../../../helpers/searching';
 import { renderWhenTrue } from '../../../helpers/rendering';
+import { formatDate } from '../../../services/formatting/formatDate';
 
 export const DATA_TYPES = {
 	UNDEFINED: 1,
@@ -193,7 +193,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 	public onSelectDateFilter = (dateFilter, child) => {
 		dateFilter.label = child.label;
-		dateFilter.value.label = dayjs(child.date).format('DD/MM/YYYY');
+		dateFilter.value.label = formatDate(child.date, 'DD/MM/YYYY');
 		const selectedFilterIndex = this.state.selectedFilters.findIndex((filter) => filter.value.value === child.value);
 
 		if (selectedFilterIndex > -1) {

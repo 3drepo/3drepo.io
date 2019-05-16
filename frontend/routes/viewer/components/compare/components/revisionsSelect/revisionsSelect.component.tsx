@@ -17,11 +17,10 @@
 
 import * as React from 'react';
 import { keyBy } from 'lodash';
-import * as dayjs from 'dayjs';
-
 import { DateTime } from '../../../../../components/dateTime/dateTime.component';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { SelectField, MenuItem, Name, Date } from './revisionsSelect.styles';
+import { formatDate } from '../../../../../../services/formatting/formatDate';
 
 interface IProps {
 	revisions: any[];
@@ -115,7 +114,7 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 	}
 
 	private getRevisionName = (revision) => {
-		return revision.tag || dayjs(revision.timestamp).format('DD/MM/YYYY');
+		return revision.tag || formatDate(revision.timestamp, 'DD/MM/YYYY');
 	}
 
 	private renderValue = () => (<Name>{this.value}</Name>);

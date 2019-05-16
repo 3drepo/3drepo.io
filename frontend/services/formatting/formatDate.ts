@@ -1,3 +1,5 @@
+import * as dayjs from 'dayjs';
+
 export const invoiceDate = (input) => {
 	const date: Date = new Date(input);
 	let invoiceDateStr: string;
@@ -64,3 +66,5 @@ export const simpleDate = (input) => {
 	const date: Date = new Date(input);
 	return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
+
+export const formatDate = (date, format) => dayjs(date).format(format);

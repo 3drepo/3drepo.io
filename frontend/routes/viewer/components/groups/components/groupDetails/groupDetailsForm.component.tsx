@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as Yup from 'yup';
-import * as dayjs from 'dayjs';
 import { isEqual } from 'lodash';
 import { Field, Form, Formik } from 'formik';
 import { Select } from '@material-ui/core';
@@ -10,6 +9,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { GROUPS_TYPES_LIST, GROUPS_TYPES } from '../../../../../../constants/groups';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { FieldsRow, StyledFormControl, StyledTextField, Description, LongLabel } from './groupDetails.styles';
+import { formatDate } from '../../../../../../services/formatting/formatDate';
 
 const GroupSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
@@ -126,7 +126,7 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 						/>
 						<StyledTextField
 							label="Last updated"
-							value={dayjs(updateDate).format('HH:mm DD MMM')}
+							value={formatDate(updateDate, 'HH:mm DD MMM')}
 							disabled
 						/>
 						<StyledFormControl>

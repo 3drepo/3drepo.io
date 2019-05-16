@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import * as dayjs from 'dayjs';
+import { formatDate } from '../../../services/formatting/formatDate';
 
 interface IProps {
 	value: string;
@@ -24,6 +24,6 @@ interface IProps {
 }
 
 export const DateTime = (props: IProps) => {
-	const formattedDateString = dayjs(props.value).format(props.format);
+	const formattedDateString = formatDate(props.value, props.format);
 	return <>{formattedDateString}</>;
 };
