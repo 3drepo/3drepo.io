@@ -35,6 +35,7 @@ import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
 interface IProps {
 	style: any;
+	key: any;
 	data: any;
 	settings: any;
 	parentId?: number;
@@ -51,6 +52,7 @@ interface IProps {
 	deselectNode?: (id) => void;
 	setTreeNodesVisibility?: (id, visibility) => void;
 	isolateNode?: (id) => void;
+	scrollToTop?: (id) => void;
 }
 
 const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
@@ -165,10 +167,11 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { expanded, isSearchResult, style } = this.props;
+		const { expanded, isSearchResult, style, key } = this.props;
 		return (
 			<Container
 				style={style}
+				key={key}
 				nodeType={this.type}
 				expandable={this.node.hasChildren}
 				selected={!isSearchResult && this.isSelected}
@@ -212,7 +215,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 
 	private goToTop = (event) => {
 		event.stopPropagation();
-		console.log('Go to top');
+		this.props.scrollToTop(this.node.parentIndex);
 	}
 
 	private handleOpenModelClick = () => {
