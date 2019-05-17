@@ -75,7 +75,11 @@ export const getIssues = (teamspace, modelId, revision?) => {
 };
 
 export const addIssueComment = (teamspace, modelId, id, comment) => {
-	return api.post(`${teamspace}/${modelId}/issues/${id}.json/comments`, comment);
+	return api.post(`${teamspace}/${modelId}/issues/${id}/comments`, comment);
+};
+
+export const deleteIssueComment = (teamspace, modelId, id, guid) => {
+	return api.delete(`${teamspace}/${modelId}/issues/${id}/comments`, {guid});
 };
 
 /**

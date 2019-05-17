@@ -230,7 +230,7 @@ function updateTextComments(account, model, sessionId, riskId, comments, data, v
 			throw responseCodes.ISSUE_COMMENT_SEALED;
 		}
 	} else if ((data.edit || data.delete) && comments.length <= data.commentIndex) {
-		throw responseCodes.ISSUE_COMMENT_INVALID_INDEX;
+		throw responseCodes.ISSUE_COMMENT_INVALID_GUID;
 	} else {
 		comments.forEach((comment) => {
 			comment.sealed = true;

@@ -381,6 +381,8 @@ router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, upd
 
 router.post("/issues/:issueId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
 
+router.delete("/issues/:issueId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
+
 function storeIssue(req, res, next) {
 	const data = req.body;
 	data.owner = req.session.user.username;
@@ -586,6 +588,19 @@ function addComment(req, res, next) {
 	const {account, model, issueId} = req.params;
 
 	Issue.addComment(account, model, issueId, user, data).then(comment => {
+		req.dataModel = comment;
+		next();
+	}).catch(err => {
+		responseCodes.onError(req, res, err);
+	});
+}
+
+function deleteComment(req, res, next) {
+	const user = req.session.user.username;
+	const guid = req.body.guid;
+	const {account, model, issueId} = req.params;
+
+	Issue.deleteComment(account, model, issueId, guid, user).then(comment => {
 		req.dataModel = comment;
 		next();
 	}).catch(err => {

@@ -147,7 +147,7 @@
 
 		ISSUE_NO_NAME: { message: "Create issue without name", status: 400 },
 		ISSUE_COMMENT_NO_TEXT: { message: "Cannot create comment with no text", status: 400 },
-		ISSUE_COMMENT_INVALID_INDEX: { message: "Invalid comment index", status: 400 },
+		ISSUE_COMMENT_INVALID_GUID: { message: "Invalid comment guid", status: 400 },
 		ISSUE_COMMENT_PERMISSION_DECLINED: { message: "Can't edit comment made by others", status: 400 },
 		ISSUE_COMMENT_SEALED: { message: "Can't edit a sealed comment or a comment in closed issue", status: 400 },
 		ISSUE_CLOSED_ALREADY: { message: "Issue closed already", status: 400 },

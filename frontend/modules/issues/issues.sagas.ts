@@ -213,11 +213,11 @@ export function* updateNewIssue({ newIssue }) {
 
 export function* postComment({ teamspace, modelId, issueData }) {
 	try {
-		const { rev_id, _id} = yield select(selectActiveIssueDetails);
+		const { _id} = yield select(selectActiveIssueDetails);
 		const { data: comment } = yield API.addIssueComment(teamspace, modelId, _id, issueData);
 		const preparedComment = yield prepareComment(comment);
 
-		yield put(IssuesActions.createCommentSuccess(preparedComment, issueData._id));
+		yield put(IssuesActions.createCommentSuccess(preparedComment, _id));
 		yield put(SnackbarActions.show('Issue comment added'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('post', 'issue comment', error));
@@ -226,16 +226,9 @@ export function* postComment({ teamspace, modelId, issueData }) {
 
 export function* removeComment({ teamspace, modelId, issueData }) {
 	try {
-		const { issueNumber, commentIndex, _id, rev_id, guid } = issueData;
-		const commentData = {
-			comment: '',
-			number: issueNumber,
-			delete: true,
-			commentIndex
-		};
-
-		yield API.updateIssue(teamspace, modelId, _id, rev_id, commentData);
-		yield put(IssuesActions.deleteCommentSuccess(guid, issueData._id));
+		const { _id, guid } = issueData;
+		yield API.deleteIssueComment(teamspace, modelId, _id, guid);
+		yield put(IssuesActions.deleteCommentSuccess(guid, _id));
 		yield put(SnackbarActions.show('Comment removed'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'comment', error));
