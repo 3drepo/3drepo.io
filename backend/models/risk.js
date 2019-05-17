@@ -189,7 +189,6 @@ function addRiskMitigationComment(account, model, sessionId, riskId, comments, d
 
 		const mitigationComment = Comment.newRiskMitigationComment(
 			data.owner,
-			data.revId,
 			data.likelihood,
 			data.consequence,
 			data.mitigation,
@@ -212,7 +211,7 @@ function updateTextComments(account, model, sessionId, riskId, comments, data, v
 
 	if (data.edit && data.commentIndex >= 0 && comments.length > data.commentIndex) {
 		if (!comments[data.commentIndex].sealed) {
-			const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpoint, data.position);
+			const textComment = Comment.newTextComment(data.owner, data.comment, viewpoint, data.position);
 
 			comments[data.commentIndex] = textComment;
 
@@ -237,7 +236,7 @@ function updateTextComments(account, model, sessionId, riskId, comments, data, v
 			comment.sealed = true;
 		});
 
-		const textComment = Comment.newTextComment(data.owner, data.revId, data.comment, viewpoint, data.position);
+		const textComment = Comment.newTextComment(data.owner, data.comment, viewpoint, data.position);
 
 		comments.push(textComment);
 
