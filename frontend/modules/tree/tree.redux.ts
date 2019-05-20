@@ -120,7 +120,7 @@ const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) => {
 };
 
 const setNodesSelectionMap = (state = INITIAL_STATE, { nodesSelectionMap }) => {
-	return { ...state, nodesSelectionMap };
+	return { ...state, nodesSelectionMap: { ...nodesSelectionMap } };
 };
 
 const setAuxiliaryMaps = (state = INITIAL_STATE, { auxiliaryMaps }) => {

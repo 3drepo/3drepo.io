@@ -29,7 +29,8 @@ import {
 	TREE_ITEM_FEDERATION_TYPE,
 	TREE_ITEM_MODEL_TYPE,
 	TREE_ITEM_OBJECT_TYPE,
-	VISIBILITY_STATES
+	VISIBILITY_STATES,
+	SELECTION_STATES
 } from '../../../../../../constants/tree';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
@@ -95,13 +96,14 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	}
 
 	get isSelected() {
-		return this.props.selectionMap[this.node._id];
+		return this.props.selectionMap[this.node._id] === SELECTION_STATES.SELECTED;
 	}
 
 	get isHightlighted() {
-		const { selectionMap, visibilityMap } = this.props;
+		const { selectionMap } = this.props;
 		const { hasChildren, _id } = this.node;
-		return !hasChildren && selectionMap[_id] && visibilityMap[_id];
+
+		return !hasChildren && selectionMap[_id] === SELECTION_STATES.SELECTED;
 	}
 
 	public static defaultProps = {
@@ -168,6 +170,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { expanded, isSearchResult, style, key } = this.props;
+
 		return (
 			<Container
 				style={style}

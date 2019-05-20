@@ -202,7 +202,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 	private renderTreeNode = ({ index, style, key, isScrolling, isVisible }) => {
 		const {
 			treeNodesList,
-			expandedNodesMap,
+			expandedNodesMap
 		} = this.props;
 
 		const treeNode = treeNodesList[index];
