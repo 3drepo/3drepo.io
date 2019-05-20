@@ -430,7 +430,7 @@ issue.updateAttrs = function(dbCol, uid, data) {
 				});
 			});
 
-			userPermissionsPromise.then((user) => {
+			return userPermissionsPromise.then((user) => {
 				const toUpdate = {};
 				const notificationPromises = [];
 				const attributeBlacklist = [
@@ -605,17 +605,8 @@ issue.updateAttrs = function(dbCol, uid, data) {
 							return Promise.all(notificationPromises).then((notifications) => {
 								notifications = _.flatten(notifications);
 								newIssue.userNotifications = notifications;
-
-								if (data.hasOwnProperty("comment")) {
-									if (!data.edit && !data.delete &&
-										newIssue.comments && newIssue.comments.length > 0) {
-										return newIssue.comments[newIssue.comments.length - 1];
-									}
-									return data;
-								} else {
-									ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, newIssue._id, newIssue);
-									return newIssue;
-								}
+								ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, newIssue._id, newIssue);
+								return newIssue;
 							});
 						});
 					});
