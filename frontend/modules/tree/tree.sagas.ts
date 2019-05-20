@@ -226,6 +226,7 @@ function* clearCurrentlySelected() {
 		}
 		nodesSelectionMap[id] = SELECTION_STATES.UNSELECTED;
 	}
+
 	yield put(TreeActions.setNodesSelectionMap(nodesSelectionMap));
 }
 
@@ -488,7 +489,8 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 		if (!skipExpand) {
 			yield expandToNode(lastNode._id);
 		}
-		const meshesByNodes = yield getMeshesByNodes(nodes);		const nodesSelectionMap = yield select(selectNodesSelectionMap);
+		const meshesByNodes = yield getMeshesByNodes(nodes);
+		const nodesSelectionMap = yield select(selectNodesSelectionMap);
 
 		for (let index = 0; index < meshesByNodes.length; index++) {
 			const { meshes, teamspace, modelId } = meshesByNodes[index];
