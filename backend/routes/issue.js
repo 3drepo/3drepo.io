@@ -354,7 +354,7 @@ router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.noti
  * @apiSuccess (200) {Object} Updated Issue Object.
  *
  */
-router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /:teamspace/:model/revision/:rid/issues Store issue based on revision
@@ -377,7 +377,7 @@ router.post("/revision/:rid/issues", middlewares.issue.canCreate, storeIssue, re
  * @apiParam {String} rid Unique Revision ID to update to.
  * @apiParam {String} issueId Unique Issue ID to update.
  */
-router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 router.post("/issues/:issueId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
 
@@ -408,9 +408,9 @@ function updateIssue(req, res, next) {
 
 	const issueId = req.params.issueId;
 
-	return Issue.updateAttrs(dbCol, issueId, data).then((issue) => {
-		req.dataModel = issue;
-		req.userNotifications = issue.userNotifications;
+	return Issue.update(dbCol, issueId, data).then(({newIssue, oldIssue}) => {
+		req.dataModel = newIssue;
+		req.oldDataModel = oldIssue;
 		next();
 	}).catch((err) => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

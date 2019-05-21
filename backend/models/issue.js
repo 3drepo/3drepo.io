@@ -32,7 +32,6 @@ const systemLogger = require("../logger.js").systemLogger;
 const Comment = require("./comment");
 const Group = require("./group");
 const Job = require("./job");
-const Notification = require("./notification");
 const Project = require("./project");
 const User = require("./user");
 const View = require("./viewpoint");
@@ -44,9 +43,6 @@ const issue = {};
 const fieldTypes = {
 	"_id": "[object Object]",
 	"assigned_roles": "[object Array]",
-	"commentCount": "[object Number]",
-	"comment": "[object String]",
-	"commentIndex": "[object Number]",
 	"comments": "[object Array]",
 	"created": "[object Number]",
 	"creator_role": "[object String]",
@@ -70,6 +66,31 @@ const fieldTypes = {
 	"viewpoints": "[object Array]",
 	"extras": "[object Object]"
 };
+
+const attributeBlacklist = [
+	"_id",
+	"comments",
+	"created",
+	"creator_role",
+	"name",
+	"norm",
+	"number",
+	"owner",
+	"rev_id",
+	"thumbnail",
+	"viewpoint",
+	"viewpoints",
+	"comments",
+	"priority_last_changed",
+	"status_last_changed"
+];
+
+const ownerPrivilegeAttributes = [
+	"position",
+	"desc",
+	"due_date",
+	"priority"
+];
 
 const statusEnum = {
 	"OPEN": C.ISSUE_STATUS_OPEN,
@@ -185,15 +206,7 @@ function toDirectXCoords(issueData) {
 	return viewpoint;
 }
 
-function addSystemComment(account, model, sessionId, issueId, comments, owner, property, oldValue, newValue) {
-	if (!comments) {
-		comments = [];
-	}
-
-	comments.forEach((comment) => {
-		comment.sealed = true;
-	});
-
+function addSystemComment(account, model, sessionId, issueId, owner, property, oldValue, newValue) {
 	const systemComment = Comment.newSystemComment(
 		owner,
 		property,
@@ -201,11 +214,9 @@ function addSystemComment(account, model, sessionId, issueId, comments, owner, p
 		newValue
 	);
 
-	comments.push(systemComment);
-
 	ChatEvent.newComment(sessionId, account, model, issueId, systemComment);
 
-	return comments;
+	return systemComment;
 }
 
 issue.setGroupIssueId = function(dbCol, data, issueId) {
@@ -242,10 +253,10 @@ issue.setGroupIssueId = function(dbCol, data, issueId) {
 
 issue.createIssue = function(dbCol, newIssue) {
 	const sessionId = newIssue.sessionId;
-	const attributeBlacklist = [
+	const newIssueAttributeBlacklist = [
 		"viewpoint"
 	];
-	const issueAttributes = Object.keys(fieldTypes).filter(attr => !attributeBlacklist.includes(attr));
+	const issueAttributes = Object.keys(fieldTypes).filter(attr => !newIssueAttributeBlacklist.includes(attr));
 	const issueAttrPromises = [];
 
 	let branch;
@@ -388,241 +399,133 @@ issue.updateFromBCF = function(dbCol, issueToUpdate, changeSet) {
 	});
 };
 
-issue.updateAttrs = function(dbCol, uid, data) {
+issue.update = async function(dbCol, issueId, data) {
+	// 1. Get old issue
 	const sessionId = data.sessionId;
-
-	if ("[object String]" === Object.prototype.toString.call(uid)) {
-		uid = utils.stringToUUID(uid);
+	const _id = utils.stringToUUID(issueId);
+	const user = data.requester;
+	let oldIssue = await this.findByUID(dbCol, _id, {}, true);
+	if (!oldIssue) {
+		throw { resCode: responseCodes.ISSUE_NOT_FOUND };
 	}
 
-	return this.findByUID(dbCol, uid, {}, true).then((oldIssue) => {
-		if (oldIssue) {
-			let typeCorrect = true;
-			let forceStatusChange;
 
-			let newIssue = _.cloneDeep(oldIssue);
+	// 2. Get user permissions
+	const dbUser = await User.findByUserName(dbCol.account);
+	const job = (await Job.findByUser(dbCol.account, data.requester) || {})._id;
+	const accountPerm = dbUser.customData.permissions.findByUser(data.requester);
+	const projAdmin = await Project.isProjectAdmin(
+		dbCol.account,
+		dbCol.model,
+		data.requester
+	);
 
-			const userPermissionsPromise = User.findByUserName(dbCol.account).then((dbUser) => {
+	const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
+	const isAdmin = projAdmin || tsAdmin;
+	const hasOwnerJob = oldIssue.creator_role === job;
+	const hasAdminPrivileges = isAdmin || hasOwnerJob;
+	const hasAssignedJob = job === oldIssue.assigned_roles[0];
+	const userPermissions = { hasAdminPrivileges,	hasAssignedJob };
 
-				return Job.findByUser(dbUser.user, data.requester).then((_job) => {
-					const job = _job ?  _job._id : null;
-					const accountPerm = dbUser.customData.permissions.findByUser(data.requester);
-					const userIsAdmin = Project.isProjectAdmin(
-						dbCol.account,
-						dbCol.model,
-						data.requester
-					);
+	// 2.5 if the user dont have the necessary permissions to update the issue throw a ISSUE_UPDATE_PERMISSION_DECLINED
+	if (ownerPrivilegeAttributes.some(attr => !!data[attr]) && !userPermissions.hasAdminPrivileges) {
+		throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
+	}
 
-					return userIsAdmin.then(projAdmin => {
-
-						const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
-						const isAdmin = projAdmin || tsAdmin;
-						const hasOwnerJob = oldIssue.creator_role === job;
-						const hasAssignedJob = job === oldIssue.assigned_roles[0];
-
-						return {
-							isAdmin,
-							hasOwnerJob,
-							hasAssignedJob
-						};
-
-					});
-				});
-			});
-
-			return userPermissionsPromise.then((user) => {
-				const toUpdate = {};
-				const notificationPromises = [];
-				const attributeBlacklist = [
-					"_id",
-					"comments",
-					"created",
-					"creator_role",
-					"name",
-					"norm",
-					"number",
-					"owner",
-					"rev_id",
-					"status",
-					"thumbnail",
-					"viewpoint",
-					"viewpoints"
-				];
-				const ownerPrivilegeAttributes = [
-					"position",
-					"desc",
-					"due_date",
-					"priority"
-				];
-				const fieldsCanBeUpdated = Object.keys(fieldTypes).filter(attr => !attributeBlacklist.includes(attr));
-
-				fieldsCanBeUpdated.forEach((key) => {
-					if (data[key] !== undefined &&
-						(("[object Object]" !== fieldTypes[key] && "[object Array]" !== fieldTypes[key] && data[key] !== newIssue[key])
-						|| (!_.isEqual(newIssue[key], data[key])))) {
-						if (null === data[key] || Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
-							if (-1 === ownerPrivilegeAttributes.indexOf(key) || (user.isAdmin || user.hasOwnerJob)) {
-								if ("assigned_roles" === key && newIssue.status === statusEnum.FOR_APPROVAL) {
-									// force status change to "in progress" if assigned roles during
-									// status is "for approval"
-									forceStatusChange = true;
-									toUpdate.status = statusEnum.IN_PROGRESS;
-									newIssue.status = statusEnum.IN_PROGRESS;
-								} else if ("due_date" === key) {
-									if (data[key] === null) {
-										data[key] = undefined;
-									}
-								} else if ("priority" === key) {
-									toUpdate.priority_last_changed = (new Date()).getTime();
-									newIssue.priority_last_changed = toUpdate.priority_last_changed;
-								}
-
-								if(key !== "extras") {
-									const updatedComments = addSystemComment(
-										dbCol.account,
-										dbCol.model,
-										data.sessionId,
-										newIssue._id,
-										newIssue.comments,
-										data.requester,
-										key,
-										newIssue[key],
-										data[key]
-									);
-
-									toUpdate.comments = updatedComments;
-									newIssue.comments = updatedComments;
-								}
-
-								toUpdate[key] = data[key];
-								newIssue[key] = data[key];
-
-								if ("assigned_roles" === key && this.isIssueAssignment(oldIssue, newIssue)) {
-									notificationPromises.push(
-										Notification.removeAssignedNotifications(
-											data.requester,
-											dbCol.account,
-											dbCol.model,
-											oldIssue
-										)
-									);
-									notificationPromises.push(
-										Notification.upsertIssueAssignedNotifications(
-											data.requester,
-											dbCol.account,
-											dbCol.model,
-											newIssue
-										)
-									);
-								}
-							} else {
-								throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
-							}
-						} else {
-							typeCorrect = false;
-						}
-					}
-				});
-
-				if (!forceStatusChange && data.hasOwnProperty("status") && data.status !== newIssue.status) {
-					const canChangeStatus = user.isAdmin ||
-						user.hasOwnerJob ||
-						(user.hasAssignedJob && data.status !== statusEnum.CLOSED);
-
-					if (canChangeStatus) {
-						// change status to for_approval if assigned roles is changed.
-						if (data.status === statusEnum.FOR_APPROVAL) {
-							toUpdate.assigned_roles = newIssue.creator_role ? [newIssue.creator_role] : [];
-							newIssue.assigned_roles = toUpdate.assigned_roles;
-						}
-
-						const updatedComments = addSystemComment(
-							dbCol.account,
-							dbCol.model,
-							data.sessionId,
-							newIssue._id,
-							newIssue.comments,
-							data.requester,
-							"status",
-							newIssue["status"],
-							data["status"]
-						);
-
-						toUpdate.comments = updatedComments;
-						newIssue.comments = updatedComments;
-
-						toUpdate.status_last_changed = (new Date()).getTime();
-						newIssue.status_last_changed = toUpdate.status_last_changed;
-
-						toUpdate.status = data.status;
-						newIssue.status = data.status;
-
-						if (this.isIssueBeingClosed(oldIssue, newIssue)) {
-							notificationPromises.push(
-								Notification.removeAssignedNotifications(
-									data.requester,
-									dbCol.account,
-									dbCol.model,
-									oldIssue
-								)
-							);
-							notificationPromises.push(
-								Notification.upsertIssueClosedNotifications(
-									data.requester,
-									dbCol.account,
-									dbCol.model,
-									newIssue
-								)
-							);
-						}
-
-						if (this.isIssueBeingReopened(oldIssue, newIssue)) {
-							notificationPromises.push(
-								Notification.removeClosedNotifications(
-									data.requester,
-									dbCol.account,
-									dbCol.model,
-									newIssue
-								)
-							);
-						}
-					} else {
-						throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
-					}
-				}
-
-				if (!typeCorrect) {
-					return Promise.reject(responseCodes.INVALID_ARGUMENTS);
-				} else if (0 === Object.keys(toUpdate).length) {
-					return (data.comment) ?
-						Promise.resolve(data) :
-						Promise.resolve(oldIssue);
-				} else {
-					return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
-						return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
-							newIssue = clean(dbCol, newIssue);
-
-							return Promise.all(notificationPromises).then((notifications) => {
-								notifications = _.flatten(notifications);
-								newIssue.userNotifications = notifications;
-								ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, newIssue._id, newIssue);
-								return newIssue;
-							});
-						});
-					});
-				}
-			}).catch((err) => {
-				if (err) {
-					return Promise.reject(err);
-				} else {
-					return Promise.reject(responseCodes.ISSUE_UPDATE_FAILED);
-				}
-			});
-		} else {
-			return Promise.reject({ resCode: responseCodes.ISSUE_NOT_FOUND });
+	// 2.6 if the user is trying to change the status and it doesnt have the necessary permissions throw a ISSUE_UPDATE_PERMISSION_DECLINED
+	if (data.status && data.status !== oldIssue.status) {
+		const canChangeStatus = userPermissions.hasAdminPrivileges || (userPermissions.hasAssignedJob && data.status !== statusEnum.CLOSED);
+		if (!canChangeStatus) {
+			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 		}
+	}
+
+	// 3. Filter out blacklisted attributes and leave proper attrs
+	data = _.omit(data, attributeBlacklist);
+	data = _.pick(data, Object.keys(fieldTypes));
+
+	if (_.isEmpty(data)) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	const today = (new Date()).getTime();
+	let systemStatusChanged = false;
+
+	// 4. Prepare side updates
+	// 4.1 If there is an issue Assigment and the status is "for_approval" change it to "in_progress"
+	if (this.isIssueAssignment(oldIssue, data) && oldIssue.status === statusEnum.FOR_APPROVAL) {
+		data.status = statusEnum.IN_PROGRESS;
+		systemStatusChanged = true;
+	}
+
+	// 5. Add system comments
+	const systemComments = [];
+	const fields = Object.keys(data);
+
+	fields.forEach(field=> {
+		if (Object.prototype.toString.call(data[field]) !== fieldTypes[field]) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
+		// if a field have the same value shouldnt update the property
+		if (_.isEqual(field[field], data[field])) {
+			delete data[field];
+			return;
+		}
+
+		// update of extras must not create a system comment
+		if(field === "extras") {
+			return;
+		}
+
+		// if it is an automatic status change shouldnt add a system comment.
+		if(field === "status" && systemStatusChanged) {
+			return;
+		}
+
+		const comment =  addSystemComment(
+			dbCol.account,
+			dbCol.model,
+			sessionId,
+			issueId,
+			user,
+			field,
+			oldIssue[field],
+			data[field]);
+
+		systemComments.push(comment);
 	});
 
+	if (systemComments.length > 0) {
+		data.comments = (oldIssue.comments || []).map(c=> ({...c,sealed:true}));
+		data.comments = data.comments.concat(systemComments);
+	}
+
+	// 4.2 If there is a priority change , save the extra field priority_last_changed with todays timestamp
+	if (this.isPriorityChange(oldIssue, data)) {
+		data.priority_last_changed = today;
+	}
+
+	// 4.3 If there is a status change, save the extra field status_last_changed with todays timestamp
+	if (this.isStatusChange(oldIssue, data)) {
+		data.status_last_changed = today;
+	}
+
+	// 4.4 If the status is changed to for_approval, the assigned role goes to the creator_role
+	if (data.status === statusEnum.FOR_APPROVAL) {
+		data.assigned_roles = oldIssue.creator_role ? [oldIssue.creator_role] : [];
+	}
+
+	// 6. Update the data
+	const issues = await db.getCollection(dbCol.account, dbCol.model + ".issues");
+	await issues.update({_id}, {$set: data});
+
+	// 7. Return the updated data and the old issue
+	oldIssue = clean(dbCol, oldIssue);
+	const newIssue = {...oldIssue, ...data};
+	ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, newIssue._id, newIssue);
+
+	return {oldIssue, newIssue};
 };
 
 issue.getIssuesReport = function(account, model, username, rid, issueIds, res) {
@@ -770,7 +673,7 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 	});
 };
 
-issue.findByUID = function(dbCol, uid, projection, noClean = false) {
+issue.findByUID = async function(dbCol, uid, projection, noClean = false) {
 
 	if ("[object String]" === Object.prototype.toString.call(uid)) {
 		uid = utils.stringToUUID(uid);
@@ -957,11 +860,30 @@ issue.isIssueBeingReopened = function (oldIssue, newIssue) {
 };
 
 issue.isIssueAssignment = function(oldIssue, newIssue) {
+	if (!newIssue.assigned_roles) {
+		return false;
+	}
+
 	if (oldIssue) {
 		return oldIssue.assigned_roles[0] !== newIssue.assigned_roles[0];
 	} else {
 		return newIssue.assigned_roles.length > 0; // In case this is a new issue with an assigned role
 	}
+};
+
+issue.isPriorityChange =  function (oldIssue, newIssue) {
+	if (!newIssue.hasOwnProperty("priority")) {
+		return false;
+	}
+
+	return oldIssue.priority !== newIssue.priority;
+};
+
+issue.isStatusChange =  function (oldIssue, newIssue) {
+	if (!newIssue.hasOwnProperty("status")) {
+		return false;
+	}
+	return oldIssue.status !== newIssue.status;
 };
 
 module.exports = issue;
