@@ -19,7 +19,7 @@
 const TreeWorker = require('worker-loader?inline!./tree.worker');
 import { put, takeLatest, call, select, take, all } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
-import { pick, uniq, flatten, values, cloneDeep } from 'lodash';
+import { pick, uniq, flatten, values, uniqBy, orderBy } from 'lodash';
 
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
@@ -28,7 +28,6 @@ import { dispatch, getAngularService } from '../../helpers/migration';
 import { GroupsActions } from '../groups';
 import { DialogActions } from '../dialog';
 import {
-	selectSelectedNodes,
 	selectIfcSpacesHidden,
 	selectNodesIndexesMap,
 	selectNodesVisibilityMap,
@@ -40,7 +39,8 @@ import {
 	selectSelectedNodesIds,
 	selectUnselectedNodesIds,
 	selectMeshesByModelId,
-	selectExpandedNodesMap
+	selectExpandedNodesMap,
+	selectNodesDefaultVisibilityMap
 } from './tree.selectors';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -122,7 +122,7 @@ function* getMeshesByNodes(nodes = []) {
 			// This should only happen in federations.
 			// Traverse down the tree to find submodel nodes
 			const nodeIndex = nodesIndexesMap[node._id];
-			for (let childNumber = 1; childNumber <= node.childrenNumber; childNumber++) {
+			for (let childNumber = 1; childNumber <= node.deepChildrenNumber; childNumber++) {
 				const childNode = treeNodesList[nodeIndex + childNumber];
 				childrenMap[childNode._id] = true;
 				stack = stack.concat([childNode]);
@@ -177,7 +177,7 @@ function* setNodeSelection(initialNode: any, selection: any) {
 			// set child nodes selection
 			if (node._id === initialNode._id && node.hasChildren) {
 				const nodeIndex = nodesIndexesMap[initialNode._id];
-				for (let childNumber = 1; childNumber <= node.childrenNumber; childNumber++) {
+				for (let childNumber = 1; childNumber <= node.deepChildrenNumber; childNumber++) {
 					nodes = nodes.concat([treeNodesList[nodeIndex + childNumber]]);
 				}
 			}
@@ -191,7 +191,7 @@ function* setNodeSelection(initialNode: any, selection: any) {
 		const parentNode = treeNodesList[parentNodeIndex];
 
 		let hasChildrenWithDifferentState = false;
-		for (let childIndex = parentNodeIndex; childIndex <= parentNodeIndex + parentNode.childrenNumber; childIndex++) {
+		for (let childIndex = parentNodeIndex; childIndex <= parentNodeIndex + parentNode.deepChildrenNumber; childIndex++) {
 			const childNode = treeNodesList[childIndex];
 			const hasSameState = nodesSelectionMap[childNode._id] === selection;
 			if (!hasSameState) {
@@ -524,96 +524,146 @@ function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], col
 	yield put(TreeActions.selectNodes(nodesIds, false, colour));
 }
 
+function* getDeepChildren(node) {
+	if (!node) {
+		throw new Error('Node does not exist');
+	}
+	const nodesIndexesMap = yield select(selectNodesIndexesMap);
+	const treeNodesList = yield select(selectTreeNodesList);
+	const nodeIndex = nodesIndexesMap[node._id];
+	return treeNodesList.slice(nodeIndex + 1, nodeIndex + node.deepChildrenNumber + 1);
+}
+
+function* getChildren(node) {
+	if (!node) {
+		throw new Error('Node does not exist');
+	}
+
+	if (node.hasChildren) {
+		return yield getNodesByIds(node.childrenIds);
+	}
+	return [];
+}
+
+function* getParents(node) {
+	const nodesIndexesMap = yield select(selectNodesIndexesMap);
+	const treeNodesList = yield select(selectTreeNodesList);
+
+	const parents = [];
+	let nextParentId = node.parentId;
+	while (!!nextParentId) {
+		const parentNodeIndex = nodesIndexesMap[nextParentId];
+		const parentNode = treeNodesList[parentNodeIndex];
+		parents.push(parentNode);
+		nextParentId = parentNode.parentId;
+	}
+
+	return parents;
+}
+
+function* updateParentNodesVisibility(parentNodes = []) {
+	const nodes = orderBy(uniqBy(parentNodes, '_id'), ['level'], ['desc']);
+	const meshesByNodes = yield getMeshesByNodes(nodes);
+	const nodesVisibilityMap = { ...(yield select(selectNodesVisibilityMap)) };
+
+	for (let index = 0; index < nodes.length; index++) {
+		const node = nodes[index];
+		const children = yield getChildren(node);
+		const meshesData = meshesByNodes[index];
+
+		let visibleChildCount = 0;
+		let hasParentOfInvisibleChild = false;
+
+		for (let i = 0; i < children.length; i++) {
+			if (nodesVisibilityMap[children[i]._id] === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
+				hasParentOfInvisibleChild = true;
+				break;
+			} else if (nodesVisibilityMap[children[i]._id] === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
+				break;
+			} else if (nodesVisibilityMap[children[i]._id] === VISIBILITY_STATES.VISIBLE) {
+				visibleChildCount++;
+			}
+		}
+
+		if (hasParentOfInvisibleChild) {
+			nodesVisibilityMap[node._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
+		} else if (children.length === visibleChildCount) {
+			nodesVisibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
+		} else if (!visibleChildCount) {
+			yield setNodeSelection(node, SELECTION_STATES.UNSELECTED);
+
+			for (let j = 0; j < meshesData.length; j++) {
+				const { meshes, teamspace, modelId } = meshesData[j];
+				Viewer.unhighlightObjects({
+					account: teamspace,
+					model: modelId,
+					ids: meshes
+				});
+			}
+			nodesVisibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
+		} else {
+			nodesVisibilityMap[node._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
+		}
+	}
+
+	yield put(TreeActions.setAuxiliaryMaps({ nodesVisibilityMap }));
+}
+
 function* setTreeNodesVisibility({ nodesIds, visibility }) {
+	console.time('setTreeNodesVisibility');
 	try {
-		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
+		const defaultVisibilityMap = yield select(selectNodesDefaultVisibilityMap);
+		const nodesVisibilityMap = {...(yield select(selectNodesVisibilityMap))};
 		const nodesIndexesMap = yield select(selectNodesIndexesMap);
 		const treeNodesList = yield select(selectTreeNodesList);
-		const numberOfInvisibleChildrenMap = yield select(selectNumberOfInvisibleChildrenMap);
+		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 
 		if (nodesIds.length && visibility === VISIBILITY_STATES.INVISIBLE) {
 			yield put(TreeActions.deselectNodes(nodesIds));
 		}
 
-		const newVisibilityMap = cloneDeep(nodesVisibilityMap);
+		const meshesToUpdate = [];
+		const parents = [];
 
-		const newNumberOfInvisibleChildrenMap = cloneDeep(numberOfInvisibleChildrenMap);
-
-		for (let nodeLoopIndex = 0; nodeLoopIndex < nodesIds.length ; nodeLoopIndex++) {
-
+		for (let nodeLoopIndex = 0; nodeLoopIndex < nodesIds.length; nodeLoopIndex++) {
 			const nodeId = nodesIds[nodeLoopIndex];
 			const nodeIndex = nodesIndexesMap[nodeId];
 			const node = treeNodesList[nodeIndex];
-			const meshesToUpdate = [];
+			const nodeVisibility = nodesVisibilityMap[nodeId];
 
-			if (node && (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE || visibility !== nodesVisibilityMap[nodeId])) {
-
+			if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE || visibility !== nodeVisibility) {
 				if (node.type === NODE_TYPES.MESH) {
 					meshesToUpdate.push(node);
 				}
 
-				if (node.hasChildren) {
-					for (let childIndex = nodeIndex; childIndex <= nodeIndex + node.childrenNumber; childIndex++) {
-						const child = treeNodesList[childIndex];
+				const children = node.hasChildren ? (yield getDeepChildren(node)) : [node];
 
-						if (child.type === NODE_TYPES.MESH && nodesVisibilityMap[child._id] !== visibility) {
-							meshesToUpdate.push(child);
-						}
+				while (children.length > 0) {
+					const child = children.pop();
 
-						if (visibility === VISIBILITY_STATES.VISIBLE) {
-
-							newVisibilityMap[child._id] = VISIBILITY_STATES.VISIBLE;
-						} else {
-							yield setNodeSelection(child, SELECTION_STATES.UNSELECTED);
-							newVisibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
-						}
+					if (nodeVisibility !== visibility && child.type === NODE_TYPES.MESH) {
+						meshesToUpdate.push(child);
 					}
 
-					if (visibility === VISIBILITY_STATES.INVISIBLE) {
-						newNumberOfInvisibleChildrenMap[node._id] = node.childrenNumber;
-					} else {
-						newNumberOfInvisibleChildrenMap[node._id] = 0;
-					}
-				} /* else {
 					if (visibility === VISIBILITY_STATES.VISIBLE) {
-						newVisibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
+						if (!(ifcSpacesHidden && defaultVisibilityMap[child._id] === VISIBILITY_STATES.INVISIBLE)) {
+							nodesVisibilityMap[child._id] = VISIBILITY_STATES.VISIBLE;
+						}
 					} else {
 						yield setNodeSelection(child, SELECTION_STATES.UNSELECTED);
-						newVisibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
+						nodesVisibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
 					}
-				} */
-
-				let currentNode = node;
-				const parents = [];
-
-				for (let i = currentNode.level - 1; i > 0; i--) {
-					const newParentIndex = nodesIndexesMap[currentNode.parentId];
-					const newParentNode = treeNodesList[newParentIndex];
-					currentNode = newParentNode;
-					newNumberOfInvisibleChildrenMap[currentNode._id] = node.childrenNumber + i;
-
-					if (currentNode.childrenNumber > newNumberOfInvisibleChildrenMap[currentNode._id]) {
-						newVisibilityMap[currentNode._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
-					} else {
-
-						// newVisibilityMap[currentNode._id] = VISIBILITY_STATES.VISIBLE;
-					}
-
-					// if == 0 to set parent as INVISIBLE
-					parents.push(currentNode);
 				}
 
-				yield put(TreeActions.setAuxiliaryMaps({
-					nodesVisibilityMap: newVisibilityMap
-				}));
-
-				yield put(TreeActions.setComponentState({
-					numberOfInvisibleChildrenMap: newNumberOfInvisibleChildrenMap
-				}));
-
-				yield put(TreeActions.updateMeshesVisibility(meshesToUpdate));
+				const nodesParents = yield getParents(node);
+				parents.push(...nodesParents);
 			}
 		}
+
+		yield put(TreeActions.setAuxiliaryMaps({ nodesVisibilityMap }));
+		yield updateParentNodesVisibility(parents);
+		yield put(TreeActions.updateMeshesVisibility(meshesToUpdate));
+		console.timeEnd('setTreeNodesVisibility');
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'tree node visibility', error));
 	}
@@ -656,13 +706,13 @@ function* handleMeshesVisibility({ meshes, visibility }) {
 			objectIds[namespacedId].push(_id);
 
 			if (!alreadyProcessed[namespacedId]) {
-				yield Viewer.switchObjectVisibility(
+				Viewer.switchObjectVisibility(
 					teamspace,
 					model,
 					objectIds[namespacedId],
 					visibility
 				);
-				alreadyProcessed[namespacedId] = node;
+				alreadyProcessed[namespacedId] = true;
 			}
 		}
 	} catch (error) {

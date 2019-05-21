@@ -64,7 +64,6 @@ export interface ITreeComponentState {
 	searchEnabled: boolean;
 	ifcSpacesHidden: boolean;
 	expandedNodesMap: any;
-	numberOfInvisibleChildrenMap: any;
 }
 
 export interface ITreeState {
@@ -72,6 +71,8 @@ export interface ITreeState {
 	treeNodesList: any[];
 	componentState: ITreeComponentState;
 	isPending?: boolean;
+	numberOfInvisibleChildrenMap: any;
+	nodesDefaultVisibilityMap: any;
 	nodesVisibilityMap: any;
 	nodesSelectionMap: any;
 	nodesIndexesMap: any;
@@ -83,17 +84,18 @@ export const INITIAL_STATE: ITreeState = {
 	selectedNodes: [],
 	treeNodesList: [],
 	isPending: true,
+	nodesDefaultVisibilityMap: {},
 	nodesVisibilityMap: {},
 	nodesSelectionMap: {},
 	nodesIndexesMap: {},
 	nodesBySharedIdsMap: {},
 	meshesByModelId: {},
+	numberOfInvisibleChildrenMap: {},
 	componentState: {
 		selectedFilters: [],
 		searchEnabled: false,
 		ifcSpacesHidden: true,
 		expandedNodesMap: {},
-		numberOfInvisibleChildrenMap: {}
 	}
 };
 
@@ -142,8 +144,8 @@ const collapseNode = (state = INITIAL_STATE, { id }) => {
 	const nodeIndex = state.nodesIndexesMap[id];
 	const node = state.treeNodesList[nodeIndex];
 
-	if (node.childrenNumber) {
-		for (let i = nodeIndex; i < nodeIndex + node.childrenNumber; i++) {
+	if (node.deepChildrenNumber) {
+		for (let i = nodeIndex; i < nodeIndex + node.deepChildrenNumber; i++) {
 			if (expandedNodesMap[state.treeNodesList[i]._id]) {
 				expandedNodesMap[state.treeNodesList[i]._id] = false;
 			}

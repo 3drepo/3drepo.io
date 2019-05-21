@@ -1,5 +1,5 @@
 import { flattenDeep } from 'lodash';
-import { VISIBILITY_STATES, SELECTION_STATES } from '../../constants/tree';
+import { VISIBILITY_STATES, SELECTION_STATES, BACKEND_VISIBILITY_STATES } from '../../constants/tree';
 
 interface INode {
 	_id: string;
@@ -8,10 +8,12 @@ interface INode {
 	level: number;
 	parentId: number;
 	hasChildren: boolean;
-	childrenNumber: number;
+	deepChildrenNumber: number;
 	isFederation?: boolean;
 	isModel?: boolean;
 	shared_ids?: string[];
+	defaultVisibility: string;
+	childrenIds: string[];
 }
 
 const isModelNode = (level, isFederation, hasFederationAsParent?) => {
@@ -31,6 +33,7 @@ const getTransformedNodeData = (node) => ({
 	meta: node.meta || [],
 	model: node.model || node.project,
 	shared_ids: node.shared_id ? [node.shared_id] : node.shared_ids,
+	defaultVisibility: BACKEND_VISIBILITY_STATES[node.toggleState]
 });
 
 const getFlattenNested = (tree, level = 1, parentId = null) => {
@@ -42,7 +45,8 @@ const getFlattenNested = (tree, level = 1, parentId = null) => {
 		level,
 		parentId,
 		hasChildren: Boolean(tree.children),
-		childrenNumber: 0
+		deepChildrenNumber: 0,
+		childrenIds: []
 	};
 
 	const dataToFlatten = [] as any;
@@ -51,8 +55,9 @@ const getFlattenNested = (tree, level = 1, parentId = null) => {
 		for (let index = 0; index < tree.children.length; index++) {
 			const subTree = tree.children[index];
 			subTree.isModel = isModelNode(level + 1, subTree.isFederation, tree.isFederation);
-			const { data: nestedData, childrenNumber } = getFlattenNested(subTree, level + 1, tree._id);
-			rowData.childrenNumber += childrenNumber;
+			const { data: nestedData, deepChildrenNumber } = getFlattenNested(subTree, level + 1, tree._id);
+			rowData.deepChildrenNumber += deepChildrenNumber;
+			rowData.childrenIds.push(subTree._id);
 			dataToFlatten.push(nestedData);
 		}
 	}
@@ -60,7 +65,7 @@ const getFlattenNested = (tree, level = 1, parentId = null) => {
 	dataToFlatten.unshift(rowData);
 
 	const data = flattenDeep(dataToFlatten);
-	return { data, childrenNumber: data.length };
+	return { data, deepChildrenNumber: data.length };
 };
 
 const getAuxiliaryMaps = (nodesList) => {
@@ -68,12 +73,14 @@ const getAuxiliaryMaps = (nodesList) => {
 		nodesIndexesMap: {},
 		nodesVisibilityMap: {},
 		nodesSelectionMap: {},
-		nodesBySharedIdsMap: {}
+		nodesBySharedIdsMap: {},
+		nodesDefaultVisibilityMap: {}
 	} as any;
 
 	return nodesList.reduce((maps, node: INode, index) => {
 		maps.nodesIndexesMap[node._id] = index;
-		maps.nodesVisibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
+		maps.nodesVisibilityMap[node._id] = node.defaultVisibility || VISIBILITY_STATES.VISIBLE;
+		maps.nodesDefaultVisibilityMap[node._id] = node.defaultVisibility;
 		maps.nodesSelectionMap[node._id] = SELECTION_STATES.UNSELECTED;
 
 		for (let sharedIndex = 0; sharedIndex < node.shared_ids.length; sharedIndex++) {

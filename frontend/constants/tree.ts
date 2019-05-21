@@ -38,6 +38,12 @@ export const VISIBILITY_STATES = {
 	PARENT_OF_INVISIBLE: 'PARENT_OF_INVISIBLE'
 };
 
+export const BACKEND_VISIBILITY_STATES = {
+	visible: 'VISIBLE',
+	invisible: 'INVISIBLE',
+	parentOfInvisible: 'PARENT_OF_INVISIBLE'
+};
+
 export const SELECTION_STATES = {
 	SELECTED: 'SELECTED',
 	UNSELECTED: 'UNSELECTED',

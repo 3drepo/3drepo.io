@@ -68,6 +68,10 @@ export const selectUnselectedNodesIds = createSelector(
 	}
 );
 
+export const selectNodesDefaultVisibilityMap = createSelector(
+	selectTreeDomain, (state) => state.nodesDefaultVisibilityMap
+);
+
 export const selectNodesVisibilityMap = createSelector(
 	selectTreeDomain, (state) => state.nodesVisibilityMap
 );
@@ -110,7 +114,7 @@ export const selectExpandedNodesMap = createSelector(
 );
 
 export const selectNumberOfInvisibleChildrenMap = createSelector(
-	selectComponentState, (state) => state.numberOfInvisibleChildrenMap
+	selectTreeDomain, (state) => state.numberOfInvisibleChildrenMap
 );
 
 export const selectVisibleTreeNodesList = createSelector(
