@@ -200,7 +200,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 			this.setState((prevState) => {
 				const newFilters = [...prevState.selectedFilters];
 				newFilters[selectedFilterIndex].label = child.label;
-				newFilters[selectedFilterIndex].value.label = dayjs(child.date).format('DD/MM/YYYY');
+				newFilters[selectedFilterIndex].value.label = formatDate(child.date, 'DD/MM/YYYY');
 				return newFilters as any;
 			}, this.handleFiltersChange);
 		} else {
