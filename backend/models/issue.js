@@ -793,19 +793,26 @@ issue.addComment = async function(account, model, issueId, user, data) {
 	}
 
 	// 2. Seal every comment
-	const comments = issuesRes[0].comments;
+	const comments = issuesRes[0].comments || [];
 	comments.forEach(c => c.sealed = true);
 
 	// 3. Create the comment
-	const viewpoint = await View.clean({account, model}, data["viewpoint"], fieldTypes["viewpoint"]);
-	viewpoint.guid = utils.generateUUID();
+	let viewpoint = null;
+
+	if (data.viewpoint) {
+		viewpoint = await View.clean({account, model}, data.viewpoint, fieldTypes.viewpoint);
+		viewpoint.guid = utils.generateUUID();
+	}
+
 	const comment = Comment.newTextComment(user, data.comment, viewpoint);
 
 	// 4. Append the new comment
 	comments.push(comment);
 
 	// 5. Update the issue.
-	await issues.update({ _id }, {$set : {comments}, $push: { viewpoints: viewpoint }});
+	const viewpointPush =  viewpoint ? {$push: { viewpoints: viewpoint }} : {};
+
+	await issues.update({ _id }, {...viewpointPush ,$set : {comments}});
 
 	// 6. Return the new comment.
 	return {...comment, viewpoint};
