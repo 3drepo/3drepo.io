@@ -561,10 +561,65 @@ function* getParents(node) {
 	return parents;
 }
 
-function* updateParentNodesVisibility(parentNodes = []) {
-	const nodes = orderBy(uniqBy(parentNodes, '_id'), ['level'], ['desc']);
+function* updateParentVisibility(nodes = []) {
+	console.time('updateParentVisibility')
 	const meshesByNodes = yield getMeshesByNodes(nodes);
 	const nodesVisibilityMap = { ...(yield select(selectNodesVisibilityMap)) };
+
+	while (nodes.length > 0) {
+		const node = nodes.pop();
+		const priorVisibility = nodesVisibilityMap;
+		const index = nodes.length - 1;
+
+		const children = yield getChildren(node);
+		const meshesData = meshesByNodes[index];
+
+		let visibleChildCount = 0;
+		let hasParentOfInvisibleChild = false;
+
+		for (let i = 0; i < children.length; i++) {
+			if (nodesVisibilityMap[children[i]._id] === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
+				hasParentOfInvisibleChild = true;
+				break;
+			} else if (nodesVisibilityMap[children[i]._id] === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
+				break;
+			} else if (nodesVisibilityMap[children[i]._id] === VISIBILITY_STATES.VISIBLE) {
+				visibleChildCount++;
+			}
+		}
+
+		if (hasParentOfInvisibleChild) {
+			nodesVisibilityMap[node._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
+		} else if (children.length === visibleChildCount) {
+			nodesVisibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
+		} else if (!visibleChildCount) {
+			yield setNodeSelection(node, SELECTION_STATES.UNSELECTED);
+
+			for (let j = 0; j < meshesData.length; j++) {
+				const { meshes, teamspace, modelId } = meshesData[j];
+				Viewer.unhighlightObjects({
+					account: teamspace,
+					model: modelId,
+					ids: meshes
+				});
+			}
+			nodesVisibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
+		} else {
+			nodesVisibilityMap[node._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
+		}
+
+		if (priorVisibility !== nodesVisibilityMap[node._id] && node.parentId) {
+			const parents = yield getParents(node);
+			if (VISIBILITY_STATES.PARENT_OF_INVISIBLE === nodesVisibilityMap[node._id]) {
+				for (let j = 0; j < parents.length; j++) {
+					const parentNode = parents[j];
+					nodesVisibilityMap[parentNode._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
+				}
+			} else {
+				nodes.push(parents[0]);
+			}
+		}
+	}
 
 	for (let index = 0; index < nodes.length; index++) {
 		const node = nodes[index];
@@ -605,6 +660,7 @@ function* updateParentNodesVisibility(parentNodes = []) {
 			nodesVisibilityMap[node._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
 		}
 	}
+	console.timeEnd('updateParentVisibility')
 
 	yield put(TreeActions.setAuxiliaryMaps({ nodesVisibilityMap }));
 }
@@ -655,13 +711,12 @@ function* setTreeNodesVisibility({ nodesIds, visibility }) {
 					}
 				}
 
-				const nodesParents = yield getParents(node);
-				parents.push(...nodesParents);
+				parents.push(node);
 			}
 		}
 
 		yield put(TreeActions.setAuxiliaryMaps({ nodesVisibilityMap }));
-		yield updateParentNodesVisibility(parents);
+		yield updateParentVisibility(parents);
 		yield put(TreeActions.updateMeshesVisibility(meshesToUpdate));
 		console.timeEnd('setTreeNodesVisibility');
 	} catch (error) {
