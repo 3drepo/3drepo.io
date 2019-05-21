@@ -409,7 +409,6 @@ issue.update = async function(dbCol, issueId, data) {
 		throw { resCode: responseCodes.ISSUE_NOT_FOUND };
 	}
 
-
 	// 2. Get user permissions
 	const dbUser = await User.findByUserName(dbCol.account);
 	const job = (await Job.findByUser(dbCol.account, data.requester) || {})._id;
@@ -784,6 +783,10 @@ issue.getThumbnail = function(dbCol, uid) {
 };
 
 issue.addComment = async function(account, model, issueId, user, data) {
+	if (!data.comment || !data.comment.trim()) {
+		throw { resCode: responseCodes.ISSUE_COMMENT_NO_TEXT};
+	}
+
 	// 1. Fetch comments
 	const _id = utils.stringToUUID(issueId) ;
 	const issues = await db.getCollection(account, model + ".issues");
