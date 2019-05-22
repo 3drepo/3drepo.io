@@ -105,6 +105,7 @@ const toggleIssuePin = (issue, selected = true) => {
 
 export function* saveIssue({ teamspace, model, issueData, revision }) {
 	try {
+		const pinData = Viewer.getPinData();
 		yield Viewer.setPinDropMode(false);
 		const myJob = yield select(selectMyJob);
 
@@ -148,7 +149,6 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 			scale: 1.0
 		};
 
-		const pinData = Viewer.getPinData();
 		if (pinData !== null) {
 			issue.pickedPos = pinData.pickedPos;
 			issue.pickedNorm = pinData.pickedNorm;

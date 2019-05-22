@@ -309,6 +309,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 		if (risk._id) {
 			updateRisk(teamspace, model, { position });
+			Viewer.setPin(null);
 		} else {
 			const colours = getRiskPinColor(risk.overall_level_of_risk, true);
 			Viewer.changePinColor({ id: NEW_PIN_ID, colours});
