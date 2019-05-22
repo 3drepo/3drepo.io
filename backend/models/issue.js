@@ -818,7 +818,7 @@ issue.addComment = async function(account, model, issueId, user, data) {
 	await issues.update({ _id }, {...viewpointPush ,$set : {comments}});
 
 	// 6. Return the new comment.
-	return {...comment, viewpoint};
+	return {...comment, viewpoint, guid: utils.uuidToString(comment.guid)};
 };
 
 issue.deleteComment = async function(account, model, issueID, guid, user) {
