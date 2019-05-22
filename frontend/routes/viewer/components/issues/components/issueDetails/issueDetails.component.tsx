@@ -305,6 +305,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		if (!this.isNewIssue) {
 			const { teamspace, model, issue } = this.props;
 			this.props.updateIssue(teamspace, model, {position});
+			Viewer.setPin(null);
 		} else {
 			Viewer.changePinColor({ id: NEW_PIN_ID, colours: PIN_COLORS.YELLOW });
 		}
