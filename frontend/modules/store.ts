@@ -7,6 +7,7 @@ const sagaMiddleware = createSagaMiddleware();
 
 export default function configureStore(initialState = {}) {
 	const middlewares = [
+		require('redux-immutable-state-invariant').default(),
 		sagaMiddleware
 	];
 

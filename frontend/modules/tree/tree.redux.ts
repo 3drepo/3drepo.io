@@ -63,7 +63,6 @@ export interface ITreeComponentState {
 	selectedFilters: any[];
 	searchEnabled: boolean;
 	ifcSpacesHidden: boolean;
-	expandedNodesMap: any;
 }
 
 export interface ITreeState {
@@ -78,6 +77,7 @@ export interface ITreeState {
 	nodesIndexesMap: any;
 	nodesBySharedIdsMap: any;
 	meshesByModelId: any;
+	expandedNodesMap: any;
 }
 
 export const INITIAL_STATE: ITreeState = {
@@ -91,11 +91,11 @@ export const INITIAL_STATE: ITreeState = {
 	nodesBySharedIdsMap: {},
 	meshesByModelId: {},
 	numberOfInvisibleChildrenMap: {},
+	expandedNodesMap: {},
 	componentState: {
 		selectedFilters: [],
 		searchEnabled: false,
-		ifcSpacesHidden: true,
-		expandedNodesMap: {},
+		ifcSpacesHidden: true
 	}
 };
 
@@ -130,17 +130,17 @@ const setAuxiliaryMaps = (state = INITIAL_STATE, { auxiliaryMaps }) => {
 };
 
 const setExpanedNodesMap = (state = INITIAL_STATE, { expandedNodesMap }) => {
-	return { ...state, componentState: { ...state.componentState, expandedNodesMap } };
+	return { ...state, expandedNodesMap };
 };
 
 const expandNode = (state = INITIAL_STATE, { id }) => {
-	const expandedNodesMap = { ...state.componentState.expandedNodesMap };
-	expandedNodesMap[id] = true;
-	return setExpanedNodesMap(state, { expandedNodesMap });
+	const newNode = { [id]: true };
+	const expandedNodesMap = { ...state.expandedNodesMap, ...newNode };
+	return { ...state, expandedNodesMap };
 };
 
 const collapseNode = (state = INITIAL_STATE, { id }) => {
-	const expandedNodesMap = { ...state.componentState.expandedNodesMap };
+	const expandedNodesMap = { ...state.expandedNodesMap };
 	const nodeIndex = state.nodesIndexesMap[id];
 	const node = state.treeNodesList[nodeIndex];
 
