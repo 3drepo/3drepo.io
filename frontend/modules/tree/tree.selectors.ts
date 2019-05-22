@@ -110,7 +110,7 @@ export const selectIfcSpacesHidden = createSelector(
 );
 
 export const selectExpandedNodesMap = createSelector(
-	selectComponentState, (state) => state.expandedNodesMap
+	selectTreeDomain, (state) => state.expandedNodesMap
 );
 
 export const selectNumberOfInvisibleChildrenMap = createSelector(
@@ -126,7 +126,7 @@ export const selectVisibleTreeNodesList = createSelector(
 		const visibleNodes = [];
 
 		for (let index = 0; index < treeNodesList.length; index++) {
-			const treeNode = treeNodesList[index];
+			const treeNode = { ...treeNodesList[index] };
 			const isSearchActive = searchEnabled && selectedFilters.length;
 			const isFirstLevel = treeNode.level === 1;
 			const isSecondLevel = treeNode.level === 2;

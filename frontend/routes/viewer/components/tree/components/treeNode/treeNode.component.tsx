@@ -24,6 +24,7 @@ import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpIcon from '@material-ui/icons/KeyboardArrowUp';
 
+import { Container, Name, NameWrapper, Actions, StyledExpandableButton } from './treeNode.styles';
 import {
 	TREE_ITEM_FEDERATION_TYPE,
 	TREE_ITEM_MODEL_TYPE,
@@ -33,8 +34,6 @@ import {
 } from '../../../../../../constants/tree';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
-import { Container, Name, NameWrapper, Actions, StyledExpandableButton } from './treeNode.styles';
-
 interface IProps {
 	style: any;
 	key: any;
@@ -113,6 +112,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		highlighted: false,
 		expanded: false,
 		hasChildren: false,
+		childrenNumber: 0
 	};
 
 	private renderExpandableButton = renderWhenTrue(() => {

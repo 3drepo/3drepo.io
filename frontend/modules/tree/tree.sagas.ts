@@ -153,7 +153,7 @@ function* expandToNode(nodeId: string) {
 }
 
 function* setNodeSelection(initialNode: any, selection: any) {
-	const nodesSelectionMap = yield select(selectNodesSelectionMap);
+	const nodesSelectionMap = {...(yield select(selectNodesSelectionMap)) };
 	const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
 	const nodesIndexesMap = yield select(selectNodesIndexesMap);
 	const treeNodesList = yield select(selectTreeNodesList);
@@ -320,7 +320,7 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false }) {
 		if (shouldCloseMeta) {
 			yield all([
 				put(ViewerActions.setMetadataVisibility(false)),
-				put(BimActions.setActiveMeta(null)),
+				put(BimActions.setActiveMeta(null))
 			]);
 		}
 		yield put(TreeActions.deselectNodes(nodesIds));
@@ -371,8 +371,8 @@ function* showTreeNodes(nodesIds = [], shouldUpdateModel = true) {
 
 			if (shouldUpdateModel) {
 				// TODO
-				const TreeService = getAngularService('TreeService') as any;
-				TreeService.updateModelVisibility();
+				// const TreeService = getAngularService('TreeService') as any;
+				// TreeService.updateModelVisibility();
 			}
 		}
 	} catch (error) {
@@ -397,8 +397,8 @@ function* hideTreeNodes(nodesIds = []) {
 			yield put(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.INVISIBLE));
 
 			// TODO
-			const TreeService = getAngularService('TreeService') as any;
-			TreeService.updateModelVisibility();
+			// const TreeService = getAngularService('TreeService') as any;
+			// TreeService.updateModelVisibility();
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('hide', 'nodes', error));
@@ -446,6 +446,8 @@ function* selectNode({ id }) {
 }
 
 function* deselectNodes({ nodesIds = [] }) {
+	console.time('DESELECT NODES');
+
 	try {
 		const nodesSelectionMap = yield select(selectNodesSelectionMap);
 		const nodes = yield getNodesByIds(nodesIds);
@@ -469,6 +471,7 @@ function* deselectNodes({ nodesIds = [] }) {
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('deselect', 'node', error));
 	}
+	console.timeEnd('DESELECT NODES');
 }
 
 function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
@@ -548,9 +551,10 @@ function* getChildren(node) {
 function* getParents(node) {
 	const nodesIndexesMap = yield select(selectNodesIndexesMap);
 	const treeNodesList = yield select(selectTreeNodesList);
-
+	console.log('getParents', node);
 	const parents = [];
 	let nextParentId = node.parentId;
+	console.log('getParents NEXT PARENT', node.parentId)
 	while (!!nextParentId) {
 		const parentNodeIndex = nodesIndexesMap[nextParentId];
 		const parentNode = treeNodesList[parentNodeIndex];
@@ -562,11 +566,13 @@ function* getParents(node) {
 }
 
 function* updateParentVisibility(nodes = []) {
-	console.time('updateParentVisibility')
+	console.time('updateParentVisibility');
+	console.log('updateParentVisibility', nodes, nodes.length);
 	const meshesByNodes = yield getMeshesByNodes(nodes);
 	const nodesVisibilityMap = { ...(yield select(selectNodesVisibilityMap)) };
 
 	while (nodes.length > 0) {
+		console.log('updateParentVisibility while');
 		const node = nodes.pop();
 		const priorVisibility = nodesVisibilityMap;
 		const index = nodes.length - 1;
@@ -578,6 +584,7 @@ function* updateParentVisibility(nodes = []) {
 		let hasParentOfInvisibleChild = false;
 
 		for (let i = 0; i < children.length; i++) {
+			console.log('for', i);
 			if (nodesVisibilityMap[children[i]._id] === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
 				hasParentOfInvisibleChild = true;
 				break;
@@ -587,6 +594,10 @@ function* updateParentVisibility(nodes = []) {
 				visibleChildCount++;
 			}
 		}
+
+		console.log('hasParentOfInvisibleChild',hasParentOfInvisibleChild);
+		console.log('children.length === visibleChildCount',children.length === visibleChildCount);
+		console.log('!visibleChildCount',!visibleChildCount);
 
 		if (hasParentOfInvisibleChild) {
 			nodesVisibilityMap[node._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
@@ -607,9 +618,14 @@ function* updateParentVisibility(nodes = []) {
 		} else {
 			nodesVisibilityMap[node._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
 		}
+		console.log('priorVisibility',priorVisibility);
+		console.log('nodesVisibilityMap[node._id]',nodesVisibilityMap[node._id]);
+		console.log('node.parentId',node.parentId);
 
 		if (priorVisibility !== nodesVisibilityMap[node._id] && node.parentId) {
 			const parents = yield getParents(node);
+			console.log('parents', parents);
+
 			if (VISIBILITY_STATES.PARENT_OF_INVISIBLE === nodesVisibilityMap[node._id]) {
 				for (let j = 0; j < parents.length; j++) {
 					const parentNode = parents[j];
@@ -660,7 +676,7 @@ function* updateParentVisibility(nodes = []) {
 			nodesVisibilityMap[node._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
 		}
 	}
-	console.timeEnd('updateParentVisibility')
+	console.timeEnd('updateParentVisibility');
 
 	yield put(TreeActions.setAuxiliaryMaps({ nodesVisibilityMap }));
 }
@@ -680,11 +696,12 @@ function* setTreeNodesVisibility({ nodesIds, visibility }) {
 
 		const meshesToUpdate = [];
 		const parents = [];
+		let parentsToUpdate = [];
 
 		for (let nodeLoopIndex = 0; nodeLoopIndex < nodesIds.length; nodeLoopIndex++) {
 			const nodeId = nodesIds[nodeLoopIndex];
 			const nodeIndex = nodesIndexesMap[nodeId];
-			const node = treeNodesList[nodeIndex];
+			const node = {...treeNodesList[nodeIndex]};
 			const nodeVisibility = nodesVisibilityMap[nodeId];
 
 			if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE || visibility !== nodeVisibility) {
@@ -710,13 +727,13 @@ function* setTreeNodesVisibility({ nodesIds, visibility }) {
 						nodesVisibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
 					}
 				}
-
 				parents.push(node);
 			}
+			parentsToUpdate = [...parents];
 		}
-
 		yield put(TreeActions.setAuxiliaryMaps({ nodesVisibilityMap }));
-		yield updateParentVisibility(parents);
+
+		yield updateParentVisibility(parentsToUpdate);
 		yield put(TreeActions.updateMeshesVisibility(meshesToUpdate));
 		console.timeEnd('setTreeNodesVisibility');
 	} catch (error) {
