@@ -7,14 +7,14 @@ const sagaMiddleware = createSagaMiddleware();
 
 export default function configureStore(initialState = {}) {
 	const middlewares = [
-		//require('redux-immutable-state-invariant').default(),
+		require('redux-immutable-state-invariant').default(),
 		sagaMiddleware
 	];
 
 	const enhancers = [];
 
 	if (window.__REDUX_DEVTOOLS_EXTENSION__) {
-		//enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
+		// enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
 	}
 
 	const store = createStore(
