@@ -332,7 +332,7 @@ export function* setMeasureVisibility({ visible }) {
 
 export function* clearHighlights() {
 	try {
-		yield Viewer.clearHighlights();
+		Viewer.clearHighlights();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('clear', 'highlights'));
 	}
