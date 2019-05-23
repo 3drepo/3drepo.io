@@ -53,7 +53,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 	private inputLocalRef = React.createRef();
 
 	get isEditMode() {
-		return !this.props.mutable || this.state.edit;
+		return (!this.props.mutable || this.state.edit) && !this.props.disabled;
 	}
 
 	get hasValueChanged() {
@@ -153,6 +153,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		} = this.props;
 		const { initialValue, currentValue } = this.state;
 		const shouldRenderActions = this.hasValueChanged && this.isEditMode;
+		const shouldRenderMutable = !this.isEditMode && !this.props.disabled;
 
 		return (
 			<Formik
@@ -188,7 +189,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 						</div>
 					}
 					{shouldRenderActions && this.renderActionsLine()}
-					{!this.isEditMode && this.renderMutableButton()}
+					{shouldRenderMutable && this.renderMutableButton()}
 				</Container>
 			</Formik>
 		);
