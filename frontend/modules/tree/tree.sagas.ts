@@ -39,7 +39,12 @@ import {
 	selectUnselectedNodesIds,
 	selectMeshesByModelId,
 	selectExpandedNodesMap,
-	selectNodesDefaultVisibilityMap
+	selectNodesDefaultVisibilityMap,
+	getSelectNodesByIds,
+	getSelectChildren,
+	getSelectDeepChildren,
+	getSelectParents,
+	getSelectMeshesByNodes
 } from './tree.selectors';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -65,12 +70,6 @@ const setupWorker = (worker, onResponse) => {
 
 const treeWorker = new TreeWorker();
 
-function* getNodesByIds(nodesIds) {
-	const treeNodesList = yield select(selectTreeNodesList);
-	const nodesIndexesMap = yield select(selectNodesIndexesMap);
-	return nodesIds.map((nodeId) => treeNodesList[nodesIndexesMap[nodeId]]);
-}
-
 function* getNodesIdsFromSharedIds(objects = []) {
 	if (!objects.length) {
 		return [];
@@ -83,60 +82,11 @@ function* getNodesIdsFromSharedIds(objects = []) {
 	return uniq(nodesIdsBySharedIds);
 }
 
-function* getMeshesByNodes(nodes = []) {
-	if (!nodes.length) {
-		return [];
-	}
-
-	const treeNodesList = yield select(selectTreeNodesList);
-	const nodesIndexesMap = yield select(selectNodesIndexesMap);
-	const idToMeshes = yield select(selectMeshesByModelId);
-	const childrenMap = {};
-	const meshesByNodes = {};
-
-	let stack = nodes;
-	while (stack.length > 0) {
-		const node = stack.pop();
-
-		if (!meshesByNodes[node.namespacedId]) {
-			meshesByNodes[node.namespacedId] = {
-				modelId: node.model,
-				teamspace: node.teamspace,
-				meshes: []
-			};
-		}
-
-		// Check top level and then check if sub model of fed
-		let meshes = node.type === NODE_TYPES.MESH
-			? [node._id]
-			: idToMeshes[node._id];
-
-		if (!meshes && idToMeshes[node.namespacedId]) {
-			meshes = idToMeshes[node.namespacedId][node._id];
-		}
-
-		if (meshes) {
-			meshesByNodes[node.namespacedId].meshes = meshesByNodes[node.namespacedId].meshes.concat(meshes);
-		} else if (!childrenMap[node._id] && node.hasChildren) {
-			// This should only happen in federations.
-			// Traverse down the tree to find submodel nodes
-			const nodeIndex = nodesIndexesMap[node._id];
-			for (let childNumber = 1; childNumber <= node.deepChildrenNumber; childNumber++) {
-				const childNode = treeNodesList[nodeIndex + childNumber];
-				childrenMap[childNode._id] = true;
-				stack = stack.concat([childNode]);
-			}
-		}
-	}
-
-	return values(meshesByNodes);
-}
-
 function* expandToNode(nodeId: string) {
 	if (nodeId) {
 		const treeNodesList = yield select(selectTreeNodesList);
 		const nodesIndexesMap = yield select(selectNodesIndexesMap);
-		const expandedNodesMap = yield select(selectExpandedNodesMap);
+		const expandedNodesMap = {...(yield select(selectExpandedNodesMap))};
 
 		let { parentId: nextParentId } = treeNodesList[nodesIndexesMap[nodeId]] || { parentId: null };
 		expandedNodesMap[nodeId] = true;
@@ -151,15 +101,9 @@ function* expandToNode(nodeId: string) {
 	}
 }
 
-function* setNodeSelection(initialNode: any, selection: any) {
-/* 	const nodesSelectionMap = yield select(selectNodesSelectionMap); */
+function* setNodesSelection(nodes = [], selection: any) {
 	const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
-/* 	const nodesIndexesMap = yield select(selectNodesIndexesMap);
-	const treeNodesList = yield select(selectTreeNodesList); */
-
 	const shouldSelect = selection === SELECTION_STATES.SELECTED;
-	const nodes = yield getDeepChildren(initialNode);
-	nodes.unshift(initialNode);
 	const newNodesSelectionMap = {};
 
 	while (nodes.length > 0) {
@@ -173,33 +117,32 @@ function* setNodeSelection(initialNode: any, selection: any) {
 				newNodesSelectionMap[node._id] = SELECTION_STATES.SELECTED;
 			}
 		}
-	}
+		/*
+		// Set parent nodes selection
+		let currentNode = {...initialNode};
+		for (let i = currentNode.level - 1; i > 0; i--) {
+			const parentNodeIndex = nodesIndexesMap[currentNode.parentId];
+			const parentNode = treeNodesList[parentNodeIndex];
 
-/*
-	// Set parent nodes selection
-	let currentNode = {...initialNode};
-	for (let i = currentNode.level - 1; i > 0; i--) {
-		const parentNodeIndex = nodesIndexesMap[currentNode.parentId];
-		const parentNode = treeNodesList[parentNodeIndex];
-
-		let hasChildrenWithDifferentState = false;
-		for (let childIndex = parentNodeIndex; childIndex <= parentNodeIndex + parentNode.deepChildrenNumber; childIndex++) {
-			const childNode = treeNodesList[childIndex];
-			const hasSameState = nodesSelectionMap[childNode._id] === selection;
-			if (!hasSameState) {
-				hasChildrenWithDifferentState = true;
-				break;
+			let hasChildrenWithDifferentState = false;
+			for (let childIndex = parentNodeIndex; childIndex <= parentNodeIndex + parentNode.deepChildrenNumber; childIndex++) {
+				const childNode = treeNodesList[childIndex];
+				const hasSameState = nodesSelectionMap[childNode._id] === selection;
+				if (!hasSameState) {
+					hasChildrenWithDifferentState = true;
+					break;
+				}
 			}
-		}
 
-		if (hasChildrenWithDifferentState) {
-			newNodesSelectionMap[parentNode._id] = SELECTION_STATES.PARENT_OF_UNSELECTED;
-		} else {
-			newNodesSelectionMap[parentNode._id] = selection;
-		}
+			if (hasChildrenWithDifferentState) {
+				newNodesSelectionMap[parentNode._id] = SELECTION_STATES.PARENT_OF_UNSELECTED;
+			} else {
+				newNodesSelectionMap[parentNode._id] = selection;
+			}
 
-		currentNode = parentNode;
-	} */
+			currentNode = parentNode;
+		} */
+	}
 
 	yield put(TreeActions.updateNodesSelectionMap(newNodesSelectionMap));
 }
@@ -271,7 +214,7 @@ function* startListenOnSelections() {
 	});
 
 	Viewer.on(VIEWER_EVENTS.MULTI_OBJECTS_SELECTED, (object) => {
-		dispatch(TreeActions.handleNodesClickBySharedIds(object.selectedNodes));
+		dispatch(TreeActions.handleNodesClickBySharedIds(object.selectedNodes, false, true));
 	});
 
 	Viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => {
@@ -300,16 +243,14 @@ function* handleBackgroundClick() {
 	return false;
 }
 
-function* handleNodesClick({ nodesIds = [], skipExpand = false }) {
-	const nodes = yield getNodesByIds(nodesIds);
+function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = false }) {
+	const nodes = yield select(getSelectNodesByIds(nodesIds));
 	const addGroup = MultiSelect.isAccumMode();
 	const removeGroup = MultiSelect.isDecumMode();
 	const isMultiSelectMode = addGroup || removeGroup;
 
 	if (!isMultiSelectMode) {
-		console.time('clearCurrentlySelected (handleNodesClick)')
 		yield clearCurrentlySelected();
-		console.timeEnd('clearCurrentlySelected (handleNodesClick)')
 	}
 
 	if (removeGroup) {
@@ -323,10 +264,7 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false }) {
 		}
 		yield put(TreeActions.deselectNodes(nodesIds));
 	} else {
-		console.time('selectNodes (handleNodesClick)')
-		yield put(TreeActions.selectNodes(nodesIds, skipExpand));
-		console.timeEnd('selectNodes (handleNodesClick)')
-
+		yield put(TreeActions.selectNodes(nodesIds, skipExpand, skipChildren));
 	}
 
 	yield TreeActions.getSelectedNodes();
@@ -424,8 +362,7 @@ function* isolateNodesBySharedIds({ objects = []}) {
 }
 
 function* isolateNode({ id }) {
-	const [ node ] = yield getNodesByIds([id]);
-
+	const [node] = yield select(getSelectNodesByIds([id]));
 	yield put(TreeActions.isolateNodesBySharedIds(node.shared_ids));
 }
 
@@ -451,16 +388,16 @@ function* deselectNodes({ nodesIds = [] }) {
 
 	try {
 		const nodesSelectionMap = yield select(selectNodesSelectionMap);
-		const nodes = yield getNodesByIds(nodesIds);
+		const nodes = yield select(getSelectNodesByIds(nodesIds));
 		const actionNodes = [];
 		for (let i = 0; i < nodes.length; i++) {
 			if (nodesSelectionMap[nodes[i]._id] !== SELECTION_STATES.UNSELECTED) {
-				yield setNodeSelection(nodes[i], SELECTION_STATES.UNSELECTED);
+				yield setNodesSelection([nodes[i]], SELECTION_STATES.UNSELECTED);
 				actionNodes.push(nodes[i]);
 			}
 		}
 
-		const meshesByNodes = yield getMeshesByNodes(actionNodes);
+		const meshesByNodes = yield select(getSelectMeshesByNodes(actionNodes));
 		for (let index = 0; index < meshesByNodes.length; index++) {
 			const { meshes, teamspace, modelId } = meshesByNodes[index];
 			Viewer.unhighlightObjects({
@@ -475,16 +412,20 @@ function* deselectNodes({ nodesIds = [] }) {
 	console.timeEnd('DESELECT NODES');
 }
 
-function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
+function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false, colour }) {
 	try {
-		const nodes = yield getNodesByIds(nodesIds);
+		let nodes = yield select(getSelectNodesByIds(nodesIds));
+
 		if (nodes.length === 0) {
 			return Promise.resolve('No nodes specified');
 		}
 
-		for (let i = 0; i < nodes.length; i++) {
-			yield setNodeSelection(nodes[i], SELECTION_STATES.SELECTED);
+		if (!skipChildren) {
+			const children = yield all(nodes.map((node) => select(getSelectDeepChildren(node))));
+			nodes = [...nodes, ...children.flat()];
 		}
+
+		yield setNodesSelection([...nodes], SELECTION_STATES.SELECTED);
 
 		const lastNode = nodes[nodes.length - 1];
 		yield handleMetadata(lastNode);
@@ -493,7 +434,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 			yield expandToNode(lastNode._id);
 		}
 
-		const meshesByNodes = yield getMeshesByNodes(nodes);
+		const meshesByNodes = yield select(getSelectMeshesByNodes(nodes));
 		const nodesSelectionMap = yield select(selectNodesSelectionMap);
 
 		for (let index = 0; index < meshesByNodes.length; index++) {
@@ -524,50 +465,16 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 
 function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], colour?: number[]}) {
 	const nodesIds = yield getNodesIdsFromSharedIds(objects);
-	yield put(TreeActions.selectNodes(nodesIds, false, colour));
+	yield put(TreeActions.selectNodes(nodesIds, false, true, colour));
 }
 
-function* getDeepChildren(node) {
-	if (!node) {
-		throw new Error('Node does not exist');
-	}
-	const nodesIndexesMap = yield select(selectNodesIndexesMap);
-	const treeNodesList = yield select(selectTreeNodesList);
-	const nodeIndex = nodesIndexesMap[node._id];
-	return treeNodesList.slice(nodeIndex + 1, nodeIndex + node.deepChildrenNumber + 1);
-}
-
-function* getChildren(node) {
-	if (!node) {
-		throw new Error('Node does not exist');
-	}
-
-	if (node.hasChildren) {
-		return yield getNodesByIds(node.childrenIds);
-	}
-	return [];
-}
-
-function* getParents(node) {
-	const nodesIndexesMap = yield select(selectNodesIndexesMap);
-	const treeNodesList = yield select(selectTreeNodesList);
-	const parents = [];
-
-	let nextParentId = node.parentId;
-
-	while (!!nextParentId) {
-		const parentNodeIndex = nodesIndexesMap[nextParentId];
-		const parentNode = treeNodesList[parentNodeIndex];
-		parents.push(parentNode);
-		nextParentId = parentNode.parentId;
-	}
-
-	return parents;
+function* deselectNodesBySharedIds({ objects = [] }) {
+	const nodesIds = yield getNodesIdsFromSharedIds(objects);
+	yield put(TreeActions.deselectNodes(nodesIds));
 }
 
 function* updateParentVisibility(nodes = []) {
-	console.time('updateParentVisibility');
-	const meshesByNodes = yield getMeshesByNodes([...nodes]);
+	const meshesByNodes = yield select(getSelectMeshesByNodes([...nodes]));
 	const nodesVisibilityMap = { ...(yield select(selectNodesVisibilityMap)) };
 
 	while (nodes.length > 0) {
@@ -576,7 +483,7 @@ function* updateParentVisibility(nodes = []) {
 		const priorVisibility = nodesVisibilityMap;
 
 		if (node.hasChildren) {
-			const children = yield getChildren(node);
+			const children = yield select(getSelectChildren(node));
 			const meshesData = meshesByNodes[index];
 
 			let visibleChildCount = 0;
@@ -598,7 +505,7 @@ function* updateParentVisibility(nodes = []) {
 			} else if (children.length && children.length === visibleChildCount) {
 				nodesVisibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
 			} else if (!visibleChildCount) {
-				yield setNodeSelection(node, SELECTION_STATES.UNSELECTED);
+				yield setNodesSelection([node], SELECTION_STATES.UNSELECTED);
 				const { meshes, teamspace, modelId } = meshesData;
 
 				Viewer.unhighlightObjects({
@@ -614,7 +521,7 @@ function* updateParentVisibility(nodes = []) {
 		}
 
 		if (priorVisibility !== nodesVisibilityMap[node._id] && node.parentId) {
-			const parents = yield getParents(node);
+			const parents = yield select(getSelectParents(node));
 
 			if (VISIBILITY_STATES.PARENT_OF_INVISIBLE === nodesVisibilityMap[node._id]) {
 				for (let j = 0; j < parents.length; j++) {
@@ -629,7 +536,7 @@ function* updateParentVisibility(nodes = []) {
 
 	for (let index = 0; index < nodes.length; index++) {
 		const node = nodes[index];
-		const children = yield getChildren(node);
+		const children = yield select(getSelectChildren(node));
 		const meshesData = meshesByNodes[index];
 
 		let visibleChildCount = 0;
@@ -651,7 +558,7 @@ function* updateParentVisibility(nodes = []) {
 		} else if (children.length === visibleChildCount) {
 			nodesVisibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
 		} else if (!visibleChildCount) {
-			yield setNodeSelection(node, SELECTION_STATES.UNSELECTED);
+			yield setNodesSelection([node], SELECTION_STATES.UNSELECTED);
 
 			for (let j = 0; j < meshesData.length; j++) {
 				const { meshes, teamspace, modelId } = meshesData[j];
@@ -696,7 +603,7 @@ function* setTreeNodesVisibility({ nodesIds, visibility }) {
 					meshesToUpdate.push(node);
 				}
 
-				const children = node.hasChildren ? (yield getDeepChildren(node)) : [node];
+				const children = node.hasChildren ? (yield select(getSelectDeepChildren(node))) : [node];
 
 				while (children.length > 0) {
 					const child = children.pop();
@@ -710,7 +617,7 @@ function* setTreeNodesVisibility({ nodesIds, visibility }) {
 							nodesVisibilityMap[child._id] = VISIBILITY_STATES.VISIBLE;
 						}
 					} else {
-						yield setNodeSelection(child, SELECTION_STATES.UNSELECTED);
+						yield setNodesSelection([child], SELECTION_STATES.UNSELECTED);
 						nodesVisibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
 					}
 				}
@@ -803,9 +710,11 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.SHOW_NODES_BY_SHARED_IDS, showNodesBySharedIds);
 	yield takeLatest(TreeTypes.SELECT_NODES, selectNodes);
 	yield takeLatest(TreeTypes.SELECT_NODES_BY_SHARED_IDS, selectNodesBySharedIds);
+	yield takeLatest(TreeTypes.DESELECT_NODES_BY_SHARED_IDS, deselectNodesBySharedIds);
 	yield takeLatest(TreeTypes.DESELECT_NODES, deselectNodes);
 	yield takeLatest(TreeTypes.ISOLATE_NODES_BY_SHARED_IDS, isolateNodesBySharedIds);
 	yield takeLatest(TreeTypes.HIDE_NODES_BY_SHARED_IDS, hideNodesBySharedIds);
 	yield takeLatest(TreeTypes.HANDLE_MESHES_VISIBILITY, handleMeshesVisibility);
 	yield takeLatest(TreeTypes.ISOLATE_NODE, isolateNode);
+	yield takeLatest(TreeTypes.CLEAR_CURRENTLY_SELECTED, clearCurrentlySelected);
 }

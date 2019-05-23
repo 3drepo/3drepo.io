@@ -16,11 +16,11 @@
  */
 
 import { createSelector } from 'reselect';
-import { pickBy, keys } from 'lodash';
+import { pickBy, keys, values } from 'lodash';
 
 import { calculateTotalMeshes } from '../../helpers/tree';
 import { searchByFilters } from '../../helpers/searching';
-import { SELECTION_STATES } from '../../constants/tree';
+import { SELECTION_STATES, NODE_TYPES } from '../../constants/tree';
 
 export const selectTreeDomain = (state) => Object.assign({}, state.tree);
 
@@ -140,5 +140,101 @@ export const selectVisibleTreeNodesList = createSelector(
 		}
 
 		return visibleNodes;
+	}
+);
+
+export const getSelectNodesByIds = (nodesIds) => createSelector(
+	selectTreeNodesList, selectNodesIndexesMap,
+	(treeNodesList, nodesIndexesMap) => {
+		return nodesIds.map((nodeId) => treeNodesList[nodesIndexesMap[nodeId]]);
+	}
+);
+
+export const getSelectChildren = (node) => createSelector(
+	getSelectNodesByIds(node.childrenIds),
+	(children) => {
+		if (!node) {
+			throw new Error('Node does not exist');
+		}
+
+		if (node.hasChildren) {
+			return children;
+		}
+		return [];
+	}
+);
+
+export const getSelectDeepChildren = (node) => createSelector(
+	selectTreeNodesList, selectNodesIndexesMap,
+	(treeNodesList, nodesIndexesMap) => {
+		const nodeIndex = nodesIndexesMap[node._id];
+		return treeNodesList.slice(nodeIndex + 1, nodeIndex + node.deepChildrenNumber + 1);
+	}
+);
+
+export const getSelectParents = (node) => createSelector(
+	selectTreeNodesList, selectNodesIndexesMap,
+	(treeNodesList, nodesIndexesMap) => {
+		const parents = [];
+
+		let nextParentId = node.parentId;
+
+		while (!!nextParentId) {
+			const parentNodeIndex = nodesIndexesMap[nextParentId];
+			const parentNode = treeNodesList[parentNodeIndex];
+			parents.push(parentNode);
+			nextParentId = parentNode.parentId;
+		}
+
+		return parents;
+	}
+);
+
+export const getSelectMeshesByNodes = (nodes = []) => createSelector(
+	selectTreeNodesList, selectNodesIndexesMap, selectMeshesByModelId,
+	(treeNodesList, nodesIndexesMap, idToMeshes) => {
+		if (!nodes.length) {
+			return [];
+		}
+
+		const childrenMap = {};
+		const meshesByNodes = {};
+
+		let stack = [...nodes];
+		while (stack.length > 0) {
+			const node = stack.pop();
+
+			if (!meshesByNodes[node.namespacedId]) {
+				meshesByNodes[node.namespacedId] = {
+					modelId: node.model,
+					teamspace: node.teamspace,
+					meshes: []
+				};
+			}
+
+			// Check top level and then check if sub model of fed
+			let meshes = node.type === NODE_TYPES.MESH
+				? [node._id]
+				: idToMeshes[node._id];
+
+			if (!meshes && idToMeshes[node.namespacedId]) {
+				meshes = idToMeshes[node.namespacedId][node._id];
+			}
+
+			if (meshes) {
+				meshesByNodes[node.namespacedId].meshes = meshesByNodes[node.namespacedId].meshes.concat(meshes);
+			} else if (!childrenMap[node._id] && node.hasChildren) {
+				// This should only happen in federations.
+				// Traverse down the tree to find submodel nodes
+				const nodeIndex = nodesIndexesMap[node._id];
+				for (let childNumber = 1; childNumber <= node.deepChildrenNumber; childNumber++) {
+					const childNode = treeNodesList[nodeIndex + childNumber];
+					childrenMap[childNode._id] = true;
+					stack = stack.concat([childNode]);
+				}
+			}
+		}
+
+		return values(meshesByNodes);
 	}
 );

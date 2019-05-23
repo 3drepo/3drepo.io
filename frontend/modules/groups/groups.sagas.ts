@@ -34,13 +34,14 @@ import {
 	selectShowDetails,
 	selectIsAllOverrided
 } from './groups.selectors';
+import { getNodesIdsFromSharedIds } from '../tree/tree.sagas';
 import { Viewer } from '../../services/viewer/viewer';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { prepareGroup, normalizeGroup } from '../../helpers/groups';
 import { selectCurrentUser } from '../currentUser';
 import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { SnackbarActions } from '../snackbar';
-import { TreeActions } from '../tree';
+import { TreeActions, getSelectMeshesByNodes } from '../tree';
 import { searchByFilters } from '../../helpers/searching';
 import { GROUPS_TYPES } from '../../constants/groups';
 
@@ -89,11 +90,10 @@ export function* highlightGroup({ group }) {
 		yield put(GroupsActions.addToHighlighted(group._id));
 
 		if (group.objects && group.objects.length > 0) {
-			const TreeService = getAngularService('TreeService') as any;
-
-			yield TreeService.showNodesBySharedIds(group.objects);
-			yield TreeService.selectNodesBySharedIds(group.objects, color);
-			yield put(TreeActions.getSelectedNodes());
+			yield put(TreeActions.showNodesBySharedIds(group.objects));
+			yield put(TreeActions.selectNodesBySharedIds(group.objects, color));
+			// TODO Do we need this? 
+			// yield put(TreeActions.getSelectedNodes());
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('higlight', 'group', error));
@@ -103,11 +103,7 @@ export function* highlightGroup({ group }) {
 export function* dehighlightGroup({ group }) {
 	try {
 		yield put(GroupsActions.removeFromHighlighted(group._id));
-
-		const TreeService = getAngularService('TreeService') as any;
-		const nodes = yield TreeService.getNodesFromSharedIds(group.objects);
-
-		yield TreeService.deselectNodes(nodes);
+		yield put(TreeActions.deselectNodesBySharedIds(group.objects));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('dehiglight', 'group', error));
 	}
@@ -116,9 +112,7 @@ export function* dehighlightGroup({ group }) {
 export function* clearSelectionHighlights() {
 	try {
 		yield put(GroupsActions.setComponentState({ highlightedGroups: [] }));
-		const TreeService = getAngularService('TreeService') as any;
-		yield TreeService.clearCurrentlySelected();
-		yield put(TreeActions.clearSelectedNodes());
+		yield put(TreeActions.clearCurrentlySelected());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('clear', 'highlighted groups', error));
 	}
@@ -154,28 +148,22 @@ export function* addColorOverride({ groups = [], renderOnly }) {
 		for (let i = 0; i < groups.length; i++) {
 			const group = groups[i];
 			const color = hexToGLColor(group.color);
-			const treeMap = yield TreeService.getMap();
+			const nodes = yield getNodesIdsFromSharedIds(group.objects);
 
-			if (treeMap) {
-				const nodes = yield TreeService.getNodesFromSharedIds(group.objects);
+			const filteredNodes = nodes.filter((n) => n !== undefined);
+			const modelsMap = yield select(getSelectMeshesByNodes(filteredNodes));
+			const modelsList = Object.keys(modelsMap);
 
-				if (nodes) {
-					const filteredNodes = nodes.filter((n) => n !== undefined);
-					const modelsMap = yield TreeService.getMeshMapFromNodes(filteredNodes);
-					const modelsList = Object.keys(modelsMap);
-
-					for (let j = 0; j < modelsList.length; j++) {
-						const modelKey = modelsList[j];
-						const meshIds = modelsMap[modelKey].meshes;
-						const [account, model] = modelKey.split('@');
-						Viewer.overrideMeshColor(account, model, meshIds, color);
-					}
-
-					const colorOverride = { models: modelsMap, color, id: group._id };
-					overridedToAdd[group._id] = colorOverride;
-				}
+			for (let j = 0; j < modelsList.length; j++) {
+				const modelKey = modelsList[j];
+				const meshIds = modelsMap[modelKey].meshes;
+				const [account, model] = modelKey.split('@');
+				Viewer.overrideMeshColor(account, model, meshIds, color);
 			}
-		}
+
+			const colorOverride = { models: modelsMap, color, id: group._id };
+			overridedToAdd[group._id] = colorOverride;
+	}
 
 		if (!renderOnly) {
 			yield put(GroupsActions.addToOverrided(overridedToAdd));
