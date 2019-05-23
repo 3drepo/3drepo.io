@@ -59,7 +59,7 @@ export const StyledLinkableField = styled(LinkableField)`
 `;
 
 export const MutableActionsLine = styled(ActionsLine)`
-	& {
+	&&	 {
 		visibility: hidden;
 
 		${/* sc-selector */ Container}:hover & {
@@ -69,7 +69,7 @@ export const MutableActionsLine = styled(ActionsLine)`
 `;
 
 export const FieldLabel = styled(InputLabel)`
-&& {
-	display: block;
-}
+	&& {
+		display: block;
+	}
 `;
