@@ -201,7 +201,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							label="Description"
 							disabled={!canEditBasicProperty}
 							validationSchema={IssueSchema}
-							mutable="true"
+							mutable={!this.isNewIssue}
 						/>
 					)} />
 

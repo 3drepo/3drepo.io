@@ -18,6 +18,8 @@
 import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
+import { LinkableField } from '../linkableField/linkableField.component';
+import { InputLabel } from '@material-ui/core';
 
 export const Container = styled.div`
 	position: relative;
@@ -46,4 +48,28 @@ export const StyledTextField = styled(TextField)`
 			box-sizing: border-box;
 		}
 	}
+`;
+
+export const StyledLinkableField = styled(LinkableField)`
+	&& {
+		display: block;
+		margin: 8px 0;
+		font-size: 14px;
+	}
+`;
+
+export const MutableActionsLine = styled(ActionsLine)`
+	& {
+		visibility: hidden;
+
+		${/* sc-selector */ Container}:hover & {
+			visibility: inherit;
+		}
+	}
+`;
+
+export const FieldLabel = styled(InputLabel)`
+&& {
+	display: block;
+}
 `;

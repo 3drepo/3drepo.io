@@ -21,11 +21,11 @@ import SaveIcon from '@material-ui/icons/Save';
 import CancelIcon from '@material-ui/icons/Cancel';
 import EditIcon from '@material-ui/icons/Edit';
 
-import { Container, ActionsLine, StyledIconButton, StyledTextField } from './textField.styles';
+import { Container, ActionsLine, StyledIconButton,
+		StyledTextField, StyledLinkableField, FieldLabel, MutableActionsLine } from './textField.styles';
 import { Formik, Field } from 'formik';
-import { LinkableField } from '../linkableField/linkableField.component';
 
-interface IProps {
+interface IProps extends TextFieldProps {
 	className?: string;
 	requiredConfirm?: boolean;
 	validationSchema?: any;
@@ -43,7 +43,7 @@ const SmallButton = ({ onClick, children}) => (
 	<StyledIconButton onClick={onClick}>{children}</StyledIconButton>
 );
 
-export class TextField extends React.PureComponent<TextFieldProps & IProps, IState> {
+export class TextField extends React.PureComponent<IProps, IState> {
 	public state = {
 		initialValue: '',
 		currentValue: '',
@@ -123,11 +123,11 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 	)
 
 	public renderMutableButton = () => (
-		<ActionsLine>
+		<MutableActionsLine>
 			<SmallButton onClick={this.setEditable}>
 				<EditIcon fontSize="small" />
 			</SmallButton>
-		</ActionsLine>
+		</MutableActionsLine>
 	)
 
 	public onBlur = (e) => {
@@ -182,7 +182,10 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 						}} />
 					}
 					{!this.isEditMode &&
-						<LinkableField>{this.state.currentValue}</LinkableField>
+						<div>
+							<FieldLabel shrink={true}>{this.props.label}</FieldLabel>
+							<StyledLinkableField>{this.state.currentValue}</StyledLinkableField>
+						</div>
 					}
 					{shouldRenderActions && this.renderActionsLine()}
 					{!this.isEditMode && this.renderMutableButton()}
