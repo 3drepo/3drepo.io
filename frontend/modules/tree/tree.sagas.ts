@@ -17,14 +17,14 @@
 
 // tslint:disable-next-line
 const TreeWorker = require('worker-loader?inline!./tree.worker');
-import { put, takeLatest, call, select, take, all } from 'redux-saga/effects';
+import { put, takeLatest, call, select, take, all, spawn } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
 import { pick, uniq, flatten, values, uniqBy, orderBy } from 'lodash';
 
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { dispatch, getAngularService } from '../../helpers/migration';
+import { dispatch } from '../../helpers/migration';
 import { GroupsActions } from '../groups';
 import { DialogActions } from '../dialog';
 import {
@@ -32,7 +32,6 @@ import {
 	selectNodesIndexesMap,
 	selectNodesVisibilityMap,
 	selectNodesSelectionMap,
-	selectNumberOfInvisibleChildrenMap,
 	selectTreeNodesList,
 	selectNodesBySharedIdsMap,
 	selectTreeNodesIds,
@@ -153,37 +152,30 @@ function* expandToNode(nodeId: string) {
 }
 
 function* setNodeSelection(initialNode: any, selection: any) {
-	const nodesSelectionMap = {...(yield select(selectNodesSelectionMap)) };
+/* 	const nodesSelectionMap = yield select(selectNodesSelectionMap); */
 	const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
-	const nodesIndexesMap = yield select(selectNodesIndexesMap);
-	const treeNodesList = yield select(selectTreeNodesList);
+/* 	const nodesIndexesMap = yield select(selectNodesIndexesMap);
+	const treeNodesList = yield select(selectTreeNodesList); */
 
-	let nodes = [initialNode];
 	const shouldSelect = selection === SELECTION_STATES.SELECTED;
+	const nodes = yield getDeepChildren(initialNode);
+	nodes.unshift(initialNode);
+	const newNodesSelectionMap = {};
 
 	while (nodes.length > 0) {
 		const node = nodes.pop();
 		const currentVisibility = nodesVisibilityMap[node._id];
 
 		if (currentVisibility !== VISIBILITY_STATES.INVISIBLE) {
-			if (!shouldSelect) {
-				nodesSelectionMap[node._id] = SELECTION_STATES.UNSELECTED;
-			} else if (currentVisibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
-				nodesSelectionMap[node._id] = SELECTION_STATES.PARENT_OF_UNSELECTED;
+			if (!shouldSelect || currentVisibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
+				newNodesSelectionMap[node._id] = SELECTION_STATES.UNSELECTED;
 			} else {
-				nodesSelectionMap[node._id] = SELECTION_STATES.SELECTED;
-			}
-
-			// set child nodes selection
-			if (node._id === initialNode._id && node.hasChildren) {
-				const nodeIndex = nodesIndexesMap[initialNode._id];
-				for (let childNumber = 1; childNumber <= node.deepChildrenNumber; childNumber++) {
-					nodes = nodes.concat([treeNodesList[nodeIndex + childNumber]]);
-				}
+				newNodesSelectionMap[node._id] = SELECTION_STATES.SELECTED;
 			}
 		}
 	}
 
+/* 
 	// Set parent nodes selection
 	let currentNode = {...initialNode};
 	for (let i = currentNode.level - 1; i > 0; i--) {
@@ -201,33 +193,37 @@ function* setNodeSelection(initialNode: any, selection: any) {
 		}
 
 		if (hasChildrenWithDifferentState) {
-			nodesSelectionMap[parentNode._id] = SELECTION_STATES.PARENT_OF_UNSELECTED;
+			newNodesSelectionMap[parentNode._id] = SELECTION_STATES.PARENT_OF_UNSELECTED;
 		} else {
-			nodesSelectionMap[parentNode._id] = selection;
+			newNodesSelectionMap[parentNode._id] = selection;
 		}
 
 		currentNode = parentNode;
-	}
+	} */
 
-	yield put(TreeActions.setNodesSelectionMap(nodesSelectionMap));
+	yield put(TreeActions.updateNodesSelectionMap(newNodesSelectionMap));
 }
 
-function* clearCurrentlySelected() {
+function* clear() {
 	yield all([
 		put(ViewerActions.clearHighlights()),
 		put(ViewerActions.setMetadataVisibility(false)),
 		put(BimActions.setActiveMeta(null))
 	]);
+}
 
-	const nodesSelectionMap = yield select(selectNodesSelectionMap);
-	for (const id in nodesSelectionMap) {
-		if (nodesSelectionMap[id] === SELECTION_STATES.UNSELECTED) {
-			continue;
-		}
-		nodesSelectionMap[id] = SELECTION_STATES.UNSELECTED;
+function* clearCurrentlySelected() {
+	yield spawn(clear);
+
+	const selectedNodesIds = yield select(selectSelectedNodesIds);
+	const newNodesSelectionMap = {};
+
+	for (let index = 0; index < selectedNodesIds.length; index++) {
+		const nodeId = selectedNodesIds[index];
+		newNodesSelectionMap[nodeId] = SELECTION_STATES.UNSELECTED;
 	}
 
-	yield put(TreeActions.setNodesSelectionMap(nodesSelectionMap));
+	yield put(TreeActions.updateNodesSelectionMap(newNodesSelectionMap));
 }
 
 function* fetchFullTree({ teamspace, modelId, revision }) {
@@ -311,7 +307,9 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false }) {
 	const isMultiSelectMode = addGroup || removeGroup;
 
 	if (!isMultiSelectMode) {
+		console.time('clearCurrentlySelected (handleNodesClick)')
 		yield clearCurrentlySelected();
+		console.timeEnd('clearCurrentlySelected (handleNodesClick)')
 	}
 
 	if (removeGroup) {
@@ -325,7 +323,10 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false }) {
 		}
 		yield put(TreeActions.deselectNodes(nodesIds));
 	} else {
+		console.time('selectNodes (handleNodesClick)')
 		yield put(TreeActions.selectNodes(nodesIds, skipExpand));
+		console.timeEnd('selectNodes (handleNodesClick)')
+
 	}
 
 	yield TreeActions.getSelectedNodes();
@@ -475,7 +476,6 @@ function* deselectNodes({ nodesIds = [] }) {
 }
 
 function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
-	console.time('SELECT NODES');
 	try {
 		const nodes = yield getNodesByIds(nodesIds);
 		if (nodes.length === 0) {
@@ -492,6 +492,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 		if (!skipExpand) {
 			yield expandToNode(lastNode._id);
 		}
+
 		const meshesByNodes = yield getMeshesByNodes(nodes);
 		const nodesSelectionMap = yield select(selectNodesSelectionMap);
 
@@ -519,7 +520,6 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
 	}
-	console.timeEnd('SELECT NODES');
 }
 
 function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], colour?: number[]}) {
@@ -584,7 +584,6 @@ function* updateParentVisibility(nodes = []) {
 		let hasParentOfInvisibleChild = false;
 
 		for (let i = 0; i < children.length; i++) {
-			console.log('for', i);
 			if (nodesVisibilityMap[children[i]._id] === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
 				hasParentOfInvisibleChild = true;
 				break;
@@ -731,6 +730,7 @@ function* setTreeNodesVisibility({ nodesIds, visibility }) {
 			}
 			parentsToUpdate = [...parents];
 		}
+
 		yield put(TreeActions.setAuxiliaryMaps({ nodesVisibilityMap }));
 
 		yield updateParentVisibility(parentsToUpdate);

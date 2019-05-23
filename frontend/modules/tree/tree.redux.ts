@@ -50,6 +50,7 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	handleBackgroundClick: [],
 	setAuxiliaryMaps: ['auxiliaryMaps'],
 	setNodesSelectionMap: ['nodesSelectionMap'],
+	updateNodesSelectionMap: ['nodesSelectionMap'],
 	showNodesBySharedIds: ['objects'],
 	selectNodes: ['nodesIds', 'skipExpand', 'colour'],
 	selectNodesBySharedIds: ['objects', 'colour'],
@@ -123,6 +124,14 @@ const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) => {
 
 const setNodesSelectionMap = (state = INITIAL_STATE, { nodesSelectionMap }) => {
 	return { ...state, nodesSelectionMap: { ...nodesSelectionMap } };
+};
+
+const updateNodesSelectionMap = (state = INITIAL_STATE, { nodesSelectionMap }) => {
+	const updatedNodesSelectionMap = {
+		...state.nodesSelectionMap,
+		...nodesSelectionMap
+	};
+	return { ...state, nodesSelectionMap: updatedNodesSelectionMap };
 };
 
 const setAuxiliaryMaps = (state = INITIAL_STATE, { auxiliaryMaps }) => {
@@ -213,5 +222,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.ADD_GROUP_TO_SELECTED]: addGroupToSelected,
 	[TreeTypes.REMOVE_GROUP_FROM_SELECTED]: removeGroupFromSelected,
 	[TreeTypes.SET_NODES_SELECTION_MAP]: setNodesSelectionMap,
+	[TreeTypes.UPDATE_NODES_SELECTION_MAP]: updateNodesSelectionMap,
 	[TreeTypes.SET_AUXILIARY_MAPS]: setAuxiliaryMaps
 });
