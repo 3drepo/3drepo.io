@@ -130,6 +130,16 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 		</ActionsLine>
 	)
 
+	public onBlur = (e) => {
+		const currentTarget = e.currentTarget;
+
+		setTimeout(() => {
+			if (!currentTarget.contains(document.activeElement)) {
+				this.declineChange();
+			}
+		}, 0);
+	}
+
 	public render() {
 		const {
 			onBeforeConfirmChange,
@@ -151,7 +161,7 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 				validationSchema={validationSchema}
 				onSubmit={this.saveChange}
 			>
-				<Container className={className}>
+				<Container onBlur={this.onBlur} className={className}>
 					{this.isEditMode &&
 						<Field name={name} render={({ field, form }) => {
 							const fieldValue = requiredConfirm ? currentValue : value;
