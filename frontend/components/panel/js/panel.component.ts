@@ -27,7 +27,6 @@ class PanelController implements ng.IController {
 
 		'PanelService',
 		'EventService',
-		'TreeService'
 	];
 
 	public maxHeightAvailable;
@@ -52,8 +51,7 @@ class PanelController implements ng.IController {
 		private $timeout: ng.ITimeoutService,
 
 		private PanelService: any,
-		private EventService: any,
-		private TreeService: any
+		private EventService: any
 	) {
 		this.unsubscribeStore = subscribe(this, (state) => {
 			const isMetadataVisible = selectIsMetadataVisible(state);
@@ -113,11 +111,6 @@ class PanelController implements ng.IController {
 					this.contentItems = newPanels;
 				}
 			}, true);
-
-		this.$scope.$watch(() => this.TreeService.getHideIfc(),
-			(hideIfc) => {
-				this.PanelService.setHideIfc(hideIfc);
-			});
 	}
 
 	public bindEvents() {

@@ -52,12 +52,14 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	setNodesSelectionMap: ['nodesSelectionMap'],
 	updateNodesSelectionMap: ['nodesSelectionMap'],
 	showNodesBySharedIds: ['objects'],
-	selectNodes: ['nodesIds', 'skipExpand', 'colour'],
+	selectNodes: ['nodesIds', 'skipExpand', 'skipChildren', 'colour'],
 	selectNodesBySharedIds: ['objects', 'colour'],
+	deselectNodesBySharedIds: ['objects'],
 	deselectNodes: ['nodesIds'],
 	isolateNodesBySharedIds: ['objects'],
 	hideNodesBySharedIds: ['objects'],
-	isolateNode: ['id']
+	isolateNode: ['id'],
+	clearCurrentlySelected: []
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
