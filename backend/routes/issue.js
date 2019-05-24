@@ -30,7 +30,7 @@ const config = require("../config.js");
 const ModelSetting = require("../models/modelSetting");
 
 /**
- * @api {get} /:teamspace/:model/issues/:uid.json Find Issue by ID
+ * @api {get} /:teamspace/:model/issues/:uid Find Issue by ID
  * @apiName findIssueById
  * @apiGroup Issues
  *
@@ -74,16 +74,16 @@ const ModelSetting = require("../models/modelSetting");
  * @apiErrorExample
  * HTTP/1.1 404 Not Found
  * {
- *	 "place": "GET /issues/issue_ID.json",
+ *	 "place": "GET /issues/issue_ID",
  *	 "status": 500,
  *	 "message": "Issue not found",
  * }
  *
  */
-router.get("/issues/:uid.json", middlewares.issue.canView, findIssueById);
+router.get("/issues/:uid", middlewares.issue.canView, findIssueById);
 
 /**
- * @api {get} /:teamspace/:model/issues/:uid.json Get Issue Thumbnail
+ * @api {get} /:teamspace/:model/issues/:uid/thumbnail.png Get Issue Thumbnail
  * @apiName findIssueById
  * @apiGroup Issues
  *
@@ -99,7 +99,7 @@ router.get("/issues/:uid.json", middlewares.issue.canView, findIssueById);
 router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 /**
- * @api {get} /:teamspace/:model/issues.json Get all Issues
+ * @api {get} /:teamspace/:model/issues Get all Issues
  * @apiName listIssues
  * @apiGroup Issues
  *
@@ -158,7 +158,7 @@ router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail
  * ]
  *
  */
-router.get("/issues.json", middlewares.issue.canView, listIssues);
+router.get("/issues", middlewares.issue.canView, listIssues);
 
 /**
  * @api {get} /:teamspace/:model/issues.bcfzip Get Issues BCF zip file
@@ -211,7 +211,7 @@ router.get("/issues/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canV
 router.get("/issues/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
 
 /**
- * @api {get} /:teamspace/:model/revision/:rid/issues.json Get all Issues by revision ID
+ * @api {get} /:teamspace/:model/revision/:rid/issues Get all Issues by revision ID
  * @apiName listIssues
  * @apiGroup Issues
  *
@@ -267,7 +267,7 @@ router.get("/issues/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue
  *	}
  * ]
  */
-router.get("/revision/:rid/issues.json", middlewares.issue.canView, listIssues);
+router.get("/revision/:rid/issues", middlewares.issue.canView, listIssues);
 
 /**
  * @api {get} /:teamspace/:model/revision/:rid/issues.bcfzip Get Issues BCF zip file by revision ID
@@ -330,7 +330,7 @@ router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
 /**
- * @api {post} /:teamspace/:model/issues.json Create a new issue.
+ * @api {post} /:teamspace/:model/issues Create a new issue.
  * @apiName  storeIssue
  * @apiGroup Issues
  *
@@ -338,10 +338,10 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  * @apiParam {String} model Model ID
  * @apiDescription Create a new issue. This is the same endpoint as listIssues, but a post request is required.
  */
-router.post("/issues.json", middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {patch} /:teamspace/:model/issues.json/issueId.json Update an Issue.
+ * @api {patch} /:teamspace/:model/issues/:issueId Update an Issue.
  * @apiName  updateIssue
  * @apiGroup Issues
  *
@@ -354,10 +354,10 @@ router.post("/issues.json", middlewares.issue.canCreate, storeIssue, middlewares
  * @apiSuccess (200) {Object} Updated Issue Object.
  *
  */
-router.patch("/issues/:issueId.json", middlewares.issue.canComment, updateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {post} /:teamspace/:model/issuesId.json Store issue based on revision
+ * @api {post} /:teamspace/:model/issuesId Store issue based on revision
  * @apiName storeIssue
  * @apiGroup Issues
  *
@@ -365,10 +365,10 @@ router.patch("/issues/:issueId.json", middlewares.issue.canComment, updateIssue,
  * @apiParam {String} model Model ID
  * @apiParam {String} rid Unique Revision ID to store.
  */
-router.post("/revision/:rid/issues.json", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
+router.post("/revision/:rid/issues", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {put} /:teamspace/:model/revision/"rid/issues/:issueId.json Update issue based on revision
+ * @api {put} /:teamspace/:model/revision/"rid/issues/:issueId Update issue based on revision
  * @apiName updateIssue
  * @apiGroup Issues
  *
@@ -377,7 +377,7 @@ router.post("/revision/:rid/issues.json", middlewares.issue.canCreate, storeIssu
  * @apiParam {String} rid Unique Revision ID to update to.
  * @apiParam {String} issueId Unique Issue ID to update.
  */
-router.patch("/revision/:rid/issues/:issueId.json", middlewares.issue.canComment, updateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 function storeIssue(req, res, next) {
 	const data = req.body;
