@@ -60,7 +60,7 @@ describe("Issues", function () {
 	};
 
 	const bcf = {
-		path: "/../../statics/bcf/example1.bcfzip",
+		path: "/../../statics/bcf/example1.bcf",
 		issue1: "75959a60-8ef1-11e6-8d05-9717c0574272",
 		issue2: "8d46d1b0-8ef1-11e6-8d05-9717c0574272"
 	};
