@@ -94,7 +94,7 @@ describe("Risks", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
+					agent.post(`/${username}/${model}/risks`)
 						.send(risk)
 						.expect(200, function(err, res) {
 							riskId = res.body._id;
@@ -122,7 +122,7 @@ describe("Risks", function () {
 				},
 
 				function(done) {
-					agent.get(`/${username}/${model}/risks/${riskId}.json`).expect(200, function(err, res) {
+					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err, res) {
 
 						expect(res.body.name).to.equal(risk.name);
 						expect(res.body.safetibase_id).to.equal(risk.safetibase_id);
@@ -156,7 +156,7 @@ describe("Risks", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
+					agent.post(`/${username}/${model}/risks`)
 						.send(risk)
 						.expect(200, function(err, res) {
 							riskId = res.body._id;
@@ -165,7 +165,7 @@ describe("Risks", function () {
 				},
 
 				function(done) {
-					agent.get(`/${username}/${model}/risks/${riskId}.json`).expect(200, function(err, res) {
+					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err, res) {
 						expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/risks/${riskId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
 						return done(err);
 					});
@@ -177,7 +177,7 @@ describe("Risks", function () {
 
 			const risk = baseRisk;
 
-			agent.post(`/${username}/${model}/risks.json`)
+			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.RISK_NO_NAME.value);
@@ -189,7 +189,7 @@ describe("Risks", function () {
 
 			const risk = Object.assign({}, baseRisk, {"name":"Risk test", "likelihood":"abc"});
 
-			agent.post(`/${username}/${model}/risks.json`)
+			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.RISK_LIKELIHOOD_INVALID.value);
@@ -201,7 +201,7 @@ describe("Risks", function () {
 
 			const risk = Object.assign({}, baseRisk, {"name":"Risk test", "consequence":"abc"});
 
-			agent.post(`/${username}/${model}/risks.json`)
+			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.RISK_CONSEQUENCE_INVALID.value);
@@ -213,7 +213,7 @@ describe("Risks", function () {
 
 			const risk = Object.assign({}, baseRisk, {"name":"Risk test", "mitigation_status":"abc"});
 
-			agent.post(`/${username}/${model}/risks.json`)
+			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(200, function(err, res) {
 					done(err);
@@ -231,7 +231,7 @@ describe("Risks", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
+					agent.post(`/${username}/${model}/risks`)
 						.send(risk)
 						.expect(200 , function(err, res) {
 							riskId = res.body._id;
@@ -242,7 +242,7 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/risks/${riskId}.json`).expect(200, function(err, res) {
+					agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err, res) {
 						expect(res.body.norm).to.deep.equal(risk.norm);
 						expect(res.body.position).to.deep.equal(risk.position);
 						done(err);
@@ -260,7 +260,7 @@ describe("Risks", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
+					agent.post(`/${username}/${model}/risks`)
 						.send(risk)
 						.expect(200, function(err, res) {
 							riskId = res.body._id;
@@ -268,12 +268,12 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(safetibaseId)
 						.expect(200, done);
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/risks/${riskId}.json`)
+					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.safetbase_id = safetibaseId.safetibase_id);
 							done(err);
@@ -291,7 +291,7 @@ describe("Risks", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
+					agent.post(`/${username}/${model}/risks`)
 						.send(risk)
 						.expect(200, function(err, res) {
 							riskId = res.body._id;
@@ -299,12 +299,12 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(associatedActivity)
 						.expect(200, done);
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/risks/${riskId}.json`)
+					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.associated_activity = associatedActivity.associated_activity);
 							done(err);
@@ -322,7 +322,7 @@ describe("Risks", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
+					agent.post(`/${username}/${model}/risks`)
 						.send(risk)
 						.expect(200, function(err, res) {
 							riskId = res.body._id;
@@ -330,12 +330,12 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(description)
 						.expect(200, done);
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/risks/${riskId}.json`)
+					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.desc = description.desc);
 							done(err);
@@ -353,7 +353,7 @@ describe("Risks", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
+					agent.post(`/${username}/${model}/risks`)
 						.send(risk)
 						.expect(200, function(err, res) {
 							riskId = res.body._id;
@@ -361,12 +361,12 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(assignedRoles)
 						.expect(200, done);
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/risks/${riskId}.json`)
+					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.assigned_roles).to.deep.equal(assignedRoles.assigned_roles);
 							done(err);
@@ -384,7 +384,7 @@ describe("Risks", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
+					agent.post(`/${username}/${model}/risks`)
 						.send(risk)
 						.expect(200, function(err, res) {
 							riskId = res.body._id;
@@ -392,12 +392,12 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(category)
 						.expect(200, done);
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/risks/${riskId}.json`)
+					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.category = category.category);
 							expect(res.body.comments[0].action).to.deep.equal({
@@ -419,7 +419,7 @@ describe("Risks", function () {
 			const data = { associated_activity: "abc123"};
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
+					agent.post(`/${username}/${model}/risks`)
 						.send(risk)
 						.expect(200 , function(err, res) {
 							riskId = res.body._id;
@@ -428,17 +428,17 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send({ comment : "hello world"})
 						.expect(200 , done);
 				},
 				function(done) {
-					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(data)
 						.expect(200, done);
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/risks/${riskId}.json`)
+					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.comments[0].sealed).to.equal(true);
 							done(err);
@@ -456,7 +456,7 @@ describe("Risks", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
+					agent.post(`/${username}/${model}/risks`)
 						.send(risk)
 						.expect(200, function(err, res) {
 							riskId = res.body._id;
@@ -464,12 +464,12 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(likelihood)
 						.expect(200, done);
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/risks/${riskId}.json`)
+					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.likelihood).to.equal(likelihood.likelihood);
 							done(err);
@@ -487,7 +487,7 @@ describe("Risks", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
+					agent.post(`/${username}/${model}/risks`)
 						.send(risk)
 						.expect(200, function(err, res) {
 							riskId = res.body._id;
@@ -495,12 +495,12 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(consequence)
 						.expect(200, done);
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/risks/${riskId}.json`)
+					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.consequence).to.equal(consequence.consequence);
 							done(err);
@@ -518,7 +518,7 @@ describe("Risks", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
+					agent.post(`/${username}/${model}/risks`)
 						.send(risk)
 						.expect(200, function(err, res) {
 							riskId = res.body._id;
@@ -526,12 +526,12 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(pin)
 						.expect(200, done);
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/risks/${riskId}.json`)
+					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.position).to.deep.equal(pin.position);
 							done(err);
@@ -550,7 +550,7 @@ describe("Risks", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
+					agent.post(`/${username}/${model}/risks`)
 						.send(risk)
 						.expect(200, function(err, res) {
 							riskId = res.body._id;
@@ -558,12 +558,12 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(mitigationStatus)
 						.expect(200, done);
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/risks/${riskId}.json`)
+					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.mitigation_status).to.equal(mitigationStatus.mitigation_status);
 							done(err);
@@ -581,7 +581,7 @@ describe("Risks", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/risks.json`)
+					agent.post(`/${username}/${model}/risks`)
 						.send(risk)
 						.expect(200, function(err, res) {
 							riskId = res.body._id;
@@ -589,12 +589,12 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
 						.send(mitigation)
 						.expect(200, done);
 				},
 				function(done) {
-					agent.get(`/${username}/${model}/risks/${riskId}.json`)
+					agent.get(`/${username}/${model}/risks/${riskId}`)
 						.expect(200, function(err, res) {
 							expect(res.body.mitigation_desc).to.equal(mitigation.mitigation_desc);
 							done(err);
@@ -611,7 +611,7 @@ describe("Risks", function () {
 
 				const risk = Object.assign({"name":"Risk test"}, baseRisk);
 
-				agent.post(`/${username}/${model}/risks.json`)
+				agent.post(`/${username}/${model}/risks`)
 					.send(risk)
 					.expect(200 , function(err, res) {
 						riskId = res.body._id;
@@ -641,13 +641,13 @@ describe("Risks", function () {
 
 				async.series([
 					function(done) {
-						agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+						agent.patch(`/${username}/${model}/risks/${riskId}`)
 							.send(comment)
 							.expect(200 , done);
 					},
 
 					function(done) {
-						agent.get(`/${username}/${model}/risks/${riskId}.json`).expect(200, function(err , res) {
+						agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err , res) {
 							comment.viewpoint.guid = res.body.comments[0].viewpoint.guid;
 
 							expect(res.body.comments.length).to.equal(1);
@@ -668,13 +668,13 @@ describe("Risks", function () {
 
 				async.series([
 					function(done) {
-						agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+						agent.patch(`/${username}/${model}/risks/${riskId}`)
 							.send(comment)
 							.expect(200 , done);
 					},
 
 					function(done) {
-						agent.get(`/${username}/${model}/risks/${riskId}.json`).expect(200, function(err , res) {
+						agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err , res) {
 
 							expect(res.body.comments.length).to.equal(1);
 							expect(res.body.comments[0].comment).to.equal(comment.comment);
@@ -691,7 +691,7 @@ describe("Risks", function () {
 
 				const comment = { comment: "" };
 
-				agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+				agent.patch(`/${username}/${model}/risks/${riskId}`)
 					.send(comment)
 					.expect(400 , function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_NO_TEXT.value);
@@ -703,7 +703,7 @@ describe("Risks", function () {
 
 				const comment = { commentIndex: 0, delete: true };
 
-				agent.patch(`/${username}/${model}/risks/${riskId}.json`)
+				agent.patch(`/${username}/${model}/risks/${riskId}`)
 					.send(comment)
 					.expect(200 , function(err, res) {
 						done(err);
@@ -715,7 +715,7 @@ describe("Risks", function () {
 				const invalidId = "00000000-0000-0000-0000-000000000000";
 				const comment = { comment: "hello world" };
 
-				agent.patch(`/${username}/${model}/risks/${invalidId}.json`)
+				agent.patch(`/${username}/${model}/risks/${invalidId}`)
 					.send(comment)
 					.expect(404 , function(err, res) {
 						done(err);
