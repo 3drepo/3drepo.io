@@ -1131,17 +1131,19 @@ schema.methods.addTeamMember = function (user, job, permissions) {
 				if (!userEntry) {
 					return Promise.reject(responseCodes.USER_NOT_FOUND);
 				}
+
+				if (!job) {
+					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_JOB);
+				}
+
 				if (userEntry.isMemberOfTeamspace(this.user)) {
 					return Promise.reject(responseCodes.USER_ALREADY_ASSIGNED);
 				}
 
 				return Role.grantTeamSpaceRoleToUser(user, this.user).then(() => {
 					const promises = [];
-					if (job) {
-						promises.push(Job.addUserToJob(this.user, user, job));
-					} else {
-						return Promise.reject(responseCodes.USER_NOT_ASSIGNED_JOB);
-					}
+					promises.push(Job.addUserToJob(this.user, user, job));
+
 					if (permissions && permissions.length) {
 						promises.push(this.customData.permissions.add({user, permissions}));
 					}
