@@ -159,7 +159,6 @@ export class Users extends React.PureComponent<IProps, IState> {
 					value: user.job,
 					items: jobs,
 					itemTemplate: JobItem,
-					placeholder: 'Unassigned',
 					onChange: this.handleChange(user, 'job')
 				},
 				{

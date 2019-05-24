@@ -87,14 +87,6 @@ schema.statics.findByUser = function(teamspace, user) {
 	return this.findOne({account: teamspace}, {users: user});
 };
 
-schema.statics.removeUserFromJobs = function(teamspace, user) {
-	const User = require("./user");
-	return User.teamspaceMemberCheck(teamspace, user).then(() => {
-		return Job.removeUserFromAnyJob(teamspace, user);
-	});
-
-};
-
 schema.statics.addUserToJob = function(teamspace, user, jobName) {
 	// Check if user is member of teamspace
 	const User = require("./user");
