@@ -32,6 +32,7 @@ import {
 	Property,
 	PropertyWrapper
 } from './revisionsDialog.styles';
+import { DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 
 interface IProps {
 	fetchModelRevisions: (teamspace, modelId) => void;
@@ -88,7 +89,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 												</Property>
 											</PropertyWrapper>
 											<Property>
-												<DateTime value={revision.timestamp} format={'HH:mm DD MMM'} />
+												<DateTime value={revision.timestamp} format={DATE_TIME_FORMAT} />
 											</Property>
 										</Row>
 										<Description>{revision.desc ? revision.desc : '(no description)'}

@@ -48,7 +48,7 @@ import {
 } from './filterPanel.styles';
 import { compareStrings } from '../../../helpers/searching';
 import { renderWhenTrue } from '../../../helpers/rendering';
-import { formatDate } from '../../../services/formatting/formatDate';
+import { formatShortDate } from '../../../services/formatting/formatDate';
 
 export const DATA_TYPES = {
 	UNDEFINED: 1,
@@ -193,14 +193,14 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 	public onSelectDateFilter = (dateFilter, child) => {
 		dateFilter.label = child.label;
-		dateFilter.value.label = formatDate(child.date, 'DD/MM/YYYY');
+		dateFilter.value.label = formatShortDate(child.date);
 		const selectedFilterIndex = this.state.selectedFilters.findIndex((filter) => filter.value.value === child.value);
 
 		if (selectedFilterIndex > -1) {
 			this.setState((prevState) => {
 				const newFilters = [...prevState.selectedFilters];
 				newFilters[selectedFilterIndex].label = child.label;
-				newFilters[selectedFilterIndex].value.label = formatDate(child.date, 'DD/MM/YYYY');
+				newFilters[selectedFilterIndex].value.label = formatShortDate(child.date);
 				return newFilters as any;
 			}, this.handleFiltersChange);
 		} else {

@@ -22,7 +22,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import { RevisionsSelect } from '../revisionsSelect/revisionsSelect.component';
 import { Container, ModelData, Name, Revisions, CurrentRevision, CompareIconWrapper } from './compareDiffItem.styles';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { formatDate } from '../../../../../../services/formatting/formatDate';
+import { formatShortDate } from '../../../../../../services/formatting/formatDate';
 
 interface IProps {
 	className?: string;
@@ -42,7 +42,7 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 	};
 
 	public get currentRevisionName() {
-		return this.props.baseRevision.tag || formatDate(this.props.baseRevision.timestamp, 'DD/MM/YYYY');
+		return this.props.baseRevision.tag || formatShortDate(this.props.baseRevision.timestamp);
 	}
 
 	public renderRevisionsSettings = renderWhenTrue(() => (

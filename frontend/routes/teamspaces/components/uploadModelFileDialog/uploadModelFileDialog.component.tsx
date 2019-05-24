@@ -31,7 +31,7 @@ import { FileInputField } from './components/fileInputField.component';
 import { unitsMap } from '../../../../constants/model-parameters';
 
 import { ModelName, ModelInfo, StyledDialogActions, CancelButton } from './uploadModelFileDialog.styles';
-import { formatDate } from '../../../../services/formatting/formatDate';
+import { formatNamedMonthDate } from '../../../../services/formatting/formatDate';
 
 const UploadSchema = Yup.object().shape({
 	revisionName: schema.revisionName,
@@ -90,7 +90,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		}
 		const lastRevision = revisions[0];
 		const info = `#Revisions: ${revisions.length}`;
-		const formatedDate = formatDate(lastRevision.timestamp, 'DD MMM YYYY');
+		const formatedDate = formatNamedMonthDate(lastRevision.timestamp);
 
 		if (lastRevision.tag) {
 			return `${info}, Most Recent: ${ lastRevision.tag } - ${ formatedDate }`;

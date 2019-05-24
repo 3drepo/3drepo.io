@@ -9,7 +9,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { GROUPS_TYPES_LIST, GROUPS_TYPES } from '../../../../../../constants/groups';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { FieldsRow, StyledFormControl, StyledTextField, Description, LongLabel } from './groupDetails.styles';
-import { formatDate } from '../../../../../../services/formatting/formatDate';
+import { formatDateTime } from '../../../../../../services/formatting/formatDate';
 
 const GroupSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
@@ -126,7 +126,7 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 						/>
 						<StyledTextField
 							label="Last updated"
-							value={formatDate(updateDate, 'HH:mm DD MMM')}
+							value={formatDateTime(updateDate)}
 							disabled
 						/>
 						<StyledFormControl>

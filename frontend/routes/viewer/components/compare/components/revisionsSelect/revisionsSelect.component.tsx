@@ -20,7 +20,7 @@ import { keyBy } from 'lodash';
 import { DateTime } from '../../../../../components/dateTime/dateTime.component';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { SelectField, MenuItem, Name, Date } from './revisionsSelect.styles';
-import { formatDate } from '../../../../../../services/formatting/formatDate';
+import { formatShortDate, NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
 
 interface IProps {
 	revisions: any[];
@@ -114,12 +114,12 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 	}
 
 	private getRevisionName = (revision) => {
-		return revision.tag || formatDate(revision.timestamp, 'DD/MM/YYYY');
+		return revision.tag || formatShortDate(revision.timestamp);
 	}
 
 	private renderValue = () => (<Name>{this.value}</Name>);
 
 	private renderName = (revision) => (<Name>{this.getRevisionName(revision)}</Name>);
 
-	private renderDate = (timestamp) => (<Date><DateTime value={timestamp} format="DD MMM YYYY" /></Date>);
+	private renderDate = (timestamp) => (<Date><DateTime value={timestamp} format={NAMED_MONTH_DATE_FORMAT} /></Date>);
 }
