@@ -72,7 +72,7 @@ describe("Notifications", function() {
 	};
 
 	const updateIssue = (modelId, issue , id) => next => {
-		return agents.teamSpace1.patch(`/${account}/${modelId}/issues/${id}.json`)
+		return agents.teamSpace1.patch(`/${account}/${modelId}/issues/${id}`)
 			.send(issue)
 			.expect(200 , function(err, res) {
 				next(err);
@@ -126,7 +126,7 @@ describe("Notifications", function() {
 			const issue = Object.assign({"name":(name || "Assign notification test") }, baseIssue);
 			const issueAssignJobA = Object.assign({}, issue, {"assigned_roles":["jobA"]});
 			async.series([next =>
-				agents.teamSpace1.post(`/${account}/${modelId}/issues.json`)
+				agents.teamSpace1.post(`/${account}/${modelId}/issues`)
 					.send(issue)
 					.expect(200 , function(err, res) {
 						issuesId.push(res.body._id);
@@ -378,7 +378,7 @@ next();
 					expect(notifications).to.be.an("array").and.to.have.length(0);
 					next();
 				},
-				next => agents.teamSpace1.post(`/${account}/${model}/issues.json`)
+				next => agents.teamSpace1.post(`/${account}/${model}/issues`)
 					.send(issueJobA)
 					.expect(200, next),
 				fetchNotification(agents.adminTeamspace1JobA),
@@ -411,7 +411,7 @@ next();
 		};
 
 		const createIssue = (modelId, name) => done => {
-			agents.teamSpace1.post(`/${account}/${modelId}/issues.json`)
+			agents.teamSpace1.post(`/${account}/${modelId}/issues`)
 				.send({...issue, name})
 				.expect(200 , function(err, res) {
 					issuesId.push(res.body._id);
