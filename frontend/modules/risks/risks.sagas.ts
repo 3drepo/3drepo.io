@@ -41,6 +41,7 @@ import {
 import { RisksActions, RisksTypes } from './risks.redux';
 import { NEW_PIN_ID } from '../../constants/viewer';
 import { PIN_COLORS } from '../../styles';
+import { selectIfcSpacesHidden, TreeActions } from '../tree';
 
 export function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));
@@ -107,6 +108,7 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 		yield Viewer.setPinDropMode(false);
 
 		const myJob = yield select(selectMyJob);
+		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 
 		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
 			Viewer.getCurrentViewpoint({ teamspace, model }),
@@ -115,11 +117,9 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 			myJob
 		]);
 
-		const TreeService = getAngularService('TreeService') as any;
 		const AnalyticService = getAngularService('AnalyticService') as any;
 
-		viewpoint.hideIfc = TreeService.getHideIfc();
-
+		viewpoint.hideIfc = ifcSpacesHidden;
 		riskData.rev_id = revision;
 
 		if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
@@ -328,87 +328,88 @@ const getRiskGroup = async (risk, groupId, revision) => {
 	return data;
 };
 
-const showMultipleGroups = async (risk, revision) => {
-	const TreeService = getAngularService('TreeService') as any;
+export function* showMultipleGroups({risk, revision}) {
+	try {
+		const hasViewpointGroups = !isEmpty(pick(risk.viewpoint, [
+			'highlighted_group_id',
+			'hidden_group_id',
+			'shown_group_id'
+		]));
 
-	const hasViewpointGroups = !isEmpty(pick(risk.viewpoint, [
-		'highlighted_group_id',
-		'hidden_group_id',
-		'shown_group_id'
-	]));
+		let objects = {} as { hidden: any[], shown: any[], objects: any[] };
 
-	let objects = {} as { hidden: any[], shown: any[], objects: any[] };
+		if (hasViewpointGroups) {
+			const [highlightedGroupData, hiddenGroupData, shownGroupData] = yield Promise.all([
+				getRiskGroup(risk, risk.viewpoint.highlighted_group_id, revision),
+				getRiskGroup(risk, risk.viewpoint.hidden_group_id, revision),
+				getRiskGroup(risk, risk.viewpoint.shown_group_id, revision)
+			]) as any;
 
-	if (hasViewpointGroups) {
-		const [highlightedGroupData, hiddenGroupData, shownGroupData] = await Promise.all([
-			getRiskGroup(risk, risk.viewpoint.highlighted_group_id, revision),
-			getRiskGroup(risk, risk.viewpoint.hidden_group_id, revision),
-			getRiskGroup(risk, risk.viewpoint.shown_group_id, revision)
-		]) as any;
+			if (hiddenGroupData) {
+				objects.hidden = hiddenGroupData.objects;
+			}
 
-		if (hiddenGroupData) {
-			objects.hidden = hiddenGroupData.objects;
+			if (shownGroupData) {
+				objects.shown = shownGroupData.objects;
+			}
+
+			if (highlightedGroupData) {
+				objects.objects = highlightedGroupData.objects;
+			}
+		} else {
+			const hasViewpointDefaultGroup = risk.viewpoint.group_id;
+			const groupId = hasViewpointDefaultGroup ? risk.viewpoint.group_id : risk.group_id;
+			const groupData = yield getRiskGroup(risk, groupId, revision);
+
+			if (groupData.hiddenObjects && !risk.viewpoint.group_id) {
+				groupData.hiddenObjects = null;
+				Cache.add('risk.group', groupId, groupData);
+			}
+
+			objects = groupData;
 		}
 
-		if (shownGroupData) {
-			objects.shown = shownGroupData.objects;
+		if (objects.hidden) {
+			yield put(TreeActions.hideNodesBySharedIds(objects.hidden));
 		}
 
-		if (highlightedGroupData) {
-			objects.objects = highlightedGroupData.objects;
-		}
-	} else {
-		const hasViewpointDefaultGroup = risk.viewpoint.group_id;
-		const groupId = hasViewpointDefaultGroup ? risk.viewpoint.group_id : risk.group_id;
-		const groupData = await getRiskGroup(risk, groupId, revision);
-
-		if (groupData.hiddenObjects && !risk.viewpoint.group_id) {
-			groupData.hiddenObjects = null;
-			Cache.add('risk.group', groupId, groupData);
+		if (objects.shown) {
+			yield put(TreeActions.isolateNodesBySharedIds(objects.shown));
 		}
 
-		objects = groupData;
+		if (objects.objects && objects.objects.length > 0) {
+			yield put(TreeActions.selectNodesBySharedIds(objects.objects));
+			window.dispatchEvent(new Event('resize'));
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('show', 'multiple groups', error));
 	}
-
-	if (objects.hidden) {
-		TreeService.hideNodesBySharedIds(objects.hidden);
-	}
-
-	if (objects.shown) {
-		TreeService.isolateNodesBySharedIds(objects.shown);
-	}
-
-	if (objects.objects && objects.objects.length > 0) {
-		TreeService.selectedIndex = undefined;
-		await TreeService.selectNodesBySharedIds(objects.objects);
-		window.dispatchEvent(new Event('resize'));
-	}
-};
+}
 
 export function* focusOnRisk({ risk, revision }) {
 	try {
 		yield Viewer.isViewerReady();
 		yield put(RisksActions.renderPins());
-		const TreeService = getAngularService('TreeService') as any;
 
 		// Remove highlight from any multi objects
 		Viewer.highlightObjects([]);
-		TreeService.clearCurrentlySelected();
+		yield put(TreeActions.clearCurrentlySelected());
 
 		const hasViewpoint = risk.viewpoint;
 		const hasHiddenOrShownGroup = hasViewpoint && (risk.viewpoint.hidden_group_id || risk.viewpoint.shown_group_id);
 
 		// Reset object visibility
 		if (hasViewpoint && risk.viewpoint.hideIfc) {
-			TreeService.setHideIfc(risk.viewpoint.hideIfc);
+			yield put(TreeActions.setIfcSpacesHidden(risk.viewpoint.hideIfc));
 		}
-		TreeService.showAllTreeNodes(!hasHiddenOrShownGroup);
+
+		yield put(TreeActions.showAllNodes(!hasHiddenOrShownGroup));
 
 		const hasViewpointGroup = hasViewpoint && (risk.viewpoint.highlighted_group_id || risk.viewpoint.group_id);
 		const hasGroup = risk.group_id;
 
 		if (hasViewpointGroup || hasGroup || hasHiddenOrShownGroup) {
-			yield showMultipleGroups(risk, revision);
+			yield put(RisksActions.showMultipleGroups(risk, revision));
 		}
 
 		const { account, model, viewpoint } = risk;
@@ -655,4 +656,5 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_COMMENTS_CHANGES, unsubscribeOnRiskCommentsChanges);
 	yield takeLatest(RisksTypes.UPDATE_NEW_RISK, updateNewRisk);
 	yield takeLatest(RisksTypes.SET_FILTERS, setFilters);
+	yield takeLatest(RisksTypes.SHOW_MULTIPLE_GROUPS, showMultipleGroups);
 }

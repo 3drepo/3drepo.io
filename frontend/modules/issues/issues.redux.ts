@@ -56,7 +56,8 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	updateNewIssue: ['newIssue'],
 	setFilters: ['filters'],
 	showCloseInfo: ['issueId'],
-	resetComponentState: []
+	resetComponentState: [],
+	showMultipleGroups: ['issue', 'revision']
 }, { prefix: 'ISSUES_' });
 
 export const INITIAL_STATE = {
