@@ -191,8 +191,7 @@ export function* deleteGroups({ teamspace, modelId, groups }) {
 export function* isolateGroup({ group }) {
 	try {
 		yield put(GroupsActions.clearSelectionHighlights());
-		const TreeService = getAngularService('TreeService') as any;
-		TreeService.isolateNodesBySharedIds(group.objects);
+		yield put(TreeActions.isolateNodesBySharedIds(group.objects));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('delete', 'groups', error));
 	}
