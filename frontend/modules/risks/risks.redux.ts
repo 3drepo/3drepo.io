@@ -53,7 +53,8 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	updateNewRisk: ['newRisk'],
 	setFilters: ['filters'],
 	showCloseInfo: ['riskId'],
-	resetComponentState: []
+	resetComponentState: [],
+	showMultipleGroups: ['risk', 'revision']
 }, { prefix: 'RISKS/' });
 
 export interface IRisksComponentState {

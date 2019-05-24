@@ -63,7 +63,8 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	attachResourcesSuccess: ['resources', 'issueId'],
 	updateResourcesSuccess: ['resourcesIds', 'updates', 'issueId' ],
 	resetComponentState: [],
-	updateIssuePin: ['issue']
+	updateIssuePin: ['issue'],
+	showMultipleGroups: ['issue', 'revision']
 }, { prefix: 'ISSUES_' });
 
 export const INITIAL_STATE = {

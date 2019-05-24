@@ -16,7 +16,7 @@
  */
 
 import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { differenceBy, isEmpty, omit, pick, map, groupBy } from 'lodash';
+import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 import * as filesize from 'filesize';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
@@ -45,6 +45,7 @@ import { NEW_PIN_ID } from '../../constants/viewer';
 import { selectTopicTypes, selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { prepareResources } from '../../helpers/resources';
 import { EXTENSION_RE } from '../../constants/resources';
+import { selectIfcSpacesHidden, TreeActions } from '../tree';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -133,6 +134,7 @@ export function* saveIssue({ teamspace, model, issueData, revision, finishSubmit
 		const pinData = Viewer.getPinData();
 		yield Viewer.setPinDropMode(false);
 		const myJob = yield select(selectMyJob);
+		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 
 		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
 			Viewer.getCurrentViewpoint({ teamspace, model }),
@@ -141,11 +143,9 @@ export function* saveIssue({ teamspace, model, issueData, revision, finishSubmit
 			myJob
 		]);
 
-		const TreeService = getAngularService('TreeService') as any;
 		const AnalyticService = getAngularService('AnalyticService') as any;
 
-		viewpoint.hideIfc = TreeService.getHideIfc();
-
+		viewpoint.hideIfc = ifcSpacesHidden;
 		issueData.rev_id = revision;
 
 		if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
@@ -374,87 +374,88 @@ const getIssueGroup = async (issue, groupId, revision) => {
 	return data;
 };
 
-const showMultipleGroups = async (issue, revision) => {
-	const TreeService = getAngularService('TreeService') as any;
+export function* showMultipleGroups({issue, revision}) {
+	try {
+		const hasViewpointGroups = !isEmpty(pick(issue.viewpoint, [
+			'highlighted_group_id',
+			'hidden_group_id',
+			'shown_group_id'
+		]));
 
-	const hasViewpointGroups = !isEmpty(pick(issue.viewpoint, [
-		'highlighted_group_id',
-		'hidden_group_id',
-		'shown_group_id'
-	]));
+		let objects = {} as { hidden: any[], shown: any[], objects: any[] };
 
-	let objects = {} as { hidden: any[], shown: any[], objects: any[] };
+		if (hasViewpointGroups) {
+			const [highlightedGroupData, hiddenGroupData, shownGroupData] = yield Promise.all([
+				getIssueGroup(issue, issue.viewpoint.highlighted_group_id, revision),
+				getIssueGroup(issue, issue.viewpoint.hidden_group_id, revision),
+				getIssueGroup(issue, issue.viewpoint.shown_group_id, revision)
+			]) as any;
 
-	if (hasViewpointGroups) {
-		const [highlightedGroupData, hiddenGroupData, shownGroupData] = await Promise.all([
-			getIssueGroup(issue, issue.viewpoint.highlighted_group_id, revision),
-			getIssueGroup(issue, issue.viewpoint.hidden_group_id, revision),
-			getIssueGroup(issue, issue.viewpoint.shown_group_id, revision)
-		]) as any;
+			if (hiddenGroupData) {
+				objects.hidden = hiddenGroupData.objects;
+			}
 
-		if (hiddenGroupData) {
-			objects.hidden = hiddenGroupData.objects;
+			if (shownGroupData) {
+				objects.shown = shownGroupData.objects;
+			}
+
+			if (highlightedGroupData) {
+				objects.objects = highlightedGroupData.objects;
+			}
+		} else {
+			const hasViewpointDefaultGroup = issue.viewpoint.group_id;
+			const groupId = hasViewpointDefaultGroup ? issue.viewpoint.group_id : issue.group_id;
+			const groupData = yield getIssueGroup(issue, groupId, revision);
+
+			if (groupData.hiddenObjects && !issue.viewpoint.group_id) {
+				groupData.hiddenObjects = null;
+				Cache.add('issue.group', groupId, groupData);
+			}
+
+			objects = groupData;
 		}
 
-		if (shownGroupData) {
-			objects.shown = shownGroupData.objects;
+		if (objects.hidden) {
+			yield put(TreeActions.hideNodesBySharedIds(objects.hidden));
 		}
 
-		if (highlightedGroupData) {
-			objects.objects = highlightedGroupData.objects;
-		}
-	} else {
-		const hasViewpointDefaultGroup = issue.viewpoint.group_id;
-		const groupId = hasViewpointDefaultGroup ? issue.viewpoint.group_id : issue.group_id;
-		const groupData = await getIssueGroup(issue, groupId, revision);
-
-		if (groupData.hiddenObjects && !issue.viewpoint.group_id) {
-			groupData.hiddenObjects = null;
-			Cache.add('issue.group', groupId, groupData);
+		if (objects.shown) {
+			yield put(TreeActions.isolateNodesBySharedIds(objects.shown));
 		}
 
-		objects = groupData;
+		if (objects.objects && objects.objects.length > 0) {
+			yield put(TreeActions.selectNodesBySharedIds(objects.objects));
+			window.dispatchEvent(new Event('resize'));
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('show', 'multiple groups', error));
 	}
-
-	if (objects.hidden) {
-		TreeService.hideNodesBySharedIds(objects.hidden);
-	}
-
-	if (objects.shown) {
-		TreeService.isolateNodesBySharedIds(objects.shown);
-	}
-
-	if (objects.objects && objects.objects.length > 0) {
-		TreeService.selectedIndex = undefined;
-		await TreeService.selectNodesBySharedIds(objects.objects);
-		window.dispatchEvent(new Event('resize'));
-	}
-};
+}
 
 export function* focusOnIssue({ issue, revision }) {
 	try {
 		yield Viewer.isViewerReady();
 		yield put(IssuesActions.renderPins());
-		const TreeService = getAngularService('TreeService') as any;
 
 		// Remove highlight from any multi objects
-		Viewer.highlightObjects([]);
-		TreeService.clearCurrentlySelected();
+		yield Viewer.highlightObjects([]);
+		yield put(TreeActions.clearCurrentlySelected());
 
 		const hasViewpoint = issue.viewpoint;
 		const hasHiddenOrShownGroup = hasViewpoint && (issue.viewpoint.hidden_group_id || issue.viewpoint.shown_group_id);
 
 		// Reset object visibility
 		if (hasViewpoint && issue.viewpoint.hideIfc) {
-			TreeService.setHideIfc(issue.viewpoint.hideIfc);
+			yield put(TreeActions.setIfcSpacesHidden(issue.viewpoint.hideIfc));
 		}
-		TreeService.showAllTreeNodes(!hasHiddenOrShownGroup);
+
+		yield put(TreeActions.showAllNodes(!hasHiddenOrShownGroup));
 
 		const hasViewpointGroup = hasViewpoint && (issue.viewpoint.highlighted_group_id || issue.viewpoint.group_id);
 		const hasGroup = issue.group_id;
 
 		if (hasViewpointGroup || hasGroup || hasHiddenOrShownGroup) {
-			yield showMultipleGroups(issue, revision);
+			yield put(IssuesActions.showMultipleGroups(issue, revision));
 		}
 
 		const { account, model, viewpoint } = issue;
@@ -847,4 +848,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.ATTACH_FILE_RESOURCES, attachFileResources);
 	yield takeLatest(IssuesTypes.ATTACH_LINK_RESOURCES, attachLinkResources);
 	yield takeLatest(IssuesTypes.UPDATE_ISSUE_PIN, updateIssuePin);
+	yield takeLatest(IssuesTypes.SHOW_MULTIPLE_GROUPS, showMultipleGroups);
 }
