@@ -662,7 +662,7 @@ export class TreeService {
 		this.setTreeNodeStatus(nodes, this.VISIBILITY_STATES.visible);
 
 		const nodesIds = nodes.map(({ _id }) => _id);
-		dispatch(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.VISIBLE));
+		//dispatch(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.VISIBLE));
 
 		// this.updateModelVisibility();
 		// action handleMeshesVisibility
@@ -675,7 +675,7 @@ export class TreeService {
 		this.setTreeNodeStatus([this.allNodes], this.VISIBILITY_STATES.invisible);
 
 		const nodesIds = this.allNodes.map(({ _id }) => _id);
-		dispatch(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.INVISIBLE));
+		//dispatch(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.INVISIBLE));
 
 		if (updateModel) {
 			// this.updateModelVisibility();

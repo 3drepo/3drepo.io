@@ -1,5 +1,5 @@
 import { flattenDeep } from 'lodash';
-import { VISIBILITY_STATES, SELECTION_STATES, BACKEND_VISIBILITY_STATES } from '../../constants/tree';
+import { VISIBILITY_STATES, SELECTION_STATES, BACKEND_VISIBILITY_STATES } from '../../../constants/tree';
 
 interface INode {
 	_id: string;
@@ -132,7 +132,7 @@ self.addEventListener('message', ({ data }) => {
 	const { data: nodesList } = getFlattenNested(mainTree);
 	const meshesByModelId = getMeshesByModelId(modelsWithMeshes);
 	const auxiliaryMaps = getAuxiliaryMaps(nodesList);
-	const result = { data: { nodesList, meshesByModelId, ...auxiliaryMaps }};
+	const result = { data: { nodesList, meshesByModelId, ...auxiliaryMaps } };
 	console.timeEnd('TREE PROCESSING');
 
 	// @ts-ignore

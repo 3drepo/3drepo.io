@@ -91,6 +91,9 @@ export function* highlightGroup({ group }) {
 
 		if (group.objects && group.objects.length > 0) {
 			yield put(TreeActions.showNodesBySharedIds(group.objects));
+
+			// ^ dzieje się szybciej i nie resolvuje przed tym co na dole,
+			// przez co promise dla tego na dole zwraca odpowiedź tego powyej
 			yield put(TreeActions.selectNodesBySharedIds(group.objects, color));
 			// TODO Do we need this? 
 			// yield put(TreeActions.getSelectedNodes());
