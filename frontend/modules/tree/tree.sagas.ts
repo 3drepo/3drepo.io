@@ -40,8 +40,9 @@ import {
 	selectSelectedNodesIds,
 	selectUnselectedNodesIds,
 	selectExpandedNodesMap,
-	selectNodesDefaultVisibilityMap,
 	getSelectNodesByIds,
+	getSelectNodesIdsFromSharedIds,
+	getSelectDeepChildren
 } from './tree.selectors';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -67,18 +68,6 @@ const bindToWorker = (worker, onResponse = Function.prototype, onError = Functio
 
 	return worker;
 };
-
-function* getNodesIdsFromSharedIds(objects = []) {
-	if (!objects.length) {
-		return [];
-	}
-	const nodesBySharedIds = yield select(selectNodesBySharedIdsMap);
-
-	const objectsSharedIds = objects.map(({ shared_ids }) => shared_ids);
-	const sharedIds = flatten(objectsSharedIds) as string[];
-	const nodesIdsBySharedIds = values(pick(nodesBySharedIds, sharedIds));
-	return uniq(nodesIdsBySharedIds);
-}
 
 function* expandToNode(nodeId: string) {
 	if (nodeId) {
@@ -230,7 +219,7 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = f
 }
 
 function* handleNodesClickBySharedIds({ nodesIds }) {
-	const nodes = yield getNodesIdsFromSharedIds(nodesIds);
+	const nodes = yield select(getSelectNodesByIds(nodesIds));
 	yield put(TreeActions.handleNodesClick(nodes));
 }
 
@@ -258,8 +247,7 @@ function* showAllNodes() {
 }
 
 function* showNodesBySharedIds({ objects = [] }) {
-	const nodesIds = yield getNodesIdsFromSharedIds(objects);
-	debugger;
+	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
 	yield showTreeNodes(nodesIds);
 }
 
@@ -279,7 +267,7 @@ function* hideSelectedNodes() {
 }
 
 function* hideNodesBySharedIds({ objects = [] }) {
-	const nodesIds = yield getNodesIdsFromSharedIds(objects);
+	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
 	yield hideTreeNodes(nodesIds, true);
 }
 
@@ -297,7 +285,6 @@ function* isolateSelectedNodes() {
 		const unselectedNodesIds = yield select(selectUnselectedNodesIds);
 
 		yield hideTreeNodes(unselectedNodesIds, true);
-		yield take(TreeTypes.SET_TREE_NODES_VISIBILITY_SUCCESS);
 		yield showTreeNodes(selectedNodesIds, true);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('isolate', 'selected nodes', error));
@@ -311,8 +298,9 @@ function* isolateNodesBySharedIds({ objects = []}) {
 }
 
 function* isolateNode({ id }) {
-	const [node] = yield select(getSelectNodesByIds([id]));
-	yield put(TreeActions.isolateNodesBySharedIds(node.shared_ids));
+	yield put(TreeActions.selectNodes([id]));
+	yield take(TreeTypes.SELECT_NODES_SUCCESS);
+	yield put(TreeActions.isolateSelectedNodes());
 }
 
 function* hideIfcSpaces() {
@@ -399,12 +387,12 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 }
 
 function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], colour?: number[]}) {
-	const nodesIds = yield getNodesIdsFromSharedIds(objects);
+	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
 	yield put(TreeActions.selectNodes(nodesIds, false, true, colour));
 }
 
 function* deselectNodesBySharedIds({ objects = [] }) {
-	const nodesIds = yield getNodesIdsFromSharedIds(objects);
+	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
 	yield put(TreeActions.deselectNodes(nodesIds));
 }
 

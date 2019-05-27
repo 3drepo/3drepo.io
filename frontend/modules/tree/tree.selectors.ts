@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { pickBy, keys, values } from 'lodash';
+import { pickBy, keys, values, flatten, pick, uniq } from 'lodash';
 
 import { calculateTotalMeshes } from '../../helpers/tree';
 import { searchByFilters } from '../../helpers/searching';
@@ -236,5 +236,18 @@ export const getSelectMeshesByNodes = (nodes = []) => createSelector(
 		}
 
 		return values(meshesByNodes);
+	}
+);
+
+export const getSelectNodesIdsFromSharedIds = (objects = []) => createSelector(
+	selectNodesBySharedIdsMap,
+	(nodesBySharedIds) => {
+		if (!objects.length) {
+			return [];
+		}
+		const objectsSharedIds = objects.map(({ shared_ids }) => shared_ids);
+		const sharedIds = flatten(objectsSharedIds) as string[];
+		const nodesIdsBySharedIds = values(pick(nodesBySharedIds, sharedIds));
+		return uniq(nodesIdsBySharedIds);
 	}
 );
