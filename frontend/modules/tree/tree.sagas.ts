@@ -32,7 +32,6 @@ import {
 	selectTreeNodesList,
 	selectTreeNodesIds,
 	selectSelectedNodesIds,
-	selectUnselectedNodesIds,
 	selectExpandedNodesMap,
 	getSelectNodesByIds,
 	getSelectNodesIdsFromSharedIds,
@@ -247,6 +246,10 @@ function* clearCurrentlySelected() {
 	yield put(TreeActions.updateNodesSelectionMap(newNodesSelectionMap));
 }
 
+/**
+ * SHOW NODES
+ */
+
 function* showAllNodes() {
 	try {
 		const nodesIds = yield select(selectTreeNodesIds);
@@ -263,13 +266,15 @@ function* showNodesBySharedIds({ objects = [] }) {
 
 function* showTreeNodes(nodesIds = [], skipNested = false) {
 	try {
-		yield put(
-			TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.VISIBLE, skipNested, skipNested)
-		);
+		yield put(TreeActions.setTreeNodesVisibility(nodesIds, VISIBILITY_STATES.VISIBLE, skipNested, skipNested));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('show', 'nodes', error));
 	}
 }
+
+/**
+ * HIDE NODES
+ */
 
 function* hideSelectedNodes() {
 	const selectedNodesIds = yield select(selectSelectedNodesIds);
@@ -289,6 +294,10 @@ function* hideTreeNodes(nodesIds = [], skipNested = false) {
 	}
 }
 
+/**
+ * ISOLATE NODES
+ */
+
 function* isolateNodes(nodesIds = [], colour?) {
 	try {
 		const nodesSelectionMap = yield select(selectNodesSelectionMap);
@@ -307,7 +316,7 @@ function* isolateNodes(nodesIds = [], colour?) {
 		unhighlightObjects(result.unhighlightObjects);
 		highlightObjects(result.highlightedObjects, result.nodesSelectionMap, colour);
 
-		yield updateMeshesVisibility(result.meshesToUpdate, nodesVisibilityMap);
+		yield updateMeshesVisibility(result.meshesToUpdate, result.nodesVisibilityMap);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('isolate', 'selected nodes', error));
 	}
@@ -464,7 +473,7 @@ function* handleMeshesVisibility(meshes, visibility) {
 	try {
 		const objectIds = {};
 		const alreadyProcessed = {};
-
+		debugger
 		for (let index = 0; index < meshes.length; index++) {
 			const node = meshes[index];
 			const { namespacedId, _id, teamspace, model } = node;
