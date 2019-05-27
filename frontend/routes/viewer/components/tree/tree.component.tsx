@@ -23,7 +23,6 @@ import Check from '@material-ui/icons/Check';
 import IconButton from '@material-ui/core/IconButton';
 import AutoSizer from 'react-virtualized/dist/es/AutoSizer';
 import List from 'react-virtualized/dist/es/List';
-import { values } from 'lodash';
 
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
@@ -116,7 +115,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 							width={width}
 							rowCount={size}
 							rowHeight={TREE_ITEM_SIZE}
-							rowRenderer={(props) => this.renderTreeNode(props)}
+							rowRenderer={this.renderTreeNode}
 							scrollToIndex={this.state.scrollToIndex}
 						/>
 					)}
@@ -138,11 +137,15 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		if (prevProps.expandedNodesMap !== this.props.expandedNodesMap) {
 			this.nodeListRef.current.recomputeRowHeights();
 			this.nodeListRef.current.forceUpdateGrid();
+			this.setState({
+				scrollToIndex: undefined
+			});
 		}
 	}
 
 	public render() {
 		const { searchEnabled, treeNodesList, isPending } = this.props;
+
 		return (
 			<ViewerPanel
 				title="Tree"
@@ -199,22 +202,25 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		</>
 	)
 
-	private renderTreeNode = ({ index, style, key, isScrolling, isVisible }) => {
+	private renderTreeNode = (props) => {
+		const { index, style, key } = props;
 		const {
 			treeNodesList,
 			expandedNodesMap
 		} = this.props;
-
 		const treeNode = treeNodesList[index];
+		const realParentIndex = treeNodesList.findIndex((node) => node._id === treeNode.parentId);
+
 		return (
 			<TreeNode
+				index={index}
 				style={style}
 				key={key}
 				data={treeNode}
 				isSearchResult={treeNode.isSearchResult}
 				parentIndex={treeNode.parentIndex}
 				expanded={expandedNodesMap[treeNode._id]}
-				scrollToTop={(parentIndex) => this.scrollToParent(parentIndex)}
+				scrollToTop={() => this.scrollToParent(realParentIndex)}
 			/>
 		);
 	}
@@ -234,8 +240,8 @@ export class Tree extends React.PureComponent<IProps, IState> {
 	)
 
 	private scrollToParent = (parentIndex) => {
-		this.setState({
-			scrollToIndex: parentIndex
-		});
+		this.nodeListRef.current.recomputeRowHeights();
+		this.nodeListRef.current.forceUpdateGrid();
+		this.setState({ scrollToIndex: parentIndex });
 	}
 }
