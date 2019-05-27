@@ -307,7 +307,7 @@ const handleToSelect = (toSelect, extraData) => {
 	return newNodesSelectionMap;
 };
 
-const handleDeselectNodes = ({ nodesIds = [], extraData }) => {
+const handleDeselectNodes = ({ nodesIds = [], ...extraData }) => {
 	const { selectedNodesIds } = extraData;
 	const filteredNodesIds = intersection(nodesIds, selectedNodesIds);
 	const nodes = getNodesByIds(filteredNodesIds);
@@ -318,7 +318,6 @@ const handleDeselectNodes = ({ nodesIds = [], extraData }) => {
 	}
 
 	const unhighlightedObjects = getSelectMeshesByNodes(nodes);
-
 	return { nodesSelectionMap, unhighlightedObjects };
 };
 
@@ -344,8 +343,43 @@ const handleSelectNodes = ({ nodes = [], ...extraData }) => {
 	return result;
 };
 
-const handleIsolateNodes = ({ nodesIds = [], ...extraData }) => {
-	const { highlightedObjects, nodesSelectionMap } = handleSelectNodes({ nodesIds, ...extraData });
+const handleIsolateNodes = ({ nodesIds = [], ...extraData }: any) => {
+	const { nodesSelectionMap, nodesVisibilityMap } = extraData;
+	const { nodesList } = localData;
+	const toUnhighlight = [];
+	const toHighlight = [];
+	const meshesToUpdate = [];
+
+	for (let index = 0; index < nodesList.length; index++) {
+		const node = nodesList[index];
+		const shouldBeVisible = nodesIds.includes(node._id);
+		if (shouldBeVisible) {
+			nodesSelectionMap[node._id] = SELECTION_STATES.SELECTED;
+			nodesVisibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
+			toHighlight.push(node);
+			if (node.type === NODE_TYPES.MESH) {
+				meshesToUpdate.push(node);
+			}
+		} else if (nodesVisibilityMap[node._id] !== VISIBILITY_STATES.INVISIBLE) {
+			toUnhighlight.push(node);
+			nodesVisibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
+			nodesSelectionMap[node._id] = SELECTION_STATES.UNSELECTED;
+			if (node.type === NODE_TYPES.MESH) {
+				meshesToUpdate.push(node);
+			}
+		}
+	}
+
+	const unhighlightedObjects = getSelectMeshesByNodes(toUnhighlight);
+	const highlightedObjects = getSelectMeshesByNodes(toHighlight);
+
+	return {
+		nodesSelectionMap,
+		nodesVisibilityMap,
+		unhighlightedObjects,
+		highlightedObjects,
+		meshesToUpdate
+	};
 };
 
 self.addEventListener('message', ({ data }) => {

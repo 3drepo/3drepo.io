@@ -36,6 +36,7 @@ import {
 	selectExpandedNodesMap,
 	getSelectNodesByIds,
 	getSelectNodesIdsFromSharedIds,
+	getSelectDeepChildren,
 } from './tree.selectors';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -46,6 +47,46 @@ import { selectActiveMeta, BimActions, selectIsActive } from '../bim';
 import { ViewerActions } from '../viewer';
 
 const TreeProcessor = new TreeProcessing();
+
+const unhighlightObjects = (objects = []) => {
+	for (let index = 0, size = objects.length; index < size; index++) {
+		const { meshes, teamspace, modelId } = objects[index];
+		Viewer.unhighlightObjects({
+			account: teamspace,
+			model: modelId,
+			ids: meshes
+		});
+	}
+};
+
+const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
+	for (let index = 0, size = objects.length; index < size; index++) {
+		const { meshes, teamspace, modelId } = objects[index];
+
+		if (meshes.length) {
+			const filterdMeshes = meshes.filter((mesh) => nodesSelectionMap[mesh] === SELECTION_STATES.SELECTED);
+			if (meshes.length > 0) {
+				Viewer.highlightObjects({
+					account: teamspace,
+					ids: filterdMeshes,
+					colour,
+					model: modelId,
+					multi: true,
+					source: 'tree',
+					forceReHighlight: true
+				});
+			}
+		}
+	}
+};
+
+function* handleMetadata(node: any) {
+	const isMetadataActive = yield select(selectIsActive);
+	if (node && node.meta && isMetadataActive) {
+		yield put(BimActions.fetchMetadata(node.teamspace, node.model, node.meta[0]));
+		yield put(ViewerActions.setMetadataVisibility(true));
+	}
+}
 
 function* expandToNode(nodeId: string) {
 	if (nodeId) {
@@ -64,28 +105,6 @@ function* expandToNode(nodeId: string) {
 
 		yield put(TreeActions.setComponentState({ expandedNodesMap }));
 	}
-}
-
-function* clear() {
-	yield all([
-		put(ViewerActions.clearHighlights()),
-		put(ViewerActions.setMetadataVisibility(false)),
-		put(BimActions.setActiveMeta(null))
-	]);
-}
-
-function* clearCurrentlySelected() {
-	yield spawn(clear);
-
-	const selectedNodesIds = yield select(selectSelectedNodesIds);
-	const newNodesSelectionMap = {};
-
-	for (let index = 0; index < selectedNodesIds.length; index++) {
-		const nodeId = selectedNodesIds[index];
-		newNodesSelectionMap[nodeId] = SELECTION_STATES.UNSELECTED;
-	}
-
-	yield put(TreeActions.updateNodesSelectionMap(newNodesSelectionMap));
 }
 
 function* fetchFullTree({ teamspace, modelId, revision }) {
@@ -131,7 +150,7 @@ function* startListenOnSelections() {
 	});
 
 	Viewer.on(VIEWER_EVENTS.MULTI_OBJECTS_SELECTED, (object) => {
-		dispatch(TreeActions.handleNodesClickBySharedIds(object.selectedNodes, false, true));
+		dispatch(TreeActions.handleNodesClickBySharedIds(object.selectedNodes));
 	});
 
 	Viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => {
@@ -187,8 +206,8 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = f
 	yield TreeActions.getSelectedNodes();
 }
 
-function* handleNodesClickBySharedIds({ nodesIds }) {
-	const nodes = yield select(getSelectNodesByIds(nodesIds));
+function* handleNodesClickBySharedIds({ objects = [] }) {
+	const nodes = yield select(getSelectNodesIdsFromSharedIds(objects));
 	yield put(TreeActions.handleNodesClick(nodes));
 }
 
@@ -204,6 +223,28 @@ function* getSelectedNodes() {
 	} catch (error) {
 		console.error(error);
 	}
+}
+
+function* clear() {
+	yield all([
+		put(ViewerActions.clearHighlights()),
+		put(ViewerActions.setMetadataVisibility(false)),
+		put(BimActions.setActiveMeta(null))
+	]);
+}
+
+function* clearCurrentlySelected() {
+	yield spawn(clear);
+
+	const selectedNodesIds = yield select(selectSelectedNodesIds);
+	const newNodesSelectionMap = {};
+
+	for (let index = 0; index < selectedNodesIds.length; index++) {
+		const nodeId = selectedNodesIds[index];
+		newNodesSelectionMap[nodeId] = SELECTION_STATES.UNSELECTED;
+	}
+
+	yield put(TreeActions.updateNodesSelectionMap(newNodesSelectionMap));
 }
 
 function* showAllNodes() {
@@ -248,28 +289,44 @@ function* hideTreeNodes(nodesIds = [], skipNested = false) {
 	}
 }
 
-function* isolateSelectedNodes() {
+function* isolateNodes(nodesIds = [], colour?) {
 	try {
-		const selectedNodesIds = yield select(selectSelectedNodesIds);
-		const unselectedNodesIds = yield select(selectUnselectedNodesIds);
+		const nodesSelectionMap = yield select(selectNodesSelectionMap);
+		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
+		const result = yield TreeProcessor.isolateNodes({
+			nodesIds,
+			nodesSelectionMap,
+			nodesVisibilityMap
+		});
 
-		yield hideTreeNodes(unselectedNodesIds, true);
-	//	yield showTreeNodes(selectedNodesIds, true);
+		yield put(TreeActions.setAuxiliaryMaps({
+			nodesVisibilityMap: result.nodesVisibilityMap,
+			nodesSelectionMap: result.nodesSelectionMap
+		}));
+
+		unhighlightObjects(result.unhighlightObjects);
+		highlightObjects(result.highlightedObjects, result.nodesSelectionMap, colour);
+
+		yield updateMeshesVisibility(result.meshesToUpdate, nodesVisibilityMap);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('isolate', 'selected nodes', error));
 	}
 }
 
+function* isolateSelectedNodes() {
+	const selectedNodesIds = yield select(selectSelectedNodesIds);
+	yield isolateNodes(selectedNodesIds);
+}
+
 function* isolateNodesBySharedIds({ objects = []}) {
-	yield put(TreeActions.selectNodesBySharedIds(objects));
-	yield take(TreeTypes.SELECT_NODES_SUCCESS);
-	yield put(TreeActions.isolateSelectedNodes());
+	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
+	yield isolateNodes(nodesIds);
 }
 
 function* isolateNode({ id }) {
-	yield put(TreeActions.selectNodes([id]));
-	yield take(TreeTypes.SELECT_NODES_SUCCESS);
-	yield put(TreeActions.isolateSelectedNodes());
+	const deepChildren = yield select(getSelectDeepChildren(id));
+	const deepChildrenIds = deepChildren.map(({ _id }) => _id);
+	yield isolateNodes([id, ...deepChildrenIds]);
 }
 
 function* hideIfcSpaces() {
@@ -281,34 +338,39 @@ function* hideIfcSpaces() {
 	}
 }
 
+/**
+ * DESELECT NODES
+ */
+
+function* deselectNodes({ nodesIds = [] }) {
+	try {
+		const selectedNodesIds = yield select(selectSelectedNodesIds);
+		const result = yield TreeProcessor.deselectNodes({
+			nodesIds,
+			selectedNodesIds
+		});
+
+		unhighlightObjects(result.unhighlightedObjects);
+		yield put(TreeActions.updateNodesSelectionMap(result.nodesSelectionMap));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('deselect', 'node', error));
+	}
+}
+
+function* deselectNodesBySharedIds({ objects = [] }) {
+	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
+	yield put(TreeActions.deselectNodes(nodesIds));
+}
+
+/**
+ * SELECT NODES
+ */
+
 function* selectNode({ id }) {
 	try {
 		yield put(TreeActions.handleNodesClick([id], true));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'node', error));
-	}
-}
-
-function* deselectNodes({ nodesIds = [] }) {
-	try {
-		const selectedNodesIds = yield select(selectSelectedNodesIds);
-		const { nodesSelectionMap, unhighlightedObjects } = yield TreeProcessor.deselectNodes({
-			nodesIds,
-			selectedNodesIds
-		});
-
-		for (let index = 0; index < unhighlightedObjects.length; index++) {
-			const { meshes, teamspace, modelId } = unhighlightedObjects[index];
-			Viewer.unhighlightObjects({
-				account: teamspace,
-				model: modelId,
-				ids: meshes
-			});
-		}
-
-		yield put(TreeActions.updateNodesSelectionMap(nodesSelectionMap));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('deselect', 'node', error));
 	}
 }
 
@@ -323,32 +385,14 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 			yield expandToNode(lastNode._id);
 		}
 
-		const { nodesSelectionMap, highlightedObjects } = yield TreeProcessor.selectNodes({
+		const result = yield TreeProcessor.selectNodes({
 			nodes,
 			skipChildren,
 			nodesVisibilityMap
 		});
 
-		for (let index = 0; index < highlightedObjects.length; index++) {
-			const { meshes, teamspace, modelId } = highlightedObjects[index];
-
-			if (meshes.length) {
-				const filterdMeshes = meshes.filter((mesh) => nodesSelectionMap[mesh] === SELECTION_STATES.SELECTED);
-				if (meshes.length > 0) {
-					Viewer.highlightObjects({
-						account: teamspace,
-						ids: filterdMeshes,
-						colour,
-						model: modelId,
-						multi: true,
-						source: 'tree',
-						forceReHighlight: true
-					});
-				}
-			}
-		}
-
-		yield put(TreeActions.updateNodesSelectionMap(nodesSelectionMap));
+		highlightObjects(result.highlightedObjects, result.nodesSelectionMap, colour);
+		yield put(TreeActions.updateNodesSelectionMap(result.nodesSelectionMap));
 		yield put(TreeActions.selectNodesSuccess());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
@@ -360,10 +404,9 @@ function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], col
 	yield put(TreeActions.selectNodes(nodesIds, false, true, colour));
 }
 
-function* deselectNodesBySharedIds({ objects = [] }) {
-	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
-	yield put(TreeActions.deselectNodes(nodesIds));
-}
+/**
+ * SET VISIBILITY
+ */
 
 function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, skipParents = false }) {
 	try {
@@ -381,19 +424,9 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 			skipParents
 		});
 
-		for (let j = 0; j < result.unhighlightedObjects.length; j++) {
-			const { meshes, teamspace, modelId } = result.unhighlightedObjects[j];
-			Viewer.unhighlightObjects({
-				account: teamspace,
-				model: modelId,
-				ids: meshes
-			});
-		}
+		unhighlightObjects(result.unhighlightedObjects.length);
 
-		const newNodesVisibilityMap = {
-			...nodesVisibilityMap,
-			...result.nodesVisibilityMap
-		};
+		const newNodesVisibilityMap = { ...nodesVisibilityMap, ...result.nodesVisibilityMap };
 
 		yield put(TreeActions.setAuxiliaryMaps({
 			nodesVisibilityMap: newNodesVisibilityMap,
@@ -453,14 +486,6 @@ function* handleMeshesVisibility(meshes, visibility) {
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('handle', 'meshes visibility', error));
-	}
-}
-
-function* handleMetadata(node: any) {
-	const isMetadataActive = yield select(selectIsActive);
-	if (node && node.meta && isMetadataActive) {
-		yield put(BimActions.fetchMetadata(node.teamspace, node.model, node.meta[0]));
-		yield put(ViewerActions.setMetadataVisibility(true));
 	}
 }
 
