@@ -149,13 +149,10 @@ export function* addColorOverride({ groups = [], renderOnly }) {
 			const nodes = yield select(getSelectNodesByIds(nodesIds));
 			const filteredNodes = nodes.filter((n) => n !== undefined);
 			const modelsMap = yield select(getSelectMeshesByNodes(filteredNodes));
-			const modelsList = Object.keys(modelsMap);
 
-			for (let j = 0; j < modelsList.length; j++) {
-				const modelKey = modelsList[j];
-				const meshIds = modelsMap[modelKey].meshes;
-				const [account, model] = modelKey.split('@');
-				Viewer.overrideMeshColor(account, model, meshIds, color);
+			for (let j = 0; j < modelsMap.length; j++) {
+				const { teamspace, modelId, meshes } = modelsMap[j];
+				Viewer.overrideMeshColor(teamspace, modelId, meshes, color);
 			}
 
 			const colorOverride = { models: modelsMap, color, id: group._id };
@@ -191,7 +188,7 @@ export function* removeColorOverride({ groups, renderOnly = false }) {
 	}
 }
 
-export function* toggleColorOverride({ group, render }) {
+export function* toggleColorOverride({ group }) {
 	try {
 		const colorOverrides = yield select(selectColorOverrides);
 		const hasColorOverride = colorOverrides[group._id];

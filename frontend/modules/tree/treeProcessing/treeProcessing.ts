@@ -48,6 +48,8 @@ export default class TreeProcessing {
 
 	public updateVisibility = (payload) => this.callAction(ACTION_TYPES.UPDATE_VISIBILITY, payload);
 
+	public isolateNodes = (payload) => this.callAction(ACTION_TYPES.ISOLATE_NODES, payload);
+
 	private handleDataResult = ({ data }) => {
 		const { actionId, error, result } = JSON.parse(data);
 

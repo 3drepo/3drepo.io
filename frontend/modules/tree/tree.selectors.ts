@@ -164,10 +164,11 @@ export const getSelectChildren = (node) => createSelector(
 	}
 );
 
-export const getSelectDeepChildren = (node) => createSelector(
+export const getSelectDeepChildren = (nodeId) => createSelector(
 	selectTreeNodesList, selectNodesIndexesMap,
 	(treeNodesList, nodesIndexesMap) => {
-		const nodeIndex = nodesIndexesMap[node._id];
+		const nodeIndex = nodesIndexesMap[nodeId];
+		const node = treeNodesList[nodeIndex];
 		return treeNodesList.slice(nodeIndex + 1, nodeIndex + node.deepChildrenNumber + 1);
 	}
 );
