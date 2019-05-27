@@ -53,7 +53,7 @@ interface IProps {
 	deselectNode?: (id) => void;
 	setTreeNodesVisibility?: (id, visibility) => void;
 	isolateNode?: (id) => void;
-	scrollToTop?: (id) => void;
+	scrollToTop?: () => void;
 }
 
 const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
@@ -218,7 +218,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 
 	private goToTop = (event) => {
 		event.stopPropagation();
-		this.props.scrollToTop(this.node.parentIndex);
+		this.props.scrollToTop();
 	}
 
 	private handleOpenModelClick = () => {
