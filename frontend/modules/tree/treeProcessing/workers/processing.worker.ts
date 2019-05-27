@@ -1,18 +1,12 @@
 import { intersection, keys, pickBy, pick, values, memoize } from 'lodash';
-import { VISIBILITY_STATES, SELECTION_STATES, BACKEND_VISIBILITY_STATES, NODE_TYPES } from '../../../constants/tree';
+import { VISIBILITY_STATES, SELECTION_STATES, NODE_TYPES } from '../../../../constants/tree';
+import { ACTION_TYPES } from '../treeProcessing.constants';
 
 const localData = {
 	nodesList: [],
 	nodesIndexesMap: {},
 	defaultVisibilityMap: {},
 	meshesByModelId: {}
-};
-
-const ACTION_TYPES = {
-	SET_DATA: 'SET_DATA',
-	UPDATE_VISIBILITY: 'UPDATE_VISIBILITY',
-	SELECT_NODES: 'SELECT_NODES',
-	DESELECT_NODES: 'DESELECT_NODES'
 };
 
 const setLocalData = ({ nodesList, nodesIndexesMap, defaultVisibilityMap }) => {
@@ -115,6 +109,7 @@ const updateParentsVisibility = (nodes = [], extraData) => {
 				for (let j = 0; j < parents.length; j++) {
 					const parentNode = parents[j];
 					nodesVisibilityMap[parentNode._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
+					processedNodes.push(parentNode._id);
 				}
 			} else {
 				nodes.push(parents[0]);
@@ -190,9 +185,7 @@ const handleUpdateVisibility = ({ nodesIds = [], ...extraData }) => {
 	};
 
 	const nodes = getNodesByIds(nodesIds);
-
 	if (shouldBeInvisible) {
-		console.log('shouldBeInvisible')
 		const selectedNodesIds = getSelectedNodesIds(extraData.nodesSelectionMap);
 		const filteredNodesIds = intersection(nodesIds, selectedNodesIds);
 
@@ -205,7 +198,8 @@ const handleUpdateVisibility = ({ nodesIds = [], ...extraData }) => {
 	const {
 		meshesToUpdate, nodesVisibilityMap,
 		nodesSelectionMap, unhighlightedObjects
-	} = handleNodesVisibility(nodes, extraData);
+	} = handleNodesVisibility(nodes, { ...extraData, ...result });
+
 	result.nodesSelectionMap = {
 		...result.nodesSelectionMap,
 		...nodesSelectionMap
@@ -214,7 +208,7 @@ const handleUpdateVisibility = ({ nodesIds = [], ...extraData }) => {
 	result.meshesToUpdate = meshesToUpdate;
 	result.unhighlightedObjects = [
 		...unhighlightedObjects,
-		...getSelectMeshesByNodes(nodes),
+		...getSelectMeshesByNodes(nodes)
 	];
 
 	return result;
@@ -232,20 +226,23 @@ const handleNodesVisibility = (nodes, extraData) => {
 	};
 
 	const parents = [];
-
+	const processedNodes = [];
 	for (let nodeLoopIndex = 0; nodeLoopIndex < nodes.length; nodeLoopIndex++) {
 		const node = nodes[nodeLoopIndex];
 		const nodeVisibility = nodesVisibilityMap[node._id];
 
+		processedNodes.push(node._id);
 		if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE || visibility !== nodeVisibility) {
 			if (node.type === NODE_TYPES.MESH) {
 				result.meshesToUpdate.push(node);
 			}
 
-			const children = node.hasChildren && !skipChildren ? getDeepChildren(node) : [node];
+			const children = node.hasChildren && !skipChildren ? getDeepChildren(node) : [];
 
 			for (let index = 0; index < children.length; index++) {
 				const child = children[index];
+				processedNodes.push(child._id);
+
 				if (nodeVisibility !== visibility && child.type === NODE_TYPES.MESH) {
 					result.meshesToUpdate.push(child);
 				}
@@ -265,15 +262,22 @@ const handleNodesVisibility = (nodes, extraData) => {
 	}
 
 	if (!skipParents) {
-		const parentsResult = updateParentsVisibility(parents, extraData);
+		const parentsResult = updateParentsVisibility(parents, {
+			...extraData,
+			nodesVisibilityMap: {
+				...extraData.nodesVisibilityMap,
+				...result.nodesVisibilityMap
+			}
+		});
+
 		return {
 			meshesToUpdate: result.meshesToUpdate,
 			nodesVisibilityMap: {
-				...result.nodesVisibilityMap,
+				...pick(result.nodesVisibilityMap, processedNodes),
 				...parentsResult.nodesVisibilityMap
 			},
 			nodesSelectionMap: {
-				...result.nodesSelectionMap,
+				...pick(result.nodesSelectionMap, processedNodes),
 				...parentsResult.nodesSelectionMap
 			},
 			unhighlightedObjects: parentsResult.unhighlightedObjects
@@ -340,6 +344,10 @@ const handleSelectNodes = ({ nodes = [], ...extraData }) => {
 	return result;
 };
 
+const handleIsolateNodes = ({ nodesIds = [], ...extraData }) => {
+	const { highlightedObjects, nodesSelectionMap } = handleSelectNodes({ nodesIds, ...extraData });
+};
+
 self.addEventListener('message', ({ data }) => {
 	const { actionId, type, ...payload } = data;
 	let result;
@@ -358,6 +366,9 @@ self.addEventListener('message', ({ data }) => {
 				break;
 			case ACTION_TYPES.UPDATE_VISIBILITY:
 				result = handleUpdateVisibility(payload);
+				break;
+			case ACTION_TYPES.ISOLATE_NODES:
+				result = handleIsolateNodes(payload);
 				break;
 			default:
 				error = 'Undefined action type';

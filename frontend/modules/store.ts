@@ -2,19 +2,23 @@ import { createStore, applyMiddleware, compose } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import createReducer from './reducers';
 import rootSaga from './sagas';
+import { IS_DEVELOPMENT } from '../constants/environment';
 
 const sagaMiddleware = createSagaMiddleware();
 
 export default function configureStore(initialState = {}) {
 	const middlewares = [
-		require('redux-immutable-state-invariant').default(),
 		sagaMiddleware
 	];
 
 	const enhancers = [];
 
-	if (window.__REDUX_DEVTOOLS_EXTENSION__) {
-		// enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
+	if (IS_DEVELOPMENT) {
+		middlewares.unshift(require('redux-immutable-state-invariant').default());
+
+		if (window.__REDUX_DEVTOOLS_EXTENSION__) {
+			// enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
+		}
 	}
 
 	const store = createStore(

@@ -1,5 +1,6 @@
 import { flattenDeep } from 'lodash';
-import { VISIBILITY_STATES, SELECTION_STATES, BACKEND_VISIBILITY_STATES } from '../../../constants/tree';
+import { VISIBILITY_STATES, SELECTION_STATES, BACKEND_VISIBILITY_STATES } from '../../../../constants/tree';
+import { IS_DEVELOPMENT } from '../../../../constants/environment';
 
 interface INode {
 	_id: string;
@@ -107,7 +108,8 @@ const getMeshesByModelId = (modelsWithMeshes) => {
 self.addEventListener('message', ({ data }) => {
 	const { mainTree, subTrees, subModels, modelsWithMeshes } = data;
 
-	console.time('TREE PRE-PROCESSING');
+	// tslint:disable-next-line
+	IS_DEVELOPMENT && console.time('TREE PRE-PROCESSING');
 	for (let index = 0; index < mainTree.children.length; index++) {
 		const child = mainTree.children[index];
 		const [modelTeamspace, model] = child.name.split(':');
@@ -126,14 +128,17 @@ self.addEventListener('message', ({ data }) => {
 			child.children[0].children = [subTree.nodes];
 		}
 	}
-	console.timeEnd('TREE PRE-PROCESSING');
+	// tslint:disable-next-line
+	IS_DEVELOPMENT && console.timeEnd('TREE PRE-PROCESSING');
 
-	console.time('TREE PROCESSING');
+	// tslint:disable-next-line
+	IS_DEVELOPMENT && console.time('TREE PROCESSING');
 	const { data: nodesList } = getFlattenNested(mainTree);
 	const meshesByModelId = getMeshesByModelId(modelsWithMeshes);
 	const auxiliaryMaps = getAuxiliaryMaps(nodesList);
 	const result = { data: { nodesList, meshesByModelId, ...auxiliaryMaps } };
-	console.timeEnd('TREE PROCESSING');
+	// tslint:disable-next-line
+	IS_DEVELOPMENT && console.timeEnd('TREE PROCESSING');
 
 	// @ts-ignore
 	self.postMessage(JSON.stringify({ result }));

@@ -3,6 +3,7 @@ const HTMLWebpackPlugin = require('html-webpack-plugin');
 const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
 const loaders = require('./tools/loaders');
 const PATHS = require('./tools/paths');
+const MODES = require('./tools/modes');
 
 module.exports = (options) => {
   const config = {
@@ -25,7 +26,6 @@ module.exports = (options) => {
         loaders.PugLoader,
       ],
     },
-
     plugins: [
       new CopyWebpackPlugin([
         { from: 'node_modules/zxcvbn/dist/zxcvbn.js' },
