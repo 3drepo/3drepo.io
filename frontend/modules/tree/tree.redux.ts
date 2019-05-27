@@ -44,8 +44,6 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	setIsPending: ['isPending'],
 	setTreeNodesVisibility: ['nodesIds', 'visibility', 'skipChildren', 'skipParents'],
 	setTreeNodesVisibilitySuccess: [],
-	updateMeshesVisibility: ['meshes'],
-	handleMeshesVisibility: ['meshes', 'visibility'],
 	handleNodesClick: ['nodesIds', 'skipExpand'],
 	handleNodesClickBySharedIds: ['nodesIds'],
 	handleBackgroundClick: [],

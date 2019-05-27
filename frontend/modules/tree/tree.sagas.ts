@@ -14,15 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-// tslint:disable-next-line
-const TreeLoaderWorker = require('worker-loader?inline!./workers/tree.worker');
-
 import { put, takeLatest, call, select, take, all, spawn } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
-import { pick, uniq, flatten, values } from 'lodash';
 
-import TreeProcessing from './treeProcessing';
+import TreeProcessing from './treeProcessing/treeProcessing';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../constants/viewer';
@@ -35,14 +30,12 @@ import {
 	selectNodesVisibilityMap,
 	selectNodesSelectionMap,
 	selectTreeNodesList,
-	selectNodesBySharedIdsMap,
 	selectTreeNodesIds,
 	selectSelectedNodesIds,
 	selectUnselectedNodesIds,
 	selectExpandedNodesMap,
 	getSelectNodesByIds,
 	getSelectNodesIdsFromSharedIds,
-	getSelectDeepChildren
 } from './tree.selectors';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -53,21 +46,6 @@ import { selectActiveMeta, BimActions, selectIsActive } from '../bim';
 import { ViewerActions } from '../viewer';
 
 const TreeProcessor = new TreeProcessing();
-
-const bindToWorker = (worker, onResponse = Function.prototype, onError = Function.prototype) => {
-	worker.addEventListener('message', (e) => {
-		const data = JSON.parse(e.data);
-		onResponse(data.result);
-	}, false);
-
-	worker.addEventListener('messageerror', (e) => {
-		// tslint:disable-next-line
-		console.error('Worker error', e);
-		onError(e);
-	}, false);
-
-	return worker;
-};
 
 function* expandToNode(nodeId: string) {
 	if (nodeId) {
@@ -136,19 +114,10 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 			: [];
 		dataToProcessed.subTrees = subTreesData.map(({ data }) => data.mainTree);
 
-		const worker = bindToWorker(new TreeLoaderWorker(), (result) => {
-			const { nodesList, ...auxiliaryMaps } = result.data;
-			dispatch(TreeActions.setAuxiliaryMaps(auxiliaryMaps));
-			dispatch(TreeActions.setTreeNodesList(nodesList));
-			worker.terminate();
-			TreeProcessor.callAction('SET_DATA', {
-				nodesList,
-				nodesIndexesMap: auxiliaryMaps.nodesIndexesMap,
-				defaultVisibilityMap: auxiliaryMaps.nodesDefaultVisibilityMap,
-				meshesByModelId: auxiliaryMaps.meshesByModelId
-			});
-		});
-		worker.postMessage(dataToProcessed);
+		const { nodesList, auxiliaryMaps } = yield TreeProcessor.transformData(dataToProcessed);
+
+		yield put(TreeActions.setAuxiliaryMaps(auxiliaryMaps));
+		yield put(TreeActions.setTreeNodesList(nodesList));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'full tree', error));
 	}
@@ -285,7 +254,7 @@ function* isolateSelectedNodes() {
 		const unselectedNodesIds = yield select(selectUnselectedNodesIds);
 
 		yield hideTreeNodes(unselectedNodesIds, true);
-		yield showTreeNodes(selectedNodesIds, true);
+	//	yield showTreeNodes(selectedNodesIds, true);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('isolate', 'selected nodes', error));
 	}
@@ -402,7 +371,6 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 		const nodesSelectionMap = yield select(selectNodesSelectionMap);
 		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 
-		console.time('Worker setTreeNodesVisibility');
 		const result = yield TreeProcessor.updateVisibility({
 			nodesIds,
 			visibility,
@@ -412,7 +380,6 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 			skipChildren,
 			skipParents
 		});
-		console.timeEnd('Worker setTreeNodesVisibility');
 
 		for (let j = 0; j < result.unhighlightedObjects.length; j++) {
 			const { meshes, teamspace, modelId } = result.unhighlightedObjects[j];
@@ -423,21 +390,24 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 			});
 		}
 
+		const newNodesVisibilityMap = {
+			...nodesVisibilityMap,
+			...result.nodesVisibilityMap
+		};
+
 		yield put(TreeActions.setAuxiliaryMaps({
-			nodesVisibilityMap: result.nodesVisibilityMap,
+			nodesVisibilityMap: newNodesVisibilityMap,
 			nodesSelectionMap: result.nodesSelectionMap
 		}));
-
-		yield put(TreeActions.updateMeshesVisibility(result.meshesToUpdate));
+		yield updateMeshesVisibility(result.meshesToUpdate, newNodesVisibilityMap);
 		yield put(TreeActions.setTreeNodesVisibilitySuccess());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'tree node visibility', error));
 	}
 }
 
-function* updateMeshesVisibility({ meshes }) {
+function* updateMeshesVisibility(meshes, nodesVisibilityMap) {
 	try {
-		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
 		const hiddenMeshes = [];
 		const shownMeshes = [];
 
@@ -450,14 +420,14 @@ function* updateMeshesVisibility({ meshes }) {
 			}
 		}
 
-		yield put(TreeActions.handleMeshesVisibility(hiddenMeshes, false));
-		yield put(TreeActions.handleMeshesVisibility(shownMeshes, true));
+		yield handleMeshesVisibility(hiddenMeshes, false);
+		yield handleMeshesVisibility(shownMeshes, true);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'meshes visibility', error));
 	}
 }
 
-function* handleMeshesVisibility({ meshes, visibility }) {
+function* handleMeshesVisibility(meshes, visibility) {
 	try {
 		const objectIds = {};
 		const alreadyProcessed = {};
@@ -505,7 +475,6 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.HIDE_IFC_SPACES, hideIfcSpaces);
 	yield takeLatest(TreeTypes.SELECT_NODE, selectNode);
 	yield takeLatest(TreeTypes.SET_TREE_NODES_VISIBILITY, setTreeNodesVisibility);
-	yield takeLatest(TreeTypes.UPDATE_MESHES_VISIBILITY, updateMeshesVisibility);
 	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK, handleNodesClick);
 	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK_BY_SHARED_IDS, handleNodesClickBySharedIds);
 	yield takeLatest(TreeTypes.HANDLE_BACKGROUND_CLICK, handleBackgroundClick);
@@ -516,7 +485,6 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.DESELECT_NODES, deselectNodes);
 	yield takeLatest(TreeTypes.ISOLATE_NODES_BY_SHARED_IDS, isolateNodesBySharedIds);
 	yield takeLatest(TreeTypes.HIDE_NODES_BY_SHARED_IDS, hideNodesBySharedIds);
-	yield takeLatest(TreeTypes.HANDLE_MESHES_VISIBILITY, handleMeshesVisibility);
 	yield takeLatest(TreeTypes.ISOLATE_NODE, isolateNode);
 	yield takeLatest(TreeTypes.CLEAR_CURRENTLY_SELECTED, clearCurrentlySelected);
 }
