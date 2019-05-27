@@ -34,14 +34,13 @@ import {
 	selectShowDetails,
 	selectIsAllOverrided
 } from './groups.selectors';
-import { getNodesIdsFromSharedIds } from '../tree/tree.sagas';
 import { Viewer } from '../../services/viewer/viewer';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { prepareGroup, normalizeGroup } from '../../helpers/groups';
 import { selectCurrentUser } from '../currentUser';
 import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { SnackbarActions } from '../snackbar';
-import { TreeActions, getSelectMeshesByNodes } from '../tree';
+import { TreeActions, getSelectMeshesByNodes, getSelectNodesIdsFromSharedIds, getSelectNodesByIds } from '../tree';
 import { searchByFilters } from '../../helpers/searching';
 import { GROUPS_TYPES } from '../../constants/groups';
 
@@ -91,12 +90,7 @@ export function* highlightGroup({ group }) {
 
 		if (group.objects && group.objects.length > 0) {
 			yield put(TreeActions.showNodesBySharedIds(group.objects));
-
-			// ^ dzieje się szybciej i nie resolvuje przed tym co na dole,
-			// przez co promise dla tego na dole zwraca odpowiedź tego powyej
 			yield put(TreeActions.selectNodesBySharedIds(group.objects, color));
-			// TODO Do we need this? 
-			// yield put(TreeActions.getSelectedNodes());
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('higlight', 'group', error));
@@ -150,8 +144,9 @@ export function* addColorOverride({ groups = [], renderOnly }) {
 		for (let i = 0; i < groups.length; i++) {
 			const group = groups[i];
 			const color = hexToGLColor(group.color);
-			const nodes = yield getNodesIdsFromSharedIds(group.objects);
+			const nodesIds = yield select(getSelectNodesIdsFromSharedIds(group.objects));
 
+			const nodes = yield select(getSelectNodesByIds(nodesIds));
 			const filteredNodes = nodes.filter((n) => n !== undefined);
 			const modelsMap = yield select(getSelectMeshesByNodes(filteredNodes));
 			const modelsList = Object.keys(modelsMap);

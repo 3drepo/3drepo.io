@@ -12,7 +12,7 @@ const ACTION_TYPES = {
 	SET_DATA: 'SET_DATA',
 	UPDATE_VISIBILITY: 'UPDATE_VISIBILITY',
 	SELECT_NODES: 'SELECT_NODES',
-	DESELECT_NODES: 'DESELECT_NODES',
+	DESELECT_NODES: 'DESELECT_NODES'
 };
 
 const setLocalData = ({ nodesList, nodesIndexesMap, defaultVisibilityMap }) => {
