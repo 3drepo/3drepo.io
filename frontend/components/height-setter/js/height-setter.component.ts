@@ -69,7 +69,6 @@ class HeightSetterController implements ng.IController, IBindings {
 			const paddingHeight = 8;
 			const omittedHeight = omittedElement ? omittedElement.clientHeight - paddingHeight : 0;
 			this.content.css('max-height', `${this.contentData.height - omittedHeight}px`);
-			
 			this.observer.observe(this.content[0], {
 				attributes: true,
 				childList: true,

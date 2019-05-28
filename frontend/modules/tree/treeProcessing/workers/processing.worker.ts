@@ -10,7 +10,8 @@ const localData = {
 	meshesByModelId: {}
 };
 
-const setLocalData = ({ nodesList, nodesIndexesMap, defaultVisibilityMap }) => {
+const setLocalData = (payload) => {
+	const { nodesList, nodesIndexesMap, defaultVisibilityMap } = payload;
 	localData.nodesList = nodesList;
 	localData.nodesIndexesMap = nodesIndexesMap;
 	localData.defaultVisibilityMap = defaultVisibilityMap;
@@ -23,7 +24,9 @@ const getSelectedNodesIds = (nodesSelectionMap) => {
 };
 
 const getNodesByIds = (nodesIds) => {
-	return nodesIds.map((nodeId) => localData.nodesList[localData.nodesIndexesMap[nodeId]]);
+	return nodesIds.map((nodeId) => {
+		return localData.nodesList[localData.nodesIndexesMap[nodeId]];
+	});
 };
 
 const getDeepChildren = memoize((node) => {
@@ -141,33 +144,35 @@ export const getSelectMeshesByNodes = (nodes = []) => {
 	while (stack.length > 0) {
 		const node = stack.pop();
 
-		if (!meshesByNodes[node.namespacedId]) {
-			meshesByNodes[node.namespacedId] = {
-				modelId: node.model,
-				teamspace: node.teamspace,
-				meshes: []
-			};
-		}
+		if (node) {
+			if (!meshesByNodes[node.namespacedId]) {
+				meshesByNodes[node.namespacedId] = {
+					modelId: node.model,
+					teamspace: node.teamspace,
+					meshes: []
+				};
+			}
 
-		// Check top level and then check if sub model of fed
-		let meshes = node.type === NODE_TYPES.MESH
-			? [node._id]
-			: idToMeshes[node._id];
+			// Check top level and then check if sub model of fed
+			let meshes = node.type === NODE_TYPES.MESH
+				? [node._id]
+				: idToMeshes[node._id];
 
-		if (!meshes && idToMeshes[node.namespacedId]) {
-			meshes = idToMeshes[node.namespacedId][node._id];
-		}
+			if (!meshes && idToMeshes[node.namespacedId]) {
+				meshes = idToMeshes[node.namespacedId][node._id];
+			}
 
-		if (meshes) {
-			meshesByNodes[node.namespacedId].meshes = meshesByNodes[node.namespacedId].meshes.concat(meshes);
-		} else if (!childrenMap[node._id] && node.hasChildren) {
-			// This should only happen in federations.
-			// Traverse down the tree to find submodel nodes
-			const nodeIndex = nodesIndexesMap[node._id];
-			for (let childNumber = 1; childNumber <= node.deepChildrenNumber; childNumber++) {
-				const childNode = treeNodesList[nodeIndex + childNumber];
-				childrenMap[childNode._id] = true;
-				stack = stack.concat([childNode]);
+			if (meshes) {
+				meshesByNodes[node.namespacedId].meshes = meshesByNodes[node.namespacedId].meshes.concat(meshes);
+			} else if (!childrenMap[node._id] && node.hasChildren) {
+				// This should only happen in federations.
+				// Traverse down the tree to find submodel nodes
+				const nodeIndex = nodesIndexesMap[node._id];
+				for (let childNumber = 1; childNumber <= node.deepChildrenNumber; childNumber++) {
+					const childNode = treeNodesList[nodeIndex + childNumber];
+					childrenMap[childNode._id] = true;
+					stack = stack.concat([childNode]);
+				}
 			}
 		}
 	}
@@ -186,6 +191,7 @@ const handleUpdateVisibility = ({ nodesIds = [], ...extraData }) => {
 	};
 
 	const nodes = getNodesByIds(nodesIds);
+
 	if (shouldBeInvisible) {
 		const selectedNodesIds = getSelectedNodesIds(extraData.nodesSelectionMap);
 		const filteredNodesIds = intersection(nodesIds, selectedNodesIds);
@@ -232,40 +238,44 @@ const handleNodesVisibility = (nodes, extraData) => {
 
 	for (let nodeLoopIndex = 0; nodeLoopIndex < nodes.length; nodeLoopIndex++) {
 		const node = nodes[nodeLoopIndex];
-		const nodeVisibility = nodesVisibilityMap[node._id];
 
-		processedNodes.push(node._id);
-		if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE || visibility !== nodeVisibility) {
-			if (node.type === NODE_TYPES.MESH) {
-				result.meshesToUpdate.push(node);
-			}
+		if (node) {
+			const nodeVisibility = nodesVisibilityMap[node._id];
 
-			const children = node.hasChildren && !skipChildren ? getDeepChildren(node) : [];
+			processedNodes.push(node._id);
 
-			if (skipChildren && skipParents) {
-				children.push(node);
-			}
-
-			for (let index = 0; index < children.length; index++) {
-				const child = children[index];
-				processedNodes.push(child._id);
-
-				if (nodeVisibility !== visibility && child.type === NODE_TYPES.MESH) {
-					result.meshesToUpdate.push(child);
+			if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE || visibility !== nodeVisibility) {
+				if (node.type === NODE_TYPES.MESH) {
+					result.meshesToUpdate.push(node);
 				}
 
-				if (visibility === VISIBILITY_STATES.VISIBLE) {
-					if (!(ifcSpacesHidden && defaultVisibilityMap[child._id] === VISIBILITY_STATES.INVISIBLE)) {
-						result.nodesVisibilityMap[child._id] = VISIBILITY_STATES.VISIBLE;
+				const children = node.hasChildren && !skipChildren ? getDeepChildren(node) : [];
+
+				if (skipChildren && skipParents) {
+					children.push(node);
+				}
+
+				for (let index = 0; index < children.length; index++) {
+					const child = children[index];
+					processedNodes.push(child._id);
+
+					if (nodeVisibility !== visibility && child.type === NODE_TYPES.MESH) {
+						result.meshesToUpdate.push(child);
 					}
-				} else {
-					result.nodesSelectionMap[child._id] = SELECTION_STATES.UNSELECTED;
-					result.nodesVisibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
-				}
-			}
 
-			if (!skipParents) {
-				parents.push(node);
+					if (visibility === VISIBILITY_STATES.VISIBLE) {
+						if (!(ifcSpacesHidden && defaultVisibilityMap[child._id] === VISIBILITY_STATES.INVISIBLE)) {
+							result.nodesVisibilityMap[child._id] = VISIBILITY_STATES.VISIBLE;
+						}
+					} else {
+						result.nodesSelectionMap[child._id] = SELECTION_STATES.UNSELECTED;
+						result.nodesVisibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
+					}
+				}
+
+				if (!skipParents) {
+					parents.push(node);
+				}
 			}
 		}
 	}
@@ -309,13 +319,10 @@ const updateParentsSelection = (parents, newNodesSelectionMap) => {
 };
 
 const handleToSelect = (toSelect, extraData) => {
-	const { nodesVisibilityMap, skipParents } = extraData;
+	const { nodesVisibilityMap } = extraData;
 
 	const newNodesSelectionMap = {};
 	const newNodesHighlightMap = {};
-
-	const clickedNode = toSelect[0];
-	const parents = getParents(clickedNode);
 
 	for (let index = 0; index < toSelect.length; index++) {
 		const node = toSelect[index];
@@ -330,13 +337,15 @@ const handleToSelect = (toSelect, extraData) => {
 		}
 	}
 
-	if (toSelect.length === 1 && !clickedNode.hasChildren) {
-		updateParentsSelection(parents, newNodesSelectionMap);
-	} else {
-		if (clickedNode.hasChildren) {
-			updateParentsSelection(parents, newNodesSelectionMap);
-		}
-	}
+	// const clickedNode = toSelect[0];
+	// const parents = getParents(clickedNode);
+	// if (toSelect.length === 1 && !clickedNode.hasChildren) {
+	// 	updateParentsSelection(parents, newNodesSelectionMap);
+	// } else {
+	// 	if (clickedNode.hasChildren) {
+	// 		updateParentsSelection(parents, newNodesSelectionMap);
+	// 	}
+	// }
 
 	return { newNodesSelectionMap, newNodesHighlightMap };
 };

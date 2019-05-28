@@ -449,6 +449,7 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 			nodesSelectionMap: result.nodesSelectionMap
 		}));
 		yield updateMeshesVisibility(result.meshesToUpdate, newNodesVisibilityMap);
+
 		yield put(TreeActions.setTreeNodesVisibilitySuccess());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'tree node visibility', error));
@@ -462,6 +463,7 @@ function* updateMeshesVisibility(meshes, nodesVisibilityMap) {
 
 		for (let i = 0; i < meshes.length; i++) {
 			const mesh = meshes[i];
+
 			if (nodesVisibilityMap[mesh._id] === VISIBILITY_STATES.INVISIBLE) {
 				hiddenMeshes.push(mesh);
 			} else {

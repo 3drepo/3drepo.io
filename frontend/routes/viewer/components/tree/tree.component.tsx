@@ -34,7 +34,7 @@ import {
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
-import { Container, TreeNodes } from './tree.styles';
+import { TreeNodes } from './tree.styles';
 import { TREE_ACTIONS_MENU, TREE_ACTIONS_ITEMS, TREE_ITEM_SIZE } from '../../../../constants/tree';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
@@ -163,7 +163,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleShowAllNodes = () => {
-		this.props.showAllNodes(true);
+		this.props.showAllNodes();
 	}
 
 	private handleFilterChange = (selectedFilters) => {
