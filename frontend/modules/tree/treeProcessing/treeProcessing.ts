@@ -1,7 +1,7 @@
 import { uniqueId } from 'lodash';
 import { ACTION_TYPES } from './treeProcessing.constants';
 // tslint:disable-next-line
-const TreeLoaderWorker = require('worker-loader?inline!./workers/tree.worker');
+const TreeLoaderWorker = require('worker-loader?inline!./workers/loading.worker');
 // tslint:disable-next-line
 const TreeProcessingWorker = require('worker-loader?inline!./workers/processing.worker');
 
