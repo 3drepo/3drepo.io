@@ -33,8 +33,6 @@ import './privacy/js/privacy.component';
 import './revisions/js/revisions.component';
 import './revisions/js/revisions.service';
 import './terms/js/terms.component';
-import './tree/js/tree.component';
-import './tree/js/tree.service';
 import './utils/js/progress.component';
 import './utils/js/tdr-focus.component';
 import './utils/js/utils.filter';
