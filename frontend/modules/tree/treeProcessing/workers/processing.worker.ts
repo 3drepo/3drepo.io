@@ -10,8 +10,7 @@ const localData = {
 	meshesByModelId: {}
 };
 
-const setLocalData = (payload) => {
-	const { nodesList, nodesIndexesMap, defaultVisibilityMap } = payload;
+const setLocalData = ({ nodesList, nodesIndexesMap, defaultVisibilityMap }) => {
 	localData.nodesList = nodesList;
 	localData.nodesIndexesMap = nodesIndexesMap;
 	localData.defaultVisibilityMap = defaultVisibilityMap;

@@ -38,7 +38,7 @@ import {
 	selectComponentState,
 	selectCompareModels
 } from './compare.selectors';
-import { TreeActions } from '../tree';
+import { TreeActions, selectNodesIndexesMap, selectTreeNodesList } from '../tree';
 import { VISIBILITY_STATES } from '../../constants/tree';
 
 const getNextRevision = (revisions, currentRevision) => {
@@ -251,7 +251,16 @@ function* changeModelNodesVisibility(nodesIds = [], visible: boolean) {
 }
 
 function* setModelsNodesVisibility(models, isVisible = true) {
-	const nodesIds = models.map(({ _id }) => _id);
+	const indexesMap = yield select(selectNodesIndexesMap);
+	const nodesList = yield select(selectTreeNodesList);
+	const nodesIds = models.map(({ _id, name }) => {
+		if (!indexesMap[_id]) {
+			const modelByName = nodesList.find((node) => node.name === name);
+			return modelByName._id;
+		}
+		return _id;
+	});
+
 	yield changeModelNodesVisibility(nodesIds, isVisible);
 }
 
