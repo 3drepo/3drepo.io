@@ -52,6 +52,10 @@ export const selectNodesSelectionMap = createSelector(
 	selectTreeDomain, (state) => state.nodesSelectionMap
 );
 
+export const selectNodesHighlightMap = createSelector(
+	selectTreeDomain, (state) => state.nodesHighlightMap
+);
+
 export const selectSelectedNodesIds = createSelector(
 	selectNodesSelectionMap, (nodesSelectionMap) => {
 		return keys(pickBy(nodesSelectionMap, (selectionState) => {

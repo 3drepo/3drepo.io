@@ -34,9 +34,9 @@ import {
 	selectExpandedNodesMap,
 	getSelectNodesByIds,
 	getSelectNodesIdsFromSharedIds,
-	getSelectDeepChildren,
 	selectInvisibleNodesIds,
 	selectDefaultHiddenNodesIds,
+	getSelectDeepChildren
 } from './tree.selectors';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -51,6 +51,7 @@ const TreeProcessor = new TreeProcessing();
 const unhighlightObjects = (objects = []) => {
 	for (let index = 0, size = objects.length; index < size; index++) {
 		const { meshes, teamspace, modelId } = objects[index];
+
 		Viewer.unhighlightObjects({
 			account: teamspace,
 			model: modelId,
@@ -408,6 +409,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 
 		highlightObjects(result.highlightedObjects, result.nodesSelectionMap, colour);
 		yield put(TreeActions.updateNodesSelectionMap(result.nodesSelectionMap));
+		yield put(TreeActions.setNodesHighlightMap(result.nodesHighlightMap));
 		yield put(TreeActions.selectNodesSuccess());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
