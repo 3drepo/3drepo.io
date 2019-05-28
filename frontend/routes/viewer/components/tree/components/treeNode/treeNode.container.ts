@@ -20,7 +20,12 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from '../../../../../../helpers/migration';
 
 import { TreeNode } from './treeNode.component';
-import { TreeActions, selectNodesVisibilityMap, selectNodesSelectionMap, selectNodesHighlightMap } from '../../../../../../modules/tree';
+import {
+	TreeActions,
+	selectNodesVisibilityMap,
+	selectNodesSelectionMap,
+	selectNodesHighlightMap
+} from '../../../../../../modules/tree';
 import { selectSettings } from '../../../../../../modules/model';
 
 const mapStateToProps = createStructuredSelector({
