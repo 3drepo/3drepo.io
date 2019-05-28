@@ -1,0 +1,175 @@
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-04T14:20:53.766Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-04T14:20:53.771Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-04T14:20:53.771Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-04T14:20:54.294Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-04T14:20:54.297Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-04T14:20:54.297Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-04T14:20:54.793Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-04T14:20:54.798Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-04T14:20:54.798Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-04T14:26:37.809Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-04T14:26:37.815Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-04T14:26:37.815Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-04T14:26:38.345Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-04T14:26:38.352Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-04T14:26:38.352Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-04T14:26:38.848Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-04T14:26:38.854Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-04T14:26:38.854Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-04T14:28:29.172Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-04T14:28:29.177Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-04T14:28:29.178Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-04T14:28:29.704Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-04T14:28:29.708Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-04T14:28:29.708Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-04T14:28:30.201Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-04T14:28:30.228Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-04T14:28:30.228Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-05T14:20:03.756Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-05T14:20:03.761Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-05T14:20:03.761Z"}
+{"level":"info","message":" [x] Received import -f /tmp/c4ccfca0-3f51-11e9-9377-432d4aae3386.json from modelq","timestamp":"2019-03-05T14:20:03.928Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"teamSpace1\"}","timestamp":"2019-03-05T14:20:03.928Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":0,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"teamSpace1\"}","timestamp":"2019-03-05T14:20:13.933Z"}
+{"level":"info","message":"Stoping bouncer client queue...","timestamp":"2019-03-05T14:20:14.182Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-05T14:20:14.184Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-05T14:20:14.189Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-05T14:20:14.189Z"}
+{"level":"info","message":" [x] Received import -f /tmp/cb036910-3f51-11e9-9377-432d4aae3386.json from modelq","timestamp":"2019-03-05T14:20:14.254Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-03-05T14:20:14.255Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":1,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-03-05T14:20:24.258Z"}
+{"level":"info","message":"Stoping bouncer client queue...","timestamp":"2019-03-05T14:20:24.267Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-05T14:20:24.268Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-05T14:20:24.274Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-05T14:20:24.274Z"}
+{"level":"info","message":" [x] Received import -f /tmp/d1044690-3f51-11e9-9377-432d4aae3386.json from modelq","timestamp":"2019-03-05T14:20:24.325Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-03-05T14:20:24.325Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":7,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-03-05T14:20:34.329Z"}
+{"level":"info","message":"Stoping bouncer client queue...","timestamp":"2019-03-05T14:20:34.374Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-05T14:20:44.906Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-05T14:20:44.912Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-05T14:20:44.912Z"}
+{"level":"info","message":" [x] Received import -f /tmp/dd50ed40-3f51-11e9-9377-432d4aae3386.json from modelq","timestamp":"2019-03-05T14:20:44.958Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"teamSpace1\"}","timestamp":"2019-03-05T14:20:44.958Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":0,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"teamSpace1\"}","timestamp":"2019-03-05T14:20:54.961Z"}
+{"level":"info","message":"Stoping bouncer client queue...","timestamp":"2019-03-05T14:20:55.496Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-05T14:20:55.508Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-05T14:20:55.517Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-05T14:20:55.517Z"}
+{"level":"info","message":" [x] Received import -f /tmp/e3a0fc30-3f51-11e9-9377-432d4aae3386.json from modelq","timestamp":"2019-03-05T14:20:55.547Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-03-05T14:20:55.547Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":1,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-03-05T14:21:05.551Z"}
+{"level":"info","message":"Stoping bouncer client queue...","timestamp":"2019-03-05T14:21:05.577Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-05T14:21:05.586Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-05T14:21:05.595Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-05T14:21:05.596Z"}
+{"level":"info","message":" [x] Received import -f /tmp/e9a2c410-3f51-11e9-9377-432d4aae3386.json from modelq","timestamp":"2019-03-05T14:21:05.625Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-03-05T14:21:05.625Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":7,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-03-05T14:21:15.629Z"}
+{"level":"info","message":"Stoping bouncer client queue...","timestamp":"2019-03-05T14:21:15.688Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-05T14:21:15.698Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-05T14:21:15.706Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-05T14:21:15.707Z"}
+{"level":"info","message":" [x] Received import -f /tmp/efa99500-3f51-11e9-9377-432d4aae3386.json from modelq","timestamp":"2019-03-05T14:21:15.744Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-03-05T14:21:15.746Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":10,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-03-05T14:21:25.749Z"}
+{"level":"info","message":"Stoping bouncer client queue...","timestamp":"2019-03-05T14:21:26.266Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-03-05T14:21:26.277Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-03-05T14:21:26.289Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-03-05T14:21:26.289Z"}
+{"level":"info","message":" [x] Received import -f /tmp/f5fb51a0-3f51-11e9-9377-432d4aae3386.json from modelq","timestamp":"2019-03-05T14:21:26.360Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-03-05T14:21:26.360Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":15,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-03-05T14:21:36.364Z"}
+{"level":"info","message":"Stoping bouncer client queue...","timestamp":"2019-03-05T14:21:36.872Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-04-17T14:18:55.515Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-04-17T14:18:55.524Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-04-17T14:18:55.524Z"}
+{"level":"info","message":" [x] Received import -f /tmp/bbe4dc20-611b-11e9-9312-e319df1c7516.json from modelq","timestamp":"2019-04-17T14:18:55.598Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"teamSpace1\"}","timestamp":"2019-04-17T14:18:55.598Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":0,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"teamSpace1\"}","timestamp":"2019-04-17T14:19:05.601Z"}
+{"level":"info","message":"Stoping bouncer client queue...","timestamp":"2019-04-17T14:19:05.930Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-04-17T14:19:05.932Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-04-17T14:19:05.946Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-04-17T14:19:05.946Z"}
+{"level":"info","message":" [x] Received import -f /tmp/c2177800-611b-11e9-9312-e319df1c7516.json from modelq","timestamp":"2019-04-17T14:19:06.007Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-04-17T14:19:06.007Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-04-17T14:21:23.631Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-04-17T14:21:23.641Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-04-17T14:21:23.642Z"}
+{"level":"info","message":" [x] Received import -f /tmp/c2177800-611b-11e9-9312-e319df1c7516.json from modelq","timestamp":"2019-04-17T14:21:23.665Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-04-17T14:21:23.666Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-04-17T14:22:12.202Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-04-17T14:22:12.209Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-04-17T14:22:12.210Z"}
+{"level":"info","message":" [x] Received import -f /tmp/c2177800-611b-11e9-9312-e319df1c7516.json from modelq","timestamp":"2019-04-17T14:22:12.231Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-04-17T14:22:12.231Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-04-17T15:13:54.443Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-04-17T15:13:54.454Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-04-17T15:13:54.454Z"}
+{"level":"info","message":" [x] Received import -f /tmp/c2177800-611b-11e9-9312-e319df1c7516.json from modelq","timestamp":"2019-04-17T15:13:54.474Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-04-17T15:13:54.475Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-04-17T15:51:24.257Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-04-17T15:51:24.263Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-04-17T15:51:24.263Z"}
+{"level":"info","message":" [x] Received import -f /tmp/c2177800-611b-11e9-9312-e319df1c7516.json from modelq","timestamp":"2019-04-17T15:51:24.284Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-04-17T15:51:24.285Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":0,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-04-17T15:51:34.290Z"}
+{"level":"info","message":" [x] Received import -f /tmp/142e0690-611c-11e9-8cc1-b739b6660296.json from modelq","timestamp":"2019-04-17T15:51:34.291Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"teamSpace1\"}","timestamp":"2019-04-17T15:51:34.294Z"}
+{"level":"info","message":"Stoping bouncer client queue...","timestamp":"2019-04-17T15:51:34.364Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-04-17T15:51:34.365Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-04-17T15:51:34.369Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-04-17T15:51:34.369Z"}
+{"level":"info","message":" [x] Received import -f /tmp/142e0690-611c-11e9-8cc1-b739b6660296.json from modelq","timestamp":"2019-04-17T15:51:34.379Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"teamSpace1\"}","timestamp":"2019-04-17T15:51:34.379Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-04-17T15:51:44.297Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-04-17T15:51:44.311Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-04-17T15:51:44.311Z"}
+{"level":"info","message":" [x] Received import -f /tmp/31213830-611c-11e9-994c-73c79509a710.json from modelq","timestamp":"2019-04-17T15:51:44.330Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"teamSpace1\"}","timestamp":"2019-04-17T15:51:44.331Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":7,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"teamSpace1\"}","timestamp":"2019-04-17T15:51:44.378Z"}
+{"level":"info","message":" [x] Received import -f /tmp/6a35ef60-6123-11e9-8607-d3b99f3679c6.json from modelq","timestamp":"2019-04-17T15:51:44.379Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"teamSpace1\"}","timestamp":"2019-04-17T15:51:44.380Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":7,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"teamSpace1\"}","timestamp":"2019-04-17T15:51:54.379Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":7,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"teamSpace1\"}","timestamp":"2019-04-17T15:51:54.380Z"}
+{"level":"info","message":" [x] Received import -f /tmp/b77009f0-6128-11e9-808a-9ba905cf2dcd.json from modelq","timestamp":"2019-04-17T15:51:54.381Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"imsharedTeamspace\",\"project\":\"40e6a14c-29b9-4ce1-a04c-86eb7d8d261a\",\"user\":\"imProjectAdmin\"}","timestamp":"2019-04-17T15:51:54.381Z"}
+{"level":"info","message":" [x] Received import -f /tmp/b7a327e0-6128-11e9-808a-9ba905cf2dcd.json from modelq","timestamp":"2019-04-17T15:51:54.386Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"imsharedTeamspace\",\"project\":\"168da6a8-f3ed-42db-b625-af4db27ce6e7\",\"user\":\"imModelAdmin\"}","timestamp":"2019-04-17T15:51:54.386Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-04-17T15:51:59.706Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-04-17T15:51:59.710Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-04-17T15:51:59.710Z"}
+{"level":"info","message":" [x] Received import -f /tmp/bc4ed5a0-6128-11e9-808a-9ba905cf2dcd.json from modelq","timestamp":"2019-04-17T15:51:59.748Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"teamSpace1\"}","timestamp":"2019-04-17T15:51:59.749Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":0,\"database\":\"imsharedTeamspace\",\"project\":\"40e6a14c-29b9-4ce1-a04c-86eb7d8d261a\",\"user\":\"imProjectAdmin\"}","timestamp":"2019-04-17T15:52:04.381Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":0,\"database\":\"imsharedTeamspace\",\"project\":\"168da6a8-f3ed-42db-b625-af4db27ce6e7\",\"user\":\"imModelAdmin\"}","timestamp":"2019-04-17T15:52:04.386Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":0,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"teamSpace1\"}","timestamp":"2019-04-17T15:52:09.751Z"}
+{"level":"info","message":"Stoping bouncer client queue...","timestamp":"2019-04-17T15:52:10.310Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-04-17T15:52:10.325Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-04-17T15:52:10.335Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-04-17T15:52:10.335Z"}
+{"level":"info","message":" [x] Received import -f /tmp/c2a3c690-6128-11e9-808a-9ba905cf2dcd.json from modelq","timestamp":"2019-04-17T15:52:10.383Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-04-17T15:52:10.383Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":1,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-04-17T15:52:20.387Z"}
+{"level":"info","message":"Stoping bouncer client queue...","timestamp":"2019-04-17T15:52:20.399Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-04-17T15:52:20.408Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-04-17T15:52:20.427Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-04-17T15:52:20.427Z"}
+{"level":"info","message":" [x] Received import -f /tmp/c8abd000-6128-11e9-808a-9ba905cf2dcd.json from modelq","timestamp":"2019-04-17T15:52:20.501Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-04-17T15:52:20.501Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":7,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-04-17T15:52:30.501Z"}
+{"level":"info","message":"Stoping bouncer client queue...","timestamp":"2019-04-17T15:52:31.003Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-04-17T15:52:31.015Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-04-17T15:52:31.028Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-04-17T15:52:31.028Z"}
+{"level":"info","message":" [x] Received import -f /tmp/cef88390-6128-11e9-808a-9ba905cf2dcd.json from modelq","timestamp":"2019-04-17T15:52:31.074Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-04-17T15:52:31.075Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":10,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-04-17T15:52:41.080Z"}
+{"level":"info","message":"Stoping bouncer client queue...","timestamp":"2019-04-17T15:52:41.127Z"}
+{"level":"info","message":"Initialising bouncer client queue...","timestamp":"2019-04-17T15:52:41.135Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in jobq of amqp://localhost:5672....","timestamp":"2019-04-17T15:52:41.148Z"}
+{"level":"info","message":"Bouncer Client Queue started. Waiting for messages in modelq of amqp://localhost:5672....","timestamp":"2019-04-17T15:52:41.148Z"}
+{"level":"info","message":" [x] Received import -f /tmp/d5012940-6128-11e9-808a-9ba905cf2dcd.json from modelq","timestamp":"2019-04-17T15:52:41.198Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"status\":\"processing\",\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-04-17T15:52:41.203Z"}
+{"level":"info","message":"sending to reply queue(callbackq): {\"value\":15,\"database\":\"teamSpace1\",\"project\":\"5bfc11fa-50ac-b7e7-4328-83aa11fa50ac\",\"user\":\"collaboratorTeamspace1Model1JobA\"}","timestamp":"2019-04-17T15:52:51.206Z"}
+{"level":"info","message":"Stoping bouncer client queue...","timestamp":"2019-04-17T15:52:51.718Z"}
