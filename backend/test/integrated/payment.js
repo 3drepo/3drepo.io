@@ -685,6 +685,15 @@ describe("Enrolling to a subscription", function () {
 					});
 			});
 
+			it("to a user without job should fail", function(done) {
+				agent.post(`/${username}/members`)
+					.send({user: username5})
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_JOB.value);
+						done(err);
+					});
+			});
+
 			it("to another (3rd) user should succeed", function(done) {
 				agent.post(`/${username}/members`)
 					.send({user: username3, job: job3})
@@ -698,15 +707,6 @@ describe("Enrolling to a subscription", function () {
 					.send({user: username4, job: job4})
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.LICENCE_LIMIT_REACHED.value);
-						done(err);
-					});
-			});
-
-			it("to a user without job should fail", function(done) {
-				agent.post(`/${username}/members`)
-					.send({user: username5})
-					.expect(400, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_JOB.value);
 						done(err);
 					});
 			});
