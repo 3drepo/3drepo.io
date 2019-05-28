@@ -101,7 +101,10 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	}
 
 	get isHightlighted() {
-		return this.props.highlightMap[this.node._id];
+		const { selectionMap } = this.props;
+		const { hasChildren, _id } = this.node;
+
+		return !hasChildren && selectionMap[_id] === SELECTION_STATES.SELECTED;
 	}
 
 	public static defaultProps = {
