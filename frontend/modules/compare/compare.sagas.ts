@@ -39,6 +39,8 @@ import {
 	selectComponentState,
 	selectCompareModels
 } from './compare.selectors';
+import { selectTreeNodesList, TreeActions } from '../tree';
+import { VISIBILITY_STATES } from '../../constants/tree';
 
 const getNextRevision = (revisions, currentRevision) => {
 	if (!currentRevision) {
@@ -244,28 +246,14 @@ function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
 	}
 }
 
-function changeModelNodesVisibility(nodeName: string, visible: boolean) {
-	const TreeService = getAngularService('TreeService') as any;
-	const tree = TreeService.getAllNodes();
-	if (tree.children) {
-		for (let index = 0; index < tree.children.length; index++) {
-			const node = tree.children[index];
-			if (node.name === nodeName) {
-				if (visible) {
-					TreeService.showTreeNodes([node]);
-				} else {
-					TreeService.hideTreeNodes([node]);
-				}
-			}
-		}
-	}
+function* changeModelNodesVisibility(nodesIds = [], visible: boolean) {
+	const visibility = visible ? VISIBILITY_STATES.VISIBLE : VISIBILITY_STATES.INVISIBLE;
+	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, false, true));
 }
 
-function setModelsNodesVisibility(models, isVisible = true) {
-	for (let index = 0; index < models.length; index++) {
-		const model = models[index];
-		changeModelNodesVisibility(`${model.teamspace}:${model.name}`, isVisible);
-	}
+function* setModelsNodesVisibility(models, isVisible = true) {
+	const nodesIds = models.map(({ _id }) => _id);
+	yield changeModelNodesVisibility(nodesIds, isVisible);
 }
 
 function* startComparisonOfFederation() {
@@ -278,8 +266,8 @@ function* startComparisonOfFederation() {
 	const compareModels = yield select(selectCompareModels);
 	const selectedModels = yield select(selectSelectedModelsMap);
 
-	setModelsNodesVisibility(compareModels, false);
-	setModelsNodesVisibility(baseModels);
+	yield setModelsNodesVisibility(compareModels, false);
+	yield setModelsNodesVisibility(baseModels);
 
 	const modelsToLoad = [];
 	for (let index = 0; index < targetModels.length; index++) {
@@ -291,8 +279,7 @@ function* startComparisonOfFederation() {
 			const canReuseModel = sharedRevisionModel && selectedModels[sharedRevisionModel._id];
 
 			if (canReuseModel) {
-				const { teamspace, name } = sharedRevisionModel;
-				changeModelNodesVisibility(`${teamspace}:${name}`, true);
+				yield changeModelNodesVisibility([sharedRevisionModel], true);
 				Viewer.diffToolSetAsComparator(
 					model.teamspace,
 					model._id
