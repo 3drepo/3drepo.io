@@ -24,9 +24,8 @@ class PanelController implements ng.IController {
 		'$window',
 		'$scope',
 		'$timeout',
-
 		'PanelService',
-		'EventService',
+		'EventService'
 	];
 
 	public maxHeightAvailable;
