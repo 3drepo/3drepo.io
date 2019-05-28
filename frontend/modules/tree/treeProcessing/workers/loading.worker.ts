@@ -1,4 +1,3 @@
-import { flattenDeep } from 'lodash';
 import { VISIBILITY_STATES, SELECTION_STATES, BACKEND_VISIBILITY_STATES } from '../../../../constants/tree';
 import { IS_DEVELOPMENT } from '../../../../constants/environment';
 
@@ -60,12 +59,20 @@ const getFlattenNested = (tree, level = 1, parentId = null) => {
 			rowData.deepChildrenNumber += deepChildrenNumber;
 			rowData.childrenIds.push(subTree._id);
 			dataToFlatten.push(nestedData);
+
+			const someOfNestedIsInvisible = nestedData.some((node: INode) => {
+				return node.defaultVisibility !== VISIBILITY_STATES.VISIBLE;
+			});
+
+			if (someOfNestedIsInvisible) {
+				rowData.defaultVisibility = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
+			}
 		}
 	}
 
 	dataToFlatten.unshift(rowData);
 
-	const data = flattenDeep(dataToFlatten);
+	const data = dataToFlatten.flat();
 	return { data, deepChildrenNumber: data.length };
 };
 
