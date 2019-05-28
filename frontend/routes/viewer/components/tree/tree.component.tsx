@@ -108,7 +108,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 						<List
 							treeNodesList={treeNodesList}
 							expandedNodesMap={expandedNodesMap}
-							className="height-catcher"
+							// className="height-catcher"
 							ref={this.nodeListRef}
 							overscanRowCount={50}
 							height={height}
