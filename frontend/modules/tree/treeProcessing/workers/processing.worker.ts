@@ -204,6 +204,8 @@ const handleUpdateVisibility = ({ nodesIds = [], ...extraData }) => {
 		...result.nodesSelectionMap,
 		...nodesSelectionMap
 	};
+
+	debugger;
 	result.nodesVisibilityMap = nodesVisibilityMap,
 	result.meshesToUpdate = meshesToUpdate;
 	result.unhighlightedObjects = [
@@ -227,6 +229,7 @@ const handleNodesVisibility = (nodes, extraData) => {
 
 	const parents = [];
 	const processedNodes = [];
+	debugger
 	for (let nodeLoopIndex = 0; nodeLoopIndex < nodes.length; nodeLoopIndex++) {
 		const node = nodes[nodeLoopIndex];
 		const nodeVisibility = nodesVisibilityMap[node._id];
@@ -238,6 +241,10 @@ const handleNodesVisibility = (nodes, extraData) => {
 			}
 
 			const children = node.hasChildren && !skipChildren ? getDeepChildren(node) : [];
+
+			if (skipChildren && skipParents) {
+				children.push(node);
+			}
 
 			for (let index = 0; index < children.length; index++) {
 				const child = children[index];
@@ -257,7 +264,9 @@ const handleNodesVisibility = (nodes, extraData) => {
 				}
 			}
 
-			parents.push(node);
+			if (!skipParents) {
+				parents.push(node);
+			}
 		}
 	}
 

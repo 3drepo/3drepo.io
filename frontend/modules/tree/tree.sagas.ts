@@ -30,12 +30,13 @@ import {
 	selectNodesVisibilityMap,
 	selectNodesSelectionMap,
 	selectTreeNodesList,
-	selectTreeNodesIds,
 	selectSelectedNodesIds,
 	selectExpandedNodesMap,
 	getSelectNodesByIds,
 	getSelectNodesIdsFromSharedIds,
 	getSelectDeepChildren,
+	selectInvisibleNodesIds,
+	selectDefaultHiddenNodesIds,
 } from './tree.selectors';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -252,8 +253,9 @@ function* clearCurrentlySelected() {
 
 function* showAllNodes() {
 	try {
-		const nodesIds = yield select(selectTreeNodesIds);
+		const nodesIds = yield select(selectInvisibleNodesIds);
 		yield showTreeNodes(nodesIds, true);
+		yield put(ViewerActions.clearHighlights());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('show', 'all nodes', error));
 	}
@@ -342,6 +344,10 @@ function* hideIfcSpaces() {
 	try {
 		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 		yield put(TreeActions.setIfcSpacesHidden(!ifcSpacesHidden));
+
+		const ifcSpacesNodesIds = yield select(selectDefaultHiddenNodesIds);
+		const visibility = !ifcSpacesHidden ? VISIBILITY_STATES.INVISIBLE : VISIBILITY_STATES.VISIBLE;
+		yield put(TreeActions.setTreeNodesVisibility(ifcSpacesNodesIds, visibility, true, true));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('hide', 'IFC spaces', error));
 	}
@@ -434,7 +440,6 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 		});
 
 		unhighlightObjects(result.unhighlightedObjects.length);
-
 		const newNodesVisibilityMap = { ...nodesVisibilityMap, ...result.nodesVisibilityMap };
 
 		yield put(TreeActions.setAuxiliaryMaps({
@@ -473,7 +478,7 @@ function* handleMeshesVisibility(meshes, visibility) {
 	try {
 		const objectIds = {};
 		const alreadyProcessed = {};
-		debugger
+
 		for (let index = 0; index < meshes.length; index++) {
 			const node = meshes[index];
 			const { namespacedId, _id, teamspace, model } = node;

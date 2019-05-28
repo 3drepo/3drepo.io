@@ -20,7 +20,7 @@ import { pickBy, keys, values, flatten, pick, uniq } from 'lodash';
 
 import { calculateTotalMeshes } from '../../helpers/tree';
 import { searchByFilters } from '../../helpers/searching';
-import { SELECTION_STATES, NODE_TYPES } from '../../constants/tree';
+import { SELECTION_STATES, NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
 
 export const selectTreeDomain = (state) => Object.assign({}, state.tree);
 
@@ -76,6 +76,14 @@ export const selectNodesVisibilityMap = createSelector(
 	selectTreeDomain, (state) => state.nodesVisibilityMap
 );
 
+export const selectInvisibleNodesIds = createSelector(
+	selectNodesVisibilityMap, (nodesVisibilityMap) => {
+		return keys(pickBy(nodesVisibilityMap, (selectionState) => {
+			return selectionState === VISIBILITY_STATES.INVISIBLE;
+		}));
+	}
+);
+
 export const selectNodesIndexesMap = createSelector(
 	selectTreeDomain, (state) => state.nodesIndexesMap
 );
@@ -107,6 +115,14 @@ export const selectSearchEnabled = createSelector(
 
 export const selectIfcSpacesHidden = createSelector(
 	selectComponentState, (state) => state.ifcSpacesHidden
+);
+
+export const selectDefaultHiddenNodesIds = createSelector(
+	selectNodesDefaultVisibilityMap, (nodesVisibilityMap) => {
+		return keys(pickBy(nodesVisibilityMap, (selectionState) => {
+			return selectionState === VISIBILITY_STATES.INVISIBLE;
+		}));
+	}
 );
 
 export const selectExpandedNodesMap = createSelector(
