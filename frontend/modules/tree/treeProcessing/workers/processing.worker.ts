@@ -1,6 +1,7 @@
 import { intersection, keys, pickBy, pick, values, memoize } from 'lodash';
 import { VISIBILITY_STATES, SELECTION_STATES, NODE_TYPES } from '../../../../constants/tree';
 import { ACTION_TYPES } from '../treeProcessing.constants';
+import { IS_DEVELOPMENT } from '../../../../constants/environment';
 
 const localData = {
 	nodesList: [],
@@ -205,7 +206,6 @@ const handleUpdateVisibility = ({ nodesIds = [], ...extraData }) => {
 		...nodesSelectionMap
 	};
 
-	debugger;
 	result.nodesVisibilityMap = nodesVisibilityMap,
 	result.meshesToUpdate = meshesToUpdate;
 	result.unhighlightedObjects = [
@@ -229,7 +229,7 @@ const handleNodesVisibility = (nodes, extraData) => {
 
 	const parents = [];
 	const processedNodes = [];
-	debugger
+
 	for (let nodeLoopIndex = 0; nodeLoopIndex < nodes.length; nodeLoopIndex++) {
 		const node = nodes[nodeLoopIndex];
 		const nodeVisibility = nodesVisibilityMap[node._id];
@@ -396,6 +396,8 @@ self.addEventListener('message', ({ data }) => {
 	let result;
 	let error: string;
 
+	// tslint:disable-next-line
+	IS_DEVELOPMENT && console.time(`TREE ACTION (${actionId})`);
 	try {
 		switch (type) {
 			case ACTION_TYPES.SET_DATA:
@@ -419,6 +421,8 @@ self.addEventListener('message', ({ data }) => {
 	} catch (e) {
 		error = e.message;
 	}
+	// tslint:disable-next-line
+	IS_DEVELOPMENT && console.timeEnd(`TREE ACTION (${actionId})`);
 
 	// @ts-ignore
 	self.postMessage(JSON.stringify({ actionId, result, error }));
