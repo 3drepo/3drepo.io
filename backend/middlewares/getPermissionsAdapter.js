@@ -20,10 +20,10 @@
 	const ModelSetting = require("../models/modelSetting");
 	const Project = require("../models/project");
 	const User = require("../models/user");
+	const ResponseCodes = require("../response_codes");
 
 	// get permissions adapter
 	function getPermissionsAdapter(account) {
-
 		return {
 			getUser: function() {
 				if(this.dbUser) {
@@ -39,9 +39,8 @@
 			accountLevel: function(username) {
 
 				return this.getUser().then(user => {
-
 					if(!user) {
-						return [];
+						throw ResponseCodes.ACCOUNT_NOT_FOUND;
 					}
 
 					const permission = user.customData.permissions.findByUser(username);
@@ -81,7 +80,6 @@
 				const projectQuery = { models: model, "permissions.user": username };
 				// project admin have access to models underneath it.
 				return Project.findOne({account}, projectQuery, { "permissions.$" : 1 }).then(project => {
-
 					if(project && project.permissions) {
 						projectPerms = project.permissions[0].permissions;
 					}
@@ -94,9 +92,8 @@
 					return ModelSetting.findById({account, model}, model);
 
 				}).then(setting => {
-
 					if(!setting) {
-						return projectPerms;
+						throw ResponseCodes.MODEL_NOT_FOUND;
 					}
 
 					const perm = setting.findPermissionByUser(username);
