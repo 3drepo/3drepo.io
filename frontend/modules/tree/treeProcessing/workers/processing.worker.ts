@@ -309,9 +309,20 @@ const updateParentsSelection = (parents, newNodesSelectionMap) => {
 	const nodeParentsSelectionMapToUpdate = {};
 
 	for (let i = 0; i < parents.length; i++) {
-		const someUnselected =
-			parents[i].childrenIds.some((childId) => newNodesSelectionMap[childId] === SELECTION_STATES.UNSELECTED);
-		nodeParentsSelectionMapToUpdate[parents[i]] = SELECTION_STATES.PARENT_OF_UNSELECTED;
+		const everySelected =
+			parents[i].childrenIds.every((childId) =>
+				(newNodesSelectionMap[childId] || nodeParentsSelectionMapToUpdate[childId]) === SELECTION_STATES.SELECTED);
+		const everyUnselected =
+			parents[i].childrenIds.every((childId) =>
+				(newNodesSelectionMap[childId] || nodeParentsSelectionMapToUpdate[childId]) === SELECTION_STATES.UNSELECTED);
+
+		if (everySelected) {
+			nodeParentsSelectionMapToUpdate[parents[i]._id] = SELECTION_STATES.SELECTED;
+		} else if (everyUnselected) {
+			nodeParentsSelectionMapToUpdate[parents[i]._id] = SELECTION_STATES.UNSELECTED;
+		} else {
+			nodeParentsSelectionMapToUpdate[parents[i]._id] = SELECTION_STATES.PARENT_OF_UNSELECTED;
+		}
 	}
 
 	return nodeParentsSelectionMapToUpdate;
@@ -321,7 +332,7 @@ const handleToSelect = (toSelect, extraData) => {
 	const { nodesVisibilityMap } = extraData;
 
 	const newNodesSelectionMap = {};
-	const newNodesHighlightMap = {};
+	let parentsNodesSelectionMap = {};
 
 	for (let index = 0; index < toSelect.length; index++) {
 		const node = toSelect[index];
@@ -336,17 +347,18 @@ const handleToSelect = (toSelect, extraData) => {
 		}
 	}
 
-	// const clickedNode = toSelect[0];
-	// const parents = getParents(clickedNode);
-	// if (toSelect.length === 1 && !clickedNode.hasChildren) {
-	// 	updateParentsSelection(parents, newNodesSelectionMap);
-	// } else {
-	// 	if (clickedNode.hasChildren) {
-	// 		updateParentsSelection(parents, newNodesSelectionMap);
-	// 	}
-	// }
+	const clickedNode = toSelect[0];
+	const parents = getParents(clickedNode);
 
-	return { newNodesSelectionMap, newNodesHighlightMap };
+	if (toSelect.length === 1 && !clickedNode.hasChildren) {
+		parentsNodesSelectionMap = updateParentsSelection(parents, newNodesSelectionMap);
+	} else {
+		if (clickedNode.hasChildren) {
+			parentsNodesSelectionMap = updateParentsSelection(parents, newNodesSelectionMap);
+		}
+	}
+
+	return { ...newNodesSelectionMap, ...parentsNodesSelectionMap };
 };
 
 const handleDeselectNodes = ({ nodesIds = [], ...extraData }) => {
@@ -377,16 +389,11 @@ const handleSelectNodes = ({ nodes = [], ...extraData }) => {
 		nodes = [...nodes, ...children.flat()];
 	}
 
-	const { newNodesSelectionMap, newNodesHighlightMap } = handleToSelect(nodes, extraData);
+	const newNodesSelectionMap = handleToSelect(nodes, extraData);
 
 	result.nodesSelectionMap = {
 		...result.nodesSelectionMap,
 		...newNodesSelectionMap
-	};
-
-	result.nodesHighlightMap = {
-		...result.nodesHighlightMap,
-		...newNodesHighlightMap
 	};
 
 	result.highlightedObjects = getSelectMeshesByNodes(nodes);

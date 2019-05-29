@@ -47,7 +47,6 @@ interface IProps {
 	isSearchResult?: boolean;
 	visibilityMap: any;
 	selectionMap: any;
-	highlightMap: any;
 	collapseNode?: (id) => void;
 	expandNode?: (id) => void;
 	selectNode?: (id) => void;
@@ -97,14 +96,11 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	}
 
 	get isSelected() {
-		return this.props.selectionMap[this.node._id] === SELECTION_STATES.SELECTED;
+		return this.props.selectionMap[this.node._id] === SELECTION_STATES.PARENT_OF_UNSELECTED;
 	}
 
 	get isHightlighted() {
-		const { selectionMap } = this.props;
-		const { hasChildren, _id } = this.node;
-
-		return !hasChildren && selectionMap[_id] === SELECTION_STATES.SELECTED;
+		return this.props.selectionMap[this.node._id] === SELECTION_STATES.SELECTED;
 	}
 
 	public static defaultProps = {

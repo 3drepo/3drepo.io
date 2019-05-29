@@ -409,7 +409,6 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 
 		highlightObjects(result.highlightedObjects, result.nodesSelectionMap, colour);
 		yield put(TreeActions.updateNodesSelectionMap(result.nodesSelectionMap));
-		yield put(TreeActions.setNodesHighlightMap(result.nodesHighlightMap));
 		yield put(TreeActions.selectNodesSuccess());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));

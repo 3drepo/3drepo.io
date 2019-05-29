@@ -50,8 +50,6 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	setAuxiliaryMaps: ['auxiliaryMaps'],
 	setNodesSelectionMap: ['nodesSelectionMap'],
 	updateNodesSelectionMap: ['nodesSelectionMap'],
-	updateNodesHighlightMap: ['nodesHighlightMap'],
-	setNodesHighlightMap: ['nodesHighlightMap'],
 	showNodesBySharedIds: ['objects'],
 	selectNodes: ['nodesIds', 'skipExpand', 'skipChildren', 'colour'],
 	selectNodesSuccess: [],
@@ -129,27 +127,17 @@ const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) => {
 };
 
 const setNodesSelectionMap = (state = INITIAL_STATE, { nodesSelectionMap }) => {
+	console.log('REDUCER: setNodesSelectionMap')
 	return { ...state, nodesSelectionMap: { ...nodesSelectionMap } };
 };
 
 const updateNodesSelectionMap = (state = INITIAL_STATE, { nodesSelectionMap }) => {
+	console.log('REDUCER: updateNodesSelectionMap')
 	const updatedNodesSelectionMap = {
 		...state.nodesSelectionMap,
 		...nodesSelectionMap
 	};
 	return { ...state, nodesSelectionMap: updatedNodesSelectionMap };
-};
-
-const setNodesHighlightMap = (state = INITIAL_STATE, { nodesHighlightMap }) => {
-	return { ...state, nodesHighlightMap: { ...nodesHighlightMap } };
-};
-
-const updateNodesHighlightMap = (state = INITIAL_STATE, { nodesHighlightMap }) => {
-	const updatedNodesHighlightMap = {
-		...state.nodesHighlightMap,
-		...nodesHighlightMap
-	};
-	return { ...state, nodesHighlightMap: updatedNodesHighlightMap };
 };
 
 const setAuxiliaryMaps = (state = INITIAL_STATE, { auxiliaryMaps }) => {
@@ -241,7 +229,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.REMOVE_GROUP_FROM_SELECTED]: removeGroupFromSelected,
 	[TreeTypes.SET_NODES_SELECTION_MAP]: setNodesSelectionMap,
 	[TreeTypes.UPDATE_NODES_SELECTION_MAP]: updateNodesSelectionMap,
-	[TreeTypes.SET_AUXILIARY_MAPS]: setAuxiliaryMaps,
-	[TreeTypes.UPDATE_NODES_HIGHLIGHT_MAP]: updateNodesHighlightMap,
-	[TreeTypes.SET_NODES_HIGHLIGHT_MAP]: setNodesHighlightMap
+	[TreeTypes.SET_AUXILIARY_MAPS]: setAuxiliaryMaps
 });
