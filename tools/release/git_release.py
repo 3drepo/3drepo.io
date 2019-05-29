@@ -48,7 +48,7 @@ code = 0
 if code:
     fatalError("git force add failed")
 
-os.system("sed -i '.json' 's/\"VERSION\" : \"[^ ]*\",/\"VERSION\" : \"" + version +"\",/' backend/VERSION.json")
+os.system("sed -i '.bak' 's/\"VERSION\" : \"[^ ]*\",/\"VERSION\" : \"" + version +"\",/' backend/VERSION.json")
 
 os.system("git add backend/VERSION.json")
 
