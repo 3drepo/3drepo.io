@@ -40,6 +40,7 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import TreeNode from './components/treeNode/treeNode.container';
 import { EmptyStateInfo } from '../views/views.styles';
+import { IS_DEVELOPMENT } from '../../../../constants/environment';
 
 interface IProps {
 	className: string;

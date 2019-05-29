@@ -23,16 +23,14 @@ import { TreeNode } from './treeNode.component';
 import {
 	TreeActions,
 	selectNodesVisibilityMap,
-	selectNodesSelectionMap,
-	selectNodesHighlightMap
+	selectNodesSelectionMap
 } from '../../../../../../modules/tree';
 import { selectSettings } from '../../../../../../modules/model';
 
 const mapStateToProps = createStructuredSelector({
 	settings: selectSettings,
 	visibilityMap: selectNodesVisibilityMap,
-	selectionMap: selectNodesSelectionMap,
-	highlightMap: selectNodesHighlightMap
+	selectionMap: selectNodesSelectionMap
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
