@@ -99,16 +99,12 @@ module.exports.createApp = function (server, serverConfig) {
 			socket.on("join", data => {
 				// check permission if the user have permission to join room
 				const auth = data.model ? middlewares.hasReadAccessToModelHelper : middlewares.isAccountAdminHelper;
+				const modelNameSpace = data.model ?  `::${data.model}` : "";
 
 				auth(username, data.account, data.model).then(hasAccess => {
-
-					const modelNameSpace = data.model ?  `::${data.model}` : "";
-
 					if(hasAccess) {
-
 						socket.join(`${data.account}${modelNameSpace}`);
 						socket.emit(joinedEventName, { account: data.account, model: data.model});
-
 					} else {
 						socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}${modelNameSpace}`});
 						systemLogger.logError(`${username} - ${sessionId} - ${socket.client.id} has no access to join room ${data.account}${modelNameSpace}`, {
@@ -117,6 +113,8 @@ module.exports.createApp = function (server, serverConfig) {
 							model: data.model
 						});
 					}
+				}).catch( err => {
+					socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}${modelNameSpace}`});
 				});
 
 			});

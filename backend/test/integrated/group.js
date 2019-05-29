@@ -142,8 +142,8 @@ describe("Groups", function () {
 
 		it("with some other teamspace should fail", function(done){
 			agent.get(`/${noAccessUser}/${model}/revision/f640aa3dec2/groups/${groupID}`)
-				.expect(401 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+				.expect(404 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
 					done(err);
 				});
 		});

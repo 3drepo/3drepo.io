@@ -40,7 +40,7 @@
 
 				return this.getUser().then(user => {
 					if(!user) {
-						throw ResponseCodes.ACCOUNT_NOT_FOUND;
+						throw ResponseCodes.RESOURCE_NOT_FOUND;
 					}
 
 					const permission = user.customData.permissions.findByUser(username);
@@ -93,7 +93,7 @@
 
 				}).then(setting => {
 					if(!setting) {
-						throw ResponseCodes.MODEL_NOT_FOUND;
+						throw ResponseCodes.RESOURCE_NOT_FOUND;
 					}
 
 					const perm = setting.findPermissionByUser(username);
