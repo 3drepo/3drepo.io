@@ -76,19 +76,28 @@ export const Slider = styled(SliderComponent).attrs({
 	.slider__track {
 		background: ${COLOR.BLACK_60};
 		opacity: 1;
+
+		&:after {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: -3px;
+			height: 3px;
+			width: 100%;
+		}
 	}
 `;
 
 export const SliderLabels = styled.div`
 	display: flex;
 	justify-content: space-between;
-	margin-top: 8px;
 	padding-left: 13px;
 `;
 
 export const SliderLabel = styled.div<ISliderLabel>`
 	color: ${((props) => props.disabled ? COLOR.BLACK_40 : COLOR.BLACK_60)};
 	cursor: pointer;
+	padding-top: 8px;
 
 	&:first-child, &:last-child {
 		width: 40px;
