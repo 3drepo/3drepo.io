@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { cond, matches, isEqual, constant, stubTrue, memoize } from 'lodash';
+import { cond, matches, isEqual, constant, stubTrue } from 'lodash';
 import { COLOR } from '../../../../../../styles';
 import {
 	TREE_ITEM_FEDERATION_TYPE,
@@ -136,4 +136,9 @@ export const NameWrapper = styled.div`
 
 export const Actions = styled.div`
 	align-self: center;
+`;
+
+export const ParentOfVisible = styled.span`
+	color: ${COLOR.LIGHT_BLUE};
+	display: flex;
 `;

@@ -24,7 +24,7 @@ import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpIcon from '@material-ui/icons/KeyboardArrowUp';
 
-import { Container, Name, NameWrapper, Actions, StyledExpandableButton } from './treeNode.styles';
+import { Container, Name, NameWrapper, Actions, StyledExpandableButton, ParentOfVisible } from './treeNode.styles';
 import {
 	TREE_ITEM_FEDERATION_TYPE,
 	TREE_ITEM_MODEL_TYPE,
@@ -56,6 +56,10 @@ interface IProps {
 	scrollToTop?: () => void;
 }
 
+interface IState {
+	hovered: boolean;
+}
+
 const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
 	<StyledExpandableButton
 		onClick={onClick}
@@ -66,11 +70,15 @@ const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
 	</StyledExpandableButton>
 );
 
-const ParentOfVisibleIcon = () => <VisibilityIcon color="disabled" />;
+const ParentOfVisibleIcon = () => <ParentOfVisible><VisibilityIcon color="inherit" /></ParentOfVisible>;
 const VisibleIcon = () => <VisibilityIcon color="primary" />;
 const InvisibleIcon = () => <VisibilityOffIcon color="action" />;
 
-export class TreeNode extends React.PureComponent<IProps, any> {
+export class TreeNode extends React.PureComponent<IProps, IState> {
+	public state = {
+		hovered: false
+	};
+
 	get node() {
 		return this.props.data;
 	}
@@ -125,23 +133,26 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		);
 	});
 
-	private renderModelActions = renderWhenTrue(() => (
-		<Actions>
-			<SmallIconButton
-				Icon={OpenInNewIcon}
-				tooltip="Open model in new tab"
-				onClick={this.handleOpenModelClick}
-			/>
-		</Actions>
+	private renderOpenModelAction = renderWhenTrue(() => (
+		<SmallIconButton
+			Icon={OpenInNewIcon}
+			tooltip="Open model in new tab"
+			onClick={this.handleOpenModelClick}
+		/>
+	));
+
+	private renderGoTopAction = renderWhenTrue(() => (
+		<SmallIconButton
+			Icon={UpIcon}
+			tooltip="Go to top"
+			onClick={this.goToTop}
+		/>
 	));
 
 	private renderActions = renderWhenTrue(() => (
 		<Actions>
-			<SmallIconButton
-				Icon={UpIcon}
-				tooltip="Go to top"
-				onClick={this.goToTop}
-			/>
+			{this.renderOpenModelAction(this.node.isModel)}
+			{this.renderGoTopAction(!this.node.isModel)}
 			<SmallIconButton
 				Icon={IsolateIcon}
 				tooltip="Isolate"
@@ -165,10 +176,15 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		return InvisibleIcon;
 	}
 
+	public createHoverHandler = (hovered) => () => {
+		this.setState({ hovered });
+	}
+
 	public render() {
 		const { expanded, isSearchResult, style, key } = this.props;
 		return (
 			<Container
+				onMouseEnter={this.createHoverHandler(true)} onMouseLeave={this.createHoverHandler(false)}
 				style={style}
 				key={key}
 				nodeType={this.type}
@@ -180,8 +196,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 				onClick={this.handleNodeClick}
 			>
 				{this.renderName()}
-				{this.renderModelActions(this.isExpandedModelInFederation)}
-				{this.renderActions(!this.node.isFederation && !this.isExpandedModelInFederation)}
+				{this.renderActions(!this.node.isFederation && this.state.hovered)}
 			</Container>
 		);
 	}
@@ -221,7 +236,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		const [teamspace, name] = this.node.name.split(':');
 		const {model} = this.props.settings.subModels.find((subModel) => subModel.name === name);
 
-		window.open(`${window.location.origin}/viewer/${teamspace}/${model}`);
+		window.open(`${window.location.origin}/viewer/${teamspace}/${model}`, '_blank', 'noopener');
 	}
 
 	private handleNodeClick = () => {
