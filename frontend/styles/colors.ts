@@ -55,7 +55,8 @@ export const COLOR = {
 	NEGATIVE: 'rgba(234, 57, 57, 1)',
 	NEGATIVE_87: 'rgba(234, 57, 57, 0.87)',
 	REGENT_GRAY: '#8397AC',
-	SILVER_CHALICE: '#A8A8A8'
+	SILVER_CHALICE: '#A8A8A8',
+	LIGHT_BLUE: '#6788ab'
 };
 
 export const PIN_COLORS = mapValues({
