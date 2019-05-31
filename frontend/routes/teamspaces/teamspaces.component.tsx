@@ -20,14 +20,14 @@ import SimpleBar from 'simplebar-react';
 import * as queryString from 'query-string';
 import { isEmpty, isEqual } from 'lodash';
 import Add from '@material-ui/icons/Add';
-import MenuItem from '@material-ui/core/MenuItem';
+import { ClickAwayListener, MenuItem } from '@material-ui/core';
 
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
-import ModelItem from './components/modelItem/modelItem.container';
-import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 import { getAngularService, runAngularTimeout } from '../../helpers/migration';
+import { MODEL_TYPE, FEDERATION_TYPE } from './teamspaces.contants';
+import { PERMISSIONS_VIEWS } from '../projects/projects.component';
 import { ProjectDialog } from './components/projectDialog/projectDialog.component';
 import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
@@ -36,8 +36,8 @@ import FederationDialog from './components/federationDialog/federationDialog.con
 import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
 import { ProjectItem } from './components/projectItem/projectItem.component';
 import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
-import { MODEL_TYPE, FEDERATION_TYPE } from './teamspaces.contants';
-import { PERMISSIONS_VIEWS } from '../projects/projects.component';
+import ModelItem from './components/modelItem/modelItem.container';
+import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -99,7 +99,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-		if (this.props.teamspaces.length === 0 ) {
+		if (this.props.teamspaces.length === 0) {
 			this.props.fetchTeamspaces(this.props.currentTeamspace);
 		}
 

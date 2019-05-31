@@ -139,7 +139,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 
 			if (!isHidden && !isPendingStatus(this.props.status)) {
 				return renderWhenTrue((
-					<Tooltip title={label} key={index}>
+					<Tooltip enterDelay={50} title={label} key={index}>
 						<IconButton aria-label={label} onClick={action}>
 							<Icon {...iconProps} />
 						</IconButton>

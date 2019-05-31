@@ -28,6 +28,7 @@ interface IProps {
 	className?: string;
 	active?: boolean;
 	placement?: TooltipProps['placement'];
+	enterDelay?: TooltipProps['enterDelay'];
 	action?: (event) => void;
 }
 
@@ -40,12 +41,18 @@ export const TooltipButton = (props: IProps) => {
 		disabled = false,
 		className,
 		active = false,
-		placement
+		placement,
+		enterDelay
 	} = props;
 	const iconProps = { color, fontSize: 'small' } as any;
 
 	return (
-		<Tooltip title={label} disableHoverListener={disabled} placement={placement}>
+		<Tooltip
+			enterDelay={enterDelay}
+			title={label}
+			disableHoverListener={disabled}
+			placement={placement}
+		>
 			<span>
 				<StyledIconButton
 					aria-label={label}

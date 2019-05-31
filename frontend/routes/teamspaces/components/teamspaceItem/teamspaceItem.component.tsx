@@ -54,6 +54,7 @@ export const TeamspaceItem = (props: IProps) => {
 	const renderActions = () => renderWhenTrue(() => (
 		<TooltipButton
 			{...ROW_ACTIONS.ADD_NEW}
+			enterDelay={50}
 			label="Add new project"
 			action={onAddProject}
 		/>

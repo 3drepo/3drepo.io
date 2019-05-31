@@ -211,6 +211,11 @@ export const MuiTheme = createMuiTheme({
 			fontSizeLarge: {
 				fontSize: 35
 			}
+		},
+		MuiTooltip: {
+			popper: {
+				pointerEvents: 'none'
+			}
 		}
 	}
 });

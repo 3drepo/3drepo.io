@@ -104,14 +104,17 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 		<RowMenu open={hovered} forceOpen={this.state.actionsMenuOpen} toggleForceOpen={this.toggleActionsMenuOpen}>
 			<TooltipButton
 				{...ROW_ACTIONS.EDIT}
+				enterDelay={50}
 				action={this.props.onEditClick}
 			/>
 			<TooltipButton
 				{...ROW_ACTIONS.PERMISSIONS}
+				enterDelay={50}
 				action={this.props.onPermissionsClick}
 			/>
 			<TooltipButton
 				{...ROW_ACTIONS.DELETE}
+				enterDelay={50}
 				action={this.props.onRemoveClick}
 			/>
 		</RowMenu>
