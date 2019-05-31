@@ -393,6 +393,7 @@ function* selectNode({ id }) {
 function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false, colour }) {
 	try {
 		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
+		const nodesSelectionMap = yield select(selectNodesSelectionMap);
 		const nodes = yield select(getSelectNodesByIds(nodesIds));
 		const lastNode = nodes[nodes.length - 1];
 		yield handleMetadata(lastNode);
@@ -404,7 +405,8 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 		const result = yield TreeProcessor.selectNodes({
 			nodes,
 			skipChildren,
-			nodesVisibilityMap
+			nodesVisibilityMap,
+			nodesSelectionMap
 		});
 
 		highlightObjects(result.highlightedObjects, result.nodesSelectionMap, colour);
