@@ -307,21 +307,28 @@ const handleNodesVisibility = (nodes, extraData) => {
 
 const updateParentsSelection = (parents, newNodesSelectionMap) => {
 	const nodeParentsSelectionMapToUpdate = {};
+	const nodesSelectionMap = { ...newNodesSelectionMap };
 
 	for (let i = 0; i < parents.length; i++) {
-		const everySelected =
-			parents[i].childrenIds.every((childId) =>
-				(newNodesSelectionMap[childId] || nodeParentsSelectionMapToUpdate[childId]) === SELECTION_STATES.SELECTED);
-		const everyUnselected =
-			parents[i].childrenIds.every((childId) =>
-				(newNodesSelectionMap[childId] || nodeParentsSelectionMapToUpdate[childId]) === SELECTION_STATES.UNSELECTED);
+		const paretnId = parents[i]._id;
+		const everyChildrenSelected =
+			parents[i].childrenIds.every((childId) => {
+				return nodesSelectionMap[childId] === SELECTION_STATES.SELECTED ||
+					nodeParentsSelectionMapToUpdate[childId] === SELECTION_STATES.SELECTED;
+			});
 
-		if (everySelected) {
-			nodeParentsSelectionMapToUpdate[parents[i]._id] = SELECTION_STATES.SELECTED;
-		} else if (everyUnselected) {
-			nodeParentsSelectionMapToUpdate[parents[i]._id] = SELECTION_STATES.UNSELECTED;
+		const everyChildrenUnselected =
+			parents[i].childrenIds.every((childId) => {
+				return nodesSelectionMap[childId] === SELECTION_STATES.UNSELECTED ||
+					nodeParentsSelectionMapToUpdate[childId] === SELECTION_STATES.UNSELECTED;
+			});
+
+		if (everyChildrenSelected) {
+			nodeParentsSelectionMapToUpdate[paretnId] = SELECTION_STATES.SELECTED;
+		} else if (everyChildrenUnselected) {
+			nodeParentsSelectionMapToUpdate[paretnId] = SELECTION_STATES.UNSELECTED;
 		} else {
-			nodeParentsSelectionMapToUpdate[parents[i]._id] = SELECTION_STATES.PARENT_OF_UNSELECTED;
+			nodeParentsSelectionMapToUpdate[paretnId] = SELECTION_STATES.PARENT_OF_UNSELECTED;
 		}
 	}
 
@@ -329,9 +336,9 @@ const updateParentsSelection = (parents, newNodesSelectionMap) => {
 };
 
 const handleToSelect = (toSelect, extraData) => {
-	const { nodesVisibilityMap } = extraData;
+	const { nodesVisibilityMap, nodesSelectionMap } = extraData;
 
-	const newNodesSelectionMap = {};
+	const newNodesSelectionMap = { ...nodesSelectionMap };
 	let parentsNodesSelectionMap = {};
 
 	for (let index = 0; index < toSelect.length; index++) {
