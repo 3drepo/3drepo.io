@@ -64,6 +64,16 @@ const deletedNotification = function(session, notification) {
 	return Queue.insertEventMessage(msg);
 };
 
+function resourcesAttached(session, user, refs) {
+	const msg = {
+		event : user + "::resourcesAttached",
+		channel : user,
+		emitter : session,
+		data : refs
+	};
+	return Queue.insertEventMessage(msg);
+}
+
 // Issues notifications
 function newIssues(emitter, account, model, data) {
 	return insertEventQueue("issue" + eventTypes.CREATED, emitter, account, model, null, data);
@@ -154,5 +164,6 @@ module.exports = {
 	newModel,
 	eventTypes,
 	upsertedNotification,
-	deletedNotification
+	deletedNotification,
+	resourcesAttached
 };

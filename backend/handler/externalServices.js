@@ -52,6 +52,16 @@ ExternalServices.getFile = (account, collection, type, key) => {
 	}
 };
 
+ExternalServices.uploadFile = (account, collection, type, data) => {
+	switch(type) {
+		case "fs":
+			return Promise.resolve(FSHandler.uploadFile(data));
+		default:
+			SystemLogger.logError(`Unrecognised external service: ${type}`);
+			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
+	}
+};
+
 ExternalServices.removeFiles = (account, collection, type, keys) => {
 	switch(type) {
 		case "fs" :

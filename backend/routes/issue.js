@@ -437,6 +437,10 @@ router.post("/issues/:issueId/comments", middlewares.issue.canComment, addCommen
  * */
 router.delete("/issues/:issueId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
 
+router.post("/revision/:rid/issues.json", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
+
+router.post("/issues/:issueId/attach-file",middlewares.issue.canComment, attachResourceToIssue, middlewares.chat.onResourcesAttached, responseCodes.onSuccessfulOperation);
+
 function storeIssue(req, res, next) {
 	const data = req.body;
 	data.owner = req.session.user.username;
@@ -659,6 +663,29 @@ function deleteComment(req, res, next) {
 		next();
 	}).catch(err => {
 		responseCodes.onError(req, res, err);
+	});
+}
+
+function attachResourceToIssue(req, res, next) {
+	const responsePlace = utils.APIInfo(req);
+	const {account, model, issueId} = req.params;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const user = req.session.user.username;
+	const upload = multer({
+		storage: multer.memoryStorage()
+	});
+
+	upload.single("file")(req, res, function (err) {
+		const name = req.body.name;
+
+		if (err) {
+			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
+		} else {
+			Issue.attachResourceFile(account, model, issueId, name, user, sessionId, req.file.buffer).then(resource => {
+				req.dataModel = resource;
+				next();
+			});
+		}
 	});
 }
 

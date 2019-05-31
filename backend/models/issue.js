@@ -25,6 +25,7 @@ const ModelSetting = require("./modelSetting");
 const History = require("./history");
 const Ref = require("./ref");
 const _ = require("lodash");
+const FileRef = require("./fileRef");
 
 const ChatEvent = require("./chatEvent");
 
@@ -909,6 +910,21 @@ issue.isStatusChange =  function (oldIssue, newIssue) {
 		return false;
 	}
 	return oldIssue.status !== newIssue.status;
+};
+
+issue.addRefToIssue = async function(account, model, issueId, username, sessionId, ref) {
+	const issues = await db.getCollection(account, model + ".issues");
+	const systemComment = addSystemComment(account, model, sessionId, issueId,null, username, "resource", null, ref.name)[0];
+	await issues.update({ _id : utils.stringToUUID(issueId)},{ $push: {refs: ref._id, comments: systemComment}});
+	return ref;
+};
+
+issue.attachResourceFile = async function(account, model, issueId, name, username, sessionId, buffer) {
+	const ref = await FileRef.uploadFileToResources(account, model, name, buffer);
+	delete ref.link;
+	delete ref.type;
+	await this.addRefToIssue(account, model, issueId, username, sessionId, ref);
+	return ref;
 };
 
 module.exports = issue;

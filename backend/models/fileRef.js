@@ -25,6 +25,7 @@ const systemLogger = require("../logger.js").systemLogger;
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
 const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
+const RESOURCES_FILE_REF_EXT = ".resources.ref";
 
 function getRefEntry(account, collection, fileName) {
 	return DB.getCollection(account, collection).then((col) => {
@@ -153,6 +154,18 @@ FileRef.removeAllFilesFromModel = function(account, model) {
 	promises.push(removeAllFiles(account, model + JSON_FILE_REF_EXT));
 	promises.push(removeAllFiles(account, model + UNITY_BUNDLE_REF_EXT));
 	return Promise.all(promises);
+};
+
+FileRef.uploadFileToResources = async function(account, model, name, data) {
+	const collName = model + RESOURCES_FILE_REF_EXT;
+	const type = "fs";
+
+	const refInfo = await ExternalServices.uploadFile(account, collName, type, data);
+	const ref = { ...refInfo, type ,name , createdAt : (new Date()).getTime()};
+
+	const resourcesRef = await DB.getCollection(account, collName);
+	await resourcesRef.insertOne(ref);
+	return ref;
 };
 
 module.exports = FileRef;

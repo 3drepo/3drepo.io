@@ -721,7 +721,6 @@ function downloadLatest(req, res, next) {
 }
 
 function uploadModel(req, res, next) {
-
 	const responsePlace = utils.APIInfo(req);
 	const account = req.params.account;
 	const model = req.params.model;
