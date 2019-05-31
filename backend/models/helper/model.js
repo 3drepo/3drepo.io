@@ -32,7 +32,7 @@ const Ref = require("../ref");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
 const multer = require("multer");
-const fs = require("fs");
+const fs = require("fs-extra");
 const ChatEvent = require("../chatEvent");
 const Project = require("../project");
 const _ = require("lodash");
@@ -689,7 +689,7 @@ function _deleteFiles(files) {
 
 	files.forEach(file => {
 
-		const deleteFile = (file.type === "file" ? fs.unlink : fs.rmdir);
+		const deleteFile = (file.type === "file" ? fs.unlink : fs.remove);
 
 		deleteFile(file.path, function(err) {
 			if(err) {
@@ -799,7 +799,6 @@ function removeModelCollections(account, model) {
 }
 
 function removeModel(account, model, forceRemove) {
-
 	return ModelSetting.findById({account, model}, model).then(setting => {
 		if (!setting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
