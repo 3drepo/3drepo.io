@@ -114,9 +114,9 @@ FileRef.getJSONFileStream = function(account, model, fileName) {
 
 FileRef.removeAllFilesFromModel = function(account, model) {
 	const promises = [];
-	promises.push(removeAllFiles(account, model, ORIGINAL_FILE_REF_EXT));
-	promises.push(removeAllFiles(account, model, JSON_FILE_REF_EXT));
-	promises.push(removeAllFiles(account, model, UNITY_BUNDLE_REF_EXT));
+	promises.push(removeAllFiles(account, model + ORIGINAL_FILE_REF_EXT));
+	promises.push(removeAllFiles(account, model + JSON_FILE_REF_EXT));
+	promises.push(removeAllFiles(account, model + UNITY_BUNDLE_REF_EXT));
 	return Promise.all(promises);
 };
 
