@@ -7,13 +7,24 @@ const localData = {
 	nodesList: [],
 	nodesIndexesMap: {},
 	defaultVisibilityMap: {},
-	meshesByModelId: {}
+	meshesByModelId: {},
+	visibilityMap: {},
+	selectionMap: {},
+	nodesBySharedIdsMap: {}
 };
 
-const setLocalData = ({ nodesList, nodesIndexesMap, defaultVisibilityMap }) => {
+const setLocalData = (data) => {
+	const {
+		nodesList, nodesIndexesMap, defaultVisibilityMap,
+		meshesByModelId, nodesBySharedIdsMap, visibilityMap, selectionMap
+	} = data;
 	localData.nodesList = nodesList;
 	localData.nodesIndexesMap = nodesIndexesMap;
 	localData.defaultVisibilityMap = defaultVisibilityMap;
+	localData.meshesByModelId = meshesByModelId;
+	localData.visibilityMap = visibilityMap;
+	localData.selectionMap = selectionMap;
+	localData.nodesBySharedIdsMap = nodesBySharedIdsMap;
 };
 
 const getSelectedNodesIds = (nodesSelectionMap) => {
@@ -59,6 +70,14 @@ const getParents = memoize((node) => {
 
 	return parents;
 }, (node) => node._id);
+
+const clearCurrentlySelected = () => {
+	const { selectionMap, nodesList } = localData;
+	for (let index = 0, size = nodesList.length; index < size; index++) {
+		const node = nodesList[index];
+		selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
+	}
+};
 
 const updateParentsVisibility = (nodes = [], extraData) => {
 	const nodesVisibilityMap = { ...extraData.nodesVisibilityMap };
@@ -336,14 +355,14 @@ const updateParentsSelection = (parents, newNodesSelectionMap) => {
 };
 
 const handleToSelect = (toSelect, extraData) => {
-	const { nodesVisibilityMap, nodesSelectionMap } = extraData;
+	const { visibilityMap, nodesSelectionMap } = extraData;
 
 	const newNodesSelectionMap = { ...nodesSelectionMap };
 	let parentsNodesSelectionMap = {};
 
 	for (let index = 0; index < toSelect.length; index++) {
 		const node = toSelect[index];
-		const currentVisibility = nodesVisibilityMap[node._id];
+		const currentVisibility = visibilityMap[node._id];
 
 		if (currentVisibility !== VISIBILITY_STATES.INVISIBLE) {
 			if (currentVisibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
@@ -383,28 +402,36 @@ const handleDeselectNodes = ({ nodesIds = [], ...extraData }) => {
 	return { nodesSelectionMap, unhighlightedObjects };
 };
 
-const handleSelectNodes = ({ nodes = [], ...extraData }) => {
+const handleSelectNodes = ({ nodesIds = [], ...extraData }) => {
 	const { skipChildren } = extraData;
+	let nodes = getNodesByIds(nodesIds);
+
 	const result = {
 		highlightedObjects: [],
 		nodesSelectionMap: {},
 		nodesHighlightMap: {}
 	};
 
+	clearCurrentlySelected();
+
 	if (!skipChildren) {
 		const children = nodes.map((node) => getDeepChildren(node)) as any;
 		nodes = [...nodes, ...children.flat()];
 	}
 
-	const newNodesSelectionMap = handleToSelect(nodes, extraData);
+	console.time('handleToSelect')
+	const newNodesSelectionMap = handleToSelect(nodes);
+	console.timeEnd('handleToSelect')
 
+	console.time('handleSelectNodes spread')
 	result.nodesSelectionMap = {
 		...result.nodesSelectionMap,
 		...newNodesSelectionMap
 	};
+	console.timeEnd('handleSelectNodes spread')
 
 	result.highlightedObjects = getSelectMeshesByNodes(nodes);
-
+	localData.selectionMap = result.nodesSelectionMap;
 	return result;
 };
 

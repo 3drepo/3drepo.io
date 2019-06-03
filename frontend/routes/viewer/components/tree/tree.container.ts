@@ -24,8 +24,8 @@ import {
 	TreeActions,
 	selectIfcSpacesHidden,
 	selectExpandedNodesMap,
-	selectNodesSelectionMap,
-	selectNodesVisibilityMap,
+	selectSelectionMap,
+	selectVisibilityMap,
 	selectNodesIndexesMap,
 	selectSearchEnabled,
 	selectSelectedFilters,
@@ -39,8 +39,8 @@ const mapStateToProps = createStructuredSelector({
 	ifcSpacesHidden: selectIfcSpacesHidden,
 	treeNodesList: selectVisibleTreeNodesList,
 	expandedNodesMap: selectExpandedNodesMap,
-	nodesSelectionMap: selectNodesSelectionMap,
-	nodesVisibilityMap: selectNodesVisibilityMap,
+	nodesSelectionMap: selectSelectionMap,
+	nodesVisibilityMap: selectVisibilityMap,
 	nodesIndexesMap: selectNodesIndexesMap,
 	isPending: selectIsPending
 });

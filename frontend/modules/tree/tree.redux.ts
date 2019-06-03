@@ -127,12 +127,10 @@ const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) => {
 };
 
 const setNodesSelectionMap = (state = INITIAL_STATE, { nodesSelectionMap }) => {
-	console.log('REDUCER: setNodesSelectionMap')
 	return { ...state, nodesSelectionMap: { ...nodesSelectionMap } };
 };
 
 const updateNodesSelectionMap = (state = INITIAL_STATE, { nodesSelectionMap }) => {
-	console.log('REDUCER: updateNodesSelectionMap')
 	const updatedNodesSelectionMap = {
 		...state.nodesSelectionMap,
 		...nodesSelectionMap

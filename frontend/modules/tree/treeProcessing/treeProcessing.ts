@@ -1,20 +1,42 @@
 import { uniqueId } from 'lodash';
 import { ACTION_TYPES } from './treeProcessing.constants';
+import { Processing } from './tree.service';
 // tslint:disable-next-line
 const TreeLoaderWorker = require('worker-loader?inline!./workers/loading.worker');
 // tslint:disable-next-line
 const TreeProcessingWorker = require('worker-loader?inline!./workers/processing.worker');
 
-export default class TreeProcessing {
+class TreeProcessing {
 	private resolves = {} as any;
 	private rejects = {} as any;
 
 	private dataWorker = new TreeProcessingWorker();
 	private loaderWorker;
+	private processing: Processing;
 
 	constructor() {
 		this.dataWorker.addEventListener('message', this.handleDataResult, false);
 		this.dataWorker.addEventListener('messageerror', this.handleError, false);
+	}
+
+	get data() {
+		return this.processing || {};
+	}
+
+	get selectedNodesIds() {
+		return this.processing ? this.processing.selectedNodesIds : [];
+	}
+
+	get visibilityMap() {
+		return this.processing ? this.processing.visibilityMap : {};
+	}
+
+	get selectionMap() {
+		return this.processing ? this.processing.selectionMap : {};
+	}
+
+	get invisibleNodesIds() {
+		return this.processing ? this.processing.invisibleNodesIds : {};
 	}
 
 	public terminate = () => {
@@ -27,7 +49,6 @@ export default class TreeProcessing {
 		return new Promise((resolve, reject) => {
 			this.resolves[actionId] = resolve;
 			this.rejects[actionId] = reject;
-			this.dataWorker.postMessage({ actionId, type, ...payload });
 		});
 	}
 
@@ -42,13 +63,13 @@ export default class TreeProcessing {
 		});
 	}
 
-	public selectNodes = (payload) => this.callAction(ACTION_TYPES.SELECT_NODES, payload);
+	public selectNodes = (payload) => this.processing.selectNodes(payload);
 
-	public deselectNodes = (payload) => this.callAction(ACTION_TYPES.DESELECT_NODES, payload);
+	public deselectNodes = (payload) => this.processing.deselectNodes(payload);
 
-	public updateVisibility = (payload) => this.callAction(ACTION_TYPES.UPDATE_VISIBILITY, payload);
+	public updateVisibility = (payload) => this.processing.updateVisibility(payload);
 
-	public isolateNodes = (payload) => this.callAction(ACTION_TYPES.ISOLATE_NODES, payload);
+	public isolateNodes = (payload) => this.processing.isolateNodes(payload);
 
 	private handleDataResult = ({ data }) => {
 		const { actionId, error, result } = JSON.parse(data);
@@ -73,12 +94,29 @@ export default class TreeProcessing {
 		resolve({ nodesList, auxiliaryMaps });
 		delete this.resolves.transform;
 
-		this.callAction(ACTION_TYPES.SET_DATA, {
+		console.time('INIT TREE SERVICE');
+		this.processing = new Processing({
+			nodesList,
+			nodesIndexesMap: {...auxiliaryMaps.nodesIndexesMap},
+			defaultVisibilityMap: {...auxiliaryMaps.nodesDefaultVisibilityMap},
+			meshesByModelId: {...auxiliaryMaps.meshesByModelId},
+			visibilityMap: {...auxiliaryMaps.nodesVisibilityMap},
+			selectionMap: {...auxiliaryMaps.nodesSelectionMap},
+			nodesBySharedIdsMap: {...auxiliaryMaps.nodesBySharedIdsMap}
+		});
+		console.timeEnd('INIT TREE SERVICE');
+
+		console.time('SET DATA REAL TIME');
+		await this.callAction(ACTION_TYPES.SET_DATA, {
 			nodesList,
 			nodesIndexesMap: auxiliaryMaps.nodesIndexesMap,
 			defaultVisibilityMap: auxiliaryMaps.nodesDefaultVisibilityMap,
-			meshesByModelId: auxiliaryMaps.meshesByModelId
+			meshesByModelId: auxiliaryMaps.meshesByModelId,
+			visibilityMap: auxiliaryMaps.nodesVisibilityMap,
+			selectionMap: auxiliaryMaps.nodesSelectionMap,
+			nodesBySharedIdsMap: auxiliaryMaps.nodesBySharedIdsMap
 		});
+		console.timeEnd('SET DATA REAL TIME')
 	}
 
 	private handleError = (e) => {
@@ -92,3 +130,5 @@ export default class TreeProcessing {
 		}
 	}
 }
+
+export default new TreeProcessing();
