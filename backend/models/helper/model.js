@@ -32,7 +32,7 @@ const Ref = require("../ref");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
 const multer = require("multer");
-const fs = require("fs-extra");
+const fs = require("fs");
 const ChatEvent = require("../chatEvent");
 const Project = require("../project");
 const _ = require("lodash");
@@ -689,21 +689,20 @@ function _deleteFiles(files) {
 
 	files.forEach(file => {
 
-		const deleteFile = (file.type === "file" ? fs.unlink : fs.remove);
+		const deleteFile = (file.type === "file" ? fs.unlinkSync : fs.rmdirSync);
 
-		deleteFile(file.path, function(err) {
-			if(err) {
-				systemLogger.logError(`error while deleting ${file.desc}`,{
-					message: err.message,
-					err: err,
-					file: file.path
-				});
-			} else {
-				systemLogger.logInfo(`${file.desc} deleted`,{
-					file: file.path
-				});
-			}
-		});
+		try {
+			deleteFile(file.path);
+			systemLogger.logInfo(`${file.desc} deleted`,{
+				file: file.path
+			});
+		} catch(err) {
+			systemLogger.logError(`error while deleting ${file.desc}`,{
+				message: err.message,
+				err: err,
+				file: file.path
+			});
+		}
 	});
 }
 
