@@ -176,15 +176,11 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 		return InvisibleIcon;
 	}
 
-	public createHoverHandler = (hovered) => () => {
-		this.setState({ hovered });
-	}
-
 	public render() {
 		const { expanded, isSearchResult, style, key } = this.props;
+
 		return (
 			<Container
-				onMouseEnter={this.createHoverHandler(true)} onMouseLeave={this.createHoverHandler(false)}
 				style={style}
 				key={key}
 				nodeType={this.type}
@@ -196,7 +192,7 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 				onClick={this.handleNodeClick}
 			>
 				{this.renderName()}
-				{this.renderActions(!this.node.isFederation && this.state.hovered)}
+				{this.renderActions(!this.node.isFederation)}
 			</Container>
 		);
 	}

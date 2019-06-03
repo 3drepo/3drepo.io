@@ -21,20 +21,13 @@ import { pickBy, keys, values, flatten, pick, uniq } from 'lodash';
 import { calculateTotalMeshes } from '../../helpers/tree';
 import { searchByFilters } from '../../helpers/searching';
 import { SELECTION_STATES, NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
+import { TreeProcessingData } from './treeProcessing/treeProcessing.constants';
 import TreeProcessing from './treeProcessing/treeProcessing';
 
 export const selectTreeDomain = (state) => Object.assign({}, state.tree);
 
 export const selectSelectedNodes = createSelector(
 	selectTreeDomain, (state) => state.selectedNodes
-);
-
-export const selectTreeNodesList = createSelector(
-	selectTreeDomain, (state) => state.treeNodesList
-);
-
-export const selectTreeNodesIds = createSelector(
-	selectTreeNodesList, (treeNodesList) => treeNodesList.map(({ _id }) => _id)
 );
 
 export const selectIsPending = createSelector(
@@ -49,7 +42,15 @@ export const selectComponentState = createSelector(
 	selectTreeDomain, (state) => state.componentState
 );
 
-const selectTreeProccessing = () => TreeProcessing.data;
+const selectTreeProccessing = () => TreeProcessing.data as TreeProcessingData;
+
+export const selectTreeNodesList = createSelector(
+	selectTreeProccessing, (treeProcessingData) => treeProcessingData.nodesList || []
+);
+
+export const selectTreeNodesIds = createSelector(
+	selectTreeNodesList, (treeNodesList) => treeNodesList.map(({ _id }) => _id)
+);
 
 export const selectSelectionMap = createSelector(
 	selectTreeProccessing, (treeProcessingData) => treeProcessingData.selectionMap
@@ -132,10 +133,6 @@ export const selectExpandedNodesMap = createSelector(
 	selectTreeDomain, (state) => state.expandedNodesMap
 );
 
-export const selectNumberOfInvisibleChildrenMap = createSelector(
-	selectTreeDomain, (state) => state.numberOfInvisibleChildrenMap
-);
-
 export const selectVisibleTreeNodesList = createSelector(
 	[
 		selectFilteredNodesList, selectNodesIndexesMap, selectSelectedFilters,
@@ -143,6 +140,7 @@ export const selectVisibleTreeNodesList = createSelector(
 	],
 	(treeNodesList, nodesIndexesMap, selectedFilters, expandedNodesMap, searchEnabled) => {
 		const visibleNodes = [];
+		console.log('selectVisibleTreeNodesList call')
 
 		for (let index = 0; index < treeNodesList.length; index++) {
 			const treeNode = { ...treeNodesList[index] };

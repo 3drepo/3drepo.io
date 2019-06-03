@@ -1,20 +1,6 @@
 import { VISIBILITY_STATES, SELECTION_STATES, BACKEND_VISIBILITY_STATES } from '../../../../constants/tree';
 import { IS_DEVELOPMENT } from '../../../../constants/environment';
-
-interface INode {
-	_id: string;
-	namespacedId: string;
-	name: string;
-	level: number;
-	parentId: number;
-	hasChildren: boolean;
-	deepChildrenNumber: number;
-	isFederation?: boolean;
-	isModel?: boolean;
-	shared_ids?: string[];
-	defaultVisibility: string;
-	childrenIds: string[];
-}
+import { INode } from '../treeProcessing.constants';
 
 const isModelNode = (level, isFederation, hasFederationAsParent?) => {
 	return (level === 1 && !isFederation) || (level === 2 && hasFederationAsParent);

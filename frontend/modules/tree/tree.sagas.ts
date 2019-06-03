@@ -21,7 +21,7 @@ import TreeProcessing from './treeProcessing/treeProcessing';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { dispatch } from '../../helpers/migration';
+import { dispatch, getAngularService } from '../../helpers/migration';
 import { GroupsActions } from '../groups';
 import { DialogActions } from '../dialog';
 import {
@@ -35,7 +35,8 @@ import {
 	selectInvisibleNodesIds,
 	selectDefaultHiddenNodesIds,
 	getSelectDeepChildren,
-	selectSelectionMap
+	selectSelectionMap,
+	selectVisibilityMap
 } from './tree.selectors';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -58,7 +59,6 @@ const unhighlightObjects = (objects = []) => {
 };
 
 const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
-	console.log('objects', objects)
 	for (let index = 0, size = objects.length; index < size; index++) {
 		const { meshes, teamspace, modelId } = objects[index];
 
@@ -132,10 +132,7 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 			: [];
 		dataToProcessed.subTrees = subTreesData.map(({ data }) => data.mainTree);
 
-		const { nodesList } = yield TreeProcessing.transformData(dataToProcessed);
-
-		yield put(TreeActions.setAuxiliaryMaps({}));
-		yield put(TreeActions.setTreeNodesList(nodesList));
+		yield TreeProcessing.transformData(dataToProcessed);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'full tree', error));
 	}
@@ -179,7 +176,6 @@ function* handleBackgroundClick() {
 }
 
 function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = false }) {
-	const nodes = yield select(getSelectNodesByIds(nodesIds));
 	const addGroup = MultiSelect.isAccumMode();
 	const removeGroup = MultiSelect.isDecumMode();
 	const isMultiSelectMode = addGroup || removeGroup;
@@ -189,6 +185,7 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = f
 	}
 
 	if (removeGroup) {
+		const nodes = yield select(getSelectNodesByIds(nodesIds));
 		const activeMeta = yield select(selectActiveMeta);
 		const shouldCloseMeta = nodes.some(({ meta }) => meta.includes(activeMeta));
 		if (shouldCloseMeta) {
@@ -201,10 +198,6 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = f
 	} else {
 		yield put(TreeActions.selectNodes(nodesIds, skipExpand, skipChildren, !isMultiSelectMode));
 	}
-
-
-
-	//yield TreeActions.getSelectedNodes();
 }
 
 function* handleNodesClickBySharedIds({ objects = [] }) {
@@ -284,15 +277,9 @@ function* hideTreeNodes(nodesIds = [], skipNested = false) {
 /**
  * ISOLATE NODES
  */
-
 function* isolateNodes(nodesIds = [], colour?) {
 	try {
 		const result = yield TreeProcessing.isolateNodes({ nodesIds });
-
-/* 		yield put(TreeActions.setAuxiliaryMaps({
-			nodesVisibilityMap: result.nodesVisibilityMap,
-			nodesSelectionMap: result.nodesSelectionMap
-		})); */
 
 		unhighlightObjects(result.unhighlightObjects);
 		highlightObjects(result.highlightedObjects, result.nodesSelectionMap, colour);
@@ -304,8 +291,8 @@ function* isolateNodes(nodesIds = [], colour?) {
 }
 
 function* isolateSelectedNodes() {
-	console.log('TreeProcessing.selectedNodesIds', TreeProcessing.selectedNodesIds);
-	yield isolateNodes(TreeProcessing.selectedNodesIds);
+	const selectedNodesIds = yield select(selectSelectedNodesIds);
+	yield isolateNodes(selectedNodesIds);
 }
 
 function* isolateNodesBySharedIds({ objects = []}) {
@@ -335,7 +322,6 @@ function* hideIfcSpaces() {
 /**
  * DESELECT NODES
  */
-
 function* deselectNodes({ nodesIds = [] }) {
 	try {
 		const result = yield TreeProcessing.deselectNodes({ nodesIds });
@@ -372,7 +358,8 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 			!skipExpand && expandToNode(lastNodeId)
 		]);
 
-		highlightObjects(result.highlightedObjects, colour);
+		const selectionMap = yield select(selectSelectionMap);
+		highlightObjects(result.highlightedObjects, selectionMap, colour);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
 	}
@@ -399,12 +386,8 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 		});
 
 		unhighlightObjects(result.unhighlightedObjects.length);
-
-/* 		yield put(TreeActions.setAuxiliaryMaps({
-			nodesVisibilityMap: newNodesVisibilityMap,
-			nodesSelectionMap: result.nodesSelectionMap
-		})); */
-		yield updateMeshesVisibility(result.meshesToUpdate, TreeProcessing.visibilityMap);
+		const visibilityMap = yield select(selectVisibilityMap);
+		yield updateMeshesVisibility(result.meshesToUpdate, visibilityMap);
 
 		yield put(TreeActions.setTreeNodesVisibilitySuccess());
 	} catch (error) {
@@ -463,6 +446,27 @@ function* handleMeshesVisibility(meshes, visibility) {
 	}
 }
 
+function* collapseNode({ id }) {
+	const expandedNodesMap = {... (yield select(selectExpandedNodesMap))};
+	const nodesIndexesMap = yield select(selectNodesIndexesMap);
+	const nodesList = yield select(selectTreeNodesList);
+
+	const nodeIndex = nodesIndexesMap[id];
+	const node = nodesList[nodeIndex];
+
+	if (node.deepChildrenNumber) {
+		for (let i = nodeIndex; i < nodeIndex + node.deepChildrenNumber; i++) {
+			if (expandedNodesMap[nodesList[i]._id]) {
+				expandedNodesMap[nodesList[i]._id] = false;
+			}
+		}
+	} else {
+		expandedNodesMap[id] = false;
+	}
+
+	yield put(TreeActions.setExpanedNodesMap(expandedNodesMap));
+};
+
 export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.FETCH_FULL_TREE, fetchFullTree);
 	yield takeLatest(TreeTypes.START_LISTEN_ON_SELECTIONS, startListenOnSelections);
@@ -486,4 +490,5 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.HIDE_NODES_BY_SHARED_IDS, hideNodesBySharedIds);
 	yield takeLatest(TreeTypes.ISOLATE_NODE, isolateNode);
 	yield takeLatest(TreeTypes.CLEAR_CURRENTLY_SELECTED, clearCurrentlySelected);
+	yield takeLatest(TreeTypes.COLLAPSE_NODE, collapseNode);
 }
