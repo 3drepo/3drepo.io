@@ -85,6 +85,7 @@ module.exports = {
 		path: require("path").resolve(__dirname, '../../submodules/tests/backend/files/'),
 		levels: 2
 	},
+	defaultStorage: "fs",
 	tokenExpiry: {
 		emailVerify: 336,
 		forgotPassword: 24

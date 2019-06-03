@@ -38,6 +38,10 @@ class GridFSHandler {
 		return DB.getFileFromGridFS(account, this.cleanColName(col), file);
 	}
 
+	storeFile(account, col, data) {
+		return DB.storeFileInGridFS(account, this.cleanColName(col), data);
+	}
+
 	removeFiles() {
 		// No need to remove anything - we will be dropping the collection
 		return Promise.resolve();

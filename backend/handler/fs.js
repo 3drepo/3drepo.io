@@ -66,7 +66,7 @@ class FSHandler {
 		}
 	}
 
-	uploadFile(data) {
+	storeFile(data) {
 		const _id = nodeuuid.v4();
 		const folderNames = generateFoldernames(_id, config.fs.levels);
 		const link = folderNames + "/" + _id;
@@ -77,7 +77,7 @@ class FSHandler {
 					if (err) {
 						reject(err);
 					} else {
-						resolve({_id, link, size:data.length});
+						resolve({_id, link, size:data.length, type: "fs"});
 					}
 				}));
 			});

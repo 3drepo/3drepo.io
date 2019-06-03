@@ -912,19 +912,30 @@ issue.isStatusChange =  function (oldIssue, newIssue) {
 	return oldIssue.status !== newIssue.status;
 };
 
-issue.addRefToIssue = async function(account, model, issueId, username, sessionId, ref) {
+issue.addRefsToIssue = async function(account, model, issueId, username, sessionId, refs) {
 	const issues = await db.getCollection(account, model + ".issues");
-	const systemComment = addSystemComment(account, model, sessionId, issueId,null, username, "resource", null, ref.name)[0];
-	await issues.update({ _id : utils.stringToUUID(issueId)},{ $push: {refs: ref._id, comments: systemComment}});
-	return ref;
+	const systemComments = [];
+	const ref_ids = [];
+
+	refs.forEach(ref => {
+		addSystemComment(account, model, sessionId, issueId, systemComments, username, "resource", null, ref.name);
+		ref_ids.push(ref._id);
+	});
+
+	await issues.update({ _id : utils.stringToUUID(issueId)},{ $push: {refs:  {$each: ref_ids}, comments:  {$each:systemComments}}});
+	return refs;
 };
 
-issue.attachResourceFile = async function(account, model, issueId, name, username, sessionId, buffer) {
-	const ref = await FileRef.uploadFileToResources(account, model, name, buffer);
-	delete ref.link;
-	delete ref.type;
-	await this.addRefToIssue(account, model, issueId, username, sessionId, ref);
-	return ref;
+issue.attachResourceFiles = async function(account, model, issueId, names, username, sessionId, buffers) {
+	const refsPromises = buffers.map((buffer,i) => FileRef.storeFileAsResource(account, model, names[i], buffer));
+	const refs = await Promise.all(refsPromises);
+	refs.forEach(r => {
+		delete r.link;
+		delete r.type;
+	});
+
+	await this.addRefsToIssue(account, model, issueId, username, sessionId, refs);
+	return refs;
 };
 
 module.exports = issue;

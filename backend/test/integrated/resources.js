@@ -71,7 +71,7 @@ describe("Resources ", function () {
 	it("should succeed on attaching documents", function(done) {
 		async.waterfall([
 			createIssue(agents.adminTeamspace1JobA),
-			attachDocs(agents.adminTeamspace1JobA, 'my awesome resource', 'test_doc.docx')
+			attachDocs(agents.adminTeamspace1JobA, ['my document', 'a pdf'], ['test_doc.docx', 'dummy.pdf'])
 		], done);
 	});
 

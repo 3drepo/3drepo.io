@@ -133,7 +133,6 @@ FileRef.getTotalOrgFileSize = function(account, model) {
 
 		return totalSize;
 	});
-
 };
 
 FileRef.getUnityBundle = function(account, model, fileName) {
@@ -156,12 +155,10 @@ FileRef.removeAllFilesFromModel = function(account, model) {
 	return Promise.all(promises);
 };
 
-FileRef.uploadFileToResources = async function(account, model, name, data) {
+FileRef.storeFileAsResource = async function(account, model, name, data) {
 	const collName = model + RESOURCES_FILE_REF_EXT;
-	const type = "fs";
-
-	const refInfo = await ExternalServices.uploadFile(account, collName, type, data);
-	const ref = { ...refInfo, type ,name , createdAt : (new Date()).getTime()};
+	const refInfo = await ExternalServices.storeFile(account, collName, data);
+	const ref = { ...refInfo, name , createdAt : (new Date()).getTime()};
 
 	const resourcesRef = await DB.getCollection(account, collName);
 	await resourcesRef.insertOne(ref);

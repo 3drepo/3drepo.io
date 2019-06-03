@@ -28,16 +28,15 @@ const createIssue = (account, modelId) => (agent, issueData = null) =>  next => 
 };
 
 
-const attachDocument = (account, modelId) => (agent, name , filename, issueId = null) => (issue,  next) => {
+const attachDocument = (account, modelId) => (agent, names , filenames, issueId = null) => (issue,  next) => {
 	next = next || issue;
 	issueId = issueId || issue._id;
 
-	console.log('name here ' + name);
+	const request = agent.post(`/${account}/${modelId}/issues/${issueId}/attach-file`)
+		.field({names : names});
 
-	agent.post(`/${account}/${modelId}/issues/${issueId}/attach-file`)
-		.field({name, hey:true})
-		.attach("file", __dirname + "/../../statics/documents/" + filename)
-		.expect(200, (err, res) => next(err, res.body));
+	filenames.forEach(file => request.attach("file", __dirname + "/../../statics/documents/" + file));
+	request.expect(200, (err, res) => next(err, res.body));
 };
 
 module.exports = {
