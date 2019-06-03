@@ -21,6 +21,7 @@ import { pickBy, keys, values, flatten, pick, uniq } from 'lodash';
 import { calculateTotalMeshes } from '../../helpers/tree';
 import { searchByFilters } from '../../helpers/searching';
 import { SELECTION_STATES, NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
+import TreeProcessing from './treeProcessing/treeProcessing';
 
 export const selectTreeDomain = (state) => Object.assign({}, state.tree);
 
@@ -48,12 +49,14 @@ export const selectComponentState = createSelector(
 	selectTreeDomain, (state) => state.componentState
 );
 
-export const selectNodesSelectionMap = createSelector(
-	selectTreeDomain, (state) => state.nodesSelectionMap
+const selectTreeProccessing = () => TreeProcessing.data;
+
+export const selectSelectionMap = createSelector(
+	selectTreeProccessing, (treeProcessingData) => treeProcessingData.selectionMap
 );
 
 export const selectSelectedNodesIds = createSelector(
-	selectNodesSelectionMap, (nodesSelectionMap) => {
+	selectSelectionMap, (nodesSelectionMap) => {
 		return keys(pickBy(nodesSelectionMap, (selectionState) => {
 			return selectionState === SELECTION_STATES.SELECTED;
 		}));
@@ -61,39 +64,39 @@ export const selectSelectedNodesIds = createSelector(
 );
 
 export const selectUnselectedNodesIds = createSelector(
-	selectNodesSelectionMap, (nodesSelectionMap) => {
+	selectSelectionMap, (nodesSelectionMap) => {
 		return keys(pickBy(nodesSelectionMap, (selectionState) => {
 			return selectionState === SELECTION_STATES.UNSELECTED;
 		}));
 	}
 );
 
-export const selectNodesDefaultVisibilityMap = createSelector(
-	selectTreeDomain, (state) => state.nodesDefaultVisibilityMap
+export const selectDefaultVisibilityMap = createSelector(
+	selectTreeProccessing, (treeProcessingData) => treeProcessingData.defaultVisibilityMap
 );
 
-export const selectNodesVisibilityMap = createSelector(
-	selectTreeDomain, (state) => state.nodesVisibilityMap
+export const selectVisibilityMap = createSelector(
+	selectTreeProccessing, (treeProcessingData) => treeProcessingData.visibilityMap
 );
 
 export const selectInvisibleNodesIds = createSelector(
-	selectNodesVisibilityMap, (nodesVisibilityMap) => {
-		return keys(pickBy(nodesVisibilityMap, (selectionState) => {
+	selectVisibilityMap, (visibilityMap) => {
+		return keys(pickBy(visibilityMap, (selectionState) => {
 			return selectionState === VISIBILITY_STATES.INVISIBLE;
 		}));
 	}
 );
 
 export const selectNodesIndexesMap = createSelector(
-	selectTreeDomain, (state) => state.nodesIndexesMap
+	selectTreeProccessing, (treeProcessingData) => treeProcessingData.nodesIndexesMap
 );
 
 export const selectNodesBySharedIdsMap = createSelector(
-	selectTreeDomain, (state) => state.nodesBySharedIdsMap
+	selectTreeProccessing, (treeProcessingData) => treeProcessingData.nodesBySharedIdsMap
 );
 
 export const selectMeshesByModelId = createSelector(
-	selectTreeDomain, (state) => state.meshesByModelId
+	selectTreeProccessing, (treeProcessingData) => treeProcessingData.meshesByModelId
 );
 
 export const selectSelectedFilters = createSelector(
@@ -118,7 +121,7 @@ export const selectIfcSpacesHidden = createSelector(
 );
 
 export const selectDefaultHiddenNodesIds = createSelector(
-	selectNodesDefaultVisibilityMap, (nodesVisibilityMap) => {
+	selectDefaultVisibilityMap, (nodesVisibilityMap) => {
 		return keys(pickBy(nodesVisibilityMap, (selectionState) => {
 			return selectionState === VISIBILITY_STATES.INVISIBLE;
 		}));

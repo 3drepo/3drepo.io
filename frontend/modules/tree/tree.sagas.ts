@@ -27,8 +27,6 @@ import { DialogActions } from '../dialog';
 import {
 	selectIfcSpacesHidden,
 	selectNodesIndexesMap,
-	selectNodesVisibilityMap,
-	selectNodesSelectionMap,
 	selectTreeNodesList,
 	selectSelectedNodesIds,
 	selectExpandedNodesMap,
@@ -36,7 +34,8 @@ import {
 	getSelectNodesIdsFromSharedIds,
 	selectInvisibleNodesIds,
 	selectDefaultHiddenNodesIds,
-	getSelectDeepChildren
+	getSelectDeepChildren,
+	selectSelectionMap
 } from './tree.selectors';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -45,8 +44,6 @@ import { MultiSelect } from '../../services/viewer/multiSelect';
 import { VISIBILITY_STATES, SELECTION_STATES } from '../../constants/tree';
 import { selectActiveMeta, BimActions, selectIsActive } from '../bim';
 import { ViewerActions } from '../viewer';
-
-const TreeProcessor = new TreeProcessing();
 
 const unhighlightObjects = (objects = []) => {
 	for (let index = 0, size = objects.length; index < size; index++) {
@@ -61,6 +58,7 @@ const unhighlightObjects = (objects = []) => {
 };
 
 const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
+	console.log('objects', objects)
 	for (let index = 0, size = objects.length; index < size; index++) {
 		const { meshes, teamspace, modelId } = objects[index];
 
@@ -134,9 +132,9 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 			: [];
 		dataToProcessed.subTrees = subTreesData.map(({ data }) => data.mainTree);
 
-		const { nodesList, auxiliaryMaps } = yield TreeProcessor.transformData(dataToProcessed);
+		const { nodesList } = yield TreeProcessing.transformData(dataToProcessed);
 
-		yield put(TreeActions.setAuxiliaryMaps(auxiliaryMaps));
+		yield put(TreeActions.setAuxiliaryMaps({}));
 		yield put(TreeActions.setTreeNodesList(nodesList));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'full tree', error));
@@ -201,10 +199,12 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = f
 		}
 		yield put(TreeActions.deselectNodes(nodesIds));
 	} else {
-		yield put(TreeActions.selectNodes(nodesIds, skipExpand, skipChildren));
+		yield put(TreeActions.selectNodes(nodesIds, skipExpand, skipChildren, !isMultiSelectMode));
 	}
 
-	yield TreeActions.getSelectedNodes();
+
+
+	//yield TreeActions.getSelectedNodes();
 }
 
 function* handleNodesClickBySharedIds({ objects = [] }) {
@@ -226,37 +226,21 @@ function* getSelectedNodes() {
 	}
 }
 
-function* clear() {
+function* clearCurrentlySelected() {
+	Viewer.clearHighlights();
 	yield all([
-		put(ViewerActions.clearHighlights()),
 		put(ViewerActions.setMetadataVisibility(false)),
 		put(BimActions.setActiveMeta(null))
 	]);
 }
 
-function* clearCurrentlySelected() {
-	yield spawn(clear);
-
-	const selectedNodesIds = yield select(selectSelectedNodesIds);
-	const newNodesSelectionMap = {};
-
-	for (let index = 0; index < selectedNodesIds.length; index++) {
-		const nodeId = selectedNodesIds[index];
-		newNodesSelectionMap[nodeId] = SELECTION_STATES.UNSELECTED;
-	}
-
-	yield put(TreeActions.updateNodesSelectionMap(newNodesSelectionMap));
-}
-
 /**
  * SHOW NODES
  */
-
 function* showAllNodes() {
 	try {
 		const nodesIds = yield select(selectInvisibleNodesIds);
 		yield showTreeNodes(nodesIds, true);
-		yield put(ViewerActions.clearHighlights());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('show', 'all nodes', error));
 	}
@@ -303,18 +287,12 @@ function* hideTreeNodes(nodesIds = [], skipNested = false) {
 
 function* isolateNodes(nodesIds = [], colour?) {
 	try {
-		const nodesSelectionMap = yield select(selectNodesSelectionMap);
-		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
-		const result = yield TreeProcessor.isolateNodes({
-			nodesIds,
-			nodesSelectionMap,
-			nodesVisibilityMap
-		});
+		const result = yield TreeProcessing.isolateNodes({ nodesIds });
 
-		yield put(TreeActions.setAuxiliaryMaps({
+/* 		yield put(TreeActions.setAuxiliaryMaps({
 			nodesVisibilityMap: result.nodesVisibilityMap,
 			nodesSelectionMap: result.nodesSelectionMap
-		}));
+		})); */
 
 		unhighlightObjects(result.unhighlightObjects);
 		highlightObjects(result.highlightedObjects, result.nodesSelectionMap, colour);
@@ -326,8 +304,8 @@ function* isolateNodes(nodesIds = [], colour?) {
 }
 
 function* isolateSelectedNodes() {
-	const selectedNodesIds = yield select(selectSelectedNodesIds);
-	yield isolateNodes(selectedNodesIds);
+	console.log('TreeProcessing.selectedNodesIds', TreeProcessing.selectedNodesIds);
+	yield isolateNodes(TreeProcessing.selectedNodesIds);
 }
 
 function* isolateNodesBySharedIds({ objects = []}) {
@@ -360,14 +338,8 @@ function* hideIfcSpaces() {
 
 function* deselectNodes({ nodesIds = [] }) {
 	try {
-		const selectedNodesIds = yield select(selectSelectedNodesIds);
-		const result = yield TreeProcessor.deselectNodes({
-			nodesIds,
-			selectedNodesIds
-		});
-
+		const result = yield TreeProcessing.deselectNodes({ nodesIds });
 		unhighlightObjects(result.unhighlightedObjects);
-		yield put(TreeActions.updateNodesSelectionMap(result.nodesSelectionMap));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('deselect', 'node', error));
 	}
@@ -381,7 +353,6 @@ function* deselectNodesBySharedIds({ objects = [] }) {
 /**
  * SELECT NODES
  */
-
 function* selectNode({ id }) {
 	try {
 		yield put(TreeActions.handleNodesClick([id], true));
@@ -390,28 +361,18 @@ function* selectNode({ id }) {
 	}
 }
 
-function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false, colour }) {
+function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false, shouldClear = false, colour }) {
 	try {
-		const nodesVisibilityMap = yield select(selectNodesVisibilityMap);
-		const nodesSelectionMap = yield select(selectNodesSelectionMap);
-		const nodes = yield select(getSelectNodesByIds(nodesIds));
-		const lastNode = nodes[nodes.length - 1];
-		yield handleMetadata(lastNode);
+		const lastNodeId = nodesIds[nodesIds.length - 1];
+		const lastNode = yield select(getSelectNodesByIds([lastNodeId]));
 
-		if (!skipExpand) {
-			yield expandToNode(lastNode._id);
-		}
+		const [result] = yield all([
+			call(TreeProcessing.selectNodes, { nodesIds, skipChildren, shouldClear }),
+			call(handleMetadata, lastNode),
+			!skipExpand && expandToNode(lastNodeId)
+		]);
 
-		const result = yield TreeProcessor.selectNodes({
-			nodes,
-			skipChildren,
-			nodesVisibilityMap,
-			nodesSelectionMap
-		});
-
-		highlightObjects(result.highlightedObjects, result.nodesSelectionMap, colour);
-		yield put(TreeActions.updateNodesSelectionMap(result.nodesSelectionMap));
-		yield put(TreeActions.selectNodesSuccess());
+		highlightObjects(result.highlightedObjects, colour);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
 	}
@@ -419,37 +380,31 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 
 function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], colour?: number[]}) {
 	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
-	yield put(TreeActions.selectNodes(nodesIds, false, true, colour));
+	yield put(TreeActions.selectNodes(nodesIds, false, true, true, colour));
 }
 
 /**
  * SET VISIBILITY
  */
-
 function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, skipParents = false }) {
 	try {
-		const nodesVisibilityMap = {...(yield select(selectNodesVisibilityMap))};
-		const nodesSelectionMap = yield select(selectNodesSelectionMap);
 		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 
-		const result = yield TreeProcessor.updateVisibility({
+		const result = yield TreeProcessing.updateVisibility({
 			nodesIds,
 			visibility,
 			ifcSpacesHidden,
-			nodesVisibilityMap,
-			nodesSelectionMap,
 			skipChildren,
 			skipParents
 		});
 
 		unhighlightObjects(result.unhighlightedObjects.length);
-		const newNodesVisibilityMap = { ...nodesVisibilityMap, ...result.nodesVisibilityMap };
 
-		yield put(TreeActions.setAuxiliaryMaps({
+/* 		yield put(TreeActions.setAuxiliaryMaps({
 			nodesVisibilityMap: newNodesVisibilityMap,
 			nodesSelectionMap: result.nodesSelectionMap
-		}));
-		yield updateMeshesVisibility(result.meshesToUpdate, newNodesVisibilityMap);
+		})); */
+		yield updateMeshesVisibility(result.meshesToUpdate, TreeProcessing.visibilityMap);
 
 		yield put(TreeActions.setTreeNodesVisibilitySuccess());
 	} catch (error) {

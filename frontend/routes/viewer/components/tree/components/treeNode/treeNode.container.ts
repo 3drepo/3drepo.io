@@ -22,15 +22,15 @@ import { connect } from '../../../../../../helpers/migration';
 import { TreeNode } from './treeNode.component';
 import {
 	TreeActions,
-	selectNodesVisibilityMap,
-	selectNodesSelectionMap
+	selectVisibilityMap,
+	selectSelectionMap
 } from '../../../../../../modules/tree';
 import { selectSettings } from '../../../../../../modules/model';
 
 const mapStateToProps = createStructuredSelector({
 	settings: selectSettings,
-	visibilityMap: selectNodesVisibilityMap,
-	selectionMap: selectNodesSelectionMap
+	visibilityMap: selectVisibilityMap,
+	selectionMap: selectSelectionMap
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
