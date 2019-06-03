@@ -46,10 +46,10 @@ export class Processing {
 	public selectNodes = ({ nodesIds = [], ...extraData }) => {
 		const { skipChildren, shouldClear } = extraData;
 		let nodes = this.getNodesByIds(nodesIds);
-/* 
+
 		if (shouldClear) {
 			this.clearCurrentlySelected();
-		} */
+		}
 
 		if (!skipChildren) {
 			const children = nodes.map((node) => this.getDeepChildren(node)) as any;

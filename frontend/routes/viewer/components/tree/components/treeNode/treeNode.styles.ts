@@ -84,6 +84,11 @@ const getPaddingLeft = cond([
 	[stubTrue, ({ level }) => level * 10]
 ]);
 
+export const Actions = styled.div`
+	align-self: center;
+	display: none;
+`;
+
 export const Container = styled.li<IContainer>`
 	cursor: ${(props) => isEqual(TREE_ITEM_FEDERATION_TYPE, props.nodeType) ? 'default' : 'pointer'};
 	border-bottom: ${(props) => props.highlighted ? 'none' : `1px solid ${COLOR.DARK_GRAY}`};
@@ -95,6 +100,10 @@ export const Container = styled.li<IContainer>`
 	align-items: center;
 	height: ${TREE_ITEM_SIZE}px;
 	box-sizing: border-box;
+
+	&:hover ${Actions} {
+		display: block;
+	}
 `;
 
 export const Name = styled.div<IName>`
@@ -132,10 +141,6 @@ export const NameWrapper = styled.div`
 	display: flex;
 	overflow: hidden;
 	flex: 1;
-`;
-
-export const Actions = styled.div`
-	align-self: center;
 `;
 
 export const ParentOfVisible = styled.span`
