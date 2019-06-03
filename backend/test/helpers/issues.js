@@ -20,13 +20,11 @@ const DEFAULT_ISSUE_DATA = {
 	"assigned_roles":[]
 };
 
-
 const createIssue = (account, modelId) => (agent, issueData = null) =>  next => {
 	agent.post(`/${account}/${modelId}/issues.json`)
 		.send({...DEFAULT_ISSUE_DATA, ...(issueData || {})})
 		.expect(200 , (err, res) => next(err, res.body));
 };
-
 
 const attachDocument = (account, modelId) => (agent, names , filenames, issueId = null) => (issue,  next) => {
 	next = next || issue;

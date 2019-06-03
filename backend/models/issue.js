@@ -691,31 +691,34 @@ issue.findByUID = async function(dbCol, uid, projection, noClean = false) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	return ModelSetting.findById(dbCol, dbCol.model).then((settings) => {
-		return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
-			return _dbCol.findOne({ _id: uid }, projection).then((foundIssue) => {
+	const settings = await ModelSetting.findById(dbCol, dbCol.model);
+	const issues = await db.getCollection(dbCol.account, dbCol.model + ".issues");
+	let foundIssue = await issues.findOne({ _id: uid }, projection);
 
-				if (!foundIssue) {
-					return Promise.reject(responseCodes.ISSUE_NOT_FOUND);
-				}
+	if (!foundIssue) {
+		return Promise.reject(responseCodes.ISSUE_NOT_FOUND);
+	}
 
-				if (!foundIssue.typePrefix) {
-					foundIssue.typePrefix = (settings.type) ? settings.type : "";
-				}
+	if(foundIssue.refs) {
+		const refsColl = await db.getCollection(dbCol.account, dbCol.model + ".resources.ref");
+		foundIssue.resources = await refsColl.find({ _id: { $in: foundIssue.refs } }, {name:1, size: 1, createdAts: 1 }).toArray();
+		delete foundIssue.refs;
+	}
 
-				if (!foundIssue.modelCode) {
-					foundIssue.modelCode = (settings.properties && settings.properties.code) ?
-						settings.properties.code : "";
-				}
+	if (!foundIssue.typePrefix) {
+		foundIssue.typePrefix = (settings.type) ? settings.type : "";
+	}
 
-				if (!noClean) {
-					foundIssue = clean(dbCol, foundIssue);
-				}
+	if (!foundIssue.modelCode) {
+		foundIssue.modelCode = (settings.properties && settings.properties.code) ?
+			settings.properties.code : "";
+	}
 
-				return foundIssue;
-			});
-		});
-	});
+	if (!noClean) {
+		foundIssue = clean(dbCol, foundIssue);
+	}
+
+	return foundIssue;
 };
 
 issue.getScreenshot = function(dbCol, uid, vid) {
