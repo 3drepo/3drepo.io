@@ -80,8 +80,9 @@ const getButtonBackgroundColor = (props) => {
 
 const getPaddingLeft = cond([
 	[matches({ level: 0 }), constant(0)],
-	[matches({ level: 1 }), constant(38)],
-	[stubTrue, ({ level }) => level * 10]
+	[matches({ nodeType: TREE_ITEM_FEDERATION_TYPE }), constant(38)],
+	[matches({ nodeType: TREE_ITEM_MODEL_TYPE }), constant(20)],
+	[stubTrue, ({ level }) => level * 10 + 10]
 ]);
 
 export const Actions = styled.div`
