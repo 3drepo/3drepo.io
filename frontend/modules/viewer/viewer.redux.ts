@@ -37,6 +37,7 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	goToExtent: [],
 	setHelicopterSpeed: ['speed'],
 	resetHelicopterSpeed: ['teamspace', 'modelId', 'updateDefaultSpeed'],
+	getHelicopterSpeed: ['teamspace', 'modelId'],
 	increaseHelicopterSpeed: ['teamspace', 'modelId'],
 	decreaseHelicopterSpeed: ['teamspace', 'modelId'],
 	setIsFocusMode: ['isFocusMode'],

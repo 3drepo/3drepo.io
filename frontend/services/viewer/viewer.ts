@@ -7,7 +7,6 @@ export class ViewerService {
 
 	private mode = VIEWER_PIN_MODE.NORMAL;
 	public initialised: any;
-	public helicopterSpeed = INITIAL_HELICOPTER_SPEED;
 
 	get viewerService() {
 		return getAngularService('ViewerService', this) as any;
@@ -121,10 +120,6 @@ export class ViewerService {
 
 	public getPinData(): any {
 		return this.viewerService.pinData;
-	}
-
-	public getHelicopterSpeed(): number {
-		return this.helicopterSpeed;
 	}
 
 	public async addPin(params) {
