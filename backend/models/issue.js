@@ -41,6 +41,8 @@ const C = require("../constants");
 
 const issue = {};
 
+const extensionRe = /\.(\w+)$/;
+
 const fieldTypes = {
 	"_id": "[object Object]",
 	"assigned_roles": "[object Array]",
@@ -701,7 +703,7 @@ issue.findByUID = async function(dbCol, uid, projection, noClean = false) {
 
 	if(foundIssue.refs) {
 		const refsColl = await db.getCollection(dbCol.account, dbCol.model + ".resources.ref");
-		foundIssue.resources = await refsColl.find({ _id: { $in: foundIssue.refs } }, {name:1, size: 1, createdAts: 1 }).toArray();
+		foundIssue.resources = await refsColl.find({ _id: { $in: foundIssue.refs } }, {name:1, size: 1, createdAts: 1, user: 1}).toArray();
 		delete foundIssue.refs;
 	}
 
@@ -929,8 +931,11 @@ issue.addRefsToIssue = async function(account, model, issueId, username, session
 	return refs;
 };
 
-issue.attachResourceFiles = async function(account, model, issueId, names, username, sessionId, buffers) {
-	const refsPromises = buffers.map((buffer,i) => FileRef.storeFileAsResource(account, model, names[i], buffer));
+issue.attachResourceFiles = async function(account, model, issueId, username, sessionId, resourceNames, files) {
+	const refsPromises = files.map((file,i) => {
+		const extension = ((file.originalname.match(extensionRe) || [])[0] || "").toLowerCase();
+		return FileRef.storeFileAsResource(account, model, username, resourceNames[i] + extension, file.buffer, {issueIds:[issueId]});
+	});
 	const refs = await Promise.all(refsPromises);
 	refs.forEach(r => {
 		delete r.link;

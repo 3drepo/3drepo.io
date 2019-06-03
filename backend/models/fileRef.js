@@ -155,10 +155,10 @@ FileRef.removeAllFilesFromModel = function(account, model) {
 	return Promise.all(promises);
 };
 
-FileRef.storeFileAsResource = async function(account, model, name, data) {
+FileRef.storeFileAsResource = async function(account, model, user, name, data, extraFields = null) {
 	const collName = model + RESOURCES_FILE_REF_EXT;
 	const refInfo = await ExternalServices.storeFile(account, collName, data);
-	const ref = { ...refInfo, name , createdAt : (new Date()).getTime()};
+	const ref = { ...refInfo, ...(extraFields || {}), name, user , createdAt : (new Date()).getTime()};
 
 	const resourcesRef = await DB.getCollection(account, collName);
 	await resourcesRef.insertOne(ref);

@@ -681,7 +681,7 @@ function attachResourcesToIssue(req, res, next) {
 		if (err) {
 			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
 		} else {
-			Issue.attachResourceFiles(account, model, issueId, names, user, sessionId, req.files.map(f => f.buffer)).then(resources => {
+			Issue.attachResourceFiles(account, model, issueId, user, sessionId, names, req.files).then(resources => {
 				req.dataModel = resources;
 				next();
 			});
