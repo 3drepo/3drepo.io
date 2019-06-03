@@ -61,6 +61,11 @@ function removeAllFiles(account, collection) {
 		if (col) {
 			const query = [
 				{
+					$match: {
+						noDelete: {$exists: false}
+					}
+				},
+				{
 					$group: {
 						_id: "$type",
 						links: {$addToSet:  "$link"}
