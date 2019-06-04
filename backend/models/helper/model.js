@@ -689,21 +689,20 @@ function _deleteFiles(files) {
 
 	files.forEach(file => {
 
-		const deleteFile = (file.type === "file" ? fs.unlink : fs.rmdir);
+		const deleteFile = (file.type === "file" ? fs.unlinkSync : fs.rmdirSync);
 
-		deleteFile(file.path, function(err) {
-			if(err) {
-				systemLogger.logError(`error while deleting ${file.desc}`,{
-					message: err.message,
-					err: err,
-					file: file.path
-				});
-			} else {
-				systemLogger.logInfo(`${file.desc} deleted`,{
-					file: file.path
-				});
-			}
-		});
+		try {
+			deleteFile(file.path);
+			systemLogger.logInfo(`${file.desc} deleted`,{
+				file: file.path
+			});
+		} catch(err) {
+			systemLogger.logError(`error while deleting ${file.desc}`,{
+				message: err.message,
+				err: err,
+				file: file.path
+			});
+		}
 	});
 }
 
@@ -799,7 +798,6 @@ function removeModelCollections(account, model) {
 }
 
 function removeModel(account, model, forceRemove) {
-
 	return ModelSetting.findById({account, model}, model).then(setting => {
 		if (!setting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
