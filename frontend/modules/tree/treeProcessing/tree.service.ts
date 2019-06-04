@@ -130,7 +130,7 @@ export class Processing {
 		];
 
 		return { unhighlightedObjects, meshesToUpdate: result.meshesToUpdate };
-	};
+	}
 
 	/* Helpers */
 

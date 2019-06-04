@@ -316,7 +316,7 @@ function* hideIfcSpaces() {
 
 		const ifcSpacesNodesIds = yield select(selectDefaultHiddenNodesIds);
 		const visibility = !ifcSpacesHidden ? VISIBILITY_STATES.INVISIBLE : VISIBILITY_STATES.VISIBLE;
-		yield put(TreeActions.setTreeNodesVisibility(ifcSpacesNodesIds, visibility, true, true));
+		yield put(TreeActions.setTreeNodesVisibility(ifcSpacesNodesIds, visibility, true));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('hide', 'IFC spaces', error));
 	}
