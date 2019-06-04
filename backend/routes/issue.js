@@ -439,7 +439,7 @@ router.delete("/issues/:issueId/comments", middlewares.issue.canComment, deleteC
 
 router.post("/revision/:rid/issues.json", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
 
-router.post("/issues/:issueId/attach-file",middlewares.issue.canComment, attachResourcesToIssue, middlewares.chat.onResourcesAttached, responseCodes.onSuccessfulOperation);
+router.post("/issues/:issueId/resources",middlewares.issue.canComment, attachResourcesToIssue, middlewares.chat.onResourcesAttached, responseCodes.onSuccessfulOperation);
 
 function storeIssue(req, res, next) {
 	const data = req.body;
@@ -677,11 +677,19 @@ function attachResourcesToIssue(req, res, next) {
 
 	upload.array("file")(req, res, function (err) {
 		const names = req.body.names;
-
+		const urls = req.body.urls;
 		if (err) {
 			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
 		} else {
-			Issue.attachResourceFiles(account, model, issueId, user, sessionId, names, req.files).then(resources => {
+			let resourcesProm = null;
+
+			if (req.files) {
+				resourcesProm = Issue.attachResourceFiles(account, model, issueId, user, sessionId, names, req.files);
+			} else {
+				resourcesProm = Issue.attachResourceUrls(account, model, issueId, user, sessionId, names, urls);
+			}
+
+			resourcesProm.then(resources => {
 				req.dataModel = resources;
 				next();
 			});

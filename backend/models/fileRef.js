@@ -21,6 +21,7 @@ const Mailer = require("../mailer/mailer");
 const ExternalServices = require("../handler/externalServices");
 const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger.js").systemLogger;
+const genUuid = require("node-uuid").v4;
 
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
@@ -113,6 +114,16 @@ function removeAllFiles(account, collection) {
 	});
 }
 
+async function insertRefInResources(account, model, user, name, refInfo) {
+	const collName = model + RESOURCES_FILE_REF_EXT;
+
+	const ref = { ...refInfo, name, user , createdAt : (new Date()).getTime()};
+	const resourcesRef = await DB.getCollection(account, collName);
+	await resourcesRef.insertOne(ref);
+
+	return ref;
+}
+
 const FileRef = {};
 
 FileRef.getOriginalFile = function(account, model, fileName) {
@@ -157,11 +168,16 @@ FileRef.removeAllFilesFromModel = function(account, model) {
 
 FileRef.storeFileAsResource = async function(account, model, user, name, data, extraFields = null) {
 	const collName = model + RESOURCES_FILE_REF_EXT;
-	const refInfo = await ExternalServices.storeFile(account, collName, data);
-	const ref = { ...refInfo, ...(extraFields || {}), name, user , createdAt : (new Date()).getTime()};
+	let refInfo = await ExternalServices.storeFile(account, collName, data);
+	refInfo = {...refInfo ,...(extraFields || {}) };
 
-	const resourcesRef = await DB.getCollection(account, collName);
-	await resourcesRef.insertOne(ref);
+	const ref = await insertRefInResources(account, model, user, name, refInfo);
+	return ref;
+};
+
+FileRef.storeUrlAsResource = async function(account, model, user, name, link, extraFields = null) {
+	const refInfo = {_id: genUuid(), link, type: "http", ...extraFields  };
+	const ref = await insertRefInResources(account, model, user, name, refInfo);
 	return ref;
 };
 

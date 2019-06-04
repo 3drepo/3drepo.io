@@ -703,7 +703,16 @@ issue.findByUID = async function(dbCol, uid, projection, noClean = false) {
 
 	if(foundIssue.refs) {
 		const refsColl = await db.getCollection(dbCol.account, dbCol.model + ".resources.ref");
-		foundIssue.resources = await refsColl.find({ _id: { $in: foundIssue.refs } }, {name:1, size: 1, createdAts: 1, user: 1}).toArray();
+		const resources = await refsColl.find({ _id: { $in: foundIssue.refs } }, {name:1, size: 1, createdAts: 1, link: 1, type: 1}).toArray();
+		resources.forEach(r => {
+			if(r.type !== "http") {
+				delete r.link;
+			}
+
+			delete r.type;
+		});
+
+		foundIssue.resources = resources;
 		delete foundIssue.refs;
 	}
 
@@ -939,6 +948,17 @@ issue.attachResourceFiles = async function(account, model, issueId, username, se
 	const refs = await Promise.all(refsPromises);
 	refs.forEach(r => {
 		delete r.link;
+		delete r.type;
+	});
+
+	await this.addRefsToIssue(account, model, issueId, username, sessionId, refs);
+	return refs;
+};
+
+issue.attachResourceUrls = async function(account, model, issueId, username, sessionId, resourceNames, urls) {
+	const refsPromises = urls.map((url, index) =>  FileRef.storeUrlAsResource(account, model, username,resourceNames[index], url,{issueIds:[issueId]}));
+	const refs = await Promise.all(refsPromises);
+	refs.forEach(r => {
 		delete r.type;
 	});
 

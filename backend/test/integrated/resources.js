@@ -45,6 +45,7 @@ describe("Resources ", function () {
 	const createIssue = IssueHelper.createIssue(account, model);
 	const attachDocs = IssueHelper.attachDocument(account, model);
 	const getIssue = IssueHelper.getIssue(account, model);
+	const attachUrl = IssueHelper.attachUrl(account, model);
 
 	let server;
 	before(function(done) {
@@ -85,20 +86,41 @@ describe("Resources ", function () {
 		], done);
 	});
 
+	it ("of url type should be able to be attached to an issue", function(done) {
+		async.waterfall([
+			createIssue(agents.adminTeamspace1JobA),
+			attachUrl(agents.adminTeamspace1JobA, ['homepage', 'blog'], ['http://www.3drepo.com', 'https://3drepo.com/blog/']),
+			(refs, next) => {
+				expect(refs).to.be.an("array").and.to.have.length(2);
+				refs = orderBy(refs, "name");
+				expect(refs[1]).to.contain({name:'homepage', link:'http://www.3drepo.com'});
+				expect(refs[0]).to.contain({name:'blog', link:'https://3drepo.com/blog/'});
+				next();
+			}
+		], done);
+	});
+
 	it("attached to an issue should appear in the issue after being retrieved", function(done) {
 		async.waterfall([
 			createIssue(agents.adminTeamspace1JobA),
 			attachDocs(agents.adminTeamspace1JobA, ['anotherDoc', 'anotherPdf'], ['test_doc.docx', 'dummy.pdf']),
 			(refs, next) => {
 				const issueId = refs[0].issueIds[0];
+				next(null, {_id: issueId});
+			},
+			attachUrl(agents.adminTeamspace1JobA, ['homepage', 'blog'], ['http://www.3drepo.com', 'https://3drepo.com/blog/']),
+			(refs, next) => {
+				const issueId = refs[0].issueIds[0];
 				next(null, issueId);
 			},
 			getIssue(agents.adminTeamspace1JobA),
 			(issue, next) => {
-				expect(issue.resources).to.be.an("array").and.to.have.length(2);
+				expect(issue.resources).to.be.an("array").and.to.have.length(4);
 				const resources = orderBy(issue.resources, "name");
 				expect(resources[0]).to.contain({name:'anotherDoc.docx'});
 				expect(resources[1]).to.contain({name:'anotherPdf.pdf'});
+				expect(resources[2]).to.contain({name:'blog', link:'https://3drepo.com/blog/'});
+				expect(resources[3]).to.contain({name:'homepage', link:'http://www.3drepo.com'});
 				next();
 			}
 		], done);

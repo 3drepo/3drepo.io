@@ -30,13 +30,21 @@ const attachDocument = (account, modelId) => (agent, names , filenames, issueId 
 	next = next || issue;
 	issueId = issueId || issue._id;
 
-	const request = agent.post(`/${account}/${modelId}/issues/${issueId}/attach-file`)
+	const request = agent.post(`/${account}/${modelId}/issues/${issueId}/resources`)
 		.field({names});
 
 	filenames.forEach(file => request.attach("file", __dirname + "/../../statics/documents/" + file));
 	request.expect(200, (err, res) => next(err, res.body));
 };
 
+const attachUrl =  (account, modelId) => (agent, names , urls, issueId = null) => (issue,  next) => {
+	next = next || issue;
+	issueId = issueId || issue._id;
+
+	agent.post(`/${account}/${modelId}/issues/${issueId}/resources`)
+		.send({names, urls})
+		.expect(200, (err, res) => next(err, res.body));
+};
 const getIssue = (account, modelId) => (agent, issueId = null) => (_issueId, next) => {
 		next = next || _issueId;
 		issueId = issueId || _issueId ;
@@ -47,5 +55,6 @@ const getIssue = (account, modelId) => (agent, issueId = null) => (_issueId, nex
 module.exports = {
 	createIssue,
 	attachDocument,
+	attachUrl,
 	getIssue
 };
