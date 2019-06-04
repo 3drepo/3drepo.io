@@ -23,7 +23,9 @@ const config = require("../../config");
 const request = require("supertest");
 const IssueHelper =  require("../helpers/issues.js");
 const async = require("async");
-const path = require('path');
+const path = require("path");
+const orderBy = require("lodash").orderBy;
+
 
 
 describe("Resources ", function () {
@@ -42,6 +44,7 @@ describe("Resources ", function () {
 
 	const createIssue = IssueHelper.createIssue(account, model);
 	const attachDocs = IssueHelper.attachDocument(account, model);
+	const getIssue = IssueHelper.getIssue(account, model);
 
 	let server;
 	before(function(done) {
@@ -68,10 +71,36 @@ describe("Resources ", function () {
 		});
 	});
 
-	it("should succeed on attaching documents", function(done) {
+	it("of file type should be able to be attached to an issue", function(done) {
 		async.waterfall([
 			createIssue(agents.adminTeamspace1JobA),
-			attachDocs(agents.adminTeamspace1JobA, ['my document', 'a pdf'], ['test_doc.docx', 'dummy.pdf'])
+			attachDocs(agents.adminTeamspace1JobA, ['firstdocument', 'seconddocument'], ['test_doc.docx', 'dummy.pdf']),
+			(refs, next) => {
+				expect(refs).to.be.an("array").and.to.have.length(2);
+				refs = orderBy(refs, "name");
+				expect(refs[0]).to.contain({name:'firstdocument.docx'});
+				expect(refs[1]).to.contain({name:'seconddocument.pdf'});
+				next();
+			}
+		], done);
+	});
+
+	it("attached to an issue should appear in the issue after being retrieved", function(done) {
+		async.waterfall([
+			createIssue(agents.adminTeamspace1JobA),
+			attachDocs(agents.adminTeamspace1JobA, ['anotherDoc', 'anotherPdf'], ['test_doc.docx', 'dummy.pdf']),
+			(refs, next) => {
+				const issueId = refs[0].issueIds[0];
+				next(null, issueId);
+			},
+			getIssue(agents.adminTeamspace1JobA),
+			(issue, next) => {
+				expect(issue.resources).to.be.an("array").and.to.have.length(2);
+				const resources = orderBy(issue.resources, "name");
+				expect(resources[0]).to.contain({name:'anotherDoc.docx'});
+				expect(resources[1]).to.contain({name:'anotherPdf.pdf'});
+				next();
+			}
 		], done);
 	});
 

@@ -31,13 +31,21 @@ const attachDocument = (account, modelId) => (agent, names , filenames, issueId 
 	issueId = issueId || issue._id;
 
 	const request = agent.post(`/${account}/${modelId}/issues/${issueId}/attach-file`)
-		.field({names : names});
+		.field({names});
 
 	filenames.forEach(file => request.attach("file", __dirname + "/../../statics/documents/" + file));
 	request.expect(200, (err, res) => next(err, res.body));
 };
 
+const getIssue = (account, modelId) => (agent, issueId = null) => (_issueId, next) => {
+		next = next || _issueId;
+		issueId = issueId || _issueId ;
+		return agent.get(`/${account}/${modelId}/issues/${issueId}.json`)
+				.expect(200, (err, res) => next(err, res.body));
+	};
+
 module.exports = {
 	createIssue,
-	attachDocument
+	attachDocument,
+	getIssue
 };
