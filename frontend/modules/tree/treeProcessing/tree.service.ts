@@ -44,12 +44,8 @@ export class Processing {
 	}
 
 	public selectNodes = ({ nodesIds = [], ...extraData }) => {
-		const { skipChildren, shouldClear } = extraData;
+		const { skipChildren } = extraData;
 		let nodes = this.getNodesByIds(nodesIds);
-
-		if (shouldClear) {
-			this.clearCurrentlySelected();
-		}
 
 		if (!skipChildren) {
 			const children = nodes.map((node) => this.getDeepChildren(node)) as any;
@@ -288,20 +284,23 @@ export class Processing {
 
 	private updateParentsSelection = (parents) => {
 		for (let i = 0; i < parents.length; i++) {
-			const everySelected =
+			const parentId = parents[i]._id;
+
+			const everyChildrenSelected =
 				parents[i].childrenIds.every((childId) => this.selectionMap[childId] === SELECTION_STATES.SELECTED);
-			const everyUnselected =
+
+			const everyChildrenUnselected =
 				parents[i].childrenIds.every((childId) => this.selectionMap[childId] === SELECTION_STATES.UNSELECTED);
 
-			if (everySelected) {
-				this.selectionMap[parents[i]._id] = SELECTION_STATES.SELECTED;
-			} else if (everyUnselected) {
-				this.selectionMap[parents[i]._id] = SELECTION_STATES.UNSELECTED;
+			if (everyChildrenSelected) {
+				this.selectionMap[parentId] = SELECTION_STATES.SELECTED;
+			} else if (everyChildrenUnselected) {
+				this.selectionMap[parentId] = SELECTION_STATES.UNSELECTED;
 			} else {
-				this.selectionMap[parents[i]._id] = SELECTION_STATES.PARENT_OF_UNSELECTED;
+				this.selectionMap[parentId] = SELECTION_STATES.PARENT_OF_UNSELECTED;
 			}
 		}
-	};
+	}
 
 	private _getDeepChildren = (node) => {
 		const nodeIndex = this.nodesIndexesMap[node._id];

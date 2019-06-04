@@ -53,6 +53,7 @@ interface IProps {
 	nodesVisibilityMap: any;
 	nodesIndexesMap: any;
 	isPending?: boolean;
+	dataRevision: string;
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
 	isolateSelectedNodes: () => void;
@@ -95,9 +96,11 @@ export class Tree extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderNodesList = renderWhenTrue(() => {
-		const { treeNodesList, expandedNodesMap } = this.props;
+		const { treeNodesList, expandedNodesMap, dataRevision } = this.props;
 		const size = treeNodesList.length;
 		const maxHeight = 842;
+
+		console.log('dataRevision', dataRevision);
 
 		const treeHeight = TREE_ITEM_SIZE * size;
 		const treeNodesHeight = treeHeight > maxHeight ?	maxHeight : treeHeight;
@@ -107,9 +110,8 @@ export class Tree extends React.PureComponent<IProps, IState> {
 				<AutoSizer>
 					{({ width, height }) => (
 						<List
-							treeNodesList={treeNodesList}
+							dataRevision={dataRevision}
 							expandedNodesMap={expandedNodesMap}
-							// className="height-catcher"
 							ref={this.nodeListRef}
 							overscanRowCount={50}
 							height={height}

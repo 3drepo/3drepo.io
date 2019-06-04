@@ -32,6 +32,8 @@ class TreeProcessing {
 
 	public isolateNodes = (payload) => this.processing.isolateNodes(payload);
 
+	public clearSelected = () => this.processing.clearCurrentlySelected();
+
 	private handleTransformedData = async ({ data }) => {
 		const { result: { data: { nodesList, ...auxiliaryMaps } } } = JSON.parse(data);
 
