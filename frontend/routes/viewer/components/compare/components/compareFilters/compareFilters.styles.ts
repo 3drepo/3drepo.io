@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { Checkbox as CheckboxComponent } from '@material-ui/core';
 import { FilterPanel as FilterPanelComponent } from '../../../../../components/filterPanel/filterPanel.component';
+import * as FilterStyles from '../../../../../components/filterPanel/filterPanel.styles';
 
 export const FilterPanel = styled(FilterPanelComponent)`
 	&& {
@@ -27,6 +28,10 @@ export const FilterPanel = styled(FilterPanelComponent)`
 			input {
 				padding: 10px 14px 12px 48px;
 			}
+		}
+
+		${FilterStyles.Placeholder} {
+			left: 48px;
 		}
 	}
 `;
