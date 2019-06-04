@@ -16,6 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { uniqueId } from 'lodash';
 
 export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	fetchFullTree: ['teamspace', 'modelId', 'revision'],
@@ -54,7 +55,8 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	hideNodesBySharedIds: ['objects'],
 	isolateNode: ['id'],
 	clearCurrentlySelected: [],
-	setExpanedNodesMap: ['expandedNodesMap']
+	setExpanedNodesMap: ['expandedNodesMap'],
+	updateDataRevision: []
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
@@ -69,6 +71,7 @@ export interface ITreeState {
 	expandedNodesMap: any;
 	componentState: ITreeComponentState;
 	isPending?: boolean;
+	dataRevision: string;
 }
 
 export const INITIAL_STATE: ITreeState = {
@@ -76,6 +79,7 @@ export const INITIAL_STATE: ITreeState = {
 	treeNodesList: [],
 	isPending: true,
 	expandedNodesMap: {},
+	dataRevision: uniqueId('tree-data-rev-'),
 	componentState: {
 		selectedFilters: [],
 		searchEnabled: false,
@@ -117,6 +121,10 @@ const setExpanedNodesMap = (state = INITIAL_STATE, { expandedNodesMap }) => {
 	return { ...state, expandedNodesMap };
 };
 
+const updateDataRevision = (state) => {
+	return { ...state, dataRevision: uniqueId('tree-data-rev-') };
+};
+
 const expandNode = (state = INITIAL_STATE, { id }) => {
 	const newNode = { [id]: true };
 	const expandedNodesMap = { ...state.expandedNodesMap, ...newNode };
@@ -138,5 +146,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.EXPAND_NODE]: expandNode,
 	[TreeTypes.SET_NODES_SELECTION_MAP]: setNodesSelectionMap,
 	[TreeTypes.SET_AUXILIARY_MAPS]: setAuxiliaryMaps,
-	[TreeTypes.SET_EXPANED_NODES_MAP]: setExpanedNodesMap
+	[TreeTypes.SET_EXPANED_NODES_MAP]: setExpanedNodesMap,
+	[TreeTypes.UPDATE_DATA_REVISION]: updateDataRevision
 });

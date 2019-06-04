@@ -42,18 +42,25 @@ export const selectComponentState = createSelector(
 	selectTreeDomain, (state) => state.componentState
 );
 
+export const selectDataRevision = createSelector(
+	selectTreeDomain, (state) => state.dataRevision
+);
+
 const selectTreeProccessing = () => TreeProcessing.data as TreeProcessingData;
 
 export const selectTreeNodesList = createSelector(
-	selectTreeProccessing, (treeProcessingData) => treeProcessingData.nodesList || []
+	selectTreeProccessing, selectDataRevision,
+	(treeProcessingData) => treeProcessingData.nodesList || []
 );
 
 export const selectTreeNodesIds = createSelector(
-	selectTreeNodesList, (treeNodesList) => treeNodesList.map(({ _id }) => _id)
+	selectTreeNodesList, selectDataRevision,
+	(treeNodesList) => treeNodesList.map(({ _id }) => _id)
 );
 
 export const selectSelectionMap = createSelector(
-	selectTreeProccessing, (treeProcessingData) => treeProcessingData.selectionMap
+	selectTreeProccessing, selectDataRevision,
+	(treeProcessingData) => treeProcessingData.selectionMap
 );
 
 export const selectSelectedNodesIds = createSelector(
@@ -73,11 +80,13 @@ export const selectUnselectedNodesIds = createSelector(
 );
 
 export const selectDefaultVisibilityMap = createSelector(
-	selectTreeProccessing, (treeProcessingData) => treeProcessingData.defaultVisibilityMap
+	selectTreeProccessing, selectDataRevision,
+	(treeProcessingData) => treeProcessingData.defaultVisibilityMap
 );
 
 export const selectVisibilityMap = createSelector(
-	selectTreeProccessing, (treeProcessingData) => treeProcessingData.visibilityMap
+	selectTreeProccessing, selectDataRevision,
+	(treeProcessingData) => treeProcessingData.visibilityMap
 );
 
 export const selectInvisibleNodesIds = createSelector(
@@ -89,15 +98,18 @@ export const selectInvisibleNodesIds = createSelector(
 );
 
 export const selectNodesIndexesMap = createSelector(
-	selectTreeProccessing, (treeProcessingData) => treeProcessingData.nodesIndexesMap
+	selectTreeProccessing, selectDataRevision,
+	(treeProcessingData) => treeProcessingData.nodesIndexesMap
 );
 
 export const selectNodesBySharedIdsMap = createSelector(
-	selectTreeProccessing, (treeProcessingData) => treeProcessingData.nodesBySharedIdsMap
+	selectTreeProccessing, selectDataRevision,
+	(treeProcessingData) => treeProcessingData.nodesBySharedIdsMap
 );
 
 export const selectMeshesByModelId = createSelector(
-	selectTreeProccessing, (treeProcessingData) => treeProcessingData.meshesByModelId
+	selectTreeProccessing, selectDataRevision,
+	(treeProcessingData) => treeProcessingData.meshesByModelId
 );
 
 export const selectSelectedFilters = createSelector(
@@ -136,7 +148,7 @@ export const selectExpandedNodesMap = createSelector(
 export const selectVisibleTreeNodesList = createSelector(
 	[
 		selectFilteredNodesList, selectNodesIndexesMap, selectSelectedFilters,
-		selectExpandedNodesMap, selectSearchEnabled
+		selectExpandedNodesMap, selectSearchEnabled, selectDataRevision
 	],
 	(treeNodesList, nodesIndexesMap, selectedFilters, expandedNodesMap, searchEnabled) => {
 		const visibleNodes = [];
