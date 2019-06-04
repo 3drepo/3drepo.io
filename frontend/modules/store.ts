@@ -14,10 +14,10 @@ export default function configureStore(initialState = {}) {
 	const enhancers = [];
 
 	if (IS_DEVELOPMENT) {
-		// middlewares.unshift(require('redux-immutable-state-invariant').default());
+		middlewares.unshift(require('redux-immutable-state-invariant').default());
 
 		if (window.__REDUX_DEVTOOLS_EXTENSION__) {
-			// enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
+			enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
 		}
 	}
 
