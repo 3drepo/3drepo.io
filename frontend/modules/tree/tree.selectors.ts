@@ -152,7 +152,6 @@ export const selectVisibleTreeNodesList = createSelector(
 	],
 	(treeNodesList, nodesIndexesMap, selectedFilters, expandedNodesMap, searchEnabled) => {
 		const visibleNodes = [];
-		console.log('selectVisibleTreeNodesList call')
 
 		for (let index = 0; index < treeNodesList.length; index++) {
 			const treeNode = { ...treeNodesList[index] };

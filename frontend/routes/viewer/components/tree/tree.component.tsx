@@ -100,8 +100,6 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		const size = treeNodesList.length;
 		const maxHeight = 842;
 
-		console.log('dataRevision', dataRevision);
-
 		const treeHeight = TREE_ITEM_SIZE * size;
 		const treeNodesHeight = treeHeight > maxHeight ?	maxHeight : treeHeight;
 

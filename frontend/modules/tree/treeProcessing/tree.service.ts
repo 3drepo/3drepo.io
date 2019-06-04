@@ -315,7 +315,7 @@ export class Processing {
 		});
 	}
 
-	private _getParents = (node) => {
+	public getParents = memoize((node = {}) => {
 		const parents = [];
 		let nextParentId = node.parentId;
 
@@ -327,17 +327,15 @@ export class Processing {
 		}
 
 		return parents;
-	}
+	}, (node = {}) => node._id);
 
-	private getParents = memoize(this._getParents, (node) => node._id);
-
-	private getChildren = memoize((node) => {
+	public getChildren = memoize((node = {}) => {
 		if (node.hasChildren) {
 			return this.getNodesByIds(node.childrenIds);
 		}
 
 		return [];
-	}, (node) => node._id);
+	}, (node = {}) => node._id);
 
 	private getSelectMeshesByNodes = (nodes = []) => {
 		const treeNodesList = this.nodesList;

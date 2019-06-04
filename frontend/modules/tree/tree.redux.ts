@@ -79,7 +79,7 @@ export const INITIAL_STATE: ITreeState = {
 	treeNodesList: [],
 	isPending: true,
 	expandedNodesMap: {},
-	dataRevision: uniqueId('tree-data-rev-'),
+	dataRevision: 'empty',
 	componentState: {
 		selectedFilters: [],
 		searchEnabled: false,
@@ -96,7 +96,7 @@ const getSelectedNodesSuccess = (state = INITIAL_STATE, { selectedNodes }) => {
 };
 
 const setTreeNodesList = (state = INITIAL_STATE, { treeNodesList }) => {
-	return { ...state, treeNodesList };
+	return { ...state, treeNodesList, dataRevision: uniqueId('tree-data-rev-') };
 };
 
 const setIsPending = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
