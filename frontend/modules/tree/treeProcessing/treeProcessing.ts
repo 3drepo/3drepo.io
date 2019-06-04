@@ -34,6 +34,10 @@ class TreeProcessing {
 
 	public clearSelected = () => this.processing.clearCurrentlySelected();
 
+	public getParents = (node) => this.processing.getParents(node);
+
+	public getChildren = (node) => this.processing.getChildren(node);
+
 	private handleTransformedData = async ({ data }) => {
 		const { result: { data: { nodesList, ...auxiliaryMaps } } } = JSON.parse(data);
 

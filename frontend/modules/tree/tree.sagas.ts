@@ -36,7 +36,8 @@ import {
 	selectDefaultHiddenNodesIds,
 	getSelectDeepChildren,
 	selectSelectionMap,
-	selectVisibilityMap
+	selectVisibilityMap,
+	getSelectParents
 } from './tree.selectors';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -81,6 +82,7 @@ const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
 
 function* handleMetadata(node: any) {
 	const isMetadataActive = yield select(selectIsActive);
+
 	if (node && node.meta && isMetadataActive) {
 		yield put(BimActions.fetchMetadata(node.teamspace, node.model, node.meta[0]));
 		yield put(ViewerActions.setMetadataVisibility(true));
@@ -92,17 +94,14 @@ function* expandToNode(nodeId: string) {
 		const treeNodesList = yield select(selectTreeNodesList);
 		const nodesIndexesMap = yield select(selectNodesIndexesMap);
 		const expandedNodesMap = {...(yield select(selectExpandedNodesMap))};
+		const node = treeNodesList[nodesIndexesMap[nodeId]];
 
-		let { parentId: nextParentId } = treeNodesList[nodesIndexesMap[nodeId]] || { parentId: null };
-		expandedNodesMap[nodeId] = true;
-
-		while (nextParentId) {
-			const { parentId, _id } = treeNodesList[nodesIndexesMap[nextParentId]];
-			expandedNodesMap[_id] = true;
-			nextParentId = parentId;
+		const parents = [node, ...TreeProcessing.getParents(node)];
+		for (let index = 0, size = parents.length; index < size; index++) {
+			expandedNodesMap[parents[index]._id] = true;
 		}
 
-		yield put(TreeActions.setComponentState({ expandedNodesMap }));
+		yield put(TreeActions.setExpanedNodesMap(expandedNodesMap));
 	}
 }
 
@@ -258,7 +257,6 @@ function* showTreeNodes(nodesIds = [], skipNested = false) {
 /**
  * HIDE NODES
  */
-
 function* hideSelectedNodes() {
 	const selectedNodesIds = yield select(selectSelectedNodesIds);
 	yield hideTreeNodes(selectedNodesIds);
@@ -378,7 +376,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 
 function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], colour?: number[]}) {
 	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
-	yield put(TreeActions.selectNodes(nodesIds, false, true, true, colour));
+	yield put(TreeActions.selectNodes(nodesIds, false, true, colour));
 }
 
 /**
