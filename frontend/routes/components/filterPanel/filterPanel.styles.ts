@@ -66,7 +66,7 @@ export const InputContainer = styled.div<IInputContainer>`
 	justify-content: flex-end;
 	position: relative;
 	margin: 0;
-	min-height: ${(props) => props.menuHidden ? `52px` : '0'};
+	min-height: ${(props) => props.menuHidden ? `50px` : '0'};
 
 	.react-autosuggest__container {
 		height: 100%;
@@ -193,7 +193,7 @@ export const Chips = styled.div<IChips>`
 
 export const Placeholder = styled.div`
 	position: absolute;
-	left: 48px;
+	left: 12px;
 	color: ${COLOR.BLACK_60};
 	font-size: 14px;
 	top: 50%;

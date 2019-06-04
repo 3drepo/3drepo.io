@@ -82,8 +82,9 @@ const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
 
 function* handleMetadata(node: any) {
 	const isMetadataActive = yield select(selectIsActive);
-
+	debugger;
 	if (node && node.meta && isMetadataActive) {
+		debugger;
 		yield put(BimActions.fetchMetadata(node.teamspace, node.model, node.meta[0]));
 		yield put(ViewerActions.setMetadataVisibility(true));
 	}
@@ -354,7 +355,7 @@ function* selectNode({ id }) {
 function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false, colour }) {
 	try {
 		const lastNodeId = nodesIds[nodesIds.length - 1];
-		const lastNode = yield select(getSelectNodesByIds([lastNodeId]));
+		const [lastNode] = yield select(getSelectNodesByIds([lastNodeId]));
 
 		const [result] = yield all([
 			call(TreeProcessing.selectNodes, { nodesIds, skipChildren }),
