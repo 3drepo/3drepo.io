@@ -82,9 +82,7 @@ const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
 
 function* handleMetadata(node: any) {
 	const isMetadataActive = yield select(selectIsActive);
-	debugger;
 	if (node && node.meta && isMetadataActive) {
-		debugger;
 		yield put(BimActions.fetchMetadata(node.teamspace, node.model, node.meta[0]));
 		yield put(ViewerActions.setMetadataVisibility(true));
 	}
