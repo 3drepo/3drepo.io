@@ -28,18 +28,22 @@ const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
 const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
 const RESOURCES_FILE_REF_EXT = ".resources.ref";
 
+const extensionRe = /\.(\w+)$/;
+
 function getRefEntry(account, collection, fileName) {
 	return DB.getCollection(account, collection).then((col) => {
 		return col ? col.findOne({_id: fileName}) : Promise.reject(ResponseCodes.NO_FILE_FOUND);
 	});
 }
 
-function fetchFile(account, model, ext, fileName) {
+function fetchFile(account, model, ext, fileName, metadata = false) {
 	const collection = model + ext;
+
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
+
 		return ExternalServices.getFile(account, collection, entry.type, entry.link).catch (() => {
 
 			systemLogger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
@@ -54,6 +58,12 @@ function fetchFile(account, model, ext, fileName) {
 				fileName :
 				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}`;
 			return ExternalServices.getFile(account, collection, "gridfs", fullName);
+		}).then(fileBuffer=> {
+			if (metadata) {
+				const type = (((entry.name || "").match(extensionRe) || [])[0] || "").toLowerCase();
+				return {file:fileBuffer, type, name: entry.name , size: entry.size};
+			}
+			return fileBuffer;
 		});
 	});
 }
@@ -152,6 +162,10 @@ FileRef.getUnityBundle = function(account, model, fileName) {
 
 FileRef.getJSONFile = function(account, model, fileName) {
 	return fetchFile(account, model, JSON_FILE_REF_EXT, fileName);
+};
+
+FileRef.getResourceFile = function(account, model, fileName) {
+	return fetchFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true);
 };
 
 FileRef.getJSONFileStream = function(account, model, fileName) {

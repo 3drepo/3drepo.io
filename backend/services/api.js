@@ -124,6 +124,9 @@ module.exports.createApp = function () {
 	app.use("/:account/:model", require("../routes/issueAnalytic"));
 	app.use("/:account/:model", require("../routes/issue"));
 
+	// resources handler
+	app.use("/:account/:model", require("../routes/resources"));
+
 	// risks handler
 	app.use("/:account/:model", require("../routes/risk"));
 
