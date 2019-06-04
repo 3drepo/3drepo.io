@@ -30,7 +30,7 @@ const config = require("../config.js");
 const ModelSetting = require("../models/modelSetting");
 
 /**
- * @api {get} /:teamspace/:model/issues/:uid Find Issue by ID
+ * @api {get} /:teamspace/:model/issues/:issueId Find Issue by ID
  * @apiName findIssueById
  * @apiGroup Issues
  *
@@ -80,10 +80,10 @@ const ModelSetting = require("../models/modelSetting");
  * }
  *
  */
-router.get("/issues/:uid", middlewares.issue.canView, findIssueById);
+router.get("/issues/:issueId", middlewares.issue.canView, findIssueById);
 
 /**
- * @api {get} /:teamspace/:model/issues/:uid/thumbnail.png Get Issue Thumbnail
+ * @api {get} /:teamspace/:model/issues/:issueId/thumbnail.png Get Issue Thumbnail
  * @apiName findIssueById
  * @apiGroup Issues
  *
@@ -96,7 +96,7 @@ router.get("/issues/:uid", middlewares.issue.canView, findIssueById);
  * @apiSuccess 200 {Object} thumbnail Thumbnail Image
  *
  */
-router.get("/issues/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
+router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 /**
  * @api {get} /:teamspace/:model/issues Get all Issues
@@ -195,10 +195,10 @@ router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
  *
  * @apiDescription Get an issue screenshot from viewpoints using a viewpoint ID and issue ID.
  */
-router.get("/issues/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
+router.get("/issues/:issueId/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
 
 /**
- * @api {get} /:teamspace/:model/issues/:uid/viewpoints/:vid/screenshotSmall.png Get smaller version of Issue screenshot
+ * @api {get} /:teamspace/:model/issues/:issueId/viewpoints/:vid/screenshotSmall.png Get smaller version of Issue screenshot
  * @apiName getScreenshotSmall
  * @apiGroup Issues
  *
@@ -208,7 +208,7 @@ router.get("/issues/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canV
  *
  * @apiSuccess (200) {Object} Issue Screenshot.
  */
-router.get("/issues/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
+router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
 
 /**
  * @api {get} /:teamspace/:model/revision/:rid/issues Get all Issues by revision ID
@@ -475,7 +475,7 @@ function findIssueById(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = { account: req.params.account, model: req.params.model };
 
-	Issue.findByUID(dbCol, params.uid).then(issue => {
+	Issue.findByUID(dbCol, params.issueId).then(issue => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issue);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -549,7 +549,7 @@ function getScreenshot(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = { account: req.params.account, model: req.params.model };
 
-	Issue.getScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
+	Issue.getScreenshot(dbCol, req.params.issueId, req.params.vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
@@ -560,7 +560,7 @@ function getScreenshotSmall(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = { account: req.params.account, model: req.params.model };
 
-	Issue.getSmallScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
+	Issue.getSmallScreenshot(dbCol, req.params.issueId, req.params.vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
@@ -571,7 +571,7 @@ function getThumbnail(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = { account: req.params.account, model: req.params.model };
 
-	Issue.getThumbnail(dbCol, req.params.uid).then(buffer => {
+	Issue.getThumbnail(dbCol, req.params.issueId).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
