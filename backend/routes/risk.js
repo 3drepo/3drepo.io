@@ -26,7 +26,7 @@ const Risk = require("../models/risk");
 const utils = require("../utils");
 
 /**
- * @api {get} /:teamspace/:model/risks/:uid Find Risk by ID
+ * @api {get} /:teamspace/:model/risks/:riskId Find Risk by ID
  * @apiName findRiskById
  * @apiGroup Risks
  *
@@ -34,10 +34,10 @@ const utils = require("../utils");
  * @apiParam {String} model Model ID
  * @apiParam {String} id Risk ID.
  */
-router.get("/risks/:uid", middlewares.issue.canView, findRiskById);
+router.get("/risks/:riskId", middlewares.issue.canView, findRiskById);
 
 /**
- * @api {get} /:teamspace/:model/risks/:uid/thumbnail.png Get Risks Thumbnail
+ * @api {get} /:teamspace/:model/risks/:riskId/thumbnail.png Get Risks Thumbnail
  * @apiName getThumbnail
  * @apiGroup Risks
  *
@@ -45,7 +45,7 @@ router.get("/risks/:uid", middlewares.issue.canView, findRiskById);
  * @apiParam {String} model Model ID
  * @apiParam {String} id Risk ID.
  */
-router.get("/risks/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
+router.get("/risks/:riskId/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 /**
  * @api {get} /:teamspace/:model/risks List All Risks
@@ -58,17 +58,17 @@ router.get("/risks/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail)
 router.get("/risks", middlewares.issue.canView, listRisks);
 
 /**
- * @api {get} /:teamspace/:model/risks/:uid/screenshot.png	Get Risks Screenshot
+ * @api {get} /:teamspace/:model/risks/:riskId/screenshot.png	Get Risks Screenshot
  * @apiName getScreenshot
  * @apiGroup Risks
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  */
-router.get("/risks/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
+router.get("/risks/:riskId/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
 
 /**
- * @api {get} /:teamspace/:model/risks/:uid/screenshotSmall.png  Get Small Risks Screenshot
+ * @api {get} /:teamspace/:model/risks/:riskId/screenshotSmall.png  Get Small Risks Screenshot
  * @apiName getScreenshotSmall
  * @apiGroup Risks
  *
@@ -76,7 +76,7 @@ router.get("/risks/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canVi
  * @apiParam {String} model Model ID
  * @apiParam {String} id Risk ID.
  */
-router.get("/risks/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
+router.get("/risks/:riskId/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
 
 /**
  * @api {get} /:teamspace/:model/risks/:rid/risks	List all Risks by revision ID
@@ -238,7 +238,7 @@ function findRiskById(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 
-	Risk.findByUID(dbCol, params.uid).then(risk => {
+	Risk.findByUID(dbCol, params.riskId).then(risk => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risk);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -260,7 +260,7 @@ function getScreenshot(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 
-	Risk.getScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
+	Risk.getScreenshot(dbCol, req.params.riskId, req.params.vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
@@ -271,7 +271,7 @@ function getScreenshotSmall(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 
-	Risk.getSmallScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
+	Risk.getSmallScreenshot(dbCol, req.params.riskId, req.params.vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
@@ -282,7 +282,7 @@ function getThumbnail(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 
-	Risk.getThumbnail(dbCol, req.params.uid).then(buffer => {
+	Risk.getThumbnail(dbCol, req.params.riskId).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
