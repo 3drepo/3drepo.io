@@ -65,9 +65,14 @@ export class Processing {
 		const filteredNodesIds = intersection(nodesIds, this.selectedNodesIds);
 		const nodes = this.getNodesByIds(filteredNodesIds);
 
+		const children = nodes.map((node) => this.getDeepChildren(node)) as any;
+		const nodesWithChildren = [...nodes, ...children.flat()];
+
 		for (let index = 0; index < filteredNodesIds.length; index++) {
 			this.selectionMap[filteredNodesIds[index]] = SELECTION_STATES.UNSELECTED;
 		}
+
+		this.handleToDeselect(nodesWithChildren);
 
 		const unhighlightedObjects = this.getSelectMeshesByNodes(nodes);
 		return { unhighlightedObjects };
@@ -258,7 +263,7 @@ export class Processing {
 		}
 
 		return result;
-	};
+	}
 
 	private handleToSelect = (toSelect) => {
 		for (let index = 0, size = toSelect.length; index < size; index++) {
@@ -278,6 +283,19 @@ export class Processing {
 		const parents = this.getParents(clickedNode);
 
 		if (clickedNode.hasChildren || toSelect.length === 1) {
+			this.updateParentsSelection(parents);
+		}
+	}
+
+	private handleToDeselect = (toDeselect) => {
+		for (let index = 0, size = toDeselect.length; index < size; index++) {
+			const node = toDeselect[index];
+			this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
+		}
+		const clickedNode = toDeselect[0];
+		const parents = this.getParents(clickedNode);
+
+		if (clickedNode.hasChildren || toDeselect.length === 1) {
 			this.updateParentsSelection(parents);
 		}
 	}
