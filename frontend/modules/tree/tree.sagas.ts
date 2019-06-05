@@ -360,13 +360,12 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 			call(handleMetadata, lastNode)
 		]);
 
-		if (!skipExpand) {
-			yield expandToNode(lastNodeId);
-		}
-
 		const selectionMap = yield select(selectSelectionMap);
 		highlightObjects(result.highlightedObjects, selectionMap, colour);
 
+		if (!skipExpand) {
+			yield expandToNode(lastNodeId);
+		}
 		yield put(TreeActions.updateDataRevision());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));

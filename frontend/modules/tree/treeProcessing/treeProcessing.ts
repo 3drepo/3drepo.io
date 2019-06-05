@@ -1,4 +1,4 @@
-import { Processing } from './tree.service';
+import { Processing } from './processing';
 import { TreeProcessingData } from './treeProcessing.constants';
 // tslint:disable-next-line
 const TreeLoaderWorker = require('worker-loader?inline!./workers/loading.worker');
