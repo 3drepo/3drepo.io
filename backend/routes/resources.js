@@ -32,9 +32,6 @@ function downloadResource(req, res, next) {
 		res.set("Content-Length", resource.size);
 		res.set("Content-Type", "application/" + resource.type);
 		res.set("Content-Disposition","attachment;filename=" + resource.name);
-		console.log("im ok here");
-		
-
 		res.send(resource.file);
 
 	}).catch(err => {

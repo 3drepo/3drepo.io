@@ -46,15 +46,22 @@ const attachUrl =  (account, modelId) => (agent, names , urls, issueId = null) =
 		.expect(200, (err, res) => next(err, res.body));
 };
 const getIssue = (account, modelId) => (agent, issueId = null) => (_issueId, next) => {
-		next = next || _issueId;
-		issueId = issueId || _issueId ;
-		return agent.get(`/${account}/${modelId}/issues/${issueId}.json`)
-				.expect(200, (err, res) => next(err, res.body));
-	};
+	next = next || _issueId;
+	issueId = issueId || _issueId ;
+	return agent.get(`/${account}/${modelId}/issues/${issueId}.json`)
+			.expect(200, (err, res) => next(err, res.body));
+};
+
+const detachResourceFromIssue = (account, modelId) => (agent, issueId, resourceId, next) => {
+	return agent.delete(`/${account}/${modelId}/issues/${issueId}/resources`)
+		.send({_id:resourceId})
+		.expect(200,(err, res) => next(err, res.body) );
+};
 
 module.exports = {
 	createIssue,
 	attachDocument,
 	attachUrl,
+	detachResourceFromIssue,
 	getIssue
 };

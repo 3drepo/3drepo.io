@@ -966,4 +966,19 @@ issue.attachResourceUrls = async function(account, model, issueId, username, ses
 	return refs;
 };
 
+issue.detachResource =  async function(account, model, issueId, resourceId, username, sessionId) {
+	const ref = await FileRef.removeResourceFromIssue(account, model, issueId, resourceId);
+	const issues = await db.getCollection(account, model + ".issues");
+	const systemComments = [];
+	await addSystemComment(account, model, sessionId, issueId, systemComments, username, "resource", ref.name, null);
+	await issues.update({_id: utils.stringToUUID(issueId)}, {$push: {comments: {$each:systemComments}}, $pull: { refs: resourceId } });
+
+	if(ref.type !== "http") {
+		delete ref.link;
+	}
+	delete ref.type;
+
+	return ref;
+};
+
 module.exports = issue;

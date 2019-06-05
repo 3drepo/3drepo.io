@@ -55,9 +55,16 @@ module.exports = {
 
 	onResourcesAttached: function(req, res, next) {
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
-		const resources = req.dataModel;
+		const resource = req.dataModel;
 
-		chatEvent.resourcesAttached(sessionId, resources);
+		chatEvent.resourceDetached(sessionId, resource);
+		next();
+	},
+
+	onResourceDetached: function(req, res, next) {
+		const sessionId = req.headers[C.HEADER_SOCKET_ID];
+		const resource = req.dataModel;
+		chatEvent.resourceDetached(sessionId, resource);
 		next();
 	}
 };

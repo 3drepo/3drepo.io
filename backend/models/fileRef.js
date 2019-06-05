@@ -28,6 +28,10 @@ const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
 const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
 const RESOURCES_FILE_REF_EXT = ".resources.ref";
 
+const ISSUES_RESOURCE_PROP = "issueIds";
+const RISKS_RESOURCE_PROP = "riskIds";
+const attachResourceProps = [ISSUES_RESOURCE_PROP, RISKS_RESOURCE_PROP];
+
 const extensionRe = /\.(\w+)$/;
 
 function getRefEntry(account, collection, fileName) {
@@ -134,6 +138,26 @@ async function insertRefInResources(account, model, user, name, refInfo) {
 	return ref;
 }
 
+async function removeResource(account, model,  resourceId, property,propertyId) {
+	const collection = model + RESOURCES_FILE_REF_EXT;
+	const ref = await getRefEntry(account, collection, resourceId);
+	if (!Array.isArray(ref[property]) || ref[property].indexOf(propertyId) === -1) {
+		throw ResponseCodes.RESOURCE_NOT_ATTACHED;
+	}
+
+	const refCounts = attachResourceProps.reduce((prev, p) => prev + (ref[p] || []).length, 0);
+
+	if (!refCounts) {
+		if (ref.type !== "http") {
+			await ExternalServices.removeFiles(account, collection, ref.type, [ref.link]);
+		}
+
+		await collection.remove({_id:resourceId});
+	}
+
+	return ref;
+}
+
 const FileRef = {};
 
 FileRef.getOriginalFile = function(account, model, fileName) {
@@ -178,6 +202,10 @@ FileRef.removeAllFilesFromModel = function(account, model) {
 	promises.push(removeAllFiles(account, model + JSON_FILE_REF_EXT));
 	promises.push(removeAllFiles(account, model + UNITY_BUNDLE_REF_EXT));
 	return Promise.all(promises);
+};
+
+FileRef.removeResourceFromIssue = async function(account, model, issueId, resourceId) {
+	return await removeResource(account, model, resourceId, ISSUES_RESOURCE_PROP, issueId);
 };
 
 FileRef.storeFileAsResource = async function(account, model, user, name, data, extraFields = null) {

@@ -74,6 +74,16 @@ function resourcesAttached(session, user, refs) {
 	return Queue.insertEventMessage(msg);
 }
 
+function resourceDetached(session, user, ref) {
+	const msg = {
+		event : user + "::resourceDetached",
+		channel : user,
+		emitter : session,
+		data : ref
+	};
+	return Queue.insertEventMessage(msg);
+}
+
 // Issues notifications
 function newIssues(emitter, account, model, data) {
 	return insertEventQueue("issue" + eventTypes.CREATED, emitter, account, model, null, data);
@@ -165,5 +175,6 @@ module.exports = {
 	eventTypes,
 	upsertedNotification,
 	deletedNotification,
-	resourcesAttached
+	resourcesAttached,
+	resourceDetached
 };

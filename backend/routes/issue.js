@@ -441,6 +441,8 @@ router.post("/revision/:rid/issues.json", middlewares.issue.canCreate, storeIssu
 
 router.post("/issues/:issueId/resources",middlewares.issue.canComment, attachResourcesToIssue, middlewares.chat.onResourcesAttached, responseCodes.onSuccessfulOperation);
 
+router.delete("/issues/:issueId/resources",middlewares.issue.canComment, detachResourcefromIssue, middlewares.chat.onResourceDetached, responseCodes.onSuccessfulOperation);
+
 function storeIssue(req, res, next) {
 	const data = req.body;
 	data.owner = req.session.user.username;
@@ -667,7 +669,7 @@ function deleteComment(req, res, next) {
 }
 
 function attachResourcesToIssue(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
+	const place = utils.APIInfo(req);
 	const {account, model, issueId} = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const user = req.session.user.username;
@@ -679,7 +681,7 @@ function attachResourcesToIssue(req, res, next) {
 		const names = req.body.names;
 		const urls = req.body.urls;
 		if (err) {
-			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
+			return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
 		} else {
 			let resourcesProm = null;
 
@@ -692,9 +694,27 @@ function attachResourcesToIssue(req, res, next) {
 			resourcesProm.then(resources => {
 				req.dataModel = resources;
 				next();
+			}).catch(promErr => {
+				responseCodes.respond(place, req, res, next, promErr, promErr);
 			});
 		}
 	});
+}
+
+function detachResourcefromIssue(req, res, next) {
+	const place = utils.APIInfo(req);
+	const {account, model, issueId} = req.params;
+	const resourceId = req.body._id;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const user = req.session.user.username;
+
+	Issue.detachResource(account, model, issueId, resourceId, user, sessionId).then(ref => {
+		req.dataModel = ref;
+		next();
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err, err);
+	});
+
 }
 
 module.exports = router;

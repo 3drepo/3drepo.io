@@ -46,6 +46,7 @@ describe("Resources ", function () {
 	const attachDocs = IssueHelper.attachDocument(account, model);
 	const getIssue = IssueHelper.getIssue(account, model);
 	const attachUrl = IssueHelper.attachUrl(account, model);
+	const detachResource = IssueHelper.detachResourceFromIssue(account, model);
 
 	let server;
 	before(function(done) {
@@ -125,5 +126,33 @@ describe("Resources ", function () {
 			}
 		], done);
 	});
+
+	// it("attached resource to issue should be able to be downloaded", done => {
+	// 	// TODO: finish me
+	// 	expect('implemented').to.equals('not implemented');
+	// 	done();
+	// })
+
+	it("attached resource to issue should be able to be deleted", done => {
+		async.waterfall([
+			createIssue(agents.adminTeamspace1JobA),
+			attachDocs(agents.adminTeamspace1JobA,  ['aPdfFile'], ['dummy.pdf']),
+			(refs, next) => {
+				const ref = refs[0];
+				const issueId = ref.issueIds[0];
+				const resourceId = ref._id;
+
+				detachResource(agents.adminTeamspace1JobA,issueId, resourceId, (err, res) => {
+					next(err, issueId);
+				}) ;
+			},
+			getIssue(agents.adminTeamspace1JobA),
+			(issue, next) => {
+				expect(issue.resources).to.be.an("array").and.to.have.length(0);
+				next();
+			}
+			], done);
+	});
+
 
 });
