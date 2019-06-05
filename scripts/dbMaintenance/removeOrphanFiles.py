@@ -1,20 +1,6 @@
 import sys, os
-import gridfs
-import uuid
 from pymongo import MongoClient
 import re
-import bson
-import random
-import StringIO
-import subprocess
-
-def cleanFileName(fileName):
-    fileNameSplit = fileName.split('/')
-    nameLength = len(fileNameSplit)
-    if "revision" in fileNameSplit:
-        return fileNameSplit[nameLength - 2] +"/" +  fileNameSplit[nameLength - 1]
-    else:
-        return fileNameSplit[nameLength - 1]
 
 if len(sys.argv) <= 5:
     print("Not enough arguments.")
@@ -27,7 +13,7 @@ userName = sys.argv[3]
 password = sys.argv[4]
 localFolder = sys.argv[5]
 
-localFolder = re.sub('//', '/', localFolder + "/")
+localFolder = re.sub("//", "/", localFolder + "/")
 
 if not os.path.exists(localFolder):
     print("LocalFolder " + localFolder + " does not exist.")
@@ -37,15 +23,19 @@ connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongo
 
 ##### Enable dry run to not commit to the database #####
 dryRun = True
-verbose = False
-overwrite = True #if there is already an entry for the filename: True = Overwrite regardless, False = Use existing entry
+verbose = True
+ignoreDirs = ["toy_2019-05-31"]
 
 ##### Retrieve file list from local folder #####
 fileList = {}
 
+ignoreDirs = [localFolder + x for x in ignoreDirs]
+ignoreDirsFilter = "^(" + "|".join(ignoreDirs) + ")"
+
 for (dirPath, dirNames, fileNames) in os.walk(localFolder):
     for fileName in fileNames:
-        fileList[re.sub('//', '/', dirPath + "/" + fileName)] = False
+        if not re.search(ignoreDirsFilter, dirPath):
+            fileList[re.sub("//", "/", dirPath + "/" + fileName)] = False
 
 ##### Connect to the Database #####
 db = MongoClient(connString)
