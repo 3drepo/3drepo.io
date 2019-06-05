@@ -49,7 +49,7 @@ if code:
     fatalError("git force add failed")
 
 os.system("sed 's/\"VERSION\" : \"[^ ]*\",/\"VERSION\" : \"" + version +"\",/' backend/VERSION.json > backend/VERSION.json.bak")
-os.system("mv backend/VERSION.json.bak backend/VERSION.json");
+os.system("mv backend/VERSION.json.bak backend/VERSION.json")
 
 os.system("git add backend/VERSION.json")
 
