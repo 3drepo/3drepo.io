@@ -45,16 +45,32 @@ export class Processing {
 
 	public selectNodes = ({ nodesIds = [], ...extraData }) => {
 		const { skipChildren } = extraData;
+		console.time('selectNodes getNodesByIds');
 		let nodes = this.getNodesByIds(nodesIds);
+		console.timeEnd('selectNodes getNodesByIds');
 
 		if (!skipChildren) {
-			const children = nodes.map((node) => this.getDeepChildren(node)) as any;
-			nodes = [...nodes, ...children.flat()];
+			console.time('selectNodes skipChildren');
+			const compactNodes = [];
+
+			for (let index = 0, size = nodes.length; index < size; index++) {
+				const node = nodes[index];
+				const children = this.getDeepChildren(node);
+				compactNodes.push(node, ...children);
+			}
+
+			nodes = compactNodes;
+			console.timeEnd('selectNodes skipChildren');
 		}
 
+		console.time('selectNodes handleToSelect');
 		this.handleToSelect(nodes);
+		console.timeEnd('selectNodes handleToSelect');
 
-		const highlightedObjects = this.getSelectMeshesByNodes(nodes);
+		console.time('selectNodes getMeshesByNodes');
+		const highlightedObjects = this.getMeshesByNodes(nodes);
+		console.timeEnd('selectNodes getMeshesByNodes');
+
 		return {
 			highlightedObjects,
 			nodesSelectionMap: { ...this.selectionMap }
@@ -74,7 +90,7 @@ export class Processing {
 
 		this.handleToDeselect(nodesWithChildren);
 
-		const unhighlightedObjects = this.getSelectMeshesByNodes(nodes);
+		const unhighlightedObjects = this.getMeshesByNodes(nodesWithChildren);
 		return { unhighlightedObjects };
 	}
 
@@ -103,8 +119,8 @@ export class Processing {
 			}
 		}
 
-		const unhighlightedObjects = this.getSelectMeshesByNodes(toUnhighlight);
-		const highlightedObjects = this.getSelectMeshesByNodes(toHighlight);
+		const unhighlightedObjects = this.getMeshesByNodes(toUnhighlight);
+		const highlightedObjects = this.getMeshesByNodes(toHighlight);
 
 		return {
 			nodesSelectionMap: { ...this.selectionMap },
@@ -131,7 +147,7 @@ export class Processing {
 		const result = this.handleNodesVisibility(nodes, extraData);
 		const unhighlightedObjects = [
 			...result.unhighlightedObjects,
-			...this.getSelectMeshesByNodes(nodes)
+			...this.getMeshesByNodes(nodes)
 		];
 
 		return { unhighlightedObjects, meshesToUpdate: result.meshesToUpdate };
@@ -172,7 +188,7 @@ export class Processing {
 				} else if (!visibleChildCount) {
 					this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
 					this.visibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
-					const meshesByNodes = this.getSelectMeshesByNodes([node]);
+					const meshesByNodes = this.getMeshesByNodes([node]);
 					const meshesData = meshesByNodes[0];
 					unhighlightedObjects.push(...meshesData);
 				} else {
@@ -320,12 +336,10 @@ export class Processing {
 		}
 	}
 
-	private _getDeepChildren = (node) => {
+	public getDeepChildren = memoize((node) => {
 		const nodeIndex = this.nodesIndexesMap[node._id];
 		return this.nodesList.slice(nodeIndex + 1, nodeIndex + node.deepChildrenNumber + 1);
-	}
-
-	private getDeepChildren = memoize(this._getDeepChildren, (node) => node._id);
+	}, (node) => node._id);
 
 	private getNodesByIds = (nodesIds) => {
 		return nodesIds.map((nodeId) => {
@@ -355,21 +369,15 @@ export class Processing {
 		return [];
 	}, (node = {}) => node._id);
 
-	private getSelectMeshesByNodes = (nodes = []) => {
-		const treeNodesList = this.nodesList;
-		const nodesIndexesMap = this.nodesIndexesMap;
-		const idToMeshes = this.meshesByModelId;
-
+	private getMeshesByNodes = (nodes = []) => {
 		if (!nodes.length) {
 			return [];
 		}
 
-		const childrenMap = {};
 		const meshesByNodes = {};
 
-		let stack = [...nodes];
-		while (stack.length > 0) {
-			const node = stack.pop();
+		for (let index = 0; index < nodes.length; index++) {
+			const node = nodes[index];
 
 			if (node) {
 				if (!meshesByNodes[node.namespacedId]) {
@@ -381,29 +389,16 @@ export class Processing {
 				}
 
 				// Check top level and then check if sub model of fed
-				let meshes = node.type === NODE_TYPES.MESH
+				const meshes = node.type === NODE_TYPES.MESH
 					? [node._id]
-					: idToMeshes[node._id];
-
-				if (!meshes && idToMeshes[node.namespacedId]) {
-					meshes = idToMeshes[node.namespacedId][node._id];
-				}
+					: this.meshesByModelId[node._id];
 
 				if (meshes) {
 					meshesByNodes[node.namespacedId].meshes = meshesByNodes[node.namespacedId].meshes.concat(meshes);
-				} else if (!childrenMap[node._id] && node.hasChildren) {
-					// This should only happen in federations.
-					// Traverse down the tree to find submodel nodes
-					const nodeIndex = nodesIndexesMap[node._id];
-					for (let childNumber = 1; childNumber <= node.deepChildrenNumber; childNumber++) {
-						const childNode = treeNodesList[nodeIndex + childNumber];
-						childrenMap[childNode._id] = true;
-						stack = stack.concat([childNode]);
-					}
 				}
 			}
 		}
 
 		return values(meshesByNodes) as any;
-	};
+	}
 }
