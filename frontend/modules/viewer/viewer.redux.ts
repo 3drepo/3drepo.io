@@ -17,7 +17,7 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { cloneDeep } from 'lodash';
-import { DEFAULT_SETTINGS, VIEWER_NAV_MODES, VIEWER_CLIP_MODES, VIEWER_PANELS } from '../../constants/viewer';
+import { DEFAULT_SETTINGS, VIEWER_NAV_MODES, VIEWER_PANELS, INITIAL_HELICOPTER_SPEED } from '../../constants/viewer';
 
 export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	waitForViewer: [],
@@ -60,7 +60,7 @@ export const INITIAL_STATE = {
 			JSON.parse(window.localStorage.getItem('visualSettings')) : DEFAULT_SETTINGS,
 	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
 	clippingMode: null,
-	helicopterSpeed: null,
+	helicopterSpeed: INITIAL_HELICOPTER_SPEED,
 	isFocusMode: false,
 	isClipEdit: false,
 	clipNumber: 0,
