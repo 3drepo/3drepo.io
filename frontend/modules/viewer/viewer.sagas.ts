@@ -217,6 +217,7 @@ export function* resetHelicopterSpeed({teamspace, modelId, updateDefaultSpeed}) 
 
 export function* getHelicopterSpeed({teamspace, modelId}) {
 	try {
+		yield Viewer.isViewerReady();
 		const { data: { heliSpeed } } = yield API.getHelicopterSpeed(teamspace, modelId);
 		const currentHeliSpeed = yield select(selectHelicopterSpeed);
 		const diff = heliSpeed - currentHeliSpeed;
@@ -253,6 +254,7 @@ export function* decreaseHelicopterSpeed({teamspace, modelId}) {
 	try {
 		const helicopterSpeed = yield select(selectHelicopterSpeed);
 		const speed = helicopterSpeed - 1;
+
 		yield Viewer.helicopterSpeedDown();
 		yield API.editHelicopterSpeed(teamspace, modelId, speed);
 		yield put(ViewerActions.setHelicopterSpeed(speed));
