@@ -57,7 +57,7 @@ export class Processing {
 		const highlightedObjects = this.getSelectMeshesByNodes(nodes);
 		return {
 			highlightedObjects,
-			nodesSelectionMap: {...this.selectionMap}
+			nodesSelectionMap: { ...this.selectionMap }
 		};
 	}
 
@@ -107,8 +107,8 @@ export class Processing {
 		const highlightedObjects = this.getSelectMeshesByNodes(toHighlight);
 
 		return {
-			nodesSelectionMap: {...this.selectionMap},
-			nodesVisibilityMap: {...this.visibilityMap},
+			nodesSelectionMap: { ...this.selectionMap },
+			nodesVisibilityMap: { ...this.visibilityMap },
 			unhighlightedObjects,
 			highlightedObjects,
 			meshesToUpdate
@@ -197,7 +197,7 @@ export class Processing {
 			}
 		}
 
-		return { unhighlightedObjects	};
+		return { unhighlightedObjects };
 	};
 
 	private handleNodesVisibility = (nodes, extraData) => {
