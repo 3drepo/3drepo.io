@@ -27,6 +27,8 @@ userName = sys.argv[3]
 password = sys.argv[4]
 localFolder = sys.argv[5]
 
+localFolder = re.sub('//', '/', localFolder + "/")
+
 if not os.path.exists(localFolder):
     print("LocalFolder " + localFolder + " does not exist.")
     sys.exit(0)
@@ -39,13 +41,11 @@ verbose = False
 overwrite = True #if there is already an entry for the filename: True = Overwrite regardless, False = Use existing entry
 
 ##### Retrieve file list from local folder #####
-tmpFileList = "tmpFileList"
-os.system("find " + localFolder + " -type f | sed 's/^" + re.sub('/','\/',localFolder) + "[\/]*//' > " + tmpFileList)
-tmpFileListHandle = open(tmpFileList, 'r')
 fileList = {}
-for filePath in tmpFileListHandle:
-    fileList[filePath.rstrip()] = False
-tmpFileListHandle.close()
+
+for (dirPath, dirNames, fileNames) in os.walk(localFolder):
+    for fileName in fileNames:
+        fileList[re.sub('//', '/', dirPath + "/" + fileName)] = False
 
 ##### Connect to the Database #####
 db = MongoClient(connString)
@@ -65,12 +65,13 @@ for database in db.database_names():
                 if verbose:
                     print("\t\t--stash: " + colName)
                 for entry in db[colName].find():
-                    fileStatus = fileList.get(entry['link'])
+                    fileStatus = fileList.get(localFolder + entry['link'])
                     if fileStatus == None:
                         fileList[entry['link']] = database + "." + modelId + "." + colName
                     else:
                         fileList[entry['link']] = True
 
+##### Identify/delete missing and orphan files #####
 for filePath in fileList:
     if isinstance(fileList[filePath], basestring):
         if verbose:
@@ -79,6 +80,5 @@ for filePath in fileList:
         if dryRun:
             print("Orphan: " + filePath)
         else:
-            fullFilePath = re.sub('//', '/', localFolder + "/") + filePath
-            os.remove(fullFilePath)
-            print("--Removed: " + fullFilePath)
+            os.remove(filePath)
+            print("--Removed: " + filePath)
