@@ -1,7 +1,5 @@
 // Components & services
-import './home/js/analytic.service';
 import './home/js/auth.interceptor';
-import './home/js/auth.service';
 import './home/js/client-config.service';
 import './home/js/dialog.service';
 import './home/js/home.component';
