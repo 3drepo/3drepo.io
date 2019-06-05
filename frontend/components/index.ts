@@ -1,5 +1,4 @@
 // Components & services
-import './cookies/js/cookies.component';
 import './home/js/analytic.service';
 import './home/js/auth.interceptor';
 import './home/js/auth.service';
@@ -10,9 +9,6 @@ import './home/js/serviceworker.service';
 import './home/js/state-manager.config';
 import './home/js/state-manager.run';
 import './home/js/state-manager.service';
-import './home/js/template.service';
-import './home/js/theme.config';
-import './icons/js/icons.constant.ts';
 import './model/js/model.component';
 import './chat/js/chat.service';
 import './panel/js/panel-card.component';
@@ -26,10 +22,8 @@ import './panel/js/panel-card-option-chips-filter.component';
 import './panel/js/panel.component';
 import './panel/js/panel.service';
 import './payment/js/payment.component';
-import './privacy/js/privacy.component';
 import './revisions/js/revisions.component';
 import './revisions/js/revisions.service';
-import './terms/js/terms.component';
 import './utils/js/progress.component';
 import './utils/js/tdr-focus.component';
 import './utils/js/utils.filter';
