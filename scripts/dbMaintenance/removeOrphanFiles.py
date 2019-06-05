@@ -34,7 +34,7 @@ if not os.path.exists(localFolder):
 connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongoPort + "/"
 
 ##### Enable dry run to not commit to the database #####
-dryRun = False
+dryRun = True
 verbose = False
 overwrite = True #if there is already an entry for the filename: True = Overwrite regardless, False = Use existing entry
 
@@ -82,4 +82,3 @@ for filePath in fileList:
             fullFilePath = re.sub('//', '/', localFolder + "/") + filePath
             os.remove(fullFilePath)
             print("--Removed: " + fullFilePath)
-            sys.exit(0)
