@@ -15,11 +15,9 @@ export const eventActions = {
 };
 
 export class AnalyticsService {
-	constructor() {
-	}
+	constructor() {}
 
 	public init() {
-		// @ts-ignore
 		const { development, ga: gaConfig } = clientConfigService;
 
 		if (development) {
