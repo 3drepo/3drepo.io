@@ -1,4 +1,4 @@
-var autoFix = true;
+var autoFix = false;
 log('===== DB Health check [Auto fix: ' + autoFix + '] ======');
 
 var specialDB = ['admin', 'local', 'notifications'];
@@ -81,7 +81,7 @@ function checkTeamMemberCount(dbName) {
 	return members;
 }
 
-function checkTeamspaceAdmins(dbName, members) {
+function checkTeamspacePrivileges(dbName, members) {
 	var userEntry = userCol.findOne({user: dbName});
 
 	var updatedPerm = [];
@@ -96,11 +96,30 @@ function checkTeamspaceAdmins(dbName, members) {
 	});
 
 	if (permChanged && autoFix) {
-		log("Removing incorrect permissions...");
+		log("Removing incorrect teamspace permissions...");
 		userCol.update({user: dbName}, {$set: { "customData.permissions": updatedPerm }});
 	}
+}
 
+function checkProjectPrivileges(thisDB, members) {
+	var projectCol = thisDB.getCollection("projects");
+	projectCol.find().forEach(function(project){
+		project.permissions.forEach(function(perm) {
+			var updatedPerm = [];
+			var needUpdate = false;
+			if(members.indexOf(perm.user) > -1) {
+				updatedPerm.push(perm);
+			} else {
+				needUpdate = true;
+				log(`[${project.name}]${perm.user} has project permissions but not a member`);
+			}
 
+			if(needUpdate && autoFix) {
+				log(`[${project.name}]Removing incorrect project permissions...`);
+				projectCol.update(project, {$set: { permissions: updatedPerm }});
+			}
+		});
+	});
 }
 
 function checkJobAndPermissions() {
@@ -115,7 +134,8 @@ function checkJobAndPermissions() {
 
 		checkTeamMemberRole(thisDB, dbName);
 		var members = checkTeamMemberCount(dbName);
-		checkTeamspaceAdmins(dbName, members);
+		checkTeamspacePrivileges(dbName, members);
+		checkProjectPrivileges(thisDB, members);
 
 		exitSubSection();
 	});
@@ -124,5 +144,4 @@ function checkJobAndPermissions() {
 
 
 checkDatabaseEntries();
-
 checkJobAndPermissions();
