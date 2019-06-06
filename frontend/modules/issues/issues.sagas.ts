@@ -20,6 +20,7 @@ import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
+import { analyticsService, eventCategories, eventActions } from '../../services/analytics';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
 import { prepareIssue } from '../../helpers/issues';
 import { prepareComments, prepareComment } from '../../helpers/comments';
@@ -118,8 +119,6 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 			myJob
 		]);
 
-		const AnalyticService = getAngularService('AnalyticService') as any;
-
 		viewpoint.hideIfc = ifcSpacesHidden;
 		issueData.rev_id = revision;
 
@@ -157,9 +156,9 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 
 		const { data: savedIssue } = yield API.saveIssue(teamspace, model, issue);
 
-		AnalyticService.sendEvent({
-			eventCategory: 'Issue',
-			eventAction: 'create'
+		analyticsService.sendEvent({
+			eventCategory: eventCategories.issue,
+			eventAction: eventActions.create
 		});
 
 		const jobs = yield select(selectJobsList);
@@ -177,10 +176,10 @@ export function* updateIssue({ teamspace, modelId, issueData }) {
 	try {
 		const { _id, rev_id } = yield select(selectActiveIssueDetails);
 		const { data: updatedIssue } = yield API.updateIssue(teamspace, modelId, _id, rev_id, issueData );
-		const AnalyticService = getAngularService('AnalyticService') as any;
-		yield AnalyticService.sendEvent({
-			eventCategory: 'Issue',
-			eventAction: 'edit'
+
+		analyticsService.sendEvent({
+			eventCategory: eventCategories.issue,
+			eventAction: eventActions.edit
 		});
 
 		toggleIssuePin(issueData, true);

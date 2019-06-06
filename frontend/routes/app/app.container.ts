@@ -23,6 +23,7 @@ import { connect, addRouting } from '../../helpers/migration';
 import { App } from './app.component';
 import { AuthActions, selectIsAuthenticated, selectActiveSession } from '../../modules/auth';
 import { selectCurrentUser } from '../../modules/currentUser';
+import { StartupActions } from '../../modules/startup/startup.redux';
 
 const mapStateToProps = createStructuredSelector({
 	isAuthenticated: selectIsAuthenticated,
@@ -32,7 +33,8 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	authenticate: AuthActions.authenticate,
-	logout: AuthActions.logout
+	logout: AuthActions.logout,
+	startup: StartupActions.startup
 }, dispatch);
 
 export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(App)));

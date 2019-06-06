@@ -18,6 +18,8 @@ export class ClientConfigService {
 	public userNotice;
 	// tslint:disable-next-line
 	public login_check_interval;
+	public ga;
+	public userId;
 	// tslint:disable-next-line
 	public captcha_client_key;
 	public legalTemplates;

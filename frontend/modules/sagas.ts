@@ -20,10 +20,12 @@ import starredMetaSaga from './starredMeta/starredMeta.sagas';
 import measureSaga from './measure/measure.sagas';
 import issuesSaga from './issues/issues.sagas';
 import compareSaga from './compare/compare.sagas';
+import startupSaga from './startup/startup.sagas';
 // <-- IMPORT MODULE SAGA -->
 
 export default function* rootSaga() {
 	yield all([
+		fork(startupSaga),
 		fork(currentUserSaga),
 		fork(userManagementSaga),
 		fork(jobsSaga),
@@ -44,6 +46,6 @@ export default function* rootSaga() {
 		fork(starredMetaSaga),
 		fork(measureSaga),
 		fork(issuesSaga),
-		fork(compareSaga)// <-- INJECT MODULE SAGA -->
+		fork(compareSaga) // <-- INJECT MODULE SAGA -->
 	]);
 }

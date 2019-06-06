@@ -31,7 +31,6 @@ function StateManagerRun(
 
 	StateManager,
 	AuthService,
-	AnalyticService,
 	$urlRouter
 ) {
 
@@ -66,12 +65,6 @@ function StateManagerRun(
 			$timeout(() => {
 				history.push(`${location.pathname}${location.search}`);
 			});
-		}
-
-		AnalyticService.sendPageView(location);
-
-		if (location.href.indexOf('sign-up') !== -1 || location.href.indexOf('register-request') !== -1) {
-			AnalyticService.sendPageViewReferer(location);
 		}
 	});
 
@@ -115,7 +108,6 @@ export const StateManagerRunModule = angular
 
 		'StateManager',
 		'AuthService',
-		'AnalyticService',
 		'$urlRouter',
 		StateManagerRun
 	]);

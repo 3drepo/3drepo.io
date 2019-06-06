@@ -1,7 +1,11 @@
 // Components & services
+
+import './home/js/api.service';
 import './home/js/auth.interceptor';
+import './home/js/auth.service';
 import './home/js/client-config.service';
 import './home/js/dialog.service';
+import './home/js/event.service';
 import './home/js/home.component';
 import './home/js/serviceworker.service';
 import './home/js/state-manager.config';
