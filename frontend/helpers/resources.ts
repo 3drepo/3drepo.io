@@ -16,6 +16,7 @@
  */
 
 import { sortByDate } from './sorting';
+import * as filesize from 'filesize';
 import * as API from '../services/api';
 
 const extensionRe = /\.(\w+)$/;
@@ -23,9 +24,11 @@ const extensionRe = /\.(\w+)$/;
 const prepareResource = (teamspace, modelId, resource) => {
 	if (!resource.link) {
 		resource.link = API.getAPIUrl(`${teamspace}/${modelId}/resources/${resource._id}`);
-		resource.type = ((resource.name.match(extensionRe) || [])[1] || '').toLowerCase();
+		resource.type = (resource.name.match(extensionRe) || ['', ''])[1].toLowerCase();
+		resource.size = filesize(resource.size, {round: 0}).replace(' ', '');
 	} else {
 		resource.type = 'http';
+		resource.size = '';
 	}
 
 	return resource;
@@ -33,5 +36,5 @@ const prepareResource = (teamspace, modelId, resource) => {
 
 export const prepareResources = (teamspace, modelId, resources = []) => {
 	const preparedResources = resources.map((resource) => prepareResource(teamspace, modelId, resource));
-	return preparedResources;
+	return sortByDate( preparedResources, { order: 'asc' });
 };

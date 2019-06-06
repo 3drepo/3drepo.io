@@ -703,7 +703,7 @@ issue.findByUID = async function(dbCol, uid, projection, noClean = false) {
 
 	if(foundIssue.refs) {
 		const refsColl = await db.getCollection(dbCol.account, dbCol.model + ".resources.ref");
-		const resources = await refsColl.find({ _id: { $in: foundIssue.refs } }, {name:1, size: 1, createdAts: 1, link: 1, type: 1}).toArray();
+		const resources = await refsColl.find({ _id: { $in: foundIssue.refs } }, {name:1, size: 1, createdAt: 1, link: 1, type: 1}).toArray();
 		resources.forEach(r => {
 			if(r.type !== "http") {
 				delete r.link;

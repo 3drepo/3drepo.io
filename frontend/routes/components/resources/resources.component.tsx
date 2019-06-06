@@ -16,7 +16,6 @@
  */
 
 import * as React from 'react';
-import * as dayjs from 'dayjs';
 
 interface IResource {
 	_id: string;
@@ -36,6 +35,8 @@ interface IState {
 
 export class Resources extends React.PureComponent<IProps, IState> {
 	public render() {
-		return this.props.resources.map((r) => (<div key={r._id}>{r.type} | <a href={r.link}>{r.name}</a></div>));
+		return this.props.resources.map((r) => (
+			<div key={r._id}>{r.type} | <a href={r.link} target="_blank" rel="noopener" >{r.name}</a> | {r.size}</div>
+		));
 	}
 }
