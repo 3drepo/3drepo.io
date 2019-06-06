@@ -42,6 +42,7 @@ import {
 import { IssuesTypes, IssuesActions } from './issues.redux';
 import { NEW_PIN_ID } from '../../constants/viewer';
 import { selectTopicTypes } from '../model';
+import { prepareResources } from '../../helpers/resources';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -65,6 +66,7 @@ export function* fetchIssue({teamspace, modelId, issueId}) {
 	try {
 		const {data} = yield API.getIssue(teamspace, modelId, issueId);
 		data.comments = yield prepareComments(data.comments);
+		data.resources = prepareResources(teamspace, modelId, data.resources);
 		yield put(IssuesActions.fetchIssueSuccess(data));
 	} catch (error) {
 		yield put(IssuesActions.fetchIssueFailure());

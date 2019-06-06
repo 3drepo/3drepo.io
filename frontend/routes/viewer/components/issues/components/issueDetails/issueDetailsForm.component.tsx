@@ -37,6 +37,7 @@ import { canChangeBasicProperty, canChangeStatus, canChangeAssigned } from '../.
 import { TextField } from '../../../../../components/textField/textField.component';
 import { DescriptionImage } from './issueDetails.styles';
 import PinButton from '../../../pinButton/pinButton.container';
+import { Resources } from '../../../../../components/resources/resources.component';
 
 interface IProps {
 	issue: any;
@@ -214,6 +215,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						</DescriptionImage>
 					)}
 				</Form>
+				<Resources resources={this.props.issue.resources || []}/>
 			</MuiPickersUtilsProvider>
 		);
 	}

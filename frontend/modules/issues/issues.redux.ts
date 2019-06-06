@@ -106,8 +106,8 @@ export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues = [] }) => {
 	};
 };
 
-export const fetchIssueSuccess = (state = INITIAL_STATE, { issue }) => {
-	const issuesMap = updateIssueProps(state.issuesMap, issue._id, { comments: issue.comments });
+export const fetchIssueSuccess = (state = INITIAL_STATE, { issue: {_id, comments, resources} }) => {
+	const issuesMap = updateIssueProps(state.issuesMap, _id, { comments, resources });
 
 	return { ...state, issuesMap, componentState: { ...state.componentState, failedToLoad: false } };
 };
