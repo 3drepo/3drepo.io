@@ -122,6 +122,27 @@ function checkProjectPrivileges(thisDB, members) {
 	});
 }
 
+function checkModelPrivileges(thisDB, members) {
+	var modelCol = thisDB.getCollection("settings");
+	modelCol.find().forEach(function(model){
+		model.permissions && model.permissions.forEach(function(perm) {
+			var updatedPerm = [];
+			var needUpdate = false;
+			if(members.indexOf(perm.user) > -1) {
+				updatedPerm.push(perm);
+			} else {
+				needUpdate = true;
+				log(`[${model.name}]${perm.user} has model permissions but not a member`);
+			}
+
+			if(needUpdate && autoFix) {
+				log(`[${model.name}]Removing incorrect model permissions...`);
+				modelCol.update(model, {$set: { permissions: updatedPerm }});
+			}
+		});
+	});
+}
+
 function checkJobAndPermissions() {
 	log('2. Check only team members are assigned to jobs and permissions');
 	addSubSection();
@@ -136,6 +157,7 @@ function checkJobAndPermissions() {
 		var members = checkTeamMemberCount(dbName);
 		checkTeamspacePrivileges(dbName, members);
 		checkProjectPrivileges(thisDB, members);
+		checkModelPrivileges(thisDB, members);
 
 		exitSubSection();
 	});
