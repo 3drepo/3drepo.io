@@ -1,4 +1,4 @@
-var autoFix = true;
+var autoFix = false;
 log('===== DB Health check [Auto fix: ' + autoFix + '] ======');
 
 var specialDB = ['admin', 'local', 'notifications'];
@@ -219,11 +219,39 @@ function removeModel(thisDB, modelID, colNames, dropEntry = false) {
 	});
 
 	if(dropEntry) {
-
+		thisDB.getCollection("settings").remove({_id: modelID});
 	}
 }
 
-function checkModelCollections(thisDB, modelID, colNames) {
+function checkModelCollections(thisDB, modelID, isFed, colNames) {
+	var minExt = isFed? ["history", "scene", "stash.json_mpc.files", "stash.json_mpc.chunks"] :
+		["history", "scene", "stash.json_mpc.files", "stash.json_mpc.chunks", "stash.3drepo", "stash.unity3d", "stash.unity3d.files", "stash.unity3d.chunks"]
+		;
+	var count = 0;
+	var colToMatch = {};
+
+	minExt.forEach(function(ext) {
+		colToMatch[`${modelID}.${ext}`]  = 1;
+	});
+
+	colNames.forEach(function(colName) {
+		if(colToMatch[colName]) {
+			++count;
+			delete colToMatch[colName];
+		}
+	});
+	if(count > 0 && count != minExt.length) {
+		log(`Failed to find some essential collections for ${modelID} :`);
+		enterSubSection();
+		Object.keys(colToMatch).forEach(function(name) log(name));
+		exitSubSection();
+		if(autoFix) {
+			log(`Removing all collections associated with ${modelID}...`);
+			removeModel(thisDB, modelID, colNames);
+		}
+	}
+}
+function checkGridFSPairs(thisDB, modelID, colNames) {
 	colNames.forEach(function(colName) {
 		var colSplit = colName.split(".");
 		if(colSplit[0] === modelID) {
@@ -250,14 +278,16 @@ function checkModelCollections(thisDB, modelID, colNames) {
 	});
 }
 
-function checkModelIDFormat(thisDB, modelID) {
+function checkModelIDFormat(thisDB, modelID, colNames) {
 	var regex = new RegExp(/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/i);
 	if(!regex.test(modelID)) {
 		log(`Incorrect model ID format: ${modelID} ${autoFix? " Removing model... " : ""}`);
 		if(autoFix) {
-			removeModel(thisDB, modelID);
+			removeModel(thisDB, modelID, colNames, true);
 		}
+		return false;
 	}
+	return true;
 }
 
 function checkModelSanity() {
@@ -271,8 +301,10 @@ function checkModelSanity() {
 		var thisDB = db.getSiblingDB(dbName);
 		var colList = thisDB.getCollectionNames();
 		thisDB.getCollection("settings").find({status: {$ne: "processing"}}).forEach(function(model) {
-//			checkModelIDFormat(thisDB, model._id, colList);
-			checkModelCollections(thisDB, model._id, colList);
+			if (!checkModelIDFormat(thisDB, model._id, colList)) return;
+			checkGridFSPairs(thisDB, model._id, colList);
+			colList = thisDB.getCollectionNames(); //Refresh the list as items may be removed
+			checkModelCollections(thisDB, model._id, model.federate, colList);
 		});
 		exitSubSection();
 	});
@@ -282,5 +314,5 @@ function checkModelSanity() {
 
 //checkDatabaseEntries();
 //checkJobAndPermissions();
-//findZombieModels();
+//findZombieModels(
 checkModelSanity();
