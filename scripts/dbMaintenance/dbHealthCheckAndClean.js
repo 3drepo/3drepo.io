@@ -1,4 +1,4 @@
-var autoFix = false;
+var autoFix = true;
 log('===== DB Health check [Auto fix: ' + autoFix + '] ======');
 
 var specialDB = ['admin', 'local', 'notifications'];
@@ -8,6 +8,8 @@ var adminDB = db.getSiblingDB('admin');
 var userCol = adminDB.getCollection('system.users');
 var TEAM_MEMBER_ROLE = "team_member";
 
+var dbList = null;
+
 function log(msg) {
 	var prefix = '';
 	for(var i = 0; i < indent; ++i) prefix += '\t';
@@ -16,6 +18,18 @@ function log(msg) {
 
 function enterSubSection() ++indent;
 function exitSubSection() --indent;
+
+function getDatabaseList() {
+	//FIXME: to remove condition. Just ensuring i don't write to all databases whilst developing!
+	if(dbList) return dbList;
+	var useDebug = [
+		{name : "nabile"}
+	];
+//	return useDebug;
+
+	dbList = adminDB.adminCommand({listDatabases: 1}).databases;
+	return dbList;
+}
 
 function checkDatabaseEntries() {
 	log('1. Checking that all databases have an entry in admin.users...');
@@ -28,7 +42,7 @@ function checkDatabaseEntries() {
 
 	var msg = autoFix ? 'The following databases have been removed:' : 'The following dbs are unaccounted for:';
 	log(`${msg}`);
-	databaseList = adminDB.adminCommand({listDatabases: 1}).databases.forEach(function(dbEntry) {
+	databaseList = getDatabaseList().forEach(function(dbEntry) {
 		var dbName = dbEntry.name;
 		if(specialDB.indexOf(dbName) == -1  && !users[dbName]) {
 			if(autoFix) {
@@ -146,7 +160,7 @@ function checkModelPrivileges(thisDB, members) {
 function checkJobAndPermissions() {
 	log('2. Check only team members are assigned to jobs and permissions');
 	enterSubSection();
-	adminDB.adminCommand({listDatabases: 1}).databases.forEach(function(dbEntry) {
+	getDatabaseList().forEach(function(dbEntry) {
 		var dbName = dbEntry.name;
 		if(specialDB.indexOf(dbName) > -1) return;
 		var thisDB = db.getSiblingDB(dbName);
@@ -167,7 +181,7 @@ function checkJobAndPermissions() {
 function findZombieModels() {
 	log('3. Find zombie model entries');
 	enterSubSection();
-	adminDB.adminCommand({listDatabases: 1}).databases.forEach(function(dbEntry) {
+	getDatabaseList().forEach(function(dbEntry) {
 		var dbName = dbEntry.name;
 		if(specialDB.indexOf(dbName) > -1) return;
 		log(`===${dbName}===`);
@@ -196,26 +210,77 @@ function findZombieModels() {
 	exitSubSection();
 }
 
-/*
+function removeModel(thisDB, modelID, colNames, dropEntry = false) {
+	if(!autoFix) return;
+	colNames.forEach(function(colName) {
+		if(colName.split(".")[0] === modelID) {
+			thisDB.getCollection(colName).drop();
+		}
+	});
+
+	if(dropEntry) {
+
+	}
+}
+
+function checkModelCollections(thisDB, modelID, colNames) {
+	colNames.forEach(function(colName) {
+		var colSplit = colName.split(".");
+		if(colSplit[0] === modelID) {
+			if(colSplit[colSplit.length -1] === "files") {
+				colSplit[colSplit.length -1] = "chunks";
+				var chunkName = colSplit.join(".");
+				if(colNames.indexOf(chunkName) === -1) {
+					log(`Cannot find chunks col for ${colName}. ${autoFix? "removing..." : ""}`);
+					if(autoFix) {
+						thisDB.getCollection(colName).drop();
+					}
+				}
+			} else if (colSplit[colSplit.length -1] === "chunks") {
+				colSplit[colSplit.length -1] = "files";
+				var fileName = colSplit.join(".");
+				if(colNames.indexOf(fileName) === -1) {
+					log(`Cannot find files col for ${colName}. ${autoFix? "removing..." : ""}`);
+					if(autoFix) {
+						thisDB.getCollection(colName).drop();
+					}
+				}
+			}
+		}
+	});
+}
+
+function checkModelIDFormat(thisDB, modelID) {
+	var regex = new RegExp(/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/i);
+	if(!regex.test(modelID)) {
+		log(`Incorrect model ID format: ${modelID} ${autoFix? " Removing model... " : ""}`);
+		if(autoFix) {
+			removeModel(thisDB, modelID);
+		}
+	}
+}
+
 function checkModelSanity() {
 	log('4. Model health check');
 	enterSubSection();
-	adminDB.adminCommand({listDatabases: 1}).databases.forEach(function(dbEntry) {
+	getDatabaseList().forEach(function(dbEntry) {
 		var dbName = dbEntry.name;
 		if(specialDB.indexOf(dbName) > -1) return;
 		log(`===${dbName}===`);
 		enterSubSection();
 		var thisDB = db.getSiblingDB(dbName);
-		thisDB.getCollection("settings").find().forEach(function(model) {
-
+		var colList = thisDB.getCollectionNames();
+		thisDB.getCollection("settings").find({status: {$ne: "processing"}}).forEach(function(model) {
+//			checkModelIDFormat(thisDB, model._id, colList);
+			checkModelCollections(thisDB, model._id, colList);
 		});
 		exitSubSection();
-	}
+	});
 	exitSubSection();
 }
-*/
 
-checkDatabaseEntries();
-checkJobAndPermissions();
-findZombieModels();
-//checkModelSanity();
+
+//checkDatabaseEntries();
+//checkJobAndPermissions();
+//findZombieModels();
+checkModelSanity();
