@@ -14,13 +14,13 @@ function log(msg) {
 	print(`${prefix}${msg}`);
 }
 
-function addSubSection() ++indent;
+function enterSubSection() ++indent;
 function exitSubSection() --indent;
 
 function checkDatabaseEntries() {
 	log('1. Checking that all databases have an entry in admin.users...');
 
-	addSubSection();
+	enterSubSection();
 	var users = {};
 	userCol.find({}, {user: 1}).forEach(function(entry) {
 		users[entry.user] = 1;
@@ -145,13 +145,13 @@ function checkModelPrivileges(thisDB, members) {
 
 function checkJobAndPermissions() {
 	log('2. Check only team members are assigned to jobs and permissions');
-	addSubSection();
+	enterSubSection();
 	adminDB.adminCommand({listDatabases: 1}).databases.forEach(function(dbEntry) {
 		var dbName = dbEntry.name;
 		if(specialDB.indexOf(dbName) > -1) return;
 		var thisDB = db.getSiblingDB(dbName);
 		log(`===${dbName}===`);
-		addSubSection();
+		enterSubSection();
 
 		checkTeamMemberRole(thisDB, dbName);
 		var members = checkTeamMemberCount(dbName);
@@ -164,6 +164,58 @@ function checkJobAndPermissions() {
 	exitSubSection();
 }
 
+function findZombieModels() {
+	log('3. Find zombie model entries');
+	enterSubSection();
+	adminDB.adminCommand({listDatabases: 1}).databases.forEach(function(dbEntry) {
+		var dbName = dbEntry.name;
+		if(specialDB.indexOf(dbName) > -1) return;
+		log(`===${dbName}===`);
+		enterSubSection();
+		var thisDB = db.getSiblingDB(dbName);
+		var modelSettingsCol = thisDB.getCollection("settings");
+		var foundModel = {};
+		thisDB.getCollectionNames().forEach(function(colName) {
+			var colNameArr = colName.split(".");
+			if(colNameArr.length > 1) {
+				var modelID = colNameArr[0];
+				foundModel[modelID] = foundModel.hasOwnProperty(modelID) ?
+					foundModel[modelID] : modelSettingsCol.findOne({_id : modelID});
+
+				if (!foundModel[modelID]) {
+					log(`Zombie collection found: ${colName}${autoFix? ". Removing..." : ""}`);
+					if(autoFix) {
+						thisDB.getCollection(colName).drop();
+					}
+				}
+			}
+		});
+
+		exitSubSection();
+	});
+	exitSubSection();
+}
+
+/*
+function checkModelSanity() {
+	log('4. Model health check');
+	enterSubSection();
+	adminDB.adminCommand({listDatabases: 1}).databases.forEach(function(dbEntry) {
+		var dbName = dbEntry.name;
+		if(specialDB.indexOf(dbName) > -1) return;
+		log(`===${dbName}===`);
+		enterSubSection();
+		var thisDB = db.getSiblingDB(dbName);
+		thisDB.getCollection("settings").find().forEach(function(model) {
+
+		});
+		exitSubSection();
+	}
+	exitSubSection();
+}
+*/
 
 checkDatabaseEntries();
 checkJobAndPermissions();
+findZombieModels();
+//checkModelSanity();
