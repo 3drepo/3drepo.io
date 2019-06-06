@@ -49,12 +49,9 @@ export class Processing {
 		}
 
 		const { skipChildren } = extraData;
-		console.time('selectNodes getNodesByIds');
 		let nodes = this.getNodesByIds(nodesIds);
-		console.timeEnd('selectNodes getNodesByIds');
 
 		if (!skipChildren) {
-			console.time('selectNodes skipChildren');
 			const compactNodes = [];
 
 			for (let index = 0, size = nodes.length; index < size; index++) {
@@ -64,12 +61,9 @@ export class Processing {
 			}
 
 			nodes = compactNodes;
-			console.timeEnd('selectNodes skipChildren');
 		}
 
-		console.time('selectNodes handleToSelect');
 		this.handleToSelect(nodes);
-		console.timeEnd('selectNodes handleToSelect');
 
 		console.time('selectNodes getMeshesByNodes');
 		const highlightedObjects = this.getMeshesByNodes(nodes);
@@ -175,6 +169,8 @@ export class Processing {
 			if (node.hasChildren) {
 				const children = this.getChildren(node);
 				let visibleChildCount = 0;
+				let selectedChildCount = 0;
+
 				let hasParentOfInvisibleChild = false;
 
 				for (let i = 0; i < children.length; i++) {
@@ -185,9 +181,13 @@ export class Processing {
 						break;
 					} else if (this.visibilityMap[children[i]._id] === VISIBILITY_STATES.VISIBLE) {
 						visibleChildCount++;
+
+						if (this.selectionMap[children[i]._id] === SELECTION_STATES.SELECTED) {
+							selectedChildCount++;
+						}
 					}
 				}
-
+				console.log('visibleChildCount', visibleChildCount)
 				if (hasParentOfInvisibleChild) {
 					this.visibilityMap[node._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
 				} else if (children.length && children.length === visibleChildCount) {
@@ -200,6 +200,10 @@ export class Processing {
 					unhighlightedObjects.push(...meshesData);
 				} else {
 					this.visibilityMap[node._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
+
+					if (!selectedChildCount) {
+						this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
+					}
 				}
 			} else {
 				this.visibilityMap[node._id] = extraData.visibility;
@@ -292,11 +296,7 @@ export class Processing {
 			const currentVisibility = this.visibilityMap[node._id];
 
 			if (currentVisibility !== VISIBILITY_STATES.INVISIBLE) {
-				if (currentVisibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
-					this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
-				} else {
-					this.selectionMap[node._id] = SELECTION_STATES.SELECTED;
-				}
+				this.selectionMap[node._id] = SELECTION_STATES.SELECTED;
 			}
 		}
 
