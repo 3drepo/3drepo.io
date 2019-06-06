@@ -91,7 +91,7 @@ export class Processing {
 		return { unhighlightedObjects };
 	}
 
-	public isolateNodes = ({ nodesIds = [] }: any) => {
+	public isolateNodes = ({ nodesIds = [], ifcSpacesHidden = true }: any) => {
 		const toUnhighlight = [];
 		const toHighlight = [];
 		const meshesToUpdate = [];
@@ -100,11 +100,18 @@ export class Processing {
 			const node = this.nodesList[index];
 			const shouldBeVisible = nodesIds.includes(node._id);
 			if (shouldBeVisible) {
-				this.selectionMap[node._id] = SELECTION_STATES.SELECTED;
-				this.visibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
-				toHighlight.push(node);
-				if (node.type === NODE_TYPES.MESH) {
-					meshesToUpdate.push(node);
+				if (ifcSpacesHidden) {
+					this.visibilityMap[node._id] = ifcSpacesHidden ? this.defaultVisibilityMap[node._id] : VISIBILITY_STATES.VISIBLE;
+				}
+
+				if (this.visibilityMap[node._id] === VISIBILITY_STATES.VISIBLE) {
+					toHighlight.push(node);
+					if (node.type === NODE_TYPES.MESH) {
+						meshesToUpdate.push(node);
+					}
+					this.selectionMap[node._id] = SELECTION_STATES.SELECTED;
+				} else {
+					this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
 				}
 			} else if (this.visibilityMap[node._id] !== VISIBILITY_STATES.INVISIBLE) {
 				toUnhighlight.push(node);
@@ -187,7 +194,7 @@ export class Processing {
 						}
 					}
 				}
-				console.log('visibleChildCount', visibleChildCount)
+
 				if (hasParentOfInvisibleChild) {
 					this.visibilityMap[node._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
 				} else if (children.length && children.length === visibleChildCount) {
