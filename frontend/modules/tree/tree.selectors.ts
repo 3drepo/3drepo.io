@@ -46,6 +46,10 @@ export const selectDataRevision = createSelector(
 	selectTreeDomain, (state) => state.dataRevision
 );
 
+export const selectActiveNode = createSelector(
+	selectTreeDomain, (state) => state.activeNode
+);
+
 const selectTreeProccessing = () => TreeProcessing.data as TreeProcessingData;
 
 export const selectTreeNodesList = createSelector(
