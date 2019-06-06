@@ -56,22 +56,24 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	isolateNode: ['id'],
 	clearCurrentlySelected: [],
 	setExpanedNodesMap: ['expandedNodesMap'],
-	updateDataRevision: []
+	updateDataRevision: [],
+	setActiveNode: ['nodeId']
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
 	selectedFilters: any[];
 	searchEnabled: boolean;
 	ifcSpacesHidden: boolean;
+	activeNode: string;
 }
 
 export interface ITreeState {
 	selectedNodes: any;
 	treeNodesList: any[];
 	expandedNodesMap: any;
-	componentState: ITreeComponentState;
 	isPending?: boolean;
 	dataRevision: string;
+	componentState: ITreeComponentState;
 }
 
 export const INITIAL_STATE: ITreeState = {
@@ -79,11 +81,12 @@ export const INITIAL_STATE: ITreeState = {
 	treeNodesList: [],
 	isPending: true,
 	expandedNodesMap: {},
-	dataRevision: 'empty',
+	dataRevision: null,
 	componentState: {
 		selectedFilters: [],
 		searchEnabled: false,
-		ifcSpacesHidden: true
+		ifcSpacesHidden: true,
+		activeNode: null
 	}
 };
 
@@ -135,6 +138,10 @@ const resetComponentState = (state = INITIAL_STATE) => {
 	return { ...state, componentState: INITIAL_STATE.componentState };
 };
 
+const setActiveNode = (state = INITIAL_STATE, { nodeId }) => {
+	return { ...state, activeNode: nodeId };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.CLEAR_SELECTED_NODES]: clearSelectedNodes,
 	[TreeTypes.GET_SELECTED_NODES_SUCCESS]: getSelectedNodesSuccess,
@@ -147,5 +154,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.SET_NODES_SELECTION_MAP]: setNodesSelectionMap,
 	[TreeTypes.SET_AUXILIARY_MAPS]: setAuxiliaryMaps,
 	[TreeTypes.SET_EXPANED_NODES_MAP]: setExpanedNodesMap,
-	[TreeTypes.UPDATE_DATA_REVISION]: updateDataRevision
+	[TreeTypes.UPDATE_DATA_REVISION]: updateDataRevision,
+	[TreeTypes.SET_ACTIVE_NODE]: setActiveNode
 });

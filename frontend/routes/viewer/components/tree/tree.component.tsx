@@ -21,8 +21,8 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
 import Check from '@material-ui/icons/Check';
 import IconButton from '@material-ui/core/IconButton';
-import AutoSizer from 'react-virtualized/dist/es/AutoSizer';
-import List from 'react-virtualized/dist/es/List';
+import { FixedSizeList as List } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
@@ -34,26 +34,26 @@ import {
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
-import { TreeNodes } from './tree.styles';
 import { TREE_ACTIONS_MENU, TREE_ACTIONS_ITEMS, TREE_ITEM_SIZE } from '../../../../constants/tree';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
-import TreeNode from './components/treeNode/treeNode.container';
 import { EmptyStateInfo } from '../views/views.styles';
-import { IS_DEVELOPMENT } from '../../../../constants/environment';
+import { TreeNodes } from './tree.styles';
+import TreeNode from './components/treeNode/treeNode.container';
 
 interface IProps {
 	className: string;
 	selectedFilters: any[];
 	searchEnabled: boolean;
 	ifcSpacesHidden: boolean;
-	treeNodesList: any[];
+	nodesList: any[];
 	expandedNodesMap: any;
 	nodesSelectionMap: any;
 	nodesVisibilityMap: any;
 	nodesIndexesMap: any;
-	isPending?: boolean;
 	dataRevision: string;
+	activeNode: string;
+	isPending?: boolean;
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
 	isolateSelectedNodes: () => void;
@@ -96,8 +96,8 @@ export class Tree extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderNodesList = renderWhenTrue(() => {
-		const { treeNodesList, expandedNodesMap, dataRevision } = this.props;
-		const size = treeNodesList.length;
+		const { nodesList, dataRevision } = this.props;
+		const size = nodesList.length;
 		const maxHeight = 842;
 
 		const treeHeight = TREE_ITEM_SIZE * size;
@@ -109,16 +109,17 @@ export class Tree extends React.PureComponent<IProps, IState> {
 					{({ width, height }) => (
 						<List
 							dataRevision={dataRevision}
-							expandedNodesMap={expandedNodesMap}
 							ref={this.nodeListRef}
-							overscanRowCount={50}
 							height={height}
 							width={width}
-							rowCount={size}
-							rowHeight={TREE_ITEM_SIZE}
-							rowRenderer={this.renderTreeNode}
+							itemData={nodesList}
+							itemCount={size}
+							itemSize={TREE_ITEM_SIZE}
+							itemKey={(index, data) => data[index]._id}
 							scrollToIndex={this.state.scrollToIndex}
-						/>
+						>
+							{this.renderTreeNode}
+						</List>
 					)}
 				</AutoSizer>
 			</TreeNodes>
@@ -135,17 +136,15 @@ export class Tree extends React.PureComponent<IProps, IState> {
 	));
 
 	public componentDidUpdate(prevProps: IProps) {
-		if (prevProps.expandedNodesMap !== this.props.expandedNodesMap) {
-			this.nodeListRef.current.recomputeRowHeights();
-			this.nodeListRef.current.forceUpdateGrid();
-			this.setState({
-				scrollToIndex: undefined
-			});
+		const { activeNode, nodesList } = this.props;
+		if (prevProps.activeNode !== activeNode && activeNode) {
+			const index = nodesList.findIndex(({ _id }) => _id === activeNode);
+			this.nodeListRef.current.scrollToItem(index, 'start');
 		}
 	}
 
 	public render() {
-		const { searchEnabled, treeNodesList, isPending } = this.props;
+		const { searchEnabled, nodesList, isPending } = this.props;
 
 		return (
 			<ViewerPanel
@@ -156,8 +155,8 @@ export class Tree extends React.PureComponent<IProps, IState> {
 			>
 				{this.renderFilterPanel(searchEnabled)}
 				<ViewerPanelContent className="height-catcher">
-					{this.renderNodesList(!isPending && !!treeNodesList.length)}
-					{this.renderNotFound(!isPending && !treeNodesList.length)}
+					{this.renderNodesList(!isPending && !!nodesList.length)}
+					{this.renderNotFound(!isPending && !nodesList.length)}
 				</ViewerPanelContent>
 			</ViewerPanel>
 		);
@@ -203,25 +202,29 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		</>
 	)
 
+	private scrollToParent = (index) => () => {
+		const { nodesList } = this.props;
+		const treeNode = nodesList[index];
+		const parentIndex = nodesList.findIndex((node) => node._id === treeNode.parentId);
+		this.nodeListRef.current.scrollToItem(parentIndex, 'start');
+	}
+
 	private renderTreeNode = (props) => {
-		const { index, style, key } = props;
-		const {
-			treeNodesList,
-			expandedNodesMap
-		} = this.props;
-		const treeNode = treeNodesList[index];
-		const realParentIndex = treeNodesList.findIndex((node) => node._id === treeNode.parentId);
+		const { index, style, data } = props;
+		const { expandedNodesMap, activeNode } = this.props;
+		const treeNode = data[index];
 
 		return (
 			<TreeNode
 				index={index}
 				style={style}
-				key={key}
+				key={treeNode._id}
 				data={treeNode}
 				isSearchResult={treeNode.isSearchResult}
 				parentIndex={treeNode.parentIndex}
+				active={activeNode === treeNode._id}
 				expanded={expandedNodesMap[treeNode._id]}
-				scrollToTop={() => this.scrollToParent(realParentIndex)}
+				scrollToTop={this.scrollToParent(index)}
 			/>
 		);
 	}
@@ -239,10 +242,4 @@ export class Tree extends React.PureComponent<IProps, IState> {
 			))}
 		</MenuList>
 	)
-
-	private scrollToParent = (parentIndex) => {
-		this.nodeListRef.current.recomputeRowHeights();
-		this.nodeListRef.current.forceUpdateGrid();
-		this.setState({ scrollToIndex: parentIndex });
-	}
 }

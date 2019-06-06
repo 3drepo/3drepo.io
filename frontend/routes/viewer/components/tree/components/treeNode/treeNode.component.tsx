@@ -39,14 +39,15 @@ interface IProps {
 	key: any;
 	data: any;
 	settings: any;
-	parentId?: number;
-	parentIndex?: number;
-	selected?: boolean;
-	highlighted?: boolean;
-	expanded?: boolean;
 	isSearchResult?: boolean;
 	visibilityMap: any;
 	selectionMap: any;
+	highlighted?: boolean;
+	expanded?: boolean;
+	parentId?: number;
+	parentIndex?: number;
+	selected?: boolean;
+	active?: boolean;
 	collapseNode?: (id) => void;
 	expandNode?: (id) => void;
 	selectNode?: (id) => void;
@@ -99,15 +100,11 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 		return this.node.level;
 	}
 
-	get isExpandedModelInFederation() {
-		return this.type === TREE_ITEM_MODEL_TYPE && this.level === 2 && this.props.expanded;
-	}
-
 	get isSelected() {
 		return this.props.selectionMap[this.node._id] === SELECTION_STATES.PARENT_OF_UNSELECTED;
 	}
 
-	get isHightlighted() {
+	get isHighlighted() {
 		return this.props.selectionMap[this.node._id] === SELECTION_STATES.SELECTED;
 	}
 
@@ -177,7 +174,7 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { expanded, isSearchResult, style, key } = this.props;
+		const { expanded, isSearchResult, style, key, active } = this.props;
 
 		return (
 			<Container
@@ -186,7 +183,8 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 				nodeType={this.type}
 				expandable={this.node.hasChildren}
 				selected={!isSearchResult && this.isSelected}
-				highlighted={!isSearchResult && this.isHightlighted}
+				active={active}
+				highlighted={!isSearchResult && this.isHighlighted}
 				expanded={isSearchResult && expanded}
 				level={this.level}
 				onClick={this.handleNodeClick}

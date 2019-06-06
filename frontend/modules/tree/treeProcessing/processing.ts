@@ -37,13 +37,17 @@ export class Processing {
 	}
 
 	public clearCurrentlySelected = () => {
-		for (let index = 0, size = this.nodesList.length; index < size; index++) {
-			const node = this.nodesList[index];
-			this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
+		const selectedNodesIds = this.selectedNodesIds;
+		for (let index = 0, size = selectedNodesIds.length; index < size; index++) {
+			this.selectionMap[selectedNodesIds[index]] = SELECTION_STATES.UNSELECTED;
 		}
 	}
 
 	public selectNodes = ({ nodesIds = [], ...extraData }) => {
+		if (!nodesIds.length) {
+			return { highlightedObjects: [] };
+		}
+
 		const { skipChildren } = extraData;
 		console.time('selectNodes getNodesByIds');
 		let nodes = this.getNodesByIds(nodesIds);
@@ -71,10 +75,9 @@ export class Processing {
 		const highlightedObjects = this.getMeshesByNodes(nodes);
 		console.timeEnd('selectNodes getMeshesByNodes');
 
-		return {
-			highlightedObjects,
-			nodesSelectionMap: { ...this.selectionMap }
-		};
+		this.selectionMap = { ...this.selectionMap };
+
+		return { highlightedObjects };
 	}
 
 	public deselectNodes = ({ nodesIds = [] }) => {
@@ -122,9 +125,10 @@ export class Processing {
 		const unhighlightedObjects = this.getMeshesByNodes(toUnhighlight);
 		const highlightedObjects = this.getMeshesByNodes(toHighlight);
 
+		this.selectionMap = { ...this.selectionMap };
+		this.visibilityMap = { ...this.visibilityMap };
+
 		return {
-			nodesSelectionMap: { ...this.selectionMap },
-			nodesVisibilityMap: { ...this.visibilityMap },
 			unhighlightedObjects,
 			highlightedObjects,
 			meshesToUpdate
@@ -149,6 +153,9 @@ export class Processing {
 			...result.unhighlightedObjects,
 			...this.getMeshesByNodes(nodes)
 		];
+
+		this.selectionMap = { ...this.selectionMap };
+		this.visibilityMap = { ...this.visibilityMap };
 
 		return { unhighlightedObjects, meshesToUpdate: result.meshesToUpdate };
 	}
@@ -268,8 +275,6 @@ export class Processing {
 
 		const result = {
 			meshesToUpdate,
-			nodesVisibilityMap: { ...this.visibilityMap },
-			nodesSelectionMap: { ...this.selectionMap },
 			unhighlightedObjects: []
 		};
 
@@ -374,31 +379,33 @@ export class Processing {
 			return [];
 		}
 
-		const meshesByNodes = {};
+		const meshesByNodesIndexes = {};
+		const meshesByNodesList = [];
 
 		for (let index = 0; index < nodes.length; index++) {
 			const node = nodes[index];
 
 			if (node) {
-				if (!meshesByNodes[node.namespacedId]) {
-					meshesByNodes[node.namespacedId] = {
+				if (meshesByNodesIndexes[node.namespacedId] === undefined) {
+					meshesByNodesList.push({
 						modelId: node.model,
 						teamspace: node.teamspace,
 						meshes: []
-					};
+					});
+					meshesByNodesIndexes[node.namespacedId] = meshesByNodesList.length - 1;
 				}
 
-				// Check top level and then check if sub model of fed
 				const meshes = node.type === NODE_TYPES.MESH
 					? [node._id]
 					: this.meshesByModelId[node._id];
 
 				if (meshes) {
-					meshesByNodes[node.namespacedId].meshes = meshesByNodes[node.namespacedId].meshes.concat(meshes);
+					const meshesByNodesIndex = meshesByNodesIndexes[node.namespacedId];
+					meshesByNodesList[meshesByNodesIndex].meshes = meshesByNodesList[meshesByNodesIndex].meshes.concat(meshes);
 				}
 			}
 		}
 
-		return values(meshesByNodes) as any;
+		return meshesByNodesList as any;
 	}
 }

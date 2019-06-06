@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { cond, matches, isEqual, constant, stubTrue } from 'lodash';
 import { COLOR } from '../../../../../../styles';
 import {
@@ -32,6 +32,7 @@ interface IContainer {
 	highlighted: boolean;
 	expanded: boolean;
 	level: number;
+	active: boolean;
 }
 
 interface IName {
@@ -61,7 +62,7 @@ const getBackgroundColor = (props) => cond([
 const getBoxShadow = (props) => {
 	if (props.expanded && isEqual(TREE_ITEM_MODEL_TYPE, props.nodeType)) {
 		return `inset 0px -12px 12px -10px ${COLOR.BLACK_20}`;
-	} else if (props.highlighted) {
+	} else if (props.active) {
 		return `inset 0px 0px 0px 1px #757575`;
 	}
 	return 'none';
@@ -78,7 +79,7 @@ const getButtonBackgroundColor = (props) => {
 	return 'transparent';
 };
 
-const getPaddingLeft = cond([
+const containerIndentation = cond([
 	[matches({ level: 0 }), constant(0)],
 	[matches({ nodeType: TREE_ITEM_FEDERATION_TYPE }), constant(38)],
 	[matches({ nodeType: TREE_ITEM_MODEL_TYPE }), constant(20)],
@@ -90,12 +91,20 @@ export const Actions = styled.div`
 	display: none;
 `;
 
+const containerBorder = css`
+	border: 1px solid ${COLOR.DARK_GRAY};
+	border-left-color: transparent;
+	border-top-color: transparent;
+	border-right-color: transparent;
+
+	${({ active }: any) => active ? 'border-color: #757575' : ''};
+`;
+
 export const Container = styled.li<IContainer>`
-	cursor: ${(props) => isEqual(TREE_ITEM_FEDERATION_TYPE, props.nodeType) ? 'default' : 'pointer'};
-	border-bottom: ${(props) => props.highlighted ? 'none' : `1px solid ${COLOR.DARK_GRAY}`};
+	${containerBorder}
+	cursor: pointer;
 	background-color: ${getBackgroundColor};
-	padding: 2px 12px 2px ${getPaddingLeft}px;
-	box-shadow: ${getBoxShadow};
+	padding: 2px 12px 2px ${containerIndentation}px;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -105,6 +114,11 @@ export const Container = styled.li<IContainer>`
 	&:hover ${Actions} {
 		display: block;
 	}
+	${({ active }: any) => active ? css`
+		${Actions} {
+			display: block;
+		}
+	` : ''};
 `;
 
 export const Name = styled.div<IName>`

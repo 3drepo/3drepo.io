@@ -222,6 +222,7 @@ function* getSelectedNodes() {
 function* clearCurrentlySelected() {
 	Viewer.clearHighlights();
 	yield all([
+		put(TreeActions.setActiveNode(null)),
 		call(TreeProcessing.clearSelected),
 		put(ViewerActions.setMetadataVisibility(false)),
 		put(BimActions.setActiveMeta(null))
@@ -282,10 +283,15 @@ function* isolateNodes(nodesIds = [], colour?) {
 		const result = yield TreeProcessing.isolateNodes({ nodesIds });
 
 		unhighlightObjects(result.unhighlightObjects);
-		highlightObjects(result.highlightedObjects, result.nodesSelectionMap, colour);
+
+		const [selectionMap, visibilityMap] = yield all([
+			select(selectSelectionMap),
+			select(selectVisibilityMap)
+		]);
+		highlightObjects(result.highlightedObjects, selectionMap, colour);
 
 		yield put(TreeActions.updateDataRevision());
-		yield updateMeshesVisibility(result.meshesToUpdate, result.nodesVisibilityMap);
+		yield updateMeshesVisibility(result.meshesToUpdate, visibilityMap);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('isolate', 'selected nodes', error));
 	}
@@ -365,6 +371,9 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 
 		if (!skipExpand) {
 			yield expandToNode(lastNodeId);
+		}
+		if (nodesIds.length === 1) {
+			yield put(TreeActions.setActiveNode(nodesIds[0]));
 		}
 		yield put(TreeActions.updateDataRevision());
 	} catch (error) {
