@@ -54,6 +54,7 @@ interface IProps {
 	handleSubmit: () => void;
 	onSavePin: (position) => void;
 	onChangePin: (pin) => void;
+	onRemoveResource: (resouce) => void;
 	pinId?: string;
 	hasPin: boolean;
 }
@@ -215,7 +216,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						</DescriptionImage>
 					)}
 				</Form>
-				<Resources resources={this.props.issue.resources || []}/>
+				<Resources resources={this.props.issue.resources || []} onRemoveResource={this.props.onRemoveResource}/>
 			</MuiPickersUtilsProvider>
 		);
 	}

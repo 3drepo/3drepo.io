@@ -138,7 +138,11 @@ async function insertRefInResources(account, model, user, name, refInfo) {
 	return ref;
 }
 
-async function removeResource(account, model,  resourceId, property,propertyId) {
+async function removeResource(account, model,  resourceId, property, propertyId) {
+	if (!account || !model || !resourceId || !propertyId) {
+		throw ResponseCodes.INVALID_ARGUMENTS;
+	}
+
 	const collection = model + RESOURCES_FILE_REF_EXT;
 	const ref = await getRefEntry(account, collection, resourceId);
 	if (!Array.isArray(ref[property]) || ref[property].indexOf(propertyId) === -1) {

@@ -53,6 +53,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	postComment: IssuesActions.postComment,
 	removeComment: IssuesActions.removeComment,
 	showNewPin: IssuesActions.showNewPin,
+	onRemoveResource: IssuesActions.removeResource,
 	subscribeOnIssueCommentsChanges: IssuesActions.subscribeOnIssueCommentsChanges,
 	unsubscribeOnIssueCommentsChanges: IssuesActions.unsubscribeOnIssueCommentsChanges,
 	updateNewIssue: IssuesActions.updateNewIssue,

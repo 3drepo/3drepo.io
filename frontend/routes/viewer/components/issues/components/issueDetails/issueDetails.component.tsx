@@ -57,6 +57,7 @@ interface IProps {
 	unsubscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	updateNewIssue: (newIssue) => void;
 	setCameraOnViewpoint: (teamspace, modelId, view) => void;
+	onRemoveResource: (resouce) => void;
 }
 
 interface IState {
@@ -166,6 +167,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onSavePin={this.onPositionSave}
 				pinId={issue._id}
 				hasPin={issue.position && issue.position.length}
+				onRemoveResource={this.props.onRemoveResource}
 			/>
 		);
 	}

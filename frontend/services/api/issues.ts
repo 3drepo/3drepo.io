@@ -99,3 +99,14 @@ export const importBCF = (teamspace, modelId, file, revision?) => {
 	}
 	return api.post(`${mainPath}/issues.bcfzip`, formData);
 };
+
+/**
+ * Remove resource from issue
+ * @param teamspace
+ * @param modelId
+ * @param issueId
+ * @param resourceId
+ */
+export const removeResource = (teamspace, modelId, issueId, resourceId ) => {
+	return api.delete(`${teamspace}/${modelId}/issues/${issueId}/resources`, {_id: resourceId});
+};

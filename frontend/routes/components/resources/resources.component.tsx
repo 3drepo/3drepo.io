@@ -16,27 +16,48 @@
  */
 
 import * as React from 'react';
+import { RemoveIcon, IconButton } from './resources.styles';
 
 interface IResource {
 	_id: string;
 	name: string;
 	link: string;
 	type: string;
-	size?: number;
+	size: number;
 }
 
 interface IProps {
 	resources: IResource[];
+	onRemoveResource: (IResource) => void;
 }
 
 interface IState {
 	value: any;
 }
 
+const RemoveButton = (props) => (
+	<IconButton
+		{...props}
+		aria-label="Toggle menu"
+		aria-haspopup="true"
+	>
+		<RemoveIcon />
+	</IconButton>
+);
+
+const ResourceItem = ({_id, link, type, name, size, onClickRemove}) => (
+	<div key={_id}>{type} |
+				<a href={link} target="_blank" rel="noopener" >{name}</a> |
+				{size} |
+				<RemoveButton onClick={onClickRemove}/></div>
+);
+
 export class Resources extends React.PureComponent<IProps, IState> {
+	public removeResource = (r) => (e) => {
+		this.props.onRemoveResource(r);
+	}
+
 	public render() {
-		return this.props.resources.map((r) => (
-			<div key={r._id}>{r.type} | <a href={r.link} target="_blank" rel="noopener" >{r.name}</a> | {r.size}</div>
-		));
+		return this.props.resources.map((r) => (<ResourceItem key={r._id} {...r} onClickRemove={this.removeResource(r)}/>));
 	}
 }

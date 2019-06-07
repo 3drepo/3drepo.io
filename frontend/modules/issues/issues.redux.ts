@@ -56,6 +56,8 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	updateNewIssue: ['newIssue'],
 	setFilters: ['filters'],
 	showCloseInfo: ['issueId'],
+	removeResource: ['resource'],
+	removeResourceSuccess: ['resource', 'issueId'],
 	resetComponentState: []
 }, { prefix: 'ISSUES_' });
 
@@ -171,6 +173,13 @@ const resetComponentState = (state = INITIAL_STATE) => {
 	return { ...state, componentState: INITIAL_STATE.componentState };
 };
 
+const removeResourceSuccess =  (state = INITIAL_STATE, { resource, issueId }) => {
+	const resources = state.issuesMap[issueId].resources.filter((r) => r._id !== resource._id);
+	const issuesMap = updateIssueProps(state.issuesMap, issueId, { resources });
+
+	return { ...state, issuesMap };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess,
 	[IssuesTypes.FETCH_ISSUE_SUCCESS]: fetchIssueSuccess,
@@ -185,5 +194,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
 	[IssuesTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
 	[IssuesTypes.SHOW_CLOSE_INFO]: showCloseInfo,
-	[IssuesTypes.RESET_COMPONENT_STATE]: resetComponentState
+	[IssuesTypes.RESET_COMPONENT_STATE]: resetComponentState,
+	[IssuesTypes.REMOVE_RESOURCE_SUCCESS]: removeResourceSuccess
 });

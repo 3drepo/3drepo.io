@@ -30,7 +30,7 @@ import { PIN_COLORS } from '../../styles';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { selectJobsList, selectMyJob } from '../jobs';
-import { selectCurrentUser } from '../currentUser';
+import { selectCurrentUser, selectCurrentTeamspace } from '../currentUser';
 import {
 	selectActiveIssueId,
 	selectIssues,
@@ -41,7 +41,7 @@ import {
 } from './issues.selectors';
 import { IssuesTypes, IssuesActions } from './issues.redux';
 import { NEW_PIN_ID } from '../../constants/viewer';
-import { selectTopicTypes } from '../model';
+import { selectTopicTypes, selectCurrentModel } from '../model';
 import { prepareResources } from '../../helpers/resources';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
@@ -658,6 +658,19 @@ export function* toggleSubmodelsIssues({ showSubmodelIssues }) {
 	}
 }
 
+export function* removeResource({ resource }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const activeIssue = yield select(selectActiveIssueDetails);
+		const model  = yield select(selectCurrentModel);
+
+		yield API.removeResource(teamspace, model, activeIssue._id, resource._id);
+		yield put(IssuesActions.removeResourceSuccess(resource, activeIssue._id));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('remove', 'resource', error));
+	}
+}
+
 export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
 	yield takeLatest(IssuesTypes.FETCH_ISSUE, fetchIssue);
@@ -683,4 +696,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.UPDATE_NEW_ISSUE, updateNewIssue);
 	yield takeLatest(IssuesTypes.SET_FILTERS, setFilters);
 	yield takeLatest(IssuesTypes.TOGGLE_SUBMODELS_ISSUES, toggleSubmodelsIssues);
+	yield takeLatest(IssuesTypes.REMOVE_RESOURCE, removeResource);
 }
