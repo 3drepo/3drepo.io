@@ -411,6 +411,12 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 	}
 }
 
+function* setSelectedNodesVisibility({ visibility }) {
+	const selectedNodesIds = yield select(selectSelectedNodesIds);
+
+	yield put(TreeActions.setSelectedNodesVisibility(selectedNodesIds, visibility, true, true));
+}
+
 function* updateMeshesVisibility(meshes, nodesVisibilityMap) {
 	try {
 		const hiddenMeshes = [];
@@ -494,6 +500,7 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.HIDE_IFC_SPACES, hideIfcSpaces);
 	yield takeLatest(TreeTypes.SELECT_NODE, selectNode);
 	yield takeLatest(TreeTypes.SET_TREE_NODES_VISIBILITY, setTreeNodesVisibility);
+	yield takeLatest(TreeTypes.SET_SELECTED_NODES_VISIBILITY, setSelectedNodesVisibility);
 	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK, handleNodesClick);
 	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK_BY_SHARED_IDS, handleNodesClickBySharedIds);
 	yield takeLatest(TreeTypes.HANDLE_BACKGROUND_CLICK, handleBackgroundClick);

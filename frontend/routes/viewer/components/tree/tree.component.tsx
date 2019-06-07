@@ -104,7 +104,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		const treeNodesHeight = treeHeight > maxHeight ?	maxHeight : treeHeight;
 
 		return (
-			<TreeNodes style={{ height: treeNodesHeight }}>
+			<TreeNodes className="tree-list" style={{ height: treeNodesHeight }}>
 				<AutoSizer>
 					{({ width, height }) => (
 						<List
