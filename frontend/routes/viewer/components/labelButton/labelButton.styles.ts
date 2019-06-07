@@ -14,37 +14,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import styled from 'styled-components';
-import Place from '@material-ui/icons/Place';
 import { Button } from '@material-ui/core';
 import { COLOR } from '../../../../styles';
 
-export const PinIcon = styled(Place).attrs({
+export const LabelButton = styled(Button).attrs({
 	classes: {
-		colorSecondary: 'secondary',
-		colorPrimary: 'primary',
-		colorDisabled: 'disabled'
+		disabled: 'disabled'
 	}
 })`
 	&& {
-		&.secondary {
-			color: ${COLOR.SUNGLOW};
-		}
-
-		&.primary {
-			color: ${COLOR.BLACK_54};
-		}
+		text-transform: none;
+		padding: 0px 13px;
+		min-height: 26px;
+		border-radius: 28px;
+		color: ${COLOR.LIGHT_GRAY};
+		background-color:  ${COLOR.BLACK_26};
 
 		&.disabled {
-			color: ${COLOR.BLACK_12};
+			background-color: ${COLOR.BLACK_12};
+			color: ${COLOR.BLACK_26};
 		}
 	}
-`;
 
-export const Container = styled.span`
-	display: flex;
-	align-items: center;
-	height: 100%;
-	min-height:40px;
+	&&:hover {
+		background-color: rgba(0, 0, 0, 0.36);
+	}
 `;

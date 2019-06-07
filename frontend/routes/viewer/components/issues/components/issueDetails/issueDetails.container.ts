@@ -31,6 +31,7 @@ import {
 } from '../../../../../../modules/issues';
 import { selectSettings, selectTopicTypes } from '../../../../../../modules/model';
 import { IssueDetails } from './issueDetails.component';
+import { DialogActions } from '../../../../../../modules/dialog';
 
 const mapStateToProps = createStructuredSelector({
 	issue: selectActiveIssueDetails,
@@ -57,6 +58,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	subscribeOnIssueCommentsChanges: IssuesActions.subscribeOnIssueCommentsChanges,
 	unsubscribeOnIssueCommentsChanges: IssuesActions.unsubscribeOnIssueCommentsChanges,
 	updateNewIssue: IssuesActions.updateNewIssue,
+	showDialog:  DialogActions.showDialog,
 	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
 }, dispatch);
 

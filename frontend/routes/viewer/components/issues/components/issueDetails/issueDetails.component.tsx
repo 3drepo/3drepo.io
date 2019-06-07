@@ -31,6 +31,7 @@ import { timingSafeEqual } from 'crypto';
 import { NEW_PIN_ID } from '../../../../../../constants/viewer';
 import { PIN_COLORS } from '../../../../../../styles';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
+import { exportIssuesToJSON } from '../../../../../../services/export';
 
 interface IProps {
 	jobs: any[];
@@ -57,7 +58,8 @@ interface IProps {
 	unsubscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	updateNewIssue: (newIssue) => void;
 	setCameraOnViewpoint: (teamspace, modelId, view) => void;
-	onRemoveResource: (resouce) => void;
+	onRemoveResource: (resource) => void;
+	showDialog: (config: any) => void;
 }
 
 interface IState {
@@ -151,7 +153,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderDetailsForm = () => {
-		const {issue} = this.props;
+		const {issue, onRemoveResource, showDialog, topicTypes, currentUser, myJob} = this.props;
 
 		return (
 			<IssueDetailsForm
@@ -160,14 +162,15 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onValueChange={this.handleIssueFormSubmit}
 				onSubmit={this.handleIssueFormSubmit}
 				permissions={this.props.settings.permissions}
-				topicTypes={this.props.topicTypes}
-				currentUser={this.props.currentUser}
-				myJob={this.props.myJob}
+				topicTypes={topicTypes}
+				currentUser={currentUser}
+				myJob={myJob}
 				onChangePin={this.handleChangePin}
 				onSavePin={this.onPositionSave}
 				pinId={issue._id}
 				hasPin={issue.position && issue.position.length}
-				onRemoveResource={this.props.onRemoveResource}
+				onRemoveResource={onRemoveResource}
+				showDialog={showDialog}
 			/>
 		);
 	}

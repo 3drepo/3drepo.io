@@ -14,37 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import * as React from 'react';
 
-import styled from 'styled-components';
-import Place from '@material-ui/icons/Place';
-import { Button } from '@material-ui/core';
-import { COLOR } from '../../../../styles';
+interface IProps {
+	handleResolve: () => void;
+	handleClose: () => void;
+	updateSettings: (settings: any) => void;
+	visualSettings: any;
+}
 
-export const PinIcon = styled(Place).attrs({
-	classes: {
-		colorSecondary: 'secondary',
-		colorPrimary: 'primary',
-		colorDisabled: 'disabled'
+interface IState {
+	selectedTab: number;
+}
+
+export class AttachResourceUrls extends React.PureComponent<any, any> {
+	public render() {
+		return (<div>files</div>);
 	}
-})`
-	&& {
-		&.secondary {
-			color: ${COLOR.SUNGLOW};
-		}
-
-		&.primary {
-			color: ${COLOR.BLACK_54};
-		}
-
-		&.disabled {
-			color: ${COLOR.BLACK_12};
-		}
-	}
-`;
-
-export const Container = styled.span`
-	display: flex;
-	align-items: center;
-	height: 100%;
-	min-height:40px;
-`;
+}

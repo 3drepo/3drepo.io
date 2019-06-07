@@ -58,6 +58,8 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	showCloseInfo: ['issueId'],
 	removeResource: ['resource'],
 	removeResourceSuccess: ['resource', 'issueId'],
+	attachResources: ['resources'],
+	attachResourcesSuccess: ['resources', 'issueId'],
 	resetComponentState: []
 }, { prefix: 'ISSUES_' });
 
@@ -180,6 +182,12 @@ const removeResourceSuccess =  (state = INITIAL_STATE, { resource, issueId }) =>
 	return { ...state, issuesMap };
 };
 
+const attachResourcesSuccess = (state = INITIAL_STATE, { resources, issueId }) => {
+	resources = state.issuesMap[issueId].resources.concat(resources);
+	const issuesMap = updateIssueProps(state.issuesMap, issueId, { resources });
+	return { ...state};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess,
 	[IssuesTypes.FETCH_ISSUE_SUCCESS]: fetchIssueSuccess,
@@ -195,5 +203,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
 	[IssuesTypes.SHOW_CLOSE_INFO]: showCloseInfo,
 	[IssuesTypes.RESET_COMPONENT_STATE]: resetComponentState,
-	[IssuesTypes.REMOVE_RESOURCE_SUCCESS]: removeResourceSuccess
+	[IssuesTypes.REMOVE_RESOURCE_SUCCESS]: removeResourceSuccess,
+	[IssuesTypes.ATTACH_RESOURCES_SUCCESS]: attachResourcesSuccess
 });

@@ -17,6 +17,9 @@
 
 import * as React from 'react';
 import { RemoveIcon, IconButton } from './resources.styles';
+import { LabelButton } from '../../viewer/components/labelButton/labelButton.styles';
+import { VisualSettingsDialog } from '../topMenu/components/visualSettingsDialog/visualSettingsDialog.component';
+import { AttachResourcesDialog } from './attachResourcesDialog/attachResourcesDialog.component';
 
 interface IResource {
 	_id: string;
@@ -29,6 +32,8 @@ interface IResource {
 interface IProps {
 	resources: IResource[];
 	onRemoveResource: (IResource) => void;
+	onAttachResources: () => void;
+	showDialog: (config: any) => void;
 }
 
 interface IState {
@@ -53,11 +58,29 @@ const ResourceItem = ({_id, link, type, name, size, onClickRemove}) => (
 );
 
 export class Resources extends React.PureComponent<IProps, IState> {
-	public removeResource = (r) => (e) => {
+	public onClickRemove = (r) => (e) => {
 		this.props.onRemoveResource(r);
 	}
 
+	public onClickAttach = () => {
+		const {onAttachResources} = this.props;
+		this.props.showDialog({
+				title: 'Attach Resources',
+				template: AttachResourcesDialog,
+				data: {
+					onAttachResources
+				}
+		});
+	}
+
 	public render() {
-		return this.props.resources.map((r) => (<ResourceItem key={r._id} {...r} onClickRemove={this.removeResource(r)}/>));
+		const resources = this.props.resources || [];
+
+		return (
+			<span>
+				{resources.map((r) => (<ResourceItem key={r._id} {...r} onClickRemove={this.onClickRemove(r)}/>))}
+				<LabelButton onClick={this.onClickAttach}>Attach resource</LabelButton>
+			</span>
+		);
 	}
 }

@@ -671,6 +671,19 @@ export function* removeResource({ resource }) {
 	}
 }
 
+export function* attachResources({ resources }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const activeIssue = yield select(selectActiveIssueDetails);
+		const model  = yield select(selectCurrentModel);
+
+		// yield API.attachResources(teamspace, model, activeIssue._id, resource._id);
+		yield put(IssuesActions.attachResourceSuccess(resources, activeIssue._id));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('remove', 'resource', error));
+	}
+}
+
 export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
 	yield takeLatest(IssuesTypes.FETCH_ISSUE, fetchIssue);
@@ -697,4 +710,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.SET_FILTERS, setFilters);
 	yield takeLatest(IssuesTypes.TOGGLE_SUBMODELS_ISSUES, toggleSubmodelsIssues);
 	yield takeLatest(IssuesTypes.REMOVE_RESOURCE, removeResource);
+	yield takeLatest(IssuesTypes.ATTACH_RESOURCES, attachResources);
 }
