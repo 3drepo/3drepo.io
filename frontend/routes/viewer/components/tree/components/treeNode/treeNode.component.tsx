@@ -53,7 +53,7 @@ interface IProps {
 	selectNode?: (id) => void;
 	deselectNode?: (id) => void;
 	setTreeNodesVisibility?: (id, visibility) => void;
-	isolateNode?: (id) => void;
+	isolateNode: (id) => void;
 	scrollToTop?: () => void;
 }
 
