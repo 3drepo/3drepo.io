@@ -1,4 +1,4 @@
-var autoFix = true;
+var autoFix = false;
 log('===== DB Health check [Auto fix: ' + autoFix + '] ======');
 
 var specialDB = ['admin', 'local', 'notifications'];
@@ -19,7 +19,7 @@ function log(msg) {
 function enterSubSection() ++indent;
 function exitSubSection() --indent;
 
-function getDatabaseList(useCache) {
+function getDatabaseList(useCache = true) {
 	if(dbList && useCache) return dbList;
 	dbList = adminDB.adminCommand({listDatabases: 1}).databases;
 	return dbList;
@@ -356,7 +356,8 @@ function checkProjectSanity() {
 
 
 checkDatabaseEntries();
-//getDatabaseList()
+//Regenerate the db list to prune out removed dbs.
+autoFix && getDatabaseList(false);
 checkJobAndPermissions();
 findZombieModels();
 checkModelSanity();
