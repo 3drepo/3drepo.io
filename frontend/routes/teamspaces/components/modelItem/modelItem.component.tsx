@@ -30,6 +30,7 @@ import { Loader } from '../../../components/loader/loader.component';
 import { Container, SubmodelsList, Time, Name, LinkedName, Status, TimeWrapper } from './modelItem.styles';
 import { RowMenu } from '../rowMenu/rowMenu.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
+import { LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 
 interface IAction {
 	label: string;
@@ -193,7 +194,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 						>
 							{ timestamp && !hovered && !isPending && !actionsMenuOpen &&
 								<Time>
-									<DateTime value={timestamp} format="DD/MM/YYYY HH:mm" />
+									<DateTime value={timestamp} format={LONG_DATE_TIME_FORMAT} />
 								</Time>
 							}
 							<RowMenu

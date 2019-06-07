@@ -1006,6 +1006,45 @@ function getMetadata(account, model, id) {
 
 }
 
+async function getSubModelRevisions(account, model, user, branch, rev) {
+	const history = await History.getHistory({ account, model }, branch, rev);
+
+	if(!history) {
+		return Promise.reject(responseCodes.INVALID_TAG_NAME);
+	}
+
+	const refNodes = await Ref.getRefNodes(account, model, history.current);
+	const modelIds = refNodes.map((refNode) => refNode.project);
+	const results = {};
+
+	const param = {};
+	param[account] = modelIds;
+
+	const promises = [];
+
+	const projection = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1};
+	modelIds.forEach((modelId) => {
+		results[modelId] = {};
+		promises.push(History.listByBranch({account, model: modelId}, null, projection).then((revisions) => {
+			revisions = History.clean(revisions);
+
+			revisions.forEach(function(revision) {
+				revision.branch = history.branch || C.MASTER_BRANCH_NAME;
+			});
+			results[modelId].revisions = revisions;
+		}));
+	});
+
+	promises.push(ModelSetting.getModelsName(param).then((modelNameResult) => {
+		const lookUp = modelNameResult[account];
+		modelIds.forEach((modelId) => {
+			results[modelId].name = lookUp[modelId];
+		});
+	}));
+
+	return Promise.all(promises).then(() => results);
+}
+
 const fileNameRegExp = /[ *"/\\[\]:;|=,<>$]/g;
 const acceptedFormat = [
 	"x","obj","3ds","md3","md2","ply",
@@ -1038,6 +1077,7 @@ module.exports = {
 	getAllMetadata,
 	getAllIdsWith4DSequenceTag,
 	getAllIdsWithMetadataField,
+	getSubModelRevisions,
 	setStatus,
 	importSuccess,
 	importFail

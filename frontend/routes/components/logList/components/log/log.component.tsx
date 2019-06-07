@@ -34,6 +34,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { TooltipButton } from '../../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { Image } from '../../../image';
+import { DATE_TIME_FORMAT } from '../../../../../services/formatting/formatDate';
 
 interface IProps {
 	comment: string;
@@ -119,7 +120,7 @@ export class Log extends React.PureComponent<IProps, any> {
 		<Info>
 			{this.renderUsername(!Boolean(this.props.action))}
 			<Date>
-				<DateTime value={this.props.created as any} format="HH:mm DD MMM" />
+				<DateTime value={this.props.created as any} format={DATE_TIME_FORMAT} />
 			</Date>
 		</Info>
 	)

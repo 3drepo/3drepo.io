@@ -6,7 +6,8 @@ import {
 	faHandPaper,
 	faSortAmountUp,
 	faSortAmountDown,
-	faHelicopter
+	faHelicopter,
+	faArrowsAltH
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faEraser);
@@ -16,3 +17,4 @@ library.add(faHandPaper);
 library.add(faSortAmountUp);
 library.add(faSortAmountDown);
 library.add(faHelicopter);
+library.add(faArrowsAltH);

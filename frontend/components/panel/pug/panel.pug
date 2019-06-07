@@ -44,6 +44,12 @@ div(ng-show="vm.showPanel")
 					model="vm.model"
 					revision="vm.revision"
 				)
+				compare(
+					ng-if="contentItem.type === 'compare'"
+					teamspace="vm.account"
+					model="vm.model"
+					revision="vm.revision"
+				)
 
 			height-setter#reactComponent(
 				ng-if="contentItem.type === 'docs' && vm.isMetadataVisible"

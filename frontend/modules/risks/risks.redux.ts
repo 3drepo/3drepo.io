@@ -207,5 +207,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
 	[RisksTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
 	[RisksTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
-	[RisksTypes.TOGGLE_SORT_ORDER]: toggleSortOrder
+	[RisksTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
+	[RisksTypes.SHOW_CLOSE_INFO]: showCloseInfo
 });

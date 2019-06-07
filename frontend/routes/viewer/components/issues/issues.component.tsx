@@ -77,24 +77,12 @@ interface IProps {
 	renderPins: () => void;
 }
 
-interface IState {
-	issueDetails?: any;
-	filteredIssues: any[];
-	modelLoaded: boolean;
-}
-
 const UNASSIGNED_JOB = {
 	name: 'Unassigned',
 	value: ''
 };
 
-export class Issues extends React.PureComponent<IProps, IState> {
-	public state: IState = {
-		issueDetails: {},
-		filteredIssues: [],
-		modelLoaded: false
-	};
-
+export class Issues extends React.PureComponent<IProps, any> {
 	get jobsList() {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}

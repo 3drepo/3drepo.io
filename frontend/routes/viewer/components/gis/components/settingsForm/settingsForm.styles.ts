@@ -16,8 +16,7 @@
  */
 
 import styled from 'styled-components';
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
+import { Typography, TextField } from '@material-ui/core';
 import { Form } from 'formik';
 
 import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
