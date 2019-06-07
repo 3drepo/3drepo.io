@@ -20,13 +20,7 @@ function enterSubSection() ++indent;
 function exitSubSection() --indent;
 
 function getDatabaseList() {
-	//FIXME: to remove condition. Just ensuring i don't write to all databases whilst developing!
 	if(dbList) return dbList;
-	var useDebug = [
-		{name : "nabile"}
-	];
-//	return useDebug;
-
 	dbList = adminDB.adminCommand({listDatabases: 1}).databases;
 	return dbList;
 }
