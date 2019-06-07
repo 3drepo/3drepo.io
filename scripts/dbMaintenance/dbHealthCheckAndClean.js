@@ -1,4 +1,4 @@
-var autoFix = false;
+var autoFix = true;
 log('===== DB Health check [Auto fix: ' + autoFix + '] ======');
 
 var specialDB = ['admin', 'local', 'notifications'];
@@ -19,8 +19,8 @@ function log(msg) {
 function enterSubSection() ++indent;
 function exitSubSection() --indent;
 
-function getDatabaseList() {
-	if(dbList) return dbList;
+function getDatabaseList(useCache) {
+	if(dbList && useCache) return dbList;
 	dbList = adminDB.adminCommand({listDatabases: 1}).databases;
 	return dbList;
 }
@@ -94,14 +94,16 @@ function checkTeamspacePrivileges(dbName, members) {
 
 	var updatedPerm = [];
 	var permChanged = false;
-	userEntry.customData.permissions.forEach(function(perm) {
-		if(members.indexOf(perm.user) == -1) {
-			permChanged = true;
-			log(`${perm.user} has teamspace privileges but not a member.`);
-		}
-		else
-			updatedPerm.push(perm);
-	});
+	if(userEntry) {
+		userEntry.customData.permissions.forEach(function(perm) {
+			if(members.indexOf(perm.user) == -1) {
+				permChanged = true;
+				log(`${perm.user} has teamspace privileges but not a member.`);
+			}
+			else
+				updatedPerm.push(perm);
+		});
+	}
 
 	if (permChanged && autoFix) {
 		log("Removing incorrect teamspace permissions...");
@@ -290,7 +292,9 @@ function checkModelInProject(thisDB, modelID, colNames) {
 		if(autoFix) {
 			removeModel(thisDB, modelID, colNames, true);
 		}
+		return false;
 	}
+	return true;
 }
 
 function checkModelSanity() {
@@ -316,7 +320,7 @@ function checkModelSanity() {
 }
 
 function checkProjectSanity() {
-	log('5. Prioject health check');
+	log('5. Project health check');
 	enterSubSection();
 	getDatabaseList().forEach(function(dbEntry) {
 		var dbName = dbEntry.name;
@@ -352,6 +356,7 @@ function checkProjectSanity() {
 
 
 checkDatabaseEntries();
+//getDatabaseList()
 checkJobAndPermissions();
 findZombieModels()
 checkModelSanity();
