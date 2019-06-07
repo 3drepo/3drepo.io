@@ -23,13 +23,14 @@ import { Container } from '../../../risks/components/riskDetails/riskDetails.sty
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
-import { mergeIssueData, canComment } from '../../../../../../helpers/issues';
+import { canComment } from '../../../../../../helpers/issues';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 import { EmptyStateInfo } from '../../../views/views.styles';
 import { timingSafeEqual } from 'crypto';
 import { NEW_PIN_ID } from '../../../../../../constants/viewer';
 import { PIN_COLORS } from '../../../../../../styles';
+import { diffData, mergeData } from '../../../../../../helpers/forms';
 
 interface IProps {
 	jobs: any[];
@@ -140,12 +141,11 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public handleIssueFormSubmit = (values) => {
 		const { teamspace, model, updateIssue, updateNewIssue } = this.props;
-		const updatedIssue = mergeIssueData(this.issueData, values);
 
 		if (this.isNewIssue) {
-			updateNewIssue(updatedIssue);
+			updateNewIssue(mergeData(this.issueData, values));
 		} else {
-			updateIssue(teamspace, model, updatedIssue);
+			updateIssue(teamspace, model, diffData(values, this.issueData));
 		}
 	}
 
@@ -304,7 +304,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public onPositionSave = (position) => {
 		if (!this.isNewIssue) {
 			const { teamspace, model, issue } = this.props;
-			this.props.updateIssue(teamspace, model, {...issue, position});
+			this.props.updateIssue(teamspace, model, {position});
+			Viewer.setPin(null);
 		} else {
 			Viewer.changePinColor({ id: NEW_PIN_ID, colours: PIN_COLORS.YELLOW });
 		}

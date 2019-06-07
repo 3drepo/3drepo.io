@@ -113,7 +113,7 @@ const getSortedRows = (rows, type, column, order) => {
 		[matchesProperty('type', JOB), sortByJob.bind(null, rows)],
 
 		// Default action
-		[stubTrue, (options) => {
+		[stubTrue, (options: { column: any, order: any }) => {
 			return orderBy(rows, ({data}) => data[options.column].value || null, options.order);
 		}]
 	]);

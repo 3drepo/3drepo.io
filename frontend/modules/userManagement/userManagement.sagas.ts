@@ -118,13 +118,11 @@ export function* removeUserCascade({ username }) {
 export function* updateUserJob({ username, job }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		yield (
-				job ?
-				API.updateUserJob(teamspace, job, username) :
-				API.removeUserJob(teamspace, username)
-		);
-		yield put(UserManagementActions.updateUserJobSuccess(username, job));
-		yield put(SnackbarActions.show('User job updated'));
+		if (job) {
+			yield (API.updateUserJob(teamspace, job, username));
+			yield put(UserManagementActions.updateUserJobSuccess(username, job));
+			yield put(SnackbarActions.show('User job updated'));
+		}
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('assign', 'job', error));
 	}

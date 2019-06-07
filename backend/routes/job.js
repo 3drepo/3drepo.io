@@ -74,16 +74,6 @@
 	router.post("/jobs/:jobId/:user", middlewares.job.canCreate, addUserToJob);
 
 	/**
-	 * @api {delete} /:teamspace/jobs Remove a job from a user
-	 * @apiName removeUserFromJobs
-	 * @apiGroup Jobs
-	 *
-	 * @apiParam {String} teamspace Name of teamspace
-	 * @apiParam {Object} user User to remove job from.
-	 */
-	router.delete("/jobs/unassign/:user", middlewares.job.canDelete, removeUserFromJobs);
-
-	/**
 	 * @api {delete} /:teamspace/jobs/:jobId Delete a job
 	 * @apiName deleteJob
 	 * @apiGroup Jobs
@@ -130,17 +120,6 @@
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
-	}
-
-	function removeUserFromJobs(req, res, next) {
-
-		Job.removeUserFromJobs(req.params.account, req.params.user).then(() => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});
-		}).catch(err => {
-
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-
 	}
 
 	function createJob(req, res, next) {

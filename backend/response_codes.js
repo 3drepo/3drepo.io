@@ -178,6 +178,7 @@
 		SUBSCRIPTION_NOT_ASSIGNED: { message: "This subscription is not assigned to any user", status: 400 },
 		USER_IN_COLLABORATOR_LIST: { message: "This user is currently in collaborator list of a model", status: 400 },
 		SUBSCRIPTION_CANNOT_REMOVE_SELF: { message: "You cannot remove yourself", status: 400 },
+		USER_NOT_ASSIGNED_JOB: { message: "Job must be assigned to user", status: 400 },
 
 		PAYMENT_TOKEN_ERROR: { message: "Payment token is invalid", status: 400 },
 		EXECUTE_AGREEMENT_ERROR: { message: "Failed to get payment from PayPal", status: 400 },
@@ -252,6 +253,9 @@
 		ACCOUNT_PERM_NOT_FOUND: { message: "Account permission not found", status: 404},
 		ACCOUNT_PERM_EMPTY: { message: "Cannot add empty permissions", status: 404},
 		ADMIN_TEMPLATE_CANNOT_CHANGE: { message: "Admin permission template cannot be changed or deleted", status: 400},
+
+		UNSUPPORTED_STORAGE_TYPE : {message: "File is stored in an unsupported storage type is not supported", status: 500},
+		UNRECOGNISED_STORAGE_TYPE : {message: "File is stored an unrecognised storage type", status: 500},
 
 		VAT_CODE_ERROR:{ message: "Error validating VAT number", status: 500},
 

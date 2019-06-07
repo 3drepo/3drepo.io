@@ -178,11 +178,18 @@ function requestHereMapTile(req, res, domain, uri) {
 }
 
 function getOSMTile(req, res) {
-	// TODO: we may want to ensure the model has access to tiles
-	const domain = "a.tile.openstreetmap.org";
-	const uri = "/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
-	systemLogger.logInfo("Fetching osm map tile: " + uri);
-	requestMapTile(req, res, domain, uri);
+	if(config.osm) {
+		const domain = config.osm ? config.osm.domain : "a.tile.openstreetmap.org";
+		const uri = `/${config.osm.prefix}/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}.png?key=${config.osm.key}`;
+		systemLogger.logInfo("Fetching osm map tile: " + domain + "/" + uri);
+		requestMapTile(req, res, domain, uri);
+	} else {
+		const domain = "a.tile.openstreetmap.org";
+		const uri = "/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
+		systemLogger.logInfo("Fetching osm map tile: " + domain + "/" + uri);
+		requestMapTile(req, res, domain, uri);
+	}
+
 }
 
 function getHereBaseInfo(req, res) {

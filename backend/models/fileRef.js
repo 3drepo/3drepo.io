@@ -17,62 +17,54 @@
 
 "use strict";
 const DB = require("../handler/db");
-// const ExternalServices = require("../handler/externalServices");
-// const ResponseCodes = require("../response_codes");
+const ExternalServices = require("../handler/externalServices");
+const ResponseCodes = require("../response_codes");
+const systemLogger = require("../logger.js").systemLogger;
 
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
 const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
 
-const gridFSMapping = {};
-gridFSMapping[ORIGINAL_FILE_REF_EXT] = ".history";
-gridFSMapping[UNITY_BUNDLE_REF_EXT] = ".stash.unity3d";
-gridFSMapping[JSON_FILE_REF_EXT] = ".stash.json_mpc";
-
-/*
- * function getRefEntry(account, collection, fileName) {
+function getRefEntry(account, collection, fileName) {
 	return DB.getCollection(account, collection).then((col) => {
 		return col ? col.findOne({_id: fileName}) : Promise.reject(ResponseCodes.NO_FILE_FOUND);
 	});
-}*/
+}
 
 function fetchFile(account, model, ext, fileName) {
-	const fileArr = fileName.split("/");
-	const fullFileName = fileArr.length > 1 ? `/${account}/${model}/revision/${fileName}` :  `/${account}/${model}/${fileName}`;
-	return DB.getFileFromGridFS(account, model + gridFSMapping[ext], fullFileName);
-	/*
+	const collection = model + ext;
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
-		return ExternalServices.getFile(entry.type, entry.link);
-	});*/
+		return ExternalServices.getFile(account, collection, entry.type, entry.link);
+	});
 }
 
 function fetchFileStream(account, model, ext, fileName, imposeModelRoute = true) {
-	let fullFileName = fileName;
-	if(imposeModelRoute) {
-		const fileArr = fileName.split("/");
-		fullFileName = fileArr.length > 1 ? `/${account}/${model}/revision/${fileName}` :  `/${account}/${model}/${fileName}`;
-	}
-	return DB.getFileStreamFromGridFS(account, model + gridFSMapping[ext], fullFileName).then((fileInfo) => {
-		return {readStream: fileInfo.stream, size: fileInfo.size};
-	});
-	/*
+	const collection = model + ext;
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
+			if (imposeModelRoute) {
+				systemLogger.logInfo("imposeModelRoute: ", imposeModelRoute);
+			}
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
-		return { readStream: ExternalServices.getFileStream(entry.type, entry.link), size: entry.size };
-	}); */
+		return ExternalServices.getFileStream(account, collection, entry.type, entry.link).then((stream) => {
+			return {readStream: stream, size: entry.size };
+		});
+	});
 }
 
-function removeAllFiles(/* account, collection*/) {
-
-	return Promise.resolve();
-/*	return DB.getCollection(account, collection).then((col) => {
+function removeAllFiles(account, collection) {
+	return DB.getCollection(account, collection).then((col) => {
 		if (col) {
 			const query = [
+				{
+					$match: {
+						noDelete: {$exists: false}
+					}
+				},
 				{
 					$group: {
 						_id: "$type",
@@ -82,12 +74,12 @@ function removeAllFiles(/* account, collection*/) {
 			return col.aggregate(query).toArray().then((results) => {
 				const delPromises = [];
 				results.forEach((entry) => {
-					delPromises.push(ExternalServices.removeFiles(entry._id, entry.links));
+					delPromises.push(ExternalServices.removeFiles(account, collection, entry._id, entry.links));
 				});
 				return Promise.all(delPromises);
 			});
 		}
-	});*/
+	});
 }
 
 const FileRef = {};
@@ -97,21 +89,7 @@ FileRef.getOriginalFile = function(account, model, fileName) {
 };
 
 FileRef.getTotalOrgFileSize = function(account, model) {
-	const colName =  `${model}${gridFSMapping[ORIGINAL_FILE_REF_EXT]}.files`;
-	return DB.getCollection(account, colName).then((col) => {
-		let totalSize = 0;
-		if(col) {
-			return col.find({},{length : 1}).toArray().then((res) => {
-				if (res && res.length) {
-					totalSize =  res.reduce((total, current) => total + current.length, 0);
-				}
-				return totalSize;
-			});
-		}
-		return totalSize;
-	});
-
-/*	return DB.getCollection(account, model, ORIGINAL_FILE_REF_EXT).then((col) => {
+	return DB.getCollection(account, model + ORIGINAL_FILE_REF_EXT).then((col) => {
 		let totalSize = 0;
 		if(col) {
 			return col.find({},{size : 1}).toArray().then((res) => {
@@ -124,7 +102,7 @@ FileRef.getTotalOrgFileSize = function(account, model) {
 
 		return totalSize;
 	});
-*/
+
 };
 
 FileRef.getUnityBundle = function(account, model, fileName) {
@@ -141,9 +119,9 @@ FileRef.getJSONFileStream = function(account, model, fileName) {
 
 FileRef.removeAllFilesFromModel = function(account, model) {
 	const promises = [];
-	promises.push(removeAllFiles(account, model, ORIGINAL_FILE_REF_EXT));
-	promises.push(removeAllFiles(account, model, JSON_FILE_REF_EXT));
-	promises.push(removeAllFiles(account, model, UNITY_BUNDLE_REF_EXT));
+	promises.push(removeAllFiles(account, model + ORIGINAL_FILE_REF_EXT));
+	promises.push(removeAllFiles(account, model + JSON_FILE_REF_EXT));
+	promises.push(removeAllFiles(account, model + UNITY_BUNDLE_REF_EXT));
 	return Promise.all(promises);
 };
 

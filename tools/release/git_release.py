@@ -48,10 +48,10 @@ code = 0
 if code:
     fatalError("git force add failed")
 
-os.system("sed -i 's/\"VERSION\" : \"[^ ]*\",/\"VERSION\" : \"" + version +"\",/' backend/VERSION.json")
+os.system("sed 's/\"VERSION\" : \"[^ ]*\",/\"VERSION\" : \"" + version +"\",/' backend/VERSION.json > backend/VERSION.json.bak")
+os.system("mv backend/VERSION.json.bak backend/VERSION.json");
 
-os.system("git add backend")
-os.system("git clean -f -d")
+os.system("git add backend/VERSION.json")
 
 os.system("git commit -m \"Version " + version + "\"")
 

@@ -242,14 +242,14 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.put(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
 				.send(comment)
 				.expect(200 , done);
 		});
 
 		it("can edit issue", function(done) {
 			agent
-				.put(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
 				.send({  status: "open" })
 				.expect(200 , done);
 		});
@@ -541,7 +541,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.put(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
 				.send(comment)
 				.expect(200 , done);
 		});
@@ -565,21 +565,21 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.put(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
 				.send(comment)
 				.expect(401 , done);
 		});
 
 		it("can edit issue", function(done) {
 			agent
-				.put(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
 				.send({  status: "open" })
 				.expect(200 , done);
 		});
 
 		it("cannot edit issue in other model", function(done) {
 			agent
-				.put(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
 				.send({  status: "open" })
 				.expect(401 , done);
 		});
@@ -833,7 +833,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.put(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
 				.send(comment)
 				.expect(404 , done);
 		});
@@ -857,21 +857,21 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.put(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
 				.send(comment)
 				.expect(401 , done);
 		});
 
 		it("can edit issue", function(done) {
 			agent
-				.put(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
 				.send({  status: "open" })
 				.expect(404 , done);
 		});
 
 		it("cannot edit issue in other model", function(done) {
 			agent
-				.put(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
 				.send({  status: "open" })
 				.expect(401 , done);
 		});
@@ -1118,7 +1118,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.put(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
 				.send(comment)
 				.expect(401 , done);
 		});
@@ -1142,21 +1142,21 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.put(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
 				.send(comment)
 				.expect(401 , done);
 		});
 
 		it("cannot edit issue", function(done) {
 			agent
-				.put(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
 				.send({  status: "open" })
 				.expect(401 , done);
 		});
 
 		it("cannot edit issue in other model", function(done) {
 			agent
-				.put(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
 				.send({  status: "open" })
 				.expect(401 , done);
 		});
@@ -1394,7 +1394,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.put(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
 				.send(comment)
 				.expect(401 , done);
 		});
@@ -1418,21 +1418,21 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.put(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
 				.send(comment)
 				.expect(401 , done);
 		});
 
 		it("cannot edit issue", function(done) {
 			agent
-				.put(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
 				.send({  status: "open" })
 				.expect(401 , done);
 		});
 
 		it("cannot edit issue in other model", function(done) {
 			agent
-				.put(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
 				.send({  status: "open" })
 				.expect(401 , done);
 		});

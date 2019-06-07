@@ -75,16 +75,6 @@ export const updateUserJob = (teamspace, job, username) => {
 };
 
 /**
- * Remove user job
- * @param teamspace
- * @param job
- * @param username
- */
-export const removeUserJob = (teamspace, username) => {
-	return api.delete(`${teamspace}/jobs/unassign/${username}`);
-};
-
-/**
  * Set user permissions
  * @param teamspace
  * @param permissionData

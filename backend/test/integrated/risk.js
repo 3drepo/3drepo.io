@@ -268,7 +268,7 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 						.send(safetibaseId)
 						.expect(200, done);
 				},
@@ -299,7 +299,7 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 						.send(associatedActivity)
 						.expect(200, done);
 				},
@@ -330,7 +330,7 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 						.send(description)
 						.expect(200, done);
 				},
@@ -361,7 +361,7 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 						.send(assignedRoles)
 						.expect(200, done);
 				},
@@ -392,7 +392,7 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 						.send(category)
 						.expect(200, done);
 				},
@@ -428,12 +428,12 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 						.send({ comment : "hello world"})
 						.expect(200 , done);
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 						.send(data)
 						.expect(200, done);
 				},
@@ -464,7 +464,7 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 						.send(likelihood)
 						.expect(200, done);
 				},
@@ -495,7 +495,7 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 						.send(consequence)
 						.expect(200, done);
 				},
@@ -526,7 +526,7 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 						.send(pin)
 						.expect(200, done);
 				},
@@ -558,7 +558,7 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 						.send(mitigationStatus)
 						.expect(200, done);
 				},
@@ -589,7 +589,7 @@ describe("Risks", function () {
 						});
 				},
 				function(done) {
-					agent.put(`/${username}/${model}/risks/${riskId}.json`)
+					agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 						.send(mitigation)
 						.expect(200, done);
 				},
@@ -641,7 +641,7 @@ describe("Risks", function () {
 
 				async.series([
 					function(done) {
-						agent.put(`/${username}/${model}/risks/${riskId}.json`)
+						agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 							.send(comment)
 							.expect(200 , done);
 					},
@@ -668,7 +668,7 @@ describe("Risks", function () {
 
 				async.series([
 					function(done) {
-						agent.put(`/${username}/${model}/risks/${riskId}.json`)
+						agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 							.send(comment)
 							.expect(200 , done);
 					},
@@ -691,7 +691,7 @@ describe("Risks", function () {
 
 				const comment = { comment: "" };
 
-				agent.put(`/${username}/${model}/risks/${riskId}.json`)
+				agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 					.send(comment)
 					.expect(400 , function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_NO_TEXT.value);
@@ -703,7 +703,7 @@ describe("Risks", function () {
 
 				const comment = { commentIndex: 0, delete: true };
 
-				agent.put(`/${username}/${model}/risks/${riskId}.json`)
+				agent.patch(`/${username}/${model}/risks/${riskId}.json`)
 					.send(comment)
 					.expect(200 , function(err, res) {
 						done(err);
@@ -715,7 +715,7 @@ describe("Risks", function () {
 				const invalidId = "00000000-0000-0000-0000-000000000000";
 				const comment = { comment: "hello world" };
 
-				agent.put(`/${username}/${model}/risks/${invalidId}.json`)
+				agent.patch(`/${username}/${model}/risks/${invalidId}.json`)
 					.send(comment)
 					.expect(404 , function(err, res) {
 						done(err);

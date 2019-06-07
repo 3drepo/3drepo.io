@@ -25,6 +25,7 @@ import { ViewpointsActions } from '../../../modules/viewpoints';
 import { JobsActions } from '../../../modules/jobs';
 import { RisksActions } from '../../../modules/risks';
 import { GroupsActions } from '../../../modules/groups';
+import { ViewerActions } from '../../../modules/viewer';
 import { VIEWER_EVENTS } from '../../../constants/viewer';
 import { StarredMetaActions } from '../../../modules/starredMeta';
 import { BimActions } from '../../../modules/bim';
@@ -267,6 +268,7 @@ class ModelController implements ng.IController {
 		dispatch(RisksActions.fetchRisks(this.account, this.model, this.revision));
 		dispatch(GroupsActions.fetchGroups(this.account, this.model, this.revision));
 		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
+		dispatch(ViewerActions.getHelicopterSpeed(this.account, this.model));
 		dispatch(StarredMetaActions.fetchStarredMeta());
 	}
 

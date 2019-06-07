@@ -48,3 +48,12 @@ export const downloadJSON = (panelName, modelName, endpoint) => {
 export const editHelicopterSpeed = (teamspace, modelId, speed) => {
 	return api.put(`${teamspace}/${modelId}/settings/heliSpeed`, {heliSpeed: speed});
 };
+
+/**
+ * Get helicopter speed
+ * @param teamspace
+ * @param modelId
+ */
+export const getHelicopterSpeed = (teamspace, modelId) => {
+	return api.get(`${teamspace}/${modelId}/settings/heliSpeed`);
+};

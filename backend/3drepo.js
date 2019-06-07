@@ -113,6 +113,11 @@ function runServer() {
 	// The core express application
 	const mainApp = express();
 
+	if(config.hasOwnProperty("umask")) {
+		systemLogger.logInfo("Setting umask: " + config.umask);
+		process.umask(config.umask);
+	}
+
 	// Peform setup for various parts of the server
 	setupSSL();
 	handleHTTPSRedirect();

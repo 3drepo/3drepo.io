@@ -192,7 +192,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							/>
 						</StyledFormControl>
 					</FieldsRow>
-					<Field name="description" render={({ field }) => (
+					<Field name="desc" render={({ field }) => (
 						<TextField
 							{...field}
 							requiredConfirm={!this.isNewIssue}
@@ -226,7 +226,7 @@ export const IssueDetailsForm = withFormik({
 			topic_type: issue.topic_type,
 			assigned_roles: get(issue, 'assigned_roles[0]', ''),
 			due_date: issue.due_date,
-			description: issue.description
+			desc: issue.desc
 		});
 	},
 	handleSubmit: (values, { props }) => {

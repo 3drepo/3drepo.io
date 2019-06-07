@@ -341,7 +341,7 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
 router.post("/issues.json", middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {put} /:teamspace/:model/issues.json/issueId.json Update an Issue.
+ * @api {patch} /:teamspace/:model/issues.json/issueId.json Update an Issue.
  * @apiName  updateIssue
  * @apiGroup Issues
  *
@@ -354,7 +354,7 @@ router.post("/issues.json", middlewares.issue.canCreate, storeIssue, middlewares
  * @apiSuccess (200) {Object} Updated Issue Object.
  *
  */
-router.put("/issues/:issueId.json", middlewares.issue.canComment, updateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.patch("/issues/:issueId.json", middlewares.issue.canComment, updateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /:teamspace/:model/issuesId.json Store issue based on revision
@@ -377,7 +377,7 @@ router.post("/revision/:rid/issues.json", middlewares.issue.canCreate, storeIssu
  * @apiParam {String} rid Unique Revision ID to update to.
  * @apiParam {String} issueId Unique Issue ID to update.
  */
-router.put("/revision/:rid/issues/:issueId.json", middlewares.issue.canComment, updateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.patch("/revision/:rid/issues/:issueId.json", middlewares.issue.canComment, updateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 function storeIssue(req, res, next) {
 	const data = req.body;

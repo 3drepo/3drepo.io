@@ -66,8 +66,6 @@ const updateClipStateCallback = (clipNumber) => {
 export function* initialiseToolbar() {
 	try {
 		yield put(ViewerActions.startListenOnNumClip());
-		const helicopterSpeed = yield Viewer.getHelicopterSpeed();
-		yield put(ViewerActions.setHelicopterSpeed(helicopterSpeed));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('initialise', 'toolbar'));
 	}
@@ -217,6 +215,28 @@ export function* resetHelicopterSpeed({teamspace, modelId, updateDefaultSpeed}) 
 	}
 }
 
+export function* getHelicopterSpeed({teamspace, modelId}) {
+	try {
+		yield Viewer.isViewerReady();
+		const { data: { heliSpeed } } = yield API.getHelicopterSpeed(teamspace, modelId);
+		const currentHeliSpeed = yield select(selectHelicopterSpeed);
+		const diff = heliSpeed - currentHeliSpeed;
+		const slower = diff > 0;
+
+		for (let i = 0; i < Math.abs(diff); ++i) {
+			if (slower) {
+				yield Viewer.helicopterSpeedUp();
+			} else {
+				yield Viewer.helicopterSpeedDown();
+			}
+		}
+
+		yield put(ViewerActions.setHelicopterSpeed(heliSpeed));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('get', 'helicopter speed'));
+	}
+}
+
 export function* increaseHelicopterSpeed({teamspace, modelId}) {
 	try {
 		const helicopterSpeed = yield select(selectHelicopterSpeed);
@@ -234,6 +254,7 @@ export function* decreaseHelicopterSpeed({teamspace, modelId}) {
 	try {
 		const helicopterSpeed = yield select(selectHelicopterSpeed);
 		const speed = helicopterSpeed - 1;
+
 		yield Viewer.helicopterSpeedDown();
 		yield API.editHelicopterSpeed(teamspace, modelId, speed);
 		yield put(ViewerActions.setHelicopterSpeed(speed));
@@ -301,6 +322,7 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.INITIALISE_TOOLBAR, initialiseToolbar);
 	yield takeLatest(ViewerTypes.SET_NAVIGATION_MODE, setNavigationMode);
 	yield takeLatest(ViewerTypes.RESET_HELICOPTER_SPEED, resetHelicopterSpeed);
+	yield takeLatest(ViewerTypes.GET_HELICOPTER_SPEED, getHelicopterSpeed);
 	yield takeLatest(ViewerTypes.INCREASE_HELICOPTER_SPEED, increaseHelicopterSpeed);
 	yield takeLatest(ViewerTypes.DECREASE_HELICOPTER_SPEED, decreaseHelicopterSpeed);
 	yield takeLatest(ViewerTypes.GO_TO_EXTENT, goToExtent);

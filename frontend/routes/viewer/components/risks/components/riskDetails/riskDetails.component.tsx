@@ -23,11 +23,12 @@ import { Container } from './riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { RiskDetailsForm } from './riskDetailsForm.component';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
-import { mergeRiskData, canComment, getRiskPinColor } from '../../../../../../helpers/risks';
+import { canComment, getRiskPinColor } from '../../../../../../helpers/risks';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 import { EmptyStateInfo } from '../../../views/views.styles';
 import { NEW_PIN_ID } from '../../../../../../constants/viewer';
+import { mergeData, diffData } from '../../../../../../helpers/forms';
 
 interface IProps {
 	jobs: any[];
@@ -138,12 +139,11 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public handleRiskFormSubmit = (values) => {
 		const { teamspace, model, updateRisk, updateNewRisk } = this.props;
-		const updatedRisk = mergeRiskData(this.riskData, values);
 
 		if (this.isNewRisk) {
-			updateNewRisk(updatedRisk);
+			updateNewRisk(mergeData(this.riskData, values));
 		} else {
-			updateRisk(teamspace, model, updatedRisk);
+			updateRisk(teamspace, model, diffData(values, this.riskData));
 		}
 	}
 
@@ -308,7 +308,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		const { teamspace, model, risk, updateRisk } = this.props;
 
 		if (risk._id) {
-			updateRisk(teamspace, model, {...risk, position});
+			updateRisk(teamspace, model, { position });
+			Viewer.setPin(null);
 		} else {
 			const colours = getRiskPinColor(risk.overall_level_of_risk, true);
 			Viewer.changePinColor({ id: NEW_PIN_ID, colours});
