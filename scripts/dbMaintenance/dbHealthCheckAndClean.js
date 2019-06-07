@@ -353,7 +353,7 @@ function checkProjectSanity() {
 
 checkDatabaseEntries();
 checkJobAndPermissions();
-findZombieModels()
+findZombieModels();
 checkModelSanity();
 checkProjectSanity();
 
