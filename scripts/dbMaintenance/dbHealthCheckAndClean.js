@@ -358,7 +358,7 @@ function checkProjectSanity() {
 checkDatabaseEntries();
 //getDatabaseList()
 checkJobAndPermissions();
-findZombieModels()
+findZombieModels();
 checkModelSanity();
 checkProjectSanity();
 
