@@ -290,6 +290,15 @@ function checkModelIDFormat(thisDB, modelID, colNames) {
 	return true;
 }
 
+function checkModelInProject(thisDB, modelID, colNames) {
+	if(!thisDB.getCollection("projects").findOne({models: modelID})){
+		log(`${modelID} not in a project${autoFix? ". Removing..." : ""}`);
+		if(autoFix) {
+			removeModel(thisDB, modelID, colNames, true);
+		}
+	}
+}
+
 function checkModelSanity() {
 	log('4. Model health check');
 	enterSubSection();
@@ -302,6 +311,7 @@ function checkModelSanity() {
 		var colList = thisDB.getCollectionNames();
 		thisDB.getCollection("settings").find({status: {$ne: "processing"}}).forEach(function(model) {
 			if (!checkModelIDFormat(thisDB, model._id, colList)) return;
+			if (!checkModelInProject(thisDB, model._id, colList)) return;
 			checkGridFSPairs(thisDB, model._id, colList);
 			colList = thisDB.getCollectionNames(); //Refresh the list as items may be removed
 			checkModelCollections(thisDB, model._id, model.federate, colList);
@@ -311,8 +321,45 @@ function checkModelSanity() {
 	exitSubSection();
 }
 
+function checkProjectSanity() {
+	log('5. Prioject health check');
+	enterSubSection();
+	getDatabaseList().forEach(function(dbEntry) {
+		var dbName = dbEntry.name;
+		if(specialDB.indexOf(dbName) > -1) return;
+		log(`===${dbName}===`);
+		enterSubSection();
+		var thisDB = db.getSiblingDB(dbName);
+		var models = {};
+		thisDB.getCollection("settings").find({},{_id: 1}).forEach(function(model) {
+			models[model._id] = true;
+		});
 
-//checkDatabaseEntries();
-//checkJobAndPermissions();
-//findZombieModels(
+		var projCol = thisDB.getCollection("projects");
+		projCol.find({}).forEach(function(project) {
+			var newModels = [];
+			project.models.forEach(function(entry){
+				if(models[entry])
+					newModels.push(entry);
+				else
+					log(`[${project.name}]Non existent model found: ${entry}`);
+			});
+
+			if(autoFix && project.models.length !== newModels.length) {
+				log(`Updating project entry...`);
+			 	projCol.update(project, {$set: {models: newModels}});
+			}
+		});
+		exitSubSection();
+	});
+	exitSubSection();
+
+}
+
+
+checkDatabaseEntries();
+checkJobAndPermissions();
+findZombieModels()
 checkModelSanity();
+checkProjectSanity();
+
