@@ -48,6 +48,7 @@ interface IProps {
 	expanded?: boolean;
 	selected?: boolean;
 	active?: boolean;
+	hasFederationRoot?: boolean;
 	collapseNode?: (id) => void;
 	expandNode?: (id) => void;
 	selectNode?: (id) => void;
@@ -174,7 +175,7 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { expanded, isSearchResult, style, key, active } = this.props;
+		const { expanded, isSearchResult, style, key, active, hasFederationRoot } = this.props;
 
 		return (
 			<Container
@@ -187,6 +188,7 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 				highlighted={!isSearchResult && this.isHighlighted}
 				expanded={isSearchResult && expanded}
 				level={this.level}
+				hasFederationRoot={hasFederationRoot}
 				onClick={this.handleNodeClick}
 			>
 				{this.renderName()}

@@ -54,7 +54,6 @@ interface IProps {
 	dataRevision: string;
 	activeNode: string;
 	isPending?: boolean;
-	isFedaration?: boolean;
 	selectNode?: (id) => boolean;
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
@@ -63,6 +62,7 @@ interface IProps {
 }
 
 interface IState {
+	isFederation: boolean,
 	isScrollToActive: boolean;
 }
 
@@ -84,6 +84,15 @@ export class Tree extends React.PureComponent<IProps, IState> {
 
 	get filters() {
 		return [];
+	}
+
+	get isFederation() {
+		const rootNode = this.props.nodesList[0];
+		if (rootNode) {
+			return rootNode.isFederation;
+		}
+
+		return false;
 	}
 
 	public nodeListRef = React.createRef() as any;
@@ -231,6 +240,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 				style={style}
 				key={treeNode._id}
 				data={treeNode}
+				hasFederationRoot={this.isFederation}
 				isSearchResult={treeNode.isSearchResult}
 				active={activeNode === treeNode._id}
 				expanded={expandedNodesMap[treeNode._id]}

@@ -80,10 +80,12 @@ const getButtonBackgroundColor = (props) => {
 };
 
 const containerIndentation = cond([
-	[matches({ level: 0 }), constant(0)],
 	[matches({ nodeType: TREE_ITEM_FEDERATION_TYPE }), constant(38)],
 	[matches({ nodeType: TREE_ITEM_MODEL_TYPE }), constant(20)],
-	[stubTrue, ({ level }) => level * 10 + 10]
+	[stubTrue, ({ level, hasFederationRoot }) => {
+		const indentation = level * 10;
+		return !hasFederationRoot ? indentation + 10 : indentation;
+	}]
 ]);
 
 export const Actions = styled.div`
