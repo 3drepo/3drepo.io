@@ -18,9 +18,9 @@
 import { createSelector } from 'reselect';
 import { pickBy, keys, values, flatten, pick, uniq } from 'lodash';
 
+import { SELECTION_STATES, NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
 import { calculateTotalMeshes } from '../../helpers/tree';
 import { searchByFilters } from '../../helpers/searching';
-import { SELECTION_STATES, NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
 import { TreeProcessingData } from './treeProcessing/treeProcessing.constants';
 import TreeProcessing from './treeProcessing/treeProcessing';
 
@@ -57,6 +57,17 @@ export const selectTreeNodesList = createSelector(
 	(treeProcessingData) => treeProcessingData.nodesList || []
 );
 
+export const selectIsFederation = createSelector(
+	selectTreeNodesList, (treeNodesList) => {
+		const rootNode = treeNodesList[0];
+		if (rootNode) {
+			return rootNode.isFederation;
+		}
+
+		return false;
+	}
+);
+
 export const selectTreeNodesIds = createSelector(
 	selectTreeNodesList, selectDataRevision,
 	(treeNodesList) => treeNodesList.map(({ _id }) => _id)
@@ -68,19 +79,7 @@ export const selectSelectionMap = createSelector(
 );
 
 export const selectSelectedNodesIds = createSelector(
-	selectSelectionMap, (nodesSelectionMap) => {
-		return keys(pickBy(nodesSelectionMap, (selectionState) => {
-			return selectionState === SELECTION_STATES.SELECTED;
-		}));
-	}
-);
-
-export const selectUnselectedNodesIds = createSelector(
-	selectSelectionMap, (nodesSelectionMap) => {
-		return keys(pickBy(nodesSelectionMap, (selectionState) => {
-			return selectionState === SELECTION_STATES.UNSELECTED;
-		}));
-	}
+	selectTreeProccessing, (treeProcessingData) => treeProcessingData.selectedNodesIds
 );
 
 export const selectDefaultVisibilityMap = createSelector(
@@ -94,11 +93,7 @@ export const selectVisibilityMap = createSelector(
 );
 
 export const selectInvisibleNodesIds = createSelector(
-	selectVisibilityMap, (visibilityMap) => {
-		return keys(pickBy(visibilityMap, (selectionState) => {
-			return selectionState === VISIBILITY_STATES.INVISIBLE;
-		}));
-	}
+	selectTreeProccessing, (treeProcessingData) => treeProcessingData.invisibleNodesIds
 );
 
 export const selectNodesIndexesMap = createSelector(
@@ -151,24 +146,32 @@ export const selectExpandedNodesMap = createSelector(
 
 export const selectVisibleTreeNodesList = createSelector(
 	[
-		selectFilteredNodesList, selectNodesIndexesMap, selectSelectedFilters,
-		selectExpandedNodesMap, selectSearchEnabled, selectDataRevision
+		selectFilteredNodesList, selectSelectedFilters,
+		selectExpandedNodesMap, selectSearchEnabled
 	],
-	(treeNodesList, nodesIndexesMap, selectedFilters, expandedNodesMap, searchEnabled) => {
+	(treeNodesList, selectedFilters, expandedNodesMap, searchEnabled) => {
 		const visibleNodes = [];
+		const indexesByRootParentIds = {};
 
 		for (let index = 0; index < treeNodesList.length; index++) {
 			const treeNode = { ...treeNodesList[index] };
+
 			const isSearchActive = searchEnabled && selectedFilters.length;
 			const isFirstLevel = treeNode.level === 1;
 			const isSecondLevel = treeNode.level === 2;
 
-			treeNode.parentIndex = nodesIndexesMap[treeNode.parentId];
 			treeNode.isSearchResult = isSearchActive && !treeNode.isFederation && !treeNode.isModel;
 			treeNode.isRegularNode = !isSearchActive && (isFirstLevel || isSecondLevel || expandedNodesMap[treeNode.parentId]);
 			if (treeNode.isSearchResult || treeNode.isRegularNode) {
 				visibleNodes.push(treeNode);
+
+				if (!treeNode.rootParentId) {
+					indexesByRootParentIds[treeNode._id] = visibleNodes.length - 1;
+				} else {
+					treeNode.rootParentIndex = indexesByRootParentIds[treeNode.rootParentId];
+				}
 			}
+
 		}
 
 		return visibleNodes;

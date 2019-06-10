@@ -34,9 +34,11 @@ import {
 } from '../../../../../../constants/tree';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
+
 interface IProps {
 	style: any;
 	key: any;
+	index: number;
 	data: any;
 	settings: any;
 	isSearchResult?: boolean;
@@ -44,8 +46,6 @@ interface IProps {
 	selectionMap: any;
 	highlighted?: boolean;
 	expanded?: boolean;
-	parentId?: number;
-	parentIndex?: number;
 	selected?: boolean;
 	active?: boolean;
 	collapseNode?: (id) => void;
@@ -54,7 +54,7 @@ interface IProps {
 	deselectNode?: (id) => void;
 	setTreeNodesVisibility?: (id, visibility) => void;
 	isolateNode: (id) => void;
-	scrollToTop?: () => void;
+	onScrollToTop: (index) => void;
 }
 
 interface IState {
@@ -223,12 +223,12 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 
 	private goToTop = (event) => {
 		event.stopPropagation();
-		this.props.scrollToTop();
+		this.props.onScrollToTop(this.props.index);
 	}
 
 	private handleOpenModelClick = () => {
 		const [teamspace, name] = this.node.name.split(':');
-		const {model} = this.props.settings.subModels.find((subModel) => subModel.name === name);
+		const { model } = this.props.settings.subModels.find((subModel) => subModel.name === name);
 
 		window.open(`${window.location.origin}/viewer/${teamspace}/${model}`, '_blank', 'noopener');
 	}

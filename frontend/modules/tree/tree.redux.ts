@@ -32,7 +32,6 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	setComponentState: ['componentState'],
 	resetComponentState: [],
 	setIfcSpacesHidden: ['ifcSpacesHidden'],
-	setTreeNodesList: ['treeNodesList'],
 	expandNode: ['id'],
 	collapseNode: ['id'],
 	selectNode: ['id'],
@@ -98,10 +97,6 @@ const getSelectedNodesSuccess = (state = INITIAL_STATE, { selectedNodes }) => {
 	return { ...state, selectedNodes };
 };
 
-const setTreeNodesList = (state = INITIAL_STATE, { treeNodesList }) => {
-	return { ...state, treeNodesList, dataRevision: uniqueId('tree-data-rev-') };
-};
-
 const setIsPending = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
 
 const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
@@ -149,7 +144,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.SET_IS_PENDING]: setIsPending,
 	[TreeTypes.RESET_COMPONENT_STATE]: resetComponentState,
 	[TreeTypes.SET_IFC_SPACES_HIDDEN]: setIfcSpacesHidden,
-	[TreeTypes.SET_TREE_NODES_LIST]: setTreeNodesList,
 	[TreeTypes.EXPAND_NODE]: expandNode,
 	[TreeTypes.SET_NODES_SELECTION_MAP]: setNodesSelectionMap,
 	[TreeTypes.SET_AUXILIARY_MAPS]: setAuxiliaryMaps,

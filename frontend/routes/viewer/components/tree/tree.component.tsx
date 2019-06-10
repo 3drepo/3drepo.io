@@ -54,6 +54,7 @@ interface IProps {
 	dataRevision: string;
 	activeNode: string;
 	isPending?: boolean;
+	isFedaration?: boolean;
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
 	isolateSelectedNodes: () => void;
@@ -202,11 +203,9 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		</>
 	)
 
-	private scrollToParent = (index) => () => {
-		const { nodesList } = this.props;
-		const treeNode = nodesList[index];
-		const parentIndex = nodesList.findIndex((node) => node._id === treeNode.parentId);
-		this.nodeListRef.current.scrollToItem(parentIndex, 'start');
+	private scrollToTop = (index) => {
+		const treeNode = this.props.nodesList[index];
+		this.nodeListRef.current.scrollToItem(treeNode.rootParentIndex, 'start');
 	}
 
 	private renderTreeNode = (props) => {
@@ -221,10 +220,9 @@ export class Tree extends React.PureComponent<IProps, IState> {
 				key={treeNode._id}
 				data={treeNode}
 				isSearchResult={treeNode.isSearchResult}
-				parentIndex={treeNode.parentIndex}
 				active={activeNode === treeNode._id}
 				expanded={expandedNodesMap[treeNode._id]}
-				scrollToTop={this.scrollToParent(index)}
+				onScrollToTop={this.scrollToTop}
 			/>
 		);
 	}

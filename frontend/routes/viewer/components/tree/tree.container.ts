@@ -32,7 +32,8 @@ import {
 	selectIsPending,
 	selectVisibleTreeNodesList,
 	selectDataRevision,
-	selectActiveNode
+	selectActiveNode,
+	selectIsFederation
 } from '../../../../modules/tree';
 
 const mapStateToProps = createStructuredSelector({
@@ -46,7 +47,8 @@ const mapStateToProps = createStructuredSelector({
 	nodesIndexesMap: selectNodesIndexesMap,
 	isPending: selectIsPending,
 	dataRevision: selectDataRevision,
-	activeNode: selectActiveNode
+	activeNode: selectActiveNode,
+	isFedaration: selectIsFederation
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
