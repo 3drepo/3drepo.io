@@ -19,6 +19,7 @@ export interface INode {
 	shared_ids?: string[];
 	defaultVisibility: string;
 	childrenIds: string[];
+	rootParentId?: string;
 }
 
 export interface TreeProcessingData {

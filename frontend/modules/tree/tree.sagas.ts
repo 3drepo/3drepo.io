@@ -21,7 +21,7 @@ import TreeProcessing from './treeProcessing/treeProcessing';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { dispatch, getAngularService } from '../../helpers/migration';
+import { dispatch } from '../../helpers/migration';
 import { GroupsActions } from '../groups';
 import { DialogActions } from '../dialog';
 import {

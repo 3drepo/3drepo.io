@@ -22,7 +22,7 @@ const getTransformedNodeData = (node) => ({
 	defaultVisibility: BACKEND_VISIBILITY_STATES[node.toggleState]
 });
 
-const getFlattenNested = (tree, level = 1, parentId = null) => {
+const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null) => {
 	const rowData: INode = {
 		...getTransformedNodeData(tree),
 		namespacedId: getNamespacedId(tree),
@@ -30,6 +30,7 @@ const getFlattenNested = (tree, level = 1, parentId = null) => {
 		isModel: tree.isModel || isModelNode(level, tree.isFederation),
 		level,
 		parentId,
+		rootParentId,
 		hasChildren: Boolean(tree.children),
 		deepChildrenNumber: 0,
 		childrenIds: []
@@ -38,10 +39,13 @@ const getFlattenNested = (tree, level = 1, parentId = null) => {
 	const dataToFlatten = [] as any;
 
 	if (tree.children) {
+		rootParentId = rowData.isModel ? rowData._id : rootParentId;
+
 		for (let index = 0; index < tree.children.length; index++) {
 			const subTree = tree.children[index];
 			subTree.isModel = isModelNode(level + 1, subTree.isFederation, tree.isFederation);
-			const { data: nestedData, deepChildrenNumber } = getFlattenNested(subTree, level + 1, tree._id);
+
+			const { data: nestedData, deepChildrenNumber } = getFlattenNested(subTree, level + 1, tree._id, rootParentId);
 			rowData.deepChildrenNumber += deepChildrenNumber;
 			rowData.childrenIds.push(subTree._id);
 			dataToFlatten.push(nestedData);
