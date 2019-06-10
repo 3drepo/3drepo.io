@@ -15,20 +15,40 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import * as React from 'react';
+import Dropzone from 'react-dropzone';
 
 interface IProps {
-	handleResolve: () => void;
-	handleClose: () => void;
-	updateSettings: (settings: any) => void;
-	visualSettings: any;
+	onSaveFiles: (files) => void ;
 }
 
 interface IState {
-	selectedTab: number;
+	files: any[];
 }
 
-export class AttachResourceFiles extends React.PureComponent<any, any> {
+export class AttachResourceFiles extends React.PureComponent<IProps, IState> {
+	public state = {
+		files: []
+	};
+
+	public onDrop = (acceptedFiles) => {
+		this.setState({files: this.state.files.concat(acceptedFiles)});
+	}
+
+	public onRemoveFile = (index) => (e) => {
+		this.setState({files: this.state.files.filter((f , i) => index !== i)});
+	}
+
+	public onSavefiles = (e) => {
+		this.props.onSaveFiles(this.state.files);
+	}
+
 	public render() {
-		return (<div>files</div>);
+		return (
+			<div>
+				<Dropzone height="32" onDrop={this.onDrop}>click or drop to add files</Dropzone>
+				{this.state.files.map((f, i) => (<div key={i}>{f.name} <button onClick={this.onRemoveFile(i)}>x</button> </div>))}
+				<button onClick={this.onSavefiles}>Save</button>
+			</div>
+		);
 	}
 }

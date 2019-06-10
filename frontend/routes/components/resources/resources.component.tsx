@@ -32,7 +32,7 @@ interface IResource {
 interface IProps {
 	resources: IResource[];
 	onRemoveResource: (IResource) => void;
-	onAttachResources: () => void;
+	onSaveFiles: (files) => void;
 	showDialog: (config: any) => void;
 }
 
@@ -63,12 +63,12 @@ export class Resources extends React.PureComponent<IProps, IState> {
 	}
 
 	public onClickAttach = () => {
-		const {onAttachResources} = this.props;
+		const {onSaveFiles} = this.props;
 		this.props.showDialog({
 				title: 'Attach Resources',
 				template: AttachResourcesDialog,
 				data: {
-					onAttachResources
+					onSaveFiles
 				}
 		});
 	}

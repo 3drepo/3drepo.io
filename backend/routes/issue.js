@@ -678,7 +678,7 @@ function attachResourcesToIssue(req, res, next) {
 	});
 
 	upload.array("file")(req, res, function (err) {
-		const names = req.body.names;
+		const names = Array.isArray(req.body.names) ? req.body.names : [req.body.names];
 		const urls = req.body.urls;
 		if (err) {
 			return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);

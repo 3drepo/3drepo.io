@@ -22,7 +22,8 @@ import * as API from '../../services/api';
 import * as Exports from '../../services/export';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
 import { prepareIssue } from '../../helpers/issues';
-import { prepareComments, prepareComment } from '../../helpers/comments';
+import { prepareComments, prepareComment, createAttachResourceComments,
+		createRemoveResourceComment } from '../../helpers/comments';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
 import { PRIORITIES, STATUSES, DEFAULT_PROPERTIES } from '../../constants/issues';
@@ -661,24 +662,30 @@ export function* toggleSubmodelsIssues({ showSubmodelIssues }) {
 export function* removeResource({ resource }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const activeIssue = yield select(selectActiveIssueDetails);
+		const issueId = (yield select(selectActiveIssueDetails))._id;
 		const model  = yield select(selectCurrentModel);
+		const username = (yield select(selectCurrentUser)).username;
 
-		yield API.removeResource(teamspace, model, activeIssue._id, resource._id);
-		yield put(IssuesActions.removeResourceSuccess(resource, activeIssue._id));
+		yield API.removeResource(teamspace, model, issueId, resource._id);
+		yield put(IssuesActions.removeResourceSuccess(resource, issueId));
+		yield put(IssuesActions.createCommentSuccess(createRemoveResourceComment(username, resource), issueId));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('remove', 'resource', error));
 	}
 }
 
-export function* attachResources({ resources }) {
+export function* attachFileResources({ files }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const activeIssue = yield select(selectActiveIssueDetails);
+		const issueId = (yield select(selectActiveIssueDetails))._id;
 		const model  = yield select(selectCurrentModel);
+		const names =  files.map((f) => f.name);
+		const username = (yield select(selectCurrentUser)).username;
 
-		// yield API.attachResources(teamspace, model, activeIssue._id, resource._id);
-		yield put(IssuesActions.attachResourceSuccess(resources, activeIssue._id));
+		const {data} = yield API.attachFileResources(teamspace, model, issueId, names, files);
+		const resources = prepareResources(teamspace, model, data);
+		yield put(IssuesActions.attachResourcesSuccess(resources, issueId));
+		yield put(IssuesActions.createCommentsSuccess(createAttachResourceComments(username, data), issueId));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('remove', 'resource', error));
 	}
@@ -710,5 +717,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.SET_FILTERS, setFilters);
 	yield takeLatest(IssuesTypes.TOGGLE_SUBMODELS_ISSUES, toggleSubmodelsIssues);
 	yield takeLatest(IssuesTypes.REMOVE_RESOURCE, removeResource);
-	yield takeLatest(IssuesTypes.ATTACH_RESOURCES, attachResources);
+	yield takeLatest(IssuesTypes.ATTACH_FILE_RESOURCES, attachFileResources);
 }

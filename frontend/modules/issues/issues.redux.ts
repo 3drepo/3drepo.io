@@ -14,9 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { cloneDeep, keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
-import { keyBy, cloneDeep } from 'lodash';
 
 export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	fetchIssues: ['teamspace', 'modelId', 'revision'],
@@ -50,6 +49,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	subscribeOnIssueCommentsChanges: ['teamspace', 'modelId', 'issueId'],
 	unsubscribeOnIssueCommentsChanges: ['teamspace', 'modelId', 'issueId'],
 	createCommentSuccess: ['comment', 'issueId'],
+	createCommentsSuccess: ['comments', 'issueId'],
 	deleteCommentSuccess: ['commentGuid', 'issueId'],
 	updateCommentSuccess: ['comment', 'issueId'],
 	toggleSortOrder: ['sortOrder'],
@@ -58,7 +58,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	showCloseInfo: ['issueId'],
 	removeResource: ['resource'],
 	removeResourceSuccess: ['resource', 'issueId'],
-	attachResources: ['resources'],
+	attachFileResources: ['files'],
 	attachResourcesSuccess: ['resources', 'issueId'],
 	resetComponentState: []
 }, { prefix: 'ISSUES_' });
@@ -135,11 +135,16 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
-export const createCommentSuccess = (state = INITIAL_STATE, { comment, issueId }) => {
-	const comments = [comment, ...state.issuesMap[issueId].comments.map((log) => ({ ...log, sealed: true, new: true }))];
-	const issuesMap = updateIssueProps(state.issuesMap, issueId, { comments });
+export const createCommentsSuccess = (state = INITIAL_STATE, { comments, issueId }) => {
+	comments = comments.concat(state.issuesMap[issueId].comments);
+	comments = comments.map((log, i) => ({ ...log, sealed: (i !== 0) ? true : log.sealed}));
 
+	const issuesMap = updateIssueProps(state.issuesMap, issueId, { comments });
 	return { ...state, issuesMap };
+};
+
+export const createCommentSuccess = (state = INITIAL_STATE, { comment, issueId }) => {
+	return createCommentsSuccess(state, {comments: [comment], issueId } );
 };
 
 export const updateCommentSuccess = (state = INITIAL_STATE, { comment, issueId }) => {
@@ -183,9 +188,9 @@ const removeResourceSuccess =  (state = INITIAL_STATE, { resource, issueId }) =>
 };
 
 const attachResourcesSuccess = (state = INITIAL_STATE, { resources, issueId }) => {
-	resources = state.issuesMap[issueId].resources.concat(resources);
+	resources = resources.concat(state.issuesMap[issueId].resources);
 	const issuesMap = updateIssueProps(state.issuesMap, issueId, { resources });
-	return { ...state};
+	return { ...state, issuesMap};
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -198,6 +203,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
 	[IssuesTypes.TOGGLE_IS_IMPORTING_BCF]: toggleIsImportingBcf,
 	[IssuesTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
+	[IssuesTypes.CREATE_COMMENTS_SUCCESS]: createCommentsSuccess,
 	[IssuesTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
 	[IssuesTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
 	[IssuesTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,

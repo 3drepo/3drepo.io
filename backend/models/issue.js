@@ -928,15 +928,23 @@ issue.isStatusChange =  function (oldIssue, newIssue) {
 
 issue.addRefsToIssue = async function(account, model, issueId, username, sessionId, refs) {
 	const issues = await db.getCollection(account, model + ".issues");
-	const systemComments = [];
+	const issueQuery = {_id: utils.stringToUUID(issueId)};
+	const issueFound = await issues.findOne(issueQuery);
+
+	if (!issueFound) {
+		throw responseCodes.ISSUE_NOT_FOUND;
+	}
+
+	const comments = issueFound.comments;
+
 	const ref_ids = [];
 
 	refs.forEach(ref => {
-		addSystemComment(account, model, sessionId, issueId, systemComments, username, "resource", null, ref.name);
+		addSystemComment(account, model, sessionId, issueId, comments, username, "resource", null, ref.name);
 		ref_ids.push(ref._id);
 	});
 
-	await issues.update({ _id : utils.stringToUUID(issueId)},{ $push: {refs:  {$each: ref_ids}, comments:  {$each:systemComments}}});
+	await issues.update(issueQuery, { $set: {comments}, $push: {refs:  {$each: ref_ids}}});
 	return refs;
 };
 
@@ -969,10 +977,16 @@ issue.attachResourceUrls = async function(account, model, issueId, username, ses
 issue.detachResource =  async function(account, model, issueId, resourceId, username, sessionId) {
 	const ref = await FileRef.removeResourceFromIssue(account, model, issueId, resourceId);
 	const issues = await db.getCollection(account, model + ".issues");
+	const issueQuery = {_id: utils.stringToUUID(issueId)};
+	const issueFound = await issues.findOne(issueQuery);
 
-	const systemComments = [];
-	await addSystemComment(account, model, sessionId, issueId, systemComments, username, "resource", ref.name, null);
-	await issues.update({_id: utils.stringToUUID(issueId)}, {$push: {comments: {$each:systemComments}}, $pull: { refs: resourceId } });
+	if (!issueFound) {
+		throw responseCodes.ISSUE_NOT_FOUND;
+	}
+
+	const comments = issueFound.comments;
+	await addSystemComment(account, model, sessionId, issueId, comments, username, "resource", ref.name, null);
+	await issues.update(issueQuery, {$set: {comments}, $pull: { refs: resourceId } });
 
 	if(ref.type !== "http") {
 		delete ref.link;

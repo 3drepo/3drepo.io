@@ -25,7 +25,7 @@ export const LabelButton = styled(Button).attrs({
 })`
 	&& {
 		text-transform: none;
-		padding: 0px 13px;
+		padding: 0 13px;
 		min-height: 26px;
 		border-radius: 28px;
 		color: ${COLOR.LIGHT_GRAY};

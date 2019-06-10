@@ -110,3 +110,19 @@ export const importBCF = (teamspace, modelId, file, revision?) => {
 export const removeResource = (teamspace, modelId, issueId, resourceId ) => {
 	return api.delete(`${teamspace}/${modelId}/issues/${issueId}/resources`, {_id: resourceId});
 };
+
+/**
+ * Attach resources to issue
+ * @param teamspace
+ * @param modelId
+ * @param issueId
+ * @param names
+ * @param files
+ */
+export const attachFileResources = (teamspace, modelId, issueId, names: any[], files: any[] ) => {
+	const headers = { headers: { 'Content-Type': 'multipart/form-data' }};
+	const formData = new FormData();
+	files.forEach((f) => formData.append('file', f));
+	names.forEach((n) => formData.append('names', n));
+	return api.post(`${teamspace}/${modelId}/issues/${issueId}/resources`, formData, headers);
+};

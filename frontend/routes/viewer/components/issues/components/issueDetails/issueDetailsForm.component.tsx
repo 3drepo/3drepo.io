@@ -55,7 +55,7 @@ interface IProps {
 	onSavePin: (position) => void;
 	onChangePin: (pin) => void;
 	onRemoveResource: (resource) => void;
-	onAttachResources: () => void;
+	attachFileResources: () => void;
 	showDialog: (config: any) => void;
 	pinId?: string;
 	hasPin: boolean;
@@ -122,7 +122,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	public render() {
 		const { issue, myJob, permissions,
 				topicTypes, currentUser, onRemoveResource,
-				onAttachResources, showDialog} = this.props;
+				attachFileResources, showDialog} = this.props;
 		const newIssue = !issue._id;
 		const canEditBasicProperty = newIssue || canChangeBasicProperty(issue, myJob, permissions, currentUser);
 
@@ -222,7 +222,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				</Form>
 				<Resources showDialog={showDialog}
 					resources={issue.resources}
-					onAttachResources={onAttachResources}
+					onSaveFiles={attachFileResources}
 					onRemoveResource={onRemoveResource}
 				/>
 			</MuiPickersUtilsProvider>

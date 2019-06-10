@@ -22,7 +22,7 @@ import * as Yup from 'yup';
 import { AttachResourceFiles } from './attachResourceFiles.component';
 import { AttachResourceUrls } from './attachResourceUrls.component';
 import { NeutralActionButton, VisualSettingsButtonsContainer,
-		VisualSettingsDialogContent, DialogTabs, DialogTab
+		DialogTabs, DialogTab
 		} from '../../topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 import { Container } from './attachResourcesDialog.styles';
 
@@ -60,6 +60,7 @@ interface IProps {
 	handleClose: () => void;
 	updateSettings: (settings: any) => void;
 	visualSettings: any;
+	onSaveFiles: any;
 }
 
 interface IState {
@@ -79,6 +80,10 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 		this.props.handleClose();
 	}
 
+	public onSaveFiles = (files) => {
+		this.props.onSaveFiles(files);
+		this.props.handleClose();
+	}
 	public render() {
 		const {selectedTab} = this.state;
 		const {visualSettings, handleClose} =  this.props;
@@ -101,7 +106,7 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 					onSubmit={this.onSubmit}
 					>
 					<Form>
-						{selectedTab === 0 && <AttachResourceFiles />}
+						{selectedTab === 0 && <AttachResourceFiles onSaveFiles={this.onSaveFiles}/>}
 						{selectedTab === 1 && <AttachResourceUrls />}
 						<Buttons onClickCancel={handleClose} />
 					</Form>

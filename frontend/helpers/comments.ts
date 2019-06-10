@@ -19,6 +19,12 @@ import { getAPIUrl } from '../services/api';
 import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
 
+export const createAttachResourceComments = (owner: string,  resources = []) =>
+	resources.map((r) => prepareComment({owner, action: {property: 'resource', to: r.name}, sealed: true }));
+
+export const createRemoveResourceComment = (owner: string,  resource ) =>
+	prepareComment({owner, action: {property: 'resource', from: resource.name}, sealed: true });
+
 export const prepareComments = (comments = []) => {
 	comments = comments.filter((c) => !c.action || c.action.property !== 'extras');
 
@@ -46,6 +52,13 @@ const convertActionCommentToText = (comment, topicTypes) => {
 
 	if (comment) {
 		switch (comment.action.property) {
+			case 'resource' :
+				if (comment.action.to) {
+					text = 'Resource ' + comment.action.to + ' attached by ' + comment.owner;
+				} else {
+					text = 'Resource ' + comment.action.from + ' removed by ' + comment.owner;
+				}
+				break;
 			case 'associated_activity':
 				comment.action.propertyText = 'Associated Activity';
 				break;

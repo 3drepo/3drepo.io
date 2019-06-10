@@ -29,6 +29,6 @@ interface IState {
 
 export class AttachResourceUrls extends React.PureComponent<any, any> {
 	public render() {
-		return (<div>files</div>);
+		return (<div>Urls</div>);
 	}
 }

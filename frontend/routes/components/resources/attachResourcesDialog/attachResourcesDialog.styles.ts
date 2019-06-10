@@ -19,10 +19,10 @@ import { DialogContent } from '@material-ui/core';
 import styled from 'styled-components';
 
 export const Container = styled(DialogContent)`
-width: 335px;
-height: 280px;
-margin-bottom: 68px;
-&& {
-	padding-top: 0;
-}
+	width: 335px;
+	height: 280px;
+	margin-bottom: 68px;
+	&& {
+		padding-top: 0;
+	}
 `;
