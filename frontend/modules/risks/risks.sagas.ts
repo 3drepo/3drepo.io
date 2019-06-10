@@ -20,7 +20,7 @@ import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
-import { analyticsService, eventCategories, eventActions } from '../../services/analytics';
+import { analyticsService, EVENT_CATEGORIES, EVENT_ACTIONS } from '../../services/analytics';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
 import { getRiskPinColor, prepareRisk } from '../../helpers/risks';
 import { prepareComments, prepareComment } from '../../helpers/comments';
@@ -156,10 +156,7 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 
 		const { data: savedRisk } = yield API.saveRisk(teamspace, model, risk);
 
-		analyticsService.sendEvent({
-			eventCategory: eventCategories.risk,
-			eventAction: eventActions.create
-		});
+		analyticsService.sendEvent(EVENT_CATEGORIES.risk, EVENT_ACTIONS.create);
 
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(savedRisk, jobs);
@@ -177,10 +174,7 @@ export function* updateRisk({ teamspace, modelId, riskData }) {
 		const { _id, rev_id } = yield select(selectActiveRiskDetails);
 		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
 
-		analyticsService.sendEvent({
-			eventCategory: eventCategories.risk,
-			eventAction: eventActions.edit
-		});
+		analyticsService.sendEvent(EVENT_CATEGORIES.risk, EVENT_ACTIONS.edit);
 
 		toggleRiskPin(riskData, true);
 		const jobs = yield select(selectJobsList);

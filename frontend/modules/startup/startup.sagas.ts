@@ -29,6 +29,6 @@ export function* startup() {
 	}
 }
 
-export default function* RisksSaga() {
+export default function* StartupSaga() {
 	yield takeLatest(StartupTypes.STARTUP, startup);
 }

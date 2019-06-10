@@ -19,7 +19,7 @@ import * as React from 'react';
 import SimpleBar from 'simplebar-react';
 import * as queryString from 'query-string';
 import { isEmpty, isEqual } from 'lodash';
-import { analyticsService, eventCategories, eventActions } from '../../services/analytics';
+import { analyticsService, EVENT_CATEGORIES, EVENT_ACTIONS } from '../../services/analytics';
 
 import Add from '@material-ui/icons/Add';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -301,10 +301,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				this.createRouteHandler(`/viewer/${activeTeamspace}/${props.model}`)(event);
 			});
 
-			analyticsService.sendEvent({
-				eventCategory: eventCategories.model,
-				eventAction: eventActions.view
-			});
+			analyticsService.sendEvent(EVENT_CATEGORIES.model, EVENT_ACTIONS.view);
 		} else {
 			this.openUploadModelFileDialog(activeTeamspace, props)(event);
 		}

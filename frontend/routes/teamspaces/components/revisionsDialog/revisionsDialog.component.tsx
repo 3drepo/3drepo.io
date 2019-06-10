@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { analyticsService, eventCategories, eventActions } from '../../../../services/analytics';
+import { analyticsService, EVENT_CATEGORIES, EVENT_ACTIONS } from '../../../../services/analytics';
 import Button from '@material-ui/core/Button';
 import { DateTime } from './../../../components/dateTime/dateTime.component';
 import {
@@ -53,10 +53,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		handleClose();
 		history.push(`/viewer/${teamspace}/${modelId}/${tag || _id}`);
 
-		analyticsService.sendEvent({
-			eventCategory: eventCategories.model,
-			eventAction: eventActions.view
-		});
+		analyticsService.sendEvent(EVENT_CATEGORIES.model, EVENT_ACTIONS.view);
 	}
 
 	public render() {
