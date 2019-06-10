@@ -55,6 +55,7 @@ interface IProps {
 	activeNode: string;
 	isPending?: boolean;
 	isFedaration?: boolean;
+	selectNode?: (id) => boolean;
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
 	isolateSelectedNodes: () => void;
@@ -63,13 +64,15 @@ interface IProps {
 
 interface IState {
 	scrollToIndex: number;
+	isScrollToActive: boolean;
 }
 
 const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show tree menu" {...props} />;
 
 export class Tree extends React.PureComponent<IProps, IState> {
 	public state = {
-		scrollToIndex: undefined
+		scrollToIndex: undefined,
+		isScrollToActive: true
 	};
 
 	get menuActionsMap() {
@@ -139,8 +142,12 @@ export class Tree extends React.PureComponent<IProps, IState> {
 	public componentDidUpdate(prevProps: IProps) {
 		const { activeNode, nodesList } = this.props;
 		if (prevProps.activeNode !== activeNode && activeNode) {
-			const index = nodesList.findIndex(({ _id }) => _id === activeNode);
-			this.nodeListRef.current.scrollToItem(index, 'start');
+			if (this.state.isScrollToActive) {
+				const index = nodesList.findIndex(({ _id }) => _id === activeNode);
+				this.nodeListRef.current.scrollToItem(index, 'start');
+			} else {
+				this.setState({ isScrollToActive: true });
+			}
 		}
 	}
 
@@ -203,9 +210,15 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		</>
 	)
 
-	private scrollToTop = (index) => {
+	private handleScrollToIndex = (index) => {
 		const treeNode = this.props.nodesList[index];
 		this.nodeListRef.current.scrollToItem(treeNode.rootParentIndex, 'start');
+	}
+
+	private handleNodesClick = (nodeId) => {
+		this.setState({ isScrollToActive: false }, () => {
+			this.props.selectNode(nodeId);
+		});
 	}
 
 	private renderTreeNode = (props) => {
@@ -222,7 +235,8 @@ export class Tree extends React.PureComponent<IProps, IState> {
 				isSearchResult={treeNode.isSearchResult}
 				active={activeNode === treeNode._id}
 				expanded={expandedNodesMap[treeNode._id]}
-				onScrollToTop={this.scrollToTop}
+				onScrollToTop={this.handleScrollToIndex}
+				onClick={this.handleNodesClick}
 			/>
 		);
 	}
