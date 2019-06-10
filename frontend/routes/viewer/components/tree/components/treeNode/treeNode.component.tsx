@@ -52,7 +52,7 @@ interface IProps {
 	expandNode?: (id) => void;
 	selectNode?: (id) => void;
 	setTreeNodesVisibility?: (id, visibility) => void;
-	isolateNode: (id) => void;
+	isolateSelectedNodes: (id) => void;
 	onScrollToTop: (index) => void;
 	onClick: (id) => void;
 }
@@ -153,7 +153,7 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 			<SmallIconButton
 				Icon={IsolateIcon}
 				tooltip="Isolate"
-				onClick={this.isolateNode}
+				onClick={this.isolateSelectedNodes}
 			/>
 			<SmallIconButton
 				Icon={this.getVisibilityIcon(this.props.visibilityMap[this.node._id])}
@@ -209,9 +209,9 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 		return;
 	}
 
-	private isolateNode = (event) => {
+	private isolateSelectedNodes = (event) => {
 		event.stopPropagation();
-		this.props.isolateNode(this.node._id);
+		this.props.isolateSelectedNodes(this.node._id);
 	}
 
 	private toggleShowNode = (event) => {

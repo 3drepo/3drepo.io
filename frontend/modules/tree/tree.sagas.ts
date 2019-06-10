@@ -295,9 +295,9 @@ function* isolateNodes(nodesIds = [], colour?) {
 	}
 }
 
-function* isolateSelectedNodes() {
+function* isolateSelectedNodes({ nodeId = null }) {
 	const selectedNodesIds = yield select(selectSelectedNodesIds);
-	yield isolateNodes(selectedNodesIds);
+	yield isolateNodes(selectedNodesIds.length ? selectedNodesIds : [nodeId]);
 }
 
 function* isolateNodesBySharedIds({ objects = []}) {
