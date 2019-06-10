@@ -51,7 +51,7 @@ interface IProps {
 	collapseNode?: (id) => void;
 	expandNode?: (id) => void;
 	selectNode?: (id) => void;
-	setTreeNodesVisibility?: (id, visibility) => void;
+	setSelectedNodesVisibility?: (id, visibility) => void;
 	isolateSelectedNodes: (id) => void;
 	onScrollToTop: (index) => void;
 	onClick: (id) => void;
@@ -218,7 +218,7 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 		event.stopPropagation();
 		const visibility = this.props.visibilityMap[this.node._id] === VISIBILITY_STATES.INVISIBLE ?
 			VISIBILITY_STATES.VISIBLE :  VISIBILITY_STATES.INVISIBLE;
-		this.props.setTreeNodesVisibility([this.node._id], visibility);
+		this.props.setSelectedNodesVisibility(this.node._id, visibility);
 	}
 
 	private goToTop = (event) => {
