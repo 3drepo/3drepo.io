@@ -37,7 +37,6 @@ import {
 	getSelectDeepChildren,
 	selectSelectionMap,
 	selectVisibilityMap,
-	getSelectParents
 } from './tree.selectors';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -207,7 +206,6 @@ function* handleNodesClickBySharedIds({ objects = [] }) {
 
 function* getSelectedNodes() {
 	try {
-		// TODO: We need to remove this delay and check if calling of viewer method is necessary
 		yield call(delay, 100);
 		const objectsStatus = yield Viewer.getObjectsStatus();
 

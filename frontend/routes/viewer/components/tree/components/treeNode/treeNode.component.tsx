@@ -51,10 +51,10 @@ interface IProps {
 	collapseNode?: (id) => void;
 	expandNode?: (id) => void;
 	selectNode?: (id) => void;
-	deselectNode?: (id) => void;
 	setTreeNodesVisibility?: (id, visibility) => void;
 	isolateNode: (id) => void;
 	onScrollToTop: (index) => void;
+	onClick: (id) => void;
 }
 
 interface IState {
@@ -234,7 +234,7 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleNodeClick = () => {
-		this.props.selectNode(this.node._id);
+		this.props.onClick(this.node._id);
 	}
 
 	private renderName = () => (
