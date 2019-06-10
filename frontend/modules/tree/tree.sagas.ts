@@ -399,7 +399,7 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 			skipParents
 		});
 
-		unhighlightObjects(result.unhighlightedObjects.length);
+		unhighlightObjects(result.unhighlightedObjects);
 		const visibilityMap = yield select(selectVisibilityMap);
 
 		yield updateMeshesVisibility(result.meshesToUpdate, visibilityMap);
@@ -409,10 +409,11 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 	}
 }
 
-function* setSelectedNodesVisibility({ visibility }) {
+function* setSelectedNodesVisibility({ nodeId, visibility }) {
 	const selectedNodesIds = yield select(selectSelectedNodesIds);
-
-	yield put(TreeActions.setSelectedNodesVisibility(selectedNodesIds, visibility, true, true));
+	const hasSelectedNodes = !!selectedNodesIds.length;
+	const nodesIds = hasSelectedNodes ? selectedNodesIds : [nodeId];
+	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, hasSelectedNodes, hasSelectedNodes));
 }
 
 function* updateMeshesVisibility(meshes, nodesVisibilityMap) {
