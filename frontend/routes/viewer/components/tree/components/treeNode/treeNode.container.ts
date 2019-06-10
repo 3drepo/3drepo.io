@@ -38,7 +38,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	expandNode: TreeActions.expandNode,
 	collapseNode: TreeActions.collapseNode,
 	setTreeNodesVisibility: TreeActions.setTreeNodesVisibility,
-	isolateNode: TreeActions.isolateNode
+	isolateSelectedNodes: TreeActions.isolateSelectedNodes
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(TreeNode);

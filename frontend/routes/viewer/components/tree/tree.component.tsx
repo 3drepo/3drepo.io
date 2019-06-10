@@ -63,7 +63,6 @@ interface IProps {
 }
 
 interface IState {
-	scrollToIndex: number;
 	isScrollToActive: boolean;
 }
 
@@ -71,7 +70,6 @@ const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show tree menu" {.
 
 export class Tree extends React.PureComponent<IProps, IState> {
 	public state = {
-		scrollToIndex: undefined,
 		isScrollToActive: true
 	};
 
@@ -119,8 +117,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 							itemData={nodesList}
 							itemCount={size}
 							itemSize={TREE_ITEM_SIZE}
-							itemKey={(index, data) => data[index]._id}
-							scrollToIndex={this.state.scrollToIndex}
+							itemKey={this.getNodeId}
 						>
 							{this.renderTreeNode}
 						</List>
@@ -169,6 +166,8 @@ export class Tree extends React.PureComponent<IProps, IState> {
 			</ViewerPanel>
 		);
 	}
+
+	private getNodeId = (index, data) => data[index]._id;
 
 	private handleShowAllNodes = () => {
 		this.props.showAllNodes();

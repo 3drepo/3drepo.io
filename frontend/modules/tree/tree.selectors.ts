@@ -79,7 +79,7 @@ export const selectSelectionMap = createSelector(
 );
 
 export const selectSelectedNodesIds = createSelector(
-	selectTreeProccessing, (treeProcessingData) => treeProcessingData.selectedNodesIds
+	selectTreeProccessing, selectDataRevision, (treeProcessingData) => treeProcessingData.selectedNodesIds
 );
 
 export const selectDefaultVisibilityMap = createSelector(
@@ -93,7 +93,8 @@ export const selectVisibilityMap = createSelector(
 );
 
 export const selectInvisibleNodesIds = createSelector(
-	selectTreeProccessing, (treeProcessingData) => treeProcessingData.invisibleNodesIds
+	selectTreeProccessing, selectDataRevision,
+	(treeProcessingData) => treeProcessingData.invisibleNodesIds
 );
 
 export const selectNodesIndexesMap = createSelector(
