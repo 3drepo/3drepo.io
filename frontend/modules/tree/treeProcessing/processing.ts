@@ -87,6 +87,8 @@ export class Processing {
 
 		this.handleToDeselect(nodesWithChildren);
 
+		this.selectionMap = { ...this.selectionMap };
+
 		const unhighlightedObjects = this.getMeshesByNodes(nodesWithChildren);
 		return { unhighlightedObjects };
 	}
@@ -300,10 +302,14 @@ export class Processing {
 	}
 
 	private handleToDeselect = (toDeselect) => {
+		if (!toDeselect.length) {
+			return;
+		}
 		for (let index = 0, size = toDeselect.length; index < size; index++) {
 			const node = toDeselect[index];
 			this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
 		}
+
 		const clickedNode = toDeselect[0];
 		const parents = this.getParents(clickedNode);
 
