@@ -17,6 +17,7 @@
 
 "use strict";
 const DB = require("../handler/db");
+const Mailer = require("../mailer/mailer");
 const ExternalServices = require("../handler/externalServices");
 const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger.js").systemLogger;
@@ -38,6 +39,13 @@ function fetchFile(account, model, ext, fileName) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
 		return ExternalServices.getFile(account, collection, entry.type, entry.link).catch (() => {
+
+			systemLogger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
+			Mailer.sendFileMissingError({
+				account, model, collection,
+				refID: entry._id
+			});
+
 			// Temporary fall back - read from gridfs
 			const fullName = ext === ORIGINAL_FILE_REF_EXT ?
 				fileName :
@@ -59,6 +67,12 @@ function fetchFileStream(account, model, ext, fileName, imposeModelRoute = true)
 		return ExternalServices.getFileStream(account, collection, entry.type, entry.link).then((stream) => {
 			return {readStream: stream, size: entry.size };
 		}).catch (() => {
+			systemLogger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
+			Mailer.sendFileMissingError({
+				account, model, collection,
+				refID: entry._id
+			});
+
 			// Temporary fall back - read from gridfs
 			const fullName = ext === ORIGINAL_FILE_REF_EXT ?
 				fileName :
