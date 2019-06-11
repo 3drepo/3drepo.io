@@ -13,8 +13,6 @@ userName = sys.argv[3]
 password = sys.argv[4]
 localFolder = sys.argv[5]
 
-localFolder = re.sub("//", "/", localFolder + "/")
-
 if not os.path.exists(localFolder):
     print("LocalFolder " + localFolder + " does not exist.")
     sys.exit(0)
@@ -22,25 +20,26 @@ if not os.path.exists(localFolder):
 connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongoPort + "/"
 
 ##### Enable dry run to not commit to the database #####
-dryRun = True
+dryRun = False
 verbose = True
 ignoreDirs = ["toy_2019-05-31"]
 
 ##### Retrieve file list from local folder #####
 fileList = {}
+missing = []
 
-ignoreDirs = [localFolder + x for x in ignoreDirs]
-ignoreDirsFilter = "^(" + "|".join(ignoreDirs) + ")"
+ignoreDirs = [os.path.normpath(os.path.join(localFolder, x)) for x in ignoreDirs]
 
 for (dirPath, dirNames, fileNames) in os.walk(localFolder):
     for fileName in fileNames:
-        if not re.search(ignoreDirsFilter, dirPath):
-            fileList[re.sub("//", "/", dirPath + "/" + fileName)] = False
+        if not dirPath in ignoreDirs:
+            entry = os.path.normpath(os.path.join(dirPath, fileName))
+            fileList[entry] = False
 
 ##### Connect to the Database #####
 db = MongoClient(connString)
 for database in db.database_names():
-    if database != "admin" and database != "local":
+    if database != "admin" and database != "local" and database != "notifications":
         db = MongoClient(connString)[database]
         if verbose:
             print("--database:" + database)
@@ -54,21 +53,25 @@ for database in db.database_names():
                 colName = modelId + colPrefix + ".ref"
                 if verbose:
                     print("\t\t--stash: " + colName)
-                for entry in db[colName].find():
-                    fileStatus = fileList.get(localFolder + entry['link'])
+                for entry in db[colName].find({"type": "fs"}):
+                    filePath = os.path.normpath(os.path.join(localFolder, entry['link']))
+                    fileStatus = fileList.get(filePath)
                     if fileStatus == None:
-                        fileList[entry['link']] = database + "." + modelId + "." + colName
+                        missing.append(database + "." + modelId + "." + colName + ":" + entry["_id"] );
                     else:
-                        fileList[entry['link']] = True
+                        fileList[filePath] = True
 
 ##### Identify/delete missing and orphan files #####
+print("===== Missing Files =====");
+for entry in missing:
+    print("\t"+ entry);
+print("=========================");
+print("===== Orphaned Files =====");
 for filePath in fileList:
-    if isinstance(fileList[filePath], basestring):
-        if verbose:
-            print("Missing: " + fileList[filePath])
-    elif not fileList[filePath]:
+    if not fileList[filePath]:
         if dryRun:
-            print("Orphan: " + filePath)
+            print("\t"+ filePath);
         else:
             os.remove(filePath)
-            print("--Removed: " + filePath)
+            print("\t\t--Removed: " + filePath)
+print("==========================");
