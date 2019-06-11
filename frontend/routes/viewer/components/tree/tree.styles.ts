@@ -17,7 +17,13 @@
 
 import styled from 'styled-components';
 
+import { ViewerPanelContent as ViewerPanelContentComponent } from '../viewerPanel/viewerPanel.styles';
+
 export const TreeNodes = styled.ul`
 	margin: 0;
 	padding: 0;
+`;
+
+export const ViewerPanelContent = styled(ViewerPanelContentComponent)`
+	overflow: hidden;
 `;
