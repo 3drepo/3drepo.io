@@ -37,7 +37,13 @@ function fetchFile(account, model, ext, fileName) {
 		if(!entry) {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
-		return ExternalServices.getFile(account, collection, entry.type, entry.link);
+		return ExternalServices.getFile(account, collection, entry.type, entry.link).catch (() => {
+			// Temporary fall back - read from gridfs
+			const fullName = ext === ORIGINAL_FILE_REF_EXT ?
+				fileName :
+				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}`;
+			return ExternalServices.getFile(account, collection, "gridfs", fullName);
+		});
 	});
 }
 
@@ -52,6 +58,14 @@ function fetchFileStream(account, model, ext, fileName, imposeModelRoute = true)
 		}
 		return ExternalServices.getFileStream(account, collection, entry.type, entry.link).then((stream) => {
 			return {readStream: stream, size: entry.size };
+		}).catch (() => {
+			// Temporary fall back - read from gridfs
+			const fullName = ext === ORIGINAL_FILE_REF_EXT ?
+				fileName :
+				`/${account}/${model}/${fileName.split("/").length > 1 ? "revision/" : ""}${fileName}`;
+			return ExternalServices.getFileStream(account, collection, "gridfs", fullName).then((stream) => {
+				return {readStream: stream, size: entry.size };
+			});
 		});
 	});
 }
