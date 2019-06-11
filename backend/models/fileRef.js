@@ -43,7 +43,8 @@ function fetchFile(account, model, ext, fileName) {
 			systemLogger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
 			Mailer.sendFileMissingError({
 				account, model, collection,
-				refID: entry._id
+				refId: entry._id,
+				link: entry.link
 			});
 
 			// Temporary fall back - read from gridfs
@@ -70,7 +71,8 @@ function fetchFileStream(account, model, ext, fileName, imposeModelRoute = true)
 			systemLogger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
 			Mailer.sendFileMissingError({
 				account, model, collection,
-				refID: entry._id
+				refId: entry._id,
+				link: entry.link
 			});
 
 			// Temporary fall back - read from gridfs

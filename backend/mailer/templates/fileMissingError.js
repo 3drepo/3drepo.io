@@ -25,7 +25,9 @@ const html = data => `
 	<br>
 	collection: ${data.collection}
 	<br>
-	ref: ${data.refID}
+	ref: ${data.refId}
+	<br>
+	link: ${data.link}
 	<br>
 	domain: ${data.domain}
 `;
