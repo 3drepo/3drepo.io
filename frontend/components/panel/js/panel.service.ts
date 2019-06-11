@@ -64,17 +64,14 @@ export class PanelService {
 	public static $inject: string[] = [
 		'$filter',
 		'$state',
-		'EventService',
 		'ViewerService'
 	];
 
 	private panelCards: IPanelCards;
-	private templatepanelCards: IPanelCards;
 
 	constructor(
 		private $filter: any,
 		private $state: any,
-		private EventService: any,
 		private viewerService: any
 	) {
 		this.reset();

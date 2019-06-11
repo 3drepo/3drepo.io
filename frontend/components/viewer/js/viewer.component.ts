@@ -102,6 +102,7 @@ class ViewerController implements ng.IController {
 		}, true);
 
 		this.cancelEventWatcher = this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
+
 			const validEvent = event !== undefined && event.type !== undefined;
 			if (validEvent && this.ViewerService.initialised) {
 				this.ViewerService.handleEvent(event, this.account, this.model);

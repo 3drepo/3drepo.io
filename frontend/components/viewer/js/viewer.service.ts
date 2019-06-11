@@ -103,44 +103,43 @@ export class ViewerService {
 	// TODO: More EventService to be removed, but these functions broadcast
 	// across multiple watchers
 
-	public handleEvent(event, account, model) {
+	public handleEvent(event) {
 
 		this.initialised.promise.then(() => {
 
 			switch (event.type) {
+				case this.EventService.EVENT.VIEWER.CLICK_PIN:
+					if (this.newPinId === 'newPinId') {
+						this.removeUnsavedPin();
+						return;
+					}
+					this.viewer.clickPin(event.value.id);
+					break;
 
-			case this.EventService.EVENT.VIEWER.CLICK_PIN:
-				if (this.newPinId === 'newPinId') {
-					this.removeUnsavedPin();
-					return;
-				}
-				this.viewer.clickPin(event.value.id);
-				break;
+				case this.EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR:
+					this.viewer.changePinColours(
+						event.value.id,
+						event.value.colours
+					);
+					break;
+				case this.EventService.EVENT.VIEWER.SET_CAMERA:
+					this.viewer.setCamera(
+						event.value.position,
+						event.value.view_dir,
+						event.value.up,
+						event.value.look_at,
+						event.value.animate !== undefined ? event.value.animate : true,
+						event.value.rollerCoasterMode,
+						event.value.account,
+						event.value.model
+					);
+					break;
 
-			case this.EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR:
-				this.viewer.changePinColours(
-					event.value.id,
-					event.value.colours
-				);
-				break;
-			case this.EventService.EVENT.VIEWER.SET_CAMERA:
-				this.viewer.setCamera(
-					event.value.position,
-					event.value.view_dir,
-					event.value.up,
-					event.value.look_at,
-					event.value.animate !== undefined ? event.value.animate : true,
-					event.value.rollerCoasterMode,
-					event.value.account,
-					event.value.model
-				);
-				break;
-
-			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED_PIN_MODE:
-				if (this.pin.pinDropMode) {
-					this.removeUnsavedPin();
-				}
-				break;
+				case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED_PIN_MODE:
+					if (this.pin.pinDropMode) {
+						this.removeUnsavedPin();
+					}
+					break;
 
 			}
 
@@ -170,6 +169,7 @@ export class ViewerService {
 	}
 
 	public removeUnsavedPin() {
+		console.log('Remove unsaved pin');
 		this.removePin({id: this.newPinId });
 		this.setPin({data: null});
 	}
@@ -214,6 +214,7 @@ export class ViewerService {
 	}
 
 	public removePin(params) {
+		console.log('removePin', params);
 		this.initialised.promise.then(() => {
 			this.viewer.removePin(
 				params.id

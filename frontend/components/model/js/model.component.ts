@@ -41,7 +41,7 @@ class ModelController implements ng.IController {
 		'$location',
 		'$mdDialog',
 
-		'EventService',
+		'RevisionsService',
 		'StateManager',
 		'PanelService',
 		'ViewerService'
@@ -72,7 +72,7 @@ class ModelController implements ng.IController {
 		private $location,
 		private $mdDialog,
 
-		private EventService,
+		private RevisionsService,
 		private StateManager,
 		private PanelService,
 		private ViewerService
@@ -167,14 +167,6 @@ class ModelController implements ng.IController {
 				angular.element(() => {
 					this.setupModelInfo();
 				});
-			}
-		});
-
-		this.$scope.$watch(this.EventService.currentEvent, (event) => {
-			this.event = event;
-
-			if (event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-				this.pointerEvents = event.value.on ? 'none' : 'inherit';
 			}
 		});
 	}
