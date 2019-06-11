@@ -439,9 +439,9 @@ router.delete("/issues/:issueId/comments", middlewares.issue.canComment, deleteC
 
 router.post("/revision/:rid/issues.json", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
 
-router.post("/issues/:issueId/resources",middlewares.issue.canComment, attachResourcesToIssue, middlewares.chat.onResourcesAttached, responseCodes.onSuccessfulOperation);
+router.post("/issues/:issueId/resources",middlewares.issue.canComment, attachResourcesToIssue, middlewares.chat.onResourcesCreated, responseCodes.onSuccessfulOperation);
 
-router.delete("/issues/:issueId/resources",middlewares.issue.canComment, detachResourcefromIssue, middlewares.chat.onResourceDetached, responseCodes.onSuccessfulOperation);
+router.delete("/issues/:issueId/resources",middlewares.issue.canComment, detachResourcefromIssue, middlewares.chat.onResourceDeleted, responseCodes.onSuccessfulOperation);
 
 function storeIssue(req, res, next) {
 	const data = req.body;

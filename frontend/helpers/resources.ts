@@ -21,7 +21,7 @@ import * as API from '../services/api';
 
 const extensionRe = /\.(\w+)$/;
 
-const prepareResource = (teamspace, modelId, resource) => {
+export const prepareResource = (teamspace, modelId, resource) => {
 	if (!resource.link) {
 		resource.link = API.getAPIUrl(`${teamspace}/${modelId}/resources/${resource._id}`);
 		resource.type = (resource.name.match(extensionRe) || ['', ''])[1].toLowerCase();

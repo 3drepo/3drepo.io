@@ -16,7 +16,7 @@
  */
 
 import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
+import { differenceBy, isEmpty, omit, pick, map, groupBy } from 'lodash';
 
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
@@ -43,7 +43,7 @@ import {
 import { IssuesTypes, IssuesActions } from './issues.redux';
 import { NEW_PIN_ID } from '../../constants/viewer';
 import { selectTopicTypes, selectCurrentModel } from '../model';
-import { prepareResources } from '../../helpers/resources';
+import { prepareResources, prepareResource } from '../../helpers/resources';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -554,26 +554,58 @@ const onCreateEvent = (createdIssue) => {
 	dispatch(IssuesActions.saveIssueSuccess(prepareIssue(createdIssue[0], jobs)));
 };
 
+const onResourcesCreated = (resources) => {
+	resources = resources.filter((r) => r.issueIds );
+	if (!resources.length) {
+		return;
+	}
+
+	const teamspace = selectCurrentTeamspace(getState());
+	const model = selectCurrentModel(getState());
+	const issueId =  resources[0].issueIds[0];
+	dispatch(IssuesActions.attachResourcesSuccess(prepareResources(teamspace, model, resources), issueId));
+};
+
+const onResourceDeleted = (resource) => {
+	if (!resource.issueIds) {
+		return;
+	}
+
+	dispatch(IssuesActions.removeResourceSuccess(resource, resource.issueIds[0]));
+};
+
 const getIssuesChannel = (teamspace, modelId) => {
 	const ChatService = getAngularService('ChatService') as any;
 	return ChatService.getChannel(teamspace, modelId).issues;
 };
 
+const getResourcesChannel = (teamspace, modelId) => {
+	const ChatService = getAngularService('ChatService') as any;
+	return ChatService.getChannel(teamspace, modelId).resources;
+};
+
 export function* subscribeOnIssueChanges({ teamspace, modelId }) {
-	const issuesNotifications = getIssuesChannel(teamspace, modelId);
-	issuesNotifications.subscribeToUpdated(onUpdateEvent, this);
-	issuesNotifications.subscribeToCreated(onCreateEvent, this);
+	const issuesChatEvents = getIssuesChannel(teamspace, modelId);
+	issuesChatEvents.subscribeToUpdated(onUpdateEvent, this);
+	issuesChatEvents.subscribeToCreated(onCreateEvent, this);
+	const resourcesChatEvents = getResourcesChannel(teamspace, modelId);
+	resourcesChatEvents.subscribeToCreated(onResourcesCreated, this);
+	resourcesChatEvents.subscribeToDeleted(onResourceDeleted, this);
 }
 
 export function* unsubscribeOnIssueChanges({ teamspace, modelId }) {
-	const issuesNotifications = getIssuesChannel(teamspace, modelId);
-	issuesNotifications.unsubscribeFromUpdated(onUpdateEvent);
-	issuesNotifications.unsubscribeFromCreated(onCreateEvent);
+	const issuesChatEvents = getIssuesChannel(teamspace, modelId);
+	issuesChatEvents.unsubscribeFromUpdated(onUpdateEvent);
+	issuesChatEvents.unsubscribeFromCreated(onCreateEvent);
+
+	const resourcesChatEvents = getResourcesChannel(teamspace, modelId);
+	resourcesChatEvents.unsubscribeFromCreated(onResourcesCreated);
+	resourcesChatEvents.unsubscribeFromDeleted(onResourceDeleted);
 }
 
 const getCommentsChannel = (teamspace, modelId, issueId) => {
-	const issuesNotifications = getIssuesChannel(teamspace, modelId);
-	return issuesNotifications.getCommentsChatEvents(issueId);
+	const issuesCommentsChatevents = getIssuesChannel(teamspace, modelId);
+	return issuesCommentsChatevents.getCommentsChatEvents(issueId);
 };
 
 const onUpdateCommentEvent = (updatedComment) => {
@@ -593,17 +625,17 @@ const onDeleteCommentEvent = (deletedComment) => {
 };
 
 export function* subscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
-	const commentsNotifications = getCommentsChannel(teamspace, modelId, issueId);
-	commentsNotifications.subscribeToCreated(onCreateCommentEvent, this);
-	commentsNotifications.subscribeToUpdated(onUpdateCommentEvent, this);
-	commentsNotifications.subscribeToDeleted(onDeleteCommentEvent, this);
+	const commentsChatEvents = getCommentsChannel(teamspace, modelId, issueId);
+	commentsChatEvents.subscribeToCreated(onCreateCommentEvent, this);
+	commentsChatEvents.subscribeToUpdated(onUpdateCommentEvent, this);
+	commentsChatEvents.subscribeToDeleted(onDeleteCommentEvent, this);
 }
 
 export function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
-	const commentsNotifications = getCommentsChannel(teamspace, modelId, issueId);
-	commentsNotifications.unsubscribeFromCreated(onCreateCommentEvent, this);
-	commentsNotifications.unsubscribeFromUpdated(onUpdateCommentEvent, this);
-	commentsNotifications.unsubscribeFromDeleted(onDeleteCommentEvent, this);
+	const commentsChatEvents = getCommentsChannel(teamspace, modelId, issueId);
+	commentsChatEvents.unsubscribeFromCreated(onCreateCommentEvent, this);
+	commentsChatEvents.unsubscribeFromUpdated(onUpdateCommentEvent, this);
+	commentsChatEvents.unsubscribeFromDeleted(onDeleteCommentEvent, this);
 }
 
 export function* setNewIssue() {

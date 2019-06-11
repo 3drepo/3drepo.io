@@ -42,7 +42,7 @@ function insertEventQueue(event, emitter, account, model, extraKeys, data) {
 	return Queue.insertEventMessage(msg);
 }
 
-// Notifications
+// Notifications chat events
 function upsertedNotification(session, notification) {
 	const msg = {
 		event : notification.username + "::notificationUpserted",
@@ -64,27 +64,16 @@ const deletedNotification = function(session, notification) {
 	return Queue.insertEventMessage(msg);
 };
 
-function resourcesAttached(session, user, refs) {
-	const msg = {
-		event : user + "::resourcesAttached",
-		channel : user,
-		emitter : session,
-		data : refs
-	};
-	return Queue.insertEventMessage(msg);
+// Resources chat events
+function resourcesCreated(emitter, account, model, data) {
+	return insertEventQueue("resource" + eventTypes.CREATED, emitter, account, model, null, data);
 }
 
-function resourceDetached(session, user, ref) {
-	const msg = {
-		event : user + "::resourceDetached",
-		channel : user,
-		emitter : session,
-		data : ref
-	};
-	return Queue.insertEventMessage(msg);
+function resourceDeleted(emitter, account, model, data) {
+	return insertEventQueue("resource" + eventTypes.DELETED, emitter, account, model, null, data);
 }
 
-// Issues notifications
+// Issues chat events
 function newIssues(emitter, account, model, data) {
 	return insertEventQueue("issue" + eventTypes.CREATED, emitter, account, model, null, data);
 }
@@ -115,7 +104,7 @@ function newModel(emitter, account, data) {
 	return insertEventQueue("model" + eventTypes.CREATED, emitter, account, null, null, data);
 }
 
-// Groups notifications
+// Groups chat events
 function newGroups(emitter, account, model, data) {
 	return insertEventQueue("group" + eventTypes.CREATED, emitter, account, model, null, data);
 }
@@ -128,7 +117,7 @@ function groupsDeleted(emitter, account, model, ids) {
 	return insertEventQueue("group" + eventTypes.DELETED, emitter, account, model, null, ids);
 }
 
-// Risks notifications
+// Risks chat events
 function newRisks(emitter, account, model, data) {
 	return insertEventQueue("risk" + eventTypes.CREATED, emitter, account, model, null, data);
 }
@@ -175,6 +164,6 @@ module.exports = {
 	eventTypes,
 	upsertedNotification,
 	deletedNotification,
-	resourcesAttached,
-	resourceDetached
+	resourcesCreated,
+	resourceDeleted
 };

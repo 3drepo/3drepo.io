@@ -53,18 +53,21 @@ module.exports = {
 		next();
 	},
 
-	onResourcesAttached: function(req, res, next) {
+	onResourcesCreated: function(req, res, next) {
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
+		const {account, model} = req.params;
 		const resource = req.dataModel;
 
-		chatEvent.resourceDetached(sessionId, resource);
+		chatEvent.resourcesCreated(sessionId, account, model, resource);
 		next();
 	},
 
-	onResourceDetached: function(req, res, next) {
+	onResourceDeleted: function(req, res, next) {
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
+		const {account, model} = req.params;
 		const resource = req.dataModel;
-		chatEvent.resourceDetached(sessionId, resource);
+
+		chatEvent.resourceDeleted(sessionId, account, model, resource);
 		next();
 	}
 };
