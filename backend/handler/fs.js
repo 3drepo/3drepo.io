@@ -35,7 +35,9 @@ class FSHandler {
 
 	getFileStream(key) {
 		try {
-			return fs.createReadStream(this.getFullPath(key));
+			return fs.existsSync(this.getFullPath(key)) ?
+				Promise.resolve(fs.createReadStream(this.getFullPath(key))) :
+				Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		} catch {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
@@ -43,7 +45,7 @@ class FSHandler {
 
 	getFile(key) {
 		try {
-			return fs.readFileSync(this.getFullPath(key));
+			return Promise.resolve(fs.readFileSync(this.getFullPath(key)));
 		} catch {
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
