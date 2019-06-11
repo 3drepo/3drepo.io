@@ -20,10 +20,11 @@ import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
 
 export const createAttachResourceComments = (owner: string,  resources = []) =>
-	resources.map((r) => prepareComment({owner, action: {property: 'resource', to: r.name}, sealed: true }));
+	resources.map((r, i) =>
+		prepareComment({_id: +(new Date()), guid: i, owner, action: {property: 'resource', to: r.name}, sealed: true }));
 
-export const createRemoveResourceComment = (owner: string,  resource ) =>
-	prepareComment({owner, action: {property: 'resource', from: resource.name}, sealed: true });
+export const createRemoveResourceComment = (owner: string, {name} ) =>
+	prepareComment({_id: +(new Date()), guid: 0, owner, action: {property: 'resource', from: name}, sealed: true });
 
 export const prepareComments = (comments = []) => {
 	comments = comments.filter((c) => !c.action || c.action.property !== 'extras');

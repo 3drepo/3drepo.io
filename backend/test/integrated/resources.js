@@ -40,8 +40,6 @@ describe("Resources ", function () {
 	const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
 	const agents = {};
 
-
-
 	const createIssue = IssueHelper.createIssue(account, model);
 	const attachDocs = IssueHelper.attachDocument(account, model);
 	const getIssue = IssueHelper.getIssue(account, model);

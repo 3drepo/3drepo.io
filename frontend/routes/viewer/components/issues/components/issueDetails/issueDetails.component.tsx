@@ -60,6 +60,7 @@ interface IProps {
 	setCameraOnViewpoint: (teamspace, modelId, view) => void;
 	onRemoveResource: (resource) => void;
 	attachFileResources: (files) => void;
+	attachLinkResources: (links) => void;
 	showDialog: (config: any) => void;
 }
 
@@ -154,7 +155,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderDetailsForm = () => {
-		const {issue, onRemoveResource, showDialog, topicTypes, currentUser, myJob, attachFileResources} = this.props;
+		const {issue, onRemoveResource, showDialog, topicTypes,
+				currentUser, myJob, attachFileResources, attachLinkResources} = this.props;
 
 		return (
 			<IssueDetailsForm
@@ -172,6 +174,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				hasPin={issue.position && issue.position.length}
 				onRemoveResource={onRemoveResource}
 				attachFileResources={attachFileResources}
+				attachLinkResources={attachLinkResources}
 				showDialog={showDialog}
 			/>
 		);

@@ -59,6 +59,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	unsubscribeOnIssueCommentsChanges: IssuesActions.unsubscribeOnIssueCommentsChanges,
 	updateNewIssue: IssuesActions.updateNewIssue,
 	attachFileResources: IssuesActions.attachFileResources,
+	attachLinkResources: IssuesActions.attachLinkResources,
 	showDialog:  DialogActions.showDialog,
 	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
 }, dispatch);

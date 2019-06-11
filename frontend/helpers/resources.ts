@@ -36,5 +36,5 @@ const prepareResource = (teamspace, modelId, resource) => {
 
 export const prepareResources = (teamspace, modelId, resources = []) => {
 	const preparedResources = resources.map((resource) => prepareResource(teamspace, modelId, resource));
-	return sortByDate( preparedResources, { order: 'asc' });
+	return sortByDate( preparedResources, { order: 'desc' });
 };

@@ -18,7 +18,6 @@
 import * as React from 'react';
 import { RemoveIcon, IconButton } from './resources.styles';
 import { LabelButton } from '../../viewer/components/labelButton/labelButton.styles';
-import { VisualSettingsDialog } from '../topMenu/components/visualSettingsDialog/visualSettingsDialog.component';
 import { AttachResourcesDialog } from './attachResourcesDialog/attachResourcesDialog.component';
 
 interface IResource {
@@ -33,6 +32,7 @@ interface IProps {
 	resources: IResource[];
 	onRemoveResource: (IResource) => void;
 	onSaveFiles: (files) => void;
+	onSaveLinks: (links) => void;
 	showDialog: (config: any) => void;
 }
 
@@ -63,12 +63,13 @@ export class Resources extends React.PureComponent<IProps, IState> {
 	}
 
 	public onClickAttach = () => {
-		const {onSaveFiles} = this.props;
+		const {onSaveFiles, onSaveLinks} = this.props;
 		this.props.showDialog({
 				title: 'Attach Resources',
 				template: AttachResourcesDialog,
 				data: {
-					onSaveFiles
+					onSaveFiles,
+					onSaveLinks
 				}
 		});
 	}

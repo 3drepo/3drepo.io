@@ -691,6 +691,24 @@ export function* attachFileResources({ files }) {
 	}
 }
 
+export function* attachLinkResources({ links }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const issueId = (yield select(selectActiveIssueDetails))._id;
+		const model  = yield select(selectCurrentModel);
+		const names =  links.map((f) => f.name);
+		const urls = links.map((f) => f.link);
+		const username = (yield select(selectCurrentUser)).username;
+
+		const {data} = yield API.attachLinkResources(teamspace, model, issueId, names, urls);
+		const resources = prepareResources(teamspace, model, data);
+		yield put(IssuesActions.attachResourcesSuccess(resources, issueId));
+		yield put(IssuesActions.createCommentsSuccess(createAttachResourceComments(username, data), issueId));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('remove', 'resource', error));
+	}
+}
+
 export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
 	yield takeLatest(IssuesTypes.FETCH_ISSUE, fetchIssue);
@@ -718,4 +736,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.TOGGLE_SUBMODELS_ISSUES, toggleSubmodelsIssues);
 	yield takeLatest(IssuesTypes.REMOVE_RESOURCE, removeResource);
 	yield takeLatest(IssuesTypes.ATTACH_FILE_RESOURCES, attachFileResources);
+	yield takeLatest(IssuesTypes.ATTACH_LINK_RESOURCES, attachLinkResources);
 }

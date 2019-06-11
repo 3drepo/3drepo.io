@@ -126,3 +126,15 @@ export const attachFileResources = (teamspace, modelId, issueId, names: any[], f
 	names.forEach((n) => formData.append('names', n));
 	return api.post(`${teamspace}/${modelId}/issues/${issueId}/resources`, formData, headers);
 };
+
+/**
+ * Attach resources to issue
+ * @param teamspace
+ * @param modelId
+ * @param issueId
+ * @param names
+ * @param urls
+ */
+export const attachLinkResources = (teamspace, modelId, issueId, names: any[], urls: any[] ) => {
+	return api.post(`${teamspace}/${modelId}/issues/${issueId}/resources`, {names, urls});
+};

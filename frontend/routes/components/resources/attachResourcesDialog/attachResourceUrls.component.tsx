@@ -15,20 +15,67 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import * as React from 'react';
+import { TextField, Button } from '@material-ui/core';
+import { Formik, Form, FieldArray, Field } from 'formik';
 
 interface IProps {
-	handleResolve: () => void;
-	handleClose: () => void;
-	updateSettings: (settings: any) => void;
-	visualSettings: any;
+	onSaveLinks: (links) => void;
+}
+
+interface IResourceUrl {
+	name: string;
+	url: string;
 }
 
 interface IState {
-	selectedTab: number;
+	urls: IResourceUrl[];
 }
 
-export class AttachResourceUrls extends React.PureComponent<any, any> {
+const EditableLinkResource = ({name, url}) =>
+	(<div><span> Name:<TextField value={name}/></span><span> Link:<TextField value={url}/></span></div>);
+
+export class AttachResourceUrls extends React.PureComponent<IProps, IState> {
+
+	public onSubmit = (values) => {
+		this.props.onSaveLinks(values.links);
+	}
+
 	public render() {
-		return (<div>Urls</div>);
+		return (
+			<div>
+				<h1>Links List</h1>
+				<Formik
+				initialValues={{ links: [] }}
+				onSubmit={this.onSubmit}
+				render={({ values }) => (
+				<Form>
+					<FieldArray
+					name="links"
+					render={(arrayHelpers) => (
+						<div>
+						{(values.links && values.links.length > 0) && (
+							values.links.map((link, index) => (
+							<div key={index}>
+								<Field name={`links.${index}.name`} />
+								<Field name={`links.${index}.link`} />
+								<button
+									type="button"
+									onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
+								>x</button>
+							</div>
+							))
+						)}
+						<div>
+							<button type="button" onClick={() => arrayHelpers.push({name: '', link: ''})}>Add link</button>
+							<button type="submit">Submit</button>
+						</div>
+						</div>
+					)}
+					/>
+				</Form>
+				)}
+				/>
+			</div>
+		);
 	}
 }

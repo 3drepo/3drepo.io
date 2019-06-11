@@ -41,17 +41,6 @@ const Buttons = (props) => {
 			>
 				Cancel
 			</NeutralActionButton>
-			<Field render={ ({ form }) => (
-					<Button
-						color="secondary"
-						variant="raised"
-						type="submit"
-						disabled={!form.isValid || form.isValidating}
-						>
-						Save
-					</Button>
-			)} />
-
 		</VisualSettingsButtonsContainer>);
 };
 
@@ -61,6 +50,7 @@ interface IProps {
 	updateSettings: (settings: any) => void;
 	visualSettings: any;
 	onSaveFiles: any;
+	onSaveLinks: any;
 }
 
 interface IState {
@@ -84,6 +74,12 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 		this.props.onSaveFiles(files);
 		this.props.handleClose();
 	}
+
+	public onSaveLinks = (links) => {
+		this.props.onSaveLinks(links);
+		this.props.handleClose();
+	}
+
 	public render() {
 		const {selectedTab} = this.state;
 		const {visualSettings, handleClose} =  this.props;
@@ -99,18 +95,10 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 					<DialogTab label="Files" />
 					<DialogTab label="Links" />
 				</DialogTabs>
-				<Formik
-					validationSchema={SettingsSchema}
-					initialValues={visualSettings}
-					enableReinitialize={true}
-					onSubmit={this.onSubmit}
-					>
-					<Form>
-						{selectedTab === 0 && <AttachResourceFiles onSaveFiles={this.onSaveFiles}/>}
-						{selectedTab === 1 && <AttachResourceUrls />}
-						<Buttons onClickCancel={handleClose} />
-					</Form>
-				</Formik>
+
+				{selectedTab === 0 && <AttachResourceFiles onSaveFiles={this.onSaveFiles}/>}
+				{selectedTab === 1 && <AttachResourceUrls onSaveLinks={this.onSaveLinks}/>}
+				<Buttons onClickCancel={handleClose} />
 			</Container>
 			);
 	}

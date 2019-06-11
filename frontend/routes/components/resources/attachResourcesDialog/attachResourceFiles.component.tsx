@@ -47,7 +47,7 @@ export class AttachResourceFiles extends React.PureComponent<IProps, IState> {
 			<div>
 				<Dropzone height="32" onDrop={this.onDrop}>click or drop to add files</Dropzone>
 				{this.state.files.map((f, i) => (<div key={i}>{f.name} <button onClick={this.onRemoveFile(i)}>x</button> </div>))}
-				<button onClick={this.onSavefiles}>Save</button>
+				<button type="button" onClick={this.onSavefiles}>Save</button>
 			</div>
 		);
 	}

@@ -59,6 +59,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	removeResource: ['resource'],
 	removeResourceSuccess: ['resource', 'issueId'],
 	attachFileResources: ['files'],
+	attachLinkResources: ['links'],
 	attachResourcesSuccess: ['resources', 'issueId'],
 	resetComponentState: []
 }, { prefix: 'ISSUES_' });
