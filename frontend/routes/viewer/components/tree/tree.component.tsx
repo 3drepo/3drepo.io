@@ -26,7 +26,6 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import {
 	IconWrapper,
 	MenuList,
@@ -38,8 +37,8 @@ import { TREE_ACTIONS_MENU, TREE_ACTIONS_ITEMS, TREE_ITEM_SIZE } from '../../../
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { EmptyStateInfo } from '../views/views.styles';
-import { TreeNodes } from './tree.styles';
 import TreeNode from './components/treeNode/treeNode.container';
+import { TreeNodes, ViewerPanelContent } from './tree.styles';
 
 interface IProps {
 	className: string;
