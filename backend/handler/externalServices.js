@@ -27,7 +27,7 @@ const ExternalServices = {};
 ExternalServices.getFileStream = (account, collection, type, key) => {
 	switch(type) {
 		case "fs" :
-			return Promise.resolve(FSHandler.getFileStream(key));
+			return FSHandler.getFileStream(key);
 		case "s3" :
 			return Promise.resolve(S3Handler.getFileStream(key));
 		case "gridfs" :
