@@ -1,6 +1,8 @@
 import sys, os
+import gridfs
 from pymongo import MongoClient
 import re
+import StringIO
 
 if len(sys.argv) <= 5:
     print("Not enough arguments.")
@@ -20,7 +22,7 @@ if not os.path.exists(localFolder):
 connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongoPort + "/"
 
 ##### Enable dry run to not commit to the database #####
-dryRun = False
+dryRun = True
 verbose = True
 ignoreDirs = ["toy_2019-05-31"]
 
@@ -53,15 +55,26 @@ for database in db.database_names():
                 colName = modelId + colPrefix + ".ref"
                 if verbose:
                     print("\t\t--stash: " + colName)
-                for entry in db[colName].find({"type": "fs"}):
-                    filePath = os.path.normpath(os.path.join(localFolder, entry['link']))
+                for refEntry in db[colName].find({"type": "fs"}):
+                    filePath = os.path.normpath(os.path.join(localFolder, refEntry['link']))
                     fileStatus = fileList.get(filePath)
                     if fileStatus == None:
-                        missing.append(database + "." + modelId + "." + colName + ":" + entry["_id"] );
+                        refInfo = database + "." + modelId + "." + colName + ":" + refEntry["_id"]
+                        if dryRun:
+                            missing.append(refInfo);
+                        else:
+##### Upload missing files to FS and insert BSON #####
+                            fs = gridfs.GridFS(db, modelId + colPrefix)
+                            for gridFSEntry in fs.find({"filename":{"$not": re.compile("unityAssets.json$")}}):
+                                if not os.path.exists(os.path.dirname(filePath)):
+                                    os.makedirs(os.path.dirname(filePath))
+                                file = open(filePath,'wb')
+                                file.write(StringIO.StringIO(gridFSEntry.read()).getvalue())
+                                file.close()
+                                missing.append("\t\t--Restored: " + refInfo + " to " + filePath);
                     else:
                         fileList[filePath] = True
 
-##### Identify/delete missing and orphan files #####
 print("===== Missing Files =====");
 for entry in missing:
     print("\t"+ entry);
@@ -72,6 +85,7 @@ for filePath in fileList:
         if dryRun:
             print("\t"+ filePath);
         else:
+##### Delete orphan files #####
             os.remove(filePath)
             print("\t\t--Removed: " + filePath)
 print("==========================");
