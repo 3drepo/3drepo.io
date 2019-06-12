@@ -19,6 +19,7 @@ import bimSaga from './bim/bim.sagas';
 import starredMetaSaga from './starredMeta/starredMeta.sagas';
 import measureSaga from './measure/measure.sagas';
 import issuesSaga from './issues/issues.sagas';
+import compareSaga from './compare/compare.sagas';
 // <-- IMPORT MODULE SAGA -->
 
 export default function* rootSaga() {
@@ -42,6 +43,7 @@ export default function* rootSaga() {
 		fork(bimSaga),
 		fork(starredMetaSaga),
 		fork(measureSaga),
-		fork(issuesSaga)// <-- INJECT MODULE SAGA -->
+		fork(issuesSaga),
+		fork(compareSaga)// <-- INJECT MODULE SAGA -->
 	]);
 }

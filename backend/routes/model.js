@@ -330,6 +330,27 @@ router.get("/:model/revision/master/head/searchtree.json", middlewares.hasReadAc
 router.get("/:model/revision/:rev/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
 
 /**
+ * @api {get} /:teamspace/:model/revision/master/head/subModelRevisions Get revision info from sub models
+ * @apiName getSubRevisionModels
+ * @apiGroup Model
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model to get properties for.
+ */
+router.get("/:model/revision/master/head/subModelRevisions", middlewares.hasReadAccessToModel, getSubModelRevisions);
+
+/**
+ * @api {get} /:teamspace/:model/revision/master/head/subModelRevisions Get revision info from sub models
+ * @apiName getSubModelRevisions
+ * @apiGroup Model
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model to get properties for.
+ * @apiParam {String} rev	Revision to use.
+ */
+router.get("/:model/revision/:revId/subModelRevisions", middlewares.hasReadAccessToModel, getSubModelRevisions);
+
+/**
  * @api {delete} /:teamspace/:model Delete Model.
  * @apiName deleteModel
  * @apiGroup Model
@@ -337,7 +358,6 @@ router.get("/:model/revision/:rev/searchtree.json", middlewares.hasReadAccessToM
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to delete.
  */
-
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 
 /**
@@ -869,6 +889,21 @@ function getJsonMpc(req, res, next) {
 
 	JSONAssets.getSuperMeshMapping(account, model, id).then(file => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function getSubModelRevisions(req, res, next) {
+
+	const model = req.params.model;
+	const account = req.params.account;
+	const revId = req.params.revId;
+	const branch = revId ? undefined : "master";
+	const username = req.session.user.username;
+
+	ModelHelpers.getSubModelRevisions(account, model, username, branch, revId).then((result) => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

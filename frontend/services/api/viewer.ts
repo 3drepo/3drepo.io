@@ -16,7 +16,7 @@
  */
 
 import api from '.';
-import * as dayjs from 'dayjs';
+import { formatDate } from '../formatting/formatDate';
 
 /**
  * Download JSON file
@@ -25,7 +25,7 @@ import * as dayjs from 'dayjs';
  * @param endpoint
  */
 export const downloadJSON = (panelName, modelName, endpoint) => {
-	const timestamp = dayjs(Date.now()).format('DD_MM_YYYY_HH_mm_ss');
+	const timestamp = formatDate(Date.now(), 'DD_MM_YYYY_HH_mm_ss');
 
 	return api.get(endpoint).then((res) => {
 		const content = JSON.stringify(res.data, null, 2);
@@ -47,4 +47,13 @@ export const downloadJSON = (panelName, modelName, endpoint) => {
  */
 export const editHelicopterSpeed = (teamspace, modelId, speed) => {
 	return api.put(`${teamspace}/${modelId}/settings/heliSpeed`, {heliSpeed: speed});
+};
+
+/**
+ * Get helicopter speed
+ * @param teamspace
+ * @param modelId
+ */
+export const getHelicopterSpeed = (teamspace, modelId) => {
+	return api.get(`${teamspace}/${modelId}/settings/heliSpeed`);
 };

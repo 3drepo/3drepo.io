@@ -329,8 +329,7 @@ describe("Federated Model", function () {
 				}]
 			})
 			.expect(404, function(err ,res) {
-
-				expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.value);
+				expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
 				done(err);
 
 			});

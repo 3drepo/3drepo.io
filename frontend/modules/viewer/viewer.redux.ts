@@ -17,7 +17,7 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { cloneDeep } from 'lodash';
-import { DEFAULT_SETTINGS, VIEWER_NAV_MODES, VIEWER_CLIP_MODES, VIEWER_PANELS } from '../../constants/viewer';
+import { DEFAULT_SETTINGS, VIEWER_NAV_MODES, VIEWER_PANELS, INITIAL_HELICOPTER_SPEED } from '../../constants/viewer';
 
 export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	waitForViewer: [],
@@ -37,6 +37,7 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	goToExtent: [],
 	setHelicopterSpeed: ['speed'],
 	resetHelicopterSpeed: ['teamspace', 'modelId', 'updateDefaultSpeed'],
+	getHelicopterSpeed: ['teamspace', 'modelId'],
 	increaseHelicopterSpeed: ['teamspace', 'modelId'],
 	decreaseHelicopterSpeed: ['teamspace', 'modelId'],
 	setIsFocusMode: ['isFocusMode'],
@@ -51,7 +52,10 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	deactivateMeasure: [],
 	updateClipState: ['clipNumber'],
 	startListenOnNumClip: [],
-	stopListenOnNumClip: []
+	stopListenOnNumClip: [],
+	setIsModelLoaded: ['isModelLoaded'],
+	startListenOnModelLoaded: [],
+	stopListenOnModelLoaded: []
 }, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {
@@ -59,13 +63,14 @@ export const INITIAL_STATE = {
 			JSON.parse(window.localStorage.getItem('visualSettings')) : DEFAULT_SETTINGS,
 	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
 	clippingMode: null,
-	helicopterSpeed: null,
+	helicopterSpeed: INITIAL_HELICOPTER_SPEED,
 	isFocusMode: false,
 	isClipEdit: false,
 	clipNumber: 0,
 	visiblePanels: {
 		[VIEWER_PANELS.METADATA]: false
-	}
+	},
+	isModelLoaded: false
 };
 
 const updateSettings = (state = INITIAL_STATE, {settings}) => {
@@ -102,6 +107,10 @@ const setPanelVisibility = (state = INITIAL_STATE, {panelName, isVisible}) => {
 	return { ...state, visiblePanels: {...visiblePanels, [panelName]: isVisible} };
 };
 
+const setIsModelLoaded = (state = INITIAL_STATE, {isModelLoaded}) => {
+	return { ...state, isModelLoaded };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerTypes.UPDATE_SETTINGS] : updateSettings,
 	[ViewerTypes.SET_NAVIGATION_MODE_SUCCESS] : setNavigationModeSuccess,
@@ -110,5 +119,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,
 	[ViewerTypes.SET_CLIP_EDIT_SUCCESS] : setClipEditSuccess,
 	[ViewerTypes.SET_CLIP_NUMBER] : setClipNumber,
-	[ViewerTypes.SET_PANEL_VISIBILITY] : setPanelVisibility
+	[ViewerTypes.SET_PANEL_VISIBILITY] : setPanelVisibility,
+	[ViewerTypes.SET_IS_MODEL_LOADED] : setIsModelLoaded
 });

@@ -1,3 +1,10 @@
+import * as dayjs from 'dayjs';
+
+export const SHORT_DATE_FORMAT = 'DD/MM/YYYY';
+export const DATE_TIME_FORMAT = 'HH:mm DD MMM';
+export const LONG_DATE_TIME_FORMAT = '"DD/MM/YYYY HH:mm';
+export const NAMED_MONTH_DATE_FORMAT = 'DD MMM YYYY';
+
 export const invoiceDate = (input) => {
 	const date: Date = new Date(input);
 	let invoiceDateStr: string;
@@ -64,3 +71,11 @@ export const simpleDate = (input) => {
 	const date: Date = new Date(input);
 	return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
+
+export const formatDate = (date, format) => dayjs(date).format(format);
+
+export const formatShortDate = (date) => formatDate(date, SHORT_DATE_FORMAT);
+
+export const formatDateTime = (date) => formatDate(date, DATE_TIME_FORMAT);
+
+export const formatNamedMonthDate = (date) => formatDate(date, NAMED_MONTH_DATE_FORMAT);

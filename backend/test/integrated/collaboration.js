@@ -173,7 +173,7 @@ describe("Sharing/Unsharing a model", function () {
 		});
 
 		it("and the viewer should be able to see list of issues", function(done) {
-			agent.get(`/${username}/${model}/issues.json`)
+			agent.get(`/${username}/${model}/issues`)
 				.expect(200, done);
 		});
 
@@ -188,7 +188,7 @@ describe("Sharing/Unsharing a model", function () {
 		});
 
 		it("and the viewer should NOT be able to see raise issue", function(done) {
-			agent.post(`/${username}/${model}/issues.json`)
+			agent.post(`/${username}/${model}/issues`)
 				.send({})
 				.expect(401 , done);
 		});
@@ -288,7 +288,7 @@ describe("Sharing/Unsharing a model", function () {
 			});
 
 			it("and the viewer should NOT be able to see raise issue", function(done) {
-				agent.post(`/${username}/${model}/issues.json`)
+				agent.post(`/${username}/${model}/issues`)
 					.send({})
 					.expect(401 , done);
 			});
@@ -384,7 +384,7 @@ describe("Sharing/Unsharing a model", function () {
 		});
 
 		it("and the commenter should be able to see list of issues", function(done) {
-			agent.get(`/${username}/${model}/issues.json`)
+			agent.get(`/${username}/${model}/issues`)
 				.expect(200, done);
 		});
 
@@ -416,7 +416,7 @@ describe("Sharing/Unsharing a model", function () {
 				"assigned_roles":["testproject.collaborator"]
 			};
 
-			agent.post(`/${username}/${model}/issues.json`)
+			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
 				.expect(200 , done);
 		});
@@ -523,7 +523,7 @@ describe("Sharing/Unsharing a model", function () {
 			});
 
 			it("and the commenter should NOT be able to see raise issue", function(done) {
-				agent.post(`/${username}/${model}/issues.json`)
+				agent.post(`/${username}/${model}/issues`)
 					.send({ })
 					.expect(401 , done);
 			});
@@ -618,7 +618,7 @@ describe("Sharing/Unsharing a model", function () {
 		});
 
 		it("and the editor should be able to see list of issues", function(done) {
-			agent.get(`/${username}/${model}/issues.json`)
+			agent.get(`/${username}/${model}/issues`)
 				.expect(200, done);
 		});
 
@@ -646,7 +646,7 @@ describe("Sharing/Unsharing a model", function () {
 				"assigned_roles":["testproject.collaborator"]
 			};
 
-			agent.post(`/${username}/${model}/issues.json`)
+			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
 				.expect(200 , done);
 		});
@@ -757,7 +757,7 @@ describe("Sharing/Unsharing a model", function () {
 			});
 
 			it("and the editor should NOT be able to raise issue", function(done) {
-				agent.post(`/${username}/${model}/issues.json`)
+				agent.post(`/${username}/${model}/issues`)
 					.send({})
 					.expect(401 , done);
 			});

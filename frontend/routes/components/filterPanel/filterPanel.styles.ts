@@ -24,32 +24,49 @@ import IconButton from '@material-ui/core/IconButton';
 import More from '@material-ui/icons/MoreVert';
 import Copy from '@material-ui/icons/FileCopy';
 
-export const Container = styled.div`
+interface IContainer {
+	filtersOpen: boolean;
+}
+
+interface ISelectedFilters {
+	empty: boolean;
+	filtersOpen: boolean;
+}
+
+interface IInputContainer {
+	menuHidden: boolean;
+}
+
+interface IChips {
+	filtersOpen: boolean;
+}
+
+export const Container = styled.div<IContainer>`
 	background-color: ${COLOR.WHITE};
 	position: relative;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
-	height: ${(props: any) => props.filtersOpen ? '45px' : 'auto'};
+	height: ${(props) => props.filtersOpen ? '45px' : 'auto'};
 	flex: none;
-` as any;
+`;
 
-export const SelectedFilters = styled.div`
+export const SelectedFilters = styled.div<ISelectedFilters>`
 	display: flex;
 	flex-wrap: wrap;
-	padding: 4px 40px 0 8px;
-	overflow: ${(props: any) => props.filtersOpen ? 'hidden' : 'auto'};
-	min-height: ${(props: any) => props.empty ? '0' : '45px'};
+	padding: ${(props) => props.empty ? '0 40px 0 8px' : '4px 40px 0 8px'};
+	overflow: ${(props) => props.filtersOpen ? 'hidden' : 'auto'};
+	min-height: ${(props) => props.empty ? '0' : '45px'};
 	position: relative;
 	max-height: 240px;
-` as any;
+`;
 
-export const InputContainer = styled.div`
+export const InputContainer = styled.div<IInputContainer>`
 	display: block;
 	justify-content: flex-end;
 	position: relative;
 	margin: 0;
-	min-height: ${(props: any) => props.menuHidden ? `52px` : '0'};
+	min-height: ${(props) => props.menuHidden ? `52px` : '0'};
 
 	.react-autosuggest__container {
 		height: 100%;
@@ -70,7 +87,7 @@ export const InputContainer = styled.div`
 			}
 		}
 	}
-` as any;
+`;
 
 export const SuggestionsList = styled(Popper)`
 	z-index: 1;
@@ -100,6 +117,10 @@ export const SuggestionsList = styled(Popper)`
 export const StyledTextField = styled(TextField)`
 	font-size: 14px;
 	margin-bottom: 12px;
+
+	&& {
+		height: 100%;
+	}
 `;
 
 export const StyledChip = styled(Chip)`
@@ -160,4 +181,29 @@ export const CopyIcon = styled(Copy)`
 export const ButtonWrapper = styled.div`
 	position: relative;
 	height: 50px;
+`;
+
+export const Chips = styled.div<IChips>`
+	position: relative;
+
+	&.compare {
+		margin-left: ${(props) => props.filtersOpen ? '38px' : '0'};
+	}
+`;
+
+export const Placeholder = styled.div`
+	position: absolute;
+	left: 48px;
+	color: ${COLOR.BLACK_60};
+	font-size: 14px;
+	top: 50%;
+	transform: translateY(-50%);
+	user-select: none;
+	cursor: text;
+	display: flex;
+	align-items: center;
+`;
+
+export const PlaceholderText = styled.span`
+	margin-left: 4px;
 `;

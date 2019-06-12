@@ -24,7 +24,7 @@ import api from './';
  * @param revision
  */
 export const getRisk = (teamspace, modelId, riskId) => {
-	return api.get(`${teamspace}/${modelId}/risks/${riskId}.json`);
+	return api.get(`${teamspace}/${modelId}/risks/${riskId}`);
 };
 
 /**
@@ -40,9 +40,9 @@ export const saveRisk = (teamspace, modelId, risk) => {
 	}
 
 	if (risk.rev_id) {
-		return api.post(`${teamspace}/${modelId}/revision/${risk.rev_id}/risks.json`, risk);
+		return api.post(`${teamspace}/${modelId}/revision/${risk.rev_id}/risks`, risk);
 	}
-	return api.post(`${teamspace}/${modelId}/risks.json`, risk);
+	return api.post(`${teamspace}/${modelId}/risks`, risk);
 };
 
 /**
@@ -53,9 +53,9 @@ export const saveRisk = (teamspace, modelId, risk) => {
  */
 export const updateRisk = (teamspace, modelId, id, revId, risk) => {
 	if (risk.rev_id) {
-		return api.patch(`${teamspace}/${modelId}/revision/${revId}/risks/${id}.json`, risk);
+		return api.patch(`${teamspace}/${modelId}/revision/${revId}/risks/${id}`, risk);
 	}
-	return api.patch(`${teamspace}/${modelId}/risks/${id}.json`, risk);
+	return api.patch(`${teamspace}/${modelId}/risks/${id}`, risk);
 };
 
 /**
@@ -66,9 +66,9 @@ export const updateRisk = (teamspace, modelId, id, revId, risk) => {
  */
 export const getRisks = (teamspace, modelId, revision?) => {
 	if (revision) {
-		return api.get(`${teamspace}/${modelId}/revision/${revision}/risks.json`);
+		return api.get(`${teamspace}/${modelId}/revision/${revision}/risks`);
 	}
-	return api.get(`${teamspace}/${modelId}/risks.json`);
+	return api.get(`${teamspace}/${modelId}/risks`);
 };
 
 /**

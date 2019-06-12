@@ -15,13 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { COLOR } from '../../../../styles/colors';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 
 interface IViewerPanelFooter {
 	padding?: string;
+}
+
+interface IViewerPanelContent {
+	isPadding?: boolean;
+	scrollDisabled?: boolean;
+}
+
+interface IViewerPanelButton {
+	active?: number;
 }
 
 export const TitleContainer = styled.div`
@@ -63,9 +72,12 @@ export const TitleIcon = styled.div`
 	justify-content: center;
 `;
 
-export const ViewerPanelContent = styled.div`
+export const ViewerPanelContent = styled.div<IViewerPanelContent>`
 	background-color: ${COLOR.WHITE_87};
-	overflow: auto;
+	overflow: ${(props) => props.scrollDisabled ? 'hidden' : 'auto'};
+	display: ${(props) => props.scrollDisabled ? 'flex' : 'block'};
+	flex-direction: ${(props) => props.scrollDisabled ? 'column' : 'unset'};
+	position: relative;
 `;
 
 export const LoaderContainer = styled(ViewerPanelContent)`
@@ -85,11 +97,18 @@ export const ViewerPanelFooter = styled(Grid).attrs({
 	font-size: 14px;
 `;
 
-export const ViewerPanelButton = styled(Button)`
+export const ViewerPanelButton = styled(Button)<IViewerPanelButton>`
 	&& {
 		flex: none;
 		margin-right: -3px;
 		width: 40px;
 		height: 40px;
+		${({ active }) => active ? css`
+			background-color: #ff9800;
+			&:hover {
+				background-color: ${COLOR.DARK_ORANGE};
+			}
+		` : ''
+		}
 	}
 `;

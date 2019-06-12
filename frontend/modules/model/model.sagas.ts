@@ -16,7 +16,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { put, takeLatest, select } from 'redux-saga/effects';
+import { put, takeLatest, select, take } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { getAngularService, dispatch } from './../../helpers/migration';
@@ -76,6 +76,15 @@ export function* fetchRevisions({ teamspace, modelId }) {
 
 		yield put(ModelActions.fetchRevisionsSuccess(revisions));
 		yield put(ModelActions.setPendingState(false));
+	} catch (e) {
+		yield put(DialogActions.showEndpointErrorDialog('fetch', 'model revisions', e));
+	}
+}
+
+export function* waitForSettingsAndFetchRevisions({ teamspace, modelId }) {
+	try {
+		yield take(ModelTypes.FETCH_SETTINGS_SUCCESS);
+		yield put(ModelActions.fetchRevisions(teamspace, modelId));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'model revisions', e));
 	}
@@ -181,4 +190,5 @@ export default function* ModelSaga() {
 	yield takeLatest(ModelTypes.SUBSCRIBE_ON_STATUS_CHANGE, subscribeOnStatusChange);
 	yield takeLatest(ModelTypes.UNSUBSCRIBE_ON_STATUS_CHANGE, unsubscribeOnStatusChange);
 	yield takeLatest(ModelTypes.FETCH_MAPS, fetchMaps);
+	yield takeLatest(ModelTypes.WAIT_FOR_SETTINGS_AND_FETCH_REVISIONS, waitForSettingsAndFetchRevisions);
 }

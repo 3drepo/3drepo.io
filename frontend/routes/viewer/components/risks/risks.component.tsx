@@ -35,8 +35,6 @@ import {
 } from '../../../../constants/risks';
 
 import { ReportedItems } from '../reportedItems';
-import { IRisksComponentState } from '../../../../modules/risks/risks.redux';
-import { ListContainer, Summary } from './risks.styles';
 
 interface IProps {
 	history: any;
@@ -76,24 +74,12 @@ interface IProps {
 	renderPins: () => void;
 }
 
-interface IState {
-	riskDetails?: any;
-	filteredRisks: any[];
-	modelLoaded: boolean;
-}
-
 const UNASSIGNED_JOB = {
 	name: 'Unassigned',
 	value: ''
 };
 
-export class Risks extends React.PureComponent<IProps, IState> {
-	public state: IState = {
-		riskDetails: {},
-		filteredRisks: [],
-		modelLoaded: false
-	};
-
+export class Risks extends React.PureComponent<IProps, any> {
 	get jobsList() {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}

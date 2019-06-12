@@ -72,7 +72,7 @@ describe("Notifications", function() {
 	};
 
 	const updateIssue = (modelId, issue , id) => next => {
-		return agents.teamSpace1.patch(`/${account}/${modelId}/issues/${id}.json`)
+		return agents.teamSpace1.patch(`/${account}/${modelId}/issues/${id}`)
 			.send(issue)
 			.expect(200 , function(err, res) {
 				next(err);
@@ -126,7 +126,7 @@ describe("Notifications", function() {
 			const issue = Object.assign({"name":(name || "Assign notification test") }, baseIssue);
 			const issueAssignJobA = Object.assign({}, issue, {"assigned_roles":["jobA"]});
 			async.series([next =>
-				agents.teamSpace1.post(`/${account}/${modelId}/issues.json`)
+				agents.teamSpace1.post(`/${account}/${modelId}/issues`)
 					.send(issue)
 					.expect(200 , function(err, res) {
 						issuesId.push(res.body._id);
@@ -378,7 +378,7 @@ next();
 					expect(notifications).to.be.an("array").and.to.have.length(0);
 					next();
 				},
-				next => agents.teamSpace1.post(`/${account}/${model}/issues.json`)
+				next => agents.teamSpace1.post(`/${account}/${model}/issues`)
 					.send(issueJobA)
 					.expect(200, next),
 				fetchNotification(agents.adminTeamspace1JobA),
@@ -411,7 +411,7 @@ next();
 		};
 
 		const createIssue = (modelId, name) => done => {
-			agents.teamSpace1.post(`/${account}/${modelId}/issues.json`)
+			agents.teamSpace1.post(`/${account}/${modelId}/issues`)
 				.send({...issue, name})
 				.expect(200 , function(err, res) {
 					issuesId.push(res.body._id);
@@ -556,49 +556,76 @@ next();
 	describe("of type model update", ()=> {
 		before(bouncerHelper.startBouncerWorker);
 
-		it("should be created for users with access to the model", done => {
-			const users = ["viewerTeamspace1Model1JobA",
-				"viewerTeamspace1Model1JobB",
-				"commenterTeamspace1Model1JobA",
-				"commenterTeamspace1Model1JobB",
-				"collaboratorTeamspace1Model1JobA",
-				"collaboratorTeamspace1Model1JobB",
-				"adminTeamspace1JobA",
-				"adminTeamspace1JobB",
-				"teamSpace1"];
+		const pollForNotification = (type, testFunction) => username => next => {
+			const intervalHandle = setInterval(() => {
 
-			const pollForNotification = username => next => {
-				const intervalHandle = setInterval(() => {
-					agents[username].get(NOTIFICATIONS_URL)
-						.expect(200, function(err, res) {
+				agents[username].get(NOTIFICATIONS_URL)
+					.expect(200, function(err, res) {
 
-							const notifications =  res.body.filter(n => n.type === "MODEL_UPDATED");
+						const notifications =  res.body.filter(n => n.type === type);
 
-							if (notifications.length > 0) {
+						if (notifications.length > 0) {
+							testFunction(notifications, ()=> {
 								clearInterval(intervalHandle);
-								expect(notifications.length).to.equal(1);
 								next();
-							}
-						});
-				}, 500);
-			};
+							});
+						}
+					});
+			}, 500);
+		};
+
+		const upload = tag => agents.teamSpace1.post(`/${account}/${model}/upload?tag=${tag}`)
+		.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+		.expect(200, function(err, res) {
+			if(err) {done(err);}
+		});
+
+		const usersWithPermission = ["viewerTeamspace1Model1JobA",
+		"viewerTeamspace1Model1JobB",
+		"commenterTeamspace1Model1JobA",
+		"commenterTeamspace1Model1JobB",
+		"collaboratorTeamspace1Model1JobA",
+		"collaboratorTeamspace1Model1JobB",
+		"adminTeamspace1JobA",
+		"adminTeamspace1JobB",
+		"teamSpace1"];
+
+		it("should be created for users with access to the model", done => {
 
 			async.parallel(
-				users.map(pollForNotification),
+				usersWithPermission.map(pollForNotification("MODEL_UPDATED", (notifications, next) => {
+					expect(notifications.length).to.equal(1);
+					expect(notifications[0].revisions.length).to.equal(1);
+					next();
+				} )),
 				() => {
 					bouncerHelper.stopBouncerWorker();
 					done();
 				}
 			);
 
-			const upload = next => agents.teamSpace1.post(`/${account}/${model}/upload`)
-				.field("tag", "onetag")
-				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
-				.expect(200, function(err, res) {
-					if(err) {done(err);}
-				});
+			upload('first');
 
-			upload();
+		}).timeout(60000);
+
+		it("should have one upload notification but with two revisions", done => {
+			bouncerHelper.startBouncerWorker(() => {
+
+				async.parallel(
+					usersWithPermission.map(pollForNotification("MODEL_UPDATED", (notifications, next) => {
+						expect(notifications.length).to.equal(1);
+						if(notifications[0].revisions.length===2) {
+							next();
+						}
+					})),
+					() => {
+						bouncerHelper.stopBouncerWorker();
+						done();
+					}
+				);
+
+				upload('second');
+			});
 
 		}).timeout(60000);
 

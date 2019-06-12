@@ -71,7 +71,7 @@ describe("Chat service", function () {
 
 	const createIssue = (agent, partialIssue) => next => {
 		const issue = Object.assign(baseIssue, partialIssue);
-		agent.post(`/${account}/${model}/issues.json`)
+		agent.post(`/${account}/${model}/issues`)
 			.send(issue)
 			.expect(200 , function(err, res) {
 				if (next) next(err, res.body)
@@ -79,7 +79,7 @@ describe("Chat service", function () {
 	};
 
 	const updateIssue = (agent, id, partialIssue) => next => {
-			return agent.patch(`/${account}/${model}/issues/${id}.json`)
+			return agent.patch(`/${account}/${model}/issues/${id}`)
 				.send(partialIssue)
 				.expect(200 , function(err, res) {
 						if (next) next(err);
@@ -221,7 +221,7 @@ describe("Chat service", function () {
 			done();
 		});
 
-		teamSpace1Agent.post(`/${account}/${model}/issues.json`)
+		teamSpace1Agent.post(`/${account}/${model}/issues`)
 			.send(issue)
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
@@ -254,7 +254,7 @@ describe("Chat service", function () {
 		});
 
 		// console.log('issueId2', issueId);
-		teamSpace1Agent.patch(`/${account}/${model}/issues/${issueId}.json`)
+		teamSpace1Agent.patch(`/${account}/${model}/issues/${issueId}`)
 			.send(comment)
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
@@ -270,7 +270,7 @@ describe("Chat service", function () {
 			done();
 		});
 
-		teamSpace1Agent.patch(`/${account}/${model}/issues/${issueId}.json`)
+		teamSpace1Agent.patch(`/${account}/${model}/issues/${issueId}`)
 			.send(comment)
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
@@ -285,7 +285,7 @@ describe("Chat service", function () {
 			done();
 		});
 
-		teamSpace1Agent.patch(`/${account}/${model}/issues/${issueId}.json`)
+		teamSpace1Agent.patch(`/${account}/${model}/issues/${issueId}`)
 			.send(comment)
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
@@ -322,7 +322,7 @@ describe("Chat service", function () {
 			}
 		], done);
 
-		teamSpace1Agent.patch(`/${account}/${model}/issues/${issueId}.json`)
+		teamSpace1Agent.patch(`/${account}/${model}/issues/${issueId}`)
 			.send({"priority":"high"})
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;

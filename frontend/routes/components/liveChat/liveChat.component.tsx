@@ -25,16 +25,20 @@ interface IProps {
 
 export class LiveChat extends React.PureComponent<IProps, any> {
 	public setNameAndMail = () => {
-		const {firstName, lastName, email } = this.props.currentUser;
-		if (!email) {
-			return;
-		}
+		try {
+			const {firstName, lastName, email } = this.props.currentUser;
+			if (!email) {
+				return;
+			}
 
-		const name = `${firstName || ''} ${lastName || ''}`.trim();
-		// @ts-ignore
-		window.LC_API.set_visitor_name(name);
-		// @ts-ignore
-		window.LC_API.set_visitor_email(email);
+			const name = `${firstName || ''} ${lastName || ''}`.trim();
+			// @ts-ignore
+			window.LC_API.set_visitor_name(name);
+			// @ts-ignore
+			window.LC_API.set_visitor_email(email);
+		} catch (e) {
+			console.debug('Livechat api error: ' + e);
+		}
 	}
 
 	public componentDidUpdate(prevProps) {

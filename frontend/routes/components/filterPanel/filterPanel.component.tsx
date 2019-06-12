@@ -17,16 +17,15 @@
 
 import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
-import * as dayjs from 'dayjs';
-import { omit, isNil, uniqBy, pick, keyBy } from 'lodash';
+import { omit, isNil, uniqBy, keyBy } from 'lodash';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import CollapseIcon from '@material-ui/icons/ExpandMore';
 import ExpandIcon from '@material-ui/icons/ChevronRight';
 
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
-
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
+import SearchIcon from '@material-ui/icons/Search';
 import { Highlight } from '../highlight/highlight.component';
 import { ENTER_KEY, BACKSPACE } from '../../../constants/keys';
 import { FiltersMenu } from './components/filtersMenu/filtersMenu.component';
@@ -42,10 +41,14 @@ import {
 	StyledIconButton,
 	MoreIcon,
 	CopyIcon,
-	ButtonWrapper
+	ButtonWrapper,
+	Chips,
+	Placeholder,
+	PlaceholderText
 } from './filterPanel.styles';
 import { compareStrings } from '../../../helpers/searching';
 import { renderWhenTrue } from '../../../helpers/rendering';
+import { formatShortDate } from '../../../services/formatting/formatDate';
 
 export const DATA_TYPES = {
 	UNDEFINED: 1,
@@ -71,6 +74,8 @@ interface IProps {
 	onChange: (selectedFilters) => void;
 	selectedFilters: any[];
 	hideMenu?: boolean;
+	className?: string;
+	autoFocus?: boolean;
 }
 
 interface IState {
@@ -143,11 +148,13 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	};
 
 	public static defaultProps = {
-		filters: []
+		filters: [],
+		autoFocus: true
 	};
 
 	private popperNode = null;
 	private filterSuggestions = [];
+	private input = null;
 
 	public componentDidMount = () => {
 		this.setState({ selectedFilters: this.props.selectedFilters });
@@ -186,14 +193,14 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 	public onSelectDateFilter = (dateFilter, child) => {
 		dateFilter.label = child.label;
-		dateFilter.value.label = dayjs(child.date).format('DD/MM/YYYY');
+		dateFilter.value.label = formatShortDate(child.date);
 		const selectedFilterIndex = this.state.selectedFilters.findIndex((filter) => filter.value.value === child.value);
 
 		if (selectedFilterIndex > -1) {
 			this.setState((prevState) => {
 				const newFilters = [...prevState.selectedFilters];
 				newFilters[selectedFilterIndex].label = child.label;
-				newFilters[selectedFilterIndex].value.label = dayjs(child.date).format('DD/MM/YYYY');
+				newFilters[selectedFilterIndex].value.label = formatShortDate(child.date);
 				return newFilters as any;
 			}, this.handleFiltersChange);
 		} else {
@@ -277,7 +284,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 		return (
 			<StyledTextField
-				autoFocus
+				autoFocus={this.props.autoFocus}
 				onPaste={this.handlePaste}
 				fullWidth
 				InputProps={{
@@ -422,15 +429,19 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 				filtersOpen={selectedFilters.length && filtersOpen}
 			>
 				{selectedFilters.length ? this.renderFilterButton() : null}
-
-				{selectedFilters.map((filter, index) => (
-					<StyledChip
-						key={index}
-						color={index === removableFilterIndex ? 'primary' : 'default'}
-						label={getSelectedFilterLabel(filter)}
-						onDelete={() => this.onDeselectFilter(filter)}
-					/>
-				))}
+				<Chips filtersOpen={selectedFilters.length && filtersOpen} className={this.props.className}>
+					{selectedFilters.map(
+						(filter, index) => (
+							<StyledChip
+								key={index}
+								color={index === removableFilterIndex ? 'primary' : 'default'}
+								label={getSelectedFilterLabel(filter)}
+								onDelete={() => this.onDeselectFilter(filter)}
+							/>
+						)
+					)
+					}
+				</Chips>
 			</SelectedFilters>
 		);
 	}
@@ -450,6 +461,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 	public handleAutoSuggestMount = (autoSuggestComponent) => {
 		if (autoSuggestComponent && autoSuggestComponent.input) {
+			this.input = autoSuggestComponent.input;
 			autoSuggestComponent.input.addEventListener('keyup', this.handleKeyUp);
 		}
 	}
@@ -479,12 +491,21 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		return onlyQueryFilters;
 	}
 
+	public renderPlaceholder = renderWhenTrue(() => (
+		<Placeholder onClick={this.handlePlaceholderClick}>
+			<SearchIcon />
+			<PlaceholderText>
+				Search
+			</PlaceholderText>
+		</Placeholder>
+	));
+
 	public render() {
 		const { value, suggestions, selectedFilters, filtersOpen } = this.state;
 		const { hideMenu, filters } = this.props;
 
 		return (
-			<Container filtersOpen={selectedFilters.length && filtersOpen}>
+			<Container filtersOpen={selectedFilters.length && filtersOpen} className={this.props.className}>
 				{this.renderSelectedFilters()}
 
 				<InputContainer menuHidden={hideMenu}>
@@ -497,7 +518,6 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 						renderSuggestion={this.renderSuggestion}
 						renderInputComponent={this.renderInputComponent}
 						inputProps={{
-							placeholder: 'Filter',
 							value,
 							onChange: this.onSearchChange,
 							onKeyPress: this.onSearchSubmit,
@@ -511,9 +531,14 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 					/>
 					{this.renderCopyButton((!hideMenu && !filters.length) || this.onlyCopyButton)}
 					{this.renderFiltersMenuButton(!hideMenu && filters.length && !this.onlyCopyButton)}
+					{this.renderPlaceholder(!Boolean(value))}
 				</InputContainer>
 
 			</Container>
 		);
+	}
+
+	private handlePlaceholderClick = () => {
+		this.input.focus();
 	}
 }

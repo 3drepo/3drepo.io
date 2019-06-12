@@ -26,7 +26,7 @@ const Risk = require("../models/risk");
 const utils = require("../utils");
 
 /**
- * @api {get} /:teamspace/:model/risks/:uid.json Find Risk by ID
+ * @api {get} /:teamspace/:model/risks/:riskId Find Risk by ID
  * @apiName findRiskById
  * @apiGroup Risks
  *
@@ -34,10 +34,10 @@ const utils = require("../utils");
  * @apiParam {String} model Model ID
  * @apiParam {String} id Risk ID.
  */
-router.get("/risks/:uid.json", middlewares.issue.canView, findRiskById);
+router.get("/risks/:riskId", middlewares.issue.canView, findRiskById);
 
 /**
- * @api {get} /:teamspace/:model/risks/:uid/thumbnail.png Get Risks Thumbnail
+ * @api {get} /:teamspace/:model/risks/:riskId/thumbnail.png Get Risks Thumbnail
  * @apiName getThumbnail
  * @apiGroup Risks
  *
@@ -45,30 +45,30 @@ router.get("/risks/:uid.json", middlewares.issue.canView, findRiskById);
  * @apiParam {String} model Model ID
  * @apiParam {String} id Risk ID.
  */
-router.get("/risks/:uid/thumbnail.png", middlewares.issue.canView, getThumbnail);
+router.get("/risks/:riskId/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 /**
- * @api {get} /:teamspace/:model/risks.json List All Risks
+ * @api {get} /:teamspace/:model/risks List All Risks
  * @apiName listRisks
  * @apiGroup Risks
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  */
-router.get("/risks.json", middlewares.issue.canView, listRisks);
+router.get("/risks", middlewares.issue.canView, listRisks);
 
 /**
- * @api {get} /:teamspace/:model/risks/:uid/screenshot.png	Get Risks Screenshot
+ * @api {get} /:teamspace/:model/risks/:riskId/screenshot.png	Get Risks Screenshot
  * @apiName getScreenshot
  * @apiGroup Risks
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  */
-router.get("/risks/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
+router.get("/risks/:riskId/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
 
 /**
- * @api {get} /:teamspace/:model/risks/:uid/screenshotSmall.png  Get Small Risks Screenshot
+ * @api {get} /:teamspace/:model/risks/:riskId/screenshotSmall.png  Get Small Risks Screenshot
  * @apiName getScreenshotSmall
  * @apiGroup Risks
  *
@@ -76,10 +76,10 @@ router.get("/risks/:uid/viewpoints/:vid/screenshot.png", middlewares.issue.canVi
  * @apiParam {String} model Model ID
  * @apiParam {String} id Risk ID.
  */
-router.get("/risks/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
+router.get("/risks/:riskId/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
 
 /**
- * @api {get} /:teamspace/:model/risks/:rid/risks.json	List all Risks by revision ID
+ * @api {get} /:teamspace/:model/revision/:rid/risks	List all Risks by revision ID
  * @apiName listRisks
  * @apiGroup Risks
  *
@@ -87,7 +87,7 @@ router.get("/risks/:uid/viewpoints/:vid/screenshotSmall.png", middlewares.issue.
  * @apiParam {String} model Model ID
  * @apiParam {String} id Revision ID.
  */
-router.get("/revision/:rid/risks.json", middlewares.issue.canView, listRisks);
+router.get("/revision/:rid/risks", middlewares.issue.canView, listRisks);
 
 /**
  * @api {get} /:teamspace/:model/risks.html  Render all Risks as HTML
@@ -100,7 +100,7 @@ router.get("/revision/:rid/risks.json", middlewares.issue.canView, listRisks);
 router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
 
 /**
- * @api {get} /:teamspace/:model/risks.html  Render all Risks as HTML by revision ID
+ * @api {get} /:teamspace/:model/revision/:rid/risks.html  Render all Risks as HTML by revision ID
  * @apiName renderRisksHTML
  * @apiGroup Risks
  *
@@ -111,7 +111,7 @@ router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
 router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHTML);
 
 /**
- * @api {post} /:teamspace/:model/risks.json  Store Risks
+ * @api {post} /:teamspace/:model/risks  Store Risks
  * @apiName storeRisk
  * @apiGroup Risks
  *
@@ -119,21 +119,21 @@ router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHT
  * @apiParam {String} model Model ID
  * @apiParam {String} id Revision ID.
  */
-router.post("/risks.json", middlewares.issue.canCreate, storeRisk);
+router.post("/risks", middlewares.issue.canCreate, storeRisk);
 
 /**
- * @api {patch} /:teamspace/:model/risks/riskId.json	Update risks based on revision
+ * @api {patch} /:teamspace/:model/risks/:riskId	Update risks based on revision
  * @apiName updateRisk
  * @apiGroup Risks
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} riskId.json Risk ID.
+ * @apiParam {String} riskId Risk ID.
  */
-router.patch("/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
+router.patch("/risks/:riskId", middlewares.issue.canComment, updateRisk);
 
 /**
- * @api {post} /:teamspace/:model/revision/:rid/risks.json	Store risks based on Revision ID
+ * @api {post} /:teamspace/:model/revision/:rid/risks	Store risks based on Revision ID
  * @apiName storeRisk
  * @apiGroup Risks
  *
@@ -141,10 +141,10 @@ router.patch("/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
  * @apiParam {String} model Model ID
  * @apiParam {String} rid Revision ID.
  */
-router.post("/revision/:rid/risks.json", middlewares.issue.canCreate, storeRisk);
+router.post("/revision/:rid/risks", middlewares.issue.canCreate, storeRisk);
 
 /**
- * @api {patch} /:teamspace/:model/revision/:rid/risks/:riskId.json  Update Risk based on revision ID
+ * @api {patch} /:teamspace/:model/revision/:rid/risks/:riskId  Update Risk based on revision ID
  * @apiName  updateRisk
  * @apiGroup Risks
  *
@@ -153,7 +153,7 @@ router.post("/revision/:rid/risks.json", middlewares.issue.canCreate, storeRisk)
  * @apiParam {String} rid Revision ID.
  * @apiParam {String} riskId Risk ID.
  */
-router.patch("/revision/:rid/risks/:riskId.json", middlewares.issue.canComment, updateRisk);
+router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updateRisk);
 
 /**
  * @api {delete} /:teamspace/:model/risks/ Delete risks
@@ -238,7 +238,7 @@ function findRiskById(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 
-	Risk.findByUID(dbCol, params.uid).then(risk => {
+	Risk.findByUID(dbCol, params.riskId).then(risk => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risk);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -260,7 +260,7 @@ function getScreenshot(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 
-	Risk.getScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
+	Risk.getScreenshot(dbCol, req.params.riskId, req.params.vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
@@ -271,7 +271,7 @@ function getScreenshotSmall(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 
-	Risk.getSmallScreenshot(dbCol, req.params.uid, req.params.vid).then(buffer => {
+	Risk.getSmallScreenshot(dbCol, req.params.riskId, req.params.vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
@@ -282,7 +282,7 @@ function getThumbnail(req, res, next) {
 	const place = utils.APIInfo(req);
 	const dbCol = {account: req.params.account, model: req.params.model};
 
-	Risk.getThumbnail(dbCol, req.params.uid).then(buffer => {
+	Risk.getThumbnail(dbCol, req.params.riskId).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);

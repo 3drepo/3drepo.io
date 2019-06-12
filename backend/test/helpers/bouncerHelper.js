@@ -119,7 +119,6 @@ function disconnectQ(){
 
 module.exports = {
 	startBouncerWorker : (callback, error = 0) => {
-		callback = callback;
 		errorCode = error;
 		logger.info("Initialising bouncer client queue...");
 		connectQ(callback);

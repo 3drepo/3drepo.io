@@ -7,7 +7,6 @@ export class ViewerService {
 
 	private mode = VIEWER_PIN_MODE.NORMAL;
 	public initialised: any;
-	public helicopterSpeed = INITIAL_HELICOPTER_SPEED;
 
 	get viewerService() {
 		return getAngularService('ViewerService', this) as any;
@@ -123,10 +122,6 @@ export class ViewerService {
 		return this.viewerService.pinData;
 	}
 
-	public getHelicopterSpeed(): number {
-		return this.helicopterSpeed;
-	}
-
 	public async addPin(params) {
 		await this.isViewerReady();
 		return this.viewer.addPin(
@@ -163,6 +158,48 @@ export class ViewerService {
 	public async disableMeasure() {
 		await this.isViewerReady();
 		this.viewer.setMeasureMode(false);
+	}
+
+	/**
+	 * Compare
+	 */
+
+	public diffToolSetAsComparator(teamspace: string, model: string) {
+		this.viewer.diffToolSetAsComparator(teamspace, model);
+	}
+
+	public diffToolLoadComparator(teamspace: string, model: string, revision: string) {
+		return this.viewer.diffToolLoadComparator(teamspace, model, revision);
+	}
+
+	public async diffToolEnableWithClashMode() {
+		await this.isViewerReady();
+		return this.viewer.diffToolEnableWithClashMode();
+	}
+
+	public async diffToolEnableWithDiffMode() {
+		await this.isViewerReady();
+		return this.viewer.diffToolEnableWithDiffMode();
+	}
+
+	public diffToolDisableAndClear = async () => {
+		await this.isViewerReady();
+		return this.viewer.diffToolDisableAndClear();
+	}
+
+	public diffToolShowBaseModel = async () => {
+		await this.isViewerReady();
+		return this.viewer.diffToolShowBaseModel();
+	}
+
+	public diffToolShowComparatorModel = async () => {
+		await this.isViewerReady();
+		return this.viewer.diffToolShowComparatorModel();
+	}
+
+	public diffToolDiffView = async () => {
+		await this.isViewerReady();
+		return this.viewer.diffToolDiffView();
 	}
 
 	public async getObjectsStatus({ teamspace, model } = { teamspace: '', model: '' }) {
@@ -260,6 +297,13 @@ export class ViewerService {
 	public async stopClipEdit() {
 		await this.isViewerReady();
 		this.viewer.stopClipEdit();
+	}
+
+	public async getModelInfo({database, model}) {
+		await this.isViewerReady();
+		return this.viewerService.getModelInfo(database, model).then((response) => {
+			return response.data;
+		});
 	}
 }
 
