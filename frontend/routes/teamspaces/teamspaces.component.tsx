@@ -301,7 +301,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				this.createRouteHandler(`/viewer/${activeTeamspace}/${props.model}`)(event);
 			});
 
-			analyticsService.sendEvent(EVENT_CATEGORIES.model, EVENT_ACTIONS.view);
+			analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
 		} else {
 			this.openUploadModelFileDialog(activeTeamspace, props)(event);
 		}

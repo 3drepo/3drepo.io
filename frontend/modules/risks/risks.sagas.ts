@@ -156,7 +156,7 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 
 		const { data: savedRisk } = yield API.saveRisk(teamspace, model, risk);
 
-		analyticsService.sendEvent(EVENT_CATEGORIES.risk, EVENT_ACTIONS.create);
+		analyticsService.sendEvent(EVENT_CATEGORIES.RISK, EVENT_ACTIONS.CREATE);
 
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(savedRisk, jobs);
@@ -174,7 +174,7 @@ export function* updateRisk({ teamspace, modelId, riskData }) {
 		const { _id, rev_id } = yield select(selectActiveRiskDetails);
 		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
 
-		analyticsService.sendEvent(EVENT_CATEGORIES.risk, EVENT_ACTIONS.edit);
+		analyticsService.sendEvent(EVENT_CATEGORIES.RISK, EVENT_ACTIONS.EDIT);
 
 		toggleRiskPin(riskData, true);
 		const jobs = yield select(selectJobsList);

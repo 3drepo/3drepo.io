@@ -3,15 +3,15 @@ import ReactGA from 'react-ga';
 import { clientConfigService } from './clientConfig';
 
 export const EVENT_CATEGORIES = {
-	issue: 'Issue',
-	risk: 'Risk',
-	model: 'Model'
+	ISSUE: 'Issue',
+	RISK: 'Risk',
+	MODEL: 'Model'
 };
 
 export const EVENT_ACTIONS = {
-	create: 'create',
-	edit: 'edit',
-	view: 'view'
+	CREATE: 'create',
+	EDIT: 'edit',
+	VIEW: 'view'
 };
 
 const REMARKETING_SCRIPT = `

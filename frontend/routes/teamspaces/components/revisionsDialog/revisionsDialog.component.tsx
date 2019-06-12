@@ -53,7 +53,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		handleClose();
 		history.push(`/viewer/${teamspace}/${modelId}/${tag || _id}`);
 
-		analyticsService.sendEvent(EVENT_CATEGORIES.model, EVENT_ACTIONS.view);
+		analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
 	}
 
 	public render() {

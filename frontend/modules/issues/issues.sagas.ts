@@ -156,7 +156,7 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 
 		const { data: savedIssue } = yield API.saveIssue(teamspace, model, issue);
 
-		analyticsService.sendEvent(EVENT_CATEGORIES.issue, EVENT_ACTIONS.create );
+		analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.CREATE);
 
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(savedIssue, jobs);
@@ -174,7 +174,7 @@ export function* updateIssue({ teamspace, modelId, issueData }) {
 		const { _id, rev_id } = yield select(selectActiveIssueDetails);
 		const { data: updatedIssue } = yield API.updateIssue(teamspace, modelId, _id, rev_id, issueData );
 
-		analyticsService.sendEvent(EVENT_CATEGORIES.issue, EVENT_ACTIONS.edit);
+		analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.EDIT);
 
 		toggleIssuePin(issueData, true);
 		const jobs = yield select(selectJobsList);
