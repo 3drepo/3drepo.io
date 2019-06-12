@@ -11,7 +11,6 @@ import './home/js/state-manager.config';
 import './home/js/state-manager.run';
 import './home/js/state-manager.service';
 import './model/js/model.component';
-import './chat/js/chat.service';
 import './panel/js/panel-card.component';
 import './panel/js/panel-card-filter.component';
 import './panel/js/panel-card-chips-filter.component';

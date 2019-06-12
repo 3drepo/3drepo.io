@@ -26,6 +26,8 @@ import { ModelTypes, ModelActions } from './model.redux';
 import { TeamspacesActions } from '../teamspaces';
 import { SnackbarActions } from './../snackbar';
 import { selectCurrentUser } from '../currentUser';
+import { CHAT_CHANNELS } from '../../constants/chat';
+import { ChatActions } from '../chat';
 
 export function* fetchSettings({ teamspace, modelId }) {
 	try {
@@ -119,24 +121,22 @@ export function* onModelStatusChanged({ modelData, teamspace, project, modelId, 
 	}
 }
 
+const onChanged = (teamspace, project, modelId, modelName) => (changedModelData) =>
+	dispatch(ModelActions.onModelStatusChanged(changedModelData, teamspace, project, modelId, modelName));
+
 export function* subscribeOnStatusChange({ teamspace, project, modelData }) {
 	const { modelId, modelName } = modelData;
-	const notificationService = yield getAngularService('ChatService');
-	const modelNotifications = yield notificationService.getChannel(teamspace, modelId).model;
 
-	const onChanged = (changedModelData) =>
-		dispatch(ModelActions.onModelStatusChanged(changedModelData, teamspace, project, modelId, modelName));
-	modelNotifications.subscribeToStatusChanged(onChanged, this);
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.MODEL, teamspace, modelId, {
+		subscribeToStatusChanged: onChanged(teamspace, project, modelId, modelName),
+	}));
 }
 
 export function* unsubscribeOnStatusChange({ teamspace, project, modelData }) {
 	const { modelId, modelName } = modelData;
-	const notificationService = yield getAngularService('ChatService');
-	const modelNotifications = yield notificationService.getChannel(teamspace, modelId).model;
-
-	const onChanged = (changedModelData) =>
-		dispatch(ModelActions.onModelStatusChanged(changedModelData, teamspace, project,  modelId, modelName));
-	modelNotifications.unsubscribeFromStatusChanged(onChanged, this);
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.MODEL, teamspace, modelId, {
+		unsubscribeToStatusChanged: onChanged(teamspace, project, modelId, modelName)
+	}));
 }
 
 export function* uploadModelFile({ teamspace, project, modelData, fileData }) {

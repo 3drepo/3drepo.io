@@ -63,7 +63,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	printIssues: IssuesActions.printIssues,
 	setActiveIssue: IssuesActions.setActiveIssue,
 	showIssueDetails: IssuesActions.showDetails,
-	toggleShowPins: IssuesActions.toggleShowPins,
 	subscribeOnIssueChanges: IssuesActions.subscribeOnIssueChanges,
 	unsubscribeOnIssueChanges: IssuesActions.unsubscribeOnIssueChanges,
 	closeDetails: IssuesActions.closeDetails,

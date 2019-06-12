@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ChatChannel } from './chat.channel';
+import { ChatEvents } from './chat.events';
+import { Channel } from './channel';
 
-export class ModelChatEvents {
-	constructor(private channel: ChatChannel) {
+export class RisksChatEvents extends ChatEvents {
+	private comments: { [id: string]: ChatEvents};
+
+	constructor(protected channel: Channel) {
+		super(channel, 'risk');
+		this.comments = {};
 	}
 
-	public subscribeToStatusChanged(callback: (data: any) => void, context: any) {
-		this.channel.subscribe('modelStatusChanged', callback, context);
+	public getCommentsChatEvents(id: string): ChatEvents {
+		if (!this.comments[id]) {
+			this.comments[id] =  new ChatEvents(this.channel, 'comment', id);
+		}
+
+		return this.comments[id];
 	}
 
-	public unsubscribeFromStatusChanged(callback: (data: any) => void) {
-		this.channel.unsubscribe('modelStatusChanged', callback);
-	}
 }

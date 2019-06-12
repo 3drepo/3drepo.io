@@ -17,39 +17,32 @@
 
 import { put, takeLatest, select } from 'redux-saga/effects';
 import * as io from 'socket.io-client';
+import { invoke } from 'lodash';
+
+import * as API from '../../services/api';
+import { dispatch } from '../../helpers/migration';
 
 import { ChatTypes, ChatActions } from './chat.redux';
 import { clientConfigService } from '../../services/clientConfig';
 import { selectJoinedRooms } from './chat.selectors';
-import { ChatChannel } from '../../services/chat/chat.channel';
-import { ModelActions } from '../model';
+import { Channel } from './channel';
 
-let socket;
+const { host, path, reconnectionAttempts } = clientConfigService.chatConfig;
+const socket = io(host, {
+	path,
+	transports: ['websocket'],
+	reconnection: true,
+	reconnectionDelay: 500,
+	reconnectionAttempts
+});
+socket.on('connect', () => dispatch(ChatActions.handleConnect()));
+socket.on('disconnect', () => dispatch(ChatActions.handleDisconnect()));
+socket.on('reconnect', () => dispatch(ChatActions.handleReconnect()));
 
 const channels = {};
 
-function* initialise() {
-	try {
-		const { host, path, reconnectionAttempts } = clientConfigService.chatConfig;
-		socket = io(host, {
-			path,
-			transports: ['websocket'],
-			reconnection: true,
-			reconnectionDelay: 500,
-			reconnectionAttempts
-		});
-
-		socket.on('connect', handleConnect);
-		socket.on('disconnect', handleDisconnect);
-		socket.on('reconnect', handleReconnect);
-	} catch (error) {
-		console.error(error);
-	}
-}
-
 function* handleConnect() {
-	debugger
-	yield put(ChatActions.saveSocketId(socket.id));
+	API.setSocketIdHeader(socket.id);
 }
 
 function* handleDisconnect(socketId) {
@@ -80,21 +73,41 @@ function* joinRoom({ teamspace, model }) {
 	}
 }
 
-function* getChannel({ teamspace, model = ''}) {
+const getChannel = (teamspace, model = '') => {
 	const channelId: string = `${teamspace}${model ? `::${model}` : ''}`;
 
 	if (!channels[channelId]) {
-		channels[channelId] = new ChatChannel(socket, teamspace, model, () => {
-			console.log('TEST')
-		});
+		channels[channelId] = new Channel(socket, teamspace, model);
 	}
 
 	return channels[channelId];
+};
+
+const invokeChannelHandlers = (channel, handlers) => {
+	for (const handler in handlers) {
+		if (handlers.hasOwnProperty(handler)) {
+			const args = handlers[handler];
+			invoke(channel, handler, args);
+		}
+	}
+};
+
+function* callChannelActions({ subchannelName, teamspace, model = '', handlers = {}}) {
+	const subchannel = getChannel(teamspace, model)[subchannelName];
+	invokeChannelHandlers(subchannel, handlers);
+}
+
+function* callCommentsChannelActions({ subchannelName, teamspace, model = '', dataId, handlers = {} }) {
+	const subchannel = getChannel(teamspace, model)[subchannelName];
+	const commentsChannel = subchannel.getCommentsChatEvents(dataId);
+	invokeChannelHandlers(commentsChannel, handlers);
 }
 
 export default function* ChatSaga() {
-	//yield takeLatest(ModelActions.fetchSettingsSuccess, initialise)
-	yield takeLatest(ChatTypes.FETCH, fetch);
 	yield takeLatest(ChatTypes.JOIN_ROOM, joinRoom);
-	yield takeLatest(ChatTypes.GET_CHANNEL, getChannel);
+	yield takeLatest(ChatTypes.CALL_CHANNEL_ACTIONS, callChannelActions);
+	yield takeLatest(ChatTypes.CALL_COMMENTS_CHANNEL_ACTIONS, callCommentsChannelActions);
+	yield takeLatest(ChatTypes.HANDLE_CONNECT, handleConnect);
+	yield takeLatest(ChatTypes.HANDLE_DISCONNECT, handleDisconnect);
+	yield takeLatest(ChatTypes.HANDLE_RECONNECT, handleReconnect);
 }

@@ -43,8 +43,10 @@ import { RisksActions, RisksTypes } from './risks.redux';
 import { NEW_PIN_ID } from '../../constants/viewer';
 import { PIN_COLORS } from '../../styles';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
+import { CHAT_CHANNELS } from '../../constants/chat';
+import { ChatActions } from '../chat';
 
-export function* fetchRisks({teamspace, modelId, revision}) {
+function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));
 	try {
 		const {data} = yield API.getRisks(teamspace, modelId, revision);
@@ -60,7 +62,7 @@ export function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(false));
 }
 
-export function* fetchRisk({teamspace, modelId, riskId}) {
+function* fetchRisk({teamspace, modelId, riskId}) {
 	yield put(RisksActions.toggleDetailsPendingState(true));
 
 	try {
@@ -104,7 +106,7 @@ const toggleRiskPin = (risk, selected = true) => {
 	}
 };
 
-export function* saveRisk({ teamspace, model, riskData, revision }) {
+function* saveRisk({ teamspace, model, riskData, revision }) {
 	try {
 		yield Viewer.setPinDropMode(false);
 
@@ -169,7 +171,7 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 	}
 }
 
-export function* updateRisk({ teamspace, modelId, riskData }) {
+function* updateRisk({ teamspace, modelId, riskData }) {
 	try {
 		const { _id, rev_id } = yield select(selectActiveRiskDetails);
 		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
@@ -189,7 +191,7 @@ export function* updateRisk({ teamspace, modelId, riskData }) {
 	}
 }
 
-export function* updateNewRisk({ newRisk }) {
+function* updateNewRisk({ newRisk }) {
 	try {
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(newRisk, jobs);
@@ -204,7 +206,7 @@ export function* updateNewRisk({ newRisk }) {
 	}
 }
 
-export function* postComment({ teamspace, modelId, riskData }) {
+function* postComment({ teamspace, modelId, riskData }) {
 	try {
 		const { _id, rev_id } = yield select(selectActiveRiskDetails);
 		const { data: comment } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
@@ -217,7 +219,7 @@ export function* postComment({ teamspace, modelId, riskData }) {
 	}
 }
 
-export function* removeComment({ teamspace, modelId, riskData }) {
+function* removeComment({ teamspace, modelId, riskData }) {
 	try {
 		const { commentIndex, _id, rev_id, guid } = riskData;
 		const commentData = {
@@ -236,7 +238,7 @@ export function* removeComment({ teamspace, modelId, riskData }) {
 	}
 }
 
-export function* renderPins() {
+function* renderPins() {
 	try {
 		const filteredRisks = yield select(selectFilteredRisks);
 		const risksList = yield select(selectRisks);
@@ -281,7 +283,7 @@ export function* renderPins() {
 	}
 }
 
-export function* downloadRisks({ teamspace, modelId }) {
+function* downloadRisks({ teamspace, modelId }) {
 	try {
 		const filteredRisks = yield select(selectFilteredRisks);
 		const risksIds = map(filteredRisks, '_id').join(',');
@@ -291,7 +293,7 @@ export function* downloadRisks({ teamspace, modelId }) {
 	}
 }
 
-export function* printRisks({ teamspace, modelId }) {
+function* printRisks({ teamspace, modelId }) {
 	try {
 		const filteredRisks = yield select(selectFilteredRisks);
 		const risksIds = map(filteredRisks, '_id').join(',');
@@ -321,7 +323,7 @@ const getRiskGroup = async (risk, groupId, revision) => {
 	return data;
 };
 
-export function* showMultipleGroups({risk, revision}) {
+function* showMultipleGroups({risk, revision}) {
 	try {
 		const hasViewpointGroups = !isEmpty(pick(risk.viewpoint, [
 			'highlighted_group_id',
@@ -379,7 +381,7 @@ export function* showMultipleGroups({risk, revision}) {
 	}
 }
 
-export function* focusOnRisk({ risk, revision }) {
+function* focusOnRisk({ risk, revision }) {
 	try {
 		yield Viewer.isViewerReady();
 		yield put(RisksActions.renderPins());
@@ -425,7 +427,7 @@ export function* focusOnRisk({ risk, revision }) {
 	}
 }
 
-export function* setActiveRisk({ risk, revision }) {
+function* setActiveRisk({ risk, revision }) {
 	try {
 		const activeRiskId = yield select(selectActiveRiskId);
 		const risksMap = yield select(selectRisksMap);
@@ -445,7 +447,7 @@ export function* setActiveRisk({ risk, revision }) {
 	}
 }
 
-export function* showDetails({ teamspace, model, revision, risk }) {
+function* showDetails({ teamspace, model, revision, risk }) {
 	try {
 		runAngularViewerTransition({
 			account: teamspace,
@@ -461,7 +463,7 @@ export function* showDetails({ teamspace, model, revision, risk }) {
 	}
 }
 
-export function* closeDetails({ teamspace, model, revision }) {
+function* closeDetails({ teamspace, model, revision }) {
 	try {
 		const activeRisk = yield select(selectActiveRiskDetails);
 		yield Viewer.removePin({ id: NEW_PIN_ID });
@@ -482,7 +484,7 @@ export function* closeDetails({ teamspace, model, revision }) {
 	}
 }
 
-export function* showNewPin({ risk, pinData }) {
+function* showNewPin({ risk, pinData }) {
 	try {
 		Viewer.removePin({ id: pinData.id });
 		Viewer.setPin(null);
@@ -502,7 +504,7 @@ export function* showNewPin({ risk, pinData }) {
 	}
 }
 
-export function* toggleShowPins({ showPins }) {
+function* toggleShowPins({ showPins }) {
 	try {
 		yield put(RisksActions.setComponentState({ showPins }));
 		yield put(RisksActions.renderPins());
@@ -528,27 +530,19 @@ const onCreateEvent = (createdRisk) => {
 	dispatch(RisksActions.saveRiskSuccess(prepareRisk(createdRisk[0], jobs)));
 };
 
-const getRisksChannel = (teamspace, modelId) => {
-	const ChatService = getAngularService('ChatService') as any;
-	return ChatService.getChannel(teamspace, modelId).risks;
-};
-
-export function* subscribeOnRiskChanges({ teamspace, modelId }) {
-	const risksNotifications = getRisksChannel(teamspace, modelId);
-	risksNotifications.subscribeToUpdated(onUpdateEvent, this);
-	risksNotifications.subscribeToCreated(onCreateEvent, this);
+function* subscribeOnRiskChanges({ teamspace, modelId }) {
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.ISSUES, teamspace, modelId, {
+		subscribeToUpdated: onUpdateEvent,
+		subscribeToCreated: onCreateEvent
+	}));
 }
 
-export function* unsubscribeOnRiskChanges({ teamspace, modelId }) {
-	const risksNotifications = getRisksChannel(teamspace, modelId);
-	risksNotifications.unsubscribeFromUpdated(onUpdateEvent);
-	risksNotifications.unsubscribeFromCreated(onCreateEvent);
+function* unsubscribeOnRiskChanges({ teamspace, modelId }) {
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.ISSUES, teamspace, modelId, {
+		unsubscribeToUpdated: onUpdateEvent,
+		unsubscribeToCreated: onCreateEvent
+	}));
 }
-
-const getCommentsChannel = (teamspace, modelId, riskId) => {
-	const risksNotifications = getRisksChannel(teamspace, modelId);
-	return risksNotifications.getCommentsChatEvents(riskId);
-};
 
 const onUpdateCommentEvent = (updatedComment) => {
 	const riskId = selectActiveRiskId(getState());
@@ -566,21 +560,23 @@ const onDeleteCommentEvent = (deletedComment) => {
 	dispatch(RisksActions.deleteCommentSuccess(deletedComment.guid, riskId));
 };
 
-export function* subscribeOnRiskCommentsChanges({ teamspace, modelId, riskId }) {
-	const commentsNotifications = getCommentsChannel(teamspace, modelId, riskId);
-	commentsNotifications.subscribeToCreated(onCreateCommentEvent, this);
-	commentsNotifications.subscribeToUpdated(onUpdateCommentEvent, this);
-	commentsNotifications.subscribeToDeleted(onDeleteCommentEvent, this);
+function* subscribeOnRiskCommentsChanges({ teamspace, modelId, riskId }) {
+	yield put(ChatActions.callCommentsChannelActions(CHAT_CHANNELS.RISKS, teamspace, modelId, riskId, {
+		subscribeToCreated: onCreateCommentEvent,
+		subscribeToUpdated: onUpdateCommentEvent,
+		subscribeToDeleted: onDeleteCommentEvent
+	}));
 }
 
-export function* unsubscribeOnRiskCommentsChanges({ teamspace, modelId, riskId }) {
-	const commentsNotifications = getCommentsChannel(teamspace, modelId, riskId);
-	commentsNotifications.unsubscribeFromCreated(onCreateCommentEvent, this);
-	commentsNotifications.unsubscribeFromUpdated(onUpdateCommentEvent, this);
-	commentsNotifications.unsubscribeFromDeleted(onDeleteCommentEvent, this);
+function* unsubscribeOnRiskCommentsChanges({ teamspace, modelId, riskId }) {
+	yield put(ChatActions.callCommentsChannelActions(CHAT_CHANNELS.RISKS, teamspace, modelId, riskId, {
+		unsubscribeToCreated: onCreateCommentEvent,
+		unsubscribeToUpdated: onUpdateCommentEvent,
+		unsubscribeToDeleted: onDeleteCommentEvent
+	}));
 }
 
-export function* setNewRisk() {
+function* setNewRisk() {
 	const risks = yield select(selectRisks);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
@@ -617,7 +613,7 @@ export function* setNewRisk() {
 	}
 }
 
-export function* setFilters({ filters }) {
+function* setFilters({ filters }) {
 	try {
 		yield put(RisksActions.setComponentState({ selectedFilters: filters }));
 		yield put(RisksActions.renderPins());

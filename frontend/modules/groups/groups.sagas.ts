@@ -43,6 +43,8 @@ import { SnackbarActions } from '../snackbar';
 import { TreeActions, getSelectMeshesByNodes, getSelectNodesIdsFromSharedIds, getSelectNodesByIds } from '../tree';
 import { searchByFilters } from '../../helpers/searching';
 import { GROUPS_TYPES } from '../../constants/groups';
+import { ChatActions } from '../chat';
+import { CHAT_CHANNELS } from '../../constants/chat';
 
 export function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(true));
@@ -434,21 +436,19 @@ const onDeleted = (deletedGroupIds) => {
 };
 
 export function* subscribeOnChanges({ teamspace, modelId }) {
-	const ChatService = yield getAngularService('ChatService');
-	const groupsNotifications = yield ChatService.getChannel(teamspace, modelId).groups;
-
-	groupsNotifications.subscribeToUpdated(onUpdated, this);
-	groupsNotifications.subscribeToCreated(onCreated, this);
-	groupsNotifications.subscribeToDeleted(onDeleted, this);
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.GROUPS, teamspace, modelId, {
+		subscribeToUpdated: onUpdated,
+		subscribeToCreated: onCreated,
+		subscribeToDeleted: onDeleted
+	}));
 }
 
 export function* unsubscribeFromChanges({ teamspace, modelId }) {
-	const ChatService = yield getAngularService('ChatService');
-	const groupsNotifications = yield ChatService.getChannel(teamspace, modelId).groups;
-
-	groupsNotifications.unsubscribeFromUpdated(onUpdated);
-	groupsNotifications.unsubscribeFromCreated(onCreated);
-	groupsNotifications.unsubscribeFromDeleted(onDeleted);
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.GROUPS, teamspace, modelId, {
+		unsubscribeToUpdated: onUpdated,
+		unsubscribeToCreated: onCreated,
+		unsubscribeToDeleted: onDeleted
+	}));
 }
 
 export function* resetToSavedSelection({ groupId }) {

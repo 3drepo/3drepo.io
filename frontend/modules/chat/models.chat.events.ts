@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ChatChannel } from './chat.channel';
+import { Channel } from './channel';
 
 export class ModelChatEvents {
-	constructor(private channel: ChatChannel) {
+	constructor(private channel: Channel) {
 	}
 
 	public subscribeToStatusChanged(callback: (data: any) => void, context: any) {

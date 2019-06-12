@@ -18,12 +18,15 @@
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: ChatTypes, Creators: ChatActions } = createActions({
-	fetch: [],
+	handleConnect: [],
+	handleDisconnect: [],
+	handleReconnect: [],
 	saveSocketId: ['socketId'],
 	setJoinedRooms: ['joinedRooms'],
 	addRoom: ['room'],
 	joinRoom: ['teamspace', 'model'],
-	getChannel: ['teamspace', 'model']
+	callChannelActions: ['subchannelName', 'teamspace', 'model', 'handlers'],
+	callCommentsChannelActions: ['subchannelName', 'teamspace', 'model', 'dataId', 'handlers']
 }, { prefix: 'CHAT/' });
 
 export interface IChatState {

@@ -20,6 +20,7 @@ import { ModelChatEvents } from './models.chat.events';
 import { IssuesChatEvents } from './issues.chat.events';
 import { RisksChatEvents } from './risks.chat.events';
 import { NotificationsChatEvents } from './notifications.chat.events';
+import { CHAT_CHANNELS } from '../../constants/chat';
 
 const getEventName = (teamspace: string, model: string, keys: string, event: string) => {
 	const eventName = [teamspace];
@@ -36,7 +37,7 @@ const getEventName = (teamspace: string, model: string, keys: string, event: str
 	return eventName.join('::');
 };
 
-export class ChatChannel {
+export class Channel {
 	/**
 	 * This property contains the object to suscribe to the issues and comments for the issues notification events
 	 */
@@ -70,16 +71,13 @@ export class ChatChannel {
 	 */
 	private subscriptions: { [event: string]: Array<{ callback: (data: any) => void, context: object }> } = {};
 
-	constructor(
-		private socket, private teamspace: string,
-		private modelStr: string, private onSubscribe: (teamspace, model) => void
-	) {
-		this.groups = new ChatEvents(this, 'group');
-		this.issues = new IssuesChatEvents(this);
-		this.risks = new RisksChatEvents(this);
-		this.model = new ModelChatEvents(this);
-		this.views = new ChatEvents(this, 'view');
-		this.notifications = new NotificationsChatEvents(this);
+	constructor(private socket, private teamspace: string, private modelStr: string) {
+		this[CHAT_CHANNELS.GROUPS] = new ChatEvents(this, 'group');
+		this[CHAT_CHANNELS.ISSUES] = new IssuesChatEvents(this);
+		this[CHAT_CHANNELS.RISKS] = new RisksChatEvents(this);
+		this[CHAT_CHANNELS.MODEL] = new ModelChatEvents(this);
+		this[CHAT_CHANNELS.VIEWS] = new ChatEvents(this, 'view');
+		this[CHAT_CHANNELS.NOTIFICATIONS] = new NotificationsChatEvents(this);
 	}
 
 	/**
@@ -144,7 +142,6 @@ export class ChatChannel {
 	}
 
 	private performSubscribe(teamspace: string, model: string, keys: any, event: any, callback: any) {
-		this.onSubscribe(teamspace, model);
 		const eventName = getEventName(teamspace, model, keys, event);
 		this.socket.on(eventName, callback);
 	}
