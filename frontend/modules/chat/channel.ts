@@ -71,7 +71,12 @@ export class Channel {
 	 */
 	private subscriptions: { [event: string]: Array<{ callback: (data: any) => void, context: object }> } = {};
 
-	constructor(private socket, private teamspace: string, private modelStr: string) {
+	constructor(
+		private socket,
+		private teamspace: string,
+		private modelStr: string,
+		private onSubscribe: () => void
+	) {
 		this[CHAT_CHANNELS.GROUPS] = new ChatEvents(this, 'group');
 		this[CHAT_CHANNELS.ISSUES] = new IssuesChatEvents(this);
 		this[CHAT_CHANNELS.RISKS] = new RisksChatEvents(this);
@@ -142,6 +147,7 @@ export class Channel {
 	}
 
 	private performSubscribe(teamspace: string, model: string, keys: any, event: any, callback: any) {
+		this.onSubscribe();
 		const eventName = getEventName(teamspace, model, keys, event);
 		this.socket.on(eventName, callback);
 	}

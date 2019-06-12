@@ -77,7 +77,9 @@ const getChannel = (teamspace, model = '') => {
 	const channelId: string = `${teamspace}${model ? `::${model}` : ''}`;
 
 	if (!channels[channelId]) {
-		channels[channelId] = new Channel(socket, teamspace, model);
+		channels[channelId] = new Channel(socket, teamspace, model, () => {
+			dispatch(ChatActions.joinRoom(teamspace, model));
+		});
 	}
 
 	return channels[channelId];
