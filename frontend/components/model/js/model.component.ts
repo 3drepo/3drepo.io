@@ -119,6 +119,8 @@ class ModelController implements ng.IController {
 			window.removeEventListener('beforeunload', refreshHandler);
 			window.removeEventListener('popstate', popStateHandler);
 			this.ViewerService.off(VIEWER_EVENTS.CLICK_PIN);
+			this.ViewerService.off(VIEWER_EVENTS.CHANGE_PIN_COLOUR);
+			this.ViewerService.off(VIEWER_EVENTS.SET_CAMERA);
 			dispatch(TreeActions.stopListenOnSelections());
 			dispatch(ViewerActions.stopListenOnModelLoaded());
 			this.resetPanelsStates();
@@ -140,6 +142,8 @@ class ModelController implements ng.IController {
 		dispatch(ViewerActions.startListenOnModelLoaded());
 
 		this.ViewerService.on(VIEWER_EVENTS.CLICK_PIN, this.onPinClick);
+		this.ViewerService.on(VIEWER_EVENTS.CHANGE_PIN_COLOUR, this.onChangePinColor);
+		this.ViewerService.on(VIEWER_EVENTS.SET_CAMERA, this.onSetCamera);
 		this.unsubscribeModelSettingsListener = subscribe(this, this.onModelSettingsChange);
 
 		this.watchers();
@@ -159,6 +163,14 @@ class ModelController implements ng.IController {
 			dispatch(IssuesActions.showDetails(this.account, this.model, this.revision, issuesMap[id]));
 			this.PanelService.showPanelsByType('issues');
 		}
+	}
+
+	public onChangePinColor = (params) => {
+		dispatch(ViewerActions.changePinColor(params));
+	}
+
+	public onSetCamera = (params) => {
+		dispatch(ViewerActions.setCamera(params));
 	}
 
 	public watchers() {

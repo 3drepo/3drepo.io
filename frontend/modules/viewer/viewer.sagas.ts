@@ -338,6 +338,23 @@ export function* clearHighlights() {
 	}
 }
 
+export function* setCamera({ params }) {
+	try {
+		Viewer.setCamera(params);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'camera'));
+	}
+}
+
+export function* changePinColor({ params }) {
+	try {
+		const { id, colours } = params;
+		Viewer.changePinColor({ id, colours });
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('change', 'pin colour'));
+	}
+}
+
 export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.WAIT_FOR_VIEWER, waitForViewer);
 	yield takeLatest(ViewerTypes.MAP_INITIALISE, mapInitialise);
@@ -364,4 +381,6 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.START_LISTEN_ON_MODEL_LOADED, startListenOnModelLoaded);
 	yield takeLatest(ViewerTypes.STOP_LISTEN_ON_MODEL_LOADED, stopListenOnModelLoaded);
 	yield takeLatest(ViewerTypes.CLEAR_HIGHLIGHTS, clearHighlights);
+	yield takeLatest(ViewerTypes.SET_CAMERA, setCamera);
+	yield takeLatest(ViewerTypes.CHANGE_PIN_COLOR, changePinColor);
 }
