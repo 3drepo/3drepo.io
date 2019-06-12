@@ -1,4 +1,5 @@
 import sys, os
+
 import gridfs
 from pymongo import MongoClient
 import re
@@ -59,19 +60,29 @@ for database in db.database_names():
                     filePath = os.path.normpath(os.path.join(localFolder, refEntry['link']))
                     fileStatus = fileList.get(filePath)
                     if fileStatus == None:
-                        refInfo = database + "." + modelId + "." + colName + ":" + refEntry["_id"]
+                        refInfo = database + "." + modelId + "." + colName + ": " + refEntry["_id"]
                         if dryRun:
                             missing.append(refInfo);
                         else:
 ##### Upload missing files to FS and insert BSON #####
                             fs = gridfs.GridFS(db, modelId + colPrefix)
-                            for gridFSEntry in fs.find({"filename":{"$not": re.compile("unityAssets.json$")}}):
+                            if colPrefix == ".history":
+                                toRepair = refEntry["_id"]
+                            else:
+                                if len(refEntry["_id"].split("/")) > 1:
+                                    toRepair = "/" + database + "/" + modelId + "/revision/" + refEntry["_id"]
+                                else:
+                                    toRepair = "/" + database + "/" + modelId + "/" + refEntry["_id"]
+                            gridFSEntry = fs.find_one({"filename": toRepair})
+                            if gridFSEntry != None:
                                 if not os.path.exists(os.path.dirname(filePath)):
                                     os.makedirs(os.path.dirname(filePath))
                                 file = open(filePath,'wb')
                                 file.write(StringIO.StringIO(gridFSEntry.read()).getvalue())
                                 file.close()
-                                missing.append("\t\t--Restored: " + refInfo + " to " + filePath);
+                                missing.append(refInfo + " (Restored to: " + filePath + ")");
+                            else:
+                                missing.append(refInfo + ": No backup found.");
                     else:
                         fileList[filePath] = True
 
