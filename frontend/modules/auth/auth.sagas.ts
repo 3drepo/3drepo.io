@@ -29,9 +29,9 @@ import { verificationMessages, forgotPasswordMessages, changePasswordMessages } 
 export function* login({ username, password }) {
 	yield put(AuthActions.setPendingStatus(true));
 
-	try {
+/* 	try { */
 		const { data: { flags }} = yield API.login(username, password);
-
+		debugger;
 		if (flags && flags.termsPrompt) {
 			yield put(DialogActions.showDialog({
 				title: 'Terms and Privacy Policy Update',
@@ -46,7 +46,7 @@ export function* login({ username, password }) {
 			avatarUrl: getAvatarUrl(username)
 		}));
 		yield put(AuthActions.loginSuccess());
-	} catch (e) {
+/* 	} catch (e) {
 		if (e.response.status === 401) {
 			yield put(AuthActions.loginFailure());
 		} else if (e.response.status === 400 && e.response.code === 'ALREADY_LOGGED_IN') {
@@ -54,7 +54,7 @@ export function* login({ username, password }) {
 		} else {
 			yield put(DialogActions.showEndpointErrorDialog('login', 'user', e));
 		}
-	}
+	} */
 	yield put(AuthActions.setPendingStatus(false));
 }
 

@@ -21,6 +21,7 @@ import measureSaga from './measure/measure.sagas';
 import issuesSaga from './issues/issues.sagas';
 import compareSaga from './compare/compare.sagas';
 import startupSaga from './startup/startup.sagas';
+import chatSaga from './chat/chat.sagas';
 // <-- IMPORT MODULE SAGA -->
 
 export default function* rootSaga() {
@@ -46,6 +47,7 @@ export default function* rootSaga() {
 		fork(starredMetaSaga),
 		fork(measureSaga),
 		fork(issuesSaga),
-		fork(compareSaga) // <-- INJECT MODULE SAGA -->
+		fork(compareSaga),
+		fork(chatSaga)// <-- INJECT MODULE SAGA -->
 	]);
 }

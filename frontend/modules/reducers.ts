@@ -23,6 +23,7 @@ import { reducer as starredMetaReducer } from './starredMeta/starredMeta.redux';
 import { reducer as measureReducer } from './measure/measure.redux';
 import { reducer as issuesReducer } from './issues/issues.redux';
 import { reducer as compareReducer } from './compare/compare.redux';
+import { reducer as chatReducer } from './chat/chat.redux';
 // <-- IMPORT MODULE REDUCER -->
 
 export default function createReducer() {
@@ -49,6 +50,7 @@ export default function createReducer() {
 		starredMeta: starredMetaReducer,
 		measure: measureReducer,
 		issues: issuesReducer,
-		compare: compareReducer// <-- INJECT MODULE REDUCER -->
+		compare: compareReducer,
+		chat: chatReducer// <-- INJECT MODULE REDUCER -->
 	});
 }

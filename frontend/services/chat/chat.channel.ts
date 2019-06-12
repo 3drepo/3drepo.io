@@ -62,7 +62,7 @@ export class ChatChannel {
 	 */
 	public model: ModelChatEvents;
 
-	public 	notifications: NotificationsChatEvents;
+	public notifications: NotificationsChatEvents;
 
 	/**
 	 * This dictionary holds the callbacks for every event in the channel .

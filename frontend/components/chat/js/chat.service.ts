@@ -32,66 +32,66 @@ export class ChatService {
 	private lastDialogOpen;
 	private socket;
 	private joined;
-	private channels: { [id: string]: ChatChannel} = {};
+	private channels: { [id: string]: ChatChannel } = {};
 
-	constructor(
-		private $injector,
-		private ClientConfigService,
-		private DialogService
-	) {
-		this.dialogOpen = false;
-
-		if (!ClientConfigService.chatHost || !ClientConfigService.chatPath) {
-			console.error('Chat server settings missing');
-			return;
-		}
-
-		this.socket = io(ClientConfigService.chatHost, {
-			path: ClientConfigService.chatPath,
-			transports: ['websocket'],
-			reconnection: true,
-			reconnectionDelay: 500,
-			reconnectionAttempts: ClientConfigService.chatReconnectionAttempts || Infinity
-		});
-
-		this.joined = [];
-		this.setupSocketEvents();
-	}
-
-	public setupSocketEvents() {
-		this.socket.on('connect', () => {
-			this.addSocketIdToHeader(this.socket.id);
-		});
-
-		this.socket.on('disconnect', () => {
-
-			console.error('The websocket for the chat service was disconnected');
-			this.DialogService.disconnected();
-
-		});
-
-		this.socket.on('reconnect', () => {
-
-			console.debug('Rejoining all rooms on reconnect');
-
-			this.addSocketIdToHeader(this.socket.id);
-
-			const lastJoined = this.joined.slice(0);
-			this.joined = [];
-
-			lastJoined.forEach((room) => {
-
-				room = room.split('::');
-
-				const account = room[0];
-				const model = room[1];
-
-				this.joinRoom(account, model);
+	/* 	constructor(
+			private $injector,
+			private ClientConfigService,
+			private DialogService
+		) {
+			this.dialogOpen = false;
+	
+			if (!ClientConfigService.chatHost || !ClientConfigService.chatPath) {
+				console.error('Chat server settings missing');
+				return;
+			}
+	
+			this.socket = io(ClientConfigService.chatHost, {
+				path: ClientConfigService.chatPath,
+				transports: ['websocket'],
+				reconnection: true,
+				reconnectionDelay: 500,
+				reconnectionAttempts: ClientConfigService.chatReconnectionAttempts || Infinity
 			});
-		});
-	}
+	
+			this.joined = [];
+			this.setupSocketEvents();
+		}
+	
+		public setupSocketEvents() {
+			this.socket.on('connect', () => {
+				this.addSocketIdToHeader(this.socket.id);
+			});
+	
+			this.socket.on('disconnect', () => {
+	
+				console.error('The websocket for the chat service was disconnected');
+				this.DialogService.disconnected();
+	
+			});
+	
+			this.socket.on('reconnect', () => {
+	
+				console.debug('Rejoining all rooms on reconnect');
+	
+				this.addSocketIdToHeader(this.socket.id);
+	
+				const lastJoined = this.joined.slice(0);
+				this.joined = [];
+	
+				lastJoined.forEach((room) => {
+	
+					room = room.split('::');
+	
+					const account = room[0];
+					const model = room[1];
+	
+					this.joinRoom(account, model);
+				});
+			});
+		} */
 
-	public addSocketIdToHeader(socketId: string) {
+/* 	public addSocketIdToHeader(socketId: string) {
 
 		const $httpProvider = this.$injector.get('$http');
 
@@ -102,19 +102,19 @@ export class ChatService {
 		$httpProvider.defaults.headers.post['x-socket-id'] = socketId;
 		$httpProvider.defaults.headers.put['x-socket-id'] = socketId;
 		$httpProvider.defaults.headers.delete['x-socket-id'] = socketId;
-	}
+	} */
 
-	public joinRoom(account: string, model: string) {
+/* 	public joinRoom(account: string, model: string) {
 		let modelNameSpace = '';
 
 		if (model) {
 			modelNameSpace = '::' + model;
 		}
 
-		const room =  account + modelNameSpace;
+		const room = account + modelNameSpace;
 		if (this.joined.indexOf(room) === -1) {
 
-			this.socket.emit('join', {account, model});
+			this.socket.emit('join', { account, model });
 			this.joined.push(room);
 		}
 	}
@@ -122,46 +122,14 @@ export class ChatService {
 	public getChannel(account: string, model: string = ''): ChatChannel {
 		const channelId: string = account + (model ? `::${model}` : '');
 
-		if ( !this.channels[channelId] ) {
+		if (!this.channels[channelId]) {
 			this.channels[channelId] = new ChatChannel(this, account, model);
 		}
 
 		return this.channels[channelId];
-	}
-
-	public getEventName(account: string, model: string, keys: string, event: string): string {
-
-		let modelNameSpace = '';
-
-		if (model) {
-			modelNameSpace = '::' + model;
-		}
-
-		let keyString = '';
-
-		if (!!keys) {
-			keyString =  '::' + keys;
-		}
-
-		return account + modelNameSpace +  keyString + '::' + event;
-	}
-
-	public performSubscribe(account: string, model: string, keys: any, event: any, callback: any) {
-
-		this.joinRoom(account, model);
-
-		const eventName = this.getEventName(account, model, keys, event);
-		this.socket.on(eventName, (data) => {
-			callback(data);
-		});
-	}
-
-	public performUnsubscribe(account: string, model: string, keys: any, event: any) {
-		this.socket.off(this.getEventName(account, model, keys, event));
-	}
-
+	} */
 }
 
 export const NotificationServiceModule = angular
 	.module('3drepo')
-	.service('ChatService', ChatService);
+	.service('ChatService', () => ({}));
