@@ -103,7 +103,7 @@ describe("Revision", function () {
 	});
 
 	it("get issues by revision id should succeed", function(done) {
-		agent.get(`/${username}/${model}/revision/${revisions[0]._id}/issues.json`)
+		agent.get(`/${username}/${model}/revision/${revisions[0]._id}/issues`)
 			.expect(200, function(err, res) {
 				done(err);
 			});
@@ -111,7 +111,7 @@ describe("Revision", function () {
 
 	it("get issues by revision tag should succeed", function(done) {
 		const revWithTag = revisions.find(rev => rev.tag);
-		agent.get(`/${username}/${model}/revision/${revWithTag.tag}/issues.json`)
+		agent.get(`/${username}/${model}/revision/${revWithTag.tag}/issues`)
 			.expect(200, function(err, res) {
 				done(err);
 			});
