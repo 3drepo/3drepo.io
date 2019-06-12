@@ -20,6 +20,7 @@
 const config = require("../config.js");
 const fs = require("fs");
 const path = require("path");
+const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger.js").systemLogger;
 
 class FSHandler {
@@ -33,11 +34,19 @@ class FSHandler {
 	}
 
 	getFileStream(key) {
-		return fs.createReadStream(this.getFullPath(key));
+		try {
+			return fs.createReadStream(this.getFullPath(key));
+		} catch {
+			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
+		}
 	}
 
 	getFile(key) {
-		return fs.readFileSync(this.getFullPath(key));
+		try {
+			return fs.readFileSync(this.getFullPath(key));
+		} catch {
+			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
+		}
 	}
 
 	removeFiles(keys) {

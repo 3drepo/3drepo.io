@@ -316,9 +316,9 @@ function importToyProject(account, username) {
 
 		return Promise.all([
 
-			importToyModel(account, username, "Lego_House_Architecture", "33586989-6130-4787-8ea5-b56b81286ccf", project.name),
-			importToyModel(account, username, "Lego_House_Landscape", "81abd908-d0b2-46f5-a9d5-38471dbfab72", project.name),
-			importToyModel(account, username, "Lego_House_Structure", "94020bb8-07d3-4811-ae29-040c961ed92f", project.name)
+			importToyModel(account, username, "Lego_House_Architecture", "a29d06a0-51b7-45d7-9d33-41a62e036e5b", project.name),
+			importToyModel(account, username, "Lego_House_Landscape", "76fa299d-b626-48c5-9327-05fa371b3a49", project.name),
+			importToyModel(account, username, "Lego_House_Structure", "7ea2eb1f-3ba6-4f13-b6e5-a1b53f17d0c6", project.name)
 
 		]).then(models => {
 
@@ -337,7 +337,7 @@ function importToyProject(account, username) {
 				};
 			});
 
-			return importToyModel(account, username, "Lego_House_Federation", "51dc4f4c-0f55-4c97-b62d-3383f7d23ab3", project.name, subModels, skip);
+			return importToyModel(account, username, "Lego_House_Federation", "cd669a0e-8fb9-4237-ac56-fc787bf3ffb5", project.name, subModels, skip);
 		});
 
 	}).catch(err => {
@@ -689,21 +689,20 @@ function _deleteFiles(files) {
 
 	files.forEach(file => {
 
-		const deleteFile = (file.type === "file" ? fs.unlink : fs.rmdir);
+		const deleteFile = (file.type === "file" ? fs.unlinkSync : fs.rmdirSync);
 
-		deleteFile(file.path, function(err) {
-			if(err) {
-				systemLogger.logError(`error while deleting ${file.desc}`,{
-					message: err.message,
-					err: err,
-					file: file.path
-				});
-			} else {
-				systemLogger.logInfo(`${file.desc} deleted`,{
-					file: file.path
-				});
-			}
-		});
+		try {
+			deleteFile(file.path);
+			systemLogger.logInfo(`${file.desc} deleted`,{
+				file: file.path
+			});
+		} catch(err) {
+			systemLogger.logError(`error while deleting ${file.desc}`,{
+				message: err.message,
+				err: err,
+				file: file.path
+			});
+		}
 	});
 }
 
@@ -799,7 +798,6 @@ function removeModelCollections(account, model) {
 }
 
 function removeModel(account, model, forceRemove) {
-
 	return ModelSetting.findById({account, model}, model).then(setting => {
 		if (!setting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
