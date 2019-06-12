@@ -74,7 +74,7 @@ const ModelSetting = require("../models/modelSetting");
  * @apiErrorExample
  * HTTP/1.1 404 Not Found
  * {
- *	 "place": "GET /issues/issue_ID",
+ *	 "place": "GET /issues/:issueId",
  *	 "status": 500,
  *	 "message": "Issue not found",
  * }
@@ -357,7 +357,7 @@ router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.noti
 router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {post} /:teamspace/:model/issuesId Store issue based on revision
+ * @api {post} /:teamspace/:model/revision/:rid/issues Store issue based on revision
  * @apiName storeIssue
  * @apiGroup Issues
  *
@@ -368,7 +368,7 @@ router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, midd
 router.post("/revision/:rid/issues", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {put} /:teamspace/:model/revision/"rid/issues/:issueId Update issue based on revision
+ * @api {put} /:teamspace/:model/revision/:rid/issues/:issueId Update issue based on revision
  * @apiName updateIssue
  * @apiGroup Issues
  *

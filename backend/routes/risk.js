@@ -79,7 +79,7 @@ router.get("/risks/:riskId/viewpoints/:vid/screenshot.png", middlewares.issue.ca
 router.get("/risks/:riskId/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
 
 /**
- * @api {get} /:teamspace/:model/risks/:rid/risks	List all Risks by revision ID
+ * @api {get} /:teamspace/:model/revision/:rid/risks	List all Risks by revision ID
  * @apiName listRisks
  * @apiGroup Risks
  *
@@ -100,7 +100,7 @@ router.get("/revision/:rid/risks", middlewares.issue.canView, listRisks);
 router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
 
 /**
- * @api {get} /:teamspace/:model/risks.html  Render all Risks as HTML by revision ID
+ * @api {get} /:teamspace/:model/revision/:rid/risks.html  Render all Risks as HTML by revision ID
  * @apiName renderRisksHTML
  * @apiGroup Risks
  *
@@ -122,7 +122,7 @@ router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHT
 router.post("/risks", middlewares.issue.canCreate, storeRisk);
 
 /**
- * @api {patch} /:teamspace/:model/risks/riskId	Update risks based on revision
+ * @api {patch} /:teamspace/:model/risks/:riskId	Update risks based on revision
  * @apiName updateRisk
  * @apiGroup Risks
  *
