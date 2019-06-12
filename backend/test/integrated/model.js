@@ -314,11 +314,12 @@ describe("Model", function () {
 			});
 	});
 
-	it("should return error if creating a model in a database that doesn't exists or not authorized for", function(done) {
+	it("should return error if creating a model in a database that doesn't exists", function(done) {
 
 		agent.post(`/${username}_someonelese/model`)
 			.send({ modelName: "testmodel", desc, type, unit, project })
-			.expect(401, function(err ,res) {
+			.expect(404, function(err ,res) {
+				expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
 				done(err);
 			});
 	});
@@ -382,7 +383,7 @@ describe("Model", function () {
 
 		it("should fail if delete again", function(done) {
 			agent.delete(`/${username}/${model}`).expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.value);
+				expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
 				done(err);
 			});
 		});
