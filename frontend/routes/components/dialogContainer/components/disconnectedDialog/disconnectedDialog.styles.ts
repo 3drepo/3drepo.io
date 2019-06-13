@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,22 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import styled from 'styled-components';
+import DialogActionsComponent from '@material-ui/core/DialogActions';
 
-export const selectDialogDomain = (state) => Object.assign({}, state.dialog);
-
-export const selectIsOpen = createSelector(
-	selectDialogDomain, (state) => state.isOpen
-);
-
-export const selectDialogConfig = createSelector(
-	selectDialogDomain, (state) => state.config
-);
-
-export const selectDialogData = createSelector(
-	selectDialogDomain, (state) => state.data
-);
-
-export const selectMuteNotifications = createSelector(
-	selectDialogDomain, (state) => state.muteNotifications
-);
+export const DialogActions = styled(DialogActionsComponent)`
+	&& {
+		margin-left: 7px;
+		justify-content: space-between;
+	}
+`;

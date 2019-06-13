@@ -23,8 +23,6 @@ export class DialogService {
 	];
 
 	private expiredDialogOpen;
-	private disconnectedDialogOpen;
-	private disconnectDialogLastOpen;
 	private muteNotifications;
 	private thirtySeconds;
 
@@ -32,60 +30,7 @@ export class DialogService {
 		private $mdDialog
 	) {
 		this.expiredDialogOpen = false;
-		this.disconnectedDialogOpen = false;
-		this.muteNotifications = false;
 		this.thirtySeconds = 30 * 1000; /* ms */
-	}
-
-	public disconnected() {
-
-		let greaterThanThirtySeconds = true;
-
-		if (this.disconnectDialogLastOpen !== undefined) {
-			greaterThanThirtySeconds = ((Date.now()) - this.disconnectDialogLastOpen) > this.thirtySeconds;
-		}
-
-		if (greaterThanThirtySeconds === false) {
-			return;
-		}
-
-		if (this.muteNotifications === true) {
-			return;
-		}
-
-		if (this.disconnectedDialogOpen === true) {
-			console.debug('Notifications - Disconnect dialog currently open');
-			return;
-		}
-
-		const title = 'Notification Service Disconnected';
-		const content = 'Your connection to the 3D Repo\'s notification service has dropped. ' +
-		'3D Repo may not behave as expected when commenting and changing issues. Try refreshing the page' +
-		' to reconnect.';
-		const escapable = true;
-
-		// Opening the dialog
-		this.disconnectedDialogOpen = true;
-		this.disconnectDialogLastOpen = Date.now();
-
-		return this.$mdDialog.show(
-			this.$mdDialog.confirm()
-				.clickOutsideToClose(escapable)
-				.escapeToClose(escapable)
-				.title(title)
-				.htmlContent(content)
-				.ariaLabel(title)
-				.ok('Continue')
-				.cancel('Mute Notifications')
-		)
-			.then(() => {
-				this.disconnectedDialogOpen = false;
-			})
-			.catch(() => {
-				this.disconnectedDialogOpen = false;
-				this.muteNotifications = true;
-			});
-
 	}
 
 	public isDefined(variable) {

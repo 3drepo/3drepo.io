@@ -38,11 +38,11 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 		isOpen: false
 	};
 
-	public renderContent = renderWhenTrue(
+	public renderContent = renderWhenTrue(() => (
 		<DialogContent>
 			<div dangerouslySetInnerHTML={{ __html: this.props.config.content }} />
 		</DialogContent>
-	);
+	));
 
 	public renderTemplate = renderWhenTrue(() => {
 		const { content, template: DialogTemplate } = this.props.config;
@@ -86,13 +86,12 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { content, title, template, DialogProps } = this.props.config;
-
 		return (
 			<MuiThemeProvider theme={MuiTheme}>
 				<Dialog {...DialogProps} open={this.props.isOpen} onClose={this.handleClose}>
 					{title && <DialogTitle disableTypography={true}>{title}</DialogTitle>}
 					{this.renderContent(content && !template)}
-					{this.renderTemplate(this.props.config.template)}
+					{this.renderTemplate(template)}
 				</Dialog>
 			</MuiThemeProvider>
 		);

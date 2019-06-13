@@ -22,6 +22,8 @@ import { invoke } from 'lodash';
 import * as API from '../../services/api';
 import { dispatch } from '../../helpers/migration';
 
+import { IS_DEVELOPMENT } from '../../constants/environment';
+import { DialogActions } from '../dialog';
 import { ChatTypes, ChatActions } from './chat.redux';
 import { clientConfigService } from '../../services/clientConfig';
 import { selectJoinedRooms } from './chat.selectors';
@@ -45,13 +47,19 @@ function* handleConnect() {
 	API.setSocketIdHeader(socket.id);
 }
 
-function* handleDisconnect(socketId) {
-	console.error('The websocket for the chat service was disconnected');
-	//DialogService.disconnected();
+function* handleDisconnect() {
+	if (IS_DEVELOPMENT) {
+		console.error('The websocket for the chat service was disconnected');
+	}
+	yield put(DialogActions.showDisconnectedDialog({
+		onCancel: () => DialogActions.setMuteNotifications(true)
+	}));
 }
 
 function* handleReconnect() {
-	console.debug('Rejoining all rooms on reconnect');
+	if (IS_DEVELOPMENT) {
+		console.debug('Rejoining all rooms on reconnect');
+	}
 
 	yield handleConnect();
 

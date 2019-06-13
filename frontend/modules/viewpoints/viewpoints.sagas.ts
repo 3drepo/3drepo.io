@@ -44,16 +44,6 @@ export function* fetchViewpoints({ teamspace, modelId }) {
 	}
 }
 
-function defer() {
-	const deferred = {} as any;
-	const promise = new Promise((resolve, reject) => {
-			deferred.resolve = resolve;
-			deferred.reject  = reject;
-	});
-	deferred.promise = promise;
-	return deferred;
-}
-
 export function* generateViewpointObject(teamspace, modelId, viewName) {
 	try {
 		const screenshot = yield getScreenshot();

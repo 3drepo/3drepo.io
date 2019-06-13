@@ -18,7 +18,7 @@
 import { createActions, createReducer } from 'reduxsauce';
 import { get, omit } from 'lodash';
 import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
-import { ErrorDialog, ConfirmDialog } from '../../routes/components/dialogContainer/components';
+import { ErrorDialog, ConfirmDialog, DisconnectedDialog } from '../../routes/components/dialogContainer/components';
 
 interface IDialogConfig {
 	title: string;
@@ -36,22 +36,25 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showConfirmDialog: ['config'],
 	hideDialog: [],
 	setPendingState: ['isPending'],
-	showScreenshotDialog: ['config']
+	showScreenshotDialog: ['config'],
+	setMuteNotifications: ['muteNotifications'],
+	showDisconnectedDialog: ['config']
 }, { prefix: 'DIALOG/' });
 
 export const INITIAL_STATE = {
 	isOpen: false,
 	isPending: false,
 	config: {},
-	data: null
+	data: null,
+	muteNotifications: false
 };
 
-export const showDialog = (state = INITIAL_STATE, action) => {
+const showDialog = (state = INITIAL_STATE, action) => {
 	const config = omit(action.config, 'data') as IDialogConfig;
 	return { ...state, config, data: action.config.data, isOpen: true };
 };
 
-export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, message, status }) => {
+const showErrorDialog = (state = INITIAL_STATE, { method, dataType, message, status }) => {
 	const config = {
 		title: 'Error',
 		template: ErrorDialog,
@@ -66,7 +69,7 @@ export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, messa
 	return showDialog(state, {config});
 };
 
-export const showEndpointErrorDialog = (state = INITIAL_STATE, { method, dataType, error }) => {
+const showEndpointErrorDialog = (state = INITIAL_STATE, { method, dataType, error }) => {
 	const isImplementationError = !error.response;
 	if (isImplementationError) {
 		console.error(error);
@@ -82,12 +85,12 @@ export const showEndpointErrorDialog = (state = INITIAL_STATE, { method, dataTyp
 	return showErrorDialog(state, { method, dataType, message, status});
 };
 
-export const showConfirmDialog = (state = INITIAL_STATE, action) => {
+const showConfirmDialog = (state = INITIAL_STATE, action) => {
 	const config = { ...action.config, template: ConfirmDialog } as IDialogConfig;
 	return showDialog(state, { config });
 };
 
-export const showScreenshotDialog = (state = INITIAL_STATE, action) => {
+const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 	const config = {
 		title: action.config.title || 'Screenshot',
 		template: ScreenshotDialog,
@@ -104,12 +107,30 @@ export const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 	return showDialog(state, {config});
 };
 
-export const hideDialog = (state = INITIAL_STATE) => {
+const showDisconnectedDialog = (state = INITIAL_STATE, action) => {
+	if (state.muteNotifications) {
+		return state;
+	}
+
+	const config = {
+		title: 'Notification Service Disconnected',
+		template: DisconnectedDialog,
+		onCancel: action.config.onCancel
+	};
+
+	return showDialog(state, { config });
+};
+
+const hideDialog = (state = INITIAL_STATE) => {
 	return { ...state, isOpen: false, isPending: false };
 };
 
-export const setPendingState = (state = INITIAL_STATE, {isPending}) => {
+const setPendingState = (state = INITIAL_STATE, {isPending}) => {
 	return { ...state, isPending };
+};
+
+const setMuteNotifications = (state = INITIAL_STATE, { muteNotifications }) => {
+	return { ...state, muteNotifications };
 };
 
 export const reducer = createReducer({...INITIAL_STATE}, {
@@ -119,5 +140,7 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.SHOW_ENDPOINT_ERROR_DIALOG]: showEndpointErrorDialog,
 	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
 	[DialogTypes.SET_PENDING_STATE]: setPendingState,
-	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog
+	[DialogTypes.SET_MUTE_NOTIFICATIONS]: setMuteNotifications,
+	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog,
+	[DialogTypes.SHOW_DISCONNECTED_DIALOG]: showDisconnectedDialog
 });
