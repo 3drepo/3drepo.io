@@ -30,7 +30,6 @@ import { VIEWER_EVENTS } from '../../../constants/viewer';
 import { StarredMetaActions } from '../../../modules/starredMeta';
 import { BimActions } from '../../../modules/bim';
 import { IssuesActions } from '../../../modules/issues';
-import { ViewerActions } from '../../../modules/viewer';
 import { CompareActions } from '../../../modules/compare';
 
 class ModelController implements ng.IController {
