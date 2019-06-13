@@ -531,14 +531,14 @@ const onCreateEvent = (createdRisk) => {
 };
 
 function* subscribeOnRiskChanges({ teamspace, modelId }) {
-	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.ISSUES, teamspace, modelId, {
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RISKS, teamspace, modelId, {
 		subscribeToUpdated: onUpdateEvent,
 		subscribeToCreated: onCreateEvent
 	}));
 }
 
 function* unsubscribeOnRiskChanges({ teamspace, modelId }) {
-	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.ISSUES, teamspace, modelId, {
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RISKS, teamspace, modelId, {
 		unsubscribeToUpdated: onUpdateEvent,
 		unsubscribeToCreated: onCreateEvent
 	}));
