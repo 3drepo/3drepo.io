@@ -30,8 +30,7 @@ export class AuthService {
 		'$state',
 
 		'ClientConfigService',
-		'AnalyticService',
-		'APIService'
+		'AnalyticService'
 	];
 
 	public initialAuthPromise;
@@ -57,8 +56,7 @@ export class AuthService {
 		private $state,
 
 		private ClientConfigService: any,
-		private AnalyticService: any,
-		private APIService: any
+		private AnalyticService: any
 	) {
 		this.doNotLogout = [
 			'/terms',

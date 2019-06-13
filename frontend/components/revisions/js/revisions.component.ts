@@ -6,8 +6,7 @@ class RevisionsController implements ng.IController {
 		'$state',
 
 		'DialogService',
-		'RevisionsService',
-		'APIService'
+		'RevisionsService'
 	];
 
 	private revisionsLoading;
@@ -24,8 +23,7 @@ class RevisionsController implements ng.IController {
 		private $state,
 
 		private DialogService,
-		private RevisionsService,
-		private APIService
+		private RevisionsService
 	) {}
 
 	public $onInit() {
@@ -81,12 +79,6 @@ class RevisionsController implements ng.IController {
 
 		this.revisions = [];
 		this.revisionsLoading = true;
-
-		this.RevisionsService.listAll(this.account, this.model)
-			.then((revisions) => {
-				this.revisionsLoading = false;
-				this.revisions = revisions;
-			});
 
 		this.DialogService.showDialog('revisions-dialog.html', this.$scope, event, true);
 	}

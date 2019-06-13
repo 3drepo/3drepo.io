@@ -1,8 +1,6 @@
 // Components & services
-import './account/js/account-upload.service';
 import './cookies/js/cookies.component';
 import './home/js/analytic.service';
-import './home/js/api.service';
 import './home/js/auth.interceptor';
 import './home/js/auth.service';
 import './home/js/client-config.service';

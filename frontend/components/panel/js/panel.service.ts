@@ -1,5 +1,3 @@
-import { APIService } from './../../home/js/api.service';
-
 /**
  *  Copyright (C) 2017 3D Repo Ltd
  *
@@ -67,7 +65,6 @@ export class PanelService {
 		'$filter',
 		'$state',
 		'EventService',
-		'APIService',
 		'ViewerService'
 	];
 
@@ -78,7 +75,6 @@ export class PanelService {
 		private $filter: any,
 		private $state: any,
 		private EventService: any,
-		private apiService: APIService,
 		private viewerService: any
 	) {
 		this.reset();
@@ -398,28 +394,6 @@ export class PanelService {
 			options: []
 		});
 
-	}
-
-	/**
-	 * Download server response JSON file from panel menu
-	 *
-	 * @param endpoint The required endpoint to correct JSON response.
-	 * @param fileName Choice of filename : "risks.json", "issues.json", "groups.json"
-	 */
-
-	public downloadJSON(fileName: string, endpoint: string) {
-		const timestamp = this.$filter('prettyDate')(Date.now(), {showSeconds: false});
-		const modelName = this.viewerService.viewer ? this.viewerService.viewer.settings.name : '';
-		this.apiService.get(`${endpoint}&convertCoords=true`).then((res) => {
-		const content = JSON.stringify(res.data, null, 2);
-		const a = document.createElement('a');
-		const file = new Blob([content]);
-		a.href = URL.createObjectURL(file);
-		a.download = `${modelName}_${timestamp}_${fileName}.json`;
-		document.body.appendChild(a); // needed for firefox
-		a.click();
-		document.body.removeChild(a);
-		});
 	}
 
 	/**
