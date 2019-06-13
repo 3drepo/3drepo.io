@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { put, takeLatest, call, select, take, all, spawn } from 'redux-saga/effects';
+import { put, takeLatest, call, select, take, all } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
 
 import TreeProcessing from './treeProcessing/treeProcessing';
