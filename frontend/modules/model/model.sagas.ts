@@ -128,7 +128,7 @@ export function* subscribeOnStatusChange({ teamspace, project, modelData }) {
 	const { modelId, modelName } = modelData;
 
 	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.MODEL, teamspace, modelId, {
-		subscribeToStatusChanged: onChanged(teamspace, project, modelId, modelName),
+		subscribeToStatusChanged: onChanged(teamspace, project, modelId, modelName)
 	}));
 }
 

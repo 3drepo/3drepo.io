@@ -96,7 +96,7 @@ export class ClientConfigService {
 			host: this.chatHost,
 			path: this.chatPath,
 			reconnectionAttempts: this.chatReconnectionAttempts || Infinity
-		}
+		};
 	}
 }
 

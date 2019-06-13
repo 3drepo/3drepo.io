@@ -37,7 +37,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	sendDeleteNotification: NotificationsActions.sendDeleteNotification,
 	confirmSendDeleteAllNotifications: NotificationsActions.confirmSendDeleteAllNotifications,
 	subscribeOnChanges: NotificationsActions.subscribeOnChanges,
-	unsubscribeOnChanges: NotificationsActions.unsubscribeOnChanges,
+	unsubscribeFromChanges: NotificationsActions.unsubscribeFromChanges,
 	showUpdatedFailedError: NotificationsActions.showUpdatedFailedError,
 	setDrawerPanelState: NotificationsActions.setDrawerPanelState
 }, dispatch);

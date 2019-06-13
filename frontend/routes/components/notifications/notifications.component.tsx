@@ -135,7 +135,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 	}
 
 	public componentWillUnmount() {
-		this.props.unsubscribeOnChanges();
+		this.props.unsubscribeFromChanges();
 	}
 
 	public toggleDrawer = () => {
