@@ -15,39 +15,122 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import * as React from 'react';
-import Dropzone from 'react-dropzone';
+import {ResourcesDropzone} from './attachResourcesDropzone';
+import { Formik, FieldArray, Form, Field } from 'formik';
+import { TextField } from '@material-ui/core';
+import { RemoveButton } from '../resources.component';
+import { StyledFormControl,
+		FieldsRow } from '../../../viewer/components/risks/components/riskDetails/riskDetails.styles';
+import { ResourcesListContainer, ResourceListItem, ResourcesListScroller } from './attachResourcesDialog.styles';
+import { DialogButtons } from './attachResourcesDialogButtons';
+import * as Yup from 'yup';
+import { get } from 'lodash';
 
 interface IProps {
 	onSaveFiles: (files) => void ;
+	onCancel: () => void;
 }
 
-interface IState {
-	files: any[];
-}
+const schema = Yup.object().shape({
+	files: Yup.array()
+		.of(
+			Yup.object().shape({
+				name: Yup.string()
+				.strict(false)
+				.trim()
+				.required('Name is required')
+			})
+		)
+		});
 
-export class AttachResourceFiles extends React.PureComponent<IProps, IState> {
-	public state = {
-		files: []
-	};
+const extensionRe = /\.(\w+)$/;
 
-	public onDrop = (acceptedFiles) => {
-		this.setState({files: this.state.files.concat(acceptedFiles)});
-	}
+const FileEntry = ({onClickRemove, index, entry}) => {
+	const nameFieldName = `files.${index}.name`;
+	const fileFieldName = `files.${index}.file`;
 
-	public onRemoveFile = (index) => (e) => {
-		this.setState({files: this.state.files.filter((f , i) => index !== i)});
-	}
+	return (
+		<FieldsRow container justify="space-between" flex={0.5}>
+			<StyledFormControl>
+				<Field name={nameFieldName} render={({ field, form }) => (
+					<TextField {...field}
+						fullWidth
+						error={Boolean(get(form.errors, nameFieldName))}
+						helperText={get(form.errors, nameFieldName)}
+					/>
+				)} />
 
+			</StyledFormControl>
+			<StyledFormControl>
+				<Field type="hidden" name={fileFieldName} />
+				<ResourceListItem>
+					<span> {entry.file.name} </span>
+					<RemoveButton onClick={onClickRemove}/>
+				</ResourceListItem>
+			</StyledFormControl>
+		</FieldsRow>
+	);
+};
+
+export class AttachResourceFiles extends React.PureComponent<IProps, any> {
 	public onSavefiles = (e) => {
 		this.props.onSaveFiles(this.state.files);
 	}
 
+	public insertFile = (fieldArray, file) => {
+		const matches = file.name.match(extensionRe);
+		const ext = matches ? matches[0] : '';
+		const name = matches ? file.name.slice(0, matches.index) : file.name;
+
+		fieldArray.insert(0, {name, ext, file});
+	}
+
+	public onAddFile = (fieldArray) => (acceptedFiles) => {
+		acceptedFiles.forEach((file) => this.insertFile(fieldArray, file));
+	}
+
+	public onSubmit = (values) => {
+		this.props.onSaveFiles(values.files.map((r) => ({name: r.name.trim(), file: r.file})));
+	}
+
 	public render() {
+		const {onCancel} = this.props;
 		return (
 			<div>
-				<Dropzone height="32" onDrop={this.onDrop}>click or drop to add files</Dropzone>
-				{this.state.files.map((f, i) => (<div key={i}>{f.name} <button onClick={this.onRemoveFile(i)}>x</button> </div>))}
-				<button type="button" onClick={this.onSavefiles}>Save</button>
+				<Formik
+				validationSchema={schema}
+				initialValues={{ files: [] }}
+				onSubmit={this.onSubmit}
+				render={({ values }) => (
+				<Form>
+					<FieldArray
+					name="files"
+					render={(arrayHelpers) => (
+						<div>
+						{(values.files && values.files.length > 0) && (
+							<ResourcesListScroller>
+								<ResourcesListContainer>
+									{values.files.map((file, index) =>
+										<FileEntry
+											key={index}
+											index={index}
+											entry={file}
+											onClickRemove={() => arrayHelpers.remove(index)}
+										/>
+										)
+									}
+								</ResourcesListContainer>
+							</ResourcesListScroller>
+						)}
+							<ResourcesDropzone onDrop={this.onAddFile(arrayHelpers)}/>
+						</div>
+					)}
+					/>
+					<DialogButtons onClickCancel={onCancel}/>
+				</Form>
+				)}
+				/>
+
 			</div>
 		);
 	}

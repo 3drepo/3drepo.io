@@ -712,6 +712,8 @@ export function* attachFileResources({ files }) {
 		const issueId = (yield select(selectActiveIssueDetails))._id;
 		const model  = yield select(selectCurrentModel);
 		const names =  files.map((f) => f.name);
+		files = files.map((f) => f.file);
+
 		const username = (yield select(selectCurrentUser)).username;
 
 		const {data} = yield API.attachFileResources(teamspace, model, issueId, names, files);

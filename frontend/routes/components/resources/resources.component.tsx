@@ -40,7 +40,7 @@ interface IState {
 	value: any;
 }
 
-const RemoveButton = (props) => (
+export const RemoveButton = (props) => (
 	<IconButton
 		{...props}
 		aria-label="Toggle menu"

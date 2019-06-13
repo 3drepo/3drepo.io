@@ -29,21 +29,6 @@ import { Container } from './attachResourcesDialog.styles';
 const SettingsSchema = Yup.object().shape({
 });
 
-const Buttons = (props) => {
-	return (
-		<VisualSettingsButtonsContainer>
-			<NeutralActionButton
-				color="primary"
-				variant="raised"
-				disabled={false}
-				type="button"
-				onClick={props.onClickCancel}
-			>
-				Cancel
-			</NeutralActionButton>
-		</VisualSettingsButtonsContainer>);
-};
-
 interface IProps {
 	handleResolve: () => void;
 	handleClose: () => void;
@@ -96,9 +81,8 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 					<DialogTab label="Links" />
 				</DialogTabs>
 
-				{selectedTab === 0 && <AttachResourceFiles onSaveFiles={this.onSaveFiles}/>}
-				{selectedTab === 1 && <AttachResourceUrls onSaveLinks={this.onSaveLinks}/>}
-				<Buttons onClickCancel={handleClose} />
+				{selectedTab === 0 && <AttachResourceFiles onSaveFiles={this.onSaveFiles} onCancel={handleClose}/>}
+				{selectedTab === 1 && <AttachResourceUrls onSaveLinks={this.onSaveLinks} onCancel={handleClose}/>}
 			</Container>
 			);
 	}
