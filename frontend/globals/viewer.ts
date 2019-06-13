@@ -375,12 +375,6 @@ export class Viewer {
 					this.emit(Viewer.EVENT.CLICK_PIN, {
 						id: pointInfo.id
 					});
-
-					this.emit(Viewer.EVENT.CHANGE_PIN_COLOUR, {
-						id: pointInfo.id,
-						colours: 'red'
-					});
-
 				} else {
 					this.emit(Viewer.EVENT.OBJECT_SELECTED, {
 						account: pointInfo.database,
