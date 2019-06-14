@@ -22,7 +22,7 @@ export interface INode {
 	rootParentId?: string;
 }
 
-export interface TreeProcessingData {
+export interface ITreeProcessingData {
 	selectedNodesIds: string[];
 	visibilityMap: any;
 	selectionMap: any;

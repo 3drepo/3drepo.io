@@ -36,7 +36,7 @@ import {
 	selectDefaultHiddenNodesIds,
 	getSelectDeepChildren,
 	selectSelectionMap,
-	selectVisibilityMap,
+	selectVisibilityMap
 } from './tree.selectors';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -486,7 +486,7 @@ function* collapseNode({ id }) {
 	}
 
 	yield put(TreeActions.setExpanedNodesMap(expandedNodesMap));
-};
+}
 
 export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.FETCH_FULL_TREE, fetchFullTree);

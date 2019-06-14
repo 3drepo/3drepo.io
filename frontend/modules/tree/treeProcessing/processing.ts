@@ -1,4 +1,4 @@
-import { memoize, values, intersection, keys, pickBy } from 'lodash';
+import { memoize, intersection, keys, pickBy } from 'lodash';
 import { SELECTION_STATES, VISIBILITY_STATES, NODE_TYPES } from '../../../constants/tree';
 
 export class Processing {
@@ -219,7 +219,7 @@ export class Processing {
 		}
 
 		return { unhighlightedObjects };
-	};
+	}
 
 	private handleNodesVisibility = (nodes, extraData) => {
 		const { ifcSpacesHidden, skipChildren, visibility, skipParents } = extraData;
