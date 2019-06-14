@@ -5,5 +5,7 @@
       "es6",
       "dom",
     ],
+    "jsx": "react",
+    "target": "es5"
   }
 }

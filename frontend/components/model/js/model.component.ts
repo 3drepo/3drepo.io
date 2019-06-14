@@ -25,7 +25,6 @@ import { ViewpointsActions } from '../../../modules/viewpoints';
 import { JobsActions } from '../../../modules/jobs';
 import { RisksActions } from '../../../modules/risks';
 import { GroupsActions } from '../../../modules/groups';
-import { ViewerActions } from '../../../modules/viewer';
 import { VIEWER_EVENTS } from '../../../constants/viewer';
 import { StarredMetaActions } from '../../../modules/starredMeta';
 import { BimActions } from '../../../modules/bim';
