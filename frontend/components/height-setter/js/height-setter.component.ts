@@ -48,10 +48,7 @@ class HeightSetterController implements ng.IController, IBindings {
 	private observer;
 	private initialTimeout;
 	private updateHeightTimeout;
-
 	private removeHeightWatch;
-	private isVirtualized;
-	private virtualizedList;
 
 	constructor(private $element, private $timeout, private $scope) {
 		this.observer = new MutationObserver(this.handleElementChange);
@@ -114,14 +111,7 @@ class HeightSetterController implements ng.IController, IBindings {
 
 	public updateHeight = debounce(() => {
 		this.updateHeightTimeout = this.$timeout(() => {
-			let requestedHeight = this.contentHeight + this.partialsHeight;
-
-			if (this.isVirtualized) {
-				this.virtualizedList = document.querySelector('.ReactVirtualized__Grid__innerScrollContainer');
-				requestedHeight += this.virtualizedList.scrollHeight > 780 ? 0 : 56;
-			} else {
-				requestedHeight += this.headerHeight;
-			}
+			const requestedHeight = this.contentHeight + this.headerHeight + this.partialsHeight;
 
 			this.contentData.panelTakenHeight = this.headerHeight;
 			this.onHeightUpdate({
