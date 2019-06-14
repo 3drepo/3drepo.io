@@ -99,15 +99,6 @@ class HeightSetterController implements ng.IController, IBindings {
 			sibCheck = sibCheck.nextSibling;
 		}
 		return contentContainer.scrollHeight + extraHeight;
-/* 
-
-		const heightCatchers = this.content[0]
-			.querySelectorAll('.ReactVirtualized__Grid__innerScrollContainer, .height-catcher');
-		const contentContainer = last(heightCatchers) as any;
-		this.isVirtualized = contentContainer.classList.contains('ReactVirtualized__Grid__innerScrollContainer');
-		const prevContentHeight = contentContainer.previousSibling && contentContainer.previousSibling.offsetHeight;
-		const footerHeight = contentContainer.nextSibling && contentContainer.nextSibling.offsetHeight;
-		return contentContainer.scrollHeight + (prevContentHeight || 0) + (footerHeight || 0); */
 	}
 
 	get partialsHeight() {
