@@ -32,8 +32,8 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	setComponentState: ['componentState'],
 	resetComponentState: [],
 	setIfcSpacesHidden: ['ifcSpacesHidden'],
-	expandNode: ['id'],
-	collapseNode: ['id'],
+	expandNodes: ['nodesIds'],
+	collapseNodes: ['nodesIds'],
 	selectNode: ['id'],
 	deselectNode: ['id'],
 	setIsPending: ['isPending'],
@@ -56,7 +56,8 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	clearCurrentlySelected: [],
 	setExpanedNodesMap: ['expandedNodesMap'],
 	updateDataRevision: [],
-	setActiveNode: ['nodeId']
+	setActiveNode: ['nodeId'],
+	goToParentNode: ['nodeId']
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
@@ -123,9 +124,11 @@ const updateDataRevision = (state) => {
 	return { ...state, dataRevision: uniqueId('tree-data-rev-') };
 };
 
-const expandNode = (state = INITIAL_STATE, { id }) => {
-	const newNode = { [id]: true };
-	const expandedNodesMap = { ...state.expandedNodesMap, ...newNode };
+const expandNodes = (state = INITIAL_STATE, { nodesIds }) => {
+	const expandedNodesMap = { ...state.expandedNodesMap };
+	for (let index = 0; index < nodesIds.length; index++) {
+		expandedNodesMap[nodesIds[index]] = true;
+	}
 	return { ...state, expandedNodesMap };
 };
 
@@ -144,7 +147,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.SET_IS_PENDING]: setIsPending,
 	[TreeTypes.RESET_COMPONENT_STATE]: resetComponentState,
 	[TreeTypes.SET_IFC_SPACES_HIDDEN]: setIfcSpacesHidden,
-	[TreeTypes.EXPAND_NODE]: expandNode,
+	[TreeTypes.EXPAND_NODES]: expandNodes,
 	[TreeTypes.SET_NODES_SELECTION_MAP]: setNodesSelectionMap,
 	[TreeTypes.SET_AUXILIARY_MAPS]: setAuxiliaryMaps,
 	[TreeTypes.SET_EXPANED_NODES_MAP]: setExpanedNodesMap,

@@ -58,10 +58,11 @@ interface IProps {
 	showAllNodes: () => void;
 	isolateSelectedNodes: () => void;
 	hideIfcSpaces: () => void;
+	goToParentNode: (nodeId: boolean) => void;
 }
 
 interface IState {
-	isFederation: boolean;
+	isFederation?: boolean;
 	isScrollToActive: boolean;
 }
 
@@ -217,9 +218,9 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		</>
 	)
 
-	private handleScrollToIndex = (index) => {
+	private handleScrollToTop = (index) => {
 		const treeNode = this.props.nodesList[index];
-		this.nodeListRef.current.scrollToItem(treeNode.rootParentIndex, 'start');
+		this.props.goToParentNode(treeNode.rootParentId);
 	}
 
 	private handleNodesClick = (nodeId) => {
@@ -243,7 +244,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 				isSearchResult={treeNode.isSearchResult}
 				active={activeNode === treeNode._id}
 				expanded={expandedNodesMap[treeNode._id]}
-				onScrollToTop={this.handleScrollToIndex}
+				onScrollToTop={this.handleScrollToTop}
 				onClick={this.handleNodesClick}
 			/>
 		);

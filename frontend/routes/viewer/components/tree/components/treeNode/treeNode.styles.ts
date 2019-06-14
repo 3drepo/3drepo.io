@@ -33,6 +33,7 @@ interface IContainer {
 	expanded: boolean;
 	level: number;
 	active: boolean;
+	hasFederationRoot: boolean;
 }
 
 interface IName {

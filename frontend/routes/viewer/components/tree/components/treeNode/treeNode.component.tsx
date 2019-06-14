@@ -49,8 +49,8 @@ interface IProps {
 	selected?: boolean;
 	active?: boolean;
 	hasFederationRoot?: boolean;
-	collapseNode?: (id) => void;
-	expandNode?: (id) => void;
+	collapseNodes?: (nodesIds: string[]) => void;
+	expandNodes?: (id) => void;
 	selectNode?: (id) => void;
 	setSelectedNodesVisibility?: (id, visibility) => void;
 	isolateSelectedNodes: (id) => void;
@@ -199,14 +199,14 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 
 	private expandNode = (event) => {
 		event.stopPropagation();
-		this.props.expandNode(this.node._id);
+		this.props.expandNodes([this.node._id]);
 	}
 
 	private collapseNode = (event) => {
 		event.stopPropagation();
 
 		if (this.node.hasChildren) {
-			this.props.collapseNode(this.node._id);
+			this.props.collapseNodes([this.node._id]);
 		}
 		return;
 	}
