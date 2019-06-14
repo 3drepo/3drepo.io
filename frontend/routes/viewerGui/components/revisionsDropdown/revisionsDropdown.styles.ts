@@ -18,27 +18,22 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-	height: 100%;
-	pointer-events: none;
-	z-index: 1;
-	flex: 1;
-  position: relative;
-`;
-
-export const LeftPanels = styled.div`
-	pointer-events: all;
-	background: pink;
-	width: 380px;
-	height: calc(100% - 95px);
+	z-index: 2;
 	position: absolute;
-	top: 0;
-	left: 90px;
-`;
-export const LeftPanelsButtons = styled.div`
-	pointer-events: all;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	width: 90px;
-	position: relative;
+	color: white;
+	text-shadow: 1px 1px #666666;
+	font-size: 14px;
+	width: 250px;
+	top: 60px;
+	left: 50%;
+	font-weight: bold;
+	margin-left: -125px;
+	text-align: center;
+
+	@media (max-width: 767px) {
+    revisions {
+        top: 10px;
+        left: 45%;
+    }
+	}
 `;

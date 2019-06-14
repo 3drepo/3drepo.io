@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,30 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import * as React from 'react';
 
-export const Container = styled.div`
-	height: 100%;
-	pointer-events: none;
-	z-index: 1;
-	flex: 1;
-  position: relative;
-`;
+import { Container } from './revisionsDropdown.styles';
 
-export const LeftPanels = styled.div`
-	pointer-events: all;
-	background: pink;
-	width: 380px;
-	height: calc(100% - 95px);
-	position: absolute;
-	top: 0;
-	left: 90px;
-`;
-export const LeftPanelsButtons = styled.div`
-	pointer-events: all;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	width: 90px;
-	position: relative;
-`;
+interface IProps {
+	className?: string;
+}
+
+export class RevisionsDropdown extends React.PureComponent<IProps, any> {
+	public render() {
+		return (
+			<Container className={this.props.className}>
+				RevisionsDropdown component
+			</Container>
+		);
+	}
+}

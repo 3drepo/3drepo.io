@@ -17,7 +17,7 @@ div.homeContainer(
 		style="pointer-events:none"
 	)
 
-	viewer-gui()
+	//- viewer-gui()
 
 	.homeHolder(layout="column" flex ng-if="!vm.isLegalPage")
 		div(
@@ -26,8 +26,8 @@ div.homeContainer(
 			ng-style="{'pointer-events': vm.$state.current.name === 'app.viewer' ? 'none' : 'all','position': vm.$state.current.name === 'app.viewer' ? 'static' : 'relative'}"
 		)
 
-	#homeLegalContainer(flex="100" layout="column" ng-if="vm.isLegalPage")
-		div(ui-view="")
+	//- #homeLegalContainer(flex="100" layout="column" ng-if="vm.isLegalPage")
+	//- 	div(ui-view="")
 
 	#legalLinks
 		a(

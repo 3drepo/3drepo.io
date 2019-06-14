@@ -26,6 +26,7 @@ import { analyticsService } from '../../services/analytics';
 import { ViewerGui } from '../viewerGui';
 import TopMenu from '../components/topMenu/topMenu.container';
 import { ViewerCanvas } from '../viewerCanvas';
+import { Dashboard } from '../dashboard';
 
 interface IProps {
 	location: any;
@@ -195,15 +196,16 @@ export class App extends React.PureComponent<IProps, IState> {
 		return (
 			<>
 				<TopMenu
-/* 					ng-if="vm.isAuthenticated"
+					/* 					ng-if="vm.isAuthenticated"
 					is-lite-mode="vm.isLiteMode"
 					on-lite-mode-change="vm.onLiteModeChange"
 					on-logout="vm.logout"
 					on-logo-click="vm.home"
 					id="topMenu" */
 				/>
-				{/* <ViewerGui /> */}
-				<ViewerCanvas />
+				{/* <Dashboard /> */}
+				<ViewerGui />
+				{/* <ViewerCanvas /> */}
 				<DialogContainer />
 				<SnackbarContainer />
 				<LiveChat/>

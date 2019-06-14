@@ -15,30 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { connect } from '../../../../helpers/migration';
 
-export const Container = styled.div`
-	height: 100%;
-	pointer-events: none;
-	z-index: 1;
-	flex: 1;
-  position: relative;
-`;
+import { RevisionsDropdown } from './revisionsDropdown.component';
 
-export const LeftPanels = styled.div`
-	pointer-events: all;
-	background: pink;
-	width: 380px;
-	height: calc(100% - 95px);
-	position: absolute;
-	top: 0;
-	left: 90px;
-`;
-export const LeftPanelsButtons = styled.div`
-	pointer-events: all;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	width: 90px;
-	position: relative;
-`;
+const mapStateToProps = createStructuredSelector({});
+
+export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(RevisionsDropdown);

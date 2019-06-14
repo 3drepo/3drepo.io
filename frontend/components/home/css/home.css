@@ -9,6 +9,12 @@
 
 }
 
+app {
+	display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 #terms, #privacy, #cookies {
 	width: 100%;
 	height: 100%;
