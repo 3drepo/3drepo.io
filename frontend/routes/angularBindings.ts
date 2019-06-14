@@ -18,19 +18,19 @@ import StaticPageViewer from './staticPageViewer/staticPageViewer.container';
 // Components
 import Dashboard from './dashboard/dashboard.container';
 import TopMenu from './components/topMenu/topMenu.container';
-import Gis from './viewer/components/gis/gis.container';
-import Views from './viewer/components/views/views.container';
-import Risks from './viewer/components/risks/risks.container';
-import Groups from './viewer/components/groups/groups.container';
-import Toolbar from './viewer/components/toolbar/toolbar.container';
-import PanelsMenu from './viewer/components/panelsMenu/panelsMenu.container';
-import { PanelButton } from './viewer/components/panelButton/panelButton.component';
-import CloseFocusModeButton from './viewer/components/closeFocusModeButton/closeFocusModeButton.container';
-import Bim from './viewer/components/bim/bim.container';
-import Issues from './viewer/components/issues/issues.container';
-import Compare from './viewer/components/compare/compare.container';
-import Tree from './viewer/components/tree/tree.container';
-import RevisionsSwitch from './components/revisionsSwitch/revisionsSwitch.container';
+import Gis from './viewerGui/components/gis/gis.container';
+import Views from './viewerGui/components/views/views.container';
+import Risks from './viewerGui/components/risks/risks.container';
+import Groups from './viewerGui/components/groups/groups.container';
+import Toolbar from './viewerGui/components/toolbar/toolbar.container';
+import PanelsMenu from './viewerGui/components/panelsMenu/panelsMenu.container';
+import { PanelButton } from './viewerGui/components/panelButton/panelButton.component';
+import CloseFocusModeButton from './viewerGui/components/closeFocusModeButton/closeFocusModeButton.container';
+import Bim from './viewerGui/components/bim/bim.container';
+import Issues from './viewerGui/components/issues/issues.container';
+import Compare from './viewerGui/components/compare/compare.container';
+import Tree from './viewerGui/components/tree/tree.container';
+import { ViewerGui } from './viewerGui';
 
 angular
 	.module('3drepo')
@@ -57,4 +57,4 @@ angular
 	.component('issues', wrap(Issues, ['teamspace', 'model', 'revision']))
 	.component('compare', wrap(Compare, ['teamspace', 'model', 'revision']))
 	.component('tree', wrap(Tree, ['teamspace', 'model', 'revision']))
-	.component('revisionsSwitch', wrap(RevisionsSwitch, ['teamspace', 'model', 'modelName', 'currentRevision']));
+	.component('viewerGui', wrap(ViewerGui));

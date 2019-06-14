@@ -23,6 +23,9 @@ import { clientConfigService } from '../../services/clientConfig';
 import { isStaticRoute } from '../../services/staticPages';
 import { LiveChat } from '../components/liveChat';
 import { analyticsService } from '../../services/analytics';
+import { ViewerGui } from '../viewerGui';
+import TopMenu from '../components/topMenu/topMenu.container';
+import { ViewerCanvas } from '../viewerCanvas';
 
 interface IProps {
 	location: any;
@@ -191,6 +194,16 @@ export class App extends React.PureComponent<IProps, IState> {
 		// TODO: In the future it'll return first level routes eg. Dashboard, Login
 		return (
 			<>
+				<TopMenu
+/* 					ng-if="vm.isAuthenticated"
+					is-lite-mode="vm.isLiteMode"
+					on-lite-mode-change="vm.onLiteModeChange"
+					on-logout="vm.logout"
+					on-logo-click="vm.home"
+					id="topMenu" */
+				/>
+				{/* <ViewerGui /> */}
+				<ViewerCanvas />
 				<DialogContainer />
 				<SnackbarContainer />
 				<LiveChat/>

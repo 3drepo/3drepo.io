@@ -16,37 +16,23 @@
  */
 
 import * as React from 'react';
-import IssuesIcon from '@material-ui/icons/Place';
-import RisksIcon from '@material-ui/icons/Warning';
-import GroupsIcon from '@material-ui/icons/GroupWork';
-import CompareIcon from '@material-ui/icons/Compare';
-import GisIcon from '@material-ui/icons/Layers';
-import ViewsIcon from '@material-ui/icons/PhotoCamera';
-import TreeIcon from '@material-ui/icons/DeviceHub';
 
-import { runAngularTimeout } from '../../../../helpers/migration';
+import { VIEWER_PANELS_ICONS } from '../../../../constants/viewerGui';
 import { Button } from './panelButton.styles';
 
-const IconsMap = {
-	place: IssuesIcon,
-	report_problem: RisksIcon,
-	group_work: GroupsIcon,
-	camera_alt: ViewsIcon,
-	device_hub: TreeIcon,
-	compare: CompareIcon,
-	layers: GisIcon
-};
-
 export const PanelButton = (props) => {
-	const { active, icon, label, onClick, type } = props;
+	const { active, label, onClick, type, className } = props;
+
+	const handleClick = () => onClick(type);
 
 	return (
 		<Button
+			className={className}
 			label={label}
-			Icon={IconsMap[icon]}
+			Icon={VIEWER_PANELS_ICONS[type]}
 			placement="right-end"
 			active={Boolean(active)}
-			action={() => runAngularTimeout(() => onClick(type))}
+			action={handleClick}
 		/>
 	);
 };

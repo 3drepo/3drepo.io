@@ -92,11 +92,11 @@ export function* stopListenOnModelLoaded() {
 }
 
 export function* startListenOnNumClip() {
-	try {
+/* 	try {
 		Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('start listen on', 'num clip'));
-	}
+	} */
 }
 
 export function* stopListenOnNumClip() {
