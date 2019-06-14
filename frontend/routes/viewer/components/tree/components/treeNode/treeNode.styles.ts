@@ -60,15 +60,6 @@ const getBackgroundColor = (props) => cond([
 		]
 	])(props.nodeType);
 
-const getBoxShadow = (props) => {
-	if (props.expanded && isEqual(TREE_ITEM_MODEL_TYPE, props.nodeType)) {
-		return `inset 0px -12px 12px -10px ${COLOR.BLACK_20}`;
-	} else if (props.active) {
-		return `inset 0px 0px 0px 1px #757575`;
-	}
-	return 'none';
-};
-
 const getButtonBackgroundColor = (props) => {
 	if (props.hasChildren) {
 		if (isEqual(TREE_ITEM_OBJECT_TYPE, props.nodeType)) {

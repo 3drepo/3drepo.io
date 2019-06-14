@@ -64,7 +64,7 @@ interface IProps {
 export class PreviewListItem extends React.PureComponent<IProps, any> {
 	get isExpiredDate() {
 		const { due_date } = this.props;
-		return due_date && new Date().valueOf() >= due_date;
+		return Number(!!(due_date && new Date().valueOf() >= due_date));
 	}
 
 	public renderArrowButton = renderWhenTrue(() => (
