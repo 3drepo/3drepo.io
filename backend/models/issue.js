@@ -67,24 +67,6 @@ const fieldTypes = {
 	"extras": "[object Object]"
 };
 
-const attributeBlacklist = [
-	"_id",
-	"comments",
-	"created",
-	"creator_role",
-	"name",
-	"norm",
-	"number",
-	"owner",
-	"rev_id",
-	"thumbnail",
-	"viewpoint",
-	"viewpoints",
-	"comments",
-	"priority_last_changed",
-	"status_last_changed"
-];
-
 const ownerPrivilegeAttributes = [
 	"position",
 	"desc",
@@ -253,10 +235,10 @@ issue.setGroupIssueId = function(dbCol, data, issueId) {
 
 issue.createIssue = function(dbCol, newIssue) {
 	const sessionId = newIssue.sessionId;
-	const newIssueAttributeBlacklist = [
+	const attributeBlacklist = [
 		"viewpoint"
 	];
-	const issueAttributes = Object.keys(fieldTypes).filter(attr => !newIssueAttributeBlacklist.includes(attr));
+	const issueAttributes = Object.keys(fieldTypes).filter(attr => !attributeBlacklist.includes(attr));
 	const issueAttrPromises = [];
 
 	let branch;
@@ -400,6 +382,25 @@ issue.updateFromBCF = function(dbCol, issueToUpdate, changeSet) {
 };
 
 issue.update = async function(dbCol, issueId, data) {
+	// 0. Set the black list for attributes
+	const attributeBlacklist = [
+		"_id",
+		"comments",
+		"created",
+		"creator_role",
+		"name",
+		"norm",
+		"number",
+		"owner",
+		"rev_id",
+		"thumbnail",
+		"viewpoint",
+		"viewpoints",
+		"comments",
+		"priority_last_changed",
+		"status_last_changed"
+	];
+
 	// 1. Get old issue
 	const sessionId = data.sessionId;
 	const _id = utils.stringToUUID(issueId);
