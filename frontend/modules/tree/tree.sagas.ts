@@ -225,6 +225,7 @@ function* clearCurrentlySelected() {
 		put(ViewerActions.setMetadataVisibility(false)),
 		put(BimActions.setActiveMeta(null))
 	]);
+	yield put(TreeActions.updateDataRevision());
 }
 
 /**
@@ -278,18 +279,20 @@ function* hideTreeNodes(nodesIds = [], skipNested = false) {
  */
 function* isolateNodes(nodesIds = [], colour?) {
 	try {
-		const result = yield TreeProcessing.isolateNodes({ nodesIds });
+		if (nodesIds.length) {
+			const result = yield TreeProcessing.isolateNodes({ nodesIds });
 
-		unhighlightObjects(result.unhighlightObjects);
+			unhighlightObjects(result.unhighlightObjects);
 
-		const [selectionMap, visibilityMap] = yield all([
-			select(selectSelectionMap),
-			select(selectVisibilityMap)
-		]);
-		highlightObjects(result.highlightedObjects, selectionMap, colour);
+			const [selectionMap, visibilityMap] = yield all([
+				select(selectSelectionMap),
+				select(selectVisibilityMap)
+			]);
+			highlightObjects(result.highlightedObjects, selectionMap, colour);
 
-		yield put(TreeActions.updateDataRevision());
-		yield updateMeshesVisibility(result.meshesToUpdate, visibilityMap);
+			yield put(TreeActions.updateDataRevision());
+			yield updateMeshesVisibility(result.meshesToUpdate, visibilityMap);
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('isolate', 'selected nodes', error));
 	}
@@ -389,21 +392,23 @@ function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], col
  */
 function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, skipParents = false }) {
 	try {
-		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
+		if (nodesIds.length) {
+			const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 
-		const result = yield TreeProcessing.updateVisibility({
-			nodesIds,
-			visibility,
-			ifcSpacesHidden,
-			skipChildren,
-			skipParents
-		});
+			const result = yield TreeProcessing.updateVisibility({
+				nodesIds,
+				visibility,
+				ifcSpacesHidden,
+				skipChildren,
+				skipParents
+			});
 
-		unhighlightObjects(result.unhighlightedObjects);
-		const visibilityMap = yield select(selectVisibilityMap);
+			unhighlightObjects(result.unhighlightedObjects);
+			const visibilityMap = yield select(selectVisibilityMap);
 
-		yield updateMeshesVisibility(result.meshesToUpdate, visibilityMap);
-		yield put(TreeActions.updateDataRevision());
+			yield updateMeshesVisibility(result.meshesToUpdate, visibilityMap);
+			yield put(TreeActions.updateDataRevision());
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'tree node visibility', error));
 	}
