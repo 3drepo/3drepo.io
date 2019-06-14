@@ -1,5 +1,5 @@
 import { Processing } from './processing';
-import { TreeProcessingData } from './treeProcessing.constants';
+import { ITreeProcessingData } from './treeProcessing.constants';
 // tslint:disable-next-line
 const TreeLoaderWorker = require('worker-loader?inline!./workers/loading.worker');
 
@@ -10,7 +10,7 @@ class TreeProcessing {
 	private processing: Processing;
 
 	get data() {
-		return (this.processing || {}) as TreeProcessingData;
+		return (this.processing || {}) as ITreeProcessingData;
 	}
 
 	public transformData = (payload) => {

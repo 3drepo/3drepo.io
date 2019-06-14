@@ -18,10 +18,10 @@
 import { createSelector } from 'reselect';
 import { pickBy, keys, values, flatten, pick, uniq } from 'lodash';
 
-import { SELECTION_STATES, NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
+import { NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
 import { calculateTotalMeshes } from '../../helpers/tree';
 import { searchByFilters } from '../../helpers/searching';
-import { TreeProcessingData } from './treeProcessing/treeProcessing.constants';
+import { ITreeProcessingData } from './treeProcessing/treeProcessing.constants';
 import TreeProcessing from './treeProcessing/treeProcessing';
 
 export const selectTreeDomain = (state) => Object.assign({}, state.tree);
@@ -50,7 +50,7 @@ export const selectActiveNode = createSelector(
 	selectTreeDomain, (state) => state.activeNode
 );
 
-const selectTreeProccessing = () => TreeProcessing.data as TreeProcessingData;
+const selectTreeProccessing = () => TreeProcessing.data as ITreeProcessingData;
 
 export const selectTreeNodesList = createSelector(
 	selectTreeProccessing, selectDataRevision,

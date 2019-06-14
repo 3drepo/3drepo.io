@@ -61,7 +61,7 @@ interface IProps {
 }
 
 interface IState {
-	isFederation: boolean,
+	isFederation: boolean;
 	isScrollToActive: boolean;
 }
 
