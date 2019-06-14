@@ -41,6 +41,8 @@ export class Processing {
 		for (let index = 0, size = selectedNodesIds.length; index < size; index++) {
 			this.selectionMap[selectedNodesIds[index]] = SELECTION_STATES.UNSELECTED;
 		}
+
+		this.selectionMap = {...this.selectionMap};
 	}
 
 	public selectNodes = ({ nodesIds = [], ...extraData }) => {
