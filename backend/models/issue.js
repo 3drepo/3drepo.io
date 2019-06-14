@@ -396,7 +396,6 @@ issue.update = async function(dbCol, issueId, data) {
 		"thumbnail",
 		"viewpoint",
 		"viewpoints",
-		"comments",
 		"priority_last_changed",
 		"status_last_changed"
 	];
