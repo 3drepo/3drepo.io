@@ -472,25 +472,52 @@ function* handleMeshesVisibility(meshes, visibility) {
 	}
 }
 
-function* collapseNode({ id }) {
+function* collapseNodes({ nodesIds }) {
 	const expandedNodesMap = {... (yield select(selectExpandedNodesMap))};
 	const nodesIndexesMap = yield select(selectNodesIndexesMap);
 	const nodesList = yield select(selectTreeNodesList);
 
-	const nodeIndex = nodesIndexesMap[id];
-	const node = nodesList[nodeIndex];
+	for (let index = 0; index < nodesIds.length; index++) {
+		const nodeId = nodesIds[index];
+		const nodeIndex = nodesIndexesMap[nodeId];
+		const node = nodesList[nodeIndex];
 
-	if (node.deepChildrenNumber) {
-		for (let i = nodeIndex; i < nodeIndex + node.deepChildrenNumber; i++) {
-			if (expandedNodesMap[nodesList[i]._id]) {
-				expandedNodesMap[nodesList[i]._id] = false;
+		if (node.deepChildrenNumber) {
+			for (let i = nodeIndex; i < nodeIndex + node.deepChildrenNumber; i++) {
+				if (expandedNodesMap[nodesList[i]._id]) {
+					expandedNodesMap[nodesList[i]._id] = false;
+				}
 			}
+		} else {
+			expandedNodesMap[nodeId] = false;
 		}
-	} else {
-		expandedNodesMap[id] = false;
 	}
 
 	yield put(TreeActions.setExpanedNodesMap(expandedNodesMap));
+}
+
+function* goToParentNode({ nodeId }) {
+	const nodesIndexesMap = yield select(selectNodesIndexesMap);
+	const nodesList = yield select(selectTreeNodesList);
+	const level = nodesList[nodesIndexesMap[nodeId]].level;
+
+	const nodesToCollapse = [];
+	const nodesToExpand = [];
+
+	let currentNodeIndex = 0;
+	while (currentNodeIndex <= nodesList.length - 1) {
+		const node = nodesList[currentNodeIndex];
+		if (node.level === level) {
+			nodesToExpand.push(node._id);
+			nodesToCollapse.push(...node.childrenIds);
+			currentNodeIndex += node.deepChildrenNumber;
+		} else {
+			currentNodeIndex++;
+		}
+	}
+
+	yield put(TreeActions.collapseNodes(nodesToCollapse));
+	yield put(TreeActions.expandNodes(nodesToExpand));
 }
 
 export default function* TreeSaga() {
@@ -517,5 +544,6 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.HIDE_NODES_BY_SHARED_IDS, hideNodesBySharedIds);
 	yield takeLatest(TreeTypes.ISOLATE_NODE, isolateNode);
 	yield takeLatest(TreeTypes.CLEAR_CURRENTLY_SELECTED, clearCurrentlySelected);
-	yield takeLatest(TreeTypes.COLLAPSE_NODE, collapseNode);
+	yield takeLatest(TreeTypes.COLLAPSE_NODES, collapseNodes);
+	yield takeLatest(TreeTypes.GO_TO_PARENT_NODE, goToParentNode);
 }

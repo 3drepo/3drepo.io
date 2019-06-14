@@ -35,8 +35,8 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setState: TreeActions.setComponentState,
-	expandNode: TreeActions.expandNode,
-	collapseNode: TreeActions.collapseNode,
+	expandNodes: TreeActions.expandNodes,
+	collapseNodes: TreeActions.collapseNodes,
 	setSelectedNodesVisibility: TreeActions.setSelectedNodesVisibility,
 	isolateSelectedNodes: TreeActions.isolateSelectedNodes
 }, dispatch);
