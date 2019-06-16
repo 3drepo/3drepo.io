@@ -416,8 +416,6 @@ export class ViewerService {
 		} else {
 			this.account = account;
 			this.model = model;
-			await this.setHelicopterSpeed();
-
 			return this.viewer.loadModel(account, model, branch, revision)
 				.then(() => {
 					// Set the current model in the viewer
