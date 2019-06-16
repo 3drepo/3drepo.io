@@ -19,6 +19,9 @@ import { createActions, createReducer } from 'reduxsauce';
 import { get, omit } from 'lodash';
 import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
 import { ErrorDialog, ConfirmDialog, DisconnectedDialog } from '../../routes/components/dialogContainer/components';
+import {
+	SimpleErrorDialog
+} from '../../routes/components/dialogContainer/components/simpleErrorDialog/simpleErrorDialog';
 
 interface IDialogConfig {
 	title: string;
@@ -33,6 +36,7 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showDialog: ['config'],
 	showEndpointErrorDialog: ['method', 'dataType', 'error'],
 	showErrorDialog: ['method', 'dataType', 'message', 'status'],
+	showSimpleErrorDialog: ['config'],
 	showConfirmDialog: ['config'],
 	hideDialog: [],
 	setPendingState: ['isPending'],
@@ -90,6 +94,11 @@ const showConfirmDialog = (state = INITIAL_STATE, action) => {
 	return showDialog(state, { config });
 };
 
+const showSimpleErrorDialog = (state = INITIAL_STATE, action) => {
+	const config = { ...action.config, template: SimpleErrorDialog } as IDialogConfig;
+	return showDialog(state, { config });
+};
+
 const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 	const config = {
 		title: action.config.title || 'Screenshot',
@@ -139,6 +148,7 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.SHOW_ERROR_DIALOG]: showErrorDialog,
 	[DialogTypes.SHOW_ENDPOINT_ERROR_DIALOG]: showEndpointErrorDialog,
 	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
+	[DialogTypes.SHOW_SIMPLE_ERROR_DIALOG]: showSimpleErrorDialog,
 	[DialogTypes.SET_PENDING_STATE]: setPendingState,
 	[DialogTypes.SET_MUTE_NOTIFICATIONS]: setMuteNotifications,
 	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog,

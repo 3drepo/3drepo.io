@@ -22,15 +22,9 @@ export class DialogService {
 		'$mdDialog'
 	];
 
-	private expiredDialogOpen;
-	private muteNotifications;
-	private thirtySeconds;
-
 	constructor(
 		private $mdDialog
 	) {
-		this.expiredDialogOpen = false;
-		this.thirtySeconds = 30 * 1000; /* ms */
 	}
 
 	public isDefined(variable) {
@@ -72,78 +66,6 @@ export class DialogService {
 		this.$mdDialog.cancel();
 	}
 
-	public confirm(title, content, escapable, ok, cancel) {
-
-		if (!this.expiredDialogOpen) {
-
-			if (escapable === undefined) {
-				escapable = true;
-			}
-
-			return this.$mdDialog.show(
-				this.$mdDialog.confirm()
-					.clickOutsideToClose(escapable)
-					.escapeToClose(escapable)
-					.title(title)
-					.textContent(content)
-					.ariaLabel(title)
-					.ok(ok)
-					.cancel(cancel)
-			);
-
-		} else {
-			return Promise.resolve();
-		}
-
-	}
-
-	public text(title, content, escapable) {
-
-		if (!this.expiredDialogOpen) {
-
-			if (escapable === undefined) {
-				escapable = true;
-			}
-
-			return this.$mdDialog.show(
-				this.$mdDialog.alert()
-					.clickOutsideToClose(escapable)
-					.escapeToClose(escapable)
-					.title(title)
-					.textContent(content)
-					.ariaLabel(title)
-					.ok('OK')
-			);
-
-		} else {
-			return Promise.resolve();
-		}
-
-	}
-
-	public html(title, content, escapable) {
-
-		if (!this.expiredDialogOpen) {
-
-			if (escapable === undefined) {
-				escapable = true;
-			}
-
-			return this.$mdDialog.show(
-				this.$mdDialog.alert()
-					.clickOutsideToClose(escapable)
-					.escapeToClose(escapable)
-					.title(title)
-					.htmlContent(content)
-					.ariaLabel(title)
-					.ok('OK')
-			);
-		} else {
-			return Promise.resolve();
-		}
-
-	}
-
 	public newUpdate() {
 
 		const title = 'Update Available';
@@ -175,30 +97,6 @@ export class DialogService {
 			});
 
 	}
-
-	public showError = (action: string, type: string, error: any) => {
-		const message = get(error, 'data.message', '');
-
-		const title = 'Error';
-		const subtitle = action && type ?
-			`Something went wrong trying to ${action} the ${type}:` :
-			`Something went wrong:`;
-
-		const content = `
-				${subtitle}
-				<br><br>
-				<strong>${message}</strong>
-				<br>
-				${error.status ? `<code>(Status Code: ${error.status})</code>` : ''}
-				<br><br>
-				If this is unexpected please message support@3drepo.io.
-			`;
-		const escapable = true;
-
-		this.html(title, content, escapable);
-		console.error(subtitle, error);
-	}
-
 }
 
 export const DialogServiceModule = angular
