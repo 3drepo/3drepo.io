@@ -206,31 +206,35 @@ function* setActiveTab({ activeTab }) {
 
 function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
 	try {
-		const model = modelId;
 		const activeTab = yield select(selectActiveTab);
 		const isDiff = activeTab === DIFF_COMPARE_TYPE;
-
 		const targetDiffModels = yield select(selectTargetDiffModels);
 		const targetClashModels = yield select(selectTargetClashModels);
 		const componentState = {} as ICompareComponentState;
 		const compareModels = yield select(selectCompareModels);
 
 		if (isDiff) {
+			const newModel = {};
+			newModel[modelId] = isTarget;
+
 			componentState.targetDiffModels = {
 				...targetDiffModels,
-					[model]: isTarget
+				...newModel
 			};
 		}
 
 		if (!isTarget) {
-			const { baseRevision } = compareModels.find((comparedModel) => comparedModel._id === model);
-			yield put(CompareActions.setTargetRevision(model, baseRevision));
+			const { baseRevision } = compareModels.find((comparedModel) => comparedModel._id === modelId);
+			yield put(CompareActions.setTargetRevision(modelId, baseRevision));
 		}
 
 		if (!isDiff) {
+			const newModel = {};
+			newModel[modelId] = isTypeChange ? isTarget : false;
+
 			componentState.targetClashModels = {
 				...targetClashModels,
-				[model]: isTypeChange ? isTarget : false
+				...newModel
 			};
 		}
 
