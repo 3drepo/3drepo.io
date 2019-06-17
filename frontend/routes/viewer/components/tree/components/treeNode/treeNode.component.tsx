@@ -110,6 +110,10 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 		return this.props.selectionMap[this.node._id] === SELECTION_STATES.SELECTED;
 	}
 
+	get isModelRoot() {
+		return !this.props.hasFederationRoot && this.level === 1;
+	}
+
 	public static defaultProps = {
 		visible: false,
 		selected: false,
@@ -150,8 +154,8 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 
 	private renderActions = renderWhenTrue(() => (
 		<Actions>
-			{this.renderOpenModelAction(this.node.isModel)}
-			{this.renderGoTopAction(!this.node.isModel)}
+			{this.renderOpenModelAction(this.node.isModel && !this.isModelRoot)}
+			{this.renderGoTopAction(!this.node.isModel && !this.isModelRoot)}
 			<SmallIconButton
 				Icon={IsolateIcon}
 				tooltip="Isolate"
@@ -165,7 +169,7 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 		</Actions>
 	));
 
-	public getVisibilityIcon(visibility) {
+	public getVisibilityIcon = (visibility) => {
 		if (visibility === VISIBILITY_STATES.VISIBLE) {
 			return VisibleIcon;
 		} else if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
@@ -183,7 +187,7 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 				style={style}
 				key={key}
 				nodeType={this.type}
-				expandable={this.node.hasChildren}
+				expandable={this.node.hasChildren && !this.isModelRoot}
 				selected={!isSearchResult && this.isSelected}
 				active={active}
 				highlighted={!isSearchResult && this.isHighlighted}
@@ -251,7 +255,7 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 
 	private renderName = () => (
 		<NameWrapper>
-			{this.renderExpandableButton(!this.node.isFederation && !this.props.isSearchResult)}
+			{this.renderExpandableButton(!this.node.isFederation && !this.isModelRoot && !this.props.isSearchResult)}
 			<Name nodeType={this.type}>{this.node.name}</Name>
 		</NameWrapper>
 	)
