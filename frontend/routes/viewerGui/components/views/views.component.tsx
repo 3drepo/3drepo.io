@@ -26,13 +26,19 @@ import AddIcon from '@material-ui/icons/Add';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Viewer } from '../../../../services/viewer/viewer';
-
-import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
-import { ViewsCountInfo, ViewpointsList, EmptyStateInfo, SearchField, Container } from './views.styles';
-import { ViewItem } from './components/viewItem/viewItem.component';
 import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
+import { ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
+import {
+	ViewsCountInfo,
+	ViewpointsList,
+	EmptyStateInfo,
+	SearchField,
+	Container,
+	ViewsContainer,
+	ViewsIcon
+} from './views.styles';
+import { ViewItem } from './components/viewItem/viewItem.component';
 
 interface IProps {
 	isPending: boolean;
@@ -265,7 +271,7 @@ export class Views extends React.PureComponent<IProps, any> {
 		this.setState({ filteredViewpoints }, onSave);
 	}
 
-	public getTitleIcon = () => <PhotoCameraIcon />;
+	public getTitleIcon = () => <ViewsIcon />;
 
 	public getSearchButton = () => {
 		if (this.props.searchEnabled) {
@@ -295,20 +301,19 @@ export class Views extends React.PureComponent<IProps, any> {
 		const { filteredViewpoints } = this.state;
 
 		return (
-			<ViewerPanel
-				title="Views"
+			<ViewsContainer
 				Icon={this.getTitleIcon()}
 				renderActions={this.getSearchButton}
 				pending={this.props.isPending}
 			>
-				<Container className="height-catcher" innerRef={this.containerRef}>
+				<Container innerRef={this.containerRef}>
 					{this.renderEmptyState(!hasViewpoints && !searchEnabled && !newViewpoint)}
 					{this.renderSearch(searchEnabled)}
 					{this.renderNotFound(searchEnabled && !filteredViewpoints.length)}
 					{this.renderViewpoints(hasViewpoints || this.props.newViewpoint)}
 				</Container>
 				{this.renderFooterContent()}
-			</ViewerPanel>
+			</ViewsContainer>
 		);
 	}
 }

@@ -16,9 +16,10 @@
  */
 
 import styled, { css } from 'styled-components';
+import { Button, Grid } from '@material-ui/core';
+
 import { COLOR } from '../../../../styles/colors';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
+import { Panel as PanelComponent } from '../../../components/panel/panel.component';
 
 interface IViewerPanelFooter {
 	padding?: string;
@@ -32,6 +33,14 @@ interface IViewerPanelContent {
 interface IViewerPanelButton {
 	active?: number;
 }
+
+export const Panel = styled(PanelComponent)`
+	margin-bottom: 20px;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+`;
 
 export const TitleContainer = styled.div`
 	display: flex;

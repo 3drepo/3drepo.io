@@ -18,9 +18,6 @@
 import * as React from 'react';
 import * as queryString from 'query-string';
 
-import ReportProblem from '@material-ui/icons/ReportProblem';
-
-import RiskDetails from './components/riskDetails/riskDetails.container';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
 	RISK_FILTERS,
@@ -33,8 +30,8 @@ import {
 	LEVELS_OF_RISK,
 	RISK_LEVELS
 } from '../../../../constants/risks';
-
-import { ReportedItems } from '../reportedItems';
+import RiskDetails from './components/riskDetails/riskDetails.container';
+import { RisksContainer } from './risks.styles';
 
 interface IProps {
 	history: any;
@@ -204,10 +201,8 @@ export class Risks extends React.PureComponent<IProps, any> {
 
 	public render() {
 		return (
-			<ReportedItems
-				title="SafetiBase"
+			<RisksContainer
 				type="risk"
-				Icon={ReportProblem}
 				isPending={this.props.isPending}
 
 				items={this.props.risks}

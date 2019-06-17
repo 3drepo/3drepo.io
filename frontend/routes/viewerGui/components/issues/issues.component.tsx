@@ -20,10 +20,7 @@ import * as queryString from 'query-string';
 // @ts-ignore
 import * as fileDialog from 'file-dialog';
 
-import PinDrop from '@material-ui/icons/PinDrop';
-import IssueDetails from './components/issueDetails/issueDetails.container';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { ReportedItems } from '../reportedItems';
 import {
 	STATUSES,
 	ISSUE_FILTERS,
@@ -32,6 +29,8 @@ import {
 	ISSUE_PRIORITIES,
 	ISSUES_ACTIONS_MENU
 } from '../../../../constants/issues';
+import IssueDetails from './components/issueDetails/issueDetails.container';
+import { IssuesContainer } from './issues.styles';
 
 interface IProps {
 	history: any;
@@ -236,9 +235,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 
 	public render() {
 		return (
-			<ReportedItems
-				title="Issues"
-				Icon={PinDrop}
+			<IssuesContainer
 				isPending={this.props.isPending}
 				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
 

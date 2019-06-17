@@ -21,8 +21,25 @@ import IconButton from '@material-ui/core/IconButton';
 import Select from '@material-ui/core/Select';
 import MapIcon from '@material-ui/icons/Map';
 
-import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import { COLOR } from './../../../../styles/colors';
+
+import {
+	VIEWER_PANELS_MIN_HEIGHTS,
+	VIEWER_PANELS,
+	VIEWER_PANELS_ICONS,
+	VIEWER_PANELS_TITLES
+} from '../../../../constants/viewerGui';
+
+import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
+import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+
+export const GisIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.GIS];
+
+export const GisContainer = styled(ViewerPanel).attrs({
+	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.GIS]
+})`
+	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.GIS]}px;
+`;
 
 export const StyledSelect = styled(Select)`
 	margin-bottom: 12px;

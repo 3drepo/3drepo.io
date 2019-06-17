@@ -42,7 +42,6 @@ class ModelController implements ng.IController {
 		'$mdDialog',
 
 		'StateManager',
-		'PanelService',
 		'ViewerService'
 	];
 
@@ -72,7 +71,6 @@ class ModelController implements ng.IController {
 		private $mdDialog,
 
 		private StateManager,
-		private PanelService,
 		private ViewerService
 	) {
 	}
@@ -95,7 +93,6 @@ class ModelController implements ng.IController {
 	}
 
 	public $onInit() {
-		this.issuesCardIndex = this.PanelService.getCardIndex('issues');
 		this.pointerEvents = 'inherit';
 
 		const popStateHandler = (event) => {
@@ -156,12 +153,12 @@ class ModelController implements ng.IController {
 
 		if (risksMap[id]) {
 			dispatch(RisksActions.showDetails(this.account, this.model, this.revision, risksMap[id]));
-			this.PanelService.showPanelsByType('risks');
+			// this.PanelService.showPanelsByType('risks');
 		}
 
 		if (issuesMap[id]) {
 			dispatch(IssuesActions.showDetails(this.account, this.model, this.revision, issuesMap[id]));
-			this.PanelService.showPanelsByType('issues');
+			// this.PanelService.showPanelsByType('issues');
 		}
 	}
 
@@ -237,11 +234,11 @@ class ModelController implements ng.IController {
 	private setupViewer(settings) {
 		if (this.riskId) {
 			// assume issue card shown by default
-			this.PanelService.hidePanelsByType('issues');
-			this.PanelService.showPanelsByType('risks');
+			// this.PanelService.hidePanelsByType('issues');
+			// this.PanelService.showPanelsByType('risks');
 		}
 
-		this.PanelService.hideSubModels(this.issuesCardIndex, !settings.federate);
+		// this.PanelService.hideSubModels(this.issuesCardIndex, !settings.federate);
 	}
 
 	private handleModelSettingsChange = async (settings) => {

@@ -19,9 +19,24 @@ import styled from 'styled-components';
 import { Tabs as TabsComponent, List } from '@material-ui/core';
 import SliderComponent from '@material-ui/lab/Slider';
 
-import { ViewerPanelFooter as ViewerPanelFooterComponent } from '../viewerPanel/viewerPanel.styles';
-
 import { COLOR } from '../../../../styles';
+
+import {
+	VIEWER_PANELS_MIN_HEIGHTS,
+	VIEWER_PANELS,
+	VIEWER_PANELS_ICONS,
+	VIEWER_PANELS_TITLES
+} from '../../../../constants/viewerGui';
+import { ViewerPanelFooter as ViewerPanelFooterComponent } from '../viewerPanel/viewerPanel.styles';
+import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+
+export const CompareIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.COMPARE];
+
+export const CompareContainer = styled(ViewerPanel).attrs({
+	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.COMPARE]
+})`
+	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.COMPARE]}px;
+`;
 
 interface ISliderLabel {
 	disabled?: boolean;

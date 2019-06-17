@@ -56,8 +56,8 @@ import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../vie
 import { EmptyStateInfo } from '../views/views.styles';
 import { ListContainer, Summary } from './../risks/risks.styles';
 import { GroupDetails } from './components/groupDetails';
-import { GroupListItem, StyledIcon } from './groups.styles';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
+import { GroupsContainer, GroupListItem, StyledIcon, GroupIcon } from './groups.styles';
 
 interface IProps {
 	teamspace: string;
@@ -214,7 +214,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				</IconButton>
 			);
 		}
-		return <GroupWork />;
+		return <GroupIcon />;
 	}
 
 	public handleDeleteGroups = () => {
@@ -388,7 +388,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent className="height-catcher">
+			<ViewerPanelContent>
 				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredGroups.length)}
 				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredGroups.length)}
 				{this.renderGroupsList(this.state.filteredGroups.length)}
@@ -446,8 +446,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		return (
-			<ViewerPanel
-				title="Groups"
+			<GroupsContainer
 				Icon={this.renderTitleIcon()}
 				renderActions={this.renderActions}
 				pending={this.props.isPending}
@@ -455,7 +454,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				{this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
 				{this.renderListView(!this.props.showDetails)}
 				{this.renderDetailsView(this.props.showDetails)}
-			</ViewerPanel>
+			</GroupsContainer>
 		);
 	}
 }

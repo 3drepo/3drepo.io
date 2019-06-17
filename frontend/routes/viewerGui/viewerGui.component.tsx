@@ -54,7 +54,7 @@ export class ViewerGui extends React.PureComponent<IProps, any> {
 					model="vm.model"
 				/>
 				{this.renderLeftPanelsButtons()}
-				{this.renderLeftPanels()}
+				{this.renderLeftPanels(this.state.visiblePanels)}
 			</Container>
 		);
 	}
@@ -70,27 +70,27 @@ export class ViewerGui extends React.PureComponent<IProps, any> {
 
 	private renderLeftPanelsButtons = () => (
 		<LeftPanelsButtons>
-			{VIEWER_LEFT_PANELS.map((panelType) => (
+			{VIEWER_LEFT_PANELS.map(({ name, type }) => (
 				<PanelButton
-					key={panelType}
+					key={type}
 					onClick={this.handleTogglePanel}
-					label="contentItem.title"
-					type={panelType}
-					active={true}
+					label={name}
+					type={type}
+					active={this.state.visiblePanels[type]}
 				/>
 			))}
 		</LeftPanelsButtons>
 	)
 
-	private renderLeftPanels = () => (
+	private renderLeftPanels = (visiblePanels) => (
 		<LeftPanels>
-			{this.state.visiblePanels[VIEWER_PANELS.ISSUES] && <Issues />}
-			{this.state.visiblePanels[VIEWER_PANELS.RISKS] && <Risks />}
-			{this.state.visiblePanels[VIEWER_PANELS.GROUPS] && <Groups />}
-			{this.state.visiblePanels[VIEWER_PANELS.VIEWS] && <Views />}
-			{this.state.visiblePanels[VIEWER_PANELS.COMPARE] && <Compare />}
-			{this.state.visiblePanels[VIEWER_PANELS.TREE] && <Tree />}
-			{this.state.visiblePanels[VIEWER_PANELS.GIS] && <Gis />}
+			{visiblePanels[VIEWER_PANELS.ISSUES] && <Issues />}
+			{visiblePanels[VIEWER_PANELS.RISKS] && <Risks />}
+			{visiblePanels[VIEWER_PANELS.GROUPS] && <Groups />}
+			{visiblePanels[VIEWER_PANELS.VIEWS] && <Views />}
+			{visiblePanels[VIEWER_PANELS.TREE] && <Tree />}
+			{visiblePanels[VIEWER_PANELS.COMPARE] && <Compare />}
+			{visiblePanels[VIEWER_PANELS.GIS] && <Gis />}
 		</LeftPanels>
 	)
 }

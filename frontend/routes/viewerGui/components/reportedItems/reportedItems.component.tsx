@@ -60,6 +60,7 @@ interface IHeaderMenuItem {
 }
 
 interface IProps {
+	className?: string;
 	title: string;
 	type: string;
 	items: any[];
@@ -85,7 +86,7 @@ interface IProps {
 	onToggleFilters: (isActive) => void;
 	onChangeFilters: (selectedFilters) => void;
 	toggleShowPins: (showPins: boolean, filteredItems) => void;
-	renderDetailsView: (statement) => void;
+	renderDetailsView: (statement) => React.ReactChildren[];
 }
 
 interface IState {
@@ -277,7 +278,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent innerRef={this.listViewRef} className="height-catcher">
+			<ViewerPanelContent innerRef={this.listViewRef}>
 				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredItems.length)}
 				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredItems.length)}
 				{this.renderItemsList(this.state.filteredItems.length)}
@@ -380,16 +381,18 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	));
 
 	public render() {
+		const { className, title, isPending, searchEnabled, showDetails } = this.props;
 		return (
 			<ViewerPanel
-				title={this.props.title}
+				className={className}
+				title={title}
 				Icon={this.renderTitleIcon()}
 				renderActions={this.renderActions}
-				pending={this.props.isPending}
+				pending={isPending}
 			>
-				{this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
-				{this.renderListView(!this.props.showDetails)}
-				{this.props.renderDetailsView(this.props.showDetails)}
+				{this.renderFilterPanel(searchEnabled && !showDetails)}
+				{this.renderListView(!showDetails)}
+				{this.props.renderDetailsView(showDetails)}
 			</ViewerPanel>
 		);
 	}

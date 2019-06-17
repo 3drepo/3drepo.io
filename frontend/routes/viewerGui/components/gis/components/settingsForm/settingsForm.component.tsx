@@ -33,7 +33,7 @@ export const SettingsForm = (props) => {
 
 	return (
 		<StyledForm>
-			<Container className="height-catcher">
+			<Container>
 				<Header>
 					To visualize map tiles match GIS point with project base point
 				</Header>

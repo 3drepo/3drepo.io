@@ -17,16 +17,16 @@
 
 import * as React from 'react';
 
+import { renderWhenTrue } from '../../../../helpers/rendering';
+import { Loader } from '../../../components/loader/loader.component';
 import {
 	Actions,
 	Title,
 	TitleIcon,
 	TitleContainer,
-	LoaderContainer
+	LoaderContainer,
+	Panel
 } from './viewerPanel.styles';
-import { Panel } from '../../../components/panel/panel.component';
-import { Loader } from '../../../components/loader/loader.component';
-import { renderWhenTrue } from '../../../../helpers/rendering';
 
 const ViewerPanelTitle = ({title, Icon, renderActions}) => (
 	<TitleContainer>
@@ -37,6 +37,7 @@ const ViewerPanelTitle = ({title, Icon, renderActions}) => (
 
 interface IProps {
 	title: string;
+	className?: string;
 	Icon?: JSX.Element;
 	pending?: boolean;
 	renderActions?: () => JSX.Element | JSX.Element[];
@@ -48,30 +49,30 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 	));
 
 	public renderLoader = renderWhenTrue(() => (
-		<LoaderContainer className="height-catcher">
+		<LoaderContainer>
 			<Loader />
 		</LoaderContainer>
 	));
 
-	public renderTitleActions = renderWhenTrue(() => (
+	public renderTitleActions = () => renderWhenTrue(() => (
 		<Actions>
 		{this.props.renderActions()}
 		</Actions>
-	));
+	))(this.props.renderActions);
 
 	public renderTitle = () => (
 		<ViewerPanelTitle
 			title={this.props.title}
 			Icon={this.props.Icon}
-			renderActions={() => this.renderTitleActions(this.props.renderActions)}
+			renderActions={this.renderTitleActions}
 		/>
 	)
 
 	public render() {
-		const { pending } = this.props;
+		const { pending, className } = this.props;
 
 		return (
-			<Panel title={this.renderTitle()}>
+			<Panel className={className} title={this.renderTitle()}>
 				{this.renderLoader(pending)}
 				{this.renderContent(!pending)}
 			</Panel>

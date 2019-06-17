@@ -30,7 +30,6 @@ export class StateManagerService {
 
 		'AuthService',
 		'ClientConfigService',
-		'PanelService',
 		'ViewerService'
 	];
 
@@ -54,7 +53,6 @@ export class StateManagerService {
 
 		private AuthService: any,
 		private ClientConfigService: any,
-		private PanelService: any,
 		private ViewerService: any
 	) {
 		this.state = {
@@ -77,7 +75,6 @@ export class StateManagerService {
 	public resetServiceStates() {
 		// We reset the state of all our services so that
 		// they're back to intial states
-		this.PanelService.reset();
 		this.ViewerService.reset();
 	}
 

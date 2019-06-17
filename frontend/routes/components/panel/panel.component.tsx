@@ -23,6 +23,7 @@ import { MuiTheme, theme } from '../../../styles';
 import { Container, Title, Content, ContentWrapper } from './panel.styles';
 
 interface IProps {
+	className?: string;
 	title?: string | JSX.Element;
 	children: any;
 	paperProps?: any;
@@ -32,7 +33,7 @@ interface IProps {
 export const Panel = (props: IProps) => (
 	<ThemeProvider theme={theme}>
 		<MuiThemeProvider theme={MuiTheme}>
-			<Container {...props.paperProps}>
+			<Container {...props.paperProps} className={props.className}>
 				<Title>{props.title}</Title>
 				<Content>
 					<ContentWrapper hiddenScrollbars={props.hiddenScrollbars}>

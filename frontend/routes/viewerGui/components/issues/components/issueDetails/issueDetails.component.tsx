@@ -322,7 +322,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return (
 			<Container>
 				<ViewerPanelContent
-					className="height-catcher"
 					onScroll={this.handlePanelScroll}
 					innerRef={this.panelRef}
 				>

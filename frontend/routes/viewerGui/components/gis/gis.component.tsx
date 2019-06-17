@@ -17,26 +17,25 @@
 
 import * as React from 'react';
 import { isEmpty, includes } from 'lodash';
-
-import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
-import { Settings } from './components/settings/settings.component';
-
 import { MenuItem, ListItem, IconButton, List } from '@material-ui/core';
-import LayersIcon from '@material-ui/icons/Layers';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+
+import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { Settings } from './components/settings/settings.component';
 import {
+	GisContainer,
 	StyledSelect,
 	MapLayer,
 	MapName,
 	MapNameWrapper,
 	StyledMapIcon,
 	VisibilityButton,
-	MapLayers
+	MapLayers,
+	GisIcon
 } from './gis.styles';
 
 interface IProps {
@@ -84,7 +83,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		const { activeMapIndex } = this.state;
 		const activeMapLayers = mapsProviders.length && mapsProviders[activeMapIndex].layers;
 		return (
-			<MapLayers className="height-catcher">
+			<MapLayers>
 				<StyledSelect onChange={this.handleChangeMapProvider} value={activeMapIndex}>
 					{this.renderMapProviders(mapsProviders)}
 				</StyledSelect>
@@ -157,7 +156,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				</IconButton>
 			);
 		}
-		return <LayersIcon />;
+		return <GisIcon />;
 	}
 
 	public renderMenuContent = () => (
@@ -253,8 +252,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 		const { settingsModeActive } = this.state;
 
 		return (
-			<ViewerPanel
-				title="GIS"
+			<GisContainer
 				Icon={this.getTitleIcon()}
 				renderActions={this.getActions}
 				pending={this.props.isPending}
@@ -269,7 +267,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 					)
 				}
 				{this.renderMapLayers(!settingsModeActive)}
-			</ViewerPanel>
+			</GisContainer>
 	);
 	}
 }

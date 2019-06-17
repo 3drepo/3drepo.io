@@ -48,7 +48,7 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 	));
 
 	public renderList = renderWhenTrue(() => (
-		<List className="height-catcher">
+		<List>
 			{this.props.compareModels.map(this.renderListItem)}
 		</List>
 	));

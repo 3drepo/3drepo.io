@@ -16,7 +16,6 @@
  */
 
 import * as React from 'react';
-import TreeIcon from '@material-ui/icons/DeviceHub';
 import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
 import Check from '@material-ui/icons/Check';
@@ -25,7 +24,6 @@ import { FixedSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
-import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import {
 	IconWrapper,
 	MenuList,
@@ -38,7 +36,7 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { EmptyStateInfo } from '../views/views.styles';
 import TreeNode from './components/treeNode/treeNode.container';
-import { TreeNodes, ViewerPanelContent } from './tree.styles';
+import { TreeContainer, TreeIcon, TreeNodes, ViewerPanelContent } from './tree.styles';
 
 interface IProps {
 	className: string;
@@ -161,18 +159,17 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		const { searchEnabled, nodesList, isPending } = this.props;
 
 		return (
-			<ViewerPanel
-				title="Tree"
+			<TreeContainer
 				Icon={<TreeIcon/>}
 				renderActions={this.renderActions}
 				pending={isPending}
 			>
 				{this.renderFilterPanel(searchEnabled)}
-				<ViewerPanelContent className="height-catcher">
+				<ViewerPanelContent>
 					{this.renderNodesList(!isPending && !!nodesList.length)}
 					{this.renderNotFound(!isPending && !nodesList.length)}
 				</ViewerPanelContent>
-			</ViewerPanel>
+			</TreeContainer>
 		);
 	}
 

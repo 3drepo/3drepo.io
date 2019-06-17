@@ -33,6 +33,8 @@ export const LeftPanels = styled.div`
 	position: absolute;
 	top: 0;
 	left: 90px;
+	display: flex;
+	flex-direction: column;
 `;
 export const LeftPanelsButtons = styled.div`
 	pointer-events: all;

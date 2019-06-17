@@ -16,7 +16,22 @@
  */
 
 import styled from 'styled-components';
+
 import { COLOR } from '../../../../styles';
+import {
+	VIEWER_PANELS_MIN_HEIGHTS,
+	VIEWER_PANELS,
+	VIEWER_PANELS_ICONS,
+	VIEWER_PANELS_TITLES
+} from '../../../../constants/viewerGui';
+import { ReportedItems } from '../reportedItems';
+
+export const RisksContainer = styled(ReportedItems).attrs({
+	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.RISKS],
+	Icon: VIEWER_PANELS_ICONS[VIEWER_PANELS.RISKS] as any
+})`
+	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.RISKS]}px;
+`;
 
 export const ListContainer = styled.ul`
 	height: 100%;

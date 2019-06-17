@@ -17,7 +17,23 @@
 
 import styled, { css } from 'styled-components';
 import { COLOR } from '../../../../styles/colors';
+
+import {
+	VIEWER_PANELS_MIN_HEIGHTS,
+	VIEWER_PANELS,
+	VIEWER_PANELS_ICONS,
+	VIEWER_PANELS_TITLES
+} from '../../../../constants/viewerGui';
 import { PreviewListItem } from '../previewListItem/previewListItem.component';
+import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+
+export const GroupIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.GROUPS];
+
+export const GroupsContainer = styled(ViewerPanel).attrs({
+	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.GROUPS],
+})`
+	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.GROUPS]}px;
+`;
 
 export const Container = styled.div``;
 

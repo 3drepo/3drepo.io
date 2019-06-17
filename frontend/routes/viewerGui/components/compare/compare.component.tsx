@@ -16,11 +16,10 @@
  */
 
 import * as React from 'react';
-import CompareIcon from '@material-ui/icons/Compare';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import CheckIcon from '@material-ui/icons/Check';
 
-import { IconButton, Tab } from '@material-ui/core';
+import { IconButton, Tab, Tooltip } from '@material-ui/core';
 
 import {
 	DIFF_COMPARE_TYPE,
@@ -38,11 +37,17 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
+import { SORT_ORDER_TYPES } from '../../../../constants/sorting';
+import { SortAmountUp, SortAmountDown } from '../../../components/fontAwesomeIcon';
+import { ICompareComponentState } from '../../../../modules/compare/compare.redux';
+import { Loader } from '../../../components/loader/loader.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { CompareDiff } from './components/compareDiff';
 import { CompareClash } from './components/compareClash';
 import {
+	CompareContainer,
+	CompareIcon,
 	Tabs,
 	TabContent,
 	SliderContainer,
@@ -54,11 +59,6 @@ import {
 	MenuList,
 	ComparisonLoader
 } from './compare.styles';
-import { SORT_ORDER_TYPES } from '../../../../constants/sorting';
-import { SortAmountUp, SortAmountDown } from '../../../components/fontAwesomeIcon';
-import { ICompareComponentState } from '../../../../modules/compare/compare.redux';
-import { Loader } from '../../../components/loader/loader.component';
-import Tooltip from '@material-ui/core/Tooltip';
 
 interface IProps {
 	className: string;
@@ -119,7 +119,6 @@ export class Compare extends React.PureComponent<IProps, any> {
 
 	get tabProps() {
 		return {
-			className: 'height-catcher',
 			compareModels: this.props.compareModels,
 			handleItemSelect: this.handleItemSelect,
 			handleAllItemsSelect: this.handleAllItemsSelect,
@@ -168,8 +167,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 		} = this.props;
 
 		return (
-			<ViewerPanel
-				title="Compare"
+			<CompareContainer
 				Icon={<CompareIcon/>}
 				renderActions={this.renderHeaderButtons}
 				pending={this.props.isPending}
@@ -181,7 +179,6 @@ export class Compare extends React.PureComponent<IProps, any> {
 						textColor="primary"
 						fullWidth={true}
 						onChange={this.handleChange}
-						className="height-catcher--partial"
 					>
 						<Tab label={COMPARE_TABS.DIFF} value={DIFF_COMPARE_TYPE} disabled={isCompareProcessed} />
 						<Tab
@@ -197,7 +194,6 @@ export class Compare extends React.PureComponent<IProps, any> {
 					</TabContent>
 				</ViewerPanelContent>
 				<ViewerPanelFooter
-					className="height-catcher--partial"
 					alignItems="center"
 					justify="space-between"
 				>
@@ -213,7 +209,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 						<CompareIcon />
 					</ViewerPanelButton>
 				</ViewerPanelFooter>
-			</ViewerPanel>
+			</CompareContainer>
 		);
 	}
 
