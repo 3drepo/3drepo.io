@@ -36,7 +36,6 @@ import {
 } from '../../../../modules/issues';
 import { selectJobsList } from '../../../../modules/jobs';
 import { selectSettings, selectTopicTypes } from '../../../../modules/model';
-import { renderPins } from '../../../../modules/risks/risks.sagas';
 
 const mapStateToProps = createStructuredSelector({
 	issues: selectIssues,
