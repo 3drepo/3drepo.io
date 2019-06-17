@@ -265,9 +265,9 @@ export class Processing {
 						}
 
 						if (visibility === VISIBILITY_STATES.VISIBLE) {
-							if (!(ifcSpacesHidden && this.defaultVisibilityMap[child._id] === VISIBILITY_STATES.INVISIBLE)) {
-								this.visibilityMap[child._id] = VISIBILITY_STATES.VISIBLE;
-							}
+							this.visibilityMap[child._id] = ifcSpacesHidden
+								? this.defaultVisibilityMap[child._id]
+								: VISIBILITY_STATES.VISIBLE;
 						} else {
 							this.selectionMap[child._id] = SELECTION_STATES.UNSELECTED;
 							this.visibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
