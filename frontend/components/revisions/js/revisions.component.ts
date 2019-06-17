@@ -1,5 +1,7 @@
 import { selectRevisions } from '../../../modules/model';
-import { getState } from '../../../helpers/migration';
+import { dispatch, getState, runAngularTimeout } from '../../../helpers/migration';
+import { selectCurrentModelName } from '../../../modules/model';
+import { DialogActions } from '../../../modules/dialog';
 
 class RevisionsController implements ng.IController {
 	public static $inject: string[] = [
@@ -70,9 +72,7 @@ class RevisionsController implements ng.IController {
 					});
 
 				}
-
 				this.RevisionsService.status.ready = false;
-
 			}
 
 		}, true);
@@ -81,7 +81,19 @@ class RevisionsController implements ng.IController {
 	public openDialog(event) {
 		this.revisionsLoading = true;
 		this.revisions = selectRevisions(getState());
-		this.DialogService.showDialog('revisions-dialog.html', this.$scope, event, true);
+		const currentModelName = selectCurrentModelName(getState());
+
+		runAngularTimeout(() => {
+			dispatch(DialogActions.showRevisionsDialog({
+				title: `Revisions - ${currentModelName}`,
+				content: 'Revisions dialog',
+				data: {
+					currentRevisionName: this.revName,
+					currentModelName,
+					revisions: this.revisions
+				}
+			}));
+		});
 	}
 
 	public revisionTimestamp(timestamp: string) {
@@ -117,4 +129,4 @@ export const RevisionsComponent: ng.IComponentOptions = {
 
 export const RevisionsComponentModule = angular
 	.module('3drepo')
-	.component('revisions', RevisionsComponent);
+	.component('revisions-old', RevisionsComponent);

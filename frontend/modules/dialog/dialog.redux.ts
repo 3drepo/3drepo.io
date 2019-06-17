@@ -18,10 +18,9 @@
 import { createActions, createReducer } from 'reduxsauce';
 import { get, omit } from 'lodash';
 import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
-import { ErrorDialog, ConfirmDialog, DisconnectedDialog } from '../../routes/components/dialogContainer/components';
 import {
-	SimpleErrorDialog
-} from '../../routes/components/dialogContainer/components/simpleErrorDialog/simpleErrorDialog';
+	ErrorDialog, ConfirmDialog, DisconnectedDialog, RevisionsDialog, SimpleErrorDialog
+} from '../../routes/components/dialogContainer/components';
 
 interface IDialogConfig {
 	title: string;
@@ -38,6 +37,7 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showErrorDialog: ['method', 'dataType', 'message', 'status'],
 	showSimpleErrorDialog: ['config'],
 	showConfirmDialog: ['config'],
+	showRevisionsDialog: ['config'],
 	hideDialog: [],
 	setPendingState: ['isPending'],
 	showScreenshotDialog: ['config'],
@@ -55,6 +55,7 @@ export const INITIAL_STATE = {
 
 const showDialog = (state = INITIAL_STATE, action) => {
 	const config = omit(action.config, 'data') as IDialogConfig;
+	console.log('show dialog', config);
 	return { ...state, config, data: action.config.data, isOpen: true };
 };
 
@@ -96,6 +97,12 @@ const showConfirmDialog = (state = INITIAL_STATE, action) => {
 
 const showSimpleErrorDialog = (state = INITIAL_STATE, action) => {
 	const config = { ...action.config, template: SimpleErrorDialog } as IDialogConfig;
+	return showDialog(state, { config });
+};
+
+const showRevisionsDialog = (state = INITIAL_STATE, action) => {
+	const config = { ...action.config, template: RevisionsDialog } as IDialogConfig;
+	console.log('showRevisionsDialog', config);
 	return showDialog(state, { config });
 };
 
@@ -149,6 +156,7 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.SHOW_ENDPOINT_ERROR_DIALOG]: showEndpointErrorDialog,
 	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
 	[DialogTypes.SHOW_SIMPLE_ERROR_DIALOG]: showSimpleErrorDialog,
+	[DialogTypes.SHOW_REVISIONS_DIALOG]: showRevisionsDialog,
 	[DialogTypes.SET_PENDING_STATE]: setPendingState,
 	[DialogTypes.SET_MUTE_NOTIFICATIONS]: setMuteNotifications,
 	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog,

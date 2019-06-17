@@ -34,7 +34,8 @@ class HomeController implements ng.IController {
 		'StateManager',
 		'ClientConfigService',
 		'SWService',
-		'DialogService'
+		'ViewerService',
+		'TemplateService'
 	];
 
 	private doNotLogout;
@@ -72,7 +73,8 @@ class HomeController implements ng.IController {
 		private StateManager,
 		private ClientConfigService,
 		private SWService,
-		private DialogService
+		private ViewerService,
+		private TemplateService
 	) {
 		subscribe(this, {
 			isAuthenticated: selectIsAuthenticated,

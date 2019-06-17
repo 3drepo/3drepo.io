@@ -28,7 +28,7 @@ export class ViewerService {
 		'$timeout',
 
 		'ClientConfigService',
-		'DialogService'
+		'EventService'
 	];
 
 	public pin: any;
@@ -51,7 +51,7 @@ export class ViewerService {
 		public $timeout: ng.ITimeoutService,
 
 		public ClientConfigService: any,
-		public DialogService: any
+		public EventService: any
 	) {
 
 		this.newPinId = 'newPinId';
