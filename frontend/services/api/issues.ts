@@ -24,7 +24,7 @@ import api from './';
  * @param issueId
  */
 export const getIssue = (teamspace, modelId, issueId) => {
-	return api.get(`${teamspace}/${modelId}/issues/${issueId}.json`);
+	return api.get(`${teamspace}/${modelId}/issues/${issueId}`);
 };
 
 /**
@@ -40,9 +40,9 @@ export const saveIssue = (teamspace, modelId, issue) => {
 	}
 
 	if (issue.rev_id) {
-		return api.post(`${teamspace}/${modelId}/revision/${issue.rev_id}/issues.json`, issue);
+		return api.post(`${teamspace}/${modelId}/revision/${issue.rev_id}/issues`, issue);
 	}
-	return api.post(`${teamspace}/${modelId}/issues.json`, issue);
+	return api.post(`${teamspace}/${modelId}/issues`, issue);
 };
 
 /**
@@ -55,9 +55,9 @@ export const saveIssue = (teamspace, modelId, issue) => {
  */
 export const updateIssue = (teamspace, modelId, id, revId, issue) => {
 	if (issue.rev_id) {
-		return api.patch(`${teamspace}/${modelId}/revision/${revId}/issues/${id}.json`, issue);
+		return api.patch(`${teamspace}/${modelId}/revision/${revId}/issues/${id}`, issue);
 	}
-	return api.patch(`${teamspace}/${modelId}/issues/${id}.json`, issue);
+	return api.patch(`${teamspace}/${modelId}/issues/${id}`, issue);
 };
 
 /**
@@ -69,9 +69,9 @@ export const updateIssue = (teamspace, modelId, id, revId, issue) => {
 export const getIssues = (teamspace, modelId, revision?) => {
 	const mainPath = `${teamspace}/${modelId}`;
 	if (revision) {
-		return api.get(`${mainPath}/revision/${revision}/issues.json`);
+		return api.get(`${mainPath}/revision/${revision}/issues`);
 	}
-	return api.get(`${mainPath}/issues.json`);
+	return api.get(`${mainPath}/issues`);
 };
 
 /**
@@ -87,7 +87,7 @@ export const importBCF = (teamspace, modelId, file, revision?) => {
 	formData.append('file', file);
 
 	if (revision) {
-		return api.post(`${mainPath}/revision/${revision}/issues.json`, formData);
+		return api.post(`${mainPath}/revision/${revision}/issues`, formData);
 	}
 	return api.post(`${mainPath}/issues.bcfzip`, formData);
 };

@@ -42,7 +42,7 @@
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
 	 */
-	router.get("/members", middlewares.loggedIn, getMemberList);
+	router.get("/members", middlewares.isTeamspaceMember, getMemberList);
 
 	/**
 	 * @api {get} /:teamspace/members Get Member List
@@ -154,17 +154,7 @@
 	}
 
 	function getMemberList(req, res, next) {
-		User.findByUserName(req.session.user.username).then(user => {
-			if(!user) {
-				return Promise.reject(responseCodes.USER_NOT_FOUND);
-			}
-
-			if(user.isMemberOfTeamspace(req.params.account)) {
-				return User.getMembers(req.params.account);
-			} else {
-				return Promise.reject(responseCodes.NOT_AUTHORIZED);
-			}
-		}).then(memArray => {
+		User.getMembers(req.params.account).then(memArray => {
 			const members = memArray.map((userData) => {
 				userData.isCurrentUser = req.session.user.username === userData.user;
 				return userData;

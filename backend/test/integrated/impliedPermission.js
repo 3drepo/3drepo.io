@@ -209,7 +209,7 @@ describe("Implied permission::", function () {
 
 		it("can view issues", function(done) {
 			agent
-				.get(`/${sharedTeamspace}/${modelId}/issues.json`)
+				.get(`/${sharedTeamspace}/${modelId}/issues`)
 				.expect(200 , done);
 		});
 
@@ -217,7 +217,7 @@ describe("Implied permission::", function () {
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
 			agent
-				.post(`/${sharedTeamspace}/${modelId}/issues.json`)
+				.post(`/${sharedTeamspace}/${modelId}/issues`)
 				.send(issue)
 				.expect(200 , done);
 
@@ -242,14 +242,14 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send(comment)
 				.expect(200 , done);
 		});
 
 		it("can edit issue", function(done) {
 			agent
-				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send({  status: "open" })
 				.expect(200 , done);
 		});
@@ -492,7 +492,7 @@ describe("Implied permission::", function () {
 
 		it("can view issues", function(done) {
 			agent
-				.get(`/${sharedTeamspace}/${modelId}/issues.json`)
+				.get(`/${sharedTeamspace}/${modelId}/issues`)
 				.expect(200, done);
 		});
 
@@ -500,7 +500,7 @@ describe("Implied permission::", function () {
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
 			agent
-				.post(`/${sharedTeamspace}/${modelId}/issues.json`)
+				.post(`/${sharedTeamspace}/${modelId}/issues`)
 				.send(issue)
 				.expect(200, done);
 
@@ -508,7 +508,7 @@ describe("Implied permission::", function () {
 
 		it("cannot view issues in other model", function(done) {
 			agent
-				.get(`/${sharedTeamspace}/${modelNoAccess}/issues.json`)
+				.get(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.expect(401, done);
 		});
 
@@ -516,7 +516,7 @@ describe("Implied permission::", function () {
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
 			agent
-				.post(`/${sharedTeamspace}/${modelNoAccess}/issues.json`)
+				.post(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.send(issue)
 				.expect(401, done);
 
@@ -541,7 +541,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send(comment)
 				.expect(200 , done);
 		});
@@ -565,21 +565,21 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
 				.send(comment)
 				.expect(401 , done);
 		});
 
 		it("can edit issue", function(done) {
 			agent
-				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send({  status: "open" })
 				.expect(200 , done);
 		});
 
 		it("cannot edit issue in other model", function(done) {
 			agent
-				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
 				.send({  status: "open" })
 				.expect(401 , done);
 		});
@@ -784,7 +784,7 @@ describe("Implied permission::", function () {
 
 		it("can view issues", function(done) {
 			agent
-				.get(`/${sharedTeamspace}/${modelId}/issues.json`)
+				.get(`/${sharedTeamspace}/${modelId}/issues`)
 				.expect(200 , done);
 		});
 
@@ -792,7 +792,7 @@ describe("Implied permission::", function () {
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
 			agent
-				.post(`/${sharedTeamspace}/${modelId}/issues.json`)
+				.post(`/${sharedTeamspace}/${modelId}/issues`)
 				.send(issue)
 				.expect(200 , done);
 
@@ -800,7 +800,7 @@ describe("Implied permission::", function () {
 
 		it("cannot view issues in other model", function(done) {
 			agent
-				.get(`/${sharedTeamspace}/${modelNoAccess}/issues.json`)
+				.get(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.expect(401 , done);
 		});
 
@@ -808,7 +808,7 @@ describe("Implied permission::", function () {
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
 			agent
-				.post(`/${sharedTeamspace}/${modelNoAccess}/issues.json`)
+				.post(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.send(issue)
 				.expect(401 , done);
 
@@ -833,7 +833,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send(comment)
 				.expect(404 , done);
 		});
@@ -857,21 +857,21 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
 				.send(comment)
 				.expect(401 , done);
 		});
 
 		it("can edit issue", function(done) {
 			agent
-				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send({  status: "open" })
 				.expect(404 , done);
 		});
 
 		it("cannot edit issue in other model", function(done) {
 			agent
-				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
 				.send({  status: "open" })
 				.expect(401 , done);
 		});
@@ -1069,7 +1069,7 @@ describe("Implied permission::", function () {
 
 		it("cannot view issues", function(done) {
 			agent
-				.get(`/${sharedTeamspace}/${modelId}/issues.json`)
+				.get(`/${sharedTeamspace}/${modelId}/issues`)
 				.expect(401 , done);
 		});
 
@@ -1077,7 +1077,7 @@ describe("Implied permission::", function () {
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
 			agent
-				.post(`/${sharedTeamspace}/${modelId}/issues.json`)
+				.post(`/${sharedTeamspace}/${modelId}/issues`)
 				.send(issue)
 				.expect(401 , done);
 
@@ -1085,7 +1085,7 @@ describe("Implied permission::", function () {
 
 		it("cannot view issues of other model in other project as well", function(done) {
 			agent
-				.get(`/${sharedTeamspace}/${modelNoAccess}/issues.json`)
+				.get(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.expect(401 , done);
 		});
 
@@ -1093,7 +1093,7 @@ describe("Implied permission::", function () {
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
 			agent
-				.post(`/${sharedTeamspace}/${modelNoAccess}/issues.json`)
+				.post(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.send(issue)
 				.expect(401 , done);
 
@@ -1118,7 +1118,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send(comment)
 				.expect(401 , done);
 		});
@@ -1142,21 +1142,21 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
 				.send(comment)
 				.expect(401 , done);
 		});
 
 		it("cannot edit issue", function(done) {
 			agent
-				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send({  status: "open" })
 				.expect(401 , done);
 		});
 
 		it("cannot edit issue in other model", function(done) {
 			agent
-				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
 				.send({  status: "open" })
 				.expect(401 , done);
 		});
@@ -1345,7 +1345,7 @@ describe("Implied permission::", function () {
 
 		it("cannot view issues", function(done) {
 			agent
-				.get(`/${sharedTeamspace}/${modelId}/issues.json`)
+				.get(`/${sharedTeamspace}/${modelId}/issues`)
 				.expect(401 , done);
 		});
 
@@ -1353,7 +1353,7 @@ describe("Implied permission::", function () {
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
 			agent
-				.post(`/${sharedTeamspace}/${modelId}/issues.json`)
+				.post(`/${sharedTeamspace}/${modelId}/issues`)
 				.send(issue)
 				.expect(401 , done);
 
@@ -1361,7 +1361,7 @@ describe("Implied permission::", function () {
 
 		it("cannot view issues of other model in other project as well", function(done) {
 			agent
-				.get(`/${sharedTeamspace}/${modelNoAccess}/issues.json`)
+				.get(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.expect(401 , done);
 		});
 
@@ -1369,7 +1369,7 @@ describe("Implied permission::", function () {
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
 			agent
-				.post(`/${sharedTeamspace}/${modelNoAccess}/issues.json`)
+				.post(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.send(issue)
 				.expect(401 , done);
 
@@ -1394,7 +1394,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send(comment)
 				.expect(401 , done);
 		});
@@ -1418,21 +1418,21 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
 				.send(comment)
 				.expect(401 , done);
 		});
 
 		it("cannot edit issue", function(done) {
 			agent
-				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
 				.send({  status: "open" })
 				.expect(401 , done);
 		});
 
 		it("cannot edit issue in other model", function(done) {
 			agent
-				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}.json`)
+				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
 				.send({  status: "open" })
 				.expect(401 , done);
 		});
