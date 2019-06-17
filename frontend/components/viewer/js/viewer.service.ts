@@ -571,29 +571,6 @@ export class ViewerService {
 		});
 	}
 
-	public helicopterSpeedDown(value: number) {
-		this.initialised.promise.then(() => {
-			this.viewer.helicopterSpeedDown();
-			this.helicopterSpeedUpdate(value);
-		});
-	}
-
-	public helicopterSpeedUp(value: number) {
-		this.initialised.promise.then(() => {
-			this.viewer.helicopterSpeedUp();
-			this.helicopterSpeedUpdate(value);
-		});
-	}
-
-	public helicopterSpeedReset(updateDefaultSpeed: boolean) {
-		this.initialised.promise.then(() => {
-			this.viewer.helicopterSpeedReset();
-			if (updateDefaultSpeed) {
-				this.helicopterSpeedUpdate(1);
-			}
-		});
-	}
-
 	public getHeliSpeed() {
 		return this.heliSpeed;
 	}
