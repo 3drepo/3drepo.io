@@ -49,6 +49,7 @@ class ViewerController implements ng.IController {
 	private shadingSetting: string;
 	private xraySetting: boolean;
 	private farPlaneSamplingPoints: number;
+	private maxShadowDistance: number;
 
 	constructor(
 		private $scope: ng.IScope,
@@ -78,7 +79,8 @@ class ViewerController implements ng.IController {
 			farPlaneAlgorithm: selectFarPlaneAlgorithm,
 			shadingSetting: selectShadingSetting,
 			xraySetting: selectXraySetting,
-			farPlaneSamplingPoints: selectFarPlaneSamplingPoints
+			farPlaneSamplingPoints: selectFarPlaneSamplingPoints,
+			maxShadowDistance : selectMaxShadowDistance
 		});
 	}
 
@@ -122,6 +124,9 @@ class ViewerController implements ng.IController {
 
 		this.$scope.$watch(() => this.farPlaneSamplingPoints,
 			this.ViewerService.setFarPlaneSamplingPoints.bind(this.ViewerService));
+
+		this.$scope.$watch(() => this.maxShadowDistance,
+			this.ViewerService.setMaxShadowDistance.bind(this.ViewerService));
 	}
 }
 

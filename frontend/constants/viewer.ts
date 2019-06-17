@@ -74,7 +74,8 @@ export const DEFAULT_SETTINGS = {
 	memory: 2032,
 	nearPlane: 10,
 	farPlaneSamplingPoints: 5,
-	farPlaneAlgorithm: 'box'
+	farPlaneAlgorithm: 'box',
+	maxShadowDistance: 10000
 };
 
 export const VIEWER_PANELS = {
