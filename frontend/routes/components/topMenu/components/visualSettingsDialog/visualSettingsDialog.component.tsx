@@ -126,7 +126,6 @@ const AdvancedSettings = (props) => {
 					return (
 					<ErrorTooltip title={form.errors.maxShadowDistance || ''} placement="bottom-end">
 					<ShortInput
-						disabled={form.values.maxShadowDistance !== 'box'}
 						error={Boolean(form.errors.maxShadowDistance)}
 						{...field}
 						/>
