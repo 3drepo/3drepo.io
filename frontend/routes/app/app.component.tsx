@@ -132,7 +132,7 @@ export class App extends React.PureComponent<IProps, IState> {
 		}
 
 		if (location.pathname !== prevProps.location.pathname) {
-			this.sendAnalyticsPageView(location, 'refefefeferer');
+			this.sendAnalyticsPageView(location);
 		}
 	}
 
