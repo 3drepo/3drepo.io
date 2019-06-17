@@ -82,6 +82,10 @@ export const selectSelectedNodesIds = createSelector(
 	selectTreeProccessing, selectDataRevision, (treeProcessingData) => treeProcessingData.selectedNodesIds || []
 );
 
+export const selectHighlightedNodesIds = createSelector(
+	selectTreeProccessing, selectDataRevision, (treeProcessingData) => treeProcessingData.highlightedNodesIds || []
+);
+
 export const selectDefaultVisibilityMap = createSelector(
 	selectTreeProccessing, selectDataRevision,
 	(treeProcessingData) => treeProcessingData.defaultVisibilityMap

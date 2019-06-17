@@ -36,7 +36,8 @@ import {
 	selectDefaultHiddenNodesIds,
 	getSelectDeepChildren,
 	selectSelectionMap,
-	selectVisibilityMap
+	selectVisibilityMap,
+	selectHighlightedNodesIds
 } from './tree.selectors';
 
 import { TreeTypes, TreeActions } from './tree.redux';
@@ -163,8 +164,8 @@ function* stopListenOnSelections() {
 }
 
 function* handleBackgroundClick() {
-	const selectedNodesIds = yield select(selectSelectedNodesIds);
-	if (selectedNodesIds.length) {
+	const highlightedNodesIds = yield select(selectHighlightedNodesIds);
+	if (highlightedNodesIds.length) {
 		yield all([
 			clearCurrentlySelected(),
 			put(GroupsActions.clearSelectionHighlights())
@@ -257,8 +258,8 @@ function* showTreeNodes(nodesIds = [], skipNested = false) {
  * HIDE NODES
  */
 function* hideSelectedNodes() {
-	const selectedNodesIds = yield select(selectSelectedNodesIds);
-	yield hideTreeNodes(selectedNodesIds);
+	const highlightedNodesIds = yield select(selectHighlightedNodesIds);
+	yield hideTreeNodes(highlightedNodesIds);
 }
 
 function* hideNodesBySharedIds({ objects = [] }) {
@@ -299,8 +300,8 @@ function* isolateNodes(nodesIds = [], colour?) {
 }
 
 function* isolateSelectedNodes({ nodeId = null }) {
-	const selectedNodesIds = yield select(selectSelectedNodesIds);
-	yield isolateNodes(selectedNodesIds.length ? selectedNodesIds : [nodeId]);
+	const highlightedNodesIds = yield select(selectHighlightedNodesIds);
+	yield isolateNodes(highlightedNodesIds.length ? highlightedNodesIds : [nodeId]);
 }
 
 function* isolateNodesBySharedIds({ objects = []}) {
@@ -415,9 +416,9 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 }
 
 function* setSelectedNodesVisibility({ nodeId, visibility }) {
-	const selectedNodesIds = yield select(selectSelectedNodesIds);
-	const hasSelectedNodes = !!selectedNodesIds.length;
-	const nodesIds = hasSelectedNodes ? selectedNodesIds : [nodeId];
+	const highlightedNodesIds = yield select(selectHighlightedNodesIds);
+	const hasSelectedNodes = !!highlightedNodesIds.length;
+	const nodesIds = hasSelectedNodes ? highlightedNodesIds : [nodeId];
 	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, hasSelectedNodes, hasSelectedNodes));
 }
 

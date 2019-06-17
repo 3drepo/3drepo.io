@@ -239,8 +239,10 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 	private handleOpenModelClick = () => {
 		const [teamspace, name] = this.node.name.split(':');
 		const { model } = this.props.settings.subModels.find((subModel) => subModel.name === name);
-
-		window.open(`${window.location.origin}/viewer/${teamspace}/${model}`, '_blank', 'noopener');
+		const url = `${window.location.origin}/viewer/${teamspace}/${model}`;
+		const newWindow = window.open() as any;
+		newWindow.opener = null;
+		newWindow.location = url;
 	}
 
 	private handleNodeClick = () => {

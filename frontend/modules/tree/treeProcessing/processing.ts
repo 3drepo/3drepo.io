@@ -1,4 +1,4 @@
-import { memoize, intersection, keys, pickBy } from 'lodash';
+import { memoize, intersection, keys, pickBy, uniqBy } from 'lodash';
 import { SELECTION_STATES, VISIBILITY_STATES, NODE_TYPES } from '../../../constants/tree';
 
 export class Processing {
@@ -30,6 +30,12 @@ export class Processing {
 		}));
 	}
 
+	public get highlightedNodesIds() {
+		return keys(pickBy(this.selectionMap, (selectionState) => {
+			return selectionState === SELECTION_STATES.SELECTED;
+		}));
+	}
+
 	public get invisibleNodesIds() {
 		return keys(pickBy(this.visibilityMap, (selectionState) => {
 			return selectionState === VISIBILITY_STATES.INVISIBLE;
@@ -37,7 +43,7 @@ export class Processing {
 	}
 
 	public clearCurrentlySelected = () => {
-		const selectedNodesIds = this.selectedNodesIds;
+		const selectedNodesIds = this.highlightedNodesIds;
 		for (let index = 0, size = selectedNodesIds.length; index < size; index++) {
 			this.selectionMap[selectedNodesIds[index]] = SELECTION_STATES.UNSELECTED;
 		}
@@ -211,7 +217,9 @@ export class Processing {
 					}
 				}
 			} else {
-				this.visibilityMap[node._id] = extraData.visibility;
+					this.visibilityMap[node._id] = extraData.ifcSpacesHidden && extraData.visibility === VISIBILITY_STATES.VISIBLE
+						? this.defaultVisibilityMap[node._id]
+						: extraData.visibility;
 			}
 
 			if (node.parentId) {
@@ -287,19 +295,21 @@ export class Processing {
 	}
 
 	private handleToSelect = (toSelect) => {
+		const parents = [];
+
 		for (let index = 0, size = toSelect.length; index < size; index++) {
 			const node = toSelect[index];
 
 			if (this.isVisibleNode(node._id)) {
 				this.selectionMap[node._id] = SELECTION_STATES.SELECTED;
+				const nodeParents = this.getParents(node);
+				parents.push(...nodeParents);
 			}
 		}
 
-		const clickedNode = toSelect[0];
-		const parents = this.getParents(clickedNode);
-
-		if (clickedNode.hasChildren || toSelect.length === 1) {
-			this.updateParentsSelection(parents);
+		if (parents.length) {
+			const uniqeParents = uniqBy(parents, ({ _id}) => _id);
+			this.updateParentsSelection(uniqeParents);
 		}
 	}
 
@@ -307,16 +317,19 @@ export class Processing {
 		if (!toDeselect.length) {
 			return;
 		}
+
+		const parents = [];
 		for (let index = 0, size = toDeselect.length; index < size; index++) {
 			const node = toDeselect[index];
 			this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
+
+			const nodeParents = this.getParents(node);
+			parents.push(...nodeParents);
 		}
 
-		const clickedNode = toDeselect[0];
-		const parents = this.getParents(clickedNode);
-
-		if (clickedNode.hasChildren || toDeselect.length === 1) {
-			this.updateParentsSelection(parents);
+		if (parents.length) {
+			const uniqeParents = uniqBy(parents, ({ _id }) => _id);
+			this.updateParentsSelection(uniqeParents);
 		}
 	}
 
