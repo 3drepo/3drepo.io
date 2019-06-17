@@ -301,7 +301,11 @@ function* isolateNodes(nodesIds = [], colour?) {
 
 function* isolateSelectedNodes({ nodeId = null }) {
 	const highlightedNodesIds = yield select(selectHighlightedNodesIds);
-	yield isolateNodes(highlightedNodesIds.length ? highlightedNodesIds : [nodeId]);
+	if (highlightedNodesIds.length) {
+		yield isolateNodes(highlightedNodesIds);
+	} else {
+		yield isolateNode(nodeId);
+	}
 }
 
 function* isolateNodesBySharedIds({ objects = []}) {
@@ -309,7 +313,7 @@ function* isolateNodesBySharedIds({ objects = []}) {
 	yield isolateNodes(nodesIds);
 }
 
-function* isolateNode({ id }) {
+function* isolateNode(id) {
 	const deepChildren = yield select(getSelectDeepChildren(id));
 	const deepChildrenIds = deepChildren.map(({ _id }) => _id);
 	yield isolateNodes([id, ...deepChildrenIds]);
@@ -543,7 +547,6 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.DESELECT_NODES, deselectNodes);
 	yield takeLatest(TreeTypes.ISOLATE_NODES_BY_SHARED_IDS, isolateNodesBySharedIds);
 	yield takeLatest(TreeTypes.HIDE_NODES_BY_SHARED_IDS, hideNodesBySharedIds);
-	yield takeLatest(TreeTypes.ISOLATE_NODE, isolateNode);
 	yield takeLatest(TreeTypes.CLEAR_CURRENTLY_SELECTED, clearCurrentlySelected);
 	yield takeLatest(TreeTypes.COLLAPSE_NODES, collapseNodes);
 	yield takeLatest(TreeTypes.GO_TO_PARENT_NODE, goToParentNode);

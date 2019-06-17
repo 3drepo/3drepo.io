@@ -52,7 +52,6 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	deselectNodes: ['nodesIds'],
 	isolateNodesBySharedIds: ['objects'],
 	hideNodesBySharedIds: ['objects'],
-	isolateNode: ['id'],
 	clearCurrentlySelected: [],
 	setExpanedNodesMap: ['expandedNodesMap'],
 	updateDataRevision: [],
