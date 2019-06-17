@@ -26,6 +26,7 @@ import {
 	selectSelectionMap
 } from '../../../../../../modules/tree';
 import { selectSettings } from '../../../../../../modules/model';
+import { ViewerActions } from '../../../../../../modules/viewer';
 
 const mapStateToProps = createStructuredSelector({
 	settings: selectSettings,
@@ -38,7 +39,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	expandNodes: TreeActions.expandNodes,
 	collapseNodes: TreeActions.collapseNodes,
 	setSelectedNodesVisibility: TreeActions.setSelectedNodesVisibility,
-	isolateSelectedNodes: TreeActions.isolateSelectedNodes
+	isolateSelectedNodes: TreeActions.isolateSelectedNodes,
+	zoomToHighlightedMeshes: ViewerActions.zoomToHighlightedMeshes
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(TreeNode);

@@ -338,6 +338,14 @@ export function* clearHighlights() {
 	}
 }
 
+export function* zoomToHighlightedMeshes() {
+	try {
+		Viewer.zoomToHighlightedMeshes();
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('zoom', 'highlighted meshes'));
+	}
+}
+
 export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.WAIT_FOR_VIEWER, waitForViewer);
 	yield takeLatest(ViewerTypes.MAP_INITIALISE, mapInitialise);
@@ -364,4 +372,5 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.START_LISTEN_ON_MODEL_LOADED, startListenOnModelLoaded);
 	yield takeLatest(ViewerTypes.STOP_LISTEN_ON_MODEL_LOADED, stopListenOnModelLoaded);
 	yield takeLatest(ViewerTypes.CLEAR_HIGHLIGHTS, clearHighlights);
+	yield takeLatest(ViewerTypes.ZOOM_TO_HIGHLIGHTED_MESHES, zoomToHighlightedMeshes);
 }

@@ -310,6 +310,11 @@ export class ViewerService {
 		await this.isViewerReady();
 		this.viewer.switchObjectVisibility(teamspace, modelId, objectIds, visibility);
 	}
+
+	public async zoomToHighlightedMeshes() {
+		await this.isViewerReady();
+		this.viewer.zoomToHighlightedMeshes();
+	}
 }
 
 export const Viewer = new ViewerService();

@@ -56,7 +56,8 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	setIsModelLoaded: ['isModelLoaded'],
 	startListenOnModelLoaded: [],
 	stopListenOnModelLoaded: [],
-	clearHighlights: []
+	clearHighlights: [],
+	zoomToHighlightedMeshes: []
 }, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {

@@ -56,6 +56,7 @@ interface IProps {
 	isolateSelectedNodes: (id) => void;
 	onScrollToTop: (index) => void;
 	onClick: (id) => void;
+	zoomToHighlightedMeshes: () => void;
 }
 
 interface IState {
@@ -190,11 +191,18 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 				level={this.level}
 				hasFederationRoot={hasFederationRoot}
 				onClick={this.handleNodeClick}
+				onDoubleClick={this.handleDoubleClick}
 			>
 				{this.renderName()}
 				{this.renderActions(!this.node.isFederation)}
 			</Container>
 		);
+	}
+
+	private handleDoubleClick = () => {
+		if (this.props.visibilityMap[this.node._id] !== VISIBILITY_STATES.INVISIBLE) {
+			this.props.zoomToHighlightedMeshes();
+		}
 	}
 
 	private expandNode = (event) => {
