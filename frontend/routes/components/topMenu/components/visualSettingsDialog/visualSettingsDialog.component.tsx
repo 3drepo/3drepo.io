@@ -121,7 +121,7 @@ const AdvancedSettings = (props) => {
 				}} />
 			</FormListItem>
 			<FormListItem>
-				Far plane points
+				Maximum Shadow Distance
 				<Field name="maxShadowDistance" render={ ({ field, form }) => {
 					return (
 					<ErrorTooltip title={form.errors.maxShadowDistance || ''} placement="bottom-end">

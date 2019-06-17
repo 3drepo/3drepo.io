@@ -57,7 +57,7 @@ export const selectFarPlaneSamplingPoints = createSelector(
 );
 
 export const selectMaxShadowDistance = createSelector(
-	selectSettings, (state) => state.selectMaxShadowDistance
+	selectSettings, (state) => state.maxShadowDistance
 );
 
 export const selectNavigationMode = createSelector(
