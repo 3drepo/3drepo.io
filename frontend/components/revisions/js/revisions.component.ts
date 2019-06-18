@@ -10,7 +10,6 @@ class RevisionsController implements ng.IController {
 		'$location',
 		'$state',
 
-		'DialogService',
 		'RevisionsService'
 	];
 
@@ -27,7 +26,6 @@ class RevisionsController implements ng.IController {
 		private $location: ng.ILocationService,
 		private $state,
 
-		private DialogService,
 		private RevisionsService
 	) {}
 
@@ -77,42 +75,6 @@ class RevisionsController implements ng.IController {
 
 		}, true);
 	}
-
-	public openDialog(event) {
-		this.revisionsLoading = true;
-		this.revisions = selectRevisions(getState());
-		const currentModelName = selectCurrentModelName(getState());
-
-		runAngularTimeout(() => {
-			dispatch(DialogActions.showRevisionsDialog({
-				title: `Revisions - ${currentModelName}`,
-				content: 'Revisions dialog',
-				data: {
-					currentRevisionName: this.revName,
-					currentModelName,
-					revisions: this.revisions
-				}
-			}));
-		});
-	}
-
-	public revisionTimestamp(timestamp: string) {
-		return this.RevisionsService.revisionDateFilter(timestamp, true);
-	}
-
-	public goToRevision(revId) {
-		this.revision = revId;
-		this.DialogService.closeDialog();
-		this.$state.go('app.viewer', {
-			modelId: this.model,
-			revision: revId
-		});
-	}
-
-	public closeDialog() {
-		this.DialogService.closeDialog();
-	}
-
 }
 
 export const RevisionsComponent: ng.IComponentOptions = {

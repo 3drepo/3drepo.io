@@ -55,7 +55,6 @@ export const INITIAL_STATE = {
 
 const showDialog = (state = INITIAL_STATE, action) => {
 	const config = omit(action.config, 'data') as IDialogConfig;
-	console.log('show dialog', config);
 	return { ...state, config, data: action.config.data, isOpen: true };
 };
 
@@ -102,7 +101,6 @@ const showSimpleErrorDialog = (state = INITIAL_STATE, action) => {
 
 const showRevisionsDialog = (state = INITIAL_STATE, action) => {
 	const config = { ...action.config, template: RevisionsDialog } as IDialogConfig;
-	console.log('showRevisionsDialog', config);
 	return showDialog(state, { config });
 };
 

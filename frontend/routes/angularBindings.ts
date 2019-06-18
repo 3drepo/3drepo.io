@@ -30,6 +30,7 @@ import Bim from './viewer/components/bim/bim.container';
 import Issues from './viewer/components/issues/issues.container';
 import Compare from './viewer/components/compare/compare.container';
 import Tree from './viewer/components/tree/tree.container';
+import RevisionsSwitch from './components/revisionsSwitch/revisionsSwitch.container';
 
 angular
 	.module('3drepo')
@@ -55,4 +56,5 @@ angular
 	.component('bim', wrap(Bim, ['teamspace', 'model']))
 	.component('issues', wrap(Issues, ['teamspace', 'model', 'revision']))
 	.component('compare', wrap(Compare, ['teamspace', 'model', 'revision']))
-	.component('tree', wrap(Tree, ['teamspace', 'model', 'revision']));
+	.component('tree', wrap(Tree, ['teamspace', 'model', 'revision']))
+	.component('revisionsSwitch', wrap(RevisionsSwitch, ['teamspace', 'model', 'modelName', 'currentRevision']));

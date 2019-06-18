@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import {get} from 'lodash';
 
 export class DialogService {
 
@@ -25,45 +24,6 @@ export class DialogService {
 	constructor(
 		private $mdDialog
 	) {
-	}
-
-	public isDefined(variable) {
-		return variable !== null && variable !== undefined;
-	}
-
-	public cancel = () => {
-		this.$mdDialog.cancel();
-	}
-
-	public showDialog(
-		dialogTemplate, scope, event, clickOutsideToClose, parent, fullscreen, closeTo
-	) {
-
-		// Allow the dialog to have cancel ability
-		scope.utilsRemoveDialog = scope.utilsRemoveDialog || this.cancel;
-
-		// Set up and show dialog
-		const data: any = {
-			controller: () => {},
-			templateUrl: `/templates/${dialogTemplate}`
-		};
-
-		data.parent = angular.element(this.isDefined(parent) ? parent : document.body);
-
-		data.scope = (this.isDefined(scope)) ? scope : null;
-		data.preserveScope = (data.scope !== null);
-		data.targetEvent = (this.isDefined(event)) ? event : null;
-		data.clickOutsideToClose = (this.isDefined(clickOutsideToClose)) ? clickOutsideToClose : true;
-		data.fullscreen = (this.isDefined(fullscreen)) ? fullscreen : false;
-		data.closeTo = (this.isDefined(closeTo)) ? closeTo : false;
-		this.$mdDialog.show(data);
-	}
-
-	/**
-	 * close a dialog
-	 */
-	public closeDialog() {
-		this.$mdDialog.cancel();
 	}
 
 	public newUpdate() {
