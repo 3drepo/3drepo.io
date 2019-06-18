@@ -17,7 +17,7 @@
 
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
-import { connect, addRouting } from '../../../../helpers/migration';
+import { connect } from '../../../../helpers/migration';
 import { createStructuredSelector } from 'reselect';
 import { ModelActions } from './../../../../modules/model';
 import { ModelItem } from './modelItem.component';
@@ -29,4 +29,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	unsubscribeOnStatusChange: ModelActions.unsubscribeOnStatusChange
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelItem)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelItem));

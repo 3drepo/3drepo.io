@@ -17,7 +17,7 @@
 
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
-import { connect, addRouting } from '../../../../helpers/migration';
+import { connect } from '../../../../helpers/migration';
 import { createStructuredSelector } from 'reselect';
 import { ModelActions, selectSettings, selectIsPending, selectMaps } from './../../../../modules/model';
 import { GisActions, selectIsInitialisedMap, selectVisibleSources } from './../../../../modules/gis';
@@ -41,4 +41,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetMap: GisActions.resetMap
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Gis)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Gis));

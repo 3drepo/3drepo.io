@@ -17,8 +17,7 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { withRouter } from 'react-router-dom';
-import { connect, addRouting } from '../../helpers/migration';
+import { connect } from '../../helpers/migration';
 
 import { Dashboard } from './dashboard.component';
 import {
@@ -40,4 +39,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchUser: CurrentUserActions.fetchUser
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Dashboard)));
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);

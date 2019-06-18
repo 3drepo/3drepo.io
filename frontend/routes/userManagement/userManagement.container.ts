@@ -18,7 +18,7 @@
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect, addRouting } from '../../helpers/migration';
+import { connect } from '../../helpers/migration';
 
 import { UserManagement } from './userManagement.component';
 import {
@@ -50,4 +50,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onTeamspaceChange: UserManagementActions.fetchTeamspaceDetails
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(UserManagement);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(UserManagement));

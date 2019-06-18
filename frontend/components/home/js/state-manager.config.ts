@@ -57,7 +57,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		}
 	});
 
-	$stateProvider.state('app.dashboard', {
+	/* $stateProvider.state('app.dashboard', {
 		url: '/dashboard',
 		template: '<dashboard flex/>',
 		data: {
@@ -108,7 +108,7 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 	$stateProvider.state('app.static', {
 		url: `/{path:${STATIC_ROUTES_PATHS.map((path) => path.replace('/', '')).join('|')}}`,
 		template: '<static-page-viewer />'
-	});
+	}); */
 
 	$httpProvider.interceptors.push('AuthInterceptor');
 

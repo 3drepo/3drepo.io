@@ -18,7 +18,7 @@
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { withRouter } from 'react-router-dom';
-import { connect, addRouting } from '../../../helpers/migration';
+import { connect } from '../../../helpers/migration';
 
 import { TopMenu } from './topMenu.component';
 import { selectCurrentUser } from '../../../modules/currentUser';
@@ -37,4 +37,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateSettings: ViewerActions.updateSettings
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(TopMenu)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(TopMenu));

@@ -17,7 +17,7 @@
 
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
-import { connect, addRouting } from '../../../../helpers/migration';
+import { connect } from '../../../../helpers/migration';
 import { createStructuredSelector } from 'reselect';
 import { ModelActions, selectSettings, selectIsPending } from './../../../../modules/model';
 import { FederationDialog } from './federationDialog.component';
@@ -31,4 +31,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchModelSettings: ModelActions.fetchSettings
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(FederationDialog)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(FederationDialog));

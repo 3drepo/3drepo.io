@@ -17,7 +17,7 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect, addRouting } from '../../helpers/migration';
+import { connect } from '../../helpers/migration';
 import { withRouter } from 'react-router-dom';
 import { AuthActions, selectMessage, selectIsPending } from '../../modules/auth';
 import { RegisterVerify } from './registerVerify.component';
@@ -32,4 +32,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	clearMessage: AuthActions.clearAuthMessage
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(RegisterVerify)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RegisterVerify));

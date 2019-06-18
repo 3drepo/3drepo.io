@@ -17,7 +17,7 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect, addRouting } from '../../helpers/migration';
+import { connect } from '../../helpers/migration';
 
 import { PasswordForgot } from './passwordForgot.component';
 import { withRouter } from 'react-router-dom';
@@ -33,4 +33,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	clearMessage: AuthActions.clearAuthMessage
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(PasswordForgot)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(PasswordForgot));

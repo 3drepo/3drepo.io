@@ -17,7 +17,7 @@
 
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
-import { connect, addRouting } from '../../../../helpers/migration';
+import { connect } from '../../../../helpers/migration';
 import { createStructuredSelector } from 'reselect';
 import { ModelActions, selectRevisions } from './../../../../modules/model';
 import { RevisionsDialog } from './revisionsDialog.component';
@@ -30,4 +30,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchModelRevisions: ModelActions.fetchRevisions
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsDialog)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsDialog));

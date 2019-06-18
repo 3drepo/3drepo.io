@@ -25,24 +25,23 @@ import Profile from '../profile/profile.container';
 import Billing from '../billing/billing.container';
 import { Container, Sidebar, Content } from './dashboard.styles';
 import { UserInfo } from '../components/userInfo/userInfo.component';
-import { RoutePlaceholder } from './components/routePlaceholder/routePlaceholder.component';
 
 const MENU_ITEMS = [
 	{
 		title: 'Teamspaces',
-		path: 'dashboard/teamspaces'
+		path: '/teamspaces'
 	},
 	{
 		title: 'User Management',
-		path: 'dashboard/user-management'
+		path: '/user-management'
 	},
 	{
 		title: 'Profile',
-		path: 'dashboard/profile'
+		path: '/profile'
 	},
 	{
 		title: 'Billing',
-		path: 'dashboard/billing'
+		path: '/billing'
 	}
 ];
 
@@ -102,6 +101,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { match, currentUser, isPending, isInitialised, isAvatarPending } = this.props;
+
 		return (
 			<Container
 				container={true}
@@ -116,7 +116,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 						items={MENU_ITEMS}
 					/>
 				</Sidebar>
-				<Route path={`${match.url}dashboard`} render={this.renderDashboardRoute} />
+				<Route path={match.url} render={this.renderDashboardRoute} />
 			</Container>
 		);
 	}

@@ -16,6 +16,8 @@
  */
 
 import * as React from 'react';
+import { Route } from 'react-router-dom';
+
 import { runAngularTimeout } from '../../helpers/migration';
 import { DialogContainer } from '../components/dialogContainer';
 import { SnackbarContainer } from '../components/snackbarContainer';
@@ -25,8 +27,10 @@ import { LiveChat } from '../components/liveChat';
 import { analyticsService } from '../../services/analytics';
 import { ViewerGui } from '../viewerGui';
 import TopMenu from '../components/topMenu/topMenu.container';
+
 import { ViewerCanvas } from '../viewerCanvas';
 import { Dashboard } from '../dashboard';
+import { AppContainer } from './app.styles';
 
 interface IProps {
 	location: any;
@@ -191,25 +195,32 @@ export class App extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public renderViewer = (props) => (
+		<>
+			<ViewerCanvas {...props } />
+			<ViewerGui {...props} />
+		</>
+	)
+
 	public render() {
-		// TODO: In the future it'll return first level routes eg. Dashboard, Login
 		return (
-			<>
-				<TopMenu
-					/* 					ng-if="vm.isAuthenticated"
-					is-lite-mode="vm.isLiteMode"
-					on-lite-mode-change="vm.onLiteModeChange"
-					on-logout="vm.logout"
-					on-logo-click="vm.home"
-					id="topMenu" */
-				/>
-				{/* <Dashboard /> */}
-				<ViewerGui />
-				{/* <ViewerCanvas /> */}
-				<DialogContainer />
-				<SnackbarContainer />
-				<LiveChat/>
-			</>
+				<AppContainer>
+					<TopMenu
+						/* 					ng-if="vm.isAuthenticated"
+						is-lite-mode="vm.isLiteMode"
+						on-lite-mode-change="vm.onLiteModeChange"
+						on-logout="vm.logout"
+						on-logo-click="vm.home"
+						id="topMenu" */
+					/>
+
+					<Route path="/dashboard" component={Dashboard} />
+					<Route path="/viewer" component={this.renderViewer} />
+
+					<DialogContainer />
+					<SnackbarContainer />
+					<LiveChat/>
+				</AppContainer>
 		);
 	}
 }

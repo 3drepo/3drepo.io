@@ -39,10 +39,11 @@ interface IPanel {
 }
 
 export const Panel = styled(PanelComponent)<IPanel>`
+	height: 100%;
 	margin-bottom: 20px;
 
 	${(props) => props.isPending ? css`
-		min-height: 0 !important;
+		min-height: 90px !important;
 	` : ''};
 
 	&:last-child {

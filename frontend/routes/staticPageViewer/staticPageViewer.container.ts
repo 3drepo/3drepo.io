@@ -16,8 +16,7 @@
  */
 
 import { withRouter } from 'react-router-dom';
-import { addRouting } from '../../helpers/migration';
 
 import { StaticPageViewer } from './staticPageViewer.component';
 
-export default addRouting(withRouter(StaticPageViewer));
+export default withRouter(StaticPageViewer);
