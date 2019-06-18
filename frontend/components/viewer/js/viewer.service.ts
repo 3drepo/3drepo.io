@@ -648,7 +648,7 @@ export class ViewerService {
 
 	public setMaxShadowDistance(value: number) {
 		if (value === undefined) { return; }
-		this.viewer.setmaxShadowDistance(value);
+		this.viewer.setMaxShadowDistance(value);
 	}
 
 	public setFarPlaneAlgorithm(algorithm: string) {

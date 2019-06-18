@@ -17,7 +17,7 @@
 
 import { subscribe } from '../../../helpers/migration';
 import { selectShadowSetting, selectStatsSetting, selectNearPlaneSetting,
-		selectFarPlaneAlgorithm, selectShadingSetting, selectXraySetting,
+		selectFarPlaneAlgorithm, selectMaxShadowDistance, selectShadingSetting, selectXraySetting,
 		selectFarPlaneSamplingPoints} from '../../../modules/viewer';
 
 class ViewerController implements ng.IController {
