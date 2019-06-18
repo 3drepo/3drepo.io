@@ -59,9 +59,7 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 }, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {
-	settings: window.localStorage.getItem('visualSettings') ?
-		Object.assign(Object.assign({}, DEFAULT_SETTINGS), JSON.parse(window.localStorage.getItem('visualSettings')))
-		: DEFAULT_SETTINGS,
+	settings: {...DEFAULT_SETTINGS, ...JSON.parse(window.localStorage.getItem('visualSettings') || '{}'))}
 	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
 	clippingMode: null,
 	helicopterSpeed: INITIAL_HELICOPTER_SPEED,
