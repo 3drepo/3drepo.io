@@ -72,7 +72,7 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 		const { pending, className } = this.props;
 
 		return (
-			<Panel className={className} title={this.renderTitle()}>
+			<Panel className={className} isPending={pending} title={this.renderTitle()}>
 				{this.renderLoader(pending)}
 				{this.renderContent(!pending)}
 			</Panel>

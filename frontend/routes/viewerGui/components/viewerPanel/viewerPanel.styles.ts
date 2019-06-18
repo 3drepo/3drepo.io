@@ -34,8 +34,16 @@ interface IViewerPanelButton {
 	active?: number;
 }
 
-export const Panel = styled(PanelComponent)`
+interface IPanel {
+	isPending?: boolean;
+}
+
+export const Panel = styled(PanelComponent)<IPanel>`
 	margin-bottom: 20px;
+
+	${(props) => props.isPending ? css`
+		min-height: 0 !important;
+	` : ''};
 
 	&:last-child {
 		margin-bottom: 0;
