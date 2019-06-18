@@ -21,7 +21,6 @@ import './panel/js/panel-card-option-chips-filter.component';
 import './panel/js/panel.component';
 import './panel/js/panel.service';
 import './payment/js/payment.component';
-import './revisions/js/revisions.component';
 import './revisions/js/revisions.service';
 import './utils/js/progress.component';
 import './utils/js/tdr-focus.component';

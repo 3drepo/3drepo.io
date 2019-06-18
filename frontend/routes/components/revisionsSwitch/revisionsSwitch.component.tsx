@@ -64,7 +64,7 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 	public renderCurrentSwitchState = renderWhenTrue(() => (
 		<DisplayedText>
 			{`${this.props.modelName} - ${this.currentRevisionName}`}
-			<ArrowDownIcon fontSize="small" />
+			{this.props.revisions.length > 1 && <ArrowDownIcon fontSize="small" />}
 		</DisplayedText>)
 	);
 
