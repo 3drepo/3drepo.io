@@ -646,6 +646,11 @@ export class ViewerService {
 		this.viewer.setFarPlaneSampleSize(farplaneSample);
 	}
 
+	public setMaxShadowDistance(value: number) {
+		if (value === undefined) { return; }
+		this.viewer.setMaxShadowDistance(value);
+	}
+
 	public setFarPlaneAlgorithm(algorithm: string) {
 		switch (algorithm) {
 			case 'box':

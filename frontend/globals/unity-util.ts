@@ -897,10 +897,18 @@ export class UnityUtil {
 
 	/**
 	 * Set the number of samples to take when determining far plane
-	* @param {number[]} value - the number of samples (per edge) the algorithm should sample
+	* @param {number} value - the number of samples (per edge) the algorithm should sample
 	 */
 	public static setFarPlaneSampleSize(value) {
 		UnityUtil.toUnity('FarPlaneSampleSize', UnityUtil.LoadingState.VIEWER_READY, value);
+	}
+
+	/**
+	* Set the maximum rending distance for shadows
+	* @param {number} value - the number of samples (per edge) the algorithm should sample
+	*/
+	public static setMaxShadowDistance(value) {
+		UnityUtil.toUnity('MaxShadowDistance', UnityUtil.LoadingState.VIEWER_READY, value);
 	}
 
 	/**
