@@ -1,3 +1,6 @@
+import { selectRevisions } from "../../../modules/model";
+import { getState } from "../../../helpers/migration";
+
 class RevisionsController implements ng.IController {
 	public static $inject: string[] = [
 		'$scope',
@@ -76,10 +79,8 @@ class RevisionsController implements ng.IController {
 	}
 
 	public openDialog(event) {
-
-		this.revisions = [];
 		this.revisionsLoading = true;
-
+		this.revisions = selectRevisions(getState());
 		this.DialogService.showDialog('revisions-dialog.html', this.$scope, event, true);
 	}
 
