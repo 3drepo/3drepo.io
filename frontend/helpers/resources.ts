@@ -21,7 +21,7 @@ import * as API from '../services/api';
 
 const extensionRe = /\.(\w+)$/;
 
-export const prepareResource = (teamspace, modelId, resource) => {
+export const prepareResource = (teamspace, modelId, resource, propertyOverride = {}) => {
 	if (!resource.link) {
 		resource.link = API.getAPIUrl(`${teamspace}/${modelId}/resources/${resource._id}`);
 		resource.type = (resource.name.match(extensionRe) || ['', ''])[1].toLowerCase();
@@ -31,10 +31,10 @@ export const prepareResource = (teamspace, modelId, resource) => {
 		resource.size = '';
 	}
 
-	return resource;
+	return {...resource, ...propertyOverride};
 };
 
-export const prepareResources = (teamspace, modelId, resources = []) => {
-	const preparedResources = resources.map((resource) => prepareResource(teamspace, modelId, resource));
+export const prepareResources = (teamspace, modelId, resources = [], propertyOverride = {}) => {
+	const preparedResources = resources.map((resource) => prepareResource(teamspace, modelId, resource, propertyOverride));
 	return sortByDate( preparedResources, { order: 'desc' });
 };

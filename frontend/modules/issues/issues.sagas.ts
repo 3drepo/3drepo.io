@@ -20,6 +20,7 @@ import { differenceBy, isEmpty, omit, pick, map, groupBy } from 'lodash';
 
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
+import * as filesize from 'filesize';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
 import { prepareIssue } from '../../helpers/issues';
 import { prepareComments, prepareComment, createAttachResourceComments,
@@ -714,14 +715,42 @@ export function* attachFileResources({ files }) {
 		const names =  files.map((f) => f.name);
 		files = files.map((f) => f.file);
 
+		const extensionRe = /\.(\w+)$/;
+		const timeStamp = +new Date();
+
+		const tempResources = files.map((f, i) => (
+			{
+				_id: timeStamp + i,
+				name: names[i] + (f.name.match(extensionRe) || ['', ''])[0].toLowerCase(),
+				uploading: true,
+				progress: 0,
+				size: 0,
+				originalSize: f.size
+			})
+			);
+
+		const rids = tempResources.map((r) => r._id);
 		const username = (yield select(selectCurrentUser)).username;
 
-		const {data} = yield API.attachFileResources(teamspace, model, issueId, names, files);
-		const resources = prepareResources(teamspace, model, data);
-		yield put(IssuesActions.attachResourcesSuccess(resources, issueId));
+		yield put(IssuesActions.attachResourcesSuccess( prepareResources(teamspace, model, tempResources), issueId));
+
+		const { data } = yield API.attachFileResources(teamspace, model, issueId, names, files, (progress) => {
+			const updates = tempResources.map((r) => (
+				{
+					progress: progress * 100,
+					size : filesize(r.originalSize * progress, {round: 0}).replace(' ', '')
+				}
+				));
+
+			dispatch(IssuesActions.updateResourcesSuccess(rids, updates, issueId));
+		});
+
+		const resources = prepareResources(teamspace, model, data, { uploading: false});
+
+		yield put(IssuesActions.updateResourcesSuccess(rids, resources, issueId));
 		yield put(IssuesActions.createCommentsSuccess(createAttachResourceComments(username, data), issueId));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('remove', 'resource', error));
+		yield put(DialogActions.showErrorDialog('attach', 'resource', error));
 	}
 }
 

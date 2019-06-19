@@ -19,6 +19,7 @@ import * as React from 'react';
 import { RemoveIcon, IconButton } from './resources.styles';
 import { LabelButton } from '../../viewer/components/labelButton/labelButton.styles';
 import { AttachResourcesDialog } from './attachResourcesDialog/attachResourcesDialog.component';
+import { LinearProgress } from '@material-ui/core';
 
 interface IResource {
 	_id: string;
@@ -50,12 +51,29 @@ export const RemoveButton = (props) => (
 	</IconButton>
 );
 
-const ResourceItem = ({_id, link, type, name, size, onClickRemove}) => (
-	<div key={_id}>{type} |
-				<a href={link} target="_blank" rel="noopener" >{name}</a> |
-				{size} |
-				<RemoveButton onClick={onClickRemove}/></div>
+const ResourceAvailable = ({_id, link, type, name, size, onClickRemove}) => (
+	<div>
+		{type} |
+		<a href={link} target="_blank" rel="noopener" >{name}</a> |
+		{size} |
+		<RemoveButton onClick={onClickRemove}/>
+	</div>
 );
+
+const ResourceUploading = ({type, name, size,  progress }) => (
+	<div >
+		<LinearProgress variant="determinate" value={progress} />
+		{type} |
+		{name} |
+		{size}
+	</div>
+);
+
+const ResourceItem = (resource) =>
+	!resource.uploading ?
+		(<ResourceAvailable {...resource}/>) :
+		(<ResourceUploading {...resource}/>)
+;
 
 export class Resources extends React.PureComponent<IProps, IState> {
 	public onClickRemove = (r) => (e) => {

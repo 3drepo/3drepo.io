@@ -61,6 +61,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	attachFileResources: ['files'],
 	attachLinkResources: ['links'],
 	attachResourcesSuccess: ['resources', 'issueId'],
+	updateResourcesSuccess: ['resourcesIds', 'updates', 'issueId' ],
 	resetComponentState: []
 }, { prefix: 'ISSUES_' });
 
@@ -194,6 +195,20 @@ const attachResourcesSuccess = (state = INITIAL_STATE, { resources, issueId }) =
 	return { ...state, issuesMap};
 };
 
+const updateResourcesSuccess = (state = INITIAL_STATE, { resourcesIds, updates, issueId }) => {
+	const resources = state.issuesMap[issueId].resources.map((r) => {
+		const updateIndex = resourcesIds.indexOf(r._id);
+		if (updateIndex >= 0) {
+			return {...r, ...updates[updateIndex]};
+		} else {
+		return r;
+		}
+	});
+
+	const issuesMap = updateIssueProps(state.issuesMap, issueId, { resources });
+	return { ...state, issuesMap};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess,
 	[IssuesTypes.FETCH_ISSUE_SUCCESS]: fetchIssueSuccess,
@@ -211,5 +226,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.SHOW_CLOSE_INFO]: showCloseInfo,
 	[IssuesTypes.RESET_COMPONENT_STATE]: resetComponentState,
 	[IssuesTypes.REMOVE_RESOURCE_SUCCESS]: removeResourceSuccess,
-	[IssuesTypes.ATTACH_RESOURCES_SUCCESS]: attachResourcesSuccess
+	[IssuesTypes.ATTACH_RESOURCES_SUCCESS]: attachResourcesSuccess,
+	[IssuesTypes.UPDATE_RESOURCES_SUCCESS]: updateResourcesSuccess
 });

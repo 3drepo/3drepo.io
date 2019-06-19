@@ -119,12 +119,19 @@ export const removeResource = (teamspace, modelId, issueId, resourceId ) => {
  * @param names
  * @param files
  */
-export const attachFileResources = (teamspace, modelId, issueId, names: any[], files: any[] ) => {
+export const attachFileResources = (teamspace, modelId, issueId, names: any[], files: any[], percentageCallback ) => {
 	const headers = { headers: { 'Content-Type': 'multipart/form-data' }};
 	const formData = new FormData();
 	files.forEach((f) => formData.append('file', f));
 	names.forEach((n) => formData.append('names', n));
-	return api.post(`${teamspace}/${modelId}/issues/${issueId}/resources`, formData, headers);
+	const progressHook = {
+		onUploadProgress: (progressEvent) => {
+			const percentCompleted = progressEvent.loaded / progressEvent.total;
+			percentageCallback(percentCompleted);
+		}
+	};
+
+	return api.post(`${teamspace}/${modelId}/issues/${issueId}/resources`, formData, { ...headers, ...progressHook });
 };
 
 /**
