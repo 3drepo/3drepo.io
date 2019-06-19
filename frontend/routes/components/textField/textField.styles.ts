@@ -27,7 +27,7 @@ export const Container = styled.div`
 
 export const ActionsLine = styled.div`
 	position: absolute;
-	bottom: 9px;
+	bottom: 4px;
 	right: 0;
 `;
 
@@ -54,6 +54,7 @@ export const StyledLinkableField = styled(LinkableField)`
 	&& {
 		display: block;
 		margin: 8px 0;
+		min-height:14px;
 		font-size: 14px;
 	}
 `;
