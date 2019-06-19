@@ -18,6 +18,11 @@
 import styled, { css } from 'styled-components';
 import RemoveCircleOutline from '@material-ui/icons/RemoveCircleOutline';
 import IconButtonComponent from '@material-ui/core/IconButton';
+import Photo from '@material-ui/icons/Photo';
+import Link from '@material-ui/icons/Link';
+import Description from '@material-ui/icons/Description';
+
+import { COLOR } from '../../../styles';
 
 export const RemoveIcon = styled(RemoveCircleOutline)`
 	&& {
@@ -32,3 +37,66 @@ export const IconButton = styled(IconButtonComponent)`
 		padding: 4px;
 	}
 `;
+
+export const ResourceItemContainer = styled.div`
+	font-size: 14px;
+	color: ${COLOR.BLACK_60};
+	display: flex;
+	align-items: center;
+	& > * {
+		padding-left: 3px;
+		padding-right: 3px;
+		padding-top: 1px;
+		padding-bottom: 1px;
+	}
+`;
+
+export const ResourceLink = styled.a`
+	flex: 1;
+	min-width: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: ${COLOR.BLACK_60};
+`;
+
+export const ResourceLabel = styled.div`
+	flex: 1;
+	min-width: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: ${COLOR.BLACK_60};
+`;
+
+export const UploadSizeLabel = styled.div`
+	padding-right: 28px;
+`;
+
+const Icon = (icon) => styled(icon).attrs({
+	classes: {
+		colorSecondary: 'secondary',
+		colorPrimary: 'primary',
+		colorDisabled: 'disabled'
+	}
+})`
+	&& {
+		&.secondary {
+			color: ${COLOR.BLACK_54};
+		}
+
+		&.primary {
+			color: ${COLOR.BLACK_54};
+		}
+
+		&.disabled {
+			color: ${COLOR.BLACK_54};
+		}
+	}
+`;
+
+export const PhotoIcon = Icon(Photo) as any;
+
+export const LinkIcon = Icon(Link) as any;
+
+export const DocumentIcon = Icon(Description) as any;

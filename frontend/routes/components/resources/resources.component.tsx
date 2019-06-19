@@ -16,7 +16,10 @@
  */
 
 import * as React from 'react';
-import { RemoveIcon, IconButton } from './resources.styles';
+import { RemoveIcon, IconButton,
+		ResourceItemContainer, ResourceLink, PhotoIcon, LinkIcon,
+		DocumentIcon, ResourceLabel, UploadSizeLabel } from './resources.styles';
+
 import { LabelButton } from '../../viewer/components/labelButton/labelButton.styles';
 import { AttachResourcesDialog } from './attachResourcesDialog/attachResourcesDialog.component';
 import { LinearProgress } from '@material-ui/core';
@@ -51,22 +54,38 @@ export const RemoveButton = (props) => (
 	</IconButton>
 );
 
-const ResourceAvailable = ({_id, link, type, name, size, onClickRemove}) => (
-	<div>
-		{type} |
-		<a href={link} target="_blank" rel="noopener" >{name}</a> |
-		{size} |
-		<RemoveButton onClick={onClickRemove}/>
-	</div>
+const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'pcx'];
+
+const ResourceIcon = ({type}) =>
+	(type === 'http') ?
+		(<LinkIcon color="primary"/>) :
+	(imageExtensions.indexOf(type) >= 0) ?
+		(<PhotoIcon color="primary"/>) :
+		(<DocumentIcon scolor="primary"/>)
+;
+
+const ResourceAvailable = ({link, type, name, size, onClickRemove}) => (
+	<ResourceItemContainer>
+		<ResourceIcon type={type}/>
+		<ResourceLink href={link} target="_blank" rel="noopener">
+			{name}
+		</ResourceLink>
+		<div>
+			{size}
+			<RemoveButton onClick={onClickRemove}/>
+		</div>
+	</ResourceItemContainer>
 );
 
 const ResourceUploading = ({type, name, size,  progress }) => (
-	<div >
+	<>
 		<LinearProgress variant="determinate" value={progress} />
-		{type} |
-		{name} |
-		{size}
-	</div>
+		<ResourceItemContainer>
+			<ResourceIcon type={type}/>
+			<ResourceLabel>{name}</ResourceLabel>
+			<UploadSizeLabel>{size}</UploadSizeLabel>
+		</ResourceItemContainer>
+	</>
 );
 
 const ResourceItem = (resource) =>
