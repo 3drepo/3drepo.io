@@ -1,5 +1,5 @@
-import { selectRevisions } from "../../../modules/model";
-import { getState } from "../../../helpers/migration";
+import { selectRevisions } from '../../../modules/model';
+import { getState } from '../../../helpers/migration';
 
 class RevisionsController implements ng.IController {
 	public static $inject: string[] = [
