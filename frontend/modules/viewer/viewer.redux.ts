@@ -58,7 +58,8 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	stopListenOnModelLoaded: [],
 	clearHighlights: [],
 	setCamera: ['params'],
-	changePinColor: ['params']
+	changePinColor: ['params'],
+	removeUnsavedPin: []
 }, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {

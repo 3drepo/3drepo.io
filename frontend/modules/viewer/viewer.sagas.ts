@@ -18,7 +18,7 @@
 import { put, select, takeLatest } from 'redux-saga/effects';
 import { getAngularService, dispatch } from '../../helpers/migration';
 import * as API from '../../services/api';
-import { VIEWER_EVENTS, VIEWER_PANELS, INITIAL_HELICOPTER_SPEED } from '../../constants/viewer';
+import { VIEWER_EVENTS, VIEWER_PANELS, INITIAL_HELICOPTER_SPEED, NEW_PIN_ID } from '../../constants/viewer';
 
 import { ViewerTypes, ViewerActions } from './viewer.redux';
 import { DialogActions } from '../dialog';
@@ -355,6 +355,15 @@ export function* changePinColor({ params }) {
 	}
 }
 
+export function* removeUnsavedPin() {
+	try {
+		Viewer.removePin({ id: NEW_PIN_ID });
+		Viewer.setPin(null);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('remove', 'unsaved pin'));
+	}
+}
+
 export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.WAIT_FOR_VIEWER, waitForViewer);
 	yield takeLatest(ViewerTypes.MAP_INITIALISE, mapInitialise);
@@ -383,4 +392,5 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.CLEAR_HIGHLIGHTS, clearHighlights);
 	yield takeLatest(ViewerTypes.SET_CAMERA, setCamera);
 	yield takeLatest(ViewerTypes.CHANGE_PIN_COLOR, changePinColor);
+	yield takeLatest(ViewerTypes.REMOVE_UNSAVED_PIN, removeUnsavedPin);
 }

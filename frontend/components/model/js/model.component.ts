@@ -121,6 +121,7 @@ class ModelController implements ng.IController {
 			this.ViewerService.off(VIEWER_EVENTS.CLICK_PIN);
 			this.ViewerService.off(VIEWER_EVENTS.CHANGE_PIN_COLOUR);
 			this.ViewerService.off(VIEWER_EVENTS.SET_CAMERA);
+			this.ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED_PIN_MODE);
 			dispatch(TreeActions.stopListenOnSelections());
 			dispatch(ViewerActions.stopListenOnModelLoaded());
 			this.resetPanelsStates();
@@ -144,6 +145,7 @@ class ModelController implements ng.IController {
 		this.ViewerService.on(VIEWER_EVENTS.CLICK_PIN, this.onPinClick);
 		this.ViewerService.on(VIEWER_EVENTS.CHANGE_PIN_COLOUR, this.onChangePinColor);
 		this.ViewerService.on(VIEWER_EVENTS.SET_CAMERA, this.onSetCamera);
+		this.ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED_PIN_MODE, this.onBackgroundSelectedPinMode);
 		this.unsubscribeModelSettingsListener = subscribe(this, this.onModelSettingsChange);
 
 		this.watchers();
@@ -171,6 +173,10 @@ class ModelController implements ng.IController {
 
 	public onSetCamera = (params) => {
 		dispatch(ViewerActions.setCamera(params));
+	}
+
+	public onBackgroundSelectedPinMode = () => {
+		dispatch(ViewerActions.removeUnsavedPin());
 	}
 
 	public watchers() {
