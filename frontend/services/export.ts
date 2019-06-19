@@ -15,7 +15,7 @@ export const printIssues = handlePrint('issues');
 export const printRisks = handlePrint('risks');
 
 const handleExportToJSON = (dataType) => (teamspace, model, dataIds) => {
-	const endpoint = `${teamspace}/${model}/${dataType}.json?ids=${dataIds}&convertCoords=1`;
+	const endpoint = `${teamspace}/${model}/${dataType}?ids=${dataIds}&convertCoords=1`;
 	return API.downloadJSON(dataType, model, endpoint);
 };
 
