@@ -21,7 +21,7 @@ const DEFAULT_ISSUE_DATA = {
 };
 
 const createIssue = (account, modelId) => (agent, issueData = null) =>  next => {
-	agent.post(`/${account}/${modelId}/issues.json`)
+	agent.post(`/${account}/${modelId}/issues`)
 		.send({...DEFAULT_ISSUE_DATA, ...(issueData || {})})
 		.expect(200 , (err, res) => next(err, res.body));
 };
@@ -48,7 +48,7 @@ const attachUrl =  (account, modelId) => (agent, names , urls, issueId = null) =
 const getIssue = (account, modelId) => (agent, issueId = null) => (_issueId, next) => {
 	next = next || _issueId;
 	issueId = issueId || _issueId ;
-	return agent.get(`/${account}/${modelId}/issues/${issueId}.json`)
+	return agent.get(`/${account}/${modelId}/issues/${issueId}`)
 			.expect(200, (err, res) => next(err, res.body));
 };
 
