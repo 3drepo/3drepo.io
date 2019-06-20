@@ -17,10 +17,10 @@
 
 "use strict";
 (function() {
-
 	const config	  = require("../config.js");
 	const MongoClient = require("mongodb").MongoClient;
 	const GridFSBucket = require("mongodb").GridFSBucket;
+	const { PassThrough } = require("stream");
 	const responseCodes = require("../response_codes");
 
 	const connConfig = {
@@ -137,6 +137,29 @@
 		});
 	}
 
+	function storeFileInGridFS(database, collection, filename, buffer) {
+		return getGridFSBucket(database, collection).then(bucket => {
+			return new Promise(function(resolve, reject) {
+				try {
+					const stream = new PassThrough();
+					stream
+						.pipe(bucket.openUploadStream(filename))
+						.on("error", function(error) {
+							reject(error);
+						})
+						.on("finish", function() {
+							resolve(filename);
+						});
+
+					stream.end(buffer);
+
+				} catch (e) {
+					reject(e);
+				}
+			});
+		});
+	}
+
 	// FIXME: this exist as a (temp) workaround because modelFactory has one call that doesn't expect promise!
 	function _getCollection(database, colName)	{
 		return db.db(database).collection(colName);
@@ -178,6 +201,7 @@
 		getCollectionStats,
 		getFileStreamFromGridFS,
 		getFileFromGridFS,
+		storeFileInGridFS,
 		_getCollection,
 		listCollections,
 		getSessionStore,

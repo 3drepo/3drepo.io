@@ -18,6 +18,7 @@
 "use strict";
 
 const DB = require("./db");
+const nodeuuid = require("node-uuid");
 
 class GridFSHandler {
 	constructor() {
@@ -39,7 +40,10 @@ class GridFSHandler {
 	}
 
 	storeFile(account, col, data) {
-		return DB.storeFileInGridFS(account, this.cleanColName(col), data);
+		const _id = nodeuuid.v4();
+		return DB.storeFileInGridFS(account, this.cleanColName(col), _id, data).then(() => (
+			{_id, link: _id, size: data.length, type: "gridfs"}
+		));
 	}
 
 	removeFiles() {
