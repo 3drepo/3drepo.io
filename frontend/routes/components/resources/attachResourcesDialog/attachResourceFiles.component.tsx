@@ -27,21 +27,8 @@ import * as Yup from 'yup';
 import { get } from 'lodash';
 
 interface IProps {
-	onSaveFiles: (files) => void ;
-	onCancel: () => void;
+	files: any[];
 }
-
-const schema = Yup.object().shape({
-	files: Yup.array()
-		.of(
-			Yup.object().shape({
-				name: Yup.string()
-				.strict(false)
-				.trim()
-				.required('Name is required')
-			})
-		)
-		});
 
 const extensionRe = /\.(\w+)$/;
 
@@ -73,10 +60,6 @@ const FileEntry = ({onClickRemove, index, entry}) => {
 };
 
 export class AttachResourceFiles extends React.PureComponent<IProps, any> {
-	public onSavefiles = (e) => {
-		this.props.onSaveFiles(this.state.files);
-	}
-
 	public insertFile = (fieldArray, file) => {
 		const matches = file.name.match(extensionRe);
 		const ext = matches ? matches[0] : '';
@@ -89,28 +72,19 @@ export class AttachResourceFiles extends React.PureComponent<IProps, any> {
 		acceptedFiles.forEach((file) => this.insertFile(fieldArray, file));
 	}
 
-	public onSubmit = (values) => {
-		this.props.onSaveFiles(values.files.map((r) => ({name: r.name.trim(), file: r.file})));
-	}
-
 	public render() {
-		const {onCancel} = this.props;
+		const {files} = this.props;
 		return (
 			<div>
-				<Formik
-				validationSchema={schema}
-				initialValues={{ files: [] }}
-				onSubmit={this.onSubmit}
-				render={({ values }) => (
-				<Form>
+
 					<FieldArray
 					name="files"
 					render={(arrayHelpers) => (
 						<div>
-						{(values.files && values.files.length > 0) && (
+						{(files && files.length > 0) && (
 							<ResourcesListScroller>
 								<ResourcesListContainer>
-									{values.files.map((file, index) =>
+									{files.map((file, index) =>
 										<FileEntry
 											key={index}
 											index={index}
@@ -124,10 +98,6 @@ export class AttachResourceFiles extends React.PureComponent<IProps, any> {
 						)}
 							<ResourcesDropzone onDrop={this.onAddFile(arrayHelpers)}/>
 						</div>
-					)}
-					/>
-					<DialogButtons onClickCancel={onCancel}/>
-				</Form>
 				)}
 				/>
 

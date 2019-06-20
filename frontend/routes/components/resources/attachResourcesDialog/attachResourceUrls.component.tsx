@@ -28,8 +28,7 @@ import * as Yup from 'yup';
 import { LabelButton } from '../../../viewer/components/labelButton/labelButton.styles';
 
 interface IProps {
-	onSaveLinks: (links) => void;
-	onCancel: () => void;
+	links: any[];
 }
 
 interface IResourceUrl {
@@ -42,15 +41,7 @@ interface IState {
 }
 
 const schema = Yup.object().shape({
-	links: Yup.array()
-		.of(
-			Yup.object().shape({
-				name: Yup.string().strict(false).trim().required('Name is required'),
-				link: Yup.string().url('Link should be a url').required('Link is required')
-			})
-		)
-		.required('required')
-		});
+	});
 
 const LinkEntry = ({onClickRemove, index }) => {
 	const nameFieldName = `links.${index}.name`;
@@ -86,49 +77,32 @@ const LinkEntry = ({onClickRemove, index }) => {
 };
 
 export class AttachResourceUrls extends React.PureComponent<IProps, IState> {
-
-	public onSubmit = (values) => {
-		this.props.onSaveLinks(values.links);
-	}
-
 	public render() {
-		const { onCancel } = this.props;
+		const { links } = this.props;
 
 		return (
-			<div>
-				<Formik
-					validationSchema={schema}
-					initialValues={{ links: [] }}
-					onSubmit={this.onSubmit}
-					render={({ values }) => (
-					<Form>
-						<FieldArray
-						name="links"
-						render={(arrayHelpers) => (
-							<div>
-								<ResourcesListScroller>
-									<ResourcesListContainer>
-									{(values.links && values.links.length > 0) && (
-										values.links.map((link, index) => (
-											<LinkEntry key={index}
-												index={index}
-												onClickRemove={() => arrayHelpers.remove(index)}
-											/>
-										))
-									)}
-									</ResourcesListContainer>
-								</ResourcesListScroller>
-								<AddLinkContainer>
-									<LabelButton onClick={() => arrayHelpers.insert(0, {name: '', link: ''})}>Add link</LabelButton>
-								</AddLinkContainer>
-							</div>
-						)}
-						/>
-						<DialogButtons onClickCancel={onCancel}/>
-					</Form>
-					)}
+				<FieldArray
+				name="links"
+				render={(arrayHelpers) => (
+					<div>
+						<ResourcesListScroller>
+							<ResourcesListContainer>
+							{(links && links.length > 0) && (
+								links.map((link, index) => (
+									<LinkEntry key={index}
+										index={index}
+										onClickRemove={() => arrayHelpers.remove(index)}
+									/>
+								))
+							)}
+							</ResourcesListContainer>
+						</ResourcesListScroller>
+						<AddLinkContainer>
+							<LabelButton onClick={() => arrayHelpers.insert(0, {name: '', link: ''})}>Add link</LabelButton>
+						</AddLinkContainer>
+					</div>
+				)}
 				/>
-			</div>
 		);
 	}
 }

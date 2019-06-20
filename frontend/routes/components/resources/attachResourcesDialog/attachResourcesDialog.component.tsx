@@ -25,6 +25,7 @@ import { NeutralActionButton, VisualSettingsButtonsContainer,
 		DialogTabs, DialogTab
 		} from '../../topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 import { Container } from './attachResourcesDialog.styles';
+import { DialogButtons } from './attachResourcesDialogButtons';
 
 const SettingsSchema = Yup.object().shape({
 });
@@ -42,6 +43,25 @@ interface IState {
 	selectedTab: number;
 }
 
+const schema = Yup.object().shape({
+	files: Yup.array()
+		.of(
+			Yup.object().shape({
+				name: Yup.string()
+				.strict(false)
+				.trim()
+				.required('Name is required')
+			})
+		),
+	links: Yup.array()
+		.of(
+			Yup.object().shape({
+				name: Yup.string().strict(false).trim().required('Name is required'),
+				link: Yup.string().url('Link should be a url').required('Link is required')
+			})
+		)
+	});
+
 export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 	public state = {
 		selectedTab: 0
@@ -51,17 +71,13 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 		this.setState({ selectedTab });
 	}
 
-	public onSubmit = (values) => {
-		this.props.handleClose();
-	}
-
-	public onSaveFiles = (files) => {
+	public onSubmit = ({files, links}) => {
+		this.props.onSaveLinks(links);
 		this.props.onSaveFiles(files);
 		this.props.handleClose();
 	}
 
-	public onSaveLinks = (links) => {
-		this.props.onSaveLinks(links);
+	public onCancel = () => {
 		this.props.handleClose();
 	}
 
@@ -81,8 +97,18 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 					<DialogTab label="Links" />
 				</DialogTabs>
 
-				{selectedTab === 0 && <AttachResourceFiles onSaveFiles={this.onSaveFiles} onCancel={handleClose}/>}
-				{selectedTab === 1 && <AttachResourceUrls onSaveLinks={this.onSaveLinks} onCancel={handleClose}/>}
+				<Formik
+				validationSchema={schema}
+				initialValues={{ files: [], links: [] }}
+				onSubmit={this.onSubmit}
+				render={({ values }) => (
+					<Form>
+						{selectedTab === 0 && <AttachResourceFiles files={values.files} />}
+						{selectedTab === 1 && <AttachResourceUrls links={values.links}/>}
+						<DialogButtons onClickCancel={this.onCancel}/>
+					</Form>
+					)}
+				/>
 			</Container>
 			);
 	}
