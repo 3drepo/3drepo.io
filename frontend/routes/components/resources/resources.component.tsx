@@ -18,11 +18,13 @@
 import * as React from 'react';
 import { RemoveIcon, IconButton,
 		ResourceItemContainer, ResourceLink, PhotoIcon, LinkIcon,
-		DocumentIcon, ResourceLabel, UploadSizeLabel } from './resources.styles';
+		DocumentIcon, ResourceLabel, UploadSizeLabel, ResourcesContainer } from './resources.styles';
 
 import { LabelButton } from '../../viewer/components/labelButton/labelButton.styles';
 import { AttachResourcesDialog } from './attachResourcesDialog/attachResourcesDialog.component';
 import { LinearProgress } from '@material-ui/core';
+import { FieldsRow, StyledFormControl } from '../../viewer/components/risks/components/riskDetails/riskDetails.styles';
+import { FieldLabel } from '../textField/textField.styles';
 
 interface IResource {
 	_id: string;
@@ -115,10 +117,18 @@ export class Resources extends React.PureComponent<IProps, IState> {
 		const resources = this.props.resources || [];
 
 		return (
-			<span>
+			<ResourcesContainer>
+				<FieldLabel >Resources</FieldLabel>
 				{resources.map((r) => (<ResourceItem key={r._id} {...r} onClickRemove={this.onClickRemove(r)}/>))}
-				<LabelButton onClick={this.onClickAttach}>Attach resource</LabelButton>
-			</span>
+				<FieldsRow container justify="space-between" flex={0.5}>
+						<StyledFormControl/>
+						<StyledFormControl>
+							<span>
+								<LabelButton onClick={this.onClickAttach}>Attach resource</LabelButton>
+							</span>
+						</StyledFormControl>
+				</FieldsRow>
+			</ResourcesContainer>
 		);
 	}
 }

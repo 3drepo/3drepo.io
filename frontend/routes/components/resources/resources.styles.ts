@@ -38,6 +38,11 @@ export const IconButton = styled(IconButtonComponent)`
 	}
 `;
 
+export const ResourcesContainer = styled.div`
+	margin-top: 5px;
+	margin-bottom: 5px;
+`;
+
 export const ResourceItemContainer = styled.div`
 	font-size: 14px;
 	color: ${COLOR.BLACK_60};

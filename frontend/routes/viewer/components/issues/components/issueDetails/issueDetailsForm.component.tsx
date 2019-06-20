@@ -221,12 +221,14 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						</DescriptionImage>
 					)}
 				</Form>
-				<Resources showDialog={showDialog}
-					resources={issue.resources}
-					onSaveFiles={attachFileResources}
-					onSaveLinks={attachLinkResources}
-					onRemoveResource={onRemoveResource}
-				/>
+				{!this.isNewIssue &&
+					<Resources showDialog={showDialog}
+						resources={issue.resources}
+						onSaveFiles={attachFileResources}
+						onSaveLinks={attachLinkResources}
+						onRemoveResource={onRemoveResource}
+					/>
+				}
 			</MuiPickersUtilsProvider>
 		);
 	}
