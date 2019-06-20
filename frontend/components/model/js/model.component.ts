@@ -42,7 +42,6 @@ class ModelController implements ng.IController {
 		'$mdDialog',
 
 		'EventService',
-		'RevisionsService',
 		'StateManager',
 		'PanelService',
 		'ViewerService'
@@ -74,7 +73,6 @@ class ModelController implements ng.IController {
 		private $mdDialog,
 
 		private EventService,
-		private RevisionsService,
 		private StateManager,
 		private PanelService,
 		private ViewerService
@@ -200,7 +198,6 @@ class ModelController implements ng.IController {
 	}
 
 	public setupModelInfo() {
-		this.RevisionsService.listAll(this.account, this.model);
 		this.loadModelSettings();
 	}
 

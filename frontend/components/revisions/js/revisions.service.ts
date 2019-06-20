@@ -19,7 +19,6 @@ export class RevisionsService {
 
 	public static $inject: string[] = [
 		'$filter',
-		'APIService',
 		'ClientConfigService'
 	];
 
@@ -28,7 +27,6 @@ export class RevisionsService {
 
 	constructor(
 		private $filter,
-		private APIService,
 		private ClientConfigService
 	) {
 		this.revisionDateFilter = this.$filter('prettyDate');
@@ -36,25 +34,6 @@ export class RevisionsService {
 			data: {},
 			ready: false
 		};
-	}
-
-	public listAll(account, model) {
-
-		return this.APIService.get(account + '/' + model + '/revisions.json')
-			.then((response) => {
-
-				if (response.status === 200) {
-					this.status.ready = true;
-					this.status.data[account + ':' + model] = response.data;
-					return response.data;
-				} else {
-					this.status.ready = false;
-					this.status.data[account + ':' + model] = null;
-					return response.data;
-				}
-
-			});
-
 	}
 
 	public isTagFormatInValid(tag) {

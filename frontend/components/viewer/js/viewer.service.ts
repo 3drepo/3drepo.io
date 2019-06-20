@@ -27,7 +27,6 @@ export class ViewerService {
 		'$timeout',
 
 		'ClientConfigService',
-		'APIService',
 		'DialogService',
 		'EventService'
 	];
@@ -52,7 +51,6 @@ export class ViewerService {
 		public $timeout: ng.ITimeoutService,
 
 		public ClientConfigService: any,
-		public APIService: any,
 		public DialogService: any,
 		public EventService: any
 	) {
@@ -309,11 +307,6 @@ export class ViewerService {
 
 	}
 
-	public getModelInfo(account: string, model: string)  {
-		const url = account + '/' + model + '.json';
-		return this.APIService.get(url);
-	}
-
 	public reset() {
 		if (this.viewer) {
 			this.disableMeasure();
@@ -423,8 +416,6 @@ export class ViewerService {
 		} else {
 			this.account = account;
 			this.model = model;
-			await this.setHelicopterSpeed();
-
 			return this.viewer.loadModel(account, model, branch, revision)
 				.then(() => {
 					// Set the current model in the viewer
@@ -580,29 +571,6 @@ export class ViewerService {
 		});
 	}
 
-	public helicopterSpeedDown(value: number) {
-		this.initialised.promise.then(() => {
-			this.viewer.helicopterSpeedDown();
-			this.helicopterSpeedUpdate(value);
-		});
-	}
-
-	public helicopterSpeedUp(value: number) {
-		this.initialised.promise.then(() => {
-			this.viewer.helicopterSpeedUp();
-			this.helicopterSpeedUpdate(value);
-		});
-	}
-
-	public helicopterSpeedReset(updateDefaultSpeed: boolean) {
-		this.initialised.promise.then(() => {
-			this.viewer.helicopterSpeedReset();
-			if (updateDefaultSpeed) {
-				this.helicopterSpeedUpdate(1);
-			}
-		});
-	}
-
 	public getHeliSpeed() {
 		return this.heliSpeed;
 	}
@@ -673,28 +641,6 @@ export class ViewerService {
 			this.viewer.setXRayHighlightOn();
 		} else {
 			this.viewer.setXRayHighlightOff();
-		}
-	}
-
-	private helicopterSpeedUpdate(value: number) {
-		if (this.account && this.model && Number.isInteger(value)) {
-			this.heliSpeed = value;
-			this.APIService.put(this.account + '/' + this.model + '/settings/heliSpeed', {heliSpeed: value})
-				.catch((err) => {
-				console.error('Failed to update helicopter speed', err);
-			});
-		}
-	}
-
-	private async setHelicopterSpeed() {
-		if (this.account && this.model) {
-			await this.APIService.get(this.account + '/' + this.model + '/settings/heliSpeed')
-				.then((res) => {
-					this.heliSpeed = res.data.heliSpeed ? res.data.heliSpeed : 1;
-				})
-				.catch((err) => {
-				console.error('Failed to fetch helicopter speed', err);
-			});
 		}
 	}
 }
