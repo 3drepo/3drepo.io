@@ -703,33 +703,34 @@ export function* removeResource({ resource }) {
 		yield put(IssuesActions.removeResourceSuccess(resource, issueId));
 		yield put(IssuesActions.createCommentSuccess(createRemoveResourceComment(username, resource), issueId));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('remove', 'resource', error));
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'resource', error));
 	}
 }
 
 export function* attachFileResources({ files }) {
+	const names =  files.map((f) => f.name);
+	files = files.map((f) => f.file);
+
+	const extensionRe = /\.(\w+)$/;
+	const timeStamp = +new Date();
+
+	const tempResources = files.map((f, i) => (
+		{
+			_id: timeStamp + i,
+			name: names[i] + (f.name.match(extensionRe) || ['', ''])[0].toLowerCase(),
+			uploading: true,
+			progress: 0,
+			size: 0,
+			originalSize: f.size
+		})
+		);
+
+	const rids = tempResources.map((r) => r._id);
+	const teamspace = yield select(selectCurrentTeamspace);
+	const issueId = (yield select(selectActiveIssueDetails))._id;
+
 	try {
-		const teamspace = yield select(selectCurrentTeamspace);
-		const issueId = (yield select(selectActiveIssueDetails))._id;
 		const model  = yield select(selectCurrentModel);
-		const names =  files.map((f) => f.name);
-		files = files.map((f) => f.file);
-
-		const extensionRe = /\.(\w+)$/;
-		const timeStamp = +new Date();
-
-		const tempResources = files.map((f, i) => (
-			{
-				_id: timeStamp + i,
-				name: names[i] + (f.name.match(extensionRe) || ['', ''])[0].toLowerCase(),
-				uploading: true,
-				progress: 0,
-				size: 0,
-				originalSize: f.size
-			})
-			);
-
-		const rids = tempResources.map((r) => r._id);
 		const username = (yield select(selectCurrentUser)).username;
 
 		yield put(IssuesActions.attachResourcesSuccess( prepareResources(teamspace, model, tempResources), issueId));
@@ -750,7 +751,10 @@ export function* attachFileResources({ files }) {
 		yield put(IssuesActions.updateResourcesSuccess(rids, resources, issueId));
 		yield put(IssuesActions.createCommentsSuccess(createAttachResourceComments(username, data), issueId));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('attach', 'resource', error));
+		for (let i = 0; i < rids.length; ++i) {
+			yield put(IssuesActions.removeResourceSuccess({_id: rids[i]}, issueId));
+		}
+		yield put(DialogActions.showEndpointErrorDialog('attach', 'resource', error));
 	}
 }
 
@@ -768,7 +772,7 @@ export function* attachLinkResources({ links }) {
 		yield put(IssuesActions.attachResourcesSuccess(resources, issueId));
 		yield put(IssuesActions.createCommentsSuccess(createAttachResourceComments(username, data), issueId));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('remove', 'resource', error));
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'resource', error));
 	}
 }
 

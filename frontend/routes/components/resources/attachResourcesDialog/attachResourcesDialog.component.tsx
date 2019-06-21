@@ -21,22 +21,19 @@ import * as React from 'react';
 import * as Yup from 'yup';
 import { AttachResourceFiles } from './attachResourceFiles.component';
 import { AttachResourceUrls } from './attachResourceUrls.component';
-import { NeutralActionButton, VisualSettingsButtonsContainer,
+import {
 		DialogTabs, DialogTab
 		} from '../../topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 import { Container } from './attachResourcesDialog.styles';
 import { DialogButtons } from './attachResourcesDialogButtons';
 
-const SettingsSchema = Yup.object().shape({
-});
-
 interface IProps {
-	handleResolve: () => void;
 	handleClose: () => void;
-	updateSettings: (settings: any) => void;
-	visualSettings: any;
 	onSaveFiles: any;
 	onSaveLinks: any;
+	quotaLeft: number;
+	fetchQuota: (teamspace: string) => void;
+	currentTeamspace: any;
 }
 
 interface IState {
@@ -52,7 +49,8 @@ const schema = Yup.object().shape({
 				.trim()
 				.required('Name is required')
 			})
-		),
+		)
+		,
 	links: Yup.array()
 		.of(
 			Yup.object().shape({
@@ -66,6 +64,10 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 	public state = {
 		selectedTab: 0
 	};
+
+	public componentDidMount = () => {
+		this.props.fetchQuota(this.props.currentTeamspace);
+	}
 
 	public handleTabChange = (event, selectedTab) => {
 		this.setState({ selectedTab });
@@ -81,10 +83,13 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 		this.props.handleClose();
 	}
 
+	public validateQuota = (files: any[]) => {
+		const totalSize = files.reduce((p, file) => p + file.file.size , 0);
+		return totalSize < (this.props.quotaLeft * 1024 * 1024);
+	}
+
 	public render() {
 		const {selectedTab} = this.state;
-		const {visualSettings, handleClose} =  this.props;
-
 		return (
 			<Container>
 				<DialogTabs
@@ -103,9 +108,9 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 				onSubmit={this.onSubmit}
 				render={({ values }) => (
 					<Form>
-						{selectedTab === 0 && <AttachResourceFiles files={values.files} />}
+						{selectedTab === 0 && <AttachResourceFiles files={values.files} validateQuota={this.validateQuota} />}
 						{selectedTab === 1 && <AttachResourceUrls links={values.links}/>}
-						<DialogButtons onClickCancel={this.onCancel}/>
+							<DialogButtons onClickCancel={this.onCancel} validateQuota={this.validateQuota}/>
 					</Form>
 					)}
 				/>

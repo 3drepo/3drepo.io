@@ -23,7 +23,7 @@ import {
 import { Field } from 'formik';
 import { Button } from '@material-ui/core';
 
-export const DialogButtons = ({onClickCancel}) => {
+export const DialogButtons = ({onClickCancel, validateQuota}) => {
 	return (
 		<VisualSettingsButtonsContainer>
 			<NeutralActionButton
@@ -41,7 +41,7 @@ export const DialogButtons = ({onClickCancel}) => {
 						color="secondary"
 						variant="raised"
 						type="submit"
-						disabled={!form.isValid || form.isValidating}
+						disabled={!form.isValid || form.isValidating || !validateQuota(form.values.files)}
 						>
 						Save
 					</Button>

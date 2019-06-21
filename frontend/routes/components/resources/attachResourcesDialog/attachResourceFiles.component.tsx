@@ -28,6 +28,7 @@ import { get } from 'lodash';
 
 interface IProps {
 	files: any[];
+	validateQuota: (files: []) => boolean;
 }
 
 const extensionRe = /\.(\w+)$/;
@@ -73,10 +74,8 @@ export class AttachResourceFiles extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const {files} = this.props;
+		const {files, validateQuota} = this.props;
 		return (
-			<div>
-
 					<FieldArray
 					name="files"
 					render={(arrayHelpers) => (
@@ -96,12 +95,13 @@ export class AttachResourceFiles extends React.PureComponent<IProps, any> {
 								</ResourcesListContainer>
 							</ResourcesListScroller>
 						)}
-							<ResourcesDropzone onDrop={this.onAddFile(arrayHelpers)}/>
+							<Field render={ ({ form }) => {
+									const errorMessage = !validateQuota(form.values.files) ? 'Quota exceeded! Try removing some files' : '';
+									return (<ResourcesDropzone onDrop={this.onAddFile(arrayHelpers)} errorMessage={errorMessage} />);
+							}} />
 						</div>
 				)}
 				/>
-
-			</div>
 		);
 	}
 }

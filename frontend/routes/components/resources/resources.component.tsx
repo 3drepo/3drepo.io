@@ -21,7 +21,7 @@ import { RemoveIcon, IconButton,
 		DocumentIcon, ResourceLabel, UploadSizeLabel, ResourcesContainer } from './resources.styles';
 
 import { LabelButton } from '../../viewer/components/labelButton/labelButton.styles';
-import { AttachResourcesDialog } from './attachResourcesDialog/attachResourcesDialog.component';
+import AttachResourcesDialog from './attachResourcesDialog/attachResourcesDialog.container';
 import { LinearProgress } from '@material-ui/core';
 import { FieldsRow, StyledFormControl } from '../../viewer/components/risks/components/riskDetails/riskDetails.styles';
 import { FieldLabel } from '../textField/textField.styles';

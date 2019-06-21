@@ -83,14 +83,21 @@ export const ExtensionAdornment =  styled((props) => {
 `;
 
 export const DropzoneContent = styled.div`
-	cursor: pointer;
-	background-color: ${(props: any) => props.isDragActive ? 'azure' : 'transparent' };
+	cursor: ${(props: any) => props.error ? 'default' : 'pointer' };
+	background-color: ${(props: any) =>
+		props.error ? COLOR.WARNING_LIGHT :
+		props.isDragActive ? COLOR.PRIMARY_MAIN_6 : 'transparent' };
 	position: relative;
 	padding: 10px;
 	border-width: 3px;
-	border-color:  ${(props: any) => !props.isDragActive ? COLOR.BLACK_50 : 'rgba(0, 0, 120, 0.5)' } ;
-	color:  ${(props: any) => !props.isDragActive ? COLOR.BLACK_60 : 'rgba(0, 0, 120, 0.6)' } ;
+	border-color:  ${(props: any) =>
+		props.error ? COLOR.NEGATIVE_87 :
+		!props.isDragActive ? COLOR.BLACK_50 :  COLOR.PRIMARY_MAIN_80 } ;
+	color:  ${(props: any) =>
+		props.error ? COLOR.NEGATIVE :
+		!props.isDragActive ? COLOR.BLACK_60 :  COLOR.PRIMARY_MAIN_80} ;
 	border-style: dashed;
 	border-radius: 5px;
 	text-align: center;
+	transition: background-color 0.3s ease,color 0.3s ease,border-color 0.3s ease ;
 ` as any;

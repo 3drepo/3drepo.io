@@ -168,7 +168,7 @@ FileRef.getOriginalFile = function(account, model, fileName) {
 	return fetchFileStream(account, model, ORIGINAL_FILE_REF_EXT, fileName, false);
 };
 
-FileRef.getTotalOrgFileSize = function(account, model) {
+FileRef.getTotalModelFileSize = function(account, model) {
 	return DB.getCollection(account, model + ORIGINAL_FILE_REF_EXT).then((col) => {
 		let totalSize = 0;
 		if(col) {
@@ -181,7 +181,15 @@ FileRef.getTotalOrgFileSize = function(account, model) {
 		}
 
 		return totalSize;
-	});
+	}).then(modelVersionsFileSize =>
+		DB.getCollection(account, model + RESOURCES_FILE_REF_EXT)
+			.then(col =>
+				col.find({ size: { $exists: true} }, {size : 1}).toArray())
+			.then(res => {
+				const resourcesSize =  (res || []).reduce((total, current) => total + current.size, 0);
+				return modelVersionsFileSize + resourcesSize;
+			})
+	);
 };
 
 FileRef.getUnityBundle = function(account, model, fileName) {

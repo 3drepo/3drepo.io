@@ -16,6 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
+import { number } from 'prop-types';
 
 const selectCurrentUserDomain = (state) => Object.assign({}, state.currentUser);
 
@@ -54,4 +55,9 @@ export const selectCollaboratorLimit = createSelector(
 export const selectSpaceInfo = createSelector(
 	selectCurrentUserDomain,
 	(state) => ({ spaceLimit: state.spaceLimit, spaceUsed: state.spaceUsed })
+);
+
+export const selectSpaceLeft = createSelector(
+	selectSpaceInfo, (state) =>
+		(state.spaceLimit === null || state.spaceLimit === undefined ? Infinity : state.spaceLimit) - state.spaceUsed
 );

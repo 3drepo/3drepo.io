@@ -949,6 +949,14 @@ issue.addRefsToIssue = async function(account, model, issueId, username, session
 };
 
 issue.attachResourceFiles = async function(account, model, issueId, username, sessionId, resourceNames, files) {
+	const quota = await User.getQuotaInfo(account);
+	const spaceLeft = ((quota.spaceLimit === null || quota.spaceLimit === undefined ? Infinity : quota.spaceLimit) - quota.spaceUsed) * 1024 * 1024;
+	const spaceToBeUsed = files.reduce((size, file) => size + file.size,0);
+
+	if (spaceLeft < spaceToBeUsed) {
+		throw responseCodes.SIZE_LIMIT_PAY;
+	}
+
 	const refsPromises = files.map((file,i) => {
 		const extension = ((file.originalname.match(extensionRe) || [])[0] || "").toLowerCase();
 		return FileRef.storeFileAsResource(account, model, username, resourceNames[i] + extension, file.buffer, {issueIds:[issueId]});

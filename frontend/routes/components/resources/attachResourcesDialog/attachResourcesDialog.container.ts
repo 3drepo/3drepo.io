@@ -14,16 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import * as React from 'react';
-import { DropzoneContent, StyledDropZone } from './attachResourcesDialog.styles';
 
-export const ResourcesDropzone = ({onDrop, errorMessage}) => (
-	<StyledDropZone onDrop={onDrop} disabled={Boolean(errorMessage)}>
-		{(args) => (
-			<DropzoneContent isDragActive={args.isDragActive} error={Boolean(errorMessage)}>
-				{! Boolean(errorMessage) && 'Click or drop to add files.'}
-				{Boolean(errorMessage) && errorMessage}
-			</DropzoneContent>
-		)}
-	</StyledDropZone>
-);
+import { connect } from '../../../../helpers/migration';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+
+import { AttachResourcesDialog } from './attachResourcesDialog.component';
+import { CurrentUserActions, selectCurrentTeamspace, selectSpaceLeft } from '../../../../modules/currentUser';
+
+const mapStateToProps = createStructuredSelector({
+	currentTeamspace: selectCurrentTeamspace,
+	quotaLeft: selectSpaceLeft
+});
+
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	fetchQuota: CurrentUserActions.fetchQuotaInfo
+}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(AttachResourcesDialog);
