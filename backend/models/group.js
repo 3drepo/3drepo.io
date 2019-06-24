@@ -803,9 +803,9 @@ function findModelSharedIDsByQuery(account, model, query, branch, revId) {
 						for(let i = 0; i < parents.length; i = i + entryPerQuery) {
 							const endIndex = i + entryPerQuery < parents.length ? i + entryPerQuery : parents.length;
 							const parentsForQuery = parents.slice(i, endIndex);
-							const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parentsForQuery }};
-							const meshProject = { shared_id: 1, _id: 0 };
-							queryPromise.push(dbCol.find(meshQuery, meshProject).toArray());
+							const objQuery = { _id: { $in: history.current }, shared_id: { $in: parentsForQuery }};
+							const objProject = { shared_id: 1, _id: 0 };
+							queryPromise.push(dbCol.find(objQuery, objProject).toArray());
 						}
 
 						return Promise.all(queryPromise).then((res) => {
