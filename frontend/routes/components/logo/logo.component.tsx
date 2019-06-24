@@ -36,4 +36,4 @@ const logoProps = {
 	longdesc: '3DRepoBuildingInformationModellingSoftware'
 };
 
-export const Logo = (props: IProps) => <Image {...logoProps} {...props} />;
+export const Logo = (props: IProps) => <Image className="topLogo" {...logoProps} {...props} />;
