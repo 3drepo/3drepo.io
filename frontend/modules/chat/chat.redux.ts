@@ -23,7 +23,6 @@ export const { Types: ChatTypes, Creators: ChatActions } = createActions({
 	handleReconnect: [],
 	saveSocketId: ['socketId'],
 	setJoinedRooms: ['joinedRooms'],
-	addRoom: ['room'],
 	joinRoom: ['teamspace', 'model'],
 	callChannelActions: ['subchannelName', 'teamspace', 'model', 'handlers'],
 	callCommentsChannelActions: ['subchannelName', 'teamspace', 'model', 'dataId', 'handlers']
@@ -32,13 +31,11 @@ export const { Types: ChatTypes, Creators: ChatActions } = createActions({
 export interface IChatState {
 	socketId: string;
 	isDialogOpen: boolean;
-	joinedRooms: string[];
 }
 
 export const INITIAL_STATE: IChatState = {
 	socketId: null,
-	isDialogOpen: false,
-	joinedRooms: []
+	isDialogOpen: false
 };
 
 const saveSocketId = (state = INITIAL_STATE, { socketId }) => {
@@ -49,13 +46,7 @@ const setJoinedRooms = (state = INITIAL_STATE, { joinedRooms }) => {
 	return { ...state, joinedRooms };
 };
 
-const addRoom = (state = INITIAL_STATE, { room }) => {
-	const joinedRooms = [...state.joinedRooms, room];
-	return { ...state, joinedRooms };
-};
-
 export const reducer = createReducer(INITIAL_STATE, {
 	[ChatTypes.SAVE_SOCKET_ID]: saveSocketId,
-	[ChatTypes.SET_JOINED_ROOMS]: setJoinedRooms,
-	[ChatTypes.ADD_ROOM]: addRoom
+	[ChatTypes.SET_JOINED_ROOMS]: setJoinedRooms
 });

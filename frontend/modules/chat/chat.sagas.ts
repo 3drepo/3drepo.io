@@ -26,7 +26,6 @@ import { IS_DEVELOPMENT } from '../../constants/environment';
 import { DialogActions } from '../dialog';
 import { ChatTypes, ChatActions } from './chat.redux';
 import { clientConfigService } from '../../services/clientConfig';
-import { selectJoinedRooms } from './chat.selectors';
 import { Channel } from './channel';
 
 const { host, path, reconnectionAttempts } = clientConfigService.chatConfig;
@@ -42,6 +41,7 @@ socket.on('disconnect', () => dispatch(ChatActions.handleDisconnect()));
 socket.on('reconnect', () => dispatch(ChatActions.handleReconnect()));
 
 const channels = {};
+const joinedRooms = [] as any;
 
 function* handleConnect() {
 	API.setSocketIdHeader(socket.id);
@@ -63,7 +63,6 @@ function* handleReconnect() {
 
 	yield handleConnect();
 
-	const joinedRooms: string[] = yield select(selectJoinedRooms);
 	for (let index = 0; index < joinedRooms.length; index++) {
 		const [teamspace, model] = joinedRooms[index].split('::');
 		socket.emit('join', { account: teamspace, model });
@@ -72,12 +71,10 @@ function* handleReconnect() {
 
 function* joinRoom({ teamspace, model }) {
 	const room = `${teamspace}${model ? '::' + model : ''}`;
-	const joinedRooms: any = yield select(selectJoinedRooms);
 
 	if (!joinedRooms.includes(room)) {
-		socket.emit('join', { account: teamspace, model });
-
-		yield put(ChatActions.addRoom(room));
+		yield socket.emit('join', { account: teamspace, model });
+		joinedRooms.push(room);
 	}
 }
 
@@ -103,12 +100,12 @@ const invokeChannelHandlers = (channel, handlers) => {
 };
 
 function* callChannelActions({ subchannelName, teamspace, model = '', handlers = {}}) {
-	const subchannel = getChannel(teamspace, model)[subchannelName];
+	const subchannel = yield getChannel(teamspace, model)[subchannelName];
 	invokeChannelHandlers(subchannel, handlers);
 }
 
 function* callCommentsChannelActions({ subchannelName, teamspace, model = '', dataId, handlers = {} }) {
-	const subchannel = getChannel(teamspace, model)[subchannelName];
+	const subchannel = yield getChannel(teamspace, model)[subchannelName];
 	const commentsChannel = subchannel.getCommentsChatEvents(dataId);
 	invokeChannelHandlers(commentsChannel, handlers);
 }

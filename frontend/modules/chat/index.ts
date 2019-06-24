@@ -19,5 +19,3 @@ export {
 	ChatTypes,
 	ChatActions
 } from './chat.redux';
-
-export * from './chat.selectors';
