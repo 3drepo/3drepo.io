@@ -56,7 +56,7 @@ interface IProps {
 	isolateSelectedNodes: (id) => void;
 	onScrollToTop: (index) => void;
 	onClick: (id) => void;
-	zoomToHighlightedMeshes: () => void;
+	zoomToHighlightedNodes: () => void;
 }
 
 interface IState {
@@ -205,7 +205,8 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 
 	private handleDoubleClick = () => {
 		if (this.props.visibilityMap[this.node._id] !== VISIBILITY_STATES.INVISIBLE) {
-			this.props.zoomToHighlightedMeshes();
+			console.log('CALL zoomToHighlightedNodes')
+			this.props.zoomToHighlightedNodes();
 		}
 	}
 

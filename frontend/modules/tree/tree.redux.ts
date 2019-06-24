@@ -56,7 +56,8 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	setExpanedNodesMap: ['expandedNodesMap'],
 	updateDataRevision: [],
 	setActiveNode: ['nodeId'],
-	goToParentNode: ['nodeId']
+	goToParentNode: ['nodeId'],
+	zoomToHighlightedNodes: []
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {

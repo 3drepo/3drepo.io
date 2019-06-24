@@ -190,44 +190,12 @@ export const getSelectNodesByIds = (nodesIds) => createSelector(
 	}
 );
 
-export const getSelectChildren = (node) => createSelector(
-	getSelectNodesByIds(node.childrenIds),
-	(children) => {
-		if (!node) {
-			throw new Error('Node does not exist');
-		}
-
-		if (node.hasChildren) {
-			return children;
-		}
-		return [];
-	}
-);
-
-export const getSelectDeepChildren = (nodeId) => createSelector(
+export const getDeepChildren = (nodeId) => createSelector(
 	selectTreeNodesList, selectNodesIndexesMap,
 	(treeNodesList, nodesIndexesMap) => {
 		const nodeIndex = nodesIndexesMap[nodeId];
 		const node = treeNodesList[nodeIndex];
 		return treeNodesList.slice(nodeIndex + 1, nodeIndex + node.deepChildrenNumber + 1);
-	}
-);
-
-export const getSelectParents = (node) => createSelector(
-	selectTreeNodesList, selectNodesIndexesMap,
-	(treeNodesList, nodesIndexesMap) => {
-		const parents = [];
-
-		let nextParentId = node.parentId;
-
-		while (!!nextParentId) {
-			const parentNodeIndex = nodesIndexesMap[nextParentId];
-			const parentNode = treeNodesList[parentNodeIndex];
-			parents.push(parentNode);
-			nextParentId = parentNode.parentId;
-		}
-
-		return parents;
 	}
 );
 
@@ -280,7 +248,7 @@ export const getSelectMeshesByNodes = (nodes = []) => createSelector(
 	}
 );
 
-export const getSelectNodesIdsFromSharedIds = (objects = []) => createSelector(
+export const getNodesIdsFromSharedIds = (objects = []) => createSelector(
 	selectNodesBySharedIdsMap,
 	(nodesBySharedIds) => {
 		if (!objects.length) {

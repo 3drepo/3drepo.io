@@ -41,7 +41,7 @@ import { prepareGroup, normalizeGroup } from '../../helpers/groups';
 import { selectCurrentUser } from '../currentUser';
 import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { SnackbarActions } from '../snackbar';
-import { TreeActions, getSelectMeshesByNodes, getSelectNodesIdsFromSharedIds, getSelectNodesByIds } from '../tree';
+import { TreeActions, getSelectMeshesByNodes, getNodesIdsFromSharedIds, getSelectNodesByIds } from '../tree';
 import { searchByFilters } from '../../helpers/searching';
 import { GROUPS_TYPES } from '../../constants/groups';
 
