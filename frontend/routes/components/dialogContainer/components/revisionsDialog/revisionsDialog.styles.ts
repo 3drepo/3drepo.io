@@ -21,6 +21,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import List from '@material-ui/core/List';
 
 import { COLOR } from '../../../../../styles/colors';
+import { FONT_WEIGHT } from '../../../../../styles';
 
 interface IItem {
 	current: boolean;
@@ -28,8 +29,13 @@ interface IItem {
 
 export const Property = styled.div`
 	color: ${COLOR.BLACK};
-	width: ${(props: any) => props.width ? `${props.width}px` : 'auto'};
-` as any;
+	width: 'auto';
+`;
+
+export const Tag = styled.div`
+	color: ${COLOR.BLACK};
+	width: 160px;
+`;
 
 export const PropertyWrapper = styled.div`
 	display: flex;
@@ -52,7 +58,7 @@ export const Item = styled(ListItem)<IItem>`
 	}
 
 	${Property} {
-		font-weight: ${(props: any) => props.current ? '500' : '200'};
+		font-weight: ${(props: any) => props.current ? FONT_WEIGHT.SEMIBOLD : FONT_WEIGHT.LIGHTER};
 	}
 ` as any;
 
@@ -65,9 +71,9 @@ export const Row = styled.div`
 
 export const Column = styled.div`
 	display: flex;
-  flex-direction: column;
-  align-self: flex-start;
-  margin-top: 10px;
+	flex-direction: column;
+	align-self: flex-start;
+	margin-top: 10px;
 `;
 
 export const Description = styled.div`
@@ -85,7 +91,7 @@ export const StyledList = styled(List)`
 
 export const StyledDialogContent = styled(DialogContent)`
 	&& {
-    padding: 0;
-    margin-bottom: 15px
+		padding: 0;
+		margin-bottom: 15px
 	}
 `;

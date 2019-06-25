@@ -36,31 +36,6 @@ interface IProps {
 }
 
 export class RevisionsSwitch extends React.PureComponent<IProps, any> {
-	public get currentRevisionName() {
-		return this.props.currentRevision || this.getRevisionDisplayedName(this.props.revisions[0]);
-	}
-
-	public get currentRevisionId() {
-		const currentRevision = this.props.revisions.find((revision) =>
-			this.currentRevisionName === revision.tag ||
-			this.currentRevisionName === formatDate(revision.timestamp, LONG_DATE_TIME_FORMAT)
-		);
-
-		return currentRevision._id;
-	}
-
-	public get revisionDataExists() {
-		return Boolean(this.props.modelName && this.currentRevisionName);
-	}
-
-	public getRevisionDisplayedName = (revision) => {
-		return revision.tag || formatDate(revision.timestamp, LONG_DATE_TIME_FORMAT);
-	}
-
-	public getRevisionTag = (revision) => {
-		return revision.tag || revision._id;
-	}
-
 	public renderCurrentSwitchState = renderWhenTrue(() => (
 		<DisplayedText>
 			{`${this.props.modelName} - ${this.currentRevisionName}`}
@@ -75,7 +50,37 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 		)
 	);
 
-	public setNewRevision = (revision) => {
+	public render() {
+		return (
+			<Container className={this.props.className} onClick={this.handleClick}>
+				{this.renderIndicator(!this.revisionDataExists)}
+				{this.renderCurrentSwitchState(this.revisionDataExists)}
+			</Container>
+		);
+	}
+
+	private get currentRevisionName() {
+		return this.props.currentRevision || this.getRevisionDisplayedName(this.props.revisions[0]);
+	}
+
+	private get currentRevisionId() {
+		const currentRevision = this.props.revisions.find((revision) =>
+			this.currentRevisionName === revision.tag ||
+			this.currentRevisionName === formatDate(revision.timestamp, LONG_DATE_TIME_FORMAT)
+		);
+
+		return currentRevision._id;
+	}
+
+	private get revisionDataExists() {
+		return Boolean(this.props.modelName && this.currentRevisionName);
+	}
+
+	private getRevisionDisplayedName = (revision) => {
+		return revision.tag || formatDate(revision.timestamp, LONG_DATE_TIME_FORMAT);
+	}
+
+	private setNewRevision = (revision) => {
 		const { pathname } = this.props.location;
 		const [, , , , currentRevisionInPath] = pathname.split('/');
 		const newPathnameBase = currentRevisionInPath ? pathname.substr(0, pathname.lastIndexOf('\/')) : pathname;
@@ -88,7 +93,7 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 		this.props.hideDialog();
 	}
 
-	public handleClick = () => {
+	private handleClick = () => {
 		if (this.props.revisions.length <= 1) {
 			return;
 		}
@@ -105,12 +110,4 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 		});
 	}
 
-	public render() {
-		return (
-			<Container className={this.props.className} onClick={this.handleClick}>
-				{this.renderIndicator(!this.revisionDataExists)}
-				{this.renderCurrentSwitchState(this.revisionDataExists)}
-			</Container>
-		);
-	}
 }

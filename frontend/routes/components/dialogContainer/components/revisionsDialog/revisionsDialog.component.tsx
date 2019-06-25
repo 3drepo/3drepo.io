@@ -6,6 +6,7 @@ import { DateTime } from '../../../dateTime/dateTime.component';
 import {
 	Item,
 	Row,
+	Tag,
 	Column,
 	Description,
 	StyledList,
@@ -13,6 +14,7 @@ import {
 	PropertyWrapper,
 	StyledDialogContent
 } from './revisionsDialog.styles';
+import { renderWhenTrue } from '../../../../../helpers/rendering';
 
 interface IProps {
 	currentRevisionName: string;
@@ -37,34 +39,44 @@ export const RevisionsDialog = (props: IProps) => {
 		<>
 			<StyledDialogContent>
 				<StyledList>
-					{revisions && revisions.map((revision) => (
-						<Item
-							button={true}
-							key={revision._id}
-							divider={true}
-							onClick={() => setNewRevision(handleSetNewRevision, revision, currentRevisionId === revision._id )}
-							current={currentRevisionId === revision._id ? 1 : 0}>
-								<Row>
-									<PropertyWrapper>
-										<Property width="160">
-											{revision.tag ? revision.tag : '(no tag)'}
-										</Property>
-										<Property>
-											{currentRevisionId === revision._id && '(current revision)'}
-										</Property>
-									</PropertyWrapper>
-									<Property>
-										<DateTime value={revision.timestamp} format={DATE_TIME_FORMAT} />
-									</Property>
-								</Row>
-								<Column>
-									<Property>
-										{revision.author}
-									</Property>
-									<Description>{revision.desc ? revision.desc : '(no description)'}</Description>
-								</Column>
-						</Item>)
-					) }
+					{
+						renderWhenTrue(() => {
+							return (
+								<>
+									{
+										revisions.map((revision) => (
+											<Item
+												key={revision._id}
+												button
+												divider
+												onClick={() => setNewRevision(handleSetNewRevision, revision, currentRevisionId === revision._id )}
+												current={currentRevisionId === revision._id}>
+													<Row>
+														<PropertyWrapper>
+															<Tag>
+																{revision.tag || '(no tag)'}
+															</Tag>
+															<Property>
+																{currentRevisionId === revision._id && '(current revision)'}
+															</Property>
+														</PropertyWrapper>
+														<Property>
+															<DateTime value={revision.timestamp} format={DATE_TIME_FORMAT} />
+														</Property>
+													</Row>
+													<Column>
+														<Property>
+															{revision.author}
+														</Property>
+														<Description>{revision.desc || '(no description)'}</Description>
+													</Column>
+											</Item>)
+										)
+									}
+								</>
+							);
+						})(Boolean(revisions.length))
+					}
 				</StyledList>
 			</StyledDialogContent>
 			<DialogActions>

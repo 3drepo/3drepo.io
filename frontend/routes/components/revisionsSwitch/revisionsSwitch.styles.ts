@@ -16,21 +16,22 @@
  */
 
 import styled from 'styled-components';
+import { COLOR, FONT_WEIGHT } from '../../../styles';
 
 export const Container = styled.div`
   z-index: 2;
   position: absolute;
-  color: white;
+  color: ${COLOR.WHITE};
   top: 60px;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
-  cursor:pointer;
+  cursor: pointer;
   outline: none;
   margin-top: 10px;
-  background-color: #8397AC;
+  background-color: ${COLOR.REGENT_GRAY};
   border-radius: 25px;
-  box-shadow: 0 3px 3px rgba(0,0,0,0.16);
+  box-shadow: 0 3px 3px ${COLOR.BLACK_16};
   padding: 0 12px;
   height: 36px;
   display: flex;
@@ -40,7 +41,7 @@ export const Container = styled.div`
 `;
 
 export const DisplayedText = styled.div`
-  font-weight: 400;
+  font-weight: ${FONT_WEIGHT.NORMAL};
   font-size: 14px;
   text-shadow: none;
   white-space: nowrap;
@@ -49,5 +50,5 @@ export const DisplayedText = styled.div`
 `;
 
 export const ProgressWrapper = styled.div`
-  color: white;
+  color: ${COLOR.WHITE};
 `;

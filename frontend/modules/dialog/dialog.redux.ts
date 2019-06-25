@@ -18,9 +18,7 @@
 import { createActions, createReducer } from 'reduxsauce';
 import { get, omit } from 'lodash';
 import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
-import {
-	ErrorDialog, ConfirmDialog, DisconnectedDialog, RevisionsDialog, SimpleErrorDialog, NewUpdateDialogDialog
-} from '../../routes/components/dialogContainer/components';
+import * as Dialogs from '../../routes/components/dialogContainer/components';
 
 interface IDialogConfig {
 	title: string;
@@ -62,7 +60,7 @@ const showDialog = (state = INITIAL_STATE, action) => {
 const showErrorDialog = (state = INITIAL_STATE, { method, dataType, message, status }) => {
 	const config = {
 		title: 'Error',
-		template: ErrorDialog,
+		template: Dialogs.ErrorDialog,
 		data: {
 			method,
 			dataType,
@@ -91,17 +89,17 @@ const showEndpointErrorDialog = (state = INITIAL_STATE, { method, dataType, erro
 };
 
 const showConfirmDialog = (state = INITIAL_STATE, action) => {
-	const config = { ...action.config, template: ConfirmDialog } as IDialogConfig;
+	const config = { ...action.config, template: Dialogs.ConfirmDialog } as IDialogConfig;
 	return showDialog(state, { config });
 };
 
 const showSimpleErrorDialog = (state = INITIAL_STATE, action) => {
-	const config = { ...action.config, template: SimpleErrorDialog } as IDialogConfig;
+	const config = { ...action.config, template: Dialogs.SimpleErrorDialog } as IDialogConfig;
 	return showDialog(state, { config });
 };
 
 const showRevisionsDialog = (state = INITIAL_STATE, action) => {
-	const config = { ...action.config, template: RevisionsDialog } as IDialogConfig;
+	const config = { ...action.config, template: Dialogs.RevisionsDialog } as IDialogConfig;
 	return showDialog(state, { config });
 };
 
@@ -129,7 +127,7 @@ const showDisconnectedDialog = (state = INITIAL_STATE, action) => {
 
 	const config = {
 		title: 'Notification Service Disconnected',
-		template: DisconnectedDialog,
+		template: Dialogs.DisconnectedDialog,
 		onCancel: action.config.onCancel
 	};
 
@@ -139,7 +137,7 @@ const showDisconnectedDialog = (state = INITIAL_STATE, action) => {
 const showNewUpdateDialog = (state = INITIAL_STATE, action) => {
 	const config = {
 		title: 'Update Available',
-		template: NewUpdateDialogDialog,
+		template: Dialogs.NewUpdateDialogDialog,
 		onConfirm: action.config.onConfirm
 	};
 
