@@ -1,5 +1,5 @@
-import { dispatch, runAngularTimeout } from "../../../helpers/migration";
-import { DialogActions } from "../../../modules/dialog";
+import { dispatch } from '../../../helpers/migration';
+import { DialogActions } from '../../../modules/dialog';
 
 /**
  *  Copyright (C) 2017 3D Repo Ltd
