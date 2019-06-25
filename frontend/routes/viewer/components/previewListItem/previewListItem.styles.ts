@@ -111,6 +111,7 @@ export const RoleIndicator = styled.div`
 	height: auto;
 	margin-right: 7px;
 	width: ${(props: any) => props.width || `5px`};
+	min-width: ${(props: any) => props.width || `5px`};
 ` as any;
 
 export const Actions = styled.div`

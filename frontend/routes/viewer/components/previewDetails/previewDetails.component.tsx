@@ -18,7 +18,7 @@
 import * as React from 'react';
 import * as Yup from 'yup';
 import { Formik, Field } from 'formik';
-import { TextField, Typography } from '@material-ui/core';
+import { TextField } from '@material-ui/core';
 
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
@@ -36,7 +36,8 @@ import {
 	ToggleButton,
 	ToggleIcon,
 	StyledForm,
-	NotCollapsableContent
+	NotCollapsableContent,
+	Typography
 } from './previewDetails.styles';
 
 interface IProps {
@@ -94,19 +95,11 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	}
 
 	public renderNameWithCounter = renderWhenTrue(() => (
-		<Typography
-			paragraph={true}
-		>
-			{`${this.props.number}. ${this.props.name}`}
-		</Typography>
+		<Typography>{`${this.props.number}. ${this.props.name}`}</Typography>
 	));
 
 	public renderName = renderWhenTrue(() => (
-		<Typography
-			paragraph={true}
-		>
-			{this.props.name}
-		</Typography>
+		<Typography>{this.props.name}</Typography>
 	));
 
 	public renderNameField = renderWhenTrue(() => (
