@@ -102,48 +102,30 @@ export class Processing {
 	}
 
 	public isolateNodes = ({ nodesIds = [], ifcSpacesHidden = true }: any) => {
-		const toUnhighlight = [];
-		const toHighlight = [];
 		const meshesToUpdate = [];
 
 		for (let index = 0; index < this.nodesList.length; index++) {
 			const node = this.nodesList[index];
 			const shouldBeVisible = nodesIds.includes(node._id);
+			let visibilityHasChanged = false;
 			if (shouldBeVisible) {
-				if (ifcSpacesHidden) {
-					this.visibilityMap[node._id] = ifcSpacesHidden ? this.defaultVisibilityMap[node._id] : VISIBILITY_STATES.VISIBLE;
-				}
-
-				if (this.isVisibleNode(node._id)) {
-					toHighlight.push(node);
-					if (node.type === NODE_TYPES.MESH) {
-						meshesToUpdate.push(node);
-					}
-					this.selectionMap[node._id] = SELECTION_STATES.SELECTED;
-				} else {
-					this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
-				}
+				this.visibilityMap[node._id] = ifcSpacesHidden ? this.defaultVisibilityMap[node._id] : VISIBILITY_STATES.VISIBLE;
+				visibilityHasChanged = true;
 			} else if (this.isVisibleNode(node._id)) {
-				toUnhighlight.push(node);
 				this.visibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
-				this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
-				if (node.type === NODE_TYPES.MESH) {
-					meshesToUpdate.push(node);
-				}
+				visibilityHasChanged = true;
 			}
-		}
 
-		const unhighlightedObjects = this.getMeshesByNodes(toUnhighlight);
-		const highlightedObjects = this.getMeshesByNodes(toHighlight);
+			if (visibilityHasChanged && node.type === NODE_TYPES.MESH) {
+				meshesToUpdate.push(node);
+			}
+			this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
+		}
 
 		this.selectionMap = { ...this.selectionMap };
 		this.visibilityMap = { ...this.visibilityMap };
 
-		return {
-			unhighlightedObjects,
-			highlightedObjects,
-			meshesToUpdate
-		};
+		return meshesToUpdate;
 	}
 
 	public updateVisibility = ({ nodesIds = [], ...extraData }) => {

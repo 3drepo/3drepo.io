@@ -286,21 +286,15 @@ function* hideTreeNodes(nodesIds = [], skipNested = false) {
 /**
  * ISOLATE NODES
  */
-function* isolateNodes(nodesIds = [], colour?) {
+function* isolateNodes(nodesIds = []) {
 	try {
 		if (nodesIds.length) {
-			const result = yield TreeProcessing.isolateNodes({ nodesIds });
+			const meshesToUpdate = yield TreeProcessing.isolateNodes({ nodesIds });
+			const visibilityMap = yield select(selectVisibilityMap);
 
-			unhighlightObjects(result.unhighlightObjects);
-
-			const [selectionMap, visibilityMap] = yield all([
-				select(selectSelectionMap),
-				select(selectVisibilityMap)
-			]);
-			highlightObjects(result.highlightedObjects, selectionMap, colour);
-
+			yield put(ViewerActions.clearHighlights());
 			yield put(TreeActions.updateDataRevision());
-			yield updateMeshesVisibility(result.meshesToUpdate, visibilityMap);
+			yield updateMeshesVisibility(meshesToUpdate, visibilityMap);
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('isolate', 'selected nodes', error));
@@ -312,19 +306,15 @@ function* isolateSelectedNodes({ nodeId = null }) {
 	if (highlightedNodesIds.length) {
 		yield isolateNodes(highlightedNodesIds);
 	} else {
-		yield isolateNode(nodeId);
+		const deepChildren = yield select(getDeepChildren(nodeId));
+		const deepChildrenIds = deepChildren.map(({ _id }) => _id);
+		yield isolateNodes([nodeId, ...deepChildrenIds]);
 	}
 }
 
 function* isolateNodesBySharedIds({ objects = []}) {
 	const nodesIds = yield select(getNodesIdsFromSharedIds(objects));
 	yield isolateNodes(nodesIds);
-}
-
-function* isolateNode(id) {
-	const deepChildren = yield select(getDeepChildren(id));
-	const deepChildrenIds = deepChildren.map(({ _id }) => _id);
-	yield isolateNodes([id, ...deepChildrenIds]);
 }
 
 function* hideIfcSpaces() {
