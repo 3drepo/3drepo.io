@@ -4,3 +4,4 @@ export * from './loadingDialog/loadingDialog.component';
 export * from './disconnectedDialog/disconnectedDialog.component';
 export * from './simpleErrorDialog/simpleErrorDialog.component';
 export * from './revisionsDialog/revisionsDialog.component';
+export * from './newUpdateDialog/newUpdateDialog.component';
