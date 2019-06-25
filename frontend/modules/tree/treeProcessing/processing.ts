@@ -36,7 +36,7 @@ export class Processing {
 		}));
 	}
 
-	public get invisibleNodesIds() {
+	public get hiddenNodesIds() {
 		return keys(pickBy(this.visibilityMap, (selectionState) => {
 			return selectionState === VISIBILITY_STATES.INVISIBLE;
 		}));
@@ -290,8 +290,8 @@ export class Processing {
 		}
 
 		if (parents.length) {
-			const uniqeParents = uniqBy(parents, ({ _id}) => _id);
-			this.updateParentsSelection(uniqeParents);
+			const uniqueParents = uniqBy(parents, ({ _id}) => _id);
+			this.updateParentsSelection(uniqueParents);
 		}
 	}
 
@@ -310,8 +310,8 @@ export class Processing {
 		}
 
 		if (parents.length) {
-			const uniqeParents = uniqBy(parents, ({ _id }) => _id);
-			this.updateParentsSelection(uniqeParents);
+			const uniqueParents = uniqBy(parents, ({ _id }) => _id);
+			this.updateParentsSelection(uniqueParents);
 		}
 	}
 

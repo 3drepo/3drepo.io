@@ -53,12 +53,12 @@ interface IProps {
 	dataRevision: string;
 	activeNode: string;
 	isPending?: boolean;
-	selectNode?: (id) => boolean;
+	handleNodesClick?: (nodes, skipExpand) => boolean;
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
 	isolateSelectedNodes: () => void;
 	hideIfcSpaces: () => void;
-	goToParentNode: (nodeId: boolean) => void;
+	goToRootNode: (nodeId: boolean) => void;
 }
 
 interface IState {
@@ -220,12 +220,12 @@ export class Tree extends React.PureComponent<IProps, IState> {
 
 	private handleScrollToTop = (index) => {
 		const treeNode = this.props.nodesList[index];
-		this.props.goToParentNode(treeNode.rootParentId);
+		this.props.goToRootNode(treeNode.rootParentId);
 	}
 
 	private handleNodesClick = (nodeId) => {
 		this.setState({ isScrollToActive: false }, () => {
-			this.props.selectNode(nodeId);
+			this.props.handleNodesClick([nodeId], true);
 		});
 	}
 

@@ -27,7 +27,7 @@ export interface ITreeProcessingData {
 	highlightedNodesIds: string[];
 	visibilityMap: any;
 	selectionMap: any;
-	invisibleNodesIds: any;
+	hiddenNodesIds: any;
 	defaultVisibilityMap: any;
 	nodesList: INode[];
 	nodesIndexesMap: any;

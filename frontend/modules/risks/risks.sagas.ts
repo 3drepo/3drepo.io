@@ -359,8 +359,7 @@ export function* showMultipleGroups({risk, revision}) {
 				objects.objects = highlightedGroupData.objects;
 			}
 		} else {
-			const hasViewpointDefaultGroup = risk.viewpoint.group_id;
-			const groupId = hasViewpointDefaultGroup ? risk.viewpoint.group_id : risk.group_id;
+			const groupId = risk.viewpoint.group_id || risk.group_id;
 			const groupData = yield getRiskGroup(risk, groupId, revision);
 
 			if (groupData.hiddenObjects && !risk.viewpoint.group_id) {

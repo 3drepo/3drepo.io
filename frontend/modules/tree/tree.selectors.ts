@@ -96,9 +96,9 @@ export const selectVisibilityMap = createSelector(
 	(treeProcessingData) => treeProcessingData.visibilityMap
 );
 
-export const selectInvisibleNodesIds = createSelector(
+export const selectHiddenNodesIds = createSelector(
 	selectTreeProccessing, selectDataRevision,
-	(treeProcessingData) => treeProcessingData.invisibleNodesIds || []
+	(treeProcessingData) => treeProcessingData.hiddenNodesIds || []
 );
 
 export const selectNodesIndexesMap = createSelector(
@@ -190,7 +190,7 @@ export const getSelectNodesByIds = (nodesIds) => createSelector(
 	}
 );
 
-export const getDeepChildren = (nodeId) => createSelector(
+export const getSelectDeepChildren = (nodeId) => createSelector(
 	selectTreeNodesList, selectNodesIndexesMap,
 	(treeNodesList, nodesIndexesMap) => {
 		const nodeIndex = nodesIndexesMap[nodeId];
@@ -252,7 +252,7 @@ export const getSelectMeshesByIds = (nodesIds = []) => createSelector(
 	}
 );
 
-export const getNodesIdsFromSharedIds = (objects = []) => createSelector(
+export const getSelectNodesIdsFromSharedIds = (objects = []) => createSelector(
 	selectNodesBySharedIdsMap,
 	(nodesBySharedIds) => {
 		if (!objects.length) {

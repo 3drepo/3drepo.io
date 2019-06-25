@@ -28,13 +28,12 @@ import {
 	selectIfcSpacesHidden,
 	selectNodesIndexesMap,
 	selectTreeNodesList,
-	selectSelectedNodesIds,
 	selectExpandedNodesMap,
 	getSelectNodesByIds,
-	getNodesIdsFromSharedIds,
-	selectInvisibleNodesIds,
+	getSelectNodesIdsFromSharedIds,
+	selectHiddenNodesIds,
 	selectDefaultHiddenNodesIds,
-	getDeepChildren,
+	getSelectDeepChildren,
 	selectSelectionMap,
 	selectVisibilityMap,
 	selectHighlightedNodesIds,
@@ -45,7 +44,7 @@ import { TreeTypes, TreeActions } from './tree.redux';
 import { selectSettings, ModelTypes } from '../model';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { VISIBILITY_STATES, SELECTION_STATES } from '../../constants/tree';
-import { selectActiveMeta, BimActions, selectIsActive } from '../bim';
+import { BimActions, selectIsActive } from '../bim';
 import { ViewerActions } from '../viewer';
 
 const unhighlightObjects = (objects = []) => {
@@ -105,7 +104,7 @@ function* expandToNode(nodeId: string) {
 			expandedNodesMap[parents[index]._id] = true;
 		}
 
-		yield put(TreeActions.setExpanedNodesMap(expandedNodesMap));
+		yield put(TreeActions.setExpandedNodesMap(expandedNodesMap));
 	}
 }
 
@@ -180,7 +179,6 @@ function* handleBackgroundClick() {
 		]);
 		yield put(TreeActions.updateDataRevision());
 	}
-	return false;
 }
 
 function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = false }) {
@@ -193,15 +191,6 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = f
 	}
 
 	if (removeGroup) {
-		const nodes = yield select(getSelectNodesByIds(nodesIds));
-		const activeMeta = yield select(selectActiveMeta);
-		const shouldCloseMeta = nodes.some(({ meta }) => meta.includes(activeMeta));
-		if (shouldCloseMeta) {
-			yield all([
-				put(ViewerActions.setMetadataVisibility(false)),
-				put(BimActions.setActiveMeta(null))
-			]);
-		}
 		yield put(TreeActions.deselectNodes(nodesIds));
 	} else {
 		yield put(TreeActions.selectNodes(nodesIds, skipExpand, skipChildren));
@@ -209,7 +198,7 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = f
 }
 
 function* handleNodesClickBySharedIds({ objects = [] }) {
-	const nodes = yield select(getNodesIdsFromSharedIds(objects));
+	const nodes = yield select(getSelectNodesIdsFromSharedIds(objects));
 	yield put(TreeActions.handleNodesClick(nodes));
 }
 
@@ -242,7 +231,7 @@ function* clearCurrentlySelected() {
  */
 function* showAllNodes() {
 	try {
-		const nodesIds = yield select(selectInvisibleNodesIds);
+		const nodesIds = yield select(selectHiddenNodesIds);
 		yield showTreeNodes(nodesIds, true);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('show', 'all nodes', error));
@@ -250,7 +239,7 @@ function* showAllNodes() {
 }
 
 function* showNodesBySharedIds({ objects = [] }) {
-	const nodesIds = yield select(getNodesIdsFromSharedIds(objects));
+	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
 	yield showTreeNodes(nodesIds);
 }
 
@@ -271,7 +260,7 @@ function* hideSelectedNodes() {
 }
 
 function* hideNodesBySharedIds({ objects = [] }) {
-	const nodesIds = yield select(getNodesIdsFromSharedIds(objects));
+	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
 	yield hideTreeNodes(nodesIds, true);
 }
 
@@ -306,14 +295,14 @@ function* isolateSelectedNodes({ nodeId = null }) {
 	if (highlightedNodesIds.length) {
 		yield isolateNodes(highlightedNodesIds);
 	} else {
-		const deepChildren = yield select(getDeepChildren(nodeId));
+		const deepChildren = yield select(getSelectDeepChildren(nodeId));
 		const deepChildrenIds = deepChildren.map(({ _id }) => _id);
 		yield isolateNodes([nodeId, ...deepChildrenIds]);
 	}
 }
 
 function* isolateNodesBySharedIds({ objects = []}) {
-	const nodesIds = yield select(getNodesIdsFromSharedIds(objects));
+	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
 	yield isolateNodes(nodesIds);
 }
 
@@ -323,7 +312,7 @@ function* hideIfcSpaces() {
 		yield put(TreeActions.setIfcSpacesHidden(!ifcSpacesHidden));
 
 		const ifcSpacesNodesIds = yield select(selectDefaultHiddenNodesIds);
-		const visibility = !ifcSpacesHidden ? VISIBILITY_STATES.INVISIBLE : VISIBILITY_STATES.VISIBLE;
+		const visibility = ifcSpacesHidden ? VISIBILITY_STATES.VISIBLE : VISIBILITY_STATES.INVISIBLE;
 		yield put(TreeActions.setTreeNodesVisibility(ifcSpacesNodesIds, visibility, true));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('hide', 'IFC spaces', error));
@@ -338,28 +327,24 @@ function* deselectNodes({ nodesIds = [] }) {
 		const result = yield TreeProcessing.deselectNodes({ nodesIds });
 		unhighlightObjects(result.unhighlightedObjects);
 
-		yield put(TreeActions.updateDataRevision());
+		yield all([
+			put(ViewerActions.setMetadataVisibility(false)),
+			put(BimActions.setActiveMeta(null)),
+			put(TreeActions.updateDataRevision())
+		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('deselect', 'node', error));
 	}
 }
 
 function* deselectNodesBySharedIds({ objects = [] }) {
-	const nodesIds = yield select(getNodesIdsFromSharedIds(objects));
+	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
 	yield put(TreeActions.deselectNodes(nodesIds));
 }
 
 /**
  * SELECT NODES
  */
-function* selectNode({ id }) {
-	try {
-		yield put(TreeActions.handleNodesClick([id], true));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('select', 'node', error));
-	}
-}
-
 function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false, colour }) {
 	try {
 		const lastNodeId = nodesIds[nodesIds.length - 1];
@@ -376,9 +361,8 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 		if (!skipExpand) {
 			yield expandToNode(lastNodeId);
 		}
-		if (nodesIds.length === 1) {
-			yield put(TreeActions.setActiveNode(nodesIds[0]));
-		}
+
+		yield put(TreeActions.setActiveNode(lastNodeId));
 		yield put(TreeActions.updateDataRevision());
 		yield zoomToHighlightedNodes();
 	} catch (error) {
@@ -387,7 +371,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 }
 
 function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], colour?: number[]}) {
-	const nodesIds = yield select(getNodesIdsFromSharedIds(objects));
+	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
 	yield put(TreeActions.selectNodes(nodesIds, false, true, colour));
 }
 
@@ -497,10 +481,10 @@ function* collapseNodes({ nodesIds }) {
 		}
 	}
 
-	yield put(TreeActions.setExpanedNodesMap(expandedNodesMap));
+	yield put(TreeActions.setExpandedNodesMap(expandedNodesMap));
 }
 
-function* goToParentNode({ nodeId }) {
+function* goToRootNode({ nodeId }) {
 	const nodesIndexesMap = yield select(selectNodesIndexesMap);
 	const nodesList = yield select(selectTreeNodesList);
 	const level = nodesList[nodesIndexesMap[nodeId]].level;
@@ -526,10 +510,8 @@ function* goToParentNode({ nodeId }) {
 
 function* zoomToHighlightedNodes() {
 	try {
-		//yield take(TreeTypes.UPDATE_DATA_REVISION);
-		requestAnimationFrame(() => {
-			dispatch(ViewerActions.zoomToHighlightedMeshes());
-		});
+		console.log('CALL zoomToHighlightedNodes');
+		yield put(ViewerActions.zoomToHighlightedMeshes());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('zoom', 'highlighted nodes', error));
 	}
@@ -544,7 +526,6 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.HIDE_SELECTED_NODES, hideSelectedNodes);
 	yield takeLatest(TreeTypes.ISOLATE_SELECTED_NODES, isolateSelectedNodes);
 	yield takeLatest(TreeTypes.HIDE_IFC_SPACES, hideIfcSpaces);
-	yield takeLatest(TreeTypes.SELECT_NODE, selectNode);
 	yield takeLatest(TreeTypes.SET_TREE_NODES_VISIBILITY, setTreeNodesVisibility);
 	yield takeLatest(TreeTypes.SET_SELECTED_NODES_VISIBILITY, setSelectedNodesVisibility);
 	yield takeLatest(TreeTypes.HANDLE_NODES_CLICK, handleNodesClick);
@@ -559,6 +540,6 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.HIDE_NODES_BY_SHARED_IDS, hideNodesBySharedIds);
 	yield takeLatest(TreeTypes.CLEAR_CURRENTLY_SELECTED, clearCurrentlySelected);
 	yield takeLatest(TreeTypes.COLLAPSE_NODES, collapseNodes);
-	yield takeLatest(TreeTypes.GO_TO_PARENT_NODE, goToParentNode);
+	yield takeLatest(TreeTypes.GO_TO_ROOT_NODE, goToRootNode);
 	yield takeLatest(TreeTypes.ZOOM_TO_HIGHLIGHTED_NODES, zoomToHighlightedNodes);
 }
