@@ -205,7 +205,6 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 
 	private handleDoubleClick = () => {
 		if (this.props.visibilityMap[this.node._id] !== VISIBILITY_STATES.INVISIBLE) {
-			console.log('CALL zoomToHighlightedNodes')
 			this.props.zoomToHighlightedNodes();
 		}
 	}

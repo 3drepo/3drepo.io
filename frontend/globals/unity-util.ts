@@ -671,24 +671,34 @@ export class UnityUtil {
 	 * 					or when you want a specific set of objects to stay highlighted when toggle mode is on
 	 */
 	public static highlightObjects(account, model, idArr, color, toggleMode, forceReHighlight) {
-
 		const maxNodesPerReq = 20000;
+		const promises = [];
 		for (let i = 0 ; i < idArr.length; i += maxNodesPerReq) {
-			setTimeout(() => {
-				const endIdx = i + maxNodesPerReq < idArr.length ? i + maxNodesPerReq : idArr.length ;
-				const arr = idArr.slice(i, endIdx);
-				const params: any = {
-					database : account,
-					model,
-					ids : arr,
-					toggle : toggleMode,
-					forceReHighlight,
-					color: color ? color : UnityUtil.defaultHighlightColor
-				};
-				UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
-			}, i > 0 ? 100 : 0);
+			const promise = new Promise((resolve, reject) => {
+				setTimeout(() => {
+					try {
+						const endIdx = i + maxNodesPerReq < idArr.length ? i + maxNodesPerReq : idArr.length ;
+						const arr = idArr.slice(i, endIdx);
+						const params: any = {
+							database : account,
+							model,
+							ids : arr,
+							toggle : toggleMode,
+							forceReHighlight,
+							color: color ? color : UnityUtil.defaultHighlightColor
+						};
+						UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+						resolve();
+					} catch (error) {
+						reject(error);
+					}
+				}, i > 0 ? 100 : 0);
+
+				promises.push(promise);
+			});
 		}
 
+		return Promise.all(promises);
 	}
 
 	/**

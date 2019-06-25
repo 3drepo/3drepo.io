@@ -209,6 +209,15 @@ export class ViewerService {
 
 	public async highlightObjects(params) {
 		await this.isViewerReady();
+		console.log('Highlight objects call: ',
+			params.account,
+			params.model,
+			params.id ? [params.id] : params.ids,
+			params.zoom,
+			params.colour,
+			params.multi,
+			params.forceReHighlight
+		);
 		this.viewer.highlightObjects(
 			params.account,
 			params.model,

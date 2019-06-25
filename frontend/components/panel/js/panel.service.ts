@@ -94,7 +94,7 @@ export class PanelService {
 		this.panelCards.left.push({
 			type: 'issues',
 			title: 'Issues',
-			show: issueId || !riskId,
+			show: false, // issueId || !riskId,
 			help: 'List current issues',
 			icon: 'place',
 			menu: [
@@ -352,7 +352,7 @@ export class PanelService {
 		this.panelCards.left.push({
 			type: 'tree',
 			title: 'Tree',
-			show: false,
+			show: true,
 			help: 'Model elements shown in a tree structure',
 			icon: 'device_hub',
 			minHeight: 80,

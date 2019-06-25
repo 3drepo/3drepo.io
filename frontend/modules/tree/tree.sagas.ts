@@ -61,24 +61,28 @@ const unhighlightObjects = (objects = []) => {
 };
 
 const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
+	const promises = [];
 	for (let index = 0, size = objects.length; index < size; index++) {
 		const { meshes, teamspace, modelId } = objects[index];
 
 		if (meshes.length) {
 			const filterdMeshes = meshes.filter((mesh) => nodesSelectionMap[mesh] === SELECTION_STATES.SELECTED);
 			if (meshes.length > 0) {
-				Viewer.highlightObjects({
-					account: teamspace,
-					ids: filterdMeshes,
-					colour,
-					model: modelId,
-					multi: true,
-					source: 'tree',
-					forceReHighlight: true
-				});
+				promises.push(
+					Viewer.highlightObjects({
+						account: teamspace,
+						ids: filterdMeshes,
+						colour,
+						model: modelId,
+						multi: true,
+						source: 'tree',
+						forceReHighlight: true
+					})
+				);
 			}
 		}
 	}
+	return Promise.all(promises);
 };
 
 function* handleMetadata(node: any) {
@@ -377,7 +381,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 		]);
 
 		const selectionMap = yield select(selectSelectionMap);
-		highlightObjects(result.highlightedObjects, selectionMap, colour);
+		yield highlightObjects(result.highlightedObjects, selectionMap, colour);
 
 		if (!skipExpand) {
 			yield expandToNode(lastNodeId);
@@ -386,6 +390,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 			yield put(TreeActions.setActiveNode(nodesIds[0]));
 		}
 		yield put(TreeActions.updateDataRevision());
+		yield zoomToHighlightedNodes();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
 	}
@@ -427,7 +432,7 @@ function* setSelectedNodesVisibility({ nodeId, visibility }) {
 	const highlightedNodesIds = yield select(selectHighlightedNodesIds);
 	const hasSelectedNodes = !!highlightedNodesIds.length;
 	const nodesIds = hasSelectedNodes ? highlightedNodesIds : [nodeId];
-	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, hasSelectedNodes, hasSelectedNodes));
+	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, hasSelectedNodes));
 }
 
 function* updateMeshesVisibility(meshes, nodesVisibilityMap) {
@@ -531,8 +536,10 @@ function* goToParentNode({ nodeId }) {
 
 function* zoomToHighlightedNodes() {
 	try {
-		yield take(TreeTypes.UPDATE_DATA_REVISION);
-		yield put(ViewerActions.zoomToHighlightedMeshes());
+		//yield take(TreeTypes.UPDATE_DATA_REVISION);
+		requestAnimationFrame(() => {
+			dispatch(ViewerActions.zoomToHighlightedMeshes());
+		});
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('zoom', 'highlighted nodes', error));
 	}
