@@ -26,9 +26,7 @@ class PanelCardController implements ng.IController {
 		'$element',
 		'$compile',
 		'$filter',
-
-		'PanelService',
-		'EventService'
+		'PanelService'
 	];
 
 	public vm = this;
@@ -59,9 +57,7 @@ class PanelCardController implements ng.IController {
 		private $element: ng.IRootElementService,
 		private $compile: ng.ICompileService,
 		private $filter: any,
-
-		private panelService: PanelService,
-		private eventService: any
+		private panelService: PanelService
 	) {}
 
 	public $onInit() {

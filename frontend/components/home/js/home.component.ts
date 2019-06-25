@@ -23,11 +23,7 @@ class HomeController implements ng.IController {
 	public static $inject: string[] = [
 		'$scope',
 		'$http',
-		'$templateCache',
-		'$element',
-		'$interval',
 		'$timeout',
-		'$compile',
 		'$mdDialog',
 		'$window',
 		'$location',
@@ -36,11 +32,8 @@ class HomeController implements ng.IController {
 
 		'AuthService',
 		'StateManager',
-		'EventService',
 		'ClientConfigService',
 		'SWService',
-		'ViewerService',
-		'TemplateService',
 		'DialogService'
 	];
 
@@ -68,11 +61,7 @@ class HomeController implements ng.IController {
 	constructor(
 		private $scope,
 		private $http,
-		private $templateCache,
-		private $element,
-		private $interval,
 		private $timeout,
-		private $compile,
 		private $mdDialog,
 		private $window,
 		private $location,
@@ -81,11 +70,8 @@ class HomeController implements ng.IController {
 
 		private AuthService,
 		private StateManager,
-		private EventService,
 		private ClientConfigService,
 		private SWService,
-		private ViewerService,
-		private TemplateService,
 		private DialogService
 	) {
 		subscribe(this, {
@@ -144,12 +130,6 @@ class HomeController implements ng.IController {
 				this.handlePaths();
 			}
 		);
-
-		this.$scope.$watch(this.EventService.currentEvent, (event) => {
-			if (event && event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-				this.pointerEvents = event.value.on ? 'none' : 'inherit';
-			}
-		});
 
 		/*
 		* Watch the state to handle moving to and from the login page

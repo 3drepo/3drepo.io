@@ -348,7 +348,6 @@ export class Viewer {
 	}
 
 	public pickPointEvent(pointInfo) {
-
 		// User clicked a mesh
 		this.emit(Viewer.EVENT.PICK_POINT, {
 			id : pointInfo.id,
@@ -369,7 +368,6 @@ export class Viewer {
 	}
 
 	public objectSelected(pointInfo) {
-
 		if (!this.selectionDisabled && !this.pinDropMode && !this.measureMode) {
 			if (pointInfo.id) {
 				if (pointInfo.pin) {
@@ -377,7 +375,6 @@ export class Viewer {
 					this.emit(Viewer.EVENT.CLICK_PIN, {
 						id: pointInfo.id
 					});
-
 				} else {
 					this.emit(Viewer.EVENT.OBJECT_SELECTED, {
 						account: pointInfo.database,
@@ -646,7 +643,6 @@ export class Viewer {
 	}
 
 	public clickPin(id) {
-
 		if (this.pins.hasOwnProperty(id)) {
 			const pin = this.pins[id];
 

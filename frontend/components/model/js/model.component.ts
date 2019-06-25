@@ -41,7 +41,7 @@ class ModelController implements ng.IController {
 		'$location',
 		'$mdDialog',
 
-		'EventService',
+		'RevisionsService',
 		'StateManager',
 		'PanelService',
 		'ViewerService'
@@ -72,7 +72,7 @@ class ModelController implements ng.IController {
 		private $location,
 		private $mdDialog,
 
-		private EventService,
+		private RevisionsService,
 		private StateManager,
 		private PanelService,
 		private ViewerService
@@ -119,6 +119,9 @@ class ModelController implements ng.IController {
 			window.removeEventListener('beforeunload', refreshHandler);
 			window.removeEventListener('popstate', popStateHandler);
 			this.ViewerService.off(VIEWER_EVENTS.CLICK_PIN);
+			this.ViewerService.off(VIEWER_EVENTS.CHANGE_PIN_COLOUR);
+			this.ViewerService.off(VIEWER_EVENTS.SET_CAMERA);
+			this.ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED_PIN_MODE);
 			dispatch(TreeActions.stopListenOnSelections());
 			dispatch(ViewerActions.stopListenOnModelLoaded());
 			this.resetPanelsStates();
@@ -140,6 +143,9 @@ class ModelController implements ng.IController {
 		dispatch(ViewerActions.startListenOnModelLoaded());
 
 		this.ViewerService.on(VIEWER_EVENTS.CLICK_PIN, this.onPinClick);
+		this.ViewerService.on(VIEWER_EVENTS.CHANGE_PIN_COLOUR, this.onChangePinColor);
+		this.ViewerService.on(VIEWER_EVENTS.SET_CAMERA, this.onSetCamera);
+		this.ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED_PIN_MODE, this.onBackgroundSelectedPinMode);
 		this.unsubscribeModelSettingsListener = subscribe(this, this.onModelSettingsChange);
 
 		this.watchers();
@@ -161,20 +167,24 @@ class ModelController implements ng.IController {
 		}
 	}
 
+	public onChangePinColor = (params) => {
+		dispatch(ViewerActions.changePinColor(params));
+	}
+
+	public onSetCamera = (params) => {
+		dispatch(ViewerActions.setCamera(params));
+	}
+
+	public onBackgroundSelectedPinMode = () => {
+		dispatch(ViewerActions.removeUnsavedPin());
+	}
+
 	public watchers() {
 		this.$scope.$watchGroup(['vm.account', 'vm.model'], () => {
 			if (this.account && this.model) {
 				angular.element(() => {
 					this.setupModelInfo();
 				});
-			}
-		});
-
-		this.$scope.$watch(this.EventService.currentEvent, (event) => {
-			this.event = event;
-
-			if (event.type === this.EventService.EVENT.TOGGLE_ISSUE_AREA_DRAWING) {
-				this.pointerEvents = event.value.on ? 'none' : 'inherit';
 			}
 		});
 	}

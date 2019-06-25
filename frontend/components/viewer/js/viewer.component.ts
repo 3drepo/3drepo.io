@@ -27,9 +27,6 @@ class ViewerController implements ng.IController {
 		'$q',
 		'$element',
 		'$timeout',
-
-		'ClientConfigService',
-		'EventService',
 		'ViewerService'
 	];
 
@@ -56,8 +53,6 @@ class ViewerController implements ng.IController {
 		private $element: ng.IRootElementService,
 		private $timeout: ng.ITimeoutService,
 
-		private ClientConfigService,
-		private EventService,
 		private ViewerService
 	) {}
 
@@ -85,9 +80,8 @@ class ViewerController implements ng.IController {
 	public $onDestroy() {
 		this.$element.on('$destroy', () => {
 			this.cancelPinWatcher();
-			this.cancelEventWatcher();
 			this.ViewerService.diffToolDisableAndClear();
-			this.viewer.reset(); // Remove events watch
+			this.viewer.reset();
 			this.viewer.destroy();
 		});
 	}
@@ -100,13 +94,6 @@ class ViewerController implements ng.IController {
 				this.viewer.setPinDropMode(this.ViewerService.pin.pinDropMode);
 			}
 		}, true);
-
-		this.cancelEventWatcher = this.$scope.$watch(this.EventService.currentEvent, (event: any) => {
-			const validEvent = event !== undefined && event.type !== undefined;
-			if (validEvent && this.ViewerService.initialised) {
-				this.ViewerService.handleEvent(event, this.account, this.model);
-			}
-		});
 
 		this.$scope.$watch(() => this.shadowsSetting, this.ViewerService.setShadows.bind(this.ViewerService));
 

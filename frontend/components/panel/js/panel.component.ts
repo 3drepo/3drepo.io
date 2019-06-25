@@ -24,8 +24,7 @@ class PanelController implements ng.IController {
 		'$window',
 		'$scope',
 		'$timeout',
-		'PanelService',
-		'EventService'
+		'PanelService'
 	];
 
 	public maxHeightAvailable;
@@ -41,16 +40,13 @@ class PanelController implements ng.IController {
 	public isMetadataVisible;
 
 	private highlightBackground;
-	private visiblePanelsMap;
 	private unsubscribeStore;
 
 	constructor(
 		private $window: ng.IWindowService,
 		private $scope: ng.IScope,
 		private $timeout: ng.ITimeoutService,
-
-		private PanelService: any,
-		private EventService: any
+		private PanelService: any
 	) {
 		this.unsubscribeStore = subscribe(this, (state) => {
 			const isMetadataVisible = selectIsMetadataVisible(state);

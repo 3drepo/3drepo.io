@@ -27,8 +27,7 @@ export class ViewerService {
 		'$timeout',
 
 		'ClientConfigService',
-		'DialogService',
-		'EventService'
+		'DialogService'
 	];
 
 	public pin: any;
@@ -51,8 +50,7 @@ export class ViewerService {
 		public $timeout: ng.ITimeoutService,
 
 		public ClientConfigService: any,
-		public DialogService: any,
-		public EventService: any
+		public DialogService: any
 	) {
 
 		this.newPinId = 'newPinId';
@@ -98,54 +96,6 @@ export class ViewerService {
 		if (this.viewer) {
 			return this.viewer.getNumPlanes();
 		}
-	}
-
-	// TODO: More EventService to be removed, but these functions broadcast
-	// across multiple watchers
-
-	public handleEvent(event, account, model) {
-
-		this.initialised.promise.then(() => {
-
-			switch (event.type) {
-
-			case this.EventService.EVENT.VIEWER.CLICK_PIN:
-				if (this.newPinId === 'newPinId') {
-					this.removeUnsavedPin();
-					return;
-				}
-				this.viewer.clickPin(event.value.id);
-				break;
-
-			case this.EventService.EVENT.VIEWER.CHANGE_PIN_COLOUR:
-				this.viewer.changePinColours(
-					event.value.id,
-					event.value.colours
-				);
-				break;
-			case this.EventService.EVENT.VIEWER.SET_CAMERA:
-				this.viewer.setCamera(
-					event.value.position,
-					event.value.view_dir,
-					event.value.up,
-					event.value.look_at,
-					event.value.animate !== undefined ? event.value.animate : true,
-					event.value.rollerCoasterMode,
-					event.value.account,
-					event.value.model
-				);
-				break;
-
-			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED_PIN_MODE:
-				if (this.pin.pinDropMode) {
-					this.removeUnsavedPin();
-				}
-				break;
-
-			}
-
-		});
-
 	}
 
 	public centreToPoint(params: any) {
@@ -347,7 +297,6 @@ export class ViewerService {
 			this.viewer = new Viewer({
 				name: 'viewer',
 				container: document.getElementById('viewer'),
-				onEvent: this.EventService.send,
 				onError: this.handleUnityError
 			});
 
