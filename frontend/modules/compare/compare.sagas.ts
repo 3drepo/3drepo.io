@@ -245,12 +245,7 @@ function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
 	}
 }
 
-function* changeModelNodesVisibility(nodesIds = [], visible: boolean) {
-	const visibility = visible ? VISIBILITY_STATES.VISIBLE : VISIBILITY_STATES.INVISIBLE;
-	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, false, true));
-}
-
-function* setModelsNodesVisibility(models, isVisible = true) {
+function* setModelsNodesVisibility(models, visibility) {
 	const indexesMap = yield select(selectNodesIndexesMap);
 	const nodesList = yield select(selectTreeNodesList);
 	const nodesIds = models.map(({ _id, name }) => {
@@ -261,7 +256,7 @@ function* setModelsNodesVisibility(models, isVisible = true) {
 		return _id;
 	});
 
-	yield changeModelNodesVisibility(nodesIds, isVisible);
+	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, false, true));
 }
 
 function* startComparisonOfFederation() {
@@ -274,10 +269,11 @@ function* startComparisonOfFederation() {
 	const compareModels = yield select(selectCompareModels);
 	const selectedModels = yield select(selectSelectedModelsMap);
 
-	yield setModelsNodesVisibility(compareModels, false);
-	yield setModelsNodesVisibility(baseModels);
+	yield setModelsNodesVisibility(compareModels, VISIBILITY_STATES.INVISIBLE);
+	yield setModelsNodesVisibility(baseModels, VISIBILITY_STATES.VISIBLE);
 
 	const modelsToLoad = [];
+	const modelsToReuse = [];
 	for (let index = 0; index < targetModels.length; index++) {
 		const model = targetModels[index];
 
@@ -287,7 +283,7 @@ function* startComparisonOfFederation() {
 			const canReuseModel = sharedRevisionModel && selectedModels[sharedRevisionModel._id];
 
 			if (canReuseModel) {
-				yield changeModelNodesVisibility([sharedRevisionModel], true);
+				modelsToReuse.push(sharedRevisionModel);
 				Viewer.diffToolSetAsComparator(
 					model.teamspace,
 					model._id
@@ -303,6 +299,7 @@ function* startComparisonOfFederation() {
 		}
 	}
 
+	yield setModelsNodesVisibility(modelsToReuse, VISIBILITY_STATES.VISIBLE);
 	yield all(modelsToLoad);
 
 	if (isDiff) {
