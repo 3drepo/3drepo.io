@@ -199,49 +199,53 @@ export const getDeepChildren = (nodeId) => createSelector(
 	}
 );
 
-export const getSelectMeshesByNodes = (nodes = []) => createSelector(
+export const getSelectMeshesByIds = (nodesIds = []) => createSelector(
 	selectTreeNodesList, selectNodesIndexesMap, selectMeshesByModelId,
 	(treeNodesList, nodesIndexesMap, idToMeshes) => {
-		if (!nodes.length) {
+		if (!nodesIds.length) {
 			return [];
 		}
 
 		const childrenMap = {};
 		const meshesByNodes = {};
 
-		let stack = [...nodes];
+		let stack = [...nodesIds];
 		while (stack.length > 0) {
-			const node = stack.pop();
+			const nodeId = stack.pop();
+			const nodeIndex = nodesIndexesMap[nodeId];
+			const node = treeNodesList[nodeIndex] as any;
 
-			if (!meshesByNodes[node.namespacedId]) {
-				meshesByNodes[node.namespacedId] = {
-					modelId: node.model,
-					teamspace: node.teamspace,
-					meshes: []
-				};
-			}
+			if (node) {
+				if (!meshesByNodes[node.namespacedId]) {
+					meshesByNodes[node.namespacedId] = {
+						modelId: node.model,
+						teamspace: node.teamspace,
+						meshes: []
+					};
+				}
 
-			// Check top level and then check if sub model of fed
-			let meshes = node.type === NODE_TYPES.MESH
-				? [node._id]
-				: idToMeshes[node._id];
+				// Check top level and then check if sub model of fed
+				let meshes = node.type === NODE_TYPES.MESH
+					? [node._id]
+					: idToMeshes[node._id];
 
-			if (!meshes && idToMeshes[node.namespacedId]) {
-				meshes = idToMeshes[node.namespacedId][node._id];
-			}
+				if (!meshes && idToMeshes[node.namespacedId]) {
+					meshes = idToMeshes[node.namespacedId][node._id];
+				}
 
-			if (meshes) {
-				meshesByNodes[node.namespacedId].meshes = meshesByNodes[node.namespacedId].meshes.concat(meshes);
-			} else if (!childrenMap[node._id] && node.hasChildren) {
-				// This should only happen in federations.
-				// Traverse down the tree to find submodel nodes
-				const nodeIndex = nodesIndexesMap[node._id];
-				for (let childNumber = 1; childNumber <= node.deepChildrenNumber; childNumber++) {
-					const childNode = treeNodesList[nodeIndex + childNumber];
-					childrenMap[childNode._id] = true;
-					stack = stack.concat([childNode]);
+				if (meshes) {
+					meshesByNodes[node.namespacedId].meshes = meshesByNodes[node.namespacedId].meshes.concat(meshes);
+				} else if (!childrenMap[node._id] && node.hasChildren) {
+					// This should only happen in federations.
+					// Traverse down the tree to find submodel nodes
+					for (let childNumber = 1; childNumber <= node.deepChildrenNumber; childNumber++) {
+						const childNode = treeNodesList[nodeIndex + childNumber];
+						childrenMap[childNode._id] = true;
+						stack = stack.concat([childNode]);
+					}
 				}
 			}
+
 		}
 
 		return values(meshesByNodes);
