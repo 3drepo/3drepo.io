@@ -146,7 +146,10 @@ export function* saveIssue({ teamspace, model, issueData, revision, finishSubmit
 		const AnalyticService = getAngularService('AnalyticService') as any;
 
 		viewpoint.hideIfc = ifcSpacesHidden;
-		issueData.rev_id = revision;
+		issueData = {
+			...issueData,
+			rev_id: revision
+		};
 
 		if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
 			const [highlightedGroup, hiddenGroup] = yield createGroup(issueData, objectInfo, teamspace, model, revision);
