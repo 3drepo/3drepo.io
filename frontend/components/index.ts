@@ -1,6 +1,5 @@
 // Components & services
 
-import './home/js/api.service';
 import './home/js/auth.interceptor';
 import './home/js/auth.service';
 import './home/js/client-config.service';
