@@ -36,7 +36,7 @@ import {
 	getSelectDeepChildren,
 	selectSelectionMap,
 	selectVisibilityMap,
-	selectHighlightedNodesIds,
+	selectFullySelectedNodesIds,
 	selectActiveNode
 } from './tree.selectors';
 
@@ -168,10 +168,10 @@ function* stopListenOnSelections() {
 }
 
 function* handleBackgroundClick() {
-	const highlightedNodesIds = yield select(selectHighlightedNodesIds);
+	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
 	const activeNode = yield select(selectActiveNode);
 
-	if (highlightedNodesIds.length || activeNode) {
+	if (fullySelectedNodes.length || activeNode) {
 		yield all([
 			clearCurrentlySelected(),
 			put(GroupsActions.clearSelectionHighlights()),
@@ -255,8 +255,8 @@ function* showTreeNodes(nodesIds = [], skipNested = false) {
  * HIDE NODES
  */
 function* hideSelectedNodes() {
-	const highlightedNodesIds = yield select(selectHighlightedNodesIds);
-	yield hideTreeNodes(highlightedNodesIds);
+	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
+	yield hideTreeNodes(fullySelectedNodes);
 }
 
 function* hideNodesBySharedIds({ objects = [] }) {
@@ -291,9 +291,9 @@ function* isolateNodes(nodesIds = []) {
 }
 
 function* isolateSelectedNodes({ nodeId = null }) {
-	const highlightedNodesIds = yield select(selectHighlightedNodesIds);
-	if (highlightedNodesIds.length) {
-		yield isolateNodes(highlightedNodesIds);
+	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
+	if (fullySelectedNodes.length) {
+		yield isolateNodes(fullySelectedNodes);
 	} else {
 		const deepChildren = yield select(getSelectDeepChildren(nodeId));
 		const deepChildrenIds = deepChildren.map(({ _id }) => _id);
@@ -364,7 +364,6 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 
 		yield put(TreeActions.setActiveNode(lastNodeId));
 		yield put(TreeActions.updateDataRevision());
-		yield zoomToHighlightedNodes();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
 	}
@@ -403,9 +402,9 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 }
 
 function* setSelectedNodesVisibility({ nodeId, visibility }) {
-	const highlightedNodesIds = yield select(selectHighlightedNodesIds);
-	const hasSelectedNodes = !!highlightedNodesIds.length;
-	const nodesIds = hasSelectedNodes ? highlightedNodesIds : [nodeId];
+	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
+	const hasSelectedNodes = !!fullySelectedNodes.length;
+	const nodesIds = hasSelectedNodes ? fullySelectedNodes : [nodeId];
 	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, hasSelectedNodes));
 }
 

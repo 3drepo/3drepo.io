@@ -30,7 +30,7 @@ export class Processing {
 		}));
 	}
 
-	public get highlightedNodesIds() {
+	public get fullySelectedNodesIds() {
 		return keys(pickBy(this.selectionMap, (selectionState) => {
 			return selectionState === SELECTION_STATES.SELECTED;
 		}));
@@ -84,13 +84,17 @@ export class Processing {
 
 	public deselectNodes = ({ nodesIds = [] }) => {
 		const filteredNodesIds = intersection(nodesIds, this.selectedNodesIds);
-		const nodes = this.getNodesByIds(filteredNodesIds);
+		const nodesWithChildren = [];
+		for (let index = 0, size = filteredNodesIds.length; index < size; index++) {
+			const nodeId = filteredNodesIds[index];
+			const [node] = this.getNodesByIds([nodeId]);
+			nodesWithChildren.push(node);
+			this.selectionMap[nodeId] = SELECTION_STATES.UNSELECTED;
 
-		const children = nodes.map((node) => this.getDeepChildren(node)) as any;
-		const nodesWithChildren = [...nodes, ...children.flat()];
-
-		for (let index = 0; index < filteredNodesIds.length; index++) {
-			this.selectionMap[filteredNodesIds[index]] = SELECTION_STATES.UNSELECTED;
+			if (node.hasChildren) {
+				const deepChildren = (this.getDeepChildren(node) as any).flat();
+				nodesWithChildren.push(...deepChildren);
+			}
 		}
 
 		this.handleToDeselect(nodesWithChildren);
