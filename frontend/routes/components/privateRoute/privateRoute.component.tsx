@@ -17,14 +17,31 @@
 
 import * as React from 'react';
 import { Route, Redirect } from 'react-router-dom';
+import TopMenu from '../topMenu/topMenu.container';
 
-export const PrivateRoute = ({ component: Component, isAuthenticated, ...routeProps }) => (
-	<Route {...routeProps} render={(props) => (
-		isAuthenticated === true
-			? <Component {...props} />
-			: <Redirect to={{
-				pathname: '/login',
-				state: { from: props.location }
-			}} />
-	)} />
-);
+export const PrivateRoute = ({ component: Component, isAuthenticated, ...routeProps }) => {
+	const redirect = (props) => (
+		<Redirect to={{
+			pathname: '/login',
+			state: { from: props.location }
+		}} />
+	);
+
+	const renderComponent = (props) => (
+		<>
+			<TopMenu
+				/* 					ng-if="vm.isAuthenticated"
+				is-lite-mode="vm.isLiteMode"
+				on-lite-mode-change="vm.onLiteModeChange"
+				on-logout="vm.logout"
+				on-logo-click="vm.home"
+				id="topMenu" */
+			/>
+			<Component {...props} />
+		</>
+	);
+
+	const renderRoute = (props) => isAuthenticated ? renderComponent(props) : redirect(props);
+
+	return <Route {...routeProps} render={renderRoute} />;
+};

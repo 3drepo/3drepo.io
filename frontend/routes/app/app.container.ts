@@ -15,11 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { Router, Route } from 'react-router-dom';
-import { connect, history } from '../../helpers/migration';
+import { connect } from '../../helpers/migration';
 
 import { App } from './app.component';
 import { AuthActions, selectIsAuthenticated, selectActiveSession } from '../../modules/auth';
@@ -38,12 +36,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	startup: StartupActions.startup
 }, dispatch);
 
-const AppWithStore = connect(mapStateToProps, mapDispatchToProps)(App);
-
-const Root = () => (
-	<Router history={history}>
-		<Route path="/" component={AppWithStore} />
-	</Router>
-);
-
-export default Root;
+export default connect(mapStateToProps, mapDispatchToProps)(App);

@@ -1,4 +1,5 @@
 import { combineReducers } from 'redux';
+import { connectRouter } from 'connected-react-router';
 
 import { reducer as currentUserReducer } from './currentUser/currentUser.redux';
 import { reducer as userManagementReducer } from './userManagement/userManagement.redux';
@@ -26,8 +27,9 @@ import { reducer as compareReducer } from './compare/compare.redux';
 import { reducer as chatReducer } from './chat/chat.redux';
 // <-- IMPORT MODULE REDUCER -->
 
-export default function createReducer() {
+export default function createReducer(history) {
 	return combineReducers({
+		router: connectRouter(history),
 		currentUser: currentUserReducer,
 		userManagement: userManagementReducer,
 		dialog: dialogReducer,

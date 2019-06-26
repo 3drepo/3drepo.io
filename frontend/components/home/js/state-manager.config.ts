@@ -116,17 +116,17 @@ function StateManagerConfig($stateProvider, $urlRouterProvider, $locationProvide
 		const AuthService = $injector.get('AuthService');
 		const isAuthenticated = selectIsAuthenticated(getState());
 
-		if (!isAuthenticated) {
+/* 		if (!isAuthenticated) {
 			const initialAuthPromise = isAuthenticated === null
 				? AuthService.initialAuthPromise.promise
 				: Promise.reject();
 
-			initialAuthPromise.catch(() => {
+ 			initialAuthPromise.catch(() => {
 				history.push('/login');
 			});
 		} else {
 			history.push('/dashboard/teamspaces');
-		}
+		} */
 	});
 }
 

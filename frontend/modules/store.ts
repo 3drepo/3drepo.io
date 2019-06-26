@@ -1,13 +1,16 @@
 import { createStore, applyMiddleware, compose } from 'redux';
+import { routerMiddleware } from 'connected-react-router'
+
+import { IS_DEVELOPMENT } from '../constants/environment';
 import createSagaMiddleware from 'redux-saga';
 import createReducer from './reducers';
 import rootSaga from './sagas';
-import { IS_DEVELOPMENT } from '../constants/environment';
 
 const sagaMiddleware = createSagaMiddleware();
 
-export default function configureStore(initialState = {}) {
+export default function configureStore(initialState = {}, history) {
 	const middlewares = [
+		routerMiddleware(history),
 		sagaMiddleware
 	];
 
@@ -26,7 +29,7 @@ export default function configureStore(initialState = {}) {
 			if (action.type === 'RESET_APP') {
 				state = undefined;
 			}
-			return createReducer()(state as any, action);
+			return createReducer(history)(state as any, action);
 		},
 		initialState,
 		compose(

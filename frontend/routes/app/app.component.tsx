@@ -16,13 +16,13 @@
  */
 
 import * as React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Switch, Redirect } from 'react-router-dom';
 
 import { runAngularTimeout } from '../../helpers/migration';
 import { DialogContainer } from '../components/dialogContainer';
 import { SnackbarContainer } from '../components/snackbarContainer';
 import { clientConfigService } from '../../services/clientConfig';
-import { isStaticRoute } from '../../services/staticPages';
+import { isStaticRoute, STATIC_ROUTES } from '../../services/staticPages';
 import { LiveChat } from '../components/liveChat';
 import { analyticsService } from '../../services/analytics';
 import { ViewerGui } from '../viewerGui';
@@ -31,6 +31,14 @@ import TopMenu from '../components/topMenu/topMenu.container';
 import { ViewerCanvas } from '../viewerCanvas';
 import { Dashboard } from '../dashboard';
 import { AppContainer } from './app.styles';
+import { PrivateRoute } from '../components/privateRoute';
+import { Login } from '../login';
+import PageTemplate from '../staticPageViewer/components/pageTemplate/pageTemplate.container';
+import { SignUp } from '../signUp';
+import { PasswordForgot } from '../passwordForgot';
+import { PasswordChange } from '../passwordChange';
+import RegisterRequest from '../registerRequest/registerRequest.container';
+import { RegisterVerify } from '../registerVerify';
 
 interface IProps {
 	location: any;
@@ -89,9 +97,10 @@ export class App extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
+		console.log('APP INIT')
 		this.props.authenticate();
 
-		if (!isStaticRoute(location.pathname)) {
+/* 		if (!isStaticRoute(location.pathname)) {
 			this.toggleAutoLogout();
 			this.toggleAutoLogin();
 		}
@@ -111,7 +120,7 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps) {
 		const { location, history, isAuthenticated } = this.props;
-		const isStatic = isStaticRoute(location.pathname);
+		/* const isStatic = isStaticRoute(location.pathname);
 		const isPublicRoute = this.isPublicRoute(location.pathname);
 
 		const isPrivateRoute = !isStatic && !isPublicRoute;
@@ -141,7 +150,7 @@ export class App extends React.PureComponent<IProps, IState> {
 
 		if (location.pathname !== prevProps.location.pathname) {
 			this.sendAnalyticsPageView(location);
-		}
+		} */
 	}
 
 	public sendAnalyticsPageView(location) {
@@ -197,25 +206,31 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public renderViewer = (props) => (
 		<>
-			<ViewerCanvas {...props } />
+			<ViewerCanvas {...props} />
 			<ViewerGui {...props} />
 		</>
 	)
 
+	public renderStaticRoutes = () => STATIC_ROUTES.map(({ title, path, fileName }) => (
+		<Route key={path} path={path} render={() => <PageTemplate title={title} fileName={fileName} />} />
+	))
+
 	public render() {
 		return (
 				<AppContainer>
-					<TopMenu
-						/* 					ng-if="vm.isAuthenticated"
-						is-lite-mode="vm.isLiteMode"
-						on-lite-mode-change="vm.onLiteModeChange"
-						on-logout="vm.logout"
-						on-logo-click="vm.home"
-						id="topMenu" */
-					/>
-
-					<Route path="/dashboard" component={Dashboard} />
-					<Route path="/viewer" component={this.renderViewer} />
+					<Switch>
+						<Route exact path="/login" component={Login} />
+						<Route exact path="/sign-up" component={SignUp} />
+						<Route exact path="/password-forgot" component={PasswordForgot} />
+						<Route exact path="/password-change" component={PasswordChange} />
+						<Route exact path="/register-request" component={RegisterRequest} />
+						<Route exact path="/register-verify" component={RegisterVerify} />
+						<PrivateRoute path="/dashboard" component={Dashboard} />
+						<PrivateRoute path="/viewer" component={this.renderViewer} />
+						{this.renderStaticRoutes()}
+						<Redirect to="/login" />
+						<Route component={() => <div>No match on app</div>} />
+					</Switch>
 
 					<DialogContainer />
 					<SnackbarContainer />

@@ -9,7 +9,7 @@ module.exports = (options) => {
   const config = {
     mode: options.mode || MODES.DEVELOPMENT,
     context: PATHS.APP_DIR,
-    entry: options.entry || './main.ts',
+    entry: options.entry || './main.tsx',
     output: Object.assign({
       path: PATHS.DIST_DIR,
       filename: 'three_d_repo.[hash].js'

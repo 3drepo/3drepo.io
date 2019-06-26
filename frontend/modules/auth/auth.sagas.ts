@@ -60,11 +60,6 @@ export function* login({ username, password }) {
 export function* logout() {
 	try {
 		yield API.logout();
-
-		// TODO: Replace to proper service after migration
-		const StateManager = getAngularService('StateManager') as any;
-		StateManager.resetServiceStates();
-
 		yield put({ type: 'RESET_APP' });
 	} catch (e) {
 		if (e.response.status === 401) {
@@ -78,7 +73,7 @@ export function* logout() {
 
 export function* authenticate() {
 	// TODO: Replace to proper service after migration
-	const AuthService = getAngularService('AuthService') as any;
+	//const AuthService = getAngularService('AuthService') as any;
 
 	try {
 		const { data: { username }} = yield API.authenticate();
@@ -87,7 +82,7 @@ export function* authenticate() {
 			avatarUrl: getAvatarUrl(username)
 		}));
 
-		yield AuthService.initialAuthPromise.resolve();
+		//yield AuthService.initialAuthPromise.resolve();
 
 		yield put(AuthActions.loginSuccess());
 	} catch (e) {
@@ -96,7 +91,7 @@ export function* authenticate() {
 		} else {
 			yield put(DialogActions.showEndpointErrorDialog('authenticate', 'user', e));
 		}
-		yield AuthService.initialAuthPromise.reject();
+		//yield AuthService.initialAuthPromise.reject();
 	}
 }
 

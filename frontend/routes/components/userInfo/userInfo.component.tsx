@@ -39,9 +39,9 @@ interface IProps {
 	avatarUrl: string;
 }
 
-const renderItems = (items, match) => items.map((item) => (
+const renderItems = (items, baseUrl) => items.map((item) => (
 	<ListItemLink
-		to={`${match.url}${item.path}`}
+		to={`${baseUrl}${item.path}`}
 		key={item.title}
 		title={item.title}
 	/>
@@ -50,7 +50,7 @@ const renderItems = (items, match) => items.map((item) => (
 const UserInfoComponent = (props: IProps) => {
 	const { match, items, loading, firstName, lastName, username, email, avatarUrl } = props;
 	const name = firstName || lastName ? `${firstName || ''} ${lastName || ''}`.trim() : username;
-
+	console.log(`${ match.url }/someptaht`);
 	return (
 		<Router>
 			<Container>
@@ -70,7 +70,7 @@ const UserInfoComponent = (props: IProps) => {
 										</UserData>
 								}
 							</UserContainer>
-							{renderItems(items, match)}
+							{renderItems(items, match.url)}
 						</StyledList>
 				</Panel>
 			</Container>
