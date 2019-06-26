@@ -18,6 +18,7 @@
 import { getState, dispatch } from '../../../helpers/migration';
 import { selectMemory } from '../../../modules/viewer';
 import { DialogActions } from '../../../modules/dialog';
+import { SimpleErrorDialog } from '../../../routes/components/dialogContainer/components';
 
 declare const Viewer: any;
 
@@ -244,8 +245,9 @@ export class ViewerService {
 			errorType = 'Unity Error';
 		}
 
-		dispatch(DialogActions.showSimpleErrorDialog({
+		dispatch(DialogActions.showDialog({
 			title: errorType,
+			template: SimpleErrorDialog,
 			content: message,
 			logError: isUnity ? 'Unity errored and user canceled reload' : '',
 			onConfirm: () => {

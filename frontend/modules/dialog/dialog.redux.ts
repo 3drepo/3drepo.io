@@ -33,7 +33,6 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showDialog: ['config'],
 	showEndpointErrorDialog: ['method', 'dataType', 'error'],
 	showErrorDialog: ['method', 'dataType', 'message', 'status'],
-	showSimpleErrorDialog: ['config'],
 	showConfirmDialog: ['config'],
 	showRevisionsDialog: ['config'],
 	hideDialog: [],
@@ -90,11 +89,6 @@ const showEndpointErrorDialog = (state = INITIAL_STATE, { method, dataType, erro
 
 const showConfirmDialog = (state = INITIAL_STATE, action) => {
 	const config = { ...action.config, template: Dialogs.ConfirmDialog } as IDialogConfig;
-	return showDialog(state, { config });
-};
-
-const showSimpleErrorDialog = (state = INITIAL_STATE, action) => {
-	const config = { ...action.config, template: Dialogs.SimpleErrorDialog } as IDialogConfig;
 	return showDialog(state, { config });
 };
 
@@ -162,7 +156,6 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.SHOW_ERROR_DIALOG]: showErrorDialog,
 	[DialogTypes.SHOW_ENDPOINT_ERROR_DIALOG]: showEndpointErrorDialog,
 	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
-	[DialogTypes.SHOW_SIMPLE_ERROR_DIALOG]: showSimpleErrorDialog,
 	[DialogTypes.SHOW_REVISIONS_DIALOG]: showRevisionsDialog,
 	[DialogTypes.SET_PENDING_STATE]: setPendingState,
 	[DialogTypes.SET_MUTE_NOTIFICATIONS]: setMuteNotifications,
