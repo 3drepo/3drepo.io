@@ -17,7 +17,7 @@
 
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
-import { connect, } from '../../../../helpers/migration';
+import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { ModelActions, selectSettings, selectRevisions, selectIsPending } from './../../../../modules/model';
 import { UploadModelFileDialog } from './uploadModelFileDialog.component';

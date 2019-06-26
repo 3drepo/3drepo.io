@@ -17,7 +17,7 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
+import { connect } from 'react-redux';
 import { ModelActions, selectSettings, selectIsPending } from './../../modules/model';
 import { ModelSettings } from './modelSettings.component';
 import { selectCurrentTeamspace } from './../../modules/userManagement';

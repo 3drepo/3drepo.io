@@ -1,4 +1,3 @@
-import createConnect from 'redux-connect-standalone';
 import { invoke } from 'lodash';
 import configureStore from '../modules/store';
 import { createBrowserHistory } from 'history';
@@ -11,7 +10,6 @@ const initialState = {};
 export const history = createBrowserHistory();
 
 export const store = configureStore(initialState, history);
-export const connect = createConnect(store);
 
 // Use to call react actions directly from AngularJS context
 // Should be removed if app is fully migrated

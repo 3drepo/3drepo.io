@@ -15,14 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
-import { RegisterRequest } from './registerRequest.component';
+import { createSelector } from 'reselect';
 
-const mapStateToProps = createStructuredSelector({});
+export const selectRouterDomain = (state) => state.router;
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const selectLocation = createSelector(
+	selectRouterDomain, (router) => router.location
+);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RegisterRequest));
+export const selectPathname = createSelector(
+	selectLocation, (location) => location.pathname
+);
+
+export const selectSearch = createSelector(
+	selectLocation, (location) => location.search
+);
+
+export const selectHash = createSelector(
+	selectLocation, (location) => location.hash
+);

@@ -18,7 +18,7 @@
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { withRouter } from 'react-router-dom';
-import { connect } from '../../../../helpers/migration';
+import { connect } from 'react-redux';
 
 import { Risks } from './risks.component';
 import {

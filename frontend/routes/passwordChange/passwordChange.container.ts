@@ -18,7 +18,7 @@
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { withRouter } from 'react-router-dom';
-import { connect } from '../../helpers/migration';
+import { connect } from 'react-redux';
 
 import { PasswordChange } from './passwordChange.component';
 import { AuthActions, selectIsPending, selectMessage } from '../../modules/auth';

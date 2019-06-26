@@ -17,7 +17,7 @@
 
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
-import { connect } from '../../../../helpers/migration';
+import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { ModelActions, selectSettings, selectIsPending, selectMaps } from './../../../../modules/model';
 import { GisActions, selectIsInitialisedMap, selectVisibleSources } from './../../../../modules/gis';

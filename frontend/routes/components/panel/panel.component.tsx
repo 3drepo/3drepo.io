@@ -17,9 +17,6 @@
 
 import * as React from 'react';
 
-import { MuiThemeProvider } from '@material-ui/core/styles';
-import { ThemeProvider } from 'styled-components';
-import { MuiTheme, theme } from '../../../styles';
 import { Container, Title, Content, ContentWrapper } from './panel.styles';
 
 interface IProps {
@@ -31,16 +28,12 @@ interface IProps {
 }
 
 export const Panel = (props: IProps) => (
-	<ThemeProvider theme={theme}>
-		<MuiThemeProvider theme={MuiTheme}>
-			<Container {...props.paperProps} className={props.className}>
-				<Title>{props.title}</Title>
-				<Content>
-					<ContentWrapper hiddenScrollbars={props.hiddenScrollbars}>
-						{props.children}
-					</ContentWrapper>
-				</Content>
-			</Container>
-		</MuiThemeProvider>
-	</ThemeProvider>
+	<Container {...props.paperProps} className={props.className}>
+		<Title>{props.title}</Title>
+		<Content>
+			<ContentWrapper hiddenScrollbars={props.hiddenScrollbars}>
+				{props.children}
+			</ContentWrapper>
+		</Content>
+	</Container>
 );

@@ -16,11 +16,8 @@
  */
 
 import * as React from 'react';
-import { MuiThemeProvider } from '@material-ui/core/styles';
-import { ThemeProvider } from 'styled-components';
 import Snackbar from '@material-ui/core/Snackbar';
 
-import { MuiTheme, theme } from '../../../styles';
 import { DefaultSnackbar } from './components/defaultSnackbar/defaultSnackbar.component';
 
 interface IProps {
@@ -90,23 +87,19 @@ export class SnackbarContainer extends React.PureComponent<IProps, IState> {
 		const {isOpen, snack} = this.state;
 		const {message, ...snackProps} = snack as any;
 		return (
-			<ThemeProvider theme={theme}>
-				<MuiThemeProvider theme={MuiTheme}>
-					<Snackbar
-						autoHideDuration={5000}
-						anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-						onClose={this.handleClose}
-						onExited={this.handleExited}
-						open={isOpen}
-						{...snackProps}
-					>
-						<DefaultSnackbar
-							message={message}
-							onClose={this.handleClose}
-						/>
-					</Snackbar>
-				</MuiThemeProvider>
-			</ThemeProvider>
+			<Snackbar
+				autoHideDuration={5000}
+				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+				onClose={this.handleClose}
+				onExited={this.handleExited}
+				open={isOpen}
+				{...snackProps}
+			>
+				<DefaultSnackbar
+					message={message}
+					onClose={this.handleClose}
+				/>
+			</Snackbar>
 		);
 	}
 }

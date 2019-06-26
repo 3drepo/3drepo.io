@@ -17,16 +17,17 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
+import { connect } from 'react-redux';
 
 import { App } from './app.component';
-import { AuthActions, selectIsAuthenticated, selectActiveSession } from '../../modules/auth';
+import { AuthActions, selectIsAuthenticated, selectActiveSession, selectIsPending } from '../../modules/auth';
 import { selectCurrentUser } from '../../modules/currentUser';
 import { StartupActions } from '../../modules/startup/startup.redux';
 
 const mapStateToProps = createStructuredSelector({
 	isAuthenticated: selectIsAuthenticated,
 	hasActiveSession: selectActiveSession,
+	isAuthPending: selectIsPending,
 	currentUser: selectCurrentUser
 });
 

@@ -18,7 +18,7 @@
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
+import { connect } from 'react-redux';
 
 import { UserManagement } from './userManagement.component';
 import {

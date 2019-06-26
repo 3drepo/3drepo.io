@@ -16,9 +16,10 @@
  */
 
 import { put, takeLatest } from 'redux-saga/effects';
+import { push } from 'connected-react-router';
+
 import * as API from '../../services/api';
 import { analyticsService } from '../../services/analytics';
-import { getAngularService, history } from '../../helpers/migration';
 import { NewTermsDialog } from '../../routes/components/newTermsDialog/newTermsDialog.component';
 import { CurrentUserActions } from '../currentUser';
 import { getAvatarUrl } from '../currentUser/currentUser.sagas';
@@ -69,20 +70,17 @@ export function* logout() {
 		}
 	}
 	yield put(AuthActions.setLocalSessionStatus(false));
+	yield put(push('/login'));
 }
 
 export function* authenticate() {
-	// TODO: Replace to proper service after migration
-	//const AuthService = getAngularService('AuthService') as any;
-
+	yield put(AuthActions.setPendingStatus(true));
 	try {
 		const { data: { username }} = yield API.authenticate();
 		yield put(CurrentUserActions.fetchUserSuccess({
 			username,
 			avatarUrl: getAvatarUrl(username)
 		}));
-
-		//yield AuthService.initialAuthPromise.resolve();
 
 		yield put(AuthActions.loginSuccess());
 	} catch (e) {
@@ -91,16 +89,11 @@ export function* authenticate() {
 		} else {
 			yield put(DialogActions.showEndpointErrorDialog('authenticate', 'user', e));
 		}
-		//yield AuthService.initialAuthPromise.reject();
 	}
 }
 
 export function* sessionExpired() {
 	try {
-		// TODO: Replace to proper service after migration
-		const StateManager = getAngularService('StateManager') as any;
-		StateManager.resetServiceStates();
-
 		yield put({ type: 'RESET_APP' });
 		yield put(DialogActions.showDialog({
 			title: 'Session expired',
@@ -142,7 +135,7 @@ export function* register({ username, data }) {
 
 	try {
 		yield API.register(username, data);
-		yield history.push('register-request');
+		yield put(push('register-request'));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('register', 'user', e));
 	}

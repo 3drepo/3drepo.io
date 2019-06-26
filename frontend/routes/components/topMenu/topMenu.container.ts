@@ -18,7 +18,7 @@
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { withRouter } from 'react-router-dom';
-import { connect } from '../../../helpers/migration';
+import { connect } from 'react-redux';
 
 import { TopMenu } from './topMenu.component';
 import { selectCurrentUser } from '../../../modules/currentUser';

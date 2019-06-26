@@ -16,7 +16,7 @@
  */
 
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../../helpers/migration';
+import { connect } from 'react-redux';
 
 import { LiveChat } from './liveChat.component';
 import { selectIsAuthenticated } from '../../../modules/auth';

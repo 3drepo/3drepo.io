@@ -16,9 +16,6 @@
  */
 
 import * as React from 'react';
-import { MuiThemeProvider } from '@material-ui/core/styles';
-import { ThemeProvider } from 'styled-components';
-import { MuiTheme, theme } from './../../../../styles';
 import { Container, Content, Header, Logo, Title } from './pageTemplate.styles';
 
 interface IProps {
@@ -37,17 +34,13 @@ export class PageTemplate extends React.PureComponent<IProps, any> {
 	public render() {
 		const { templates, fileName } = this.props;
 		return (
-			<ThemeProvider theme={theme}>
-				<MuiThemeProvider theme={MuiTheme}>
-					<Container>
-						<Header>
-							<Title>{this.props.title}</Title>
-							<Logo src="images/3drepo-logo-white.png" alt="3D Repo" />
-						</Header>
-						<Content dangerouslySetInnerHTML={{ __html: templates[fileName] }} />
-					</Container>
-				</MuiThemeProvider>
-			</ThemeProvider>
+			<Container>
+				<Header>
+					<Title>{this.props.title}</Title>
+					<Logo src="images/3drepo-logo-white.png" alt="3D Repo" />
+				</Header>
+				<Content dangerouslySetInnerHTML={{ __html: templates[fileName] }} />
+			</Container>
 		);
 	}
 }

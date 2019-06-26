@@ -10,8 +10,8 @@ const sagaMiddleware = createSagaMiddleware();
 
 export default function configureStore(initialState = {}, history) {
 	const middlewares = [
-		routerMiddleware(history),
-		sagaMiddleware
+		sagaMiddleware,
+		routerMiddleware(history)
 	];
 
 	const enhancers = [];

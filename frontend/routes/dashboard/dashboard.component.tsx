@@ -62,12 +62,12 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 	public renderRoutes = (match, currentUser) => (
 		<Switch>
 			<Route
-				exact={true}
+				exact
 				path={`${match.url}/teamspaces`}
 				component={Teamspaces}
 			/>
 			<Route
-				exact={true}
+				exact
 				path={`${match.url}/teamspaces/:teamspace/models/:modelId`}
 				component={ModelSettings}
 			/>
@@ -76,7 +76,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 				component={UserManagement}
 			/>
 			<Route
-				exact={true}
+				exact
 				path={`${match.url}/profile`}
 				component={Profile}
 			/>
@@ -84,24 +84,18 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 				path={`${match.url}/billing`}
 				component={Billing}
 			/>
-			<Redirect exact={true} from={match.url} to={`${match.url}/teamspaces`} />
+			<Redirect exact from={match.url} to={`${match.url}/teamspaces`} />
 			<Redirect
-				exact={true}
+				exact
 				from={`${match.url}/user-management`}
 				to={`${match.url}/user-management/${currentUser.username}`}
 			/>
 		</Switch>
 	)
 
-	public renderDashboardRoute = ({match}) => (
-		<Content>
-			{this.renderRoutes(match, this.props.currentUser)}
-		</Content>
-	)
-
 	public render() {
 		const { match, currentUser, isPending, isInitialised, isAvatarPending } = this.props;
-
+		console.log('RENDER DASHBOARD');
 		return (
 			<Container
 				container={true}
@@ -112,11 +106,14 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 				<Sidebar>
 					<UserInfo
 						{...currentUser}
+						match={match}
 						loading={!isInitialised && (isPending || isAvatarPending)}
 						items={MENU_ITEMS}
 					/>
 				</Sidebar>
-				<Route path={match.url} render={this.renderDashboardRoute} />
+				<Content>
+					{this.renderRoutes(match, this.props.currentUser)}
+				</Content>
 			</Container>
 		);
 	}

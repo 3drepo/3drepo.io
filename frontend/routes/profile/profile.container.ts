@@ -17,7 +17,7 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
+import { connect } from 'react-redux';
 
 import { Profile } from './profile.component';
 import { CurrentUserActions, selectCurrentUser, selectIsAvatarPending } from '../../modules/currentUser';

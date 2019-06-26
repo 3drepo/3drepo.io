@@ -112,7 +112,6 @@ interface IProps {
 }
 
 export class UserMenu extends React.PureComponent<IProps, any> {
-
 	public openUserManual() {
 		window.open('http://3drepo.org/support/', '_blank');
 	}

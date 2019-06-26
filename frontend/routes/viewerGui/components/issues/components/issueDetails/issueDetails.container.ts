@@ -17,7 +17,7 @@
 
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../../../../../helpers/migration';
+import { connect } from 'react-redux';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';

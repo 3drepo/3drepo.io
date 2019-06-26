@@ -18,7 +18,6 @@
 import * as React from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
 
-import { runAngularTimeout } from '../../helpers/migration';
 import { DialogContainer } from '../components/dialogContainer';
 import { SnackbarContainer } from '../components/snackbarContainer';
 import { clientConfigService } from '../../services/clientConfig';
@@ -26,7 +25,6 @@ import { isStaticRoute, STATIC_ROUTES } from '../../services/staticPages';
 import { LiveChat } from '../components/liveChat';
 import { analyticsService } from '../../services/analytics';
 import { ViewerGui } from '../viewerGui';
-import TopMenu from '../components/topMenu/topMenu.container';
 
 import { ViewerCanvas } from '../viewerCanvas';
 import { Dashboard } from '../dashboard';
@@ -46,6 +44,7 @@ interface IProps {
 	isAuthenticated: boolean;
 	hasActiveSession: boolean;
 	currentUser: any;
+	isAuthPending: boolean;
 	authenticate: () => void;
 	logout: () => void;
 	startup: () => void;
@@ -97,10 +96,9 @@ export class App extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		console.log('APP INIT')
 		this.props.authenticate();
 
-/* 		if (!isStaticRoute(location.pathname)) {
+		if (!isStaticRoute(location.pathname)) {
 			this.toggleAutoLogout();
 			this.toggleAutoLogin();
 		}
@@ -120,7 +118,7 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps) {
 		const { location, history, isAuthenticated } = this.props;
-		/* const isStatic = isStaticRoute(location.pathname);
+		const isStatic = isStaticRoute(location.pathname);
 		const isPublicRoute = this.isPublicRoute(location.pathname);
 
 		const isPrivateRoute = !isStatic && !isPublicRoute;
@@ -128,29 +126,23 @@ export class App extends React.PureComponent<IProps, IState> {
 		if (isPrivateRoute && isAuthenticated !== prevProps.isAuthenticated) {
 			if (isAuthenticated) {
 				this.toggleAutoLogin(false);
-				runAngularTimeout(() => {
-					history.push(this.state.referrer);
-				});
+				history.push(this.state.referrer);
 			} else {
 				this.toggleAutoLogout(false);
 				this.toggleAutoLogin();
-				runAngularTimeout(() => {
-					history.push('/login');
-				});
+				history.push('/login');
 			}
 		}
 
 		if (isPublicRoute && isAuthenticated) {
 			const isLoginRoute = LOGIN_ROUTE_PATH === location.pathname;
-			runAngularTimeout(() => {
-				history.push(isLoginRoute ? this.state.referrer : DEFAULT_REDIRECT);
-				this.setState({ referrer: DEFAULT_REDIRECT });
-			});
+			history.push(isLoginRoute ? this.state.referrer : DEFAULT_REDIRECT);
+			this.setState({ referrer: DEFAULT_REDIRECT });
 		}
 
 		if (location.pathname !== prevProps.location.pathname) {
 			this.sendAnalyticsPageView(location);
-		} */
+		}
 	}
 
 	public sendAnalyticsPageView(location) {
@@ -186,9 +178,7 @@ export class App extends React.PureComponent<IProps, IState> {
 		const isSessionExpired = hasActiveSession !== isAuthenticated;
 		if (isSessionExpired) {
 			logout();
-			runAngularTimeout(() => {
-				history.push('/login');
-			});
+			history.push('/login');
 		}
 	}
 
@@ -216,6 +206,12 @@ export class App extends React.PureComponent<IProps, IState> {
 	))
 
 	public render() {
+		const { isAuthPending, isAuthenticated } = this.props;
+		console.log('RENDER APP');
+		if (isAuthPending) {
+			return null;
+		}
+
 		return (
 				<AppContainer>
 					<Switch>
@@ -228,7 +224,7 @@ export class App extends React.PureComponent<IProps, IState> {
 						<PrivateRoute path="/dashboard" component={Dashboard} />
 						<PrivateRoute path="/viewer" component={this.renderViewer} />
 						{this.renderStaticRoutes()}
-						<Redirect to="/login" />
+						<Redirect to={isAuthenticated ? '/dashboard' : '/login'} />
 						<Route component={() => <div>No match on app</div>} />
 					</Switch>
 
