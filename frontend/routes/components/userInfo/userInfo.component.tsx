@@ -28,7 +28,6 @@ interface IMenuItem {
 }
 
 interface IProps {
-	match: any;
 	items: IMenuItem[];
 	loading: boolean;
 	firstName: string;
@@ -38,16 +37,16 @@ interface IProps {
 	avatarUrl: string;
 }
 
-const renderItems = (items, baseUrl) => items.map((item) => (
+const renderItems = (items) => items.map((item) => (
 	<ListItemLink
-		to={`${baseUrl}${item.path}`}
+		to={item.path}
 		key={item.title}
 		title={item.title}
 	/>
 ));
 
 const UserInfoComponent = (props: IProps) => {
-	const { match, items, loading, firstName, lastName, username, email, avatarUrl } = props;
+	const { items, loading, firstName, lastName, username, email, avatarUrl } = props;
 	const name = firstName || lastName ? `${firstName || ''} ${lastName || ''}`.trim() : username;
 	return (
 		<Container>
@@ -67,7 +66,7 @@ const UserInfoComponent = (props: IProps) => {
 									</UserData>
 							}
 						</UserContainer>
-						{renderItems(items, match.url)}
+						{renderItems(items)}
 					</StyledList>
 			</Panel>
 		</Container>

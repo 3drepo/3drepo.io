@@ -25,23 +25,24 @@ import Profile from '../profile/profile.container';
 import Billing from '../billing/billing.container';
 import { Container, Sidebar, Content } from './dashboard.styles';
 import { UserInfo } from '../components/userInfo/userInfo.component';
+import { ROUTES } from '../../constants/routes';
 
 const MENU_ITEMS = [
 	{
 		title: 'Teamspaces',
-		path: '/teamspaces'
+		path: ROUTES.TEAMSPACES
 	},
 	{
 		title: 'User Management',
-		path: '/user-management'
+		path: ROUTES.USER_MANAGEMENT_MAIN
 	},
 	{
 		title: 'Profile',
-		path: '/profile'
+		path: ROUTES.PROFILE
 	},
 	{
 		title: 'Billing',
-		path: '/billing'
+		path: ROUTES.BILLING
 	}
 ];
 
@@ -64,32 +65,32 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 		<Switch>
 			<Route
 				exact
-				path={`${match.url}/teamspaces`}
+				path={ROUTES.TEAMSPACES}
 				component={Teamspaces}
 			/>
 			<Route
 				exact
-				path={`${match.url}/teamspaces/:teamspace/models/:modelId`}
+				path={ROUTES.MODEL_SETTINGS}
 				component={ModelSettings}
 			/>
 			<Route
-				path={`${match.url}/user-management/:teamspace`}
+				path={ROUTES.USER_MANAGEMENT_TEAMSPACE}
 				component={UserManagement}
 			/>
 			<Route
 				exact
-				path={`${match.url}/profile`}
+				path={ROUTES.PROFILE}
 				component={Profile}
 			/>
 			<Route
-				path={`${match.url}/billing`}
+				path={ROUTES.BILLING}
 				component={Billing}
 			/>
-			<Redirect exact from={match.url} to={`${match.url}/teamspaces`} />
+			<Redirect exact from={match.url} to={ROUTES.TEAMSPACES} />
 			<Redirect
 				exact
-				from={`${match.url}/user-management`}
-				to={`${match.url}/user-management/${currentUser.username}`}
+				from={ROUTES.USER_MANAGEMENT_MAIN}
+				to={`${ROUTES.USER_MANAGEMENT_MAIN}/${currentUser.username}`}
 			/>
 		</Switch>
 	)
@@ -106,7 +107,6 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 				<Sidebar>
 					<UserInfo
 						{...currentUser}
-						match={match}
 						loading={!isInitialised && (isPending || isAvatarPending)}
 						items={MENU_ITEMS}
 					/>

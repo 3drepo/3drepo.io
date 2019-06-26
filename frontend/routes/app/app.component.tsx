@@ -37,6 +37,7 @@ import { PasswordForgot } from '../passwordForgot';
 import { PasswordChange } from '../passwordChange';
 import RegisterRequest from '../registerRequest/registerRequest.container';
 import { RegisterVerify } from '../registerVerify';
+import { ROUTES } from '../../constants/routes';
 
 interface IProps {
 	location: any;
@@ -55,9 +56,7 @@ interface IState {
 	autologoutInterval?: number;
 }
 
-const DEFAULT_REDIRECT = '/dashboard/teamspaces';
-const MAIN_ROUTE_PATH = '/';
-const LOGIN_ROUTE_PATH = '/login';
+const DEFAULT_REDIRECT = ROUTES.TEAMSPACES;
 
 const PUBLIC_ROUTES = [
 	'login',
@@ -103,7 +102,7 @@ export class App extends React.PureComponent<IProps, IState> {
 			this.toggleAutoLogin();
 		}
 
-		const initialReferrer = location.pathname !== MAIN_ROUTE_PATH
+		const initialReferrer = location.pathname !== ROUTES.HOME
 			? `${location.pathname}${location.search}`
 			: DEFAULT_REDIRECT;
 
@@ -130,12 +129,12 @@ export class App extends React.PureComponent<IProps, IState> {
 			} else {
 				this.toggleAutoLogout(false);
 				this.toggleAutoLogin();
-				history.push('/login');
+				history.push(ROUTES.LOGIN);
 			}
 		}
 
 		if (isPublicRoute && isAuthenticated) {
-			const isLoginRoute = LOGIN_ROUTE_PATH === location.pathname;
+			const isLoginRoute = ROUTES.LOGIN === location.pathname;
 			history.push(isLoginRoute ? this.state.referrer : DEFAULT_REDIRECT);
 			this.setState({ referrer: DEFAULT_REDIRECT });
 		}
@@ -178,7 +177,7 @@ export class App extends React.PureComponent<IProps, IState> {
 		const isSessionExpired = hasActiveSession !== isAuthenticated;
 		if (isSessionExpired) {
 			logout();
-			history.push('/login');
+			history.push(ROUTES.LOGIN);
 		}
 	}
 
@@ -207,7 +206,6 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { isAuthPending, isAuthenticated } = this.props;
-		console.log('RENDER APP');
 		if (isAuthPending) {
 			return null;
 		}
@@ -215,16 +213,16 @@ export class App extends React.PureComponent<IProps, IState> {
 		return (
 				<AppContainer>
 					<Switch>
-						<Route exact path="/login" component={Login} />
-						<Route exact path="/sign-up" component={SignUp} />
-						<Route exact path="/password-forgot" component={PasswordForgot} />
-						<Route exact path="/password-change" component={PasswordChange} />
-						<Route exact path="/register-request" component={RegisterRequest} />
-						<Route exact path="/register-verify" component={RegisterVerify} />
-						<PrivateRoute path="/dashboard" component={Dashboard} />
-						<PrivateRoute path="/viewer" component={this.renderViewer} />
+						<Route exact path={ROUTES.LOGIN} component={Login} />
+						<Route exact path={ROUTES.SIGN_UP} component={SignUp} />
+						<Route exact path={ROUTES.PASSWORD_FORGOT} component={PasswordForgot} />
+						<Route exact path={ROUTES.PASSWORD_CHANGE} component={PasswordChange} />
+						<Route exact path={ROUTES.REGISTER_REQUEST} component={RegisterRequest} />
+						<Route exact path={ROUTES.REGISTER_VERIFY} component={RegisterVerify} />
+						<PrivateRoute path={ROUTES.DASHBOARD} component={Dashboard} />
+						<PrivateRoute path={ROUTES.VIEWER} component={this.renderViewer} />
 						{this.renderStaticRoutes()}
-						<Redirect to={isAuthenticated ? '/dashboard' : '/login'} />
+						<Redirect to={isAuthenticated ? ROUTES.DASHBOARD : ROUTES.LOGIN} />
 						<Route component={() => <div>No match on app</div>} />
 					</Switch>
 

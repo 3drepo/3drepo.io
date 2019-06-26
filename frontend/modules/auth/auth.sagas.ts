@@ -26,6 +26,7 @@ import { getAvatarUrl } from '../currentUser/currentUser.sagas';
 import { DialogActions } from '../dialog';
 import { AuthActions, AuthTypes } from './auth.redux';
 import { verificationMessages, forgotPasswordMessages, changePasswordMessages } from './auth.helpers';
+import { ROUTES } from '../../constants/routes';
 
 export function* login({ username, password }) {
 	yield put(AuthActions.setPendingStatus(true));
@@ -70,7 +71,7 @@ export function* logout() {
 		}
 	}
 	yield put(AuthActions.setLocalSessionStatus(false));
-	yield put(push('/login'));
+	yield put(push(ROUTES.LOGIN));
 }
 
 export function* authenticate() {

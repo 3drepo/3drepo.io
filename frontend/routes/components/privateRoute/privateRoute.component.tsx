@@ -18,19 +18,20 @@
 import * as React from 'react';
 import { Route, Redirect } from 'react-router-dom';
 import TopMenu from '../topMenu/topMenu.container';
+import { ROUTES } from '../../../constants/routes';
 
 export const PrivateRoute = ({ component: Component, isAuthenticated, onLogout, push, ...routeProps }) => {
 	const redirect = (props) => (
 		<Redirect to={{
-			pathname: '/login',
+			pathname: ROUTES.LOGIN,
 			state: { from: props.location }
 		}} />
 	);
 
 	const onLogoClick = () => {
-		let path = '/';
+		let path = ROUTES.HOME;
 		if (isAuthenticated) {
-			path = '/dashboard/teamspaces';
+			path = ROUTES.TEAMSPACES;
 		}
 
 		push(path);
