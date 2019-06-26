@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { Button } from '@material-ui/core';
-import { Field, Form, Formik } from 'formik';
+import { Form, Formik } from 'formik';
 import * as React from 'react';
 import * as Yup from 'yup';
 import { AttachResourceFiles } from './attachResourceFiles.component';
@@ -26,6 +24,7 @@ import {
 		} from '../../topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 import { Container } from './attachResourcesDialog.styles';
 import { DialogButtons } from './attachResourcesDialogButtons';
+import { clientConfigService } from '../../../../services/clientConfig';
 
 interface IProps {
 	handleClose: () => void;
@@ -88,6 +87,11 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 		return totalSize < (this.props.quotaLeft * 1024 * 1024);
 	}
 
+	public validateUploadLimit = (files: any[]) => {
+		return files.map((f) => f.file.size)
+				.every((s) => s <= clientConfigService.resourceUploadSizeLimit);
+	}
+
 	public render() {
 		const {selectedTab} = this.state;
 		return (
@@ -108,7 +112,15 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 				onSubmit={this.onSubmit}
 				render={({ values }) => (
 					<Form>
-						{selectedTab === 0 && <AttachResourceFiles files={values.files} validateQuota={this.validateQuota} />}
+						{
+							selectedTab === 0 &&
+								<AttachResourceFiles
+									files={values.files}
+									validateQuota={this.validateQuota}
+									validateUploadLimit={this.validateUploadLimit}
+									uploadLimit={clientConfigService.resourceUploadSizeLimit}
+								/>
+						}
 						{selectedTab === 1 && <AttachResourceUrls links={values.links}/>}
 							<DialogButtons onClickCancel={this.onCancel} validateQuota={this.validateQuota}/>
 					</Form>

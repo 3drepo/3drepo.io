@@ -28,6 +28,7 @@ const _ = require("lodash");
 const FileRef = require("./fileRef");
 
 const ChatEvent = require("./chatEvent");
+const config = require("../config.js");
 
 const systemLogger = require("../logger.js").systemLogger;
 const Comment = require("./comment");
@@ -955,6 +956,10 @@ issue.attachResourceFiles = async function(account, model, issueId, username, se
 
 	if (spaceLeft < spaceToBeUsed) {
 		throw responseCodes.SIZE_LIMIT_PAY;
+	}
+
+	if (!files.map(f => f.size).every(v => v.size < config.resourceUploadSizeLimit)) {
+		throw responseCodes.SIZE_LIMIT;
 	}
 
 	const refsPromises = files.map((file,i) => {

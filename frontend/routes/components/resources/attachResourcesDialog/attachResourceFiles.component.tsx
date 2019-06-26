@@ -16,19 +16,20 @@
  */
 import * as React from 'react';
 import {ResourcesDropzone} from './attachResourcesDropzone';
-import { Formik, FieldArray, Form, Field } from 'formik';
+import { FieldArray, Field } from 'formik';
 import { TextField } from '@material-ui/core';
 import { RemoveButton } from '../resources.component';
 import { StyledFormControl,
 		FieldsRow } from '../../../viewer/components/risks/components/riskDetails/riskDetails.styles';
 import { ResourcesListContainer, ResourceListItem, ResourcesListScroller } from './attachResourcesDialog.styles';
-import { DialogButtons } from './attachResourcesDialogButtons';
-import * as Yup from 'yup';
+import * as filesize from 'filesize';
 import { get } from 'lodash';
 
 interface IProps {
 	files: any[];
+	uploadLimit: number;
 	validateQuota: (files: []) => boolean;
+	validateUploadLimit: (files: []) => boolean;
 }
 
 const extensionRe = /\.(\w+)$/;
@@ -74,11 +75,11 @@ export class AttachResourceFiles extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const {files, validateQuota} = this.props;
+		const {files, validateQuota, validateUploadLimit, uploadLimit} = this.props;
 		return (
 					<FieldArray
-					name="files"
-					render={(arrayHelpers) => (
+						name="files"
+						render={(arrayHelpers) => (
 						<div>
 						{(files && files.length > 0) && (
 							<ResourcesListScroller>
@@ -96,7 +97,12 @@ export class AttachResourceFiles extends React.PureComponent<IProps, any> {
 							</ResourcesListScroller>
 						)}
 							<Field render={ ({ form }) => {
-									const errorMessage = !validateQuota(form.values.files) ? 'Quota exceeded! Try removing some files' : '';
+									let errorMessage = !validateQuota(form.values.files) ?
+														'Quota exceeded! Try removing some files' : '';
+
+									errorMessage = !validateUploadLimit(form.values.files) ?
+													`Size limit per file exceeded! The size limit is ${filesize(uploadLimit, {fullform: true})}` : '';
+
 									return (<ResourcesDropzone onDrop={this.onAddFile(arrayHelpers)} errorMessage={errorMessage} />);
 							}} />
 						</div>
