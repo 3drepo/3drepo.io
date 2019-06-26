@@ -265,9 +265,9 @@ class PanelController implements ng.IController {
 
 export const PanelComponent: ng.IComponentOptions = {
 	bindings: {
-		account:  '=',
-		branch:   '=',
-		model:  '=',
+		account: '=',
+		branch: '=',
+		model: '=',
 		modelSettings: '=',
 		position: '@',
 		revision: '=',

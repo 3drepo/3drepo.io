@@ -27,10 +27,7 @@ export class AuthService {
 		'$window',
 		'$mdDialog',
 		'$timeout',
-		'$state',
-
-		'ClientConfigService',
-		'AnalyticService'
+		'$state'
 	];
 
 	public initialAuthPromise;
@@ -53,10 +50,7 @@ export class AuthService {
 		private $window,
 		private $mdDialog,
 		private $timeout,
-		private $state,
-
-		private ClientConfigService: any,
-		private AnalyticService: any
+		private $state
 	) {
 		this.doNotLogout = [
 			'/terms',

@@ -17,6 +17,7 @@
 
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '../../services/api';
+import { analyticsService } from '../../services/analytics';
 import { getAngularService, history } from '../../helpers/migration';
 import { NewTermsDialog } from '../../routes/components/newTermsDialog/newTermsDialog.component';
 import { CurrentUserActions } from '../currentUser';
@@ -38,9 +39,7 @@ export function* login({ username, password }) {
 			}));
 		}
 
-		// TODO: Replace to proper service after migration
-		const AnalyticService = getAngularService('AnalyticService') as any;
-		yield AnalyticService.setUserId(username);
+		yield analyticsService.setUserId(username);
 
 		yield put(CurrentUserActions.fetchUserSuccess({
 			username,

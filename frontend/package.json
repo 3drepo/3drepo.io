@@ -64,6 +64,7 @@
     "react-copy-to-clipboard": "5.0.1",
     "react-dom": "16.4.2",
     "react-dropzone": "6.0.2",
+    "react-ga": "^2.5.7",
     "react-google-recaptcha": "1.0.5",
     "react-highlight-words": "0.14.0",
     "react-image": "2.0.0",

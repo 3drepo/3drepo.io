@@ -22,15 +22,17 @@ import { SnackbarContainer } from '../components/snackbarContainer';
 import { clientConfigService } from '../../services/clientConfig';
 import { isStaticRoute } from '../../services/staticPages';
 import { LiveChat } from '../components/liveChat';
+import { analyticsService } from '../../services/analytics';
 
 interface IProps {
 	location: any;
 	history: any;
 	isAuthenticated: boolean;
 	hasActiveSession: boolean;
+	currentUser: any;
 	authenticate: () => void;
 	logout: () => void;
-	currentUser: any;
+	startup: () => void;
 }
 
 interface IState {
@@ -51,17 +53,31 @@ const PUBLIC_ROUTES = [
 	'password-change'
 ] as any;
 
+const ANALYTICS_REFERER_ROUTES = [
+	'sign-up',
+	'register-request'
+] as any;
+
 export class App extends React.PureComponent<IProps, IState> {
+	private authenticationInterval;
+	private loginInterval;
+
+	constructor(props) {
+		super(props);
+		props.startup();
+	}
+
 	public state = {
 		referrer: DEFAULT_REDIRECT,
 		autologoutInterval: clientConfigService.login_check_interval || 4
 	};
 
-	private authenticationInterval;
-	private loginInterval;
-
 	public isPublicRoute(path) {
 		return PUBLIC_ROUTES.includes(path.replace('/', ''));
+	}
+
+	public isRefererRoute(path) {
+		return ANALYTICS_REFERER_ROUTES.includes(path.replace('/', ''));
 	}
 
 	public componentDidMount() {
@@ -77,6 +93,7 @@ export class App extends React.PureComponent<IProps, IState> {
 			: DEFAULT_REDIRECT;
 
 		this.setState({ referrer: initialReferrer });
+		this.sendAnalyticsPageView(location);
 	}
 
 	public componentWillUnmount() {
@@ -112,6 +129,19 @@ export class App extends React.PureComponent<IProps, IState> {
 				history.push(isLoginRoute ? this.state.referrer : DEFAULT_REDIRECT);
 				this.setState({ referrer: DEFAULT_REDIRECT });
 			});
+		}
+
+		if (location.pathname !== prevProps.location.pathname) {
+			this.sendAnalyticsPageView(location);
+		}
+	}
+
+	public sendAnalyticsPageView(location) {
+		const isAnalyticsRefererRoute = this.isRefererRoute(location.pathname);
+		analyticsService.sendPageView(location);
+
+		if (isAnalyticsRefererRoute) {
+			analyticsService.sendPageViewReferer(location);
 		}
 	}
 

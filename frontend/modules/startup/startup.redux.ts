@@ -15,30 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export class TemplateService {
+import { createActions } from 'reduxsauce';
 
-	public static $inject: string[] = [
-		'$http',
-		'$templateCache'
-	];
-
-	constructor(
-		private $http: any,
-		private $templateCache: any
-	) {
-	}
-
-	public precache(preCacheTemplates) {
-		preCacheTemplates.forEach((templatePath) => {
-			this.$http.get(templatePath).then((response) => {
-				this.$templateCache.put(templatePath, response.data);
-			});
-		});
-
-	}
-
-}
-
-export const TemplateServiceModule = angular
-	.module('3drepo')
-	.service('TemplateService', TemplateService);
+export const { Types: StartupTypes, Creators: StartupActions } = createActions({
+	startup: null
+}, { prefix: 'STARTUP/' });

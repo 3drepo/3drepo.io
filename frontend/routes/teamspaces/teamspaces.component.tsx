@@ -19,6 +19,8 @@ import * as React from 'react';
 import SimpleBar from 'simplebar-react';
 import * as queryString from 'query-string';
 import { isEmpty, isEqual } from 'lodash';
+import { analyticsService, EVENT_CATEGORIES, EVENT_ACTIONS } from '../../services/analytics';
+
 import Add from '@material-ui/icons/Add';
 import MenuItem from '@material-ui/core/MenuItem';
 
@@ -27,7 +29,7 @@ import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import ModelItem from './components/modelItem/modelItem.container';
 import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
-import { getAngularService, runAngularTimeout } from '../../helpers/migration';
+import { runAngularTimeout } from '../../helpers/migration';
 import { ProjectDialog } from './components/projectDialog/projectDialog.component';
 import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
@@ -299,8 +301,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				this.createRouteHandler(`/viewer/${activeTeamspace}/${props.model}`)(event);
 			});
 
-			const analyticService = getAngularService('AnalyticService') as any;
-			analyticService.sendEvent({ eventCategory: 'Model', eventAction: 'view' });
+			analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
 		} else {
 			this.openUploadModelFileDialog(activeTeamspace, props)(event);
 		}
