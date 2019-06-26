@@ -52,6 +52,7 @@ interface IProps {
 	isAvatarPending: boolean;
 	currentUser: any;
 	fetchUser: (username) => void;
+	push: (path) => void;
 }
 
 export class Dashboard extends React.PureComponent<IProps, any> {
@@ -95,7 +96,6 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { match, currentUser, isPending, isInitialised, isAvatarPending } = this.props;
-		console.log('RENDER DASHBOARD');
 		return (
 			<Container
 				container={true}

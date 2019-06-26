@@ -16,7 +16,6 @@
  */
 
 import * as React from 'react';
-import { BrowserRouter as Router, withRouter } from 'react-router-dom';
 
 import { ListItemLink } from './components/listItemLink/listItemLink.component';
 import { Container, UserContainer, UserData, UserName, UserEmail, StyledList, LoadingText } from './userInfo.styles';
@@ -51,29 +50,27 @@ const UserInfoComponent = (props: IProps) => {
 	const { match, items, loading, firstName, lastName, username, email, avatarUrl } = props;
 	const name = firstName || lastName ? `${firstName || ''} ${lastName || ''}`.trim() : username;
 	return (
-		<Router>
-			<Container>
-				<Panel title={username}>
-						<StyledList>
-							<UserContainer>
-								<Avatar
-									name={name}
-									url={avatarUrl}
-									loading={loading}
-								/>
-								{ loading
-									? <LoadingText>Loading...</LoadingText>
-									: <UserData>
-											<UserName>{firstName} {lastName}</UserName>
-											<UserEmail>{email}</UserEmail>
-										</UserData>
-								}
-							</UserContainer>
-							{renderItems(items, match.url)}
-						</StyledList>
-				</Panel>
-			</Container>
-		</Router>
+		<Container>
+			<Panel title={username}>
+					<StyledList>
+						<UserContainer>
+							<Avatar
+								name={name}
+								url={avatarUrl}
+								loading={loading}
+							/>
+							{ loading
+								? <LoadingText>Loading...</LoadingText>
+								: <UserData>
+										<UserName>{firstName} {lastName}</UserName>
+										<UserEmail>{email}</UserEmail>
+									</UserData>
+							}
+						</UserContainer>
+						{renderItems(items, match.url)}
+					</StyledList>
+			</Panel>
+		</Container>
 	);
 };
 
