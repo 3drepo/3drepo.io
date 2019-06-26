@@ -171,8 +171,8 @@ export class Notifications extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps: IProps) {
-		if (prevProps.notifications !== this.props.notifications) {
-			const unreadCount =  this.props.notifications.filter((n) => !n.read).length;
+		if (prevProps.notifications !== this.props.notifications && this.props.notifications.length) {
+			const unreadCount = this.props.notifications.filter((n) => !n.read).length;
 			const groupedByTeamspace = { thisWeek: [], lastWeek: [], older: []};
 
 			const thisWeek = this.thisWeeksNotifications(this.props.notifications);

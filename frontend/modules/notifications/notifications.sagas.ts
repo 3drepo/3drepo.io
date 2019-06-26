@@ -109,9 +109,9 @@ function* showUpdatedFailedError({ errorMessage }) {
 	yield put(DialogActions.showErrorDialog('update', 'model', errorMessage));
 }
 
-const onUpserted = () => dispatch(NotificationsActions.upsertNotification());
+const onUpserted = (notification) => dispatch(NotificationsActions.upsertNotification(notification));
 
-const onDeleted = () => dispatch(NotificationsActions.deleteNotification());
+const onDeleted = (notification) => dispatch(NotificationsActions.deleteNotification(notification));
 
 function* subscribeOnChanges() {
 	const currentUser = yield select(selectCurrentUser);

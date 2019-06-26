@@ -319,7 +319,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { failedToLoad, issue } = this.props;
-
 		return (
 			<Container>
 				<ViewerPanelContent
