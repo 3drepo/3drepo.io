@@ -27,8 +27,7 @@ export class ViewerService {
 		'$q',
 		'$timeout',
 
-		'ClientConfigService',
-		'EventService'
+		'ClientConfigService'
 	];
 
 	public pin: any;
@@ -50,8 +49,7 @@ export class ViewerService {
 		public $q: ng.IQService,
 		public $timeout: ng.ITimeoutService,
 
-		public ClientConfigService: any,
-		public EventService: any
+		public ClientConfigService: any
 	) {
 
 		this.newPinId = 'newPinId';
