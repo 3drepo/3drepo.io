@@ -143,11 +143,15 @@ async function removeResource(account, model,  resourceId, property, propertyId)
 		throw ResponseCodes.INVALID_ARGUMENTS;
 	}
 
-	const collection = model + RESOURCES_FILE_REF_EXT;
-	const ref = await getRefEntry(account, collection, resourceId);
+	const collName = model + RESOURCES_FILE_REF_EXT;
+	const collection = await DB.getCollection(account, collName);
+	const ref = await collection.findOne({_id: resourceId});
+
 	if (!Array.isArray(ref[property]) || ref[property].indexOf(propertyId) === -1) {
 		throw ResponseCodes.RESOURCE_NOT_ATTACHED;
 	}
+
+	ref[property] = ref[property].filter(entry => entry !== propertyId);
 
 	const refCounts = attachResourceProps.reduce((prev, p) => prev + (ref[p] || []).length, 0);
 
@@ -157,6 +161,9 @@ async function removeResource(account, model,  resourceId, property, propertyId)
 		}
 
 		await collection.remove({_id:resourceId});
+	} else {
+		delete ref._id;
+		await collection.update({_id: resourceId}, { $set: ref });
 	}
 
 	return ref;
