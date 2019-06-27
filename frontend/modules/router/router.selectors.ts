@@ -34,3 +34,11 @@ export const selectSearch = createSelector(
 export const selectHash = createSelector(
 	selectLocation, (location) => location.hash
 );
+
+export const selectRouteRevision = createSelector(
+	selectRouterDomain, (router) => {
+		router
+		debugger;
+		return {};
+	}
+)
