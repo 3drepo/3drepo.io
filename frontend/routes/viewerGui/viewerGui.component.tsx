@@ -16,8 +16,7 @@
  */
 
 import * as React from 'react';
-import Splitter from 'm-react-splitters';
-import 'm-react-splitters/lib/splitters.css';
+import { isEmpty } from 'lodash';
 
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
 import Toolbar from './components/toolbar/toolbar.container';
@@ -34,6 +33,17 @@ import { Container, LeftPanels, LeftPanelsButtons } from './viewerGui.styles';
 
 interface IProps {
 	className?: string;
+	match: {
+		params: {
+			model: string;
+			teamspace: string;
+			revision?: string;
+		}
+	};
+	queryParams: {
+		issueId?: string;
+		riskId?: string;
+	};
 }
 
 // model.pug
@@ -43,16 +53,34 @@ export class ViewerGui extends React.PureComponent<IProps, any> {
 		visiblePanels: {}
 	};
 
+	public componentDidMount() {
+		const changes = {} as any;
+		const { issueId, riskId } = this.props.queryParams;
+
+		if (issueId || riskId) {
+			changes.visiblePanels = {};
+			if (issueId) {
+				changes.visiblePanels[VIEWER_PANELS.ISSUES] = true;
+			}
+			if (riskId) {
+				changes.visiblePanels[VIEWER_PANELS.RISKS] = true;
+			}
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
+	}
+
+	private get urlParams() {
+		return this.props.match.params;
+	}
+
 	public render() {
 		return (
 			<Container className={this.props.className}>
 				<RevisionsDropdown />
-				<Toolbar
-					/* ng-if="!vm.isLiteMode" */
-					/* style="pointer-events:{{vm.pointerEvents}}" */
-					teamspace="vm.account"
-					model="vm.model"
-				/>
+				<Toolbar {...this.urlParams.teamspace} />
 				{this.renderLeftPanelsButtons()}
 				{this.renderLeftPanels(this.state.visiblePanels)}
 			</Container>
@@ -84,13 +112,13 @@ export class ViewerGui extends React.PureComponent<IProps, any> {
 
 	private renderLeftPanels = (visiblePanels) => (
 		<LeftPanels>
-			{visiblePanels[VIEWER_PANELS.ISSUES] && <Issues />}
-			{visiblePanels[VIEWER_PANELS.RISKS] && <Risks />}
-			{visiblePanels[VIEWER_PANELS.GROUPS] && <Groups />}
-			{visiblePanels[VIEWER_PANELS.VIEWS] && <Views />}
-			{visiblePanels[VIEWER_PANELS.TREE] && <Tree />}
-			{visiblePanels[VIEWER_PANELS.COMPARE] && <Compare />}
-			{visiblePanels[VIEWER_PANELS.GIS] && <Gis />}
+			{visiblePanels[VIEWER_PANELS.ISSUES] && <Issues {...this.urlParams.teamspace} />}
+			{visiblePanels[VIEWER_PANELS.RISKS] && <Risks {...this.urlParams.teamspace} />}
+			{visiblePanels[VIEWER_PANELS.GROUPS] && <Groups {...this.urlParams.teamspace} />}
+			{visiblePanels[VIEWER_PANELS.VIEWS] && <Views {...this.urlParams.teamspace} />}
+			{visiblePanels[VIEWER_PANELS.TREE] && <Tree {...this.urlParams.teamspace} />}
+			{visiblePanels[VIEWER_PANELS.COMPARE] && <Compare {...this.urlParams.teamspace} />}
+			{visiblePanels[VIEWER_PANELS.GIS] && <Gis {...this.urlParams.teamspace} />}
 		</LeftPanels>
 	)
 }

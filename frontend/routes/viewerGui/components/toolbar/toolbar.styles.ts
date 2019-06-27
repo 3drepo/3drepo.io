@@ -35,6 +35,7 @@ export const Container = styled.div`
 	bottom: 35px;
 	left: 50%;
 	transform: translateX(-50%);
+	pointer-events: all;
 ` as any;
 
 export const ButtonWrapper = styled.div`

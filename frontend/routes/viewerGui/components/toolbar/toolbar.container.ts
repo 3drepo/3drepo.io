@@ -51,7 +51,7 @@ const mapStateToProps = createStructuredSelector({
 	isMetadataActive: selectIsActive,
 	isMeasureActive: selectIsMeasureActive,
 	isMeasureDisabled: selectIsMeasureDisabled,
-	metaKeysExist: selectMetaKeysExist
+	metaKeysExist: selectMetaKeysExist,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

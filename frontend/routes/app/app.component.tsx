@@ -212,7 +212,11 @@ export class App extends React.PureComponent<IProps, IState> {
 						<Route exact path={ROUTES.REGISTER_REQUEST} component={RegisterRequest} />
 						<Route exact path={ROUTES.REGISTER_VERIFY} component={RegisterVerify} />
 						<PrivateRoute key={ROUTES.DASHBOARD} path={ROUTES.DASHBOARD} component={Dashboard} />
-						<PrivateRoute key={ROUTES.VIEWER} path={ROUTES.VIEWER} component={this.renderViewer} />
+						<PrivateRoute
+							key={ROUTES.VIEWER}
+							path={`${ROUTES.VIEWER}/:teamspace/:model/:revision?`}
+							component={this.renderViewer}
+						/>
 						{this.renderStaticRoutes()}
 						<Route component={() => <div>No match on app</div>} />
 					</Switch>

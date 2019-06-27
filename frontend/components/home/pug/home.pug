@@ -1,9 +1,6 @@
 div.homeContainer(
 	ng-style="{ 'background-image': 'url({{vm.backgroundImage}})' }"
-	layout="column"
-	flex="100"
-	ng-keydown="vm.keyAction($event)"
-	ng-keyup="vm.keyAction($event)")
+)
 
 	viewer(
 		id="viewer"
@@ -16,10 +13,3 @@ div.homeContainer(
 		revision="vm.$state.params.revision"
 		style="pointer-events:none"
 	)
-
-	#legalLinks
-		a(
-			ng-repeat="display in vm.legalDisplays"
-			target="_blank"
-			rel="noopener"
-			href="{{display.path}}") {{display.title}}

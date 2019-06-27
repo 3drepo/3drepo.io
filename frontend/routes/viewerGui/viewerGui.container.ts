@@ -19,9 +19,12 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { connect } from 'react-redux';
 
+import { selectQueryParams } from '../../modules/router/router.selectors';
 import { ViewerGui } from './viewerGui.component';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	queryParams: selectQueryParams
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 

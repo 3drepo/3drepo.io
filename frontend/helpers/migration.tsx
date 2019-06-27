@@ -3,7 +3,7 @@ import configureStore from '../modules/store';
 import { createBrowserHistory } from 'history';
 
 // Angular service injector
-export const getAngularService = (name, caller?) => angular.element(document.body).injector().get(name, caller);
+export const getAngularService = Function.prototype;
 
 // Should be replaced with proper react-redux connect if app is fully migrated
 const initialState = {};
@@ -49,14 +49,4 @@ export const subscribe = (context, selectors: any = {}) => {
 			Object.assign(context, dataToBind);
 		});
 	});
-};
-
-export const runAngularTimeout = (callback, context?) => {
-	const $timeout = getAngularService('$timeout', context) as (callback) => void;
-	return $timeout(callback);
-};
-
-export const runAngularViewerTransition = (options) => {
-	const $state = getAngularService('$state', this) as any;
-	$state.go('app.viewer', options, { notify: false });
 };

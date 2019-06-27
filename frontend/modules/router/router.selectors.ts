@@ -16,6 +16,9 @@
  */
 
 import { createSelector } from 'reselect';
+import { matchPath } from 'react-router';
+import * as queryString from 'query-string';
+import { ROUTES } from '../../constants/routes';
 
 export const selectRouterDomain = (state) => state.router;
 
@@ -35,10 +38,14 @@ export const selectHash = createSelector(
 	selectLocation, (location) => location.hash
 );
 
-export const selectRouteRevision = createSelector(
-	selectRouterDomain, (router) => {
-		router
-		debugger;
-		return {};
+export const selectUrlParams = createSelector(
+	selectLocation, (location) => {
+		return matchPath(location.pathname, {
+			path: `${ROUTES.VIEWER}/:teamspace/:model/:revision?`
+		}).params;
 	}
-)
+);
+
+export const selectQueryParams = createSelector(
+	selectLocation, (location) => queryString.parse(location.search)
+);
