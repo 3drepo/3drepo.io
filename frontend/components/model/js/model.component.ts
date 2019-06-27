@@ -41,7 +41,6 @@ class ModelController implements ng.IController {
 		'$location',
 		'$mdDialog',
 
-		'RevisionsService',
 		'StateManager',
 		'PanelService',
 		'ViewerService'
@@ -72,7 +71,6 @@ class ModelController implements ng.IController {
 		private $location,
 		private $mdDialog,
 
-		private RevisionsService,
 		private StateManager,
 		private PanelService,
 		private ViewerService

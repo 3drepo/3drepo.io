@@ -20,15 +20,13 @@ export class AccountUploadService {
 	public static $inject: string[] = [
 		'$q',
 		'ClientConfigService',
-		'APIService',
-		'RevisionsService'
+		'APIService'
 	];
 
 	constructor(
 		private $q,
 		private ClientConfigService,
-		private APIService,
-		private RevisionsService
+		private APIService
 	) {}
 
 	public $onInit() {}
