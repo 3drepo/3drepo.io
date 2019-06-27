@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { put, takeLatest, fork } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 
 import * as API from '../../services/api';
@@ -28,7 +28,7 @@ import { AuthActions, AuthTypes } from './auth.redux';
 import { verificationMessages, forgotPasswordMessages, changePasswordMessages } from './auth.helpers';
 import { ROUTES } from '../../constants/routes';
 
-export function* login({ username, password }) {
+function* login({ username, password }) {
 	yield put(AuthActions.setPendingStatus(true));
 
 	try {
@@ -47,6 +47,7 @@ export function* login({ username, password }) {
 			avatarUrl: getAvatarUrl(username)
 		}));
 		yield put(AuthActions.loginSuccess());
+		yield fork(watchSession);
 	} catch (e) {
 		if (e.response.status === 401) {
 			yield put(AuthActions.loginFailure());
@@ -59,7 +60,7 @@ export function* login({ username, password }) {
 	yield put(AuthActions.setPendingStatus(false));
 }
 
-export function* logout() {
+function* logout() {
 	try {
 		yield API.logout();
 		yield put({ type: 'RESET_APP' });
@@ -74,7 +75,7 @@ export function* logout() {
 	yield put(push(ROUTES.LOGIN));
 }
 
-export function* authenticate() {
+function* authenticate() {
 	yield put(AuthActions.setPendingStatus(true));
 	try {
 		const { data: { username }} = yield API.authenticate();
@@ -84,6 +85,7 @@ export function* authenticate() {
 		}));
 
 		yield put(AuthActions.loginSuccess());
+		yield fork(watchSession);
 	} catch (e) {
 		if (e.response.status === 401) {
 			yield put(AuthActions.loginFailure());
@@ -93,7 +95,7 @@ export function* authenticate() {
 	}
 }
 
-export function* sessionExpired() {
+function* sessionExpired() {
 	try {
 		yield put({ type: 'RESET_APP' });
 		yield put(DialogActions.showDialog({
@@ -105,7 +107,7 @@ export function* sessionExpired() {
 	}
 }
 
-export function* sendPasswordChangeRequest({ userNameOrEmail }) {
+function* sendPasswordChangeRequest({ userNameOrEmail }) {
 	yield put(AuthActions.setPendingStatus(true));
 
 	try {
@@ -118,7 +120,7 @@ export function* sendPasswordChangeRequest({ userNameOrEmail }) {
 	yield put(AuthActions.setPendingStatus(false));
 }
 
-export function* changePassword({ username, token, password }) {
+function* changePassword({ username, token, password }) {
 	yield put(AuthActions.setPendingStatus(true));
 
 	try {
@@ -131,7 +133,7 @@ export function* changePassword({ username, token, password }) {
 	yield put(AuthActions.setPendingStatus(false));
 }
 
-export function* register({ username, data }) {
+function* register({ username, data }) {
 	yield put(AuthActions.setPendingStatus(true));
 
 	try {
@@ -143,7 +145,7 @@ export function* register({ username, data }) {
 	yield put(AuthActions.setPendingStatus(false));
 }
 
-export function* verify({ username, token }) {
+function* verify({ username, token }) {
 	yield put(AuthActions.setPendingStatus(true));
 
 	try {
@@ -159,6 +161,20 @@ export function* verify({ username, token }) {
 	yield put(AuthActions.setPendingStatus(false));
 }
 
+function* watchSession() {
+	try {
+		let shouldLogout = false;
+
+/* 		while (!shouldLogout) {
+
+		} */
+
+		//yield put(AuthActions.logout());
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('verify', 'user session', error));
+	}
+}
+
 export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.AUTHENTICATE, authenticate);
 	yield takeLatest(AuthTypes.LOGIN, login);
@@ -168,4 +184,5 @@ export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.CHANGE_PASSWORD, changePassword);
 	yield takeLatest(AuthTypes.REGISTER, register);
 	yield takeLatest(AuthTypes.VERIFY, verify);
+	yield takeLatest(AuthTypes.WATCH_SESSION, watchSession);
 }

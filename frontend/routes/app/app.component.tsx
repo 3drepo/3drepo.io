@@ -37,7 +37,7 @@ import { PasswordForgot } from '../passwordForgot';
 import { PasswordChange } from '../passwordChange';
 import RegisterRequest from '../registerRequest/registerRequest.container';
 import { RegisterVerify } from '../registerVerify';
-import { ROUTES } from '../../constants/routes';
+import { ROUTES, PUBLIC_ROUTES } from '../../constants/routes';
 
 interface IProps {
 	location: any;
@@ -57,15 +57,6 @@ interface IState {
 }
 
 const DEFAULT_REDIRECT = ROUTES.TEAMSPACES;
-
-const PUBLIC_ROUTES = [
-	'login',
-	'sign-up',
-	'register-request',
-	'register-verify',
-	'password-forgot',
-	'password-change'
-] as any;
 
 const ANALYTICS_REFERER_ROUTES = [
 	'sign-up',
@@ -87,7 +78,7 @@ export class App extends React.PureComponent<IProps, IState> {
 	};
 
 	public isPublicRoute(path) {
-		return PUBLIC_ROUTES.includes(path.replace('/', ''));
+		return PUBLIC_ROUTES.includes(path);
 	}
 
 	public isRefererRoute(path) {
@@ -96,7 +87,6 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		this.props.authenticate();
-
 		if (!isStaticRoute(location.pathname)) {
 			this.toggleAutoLogout();
 			this.toggleAutoLogin();
@@ -171,10 +161,13 @@ export class App extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public get hasActiveSession() {
+		return JSON.parse(window.localStorage.getItem('loggedIn'));
+	}
+
 	public handleAutoLogout = () => {
 		const { isAuthenticated, logout, history } = this.props;
-		const hasActiveSession = JSON.parse(window.localStorage.getItem('loggedIn'));
-		const isSessionExpired = hasActiveSession !== isAuthenticated;
+		const isSessionExpired = this.hasActiveSession !== isAuthenticated;
 		if (isSessionExpired) {
 			logout();
 			history.push(ROUTES.LOGIN);
@@ -183,9 +176,8 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public handleAutoLogin = () => {
 		const { isAuthenticated } = this.props;
-		const hasActiveSession = JSON.parse(window.localStorage.getItem('loggedIn'));
 
-		if (hasActiveSession && !isAuthenticated) {
+		if (this.hasActiveSession && !isAuthenticated) {
 			this.props.authenticate();
 			if (!this.authenticationInterval) {
 				this.toggleAutoLogout();
@@ -206,7 +198,7 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { isAuthPending, isAuthenticated } = this.props;
-		if (isAuthPending) {
+		if (isAuthPending || isAuthenticated === null) {
 			return null;
 		}
 
@@ -222,7 +214,6 @@ export class App extends React.PureComponent<IProps, IState> {
 						<PrivateRoute path={ROUTES.DASHBOARD} component={Dashboard} />
 						<PrivateRoute path={ROUTES.VIEWER} component={this.renderViewer} />
 						{this.renderStaticRoutes()}
-						<Redirect to={isAuthenticated ? ROUTES.DASHBOARD : ROUTES.LOGIN} />
 						<Route component={() => <div>No match on app</div>} />
 					</Switch>
 

@@ -36,7 +36,6 @@ interface IProps {
 export class TopMenu extends React.PureComponent<IProps, any> {
 	public render() {
 		const { logoUrl, onLogoClick, ...userMenuProps } = this.props;
-		debugger
 		return (
 			<Container>
 				<Logo onClick={onLogoClick} />

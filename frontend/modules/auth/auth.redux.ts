@@ -31,7 +31,8 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	register: ['username', 'data'],
 	verify: ['username', 'token'],
 	setAuthMessage: ['message'],
-	clearAuthMessage: []
+	clearAuthMessage: [],
+	watchSession: []
 }, { prefix: 'AUTH/' });
 
 export const INITIAL_STATE = {

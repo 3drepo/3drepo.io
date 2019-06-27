@@ -15,3 +15,12 @@ export const ROUTES = {
 	PROFILE: '/dashboard/profile',
 	BILLING: '/dashboard/billing'
 };
+
+export const PUBLIC_ROUTES = [
+	ROUTES.LOGIN,
+	ROUTES.SIGN_UP,
+	ROUTES.REGISTER_REQUEST,
+	ROUTES.REGISTER_VERIFY,
+	ROUTES.PASSWORD_FORGOT,
+	ROUTES.PASSWORD_FORGOT
+] as any;
