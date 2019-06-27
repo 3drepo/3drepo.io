@@ -7,7 +7,6 @@ requireAll(require.context('./css', true, /\.css$/));
 
 // css from libs
 import 'simplebar/dist/simplebar.min.css';
-import 'angular-material/angular-material.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 import './services/fontAwesome';
 
@@ -15,8 +14,6 @@ import './services/fontAwesome';
 import { UnityUtil } from './globals/unity-util';
 import { Pin } from './globals/pin';
 import { Viewer } from './globals/viewer';
-
-import './styles/global';
 
 /* import { TDR } from './components/init'; */
 
@@ -45,8 +42,10 @@ import * as ReactDOM from 'react-dom';
 
 // Import all the third party stuff
 import { Provider } from 'react-redux';
-import { ConnectedRouter } from 'connected-react-router'
+import { ConnectedRouter } from 'connected-react-router';
 import 'normalize.css/normalize.css';
+
+import './styles/global';
 import Root from './routes/index';
 import { store, history } from './helpers/migration';
 

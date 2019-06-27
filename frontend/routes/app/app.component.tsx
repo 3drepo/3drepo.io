@@ -17,6 +17,7 @@
 
 import * as React from 'react';
 import { Route, Switch } from 'react-router-dom';
+import { memoize } from 'lodash';
 
 import { clientConfigService } from '../../services/clientConfig';
 import { isStaticRoute, STATIC_ROUTES } from '../../services/staticPages';
@@ -37,6 +38,7 @@ import { PasswordChange } from '../passwordChange';
 import RegisterRequest from '../registerRequest/registerRequest.container';
 import { RegisterVerify } from '../registerVerify';
 import { AppContainer } from './app.styles';
+import { renderWhenTrue } from '../../helpers/rendering';
 
 interface IProps {
 	location: any;
@@ -191,9 +193,9 @@ export class App extends React.PureComponent<IProps, IState> {
 		</>
 	)
 
-	public renderStaticRoutes = () => STATIC_ROUTES.map(({ title, path, fileName }) => (
+	public renderStaticRoutes = memoize(() => STATIC_ROUTES.map(({ title, path, fileName }) => (
 		<Route key={path} path={path} render={() => <StaticPageRoute title={title} fileName={fileName} />} />
-	))
+	)));
 
 	public render() {
 		const { isAuthPending, isAuthenticated } = this.props;
@@ -210,8 +212,8 @@ export class App extends React.PureComponent<IProps, IState> {
 						<Route exact path={ROUTES.PASSWORD_CHANGE} component={PasswordChange} />
 						<Route exact path={ROUTES.REGISTER_REQUEST} component={RegisterRequest} />
 						<Route exact path={ROUTES.REGISTER_VERIFY} component={RegisterVerify} />
-						<PrivateRoute path={ROUTES.DASHBOARD} component={Dashboard} />
-						<PrivateRoute path={ROUTES.VIEWER} component={this.renderViewer} />
+						<PrivateRoute key={ROUTES.DASHBOARD} path={ROUTES.DASHBOARD} component={Dashboard} />
+						<PrivateRoute key={ROUTES.VIEWER} path={ROUTES.VIEWER} component={this.renderViewer} />
 						{this.renderStaticRoutes()}
 						<Route component={() => <div>No match on app</div>} />
 					</Switch>

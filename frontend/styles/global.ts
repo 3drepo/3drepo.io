@@ -1,11 +1,54 @@
 import { injectGlobal } from 'styled-components';
+import { COLOR } from './colors';
+import { FONT_WEIGHT } from './fonts';
 
 // tslint:disable-next-line: no-unused-expression
 injectGlobal`
+	* {
+		font-family: Roboto, 'Helvetica Neue', sans-serif;
+		font-size: 100%;
+	}
+
+	html, body {
+		height: 100%;
+		position: relative;
+		-webkit-tap-highlight-color: ${COLOR.BLACK};
+		-webkit-touch-callout: none;
+		min-height: 100%;
+		-webkit-text-size-adjust: 100%;
+		-ms-text-size-adjust: 100%;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	body {
+		margin: 0;
+		padding: 0;
+	}
+
+	select,
+	button,
+	textarea,
+	input {
+		vertical-align: baseline;
+	}
+
+	input[type="reset"],
+	input[type="submit"],
+	html input[type="button"],
+	button {
+		cursor: pointer;
+		-webkit-appearance: button;
+
+		&[disabled] {
+			cursor: default;
+		}
+	}
+
 	@font-face {
 		font-family: 'Material Icons';
 		font-style: normal;
-		font-weight: 400;
+		font-weight: ${FONT_WEIGHT.NORMAL};
 		src: url('../node_modules/material-design-icons/iconfont/MaterialIcons-Regular.eot'); /* For IE6-8 */
 		src: local('Material Icons'),
 		local('MaterialIcons-Regular'),
@@ -13,7 +56,6 @@ injectGlobal`
 		url('../node_modules/material-design-icons/iconfont/MaterialIcons-Regular.woff') format('woff'),
 		url('../node_modules/material-design-icons/iconfont/MaterialIcons-Regular.ttf') format('truetype');
 	}
-
 
   #app {
 		flex: 1;
