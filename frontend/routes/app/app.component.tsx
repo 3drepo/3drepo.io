@@ -37,7 +37,7 @@ import { PasswordForgot } from '../passwordForgot';
 import { PasswordChange } from '../passwordChange';
 import RegisterRequest from '../registerRequest/registerRequest.container';
 import { RegisterVerify } from '../registerVerify';
-import { AppContainer, ExternalLinks, ExternalLink } from './app.styles';
+import { AppContainer } from './app.styles';
 
 interface IProps {
 	location: any;
@@ -185,21 +185,6 @@ export class App extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public renderExternalLinks = () => {
-		const links = [
-			...STATIC_ROUTES,
-			{ title: 'Contact', path: 'http://3drepo.org/contact/' },
-			{ title: 'Contact', path: 'http://3drepo.org/contact/' }
-		];
-		return (
-			<ExternalLinks>
-				{links.map(({ path, title }, index) => (
-					<ExternalLink key={index} href={path}>{title}</ExternalLink>
-				))}
-			</ExternalLinks>
-		);
-	}
-
 	public renderViewer = (props) => (
 		<>
 			<ViewerCanvas {...props} />
@@ -231,8 +216,6 @@ export class App extends React.PureComponent<IProps, IState> {
 						{this.renderStaticRoutes()}
 						<Route component={() => <div>No match on app</div>} />
 					</Switch>
-
-					{this.renderExternalLinks()}
 					<DialogContainer />
 					<SnackbarContainer />
 					<LiveChat/>

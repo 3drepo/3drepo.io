@@ -19,6 +19,8 @@ import * as React from 'react';
 import { Route, Redirect } from 'react-router-dom';
 import TopMenu from '../topMenu/topMenu.container';
 import { ROUTES } from '../../../constants/routes';
+import { STATIC_ROUTES } from '../../../services/staticPages';
+import { ExternalLinks, ExternalLink } from './privateRoute.styles';
 
 export const PrivateRoute = ({ component: Component, isAuthenticated, onLogout, push, ...routeProps }) => {
 	const redirect = (props) => (
@@ -37,6 +39,21 @@ export const PrivateRoute = ({ component: Component, isAuthenticated, onLogout, 
 		push(path);
 	};
 
+	const renderExternalLinks = () => {
+		const links = [
+			...STATIC_ROUTES,
+			{ title: 'Contact', path: 'http://3drepo.org/contact/' },
+			{ title: 'Contact', path: 'http://3drepo.org/contact/' }
+		];
+		return (
+			<ExternalLinks>
+				{links.map(({ path, title }, index) => (
+					<ExternalLink key={index} href={path}>{title}</ExternalLink>
+				))}
+			</ExternalLinks>
+		);
+	};
+
 	const renderComponent = (props) => (
 		<>
 			<TopMenu
@@ -45,6 +62,7 @@ export const PrivateRoute = ({ component: Component, isAuthenticated, onLogout, 
 				id="topMenu"
 			/>
 			<Component {...props} />
+			{renderExternalLinks()}
 		</>
 	);
 
