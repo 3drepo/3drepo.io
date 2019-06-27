@@ -33,21 +33,17 @@ import { VIEWER_CLIP_MODES } from '../../constants/viewer';
 import { MeasureActions } from '../measure';
 import { BimActions } from '../bim';
 
-export const getViewer = () => {
-	const ViewerService = getAngularService('ViewerService') as any;
-	return ViewerService.getViewer();
-};
+const getViewer = () => Viewer.viewer;
 
-export function* waitForViewer() {
+function* waitForViewer() {
 	try {
-		const ViewerService = yield getAngularService('ViewerService') as any;
-		yield ViewerService.initialised.promise;
+		yield Viewer.isViewerReady();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('initialise', 'viewer'));
 	}
 }
 
-export function* mapInitialise({surveyPoints, sources = []}) {
+function* mapInitialise({surveyPoints, sources = []}) {
 	try {
 		yield put(ViewerActions.waitForViewer());
 
@@ -63,7 +59,7 @@ const updateClipStateCallback = (clipNumber) => {
 	dispatch(ViewerActions.updateClipState(clipNumber));
 };
 
-export function* initialiseToolbar() {
+function* initialiseToolbar() {
 	try {
 		yield put(ViewerActions.startListenOnNumClip());
 	} catch (error) {
@@ -75,7 +71,7 @@ const setIsModelLoaded = () => {
 	dispatch(ViewerActions.setIsModelLoaded(true));
 };
 
-export function* startListenOnModelLoaded() {
+function* startListenOnModelLoaded() {
 	try {
 		Viewer.on(VIEWER_EVENTS.MODEL_LOADED, setIsModelLoaded);
 	} catch (error) {
@@ -83,7 +79,7 @@ export function* startListenOnModelLoaded() {
 	}
 }
 
-export function* stopListenOnModelLoaded() {
+function* stopListenOnModelLoaded() {
 	try {
 		Viewer.off(VIEWER_EVENTS.MODEL_LOADED, setIsModelLoaded);
 	} catch (error) {
@@ -91,7 +87,7 @@ export function* stopListenOnModelLoaded() {
 	}
 }
 
-export function* startListenOnNumClip() {
+function* startListenOnNumClip() {
 /* 	try {
 		Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
 	} catch (error) {
@@ -99,7 +95,7 @@ export function* startListenOnNumClip() {
 	} */
 }
 
-export function* stopListenOnNumClip() {
+function* stopListenOnNumClip() {
 	try {
 		Viewer.off(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
 	} catch (error) {
@@ -107,7 +103,7 @@ export function* stopListenOnNumClip() {
 	}
 }
 
-export function* updateClipState({clipNumber}) {
+function* updateClipState({clipNumber}) {
 	try {
 		const isClipEdit = yield select(selectIsClipEdit);
 		const currentClipNumber = yield select(selectClipNumber);
@@ -125,7 +121,7 @@ export function* updateClipState({clipNumber}) {
 	}
 }
 
-export function* resetMapSources({source}) {
+function* resetMapSources({source}) {
 	try {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().resetMapSources(source);
@@ -134,7 +130,7 @@ export function* resetMapSources({source}) {
 	}
 }
 
-export function* addMapSource({source}) {
+function* addMapSource({source}) {
 	try {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().addMapSource(source);
@@ -143,7 +139,7 @@ export function* addMapSource({source}) {
 	}
 }
 
-export function* removeMapSource({source}) {
+function* removeMapSource({source}) {
 	try {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().removeMapSource(source);
@@ -152,7 +148,7 @@ export function* removeMapSource({source}) {
 	}
 }
 
-export function* mapStart() {
+function* mapStart() {
 	try {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().mapStart();
@@ -161,7 +157,7 @@ export function* mapStart() {
 	}
 }
 
-export function* mapStop() {
+function* mapStop() {
 	try {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().mapStop();
@@ -170,7 +166,7 @@ export function* mapStop() {
 	}
 }
 
-export function* getScreenshot() {
+function* getScreenshot() {
 	try {
 		yield put(ViewerActions.waitForViewer());
 		return yield getViewer().getScreenshot();
@@ -179,34 +175,7 @@ export function* getScreenshot() {
 	}
 }
 
-export function* showViewpoint(teamspace, modelId, item) {
-	try {
-		const ViewerService = yield getAngularService('ViewerService') as any;
-
-		if (item) {
-			if (item.viewpoint) {
-				item.viewpoint.account = teamspace;
-				item.viewpoint.model = modelId;
-
-				yield ViewerService.setCamera(item.viewpoint);
-			}
-
-			if (item.clippingPlanes) {
-				const clipData = {
-					clippingPlanes: item.clippingPlanes,
-					account: teamspace,
-					modelId
-				};
-
-				yield ViewerService.updateClippingPlanes(clipData);
-			}
-		}
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('show', 'viewpoint', error));
-	}
-}
-
-export function* goToExtent() {
+function* goToExtent() {
 	try {
 		yield Viewer.goToExtent();
 	} catch (error) {
@@ -214,7 +183,7 @@ export function* goToExtent() {
 	}
 }
 
-export function* setNavigationMode({mode}) {
+function* setNavigationMode({mode}) {
 	try {
 		yield Viewer.setNavigationMode(mode);
 		yield put(ViewerActions.setNavigationModeSuccess(mode));
@@ -223,7 +192,7 @@ export function* setNavigationMode({mode}) {
 	}
 }
 
-export function* resetHelicopterSpeed({teamspace, modelId, updateDefaultSpeed}) {
+function* resetHelicopterSpeed({teamspace, modelId, updateDefaultSpeed}) {
 	try {
 		yield Viewer.helicopterSpeedReset();
 		if (updateDefaultSpeed) {
@@ -235,7 +204,7 @@ export function* resetHelicopterSpeed({teamspace, modelId, updateDefaultSpeed}) 
 	}
 }
 
-export function* getHelicopterSpeed({teamspace, modelId}) {
+function* getHelicopterSpeed({teamspace, modelId}) {
 	try {
 		yield Viewer.isViewerReady();
 		const { data: { heliSpeed } } = yield API.getHelicopterSpeed(teamspace, modelId);
@@ -257,7 +226,7 @@ export function* getHelicopterSpeed({teamspace, modelId}) {
 	}
 }
 
-export function* increaseHelicopterSpeed({teamspace, modelId}) {
+function* increaseHelicopterSpeed({teamspace, modelId}) {
 	try {
 		const helicopterSpeed = yield select(selectHelicopterSpeed);
 		const speed = helicopterSpeed + 1;
@@ -270,7 +239,7 @@ export function* increaseHelicopterSpeed({teamspace, modelId}) {
 	}
 }
 
-export function* decreaseHelicopterSpeed({teamspace, modelId}) {
+function* decreaseHelicopterSpeed({teamspace, modelId}) {
 	try {
 		const helicopterSpeed = yield select(selectHelicopterSpeed);
 		const speed = helicopterSpeed - 1;
@@ -283,7 +252,7 @@ export function* decreaseHelicopterSpeed({teamspace, modelId}) {
 	}
 }
 
-export function* setClippingMode({mode}) {
+function* setClippingMode({mode}) {
 	try {
 		if (mode) {
 			const isSingle = mode === VIEWER_CLIP_MODES.SINGLE;
@@ -295,7 +264,7 @@ export function* setClippingMode({mode}) {
 	}
 }
 
-export function* setClipEdit({isClipEdit}) {
+function* setClipEdit({isClipEdit}) {
 	try {
 		if (isClipEdit) {
 			yield Viewer.startClipEdit();
@@ -308,7 +277,7 @@ export function* setClipEdit({isClipEdit}) {
 	}
 }
 
-export function* setMetadataVisibility({ visible }) {
+function* setMetadataVisibility({ visible }) {
 	try {
 		yield put(ViewerActions.setPanelVisibility(VIEWER_PANELS.METADATA, visible));
 	} catch (error) {
@@ -316,7 +285,7 @@ export function* setMetadataVisibility({ visible }) {
 	}
 }
 
-export function* setMeasureVisibility({ visible }) {
+function* setMeasureVisibility({ visible }) {
 	try {
 		const metadataActive = yield select(selectIsMetadataVisible);
 		if (visible && metadataActive) {
@@ -330,7 +299,7 @@ export function* setMeasureVisibility({ visible }) {
 	}
 }
 
-export function* clearHighlights() {
+function* clearHighlights() {
 	try {
 		Viewer.clearHighlights();
 	} catch (error) {
@@ -338,7 +307,7 @@ export function* clearHighlights() {
 	}
 }
 
-export function* setCamera({ params }) {
+function* setCamera({ params }) {
 	try {
 		Viewer.setCamera(params);
 	} catch (error) {
@@ -346,7 +315,7 @@ export function* setCamera({ params }) {
 	}
 }
 
-export function* changePinColor({ params }) {
+function* changePinColor({ params }) {
 	try {
 		const { id, colours } = params;
 		Viewer.changePinColor({ id, colours });
@@ -355,7 +324,7 @@ export function* changePinColor({ params }) {
 	}
 }
 
-export function* removeUnsavedPin() {
+function* removeUnsavedPin() {
 	try {
 		Viewer.removePin({ id: NEW_PIN_ID });
 		Viewer.setPin(null);
