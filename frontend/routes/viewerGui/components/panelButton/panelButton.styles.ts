@@ -26,10 +26,13 @@ export const Button = styled(TooltipButton)`
 		background-color: ${(props: any) => props.active ? COLOR.PRIMARY_MAIN : COLOR.REGENT_GRAY};
 		color: ${COLOR.WHITE};
 		box-shadow: 0 3px 3px ${COLOR.BLACK_16};
-		margin-bottom: 20px;
 
 		&:hover {
 			background-color: ${(props: any) => props.active ? COLOR.PRIMARY_MAIN : COLOR.REGENT_GRAY};
 		}
 	}
+`;
+
+export const ButtonWrapper = styled.div`
+	margin-bottom: 20px;
 `;

@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
-import { COLOR, WHITE, FONT_WEIGHT } from '../../../../styles';
+import { COLOR, FONT_WEIGHT } from '../../../../styles';
 
 export const Container = styled.div`
 	background-color: ${COLOR.REGENT_GRAY};
@@ -36,6 +36,7 @@ export const Container = styled.div`
 	left: 50%;
 	transform: translateX(-50%);
 	pointer-events: all;
+	z-index: 1;
 ` as any;
 
 export const ButtonWrapper = styled.div`

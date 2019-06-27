@@ -275,6 +275,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 					action={action}
 					active={active}
 					disabled={disabled}
+					placement="top"
 				/>
 				{this.renderSubmenuDot(subMenu.length)}
 				{this.renderSubmenu(subMenu, label)}

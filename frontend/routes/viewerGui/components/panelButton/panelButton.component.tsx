@@ -18,7 +18,7 @@
 import * as React from 'react';
 
 import { VIEWER_PANELS_ICONS } from '../../../../constants/viewerGui';
-import { Button } from './panelButton.styles';
+import { Button, ButtonWrapper } from './panelButton.styles';
 
 export const PanelButton = (props) => {
 	const { active, label, onClick, type, className } = props;
@@ -26,13 +26,15 @@ export const PanelButton = (props) => {
 	const handleClick = () => onClick(type);
 
 	return (
-		<Button
-			className={className}
-			label={label}
-			Icon={VIEWER_PANELS_ICONS[type]}
-			placement="right-end"
-			active={Boolean(active)}
-			action={handleClick}
-		/>
+		<ButtonWrapper>
+			<Button
+				className={className}
+				label={label}
+				Icon={VIEWER_PANELS_ICONS[type]}
+				placement="right"
+				active={Boolean(active)}
+				action={handleClick}
+			/>
+		</ButtonWrapper>
 	);
 };
