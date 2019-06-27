@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
-    "types": ["angular", "react", "react-dom", "lodash", "node"],
+    "types": ["react", "react-dom", "lodash", "node"],
     "lib": [
       "es5",
       "es6",

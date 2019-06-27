@@ -1,15 +1,41 @@
-import { getAngularService } from '../../helpers/migration';
+
+import { UnityUtil } from '../../globals/unity-util';
+import { getState } from '../../helpers/migration';
+import { selectMemory } from '../../modules/viewer';
 import { MultiSelect } from './multiSelect';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_PIN_MODE } from '../../constants/viewer';
+import { Viewer as ViewerInstance } from '../../globals/viewer';
 
 export class ViewerService {
 	private viewerInstance = null;
 
 	private mode = VIEWER_PIN_MODE.NORMAL;
+	public pin: any;
+	public newPinId: string;
+	public currentModel: any;
 	public initialised: any;
+	public currentModelInit: any;
 
-	get viewerService() {
-		return getAngularService('ViewerService', this) as any;
+	private pinData: any;
+	private Viewer: any;
+	private model: string;
+	private account: string;
+	private heliSpeed: number = 1;
+
+	private stats: boolean = false;
+	public helicopterSpeed = INITIAL_HELICOPTER_SPEED;
+
+	constructor() {
+		this.newPinId = 'newPinId';
+		this.pinData = null;
+
+		this.currentModel = {
+			model: null
+		};
+
+		this.pin = {
+			pinDropMode: false
+		};
 	}
 
 	get viewer() {
@@ -17,7 +43,14 @@ export class ViewerService {
 			return this.viewerInstance;
 		}
 
-		this.viewerInstance = this.viewerService.getViewer();
+		this.viewerInstance = new ViewerInstance({
+			name: 'viewer',
+			container: document.getElementById('viewer'),
+			onEvent: this.EventService.send,
+			onError: this.handleUnityError
+		});
+
+		this.viewer.setUnity();
 		return this.viewerInstance;
 	}
 
@@ -26,11 +59,11 @@ export class ViewerService {
 	}
 
 	public async isViewerReady() {
-		await this.viewerService.initialised.promise;
+		await this.initialised.promise;
 	}
 
 	public async isModelReady() {
-		await this.viewerService.isModelLoaded;
+		await this.isModelLoaded;
 	}
 
 	public async updateViewerSettings(settings) {
@@ -115,11 +148,11 @@ export class ViewerService {
 	}
 
 	public setPin(data) {
-		this.viewerService.pinData = data;
+		this.pinData = data;
 	}
 
 	public getPinData(): any {
-		return this.viewerService.pinData;
+		return this.pinData;
 	}
 
 	public async addPin(params) {
