@@ -17,14 +17,13 @@
 
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { differenceBy, isEmpty, omit, pick, map, groupBy } from 'lodash';
-
+import * as filesize from 'filesize';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
-import * as filesize from 'filesize';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
 import { prepareIssue } from '../../helpers/issues';
 import { prepareComments, prepareComment, createAttachResourceComments,
-		createRemoveResourceComment } from '../../helpers/comments';
+	createRemoveResourceComment } from '../../helpers/comments';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
 import { PRIORITIES, STATUSES, DEFAULT_PROPERTIES } from '../../constants/issues';
@@ -45,6 +44,7 @@ import { IssuesTypes, IssuesActions } from './issues.redux';
 import { NEW_PIN_ID } from '../../constants/viewer';
 import { selectTopicTypes, selectCurrentModel } from '../model';
 import { prepareResources, prepareResource } from '../../helpers/resources';
+import { EXTENSION_RE } from '../../constants/resources';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -560,9 +560,9 @@ const onResourcesCreated = (resources) => {
 	if (!resources.length) {
 		return;
 	}
-
-	const teamspace = selectCurrentTeamspace(getState());
-	const model = selectCurrentModel(getState());
+	const currentState = getState();
+	const teamspace = selectCurrentTeamspace(currentState);
+	const model = selectCurrentModel(currentState);
 	const issueId =  resources[0].issueIds[0];
 	dispatch(IssuesActions.attachResourcesSuccess(prepareResources(teamspace, model, resources), issueId));
 };
@@ -708,16 +708,15 @@ export function* removeResource({ resource }) {
 }
 
 export function* attachFileResources({ files }) {
-	const names =  files.map((f) => f.name);
-	files = files.map((f) => f.file);
+	const names =  files.map((file) => file.name);
+	files = files.map((file) => file.file);
 
-	const extensionRe = /\.(\w+)$/;
-	const timeStamp = +new Date();
+	const timeStamp = Date.now();
 
 	const tempResources = files.map((f, i) => (
 		{
 			_id: timeStamp + i,
-			name: names[i] + (f.name.match(extensionRe) || ['', ''])[0].toLowerCase(),
+			name: names[i] + (f.name.match(EXTENSION_RE) || ['', ''])[0].toLowerCase(),
 			uploading: true,
 			progress: 0,
 			size: 0,
@@ -725,7 +724,7 @@ export function* attachFileResources({ files }) {
 		})
 		);
 
-	const rids = tempResources.map((r) => r._id);
+	const resourceIds = tempResources.map((resource) => resource._id);
 	const teamspace = yield select(selectCurrentTeamspace);
 	const issueId = (yield select(selectActiveIssueDetails))._id;
 
@@ -743,16 +742,16 @@ export function* attachFileResources({ files }) {
 				}
 				));
 
-			dispatch(IssuesActions.updateResourcesSuccess(rids, updates, issueId));
+			dispatch(IssuesActions.updateResourcesSuccess(resourceIds, updates, issueId));
 		});
 
 		const resources = prepareResources(teamspace, model, data, { uploading: false});
 
-		yield put(IssuesActions.updateResourcesSuccess(rids, resources, issueId));
+		yield put(IssuesActions.updateResourcesSuccess(resourceIds, resources, issueId));
 		yield put(IssuesActions.createCommentsSuccess(createAttachResourceComments(username, data), issueId));
 	} catch (error) {
-		for (let i = 0; i < rids.length; ++i) {
-			yield put(IssuesActions.removeResourceSuccess({_id: rids[i]}, issueId));
+		for (let i = 0; i < resourceIds.length; ++i) {
+			yield put(IssuesActions.removeResourceSuccess({_id: resourceIds[i]}, issueId));
 		}
 		yield put(DialogActions.showEndpointErrorDialog('attach', 'resource', error));
 	}
@@ -762,9 +761,9 @@ export function* attachLinkResources({ links }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const issueId = (yield select(selectActiveIssueDetails))._id;
-		const model  = yield select(selectCurrentModel);
-		const names =  links.map((f) => f.name);
-		const urls = links.map((f) => f.link);
+		const model = yield select(selectCurrentModel);
+		const names = links.map((link) => link.name);
+		const urls = links.map((link) => link.link);
 		const username = (yield select(selectCurrentUser)).username;
 
 		const {data} = yield API.attachLinkResources(teamspace, model, issueId, names, urls);

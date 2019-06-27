@@ -15,17 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import * as React from 'react';
-import { TextField, Button, Grid } from '@material-ui/core';
-import { Formik, Form, FieldArray, Field } from 'formik';
-import { DialogButtons } from './attachResourcesDialogButtons';
-import { StyledFormControl,
-	FieldsRow } from '../../../viewer/components/risks/components/riskDetails/riskDetails.styles';
-import { ResourceListLinkItem, ResourcesListContainer,
+import { FieldArray } from 'formik';
+import { ResourcesListContainer,
 	AddLinkContainer, ResourcesListScroller } from './attachResourcesDialog.styles';
-import { RemoveButton } from '../resources.component';
-import { get } from 'lodash';
-import * as Yup from 'yup';
 import { LabelButton } from '../../../viewer/components/labelButton/labelButton.styles';
+import { LinkEntry } from './attachResourceLinkEntry.component';
 
 interface IProps {
 	links: any[];
@@ -40,69 +34,33 @@ interface IState {
 	urls: IResourceUrl[];
 }
 
-const schema = Yup.object().shape({
-	});
-
-const LinkEntry = ({onClickRemove, index }) => {
-	const nameFieldName = `links.${index}.name`;
-	const linkFieldName = `links.${index}.link`;
-
-	return (
-	<FieldsRow container justify="space-between" flex={0.5}>
-		<StyledFormControl>
-			<Field name={nameFieldName} render={({ field, form }) => (
-				<TextField {...field}
-					placeholder="3d Repo"
-					fullWidth
-					error={Boolean(get(form.errors, nameFieldName))}
-					helperText={get(form.errors, nameFieldName)}
-				/>
-			)} />
-		</StyledFormControl>
-		<StyledFormControl>
-			<ResourceListLinkItem>
-				<Field name={linkFieldName} render={({ field, form }) => (
-					<TextField {...field}
-						placeholder="https://3drepo.com/"
-						fullWidth
-						error={Boolean(get(form.errors, linkFieldName))}
-						helperText={get(form.errors, linkFieldName)}
-					/>
-				)} />
-				<RemoveButton onClick={onClickRemove}/>
-			</ResourceListLinkItem>
-		</StyledFormControl>
-	</FieldsRow>
-	);
-};
-
 export class AttachResourceUrls extends React.PureComponent<IProps, IState> {
 	public render() {
 		const { links } = this.props;
 
 		return (
-				<FieldArray
-				name="links"
-				render={(arrayHelpers) => (
-					<div>
-						<ResourcesListScroller>
-							<ResourcesListContainer>
-							{(links && links.length > 0) && (
-								links.map((link, index) => (
-									<LinkEntry key={index}
-										index={index}
-										onClickRemove={() => arrayHelpers.remove(index)}
-									/>
-								))
-							)}
-							</ResourcesListContainer>
-						</ResourcesListScroller>
-						<AddLinkContainer>
-							<LabelButton onClick={() => arrayHelpers.insert(0, {name: '', link: ''})}>Add link</LabelButton>
-						</AddLinkContainer>
-					</div>
-				)}
-				/>
+			<FieldArray
+			name="links"
+			render={(arrayHelpers) => (
+				<div>
+					<ResourcesListScroller>
+						<ResourcesListContainer>
+						{(links && links.length > 0) && (
+							links.map((link, index) => (
+								<LinkEntry key={index}
+									index={index}
+									onClickRemove={() => arrayHelpers.remove(index)}
+								/>
+							))
+						)}
+						</ResourcesListContainer>
+					</ResourcesListScroller>
+					<AddLinkContainer>
+						<LabelButton onClick={() => arrayHelpers.insert(0, {name: '', link: ''})}>Add link</LabelButton>
+					</AddLinkContainer>
+				</div>
+			)}
+			/>
 		);
 	}
 }

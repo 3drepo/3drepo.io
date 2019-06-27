@@ -196,12 +196,13 @@ const attachResourcesSuccess = (state = INITIAL_STATE, { resources, issueId }) =
 };
 
 const updateResourcesSuccess = (state = INITIAL_STATE, { resourcesIds, updates, issueId }) => {
-	const resources = state.issuesMap[issueId].resources.map((r) => {
-		const updateIndex = resourcesIds.indexOf(r._id);
+	const resources = state.issuesMap[issueId].resources.map((resource) => {
+		const updateIndex = resourcesIds.indexOf(resource._id);
+
 		if (updateIndex >= 0) {
-			return {...r, ...updates[updateIndex]};
+			return {...resource, ...updates[updateIndex]};
 		} else {
-		return r;
+			return resource;
 		}
 	});
 

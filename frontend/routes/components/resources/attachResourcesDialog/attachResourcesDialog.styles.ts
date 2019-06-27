@@ -15,11 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DialogContent, Divider, InputAdornment, Typography } from '@material-ui/core';
+import { DialogContent, InputAdornment } from '@material-ui/core';
 import styled from 'styled-components';
 import Dropzone from 'react-dropzone';
-import * as React from 'react';
 import { COLOR } from '../../../../styles';
+
+const dropZoneColors = (normalColour, dragColour, errorColour) => (props: any) =>
+	props.error ? errorColour :
+	props.isDragActive ? dragColour :  normalColour ;
 
 export const Container = styled(DialogContent)`
 	width: 500px;
@@ -58,7 +61,7 @@ export const ResourceListItem = styled.div`
 		flex-grow: 1;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		padding-top:4px;
+		padding-top: 4px;
 	}
 `;
 
@@ -73,29 +76,14 @@ export const AddLinkContainer = styled.div`
 	margin-top: 20px;
 `;
 
-export const ExtensionAdornment =  styled((props) => {
-	return React.createElement(InputAdornment,  {...props, position: 'end'});
-})`
-	p {
-		font-weight: bold;
-		font-family: courier;
-	}
-`;
-
 export const DropzoneContent = styled.div`
 	cursor: ${(props: any) => props.error ? 'default' : 'pointer' };
-	background-color: ${(props: any) =>
-		props.error ? COLOR.WARNING_LIGHT :
-		props.isDragActive ? COLOR.PRIMARY_MAIN_6 : 'transparent' };
+	background-color: ${dropZoneColors('transparent', COLOR.PRIMARY_MAIN_6, COLOR.WARNING_LIGHT)};
 	position: relative;
 	padding: 10px;
 	border-width: 3px;
-	border-color:  ${(props: any) =>
-		props.error ? COLOR.NEGATIVE_87 :
-		!props.isDragActive ? COLOR.BLACK_50 :  COLOR.PRIMARY_MAIN_80 } ;
-	color:  ${(props: any) =>
-		props.error ? COLOR.NEGATIVE :
-		!props.isDragActive ? COLOR.BLACK_60 :  COLOR.PRIMARY_MAIN_80} ;
+	border-color: ${dropZoneColors(COLOR.BLACK_50, COLOR.PRIMARY_MAIN_80, COLOR.NEGATIVE_87)};
+	color: ${dropZoneColors(COLOR.BLACK_60, COLOR.PRIMARY_MAIN_80, COLOR.NEGATIVE)};
 	border-style: dashed;
 	border-radius: 5px;
 	text-align: center;

@@ -15,15 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import * as React from 'react';
-import {ResourcesDropzone} from './attachResourcesDropzone';
-import { FieldArray, Field } from 'formik';
-import { TextField } from '@material-ui/core';
-import { RemoveButton } from '../resources.component';
-import { StyledFormControl,
-		FieldsRow } from '../../../viewer/components/risks/components/riskDetails/riskDetails.styles';
-import { ResourcesListContainer, ResourceListItem, ResourcesListScroller } from './attachResourcesDialog.styles';
 import * as filesize from 'filesize';
-import { get } from 'lodash';
+import { FieldArray, Field } from 'formik';
+import { ResourcesDropzone } from './attachResourcesDropzone';
+import { ResourcesListContainer, ResourcesListScroller } from './attachResourcesDialog.styles';
+import { EXTENSION_RE } from '../../../../constants/resources';
+import { FileEntry } from './attachResourceFileEntry.component';
 
 interface IProps {
 	files: any[];
@@ -32,38 +29,9 @@ interface IProps {
 	validateUploadLimit: (files: []) => boolean;
 }
 
-const extensionRe = /\.(\w+)$/;
-
-const FileEntry = ({onClickRemove, index, entry}) => {
-	const nameFieldName = `files.${index}.name`;
-	const fileFieldName = `files.${index}.file`;
-
-	return (
-		<FieldsRow container justify="space-between" flex={0.5}>
-			<StyledFormControl>
-				<Field name={nameFieldName} render={({ field, form }) => (
-					<TextField {...field}
-						fullWidth
-						error={Boolean(get(form.errors, nameFieldName))}
-						helperText={get(form.errors, nameFieldName)}
-					/>
-				)} />
-
-			</StyledFormControl>
-			<StyledFormControl>
-				<Field type="hidden" name={fileFieldName} />
-				<ResourceListItem>
-					<span> {entry.file.name} </span>
-					<RemoveButton onClick={onClickRemove}/>
-				</ResourceListItem>
-			</StyledFormControl>
-		</FieldsRow>
-	);
-};
-
 export class AttachResourceFiles extends React.PureComponent<IProps, any> {
 	public insertFile = (fieldArray, file) => {
-		const matches = file.name.match(extensionRe);
+		const matches = file.name.match(EXTENSION_RE);
 		const ext = matches ? matches[0] : '';
 		const name = matches ? file.name.slice(0, matches.index) : file.name;
 

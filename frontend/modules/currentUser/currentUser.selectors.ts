@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { number } from 'prop-types';
+import { isNil } from 'lodash';
 
 const selectCurrentUserDomain = (state) => Object.assign({}, state.currentUser);
 
@@ -59,5 +59,5 @@ export const selectSpaceInfo = createSelector(
 
 export const selectSpaceLeft = createSelector(
 	selectSpaceInfo, (state) =>
-		(state.spaceLimit === null || state.spaceLimit === undefined ? Infinity : state.spaceLimit) - state.spaceUsed
+		(isNil(state.spaceLimit) ? Infinity : state.spaceLimit) - state.spaceUsed
 );

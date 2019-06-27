@@ -79,22 +79,13 @@ export const UploadSizeLabel = styled.div`
 `;
 
 const Icon = (icon) => styled(icon).attrs({
+	color: 'primary',
 	classes: {
-		colorSecondary: 'secondary',
-		colorPrimary: 'primary',
-		colorDisabled: 'disabled'
+		colorPrimary: 'primary'
 	}
 })`
 	&& {
-		&.secondary {
-			color: ${COLOR.BLACK_54};
-		}
-
 		&.primary {
-			color: ${COLOR.BLACK_54};
-		}
-
-		&.disabled {
 			color: ${COLOR.BLACK_54};
 		}
 	}

@@ -55,9 +55,9 @@ const convertActionCommentToText = (comment, topicTypes) => {
 		switch (comment.action.property) {
 			case 'resource' :
 				if (comment.action.to) {
-					text = 'Resource ' + comment.action.to + ' attached by ' + comment.owner;
+					text = `Resource ${comment.action.to} attached by ${comment.owner}`;
 				} else {
-					text = 'Resource ' + comment.action.from + ' removed by ' + comment.owner;
+					text = `Resource ${comment.action.from} removed by ${comment.owner}`;
 				}
 				break;
 			case 'associated_activity':

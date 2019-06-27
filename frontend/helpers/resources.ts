@@ -15,16 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { sortByDate } from './sorting';
 import * as filesize from 'filesize';
 import * as API from '../services/api';
-
-const extensionRe = /\.(\w+)$/;
+import { sortByDate } from './sorting';
+import { EXTENSION_RE } from '../constants/resources';
 
 export const prepareResource = (teamspace, modelId, resource, propertyOverride = {}) => {
 	if (!resource.link) {
 		resource.link = API.getAPIUrl(`${teamspace}/${modelId}/resources/${resource._id}`);
-		resource.type = (resource.name.match(extensionRe) || ['', ''])[1].toLowerCase();
+		resource.type = (resource.name.match(EXTENSION_RE) || ['', ''])[1].toLowerCase();
 		resource.size = filesize(resource.size, {round: 0}).replace(' ', '');
 	} else {
 		resource.type = 'http';

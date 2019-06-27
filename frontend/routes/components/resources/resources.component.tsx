@@ -16,13 +16,12 @@
  */
 
 import * as React from 'react';
+import { LinearProgress } from '@material-ui/core';
 import { RemoveIcon, IconButton,
-		ResourceItemContainer, ResourceLink, PhotoIcon, LinkIcon,
-		DocumentIcon, ResourceLabel, UploadSizeLabel, ResourcesContainer } from './resources.styles';
-
+	ResourceItemContainer, ResourceLink, PhotoIcon, LinkIcon,
+	DocumentIcon, ResourceLabel, UploadSizeLabel, ResourcesContainer } from './resources.styles';
 import { LabelButton } from '../../viewer/components/labelButton/labelButton.styles';
 import AttachResourcesDialog from './attachResourcesDialog/attachResourcesDialog.container';
-import { LinearProgress } from '@material-ui/core';
 import { FieldsRow, StyledFormControl } from '../../viewer/components/risks/components/riskDetails/riskDetails.styles';
 import { FieldLabel } from '../textField/textField.styles';
 
@@ -60,10 +59,10 @@ const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'pcx'];
 
 const ResourceIcon = ({type}) =>
 	(type === 'http') ?
-		(<LinkIcon color="primary"/>) :
+		(<LinkIcon />) :
 	(imageExtensions.indexOf(type) >= 0) ?
-		(<PhotoIcon color="primary"/>) :
-		(<DocumentIcon scolor="primary"/>)
+		(<PhotoIcon />) :
+		(<DocumentIcon />)
 ;
 
 const ResourceAvailable = ({link, type, name, size, onClickRemove}) => (
@@ -118,15 +117,15 @@ export class Resources extends React.PureComponent<IProps, IState> {
 
 		return (
 			<ResourcesContainer>
-				<FieldLabel >Resources</FieldLabel>
+				<FieldLabel>Resources</FieldLabel>
 				{resources.map((r) => (<ResourceItem key={r._id} {...r} onClickRemove={this.onClickRemove(r)}/>))}
 				<FieldsRow container justify="space-between" flex={0.5}>
-						<StyledFormControl/>
-						<StyledFormControl>
-							<span>
-								<LabelButton onClick={this.onClickAttach}>Attach resource</LabelButton>
-							</span>
-						</StyledFormControl>
+					<StyledFormControl/>
+					<StyledFormControl>
+						<span>
+							<LabelButton onClick={this.onClickAttach}>Attach resource</LabelButton>
+						</span>
+					</StyledFormControl>
 				</FieldsRow>
 			</ResourcesContainer>
 		);

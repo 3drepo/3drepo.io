@@ -156,7 +156,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public renderDetailsForm = () => {
 		const {issue, onRemoveResource, showDialog, topicTypes,
-				currentUser, myJob, attachFileResources, attachLinkResources} = this.props;
+			currentUser, myJob, attachFileResources, attachLinkResources} = this.props;
 
 		return (
 			<IssueDetailsForm

@@ -107,24 +107,24 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 				</DialogTabs>
 
 				<Formik
-				validationSchema={schema}
-				initialValues={{ files: [], links: [] }}
-				onSubmit={this.onSubmit}
-				render={({ values }) => (
-					<Form>
-						{
-							selectedTab === 0 &&
-								<AttachResourceFiles
-									files={values.files}
-									validateQuota={this.validateQuota}
-									validateUploadLimit={this.validateUploadLimit}
-									uploadLimit={clientConfigService.resourceUploadSizeLimit}
-								/>
-						}
-						{selectedTab === 1 && <AttachResourceUrls links={values.links}/>}
-							<DialogButtons onClickCancel={this.onCancel} validateQuota={this.validateQuota}/>
-					</Form>
-					)}
+					validationSchema={schema}
+					initialValues={{ files: [], links: [] }}
+					onSubmit={this.onSubmit}
+					render={({ values }) => (
+						<Form>
+							{
+								selectedTab === 0 &&
+									<AttachResourceFiles
+										files={values.files}
+										validateQuota={this.validateQuota}
+										validateUploadLimit={this.validateUploadLimit}
+										uploadLimit={clientConfigService.resourceUploadSizeLimit}
+									/>
+							}
+							{selectedTab === 1 && <AttachResourceUrls links={values.links}/>}
+								<DialogButtons onClickCancel={this.onCancel} validateQuota={this.validateQuota}/>
+						</Form>
+						)}
 				/>
 			</Container>
 			);

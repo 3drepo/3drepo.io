@@ -14,14 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import * as React from 'react';
-import {
-		NeutralActionButton,
-		VisualSettingsButtonsContainer
-	} from '../../topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 import { Field } from 'formik';
 import { Button } from '@material-ui/core';
+import {
+	NeutralActionButton,
+	VisualSettingsButtonsContainer
+} from '../../topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 
 export const DialogButtons = ({onClickCancel, validateQuota}) => {
 	return (
@@ -37,14 +36,14 @@ export const DialogButtons = ({onClickCancel, validateQuota}) => {
 			</NeutralActionButton>
 
 			<Field render={ ({ form }) => (
-					<Button
-						color="secondary"
-						variant="raised"
-						type="submit"
-						disabled={!form.isValid || form.isValidating || !validateQuota(form.values.files)}
-						>
-						Save
-					</Button>
+				<Button
+					color="secondary"
+					variant="raised"
+					type="submit"
+					disabled={!form.isValid || form.isValidating || !validateQuota(form.values.files)}
+				>
+					Save
+				</Button>
 			)} />
 		</VisualSettingsButtonsContainer>
 		);

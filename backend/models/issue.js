@@ -958,7 +958,7 @@ issue.attachResourceFiles = async function(account, model, issueId, username, se
 		throw responseCodes.SIZE_LIMIT_PAY;
 	}
 
-	if (!files.map(f => f.size).every(v => v.size < config.resourceUploadSizeLimit)) {
+	if (!files.every(f => f.size < config.resourceUploadSizeLimit)) {
 		throw responseCodes.SIZE_LIMIT;
 	}
 
