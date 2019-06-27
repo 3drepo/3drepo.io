@@ -16,8 +16,8 @@
  */
 
 import styled from 'styled-components';
-import { COLOR } from '../../../../styles/colors';
-import { FONT_WEIGHT } from '../../../../styles/fonts';
+import { COLOR } from '../../../styles/colors';
+import { FONT_WEIGHT } from '../../../styles/fonts';
 
 export const Container = styled.div``;
 

@@ -15,8 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { withRouter } from 'react-router-dom';
+import * as React from 'react';
+import { Container, Content, Header, Logo, Title } from './staticPageRoute.styles';
 
-import { StaticPageViewer } from './staticPageViewer.component';
+interface IProps {
+	title: string;
+	fileName: string;
+	isPending: boolean;
+	templates: object;
+	loadTemplate: (fileName) => void;
+}
 
-export default withRouter(StaticPageViewer);
+export class PageTemplate extends React.PureComponent<IProps, any> {
+	public async componentDidMount() {
+		this.props.loadTemplate(this.props.fileName);
+	}
+
+	public render() {
+		const { templates, fileName } = this.props;
+		return (
+			<Container>
+				<Header>
+					<Title>{this.props.title}</Title>
+					<Logo src="images/3drepo-logo-white.png" alt="3D Repo" />
+				</Header>
+				<Content dangerouslySetInnerHTML={{ __html: templates[fileName] }} />
+			</Container>
+		);
+	}
+}

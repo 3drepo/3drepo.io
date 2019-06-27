@@ -16,28 +16,27 @@
  */
 
 import * as React from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 
-import { DialogContainer } from '../components/dialogContainer';
-import { SnackbarContainer } from '../components/snackbarContainer';
 import { clientConfigService } from '../../services/clientConfig';
 import { isStaticRoute, STATIC_ROUTES } from '../../services/staticPages';
-import { LiveChat } from '../components/liveChat';
 import { analyticsService } from '../../services/analytics';
-import { ViewerGui } from '../viewerGui';
-
-import { ViewerCanvas } from '../viewerCanvas';
-import { Dashboard } from '../dashboard';
-import { AppContainer } from './app.styles';
+import { DialogContainer } from '../components/dialogContainer';
+import { SnackbarContainer } from '../components/snackbarContainer';
+import { ROUTES, PUBLIC_ROUTES } from '../../constants/routes';
 import { PrivateRoute } from '../components/privateRoute';
+import StaticPageRoute from '../components/staticPageRoute/staticPageRoute.container';
+import { LiveChat } from '../components/liveChat';
+import { ViewerCanvas } from '../viewerCanvas';
+import { ViewerGui } from '../viewerGui';
+import { Dashboard } from '../dashboard';
 import { Login } from '../login';
-import PageTemplate from '../staticPageViewer/components/pageTemplate/pageTemplate.container';
 import { SignUp } from '../signUp';
 import { PasswordForgot } from '../passwordForgot';
 import { PasswordChange } from '../passwordChange';
 import RegisterRequest from '../registerRequest/registerRequest.container';
 import { RegisterVerify } from '../registerVerify';
-import { ROUTES, PUBLIC_ROUTES } from '../../constants/routes';
+import { AppContainer } from './app.styles';
 
 interface IProps {
 	location: any;
@@ -193,7 +192,7 @@ export class App extends React.PureComponent<IProps, IState> {
 	)
 
 	public renderStaticRoutes = () => STATIC_ROUTES.map(({ title, path, fileName }) => (
-		<Route key={path} path={path} render={() => <PageTemplate title={title} fileName={fileName} />} />
+		<Route key={path} path={path} render={() => <StaticPageRoute title={title} fileName={fileName} />} />
 	))
 
 	public render() {

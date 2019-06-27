@@ -15,32 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Container, Content, Header, Logo, Title } from './pageTemplate.styles';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { connect } from 'react-redux';
 
-interface IProps {
-	title: string;
-	fileName: string;
-	isPending: boolean;
-	templates: object;
-	loadTemplate: (fileName) => void;
-}
+import { PageTemplate } from './staticPageRoute.component';
+import {
+	StaticPagesActions,
+	selectStaticPagesTemplates,
+	selectStaticPagesIsPending
+} from '../../../modules/staticPages';
 
-export class PageTemplate extends React.PureComponent<IProps, any> {
-	public async componentDidMount() {
-		this.props.loadTemplate(this.props.fileName);
-	}
+const mapStateToProps = createStructuredSelector({
+	templates: selectStaticPagesTemplates,
+	isPending: selectStaticPagesIsPending
+});
 
-	public render() {
-		const { templates, fileName } = this.props;
-		return (
-			<Container>
-				<Header>
-					<Title>{this.props.title}</Title>
-					<Logo src="images/3drepo-logo-white.png" alt="3D Repo" />
-				</Header>
-				<Content dangerouslySetInnerHTML={{ __html: templates[fileName] }} />
-			</Container>
-		);
-	}
-}
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	loadTemplate: StaticPagesActions.loadTemplate
+}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(PageTemplate);
