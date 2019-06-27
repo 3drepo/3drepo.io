@@ -27,10 +27,10 @@ export class ClientConfigService {
 	public liveChatLicense;
 	public tagRegExp;
 	public uploadSizeLimit;
+	public apiUrls;
 	private chatHost;
 	private chatPath;
 	private chatReconnectionAttempts;
-	private apiUrls;
 	private apiAlgorithm;
 	private MAP_API;
 	private C;

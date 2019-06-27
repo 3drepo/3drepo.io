@@ -5,6 +5,7 @@ import { selectMemory } from '../../modules/viewer';
 import { MultiSelect } from './multiSelect';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_PIN_MODE } from '../../constants/viewer';
 import { Viewer as ViewerInstance } from '../../globals/viewer';
+import { clientConfigService } from '../clientConfig';
 
 export class ViewerService {
 	private viewerInstance = null;
@@ -17,10 +18,8 @@ export class ViewerService {
 	public currentModelInit: any;
 
 	private pinData: any;
-	private Viewer: any;
 	private model: string;
 	private account: string;
-	private heliSpeed: number = 1;
 
 	private stats: boolean = false;
 	public helicopterSpeed = INITIAL_HELICOPTER_SPEED;
@@ -46,11 +45,10 @@ export class ViewerService {
 		this.viewerInstance = new ViewerInstance({
 			name: 'viewer',
 			container: document.getElementById('viewer'),
-			onEvent: this.EventService.send,
 			onError: this.handleUnityError
 		});
 
-		this.viewer.setUnity();
+		this.viewerInstance.setUnity();
 		return this.viewerInstance;
 	}
 
@@ -63,7 +61,7 @@ export class ViewerService {
 	}
 
 	public async isModelReady() {
-		await this.isModelLoaded;
+		await this.viewer.isModelLoaded();
 	}
 
 	public async updateViewerSettings(settings) {
@@ -83,6 +81,12 @@ export class ViewerService {
 	public getNumPlanes() {
 		if (this.viewer) {
 			return this.viewer.getNumPlanes();
+		}
+	}
+
+	public centreToPoint(params: any) {
+		if (this.viewer) {
+			this.viewer.centreToPoint(params);
 		}
 	}
 
@@ -118,6 +122,11 @@ export class ViewerService {
 		return this.viewer.showAll();
 	}
 
+	public removeUnsavedPin() {
+		this.removePin({ id: this.newPinId });
+		this.setPin({ data: null });
+	}
+
 	public async clearHighlights() {
 		await this.isViewerReady();
 		this.viewer.clearHighlights();
@@ -140,7 +149,7 @@ export class ViewerService {
 	 * Pins
 	 */
 	public setPinDropMode(on: boolean) {
-		this.viewerService.pin.pinDropMode = on;
+		this.pin.pinDropMode = on;
 
 		if (on) {
 			MultiSelect.toggleAreaSelect(false);
@@ -262,6 +271,25 @@ export class ViewerService {
 		);
 	}
 
+	public getNavMode() {
+		if (this.viewer) {
+			return this.viewer.currentNavMode;
+		}
+	}
+
+	public getMultiSelectMode() {
+		if (this.viewer) {
+			return this.viewer.multiSelectMode;
+		}
+		return false;
+	}
+
+	public setMultiSelectMode(value) {
+		if (this.viewer) {
+			this.viewer.setMultiSelectMode(value);
+		}
+	}
+
 	public async startAreaSelect() {
 		await this.isViewerReady();
 		this.viewer.startAreaSelect();
@@ -342,6 +370,199 @@ export class ViewerService {
 	public async switchObjectVisibility(teamspace, modelId, objectIds, visibility) {
 		await this.isViewerReady();
 		this.viewer.switchObjectVisibility(teamspace, modelId, objectIds, visibility);
+	}
+
+	public hideHiddenByDefaultObjects() {
+		this.initialised.promise.then(() => {
+			this.viewer.hideHiddenByDefaultObjects();
+		});
+	}
+
+	public showHiddenByDefaultObjects() {
+		this.initialised.promise.then(() => {
+			this.viewer.showHiddenByDefaultObjects();
+		});
+	}
+
+	public handleUnityError = (message: string, reload: boolean, isUnity: boolean) => {
+
+		let errorType = '3D Repo Error';
+
+		if (isUnity) {
+			errorType = 'Unity Error';
+		}
+
+		this.DialogService.html(errorType, message, true)
+			.then(() => {
+				if (reload) {
+					location.reload();
+				}
+			}, () => {
+				console.error('Unity errored and user canceled reload', message);
+			});
+
+	}
+
+	public reset() {
+		if (this.viewer) {
+			this.disableMeasure();
+			this.viewer.reset();
+		}
+	}
+
+	public unityInserted(): boolean {
+		if (this.viewer === undefined) {
+			return false;
+		} else {
+			return this.viewer.unityScriptInserted;
+		}
+	}
+
+	public getMemory() {
+		const MAX_MEMORY = 2130706432; // The maximum memory Unity can allocate
+		const assignedMemory = selectMemory(getState()) * 1024 * 1024; // Memory is in Mb.
+		return Math.min(assignedMemory, MAX_MEMORY);
+	}
+
+	public initViewer() {
+		console.debug('Initiating Viewer');
+		if (this.unityInserted() === true) {
+			return this.callInit();
+		} else if (this.viewer) {
+
+			return this.viewer.insertUnityLoader(this.getMemory())
+				.then(() => { this.callInit(); })
+				.catch((error) => {
+					console.error('Error inserting Unity script: ', error);
+				});
+		}
+	}
+
+	public callInit() {
+		return this.viewer.init({
+				getAPI: {
+					hostNames: clientConfigService.apiUrls.all
+				},
+				showAll: true
+			})
+			.catch((error) => {
+				console.error('Error creating Viewer Directive: ', error);
+			});
+	}
+
+	public async loadViewerModel(account, model, branch, revision) {
+		if (!account || !model) {
+			console.error('Account, model, branch or revision was not defined!', account, model, branch, revision);
+			return Promise.reject('Account, model, branch or revision was not defined!');
+		} else {
+			this.account = account;
+			this.model = model;
+			return this.viewer.loadModel(account, model, branch, revision)
+				.then(() => {
+					// Set the current model in the viewer
+					this.currentModel.model = model;
+					this.initialised.resolve();
+				})
+				.catch((error) => {
+					console.error('Error loading model: ', error);
+				});
+		}
+	}
+
+	public async zoomToHighlightedMeshes() {
+		await this.isViewerReady();
+		this.viewer.zoomToHighlightedMeshes();
+	}
+
+	public setShadows(type: string) {
+		switch (type) {
+			case 'soft':
+				this.viewer.enableSoftShadows();
+				break;
+			case 'hard':
+				this.viewer.enableHardShadows();
+				break;
+			case 'none':
+				this.viewer.disableShadows();
+				break;
+		}
+	}
+
+	public setStats(val: boolean = false) {
+		if (val !== this.stats) {
+			this.viewer.toggleStats();
+			this.stats = val;
+		}
+	}
+
+	public setNearPlane(nearplane: number) {
+		if (nearplane === undefined) { return; }
+		this.viewer.setDefaultNearPlane(nearplane);
+	}
+
+	public setFarPlaneSamplingPoints(farplaneSample: number) {
+		if (farplaneSample === undefined) { return; }
+		this.viewer.setFarPlaneSampleSize(farplaneSample);
+	}
+
+	public setFarPlaneAlgorithm(algorithm: string) {
+		switch (algorithm) {
+			case 'box':
+				this.viewer.useBoundingBoxFarPlaneAlgorithm();
+				break;
+			case 'sphere':
+				this.viewer.useBoundingSphereFarPlaneAlgorithm();
+				break;
+		}
+	}
+
+	public setShading(shading: string) {
+		switch (shading) {
+			case 'standard':
+				this.viewer.setRenderingQualityDefault();
+				break;
+			case 'architectural':
+				this.viewer.setRenderingQualityHigh();
+				break;
+		}
+	}
+
+	public setXray(xray: boolean) {
+		if (xray) {
+			this.viewer.setXRayHighlightOn();
+		} else {
+			this.viewer.setXRayHighlightOff();
+		}
+	}
+
+	public async resetMapSources(source) {
+		await this.isViewerReady();
+		this.viewer.resetMapSources(source);
+	}
+
+	public async addMapSource(source) {
+		await this.isViewerReady();
+		this.viewer.addMapSource(source);
+	}
+
+	public async removeMapSource(source) {
+		await this.isViewerReady();
+		this.viewer.removeMapSource(source);
+	}
+
+	public async mapInitialise(surveyPoints) {
+		await this.isViewerReady();
+		this.viewer.mapInitialise(surveyPoints);
+	}
+
+	public async mapStart() {
+		await this.isViewerReady();
+		this.viewer.mapStart();
+	}
+
+	public async mapStop() {
+		await this.isViewerReady();
+		this.viewer.mapStop();
 	}
 }
 
