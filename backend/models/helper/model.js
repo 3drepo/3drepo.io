@@ -163,24 +163,24 @@ function importFail(account, model, sharedSpacePath, user, errCode, errMsg) {
 		if (!errMsg) {
 			errMsg = setting.errorReason.message;
 		}
-
-		const attachments = [];
-		if(setting.corID && sharedSpacePath) {
-			const path = require("path");
-			const sharedDir = path.join(sharedSpacePath, setting.corID);
-			const files = fs.readdirSync(sharedDir);
-			files.forEach((file) => {
-				if(file.endsWith(".log")) {
-					attachments.push({
-						filename: file,
-						path: path.join(sharedDir, file)
-					});
-				}
-			});
-
-		}
-
 		if (!translatedError.userErr) {
+
+			const attachments = [];
+			if(setting.corID && sharedSpacePath) {
+				const path = require("path");
+				const sharedDir = path.join(sharedSpacePath, setting.corID);
+				const files = fs.readdirSync(sharedDir);
+				files.forEach((file) => {
+					if(file.endsWith(".log")) {
+						attachments.push({
+							filename: file,
+							path: path.join(sharedDir, file)
+						});
+					}
+				});
+
+			}
+
 			Mailer.sendImportError({
 				account,
 				model,
