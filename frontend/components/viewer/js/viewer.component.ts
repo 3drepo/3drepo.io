@@ -63,7 +63,7 @@ class ViewerController implements ng.IController {
 		this.pointerEvents = 'auto';
 		this.measureMode = false;
 
-		this.viewer = this.ViewerService.getViewer();
+/* 		this.viewer = this.ViewerService.getViewer(); */
 		this.watchers();
 
 		subscribe(this, {
@@ -80,9 +80,9 @@ class ViewerController implements ng.IController {
 	public $onDestroy() {
 		this.$element.on('$destroy', () => {
 			this.cancelPinWatcher();
-			this.ViewerService.diffToolDisableAndClear();
+/* 			this.ViewerService.diffToolDisableAndClear();
 			this.viewer.reset();
-			this.viewer.destroy();
+			this.viewer.destroy(); */
 		});
 	}
 

@@ -25,6 +25,7 @@ import { reducer as measureReducer } from './measure/measure.redux';
 import { reducer as issuesReducer } from './issues/issues.redux';
 import { reducer as compareReducer } from './compare/compare.redux';
 import { reducer as chatReducer } from './chat/chat.redux';
+import { reducer as viewerGuiReducer } from './viewerGui/viewerGui.redux';
 // <-- IMPORT MODULE REDUCER -->
 
 export default function createReducer(history) {
@@ -53,6 +54,7 @@ export default function createReducer(history) {
 		measure: measureReducer,
 		issues: issuesReducer,
 		compare: compareReducer,
-		chat: chatReducer// <-- INJECT MODULE REDUCER -->
+		chat: chatReducer,
+		viewerGui: viewerGuiReducer// <-- INJECT MODULE REDUCER -->
 	});
 }

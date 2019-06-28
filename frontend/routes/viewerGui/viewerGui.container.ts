@@ -20,12 +20,26 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from 'react-redux';
 
 import { selectQueryParams } from '../../modules/router/router.selectors';
+import { selectCurrentUser } from '../../modules/currentUser';
 import { ViewerGui } from './viewerGui.component';
+import { TreeActions } from '../../modules/tree';
+import { ViewerActions } from '../../modules/viewer';
+import { selectSettings, selectIsPending } from '../../modules/model';
+import { ViewerGuiActions } from '../../modules/viewerGui';
 
 const mapStateToProps = createStructuredSelector({
-	queryParams: selectQueryParams
+	queryParams: selectQueryParams,
+	currentUser: selectCurrentUser,
+	modelSettings: selectSettings,
+	isModelPending: selectIsPending
 });
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	fetchData: ViewerGuiActions.fetchData,
+	startListenOnSelections: TreeActions.startListenOnSelections,
+	stopListenOnSelections: TreeActions.stopListenOnSelections,
+	startListenOnModelLoaded: ViewerActions.startListenOnModelLoaded,
+	stopListenOnModelLoaded: ViewerActions.stopListenOnModelLoaded,
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(ViewerGui);

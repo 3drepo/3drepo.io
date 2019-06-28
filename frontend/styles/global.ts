@@ -96,26 +96,6 @@ injectGlobal`
 		background: #cfcdcc;
 	}
 
-	.close-icon {
-		margin-left: 13px;
-			margin-top: 13px;
-			color: white;
-	}
-
-	.focus-button {
-		height: 50px;
-		width: 50px;
-		margin: 15px !important;
-		position: absolute;
-		z-index: 1000000000000;
-		border-radius: 30px;
-		background: rgb(6,86,60);
-		top: 0;
-		right: 0;
-		cursor: pointer;
-		display: none;
-	}
-
 	.connection {
 		position: absolute;
 		left: 0;
@@ -137,86 +117,52 @@ injectGlobal`
 		background-color: #4AD36B;
 	}
 
-	/* Material ui overrides */
-
-	.threeDRepo md-chip-template   {
-		font-weight: 400;
-		font-size: 13px;
+	#viewer .loadingViewer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 36px;
+    text-align: center;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
 	}
 
-	.threeDRepo  .md-chips.md-removable md-chip .md-chip-content{
-		padding-right: 8px;
-	}
-
-	.threeDRepo .md-chips md-chip .md-chip-remove md-icon {
-		min-width: 0px;
-		min-height: 0px;
-		width:14px;
-		height:14px;
-		color: #eaeaea;
-	}
-
-	.threeDRepo .md-chips md-chip .md-chip-remove {
-		background: rgba(0, 0, 0, 0.87);
-		width: 16px;
-		height: 16px;
-		border-radius: 8px;
-		opacity: .4;
-	}
-
-	.threeDRepo .md-chips md-chip .md-chip-remove:hover {
-		opacity: .54;
-	}
-
-	.threeDRepo .md-chips md-chip .md-chip-remove-container {
-		margin:9px;
-		line-height: 0px;
+	#viewer .loadingViewerText {
+		text-shadow: 1px 1px ${COLOR.BLACK_30};
+		color: ${COLOR.WHITE};
+		padding-top: 40vh;
 	}
 
 
-	.threeDRepo  md-menu-item ng-include>.md-button {
-			text-align: left;
-			display: inline-block;
-			border-radius: 0;
-			margin: auto 0;
-			font-size: 15px;
-			text-transform: none;
-			font-weight: 400;
-			height: 100%;
-			padding-left: 16px;
-			padding-right: 16px;
-		width: 100%;
+	#viewer .unityProgressBar {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 3px;
+		border-bottom: solid 1px #bd0000;
+		background-color: ${COLOR.RED};
 	}
 
-	.threeDRepo md-menu-item> ng-include {
-			width: 100%;
-			margin: auto 0;
-		padding: 0px;
+	#viewer #unityViewer {
+		position : absolute;
+		height: 100% !important;
+		width: 100% !important;
+		overflow: hidden;
+		background: ${COLOR.TRANSPARENT} !important;
 	}
 
-	.threeDRepo md-menu-item ng-include>.md-button md-icon {
-			margin: auto 16px auto 0;
+	.emscripten {
+		background: ${COLOR.TRANSPARENT} !important;
 	}
 
-
-	.threeDRepo md-menu-item ng-include p {
-			display: inline-block;
-			margin: auto;
-			margin-top: auto;
-			margin-right: auto;
-			margin-bottom: auto;
-			margin-left: auto;
+	div#unityViewer.emscripten canvas {
+		background: ${COLOR.TRANSPARENT} !important;
 	}
 
-	.threeDRepo md-menu-bar {
-		padding: 0px;
-	}
-
-	.threeDRepo md-menu-bar md-menu.md-open> .md-button {
-		background-color: #3171B6;
-	}
-
-	.threeDRepo md-menu-item p {
-		white-space: pre-wrap;
+	#viewer #unityViewer canvas {
+		height: 100% !important;
+		width: 100% !important;
+		background: ${COLOR.TRANSPARENT} !important;
 	}
 `;

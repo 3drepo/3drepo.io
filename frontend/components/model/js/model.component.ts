@@ -117,10 +117,10 @@ class ModelController implements ng.IController {
 			this.ViewerService.off(VIEWER_EVENTS.CHANGE_PIN_COLOUR);
 			this.ViewerService.off(VIEWER_EVENTS.SET_CAMERA);
 			this.ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED_PIN_MODE);
-			dispatch(TreeActions.stopListenOnSelections());
-			dispatch(ViewerActions.stopListenOnModelLoaded());
+/* 			dispatch(TreeActions.stopListenOnSelections());
+			dispatch(ViewerActions.stopListenOnModelLoaded()); */
 			this.resetPanelsStates();
-			dispatch(BimActions.setIsActive(false));
+/* 			dispatch(BimActions.setIsActive(false)); */
 		});
 
 		this.$timeout(() => {
@@ -130,18 +130,18 @@ class ModelController implements ng.IController {
 			);
 		});
 
-		const username = selectCurrentUser(getState()).username;
-		dispatch(CurrentUserActions.fetchUser(username));
-		dispatch(JobsActions.fetchJobs(this.account));
+/* 		const username = selectCurrentUser(getState()).username; */
+/* 		dispatch(CurrentUserActions.fetchUser(username)); */
+/* 		dispatch(JobsActions.fetchJobs(this.account));
 		dispatch(JobsActions.getMyJob(this.account));
 		dispatch(TreeActions.startListenOnSelections());
-		dispatch(ViewerActions.startListenOnModelLoaded());
+		dispatch(ViewerActions.startListenOnModelLoaded()); */
 
 		this.ViewerService.on(VIEWER_EVENTS.CLICK_PIN, this.onPinClick);
 		this.ViewerService.on(VIEWER_EVENTS.CHANGE_PIN_COLOUR, this.onChangePinColor);
 		this.ViewerService.on(VIEWER_EVENTS.SET_CAMERA, this.onSetCamera);
 		this.ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED_PIN_MODE, this.onBackgroundSelectedPinMode);
-		this.unsubscribeModelSettingsListener = subscribe(this, this.onModelSettingsChange);
+		// this.unsubscribeModelSettingsListener = subscribe(this, this.onModelSettingsChange);
 
 		this.watchers();
 	}
@@ -259,18 +259,18 @@ class ModelController implements ng.IController {
 		}
 	}
 
-	private loadModelSettings() {
-		dispatch(ModelActions.fetchSettings(this.account, this.model));
-		dispatch(ModelActions.fetchMetaKeys(this.account, this.model));
-		dispatch(ModelActions.waitForSettingsAndFetchRevisions(this.account, this.model));
-		dispatch(TreeActions.fetchFullTree(this.account, this.model, this.revision));
-		dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
-		dispatch(IssuesActions.fetchIssues(this.account, this.model, this.revision));
-		dispatch(RisksActions.fetchRisks(this.account, this.model, this.revision));
-		dispatch(GroupsActions.fetchGroups(this.account, this.model, this.revision));
-		dispatch(ViewerActions.getHelicopterSpeed(this.account, this.model));
-		dispatch(StarredMetaActions.fetchStarredMeta());
-	}
+	// private loadModelSettings() {
+	// 	dispatch(ModelActions.fetchSettings(this.account, this.model));
+	// 	dispatch(ModelActions.fetchMetaKeys(this.account, this.model));
+	// 	dispatch(ModelActions.waitForSettingsAndFetchRevisions(this.account, this.model));
+	// 	dispatch(TreeActions.fetchFullTree(this.account, this.model, this.revision));
+	// 	dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
+	// 	dispatch(IssuesActions.fetchIssues(this.account, this.model, this.revision));
+	// 	dispatch(RisksActions.fetchRisks(this.account, this.model, this.revision));
+	// 	dispatch(GroupsActions.fetchGroups(this.account, this.model, this.revision));
+	// 	dispatch(ViewerActions.getHelicopterSpeed(this.account, this.model));
+	// 	dispatch(StarredMetaActions.fetchStarredMeta());
+	// }
 
 	private resetPanelsStates() {
 		dispatch(IssuesActions.resetComponentState());

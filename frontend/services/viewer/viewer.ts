@@ -1,4 +1,4 @@
-
+import axios from 'axios';
 import { UnityUtil } from '../../globals/unity-util';
 import { getState } from '../../helpers/migration';
 import { selectMemory } from '../../modules/viewer';
@@ -6,15 +6,20 @@ import { MultiSelect } from './multiSelect';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_PIN_MODE } from '../../constants/viewer';
 import { Viewer as ViewerInstance } from '../../globals/viewer';
 import { clientConfigService } from '../clientConfig';
+import { IS_DEVELOPMENT } from '../../constants/environment';
 
 export class ViewerService {
-	private viewerInstance = null;
+	private viewer = null;
 
 	private mode = VIEWER_PIN_MODE.NORMAL;
 	public pin: any;
 	public newPinId: string;
 	public currentModel: any;
-	public initialised: any;
+	public initialised: {
+		promise: Promise<any>;
+		resolve: () => void;
+		reject: () => void;
+	};
 	public currentModelInit: any;
 
 	private pinData: any;
@@ -37,7 +42,7 @@ export class ViewerService {
 		};
 	}
 
-	get viewer() {
+/* 	get viewer() {
 		if (this.viewerInstance) {
 			return this.viewerInstance;
 		}
@@ -50,7 +55,7 @@ export class ViewerService {
 
 		this.viewerInstance.setUnity();
 		return this.viewerInstance;
-	}
+	} */
 
 	get isPinMode() {
 		return this.mode === VIEWER_PIN_MODE.PIN;
@@ -62,6 +67,60 @@ export class ViewerService {
 
 	public async isModelReady() {
 		await this.viewer.isModelLoaded();
+	}
+
+	public get memory() {
+		const MAX_MEMORY = 2130706432; // The maximum memory Unity can allocate
+		const assignedMemory = selectMemory(getState()) * 1024 * 1024; // Memory is in Mb.
+		return Math.min(assignedMemory, MAX_MEMORY);
+	}
+
+	public init = async (container, name = 'viewer') => {
+		if (IS_DEVELOPMENT) {
+			console.debug('Initiating Viewer');
+		}
+
+		this.setInitialisePromise();
+
+		this.viewer = new ViewerInstance({
+			name,
+			container,
+			onError: this.handleUnityError
+		});
+
+		this.viewer.setUnity();
+
+		try {
+			await this.viewer.unityScriptInserted ? Promise.resolve() : this.viewer.insertUnityLoader(this.memory);
+
+			setTimeout(() => {
+				this.viewer.init({
+					getAPI: {
+						hostNames: clientConfigService.apiUrls.all
+					},
+					showAll: true
+				});
+			}, 1000);
+		} catch (error) {
+			console.error('Error while initialising Unity script: ', error);
+		}
+	}
+
+	public setInitialisePromise() {
+		const initialised = {} as any;
+		initialised.promise = new Promise((resolve, reject) => {
+			initialised.resolve = resolve;
+			initialised.reject = reject;
+		});
+		this.initialised = initialised;
+	}
+
+	public async destroy() {
+		await this.isViewerReady();
+		this.diffToolDisableAndClear();
+		this.viewer.reset();
+		this.viewer.destroy();
+		this.viewer = null;
 	}
 
 	public async updateViewerSettings(settings) {
@@ -360,28 +419,19 @@ export class ViewerService {
 		this.viewer.stopClipEdit();
 	}
 
-	public async getModelInfo({database, model}) {
-		await this.isViewerReady();
-		return this.viewerService.getModelInfo(database, model).then((response) => {
-			return response.data;
-		});
-	}
-
 	public async switchObjectVisibility(teamspace, modelId, objectIds, visibility) {
 		await this.isViewerReady();
 		this.viewer.switchObjectVisibility(teamspace, modelId, objectIds, visibility);
 	}
 
-	public hideHiddenByDefaultObjects() {
-		this.initialised.promise.then(() => {
-			this.viewer.hideHiddenByDefaultObjects();
-		});
+	public async hideHiddenByDefaultObjects() {
+		await this.isViewerReady();
+		this.viewer.hideHiddenByDefaultObjects();
 	}
 
-	public showHiddenByDefaultObjects() {
-		this.initialised.promise.then(() => {
-			this.viewer.showHiddenByDefaultObjects();
-		});
+	public async showHiddenByDefaultObjects() {
+		await this.isViewerReady();
+		this.viewer.showHiddenByDefaultObjects();
 	}
 
 	public handleUnityError = (message: string, reload: boolean, isUnity: boolean) => {
@@ -410,54 +460,20 @@ export class ViewerService {
 		}
 	}
 
-	public unityInserted(): boolean {
-		if (this.viewer === undefined) {
-			return false;
+	public async loadViewerModel(teamspace, model, branch, revision) {
+		if (!teamspace || !model) {
+			console.error('Teamspace, model, branch or revision was not defined!', teamspace, model, branch, revision);
+			return Promise.reject('Teamspace, model, branch or revision was not defined!');
 		} else {
-			return this.viewer.unityScriptInserted;
-		}
-	}
-
-	public getMemory() {
-		const MAX_MEMORY = 2130706432; // The maximum memory Unity can allocate
-		const assignedMemory = selectMemory(getState()) * 1024 * 1024; // Memory is in Mb.
-		return Math.min(assignedMemory, MAX_MEMORY);
-	}
-
-	public initViewer() {
-		console.debug('Initiating Viewer');
-		if (this.unityInserted() === true) {
-			return this.callInit();
-		} else if (this.viewer) {
-
-			return this.viewer.insertUnityLoader(this.getMemory())
-				.then(() => { this.callInit(); })
-				.catch((error) => {
-					console.error('Error inserting Unity script: ', error);
-				});
-		}
-	}
-
-	public callInit() {
-		return this.viewer.init({
-				getAPI: {
-					hostNames: clientConfigService.apiUrls.all
-				},
-				showAll: true
-			})
-			.catch((error) => {
-				console.error('Error creating Viewer Directive: ', error);
-			});
-	}
-
-	public async loadViewerModel(account, model, branch, revision) {
-		if (!account || !model) {
-			console.error('Account, model, branch or revision was not defined!', account, model, branch, revision);
-			return Promise.reject('Account, model, branch or revision was not defined!');
-		} else {
-			this.account = account;
+			this.account = teamspace;
 			this.model = model;
-			return this.viewer.loadModel(account, model, branch, revision)
+
+			try {
+				await this.viewer.loadModel(teamspace, model, branch, revision)
+			} catch (error) {
+				console.error('Error loading model: ', error);
+			}
+			return this.viewer.loadModel(teamspace, model, branch, revision)
 				.then(() => {
 					// Set the current model in the viewer
 					this.currentModel.model = model;

@@ -27,6 +27,7 @@ export const Container = styled.div`
 	position: relative;
 	padding-right: 5px;
 	height: 80px;
+	z-index: 1;
 
 	${LogoStyles.Image} {
 		position: absolute;

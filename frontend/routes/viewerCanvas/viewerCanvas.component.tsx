@@ -17,18 +17,32 @@
 
 import * as React from 'react';
 
+import { IViewerContext } from '../../contexts/viewer.context';
 import { Container } from './viewerCanvas.styles';
 
 interface IProps {
 	className?: string;
+	viewer: IViewerContext;
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
+	private containerRef = React.createRef<HTMLElement>();
+
+	public componentDidMount() {
+		this.props.viewer.init(this.containerRef.current);
+	}
+
+	public componentWillUnmount() {
+		this.props.viewer.destroy();
+	}
+
 	public render() {
 		return (
-			<Container className={this.props.className}>
-				ViewerCanvas component
-			</Container>
+			<Container
+				id="viewer"
+				innerRef={this.containerRef}
+				className={this.props.className}
+			/>
 		);
 	}
 }

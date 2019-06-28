@@ -8,7 +8,6 @@ import { App } from './app';
 
 export class RootContainer extends React.Component {
 	public render() {
-		console.log('RENDER ROOT')
 		return (
 			<ThemeProvider theme={theme}>
 				<MuiThemeProvider theme={MuiTheme}>

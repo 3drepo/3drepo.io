@@ -19,6 +19,7 @@ import * as React from 'react';
 import { isEmpty } from 'lodash';
 
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
+import { IViewerContext } from '../../contexts/viewer.context';
 import Toolbar from './components/toolbar/toolbar.container';
 import Gis from './components/gis/gis.container';
 import { Views } from './components/views';
@@ -30,9 +31,13 @@ import { Tree } from './components/tree';
 import { PanelButton } from './components/panelButton/panelButton.component';
 import { RevisionsDropdown } from './components/revisionsDropdown';
 import { Container, LeftPanels, LeftPanelsButtons } from './viewerGui.styles';
+import { CloseFocusModeButton } from './components/closeFocusModeButton';
 
 interface IProps {
 	className?: string;
+	viewer: IViewerContext,
+	modelSettings: any;
+	isModelPending: boolean;
 	match: {
 		params: {
 			model: string;
@@ -44,9 +49,15 @@ interface IProps {
 		issueId?: string;
 		riskId?: string;
 	};
+	fetchUser: (teamspace, model) => void;
+	fetchJobs: (teamspace, model) => void;
+	getMyJob: (teamspace, model) => void;
+	startListenOnSelections: () => void;
+	stopListenOnSelections: () => void;
+	startListenOnModelLoaded: () => void;
+	stopListenOnModelLoaded: () => void;
+	fetchData: (teamspace, model, revision?) => void;
 }
-
-// model.pug
 
 export class ViewerGui extends React.PureComponent<IProps, any> {
 	public state = {
@@ -55,7 +66,7 @@ export class ViewerGui extends React.PureComponent<IProps, any> {
 
 	public componentDidMount() {
 		const changes = {} as any;
-		const { issueId, riskId } = this.props.queryParams;
+		const { queryParams: { issueId, riskId }, match: { params } } = this.props;
 
 		if (issueId || riskId) {
 			changes.visiblePanels = {};
@@ -67,8 +78,32 @@ export class ViewerGui extends React.PureComponent<IProps, any> {
 			}
 		}
 
+		this.handleLoadModelSettings();
+
 		if (!isEmpty(changes)) {
 			this.setState(changes);
+		}
+
+		this.props.startListenOnSelections();
+		this.props.startListenOnModelLoaded();
+		this.props.fetchData(params.teamspace, params.model, params.revision);
+	}
+
+	public componentDidUpdate(prevProps) {
+		const { modelSettings, isModelPending, match: { params } } = this.props;
+
+		const teamspaceChanged = params.teamspace !== prevProps.match.params.teamspace;
+		const modelChanged = params.model !== prevProps.match.params.model;
+
+		if (teamspaceChanged || modelChanged) {
+			this.props.fetchData(params.teamspace, params.model, params.revision);
+		}
+
+		const isModelPendingChanged = isModelPending !== prevProps.isModelPending;
+		const settingsChanged = modelSettings._id !== prevProps.modelSettings._id;
+
+		if (isModelPendingChanged && settingsChanged && !prevProps.isModelPending) {
+			this.handleModelSettingsChange(modelSettings);
 		}
 	}
 
@@ -80,11 +115,20 @@ export class ViewerGui extends React.PureComponent<IProps, any> {
 		return (
 			<Container className={this.props.className}>
 				<RevisionsDropdown />
+				<CloseFocusModeButton />
 				<Toolbar {...this.urlParams.teamspace} />
 				{this.renderLeftPanelsButtons()}
 				{this.renderLeftPanels(this.state.visiblePanels)}
 			</Container>
 		);
+	}
+
+	private async handleModelSettingsChange(modelSettings) {
+		//this.props.
+	}
+
+	private handleLoadModelSettings = () => {
+
 	}
 
 	private handleTogglePanel = (panelType) => {

@@ -15,10 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { createActions, createReducer } from 'reduxsauce';
 
-export const Container = styled.div`
-	position: absolute;
-	width: 100%;
-	height: 100%;
-`;
+export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActions({
+	fetchData: ['teamspace', 'model', 'revision']
+}, { prefix: 'VIEWER_GUI/' });
+
+export interface IViewerGuiState {
+
+}
+
+export const INITIAL_STATE: IViewerGuiState = {
+
+};
+
+export const reducer = createReducer(INITIAL_STATE, {
+});

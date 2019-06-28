@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { getState, dispatch } from '../../../helpers/migration';
+// TODO - TO REMOVE
+
+import { getState } from '../../../helpers/migration';
 import { selectMemory } from '../../../modules/viewer';
 import { DialogActions } from '../../../modules/dialog';
 import { ErrorDialog } from '../../../routes/components/dialogContainer/components';
