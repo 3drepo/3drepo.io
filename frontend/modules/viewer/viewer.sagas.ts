@@ -16,7 +16,9 @@
  */
 
 import { put, select, takeLatest } from 'redux-saga/effects';
-import { getAngularService, dispatch } from '../../helpers/migration';
+import { push } from 'connected-react-router';
+
+import { dispatch } from '../../helpers/migration';
 import * as API from '../../services/api';
 import { VIEWER_EVENTS, VIEWER_PANELS, INITIAL_HELICOPTER_SPEED, NEW_PIN_ID } from '../../constants/viewer';
 
@@ -32,6 +34,9 @@ import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_CLIP_MODES } from '../../constants/viewer';
 import { MeasureActions } from '../measure';
 import { BimActions } from '../bim';
+import { selectUrlParams } from '../router/router.selectors';
+import { selectSettings } from '../model';
+import { ROUTES } from '../../constants/routes';
 
 const getViewer = () => Viewer.viewer;
 
@@ -333,11 +338,22 @@ function* removeUnsavedPin() {
 	}
 }
 
-function* loadModel({ teamspace, model, revision }) {
+function* loadModel() {
 	try {
+		const { teamspace, model, revision } = yield select(selectUrlParams);
+		const modelSettings = yield select(selectSettings);
+
 		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head');
+		yield Viewer.updateViewerSettings(modelSettings);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('load', 'model'));
+		const content = 'The model was either not found, failed to load correctly ' +
+			'or you are not authorized to view it. ' +
+			' You will now be redirected to the teamspace page.';
+		yield put(DialogActions.showDialog({
+			title: 'Model Error',
+			content
+		})
+		yield put(push(ROUTES.TEAMSPACES));
 	}
 }
 

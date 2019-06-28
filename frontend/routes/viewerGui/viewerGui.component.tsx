@@ -54,7 +54,7 @@ interface IProps {
 	startListenOnModelLoaded: () => void;
 	stopListenOnModelLoaded: () => void;
 	fetchData: (teamspace, model, revision?) => void;
-	loadModel: (teamspace, model, revision?) => void;
+	loadModel: () => void;
 	resetPanelsStates: () => void;
 }
 
@@ -140,7 +140,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		const { teamspace, model, revision } = this.props.match.params;
 		console.error('handleModelSettingsChange')
 		//TODO: this.PanelService.hideSubModels(this.issuesCardIndex, !modelSettings.federate);
-		this.props.loadModel(teamspace, model, revision);
+		this.props.loadModel();
 	}
 
 	private handleTogglePanel = (panelType) => {

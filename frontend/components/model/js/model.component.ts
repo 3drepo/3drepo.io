@@ -75,22 +75,6 @@ class ModelController implements ng.IController {
 	) {
 	}
 
-	public onModelSettingsChange = (state) => {
-		const settings = selectSettings(state);
-		const isPending = selectIsPending(state);
-
-		const isPendingChanged = this.isPending !== isPending;
-		const settingsChanged = this.settings._id !== settings._id;
-
-		const changes = { isPending } as any;
-		if (isPendingChanged && settingsChanged && !isPending && !this.modelSettingsLoaded) {
-			changes.settings = settings;
-			changes.modelSettingsLoaded = true;
-			this.handleModelSettingsChange(settings);
-		}
-
-		return changes;
-	}
 
 	public $onInit() {
 		this.pointerEvents = 'inherit';
@@ -117,33 +101,12 @@ class ModelController implements ng.IController {
 			this.ViewerService.off(VIEWER_EVENTS.CHANGE_PIN_COLOUR);
 			this.ViewerService.off(VIEWER_EVENTS.SET_CAMERA);
 			this.ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED_PIN_MODE);
-/* 			dispatch(TreeActions.stopListenOnSelections());
-			dispatch(ViewerActions.stopListenOnModelLoaded()); */
-			this.resetPanelsStates();
-/* 			dispatch(BimActions.setIsActive(false)); */
 		});
-
-		this.$timeout(() => {
-			// Get the model element
-			this.modelUI = angular.element(
-				this.$element[0].querySelector('#modelUI')
-			);
-		});
-
-/* 		const username = selectCurrentUser(getState()).username; */
-/* 		dispatch(CurrentUserActions.fetchUser(username)); */
-/* 		dispatch(JobsActions.fetchJobs(this.account));
-		dispatch(JobsActions.getMyJob(this.account));
-		dispatch(TreeActions.startListenOnSelections());
-		dispatch(ViewerActions.startListenOnModelLoaded()); */
 
 		this.ViewerService.on(VIEWER_EVENTS.CLICK_PIN, this.onPinClick);
 		this.ViewerService.on(VIEWER_EVENTS.CHANGE_PIN_COLOUR, this.onChangePinColor);
 		this.ViewerService.on(VIEWER_EVENTS.SET_CAMERA, this.onSetCamera);
 		this.ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED_PIN_MODE, this.onBackgroundSelectedPinMode);
-		// this.unsubscribeModelSettingsListener = subscribe(this, this.onModelSettingsChange);
-
-		this.watchers();
 	}
 
 	public onPinClick = ({ id }) => {
@@ -153,12 +116,10 @@ class ModelController implements ng.IController {
 
 		if (risksMap[id]) {
 			dispatch(RisksActions.showDetails(this.account, this.model, this.revision, risksMap[id]));
-			// this.PanelService.showPanelsByType('risks');
 		}
 
 		if (issuesMap[id]) {
 			dispatch(IssuesActions.showDetails(this.account, this.model, this.revision, issuesMap[id]));
-			// this.PanelService.showPanelsByType('issues');
 		}
 	}
 
@@ -173,64 +134,4 @@ class ModelController implements ng.IController {
 	public onBackgroundSelectedPinMode = () => {
 		dispatch(ViewerActions.removeUnsavedPin());
 	}
-
-	public watchers() {
-		this.$scope.$watchGroup(['vm.account', 'vm.model'], () => {
-			if (this.account && this.model) {
-				angular.element(() => {
-					this.setupModelInfo();
-				});
-			}
-		});
-	}
-
-	public handleModelError() {
-
-		const message = 'The model was either not found, failed to load correctly ' +
-		'or you are not authorized to view it. ' +
-		' You will now be redirected to the teamspace page.';
-
-		this.$mdDialog.show(
-			this.$mdDialog.alert()
-				.clickOutsideToClose(true)
-				.title('Model Error')
-				.textContent(message)
-				.ariaLabel('Model Error')
-				.ok('OK')
-		);
-
-		this.$location.path('/dashboard/teamspaces');
-	}
-
-	private loadModel = () => {
-		return this.ViewerService.loadViewerModel(
-			this.account,
-			this.model,
-			this.branch,
-			this.revision
-		).then(() => {
-			// IMPORTANT: only load model settings after it has started loading the model
-			// loadViewerModel can cancel previous model loads which will kill off old unity promises
-			this.ViewerService.updateViewerSettings(this.settings);
-		});
-	}
 }
-
-export const ModelComponent: ng.IComponentOptions = {
-	bindings: {
-		account: '=',
-		branch:  '=',
-		issueId: '=',
-		riskId: '=',
-		model: '=',
-		revision: '=',
-		state: '='
-	},
-	controller: ModelController,
-	controllerAs: 'vm',
-	templateUrl: 'templates/model.html'
-};
-
-export const ModelComponentModule = angular
-	.module('3drepo')
-	.component('model', ModelComponent);

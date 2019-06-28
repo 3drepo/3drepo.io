@@ -60,7 +60,7 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	setCamera: ['params'],
 	changePinColor: ['params'],
 	removeUnsavedPin: [],
-	loadModel: ['teamspace', 'model', 'revision']
+	loadModel: []
 }, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {
