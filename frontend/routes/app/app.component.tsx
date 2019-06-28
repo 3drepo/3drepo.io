@@ -26,7 +26,6 @@ import { DialogContainer } from '../components/dialogContainer';
 import { SnackbarContainer } from '../components/snackbarContainer';
 import { ROUTES, PUBLIC_ROUTES } from '../../constants/routes';
 import { PrivateRoute } from '../components/privateRoute';
-import { PublicRoute } from '../components/publicRoute';
 import StaticPageRoute from '../components/staticPageRoute/staticPageRoute.container';
 import { LiveChat } from '../components/liveChat';
 import { ViewerCanvas } from '../viewerCanvas';
@@ -39,6 +38,7 @@ import { PasswordChange } from '../passwordChange';
 import RegisterRequest from '../registerRequest/registerRequest.container';
 import { RegisterVerify } from '../registerVerify';
 import { AppContainer } from './app.styles';
+import { ExternalLinks } from '../components/externalLinks/externalLinks.component';
 
 interface IProps {
 	location: any;
@@ -206,12 +206,12 @@ export class App extends React.PureComponent<IProps, IState> {
 		return (
 				<AppContainer>
 					<Switch>
-						<PublicRoute exact path={ROUTES.LOGIN} component={Login} />
-						<PublicRoute exact path={ROUTES.SIGN_UP} component={SignUp} />
-						<PublicRoute exact path={ROUTES.PASSWORD_FORGOT} component={PasswordForgot} />
-						<PublicRoute exact path={ROUTES.PASSWORD_CHANGE} component={PasswordChange} />
-						<PublicRoute exact path={ROUTES.REGISTER_REQUEST} component={RegisterRequest} />
-						<PublicRoute exact path={ROUTES.REGISTER_VERIFY} component={RegisterVerify} />
+						<Route exact path={ROUTES.LOGIN} component={Login} />
+						<Route exact path={ROUTES.SIGN_UP} component={SignUp} />
+						<Route exact path={ROUTES.PASSWORD_FORGOT} component={PasswordForgot} />
+						<Route exact path={ROUTES.PASSWORD_CHANGE} component={PasswordChange} />
+						<Route exact path={ROUTES.REGISTER_REQUEST} component={RegisterRequest} />
+						<Route exact path={ROUTES.REGISTER_VERIFY} component={RegisterVerify} />
 						<PrivateRoute key={ROUTES.DASHBOARD} path={ROUTES.DASHBOARD} component={Dashboard} />
 						<PrivateRoute
 							key={ROUTES.VIEWER}
@@ -221,6 +221,7 @@ export class App extends React.PureComponent<IProps, IState> {
 						{this.renderStaticRoutes()}
 						<Route component={() => <div>No match on app</div>} />
 					</Switch>
+					<ExternalLinks />
 					<DialogContainer />
 					<SnackbarContainer />
 					<LiveChat/>

@@ -6,7 +6,6 @@ import GisIcon from '@material-ui/icons/Layers';
 import ViewsIcon from '@material-ui/icons/PhotoCamera';
 import TreeIcon from '@material-ui/icons/DeviceHub';
 
-
 export const VIEWER_PANELS = {
 	GIS: 'gis',
 	ISSUES: 'issues',
