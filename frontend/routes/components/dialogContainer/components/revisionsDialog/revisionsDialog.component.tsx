@@ -59,7 +59,7 @@ const renderRevisionItem = (revision, currentRevisionId, handleSetNewRevision) =
 			<Description>{revision.desc || '(no description)'}</Description>
 		</Column>
 	</Item>
-)
+);
 
 const renderRevisions = ({ revisions, currentRevisionId, handleSetNewRevision }) => renderWhenTrue(
 	() => revisions.map((revision) => renderRevisionItem(revision, currentRevisionId, handleSetNewRevision))
