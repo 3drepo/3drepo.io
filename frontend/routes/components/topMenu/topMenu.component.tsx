@@ -18,10 +18,12 @@
 import * as React from 'react';
 
 import { UserMenu } from './components/userMenu/userMenu.component';
+import { ExtrasMenu } from './components/extrasMenu/extrasMenu.component';
 import { Logo } from '../logo/logo.component';
 import Notifications from '../notifications/notifications.container';
 import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Container, BackIcon } from './topMenu.styles';
+import { ROUTES } from '../../../constants/routes';
 
 interface IProps {
 	currentUser: any;
@@ -50,11 +52,15 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 					{...userMenuProps}
 					onTeamspacesClick={this.props.onLogoClick}
 				/>
+				<ExtrasMenu
+					{...userMenuProps}
+					onTeamspacesClick={this.props.onLogoClick}
+				/>
 			</Container>
 		);
 	}
 
 	private handleBackToTeamspaces = () => {
-		this.props.history.push('/dashboard/teamspaces');
+		this.props.history.push(ROUTES.TEAMSPACES);
 	}
 }

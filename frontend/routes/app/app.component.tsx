@@ -226,7 +226,7 @@ export class App extends React.PureComponent<IProps, IState> {
 						{this.renderStaticRoutes()}
 						<Route component={() => <div>No match on app</div>} />
 					</Switch>
-					<ExternalLinks />
+{/* 					<ExternalLinks /> */}
 					<DialogContainer />
 					<SnackbarContainer />
 					<LiveChat/>

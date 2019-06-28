@@ -137,7 +137,6 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleModelSettingsChange(modelSettings) {
-		const { teamspace, model, revision } = this.props.match.params;
 		console.error('handleModelSettingsChange')
 		//TODO: this.PanelService.hideSubModels(this.issuesCardIndex, !modelSettings.federate);
 		this.props.loadModel();
