@@ -99,27 +99,17 @@ function importSuccess(account, model, sharedSpacePath, user) {
 	setStatus(account, model, "ok", user).then(setting => {
 		if (setting) {
 			if (sharedSpacePath) {
-				const files = function(filePath, fileDir, jsonFile) {
-					return [
-						{desc: "tmp model file", type: "file", path: filePath},
-						{desc: "json file", type: "file", path: jsonFile},
-						{desc: "tmp dir", type: "dir", path: fileDir}
-					];
-				};
+				const path = require("path");
+				const tmpDir = path.join(sharedSpacePath, setting.corID);
+				const tmpModelFile = path.join(sharedSpacePath, `${setting.corID}.json`);
+				const filesToDelete  = [{ type:"file", path: tmpModelFile}];
 
-				const tmpDir = `${sharedSpacePath}/${setting.corID}`;
-				const tmpModelFile = `${sharedSpacePath}/${setting.corID}.json`;
-				fs.stat(tmpModelFile, function(err) {
-					let tmpJsonFile;
-					if (err) {
-						tmpJsonFile = `${tmpDir}/obj.json`;
-					} else {
-						const tmpModelFileData = require(tmpModelFile);
-						tmpJsonFile = tmpModelFileData.file;
-					}
-
-					_deleteFiles(files(tmpModelFile, tmpDir, tmpJsonFile));
+				fs.readdirSync(tmpDir).forEach((file) => {
+					filesToDelete.push({ type: "file", path: path.join(tmpDir, file)});
 				});
+
+				_deleteFiles(filesToDelete);
+				_deleteFiles([{desc: "tmp dir", type: "dir", path: tmpDir}]);
 			}
 			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
 			setting.corID = undefined;
@@ -711,11 +701,8 @@ function _deleteFiles(files) {
 
 		try {
 			deleteFile(file.path);
-			systemLogger.logInfo(`${file.desc} deleted`,{
-				file: file.path
-			});
 		} catch(err) {
-			systemLogger.logError(`error while deleting ${file.desc}`,{
+			systemLogger.logError("error while deleting file",{
 				message: err.message,
 				err: err,
 				file: file.path
