@@ -16,40 +16,18 @@
  */
 
 import * as React from 'react';
-import { Route, Redirect } from 'react-router-dom';
-import TopMenu from '../topMenu/topMenu.container';
-import { ROUTES } from '../../../constants/routes';
+import { Route } from 'react-router-dom';
 import { ExternalLinks } from '../externalLinks/externalLinks.component';
 
-export const PrivateRoute = ({ component: Component, isAuthenticated, onLogout, push, ...routeProps }) => {
-	const redirect = (props) => (
-		<Redirect to={{
-			pathname: ROUTES.LOGIN,
-			state: { from: props.location }
-		}} />
-	);
-
-	const onLogoClick = () => {
-		let path = ROUTES.HOME;
-		if (isAuthenticated) {
-			path = ROUTES.TEAMSPACES;
-		}
-
-		push(path);
-	};
-
+export const PublicRoute = ({ component: Component, ...routeProps }) => {
 	const renderComponent = (props) => (
 		<>
-			<TopMenu
-				onLogout={onLogout}
-				onLogoClick={onLogoClick}
-				id="topMenu"
-			/>
 			<Component {...props} />
 			<ExternalLinks />
 		</>
 	);
 
-	const renderRoute = (props) => isAuthenticated ? renderComponent(props) : redirect(props);
+	const renderRoute = (props) => renderComponent(props);
+
 	return <Route {...routeProps} render={renderRoute} />;
 };
