@@ -32,56 +32,48 @@ const setNewRevision = (handler, revision, isTheSameRevision) => {
 	handler(revision);
 };
 
-export const RevisionsDialog = (props: IProps) => {
-	const { revisions, handleSetNewRevision, currentRevisionId } = props;
+const renderRevisionItem = (revision, currentRevisionId, handleSetNewRevision) => (
+	<Item
+		key={revision._id}
+		button
+		divider
+		onClick={() => setNewRevision(handleSetNewRevision, revision, currentRevisionId === revision._id)}
+		current={currentRevisionId === revision._id}>
+		<Row>
+			<PropertyWrapper>
+				<Tag>
+					{revision.tag || '(no tag)'}
+				</Tag>
+				<Property>
+					{currentRevisionId === revision._id && '(current revision)'}
+				</Property>
+			</PropertyWrapper>
+			<Property>
+				<DateTime value={revision.timestamp} format={DATE_TIME_FORMAT} />
+			</Property>
+		</Row>
+		<Column>
+			<Property>
+				{revision.author}
+			</Property>
+			<Description>{revision.desc || '(no description)'}</Description>
+		</Column>
+	</Item>
+)
 
-	return (
-		<>
-			<StyledDialogContent>
-				<StyledList>
-					{
-						renderWhenTrue(() => {
-							return (
-								<>
-									{
-										revisions.map((revision) => (
-											<Item
-												key={revision._id}
-												button
-												divider
-												onClick={() => setNewRevision(handleSetNewRevision, revision, currentRevisionId === revision._id )}
-												current={currentRevisionId === revision._id}>
-													<Row>
-														<PropertyWrapper>
-															<Tag>
-																{revision.tag || '(no tag)'}
-															</Tag>
-															<Property>
-																{currentRevisionId === revision._id && '(current revision)'}
-															</Property>
-														</PropertyWrapper>
-														<Property>
-															<DateTime value={revision.timestamp} format={DATE_TIME_FORMAT} />
-														</Property>
-													</Row>
-													<Column>
-														<Property>
-															{revision.author}
-														</Property>
-														<Description>{revision.desc || '(no description)'}</Description>
-													</Column>
-											</Item>)
-										)
-									}
-								</>
-							);
-						})(Boolean(revisions.length))
-					}
-				</StyledList>
-			</StyledDialogContent>
-			<DialogActions>
-				<Button onClick={props.handleClose} variant="raised" color="secondary">Cancel</Button>;
-			</DialogActions>
-		</>
-	);
-};
+const renderRevisions = ({ revisions, currentRevisionId, handleSetNewRevision }) => renderWhenTrue(
+	() => revisions.map((revision) => renderRevisionItem(revision, currentRevisionId, handleSetNewRevision))
+)(Boolean(revisions.length));
+
+export const RevisionsDialog = (props: IProps) => (
+	<>
+		<StyledDialogContent>
+			<StyledList>
+				{renderRevisions(props)}
+			</StyledList>
+		</StyledDialogContent>
+		<DialogActions>
+			<Button onClick={props.handleClose} variant="raised" color="secondary">Cancel</Button>;
+		</DialogActions>
+	</>
+);
