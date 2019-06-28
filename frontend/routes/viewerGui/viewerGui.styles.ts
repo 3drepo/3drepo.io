@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
 export const Container = styled.div`
 	height: 100%;
@@ -34,6 +34,7 @@ export const LeftPanels = styled.div`
 	display: flex;
 	flex-direction: column;
 `;
+
 export const LeftPanelsButtons = styled.div`
 	pointer-events: all;
 	display: flex;
@@ -42,3 +43,21 @@ export const LeftPanelsButtons = styled.div`
 	width: 90px;
 	position: relative;
 `;
+
+export const DataLoader = styled.div`
+	position: fixed;
+	pointer-events: none;
+	left: 50%;
+	bottom: 110px;
+	background: rgba(131, 151, 172, 0.85);
+	padding: 10px 20px;
+	z-index: 2;
+	box-shadow: 0px 0px 3px rgba(0,0,0, .2);
+	color: white;
+	font-size: 13px;
+	border-radius: 10px;
+	visibility: ${(props: any) => props.shouldHide ? 'hidden' : 'visible' };
+	transform: ${(props: any) => props.shouldHide ? 'translate(-50%, 10px)' : 'translate(-50%, 0)' };
+	opacity: ${(props: any) => props.shouldHide ? 0 : 1 };
+	transition: visibility 250ms linear, opacity 250ms ease-in-out, transform 250ms ease-in-out;
+` as any;

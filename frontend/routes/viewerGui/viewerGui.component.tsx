@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { isEmpty } from 'lodash';
+import { isEmpty, cond } from 'lodash';
 
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
 import { IViewerContext } from '../../contexts/viewer.context';
@@ -30,8 +30,8 @@ import { Compare } from './components/compare';
 import { Tree } from './components/tree';
 import { PanelButton } from './components/panelButton/panelButton.component';
 import { RevisionsDropdown } from './components/revisionsDropdown';
-import { Container, LeftPanels, LeftPanelsButtons } from './viewerGui.styles';
 import { CloseFocusModeButton } from './components/closeFocusModeButton';
+import { Container, LeftPanels, LeftPanelsButtons, DataLoader } from './viewerGui.styles';
 
 interface IProps {
 	className?: string;
@@ -61,12 +61,18 @@ interface IProps {
 interface IState {
 	loadedModelId: string;
 	visiblePanels: any;
+	showLoader: boolean;
+	loaderType: string;
+	loaderProgress: number;
 }
 
 export class ViewerGui extends React.PureComponent<IProps, IState> {
 	public state = {
 		visiblePanels: {},
-		loadedModelId: null
+		loadedModelId: null,
+		showLoader: false,
+		loaderType: null,
+		loaderProgress: 0
 	};
 
 	public componentDidMount() {
@@ -90,6 +96,62 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
+
+		setTimeout(() => {
+			this.setState({
+				showLoader: true,
+				loaderType: 'VIEWER_INIT',
+				loaderProgress: 10
+			}, () => {
+				setTimeout(() => {
+					this.setState({ loaderProgress: 15 }, () => {
+						setTimeout(() => {
+							this.setState({ loaderProgress: 40 }, () => {
+								setTimeout(() => {
+									this.setState({ loaderProgress: 87 }, () => {
+										setTimeout(() => {
+											this.setState({
+												loaderType: 'MODEL_DOWNLOAD',
+												loaderProgress: 5
+											}, () => {
+													setTimeout(() => {
+														this.setState({
+															loaderProgress: 68
+														}, () => {
+																setTimeout(() => {
+																	this.setState({
+																		loaderType: 'MODEL_LOAD',
+																		loaderProgress: 68
+																	}, () => {
+																			setTimeout(() => {
+																				this.setState({ loaderProgress: 15 }, () => {
+																					setTimeout(() => {
+																						this.setState({ loaderProgress: 40 }, () => {
+																							setTimeout(() => {
+																								this.setState({ loaderProgress: 99 }, () => {
+																									setTimeout(() => {
+																										this.setState({ showLoader: null });
+																									}, 500);
+																								});
+																							}, 500);
+																						});
+																					}, 500);
+																				});
+																			}, 500);
+																	});
+																}, 500);
+														});
+													}, 500);
+											});
+										}, 500);
+									});
+								}, 500);
+							});
+						}, 500);
+					});
+				}, 500);
+			});
+		}, 2000);
 
 	}
 
@@ -132,6 +194,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 				<Toolbar {...this.urlParams.teamspace} />
 				{this.renderLeftPanelsButtons()}
 				{this.renderLeftPanels(this.state.visiblePanels)}
+				{this.renderLoader()}
 			</Container>
 		);
 	}
@@ -150,6 +213,20 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 			}
 		}));
 	}
+
+	private get loaderText() {
+		return cond([
+			[(value) => value === 'VIEWER_INIT' , () => 'Loading viewer'],
+			[(value) => value === 'MODEL_DOWNLOAD' , () => 'Downloading model'],
+			[(value) => value === 'MODEL_LOAD' , () => 'Processing model']
+		])(this.state.loaderType);
+	}
+
+	private renderLoader = () => (
+		<DataLoader shouldHide={!this.state.showLoader}>
+			{this.loaderText} ({this.state.loaderProgress}%)
+		</DataLoader>
+	)
 
 	private renderLeftPanelsButtons = () => (
 		<LeftPanelsButtons>

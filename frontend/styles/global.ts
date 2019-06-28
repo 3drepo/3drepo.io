@@ -142,6 +142,7 @@ injectGlobal`
 		height: 3px;
 		border-bottom: solid 1px #bd0000;
 		background-color: ${COLOR.RED};
+		opacity: 0;
 	}
 
 	#viewer #unityViewer {

@@ -352,7 +352,7 @@ function* loadModel() {
 		yield put(DialogActions.showDialog({
 			title: 'Model Error',
 			content
-		})
+		}));
 		yield put(push(ROUTES.TEAMSPACES));
 	}
 }

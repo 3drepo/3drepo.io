@@ -247,7 +247,7 @@ export class Viewer {
 			// Set option param from viewerDirective
 			this.options = options;
 			this.loadingDivText.style.display = 'block';
-			this.loadingDivText.innerHTML = 'Loading Viewer...';
+			// this.loadingDivText.innerHTML = 'Loading Viewer...';
 			document.body.style.cursor = 'wait';
 
 			// Shouldn't need this, but for something it is not being recognised from unitySettings!
