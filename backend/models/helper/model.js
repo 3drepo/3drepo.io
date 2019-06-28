@@ -148,10 +148,11 @@ function importSuccess(account, model, sharedSpacePath, user) {
  * @param {account} acount - User account
  * @param {model} model - Model
  * @param {user} - user who initiated the request
+ * @param {sharedSpacePath} - path to sharedspace
  * @param {errCode} errCode - Defined bouncer error code or IO response code
  * @param {errMsg} errMsg - Verbose error message (errCode.message will be used if undefined)
  */
-function importFail(account, model, user, errCode, errMsg) {
+function importFail(account, model, sharedSpacePath, user, errCode, errMsg) {
 	ModelSetting.findById({account, model}, model).then(setting => {
 		// mark model failed
 		setting.status = "failed";
@@ -173,6 +174,22 @@ function importFail(account, model, user, errCode, errMsg) {
 			errMsg = setting.errorReason.message;
 		}
 
+		const attachments = [];
+		if(setting.corID && sharedSpacePath) {
+			const path = require("path");
+			const sharedDir = path.join(sharedSpacePath, setting.corID);
+			const files = fs.readdirSync(sharedDir);
+			files.forEach((file) => {
+				if(file.endsWith(".log")) {
+					attachments.push({
+						filename: file,
+						path: path.join(sharedDir, file)
+					});
+				}
+			});
+
+		}
+
 		if (!translatedError.userErr) {
 			Mailer.sendImportError({
 				account,
@@ -180,7 +197,8 @@ function importFail(account, model, user, errCode, errMsg) {
 				username: user,
 				err: errMsg,
 				corID: setting.corID,
-				bouncerErr: errCode
+				bouncerErr: errCode,
+				attachments
 			}).catch(err => systemLogger.logError(err));
 		}
 
