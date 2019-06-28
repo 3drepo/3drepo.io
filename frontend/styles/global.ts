@@ -61,6 +61,7 @@ injectGlobal`
 		flex: 1;
 		display: flex;
 		min-height: 100%;
+		max-height: 100%;
 		background: url('/images/viewer_background.png') no-repeat;
 		background-size: cover;
 	}
