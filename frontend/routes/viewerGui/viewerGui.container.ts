@@ -36,6 +36,8 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchData: ViewerGuiActions.fetchData,
+	resetPanelsStates: ViewerGuiActions.resetPanelsStates,
+	loadModel: ViewerActions.loadModel,
 	startListenOnSelections: TreeActions.startListenOnSelections,
 	stopListenOnSelections: TreeActions.stopListenOnSelections,
 	startListenOnModelLoaded: ViewerActions.startListenOnModelLoaded,

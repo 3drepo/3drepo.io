@@ -18,7 +18,8 @@
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActions({
-	fetchData: ['teamspace', 'model', 'revision']
+	fetchData: ['teamspace', 'model', 'revision'],
+	resetPanelsStates: []
 }, { prefix: 'VIEWER_GUI/' });
 
 export interface IViewerGuiState {
@@ -26,7 +27,7 @@ export interface IViewerGuiState {
 }
 
 export const INITIAL_STATE: IViewerGuiState = {
-
+	visiblePanels: {}
 };
 
 export const reducer = createReducer(INITIAL_STATE, {

@@ -9,9 +9,7 @@ import { clientConfigService } from '../clientConfig';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 
 export class ViewerService {
-	private viewer = null;
-
-	private mode = VIEWER_PIN_MODE.NORMAL;
+	public viewer = null;
 	public pin: any;
 	public newPinId: string;
 	public currentModel: any;
@@ -21,7 +19,8 @@ export class ViewerService {
 		reject: () => void;
 	};
 	public currentModelInit: any;
-
+	
+	private mode = VIEWER_PIN_MODE.NORMAL;
 	private pinData: any;
 	private model: string;
 	private account: string;
@@ -463,25 +462,10 @@ export class ViewerService {
 	public async loadViewerModel(teamspace, model, branch, revision) {
 		if (!teamspace || !model) {
 			console.error('Teamspace, model, branch or revision was not defined!', teamspace, model, branch, revision);
-			return Promise.reject('Teamspace, model, branch or revision was not defined!');
+			await Promise.reject('Teamspace, model, branch or revision was not defined!');
 		} else {
-			this.account = teamspace;
-			this.model = model;
-
-			try {
-				await this.viewer.loadModel(teamspace, model, branch, revision)
-			} catch (error) {
-				console.error('Error loading model: ', error);
-			}
-			return this.viewer.loadModel(teamspace, model, branch, revision)
-				.then(() => {
-					// Set the current model in the viewer
-					this.currentModel.model = model;
-					this.initialised.resolve();
-				})
-				.catch((error) => {
-					console.error('Error loading model: ', error);
-				});
+			await this.viewer.loadModel(teamspace, model, branch, revision);
+			this.initialised.resolve();
 		}
 	}
 

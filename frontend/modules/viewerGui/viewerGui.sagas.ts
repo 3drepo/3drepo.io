@@ -29,6 +29,7 @@ import { ViewerActions } from '../viewer';
 import { StarredMetaActions } from '../starredMeta';
 import { JobsActions } from '../jobs';
 import { CurrentUserActions, selectCurrentUser } from '../currentUser';
+import { CompareActions } from '../compare';
 
 function* fetchData({ teamspace, model, revision }) {
 	try {
@@ -55,6 +56,20 @@ function* fetchData({ teamspace, model, revision }) {
 	}
 }
 
+function* resetPanelsStates() {
+	try {
+		yield all([
+			put(IssuesActions.resetComponentState()),
+			put(RisksActions.resetComponentState()),
+			put(GroupsActions.resetComponentState()),
+			put(CompareActions.resetComponentState()),
+		]);
+	} catch (error) {
+		console.error(error);
+	}
+}
+
 export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.FETCH_DATA, fetchData);
+	yield takeLatest(ViewerGuiTypes.RESET_PANELS_STATES, resetPanelsStates);
 }

@@ -26,7 +26,6 @@ export const Container = styled.div`
 `;
 
 export const LeftPanels = styled.div`
-	pointer-events: all;
 	width: 380px;
 	height: calc(100% - 95px);
 	position: absolute;

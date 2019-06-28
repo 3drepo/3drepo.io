@@ -202,22 +202,6 @@ class ModelController implements ng.IController {
 		this.$location.path('/dashboard/teamspaces');
 	}
 
-	public setupModelInfo() {
-		this.loadModelSettings();
-	}
-
-	public setSelectedObjects(selectedObjects) {
-		this.selectedObjects = selectedObjects;
-	}
-
-	public setInitialSelectedObjects(data) {
-		this.initialSelectedObjects = data.selectedObjects;
-		// Set the value to null so that it will be registered again
-		this.$timeout(() => {
-			this.initialSelectedObjects = null;
-		});
-	}
-
 	private loadModel = () => {
 		return this.ViewerService.loadViewerModel(
 			this.account,
@@ -229,54 +213,6 @@ class ModelController implements ng.IController {
 			// loadViewerModel can cancel previous model loads which will kill off old unity promises
 			this.ViewerService.updateViewerSettings(this.settings);
 		});
-	}
-
-	private setupViewer(settings) {
-		if (this.riskId) {
-			// assume issue card shown by default
-			// this.PanelService.hidePanelsByType('issues');
-			// this.PanelService.showPanelsByType('risks');
-		}
-
-		// this.PanelService.hideSubModels(this.issuesCardIndex, !settings.federate);
-	}
-
-	private handleModelSettingsChange = async (settings) => {
-		await this.setupViewer(settings);
-		if (!this.ViewerService.currentModel.model) {
-			if (this.ViewerService.viewer) {
-				try {
-					await this.ViewerService.initViewer();
-					await this.loadModel();
-				} catch (error) {
-					console.error('Failed to load model: ', error);
-				}
-			} else {
-				console.error('Failed to locate viewer');
-			}
-		} else {
-			await this.loadModel();
-		}
-	}
-
-	// private loadModelSettings() {
-	// 	dispatch(ModelActions.fetchSettings(this.account, this.model));
-	// 	dispatch(ModelActions.fetchMetaKeys(this.account, this.model));
-	// 	dispatch(ModelActions.waitForSettingsAndFetchRevisions(this.account, this.model));
-	// 	dispatch(TreeActions.fetchFullTree(this.account, this.model, this.revision));
-	// 	dispatch(ViewpointsActions.fetchViewpoints(this.account, this.model));
-	// 	dispatch(IssuesActions.fetchIssues(this.account, this.model, this.revision));
-	// 	dispatch(RisksActions.fetchRisks(this.account, this.model, this.revision));
-	// 	dispatch(GroupsActions.fetchGroups(this.account, this.model, this.revision));
-	// 	dispatch(ViewerActions.getHelicopterSpeed(this.account, this.model));
-	// 	dispatch(StarredMetaActions.fetchStarredMeta());
-	// }
-
-	private resetPanelsStates() {
-		dispatch(IssuesActions.resetComponentState());
-		dispatch(RisksActions.resetComponentState());
-		dispatch(GroupsActions.resetComponentState());
-		dispatch(CompareActions.resetComponentState());
 	}
 }
 

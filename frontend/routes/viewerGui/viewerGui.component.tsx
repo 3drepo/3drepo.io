@@ -49,24 +49,29 @@ interface IProps {
 		issueId?: string;
 		riskId?: string;
 	};
-	fetchUser: (teamspace, model) => void;
-	fetchJobs: (teamspace, model) => void;
-	getMyJob: (teamspace, model) => void;
 	startListenOnSelections: () => void;
 	stopListenOnSelections: () => void;
 	startListenOnModelLoaded: () => void;
 	stopListenOnModelLoaded: () => void;
 	fetchData: (teamspace, model, revision?) => void;
+	loadModel: (teamspace, model, revision?) => void;
+	resetPanelsStates: () => void;
 }
 
-export class ViewerGui extends React.PureComponent<IProps, any> {
+interface IState {
+	loadedModelId: string;
+	visiblePanels: any;
+}
+
+export class ViewerGui extends React.PureComponent<IProps, IState> {
 	public state = {
-		visiblePanels: {}
+		visiblePanels: {},
+		loadedModelId: null
 	};
 
 	public componentDidMount() {
-		const changes = {} as any;
-		const { queryParams: { issueId, riskId }, match: { params } } = this.props;
+		const changes = {} as IState;
+		const { modelSettings, queryParams: { issueId, riskId }, match: { params } } = this.props;
 
 		if (issueId || riskId) {
 			changes.visiblePanels = {};
@@ -78,20 +83,19 @@ export class ViewerGui extends React.PureComponent<IProps, any> {
 			}
 		}
 
-		this.handleLoadModelSettings();
+		this.props.startListenOnSelections();
+		this.props.startListenOnModelLoaded();
+		this.props.fetchData(params.teamspace, params.model, params.revision);
 
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
 
-		this.props.startListenOnSelections();
-		this.props.startListenOnModelLoaded();
-		this.props.fetchData(params.teamspace, params.model, params.revision);
 	}
 
-	public componentDidUpdate(prevProps) {
+	public componentDidUpdate(prevProps: IProps, prevState: IState) {
+		const changes = {} as IState;
 		const { modelSettings, isModelPending, match: { params } } = this.props;
-
 		const teamspaceChanged = params.teamspace !== prevProps.match.params.teamspace;
 		const modelChanged = params.model !== prevProps.match.params.model;
 
@@ -99,12 +103,21 @@ export class ViewerGui extends React.PureComponent<IProps, any> {
 			this.props.fetchData(params.teamspace, params.model, params.revision);
 		}
 
-		const isModelPendingChanged = isModelPending !== prevProps.isModelPending;
-		const settingsChanged = modelSettings._id !== prevProps.modelSettings._id;
-
-		if (isModelPendingChanged && settingsChanged && !prevProps.isModelPending) {
+		const settingsChanged = modelSettings._id !== prevState.loadedModelId;
+		if (!isModelPending && settingsChanged) {
+			changes.loadedModelId = modelSettings._id;
 			this.handleModelSettingsChange(modelSettings);
 		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
+		}
+	}
+
+	public componentWillUnmount() {
+		this.props.stopListenOnSelections();
+		this.props.stopListenOnModelLoaded();
+		this.props.resetPanelsStates();
 	}
 
 	private get urlParams() {
@@ -123,12 +136,11 @@ export class ViewerGui extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	private async handleModelSettingsChange(modelSettings) {
-		//this.props.
-	}
-
-	private handleLoadModelSettings = () => {
-
+	private handleModelSettingsChange(modelSettings) {
+		const { teamspace, model, revision } = this.props.match.params;
+		console.error('handleModelSettingsChange')
+		//TODO: this.PanelService.hideSubModels(this.issuesCardIndex, !modelSettings.federate);
+		this.props.loadModel(teamspace, model, revision);
 	}
 
 	private handleTogglePanel = (panelType) => {
