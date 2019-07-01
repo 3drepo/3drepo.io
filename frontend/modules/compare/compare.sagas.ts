@@ -36,7 +36,8 @@ import {
 	selectTargetDiffModels,
 	selectTargetModelsList,
 	selectComponentState,
-	selectCompareModels
+	selectCompareModels,
+	selectTargetModels
 } from './compare.selectors';
 import { TreeActions, selectNodesIndexesMap, selectTreeNodesList } from '../tree';
 import { VISIBILITY_STATES } from '../../constants/tree';
@@ -264,26 +265,26 @@ function* startComparisonOfFederation() {
 	const activeTab = yield select(selectActiveTab);
 	const isDiff = activeTab === DIFF_COMPARE_TYPE;
 
-	const targetModels = yield select(selectTargetModelsList);
-	const baseModels = yield select(selectBaseModelsList);
 	const compareModels = yield select(selectCompareModels);
-	const selectedModels = yield select(selectSelectedModelsMap);
-
-	yield setModelsNodesVisibility(compareModels, VISIBILITY_STATES.INVISIBLE);
-	yield setModelsNodesVisibility(baseModels, VISIBILITY_STATES.VISIBLE);
+	const baseModels = yield select(selectBaseModelsList);
+	const selectedModelsMap = yield select(selectSelectedModelsMap);
+	const targetModelsMap = yield select(selectTargetModels);
 
 	const modelsToLoad = [];
-	const modelsToReuse = [];
-	for (let index = 0; index < targetModels.length; index++) {
-		const model = targetModels[index];
+	const modelsToHide = [];
+	const modelsToShow = [...baseModels];
 
-		if (model && selectedModels[model._id]) {
+	for (let index = 0; index < compareModels.length; index++) {
+		const model = compareModels[index];
+		const isSelectedModel = selectedModelsMap[model._id];
+		const isTargetModel = targetModelsMap[model._id];
+
+		if (isTargetModel && isSelectedModel) {
 			const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
-			const sharedRevisionModel = compareModels.find(({ baseRevision }) => baseRevision.name === targetRevision.name);
-			const canReuseModel = sharedRevisionModel && selectedModels[sharedRevisionModel._id];
+			const canReuseModel = model.baseRevision.name === targetRevision.name && selectedModelsMap[model._id];
 
 			if (canReuseModel) {
-				modelsToReuse.push(sharedRevisionModel);
+				modelsToShow.push(model);
 				Viewer.diffToolSetAsComparator(
 					model.teamspace,
 					model._id
@@ -296,10 +297,13 @@ function* startComparisonOfFederation() {
 				);
 				modelsToLoad.push(modelPromise);
 			}
+		} else {
+			modelsToHide.push(model);
 		}
 	}
 
-	yield setModelsNodesVisibility(modelsToReuse, VISIBILITY_STATES.VISIBLE);
+	yield setModelsNodesVisibility(modelsToHide, VISIBILITY_STATES.INVISIBLE);
+	yield setModelsNodesVisibility(modelsToShow, VISIBILITY_STATES.VISIBLE);
 	yield all(modelsToLoad);
 
 	if (isDiff) {
