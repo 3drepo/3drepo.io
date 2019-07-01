@@ -694,7 +694,7 @@ export function* toggleSubmodelsIssues({ showSubmodelIssues }) {
 
 export function* removeResource({ resource }) {
 	try {
-		const teamspace = yield select(selectCurrentTeamspace);
+		const teamspace = yield select(selectCurrentModelTeamspace);
 		const issueId = (yield select(selectActiveIssueDetails))._id;
 		const model  = yield select(selectCurrentModel);
 		const username = (yield select(selectCurrentUser)).username;

@@ -166,6 +166,7 @@ async function removeResource(account, model,  resourceId, property, propertyId)
 		await collection.update({_id: resourceId}, { $set: ref });
 	}
 
+	ref[property] = [propertyId]; // This is to identify from where this ref has been dettached
 	return ref;
 }
 
