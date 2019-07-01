@@ -23,7 +23,19 @@ const FileRef = require("../models/fileRef");
 const utils = require("../utils");
 const responseCodes = require("../response_codes");
 
-router.get("/resources/:resourceId",middlewares.issue.canView,  downloadResource);
+/**
+ * @api {get} /:teamspace/:model/resources/:resourceId Get resource file
+ * @apiName getResource
+ * @apiGroup Resources
+ *
+ * @apiDescription Is the URL for downloading the resource file identified by the resourceId.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {String} resourceId The Id of the resource
+ *
+ */
+router.get("/resources/:resourceId", middlewares.issue.canView,  downloadResource);
 
 function downloadResource(req, res, next) {
 	const {account, model, resourceId } = req.params;
