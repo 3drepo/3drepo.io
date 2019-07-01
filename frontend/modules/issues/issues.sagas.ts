@@ -42,8 +42,8 @@ import {
 } from './issues.selectors';
 import { IssuesTypes, IssuesActions } from './issues.redux';
 import { NEW_PIN_ID } from '../../constants/viewer';
-import { selectTopicTypes, selectCurrentModel } from '../model';
-import { prepareResources, prepareResource } from '../../helpers/resources';
+import { selectTopicTypes, selectCurrentModel, selectCurrentModelTeamspace } from '../model';
+import { prepareResources } from '../../helpers/resources';
 import { EXTENSION_RE } from '../../constants/resources';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
@@ -725,7 +725,7 @@ export function* attachFileResources({ files }) {
 		);
 
 	const resourceIds = tempResources.map((resource) => resource._id);
-	const teamspace = yield select(selectCurrentTeamspace);
+	const teamspace = yield select(selectCurrentModelTeamspace);
 	const issueId = (yield select(selectActiveIssueDetails))._id;
 
 	try {
@@ -759,7 +759,7 @@ export function* attachFileResources({ files }) {
 
 export function* attachLinkResources({ links }) {
 	try {
-		const teamspace = yield select(selectCurrentTeamspace);
+		const teamspace = yield select(selectCurrentModelTeamspace);
 		const issueId = (yield select(selectActiveIssueDetails))._id;
 		const model = yield select(selectCurrentModel);
 		const names = links.map((link) => link.name);

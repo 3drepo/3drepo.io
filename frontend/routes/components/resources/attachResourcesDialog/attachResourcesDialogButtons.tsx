@@ -22,7 +22,7 @@ import {
 	VisualSettingsButtonsContainer
 } from '../../topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 
-export const DialogButtons = ({onClickCancel, validateQuota}) => {
+export const DialogButtons = ({onClickCancel, validateQuota, validateUploadLimit}) => {
 	return (
 		<VisualSettingsButtonsContainer>
 			<NeutralActionButton
@@ -40,7 +40,8 @@ export const DialogButtons = ({onClickCancel, validateQuota}) => {
 					color="secondary"
 					variant="raised"
 					type="submit"
-					disabled={!form.isValid || form.isValidating || !validateQuota(form.values.files)}
+					disabled={!form.isValid || form.isValidating ||
+						!validateQuota(form.values.files) || !validateUploadLimit(form.values.files) }
 				>
 					Save
 				</Button>

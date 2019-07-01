@@ -122,7 +122,11 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 									/>
 							}
 							{selectedTab === 1 && <AttachResourceUrls links={values.links}/>}
-								<DialogButtons onClickCancel={this.onCancel} validateQuota={this.validateQuota}/>
+								<DialogButtons
+									onClickCancel={this.onCancel}
+									validateQuota={this.validateQuota}
+									validateUploadLimit={this.validateUploadLimit}
+								/>
 						</Form>
 						)}
 				/>
