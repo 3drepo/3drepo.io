@@ -70,3 +70,9 @@ for database in db.database_names():
                             else:
                                 gridfs.GridFS(db, colName).delete(bson._id)
                                 print("\t\t\tGridFS entry deleted: " + bson.filename)
+
+##### Drop collection if empty #####
+                if not dryRun and db[colName + ".files"].count() == 0:
+                    db[colName + ".files"].drop()
+                    db[colName + ".chunks"].drop()
+                    print("\t\t\tEmpty collection dropped: " + colName + ".(files|chunks)")
