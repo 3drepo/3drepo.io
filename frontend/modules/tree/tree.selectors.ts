@@ -183,14 +183,14 @@ export const selectVisibleTreeNodesList = createSelector(
 	}
 );
 
-export const getSelectNodesByIds = (nodesIds) => createSelector(
+export const selectGetNodesByIds = (nodesIds) => createSelector(
 	selectTreeNodesList, selectNodesIndexesMap,
 	(treeNodesList, nodesIndexesMap) => {
 		return nodesIds.map((nodeId) => treeNodesList[nodesIndexesMap[nodeId]]);
 	}
 );
 
-export const getSelectDeepChildren = (nodeId) => createSelector(
+export const selectGetDeepChildren = (nodeId) => createSelector(
 	selectTreeNodesList, selectNodesIndexesMap,
 	(treeNodesList, nodesIndexesMap) => {
 		const nodeIndex = nodesIndexesMap[nodeId];
@@ -199,7 +199,7 @@ export const getSelectDeepChildren = (nodeId) => createSelector(
 	}
 );
 
-export const getSelectMeshesByIds = (nodesIds = []) => createSelector(
+export const selectGetMeshesByIds = (nodesIds = []) => createSelector(
 	selectTreeNodesList, selectNodesIndexesMap, selectMeshesByModelId,
 	(treeNodesList, nodesIndexesMap, idToMeshes) => {
 		if (!nodesIds.length) {
@@ -252,7 +252,7 @@ export const getSelectMeshesByIds = (nodesIds = []) => createSelector(
 	}
 );
 
-export const getSelectNodesIdsFromSharedIds = (objects = []) => createSelector(
+export const selectGetNodesIdsFromSharedIds = (objects = []) => createSelector(
 	selectNodesBySharedIdsMap,
 	(nodesBySharedIds) => {
 		if (!objects.length) {

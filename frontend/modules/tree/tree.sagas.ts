@@ -29,11 +29,11 @@ import {
 	selectNodesIndexesMap,
 	selectTreeNodesList,
 	selectExpandedNodesMap,
-	getSelectNodesByIds,
-	getSelectNodesIdsFromSharedIds,
+	selectGetNodesByIds,
+	selectGetNodesIdsFromSharedIds,
 	selectHiddenNodesIds,
 	selectDefaultHiddenNodesIds,
-	getSelectDeepChildren,
+	selectGetDeepChildren,
 	selectSelectionMap,
 	selectVisibilityMap,
 	selectFullySelectedNodesIds,
@@ -198,7 +198,7 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = f
 }
 
 function* handleNodesClickBySharedIds({ objects = [] }) {
-	const nodes = yield select(getSelectNodesIdsFromSharedIds(objects));
+	const nodes = yield select(selectGetNodesIdsFromSharedIds(objects));
 	yield put(TreeActions.handleNodesClick(nodes));
 }
 
@@ -239,7 +239,7 @@ function* showAllNodes() {
 }
 
 function* showNodesBySharedIds({ objects = [] }) {
-	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
+	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
 	yield showTreeNodes(nodesIds);
 }
 
@@ -260,7 +260,7 @@ function* hideSelectedNodes() {
 }
 
 function* hideNodesBySharedIds({ objects = [] }) {
-	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
+	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
 	yield hideTreeNodes(nodesIds, true);
 }
 
@@ -295,14 +295,14 @@ function* isolateSelectedNodes({ nodeId = null }) {
 	if (fullySelectedNodes.length) {
 		yield isolateNodes(fullySelectedNodes);
 	} else {
-		const deepChildren = yield select(getSelectDeepChildren(nodeId));
+		const deepChildren = yield select(selectGetDeepChildren(nodeId));
 		const deepChildrenIds = deepChildren.map(({ _id }) => _id);
 		yield isolateNodes([nodeId, ...deepChildrenIds]);
 	}
 }
 
 function* isolateNodesBySharedIds({ objects = []}) {
-	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
+	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
 	yield isolateNodes(nodesIds);
 }
 
@@ -338,7 +338,7 @@ function* deselectNodes({ nodesIds = [] }) {
 }
 
 function* deselectNodesBySharedIds({ objects = [] }) {
-	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
+	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
 	yield put(TreeActions.deselectNodes(nodesIds));
 }
 
@@ -348,7 +348,7 @@ function* deselectNodesBySharedIds({ objects = [] }) {
 function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false, colour }) {
 	try {
 		const lastNodeId = nodesIds[nodesIds.length - 1];
-		const [lastNode] = yield select(getSelectNodesByIds([lastNodeId]));
+		const [lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
 
 		const [result] = yield all([
 			call(TreeProcessing.selectNodes, { nodesIds, skipChildren }),
@@ -370,7 +370,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 }
 
 function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], colour?: number[]}) {
-	const nodesIds = yield select(getSelectNodesIdsFromSharedIds(objects));
+	const nodesIds = yield select(selectGetNodesIdsFromSharedIds(objects));
 	yield put(TreeActions.selectNodes(nodesIds, false, true, colour));
 }
 
