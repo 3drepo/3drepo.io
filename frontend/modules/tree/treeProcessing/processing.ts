@@ -105,8 +105,14 @@ export class Processing {
 		return { unhighlightedObjects };
 	}
 
-	public isolateNodes = ({ nodesIds = [], ifcSpacesHidden = true }: any) => {
+	public isolateNodes = ({ nodesIds = [], ifcSpacesHidden = true, skipChildren = false }: any) => {
 		const meshesToUpdate = [];
+
+		if (!skipChildren) {
+			const deepChildren = this.getDeepChildren(nodesIds[0]);
+			const deepChildrenIds = deepChildren.map(({ _id }) => _id);
+			nodesIds.push(...deepChildrenIds);
+		}
 
 		for (let index = 0; index < this.nodesList.length; index++) {
 			const node = this.nodesList[index];
@@ -116,6 +122,10 @@ export class Processing {
 				this.visibilityMap[node._id] = ifcSpacesHidden ? this.defaultVisibilityMap[node._id] : VISIBILITY_STATES.VISIBLE;
 				visibilityHasChanged = true;
 			} else if (this.isVisibleNode(node._id)) {
+				const nodeIndex
+				const { childrenIds } = this.nodesList[nodeIndex];
+				const children = this.getChildren(node._id);
+				const hasIsolatedChildren = 
 				this.visibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
 				visibilityHasChanged = true;
 			}

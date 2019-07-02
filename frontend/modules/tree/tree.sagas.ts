@@ -16,6 +16,7 @@
  */
 import { put, takeLatest, call, select, take, all, spawn } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
+import { uniq } from 'lodash';
 
 import TreeProcessing from './treeProcessing/treeProcessing';
 import * as API from '../../services/api';
@@ -275,10 +276,11 @@ function* hideTreeNodes(nodesIds = [], skipNested = false) {
 /**
  * ISOLATE NODES
  */
-function* isolateNodes(nodesIds = []) {
+function* isolateNodes(nodesIds = [], skipChildren = false) {
 	try {
 		if (nodesIds.length) {
-			const meshesToUpdate = yield TreeProcessing.isolateNodes({ nodesIds });
+			const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
+			const meshesToUpdate = yield TreeProcessing.isolateNodes({ nodesIds, skipChildren, ifcSpacesHidden });
 			const visibilityMap = yield select(selectVisibilityMap);
 
 			yield put(ViewerActions.clearHighlights());
@@ -293,11 +295,9 @@ function* isolateNodes(nodesIds = []) {
 function* isolateSelectedNodes({ nodeId = null }) {
 	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
 	if (fullySelectedNodes.length) {
-		yield isolateNodes(fullySelectedNodes);
+		yield isolateNodes(fullySelectedNodes, true);
 	} else {
-		const deepChildren = yield select(selectGetDeepChildren(nodeId));
-		const deepChildrenIds = deepChildren.map(({ _id }) => _id);
-		yield isolateNodes([nodeId, ...deepChildrenIds]);
+		yield isolateNodes([nodeId]);
 	}
 }
 

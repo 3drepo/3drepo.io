@@ -30,6 +30,7 @@ import { StarredMetaActions } from '../../../modules/starredMeta';
 import { BimActions } from '../../../modules/bim';
 import { IssuesActions } from '../../../modules/issues';
 import { CompareActions } from '../../../modules/compare';
+import { ViewerActions } from '../../../modules/viewer';
 
 class ModelController implements ng.IController {
 
