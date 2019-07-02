@@ -35,6 +35,16 @@ export const LeftPanels = styled.div`
 	flex-direction: column;
 `;
 
+export const RightPanels = styled.div`
+	width: 380px;
+	height: calc(100% - 95px);
+	position: absolute;
+	top: 0;
+	right: 90px;
+	display: flex;
+	flex-direction: column;
+`;
+
 export const LeftPanelsButtons = styled.div`
 	pointer-events: all;
 	display: flex;

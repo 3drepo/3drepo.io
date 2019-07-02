@@ -28,14 +28,15 @@ import { Groups } from './components/groups';
 import { Issues } from './components/issues';
 import { Compare } from './components/compare';
 import { Tree } from './components/tree';
+import { Bim } from './components/bim';
 import { PanelButton } from './components/panelButton/panelButton.component';
 import { RevisionsDropdown } from './components/revisionsDropdown';
 import { CloseFocusModeButton } from './components/closeFocusModeButton';
-import { Container, LeftPanels, LeftPanelsButtons, DataLoader } from './viewerGui.styles';
+import { Container, LeftPanels, RightPanels, LeftPanelsButtons, DataLoader } from './viewerGui.styles';
 
 interface IProps {
 	className?: string;
-	viewer: IViewerContext,
+	viewer: IViewerContext;
 	modelSettings: any;
 	isModelPending: boolean;
 	match: {
@@ -49,6 +50,7 @@ interface IProps {
 		issueId?: string;
 		riskId?: string;
 	};
+	visiblePanels: any;
 	startListenOnSelections: () => void;
 	stopListenOnSelections: () => void;
 	startListenOnModelLoaded: () => void;
@@ -56,11 +58,11 @@ interface IProps {
 	fetchData: (teamspace, model, revision?) => void;
 	loadModel: () => void;
 	resetPanelsStates: () => void;
+	setPanelVisibility: (panelName, visibility) => void;
 }
 
 interface IState {
 	loadedModelId: string;
-	visiblePanels: any;
 	showLoader: boolean;
 	loaderType: string;
 	loaderProgress: number;
@@ -68,7 +70,6 @@ interface IState {
 
 export class ViewerGui extends React.PureComponent<IProps, IState> {
 	public state = {
-		visiblePanels: {},
 		loadedModelId: null,
 		showLoader: false,
 		loaderType: null,
@@ -76,26 +77,20 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-		const changes = {} as IState;
-		const { modelSettings, queryParams: { issueId, riskId }, match: { params } } = this.props;
+		const { queryParams: { issueId, riskId }, match: { params } } = this.props;
 
 		if (issueId || riskId) {
-			changes.visiblePanels = {};
 			if (issueId) {
-				changes.visiblePanels[VIEWER_PANELS.ISSUES] = true;
+				this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
 			}
 			if (riskId) {
-				changes.visiblePanels[VIEWER_PANELS.RISKS] = true;
+				this.props.setPanelVisibility(VIEWER_PANELS.RISKS, true);
 			}
 		}
 
 		this.props.startListenOnSelections();
 		this.props.startListenOnModelLoaded();
 		this.props.fetchData(params.teamspace, params.model, params.revision);
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
-		}
 
 		setTimeout(() => {
 			this.setState({
@@ -193,7 +188,8 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 				<CloseFocusModeButton />
 				<Toolbar {...this.urlParams.teamspace} />
 				{this.renderLeftPanelsButtons()}
-				{this.renderLeftPanels(this.state.visiblePanels)}
+				{this.renderLeftPanels(this.props.visiblePanels)}
+				{this.renderRightPanels(this.props.visiblePanels)}
 				{this.renderLoader()}
 			</Container>
 		);
@@ -206,12 +202,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleTogglePanel = (panelType) => {
-		this.setState(({ visiblePanels }) => ({
-			visiblePanels: {
-				...visiblePanels,
-				[panelType]: !visiblePanels[panelType]
-			}
-		}));
+		this.props.setPanelVisibility(panelType, !this.props.visiblePanels[panelType]);
 	}
 
 	private get loaderText() {
@@ -236,7 +227,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 					onClick={this.handleTogglePanel}
 					label={name}
 					type={type}
-					active={this.state.visiblePanels[type]}
+					active={this.props.visiblePanels[type]}
 				/>
 			))}
 		</LeftPanelsButtons>
@@ -252,5 +243,11 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 			{visiblePanels[VIEWER_PANELS.COMPARE] && <Compare {...this.urlParams.teamspace} />}
 			{visiblePanels[VIEWER_PANELS.GIS] && <Gis {...this.urlParams.teamspace} />}
 		</LeftPanels>
+	)
+
+	private renderRightPanels = (visiblePanels) => (
+		<RightPanels>
+			{visiblePanels[VIEWER_PANELS.BIM] && <Bim {...this.urlParams.teamspace} />}
+		</RightPanels>
 	)
 }

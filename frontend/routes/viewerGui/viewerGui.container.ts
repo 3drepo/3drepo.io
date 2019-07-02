@@ -25,23 +25,25 @@ import { ViewerGui } from './viewerGui.component';
 import { TreeActions } from '../../modules/tree';
 import { ViewerActions } from '../../modules/viewer';
 import { selectSettings, selectIsPending } from '../../modules/model';
-import { ViewerGuiActions } from '../../modules/viewerGui';
+import { ViewerGuiActions, selectVisiblePanels } from '../../modules/viewerGui';
 
 const mapStateToProps = createStructuredSelector({
 	queryParams: selectQueryParams,
 	currentUser: selectCurrentUser,
 	modelSettings: selectSettings,
-	isModelPending: selectIsPending
+	isModelPending: selectIsPending,
+	visiblePanels: selectVisiblePanels
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchData: ViewerGuiActions.fetchData,
 	resetPanelsStates: ViewerGuiActions.resetPanelsStates,
+	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
 	loadModel: ViewerActions.loadModel,
 	startListenOnSelections: TreeActions.startListenOnSelections,
 	stopListenOnSelections: TreeActions.stopListenOnSelections,
 	startListenOnModelLoaded: ViewerActions.startListenOnModelLoaded,
-	stopListenOnModelLoaded: ViewerActions.stopListenOnModelLoaded,
+	stopListenOnModelLoaded: ViewerActions.stopListenOnModelLoaded
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(ViewerGui);

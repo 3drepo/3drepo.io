@@ -27,8 +27,7 @@ import { DialogActions } from '../dialog';
 import {
 	selectHelicopterSpeed,
 	selectIsClipEdit,
-	selectClipNumber,
-	selectIsMetadataVisible
+	selectClipNumber
 } from './viewer.selectors';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_CLIP_MODES } from '../../constants/viewer';
@@ -37,6 +36,7 @@ import { BimActions } from '../bim';
 import { selectUrlParams } from '../router/router.selectors';
 import { selectSettings } from '../model';
 import { ROUTES } from '../../constants/routes';
+import { selectIsMetadataVisible } from '../viewerGui';
 
 const getViewer = () => Viewer.viewer;
 

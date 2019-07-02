@@ -27,8 +27,7 @@ import {
 	selectIsFocusMode,
 	selectClippingMode,
 	selectIsClipEdit,
-	selectClipNumber,
-	selectIsMetadataVisible
+	selectClipNumber
 } from '../../../../modules/viewer';
 
 import { TreeActions } from '../../../../modules/tree';
@@ -39,6 +38,7 @@ import {
 } from '../../../../modules/measure';
 import { BimActions, selectIsActive } from '../../../../modules/bim';
 import { selectMetaKeysExist } from '../../../../modules/model';
+import { selectIsMetadataVisible, ViewerGuiActions } from '../../../../modules/viewerGui';
 
 const mapStateToProps = createStructuredSelector({
 	navigationMode: selectNavigationMode,
@@ -51,7 +51,7 @@ const mapStateToProps = createStructuredSelector({
 	isMetadataActive: selectIsActive,
 	isMeasureActive: selectIsMeasureActive,
 	isMeasureDisabled: selectIsMeasureDisabled,
-	metaKeysExist: selectMetaKeysExist,
+	metaKeysExist: selectMetaKeysExist
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -70,7 +70,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setMetadataVisibility: ViewerActions.setMetadataVisibility,
 	setMetadataActive: BimActions.setIsActive,
 	setMeasureVisibility: ViewerActions.setMeasureVisibility,
-	stopListenOnNumClip: ViewerActions.stopListenOnNumClip
+	stopListenOnNumClip: ViewerActions.stopListenOnNumClip,
+	setPanelVisibility: ViewerGuiActions.setPanelVisibility
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Toolbar);

@@ -16,5 +16,16 @@
  */
 
 import { createSelector } from 'reselect';
+import * as Bim from '../bim';
+import { VIEWER_PANELS } from '../../constants/viewerGui';
 
 export const selectViewerGuiDomain = (state) => Object.assign({}, state.viewerGui);
+
+export const selectVisiblePanels = createSelector(
+	selectViewerGuiDomain, (state) => state.visiblePanels
+);
+
+export const selectIsMetadataVisible = createSelector(
+	selectVisiblePanels, Bim.selectIsPending,
+	(state, isPending) => state[VIEWER_PANELS.BIM] && !isPending
+);

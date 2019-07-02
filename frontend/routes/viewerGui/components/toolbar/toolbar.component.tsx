@@ -54,6 +54,7 @@ import {
 	MAX_HELICOPTER_SPEED,
 	MIN_HELICOPTER_SPEED
 } from '../../../../constants/viewer';
+import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 
 const HelicopterIcon = () => <Helicopter IconProps={{ className: 'fontSizeSmall' }} />;
 
@@ -70,6 +71,7 @@ interface IProps {
 	isMeasureActive: boolean;
 	isMeasureDisabled: boolean;
 	metaKeysExist: boolean;
+	isMetadataVisible: boolean;
 	goToExtent: () => void;
 	setNavigationMode: (navigationMode) => void;
 	initialiseToolbar: () => void;
@@ -86,6 +88,7 @@ interface IProps {
 	setMetadataActive: (isActive) => void;
 	setMeasureVisibility: (visible) => void;
 	stopListenOnNumClip: () => void;
+	setPanelVisibility: (panelName, visibility) => void;
 }
 
 interface IState {
@@ -321,12 +324,16 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			isMetadataActive,
 			setMetadataVisibility,
 			setMetadataActive,
-			setMeasureVisibility
+			setMeasureVisibility,
+			setPanelVisibility,
+			isMetadataVisible
 		} = this.props;
 		setMetadataActive(!isMetadataActive);
+		setPanelVisibility(VIEWER_PANELS.BIM, !isMetadataVisible);
 
 		if (isMetadataActive) {
 			setMetadataVisibility(false);
+
 		} else {
 			setMeasureVisibility(false);
 		}

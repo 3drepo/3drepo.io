@@ -72,9 +72,6 @@ export const INITIAL_STATE = {
 	isFocusMode: false,
 	isClipEdit: false,
 	clipNumber: 0,
-	visiblePanels: {
-		[VIEWER_PANELS.METADATA]: false
-	},
 	isModelLoaded: false
 };
 
@@ -107,11 +104,6 @@ const setClipNumber = (state = INITIAL_STATE, {clipNumber}) => {
 	return { ...state, clipNumber };
 };
 
-const setPanelVisibility = (state = INITIAL_STATE, {panelName, isVisible}) => {
-	const visiblePanels = cloneDeep(state.visiblePanels);
-	return { ...state, visiblePanels: {...visiblePanels, [panelName]: isVisible} };
-};
-
 const setIsModelLoaded = (state = INITIAL_STATE, {isModelLoaded}) => {
 	return { ...state, isModelLoaded };
 };
@@ -124,6 +116,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,
 	[ViewerTypes.SET_CLIP_EDIT_SUCCESS] : setClipEditSuccess,
 	[ViewerTypes.SET_CLIP_NUMBER] : setClipNumber,
-	[ViewerTypes.SET_PANEL_VISIBILITY] : setPanelVisibility,
 	[ViewerTypes.SET_IS_MODEL_LOADED] : setIsModelLoaded
 });
