@@ -476,7 +476,6 @@ export class UnityUtil {
 			model
 		};
 		UnityUtil.toUnity('DiffToolAssignAsComparator', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
-
 	}
 
 	/**

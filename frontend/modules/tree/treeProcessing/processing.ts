@@ -234,17 +234,13 @@ export class Processing {
 		const { ifcSpacesHidden, skipChildren, visibility, skipParents } = extraData;
 
 		const parents = [];
-		const processedNodes = [];
 		const meshesToUpdate = [];
 
 		for (let nodeLoopIndex = 0; nodeLoopIndex < nodes.length; nodeLoopIndex++) {
 			const node = nodes[nodeLoopIndex];
 
 			if (node) {
-				const nodeVisibility = this.visibilityMap[node._id];
-				processedNodes.push(node._id);
-
-				if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE || visibility !== nodeVisibility) {
+				if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE || visibility !== this.visibilityMap[node._id]) {
 					if (node.type === NODE_TYPES.MESH) {
 						meshesToUpdate.push(node);
 					}
@@ -257,9 +253,8 @@ export class Processing {
 
 					for (let index = 0; index < children.length; index++) {
 						const child = children[index];
-						processedNodes.push(child._id);
 
-						if (nodeVisibility !== visibility && child.type === NODE_TYPES.MESH) {
+						if (this.visibilityMap[node._id] !== visibility && child.type === NODE_TYPES.MESH) {
 							meshesToUpdate.push(child);
 						}
 

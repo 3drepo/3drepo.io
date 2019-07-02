@@ -257,7 +257,7 @@ function* setModelsNodesVisibility(models, visibility) {
 		return _id;
 	});
 
-	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, false, true));
+	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, false, false));
 }
 
 function* startComparisonOfFederation() {
@@ -284,7 +284,11 @@ function* startComparisonOfFederation() {
 			const canReuseModel = model.baseRevision.name === targetRevision.name && selectedModelsMap[model._id];
 
 			if (canReuseModel) {
-				modelsToShow.push(model);
+				const isAlreadyVisible = modelsToShow.some(({ _id }) => !!model._id);
+
+				if (!isAlreadyVisible) {
+					modelsToShow.push(model);
+				}
 				Viewer.diffToolSetAsComparator(
 					model.teamspace,
 					model._id
