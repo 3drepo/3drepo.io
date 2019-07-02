@@ -434,7 +434,6 @@ export class Viewer {
 
 			if (idsIn) {
 				const uniqueIds = Array.from(new Set(idsIn));
-				console.log('highlightObjects uniqueIds', uniqueIds)
 				if (uniqueIds.length) {
 					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multiOverride, forceReHighlight);
 					return;

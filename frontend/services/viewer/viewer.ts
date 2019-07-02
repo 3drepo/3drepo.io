@@ -85,7 +85,7 @@ export class ViewerService {
 		return this.viewer.showAll();
 	}
 
-	public async clearHighlights() {
+	public clearHighlights = async () => {
 		await this.isViewerReady();
 		this.viewer.clearHighlights();
 	}
@@ -209,15 +209,6 @@ export class ViewerService {
 
 	public async highlightObjects(params) {
 		await this.isViewerReady();
-		console.log('Highlight objects call: ',
-			params.account,
-			params.model,
-			params.id ? [params.id] : params.ids,
-			params.zoom,
-			params.colour,
-			params.multi,
-			params.forceReHighlight
-		);
 		this.viewer.highlightObjects(
 			params.account,
 			params.model,
@@ -321,7 +312,7 @@ export class ViewerService {
 	}
 
 	public async zoomToHighlightedMeshes() {
-		await this.isViewerReady();
+		await this.isModelReady();
 		this.viewer.zoomToHighlightedMeshes();
 	}
 }

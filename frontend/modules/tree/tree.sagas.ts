@@ -34,7 +34,6 @@ import {
 	selectGetNodesIdsFromSharedIds,
 	selectHiddenNodesIds,
 	selectDefaultHiddenNodesIds,
-	selectGetDeepChildren,
 	selectSelectionMap,
 	selectVisibilityMap,
 	selectFullySelectedNodesIds,
@@ -62,6 +61,7 @@ const unhighlightObjects = (objects = []) => {
 
 const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
 	const promises = [];
+
 	for (let index = 0, size = objects.length; index < size; index++) {
 		const { meshes, teamspace, modelId } = objects[index];
 
@@ -188,7 +188,8 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = f
 	const isMultiSelectMode = addGroup || removeGroup;
 
 	if (!isMultiSelectMode) {
-		yield clearCurrentlySelected();
+		yield put(TreeActions.clearCurrentlySelected());
+		yield take(TreeTypes.UPDATE_DATA_REVISION);
 	}
 
 	if (removeGroup) {
@@ -217,7 +218,7 @@ function* getSelectedNodes() {
 }
 
 function* clearCurrentlySelected() {
-	Viewer.clearHighlights();
+	yield put(ViewerActions.clearHighlights());
 	yield all([
 		put(TreeActions.setActiveNode(null)),
 		call(TreeProcessing.clearSelected),
@@ -356,10 +357,10 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 		]);
 
 		const selectionMap = yield select(selectSelectionMap);
-		yield highlightObjects(result.highlightedObjects, selectionMap, colour);
+		yield call(highlightObjects, result.highlightedObjects, selectionMap, colour);
 
 		if (!skipExpand) {
-			yield expandToNode(lastNodeId);
+			yield call(expandToNode, lastNodeId);
 		}
 
 		yield put(TreeActions.setActiveNode(lastNodeId));
@@ -509,7 +510,7 @@ function* goToRootNode({ nodeId }) {
 
 function* zoomToHighlightedNodes() {
 	try {
-		console.log('CALL zoomToHighlightedNodes');
+		yield call(delay, 100);
 		yield put(ViewerActions.zoomToHighlightedMeshes());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('zoom', 'highlighted nodes', error));
