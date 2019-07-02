@@ -114,7 +114,7 @@ export class ViewerService {
 		this.initialised = initialised;
 	}
 
-	public async destroy() {
+	public destroy = async () => {
 		await this.isViewerReady();
 		this.diffToolDisableAndClear();
 		this.viewer.reset();
@@ -148,15 +148,15 @@ export class ViewerService {
 		}
 	}
 
-	public on(...args) {
+	public on = (...args) => {
 		this.viewer.on(...args);
 	}
 
-	public once(...args) {
+	public once = (...args) => {
 		this.viewer.once(...args);
 	}
 
-	public off(...args) {
+	public off = (...args) => {
 		this.viewer.off(...args);
 	}
 

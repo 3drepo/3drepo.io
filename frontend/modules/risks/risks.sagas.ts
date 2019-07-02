@@ -17,20 +17,27 @@
 
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
+import { push } from 'connected-react-router';
 
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
 import { analyticsService, EVENT_CATEGORIES, EVENT_ACTIONS } from '../../services/analytics';
-import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
+import { dispatch, getState } from '../../helpers/migration';
 import { getRiskPinColor, prepareRisk } from '../../helpers/risks';
 import { prepareComments, prepareComment } from '../../helpers/comments';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
 import { RISK_LEVELS } from '../../constants/risks';
+import { ROUTES } from '../../constants/routes';
+import { NEW_PIN_ID } from '../../constants/viewer';
+import { CHAT_CHANNELS } from '../../constants/chat';
+import { PIN_COLORS } from '../../styles';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentUser } from '../currentUser';
+import { selectIfcSpacesHidden, TreeActions } from '../tree';
+import { ChatActions } from '../chat';
 import {
 	selectActiveRiskId,
 	selectRisks,
@@ -40,11 +47,6 @@ import {
 	selectFilteredRisks
 } from './risks.selectors';
 import { RisksActions, RisksTypes } from './risks.redux';
-import { NEW_PIN_ID } from '../../constants/viewer';
-import { PIN_COLORS } from '../../styles';
-import { selectIfcSpacesHidden, TreeActions } from '../tree';
-import { CHAT_CHANNELS } from '../../constants/chat';
-import { ChatActions } from '../chat';
 
 function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));
@@ -447,14 +449,15 @@ function* setActiveRisk({ risk, revision }) {
 	}
 }
 
+function* goToRisk(teamspace, model, revision, riskId?) {
+	const path = [ROUTES.VIEWER, teamspace, model, revision].filter(Boolean).join('/');
+	const query = riskId ? `?riskId=${riskId}` : '';
+	yield put(push(`${path}${query}`));
+}
+
 function* showDetails({ teamspace, model, revision, risk }) {
 	try {
-		runAngularViewerTransition({
-			account: teamspace,
-			model,
-			revision,
-			riskId: risk._id
-		});
+		yield goToRisk(teamspace, model, revision, risk._id);
 
 		yield put(RisksActions.setActiveRisk(risk, revision));
 		yield put(RisksActions.setComponentState({ showDetails: true }));
@@ -469,13 +472,7 @@ function* closeDetails({ teamspace, model, revision }) {
 		yield Viewer.removePin({ id: NEW_PIN_ID });
 
 		if (activeRisk) {
-			runAngularViewerTransition({
-				account: teamspace,
-				model,
-				revision,
-				riskId: null,
-				noSet: true
-			});
+			yield goToRisk(teamspace, model, revision);
 		}
 
 		yield put(RisksActions.setComponentState({ showDetails: false }));

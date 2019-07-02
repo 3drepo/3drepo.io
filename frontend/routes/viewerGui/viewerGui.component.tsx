@@ -33,6 +33,7 @@ import { PanelButton } from './components/panelButton/panelButton.component';
 import { RevisionsDropdown } from './components/revisionsDropdown';
 import { CloseFocusModeButton } from './components/closeFocusModeButton';
 import { Container, LeftPanels, RightPanels, LeftPanelsButtons, DataLoader } from './viewerGui.styles';
+import { VIEWER_EVENTS } from '../../constants/viewer';
 
 interface IProps {
 	className?: string;
@@ -52,6 +53,10 @@ interface IProps {
 		riskId?: string;
 	};
 	visiblePanels: any;
+	risksMap: any;
+	issuesMap: any;
+	showIssueDetails: (teamspace, model, revision, id) => void;
+	showRiskDetails: (teamspace, model, revision, id) => void;
 	startListenOnSelections: () => void;
 	stopListenOnSelections: () => void;
 	startListenOnModelLoaded: () => void;
@@ -78,7 +83,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-		const { queryParams: { issueId, riskId }, match: { params } } = this.props;
+		const { queryParams: { issueId, riskId }, match: { params }, viewer } = this.props;
 
 		if (issueId || riskId) {
 			if (issueId) {
@@ -92,70 +97,80 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		this.props.startListenOnSelections();
 		this.props.startListenOnModelLoaded();
 		this.props.fetchData(params.teamspace, params.model, params.revision);
+		viewer.on(VIEWER_EVENTS.CLICK_PIN, this.handlePinClick);
 
-		setTimeout(() => {
-			this.setState({
-				showLoader: true,
-				loaderType: 'VIEWER_INIT',
-				loaderProgress: 10
-			}, () => {
-				setTimeout(() => {
-					this.setState({ loaderProgress: 15 }, () => {
-						setTimeout(() => {
-							this.setState({ loaderProgress: 40 }, () => {
-								setTimeout(() => {
-									this.setState({ loaderProgress: 87 }, () => {
-										setTimeout(() => {
-											this.setState({
-												loaderType: 'MODEL_DOWNLOAD',
-												loaderProgress: 5
-											}, () => {
-													setTimeout(() => {
-														this.setState({
-															loaderProgress: 68
-														}, () => {
-																setTimeout(() => {
-																	this.setState({
-																		loaderType: 'MODEL_LOAD',
-																		loaderProgress: 68
-																	}, () => {
-																			setTimeout(() => {
-																				this.setState({ loaderProgress: 15 }, () => {
-																					setTimeout(() => {
-																						this.setState({ loaderProgress: 40 }, () => {
-																							setTimeout(() => {
-																								this.setState({ loaderProgress: 99 }, () => {
-																									setTimeout(() => {
-																										this.setState({ showLoader: null });
-																									}, 500);
-																								});
-																							}, 500);
-																						});
-																					}, 500);
-																				});
-																			}, 500);
-																	});
-																}, 500);
-														});
-													}, 500);
-											});
-										}, 500);
-									});
-								}, 500);
-							});
-						}, 500);
-					});
-				}, 500);
-			});
-		}, 2000);
+		// setTimeout(() => {
+		// 	this.setState({
+		// 		showLoader: true,
+		// 		loaderType: 'VIEWER_INIT',
+		// 		loaderProgress: 10
+		// 	}, () => {
+		// 		setTimeout(() => {
+		// 			this.setState({ loaderProgress: 15 }, () => {
+		// 				setTimeout(() => {
+		// 					this.setState({ loaderProgress: 40 }, () => {
+		// 						setTimeout(() => {
+		// 							this.setState({ loaderProgress: 87 }, () => {
+		// 								setTimeout(() => {
+		// 									this.setState({
+		// 										loaderType: 'MODEL_DOWNLOAD',
+		// 										loaderProgress: 5
+		// 									}, () => {
+		// 											setTimeout(() => {
+		// 												this.setState({
+		// 													loaderProgress: 68
+		// 												}, () => {
+		// 														setTimeout(() => {
+		// 															this.setState({
+		// 																loaderType: 'MODEL_LOAD',
+		// 																loaderProgress: 68
+		// 															}, () => {
+		// 																	setTimeout(() => {
+		// 																		this.setState({ loaderProgress: 15 }, () => {
+		// 																			setTimeout(() => {
+		// 																				this.setState({ loaderProgress: 40 }, () => {
+		// 																					setTimeout(() => {
+		// 																						this.setState({ loaderProgress: 99 }, () => {
+		// 																							setTimeout(() => {
+		// 																								this.setState({ showLoader: null });
+		// 																							}, 500);
+		// 																						});
+		// 																					}, 500);
+		// 																				});
+		// 																			}, 500);
+		// 																		});
+		// 																	}, 500);
+		// 															});
+		// 														}, 500);
+		// 												});
+		// 											}, 500);
+		// 									});
+		// 								}, 500);
+		// 							});
+		// 						}, 500);
+		// 					});
+		// 				}, 500);
+		// 			});
+		// 		}, 500);
+		// 	});
+		// }, 2000);
 
 	}
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
 		const changes = {} as IState;
-		const { modelSettings, isModelPending, match: { params }, isFocusMode } = this.props;
+		const { modelSettings, isModelPending, match: { params }, queryParams } = this.props;
 		const teamspaceChanged = params.teamspace !== prevProps.match.params.teamspace;
 		const modelChanged = params.model !== prevProps.match.params.model;
+
+		const { issueId, riskId } = queryParams;
+
+		if (issueId !== prevProps.queryParams.issueId) {
+			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
+		}
+		if (riskId !== prevProps.queryParams.riskId) {
+			this.props.setPanelVisibility(VIEWER_PANELS.RISKS, true);
+		}
 
 		if (teamspaceChanged || modelChanged) {
 			this.props.fetchData(params.teamspace, params.model, params.revision);
@@ -173,6 +188,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
+		this.props.viewer.off(VIEWER_EVENTS.CLICK_PIN);
 		this.props.stopListenOnSelections();
 		this.props.stopListenOnModelLoaded();
 		this.props.resetPanelsStates();
@@ -203,6 +219,20 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		console.error('handleModelSettingsChange')
 		//TODO: this.PanelService.hideSubModels(this.issuesCardIndex, !modelSettings.federate);
 		this.props.loadModel();
+	}
+
+	private handlePinClick = ({ id }) => {
+		const { risksMap, issuesMap, showIssueDetails, showRiskDetails, match, setPanelVisibility } = this.props;
+		const { teamspace, model, revision } = match.params;
+		if (risksMap[id]) {
+			setPanelVisibility(VIEWER_PANELS.RISKS, true);
+			showRiskDetails(teamspace, model, revision, risksMap[id]);
+		}
+
+		if (issuesMap[id]) {
+			setPanelVisibility(VIEWER_PANELS.ISSUES, true);
+			showIssueDetails(teamspace, model, revision, issuesMap[id]);
+		}
 	}
 
 	private handleTogglePanel = (panelType) => {
@@ -239,19 +269,19 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 	private renderLeftPanels = (visiblePanels) => (
 		<LeftPanels>
-			{visiblePanels[VIEWER_PANELS.ISSUES] && <Issues {...this.urlParams.teamspace} />}
-			{visiblePanels[VIEWER_PANELS.RISKS] && <Risks {...this.urlParams.teamspace} />}
-			{visiblePanels[VIEWER_PANELS.GROUPS] && <Groups {...this.urlParams.teamspace} />}
-			{visiblePanels[VIEWER_PANELS.VIEWS] && <Views {...this.urlParams.teamspace} />}
-			{visiblePanels[VIEWER_PANELS.TREE] && <Tree {...this.urlParams.teamspace} />}
-			{visiblePanels[VIEWER_PANELS.COMPARE] && <Compare {...this.urlParams.teamspace} />}
-			{visiblePanels[VIEWER_PANELS.GIS] && <Gis {...this.urlParams.teamspace} />}
+			{visiblePanels[VIEWER_PANELS.ISSUES] && <Issues {...this.urlParams} />}
+			{visiblePanels[VIEWER_PANELS.RISKS] && <Risks {...this.urlParams} />}
+			{visiblePanels[VIEWER_PANELS.GROUPS] && <Groups {...this.urlParams} />}
+			{visiblePanels[VIEWER_PANELS.VIEWS] && <Views {...this.urlParams} />}
+			{visiblePanels[VIEWER_PANELS.TREE] && <Tree {...this.urlParams} />}
+			{visiblePanels[VIEWER_PANELS.COMPARE] && <Compare {...this.urlParams} />}
+			{visiblePanels[VIEWER_PANELS.GIS] && <Gis {...this.urlParams} />}
 		</LeftPanels>
 	)
 
 	private renderRightPanels = (visiblePanels) => (
 		<RightPanels>
-			{visiblePanels[VIEWER_PANELS.BIM] && <Bim {...this.urlParams.teamspace} />}
+			{visiblePanels[VIEWER_PANELS.BIM] && <Bim {...this.urlParams} />}
 		</RightPanels>
 	)
 }

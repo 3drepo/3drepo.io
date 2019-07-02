@@ -476,7 +476,7 @@ function* setActiveIssue({ issue, revision }) {
 
 function* goToIssue(teamspace, model, revision, issueId?) {
 	const path = [ROUTES.VIEWER, teamspace, model, revision].filter(Boolean).join('/');
-	const query = issueId ? `?${issueId}` : '';
+	const query = issueId ? `?issueId=${issueId}` : '';
 	yield put(push(`${path}${query}`));
 }
 

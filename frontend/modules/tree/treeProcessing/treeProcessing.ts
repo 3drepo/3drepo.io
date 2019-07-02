@@ -7,10 +7,12 @@ class TreeProcessing {
 	private resolves = {} as any;
 	private rejects = {} as any;
 	private loaderWorker;
-	private processing: Processing;
+	private processing = {
+		clearCurrentlySelected: Function.prototype
+	} as Processing;
 
 	get data() {
-		return (this.processing || {}) as ITreeProcessingData;
+		return (this.processing) as ITreeProcessingData;
 	}
 
 	public transformData = (payload) => {

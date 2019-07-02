@@ -7,7 +7,11 @@ export const getAngularService = Function.prototype;
 
 // Should be replaced with proper react-redux connect if app is fully migrated
 const initialState = {};
-export const history = createBrowserHistory();
+export const history = createBrowserHistory({
+	getUserConfirmation(message, callback) {
+		debugger;
+	}
+});
 
 export const store = configureStore(initialState, history);
 

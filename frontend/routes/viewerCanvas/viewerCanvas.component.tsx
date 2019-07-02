@@ -16,24 +16,45 @@
  */
 
 import * as React from 'react';
+import EventListener from 'react-event-listener';
 
 import { IViewerContext } from '../../contexts/viewer.context';
+import { VIEWER_EVENTS } from '../../constants/viewer';
 import { Container } from './viewerCanvas.styles';
 
 interface IProps {
 	className?: string;
 	viewer: IViewerContext;
+	match: {
+		params: {
+			model: string;
+			teamspace: string;
+			revision?: string;
+		}
+	};
+	changePinColor: (params) => void;
+	setCamera: (params) => void;
+	removeUnsavedPin: () => void;
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	private containerRef = React.createRef<HTMLElement>();
 
 	public componentDidMount() {
-		this.props.viewer.init(this.containerRef.current);
+		const { viewer, changePinColor, setCamera, removeUnsavedPin } = this.props;
+		viewer.init(this.containerRef.current);
+
+		viewer.on(VIEWER_EVENTS.CHANGE_PIN_COLOUR, changePinColor);
+		viewer.on(VIEWER_EVENTS.SET_CAMERA, setCamera);
+		viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED_PIN_MODE, removeUnsavedPin);
 	}
 
 	public componentWillUnmount() {
-		this.props.viewer.destroy();
+		const { viewer } = this.props;
+		viewer.off(VIEWER_EVENTS.CHANGE_PIN_COLOUR);
+		viewer.off(VIEWER_EVENTS.SET_CAMERA);
+		viewer.off(VIEWER_EVENTS.BACKGROUND_SELECTED_PIN_MODE);
+		viewer.destroy();
 	}
 
 	public render() {
