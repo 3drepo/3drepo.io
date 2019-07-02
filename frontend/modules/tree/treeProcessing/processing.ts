@@ -1,4 +1,4 @@
-import { memoize, intersection, keys, pickBy, uniqBy } from 'lodash';
+import { memoize, intersection, keys, pickBy, uniqBy, keys } from 'lodash';
 import { SELECTION_STATES, VISIBILITY_STATES, NODE_TYPES } from '../../../constants/tree';
 
 export class Processing {
@@ -107,25 +107,27 @@ export class Processing {
 
 	public isolateNodes = ({ nodesIds = [], ifcSpacesHidden = true, skipChildren = false }: any) => {
 		const meshesToUpdate = [];
+		const parentsMap = {};
 
-		if (!skipChildren) {
-			const deepChildren = this.getDeepChildren(nodesIds[0]);
-			const deepChildrenIds = deepChildren.map(({ _id }) => _id);
-			nodesIds.push(...deepChildrenIds);
+		for (let index = 0; index < nodesIds.length; index++) {
+			const [node] = this.getNodesByIds([nodesIds[index]]);
+			parentsMap[node.parentId] = true;
+
+			if (!skipChildren) {
+				const deepChildren = this.getDeepChildren(node);
+				const deepChildrenIds = deepChildren.map(({ _id }) => _id);
+				nodesIds.push(...deepChildrenIds);
+			}
 		}
 
-		for (let index = 0; index < this.nodesList.length; index++) {
+		for (let index = this.nodesList.length - 1; index >= 0; index--) {
 			const node = this.nodesList[index];
 			const shouldBeVisible = nodesIds.includes(node._id);
 			let visibilityHasChanged = false;
 			if (shouldBeVisible) {
 				this.visibilityMap[node._id] = ifcSpacesHidden ? this.defaultVisibilityMap[node._id] : VISIBILITY_STATES.VISIBLE;
 				visibilityHasChanged = true;
-			} else if (this.isVisibleNode(node._id)) {
-				const nodeIndex
-				const { childrenIds } = this.nodesList[nodeIndex];
-				const children = this.getChildren(node._id);
-				const hasIsolatedChildren = 
+			} else if (this.isVisibleNode(node._id) && !parentsMap[node._id]) {
 				this.visibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
 				visibilityHasChanged = true;
 			}
@@ -136,6 +138,10 @@ export class Processing {
 			this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
 		}
 
+		this.updateParentsVisibility(this.getNodesByIds(keys(parentsMap)), {
+			visibility: VISIBILITY_STATES.PARENT_OF_INVISIBLE,
+			ifcSpacesHidden
+		});
 		this.selectionMap = { ...this.selectionMap };
 		this.visibilityMap = { ...this.visibilityMap };
 
@@ -170,11 +176,8 @@ export class Processing {
 	private updateParentsVisibility = (nodes = [], extraData) => {
 		const unhighlightedObjects = [];
 
-		const processedNodes = [];
-
 		while (nodes.length > 0) {
 			const node = nodes.pop();
-			processedNodes.push(node._id);
 
 			if (node.hasChildren) {
 				const children = this.getChildren(node);
