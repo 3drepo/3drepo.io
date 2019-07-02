@@ -251,7 +251,7 @@ export class ViewerService {
 			data: {
 				message
 			},
-			logError: isUnity ? 'Unity errored and user canceled reload' : '',
+			logError: isUnity ? 'Unity errored and user cancelled reload' : '',
 			onConfirm: () => {
 				if (reload) {
 					location.reload();
