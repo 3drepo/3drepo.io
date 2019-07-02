@@ -81,6 +81,19 @@ const statusEnum = {
 	"CLOSED": C.ISSUE_STATUS_CLOSED
 };
 
+function setViewpointScreenshot(dbCol, viewpoint) {
+	if (!viewpoint || !viewpoint.screenshot) {
+		return viewpoint;
+	}
+
+	const issueId = utils.uuidToString(dbCol._id);
+	const viewpointId = utils.uuidToString(viewpoint.guid);
+
+	viewpoint.screenshot = dbCol.account + "/" + dbCol.model + "/issues/" + issueId + "/viewpoints/" + viewpointId + "/screenshot.png";
+	viewpoint.screenshotSmall = dbCol.account + "/" + dbCol.model + "/issues/" + issueId + "/viewpoints/" + viewpointId + "/screenshotSmall.png";
+	return viewpoint;
+}
+
 function clean(dbCol, issueToClean) {
 	const idKeys = ["_id", "rev_id", "parent", "group_id"];
 	const commentIdKeys = ["rev_id", "guid", "viewpoint"];
@@ -106,8 +119,7 @@ function clean(dbCol, issueToClean) {
 			});
 
 			if (issueToClean.viewpoints[i].screenshot) {
-				issueToClean.viewpoints[i].screenshot = issueToClean.account + "/" + issueToClean.model + "/issues/" + issueToClean._id + "/viewpoints/" + issueToClean.viewpoints[i].guid + "/screenshot.png";
-				issueToClean.viewpoints[i].screenshotSmall = issueToClean.account + "/" + issueToClean.model + "/issues/" + issueToClean._id + "/viewpoints/" + issueToClean.viewpoints[i].guid + "/screenshotSmall.png";
+				setViewpointScreenshot(issueToClean, issueToClean.viewpoints[i]);
 			}
 
 			if (0 === i) {
@@ -783,7 +795,7 @@ issue.getThumbnail = function(dbCol, uid) {
 };
 
 issue.addComment = async function(account, model, issueId, user, data) {
-	if (!data.comment || !data.comment.trim()) {
+	if ((!data.comment || !data.comment.trim()) && !_.get(data,"viewpoint.screenshot")) {
 		throw { resCode: responseCodes.ISSUE_COMMENT_NO_TEXT};
 	}
 
@@ -816,6 +828,9 @@ issue.addComment = async function(account, model, issueId, user, data) {
 	const viewpointPush =  viewpoint ? {$push: { viewpoints: viewpoint }} : {};
 
 	await issues.update({ _id }, {...viewpointPush ,$set : {comments}});
+
+	const dbCol = {account, model, _id: issueId};
+	setViewpointScreenshot(dbCol, viewpoint);
 
 	// 6. Return the new comment.
 	return {...comment, viewpoint, guid: utils.uuidToString(comment.guid)};
