@@ -12,7 +12,6 @@ describe("Implied permission::", function () {
 	const app = require("../../services/api.js").createApp();
 	const sharedTeamspace = "imsharedTeamspace";
 	const C = require("../../constants");
-	const middlewares = require("../../middlewares/middlewares");
 	const request = require("supertest");
 	const expect = require("chai").expect;
 	const model = {
@@ -242,7 +241,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
+			agent.post(`/${sharedTeamspace}/${modelId}/issues/${issueId}/comments`)
 				.send(comment)
 				.expect(200 , done);
 		});
@@ -541,7 +540,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
+			agent.post(`/${sharedTeamspace}/${modelId}/issues/${issueId}/comments`)
 				.send(comment)
 				.expect(200 , done);
 		});
@@ -565,7 +564,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
+			agent.post(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}/comments`)
 				.send(comment)
 				.expect(401 , done);
 		});
@@ -833,7 +832,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
+			agent.post(`/${sharedTeamspace}/${modelId}/issues/${issueId}/comments`)
 				.send(comment)
 				.expect(404 , done);
 		});
@@ -857,7 +856,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
+			agent.post(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}/comments`)
 				.send(comment)
 				.expect(401 , done);
 		});
@@ -1118,7 +1117,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
+			agent.post(`/${sharedTeamspace}/${modelId}/issues/${issueId}/comments`)
 				.send(comment)
 				.expect(401 , done);
 		});
@@ -1142,7 +1141,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
+			agent.post(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}/comments`)
 				.send(comment)
 				.expect(401 , done);
 		});
@@ -1394,7 +1393,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
+			agent.post(`/${sharedTeamspace}/${modelId}/issues/${issueId}/comments`)
 				.send(comment)
 				.expect(401 , done);
 		});
@@ -1418,7 +1417,7 @@ describe("Implied permission::", function () {
 				}
 			};
 
-			agent.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
+			agent.post(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}/comments`)
 				.send(comment)
 				.expect(401 , done);
 		});

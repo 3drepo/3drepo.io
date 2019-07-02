@@ -354,7 +354,7 @@ router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.noti
  * @apiSuccess (200) {Object} Updated Issue Object.
  *
  */
-router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /:teamspace/:model/revision/:rid/issues Store issue based on revision
@@ -377,7 +377,65 @@ router.post("/revision/:rid/issues", middlewares.issue.canCreate, storeIssue, re
  * @apiParam {String} rid Unique Revision ID to update to.
  * @apiParam {String} issueId Unique Issue ID to update.
  */
-router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {post} /:teamspace/:model/issues/:issueId/comments Add an comment for an issue
+ * @apiName commentIssue
+ * @apiGroup Issues
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {String} issueId Unique Issue ID to update.
+ * @apiParam {Json} PAYLOAD The data with the comment to be added.
+ * @apiParamExample {json} PAYLOAD
+ *    {
+ *      "comment": "This is a commment",
+ *      "viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
+ *    }
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *   {
+ *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
+ *       comment: "This is a commment",
+ *       created: 1558534690327,
+ *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
+ *       owner: "username",
+ *       viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
+ *   }
+ *
+ * @apiError 404 Issue not found
+ * @apiError 400 Comment with no text
+ * */
+router.post("/issues/:issueId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {delete} /:teamspace/:model/issues/:issueId/comments Deletes an comment from an issue
+ * @apiName commentIssue
+ * @apiGroup Issues
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {String} issueId Unique Issue ID to update.
+ * @apiParam {Json} PAYLOAD The data with the comment guid to be deleted.
+ * @apiParamExample {json} PAYLOAD
+ *    {
+ *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
+ *    }
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *   {
+ *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
+ *   }
+ *
+ * @apiError 404 Issue not found
+ * @apiError 401 Not authorized, when the user is not the owner
+ * @apiError 400 Issue comment sealed, when the user is trying to delete a comment that is sealed
+ * @apiError 400 GUID invalid, when the user sent an invalid guid
+ * */
+router.delete("/issues/:issueId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
 
 function storeIssue(req, res, next) {
 	const data = req.body;
@@ -404,9 +462,9 @@ function updateIssue(req, res, next) {
 
 	const issueId = req.params.issueId;
 
-	return Issue.updateAttrs(dbCol, issueId, data).then((issue) => {
-		req.dataModel = issue;
-		req.userNotifications = issue.userNotifications;
+	return Issue.update(dbCol, issueId, data).then(({newIssue, oldIssue}) => {
+		req.dataModel = newIssue;
+		req.oldDataModel = oldIssue;
 		next();
 	}).catch((err) => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -575,6 +633,32 @@ function getThumbnail(req, res, next) {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
+	});
+}
+
+function addComment(req, res, next) {
+	const user = req.session.user.username;
+	const data =  req.body;
+	const {account, model, issueId} = req.params;
+
+	Issue.addComment(account, model, issueId, user, data).then(comment => {
+		req.dataModel = comment;
+		next();
+	}).catch(err => {
+		responseCodes.onError(req, res, err);
+	});
+}
+
+function deleteComment(req, res, next) {
+	const user = req.session.user.username;
+	const guid = req.body.guid;
+	const {account, model, issueId} = req.params;
+
+	Issue.deleteComment(account, model, issueId, guid, user).then(comment => {
+		req.dataModel = comment;
+		next();
+	}).catch(err => {
+		responseCodes.onError(req, res, err);
 	});
 }
 

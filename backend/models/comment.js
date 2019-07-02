@@ -30,7 +30,6 @@ const fieldTypes = {
 	"mitigation": "[object String]",
 	"owner": "[object String]",
 	"pinPosition": "[object Array]",
-	"rev_id": "[object Object]",
 	"sealed": "[object Boolean]",
 	"screenshot": "[object Object]",
 	"to": "[object String]",
@@ -39,24 +38,16 @@ const fieldTypes = {
 };
 
 class CommentGenerator {
-	constructor(owner, revId = undefined) {
+	constructor(owner) {
 		this.guid = utils.generateUUID();
 		this.created = (new Date()).getTime();
 		this.owner = owner;
-
-		if (revId) {
-			if ("[object String]" === Object.prototype.toString.call(revId)) {
-				revId = utils.stringToUUID(revId);
-			}
-
-			this.rev_id = revId;
-		}
 	}
 }
 
 class TextCommentGenerator extends CommentGenerator {
-	constructor(owner, revId, commentText, viewpoint, pinPosition) {
-		super(owner, revId);
+	constructor(owner, commentText, viewpoint, pinPosition) {
+		super(owner);
 
 		if (fieldTypes.comment === Object.prototype.toString.call(commentText)) {
 			if (commentText.length > 0 || (viewpoint &&
@@ -100,8 +91,8 @@ class SystemCommentGenerator extends CommentGenerator {
 }
 
 class RiskMitigationCommentGenerator extends TextCommentGenerator {
-	constructor(owner, revId, likelihood, consequence, mitigation, viewpoint, pinPosition) {
-		super(owner, revId, mitigation, viewpoint, pinPosition);
+	constructor(owner, likelihood, consequence, mitigation, viewpoint, pinPosition) {
+		super(owner, mitigation, viewpoint, pinPosition);
 
 		likelihood = parseInt(likelihood);
 		consequence = parseInt(consequence);
@@ -119,7 +110,7 @@ class RiskMitigationCommentGenerator extends TextCommentGenerator {
 }
 
 module.exports = {
-	newTextComment : (owner, revId, commentText, viewpoint, pinPosition) => new TextCommentGenerator(owner, revId, commentText, viewpoint, pinPosition),
+	newTextComment : (owner, commentText, viewpoint, pinPosition) => new TextCommentGenerator(owner, commentText, viewpoint, pinPosition),
 	newSystemComment : (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to),
-	newRiskMitigationComment : (owner, revId, likelihood, consequence, mitigation, viewpoint, pinPosition) => new RiskMitigationCommentGenerator(owner, revId, likelihood, consequence, mitigation, viewpoint, pinPosition)
+	newRiskMitigationComment : (owner, likelihood, consequence, mitigation, viewpoint, pinPosition) => new RiskMitigationCommentGenerator(owner, likelihood, consequence, mitigation, viewpoint, pinPosition)
 };

@@ -29,5 +29,27 @@ module.exports = {
 		deletedNotifications.forEach(chatEvent.deletedNotification.bind(null,sessionId));
 		upsertedNotifications.forEach(chatEvent.upsertedNotification.bind(null,sessionId));
 		next();
+	},
+
+	onCommentCreated: function(req, res, next) {
+		const sessionId = req.headers[C.HEADER_SOCKET_ID];
+		const comment = req.dataModel;
+		const account = req.params.account;
+		const model = req.params.model;
+		const _id = req.params.issueId;
+
+		chatEvent.newComment(sessionId, account, model, _id, comment);
+		next();
+	},
+
+	onCommentDeleted: function(req, res, next) {
+		const sessionId = req.headers[C.HEADER_SOCKET_ID];
+		const comment = req.dataModel;
+		const account = req.params.account;
+		const model = req.params.model;
+		const _id = req.params.issueId;
+
+		chatEvent.commentDeleted (sessionId, account, model, _id, comment);
+		next();
 	}
 };

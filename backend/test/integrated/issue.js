@@ -555,7 +555,7 @@ describe("Issues", function () {
 						});
 				},
 				function(done) {
-					agent.patch(`/${username}/${model}/issues/${issueId}`)
+					agent.post(`/${username}/${model}/issues/${issueId}/comments`)
 						.send({ comment : "hello world"})
 						.expect(200 , done);
 				},
@@ -1152,7 +1152,7 @@ describe("Issues", function () {
 							}
 						};
 
-						agent.patch(`/${username}/${model}/issues/${issueId}`)
+						agent.post(`/${username}/${model}/issues/${issueId}/comments`)
 							.send(comment)
 							.expect(200 , done);
 
@@ -1160,6 +1160,10 @@ describe("Issues", function () {
 				], done);
 
 			});
+
+
+			/*
+			The UI doesnt support this
 
 			it("should succeed", function(done) {
 				agent.patch(`/${username}/${model}/issues/${issueId}`)
@@ -1177,12 +1181,13 @@ describe("Issues", function () {
 						done(err);
 					});
 			});
+			*/
 
 		});
 
 		describe("and then commenting", function() {
-
 			let issueId;
+			let commentId = null
 
 			before(function(done) {
 
@@ -1218,7 +1223,7 @@ describe("Issues", function () {
 
 				async.series([
 					function(done) {
-						agent.patch(`/${username}/${model}/issues/${issueId}`)
+						agent.post(`/${username}/${model}/issues/${issueId}/comments`)
 							.send(comment)
 							.expect(200 , done);
 					},
@@ -1240,6 +1245,7 @@ describe("Issues", function () {
 							expect(res.body.comments[0].viewpoint.far).to.equal(comment.viewpoint.far);
 							expect(res.body.comments[0].viewpoint.near).to.equal(comment.viewpoint.near);
 							expect(res.body.comments[0].viewpoint.clippingPlanes).to.deep.equal(comment.viewpoint.clippingPlanes);
+							commentId = res.body.comments[0].guid;
 
 							done(err);
 						});
@@ -1247,6 +1253,10 @@ describe("Issues", function () {
 				], done);
 
 			});
+
+
+			/*
+			There is no way of doing this through the ui
 
 			it("should succeed if editing an existing comment", function(done) {
 
@@ -1272,12 +1282,13 @@ describe("Issues", function () {
 				], done);
 
 			});
+			*/
 
 			it("should fail if comment is empty", function(done) {
 
 				const comment = { comment: "" };
 
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
+				agent.post(`/${username}/${model}/issues/${issueId}/comments`)
 					.send(comment)
 					.expect(400 , function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_NO_TEXT.value);
@@ -1287,10 +1298,8 @@ describe("Issues", function () {
 
 			it("should succeed if removing an existing comment", function(done) {
 
-				const comment = { commentIndex: 0, delete: true };
-
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
-					.send(comment)
+				agent.delete(`/${username}/${model}/issues/${issueId}/comments`)
+					.send({guid:commentId})
 					.expect(200 , function(err, res) {
 						done(err);
 					});
@@ -1331,7 +1340,7 @@ describe("Issues", function () {
 						// add an comment
 						const comment = { comment: "hello world" };
 
-						agent.patch(`/${username}/${model}/issues/${issueId}`)
+						agent.post(`/${username}/${model}/issues/${issueId}/comments`)
 							.send(comment)
 							.expect(200 , function(err, res) {
 								done(err);
