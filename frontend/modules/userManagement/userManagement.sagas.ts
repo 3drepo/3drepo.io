@@ -185,8 +185,14 @@ export function* fetchModelsPermissions({ models }) {
 
 		if (models.length) {
 			const requiredModels = models.map(({ model }) => model);
-			const response = yield API.fetchModelsPermissions(teamspace, requiredModels);
-			data = response.data;
+			const promises = [];
+			const chunks = 10;
+			for (let i = 0; i < requiredModels.length; i += chunks) {
+				const currentBatch = requiredModels.slice(i, i + chunks);
+				promises.push(API.fetchModelsPermissions(teamspace, currentBatch).then((response) => data = response.data));
+			}
+
+			data = yield Promise.all(promises).then((res) => [].concat(...res));
 		}
 
 		yield put(UserManagementActions.fetchModelPermissionsSuccess(data));
