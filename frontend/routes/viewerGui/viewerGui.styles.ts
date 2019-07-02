@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { keyframes } from 'styled-components';
+import styled, { css } from 'styled-components';
+import { COLOR } from '../../styles';
 
 export const Container = styled.div`
 	height: 100%;
@@ -25,24 +26,27 @@ export const Container = styled.div`
   position: relative;
 `;
 
-export const LeftPanels = styled.div`
+const panelStyles = css`
 	width: 380px;
 	height: calc(100% - 95px);
 	position: absolute;
 	top: 0;
-	left: 90px;
 	display: flex;
 	flex-direction: column;
+
+	& > * {
+		pointer-events: all;
+	}
+`;
+
+export const LeftPanels = styled.div`
+	${panelStyles};
+	left: 90px;
 `;
 
 export const RightPanels = styled.div`
-	width: 380px;
-	height: calc(100% - 95px);
-	position: absolute;
-	top: 0;
+	${panelStyles};
 	right: 90px;
-	display: flex;
-	flex-direction: column;
 `;
 
 export const LeftPanelsButtons = styled.div`
@@ -62,7 +66,7 @@ export const DataLoader = styled.div`
 	background: rgba(131, 151, 172, 0.85);
 	padding: 10px 20px;
 	z-index: 2;
-	box-shadow: 0px 0px 3px rgba(0,0,0, .2);
+	box-shadow: 0px 0px 3px rgba(${COLOR.BLACK_20});
 	color: white;
 	font-size: 13px;
 	border-radius: 10px;
