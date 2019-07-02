@@ -39,6 +39,7 @@ interface IProps {
 	viewer: IViewerContext;
 	modelSettings: any;
 	isModelPending: boolean;
+	isFocusMode: boolean;
 	match: {
 		params: {
 			model: string;
@@ -152,7 +153,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
 		const changes = {} as IState;
-		const { modelSettings, isModelPending, match: { params } } = this.props;
+		const { modelSettings, isModelPending, match: { params }, isFocusMode } = this.props;
 		const teamspaceChanged = params.teamspace !== prevProps.match.params.teamspace;
 		const modelChanged = params.model !== prevProps.match.params.model;
 
@@ -182,16 +183,19 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
+		const { visiblePanels, isFocusMode } = this.props;
 		return (
-			<Container className={this.props.className}>
-				<RevisionsDropdown />
-				<CloseFocusModeButton />
-				<Toolbar {...this.urlParams.teamspace} />
-				{this.renderLeftPanelsButtons()}
-				{this.renderLeftPanels(this.props.visiblePanels)}
-				{this.renderRightPanels(this.props.visiblePanels)}
-				{this.renderLoader()}
-			</Container>
+			<>
+				<CloseFocusModeButton isFocusMode={isFocusMode} />
+				<Container className={this.props.className} hidden={isFocusMode}>
+					<RevisionsDropdown />
+					<Toolbar {...this.urlParams.teamspace} />
+					{this.renderLeftPanelsButtons()}
+					{this.renderLeftPanels(visiblePanels)}
+					{this.renderRightPanels(visiblePanels)}
+					{this.renderLoader()}
+				</Container>
+			</>
 		);
 	}
 

@@ -61,7 +61,7 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	changePinColor: ['params'],
 	removeUnsavedPin: [],
 	loadModel: []
-}, { prefix: 'VIEWER/' });
+}, { prefix: 'VIEWER_CANVAS/' });
 
 export const INITIAL_STATE = {
 	settings: window.localStorage.getItem('visualSettings') ?

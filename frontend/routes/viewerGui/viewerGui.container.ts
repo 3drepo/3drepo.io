@@ -23,7 +23,7 @@ import { selectQueryParams } from '../../modules/router/router.selectors';
 import { selectCurrentUser } from '../../modules/currentUser';
 import { ViewerGui } from './viewerGui.component';
 import { TreeActions } from '../../modules/tree';
-import { ViewerActions } from '../../modules/viewer';
+import { ViewerActions, selectIsFocusMode } from '../../modules/viewer';
 import { selectSettings, selectIsPending } from '../../modules/model';
 import { ViewerGuiActions, selectVisiblePanels } from '../../modules/viewerGui';
 
@@ -32,7 +32,8 @@ const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
 	modelSettings: selectSettings,
 	isModelPending: selectIsPending,
-	visiblePanels: selectVisiblePanels
+	visiblePanels: selectVisiblePanels,
+	isFocusMode: selectIsFocusMode
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

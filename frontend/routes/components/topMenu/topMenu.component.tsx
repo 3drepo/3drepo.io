@@ -27,9 +27,10 @@ import { ROUTES } from '../../../constants/routes';
 
 interface IProps {
 	currentUser: any;
-	logoUrl?: string;
 	history: any;
+	isFocusMode: boolean;
 	visualSettings?: any;
+	logoUrl?: string;
 	onLogout?: () => void;
 	onLogoClick?: () => void;
 	updateSettings?: (settings: any) => void;
@@ -37,9 +38,9 @@ interface IProps {
 
 export class TopMenu extends React.PureComponent<IProps, any> {
 	public render() {
-		const { logoUrl, onLogoClick, ...userMenuProps } = this.props;
+		const { logoUrl, onLogoClick, isFocusMode, ...userMenuProps } = this.props;
 		return (
-			<Container>
+			<Container hidden={isFocusMode}>
 				<Logo onClick={onLogoClick} />
 
 				<TooltipButton

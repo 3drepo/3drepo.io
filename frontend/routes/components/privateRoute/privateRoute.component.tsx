@@ -39,11 +39,7 @@ export const PrivateRoute = ({ component: Component, isAuthenticated, onLogout, 
 
 	const renderComponent = (props) => (
 		<>
-			<TopMenu
-				onLogout={onLogout}
-				onLogoClick={onLogoClick}
-				id="topMenu"
-			/>
+			<TopMenu onLogout={onLogout} onLogoClick={onLogoClick} />
 			<Component {...props} />
 		</>
 	);

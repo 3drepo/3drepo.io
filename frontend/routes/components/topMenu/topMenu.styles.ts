@@ -28,6 +28,7 @@ export const Container = styled.div`
 	padding-right: 5px;
 	height: 80px;
 	z-index: 1;
+	visibility: ${({ hidden }) => hidden ? 'hidden' : 'initial'};
 
 	${LogoStyles.Image} {
 		position: absolute;

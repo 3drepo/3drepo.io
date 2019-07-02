@@ -24,6 +24,7 @@ export const Container = styled.div`
 	z-index: 1;
 	flex: 1;
   position: relative;
+	visibility: ${({ hidden }) => hidden ? 'hidden' : 'initial'};
 `;
 
 const panelStyles = css`

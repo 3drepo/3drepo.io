@@ -20,15 +20,16 @@ import { createStructuredSelector } from 'reselect';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 
-import { TopMenu } from './topMenu.component';
 import { selectCurrentUser } from '../../../modules/currentUser';
 import { AuthActions } from '../../../modules/auth';
 import { DialogActions } from '../../../modules/dialog';
-import { selectSettings, ViewerActions } from '../../../modules/viewer';
+import { selectSettings, ViewerActions, selectIsFocusMode } from '../../../modules/viewer';
+import { TopMenu } from './topMenu.component';
 
 const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
-	visualSettings: selectSettings
+	visualSettings: selectSettings,
+	isFocusMode: selectIsFocusMode
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
