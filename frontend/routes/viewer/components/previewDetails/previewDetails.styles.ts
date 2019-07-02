@@ -119,6 +119,6 @@ export const ToggleIcon = styled(ExpandMoreIcon)`
 ` as any;
 
 export const Typography = styled(TypographyComponent)`
- 	max-height: 40px;
+	max-height: 40px;
 	overflow: hidden;
 `;
