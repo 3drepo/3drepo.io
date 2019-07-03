@@ -14,7 +14,7 @@
  **  You should have received a copy of the GNU Affero General Public License
  **  along with this program.  If not, see <http=//www.gnu.org/licenses/>.
  **/
-import * as EventEmitter from 'eventemitter3';
+import EventEmitter from 'eventemitter3';
 
 import { VIEWER_NAV_MODES, VIEWER_MAP_SOURCES, VIEWER_EVENTS, VIEWER_ERRORS } from '../constants/viewer';
 

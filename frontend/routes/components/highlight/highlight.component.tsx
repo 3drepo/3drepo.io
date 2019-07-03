@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import * as Highlighter from 'react-highlight-words';
+import Highlighter from 'react-highlight-words';
 import { trim } from 'lodash';
 
 import { Mark } from './highlight.styles';

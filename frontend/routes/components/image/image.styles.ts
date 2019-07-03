@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import * as Img from 'react-image';
+import Img from 'react-image';
 
 const previewStateStyles = css`
 	cursor: pointer;

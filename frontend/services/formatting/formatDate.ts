@@ -1,4 +1,4 @@
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
 export const SHORT_DATE_FORMAT = 'DD/MM/YYYY';
 export const DATE_TIME_FORMAT = 'HH:mm DD MMM';

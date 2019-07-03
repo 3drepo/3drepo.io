@@ -1,20 +1,28 @@
 {
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
-    "types": ["react", "react-dom", "lodash", "node"],
-    "lib": [
-      "es5",
-      "es6",
-      "dom",
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "target": "es6",
+    "types": [
+      "react",
+      "react-dom",
+      "lodash",
+      "node"
     ],
-    "target": "es5",
+    "lib": [
+      "es2015",
+      "es2017",
+      "dom"
+    ],
     "jsx": "react",
     "removeComments": true,
     "sourceMap": true,
+    "allowJs": true,
   },
   "exclude": [
     "node_modules",
     "tests",
     "internals"
-  ]
+  ],
 }

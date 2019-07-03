@@ -21,7 +21,7 @@ import Radio from '@material-ui/core/Radio';
 import Tooltip from '@material-ui/core/Tooltip';
 
 // @ts-ignore
-import * as AdminIconSrc from '../../../icons/how_to_reg.svg';
+import AdminIconSrc from '../../../icons/how_to_reg.svg';
 
 import { MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
 import { CELL_TYPES, CustomTable, CheckboxField } from '../customTable/customTable.component';

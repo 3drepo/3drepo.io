@@ -16,7 +16,7 @@
  */
 
 import { Viewer } from './viewer';
-import * as EventEmitter from 'eventemitter3';
+import EventEmitter from 'eventemitter3';
 
 const EVENTS = {
 	STATE_CHANGE: 'STATE_CHANGE'
