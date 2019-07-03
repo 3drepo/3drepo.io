@@ -25,7 +25,7 @@ const config = require("../config.js");
 
 const ExternalServices = {};
 
-const getDefaultStorageType = () => config.defaultStorage || config.fs || "gridfs";
+const getDefaultStorageType = () => config.defaultStorage || (config.fs ? "fs" : null) || "gridfs";
 
 ExternalServices.getFileStream = (account, collection, type, key) => {
 	switch(type) {

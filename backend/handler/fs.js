@@ -60,9 +60,6 @@ class FSHandler {
 	constructor() {
 		if (config.fs && config.fs.path && config.fs.levels) {
 			this.testFilesystem();
-		} else {
-			systemLogger.logError("Filesystem is not configured.");
-			throw new Error("Filesystem is not configured");
 		}
 	}
 
