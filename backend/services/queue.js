@@ -322,7 +322,7 @@ class ImportQueue {
 			if (resErrorCode === 0) {
 				ModelHelper.importSuccess(resDatabase, resProject, this.sharedSpacePath, resUser);
 			} else {
-				ModelHelper.importFail(resDatabase, resProject, resUser, resErrorCode, resErrorMessage);
+				ModelHelper.importFail(resDatabase, resProject, this.sharedSpacePath, resUser, resErrorCode, resErrorMessage);
 			}
 		}
 	}
