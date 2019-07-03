@@ -1,4 +1,5 @@
-import axios from 'axios';
+import * as React from 'react';
+
 import { UnityUtil } from '../../globals/unity-util';
 import { getState } from '../../helpers/migration';
 import { selectMemory } from '../../modules/viewer';
@@ -19,7 +20,7 @@ export class ViewerService {
 		reject: () => void;
 	};
 	public currentModelInit: any;
-	
+
 	private mode = VIEWER_PIN_MODE.NORMAL;
 	private pinData: any;
 	private model: string;
@@ -40,21 +41,6 @@ export class ViewerService {
 			pinDropMode: false
 		};
 	}
-
-/* 	get viewer() {
-		if (this.viewerInstance) {
-			return this.viewerInstance;
-		}
-
-		this.viewerInstance = new ViewerInstance({
-			name: 'viewer',
-			container: document.getElementById('viewer'),
-			onError: this.handleUnityError
-		});
-
-		this.viewerInstance.setUnity();
-		return this.viewerInstance;
-	} */
 
 	get isPinMode() {
 		return this.mode === VIEWER_PIN_MODE.PIN;
@@ -567,3 +553,7 @@ export class ViewerService {
 }
 
 export const Viewer = new ViewerService();
+
+export const withViewer = (WrappedComponent) => (props) => (
+	<WrappedComponent viewer={Viewer} {...props} />
+);

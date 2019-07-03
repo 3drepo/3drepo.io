@@ -31,6 +31,7 @@ import {
 } from '../../../../../../modules/issues';
 import { selectSettings, selectTopicTypes } from '../../../../../../modules/model';
 import { IssueDetails } from './issueDetails.component';
+import { withViewer } from '../../../../../../services/viewer/viewer';
 
 const mapStateToProps = createStructuredSelector({
 	issue: selectActiveIssueDetails,
@@ -59,4 +60,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(IssueDetails);
+export default withViewer(connect(mapStateToProps, mapDispatchToProps)(IssueDetails));

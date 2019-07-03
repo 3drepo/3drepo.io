@@ -28,6 +28,7 @@ import { selectSettings, selectIsPending } from '../../modules/model';
 import { ViewerGuiActions, selectVisiblePanels } from '../../modules/viewerGui';
 import { IssuesActions, selectIssuesMap } from '../../modules/issues';
 import { RisksActions, selectRisksMap } from '../../modules/risks';
+import { withViewer } from '../../services/viewer/viewer';
 
 const mapStateToProps = createStructuredSelector({
 	queryParams: selectQueryParams,
@@ -53,4 +54,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showRiskDetails: RisksActions.showDetails
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(ViewerGui);
+export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerGui));

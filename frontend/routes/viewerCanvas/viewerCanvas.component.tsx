@@ -16,15 +16,13 @@
  */
 
 import * as React from 'react';
-import EventListener from 'react-event-listener';
 
-import { IViewerContext } from '../../contexts/viewer.context';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { Container } from './viewerCanvas.styles';
 
 interface IProps {
 	className?: string;
-	viewer: IViewerContext;
+	viewer: any;
 	match: {
 		params: {
 			model: string;

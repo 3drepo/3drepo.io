@@ -38,8 +38,6 @@ import { PasswordChange } from '../passwordChange';
 import RegisterRequest from '../registerRequest/registerRequest.container';
 import { RegisterVerify } from '../registerVerify';
 import { AppContainer } from './app.styles';
-import { ExternalLinks } from '../components/externalLinks/externalLinks.component';
-import { ViewerContext } from '../../contexts/viewer.context';
 
 interface IProps {
 	location: any;
@@ -188,14 +186,10 @@ export class App extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderViewer = (props) => (
-		<ViewerContext.Consumer>
-			{(viewerContext) => (
-			<>
-				<ViewerCanvas {...props} viewer={viewerContext} />
-				<ViewerGui {...props} viewer={viewerContext} />
-			</>
-			)}
-		</ViewerContext.Consumer>
+		<>
+			<ViewerCanvas {...props} />
+			<ViewerGui {...props} />
+		</>
 	)
 
 	public renderStaticRoutes = memoize(() => STATIC_ROUTES.map(({ title, path, fileName }) => (

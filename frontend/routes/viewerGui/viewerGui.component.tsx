@@ -19,7 +19,6 @@ import * as React from 'react';
 import { isEmpty, cond } from 'lodash';
 
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
-import { IViewerContext } from '../../contexts/viewer.context';
 import Toolbar from './components/toolbar/toolbar.container';
 import Gis from './components/gis/gis.container';
 import { Views } from './components/views';
@@ -37,7 +36,7 @@ import { VIEWER_EVENTS } from '../../constants/viewer';
 
 interface IProps {
 	className?: string;
-	viewer: IViewerContext;
+	viewer: any;
 	modelSettings: any;
 	isModelPending: boolean;
 	isFocusMode: boolean;
@@ -216,7 +215,6 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleModelSettingsChange(modelSettings) {
-		console.error('handleModelSettingsChange')
 		//TODO: this.PanelService.hideSubModels(this.issuesCardIndex, !modelSettings.federate);
 		this.props.loadModel();
 	}
