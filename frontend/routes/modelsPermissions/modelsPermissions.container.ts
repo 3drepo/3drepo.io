@@ -18,6 +18,7 @@
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 
 import { ModelsPermissions } from './modelsPermissions.component';
 import {
@@ -38,4 +39,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onPermissionsChange: UserManagementActions.updateModelsPermissionsPre
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(ModelsPermissions);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelsPermissions));
