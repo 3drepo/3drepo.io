@@ -324,7 +324,6 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 
 		if (isMetadataActive) {
 			setMetadataVisibility(false);
-
 		} else {
 			setMeasureVisibility(false);
 		}

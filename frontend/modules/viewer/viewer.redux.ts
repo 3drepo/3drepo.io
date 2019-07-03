@@ -60,7 +60,12 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	setCamera: ['params'],
 	changePinColor: ['params'],
 	removeUnsavedPin: [],
-	loadModel: []
+	loadModel: [],
+	setIsPinDropMode: ['mode'],
+	setIsPinDropModeSuccess: ['isPinDropMode'],
+	setPinData: ['pinData'],
+	removePins: ['pinsIds'],
+	addPin: ['pinData']
 }, { prefix: 'VIEWER_CANVAS/' });
 
 export const INITIAL_STATE = {
@@ -72,40 +77,50 @@ export const INITIAL_STATE = {
 	isFocusMode: false,
 	isClipEdit: false,
 	clipNumber: 0,
-	isModelLoaded: false
+	isModelLoaded: false,
+	isPinDropMode: false,
+	pinData: null
 };
 
-const updateSettings = (state = INITIAL_STATE, {settings}) => {
+const updateSettings = (state = INITIAL_STATE, { settings }) => {
 	window.localStorage.setItem('visualSettings', JSON.stringify(settings));
 	return { ...state, settings };
 };
 
-const setNavigationModeSuccess = (state = INITIAL_STATE, {mode}) => {
+const setNavigationModeSuccess = (state = INITIAL_STATE, { mode }) => {
 	return { ...state, navigationMode: mode };
 };
 
-const setClippingModeSuccess = (state = INITIAL_STATE, {mode}) => {
+const setClippingModeSuccess = (state = INITIAL_STATE, { mode }) => {
 	return { ...state, clippingMode: mode, isClipEdit: true };
 };
 
-const setHelicopterSpeed = (state = INITIAL_STATE, {speed}) => {
+const setHelicopterSpeed = (state = INITIAL_STATE, { speed }) => {
 	return { ...state, helicopterSpeed: speed };
 };
 
-const setIsFocusMode = (state = INITIAL_STATE, {isFocusMode}) => {
+const setIsFocusMode = (state = INITIAL_STATE, { isFocusMode }) => {
 	return { ...state, isFocusMode };
 };
 
-const setClipEditSuccess = (state = INITIAL_STATE, {isClipEdit}) => {
+const setIsPinDropModeSuccess = (state = INITIAL_STATE, { isPinDropMode }) => {
+	return { ...state, isPinDropMode };
+};
+
+const setClipEditSuccess = (state = INITIAL_STATE, { isClipEdit }) => {
 	return { ...state, isClipEdit };
 };
 
-const setClipNumber = (state = INITIAL_STATE, {clipNumber}) => {
+const setClipNumber = (state = INITIAL_STATE, { clipNumber }) => {
 	return { ...state, clipNumber };
 };
 
-const setIsModelLoaded = (state = INITIAL_STATE, {isModelLoaded}) => {
+const setIsModelLoaded = (state = INITIAL_STATE, { isModelLoaded }) => {
 	return { ...state, isModelLoaded };
+};
+
+const setPinData = (state = INITIAL_STATE, { pinData }) => {
+	return { ...state, pinData };
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -116,5 +131,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,
 	[ViewerTypes.SET_CLIP_EDIT_SUCCESS] : setClipEditSuccess,
 	[ViewerTypes.SET_CLIP_NUMBER] : setClipNumber,
-	[ViewerTypes.SET_IS_MODEL_LOADED] : setIsModelLoaded
+	[ViewerTypes.SET_IS_MODEL_LOADED] : setIsModelLoaded,
+	[ViewerTypes.SET_IS_PIN_DROP_MODE_SUCCESS]: setIsPinDropModeSuccess,
+	[ViewerTypes.SET_PIN_DATA]: setPinData
 });

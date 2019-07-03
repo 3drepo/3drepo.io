@@ -23,13 +23,14 @@ import { DialogActions } from '../../../../modules/dialog';
 
 import { NewCommentForm } from './newCommentForm.component';
 import { MeasureActions } from '../../../../modules/measure';
+import { withViewer } from '../../../../services/viewer/viewer';
 
 const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showScreenshotDialog: DialogActions.showScreenshotDialog,
 	setDisabled: MeasureActions.setDisabled,
-	deactivateMeasure: MeasureActions.deactivateMeasure
+	deactivateMeasure: MeasureActions.deactivateMeasure,
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(NewCommentForm);
+export default withViewer(connect(mapStateToProps, mapDispatchToProps)(NewCommentForm));

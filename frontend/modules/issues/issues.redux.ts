@@ -57,8 +57,10 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	setFilters: ['filters'],
 	showCloseInfo: ['issueId'],
 	resetComponentState: [],
-	showMultipleGroups: ['issue', 'revision']
-}, { prefix: 'ISSUES_' });
+	showMultipleGroups: ['issue', 'revision'],
+	setNewComment: ['newComment'],
+	saveNewScreenshot: ['teamspace', 'model', 'isNewIssue'],
+}, { prefix: 'ISSUES/' });
 
 export const INITIAL_STATE = {
 	issuesMap: {},

@@ -18,15 +18,18 @@
 import { put, takeLatest, select } from 'redux-saga/effects';
 
 import { GisTypes, GisActions } from './gis.redux';
-import { ViewerActions } from '../viewer';
 import { selectVisibleSources } from './gis.selectors';
+import { DialogActions } from '../dialog';
+import { Viewer } from '../../services/viewer/viewer';
 
 export function* initialiseMap({params}) {
 	try {
-		yield put(ViewerActions.mapInitialise(params));
+		Viewer.mapInitialise(params);
 		yield put(GisActions.initialiseMapSuccess(true));
 
-	} catch (error) {}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('initialise', 'map', error));
+	}
 }
 
 export function* addSource({source}) {
@@ -34,41 +37,49 @@ export function* addSource({source}) {
 		const visibleSources = yield select(selectVisibleSources);
 
 		if (!visibleSources.includes(source)) {
-			yield put(ViewerActions.addMapSource(source));
+			Viewer.addMapSource(source);
 		}
 
 		if (!visibleSources.length) {
-			yield put(ViewerActions.mapStart());
+			Viewer.mapStart();
 		}
 		yield put(GisActions.addSourceSuccess(source));
-	} catch (error) {}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('add', 'source', error));
+	}
 }
 
 export function* removeSource({source}) {
 	try {
-		yield put(ViewerActions.removeMapSource(source));
+		Viewer.removeMapSource(source);
 		const visibleSources = yield select(selectVisibleSources);
 
 		if (visibleSources.length === 1) {
-			yield put(ViewerActions.mapStop());
+			Viewer.mapStop();
 		}
 
 		yield put(GisActions.removeSourceSuccess(source));
-	} catch (error) {}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('remove', 'source', error));
+	}
 }
 
 export function* resetSources() {
 	try {
 		yield put(GisActions.resetMap());
 		yield put(GisActions.resetSourcesSuccess());
-	} catch (error) {}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('reset', 'sources', error));
+	}
 }
 
 export function* resetMap() {
 	try {
-		yield put(ViewerActions.resetMapSources());
-		yield put(ViewerActions.mapStop());
-	} catch (error) { }
+		Viewer.resetMapSources();
+		Viewer.mapStop();
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('reset', 'map', error));
+	}
 }
 
 export default function* GisSaga() {

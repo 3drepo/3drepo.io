@@ -16,17 +16,18 @@
  */
 
 import * as React from 'react';
-import { Viewer } from '../../../../services/viewer/viewer';
 import { VIEWER_EVENTS, NEW_PIN_ID } from '../../../../constants/viewer';
 import { PIN_COLORS } from '../../../../styles';
 import { PinIcon, LabelButton, Container } from './pinButton.styles';
 
 interface IProps {
-	onChange: (pin) => void;
-	onSave: (position) => void;
+	viewer: any;
 	hasPin: boolean;
 	disabled?: boolean;
 	pinId?: string;
+	pinData: any;
+	onChange: (pin) => void;
+	onSave: (position) => void;
 	disableMeasure: (isDisabled) => void;
 	deactivateMeasure: () => void;
 }
@@ -50,17 +51,19 @@ export class PinButton extends React.PureComponent<IProps, any> {
 	public getPinId = () =>  this.props.hasPin ? this.props.pinId : NEW_PIN_ID;
 
 	public handleChangePin = (active) => {
+		const { deactivateMeasure, disableMeasure, viewer } = this.props;
 		if (active) {
-			Viewer.setPinDropMode(true);
-			this.props.deactivateMeasure();
-			this.props.disableMeasure(true);
+			viewer.setPinDropMode(true);
+			deactivateMeasure();
+			disableMeasure(true);
 			this.togglePinListeners(true);
-			Viewer.changePinColor({ id: this.getPinId(), colours: PIN_COLORS.SUNGLOW });
+			viewer.changePinColor({ id: this.getPinId(), colours: PIN_COLORS.SUNGLOW });
 		} else {
-			Viewer.setPinDropMode(false);
-			this.props.disableMeasure(false);
+			viewer.setPinDropMode(false);
+			disableMeasure(false);
 			this.togglePinListeners(false);
-			const pinData = Viewer.getPinData();
+
+			const pinData = viewer.getPinData();
 
 			if (pinData) {
 				this.props.onSave(pinData.pickedPos);
@@ -71,7 +74,7 @@ export class PinButton extends React.PureComponent<IProps, any> {
 
 	public togglePinListeners = (enabled: boolean) => {
 		const resolver = enabled ? 'on' : 'off';
-		Viewer[resolver](VIEWER_EVENTS.PICK_POINT, this.handlePickPoint);
+		this.props.viewer[resolver](VIEWER_EVENTS.PICK_POINT, this.handlePickPoint);
 	}
 
 	public handlePickPoint = ({ trans, position, normal, selectColour, id }) => {
@@ -79,7 +82,7 @@ export class PinButton extends React.PureComponent<IProps, any> {
 			return null;
 		}
 
-		this.setState({wasPinDropped: true});
+		this.setState({ wasPinDropped: true });
 
 		if (trans) {
 			position = trans.inverse().multMatrixPnt(position);

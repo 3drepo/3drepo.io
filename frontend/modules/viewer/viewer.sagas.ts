@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, takeLatest } from 'redux-saga/effects';
+import { put, select, takeLatest, all } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 
 import { dispatch } from '../../helpers/migration';
@@ -37,6 +37,7 @@ import { selectUrlParams } from '../router/router.selectors';
 import { selectSettings } from '../model';
 import { ROUTES } from '../../constants/routes';
 import { selectIsMetadataVisible } from '../viewerGui';
+import { MultiSelect } from '../../services/viewer/multiSelect';
 
 const getViewer = () => Viewer.viewer;
 
@@ -44,7 +45,7 @@ function* waitForViewer() {
 	try {
 		yield Viewer.isViewerReady();
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('initialise', 'viewer'));
+		yield put(DialogActions.showErrorDialog('initialise', 'viewer', error));
 	}
 }
 
@@ -56,7 +57,7 @@ function* mapInitialise({surveyPoints, sources = []}) {
 		viewer.mapInitialise(surveyPoints);
 		sources.map(viewer.addMapSource);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('initialise', 'map'));
+		yield put(DialogActions.showErrorDialog('initialise', 'map', error));
 	}
 }
 
@@ -68,7 +69,7 @@ function* initialiseToolbar() {
 	try {
 		yield put(ViewerActions.startListenOnNumClip());
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('initialise', 'toolbar'));
+		yield put(DialogActions.showErrorDialog('initialise', 'toolbar', error));
 	}
 }
 
@@ -80,7 +81,7 @@ function* startListenOnModelLoaded() {
 	try {
 		Viewer.on(VIEWER_EVENTS.MODEL_LOADED, setIsModelLoaded);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('start listen on', 'model loaded'));
+		yield put(DialogActions.showErrorDialog('start listen on', 'model loaded', error));
 	}
 }
 
@@ -88,7 +89,7 @@ function* stopListenOnModelLoaded() {
 	try {
 		Viewer.off(VIEWER_EVENTS.MODEL_LOADED, setIsModelLoaded);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('stop listen on', 'model loaded'));
+		yield put(DialogActions.showErrorDialog('stop listen on', 'model loaded', error));
 	}
 }
 
@@ -96,7 +97,7 @@ function* startListenOnNumClip() {
 	try {
 		Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('start listen on', 'num clip'));
+		yield put(DialogActions.showErrorDialog('start listen on', 'num clip', error));
 	}
 }
 
@@ -104,7 +105,7 @@ function* stopListenOnNumClip() {
 	try {
 		Viewer.off(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('stop listen on', 'num clip'));
+		yield put(DialogActions.showErrorDialog('stop listen on', 'num clip', error));
 	}
 }
 
@@ -122,7 +123,7 @@ function* updateClipState({clipNumber}) {
 			yield put(ViewerActions.setClippingMode(null));
 		}
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'clip state'));
+		yield put(DialogActions.showErrorDialog('update', 'clip state', error));
 	}
 }
 
@@ -131,7 +132,7 @@ function* resetMapSources({source}) {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().resetMapSources(source);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('reset', 'map sources'));
+		yield put(DialogActions.showErrorDialog('reset', 'map sources', error));
 	}
 }
 
@@ -140,16 +141,16 @@ function* addMapSource({source}) {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().addMapSource(source);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('add', 'map source'));
+		yield put(DialogActions.showErrorDialog('add', 'map source', error));
 	}
 }
 
-function* removeMapSource({source}) {
+function* removeMapSource({ source }) {
 	try {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().removeMapSource(source);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('remove', 'map source'));
+		yield put(DialogActions.showErrorDialog('remove', 'map source', error));
 	}
 }
 
@@ -158,7 +159,7 @@ function* mapStart() {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().mapStart();
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('start', 'map rendering'));
+		yield put(DialogActions.showErrorDialog('start', 'map rendering', error));
 	}
 }
 
@@ -167,7 +168,7 @@ function* mapStop() {
 		yield put(ViewerActions.waitForViewer());
 		getViewer().mapStop();
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('stop', 'map rendering'));
+		yield put(DialogActions.showErrorDialog('stop', 'map rendering', error));
 	}
 }
 
@@ -176,7 +177,7 @@ function* getScreenshot() {
 		yield put(ViewerActions.waitForViewer());
 		return yield getViewer().getScreenshot();
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('get', 'screenshot'));
+		yield put(DialogActions.showErrorDialog('get', 'screenshot', error));
 	}
 }
 
@@ -184,7 +185,7 @@ function* goToExtent() {
 	try {
 		yield Viewer.goToExtent();
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('go', 'to extent'));
+		yield put(DialogActions.showErrorDialog('go', 'to extent', error));
 	}
 }
 
@@ -193,7 +194,7 @@ function* setNavigationMode({mode}) {
 		yield Viewer.setNavigationMode(mode);
 		yield put(ViewerActions.setNavigationModeSuccess(mode));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set', 'navigation mode'));
+		yield put(DialogActions.showErrorDialog('set', 'navigation mode', error));
 	}
 }
 
@@ -205,7 +206,7 @@ function* resetHelicopterSpeed({teamspace, modelId, updateDefaultSpeed}) {
 		}
 		yield put(ViewerActions.setHelicopterSpeed(INITIAL_HELICOPTER_SPEED));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('reset', 'helicopter speed'));
+		yield put(DialogActions.showErrorDialog('reset', 'helicopter speed', error));
 	}
 }
 
@@ -227,7 +228,7 @@ function* getHelicopterSpeed({teamspace, modelId}) {
 
 		yield put(ViewerActions.setHelicopterSpeed(heliSpeed));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('get', 'helicopter speed'));
+		yield put(DialogActions.showErrorDialog('get', 'helicopter speed', error));
 	}
 }
 
@@ -240,7 +241,7 @@ function* increaseHelicopterSpeed({teamspace, modelId}) {
 		yield API.editHelicopterSpeed(teamspace, modelId, speed);
 		yield put(ViewerActions.setHelicopterSpeed(speed));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('increase', 'helicopter speed'));
+		yield put(DialogActions.showErrorDialog('increase', 'helicopter speed', error));
 	}
 }
 
@@ -253,7 +254,7 @@ function* decreaseHelicopterSpeed({teamspace, modelId}) {
 		yield API.editHelicopterSpeed(teamspace, modelId, speed);
 		yield put(ViewerActions.setHelicopterSpeed(speed));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('decrease', 'helicopter speed'));
+		yield put(DialogActions.showErrorDialog('decrease', 'helicopter speed', error));
 	}
 }
 
@@ -265,7 +266,7 @@ function* setClippingMode({mode}) {
 		}
 		yield put(ViewerActions.setClippingModeSuccess(mode));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set', 'clipping mode'));
+		yield put(DialogActions.showErrorDialog('set', 'clipping mode', error));
 	}
 }
 
@@ -278,7 +279,7 @@ function* setClipEdit({isClipEdit}) {
 		}
 		yield put(ViewerActions.setClipEditSuccess(isClipEdit));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('toggle', 'clip edit'));
+		yield put(DialogActions.showErrorDialog('toggle', 'clip edit', error));
 	}
 }
 
@@ -286,7 +287,7 @@ function* setMetadataVisibility({ visible }) {
 	try {
 		yield put(ViewerActions.setPanelVisibility(VIEWER_PANELS.METADATA, visible));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set', 'metadata visibility'));
+		yield put(DialogActions.showErrorDialog('set', 'metadata visibility', error));
 	}
 }
 
@@ -300,7 +301,7 @@ function* setMeasureVisibility({ visible }) {
 
 		yield put(MeasureActions.setMeasureActive(visible));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set', 'measure visibility'));
+		yield put(DialogActions.showErrorDialog('set', 'measure visibility', error));
 	}
 }
 
@@ -308,7 +309,7 @@ function* clearHighlights() {
 	try {
 		Viewer.clearHighlights();
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('clear', 'highlights'));
+		yield put(DialogActions.showErrorDialog('clear', 'highlights', error));
 	}
 }
 
@@ -316,7 +317,7 @@ function* setCamera({ params }) {
 	try {
 		Viewer.setCamera(params);
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set', 'camera'));
+		yield put(DialogActions.showErrorDialog('set', 'camera', error));
 	}
 }
 
@@ -325,16 +326,16 @@ function* changePinColor({ params }) {
 		const { id, colours } = params;
 		Viewer.changePinColor({ id, colours });
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('change', 'pin colour'));
+		yield put(DialogActions.showErrorDialog('change', 'pin colour', error));
 	}
 }
 
 function* removeUnsavedPin() {
 	try {
 		Viewer.removePin({ id: NEW_PIN_ID });
-		Viewer.setPin(null);
+		yield put(ViewerActions.setPinData(null));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('remove', 'unsaved pin'));
+		yield put(DialogActions.showErrorDialog('remove', 'unsaved pin', error));
 	}
 }
 
@@ -349,11 +350,40 @@ function* loadModel() {
 		const content = 'The model was either not found, failed to load correctly ' +
 			'or you are not authorized to view it. ' +
 			' You will now be redirected to the teamspace page.';
-		yield put(DialogActions.showDialog({
-			title: 'Model Error',
-			content
-		}));
+		yield put(DialogActions.showDialog({ title: 'Model Error', content }));
 		yield put(push(ROUTES.TEAMSPACES));
+	}
+}
+
+/**
+ * Pins
+*/
+function* setIsPinDropMode({ mode }: { mode: boolean }) {
+	try {
+		yield put(ViewerActions.setIsPinDropModeSuccess(mode));
+
+		if (mode) {
+			MultiSelect.toggleAreaSelect(false);
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'pin drop mode', error));
+	}
+}
+
+function* removePins({ pinsIds = [] }) {
+	try {
+		const removeActions = pinsIds.map((id) => Viewer.removePin({ id }));
+		yield all(removeActions);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('remve', 'pins', error));
+	}
+}
+
+function* addPin({ pinData }) {
+	try {
+		yield ViewerActions.addPin(pinData);
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('add', 'pin', error));
 	}
 }
 
@@ -387,4 +417,7 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.CHANGE_PIN_COLOR, changePinColor);
 	yield takeLatest(ViewerTypes.REMOVE_UNSAVED_PIN, removeUnsavedPin);
 	yield takeLatest(ViewerTypes.LOAD_MODEL, loadModel);
+	yield takeLatest(ViewerTypes.SET_IS_PIN_DROP_MODE, setIsPinDropMode);
+	yield takeLatest(ViewerTypes.REMOVE_PINS, removePins);
+	yield takeLatest(ViewerTypes.ADD_PIN, addPin);
 }

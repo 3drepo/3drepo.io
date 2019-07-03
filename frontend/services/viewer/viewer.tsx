@@ -521,9 +521,9 @@ export class ViewerService {
 		}
 	}
 
-	public async resetMapSources(source) {
+	public async resetMapSources() {
 		await this.isViewerReady();
-		this.viewer.resetMapSources(source);
+		this.viewer.resetMapSources();
 	}
 
 	public async addMapSource(source) {

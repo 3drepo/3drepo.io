@@ -62,7 +62,7 @@ function* resetPanelsStates() {
 			put(IssuesActions.resetComponentState()),
 			put(RisksActions.resetComponentState()),
 			put(GroupsActions.resetComponentState()),
-			put(CompareActions.resetComponentState()),
+			put(CompareActions.resetComponentState())
 		]);
 	} catch (error) {
 		console.error(error);

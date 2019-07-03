@@ -133,7 +133,6 @@ export class Viewer {
 			this.name = config.name;
 		}
 
-		this.callback = config.onEvent;
 		this.errCallback = config.onError;
 
 		UnityUtil.init(config.onError);
@@ -189,10 +188,6 @@ export class Viewer {
 	}
 
 	public emit = (event, ...args) => {
-		if (this.callback) {
-			this.callback(event, ...args);
-		}
-
 		this.emitter.emit(event, ...args);
 	}
 
@@ -385,12 +380,10 @@ export class Viewer {
 				}
 			} else {
 				this.emit(Viewer.EVENT.BACKGROUND_SELECTED);
-				this.emitter.emit(Viewer.EVENT.BACKGROUND_SELECTED);
 			}
 		} else {
 			if (!pointInfo.id) {
 				this.emit(Viewer.EVENT.BACKGROUND_SELECTED_PIN_MODE);
-				this.emitter.emit(Viewer.EVENT.BACKGROUND_SELECTED_PIN_MODE);
 			}
 		}
 
@@ -474,13 +467,13 @@ export class Viewer {
 		this.currentNavMode = newNavMode;
 	}
 
-	public setCamera(pos, viewDir, upDir, lookAt, animate, rollerCoasterMode, account, model) {
+/* 	public setCamera(pos, viewDir, upDir, lookAt, animate, rollerCoasterMode, account, model) {
 		this.updateCamera(pos, upDir, viewDir, lookAt, animate, rollerCoasterMode, account, model);
 	}
 
 	public updateCamera(pos, up, viewDir, lookAt, animate, rollerCoasterMode, account, model) {
 		UnityUtil.setViewpoint(pos, up, viewDir, lookAt, account, model);
-	}
+	} */
 
 	public reset() {
 		this.setMeasureMode(false);
