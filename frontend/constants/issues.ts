@@ -82,14 +82,6 @@ export const ISSUE_COLORS = {
 	}
 };
 
-export const STATUSES_COLOURS = {
-	[PRIORITIES.NONE]: '#777777',
-	[PRIORITIES.LOW]: '#4CAF50',
-	[PRIORITIES.MEDIUM]: '#FF9800',
-	[PRIORITIES.HIGH]: '#F44336',
-	[STATUSES.CLOSED]: '#0C2F54'
-};
-
 export const STATUSES_ICONS = {
   [STATUSES.OPEN]: PanoramaFishEyeIcon,
   [STATUSES.IN_PROGRESS]: LensIcon,
