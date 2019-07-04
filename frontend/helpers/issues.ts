@@ -17,7 +17,7 @@
 
 import { get, omit } from 'lodash';
 import { getAPIUrl } from '../services/api';
-import { STATUSES_COLOURS, STATUSES_ICONS, STATUSES } from '../constants/issues';
+import { ISSUE_COLORS, STATUSES_ICONS, STATUSES } from '../constants/issues';
 import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
 import { sortByDate } from './sorting';
 
@@ -46,12 +46,19 @@ export const prepareIssue = (issue, jobs = []) => {
 };
 
 export const getStatusIcon = (priority, status) => {
-  const statusIcon = {
-    Icon: STATUSES_ICONS[status] || null,
-    color: STATUSES_COLOURS[status] || STATUSES_COLOURS[priority] || null
+	const statusIcon = {
+		Icon: STATUSES_ICONS[status] || null,
+		color: (ISSUE_COLORS[status] ? ISSUE_COLORS[status].color : null) ||
+		(ISSUE_COLORS[priority] ? ISSUE_COLORS[priority].color : null) || null
   };
 
   return {...statusIcon};
+};
+
+export const getIssuePinColor = (status: string, priority: string, selected: boolean = false) => {
+	return (selected)
+		? (ISSUE_COLORS[status] ? ISSUE_COLORS[status].selectedColor : ISSUE_COLORS[priority].selectedColor)
+		: (ISSUE_COLORS[status] ? ISSUE_COLORS[status].pinColor : ISSUE_COLORS[priority].pinColor);
 };
 
 const isOpenIssue = (status) => status !== 'closed';

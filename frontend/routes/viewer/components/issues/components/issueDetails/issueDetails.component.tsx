@@ -23,13 +23,12 @@ import { Container } from '../../../risks/components/riskDetails/riskDetails.sty
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
-import { canComment } from '../../../../../../helpers/issues';
+import { canComment, getIssuePinColor } from '../../../../../../helpers/issues';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 import { EmptyStateInfo } from '../../../views/views.styles';
 import { timingSafeEqual } from 'crypto';
 import { NEW_PIN_ID } from '../../../../../../constants/viewer';
-import { PIN_COLORS } from '../../../../../../styles';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 
 interface IProps {
@@ -301,12 +300,14 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public onPositionSave = (position) => {
+		const { teamspace, model, issue, updateIssue } = this.props;
+
 		if (!this.isNewIssue) {
-			const { teamspace, model, issue } = this.props;
-			this.props.updateIssue(teamspace, model, {position});
+			updateIssue(teamspace, model, {position});
 			Viewer.setPin(null);
 		} else {
-			Viewer.changePinColor({ id: NEW_PIN_ID, colours: PIN_COLORS.YELLOW });
+			const colours = getIssuePinColor(issue.status, issue.priority, true);
+			Viewer.changePinColor({ id: NEW_PIN_ID, colours});
 		}
 	}
 

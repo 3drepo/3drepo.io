@@ -21,7 +21,7 @@ import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
-import { prepareIssue } from '../../helpers/issues';
+import { getIssuePinColor, prepareIssue } from '../../helpers/issues';
 import { prepareComments, prepareComment } from '../../helpers/comments';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
@@ -98,7 +98,7 @@ const toggleIssuePin = (issue, selected = true) => {
 	if (issue && issue.position && issue.position.length > 0 && issue._id) {
 		Viewer.changePinColor({
 			id: issue._id,
-			colours: selected ? PIN_COLORS.YELLOW : PIN_COLORS.BLUE
+			colours: getIssuePinColor(issue.status, issue.priority, selected)
 		});
 	}
 };
@@ -259,7 +259,7 @@ export function* renderPins() {
 
 				if (pinPosition) {
 					const isSelectedPin = activeIssueId && issue._id === activeIssueId;
-					const pinColor = isSelectedPin ? PIN_COLORS.YELLOW : PIN_COLORS.BLUE;
+					const pinColor = getIssuePinColor(issue.status, issue.priority, isSelectedPin);
 
 					Viewer.addPin({
 						id: issue._id,

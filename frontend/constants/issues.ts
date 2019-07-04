@@ -10,6 +10,7 @@ import { SortAmountUp, SortAmountDown } from '../routes/components/fontAwesomeIc
 import ViewModule from '@material-ui/icons/ViewModule';
 
 import { DATA_TYPES } from '../routes/components/filterPanel/filterPanel.component';
+import { COLOR, PIN_COLORS } from '../styles';
 
 export const ISSUE_PANEL_NAME = 'issue';
 
@@ -52,6 +53,34 @@ export const ISSUE_PRIORITIES = [
 	{ value: PRIORITIES.MEDIUM, name: 'Medium' },
 	{ value: PRIORITIES.HIGH, name: 'High' }
 ];
+
+export const ISSUE_COLORS = {
+	[PRIORITIES.NONE]: {
+		color: COLOR.DARK_GRAY,
+		pinColor: PIN_COLORS.DARK_GRAY,
+		selectedColor: PIN_COLORS.DARK_GRAY
+	},
+	[PRIORITIES.LOW]: {
+		color: COLOR.LEMON_CHIFFON,
+		pinColor: PIN_COLORS.LEMON_CHIFFON,
+		selectedColor: PIN_COLORS.LIGHT_YELLOW
+	},
+	[PRIORITIES.MEDIUM]: {
+		color: COLOR.DARK_ORANGE,
+		pinColor: PIN_COLORS.DARK_ORANGE,
+		selectedColor: PIN_COLORS.ORANGE
+	},
+	[PRIORITIES.HIGH]: {
+		color: COLOR.MAROON,
+		pinColor: PIN_COLORS.MAROON,
+		selectedColor: PIN_COLORS.RED
+	},
+	[STATUSES.CLOSED]: {
+		color: COLOR.GREEN,
+		pinColor: PIN_COLORS.GREEN,
+		selectedColor: PIN_COLORS.MED_SEA_GREEN
+	}
+};
 
 export const STATUSES_COLOURS = {
 	[PRIORITIES.NONE]: '#777777',
