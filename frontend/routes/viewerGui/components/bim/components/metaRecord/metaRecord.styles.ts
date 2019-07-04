@@ -61,4 +61,6 @@ export const StarIconWrapper = styled(Icon)`
 	margin-right: 2px;
 	margin-top: -2px;
 	cursor: pointer;
+	display: flex;
+	align-items: center;
 ` as any;
