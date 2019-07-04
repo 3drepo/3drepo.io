@@ -73,8 +73,14 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public onSubmit = ({files, links}) => {
-		this.props.onSaveLinks(links);
-		this.props.onSaveFiles(files);
+		if (links.length > 0) {
+			this.props.onSaveLinks(links);
+		}
+
+		if (files.length > 0) {
+			this.props.onSaveFiles(files);
+		}
+
 		this.props.handleClose();
 	}
 

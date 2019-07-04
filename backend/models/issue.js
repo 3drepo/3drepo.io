@@ -928,6 +928,10 @@ issue.isStatusChange =  function (oldIssue, newIssue) {
 };
 
 issue.addRefsToIssue = async function(account, model, issueId, username, sessionId, refs) {
+	if (refs.length === 0) {
+		return [];
+	}
+
 	const issues = await db.getCollection(account, model + ".issues");
 	const issueQuery = {_id: utils.stringToUUID(issueId)};
 	const issueFound = await issues.findOne(issueQuery);
@@ -936,12 +940,12 @@ issue.addRefsToIssue = async function(account, model, issueId, username, session
 		throw responseCodes.ISSUE_NOT_FOUND;
 	}
 
-	const comments = issueFound.comments;
+	const comments = issueFound.comments || [];
 
 	const ref_ids = [];
 
 	refs.forEach(ref => {
-		addSystemComment(account, model, sessionId, issueId, comments, username, "resource", null, ref.name);
+		comments.push(addSystemComment(account, model, sessionId, issueId, username, "resource", null, ref.name));
 		ref_ids.push(ref._id);
 	});
 
@@ -998,7 +1002,7 @@ issue.detachResource =  async function(account, model, issueId, resourceId, user
 	}
 
 	const comments = issueFound.comments;
-	await addSystemComment(account, model, sessionId, issueId, comments, username, "resource", ref.name, null);
+	comments.push(await addSystemComment(account, model, sessionId, issueId, username, "resource", ref.name, null));
 	await issues.update(issueQuery, {$set: {comments}, $pull: { refs: resourceId } });
 
 	if(ref.type !== "http") {
