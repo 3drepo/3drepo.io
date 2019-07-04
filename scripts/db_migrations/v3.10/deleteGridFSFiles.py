@@ -26,18 +26,6 @@ connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongo
 
 ##### Enable dry run to not commit to the database #####
 dryRun = True
-ignoreDirs = ["toy_2019-05-31"]
-
-##### Retrieve file list from local folder #####
-fileList = {}
-
-ignoreDirs = [os.path.normpath(os.path.join(localFolder, x)) for x in ignoreDirs]
-
-for (dirPath, dirNames, fileNames) in os.walk(localFolder):
-    for fileName in fileNames:
-        if not dirPath in ignoreDirs:
-            entry = os.path.normpath(os.path.join(dirPath, fileName))
-            fileList[entry] = False
 
 ##### Connect to the database #####
 db = MongoClient(connString)
@@ -49,7 +37,7 @@ for database in db.database_names():
         print("--database:" + database)
 
 ##### Get a model ID #####
-        for model in db.settings.find({"federate": {"$ne": True}}, {"_id": 1}):
+        for model in db.settings.find({}, {"_id": 1}):
             modelId = model.get('_id')
             print("\t--model: " + modelId)
             for colPrefix in [".history",".stash.json_mpc", ".stash.unity3d" ]:
@@ -59,17 +47,22 @@ for database in db.database_names():
 ##### Check if bson files exist on db and file store before deleting #####
                 for bson in gridfs.GridFS(db, colName).find():
                     bsonRef = db[colName + ".ref"].find_one({"_id": bson.filename})
-                    if bsonRef and bsonRef["link"]:
-                        filePath = os.path.normpath(os.path.join(localFolder, bsonRef['link']))
-                        fileStatus = fileList.get(filePath)
-                        if fileStatus == None:
-                            print("\t\t\tLinked file not found: " + bson.filename + " -> " + bsonRef["link"])
-                        else:
-                            if dryRun:
-                                print("\t\t\tGridFS entry to be deleted: " + bson.filename)
+                    if bsonRef:
+                        if bsonRef["link"]:
+                            filePath = os.path.normpath(os.path.join(localFolder, bsonRef['link']))
+                            fileStatus = os.path.isfile(filePath)
+                            if fileStatus:
+                                if dryRun:
+                                    print("\t\t\tGridFS entry to be deleted: " + bson.filename)
+                                else:
+                                    gridfs.GridFS(db, colName).delete(bson._id)
+                                    print("\t\t\tGridFS entry deleted: " + bson.filename)
                             else:
-                                gridfs.GridFS(db, colName).delete(bson._id)
-                                print("\t\t\tGridFS entry deleted: " + bson.filename)
+                                print("\t\t\tLinked file not found: " + bson.filename + " -> " + bsonRef["link"])
+                        else:
+                            print("\t\t\tMissing file link: " + bson.filename)
+                    else:
+                        print("\t\t\tRef entry not found: " + bson.filename)
 
 ##### Drop collection if empty #####
                 if not dryRun and db[colName + ".files"].count() == 0:
