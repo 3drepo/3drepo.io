@@ -60,7 +60,7 @@ interface IProps {
 	hideComment?: boolean;
 	hideScreenshot?: boolean;
 	showResidualRiskInput?: boolean;
-	onSave: (commentData) => void;
+	onSave: (commentData, finishSubmitting) => void;
 	onTakeScreenshot: (screenshot) => void;
 	showScreenshotDialog: (options) => void;
 	setDisabled: (isDisabled) => void;
@@ -116,9 +116,10 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	public handleSave = (values, form) => {
 		const screenshot = values.screenshot.substring(values.screenshot.indexOf(',') + 1);
 		const commentValues = { ...values, screenshot };
-		this.props.onSave(commentValues);
+		this.props.onSave(commentValues, () => {
+			form.resetForm();
+		});
 		this.setState({ newScreenshot: ''});
-		form.resetForm();
 	}
 
 	public handleNewScreenshot = async () => {
@@ -245,16 +246,16 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 								{this.renderCommentTypeToggle(!hideComment && showResidualRiskInput)}
 							</ActionsGroup>
 							<Field render={({ form }) => (
-								<ViewerPanelButton
-									variant="fab"
-									color="secondary"
-									type="submit"
-									mini={true}
-									disabled={!hideComment && (!canComment || !form.isValid || form.isValidating)}
-									aria-label="Add new comment"
-								>
-									<SaveIcon fontSize="small" />
-								</ViewerPanelButton>
+									<ViewerPanelButton
+										variant="fab"
+										color="secondary"
+										type="submit"
+										mini={true}
+										disabled={!hideComment && (!canComment || !form.isValid || form.isValidating) || form.isSubmitting}
+										aria-label="Add new comment"
+									>
+										<SaveIcon fontSize="small" />
+									</ViewerPanelButton>
 								)}
 							/>
 						</Actions>

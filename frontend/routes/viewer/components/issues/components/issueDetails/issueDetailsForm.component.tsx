@@ -184,7 +184,8 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								/>
 						</StyledFormControl>
 						<StyledFormControl>
-							<PinButton onChange={this.props.onChangePin}
+							<PinButton
+								onChange={this.props.onChangePin}
 								onSave={this.props.onSavePin}
 								pinId={this.props.pinId}
 								hasPin={this.props.hasPin}
@@ -220,7 +221,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 }
 
 export const IssueDetailsForm = withFormik({
-	mapPropsToValues: ({ issue, topicTypes }) => {
+	mapPropsToValues: ({ issue }) => {
 		return ({
 			status: issue.status,
 			priority: issue.priority,

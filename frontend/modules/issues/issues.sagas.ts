@@ -103,7 +103,7 @@ const toggleIssuePin = (issue, selected = true) => {
 	}
 };
 
-export function* saveIssue({ teamspace, model, issueData, revision }) {
+export function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting }) {
 	try {
 		const pinData = Viewer.getPinData();
 		yield Viewer.setPinDropMode(false);
@@ -165,6 +165,8 @@ export function* saveIssue({ teamspace, model, issueData, revision }) {
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(savedIssue, jobs);
 
+		finishSubmitting();
+
 		yield put(IssuesActions.showDetails(teamspace, model, revision, savedIssue));
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue created'));
@@ -211,12 +213,13 @@ export function* updateNewIssue({ newIssue }) {
 	}
 }
 
-export function* postComment({ teamspace, modelId, issueData }) {
+export function* postComment({ teamspace, modelId, issueData, finishSubmitting }) {
 	try {
-		const { _id} = yield select(selectActiveIssueDetails);
+		const { _id } = yield select(selectActiveIssueDetails);
 		const { data: comment } = yield API.addIssueComment(teamspace, modelId, _id, issueData);
 		const preparedComment = yield prepareComment(comment);
 
+		finishSubmitting();
 		yield put(IssuesActions.createCommentSuccess(preparedComment, _id));
 		yield put(SnackbarActions.show('Issue comment added'));
 	} catch (error) {

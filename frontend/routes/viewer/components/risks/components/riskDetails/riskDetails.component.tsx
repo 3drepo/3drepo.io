@@ -47,9 +47,9 @@ interface IProps {
 	setState: (componentState) => void;
 	fetchRisk: (teamspace, model, riskId) => void;
 	showNewPin: (risk, pinData) => void;
-	saveRisk: (teamspace, modelId, risk, revision) => void;
+	saveRisk: (teamspace, modelId, risk, revision, finishSubmitting) => void;
 	updateRisk: (teamspace, modelId, risk) => void;
-	postComment: (teamspace, modelId, riskData) => void;
+	postComment: (teamspace, modelId, riskData, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, riskData) => void;
 	subscribeOnRiskCommentsChanges: (teamspace, modelId, riskId) => void;
 	unsubscribeOnRiskCommentsChanges: (teamspace, modelId, riskId) => void;
@@ -271,7 +271,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		this.props.showNewPin(this.props.risk, pinData);
 	}
 
-	public postComment = async (teamspace, model, {comment, screenshot}) => {
+	public postComment = async (teamspace, model, { comment, screenshot }, finishSubmitting) => {
 		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
 
 		const pinData = await Viewer.getPinData();
@@ -292,15 +292,15 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			}
 		};
 
-		this.props.postComment(teamspace, model, riskCommentData);
+		this.props.postComment(teamspace, model, riskCommentData, finishSubmitting);
 	}
 
-	public handleSave = (formValues) => {
+	public handleSave = (formValues, finishSubmitting) => {
 		const { teamspace, model, saveRisk, revision } = this.props;
 		if (this.isNewRisk) {
-			saveRisk(teamspace, model, this.riskData, revision);
+			saveRisk(teamspace, model, this.riskData, revision, finishSubmitting);
 		} else {
-			this.postComment(teamspace, model, formValues);
+			this.postComment(teamspace, model, formValues, finishSubmitting);
 		}
 	}
 
