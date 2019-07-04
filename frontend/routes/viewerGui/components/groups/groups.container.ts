@@ -35,6 +35,8 @@ import {
 import { DialogActions } from '../../../../modules/dialog';
 import { selectSettings } from '../../../../modules/model';
 import { Groups } from './groups.component';
+import { withViewer } from '../../../../services/viewer/viewer';
+import { selectIsModelLoaded } from '../../../../modules/viewer';
 
 const mapStateToProps = createStructuredSelector({
 	groups: selectGroups,
@@ -47,7 +49,8 @@ const mapStateToProps = createStructuredSelector({
 	searchEnabled: selectSearchEnabled,
 	selectedFilters: selectSelectedFilters,
 	colorOverrides: selectColorOverrides,
-	modelSettings: selectSettings
+	modelSettings: selectSettings,
+	isModelLoaded: selectIsModelLoaded
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -69,4 +72,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	unsubscribeFromChanges: GroupsActions.unsubscribeFromChanges
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Groups);
+export default withViewer(connect(mapStateToProps, mapDispatchToProps)(Groups));

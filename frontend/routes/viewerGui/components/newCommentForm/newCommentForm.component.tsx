@@ -124,10 +124,10 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleNewScreenshot = async () => {
-		const { showScreenshotDialog, onTakeScreenshot } = this.props;
+		const { showScreenshotDialog, onTakeScreenshot, viewer } = this.props;
 
 		showScreenshotDialog({
-			sourceImage: Viewer.getScreenshot(),
+			sourceImage: viewer.getScreenshot(),
 			onSave: (screenshot) => onTakeScreenshot(screenshot)
 		});
 	}

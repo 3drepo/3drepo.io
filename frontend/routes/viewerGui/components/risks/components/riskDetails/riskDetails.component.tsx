@@ -17,7 +17,6 @@
 
 import * as React from 'react';
 
-import { Viewer } from '../../../../../../services/viewer/viewer';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { Container } from './riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
@@ -31,6 +30,7 @@ import { NEW_PIN_ID } from '../../../../../../constants/viewer';
 import { mergeData, diffData } from '../../../../../../helpers/forms';
 
 interface IProps {
+	viewer: any;
 	jobs: any[];
 	risk: any;
 	teamspace: string;
@@ -254,8 +254,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleNewScreenshot = async (screenshot) => {
-		const { teamspace, model } = this.props;
-		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
+		const { teamspace, model, viewer } = this.props;
+		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
 
 		if (this.isNewRisk) {
 			this.props.setState({ newRisk: {
@@ -272,9 +272,9 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public postComment = async (teamspace, model, {comment, screenshot}) => {
-		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
+		const viewpoint = await this.props.viewer.getCurrentViewpoint({ teamspace, model });
 
-		const pinData = await Viewer.getPinData();
+		const pinData = await this.props.viewer.getPinData();
 		let position;
 
 		if (pinData) {
@@ -305,14 +305,14 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public onPositionSave = (position) => {
-		const { teamspace, model, risk, updateRisk } = this.props;
+		const { teamspace, model, risk, updateRisk, viewer } = this.props;
 
 		if (risk._id) {
 			updateRisk(teamspace, model, { position });
-			Viewer.setPin(null);
+			viewer.setPin(null);
 		} else {
 			const colours = getRiskPinColor(risk.overall_level_of_risk, true);
-			Viewer.changePinColor({ id: NEW_PIN_ID, colours});
+			viewer.changePinColor({ id: NEW_PIN_ID, colours});
 		}
 	}
 

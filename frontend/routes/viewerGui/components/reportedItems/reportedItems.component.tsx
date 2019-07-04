@@ -61,7 +61,6 @@ interface IHeaderMenuItem {
 
 interface IProps {
 	className?: string;
-	title?: string;
 	type: string;
 	items: any[];
 	searchEnabled: boolean;
@@ -69,12 +68,14 @@ interface IProps {
 	permissions: any[];
 	filters: any[];
 	headerMenuItems: IHeaderMenuItem[];
-	revision?: string;
-	isPending?: boolean;
-	fetchingDetailsIsPending?: boolean;
 	activeItemId?: string;
-	showDetails?: boolean;
 	showDefaultHiddenItems: boolean;
+	isModelLoaded: boolean;
+	title?: string;
+	isPending?: boolean;
+	revision?: string;
+	fetchingDetailsIsPending?: boolean;
+	showDetails?: boolean;
 	Icon?: any;
 	isImportingBCF?: boolean;
 	sortOrder?: string;
@@ -91,13 +92,11 @@ interface IProps {
 
 interface IState {
 	filteredItems: any[];
-	modelLoaded: boolean;
 }
 
 export class ReportedItems extends React.PureComponent<IProps, IState> {
 	public state = {
 		filteredItems: [],
-		modelLoaded: true
 	};
 
 	get activeItemIndex() {
@@ -116,7 +115,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		if (this.props.isImportingBCF) {
 			return 'Uploading BCF...';
 		}
-		if (this.state.modelLoaded) {
+		if (this.props.isModelLoaded) {
 			return `${this.state.filteredItems.length} results displayed`;
 		}
 		return 'Model is loading';
@@ -126,11 +125,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	public listContainerRef = React.createRef<any>();
 
 	public componentDidMount() {
-		if (Viewer.viewer.model && !this.state.modelLoaded) {
-			this.setState({ modelLoaded: true });
-		}
-
-		this.toggleModelLoadedEvent(true);
 		this.setState({ filteredItems: this.filteredItems });
 	}
 
@@ -159,10 +153,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public componentWillUnmount() {
-		this.toggleModelLoadedEvent(false);
-	}
-
 	public scrollToFocusedItem = (items) => {
 		if (!this.listViewRef.current) {
 			return;
@@ -182,15 +172,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 				}
 			}
 		});
-	}
-
-	public toggleModelLoadedEvent = (enabled: boolean) => {
-		const resolver = enabled ? 'on' : 'off';
-		Viewer[resolver](VIEWER_EVENTS.MODEL_LOADED, this.handleLoadedModel);
-	}
-
-	public handleLoadedModel = () => {
-		this.setState({ modelLoaded: true });
 	}
 
 	public hasPermission = (permission) => {
@@ -269,7 +250,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 					onArrowClick={this.handleShowItemDetails(item)}
 					active={this.props.activeItemId === item._id}
 					hasViewPermission={this.hasPermission(VIEW_ISSUE)}
-					modelLoaded={this.state.modelLoaded}
+					modelLoaded={this.props.isModelLoaded}
 					panelName={this.props.type}
 				/>
 			))}
@@ -290,7 +271,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 					onClick={this.handleAddNewItem}
 					color="secondary"
 					variant="fab"
-					disabled={!this.hasPermission(CREATE_ISSUE) || !this.state.modelLoaded}
+					disabled={!this.hasPermission(CREATE_ISSUE) || !this.props.isModelLoaded}
 				>
 					<AddIcon />
 				</ViewerPanelButton>

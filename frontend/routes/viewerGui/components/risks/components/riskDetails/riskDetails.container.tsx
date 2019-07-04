@@ -33,6 +33,7 @@ import {
 import { selectSettings } from '../../../../../../modules/model';
 import { RiskDetails } from './riskDetails.component';
 import { DialogActions } from '../../../../../../modules/dialog';
+import { withViewer } from '../../../../../../services/viewer/viewer';
 
 const mapStateToProps = createStructuredSelector({
 	risk: selectActiveRiskDetails,
@@ -62,4 +63,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(RiskDetails);
+export default withViewer(connect(mapStateToProps, mapDispatchToProps)(RiskDetails));

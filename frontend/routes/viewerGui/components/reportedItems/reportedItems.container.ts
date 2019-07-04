@@ -20,8 +20,11 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from 'react-redux';
 
 import { ReportedItems } from './reportedItems.component';
+import { selectIsModelLoaded } from '../../../../modules/viewer';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	isModelLoaded: selectIsModelLoaded
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 

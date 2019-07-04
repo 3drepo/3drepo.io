@@ -16,6 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { VIEWER_PANELS } from '../../constants/viewerGui';
 
 export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActions({
 	fetchData: ['teamspace', 'model', 'revision'],
@@ -29,7 +30,9 @@ export interface IViewerGuiState {
 }
 
 export const INITIAL_STATE: IViewerGuiState = {
-	visiblePanels: {}
+	visiblePanels: {
+		[VIEWER_PANELS.ISSUES]: true
+	}
 };
 
 export const setPanelVisibility = (state = INITIAL_STATE, { panelName, visibility }) => {
