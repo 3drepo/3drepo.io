@@ -30,6 +30,7 @@ import { StarredMetaActions } from '../starredMeta';
 import { JobsActions } from '../jobs';
 import { CurrentUserActions, selectCurrentUser } from '../currentUser';
 import { CompareActions } from '../compare';
+import { DialogActions } from '../dialog';
 
 function* fetchData({ teamspace, model, revision }) {
 	try {
@@ -52,7 +53,7 @@ function* fetchData({ teamspace, model, revision }) {
 			put(StarredMetaActions.fetchStarredMeta())
 		]);
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('fetch', 'initial model data', error));
 	}
 }
 
@@ -65,7 +66,7 @@ function* resetPanelsStates() {
 			put(CompareActions.resetComponentState())
 		]);
 	} catch (error) {
-		console.error(error);
+		yield put(DialogActions.showErrorDialog('reset', 'panels data', error));
 	}
 }
 

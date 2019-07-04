@@ -86,82 +86,82 @@ class HomeController implements ng.IController {
 		this.setLoginPage();
 		this.SWService.init();
 
-		// Pages to not attempt a interval triggered logout from
+	// 	// Pages to not attempt a interval triggered logout from
 
-		this.legalPages = this.AuthService.legalPages;
-		this.loggedOutStates = this.AuthService.loggedOutStates;
+	// 	this.legalPages = this.AuthService.legalPages;
+	// 	this.loggedOutStates = this.AuthService.loggedOutStates;
 
-		this.loggedIn = false;
-		this.loginPage = true;
-		this.isLoggedOutPage = false;
+	// 	this.loggedIn = false;
+	// 	this.loginPage = true;
+	// 	this.isLoggedOutPage = false;
 
-		this.functions = this.StateManager.functions;
-		this.pointerEvents = 'inherit';
-		this.goToAccount = false;
-		this.goToUserPage = false;
+	// 	this.functions = this.StateManager.functions;
+	// 	this.pointerEvents = 'inherit';
+	// 	this.goToAccount = false;
+	// 	this.goToUserPage = false;
 
-		this.firstState = true;
+	// 	this.firstState = true;
 
-		// Required for everything to work
-		this.state = this.StateManager.state;
-		this.query = this.StateManager.query;
+	// 	// Required for everything to work
+	// 	this.state = this.StateManager.state;
+	// 	this.query = this.StateManager.query;
 
-		this.legalDisplays = STATIC_ROUTES;
-		this.legalDisplays.push({title: 'Pricing', path: 'http://3drepo.org/pricing'});
-		this.legalDisplays.push({title: 'Contact', path: 'http://3drepo.org/contact/'});
+	// 	this.legalDisplays = STATIC_ROUTES;
+	// 	this.legalDisplays.push({title: 'Pricing', path: 'http://3drepo.org/pricing'});
+	// 	this.legalDisplays.push({title: 'Contact', path: 'http://3drepo.org/contact/'});
 
-		this.watchers();
+	// 	this.watchers();
 
-		/**
-		 * Close the dialog
-		 */
-		this.$scope.closeDialog = function() {
-			this.$mdDialog.cancel();
-		};
+	// 	/**
+	// 	 * Close the dialog
+	// 	 */
+	// 	this.$scope.closeDialog = function() {
+	// 		this.$mdDialog.cancel();
+	// 	};
 
-	}
+	// }
 
-	public watchers() {
+	// public watchers() {
 
-		this.$scope.$watch(
-			() => {
-				return this.$location.path();
-			}, () => {
-				this.handlePaths();
-			}
-		);
+		// this.$scope.$watch(
+		// 	() => {
+		// 		return this.$location.path();
+		// 	}, () => {
+		// 		this.handlePaths();
+		// 	}
+		// );
 
 		/*
-		* Watch the state to handle moving to and from the login page
-		*/
-		this.$scope.$watch('vm.state', (oldState, newState) => {
-			const change = JSON.stringify(oldState) !== JSON.stringify(newState);
+		// * Watch the state to handle moving to and from the login page
+		// */
+		// this.$scope.$watch('vm.state', (oldState, newState) => {
+		// 	const change = JSON.stringify(oldState) !== JSON.stringify(newState);
 
-			this.loggedIn = this.AuthService.isLoggedIn();
+		// 	this.loggedIn = this.AuthService.isLoggedIn();
 
-			if ( (newState && change) || (newState && this.firstState)) {
+		// 	if ( (newState && change) || (newState && this.firstState)) {
 
-				// If it's a legal page
-				const legal = this.$state.current.name.includes('app.static');
-				const loggedOutPage = this.pageCheck(this.$state.current.name, this.loggedOutStates);
+		// 		// If it's a legal page
+		// 		const legal = this.$state.current.name.includes('app.static');
+		// 		const loggedOutPage = this.pageCheck(this.$state.current.name, this.loggedOutStates);
 
-				if (legal) {
-					this.isLegalPage = true;
-					this.isLoggedOutPage = false;
-				} else if (loggedOutPage && !newState.loggedIn) {
-					// If its a logged out page which isnt login
-					this.isLegalPage = false;
-					this.isLoggedOutPage = true;
-				} else if (
-					!this.AuthService.getUsername() &&
-					!legal &&
-					!loggedOutPage
-				) {
-					this.isLoggedOutPage = false;
-				}
+		// 		if (legal) {
+		// 			this.isLegalPage = true;
+		// 			this.isLoggedOutPage = false;
+		// 		} else if (loggedOutPage && !newState.loggedIn) {
+		// 			// If its a logged out page which isnt login
+		// 			this.isLegalPage = false;
+		// 			this.isLoggedOutPage = true;
+		// 		} else if (
+		// 			!this.AuthService.getUsername() &&
+		// 			!legal &&
+		// 			!loggedOutPage
+		// 		) {
+		// 			this.isLoggedOutPage = false;
+		// 		}
 
-			}
-		}, true);
+		// 	}
+		// }, true);
 
 	}
 
@@ -228,45 +228,45 @@ class HomeController implements ng.IController {
 		});
 	}
 
-	public hasTrailingSlash() {
-		// Check if we have a trailing slash in our URL
-		const absUrl = this.$location.absUrl();
-		const trailingCheck = absUrl.substr(-1);
-		if (trailingCheck === '/') {
-			return true;
-		}
-		return false;
-	}
+	// public hasTrailingSlash() {
+	// 	// Check if we have a trailing slash in our URL
+	// 	const absUrl = this.$location.absUrl();
+	// 	const trailingCheck = absUrl.substr(-1);
+	// 	if (trailingCheck === '/') {
+	// 		return true;
+	// 	}
+	// 	return false;
+	// }
 
-	public removeTrailingSlash() {
-		// Remove the trailing slash from the URL
-		const currentPath = this.$location.path();
-		const minusSlash = currentPath.slice(0, -1);
-		this.$location.path(minusSlash);
-	}
+	// public removeTrailingSlash() {
+	// 	// Remove the trailing slash from the URL
+	// 	const currentPath = this.$location.path();
+	// 	const minusSlash = currentPath.slice(0, -1);
+	// 	this.$location.path(minusSlash);
+	// }
 
-	public home = () => {
-		this.StateManager.resetServiceStates();
-		this.StateManager.goHome();
-	}
+	// public home = () => {
+	// 	this.StateManager.resetServiceStates();
+	// 	this.StateManager.goHome();
+	// }
 
-	public legalDisplay(event, display) {
-		this.$window.open('/' + display.value);
-	}
+	// public legalDisplay(event, display) {
+	// 	this.$window.open('/' + display.value);
+	// }
 }
 
-export const HomeComponent: ng.IComponentOptions = {
-	bindings: {
-		account: '@',
-		password: '@',
-		loggedInUrl: '@',
-		loggedOutUrl: '@'
-	},
-	controller: HomeController,
-	controllerAs: 'vm',
-	templateUrl: 'templates/home.html'
-};
+// export const HomeComponent: ng.IComponentOptions = {
+// 	bindings: {
+// 		account: '@',
+// 		password: '@',
+// 		loggedInUrl: '@',
+// 		loggedOutUrl: '@'
+// 	},
+// 	controller: HomeController,
+// 	controllerAs: 'vm',
+// 	templateUrl: 'templates/home.html'
+// };
 
-export const HomeComponentModule = angular
-	.module('3drepo')
-	.component('home', HomeComponent);
+// export const HomeComponentModule = angular
+// 	.module('3drepo')
+// 	.component('home', HomeComponent);
