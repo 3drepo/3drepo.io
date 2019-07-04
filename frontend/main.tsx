@@ -56,7 +56,6 @@ render();
 
 (() => {
 	if ('serviceWorker' in navigator && !IS_DEVELOPMENT) {
-		console.log('INSTALL')
 		OfflinePluginRuntime.install();
 	}
 })();
