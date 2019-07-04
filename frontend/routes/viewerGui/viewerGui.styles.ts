@@ -47,7 +47,8 @@ export const LeftPanels = styled.div`
 
 export const RightPanels = styled.div`
 	${panelStyles};
-	right: 90px;
+	width: 450px
+	right: 20px;
 `;
 
 export const LeftPanelsButtons = styled.div`

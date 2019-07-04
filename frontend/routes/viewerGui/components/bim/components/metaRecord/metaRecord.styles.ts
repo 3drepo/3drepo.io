@@ -43,7 +43,7 @@ export const MetaKeyText = styled.div`
 	color: ${COLOR.BLACK_60};
 	font-size: 14px;
 	padding-right: 10px;
-	word-break: break-all;
+	word-break: break-word;
 `;
 
 export const MetaValue = styled(LinkableField)`
@@ -51,7 +51,7 @@ export const MetaValue = styled(LinkableField)`
 	color: ${COLOR.BLACK_87};
 	font-size: 14px;
 	padding-right: 10px;
-	word-break: break-all;
+	word-break: break-word;
 `;
 
 export const StarIconWrapper = styled(Icon)`
