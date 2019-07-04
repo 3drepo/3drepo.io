@@ -539,6 +539,70 @@ describe("Issues", function () {
 			], done);
 		});
 
+		it("screenshot within comments should work", (done) => {
+			const issue = Object.assign({"name":"Issue test"}, baseIssue, { topic_type: "ru123"});
+			let issueId;
+			let commentId;
+			const data = { topic_type: "abc123"};
+			const comment = {
+				comment:'',
+				viewpoint:{
+					up:[0,1,0],
+					position:[38,38 ,125.08011914810137],
+					look_at:[0,0,-163.08011914810137],
+					view_dir:[0,0,-1],
+					right:[1,0,0],
+					unityHeight :3.537606904422707,
+					fov:2.1124830653010416,
+					aspect_ratio:0.8750189337327384,
+					far:276.75612077194506 ,
+					near:76.42411012233212,
+					clippingPlanes:[],
+					screenshot:pngBase64
+				}
+			}
+
+			async.series([
+				next => {
+					agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+							issueId = res.body._id;
+							return next(err);
+						});
+				},
+				next => {
+					agent.post(`/${username}/${model}/issues/${issueId}/comments`)
+						.send(comment)
+						.expect(200 , (err, res) => {
+							const comment = res.body;
+							console.log(comment);
+							console.log()
+							expect(comment.viewpoint.screenshot).to.exist
+								.and.to.be.not.equal(pngBase64);
+							expect(comment.viewpoint.screenshotSmall).to.exist;
+							commentId = comment.guid;
+							return next(err);
+						});
+				},
+				next => {
+					agent.patch(`/${username}/${model}/issues/${issueId}`)
+						.send(data)
+						.expect(200, (err, res) => {
+							const comment = res.body.comments.filter(c=> c.guid == commentId)[0];
+							console.log(comment);
+
+
+							expect(comment.viewpoint.screenshot).to.exist
+								.and.to.be.not.equal(pngBase64);
+							expect(comment.viewpoint.screenshotSmall).to.exist;
+
+							return next(err);
+						});
+				}
+			],done);
+		})
+
 		it("seal last non system comment when adding system comment", function(done) {
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue, { topic_type: "ru123"});
