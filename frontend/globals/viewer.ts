@@ -467,13 +467,13 @@ export class Viewer {
 		this.currentNavMode = newNavMode;
 	}
 
-/* 	public setCamera(pos, viewDir, upDir, lookAt, animate, rollerCoasterMode, account, model) {
+	public setCamera(pos, viewDir, upDir, lookAt, animate, rollerCoasterMode, account, model) {
 		this.updateCamera(pos, upDir, viewDir, lookAt, animate, rollerCoasterMode, account, model);
 	}
 
 	public updateCamera(pos, up, viewDir, lookAt, animate, rollerCoasterMode, account, model) {
 		UnityUtil.setViewpoint(pos, up, viewDir, lookAt, account, model);
-	} */
+	}
 
 	public reset() {
 		this.setMeasureMode(false);
@@ -641,25 +641,24 @@ export class Viewer {
 
 			// this.highlightPin(id); This was preventing changing the colour of the pin
 			// Replace with
-			this.emit(Viewer.EVENT.CHANGE_PIN_COLOUR, {
-				colours: Pin.pinColours.yellow,
-				id
-			});
 
-			this.emit(Viewer.EVENT.SET_CAMERA, {
-				account: pin.account,
-				model: pin.model,
-				position : pin.viewpoint.position,
-				up: pin.viewpoint.up,
-				view_dir : pin.viewpoint.view_dir
-			});
+			this.changePinColours(id, Pin.pinColours.yellow);
+			this.setCamera(
+				pin.position,
+				pin.view_dir,
+				pin.up,
+				pin.look_at,
+				pin.animate !== undefined ? pin.animate : true,
+				pin.rollerCoasterMode,
+				pin.account,
+				pin.model
+			);
 
-			this.emit(Viewer.EVENT.UPDATE_CLIPPING_PLANES, {
-				account: pin.account,
-				clippingPlanes: pin.viewpoint.clippingPlanes,
-				fromClipPanel: false,
-				model: pin.model
-			});
+			this.updateClippingPlanes(
+				pin.viewpoint.clippingPlanes,
+				pin.account,
+				pin.model
+			);
 		}
 
 	}

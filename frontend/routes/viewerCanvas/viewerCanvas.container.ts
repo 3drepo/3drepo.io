@@ -20,15 +20,10 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from 'react-redux';
 
 import { ViewerCanvas } from './viewerCanvas.component';
-import { ViewerActions } from '../../modules/viewer';
 import { withViewer } from '../../services/viewer/viewer';
 
 const mapStateToProps = createStructuredSelector({});
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	changePinColor: ViewerActions.changePinColor,
-	removeUnsavedPin: ViewerActions.removeUnsavedPin,
-	setCamera: ViewerActions.setCamera
-}, dispatch);
+export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerCanvas));
