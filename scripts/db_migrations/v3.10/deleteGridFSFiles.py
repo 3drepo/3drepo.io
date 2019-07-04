@@ -27,6 +27,10 @@ connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongo
 ##### Enable dry run to not commit to the database #####
 dryRun = True
 
+##### If noChecks=True, run scripts/dbMaintenance/removeOrphanFiles.py beforehand #####
+##### to ensure DB/FS integrity #####
+noChecks = True
+
 ##### Connect to the database #####
 db = MongoClient(connString)
 
@@ -44,28 +48,34 @@ for database in db.database_names():
                 colName = modelId + colPrefix
                 print("\t\t---col: " + colName)
 
+                if noChecks:
+                    if not dryRun:
+                        db[colName + ".files"].drop()
+                        db[colName + ".chunks"].drop()
+                        print("\t\t\tCollection dropped: " + colName + ".(files|chunks)")
+                else:
 ##### Check if bson files exist on db and file store before deleting #####
-                for bson in gridfs.GridFS(db, colName).find():
-                    bsonRef = db[colName + ".ref"].find_one({"_id": bson.filename})
-                    if bsonRef:
-                        if bsonRef["link"]:
-                            filePath = os.path.normpath(os.path.join(localFolder, bsonRef['link']))
-                            fileStatus = os.path.isfile(filePath)
-                            if fileStatus:
-                                if dryRun:
-                                    print("\t\t\tGridFS entry to be deleted: " + bson.filename)
+                    for bson in gridfs.GridFS(db, colName).find():
+                        bsonRef = db[colName + ".ref"].find_one({"_id": bson.filename})
+                        if bsonRef:
+                            if bsonRef["link"]:
+                                filePath = os.path.normpath(os.path.join(localFolder, bsonRef['link']))
+                                fileStatus = os.path.isfile(filePath)
+                                if fileStatus:
+                                    if dryRun:
+                                        print("\t\t\tGridFS entry to be deleted: " + bson.filename)
+                                    else:
+                                        gridfs.GridFS(db, colName).delete(bson._id)
+                                        print("\t\t\tGridFS entry deleted: " + bson.filename)
                                 else:
-                                    gridfs.GridFS(db, colName).delete(bson._id)
-                                    print("\t\t\tGridFS entry deleted: " + bson.filename)
+                                    print("\t\t\tLinked file not found: " + bson.filename + " -> " + bsonRef["link"])
                             else:
-                                print("\t\t\tLinked file not found: " + bson.filename + " -> " + bsonRef["link"])
+                                print("\t\t\tMissing file link: " + bson.filename)
                         else:
-                            print("\t\t\tMissing file link: " + bson.filename)
-                    else:
-                        print("\t\t\tRef entry not found: " + bson.filename)
+                            print("\t\t\tRef entry not found: " + bson.filename)
 
 ##### Drop collection if empty #####
-                if not dryRun and db[colName + ".files"].count() == 0:
-                    db[colName + ".files"].drop()
-                    db[colName + ".chunks"].drop()
-                    print("\t\t\tEmpty collection dropped: " + colName + ".(files|chunks)")
+                    if not dryRun and db[colName + ".files"].count() == 0:
+                        db[colName + ".files"].drop()
+                        db[colName + ".chunks"].drop()
+                        print("\t\t\tEmpty collection dropped: " + colName + ".(files|chunks)")
