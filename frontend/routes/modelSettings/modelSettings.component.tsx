@@ -28,7 +28,6 @@ import InputLabel from '@material-ui/core/InputLabel';
 import { Loader } from '../components/loader/loader.component';
 
 import { schema } from '../../services/validation';
-import { runAngularTimeout } from '../../helpers/migration';
 import { clientConfigService } from '../../services/clientConfig';
 
 import { Panel } from '../components/panel/panel.component';

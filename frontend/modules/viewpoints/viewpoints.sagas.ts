@@ -16,12 +16,11 @@
  */
 
 import { put, takeLatest } from 'redux-saga/effects';
-import { getAngularService, dispatch } from '../../helpers/migration';
+import { dispatch } from '../../helpers/migration';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ViewpointsTypes, ViewpointsActions } from './viewpoints.redux';
 import { DialogActions } from '../dialog';
-import { getScreenshot } from '../viewer/viewer.sagas';
 import { ChatActions } from '../chat';
 import { CHAT_CHANNELS } from '../../constants/chat';
 
@@ -46,7 +45,7 @@ export function* fetchViewpoints({ teamspace, modelId }) {
 
 export function* generateViewpointObject(teamspace, modelId, viewName) {
 	try {
-		const screenshot = yield getScreenshot();
+		const screenshot = yield Viewer.getScreenshot();
 		const { clippingPlanes, ...viewpoint } = yield Viewer.getCurrentViewpoint({
 			teamspace,
 			model: modelId

@@ -591,12 +591,11 @@ function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
 
 export function* setNewIssue() {
 	const activeIssue = yield select(selectActiveIssueDetails);
-	const issues = yield select(selectIssues);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
 	const topicTypes: any[] = yield select(selectTopicTypes);
 
-	const topicType =  topicTypes.find((t) => t.value ===  DEFAULT_PROPERTIES.TOPIC_TYPE) ?
+	const topicType =  topicTypes.find((t) => t.value === DEFAULT_PROPERTIES.TOPIC_TYPE) ?
 						DEFAULT_PROPERTIES.TOPIC_TYPE : topicTypes[0].value;
 
 	try {

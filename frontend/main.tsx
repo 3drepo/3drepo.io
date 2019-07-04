@@ -16,6 +16,7 @@ import { UnityUtil } from './globals/unity-util';
 import { Pin } from './globals/pin';
 import { Viewer } from './globals/viewer';
 import './services/fontAwesome';
+import { IS_DEVELOPMENT } from './constants/environment';
 
 // css from libs
 
@@ -54,7 +55,7 @@ const render = () => {
 render();
 
 (() => {
-	if ('serviceWorker' in navigator) {
+	if ('serviceWorker' in navigator && !IS_DEVELOPMENT) {
 		OfflinePluginRuntime.install();
 	}
 })();

@@ -52,14 +52,7 @@ module.exports = (options) => {
         minifyCSS: true,
         minifyURLs: true,
       }),
-      ...(options.plugins || []),
-      new OfflinePlugin({
-        ServiceWorker: {
-          output: '../sw.js',
-          entry: './serviceWorkerExtras.js'
-        },
-        excludes: ['**/*.map']
-      })
+      ...(options.plugins || [])
     ],
 
     resolve: {
@@ -74,7 +67,15 @@ module.exports = (options) => {
   }
 
   if (options.mode !== MODES.DEVELOPMENT) {
-
+    config.plugins.push(
+      new OfflinePlugin({
+        ServiceWorker: {
+          output: '../sw.js',
+          entry: './serviceWorkerExtras.js'
+        },
+        excludes: ['**/*.map']
+      })
+    );
   }
 
   return config;

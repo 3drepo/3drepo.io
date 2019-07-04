@@ -427,15 +427,14 @@ export class ViewerService {
 			errorType = 'Unity Error';
 		}
 
-		this.DialogService.html(errorType, message, true)
+/* 		this.DialogService.html(errorType, message, true)
 			.then(() => {
 				if (reload) {
 					location.reload();
 				}
 			}, () => {
-				console.error('Unity errored and user canceled reload', message);
-			});
-
+			}); */
+		console.error('Unity errored and user canceled reload', message);
 	}
 
 	public reset() {

@@ -61,7 +61,7 @@ interface IHeaderMenuItem {
 
 interface IProps {
 	className?: string;
-	title: string;
+	title?: string;
 	type: string;
 	items: any[];
 	searchEnabled: boolean;
