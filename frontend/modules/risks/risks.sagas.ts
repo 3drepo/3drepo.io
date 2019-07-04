@@ -236,7 +236,7 @@ export function* removeComment({ teamspace, modelId, riskData }) {
 		};
 
 		yield API.updateRisk(teamspace, modelId, _id, rev_id, commentData);
-		yield put(RisksActions.deleteCommentSuccess(guid));
+		yield put(RisksActions.deleteCommentSuccess(guid, _id));
 		yield put(SnackbarActions.show('Comment removed'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('remove', 'comment', error));
