@@ -49,10 +49,10 @@ export const getStatusIcon = (priority, status) => {
 	const statusIcon = {
 		Icon: STATUSES_ICONS[status] || null,
 		color: (ISSUE_COLORS[status] ? ISSUE_COLORS[status].color : null) ||
-		(ISSUE_COLORS[priority] ? ISSUE_COLORS[priority].color : null) || null
-  };
+			(ISSUE_COLORS[priority] ? ISSUE_COLORS[priority].color : null) || null
+	};
 
-  return {...statusIcon};
+	return {...statusIcon};
 };
 
 export const getIssuePinColor = (status: string, priority: string, selected: boolean = false) => {
