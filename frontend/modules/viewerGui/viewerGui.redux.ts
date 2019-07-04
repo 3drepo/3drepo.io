@@ -20,7 +20,8 @@ import { createActions, createReducer } from 'reduxsauce';
 export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActions({
 	fetchData: ['teamspace', 'model', 'revision'],
 	resetPanelsStates: [],
-	setPanelVisibility: ['panelName', 'visibility']
+	setPanelVisibility: ['panelName', 'visibility'],
+	setMeasureVisibility: ['visible']
 }, { prefix: 'VIEWER_GUI/' });
 
 export interface IViewerGuiState {

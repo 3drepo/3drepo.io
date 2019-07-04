@@ -16,12 +16,10 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { cloneDeep } from 'lodash';
-import { DEFAULT_SETTINGS, VIEWER_NAV_MODES, VIEWER_PANELS, INITIAL_HELICOPTER_SPEED } from '../../constants/viewer';
+import { DEFAULT_SETTINGS, VIEWER_NAV_MODES, INITIAL_HELICOPTER_SPEED } from '../../constants/viewer';
 
 export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	waitForViewer: [],
-	mapInitialise: ['surveyPoints', 'sources'],
 	resetMapSources: ['source'],
 	addMapSource: ['source'],
 	removeMapSource: ['source'],
@@ -46,9 +44,6 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	setClipEdit: ['isClipEdit'],
 	setClipEditSuccess: ['isClipEdit'],
 	setClipNumber: ['clipNumber'],
-	setMetadataVisibility: ['visible'],
-	setMeasureVisibility: ['visible'],
-	setPanelVisibility: ['panelName', 'isVisible'],
 	deactivateMeasure: [],
 	updateClipState: ['clipNumber'],
 	startListenOnNumClip: [],

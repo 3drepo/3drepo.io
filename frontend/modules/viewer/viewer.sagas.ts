@@ -36,7 +36,7 @@ import { BimActions } from '../bim';
 import { selectUrlParams } from '../router/router.selectors';
 import { selectSettings } from '../model';
 import { ROUTES } from '../../constants/routes';
-import { selectIsMetadataVisible } from '../viewerGui';
+import { selectIsMetadataVisible, ViewerGuiActions } from '../viewerGui';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 
 const getViewer = () => Viewer.viewer;
@@ -46,18 +46,6 @@ function* waitForViewer() {
 		yield Viewer.isViewerReady();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('initialise', 'viewer', error));
-	}
-}
-
-function* mapInitialise({surveyPoints, sources = []}) {
-	try {
-		yield put(ViewerActions.waitForViewer());
-
-		const viewer = getViewer();
-		viewer.mapInitialise(surveyPoints);
-		sources.map(viewer.addMapSource);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('initialise', 'map', error));
 	}
 }
 
@@ -283,28 +271,6 @@ function* setClipEdit({isClipEdit}) {
 	}
 }
 
-function* setMetadataVisibility({ visible }) {
-	try {
-		yield put(ViewerActions.setPanelVisibility(VIEWER_PANELS.METADATA, visible));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set', 'metadata visibility', error));
-	}
-}
-
-function* setMeasureVisibility({ visible }) {
-	try {
-		const metadataActive = yield select(selectIsMetadataVisible);
-		if (visible && metadataActive) {
-			yield put(ViewerActions.setMetadataVisibility(false));
-			yield put(BimActions.setIsActive(false));
-		}
-
-		yield put(MeasureActions.setMeasureActive(visible));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set', 'measure visibility', error));
-	}
-}
-
 function* clearHighlights() {
 	try {
 		Viewer.clearHighlights();
@@ -389,7 +355,6 @@ function* addPin({ pinData }) {
 
 export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.WAIT_FOR_VIEWER, waitForViewer);
-	yield takeLatest(ViewerTypes.MAP_INITIALISE, mapInitialise);
 	yield takeLatest(ViewerTypes.RESET_MAP_SOURCES, resetMapSources);
 	yield takeLatest(ViewerTypes.ADD_MAP_SOURCE, addMapSource);
 	yield takeLatest(ViewerTypes.REMOVE_MAP_SOURCE, removeMapSource);
@@ -404,8 +369,6 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.DECREASE_HELICOPTER_SPEED, decreaseHelicopterSpeed);
 	yield takeLatest(ViewerTypes.GO_TO_EXTENT, goToExtent);
 	yield takeLatest(ViewerTypes.SET_CLIPPING_MODE, setClippingMode);
-	yield takeLatest(ViewerTypes.SET_METADATA_VISIBILITY, setMetadataVisibility);
-	yield takeLatest(ViewerTypes.SET_MEASURE_VISIBILITY, setMeasureVisibility);
 	yield takeLatest(ViewerTypes.UPDATE_CLIP_STATE, updateClipState);
 	yield takeLatest(ViewerTypes.SET_CLIP_EDIT, setClipEdit);
 	yield takeLatest(ViewerTypes.START_LISTEN_ON_NUM_CLIP, startListenOnNumClip);

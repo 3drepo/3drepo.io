@@ -30,6 +30,10 @@ import { StarredMetaActions } from '../starredMeta';
 import { JobsActions } from '../jobs';
 import { CurrentUserActions, selectCurrentUser } from '../currentUser';
 import { CompareActions } from '../compare';
+import { selectIsMetadataVisible } from './viewerGui.selectors';
+import { VIEWER_PANELS } from '../../constants/viewerGui';
+import { BimActions } from '../bim';
+import { MeasureActions } from '../measure';
 import { DialogActions } from '../dialog';
 
 function* fetchData({ teamspace, model, revision }) {
@@ -70,7 +74,23 @@ function* resetPanelsStates() {
 	}
 }
 
+function* setMeasureVisibility({ visible }) {
+	try {
+		const metadataActive = yield select(selectIsMetadataVisible);
+
+		if (visible && metadataActive) {
+			yield put(BimActions.setIsActive(false));
+		}
+
+		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, !visible));
+		yield put(MeasureActions.setMeasureActive(visible));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'measure visibility', error));
+	}
+}
+
 export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.FETCH_DATA, fetchData);
 	yield takeLatest(ViewerGuiTypes.RESET_PANELS_STATES, resetPanelsStates);
+	yield takeLatest(ViewerGuiTypes.SET_MEASURE_VISIBILITY, setMeasureVisibility);
 }

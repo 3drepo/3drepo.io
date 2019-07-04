@@ -84,7 +84,6 @@ interface IProps {
 	setIsFocusMode: (isFocusMode) => void;
 	setClippingMode: (clippingMode) => void;
 	setClipEdit: (isClipEdit) => void;
-	setMetadataVisibility: (visible) => void;
 	setMetadataActive: (isActive) => void;
 	setMeasureVisibility: (visible) => void;
 	stopListenOnNumClip: () => void;
@@ -313,7 +312,6 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	private toggleMetadataPanel = () => {
 		const {
 			isMetadataActive,
-			setMetadataVisibility,
 			setMetadataActive,
 			setMeasureVisibility,
 			setPanelVisibility,
@@ -323,7 +321,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		setPanelVisibility(VIEWER_PANELS.BIM, !isMetadataVisible);
 
 		if (isMetadataActive) {
-			setMetadataVisibility(false);
+			setPanelVisibility(VIEWER_PANELS.BIM, false);
 		} else {
 			setMeasureVisibility(false);
 		}

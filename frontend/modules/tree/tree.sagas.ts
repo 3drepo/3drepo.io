@@ -21,6 +21,7 @@ import TreeProcessing from './treeProcessing/treeProcessing';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../constants/viewer';
+import { VIEWER_PANELS } from '../../constants/viewerGui';
 import { dispatch } from '../../helpers/migration';
 import { GroupsActions } from '../groups';
 import { DialogActions } from '../dialog';
@@ -44,7 +45,7 @@ import { selectSettings, ModelTypes } from '../model';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { VISIBILITY_STATES, SELECTION_STATES } from '../../constants/tree';
 import { selectActiveMeta, BimActions, selectIsActive } from '../bim';
-import { ViewerActions } from '../viewer';
+import { ViewerGuiActions } from '../viewerGui';
 
 const unhighlightObjects = (objects = []) => {
 	for (let index = 0, size = objects.length; index < size; index++) {
@@ -83,7 +84,8 @@ function* handleMetadata(node: any) {
 	const isMetadataActive = yield select(selectIsActive);
 	if (node && node.meta && isMetadataActive) {
 		yield put(BimActions.fetchMetadata(node.teamspace, node.model, node.meta[0]));
-		yield put(ViewerActions.setMetadataVisibility(true));
+		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, true));
+
 	}
 }
 
@@ -189,7 +191,7 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = f
 		const shouldCloseMeta = nodes.some(({ meta }) => meta.includes(activeMeta));
 		if (shouldCloseMeta) {
 			yield all([
-				put(ViewerActions.setMetadataVisibility(false)),
+				put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false)),
 				put(BimActions.setActiveMeta(null))
 			]);
 		}
@@ -222,7 +224,7 @@ function* clearCurrentlySelected() {
 	yield all([
 		put(TreeActions.setActiveNode(null)),
 		call(TreeProcessing.clearSelected),
-		put(ViewerActions.setMetadataVisibility(false)),
+		put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false)),
 		put(BimActions.setActiveMeta(null))
 	]);
 	yield put(TreeActions.updateDataRevision());
