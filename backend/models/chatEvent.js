@@ -69,8 +69,8 @@ function newIssues(emitter, account, model, data) {
 	return insertEventQueue("issue" + eventTypes.CREATED, emitter, account, model, null, data);
 }
 
-function issueChanged(emitter, account, model, issueId, data) {
-	return insertEventQueue("issue" + eventTypes.UPDATED, emitter, account, model, null, data);
+function issueChanged(emitter, account, model, _id, data) {
+	return insertEventQueue("issue" + eventTypes.UPDATED, emitter, account, model, null , {_id,...data});
 }
 
 // comments notifications

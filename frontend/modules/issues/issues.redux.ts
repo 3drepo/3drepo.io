@@ -117,8 +117,7 @@ export const fetchIssueFailure = (state = INITIAL_STATE) => {
 };
 
 export const saveIssueSuccess = (state = INITIAL_STATE, { issue }) => {
-	const issuesMap = cloneDeep(state.issuesMap);
-	issuesMap[issue._id] = issue;
+	const issuesMap = updateIssueProps(state.issuesMap, issue._id, issue);
 
 	return {
 		...state,
