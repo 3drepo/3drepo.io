@@ -58,7 +58,7 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 		<Actions>
 		{this.props.renderActions()}
 		</Actions>
-	))(this.props.renderActions);
+	))(this.props.renderActions)
 
 	public renderTitle = () => (
 		<ViewerPanelTitle

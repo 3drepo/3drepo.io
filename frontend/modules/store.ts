@@ -1,5 +1,5 @@
 import { createStore, applyMiddleware, compose } from 'redux';
-import { routerMiddleware } from 'connected-react-router'
+import { routerMiddleware } from 'connected-react-router';
 
 import { IS_DEVELOPMENT } from '../constants/environment';
 import createSagaMiddleware from 'redux-saga';
@@ -20,7 +20,7 @@ export default function configureStore(initialState = {}, history) {
 		// middlewares.unshift(require('redux-immutable-state-invariant').default());
 
 		if (window.__REDUX_DEVTOOLS_EXTENSION__) {
-			//enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
+			// enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
 		}
 	}
 

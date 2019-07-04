@@ -35,6 +35,7 @@ interface IViewerPanelButton {
 }
 
 interface IPanel {
+	classname?: string;
 	isPending?: boolean;
 }
 

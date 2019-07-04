@@ -47,7 +47,6 @@ function* login({ username, password }) {
 			avatarUrl: getAvatarUrl(username)
 		}));
 		yield put(AuthActions.loginSuccess());
-		yield fork(watchSession);
 	} catch (e) {
 		if (e.response.status === 401) {
 			yield put(AuthActions.loginFailure());
@@ -85,7 +84,6 @@ function* authenticate() {
 		}));
 
 		yield put(AuthActions.loginSuccess());
-		yield fork(watchSession);
 	} catch (e) {
 		if (e.response.status === 401) {
 			yield put(AuthActions.loginFailure());
@@ -161,20 +159,6 @@ function* verify({ username, token }) {
 	yield put(AuthActions.setPendingStatus(false));
 }
 
-function* watchSession() {
-	try {
-		let shouldLogout = false;
-
-/* 		while (!shouldLogout) {
-
-		} */
-
-		//yield put(AuthActions.logout());
-	} catch (error) {
-		yield put(DialogActions.showEndpointErrorDialog('verify', 'user session', error));
-	}
-}
-
 export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.AUTHENTICATE, authenticate);
 	yield takeLatest(AuthTypes.LOGIN, login);
@@ -184,5 +168,4 @@ export default function* AuthSaga() {
 	yield takeLatest(AuthTypes.CHANGE_PASSWORD, changePassword);
 	yield takeLatest(AuthTypes.REGISTER, register);
 	yield takeLatest(AuthTypes.VERIFY, verify);
-	yield takeLatest(AuthTypes.WATCH_SESSION, watchSession);
 }

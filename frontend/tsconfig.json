@@ -17,8 +17,7 @@
     ],
     "jsx": "react",
     "removeComments": true,
-    "sourceMap": true,
-    "allowJs": true,
+    "sourceMap": true
   },
   "exclude": [
     "node_modules",

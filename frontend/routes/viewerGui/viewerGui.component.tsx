@@ -215,7 +215,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleModelSettingsChange(modelSettings) {
-		//TODO: this.PanelService.hideSubModels(this.issuesCardIndex, !modelSettings.federate);
+		// TODO: this.PanelService.hideSubModels(this.issuesCardIndex, !modelSettings.federate);
 		this.props.loadModel();
 	}
 
