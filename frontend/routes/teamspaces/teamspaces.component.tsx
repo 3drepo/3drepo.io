@@ -29,7 +29,6 @@ import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import ModelItem from './components/modelItem/modelItem.container';
 import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
-import { runAngularTimeout } from '../../helpers/migration';
 import { ProjectDialog } from './components/projectDialog/projectDialog.component';
 import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
@@ -297,9 +296,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		const { activeTeamspace } = this.state;
 		if (props.timestamp) {
 			event.persist();
-			runAngularTimeout(() => {
-				this.createRouteHandler(`/viewer/${activeTeamspace}/${props.model}`)(event);
-			});
+			this.createRouteHandler(`/viewer/${activeTeamspace}/${props.model}`)(event);
 
 			analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
 		} else {
@@ -326,7 +323,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				activeTeamspace={activeTeamspace}
 				actions={[]}
 				onModelItemClick={this.createModelItemClickHandler(props)}
-				onPermissionsClick={ this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
+				onPermissionsClick={this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
 					project: props.projectName,
 					view: PERMISSIONS_VIEWS.MODELS,
 					modelId: props.model

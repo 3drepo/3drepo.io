@@ -31,6 +31,7 @@ import {
 	PropertyWrapper
 } from './revisionsDialog.styles';
 import { DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
+import { ROUTES } from '../../../../constants/routes';
 
 interface IProps {
 	fetchModelRevisions: (teamspace, modelId) => void;
@@ -51,7 +52,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		const { teamspace, modelId, handleClose, history } = this.props;
 
 		handleClose();
-		history.push(`/viewer/${teamspace}/${modelId}/${tag || _id}`);
+		history.push(`${ROUTES.VIEWER}/${teamspace}/${modelId}/${tag || _id}`);
 
 		analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
 	}

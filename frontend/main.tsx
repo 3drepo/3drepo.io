@@ -1,19 +1,28 @@
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import { ConnectedRouter } from 'connected-react-router';
+import * as OfflinePluginRuntime from 'offline-plugin/runtime';
+import 'normalize.css/normalize.css';
+import 'simplebar/dist/simplebar.min.css';
+import 'font-awesome/css/font-awesome.min.css';
 import 'simplebar';
+
+import './styles/global';
+import Root from './routes/index';
+import { store, history } from './helpers/migration';
+
+import { UnityUtil } from './globals/unity-util';
+import { Pin } from './globals/pin';
+import { Viewer } from './globals/viewer';
+import './services/fontAwesome';
+
+// css from libs
 
 const requireAll = (r) => r.keys().forEach(r);
 
 // @ts-ignore
 requireAll(require.context('./css', true, /\.css$/));
-
-// css from libs
-import 'simplebar/dist/simplebar.min.css';
-import 'font-awesome/css/font-awesome.min.css';
-import './services/fontAwesome';
-
-// TypeScript compiled globals
-import { UnityUtil } from './globals/unity-util';
-import { Pin } from './globals/pin';
-import { Viewer } from './globals/viewer';
 
 /* import { TDR } from './components/init'; */
 
@@ -31,24 +40,6 @@ requireAll(require.context('./components', true, /\.css$/));
 // @ts-ignore
 requireAll(require.context('./components', true, /\.pug$/));
 
-/**
- * app.js
- *
- * This is the entry file for the application, only setup and boilerplate
- * code.
- */
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-
-// Import all the third party stuff
-import { Provider } from 'react-redux';
-import { ConnectedRouter } from 'connected-react-router';
-import 'normalize.css/normalize.css';
-
-import './styles/global';
-import Root from './routes/index';
-import { store, history } from './helpers/migration';
-
 const render = () => {
 	ReactDOM.render(
 		<Provider store={store} >
@@ -61,3 +52,9 @@ const render = () => {
 };
 
 render();
+
+(() => {
+	if ('serviceWorker' in navigator) {
+		OfflinePluginRuntime.install();
+	}
+})();

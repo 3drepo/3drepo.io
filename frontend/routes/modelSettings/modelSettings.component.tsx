@@ -47,6 +47,7 @@ import {
 	LoaderContainer
 } from './modelSettings.styles';
 import { convertPositionToOpenGL, convertPositionToDirectX } from '../../helpers/model';
+import { ROUTES } from '../../constants/routes';
 
 const ModelSettingsSchema = Yup.object().shape({
 	code: Yup.string()
@@ -207,11 +208,9 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		const { project } = queryParams;
 		const { teamspace } = match.params;
 
-		runAngularTimeout(() => {
-			history.push({
-				pathname: '/dashboard/teamspaces',
-				search: `?teamspace=${teamspace}&project=${project}`
-			});
+		history.push({
+			pathname: ROUTES.TEAMSPACES,
+			search: `?teamspace=${teamspace}&project=${project}`
 		});
 	}
 

@@ -1,9 +1,10 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
-const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
-const loaders = require('./tools/loaders');
+const OfflinePlugin = require('offline-plugin');
+
 const PATHS = require('./tools/paths');
 const MODES = require('./tools/modes');
+const loaders = require('./tools/loaders');
 
 module.exports = (options) => {
   const config = {
@@ -34,26 +35,31 @@ module.exports = (options) => {
         { from: 'icons/*', to: '../' },
         { from: 'unity/**', to: '../' },
         { from: 'manifest-icons/*', to: '../' },
+        { from: 'serviceWorkerExtras.js', to: '../' },
         { context: '../resources', from: '**/*.html', to: '../templates' }
       ], options),
       new HTMLWebpackPlugin({
         template: './index.html',
-        filename: '../index.html'
+        filename: '../index.html',
+        removeComments: true,
+        collapseWhitespace: true,
+        removeRedundantAttributes: true,
+        useShortDoctype: true,
+        removeEmptyAttributes: true,
+        removeStyleLinkTypeAttributes: true,
+        keepClosingSlash: true,
+        minifyJS: true,
+        minifyCSS: true,
+        minifyURLs: true,
       }),
-      new SWPrecacheWebpackPlugin({
-        filename: '../service-worker.js',
-        staticFileGlobs: [
-          '../../public/index.html',
-          '../../public/templates/.{html}',
-          '../../public/dist/**/*.{js,css}',
-          '../../public/dist/**/*.{svg,eot,ttf,woff,woff2}',
-          '../../public/icons/**/*.{svg}',
-          '../../public/images/**/*.{png,jpg}',
-          '../../public/unity/**/*.{js,html,data,mem,css,png,jpg}',
-        ],
-        stripPrefix: '../../public/'
-      }),
-      ...(options.plugins || [])
+      ...(options.plugins || []),
+      new OfflinePlugin({
+        ServiceWorker: {
+          output: '../sw.js',
+          entry: './serviceWorkerExtras.js'
+        },
+        excludes: ['**/*.map']
+      })
     ],
 
     resolve: {
@@ -65,6 +71,10 @@ module.exports = (options) => {
     target: 'web',
 
     stats: options.stats
+  }
+
+  if (options.mode !== MODES.DEVELOPMENT) {
+
   }
 
   return config;
