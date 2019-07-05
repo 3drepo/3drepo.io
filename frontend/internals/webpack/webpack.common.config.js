@@ -1,6 +1,8 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const OfflinePlugin = require('offline-plugin');
+const pickBy = require('lodash/pickBy');
+const identity = require('lodash/identity');
 
 const PATHS = require('./tools/paths');
 const MODES = require('./tools/modes');
@@ -10,10 +12,14 @@ module.exports = (options) => {
   const config = {
     mode: options.mode || MODES.DEVELOPMENT,
     context: PATHS.APP_DIR,
-    entry: options.entry || './main.tsx',
+    entry: pickBy({
+      support: './support.ts',
+      main: './main.tsx',
+      ...options.entry
+    }, identity),
     output: Object.assign({
       path: PATHS.DIST_DIR,
-      filename: 'three_d_repo.[hash].js'
+      filename: 'three_d_repo.[name].[hash].js'
     }, options.output),
     module: {
       rules: [
