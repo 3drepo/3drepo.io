@@ -635,34 +635,6 @@ export class Viewer {
 		// }
 	}
 
-	public clickPin(id) {
-		if (this.pins.hasOwnProperty(id)) {
-			const pin = this.pins[id];
-
-			// this.highlightPin(id); This was preventing changing the colour of the pin
-			// Replace with
-
-			this.changePinColours(id, Pin.pinColours.yellow);
-			this.setCamera(
-				pin.position,
-				pin.view_dir,
-				pin.up,
-				pin.look_at,
-				pin.animate !== undefined ? pin.animate : true,
-				pin.rollerCoasterMode,
-				pin.account,
-				pin.model
-			);
-
-			this.updateClippingPlanes(
-				pin.viewpoint.clippingPlanes,
-				pin.account,
-				pin.model
-			);
-		}
-
-	}
-
 	public setPinVisibility(id, visibility) {
 		if (this.pins.hasOwnProperty(id)) {
 			const pin = this.pins[id];

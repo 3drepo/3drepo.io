@@ -315,14 +315,18 @@ const getRiskGroup = async (risk, groupId, revision) => {
 		return cachedGroup;
 	}
 
-	const { data } = await API.getGroup(risk.account, risk.model, groupId, revision);
+	try {
+		const { data } = await API.getGroup(risk.account, risk.model, groupId, revision);
 
-	if (data.hiddenObjects && !risk.viewpoint.group_id) {
-		data.hiddenObjects = null;
+		if (data.hiddenObjects && !risk.viewpoint.group_id) {
+			data.hiddenObjects = null;
+		}
+
+		Cache.add('risk.group', groupId, data);
+		return data;
+	} catch (error) {
+		return null;
 	}
-
-	Cache.add('risk.group', groupId, data);
-	return data;
 };
 
 function* showMultipleGroups({risk, revision}) {

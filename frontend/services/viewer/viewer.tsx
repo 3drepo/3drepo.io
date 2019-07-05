@@ -13,18 +13,14 @@ export class ViewerService {
 	public viewer = null;
 	public pin: any;
 	public newPinId: string;
-	public currentModel: any;
 	public initialised: {
 		promise: Promise<any>;
 		resolve: () => void;
 		reject: () => void;
 	};
-	public currentModelInit: any;
 
 	private mode = VIEWER_PIN_MODE.NORMAL;
 	private pinData: any;
-	private model: string;
-	private account: string;
 
 	private stats: boolean = false;
 	public helicopterSpeed = INITIAL_HELICOPTER_SPEED;
@@ -32,10 +28,6 @@ export class ViewerService {
 	constructor() {
 		this.newPinId = 'newPinId';
 		this.pinData = null;
-
-		this.currentModel = {
-			model: null
-		};
 
 		this.pin = {
 			pinDropMode: false
@@ -193,7 +185,7 @@ export class ViewerService {
 	 * Pins
 	 */
 	public setPinDropMode(on: boolean) {
-		this.pin.pinDropMode = on;
+		this.viewer.setPinDropMode(on);
 
 		if (on) {
 			MultiSelect.toggleAreaSelect(false);

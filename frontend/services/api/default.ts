@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { clientConfigService } from '../clientConfig';
 import { memoize } from 'lodash';
-import { getAngularService } from '../../helpers/migration';
+
+import { AuthActions } from '../../modules/auth';
+import { dispatch } from '../../helpers/migration';
 
 axios.defaults.withCredentials = true;
 
@@ -9,8 +11,18 @@ axios.interceptors.response.use(
 	(response) => response,
 	(error) => {
 		try {
-			const interceptor = getAngularService('AuthInterceptor') as any;
-			interceptor.responseError(error.response);
+			const invalidMessages = ['Authentication error', 'You are not logged in'] as any;
+			const notLogin = error.data.place !== 'GET /login';
+			const unauthorized = error.status === 401 &&
+				invalidMessages.includes(error.data.message);
+
+			const sessionHasExpired = unauthorized && notLogin;
+			if (sessionHasExpired) {
+				dispatch(AuthActions.sessionExpired());
+			} else {
+				throw error.response;
+			}
+
 			error.response.handled = true;
 			return Promise.reject(error);
 		} catch (e) {
