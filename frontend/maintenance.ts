@@ -1,6 +1,6 @@
-import { IS_MAINTENANCE } from './constants/environment';
+import { clientConfigService } from './services/clientConfig';
 
-if (IS_MAINTENANCE) {
+if (clientConfigService.isMaintenanceEnabled) {
 	document.getElementById('maintenanceMode').style.display = 'block';
 	document.getElementById('app').style.display = 'none';
 }

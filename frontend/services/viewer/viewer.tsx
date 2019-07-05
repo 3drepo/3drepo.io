@@ -450,7 +450,7 @@ export class ViewerService {
 		this.viewer.zoomToHighlightedMeshes();
 	}
 
-	public setShadows(type: string) {
+	public setShadows = (type: string) => {
 		switch (type) {
 			case 'soft':
 				this.viewer.enableSoftShadows();
@@ -464,24 +464,24 @@ export class ViewerService {
 		}
 	}
 
-	public setStats(val: boolean = false) {
+	public setStats = (val: boolean = false) => {
 		if (val !== this.stats) {
 			this.viewer.toggleStats();
 			this.stats = val;
 		}
 	}
 
-	public setNearPlane(nearplane: number) {
+	public setNearPlane = (nearplane: number) => {
 		if (nearplane === undefined) { return; }
 		this.viewer.setDefaultNearPlane(nearplane);
 	}
 
-	public setFarPlaneSamplingPoints(farplaneSample: number) {
+	public setFarPlaneSamplingPoints = (farplaneSample: number) => {
 		if (farplaneSample === undefined) { return; }
 		this.viewer.setFarPlaneSampleSize(farplaneSample);
 	}
 
-	public setFarPlaneAlgorithm(algorithm: string) {
+	public setFarPlaneAlgorithm = (algorithm: string) => {
 		switch (algorithm) {
 			case 'box':
 				this.viewer.useBoundingBoxFarPlaneAlgorithm();
@@ -492,7 +492,7 @@ export class ViewerService {
 		}
 	}
 
-	public setShading(shading: string) {
+	public setShading = (shading: string) => {
 		switch (shading) {
 			case 'standard':
 				this.viewer.setRenderingQualityDefault();
@@ -503,7 +503,7 @@ export class ViewerService {
 		}
 	}
 
-	public setXray(xray: boolean) {
+	public setXray = (xray: boolean) => {
 		if (xray) {
 			this.viewer.setXRayHighlightOn();
 		} else {

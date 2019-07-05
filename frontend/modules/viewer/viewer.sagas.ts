@@ -16,48 +16,35 @@
  */
 
 import { put, takeLatest, select } from 'redux-saga/effects';
-import { pipe, keys, filter, map } from 'ramda';
-import { ViewerTypes, ViewerActions } from './viewer.redux';
+import { keys } from 'lodash';
 import { DialogActions } from '../dialog';
-import { selectSettings } from './viewer.selectors';
 import { Viewer } from '../../services/viewer/viewer';
+import { selectSettings } from './viewer.selectors';
+import { ViewerTypes, ViewerActions } from './viewer.redux';
 
-const actionsMap = {
-	farPlaneAlgorithm: (newFarPlaneAlgorithm) => {
-		Viewer.setFarPlaneAlgorithm(newFarPlaneAlgorithm);
-	},
-	farPlaneSamplingPoints: (newFarPlaneSamplingPoints) => {
-		Viewer.setFarPlaneSamplingPoints(newFarPlaneSamplingPoints);
-	},
-	nearPlane: (newNearPlane) => {
-		Viewer.setNearPlane(newNearPlane);
-	},
-	shading: (newShading) => {
-		Viewer.setShading(newShading);
-	},
-	shadows: (newShadows) => {
-		Viewer.setShadows(newShadows);
-	},
-	statistics: (newStatistics) => {
-		Viewer.setStats(newStatistics);
-	},
-	xray: (newXray) => {
-		Viewer.setXray(newXray);
-	}
+const updateHandlers = {
+	farPlaneAlgorithm: Viewer.setFarPlaneAlgorithm,
+	farPlaneSamplingPoints: Viewer.setFarPlaneSamplingPoints,
+	nearPlane: Viewer.setNearPlane,
+	shading: Viewer.setShading,
+	shadows: Viewer.setShadows,
+	statistics: Viewer.setStats,
+	xray: Viewer.setXray
 };
 
-const callAction = (key, value) => actionsMap[key](value);
-
-const callActionsByDifferentKeys = (a, b) => pipe(
-	keys,
-	filter((key) => a[key] !== b[key]),
-	map((key) => callAction(key, b[key]))
-)(a);
+const callUpdateHandlers = (oldSettings, settings) => {
+	keys(oldSettings).forEach((key) => {
+		if (oldSettings[key] !== settings[key]) {
+			const update = updateHandlers[key];
+			update(settings[key]);
+		}
+	});
+};
 
 function* updateSettings({ settings }) {
 	try {
 		const oldSettings = yield select(selectSettings);
-		callActionsByDifferentKeys(oldSettings, settings);
+		callUpdateHandlers(oldSettings, settings);
 
 		window.localStorage.setItem('visualSettings', JSON.stringify(settings));
 		yield put(ViewerActions.updateSettingsSuccess(settings));

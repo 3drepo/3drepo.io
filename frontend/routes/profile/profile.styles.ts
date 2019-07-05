@@ -124,7 +124,6 @@ export const DropzoneMessage = styled.div`
 	justify-content: center;
 	text-align: center;
 	padding-bottom: 5px;
-	font-family: 'Material Icons';
 	box-sizing: border-box;
 `;
 

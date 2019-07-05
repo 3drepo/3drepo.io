@@ -16,6 +16,7 @@ import { Pin } from './globals/pin';
 import { Viewer } from './globals/viewer';
 import './services/fontAwesome';
 import { IS_DEVELOPMENT, IS_MAINTENANCE } from './constants/environment';
+import { clientConfigService } from './services/clientConfig';
 
 // css from libs
 
@@ -45,22 +46,12 @@ const render = () => {
 };
 
 const initApp = () => {
-	if (!window.ClientConfig) {
-		console.error('ClientConfig has not been provided...');
-		return;
-	}
-
-	if (!IS_MAINTENANCE) {
+	if (clientConfigService.isValid && !clientConfigService.isMaintenanceEnabled) {
+		clientConfigService.injectCustomCSS();
 		render();
 	}
 
-	if (window.ClientConfig.VERSION) {
-		/* tslint:disable */
-		console.log(`===== 3D REPO - Version ${window.ClientConfig.VERSION} =====`);
-		/* tslint:enable */
-	} else {
-		console.error('No version number in config...');
-	}
+	clientConfigService.logAppVersion();
 };
 
 initApp();

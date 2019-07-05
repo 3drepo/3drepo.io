@@ -45,6 +45,7 @@ const DEFAULT_INPUT_PROPS = {
 };
 
 const USER_NOTICE = clientConfigService.userNotice;
+const WELCOME_MESSAGE = clientConfigService.getCustomLoginMessage() || 'Welcome to 3D Repo';
 
 interface IProps {
 	history: any;
@@ -112,7 +113,7 @@ export class Login extends React.PureComponent<IProps, IState> {
 				<Logo />
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Log in" hiddenScrollbars={true}>
-						<Headline>{headlineText || 'Welcome to 3D Repo'}</Headline>
+						<Headline>{WELCOME_MESSAGE}</Headline>
 						{USER_NOTICE && <UserNotice>{USER_NOTICE}</UserNotice>}
 
 						<Formik

@@ -53,7 +53,6 @@
     "normalize.css": "8.0.1",
     "offline-plugin": "5.0.7",
     "query-string": "6.2.0",
-    "ramda": "0.26.1",
     "react": "16.4.2",
     "react-autosuggest": "9.4.1",
     "react-copy-to-clipboard": "5.0.1",
