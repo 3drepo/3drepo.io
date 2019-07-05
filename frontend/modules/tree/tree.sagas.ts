@@ -22,7 +22,7 @@ import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
-import { dispatch } from '../../helpers/migration';
+import { dispatch } from '../store';
 import { GroupsActions } from '../groups';
 import { DialogActions } from '../dialog';
 import {

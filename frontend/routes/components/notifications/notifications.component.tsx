@@ -26,7 +26,6 @@ import MoreVert from '@material-ui/icons/MoreVert';
 import Close from '@material-ui/icons/Close';
 
 import { simpleDate } from '../../../services/formatting/formatDate';
-import { getAngularService } from '../../../helpers/migration';
 import { BarIconButton } from '../components.styles';
 import { ListSubheaderToolbar } from '../listSubheaderToolbar/listSubheaderToolbar.component';
 import { INotification } from './components/notificationItem/notificationItem.component';

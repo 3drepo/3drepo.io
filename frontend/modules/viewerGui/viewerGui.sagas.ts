@@ -40,7 +40,7 @@ import { VIEWER_PANELS } from '../../constants/viewerGui';
 import { BimActions } from '../bim';
 import { MeasureActions } from '../measure';
 import { DialogActions } from '../dialog';
-import { dispatch } from '../../helpers/migration';
+import { dispatch } from '../store';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_EVENTS, VIEWER_CLIP_MODES, INITIAL_HELICOPTER_SPEED, NEW_PIN_ID } from '../../constants/viewer';
 import { selectUrlParams } from '../router/router.selectors';

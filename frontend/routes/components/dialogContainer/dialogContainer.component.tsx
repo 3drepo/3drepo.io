@@ -21,7 +21,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 
-import { dispatch } from '../../../helpers/migration';
+import { dispatch } from '../../../modules/store';
 import { renderWhenTrue } from '../../../helpers/rendering';
 
 interface IProps {

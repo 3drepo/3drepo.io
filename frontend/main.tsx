@@ -9,7 +9,7 @@ import 'simplebar';
 
 import './styles/global';
 import Root from './routes/index';
-import { store, history } from './helpers/migration';
+import { store, history } from './modules/store';
 
 import { UnityUtil } from './globals/unity-util';
 import { Pin } from './globals/pin';

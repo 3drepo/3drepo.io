@@ -22,7 +22,7 @@ import { push } from 'connected-react-router';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
 import { analyticsService, EVENT_CATEGORIES, EVENT_ACTIONS } from '../../services/analytics';
-import { dispatch, getState } from '../../helpers/migration';
+import { dispatch, getState } from '../store';
 import { getRiskPinColor, prepareRisk } from '../../helpers/risks';
 import { prepareComments, prepareComment } from '../../helpers/comments';
 import { Cache } from '../../services/cache';

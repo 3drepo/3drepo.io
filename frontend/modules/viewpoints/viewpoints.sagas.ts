@@ -16,7 +16,7 @@
  */
 
 import { put, takeLatest } from 'redux-saga/effects';
-import { dispatch } from '../../helpers/migration';
+import { dispatch } from '../store';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { ViewpointsTypes, ViewpointsActions } from './viewpoints.redux';

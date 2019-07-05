@@ -17,7 +17,7 @@
 
 import { values } from 'lodash';
 import { put, takeLatest, takeEvery, select, all } from 'redux-saga/effects';
-import { getAngularService, dispatch } from '../../helpers/migration';
+import { dispatch } from '../store';
 import { calculateTotalMeshes } from '../../helpers/tree';
 
 import * as API from '../../services/api';

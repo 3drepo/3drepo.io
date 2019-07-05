@@ -19,8 +19,7 @@ import { cloneDeep } from 'lodash';
 import { put, takeLatest, select, take } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import { clientConfigService } from '../../services/clientConfig';
-import { dispatch } from './../../helpers/migration';
+import { dispatch } from '../store';
 import { uploadFileStatuses } from './model.helpers';
 import { DialogActions } from '../dialog';
 import { ModelTypes, ModelActions } from './model.redux';

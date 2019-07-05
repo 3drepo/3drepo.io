@@ -25,7 +25,7 @@ import { DialogActions } from '../dialog';
 import { NotificationsTypes, NotificationsActions, selectNotifications } from './index';
 import { selectCurrentUser } from '../currentUser';
 import { ChatActions } from '../chat';
-import { dispatch } from '../../helpers/migration';
+import { dispatch } from '../store';
 import { CHAT_CHANNELS } from '../../constants/chat';
 
 const getNotificationById = (notifications, id) => {

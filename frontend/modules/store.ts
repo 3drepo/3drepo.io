@@ -1,3 +1,4 @@
+import { createBrowserHistory } from 'history';
 import { createStore, applyMiddleware, compose } from 'redux';
 import { routerMiddleware } from 'connected-react-router';
 
@@ -8,7 +9,11 @@ import rootSaga from './sagas';
 
 const sagaMiddleware = createSagaMiddleware();
 
-export default function configureStore(initialState = {}, history) {
+const initialState = {};
+
+export const history = createBrowserHistory();
+
+function configureStore() {
 	const middlewares = [
 		sagaMiddleware,
 		routerMiddleware(history)
@@ -24,6 +29,7 @@ export default function configureStore(initialState = {}, history) {
 		}
 	}
 
+	// tslint:disable-next-line: no-shadowed-variable
 	const store = createStore(
 		(state, action) => {
 			if (action.type === 'RESET_APP') {
@@ -42,3 +48,9 @@ export default function configureStore(initialState = {}, history) {
 
 	return store;
 }
+
+export const store = configureStore();
+
+export const dispatch = (action) => store.dispatch(action);
+
+export const getState = store.getState;

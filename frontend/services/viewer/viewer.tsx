@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { getState } from '../../helpers/migration';
+import { getState } from '../../modules/store';
 import { selectMemory } from '../../modules/viewer';
 import { MultiSelect } from './multiSelect';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_PIN_MODE } from '../../constants/viewer';

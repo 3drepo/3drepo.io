@@ -3,7 +3,7 @@ import { clientConfigService } from '../clientConfig';
 import { memoize } from 'lodash';
 
 import { AuthActions } from '../../modules/auth';
-import { dispatch } from '../../helpers/migration';
+import { dispatch } from '../../modules/store';
 
 axios.defaults.withCredentials = true;
 

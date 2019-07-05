@@ -20,7 +20,7 @@ import io from 'socket.io-client';
 import { invoke } from 'lodash';
 
 import * as API from '../../services/api';
-import { dispatch } from '../../helpers/migration';
+import { dispatch } from '../store';
 
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import { ChatTypes, ChatActions } from './chat.redux';
