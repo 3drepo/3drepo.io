@@ -32,7 +32,7 @@ export const LinkEntry = ({onClickRemove, index }) => {
 		<StyledFormControl>
 			<Field name={nameFieldName} render={({ field, form }) => (
 				<TextField {...field}
-					placeholder="3d Repo"
+					placeholder="3D Repo"
 					fullWidth
 					error={Boolean(get(form.errors, nameFieldName))}
 					helperText={get(form.errors, nameFieldName)}
