@@ -29,3 +29,7 @@ export const selectIsMetadataVisible = createSelector(
 	selectVisiblePanels, Bim.selectIsPending,
 	(state, isPending) => state[VIEWER_PANELS.BIM] && !isPending
 );
+
+export const selectIsModelLoaded = createSelector(
+	selectViewerGuiDomain, (state) => state.isModelLoaded
+);

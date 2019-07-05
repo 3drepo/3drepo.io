@@ -16,10 +16,10 @@
  */
 
 import { createSelector } from 'reselect';
-import { isEqual, values, orderBy, omitBy, size } from 'lodash';
+import { isEqual, values, orderBy, omitBy } from 'lodash';
 import { searchByFilters } from '../../helpers/searching';
 import { DIFF_COMPARE_TYPE, COMPARE_SORT_TYPES } from '../../constants/compare';
-import { selectIsModelLoaded } from '../viewer';
+import { selectIsModelLoaded } from '../viewerGui';
 
 export const selectCompareDomain = (state) => Object.assign({}, state.compare);
 

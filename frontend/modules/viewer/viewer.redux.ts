@@ -48,9 +48,6 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	updateClipState: ['clipNumber'],
 	startListenOnNumClip: [],
 	stopListenOnNumClip: [],
-	setIsModelLoaded: ['isModelLoaded'],
-	startListenOnModelLoaded: [],
-	stopListenOnModelLoaded: [],
 	clearHighlights: [],
 	setCamera: ['params'],
 	changePinColor: ['params'],
@@ -72,7 +69,6 @@ export const INITIAL_STATE = {
 	isFocusMode: false,
 	isClipEdit: false,
 	clipNumber: 0,
-	isModelLoaded: false,
 	isPinDropMode: false,
 	pinData: null
 };
@@ -110,10 +106,6 @@ const setClipNumber = (state = INITIAL_STATE, { clipNumber }) => {
 	return { ...state, clipNumber };
 };
 
-const setIsModelLoaded = (state = INITIAL_STATE, { isModelLoaded }) => {
-	return { ...state, isModelLoaded };
-};
-
 const setPinData = (state = INITIAL_STATE, { pinData }) => {
 	return { ...state, pinData };
 };
@@ -126,7 +118,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,
 	[ViewerTypes.SET_CLIP_EDIT_SUCCESS] : setClipEditSuccess,
 	[ViewerTypes.SET_CLIP_NUMBER] : setClipNumber,
-	[ViewerTypes.SET_IS_MODEL_LOADED] : setIsModelLoaded,
 	[ViewerTypes.SET_IS_PIN_DROP_MODE_SUCCESS]: setIsPinDropModeSuccess,
 	[ViewerTypes.SET_PIN_DATA]: setPinData
 });

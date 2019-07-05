@@ -22,17 +22,25 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	fetchData: ['teamspace', 'model', 'revision'],
 	resetPanelsStates: [],
 	setPanelVisibility: ['panelName', 'visibility'],
-	setMeasureVisibility: ['visible']
+	setMeasureVisibility: ['visible'],
+	startListenOnModelLoaded: [],
+	stopListenOnModelLoaded: [],
+	startListenOnClickPin: [],
+	stopListenOnClickPin: [],
+	handlePinClick: ['id'],
+	setIsModelLoaded: ['isModelLoaded']
 }, { prefix: 'VIEWER_GUI/' });
 
 export interface IViewerGuiState {
 	visiblePanels: any;
+	isModelLoaded: boolean;
 }
 
 export const INITIAL_STATE: IViewerGuiState = {
 	visiblePanels: {
 		[VIEWER_PANELS.ISSUES]: true
-	}
+	},
+	isModelLoaded: false
 };
 
 export const setPanelVisibility = (state = INITIAL_STATE, { panelName, visibility }) => {
@@ -40,6 +48,11 @@ export const setPanelVisibility = (state = INITIAL_STATE, { panelName, visibilit
 	return { ...state,  visiblePanels: {...visiblePanels, [panelName]: visibility} };
 };
 
+const setIsModelLoaded = (state = INITIAL_STATE, { isModelLoaded }) => {
+	return { ...state, isModelLoaded };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
-	[ViewerGuiTypes.SET_PANEL_VISIBILITY]: setPanelVisibility
+	[ViewerGuiTypes.SET_PANEL_VISIBILITY]: setPanelVisibility,
+	[ViewerGuiTypes.SET_IS_MODEL_LOADED] : setIsModelLoaded
 });

@@ -26,9 +26,6 @@ import { TreeActions } from '../../modules/tree';
 import { ViewerActions, selectIsFocusMode } from '../../modules/viewer';
 import { selectSettings, selectIsPending } from '../../modules/model';
 import { ViewerGuiActions, selectVisiblePanels } from '../../modules/viewerGui';
-import { IssuesActions, selectIssuesMap } from '../../modules/issues';
-import { RisksActions, selectRisksMap } from '../../modules/risks';
-import { withViewer } from '../../services/viewer/viewer';
 
 const mapStateToProps = createStructuredSelector({
 	queryParams: selectQueryParams,
@@ -36,9 +33,7 @@ const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	isModelPending: selectIsPending,
 	visiblePanels: selectVisiblePanels,
-	isFocusMode: selectIsFocusMode,
-	risksMap: selectRisksMap,
-	issuesMap: selectIssuesMap
+	isFocusMode: selectIsFocusMode
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -46,12 +41,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetPanelsStates: ViewerGuiActions.resetPanelsStates,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
 	loadModel: ViewerActions.loadModel,
-	startListenOnSelections: TreeActions.startListenOnSelections,
 	stopListenOnSelections: TreeActions.stopListenOnSelections,
-	startListenOnModelLoaded: ViewerActions.startListenOnModelLoaded,
-	stopListenOnModelLoaded: ViewerActions.stopListenOnModelLoaded,
-	showIssueDetails: IssuesActions.showDetails,
-	showRiskDetails: RisksActions.showDetails
+	stopListenOnModelLoaded: ViewerGuiActions.stopListenOnModelLoaded,
+	stopListenOnClickPin: ViewerGuiActions.stopListenOnClickPin
 }, dispatch);
 
-export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerGui));
+export default connect(mapStateToProps, mapDispatchToProps)(ViewerGui);

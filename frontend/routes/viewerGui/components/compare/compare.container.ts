@@ -35,7 +35,7 @@ import {
 	selectIsAnyTargetClashModel
 } from '../../../../modules/compare';
 import { selectIsFederation } from '../../../../modules/model';
-import { selectIsModelLoaded } from '../../../../modules/viewer';
+import { selectIsModelLoaded } from '../../../../modules/viewerGui';
 
 const mapStateToProps = createStructuredSelector({
 	activeTab: selectActiveTab,

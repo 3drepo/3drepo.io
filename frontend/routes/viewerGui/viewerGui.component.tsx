@@ -32,11 +32,9 @@ import { PanelButton } from './components/panelButton/panelButton.component';
 import { RevisionsDropdown } from './components/revisionsDropdown';
 import { CloseFocusModeButton } from './components/closeFocusModeButton';
 import { Container, LeftPanels, RightPanels, LeftPanelsButtons, DataLoader } from './viewerGui.styles';
-import { VIEWER_EVENTS } from '../../constants/viewer';
 
 interface IProps {
 	className?: string;
-	viewer: any;
 	modelSettings: any;
 	isModelPending: boolean;
 	isFocusMode: boolean;
@@ -52,14 +50,9 @@ interface IProps {
 		riskId?: string;
 	};
 	visiblePanels: any;
-	risksMap: any;
-	issuesMap: any;
-	showIssueDetails: (teamspace, model, revision, id) => void;
-	showRiskDetails: (teamspace, model, revision, id) => void;
-	startListenOnSelections: () => void;
 	stopListenOnSelections: () => void;
-	startListenOnModelLoaded: () => void;
 	stopListenOnModelLoaded: () => void;
+	stopListenOnClickPin: () => void;
 	fetchData: (teamspace, model, revision?) => void;
 	loadModel: () => void;
 	resetPanelsStates: () => void;
@@ -82,7 +75,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-		const { queryParams: { issueId, riskId }, match: { params }, viewer } = this.props;
+		const { queryParams: { issueId, riskId }, match: { params } } = this.props;
 
 		if (issueId || riskId) {
 			if (issueId) {
@@ -93,10 +86,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 			}
 		}
 
-		this.props.startListenOnSelections();
-		this.props.startListenOnModelLoaded();
 		this.props.fetchData(params.teamspace, params.model, params.revision);
-		viewer.on(VIEWER_EVENTS.CLICK_PIN, this.handlePinClick);
 
 		// setTimeout(() => {
 		// 	this.setState({
@@ -187,9 +177,9 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
-		this.props.viewer.off(VIEWER_EVENTS.CLICK_PIN);
 		this.props.stopListenOnSelections();
 		this.props.stopListenOnModelLoaded();
+		this.props.stopListenOnClickPin();
 		this.props.resetPanelsStates();
 	}
 
@@ -217,20 +207,6 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	private handleModelSettingsChange(modelSettings) {
 		// TODO: this.PanelService.hideSubModels(this.issuesCardIndex, !modelSettings.federate);
 		this.props.loadModel();
-	}
-
-	private handlePinClick = ({ id }) => {
-		const { risksMap, issuesMap, showIssueDetails, showRiskDetails, match, setPanelVisibility } = this.props;
-		const { teamspace, model, revision } = match.params;
-		if (risksMap[id]) {
-			setPanelVisibility(VIEWER_PANELS.RISKS, true);
-			showRiskDetails(teamspace, model, revision, risksMap[id]);
-		}
-
-		if (issuesMap[id]) {
-			setPanelVisibility(VIEWER_PANELS.ISSUES, true);
-			showIssueDetails(teamspace, model, revision, issuesMap[id]);
-		}
 	}
 
 	private handleTogglePanel = (panelType) => {

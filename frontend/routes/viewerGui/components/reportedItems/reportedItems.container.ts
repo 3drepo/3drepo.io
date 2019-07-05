@@ -20,7 +20,7 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from 'react-redux';
 
 import { ReportedItems } from './reportedItems.component';
-import { selectIsModelLoaded } from '../../../../modules/viewer';
+import { selectIsModelLoaded } from '../../../../modules/viewerGui';
 
 const mapStateToProps = createStructuredSelector({
 	isModelLoaded: selectIsModelLoaded

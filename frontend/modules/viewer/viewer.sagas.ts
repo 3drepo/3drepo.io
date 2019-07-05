@@ -20,7 +20,7 @@ import { push } from 'connected-react-router';
 
 import { dispatch } from '../../helpers/migration';
 import * as API from '../../services/api';
-import { VIEWER_EVENTS, VIEWER_PANELS, INITIAL_HELICOPTER_SPEED, NEW_PIN_ID } from '../../constants/viewer';
+import { VIEWER_EVENTS, INITIAL_HELICOPTER_SPEED, NEW_PIN_ID } from '../../constants/viewer';
 
 import { ViewerTypes, ViewerActions } from './viewer.redux';
 import { DialogActions } from '../dialog';
@@ -31,12 +31,9 @@ import {
 } from './viewer.selectors';
 import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_CLIP_MODES } from '../../constants/viewer';
-import { MeasureActions } from '../measure';
-import { BimActions } from '../bim';
 import { selectUrlParams } from '../router/router.selectors';
 import { selectSettings } from '../model';
 import { ROUTES } from '../../constants/routes';
-import { selectIsMetadataVisible, ViewerGuiActions } from '../viewerGui';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 
 const getViewer = () => Viewer.viewer;
@@ -58,26 +55,6 @@ function* initialiseToolbar() {
 		yield put(ViewerActions.startListenOnNumClip());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('initialise', 'toolbar', error));
-	}
-}
-
-const setIsModelLoaded = () => {
-	dispatch(ViewerActions.setIsModelLoaded(true));
-};
-
-function* startListenOnModelLoaded() {
-	try {
-		Viewer.on(VIEWER_EVENTS.MODEL_LOADED, setIsModelLoaded);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('start listen on', 'model loaded', error));
-	}
-}
-
-function* stopListenOnModelLoaded() {
-	try {
-		Viewer.off(VIEWER_EVENTS.MODEL_LOADED, setIsModelLoaded);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('stop listen on', 'model loaded', error));
 	}
 }
 
@@ -373,8 +350,6 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.SET_CLIP_EDIT, setClipEdit);
 	yield takeLatest(ViewerTypes.START_LISTEN_ON_NUM_CLIP, startListenOnNumClip);
 	yield takeLatest(ViewerTypes.STOP_LISTEN_ON_NUM_CLIP, stopListenOnNumClip);
-	yield takeLatest(ViewerTypes.START_LISTEN_ON_MODEL_LOADED, startListenOnModelLoaded);
-	yield takeLatest(ViewerTypes.STOP_LISTEN_ON_MODEL_LOADED, stopListenOnModelLoaded);
 	yield takeLatest(ViewerTypes.CLEAR_HIGHLIGHTS, clearHighlights);
 	yield takeLatest(ViewerTypes.SET_CAMERA, setCamera);
 	yield takeLatest(ViewerTypes.CHANGE_PIN_COLOR, changePinColor);
