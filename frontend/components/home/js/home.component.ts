@@ -14,77 +14,77 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { subscribe } from '../../../helpers/migration';
-import { selectIsAuthenticated, selectIsPending } from '../../../modules/auth';
-import { STATIC_ROUTES } from '../../../services/staticPages';
+// import { subscribe } from '../../../helpers/migration';
+// import { selectIsAuthenticated, selectIsPending } from '../../../modules/auth';
+// import { STATIC_ROUTES } from '../../../services/staticPages';
 
-class HomeController implements ng.IController {
+// class HomeController implements ng.IController {
 
-	public static $inject: string[] = [
-		'$scope',
-		'$http',
-		'$timeout',
-		'$mdDialog',
-		'$window',
-		'$location',
-		'$document',
-		'$state',
+// 	public static $inject: string[] = [
+// 		'$scope',
+// 		'$http',
+// 		'$timeout',
+// 		'$mdDialog',
+// 		'$window',
+// 		'$location',
+// 		'$document',
+// 		'$state',
 
-		'AuthService',
-		'StateManager',
-		'ClientConfigService',
-		'SWService',
-		'ViewerService'
-	];
+// 		'AuthService',
+// 		'StateManager',
+// 		'ClientConfigService',
+// 		'SWService',
+// 		'DialogService'
+// 	];
 
-	private doNotLogout;
-	private legalPages;
-	private loggedOutStates;
-	private loggedIn;
-	private loginPage;
-	private isLoggedOutPage;
-	private functions;
-	private pointerEvents;
-	private goToAccount;
-	private goToUserPage;
-	private firstState;
-	private state;
-	private query;
-	private isMobileDevice;
-	private legalDisplays;
-	private isLegalPage;
-	private page;
-	private loginMessage;
-	private backgroundImage;
-	private topLogo;
+// 	private doNotLogout;
+// 	private legalPages;
+// 	private loggedOutStates;
+// 	private loggedIn;
+// 	private loginPage;
+// 	private isLoggedOutPage;
+// 	private functions;
+// 	private pointerEvents;
+// 	private goToAccount;
+// 	private goToUserPage;
+// 	private firstState;
+// 	private state;
+// 	private query;
+// 	private isMobileDevice;
+// 	private legalDisplays;
+// 	private isLegalPage;
+// 	private page;
+// 	private loginMessage;
+// 	private backgroundImage;
+// 	private topLogo;
 
-	constructor(
-		private $scope,
-		private $http,
-		private $timeout,
-		private $mdDialog,
-		private $window,
-		private $location,
-		private $document,
-		private $state,
+// 	constructor(
+// 		private $scope,
+// 		private $http,
+// 		private $timeout,
+// 		private $mdDialog,
+// 		private $window,
+// 		private $location,
+// 		private $document,
+// 		private $state,
 
-		private AuthService,
-		private StateManager,
-		private ClientConfigService,
-		private SWService,
-		private ViewerService
-	) {
-		subscribe(this, {
-			isAuthenticated: selectIsAuthenticated,
-			isPending: selectIsPending
-		});
-	}
+// 		private AuthService,
+// 		private StateManager,
+// 		private ClientConfigService,
+// 		private SWService,
+// 		private DialogService
+// 	) {
+// 		subscribe(this, {
+// 			isAuthenticated: selectIsAuthenticated,
+// 			isPending: selectIsPending
+// 		});
+// 	}
 
-	public $onInit() {
+// 	public $onInit() {
 
-		this.handlePaths();
-		this.setLoginPage();
-		this.SWService.init();
+		// this.handlePaths();
+		// this.setLoginPage();
+		// this.SWService.init();
 
 	// 	// Pages to not attempt a interval triggered logout from
 
@@ -214,19 +214,19 @@ class HomeController implements ng.IController {
 
 	}
 
-	public handlePaths() {
-		// TODO: this is a bit of a hack, it would be nice to
-		// include this in the StateManager
-		if (this.hasTrailingSlash()) {
-			this.removeTrailingSlash();
-		}
-	}
+	// public handlePaths() {
+	// 	// TODO: this is a bit of a hack, it would be nice to
+	// 	// include this in the StateManager
+	// 	if (this.hasTrailingSlash()) {
+	// 		this.removeTrailingSlash();
+	// 	}
+	// }
 
-	public pageCheck(state, pages) {
-		return pages.some((page) => {
-			return state[page] === true;
-		});
-	}
+	// public pageCheck(state, pages) {
+	// 	return pages.some((page) => {
+	// 		return state[page] === true;
+	// 	});
+	// }
 
 	// public hasTrailingSlash() {
 	// 	// Check if we have a trailing slash in our URL
