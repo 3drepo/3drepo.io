@@ -60,6 +60,12 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 		);
 	});
 
+	public componentDidUpdate(prevProps) {
+		if (this.props.config && this.props.config.logError && !prevProps.config.logError) {
+			console.error(this.props.config.logError, this.props.config.content);
+		}
+	}
+
 	public handleCallback = (callback) => {
 		const action = callback();
 
@@ -86,6 +92,7 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { content, title, template, DialogProps } = this.props.config;
+
 		return (
 			<MuiThemeProvider theme={MuiTheme}>
 				<Dialog {...DialogProps} open={this.props.isOpen} onClose={this.handleClose}>

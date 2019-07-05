@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select } from 'redux-saga/effects';
+import { takeLatest } from 'redux-saga/effects';
 import * as io from 'socket.io-client';
 import { invoke } from 'lodash';
 
@@ -23,7 +23,6 @@ import * as API from '../../services/api';
 import { dispatch } from '../../helpers/migration';
 
 import { IS_DEVELOPMENT } from '../../constants/environment';
-import { DialogActions } from '../dialog';
 import { ChatTypes, ChatActions } from './chat.redux';
 import { clientConfigService } from '../../services/clientConfig';
 import { Channel } from './channel';
@@ -51,9 +50,6 @@ function* handleDisconnect() {
 	if (IS_DEVELOPMENT) {
 		console.error('The websocket for the chat service was disconnected');
 	}
-	yield put(DialogActions.showDisconnectedDialog({
-		onCancel: () => DialogActions.setMuteNotifications(true)
-	}));
 }
 
 function* handleReconnect() {

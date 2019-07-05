@@ -18,7 +18,7 @@
 import { createActions, createReducer } from 'reduxsauce';
 import { get, omit } from 'lodash';
 import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
-import { ErrorDialog, ConfirmDialog, DisconnectedDialog } from '../../routes/components/dialogContainer/components';
+import * as Dialogs from '../../routes/components/dialogContainer/components';
 
 interface IDialogConfig {
 	title: string;
@@ -34,11 +34,12 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showEndpointErrorDialog: ['method', 'dataType', 'error'],
 	showErrorDialog: ['method', 'dataType', 'message', 'status'],
 	showConfirmDialog: ['config'],
+	showRevisionsDialog: ['config'],
 	hideDialog: [],
 	setPendingState: ['isPending'],
 	showScreenshotDialog: ['config'],
 	setMuteNotifications: ['muteNotifications'],
-	showDisconnectedDialog: ['config']
+	showNewUpdateDialog: ['config']
 }, { prefix: 'DIALOG/' });
 
 export const INITIAL_STATE = {
@@ -57,7 +58,7 @@ const showDialog = (state = INITIAL_STATE, action) => {
 const showErrorDialog = (state = INITIAL_STATE, { method, dataType, message, status }) => {
 	const config = {
 		title: 'Error',
-		template: ErrorDialog,
+		template: Dialogs.ErrorDialog,
 		data: {
 			method,
 			dataType,
@@ -86,7 +87,12 @@ const showEndpointErrorDialog = (state = INITIAL_STATE, { method, dataType, erro
 };
 
 const showConfirmDialog = (state = INITIAL_STATE, action) => {
-	const config = { ...action.config, template: ConfirmDialog } as IDialogConfig;
+	const config = { ...action.config, template: Dialogs.ConfirmDialog } as IDialogConfig;
+	return showDialog(state, { config });
+};
+
+const showRevisionsDialog = (state = INITIAL_STATE, action) => {
+	const config = { ...action.config, template: Dialogs.RevisionsDialog } as IDialogConfig;
 	return showDialog(state, { config });
 };
 
@@ -107,15 +113,11 @@ const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 	return showDialog(state, {config});
 };
 
-const showDisconnectedDialog = (state = INITIAL_STATE, action) => {
-	if (state.muteNotifications) {
-		return state;
-	}
-
+const showNewUpdateDialog = (state = INITIAL_STATE, action) => {
 	const config = {
-		title: 'Notification Service Disconnected',
-		template: DisconnectedDialog,
-		onCancel: action.config.onCancel
+		title: 'Update Available',
+		template: Dialogs.NewUpdateDialogDialog,
+		onConfirm: action.config.onConfirm
 	};
 
 	return showDialog(state, { config });
@@ -139,8 +141,9 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.SHOW_ERROR_DIALOG]: showErrorDialog,
 	[DialogTypes.SHOW_ENDPOINT_ERROR_DIALOG]: showEndpointErrorDialog,
 	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
+	[DialogTypes.SHOW_REVISIONS_DIALOG]: showRevisionsDialog,
 	[DialogTypes.SET_PENDING_STATE]: setPendingState,
 	[DialogTypes.SET_MUTE_NOTIFICATIONS]: setMuteNotifications,
 	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog,
-	[DialogTypes.SHOW_DISCONNECTED_DIALOG]: showDisconnectedDialog
+	[DialogTypes.SHOW_NEW_UPDATE_DIALOG]: showNewUpdateDialog
 });

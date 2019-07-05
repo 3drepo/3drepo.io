@@ -25,6 +25,8 @@ export class ClientConfigService {
 	public captcha_client_key;
 	public legalTemplates;
 	public liveChatLicense;
+	public tagRegExp;
+	public uploadSizeLimit;
 	private chatHost;
 	private chatPath;
 	private chatReconnectionAttempts;

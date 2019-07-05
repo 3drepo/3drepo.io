@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { getState } from '../../../helpers/migration';
+import { getState, dispatch } from '../../../helpers/migration';
 import { selectMemory } from '../../../modules/viewer';
+import { DialogActions } from '../../../modules/dialog';
+import { ErrorDialog } from '../../../routes/components/dialogContainer/components';
 
 declare const Viewer: any;
 
@@ -26,8 +28,7 @@ export class ViewerService {
 		'$q',
 		'$timeout',
 
-		'ClientConfigService',
-		'DialogService'
+		'ClientConfigService'
 	];
 
 	public pin: any;
@@ -49,8 +50,7 @@ export class ViewerService {
 		public $q: ng.IQService,
 		public $timeout: ng.ITimeoutService,
 
-		public ClientConfigService: any,
-		public DialogService: any
+		public ClientConfigService: any
 	) {
 
 		this.newPinId = 'newPinId';
@@ -239,22 +239,25 @@ export class ViewerService {
 	}
 
 	public handleUnityError = (message: string, reload: boolean, isUnity: boolean) =>  {
-
 		let errorType = '3D Repo Error';
 
 		if (isUnity) {
 			errorType = 'Unity Error';
 		}
 
-		this.DialogService.html(errorType, message, true)
-			.then(() => {
+		dispatch(DialogActions.showDialog({
+			title: errorType,
+			template: ErrorDialog,
+			data: {
+				message
+			},
+			logError: isUnity ? 'Unity errored and user cancelled reload' : '',
+			onConfirm: () => {
 				if (reload) {
 					location.reload();
 				}
-			}, () => {
-				console.error('Unity errored and user canceled reload', message);
-			});
-
+			}
+		}));
 	}
 
 	public reset() {
@@ -291,9 +294,7 @@ export class ViewerService {
 	}
 
 	public getViewer() {
-
 		if (this.viewer === undefined) {
-
 			this.viewer = new Viewer({
 				name: 'viewer',
 				container: document.getElementById('viewer'),

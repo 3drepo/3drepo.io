@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { ButtonBase } from '@material-ui/core';
 
-import { COLOR, BLACK } from '../../../../../../styles';
+import { COLOR } from '../../../../../../styles';
 import { TARGET_MODEL_TYPE } from '../../../../../../constants/compare';
 import * as RevisionSelectStyles from '../revisionsSelect/revisionsSelect.styles';
 

@@ -3,7 +3,6 @@
 import './home/js/auth.interceptor';
 import './home/js/auth.service';
 import './home/js/client-config.service';
-import './home/js/dialog.service';
 import './home/js/home.component';
 import './home/js/serviceworker.service';
 import './home/js/state-manager.config';
@@ -21,8 +20,6 @@ import './panel/js/panel-card-option-chips-filter.component';
 import './panel/js/panel.component';
 import './panel/js/panel.service';
 import './payment/js/payment.component';
-import './revisions/js/revisions.component';
-import './revisions/js/revisions.service';
 import './utils/js/progress.component';
 import './utils/js/tdr-focus.component';
 import './utils/js/utils.filter';

@@ -1,3 +1,6 @@
+import { dispatch } from '../../../helpers/migration';
+import { DialogActions } from '../../../modules/dialog';
+
 /**
  *  Copyright (C) 2017 3D Repo Ltd
  *
@@ -18,7 +21,6 @@
 export class SWService {
 
 	public static $inject: string[] = [
-		'DialogService',
 		'ClientConfigService'
 	];
 
@@ -27,7 +29,6 @@ export class SWService {
 	private newVersionDialogOpen: boolean;
 
 	constructor(
-		private DialogService: any,
 		private ClientConfigService: any
 	) {
 		this.path = '/';
@@ -114,7 +115,11 @@ export class SWService {
 		if (!this.newVersionDialogOpen) {
 			this.newVersionDialogOpen = true;
 			setTimeout(() => {
-				this.DialogService.newUpdate();
+				dispatch(DialogActions.showNewUpdateDialog({
+					onConfirm: () => {
+						location.reload();
+					}
+				}));
 			}, 500);
 		}
 
