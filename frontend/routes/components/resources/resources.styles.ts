@@ -43,6 +43,16 @@ export const ResourcesContainer = styled.div`
 	margin-bottom: 5px;
 `;
 
+export const ActionContainer = styled.span`
+	min-width: 28px;
+	min-height: 28px;
+`;
+
+export const ResourceItemRightColumn = styled.div`
+	display: flex;
+	align-items: center;
+`;
+
 export const ResourceItemContainer = styled.div`
 	font-size: 14px;
 	color: ${COLOR.BLACK_60};

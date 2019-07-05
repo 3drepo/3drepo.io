@@ -19,7 +19,8 @@ import * as React from 'react';
 import { LinearProgress } from '@material-ui/core';
 import { RemoveIcon, IconButton,
 	ResourceItemContainer, ResourceLink, PhotoIcon, LinkIcon,
-	DocumentIcon, ResourceLabel, UploadSizeLabel, ResourcesContainer } from './resources.styles';
+	DocumentIcon, ResourceLabel, UploadSizeLabel, ResourcesContainer,
+	ActionContainer, ResourceItemRightColumn } from './resources.styles';
 import { LabelButton } from '../../viewer/components/labelButton/labelButton.styles';
 import AttachResourcesDialog from './attachResourcesDialog/attachResourcesDialog.container';
 import { FieldsRow, StyledFormControl } from '../../viewer/components/risks/components/riskDetails/riskDetails.styles';
@@ -34,6 +35,7 @@ interface IResource {
 }
 
 interface IProps {
+	canEdit: boolean;
 	resources: IResource[];
 	onRemoveResource: (IResource) => void;
 	onSaveFiles: (files) => void;
@@ -65,16 +67,18 @@ const ResourceIcon = ({type}) =>
 		(<DocumentIcon />)
 ;
 
-const ResourceAvailable = ({link, type, name, size, onClickRemove}) => (
+const ResourceAvailable = ({link, type, name, size, onClickRemove, canEdit}) => (
 	<ResourceItemContainer>
 		<ResourceIcon type={type}/>
 		<ResourceLink href={link} target="_blank" rel="noopener">
 			{name}
 		</ResourceLink>
-		<div>
+		<ResourceItemRightColumn>
 			{size}
-			<RemoveButton onClick={onClickRemove}/>
-		</div>
+			<ActionContainer>
+			{canEdit && <RemoveButton onClick={onClickRemove}/>}
+			</ActionContainer>
+		</ResourceItemRightColumn>
 	</ResourceItemContainer>
 );
 
@@ -113,17 +117,17 @@ export class Resources extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const resources = this.props.resources || [];
+		const { resources = [], canEdit } = this.props;
 
 		return (
 			<ResourcesContainer>
 				<FieldLabel>Resources</FieldLabel>
-				{resources.map((r) => (<ResourceItem key={r._id} {...r} onClickRemove={this.onClickRemove(r)}/>))}
+				{resources.map((r) => (<ResourceItem key={r._id} {...r} canEdit={canEdit} onClickRemove={this.onClickRemove(r)}/>))}
 				<FieldsRow container justify="space-between" flex={0.5}>
 					<StyledFormControl/>
 					<StyledFormControl>
 						<span>
-							<LabelButton onClick={this.onClickAttach}>Attach resource</LabelButton>
+							<LabelButton disabled={!canEdit} onClick={this.onClickAttach}>Attach resource</LabelButton>
 						</span>
 					</StyledFormControl>
 				</FieldsRow>

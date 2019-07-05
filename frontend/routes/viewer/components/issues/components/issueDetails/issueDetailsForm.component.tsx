@@ -227,6 +227,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						onSaveFiles={attachFileResources}
 						onSaveLinks={attachLinkResources}
 						onRemoveResource={onRemoveResource}
+						canEdit={canEditBasicProperty}
 					/>
 				}
 			</MuiPickersUtilsProvider>
