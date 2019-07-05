@@ -50,7 +50,6 @@ const WELCOME_MESSAGE = clientConfigService.getCustomLoginMessage() || 'Welcome 
 interface IProps {
 	history: any;
 	location: any;
-	headlineText?: string;
 	onLogin: (login, password) => void;
 	isPending: boolean;
 	isAuthenticated: boolean;
@@ -101,7 +100,6 @@ export class Login extends React.PureComponent<IProps, IState> {
 	)
 
 	public render() {
-		const { headlineText } = this.props;
 		const { login, password } = this.state;
 
 		return (
@@ -110,7 +108,6 @@ export class Login extends React.PureComponent<IProps, IState> {
 				direction="column"
 				alignItems="center"
 				wrap="nowrap">
-				<Logo />
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Log in" hiddenScrollbars={true}>
 						<Headline>{WELCOME_MESSAGE}</Headline>

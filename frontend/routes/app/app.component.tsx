@@ -28,6 +28,7 @@ import { ROUTES, PUBLIC_ROUTES } from '../../constants/routes';
 import { PrivateRoute } from '../components/privateRoute';
 import StaticPageRoute from '../components/staticPageRoute/staticPageRoute.container';
 import { LiveChat } from '../components/liveChat';
+import TopMenu from '../components/topMenu/topMenu.container';
 import { ViewerCanvas } from '../viewerCanvas';
 import { ViewerGui } from '../viewerGui';
 import { Dashboard } from '../dashboard';
@@ -38,6 +39,7 @@ import { PasswordChange } from '../passwordChange';
 import RegisterRequest from '../registerRequest/registerRequest.container';
 import { RegisterVerify } from '../registerVerify';
 import { AppContainer } from './app.styles';
+import { renderWhenTrue } from '../../helpers/rendering';
 
 interface IProps {
 	location: any;
@@ -165,6 +167,16 @@ export class App extends React.PureComponent<IProps, IState> {
 		return JSON.parse(window.localStorage.getItem('loggedIn'));
 	}
 
+	public handleLogoClick = () => {
+		const { isAuthenticated, history } = this.props;
+		let path = ROUTES.HOME;
+		if (isAuthenticated) {
+			path = ROUTES.TEAMSPACES;
+		}
+
+		history.push(path);
+	};
+
 	public handleAutoLogout = () => {
 		const { isAuthenticated, logout, history } = this.props;
 		const isSessionExpired = this.hasActiveSession !== isAuthenticated;
@@ -200,14 +212,24 @@ export class App extends React.PureComponent<IProps, IState> {
 		return <Route exact path={ROUTES.LOGIN} component={Login} />;
 	});
 
+	public renderHeader = renderWhenTrue(() => (
+		<TopMenu onLogout={this.props.logout} onLogoClick={this.handleLogoClick} />
+	))
+
 	public render() {
 		const { isAuthPending } = this.props;
 		if (isAuthPending) {
-			return this.renderLoginRoute();
+			return (
+				<AppContainer>
+					{this.renderHeader(true)}
+					{this.renderLoginRoute()}
+				</AppContainer>
+			);
 		}
 
 		return (
 				<AppContainer>
+					{this.renderHeader(!isStaticRoute(location.pathname))}
 					<Switch>
 						{this.renderLoginRoute()}
 						<Route exact path={ROUTES.SIGN_UP} component={SignUp} />
@@ -224,7 +246,6 @@ export class App extends React.PureComponent<IProps, IState> {
 						{this.renderStaticRoutes()}
 						<Route component={() => <div>No match on app</div>} />
 					</Switch>
-{/* 					<ExternalLinks /> */}
 					<DialogContainer />
 					<SnackbarContainer />
 					<LiveChat/>

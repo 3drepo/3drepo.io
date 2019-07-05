@@ -24,7 +24,6 @@ import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 
 import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../services/validation';
-import { Logo } from '../components/logo/logo.component';
 import { Panel } from '../components/panel/panel.component';
 import { Container, Message, Buttons, StyledButton } from './passwordChange.styles';
 import { SubmitButton } from '../components/submitButton/submitButton.component';
@@ -170,7 +169,6 @@ export class PasswordChange extends React.PureComponent<IProps, IState> {
 				container
 				direction="column"
 				alignItems="center">
-				<Link to="/login"><Logo /></Link>
 				<Grid item xs={9} sm={7} md={5} lg={3} xl={2}>
 					<Panel title="Forgot password">
 						{ this.props.message

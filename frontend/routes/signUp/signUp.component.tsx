@@ -17,7 +17,6 @@
 
 import * as React from 'react';
 import * as Yup from 'yup';
-import { Link } from 'react-router-dom';
 import { omit } from 'lodash';
 import { Formik, Field, Form } from 'formik';
 
@@ -25,7 +24,6 @@ import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../s
 import { clientConfigService } from './../../services/clientConfig';
 
 import { Panel } from '../components/panel/panel.component';
-import { Logo } from '../components/logo/logo.component';
 import { Footer } from './components/footer';
 import { SubmitButton } from '../components/submitButton/submitButton.component';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -168,7 +166,6 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 				direction="column"
 				alignItems="center"
 				wrap="nowrap">
-				<Link to="/login"><Logo /></Link>
 				<StyledGrid item xs={9} sm={6} md={6} lg={6} xl={2}>
 					<Panel title="Sign up" hiddenScrollbars={true}>
 						<Headline>Creating a 3D Repo account is free</Headline>

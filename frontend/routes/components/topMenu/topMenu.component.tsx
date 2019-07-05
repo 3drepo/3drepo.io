@@ -24,11 +24,13 @@ import Notifications from '../notifications/notifications.container';
 import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Container, BackIcon } from './topMenu.styles';
 import { ROUTES } from '../../../constants/routes';
+import { renderWhenTrue } from '../../../helpers/rendering';
 
 interface IProps {
 	currentUser: any;
 	history: any;
 	isFocusMode: boolean;
+	isAuthenticated: boolean;
 	visualSettings?: any;
 	logoUrl?: string;
 	onLogout?: () => void;
@@ -37,12 +39,10 @@ interface IProps {
 }
 
 export class TopMenu extends React.PureComponent<IProps, any> {
-	public render() {
-		const { logoUrl, onLogoClick, isFocusMode, ...userMenuProps } = this.props;
+	public renderUserMenu = renderWhenTrue(() => {
+		const { logoUrl, onLogoClick, isFocusMode, isAuthenticated, ...userMenuProps } = this.props;
 		return (
-			<Container hidden={isFocusMode}>
-				<Logo onClick={onLogoClick} />
-
+			<>
 				<TooltipButton
 					label="Back to teamspaces"
 					Icon={BackIcon}
@@ -53,6 +53,18 @@ export class TopMenu extends React.PureComponent<IProps, any> {
 					{...userMenuProps}
 					onTeamspacesClick={this.props.onLogoClick}
 				/>
+			</>
+		);
+	});
+
+	public render() {
+		const { logoUrl, onLogoClick, isFocusMode, isAuthenticated, ...userMenuProps } = this.props;
+		return (
+			<Container hidden={isFocusMode}>
+				<Logo onClick={onLogoClick} />
+
+				{this.renderUserMenu(isAuthenticated)}
+
 				<ExtrasMenu
 					{...userMenuProps}
 					onTeamspacesClick={this.props.onLogoClick}

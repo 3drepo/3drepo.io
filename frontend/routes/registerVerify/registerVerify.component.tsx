@@ -21,8 +21,6 @@ import Grid from '@material-ui/core/Grid';
 import { Link } from 'react-router-dom';
 
 import { Panel } from '../components/panel/panel.component';
-import { Logo } from '../components/logo/logo.component';
-
 import { Container, Paragraph, Buttons, StyledButton  } from './registerVerify.styles';
 
 interface IProps {
@@ -82,7 +80,6 @@ export class RegisterVerify extends React.PureComponent<IProps, IState> {
 				alignItems="center"
 				wrap="nowrap"
 			>
-				<Logo />
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Registered for 3D Repo">
 						{message && <Paragraph> {message} </Paragraph>}

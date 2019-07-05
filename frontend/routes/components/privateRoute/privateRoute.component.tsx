@@ -28,21 +28,7 @@ export const PrivateRoute = ({ component: Component, isAuthenticated, onLogout, 
 		}} />
 	);
 
-	const onLogoClick = () => {
-		let path = ROUTES.HOME;
-		if (isAuthenticated) {
-			path = ROUTES.TEAMSPACES;
-		}
-
-		push(path);
-	};
-
-	const renderComponent = (props) => (
-		<>
-			<TopMenu onLogout={onLogout} onLogoClick={onLogoClick} />
-			<Component {...props} />
-		</>
-	);
+	const renderComponent = (props) => <Component {...props} />;
 
 	if (isAuthenticated === null) {
 		return null;

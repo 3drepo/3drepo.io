@@ -17,9 +17,7 @@
 
 import * as React from 'react';
 import Grid from '@material-ui/core/Grid';
-import { Link } from 'react-router-dom';
 import { Panel } from '../components/panel/panel.component';
-import { Logo } from '../components/logo/logo.component';
 
 import { Container, Paragraph } from './registerRequest.styles';
 
@@ -32,7 +30,6 @@ export class RegisterRequest extends React.PureComponent<any, any> {
 				alignItems="center"
 				wrap="nowrap"
 				>
-				<Link to="/login"><Logo /></Link>
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Sign up request">
 						<Paragraph>

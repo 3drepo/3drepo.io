@@ -25,9 +25,10 @@ export const Container = styled.div`
 	justify-content: flex-end;
 	align-items: center;
 	position: relative;
-	padding-right: 5px;
+	padding-right: 10px;
 	height: 80px;
 	z-index: 1;
+	margin-top: 5px;
 	visibility: ${({ hidden }) => hidden ? 'hidden' : 'initial'};
 
 	${LogoStyles.Image} {
