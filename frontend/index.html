@@ -20,6 +20,12 @@
 
     <!-- Inline CSS if CSS fails, also faster-->
     <style>
+      html, body {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+      }
+  
       body .unsupported-page {
       	max-width: 100%;
       	max-height: 100%;
@@ -113,34 +119,6 @@
           </table>
       </div>
     </div>
-
-    <!-- Handle Internet Explorer -->
-    <script>
-
-      if (window && window.navigator && window.navigator.userAgent) {
-        var ua = window.navigator.userAgent;
-        var ie = false;
-
-        var msie = ua.indexOf('MSIE ');
-        if (msie > 0) {
-            // IE 10 or older => return version number
-            ie = true;
-        }
-
-        var trident = ua.indexOf('Trident/');
-        if (trident > 0) {
-            // IE 11 => return version number
-            ie = true;
-        }
-
-        if (ie === true) {
-          document.querySelector('.notSupported').style.visibility='visible';
-          document.querySelector('.notSupportedButton').style.display = 'visible';
-        }
-
-      }
-
-    </script>
 
     <div id="app"></div>
 

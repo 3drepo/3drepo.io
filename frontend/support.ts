@@ -1,4 +1,4 @@
-import UnsupportedBrowserDetection from './utils/unsupportedBrowserDetection';
+import UnsupportedBrowserDetection from './services/unsupportedBrowserDetection';
 
 const detection = new UnsupportedBrowserDetection();
 

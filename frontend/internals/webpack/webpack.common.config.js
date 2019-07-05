@@ -13,13 +13,14 @@ module.exports = (options) => {
     mode: options.mode || MODES.DEVELOPMENT,
     context: PATHS.APP_DIR,
     entry: pickBy({
+      maintenance: './maintenance.ts',
       support: './support.ts',
       main: './main.tsx',
       ...options.entry
     }, identity),
     output: Object.assign({
       path: PATHS.DIST_DIR,
-      filename: 'three_d_repo.[name].[hash].js'
+      filename: '[name].[chunkhash].js'
     }, options.output),
     module: {
       rules: [

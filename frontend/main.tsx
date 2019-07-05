@@ -15,7 +15,7 @@ import { UnityUtil } from './globals/unity-util';
 import { Pin } from './globals/pin';
 import { Viewer } from './globals/viewer';
 import './services/fontAwesome';
-import { IS_DEVELOPMENT } from './constants/environment';
+import { IS_DEVELOPMENT, IS_MAINTENANCE } from './constants/environment';
 
 // css from libs
 
@@ -36,7 +36,7 @@ requireAll(require.context('./components', true, /\.pug$/));
 const render = () => {
 	ReactDOM.render(
 		<Provider store={store} >
-			<ConnectedRouter history={history} >
+			<ConnectedRouter history={history}>
 				<Root />
 			</ConnectedRouter>
 		</Provider>,
@@ -44,7 +44,18 @@ const render = () => {
 	);
 };
 
-render();
+const initApp = () => {
+	if (!window.ClientConfig) {
+		console.error('ClientConfig has not been provided...');
+		return;
+	}
+
+	if (!IS_MAINTENANCE) {
+		render();
+	}
+};
+
+initApp();
 
 if (!IS_DEVELOPMENT) {
 	// tslint:disable-next-line: no-var-requires
