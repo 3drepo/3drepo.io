@@ -20,14 +20,14 @@ import { createStructuredSelector } from 'reselect';
 import { connect } from 'react-redux';
 
 import { CloseFocusModeButton } from './closeFocusModeButton.component';
-import { ViewerActions, selectIsFocusMode } from '../../../../modules/viewer';
+import { ViewerGuiActions, selectIsFocusMode } from '../../../../modules/viewerGui';
 
 const mapStateToProps = createStructuredSelector({
 	isFocusMode: selectIsFocusMode
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	setIsFocusMode: ViewerActions.setIsFocusMode
+	setIsFocusMode: ViewerGuiActions.setIsFocusMode
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(CloseFocusModeButton);

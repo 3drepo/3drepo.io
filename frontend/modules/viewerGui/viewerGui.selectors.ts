@@ -33,3 +33,27 @@ export const selectIsMetadataVisible = createSelector(
 export const selectIsModelLoaded = createSelector(
 	selectViewerGuiDomain, (state) => state.isModelLoaded
 );
+
+export const selectNavigationMode = createSelector(
+	selectViewerGuiDomain, (state) => state.navigationMode
+);
+
+export const selectHelicopterSpeed = createSelector(
+	selectViewerGuiDomain, (state) => state.helicopterSpeed
+);
+
+export const selectIsFocusMode = createSelector(
+	selectViewerGuiDomain, (state) => state.isFocusMode
+);
+
+export const selectClippingMode = createSelector(
+	selectViewerGuiDomain, (state) => state.clippingMode
+);
+
+export const selectIsClipEdit = createSelector(
+	selectViewerGuiDomain, (state) => state.isClipEdit
+);
+
+export const selectClipNumber = createSelector(
+	selectViewerGuiDomain, (state) => state.clipNumber
+);

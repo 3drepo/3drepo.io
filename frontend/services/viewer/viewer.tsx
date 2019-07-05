@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { UnityUtil } from '../../globals/unity-util';
 import { getState } from '../../helpers/migration';
 import { selectMemory } from '../../modules/viewer';
 import { MultiSelect } from './multiSelect';

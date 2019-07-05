@@ -21,14 +21,15 @@ import { connect } from 'react-redux';
 
 import { Toolbar } from './toolbar.component';
 import {
-	ViewerActions,
+	ViewerGuiActions,
 	selectNavigationMode,
 	selectHelicopterSpeed,
 	selectIsFocusMode,
 	selectClippingMode,
 	selectIsClipEdit,
-	selectClipNumber
-} from '../../../../modules/viewer';
+	selectClipNumber,
+	selectIsMetadataVisible
+} from '../../../../modules/viewerGui';
 
 import { TreeActions } from '../../../../modules/tree';
 
@@ -38,7 +39,6 @@ import {
 } from '../../../../modules/measure';
 import { BimActions, selectIsActive } from '../../../../modules/bim';
 import { selectMetaKeysExist } from '../../../../modules/model';
-import { selectIsMetadataVisible, ViewerGuiActions } from '../../../../modules/viewerGui';
 
 const mapStateToProps = createStructuredSelector({
 	navigationMode: selectNavigationMode,
@@ -55,22 +55,22 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	initialiseToolbar: ViewerActions.initialiseToolbar,
-	goToExtent: ViewerActions.goToExtent,
-	setNavigationMode: ViewerActions.setNavigationMode,
-	resetHelicopterSpeed: ViewerActions.resetHelicopterSpeed,
-	increaseHelicopterSpeed: ViewerActions.increaseHelicopterSpeed,
-	decreaseHelicopterSpeed: ViewerActions.decreaseHelicopterSpeed,
+	initialiseToolbar: ViewerGuiActions.initialiseToolbar,
+	goToExtent: ViewerGuiActions.goToExtent,
+	setNavigationMode: ViewerGuiActions.setNavigationMode,
+	resetHelicopterSpeed: ViewerGuiActions.resetHelicopterSpeed,
+	increaseHelicopterSpeed: ViewerGuiActions.increaseHelicopterSpeed,
+	decreaseHelicopterSpeed: ViewerGuiActions.decreaseHelicopterSpeed,
+	setIsFocusMode: ViewerGuiActions.setIsFocusMode,
+	setClippingMode: ViewerGuiActions.setClippingMode,
+	setClipEdit: ViewerGuiActions.setClipEdit,
+	stopListenOnNumClip: ViewerGuiActions.stopListenOnNumClip,
+	setMeasureVisibility: ViewerGuiActions.setMeasureVisibility,
+	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
+	setMetadataActive: BimActions.setIsActive,
 	showAllNodes: TreeActions.showAllNodes,
 	hideSelectedNodes: TreeActions.hideSelectedNodes,
 	isolateSelectedNodes: TreeActions.isolateSelectedNodes,
-	setIsFocusMode: ViewerActions.setIsFocusMode,
-	setClippingMode: ViewerActions.setClippingMode,
-	setClipEdit: ViewerActions.setClipEdit,
-	setMetadataActive: BimActions.setIsActive,
-	setMeasureVisibility: ViewerGuiActions.setMeasureVisibility,
-	stopListenOnNumClip: ViewerActions.stopListenOnNumClip,
-	setPanelVisibility: ViewerGuiActions.setPanelVisibility
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Toolbar);

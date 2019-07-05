@@ -17,11 +17,6 @@
 
 // TODO - TO REMOVE
 
-import { getState } from '../../../helpers/migration';
-import { selectMemory } from '../../../modules/viewer';
-import { DialogActions } from '../../../modules/dialog';
-import { ErrorDialog } from '../../../routes/components/dialogContainer/components';
-
 declare const Viewer: any;
 
 export class ViewerService {

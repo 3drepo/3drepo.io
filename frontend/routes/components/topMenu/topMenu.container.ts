@@ -23,7 +23,8 @@ import { connect } from 'react-redux';
 import { selectCurrentUser } from '../../../modules/currentUser';
 import { AuthActions } from '../../../modules/auth';
 import { DialogActions } from '../../../modules/dialog';
-import { selectSettings, ViewerActions, selectIsFocusMode } from '../../../modules/viewer';
+import { selectSettings, ViewerActions } from '../../../modules/viewer';
+import { selectIsFocusMode } from '../../../modules/viewerGui';
 import { TopMenu } from './topMenu.component';
 
 const mapStateToProps = createStructuredSelector({
