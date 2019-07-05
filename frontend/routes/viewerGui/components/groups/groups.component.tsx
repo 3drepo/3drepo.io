@@ -173,9 +173,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public toggleViewerEvents = (enabled = true) => {
 		const eventHandler = enabled ? 'on' : 'off';
-		this.props.viewer[eventHandler](VIEWER_EVENTS.MODEL_LOADED, () => {
-			this.setState({ modelLoaded: true });
-		});
 		this.props.viewer[eventHandler](VIEWER_EVENTS.BACKGROUND_SELECTED, this.resetActiveGroup);
 	}
 
