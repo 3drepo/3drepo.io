@@ -68,7 +68,7 @@ export class AttachResourceFiles extends React.PureComponent<IProps, any> {
 									const errorMessage = !validateQuota(form.values.files) ?
 													'Quota exceeded! Try removing some files' :
 													!validateUploadLimit(form.values.files) ?
-													`Size limit per file exceeded! The size limit is ${filesize(uploadLimit, {fullform: true})}` : '';
+													`File too large! Maximum attachment file size is ${filesize(uploadLimit, {fullform: true})}` : '';
 
 									return (<ResourcesDropzone onDrop={this.onAddFile(arrayHelpers)} errorMessage={errorMessage} />);
 							}} />
