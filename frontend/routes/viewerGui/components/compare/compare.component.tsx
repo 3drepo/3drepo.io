@@ -41,7 +41,6 @@ import { SORT_ORDER_TYPES } from '../../../../constants/sorting';
 import { SortAmountUp, SortAmountDown } from '../../../components/fontAwesomeIcon';
 import { ICompareComponentState } from '../../../../modules/compare/compare.redux';
 import { Loader } from '../../../components/loader/loader.component';
-import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
 import { CompareDiff } from './components/compareDiff';
 import { CompareClash } from './components/compareClash';
@@ -163,7 +162,6 @@ export class Compare extends React.PureComponent<IProps, any> {
 			isCompareProcessed,
 			isFederation,
 			isAnyTargetClashModel,
-			revision
 		} = this.props;
 
 		return (

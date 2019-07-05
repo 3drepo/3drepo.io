@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import * as Autosuggest from 'react-autosuggest';
+import Autosuggest from 'react-autosuggest';
 
 import Grid from '@material-ui/core/Grid';
 import MenuItem from '@material-ui/core/MenuItem';

@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import * as Autosuggest from 'react-autosuggest';
+import Autosuggest from 'react-autosuggest';
 import { omit, isNil, uniqBy, keyBy } from 'lodash';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import CollapseIcon from '@material-ui/icons/ExpandMore';
