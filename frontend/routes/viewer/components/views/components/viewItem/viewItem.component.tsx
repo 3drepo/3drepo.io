@@ -109,7 +109,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 							autoFocus
 						/>
 					)} />
-					<IconsGroup>
+					<IconsGroup disabled={this.state.isDeletePending}>
 						<StyledCancelIcon onClick={this.props.onCancelEditMode} />
 						<SaveIconButton type="submit" disableRipple={true}>
 							<StyledSaveIcon />
