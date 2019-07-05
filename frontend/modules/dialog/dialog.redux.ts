@@ -39,7 +39,6 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	setPendingState: ['isPending'],
 	showScreenshotDialog: ['config'],
 	setMuteNotifications: ['muteNotifications'],
-	showDisconnectedDialog: ['config'],
 	showNewUpdateDialog: ['config']
 }, { prefix: 'DIALOG/' });
 
@@ -114,20 +113,6 @@ const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 	return showDialog(state, {config});
 };
 
-const showDisconnectedDialog = (state = INITIAL_STATE, action) => {
-	if (state.muteNotifications) {
-		return state;
-	}
-
-	const config = {
-		title: 'Notification Service Disconnected',
-		template: Dialogs.DisconnectedDialog,
-		onCancel: action.config.onCancel
-	};
-
-	return showDialog(state, { config });
-};
-
 const showNewUpdateDialog = (state = INITIAL_STATE, action) => {
 	const config = {
 		title: 'Update Available',
@@ -160,6 +145,5 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.SET_PENDING_STATE]: setPendingState,
 	[DialogTypes.SET_MUTE_NOTIFICATIONS]: setMuteNotifications,
 	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog,
-	[DialogTypes.SHOW_DISCONNECTED_DIALOG]: showDisconnectedDialog,
 	[DialogTypes.SHOW_NEW_UPDATE_DIALOG]: showNewUpdateDialog
 });
