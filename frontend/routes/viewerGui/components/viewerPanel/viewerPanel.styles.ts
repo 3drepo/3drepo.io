@@ -44,7 +44,7 @@ export const Panel = styled(PanelComponent)<IPanel>`
 	margin-bottom: 20px;
 
 	${(props) => props.isPending ? css`
-		min-height: 90px !important;
+		min-height: 120px !important;
 	` : ''};
 
 	&:last-child {

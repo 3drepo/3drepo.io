@@ -196,16 +196,20 @@ export class App extends React.PureComponent<IProps, IState> {
 		<Route key={path} path={path} render={() => <StaticPageRoute title={title} fileName={fileName} />} />
 	)));
 
+	public renderLoginRoute = memoize(() => {
+		return <Route exact path={ROUTES.LOGIN} component={Login} />;
+	});
+
 	public render() {
-		const { isAuthPending, isAuthenticated } = this.props;
-		if (isAuthPending || isAuthenticated === null) {
-			return null;
+		const { isAuthPending } = this.props;
+		if (isAuthPending) {
+			return this.renderLoginRoute();
 		}
 
 		return (
 				<AppContainer>
 					<Switch>
-						<Route exact path={ROUTES.LOGIN} component={Login} />
+						{this.renderLoginRoute()}
 						<Route exact path={ROUTES.SIGN_UP} component={SignUp} />
 						<Route exact path={ROUTES.PASSWORD_FORGOT} component={PasswordForgot} />
 						<Route exact path={ROUTES.PASSWORD_CHANGE} component={PasswordChange} />

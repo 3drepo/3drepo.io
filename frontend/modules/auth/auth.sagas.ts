@@ -96,6 +96,7 @@ function* authenticate() {
 function* sessionExpired() {
 	try {
 		yield put({ type: 'RESET_APP' });
+		yield put(AuthActions.setLocalSessionStatus(false));
 		yield put(DialogActions.showDialog({
 			title: 'Session expired',
 			content: 'You have been logged out as your session has expired'

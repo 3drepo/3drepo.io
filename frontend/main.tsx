@@ -7,28 +7,27 @@ import 'simplebar/dist/simplebar.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 import 'simplebar';
 
-import './styles/global';
 import Root from './routes/index';
 import { store, history } from './modules/store';
+import './styles/global';
 
 import { UnityUtil } from './globals/unity-util';
 import { Pin } from './globals/pin';
 import { Viewer } from './globals/viewer';
-import './services/fontAwesome';
-import { IS_DEVELOPMENT, IS_MAINTENANCE } from './constants/environment';
+import { IS_DEVELOPMENT } from './constants/environment';
 import { clientConfigService } from './services/clientConfig';
+import './services/fontAwesome';
 
 // css from libs
 
 const requireAll = (r) => r.keys().forEach(r);
 
-// @ts-ignore
-requireAll(require.context('./css', true, /\.css$/));
-
 window.UnityUtil = UnityUtil;
 window.Viewer = Viewer;
 window.Pin = Pin;
 
+// @ts-ignore
+requireAll(require.context('./css', true, /\.css$/));
 // @ts-ignore
 requireAll(require.context('./components', true, /\.css$/));
 // @ts-ignore

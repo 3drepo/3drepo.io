@@ -44,6 +44,10 @@ export const PrivateRoute = ({ component: Component, isAuthenticated, onLogout, 
 		</>
 	);
 
+	if (isAuthenticated === null) {
+		return null;
+	}
+
 	const renderRoute = (props) => isAuthenticated ? renderComponent(props) : redirect(props);
 	return <Route {...routeProps} render={renderRoute} />;
 };
