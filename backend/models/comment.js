@@ -16,8 +16,11 @@
  */
 "use strict";
 
+const get = require("lodash").get;
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
+const View = require("./viewpoint");
+const db = require("../handler/db");
 
 const fieldTypes = {
 	"action": "[object Object]",
@@ -109,8 +112,51 @@ class RiskMitigationCommentGenerator extends TextCommentGenerator {
 	}
 }
 
+const addComment = async function(account, model, colName, id, user, data) {
+	if ((!data.comment || !data.comment.trim()) && !get(data,"viewpoint.screenshot")) {
+		throw { resCode: responseCodes.ISSUE_COMMENT_NO_TEXT};
+	}
+
+	// 1. Fetch comments
+	const _id = utils.stringToUUID(id) ;
+	const col = await db.getCollection(account, model + "." + colName);
+	const items = await col.find({ _id }, {comments: 1}).toArray();
+	if (items.length === 0) {
+		throw { resCode: responseCodes.ISSUE_NOT_FOUND };
+	}
+
+	// 2. Seal every comment
+	const comments = items[0].comments || [];
+	comments.forEach(c => c.sealed = true);
+
+	// 3. Create the comment
+	let viewpoint = null;
+
+	if (data.viewpoint) {
+		viewpoint = await View.clean({account, model}, data.viewpoint, fieldTypes.viewpoint);
+		viewpoint.guid = utils.generateUUID();
+	}
+
+	const comment = new TextCommentGenerator(user, data.comment, viewpoint);
+
+	// 4. Append the new comment
+	comments.push(comment);
+
+	// 5. Update the item.
+	const viewpointPush =  viewpoint ? {$push: { viewpoints: viewpoint }} : {};
+
+	await col.update({ _id }, {...viewpointPush ,$set : {comments}});
+
+	const dbCol = {account, model, colName, _id: id};
+	View.setViewpointScreenshot(dbCol, viewpoint);
+
+	// 6. Return the new comment.
+	return {...comment, viewpoint, guid: utils.uuidToString(comment.guid)};
+};
+
 module.exports = {
 	newTextComment : (owner, commentText, viewpoint, pinPosition) => new TextCommentGenerator(owner, commentText, viewpoint, pinPosition),
 	newSystemComment : (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to),
-	newRiskMitigationComment : (owner, likelihood, consequence, mitigation, viewpoint, pinPosition) => new RiskMitigationCommentGenerator(owner, likelihood, consequence, mitigation, viewpoint, pinPosition)
+	newRiskMitigationComment : (owner, likelihood, consequence, mitigation, viewpoint, pinPosition) => new RiskMitigationCommentGenerator(owner, likelihood, consequence, mitigation, viewpoint, pinPosition),
+	addComment
 };

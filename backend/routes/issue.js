@@ -28,6 +28,7 @@ const utils = require("../utils");
 const multer = require("multer");
 const config = require("../config.js");
 const ModelSetting = require("../models/modelSetting");
+const Comment = require("../models/comment");
 
 /**
  * @api {get} /:teamspace/:model/issues/:issueId Find Issue by ID
@@ -719,7 +720,7 @@ function addComment(req, res, next) {
 	const data =  req.body;
 	const {account, model, issueId} = req.params;
 
-	Issue.addComment(account, model, issueId, user, data).then(comment => {
+	Comment.addComment(account, model, "issues", issueId, user, data).then(comment => {
 		req.dataModel = comment;
 		next();
 	}).catch(err => {
