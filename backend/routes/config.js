@@ -40,7 +40,8 @@ function createClientConfig(serverConfig, req) {
 		"googleConversionId": config.googleConversionId,
 		"userNotice" : config.userNotice,
 		"customLogins" : config.customLogins,
-		"liveChatLicense" : config.liveChatLicense
+		"liveChatLicense" : config.liveChatLicense,
+		"resourceUploadSizeLimit" : config.resourceUploadSizeLimit
 	};
 
 	if (config.hasOwnProperty("captcha_client_key")) {

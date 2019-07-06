@@ -99,3 +99,49 @@ export const importBCF = (teamspace, modelId, file, revision?) => {
 	}
 	return api.post(`${mainPath}/issues.bcfzip`, formData);
 };
+
+/**
+ * Remove resource from issue
+ * @param teamspace
+ * @param modelId
+ * @param issueId
+ * @param resourceId
+ */
+export const removeResource = (teamspace, modelId, issueId, resourceId ) => {
+	return api.delete(`${teamspace}/${modelId}/issues/${issueId}/resources`, {_id: resourceId});
+};
+
+/**
+ * Attach resources to issue
+ * @param teamspace
+ * @param modelId
+ * @param issueId
+ * @param names
+ * @param files
+ */
+export const attachFileResources = (teamspace, modelId, issueId, names: any[], files: any[], percentageCallback ) => {
+	const headers = { headers: { 'Content-Type': 'multipart/form-data' }};
+	const formData = new FormData();
+	files.forEach((f) => formData.append('file', f));
+	names.forEach((n) => formData.append('names', n));
+	const progressHook = {
+		onUploadProgress: (progressEvent) => {
+			const percentCompleted = progressEvent.loaded / progressEvent.total;
+			percentageCallback(percentCompleted);
+		}
+	};
+
+	return api.post(`${teamspace}/${modelId}/issues/${issueId}/resources`, formData, { ...headers, ...progressHook });
+};
+
+/**
+ * Attach resources to issue
+ * @param teamspace
+ * @param modelId
+ * @param issueId
+ * @param names
+ * @param urls
+ */
+export const attachLinkResources = (teamspace, modelId, issueId, names: any[], urls: any[] ) => {
+	return api.post(`${teamspace}/${modelId}/issues/${issueId}/resources`, {names, urls});
+};

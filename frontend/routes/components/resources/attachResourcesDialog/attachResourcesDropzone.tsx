@@ -14,37 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import * as React from 'react';
+import { DropzoneContent, StyledDropZone } from './attachResourcesDialog.styles';
 
-import styled from 'styled-components';
-import Place from '@material-ui/icons/Place';
-import { Button } from '@material-ui/core';
-import { COLOR } from '../../../../styles';
-
-export const PinIcon = styled(Place).attrs({
-	classes: {
-		colorSecondary: 'secondary',
-		colorPrimary: 'primary',
-		colorDisabled: 'disabled'
-	}
-})`
-	&& {
-		&.secondary {
-			color: ${COLOR.SUNGLOW};
-		}
-
-		&.primary {
-			color: ${COLOR.BLACK_54};
-		}
-
-		&.disabled {
-			color: ${COLOR.BLACK_12};
-		}
-	}
-`;
-
-export const Container = styled.span`
-	display: flex;
-	align-items: center;
-	height: 100%;
-	min-height:40px;
-`;
+export const ResourcesDropzone = ({onDrop, errorMessage}) => (
+	<StyledDropZone onDrop={onDrop} disabled={Boolean(errorMessage)}>
+		{(args) => (
+			<DropzoneContent isDragActive={args.isDragActive} error={Boolean(errorMessage)}>
+				{! Boolean(errorMessage) && 'Click or drop to add files.'}
+				{Boolean(errorMessage) && errorMessage}
+			</DropzoneContent>
+		)}
+	</StyledDropZone>
+);

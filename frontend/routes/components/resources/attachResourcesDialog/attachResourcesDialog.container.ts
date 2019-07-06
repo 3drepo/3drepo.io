@@ -15,36 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import Place from '@material-ui/icons/Place';
-import { Button } from '@material-ui/core';
-import { COLOR } from '../../../../styles';
+import { connect } from '../../../../helpers/migration';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
 
-export const PinIcon = styled(Place).attrs({
-	classes: {
-		colorSecondary: 'secondary',
-		colorPrimary: 'primary',
-		colorDisabled: 'disabled'
-	}
-})`
-	&& {
-		&.secondary {
-			color: ${COLOR.SUNGLOW};
-		}
+import { AttachResourcesDialog } from './attachResourcesDialog.component';
+import { CurrentUserActions, selectCurrentTeamspace, selectSpaceLeft } from '../../../../modules/currentUser';
 
-		&.primary {
-			color: ${COLOR.BLACK_54};
-		}
+const mapStateToProps = createStructuredSelector({
+	currentTeamspace: selectCurrentTeamspace,
+	quotaLeft: selectSpaceLeft
+});
 
-		&.disabled {
-			color: ${COLOR.BLACK_12};
-		}
-	}
-`;
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	fetchQuota: CurrentUserActions.fetchQuotaInfo
+}, dispatch);
 
-export const Container = styled.span`
-	display: flex;
-	align-items: center;
-	height: 100%;
-	min-height:40px;
-`;
+export default connect(mapStateToProps, mapDispatchToProps)(AttachResourcesDialog);

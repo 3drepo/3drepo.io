@@ -437,6 +437,84 @@ router.post("/issues/:issueId/comments", middlewares.issue.canComment, addCommen
  * */
 router.delete("/issues/:issueId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
 
+router.post("/revision/:rid/issues.json", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {post} /:teamspace/:model/issues/:issueId/resources Attach resources to an issue
+ * @apiName attachResource
+ * @apiGroup Issues
+ * @apiDescription Attaches file or url resources to an issue.
+ * If the type of the resource is file it should be send as multipart/form-data.
+ * Both types at the same time cant be sent. So in order to attach files and urls it should be done
+ * with two different requests.
+ *
+ * This method triggers a chat event
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {String} issueId Issue unique ID
+ *
+ * @apiParam (Request body file resource (multipart/form-data)) {File[]} files The array of files to be attached
+ * @apiParam (Request body file resource (multipart/form-data)) {String[]} names The names of the files; it should have the same length as the files field and should include the file extension
+ * @apiParam (Request body url resource) {String[]} urls The array of urls to be attached
+ * @apiParam (Request body url resource) {String[]} names The names of the urls; it should have the same length as the url field
+ *
+ * @apiSuccessExample {json} Success example result after two files has been uploaded
+ *
+ * [
+ *    {
+ *       "_id":"7617f775-9eb7-4877-8ec3-98ea3457e519",
+ *       "size":1422,
+ *       "issueIds":[
+ *          "3e8a11e0-9812-11e9-9c4d-ebde5888e062"
+ *       ],
+ *       "name":"todo.txt",
+ *       "user":"teamSpace1",
+ *       "createdAt":1561973996461
+ *    },
+ *    {
+ *       "_id":"e25e42d5-c4f0-4fbc-a8f4-bc9899e6662a",
+ *       "size":2509356,
+ *       "issueIds":[
+ *          "3e8a11e0-9812-11e9-9c4d-ebde5888e062"
+ *       ],
+ *       "name":"football.gif",
+ *       "user":"teamSpace1",
+ *       "createdAt":1561973996462
+ *    }
+ * ]
+ */
+router.post("/issues/:issueId/resources",middlewares.issue.canComment, attachResourcesToIssue, middlewares.chat.onResourcesCreated, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {delete} /:teamspace/:model/issues/:issueId/resources Detach a resource from an issue
+ * @apiName detachResource
+ * @apiGroup Issues
+ * @apiDescription Detachs a resource from an issue. If the issue is the last entity
+ * the resources has been attached to it also deletes the resource from the system. This
+ * method triggers a chat event .
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {String} issueId Issue unique ID
+ *
+ * @apiParam (Request body) {String} _id The resource id to be detached
+ *
+ * @apiSuccessExample {json}
+ *
+ * {
+ *    "_id":"e25e42d5-c4f0-4fbc-a8f4-bc9899e6662a",
+ *    "size":2509356,
+ *    "issueIds":[
+ *    ],
+ *    "name":"football.gif",
+ *    "user":"teamSpace1",
+ *    "createdAt":1561973996462
+ * }
+ *
+ */
+router.delete("/issues/:issueId/resources",middlewares.issue.canComment, detachResourcefromIssue, middlewares.chat.onResourceDeleted, responseCodes.onSuccessfulOperation);
+
 function storeIssue(req, res, next) {
 	const data = req.body;
 	data.owner = req.session.user.username;
@@ -660,6 +738,55 @@ function deleteComment(req, res, next) {
 	}).catch(err => {
 		responseCodes.onError(req, res, err);
 	});
+}
+
+function attachResourcesToIssue(req, res, next) {
+	const place = utils.APIInfo(req);
+	const {account, model, issueId} = req.params;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const user = req.session.user.username;
+	const upload = multer({
+		storage: multer.memoryStorage()
+	});
+
+	upload.array("file")(req, res, function (err) {
+		const names = Array.isArray(req.body.names) ? req.body.names : [req.body.names];
+		const urls = req.body.urls;
+		if (err) {
+			return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
+		} else {
+			let resourcesProm = null;
+
+			if (req.files) {
+				resourcesProm = Issue.attachResourceFiles(account, model, issueId, user, sessionId, names, req.files);
+			} else {
+				resourcesProm = Issue.attachResourceUrls(account, model, issueId, user, sessionId, names, urls);
+			}
+
+			resourcesProm.then(resources => {
+				req.dataModel = resources;
+				next();
+			}).catch(promErr => {
+				responseCodes.respond(place, req, res, next, promErr, promErr);
+			});
+		}
+	});
+}
+
+function detachResourcefromIssue(req, res, next) {
+	const place = utils.APIInfo(req);
+	const {account, model, issueId} = req.params;
+	const resourceId = req.body._id;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const user = req.session.user.username;
+
+	Issue.detachResource(account, model, issueId, resourceId, user, sessionId).then(ref => {
+		req.dataModel = ref;
+		next();
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err, err);
+	});
+
 }
 
 module.exports = router;
