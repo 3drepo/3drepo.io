@@ -50,9 +50,9 @@ interface IProps {
 	setState: (componentState) => void;
 	fetchIssue: (teamspace, model, issueId) => void;
 	showNewPin: (issue, pinData) => void;
-	saveIssue: (teamspace, modelId, issue, revision) => void;
+	saveIssue: (teamspace, modelId, issue, revision, finishSubmitting) => void;
 	updateIssue: (teamspace, modelId, issue) => void;
-	postComment: (teamspace, modelId, issueData) => void;
+	postComment: (teamspace, modelId, issueData, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, issueData) => void;
 	subscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	unsubscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
@@ -287,7 +287,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		this.props.showNewPin(this.props.issue, pinData);
 	}
 
-	public postComment = async (teamspace, model, {comment, screenshot}) => {
+	public postComment = async (teamspace, model, { comment, screenshot }, finishSubmitting) => {
 		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
 		const issueCommentData = {
 			_id: this.issueData._id,
@@ -298,15 +298,15 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			}
 		};
 
-		this.props.postComment(teamspace, model, issueCommentData);
+		this.props.postComment(teamspace, model, issueCommentData, finishSubmitting);
 	}
 
-	public handleSave = (formValues) => {
+	public handleSave = (formValues, finishSubmitting) => {
 		const { teamspace, model, saveIssue, revision } = this.props;
 		if (this.isNewIssue) {
-			saveIssue(teamspace, model, this.issueData, revision);
+			saveIssue(teamspace, model, this.issueData, revision, finishSubmitting);
 		} else {
-			this.postComment(teamspace, model, formValues);
+			this.postComment(teamspace, model, formValues, finishSubmitting);
 		}
 	}
 

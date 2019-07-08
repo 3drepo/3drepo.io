@@ -102,7 +102,7 @@ const toggleRiskPin = (risk, selected = true) => {
 	}
 };
 
-export function* saveRisk({ teamspace, model, riskData, revision }) {
+export function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting }) {
 	try {
 		yield Viewer.setPinDropMode(false);
 
@@ -165,6 +165,7 @@ export function* saveRisk({ teamspace, model, riskData, revision }) {
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(savedRisk, jobs);
 
+		finishSubmitting();
 		yield put(RisksActions.showDetails(teamspace, model, revision, preparedRisk));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(SnackbarActions.show('Risk created'));
@@ -211,12 +212,13 @@ export function* updateNewRisk({ newRisk }) {
 	}
 }
 
-export function* postComment({ teamspace, modelId, riskData }) {
+export function* postComment({ teamspace, modelId, riskData, finishSubmitting }) {
 	try {
 		const { _id, rev_id } = yield select(selectActiveRiskDetails);
 		const { data: comment } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
 		const preparedComment = yield prepareComment(comment);
 
+		finishSubmitting();
 		yield put(RisksActions.createCommentSuccess(preparedComment, riskData._id));
 		yield put(SnackbarActions.show('Risk comment added'));
 	} catch (error) {
