@@ -22,7 +22,7 @@ export const Container = styled.div`
 	pointer-events: none;
 	z-index: 1;
 	flex: 1;
-  position: relative;
+	position: relative;
 	visibility: ${({ hidden }) => hidden ? 'hidden' : 'initial'};
 `;
 

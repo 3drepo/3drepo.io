@@ -16,11 +16,12 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from '../../../../styles';
 
 export const Container = styled.div`
 	z-index: 2;
 	position: absolute;
-	color: white;
+	color: ${COLOR.WHITE};
 	text-shadow: 1px 1px #666666;
 	font-size: 14px;
 	width: 250px;
@@ -29,11 +30,4 @@ export const Container = styled.div`
 	font-weight: bold;
 	margin-left: -125px;
 	text-align: center;
-
-	@media (max-width: 767px) {
-    revisions {
-        top: 10px;
-        left: 45%;
-    }
-	}
 `;

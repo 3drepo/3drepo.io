@@ -26,8 +26,8 @@ export const Container = styled.div`
 	background: rgba(131, 151, 172, 0.85);
 	padding: 10px 20px;
 	z-index: 2;
-	box-shadow: 0px 0px 3px rgba(${COLOR.BLACK_20});
-	color: white;
+	box-shadow: 0 0 3px rgba(${COLOR.BLACK_20});
+	color: ${COLOR.WHITE};
 	font-size: 13px;
 	border-radius: 10px;
 	visibility: ${(props: any) => props.shouldHide ? 'hidden' : 'visible'};
