@@ -40,6 +40,7 @@ import RegisterRequest from '../registerRequest/registerRequest.container';
 import { RegisterVerify } from '../registerVerify';
 import { AppContainer } from './app.styles';
 import { renderWhenTrue } from '../../helpers/rendering';
+import { NotFound } from '../notFound';
 
 interface IProps {
 	location: any;
@@ -214,7 +215,7 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public renderHeader = renderWhenTrue(() => (
 		<TopMenu onLogout={this.props.logout} onLogoClick={this.handleLogoClick} />
-	))
+	));
 
 	public render() {
 		const { isAuthPending } = this.props;
@@ -237,14 +238,13 @@ export class App extends React.PureComponent<IProps, IState> {
 						<Route exact path={ROUTES.PASSWORD_CHANGE} component={PasswordChange} />
 						<Route exact path={ROUTES.REGISTER_REQUEST} component={RegisterRequest} />
 						<Route exact path={ROUTES.REGISTER_VERIFY} component={RegisterVerify} />
-						<PrivateRoute key={ROUTES.DASHBOARD} path={ROUTES.DASHBOARD} component={Dashboard} />
+						<PrivateRoute path={ROUTES.DASHBOARD} component={Dashboard} />
 						<PrivateRoute
-							key={ROUTES.VIEWER}
 							path={`${ROUTES.VIEWER}/:teamspace/:model/:revision?`}
 							component={this.renderViewer}
 						/>
 						{this.renderStaticRoutes()}
-						<Route component={() => <div>No match on app</div>} />
+						<Route component={NotFound} />
 					</Switch>
 					<DialogContainer />
 					<SnackbarContainer />

@@ -28,10 +28,6 @@ window.Pin = Pin;
 
 // @ts-ignore
 requireAll(require.context('./css', true, /\.css$/));
-// @ts-ignore
-requireAll(require.context('./components', true, /\.css$/));
-// @ts-ignore
-requireAll(require.context('./components', true, /\.pug$/));
 
 const render = () => {
 	ReactDOM.render(

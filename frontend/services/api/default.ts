@@ -12,21 +12,33 @@ axios.interceptors.response.use(
 	(error) => {
 		try {
 			const invalidMessages = ['Authentication error', 'You are not logged in'] as any;
-			if (error.data) {
-				const notLogin = error.data.place !== 'GET /login';
-				const unauthorized = error.status === 401 &&
-					invalidMessages.includes(error.data.message);
 
-				const sessionHasExpired = unauthorized && notLogin;
+			switch (error.status) {
+				case 401:
+					if (error.data) {
+						const notLogin = error.data.place !== 'GET /login';
+						const unauthorized = error.status === 401 &&
+							invalidMessages.includes(error.data.message);
 
-				if (sessionHasExpired) {
-					dispatch(AuthActions.sessionExpired());
-				} else {
-					throw error.response;
-				}
+						const sessionHasExpired = unauthorized && notLogin;
 
-				error.response.handled = true;
+						if (sessionHasExpired) {
+							dispatch(AuthActions.sessionExpired());
+						} else {
+							throw error.response;
+						}
+
+						error.response.handled = true;
+					}
+					break;
+				case 403:
+					console.log('403 ERROR');
+					error.response.handled = true;
+					break;
+				default:
+					break;
 			}
+
 			return Promise.reject(error);
 		} catch (e) {
 			return Promise.reject(error);
