@@ -59,8 +59,8 @@ interface IProps {
 	sendUpdateAllNotificationsRead: (read: boolean) => void;
 	showUpdatedFailedError: (errorMessage: string) => void;
 	sendDeleteNotification: (id: string) => void;
-	deleteNotification: (notification: any) => void;
-	upsertNotification: (notification: any) => void;
+	subscribeOnChanges: () => void;
+	unsubscribeFromChanges: () => void;
 	setDrawerPanelState: (open: boolean) => void;
 }
 
@@ -85,8 +85,6 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		open: false,
 		menuElement: null
 	};
-
-	private chatService = getAngularService('ChatService') as any;
 
 	get today() {
 		return simpleDate(new Date());
@@ -133,16 +131,11 @@ export class Notifications extends React.PureComponent<IProps, any> {
 
 	public componentDidMount() {
 		this.props.sendGetNotifications();
-
-		const chatChannel = this.chatService.getChannel(this.props.currentUser.username);
-		chatChannel.notifications.subscribeToUpserted(this.props.upsertNotification, this);
-		chatChannel.notifications.subscribeToDeleted(this.props.deleteNotification, this);
+		this.props.subscribeOnChanges();
 	}
 
 	public componentWillUnmount() {
-		const chatChannel = this.chatService.getChannel(this.props.currentUser.username);
-		chatChannel.notifications.unsubscribeFromUpserted(this.props.upsertNotification);
-		chatChannel.notifications.unsubscribeFromDeleted(this.props.deleteNotification);
+		this.props.unsubscribeFromChanges();
 	}
 
 	public toggleDrawer = () => {
@@ -178,8 +171,8 @@ export class Notifications extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps: IProps) {
-		if (prevProps.notifications !== this.props.notifications) {
-			const unreadCount =  this.props.notifications.filter((n) => !n.read).length;
+		if (prevProps.notifications !== this.props.notifications && this.props.notifications.length) {
+			const unreadCount = this.props.notifications.filter((n) => !n.read).length;
 			const groupedByTeamspace = { thisWeek: [], lastWeek: [], older: []};
 
 			const thisWeek = this.thisWeeksNotifications(this.props.notifications);

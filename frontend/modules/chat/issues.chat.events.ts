@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2018 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,13 +16,13 @@
  */
 
 import { ChatEvents } from './chat.events';
-import { ChatChannel } from './chat.channel';
+import { Channel } from './channel';
 
-export class RisksChatEvents extends ChatEvents {
+export class IssuesChatEvents extends ChatEvents {
 	private comments: { [id: string]: ChatEvents};
 
-	constructor(protected channel: ChatChannel) {
-		super(channel, 'risk');
+	constructor(protected channel: Channel) {
+		super(channel, 'issue');
 		this.comments = {};
 	}
 

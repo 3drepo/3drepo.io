@@ -19,13 +19,16 @@ import { cloneDeep } from 'lodash';
 import { put, takeLatest, select, take } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import { getAngularService, dispatch } from './../../helpers/migration';
+import { clientConfigService } from '../../services/clientConfig';
+import { dispatch } from './../../helpers/migration';
 import { uploadFileStatuses } from './model.helpers';
 import { DialogActions } from '../dialog';
 import { ModelTypes, ModelActions } from './model.redux';
 import { TeamspacesActions } from '../teamspaces';
 import { SnackbarActions } from './../snackbar';
 import { selectCurrentUser } from '../currentUser';
+import { CHAT_CHANNELS } from '../../constants/chat';
+import { ChatActions } from '../chat';
 
 export function* fetchSettings({ teamspace, modelId }) {
 	try {
@@ -119,48 +122,67 @@ export function* onModelStatusChanged({ modelData, teamspace, project, modelId, 
 	}
 }
 
+const onChanged = (teamspace, project, modelId, modelName) => (changedModelData) =>
+	dispatch(ModelActions.onModelStatusChanged(changedModelData, teamspace, project, modelId, modelName));
+
 export function* subscribeOnStatusChange({ teamspace, project, modelData }) {
 	const { modelId, modelName } = modelData;
-	const notificationService = yield getAngularService('ChatService');
-	const modelNotifications = yield notificationService.getChannel(teamspace, modelId).model;
 
-	const onChanged = (changedModelData) =>
-		dispatch(ModelActions.onModelStatusChanged(changedModelData, teamspace, project, modelId, modelName));
-	modelNotifications.subscribeToStatusChanged(onChanged, this);
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.MODEL, teamspace, modelId, {
+		subscribeToStatusChanged: onChanged(teamspace, project, modelId, modelName)
+	}));
 }
 
 export function* unsubscribeOnStatusChange({ teamspace, project, modelData }) {
 	const { modelId, modelName } = modelData;
-	const notificationService = yield getAngularService('ChatService');
-	const modelNotifications = yield notificationService.getChannel(teamspace, modelId).model;
-
-	const onChanged = (changedModelData) =>
-		dispatch(ModelActions.onModelStatusChanged(changedModelData, teamspace, project,  modelId, modelName));
-	modelNotifications.unsubscribeFromStatusChanged(onChanged, this);
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.MODEL, teamspace, modelId, {
+		unsubscribeToStatusChanged: onChanged(teamspace, project, modelId, modelName)
+	}));
 }
+
+const isTagFormatInValid = (tag) => {
+	return tag && !tag.match(clientConfigService.tagRegExp);
+};
 
 export function* uploadModelFile({ teamspace, project, modelData, fileData }) {
 	try {
-		const formData = new FormData();
-		formData.append('file', fileData.file);
-		formData.append('tag', fileData.tag);
-		formData.append('desc', fileData.desc);
+		const isInvalidTag = isTagFormatInValid(fileData.tag);
 
-		const { modelId, modelName } = modelData;
-		const { data: { status }, data } = yield API.uploadModelFile(teamspace, modelId, formData);
+		if (isInvalidTag) {
+			const INVALID_TAG_MESSAGE =
+				`Invalid revision name;
+				check length is between 1 and 20 and uses alphanumeric characters
+			`;
 
-		if (status === uploadFileStatuses.ok) {
-			if (data.hasOwnProperty('errorReason') && data.errorReason.message) {
-				yield put(SnackbarActions.show(data.errorReason.message));
-			} else {
-				yield put(SnackbarActions.show(`Model ${modelName} uploaded successfully`));
+			yield put(SnackbarActions.show(INVALID_TAG_MESSAGE));
+		} else if (fileData.file.size > clientConfigService.uploadSizeLimit) {
+			const size = clientConfigService.uploadSizeLimit / 1048576 as any;
+			const maxSize = parseInt(size, 10).toFixed(0);
+			const MAX_SIZE_MESSAGE = `File exceeds size limit of ${maxSize}mb`;
+
+			yield put(SnackbarActions.show(MAX_SIZE_MESSAGE));
+		} else {
+			const formData = new FormData();
+			formData.append('file', fileData.file);
+			formData.append('tag', fileData.tag);
+			formData.append('desc', fileData.desc);
+
+			const { modelId, modelName } = modelData;
+			const { data: { status }, data } = yield API.uploadModelFile(teamspace, modelId, formData);
+
+			if (status === uploadFileStatuses.ok) {
+				if (data.hasOwnProperty('errorReason') && data.errorReason.message) {
+					yield put(SnackbarActions.show(data.errorReason.message));
+				} else {
+					yield put(SnackbarActions.show(`Model ${modelName} uploaded successfully`));
+				}
 			}
-		}
-		if (status === uploadFileStatuses.failed) {
-			if (data.hasOwnProperty('errorReason') && data.errorReason.message) {
-				yield put(SnackbarActions.show(`Failed to import ${modelName} model: ${data.errorReason.message}`));
-			} else {
-				yield put(SnackbarActions.show(`Failed to import ${modelName} model`));
+			if (status === uploadFileStatuses.failed) {
+				if (data.hasOwnProperty('errorReason') && data.errorReason.message) {
+					yield put(SnackbarActions.show(`Failed to import ${modelName} model: ${data.errorReason.message}`));
+				} else {
+					yield put(SnackbarActions.show(`Failed to import ${modelName} model`));
+				}
 			}
 		}
 	} catch (e) {

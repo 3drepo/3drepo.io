@@ -25,6 +25,11 @@ export class ClientConfigService {
 	public captcha_client_key;
 	public legalTemplates;
 	public liveChatLicense;
+	public tagRegExp;
+	public uploadSizeLimit;
+	private chatHost;
+	private chatPath;
+	private chatReconnectionAttempts;
 	private apiUrls;
 	private apiAlgorithm;
 	private MAP_API;
@@ -86,6 +91,14 @@ export class ClientConfigService {
 		}
 
 		return '';
+	}
+
+	public get chatConfig() {
+		return {
+			host: this.chatHost,
+			path: this.chatPath,
+			reconnectionAttempts: this.chatReconnectionAttempts || Infinity
+		};
 	}
 }
 

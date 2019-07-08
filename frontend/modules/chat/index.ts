@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2016 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,33 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export class RevisionsService {
-
-	public static $inject: string[] = [
-		'$filter',
-		'ClientConfigService'
-	];
-
-	public status: any;
-	public revisionDateFilter: any;
-
-	constructor(
-		private $filter,
-		private ClientConfigService
-	) {
-		this.revisionDateFilter = this.$filter('prettyDate');
-		this.status = {
-			data: {},
-			ready: false
-		};
-	}
-
-	public isTagFormatInValid(tag) {
-		return tag && !tag.match(this.ClientConfigService.tagRegExp);
-	}
-
-}
-
-export const RevisionsServiceModule = angular
-	.module('3drepo')
-	.service('RevisionsService', RevisionsService);
+export {
+	ChatTypes,
+	ChatActions
+} from './chat.redux';

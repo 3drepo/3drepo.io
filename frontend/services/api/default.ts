@@ -19,11 +19,6 @@ axios.interceptors.response.use(
 	}
 );
 
-const addSocketIdToHeader = () => {
-	const ChatService = getAngularService('ChatService') as any;
-	axios.defaults.headers['x-socket-id'] = ChatService.socket.id;
-};
-
 const getRequest = (url, ...options) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.GET_API, url));
 	return axios.get(requestUrl, ...options);
@@ -57,8 +52,11 @@ export const API = {
 	delete: deleteRequest
 };
 
+export const setSocketIdHeader = (socketId) => {
+	axios.defaults.headers['x-socket-id'] = socketId;
+};
+
 export const getAPIUrl = (url: string) => {
-	addSocketIdToHeader();
 	return encodeURI(clientConfigService.apiUrl(clientConfigService.GET_API, url));
 };
 

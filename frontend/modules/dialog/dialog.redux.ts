@@ -18,7 +18,7 @@
 import { createActions, createReducer } from 'reduxsauce';
 import { get, omit } from 'lodash';
 import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
-import { ErrorDialog, ConfirmDialog } from '../../routes/components/dialogContainer/components';
+import * as Dialogs from '../../routes/components/dialogContainer/components';
 
 interface IDialogConfig {
 	title: string;
@@ -34,27 +34,31 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showEndpointErrorDialog: ['method', 'dataType', 'error'],
 	showErrorDialog: ['method', 'dataType', 'message', 'status'],
 	showConfirmDialog: ['config'],
+	showRevisionsDialog: ['config'],
 	hideDialog: [],
 	setPendingState: ['isPending'],
-	showScreenshotDialog: ['config']
+	showScreenshotDialog: ['config'],
+	setMuteNotifications: ['muteNotifications'],
+	showNewUpdateDialog: ['config']
 }, { prefix: 'DIALOG/' });
 
 export const INITIAL_STATE = {
 	isOpen: false,
 	isPending: false,
 	config: {},
-	data: null
+	data: null,
+	muteNotifications: false
 };
 
-export const showDialog = (state = INITIAL_STATE, action) => {
+const showDialog = (state = INITIAL_STATE, action) => {
 	const config = omit(action.config, 'data') as IDialogConfig;
 	return { ...state, config, data: action.config.data, isOpen: true };
 };
 
-export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, message, status }) => {
+const showErrorDialog = (state = INITIAL_STATE, { method, dataType, message, status }) => {
 	const config = {
 		title: 'Error',
-		template: ErrorDialog,
+		template: Dialogs.ErrorDialog,
 		data: {
 			method,
 			dataType,
@@ -66,7 +70,7 @@ export const showErrorDialog = (state = INITIAL_STATE, { method, dataType, messa
 	return showDialog(state, {config});
 };
 
-export const showEndpointErrorDialog = (state = INITIAL_STATE, { method, dataType, error }) => {
+const showEndpointErrorDialog = (state = INITIAL_STATE, { method, dataType, error }) => {
 	const isImplementationError = !error.response;
 	if (isImplementationError) {
 		console.error(error);
@@ -82,12 +86,17 @@ export const showEndpointErrorDialog = (state = INITIAL_STATE, { method, dataTyp
 	return showErrorDialog(state, { method, dataType, message, status});
 };
 
-export const showConfirmDialog = (state = INITIAL_STATE, action) => {
-	const config = { ...action.config, template: ConfirmDialog } as IDialogConfig;
+const showConfirmDialog = (state = INITIAL_STATE, action) => {
+	const config = { ...action.config, template: Dialogs.ConfirmDialog } as IDialogConfig;
 	return showDialog(state, { config });
 };
 
-export const showScreenshotDialog = (state = INITIAL_STATE, action) => {
+const showRevisionsDialog = (state = INITIAL_STATE, action) => {
+	const config = { ...action.config, template: Dialogs.RevisionsDialog } as IDialogConfig;
+	return showDialog(state, { config });
+};
+
+const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 	const config = {
 		title: action.config.title || 'Screenshot',
 		template: ScreenshotDialog,
@@ -104,12 +113,26 @@ export const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 	return showDialog(state, {config});
 };
 
-export const hideDialog = (state = INITIAL_STATE) => {
+const showNewUpdateDialog = (state = INITIAL_STATE, action) => {
+	const config = {
+		title: 'Update Available',
+		template: Dialogs.NewUpdateDialogDialog,
+		onConfirm: action.config.onConfirm
+	};
+
+	return showDialog(state, { config });
+};
+
+const hideDialog = (state = INITIAL_STATE) => {
 	return { ...state, isOpen: false, isPending: false };
 };
 
-export const setPendingState = (state = INITIAL_STATE, {isPending}) => {
+const setPendingState = (state = INITIAL_STATE, {isPending}) => {
 	return { ...state, isPending };
+};
+
+const setMuteNotifications = (state = INITIAL_STATE, { muteNotifications }) => {
+	return { ...state, muteNotifications };
 };
 
 export const reducer = createReducer({...INITIAL_STATE}, {
@@ -118,6 +141,9 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.SHOW_ERROR_DIALOG]: showErrorDialog,
 	[DialogTypes.SHOW_ENDPOINT_ERROR_DIALOG]: showEndpointErrorDialog,
 	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
+	[DialogTypes.SHOW_REVISIONS_DIALOG]: showRevisionsDialog,
 	[DialogTypes.SET_PENDING_STATE]: setPendingState,
-	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog
+	[DialogTypes.SET_MUTE_NOTIFICATIONS]: setMuteNotifications,
+	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog,
+	[DialogTypes.SHOW_NEW_UPDATE_DIALOG]: showNewUpdateDialog
 });

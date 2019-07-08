@@ -36,7 +36,6 @@ import {
 } from '../../../../modules/issues';
 import { selectJobsList } from '../../../../modules/jobs';
 import { selectSettings, selectTopicTypes } from '../../../../modules/model';
-import { renderPins } from '../../../../modules/risks/risks.sagas';
 
 const mapStateToProps = createStructuredSelector({
 	issues: selectIssues,
@@ -63,7 +62,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	printIssues: IssuesActions.printIssues,
 	setActiveIssue: IssuesActions.setActiveIssue,
 	showIssueDetails: IssuesActions.showDetails,
-	toggleShowPins: IssuesActions.toggleShowPins,
 	subscribeOnIssueChanges: IssuesActions.subscribeOnIssueChanges,
 	unsubscribeOnIssueChanges: IssuesActions.unsubscribeOnIssueChanges,
 	closeDetails: IssuesActions.closeDetails,

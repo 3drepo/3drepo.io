@@ -15,14 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ChatService } from './chat.service';
 import { ChatEvents } from './chat.events';
 import { ModelChatEvents } from './models.chat.events';
 import { IssuesChatEvents } from './issues.chat.events';
 import { RisksChatEvents } from './risks.chat.events';
 import { NotificationsChatEvents } from './notifications.chat.events';
+import { CHAT_CHANNELS } from '../../constants/chat';
 
-export class ChatChannel {
+const getEventName = (teamspace: string, model: string, keys: string, event: string) => {
+	const eventName = [teamspace];
+
+	if (model) {
+		eventName.push(model);
+	}
+	if (!!keys) {
+		eventName.push(keys);
+	}
+
+	eventName.push(event);
+
+	return eventName.join('::');
+};
+
+export class Channel {
 	/**
 	 * This property contains the object to suscribe to the issues and comments for the issues notification events
 	 */
@@ -48,7 +63,7 @@ export class ChatChannel {
 	 */
 	public model: ModelChatEvents;
 
-	public 	notifications: NotificationsChatEvents;
+	public notifications: NotificationsChatEvents;
 
 	/**
 	 * This dictionary holds the callbacks for every event in the channel .
@@ -56,13 +71,18 @@ export class ChatChannel {
 	 */
 	private subscriptions: { [event: string]: Array<{ callback: (data: any) => void, context: object }> } = {};
 
-	constructor(private chatService: ChatService, private account: string, private modelStr: string) {
-		this.groups = new ChatEvents(this, 'group');
-		this.issues = new IssuesChatEvents(this);
-		this.risks = new RisksChatEvents(this);
-		this.model = new ModelChatEvents(this);
-		this.views = new ChatEvents(this, 'view');
-		this.notifications = new NotificationsChatEvents(this);
+	constructor(
+		private socket,
+		private teamspace: string,
+		private modelStr: string,
+		private onSubscribe: () => void
+	) {
+		this[CHAT_CHANNELS.GROUPS] = new ChatEvents(this, 'group');
+		this[CHAT_CHANNELS.ISSUES] = new IssuesChatEvents(this);
+		this[CHAT_CHANNELS.RISKS] = new RisksChatEvents(this);
+		this[CHAT_CHANNELS.MODEL] = new ModelChatEvents(this);
+		this[CHAT_CHANNELS.VIEWS] = new ChatEvents(this, 'view');
+		this[CHAT_CHANNELS.NOTIFICATIONS] = new NotificationsChatEvents(this);
 	}
 
 	/**
@@ -73,13 +93,12 @@ export class ChatChannel {
 	 * @param keys extra keys for suscribing to a particular entity events
 	 */
 	public subscribe(event: string, callback: (data: any) => void, context: any, keys = null) {
-		const eventFullName = this.chatService.getEventName(this.account, this.modelStr, keys, event);
+		const eventFullName = getEventName(this.teamspace, this.modelStr, keys, event);
 		if (!this.hasSubscriptions(eventFullName)) {
-			this.chatService.performSubscribe(this.account, this.modelStr, keys, event,
-				this.onEvent.bind(this, eventFullName));
+			this.performSubscribe(this.teamspace, this.modelStr, keys, event, this.onEvent.bind(this, eventFullName));
 		}
 
-		this.AddCallback(eventFullName, callback, context);
+		this.addCallback(eventFullName, callback, context);
 	}
 
 	/**
@@ -89,12 +108,12 @@ export class ChatChannel {
 	 * @param keys extra keys for unsuscribing to a particular entity events
 	 */
 	public unsubscribe(event: string, callback: (data: any) => void, keys = null) {
-		const eventFullName = this.chatService.getEventName(this.account, this.modelStr, keys, event);
+		const eventFullName = getEventName(this.teamspace, this.modelStr, keys, event);
 
 		this.removeCallBack(eventFullName, callback);
 
 		if (!this.hasSubscriptions(eventFullName)) {
-			this.chatService.performUnsubscribe(this.account, this.modelStr, keys, event);
+			this.performUnsubscribe(this.teamspace, this.modelStr, keys, event);
 		}
 	}
 
@@ -102,7 +121,7 @@ export class ChatChannel {
 		this.subscriptions[event].forEach((cb) => cb.callback.call(cb.context, data));
 	}
 
-	private AddCallback(event, callback, context): void {
+	private addCallback(event, callback, context): void {
 		if (!this.hasSubscriptions(event)) {
 			this.subscriptions[event] = [];
 		}
@@ -127,4 +146,13 @@ export class ChatChannel {
 		return (this.subscriptions[event] || []).length > 0;
 	}
 
+	private performSubscribe(teamspace: string, model: string, keys: any, event: any, callback: any) {
+		this.onSubscribe();
+		const eventName = getEventName(teamspace, model, keys, event);
+		this.socket.on(eventName, callback);
+	}
+
+	private performUnsubscribe(teamspace: string, model: string, keys: any, event: any) {
+		this.socket.off(getEventName(teamspace, model, keys, event));
+	}
 }

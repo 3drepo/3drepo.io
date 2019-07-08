@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,22 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import { ChatEvents } from './chat.events';
+import { Channel } from './channel';
 
-export const selectDialogDomain = (state) => Object.assign({}, state.dialog);
+export class RisksChatEvents extends ChatEvents {
+	private comments: { [id: string]: ChatEvents};
 
-export const selectIsOpen = createSelector(
-	selectDialogDomain, (state) => state.isOpen
-);
+	constructor(protected channel: Channel) {
+		super(channel, 'risk');
+		this.comments = {};
+	}
 
-export const selectDialogConfig = createSelector(
-	selectDialogDomain, (state) => state.config
-);
+	public getCommentsChatEvents(id: string): ChatEvents {
+		if (!this.comments[id]) {
+			this.comments[id] =  new ChatEvents(this.channel, 'comment', id);
+		}
 
-export const selectDialogData = createSelector(
-	selectDialogDomain, (state) => state.data
-);
+		return this.comments[id];
+	}
 
-export const selectMuteNotifications = createSelector(
-	selectDialogDomain, (state) => state.muteNotifications
-);
+}

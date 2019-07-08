@@ -15,25 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ChatChannel } from './chat.channel';
+import { Channel } from './channel';
 
-export class NotificationsChatEvents {
-	constructor(private channel: ChatChannel) {
+export class ModelChatEvents {
+	constructor(private channel: Channel) {
 	}
 
-	public subscribeToUpserted(callback: (data: any) => void, context: any) {
-		this.channel.subscribe('notificationUpserted', callback, context);
+	public subscribeToStatusChanged(callback: (data: any) => void, context: any) {
+		this.channel.subscribe('modelStatusChanged', callback, context);
 	}
 
-	public unsubscribeFromUpserted(callback: (data: any) => void) {
-		this.channel.unsubscribe('notificationUpserted', callback);
-	}
-
-	public subscribeToDeleted(callback: (data: any) => void, context: any) {
-		this.channel.subscribe('notificationDeleted', callback, context);
-	}
-
-	public unsubscribeFromDeleted(callback: (data: any) => void) {
-		this.channel.unsubscribe('notificationDeleted', callback);
+	public unsubscribeFromStatusChanged(callback: (data: any) => void) {
+		this.channel.unsubscribe('modelStatusChanged', callback);
 	}
 }

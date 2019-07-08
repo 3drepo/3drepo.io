@@ -12,6 +12,7 @@ interface IProps {
 }
 export const ErrorDialog = (props: IProps) => {
 	const { method, dataType, message, status } = props;
+
 	return (
 		<>
 			<DialogContent>

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ChatEvents } from './chat.events';
-import { ChatChannel } from './chat.channel';
+import styled from 'styled-components';
+import DialogActionsComponent from '@material-ui/core/DialogActions';
 
-export class IssuesChatEvents extends ChatEvents {
-	private comments: { [id: string]: ChatEvents};
-
-	constructor(protected channel: ChatChannel) {
-		super(channel, 'issue');
-		this.comments = {};
+export const DialogActions = styled(DialogActionsComponent)`
+	&& {
+		margin-left: 7px;
+		justify-content: space-between;
 	}
-
-	public getCommentsChatEvents(id: string): ChatEvents {
-		if (!this.comments[id]) {
-			this.comments[id] =  new ChatEvents(this.channel, 'comment', id);
-		}
-
-		return this.comments[id];
-	}
-
-}
+`;

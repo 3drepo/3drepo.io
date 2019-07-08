@@ -23,12 +23,16 @@ import {
 } from '../../routes/components/deleteAllNotificationsDialog/deleteAllNotificationsDialog.component';
 import { DialogActions } from '../dialog';
 import { NotificationsTypes, NotificationsActions, selectNotifications } from './index';
+import { selectCurrentUser } from '../currentUser';
+import { ChatActions } from '../chat';
+import { dispatch } from '../../helpers/migration';
+import { CHAT_CHANNELS } from '../../constants/chat';
 
 const getNotificationById = (notifications, id) => {
 	return notifications.find((n) => n._id === id );
 };
 
-export function* sendGetNotifications() {
+function* sendGetNotifications() {
 	try {
 		const { data } = yield API.getNotifications();
 		yield put(NotificationsActions.setNotifications(data));
@@ -37,7 +41,7 @@ export function* sendGetNotifications() {
 	}
 }
 
-export function* sendUpdateNotificationRead({ notificationId, read }) {
+function* sendUpdateNotificationRead({ notificationId, read }) {
 	try {
 		const notifications = yield select(selectNotifications);
 		const notification = yield getNotificationById(notifications, notificationId);
@@ -53,7 +57,7 @@ export function* sendUpdateNotificationRead({ notificationId, read }) {
 	}
 }
 
-export function* sendUpdateAllNotificationsRead({ read }) {
+function* sendUpdateAllNotificationsRead({ read }) {
 	try {
 		yield put(NotificationsActions.patchAllNotifications({read}));
 		yield API.patchAllNotifications({read});
@@ -62,7 +66,7 @@ export function* sendUpdateAllNotificationsRead({ read }) {
 	}
 }
 
-export function* sendDeleteNotification({ notificationId }) {
+function* sendDeleteNotification({ notificationId }) {
 	const notifications = yield select(selectNotifications);
 	const notification = yield getNotificationById(notifications, notificationId);
 	if (!notification) {
@@ -78,7 +82,7 @@ export function* sendDeleteNotification({ notificationId }) {
 	}
 }
 
-export function* sendDeleteAllNotifications() {
+function* sendDeleteAllNotifications() {
 	const notifications = yield select(selectNotifications);
 
 	try {
@@ -91,7 +95,7 @@ export function* sendDeleteAllNotifications() {
 	}
 }
 
-export function* confirmSendDeleteAllNotifications() {
+function* confirmSendDeleteAllNotifications() {
 	const config = {
 		title: 'Delete All Notifications',
 		template: DeleteAllNotificationsDialog ,
@@ -101,8 +105,28 @@ export function* confirmSendDeleteAllNotifications() {
 	yield put(DialogActions.showDialog(config));
 }
 
-export function* showUpdatedFailedError({ errorMessage }) {
+function* showUpdatedFailedError({ errorMessage }) {
 	yield put(DialogActions.showErrorDialog('update', 'model', errorMessage));
+}
+
+const onUpserted = (notification) => dispatch(NotificationsActions.upsertNotification(notification));
+
+const onDeleted = (notification) => dispatch(NotificationsActions.deleteNotification(notification));
+
+function* subscribeOnChanges() {
+	const currentUser = yield select(selectCurrentUser);
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.NOTIFICATIONS, currentUser.username, '', {
+		subscribeToUpserted: onUpserted,
+		subscribeToDeleted: onDeleted
+	}));
+}
+
+function* unsubscribeFromChanges() {
+	const currentUser = yield select(selectCurrentUser);
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.NOTIFICATIONS, currentUser.username, '', {
+		unsubscribeFromUpserted: onUpserted,
+		unsubscribeFromDeleted: onDeleted
+	}));
 }
 
 export default function* NotificationsSaga() {
@@ -113,4 +137,6 @@ export default function* NotificationsSaga() {
 	yield takeLatest(NotificationsTypes.SEND_DELETE_ALL_NOTIFICATIONS, sendDeleteAllNotifications);
 	yield takeLatest(NotificationsTypes.CONFIRM_SEND_DELETE_ALL_NOTIFICATIONS, confirmSendDeleteAllNotifications);
 	yield takeLatest(NotificationsTypes.SHOW_UPDATED_FAILED_ERROR, showUpdatedFailedError);
+	yield takeLatest(NotificationsTypes.SUBSCRIBE_ON_CHANGES, subscribeOnChanges);
+	yield takeLatest(NotificationsTypes.UNSUBSCRIBE_FROM_CHANGES, unsubscribeFromChanges);
 }

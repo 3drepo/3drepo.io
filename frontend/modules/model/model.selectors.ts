@@ -43,6 +43,10 @@ export const selectCurrentModel = createSelector(
 	selectSettings, (state) => state.model
 );
 
+export const selectCurrentModelName = createSelector(
+	selectSettings, (state) => state.name
+);
+
 export const selectMetaKeys = createSelector(
 	selectModelDomain, (state) => state.metaKeys
 );

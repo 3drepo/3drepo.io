@@ -31,7 +31,6 @@ export function* login({ username, password }) {
 
 	try {
 		const { data: { flags }} = yield API.login(username, password);
-
 		if (flags && flags.termsPrompt) {
 			yield put(DialogActions.showDialog({
 				title: 'Terms and Privacy Policy Update',

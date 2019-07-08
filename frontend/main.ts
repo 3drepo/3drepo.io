@@ -6,7 +6,6 @@ import 'angular-material';
 import 'angular-sanitize';
 import 'angular-aria';
 import 'angular-recaptcha';
-import * as io from 'socket.io-client';
 import 'simplebar';
 import 'ngclipboard';
 
@@ -27,7 +26,6 @@ import { Pin } from './globals/pin';
 import { Viewer } from './globals/viewer';
 import { TDR } from './components/init';
 
-window.io = io;
 window.UnityUtil = UnityUtil;
 window.Viewer = Viewer;
 window.Pin = Pin;
