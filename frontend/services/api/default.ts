@@ -4,6 +4,9 @@ import { memoize } from 'lodash';
 
 import { AuthActions } from '../../modules/auth';
 import { dispatch } from '../../modules/store';
+import { DialogActions } from '../../modules/dialog';
+import { push } from 'connected-react-router';
+import { ROUTES } from '../../constants/routes';
 
 axios.defaults.withCredentials = true;
 
@@ -13,12 +16,11 @@ axios.interceptors.response.use(
 		try {
 			const invalidMessages = ['Authentication error', 'You are not logged in'] as any;
 
-			switch (error.status) {
+			switch (error.response.status) {
 				case 401:
-					if (error.data) {
-						const notLogin = error.data.place !== 'GET /login';
-						const unauthorized = error.status === 401 &&
-							invalidMessages.includes(error.data.message);
+					if (error.response.data) {
+						const notLogin = error.response.data.place !== 'GET /login';
+						const unauthorized = invalidMessages.includes(error.response.data.message);
 
 						const sessionHasExpired = unauthorized && notLogin;
 
@@ -27,13 +29,18 @@ axios.interceptors.response.use(
 						} else {
 							throw error.response;
 						}
-
-						error.response.handled = true;
+						error.handled = true;
 					}
 					break;
 				case 403:
-					console.log('403 ERROR');
-					error.response.handled = true;
+					dispatch(DialogActions.showDialog({
+						title: 'Forbidden',
+						content: 'No access',
+						onCancel: () => {
+							dispatch(push(ROUTES.TEAMSPACES));
+						}
+					}));
+					error.handled = true;
 					break;
 				default:
 					break;
