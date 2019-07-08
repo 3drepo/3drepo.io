@@ -106,3 +106,9 @@ export const ButtonContainer = styled.div`
 	justify-content: flex-end;
 	margin: 12px 0 24px;
 `;
+
+export const TermsLabel = styled.div``;
+
+export const TermLink = styled.a`
+	color: ${COLOR.PRIMARY_MAIN};
+`;

@@ -13,6 +13,14 @@ export const STATIC_ROUTES = getStaticRoutes() as any;
 
 export const STATIC_ROUTES_PATHS = STATIC_ROUTES.map(({ path }) => path) as any;
 
+const getPage = (pageName) => STATIC_ROUTES.find((route) => route.page === pageName);
+
+export const TERMS_PAGE = getPage('terms');
+
+export const PRIVACY_PAGE = getPage('privacy');
+
+export const COOKIES_PAGE = getPage('cookies');
+
 export const isStaticRoute = (path) => STATIC_ROUTES_PATHS.includes(path);
 
 export const getStaticFile = (filePath) => axios.get(`/templates/${filePath}`);

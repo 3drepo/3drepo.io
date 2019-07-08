@@ -37,10 +37,13 @@ import {
 	Headline,
 	StyledGrid,
 	StyledFormControl,
-	ButtonContainer
+	ButtonContainer,
+	TermsLabel,
+	TermLink
 } from './signUp.styles';
 import { FieldsRow, StyledTextField } from '../profile/profile.styles';
 import { SelectField } from '../components/selectField/selectField.component';
+import { STATIC_ROUTES, TERMS_PAGE, COOKIES_PAGE, PRIVACY_PAGE } from '../../services/staticPages';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -160,6 +163,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const {isPending} = this.props;
+
 		return (
 			<Container
 				container
@@ -304,7 +308,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											value={field.value ? '1' : '0'}
 											disabled={isPending}
 											control={<Checkbox color="secondary" checked={field.value} />}
-											label="I agree to the Terms & Conditions and I have read the Privacy policy and the Cookies policy."
+											label={this.termsLabel}
 										/>
 									)}
 								/>
@@ -324,6 +328,16 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 					</Panel>
 				</StyledGrid>
 			</Container>
+		);
+	}
+
+	private get termsLabel() {
+		return (
+			<TermsLabel>
+				I agree to the <TermLink href={TERMS_PAGE.path} target="_blank">{TERMS_PAGE.title}</TermLink>&nbsp;
+				and I have read the <TermLink href={PRIVACY_PAGE.path} target="_blank">{PRIVACY_PAGE.title}</TermLink> policy
+				and the <TermLink href={COOKIES_PAGE.path} target="_blank">{COOKIES_PAGE.title}</TermLink> policy.
+			</TermsLabel>
 		);
 	}
 }

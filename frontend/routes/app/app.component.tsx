@@ -176,7 +176,7 @@ export class App extends React.PureComponent<IProps, IState> {
 		}
 
 		history.push(path);
-	};
+	}
 
 	public handleAutoLogout = () => {
 		const { isAuthenticated, logout, history } = this.props;
