@@ -1,6 +1,4 @@
-/**
- *	Copyright (C) 2019 3D Repo Ltd
- *
+/*
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU Affero General Public License as
  *	published by the Free Software Foundation, either version 3 of the
@@ -58,8 +56,14 @@ const createFoldersIfNecessary = (foldersPath) => {
 
 class FSHandler {
 	constructor() {
-		if (config.fs && config.fs.path && config.fs.levels) {
-			this.testFilesystem();
+		if (config.fs) {
+			if (config.fs.path && config.fs.levels) {
+				this.testFilesystem();
+			} else {
+				const err = "fs entry found in config, but cannot find path/levels entry";
+				systemLogger.logError(err);
+				throw new Error(err);
+			}
 		}
 	}
 
