@@ -14,35 +14,52 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { get, omit } from 'lodash';
 import { getAPIUrl } from '../services/api';
 import { STATUSES_COLOURS, STATUSES_ICONS, STATUSES } from '../constants/issues';
 import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
-import { sortByDate } from './sorting';
+
+const renameFieldIfExists = (issue, fieldName, newFieldName) => {
+	if (issue[fieldName]) {
+		issue[newFieldName] = issue[fieldName];
+	}
+};
 
 export const prepareIssue = (issue, jobs = []) => {
-	const thumbnail = getAPIUrl(issue.thumbnail);
+	const preparedIssue = {...issue};
+	if (issue.thumbnail) {
+		const thumbnail = getAPIUrl(issue.thumbnail);
+		preparedIssue.thumbnail = thumbnail;
+	}
+
 	const descriptionThumbnail = issue.viewpoint && issue.viewpoint.screenshot
 		? getAPIUrl(issue.viewpoint.screenshot)
 		: (issue.descriptionThumbnail || '');
-	const { Icon, color } = this.getStatusIcon(issue.priority, issue.status);
-	const roleColor = get(jobs.find((job) => job.name === get(issue.assigned_roles, '[0]')), 'color');
 
-	return {
-		...issue,
-		defaultHidden: issue.status === STATUSES.CLOSED,
-		name: issue.name,
-		description: issue.desc,
-		author: issue.owner,
-		createdDate: issue.created,
-		thumbnail,
-		descriptionThumbnail,
-		StatusIconComponent: Icon,
-		statusColor: color,
-		roleColor,
-		comments: issue.comments || []
-	};
+	if (descriptionThumbnail) {
+		preparedIssue.descriptionThumbnail = descriptionThumbnail;
+	}
+
+	if (issue.priority && issue.status) {
+		const { Icon, color } = this.getStatusIcon(issue.priority, issue.status);
+		preparedIssue.StatusIconComponent = Icon;
+		preparedIssue.statusColor = color;
+	}
+
+	if (issue.assigned_roles) {
+		const assignedJob = jobs.find((job) => job.name === (issue.assigned_roles || [])[0]);
+		const roleColor = (assignedJob || {}).color;
+		preparedIssue.roleColor = roleColor;
+	}
+
+	if (issue.status) {
+		preparedIssue.defaultHidden = issue.status === STATUSES.CLOSED;
+	}
+
+	renameFieldIfExists(issue, 'desc', 'description');
+	renameFieldIfExists(issue, 'owner', 'author');
+	renameFieldIfExists(issue, 'created', 'createdDate');
+
+	return preparedIssue;
 };
 
 export const getStatusIcon = (priority, status) => {

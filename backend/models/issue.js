@@ -536,9 +536,11 @@ issue.update = async function(dbCol, issueId, data) {
 	await issues.update({_id}, {$set: data});
 
 	// 7. Return the updated data and the old issue
+	const newIssue = clean(dbCol,{...oldIssue, ...data});
 	oldIssue = clean(dbCol, oldIssue);
-	const newIssue = {...oldIssue, ...data};
-	ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, newIssue._id, newIssue);
+
+	delete data.comments;
+	ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, newIssue._id, data);
 
 	return {oldIssue, newIssue};
 };

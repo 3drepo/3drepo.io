@@ -540,7 +540,12 @@ export function* toggleShowPins({ showPins }) {
 
 const onUpdateEvent = (updatedIssue) => {
 	const jobs = selectJobsList(getState());
+	if (updatedIssue.comments) {
+		updatedIssue.comments = prepareComments(updatedIssue.comments);
+	}
+
 	if (updatedIssue.status === STATUSES.CLOSED) {
+
 		dispatch(IssuesActions.showCloseInfo(updatedIssue._id));
 		setTimeout(() => {
 			dispatch(IssuesActions.saveIssueSuccess(prepareIssue(updatedIssue, jobs)));
