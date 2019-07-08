@@ -167,6 +167,8 @@
 		INVALID_ROLE: { message: "Invalid role name", status: 400 },
 		ALREADY_IN_ROLE: { message: "User already assigned with this role", status: 400 },
 
+		RESOURCE_NOT_ATTACHED: { message: "The resource is not attached to that particular entity", status: 400},
+
 		EMAIL_EXISTS: { message: "Email already exists", status: 400 },
 		COLLABORATOR_LIMIT_EXCEEDED: { message: "You do not have enough quota to add an extra collaborator", status: 400 },
 

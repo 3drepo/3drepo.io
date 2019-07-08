@@ -51,5 +51,23 @@ module.exports = {
 
 		chatEvent.commentDeleted (sessionId, account, model, _id, comment);
 		next();
+	},
+
+	onResourcesCreated: function(req, res, next) {
+		const sessionId = req.headers[C.HEADER_SOCKET_ID];
+		const {account, model} = req.params;
+		const resource = req.dataModel;
+
+		chatEvent.resourcesCreated(sessionId, account, model, resource);
+		next();
+	},
+
+	onResourceDeleted: function(req, res, next) {
+		const sessionId = req.headers[C.HEADER_SOCKET_ID];
+		const {account, model} = req.params;
+		const resource = req.dataModel;
+
+		chatEvent.resourceDeleted(sessionId, account, model, resource);
+		next();
 	}
 };

@@ -25,8 +25,10 @@ const ModelSetting = require("./modelSetting");
 const History = require("./history");
 const Ref = require("./ref");
 const _ = require("lodash");
+const FileRef = require("./fileRef");
 
 const ChatEvent = require("./chatEvent");
+const config = require("../config.js");
 
 const systemLogger = require("../logger.js").systemLogger;
 const Comment = require("./comment");
@@ -39,6 +41,8 @@ const View = require("./viewpoint");
 const C = require("../constants");
 
 const issue = {};
+
+const extensionRe = /\.(\w+)$/;
 
 const fieldTypes = {
 	"_id": "[object Object]",
@@ -692,31 +696,43 @@ issue.findByUID = async function(dbCol, uid, projection, noClean = false) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	return ModelSetting.findById(dbCol, dbCol.model).then((settings) => {
-		return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
-			return _dbCol.findOne({ _id: uid }, projection).then((foundIssue) => {
+	const settings = await ModelSetting.findById(dbCol, dbCol.model);
+	const issues = await db.getCollection(dbCol.account, dbCol.model + ".issues");
+	let foundIssue = await issues.findOne({ _id: uid }, projection);
 
-				if (!foundIssue) {
-					return Promise.reject(responseCodes.ISSUE_NOT_FOUND);
-				}
+	if (!foundIssue) {
+		return Promise.reject(responseCodes.ISSUE_NOT_FOUND);
+	}
 
-				if (!foundIssue.typePrefix) {
-					foundIssue.typePrefix = (settings.type) ? settings.type : "";
-				}
+	if(foundIssue.refs) {
+		const refsColl = await db.getCollection(dbCol.account, dbCol.model + ".resources.ref");
+		const resources = await refsColl.find({ _id: { $in: foundIssue.refs } }, {name:1, size: 1, createdAt: 1, link: 1, type: 1}).toArray();
+		resources.forEach(r => {
+			if(r.type !== "http") {
+				delete r.link;
+			}
 
-				if (!foundIssue.modelCode) {
-					foundIssue.modelCode = (settings.properties && settings.properties.code) ?
-						settings.properties.code : "";
-				}
-
-				if (!noClean) {
-					foundIssue = clean(dbCol, foundIssue);
-				}
-
-				return foundIssue;
-			});
+			delete r.type;
 		});
-	});
+
+		foundIssue.resources = resources;
+		delete foundIssue.refs;
+	}
+
+	if (!foundIssue.typePrefix) {
+		foundIssue.typePrefix = (settings.type) ? settings.type : "";
+	}
+
+	if (!foundIssue.modelCode) {
+		foundIssue.modelCode = (settings.properties && settings.properties.code) ?
+			settings.properties.code : "";
+	}
+
+	if (!noClean) {
+		foundIssue = clean(dbCol, foundIssue);
+	}
+
+	return foundIssue;
 };
 
 issue.getScreenshot = function(dbCol, uid, vid) {
@@ -911,6 +927,92 @@ issue.isStatusChange =  function (oldIssue, newIssue) {
 		return false;
 	}
 	return oldIssue.status !== newIssue.status;
+};
+
+issue.addRefsToIssue = async function(account, model, issueId, username, sessionId, refs) {
+	if (refs.length === 0) {
+		return [];
+	}
+
+	const issues = await db.getCollection(account, model + ".issues");
+	const issueQuery = {_id: utils.stringToUUID(issueId)};
+	const issueFound = await issues.findOne(issueQuery);
+
+	if (!issueFound) {
+		throw responseCodes.ISSUE_NOT_FOUND;
+	}
+
+	const comments = issueFound.comments || [];
+
+	const ref_ids = [];
+
+	refs.forEach(ref => {
+		comments.push(addSystemComment(account, model, sessionId, issueId, username, "resource", null, ref.name));
+		ref_ids.push(ref._id);
+	});
+
+	await issues.update(issueQuery, { $set: {comments}, $push: {refs:  {$each: ref_ids}}});
+	return refs;
+};
+
+issue.attachResourceFiles = async function(account, model, issueId, username, sessionId, resourceNames, files) {
+	const quota = await User.getQuotaInfo(account);
+	const spaceLeft = ((quota.spaceLimit === null || quota.spaceLimit === undefined ? Infinity : quota.spaceLimit) - quota.spaceUsed) * 1024 * 1024;
+	const spaceToBeUsed = files.reduce((size, file) => size + file.size,0);
+
+	if (spaceLeft < spaceToBeUsed) {
+		throw responseCodes.SIZE_LIMIT_PAY;
+	}
+
+	if (!files.every(f => f.size < config.resourceUploadSizeLimit)) {
+		throw responseCodes.SIZE_LIMIT;
+	}
+
+	const refsPromises = files.map((file,i) => {
+		const extension = ((file.originalname.match(extensionRe) || [])[0] || "").toLowerCase();
+		return FileRef.storeFileAsResource(account, model, username, resourceNames[i] + extension, file.buffer, {issueIds:[issueId]});
+	});
+	const refs = await Promise.all(refsPromises);
+	refs.forEach(r => {
+		delete r.link;
+		delete r.type;
+	});
+
+	await this.addRefsToIssue(account, model, issueId, username, sessionId, refs);
+	return refs;
+};
+
+issue.attachResourceUrls = async function(account, model, issueId, username, sessionId, resourceNames, urls) {
+	const refsPromises = urls.map((url, index) =>  FileRef.storeUrlAsResource(account, model, username,resourceNames[index], url,{issueIds:[issueId]}));
+	const refs = await Promise.all(refsPromises);
+	refs.forEach(r => {
+		delete r.type;
+	});
+
+	await this.addRefsToIssue(account, model, issueId, username, sessionId, refs);
+	return refs;
+};
+
+issue.detachResource =  async function(account, model, issueId, resourceId, username, sessionId) {
+	const ref = await FileRef.removeResourceFromIssue(account, model, issueId, resourceId);
+	const issues = await db.getCollection(account, model + ".issues");
+	const issueQuery = {_id: utils.stringToUUID(issueId)};
+	const issueFound = await issues.findOne(issueQuery);
+
+	if (!issueFound) {
+		throw responseCodes.ISSUE_NOT_FOUND;
+	}
+
+	const comments = issueFound.comments;
+	comments.push(await addSystemComment(account, model, sessionId, issueId, username, "resource", ref.name, null));
+	await issues.update(issueQuery, {$set: {comments}, $pull: { refs: resourceId } });
+
+	if(ref.type !== "http") {
+		delete ref.link;
+	}
+	delete ref.type;
+
+	return ref;
 };
 
 module.exports = issue;

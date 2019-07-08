@@ -16,13 +16,14 @@
  */
 
 import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
-
+import { differenceBy, isEmpty, omit, pick, map, groupBy } from 'lodash';
+import * as filesize from 'filesize';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
 import { prepareIssue } from '../../helpers/issues';
-import { prepareComments, prepareComment } from '../../helpers/comments';
+import { prepareComments, prepareComment, createAttachResourceComments,
+	createRemoveResourceComment } from '../../helpers/comments';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
 import { PRIORITIES, STATUSES, DEFAULT_PROPERTIES } from '../../constants/issues';
@@ -30,7 +31,7 @@ import { PIN_COLORS } from '../../styles';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { selectJobsList, selectMyJob } from '../jobs';
-import { selectCurrentUser } from '../currentUser';
+import { selectCurrentUser, selectCurrentTeamspace } from '../currentUser';
 import {
 	selectActiveIssueId,
 	selectIssues,
@@ -41,7 +42,9 @@ import {
 } from './issues.selectors';
 import { IssuesTypes, IssuesActions } from './issues.redux';
 import { NEW_PIN_ID } from '../../constants/viewer';
-import { selectTopicTypes } from '../model';
+import { selectTopicTypes, selectCurrentModel, selectCurrentModelTeamspace } from '../model';
+import { prepareResources } from '../../helpers/resources';
+import { EXTENSION_RE } from '../../constants/resources';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -65,6 +68,7 @@ export function* fetchIssue({teamspace, modelId, issueId}) {
 	try {
 		const {data} = yield API.getIssue(teamspace, modelId, issueId);
 		data.comments = yield prepareComments(data.comments);
+		data.resources = prepareResources(teamspace, modelId, data.resources);
 		yield put(IssuesActions.fetchIssueSuccess(data));
 	} catch (error) {
 		yield put(IssuesActions.fetchIssueFailure());
@@ -556,26 +560,58 @@ const onCreateEvent = (createdIssue) => {
 	dispatch(IssuesActions.saveIssueSuccess(prepareIssue(createdIssue[0], jobs)));
 };
 
+const onResourcesCreated = (resources) => {
+	resources = resources.filter((r) => r.issueIds );
+	if (!resources.length) {
+		return;
+	}
+	const currentState = getState();
+	const teamspace = selectCurrentTeamspace(currentState);
+	const model = selectCurrentModel(currentState);
+	const issueId =  resources[0].issueIds[0];
+	dispatch(IssuesActions.attachResourcesSuccess(prepareResources(teamspace, model, resources), issueId));
+};
+
+const onResourceDeleted = (resource) => {
+	if (!resource.issueIds) {
+		return;
+	}
+
+	dispatch(IssuesActions.removeResourceSuccess(resource, resource.issueIds[0]));
+};
+
 const getIssuesChannel = (teamspace, modelId) => {
 	const ChatService = getAngularService('ChatService') as any;
 	return ChatService.getChannel(teamspace, modelId).issues;
 };
 
+const getResourcesChannel = (teamspace, modelId) => {
+	const ChatService = getAngularService('ChatService') as any;
+	return ChatService.getChannel(teamspace, modelId).resources;
+};
+
 export function* subscribeOnIssueChanges({ teamspace, modelId }) {
-	const issuesNotifications = getIssuesChannel(teamspace, modelId);
-	issuesNotifications.subscribeToUpdated(onUpdateEvent, this);
-	issuesNotifications.subscribeToCreated(onCreateEvent, this);
+	const issuesChatEvents = getIssuesChannel(teamspace, modelId);
+	issuesChatEvents.subscribeToUpdated(onUpdateEvent, this);
+	issuesChatEvents.subscribeToCreated(onCreateEvent, this);
+	const resourcesChatEvents = getResourcesChannel(teamspace, modelId);
+	resourcesChatEvents.subscribeToCreated(onResourcesCreated, this);
+	resourcesChatEvents.subscribeToDeleted(onResourceDeleted, this);
 }
 
 export function* unsubscribeOnIssueChanges({ teamspace, modelId }) {
-	const issuesNotifications = getIssuesChannel(teamspace, modelId);
-	issuesNotifications.unsubscribeFromUpdated(onUpdateEvent);
-	issuesNotifications.unsubscribeFromCreated(onCreateEvent);
+	const issuesChatEvents = getIssuesChannel(teamspace, modelId);
+	issuesChatEvents.unsubscribeFromUpdated(onUpdateEvent);
+	issuesChatEvents.unsubscribeFromCreated(onCreateEvent);
+
+	const resourcesChatEvents = getResourcesChannel(teamspace, modelId);
+	resourcesChatEvents.unsubscribeFromCreated(onResourcesCreated);
+	resourcesChatEvents.unsubscribeFromDeleted(onResourceDeleted);
 }
 
 const getCommentsChannel = (teamspace, modelId, issueId) => {
-	const issuesNotifications = getIssuesChannel(teamspace, modelId);
-	return issuesNotifications.getCommentsChatEvents(issueId);
+	const issuesCommentsChatevents = getIssuesChannel(teamspace, modelId);
+	return issuesCommentsChatevents.getCommentsChatEvents(issueId);
 };
 
 const onUpdateCommentEvent = (updatedComment) => {
@@ -595,17 +631,17 @@ const onDeleteCommentEvent = (deletedComment) => {
 };
 
 export function* subscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
-	const commentsNotifications = getCommentsChannel(teamspace, modelId, issueId);
-	commentsNotifications.subscribeToCreated(onCreateCommentEvent, this);
-	commentsNotifications.subscribeToUpdated(onUpdateCommentEvent, this);
-	commentsNotifications.subscribeToDeleted(onDeleteCommentEvent, this);
+	const commentsChatEvents = getCommentsChannel(teamspace, modelId, issueId);
+	commentsChatEvents.subscribeToCreated(onCreateCommentEvent, this);
+	commentsChatEvents.subscribeToUpdated(onUpdateCommentEvent, this);
+	commentsChatEvents.subscribeToDeleted(onDeleteCommentEvent, this);
 }
 
 export function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
-	const commentsNotifications = getCommentsChannel(teamspace, modelId, issueId);
-	commentsNotifications.unsubscribeFromCreated(onCreateCommentEvent, this);
-	commentsNotifications.unsubscribeFromUpdated(onUpdateCommentEvent, this);
-	commentsNotifications.unsubscribeFromDeleted(onDeleteCommentEvent, this);
+	const commentsChatEvents = getCommentsChannel(teamspace, modelId, issueId);
+	commentsChatEvents.unsubscribeFromCreated(onCreateCommentEvent, this);
+	commentsChatEvents.unsubscribeFromUpdated(onUpdateCommentEvent, this);
+	commentsChatEvents.unsubscribeFromDeleted(onDeleteCommentEvent, this);
 }
 
 export function* setNewIssue() {
@@ -661,6 +697,89 @@ export function* toggleSubmodelsIssues({ showSubmodelIssues }) {
 	}
 }
 
+export function* removeResource({ resource }) {
+	try {
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const issueId = (yield select(selectActiveIssueDetails))._id;
+		const model  = yield select(selectCurrentModel);
+		const username = (yield select(selectCurrentUser)).username;
+
+		yield API.removeResource(teamspace, model, issueId, resource._id);
+		yield put(IssuesActions.removeResourceSuccess(resource, issueId));
+		yield put(IssuesActions.createCommentSuccess(createRemoveResourceComment(username, resource), issueId));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'resource', error));
+	}
+}
+
+export function* attachFileResources({ files }) {
+	const names =  files.map((file) => file.name);
+	files = files.map((file) => file.file);
+
+	const timeStamp = Date.now();
+
+	const tempResources = files.map((f, i) => (
+		{
+			_id: timeStamp + i,
+			name: names[i] + (f.name.match(EXTENSION_RE) || ['', ''])[0].toLowerCase(),
+			uploading: true,
+			progress: 0,
+			size: 0,
+			originalSize: f.size
+		})
+		);
+
+	const resourceIds = tempResources.map((resource) => resource._id);
+	const teamspace = yield select(selectCurrentModelTeamspace);
+	const issueId = (yield select(selectActiveIssueDetails))._id;
+
+	try {
+		const model  = yield select(selectCurrentModel);
+		const username = (yield select(selectCurrentUser)).username;
+
+		yield put(IssuesActions.attachResourcesSuccess( prepareResources(teamspace, model, tempResources), issueId));
+
+		const { data } = yield API.attachFileResources(teamspace, model, issueId, names, files, (progress) => {
+			const updates = tempResources.map((r) => (
+				{
+					progress: progress * 100,
+					size : filesize(r.originalSize * progress, {round: 0}).replace(' ', '')
+				}
+				));
+
+			dispatch(IssuesActions.updateResourcesSuccess(resourceIds, updates, issueId));
+		});
+
+		const resources = prepareResources(teamspace, model, data, { uploading: false});
+
+		yield put(IssuesActions.updateResourcesSuccess(resourceIds, resources, issueId));
+		yield put(IssuesActions.createCommentsSuccess(createAttachResourceComments(username, data), issueId));
+	} catch (error) {
+		for (let i = 0; i < resourceIds.length; ++i) {
+			yield put(IssuesActions.removeResourceSuccess({_id: resourceIds[i]}, issueId));
+		}
+		yield put(DialogActions.showEndpointErrorDialog('attach', 'resource', error));
+	}
+}
+
+export function* attachLinkResources({ links }) {
+	try {
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const issueId = (yield select(selectActiveIssueDetails))._id;
+		const model = yield select(selectCurrentModel);
+		const names = links.map((link) => link.name);
+		const urls = links.map((link) => link.link);
+		const username = (yield select(selectCurrentUser)).username;
+
+		const {data} = yield API.attachLinkResources(teamspace, model, issueId, names, urls);
+		const resources = prepareResources(teamspace, model, data);
+		yield put(IssuesActions.attachResourcesSuccess(resources, issueId));
+		yield put(IssuesActions.createCommentsSuccess(createAttachResourceComments(username, data), issueId));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'resource', error));
+	}
+}
+
 export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
 	yield takeLatest(IssuesTypes.FETCH_ISSUE, fetchIssue);
@@ -686,4 +805,7 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.UPDATE_NEW_ISSUE, updateNewIssue);
 	yield takeLatest(IssuesTypes.SET_FILTERS, setFilters);
 	yield takeLatest(IssuesTypes.TOGGLE_SUBMODELS_ISSUES, toggleSubmodelsIssues);
+	yield takeLatest(IssuesTypes.REMOVE_RESOURCE, removeResource);
+	yield takeLatest(IssuesTypes.ATTACH_FILE_RESOURCES, attachFileResources);
+	yield takeLatest(IssuesTypes.ATTACH_LINK_RESOURCES, attachLinkResources);
 }

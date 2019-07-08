@@ -82,8 +82,10 @@ module.exports = {
 		bucketName: "3drepo-travis"
 	},
 	fs: {
-		path: require("path").resolve(__dirname, '../../submodules/tests/backend/files/')
+		path: require("path").resolve(__dirname, '../../submodules/tests/backend/files/'),
+		levels: 2
 	},
+	defaultStorage: "fs",
 	tokenExpiry: {
 		emailVerify: 336,
 		forgotPassword: 24

@@ -22,15 +22,63 @@ const fs = require("fs");
 const path = require("path");
 const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger.js").systemLogger;
+const nodeuuid = require("node-uuid");
+const farmhash = require("farmhash");
+
+const generateFoldernames = (fileName, dirLevels) => {
+	const folders = [];
+	const minChunkLen = 4;
+	const nameChunkLen = Math.max(fileName.length / dirLevels, minChunkLen);
+
+	for(let i = 0 ; i < dirLevels; i++) {
+		const chunkStart = (i * nameChunkLen) % fileName.length;
+		const fileNameHash = farmhash.fingerprint32(fileName.substr(chunkStart,nameChunkLen) + Math.random());
+		folders.push(fileNameHash & 255);
+	}
+	return folders.join("/");
+};
+
+const createFoldersIfNecessary = (foldersPath) => {
+	return new Promise((resolve, reject) => {
+		fs.access(foldersPath, fs.constants.F_OK, (err) => {
+			if (!err) {
+				resolve();
+			} else {
+				fs.mkdir(foldersPath, { recursive: true},(creationErr)=>{
+					if (creationErr) {
+						reject(creationErr);
+					} else {
+						resolve();
+					}
+				});
+			}
+		});
+	});
+};
 
 class FSHandler {
 	constructor() {
-		if (config.fs && config.fs.path) {
+		if (config.fs && config.fs.path && config.fs.levels) {
 			this.testFilesystem();
-		} else {
-			systemLogger.logError("Filesystem is not configured.");
-			throw new Error("Filesystem is not configured");
 		}
+	}
+
+	storeFile(data) {
+		const _id = nodeuuid.v4();
+		const folderNames = generateFoldernames(_id, config.fs.levels);
+		const link = folderNames + "/" + _id;
+
+		return new Promise((resolve, reject) => {
+			createFoldersIfNecessary(this.getFullPath(folderNames)).then(() =>{
+				fs.writeFile(this.getFullPath(link), data ,(err=> {
+					if (err) {
+						reject(err);
+					} else {
+						resolve({_id, link, size:data.length, type: "fs"});
+					}
+				}));
+			});
+		});
 	}
 
 	getFileStream(key) {

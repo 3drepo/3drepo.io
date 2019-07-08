@@ -19,7 +19,8 @@ import * as React from 'react';
 import { Viewer } from '../../../../services/viewer/viewer';
 import { VIEWER_EVENTS, NEW_PIN_ID } from '../../../../constants/viewer';
 import { PIN_COLORS } from '../../../../styles';
-import { PinIcon, LabelButton, Container } from './pinButton.styles';
+import { PinIcon, Container } from './pinButton.styles';
+import { LabelButton } from '../labelButton/labelButton.styles';
 
 interface IProps {
 	onChange: (pin) => void;
