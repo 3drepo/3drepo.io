@@ -107,8 +107,6 @@ export const ButtonContainer = styled.div`
 	margin: 12px 0 24px;
 `;
 
-export const TermsLabel = styled.div``;
-
 export const TermLink = styled.a`
 	color: ${COLOR.PRIMARY_MAIN};
 `;
