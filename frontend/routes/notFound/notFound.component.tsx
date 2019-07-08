@@ -18,6 +18,7 @@
 import { ROUTES } from '../../constants/routes';
 
 interface IProps {
+	location: any;
 	history: {
 		push: (routeName) => void;
 	};
@@ -25,12 +26,14 @@ interface IProps {
 }
 
 export const NotFound = (props: IProps) => {
-	props.showDialog({
-		title: 'Wrong url',
-		content: 'Test message',
-		onCancel: () => {
-			props.history.push(ROUTES.TEAMSPACES);
-		}
-	});
+	if (props.location.pathname !== ROUTES.HOME) {
+		props.showDialog({
+			title: 'Wrong url',
+			content: 'Test message',
+			onCancel: () => {
+				props.history.push(ROUTES.TEAMSPACES);
+			}
+		});
+	}
 	return null;
 };
