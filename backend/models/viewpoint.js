@@ -118,7 +118,7 @@ view.setViewpointScreenshot = function(dbCol, viewpoint) {
 	viewpoint.screenshot = dbCol.account + "/" + dbCol.model + "/" + dbCol.colName + "/" + id + "/viewpoints/" + viewpointId + "/screenshot.png";
 	viewpoint.screenshotSmall = dbCol.account + "/" + dbCol.model + "/" + dbCol.colName + "/" + id + "/viewpoints/" + viewpointId + "/screenshotSmall.png";
 	return viewpoint;
-}
+};
 
 view.getThumbnail = function (dbColOptions, uid) {
 

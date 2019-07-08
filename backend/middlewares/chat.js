@@ -36,7 +36,7 @@ module.exports = {
 		const comment = req.dataModel;
 		const account = req.params.account;
 		const model = req.params.model;
-		const _id = req.params.issueId;
+		const _id = req.params.issueId || req.params.rid;
 
 		chatEvent.newComment(sessionId, account, model, _id, comment);
 		next();
@@ -47,7 +47,7 @@ module.exports = {
 		const comment = req.dataModel;
 		const account = req.params.account;
 		const model = req.params.model;
-		const _id = req.params.issueId;
+		const _id = req.params.issueId || req.params.rid;
 
 		chatEvent.commentDeleted (sessionId, account, model, _id, comment);
 		next();

@@ -154,9 +154,50 @@ const addComment = async function(account, model, colName, id, user, data) {
 	return {...comment, viewpoint, guid: utils.uuidToString(comment.guid)};
 };
 
+const deleteComment =  async function(account, model, colName, id, guid, user) {
+	// 1. Fetch comments
+	const _id = utils.stringToUUID(id) ;
+	const col = await db.getCollection(account, model + "." + colName);
+	const items = await col.find({ _id }, {comments: 1}).toArray();
+
+	if (items.length === 0) {
+		throw { resCode: responseCodes.ISSUE_NOT_FOUND };
+	}
+
+	let comments = items[0].comments;
+	const count = comments.length;
+	// 3. Filter out the particular comment
+	comments = comments.filter(c => {
+		if(utils.uuidToString(c.guid) !== guid) {
+			return true;
+		}
+
+		if (c.sealed) {
+			throw { resCode: responseCodes.ISSUE_COMMENT_SEALED};
+		}
+
+		if (c.owner !== user) {
+			throw { resCode: responseCodes.NOT_AUTHORIZED};
+		}
+
+		return false;
+	});
+
+	if(count === comments.length) {
+		throw { resCode: responseCodes.ISSUE_COMMENT_INVALID_GUID};
+	}
+
+	// 4. Update the issue;
+	await col.update({ _id }, {$set : {comments}});
+
+	// 5. Return which comment was deleted
+	return {guid};
+};
+
 module.exports = {
 	newTextComment : (owner, commentText, viewpoint, pinPosition) => new TextCommentGenerator(owner, commentText, viewpoint, pinPosition),
 	newSystemComment : (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to),
 	newRiskMitigationComment : (owner, likelihood, consequence, mitigation, viewpoint, pinPosition) => new RiskMitigationCommentGenerator(owner, likelihood, consequence, mitigation, viewpoint, pinPosition),
-	addComment
+	addComment,
+	deleteComment
 };
