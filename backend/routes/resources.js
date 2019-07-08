@@ -22,6 +22,7 @@ const middlewares = require("../middlewares/middlewares");
 const FileRef = require("../models/fileRef");
 const utils = require("../utils");
 const responseCodes = require("../response_codes");
+const mimeTypes = require("mime-types");
 
 /**
  * @api {get} /:teamspace/:model/resources/:resourceId Get resource file
@@ -42,7 +43,7 @@ function downloadResource(req, res, next) {
 
 	FileRef.getResourceFile(account, model, resourceId).then(resource => {
 		res.set("Content-Length", resource.size);
-		res.set("Content-Type", "application/" + resource.type);
+		res.set("Content-Type", mimeTypes.lookup(resource.type) || "application/octet-stream");
 		res.set("Content-Disposition","attachment;filename=" + resource.name);
 		res.send(resource.file);
 

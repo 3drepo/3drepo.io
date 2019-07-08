@@ -45,6 +45,7 @@
     "html-pdf": "2.2.0",
     "json2csv": "4.3.3",
     "lodash": "4.17.11",
+    "mime-types": "2.1.24",
     "moment": "2.24.0",
     "moment-timezone": "0.5.23",
     "mongodb": "2.2.21",
