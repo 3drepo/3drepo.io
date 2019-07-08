@@ -181,6 +181,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 			<Container
 				container={true}
 				direction="row"
+				wrap="nowrap"
 			>
 				<ModelsContainer item={true}>
 					<CustomTable

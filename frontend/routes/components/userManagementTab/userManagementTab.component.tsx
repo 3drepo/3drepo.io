@@ -22,6 +22,7 @@ import { Container, Content, Footer } from './userManagementTab.styles';
 interface IProps {
 	children: React.ReactChild;
 	footerLabel?: string;
+	withHeader?: boolean;
 }
 
 export const UserManagementTab = (props: IProps) => {
@@ -33,8 +34,9 @@ export const UserManagementTab = (props: IProps) => {
 				direction="column"
 				alignItems="stretch"
 				wrap="nowrap"
+				justify="space-between"
 			>
-				<Content item={true}>{children}</Content>
+				<Content item={true} withHeader={props.withHeader}>{children}</Content>
 				{footerLabel && (<Footer item={true}>{footerLabel}</Footer>)}
 			</Container>
 		</>

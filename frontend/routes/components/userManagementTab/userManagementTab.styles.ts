@@ -21,19 +21,24 @@ import Grid from '@material-ui/core/Grid';
 import { COLOR } from '../../../styles';
 
 const FOOTER_HEIGHT = 45;
+const FOOTER_HEIGHT_WITH_HEADER = 145;
 
-export const Container = styled(Grid) `
+interface IContent {
+	withHeader: boolean;
+}
+
+export const Container = styled(Grid)`
 	height: 100%;
 	overflow: hidden;
 	background-color: rgba(250, 250, 250, .89);
 `;
 
-export const Content = styled(Grid) `
-	max-height: calc(100% - ${FOOTER_HEIGHT}px);
+export const Content = styled(Grid)<IContent>`
+	max-height: calc(100% - ${(props) => props.withHeader ? FOOTER_HEIGHT_WITH_HEADER : FOOTER_HEIGHT}px);
 	flex: 1;
 `;
 
-export const Footer = styled(Grid) `
+export const Footer = styled(Grid)`
 	padding: 16px 24px;
 	font-size: 14px;
 	color: ${COLOR.BLACK_30};

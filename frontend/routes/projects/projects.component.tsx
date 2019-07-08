@@ -157,7 +157,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		const footerLabel = this.getFooterLabel(currentView);
 		return (
 			<Container>
-				<UserManagementTab footerLabel={footerLabel}>
+				<UserManagementTab footerLabel={footerLabel} withHeader={true}>
 					<>
 						<Options
 							container={true}

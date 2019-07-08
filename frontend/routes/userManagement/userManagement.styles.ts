@@ -28,7 +28,6 @@ export const TabContent = styled.div`
 	background-color: ${COLOR.WHITE};
 	flex: 1;
 	position: relative;
-
 	${media.tablet`height: 500px;`}
 `;
 
