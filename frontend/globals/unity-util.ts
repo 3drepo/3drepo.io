@@ -282,6 +282,11 @@ export class UnityUtil {
 		UnityUtil.loadingResolve.resolve();
 	}
 
+	public static loadingProgress(progress) {
+		//Change here
+		console.log(`Progress: ${progress}`);
+	}
+
 	public static navMethodChanged(newNavMode) {
 		if (UnityUtil.viewer && UnityUtil.viewer.navMethodChanged) {
 			UnityUtil.viewer.navMethodChanged(newNavMode);
@@ -933,6 +938,20 @@ export class UnityUtil {
 	 */
 	public static showHiddenByDefaultObjects() {
 		UnityUtil.toUnity('ShowHiddenByDefaultObjects', UnityUtil.LoadingState.MODEL_LOADED, undefined);
+	}
+
+	/**
+	 * Show progress bar while model is loading
+	 */
+	public static showProgressBar() {
+		UnityUtil.toUnity('ShowProgressBar', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Hide progress bar while model is loading
+	 */
+	public static hideProgressBar() {
+		UnityUtil.toUnity('HideProgressBar', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
