@@ -45,6 +45,7 @@ import { NEW_PIN_ID } from '../../constants/viewer';
 import { selectTopicTypes, selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { prepareResources } from '../../helpers/resources';
 import { EXTENSION_RE } from '../../constants/resources';
+import { AccountUploadService } from '../../components/account/js/account-upload.service';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -460,6 +461,16 @@ export function* setActiveIssue({ issue, revision }) {
 	try {
 		const activeIssueId = yield select(selectActiveIssueId);
 		const issuesMap = yield select(selectIssuesMap);
+
+		if (issuesMap[activeIssueId]) {
+			const {account , model } = issuesMap[activeIssueId];
+			yield put(IssuesActions.unsubscribeOnIssueCommentsChanges(account, model, activeIssueId));
+		}
+
+		if (issue) {
+			const {account , model, _id} = issue;
+			yield put(IssuesActions.subscribeOnIssueCommentsChanges(account, model, _id));
+		}
 
 		if (activeIssueId !== issue._id) {
 			if (activeIssueId) {

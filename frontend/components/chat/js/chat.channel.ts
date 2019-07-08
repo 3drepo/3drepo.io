@@ -113,6 +113,10 @@ export class ChatChannel {
 			this.subscriptions[event] = [];
 		}
 
+		if (this.hasAlreadySubscribed(event, callback, context)) {
+			return;
+		}
+
 		this.subscriptions[event].push({ callback, context });
 	}
 
@@ -131,6 +135,15 @@ export class ChatChannel {
 
 	private hasSubscriptions(event: string) {
 		return (this.subscriptions[event] || []).length > 0;
+	}
+
+	private hasAlreadySubscribed(event, callback, context) {
+		const subscriptions =  this.subscriptions[event];
+
+		if (!subscriptions) {
+			return false;
+		}
+		return subscriptions.some((subscription) =>  subscription.callback === callback &&  subscription.context === context);
 	}
 
 }

@@ -96,20 +96,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
-	public componentDidMount() {
-		const { teamspace, model, fetchIssue, issue, subscribeOnIssueCommentsChanges } = this.props;
-
-		if (issue._id) {
-			fetchIssue(teamspace, model, issue._id);
-			subscribeOnIssueCommentsChanges(teamspace, model, issue._id);
-		}
-	}
-
-	public componentWillUnmount() {
-		const { teamspace, model, issue, unsubscribeOnIssueCommentsChanges } = this.props;
-		unsubscribeOnIssueCommentsChanges(teamspace, model, issue._id);
-	}
-
 	public componentDidUpdate(prevProps) {
 		const { teamspace, model, fetchIssue, issue } = this.props;
 
