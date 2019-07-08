@@ -24,7 +24,9 @@ const nodeuuid = require("node-uuid");
 const farmhash = require("farmhash");
 
 const generateFoldernames = (fileName, dirLevels) => {
-	if (dirLevels < 1) return "";
+	if (dirLevels < 1) {
+		return "";
+	}
 	const folders = [];
 	const minChunkLen = 4;
 	const nameChunkLen = Math.max(fileName.length / dirLevels, minChunkLen);
