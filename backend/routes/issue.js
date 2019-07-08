@@ -733,7 +733,7 @@ function deleteComment(req, res, next) {
 	const guid = req.body.guid;
 	const {account, model, issueId} = req.params;
 
-	Issue.deleteComment(account, model, issueId, guid, user).then(comment => {
+	Comment.deleteComment(account, model, "issues", issueId, guid, user).then(comment => {
 		req.dataModel = comment;
 		next();
 	}).catch(err => {

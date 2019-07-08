@@ -80,3 +80,25 @@ export const getRisks = (teamspace, modelId, revision?) => {
 export const deleteRisks = (teamspace, modelId, risksIds) => {
 	return api.delete(`${teamspace}/${modelId}/risks/?ids=${risksIds}`);
 };
+
+/**
+ * Post a comment for risks
+ * @param teamspace the teamspace
+ * @param modelId the model id for the model which contains the risk
+ * @param id the risks id
+ * @param comment the message in the comment that the user wants to post
+ */
+export const addRiskComment = (teamspace, modelId, id, comment) => {
+	return api.post(`${teamspace}/${modelId}/risks/${id}/comments`, comment);
+};
+
+/**
+ * Deletes a comment from risks
+ * @param teamspace the teamspace
+ * @param modelId the model id for the model which contains the risk
+ * @param id the risk id
+ * @param guid the comment id to be deleted
+ */
+export const deleteRiskComment = (teamspace, modelId, id, guid) => {
+	return api.delete(`${teamspace}/${modelId}/risks/${id}/comments`, {guid});
+};
