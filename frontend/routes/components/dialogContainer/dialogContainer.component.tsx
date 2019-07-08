@@ -20,9 +20,11 @@ import * as React from 'react';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
+import { Button } from '@material-ui/core';
 
 import { dispatch } from '../../../modules/store';
 import { renderWhenTrue } from '../../../helpers/rendering';
+import { DialogActions } from './dialogContainer.styles';
 
 interface IProps {
 	config: any;
@@ -64,6 +66,12 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 		}
 	}
 
+	public renderActions = renderWhenTrue(() => (
+		<DialogActions>
+			<Button onClick={this.handleClose} color="secondary">Ok</Button>}
+		</DialogActions>
+	));
+
 	public handleCallback = (callback) => {
 		const action = callback();
 
@@ -89,13 +97,13 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { content, title, template, DialogProps } = this.props.config;
-
+		const { content, title, template, DialogProps, onCancel } = this.props.config;
 		return (
 			<Dialog {...DialogProps} open={this.props.isOpen} onClose={this.handleClose}>
 				{title && <DialogTitle disableTypography={true}>{title}</DialogTitle>}
 				{this.renderContent(content && !template)}
 				{this.renderTemplate(template)}
+				{this.renderActions(content && onCancel)}
 			</Dialog>
 		);
 	}

@@ -15,12 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import { ROUTES } from '../../constants/routes';
 
 interface IProps {
-	showDialog: () => void;
+	history: {
+		push: (routeName) => void;
+	},
+	showDialog: (config) => void;
 }
 
 export const NotFound = (props: IProps) => {
+	props.showDialog({
+		title: 'Wrong url',
+		content: 'Test message',
+		onCancel: () => {
+			props.history.push(ROUTES.TEAMSPACES);
+		}
+	});
 	return null;
 };
