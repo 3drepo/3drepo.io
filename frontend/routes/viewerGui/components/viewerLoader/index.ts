@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,22 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ROUTES } from '../../constants/routes';
-
-interface IProps {
-	history: {
-		push: (routeName) => void;
-	};
-	showDialog: (config) => void;
-}
-
-export const NotFound = (props: IProps) => {
-	props.showDialog({
-		title: 'Wrong url',
-		content: 'Test message',
-		onCancel: () => {
-			props.history.push(ROUTES.TEAMSPACES);
-		}
-	});
-	return null;
-};
+export { default as ViewerLoader } from './viewerLoader.container';

@@ -157,7 +157,7 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public toggleAutoLogin = (shouldStart = true) => {
 		if (shouldStart) {
-			this.loginInterval = setInterval(this.handleAutoLogin, 1000);
+			this.loginInterval = setInterval(this.handleAutoLogin, 2000);
 		} else {
 			clearInterval(this.loginInterval);
 			this.loginInterval = null;

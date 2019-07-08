@@ -135,22 +135,12 @@ export class Viewer {
 
 		this.errCallback = config.onError;
 
-		UnityUtil.init(config.onError);
+		UnityUtil.init(config.onError, this.onUnityProgress);
 
 		this.unityLoaderReady = false;
 
 		this.viewer = document.createElement('div');
 		this.viewer.className = 'viewer';
-
-		this.loadingDiv = document.createElement('div');
-		this.loadingDivText = document.createElement('p');
-
-		this.loadingDivText.innerHTML = '';
-
-		this.loadingDiv.className += 'loadingViewer';
-		this.loadingDivText.className += 'loadingViewerText';
-
-		this.loadingDiv.appendChild(this.loadingDivText);
 
 		const unityHolder = document.createElement('div');
 		unityHolder.className = 'emscripten';
@@ -169,7 +159,6 @@ export class Viewer {
 
 		this.element.appendChild(this.viewer);
 		this.viewer.appendChild(unityHolder);
-		this.viewer.appendChild(this.loadingDiv);
 
 		this.unityLoaderScript = document.createElement('script');
 
@@ -241,8 +230,7 @@ export class Viewer {
 
 			// Set option param from viewerDirective
 			this.options = options;
-			this.loadingDivText.style.display = 'block';
-			// this.loadingDivText.innerHTML = 'Loading Viewer...';
+			this.emit(Viewer.EVENT.VIEWER_INIT);
 			document.body.style.cursor = 'wait';
 
 			// Shouldn't need this, but for something it is not being recognised from unitySettings!
@@ -265,21 +253,27 @@ export class Viewer {
 
 			UnityUtil.onReady().then(() => {
 				this.initialized = true;
-				this.loadingDivText.style.display = 'none';
 				this.emit(Viewer.EVENT.UNITY_READY, {
 					model: this.modelString,
 					name: this.name
 				});
 				resolve();
 			}).catch((error) => {
-				this.loadingDivText.innerHTML = 'Loading Viewer Failed!';
-				this.loadingDivText.style.display = 'block';
+				this.emit(Viewer.EVENT.VIEWER_INIT, error);
 				console.error('UnityUtil.onReady failed: ', error);
 				reject(error);
 			});
 
 		});
 
+	}
+
+	public onUnityProgress = (progress) => {
+		if (progress === 1) {
+			this.emit(Viewer.EVENT.VIEWER_INIT_SUCCESS, progress);
+		} else {
+			this.emit(Viewer.EVENT.VIEWER_INIT_PROGRESS, progress);
+		}
 	}
 
 	public getDefaultHighlightColor() {
@@ -486,6 +480,7 @@ export class Viewer {
 	public cancelLoadModel() {
 		document.body.style.cursor = 'initial';
 		UnityUtil.cancelLoadModel();
+		this.emit(Viewer.EVENT.MODEL_LOADING_CANCEL);
 	}
 
 	public async isModelLoaded() {
@@ -495,12 +490,12 @@ export class Viewer {
 
 	public async loadModel(account, model, branch, revision) {
 		await UnityUtil.onReady();
+		this.emit(Viewer.EVENT.MODEL_LOADING_START);
 		this.initialized = true;
 		this.account = account;
 		this.model = model;
 		this.branch = branch;
 		this.revision = revision;
-		this.loadingDivText.style.display = 'none';
 		document.body.style.cursor = 'wait';
 
 		UnityUtil.loadModel(account, model, branch, revision);
@@ -508,7 +503,7 @@ export class Viewer {
 		UnityUtil.onLoaded().then((bbox) => {
 			document.body.style.cursor = 'initial';
 
-			this.emit(Viewer.EVENT.MODEL_LOADED);
+			this.emit(Viewer.EVENT.MODEL_LOADED, 1);
 			this.emit(Viewer.EVENT.BBOX_READY, bbox);
 		}).catch((error) => {
 			document.body.style.cursor = 'initial';

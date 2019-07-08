@@ -32,6 +32,7 @@ import { PanelButton } from './components/panelButton/panelButton.component';
 import { RevisionsDropdown } from './components/revisionsDropdown';
 import { CloseFocusModeButton } from './components/closeFocusModeButton';
 import { Container, LeftPanels, RightPanels, LeftPanelsButtons, DataLoader } from './viewerGui.styles';
+import { ViewerLoader } from './components/viewerLoader';
 
 interface IProps {
 	className?: string;
@@ -198,7 +199,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 					{this.renderLeftPanelsButtons()}
 					{this.renderLeftPanels(visiblePanels)}
 					{this.renderRightPanels(visiblePanels)}
-					{this.renderLoader()}
+					<ViewerLoader />
 				</Container>
 			</>
 		);
@@ -212,20 +213,6 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	private handleTogglePanel = (panelType) => {
 		this.props.setPanelVisibility(panelType, !this.props.visiblePanels[panelType]);
 	}
-
-	private get loaderText() {
-		return cond([
-			[(value) => value === 'VIEWER_INIT' , () => 'Loading viewer'],
-			[(value) => value === 'MODEL_DOWNLOAD' , () => 'Downloading model'],
-			[(value) => value === 'MODEL_LOAD' , () => 'Processing model']
-		])(this.state.loaderType);
-	}
-
-	private renderLoader = () => (
-		<DataLoader shouldHide={!this.state.showLoader}>
-			{this.loaderText} ({this.state.loaderProgress}%)
-		</DataLoader>
-	)
 
 	private renderLeftPanelsButtons = () => (
 		<LeftPanelsButtons>
