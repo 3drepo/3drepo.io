@@ -57,7 +57,7 @@ const createFoldersIfNecessary = (foldersPath) => {
 class FSHandler {
 	constructor() {
 		if (config.fs) {
-			if (config.fs.path && config.fs.levels) {
+			if (config.fs.hasOwnProperty("path") && config.fs.hasOwnProperty("levels")) {
 				this.testFilesystem();
 			} else {
 				const err = "fs entry found in config, but cannot find path/levels entry";
@@ -70,7 +70,7 @@ class FSHandler {
 	storeFile(data) {
 		const _id = nodeuuid.v4();
 		const folderNames = generateFoldernames(_id, config.fs.levels);
-		const link = folderNames + "/" + _id;
+		const link = path.join(folderNames, _id);
 
 		return new Promise((resolve, reject) => {
 			createFoldersIfNecessary(this.getFullPath(folderNames)).then(() =>{
