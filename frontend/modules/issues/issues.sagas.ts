@@ -45,7 +45,6 @@ import { NEW_PIN_ID } from '../../constants/viewer';
 import { selectTopicTypes, selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { prepareResources } from '../../helpers/resources';
 import { EXTENSION_RE } from '../../constants/resources';
-import { AccountUploadService } from '../../components/account/js/account-upload.service';
 
 export function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -107,6 +106,27 @@ const toggleIssuePin = (issue, selected = true) => {
 		});
 	}
 };
+
+function* updateIssuePin({issue}) {
+	yield Viewer.removePin({ id: issue._id });
+	if (issue && issue.position && issue.position.length > 0 && issue._id) {
+		const { _id } = yield select(selectActiveIssueDetails);
+
+		const isSelectedPin = _id && issue._id === _id;
+		const pinColor = isSelectedPin ? PIN_COLORS.YELLOW : PIN_COLORS.BLUE;
+
+		Viewer.addPin({
+			id: issue._id,
+			type: 'issue',
+			account: issue.account,
+			model: issue.model,
+			pickedPos: issue.position,
+			pickedNorm: issue.norm,
+			colours: pinColor,
+			viewpoint: issue.viewpoint
+		});
+	}
+}
 
 export function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting }) {
 	try {
@@ -558,6 +578,8 @@ const onUpdateEvent = (updatedIssue) => {
 		updatedIssue.comments = prepareComments(updatedIssue.comments);
 	}
 
+	dispatch(IssuesActions.updateIssuePin(updatedIssue));
+
 	if (updatedIssue.status === STATUSES.CLOSED) {
 
 		dispatch(IssuesActions.showCloseInfo(updatedIssue._id));
@@ -572,6 +594,7 @@ const onUpdateEvent = (updatedIssue) => {
 const onCreateEvent = (createdIssue) => {
 	const jobs = selectJobsList(getState());
 	dispatch(IssuesActions.saveIssueSuccess(prepareIssue(createdIssue[0], jobs)));
+	dispatch(IssuesActions.updateIssuePin(createdIssue[0]));
 };
 
 const onResourcesCreated = (resources) => {
@@ -822,4 +845,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.REMOVE_RESOURCE, removeResource);
 	yield takeLatest(IssuesTypes.ATTACH_FILE_RESOURCES, attachFileResources);
 	yield takeLatest(IssuesTypes.ATTACH_LINK_RESOURCES, attachLinkResources);
+	yield takeLatest(IssuesTypes.UPDATE_ISSUE_PIN, updateIssuePin);
 }
