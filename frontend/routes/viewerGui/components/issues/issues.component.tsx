@@ -54,7 +54,8 @@ interface IProps {
 		permissions: any[];
 		properties: {
 			topicTypes: any[];
-		}
+		},
+		federate: boolean;
 	};
 	activeIssueDetails: any;
 	sortOrder: string;
@@ -119,7 +120,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 		});
 	}
 
-	get headerMenuItems() {
+	get commonHeaderMenuItems() {
 		const {
 			printIssues,
 			downloadIssues,
@@ -127,15 +128,13 @@ export class Issues extends React.PureComponent<IProps, any> {
 			exportBCF,
 			teamspace,
 			model,
-			revision,
-			showSubmodelIssues,
-			toggleSubmodelsIssues
+			revision
 		} = this.props;
 
 		return [{
 			...ISSUES_ACTIONS_MENU.PRINT,
 			onClick: () => printIssues(teamspace, model)
-		}, , {
+		}, {
 			...ISSUES_ACTIONS_MENU.IMPORT_BCF,
 			onClick: () => {
 				fileDialog({ accept: '.zip,.bcfzip,.bcf' }, (files) => {
@@ -153,11 +152,26 @@ export class Issues extends React.PureComponent<IProps, any> {
 			onClick: () => {
 				this.props.toggleSortOrder();
 			}
-		}, {
+		}];
+	}
+
+	get toggleSubmodelsMenuItem() {
+		const {
+			showSubmodelIssues,
+			toggleSubmodelsIssues
+		} = this.props;
+
+		return {
 			...ISSUES_ACTIONS_MENU.SHOW_SUBMODEL_ISSUES,
 			enabled: showSubmodelIssues,
 			onClick: () => toggleSubmodelsIssues(!showSubmodelIssues)
-		}];
+		};
+	}
+
+	get headerMenuItems() {
+		return !this.props.modelSettings.federate ?
+			this.commonHeaderMenuItems :
+			[...this.commonHeaderMenuItems, this.toggleSubmodelsMenuItem];
 	}
 
 	get showDefaultHiddenItems() {

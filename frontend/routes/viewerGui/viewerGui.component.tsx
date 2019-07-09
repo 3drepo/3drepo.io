@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { isEmpty, cond } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
 import Toolbar from './components/toolbar/toolbar.container';
@@ -116,7 +116,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		const settingsChanged = modelSettings._id !== prevState.loadedModelId;
 		if (!isModelPending && settingsChanged) {
 			changes.loadedModelId = modelSettings._id;
-			this.handleModelSettingsChange(modelSettings);
+			this.handleModelSettingsChange();
 		}
 
 		if (!isEmpty(changes)) {
@@ -156,8 +156,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		);
 	}
 
-	private handleModelSettingsChange(modelSettings) {
-		// TODO: this.PanelService.hideSubModels(this.issuesCardIndex, !modelSettings.federate);
+	private handleModelSettingsChange() {
 		this.props.loadModel();
 	}
 
