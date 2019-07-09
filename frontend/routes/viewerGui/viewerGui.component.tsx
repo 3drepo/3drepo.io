@@ -150,7 +150,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 					{this.renderLeftPanelsButtons()}
 					{this.renderLeftPanels(visiblePanels)}
 					{this.renderRightPanels(visiblePanels)}
-					{this.renderViewerLoader(viewer.viewer)}
+					{this.renderViewerLoader(viewer.hasInstance)}
 				</Container>
 			</>
 		);

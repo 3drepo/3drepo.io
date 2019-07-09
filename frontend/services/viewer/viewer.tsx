@@ -32,8 +32,6 @@ export class ViewerService {
 		this.pin = {
 			pinDropMode: false
 		};
-
-		window.viewerService = this;
 	}
 
 	get isPinMode() {
@@ -48,6 +46,10 @@ export class ViewerService {
 		await this.viewer.isModelLoaded();
 	}
 
+	public get hasInstance() {
+		return !!this.viewer;
+	}
+
 	public get memory() {
 		const MAX_MEMORY = 2130706432; // The maximum memory Unity can allocate
 		const assignedMemory = selectMemory(getState()) * 1024 * 1024; // Memory is in Mb.
@@ -58,34 +60,35 @@ export class ViewerService {
 		this.container = container;
 	}
 
-	public init = async (container, name = 'viewer') => {
+	public init = async (name = 'viewer') => {
 		if (IS_DEVELOPMENT) {
 			console.debug('Initiating Viewer');
 		}
 
 		this.setInitialisePromise();
 
-		this.viewer = new ViewerInstance({
-			name,
-			container,
-			onError: this.handleUnityError
-		});
+		if (!this.viewer) {
+			this.viewer = new ViewerInstance({
+				name,
+				container: this.container,
+				onError: this.handleUnityError
+			});
 
-		this.viewer.setUnity();
+			this.viewer.setUnity();
+			try {
+				await this.viewer.unityScriptInserted ? Promise.resolve() : this.viewer.insertUnityLoader(this.memory);
 
-		try {
-			await this.viewer.unityScriptInserted ? Promise.resolve() : this.viewer.insertUnityLoader(this.memory);
-
-			setTimeout(() => {
-				this.viewer.init({
-					getAPI: {
-						hostNames: clientConfigService.apiUrls.all
-					},
-					showAll: true
-				});
-			}, 1000);
-		} catch (error) {
-			console.error('Error while initialising Unity script: ', error);
+				setTimeout(() => {
+					this.viewer.init({
+						getAPI: {
+							hostNames: clientConfigService.apiUrls.all
+						},
+						showAll: true
+					});
+				}, 1000);
+			} catch (error) {
+				console.error('Error while initialising Unity script: ', error);
+			}
 		}
 	}
 
