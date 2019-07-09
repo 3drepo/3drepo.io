@@ -16,7 +16,6 @@
  */
 
 import * as React from 'react';
-import { cond } from 'lodash';
 
 import { Container } from './viewerLoader.styles';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';

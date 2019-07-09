@@ -33,6 +33,7 @@ import { RevisionsDropdown } from './components/revisionsDropdown';
 import { CloseFocusModeButton } from './components/closeFocusModeButton';
 import { Container, LeftPanels, RightPanels, LeftPanelsButtons } from './viewerGui.styles';
 import { ViewerLoader } from './components/viewerLoader';
+import { renderWhenTrue } from '../../helpers/rendering';
 
 interface IProps {
 	viewer: any;
@@ -77,7 +78,9 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-		const { queryParams: { issueId, riskId }, match: { params } } = this.props;
+		const { queryParams: { issueId, riskId }, match: { params }, viewer } = this.props;
+
+		viewer.init();
 
 		if (issueId || riskId) {
 			if (issueId) {
@@ -133,8 +136,11 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		return this.props.match.params;
 	}
 
+	public renderViewerLoader = renderWhenTrue(() => <ViewerLoader />);
+
 	public render() {
-		const { visiblePanels, isFocusMode } = this.props;
+		const { visiblePanels, isFocusMode, viewer } = this.props;
+
 		return (
 			<>
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
@@ -144,7 +150,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 					{this.renderLeftPanelsButtons()}
 					{this.renderLeftPanels(visiblePanels)}
 					{this.renderRightPanels(visiblePanels)}
-					<ViewerLoader />
+					{this.renderViewerLoader(viewer.viewer)}
 				</Container>
 			</>
 		);

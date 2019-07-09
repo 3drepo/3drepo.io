@@ -198,12 +198,6 @@ export class App extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public renderViewer = (props) => (
-		<>
-			<ViewerGui {...props} />
-		</>
-	)
-
 	public renderStaticRoutes = memoize(() => STATIC_ROUTES.map(({ title, path, fileName }) => (
 		<Route key={path} path={path} render={() => <StaticPageRoute title={title} fileName={fileName} />} />
 	)));
@@ -230,7 +224,7 @@ export class App extends React.PureComponent<IProps, IState> {
 		return (
 				<AppContainer>
 					{this.renderHeader(!isStaticRoute(location.pathname))}
-					<ViewerCanvas  />
+					<ViewerCanvas />
 					<Switch>
 						{this.renderLoginRoute()}
 						<Route exact path={ROUTES.SIGN_UP} component={SignUp} />
@@ -241,7 +235,7 @@ export class App extends React.PureComponent<IProps, IState> {
 						<PrivateRoute path={ROUTES.DASHBOARD} component={Dashboard} />
 						<PrivateRoute
 							path={`${ROUTES.VIEWER}/:teamspace/:model/:revision?`}
-							component={this.renderViewer}
+							component={ViewerGui}
 						/>
 						{this.renderStaticRoutes()}
 						<Route component={NotFound} />
