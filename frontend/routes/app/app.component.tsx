@@ -200,7 +200,6 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public renderViewer = (props) => (
 		<>
-			<ViewerCanvas {...props} />
 			<ViewerGui {...props} />
 		</>
 	)
@@ -231,6 +230,7 @@ export class App extends React.PureComponent<IProps, IState> {
 		return (
 				<AppContainer>
 					{this.renderHeader(!isStaticRoute(location.pathname))}
+					<ViewerCanvas  />
 					<Switch>
 						{this.renderLoginRoute()}
 						<Route exact path={ROUTES.SIGN_UP} component={SignUp} />

@@ -23,6 +23,7 @@ export class ViewerService {
 
 	private stats: boolean = false;
 	public helicopterSpeed = INITIAL_HELICOPTER_SPEED;
+	private container;
 
 	constructor() {
 		this.newPinId = 'newPinId';
@@ -31,6 +32,8 @@ export class ViewerService {
 		this.pin = {
 			pinDropMode: false
 		};
+
+		window.viewerService = this;
 	}
 
 	get isPinMode() {
@@ -51,7 +54,11 @@ export class ViewerService {
 		return Math.min(assignedMemory, MAX_MEMORY);
 	}
 
-	public init = async (container, name = 'viewer') => {
+	public setContainer = (container) => {
+		this.container = container;
+	}
+
+	public init = async (name = 'viewer') => {
 		if (IS_DEVELOPMENT) {
 			console.debug('Initiating Viewer');
 		}
@@ -60,7 +67,7 @@ export class ViewerService {
 
 		this.viewer = new ViewerInstance({
 			name,
-			container,
+			container: this.container,
 			onError: this.handleUnityError
 		});
 
@@ -92,11 +99,8 @@ export class ViewerService {
 	}
 
 	public destroy = async () => {
-		await this.isViewerReady();
-		this.diffToolDisableAndClear();
-		this.viewer.reset();
 		this.viewer.destroy();
-		this.viewer = null;
+		this.container = null;
 	}
 
 	public async updateViewerSettings(settings) {

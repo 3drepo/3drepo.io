@@ -35,7 +35,6 @@ import {
 import { Avatar } from '../../../avatar/avatar.component';
 import { VisualSettingsDialog } from '../visualSettingsDialog/visualSettingsDialog.component';
 import { STATIC_ROUTES } from '../../../../../services/staticPages';
-import { LANDING_PAGES } from '../../../externalLinks/externalLinks.constants';
 
 const UserButton = ({ IconProps, Icon, ...props }) => (
 	<IconButton

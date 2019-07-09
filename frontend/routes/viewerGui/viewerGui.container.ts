@@ -25,6 +25,7 @@ import { ViewerGui } from './viewerGui.component';
 import { TreeActions } from '../../modules/tree';
 import { selectSettings, selectIsPending } from '../../modules/model';
 import { ViewerGuiActions, selectVisiblePanels, selectIsFocusMode } from '../../modules/viewerGui';
+import { withViewer } from '../../services/viewer/viewer';
 
 const mapStateToProps = createStructuredSelector({
 	queryParams: selectQueryParams,
@@ -45,4 +46,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	stopListenOnClickPin: ViewerGuiActions.stopListenOnClickPin
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(ViewerGui);
+export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerGui));

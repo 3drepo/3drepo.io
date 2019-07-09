@@ -98,8 +98,6 @@ export class Viewer {
 
 	public handle;
 	public unityLoaderReady: boolean;
-	public loadingDiv: HTMLElement;
-	public loadingDivText: HTMLElement;
 
 	public options;
 	public Module;
@@ -285,7 +283,8 @@ export class Viewer {
 	}
 
 	public destroy() {
-		UnityUtil.reset();
+		this.emitter.removeAllListeners();
+		this.reset();
 	}
 
 	public showAll() {
@@ -472,7 +471,6 @@ export class Viewer {
 	public reset() {
 		this.setMeasureMode(false);
 		this.setPinDropMode(false);
-		this.loadingDivText.style.display = 'none';
 		this.initialized = false;
 		UnityUtil.reset();
 	}

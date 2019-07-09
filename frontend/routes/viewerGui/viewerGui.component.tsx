@@ -31,10 +31,11 @@ import { Bim } from './components/bim';
 import { PanelButton } from './components/panelButton/panelButton.component';
 import { RevisionsDropdown } from './components/revisionsDropdown';
 import { CloseFocusModeButton } from './components/closeFocusModeButton';
-import { Container, LeftPanels, RightPanels, LeftPanelsButtons, DataLoader } from './viewerGui.styles';
+import { Container, LeftPanels, RightPanels, LeftPanelsButtons } from './viewerGui.styles';
 import { ViewerLoader } from './components/viewerLoader';
 
 interface IProps {
+	viewer: any;
 	className?: string;
 	modelSettings: any;
 	isModelPending: boolean;
@@ -88,63 +89,6 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		}
 
 		this.props.fetchData(params.teamspace, params.model, params.revision);
-
-		// setTimeout(() => {
-		// 	this.setState({
-		// 		showLoader: true,
-		// 		loaderType: 'VIEWER_INIT',
-		// 		loaderProgress: 10
-		// 	}, () => {
-		// 		setTimeout(() => {
-		// 			this.setState({ loaderProgress: 15 }, () => {
-		// 				setTimeout(() => {
-		// 					this.setState({ loaderProgress: 40 }, () => {
-		// 						setTimeout(() => {
-		// 							this.setState({ loaderProgress: 87 }, () => {
-		// 								setTimeout(() => {
-		// 									this.setState({
-		// 										loaderType: 'MODEL_DOWNLOAD',
-		// 										loaderProgress: 5
-		// 									}, () => {
-		// 											setTimeout(() => {
-		// 												this.setState({
-		// 													loaderProgress: 68
-		// 												}, () => {
-		// 														setTimeout(() => {
-		// 															this.setState({
-		// 																loaderType: 'MODEL_LOAD',
-		// 																loaderProgress: 68
-		// 															}, () => {
-		// 																	setTimeout(() => {
-		// 																		this.setState({ loaderProgress: 15 }, () => {
-		// 																			setTimeout(() => {
-		// 																				this.setState({ loaderProgress: 40 }, () => {
-		// 																					setTimeout(() => {
-		// 																						this.setState({ loaderProgress: 99 }, () => {
-		// 																							setTimeout(() => {
-		// 																								this.setState({ showLoader: null });
-		// 																							}, 500);
-		// 																						});
-		// 																					}, 500);
-		// 																				});
-		// 																			}, 500);
-		// 																		});
-		// 																	}, 500);
-		// 															});
-		// 														}, 500);
-		// 												});
-		// 											}, 500);
-		// 									});
-		// 								}, 500);
-		// 							});
-		// 						}, 500);
-		// 					});
-		// 				}, 500);
-		// 			});
-		// 		}, 500);
-		// 	});
-		// }, 2000);
-
 	}
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
@@ -182,6 +126,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		this.props.stopListenOnModelLoaded();
 		this.props.stopListenOnClickPin();
 		this.props.resetPanelsStates();
+		this.props.viewer.destroy();
 	}
 
 	private get urlParams() {
