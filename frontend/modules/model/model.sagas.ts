@@ -28,6 +28,7 @@ import { SnackbarActions } from './../snackbar';
 import { selectCurrentUser } from '../currentUser';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { ChatActions } from '../chat';
+import { clientConfigService } from '../../services/clientConfig';
 
 export function* fetchSettings({ teamspace, modelId }) {
 	try {

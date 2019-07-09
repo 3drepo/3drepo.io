@@ -16,13 +16,11 @@
  */
 
 import styled from 'styled-components';
-import { COLOR, FONT_WEIGHT } from '../../../styles';
+import { COLOR, FONT_WEIGHT } from '../../../../styles';
 
 export const Container = styled.div`
-	z-index: 2;
 	position: absolute;
 	color: ${COLOR.WHITE};
-	top: 60px;
 	left: 50%;
 	transform: translateX(-50%);
 	text-align: center;
@@ -38,6 +36,7 @@ export const Container = styled.div`
 	align-items: center;
 	justify-content: center;
 	min-width: 200px;
+	pointer-events: all;
 `;
 
 export const DisplayedText = styled.div`

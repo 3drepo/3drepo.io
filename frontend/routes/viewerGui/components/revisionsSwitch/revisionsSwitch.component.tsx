@@ -19,15 +19,14 @@ import * as React from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 
+import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Container, DisplayedText, ProgressWrapper } from './revisionsSwitch.styles';
-import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../services/formatting/formatDate';
-import { renderWhenTrue } from '../../../helpers/rendering';
-import { runAngularTimeout } from '../../../helpers/migration';
 
 interface IProps {
 	className?: string;
-	currentRevision?: string;
-	modelName?: string;
+	urlParams: any;
+	modelSettings?: any;
 	revisions?: any[];
 	history: any;
 	location: any;
@@ -38,7 +37,7 @@ interface IProps {
 export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 	public renderCurrentSwitchState = renderWhenTrue(() => (
 		<DisplayedText>
-			{`${this.props.modelName} - ${this.currentRevisionName}`}
+			{`${this.props.modelSettings.name} - ${this.currentRevisionName}`}
 			{this.props.revisions.length > 1 && <ArrowDownIcon fontSize="small" />}
 		</DisplayedText>)
 	);
@@ -60,7 +59,8 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 	}
 
 	private get currentRevisionName() {
-		return this.props.currentRevision || this.getRevisionDisplayedName(this.props.revisions[0]);
+		debugger;
+		return this.props.urlParams.revision || this.getRevisionDisplayedName(this.props.revisions[0]);
 	}
 
 	private get currentRevisionId() {
@@ -73,7 +73,7 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 	}
 
 	private get revisionDataExists() {
-		return Boolean(this.props.modelName && this.currentRevisionName);
+		return Boolean(this.props.modelSettings && this.props.modelSettings.name && this.props.revisions.length && this.currentRevisionName);
 	}
 
 	private getRevisionDisplayedName = (revision) => {
@@ -86,10 +86,7 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 		const newPathnameBase = currentRevisionInPath ? pathname.substr(0, pathname.lastIndexOf('\/')) : pathname;
 		const newPathname = `${newPathnameBase}/${revision.tag || revision._id}`;
 
-		runAngularTimeout(() => {
-			this.props.history.push(newPathname);
-		});
-
+		this.props.history.push(newPathname);
 		this.props.hideDialog();
 	}
 
@@ -99,11 +96,11 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 		}
 
 		this.props.showRevisionsDialog({
-			title: `Revisions - ${this.props.modelName}`,
+			title: `Revisions - ${this.props.modelSettings.name}`,
 			data: {
 				currentRevisionName: this.currentRevisionName,
 				currentRevisionId: this.currentRevisionId,
-				currentModelName: this.props.modelName,
+				currentModelName: this.props.modelSettings.name,
 				revisions: this.props.revisions,
 				handleSetNewRevision: this.setNewRevision
 			}

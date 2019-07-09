@@ -18,14 +18,17 @@
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router';
-import { connect, addRouting } from '../../../helpers/migration';
+import { connect } from 'react-redux';
 
 import { RevisionsSwitch } from './revisionsSwitch.component';
-import { selectRevisions } from '../../../modules/model';
-import { DialogActions } from '../../../modules/dialog';
+import { DialogActions } from '../../../../modules/dialog';
+import { selectRevisions, selectSettings } from '../../../../modules/model';
+import { selectUrlParams } from '../../../../modules/router/router.selectors';
 
 const mapStateToProps = createStructuredSelector({
-	revisions: selectRevisions
+	revisions: selectRevisions,
+	modelSettings: selectSettings,
+	urlParams: selectUrlParams
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -33,4 +36,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	hideDialog: DialogActions.hideDialog
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsSwitch)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsSwitch));

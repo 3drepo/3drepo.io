@@ -29,10 +29,10 @@ import { Compare } from './components/compare';
 import { Tree } from './components/tree';
 import { Bim } from './components/bim';
 import { PanelButton } from './components/panelButton/panelButton.component';
-import { RevisionsDropdown } from './components/revisionsDropdown';
+import RevisionsSwitch from './components/revisionsSwitch/revisionsSwitch.container';
+import { ViewerLoader } from './components/viewerLoader';
 import { CloseFocusModeButton } from './components/closeFocusModeButton';
 import { Container, LeftPanels, RightPanels, LeftPanelsButtons } from './viewerGui.styles';
-import { ViewerLoader } from './components/viewerLoader';
 import { renderWhenTrue } from '../../helpers/rendering';
 
 interface IProps {
@@ -145,7 +145,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 			<>
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
 				<Container className={this.props.className} hidden={isFocusMode}>
-					<RevisionsDropdown />
+					<RevisionsSwitch />
 					<Toolbar {...this.urlParams.teamspace} />
 					{this.renderLeftPanelsButtons()}
 					{this.renderLeftPanels(visiblePanels)}

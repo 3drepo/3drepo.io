@@ -5,7 +5,6 @@ const loadPasswordLibrary = () => new Promise((resolve) => {
 		script.src = ZXCVBN_SRC;
 		script.type = 'text/javascript';
 		script.async = true;
-		const first = document.getElementsByTagName('script')[0];
 		document.body.appendChild(script);
 		script.onload = () => resolve(window.zxcvbn);
 	} else {
@@ -13,7 +12,6 @@ const loadPasswordLibrary = () => new Promise((resolve) => {
 	}
 });
 
-// TODO: Should be changed to dynamic import if app is fully migrated
 export const getPasswordStrength = (password) => loadPasswordLibrary().then((zxcvbn: any) => zxcvbn(password).score);
 
 export const differentThan = function(ref: any, message: any) {
@@ -50,7 +48,6 @@ export const strength = function(requiredValue: any, message: any) {
 		exclusive: false,
 		message: message || '${path} is too weak',
 		async test(value: any) {
-			// TODO: Should be changed to dynamic import if app is fully migrated
 			const result = await getPasswordStrength(value);
 			return result > requiredValue;
 		}

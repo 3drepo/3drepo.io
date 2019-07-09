@@ -5,15 +5,6 @@ export const compareStrings = (string1, string2) => {
 	return (string1 || '').toLowerCase().includes((string2 || '').toLowerCase());
 };
 
-// DEPRECATED
-export const stringSearch = (superString: string, subString: string) => {
-	if (!superString) {
-		return false;
-	}
-
-	return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
-};
-
 export const searchByFilters = (
 		items = [],
 		filters = [],
