@@ -59,7 +59,6 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 	}
 
 	private get currentRevisionName() {
-		debugger;
 		return this.props.urlParams.revision || this.getRevisionDisplayedName(this.props.revisions[0]);
 	}
 
@@ -73,7 +72,7 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 	}
 
 	private get revisionDataExists() {
-		return Boolean(this.props.modelSettings && this.props.modelSettings.name && this.props.revisions.length && this.currentRevisionName);
+		return Boolean(this.props.modelSettings.name && this.props.revisions.length && this.currentRevisionName);
 	}
 
 	private getRevisionDisplayedName = (revision) => {
