@@ -15,11 +15,6 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { subscribe } from '../../../helpers/migration';
-import { selectShadowSetting, selectStatsSetting, selectNearPlaneSetting,
-		selectFarPlaneAlgorithm, selectShadingSetting, selectXraySetting,
-		selectFarPlaneSamplingPoints} from '../../../modules/viewer';
-
 class ViewerController implements ng.IController {
 
 	public static $inject: string[] = [
@@ -65,16 +60,6 @@ class ViewerController implements ng.IController {
 
 /* 		this.viewer = this.ViewerService.getViewer(); */
 		this.watchers();
-
-		subscribe(this, {
-			shadowsSetting: selectShadowSetting,
-			statsSetting: selectStatsSetting,
-			nearPlaneSetting: selectNearPlaneSetting,
-			farPlaneAlgorithm: selectFarPlaneAlgorithm,
-			shadingSetting: selectShadingSetting,
-			xraySetting: selectXraySetting,
-			farPlaneSamplingPoints: selectFarPlaneSamplingPoints
-		});
 	}
 
 	public $onDestroy() {
@@ -94,21 +79,6 @@ class ViewerController implements ng.IController {
 				this.viewer.setPinDropMode(this.ViewerService.pin.pinDropMode);
 			}
 		}, true);
-
-		this.$scope.$watch(() => this.shadowsSetting, this.ViewerService.setShadows.bind(this.ViewerService));
-
-		this.$scope.$watch(() => this.statsSetting, this.ViewerService.setStats.bind(this.ViewerService));
-
-		this.$scope.$watch(() => this.nearPlaneSetting, this.ViewerService.setNearPlane.bind(this.ViewerService));
-
-		this.$scope.$watch(() => this.farPlaneAlgorithm, this.ViewerService.setFarPlaneAlgorithm.bind(this.ViewerService));
-
-		this.$scope.$watch(() => this.shadingSetting, this.ViewerService.setShading.bind(this.ViewerService) );
-
-		this.$scope.$watch(() => this.xraySetting, this.ViewerService.setXray.bind(this.ViewerService));
-
-		this.$scope.$watch(() => this.farPlaneSamplingPoints,
-			this.ViewerService.setFarPlaneSamplingPoints.bind(this.ViewerService));
 	}
 }
 
