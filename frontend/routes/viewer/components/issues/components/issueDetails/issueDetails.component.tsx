@@ -299,7 +299,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public onPositionSave = (position) => {
 		if (!this.isNewIssue) {
 			const { teamspace, model, issue } = this.props;
-			this.props.updateIssue(teamspace, model, {position});
+			this.props.updateIssue(teamspace, model, {position: position || []});
 			Viewer.setPin(null);
 		} else {
 			Viewer.changePinColor({ id: NEW_PIN_ID, colours: PIN_COLORS.YELLOW });
