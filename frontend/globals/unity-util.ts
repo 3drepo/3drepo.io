@@ -55,10 +55,12 @@ export class UnityUtil {
 	public static UNITY_GAME_OBJECT = 'WebGLInterface';
 	public static defaultHighlightColor = [1, 1, 0];
 	private static progressCallback = Function.prototype;
+	private static modelLoaderProgressCallback = Function.prototype;
 
-	public static init(errorCallback: any, progressCallback: any) {
+	public static init(errorCallback: any, progressCallback: any, modelLoaderProgressCallback: any) {
 		UnityUtil.errorCallback = errorCallback;
 		UnityUtil.progressCallback = progressCallback;
+		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
 	}
 
 	public static onProgress(gameInstance, progress: number) {
@@ -283,8 +285,7 @@ export class UnityUtil {
 	}
 
 	public static loadingProgress(progress) {
-		//Change here
-		console.log(`Progress: ${progress}`);
+		UnityUtil.modelLoaderProgressCallback(progress);
 	}
 
 	public static navMethodChanged(newNavMode) {

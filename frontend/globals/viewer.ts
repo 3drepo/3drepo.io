@@ -133,7 +133,8 @@ export class Viewer {
 
 		this.errCallback = config.onError;
 
-		UnityUtil.init(config.onError, this.onUnityProgress);
+		UnityUtil.init(config.onError, this.onUnityProgress, this.onModelProgress);
+		UnityUtil.hideProgressBar();
 
 		this.unityLoaderReady = false;
 
@@ -271,6 +272,14 @@ export class Viewer {
 			this.emit(Viewer.EVENT.VIEWER_INIT_SUCCESS, progress);
 		} else {
 			this.emit(Viewer.EVENT.VIEWER_INIT_PROGRESS, progress);
+		}
+	}
+
+	public onModelProgress = (progress) => {
+		if (progress === 1) {
+			this.emit(Viewer.EVENT.MODEL_LOADED, progress);
+		} else {
+			this.emit(Viewer.EVENT.MODEL_LOADING_PROGRESS, progress);
 		}
 	}
 

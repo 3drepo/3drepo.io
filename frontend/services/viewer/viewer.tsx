@@ -58,7 +58,7 @@ export class ViewerService {
 		this.container = container;
 	}
 
-	public init = async (name = 'viewer') => {
+	public init = async (container, name = 'viewer') => {
 		if (IS_DEVELOPMENT) {
 			console.debug('Initiating Viewer');
 		}
@@ -67,7 +67,7 @@ export class ViewerService {
 
 		this.viewer = new ViewerInstance({
 			name,
-			container: this.container,
+			container,
 			onError: this.handleUnityError
 		});
 
