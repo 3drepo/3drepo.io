@@ -11,6 +11,11 @@ export const getStaticRoutes = memoize(() => {
 
 export const STATIC_ROUTES = getStaticRoutes() as any;
 
+export const LANDING_ROUTES = [
+	{ title: 'Pricing', path: 'http://3drepo.org/pricing/' },
+	{ title: 'Contact', path: 'http://3drepo.org/contact/' }
+];
+
 export const STATIC_ROUTES_PATHS = STATIC_ROUTES.map(({ path }) => path) as any;
 
 const getPage = (pageName) => STATIC_ROUTES.find((route) => route.page === pageName);

@@ -26,7 +26,7 @@ import Switch from '@material-ui/core/Switch';
 import { COLOR } from '../../../../../styles';
 import * as AvatarStyles from '../../../avatar/avatar.styles';
 
-export const UserIcon = styled(Menu)`
+export const BurgerIcon = styled(Menu)`
 	&& {
 		color: ${COLOR.WHITE};
 		font-size: 28px;
