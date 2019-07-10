@@ -99,6 +99,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		const { modelSettings, isModelPending, match: { params }, queryParams } = this.props;
 		const teamspaceChanged = params.teamspace !== prevProps.match.params.teamspace;
 		const modelChanged = params.model !== prevProps.match.params.model;
+		const revisionChanged = params.revision !== prevProps.match.params.revision;
 
 		const { issueId, riskId } = queryParams;
 
@@ -109,7 +110,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 			this.props.setPanelVisibility(VIEWER_PANELS.RISKS, true);
 		}
 
-		if (teamspaceChanged || modelChanged) {
+		if (teamspaceChanged || modelChanged || revisionChanged) {
 			this.props.fetchData(params.teamspace, params.model, params.revision);
 		}
 

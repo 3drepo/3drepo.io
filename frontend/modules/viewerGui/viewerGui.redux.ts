@@ -30,7 +30,6 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	stopListenOnClickPin: [],
 	handlePinClick: ['id'],
 	setIsModelLoaded: ['isModelLoaded'],
-
 	loadModel: [],
 	initialiseToolbar: [],
 	goToExtent: [],

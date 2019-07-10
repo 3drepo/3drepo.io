@@ -38,7 +38,7 @@ const renderRevisionItem = (revision, currentRevisionId, handleSetNewRevision) =
 		button
 		divider
 		onClick={() => setNewRevision(handleSetNewRevision, revision, currentRevisionId === revision._id)}
-		current={currentRevisionId === revision._id}>
+		isActive={currentRevisionId === revision._id}>
 		<Row>
 			<PropertyWrapper>
 				<Tag>
