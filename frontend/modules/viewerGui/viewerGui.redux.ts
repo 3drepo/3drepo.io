@@ -56,14 +56,7 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	clearHighlights: [],
 	setCamera: ['params'],
 	changePinColor: ['params'],
-	removeUnsavedPin: [],
-	resetMapSources: ['source'],
-	addMapSource: ['source'],
-	removeMapSource: ['source'],
-	mapStart: [],
-	mapStop: [],
-	getScreenshot: [],
-	waitForViewer: []
+	removeUnsavedPin: []
 }, { prefix: 'VIEWER_GUI/' });
 
 export interface IViewerGuiState {

@@ -115,7 +115,8 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		}
 
 		const settingsChanged = modelSettings._id !== prevState.loadedModelId;
-		if (!isModelPending && settingsChanged) {
+
+		if (!isModelPending && (settingsChanged || revisionChanged)) {
 			changes.loadedModelId = modelSettings._id;
 			this.handleModelSettingsChange();
 		}

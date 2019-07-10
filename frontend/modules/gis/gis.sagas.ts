@@ -42,6 +42,7 @@ export function* addSource({source}) {
 		if (!visibleSources.length) {
 			Viewer.mapStart();
 		}
+
 		yield put(GisActions.addSourceSuccess(source));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('add', 'source', error));

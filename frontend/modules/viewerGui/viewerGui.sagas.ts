@@ -47,16 +47,6 @@ import { selectUrlParams } from '../router/router.selectors';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { ROUTES } from '../../constants/routes';
 
-const getViewer = () => Viewer.viewer;
-
-function* waitForViewer() {
-	try {
-		yield Viewer.isViewerReady();
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('initialise', 'viewer', error));
-	}
-}
-
 function* fetchData({ teamspace, model, revision }) {
 	try {
 		const { username } = yield select(selectCurrentUser);
@@ -214,60 +204,6 @@ function* updateClipState({clipNumber}) {
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'clip state', error));
-	}
-}
-
-function* resetMapSources({source}) {
-	try {
-		yield put(ViewerGuiActions.waitForViewer());
-		getViewer().resetMapSources(source);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('reset', 'map sources', error));
-	}
-}
-
-function* addMapSource({source}) {
-	try {
-		yield put(ViewerGuiActions.waitForViewer());
-		getViewer().addMapSource(source);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('add', 'map source', error));
-	}
-}
-
-function* removeMapSource({ source }) {
-	try {
-		yield put(ViewerGuiActions.waitForViewer());
-		getViewer().removeMapSource(source);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('remove', 'map source', error));
-	}
-}
-
-function* mapStart() {
-	try {
-		yield put(ViewerGuiActions.waitForViewer());
-		getViewer().mapStart();
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('start', 'map rendering', error));
-	}
-}
-
-function* mapStop() {
-	try {
-		yield put(ViewerGuiActions.waitForViewer());
-		getViewer().mapStop();
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('stop', 'map rendering', error));
-	}
-}
-
-function* getScreenshot() {
-	try {
-		yield put(ViewerGuiActions.waitForViewer());
-		return yield getViewer().getScreenshot();
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('get', 'screenshot', error));
 	}
 }
 
@@ -444,13 +380,6 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.START_LISTEN_ON_CLICK_PIN, startListenOnClickPin);
 	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_CLICK_PIN, stopListenOnClickPin);
 	yield takeLatest(ViewerGuiTypes.HANDLE_PIN_CLICK, handlePinClick);
-	yield takeLatest(ViewerGuiTypes.WAIT_FOR_VIEWER, waitForViewer);
-	yield takeLatest(ViewerGuiTypes.RESET_MAP_SOURCES, resetMapSources);
-	yield takeLatest(ViewerGuiTypes.ADD_MAP_SOURCE, addMapSource);
-	yield takeLatest(ViewerGuiTypes.REMOVE_MAP_SOURCE, removeMapSource);
-	yield takeLatest(ViewerGuiTypes.MAP_START, mapStart);
-	yield takeLatest(ViewerGuiTypes.MAP_STOP, mapStop);
-	yield takeLatest(ViewerGuiTypes.GET_SCREENSHOT, getScreenshot);
 	yield takeLatest(ViewerGuiTypes.INITIALISE_TOOLBAR, initialiseToolbar);
 	yield takeLatest(ViewerGuiTypes.SET_NAVIGATION_MODE, setNavigationMode);
 	yield takeLatest(ViewerGuiTypes.RESET_HELICOPTER_SPEED, resetHelicopterSpeed);
