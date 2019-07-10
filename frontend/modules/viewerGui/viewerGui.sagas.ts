@@ -79,7 +79,9 @@ function* resetPanelsStates() {
 			put(IssuesActions.resetComponentState()),
 			put(RisksActions.resetComponentState()),
 			put(GroupsActions.resetComponentState()),
-			put(CompareActions.resetComponentState())
+			put(CompareActions.resetComponentState()),
+			put(BimActions.resetBimState()),
+			put(ViewerGuiActions.resetVisiblePanels())
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'panels data', error));
@@ -93,8 +95,6 @@ function* setMeasureVisibility({ visible }) {
 		if (visible && metadataActive) {
 			yield put(BimActions.setIsActive(false));
 		}
-
-		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, !visible));
 		yield put(MeasureActions.setMeasureActive(visible));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'measure visibility', error));

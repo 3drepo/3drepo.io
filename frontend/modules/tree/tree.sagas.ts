@@ -85,7 +85,6 @@ function* handleMetadata(node: any) {
 	if (node && node.meta && isMetadataActive) {
 		yield put(BimActions.fetchMetadata(node.teamspace, node.model, node.meta[0]));
 		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, true));
-
 	}
 }
 

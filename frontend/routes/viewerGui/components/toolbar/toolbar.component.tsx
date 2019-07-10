@@ -328,7 +328,11 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	}
 
 	private toggleMeasure = () => {
-		const { isMeasureActive, setMeasureVisibility } = this.props;
+		const { isMeasureActive, setMeasureVisibility, setPanelVisibility } = this.props;
 		setMeasureVisibility(!isMeasureActive);
+
+		if (!isMeasureActive) {
+			setPanelVisibility(VIEWER_PANELS.BIM, false);
+		}
 	}
 }

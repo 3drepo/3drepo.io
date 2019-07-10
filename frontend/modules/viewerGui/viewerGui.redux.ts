@@ -56,7 +56,8 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	clearHighlights: [],
 	setCamera: ['params'],
 	changePinColor: ['params'],
-	removeUnsavedPin: []
+	removeUnsavedPin: [],
+	resetVisiblePanels: []
 }, { prefix: 'VIEWER_GUI/' });
 
 export interface IViewerGuiState {
@@ -128,6 +129,10 @@ const setPinData = (state = INITIAL_STATE, { pinData }) => {
 	return { ...state, pinData };
 };
 
+const resetVisiblePanels = (state = INITIAL_STATE) => {
+	return { ...state, visiblePanels: INITIAL_STATE.visiblePanels };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerGuiTypes.SET_PANEL_VISIBILITY]: setPanelVisibility,
 	[ViewerGuiTypes.SET_IS_MODEL_LOADED] : setIsModelLoaded,
@@ -138,5 +143,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerGuiTypes.SET_CLIP_EDIT_SUCCESS] : setClipEditSuccess,
 	[ViewerGuiTypes.SET_CLIP_NUMBER] : setClipNumber,
 	[ViewerGuiTypes.SET_IS_PIN_DROP_MODE_SUCCESS]: setIsPinDropModeSuccess,
-	[ViewerGuiTypes.SET_PIN_DATA]: setPinData
+	[ViewerGuiTypes.SET_PIN_DATA]: setPinData,
+	[ViewerGuiTypes.RESET_VISIBLE_PANELS]: resetVisiblePanels
 });
