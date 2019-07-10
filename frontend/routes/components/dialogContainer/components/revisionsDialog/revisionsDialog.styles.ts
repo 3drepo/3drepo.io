@@ -24,7 +24,9 @@ import { COLOR } from '../../../../../styles/colors';
 import { FONT_WEIGHT } from '../../../../../styles';
 
 interface IItem {
-	isActive: boolean;
+	theme: {
+		isActive?: boolean;
+	};
 }
 
 export const Property = styled.div`
@@ -53,14 +55,14 @@ export const Item = styled(ListItem)<IItem>`
 	&& {
 		justify-content: space-between;
 		padding: 22px 30px;
-		background-color: ${(props: any) => props.isActive ? COLOR.WHITE : COLOR.BLACK_6};
+		background-color: ${({theme}) => theme.isActive ? COLOR.WHITE : COLOR.BLACK_6};
 		border-bottom: 1px solid ${COLOR.BLACK_20};
 	}
 
 	${Property} {
-		font-weight: ${(props: any) => props.isActive ? FONT_WEIGHT.SEMIBOLD : FONT_WEIGHT.LIGHTER};
+		font-weight: ${({theme}) => theme.isActive ? FONT_WEIGHT.SEMIBOLD : FONT_WEIGHT.LIGHTER};
 	}
-` as any;
+`;
 
 export const Row = styled.div`
 	display: flex;

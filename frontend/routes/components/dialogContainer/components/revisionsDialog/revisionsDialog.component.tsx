@@ -32,34 +32,40 @@ const setNewRevision = (handler, revision, isTheSameRevision) => {
 	handler(revision);
 };
 
-const renderRevisionItem = (revision, currentRevisionId, handleSetNewRevision) => (
-	<Item
-		key={revision._id}
-		button
-		divider
-		onClick={() => setNewRevision(handleSetNewRevision, revision, currentRevisionId === revision._id)}
-		isActive={currentRevisionId === revision._id}>
-		<Row>
-			<PropertyWrapper>
-				<Tag>
-					{revision.tag || '(no tag)'}
-				</Tag>
+const renderRevisionItem = (revision, currentRevisionId, handleSetNewRevision) => {
+	const isCurrentRevision = currentRevisionId === revision._id;
+	const props = {
+		key: revision._id,
+		onClick: () => setNewRevision(handleSetNewRevision, revision, isCurrentRevision),
+		theme: {
+			isActive: isCurrentRevision
+		}
+	};
+
+	return (
+		<Item {...props} button divider>
+			<Row>
+				<PropertyWrapper>
+					<Tag>
+						{revision.tag || '(no tag)'}
+					</Tag>
+					<Property>
+						{isCurrentRevision && '(current revision)'}
+					</Property>
+				</PropertyWrapper>
 				<Property>
-					{currentRevisionId === revision._id && '(current revision)'}
+					<DateTime value={revision.timestamp} format={DATE_TIME_FORMAT} />
 				</Property>
-			</PropertyWrapper>
-			<Property>
-				<DateTime value={revision.timestamp} format={DATE_TIME_FORMAT} />
-			</Property>
-		</Row>
-		<Column>
-			<Property>
-				{revision.author}
-			</Property>
-			<Description>{revision.desc || '(no description)'}</Description>
-		</Column>
-	</Item>
-);
+			</Row>
+			<Column>
+				<Property>
+					{revision.author}
+				</Property>
+				<Description>{revision.desc || '(no description)'}</Description>
+			</Column>
+		</Item>
+	)
+};
 
 const renderRevisions = ({ revisions, currentRevisionId, handleSetNewRevision }) => renderWhenTrue(
 	() => revisions.map((revision) => renderRevisionItem(revision, currentRevisionId, handleSetNewRevision))

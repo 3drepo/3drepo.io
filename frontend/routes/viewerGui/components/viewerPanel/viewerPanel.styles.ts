@@ -26,7 +26,6 @@ interface IViewerPanelFooter {
 }
 
 interface IViewerPanelContent {
-	isPadding?: boolean;
 	scrollDisabled?: boolean;
 }
 
@@ -37,6 +36,7 @@ interface IViewerPanelButton {
 interface IPanel {
 	classname?: string;
 	isPending?: boolean;
+	title?: any;
 }
 
 export const Panel = styled(PanelComponent)<IPanel>`
