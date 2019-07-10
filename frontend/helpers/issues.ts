@@ -55,9 +55,9 @@ export const prepareIssue = (issue, jobs = []) => {
 		preparedIssue.defaultHidden = issue.status === STATUSES.CLOSED;
 	}
 
-	renameFieldIfExists(issue, 'desc', 'description');
-	renameFieldIfExists(issue, 'owner', 'author');
-	renameFieldIfExists(issue, 'created', 'createdDate');
+	renameFieldIfExists(preparedIssue, 'desc', 'description');
+	renameFieldIfExists(preparedIssue, 'owner', 'author');
+	renameFieldIfExists(preparedIssue, 'created', 'createdDate');
 
 	return preparedIssue;
 };
