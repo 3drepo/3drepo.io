@@ -222,7 +222,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		/>
 	));
 
-	public async componentDidMount() {
+	public componentDidMount() {
 		const { subscribeOnChanges, teamspace, model } = this.props;
 
 		this.setState({ filteredGroups: this.filteredGroups });

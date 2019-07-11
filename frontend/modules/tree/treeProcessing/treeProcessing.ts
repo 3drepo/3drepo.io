@@ -40,7 +40,7 @@ class TreeProcessing {
 
 	public getChildren = (node) => this.processing.getChildren(node);
 
-	private handleTransformedData = async ({ data }) => {
+	private handleTransformedData = ({ data }) => {
 		const { result: { data: { nodesList, ...auxiliaryMaps } } } = JSON.parse(data);
 
 		this.loaderWorker.terminate();

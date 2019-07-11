@@ -235,7 +235,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		form.resetForm();
 	}
 
-	public handleNewScreenshot = async () => {
+	public handleNewScreenshot = () => {
 		const { showScreenshotDialog, onTakeScreenshot, viewer } = this.props;
 
 		showScreenshotDialog({

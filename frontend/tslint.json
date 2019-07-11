@@ -50,6 +50,7 @@
         ],
         "no-irregular-whitespace": true,
         "no-empty-interface": true,
-        "curly": true
+        "curly": true,
+        "no-async-without-await": true
     }
 }

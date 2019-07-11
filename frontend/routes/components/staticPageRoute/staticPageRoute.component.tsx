@@ -27,7 +27,7 @@ interface IProps {
 }
 
 export class PageTemplate extends React.PureComponent<IProps, any> {
-	public async componentDidMount() {
+	public componentDidMount() {
 		this.props.loadTemplate(this.props.fileName);
 	}
 

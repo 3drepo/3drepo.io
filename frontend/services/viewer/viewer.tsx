@@ -102,7 +102,7 @@ export class ViewerService {
 		this.initialised = initialised;
 	}
 
-	public destroy = async () => {
+	public destroy = () => {
 		this.viewer.destroy();
 		this.container = null;
 	}
