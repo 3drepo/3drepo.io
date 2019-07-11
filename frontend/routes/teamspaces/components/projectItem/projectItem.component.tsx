@@ -118,12 +118,12 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 	))(this.isProjectAdmin()) as any
 
 	public render() {
-		const { renderChildItem, name, active } = this.props;
+		const { renderChildItem, name, active, onRootClick } = this.props;
 		const { items } = this.state;
 
 		return (
 			<TreeList
-				onRootClick={this.props.onRootClick}
+				onRootClick={onRootClick}
 				name={name}
 				level={TREE_LEVELS.PROJECT}
 				items={items}

@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import Grid from '@material-ui/core/Grid';
 
@@ -81,6 +82,10 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 		items: [],
 		level: TREE_LEVELS.TEAMSPACE,
 		active: false
+	};
+
+	public static propTypes = {
+		onRootClick: PropTypes.func,
 	};
 
 	public state = {

@@ -21,11 +21,9 @@ import { Formik, Field } from 'formik';
 import SaveIcon from '@material-ui/icons/Save';
 import CameraIcon from '@material-ui/icons/AddAPhoto';
 import InputLabel from '@material-ui/core/InputLabel';
-import PinDropIcon from '@material-ui/icons/PinDrop';
 import ReportProblemIcon from '@material-ui/icons/ReportProblem';
 import ShortTextIcon from '@material-ui/icons/ShortText';
 
-import { Viewer } from '../../../../services/viewer/viewer';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
@@ -37,22 +35,16 @@ import {
 	Container
 } from './newCommentForm.styles';
 import {
-	LEVELS_OF_RISK,
-	RISK_CATEGORIES,
 	RISK_CONSEQUENCES,
-	RISK_LIKELIHOODS,
-	RISK_MITIGATION_STATUSES
+	RISK_LIKELIHOODS
 } from '../../../../constants/risks';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
-import { TextField } from '../../../components/textField/textField.component';
 import { FieldsRow, StyledFormControl } from '../risks/components/riskDetails/riskDetails.styles';
-import { RiskSchema } from '../risks/components/riskDetails/riskDetailsForm.component';
 import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
-import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { Image } from '../../../components/image';
 
 interface IProps {
-	innerRef: any;
+	formRef: any;
 	canComment: boolean;
 	comment?: string;
 	screenshot?: string;
@@ -106,7 +98,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 			this.setState({
 				newScreenshot: this.props.screenshot
 			});
-			this.props.innerRef.current.setFieldValue('screenshot', this.props.screenshot);
+			this.props.formRef.current.setFieldValue('screenshot', this.props.screenshot);
 		}
 	}
 
@@ -225,7 +217,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 			hideComment,
 			hideScreenshot,
 			showResidualRiskInput,
-			innerRef,
+			formRef,
 			canComment
 		} = this.props;
 
@@ -233,7 +225,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 			<Container>
 				{this.renderCreatedScreenshot(Boolean(this.state.newScreenshot))}
 				<Formik
-					ref={innerRef}
+					ref={formRef}
 					initialValues={{ comment: '', screenshot: this.state.newScreenshot }}
 					validationSchema={NewCommentSchema}
 					onSubmit={this.handleSave}

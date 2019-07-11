@@ -483,7 +483,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					{this.renderHeader(cells)}
 				</Head>
 				<BodyWrapper>
-					<Body innerRef={this.rowsContainerRef}>
+					<Body ref={this.rowsContainerRef}>
 						<SimpleBar data-simplebar-x-hidden={true}>
 							{this.renderRows(cells, processedRows, showCheckbox)}
 						</SimpleBar>

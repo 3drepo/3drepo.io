@@ -39,7 +39,6 @@ export const Headline = styled.div`
 export const Details = styled.div`
 	transition: all 200ms ease-in-out;
 	background: ${(props: any) => props.active ? COLOR.WHITE : 'transparent'};
-
 	box-shadow: 0 12px 30px ${(props: any) => props.disableShadow ? 'none' : 'currentColor'};
 `;
 

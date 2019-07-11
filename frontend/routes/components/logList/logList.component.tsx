@@ -26,7 +26,7 @@ interface IProps {
 	isPending: boolean;
 	currentUser: string;
 	teamspace: string;
-	innerRef?: any;
+	commentsRef?: any;
 	removeLog: (index, guid) => void;
 	setCameraOnViewpoint: (viewpoint) => void;
 }
@@ -56,7 +56,7 @@ export class LogList extends React.PureComponent<IProps, any> {
 
 	public render() {
 		return (
-			<Container innerRef={this.props.innerRef}>
+			<Container ref={this.props.commentsRef}>
 				{this.props.isPending ? this.renderLoader() : this.props.items.map(this.renderLogItem)}
 			</Container>
 		);

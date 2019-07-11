@@ -21,7 +21,7 @@ import { IconProps } from '@material-ui/core/Icon';
 import { IconContainer } from './fontAwesomeIcon.styles';
 
 interface IExtendedIconProps extends IconProps {
-	innerRef?: any;
+	ref?: any;
 }
 interface IProps {
 	icon: any;

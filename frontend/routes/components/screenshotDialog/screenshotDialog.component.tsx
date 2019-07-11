@@ -210,7 +210,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public renderTools = () => (
 		<Tools
-			innerRef={this.toolsRef}
+			ref={this.toolsRef}
 			size={this.state.brushSize}
 			color={this.state.brushColor}
 			onDrawClick={this.setBrushMode}
@@ -228,14 +228,14 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		const { sourceImage } = this.state;
 
 		return (
-			<Container innerRef={this.containerRef}>
+			<Container ref={this.containerRef}>
 				<EventListener target="window" onResize={this.handleResize} />
-				<HiddenCanvas innerRef={this.hiddenCanvasRef} />
+				<HiddenCanvas ref={this.hiddenCanvasRef} />
 				<BackgroundImage src={sourceImage} />
 				{this.renderIndicator(!this.props.disabled)}
 				{this.renderTools()}
 				<Canvas
-					innerRef={this.canvasRef}
+					ref={this.canvasRef}
 					onMouseDown={this.handleMouseDown}
 					onTouchStart={this.handleMouseDown}
 					onMouseUp={this.handleMouseUp}

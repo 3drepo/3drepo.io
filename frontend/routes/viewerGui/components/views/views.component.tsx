@@ -306,7 +306,7 @@ export class Views extends React.PureComponent<IProps, any> {
 				renderActions={this.getSearchButton}
 				pending={this.props.isPending}
 			>
-				<Container innerRef={this.containerRef}>
+				<Container ref={this.containerRef}>
 					{this.renderEmptyState(!hasViewpoints && !searchEnabled && !newViewpoint)}
 					{this.renderSearch(searchEnabled)}
 					{this.renderNotFound(searchEnabled && !filteredViewpoints.length)}

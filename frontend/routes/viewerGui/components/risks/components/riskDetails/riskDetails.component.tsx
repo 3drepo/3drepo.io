@@ -73,7 +73,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		scrolled: false
 	};
 
-	public commentRef = React.createRef<any>();
+	public formRef = React.createRef<any>();
 	public panelRef = React.createRef<any>();
 	public commentsRef = React.createRef<any>();
 
@@ -182,7 +182,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	public renderLogList = renderWhenTrue(() => {
 		return (
 			<LogList
-				innerRef={this.commentsRef}
+				commentsRef={this.commentsRef}
 				items={this.riskData.comments}
 				isPending={this.props.fetchingDetailsIsPending}
 				removeLog={this.removeComment}
@@ -236,7 +236,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				comment={this.props.newComment.comment}
 				screenshot={this.props.newComment.screenshot}
 				viewpoint={this.props.newComment.viewpoint}
-				innerRef={this.commentRef}
+				formRef={this.formRef}
 				onTakeScreenshot={this.handleNewScreenshot}
 				onSave={this.handleSave}
 				canComment={this.userCanComment()}
@@ -329,7 +329,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			<Container>
 				<ViewerPanelContent
 					onScroll={this.handlePanelScroll}
-					innerRef={this.panelRef}
+					ref={this.panelRef}
 				>
 					{this.renderFailedState(failedToLoad)}
 					{this.renderPreview(!failedToLoad && risk)}

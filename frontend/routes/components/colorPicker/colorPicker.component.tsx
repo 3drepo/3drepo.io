@@ -367,7 +367,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 					>
 						<CanvasContainer item={true}>
 							<BlockCanvas
-								innerRef={this.blockCanvasRef}
+								ref={this.blockCanvasRef}
 								width={185}
 								height={170}
 								onMouseDown={this.onBlockCanvasClick.bind(null, true)}
@@ -375,7 +375,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 								onMouseMove={this.onBlockCanvasMove}
 							/>
 							<ColorPointer
-								innerRef={this.pointerRef}
+								ref={this.pointerRef}
 								style={{
 									top: pointerTop,
 									left: pointerLeft
@@ -384,7 +384,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						</CanvasContainer>
 						<CanvasContainer item={true}>
 							<StripCanvas
-								innerRef={this.stripCanvasRef}
+								ref={this.stripCanvasRef}
 								width={23}
 								height={170}
 								onClick={this.onStripCanvasClick}

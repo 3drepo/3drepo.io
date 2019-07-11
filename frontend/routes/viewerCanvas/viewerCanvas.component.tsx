@@ -43,7 +43,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		return (
 			<Container
 				id="viewer"
-				innerRef={this.containerRef}
+				ref={this.containerRef}
 				className={this.props.className}
 			/>
 		);

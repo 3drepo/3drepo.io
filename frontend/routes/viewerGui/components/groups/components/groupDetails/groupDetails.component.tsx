@@ -235,7 +235,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			<Container>
 				<Content
 					onScroll={this.handlePanelScroll}
-					innerRef={this.panelRef}
+					ref={this.panelRef}
 				>
 					{this.renderPreview(this.groupData)}
 				</Content>

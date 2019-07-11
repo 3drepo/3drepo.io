@@ -33,10 +33,10 @@ interface IProps {
 	projects: any[];
 	active: boolean;
 	isMyTeamspace: boolean;
-	onToggle: () => void;
+	permissions: any[];
+	onToggle: (state) => void;
 	renderChildItem: () => JSX.Element;
 	onAddProject: () => void;
-	permissions: any[];
 }
 
 export const TeamspaceItem = (props: IProps) => {

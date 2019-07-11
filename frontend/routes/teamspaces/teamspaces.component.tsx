@@ -148,8 +148,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		this.props.history.push({ pathname, search: `?${queryString.stringify(params)}` });
 	}
 
-	public onTeamspaceClick = (teamspace) => {
-		this.setState({ activeTeamspace: teamspace.account });
+	public onTeamspaceClick = ({ name }) => {
+		this.setState({ activeTeamspace: name });
 	}
 
 	/**
@@ -400,7 +400,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			active={this.isActiveTeamspace(teamspace.account)}
 			isMyTeamspace={index === 0}
 			renderChildItem={this.renderProject}
-			onToggle={this.onTeamspaceClick.bind(this, teamspace)}
+			onToggle={this.onTeamspaceClick}
 			onAddProject={this.openProjectDialog(teamspace.account)}
 		/>
 	))

@@ -1,11 +1,11 @@
-import { injectGlobal } from 'styled-components';
+import { createGlobalStyle } from 'styled-components';
 import { COLOR } from './colors';
 import { clientConfigService } from '../services/clientConfig';
 
 const appBackgroundImage = clientConfigService.getCustomBackgroundImagePath() || '/images/viewer_background.png';
 
 // tslint:disable-next-line: no-unused-expression
-injectGlobal`
+export const GlobalStyle = createGlobalStyle`
 	* {
 		font-family: Roboto, 'Helvetica Neue', sans-serif;
 		font-size: 100%;

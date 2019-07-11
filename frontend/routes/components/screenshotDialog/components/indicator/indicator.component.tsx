@@ -48,7 +48,7 @@ export class Indicator extends React.PureComponent <IProps, any> {
 					target="window"
 					onMouseMove={this.handleMouseMove}
 				/>
-				<StyledIndicator {...this.props} innerRef={this.indicatorRef} />
+				<StyledIndicator {...this.props} ref={this.indicatorRef} />
 			</>
 		);
 	}

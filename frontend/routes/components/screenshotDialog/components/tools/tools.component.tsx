@@ -30,7 +30,7 @@ import { FONT_WEIGHT } from '../../../../../styles';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 
 interface IProps {
-	innerRef: any;
+	ref: any;
 	size: number;
 	color: string;
 	disabled?: boolean;
@@ -119,10 +119,10 @@ export class Tools extends React.PureComponent<IProps, any> {
 	));
 
 	public render() {
-		const { innerRef, disabled, onCancel } = this.props;
+		const { ref, disabled, onCancel } = this.props;
 
 		return (
-			<ToolsContainer innerRef={innerRef} disabled={disabled}>
+			<ToolsContainer ref={ref} disabled={disabled}>
 				{this.renderToolset(!disabled)}
 				<StyledButton onClick={onCancel} color="primary">Cancel</StyledButton>
 				{this.renderSaveButton(!disabled)}
