@@ -21,7 +21,7 @@ import ContactSupport from '@material-ui/icons/ContactSupport';
 import ExitToApp from '@material-ui/icons/ExitToApp';
 import Settings from '@material-ui/icons/Settings';
 import ViewList from '@material-ui/icons/ViewList';
-import * as React from 'react';
+import React from 'react';
 
 import { Avatar } from '../../../avatar/avatar.component';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';

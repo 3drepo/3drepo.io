@@ -17,7 +17,7 @@
 
 import Grid from '@material-ui/core/Grid';
 import Tooltip from '@material-ui/core/Tooltip';
-import * as React from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { clientConfigService } from '../../../services/clientConfig';

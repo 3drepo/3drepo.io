@@ -17,7 +17,7 @@
 
 import Grid from '@material-ui/core/Grid';
 import { isEmpty } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import Folder from '@material-ui/icons/Folder';
 import FolderOpen from '@material-ui/icons/FolderOpen';

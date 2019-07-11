@@ -18,7 +18,7 @@
 import Radio from '@material-ui/core/Radio';
 import Tooltip from '@material-ui/core/Tooltip';
 import { isEmpty, isEqual, memoize, pick } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 // @ts-ignore
 import AdminIconSrc from '../../../icons/how_to_reg.svg';

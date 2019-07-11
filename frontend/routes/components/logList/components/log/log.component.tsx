@@ -16,7 +16,7 @@
  */
 
 import CloseIcon from '@material-ui/icons/Close';
-import * as React from 'react';
+import React from 'react';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { TooltipButton } from '../../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { DATE_TIME_FORMAT } from '../../../../../services/formatting/formatDate';

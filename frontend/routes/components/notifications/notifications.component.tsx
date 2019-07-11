@@ -23,7 +23,7 @@ import Typography from '@material-ui/core/Typography';
 import Close from '@material-ui/icons/Close';
 import MoreVert from '@material-ui/icons/MoreVert';
 import { groupBy, sortBy, toArray } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { simpleDate } from '../../../services/formatting/formatDate';

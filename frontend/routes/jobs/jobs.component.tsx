@@ -17,8 +17,8 @@
 
 import RemoveCircle from '@material-ui/icons/RemoveCircle';
 import { isEmpty, isEqual } from 'lodash';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 import { ColorPicker } from '../components/colorPicker/colorPicker.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';

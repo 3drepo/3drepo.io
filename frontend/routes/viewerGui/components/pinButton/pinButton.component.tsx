@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { NEW_PIN_ID, VIEWER_EVENTS } from '../../../../constants/viewer';
 import { PIN_COLORS } from '../../../../styles';
 import { Container, LabelButton, PinIcon } from './pinButton.styles';

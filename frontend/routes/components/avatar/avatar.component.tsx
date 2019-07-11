@@ -16,7 +16,7 @@
  */
 
 import { memoize } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import { AvatarPlaceholder, Container, StyledAvatar, StyledIcon } from './avatar.styles';
 

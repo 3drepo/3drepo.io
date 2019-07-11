@@ -16,7 +16,7 @@
  */
 
 import { snakeCase } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import { Chip, Input } from '@material-ui/core';
 import { ENTER_KEY } from '../../../constants/keys';

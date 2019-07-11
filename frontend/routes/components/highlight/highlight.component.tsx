@@ -16,7 +16,7 @@
  */
 
 import { trim } from 'lodash';
-import * as React from 'react';
+import React, { memo } from 'react';
 import Highlighter from 'react-highlight-words';
 
 import { Mark } from './highlight.styles';
@@ -28,15 +28,17 @@ interface IProps {
 	caseSensitive?: boolean;
 }
 
-export const Highlight = ({splitQueryToWords, search, text, caseSensitive}: IProps) => {
+const HighlightTag = (props) => <Mark {...props as any} />;
+
+export const Highlight = memo(({splitQueryToWords, search, text, caseSensitive}: IProps) => {
 	const searchWords = splitQueryToWords ? search.split(' ') : [trim(search)];
 	return (
 		<Highlighter
 			searchWords={searchWords}
 			autoEscape
 			textToHighlight={text || ''}
-			highlightTag={Mark}
+			highlightTag={HighlightTag}
 			caseSensitive={caseSensitive}
 		/>
 	);
-};
+});

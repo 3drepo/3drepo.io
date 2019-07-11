@@ -17,7 +17,7 @@
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-import * as React from 'react';
+import React from 'react';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';

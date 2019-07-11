@@ -17,7 +17,7 @@
 
 import Grid from '@material-ui/core/Grid';
 import { Field, Form, Formik } from 'formik';
-import * as React from 'react';
+import React from 'react';
 import * as Yup from 'yup';
 
 import { schema } from '../../../services/validation';

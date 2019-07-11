@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import Input from '@material-ui/core/Input';
 import { Item, StyledSelect } from './cellSelect.styles';

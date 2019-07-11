@@ -16,7 +16,7 @@
  */
 
 import * as queryString from 'query-string';
-import * as React from 'react';
+import React from 'react';
 
 import {
 	LEVELS_OF_RISK,

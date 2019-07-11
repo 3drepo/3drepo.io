@@ -18,7 +18,7 @@
 // @ts-ignore
 import * as fileDialog from 'file-dialog';
 import * as queryString from 'query-string';
-import * as React from 'react';
+import React from 'react';
 
 import {
 	ISSUE_FILTER_RELATED_FIELDS,

@@ -16,7 +16,7 @@
  */
 
 import { MenuItem, Paper } from '@material-ui/core';
-import * as React from 'react';
+import React from 'react';
 import * as Autosuggest from 'react-autosuggest';
 import { Highlight } from '../highlight/highlight.component';
 

@@ -20,7 +20,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import InfoIcon from '@material-ui/icons/Info';
 import SearchIcon from '@material-ui/icons/Search';
 import { isEmpty } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '../../../../constants/bim';
 import { getFilters } from '../../../../helpers/bim';

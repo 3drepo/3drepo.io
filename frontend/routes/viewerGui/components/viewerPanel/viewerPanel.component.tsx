@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Loader } from '../../../components/loader/loader.component';

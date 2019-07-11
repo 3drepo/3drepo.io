@@ -18,7 +18,7 @@
 import { TextFieldProps } from '@material-ui/core/TextField';
 import CancelIcon from '@material-ui/icons/Cancel';
 import SaveIcon from '@material-ui/icons/Save';
-import * as React from 'react';
+import React from 'react';
 
 import { Field, Formik } from 'formik';
 import { ActionsLine, Container, StyledIconButton, StyledTextField } from './textField.styles';

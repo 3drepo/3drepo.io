@@ -21,7 +21,7 @@ import ReportProblemIcon from '@material-ui/icons/ReportProblem';
 import SaveIcon from '@material-ui/icons/Save';
 import ShortTextIcon from '@material-ui/icons/ShortText';
 import { Field, Formik } from 'formik';
-import * as React from 'react';
+import React from 'react';
 import * as Yup from 'yup';
 
 import {

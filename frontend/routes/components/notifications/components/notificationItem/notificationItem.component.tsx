@@ -18,7 +18,7 @@
 import { Tooltip } from '@material-ui/core';
 import Avatar from '@material-ui/core/Avatar';
 import Place from '@material-ui/icons/Place';
-import * as React from 'react';
+import React from 'react';
 
 import ChangeHistory from '@material-ui/icons/ChangeHistory';
 import Clear from '@material-ui/icons/Clear';

@@ -17,7 +17,7 @@
 
 import { IconProps as IIconProps } from '@material-ui/core/Icon';
 import IconButton, { IconButtonProps } from '@material-ui/core/IconButton';
-import * as React from 'react';
+import React from 'react';
 
 import { StyledPopover } from './buttonMenu.styles';
 

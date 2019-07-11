@@ -3,7 +3,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import { Field, Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 import * as Yup from 'yup';
 
 import { GROUPS_TYPES, GROUPS_TYPES_LIST } from '../../../../../../constants/groups';

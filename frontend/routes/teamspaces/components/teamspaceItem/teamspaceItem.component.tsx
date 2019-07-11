@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';

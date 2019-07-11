@@ -17,7 +17,7 @@
 
 import { connect, withFormik, Field, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 import * as Yup from 'yup';
 
 import InputLabel from '@material-ui/core/InputLabel';

@@ -25,8 +25,8 @@ import {
 	pick,
 	values
 } from 'lodash';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';

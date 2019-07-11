@@ -17,7 +17,7 @@
 
 import CheckIcon from '@material-ui/icons/Check';
 import MoreIcon from '@material-ui/icons/MoreVert';
-import * as React from 'react';
+import React from 'react';
 
 import { IconButton, Tab, Tooltip } from '@material-ui/core';
 

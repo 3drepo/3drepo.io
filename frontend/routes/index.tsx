@@ -1,5 +1,5 @@
 import { MuiThemeProvider } from '@material-ui/core';
-import * as React from 'react';
+import React from 'react';
 import { withRouter, Route } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 

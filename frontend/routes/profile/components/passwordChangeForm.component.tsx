@@ -17,7 +17,7 @@
 
 import { Field, Form, Formik } from 'formik';
 import { omit } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 import * as Yup from 'yup';
 
 import {

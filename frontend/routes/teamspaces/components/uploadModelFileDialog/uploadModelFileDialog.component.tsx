@@ -16,7 +16,7 @@
  */
 
 import { Field, Form, Formik } from 'formik';
-import * as React from 'react';
+import React from 'react';
 import * as Yup from 'yup';
 
 import Button from '@material-ui/core/Button';

@@ -1,6 +1,6 @@
 import Button from '@material-ui/core/Button';
 import DialogContent from '@material-ui/core/DialogContent';
-import * as React from 'react';
+import React from 'react';
 
 import { DialogActions } from './newUpdateDialog.styles';
 

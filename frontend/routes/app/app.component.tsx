@@ -16,7 +16,7 @@
  */
 
 import { memoize } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { PUBLIC_ROUTES, ROUTES } from '../../constants/routes';

@@ -17,7 +17,7 @@
 
 import { Checkbox, IconButton, Tooltip } from '@material-ui/core';
 import { cond, isEmpty, isEqual, matchesProperty, orderBy, pick, stubTrue, values } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 import SimpleBar from 'simplebar-react';
 
 import { SORT_ORDER_TYPES } from '../../../constants/sorting';

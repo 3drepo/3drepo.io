@@ -17,7 +17,7 @@
 
 import { isEmpty, pick } from 'lodash';
 import * as queryString from 'query-string';
-import * as React from 'react';
+import React from 'react';
 import SimpleBar from 'simplebar-react';
 
 import { MODEL_ROLES_LIST } from '../../constants/model-permissions';

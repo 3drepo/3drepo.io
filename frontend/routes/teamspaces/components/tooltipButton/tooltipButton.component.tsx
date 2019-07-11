@@ -17,7 +17,7 @@
 
 import Tooltip from '@material-ui/core/Tooltip';
 import { TooltipProps } from '@material-ui/core/Tooltip';
-import * as React from 'react';
+import React from 'react';
 import { StyledIconButton } from './tooltipButton.styles';
 
 interface IProps {

@@ -16,7 +16,7 @@
  */
 
 import IconButton from '@material-ui/core/IconButton';
-import * as React from 'react';
+import React from 'react';
 
 import { LANDING_ROUTES, STATIC_ROUTES } from '../../../../../services/staticPages';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';

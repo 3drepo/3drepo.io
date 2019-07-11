@@ -20,7 +20,7 @@ import Grid from '@material-ui/core/Grid';
 import InputLabel from '@material-ui/core/InputLabel';
 import {isEmpty, isEqual} from 'lodash';
 import * as queryString from 'query-string';
-import * as React from 'react';
+import React from 'react';
 import { Route } from 'react-router-dom';
 
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';

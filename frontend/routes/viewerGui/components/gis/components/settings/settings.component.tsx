@@ -16,7 +16,7 @@
  */
 
 import { withFormik } from 'formik';
-import * as React from 'react';
+import React from 'react';
 import * as Yup from 'yup';
 
 import { convertPositionToDirectX, convertPositionToOpenGL } from '../../../../../../helpers/model';

@@ -22,7 +22,7 @@ import RemoveIcon from '@material-ui/icons/Remove';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
-import * as React from 'react';
+import React from 'react';
 
 import {
 	SELECTION_STATES,

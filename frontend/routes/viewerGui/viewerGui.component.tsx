@@ -16,7 +16,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
 import { renderWhenTrue } from '../../helpers/rendering';

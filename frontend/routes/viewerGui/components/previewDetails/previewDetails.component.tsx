@@ -17,7 +17,7 @@
 
 import { TextField, Typography } from '@material-ui/core';
 import { Field, Formik } from 'formik';
-import * as React from 'react';
+import React from 'react';
 import * as Yup from 'yup';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';

@@ -19,7 +19,7 @@ import DayJsUtils from '@date-io/dayjs';
 import { connect, withFormik, Field, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
-import * as React from 'react';
+import React from 'react';
 import * as Yup from 'yup';
 
 import InputLabel from '@material-ui/core/InputLabel';

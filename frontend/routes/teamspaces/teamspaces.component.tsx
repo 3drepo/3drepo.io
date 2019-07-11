@@ -17,7 +17,7 @@
 
 import { isEmpty, isEqual } from 'lodash';
 import * as queryString from 'query-string';
-import * as React from 'react';
+import React from 'react';
 import SimpleBar from 'simplebar-react';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 

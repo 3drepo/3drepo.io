@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { Checkbox, FilterContainer, FilterPanel } from './compareFilters.styles';
 
 interface IProps {

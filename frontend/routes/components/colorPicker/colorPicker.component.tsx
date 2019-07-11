@@ -20,7 +20,7 @@ import Grid from '@material-ui/core/Grid';
 import RootRef from '@material-ui/core/RootRef';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import { identity, memoize } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import {
 	BlockCanvas,

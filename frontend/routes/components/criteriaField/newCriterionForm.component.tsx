@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 import * as Yup from 'yup';
 
 import { Tooltip } from '@material-ui/core';

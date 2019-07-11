@@ -16,7 +16,7 @@
  */
 
 import { startCase } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';

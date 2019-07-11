@@ -16,7 +16,7 @@
  */
 
 import Button from '@material-ui/core/Button';
-import * as React from 'react';
+import React from 'react';
 
 import { clientConfigService } from '../../../../../services/clientConfig';
 import { FileLabel, HiddenFileInput } from './fileInputField.styles';

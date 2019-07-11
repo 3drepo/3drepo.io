@@ -20,7 +20,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import { isEmpty, isEqual } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 import { Link, Redirect, Route, Switch } from 'react-router-dom';
 
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';

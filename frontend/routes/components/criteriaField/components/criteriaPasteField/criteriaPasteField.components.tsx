@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 import { ENTER_KEY } from '../../../../../constants/keys';
 import { PasteButton, PasteContainer, PasteField, StyledCloseIcon, StyledSaveIcon } from './criteriaPasteField.styles';

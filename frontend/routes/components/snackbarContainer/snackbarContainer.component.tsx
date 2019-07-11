@@ -16,7 +16,7 @@
  */
 
 import Snackbar from '@material-ui/core/Snackbar';
-import * as React from 'react';
+import React from 'react';
 
 import { DefaultSnackbar } from './components/defaultSnackbar/defaultSnackbar.component';
 

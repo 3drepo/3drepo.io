@@ -25,7 +25,7 @@ import InvertColors from '@material-ui/icons/InvertColors';
 import SearchIcon from '@material-ui/icons/Search';
 import Visibility from '@material-ui/icons/VisibilityOutlined';
 import { isEmpty, isEqual, size, stubTrue } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import {
 	DEFAULT_OVERRIDE_COLOR,

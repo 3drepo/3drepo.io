@@ -18,7 +18,7 @@
 import Label from '@material-ui/icons/Label';
 import LabelOutlined from '@material-ui/icons/LabelOutlined';
 import { groupBy, isEmpty, isEqual } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';

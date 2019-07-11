@@ -16,7 +16,7 @@
  */
 
 import Button from '@material-ui/core/Button';
-import * as React from 'react';
+import React from 'react';
 import { ROUTES } from '../../../../constants/routes';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../services/analytics';
 import { DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';

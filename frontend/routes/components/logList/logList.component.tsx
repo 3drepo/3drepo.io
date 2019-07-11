@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { Loader } from '../../components/loader/loader.component';
 import { Log } from './components/log/log.component';

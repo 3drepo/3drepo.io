@@ -17,7 +17,7 @@
 
 import DayJsUtils from '@date-io/dayjs';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
-import * as React from 'react';
+import React from 'react';
 
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 

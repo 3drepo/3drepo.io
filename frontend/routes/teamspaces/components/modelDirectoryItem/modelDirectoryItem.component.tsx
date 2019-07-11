@@ -17,7 +17,7 @@
 
 import Bookmarks from '@material-ui/icons/Bookmarks';
 import BookmarksOutlined from '@material-ui/icons/BookmarksOutlined';
-import * as React from 'react';
+import React from 'react';
 
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';

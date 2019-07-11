@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { EmptyStateInfo } from '../../../views/views.styles';
 import { CompareDiffItem } from '../compareDiffItem/compareDiffItem.component';

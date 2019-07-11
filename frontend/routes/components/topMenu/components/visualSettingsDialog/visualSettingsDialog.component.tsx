@@ -18,7 +18,7 @@
 import { Button, InputAdornment, List, MenuItem, Switch } from '@material-ui/core';
 import { Field, Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 import * as Yup from 'yup';
 import { DEFAULT_SETTINGS } from '../../../../../constants/viewer';
 import { schema } from '../../../../../services/validation';

@@ -17,7 +17,7 @@
 
 import { Checkbox } from '@material-ui/core';
 import { capitalize } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import { BASE_MODEL_TYPE, TARGET_MODEL_TYPE } from '../../../../../../constants/compare';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';

@@ -16,7 +16,7 @@
  */
 
 import Tooltip from '@material-ui/core/Tooltip';
-import * as React from 'react';
+import React from 'react';
 import { CompanyName, Container, FullName, TooltipText, Username } from './dynamicUsername.styles';
 
 interface IProps {

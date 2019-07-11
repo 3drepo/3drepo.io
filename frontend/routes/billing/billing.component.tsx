@@ -19,7 +19,7 @@ import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import { values } from 'lodash';
 import * as queryString from 'query-string';
-import * as React from 'react';
+import React from 'react';
 import { Link, Redirect, Route, Switch } from 'react-router-dom';
 
 import { Panel } from '../components/panel/panel.component';

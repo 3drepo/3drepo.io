@@ -1,6 +1,6 @@
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
-import * as React from 'react';
+import React from 'react';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { DATE_TIME_FORMAT } from '../../../../../services/formatting/formatDate';
 import { DateTime } from '../../../dateTime/dateTime.component';

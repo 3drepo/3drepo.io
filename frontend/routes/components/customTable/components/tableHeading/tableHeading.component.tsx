@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { SortLabel } from './tableHeading.styles';
 
 export const TableHeading = ({ label, activeSort, sortOrder, onClick, onChange, hideSortIcon }) => {

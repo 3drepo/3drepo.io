@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { NEW_PIN_ID } from '../../../../../../constants/viewer';
 import { diffData, mergeData } from '../../../../../../helpers/forms';

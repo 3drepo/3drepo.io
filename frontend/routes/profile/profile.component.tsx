@@ -16,7 +16,7 @@
  */
 
 import { pick } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import { Panel } from '../components/panel/panel.component';
 import { APIKeyForm } from './components/apiKeyForm.component';

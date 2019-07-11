@@ -17,7 +17,7 @@
 
 import { Field, Formik } from 'formik';
 import { isEmpty, isEqual } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 import * as Yup from 'yup';
 
 import { formatBytesGB } from '../../../services/formatting/formatCapacity';

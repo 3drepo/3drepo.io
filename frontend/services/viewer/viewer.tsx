@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_PIN_MODE } from '../../constants/viewer';

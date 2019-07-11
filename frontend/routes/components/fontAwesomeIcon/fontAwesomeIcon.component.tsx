@@ -17,7 +17,7 @@
 
 import { FontAwesomeIcon as FontAwesomeIconComponent } from '@fortawesome/react-fontawesome';
 import { IconProps } from '@material-ui/core/Icon';
-import * as React from 'react';
+import React from 'react';
 import { IconContainer } from './fontAwesomeIcon.styles';
 
 interface IExtendedIconProps extends IconProps {

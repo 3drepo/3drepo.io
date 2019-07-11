@@ -17,7 +17,7 @@
 
 import { Button } from '@material-ui/core';
 import { Form } from 'formik';
-import * as React from 'react';
+import React from 'react';
 
 import {
 	DeleteButton,

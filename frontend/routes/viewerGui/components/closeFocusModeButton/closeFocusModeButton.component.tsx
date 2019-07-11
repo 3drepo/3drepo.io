@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import Fade from '@material-ui/core/Fade';
 import CloseIcon from '@material-ui/icons/Close';

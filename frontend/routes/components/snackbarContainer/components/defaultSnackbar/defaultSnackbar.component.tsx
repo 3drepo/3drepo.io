@@ -18,7 +18,7 @@
 import IconButton from '@material-ui/core/IconButton';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import Close from '@material-ui/icons/Close';
-import * as React from 'react';
+import React from 'react';
 
 interface IProps {
 	message: string;

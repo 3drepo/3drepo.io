@@ -17,7 +17,7 @@
 
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 import SaveIcon from '@material-ui/icons/Save';
-import * as React from 'react';
+import React from 'react';
 
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';

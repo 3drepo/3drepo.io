@@ -1,8 +1,8 @@
 import { ConnectedRouter } from 'connected-react-router';
 import 'font-awesome/css/font-awesome.min.css';
 import 'normalize.css/normalize.css';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import 'simplebar';
 import 'simplebar/dist/simplebar.min.css';

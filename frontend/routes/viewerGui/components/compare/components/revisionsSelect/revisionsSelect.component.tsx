@@ -16,7 +16,7 @@
  */
 
 import { keyBy } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { formatShortDate, NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
 import { DateTime } from '../../../../../components/dateTime/dateTime.component';

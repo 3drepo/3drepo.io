@@ -18,7 +18,7 @@
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import { Field, Form, Formik } from 'formik';
-import * as React from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import * as Yup from 'yup';
 

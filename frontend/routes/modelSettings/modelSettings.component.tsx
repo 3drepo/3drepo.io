@@ -18,7 +18,7 @@
 import { Field, Formik } from 'formik';
 import { isEmpty } from 'lodash';
 import * as queryString from 'query-string';
-import * as React from 'react';
+import React from 'react';
 import * as Yup from 'yup';
 
 import Button from '@material-ui/core/Button';

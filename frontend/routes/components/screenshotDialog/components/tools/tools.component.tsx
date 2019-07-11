@@ -20,7 +20,7 @@ import Select from '@material-ui/core/Select';
 import BorderColorIcon from '@material-ui/icons/BorderColor';
 import ClearIcon from '@material-ui/icons/Clear';
 import { range } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { FONT_WEIGHT } from '../../../../../styles';

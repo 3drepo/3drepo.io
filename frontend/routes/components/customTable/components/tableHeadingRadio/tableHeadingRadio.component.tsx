@@ -16,7 +16,7 @@
  */
 
 import { Grid, Tooltip } from '@material-ui/core';
-import * as React from 'react';
+import React from 'react';
 
 import { SortLabel } from '../tableHeading/tableHeading.styles';
 import { RadioButton, RadioContainer } from './tableHeadingRadio.styles';

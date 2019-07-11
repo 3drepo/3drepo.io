@@ -22,7 +22,7 @@ import GisIcon from '@material-ui/icons/Layers';
 import ViewsIcon from '@material-ui/icons/PhotoCamera';
 import IssuesIcon from '@material-ui/icons/Place';
 import RisksIcon from '@material-ui/icons/Warning';
-import * as React from 'react';
+import React from 'react';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Container } from './panelsMenu.styles';
 
