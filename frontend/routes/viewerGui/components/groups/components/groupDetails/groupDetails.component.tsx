@@ -58,22 +58,6 @@ interface IState {
 }
 
 export class GroupDetails extends React.PureComponent<IProps, IState> {
-	public state = {
-		isFormValid: false,
-		isFormDirty: false,
-		scrolled: false
-	};
-
-	public formRef = React.createRef<HTMLElement>() as any;
-	public panelRef = React.createRef<any>();
-
-	public componentDidMount() {
-		if (!this.isNewGroup) {
-			this.props.setState({ newGroup: { ...this.groupData }});
-		} else {
-			this.props.setState({ isFormValid: true });
-		}
-	}
 
 	get isNewGroup() {
 		return !this.props.activeGroup._id;
@@ -96,6 +80,54 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		}
 
 		return this.state.isFormDirty && this.state.isFormValid && this.hasValidRules;
+	}
+	public state = {
+		isFormValid: false,
+		isFormDirty: false,
+		scrolled: false
+	};
+
+	public formRef = React.createRef<HTMLElement>() as any;
+	public panelRef = React.createRef<any>();
+
+	public renderRulesField = renderWhenTrue(() => (
+		<CriteriaField
+			name="rules"
+			value={this.groupData.rules}
+			{...this.props.criteriaFieldState}
+			onChange={this.handleFieldChange}
+			onCriterionSelect={this.handleCriterionSelect}
+			setState={this.props.setCriteriaState}
+			label="Filters"
+			placeholder="Select first filter"
+			disabled={!this.props.canUpdate}
+			fieldNames={this.props.fieldNames}
+		/>
+	));
+
+	public renderPreview = renderWhenTrue(() => (
+		<PreviewDetails
+			key={this.groupData._id}
+			{...this.groupData}
+			roleColor={this.groupData.color}
+			createdDate={this.groupData.createdDate}
+			editable={this.props.canUpdate}
+			onNameChange={this.handleFieldChange}
+			renderCollapsable={this.renderGroupForm}
+			renderNotCollapsable={() => this.renderRulesField(this.groupData.type === GROUPS_TYPES.SMART)}
+			disableExpanding
+			panelName={GROUP_PANEL_NAME}
+			StatusIconComponent={GROUP_TYPES_ICONS[this.groupData.type]}
+			scrolled={this.state.scrolled}
+		/>
+	));
+
+	public componentDidMount() {
+		if (!this.isNewGroup) {
+			this.props.setState({ newGroup: { ...this.groupData }});
+		} else {
+			this.props.setState({ isFormValid: true });
+		}
 	}
 
 	public handleGroupFormSubmit = () => {
@@ -157,38 +189,6 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			this.setState({ scrolled: false });
 		}
 	}
-
-	public renderRulesField = renderWhenTrue(() => (
-		<CriteriaField
-			name="rules"
-			value={this.groupData.rules}
-			{...this.props.criteriaFieldState}
-			onChange={this.handleFieldChange}
-			onCriterionSelect={this.handleCriterionSelect}
-			setState={this.props.setCriteriaState}
-			label="Filters"
-			placeholder="Select first filter"
-			disabled={!this.props.canUpdate}
-			fieldNames={this.props.fieldNames}
-		/>
-	));
-
-	public renderPreview = renderWhenTrue(() => (
-		<PreviewDetails
-			key={this.groupData._id}
-			{...this.groupData}
-			roleColor={this.groupData.color}
-			createdDate={this.groupData.createdDate}
-			editable={this.props.canUpdate}
-			onNameChange={this.handleFieldChange}
-			renderCollapsable={this.renderGroupForm}
-			renderNotCollapsable={() => this.renderRulesField(this.groupData.type === GROUPS_TYPES.SMART)}
-			disableExpanding
-			panelName={GROUP_PANEL_NAME}
-			StatusIconComponent={GROUP_TYPES_ICONS[this.groupData.type]}
-			scrolled={this.state.scrolled}
-		/>
-	));
 
 	public setIsFormValid = (isFormValid) => {
 		this.setState({ isFormValid });

@@ -95,9 +95,6 @@ interface IState {
 }
 
 export class ReportedItems extends React.PureComponent<IProps, IState> {
-	public state = {
-		filteredItems: [],
-	};
 
 	get activeItemIndex() {
 		return this.state.filteredItems.findIndex((item) => item._id === this.props.activeItemId);
@@ -120,9 +117,79 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		}
 		return 'Model is loading';
 	}
+	public state = {
+		filteredItems: [],
+	};
 
 	public listViewRef = React.createRef<HTMLElement>();
 	public listContainerRef = React.createRef<any>();
+
+	public renderItemsList = renderWhenTrue(() => (
+		<ListContainer ref={this.listContainerRef}>
+			{this.state.filteredItems.map((item, index) => (
+				<PreviewListItem
+					{...item}
+					key={index}
+					onItemClick={this.handleItemFocus(item)}
+					onArrowClick={this.handleShowItemDetails(item)}
+					active={this.props.activeItemId === item._id}
+					hasViewPermission={this.hasPermission(VIEW_ISSUE)}
+					modelLoaded={this.props.isModelLoaded}
+					panelName={this.props.type}
+				/>
+			))}
+		</ListContainer>
+	));
+
+	public renderListView = renderWhenTrue(() => (
+		<>
+			<ViewerPanelContent innerRef={this.listViewRef}>
+				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredItems.length)}
+				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredItems.length)}
+				{this.renderItemsList(this.state.filteredItems.length)}
+			</ViewerPanelContent>
+			<ViewerPanelFooter alignItems="center" justify="space-between">
+				<Summary>{this.listFooterText}</Summary>
+				<ViewerPanelButton
+					aria-label="Add item"
+					onClick={this.handleAddNewItem}
+					color="secondary"
+					variant="fab"
+					disabled={!this.hasPermission(CREATE_ISSUE) || !this.props.isModelLoaded}
+				>
+					<AddIcon />
+				</ViewerPanelButton>
+			</ViewerPanelFooter>
+		</>
+	));
+
+	public renderFilterPanel = renderWhenTrue(() => (
+		<FilterPanel
+			onChange={this.props.onChangeFilters}
+			filters={this.props.filters as any}
+			selectedFilters={this.props.selectedFilters}
+		/>
+	));
+
+	public renderHeaderNavigation = renderWhenTrue(() => {
+		const initialIndex = this.state.filteredItems.findIndex(({ _id }) => this.props.activeItemId === _id);
+
+		return (
+			<ListNavigation
+				initialIndex={initialIndex}
+				lastIndex={this.state.filteredItems.length - 1}
+				onChange={this.handleNavigationChange}
+			/>
+		);
+	});
+
+	public renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>No entries have been created yet</EmptyStateInfo>
+	));
+
+	public renderNotFound = renderWhenTrue(() => (
+		<EmptyStateInfo>No entry matched</EmptyStateInfo>
+	));
 
 	public componentDidMount() {
 		this.setState({ filteredItems: this.filteredItems });
@@ -291,14 +358,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		return <Icon />;
 	}
 
-	public renderFilterPanel = renderWhenTrue(() => (
-		<FilterPanel
-			onChange={this.props.onChangeFilters}
-			filters={this.props.filters as any}
-			selectedFilters={this.props.selectedFilters}
-		/>
-	));
-
 	public renderSortIcon = (Icon) => {
 		if (this.props.sortOrder === 'asc') {
 			return <Icon.ASC IconProps={{ fontSize: 'small' }} /> ;
@@ -328,18 +387,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		this.props.onShowDetails(this.state.filteredItems[currentIndex]);
 	}
 
-	public renderHeaderNavigation = renderWhenTrue(() => {
-		const initialIndex = this.state.filteredItems.findIndex(({ _id }) => this.props.activeItemId === _id);
-
-		return (
-			<ListNavigation
-				initialIndex={initialIndex}
-				lastIndex={this.state.filteredItems.length - 1}
-				onChange={this.handleNavigationChange}
-			/>
-		);
-	});
-
 	public renderActions = () => {
 		if (this.props.showDetails) {
 			return this.renderHeaderNavigation(this.props.activeItemId && this.state.filteredItems.length >= 2);
@@ -352,14 +399,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 			</>
 		);
 	}
-
-	public renderEmptyState = renderWhenTrue(() => (
-		<EmptyStateInfo>No entries have been created yet</EmptyStateInfo>
-	));
-
-	public renderNotFound = renderWhenTrue(() => (
-		<EmptyStateInfo>No entry matched</EmptyStateInfo>
-	));
 
 	public render() {
 		const { className, title, isPending, searchEnabled, showDetails } = this.props;

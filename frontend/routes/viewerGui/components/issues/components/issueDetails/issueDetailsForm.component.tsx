@@ -66,13 +66,26 @@ const IssueSchema = Yup.object().shape({
 });
 
 class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
-	public state = {
-		isSaving: false
-	};
 
 	get isNewIssue() {
 		return !this.props.issue._id;
 	}
+	public state = {
+		isSaving: false
+	};
+
+	public autoSave = debounce(() => {
+		const { formik, handleSubmit } = this.props;
+		if (!formik.isValid) {
+			return;
+		}
+
+		this.setState({ isSaving: true }, () => {
+			formik.setFieldValue();
+			handleSubmit();
+			this.setState({ isSaving: false });
+		});
+	}, 200);
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
@@ -93,19 +106,6 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			this.setState(changes);
 		}
 	}
-
-	public autoSave = debounce(() => {
-		const { formik, handleSubmit } = this.props;
-		if (!formik.isValid) {
-			return;
-		}
-
-		this.setState({ isSaving: true }, () => {
-			formik.setFieldValue();
-			handleSubmit();
-			this.setState({ isSaving: false });
-		});
-	}, 200);
 
 	public getDueDateFormat = (timestamp) => {
 		const formatBase = 'DD MMM';

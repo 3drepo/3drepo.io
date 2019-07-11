@@ -52,6 +52,67 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 		value: []
 	};
 
+	public renderMultipleInputs = renderWhenTrue(() => (
+		<MultipleInputsContainer>
+			<AddButton>
+				<SmallIconButton
+					tooltip="Add value"
+					onClick={this.addMultipleInput}
+					Icon={AddIcon}
+					disabled={!Boolean(this.state.value.length)}
+				/>
+			</AddButton>
+			<MultipleInputs>
+				{this.renderNewMultipleInputs()}
+			</MultipleInputs>
+		</MultipleInputsContainer>
+	));
+
+	public renderSingleInput = renderWhenTrue(() => (
+		<InputWrapper>
+			<SingleInput
+				value={this.props.value}
+				onChange={this.handleSingleValueChange}
+				helperText={this.props.touched[0] && this.getHelperText(0)}
+				error={this.props.touched[0] && this.props.error}
+			/>
+		</InputWrapper>
+	));
+
+	public renderRangeInputs = renderWhenTrue(() => {
+		return (
+			<RangeInputs>
+				<RangeInput
+					value={this.state.value[0]}
+					onChange={(event) => this.handleMultiValueChange(event, 0)}
+					helperText={this.props.touched[0] && this.getHelperText(0)}
+					error={this.props.touched[0] && this.getHelperText(0)}
+				/>
+				<RangeInput
+					value={this.state.value[1]}
+					onChange={(event) => this.handleMultiValueChange(event, 1)}
+					helperText={this.props.touched[1] && this.getHelperText(1)}
+					error={this.props.touched[1] && this.getHelperText(1)}
+				/>
+			</RangeInputs>
+		);
+	});
+
+	public renderInitialState = renderWhenTrue(() => (
+		<>
+			<InputLabel shrink>Value</InputLabel>
+			<SingleInput
+				placeholder="Set value"
+				fullWidth
+				disabled
+			/>
+		</>
+	));
+
+	public renderLabel = renderWhenTrue(() =>
+		<InputLabel shrink>Value</InputLabel>
+	);
+
 	public getHelperText = (index) => {
 		if (this.props.helperText && this.props.helperText.length) {
 			if (typeof this.props.helperText !== 'string')  {
@@ -150,22 +211,6 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 		return Inputs;
 	}
 
-	public renderMultipleInputs = renderWhenTrue(() => (
-		<MultipleInputsContainer>
-			<AddButton>
-				<SmallIconButton
-					tooltip="Add value"
-					onClick={this.addMultipleInput}
-					Icon={AddIcon}
-					disabled={!Boolean(this.state.value.length)}
-				/>
-			</AddButton>
-			<MultipleInputs>
-				{this.renderNewMultipleInputs()}
-			</MultipleInputs>
-		</MultipleInputsContainer>
-	));
-
 	public renderNewMultipleInput = (index) => {
 		const helperText = this.props.touched[index] && this.getHelperText(index);
 		return (
@@ -186,51 +231,6 @@ export class CriteriaValueField extends React.PureComponent<IProps, IState> {
 			</NewMultipleInputWrapper>
 		);
 	}
-
-	public renderSingleInput = renderWhenTrue(() => (
-		<InputWrapper>
-			<SingleInput
-				value={this.props.value}
-				onChange={this.handleSingleValueChange}
-				helperText={this.props.touched[0] && this.getHelperText(0)}
-				error={this.props.touched[0] && this.props.error}
-			/>
-		</InputWrapper>
-	));
-
-	public renderRangeInputs = renderWhenTrue(() => {
-		return (
-			<RangeInputs>
-				<RangeInput
-					value={this.state.value[0]}
-					onChange={(event) => this.handleMultiValueChange(event, 0)}
-					helperText={this.props.touched[0] && this.getHelperText(0)}
-					error={this.props.touched[0] && this.getHelperText(0)}
-				/>
-				<RangeInput
-					value={this.state.value[1]}
-					onChange={(event) => this.handleMultiValueChange(event, 1)}
-					helperText={this.props.touched[1] && this.getHelperText(1)}
-					error={this.props.touched[1] && this.getHelperText(1)}
-				/>
-			</RangeInputs>
-		);
-	});
-
-	public renderInitialState = renderWhenTrue(() => (
-		<>
-			<InputLabel shrink>Value</InputLabel>
-			<SingleInput
-				placeholder="Set value"
-				fullWidth
-				disabled
-			/>
-		</>
-	));
-
-	public renderLabel = renderWhenTrue(() =>
-		<InputLabel shrink>Value</InputLabel>
-	);
 
 	public render() {
 		const { selectedOperator } = this.props;

@@ -182,6 +182,14 @@ export class Issues extends React.PureComponent<IProps, any> {
 		return false;
 	}
 
+	public renderDetailsView = renderWhenTrue(() => (
+		<IssueDetails
+			teamspace={this.props.teamspace}
+			model={this.props.model}
+			revision={this.props.revision}
+		/>
+	));
+
 	public componentDidMount() {
 		this.props.subscribeOnIssueChanges(this.props.teamspace, this.props.model);
 	}
@@ -238,14 +246,6 @@ export class Issues extends React.PureComponent<IProps, any> {
 		}
 		this.props.setState(changes);
 	}
-
-	public renderDetailsView = renderWhenTrue(() => (
-		<IssueDetails
-			teamspace={this.props.teamspace}
-			model={this.props.model}
-			revision={this.props.revision}
-		/>
-	));
 
 	public render() {
 		return (

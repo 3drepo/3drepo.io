@@ -97,11 +97,130 @@ interface IState {
 const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show groups menu" {...props} />;
 
 export class Groups extends React.PureComponent<IProps, IState> {
+
+	get filteredGroups() {
+		const { groups, selectedFilters } = this.props;
+		return searchByFilters(groups, selectedFilters, false);
+	}
+
+	get filters() {
+		return [];
+	}
+
+	get menuActionsMap() {
+		const { toggleColorOverrideAll, teamspace, model, downloadGroups } = this.props;
+		return {
+			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => toggleColorOverrideAll(!this.overridesAllGroups),
+			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => this.handleDeleteGroups(),
+			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadGroups(teamspace, model)
+		};
+	}
+
+	get overridesAllGroups() {
+		const { groups, colorOverrides } = this.props;
+		return Boolean(groups.length) && groups.length === size(colorOverrides);
+	}
+
+	public get canAddOrUpdate() {
+		const { isModelLoaded, modelSettings } = this.props;
+		if (isModelLoaded && modelSettings && modelSettings.permissions) {
+			return hasPermissions(CREATE_ISSUE, modelSettings.permissions);
+		}
+		return false;
+	}
 	public state = {
 		filteredGroups: []
 	};
 
 	public groupsContainerRef = React.createRef<any>();
+
+	public renderHeaderNavigation = renderWhenTrue(() => {
+		const initialIndex = this.state.filteredGroups.findIndex(({ _id }) => this.props.activeGroupId === _id);
+
+		return (
+			<ListNavigation
+				initialIndex={initialIndex}
+				lastIndex={this.state.filteredGroups.length - 1}
+				onChange={this.handleNavigationChange}
+			/>
+		);
+	});
+
+	public renderGroupsList = renderWhenTrue(() => {
+		const Items = this.state.filteredGroups.map((group) => (
+			<GroupListItem
+				{...group}
+				key={group._id}
+				hideThumbnail
+				statusColor={this.getOverridedColor(group._id, group.color)}
+				highlighted={this.isHighlighted(group)}
+				roleColor={group.color}
+				onItemClick={this.setActiveGroup(group)}
+				onArrowClick={this.handleShowGroupDetails(group)}
+				active={this.isActive(group)}
+				modelLoaded={this.props.isModelLoaded}
+				renderActions={this.renderGroupActions(group)}
+				hasViewPermission={stubTrue}
+				panelName={GROUP_PANEL_NAME}
+				extraInfo={this.renderObjectsNumber(group.totalSavedMeshes)}
+			/>
+		));
+
+		return <ListContainer className="groups-list" ref={this.groupsContainerRef}>{Items}</ListContainer>;
+	});
+
+	public renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>No groups have been created yet</EmptyStateInfo>
+	));
+
+	public renderNotFound = renderWhenTrue(() => (
+		<EmptyStateInfo>No groups matched</EmptyStateInfo>
+	));
+
+	public renderListView = renderWhenTrue(() => (
+		<>
+			<ViewerPanelContent>
+				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredGroups.length)}
+				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredGroups.length)}
+				{this.renderGroupsList(this.state.filteredGroups.length)}
+			</ViewerPanelContent>
+			<ViewerPanelFooter alignItems="center" justify="space-between">
+				<Summary>
+					{`${this.state.filteredGroups.length} groups displayed`}
+				</Summary>
+				<ViewerPanelButton
+					aria-label="Add group"
+					onClick={this.props.setNewGroup}
+					color="secondary"
+					variant="fab"
+					disabled={!this.canAddOrUpdate}
+				>
+					<AddIcon />
+				</ViewerPanelButton>
+			</ViewerPanelFooter>
+		</>
+	)
+	);
+
+	public renderFilterPanel = renderWhenTrue(() => (
+		<FilterPanel
+			filters={this.filters}
+			onChange={this.handleFilterChange}
+			selectedFilters={this.props.selectedFilters}
+			hideMenu
+		/>
+	));
+
+	public renderDetailsView = renderWhenTrue(() => (
+		<GroupDetails
+			teamspace={this.props.teamspace}
+			model={this.props.model}
+			revision={this.props.revision}
+			saveGroup={this.props.saveGroup}
+			resetToSavedSelection={this.handleResetToSavedSelection}
+			canUpdate={this.canAddOrUpdate}
+		/>
+	));
 
 	public async componentDidMount() {
 		const { subscribeOnChanges, teamspace, model } = this.props;
@@ -142,29 +261,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		const { teamspace, model, unsubscribeFromChanges } = this.props;
 		unsubscribeFromChanges(teamspace, model);
 		this.toggleViewerEvents(false);
-	}
-
-	get filteredGroups() {
-		const { groups, selectedFilters } = this.props;
-		return searchByFilters(groups, selectedFilters, false);
-	}
-
-	get filters() {
-		return [];
-	}
-
-	get menuActionsMap() {
-		const { toggleColorOverrideAll, teamspace, model, downloadGroups } = this.props;
-		return {
-			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => toggleColorOverrideAll(!this.overridesAllGroups),
-			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => this.handleDeleteGroups(),
-			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadGroups(teamspace, model)
-		};
-	}
-
-	get overridesAllGroups() {
-		const { groups, colorOverrides } = this.props;
-		return Boolean(groups.length) && groups.length === size(colorOverrides);
 	}
 
 	public resetActiveGroup = () => {
@@ -250,18 +346,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		this.props.showGroupDetails(this.state.filteredGroups[currentIndex], this.props.revision);
 	}
 
-	public renderHeaderNavigation = renderWhenTrue(() => {
-		const initialIndex = this.state.filteredGroups.findIndex(({ _id }) => this.props.activeGroupId === _id);
-
-		return (
-			<ListNavigation
-				initialIndex={initialIndex}
-				lastIndex={this.state.filteredGroups.length - 1}
-				onChange={this.handleNavigationChange}
-			/>
-		);
-	});
-
 	public renderActions = () => {
 		if (this.props.showDetails) {
 			return this.renderHeaderNavigation(this.props.activeGroupId && this.state.filteredGroups.length >= 2);
@@ -284,14 +368,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	public isOverrided = (groupId) => Boolean(this.props.colorOverrides[groupId]);
-
-	public get canAddOrUpdate() {
-		const { isModelLoaded, modelSettings } = this.props;
-		if (isModelLoaded && modelSettings && modelSettings.permissions) {
-			return hasPermissions(CREATE_ISSUE, modelSettings.permissions);
-		}
-		return false;
-	}
 
 	public isHighlighted = (group) => {
 		return Boolean(this.props.highlightedGroups[group._id]);
@@ -346,75 +422,10 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return `${objectsNumber} objects`;
 	}
 
-	public renderGroupsList = renderWhenTrue(() => {
-		const Items = this.state.filteredGroups.map((group) => (
-			<GroupListItem
-				{...group}
-				key={group._id}
-				hideThumbnail
-				statusColor={this.getOverridedColor(group._id, group.color)}
-				highlighted={this.isHighlighted(group)}
-				roleColor={group.color}
-				onItemClick={this.setActiveGroup(group)}
-				onArrowClick={this.handleShowGroupDetails(group)}
-				active={this.isActive(group)}
-				modelLoaded={this.props.isModelLoaded}
-				renderActions={this.renderGroupActions(group)}
-				hasViewPermission={stubTrue}
-				panelName={GROUP_PANEL_NAME}
-				extraInfo={this.renderObjectsNumber(group.totalSavedMeshes)}
-			/>
-		));
-
-		return <ListContainer className="groups-list" ref={this.groupsContainerRef}>{Items}</ListContainer>;
-	});
-
-	public renderEmptyState = renderWhenTrue(() => (
-		<EmptyStateInfo>No groups have been created yet</EmptyStateInfo>
-	));
-
-	public renderNotFound = renderWhenTrue(() => (
-		<EmptyStateInfo>No groups matched</EmptyStateInfo>
-	));
-
-	public renderListView = renderWhenTrue(() => (
-		<>
-			<ViewerPanelContent>
-				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredGroups.length)}
-				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredGroups.length)}
-				{this.renderGroupsList(this.state.filteredGroups.length)}
-			</ViewerPanelContent>
-			<ViewerPanelFooter alignItems="center" justify="space-between">
-				<Summary>
-					{`${this.state.filteredGroups.length} groups displayed`}
-				</Summary>
-				<ViewerPanelButton
-					aria-label="Add group"
-					onClick={this.props.setNewGroup}
-					color="secondary"
-					variant="fab"
-					disabled={!this.canAddOrUpdate}
-				>
-					<AddIcon />
-				</ViewerPanelButton>
-			</ViewerPanelFooter>
-		</>
-	)
-	);
-
   public handleFilterChange = (selectedFilters) => {
 		this.props.setState({ selectedFilters });
 		this.setState({ filteredGroups: this.filteredGroups });
   }
-
-	public renderFilterPanel = renderWhenTrue(() => (
-		<FilterPanel
-			filters={this.filters}
-			onChange={this.handleFilterChange}
-			selectedFilters={this.props.selectedFilters}
-			hideMenu
-		/>
-	));
 
 	public handleSaveGroup = (teamspace, model, group) => {
 		this.props.saveGroup(teamspace, model, group);
@@ -423,17 +434,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	public handleResetToSavedSelection = () => {
 		this.props.resetToSavedSelection(this.props.activeGroupId);
 	}
-
-	public renderDetailsView = renderWhenTrue(() => (
-		<GroupDetails
-			teamspace={this.props.teamspace}
-			model={this.props.model}
-			revision={this.props.revision}
-			saveGroup={this.props.saveGroup}
-			resetToSavedSelection={this.handleResetToSavedSelection}
-			canUpdate={this.canAddOrUpdate}
-		/>
-	));
 
 	public render() {
 		return (

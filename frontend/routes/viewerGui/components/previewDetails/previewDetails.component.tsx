@@ -71,28 +71,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		expanded: false
 	};
 
-	public componentDidMount() {
-		const { editable, defaultExpanded } = this.props;
-		this.setState({
-			defaultExpanded: editable || defaultExpanded,
-			expanded: editable || defaultExpanded
-		});
-	}
-
-	public handleNameChange = (field) => (event) => {
-		field.onChange(event);
-		this.props.onNameChange(event, event.target.value);
-	}
-
-	public handleToggle = (event) => {
-		event.persist();
-		this.setState(({ expanded }) => ({ expanded: !expanded }), () => {
-			if (this.props.onExpandChange) {
-				this.props.onExpandChange(event, this.state.expanded);
-			}
-		});
-	}
-
 	public renderNameWithCounter = renderWhenTrue(() => (
 		<Typography
 			paragraph
@@ -156,6 +134,28 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public renderDeleteMessage = renderWhenTrue(() =>
 		<ActionMessage content={`This ${this.props.panelName} has been deleted by someone else`} />
 	);
+
+	public componentDidMount() {
+		const { editable, defaultExpanded } = this.props;
+		this.setState({
+			defaultExpanded: editable || defaultExpanded,
+			expanded: editable || defaultExpanded
+		});
+	}
+
+	public handleNameChange = (field) => (event) => {
+		field.onChange(event);
+		this.props.onNameChange(event, event.target.value);
+	}
+
+	public handleToggle = (event) => {
+		event.persist();
+		this.setState(({ expanded }) => ({ expanded: !expanded }), () => {
+			if (this.props.onExpandChange) {
+				this.props.onExpandChange(event, this.state.expanded);
+			}
+		});
+	}
 
 	public render() {
 		const {

@@ -67,9 +67,6 @@ interface IState {
 const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show tree menu" {...props} />;
 
 export class Tree extends React.PureComponent<IProps, IState> {
-	public state = {
-		isScrollToActive: true
-	};
 
 	get menuActionsMap() {
 		const { isolateSelectedNodes, hideIfcSpaces } = this.props;
@@ -92,6 +89,14 @@ export class Tree extends React.PureComponent<IProps, IState> {
 
 		return false;
 	}
+
+	public static defaultProps = {
+		selectedFilters: [],
+		searchEnabled: true
+	};
+	public state = {
+		isScrollToActive: true
+	};
 
 	public nodeListRef = React.createRef() as any;
 
@@ -133,11 +138,6 @@ export class Tree extends React.PureComponent<IProps, IState> {
 			</TreeNodes>
 		);
 	});
-
-	public static defaultProps = {
-		selectedFilters: [],
-		searchEnabled: true
-	};
 
 	private renderNotFound = renderWhenTrue(() => (
 		<EmptyStateInfo>No nodes matched</EmptyStateInfo>

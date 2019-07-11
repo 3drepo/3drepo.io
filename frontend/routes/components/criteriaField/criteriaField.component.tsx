@@ -85,6 +85,39 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		criterionForm: { ...emptyCriterion }
 	};
 
+	public renderPlaceholder = renderWhenTrue(() => (
+		<Placeholder>{this.props.placeholder}</Placeholder>
+	));
+
+	public renderCriteriaPasteField = renderWhenTrue(() => (
+		<CriteriaPasteField
+			name="pasteField"
+			initialValue={this.props.pastedCriteria}
+			onChange={this.handlePaste}
+			setState={this.handlePasteFieldChange}
+			onCancel={this.togglePasteMode}
+		/>
+	));
+
+	public renderCriteriaChips = renderWhenTrue(() => (
+		<ChipsContainer>
+			<ChipsDeselectCatcher onClick={this.deselectCriterion} />
+			{this.state.selectedCriteria.map(this.renderCriterion)}
+		</ChipsContainer>
+	));
+
+	public renderOptionsMenu = renderWhenTrue(() => (
+		<ButtonContainer>
+			<ButtonMenu
+				renderButton={MenuButton}
+				renderContent={this.renderOptions}
+				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
+				ButtonProps={{ disabled: false }}
+			/>
+		</ButtonContainer>
+	));
+
 	public componentDidMount() {
 		const { value, criterionForm, selectedCriterion } = this.props;
 		const changes = {} as IState;
@@ -201,10 +234,6 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		return criterion._id === selectedCriterion;
 	}
 
-	public renderPlaceholder = renderWhenTrue(() => (
-		<Placeholder>{this.props.placeholder}</Placeholder>
-	));
-
 	public renderCriterion = (criterion) => (
 		<Chip
 			key={criterion._id}
@@ -215,23 +244,6 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 			clickable
 		/>
 	)
-
-	public renderCriteriaPasteField = renderWhenTrue(() => (
-		<CriteriaPasteField
-			name="pasteField"
-			initialValue={this.props.pastedCriteria}
-			onChange={this.handlePaste}
-			setState={this.handlePasteFieldChange}
-			onCancel={this.togglePasteMode}
-		/>
-	));
-
-	public renderCriteriaChips = renderWhenTrue(() => (
-		<ChipsContainer>
-			<ChipsDeselectCatcher onClick={this.deselectCriterion} />
-			{this.state.selectedCriteria.map(this.renderCriterion)}
-		</ChipsContainer>
-	));
 
 	public renderCopyOption = (props) => (
 		<CopyToClipboard text={JSON.stringify(this.props.value)}>
@@ -263,18 +275,6 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 			</OptionsList>
 		);
 	}
-
-	public renderOptionsMenu = renderWhenTrue(() => (
-		<ButtonContainer>
-			<ButtonMenu
-				renderButton={MenuButton}
-				renderContent={this.renderOptions}
-				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-				ButtonProps={{ disabled: false }}
-			/>
-		</ButtonContainer>
-	));
 
 	public renderForm = () => (
 		<FormContainer>

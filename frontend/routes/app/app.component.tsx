@@ -67,18 +67,34 @@ const ANALYTICS_REFERER_ROUTES = [
 ] as any;
 
 export class App extends React.PureComponent<IProps, IState> {
+
+	public get hasActiveSession() {
+		return JSON.parse(window.localStorage.getItem('loggedIn'));
+	}
 	private authenticationInterval;
 	private loginInterval;
-
-	constructor(props) {
-		super(props);
-		props.startup();
-	}
 
 	public state = {
 		referrer: DEFAULT_REDIRECT,
 		autologoutInterval: clientConfigService.login_check_interval || 4
 	};
+
+	public renderStaticRoutes = memoize(() => STATIC_ROUTES.map(({ title, path, fileName }) => (
+		<Route key={path} path={path} render={() => <StaticPageRoute title={title} fileName={fileName} />} />
+	)));
+
+	public renderLoginRoute = memoize(() => {
+		return <Route exact path={ROUTES.LOGIN} component={Login} />;
+	});
+
+	public renderHeader = renderWhenTrue(() => (
+		<TopMenu onLogout={this.props.logout} onLogoClick={this.handleLogoClick} />
+	));
+
+	constructor(props) {
+		super(props);
+		props.startup();
+	}
 
 	public isPublicRoute(path) {
 		return PUBLIC_ROUTES.includes(path);
@@ -164,10 +180,6 @@ export class App extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public get hasActiveSession() {
-		return JSON.parse(window.localStorage.getItem('loggedIn'));
-	}
-
 	public handleLogoClick = () => {
 		const { isAuthenticated, history } = this.props;
 		let path = ROUTES.HOME;
@@ -197,18 +209,6 @@ export class App extends React.PureComponent<IProps, IState> {
 			}
 		}
 	}
-
-	public renderStaticRoutes = memoize(() => STATIC_ROUTES.map(({ title, path, fileName }) => (
-		<Route key={path} path={path} render={() => <StaticPageRoute title={title} fileName={fileName} />} />
-	)));
-
-	public renderLoginRoute = memoize(() => {
-		return <Route exact path={ROUTES.LOGIN} component={Login} />;
-	});
-
-	public renderHeader = renderWhenTrue(() => (
-		<TopMenu onLogout={this.props.logout} onLogoClick={this.handleLogoClick} />
-	));
 
 	public render() {
 		const { isAuthPending } = this.props;

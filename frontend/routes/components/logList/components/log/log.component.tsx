@@ -70,11 +70,6 @@ export class Log extends React.PureComponent<IProps, any> {
 		return !this.props.sealed && !this.props.action && this.props.currentUser === this.props.owner;
 	}
 
-	public removeComment = (event) => {
-		event.stopPropagation();
-		this.props.removeLog(this.props.index, this.props.guid);
-	}
-
 	public renderRemoveButton = renderWhenTrue(() => (
 		<RemoveButtonWrapper screenshot={this.isScreenshot}>
 			<TooltipButton
@@ -115,6 +110,11 @@ export class Log extends React.PureComponent<IProps, any> {
 	public renderUsername = renderWhenTrue((
 		<DynamicUsername teamspace={this.props.teamspace} name={this.props.owner} />
 	));
+
+	public removeComment = (event) => {
+		event.stopPropagation();
+		this.props.removeLog(this.props.index, this.props.guid);
+	}
 
 	public renderInfo = () => (
 		<Info>

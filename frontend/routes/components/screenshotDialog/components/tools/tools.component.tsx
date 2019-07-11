@@ -53,21 +53,6 @@ export class Tools extends React.PureComponent<IProps, any> {
 		activeTool: TOOL_TYPES.BRUSH
 	};
 
-	public handleToolClick = (type, callback?) => () => {
-		this.setState({ activeTool: type }, callback);
-	}
-
-	public renderBrushSizes = () => range(56, 1).map((size, index) => (
-		<MenuItem key={index} value={size}>{size}</MenuItem>
-	))
-
-	public getToolColor = (toolType) => {
-		if (this.state.activeTool === toolType) {
-			return 'secondary';
-		}
-		return 'action';
-	}
-
 	public renderToolset = renderWhenTrue(() => {
 		const { size, color, onDrawClick, onEraseClick, onClearClick, onColorChange, onBrushSizeChange } = this.props;
 		return (
@@ -117,6 +102,21 @@ export class Tools extends React.PureComponent<IProps, any> {
 	public renderSaveButton = renderWhenTrue(() => (
 		<StyledButton onClick={this.props.onSave} color="secondary" variant="raised">Save</StyledButton>
 	));
+
+	public handleToolClick = (type, callback?) => () => {
+		this.setState({ activeTool: type }, callback);
+	}
+
+	public renderBrushSizes = () => range(56, 1).map((size, index) => (
+		<MenuItem key={index} value={size}>{size}</MenuItem>
+	))
+
+	public getToolColor = (toolType) => {
+		if (this.state.activeTool === toolType) {
+			return 'secondary';
+		}
+		return 'action';
+	}
 
 	public render() {
 		const { ref, disabled, onCancel } = this.props;

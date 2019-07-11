@@ -139,6 +139,16 @@ const mapFiltersToSuggestions = (filters, selectedFilters) => {
 };
 
 export class FilterPanel extends React.PureComponent<IProps, IState> {
+
+	public get onlyCopyButton() {
+		const onlyQueryFilters = this.props.filters.every((filter) => filter.type === DATA_TYPES.QUERY);
+		return onlyQueryFilters;
+	}
+
+	public static defaultProps = {
+		filters: [],
+		autoFocus: true
+	};
 	public state = {
 		selectedFilters: [],
 		value: '',
@@ -147,14 +157,38 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		removableFilterIndex: null
 	};
 
-	public static defaultProps = {
-		filters: [],
-		autoFocus: true
-	};
-
 	private popperNode = null;
 	private filterSuggestions = [];
 	private input = null;
+
+	public renderCopyButton = renderWhenTrue(() => (
+		<CopyToClipboard text={JSON.stringify(this.props.selectedFilters)}>
+			<ButtonContainer>
+				<CopyButton IconProps={{size: 'small'}} disabled={!this.props.selectedFilters.length} />
+			</ButtonContainer>
+		</CopyToClipboard>
+	));
+
+	public renderFiltersMenuButton = renderWhenTrue(() => (
+		<ButtonContainer>
+			<ButtonMenu
+				renderButton={MoreButton}
+				renderContent={this.renderFiltersMenu}
+				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
+				ButtonProps={{ disabled: false }}
+			/>
+		</ButtonContainer>
+	));
+
+	public renderPlaceholder = renderWhenTrue(() => (
+		<Placeholder onClick={this.handlePlaceholderClick}>
+			<SearchIcon />
+			<PlaceholderText>
+				Search
+			</PlaceholderText>
+		</Placeholder>
+	));
 
 	public componentDidMount = () => {
 		this.setState({ selectedFilters: this.props.selectedFilters });
@@ -465,40 +499,6 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 			autoSuggestComponent.input.addEventListener('keyup', this.handleKeyUp);
 		}
 	}
-
-	public renderCopyButton = renderWhenTrue(() => (
-		<CopyToClipboard text={JSON.stringify(this.props.selectedFilters)}>
-			<ButtonContainer>
-				<CopyButton IconProps={{size: 'small'}} disabled={!this.props.selectedFilters.length} />
-			</ButtonContainer>
-		</CopyToClipboard>
-	));
-
-	public renderFiltersMenuButton = renderWhenTrue(() => (
-		<ButtonContainer>
-			<ButtonMenu
-				renderButton={MoreButton}
-				renderContent={this.renderFiltersMenu}
-				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-				ButtonProps={{ disabled: false }}
-			/>
-		</ButtonContainer>
-	));
-
-	public get onlyCopyButton() {
-		const onlyQueryFilters = this.props.filters.every((filter) => filter.type === DATA_TYPES.QUERY);
-		return onlyQueryFilters;
-	}
-
-	public renderPlaceholder = renderWhenTrue(() => (
-		<Placeholder onClick={this.handlePlaceholderClick}>
-			<SearchIcon />
-			<PlaceholderText>
-				Search
-			</PlaceholderText>
-		</Placeholder>
-	));
 
 	public render() {
 		const { value, suggestions, selectedFilters, filtersOpen } = this.state;

@@ -79,6 +79,12 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, IState> {
 		filterAlreadyExistsError: false
 	};
 
+	public renderRegexInfo = renderWhenTrue(() => (
+		<RegexInfoLink href={REGEX_INFO_URL} target="_blank">
+			<Tooltip title={REGEX_INFO_TEXT} placement="right"><InfoIcon color="secondary" /></Tooltip>
+		</RegexInfoLink>
+	));
+
 	public componentDidUpdate(prevProps, prevState) {
 		const { field, operator } = this.props.formik.values;
 		const fieldChanged = field !== prevProps.formik.values.field;
@@ -121,12 +127,6 @@ class NewCreaterionFormComponent extends React.PureComponent<IProps, IState> {
 			...operatorsItems
 		];
 	}
-
-	public renderRegexInfo = renderWhenTrue(() => (
-		<RegexInfoLink href={REGEX_INFO_URL} target="_blank">
-			<Tooltip title={REGEX_INFO_TEXT} placement="right"><InfoIcon color="secondary" /></Tooltip>
-		</RegexInfoLink>
-	));
 
 	public renderSelectedOperator = (operator) => (
 		<SelectFieldValue placeholder={Number(!operator)}>

@@ -34,22 +34,6 @@ interface IProps {
 }
 
 export class ScreenshotDialog extends React.PureComponent<IProps, any> {
-	public state = {
-		color: COLOR.RED,
-		brushSize: 5,
-		brushColor: COLOR.RED,
-		sourceImage: ''
-	};
-
-	public isDrawing;
-	public prevMousePosition = { x: 0, y: 0 };
-	public currMousePosition = { x: 0, y: 0 };
-
-	public containerRef = React.createRef<any>();
-	public canvasRef = React.createRef<any>();
-	public brushRef = React.createRef<any>();
-	public toolsRef = React.createRef<any>();
-	public hiddenCanvasRef = React.createRef<any>();
 
 	get containerElement() {
 		return this.containerRef.current;
@@ -74,6 +58,26 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	get toolsElement() {
 		return this.toolsRef.current;
 	}
+	public state = {
+		color: COLOR.RED,
+		brushSize: 5,
+		brushColor: COLOR.RED,
+		sourceImage: ''
+	};
+
+	public isDrawing;
+	public prevMousePosition = { x: 0, y: 0 };
+	public currMousePosition = { x: 0, y: 0 };
+
+	public containerRef = React.createRef<any>();
+	public canvasRef = React.createRef<any>();
+	public brushRef = React.createRef<any>();
+	public toolsRef = React.createRef<any>();
+	public hiddenCanvasRef = React.createRef<any>();
+
+	public renderIndicator = renderWhenTrue(() => (
+		<Indicator color={this.state.color} size={this.state.brushSize} />
+	));
 
 	public setCanvasSize = () => {
 		const width = this.containerElement.offsetWidth;
@@ -203,10 +207,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			this.setBrushMode();
 		});
 	}
-
-	public renderIndicator = renderWhenTrue(() => (
-		<Indicator color={this.state.color} size={this.state.brushSize} />
-	));
 
 	public renderTools = () => (
 		<Tools

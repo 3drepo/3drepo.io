@@ -36,13 +36,6 @@ interface IState {
 }
 
 export class RevisionsSelect extends React.PureComponent<IProps, IState> {
-	public state = {
-		value: null
-	};
-
-	public static defaultProps = {
-		disabled: false
-	};
 
 	get defaultValue() {
 		const { defaultValue, revisions } = this.props;
@@ -56,6 +49,13 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 	get value() {
 		return this.getRevisionName(this.revisionsMap[this.state.value]);
 	}
+
+	public static defaultProps = {
+		disabled: false
+	};
+	public state = {
+		value: null
+	};
 
 	private renderSelect = renderWhenTrue(() => {
 		const { revisions, disabled } = this.props;

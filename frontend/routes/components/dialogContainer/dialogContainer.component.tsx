@@ -60,17 +60,17 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 		);
 	});
 
-	public componentDidUpdate(prevProps) {
-		if (this.props.config && this.props.config.logError && !prevProps.config.logError) {
-			console.error(this.props.config.logError, this.props.config.content);
-		}
-	}
-
 	public renderActions = renderWhenTrue(() => (
 		<DialogActions>
 			<Button onClick={this.handleClose} color="secondary">Ok</Button>}
 		</DialogActions>
 	));
+
+	public componentDidUpdate(prevProps) {
+		if (this.props.config && this.props.config.logError && !prevProps.config.logError) {
+			console.error(this.props.config.logError, this.props.config.content);
+		}
+	}
 
 	public handleCallback = (callback) => {
 		const action = callback();

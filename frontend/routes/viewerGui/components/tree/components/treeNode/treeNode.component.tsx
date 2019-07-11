@@ -77,9 +77,6 @@ const VisibleIcon = () => <VisibilityIcon color="primary" />;
 const InvisibleIcon = () => <VisibilityOffIcon color="action" />;
 
 export class TreeNode extends React.PureComponent<IProps, IState> {
-	public state = {
-		hovered: false
-	};
 
 	get node() {
 		return this.props.data;
@@ -116,6 +113,9 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 		expanded: false,
 		hasChildren: false,
 		childrenNumber: 0
+	};
+	public state = {
+		hovered: false
 	};
 
 	private renderExpandableButton = renderWhenTrue(() => {

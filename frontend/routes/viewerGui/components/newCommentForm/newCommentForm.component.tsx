@@ -72,11 +72,6 @@ const NewCommentSchema = Yup.object().shape({
 });
 
 export class NewCommentForm extends React.PureComponent<IProps, IState> {
-	public state = {
-		isPinActive: false,
-		newScreenshot: '',
-		isResidualRiskInputActive: this.props.showResidualRiskInput
-	};
 
 	get commentTypeIcon() {
 		return this.state.isResidualRiskInputActive ? ReportProblemIcon : ShortTextIcon;
@@ -92,6 +87,12 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		}
 		return 'You are not able to comment';
 	}
+
+    public state = {
+        isPinActive: false,
+        newScreenshot: '',
+        isResidualRiskInputActive: this.props.showResidualRiskInput
+    };
 
 	public componentDidUpdate = (prevProps) => {
 		if (prevProps.screenshot !== this.props.screenshot) {
@@ -211,6 +212,43 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 			)} />
 		</Container>
 	));
+
+	public componentDidUpdate = (prevProps) => {
+		if (prevProps.screenshot !== this.props.screenshot) {
+			this.setState({
+				newScreenshot: this.props.screenshot
+			});
+			this.props.innerRef.current.setFieldValue('screenshot', this.props.screenshot);
+		}
+	}
+
+	public componentWillUnmount() {
+		this.props.viewer.setPinDropMode(false);
+		this.props.setDisabled(false);
+	}
+
+	public handleSave = (values, form) => {
+		const screenshot = values.screenshot.substring(values.screenshot.indexOf(',') + 1);
+		const commentValues = { ...values, screenshot };
+		this.props.onSave(commentValues);
+		this.setState({ newScreenshot: ''});
+		form.resetForm();
+	}
+
+	public handleNewScreenshot = async () => {
+		const { showScreenshotDialog, onTakeScreenshot, viewer } = this.props;
+
+		showScreenshotDialog({
+			sourceImage: viewer.getScreenshot(),
+			onSave: (screenshot) => onTakeScreenshot(screenshot)
+		});
+	}
+
+	public handleChangeCommentType = () => {
+		const isResidualRiskInputActive = !this.state.isResidualRiskInputActive;
+
+		this.setState({ isResidualRiskInputActive });
+	}
 
 	public render() {
 		const {

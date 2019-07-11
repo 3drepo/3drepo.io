@@ -2,6 +2,17 @@ import { intersection, keys, memoize, pickBy } from 'lodash';
 import { NODE_TYPES, SELECTION_STATES, VISIBILITY_STATES } from '../../../constants/tree';
 
 export class Processing {
+	public get selectedNodesIds() {
+		return keys(pickBy(this.selectionMap, (selectionState) => {
+			return selectionState !== SELECTION_STATES.UNSELECTED;
+		}));
+	}
+
+	public get invisibleNodesIds() {
+		return keys(pickBy(this.visibilityMap, (selectionState) => {
+			return selectionState === VISIBILITY_STATES.INVISIBLE;
+		}));
+	}
 	public nodesList = [];
 	public nodesIndexesMap = {};
 	public defaultVisibilityMap = {};
@@ -9,6 +20,33 @@ export class Processing {
 	public nodesBySharedIdsMap = {};
 	public selectionMap = {};
 	public visibilityMap = {};
+
+	public getDeepChildren = memoize((node) => {
+		const nodeIndex = this.nodesIndexesMap[node._id];
+		return this.nodesList.slice(nodeIndex + 1, nodeIndex + node.deepChildrenNumber + 1);
+	}, (node) => node._id);
+
+	public getParents = memoize((node = {}) => {
+		const parents = [];
+		let nextParentId = node.parentId;
+
+		while (!!nextParentId) {
+			const parentNodeIndex = this.nodesIndexesMap[nextParentId];
+			const parentNode = this.nodesList[parentNodeIndex];
+			parents.push(parentNode);
+			nextParentId = parentNode.parentId;
+		}
+
+		return parents;
+	}, (node = {}) => node._id);
+
+	public getChildren = memoize((node = {}) => {
+		if (node.hasChildren) {
+			return this.getNodesByIds(node.childrenIds);
+		}
+
+		return [];
+	}, (node = {}) => node._id);
 
 	constructor(data) {
 		const {
@@ -22,18 +60,6 @@ export class Processing {
 		this.visibilityMap = visibilityMap;
 		this.selectionMap = selectionMap;
 		this.nodesBySharedIdsMap = nodesBySharedIdsMap;
-	}
-
-	public get selectedNodesIds() {
-		return keys(pickBy(this.selectionMap, (selectionState) => {
-			return selectionState !== SELECTION_STATES.UNSELECTED;
-		}));
-	}
-
-	public get invisibleNodesIds() {
-		return keys(pickBy(this.visibilityMap, (selectionState) => {
-			return selectionState === VISIBILITY_STATES.INVISIBLE;
-		}));
 	}
 
 	public clearCurrentlySelected = () => {
@@ -340,38 +366,11 @@ export class Processing {
 		}
 	}
 
-	public getDeepChildren = memoize((node) => {
-		const nodeIndex = this.nodesIndexesMap[node._id];
-		return this.nodesList.slice(nodeIndex + 1, nodeIndex + node.deepChildrenNumber + 1);
-	}, (node) => node._id);
-
 	private getNodesByIds = (nodesIds) => {
 		return nodesIds.map((nodeId) => {
 			return this.nodesList[this.nodesIndexesMap[nodeId]];
 		});
 	}
-
-	public getParents = memoize((node = {}) => {
-		const parents = [];
-		let nextParentId = node.parentId;
-
-		while (!!nextParentId) {
-			const parentNodeIndex = this.nodesIndexesMap[nextParentId];
-			const parentNode = this.nodesList[parentNodeIndex];
-			parents.push(parentNode);
-			nextParentId = parentNode.parentId;
-		}
-
-		return parents;
-	}, (node = {}) => node._id);
-
-	public getChildren = memoize((node = {}) => {
-		if (node.hasChildren) {
-			return this.getNodesByIds(node.childrenIds);
-		}
-
-		return [];
-	}, (node = {}) => node._id);
 
 	private isVisibleNode = (nodeId) => {
 		return this.visibilityMap[nodeId] !== VISIBILITY_STATES.INVISIBLE;

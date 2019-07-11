@@ -23,14 +23,10 @@
             true,
             {
                 "order": [
-                    "public-static-field",
-                    "private-static-field",
-                    "private-instance-field",
-                    "private-constructor",
-                    "public-constructor",
-                    "public-instance-method",
-                    "protected-instance-method",
-                    "private-instance-method"
+                    "static-field",
+                    "instance-field",
+                    "constructor",
+                    "instance-method"
                 ]
             }
         ],
@@ -43,6 +39,7 @@
         "jsx-self-close": true,
         "jsx-space-before-trailing-slash": true,
         "jsx-no-bind": true,
-        "jsx-boolean-value": [true, "never"]
+        "jsx-boolean-value": [true, "never"],
+        "no-invalid-template-strings": true
     }
 }

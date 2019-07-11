@@ -134,6 +134,14 @@ export class Risks extends React.PureComponent<IProps, any> {
 		return false;
 	}
 
+	public renderDetailsView = renderWhenTrue(() => (
+		<RiskDetails
+			teamspace={this.props.teamspace}
+			model={this.props.model}
+			saveRisk={this.props.saveRisk}
+		/>
+	));
+
 	public componentDidMount() {
 		this.props.subscribeOnRiskChanges(this.props.teamspace, this.props.model);
 	}
@@ -190,14 +198,6 @@ export class Risks extends React.PureComponent<IProps, any> {
 		}
 		this.props.setState(changes);
 	}
-
-	public renderDetailsView = renderWhenTrue(() => (
-		<RiskDetails
-			teamspace={this.props.teamspace}
-			model={this.props.model}
-			saveRisk={this.props.saveRisk}
-		/>
-	));
 
 	public render() {
 		return (

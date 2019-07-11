@@ -67,13 +67,26 @@ export const RiskSchema = Yup.object().shape({
 });
 
 class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
-	public state = {
-		isSaving: false
-	};
 
 	get isNewRisk() {
 		return !this.props.risk._id;
 	}
+	public state = {
+		isSaving: false
+	};
+
+	public autoSave = debounce(() => {
+		const { formik, handleSubmit } = this.props;
+		if (!formik.isValid) {
+			return;
+		}
+
+		this.setState({ isSaving: true }, () => {
+			formik.setFieldValue();
+			handleSubmit();
+			this.setState({ isSaving: false });
+		});
+	}, 200);
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
@@ -123,19 +136,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			formik.setFieldValue('overall_level_of_risk', levelsOfRisk.level_of_risk);
 		}
 	}
-
-	public autoSave = debounce(() => {
-		const { formik, handleSubmit } = this.props;
-		if (!formik.isValid) {
-			return;
-		}
-
-		this.setState({ isSaving: true }, () => {
-			formik.setFieldValue();
-			handleSubmit();
-			this.setState({ isSaving: false });
-		});
-	}, 200);
 
 	public render() {
 		const { risk, myJob, permissions, currentUser } = this.props;
