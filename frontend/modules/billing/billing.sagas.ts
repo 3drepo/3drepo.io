@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, all, select } from 'redux-saga/effects';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
+import { LoadingDialog } from '../../routes/components/dialogContainer/components';
 import * as API from '../../services/api';
-import { BillingTypes, BillingActions, selectLicencesInfo, dialogMessages } from './index';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
-import { LoadingDialog } from '../../routes/components/dialogContainer/components';
+import { dialogMessages, selectLicencesInfo, BillingActions, BillingTypes } from './index';
 
 export function* fetchPlans() {
 	try {

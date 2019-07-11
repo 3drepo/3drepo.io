@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as Yup from 'yup';
-import { Link } from 'react-router-dom';
-import { Formik, Form, Field } from 'formik';
-import * as queryString from 'query-string';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
+import { Field, Form, Formik } from 'formik';
+import * as queryString from 'query-string';
+import * as React from 'react';
+import { Link } from 'react-router-dom';
+import * as Yup from 'yup';
 
 import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../services/validation';
 import { Panel } from '../components/panel/panel.component';
-import { Container, Message, Buttons, StyledButton } from './passwordChange.styles';
 import { SubmitButton } from '../components/submitButton/submitButton.component';
+import { Buttons, Container, Message, StyledButton } from './passwordChange.styles';
 
 const PasswordChangeSchema = Yup.object().shape({
 	newPassword: schema.password

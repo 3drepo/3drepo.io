@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Typography, TextField } from '@material-ui/core';
+import { TextField, Typography } from '@material-ui/core';
 import { Form } from 'formik';
+import styled from 'styled-components';
 
 import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
 

@@ -15,25 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { isEmpty } from 'lodash';
+import * as React from 'react';
 
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
-import Toolbar from './components/toolbar/toolbar.container';
+import { renderWhenTrue } from '../../helpers/rendering';
+import { Bim } from './components/bim';
+import { CloseFocusModeButton } from './components/closeFocusModeButton';
+import { Compare } from './components/compare';
 import Gis from './components/gis/gis.container';
-import { Views } from './components/views';
-import { Risks } from './components/risks';
 import { Groups } from './components/groups';
 import { Issues } from './components/issues';
-import { Compare } from './components/compare';
-import { Tree } from './components/tree';
-import { Bim } from './components/bim';
 import { PanelButton } from './components/panelButton/panelButton.component';
 import RevisionsSwitch from './components/revisionsSwitch/revisionsSwitch.container';
+import { Risks } from './components/risks';
+import Toolbar from './components/toolbar/toolbar.container';
+import { Tree } from './components/tree';
 import { ViewerLoader } from './components/viewerLoader';
-import { CloseFocusModeButton } from './components/closeFocusModeButton';
-import { Container, LeftPanels, RightPanels, LeftPanelsButtons } from './viewerGui.styles';
-import { renderWhenTrue } from '../../helpers/rendering';
+import { Views } from './components/views';
+import { Container, LeftPanels, LeftPanelsButtons, RightPanels } from './viewerGui.styles';
 
 interface IProps {
 	viewer: any;

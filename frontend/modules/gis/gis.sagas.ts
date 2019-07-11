@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select } from 'redux-saga/effects';
+import { put, select, takeLatest } from 'redux-saga/effects';
 
-import { GisTypes, GisActions } from './gis.redux';
-import { selectVisibleSources } from './gis.selectors';
-import { DialogActions } from '../dialog';
 import { Viewer } from '../../services/viewer/viewer';
+import { DialogActions } from '../dialog';
+import { GisActions, GisTypes } from './gis.redux';
+import { selectVisibleSources } from './gis.selectors';
 
 export function* initialiseMap({params}) {
 	try {

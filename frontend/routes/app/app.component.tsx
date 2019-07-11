@@ -15,32 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { memoize } from 'lodash';
 import * as React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { memoize } from 'lodash';
 
+import { PUBLIC_ROUTES, ROUTES } from '../../constants/routes';
+import { renderWhenTrue } from '../../helpers/rendering';
+import { analyticsService } from '../../services/analytics';
 import { clientConfigService } from '../../services/clientConfig';
 import { isStaticRoute, STATIC_ROUTES } from '../../services/staticPages';
-import { analyticsService } from '../../services/analytics';
 import { DialogContainer } from '../components/dialogContainer';
-import { SnackbarContainer } from '../components/snackbarContainer';
-import { ROUTES, PUBLIC_ROUTES } from '../../constants/routes';
-import { PrivateRoute } from '../components/privateRoute';
-import StaticPageRoute from '../components/staticPageRoute/staticPageRoute.container';
 import { LiveChat } from '../components/liveChat';
+import { PrivateRoute } from '../components/privateRoute';
+import { SnackbarContainer } from '../components/snackbarContainer';
+import StaticPageRoute from '../components/staticPageRoute/staticPageRoute.container';
 import TopMenu from '../components/topMenu/topMenu.container';
-import { ViewerCanvas } from '../viewerCanvas';
-import { ViewerGui } from '../viewerGui';
 import { Dashboard } from '../dashboard';
 import { Login } from '../login';
-import { SignUp } from '../signUp';
-import { PasswordForgot } from '../passwordForgot';
+import { NotFound } from '../notFound';
 import { PasswordChange } from '../passwordChange';
+import { PasswordForgot } from '../passwordForgot';
 import RegisterRequest from '../registerRequest/registerRequest.container';
 import { RegisterVerify } from '../registerVerify';
+import { SignUp } from '../signUp';
+import { ViewerCanvas } from '../viewerCanvas';
+import { ViewerGui } from '../viewerGui';
 import { AppContainer } from './app.styles';
-import { renderWhenTrue } from '../../helpers/rendering';
-import { NotFound } from '../notFound';
 
 interface IProps {
 	location: any;

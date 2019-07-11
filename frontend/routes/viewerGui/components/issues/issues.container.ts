@@ -15,27 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
 
-import { Issues } from './issues.component';
 import {
-	IssuesActions,
-	selectIssues,
 	selectActiveIssueId,
-	selectShowDetails,
+	selectFetchingDetailsIsPending,
+	selectIssues,
+	selectIsImportingBCF,
+	selectIsIssuesPending,
 	selectSearchEnabled,
 	selectSelectedFilters,
+	selectShowDetails,
 	selectShowPins,
-	selectIsIssuesPending,
 	selectShowSubmodelIssues,
-	selectIsImportingBCF,
 	selectSortOrder,
-	selectFetchingDetailsIsPending
+	IssuesActions
 } from '../../../../modules/issues';
 import { selectJobsList } from '../../../../modules/jobs';
 import { selectSettings, selectTopicTypes } from '../../../../modules/model';
+import { Issues } from './issues.component';
 
 const mapStateToProps = createStructuredSelector({
 	issues: selectIssues,

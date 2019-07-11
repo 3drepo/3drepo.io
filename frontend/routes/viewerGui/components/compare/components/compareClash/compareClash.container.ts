@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
 
-import { CompareClash } from './compareClash.component';
 import {
-	CompareActions,
-	selectSelectedFilters,
 	selectIsAllSelected,
+	selectSelectedFilters,
 	selectSelectedModelsMap,
-	selectTargetClashModels
+	selectTargetClashModels,
+	CompareActions
 } from '../../../../../../modules/compare';
+import { CompareClash } from './compareClash.component';
 
 const mapStateToProps = createStructuredSelector({
 	selectedItemsMap: selectSelectedModelsMap,

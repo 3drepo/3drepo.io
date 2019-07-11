@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
+import styled from 'styled-components';
 
 export const StyledButton = styled(Button)`
 	&& {

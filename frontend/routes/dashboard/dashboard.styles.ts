@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
-import * as PanelStyles from '../components/panel/panel.styles';
+import styled from 'styled-components';
 import { media } from '../../styles';
+import * as PanelStyles from '../components/panel/panel.styles';
 
 export const Container = styled(Grid)`
 	&& {

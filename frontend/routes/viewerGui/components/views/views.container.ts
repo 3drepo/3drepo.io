@@ -15,21 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
+import { selectIsCommenter } from '../../../../modules/model/permissions.selectors';
 import {
-	ViewpointsActions,
+	selectActiveViewpoint,
+	selectEditMode,
 	selectIsPending,
 	selectNewViewpoint,
-	selectActiveViewpoint,
-	selectViewpointsList,
-	selectSearchQuery,
 	selectSearchEnabled,
-	selectEditMode
+	selectSearchQuery,
+	selectViewpointsList,
+	ViewpointsActions
 } from './../../../../modules/viewpoints';
 import { Views } from './views.component';
-import { selectIsCommenter } from '../../../../modules/model/permissions.selectors';
 
 const mapStateToProps = createStructuredSelector({
 	viewpoints: selectViewpointsList,

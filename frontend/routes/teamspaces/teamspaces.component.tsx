@@ -15,30 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isEmpty, isEqual } from 'lodash';
+import * as queryString from 'query-string';
 import * as React from 'react';
 import SimpleBar from 'simplebar-react';
-import * as queryString from 'query-string';
-import { isEmpty, isEqual } from 'lodash';
-import { analyticsService, EVENT_CATEGORIES, EVENT_ACTIONS } from '../../services/analytics';
+import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 
-import Add from '@material-ui/icons/Add';
 import MenuItem from '@material-ui/core/MenuItem';
+import Add from '@material-ui/icons/Add';
 
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
-import ModelItem from './components/modelItem/modelItem.container';
-import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
-import { ProjectDialog } from './components/projectDialog/projectDialog.component';
-import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
-import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
-import { ModelDialog } from './components/modelDialog/modelDialog.component';
-import FederationDialog from './components/federationDialog/federationDialog.container';
-import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
-import { ProjectItem } from './components/projectItem/projectItem.component';
-import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
-import { MODEL_TYPE, FEDERATION_TYPE } from './teamspaces.contants';
 import { PERMISSIONS_VIEWS } from '../projects/projects.component';
+import FederationDialog from './components/federationDialog/federationDialog.container';
+import { ModelDialog } from './components/modelDialog/modelDialog.component';
+import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
+import ModelItem from './components/modelItem/modelItem.container';
+import { ProjectDialog } from './components/projectDialog/projectDialog.component';
+import { ProjectItem } from './components/projectItem/projectItem.component';
+import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
+import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
+import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
+import { FEDERATION_TYPE, MODEL_TYPE } from './teamspaces.contants';
+import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',

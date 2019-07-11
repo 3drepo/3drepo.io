@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import Popover from '@material-ui/core/Popover';
+import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 
 export const Container = styled.div``;

@@ -17,10 +17,10 @@
 
 import * as React from 'react';
 
-import { ListItemLink } from './components/listItemLink/listItemLink.component';
-import { Container, UserContainer, UserData, UserName, UserEmail, StyledList, LoadingText } from './userInfo.styles';
-import { Panel } from '../panel/panel.component';
 import { Avatar } from '../avatar/avatar.component';
+import { Panel } from '../panel/panel.component';
+import { ListItemLink } from './components/listItemLink/listItemLink.component';
+import { Container, LoadingText, StyledList, UserContainer, UserData, UserEmail, UserName } from './userInfo.styles';
 
 interface IMenuItem {
 	title: string;

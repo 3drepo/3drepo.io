@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { withRouter } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { AuthActions, selectIsPending } from '../../modules/auth';
+import { selectIsPending, AuthActions } from '../../modules/auth';
 
 import { SignUp } from './signUp.component';
 

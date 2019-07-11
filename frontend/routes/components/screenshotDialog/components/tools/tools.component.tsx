@@ -15,19 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { range } from 'lodash';
+import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import BorderColorIcon from '@material-ui/icons/BorderColor';
 import ClearIcon from '@material-ui/icons/Clear';
-import MenuItem from '@material-ui/core/MenuItem';
+import { range } from 'lodash';
+import * as React from 'react';
 
-import { Eraser } from '../../../fontAwesomeIcon';
-import { ToolsContainer, OptionsDivider, StyledButton } from './tools.styles';
+import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { FONT_WEIGHT } from '../../../../../styles';
 import { TooltipButton } from '../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ColorPicker } from '../../../colorPicker/colorPicker.component';
-import { FONT_WEIGHT } from '../../../../../styles';
-import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { Eraser } from '../../../fontAwesomeIcon';
+import { OptionsDivider, StyledButton, ToolsContainer } from './tools.styles';
 
 interface IProps {
 	ref: any;

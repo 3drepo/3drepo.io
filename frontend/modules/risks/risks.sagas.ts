@@ -15,38 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 import { push } from 'connected-react-router';
+import { differenceBy, isEmpty, map, omit, pick } from 'lodash';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
-import * as API from '../../services/api';
-import * as Exports from '../../services/export';
-import { analyticsService, EVENT_CATEGORIES, EVENT_ACTIONS } from '../../services/analytics';
-import { dispatch, getState } from '../store';
-import { getRiskPinColor, prepareRisk } from '../../helpers/risks';
-import { prepareComments, prepareComment } from '../../helpers/comments';
-import { Cache } from '../../services/cache';
-import { Viewer } from '../../services/viewer/viewer';
+import { CHAT_CHANNELS } from '../../constants/chat';
 import { RISK_LEVELS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
 import { NEW_PIN_ID } from '../../constants/viewer';
-import { CHAT_CHANNELS } from '../../constants/chat';
+import { prepareComment, prepareComments } from '../../helpers/comments';
+import { getRiskPinColor, prepareRisk } from '../../helpers/risks';
+import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
+import * as API from '../../services/api';
+import { Cache } from '../../services/cache';
+import * as Exports from '../../services/export';
+import { Viewer } from '../../services/viewer/viewer';
 import { PIN_COLORS } from '../../styles';
-import { DialogActions } from '../dialog';
-import { SnackbarActions } from '../snackbar';
-import { selectJobsList, selectMyJob } from '../jobs';
-import { selectCurrentUser } from '../currentUser';
-import { selectIfcSpacesHidden, TreeActions } from '../tree';
 import { ChatActions } from '../chat';
-import {
-	selectActiveRiskId,
-	selectRisks,
-	selectShowPins,
-	selectRisksMap,
-	selectActiveRiskDetails,
-	selectFilteredRisks
-} from './risks.selectors';
+import { selectCurrentUser } from '../currentUser';
+import { DialogActions } from '../dialog';
+import { selectJobsList, selectMyJob } from '../jobs';
+import { SnackbarActions } from '../snackbar';
+import { dispatch, getState } from '../store';
+import { selectIfcSpacesHidden, TreeActions } from '../tree';
 import { RisksActions, RisksTypes } from './risks.redux';
+import {
+	selectActiveRiskDetails,
+	selectActiveRiskId,
+	selectFilteredRisks,
+	selectRisks,
+	selectRisksMap,
+	selectShowPins
+} from './risks.selectors';
 
 function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));

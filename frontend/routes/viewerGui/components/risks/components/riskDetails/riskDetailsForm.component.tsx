@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect, withFormik, Field, Form } from 'formik';
+import { debounce, get, isEmpty, isEqual } from 'lodash';
 import * as React from 'react';
 import * as Yup from 'yup';
-import { get, isEqual, isEmpty, debounce } from 'lodash';
-import { Field, Form, withFormik, connect } from 'formik';
 
 import InputLabel from '@material-ui/core/InputLabel';
-import { Image } from '../../../../../components/image';
 import {
 	LEVELS_OF_RISK,
 	RISK_CATEGORIES,
@@ -30,12 +29,13 @@ import {
 	RISK_MITIGATION_STATUSES
 } from '../../../../../../constants/risks';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
-import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
+import { canChangeAssigned, canChangeBasicProperty, canChangeStatus } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
-import { canChangeBasicProperty, canChangeStatus, canChangeAssigned } from '../../../../../../helpers/risks';
+import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
+import { Image } from '../../../../../components/image';
 import { TextField } from '../../../../../components/textField/textField.component';
-import { Container, FieldsContainer, FieldsRow, StyledFormControl, DescriptionImage } from './riskDetails.styles';
 import PinButton from '../../../pinButton/pinButton.container';
+import { Container, DescriptionImage, FieldsContainer, FieldsRow, StyledFormControl } from './riskDetails.styles';
 
 interface IProps {
 	risk: any;

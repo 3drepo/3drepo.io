@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-import { COLOR, media } from '../../styles';
+import { media, COLOR } from '../../styles';
 
 export const Header = styled.div`
 	background-color: ${COLOR.WHITE};

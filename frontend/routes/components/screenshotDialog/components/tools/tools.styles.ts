@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
+import Divider from '@material-ui/core/Divider';
+import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../../styles';
 import * as ColorPickerStyles from '../../../../components/colorPicker/colorPicker.styles';

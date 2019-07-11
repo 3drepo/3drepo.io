@@ -18,13 +18,13 @@
 import * as React from 'react';
 import EventListener from 'react-event-listener';
 
-import { Container, Canvas, BackgroundImage, HiddenCanvas } from './screenshotDialog.styles';
+import { getPointerPosition } from '../../../helpers/events';
+import { loadImage } from '../../../helpers/images';
+import { renderWhenTrue } from '../../../helpers/rendering';
 import { COLOR } from '../../../styles';
 import { Indicator } from './components/indicator/indicator.component';
-import { loadImage } from '../../../helpers/images';
-import { getPointerPosition } from '../../../helpers/events';
-import { renderWhenTrue } from '../../../helpers/rendering';
 import { Tools } from './components/tools/tools.component';
+import { BackgroundImage, Canvas, Container, HiddenCanvas } from './screenshotDialog.styles';
 
 interface IProps {
 	sourceImage: string | Promise<string>;

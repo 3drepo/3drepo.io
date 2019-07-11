@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { Form } from 'formik';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { IconButton, MenuItem, TextField } from '@material-ui/core';
 import CancelIcon from '@material-ui/icons/Cancel';
+import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
-import { IconButton, MenuItem, TextField } from '@material-ui/core';
+import { Form } from 'formik';
+import styled, { css } from 'styled-components';
 
+import { FONT_WEIGHT } from '../../../../../../styles';
 import { COLOR } from '../../../../../../styles/colors';
 import * as ImageStyles from '../../../../../components/image/image.styles';
-import { FONT_WEIGHT } from '../../../../../../styles';
 
 const IconStyles = css`
 	cursor: pointer;

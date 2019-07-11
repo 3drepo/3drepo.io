@@ -15,14 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import CancelIcon from '@material-ui/icons/Cancel';
-import SearchIcon from '@material-ui/icons/Search';
-import Check from '@material-ui/icons/Check';
 import IconButton from '@material-ui/core/IconButton';
-import { FixedSizeList as List } from 'react-window';
+import CancelIcon from '@material-ui/icons/Cancel';
+import Check from '@material-ui/icons/Check';
+import SearchIcon from '@material-ui/icons/Search';
+import * as React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
+import { FixedSizeList as List } from 'react-window';
 
+import { TREE_ACTIONS_ITEMS, TREE_ACTIONS_MENU, TREE_ITEM_SIZE } from '../../../../constants/tree';
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import {
 	IconWrapper,
@@ -30,10 +32,8 @@ import {
 	StyledItemText,
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
-import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
-import { TREE_ACTIONS_MENU, TREE_ACTIONS_ITEMS, TREE_ITEM_SIZE } from '../../../../constants/tree';
-import { renderWhenTrue } from '../../../../helpers/rendering';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
+import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { EmptyStateInfo } from '../views/views.styles';
 import TreeNode from './components/treeNode/treeNode.container';
 import { TreeContainer, TreeIcon, TreeNodes, ViewerPanelContent } from './tree.styles';

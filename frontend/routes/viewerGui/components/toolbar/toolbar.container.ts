@@ -15,29 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
 
-import { Toolbar } from './toolbar.component';
 import {
-	ViewerGuiActions,
-	selectNavigationMode,
-	selectHelicopterSpeed,
-	selectIsFocusMode,
 	selectClippingMode,
-	selectIsClipEdit,
 	selectClipNumber,
-	selectIsMetadataVisible
+	selectHelicopterSpeed,
+	selectIsClipEdit,
+	selectIsFocusMode,
+	selectIsMetadataVisible,
+	selectNavigationMode,
+	ViewerGuiActions
 } from '../../../../modules/viewerGui';
+import { Toolbar } from './toolbar.component';
 
 import { TreeActions } from '../../../../modules/tree';
 
+import { selectIsActive, BimActions } from '../../../../modules/bim';
 import {
 	selectIsMeasureActive,
 	selectIsMeasureDisabled
 } from '../../../../modules/measure';
-import { BimActions, selectIsActive } from '../../../../modules/bim';
 import { selectMetaKeysExist } from '../../../../modules/model';
 
 const mapStateToProps = createStructuredSelector({

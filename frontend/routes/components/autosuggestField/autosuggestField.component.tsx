@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { MenuItem, Paper } from '@material-ui/core';
 import * as React from 'react';
 import * as Autosuggest from 'react-autosuggest';
-import { MenuItem, Paper } from '@material-ui/core';
 import { Highlight } from '../highlight/highlight.component';
 
-import { Container, SuggestionsList, StyledTextField } from './autosuggestField.styles';
+import { Container, StyledTextField, SuggestionsList } from './autosuggestField.styles';
 
 interface IProps {
 	suggestions: any[];

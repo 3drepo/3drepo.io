@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import Notifications from '@material-ui/icons/Notifications';
+import * as React from 'react';
 import { EmptyItem, EmptyItemText } from './emptyItem.styles';
 
 export class NotificationEmptyItem extends React.PureComponent {

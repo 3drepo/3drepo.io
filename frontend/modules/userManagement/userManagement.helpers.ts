@@ -1,4 +1,4 @@
-import { get, first } from 'lodash';
+import { first, get } from 'lodash';
 import { MODEL_ROLES_TYPES } from '../../constants/model-permissions';
 import { PROJECT_ROLES_TYPES } from '../../constants/project-permissions';
 

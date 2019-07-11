@@ -15,22 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Field, Form, Formik } from 'formik';
 import * as React from 'react';
 import * as Yup from 'yup';
-import { Formik, Form, Field } from 'formik';
 
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
 import InputLabel from '@material-ui/core/InputLabel';
+import TextField from '@material-ui/core/TextField';
 
 import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 
-import { Row, SelectWrapper, FieldWrapper } from './modelDialog.styles';
 import { MODEL_SUBTYPES } from './../../teamspaces.contants';
+import { FieldWrapper, Row, SelectWrapper } from './modelDialog.styles';
 
 const ModelSchema = Yup.object().shape({
 	modelName: schema.firstName.max(120).required(),

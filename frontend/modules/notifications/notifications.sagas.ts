@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select} from 'redux-saga/effects';
+import { put, select, takeLatest} from 'redux-saga/effects';
 
-import * as API from '../../services/api';
+import { CHAT_CHANNELS } from '../../constants/chat';
 import {
 	DeleteAllNotificationsDialog
 } from '../../routes/components/deleteAllNotificationsDialog/deleteAllNotificationsDialog.component';
-import { DialogActions } from '../dialog';
-import { NotificationsTypes, NotificationsActions, selectNotifications } from './index';
-import { selectCurrentUser } from '../currentUser';
+import * as API from '../../services/api';
 import { ChatActions } from '../chat';
+import { selectCurrentUser } from '../currentUser';
+import { DialogActions } from '../dialog';
 import { dispatch } from '../store';
-import { CHAT_CHANNELS } from '../../constants/chat';
+import { selectNotifications, NotificationsActions, NotificationsTypes } from './index';
 
 const getNotificationById = (notifications, id) => {
 	return notifications.find((n) => n._id === id );

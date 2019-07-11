@@ -18,23 +18,23 @@
 import * as React from 'react';
 import Truncate from 'react-truncate';
 
-import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 
+import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
 import {
-	MenuItemContainer,
-	Thumbnail,
+	Actions,
+	ArrowButton,
+	Container,
 	Content,
 	Description,
-	RoleIndicator,
-	Container,
-	ThumbnailWrapper,
-	ArrowButton,
-	StyledArrowIcon,
+	MenuItemContainer,
 	Name,
-	Actions
+	RoleIndicator,
+	StyledArrowIcon,
+	Thumbnail,
+	ThumbnailWrapper
 } from './previewListItem.styles';
-import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
 
 interface IProps {
 	className?: string;

@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { cloneDeep, keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
-import { keyBy, cloneDeep } from 'lodash';
 
 export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchRisks: ['teamspace', 'modelId', 'revision'],

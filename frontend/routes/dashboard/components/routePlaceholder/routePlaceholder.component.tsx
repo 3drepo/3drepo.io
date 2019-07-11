@@ -17,9 +17,9 @@
 
 import * as React from 'react';
 
-import { Container } from './routePlaceholder.styles';
-import { Panel } from '../../../components/panel/panel.component';
 import { Loader } from '../../../components/loader/loader.component';
+import { Panel } from '../../../components/panel/panel.component';
+import { Container } from './routePlaceholder.styles';
 
 export const RoutePlaceholder = () => (
 	<Panel>

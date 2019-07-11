@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import * as React from 'react';
-import { ListSubheaderContainer, StyledToolbar, RightContent } from './listSubheaderToolbar.styles';
+import { ListSubheaderContainer, RightContent, StyledToolbar } from './listSubheaderToolbar.styles';
 
 interface IProps {
 	rightContent: JSX.Element;

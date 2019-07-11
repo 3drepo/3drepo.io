@@ -15,38 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isEmpty, isEqual } from 'lodash';
 import * as React from 'react';
-import { isEqual, isEmpty } from 'lodash';
 
-import ArrowBack from '@material-ui/icons/ArrowBack';
-import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
-import SearchIcon from '@material-ui/icons/Search';
+import AddIcon from '@material-ui/icons/Add';
+import ArrowBack from '@material-ui/icons/ArrowBack';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
+import SearchIcon from '@material-ui/icons/Search';
 
-import { hasPermissions } from '../../../../helpers/permissions';
-import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
-import { renderWhenTrue } from '../../../../helpers/rendering';
-import { PreviewListItem } from '../previewListItem/previewListItem.component';
-import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { ListContainer, Summary } from '../risks/risks.styles';
-import { ViewerPanelContent, ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
-import {
-	MenuList,
-	StyledListItem,
-	StyledItemText,
-	IconWrapper
-} from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
-import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
-import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
+import { ACTIONS_TYPES } from '../../../../constants/issues';
+import { VIEWER_EVENTS } from '../../../../constants/viewer';
+import { hasPermissions } from '../../../../helpers/permissions';
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import { searchByFilters } from '../../../../helpers/searching';
 import { sortByDate } from '../../../../helpers/sorting';
 import { Viewer } from '../../../../services/viewer/viewer';
-import { VIEWER_EVENTS } from '../../../../constants/viewer';
-import { ACTIONS_TYPES } from '../../../../constants/issues';
+import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
+import {
+	IconWrapper,
+	MenuList,
+	StyledItemText,
+	StyledListItem
+} from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
+import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
+import { PreviewListItem } from '../previewListItem/previewListItem.component';
+import { ListContainer, Summary } from '../risks/risks.styles';
+import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../views/views.styles';
 
 const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show filters menu" {...props} />;

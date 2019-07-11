@@ -1,20 +1,20 @@
+import { ConnectedRouter } from 'connected-react-router';
+import 'font-awesome/css/font-awesome.min.css';
+import 'normalize.css/normalize.css';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { ConnectedRouter } from 'connected-react-router';
-import 'normalize.css/normalize.css';
-import 'simplebar/dist/simplebar.min.css';
-import 'font-awesome/css/font-awesome.min.css';
 import 'simplebar';
+import 'simplebar/dist/simplebar.min.css';
 
+import { history, store } from './modules/store';
 import Root from './routes/index';
-import { store, history } from './modules/store';
 import './styles/global';
 
-import { UnityUtil } from './globals/unity-util';
-import { Pin } from './globals/pin';
-import { Viewer } from './globals/viewer';
 import { IS_DEVELOPMENT } from './constants/environment';
+import { Pin } from './globals/pin';
+import { UnityUtil } from './globals/unity-util';
+import { Viewer } from './globals/viewer';
 import { clientConfigService } from './services/clientConfig';
 import './services/fontAwesome';
 

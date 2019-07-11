@@ -17,8 +17,8 @@
 
 import * as React from 'react';
 
-import { Container } from './viewerLoader.styles';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
+import { Container } from './viewerLoader.styles';
 
 interface IProps {
 	viewer: any;

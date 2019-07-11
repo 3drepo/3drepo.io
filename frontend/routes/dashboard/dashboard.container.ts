@@ -15,19 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { push } from 'connected-react-router';
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
-import { push } from 'connected-react-router';
 
-import { Dashboard } from './dashboard.component';
 import {
 	selectCurrentUser,
-	selectIsInitialised,
 	selectIsAvatarPending,
+	selectIsInitialised,
 	selectIsPending,
 	CurrentUserActions
 } from '../../modules/currentUser';
+import { Dashboard } from './dashboard.component';
 
 const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,

@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import Grid from '@material-ui/core/Grid';
+import * as React from 'react';
 
-import { Name, Color } from './jobItem.styles';
+import { Color, Name } from './jobItem.styles';
 
 interface IProps {
 	name: string;

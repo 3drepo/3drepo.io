@@ -14,26 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import * as React from 'react';
-import { groupBy, sortBy, toArray } from 'lodash';
+import Badge from '@material-ui/core/Badge';
+import Drawer from '@material-ui/core/Drawer';
+import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import Drawer from '@material-ui/core/Drawer';
-import Badge from '@material-ui/core/Badge';
 import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import MoreVert from '@material-ui/icons/MoreVert';
 import Close from '@material-ui/icons/Close';
+import MoreVert from '@material-ui/icons/MoreVert';
+import { groupBy, sortBy, toArray } from 'lodash';
+import * as React from 'react';
 
+import { renderWhenTrue } from '../../../helpers/rendering';
 import { simpleDate } from '../../../services/formatting/formatDate';
 import { BarIconButton } from '../components.styles';
 import { ListSubheaderToolbar } from '../listSubheaderToolbar/listSubheaderToolbar.component';
-import { INotification } from './components/notificationItem/notificationItem.component';
 import { NotificationEmptyItem } from './components/emptyItem/emptyItem.component';
+import { INotification } from './components/notificationItem/notificationItem.component';
 import { NotificationsPanel } from './components/panel/panel.component';
 import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.component';
-import { NotificationsList, NotificationsIcon, NotificationWeekHeader } from './notifications.styles';
-import { renderWhenTrue } from '../../../helpers/rendering';
+import { NotificationsIcon, NotificationsList, NotificationWeekHeader } from './notifications.styles';
 
 /**
  * Gets the date of the sunday thats away from the offset .

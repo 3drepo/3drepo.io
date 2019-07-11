@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createStructuredSelector } from 'reselect';
-import { bindActionCreators } from 'redux';
-import { withRouter } from 'react-router';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
 
-import { RevisionsSwitch } from './revisionsSwitch.component';
 import { DialogActions } from '../../../../modules/dialog';
 import { selectRevisions, selectSettings } from '../../../../modules/model';
 import { selectUrlParams } from '../../../../modules/router/router.selectors';
+import { RevisionsSwitch } from './revisionsSwitch.component';
 
 const mapStateToProps = createStructuredSelector({
 	revisions: selectRevisions,

@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import { ModelActions, selectSettings, selectRevisions, selectIsPending } from './../../../../modules/model';
+import { selectIsPending, selectRevisions, selectSettings, ModelActions } from './../../../../modules/model';
 import { UploadModelFileDialog } from './uploadModelFileDialog.component';
 
 const mapStateToProps = createStructuredSelector({

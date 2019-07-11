@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { flatten, keys, pick, pickBy, uniq, values } from 'lodash';
 import { createSelector } from 'reselect';
-import { pickBy, keys, values, flatten, pick, uniq } from 'lodash';
 
 import { NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
-import { calculateTotalMeshes } from '../../helpers/tree';
 import { searchByFilters } from '../../helpers/searching';
-import { ITreeProcessingData } from './treeProcessing/treeProcessing.constants';
+import { calculateTotalMeshes } from '../../helpers/tree';
 import TreeProcessing from './treeProcessing/treeProcessing';
+import { ITreeProcessingData } from './treeProcessing/treeProcessing.constants';
 
 export const selectTreeDomain = (state) => Object.assign({}, state.tree);
 

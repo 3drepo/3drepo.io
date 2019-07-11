@@ -15,23 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Button from '@material-ui/core/Button';
+import DialogActions from '@material-ui/core/DialogActions';
+import InputLabel from '@material-ui/core/InputLabel';
+import TextField from '@material-ui/core/TextField';
+import ArrowBack from '@material-ui/icons/ArrowBack';
+import ArrowForward from '@material-ui/icons/ArrowForward';
+import { Field, Form, Formik } from 'formik';
+import { differenceBy, includes, isEmpty } from 'lodash';
 import * as React from 'react';
 import * as Yup from 'yup';
-import { Formik, Form, Field } from 'formik';
-import { isEmpty, includes, differenceBy } from 'lodash';
 import {
 	getAvailableModels,
 	getFederatedModels,
 	getModelsMap,
-	getProject,
-	getNewSelectedModels
+	getNewSelectedModels,
+	getProject
 } from './federationDialog.helpers';
-import DialogActions from '@material-ui/core/DialogActions';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import InputLabel from '@material-ui/core/InputLabel';
-import ArrowForward from '@material-ui/icons/ArrowForward';
-import ArrowBack from '@material-ui/icons/ArrowBack';
 
 import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
@@ -39,7 +39,7 @@ import { CellSelect } from '../../../components/customTable/components/cellSelec
 import { LoadingDialog } from './../../../../routes/components/dialogContainer/components';
 import { SubModelsField } from './components/subModelsField/subModelsField.component';
 
-import { Row, SelectWrapper, FieldWrapper, StyledDialogContent } from './federationDialog.styles';
+import { FieldWrapper, Row, SelectWrapper, StyledDialogContent } from './federationDialog.styles';
 
 const FederationSchema = Yup.object().shape({
 	modelName: schema.firstName.min(2).max(120).required(),

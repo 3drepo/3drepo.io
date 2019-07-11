@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select } from 'redux-saga/effects';
+import { put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
-import { selectCurrentTeamspace } from '../userManagement/userManagement.selectors';
-import { JobsTypes, JobsActions } from './jobs.redux';
 import { SnackbarActions } from '../snackbar';
+import { selectCurrentTeamspace } from '../userManagement/userManagement.selectors';
+import { JobsActions, JobsTypes } from './jobs.redux';
 
 export function* fetchJobs({ teamspace }) {
 	try {

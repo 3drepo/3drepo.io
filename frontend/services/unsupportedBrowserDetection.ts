@@ -1,5 +1,5 @@
-import UAParser from 'ua-parser-js';
 import semverCompare from 'semver-compare';
+import UAParser from 'ua-parser-js';
 
 const DEFAULT_SUPPORTED_BROWSERS_CONFIG = {
 	desktop: [{

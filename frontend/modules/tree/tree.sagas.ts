@@ -14,38 +14,38 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { put, takeLatest, call, select, take, all } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
+import { all, call, put, select, take, takeLatest } from 'redux-saga/effects';
 
-import TreeProcessing from './treeProcessing/treeProcessing';
-import * as API from '../../services/api';
-import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
-import { dispatch } from '../store';
-import { GroupsActions } from '../groups';
+import * as API from '../../services/api';
+import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
+import { GroupsActions } from '../groups';
+import { dispatch } from '../store';
 import {
-	selectIfcSpacesHidden,
-	selectNodesIndexesMap,
-	selectTreeNodesList,
-	selectSelectedNodesIds,
-	selectExpandedNodesMap,
+	getSelectDeepChildren,
 	getSelectNodesByIds,
 	getSelectNodesIdsFromSharedIds,
-	selectInvisibleNodesIds,
 	selectDefaultHiddenNodesIds,
-	getSelectDeepChildren,
+	selectExpandedNodesMap,
+	selectIfcSpacesHidden,
+	selectInvisibleNodesIds,
+	selectNodesIndexesMap,
+	selectSelectedNodesIds,
 	selectSelectionMap,
+	selectTreeNodesList,
 	selectVisibilityMap
 } from './tree.selectors';
+import TreeProcessing from './treeProcessing/treeProcessing';
 
-import { TreeTypes, TreeActions } from './tree.redux';
-import { selectSettings, ModelTypes } from '../model';
+import { SELECTION_STATES, VISIBILITY_STATES } from '../../constants/tree';
 import { MultiSelect } from '../../services/viewer/multiSelect';
-import { VISIBILITY_STATES, SELECTION_STATES } from '../../constants/tree';
-import { selectActiveMeta, BimActions, selectIsActive } from '../bim';
+import { selectActiveMeta, selectIsActive, BimActions } from '../bim';
+import { selectSettings, ModelTypes } from '../model';
 import { ViewerGuiActions } from '../viewerGui';
+import { TreeActions, TreeTypes } from './tree.redux';
 
 const unhighlightObjects = (objects = []) => {
 	for (let index = 0, size = objects.length; index < size; index++) {

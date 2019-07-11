@@ -1,6 +1,6 @@
+import IFCSpacesIcon from '@material-ui/icons/ViewAgenda';
 import ShowAllIcon from '@material-ui/icons/Visibility';
 import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
-import IFCSpacesIcon from '@material-ui/icons/ViewAgenda';
 
 export const TREE_ACTIONS_ITEMS = {
 	SHOW_ALL: 'showAll',

@@ -15,23 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
-import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
-import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
 import {
-	IssuesActions,
 	selectActiveIssueDetails,
 	selectExpandDetails,
+	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
 	selectNewComment,
-	selectFailedToLoad
+	IssuesActions
 } from '../../../../../../modules/issues';
+import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
 import { selectSettings, selectTopicTypes } from '../../../../../../modules/model';
-import { IssueDetails } from './issueDetails.component';
+import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { withViewer } from '../../../../../../services/viewer/viewer';
+import { IssueDetails } from './issueDetails.component';
 
 const mapStateToProps = createStructuredSelector({
 	issue: selectActiveIssueDetails,

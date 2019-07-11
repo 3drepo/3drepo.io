@@ -15,23 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { isEmpty, isEqual, stubTrue, size } from 'lodash';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
-import SearchIcon from '@material-ui/icons/Search';
 import Delete from '@material-ui/icons/Delete';
 import InvertColors from '@material-ui/icons/InvertColors';
+import SearchIcon from '@material-ui/icons/Search';
 import Visibility from '@material-ui/icons/VisibilityOutlined';
+import { isEmpty, isEqual, size, stubTrue } from 'lodash';
+import * as React from 'react';
 
 import {
 	DEFAULT_OVERRIDE_COLOR,
+	GROUP_PANEL_NAME,
 	GROUPS_ACTIONS_ITEMS,
-	GROUPS_ACTIONS_MENU,
-	GROUP_PANEL_NAME
+	GROUPS_ACTIONS_MENU
 } from '../../../../constants/groups';
 import { CREATE_ISSUE } from '../../../../constants/issue-permissions';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
@@ -47,14 +47,14 @@ import {
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
+import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../views/views.styles';
 import { ListContainer, Summary } from './../risks/risks.styles';
 import { GroupDetails } from './components/groupDetails';
-import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
-import { GroupsContainer, GroupListItem, StyledIcon, GroupIcon } from './groups.styles';
+import { GroupsContainer, GroupIcon, GroupListItem, StyledIcon } from './groups.styles';
 
 interface IProps {
 	viewer: any;

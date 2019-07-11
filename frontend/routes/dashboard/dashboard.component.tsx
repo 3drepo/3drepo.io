@@ -16,16 +16,16 @@
  */
 
 import * as React from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 
-import Teamspaces from '../teamspaces/teamspaces.container';
-import ModelSettings from '../modelSettings/modelSettings.container';
-import UserManagement from '../userManagement/userManagement.container';
-import Profile from '../profile/profile.container';
-import Billing from '../billing/billing.container';
-import { Container, Sidebar, Content } from './dashboard.styles';
-import { UserInfo } from '../components/userInfo/userInfo.component';
 import { ROUTES } from '../../constants/routes';
+import Billing from '../billing/billing.container';
+import { UserInfo } from '../components/userInfo/userInfo.component';
+import ModelSettings from '../modelSettings/modelSettings.container';
+import Profile from '../profile/profile.container';
+import Teamspaces from '../teamspaces/teamspaces.container';
+import UserManagement from '../userManagement/userManagement.container';
+import { Container, Content, Sidebar } from './dashboard.styles';
 
 const MENU_ITEMS = [
 	{

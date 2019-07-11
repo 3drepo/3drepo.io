@@ -15,30 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import DayJsUtils from '@date-io/dayjs';
+import { MuiPickersUtilsProvider } from 'material-ui-pickers';
+import * as React from 'react';
 
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import List from '@material-ui/core/List';
 import ArrowRight from '@material-ui/icons/ArrowRight';
-import Copy from '@material-ui/icons/FileCopy';
 import Check from '@material-ui/icons/Check';
+import Copy from '@material-ui/icons/FileCopy';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { DATA_TYPES } from '../../filterPanel.component';
 
 import {
-	MenuList,
-	NestedWrapper,
 	ChildMenu,
-	StyledItemText,
-	StyledListItem,
-	StyledDatePicker,
 	CopyItem,
 	CopyText,
-	MenuFooter
+	MenuFooter,
+	MenuList,
+	NestedWrapper,
+	StyledDatePicker,
+	StyledItemText,
+	StyledListItem
 } from './filtersMenu.styles';
 
 interface IProps {

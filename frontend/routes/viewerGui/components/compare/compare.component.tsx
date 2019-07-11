@@ -15,49 +15,49 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import MoreIcon from '@material-ui/icons/MoreVert';
 import CheckIcon from '@material-ui/icons/Check';
+import MoreIcon from '@material-ui/icons/MoreVert';
+import * as React from 'react';
 
 import { IconButton, Tab, Tooltip } from '@material-ui/core';
 
 import {
-	DIFF_COMPARE_TYPE,
-	COMPARE_TABS,
 	CLASH_COMPARE_TYPE,
-	RENDERING_TYPES,
-	RENDERING_TYPES_LIST,
 	COMPARE_ACTIONS_MENU,
-	COMPARE_SORT_TYPES
+	COMPARE_SORT_TYPES,
+	COMPARE_TABS,
+	DIFF_COMPARE_TYPE,
+	RENDERING_TYPES,
+	RENDERING_TYPES_LIST
 } from '../../../../constants/compare';
-import {
-	StyledListItem,
-	IconWrapper,
-	StyledItemText
-} from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
-import { renderWhenTrue } from '../../../../helpers/rendering';
-import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { SORT_ORDER_TYPES } from '../../../../constants/sorting';
-import { SortAmountUp, SortAmountDown } from '../../../components/fontAwesomeIcon';
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ICompareComponentState } from '../../../../modules/compare/compare.redux';
+import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
+import {
+	IconWrapper,
+	StyledItemText,
+	StyledListItem
+} from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { SortAmountDown, SortAmountUp } from '../../../components/fontAwesomeIcon';
 import { Loader } from '../../../components/loader/loader.component';
-import { ViewerPanelContent, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
-import { CompareDiff } from './components/compareDiff';
-import { CompareClash } from './components/compareClash';
+import { ViewerPanelButton, ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import {
 	CompareContainer,
 	CompareIcon,
+	ComparisonLoader,
+	MenuList,
+	Slider,
+	SliderContainer,
+	SliderLabel,
+	SliderLabels,
+	SliderWrapper,
 	Tabs,
 	TabContent,
-	SliderContainer,
-	Slider,
-	SliderLabels,
-	SliderLabel,
-	SliderWrapper,
-	ViewerPanelFooter,
-	MenuList,
-	ComparisonLoader
+	ViewerPanelFooter
 } from './compare.styles';
+import { CompareClash } from './components/compareClash';
+import { CompareDiff } from './components/compareDiff';
 
 interface IProps {
 	className: string;

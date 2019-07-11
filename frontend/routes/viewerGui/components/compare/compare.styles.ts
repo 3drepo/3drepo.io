@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Tabs as TabsComponent, List } from '@material-ui/core';
+import { List, Tabs as TabsComponent } from '@material-ui/core';
 import SliderComponent from '@material-ui/lab/Slider';
+import styled from 'styled-components';
 
 import { COLOR } from '../../../../styles';
 
 import {
-	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,
+	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
-import { ViewerPanelFooter as ViewerPanelFooterComponent } from '../viewerPanel/viewerPanel.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { ViewerPanelFooter as ViewerPanelFooterComponent } from '../viewerPanel/viewerPanel.styles';
 
 export const CompareIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.COMPARE];
 

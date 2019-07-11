@@ -16,11 +16,11 @@
  */
 
 import * as React from 'react';
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { EmptyStateInfo } from '../../../views/views.styles';
 import { CompareDiffItem } from '../compareDiffItem/compareDiffItem.component';
 import { CompareFilters } from '../compareFilters/compareFilters.component';
 import { Container, List } from './compareDiff.styles';
-import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { EmptyStateInfo } from '../../../views/views.styles';
 
 interface IProps {
 	className: string;

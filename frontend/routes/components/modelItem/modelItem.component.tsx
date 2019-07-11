@@ -18,7 +18,7 @@
 import * as React from 'react';
 
 import { Highlight } from '../highlight/highlight.component';
-import { Container, Name, Detail } from './modelItem.styles';
+import { Container, Detail, Name } from './modelItem.styles';
 
 interface IProps {
 	name: string;

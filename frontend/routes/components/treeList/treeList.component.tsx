@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import { isEmpty } from 'lodash';
 import Grid from '@material-ui/core/Grid';
+import { isEmpty } from 'lodash';
+import * as React from 'react';
 
-import { Container, Headline, Details, Title, IconContainer } from './treeList.styles';
 import Folder from '@material-ui/icons/Folder';
 import FolderOpen from '@material-ui/icons/FolderOpen';
+import { Container, Details, Headline, IconContainer, Title } from './treeList.styles';
 
 export const TREE_LEVELS = {
 	TEAMSPACE: 1,
@@ -82,10 +81,6 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 		items: [],
 		level: TREE_LEVELS.TEAMSPACE,
 		active: false
-	};
-
-	public static propTypes = {
-		onRootClick: PropTypes.func,
 	};
 
 	public state = {

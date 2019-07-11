@@ -17,14 +17,14 @@
 
 import styled from 'styled-components';
 
-import { ViewerPanelContent as ViewerPanelContentComponent } from '../viewerPanel/viewerPanel.styles';
 import {
-	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,
+	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { ViewerPanelContent as ViewerPanelContentComponent } from '../viewerPanel/viewerPanel.styles';
 
 export const TreeIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.TREE];
 

@@ -17,42 +17,42 @@
 
 import * as React from 'react';
 
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Fade from '@material-ui/core/Fade';
-import HomeIcon from '@material-ui/icons/Home';
-import ClipIcon from '@material-ui/icons/Crop';
 import FocusIcon from '@material-ui/icons/CenterFocusStrong';
-import ShowAllIcon from '@material-ui/icons/Visibility';
-import HideIcon from '@material-ui/icons/VisibilityOff';
-import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
+import ClipIcon from '@material-ui/icons/Crop';
+import HomeIcon from '@material-ui/icons/Home';
 import MetadataIcon from '@material-ui/icons/Info';
 import TurntableIcon from '@material-ui/icons/Redo';
 import MeasureIcon from '@material-ui/icons/Straighten';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import ShowAllIcon from '@material-ui/icons/Visibility';
+import HideIcon from '@material-ui/icons/VisibilityOff';
+import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
 
 import IncreaseIcon from '@material-ui/icons/Add';
 import DecreaseIcon from '@material-ui/icons/Remove';
 import ResetIcon from '@material-ui/icons/Replay';
 
-import { Helicopter } from '../../../components/fontAwesomeIcon';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { Helicopter } from '../../../components/fontAwesomeIcon';
 
 import {
-	Container,
 	ButtonWrapper,
 	ClipIconWrapper,
 	ClipNumber,
+	Container,
 	Submenu,
 	SubmenuDot,
 	ToolbarButton
 } from './toolbar.styles';
 
 import {
-	VIEWER_NAV_MODES,
-	VIEWER_CLIP_MODES,
-	VIEWER_TOOLBAR_ITEMS,
 	INITIAL_HELICOPTER_SPEED,
 	MAX_HELICOPTER_SPEED,
-	MIN_HELICOPTER_SPEED
+	MIN_HELICOPTER_SPEED,
+	VIEWER_CLIP_MODES,
+	VIEWER_NAV_MODES,
+	VIEWER_TOOLBAR_ITEMS
 } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 

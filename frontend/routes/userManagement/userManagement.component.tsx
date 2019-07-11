@@ -15,27 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Route, Switch, Link, Redirect } from 'react-router-dom';
-import { isEqual, isEmpty } from 'lodash';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
+import Tab from '@material-ui/core/Tab';
+import Tabs from '@material-ui/core/Tabs';
+import { isEmpty, isEqual } from 'lodash';
+import * as React from 'react';
+import { Link, Redirect, Route, Switch } from 'react-router-dom';
 
-import Users from '../users/users.container';
-import Jobs from '../jobs/jobs.container';
-import Projects from '../projects/projects.container';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
-import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
+import { TextOverlay } from '../components/textOverlay/textOverlay.component';
+import Jobs from '../jobs/jobs.container';
+import Projects from '../projects/projects.container';
+import Users from '../users/users.container';
 
 import {
 	Header,
+	LoaderContainer,
 	TabContent,
-	TeamspaceSelectContainer,
-	LoaderContainer
+	TeamspaceSelectContainer
 } from './userManagement.styles';
 
 export const USERS_TAB = {

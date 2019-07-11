@@ -15,28 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
 
-import {
-	GroupsActions,
-	selectGroups,
-	selectIsPending,
-	selectActiveGroupId,
-	selectActiveGroupDetails,
-	selectShowDetails,
-	selectHighlightedGroups,
-	selectSearchEnabled,
-	selectSelectedFilters,
-	selectColorOverrides,
-	selectGroupsMap
-} from './../../../../modules/groups';
 import { DialogActions } from '../../../../modules/dialog';
 import { selectSettings } from '../../../../modules/model';
-import { Groups } from './groups.component';
-import { withViewer } from '../../../../services/viewer/viewer';
 import { selectIsModelLoaded } from '../../../../modules/viewerGui';
+import { withViewer } from '../../../../services/viewer/viewer';
+import {
+	selectActiveGroupDetails,
+	selectActiveGroupId,
+	selectColorOverrides,
+	selectGroups,
+	selectGroupsMap,
+	selectHighlightedGroups,
+	selectIsPending,
+	selectSearchEnabled,
+	selectSelectedFilters,
+	selectShowDetails,
+	GroupsActions
+} from './../../../../modules/groups';
+import { Groups } from './groups.component';
 
 const mapStateToProps = createStructuredSelector({
 	groups: selectGroups,

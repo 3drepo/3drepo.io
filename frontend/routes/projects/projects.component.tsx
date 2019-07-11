@@ -15,19 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as queryString from 'query-string';
-import { Route } from 'react-router-dom';
-import {isEqual, isEmpty} from 'lodash';
-import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
+import Grid from '@material-ui/core/Grid';
 import InputLabel from '@material-ui/core/InputLabel';
+import {isEmpty, isEqual} from 'lodash';
+import * as queryString from 'query-string';
+import * as React from 'react';
+import { Route } from 'react-router-dom';
 
-import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
-import { ProjectsPermissions } from '../projectsPermissions';
-import { ModelsPermissions } from '../modelsPermissions';
-import { Container, Options, SelectContainer, SwitchButton, IconLeft, IconRight } from './projects.styles';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
+import { ModelsPermissions } from '../modelsPermissions';
+import { ProjectsPermissions } from '../projectsPermissions';
+import { Container, IconLeft, IconRight, Options, SelectContainer, SwitchButton } from './projects.styles';
 
 export const PERMISSIONS_VIEWS = {
 	PROJECTS: 0,

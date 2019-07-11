@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Field, Formik } from 'formik';
+import { isEmpty } from 'lodash';
+import * as queryString from 'query-string';
 import * as React from 'react';
 import * as Yup from 'yup';
-import * as queryString from 'query-string';
-import { isEmpty } from 'lodash';
-import { Formik, Field } from 'formik';
 
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -27,26 +27,26 @@ import InputLabel from '@material-ui/core/InputLabel';
 
 import { Loader } from '../components/loader/loader.component';
 
-import { schema } from '../../services/validation';
 import { clientConfigService } from '../../services/clientConfig';
+import { schema } from '../../services/validation';
 
-import { Panel } from '../components/panel/panel.component';
-import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { Chips } from '../components/chips/chips.component';
+import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+import { Panel } from '../components/panel/panel.component';
 
+import { ROUTES } from '../../constants/routes';
+import { convertPositionToDirectX, convertPositionToOpenGL } from '../../helpers/model';
 import {
+	BackButton,
 	FieldsRow,
-	StyledTextField,
+	GridColumn,
+	Headline,
+	LoaderContainer,
 	SelectWrapper,
 	StyledForm,
-	Headline,
-	GridColumn,
 	StyledIcon,
-	BackButton,
-	LoaderContainer
+	StyledTextField
 } from './modelSettings.styles';
-import { convertPositionToOpenGL, convertPositionToDirectX } from '../../helpers/model';
-import { ROUTES } from '../../constants/routes';
 
 const ModelSettingsSchema = Yup.object().shape({
 	code: Yup.string()

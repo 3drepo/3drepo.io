@@ -15,11 +15,11 @@
  *along with this program.If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import Button from '@material-ui/core/Button';
+import * as React from 'react';
 
 import { clientConfigService } from '../../../../../services/clientConfig';
-import { HiddenFileInput, FileLabel } from './fileInputField.styles';
+import { FileLabel, HiddenFileInput } from './fileInputField.styles';
 
 interface IProps {
 	name: string;

@@ -1,5 +1,5 @@
-import { VISIBILITY_STATES, SELECTION_STATES, BACKEND_VISIBILITY_STATES } from '../../../../constants/tree';
 import { IS_DEVELOPMENT } from '../../../../constants/environment';
+import { BACKEND_VISIBILITY_STATES, SELECTION_STATES, VISIBILITY_STATES } from '../../../../constants/tree';
 import { INode } from '../treeProcessing.constants';
 
 const isModelNode = (level, isFederation, hasFederationAsParent?) => {

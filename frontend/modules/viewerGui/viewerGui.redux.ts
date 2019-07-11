@@ -16,8 +16,8 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { INITIAL_HELICOPTER_SPEED, VIEWER_NAV_MODES } from '../../constants/viewer';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
-import { VIEWER_NAV_MODES, INITIAL_HELICOPTER_SPEED } from '../../constants/viewer';
 
 export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActions({
 	fetchData: ['teamspace', 'model', 'revision'],

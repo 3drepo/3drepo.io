@@ -15,27 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
 
-import { Compare } from './compare.component';
 import {
-	CompareActions,
 	selectActiveTab,
 	selectFilteredCompareModels,
-	selectRenderingType,
-	selectSortType,
-	selectSortOrder,
+	selectIsAnyTargetClashModel,
 	selectIsCompareActive,
-	selectIsPending,
 	selectIsCompareButtonDisabled,
-	selectSelectedModelsMap,
 	selectIsCompareProcessed,
-	selectIsAnyTargetClashModel
+	selectIsPending,
+	selectRenderingType,
+	selectSelectedModelsMap,
+	selectSortOrder,
+	selectSortType,
+	CompareActions
 } from '../../../../modules/compare';
 import { selectIsFederation } from '../../../../modules/model';
 import { selectIsModelLoaded } from '../../../../modules/viewerGui';
+import { Compare } from './compare.component';
 
 const mapStateToProps = createStructuredSelector({
 	activeTab: selectActiveTab,

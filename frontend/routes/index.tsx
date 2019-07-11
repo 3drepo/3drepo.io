@@ -1,9 +1,9 @@
-import * as React from 'react';
-import { Route, withRouter } from 'react-router-dom';
 import { MuiThemeProvider } from '@material-ui/core';
+import * as React from 'react';
+import { withRouter, Route } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 
-import { MuiTheme, theme } from '../styles';
+import { theme, MuiTheme } from '../styles';
 import { GlobalStyle } from '../styles/global';
 
 import { App } from './app';

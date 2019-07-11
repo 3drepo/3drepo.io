@@ -1,7 +1,7 @@
-import * as React from 'react';
-import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import * as React from 'react';
 
 import { Headline } from './removeUserDialog.styles';
 

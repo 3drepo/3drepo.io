@@ -15,31 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isEqual, uniqBy } from 'lodash';
 import * as React from 'react';
-import { uniqBy, isEqual } from 'lodash';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
+import { getCriteriaLabel, getUpdatedCriteria, prepareCriterion } from '../../../helpers/criteria';
+import { renderWhenTrue } from '../../../helpers/rendering';
 import {
-	Container,
-	InputLabel,
+	ButtonContainer,
+	Chip,
 	ChipsContainer,
 	ChipsDeselectCatcher,
-	ButtonContainer,
-	IconButton,
-	StyledMoreIcon,
-	SelectedCriteria,
+	Container,
 	FormContainer,
+	IconButton,
+	InputLabel,
 	MenuItem,
 	OptionsList,
 	Placeholder,
-	Chip
+	SelectedCriteria,
+	StyledMoreIcon
 } from './criteriaField.styles';
-import { renderWhenTrue } from '../../../helpers/rendering';
-import { getCriteriaLabel, prepareCriterion, getUpdatedCriteria } from '../../../helpers/criteria';
 
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
-import { NewCriterionForm } from './newCriterionForm.component';
 import { CriteriaPasteField } from './components/criteriaPasteField/criteriaPasteField.components';
+import { NewCriterionForm } from './newCriterionForm.component';
 
 interface IProps {
 	className?: string;

@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select } from 'redux-saga/effects';
+import { put, select, takeLatest } from 'redux-saga/effects';
 
-import { StaticPagesTypes, StaticPagesActions } from './staticPages.redux';
 import { getStaticFile } from '../../services/staticPages';
+import { StaticPagesActions, StaticPagesTypes } from './staticPages.redux';
 import { selectStaticPagesTemplates } from './staticPages.selectors';
 
 export function* loadTemplate({ path }) {

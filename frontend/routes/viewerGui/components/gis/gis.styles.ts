@@ -24,14 +24,14 @@ import MapIcon from '@material-ui/icons/Map';
 import { COLOR } from './../../../../styles/colors';
 
 import {
-	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,
+	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
 
-import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 
 export const GisIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.GIS];
 

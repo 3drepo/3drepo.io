@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
+import styled from 'styled-components';
 
-import { COLOR, ellipsis } from '../../../styles';
+import { ellipsis, COLOR } from '../../../styles';
 
 const isActive = (props) => props.forceActive && props.active && !props.disabled;
 

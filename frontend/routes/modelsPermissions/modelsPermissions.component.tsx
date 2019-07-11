@@ -15,23 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import { isEmpty, pick } from 'lodash';
 import * as queryString from 'query-string';
-import { pick, isEmpty } from 'lodash';
+import * as React from 'react';
 import SimpleBar from 'simplebar-react';
 
 import { MODEL_ROLES_LIST } from '../../constants/model-permissions';
-import { CELL_TYPES, CustomTable } from '../components/customTable/customTable.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
+import { CustomTable, CELL_TYPES } from '../components/customTable/customTable.component';
 import { ModelItem } from '../components/modelItem/modelItem.component';
-import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 import { PermissionsTable } from '../components/permissionsTable/permissionsTable.component';
+import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 
 import {
 	Container,
 	ModelsContainer,
-	PermissionsContainer,
-	OverflowWrapper
+	OverflowWrapper,
+	PermissionsContainer
 } from './modelsPermissions.styles';
 
 const MODEL_TABLE_CELLS = [{

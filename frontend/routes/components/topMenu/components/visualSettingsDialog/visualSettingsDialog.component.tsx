@@ -17,15 +17,15 @@
 
 import { Button, InputAdornment, List, MenuItem, Switch } from '@material-ui/core';
 import { Field, Form, Formik } from 'formik';
+import { isEqual } from 'lodash';
 import * as React from 'react';
 import * as Yup from 'yup';
-import { schema } from '../../../../../services/validation';
-import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NeutralActionButton, ShortInput,
-		VisualSettingsButtonsContainer, VisualSettingsDialogContent,
-		NegativeActionButton } from './visualSettingsDialog.styles';
-import { isEqual } from 'lodash';
 import { DEFAULT_SETTINGS } from '../../../../../constants/viewer';
+import { schema } from '../../../../../services/validation';
 import { SelectField } from '../../../selectField/selectField.component';
+import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NegativeActionButton, NeutralActionButton,
+		ShortInput, VisualSettingsButtonsContainer,
+		VisualSettingsDialogContent } from './visualSettingsDialog.styles';
 
 const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),

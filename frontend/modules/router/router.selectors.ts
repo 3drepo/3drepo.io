@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
-import { matchPath } from 'react-router';
 import * as queryString from 'query-string';
+import { matchPath } from 'react-router';
+import { createSelector } from 'reselect';
 import { ROUTES } from '../../constants/routes';
 
 export const selectRouterDomain = (state) => state.router;

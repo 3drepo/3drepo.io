@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import DialogActionsComponent from '@material-ui/core/DialogActions';
+import styled from 'styled-components';
 
 export const DialogActions = styled(DialogActionsComponent)`
 	&& {

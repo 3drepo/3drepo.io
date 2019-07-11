@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import MoreIcon from '@material-ui/icons/MoreVert';
 import IconButton from '@material-ui/core/IconButton';
+import MoreIcon from '@material-ui/icons/MoreVert';
+import * as React from 'react';
 
 export const MenuButton = ({
 	IconProps = {}, Icon = MoreIcon, ariaLabel = 'Show menu', ariaHasPopup = true, ...props

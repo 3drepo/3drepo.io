@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import * as Yup from 'yup';
-import { strength, differentThan, equalTo } from './customValidators';
+import { differentThan, equalTo, strength } from './customValidators';
 import { getPasswordStrength } from './customValidators';
 
 export const VALIDATIONS_MESSAGES = {

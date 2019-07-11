@@ -21,7 +21,7 @@ import * as ReactDOM from 'react-dom';
 import Tooltip from '@material-ui/core/Tooltip';
 import Add from '@material-ui/icons/Add';
 
-import { Container, Panel, FloatingButtonContainer, FloatingButton } from './floatingActionPanel.styles';
+import { Container, FloatingButton, FloatingButtonContainer, Panel } from './floatingActionPanel.styles';
 
 interface IProps {
 	render: (closePanel: any) => void;

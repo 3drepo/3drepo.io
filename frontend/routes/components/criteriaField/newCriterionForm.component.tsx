@@ -1,36 +1,36 @@
+import { get } from 'lodash';
 import * as React from 'react';
 import * as Yup from 'yup';
-import { get } from 'lodash';
 
-import { Form, Field, withFormik, connect } from 'formik';
+import { Tooltip } from '@material-ui/core';
+import Button from '@material-ui/core/Button';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
-import Button from '@material-ui/core/Button';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
-import { Tooltip } from '@material-ui/core';
+import { connect, withFormik, Field, Form } from 'formik';
 
 import {
-	SelectField,
+	CRITERIA_LIST,
+	CRITERIA_OPERATORS_LABELS,
+	CRITERIA_OPERATORS_TYPES,
+	REGEX_INFO_TEXT,
+	REGEX_INFO_URL,
+	VALUE_DATA_TYPES,
+	VALUE_FIELD_MAP
+} from '../../../constants/criteria';
+import { renderWhenTrue } from '../../../helpers/rendering';
+import { schema, VALIDATIONS_MESSAGES } from '../../../services/validation';
+import { AutosuggestField } from '../autosuggestField/autosuggestField.component';
+import { CriteriaValueField } from './components/criteriaValueField/criteriaValueField.component';
+import { RegexInfoLink } from './components/criteriaValueField/criteriaValueField.styles';
+import {
+	CustomError,
 	FormControl,
 	NewCriterionFooter,
 	OperatorSubheader,
-	SelectFieldValue,
-	CustomError
+	SelectField,
+	SelectFieldValue
 } from './criteriaField.styles';
-import { CriteriaValueField } from './components/criteriaValueField/criteriaValueField.component';
-import {
-	CRITERIA_LIST,
-	VALUE_FIELD_MAP,
-	VALUE_DATA_TYPES,
-	REGEX_INFO_URL,
-	CRITERIA_OPERATORS_TYPES,
-	REGEX_INFO_TEXT,
-	CRITERIA_OPERATORS_LABELS
-} from '../../../constants/criteria';
-import { AutosuggestField } from '../autosuggestField/autosuggestField.component';
-import { schema, VALIDATIONS_MESSAGES } from '../../../services/validation';
-import { renderWhenTrue } from '../../../helpers/rendering';
-import { RegexInfoLink } from './components/criteriaValueField/criteriaValueField.styles';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;

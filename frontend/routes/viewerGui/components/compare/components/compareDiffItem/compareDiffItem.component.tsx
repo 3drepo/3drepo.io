@@ -17,12 +17,12 @@
 
 import * as React from 'react';
 
-import { ArrowsAltH } from '../../../../../components/fontAwesomeIcon';
 import Checkbox from '@material-ui/core/Checkbox';
-import { RevisionsSelect } from '../revisionsSelect/revisionsSelect.component';
-import { Container, ModelData, Name, Revisions, CurrentRevision, CompareIconWrapper } from './compareDiffItem.styles';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { formatShortDate } from '../../../../../../services/formatting/formatDate';
+import { ArrowsAltH } from '../../../../../components/fontAwesomeIcon';
+import { RevisionsSelect } from '../revisionsSelect/revisionsSelect.component';
+import { CompareIconWrapper, Container, CurrentRevision, ModelData, Name, Revisions } from './compareDiffItem.styles';
 
 interface IProps {
 	className?: string;

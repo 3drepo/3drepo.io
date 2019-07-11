@@ -15,32 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import RemoveCircle from '@material-ui/icons/RemoveCircle';
+import {
+	cond,
+	isEmpty,
+	isEqual,
+	isNumber,
+	matches,
+	pick,
+	values
+} from 'lodash';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {
-	pick,
-	values,
-	isNumber,
-	cond,
-	matches,
-	isEqual,
-	isEmpty
-} from 'lodash';
-import RemoveCircle from '@material-ui/icons/RemoveCircle';
 
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
+import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
 import {
 	CustomTable,
 	CELL_TYPES,
 	TableButton
 } from '../components/customTable/customTable.component';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
-import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 import { JobItem } from '../components/jobItem/jobItem.component';
-import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
-import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
+import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 import { UserItem } from '../components/userItem/userItem.component';
-import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
 
 const USERS_TABLE_CELLS = [
 	{

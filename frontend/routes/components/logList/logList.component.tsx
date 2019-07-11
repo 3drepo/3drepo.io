@@ -17,9 +17,9 @@
 
 import * as React from 'react';
 
+import { Loader } from '../../components/loader/loader.component';
 import { Log } from './components/log/log.component';
 import { Container, LoaderContainer } from './logList.styles';
-import { Loader } from '../../components/loader/loader.component';
 
 interface IProps {
 	items: any[];

@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import styled from 'styled-components';
-import { Button, DialogContent, ListItem, Tooltip, Input, Tabs, Tab } from '@material-ui/core';
+import { Button, DialogContent, Input, ListItem, Tab, Tabs, Tooltip } from '@material-ui/core';
 import { TooltipProps } from '@material-ui/core/Tooltip';
 import { omit } from 'lodash';
+import * as React from 'react';
+import styled from 'styled-components';
 import { COLOR } from '../../../../../styles';
 
 export const NegativeActionButton = styled(Button)`

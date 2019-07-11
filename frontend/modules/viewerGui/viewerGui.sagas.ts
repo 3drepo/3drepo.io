@@ -15,37 +15,37 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, all, select } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
+import { ROUTES } from '../../constants/routes';
+import { INITIAL_HELICOPTER_SPEED, NEW_PIN_ID, VIEWER_CLIP_MODES, VIEWER_EVENTS } from '../../constants/viewer';
+import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as API from '../../services/api';
-import { ViewerGuiTypes, ViewerGuiActions } from './viewerGui.redux';
-import { ModelActions, selectRevisions, selectSettings } from '../model';
+import { MultiSelect } from '../../services/viewer/multiSelect';
+import { Viewer } from '../../services/viewer/viewer';
+import { BimActions } from '../bim';
+import { CompareActions } from '../compare';
+import { selectCurrentUser, CurrentUserActions } from '../currentUser';
+import { DialogActions } from '../dialog';
+import { GroupsActions } from '../groups';
+import { selectIssuesMap, IssuesActions } from '../issues';
+import { JobsActions } from '../jobs';
+import { MeasureActions } from '../measure';
+import { selectRevisions, selectSettings, ModelActions } from '../model';
+import { selectRisksMap, RisksActions } from '../risks';
+import { selectUrlParams } from '../router/router.selectors';
+import { StarredMetaActions } from '../starredMeta';
+import { dispatch } from '../store';
 import { TreeActions } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
-import { IssuesActions, selectIssuesMap } from '../issues';
-import { RisksActions, selectRisksMap } from '../risks';
-import { GroupsActions } from '../groups';
-import { StarredMetaActions } from '../starredMeta';
-import { JobsActions } from '../jobs';
-import { CurrentUserActions, selectCurrentUser } from '../currentUser';
-import { CompareActions } from '../compare';
+import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';
 import {
-	selectIsMetadataVisible,
+	selectClipNumber,
 	selectHelicopterSpeed,
 	selectIsClipEdit,
-	selectClipNumber
+	selectIsMetadataVisible
 } from './viewerGui.selectors';
-import { VIEWER_PANELS } from '../../constants/viewerGui';
-import { BimActions } from '../bim';
-import { MeasureActions } from '../measure';
-import { DialogActions } from '../dialog';
-import { dispatch } from '../store';
-import { Viewer } from '../../services/viewer/viewer';
-import { VIEWER_EVENTS, VIEWER_CLIP_MODES, INITIAL_HELICOPTER_SPEED, NEW_PIN_ID } from '../../constants/viewer';
-import { selectUrlParams } from '../router/router.selectors';
-import { MultiSelect } from '../../services/viewer/multiSelect';
-import { ROUTES } from '../../constants/routes';
 
 function* fetchData({ teamspace, model, revision }) {
 	try {

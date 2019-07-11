@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
 import { Button, Grid } from '@material-ui/core';
+import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../styles/colors';
 import { Panel as PanelComponent } from '../../../components/panel/panel.component';

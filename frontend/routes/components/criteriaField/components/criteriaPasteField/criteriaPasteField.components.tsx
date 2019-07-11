@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { PasteContainer, PasteField, PasteButton, StyledSaveIcon, StyledCloseIcon } from './criteriaPasteField.styles';
 import { ENTER_KEY } from '../../../../../constants/keys';
+import { PasteButton, PasteContainer, PasteField, StyledCloseIcon, StyledSaveIcon } from './criteriaPasteField.styles';
 
 interface IProps {
 	name?: string;

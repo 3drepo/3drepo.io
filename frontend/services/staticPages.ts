@@ -1,6 +1,6 @@
-import { clientConfigService } from './clientConfig';
-import { memoize, kebabCase } from 'lodash';
 import axios from 'axios';
+import { kebabCase, memoize } from 'lodash';
+import { clientConfigService } from './clientConfig';
 
 export const getStaticRoutes = memoize(() => {
 	return clientConfigService.legalTemplates.map((route) => {

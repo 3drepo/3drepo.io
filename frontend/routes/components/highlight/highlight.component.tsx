@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { trim } from 'lodash';
 import * as React from 'react';
 import Highlighter from 'react-highlight-words';
-import { trim } from 'lodash';
 
 import { Mark } from './highlight.styles';
 

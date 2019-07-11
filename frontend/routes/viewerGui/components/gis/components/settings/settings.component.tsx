@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { withFormik } from 'formik';
 import * as React from 'react';
 import * as Yup from 'yup';
-import { withFormik } from 'formik';
 
+import { convertPositionToDirectX, convertPositionToOpenGL } from '../../../../../../helpers/model';
 import { schema } from '../../../../../../services/validation';
-import { convertPositionToOpenGL, convertPositionToDirectX } from '../../../../../../helpers/model';
 
 import { SettingsForm } from './../settingsForm/settingsForm.component';
 

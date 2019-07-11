@@ -1,4 +1,4 @@
-import { isArray, groupBy, map, get } from 'lodash';
+import { get, groupBy, isArray, map } from 'lodash';
 import { DATA_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 
 export const compareStrings = (string1, string2) => {

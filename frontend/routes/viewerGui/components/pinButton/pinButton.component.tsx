@@ -16,9 +16,9 @@
  */
 
 import * as React from 'react';
-import { VIEWER_EVENTS, NEW_PIN_ID } from '../../../../constants/viewer';
+import { NEW_PIN_ID, VIEWER_EVENTS } from '../../../../constants/viewer';
 import { PIN_COLORS } from '../../../../styles';
-import { PinIcon, LabelButton, Container } from './pinButton.styles';
+import { Container, LabelButton, PinIcon } from './pinButton.styles';
 
 interface IProps {
 	viewer: any;

@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
+import { Field, Form, Formik } from 'formik';
 import { omit } from 'lodash';
+import * as React from 'react';
+import * as Yup from 'yup';
 
 import {
+	FieldsRow,
 	FormContainer,
 	Headline,
-	StyledTextField,
-	FieldsRow,
-	StyledButton
+	StyledButton,
+	StyledTextField
 } from '../profile.styles';
 
 import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../../services/validation';

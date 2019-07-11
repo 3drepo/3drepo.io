@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
 import { values } from 'lodash';
+import { createSelector } from 'reselect';
 import { extendTeamspacesInfo } from './teamspaces.helpers';
 
 export const selectTeamspacesDomain = (state) => Object.assign({}, state.teamspaces);

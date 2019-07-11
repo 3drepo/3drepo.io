@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
 import Img from 'react-image';
+import styled, { css } from 'styled-components';
 
 const previewStateStyles = css`
 	cursor: pointer;

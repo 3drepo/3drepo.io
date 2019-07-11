@@ -1,20 +1,20 @@
-import * as React from 'react';
-import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
+import DialogActions from '@material-ui/core/DialogActions';
+import * as React from 'react';
+import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { DATE_TIME_FORMAT } from '../../../../../services/formatting/formatDate';
 import { DateTime } from '../../../dateTime/dateTime.component';
 import {
-	Item,
-	Row,
-	Tag,
 	Column,
 	Description,
-	StyledList,
+	Item,
 	Property,
 	PropertyWrapper,
-	StyledDialogContent
+	Row,
+	StyledDialogContent,
+	StyledList,
+	Tag
 } from './revisionsDialog.styles';
-import { renderWhenTrue } from '../../../../../helpers/rendering';
 
 interface IProps {
 	currentRevisionName: string;
@@ -64,7 +64,7 @@ const renderRevisionItem = (revision, currentRevisionId, handleSetNewRevision) =
 				<Description>{revision.desc || '(no description)'}</Description>
 			</Column>
 		</Item>
-	)
+	);
 };
 
 const renderRevisions = ({ revisions, currentRevisionId, handleSetNewRevision }) => renderWhenTrue(

@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+import * as React from 'react';
 
-import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { Container, DisplayedText, ProgressWrapper } from './revisionsSwitch.styles';
 
 interface IProps {

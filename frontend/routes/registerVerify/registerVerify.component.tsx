@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as queryString from 'query-string';
 import Grid from '@material-ui/core/Grid';
+import * as queryString from 'query-string';
+import * as React from 'react';
 import { Link } from 'react-router-dom';
 
 import { Panel } from '../components/panel/panel.component';
-import { Container, Paragraph, Buttons, StyledButton  } from './registerVerify.styles';
+import { Buttons, Container, Paragraph, StyledButton  } from './registerVerify.styles';
 
 interface IProps {
 	match: any;

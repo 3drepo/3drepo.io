@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import FormControl from '@material-ui/core/FormControl';
+import styled from 'styled-components';
 
-import { TextField } from '../../../../../components/textField/textField.component';
 import { COLOR } from '../../../../../../styles';
+import { TextField } from '../../../../../components/textField/textField.component';
 import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
 
 export const Container = styled.div`

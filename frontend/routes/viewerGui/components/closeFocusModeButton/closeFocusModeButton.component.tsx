@@ -20,8 +20,8 @@ import * as React from 'react';
 import Fade from '@material-ui/core/Fade';
 import CloseIcon from '@material-ui/icons/Close';
 
-import { Container } from './closeFocusModeButton.styles';
 import { Button } from '../../components/panelButton/panelButton.styles';
+import { Container } from './closeFocusModeButton.styles';
 
 interface IProps {
 	isFocusMode: boolean;

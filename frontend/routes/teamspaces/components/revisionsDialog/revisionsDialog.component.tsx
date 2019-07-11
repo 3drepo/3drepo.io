@@ -15,23 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { analyticsService, EVENT_CATEGORIES, EVENT_ACTIONS } from '../../../../services/analytics';
 import Button from '@material-ui/core/Button';
+import * as React from 'react';
+import { ROUTES } from '../../../../constants/routes';
+import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../services/analytics';
+import { DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { DateTime } from './../../../components/dateTime/dateTime.component';
 import {
-	Item,
-	Row,
 	Description,
+	Item,
 	Message,
+	Property,
+	PropertyWrapper,
+	Row,
 	StyledDialogActions,
 	StyledDialogContent,
-	StyledList,
-	Property,
-	PropertyWrapper
+	StyledList
 } from './revisionsDialog.styles';
-import { DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
-import { ROUTES } from '../../../../constants/routes';
 
 interface IProps {
 	fetchModelRevisions: (teamspace, modelId) => void;

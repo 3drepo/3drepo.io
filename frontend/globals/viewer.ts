@@ -16,7 +16,7 @@
  **/
 import EventEmitter from 'eventemitter3';
 
-import { VIEWER_NAV_MODES, VIEWER_MAP_SOURCES, VIEWER_EVENTS, VIEWER_ERRORS } from '../constants/viewer';
+import { VIEWER_ERRORS, VIEWER_EVENTS, VIEWER_MAP_SOURCES, VIEWER_NAV_MODES } from '../constants/viewer';
 
 declare const Pin;
 declare const UnityUtil;

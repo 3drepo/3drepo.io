@@ -15,27 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { isEmpty, includes } from 'lodash';
-import { MenuItem, ListItem, IconButton, List } from '@material-ui/core';
+import { IconButton, List, ListItem, MenuItem } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import { includes, isEmpty } from 'lodash';
+import * as React from 'react';
 
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
-import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Settings } from './components/settings/settings.component';
 import {
 	GisContainer,
-	StyledSelect,
+	GisIcon,
 	MapLayer,
+	MapLayers,
 	MapName,
 	MapNameWrapper,
 	StyledMapIcon,
-	VisibilityButton,
-	MapLayers,
-	GisIcon
+	StyledSelect,
+	VisibilityButton
 } from './gis.styles';
 
 interface IProps {

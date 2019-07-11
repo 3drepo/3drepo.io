@@ -15,21 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import SaveIcon from '@material-ui/icons/Save';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
+import SaveIcon from '@material-ui/icons/Save';
+import * as React from 'react';
 
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
+import { GROUP_PANEL_NAME, GROUP_TYPES_ICONS, GROUPS_TYPES } from '../../../../../../constants/groups';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
-import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
-import { ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
 import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
 import { CriteriaField } from '../../../../../components/criteriaField/criteriaField.component';
-import { GROUPS_TYPES, GROUP_PANEL_NAME, GROUP_TYPES_ICONS } from '../../../../../../constants/groups';
-import { Container, Content, ColorPickerWrapper, Actions } from './groupDetails.styles';
+import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
+import { ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
+import { ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
+import { Actions, ColorPickerWrapper, Container, Content } from './groupDetails.styles';
 import { GroupDetailsForm } from './groupDetailsForm.component';
 
 interface IProps {

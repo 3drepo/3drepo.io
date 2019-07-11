@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
 
-import { ModelsPermissions } from './modelsPermissions.component';
 import {
-	UserManagementActions,
-	selectModels,
 	selectCurrentModels,
-	selectExtendedModelPermissions
+	selectExtendedModelPermissions,
+	selectModels,
+	UserManagementActions
 } from '../../modules/userManagement';
+import { ModelsPermissions } from './modelsPermissions.component';
 
 const mapStateToProps = createStructuredSelector({
 	models: selectModels,

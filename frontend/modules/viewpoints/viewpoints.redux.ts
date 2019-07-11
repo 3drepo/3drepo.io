@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createActions, createReducer } from 'reduxsauce';
 import { cloneDeep, keyBy } from 'lodash';
+import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createActions({
 	setPendingState: ['pendingState'],

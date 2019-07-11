@@ -16,9 +16,9 @@
  */
 
 import * as React from 'react';
-import { Route, Redirect } from 'react-router-dom';
-import TopMenu from '../topMenu/topMenu.container';
+import { Redirect, Route } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
+import TopMenu from '../topMenu/topMenu.container';
 
 export const PrivateRoute = ({ component: Component, isAuthenticated, onLogout, push, ...routeProps }) => {
 	const redirect = (props) => (

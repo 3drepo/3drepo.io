@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { isEqual, isEmpty } from 'lodash';
 import CloudDownload from '@material-ui/icons/CloudDownload';
+import { isEmpty, isEqual } from 'lodash';
+import * as React from 'react';
 
+import { LoaderContainer } from '../billing/billing.styles';
 import { CustomTable, CELL_TYPES, TableButton } from '../components/customTable/customTable.component';
 import { Loader } from '../components/loader/loader.component';
-import { LoaderContainer } from '../billing/billing.styles';
 import { Container } from './history.styles';
 
 const INVOICE_REFUND_STATUS = 'Refund';

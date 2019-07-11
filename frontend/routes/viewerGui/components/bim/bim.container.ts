@@ -15,24 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
 
-import { Bim } from './bim.component';
 import {
-	BimActions,
+	selectActiveMeta,
 	selectFilteredMetadata,
+	selectIsPending,
+	selectSearchEnabled,
 	selectSelectedFilters,
 	selectShowStarred,
-	selectSearchEnabled,
-	selectIsPending,
-	selectActiveMeta
+	BimActions
 } from '../../../../modules/bim';
+import { Bim } from './bim.component';
 
-import { selectStarredMeta, StarredMetaActions } from '../../../../modules/starredMeta';
-import { selectMetaKeys } from '../../../../modules/model';
 import { DialogActions } from '../../../../modules/dialog';
+import { selectMetaKeys } from '../../../../modules/model';
+import { selectStarredMeta, StarredMetaActions } from '../../../../modules/starredMeta';
 
 const mapStateToProps = createStructuredSelector({
 	metadata: selectFilteredMetadata,

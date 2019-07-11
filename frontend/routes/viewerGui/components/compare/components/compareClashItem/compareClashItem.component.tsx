@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { capitalize } from 'lodash';
 import { Checkbox } from '@material-ui/core';
+import { capitalize } from 'lodash';
+import * as React from 'react';
 
-import { TARGET_MODEL_TYPE, BASE_MODEL_TYPE } from '../../../../../../constants/compare';
-import { Container, ClashTypeSwitch, ClashSettings, Name, Model } from './compareClashItem.styles';
+import { BASE_MODEL_TYPE, TARGET_MODEL_TYPE } from '../../../../../../constants/compare';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { RevisionsSelect } from '../revisionsSelect/revisionsSelect.component';
+import { ClashSettings, ClashTypeSwitch, Container, Model, Name } from './compareClashItem.styles';
 
 interface IProps {
 	className?: string;

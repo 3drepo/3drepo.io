@@ -17,13 +17,13 @@
 
 import * as React from 'react';
 
-import DialogTitle from '@material-ui/core/DialogTitle';
+import { Button } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
-import { Button } from '@material-ui/core';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
-import { dispatch } from '../../../modules/store';
 import { renderWhenTrue } from '../../../helpers/rendering';
+import { dispatch } from '../../../modules/store';
 import { DialogActions } from './dialogContainer.styles';
 
 interface IProps {

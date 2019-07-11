@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import { AuthActions, selectMessage, selectIsPending } from '../../modules/auth';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { selectIsPending, selectMessage, AuthActions } from '../../modules/auth';
 import { RegisterVerify } from './registerVerify.component';
 
 const mapStateToProps = createStructuredSelector({

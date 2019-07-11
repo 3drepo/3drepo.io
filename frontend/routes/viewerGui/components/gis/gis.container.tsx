@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import { ModelActions, selectSettings, selectIsPending, selectMaps } from './../../../../modules/model';
-import { GisActions, selectIsInitialisedMap, selectVisibleSources } from './../../../../modules/gis';
+import { selectIsInitialisedMap, selectVisibleSources, GisActions } from './../../../../modules/gis';
+import { selectIsPending, selectMaps, selectSettings, ModelActions } from './../../../../modules/model';
 import { Gis } from './gis.component';
 
 const mapStateToProps = createStructuredSelector({

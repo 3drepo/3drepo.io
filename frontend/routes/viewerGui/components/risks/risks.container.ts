@@ -15,27 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { withRouter } from 'react-router-dom';
-import { connect } from 'react-redux';
 
-import { Risks } from './risks.component';
-import {
-	RisksActions,
-	selectRisks,
-	selectActiveRiskId,
-	selectActiveRiskDetails,
-	selectShowDetails,
-	selectSearchEnabled,
-	selectSelectedFilters,
-	selectShowPins,
-	selectIsRisksPending,
-	selectSortOrder,
-	selectFetchingDetailsIsPending
-} from '../../../../modules/risks';
 import { selectJobsList } from '../../../../modules/jobs';
 import { selectSettings } from '../../../../modules/model';
+import {
+	selectActiveRiskDetails,
+	selectActiveRiskId,
+	selectFetchingDetailsIsPending,
+	selectIsRisksPending,
+	selectRisks,
+	selectSearchEnabled,
+	selectSelectedFilters,
+	selectShowDetails,
+	selectShowPins,
+	selectSortOrder,
+	RisksActions
+} from '../../../../modules/risks';
+import { Risks } from './risks.component';
 
 const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,

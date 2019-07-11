@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { withRouter } from 'react-router-dom';
-import { connect } from 'react-redux';
 
+import { selectIsAuthenticated, AuthActions } from '../../../modules/auth';
 import { selectCurrentUser } from '../../../modules/currentUser';
-import { AuthActions, selectIsAuthenticated } from '../../../modules/auth';
 import { DialogActions } from '../../../modules/dialog';
 import { selectSettings, ViewerActions } from '../../../modules/viewer';
 import { selectIsFocusMode } from '../../../modules/viewerGui';

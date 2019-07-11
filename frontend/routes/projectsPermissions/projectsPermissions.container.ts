@@ -19,8 +19,8 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { ProjectsPermissions } from './projectsPermissions.component';
 import { selectExtendedProjectPermissions, UserManagementActions } from '../../modules/userManagement';
+import { ProjectsPermissions } from './projectsPermissions.component';
 
 const mapStateToProps = createStructuredSelector({
 	permissions: selectExtendedProjectPermissions

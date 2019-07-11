@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { memoize } from 'lodash';
+import * as React from 'react';
 
-import { Container, AvatarPlaceholder, StyledAvatar, StyledIcon } from './avatar.styles';
+import { AvatarPlaceholder, Container, StyledAvatar, StyledIcon } from './avatar.styles';
 
 interface IProps {
 	name: string;

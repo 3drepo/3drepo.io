@@ -15,28 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import DayJsUtils from '@date-io/dayjs';
+import { connect, withFormik, Field, Form } from 'formik';
+import { debounce, get, isEmpty, isEqual } from 'lodash';
+import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import * as React from 'react';
 import * as Yup from 'yup';
-import { MuiPickersUtilsProvider } from 'material-ui-pickers';
-import DayJsUtils from '@date-io/dayjs';
-import { get, isEqual, isEmpty, debounce } from 'lodash';
-import { Field, Form, withFormik, connect } from 'formik';
 
 import InputLabel from '@material-ui/core/InputLabel';
+import {
+	DEFAULT_PROPERTIES, ISSUE_PRIORITIES, ISSUE_STATUSES
+} from '../../../../../../constants/issues';
+import { canChangeAssigned, canChangeBasicProperty, canChangeStatus } from '../../../../../../helpers/issues';
+import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
+import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
+import { DateField } from '../../../../../components/dateField/dateField.component';
 import { Image } from '../../../../../components/image';
+import { TextField } from '../../../../../components/textField/textField.component';
+import PinButton from '../../../pinButton/pinButton.container';
 import {
 	FieldsRow, StyledFormControl
 }	from './../../../risks/components/riskDetails/riskDetails.styles';
-import {
-	ISSUE_STATUSES, ISSUE_PRIORITIES, DEFAULT_PROPERTIES
-} from '../../../../../../constants/issues';
-import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
-import { DateField } from '../../../../../components/dateField/dateField.component';
-import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
-import { canChangeBasicProperty, canChangeStatus, canChangeAssigned } from '../../../../../../helpers/issues';
-import { TextField } from '../../../../../components/textField/textField.component';
 import { DescriptionImage } from './issueDetails.styles';
-import PinButton from '../../../pinButton/pinButton.container';
 
 interface IProps {
 	issue: any;

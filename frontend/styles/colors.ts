@@ -1,6 +1,6 @@
 import { mapValues } from 'lodash';
 
-import { hexToRgba, hexToGLColor } from '../helpers/colors';
+import { hexToGLColor, hexToRgba } from '../helpers/colors';
 
 export const BLACK = '#00000';
 export const WHITE = '#ffffff';

@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
 
-import { TreeNode } from './treeNode.component';
-import {
-	TreeActions,
-	selectVisibilityMap,
-	selectSelectionMap
-} from '../../../../../../modules/tree';
 import { selectSettings } from '../../../../../../modules/model';
+import {
+	selectSelectionMap,
+	selectVisibilityMap,
+	TreeActions
+} from '../../../../../../modules/tree';
+import { TreeNode } from './treeNode.component';
 
 const mapStateToProps = createStructuredSelector({
 	settings: selectSettings,

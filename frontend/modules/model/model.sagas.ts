@@ -16,19 +16,19 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { put, takeLatest, select, take } from 'redux-saga/effects';
+import { put, select, take, takeLatest } from 'redux-saga/effects';
 
+import { CHAT_CHANNELS } from '../../constants/chat';
 import * as API from '../../services/api';
-import { dispatch } from '../store';
-import { uploadFileStatuses } from './model.helpers';
+import { clientConfigService } from '../../services/clientConfig';
+import { ChatActions } from '../chat';
+import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
-import { ModelTypes, ModelActions } from './model.redux';
+import { dispatch } from '../store';
 import { TeamspacesActions } from '../teamspaces';
 import { SnackbarActions } from './../snackbar';
-import { selectCurrentUser } from '../currentUser';
-import { CHAT_CHANNELS } from '../../constants/chat';
-import { ChatActions } from '../chat';
-import { clientConfigService } from '../../services/clientConfig';
+import { uploadFileStatuses } from './model.helpers';
+import { ModelActions, ModelTypes } from './model.redux';
 
 export function* fetchSettings({ teamspace, modelId }) {
 	try {

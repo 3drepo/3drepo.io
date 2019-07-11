@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
 
-import { PageTemplate } from './staticPageRoute.component';
 import {
-	StaticPagesActions,
+	selectStaticPagesIsPending,
 	selectStaticPagesTemplates,
-	selectStaticPagesIsPending
+	StaticPagesActions
 } from '../../../modules/staticPages';
+import { PageTemplate } from './staticPageRoute.component';
 
 const mapStateToProps = createStructuredSelector({
 	templates: selectStaticPagesTemplates,

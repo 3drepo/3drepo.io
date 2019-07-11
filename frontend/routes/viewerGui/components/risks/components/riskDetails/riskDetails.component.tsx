@@ -17,17 +17,17 @@
 
 import * as React from 'react';
 
+import { NEW_PIN_ID } from '../../../../../../constants/viewer';
+import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { Container } from './riskDetails.styles';
-import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
-import { RiskDetailsForm } from './riskDetailsForm.component';
-import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
 import { canComment, getRiskPinColor } from '../../../../../../helpers/risks';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
+import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
+import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
-import { NEW_PIN_ID } from '../../../../../../constants/viewer';
-import { mergeData, diffData } from '../../../../../../helpers/forms';
+import { Container } from './riskDetails.styles';
+import { RiskDetailsForm } from './riskDetailsForm.component';
 
 interface IProps {
 	viewer: any;

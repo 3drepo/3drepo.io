@@ -21,11 +21,11 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Loader } from '../../../components/loader/loader.component';
 import {
 	Actions,
-	Title,
-	TitleIcon,
-	TitleContainer,
 	LoaderContainer,
-	Panel
+	Panel,
+	Title,
+	TitleContainer,
+	TitleIcon
 } from './viewerPanel.styles';
 
 const ViewerPanelTitle = ({title, Icon, renderActions}) => (

@@ -15,24 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
 import Grid from '@material-ui/core/Grid';
+import { Field, Form, Formik } from 'formik';
+import * as React from 'react';
+import * as Yup from 'yup';
 
 import { schema } from '../../../services/validation';
 
 import {
+	DropzoneContent,
+	DropzoneMessage,
+	DropzonePreview,
+	DropzoneProgress,
+	FieldsRow,
 	FormContainer,
 	Headline,
+	StyledButton,
 	StyledDropzone,
-	DropzoneMessage,
-	DropzoneProgress,
-	StyledTextField,
-	FieldsRow,
-	DropzoneContent,
-	DropzonePreview,
-	StyledButton
+	StyledTextField
 } from '../profile.styles';
 
 interface IProps {

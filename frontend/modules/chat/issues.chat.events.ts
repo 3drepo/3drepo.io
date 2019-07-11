@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ChatEvents } from './chat.events';
 import { Channel } from './channel';
+import { ChatEvents } from './chat.events';
 
 export class IssuesChatEvents extends ChatEvents {
 	private comments: { [id: string]: ChatEvents};

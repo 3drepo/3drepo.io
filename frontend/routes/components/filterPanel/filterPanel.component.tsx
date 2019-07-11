@@ -15,40 +15,40 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import ExpandIcon from '@material-ui/icons/ChevronRight';
+import CollapseIcon from '@material-ui/icons/ExpandMore';
+import { isNil, keyBy, omit, uniqBy } from 'lodash';
 import * as React from 'react';
 import Autosuggest from 'react-autosuggest';
-import { omit, isNil, uniqBy, keyBy } from 'lodash';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import CollapseIcon from '@material-ui/icons/ExpandMore';
-import ExpandIcon from '@material-ui/icons/ChevronRight';
 
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
-import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import SearchIcon from '@material-ui/icons/Search';
+import { BACKSPACE, ENTER_KEY } from '../../../constants/keys';
+import { renderWhenTrue } from '../../../helpers/rendering';
+import { compareStrings } from '../../../helpers/searching';
+import { formatShortDate } from '../../../services/formatting/formatDate';
+import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { Highlight } from '../highlight/highlight.component';
-import { ENTER_KEY, BACKSPACE } from '../../../constants/keys';
 import { FiltersMenu } from './components/filtersMenu/filtersMenu.component';
 import {
-	Container,
-	SelectedFilters,
-	InputContainer,
-	SuggestionsList,
-	StyledTextField,
-	StyledChip,
-	FiltersButton,
 	ButtonContainer,
-	StyledIconButton,
-	MoreIcon,
-	CopyIcon,
 	ButtonWrapper,
 	Chips,
+	Container,
+	CopyIcon,
+	FiltersButton,
+	InputContainer,
+	MoreIcon,
 	Placeholder,
-	PlaceholderText
+	PlaceholderText,
+	SelectedFilters,
+	StyledChip,
+	StyledIconButton,
+	StyledTextField,
+	SuggestionsList
 } from './filterPanel.styles';
-import { compareStrings } from '../../../helpers/searching';
-import { renderWhenTrue } from '../../../helpers/rendering';
-import { formatShortDate } from '../../../services/formatting/formatDate';
 
 export const DATA_TYPES = {
 	UNDEFINED: 1,

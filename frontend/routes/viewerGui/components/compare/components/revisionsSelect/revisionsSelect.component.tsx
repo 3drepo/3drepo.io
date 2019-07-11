@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { keyBy } from 'lodash';
-import { DateTime } from '../../../../../components/dateTime/dateTime.component';
+import * as React from 'react';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { SelectField, MenuItem, Name, Date } from './revisionsSelect.styles';
 import { formatShortDate, NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
+import { DateTime } from '../../../../../components/dateTime/dateTime.component';
+import { Date, MenuItem, Name, SelectField } from './revisionsSelect.styles';
 
 interface IProps {
 	revisions: any[];

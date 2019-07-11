@@ -1,13 +1,13 @@
 import * as React from 'react';
 
-import { getState, dispatch } from '../../modules/store';
-import { selectMemory } from '../../modules/viewer';
-import { MultiSelect } from './multiSelect';
+import { IS_DEVELOPMENT } from '../../constants/environment';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_PIN_MODE } from '../../constants/viewer';
 import { Viewer as ViewerInstance } from '../../globals/viewer';
-import { clientConfigService } from '../clientConfig';
-import { IS_DEVELOPMENT } from '../../constants/environment';
 import { DialogActions } from '../../modules/dialog';
+import { dispatch, getState } from '../../modules/store';
+import { selectMemory } from '../../modules/viewer';
+import { clientConfigService } from '../clientConfig';
+import { MultiSelect } from './multiSelect';
 
 export class ViewerService {
 	public viewer = null;

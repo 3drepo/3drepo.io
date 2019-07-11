@@ -15,28 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TextField, Typography } from '@material-ui/core';
+import { Field, Formik } from 'formik';
 import * as React from 'react';
 import * as Yup from 'yup';
-import { Formik, Field } from 'formik';
-import { TextField, Typography } from '@material-ui/core';
 
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
-import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
 import {
-	Content,
-	Container,
 	Collapsable,
-	Details,
-	Summary,
 	CollapsableContent,
-	ToggleButtonContainer,
-	ToggleButton,
-	ToggleIcon,
+	Container,
+	Content,
+	Details,
+	NotCollapsableContent,
 	StyledForm,
-	NotCollapsableContent
+	Summary,
+	ToggleButton,
+	ToggleButtonContainer,
+	ToggleIcon
 } from './previewDetails.styles';
 
 interface IProps {

@@ -16,9 +16,9 @@
  */
 
 import { get, omit } from 'lodash';
+import { STATUSES, STATUSES_COLOURS, STATUSES_ICONS } from '../constants/issues';
 import { getAPIUrl } from '../services/api';
-import { STATUSES_COLOURS, STATUSES_ICONS, STATUSES } from '../constants/issues';
-import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
+import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 import { sortByDate } from './sorting';
 
 export const prepareIssue = (issue, jobs = []) => {

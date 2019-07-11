@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
+import { Field, Form, Formik } from 'formik';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import * as Yup from 'yup';
-import { Formik, Field, Form } from 'formik';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
 
 import { clientConfigService } from '../../services/clientConfig';
 import { schema } from '../../services/validation';
-import { Panel } from '../components/panel/panel.component';
 import { Logo } from '../components/logo/logo.component';
+import { Panel } from '../components/panel/panel.component';
 import { SubmitButton } from '../components/submitButton/submitButton.component';
-import { Container, Headline, LoginButtons, StyledButton, UserNotice } from './login.styles';
 import { Footer } from './components/footer';
+import { Container, Headline, LoginButtons, StyledButton, UserNotice } from './login.styles';
 
 const LoginSchema = Yup.object().shape({
 	login: schema.required,

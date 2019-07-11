@@ -1,9 +1,9 @@
 import styled from 'styled-components';
 
 import {
-	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,
+	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
 import { ReportedItems } from '../reportedItems';

@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import { Checkbox as CheckboxComponent } from '@material-ui/core';
+import styled from 'styled-components';
 import { FilterPanel as FilterPanelComponent } from '../../../../../components/filterPanel/filterPanel.component';
 import * as FilterStyles from '../../../../../components/filterPanel/filterPanel.styles';
 

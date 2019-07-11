@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
 
-import { NotFound } from './notFound.component';
 import { DialogActions } from '../../modules/dialog';
+import { NotFound } from './notFound.component';
 
 const mapStateToProps = createStructuredSelector({});
 

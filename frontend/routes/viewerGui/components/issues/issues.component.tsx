@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as queryString from 'query-string';
 // @ts-ignore
 import * as fileDialog from 'file-dialog';
+import * as queryString from 'query-string';
+import * as React from 'react';
 
-import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
-	STATUSES,
-	ISSUE_FILTERS,
 	ISSUE_FILTER_RELATED_FIELDS,
-	ISSUE_STATUSES,
+	ISSUE_FILTERS,
 	ISSUE_PRIORITIES,
-	ISSUES_ACTIONS_MENU
+	ISSUE_STATUSES,
+	ISSUES_ACTIONS_MENU,
+	STATUSES
 } from '../../../../constants/issues';
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import IssueDetails from './components/issueDetails/issueDetails.container';
 import { IssuesContainer } from './issues.styles';
 

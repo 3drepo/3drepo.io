@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { push } from 'connected-react-router';
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
-import { push } from 'connected-react-router';
 
-import { PrivateRoute } from './privateRoute.component';
 import { selectIsAuthenticated, AuthActions } from '../../../modules/auth';
+import { PrivateRoute } from './privateRoute.component';
 
 const mapStateToProps = createStructuredSelector({
 	isAuthenticated: selectIsAuthenticated

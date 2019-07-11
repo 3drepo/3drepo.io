@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {get, omit, pick} from 'lodash';
 import {createActions, createReducer} from 'reduxsauce';
-import {pick, get, omit} from 'lodash';
-import {TEAMSPACE_PERMISSIONS} from '../../constants/teamspace-permissions';
 import {PROJECT_ROLES_TYPES} from '../../constants/project-permissions';
+import {TEAMSPACE_PERMISSIONS} from '../../constants/teamspace-permissions';
 import { sortByField } from '../../helpers/sorting';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({

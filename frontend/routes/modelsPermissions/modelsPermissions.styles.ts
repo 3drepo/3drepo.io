@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
+import styled from 'styled-components';
 
+import { isFirefox, isWindows, COLOR } from '../../styles';
 import * as CustomTable from '../components/customTable/customTable.styles';
-import { COLOR, isWindows, isFirefox } from '../../styles';
 
 export const Container = styled(Grid)`
 	min-width: 0;

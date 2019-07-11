@@ -1,5 +1,5 @@
 import { omit, pick } from 'lodash';
-import { GROUPS_TYPES, GROUP_TYPES_ICONS } from '../constants/groups';
+import { GROUP_TYPES_ICONS, GROUPS_TYPES } from '../constants/groups';
 import { COLOR } from '../styles';
 import { getGroupHexColor, hexToArray } from './colors';
 import { prepareCriterion } from './criteria';

@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, fork } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
+import { fork, put, takeLatest } from 'redux-saga/effects';
 
-import * as API from '../../services/api';
-import { analyticsService } from '../../services/analytics';
+import { ROUTES } from '../../constants/routes';
 import { NewTermsDialog } from '../../routes/components/newTermsDialog/newTermsDialog.component';
+import { analyticsService } from '../../services/analytics';
+import * as API from '../../services/api';
 import { CurrentUserActions } from '../currentUser';
 import { getAvatarUrl } from '../currentUser/currentUser.sagas';
 import { DialogActions } from '../dialog';
+import { changePasswordMessages, forgotPasswordMessages, verificationMessages } from './auth.helpers';
 import { AuthActions, AuthTypes } from './auth.redux';
-import { verificationMessages, forgotPasswordMessages, changePasswordMessages } from './auth.helpers';
-import { ROUTES } from '../../constants/routes';
 
 function* login({ username, password }) {
 	yield put(AuthActions.setPendingStatus(true));

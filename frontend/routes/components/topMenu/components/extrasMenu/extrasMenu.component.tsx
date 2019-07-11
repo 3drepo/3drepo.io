@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import IconButton from '@material-ui/core/IconButton';
+import * as React from 'react';
 
+import { LANDING_ROUTES, STATIC_ROUTES } from '../../../../../services/staticPages';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
 import {
+	BurgerIcon,
 	MenuContent,
 	MenuItem,
-	MenuText,
-	BurgerIcon
+	MenuText
 } from './extrasMenu.styles';
-import { STATIC_ROUTES, LANDING_ROUTES } from '../../../../../services/staticPages';
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
 	<IconButton

@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createActions, createReducer } from 'reduxsauce';
 import { get, omit } from 'lodash';
-import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
+import { createActions, createReducer } from 'reduxsauce';
 import * as Dialogs from '../../routes/components/dialogContainer/components';
+import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
 
 interface IDialogConfig {
 	title: string;

@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { cond, constant, isEqual, matches, stubTrue } from 'lodash';
 import styled, { css } from 'styled-components';
-import { cond, matches, isEqual, constant, stubTrue } from 'lodash';
-import { COLOR } from '../../../../../../styles';
 import {
 	TREE_ITEM_FEDERATION_TYPE,
 	TREE_ITEM_MODEL_TYPE,
 	TREE_ITEM_OBJECT_TYPE,
 	TREE_ITEM_SIZE
 } from '../../../../../../constants/tree';
+import { COLOR } from '../../../../../../styles';
 
 interface IContainer {
 	nodeType: string;

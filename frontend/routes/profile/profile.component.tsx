@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { pick } from 'lodash';
+import * as React from 'react';
 
 import { Panel } from '../components/panel/panel.component';
-import { ProfileDataForm } from './components/profileDataForm.component';
-import { PasswordChangeForm } from './components/passwordChangeForm.component';
-import { Container } from './profile.styles';
 import { APIKeyForm } from './components/apiKeyForm.component';
+import { PasswordChangeForm } from './components/passwordChangeForm.component';
+import { ProfileDataForm } from './components/profileDataForm.component';
+import { Container } from './profile.styles';
 
 interface IProps {
 	currentUser: any;

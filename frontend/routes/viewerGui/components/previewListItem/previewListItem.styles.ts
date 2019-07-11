@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import MenuItem from '@material-ui/core/MenuItem';
-import ArrowIcon from '@material-ui/icons/ArrowForward';
-import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import MenuItem from '@material-ui/core/MenuItem';
+import Typography from '@material-ui/core/Typography';
+import ArrowIcon from '@material-ui/icons/ArrowForward';
+import styled from 'styled-components';
 
 import { COLOR } from '../../../../styles/colors';
 

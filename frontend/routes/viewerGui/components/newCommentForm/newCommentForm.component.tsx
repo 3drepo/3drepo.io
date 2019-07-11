@@ -15,33 +15,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InputLabel from '@material-ui/core/InputLabel';
+import CameraIcon from '@material-ui/icons/AddAPhoto';
+import ReportProblemIcon from '@material-ui/icons/ReportProblem';
+import SaveIcon from '@material-ui/icons/Save';
+import ShortTextIcon from '@material-ui/icons/ShortText';
+import { Field, Formik } from 'formik';
 import * as React from 'react';
 import * as Yup from 'yup';
-import { Formik, Field } from 'formik';
-import SaveIcon from '@material-ui/icons/Save';
-import CameraIcon from '@material-ui/icons/AddAPhoto';
-import InputLabel from '@material-ui/core/InputLabel';
-import ReportProblemIcon from '@material-ui/icons/ReportProblem';
-import ShortTextIcon from '@material-ui/icons/ShortText';
 
-import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
-import { renderWhenTrue } from '../../../../helpers/rendering';
-import {
-	StyledTextField,
-	Actions,
-	ActionsGroup,
-	TextFieldWrapper,
-	StyledForm,
-	Container
-} from './newCommentForm.styles';
 import {
 	RISK_CONSEQUENCES,
 	RISK_LIKELIHOODS
 } from '../../../../constants/risks';
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
+import { Image } from '../../../components/image';
+import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { FieldsRow, StyledFormControl } from '../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
-import { Image } from '../../../components/image';
+import {
+	Actions,
+	ActionsGroup,
+	Container,
+	StyledForm,
+	StyledTextField,
+	TextFieldWrapper
+} from './newCommentForm.styles';
 
 interface IProps {
 	formRef: any;

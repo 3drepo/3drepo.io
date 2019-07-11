@@ -15,25 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import AddIcon from '@material-ui/icons/Add';
+import UpIcon from '@material-ui/icons/KeyboardArrowUp';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import RemoveIcon from '@material-ui/icons/Remove';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import UpIcon from '@material-ui/icons/KeyboardArrowUp';
+import * as React from 'react';
 
-import { Container, Name, NameWrapper, Actions, StyledExpandableButton, ParentOfVisible } from './treeNode.styles';
 import {
+	SELECTION_STATES,
 	TREE_ITEM_FEDERATION_TYPE,
 	TREE_ITEM_MODEL_TYPE,
 	TREE_ITEM_OBJECT_TYPE,
-	VISIBILITY_STATES,
-	SELECTION_STATES
+	VISIBILITY_STATES
 } from '../../../../../../constants/tree';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
+import { Actions, Container, Name, NameWrapper, ParentOfVisible, StyledExpandableButton } from './treeNode.styles';
 
 interface IProps {
 	style: any;

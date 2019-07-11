@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import { ModelActions, selectSettings, selectIsPending } from './../../../../modules/model';
+import { selectIsPending, selectSettings, ModelActions } from './../../../../modules/model';
 import { FederationDialog } from './federationDialog.component';
 
 const mapStateToProps = createStructuredSelector({

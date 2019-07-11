@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
-import { ModelActions, selectSettings, selectIsPending } from './../../modules/model';
-import { ModelSettings } from './modelSettings.component';
+import { selectIsPending, selectSettings, ModelActions } from './../../modules/model';
 import { selectCurrentTeamspace } from './../../modules/userManagement';
+import { ModelSettings } from './modelSettings.component';
 
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,

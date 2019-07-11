@@ -17,12 +17,12 @@
 
 import * as React from 'react';
 
+import { TARGET_MODEL_TYPE } from '../../../../../../constants/compare';
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { EmptyStateInfo } from '../../../views/views.styles';
 import { CompareClashItem } from '../compareClashItem/compareClashItem.component';
 import { CompareFilters } from '../compareFilters/compareFilters.component';
 import { Container, List } from './compareClash.styles';
-import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { EmptyStateInfo } from '../../../views/views.styles';
-import { TARGET_MODEL_TYPE } from '../../../../../../constants/compare';
 
 interface IProps {
 	className: string;

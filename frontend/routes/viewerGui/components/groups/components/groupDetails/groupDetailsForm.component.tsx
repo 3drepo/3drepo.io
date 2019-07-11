@@ -1,15 +1,15 @@
-import * as React from 'react';
-import * as Yup from 'yup';
-import { isEqual } from 'lodash';
-import { Field, Form, Formik } from 'formik';
 import { Select } from '@material-ui/core';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
+import { Field, Form, Formik } from 'formik';
+import { isEqual } from 'lodash';
+import * as React from 'react';
+import * as Yup from 'yup';
 
-import { GROUPS_TYPES_LIST, GROUPS_TYPES } from '../../../../../../constants/groups';
-import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
-import { FieldsRow, StyledFormControl, StyledTextField, Description, LongLabel } from './groupDetails.styles';
+import { GROUPS_TYPES, GROUPS_TYPES_LIST } from '../../../../../../constants/groups';
 import { formatDateTime } from '../../../../../../services/formatting/formatDate';
+import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
+import { Description, FieldsRow, LongLabel, StyledFormControl, StyledTextField } from './groupDetails.styles';
 
 const GroupSchema = Yup.object().shape({
 	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)

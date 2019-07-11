@@ -15,30 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { isEqual } from 'lodash';
+import * as React from 'react';
 
-import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import IconButton from '@material-ui/core/IconButton';
-import SearchIcon from '@material-ui/icons/Search';
-import CancelIcon from '@material-ui/icons/Cancel';
 import AddIcon from '@material-ui/icons/Add';
+import CancelIcon from '@material-ui/icons/Cancel';
+import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
+import SearchIcon from '@material-ui/icons/Search';
 
-import { renderWhenTrue } from '../../../../helpers/rendering';
-import { Viewer } from '../../../../services/viewer/viewer';
-import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
-import { ViewerPanelFooter, ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
+import { renderWhenTrue } from '../../../../helpers/rendering';
+import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
+import { Viewer } from '../../../../services/viewer/viewer';
+import { ViewerPanelButton, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
+import { ViewItem } from './components/viewItem/viewItem.component';
 import {
-	ViewsCountInfo,
-	ViewpointsList,
+	Container,
 	EmptyStateInfo,
 	SearchField,
-	Container,
+	ViewpointsList,
 	ViewsContainer,
+	ViewsCountInfo,
 	ViewsIcon
 } from './views.styles';
-import { ViewItem } from './components/viewItem/viewItem.component';
 
 interface IProps {
 	isPending: boolean;

@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { Grid, Tooltip } from '@material-ui/core';
+import * as React from 'react';
 
-import { RadioContainer, RadioButton } from './tableHeadingRadio.styles';
 import { SortLabel } from '../tableHeading/tableHeading.styles';
+import { RadioButton, RadioContainer } from './tableHeadingRadio.styles';
 
 interface IProps {
 	label: string;

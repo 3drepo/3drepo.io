@@ -15,25 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
-import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
-import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
+import { DialogActions } from '../../../../../../modules/dialog';
+import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
+import { selectSettings } from '../../../../../../modules/model';
 import {
-	RisksActions,
 	selectActiveRiskDetails,
+	selectAssociatedActivities,
 	selectExpandDetails,
+	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
 	selectNewComment,
-	selectFailedToLoad,
-	selectAssociatedActivities
+	RisksActions
 } from '../../../../../../modules/risks';
-import { selectSettings } from '../../../../../../modules/model';
-import { RiskDetails } from './riskDetails.component';
-import { DialogActions } from '../../../../../../modules/dialog';
+import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { withViewer } from '../../../../../../services/viewer/viewer';
+import { RiskDetails } from './riskDetails.component';
 
 const mapStateToProps = createStructuredSelector({
 	risk: selectActiveRiskDetails,

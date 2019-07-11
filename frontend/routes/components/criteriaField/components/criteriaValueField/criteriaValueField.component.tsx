@@ -1,26 +1,26 @@
 import * as React from 'react';
 
-import {
-	RangeInputs,
-	MultipleInputs,
-	RangeInput,
-	SingleInput,
-	AddButton,
-	RemoveButton,
-	MultipleInput,
-	MultipleInputsContainer,
-	NewMultipleInputWrapper,
-	InputWrapper
-} from './criteriaValueField.styles';
 import AddIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveIcon from '@material-ui/icons/RemoveCircleOutline';
+import {
+	AddButton,
+	InputWrapper,
+	MultipleInput,
+	MultipleInputs,
+	MultipleInputsContainer,
+	NewMultipleInputWrapper,
+	RangeInput,
+	RangeInputs,
+	RemoveButton,
+	SingleInput
+} from './criteriaValueField.styles';
 
-import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { InputLabel } from '@material-ui/core';
 import {
 	VALUE_FIELD_MAP,
 	VALUE_FIELD_TYPES
 } from '../../../../../constants/criteria';
-import { InputLabel } from '@material-ui/core';
+import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { SmallIconButton } from '../../../smallIconButon/smallIconButton.component';
 
 interface IProps {

@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import IconButton, { IconButtonProps } from '@material-ui/core/IconButton';
 import { IconProps as IIconProps } from '@material-ui/core/Icon';
+import IconButton, { IconButtonProps } from '@material-ui/core/IconButton';
+import * as React from 'react';
 
 import { StyledPopover } from './buttonMenu.styles';
 

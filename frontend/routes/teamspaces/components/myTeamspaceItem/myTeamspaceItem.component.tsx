@@ -17,8 +17,8 @@
 
 import * as React from 'react';
 
-import { Container, Subtitle } from './myTeamspaceItem.styles';
 import { DefaultHeadline } from '../../../components/treeList/treeList.component';
+import { Container, Subtitle } from './myTeamspaceItem.styles';
 
 export const MyTeamspaceItem = (props) => (
 	<Container>

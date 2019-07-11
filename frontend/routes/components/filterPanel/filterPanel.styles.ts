@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { COLOR } from './../../../styles/colors';
-import Popper from '@material-ui/core/Popper';
-import TextField from '@material-ui/core/TextField';
 import Chip from '@material-ui/core/Chip';
 import IconButton from '@material-ui/core/IconButton';
-import More from '@material-ui/icons/MoreVert';
+import Popper from '@material-ui/core/Popper';
+import TextField from '@material-ui/core/TextField';
 import Copy from '@material-ui/icons/FileCopy';
+import More from '@material-ui/icons/MoreVert';
+import styled, { css } from 'styled-components';
+import { COLOR } from './../../../styles/colors';
 
 interface IContainer {
 	filtersOpen: boolean;

@@ -16,8 +16,8 @@
  */
 
 import styled from 'styled-components';
-import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { COLOR } from '../../../../styles';
+import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 
 export const setStyle = (statement, trueValue, falseValue) => statement ? trueValue : falseValue;
 

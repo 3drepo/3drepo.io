@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import FormControl from '@material-ui/core/FormControl';
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
+import ArrowBack from '@material-ui/icons/ArrowBack';
+import { Form } from 'formik';
 import styled from 'styled-components';
 import { COLOR } from '../../styles/colors';
-import { Form } from 'formik';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
-import FormControl from '@material-ui/core/FormControl';
-import ArrowBack from '@material-ui/icons/ArrowBack';
 
 export const StyledTextField = styled(TextField)``;
 

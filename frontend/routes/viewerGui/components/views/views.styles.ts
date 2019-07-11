@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import { MenuItem, MenuList, TextField } from '@material-ui/core';
+import styled from 'styled-components';
 
 import { COLOR } from '../../../../styles/colors';
 
 import {
-	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,
+	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';

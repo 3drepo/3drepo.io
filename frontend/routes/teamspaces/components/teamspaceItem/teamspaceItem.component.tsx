@@ -18,8 +18,8 @@
 import * as React from 'react';
 
 import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
-import { MyTeamspaceItem } from '../myTeamspaceItem/myTeamspaceItem.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
+import { MyTeamspaceItem } from '../myTeamspaceItem/myTeamspaceItem.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 
 import StorageNormal from '@material-ui/icons/Storage';

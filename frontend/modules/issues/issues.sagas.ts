@@ -15,39 +15,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 import { push } from 'connected-react-router';
+import { differenceBy, isEmpty, map, omit, pick } from 'lodash';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
-import * as API from '../../services/api';
-import * as Exports from '../../services/export';
-import { analyticsService, EVENT_CATEGORIES, EVENT_ACTIONS } from '../../services/analytics';
-import { dispatch, getState } from '../store';
-import { prepareIssue } from '../../helpers/issues';
-import { prepareComments, prepareComment } from '../../helpers/comments';
-import { Cache } from '../../services/cache';
-import { Viewer } from '../../services/viewer/viewer';
-import { PRIORITIES, STATUSES, DEFAULT_PROPERTIES } from '../../constants/issues';
-import { PIN_COLORS } from '../../styles';
-import { DialogActions } from '../dialog';
-import { SnackbarActions } from '../snackbar';
-import { selectJobsList, selectMyJob } from '../jobs';
-import { selectCurrentUser } from '../currentUser';
-import {
-	selectActiveIssueId,
-	selectIssues,
-	selectShowPins,
-	selectIssuesMap,
-	selectActiveIssueDetails,
-	selectFilteredIssues
-} from './issues.selectors';
-import { IssuesTypes, IssuesActions } from './issues.redux';
-import { NEW_PIN_ID } from '../../constants/viewer';
-import { selectTopicTypes } from '../model';
-import { selectIfcSpacesHidden, TreeActions } from '../tree';
 import { CHAT_CHANNELS } from '../../constants/chat';
-import { ChatActions } from '../chat';
+import { DEFAULT_PROPERTIES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { ROUTES } from '../../constants/routes';
+import { NEW_PIN_ID } from '../../constants/viewer';
+import { prepareComment, prepareComments } from '../../helpers/comments';
+import { prepareIssue } from '../../helpers/issues';
+import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
+import * as API from '../../services/api';
+import { Cache } from '../../services/cache';
+import * as Exports from '../../services/export';
+import { Viewer } from '../../services/viewer/viewer';
+import { PIN_COLORS } from '../../styles';
+import { ChatActions } from '../chat';
+import { selectCurrentUser } from '../currentUser';
+import { DialogActions } from '../dialog';
+import { selectJobsList, selectMyJob } from '../jobs';
+import { selectTopicTypes } from '../model';
+import { SnackbarActions } from '../snackbar';
+import { dispatch, getState } from '../store';
+import { selectIfcSpacesHidden, TreeActions } from '../tree';
+import { IssuesActions, IssuesTypes } from './issues.redux';
+import {
+	selectActiveIssueDetails,
+	selectActiveIssueId,
+	selectFilteredIssues,
+	selectIssues,
+	selectIssuesMap,
+	selectShowPins
+} from './issues.selectors';
 
 function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));

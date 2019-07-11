@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ChatEvents } from './chat.events';
-import { ModelChatEvents } from './models.chat.events';
-import { IssuesChatEvents } from './issues.chat.events';
-import { RisksChatEvents } from './risks.chat.events';
-import { NotificationsChatEvents } from './notifications.chat.events';
 import { CHAT_CHANNELS } from '../../constants/chat';
+import { ChatEvents } from './chat.events';
+import { IssuesChatEvents } from './issues.chat.events';
+import { ModelChatEvents } from './models.chat.events';
+import { NotificationsChatEvents } from './notifications.chat.events';
+import { RisksChatEvents } from './risks.chat.events';
 
 const getEventName = (teamspace: string, model: string, keys: string, event: string) => {
 	const eventName = [teamspace];

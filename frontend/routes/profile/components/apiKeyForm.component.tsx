@@ -15,21 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
+import { Field, Form, Formik } from 'formik';
 import { omit } from 'lodash';
+import * as React from 'react';
+import * as Yup from 'yup';
 
+import { Button, Grid } from '@material-ui/core';
 import {
+	DeleteButton,
+	FieldsRow,
 	FormContainer,
 	Headline,
-	StyledTextField,
-	FieldsRow,
 	StyledButton,
 	StyledButtonContainer,
-	DeleteButton
+	StyledTextField
 } from '../profile.styles';
-import { Grid, Button } from '@material-ui/core';
 
 interface IProps {
 	apiKey: string;

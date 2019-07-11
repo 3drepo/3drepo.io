@@ -1,5 +1,5 @@
-import { memoize, intersection, keys, pickBy } from 'lodash';
-import { SELECTION_STATES, VISIBILITY_STATES, NODE_TYPES } from '../../../constants/tree';
+import { intersection, keys, memoize, pickBy } from 'lodash';
+import { NODE_TYPES, SELECTION_STATES, VISIBILITY_STATES } from '../../../constants/tree';
 
 export class Processing {
 	public nodesList = [];

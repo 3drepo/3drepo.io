@@ -16,13 +16,13 @@
  */
 
 import { put, takeLatest } from 'redux-saga/effects';
-import { dispatch } from '../store';
+import { CHAT_CHANNELS } from '../../constants/chat';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
-import { ViewpointsTypes, ViewpointsActions } from './viewpoints.redux';
-import { DialogActions } from '../dialog';
 import { ChatActions } from '../chat';
-import { CHAT_CHANNELS } from '../../constants/chat';
+import { DialogActions } from '../dialog';
+import { dispatch } from '../store';
+import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
 
 export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
 

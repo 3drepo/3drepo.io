@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import Snackbar from '@material-ui/core/Snackbar';
+import * as React from 'react';
 
 import { DefaultSnackbar } from './components/defaultSnackbar/defaultSnackbar.component';
 

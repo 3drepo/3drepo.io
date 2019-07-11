@@ -19,8 +19,8 @@ import { put, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
-import { StarredMetaTypes, StarredMetaActions } from './starredMeta.redux';
 import { SnackbarActions } from '../snackbar';
+import { StarredMetaActions, StarredMetaTypes } from './starredMeta.redux';
 
 export function* fetchStarredMeta() {
 	try {

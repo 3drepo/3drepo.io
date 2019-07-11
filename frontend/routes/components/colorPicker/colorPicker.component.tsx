@@ -15,28 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { memoize, identity } from 'lodash';
-import RootRef from '@material-ui/core/RootRef';
-import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
+import Grid from '@material-ui/core/Grid';
+import RootRef from '@material-ui/core/RootRef';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
+import { identity, memoize } from 'lodash';
+import * as React from 'react';
 
 import {
-	Panel,
-	Dot,
-	ColorSelect,
-	StyledIconButton,
 	BlockCanvas,
-	StripCanvas,
-	Footer,
 	CanvasContainer,
 	ColorPointer,
-	StyledButton,
-	PredefinedColorsContainer,
+	ColorSelect,
+	Dot,
+	Footer,
+	Panel,
 	PredefinedColor,
+	PredefinedColorsContainer,
 	SelectedColor,
 	SelectedHash,
+	StripCanvas,
+	StyledButton,
+	StyledIconButton,
 	StyledStartAdornment
 } from './colorPicker.styles';
 

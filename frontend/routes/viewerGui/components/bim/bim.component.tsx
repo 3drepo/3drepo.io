@@ -15,29 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { isEmpty } from 'lodash';
 import { IconButton, Tab } from '@material-ui/core';
+import CancelIcon from '@material-ui/icons/Cancel';
 import InfoIcon from '@material-ui/icons/Info';
 import SearchIcon from '@material-ui/icons/Search';
-import CancelIcon from '@material-ui/icons/Cancel';
+import { isEmpty } from 'lodash';
+import * as React from 'react';
 
-import { FilterPanel, ISelectedFilter } from '../../../components/filterPanel/filterPanel.component';
+import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '../../../../constants/bim';
+import { getFilters } from '../../../../helpers/bim';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { IMetaRecord } from '../../../../modules/bim/bim.redux';
-import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '../../../../constants/bim';
+import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import {
 	MenuList,
-	StyledListItem,
-	StyledItemText
+	StyledItemText,
+	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
-import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
-import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { getFilters } from '../../../../helpers/bim';
-import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
-import { MetaRecord } from './components/metaRecord/metaRecord.component';
-import { Container, EmptyStateInfo, Tabs } from './bim.styles';
+import { FilterPanel, ISelectedFilter } from '../../../components/filterPanel/filterPanel.component';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
+import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
+import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
+import { Container, EmptyStateInfo, Tabs } from './bim.styles';
+import { MetaRecord } from './components/metaRecord/metaRecord.component';
 
 interface IProps {
 	className: string;

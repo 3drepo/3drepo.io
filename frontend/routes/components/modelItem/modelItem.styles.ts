@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
+import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 
 export const Container = styled.div``;

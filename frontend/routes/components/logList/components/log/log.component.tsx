@@ -15,26 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CloseIcon from '@material-ui/icons/Close';
 import * as React from 'react';
+import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { TooltipButton } from '../../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
+import { DATE_TIME_FORMAT } from '../../../../../services/formatting/formatDate';
 import { DateTime } from '../../../dateTime/dateTime.component';
 import DynamicUsername from '../../../dynamicUsername/dynamicUsername.container';
+import { Image } from '../../../image';
 import {
 	Container,
-	UserMessage,
-	SystemMessage,
+	Date,
 	Info,
+	MessageContainer,
+	RemoveButtonWrapper,
 	Screenshot,
 	ScreenshotMessage,
 	ScreenshotWrapper,
-	MessageContainer,
-	RemoveButtonWrapper,
-	Date
+	SystemMessage,
+	UserMessage
 } from './log.styles';
-import CloseIcon from '@material-ui/icons/Close';
-import { TooltipButton } from '../../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
-import { renderWhenTrue } from '../../../../../helpers/rendering';
-import { Image } from '../../../image';
-import { DATE_TIME_FORMAT } from '../../../../../services/formatting/formatDate';
 
 interface IProps {
 	comment: string;

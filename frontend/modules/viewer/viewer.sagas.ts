@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select } from 'redux-saga/effects';
 import { keys } from 'lodash';
-import { DialogActions } from '../dialog';
+import { put, select, takeLatest } from 'redux-saga/effects';
 import { Viewer } from '../../services/viewer/viewer';
+import { DialogActions } from '../dialog';
+import { ViewerActions, ViewerTypes } from './viewer.redux';
 import { selectSettings } from './viewer.selectors';
-import { ViewerTypes, ViewerActions } from './viewer.redux';
 
 const updateHandlers = {
 	farPlaneAlgorithm: Viewer.setFarPlaneAlgorithm,

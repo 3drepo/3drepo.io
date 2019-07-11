@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { invoke } from 'lodash';
 import { put, takeLatest } from 'redux-saga/effects';
 import io from 'socket.io-client';
-import { invoke } from 'lodash';
 
 import * as API from '../../services/api';
 import { dispatch } from '../store';
 
 import { IS_DEVELOPMENT } from '../../constants/environment';
-import { ChatTypes, ChatActions } from './chat.redux';
 import { clientConfigService } from '../../services/clientConfig';
 import { Channel } from './channel';
+import { ChatActions, ChatTypes } from './chat.redux';
 
 const { host, path, reconnectionAttempts } = clientConfigService.chatConfig;
 const socket = io(host, {

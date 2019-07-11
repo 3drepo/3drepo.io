@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import { ButtonBase } from '@material-ui/core';
+import styled from 'styled-components';
 
-import { COLOR } from '../../../../../../styles';
 import { TARGET_MODEL_TYPE } from '../../../../../../constants/compare';
+import { COLOR } from '../../../../../../styles';
 import * as RevisionSelectStyles from '../revisionsSelect/revisionsSelect.styles';
 
 interface IContainer {

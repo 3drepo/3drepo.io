@@ -1,10 +1,10 @@
-import IssuesIcon from '@material-ui/icons/Place';
-import RisksIcon from '@material-ui/icons/Warning';
-import GroupsIcon from '@material-ui/icons/GroupWork';
 import CompareIcon from '@material-ui/icons/Compare';
+import TreeIcon from '@material-ui/icons/DeviceHub';
+import GroupsIcon from '@material-ui/icons/GroupWork';
 import GisIcon from '@material-ui/icons/Layers';
 import ViewsIcon from '@material-ui/icons/PhotoCamera';
-import TreeIcon from '@material-ui/icons/DeviceHub';
+import IssuesIcon from '@material-ui/icons/Place';
+import RisksIcon from '@material-ui/icons/Warning';
 
 export const VIEWER_PANELS = {
 	GIS: 'gis',

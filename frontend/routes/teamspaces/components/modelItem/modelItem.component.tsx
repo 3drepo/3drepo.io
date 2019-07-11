@@ -15,22 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { startCase } from 'lodash';
+import * as React from 'react';
 
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 
-import { renderWhenTrue } from '../../../../helpers/rendering';
 import { hasPermissions } from '../../../../helpers/permissions';
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import { DateTime } from '../../../components/dateTime/dateTime.component';
 import { Loader } from '../../../components/loader/loader.component';
 
-import { Container, SubmodelsList, Time, Name, LinkedName, Status, TimeWrapper } from './modelItem.styles';
-import { RowMenu } from '../rowMenu/rowMenu.component';
-import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
+import { ROW_ACTIONS } from '../../teamspaces.contants';
+import { RowMenu } from '../rowMenu/rowMenu.component';
+import { Container, LinkedName, Name, Status, SubmodelsList, Time, TimeWrapper } from './modelItem.styles';
 
 interface IAction {
 	label: string;

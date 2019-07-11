@@ -15,34 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Field, Form, Formik } from 'formik';
+import { omit } from 'lodash';
 import * as React from 'react';
 import * as Yup from 'yup';
-import { omit } from 'lodash';
-import { Formik, Field, Form } from 'formik';
 
 import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../services/validation';
 import { clientConfigService } from './../../services/clientConfig';
 
-import { Panel } from '../components/panel/panel.component';
-import { Footer } from './components/footer';
-import { SubmitButton } from '../components/submitButton/submitButton.component';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
+import { Panel } from '../components/panel/panel.component';
+import { SubmitButton } from '../components/submitButton/submitButton.component';
+import { Footer } from './components/footer';
 import { ReCaptcha } from './components/reCaptcha/reCaptcha.component';
 
+import { COOKIES_PAGE, PRIVACY_PAGE, TERMS_PAGE } from '../../services/staticPages';
+import { SelectField } from '../components/selectField/selectField.component';
+import { FieldsRow, StyledTextField } from '../profile/profile.styles';
 import {
+	ButtonContainer,
 	Container,
 	Headline,
-	StyledGrid,
 	StyledFormControl,
-	ButtonContainer,
+	StyledGrid,
 	TermLink
 } from './signUp.styles';
-import { FieldsRow, StyledTextField } from '../profile/profile.styles';
-import { SelectField } from '../components/selectField/selectField.component';
-import { TERMS_PAGE, COOKIES_PAGE, PRIVACY_PAGE } from '../../services/staticPages';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;

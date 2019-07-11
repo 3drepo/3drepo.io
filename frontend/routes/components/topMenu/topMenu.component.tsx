@@ -17,14 +17,14 @@
 
 import * as React from 'react';
 
-import { UserMenu } from './components/userMenu/userMenu.component';
-import { ExtrasMenu } from './components/extrasMenu/extrasMenu.component';
-import { Logo } from '../logo/logo.component';
-import Notifications from '../notifications/notifications.container';
-import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
-import { Container, BackIcon } from './topMenu.styles';
 import { ROUTES } from '../../../constants/routes';
 import { renderWhenTrue } from '../../../helpers/rendering';
+import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
+import { Logo } from '../logo/logo.component';
+import Notifications from '../notifications/notifications.container';
+import { ExtrasMenu } from './components/extrasMenu/extrasMenu.component';
+import { UserMenu } from './components/userMenu/userMenu.component';
+import { BackIcon, Container } from './topMenu.styles';
 
 interface IProps {
 	currentUser: any;

@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { Field } from 'formik';
+import * as React from 'react';
 
-import { ViewerPanelFooter, ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
-import { StyledForm, Header, Headline, StyledTextField, Container } from './settingsForm.styles';
+import { ViewerPanelButton, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
+import { Container, Header, Headline, StyledForm, StyledTextField } from './settingsForm.styles';
 
 import SaveIcon from '@material-ui/icons/Save';
 

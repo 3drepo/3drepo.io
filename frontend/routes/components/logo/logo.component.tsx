@@ -17,9 +17,9 @@
 
 import * as React from 'react';
 
-import { clientConfigService } from '../../../services/clientConfig';
 // @ts-ignore
 import DEFAULT_LOGO from '../../../images/3drepo-logo-white.png';
+import { clientConfigService } from '../../../services/clientConfig';
 import { Image } from './logo.styles';
 
 interface IProps {

@@ -19,16 +19,16 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { connect } from 'react-redux';
-import { GroupDetails } from './groupDetails.component';
-import {
-	GroupsActions,
-	selectActiveGroupDetails,
-	selectExpandDetails,
-	selectCriteriaFieldState
-} from '../../../../../../modules/groups';
-import { selectSettings, selectMetaKeys } from '../../../../../../modules/model';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
+import {
+	selectActiveGroupDetails,
+	selectCriteriaFieldState,
+	selectExpandDetails,
+	GroupsActions
+} from '../../../../../../modules/groups';
+import { selectMetaKeys, selectSettings } from '../../../../../../modules/model';
 import { selectSelectedNodes, selectTotalMeshes } from '../../../../../../modules/tree';
+import { GroupDetails } from './groupDetails.component';
 
 const mapStateToProps = createStructuredSelector({
 	activeGroup: selectActiveGroupDetails,

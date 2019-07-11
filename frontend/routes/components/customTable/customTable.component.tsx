@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Checkbox, IconButton, Tooltip } from '@material-ui/core';
+import { cond, isEmpty, isEqual, matchesProperty, orderBy, pick, stubTrue, values } from 'lodash';
 import * as React from 'react';
 import SimpleBar from 'simplebar-react';
-import { matchesProperty, cond, orderBy, pick, values, stubTrue, isEqual, isEmpty } from 'lodash';
-import { Tooltip, IconButton, Checkbox } from '@material-ui/core';
 
 import { SORT_ORDER_TYPES } from '../../../constants/sorting';
-import { sortByName, sortByJob } from '../../../helpers/sorting';
-import { JobItem } from '../jobItem/jobItem.component';
+import { sortByJob, sortByName } from '../../../helpers/sorting';
 import { Highlight } from '../highlight/highlight.component';
+import { JobItem } from '../jobItem/jobItem.component';
 import { TableHeading } from './components/tableHeading/tableHeading.component';
 
-import { Container, Head, BodyWrapper, Body, Row, Cell, CheckboxCell } from './customTable.styles';
+import { Body, BodyWrapper, Cell, CheckboxCell, Container, Head, Row } from './customTable.styles';
 
 export const TableButton = ({Icon, onClick, disabled}) => {
 	return (

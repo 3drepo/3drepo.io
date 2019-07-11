@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 
-import { Container, Title, Content, ContentWrapper } from './panel.styles';
+import { Container, Content, ContentWrapper, Title } from './panel.styles';
 
 interface IProps {
 	className?: string;

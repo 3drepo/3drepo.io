@@ -22,10 +22,10 @@ import Grid from '@material-ui/core/Grid';
 import { ColorPicker } from '../colorPicker/colorPicker.component';
 import {
 	Container,
-	Title,
 	SaveButton,
 	StyledTextField,
-	StyledTextFieldContainer
+	StyledTextFieldContainer,
+	Title
 } from './newJobForm.styles';
 
 interface IProps {

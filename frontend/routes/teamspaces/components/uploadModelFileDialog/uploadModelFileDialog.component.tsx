@@ -15,23 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Field, Form, Formik } from 'formik';
 import * as React from 'react';
 import * as Yup from 'yup';
-import { Formik, Form, Field } from 'formik';
 
-import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
+import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
 import {
 	LoadingDialog
 } from './../../../../routes/components/dialogContainer/components/loadingDialog/loadingDialog.component';
 
+import { unitsMap } from '../../../../constants/model-parameters';
 import { schema } from '../../../../services/validation';
 import { FileInputField } from './components/fileInputField.component';
-import { unitsMap } from '../../../../constants/model-parameters';
 
-import { ModelName, ModelInfo, StyledDialogActions, CancelButton } from './uploadModelFileDialog.styles';
 import { formatNamedMonthDate } from '../../../../services/formatting/formatDate';
+import { CancelButton, ModelInfo, ModelName, StyledDialogActions } from './uploadModelFileDialog.styles';
 
 const UploadSchema = Yup.object().shape({
 	revisionName: schema.revisionName,

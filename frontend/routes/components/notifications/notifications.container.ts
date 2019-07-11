@@ -19,10 +19,10 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { Notifications } from './notifications.component';
-import { NotificationsActions, selectNotifications, selectDrawerOpenState  } from '../../../modules/notifications';
-import { selectCurrentUser } from '../../../modules/currentUser';
 import { withRouter } from 'react-router';
+import { selectCurrentUser } from '../../../modules/currentUser';
+import { selectDrawerOpenState, selectNotifications, NotificationsActions  } from '../../../modules/notifications';
+import { Notifications } from './notifications.component';
 
 const mapStateToProps = createStructuredSelector({
 	notifications: selectNotifications,

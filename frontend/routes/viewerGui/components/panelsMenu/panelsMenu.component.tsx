@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import IssuesIcon from '@material-ui/icons/Place';
-import RisksIcon from '@material-ui/icons/Warning';
-import GroupsIcon from '@material-ui/icons/GroupWork';
 import CompareIcon from '@material-ui/icons/Compare';
+import TreeIcon from '@material-ui/icons/DeviceHub';
+import GroupsIcon from '@material-ui/icons/GroupWork';
 import GisIcon from '@material-ui/icons/Layers';
 import ViewsIcon from '@material-ui/icons/PhotoCamera';
-import TreeIcon from '@material-ui/icons/DeviceHub';
-import { Container } from './panelsMenu.styles';
+import IssuesIcon from '@material-ui/icons/Place';
+import RisksIcon from '@material-ui/icons/Warning';
+import * as React from 'react';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
+import { Container } from './panelsMenu.styles';
 
 interface IState {
 	activePanels: any;

@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { groupBy, isEmpty, isEqual } from 'lodash';
 import Label from '@material-ui/icons/Label';
 import LabelOutlined from '@material-ui/icons/LabelOutlined';
+import { groupBy, isEmpty, isEqual } from 'lodash';
+import * as React from 'react';
 
-import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
-import { TooltipButton } from '../tooltipButton/tooltipButton.component';
-import { ROW_ACTIONS, MODEL_TYPE, FEDERATION_TYPE  } from '../../teamspaces.contants';
-import { RowMenu } from '../rowMenu/rowMenu.component';
-import { renderWhenTrue } from '../../../../helpers/rendering';
 import { hasPermissions } from '../../../../helpers/permissions';
+import { renderWhenTrue } from '../../../../helpers/rendering';
+import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
+import { FEDERATION_TYPE, MODEL_TYPE, ROW_ACTIONS  } from '../../teamspaces.contants';
+import { RowMenu } from '../rowMenu/rowMenu.component';
+import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 
 interface IProps {
 	name: string;

@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import { memoize } from 'lodash';
+import styled from 'styled-components';
 
-import { COLOR, FONT_WEIGHT, isWindows, isFirefox } from '../../../styles';
+import { isFirefox, isWindows, COLOR, FONT_WEIGHT } from '../../../styles';
 
 import * as UserItem from '../userItem/userItem.styles';
 import * as CellSelect from './components/cellSelect/cellSelect.styles';

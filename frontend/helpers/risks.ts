@@ -16,16 +16,16 @@
  */
 
 import { get, omit } from 'lodash';
-import { getAPIUrl } from '../services/api';
 import {
+	LEVELS,
 	RISK_CONSEQUENCES,
-	RISK_LIKELIHOODS,
+	RISK_LEVELS,
 	RISK_LEVELS_COLOURS,
 	RISK_LEVELS_ICONS,
-	RISK_LEVELS,
-	LEVELS
+	RISK_LIKELIHOODS
 } from '../constants/risks';
-import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
+import { getAPIUrl } from '../services/api';
+import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 import { sortByDate } from './sorting';
 
 export const prepareRisk = (risk, jobs = []) => {

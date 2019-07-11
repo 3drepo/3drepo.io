@@ -1,7 +1,7 @@
-import styled from 'styled-components';
-import Paper from '@material-ui/core/Paper';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import Paper from '@material-ui/core/Paper';
+import styled from 'styled-components';
 
 import { COLOR } from '../../../../../styles';
 

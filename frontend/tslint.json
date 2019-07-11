@@ -8,8 +8,14 @@
         "no-console": [true, "log", "warning"],
         "object-literal-sort-keys": false,
         "no-empty": false,
-        "ordered-imports": false,
-        "trailing-comma":  true,
+        "ordered-imports": [
+            true,
+            {
+                "named-imports-order": "lowercase-first",
+                "module-source-path": "full"
+            }
+        ],
+        "trailing-comma": true,
         "forin": false,
         "no-bitwise": false,
         "quotemark": [true, "single", "jsx-double"],
@@ -33,6 +39,9 @@
         "jsx-no-lambda": false,
         "jsx-curly-spacing": [true, "never"],
         "jsx-equals-spacing": [true, "never"],
-        "jsx-boolean-value": false
+        "jsx-no-string-ref": true,
+        "jsx-self-close": true,
+        "jsx-space-before-trailing-slash": true,
+        "jsx-no-bind": true
     }
 }

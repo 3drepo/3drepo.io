@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
 
-import { ViewerCanvas } from './viewerCanvas.component';
 import { withViewer } from '../../services/viewer/viewer';
+import { ViewerCanvas } from './viewerCanvas.component';
 
 const mapStateToProps = createStructuredSelector({});
 

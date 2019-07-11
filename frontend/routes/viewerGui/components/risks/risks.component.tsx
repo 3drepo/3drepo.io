@@ -15,21 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import * as queryString from 'query-string';
+import * as React from 'react';
 
-import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
-	RISK_FILTERS,
-	RISK_MITIGATION_STATUSES,
-	RISK_FILTER_RELATED_FIELDS,
-	RISKS_ACTIONS_MENU,
-	RISK_CONSEQUENCES,
-	RISK_LIKELIHOODS,
-	RISK_CATEGORIES,
 	LEVELS_OF_RISK,
-	RISK_LEVELS
+	RISK_CATEGORIES,
+	RISK_CONSEQUENCES,
+	RISK_FILTER_RELATED_FIELDS,
+	RISK_FILTERS,
+	RISK_LEVELS,
+	RISK_LIKELIHOODS,
+	RISK_MITIGATION_STATUSES,
+	RISKS_ACTIONS_MENU
 } from '../../../../constants/risks';
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import RiskDetails from './components/riskDetails/riskDetails.container';
 import { RisksContainer } from './risks.styles';
 

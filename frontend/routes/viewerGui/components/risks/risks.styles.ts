@@ -17,13 +17,13 @@
 
 import styled from 'styled-components';
 
-import { COLOR } from '../../../../styles';
 import {
-	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,
+	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
+import { COLOR } from '../../../../styles';
 import { ReportedItems } from '../reportedItems';
 
 export const RisksContainer = styled(ReportedItems).attrs({

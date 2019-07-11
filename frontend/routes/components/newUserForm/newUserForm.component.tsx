@@ -18,19 +18,19 @@
 import * as React from 'react';
 import Autosuggest from 'react-autosuggest';
 
-import Grid from '@material-ui/core/Grid';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Grid from '@material-ui/core/Grid';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
 
 import { JobItem } from '../jobItem/jobItem.component';
 import { UserItem } from '../userItem/userItem.component';
 
 import {
-	Container, Title, SaveButton, StyledTextField, StyledSelect, SuggestionsList, EmptySelectValue
+	Container, EmptySelectValue, SaveButton, StyledSelect, StyledTextField, SuggestionsList, Title
 } from './newUserForm.styles';
 
 interface IProps {

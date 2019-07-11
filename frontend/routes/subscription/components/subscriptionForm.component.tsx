@@ -15,30 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Formik, Field } from 'formik';
-import * as Yup from 'yup';
+import { Field, Formik } from 'formik';
 import { isEmpty, isEqual } from 'lodash';
+import * as React from 'react';
+import * as Yup from 'yup';
 
-import { schema } from '../../../services/validation';
 import { formatBytesGB } from '../../../services/formatting/formatCapacity';
+import { schema } from '../../../services/validation';
 
 import {
-	StyledTextField,
+	ConfirmContainer,
+	FieldsColumn,
+	FieldsRow,
+	FormContainer,
+	FormFooter,
+	FormInfo,
+	FormInfoContainer,
+	PayPalLogo,
+	StyledButton,
+	StyledForm,
+	StyledFormControl,
+	StyledInputLabel,
 	StyledSelectField,
 	StyledSelectItem,
-	StyledInputLabel,
-	StyledFormControl,
-	StyledButton,
-	FormContainer,
-	FieldsRow,
-	FieldsColumn,
-	FormFooter,
-	FormInfoContainer,
-	ConfirmContainer,
-	FormInfo,
-	PayPalLogo,
-	StyledForm
+	StyledTextField
 } from '../subscription.styles';
 
 const SubscriptionSchema = Yup.object().shape({

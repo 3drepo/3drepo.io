@@ -17,11 +17,11 @@
 
 import * as React from 'react';
 
-import { Author, Date, Details, Container, Status, Icon, ExtraInfo } from './previewItemInfo.styles';
+import { Author, Container, Date, Details, ExtraInfo, Icon, Status } from './previewItemInfo.styles';
 
-import { DateTime } from '../../../components/dateTime/dateTime.component';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { NAMED_MONTH_DATE_FORMAT } from '../../../../services/formatting/formatDate';
+import { DateTime } from '../../../components/dateTime/dateTime.component';
 
 interface IProps {
 	author: string;

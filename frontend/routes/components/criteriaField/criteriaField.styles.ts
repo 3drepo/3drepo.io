@@ -15,21 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
 import {
 	Chip as ChipComponent,
-	IconButton as IconButtonComponent,
 	FormControl as FormControlComponent,
+	IconButton as IconButtonComponent,
 	InputLabel as InputLabelComponent,
 	List as ListComponent,
-	MenuItem as MenuItemComponent,
-	ListSubheader
+	ListSubheader,
+	MenuItem as MenuItemComponent
 } from '@material-ui/core';
 import MoreIcon from '@material-ui/icons/MoreVert';
+import styled, { css } from 'styled-components';
 
-import { SelectField as SelectFieldComponent } from '../selectField/selectField.component';
-import { COLOR } from '../../../styles';
 import { hexToRgba } from '../../../helpers/colors';
+import { COLOR } from '../../../styles';
+import { SelectField as SelectFieldComponent } from '../selectField/selectField.component';
 
 export const Container = styled.div`
 	border-top: 1px solid ${COLOR.BLACK_20};

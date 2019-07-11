@@ -18,18 +18,18 @@
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
+import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog/dialog.redux';
 import { JobsActions } from '../jobs';
 import { SnackbarActions } from '../snackbar';
 import { selectTeamspacesWithAdminAccess } from '../teamspaces/teamspaces.selectors';
 import { selectCurrentProject, selectCurrentTeamspace } from '../userManagement/userManagement.selectors';
-import { selectCurrentUser } from '../currentUser';
 
-import { UserManagementActions, UserManagementTypes } from './userManagement.redux';
-import { RemoveUserDialog } from '../../routes/users/components/removeUserDialog/removeUserDialog.component';
 import {
 	FederationReminderDialog
 } from '../../routes/modelsPermissions/components/federationReminderDialog/federationReminderDialog.component';
+import { RemoveUserDialog } from '../../routes/users/components/removeUserDialog/removeUserDialog.component';
+import { UserManagementActions, UserManagementTypes } from './userManagement.redux';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
 	try {

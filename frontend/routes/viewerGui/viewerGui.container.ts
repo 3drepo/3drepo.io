@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from 'react-redux';
 
-import { selectQueryParams } from '../../modules/router/router.selectors';
 import { selectCurrentUser } from '../../modules/currentUser';
-import { ViewerGui } from './viewerGui.component';
+import { selectIsPending, selectSettings } from '../../modules/model';
+import { selectQueryParams } from '../../modules/router/router.selectors';
 import { TreeActions } from '../../modules/tree';
-import { selectSettings, selectIsPending } from '../../modules/model';
-import { ViewerGuiActions, selectVisiblePanels, selectIsFocusMode } from '../../modules/viewerGui';
+import { selectIsFocusMode, selectVisiblePanels, ViewerGuiActions } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
+import { ViewerGui } from './viewerGui.component';
 
 const mapStateToProps = createStructuredSelector({
 	queryParams: selectQueryParams,
