@@ -35,7 +35,7 @@ export const StyledSelect = styled(Select)`
 export const Container = styled(Grid)`
 	&& {
 		height: 100%;
-		padding-top: 30px;
+		z-index: 1;
 	}
 
 	${PanelStyles.Container} {

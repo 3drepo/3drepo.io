@@ -142,7 +142,7 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { items, level, renderRoot, forceActive, ...props } = this.props;
+		const { items, level, renderRoot, forceActive, onClick, ...props } = this.props;
 		const { active, hovered } = this.state;
 		const disabled = !items.length;
 

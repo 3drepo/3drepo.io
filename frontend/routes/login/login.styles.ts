@@ -27,6 +27,7 @@ const CONTENT_PADDING = 20;
 export const Container = styled(Grid)`
 	&& {
 		height: 100%;
+		z-index: 1;
 	}
 
 	${PanelStyles.Container} {

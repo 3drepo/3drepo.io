@@ -25,6 +25,7 @@ import * as PanelStyles from '../components/panel/panel.styles';
 export const Container = styled(Grid)`
 	&& {
 		height: 100%;
+		z-index: 1;
 	}
 
 	${PanelStyles.Container} {

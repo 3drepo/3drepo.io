@@ -48,6 +48,7 @@ export class ViewerService {
 	}
 
 	public get hasInstance() {
+		debugger;
 		return !!this.viewer;
 	}
 
@@ -57,39 +58,36 @@ export class ViewerService {
 		return Math.min(assignedMemory, MAX_MEMORY);
 	}
 
-	public setContainer = (container) => {
+	public setupInstance = (container, name = 'viewer') => {
 		this.container = container;
+		this.viewer = new ViewerInstance({
+			name,
+			container: this.container,
+			onError: this.handleUnityError
+		});
 	}
 
-	public init = async (name = 'viewer') => {
+	public init = async () => {
 		if (IS_DEVELOPMENT) {
 			console.debug('Initiating Viewer');
 		}
 
 		this.setInitialisePromise();
 
-		if (!this.viewer) {
-			this.viewer = new ViewerInstance({
-				name,
-				container: this.container,
-				onError: this.handleUnityError
-			});
+		this.viewer.setUnity();
+		try {
+			await this.viewer.unityScriptInserted ? Promise.resolve() : this.viewer.insertUnityLoader(this.memory);
 
-			this.viewer.setUnity();
-			try {
-				await this.viewer.unityScriptInserted ? Promise.resolve() : this.viewer.insertUnityLoader(this.memory);
-
-				setTimeout(() => {
-					this.viewer.init({
-						getAPI: {
-							hostNames: clientConfigService.apiUrls.all
-						},
-						showAll: true
-					});
-				}, 1000);
-			} catch (error) {
-				console.error('Error while initialising Unity script: ', error);
-			}
+			setTimeout(() => {
+				this.viewer.init({
+					getAPI: {
+						hostNames: clientConfigService.apiUrls.all
+					},
+					showAll: true
+				});
+			}, 1000);
+		} catch (error) {
+			console.error('Error while initialising Unity script: ', error);
 		}
 	}
 
@@ -134,14 +132,17 @@ export class ViewerService {
 	}
 
 	public on = (...args) => {
+
 		this.viewer.on(...args);
 	}
 
 	public once = (...args) => {
+
 		this.viewer.once(...args);
 	}
 
 	public off = (...args) => {
+
 		this.viewer.off(...args);
 	}
 

@@ -36,7 +36,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 	public componentDidMount() {
 		const { viewer } = this.props;
-		viewer.setContainer(this.containerRef.current);
+		viewer.setupInstance(this.containerRef.current);
 	}
 
 	public render() {
