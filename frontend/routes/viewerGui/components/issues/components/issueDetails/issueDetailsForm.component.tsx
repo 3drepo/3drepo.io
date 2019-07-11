@@ -125,7 +125,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				<Form>
 					<FieldsRow container alignItems="center" justify="space-between">
 						<StyledFormControl>
-							<InputLabel shrink={true} htmlFor="priority">Priority</InputLabel>
+							<InputLabel shrink htmlFor="priority">Priority</InputLabel>
 							<Field name="priority" render={({ field }) => (
 								<CellSelect
 									{...field}
@@ -136,7 +136,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							)} />
 						</StyledFormControl>
 						<StyledFormControl>
-							<InputLabel shrink={true} htmlFor="status">Status</InputLabel>
+							<InputLabel shrink htmlFor="status">Status</InputLabel>
 							<Field name="status" render={({ field }) => (
 								<CellSelect
 									{...field}
@@ -149,7 +149,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					</FieldsRow>
 					<FieldsRow container alignItems="center" justify="space-between">
 						<StyledFormControl>
-							<InputLabel shrink={true} htmlFor="assigned_roles">Assign</InputLabel>
+							<InputLabel shrink htmlFor="assigned_roles">Assign</InputLabel>
 							<Field name="assigned_roles" render={({ field }) => (
 								<CellSelect
 									{...field}
@@ -160,7 +160,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							)} />
 						</StyledFormControl>
 						<StyledFormControl>
-							<InputLabel shrink={true} htmlFor="topic_type">Type</InputLabel>
+							<InputLabel shrink htmlFor="topic_type">Type</InputLabel>
 							<Field name="topic_type" render={({ field }) => (
 								<CellSelect
 									{...field}
@@ -174,7 +174,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					</FieldsRow>
 					<FieldsRow container justify="space-between" flex={0.5}>
 						<StyledFormControl>
-							<InputLabel shrink={true}>Due date</InputLabel>
+							<InputLabel shrink>Due date</InputLabel>
 							<Field name="due_date" render={({ field }) =>
 								<DateField
 									{...field}

@@ -109,7 +109,7 @@ export class Login extends React.PureComponent<IProps, IState> {
 				alignItems="center"
 				wrap="nowrap">
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
-					<Panel title="Log in" hiddenScrollbars={true}>
+					<Panel title="Log in" hiddenScrollbars>
 						<Headline>{WELCOME_MESSAGE}</Headline>
 						{USER_NOTICE && <UserNotice>{USER_NOTICE}</UserNotice>}
 
@@ -127,7 +127,7 @@ export class Login extends React.PureComponent<IProps, IState> {
 										label="Username"
 										placeholder="Type username..."
 										autoComplete="login"
-										autoFocus={true}
+										autoFocus
 									/>
 								)} />
 								<Field name="password" render={({ field }) => (

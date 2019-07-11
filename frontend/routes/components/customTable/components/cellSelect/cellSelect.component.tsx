@@ -72,7 +72,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 				>
 					{
 						TemplateComponent ?
-							(<TemplateComponent {...item}/>) :
+							(<TemplateComponent {...item} />) :
 							item[labelName] || item.value
 					}
 				</Item>
@@ -110,7 +110,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 				name={name}
 				readOnly={readOnly}
 				disabled={readOnly || disabled || hasNoOptions}
-				displayEmpty={true}
+				displayEmpty
 				input={<Input id={inputId} readOnly={readOnly} />}
 				value={selectedValue}
 				onChange={this.handleChange}

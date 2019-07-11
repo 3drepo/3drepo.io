@@ -99,7 +99,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 		const { match, currentUser, isPending, isInitialised, isAvatarPending } = this.props;
 		return (
 			<Container
-				container={true}
+				container
 				direction="row"
 				justify="space-between"
 				alignContent="flex-start"

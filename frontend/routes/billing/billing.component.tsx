@@ -109,7 +109,7 @@ export class Billing extends React.PureComponent<IProps, IState> {
 			<Panel title="Billing" paperProps={paperProps}>
 				<Switch>
 					<Route path={`${match.url}/:tab`} render={this.renderRoute} />
-					<Redirect exact={true} from={`${match.url}`} to={`${match.url}/${TABS.SUBSCRIPTION.path}`} />
+					<Redirect exact from={`${match.url}`} to={`${match.url}/${TABS.SUBSCRIPTION.path}`} />
 				</Switch>
 			</Panel>
 		);

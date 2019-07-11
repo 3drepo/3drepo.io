@@ -166,16 +166,16 @@ export class Compare extends React.PureComponent<IProps, any> {
 
 		return (
 			<CompareContainer
-				Icon={<CompareIcon/>}
+				Icon={<CompareIcon />}
 				renderActions={this.renderHeaderButtons}
 				pending={this.props.isPending}
 			>
-				<ViewerPanelContent scrollDisabled={true}>
+				<ViewerPanelContent scrollDisabled>
 					<Tabs
 						value={activeTab}
 						indicatorColor="secondary"
 						textColor="primary"
-						fullWidth={true}
+						fullWidth
 						onChange={this.handleChange}
 					>
 						<Tab label={COMPARE_TABS.DIFF} value={DIFF_COMPARE_TYPE} disabled={isCompareProcessed} />

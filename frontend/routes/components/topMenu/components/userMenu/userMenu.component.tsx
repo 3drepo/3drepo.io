@@ -48,7 +48,7 @@ const UserButton = ({ IconProps, Icon, ...props }) => (
 
 const UserMenuButton = ({ Icon, ...props }) => {
 	return (
-		<MenuItem button={true} aria-label={props.label} onClick={props.onButtonClick}>
+		<MenuItem button aria-label={props.label} onClick={props.onButtonClick}>
 			<MenuIcon>
 				<Icon />
 			</MenuIcon>

@@ -412,7 +412,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			color="secondary"
 			aria-label="Toggle menu"
 			aria-haspopup="true"
-			mini={true}
+			mini
 			onClick={props.onClick}
 			disabled={isPending}
 		>

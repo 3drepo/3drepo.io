@@ -72,8 +72,8 @@ export class PanelsMenu extends React.PureComponent<any, IState> {
 			className="panelButton"
 			placement="right-end"
 			active={this.state.activePanels[buttonProps.label]}
-		/>)
-	)
+		/>
+	))
 
 	private togglePanel = (panel) => {
 		this.setState((prevState) => ({

@@ -21,7 +21,7 @@ export const ErrorDialog = (props: IProps) => {
 					`Something went wrong:`
 				}
 
-				<br /><br/>
+				<br /><br />
 				<strong>{message}</strong>
 				<br />
 				{status && (<code>(Status Code: {status})</code>)}

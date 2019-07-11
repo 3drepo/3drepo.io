@@ -108,7 +108,7 @@
     "stylelint-processor-styled-components": "1.5.0",
     "ts-loader": "6.0.0",
     "tslint": "5.18.0",
-    "tslint-react": "3.6.0",
+    "tslint-react": "4.0.0",
     "typedoc": "0.13.0",
     "typescript": "3.4.3",
     "webpack": "4.31.0",

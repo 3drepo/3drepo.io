@@ -37,24 +37,24 @@ export const UserItem = (props: IProps) => {
 
 	return (
 		<Grid
-			container={true}
+			container
 			direction="column"
 			justify="center"
 			alignItems="flex-start"
 		>
-			<Name item={true}>
+			<Name item>
 				<Highlight
 					{...highlightProps}
 					text={`${upperCase(props.lastName)}, ${props.firstName}`}
 				/>
 			</Name>
-			<Detail item={true}>
+			<Detail item>
 				<Highlight
 					{...highlightProps}
 					text={props.user}
 				/>
 			</Detail>
-			<Detail item={true}>
+			<Detail item>
 				<Highlight
 					{...highlightProps}
 					text={props.company || ''}

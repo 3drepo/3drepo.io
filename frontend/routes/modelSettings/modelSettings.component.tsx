@@ -244,13 +244,13 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 				<StyledForm>
 					<Headline color="primary" variant="subheading">Model Information</Headline>
 					<Grid>
-						<FieldsRow container={true} wrap="nowrap">
+						<FieldsRow container wrap="nowrap">
 							<Field name="id" render={ ({ field }) => (
 								<StyledTextField
 									{...field}
 									label="Model ID"
 									margin="normal"
-									disabled={true}
+									disabled
 								/>
 							)} />
 							<Field name="name" render={ ({ field, form }) => (
@@ -263,13 +263,13 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								/>
 							)} />
 						</FieldsRow>
-						<FieldsRow container={true} wrap="nowrap">
+						<FieldsRow container wrap="nowrap">
 							<Field name="type" render={ ({ field }) => (
 								<StyledTextField
 									{...field}
 									label="Model type"
 									margin="normal"
-									disabled={true}
+									disabled
 								/>
 							)} />
 							<Field name="code" render={ ({ field }) => (
@@ -280,7 +280,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								/>
 							)} />
 						</FieldsRow>
-						<FieldsRow container={true} wrap="nowrap">
+						<FieldsRow container wrap="nowrap">
 							<Field name="fourDSequenceTag" render={ ({ field }) => (
 								<StyledTextField
 									{...field}
@@ -288,14 +288,14 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 									margin="normal"
 								/>
 							)} />
-							<SelectWrapper fullWidth={true}>
-								<InputLabel shrink={true} htmlFor="unit-select">Unit</InputLabel>
+							<SelectWrapper fullWidth>
+								<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
 								<Field name="unit" render={ ({ field }) => (
 									<CellSelect
 										{...field}
 										items={clientConfigService.units}
 										inputId="unit-select"
-										disabled={true}
+										disabled
 									/>
 								)} />
 							</SelectWrapper>
@@ -303,9 +303,9 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 						<Field name="topicTypes" render={({ field }) => <Chips {...field} inputPlaceholder={'Enter topic types'} />} />
 					</Grid>
 					<Headline color="primary" variant="subheading">GIS Reference Information</Headline>
-					<Grid container={true} direction="column" wrap="nowrap">
-						<Grid container={true} direction="row" wrap="nowrap">
-							<GridColumn container={true} direction="column" wrap="nowrap">
+					<Grid container direction="column" wrap="nowrap">
+						<Grid container direction="row" wrap="nowrap">
+							<GridColumn container direction="column" wrap="nowrap">
 								<Headline color="textPrimary" variant="subheading">Survey Point</Headline>
 								<Field name="latitude" render={ ({ field, form }) => (
 									<StyledTextField
@@ -330,7 +330,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										{...field}
 										label="Elevation"
 										margin="normal"
-										disabled={true}
+										disabled
 										error={Boolean(form.errors.elevation)}
 										helperText={form.errors.elevation}
 									/>
@@ -345,7 +345,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 									/>
 								)} />
 							</GridColumn>
-							<GridColumn container={true} direction="column" wrap="nowrap">
+							<GridColumn container direction="column" wrap="nowrap">
 								<Headline color="textPrimary" variant="subheading">Project Point</Headline>
 								<Field name="axisX" render={ ({ field, form }) => (
 									<StyledTextField
@@ -378,7 +378,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 							</GridColumn>
 						</Grid>
 					</Grid>
-					<Grid container={true} direction="column" alignItems="flex-end">
+					<Grid container direction="column" alignItems="flex-end">
 						<Field render={ ({ form }) =>
 							<Button
 								type="submit"

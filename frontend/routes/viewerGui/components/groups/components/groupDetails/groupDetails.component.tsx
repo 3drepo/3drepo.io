@@ -220,7 +220,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 					color="secondary"
 					type="submit"
 					onClick={this.handleGroupFormSubmit}
-					mini={true}
+					mini
 					aria-label="Save group"
 					disabled={!this.isFormValid || !this.props.canUpdate}
 				>

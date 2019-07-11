@@ -18,19 +18,13 @@ import { Viewer } from './globals/viewer';
 import { clientConfigService } from './services/clientConfig';
 import './services/fontAwesome';
 
-// css from libs
-
-const requireAll = (r) => r.keys().forEach(r);
-
 window.UnityUtil = UnityUtil;
 window.Viewer = Viewer;
 window.Pin = Pin;
 
-// @ts-ignore
-requireAll(require.context('./css', true, /\.css$/));
-
 const render = () => {
 	ReactDOM.render(
+		// tslint:disable-next-line: jsx-wrap-multiline
 		<Provider store={store} >
 			<ConnectedRouter history={history}>
 				<Root />

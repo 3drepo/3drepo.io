@@ -93,10 +93,10 @@ const getIcon = (notification) => {
 	switch (notification.type) {
 		case TYPES.ISSUE_CLOSED:
 		case TYPES.ISSUE_ASSIGNED:
-			return (<Place/>);
+			return (<Place />);
 		case TYPES.MODEL_UPDATED:
 		case TYPES.MODEL_UPDATED_FAILED:
-			return (<ChangeHistory/>);
+			return (<ChangeHistory />);
 	}
 };
 

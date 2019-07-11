@@ -157,30 +157,30 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		const footerLabel = this.getFooterLabel(currentView);
 		return (
 			<Container>
-				<UserManagementTab footerLabel={footerLabel} withHeader={true}>
+				<UserManagementTab footerLabel={footerLabel} withHeader>
 					<>
 						<Options
-							container={true}
+							container
 							direction="row"
 							justify="space-between"
 							alignContent="center"
 						>
-							<SelectContainer item={true}>
-								<FormControl fullWidth={true}>
-									<InputLabel shrink={true} htmlFor="project">
+							<SelectContainer item>
+								<FormControl fullWidth>
+									<InputLabel shrink htmlFor="project">
 										Project
 									</InputLabel>
 									<CellSelect
 										items={projectsItems}
 										value={selectedProject}
 										placeholder="Select a project"
-										disabledPlaceholder={true}
+										disabledPlaceholder
 										onChange={this.onProjectChange}
 										inputId="project"
 									/>
 								</FormControl>
 							</SelectContainer>
-							<Grid item={true}>
+							<Grid item>
 								<SwitchButton
 									color="secondary"
 									onClick={this.handleViewChange}
@@ -191,7 +191,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 								</SwitchButton>
 							</Grid>
 						</Options>
-						<Route path={match.url} render={this.renderPermissionsView}/>
+						<Route path={match.url} render={this.renderPermissionsView} />
 					</>
 				</UserManagementTab>
 			</Container>

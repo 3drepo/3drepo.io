@@ -85,7 +85,7 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 
 		return (
 			<StyledTextField
-				fullWidth={true}
+				fullWidth
 				InputProps={ {
 					inputRef: (node) => {
 						ref(node);
@@ -112,7 +112,7 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 	public renderUserSuggestion = (suggestion, {query, isHighlighted}) => {
 		return (
 			<MenuItem selected={isHighlighted} component="div">
-				<UserItem {...suggestion} searchText={query}/>
+				<UserItem {...suggestion} searchText={query} />
 			</MenuItem>
 		);
 	}
@@ -124,7 +124,7 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 			placement="bottom"
 		>
 			<Paper
-				square={true}
+				square
 				{...options.containerProps}
 				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
 			>
@@ -138,11 +138,11 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 		return (
 			<Container>
 				<Grid
-					container={true}
+					container
 					direction="column">
 					<Title>{title}</Title>
 
-					<FormControl required={true}>
+					<FormControl required>
 						<Autosuggest
 							suggestions={users}
 							onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
@@ -164,10 +164,10 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 					</FormControl>
 
 					<FormControl>
-						<InputLabel shrink={true} htmlFor="job">Job</InputLabel>
+						<InputLabel shrink htmlFor="job">Job</InputLabel>
 						<StyledSelect
 							value={this.state.job}
-							displayEmpty={true}
+							displayEmpty
 							inputProps={ {
 								id: 'job'
 							} }
@@ -190,7 +190,7 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 					/>
 
 					<Grid
-						container={true}
+						container
 						direction="row">
 						<SaveButton
 							variant="contained"

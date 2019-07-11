@@ -109,7 +109,7 @@ export class PinButton extends React.PureComponent<IProps, any> {
 
 		return (
 				<Container>
-					<PinIcon color={pinIConColor}/>
+					<PinIcon color={pinIConColor} />
 					<LabelButton disabled={disabled} onClick={this.onClickButton}>{pinLabel}</LabelButton>
 				</Container>
 				);

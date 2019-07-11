@@ -53,9 +53,9 @@ export const ModelDirectoryItem = (props: IProps) => {
 			items={items}
 			level={TREE_LEVELS.MODEL}
 			renderItem={renderChildItem}
-			active={true}
-			disableShadow={true}
-			forceActive={true}
+			active
+			disableShadow
+			forceActive
 			IconProps={ {
 				IconOpened: BookmarksOutlined,
 				IconClosed: Bookmarks

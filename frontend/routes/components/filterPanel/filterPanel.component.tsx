@@ -305,7 +305,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 			placement="bottom"
 		>
 			<Paper
-				square={true}
+				square
 				{...options.containerProps}
 				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
 			>

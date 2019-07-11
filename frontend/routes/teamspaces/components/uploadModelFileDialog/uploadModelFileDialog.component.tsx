@@ -133,7 +133,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									helperText={form.errors.revisionName}
 									label="Name"
 									margin="normal"
-									fullWidth={true}
+									fullWidth
 								/>}
 								/>
 						<Field
@@ -143,7 +143,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									{...field}
 									label="Description"
 									margin="normal"
-									fullWidth={true}
+									fullWidth
 								/>}
 						/>
 						{ modelSettings.properties &&

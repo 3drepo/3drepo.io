@@ -90,7 +90,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 					)} />
 					<IconsGroup>
 						<StyledCancelIcon onClick={this.props.onCancelEditMode} />
-						<SaveIconButton type="submit" disableRipple={true}>
+						<SaveIconButton type="submit" disableRipple>
 							<StyledSaveIcon />
 						</SaveIconButton>
 					</IconsGroup>

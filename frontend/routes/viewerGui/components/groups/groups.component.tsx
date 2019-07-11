@@ -412,7 +412,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			filters={this.filters}
 			onChange={this.handleFilterChange}
 			selectedFilters={this.props.selectedFilters}
-			hideMenu={true}
+			hideMenu
 		/>
 	));
 

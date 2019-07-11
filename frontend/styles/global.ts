@@ -81,4 +81,27 @@ export const GlobalStyle = createGlobalStyle`
 		width: 100% !important;
 		background: ${COLOR.TRANSPARENT} !important;
 	}
+
+	/* simplebar */
+
+	[data-simplebar=init] > .simplebar-scroll-content > .simplebar-content,
+	[data-simplebar=init] > .simplebar-scroll-content {
+		min-height: 100%;
+	}
+
+	[data-simplebar=init][data-simplebar-x-hidden] > .simplebar-scroll-content > .simplebar-content {
+		overflow-x: hidden;
+	}
+
+	[data-simplebar=init][data-simplebar-x-hidden] > .simplebar-track.horizontal{
+		display: none;
+	}
+
+	[data-simplebar=init][data-simplebar-y-hidden] > .simplebar-scroll-content > .simplebar-content {
+		overflow-y: hidden !important;
+	}
+
+	[data-simplebar=init][data-simplebar-y-hidden] > .simplebar-track.vertical {
+		display: none;
+	}
 `;

@@ -179,11 +179,11 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Container
-				container={true}
+				container
 				direction="row"
 				wrap="nowrap"
 			>
-				<ModelsContainer item={true}>
+				<ModelsContainer item>
 					<CustomTable
 						cells={MODEL_TABLE_CELLS}
 						rows={modelRows}
@@ -195,9 +195,9 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 							null
 					}
 				</ModelsContainer>
-				<PermissionsContainer item={true}>
+				<PermissionsContainer item>
 					<OverflowWrapper>
-						<SimpleBar data-simplebar-y-hidden={true}>
+						<SimpleBar data-simplebar-y-hidden>
 							<PermissionsTable
 								key={permissionsRevision}
 								permissions={permissions}

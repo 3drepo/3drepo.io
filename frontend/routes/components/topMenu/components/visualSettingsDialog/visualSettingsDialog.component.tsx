@@ -56,9 +56,10 @@ const BasicSettings = (props) => {
 			<FormListItem>
 				XRay highlighting
 				<Field name="xray" render={ ({ field }) => (
-					<Switch checked={field.value} {...field} value="true" color="secondary" />)}/>
+					<Switch checked={field.value} {...field} value="true" color="secondary" />)} />
 			</FormListItem>
-		</List>);
+		</List>
+	);
 };
 
 const AdvancedSettings = (props) => {
@@ -68,7 +69,7 @@ const AdvancedSettings = (props) => {
 				Show Statistics
 				<Field name="statistics" render={ ({ field }) => (
 					<Switch checked={field.value} {...field} value="true" color="secondary" />
-				)}/>
+				)} />
 			</FormListItem>
 			<FormListItem>
 				Memory for Unity
@@ -78,7 +79,7 @@ const AdvancedSettings = (props) => {
 					<ShortInput
 						error={Boolean(form.errors.memory)}
 						{...field}
-						endAdornment={<InputAdornment position="end">MB</InputAdornment>}/>
+						endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
 					</ErrorTooltip>
 					);
 				}} />
@@ -103,7 +104,7 @@ const AdvancedSettings = (props) => {
 						<MenuItem value="box">Bounding box</MenuItem>
 						<MenuItem value="sphere">Bounding sphere</MenuItem>
 					</SelectField>
-				)}/>
+				)} />
 			</FormListItem>
 			<FormListItem>
 				Far plane points
@@ -119,7 +120,8 @@ const AdvancedSettings = (props) => {
 					);
 				}} />
 			</FormListItem>
-		</List>);
+		</List>
+	);
 };
 
 const Buttons = (props) => {
@@ -156,7 +158,8 @@ const Buttons = (props) => {
 					</Button>
 			)} />
 
-		</VisualSettingsButtonsContainer>);
+		</VisualSettingsButtonsContainer>
+	);
 };
 
 interface IProps {
@@ -218,7 +221,7 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 				<Formik
 					validationSchema={SettingsSchema}
 					initialValues={visualSettings}
-					enableReinitialize={true}
+					enableReinitialize
 					onSubmit={this.onSubmit}
 					>
 					<Form>

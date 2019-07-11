@@ -179,18 +179,17 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		this.props.setCameraOnViewpoint(this.props.teamspace, this.props.model, viewpoint);
 	}
 
-	public renderLogList = renderWhenTrue(() => {
-		return (
-			<LogList
-				commentsRef={this.commentsRef}
-				items={this.riskData.comments}
-				isPending={this.props.fetchingDetailsIsPending}
-				removeLog={this.removeComment}
-				teamspace={this.props.teamspace}
-				currentUser={this.props.currentUser.username}
-				setCameraOnViewpoint={this.setCameraOnViewpoint}
-			/>);
-	});
+	public renderLogList = renderWhenTrue(() => (
+		<LogList
+			commentsRef={this.commentsRef}
+			items={this.riskData.comments}
+			isPending={this.props.fetchingDetailsIsPending}
+			removeLog={this.removeComment}
+			teamspace={this.props.teamspace}
+			currentUser={this.props.currentUser.username}
+			setCameraOnViewpoint={this.setCameraOnViewpoint}
+		/>
+	));
 
 	public handlePanelScroll = (e) => {
 		if (e.target.scrollTop > 0 && !this.state.scrolled) {

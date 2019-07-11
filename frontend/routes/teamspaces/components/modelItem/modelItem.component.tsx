@@ -156,7 +156,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 
 	public renderPendingStatus = (status) => (
 		<Status>
-			<Loader content={`${startCase(status)}...`} size={20} horizontal={true} />
+			<Loader content={`${startCase(status)}...`} size={20} horizontal />
 		</Status>
 	)
 
@@ -175,8 +175,8 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 
 		return(
 				<Container onMouseEnter={this.createHoverHandler(true)} onMouseLeave={this.createHoverHandler(false)}>
-					<Grid container={true} direction="row" alignItems="center" justify="space-between" wrap="nowrap">
-						<Grid container={true} justify="space-between" wrap="nowrap" alignItems="center">
+					<Grid container direction="row" alignItems="center" justify="space-between" wrap="nowrap">
+						<Grid container justify="space-between" wrap="nowrap" alignItems="center">
 							{ isPending
 								? ( showLink
 									? <><LinkedName onClick={onModelItemClick}>{name}</LinkedName> {this.renderPendingStatus(status)}</>
@@ -185,7 +185,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 							}
 						</Grid>
 						<TimeWrapper
-							container={true}
+							container
 							wrap="nowrap"
 							direction="row"
 							alignItems="center"

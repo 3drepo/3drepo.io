@@ -85,7 +85,7 @@ export class Chips extends React.PureComponent<IProps, IState> {
 		const { name, onBlur, value, inputPlaceholder } = this.props;
 
 		return (
-			<ChipsGrid container={true} direction="column">
+			<ChipsGrid container direction="column">
 				<ChipsContainer>
 					{ value.map(
 						(chip, index) => (

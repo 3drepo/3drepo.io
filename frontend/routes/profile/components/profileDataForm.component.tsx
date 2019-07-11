@@ -91,9 +91,9 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 				onSubmit={this.handleProfileUpdate}
 			>
 				<Form>
-					<FormContainer container={true} direction="column">
+					<FormContainer container direction="column">
 						<Headline color="primary" variant="subheading">Basic Information</Headline>
-						<Grid container={true} direction="row" wrap="nowrap">
+						<Grid container direction="row" wrap="nowrap">
 							<StyledDropzone
 								disabled={isAvatarPending}
 								accept=".gif,.jpg,.png"
@@ -105,14 +105,14 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 									<DropzoneMessage>+</DropzoneMessage>
 								</DropzoneContent>
 							</StyledDropzone>
-							<Grid container={true} direction="column">
-								<FieldsRow container={true} wrap="nowrap">
+							<Grid container direction="column">
+								<FieldsRow container wrap="nowrap">
 									<Field name="firstName" render={ ({ field, form }) => (
 										<StyledTextField
 											{...field}
 											error={Boolean(form.errors.firstName)}
 											helperText={form.errors.firstName}
-											required={true}
+											required
 											label="First name"
 											margin="normal"
 										/>
@@ -122,18 +122,18 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 											{...field}
 											error={Boolean(form.errors.lastName)}
 											helperText={form.errors.lastName}
-											required={true}
+											required
 											label="Last name"
 											margin="normal"
 										/>
 									)} />
 								</FieldsRow>
-								<FieldsRow container={true} wrap="nowrap">
+								<FieldsRow container wrap="nowrap">
 									<StyledTextField
 										value={username}
 										label="Username"
 										margin="normal"
-										disabled={true}
+										disabled
 									/>
 									<Field name="email" render={ ({ field, form }) => (
 										<StyledTextField
@@ -142,7 +142,7 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 											helperText={form.errors.email}
 											label="Email"
 											margin="normal"
-											required={true}
+											required
 										/>
 									)} />
 								</FieldsRow>

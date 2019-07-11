@@ -302,7 +302,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		return colors.slice(0, 7).map((color, index) => {
 			return (
 				<PredefinedColor
-					item={true}
+					item
 					key={index}
 					color={color}
 					onClick={this.onPredefinedColorClick(color)}
@@ -325,15 +325,15 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 			<>
 				<RootRef rootRef={this.colorSelectRef}>
 					<ColorSelect
-						container={true}
+						container
 						onClick={this.handleClick}
 						direction="row"
 						alignItems="center"
 						justify="flex-start"
 						disabled={disabled}
 					>
-						<Dot item={true} color={value} />
-						<Grid item={true}>
+						<Dot item color={value} />
+						<Grid item>
 							<StyledIconButton aria-label="Toggle picker" disabled={disabled}>
 								<ArrowDropDown />
 							</StyledIconButton>
@@ -350,7 +350,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 					{
 						predefinedColors.length ? (
 							<PredefinedColorsContainer
-								container={true}
+								container
 								direction="row"
 								alignItems="center"
 								justify="flex-start"
@@ -360,12 +360,12 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						) : null
 					}
 					<Grid
-						container={true}
+						container
 						direction="row"
 						alignItems="center"
 						justify="space-between"
 					>
-						<CanvasContainer item={true}>
+						<CanvasContainer item>
 							<BlockCanvas
 								ref={this.blockCanvasRef}
 								width={185}
@@ -382,7 +382,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 								}}
 							/>
 						</CanvasContainer>
-						<CanvasContainer item={true}>
+						<CanvasContainer item>
 							<StripCanvas
 								ref={this.stripCanvasRef}
 								width={23}
@@ -392,20 +392,20 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						</CanvasContainer>
 					</Grid>
 					<Grid
-						container={true}
+						container
 						direction="row"
 						justify="flex-start"
 						alignItems="center"
 					>
-						<Grid item={true}>
+						<Grid item>
 							<SelectedColor color={colorHash} />
 						</Grid>
-						<Grid item={true}>
+						<Grid item>
 							<FormControl>
 								<SelectedHash
 									value={hashInput}
 									onChange={this.handleHashInputChange}
-									startAdornment={<StyledStartAdornment position="start" disableTypography={true}>#</StyledStartAdornment>}
+									startAdornment={<StyledStartAdornment position="start" disableTypography>#</StyledStartAdornment>}
 								/>
 							</FormControl>
 						</Grid>

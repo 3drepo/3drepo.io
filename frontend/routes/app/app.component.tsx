@@ -242,7 +242,7 @@ export class App extends React.PureComponent<IProps, IState> {
 					</Switch>
 					<DialogContainer />
 					<SnackbarContainer />
-					<LiveChat/>
+					<LiveChat />
 				</AppContainer>
 		);
 	}

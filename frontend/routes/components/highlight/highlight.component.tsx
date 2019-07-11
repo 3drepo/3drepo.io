@@ -33,7 +33,7 @@ export const Highlight = ({splitQueryToWords, search, text, caseSensitive}: IPro
 	return (
 		<Highlighter
 			searchWords={searchWords}
-			autoEscape={true}
+			autoEscape
 			textToHighlight={text || ''}
 			highlightTag={Mark}
 			caseSensitive={caseSensitive}

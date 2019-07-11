@@ -290,8 +290,8 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 			>
 				<Form>
 					<StyledDialogContent>
-						<SelectWrapper fullWidth={true} required={true}>
-							<InputLabel shrink={true} htmlFor="teamspace-select">Teamspace</InputLabel>
+						<SelectWrapper fullWidth required>
+							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
 							<Field name="teamspace" render={ ({ field, form }) => (
 								<CellSelect
 									{...field}
@@ -300,15 +300,15 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 									items={teamspaces}
 									placeholder="Select teamspace"
 									disabled={Boolean(teamspace)}
-									disabledPlaceholder={true}
+									disabledPlaceholder
 									inputId="teamspace-select"
 									value={teamspace}
 									onChange={this.handleTeamspaceChange(field.onChange)}
 								/>
 							)} />
 						</SelectWrapper>
-						<SelectWrapper fullWidth={true} required={true}>
-							<InputLabel shrink={true} htmlFor="project-select">Project</InputLabel>
+						<SelectWrapper fullWidth required>
+							<InputLabel shrink htmlFor="project-select">Project</InputLabel>
 							<Field name="project" render={ ({ field, form }) => (
 								<CellSelect
 									{...field}
@@ -317,7 +317,7 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 									items={projectsItems}
 									placeholder="Select project"
 									disabled={Boolean(project)}
-									disabledPlaceholder={true}
+									disabledPlaceholder
 									inputId="project-select"
 									value={project}
 									onChange={this.handleProjectChange(field.onChange)}
@@ -334,21 +334,21 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 										label="Federation Name"
 										margin="normal"
 										disabled={editMode}
-										required={true}
-										fullWidth={true}
+										required
+										fullWidth
 										value={this.state.name}
 										onChange={this.handleNameChange(field.onChange)}
 									/>
 								)} />
 							</FieldWrapper>
-							<SelectWrapper fullWidth={true} required={true}>
-								<InputLabel shrink={true} htmlFor="unit-select">Unit</InputLabel>
+							<SelectWrapper fullWidth required>
+								<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
 								<Field name="unit" render={ ({ field }) => (
 									<CellSelect
 										{...field}
 										placeholder="Select unit"
-										disabledPlaceholder={true}
-										required={true}
+										disabledPlaceholder
+										required
 										items={clientConfigService.units}
 										value={unit}
 										disabled={editMode}

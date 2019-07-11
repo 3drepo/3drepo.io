@@ -257,23 +257,21 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderButtons = () => {
-		return this.toolbarList.map((
-			{label, Icon, action, show = true, subMenu = [], active = false, disabled = false }, index
-			) => renderWhenTrue(() => (
+		return this.toolbarList.map(({ show = true, subMenu = [], ...button }, index) => renderWhenTrue(() => (
 			<ButtonWrapper key={index}>
 				<ToolbarButton
 					variant="primary"
-					label={label}
-					Icon={Icon}
-					action={action}
-					active={active}
-					disabled={disabled}
+					label={button.label}
+					Icon={button.Icon}
+					action={button.action}
+					active={button.active}
+					disabled={button.disabled}
 					placement="top"
 				/>
 				{this.renderSubmenuDot(subMenu.length)}
-				{this.renderSubmenu(subMenu, label)}
-			</ButtonWrapper>)
-		)(show));
+				{this.renderSubmenu(subMenu, button.label)}
+			</ButtonWrapper>
+		))(show));
 	}
 
 	public renderSubmenu = (subMenu, label) => renderWhenTrue(() => {

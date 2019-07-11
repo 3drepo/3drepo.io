@@ -65,22 +65,22 @@ export class NewJobForm extends React.PureComponent<IProps, any> {
 		return (
 			<Container>
 				<Grid
-					container={true}
+					container
 					direction="column">
 					<Title>{title}</Title>
 
 					<Grid
-						item={true}
-						container={true}
+						item
+						container
 						direction="row"
 						spacing={16}
 						wrap="nowrap"
 					>
-						<StyledTextFieldContainer item={true}>
+						<StyledTextFieldContainer item>
 							<StyledTextField
-								autoFocus={true}
+								autoFocus
 								placeholder="Set job name"
-								fullWidth={true}
+								fullWidth
 								value={name}
 								onChange={this.handleJobNameChange}
 								InputLabelProps={ {
@@ -88,7 +88,7 @@ export class NewJobForm extends React.PureComponent<IProps, any> {
 								} }
 							/>
 						</StyledTextFieldContainer>
-						<Grid item={true}>
+						<Grid item>
 							<ColorPicker
 								value={color}
 								predefinedColors={colors}

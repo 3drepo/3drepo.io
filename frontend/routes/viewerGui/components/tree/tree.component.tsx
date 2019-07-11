@@ -100,7 +100,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 			filters={this.filters}
 			onChange={this.handleFilterChange}
 			selectedFilters={this.props.selectedFilters}
-			hideMenu={true}
+			hideMenu
 		/>
 	));
 
@@ -160,7 +160,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 
 		return (
 			<TreeContainer
-				Icon={<TreeIcon/>}
+				Icon={<TreeIcon />}
 				renderActions={this.renderActions}
 				pending={isPending}
 			>

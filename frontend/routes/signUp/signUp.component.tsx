@@ -178,7 +178,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 				alignItems="center"
 				wrap="nowrap">
 				<StyledGrid item xs={9} sm={6} md={6} lg={6} xl={2}>
-					<Panel title="Sign up" hiddenScrollbars={true}>
+					<Panel title="Sign up" hiddenScrollbars>
 						<Headline>Creating a 3D Repo account is free</Headline>
 						<Formik
 							initialValues={RegistrationInitialValues}
@@ -195,7 +195,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										helperText={form.touched.username && (form.errors.username || '')}
 										label="Username"
 										disabled={isPending}
-										fullWidth={true}
+										fullWidth
 									/>
 								)} />
 								<FieldsRow container wrap="nowrap">

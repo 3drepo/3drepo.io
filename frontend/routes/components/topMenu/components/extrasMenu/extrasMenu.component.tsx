@@ -39,7 +39,7 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 
 const ExternalLink = ({ ...props }) => {
 	return (
-		<MenuItem button={true} aria-label={props.label} onClick={props.onButtonClick}>
+		<MenuItem button aria-label={props.label} onClick={props.onButtonClick}>
 			<MenuText primary={props.label} />
 		</MenuItem>
 	);

@@ -72,7 +72,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 		const { size, color, onDrawClick, onEraseClick, onClearClick, onColorChange, onBrushSizeChange } = this.props;
 		return (
 			<>
-				<ColorPicker disableUnderline={true} value={color} onChange={onColorChange} />
+				<ColorPicker disableUnderline value={color} onChange={onColorChange} />
 				<Select
 					disableUnderline
 					value={size}

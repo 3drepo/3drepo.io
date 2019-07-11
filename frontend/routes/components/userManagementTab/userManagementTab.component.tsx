@@ -30,14 +30,14 @@ export const UserManagementTab = (props: IProps) => {
 	return (
 		<>
 			<Container
-				container={true}
+				container
 				direction="column"
 				alignItems="stretch"
 				wrap="nowrap"
 				justify="space-between"
 			>
-				<Content item={true} withHeader={props.withHeader}>{children}</Content>
-				{footerLabel && (<Footer item={true}>{footerLabel}</Footer>)}
+				<Content item withHeader={props.withHeader}>{children}</Content>
+				{footerLabel && (<Footer item>{footerLabel}</Footer>)}
 			</Container>
 		</>
 	);

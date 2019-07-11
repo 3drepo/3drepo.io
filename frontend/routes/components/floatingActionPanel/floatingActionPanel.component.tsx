@@ -84,7 +84,7 @@ export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
 							variant="fab"
 							color="secondary"
 							aria-label="Toggle panel"
-							mini={true}
+							mini
 							onClick={this.handleClick}
 							disabled={buttonProps.disabled}
 						>

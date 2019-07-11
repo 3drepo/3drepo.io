@@ -181,7 +181,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		return (
 			<Switch>
 				{ TABS_ROUTES.map(({path, component: Component}, index) => (
-					<Route key={index} exact={true} path={`${match.path}/${path}`} component={Component} />
+					<Route key={index} exact path={`${match.path}/${path}`} component={Component} />
 				))}
 			</Switch>
 		);
@@ -196,13 +196,13 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 			<>
 				<Header>
 					<TeamspaceSelectContainer>
-						<FormControl fullWidth={true}>
-							<InputLabel shrink={true} htmlFor="teamspace-select">Teamspace</InputLabel>
+						<FormControl fullWidth>
+							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
 							<CellSelect
 								items={teamspacesItems}
 								value={selectedTeamspace}
 								placeholder="Select teamspace"
-								disabledPlaceholder={true}
+								disabledPlaceholder
 								onChange={this.onTeamspaceChange}
 								inputId="teamspace-select"
 							/>
@@ -244,7 +244,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 				<Switch>
 					<Route path={`${userManagmentMatch.url}/:tab`} render={this.renderUserManagementRoute} />
 					<Redirect
-						exact={true}
+						exact
 						from={`${userManagmentMatch.url}`}
 						to={`${userManagmentMatch.url}/users`}
 					/>

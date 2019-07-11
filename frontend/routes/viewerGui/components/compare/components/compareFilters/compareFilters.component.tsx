@@ -45,7 +45,7 @@ export class CompareFilters extends React.PureComponent<IProps, any> {
 					className="compare"
 					onChange={onFilterChange}
 					selectedFilters={selectedFilters}
-					hideMenu={true}
+					hideMenu
 					autoFocus={false}
 				/>
 			</FilterContainer>

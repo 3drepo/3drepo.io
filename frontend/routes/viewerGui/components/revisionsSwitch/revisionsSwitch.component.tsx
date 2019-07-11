@@ -39,8 +39,8 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 		<DisplayedText>
 			{`${this.props.modelSettings.name} - ${this.currentRevisionName}`}
 			{this.props.revisions.length > 1 && <ArrowDownIcon fontSize="small" />}
-		</DisplayedText>)
-	);
+		</DisplayedText>
+	));
 
 	public renderIndicator = renderWhenTrue(() => (
 		<ProgressWrapper>

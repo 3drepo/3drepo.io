@@ -102,8 +102,8 @@ export class Views extends React.PureComponent<IProps, any> {
 		<ViewItem
 			isCommenter={this.props.isCommenter}
 			viewpoint={this.props.newViewpoint}
-			active={true}
-			editMode={true}
+			active
+			editMode
 			onCancelEditMode={this.handleCancelEditMode}
 			onSaveEdit={this.handleSave}
 			teamspace={this.props.teamspace}

@@ -167,16 +167,17 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 	public getMenuButton = () => 	(
 		<ButtonMenu
-			key={0}
-			renderButton={MenuButton}
-			renderContent={this.renderMenuContent}
-			PopoverProps={{
-				anchorOrigin: { vertical: 'center', horizontal: 'left' }
-			}}
-			ButtonProps={{
-				disabled: this.props.isPending || this.state.settingsModeActive
-			}}
-	/>)
+				key={0}
+				renderButton={MenuButton}
+				renderContent={this.renderMenuContent}
+				PopoverProps={{
+					anchorOrigin: { vertical: 'center', horizontal: 'left' }
+				}}
+				ButtonProps={{
+					disabled: this.props.isPending || this.state.settingsModeActive
+				}}
+		/>
+	)
 
 	public getActions = () => {
 		if (!this.state.settingsModeActive) {
@@ -201,7 +202,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 
 	public renderShowLayerButton = (layer, statement) => renderWhenTrue(
 		<VisibilityButton onClick={() => this.props.addSource(layer.source)}>
-			<VisibilityOffIcon/>
+			<VisibilityOffIcon />
 		</VisibilityButton>
 	)(statement)
 

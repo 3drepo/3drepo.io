@@ -154,10 +154,10 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 			<Field name="comment" render={({ field }) => (
 				<StyledTextField
 					{...field}
-					autoFocus={true}
+					autoFocus
 					placeholder={this.commentPlaceholder}
-					multiline={true}
-					fullWidth={true}
+					multiline
+					fullWidth
 					InputLabelProps={{ shrink: true }}
 					inputProps={{ rowsMax: 4, maxLength: 220 }}
 					disabled={!this.props.canComment}
@@ -174,7 +174,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		<Container>
 			<FieldsRow container alignItems="center" justify="space-between">
 				<StyledFormControl>
-					<InputLabel shrink={true} htmlFor="likelihood">Risk Likelihood</InputLabel>
+					<InputLabel shrink htmlFor="likelihood">Risk Likelihood</InputLabel>
 					<Field name="likelihood" render={({ field }) => (
 						<CellSelect
 							{...field}
@@ -186,7 +186,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 				</StyledFormControl>
 
 				<StyledFormControl>
-					<InputLabel shrink={true} htmlFor="consequence">Risk Consequence</InputLabel>
+					<InputLabel shrink htmlFor="consequence">Risk Consequence</InputLabel>
 					<Field name="consequence" render={({ field }) => (
 						<CellSelect
 							{...field}
@@ -201,8 +201,8 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 			<Field name="mitigation_desc" render={({ field, form }) => (
 				<StyledTextField
 					{...field}
-					multiline={true}
-					fullWidth={true}
+					multiline
+					fullWidth
 					InputLabelProps={{ shrink: true }}
 					label="Residual Risk"
 					placeholder="Describe the residual risk"
@@ -243,7 +243,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 									variant="fab"
 									color="secondary"
 									type="submit"
-									mini={true}
+									mini
 									disabled={!hideComment && (!canComment || !form.isValid || form.isValidating)}
 									aria-label="Add new comment"
 								>

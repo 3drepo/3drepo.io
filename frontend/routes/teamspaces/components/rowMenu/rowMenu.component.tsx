@@ -73,7 +73,7 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 
 		return (
 			<StyledGrid
-				container={true}
+				container
 				wrap="nowrap"
 				direction="row"
 				alignItems="center"
@@ -84,7 +84,7 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 					{...growProps}
 				>
 					<StyledGrid
-						container={true}
+						container
 						wrap="nowrap"
 						direction="row"
 						alignItems="center"

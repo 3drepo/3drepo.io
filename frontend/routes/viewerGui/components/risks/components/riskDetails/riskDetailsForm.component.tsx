@@ -147,7 +147,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			<Form>
 				<FieldsRow container alignItems="center" justify="space-between">
 					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="assigned_roles">Risk owner</InputLabel>
+						<InputLabel shrink htmlFor="assigned_roles">Risk owner</InputLabel>
 						<Field name="assigned_roles" render={({ field }) => (
 							<CellSelect
 								{...field}
@@ -159,7 +159,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					</StyledFormControl>
 
 					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="category">Category</InputLabel>
+						<InputLabel shrink htmlFor="category">Category</InputLabel>
 						<Field name="category" render={({ field }) => (
 							<CellSelect
 								{...field}
@@ -218,7 +218,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				<FieldsRow container alignItems="center" justify="space-between">
 					<FieldsContainer>
 						<StyledFormControl>
-							<InputLabel shrink={true} htmlFor="likelihood">Risk Likelihood</InputLabel>
+							<InputLabel shrink htmlFor="likelihood">Risk Likelihood</InputLabel>
 							<Field name="likelihood" render={({ field }) => (
 								<CellSelect
 									{...field}
@@ -231,7 +231,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						</StyledFormControl>
 
 						<StyledFormControl>
-							<InputLabel shrink={true} htmlFor="consequence">Risk Consequence</InputLabel>
+							<InputLabel shrink htmlFor="consequence">Risk Consequence</InputLabel>
 							<Field name="consequence" render={({ field }) => (
 								<CellSelect
 									{...field}
@@ -246,13 +246,13 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 					<FieldsContainer>
 						<StyledFormControl>
-							<InputLabel shrink={true} htmlFor="level_of_risk">Level of Risk</InputLabel>
+							<InputLabel shrink htmlFor="level_of_risk">Level of Risk</InputLabel>
 							<Field name="level_of_risk" render={({ field }) => (
 								<CellSelect
 									{...field}
 									items={LEVELS_OF_RISK}
 									inputId="level_of_risk"
-									disabled={true}
+									disabled
 									readOnly
 								/>
 							)} />
@@ -284,7 +284,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 				<Container>
 					<StyledFormControl>
-						<InputLabel shrink={true} htmlFor="mitigation_status">Mitigation Status</InputLabel>
+						<InputLabel shrink htmlFor="mitigation_status">Mitigation Status</InputLabel>
 						<Field name="mitigation_status" render={({ field }) => (
 							<CellSelect
 								{...field}
@@ -299,7 +299,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				<FieldsRow container alignItems="center" justify="space-between">
 					<FieldsContainer>
 						<StyledFormControl>
-							<InputLabel shrink={true} htmlFor="residual_likelihood">Mitigated Likelihood</InputLabel>
+							<InputLabel shrink htmlFor="residual_likelihood">Mitigated Likelihood</InputLabel>
 							<Field name="residual_likelihood" render={({ field }) => (
 								<CellSelect
 									{...field}
@@ -311,7 +311,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						</StyledFormControl>
 
 						<StyledFormControl>
-							<InputLabel shrink={true} htmlFor="residual_consequence">Mitigated Consequence</InputLabel>
+							<InputLabel shrink htmlFor="residual_consequence">Mitigated Consequence</InputLabel>
 							<Field name="residual_consequence" render={({ field }) => (
 								<CellSelect
 									{...field}
@@ -325,13 +325,13 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 					<FieldsContainer>
 						<StyledFormControl>
-							<InputLabel shrink={true} htmlFor="residual_level_of_risk">Level of Mitigated Risk</InputLabel>
+							<InputLabel shrink htmlFor="residual_level_of_risk">Level of Mitigated Risk</InputLabel>
 							<Field name="residual_level_of_risk" render={({ field }) => (
 								<CellSelect
 									{...field}
 									items={LEVELS_OF_RISK}
 									inputId="residual_level_of_risk"
-									disabled={true}
+									disabled
 									readOnly
 								/>
 							)} />

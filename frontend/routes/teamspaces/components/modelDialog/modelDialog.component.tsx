@@ -140,8 +140,8 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 			>
 				<Form>
 					<DialogContent>
-						<SelectWrapper fullWidth={true} required={true}>
-							<InputLabel shrink={true} htmlFor="teamspace-select">Teamspace</InputLabel>
+						<SelectWrapper fullWidth required>
+							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
 							<Field name="teamspace" render={ ({ field, form }) => (
 								<CellSelect
 									{...field}
@@ -150,15 +150,15 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 									items={teamspaces}
 									placeholder="Select teamspace"
 									disabled={Boolean(teamspace)}
-									disabledPlaceholder={true}
+									disabledPlaceholder
 									inputId="teamspace-select"
 									value={teamspace}
 									onChange={this.handleTeamspaceChange(field.onChange)}
 								/>
 							)} />
 						</SelectWrapper>
-						<SelectWrapper fullWidth={true} required={true}>
-							<InputLabel shrink={true} htmlFor="project-select">Project</InputLabel>
+						<SelectWrapper fullWidth required>
+							<InputLabel shrink htmlFor="project-select">Project</InputLabel>
 							<Field name="project" render={ ({ field, form }) => (
 								<CellSelect
 									{...field}
@@ -167,7 +167,7 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 									items={projectsItems}
 									placeholder="Select project"
 									disabled={Boolean(project)}
-									disabledPlaceholder={true}
+									disabledPlaceholder
 									inputId="project-select"
 									value={project}
 									onChange={this.handleProjectChange(field.onChange)}
@@ -183,21 +183,21 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 										helperText={form.touched.modelName && (form.errors.modelName || '')}
 										label="Model Name"
 										margin="normal"
-										required={true}
-										fullWidth={true}
+										required
+										fullWidth
 										value={this.state.modelName}
 										onChange={this.handleNameChange(field.onChange)}
 									/>
 								)} />
 							</FieldWrapper>
-							<SelectWrapper fullWidth={true} required={true}>
-								<InputLabel shrink={true} htmlFor="unit-select">Unit</InputLabel>
+							<SelectWrapper fullWidth required>
+								<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
 								<Field name="unit" render={ ({ field }) => (
 									<CellSelect
 										{...field}
 										placeholder="Select unit"
-										disabledPlaceholder={true}
-										required={true}
+										disabledPlaceholder
+										required
 										items={clientConfigService.units}
 										value={unit}
 										onChange={this.handleUnitChange(field.onChange)}
@@ -213,19 +213,19 @@ export class ModelDialog extends React.PureComponent<IProps, IState> {
 										{...field}
 										label="Model Code (optional)"
 										margin="normal"
-										fullWidth={true}
+										fullWidth
 									/>
 								)} />
 							</FieldWrapper>
-							<SelectWrapper fullWidth={true} required={true}>
-								<InputLabel shrink={true} htmlFor="type-select">Model Type</InputLabel>
+							<SelectWrapper fullWidth required>
+								<InputLabel shrink htmlFor="type-select">Model Type</InputLabel>
 								<Field name="type" render={ ({ field }) => (
 									<CellSelect
 										{...field}
 										placeholder="Select model type"
-										disabledPlaceholder={true}
+										disabledPlaceholder
 										items={MODEL_SUBTYPES}
-										required={true}
+										required
 										inputId="type-select"
 									/>
 								)} />

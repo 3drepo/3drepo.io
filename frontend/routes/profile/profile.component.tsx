@@ -59,7 +59,7 @@ export class Profile extends React.PureComponent<IProps, any> {
 				<Container>
 					{currentUser.email ? <ProfileDataForm {...profileDataFormProps} /> : null}
 					<PasswordChangeForm {...passwordChangeFormProps} />
-					<APIKeyForm  {...apiKeyProps}/>
+					<APIKeyForm  {...apiKeyProps} />
 				</Container>
 			</Panel>
 		);

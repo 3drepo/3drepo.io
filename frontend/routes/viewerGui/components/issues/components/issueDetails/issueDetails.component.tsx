@@ -194,7 +194,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				teamspace={this.props.teamspace}
 				currentUser={this.props.currentUser.username}
 				setCameraOnViewpoint={this.setCameraOnViewpoint}
-			/>);
+			/>
+		);
 	});
 
 	public handlePanelScroll = (e) => {

@@ -95,7 +95,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 
 	public renderNameWithCounter = renderWhenTrue(() => (
 		<Typography
-			paragraph={true}
+			paragraph
 		>
 			{`${this.props.number}. ${this.props.name}`}
 		</Typography>
@@ -103,7 +103,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 
 	public renderName = renderWhenTrue(() => (
 		<Typography
-			paragraph={true}
+			paragraph
 		>
 			{this.props.name}
 		</Typography>
