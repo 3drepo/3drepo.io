@@ -53,10 +53,10 @@
     "normalize.css": "8.0.1",
     "offline-plugin": "5.0.7",
     "query-string": "6.2.0",
-    "react": "16.4.2",
+    "react": "^16.8.6",
     "react-autosuggest": "9.4.1",
     "react-copy-to-clipboard": "5.0.1",
-    "react-dom": "16.4.2",
+    "react-dom": "16.8.6",
     "react-dropzone": "6.0.2",
     "react-event-listener": "^0.6.6",
     "react-ga": "^2.5.7",
@@ -118,7 +118,7 @@
     "webpack-stream": "4.0.0"
   },
   "resolutions": {
-    "react": "16.4.2",
-    "react-dom": "16.4.2"
+    "react": "16.8.6",
+    "react-dom": "16.8.6"
   }
 }
