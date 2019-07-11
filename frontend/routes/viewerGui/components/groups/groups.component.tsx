@@ -422,10 +422,10 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return `${objectsNumber} objects`;
 	}
 
-  public handleFilterChange = (selectedFilters) => {
+	public handleFilterChange = (selectedFilters) => {
 		this.props.setState({ selectedFilters });
 		this.setState({ filteredGroups: this.filteredGroups });
-  }
+	}
 
 	public handleSaveGroup = (teamspace, model, group) => {
 		this.props.saveGroup(teamspace, model, group);

@@ -45,14 +45,10 @@ export const prepareIssue = (issue, jobs = []) => {
 	};
 };
 
-export const getStatusIcon = (priority, status) => {
-  const statusIcon = {
-    Icon: STATUSES_ICONS[status] || null,
-    color: STATUSES_COLOURS[status] || STATUSES_COLOURS[priority] || null
-  };
-
-  return {...statusIcon};
-};
+export const getStatusIcon = (priority, status) => ({
+	Icon: STATUSES_ICONS[status] || null,
+	color: STATUSES_COLOURS[status] || STATUSES_COLOURS[priority] || null
+});
 
 const isOpenIssue = (status) => status !== 'closed';
 

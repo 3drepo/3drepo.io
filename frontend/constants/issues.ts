@@ -62,10 +62,10 @@ export const STATUSES_COLOURS = {
 };
 
 export const STATUSES_ICONS = {
-  [STATUSES.OPEN]: PanoramaFishEyeIcon,
-  [STATUSES.IN_PROGRESS]: LensIcon,
-  [STATUSES.FOR_APPROVAL]: AdjustIcon,
-  [STATUSES.CLOSED]: CheckCircleIcon
+	[STATUSES.OPEN]: PanoramaFishEyeIcon,
+	[STATUSES.IN_PROGRESS]: LensIcon,
+	[STATUSES.FOR_APPROVAL]: AdjustIcon,
+	[STATUSES.CLOSED]: CheckCircleIcon
 };
 
 export const ISSUE_FILTER_RELATED_FIELDS = {

@@ -22,11 +22,11 @@ import * as React from 'react';
 export const MenuButton = ({
 	IconProps = {}, Icon = MoreIcon, ariaLabel = 'Show menu', ariaHasPopup = true, ...props
 }) => (
-  <IconButton
-    {...props}
-    aria-label={ariaLabel}
-    aria-haspopup={ariaHasPopup}
-  >
-    <Icon {...IconProps} />
-  </IconButton>
+	<IconButton
+		{...props}
+		aria-label={ariaLabel}
+		aria-haspopup={ariaHasPopup}
+	>
+		<Icon {...IconProps} />
+	</IconButton>
 );

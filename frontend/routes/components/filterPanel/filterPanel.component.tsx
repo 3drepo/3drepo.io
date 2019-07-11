@@ -209,13 +209,13 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-  public renderFiltersMenu = () => (
-    <FiltersMenu
+	public renderFiltersMenu = () => (
+		<FiltersMenu
 			items={this.props.filters}
 			selectedItems={this.state.selectedFilters}
 			onToggleFilter={this.onToggleFilter}
-    />
-  )
+		/>
+	)
 
 	public onDeselectFilter = (selectedFilter) => {
 		this.setState({

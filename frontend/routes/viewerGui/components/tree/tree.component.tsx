@@ -181,7 +181,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 
 	private handleFilterChange = (selectedFilters) => {
 		this.props.setState({ selectedFilters });
-  }
+	}
 
 	private handleCloseSearchMode = () => {
 		this.props.setState({ searchEnabled: false, selectedFilters: [] });
