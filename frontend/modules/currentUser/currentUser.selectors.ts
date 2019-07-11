@@ -17,7 +17,7 @@
 
 import { createSelector } from 'reselect';
 
-const selectCurrentUserDomain = (state) => Object.assign({}, state.currentUser);
+const selectCurrentUserDomain = (state) => ({...state.currentUser});
 
 export const selectCurrentTeamspace = createSelector(
 	selectCurrentUserDomain, (state) => state.currentTeamspace

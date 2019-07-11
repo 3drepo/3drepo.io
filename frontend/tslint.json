@@ -40,6 +40,16 @@
         "jsx-space-before-trailing-slash": true,
         "jsx-no-bind": true,
         "jsx-boolean-value": [true, "never"],
-        "no-invalid-template-strings": true
+        "no-invalid-template-strings": true,
+        "prefer-object-spread": true,
+        "radix": true,
+        "unnecessary-constructor": true,
+        "max-classes-per-file": [
+            true,
+            1
+        ],
+        "no-irregular-whitespace": true,
+        "no-empty-interface": true,
+        "curly": true
     }
 }

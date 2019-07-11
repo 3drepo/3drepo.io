@@ -24,7 +24,7 @@ import { calculateTotalMeshes } from '../../helpers/tree';
 import TreeProcessing from './treeProcessing/treeProcessing';
 import { ITreeProcessingData } from './treeProcessing/treeProcessing.constants';
 
-export const selectTreeDomain = (state) => Object.assign({}, state.tree);
+export const selectTreeDomain = (state) => ({...state.tree});
 
 export const selectSelectedNodes = createSelector(
 	selectTreeDomain, (state) => state.selectedNodes

@@ -103,7 +103,8 @@ export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
 	const { teamspace, currentUser } = action;
 	const users = action.users.map(prepareUserData.bind(null, teamspace.name, currentUser));
 
-	return Object.assign({}, INITIAL_STATE, {
+	return {
+		...INITIAL_STATE,
 		users,
 		isPending: false,
 		...pick(teamspace, ['models', 'permissions', 'isAdmin', 'fedModels']),
@@ -111,7 +112,7 @@ export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
 		selectedTeamspace: teamspace.account,
 		isTeamspaceAdmin: teamspace.isAdmin,
 		collaboratorLimit: action.collaboratorLimit
-	});
+	};
 };
 
 export const setPendingState = (state = INITIAL_STATE, { isPending }) => {
@@ -192,10 +193,11 @@ export const updateProjectPermissionsSuccess = (state = INITIAL_STATE, { permiss
 
 export const fetchModelPermissionsSuccess = (state = INITIAL_STATE, { selectedModels }) => {
 	const permissions = selectedModels.length === 1 ? selectedModels[0].permissions : [];
-	const currentProject = Object.assign({}, omit(state.currentProject, ['currentModels']), {
+	const currentProject = {
+		...omit(state.currentProject, ['currentModels']),
 		modelsPermissions: permissions,
 		currentModels: selectedModels
-	});
+	};
 	return {...state, currentProject};
 };
 

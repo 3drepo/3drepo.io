@@ -19,7 +19,7 @@ import { values } from 'lodash';
 import { createSelector } from 'reselect';
 import { extendTeamspacesInfo } from './teamspaces.helpers';
 
-export const selectTeamspacesDomain = (state) => Object.assign({}, state.teamspaces);
+export const selectTeamspacesDomain = (state) => ({...state.teamspaces});
 
 export const selectTeamspaces = createSelector(
 	selectTeamspacesDomain, (state) => values(state.teamspaces)

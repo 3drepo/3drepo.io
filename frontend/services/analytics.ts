@@ -87,14 +87,14 @@ class AnalyticsService {
 		const args = ['create',  clientConfigService.ga.trackId, 'auto', {}];
 
 		if (clientConfigService.userId) {
-			args[3] = Object.assign({ userId: clientConfigService.userId}, args[3]);
+			args[3] = { userId: clientConfigService.userId, ...args[3] };
 		}
 
 		ReactGA.ga.apply(window, args);
 
 		const refererArgs =  args.concat([]);
 		refererArgs[1] = clientConfigService.ga.refererTrackId;
-		refererArgs[3] = Object.assign({name: 'referer', allowLinker: true}, args[3]);
+		refererArgs[3] = { name: 'referer', allowLinker: true, ...args[3] };
 
 		ReactGA.ga.apply(window, refererArgs);
 		ReactGA.ga('referer.require', 'linker');

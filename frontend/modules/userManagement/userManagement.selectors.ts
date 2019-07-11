@@ -18,7 +18,7 @@
 import { createSelector } from 'reselect';
 import { getExtendedModelPermissions, getExtendedProjectPermissions } from './userManagement.helpers';
 
-export const selectUserManagementDomain = (state) => Object.assign({}, state.userManagement);
+export const selectUserManagementDomain = (state) => ({...state.userManagement});
 
 export const selectUsers = createSelector(
 	selectUserManagementDomain, (state) => state.users

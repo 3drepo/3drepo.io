@@ -17,7 +17,7 @@
 
 import { createSelector } from 'reselect';
 
-export const selectStaticPagesDomain = (state) => Object.assign({}, state.staticPages);
+export const selectStaticPagesDomain = (state) => ({...state.staticPages});
 
 export const selectStaticPagesTemplates = createSelector(
 	selectStaticPagesDomain, (state) => state.templates

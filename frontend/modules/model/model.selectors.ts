@@ -17,7 +17,7 @@
 
 import { createSelector, createSelectorCreator } from 'reselect';
 
-export const selectModelDomain = (state) => Object.assign({}, state.model);
+export const selectModelDomain = (state) => ({...state.model});
 
 export const selectSettings = createSelector(
 	selectModelDomain, (state) => state.settings

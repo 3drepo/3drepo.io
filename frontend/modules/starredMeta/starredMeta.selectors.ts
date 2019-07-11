@@ -17,7 +17,7 @@
 
 import { createSelector } from 'reselect';
 
-export const selectStarredMetaDomain = (state) => Object.assign({}, state.starredMeta);
+export const selectStarredMetaDomain = (state) => ({...state.starredMeta});
 
 export const selectStarredMeta = createSelector(
 	selectStarredMetaDomain, (state) => state.starredMetaMap

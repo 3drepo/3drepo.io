@@ -20,7 +20,7 @@ import { createSelector } from 'reselect';
 import { RISK_LEVELS } from '../../constants/risks';
 import { searchByFilters } from '../../helpers/searching';
 
-export const selectRisksDomain = (state) => Object.assign({}, state.risks);
+export const selectRisksDomain = (state) => ({...state.risks});
 
 export const selectRisks = createSelector(
 	selectRisksDomain, (state) => values(state.risksMap)

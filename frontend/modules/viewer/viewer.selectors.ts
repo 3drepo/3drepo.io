@@ -16,7 +16,7 @@
  */
 import { createSelector } from 'reselect';
 
-export const selectViewerDomain = (state) => Object.assign({}, state.viewer);
+export const selectViewerDomain = (state) => ({...state.viewer});
 
 export const selectSettings = createSelector(
 	selectViewerDomain, (state) => state.settings

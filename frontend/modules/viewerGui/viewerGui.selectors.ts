@@ -19,7 +19,7 @@ import { createSelector } from 'reselect';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as Bim from '../bim';
 
-export const selectViewerGuiDomain = (state) => Object.assign({}, state.viewerGui);
+export const selectViewerGuiDomain = (state) => ({...state.viewerGui});
 
 export const selectVisiblePanels = createSelector(
 	selectViewerGuiDomain, (state) => state.visiblePanels

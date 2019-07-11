@@ -40,20 +40,19 @@ export const INITIAL_STATE = {
 	isPending: true
 };
 
-const fetchPlansSuccess = (state = INITIAL_STATE, { plans }) =>
-	Object.assign({}, state, { plans });
+const fetchPlansSuccess = (state = INITIAL_STATE, { plans }) => ({...state,  plans});
 
-const fetchInvoicesSuccess = (state = INITIAL_STATE, { invoices }) =>
-	Object.assign({}, state, { invoices, isPending: false });
+const fetchInvoicesSuccess = (state = INITIAL_STATE, { invoices }) => ({...state,  invoices, isPending: false});
 
-const fetchSubscriptionsSuccess = (state = INITIAL_STATE, { subscriptions }) =>
-	Object.assign({}, state, { subscriptions, isPending: false });
+const fetchSubscriptionsSuccess = (state = INITIAL_STATE, { subscriptions }) => {
+	return { ...state, subscriptions, isPending: false };
+};
 
-const fetchBillingInfoSuccess = (state = INITIAL_STATE, { billingInfo }) =>
-	Object.assign({}, state, { billingInfo, isPending: false });
+const fetchBillingInfoSuccess = (state = INITIAL_STATE, { billingInfo }) => {
+	return { ...state, billingInfo, isPending: false };
+};
 
-export const setPendingState = (state = INITIAL_STATE, { isPending }) =>
-	Object.assign({}, state, { isPending });
+const setPendingState = (state = INITIAL_STATE, { isPending }) => ({...state,  isPending});
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[BillingTypes.SET_PENDING_STATE]: setPendingState,

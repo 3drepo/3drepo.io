@@ -19,7 +19,7 @@ import { size, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { searchByFilters } from '../../helpers/searching';
 
-export const selectGroupsDomain = (state) => Object.assign({}, state.groups);
+export const selectGroupsDomain = (state) => ({...state.groups});
 
 export const selectGroups = createSelector(
 	selectGroupsDomain, (state) => values(state.groupsMap)

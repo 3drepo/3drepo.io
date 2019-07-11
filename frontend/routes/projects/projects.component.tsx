@@ -75,7 +75,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 
 	public updateUrlParams = (params) => {
 		const {location: {pathname, search}} = this.props;
-		const queryParams = Object.assign({}, queryString.parse(search), params);
+		const queryParams = { ...queryString.parse(search), ...params };
 		const updatedQueryString = queryString.stringify(queryParams);
 		this.props.history.push(`${pathname}?${updatedQueryString}`);
 	}

@@ -59,7 +59,7 @@ const setTeamspaces = (state = INITIAL_STATE, action) => {
 			{ order: 'asc', config: { field: 'name' } });
 	});
 
-	return Object.assign({}, state, {teamspaces});
+	return {...state, teamspaces};
 };
 
 // Projects
@@ -149,7 +149,7 @@ const setModelUploadStatus = (state = INITIAL_STATE, action) => {
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
-	return Object.assign({}, state, { isPending: pendingState });
+	return {...state,  isPending: pendingState};
 };
 
 const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {

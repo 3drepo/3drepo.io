@@ -21,7 +21,7 @@ import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE } from '../../constants/compare';
 import { searchByFilters } from '../../helpers/searching';
 import { selectIsModelLoaded } from '../viewerGui';
 
-export const selectCompareDomain = (state) => Object.assign({}, state.compare);
+export const selectCompareDomain = (state) => ({...state.compare});
 
 export const selectComponentState = createSelector(
 	selectCompareDomain, (state) => state.componentState

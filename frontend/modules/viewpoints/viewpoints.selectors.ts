@@ -17,7 +17,7 @@
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
 
-export const selectViewpointsDomain = (state) => Object.assign({}, state.viewpoints);
+export const selectViewpointsDomain = (state) => ({...state.viewpoints});
 
 export const selectIsPending = createSelector(
 	selectViewpointsDomain, (state) => state.isPending
