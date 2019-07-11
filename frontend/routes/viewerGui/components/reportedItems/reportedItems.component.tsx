@@ -143,7 +143,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent innerRef={this.listViewRef}>
+			<ViewerPanelContent ref={this.listViewRef}>
 				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredItems.length)}
 				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredItems.length)}
 				{this.renderItemsList(this.state.filteredItems.length)}
@@ -306,45 +306,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		}
 		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
 	}
-
-	public renderItemsList = renderWhenTrue(() => (
-		<ListContainer ref={this.listContainerRef}>
-			{this.state.filteredItems.map((item, index) => (
-				<PreviewListItem
-					{...item}
-					key={index}
-					onItemClick={this.handleItemFocus(item)}
-					onArrowClick={this.handleShowItemDetails(item)}
-					active={this.props.activeItemId === item._id}
-					hasViewPermission={this.hasPermission(VIEW_ISSUE)}
-					modelLoaded={this.props.isModelLoaded}
-					panelName={this.props.type}
-				/>
-			))}
-		</ListContainer>
-	));
-
-	public renderListView = renderWhenTrue(() => (
-		<>
-			<ViewerPanelContent ref={this.listViewRef}>
-				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredItems.length)}
-				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredItems.length)}
-				{this.renderItemsList(this.state.filteredItems.length)}
-			</ViewerPanelContent>
-			<ViewerPanelFooter alignItems="center" justify="space-between">
-				<Summary>{this.listFooterText}</Summary>
-				<ViewerPanelButton
-					aria-label="Add item"
-					onClick={this.handleAddNewItem}
-					color="secondary"
-					variant="fab"
-					disabled={!this.hasPermission(CREATE_ISSUE) || !this.props.isModelLoaded}
-				>
-					<AddIcon />
-				</ViewerPanelButton>
-			</ViewerPanelFooter>
-		</>
-	));
 
 	public renderTitleIcon = () => {
 		const { showDetails, Icon } = this.props;

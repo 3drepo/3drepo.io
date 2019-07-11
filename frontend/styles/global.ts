@@ -1,6 +1,6 @@
 import { createGlobalStyle } from 'styled-components';
-import { COLOR } from './colors';
 import { clientConfigService } from '../services/clientConfig';
+import { COLOR } from './colors';
 
 const appBackgroundImage = clientConfigService.getCustomBackgroundImagePath() || '/images/viewer_background.png';
 
