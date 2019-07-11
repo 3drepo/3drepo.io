@@ -123,7 +123,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 
 		return (
 			<TreeList
-				onRootClick={onRootClick}
+				onClick={onRootClick}
 				name={name}
 				level={TREE_LEVELS.PROJECT}
 				items={items}

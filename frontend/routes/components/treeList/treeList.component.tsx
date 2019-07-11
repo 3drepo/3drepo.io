@@ -66,7 +66,7 @@ interface IProps {
 	renderItem?: (props) => JSX.Element;
 	renderRoot?: (props) => JSX.Element;
 	renderActions?: (props) => (JSX.Element | Element);
-	onRootClick?: (state) => void;
+	onClick?: (state) => void;
 	setActiveProject?: (projectName) => void;
 }
 
@@ -104,8 +104,8 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 
 		if (items.length) {
 			this.setState({ active: !active, name }, () => {
-				if (this.props.onRootClick) {
-					this.props.onRootClick(this.state);
+				if (this.props.onClick) {
+					this.props.onClick(this.state);
 				}
 			});
 		}

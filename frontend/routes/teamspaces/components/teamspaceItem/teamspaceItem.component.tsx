@@ -64,7 +64,7 @@ export const TeamspaceItem = (props: IProps) => {
 			name={account}
 			level={TREE_LEVELS.TEAMSPACE}
 			items={projects}
-			onRootClick={onToggle}
+			onClick={onToggle}
 			active={active}
 			renderItem={renderChildItem}
 			renderRoot={isMyTeamspace ? MyTeamspaceItem : null}
