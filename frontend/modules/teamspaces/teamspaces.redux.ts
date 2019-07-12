@@ -21,7 +21,7 @@ import { sortByField } from '../../helpers/sorting';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetchTeamspaces: ['username'],
-	setTeamspaces: ['teamspaces'],
+	fetchTeamspacesSuccess: ['entities'],
 	setPendingState: ['pendingState'],
 	setModelUploadStatus: ['teamspace', 'project', 'model', 'modelData'],
 	setComponentState: ['componentState'],
@@ -43,6 +43,8 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 
 export const INITIAL_STATE = {
 	teamspaces: {},
+	projects: {},
+	models: {},
 	componentState: {
 		activeTeamspace: '',
 		activeProject: '',
@@ -50,21 +52,19 @@ export const INITIAL_STATE = {
 	}
 };
 
-const setTeamspaces = (state = INITIAL_STATE, action) => {
-	const teamspaces = keyBy(action.teamspaces, 'account');
-	const accounts = Object.keys(teamspaces);
+const fetchTeamspacesSuccess = (state = INITIAL_STATE, { entities }) => {
+	const teamspacesList = Object.keys(entities.teamspaces);
 
-	accounts.map((user) => {
-		return teamspaces[user].projects = sortByField(teamspaces[user].projects,
-			{ order: 'asc', config: { field: 'name' } });
-	});
+	// teamspacesList.forEach((user) => {
+	// 	return teamspaces[user].projects = sortByField(entities.teamspaces[user].projects,
+	// 		{ order: 'asc', config: { field: 'name' } });
+	// });
 
-	return {...state, teamspaces};
+	return { ...state, ...entities };
 };
 
 // Projects
 const updateProjectSuccess = (state = INITIAL_STATE, action) => {
-
 	const teamspaces = cloneDeep(state.teamspaces);
 	const projects = [...state.teamspaces[action.teamspace].projects].map((project) => {
 		if (project.name === action.projectName) {
@@ -78,10 +78,13 @@ const updateProjectSuccess = (state = INITIAL_STATE, action) => {
 };
 
 const createProjectSuccess = (state = INITIAL_STATE, action) => {
-	const teamspaces = cloneDeep(state.teamspaces);
-	teamspaces[action.teamspace].projects.push(action.projectData);
+	const teamspace = { ...state.teamspaces[action.teamspace] };
+	teamspace.projects = [...teamspace.projects, action.projectData._id];
+	const projects = { ...state.projects };
+	projects[action.projectData._id] = action.projectData;
+	const teamspaces = { ...state.teamspaces, [action.teamspace]: teamspace };
 
-	return { ...state, teamspaces };
+	return { ...state, projects, teamspaces };
 };
 
 const removeProjectSuccess = (state = INITIAL_STATE, action) => {
@@ -157,7 +160,7 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 };
 
 export const reducer = createReducer({ ...INITIAL_STATE }, {
-	[TeamspacesTypes.SET_TEAMSPACES]: setTeamspaces,
+	[TeamspacesTypes.FETCH_TEAMSPACES_SUCCESS]: fetchTeamspacesSuccess,
 	[TeamspacesTypes.SET_MODEL_UPLOAD_STATUS]: setModelUploadStatus,
 	[TeamspacesTypes.SET_PENDING_STATE]: setPendingState,
 	[TeamspacesTypes.SET_COMPONENT_STATE]: setComponentState,

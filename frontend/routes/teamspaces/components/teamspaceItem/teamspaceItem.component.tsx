@@ -63,7 +63,7 @@ export const TeamspaceItem = (props: IProps) => {
 		<TreeList
 			name={account}
 			level={TREE_LEVELS.TEAMSPACE}
-			items={projects}
+			items={projects || []}
 			onClick={onToggle}
 			active={active}
 			renderItem={renderChildItem}

@@ -23,6 +23,8 @@ import InputLabel from '@material-ui/core/InputLabel';
 import TextField from '@material-ui/core/TextField';
 import { Field, Form, Formik } from 'formik';
 import React from 'react';
+import memoizeOne from 'memoize-one';
+
 import * as Yup from 'yup';
 
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
@@ -40,6 +42,11 @@ interface IProps {
 	handleClose: () => void;
 }
 
+const getTeamspacesItems = memoizeOne((teamspaces) => teamspaces.map(({ account }) => ({
+	value: account,
+	name: account
+})));
+
 export class ProjectDialog extends React.PureComponent<IProps, any> {
 	public static defaultProps = {
 		name: '',
@@ -51,7 +58,8 @@ export class ProjectDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { name, teamspace, teamspaces, handleClose } = this.props;
+		const { name, teamspace, handleClose } = this.props;
+		const teamspaces = getTeamspacesItems(this.props.teamspaces);
 
 		return (
 			<Formik
