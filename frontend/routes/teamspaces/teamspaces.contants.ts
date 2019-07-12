@@ -76,3 +76,10 @@ export const MODEL_SUBTYPES = [
 	{ value: 'Structural' },
 	{ value: 'Other' }
 ];
+
+export const LIST_ITEMS_TYPES = {
+	TEAMSPACE: 'TEAMSPACE',
+	MODEL: 'MODEL',
+	FEDERATION: 'FEDERATION',
+	PROJECT: 'PROJECT',
+};

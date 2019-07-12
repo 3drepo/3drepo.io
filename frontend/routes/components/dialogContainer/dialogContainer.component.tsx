@@ -98,6 +98,7 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { content, title, template, DialogProps, onCancel } = this.props.config;
+
 		return (
 			<Dialog {...DialogProps} open={this.props.isOpen} onClose={this.handleClose}>
 				{title && <DialogTitle disableTypography>{title}</DialogTitle>}

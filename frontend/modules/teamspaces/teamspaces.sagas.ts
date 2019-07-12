@@ -15,19 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalize } from 'normalizr';
 import { put, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { TeamspacesActions, TeamspacesTypes } from './teamspaces.redux';
+import { teamspacesSchema } from './teamspaces.schema';
 
 export function* fetchTeamspaces({ username }) {
 	try {
 		yield put(TeamspacesActions.setPendingState(true));
-		const accounts = (yield API.fetchTeamspace(username)).data.accounts;
+		const teamspaces = (yield API.fetchTeamspace(username)).data.accounts;
+		const normalizedData = normalize(teamspaces, [teamspacesSchema]);
 
-		yield put(TeamspacesActions.setTeamspaces(accounts));
+		console.log('teamspaces', teamspaces)
+
+		yield put(TeamspacesActions.fetchTeamspacesSuccess(normalizedData.entities));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'team spaces', e));
 	}

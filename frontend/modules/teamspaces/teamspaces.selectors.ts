@@ -17,16 +17,47 @@
 
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
+import { LIST_ITEMS_TYPES } from '../../routes/teamspaces/teamspaces.contants';
 import { extendTeamspacesInfo } from './teamspaces.helpers';
 
-export const selectTeamspacesDomain = (state) => ({...state.teamspaces});
+export const selectTeamspacesDomain = (state) => ({ ...state.teamspaces });
 
-export const selectTeamspaces = createSelector(
+export const selectTeamspacesList = createSelector(
 	selectTeamspacesDomain, (state) => values(state.teamspaces)
 );
 
+export const selectProjects = createSelector(
+	selectTeamspacesDomain, (state) => state.projects
+);
+
+export const selectModels = createSelector(
+	selectTeamspacesDomain, (state) => state.models
+);
+
+export const selectFlattenTeamspaces = createSelector(
+	selectTeamspacesList, selectProjects, selectModels, (teamspacesList, projects, models) => {
+		const flattenList = [];
+
+		for (let index = 0; index < teamspacesList.length; index++) {
+			flattenList.push({ ...teamspacesList[index], type: LIST_ITEMS_TYPES.TEAMSPACE });
+			const projectsIds = teamspacesList[index].projects;
+
+			for (let j = 0; j < projectsIds.length; j++) {
+				const project = projects[projectsIds[j]];
+				flattenList.push({ ...project, type: LIST_ITEMS_TYPES.PROJECT });
+				const modelsIds = project.models;
+
+				for (let m = 0; m < modelsIds.length; m++) {
+					flattenList.push({ ...models[modelsIds[m]], type: LIST_ITEMS_TYPES.MODEL });
+				}
+			}
+		}
+		return flattenList;
+	}
+);
+
 export const selectTeamspacesWithAdminAccess = createSelector(
-	selectTeamspaces, (teamspaces) => extendTeamspacesInfo(teamspaces)
+	selectTeamspacesList, (teamspaces) => extendTeamspacesInfo(teamspaces)
 );
 
 export const selectIsPending = createSelector(

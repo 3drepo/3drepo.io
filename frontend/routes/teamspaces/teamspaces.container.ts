@@ -23,15 +23,18 @@ import { selectCurrentTeamspace } from '../../modules/currentUser';
 import { DialogActions } from '../../modules/dialog';
 import { selectActiveProject,
 	selectActiveTeamspace,
+	selectFlattenTeamspaces,
 	selectIsPending,
-	selectTeamspaces,
-	TeamspacesActions
+	TeamspacesActions,
+	selectTeamspacesList,
 } from '../../modules/teamspaces';
 import { ModelActions } from './../../modules/model';
 import { Teamspaces } from './teamspaces.component';
+
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,
-	teamspaces: selectTeamspaces,
+	items: selectFlattenTeamspaces,
+	teamspaces: selectTeamspacesList,
 	isPending: selectIsPending,
 	activeProject: selectActiveProject,
 	activeTeamspace: selectActiveTeamspace

@@ -169,7 +169,6 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 							: <DefaultHeadline {...headlineProps} />
 					}
 				</Headline>
-				{active ? <Details {...props}>{this.renderItems()}</Details> : null}
 			</Container>
 		);
 	}

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty, matches, cond, stubTrue } from 'lodash';
 import * as queryString from 'query-string';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
@@ -27,17 +27,18 @@ import Add from '@material-ui/icons/Add';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
+import { renderWhenTrue } from '../../helpers/rendering';
 import { PERMISSIONS_VIEWS } from '../projects/projects.component';
 import FederationDialog from './components/federationDialog/federationDialog.container';
 import { ModelDialog } from './components/modelDialog/modelDialog.component';
 import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
 import ModelItem from './components/modelItem/modelItem.container';
-import { ProjectDialog } from './components/projectDialog/projectDialog.component';
+import ProjectDialog from './components/projectDialog/projectDialog.container';
 import { ProjectItem } from './components/projectItem/projectItem.component';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
 import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
 import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
-import { FEDERATION_TYPE, MODEL_TYPE } from './teamspaces.contants';
+import { FEDERATION_TYPE, MODEL_TYPE, LIST_ITEMS_TYPES } from './teamspaces.contants';
 import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 
 const PANEL_PROPS = {
@@ -47,14 +48,12 @@ const PANEL_PROPS = {
 	}
 };
 
-const getTeamspacesItems = (teamspaces) => teamspaces.map(({ account, projects }) => ({ value: account, projects }));
-
 interface IProps {
 	match: any;
 	history: any;
 	location: any;
 	currentTeamspace: string;
-	teamspaces: any[];
+	items: any[];
 	isPending: boolean;
 	activeTeamspace: string;
 	activeProject: string;
@@ -99,15 +98,24 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		teamspacesItems: []
 	};
 
+	public get activeTeamspace() {
+		const { teamspace } = this.props.match.params;
+
+		if (teamspace) {
+			return teamspace;
+		}
+
+		return this.state.activeTeamspace;
+	}
+
 	public componentDidMount() {
-		if (this.props.teamspaces.length === 0 ) {
+		if (this.props.items.length === 0 ) {
 			this.props.fetchTeamspaces(this.props.currentTeamspace);
 		}
 
 		this.setState({
 			activeTeamspace: this.props.activeTeamspace || this.props.currentTeamspace,
-			activeProject: this.props.activeProject,
-			teamspacesItems: getTeamspacesItems(this.props.teamspaces)
+			activeProject: this.props.activeProject
 		});
 	}
 
@@ -117,12 +125,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		const currentTeamspaceChanged = this.props.currentTeamspace !== prevProps.currentTeamspace;
 		if (currentTeamspaceChanged) {
 			changes.activeTeamspace = this.props.currentTeamspace;
-		}
-
-		const teamspacesChanged = !isEqual(this.props.teamspaces, prevProps.teamspaces);
-
-		if (teamspacesChanged) {
-			changes.teamspacesItems = getTeamspacesItems(this.props.teamspaces);
 		}
 
 		if (!isEmpty(changes)) {
@@ -135,11 +137,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			activeTeamspace: this.state.activeTeamspace,
 			activeProject: this.state.activeProject
 		});
-	}
-
-	public getTeamspaceProjects = (teamspaceName) => {
-		const teamspace = this.props.teamspaces.find((teamspaceItem) => teamspaceItem.account === teamspaceName);
-		return teamspace.projects.map(({ name, models }) => ({ value: name, models }));
 	}
 
 	public createRouteHandler = (pathname, params = {}) => (event) => {
@@ -157,7 +154,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	 */
 	public openProjectDialog = (teamspaceName = '', projectName = '') => (event) => {
 		event.stopPropagation();
-		const { teamspacesItems } = this.state as IState;
 
 		const isNewProject = !projectName.length;
 		this.props.showDialog({
@@ -166,7 +162,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			data: {
 				name: projectName,
 				teamspace: teamspaceName,
-				teamspaces: teamspacesItems
 			},
 			onConfirm: ({ teamspace, ...projectData }) => {
 				if (isNewProject) {
@@ -178,22 +173,22 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public createRemoveProjectHandler = (projectName) => (event) => {
-		event.stopPropagation();
-		this.props.showConfirmDialog({
-			title: 'Delete project',
-			content: `
-				Do you really want to delete project <b>${projectName}</b>? <br /><br />
-				This will remove the project from your teamspace,
-				deleting all the models inside of it!
-			`,
-			onConfirm: () => {
-				this.props.removeProject(this.state.activeTeamspace, projectName);
-			}
-		});
-	}
+	// public createRemoveProjectHandler = (projectName) => (event) => {
+	// 	event.stopPropagation();
+	// 	this.props.showConfirmDialog({
+	// 		title: 'Delete project',
+	// 		content: `
+	// 			Do you really want to delete project <b>${projectName}</b>? <br /><br />
+	// 			This will remove the project from your teamspace,
+	// 			deleting all the models inside of it!
+	// 		`,
+	// 		onConfirm: () => {
+	// 			this.props.removeProject(this.state.activeTeamspace, projectName);
+	// 		}
+	// 	});
+	// }
 
-	public createRemoveModelHandler = (modelName, modelId, projectName, type) => (event) => {
+/* 	public createRemoveModelHandler = (modelName, modelId, projectName, type) => (event) => {
 		event.stopPropagation();
 
 		this.props.showConfirmDialog({
@@ -208,8 +203,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				});
 			}
 		});
-	}
-
+	} */
+/* 
 	public openModelDialog =
 		(teamspaceName = '', projectName = '', modelName = '', modelId = '') => (event) => {
 		event.stopPropagation();
@@ -231,9 +226,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				this.props.createModel(teamspace, modelData);
 			}
 		});
-	}
+	} */
 
-	public openFederationDialog =
+/* 	public openFederationDialog =
 		(teamspaceName = '', projectName = '', modelName = '', modelId = '') => (event) => {
 			event.stopPropagation();
 			const { teamspacesItems } = this.state as IState;
@@ -261,9 +256,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				}
 			}
 		});
-	}
+	} */
 
-	public openUploadModelFileDialog = (teamspaceName = '', modelProps) => (event) => {
+/* 	public openUploadModelFileDialog = (teamspaceName = '', modelProps) => (event) => {
 		event.stopPropagation();
 
 		this.props.showDialog({
@@ -290,9 +285,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				modelId: props.model
 			}
 		});
-	}
+	} */
 
-	public createModelItemClickHandler = (props) => (event) => {
+/* 	public createModelItemClickHandler = (props) => (event) => {
 		const { activeTeamspace } = this.state;
 		if (props.timestamp) {
 			event.persist();
@@ -306,49 +301,47 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	public createDownloadModelHandler = (activeTeamspace, modelId) => () => {
 		this.props.downloadModel(activeTeamspace, modelId);
-	}
+	} */
 
 	/**
 	 * Render methods
 	 */
-	public renderModel = (props) => {
-		const type = props.federate ? FEDERATION_TYPE : MODEL_TYPE;
-		const { activeTeamspace } = this.state;
-		const { match } = this.props;
+	// public renderModel = (props, ) => {
+	// 	const type = props.federate ? FEDERATION_TYPE : MODEL_TYPE;
+	// 	const { activeTeamspace } = this.state;
+	// 	const { match } = this.props;
 
-		return (
-			<ModelItem
-				{...props}
-				key={props.model}
-				activeTeamspace={activeTeamspace}
-				actions={[]}
-				onModelItemClick={this.createModelItemClickHandler(props)}
-				onPermissionsClick={this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
-					project: props.projectName,
-					view: PERMISSIONS_VIEWS.MODELS,
-					modelId: props.model
-				})}
-				onSettingsClick={this.createRouteHandler(`${match.url}/${activeTeamspace}/models/${props.model}`, {
-					project: props.projectName
-				})}
-				onDeleteClick={this.createRemoveModelHandler(props.name, props.model, props.projectName, type)}
-				onDownloadClick={this.createDownloadModelHandler(this.state.activeTeamspace, props.model)}
-				onRevisionsClick={this.openModelRevisionsDialog(props)}
-				onModelUpload={this.openUploadModelFileDialog(this.state.activeTeamspace, props)}
-				onEditClick={this.openFederationDialog(this.state.activeTeamspace, props.projectName, props.name, props.model)}
-			/>
-		);
-	}
+	// 	return (
+	// 		<ModelItem
+	// 			{...props}
+	// 			key={props.model}
+	// 			activeTeamspace={activeTeamspace}
+	// 			actions={[]}
+	// 			onModelItemClick={this.createModelItemClickHandler(props)}
+	// 			onPermissionsClick={this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
+	// 				project: props.projectName,
+	// 				view: PERMISSIONS_VIEWS.MODELS,
+	// 				modelId: props.model
+	// 			})}
+	// 			onSettingsClick={this.createRouteHandler(`${match.url}/${activeTeamspace}/models/${props.model}`, {
+	// 				project: props.projectName
+	// 			})}
+	// 			onDeleteClick={this.createRemoveModelHandler(props.name, props.model, props.projectName, type)}
+	// 			onDownloadClick={this.createDownloadModelHandler(this.state.activeTeamspace, props.model)}
+	// 			onRevisionsClick={this.openModelRevisionsDialog(props)}
+	// 			onModelUpload={this.openUploadModelFileDialog(this.state.activeTeamspace, props)}
+	// 			onEditClick={this.openFederationDialog(this.state.activeTeamspace, props.projectName, props.name, props.model)}
+	// 		/>
+	// 	);
+	// }
 
-	public createModelDirectoryAddHandler = (props) => {
+/* 	public createModelDirectoryAddHandler = (props) => {
 		return props.type === FEDERATION_TYPE
 			? this.openFederationDialog(this.state.activeTeamspace, props.projectName)
 			: this.openModelDialog(this.state.activeTeamspace, props.projectName);
-	}
+	} */
 
-	public renderModelDirectoryItem = (projectName) =>
-		(modelProps) => this.renderModel({ ...modelProps, projectName })
-
+/* 
 	public renderModelDirectory = (permissions, props) => (
 		<ModelDirectoryItem
 			{...props}
@@ -356,54 +349,41 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			renderChildItem={this.renderModelDirectoryItem(props.projectName)}
 			onAddClick={this.createModelDirectoryAddHandler(props)}
 		/>
-	)
+	) */
 
-	public isActiveProject = (projectName) => projectName === this.props.activeProject;
+/* 	public isActiveProject = (projectName) => projectName === this.props.activeProject; */
 
-	public isActiveTeamspace = (account) => {
-		const { teamspace } = this.props.match.params;
-
-		if (teamspace) {
-			return account === teamspace;
-		}
-
-		return account === this.state.activeTeamspace;
-	}
-
-	public renderProject = (props) => {
-		const { activeTeamspace } = this.state;
-
+/* 	public renderProject = (props, index) => {
 		return (
 			<ProjectItem
 				{...props}
-				renderChildItem={this.renderModelDirectory.bind(this, props.permissions)}
-				onEditClick={this.openProjectDialog(activeTeamspace, props.name)}
+				key={index}
+				onEditClick={this.openProjectDialog(this.activeTeamspace, props.name)}
 				onPermissionsClick={
-					this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
+					this.createRouteHandler(`/dashboard/user-management/${this.activeTeamspace}/projects`, {
 						project: props.name
 					})}
 				onRemoveClick={this.createRemoveProjectHandler(props.name)}
-				active={this.isActiveProject(props.name)}
+				active={props.name === this.props.activeProject}
 				onRootClick={this.setActiveProject}
 			/>
 		);
-	}
+	} */
 
-	public setActiveProject = ({active, name}) => {
+/* 	public setActiveProject = ({ active, name }) => {
 		this.setState({ activeProject: active ? name : ''	});
-	}
+	} */
 
-	public renderTeamspaces = (teamspaces) => teamspaces.map((teamspace, index) => (
+	public renderTeamspace = (teamspace, index) => (
 		<TeamspaceItem
 			{...teamspace}
 			key={index}
-			active={this.isActiveTeamspace(teamspace.account)}
+			active={teamspace.account === this.activeTeamspace}
 			isMyTeamspace={index === 0}
-			renderChildItem={this.renderProject}
 			onToggle={this.onTeamspaceClick}
 			onAddProject={this.openProjectDialog(teamspace.account)}
 		/>
-	))
+	)
 
 	public renderMenuButton = (isPending, props) => (
 		<MenuButton
@@ -430,15 +410,35 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				<MenuItem onClick={createMenuClickHandler(this.openProjectDialog(), close)}>
 					Add project
 				</MenuItem>
-				<MenuItem onClick={createMenuClickHandler(this.openModelDialog(), close)}>
+{/* 				<MenuItem onClick={createMenuClickHandler(this.openModelDialog(), close)}>
 					Add model
 				</MenuItem>
 				<MenuItem onClick={createMenuClickHandler(this.openFederationDialog(), close)}>
 					Add federation
-				</MenuItem>
+				</MenuItem> */}
 			</>
 		);
 	}
+
+	public renderListItem = cond([
+		[matches({ type: LIST_ITEMS_TYPES.TEAMSPACE }), this.renderTeamspace],
+		[stubTrue, () => null]
+/* 		[matches({ type: LIST_ITEMS_TYPES.PROJECT }), this.renderProject],
+		[matches({ type: LIST_ITEMS_TYPES.FEDERATION }), this.renderModel],
+		[matches({ type: LIST_ITEMS_TYPES.MODEL }), this.renderModel], */
+	])
+
+	public renderLoader = renderWhenTrue(() => (
+		<LoaderContainer>
+			<Loader content="Loading teamspaces..." />
+		</LoaderContainer>
+	))
+
+	public renderList = renderWhenTrue(() => (
+		<SimpleBar>
+			{this.props.items.map(this.renderListItem)}
+		</SimpleBar>
+	))
 
 	public render() {
 		const { isPending } = this.props;
@@ -463,17 +463,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					/>
 				</Head>
 				<List>
-					{
-						isPending ? (
-							<LoaderContainer>
-								<Loader content="Loading teamspaces..." />
-							</LoaderContainer>
-						) : (
-							<SimpleBar>
-								{this.renderTeamspaces(this.props.teamspaces)}
-							</SimpleBar>
-						)
-					}
+					{this.renderLoader(isPending)}
+					{this.renderList(!isPending)}
 				</List>
 			</Panel>
 		);
