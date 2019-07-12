@@ -180,7 +180,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		event.stopPropagation();
 		console.log('Share model', props);
 	}
-
+/*
 	public openModelDialog =
 		(teamspaceName = '', projectName = '', modelName = '', modelId = '') => (event) => {
 		event.stopPropagation();
@@ -202,9 +202,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				this.props.createModel(teamspace, modelData);
 			}
 		});
-	}
+	} */
 
-	public openFederationDialog =
+/* 	public openFederationDialog =
 		(teamspaceName = '', projectName = '', modelName = '', modelId = '') => (event) => {
 			event.stopPropagation();
 			const { teamspacesItems } = this.state as IState;
@@ -232,7 +232,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				}
 			}
 		});
-	}
+	} */
 
 /* 	public openUploadModelFileDialog = (teamspaceName = '', modelProps) => (event) => {
 		event.stopPropagation();
@@ -330,7 +330,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				</MenuItem>
 				<MenuItem onClick={createMenuClickHandler(this.openFederationDialog, close)}>
 					Add federation
-				</MenuItem>
+				</MenuItem> */}
 			</>
 		);
 	}
