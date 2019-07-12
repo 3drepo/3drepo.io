@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { get, omit } from 'lodash';
+import { get } from 'lodash';
 import { getAPIUrl } from '../services/api';
 import {
 	RISK_CONSEQUENCES,
@@ -26,12 +26,6 @@ import {
 	LEVELS
 } from '../constants/risks';
 import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
-
-const renameFieldIfExists = (risk, fieldName, newFieldName) => {
-	if (risk[fieldName] !== null || risk[fieldName] !== undefined) {
-		risk[newFieldName] = risk[fieldName];
-	}
-};
 
 export const prepareRisk = (risk, jobs = []) => {
 	const preparedRisk = {...risk};
@@ -88,10 +82,6 @@ export const prepareRisk = (risk, jobs = []) => {
 	if (preparedRisk.mitigation_status) {
 		preparedRisk.defaultHidden = preparedRisk.mitigation_status === RISK_LEVELS.AGREED_FULLY;
 	}
-
-	renameFieldIfExists(preparedRisk, 'desc', 'description');
-	renameFieldIfExists(preparedRisk, 'owner', 'author');
-	renameFieldIfExists(preparedRisk, 'created', 'createdDate');
 
 	return preparedRisk;
 };

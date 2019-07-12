@@ -28,7 +28,7 @@ import {
 	FieldsRow, StyledFormControl
 }	from './../../../risks/components/riskDetails/riskDetails.styles';
 import {
-	ISSUE_STATUSES, ISSUE_PRIORITIES, DEFAULT_PROPERTIES
+	ISSUE_STATUSES, ISSUE_PRIORITIES
 } from '../../../../../../constants/issues';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { DateField } from '../../../../../components/dateField/dateField.component';

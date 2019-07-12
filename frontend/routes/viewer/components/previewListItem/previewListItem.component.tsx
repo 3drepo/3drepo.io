@@ -39,9 +39,9 @@ import { ActionMessage } from '../../../components/actionMessage/actionMessage.c
 interface IProps {
 	className?: string;
 	name: string;
-	description: string;
-	author: string;
-	createdDate: number;
+	desc: string;
+	owner: string;
+	created: number;
 	thumbnail: string;
 	roleColor: string;
 	StatusIconComponent: any;
@@ -99,8 +99,8 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 			roleColor,
 			// tslint:disable-next-line
 			number,
-			description,
-			author,
+			desc,
+			owner,
 			hideThumbnail,
 			StatusIconComponent,
 			statusColor,
@@ -114,7 +114,7 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 		} = this.props;
 
 		const shouldRenderActions = renderActions && active;
-		const createdDate = !shouldRenderActions ? this.props.createdDate : '';
+		const createdDate = !shouldRenderActions ? this.props.created : '';
 		const extraInfo = !shouldRenderActions ? this.props.extraInfo : '';
 
 		return (
@@ -134,14 +134,14 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 						{this.renderName(!(number))}
 
 						<PreviewItemInfo
-							author={author}
+							author={owner}
 							StatusIconComponent={StatusIconComponent}
 							statusColor={statusColor}
 							createdAt={createdDate}
 							extraInfo={extraInfo}
 						/>
 						<Description>
-							<Truncate lines={3}>{description || '(no description)'}</Truncate>
+							<Truncate lines={3}>{desc || '(no description)'}</Truncate>
 						</Description>
 						{this.renderActions(renderActions && active)}
 					</Content>
