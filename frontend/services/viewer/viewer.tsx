@@ -48,7 +48,6 @@ export class ViewerService {
 	}
 
 	public get hasInstance() {
-		debugger;
 		return !!this.viewer;
 	}
 
