@@ -18,7 +18,7 @@ export default function configureStore(initialState = {}) {
 		// middlewares.unshift(require('redux-immutable-state-invariant').default());
 
 		if (window.__REDUX_DEVTOOLS_EXTENSION__) {
-			// enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
+			enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
 		}
 	}
 

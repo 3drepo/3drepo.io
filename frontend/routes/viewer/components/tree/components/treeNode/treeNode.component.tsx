@@ -188,9 +188,9 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 				key={key}
 				nodeType={this.type}
 				expandable={this.node.hasChildren && !this.isModelRoot}
-				selected={!isSearchResult && this.isSelected}
+				selected={this.isSelected}
 				active={active}
-				highlighted={!isSearchResult && this.isHighlighted}
+				highlighted={this.isHighlighted}
 				expanded={isSearchResult && expanded}
 				level={this.level}
 				hasFederationRoot={hasFederationRoot}

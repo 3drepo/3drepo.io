@@ -23,6 +23,7 @@ import Check from '@material-ui/icons/Check';
 import IconButton from '@material-ui/core/IconButton';
 import { FixedSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
+import { values } from 'lodash';
 
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
@@ -53,12 +54,14 @@ interface IProps {
 	dataRevision: string;
 	activeNode: string;
 	isPending?: boolean;
+	visibleNodesIds: any[];
 	handleNodesClick?: (nodes, skipExpand) => boolean;
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
 	isolateSelectedNodes: () => void;
 	hideIfcSpaces: () => void;
 	goToRootNode: (nodeId: boolean) => void;
+	selectNodes: (nodesIds: any[]) => void;
 }
 
 interface IState {
@@ -78,7 +81,8 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		return {
 			[TREE_ACTIONS_ITEMS.SHOW_ALL]: this.handleShowAllNodes,
 			[TREE_ACTIONS_ITEMS.ISOLATE_SELECTED]: isolateSelectedNodes,
-			[TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES]: hideIfcSpaces
+			[TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES]: hideIfcSpaces,
+			[TREE_ACTIONS_ITEMS.SELECT_ALL]: this.handleSelectAllNodes
 		};
 	}
 
@@ -180,6 +184,10 @@ export class Tree extends React.PureComponent<IProps, IState> {
 
 	private handleShowAllNodes = () => {
 		this.props.showAllNodes();
+	}
+
+	private handleSelectAllNodes = () => {
+		this.props.selectNodes(this.props.visibleNodesIds);
 	}
 
 	private handleFilterChange = (selectedFilters) => {

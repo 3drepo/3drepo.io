@@ -264,3 +264,8 @@ export const selectGetNodesIdsFromSharedIds = (objects = []) => createSelector(
 		return uniq(nodesIdsBySharedIds);
 	}
 );
+
+export const selectVisibleTreeNodesIds = createSelector(
+	selectVisibleTreeNodesList,
+	(visibleNodes) => visibleNodes.map((visibleNode) => visibleNode._id)
+);
