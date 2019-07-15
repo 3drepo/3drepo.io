@@ -17,7 +17,7 @@
 
 import { values } from 'lodash';
 import { put, takeLatest, takeEvery, select, all } from 'redux-saga/effects';
-import { getAngularService, dispatch } from '../../helpers/migration';
+import { getAngularService, dispatch, getState } from '../../helpers/migration';
 import { calculateTotalMeshes } from '../../helpers/tree';
 
 import * as API from '../../services/api';
@@ -373,11 +373,20 @@ export function* setNewGroup() {
 }
 
 const onUpdated = (updatedGroup) => {
-	dispatch(GroupsActions.showUpdateInfo());
+	const group = prepareGroup(updatedGroup);
+	const state = getState();
+	const isShowingDetails = selectShowDetails(state);
+	const activeGroupId = selectActiveGroupId(state);
 
-	setTimeout(() => {
-		dispatch(GroupsActions.updateGroupSuccess(prepareGroup(updatedGroup)));
-	}, 5000);
+	if (isShowingDetails && activeGroupId === group._id) {
+		dispatch(GroupsActions.showUpdateInfo());
+
+		setTimeout(() => {
+			dispatch(GroupsActions.updateGroupSuccess(group));
+		}, 5000);
+	} else {
+		dispatch(GroupsActions.updateGroupSuccess(group));
+	}
 };
 
 const onCreated = (createdGroup) => {

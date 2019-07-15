@@ -96,14 +96,14 @@ export const selectIsAllOverrided = createSelector(
 
 export const filteredOverridedGroups = createSelector(
 	selectColorOverrides, selectFilteredGroups, (overrides, groups) => {
-		groups = groups.reduce((map, group) => {
+		const groupsMap = groups.reduce((map, group) => {
 			map[group._id] = group;
 			return map;
 		} , {});
 
 		return overrides.reduce((groupsOverrides, groupId) => {
-			if (groups[groupId]) {
-				groupsOverrides.push(groups[groupId]);
+			if (groupsMap[groupId]) {
+				groupsOverrides.push(groupsMap[groupId]);
 			}
 			return groupsOverrides;
 		}, []);
