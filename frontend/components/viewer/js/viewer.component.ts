@@ -14,14 +14,13 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { difference } from 'lodash';
 import { subscribe } from '../../../helpers/migration';
 import { selectShadowSetting, selectStatsSetting, selectNearPlaneSetting,
 		selectFarPlaneAlgorithm, selectMaxShadowDistance, selectShadingSetting, selectXraySetting,
 		selectFarPlaneSamplingPoints} from '../../../modules/viewer';
 import { filteredOverridedGroups } from '../../../modules/groups';
-import { Viewer } from '../../../services/viewer/viewer';
-import { getColorOverrides, overridesDiff, removeColorOverrides, addColorOverrides } from '../../../helpers/colorOverrides';
+import { getColorOverrides, overridesDiff,
+	removeColorOverrides, addColorOverrides } from '../../../helpers/colorOverrides';
 
 class ViewerController implements ng.IController {
 
