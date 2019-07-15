@@ -301,7 +301,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		this.props.showGroupDetails(group, this.props.revision);
 	}
 
-	public isOverrided = (groupId) => Boolean(this.props.colorOverrides[groupId]);
+	public isOverrided = (groupId) => this.props.colorOverrides.includes(groupId);
 
 	public get canAddOrUpdate() {
 		if (this.props.modelSettings && this.props.modelSettings.permissions) {
@@ -323,7 +323,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		deleteGroups(teamspace, model, groupId);
 	}
 
-	public handleColorOverride = (group) => () => this.props.toggleColorOverride(group);
+	public handleColorOverride = (group) => () => this.props.toggleColorOverride(group._id);
 
 	public handleGroupIsolate = (group) => () => this.props.isolateGroup(group);
 
