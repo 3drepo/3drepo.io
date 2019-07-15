@@ -169,11 +169,11 @@ export function* toggleColorOverride({ groupId }) {
 export function* toggleColorOverrideAll({ overrideAll = true }) {
 	try {
 		if (!overrideAll) {
-			const colorOverrides = yield select(selectColorOverrides);
-			yield put(GroupsActions.removeColorOverride(values(colorOverrides)));
+			yield put(GroupsActions.setColorOverrides([]));
 		} else {
-			const groups = yield select(selectGroups);
-			yield put(GroupsActions.addColorOverride(groups));
+			const groups = yield select(selectFilteredGroups);
+			const groupsIds = groups.map((group) => group._id);
+			yield put(GroupsActions.setColorOverrides(groupsIds));
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('toggle', 'color override', error));
@@ -264,13 +264,6 @@ export function* showDetails({ group, revision }) {
 export function* closeDetails() {
 	try {
 		const activeGroup = yield select(selectActiveGroupDetails);
-
-		const colorOverrides = yield select(selectColorOverrides);
-		const overridedGroup = colorOverrides[activeGroup._id];
-		if (overridedGroup) {
-			yield put(GroupsActions.addColorOverride([activeGroup], true));
-		}
-
 		yield put(GroupsActions.highlightGroup(activeGroup));
 		yield put(GroupsActions.setComponentState({ showDetails: false }));
 	} catch (error) {
@@ -304,7 +297,7 @@ export function* createGroup({ teamspace, modelId, revision }) {
 		const preparedGroup = prepareGroup(data);
 
 		if (isAllOverrided) {
-			yield put(GroupsActions.addColorOverride([preparedGroup]));
+			yield put(GroupsActions.addColorOverride(preparedGroup._id));
 		}
 
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));

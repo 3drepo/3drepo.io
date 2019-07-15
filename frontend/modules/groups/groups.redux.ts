@@ -37,6 +37,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	clearSelectionHighlights: [],
 	addColorOverride: ['groupId'],
 	removeColorOverride: ['groupId'],
+	setColorOverrides: ['groupIds'],
 	toggleColorOverride: ['groupId'],
 	toggleColorOverrideAll: ['overrideAll'],
 	deleteGroups: ['teamspace', 'modelId', 'groups'],
@@ -160,6 +161,14 @@ export const removeColorOverride = (state = INITIAL_STATE, { groupId }) => {
 	return {...state, colorOverrides: state.colorOverrides.filter((id) => groupId !== id)};
 };
 
+export const setColorOverrides = (state = INITIAL_STATE, { groupIds }) => {
+	// This is done to keep the relative override order
+	const overridesLeft = state.colorOverrides.filter((groupId) => groupIds.includes(groupId));
+	const newOverrides = groupIds.filter((groupId) =>  !state.colorOverrides.includes(groupId));
+
+	return {...state, colorOverrides: newOverrides.concat(overridesLeft)};
+};
+
 export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
 	const groupsMap = { ...state.groupsMap };
 	const newGroup = { ...state.componentState.newGroup };
@@ -225,6 +234,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.REMOVE_FROM_HIGHLIGHTED]: removeFromHighlighted,
 	[GroupsTypes.ADD_COLOR_OVERRIDE]: addColorOverride,
 	[GroupsTypes.REMOVE_COLOR_OVERRIDE]: removeColorOverride,
+	[GroupsTypes.SET_COLOR_OVERRIDES]: setColorOverrides,
 	[GroupsTypes.UPDATE_GROUP_SUCCESS]: updateGroupSuccess,
 	[GroupsTypes.DELETE_GROUPS_SUCCESS]: deleteGroupsSuccess,
 	[GroupsTypes.SET_CRITERIA_FIELD_STATE]: setCriteriaFieldState,

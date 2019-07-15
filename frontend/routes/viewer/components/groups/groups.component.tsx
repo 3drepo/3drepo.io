@@ -63,6 +63,7 @@ interface IProps {
 	teamspace: string;
 	model: any;
 	revision?: string;
+	isAllOverrided: boolean;
 	isPending?: boolean;
 	showDetails?: boolean;
 	groups: any[];
@@ -169,9 +170,9 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	get menuActionsMap() {
-		const { toggleColorOverrideAll, teamspace, model, downloadGroups } = this.props;
+		const { toggleColorOverrideAll, teamspace, model, downloadGroups, isAllOverrided } = this.props;
 		return {
-			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => toggleColorOverrideAll(!this.overridesAllGroups),
+			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => toggleColorOverrideAll(!isAllOverrided),
 			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => this.handleDeleteGroups(),
 			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadGroups(teamspace, model)
 		};
@@ -246,7 +247,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 						<IconWrapper><Icon fontSize="small" /></IconWrapper>
 						<StyledItemText>
 							{label}
-							{(name === GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL && this.overridesAllGroups) && <Check fontSize="small" />}
+							{(name === GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL && this.props.isAllOverrided) && <Check fontSize="small" />}
 						</StyledItemText>
 					</StyledListItem>
 				);
