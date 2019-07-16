@@ -97,11 +97,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { teamspace, model, fetchIssue, issue } = this.props;
-
-		if (issue._id !== prevProps.issue._id) {
-			fetchIssue(teamspace, model, issue._id);
-		}
+		const { issue } = this.props;
 
 		if (
 			issue.comments && prevProps.issue.comments &&

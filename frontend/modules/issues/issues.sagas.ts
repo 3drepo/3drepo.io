@@ -490,6 +490,7 @@ export function* setActiveIssue({ issue, revision }) {
 		if (issue) {
 			const {account , model, _id} = issue;
 			yield put(IssuesActions.subscribeOnIssueCommentsChanges(account, model, _id));
+			yield put(IssuesActions.fetchIssue(account , model, _id));
 		}
 
 		if (activeIssueId !== issue._id) {
