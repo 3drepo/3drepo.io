@@ -19,14 +19,16 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectTeamspacesList } from '../../../../modules/teamspaces';
+import { selectTeamspacesList, TeamspacesActions } from '../../../../modules/teamspaces';
 import { ProjectDialog } from './projectDialog.component';
 
 const mapStateToProps = createStructuredSelector({
-	teamspaces: selectTeamspacesList
+	teamspaces: selectTeamspacesList,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	createProject: TeamspacesActions.createProject,
+	updateProject: TeamspacesActions.updateProject,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProjectDialog);

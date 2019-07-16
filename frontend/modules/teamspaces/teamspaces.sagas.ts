@@ -16,21 +16,20 @@
  */
 
 import { normalize } from 'normalizr';
-import { put, takeLatest } from 'redux-saga/effects';
+import { put, takeLatest, select } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { TeamspacesActions, TeamspacesTypes } from './teamspaces.redux';
 import { teamspacesSchema } from './teamspaces.schema';
+import { selectProjects } from './teamspaces.selectors';
 
 export function* fetchTeamspaces({ username }) {
 	try {
 		yield put(TeamspacesActions.setPendingState(true));
 		const teamspaces = (yield API.fetchTeamspace(username)).data.accounts;
 		const normalizedData = normalize(teamspaces, [teamspacesSchema]);
-
-		console.log('teamspaces', teamspaces)
 
 		yield put(TeamspacesActions.fetchTeamspacesSuccess(normalizedData.entities));
 	} catch (e) {
@@ -53,23 +52,27 @@ export function* createProject({ teamspace, projectData }) {
 	}
 }
 
-export function* updateProject({ teamspace, projectName, projectData }) {
+export function* updateProject({ teamspace, projectId, projectData }) {
 	try {
-		yield API.updateProject(teamspace, projectName, projectData);
+		const projects = yield select(selectProjects);
+		yield API.updateProject(teamspace, projects[projectId].name, projectData);
+
+		const updatedProject = { ...projects[projectData._id], ...projectData };
 
 		yield put(SnackbarActions.show('Project updated'));
-		yield put(TeamspacesActions.updateProjectSuccess(teamspace, projectName, projectData));
+		yield put(TeamspacesActions.updateProjectSuccess(updatedProject));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'project', e));
 	}
 }
 
-export function* removeProject({ teamspace, projectName }) {
+export function* removeProject({ teamspace, projectId }) {
 	try {
-		yield API.removeProject(teamspace, projectName);
+		const projects = yield select(selectProjects);
+		yield API.removeProject(teamspace, projects[projectId].name);
 
 		yield put(SnackbarActions.show('Project removed'));
-		yield put(TeamspacesActions.removeProjectSuccess(teamspace, projectName));
+		yield put(TeamspacesActions.removeProjectSuccess(teamspace, projectId));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'project', e));
 	}

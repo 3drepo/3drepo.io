@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,37 +16,20 @@
  */
 
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectCurrentTeamspace } from '../../modules/currentUser';
-import { DialogActions } from '../../modules/dialog';
-import { selectActiveProject,
-	selectActiveTeamspace,
-	selectFlattenTeamspaces,
-	selectIsPending,
-	TeamspacesActions,
-} from '../../modules/teamspaces';
-import { ModelActions } from './../../modules/model';
-import { Teamspaces } from './teamspaces.component';
+import { DialogActions } from '../../../../modules/dialog';
+import { selectTeamspacesList, TeamspacesActions } from '../../../../modules/teamspaces';
+import { ProjectItem } from './projectItem.component';
 
 const mapStateToProps = createStructuredSelector({
-	currentTeamspace: selectCurrentTeamspace,
-	items: selectFlattenTeamspaces,
-	isPending: selectIsPending,
-	activeProject: selectActiveProject,
-	activeTeamspace: selectActiveTeamspace
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	showDialog: DialogActions.showDialog,
+	removeProject: TeamspacesActions.removeProject,
 	showConfirmDialog: DialogActions.showConfirmDialog,
-	createModel: TeamspacesActions.createModel,
-	updateModel: TeamspacesActions.updateModel,
-	removeModel: TeamspacesActions.removeModel,
-	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
-	downloadModel: ModelActions.downloadModel,
-	setState: TeamspacesActions.setComponentState
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Teamspaces);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ProjectItem));
