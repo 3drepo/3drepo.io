@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { pick, values } from 'lodash';
 import { createSelector } from 'reselect';
+import { selectModels as selectModelsMap } from '../teamspaces';
 import { getExtendedModelPermissions, getExtendedProjectPermissions } from './userManagement.helpers';
 
 export const selectUserManagementDomain = (state) => ({ ...state.userManagement });
@@ -51,7 +53,9 @@ export const selectExtendedProjectPermissions = createSelector(
 );
 
 export const selectModels = createSelector(
-	selectUserManagementDomain, (state) => state.currentProject.models || []
+	selectUserManagementDomain, selectModelsMap, (state, modelsMap) => {
+		return values(pick(modelsMap, (state.currentProject.models || [])));
+	}
 );
 
 export const selectCurrentModels = createSelector(
