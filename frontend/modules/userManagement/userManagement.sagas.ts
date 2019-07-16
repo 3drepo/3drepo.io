@@ -41,7 +41,7 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 		yield put(UserManagementActions.setPendingState(true));
 
 		const teamspaces = yield select(selectTeamspacesWithAdminAccess);
-		const teamspaceDetails = teamspaces.find(({ account }) => account === teamspace) || {};
+		const teamspaceDetails = teamspaces.find(({ account }) => account === teamspace) || { projects: [] };
 		const currentUser = yield select(selectCurrentUser);
 
 		const [users, quota] = yield all([
