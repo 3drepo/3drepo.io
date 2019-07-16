@@ -182,7 +182,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			}
 		});
 	} */
-/* 
+/*
 	public openModelDialog =
 		(teamspaceName = '', projectName = '', modelName = '', modelId = '') => (event) => {
 		event.stopPropagation();
