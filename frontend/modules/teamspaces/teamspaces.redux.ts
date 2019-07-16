@@ -27,11 +27,11 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	setComponentState: ['componentState'],
 	// Projects
 	createProject: ['teamspace', 'projectData'],
-	updateProject: ['teamspace', 'projectName', 'projectData'],
-	removeProject: ['teamspace', 'projectName'],
+	updateProject: ['teamspace', 'projectId', 'projectData'],
+	removeProject: ['teamspace', 'projectId'],
 	createProjectSuccess: ['teamspace', 'projectData'],
-	updateProjectSuccess: ['teamspace', 'projectName', 'projectData'],
-	removeProjectSuccess: ['teamspace', 'projectName'],
+	updateProjectSuccess: ['projectData'],
+	removeProjectSuccess: ['teamspace', 'projectId'],
 	// Models
 	createModel: ['teamspace', 'modelData'],
 	updateModel: ['teamspace', 'modelId', 'modelData'],
@@ -46,6 +46,7 @@ export const INITIAL_STATE = {
 	projects: {},
 	models: {},
 	componentState: {
+		visibleItems: {},
 		activeTeamspace: '',
 		activeProject: '',
 		teamspacesItems: []
@@ -65,16 +66,10 @@ const fetchTeamspacesSuccess = (state = INITIAL_STATE, { entities }) => {
 
 // Projects
 const updateProjectSuccess = (state = INITIAL_STATE, action) => {
-	const teamspaces = cloneDeep(state.teamspaces);
-	const projects = [...state.teamspaces[action.teamspace].projects].map((project) => {
-		if (project.name === action.projectName) {
-			return { ...project, ...action.projectData };
-		}
-		return project;
-	});
-	teamspaces[action.teamspace].projects = projects;
+	const projects = { ...state.projects };
+	projects[action.projectData._id] = action.projectData;
 
-	return { ...state, teamspaces };
+	return { ...state, projects };
 };
 
 const createProjectSuccess = (state = INITIAL_STATE, action) => {
@@ -88,12 +83,13 @@ const createProjectSuccess = (state = INITIAL_STATE, action) => {
 };
 
 const removeProjectSuccess = (state = INITIAL_STATE, action) => {
-	const teamspaces = cloneDeep(state.teamspaces);
-	const projects = [...state.teamspaces[action.teamspace].projects]
-		.filter(({ name }) => name !== action.projectName);
-	teamspaces[action.teamspace].projects = projects;
+	const teamspace = { ...state.teamspaces[action.teamspace] };
+	teamspace.projects = teamspace.projects.filter((id) => id !== action.projectId);
+	const teamspaces = { ...state.teamspaces, [action.teamspace]: teamspace };
+	const projects = { ...state.projects };
+	delete projects[action.projectId];
 
-	return { ...state, teamspaces };
+	return { ...state, teamspaces, projects };
 };
 
 const getModelData = (state, teamspace, projectName) => {

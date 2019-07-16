@@ -35,7 +35,7 @@ import { ModelDialog } from './components/modelDialog/modelDialog.component';
 import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
 import ModelItem from './components/modelItem/modelItem.container';
 import ProjectDialog from './components/projectDialog/projectDialog.container';
-import { ProjectItem } from './components/projectItem/projectItem.component';
+import ProjectItem from './components/projectItem/projectItem.container';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
 import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
 import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
@@ -153,41 +153,19 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	/**
 	 * Dialog handlers
 	 */
-	public openProjectDialog = (teamspaceName = '', projectName = '') => (event) => {
+	public openProjectDialog = (teamspaceName = '', projectId?, projectName = '') => (event) => {
 		event.stopPropagation();
 
-		const isNewProject = !projectName.length;
 		this.props.showDialog({
 			title: projectName ? 'Edit project' : 'New project',
 			template: ProjectDialog,
 			data: {
+				id: projectId,
 				name: projectName,
 				teamspace: teamspaceName,
 			},
-			onConfirm: ({ teamspace, ...projectData }) => {
-				if (isNewProject) {
-					this.props.createProject(teamspace, projectData);
-				} else {
-					this.props.updateProject(teamspace, projectName, projectData);
-				}
-			}
 		});
 	}
-
-	// public createRemoveProjectHandler = (projectName) => (event) => {
-	// 	event.stopPropagation();
-	// 	this.props.showConfirmDialog({
-	// 		title: 'Delete project',
-	// 		content: `
-	// 			Do you really want to delete project <b>${projectName}</b>? <br /><br />
-	// 			This will remove the project from your teamspace,
-	// 			deleting all the models inside of it!
-	// 		`,
-	// 		onConfirm: () => {
-	// 			this.props.removeProject(this.state.activeTeamspace, projectName);
-	// 		}
-	// 	});
-	// }
 
 /* 	public createRemoveModelHandler = (modelName, modelId, projectName, type) => (event) => {
 		event.stopPropagation();
@@ -357,26 +335,22 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 /* 	public isActiveProject = (projectName) => projectName === this.props.activeProject; */
 
-/* 	public renderProject = (props, index) => {
+	public renderProject = (props) => {
 		return (
 			<ProjectItem
 				{...props}
-				key={index}
-				onEditClick={this.openProjectDialog(this.activeTeamspace, props.name)}
-				onPermissionsClick={
-					this.createRouteHandler(`/dashboard/user-management/${this.activeTeamspace}/projects`, {
-						project: props.name
-					})}
-				onRemoveClick={this.createRemoveProjectHandler(props.name)}
+				teamspace={this.activeTeamspace}
+				key={props._id}
+				onEditClick={this.openProjectDialog(this.activeTeamspace, props._id, props.name)}
 				active={props.name === this.props.activeProject}
-				onRootClick={this.setActiveProject}
+				onRootClick={this.handleProjectClick}
 			/>
 		);
-	} */
+	}
 
-/* 	public setActiveProject = ({ active, name }) => {
+	public handleProjectClick = ({ active, name }) => {
 		this.setState({ activeProject: active ? name : ''	});
-	} */
+	}
 
 	public renderTeamspace = (teamspace, index) => (
 		<TeamspaceItem
@@ -426,9 +400,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	public renderListItem = cond([
 		[matches({ type: LIST_ITEMS_TYPES.TEAMSPACE }), this.renderTeamspace],
+		[matches({ type: LIST_ITEMS_TYPES.PROJECT }), this.renderProject],
 		[stubTrue, () => null]
-/* 		[matches({ type: LIST_ITEMS_TYPES.PROJECT }), this.renderProject],
-		[matches({ type: LIST_ITEMS_TYPES.FEDERATION }), this.renderModel],
+/* 		[matches({ type: LIST_ITEMS_TYPES.FEDERATION }), this.renderModel],
 		[matches({ type: LIST_ITEMS_TYPES.MODEL }), this.renderModel], */
 	])
 

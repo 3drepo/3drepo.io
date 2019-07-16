@@ -35,11 +35,14 @@ const ProjectSchema = Yup.object().shape({
 });
 
 interface IProps {
+	id?: string;
 	name?: string;
 	teamspace?: string;
 	teamspaces: any[];
-	handleResolve: (project) => void;
 	handleClose: () => void;
+	createProject: (teamspace, projectData) => void;
+	updateProject: (teamspace, projectName, projectData) => void;
+
 }
 
 const getTeamspacesItems = memoizeOne((teamspaces) => teamspaces.map(({ account }) => ({
@@ -53,8 +56,25 @@ export class ProjectDialog extends React.PureComponent<IProps, any> {
 		teamspace: ''
 	};
 
-	public handleProjectSave = (values) => {
-		this.props.handleResolve(values);
+	public get isNewProject() {
+		return !this.props.id;
+	}
+
+	public get data() {
+		const { name, id } = this.props;
+		return { name, _id: id };
+	}
+
+	public handleProjectSave = ({ teamspace, name }) => {
+		const { createProject, updateProject, handleClose } = this.props;
+		const updatedProject = { ...this.data, name };
+
+		if (this.isNewProject) {
+			createProject(teamspace, updatedProject);
+		} else {
+			updateProject(teamspace, this.data._id, updatedProject);
+		}
+		handleClose();
 	}
 
 	public render() {

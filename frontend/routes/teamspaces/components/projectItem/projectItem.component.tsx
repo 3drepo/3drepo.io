@@ -20,6 +20,7 @@ import LabelOutlined from '@material-ui/icons/LabelOutlined';
 import { groupBy, isEmpty, isEqual } from 'lodash';
 import React from 'react';
 
+import { ROUTES } from '../../../../constants/routes';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
@@ -28,13 +29,17 @@ import { RowMenu } from '../rowMenu/rowMenu.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 
 interface IProps {
+	_id: string;
 	name: string;
 	models: any[];
 	active: boolean;
 	permissions: any[];
+	teamspace: string;
+	history: any;
 	renderChildItem: () => JSX.Element;
 	onEditClick: (event) => void;
-	onRemoveClick: (event) => void;
+	removeProject: (teamspace, projectId) => void;
+	showConfirmDialog: (config) => void;
 	onPermissionsClick: (event) => void;
 	onRootClick: (projectName) => void;
 }
@@ -93,6 +98,30 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public handleRemove = (event) => {
+		event.stopPropagation();
+		this.props.showConfirmDialog({
+			title: 'Delete project',
+			content: `
+				Do you really want to delete project <b>${this.props.name}</b>? <br /><br />
+				This will remove the project from your teamspace,
+				deleting all the models inside of it!
+			`,
+			onConfirm: () => {
+				this.props.removeProject(this.props.teamspace, this.props._id);
+			}
+		});
+	}
+
+	public handlePermissionsClick = (event) => {
+		event.stopPropagation();
+
+		this.props.history.push({
+			pathname: `${ROUTES.USER_MANAGEMENT_MAIN}/${this.props.teamspace}/projects`,
+			search: `?project=${this.props.name}`
+		});
+	}
+
 	public toggleActionsMenuOpen = (event) => {
 		event.stopPropagation();
 		this.setState({actionsMenuOpen: !this.state.actionsMenuOpen});
@@ -108,11 +137,11 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 			/>
 			<TooltipButton
 				{...ROW_ACTIONS.PERMISSIONS}
-				action={this.props.onPermissionsClick}
+				action={this.handlePermissionsClick}
 			/>
 			<TooltipButton
 				{...ROW_ACTIONS.DELETE}
-				action={this.props.onRemoveClick}
+				action={this.handleRemove}
 			/>
 		</RowMenu>
 	))(this.isProjectAdmin()) as any
