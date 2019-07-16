@@ -22,7 +22,7 @@ import { createStructuredSelector } from 'reselect';
 import { DialogActions } from '../../../../modules/dialog';
 import { ModelActions } from '../../../../modules/model';
 import { TeamspacesActions } from '../../../../modules/teamspaces';
-import { ModelItem } from './modelItem.component';
+import { ModelListItem } from './modelListItem.component';
 
 const mapStateToProps = createStructuredSelector({});
 
@@ -36,4 +36,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	downloadModel: ModelActions.downloadModel,
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelItem));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelListItem));

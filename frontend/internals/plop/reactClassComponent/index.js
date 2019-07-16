@@ -4,8 +4,8 @@ const templatesPath = path.join(__dirname, 'templates');
 
 module.exports = (plop) => {
   const containerDirectory = 'routes/{{ directory }}/{{ camelCase name }}';
-  plop.setGenerator('React component', {
-    description: 'Generate a Redux component',
+  plop.setGenerator('React class component', {
+    description: 'Generate a React class component',
     prompts: [{
       type: 'input',
       name: 'name',

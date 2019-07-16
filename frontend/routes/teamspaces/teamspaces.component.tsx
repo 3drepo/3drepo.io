@@ -32,7 +32,7 @@ import { PERMISSIONS_VIEWS } from '../projects/projects.component';
 import FederationDialog from './components/federationDialog/federationDialog.container';
 import { ModelDialog } from './components/modelDialog/modelDialog.component';
 import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
-import ModelItem from './components/modelItem/modelItem.container';
+import { ModelGridItem } from './components/modelGridItem/modelGridItem.component';
 import ProjectDialog from './components/projectDialog/projectDialog.container';
 import ProjectItem from './components/projectItem/projectItem.container';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
@@ -245,7 +245,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	}*/
 
 	private renderModel = (props) => (
-		<ModelItem
+		<ModelGridItem
 			{...props}
 			key={props.model}
 			activeTeamspace={this.activeTeamspace}

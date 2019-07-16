@@ -80,7 +80,7 @@ interface IState {
 const isPendingStatus = (status) => status &&
 	status === 'uploading' || status === 'queued' || status === 'processing';
 
-export class ModelItem extends React.PureComponent<IProps, IState> {
+export class ModelListItem extends React.PureComponent<IProps, IState> {
 	public state = {
 		hovered: false,
 		statusText: '',
