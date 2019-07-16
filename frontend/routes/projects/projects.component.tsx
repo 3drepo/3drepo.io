@@ -141,7 +141,6 @@ export class Projects extends React.PureComponent<IProps, IState> {
 
 	public renderPermissionsView = () => {
 		const { currentView } = this.state;
-		const { location } = this.props;
 
 		return (
 			<>

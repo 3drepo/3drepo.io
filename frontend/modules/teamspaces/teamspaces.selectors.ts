@@ -30,6 +30,12 @@ export const selectProjects = createSelector(
 	selectTeamspacesDomain, (state) => state.projects
 );
 
+export const selectProjectsList = createSelector(
+	selectProjects, (projects) => {
+		return Object.values(projects);
+	}
+);
+
 export const selectModels = createSelector(
 	selectTeamspacesDomain, (state) => state.models
 );
@@ -57,7 +63,7 @@ export const selectFlattenTeamspaces = createSelector(
 );
 
 export const selectTeamspacesWithAdminAccess = createSelector(
-	selectTeamspacesList, (teamspaces) => extendTeamspacesInfo(teamspaces)
+	selectTeamspacesList, selectProjects, extendTeamspacesInfo
 );
 
 export const selectIsPending = createSelector(
