@@ -18,7 +18,7 @@ import { subscribe } from '../../../helpers/migration';
 import { selectShadowSetting, selectStatsSetting, selectNearPlaneSetting,
 		selectFarPlaneAlgorithm, selectMaxShadowDistance, selectShadingSetting, selectXraySetting,
 		selectFarPlaneSamplingPoints} from '../../../modules/viewer';
-import { filteredOverridedGroups } from '../../../modules/groups';
+import { filteredOverridenGroups } from '../../../modules/groups';
 import { getColorOverrides, overridesDiff,
 	removeColorOverrides, addColorOverrides } from '../../../helpers/colorOverrides';
 
@@ -84,7 +84,7 @@ class ViewerController implements ng.IController {
 			xraySetting: selectXraySetting,
 			farPlaneSamplingPoints: selectFarPlaneSamplingPoints,
 			maxShadowDistance : selectMaxShadowDistance,
-			colourOverrides: filteredOverridedGroups
+			colourOverrides: filteredOverridenGroups
 		});
 	}
 

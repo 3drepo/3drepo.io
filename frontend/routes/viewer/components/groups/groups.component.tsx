@@ -63,7 +63,7 @@ interface IProps {
 	teamspace: string;
 	model: any;
 	revision?: string;
-	isAllOverrided: boolean;
+	isAllOverriden: boolean;
 	isPending?: boolean;
 	showDetails?: boolean;
 	groups: any[];
@@ -170,9 +170,9 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	get menuActionsMap() {
-		const { toggleColorOverrideAll, teamspace, model, downloadGroups, isAllOverrided } = this.props;
+		const { toggleColorOverrideAll, teamspace, model, downloadGroups, isAllOverriden } = this.props;
 		return {
-			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => toggleColorOverrideAll(!isAllOverrided),
+			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => toggleColorOverrideAll(!isAllOverriden),
 			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => this.handleDeleteGroups(),
 			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadGroups(teamspace, model)
 		};
@@ -195,9 +195,9 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		Viewer[eventHandler](VIEWER_EVENTS.BACKGROUND_SELECTED, this.resetActiveGroup);
 	}
 
-	public getOverridedColor = (groupId, color) => {
-		const overrided = this.isOverrided(groupId);
-		return overrided ? hexToRgba(color) : DEFAULT_OVERRIDE_COLOR;
+	public getOverridenColor = (groupId, color) => {
+		const overriden = this.isOverriden(groupId);
+		return overriden ? hexToRgba(color) : DEFAULT_OVERRIDE_COLOR;
 	}
 
 	public handleCloseSearchMode = () => {
@@ -247,7 +247,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 						<IconWrapper><Icon fontSize="small" /></IconWrapper>
 						<StyledItemText>
 							{label}
-							{(name === GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL && this.props.isAllOverrided) && <Check fontSize="small" />}
+							{(name === GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL && this.props.isAllOverriden) && <Check fontSize="small" />}
 						</StyledItemText>
 					</StyledListItem>
 				);
@@ -302,7 +302,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		this.props.showGroupDetails(group, this.props.revision);
 	}
 
-	public isOverrided = (groupId) => this.props.colorOverrides.includes(groupId);
+	public isOverriden = (groupId) => this.props.colorOverrides.includes(groupId);
 
 	public get canAddOrUpdate() {
 		if (this.props.modelSettings && this.props.modelSettings.permissions) {
@@ -352,7 +352,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	)
 
 	public renderTintIcon = (group) => () => (
-		<StyledIcon color={this.getOverridedColor(group._id, group.color)}>
+		<StyledIcon color={this.getOverridenColor(group._id, group.color)}>
 			<InvertColors color="inherit" fontSize="inherit" />
 		</StyledIcon>
 	)
@@ -370,7 +370,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				{...group}
 				key={group._id}
 				hideThumbnail
-				statusColor={this.getOverridedColor(group._id, group.color)}
+				statusColor={this.getOverridenColor(group._id, group.color)}
 				highlighted={this.isHighlighted(group)}
 				roleColor={group.color}
 				onItemClick={this.setActiveGroup(group)}

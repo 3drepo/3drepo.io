@@ -90,7 +90,7 @@ export const selectCriteriaFieldState = createSelector(
 	selectComponentState, (state) => state.criteriaFieldState
 );
 
-export const filteredOverridedGroups = createSelector(
+export const filteredOverridenGroups = createSelector(
 	selectColorOverrides, selectFilteredGroups, (overrides, groups) => {
 		const groupsMap = groups.reduce((map, group) => {
 			map[group._id] = group;
@@ -106,7 +106,7 @@ export const filteredOverridedGroups = createSelector(
 	}
 );
 
-export const selectIsAllOverrided = createSelector(
-	filteredOverridedGroups, selectFilteredGroups, (overrides, groups) =>
+export const selectIsAllOverriden = createSelector(
+	filteredOverridenGroups, selectFilteredGroups, (overrides, groups) =>
 		overrides.length > 0 && overrides.length === groups.length
 );
