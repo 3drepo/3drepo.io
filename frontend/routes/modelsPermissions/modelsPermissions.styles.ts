@@ -18,12 +18,13 @@
 import Grid from '@material-ui/core/Grid';
 import styled from 'styled-components';
 
-import { isFirefox, isWindows, COLOR } from '../../styles';
+import { COLOR } from '../../styles';
 import * as CustomTable from '../components/customTable/customTable.styles';
 
 export const Container = styled(Grid)`
 	min-width: 0;
 	height: 100%;
+	overflow: hidden;
 `;
 
 export const ModelsContainer = styled(Grid)`

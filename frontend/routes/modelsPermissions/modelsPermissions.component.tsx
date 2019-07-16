@@ -16,6 +16,7 @@
  */
 
 import { isEmpty, pick } from 'lodash';
+import memoizeOne from 'memoize-one';
 import * as queryString from 'query-string';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
@@ -42,23 +43,22 @@ const MODEL_TABLE_CELLS = [{
 	searchBy: ['name']
 }];
 
-const getModelsTableRows = (models = [], selectedModels = []) => {
+const getModelsTableRows = memoizeOne((models = [], selectedModels = []) => {
 	return models.map((model) => {
-		const data = [
-			{
-				name: model.name,
-				isFederation: model.federate
-			}
-		];
+		const data = [{
+			name: model.name,
+			isFederation: model.federate
+		}];
 
 		const selected = selectedModels.some((selectedModel) => selectedModel.model === model.model);
 		return { ...model, data, selected };
 	});
-};
+});
 
 interface IProps {
 	location: any;
 	models: any[];
+	modelsMap: any;
 	selectedModels: any[];
 	permissions: any[];
 	onSelectionChange: (selectedModels) => void;
@@ -158,7 +158,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 				if (queryParams.modelId) {
 						const selectedModel = this.props.models.find(({ model }) => model === queryParams.modelId);
 						if (selectedModel) {
-								this.props.onSelectionChange([selectedModel]);
+							this.props.onSelectionChange([selectedModel]);
 						}
 				}
 		}
@@ -174,8 +174,8 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {models, permissions, selectedModels} = this.props;
-		const {modelRows, permissionsRevision} = this.state;
+		const { models, permissions, selectedModels } = this.props;
+		const { modelRows, permissionsRevision } = this.state;
 
 		return (
 			<Container

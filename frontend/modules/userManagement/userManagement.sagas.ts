@@ -15,29 +15,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, takeLatest, take } from 'redux-saga/effects';
+import { pick, values } from 'lodash';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog/dialog.redux';
 import { JobsActions } from '../jobs';
 import { SnackbarActions } from '../snackbar';
-import { selectTeamspacesWithAdminAccess, selectProjects } from '../teamspaces/teamspaces.selectors';
-import { selectCurrentProject, selectCurrentTeamspace } from '../userManagement/userManagement.selectors';
+import { selectModels, selectProjects, selectTeamspacesWithAdminAccess } from '../teamspaces';
+import {
+	selectCurrentProject,
+	selectCurrentTeamspace,
+	UserManagementActions,
+	UserManagementTypes
+} from '../userManagement';
 
 import {
 	FederationReminderDialog
 } from '../../routes/modelsPermissions/components/federationReminderDialog/federationReminderDialog.component';
 import { RemoveUserDialog } from '../../routes/users/components/removeUserDialog/removeUserDialog.component';
-import { UserManagementActions, UserManagementTypes } from './userManagement.redux';
-import { TeamspacesTypes } from '../teamspaces';
 
 export function* fetchTeamspaceDetails({ teamspace }) {
 	try {
 		yield put(UserManagementActions.setPendingState(true));
 
 		const teamspaces = yield select(selectTeamspacesWithAdminAccess);
-		const teamspaceDetails = teamspaces.find(({ account }) => account === teamspace) || { projects: [] };
+		const teamspaceDetails = teamspaces.find(({ account }) => account === teamspace) || {};
 		const currentUser = yield select(selectCurrentUser);
 
 		const [users, quota] = yield all([
@@ -48,7 +52,7 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 		]);
 
 		const projectsMap = yield select(selectProjects);
-		teamspaceDetails.projects = teamspaceDetails.projects.map((projectId) => projectsMap[projectId]);
+		teamspaceDetails.projects = values(pick(projectsMap, teamspaceDetails.projects || []));
 
 		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(
 			teamspaceDetails,
@@ -160,9 +164,9 @@ export function* getUsersSuggestions({ searchText }) {
 export function* fetchProject({ project }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const response = yield API.fetchProject(teamspace, project);
+		const { data: projectData } = yield API.fetchProject(teamspace, project);
 
-		yield put(UserManagementActions.setProject(response.data));
+		yield put(UserManagementActions.setProject(projectData));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'project permissions', error));
 	}
@@ -187,7 +191,7 @@ export function* fetchModelsPermissions({ models }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
 		let data = [];
-
+		debugger;
 		if (models.length) {
 			const requiredModels = models.map(({ model }) => model);
 			const promises = [];
