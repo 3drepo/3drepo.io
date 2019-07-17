@@ -19,6 +19,7 @@ import { createSelector } from 'reselect';
 import { size, values } from 'lodash';
 import { searchByFilters } from '../../helpers/searching';
 import GroupsSaga from './groups.sagas';
+import { getGroupOverride } from '../../helpers/colorOverrides';
 
 export const selectGroupsDomain = (state) => Object.assign({}, state.groups);
 
@@ -70,6 +71,10 @@ export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
 
+export const selectIsAllOverriden = createSelector(
+	selectComponentState, (state) => state.allOverriden
+);
+
 export const selectFilteredGroups = createSelector(
 	selectGroups, selectSelectedFilters, (issues, selectedFilters) => {
 		return searchByFilters(issues, selectedFilters);
@@ -90,23 +95,18 @@ export const selectCriteriaFieldState = createSelector(
 	selectComponentState, (state) => state.criteriaFieldState
 );
 
-export const filteredOverridenGroups = createSelector(
-	selectColorOverrides, selectFilteredGroups, (overrides, groups) => {
+export const selectOverrides = createSelector(
+	selectColorOverrides, selectFilteredGroups, (groupOverrides, groups) => {
 		const groupsMap = groups.reduce((map, group) => {
 			map[group._id] = group;
 			return map;
 		} , {});
 
-		return overrides.reduce((groupsOverrides, groupId) => {
+		return groupOverrides.reduce((overrides, groupId) => {
 			if (groupsMap[groupId]) {
-				groupsOverrides.push(groupsMap[groupId]);
+				getGroupOverride(overrides, groupsMap[groupId]);
 			}
-			return groupsOverrides;
-		}, []);
+			return overrides;
+		}, {});
 	}
-);
-
-export const selectIsAllOverriden = createSelector(
-	filteredOverridenGroups, selectFilteredGroups, (overrides, groups) =>
-		overrides.length > 0 && overrides.length === groups.length
 );

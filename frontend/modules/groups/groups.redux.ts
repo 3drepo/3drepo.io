@@ -39,7 +39,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	removeColorOverride: ['groupId'],
 	setColorOverrides: ['groupIds'],
 	toggleColorOverride: ['groupId'],
-	toggleColorOverrideAll: ['overrideAll'],
+	setOverrideAll: ['overrideAll'],
 	deleteGroups: ['teamspace', 'modelId', 'groups'],
 	showDeleteInfo: ['groupIds'],
 	deleteGroupsSuccess: ['groupIds'],
@@ -77,6 +77,7 @@ export interface IGroupComponentState {
 	highlightedGroups: any;
 	totalMeshes: number;
 	criteriaFieldState: ICriteriaFieldState;
+	allOverriden: boolean;
 }
 
 export interface IGroupState {
@@ -110,7 +111,8 @@ export const INITIAL_STATE: IGroupState = {
 		updatedGroup: {},
 		selectedFilters: [],
 		totalMeshes: 0,
-		criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
+		criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE,
+		allOverriden: false
 	},
 	colorOverrides: [],
 	fieldNames: []
@@ -158,7 +160,8 @@ export const addColorOverride = (state = INITIAL_STATE, { groupId }) => {
 };
 
 export const removeColorOverride = (state = INITIAL_STATE, { groupId }) => {
-	return {...state, colorOverrides: state.colorOverrides.filter((id) => groupId !== id)};
+	const componentState = { ...state.componentState, allOverriden: false };
+	return {...state, componentState, colorOverrides: state.colorOverrides.filter((id) => groupId !== id)};
 };
 
 export const setColorOverrides = (state = INITIAL_STATE, { groupIds }) => {
@@ -167,6 +170,16 @@ export const setColorOverrides = (state = INITIAL_STATE, { groupIds }) => {
 	const newOverrides = groupIds.filter((groupId) =>  !state.colorOverrides.includes(groupId));
 
 	return {...state, colorOverrides: newOverrides.concat(overridesLeft)};
+};
+
+export const setOverrideAll = (state = INITIAL_STATE, { overrideAll }) => {
+	let groupIds = [];
+	if (overrideAll) {
+		groupIds = Object.keys(state.groupsMap);
+	}
+
+	const componentState = { ...state.componentState, allOverriden: overrideAll };
+	return setColorOverrides({...state, componentState}, { groupIds });
 };
 
 export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
@@ -180,6 +193,11 @@ export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
 		newGroup.objects = group.objects;
 		newGroup.totalSavedMeshes = group.totalSavedMeshes;
 	}
+
+	if (state.componentState.allOverriden) {
+		state = addColorOverride(state, { groupId: group._id});
+	}
+
 	return { ...state, groupsMap, componentState: { ...state.componentState, newGroup } };
 };
 
@@ -239,5 +257,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.DELETE_GROUPS_SUCCESS]: deleteGroupsSuccess,
 	[GroupsTypes.SET_CRITERIA_FIELD_STATE]: setCriteriaFieldState,
 	[GroupsTypes.SHOW_UPDATE_INFO]: showUpdateInfo,
-	[GroupsTypes.RESET_COMPONENT_STATE]: resetComponentState
+	[GroupsTypes.RESET_COMPONENT_STATE]: resetComponentState,
+	[GroupsTypes.SET_OVERRIDE_ALL]: setOverrideAll
 });

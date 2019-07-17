@@ -18,8 +18,8 @@ import { subscribe } from '../../../helpers/migration';
 import { selectShadowSetting, selectStatsSetting, selectNearPlaneSetting,
 		selectFarPlaneAlgorithm, selectMaxShadowDistance, selectShadingSetting, selectXraySetting,
 		selectFarPlaneSamplingPoints} from '../../../modules/viewer';
-import { filteredOverridenGroups } from '../../../modules/groups';
-import { getColorOverrides, overridesDiff,
+import { selectOverrides } from '../../../modules/groups';
+import { overridesDiff,
 	removeColorOverrides, addColorOverrides } from '../../../helpers/colorOverrides';
 
 class ViewerController implements ng.IController {
@@ -52,7 +52,7 @@ class ViewerController implements ng.IController {
 	private xraySetting: boolean;
 	private farPlaneSamplingPoints: number;
 	private maxShadowDistance: number;
-	private colourOverrides: any[] = [];
+	private colorOverrides: any[] = [];
 
 	constructor(
 		private $scope: ng.IScope,
@@ -84,7 +84,7 @@ class ViewerController implements ng.IController {
 			xraySetting: selectXraySetting,
 			farPlaneSamplingPoints: selectFarPlaneSamplingPoints,
 			maxShadowDistance : selectMaxShadowDistance,
-			colourOverrides: filteredOverridenGroups
+			colorOverrides: selectOverrides
 		});
 	}
 
@@ -132,10 +132,7 @@ class ViewerController implements ng.IController {
 		this.$scope.$watch(() => this.maxShadowDistance,
 			this.ViewerService.setMaxShadowDistance.bind(this.ViewerService));
 
-		this.$scope.$watch(() => this.colourOverrides,  async (groups, previousGroups) => {
-			const overrides = getColorOverrides(groups);
-			const prevOverrides = getColorOverrides(previousGroups);
-
+		this.$scope.$watch(() => this.colorOverrides,  async (overrides, prevOverrides) => {
 			const toAdd = overridesDiff(overrides, prevOverrides);
 			const toRemove = overridesDiff(prevOverrides, overrides );
 

@@ -166,20 +166,6 @@ export function* toggleColorOverride({ groupId }) {
 	}
 }
 
-export function* toggleColorOverrideAll({ overrideAll = true }) {
-	try {
-		if (!overrideAll) {
-			yield put(GroupsActions.setColorOverrides([]));
-		} else {
-			const groups = yield select(selectFilteredGroups);
-			const groupsIds = groups.map((group) => group._id);
-			yield put(GroupsActions.setColorOverrides(groupsIds));
-		}
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('toggle', 'color override', error));
-	}
-}
-
 export function* deleteGroups({ teamspace, modelId, groups }) {
 	try {
 		yield API.deleteGroups(teamspace, modelId, groups);
@@ -437,7 +423,6 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.DEHIGHLIGHT_GROUP, dehighlightGroup);
 	yield takeLatest(GroupsTypes.CLEAR_SELECTION_HIGHLIGHTS, clearSelectionHighlights);
 	yield takeLatest(GroupsTypes.TOGGLE_COLOR_OVERRIDE, toggleColorOverride);
-	yield takeLatest(GroupsTypes.TOGGLE_COLOR_OVERRIDE_ALL, toggleColorOverrideAll);
 	yield takeLatest(GroupsTypes.DELETE_GROUPS, deleteGroups);
 	yield takeLatest(GroupsTypes.ISOLATE_GROUP, isolateGroup);
 	yield takeLatest(GroupsTypes.DOWNLOAD_GROUPS, downloadGroups);

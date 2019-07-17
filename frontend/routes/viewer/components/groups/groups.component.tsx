@@ -81,7 +81,7 @@ interface IProps {
 	setActiveGroup: (group, revision?) => void;
 	saveGroup: (teamspace, model, group) => void;
 	toggleColorOverride: (group) => void;
-	toggleColorOverrideAll: (overrideAll) => void;
+	setOverrideAll: (overrideAll) => void;
 	deleteGroups: (teamspace, model, groups) => void;
 	showConfirmDialog: (config) => void;
 	isolateGroup: (group) => void;
@@ -170,9 +170,9 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	get menuActionsMap() {
-		const { toggleColorOverrideAll, teamspace, model, downloadGroups, isAllOverriden } = this.props;
+		const { setOverrideAll, teamspace, model, downloadGroups, isAllOverriden } = this.props;
 		return {
-			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => toggleColorOverrideAll(!isAllOverriden),
+			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => setOverrideAll(!isAllOverriden),
 			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => this.handleDeleteGroups(),
 			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadGroups(teamspace, model)
 		};

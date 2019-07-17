@@ -60,7 +60,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	closeDetails: GroupsActions.closeDetails,
 	onFiltersChange: GroupsActions.onFiltersChange,
 	toggleColorOverride: GroupsActions.toggleColorOverride,
-	toggleColorOverrideAll: GroupsActions.toggleColorOverrideAll,
+	setOverrideAll: GroupsActions.setOverrideAll,
 	deleteGroups: GroupsActions.deleteGroups,
 	showConfirmDialog: DialogActions.showConfirmDialog,
 	isolateGroup: GroupsActions.isolateGroup,

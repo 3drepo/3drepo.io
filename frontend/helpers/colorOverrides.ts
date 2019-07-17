@@ -18,7 +18,7 @@ import { getAngularService } from './migration';
 import { hexToGLColor } from './colors';
 import { Viewer } from '../services/viewer/viewer';
 
-export const getColorOverrides = (groups) => groups.reduce((overrides, group) => {
+export const getGroupOverride = (overrides, group) => {
 	const color = group.color;
 	group.objects.forEach((object) => {
 		object.shared_ids.forEach((sharedId) => {
@@ -26,7 +26,9 @@ export const getColorOverrides = (groups) => groups.reduce((overrides, group) =>
 			});
 		});
 	return overrides;
-}, {});
+};
+
+export const getColorOverrides = (groups) => groups.reduce(getGroupOverride, {});
 
 export const overridesDiff = (overrideA, overrideB) => {
 	const keys = Object.keys(overrideA);
