@@ -42,10 +42,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showDialog: DialogActions.showDialog,
 	showConfirmDialog: DialogActions.showConfirmDialog,
 	createModel: TeamspacesActions.createModel,
-	updateModel: TeamspacesActions.updateModel,
-	removeModel: TeamspacesActions.removeModel,
 	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
-	downloadModel: ModelActions.downloadModel,
 	setState: TeamspacesActions.setComponentState
 }, dispatch);
 

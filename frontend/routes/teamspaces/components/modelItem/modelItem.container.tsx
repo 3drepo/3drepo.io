@@ -19,14 +19,21 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { ModelActions } from './../../../../modules/model';
+import { DialogActions } from '../../../../modules/dialog';
+import { ModelActions } from '../../../../modules/model';
+import { TeamspacesActions } from '../../../../modules/teamspaces';
 import { ModelItem } from './modelItem.component';
 
 const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	showDialog: DialogActions.showDialog,
+	showConfirmDialog: DialogActions.showConfirmDialog,
 	subscribeOnStatusChange: ModelActions.subscribeOnStatusChange,
-	unsubscribeOnStatusChange: ModelActions.unsubscribeOnStatusChange
+	unsubscribeOnStatusChange: ModelActions.unsubscribeOnStatusChange,
+	updateModel: TeamspacesActions.updateModel,
+	removeModel: TeamspacesActions.removeModel,
+	downloadModel: ModelActions.downloadModel,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelItem));
