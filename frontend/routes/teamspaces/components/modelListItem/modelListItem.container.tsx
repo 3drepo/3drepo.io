@@ -23,6 +23,10 @@ import { DialogActions } from '../../../../modules/dialog';
 import { ModelActions } from '../../../../modules/model';
 import { TeamspacesActions } from '../../../../modules/teamspaces';
 import { ModelListItem } from './modelListItem.component';
+import { DialogActions } from '../../../../modules/dialog';
+import { ModelActions } from '../../../../modules/model';
+import { TeamspacesActions } from '../../../../modules/teamspaces';
+import { ModelItem } from './modelItem.component';
 
 const mapStateToProps = createStructuredSelector({});
 
