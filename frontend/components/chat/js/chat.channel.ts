@@ -24,27 +24,32 @@ import { NotificationsChatEvents } from './notifications.chat.events';
 
 export class ChatChannel {
 	/**
-	 * This property contains the object to suscribe to the issues and comments for the issues notification events
+	 * This property contains the object to suscribe to the issues and comments for the issues chat events
 	 */
 	public issues: IssuesChatEvents;
 
 	/**
-	 * This property contains the object to suscribe to the risks and comments for the risks notification events
+	 * This property contains the object to suscribe to the risks and comments for the risks chat events
 	 */
 	public risks: RisksChatEvents;
 
 	/**
-	 * This property contains the object to suscribe to the groups notification events
+	 * This property contains the object to suscribe to the groups chat events
 	 */
 	public groups: ChatEvents;
 
 	/**
-	 * This property contains the object to suscribe to the views notification events
+	 * This property contains the object to suscribe to the resources chat events
+	 */
+	public resources: ChatEvents;
+
+	/**
+	 * This property contains the object to suscribe to the views chat events
 	 */
 	public views: ChatEvents;
 
 	/**
-	 * This property contains the object to suscribe to the general modem status notification events
+	 * This property contains the object to suscribe to the general modem status chat events
 	 */
 	public model: ModelChatEvents;
 
@@ -62,6 +67,7 @@ export class ChatChannel {
 		this.risks = new RisksChatEvents(this);
 		this.model = new ModelChatEvents(this);
 		this.views = new ChatEvents(this, 'view');
+		this.resources = new ChatEvents(this, 'resource');
 		this.notifications = new NotificationsChatEvents(this);
 	}
 
@@ -107,6 +113,10 @@ export class ChatChannel {
 			this.subscriptions[event] = [];
 		}
 
+		if (this.hasAlreadySubscribed(event, callback, context)) {
+			return;
+		}
+
 		this.subscriptions[event].push({ callback, context });
 	}
 
@@ -125,6 +135,15 @@ export class ChatChannel {
 
 	private hasSubscriptions(event: string) {
 		return (this.subscriptions[event] || []).length > 0;
+	}
+
+	private hasAlreadySubscribed(event, callback, context) {
+		const subscriptions =  this.subscriptions[event];
+
+		if (!subscriptions) {
+			return false;
+		}
+		return subscriptions.some((subscription) =>  subscription.callback === callback &&  subscription.context === context);
 	}
 
 }

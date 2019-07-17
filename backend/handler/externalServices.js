@@ -21,8 +21,11 @@ const S3Handler = require("./s3");
 const GridFSHandler = require("./gridfs");
 const ResponseCodes = require("../response_codes");
 const SystemLogger = require("../logger.js").systemLogger;
+const config = require("../config.js");
 
 const ExternalServices = {};
+
+const getDefaultStorageType = () => config.defaultStorage || (config.fs ? "fs" : null) || "gridfs";
 
 ExternalServices.getFileStream = (account, collection, type, key) => {
 	switch(type) {
@@ -41,11 +44,25 @@ ExternalServices.getFileStream = (account, collection, type, key) => {
 ExternalServices.getFile = (account, collection, type, key) => {
 	switch(type) {
 		case "fs" :
-			return FSHandler.getFile(key);
+			return  Promise.resolve(FSHandler.getFile(key));
 		case "s3" :
-			return S3Handler.getFile(key);
+			return  Promise.resolve(S3Handler.getFile(key));
 		case "gridfs" :
 			return GridFSHandler.getFile(account, collection, key);
+		default:
+			SystemLogger.logError(`Unrecognised external service: ${type}`);
+			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
+	}
+};
+
+ExternalServices.storeFile = (account, collection, data) => {
+	const type = getDefaultStorageType();
+
+	switch(type) {
+		case "fs":
+			return FSHandler.storeFile(data);
+		case "gridfs":
+			return GridFSHandler.storeFile(account, collection, data);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
 			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);

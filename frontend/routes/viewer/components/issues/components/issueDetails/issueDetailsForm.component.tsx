@@ -37,6 +37,7 @@ import { canChangeBasicProperty, canChangeStatus, canChangeAssigned } from '../.
 import { TextField } from '../../../../../components/textField/textField.component';
 import { DescriptionImage } from './issueDetails.styles';
 import PinButton from '../../../pinButton/pinButton.container';
+import { Resources } from '../../../../../components/resources/resources.component';
 
 interface IProps {
 	issue: any;
@@ -53,6 +54,10 @@ interface IProps {
 	handleSubmit: () => void;
 	onSavePin: (position) => void;
 	onChangePin: (pin) => void;
+	onRemoveResource: (resource) => void;
+	attachFileResources: () => void;
+	attachLinkResources: () => void;
+	showDialog: (config: any) => void;
 	pinId?: string;
 	hasPin: boolean;
 }
@@ -116,7 +121,9 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { issue, myJob, permissions, topicTypes, currentUser } = this.props;
+		const { issue, myJob, permissions,
+				topicTypes, currentUser, onRemoveResource,
+				attachFileResources, attachLinkResources, showDialog} = this.props;
 		const newIssue = !issue._id;
 		const canEditBasicProperty = newIssue || canChangeBasicProperty(issue, myJob, permissions, currentUser);
 
@@ -184,7 +191,8 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								/>
 						</StyledFormControl>
 						<StyledFormControl>
-							<PinButton onChange={this.props.onChangePin}
+							<PinButton
+								onChange={this.props.onChangePin}
 								onSave={this.props.onSavePin}
 								pinId={this.props.pinId}
 								hasPin={this.props.hasPin}
@@ -214,13 +222,22 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						</DescriptionImage>
 					)}
 				</Form>
+				{!this.isNewIssue &&
+					<Resources showDialog={showDialog}
+						resources={issue.resources}
+						onSaveFiles={attachFileResources}
+						onSaveLinks={attachLinkResources}
+						onRemoveResource={onRemoveResource}
+						canEdit={canEditBasicProperty}
+					/>
+				}
 			</MuiPickersUtilsProvider>
 		);
 	}
 }
 
 export const IssueDetailsForm = withFormik({
-	mapPropsToValues: ({ issue, topicTypes }) => {
+	mapPropsToValues: ({ issue }) => {
 		return ({
 			status: issue.status,
 			priority: issue.priority,

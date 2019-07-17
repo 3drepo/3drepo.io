@@ -61,10 +61,14 @@ export const StyledForm = styled(Form)`
 	justify-content: space-between;
 `;
 
-export const IconsGroup = styled.div`
+export const IconsGroup = styled.div<{ disabled: boolean }>`
 	display: flex;
 	align-items: center;
 	margin-right: 20px;
+	${({ disabled }) => disabled ? css`
+		pointer-events: none;
+		opacity: 0.2;
+	` : ``}
 `;
 
 export const ThumbnailPlaceholder = styled.div`

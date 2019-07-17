@@ -61,7 +61,6 @@ function createRoundRobinAlgorithm(algoConfig) {
 	}
 
 	return roundRobin;
-
 }
 
 /** *****************************************************************************
@@ -272,6 +271,7 @@ if(config.paypal) {
 
 // upload size limit
 config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
+config.resourceUploadSizeLimit =  config.resourceUploadSizeLimit || 104857600;
 config.version = VERSION;
 config.userNotice = coalesce(config.userNotice, "");
 

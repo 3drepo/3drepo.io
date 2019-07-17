@@ -17,6 +17,7 @@
 
 import * as React from 'react';
 import { Formik, Field } from 'formik';
+import { debounce } from 'lodash';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { Image } from '../../../../../components/image';
@@ -46,13 +47,17 @@ interface IProps {
 	isCommenter: boolean;
 	onCancelEditMode: () => void;
 	onSaveEdit: (values) => void;
-	onDelete?: (event) => void;
+	onDelete?: (teamspace, model, id) => void;
 	onOpenEditMode?: () => void;
 	onClick?: (viewpoint) => void;
 	onChangeName?: (viewpointName) => void;
 }
 
 export class ViewItem extends React.PureComponent<IProps, any> {
+	public state = {
+		isDeletePending: false
+	};
+
 	public renderScreenshotPlaceholder = renderWhenTrue(() => <ThumbnailPlaceholder />);
 
 	public renderViewpointName = renderWhenTrue(() => (
@@ -63,13 +68,29 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		<NameRow>
 			<Name>{this.props.viewpoint.name}</Name>
 			{this.props.isCommenter &&
-				<IconsGroup>
+				<IconsGroup disabled={this.state.isDeletePending}>
 					<StyledEditIcon onClick={this.props.onOpenEditMode} />
-					<StyledDeleteIcon onClick={this.props.onDelete} />
+					<StyledDeleteIcon onClick={this.handleDelete} />
 				</IconsGroup>
 			}
 		</NameRow>
 	));
+
+	// tslint:disable-next-line: variable-name
+	public _handleDelete = debounce((event) => {
+		if (!this.state.isDeletePending) {
+			event.stopPropagation();
+			const { teamspace, modelId, viewpoint } = this.props;
+			this.setState({ isDeletePending: true }, () => {
+				this.props.onDelete(teamspace, modelId, viewpoint._id);
+			});
+		}
+	}, 150, { leading: true });
+
+	public handleDelete = (event) => {
+		event.persist();
+		this._handleDelete(event);
+	}
 
 	public renderViewpointForm = renderWhenTrue(() => {
 		return (
@@ -88,7 +109,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 							autoFocus
 						/>
 					)} />
-					<IconsGroup>
+					<IconsGroup disabled={this.state.isDeletePending}>
 						<StyledCancelIcon onClick={this.props.onCancelEditMode} />
 						<SaveIconButton type="submit" disableRipple={true}>
 							<StyledSaveIcon />

@@ -123,7 +123,7 @@ export class Views extends React.PureComponent<IProps, any> {
 					editMode={editMode}
 					onCancelEditMode={this.handleCancelEditMode}
 					onOpenEditMode={this.handleOpenEditMode}
-					onDelete={this.handleDelete(viewpoint._id)}
+					onDelete={this.props.deleteViewpoint}
 					teamspace={teamspace}
 					modelId={modelId}
 					onSaveEdit={this.handleUpdate(viewpoint._id)}
@@ -244,12 +244,6 @@ export class Views extends React.PureComponent<IProps, any> {
 			searchEnabled: false,
 			searchQuery: ''
 		})
-
-	public handleDelete = (viewpointId) => (event) => {
-		event.stopPropagation();
-		const { teamspace, modelId } = this.props;
-		this.props.deleteViewpoint(teamspace, modelId, viewpointId);
-	}
 
 	public handleSearchQueryChange = (event) => {
 		const searchQuery = event.currentTarget.value.toLowerCase();
