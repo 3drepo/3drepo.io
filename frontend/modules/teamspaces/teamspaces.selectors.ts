@@ -45,16 +45,28 @@ export const selectFlattenTeamspaces = createSelector(
 		const flattenList = [];
 
 		for (let index = 0; index < teamspacesList.length; index++) {
-			flattenList.push({ ...teamspacesList[index], type: LIST_ITEMS_TYPES.TEAMSPACE });
+			flattenList.push({
+				...teamspacesList[index],
+				type: LIST_ITEMS_TYPES.TEAMSPACE,
+				id: teamspacesList[index].name
+			});
 			const projectsIds = teamspacesList[index].projects;
 
 			for (let j = 0; j < projectsIds.length; j++) {
 				const project = projects[projectsIds[j]];
-				flattenList.push({ ...project, type: LIST_ITEMS_TYPES.PROJECT });
+				flattenList.push({
+					...project,
+					type: LIST_ITEMS_TYPES.PROJECT,
+					id: projectsIds[j]
+				});
 				const modelsIds = project.models;
 
 				for (let m = 0; m < modelsIds.length; m++) {
-					flattenList.push({ ...models[modelsIds[m]], type: LIST_ITEMS_TYPES.MODEL });
+					flattenList.push({
+						...models[modelsIds[m]],
+						type: LIST_ITEMS_TYPES.MODEL,
+						id: modelsIds[m]
+					});
 				}
 			}
 		}

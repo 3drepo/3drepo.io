@@ -16,6 +16,7 @@
  */
 
 import { startCase } from 'lodash';
+import memoizeOne from 'memoize-one';
 import React from 'react';
 
 import Grid from '@material-ui/core/Grid';
@@ -28,9 +29,13 @@ import { DateTime } from '../../../components/dateTime/dateTime.component';
 import { Loader } from '../../../components/loader/loader.component';
 
 import { LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
-import { ROW_ACTIONS } from '../../teamspaces.contants';
+import { ROW_ACTIONS, FEDERATION_TYPE, MODEL_TYPE } from '../../teamspaces.contants';
 import { RowMenu } from '../rowMenu/rowMenu.component';
 import { Container, LinkedName, Name, Status, SubmodelsList, Time, TimeWrapper } from './modelItem.styles';
+import { ROUTES } from '../../../../constants/routes';
+import { PERMISSIONS_VIEWS } from '../../../projects/projects.component';
+import { EVENT_CATEGORIES, analyticsService, EVENT_ACTIONS } from '../../../../services/analytics';
+import RevisionsDialog from '../revisionsDialog/revisionsDialog.container';
 
 interface IAction {
 	label: string;
@@ -42,6 +47,7 @@ interface IAction {
 }
 interface IProps {
 	name: string;
+	history: any;
 	activeTeamspace: string;
 	status: string;
 	federate: boolean;
@@ -50,6 +56,12 @@ interface IProps {
 	subModels?: any[];
 	timestamp: string;
 	permissions?: any[];
+	showDialog: (config) => void;
+	showConfirmDialog: (config) => void;
+	updateModel: (teamspace, modelName, modelData) => void;
+	removeModel: (teamspace, modelData) => void;
+	downloadModel: (teamspace, modelId) => void;
+
 	onModelItemClick: (event) => void;
 	onModelUpload: (event) => void;
 	onRevisionsClick: (event) => void;
@@ -83,13 +95,13 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 
 		const sharedActions = [{
 			...ROW_ACTIONS.SETTINGS,
-			action: props.onSettingsClick
+			action: this.handleSettingsClick
 		}, {
 			...ROW_ACTIONS.PERMISSIONS,
-			action: props.onPermissionsClick
+			action: this.handlePermissionsClick
 		}, {
 			...ROW_ACTIONS.DELETE,
-			action: props.onDeleteClick
+			action: this.handleDownloadClick
 		}];
 
 		this.modelActions = [{
@@ -97,10 +109,10 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 			action: props.onModelUpload
 		}, {
 			...ROW_ACTIONS.REVISIONS,
-			action: props.onRevisionsClick
+			action: this.handleRevisionsClick
 		}, {
 			...ROW_ACTIONS.DOWNLOAD,
-			action: props.onDownloadClick,
+			action: this.handleDownloadClick,
 			isHidden: !Boolean(props.timestamp)
 		}, ...sharedActions];
 
@@ -108,6 +120,10 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 			...ROW_ACTIONS.EDIT,
 			action: props.onEditClick
 		}, ...sharedActions];
+	}
+
+	public get isFederation() {
+		return this.props.federate ? FEDERATION_TYPE : MODEL_TYPE;
 	}
 
 	public componentDidMount = () => {
@@ -130,6 +146,73 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 		return subModels.length ? <SubmodelsList>{submodelsAsString}</SubmodelsList> : null;
 	}
 
+	public handlePermissionsClick = (event) => {
+		event.stopPropagation();
+		const { history, projectName, activeTeamspace, model } = this.props;
+		history.push({
+			pathname: `${ROUTES.USER_MANAGEMENT_MAIN}/${activeTeamspace}/projects`,
+			search: `?project=${projectName}&modelId=${model}&view=${PERMISSIONS_VIEWS.MODELS}`
+		});
+	}
+
+	public handleSettingsClick = () => {
+		event.stopPropagation();
+		const { history, projectName, activeTeamspace, model } = this.props;
+		history.push({
+			pathname: `${ROUTES.MODEL_SETTINGS}/${activeTeamspace}/models/${model}`,
+			search: `?project=${projectName}`
+		});
+	}
+
+	public handleDownloadClick = () => {
+		this.props.downloadModel(this.props.activeTeamspace, this.props.model);
+	}
+
+	public handleRevisionsClick = () => {
+		event.stopPropagation();
+		const { activeTeamspace, model, name } = this.props;
+
+		this.props.showDialog({
+			title: `${name} - Revisions`,
+			template: RevisionsDialog,
+			data: {
+				teamspace: activeTeamspace,
+				modelId: model
+			}
+		});
+	}
+
+	public handleDelete = () => {
+		event.stopPropagation();
+
+		const { activeTeamspace, showConfirmDialog, name, model, projectName, removeModel } = this.props;
+		const type = this.isFederation ? 'federation' : 'model';
+
+		showConfirmDialog({
+			title: `Delete ${type}`,
+			content: `
+				Do you really want to delete ${type} <b>${name}</b>? <br /><br />
+				Your data will be lost permanently and will not be recoverable.
+			`,
+			onConfirm: () => {
+				removeModel(activeTeamspace, {
+					id: model, name, project: projectName
+				});
+			}
+		});
+	}
+
+	public handleClick = () => {
+		event.stopPropagation();
+		const { history, activeTeamspace, timestamp, model } = this.props;
+		if (timestamp) {
+			history.push(`${ROUTES.VIEWER}/${activeTeamspace}/${model}`);
+			analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
+		} else {
+			// this.openUploadModelFileDialog(activeTeamspace, props)(event);
+		}
+	}
+
 	public renderActions = (actions) => {
 		const { permissions } = this.props;
 		return actions ? actions.map((actionItem, index) => {
@@ -148,9 +231,9 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 		}) : null;
 	}
 
-	public createHoverHandler = (hovered) => () => {
+	public createHoverHandler = memoizeOne((hovered) => () => {
 		this.setState({ hovered });
-	}
+	});
 
 	public renderPendingStatus = (status) => (
 		<Status>
@@ -164,7 +247,7 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { name, subModels, timestamp, onModelItemClick, status } = this.props;
+		const { name, subModels, timestamp, status } = this.props;
 		const { hovered, actionsMenuOpen } = this.state;
 		const isFederation = Boolean(subModels);
 		const actions = isFederation ? this.federationActions : this.modelActions;
@@ -177,9 +260,9 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 						<Grid container justify="space-between" wrap="nowrap" alignItems="center">
 							{ isPending
 								? ( showLink
-									? <><LinkedName onClick={onModelItemClick}>{name}</LinkedName> {this.renderPendingStatus(status)}</>
+									? <><LinkedName onClick={this.handleClick}>{name}</LinkedName> {this.renderPendingStatus(status)}</>
 									: <><Name>{name}</Name>{this.renderPendingStatus(status)}</>)
-								: <LinkedName onClick={onModelItemClick}>{name}</LinkedName>
+								: <LinkedName onClick={this.handleClick}>{name}</LinkedName>
 							}
 						</Grid>
 						<TimeWrapper

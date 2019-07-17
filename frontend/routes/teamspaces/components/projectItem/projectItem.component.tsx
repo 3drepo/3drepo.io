@@ -127,6 +127,10 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 		this.setState({actionsMenuOpen: !this.state.actionsMenuOpen});
 	}
 
+	private handleClick = (...args) => {
+		this.props.onRootClick({ ...args, models: this.props.models });
+	}
+
 	public isProjectAdmin = () => hasPermissions('admin_project', this.props.permissions);
 
 	public renderProjectActions = ({ hovered }) => renderWhenTrue(() => (
@@ -147,12 +151,12 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 	))(this.isProjectAdmin()) as any
 
 	public render() {
-		const { renderChildItem, name, active, onRootClick } = this.props;
+		const { renderChildItem, name, active } = this.props;
 		const { items } = this.state;
 
 		return (
 			<TreeList
-				onClick={onRootClick}
+				onClick={this.handleClick}
 				name={name}
 				level={TREE_LEVELS.PROJECT}
 				items={items}
