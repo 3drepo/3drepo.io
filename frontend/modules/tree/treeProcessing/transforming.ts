@@ -1,6 +1,6 @@
-import { VISIBILITY_STATES, SELECTION_STATES, BACKEND_VISIBILITY_STATES } from '../../../../constants/tree';
-import { IS_DEVELOPMENT } from '../../../../constants/environment';
-import { INode } from '../treeProcessing.constants';
+import { VISIBILITY_STATES, SELECTION_STATES, BACKEND_VISIBILITY_STATES } from '../../../constants/tree';
+import { IS_DEVELOPMENT } from '../../../constants/environment';
+import { INode } from './treeProcessing.constants';
 
 const isModelNode = (level, isFederation, hasFederationAsParent?) => {
 	return (level === 1 && !isFederation) || (level === 2 && hasFederationAsParent);
@@ -102,41 +102,40 @@ const getMeshesByModelId = (modelsWithMeshes) => {
 	return meshesByModelId;
 };
 
-self.addEventListener('message', ({ data }) => {
-	const { mainTree, subTrees, subModels, modelsWithMeshes } = data;
+export default ({ mainTree, subTrees, subModels, modelsWithMeshes }) => new Promise((resolve, reject) => {
+	try {
+		// tslint:disable-next-line
+		IS_DEVELOPMENT && console.time('TREE PRE-PROCESSING NEW');
+		for (let index = 0; index < mainTree.children.length; index++) {
+			const child = mainTree.children[index];
+			const [modelTeamspace, model] = child.name.split(':');
+			const subModel = subModels.find((m) => m.model === model);
 
-	// tslint:disable-next-line
-	IS_DEVELOPMENT && console.time('TREE PRE-PROCESSING');
-	for (let index = 0; index < mainTree.children.length; index++) {
-		const child = mainTree.children[index];
-		const [modelTeamspace, model] = child.name.split(':');
-		const subModel = subModels.find((m) => m.model === model);
+			if (subModel) {
+				child.name = [modelTeamspace, subModel.name].join(':');
+			}
 
-		if (subModel) {
-			child.name = [modelTeamspace, subModel.name].join(':');
+			if (subModel && child.children && child.children[0]) {
+				child.children[0].name = subModel.name;
+			}
+
+			if (subTrees.length) {
+				const subTree = subTrees.find(({ nodes }) => nodes.project === model);
+				child.children[0].children = [subTree.nodes];
+			}
 		}
+		// tslint:disable-next-line
+		IS_DEVELOPMENT && console.timeEnd('TREE PRE-PROCESSING NEW');
 
-		if (subModel && child.children && child.children[0]) {
-			child.children[0].name = subModel.name;
-		}
-
-		if (subTrees.length) {
-			const subTree = subTrees.find(({ nodes }) => nodes.project === model);
-			child.children[0].children = [subTree.nodes];
-		}
+		// tslint:disable-next-line
+		IS_DEVELOPMENT && console.time('TREE PROCESSING NEW');
+		const { data: nodesList } = getFlattenNested(mainTree);
+		const meshesByModelId = getMeshesByModelId(modelsWithMeshes);
+		const auxiliaryMaps = getAuxiliaryMaps(nodesList);
+		// tslint:disable-next-line
+		IS_DEVELOPMENT && console.timeEnd('TREE PROCESSING NEW');
+		resolve({ nodesList, meshesByModelId, ...auxiliaryMaps });
+	} catch (error) {
+		reject(error);
 	}
-	// tslint:disable-next-line
-	IS_DEVELOPMENT && console.timeEnd('TREE PRE-PROCESSING');
-
-	// tslint:disable-next-line
-	IS_DEVELOPMENT && console.time('TREE PROCESSING');
-	const { data: nodesList } = getFlattenNested(mainTree);
-	const meshesByModelId = getMeshesByModelId(modelsWithMeshes);
-	const auxiliaryMaps = getAuxiliaryMaps(nodesList);
-	const result = { data: { nodesList, meshesByModelId, ...auxiliaryMaps } };
-	// tslint:disable-next-line
-	IS_DEVELOPMENT && console.timeEnd('TREE PROCESSING');
-
-	// @ts-ignore
-	self.postMessage(JSON.stringify({ result }));
-}, false);
+});
