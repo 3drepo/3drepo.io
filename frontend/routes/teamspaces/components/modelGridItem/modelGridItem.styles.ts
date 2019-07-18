@@ -27,6 +27,7 @@ export const Container = styled.div`
   justify-content: space-between;
   font-size: 12px;
   padding: 5px;
+  position: relative;
 `;
 
 export const Header = styled.div`
@@ -63,4 +64,9 @@ export const Property = styled.span`
 
 export const Timestamp = styled.span`
   align-self: flex-end;
+`;
+
+export const Actions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
 `;

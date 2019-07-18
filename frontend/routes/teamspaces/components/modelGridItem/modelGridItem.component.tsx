@@ -17,17 +17,16 @@
 
 import React, { useState } from 'react';
 
-import { IconButton, Tooltip } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
 import { COLOR } from '../../../../styles';
 import { SmallIconButton } from '../../../components/smallIconButon/smallIconButton.component';
 
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { StarIcon } from '../../../components/starIcon/starIcon.component';
-import { RowMenu } from '../rowMenu/rowMenu.component';
+import { ActionsMenu } from '../actionsMenu/actionsMenu.component';
 
 import {
+	Actions,
 	Container,
 	Content,
 	Header,
@@ -57,8 +56,6 @@ interface IProps {
 	onEditClick: () => void;
 }
 
-const MoreIcon = () => (<MoreVert fontSize="small" />);
-
 export function ModelGridItem({
 	name, className, federate = false, permissions, timestamp,
 	onSettingsClick,
@@ -81,15 +78,11 @@ export function ModelGridItem({
 						aria-label={label}
 						onClick={action}
 						Icon={ActionsIconButton}
-						tooltip={'Hello'}
+						tooltip={label}
 					/>
 				))(hasPermissions(requiredPermissions, permissions));
 			}
 		}) : null;
-	};
-
-	const toggleActionsMenuOpen = () => {
-		this.setState({actionsMenuOpen: !this.state.actionsMenuOpen});
 	};
 
 	const sharedActions = [{
@@ -117,7 +110,6 @@ export function ModelGridItem({
 
 	const hovered = false;
 	const isPending = false;
-	const actionsMenuOpen = false;
 
 	const federationActions = [{
 		...ROW_ACTIONS.EDIT,
@@ -126,6 +118,8 @@ export function ModelGridItem({
 
 	const rowActions = federate ? federationActions : modelActions;
 
+	const [actionsMenuOpen, setAtionsMenuOpen] = useState(false);
+
 	return (
 		<Container className={className} federate={federate}>
 			<Header>
@@ -133,15 +127,16 @@ export function ModelGridItem({
 					<StarIcon active={Number(federate)} activeColor={COLOR.SUNGLOW}	onClick={() => {console.log('star click')}} />
 					<Name>{name}</Name>
 				</NameWrapper>
-				{/* TODOL RowMenu */}
-				{/* <RowMenu
-						open={hovered}
-						disabled={isPending}
-						forceOpen={actionsMenuOpen}
-						toggleForceOpen={toggleActionsMenuOpen}
-					>
+				<ActionsMenu
+					open={hovered}
+					disabled={isPending}
+					forceOpen={actionsMenuOpen}
+					toggleForceOpen={() => setAtionsMenuOpen(!actionsMenuOpen)}
+				>
+					<Actions>
 						{renderActions(rowActions)}
-				</RowMenu> */}
+					</Actions>
+			</ActionsMenu>
 			</Header>
 			<Content>
 				<PropertiesColumn>
