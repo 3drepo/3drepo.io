@@ -13,7 +13,7 @@ const getNamespacedId = (node) => {
 
 const getTransformedNodeData = (node) => ({
 	_id: node._id,
-	name: node.name,
+	name: node.name || node._id,
 	type: node.type,
 	teamspace: node.account,
 	meta: node.meta || [],
@@ -108,11 +108,13 @@ export default ({ mainTree, subTrees, subModels, modelsWithMeshes }) => new Prom
 		IS_DEVELOPMENT && console.time('TREE PRE-PROCESSING NEW');
 		for (let index = 0; index < mainTree.children.length; index++) {
 			const child = mainTree.children[index];
-			const [modelTeamspace, model] = child.name.split(':');
+			const [modelTeamspace, model] = (child.name || '').split(':');
 			const subModel = subModels.find((m) => m.model === model);
 
 			if (subModel) {
-				child.name = [modelTeamspace, subModel.name].join(':');
+					child.name = [modelTeamspace, subModel.name].join(':');
+			} else {
+					child.name = child.name || child._id;
 			}
 
 			if (subModel && child.children && child.children[0]) {
