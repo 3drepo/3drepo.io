@@ -275,11 +275,11 @@ config.vat.checkUrl = coalesce(config.vat.checkUrl, "http://ec.europa.eu/taxatio
 
 // get frontend base url
 config.getBaseURL = function (internalAccess) {
-	const ssl = internalAccess ? config.using_ssl : config.public_is_ssl;
+	const ssl = internalAccess ? config.using_ssl : config.public_using_ssl;
 
 	const port = internalAccess ? config.port : config.public_port;
 
-	const showPort = ssl && port !== 443 || !ssl && port !== 80;
+	const showPort = !(ssl && port === 443 || !ssl && port === 80);
 
 	return `${ssl ? "https://" : "http://"}${config.host}${showPort ? ":" + port : ""}`;
 };
