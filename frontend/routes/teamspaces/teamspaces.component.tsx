@@ -37,7 +37,7 @@ import ModelItem from './components/modelItem/modelItem.container';
 import ProjectDialog from './components/projectDialog/projectDialog.container';
 import ProjectItem from './components/projectItem/projectItem.container';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
-import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
+import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
 import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
 import { FEDERATION_TYPE, MODEL_TYPE, LIST_ITEMS_TYPES } from './teamspaces.contants';
 import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
@@ -83,7 +83,7 @@ interface IState {
 	activeTeamspace: string;
 	activeProject: string;
 	teamspacesItems: any[];
-	activeItems: any;
+	visibileItems: any;
 }
 
 export class Teamspaces extends React.PureComponent<IProps, IState> {
@@ -95,17 +95,11 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		activeTeamspace: '',
 		activeProject: '',
 		teamspacesItems: [],
-		activeItems: {}
+		visibileItems: {}
 	};
 
 	public get activeTeamspace() {
-		const { teamspace } = this.props.match.params;
-
-		if (teamspace) {
-			return teamspace;
-		}
-
-		return this.state.activeTeamspace;
+		return this.props.match.params.teamspace || this.state.activeTeamspace;
 	}
 
 	public componentDidMount() {
@@ -113,9 +107,23 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			this.props.fetchTeamspaces(this.props.currentTeamspace);
 		}
 
-		this.setState({
-			activeTeamspace: this.props.activeTeamspace || this.props.currentTeamspace,
-			activeProject: this.props.activeProject
+		const activeTeamspace = this.props.activeTeamspace || this.props.currentTeamspace;
+		const activeProject = this.props.activeProject;
+		const visibileItems = {};
+
+		if (activeTeamspace) {
+			visibileItems[activeTeamspace] = true;
+		}
+
+		if (activeProject) {
+			visibileItems[activeProject] = true;
+		}
+
+		this.setState({ activeTeamspace, activeProject, visibileItems}, () => {
+			this.onTeamspaceClick({
+				name: this.state.activeTeamspace,
+				projects: [this.props.activeProject]
+			});
 		});
 	}
 
@@ -139,32 +147,26 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public createRouteHandler = (pathname, params = {}) => (event) => {
-		event.stopPropagation();
-
-		this.props.history.push({ pathname, search: `?${queryString.stringify(params)}` });
-	}
-
 	public onTeamspaceClick = ({ name, projects }) => {
 		this.setState((prevState) => {
-			const activeItems = { ...prevState.activeItems };
+			const visibileItems = { ...prevState.visibileItems };
 
 			[...projects, name].forEach((id) => {
-				activeItems[id] = !activeItems[id];
+				visibileItems[id] = !visibileItems[id];
 			});
 
 			return {
 				activeTeamspace: name,
-				activeItems
+				visibileItems
 			};
 		});
 	}
 
-	public openProjectDialog = (teamspaceName = '', projectId?, projectName = '') => (event) => {
+	public openProjectDialog = (event, teamspaceName = '', projectId?, projectName = '') => {
 		event.stopPropagation();
 
 		this.props.showDialog({
-			title: projectName ? 'Edit project' : 'New project',
+			title: 'New project',
 			template: ProjectDialog,
 			data: {
 				id: projectId,
@@ -257,35 +259,31 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		/>
 	)
 
-/* 	public createModelDirectoryAddHandler = (props) => {
-		return props.type === FEDERATION_TYPE
-			? this.openFederationDialog(this.state.activeTeamspace, props.projectName)
-			: this.openModelDialog(this.state.activeTeamspace, props.projectName);
-	} */
-
-/*
-	public renderModelDirectory = (permissions, props) => (
-		<ModelDirectoryItem
-			{...props}
-			permissions={permissions}
-			renderChildItem={this.renderModelDirectoryItem(props.projectName)}
-			onAddClick={this.createModelDirectoryAddHandler(props)}
-		/>
-	) */
-
 	private renderProject = (props) => (
 		<ProjectItem
 			{...props}
 			teamspace={this.activeTeamspace}
 			key={props._id}
-			onEditClick={this.openProjectDialog(this.activeTeamspace, props._id, props.name)}
+			onEditClick={this.openProjectDialog}
 			active={props.name === this.props.activeProject}
+			disabled={!props.models.length}
 			onRootClick={this.handleProjectClick}
 		/>
 	)
 
-	private handleProjectClick = ({ active, name, models }) => {
-		this.setState({ activeProject: active ? name : ''	});
+	public handleProjectClick = ({ name, models }) => {
+		this.setState((prevState) => {
+			const visibileItems = { ...prevState.visibileItems };
+
+			models.forEach((id) => {
+				visibileItems[id] = !visibileItems[id];
+			});
+
+			return {
+				activeProject: name,
+				visibileItems
+			};
+		});
 	}
 
 	private renderTeamspace = (teamspace, index) => (
@@ -295,7 +293,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			active={teamspace.account === this.activeTeamspace}
 			isMyTeamspace={index === 0}
 			onToggle={this.onTeamspaceClick}
-			onAddProject={this.openProjectDialog(teamspace.account)}
+			onAddProject={this.openProjectDialog}
 		/>
 	)
 
@@ -321,13 +319,13 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		};
 		return (
 			<>
-				<MenuItem onClick={createMenuClickHandler(this.openProjectDialog(), close)}>
+				<MenuItem onClick={createMenuClickHandler(this.openProjectDialog, close)}>
 					Add project
 				</MenuItem>
-				<MenuItem onClick={createMenuClickHandler(this.openModelDialog(), close)}>
+				<MenuItem onClick={createMenuClickHandler(this.openModelDialog, close)}>
 					Add model
 				</MenuItem>
-				<MenuItem onClick={createMenuClickHandler(this.openFederationDialog(), close)}>
+				<MenuItem onClick={createMenuClickHandler(this.openFederationDialog, close)}>
 					Add federation
 				</MenuItem>
 			</>
@@ -355,7 +353,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
             <Body>
                 <SimpleBar>
                     {this.props.items.filter(({ id, type }) => {
-				return type === LIST_ITEMS_TYPES.TEAMSPACE || !!this.state.activeItems[id];
+				return type === LIST_ITEMS_TYPES.TEAMSPACE || !!this.state.visibileItems[id];
 			}).map(this.renderListItem)}
                 </SimpleBar>
             </Body>
