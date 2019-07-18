@@ -58,7 +58,8 @@ export const COLOR = {
 	SILVER_CHALICE: '#A8A8A8',
 	LIGHT_BLUE: '#6788ab',
 	ALICE_BLUE: '#f0f7ff',
-	CLOUD: '#cfcdcc'
+	CLOUD: '#cfcdcc',
+	TUNDORA: '#4d4d4d'
 };
 
 export const PIN_COLORS = mapValues({

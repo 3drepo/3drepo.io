@@ -75,4 +75,5 @@ export const GridContainer = styled.div`
   grid-template-columns: repeat(4, 1fr);
   grid-gap: 10px;
   grid-auto-rows: minmax(100px, auto);
+	margin-top: 10px;
 `;
