@@ -16,12 +16,11 @@
  */
 
 import Grid from '@material-ui/core/Grid';
-import { isEmpty } from 'lodash';
 import React from 'react';
 
 import Folder from '@material-ui/icons/Folder';
 import FolderOpen from '@material-ui/icons/FolderOpen';
-import { Container, Details, Headline, IconContainer, Title } from './treeList.styles';
+import { Container, Headline, IconContainer, Title } from './treeList.styles';
 
 export const TREE_LEVELS = {
 	TEAMSPACE: 1,
@@ -49,91 +48,45 @@ export const DefaultHeadline = ({renderActions, ...props}) => (
 		alignItems="center"
 		justify="flex-start"
 		wrap="nowrap">
-		<HeadlineIcon fontSize="small" active={props.active} {...props.IconProps} />
+		<HeadlineIcon fontSize="small" active={props.active && !props.disabled} {...props.IconProps} />
 		<Title>{props.name} {props.disabled ? '(empty)' : ''}</Title>
 		{renderActions && renderActions(props)}
 	</Grid>
 );
 
 interface IProps {
+	id: string;
 	name: string;
-	items: any[];
 	level?: number;
 	active?: boolean;
 	disableShadow?: boolean;
-	forceActive?: boolean;
+	disabled?: boolean;
 	IconProps?: any;
-	renderItem?: (props) => JSX.Element;
 	renderRoot?: (props) => JSX.Element;
 	renderActions?: (props) => (JSX.Element | Element);
-	onClick?: (state) => void;
-	setActiveProject?: (projectName) => void;
+	onClick?: () => void;
 }
 
 interface IState {
-	active: boolean;
 	hovered: boolean;
-	name: string;
 }
 
 export class TreeList extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
-		items: [],
 		level: TREE_LEVELS.TEAMSPACE,
-		active: false
+		active: false,
+		disabled: false,
 	};
 
 	public state = {
-		active: false,
-		hovered: false,
-		name: ''
+		hovered: false
 	};
 
-	public renderItems = () => {
-		return this.props.items.map((itemProps, index) => {
-			return this.props.renderItem({
-				key: index,
-				...itemProps
-			});
-		});
-	}
-
 	public handleRootClick = () => {
-		const { active } = this.state;
-		const { items, name } = this.props;
+		const { id, name, disabled, onClick } = this.props;
 
-		if (items.length) {
-			this.setState({ active: !active, name }, () => {
-				if (this.props.onClick) {
-					this.props.onClick(this.state);
-				}
-			});
-		}
-	}
-
-	public componentDidMount() {
-		const changes = {} as IState;
-
-		if (this.props.active) {
-			changes.active = true;
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
-		}
-	}
-
-	public componentDidUpdate = (prevProps) => {
-		const changes = {} as IState;
-		const { active, items } = this.props;
-
-		const activeChanged = active !== prevProps.active;
-		if (activeChanged) {
-			changes.active = active && Boolean(items.length);
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
+		if (!disabled && onClick) {
+			this.props.onClick();
 		}
 	}
 
@@ -142,11 +95,10 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { items, level, renderRoot, forceActive, onClick, ...props } = this.props;
-		const { active, hovered } = this.state;
-		const disabled = !items.length;
+		const { level, renderRoot, onClick, active, disabled, ...props } = this.props;
+		const { hovered } = this.state;
 
-		const containerProps = { active, level, disabled, hovered, forceActive };
+		const containerProps = { active, level, disabled, hovered };
 
 		const headlineProps = {
 			...props,

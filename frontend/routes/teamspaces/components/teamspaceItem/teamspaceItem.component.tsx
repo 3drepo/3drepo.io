@@ -27,6 +27,7 @@ import StorageOutlined from '@material-ui/icons/StorageOutlined';
 
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { ProjectDialog } from '../projectDialog/projectDialog.component';
 
 interface IProps {
 	account: string;
@@ -36,7 +37,7 @@ interface IProps {
 	permissions: any[];
 	onToggle: (state) => void;
 	renderChildItem: () => JSX.Element;
-	onAddProject: () => void;
+	onAddProject: (event, teamspaceName) => void;
 }
 
 export const TeamspaceItem = (props: IProps) => {
@@ -51,16 +52,18 @@ export const TeamspaceItem = (props: IProps) => {
 		permissions
 	} = props;
 
+	const handleAddNewProject = (event) => onAddProject(event, account);
+
 	const renderActions = () => renderWhenTrue(() => (
 		<TooltipButton
 			{...ROW_ACTIONS.ADD_NEW}
 			label="Add new project"
-			action={onAddProject}
+			action={handleAddNewProject}
 		/>
 	))(hasPermissions('create_project', permissions)) as any;
 
 	const handleClick = (...args) => {
-		onToggle({ ...args, projects });
+		onToggle({ ...args, name: account, projects });
 	};
 
 	return (

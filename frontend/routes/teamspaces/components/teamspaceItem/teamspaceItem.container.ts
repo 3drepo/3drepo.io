@@ -16,21 +16,16 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { DialogActions } from '../../../../modules/dialog';
-import { selectTeamspacesList, TeamspacesActions } from '../../../../modules/teamspaces';
-import { ProjectItem } from './projectItem.component';
+import { TeamspaceItem } from './teamspaceItem.component';
 
-const mapStateToProps = createStructuredSelector({
-});
+const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	removeProject: TeamspacesActions.removeProject,
-	showConfirmDialog: DialogActions.showConfirmDialog,
 	showDialog: DialogActions.showDialog,
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ProjectItem));
+export default connect(mapStateToProps, mapDispatchToProps)(TeamspaceItem);

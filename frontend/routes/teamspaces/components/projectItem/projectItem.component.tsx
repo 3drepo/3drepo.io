@@ -25,6 +25,7 @@ import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
 import { FEDERATION_TYPE, MODEL_TYPE, ROW_ACTIONS  } from '../../teamspaces.contants';
+import ProjectDialog from '../projectDialog/projectDialog.container';
 import { RowMenu } from '../rowMenu/rowMenu.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 
@@ -33,13 +34,14 @@ interface IProps {
 	name: string;
 	models: any[];
 	active: boolean;
+	disabled: boolean;
 	permissions: any[];
 	teamspace: string;
 	history: any;
 	renderChildItem: () => JSX.Element;
-	onEditClick: (event) => void;
 	removeProject: (teamspace, projectId) => void;
 	showConfirmDialog: (config) => void;
+	showDialog: (config) => void;
 	onPermissionsClick: (event) => void;
 	onRootClick: (projectName) => void;
 }
@@ -122,13 +124,29 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public handleEditClick = (event) => {
+		event.stopPropagation();
+		const { teamspace, name, _id } = this.props;
+
+		this.props.showDialog({
+			title: 'Edit project',
+			template: ProjectDialog,
+			data: {
+				id: _id,
+				name,
+				teamspace,
+			},
+		});
+	}
+
 	public toggleActionsMenuOpen = (event) => {
 		event.stopPropagation();
 		this.setState({actionsMenuOpen: !this.state.actionsMenuOpen});
 	}
 
-	private handleClick = (...args) => {
-		this.props.onRootClick({ ...args, models: this.props.models });
+	private handleClick = () => {
+		const { _id, name, models } = this.props;
+		this.props.onRootClick({ id: _id,	name, models });
 	}
 
 	public isProjectAdmin = () => hasPermissions('admin_project', this.props.permissions);
@@ -137,7 +155,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 		<RowMenu open={hovered} forceOpen={this.state.actionsMenuOpen} toggleForceOpen={this.toggleActionsMenuOpen}>
 			<TooltipButton
 				{...ROW_ACTIONS.EDIT}
-				action={this.props.onEditClick}
+				action={this.handleEditClick}
 			/>
 			<TooltipButton
 				{...ROW_ACTIONS.PERMISSIONS}
@@ -151,20 +169,17 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 	))(this.isProjectAdmin()) as any
 
 	public render() {
-		const { renderChildItem, name, active } = this.props;
-		const { items } = this.state;
-
+		const { name, active, disabled, _id } = this.props;
 		return (
 			<TreeList
 				onClick={this.handleClick}
 				name={name}
 				level={TREE_LEVELS.PROJECT}
-				items={items}
+				disabled={disabled}
 				IconProps={ {
 					IconClosed: Label,
 					IconOpened: LabelOutlined
-				} }
-				renderItem={renderChildItem}
+				}}
 				renderActions={this.renderProjectActions}
 				active={active}
 			/>

@@ -20,7 +20,7 @@ import styled from 'styled-components';
 
 import { ellipsis, COLOR } from '../../../styles';
 
-const isActive = (props) => props.forceActive && props.active && !props.disabled;
+const isActive = (props) => props.active && !props.disabled;
 
 export const Headline = styled.div`
 	cursor: pointer;
