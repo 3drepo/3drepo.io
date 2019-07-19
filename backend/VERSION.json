@@ -1,11 +1,11 @@
-{ "VERSION" : "3.9.4",
+{ "VERSION" : "3.10.0",
   "unity" : {
 	"current" : "2.20.0",
 	"supported": []
   },
   "navis" :{
-	"current" : "2.16.0",
-	"supported": ["2.8.0"]
+	"current" : "3.10.0",
+	"supported": ["2.16.0", "2.8.0"]
   },
   "unitydll" : {
 	"current": "2.8.0",

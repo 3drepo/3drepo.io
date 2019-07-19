@@ -157,6 +157,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				attachFileResources={attachFileResources}
 				attachLinkResources={attachLinkResources}
 				showDialog={showDialog}
+				canComment={this.userCanComment}
 			/>
 		);
 	}
