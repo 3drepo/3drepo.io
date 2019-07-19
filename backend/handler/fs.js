@@ -1,6 +1,4 @@
-/**
- *	Copyright (C) 2019 3D Repo Ltd
- *
+/*
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU Affero General Public License as
  *	published by the Free Software Foundation, either version 3 of the
@@ -26,6 +24,9 @@ const nodeuuid = require("node-uuid");
 const farmhash = require("farmhash");
 
 const generateFoldernames = (fileName, dirLevels) => {
+	if (dirLevels < 1) {
+		return "";
+	}
 	const folders = [];
 	const minChunkLen = 4;
 	const nameChunkLen = Math.max(fileName.length / dirLevels, minChunkLen);
@@ -58,15 +59,21 @@ const createFoldersIfNecessary = (foldersPath) => {
 
 class FSHandler {
 	constructor() {
-		if (config.fs && config.fs.path && config.fs.levels) {
-			this.testFilesystem();
+		if (config.fs) {
+			if (config.fs.hasOwnProperty("path") && config.fs.hasOwnProperty("levels")) {
+				this.testFilesystem();
+			} else {
+				const err = "fs entry found in config, but cannot find path/levels entry";
+				systemLogger.logError(err);
+				throw new Error(err);
+			}
 		}
 	}
 
 	storeFile(data) {
 		const _id = nodeuuid.v4();
 		const folderNames = generateFoldernames(_id, config.fs.levels);
-		const link = folderNames + "/" + _id;
+		const link = path.join(folderNames, _id);
 
 		return new Promise((resolve, reject) => {
 			createFoldersIfNecessary(this.getFullPath(folderNames)).then(() =>{

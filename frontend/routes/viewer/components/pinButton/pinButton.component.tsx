@@ -73,6 +73,13 @@ export class PinButton extends React.PureComponent<IProps, any> {
 	public togglePinListeners = (enabled: boolean) => {
 		const resolver = enabled ? 'on' : 'off';
 		Viewer[resolver](VIEWER_EVENTS.PICK_POINT, this.handlePickPoint);
+		Viewer[resolver](VIEWER_EVENTS.BACKGROUND_SELECTED_PIN_MODE, this.handleClickBackground);
+	}
+
+	public handleClickBackground = (event) => {
+		Viewer.removePin({id: this.getPinId() });
+		Viewer.setPin({data: null});
+
 	}
 
 	public handlePickPoint = ({ trans, position, normal, selectColour, id }) => {

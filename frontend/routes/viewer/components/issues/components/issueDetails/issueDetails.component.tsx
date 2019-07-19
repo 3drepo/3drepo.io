@@ -96,26 +96,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
-	public componentDidMount() {
-		const { teamspace, model, fetchIssue, issue, subscribeOnIssueCommentsChanges } = this.props;
-
-		if (issue._id) {
-			fetchIssue(teamspace, model, issue._id);
-			subscribeOnIssueCommentsChanges(teamspace, model, issue._id);
-		}
-	}
-
-	public componentWillUnmount() {
-		const { teamspace, model, issue, unsubscribeOnIssueCommentsChanges } = this.props;
-		unsubscribeOnIssueCommentsChanges(teamspace, model, issue._id);
-	}
-
 	public componentDidUpdate(prevProps) {
-		const { teamspace, model, fetchIssue, issue } = this.props;
-
-		if (issue._id !== prevProps.issue._id) {
-			fetchIssue(teamspace, model, issue._id);
-		}
+		const { issue } = this.props;
 
 		if (
 			issue.comments && prevProps.issue.comments &&
@@ -314,7 +296,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public onPositionSave = (position) => {
 		if (!this.isNewIssue) {
 			const { teamspace, model, issue } = this.props;
-			this.props.updateIssue(teamspace, model, {position});
+			this.props.updateIssue(teamspace, model, {position: position || []});
 			Viewer.setPin(null);
 		} else {
 			Viewer.changePinColor({ id: NEW_PIN_ID, colours: PIN_COLORS.YELLOW });

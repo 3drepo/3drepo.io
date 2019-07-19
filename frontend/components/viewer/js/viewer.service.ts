@@ -112,10 +112,6 @@ export class ViewerService {
 			switch (event.type) {
 
 			case this.EventService.EVENT.VIEWER.CLICK_PIN:
-				if (this.newPinId === 'newPinId') {
-					this.removeUnsavedPin();
-					return;
-				}
 				this.viewer.clickPin(event.value.id);
 				break;
 
@@ -137,13 +133,6 @@ export class ViewerService {
 					event.value.model
 				);
 				break;
-
-			case this.EventService.EVENT.VIEWER.BACKGROUND_SELECTED_PIN_MODE:
-				if (this.pin.pinDropMode) {
-					this.removeUnsavedPin();
-				}
-				break;
-
 			}
 
 		});
@@ -169,11 +158,6 @@ export class ViewerService {
 				params.model
 			);
 		});
-	}
-
-	public removeUnsavedPin() {
-		this.removePin({id: this.newPinId });
-		this.setPin({data: null});
 	}
 
 	public changePinColours(params) {
