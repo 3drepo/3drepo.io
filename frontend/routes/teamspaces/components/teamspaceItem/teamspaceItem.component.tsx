@@ -30,29 +30,29 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ProjectDialog } from '../projectDialog/projectDialog.component';
 
 interface IProps {
-	account: string;
+	name: string;
 	projects: any[];
 	active: boolean;
 	isMyTeamspace: boolean;
+	disabled: boolean;
 	permissions: any[];
 	onToggle: (state) => void;
-	renderChildItem: () => JSX.Element;
 	onAddProject: (event, teamspaceName) => void;
 }
 
 export const TeamspaceItem = (props: IProps) => {
 	const {
-		account,
+		name,
 		projects,
 		onToggle,
 		active,
-		renderChildItem,
 		isMyTeamspace,
 		onAddProject,
-		permissions
+		permissions,
+		disabled
 	} = props;
 
-	const handleAddNewProject = (event) => onAddProject(event, account);
+	const handleAddNewProject = (event) => onAddProject(event, name);
 
 	const renderActions = () => renderWhenTrue(() => (
 		<TooltipButton
@@ -63,17 +63,17 @@ export const TeamspaceItem = (props: IProps) => {
 	))(hasPermissions('create_project', permissions)) as any;
 
 	const handleClick = (...args) => {
-		onToggle({ ...args, name: account, projects });
+		onToggle({ ...args, name, projects });
 	};
 
 	return (
 		<TreeList
-			name={account}
+			id={name}
+			name={name}
+			disabled={disabled}
 			level={TREE_LEVELS.TEAMSPACE}
-			items={projects || []}
 			onClick={handleClick}
 			active={active}
-			renderItem={renderChildItem}
 			renderRoot={isMyTeamspace ? MyTeamspaceItem : null}
 			IconProps={{
 				IconOpened: StorageOutlined,

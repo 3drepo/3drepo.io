@@ -282,14 +282,15 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	private renderTeamspace = (teamspace, index) => (
+	private renderTeamspace = (props) => (
 		<TeamspaceItem
-			{...teamspace}
-			key={index}
-			active={teamspace.account === this.activeTeamspace}
-			isMyTeamspace={index === 0}
+			{...props}
+			key={props.account}
+			name={props.account}
+			isMyTeamspace={this.props.currentTeamspace === props.account}
 			onToggle={this.onTeamspaceClick}
 			onAddProject={this.openProjectDialog}
+			disabled={!props.projects.length}
 		/>
 	)
 
