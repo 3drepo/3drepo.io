@@ -19,6 +19,7 @@ const _ = require("lodash");
 
 const ModelSetting = require("./modelSetting");
 const Project = require("./project");
+const View = require("./viewpoint");
 const User = require("./user");
 const Job = require("./job");
 
@@ -33,22 +34,96 @@ const ChatEvent = require("./chatEvent");
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
 class Ticket {
-	constructor(collName, responseCodeType, fieldTypes, ownerPrivilegeAttributes, clean) {
+	constructor(collName, responseCodeType, fieldTypes, ownerPrivilegeAttributes) {
 		this.collName = collName;
 		this.response = getResponse(responseCodeType);
-		this.clean = clean;
 		this.fieldTypes = fieldTypes;
 		this.ownerPrivilegeAttributes = ownerPrivilegeAttributes;
 	}
 
-	async findByUID(account, model, uid, projection, noClean = false) {
+	clean(account, model, ticketToClean) {
+		const idKeys = ["_id", "rev_id", "parent", "group_id"];
+		const commentIdKeys = ["rev_id", "guid", "viewpoint"];
+		const vpIdKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid", "group_id"];
+
+		ticketToClean.account = account;
+		ticketToClean.model = ticketToClean.origin_model ||  model;
+		const id = utils.uuidToString(ticketToClean._id);
+
+		idKeys.concat(vpIdKeys).forEach((key) => {
+			if (ticketToClean[key]) {
+				ticketToClean[key] = utils.uuidToString(ticketToClean[key]);
+			}
+		});
+
+		if (ticketToClean.viewpoints) {
+			ticketToClean.viewpoints.forEach((viewpoint, i) => {
+				vpIdKeys.forEach((key) => {
+					if (viewpoint[key]) {
+						viewpoint[key] = utils.uuidToString(viewpoint[key]);
+					}
+				});
+
+				if (viewpoint.screenshot) {
+					View.setViewpointScreenshot(this.collName, account, model, id, viewpoint);
+				}
+
+				if (0 === i) {
+					ticketToClean.viewpoint = viewpoint;
+				}
+			});
+		}
+
+		if (ticketToClean.comments) {
+			ticketToClean.comments.forEach((comment) => {
+				commentIdKeys.forEach((key) => {
+					if (comment[key]) {
+						comment[key] = utils.uuidToString(comment[key]);
+					}
+				});
+
+				if (comment.viewpoint) {
+					const commentViewpoint = ticketToClean.viewpoints.find((vp) =>
+						vp.guid === comment.viewpoint
+					);
+
+					if (commentViewpoint) {
+						comment.viewpoint = commentViewpoint;
+					}
+				}
+			});
+		}
+
+		if (ticketToClean.thumbnail && ticketToClean.thumbnail.flag) {
+			ticketToClean.thumbnail = account + "/" + model + "/" + this.collName + "/" + id + "/thumbnail.png";
+		}
+
+		// Return empty arrays as frontend expects them
+		// Return empty objects as frontend expects them
+		Object.keys(this.fieldTypes).forEach((field) => {
+			if (!ticketToClean[field]) {
+				if ("[object Array]" === this.fieldTypes[field]) {
+					ticketToClean[field] = [];
+				} else if ("[object Object]" === this.fieldTypes[field]) {
+					ticketToClean[field] = {};
+				}
+			}
+		});
+
+		delete ticketToClean.viewpoints;
+		delete ticketToClean.viewCount;
+
+		return ticketToClean;
+	}
+
+	async findByUID(account, model, uid, projection) {
 		if ("[object String]" === Object.prototype.toString.call(uid)) {
 			uid = utils.stringToUUID(uid);
 		}
 
 		const settings = await ModelSetting.findById({account}, model);
 		const tickets = await db.getCollection(account, model + "." + this.collName);
-		let foundTicket = await tickets.findOne({ _id: uid }, projection);
+		const foundTicket = await tickets.findOne({ _id: uid }, projection);
 
 		if (!foundTicket) {
 			return Promise.reject(this.response("NOT_FOUND"));
@@ -78,10 +153,6 @@ class Ticket {
 				settings.properties.code : "";
 		}
 
-		if (!noClean) {
-			foundTicket = this.clean(account, model, foundTicket);
-		}
-
 		return foundTicket;
 	}
 
@@ -97,19 +168,19 @@ class Ticket {
 		return systemComment;
 	}
 
-	async update(user, sessionId, account, model, id, data, beforeUpdate = _.identity) {
+	async update(attributeBlacklist, user, sessionId, account, model, id, data, beforeUpdate = _.identity) {
 
 		// 1. Get old ticket
 		let oldTicket = await this.findByUID(account, model, id, {}, true);
 
 		// 2. Get user permissions
 		const dbUser = await User.findByUserName(account);
-		const job = (await Job.findByUser(account, data.requester) || {})._id;
-		const accountPerm = dbUser.customData.permissions.findByUser(data.requester);
+		const job = (await Job.findByUser(account, user) || {})._id;
+		const accountPerm = dbUser.customData.permissions.findByUser(user);
 		const projAdmin = await Project.isProjectAdmin(
 			account,
 			model,
-			data.requester
+			user
 		);
 
 		const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
@@ -170,21 +241,20 @@ class Ticket {
 			data.comments = data.comments.concat(systemComments);
 		}
 
-		data = beforeUpdate(data, oldTicket);
+		data = await beforeUpdate(data, oldTicket);
 
 		// 6. Update the data
+		const _id = utils.stringToUUID(id);
+
 		const tickets = await db.getCollection(account, model + "." + this.collName);
 		await tickets.update({_id}, {$set: data});
 
 		// 7. Return the updated data and the old ticket
-		const updatedTicket = this.clean(account, model,{...oldTicket, ...data});
+		const updatedTicket =  this.clean(account, model,{...oldTicket, ...data});
 		oldTicket = this.clean(account, model, oldTicket);
-
 		delete data.comments;
 
-		// ChatEvent.issueChanged(sessionId, account, model, newIssue._id, data);
-
-		return {oldTicket, updatedTicket};
+		return {oldTicket, updatedTicket, data};
 	}
 }
 

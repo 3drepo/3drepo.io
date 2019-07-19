@@ -33,10 +33,8 @@ const config = require("../config.js");
 const systemLogger = require("../logger.js").systemLogger;
 const Comment = require("./comment");
 const Group = require("./group");
-const Job = require("./job");
-const Project = require("./project");
 const User = require("./user");
-const View = require("./viewpoint");
+const Ticket = require("./ticket");
 
 const C = require("../constants");
 
@@ -78,93 +76,14 @@ const ownerPrivilegeAttributes = [
 	"priority"
 ];
 
+const ticket =  new Ticket("issues", "ISSUE", fieldTypes,ownerPrivilegeAttributes);
+
 const statusEnum = {
 	"OPEN": C.ISSUE_STATUS_OPEN,
 	"IN_PROGRESS": C.ISSUE_STATUS_IN_PROGRESS,
 	"FOR_APPROVAL": C.ISSUE_STATUS_FOR_APPROVAL,
 	"CLOSED": C.ISSUE_STATUS_CLOSED
 };
-
-function clean(dbCol, issueToClean) {
-	dbCol.colName = "issues";
-	dbCol._id = issueToClean._id;
-	const idKeys = ["_id", "rev_id", "parent", "group_id"];
-	const commentIdKeys = ["rev_id", "guid", "viewpoint"];
-	const vpIdKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid", "group_id"];
-
-	issueToClean.account = dbCol.account;
-	issueToClean.model = (issueToClean.origin_model) ? issueToClean.origin_model : dbCol.model;
-
-	idKeys.concat(vpIdKeys).forEach((key) => {
-		if (issueToClean[key]) {
-			issueToClean[key] = utils.uuidToString(issueToClean[key]);
-		}
-	});
-
-	if (issueToClean.viewpoints) {
-		issueToClean.viewpoints.forEach((viewpoint, i) => {
-			vpIdKeys.forEach((key) => {
-				if (issueToClean.viewpoints[i] && issueToClean.viewpoints[i][key]) {
-					issueToClean.viewpoints[i][key] = utils.uuidToString(issueToClean.viewpoints[i][key]);
-				} else {
-					delete issueToClean.viewpoints[i][key];
-				}
-			});
-
-			if (issueToClean.viewpoints[i].screenshot) {
-				View.setViewpointScreenshot(dbCol, issueToClean.viewpoints[i]);
-			}
-
-			if (0 === i) {
-				issueToClean.viewpoint = issueToClean.viewpoints[i];
-			}
-		});
-	}
-
-	if (issueToClean.comments) {
-		issueToClean.comments.forEach((comment, i) => {
-			commentIdKeys.forEach((key) => {
-				if (issueToClean.comments[i] && issueToClean.comments[i][key]) {
-					issueToClean.comments[i][key] = utils.uuidToString(issueToClean.comments[i][key]);
-				}
-			});
-
-			if (issueToClean.comments[i].viewpoint) {
-				const commentViewpoint = issueToClean.viewpoints.find((vp) =>
-					vp.guid === issueToClean.comments[i].viewpoint
-				);
-
-				if (commentViewpoint) {
-					issueToClean.comments[i].viewpoint = commentViewpoint;
-				}
-			}
-		});
-	}
-
-	if (issueToClean.thumbnail && issueToClean.thumbnail.flag) {
-		issueToClean.thumbnail = issueToClean.account + "/" + issueToClean.model + "/issues/" + issueToClean._id + "/thumbnail.png";
-	}
-
-	// TODO - Remove this temporary hack later
-	// Return empty arrays as frontend expects them
-	// Return empty objects as frontend expects them
-	Object.keys(fieldTypes).forEach((field) => {
-		if (!issueToClean[field]) {
-			if ("[object Array]" === fieldTypes[field]) {
-				issueToClean[field] = [];
-			} else if ("[object Object]" === fieldTypes[field]) {
-				issueToClean[field] = {};
-			}
-		}
-	});
-
-	delete issueToClean.viewpoints;
-
-	// Issue view count is not used and no longer being updated
-	delete issueToClean.viewCount;
-
-	return issueToClean;
-}
 
 function toDirectXCoords(issueData) {
 	const fieldsToConvert = ["position", "norm"];
@@ -362,7 +281,7 @@ issue.createIssue = function(dbCol, newIssue) {
 								settings.properties.code : "";
 						}
 
-						newIssue = clean(dbCol, newIssue);
+						newIssue = ticket.clean(dbCol.account, dbCol.model, newIssue);
 						ChatEvent.newIssues(sessionId, dbCol.account, dbCol.model, [newIssue]);
 
 						return Promise.resolve(newIssue);
@@ -379,14 +298,42 @@ issue.updateFromBCF = function(dbCol, issueToUpdate, changeSet) {
 	return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
 		return _dbCol.update({_id: utils.stringToUUID(issueToUpdate._id)}, {$set: changeSet}).then(() => {
 			const sessionId = issueToUpdate.sessionId;
-			const updatedIssue = clean(dbCol, issueToUpdate);
+			const updatedIssue = ticket.clean(dbCol.account, dbCol.model, issueToUpdate);
 			ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, updatedIssue._id, updatedIssue);
 			return updatedIssue;
 		});
 	});
 };
 
-issue.update = async function(dbCol, issueId, data) {
+issue.onBeforeUpdate = async function(data, oldIssue, userPermissions) {
+	// 2.6 if the user is trying to change the status and it doesnt have the necessary permissions throw a ISSUE_UPDATE_PERMISSION_DECLINED
+	if (data.status && data.status !== oldIssue.status) {
+		const canChangeStatus = userPermissions.hasAdminPrivileges || (userPermissions.hasAssignedJob && data.status !== statusEnum.CLOSED);
+		if (!canChangeStatus) {
+			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
+		}
+	}
+
+	const today = (new Date()).getTime();
+
+	// 4.2 If there is a priority change , save the extra field priority_last_changed with todays timestamp
+	if (this.isPriorityChange(oldIssue, data)) {
+		data.priority_last_changed = today;
+	}
+
+	// 4.3 If there is a status change, save the extra field status_last_changed with todays timestamp
+	if (this.isStatusChange(oldIssue, data)) {
+		data.status_last_changed = today;
+	}
+
+	// 4.4 If the status is changed to for_approval, the assigned role goes to the creator_role
+	if (data.status === statusEnum.FOR_APPROVAL) {
+		data.assigned_roles = oldIssue.creator_role ? [oldIssue.creator_role] : [];
+	}
+	return data;
+};
+
+issue.update = async function(user, sessionId, account, model, issueId, data) {
 	// 0. Set the black list for attributes
 	const attributeBlacklist = [
 		"_id",
@@ -405,133 +352,7 @@ issue.update = async function(dbCol, issueId, data) {
 		"status_last_changed"
 	];
 
-	// 1. Get old issue
-	const sessionId = data.sessionId;
-	const _id = utils.stringToUUID(issueId);
-	const user = data.requester;
-	let oldIssue = await this.findByUID(dbCol, _id, {}, true);
-	if (!oldIssue) {
-		throw { resCode: responseCodes.ISSUE_NOT_FOUND };
-	}
-
-	// 2. Get user permissions
-	const dbUser = await User.findByUserName(dbCol.account);
-	const job = (await Job.findByUser(dbCol.account, data.requester) || {})._id;
-	const accountPerm = dbUser.customData.permissions.findByUser(data.requester);
-	const projAdmin = await Project.isProjectAdmin(
-		dbCol.account,
-		dbCol.model,
-		data.requester
-	);
-
-	const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
-	const isAdmin = projAdmin || tsAdmin;
-	const hasOwnerJob = oldIssue.creator_role === job;
-	const hasAdminPrivileges = isAdmin || hasOwnerJob;
-	const hasAssignedJob = job === oldIssue.assigned_roles[0];
-	const userPermissions = { hasAdminPrivileges,	hasAssignedJob };
-
-	// 2.5 if the user dont have the necessary permissions to update the issue throw a ISSUE_UPDATE_PERMISSION_DECLINED
-	if (ownerPrivilegeAttributes.some(attr => !!data[attr]) && !userPermissions.hasAdminPrivileges) {
-		throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
-	}
-
-	// 2.6 if the user is trying to change the status and it doesnt have the necessary permissions throw a ISSUE_UPDATE_PERMISSION_DECLINED
-	if (data.status && data.status !== oldIssue.status) {
-		const canChangeStatus = userPermissions.hasAdminPrivileges || (userPermissions.hasAssignedJob && data.status !== statusEnum.CLOSED);
-		if (!canChangeStatus) {
-			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
-		}
-	}
-
-	// 3. Filter out blacklisted attributes and leave proper attrs
-	data = _.omit(data, attributeBlacklist);
-	data = _.pick(data, Object.keys(fieldTypes));
-
-	if (_.isEmpty(data)) {
-		throw responseCodes.INVALID_ARGUMENTS;
-	}
-
-	const today = (new Date()).getTime();
-	let systemStatusChanged = false;
-
-	// 4. Prepare side updates
-	// 4.1 If there is an issue Assigment and the status is "for_approval" change it to "in_progress"
-	if (this.isIssueAssignment(oldIssue, data) && oldIssue.status === statusEnum.FOR_APPROVAL) {
-		data.status = statusEnum.IN_PROGRESS;
-		systemStatusChanged = true;
-	}
-
-	// 5. Add system comments
-	const systemComments = [];
-	const fields = Object.keys(data);
-
-	fields.forEach(field=> {
-		if (Object.prototype.toString.call(data[field]) !== fieldTypes[field]) {
-			throw responseCodes.INVALID_ARGUMENTS;
-		}
-
-		// if a field have the same value shouldnt update the property
-		if (_.isEqual(field[field], data[field])) {
-			delete data[field];
-			return;
-		}
-
-		// update of extras must not create a system comment
-		if(field === "extras") {
-			return;
-		}
-
-		// if it is an automatic status change shouldnt add a system comment.
-		if(field === "status" && systemStatusChanged) {
-			return;
-		}
-
-		const comment =  addSystemComment(
-			dbCol.account,
-			dbCol.model,
-			sessionId,
-			issueId,
-			user,
-			field,
-			oldIssue[field],
-			data[field]);
-
-		systemComments.push(comment);
-	});
-
-	if (systemComments.length > 0) {
-		data.comments = (oldIssue.comments || []).map(c=> ({...c,sealed:true}));
-		data.comments = data.comments.concat(systemComments);
-	}
-
-	// 4.2 If there is a priority change , save the extra field priority_last_changed with todays timestamp
-	if (this.isPriorityChange(oldIssue, data)) {
-		data.priority_last_changed = today;
-	}
-
-	// 4.3 If there is a status change, save the extra field status_last_changed with todays timestamp
-	if (this.isStatusChange(oldIssue, data)) {
-		data.status_last_changed = today;
-	}
-
-	// 4.4 If the status is changed to for_approval, the assigned role goes to the creator_role
-	if (data.status === statusEnum.FOR_APPROVAL) {
-		data.assigned_roles = oldIssue.creator_role ? [oldIssue.creator_role] : [];
-	}
-
-	// 6. Update the data
-	const issues = await db.getCollection(dbCol.account, dbCol.model + ".issues");
-	await issues.update({_id}, {$set: data});
-
-	// 7. Return the updated data and the old issue
-	const newIssue = clean(dbCol,{...oldIssue, ...data});
-	oldIssue = clean(dbCol, oldIssue);
-
-	delete data.comments;
-	ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, newIssue._id, data);
-
-	return {oldIssue, newIssue};
+	return await ticket.update(attributeBlacklist, user, sessionId, account, model, issueId, data, this.onBeforeUpdate.bind(this));
 };
 
 issue.getIssuesReport = function(account, model, username, rid, issueIds, res) {
@@ -665,7 +486,7 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 								});
 							}
 							if (!noClean) {
-								mainIssues = mainIssues.map(x => clean(dbCol, x));
+								mainIssues = mainIssues.map(x => ticket.clean(dbCol.account, dbCol.model, x));
 							}
 
 							return mainIssues;
@@ -679,51 +500,6 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 	});
 };
 
-issue.findByUID = async function(dbCol, uid, projection, noClean = false) {
-
-	if ("[object String]" === Object.prototype.toString.call(uid)) {
-		uid = utils.stringToUUID(uid);
-	}
-
-	const settings = await ModelSetting.findById(dbCol, dbCol.model);
-	const issues = await db.getCollection(dbCol.account, dbCol.model + ".issues");
-	let foundIssue = await issues.findOne({ _id: uid }, projection);
-
-	if (!foundIssue) {
-		return Promise.reject(responseCodes.ISSUE_NOT_FOUND);
-	}
-
-	if(foundIssue.refs) {
-		const refsColl = await db.getCollection(dbCol.account, dbCol.model + ".resources.ref");
-		const resources = await refsColl.find({ _id: { $in: foundIssue.refs } }, {name:1, size: 1, createdAt: 1, link: 1, type: 1}).toArray();
-		resources.forEach(r => {
-			if(r.type !== "http") {
-				delete r.link;
-			}
-
-			delete r.type;
-		});
-
-		foundIssue.resources = resources;
-		delete foundIssue.refs;
-	}
-
-	if (!foundIssue.typePrefix) {
-		foundIssue.typePrefix = (settings.type) ? settings.type : "";
-	}
-
-	if (!foundIssue.modelCode) {
-		foundIssue.modelCode = (settings.properties && settings.properties.code) ?
-			settings.properties.code : "";
-	}
-
-	if (!noClean) {
-		foundIssue = clean(dbCol, foundIssue);
-	}
-
-	return foundIssue;
-};
-
 issue.getScreenshot = function(dbCol, uid, vid) {
 
 	if ("[object String]" === Object.prototype.toString.call(uid)) {
@@ -734,7 +510,7 @@ issue.getScreenshot = function(dbCol, uid, vid) {
 		vid = utils.stringToUUID(vid);
 	}
 
-	return this.findByUID(dbCol, uid, { viewpoints: { $elemMatch: { guid: vid } },
+	return ticket.findByUID(dbCol.account, dbCol.model, uid, { viewpoints: { $elemMatch: { guid: vid } },
 		"viewpoints.screenshot.resizedContent": 0
 	}, true).then((foundIssue) => {
 		if (!_.get(foundIssue, "viewpoints[0].screenshot.content.buffer")) {
@@ -755,7 +531,7 @@ issue.getSmallScreenshot = function(dbCol, uid, vid) {
 		vid = utils.stringToUUID(vid);
 	}
 
-	return this.findByUID(dbCol, uid, { viewpoints: { $elemMatch: { guid: vid } } }, true)
+	return ticket.findByUID(dbCol.account, dbCol.model, uid, { viewpoints: { $elemMatch: { guid: vid } } })
 		.then((foundIssue) => {
 			if (_.get(foundIssue, "viewpoints[0].screenshot.resizedContent.buffer")) {
 				return foundIssue.viewpoints[0].screenshot.resizedContent.buffer;
@@ -792,13 +568,18 @@ issue.getThumbnail = function(dbCol, uid) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	return this.findByUID(dbCol, uid, { thumbnail: 1 }, true).then((foundIssue) => {
+	return ticket.findByUID(dbCol.account, dbCol.model, uid, { thumbnail: 1 }).then((foundIssue) => {
 		if (!_.get(foundIssue, "thumbnail.content.buffer")) {
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {
 			return foundIssue.thumbnail.content.buffer;
 		}
 	});
+};
+
+issue.findByUID = async function(account, model, issueId) {
+	const foundIssue = await ticket.findByUID(account, model, issueId);
+	return ticket.clean(account, model, foundIssue);
 };
 
 issue.deleteComment = async function(account, model, issueID, guid, user) {

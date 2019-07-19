@@ -355,7 +355,7 @@ router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.noti
  * @apiSuccess (200) {Object} Updated Issue Object.
  *
  */
-router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.notification.onIssueUpdate, middlewares.chat.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /:teamspace/:model/revision/:rid/issues Store issue based on revision
@@ -532,18 +532,18 @@ function storeIssue(req, res, next) {
 
 function updateIssue(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = { account: req.params.account, model: req.params.model };
+	const { account, model } = req.params;
 	const data = req.body;
 
-	data.requester = req.session.user.username;
-	data.revId = req.params.rid;
-	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const user = req.session.user.username;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	const issueId = req.params.issueId;
 
-	return Issue.update(dbCol, issueId, data).then(({newIssue, oldIssue}) => {
-		req.dataModel = newIssue;
-		req.oldDataModel = oldIssue;
+	return Issue.update(user, sessionId, account, model, issueId, data).then(({updatedTicket, oldTicket, data}) => {
+		req.dataModel = updatedTicket;
+		req.oldDataModel = oldTicket;
+		req.data = data;
 		next();
 	}).catch((err) => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -608,11 +608,10 @@ function getIssuesBCF(req, res, next) {
 }
 
 function findIssueById(req, res, next) {
-	const params = req.params;
 	const place = utils.APIInfo(req);
-	const dbCol = { account: req.params.account, model: req.params.model };
+	const {account, model, issueId} = req.params;
 
-	Issue.findByUID(dbCol, params.issueId).then(issue => {
+	Issue.findByUID(account, model, issueId).then(issue => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issue);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
