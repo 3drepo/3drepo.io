@@ -20,12 +20,12 @@ import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
-import { StarredMetaActions, StarredMetaTypes } from './starredMeta.redux';
+import { StarredActions, StarredTypes } from './starred.redux';
 
 export function* fetchStarredMeta() {
 	try {
 		const { data: starredMeta } = yield API.getStarredMeta();
-		yield put(StarredMetaActions.setStarredMeta(starredMeta));
+		yield put(StarredActions.setStarredMeta(starredMeta));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'starred meta', error));
 	}
@@ -34,7 +34,7 @@ export function* fetchStarredMeta() {
 export function* addToStarredMeta({ metaRecordKey }) {
 	try {
 		yield API.addStarredMeta(metaRecordKey);
-		yield put(StarredMetaActions.addToStarredMetaSuccess(metaRecordKey));
+		yield put(StarredActions.addToStarredMetaSuccess(metaRecordKey));
 		yield put(SnackbarActions.show(`Meta key ${metaRecordKey} added to starred`));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('add', 'starred meta', error));
@@ -44,7 +44,7 @@ export function* addToStarredMeta({ metaRecordKey }) {
 export function* removeFromStarredMeta({ metaRecordKey }) {
 	try {
 		yield API.removeStarredMeta(metaRecordKey);
-		yield put(StarredMetaActions.removeFromStarredMetaSuccess(metaRecordKey));
+		yield put(StarredActions.removeFromStarredMetaSuccess(metaRecordKey));
 		yield put(SnackbarActions.show(`Meta key ${metaRecordKey} removed from starred`));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'starred meta', error));
@@ -54,15 +54,15 @@ export function* removeFromStarredMeta({ metaRecordKey }) {
 export function* clearStarredMeta() {
 	try {
 		yield API.overrideStarredMeta([]);
-		yield put(StarredMetaActions.setStarredMeta([]));
+		yield put(StarredActions.setStarredMeta([]));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('override', 'starred meta', error));
 	}
 }
 
 export default function* StarredMetaSaga() {
-	yield takeLatest(StarredMetaTypes.FETCH_STARRED_META, fetchStarredMeta);
-	yield takeLatest(StarredMetaTypes.ADD_TO_STARRED_META, addToStarredMeta);
-	yield takeLatest(StarredMetaTypes.REMOVE_FROM_STARRED_META, removeFromStarredMeta);
-	yield takeLatest(StarredMetaTypes.CLEAR_STARRED_META, clearStarredMeta);
+	yield takeLatest(StarredTypes.FETCH_STARRED_META, fetchStarredMeta);
+	yield takeLatest(StarredTypes.ADD_TO_STARRED_META, addToStarredMeta);
+	yield takeLatest(StarredTypes.REMOVE_FROM_STARRED_META, removeFromStarredMeta);
+	yield takeLatest(StarredTypes.CLEAR_STARRED_META, clearStarredMeta);
 }

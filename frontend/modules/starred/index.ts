@@ -16,8 +16,8 @@
  */
 
 export {
-	StarredMetaTypes,
-	StarredMetaActions
-} from './starredMeta.redux';
+	StarredTypes,
+	StarredActions
+} from './starred.redux';
 
-export * from './starredMeta.selectors';
+export * from './starred.selectors';

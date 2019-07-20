@@ -18,7 +18,7 @@
 import { omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
-export const { Types: StarredMetaTypes, Creators: StarredMetaActions } = createActions({
+export const { Types: StarredTypes, Creators: StarredActions } = createActions({
 	fetchStarredMeta: [],
 	setStarredMeta: ['starredMeta'],
 	addToStarredMeta: ['metaRecordKey'],
@@ -26,13 +26,13 @@ export const { Types: StarredMetaTypes, Creators: StarredMetaActions } = createA
 	addToStarredMetaSuccess: ['metaRecord'],
 	removeFromStarredMetaSuccess: ['metaRecord'],
 	clearStarredMeta: []
-}, { prefix: 'STARRED_META/' });
+}, { prefix: 'STARRED/' });
 
-export interface IStarredMetaState {
+export interface IStarredState {
 	starredMetaMap: any;
 }
 
-export const INITIAL_STATE: IStarredMetaState = {
+export const INITIAL_STATE: IStarredState = {
 	starredMetaMap: {}
 };
 
@@ -63,7 +63,7 @@ const removeFromStarredMetaSuccess = (state = INITIAL_STATE, { metaRecord }) => 
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[StarredMetaTypes.SET_STARRED_META]: setStarredMeta,
-	[StarredMetaTypes.ADD_TO_STARRED_META_SUCCESS]: addToStarredMetaSuccess,
-	[StarredMetaTypes.REMOVE_FROM_STARRED_META_SUCCESS]: removeFromStarredMetaSuccess
+	[StarredTypes.SET_STARRED_META]: setStarredMeta,
+	[StarredTypes.ADD_TO_STARRED_META_SUCCESS]: addToStarredMetaSuccess,
+	[StarredTypes.REMOVE_FROM_STARRED_META_SUCCESS]: removeFromStarredMetaSuccess
 });
