@@ -51,9 +51,13 @@ interface IProps {
 	items: any[];
 	isPending: boolean;
 	visibleItems: any[];
+	starredTeamspaceItemsMap: any;
 	showDialog: (config) => void;
 	fetchTeamspaces: (username) => void;
 	setState: (componentState: any) => void;
+
+	addToStarred: (modelName) => void;
+	removeFromStarred: (modelName) => void;
 }
 
 interface IState {
@@ -139,7 +143,11 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	private renderModels = (models, projectId) => renderWhenTrue(() => (
 		<GridContainer key={`container-${projectId}`}>
 			{models.map((props) => (
-				<ModelGridItem key={props.model} {...props} />
+				<ModelGridItem
+					key={props.model}
+					isStarred={this.props.starredTeamspaceItemsMap[props.name]}
+					{...props}
+				/>
 			))}
 		</GridContainer>
 	))(models.length && this.state.visibleItems[projectId])

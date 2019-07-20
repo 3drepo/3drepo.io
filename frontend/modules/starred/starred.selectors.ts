@@ -22,3 +22,7 @@ export const selectStarredDomain = (state) => ({...state.starred});
 export const selectStarredMeta = createSelector(
 	selectStarredDomain, (state) => state.starredMetaMap
 );
+
+export const selectStarredTeamspaceItems = createSelector(
+	selectStarredDomain, (state) => state.starredTeamspaceItemsMap
+);

@@ -22,6 +22,10 @@ import { createStructuredSelector } from 'reselect';
 import { selectCurrentTeamspace } from '../../modules/currentUser';
 import { DialogActions } from '../../modules/dialog';
 import {
+	selectStarredTeamspaceItems,
+	StarredActions
+} from '../../modules/starred';
+import {
 	selectFlattenTeamspaces,
 	selectIsPending,
 	selectProjects,
@@ -29,6 +33,7 @@ import {
 	selectVisibleItems,
 	TeamspacesActions,
 } from '../../modules/teamspaces';
+
 import { Teamspaces } from './teamspaces.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -36,14 +41,17 @@ const mapStateToProps = createStructuredSelector({
 	items: selectFlattenTeamspaces,
 	isPending: selectIsPending,
 	visibleItems: selectVisibleItems,
-	teamspaces: selectTeamspaces
+	teamspaces: selectTeamspaces,
+	starredTeamspaceItemsMap: selectStarredTeamspaceItems
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showDialog: DialogActions.showDialog,
 	createModel: TeamspacesActions.createModel,
 	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
-	setState: TeamspacesActions.setComponentState
+	setState: TeamspacesActions.setComponentState,
+	addToStarred: StarredActions.addToStarredTeamspaceItems,
+	removeFromStarred: StarredActions.removeFromStarredTeamspaceItems
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Teamspaces);
