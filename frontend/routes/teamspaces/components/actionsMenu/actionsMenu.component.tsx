@@ -35,13 +35,17 @@ export function ActionsMenu(props: IProps) {
 	const [toggleForceOpen, setToggleForceOpen] = useState(false);
 	const opened = open || toggleForceOpen;
 
+	const toggleForceOpenHandler = () => setToggleForceOpen(!toggleForceOpen);
+	const closeHandler = () => setOpen(false);
+	const openHandler = () => setOpen(true);
+
 	return (
-		<Container onMouseLeave={() => setOpen(false)}>
-			<ActionsButton onMouseEnter={() => setOpen(true)}>
+		<Container onMouseLeave={closeHandler}>
+			<ActionsButton onMouseEnter={openHandler}>
 				<SmallIconButton
 					aria-label={'Toggle actions menu'}
 					Icon={MoreIcon}
-					onClick={() => setToggleForceOpen(!toggleForceOpen)}
+					onClick={toggleForceOpenHandler}
 					disabled={props.disabled}
 					tooltip={'Toggle actions menu'}
 				/>
