@@ -109,12 +109,7 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 		};
 
 		// mocked Grid TODO: remove after
-		if (this.props.level === 3 &&
-			(
-				this.props.items[0].name === 'Lego_House_Architecture' ||
-				this.props.items[0].name === 'Test fed 2'
-			)
-		) {
+		if (this.props.level === 3) {
 			return (
 				<GridContainer>
 					{this.renderItems()}

@@ -175,6 +175,11 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public createShareModelHandler = (props) => (event) => {
+		event.stopPropagation();
+		console.log('Share model', props);
+	}
+
 	public openModelDialog =
 		(teamspaceName = '', projectName = '', modelName = '', modelId = '') => (event) => {
 		event.stopPropagation();

@@ -16,8 +16,8 @@
  */
 
 import Grid from '@material-ui/core/Grid';
-import Grow from '@material-ui/core/Grow';
 import styled from 'styled-components';
+import { COLOR } from '../../../../styles';
 
 export const Container = styled.div``;
 
@@ -28,15 +28,18 @@ export const StyledGrid = styled(Grid)`
     position: absolute;
     right: 0;
     top: 0;
-    background: white;
+    background: ${(props) => props.federate ? COLOR.ALICE_BLUE : COLOR.WHITE};
     position: absolute;
+    z-index: 0;
 	}
 
+  transition: opacity 200ms ease-in-out;
+  opacity: ${(props) => props.opened ? 1 : 0};
   pointer-events: ${(props) => props.opened ? 'all' : 'none'};
 `;
 
-export const StyledGrow = styled(Grow)`
-	&& {
-		transform-origin: right;
+export const ActionsButton = styled.div`
+  &:hover ${StyledGrid} {
+		opacity: 1;
 	}
 `;

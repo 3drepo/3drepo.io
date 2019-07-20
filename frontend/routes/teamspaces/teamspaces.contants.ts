@@ -22,25 +22,10 @@ import Delete from '@material-ui/icons/Delete';
 import Edit from '@material-ui/icons/Edit';
 import People from '@material-ui/icons/People';
 import Settings from '@material-ui/icons/Settings';
+import Share from '@material-ui/icons/Share';
 import SettingsBackupRestore from '@material-ui/icons/SettingsBackupRestore';
 
 export const ROW_ACTIONS = {
-	PERMISSIONS: {
-		label: 'Permissions',
-		Icon: People,
-		requiredPermissions: 'manage_model_permission'
-	},
-	SETTINGS: {
-		label: 'Settings',
-		Icon: Settings,
-		requiredPermissions: 'change_model_settings'
-	},
-	DELETE: {
-		label: 'Delete',
-		Icon: Delete,
-		color: 'error',
-		requiredPermissions: 'delete_model'
-	},
 	UPLOAD_FILE: {
 		label: 'Upload file',
 		Icon: CloudUpload,
@@ -54,6 +39,26 @@ export const ROW_ACTIONS = {
 		label: 'Download',
 		Icon: CloudDownload,
 		requiredPermissions: 'download_model'
+	},
+	PERMISSIONS: {
+		label: 'Permissions',
+		Icon: People,
+		requiredPermissions: 'manage_model_permission'
+	},
+	SHARE: {
+		label: 'Share',
+		Icon: Share,
+	},
+	SETTINGS: {
+		label: 'Settings',
+		Icon: Settings,
+		requiredPermissions: 'change_model_settings'
+	},
+	DELETE: {
+		label: 'Delete',
+		Icon: Delete,
+		color: 'error',
+		requiredPermissions: 'delete_model'
 	},
 	ADD_NEW: {
 		label: 'Add new item',

@@ -49,6 +49,7 @@ interface IProps {
 	federate: boolean;
 	onSettingsClick: () => void;
 	onPermissionsClick: () => void;
+	onShareClick: () => void;
 	onDeleteClick: () => void;
 	onModelUpload: () => void;
 	onRevisionsClick: () => void;
@@ -60,6 +61,7 @@ export function ModelGridItem({
 	name, className, federate = false, permissions, timestamp,
 	onSettingsClick,
 	onPermissionsClick,
+	onShareClick,
 	onDeleteClick,
 	onModelUpload,
 	onRevisionsClick,
@@ -86,11 +88,14 @@ export function ModelGridItem({
 	};
 
 	const sharedActions = [{
-		...ROW_ACTIONS.SETTINGS,
-		action: onSettingsClick
-	}, {
 		...ROW_ACTIONS.PERMISSIONS,
 		action: onPermissionsClick
+	}, {
+		...ROW_ACTIONS.SHARE,
+		action: onShareClick
+	}, {
+		...ROW_ACTIONS.SETTINGS,
+		action: onSettingsClick
 	}, {
 		...ROW_ACTIONS.DELETE,
 		action: onDeleteClick
@@ -108,7 +113,6 @@ export function ModelGridItem({
 		isHidden: !Boolean(timestamp)
 	}, ...sharedActions];
 
-	const hovered = false;
 	const isPending = false;
 
 	const federationActions = [{
@@ -118,8 +122,6 @@ export function ModelGridItem({
 
 	const rowActions = federate ? federationActions : modelActions;
 
-	const [actionsMenuOpen, setAtionsMenuOpen] = useState(false);
-
 	return (
 		<Container className={className} federate={federate}>
 			<Header>
@@ -127,16 +129,11 @@ export function ModelGridItem({
 					<StarIcon active={Number(federate)} activeColor={COLOR.SUNGLOW}	onClick={() => {console.log('star click')}} />
 					<Name>{name}</Name>
 				</NameWrapper>
-				<ActionsMenu
-					open={hovered}
-					disabled={isPending}
-					forceOpen={actionsMenuOpen}
-					toggleForceOpen={() => setAtionsMenuOpen(!actionsMenuOpen)}
-				>
+				<ActionsMenu disabled={isPending} federate={federate}>
 					<Actions>
 						{renderActions(rowActions)}
 					</Actions>
-			</ActionsMenu>
+				</ActionsMenu>
 			</Header>
 			<Content>
 				<PropertiesColumn>

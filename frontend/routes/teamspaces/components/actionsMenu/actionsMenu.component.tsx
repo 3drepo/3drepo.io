@@ -17,50 +17,46 @@
 
 import MoreVert from '@material-ui/icons/MoreVert';
 import React, { useState } from 'react';
-
 import { SmallIconButton } from './../../../components/smallIconButon/smallIconButton.component';
-import { Container, StyledGrid, StyledGrow } from './actionsMenu.styles';
+
+import { ActionsButton, Container, StyledGrid } from './actionsMenu.styles';
 
 interface IProps {
 	className?: string;
-	open?: boolean;
 	disabled: boolean;
-	forceOpen?: boolean;
+	federate: boolean;
 	children: any;
-	toggleForceOpen: () => void;
 }
 
 const MoreIcon = () => <MoreVert fontSize="small" />;
 
 export function ActionsMenu(props: IProps) {
-	const opened = props.open || props.forceOpen;
-
-	const growProps = !props.disabled && {
-		in: opened,
-		timeout: 300
-	};
+	const [open, setOpen] = useState(false);
+	const [toggleForceOpen, setToggleForceOpen] = useState(false);
+	const opened = open || toggleForceOpen;
 
 	return (
-		<Container>
-			<StyledGrow appear={!props.disabled} {...growProps}>
-				<StyledGrid
-					container
-					wrap="nowrap"
-					direction="row"
-					alignItems="center"
-					justify="flex-start"
-					opened={opened}
-				>
-					{props.children}
-				</StyledGrid>
-			</StyledGrow>
-			<SmallIconButton
-				aria-label={'Toggle actions menu'}
-				Icon={MoreIcon}
-				onClick={props.toggleForceOpen}
-				disabled={props.disabled}
-				tooltip={'Toggle actions menu'}
-			/>
+		<Container onMouseLeave={() => setOpen(false)}>
+			<ActionsButton onMouseEnter={() => setOpen(true)}>
+				<SmallIconButton
+					aria-label={'Toggle actions menu'}
+					Icon={MoreIcon}
+					onClick={() => setToggleForceOpen(!toggleForceOpen)}
+					disabled={props.disabled}
+					tooltip={'Toggle actions menu'}
+				/>
+			</ActionsButton>
+			<StyledGrid
+				container
+				wrap="wrap"
+				direction="row"
+				alignItems="center"
+				justify="flex-start"
+				opened={opened}
+				federate={props.federate}
+			>
+				{props.children}
+			</StyledGrid>
 		</Container>
 	);
 }

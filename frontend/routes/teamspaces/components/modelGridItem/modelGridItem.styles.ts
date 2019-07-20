@@ -67,6 +67,10 @@ export const Timestamp = styled.span`
 `;
 
 export const Actions = styled.div`
+  position: absolute;
+  right: 40px;
+  top: 5px;
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
 `;
