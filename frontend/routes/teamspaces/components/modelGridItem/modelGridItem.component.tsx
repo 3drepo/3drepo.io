@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { COLOR } from '../../../../styles';
 import { SmallIconButton } from '../../../components/smallIconButon/smallIconButton.component';
+import { ROW_ACTIONS } from '../../teamspaces.contants';
 
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -27,6 +28,7 @@ import { ActionsMenu } from '../actionsMenu/actionsMenu.component';
 
 import {
 	Actions,
+	ClickableLayer,
 	Container,
 	Content,
 	Header,
@@ -36,9 +38,9 @@ import {
 	Property,
 	Timestamp
 } from './modelGridItem.styles';
-import { ROW_ACTIONS } from '../../teamspaces.contants';
 
 interface IProps {
+	activeTeamspace: string;
 	className?: string;
 	name: string;
 	model: string;
@@ -55,19 +57,34 @@ interface IProps {
 	onRevisionsClick: () => void;
 	onDownloadClick: () => void;
 	onEditClick: () => void;
+	onModelItemClick: () => void;
+	subscribeOnStatusChange: (teamspace, project, modelData) => void;
+	unsubscribeOnStatusChange: (teamspace, project, modelData) => void;
 }
 
-export function ModelGridItem({
-	name, className, federate = false, permissions, timestamp,
-	onSettingsClick,
-	onPermissionsClick,
-	onShareClick,
-	onDeleteClick,
-	onModelUpload,
-	onRevisionsClick,
-	onDownloadClick,
-	onEditClick
-}: IProps) {
+export function ModelGridItem(props: IProps) {
+	const {
+		activeTeamspace,
+		name,
+		model,
+		projectName,
+		className,
+		federate = false,
+		permissions,
+		timestamp,
+		onSettingsClick,
+		onPermissionsClick,
+		onShareClick,
+		onDeleteClick,
+		onModelUpload,
+		onRevisionsClick,
+		onDownloadClick,
+		onEditClick,
+		onModelItemClick,
+		subscribeOnStatusChange,
+		unsubscribeOnStatusChange
+	} = props;
+
 	const renderActions = (actions) => {
 		return actions ? actions.map((actionItem, index) => {
 			const {label, action, Icon, color, isHidden = false, requiredPermissions = ''} = actionItem;
@@ -77,6 +94,7 @@ export function ModelGridItem({
 			if (!isHidden) {
 				return renderWhenTrue((
 					<SmallIconButton
+						key={index}
 						aria-label={label}
 						onClick={action}
 						Icon={ActionsIconButton}
@@ -122,8 +140,17 @@ export function ModelGridItem({
 
 	const rowActions = federate ? federationActions : modelActions;
 
+	useEffect(() => {
+			if (!federate) {
+				const modelData = { modelId: model, modelName: name };
+				subscribeOnStatusChange(activeTeamspace, projectName, modelData);
+				return () => unsubscribeOnStatusChange(activeTeamspace, projectName, modelData);
+			}
+	}, []);
+
 	return (
 		<Container className={className} federate={federate}>
+			<ClickableLayer onClick={onModelItemClick} />
 			<Header>
 				<NameWrapper>
 					<StarIcon active={Number(federate)} activeColor={COLOR.SUNGLOW}	onClick={() => {console.log('star click')}} />

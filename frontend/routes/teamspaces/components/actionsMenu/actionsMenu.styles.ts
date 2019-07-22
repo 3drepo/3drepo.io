@@ -19,23 +19,30 @@ import Grid from '@material-ui/core/Grid';
 import styled from 'styled-components';
 import { COLOR } from '../../../../styles';
 
+interface IStyledGrid {
+	theme: {
+		opened: boolean,
+		federate: boolean
+	};
+}
+
 export const Container = styled.div``;
 
-export const StyledGrid = styled(Grid)`
+export const StyledGrid = styled(Grid)<IStyledGrid>`
 	&& {
     width: 100%;
     height: 100%;
     position: absolute;
     right: 0;
     top: 0;
-    background: ${(props) => props.federate ? COLOR.ALICE_BLUE : COLOR.WHITE};
+    background: ${(props) => props.theme.federate ? COLOR.ALICE_BLUE : COLOR.WHITE};
     position: absolute;
     z-index: 0;
 	}
 
   transition: opacity 200ms ease-in-out;
-  opacity: ${(props) => props.opened ? 1 : 0};
-  pointer-events: ${(props) => props.opened ? 'all' : 'none'};
+  opacity: ${(props) => props.theme.opened ? 1 : 0};
+  pointer-events: ${(props) => props.theme.opened ? 'all' : 'none'};
 `;
 
 export const ActionsButton = styled.div`

@@ -135,6 +135,7 @@ export function* subscribeOnStatusChange({ teamspace, project, modelData }) {
 
 export function* unsubscribeOnStatusChange({ teamspace, project, modelData }) {
 	const { modelId, modelName } = modelData;
+
 	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.MODEL, teamspace, modelId, {
 		unsubscribeToStatusChanged: onChanged(teamspace, project, modelId, modelName)
 	}));

@@ -30,24 +30,26 @@ interface IProps {
 
 const MoreIcon = () => <MoreVert fontSize="small" />;
 
-export function ActionsMenu(props: IProps) {
+export function ActionsMenu({federate, disabled, children}: IProps) {
 	const [open, setOpen] = useState(false);
 	const [toggleForceOpen, setToggleForceOpen] = useState(false);
 	const opened = open || toggleForceOpen;
 
-	const toggleForceOpenHandler = () => setToggleForceOpen(!toggleForceOpen);
+	const toggleForceOpenHandler = (event) => {
+		event.stopPropagation();
+		setToggleForceOpen(!toggleForceOpen);
+	};
 	const closeHandler = () => setOpen(false);
 	const openHandler = () => setOpen(true);
 
 	return (
-		<Container onMouseLeave={closeHandler}>
+		<Container onMouseLeave={closeHandler} opened={opened}>
 			<ActionsButton onMouseEnter={openHandler}>
 				<SmallIconButton
-					aria-label={'Toggle actions menu'}
+					ariaLabel={'Toggle actions menu'}
 					Icon={MoreIcon}
 					onClick={toggleForceOpenHandler}
-					disabled={props.disabled}
-					tooltip={'Toggle actions menu'}
+					disabled={disabled}
 				/>
 			</ActionsButton>
 			<StyledGrid
@@ -56,10 +58,9 @@ export function ActionsMenu(props: IProps) {
 				direction="row"
 				alignItems="center"
 				justify="flex-start"
-				opened={opened}
-				federate={props.federate}
+				theme={{ opened, federate }}
 			>
-				{props.children}
+				{children}
 			</StyledGrid>
 		</Container>
 	);

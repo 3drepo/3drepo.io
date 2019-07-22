@@ -74,3 +74,12 @@ export const Actions = styled.div`
   flex-wrap: wrap;
   justify-content: flex-end;
 `;
+
+export const ClickableLayer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+`;

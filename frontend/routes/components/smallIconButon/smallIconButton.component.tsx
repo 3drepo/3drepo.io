@@ -17,29 +17,40 @@
 
 import { Tooltip } from '@material-ui/core';
 import React from 'react';
+import { renderWhenTrueOtherwise } from '../../../helpers/rendering';
 import { SmallIconButtonStyled } from './smallIconButton.styles';
 
 interface IProps {
 	onClick?: (event: React.SyntheticEvent) => void;
 	Icon: React.ComponentType;
-	tooltip: string;
+	ariaLabel?: string;
+	tooltip?: string;
 	disabled?: boolean;
 }
 
 export class SmallIconButton extends React.PureComponent<IProps, any> {
-	public render() {
-		const { Icon, tooltip, onClick, disabled = false } = this.props;
+	public renderButtonConditionally = renderWhenTrueOtherwise(() => (
+		<Tooltip title={this.props.tooltip}>
+			{this.renderButton()}
+		</Tooltip>
+	), () => this.renderButton());
+
+	public renderButton = () => {
+		const { Icon, ariaLabel, tooltip, onClick, disabled = false } = this.props;
+
 		return (
-			<Tooltip title={tooltip}>
-				<SmallIconButtonStyled
-					component="span"
-					aria-label={tooltip}
-					onClick={onClick}
-					disabled={disabled}
-					>
-					<Icon />
-				</SmallIconButtonStyled>
-			</Tooltip>
+			<SmallIconButtonStyled
+				component="span"
+				aria-label={ariaLabel || tooltip}
+				onClick={onClick}
+				disabled={disabled}
+				>
+				<Icon />
+			</SmallIconButtonStyled>
 		);
+	}
+
+	public render() {
+		return this.renderButtonConditionally(this.props.tooltip);
 	}
 }
