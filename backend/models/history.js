@@ -63,9 +63,13 @@ historySchema.statics.getHistory = function(dbColOptions, branch, revId, project
 
 historySchema.statics.tagRegExp = /^[a-zA-Z0-9_-]{1,20}$/;
 // list revisions by branch
-historySchema.statics.listByBranch = function(dbColOptions, branch, projection) {
+historySchema.statics.listByBranch = function(dbColOptions, branch, projection, showVoid = false) {
 
 	const query = {"incomplete": {"$exists": false}};
+
+	if(!showVoid) {
+		query.void = {"$ne" : true};
+	}
 
 	if(branch === C.MASTER_BRANCH_NAME) {
 		query.shared_id = stringToUUID(C.MASTER_BRANCH);
