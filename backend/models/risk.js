@@ -37,6 +37,8 @@ const View = require("./viewpoint");
 
 const C = require("../constants");
 
+const Ticket = require("./ticket");
+
 const risk = {};
 
 const fieldTypes = {
@@ -76,6 +78,8 @@ const LEVELS = {
 	HIGH: 3,
 	VERY_HIGH: 4
 };
+
+const ticket = new Ticket("risks", "RISK", fieldTypes, []);
 
 function clean(dbCol, riskToClean) {
 	const idKeys = ["_id", "rev_id", "parent"];
@@ -437,6 +441,65 @@ risk.createRisk = function(dbCol, newRisk) {
 			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
 		}
 	});
+};
+
+risk.createViewPoint = async (account, model, viewpoint) => {
+	let newViewpoint = null;
+
+	if (viewpoint) {
+		newViewpoint = {...viewpoint};
+		if (Object.prototype.toString.call(viewpoint) === fieldTypes["viewpoint"]) {
+			newViewpoint.guid = utils.generateUUID();
+			newViewpoint = await View.clean({account, model}, newViewpoint, fieldTypes.viewpoint);
+		} else {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+	}
+
+	return newViewpoint;
+};
+
+risk.onBeforeUpdate = (account, model, sessionId, residualData) => async function(data, oldRisk) {
+	if (residualData.residual) {
+		const updatedComments = addRiskMitigationComment(
+			account,
+			model,
+			sessionId,
+			oldRisk._id,
+			oldRisk.comments,
+			data,
+			this.createViewPoint(residualData.viewpoint)
+		);
+
+		data.comments = updatedComments;
+	}
+
+	return data;
+};
+
+risk.update = async function(user, sessionId, account, model, issueId, data) {
+	// 0. Set the black list for attributes
+	const attributeBlacklist = [
+		"_id",
+		"comments",
+		"created",
+		"creator_role",
+		"name",
+		"norm",
+		"number",
+		"owner",
+		"rev_id",
+		"status",
+		"thumbnail",
+		"viewpoint",
+		"viewpoints"
+	];
+
+	const residualData = _.pick(data, ["viewpoint", "residual"]);
+	const beforeUpdate =  this.onBeforeUpdate(account, model, sessionId, residualData).bind(this);
+
+	data = _.omit(data, ["viewpoint", "residual"]);
+	return await ticket.update(attributeBlacklist, user, sessionId, account, model, issueId, data, beforeUpdate);
 };
 
 risk.updateAttrs = function(dbCol, uid, data) {

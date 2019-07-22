@@ -355,7 +355,7 @@ router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.noti
  * @apiSuccess (200) {Object} Updated Issue Object.
  *
  */
-router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.notification.onIssueUpdate, middlewares.chat.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.chat.onUpdateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /:teamspace/:model/revision/:rid/issues Store issue based on revision
@@ -532,15 +532,13 @@ function storeIssue(req, res, next) {
 
 function updateIssue(req, res, next) {
 	const place = utils.APIInfo(req);
-	const { account, model } = req.params;
-	const data = req.body;
+	const { account, model, issueId } = req.params;
+	const updateData = req.body;
 
 	const user = req.session.user.username;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	const issueId = req.params.issueId;
-
-	return Issue.update(user, sessionId, account, model, issueId, data).then(({updatedTicket, oldTicket, data}) => {
+	return Issue.update(user, sessionId, account, model, issueId, updateData).then(({updatedTicket, oldTicket, data}) => {
 		req.dataModel = updatedTicket;
 		req.oldDataModel = oldTicket;
 		req.data = data;

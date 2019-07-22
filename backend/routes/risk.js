@@ -239,21 +239,18 @@ function storeRisk(req, res, next) {
 
 function updateRisk(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model};
-	const data = req.body;
+	const { account, model, riskId } = req.params;
+	const updateData = req.body;
 
-	data.owner = req.session.user.username;
-	data.requester = req.session.user.username;
-	data.revId = req.params.rid;
-	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const user = req.session.user.username;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	const riskId = req.params.riskId;
-
-	return Risk.updateAttrs(dbCol, riskId, data).then((risk) => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, risk);
-
+	return Risk.update(user, sessionId, account, model, riskId, updateData).then(({updatedTicket, oldTicket, data}) => {
+		req.dataModel = updatedTicket;
+		req.oldDataModel = oldTicket;
+		req.data = data;
+		next();
 	}).catch((err) => {
-
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }

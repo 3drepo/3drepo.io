@@ -236,12 +236,12 @@ class Ticket {
 			systemComments.push(comment);
 		});
 
+		data = await beforeUpdate(data, oldTicket, userPermissions, systemComments);
+
 		if (systemComments.length > 0) {
 			data.comments = (oldTicket.comments || []).map(c=> ({...c,sealed:true}));
 			data.comments = data.comments.concat(systemComments);
 		}
-
-		data = await beforeUpdate(data, oldTicket);
 
 		// 6. Update the data
 		const _id = utils.stringToUUID(id);

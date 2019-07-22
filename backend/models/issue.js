@@ -305,7 +305,7 @@ issue.updateFromBCF = function(dbCol, issueToUpdate, changeSet) {
 	});
 };
 
-issue.onBeforeUpdate = async function(data, oldIssue, userPermissions) {
+issue.onBeforeUpdate = async function(data, oldIssue, userPermissions, systemComments) {
 	// 2.6 if the user is trying to change the status and it doesnt have the necessary permissions throw a ISSUE_UPDATE_PERMISSION_DECLINED
 	if (data.status && data.status !== oldIssue.status) {
 		const canChangeStatus = userPermissions.hasAdminPrivileges || (userPermissions.hasAssignedJob && data.status !== statusEnum.CLOSED);
@@ -326,10 +326,20 @@ issue.onBeforeUpdate = async function(data, oldIssue, userPermissions) {
 		data.status_last_changed = today;
 	}
 
+	if (this.isIssueAssignment(oldIssue, data) && oldIssue.status === statusEnum.FOR_APPROVAL) {
+		data.status = statusEnum.IN_PROGRESS;
+		const i = systemComments.findIndex((element) => {
+			return element.property === "status";
+		});
+
+		systemComments.splice(i,1);
+	}
+
 	// 4.4 If the status is changed to for_approval, the assigned role goes to the creator_role
 	if (data.status === statusEnum.FOR_APPROVAL) {
 		data.assigned_roles = oldIssue.creator_role ? [oldIssue.creator_role] : [];
 	}
+
 	return data;
 };
 
