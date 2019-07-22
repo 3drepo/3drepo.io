@@ -127,6 +127,15 @@ router.put("/revisions/:id/tag", middlewares.hasReadAccessToModel, updateRevisio
  * @apiParam {String} model Model ID
  * @apiParam {String} id Unique Revision ID or tag
  *
+ * @apiParamExample {json} Input
+ *    {
+ *       "void": true
+ *    }
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *    {}
+ *
  */
 
 router.patch("/revisions/:id", middlewares.hasReadAccessToModel, updateRevision);
