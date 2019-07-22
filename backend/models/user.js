@@ -611,7 +611,7 @@ function _fillInModelDetails(accountName, setting, permissions) {
 		errorReason: setting.errorReason,
 		subModels: setting.federate && setting.toObject().subModels || undefined,
 		timestamp: setting.timestamp || null,
-		code: setting.properties ? setting.properties.code || null : null
+		code: setting.properties ? setting.properties.code || undefined : undefined
 
 	};
 
