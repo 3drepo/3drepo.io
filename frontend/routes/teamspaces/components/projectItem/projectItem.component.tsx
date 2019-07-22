@@ -33,7 +33,6 @@ interface IProps {
 	_id: string;
 	name: string;
 	models: any[];
-	active: boolean;
 	disabled: boolean;
 	permissions: any[];
 	teamspace: string;
@@ -43,7 +42,7 @@ interface IProps {
 	showConfirmDialog: (config) => void;
 	showDialog: (config) => void;
 	onPermissionsClick: (event) => void;
-	onRootClick: (projectName) => void;
+	onClick: (projectName) => void;
 }
 
 interface IState {
@@ -145,8 +144,8 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleClick = () => {
-		const { _id, name, models } = this.props;
-		this.props.onRootClick({ id: _id,	name, models });
+		const { _id, models } = this.props;
+		this.props.onClick({ id: _id, models });
 	}
 
 	public isProjectAdmin = () => hasPermissions('admin_project', this.props.permissions);
@@ -169,19 +168,18 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 	))(this.isProjectAdmin()) as any
 
 	public render() {
-		const { name, active, disabled, _id } = this.props;
+		const { name, disabled } = this.props;
 		return (
 			<TreeList
 				onClick={this.handleClick}
 				name={name}
 				level={TREE_LEVELS.PROJECT}
 				disabled={disabled}
-				IconProps={ {
+				IconProps={{
 					IconClosed: Label,
 					IconOpened: LabelOutlined
 				}}
 				renderActions={this.renderProjectActions}
-				active={active}
 			/>
 		);
 	}

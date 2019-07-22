@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEmpty, matches, cond, stubTrue } from 'lodash';
-import * as queryString from 'query-string';
+import { cond, isEmpty, matches, stubTrue } from 'lodash';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
@@ -24,10 +23,10 @@ import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../service
 import MenuItem from '@material-ui/core/MenuItem';
 import Add from '@material-ui/icons/Add';
 
+import { renderWhenTrue } from '../../helpers/rendering';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
-import { renderWhenTrue } from '../../helpers/rendering';
 import { PERMISSIONS_VIEWS } from '../projects/projects.component';
 import FederationDialog from './components/federationDialog/federationDialog.container';
 import { ModelDialog } from './components/modelDialog/modelDialog.component';
@@ -39,7 +38,7 @@ import ModelListItem from './components/modelListItem/modelListItem.container';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
 import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
 import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
-import { FEDERATION_TYPE, MODEL_TYPE, LIST_ITEMS_TYPES } from './teamspaces.contants';
+import { FEDERATION_TYPE, LIST_ITEMS_TYPES, MODEL_TYPE } from './teamspaces.contants';
 import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 
 const PANEL_PROPS = {
@@ -53,6 +52,8 @@ interface IProps {
 	match: any;
 	history: any;
 	location: any;
+	teamspaces: any;
+	projects: any;
 	currentTeamspace: string;
 	items: any[];
 	isPending: boolean;
@@ -83,7 +84,7 @@ interface IState {
 	activeTeamspace: string;
 	activeProject: string;
 	teamspacesItems: any[];
-	visibileItems: any;
+	visibleItems: any;
 }
 
 export class Teamspaces extends React.PureComponent<IProps, IState> {
@@ -95,7 +96,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		activeTeamspace: '',
 		activeProject: '',
 		teamspacesItems: [],
-		visibileItems: {}
+		visibleItems: {}
 	};
 
 	public get activeTeamspace() {
@@ -103,36 +104,40 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		if (this.props.items.length === 0 ) {
-			this.props.fetchTeamspaces(this.props.currentTeamspace);
+		const {items, fetchTeamspaces, currentTeamspace} = this.props;
+		if (!items.length) {
+			fetchTeamspaces(currentTeamspace);
 		}
-
-		const activeTeamspace = this.props.activeTeamspace || this.props.currentTeamspace;
-		const activeProject = this.props.activeProject;
-		const visibileItems = {};
-
-		if (activeTeamspace) {
-			visibileItems[activeTeamspace] = true;
-		}
-
-		if (activeProject) {
-			visibileItems[activeProject] = true;
-		}
-
-		this.setState({ activeTeamspace, activeProject, visibileItems}, () => {
-			this.onTeamspaceClick({
-				name: this.state.activeTeamspace,
-				projects: [this.props.activeProject]
-			});
-		});
 	}
 
-	public componentDidUpdate(prevProps) {
+	public componentDidUpdate(prevProps, prevState) {
 		const changes = {} as IState;
+		const { isPending, teamspaces, currentTeamspace, activeProject, projects } = this.props;
 
-		const currentTeamspaceChanged = this.props.currentTeamspace !== prevProps.currentTeamspace;
-		if (currentTeamspaceChanged) {
-			changes.activeTeamspace = this.props.currentTeamspace;
+		const isPendingChanged = isPending !== prevProps.isPending;
+		if (isPendingChanged) {
+			const activeTeamspace = this.props.activeTeamspace || currentTeamspace;
+			const visibleItems = { ...prevState.visibleItems };
+
+			if (activeTeamspace && teamspaces[activeTeamspace]) {
+				visibleItems[activeTeamspace] = true;
+				[...teamspaces[activeTeamspace].projects, activeTeamspace].forEach((id) => {
+					visibleItems[id] = true;
+				});
+			}
+
+			if (activeProject && projects[activeProject]) {
+				visibleItems[activeProject] = true;
+				projects[activeProject].models.forEach((id) => {
+					visibleItems[id] = true;
+				});
+			}
+
+			changes.activeTeamspace = activeTeamspace;
+			changes.activeProject = activeProject;
+			changes.visibleItems = visibleItems;
+
+			changes.visibleItems = visibleItems;
 		}
 
 		if (!isEmpty(changes)) {
@@ -147,17 +152,17 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public onTeamspaceClick = ({ name, projects }) => {
+	public handleTeamspaceClick = ({ name, projects }) => {
 		this.setState((prevState) => {
-			const visibileItems = { ...prevState.visibileItems };
+			const visibleItems = { ...prevState.visibleItems };
 
 			[...projects, name].forEach((id) => {
-				visibileItems[id] = !visibileItems[id];
+				visibleItems[id] = !visibleItems[id];
 			});
 
 			return {
-				activeTeamspace: name,
-				visibileItems
+				activeTeamspace: visibleItems[name] ? name : '',
+				visibleItems
 			};
 		});
 	}
@@ -256,8 +261,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			key={props.model}
 			activeTeamspace={this.activeTeamspace}
 			actions={[]}
-			//onModelUpload={this.openUploadModelFileDialog(this.state.activeTeamspace, props)}
-			//onEditClick={this.openFederationDialog(this.state.activeTeamspace, props.projectName, props.name, props.model)}
+			// onModelUpload={this.openUploadModelFileDialog(this.state.activeTeamspace, props)}
+			// onEditClick={this.openFederationDialog(this.state.activeTeamspace, props.projectName, props.name, props.model)}
 		/>
 	)
 
@@ -267,23 +272,22 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			teamspace={this.activeTeamspace}
 			key={props._id}
 			onEditClick={this.openProjectDialog}
-			active={props.name === this.props.activeProject}
 			disabled={!props.models.length}
-			onRootClick={this.handleProjectClick}
+			onClick={this.handleProjectClick}
 		/>
 	)
 
-	public handleProjectClick = ({ name, models }) => {
+	public handleProjectClick = ({ id: projectId, models }) => {
 		this.setState((prevState) => {
-			const visibileItems = { ...prevState.visibileItems };
+			const visibleItems = { ...prevState.visibleItems };
 
 			models.forEach((id) => {
-				visibileItems[id] = !visibileItems[id];
+				visibleItems[id] = !visibleItems[id];
 			});
 
 			return {
-				activeProject: name,
-				visibileItems
+				activeProject: projectId,
+				visibleItems
 			};
 		});
 	}
@@ -293,8 +297,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			{...props}
 			key={props.account}
 			name={props.account}
+			active={this.state.visibleItems[props.account]}
 			isMyTeamspace={this.props.currentTeamspace === props.account}
-			onToggle={this.onTeamspaceClick}
+			onToggle={this.handleTeamspaceClick}
 			onAddProject={this.openProjectDialog}
 			disabled={!props.projects.length}
 		/>
@@ -352,7 +357,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	private renderList = renderWhenTrue(() => (
 		<SimpleBar>
 			{this.props.items.filter(({ id, type }) => {
-				return type === LIST_ITEMS_TYPES.TEAMSPACE || !!this.state.visibileItems[id];
+				return type === LIST_ITEMS_TYPES.TEAMSPACE || !!this.state.visibleItems[id];
 			}).map(this.renderListItem)}
 		</SimpleBar>
 	));

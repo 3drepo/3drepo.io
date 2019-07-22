@@ -22,8 +22,12 @@ import { extendTeamspacesInfo } from './teamspaces.helpers';
 
 export const selectTeamspacesDomain = (state) => ({ ...state.teamspaces });
 
+export const selectTeamspaces = createSelector(
+	selectTeamspacesDomain, (state) => state.teamspaces
+);
+
 export const selectTeamspacesList = createSelector(
-	selectTeamspacesDomain, (state) => values(state.teamspaces)
+	selectTeamspaces, (teamspaces) => values(teamspaces)
 );
 
 export const selectProjects = createSelector(

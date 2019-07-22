@@ -55,7 +55,6 @@ export const DefaultHeadline = ({renderActions, ...props}) => (
 );
 
 interface IProps {
-	id: string;
 	name: string;
 	level?: number;
 	active?: boolean;
@@ -68,6 +67,7 @@ interface IProps {
 }
 
 interface IState {
+	active: boolean;
 	hovered: boolean;
 }
 
@@ -79,24 +79,31 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 	};
 
 	public state = {
+		active: false,
 		hovered: false
 	};
 
-	public handleRootClick = () => {
-		const { id, name, disabled, onClick } = this.props;
+	private get isActive() {
+		return this.props.active || this.state.active;
+	}
+
+	private handleRootClick = () => {
+		const { disabled, onClick } = this.props;
 
 		if (!disabled && onClick) {
+			this.setState(({active}) => ({ active: !active }));
 			this.props.onClick();
 		}
 	}
 
-	public createHoverHandler = (hovered) => () => {
+	private createHoverHandler = (hovered) => () => {
 		this.setState({ hovered });
 	}
 
 	public render() {
-		const { level, renderRoot, onClick, active, disabled, ...props } = this.props;
+		const { level, renderRoot, onClick, disabled, ...props } = this.props;
 		const { hovered } = this.state;
+		const active = this.isActive;
 
 		const containerProps = { active, level, disabled, hovered };
 

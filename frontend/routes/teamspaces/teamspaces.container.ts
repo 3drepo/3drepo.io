@@ -25,9 +25,10 @@ import { selectActiveProject,
 	selectActiveTeamspace,
 	selectFlattenTeamspaces,
 	selectIsPending,
+	selectProjects,
+	selectTeamspaces,
 	TeamspacesActions,
 } from '../../modules/teamspaces';
-import { ModelActions } from './../../modules/model';
 import { Teamspaces } from './teamspaces.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -35,7 +36,9 @@ const mapStateToProps = createStructuredSelector({
 	items: selectFlattenTeamspaces,
 	isPending: selectIsPending,
 	activeProject: selectActiveProject,
-	activeTeamspace: selectActiveTeamspace
+	activeTeamspace: selectActiveTeamspace,
+	projects: selectProjects,
+	teamspaces: selectTeamspaces
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
