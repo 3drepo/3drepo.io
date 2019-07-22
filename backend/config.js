@@ -72,6 +72,7 @@ const fillInServerDetails = function (serverObject, name) {
 	serverObject = coalesce(serverObject, {});
 	serverObject.name = coalesce(serverObject.name, name);
 	serverObject.port = serverObject.port || config.port;
+	serverObject.chatOnPublicPort = serverObject.chatOnPublicPort || false; // used for chat only
 	serverObject.hostname = `${serverObject.subdomain ? serverObject.subdomain + "." : ""}${serverObject.hostname || config.host}`;
 	serverObject.host_dir = serverObject.subdirectory ? ("/" + serverObject.subdirectory) : "/";
 
@@ -203,7 +204,7 @@ for (let i = 0; i < config.servers.length; i++) {
 	} else if (server.service === "chat") {
 
 		fillInServerDetails(server, "chat");
-		server.chat_host = server.base_url_no_port + ":" + server.port;
+		server.chat_host = server.chatOnPublicPort ? server.base_url : server.base_url_no_port + ":" + server.port;
 		config.chat_server = server;
 		config.chat_reconnection_attempts = (typeof server.reconnection_attempts !== "undefined" ? server.reconnection_attempts : config.chat_reconnection_attempts);
 
