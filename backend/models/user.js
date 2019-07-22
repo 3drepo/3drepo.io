@@ -610,7 +610,9 @@ function _fillInModelDetails(accountName, setting, permissions) {
 		status: setting.status,
 		errorReason: setting.errorReason,
 		subModels: setting.federate && setting.toObject().subModels || undefined,
-		timestamp: setting.timestamp || null
+		timestamp: setting.timestamp || null,
+		code: setting.properties ? setting.properties.code || null : null
+
 	};
 
 	return Promise.resolve(model);
