@@ -20,6 +20,7 @@ const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const utils = require("../utils");
 const C = require("../constants");
+const ResponseCodes = require("../response_codes");
 
 const stringToUUID = utils.stringToUUID;
 const uuidToString = utils.uuidToString;
@@ -41,7 +42,8 @@ const historySchema = Schema({
 	incomplete: Number,
 	coordOffset: [],
 	current: [],
-	rFile: []
+	rFile: [],
+	void: Boolean
 });
 
 historySchema.statics.getHistory = function(dbColOptions, branch, revId, projection) {
@@ -109,6 +111,27 @@ historySchema.statics.findByUID = function(dbColOptions, revId, projection) {
 	projection = projection || {};
 	return History.findOne(dbColOptions, { _id: stringToUUID(revId)}, projection);
 
+};
+
+historySchema.statics.updateRevision = async function(dbColOptions, modelId, data) {
+	if(data.hasOwnProperty("void") &&
+		Object.prototype.toString.call(data.void) === "[object Boolean]") {
+		const rev = await History.findByUID(dbColOptions, modelId);
+		if(!rev) {
+			return Promise.reject(ResponseCodes.MODEL_HISTORY_NOT_FOUND);
+		}
+
+		if(data.void) {
+			rev.void = true;
+		} else {
+			rev.void = undefined;
+		}
+
+		return rev.save().then(() => ResponseCodes.OK);
+
+	} else {
+		return Promise.reject(ResponseCodes.INVALID_ARGUMENTS);
+	}
 };
 
 historySchema.statics.findByTag = function(dbColOptions, tag, projection) {
