@@ -109,12 +109,27 @@ router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevi
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} id Unique Revision ID
+ * @apiParam {String} id Unique Revision ID or tag
  * @apiParam {String} tag Tag to update
  *
  */
 
 router.put("/revisions/:id/tag", middlewares.hasReadAccessToModel, updateRevisionTag);
+
+/**
+ * @api {patch} /:teamspace/:model/revisions/:id
+ * @apiName updateRevisionStatus
+ * @apiGroup Revisions
+ *
+ * @apiDescription Update the status of revision, setting it to void/active
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {String} id Unique Revision ID or tag
+ *
+ */
+
+router.patch("/revisions/:id", middlewares.hasReadAccessToModel, updateRevision);
 
 function listRevisions(req, res, next) {
 
@@ -155,6 +170,19 @@ function listRevisionsByBranch(req, res, next) {
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
+	});
+}
+
+function updateRevision(req, res, next) {
+
+	const place = utils.APIInfo(req);
+	const account = req.params.account;
+	const model = req.params.model;
+
+	History.updateRevision({account, model}, req.params.id, req.body).then(() => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, {});
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err, err);
 	});
 }
 
