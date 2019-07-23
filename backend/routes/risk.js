@@ -131,7 +131,7 @@ router.post("/risks", middlewares.issue.canCreate, storeRisk);
  * @apiParam {String} model Model ID
  * @apiParam {String} riskId Risk ID.
  */
-router.patch("/risks/:riskId", middlewares.issue.canComment, updateRisk);
+router.patch("/risks/:riskId", middlewares.issue.canComment, updateRisk,responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /:teamspace/:model/revision/:rid/risks	Store risks based on Revision ID
@@ -154,7 +154,7 @@ router.post("/revision/:rid/risks", middlewares.issue.canCreate, storeRisk);
  * @apiParam {String} rid Revision ID.
  * @apiParam {String} riskId Risk ID.
  */
-router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updateRisk);
+router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updateRisk, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /:teamspace/:model/risks/:rid/comments Add an comment for an issue
@@ -253,6 +253,11 @@ function updateRisk(req, res, next) {
 	}).catch((err) => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
+}
+
+function stuff(req, res, next) {
+	console.log("helo");
+	next();
 }
 
 function deleteRisks(req, res, next) {
