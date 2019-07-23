@@ -225,7 +225,7 @@ function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
 
 		if (!isTarget) {
 			const { baseRevision } = compareModels.find((comparedModel) => comparedModel._id === modelId);
-			yield put(CompareActions.setTargetRevision(modelId, baseRevision));
+			yield put(CompareActions.setTargetRevision(modelId, baseRevision, isDiff));
 		}
 
 		if (!isDiff) {
@@ -321,7 +321,6 @@ function* startComparisonOfModel() {
 	const targetModels = yield select(selectTargetModelsList);
 	const { teamspace, _id } = targetModels[0];
 	const revision = targetModels[0].targetDiffRevision;
-
 	yield Viewer.diffToolLoadComparator(teamspace, _id, revision.name);
 }
 
@@ -398,12 +397,16 @@ function* resetComponentState() {
 	}
 }
 
-function* setTargetRevision({ modelId, targetRevision }) {
+function* setTargetRevision({ modelId, targetRevision, isDiff }) {
 	try {
 		const isCompareActive = yield select(selectIsCompareActive);
 		const componentState = yield select(selectComponentState);
 		const modelIndex = componentState.compareModels.findIndex((model) => model._id === modelId);
-		componentState.compareModels[modelIndex].targetClashRevision = targetRevision;
+		if (isDiff) {
+			componentState.compareModels[modelIndex].targetDiffRevision = targetRevision;
+		} else {
+			componentState.compareModels[modelIndex].targetClashRevision = targetRevision;
+		}
 		yield put(CompareActions.setComponentState(componentState));
 
 		if (isCompareActive) {
