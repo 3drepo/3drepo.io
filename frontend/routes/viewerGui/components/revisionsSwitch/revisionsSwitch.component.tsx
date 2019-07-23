@@ -21,6 +21,7 @@ import React from 'react';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
+import { TYPES } from './../../../components/dialogContainer/components/revisionsDialog/revisionsDialog.component';
 import { Container, DisplayedText, ProgressWrapper } from './revisionsSwitch.styles';
 
 interface IProps {
@@ -71,12 +72,12 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 		return currentRevision._id;
 	}
 
-	private get revisionDataExists() {
-		return Boolean(this.props.modelSettings.name && this.props.revisions.length && this.currentRevisionName);
-	}
-
 	private getRevisionDisplayedName = (revision) => {
 		return revision.tag || formatDate(revision.timestamp, LONG_DATE_TIME_FORMAT);
+	}
+
+	private get revisionDataExists() {
+		return Boolean(this.props.modelSettings.name && this.props.revisions.length && this.currentRevisionName);
 	}
 
 	private setNewRevision = (revision) => {
@@ -95,13 +96,14 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 		}
 
 		this.props.showRevisionsDialog({
-			title: `Revisions - ${this.props.modelSettings.name}`,
+			title: `${this.props.modelSettings.name} - Revisions`,
 			data: {
 				currentRevisionName: this.currentRevisionName,
 				currentRevisionId: this.currentRevisionId,
 				currentModelName: this.props.modelSettings.name,
 				revisions: this.props.revisions,
-				handleSetNewRevision: this.setNewRevision
+				handleSetNewRevision: this.setNewRevision,
+				type: TYPES.VIEWER
 			}
 		});
 	}

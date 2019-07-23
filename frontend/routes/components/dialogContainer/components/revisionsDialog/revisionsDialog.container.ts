@@ -19,7 +19,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectRevisions, ModelActions } from './../../../../modules/model';
+import { selectRevisions, ModelActions } from './../../../../../modules/model';
 import { RevisionsDialog } from './revisionsDialog.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -27,7 +27,8 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchModelRevisions: ModelActions.fetchRevisions
+	fetchModelRevisions: ModelActions.fetchRevisions,
+	resetModelRevisions: ModelActions.resetRevisions
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsDialog));

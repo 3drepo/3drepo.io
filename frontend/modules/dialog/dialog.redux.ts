@@ -16,8 +16,10 @@
  */
 
 import { get, omit } from 'lodash';
-import { createActions, createReducer } from 'reduxsauce';
+import { createActions, createReducer } from 'reduxsauce'
 import * as Dialogs from '../../routes/components/dialogContainer/components';
+// @ts-ignore
+import RevisionsDialog from '../../routes/components/dialogContainer/components/revisionsDialog/revisionsDialog.container';
 import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
 
 interface IDialogConfig {
@@ -92,7 +94,7 @@ const showConfirmDialog = (state = INITIAL_STATE, action) => {
 };
 
 const showRevisionsDialog = (state = INITIAL_STATE, action) => {
-	const config = { ...action.config, template: Dialogs.RevisionsDialog } as IDialogConfig;
+	const config = { ...action.config, template: RevisionsDialog } as IDialogConfig;
 	return showDialog(state, { config });
 };
 

@@ -25,6 +25,7 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	waitForSettingsAndFetchRevisions: ['teamspace', 'modelId'],
 	fetchRevisions: ['teamspace', 'modelId'],
 	fetchRevisionsSuccess: ['revisions'],
+	resetRevisions: [],
 	downloadModel: ['teamspace', 'modelId'],
 	uploadModelFile: ['teamspace', 'project', 'modelData', 'fileData'],
 	setPendingState: ['pendingState'],
@@ -68,6 +69,10 @@ const fetchRevisionsSuccess = (state = INITIAL_STATE, { revisions }) => {
 	return { ...state, revisions };
 };
 
+const resetRevisions = (state = INITIAL_STATE) => {
+	return { ...state, revisions: INITIAL_STATE.revisions };
+};
+
 const fetchMapsSuccess = (state = INITIAL_STATE, { maps }) => {
 	return { ...state, maps };
 };
@@ -80,6 +85,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ModelTypes.FETCH_META_KEYS_SUCCESS]: fetchMetaKeysSuccess,
 	[ModelTypes.FETCH_SETTINGS_SUCCESS]: fetchSettingsSuccess,
 	[ModelTypes.FETCH_REVISIONS_SUCCESS]: fetchRevisionsSuccess,
+	[ModelTypes.RESET_REVISIONS]: resetRevisions,
 	[ModelTypes.SET_PENDING_STATE]: setPendingState,
 	[ModelTypes.FETCH_MAPS_SUCCESS]: fetchMapsSuccess,
 	[ModelTypes.UPDATE_SETTINGS_SUCCESS]: updateSettingsSuccess

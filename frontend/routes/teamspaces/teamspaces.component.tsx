@@ -26,6 +26,8 @@ import { renderWhenTrue } from '../../helpers/rendering';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
+import { PERMISSIONS_VIEWS } from '../projects/projects.component';
+import { TYPES } from './../components/dialogContainer/components/revisionsDialog/revisionsDialog.component';
 import FederationDialog from './components/federationDialog/federationDialog.container';
 import ModelDialog from './components/modelDialog/modelDialog.container';
 import ModelGridItem from './components/modelGridItem/modelGridItem.container';
@@ -34,6 +36,10 @@ import ProjectItem from './components/projectItem/projectItem.container';
 import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
 import { LIST_ITEMS_TYPES } from './teamspaces.contants';
 import { GridContainer, Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
+import { ProjectDialog } from './components/projectDialog/projectDialog.component';
+import { ProjectItem } from './components/projectItem/projectItem.component';
+import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
+import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -51,7 +57,14 @@ interface IProps {
 	items: any[];
 	isPending: boolean;
 	visibleItems: any[];
+	activeTeamspace: string;
+	activeProject: string;
+	revisions?: any[];
+
 	showDialog: (config) => void;
+	showConfirmDialog: (config) => void;
+	showRevisionsDialog: (config) => void;
+	hideDialog: () => void;
 	fetchTeamspaces: (username) => void;
 	setState: (componentState: any) => void;
 }
@@ -133,6 +146,21 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			}
 
 			return { visibleItems };
+		});
+	}
+
+	public openModelRevisionsDialog = (props) => (event) => {
+		event.stopPropagation();
+
+		this.props.showRevisionsDialog({
+			title: `${props.name} - Revisions`,
+			data: {
+				currentModelName: props.name,
+				teamspace: this.state.activeTeamspace,
+				revisions: this.props.revisions,
+				modelId: props.model,
+				type: TYPES.TEAMSPACES
+			}
 		});
 	}
 
