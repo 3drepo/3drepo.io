@@ -265,14 +265,19 @@ export function* removeComment({ teamspace, modelId, issueData }) {
 
 export function* renderPins() {
 	try {
+		const activeIssueId = yield select(selectActiveIssueId);
 		const filteredIssues = yield select(selectFilteredIssues);
 		const issuesList = yield select(selectIssues);
+
+		if (activeIssueId) {
+			filteredIssues = filteredIssues.concat(issuesList.filter(issue => issue._id === activeIssueId));
+		}
+
 		const shouldShowPins = yield select(selectShowPins);
 		const invisibleIssues = issuesList.length !== filteredIssues.length
 			? differenceBy(issuesList, filteredIssues, '_id')
 			: [];
 
-		const activeIssueId = yield select(selectActiveIssueId);
 		const removePins = (issues) => issues.forEach((issue) => {
 			Viewer.removePin({ id: issue._id });
 		});
