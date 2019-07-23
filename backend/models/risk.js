@@ -30,12 +30,7 @@ const ChatEvent = require("./chatEvent");
 const systemLogger = require("../logger.js").systemLogger;
 const Comment = require("./comment");
 const Group = require("./group");
-const Job = require("./job");
-const Project = require("./project");
-const User = require("./user");
 const View = require("./viewpoint");
-
-const C = require("../constants");
 
 const Ticket = require("./ticket");
 
@@ -204,71 +199,6 @@ function addRiskMitigationComment(account, model, sessionId, riskId, comments, d
 
 		ChatEvent.newComment(sessionId, account, model, riskId, mitigationComment);
 	}
-
-	return comments;
-}
-
-function updateTextComments(account, model, sessionId, riskId, comments, data, viewpoint) {
-	if (!comments) {
-		comments = [];
-	}
-
-	if (data.edit && data.commentIndex >= 0 && comments.length > data.commentIndex) {
-		if (!comments[data.commentIndex].sealed) {
-			const textComment = Comment.newTextComment(data.owner, data.comment, viewpoint, data.position);
-
-			comments[data.commentIndex] = textComment;
-
-			ChatEvent.commentChanged(sessionId, account, model, riskId, data);
-		} else {
-			throw responseCodes.ISSUE_COMMENT_SEALED;
-		}
-	} else if (data.sealed && data.commentIndex >= 0 && comments.length > data.commentIndex) {
-		comments[data.commentIndex].sealed = true;
-	} else if (data.delete && data.commentIndex >= 0 && comments.length > data.commentIndex) {
-		if (!comments[data.commentIndex].sealed) {
-			comments.splice(data.commentIndex, 1);
-
-			ChatEvent.commentDeleted(sessionId, account, model, riskId, data);
-		} else {
-			throw responseCodes.ISSUE_COMMENT_SEALED;
-		}
-	} else if ((data.edit || data.delete) && comments.length <= data.commentIndex) {
-		throw responseCodes.ISSUE_COMMENT_INVALID_GUID;
-	} else {
-		comments.forEach((comment) => {
-			comment.sealed = true;
-		});
-
-		const textComment = Comment.newTextComment(data.owner, data.comment, viewpoint, data.position);
-
-		comments.push(textComment);
-
-		ChatEvent.newComment(sessionId, account, model, riskId, textComment);
-	}
-
-	return comments;
-}
-
-function addSystemComment(account, model, sessionId, riskId, comments, owner, property, oldValue, newValue) {
-	if (!comments) {
-		comments = [];
-	}
-
-	comments.forEach((comment) => {
-		comment.sealed = true;
-	});
-
-	const systemComment = Comment.newSystemComment(
-		owner,
-		property,
-		oldValue,
-		newValue
-	);
-
-	comments.push(systemComment);
-
-	ChatEvent.newComment(sessionId, account, model, riskId, systemComment);
 
 	return comments;
 }
