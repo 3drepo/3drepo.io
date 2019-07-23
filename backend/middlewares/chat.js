@@ -79,5 +79,15 @@ module.exports = {
 
 		chatEvent.issueChanged(sessionId, account, model, issue._id, data);
 		next();
+	},
+
+	onUpdateRisk: function(req, res, next) {
+		const sessionId = req.headers[C.HEADER_SOCKET_ID];
+		const {account, model} = req.params;
+		const risk = req.dataModel;
+		const data = req.data;
+
+		chatEvent.riskChanged(sessionId, account, model, risk._id, data);
+		next();
 	}
 };
