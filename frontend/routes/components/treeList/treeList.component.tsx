@@ -115,15 +115,6 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 			renderActions: this.props.renderActions
 		};
 
-		// mocked Grid TODO: remove after
-		if (this.props.level === 3) {
-			return (
-				<GridContainer>
-					{this.renderItems()}
-				</GridContainer>
-			);
-		}
-
 		return (
 			<Container {...containerProps}>
 				<Headline

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -19,29 +19,21 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import {
-	selectFederations,
-	selectModels,
-	selectProjects,
-	selectTeamspaces,
-	TeamspacesActions,
-} from '../../../../modules/teamspaces';
-import { selectIsPending, selectSettings, ModelActions } from './../../../../modules/model';
-import { FederationDialog } from './federationDialog.component';
+import { DialogActions } from '../../../../modules/dialog';
+import { ModelActions } from '../../../../modules/model';
+import { TeamspacesActions } from '../../../../modules/teamspaces';
+import { ModelGridItem } from './modelGridItem.component';
 
-const mapStateToProps = createStructuredSelector({
-	settings: selectSettings,
-	isPending: selectIsPending,
-	teamspaces: selectTeamspaces,
-	projects: selectProjects,
-	models: selectModels,
-	federations: selectFederations,
-});
+const mapStateToProps = createStructuredSelector({});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchModelSettings: ModelActions.fetchSettings,
-	createModel: TeamspacesActions.createModel,
+	showDialog: DialogActions.showDialog,
+	showConfirmDialog: DialogActions.showConfirmDialog,
+	subscribeOnStatusChange: ModelActions.subscribeOnStatusChange,
+	unsubscribeOnStatusChange: ModelActions.unsubscribeOnStatusChange,
 	updateModel: TeamspacesActions.updateModel,
+	removeModel: TeamspacesActions.removeModel,
+	downloadModel: ModelActions.downloadModel,
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(FederationDialog));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelGridItem));

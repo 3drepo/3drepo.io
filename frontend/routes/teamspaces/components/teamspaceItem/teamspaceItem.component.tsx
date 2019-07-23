@@ -63,7 +63,7 @@ export const TeamspaceItem = (props: IProps) => {
 	))(hasPermissions('create_project', permissions)) as any;
 
 	const handleClick = () => {
-		onToggle({ name, projects });
+		onToggle({ id: name, nested: projects });
 	};
 
 	return (

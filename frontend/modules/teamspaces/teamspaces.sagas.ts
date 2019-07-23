@@ -115,12 +115,16 @@ export function* updateModel({ teamspace, modelId, modelData }) {
 
 export function* removeModel({ teamspace, modelData }) {
 	try {
-		const response = yield API.removeModel(teamspace, modelData.id);
-		const removedModel = response.data;
+		const { data: removedModel } = yield API.removeModel(teamspace, modelData.id);
+		const projects = yield select(selectProjects);
 
 		yield put(SnackbarActions.show(`${removedModel.federate ? 'Federation' : 'Model'} removed`));
 		yield put(TeamspacesActions.removeModelSuccess(
-			teamspace, { ...removedModel, projectName: modelData.project, name: modelData.name })
+			teamspace, {
+				...removedModel,
+				projectName: projects[modelData.project].name,
+				name: modelData.name
+			})
 		);
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'model', e));

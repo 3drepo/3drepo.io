@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { values } from 'lodash';
+import { values, pick, pickBy } from 'lodash';
 import { createSelector } from 'reselect';
 import { LIST_ITEMS_TYPES } from '../../routes/teamspaces/teamspaces.contants';
 import { extendTeamspacesInfo } from './teamspaces.helpers';
@@ -35,13 +35,27 @@ export const selectProjects = createSelector(
 );
 
 export const selectProjectsList = createSelector(
-	selectProjects, (projects) => {
-		return Object.values(projects);
+	selectProjects, (projects) => Object.values(projects)
+);
+
+const selectTeamspaceName = (state, ownProps) => ownProps.teamspace;
+
+export const selectProjectsByTeamspace = createSelector(
+	selectTeamspaces, selectProjects, selectTeamspaceName,
+	(teamspaces, projects, teamspace) => {
+		if (!teamspaces[teamspace]) {
+			return {};
+		}
+		return pick(projects, teamspaces[teamspace].projects);
 	}
 );
 
 export const selectModels = createSelector(
 	selectTeamspacesDomain, (state) => state.models
+);
+
+export const selectFederations = createSelector(
+	selectModels, (models) => pickBy(models, (federate) => !!federate)
 );
 
 export const selectFlattenTeamspaces = createSelector(
@@ -52,26 +66,30 @@ export const selectFlattenTeamspaces = createSelector(
 			flattenList.push({
 				...teamspacesList[index],
 				type: LIST_ITEMS_TYPES.TEAMSPACE,
-				id: teamspacesList[index].name
+				id: teamspacesList[index].account
 			});
+
+			const teamspaceName = teamspacesList[index].account;
 			const projectsIds = teamspacesList[index].projects;
 
 			for (let j = 0; j < projectsIds.length; j++) {
 				const project = projects[projectsIds[j]];
+
+				const projectModels = project.models.map((modelId) => ({
+					...models[modelId],
+					teamspace: teamspaceName,
+					project: projectsIds[j],
+					type: LIST_ITEMS_TYPES.MODEL,
+					id: modelId
+				}));
+
 				flattenList.push({
 					...project,
+					models: projectModels,
+					teamspace: teamspaceName,
 					type: LIST_ITEMS_TYPES.PROJECT,
 					id: projectsIds[j]
 				});
-				const modelsIds = project.models;
-
-				for (let m = 0; m < modelsIds.length; m++) {
-					flattenList.push({
-						...models[modelsIds[m]],
-						type: LIST_ITEMS_TYPES.MODEL,
-						id: modelsIds[m]
-					});
-				}
 			}
 		}
 		return flattenList;

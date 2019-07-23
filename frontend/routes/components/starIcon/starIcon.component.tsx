@@ -23,7 +23,7 @@ import StarBorder from '@material-ui/icons/StarBorder';
 import { IconWrapper } from './starIcon.styles';
 
 interface IProps {
-	active: number;
+	active: boolean;
 	activeColor: string;
 	onClick: () => void;
 }

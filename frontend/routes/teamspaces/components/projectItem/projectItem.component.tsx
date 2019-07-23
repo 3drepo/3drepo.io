@@ -46,58 +46,13 @@ interface IProps {
 }
 
 interface IState {
-	items: any[];
 	actionsMenuOpen: boolean;
 }
 
-const splitModels = (modelsList = []) => {
-	const { federations = [], models = [] } = groupBy(modelsList, ({ federate }) => {
-		return federate ? 'federations' : 'models';
-	});
-
-	return { federations, models };
-};
-
-const getProjectItems = (modelsList, projectName) => {
-	const { federations = [], models = [] } = splitModels(modelsList);
-
-	return [{
-		name: 'Federations',
-		items: federations,
-		type: FEDERATION_TYPE,
-		projectName
-	}, {
-		name: 'Models',
-		items: models,
-		type: MODEL_TYPE,
-		projectName
-	}];
-};
-
 export class ProjectItem extends React.PureComponent<IProps, IState> {
 	public state = {
-		items: [],
 		actionsMenuOpen: false
 	};
-
-	public componentDidMount() {
-		this.setState({
-			items: getProjectItems(this.props.models, this.props.name)
-		});
-	}
-
-	public componentDidUpdate(prevProps: IProps) {
-		const changes = {} as IState;
-
-		const modelsChanged = !isEqual(this.props.models, prevProps.models);
-		if (modelsChanged) {
-			changes.items = getProjectItems(this.props.models, this.props.name);
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
-		}
-	}
 
 	public handleRemove = (event) => {
 		event.stopPropagation();
@@ -144,14 +99,18 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 	}
 
 	private handleClick = () => {
-		const { _id, models } = this.props;
-		this.props.onClick({ id: _id, models });
+		const { _id } = this.props;
+		this.props.onClick({ id: _id });
 	}
 
 	public isProjectAdmin = () => hasPermissions('admin_project', this.props.permissions);
 
 	public renderProjectActions = ({ hovered }) => renderWhenTrue(() => (
-		<RowMenu open={hovered} forceOpen={this.state.actionsMenuOpen} toggleForceOpen={this.toggleActionsMenuOpen}>
+		<RowMenu
+			open={hovered}
+			forceOpen={this.state.actionsMenuOpen}
+			toggleForceOpen={this.toggleActionsMenuOpen}
+		>
 			<TooltipButton
 				{...ROW_ACTIONS.EDIT}
 				action={this.handleEditClick}

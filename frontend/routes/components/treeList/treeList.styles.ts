@@ -77,11 +77,3 @@ export const IconContainer = styled.div`
 	margin-right: 12px;
 	display: flex;
 `;
-
-export const GridContainer = styled.div`
-	display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-gap: 10px;
-  grid-auto-rows: minmax(80px, auto);
-	margin-top: 10px;
-`;

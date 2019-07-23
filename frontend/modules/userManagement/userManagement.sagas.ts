@@ -191,7 +191,6 @@ export function* fetchModelsPermissions({ models }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
 		let data = [];
-		debugger;
 		if (models.length) {
 			const requiredModels = models.map(({ model }) => model);
 			const response = yield API.fetchModelsPermissions(teamspace, requiredModels);

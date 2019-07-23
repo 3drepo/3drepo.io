@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cond, isEmpty, matches, stubTrue } from 'lodash';
+import { cond, isEmpty, matches, stubTrue, pick } from 'lodash';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
@@ -39,7 +39,7 @@ import RevisionsDialog from './components/revisionsDialog/revisionsDialog.contai
 import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
 import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
 import { FEDERATION_TYPE, LIST_ITEMS_TYPES, MODEL_TYPE } from './teamspaces.contants';
-import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
+import { Head, List, LoaderContainer, MenuButton, GridContainer } from './teamspaces.styles';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -121,22 +121,14 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 			if (activeTeamspace && teamspaces[activeTeamspace]) {
 				visibleItems[activeTeamspace] = true;
-				[...teamspaces[activeTeamspace].projects, activeTeamspace].forEach((id) => {
-					visibleItems[id] = true;
-				});
 			}
 
 			if (activeProject && projects[activeProject]) {
 				visibleItems[activeProject] = true;
-				projects[activeProject].models.forEach((id) => {
-					visibleItems[id] = true;
-				});
 			}
 
 			changes.activeTeamspace = activeTeamspace;
 			changes.activeProject = activeProject;
-			changes.visibleItems = visibleItems;
-
 			changes.visibleItems = visibleItems;
 		}
 
@@ -148,24 +140,16 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public componentWillUnmount() {
 		this.props.setState({
 			activeTeamspace: this.state.activeTeamspace,
-			activeProject: this.state.activeProject
+			activeProject: this.state.activeProject,
+			visibleItems: this.state.visibleItems
 		});
 	}
 
-	public handleTeamspaceClick = ({ name, projects }) => {
-		this.setState((prevState) => {
-			const visibleItems = { ...prevState.visibleItems };
-
-			[...projects, name].forEach((id) => {
-				visibleItems[id] = !visibleItems[id];
-			});
-
-			return {
-				activeTeamspace: visibleItems[name] ? name : '',
-				visibleItems
-			};
-		});
-	}
+	private shouldBeVisible = cond([
+		[matches({ type: LIST_ITEMS_TYPES.TEAMSPACE }), stubTrue],
+		[matches({ type: LIST_ITEMS_TYPES.PROJECT }), ({ teamspace }) => this.state.visibleItems[teamspace]],
+		[stubTrue, () => false]
+	]);
 
 	public openProjectDialog = (event, teamspaceName = '', projectId?, projectName = '') => {
 		event.stopPropagation();
@@ -198,99 +182,50 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			data: {
 				modelName,
 				teamspace: teamspaceName,
-				teamspaces,
 				project: projectName,
-				projects: teamspaceName ? this.getTeamspaceProjects(teamspaceName) : [],
 				modelId
 			},
 			onConfirm: ({ teamspace, ...modelData }) => {
 				this.props.createModel(teamspace, modelData);
 			}
 		});
-	}
-
-	public openFederationDialog =
-		(teamspaceName = '', projectName = '', modelName = '', modelId = '') => (event) => {
-			event.stopPropagation();
-			const { teamspacesItems } = this.state as IState;
-			const isNewModel = !modelName.length;
-			const teamspaces = teamspacesItems.filter((teamspace) => teamspace.projects.length);
-
-			this.props.showDialog({
-				title: modelName ? 'Edit federation' : 'New federation',
-				template: FederationDialog,
-				data: {name: modelName,
-				modelName,
-				teamspace: teamspaceName,
-				teamspaces,
-				project:  projectName ,
-				projects: teamspaceName ? this.getTeamspaceProjects(teamspaceName) : [],
-
-				editMode: !!modelName,
-				modelId
-			},
-			onConfirm: ({ teamspace, ...modelData }) => {
-				if (isNewModel) {
-					this.props.createModel(teamspace, modelData);
-				} else {
-					this.props.updateModel(teamspace, modelId, modelData);
-				}
-			}
-		});
-	}
-
-/* 	public openUploadModelFileDialog = (teamspaceName = '', modelProps) => (event) => {
-		event.stopPropagation();
-
-		this.props.showDialog({
-			title: `Upload Model`,
-			template: UploadModelFileDialog,
-			data: {
-				teamspaceName,
-				modelName: modelProps.name,
-				modelId: modelProps.model,
-				canUpload: modelProps.canUpload,
-				projectName: modelProps.projectName
-			}
-		});
 	}*/
 
-	private renderModel = (props) => (
-		<ModelGridItem
-			{...props}
-			key={props.model}
-			activeTeamspace={this.activeTeamspace}
-			actions={[]}
-			// onModelUpload={this.openUploadModelFileDialog(this.state.activeTeamspace, props)}
-			// onEditClick={this.openFederationDialog(this.state.activeTeamspace, props.projectName, props.name, props.model)}
-		/>
-	)
-
-	private renderProject = (props) => (
-		<ProjectItem
-			{...props}
-			teamspace={this.activeTeamspace}
-			key={props._id}
-			onEditClick={this.openProjectDialog}
-			disabled={!props.models.length}
-			onClick={this.handleProjectClick}
-		/>
-	)
-
-	public handleProjectClick = ({ id: projectId, models }) => {
+	private handleVisibilityChange = ({ id: itemId, nested = []}) => {
 		this.setState((prevState) => {
 			const visibleItems = { ...prevState.visibleItems };
+			visibleItems[itemId] = !visibleItems[itemId];
 
-			models.forEach((id) => {
-				visibleItems[id] = !visibleItems[id];
-			});
+			if (!visibleItems[itemId]) {
+				nested.forEach((id) => {
+					visibleItems[id] = visibleItems[itemId];
+				});
+			}
 
-			return {
-				activeProject: projectId,
-				visibleItems
-			};
+			return { visibleItems };
 		});
 	}
+
+	private renderModels = (models, areVisible) => renderWhenTrue(() => (
+		<GridContainer>
+			{models.map((props) => (
+				<ModelGridItem key={props.model} {...props} />
+			))}
+		</GridContainer>
+	))(models.length && areVisible)
+
+	private renderProject = (props) => (
+		<>
+			<ProjectItem
+				{...props}
+				key={props._id}
+				onEditClick={this.openProjectDialog}
+				disabled={!props.models.length}
+				onClick={this.handleVisibilityChange}
+			/>
+			{this.renderModels(props.models, this.state.visibleItems[props._id])}
+		</>
+	)
 
 	private renderTeamspace = (props) => (
 		<TeamspaceItem
@@ -299,7 +234,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			name={props.account}
 			active={this.state.visibleItems[props.account]}
 			isMyTeamspace={this.props.currentTeamspace === props.account}
-			onToggle={this.handleTeamspaceClick}
+			onToggle={this.handleVisibilityChange}
 			onAddProject={this.openProjectDialog}
 			disabled={!props.projects.length}
 		/>
@@ -343,8 +278,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	private renderListItem = cond([
 		[matches({ type: LIST_ITEMS_TYPES.TEAMSPACE }), this.renderTeamspace],
 		[matches({ type: LIST_ITEMS_TYPES.PROJECT }), this.renderProject],
-		[matches({ type: LIST_ITEMS_TYPES.FEDERATION }), this.renderModel],
-		[matches({ type: LIST_ITEMS_TYPES.MODEL }), this.renderModel],
 		[stubTrue, () => null]
 	]);
 
@@ -356,9 +289,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	private renderList = renderWhenTrue(() => (
 		<SimpleBar>
-			{this.props.items.filter(({ id, type }) => {
-				return type === LIST_ITEMS_TYPES.TEAMSPACE || !!this.state.visibleItems[id];
-			}).map(this.renderListItem)}
+			{this.props.items.filter(this.shouldBeVisible).map(this.renderListItem)}
 		</SimpleBar>
 	));
 

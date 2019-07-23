@@ -20,13 +20,14 @@ import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 
 interface IIconWrapper {
+	active: boolean;
 	theme: {
 		activeColor?: string;
 	};
 }
 
 export const IconWrapper = styled(Icon)<IIconWrapper>`
-	color: ${(props: any) => props.active ? props.theme.activeColor || COLOR.DARK_ORANGE : COLOR.BLACK_20};
+	color: ${(props) => props.active ? props.theme.activeColor || COLOR.DARK_ORANGE : COLOR.BLACK_20};
 	cursor: pointer;
 	display: flex;
 	align-items: center;
@@ -35,4 +36,4 @@ export const IconWrapper = styled(Icon)<IIconWrapper>`
 		width: auto;
     height: auto;
 	}
-` as any;
+`;
