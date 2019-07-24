@@ -47,6 +47,7 @@ interface IProps {
 	name: string;
 	model: string;
 	permissions: any[];
+	projectName: string;
 	project: string;
 	status: string;
 	timestamp: string;
@@ -90,19 +91,19 @@ export function ModelGridItem(props: IProps) {
 
 	const handlePermissionsClick = (event) => {
 		event.stopPropagation();
-		const { history, project, teamspace, model } = props;
+		const { history, projectName, teamspace, model } = props;
 		history.push({
 			pathname: `${ROUTES.USER_MANAGEMENT_MAIN}/${teamspace}/projects`,
-			search: `?project=${project}&modelId=${model}&view=${PERMISSIONS_VIEWS.MODELS}`
+			search: `?project=${projectName}&modelId=${model}&view=${PERMISSIONS_VIEWS.MODELS}`
 		});
 	};
 
 	const handleSettingsClick = () => {
 		event.stopPropagation();
-		const { history, project, teamspace, model } = props;
+		const { history, projectName, teamspace, model } = props;
 		history.push({
 			pathname: `${ROUTES.MODEL_SETTINGS}/${teamspace}/models/${model}`,
-			search: `?project=${project}`
+			search: `?project=${projectName}`
 		});
 	};
 
@@ -178,7 +179,6 @@ export function ModelGridItem(props: IProps) {
 	const handleFederationEdit = (event) => {
 		event.stopPropagation();
 		const { teamspace, model, name, project } = props;
-		debugger;
 
 		props.showDialog({
 			title: 'Edit federation',

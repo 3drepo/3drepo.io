@@ -79,6 +79,7 @@ export const selectFlattenTeamspaces = createSelector(
 					...models[modelId],
 					teamspace: teamspaceName,
 					project: projectsIds[j],
+					projectName: project.name,
 					type: LIST_ITEMS_TYPES.MODEL,
 					id: modelId
 				}));

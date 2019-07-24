@@ -114,7 +114,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const { teamspaces, match, history, currentUser } = this.props;
+		const { teamspaces, match, history, currentUser, onTeamspaceChange } = this.props;
 		const { activeTab } = this.state;
 		const selectedTeamspace = match.params.teamspace;
 
