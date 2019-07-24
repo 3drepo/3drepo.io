@@ -23,7 +23,7 @@ const onSuccess = responseCodes.onSuccessfulOperation;
 const middlewares = require("../middlewares/middlewares");
 const User =  require("../models/user");
 const utils = require("../utils");
-const { isString, isArray } = require("lodash");
+const { isString, isArray, isObject } = require("lodash");
 
 /**
  * @api {get} /me Gets the profile for the logged user
@@ -143,6 +143,71 @@ router.put("/starredMeta", middlewares.loggedIn, replaceStarredMetadataTags, onS
  * */
 router.delete("/starredMeta", middlewares.loggedIn, deleteStarredMetadataTag, onSuccess);
 
+/**
+ * @api {get} /starredModels Gets the starred models for the logged user
+ * @apiName GetStarredModels
+ * @apiGroup User
+ * */
+router.get("/starredModels", middlewares.loggedIn, getStarredModels, onSuccess);
+
+/**
+ * @api {post} /starredModels Adds a starred models for the logged user
+ * @apiName StarModels
+ * @apiGroup User
+ *
+ * @apiParam  {String} tag The tag to be starred
+ * @apiParamExample {json} Input
+ *    {
+ *      "tag": "material"
+ *    }
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *	  {}
+ *
+ * @apiError 400 BadRequest The request was malformed
+ * */
+router.post("/starredModels", middlewares.loggedIn, appendStarredModels, onSuccess);
+
+/**
+ * @api {put} /starredModels Sets the whole starred models for the logged user
+ * @apiName SetStarredModels
+ * @apiGroup User
+ *
+ * @apiParam  [String]  An array of tags to be starred
+ * @apiParamExample {json} Input
+ *    [
+ *    	"material",
+ * 	  	"color"
+ * 	  ]
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *	  {}
+ *
+ * @apiError 400 BadRequest The request was malformed
+ * */
+router.put("/starredModels", middlewares.loggedIn, replaceStarredModels, onSuccess);
+
+/**
+ * @api {delete} /starredModels removes a starred models for the logged user if the tag exists
+ * @apiName UnstarModels
+ * @apiGroup User
+ *
+ * @apiParam  {String} tag The tag to be starred
+ * @apiParamExample {json} Input
+ *    {
+ *      "tag": "material"
+ *    }
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *	  {}
+ *
+ * @apiError 400 BadRequest The request was malformed
+ * */
+router.delete("/starredModels", middlewares.loggedIn, deleteStarredModels, onSuccess);
+
 async function getProfile(req, res, next) {
 	const username = req.session.user.username;
 	req.dataModel = await User.getProfileByUsername(username);
@@ -210,6 +275,50 @@ async function deleteStarredMetadataTag(req, res, next) {
 		return;
 	}
 	req.dataModel = await User.deleteStarredMetadataTag(username,tag);
+	next();
+}
+
+async function getStarredModels(req, res, next) {
+	const username = req.session.user.username;
+	req.dataModel = await User.getStarredModels(username);
+	next();
+}
+
+async function appendStarredModels(req, res, next) {
+	const username = req.session.user.username;
+	const ts = req.body.teamspace;
+	const model = req.body.model;
+	if (!ts || !isString(ts) || !model || !isString(model)) {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+		return;
+	}
+
+	req.dataModel = await User.appendStarredModels(username, ts, model);
+	next();
+}
+
+async function replaceStarredModels(req, res, next) {
+	const username = req.session.user.username;
+	const data = req.body;
+
+	if (!isObject(data)) {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+		return;
+	}
+
+	req.dataModel = await User.setStarredModels(username, data);
+	next();
+}
+
+async function deleteStarredModels(req, res, next) {
+	const username = req.session.user.username;
+	const ts = req.body.teamspace;
+	const model = req.body.model;
+	if (!ts || !isString(ts) || !model || !isString(model)) {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+		return;
+	}
+	req.dataModel = await User.deleteStarredModel(username, ts, model);
 	next();
 }
 
