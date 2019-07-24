@@ -18,11 +18,20 @@
 import styled from 'styled-components';
 import { MenuItem as MenuItemComponent } from '@material-ui/core';
 import { SelectField as SelectFieldComponent } from '../../../../../components/selectField/selectField.component';
+
 import { COLOR } from '../../../../../../styles';
 
 export const Container = styled.div``;
 
-export const SelectField = styled(SelectFieldComponent)`
+export const SelectField = styled(SelectFieldComponent).attrs({
+	classes: {
+		select: 'select'
+	}
+})`
+	&& .select {
+		padding-right: 23px;
+	}
+
 	&& {
 		min-width: 80px;
 	}

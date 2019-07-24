@@ -35,7 +35,7 @@ export const Container = styled.div<IContainer>`
 	align-items: center;
 	border-bottom: 1px solid ${COLOR.BLACK_6};
 	height: 80px;
-	padding-right: 30px;
+	padding-right: 10px;
 `;
 
 export const ModelData = styled.div`
@@ -52,21 +52,20 @@ export const Name = styled.div<IName>`
 export const CurrentRevision = styled.div<ICurrentRevision>`
 	color: ${(props) => props.disabled ? COLOR.BLACK_20 : '#757575'};
 	font-size: 14px;
+	width: 142px;
+	display: inline-block;
 `;
 
 export const Revisions = styled.div`
 	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
 	width: 100%;
 	height: 20px;
-	align-items: center;
 	overflow: hidden;
 	margin-top: 6px;
 `;
 
 export const CompareIconWrapper = styled.div`
-	position: absolute;
-	left: calc(50% - 8px);
-	transform: translateX(-50%);
+	display: inline-block;
+	width: 20px;
+	padding-top: 1px;
 `;
