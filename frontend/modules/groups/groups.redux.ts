@@ -77,7 +77,7 @@ export interface IGroupComponentState {
 	highlightedGroups: any;
 	totalMeshes: number;
 	criteriaFieldState: ICriteriaFieldState;
-	allOverriden: boolean;
+	allOverridden: boolean;
 }
 
 export interface IGroupState {
@@ -112,7 +112,7 @@ export const INITIAL_STATE: IGroupState = {
 		selectedFilters: [],
 		totalMeshes: 0,
 		criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE,
-		allOverriden: false
+		allOverridden: false
 	},
 	colorOverrides: [],
 	fieldNames: []
@@ -160,7 +160,7 @@ export const addColorOverride = (state = INITIAL_STATE, { groupId }) => {
 };
 
 export const removeColorOverride = (state = INITIAL_STATE, { groupId }) => {
-	const componentState = { ...state.componentState, allOverriden: false };
+	const componentState = { ...state.componentState, allOverridden: false };
 	return {...state, componentState, colorOverrides: state.colorOverrides.filter((id) => groupId !== id)};
 };
 
@@ -178,7 +178,7 @@ export const setOverrideAll = (state = INITIAL_STATE, { overrideAll }) => {
 		groupIds = Object.keys(state.groupsMap);
 	}
 
-	const componentState = { ...state.componentState, allOverriden: overrideAll };
+	const componentState = { ...state.componentState, allOverridden: overrideAll };
 	return setColorOverrides({...state, componentState}, { groupIds });
 };
 
@@ -194,7 +194,7 @@ export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
 		newGroup.totalSavedMeshes = group.totalSavedMeshes;
 	}
 
-	if (state.componentState.allOverriden) {
+	if (state.componentState.allOverridden) {
 		state = addColorOverride(state, { groupId: group._id});
 	}
 

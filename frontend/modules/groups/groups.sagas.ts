@@ -32,7 +32,7 @@ import {
 	selectActiveGroupDetails,
 	selectSelectedFilters,
 	selectShowDetails,
-	selectIsAllOverriden,
+	selectIsAllOverridden,
 	selectActiveGroupId
 } from './groups.selectors';
 import { Viewer } from '../../services/viewer/viewer';
@@ -175,7 +175,7 @@ export function* deleteGroups({ teamspace, modelId, groups }) {
 		const groupsMap = yield select(selectGroupsMap);
 
 		yield all(groupsToDelete.map((groupId) => {
-			const overridenGroup = colorOverrides[groupId];
+			const overriddenGroup = colorOverrides[groupId];
 			const group = groupsMap[groupId];
 
 			const actions = [
@@ -183,8 +183,8 @@ export function* deleteGroups({ teamspace, modelId, groups }) {
 				put(GroupsActions.deleteGroupsSuccess([groupId]))
 			];
 
-			if (overridenGroup) {
-				actions.push(put(GroupsActions.removeColorOverride([overridenGroup])));
+			if (overriddenGroup) {
+				actions.push(put(GroupsActions.removeColorOverride([overriddenGroup])));
 			}
 
 			return actions;
@@ -231,9 +231,9 @@ export function* showDetails({ group, revision }) {
 		}
 
 		const colorOverrides = yield select(selectColorOverrides);
-		const overridenGroup = colorOverrides[group._id];
-		if (overridenGroup) {
-			yield put(GroupsActions.removeColorOverride([overridenGroup], true));
+		const overriddenGroup = colorOverrides[group._id];
+		if (overriddenGroup) {
+			yield put(GroupsActions.removeColorOverride([overriddenGroup], true));
 		}
 
 		yield put(GroupsActions.setActiveGroup(group, revision));
@@ -259,7 +259,7 @@ export function* closeDetails() {
 
 export function* createGroup({ teamspace, modelId, revision }) {
 	try {
-		const isAllOverriden = yield select(selectIsAllOverriden);
+		const isAllOverridden = yield select(selectIsAllOverridden);
 		const currentUser = yield select(selectCurrentUser);
 		const newGroupDetails = yield select(selectNewGroupDetails);
 		const objectsStatus = yield Viewer.getObjectsStatus();
@@ -282,7 +282,7 @@ export function* createGroup({ teamspace, modelId, revision }) {
 
 		const preparedGroup = prepareGroup(data);
 
-		if (isAllOverriden) {
+		if (isAllOverridden) {
 			yield put(GroupsActions.addColorOverride(preparedGroup._id));
 		}
 

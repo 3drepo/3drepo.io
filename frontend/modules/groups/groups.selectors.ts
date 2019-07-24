@@ -71,8 +71,8 @@ export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
 
-export const selectIsAllOverriden = createSelector(
-	selectComponentState, (state) => state.allOverriden
+export const selectIsAllOverridden = createSelector(
+	selectComponentState, (state) => state.allOverridden
 );
 
 export const selectFilteredGroups = createSelector(
