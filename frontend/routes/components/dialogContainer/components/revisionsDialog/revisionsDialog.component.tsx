@@ -7,6 +7,7 @@ import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../.
 import { DATE_TIME_FORMAT } from '../../../../../services/formatting/formatDate';
 import { DateTime } from '../../../dateTime/dateTime.component';
 import {
+	ActionsMenuWrapper,
 	Column,
 	Description,
 	Item,
@@ -17,11 +18,35 @@ import {
 	StyledList,
 	Tag
 } from './revisionsDialog.styles';
+import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
+import {
+	MenuList,
+	StyledItemText,
+	StyledListItem
+} from '../../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { MenuButton as MenuButtonComponent } from '../../../../components/menuButton/menuButton.component';
+
+const MenuButton = (props) => <MenuButtonComponent ariaLabel="Show menu" {...props} />;
 
 export const TYPES = {
 	TEAMSPACES: 'teamspaces-revisions',
 	VIEWER: 'viewer-revisions',
 };
+
+const MENU = [
+	{
+		name: 'make-void',
+		label: 'Make void'
+	},
+	{
+		name: 'make-active',
+		label: 'Make active'
+	},
+	{
+		name: 'set-latest',
+		label: 'Set latest'
+	},
+];
 
 interface IProps {
 	currentRevisionName: string;
@@ -67,11 +92,37 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
 	}
 
+	private renderActionsMenu = (menu) =>  {
+		return(
+			<MenuList>
+				{MENU.map(({ name, label }) => (
+					<StyledListItem key={name} button onClick={(e) => {
+						this.menuActionsMap[name](e);
+						menu.close(e);
+					}}>
+						<StyledItemText>{label}</StyledItemText>
+					</StyledListItem>
+				))}
+			</MenuList>
+		);
+	}
+
+	get menuActionsMap() {
+		return {
+			['make-void']: (e) => {
+			},
+			['make-active']: (e) => {
+			},
+			['set-latest']: (e) => {
+			},
+		};
+	}
+
 	public renderRevisionItem = (revision, currentRevisionId, handleSetNewRevision) => {
 		const isCurrentRevision = currentRevisionId === revision._id;
 		const props = {
 			key: revision._id,
-			onClick: () => {
+			onClick: (event) => {
 				if (this.props.type === TYPES.VIEWER) {
 					this.setNewRevision(handleSetNewRevision, revision, isCurrentRevision);
 				} else {
@@ -97,6 +148,18 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 					<Property>
 						<DateTime value={revision.timestamp} format={DATE_TIME_FORMAT} />
 					</Property>
+
+					{this.props.type === TYPES.TEAMSPACES &&
+						<ActionsMenuWrapper>
+							<ButtonMenu
+								renderButton={MenuButton}
+								renderContent={this.renderActionsMenu}
+								PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+								PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
+								ButtonProps={{ disabled: false }}
+							/>
+						</ActionsMenuWrapper>
+					}
 				</Row>
 				<Column>
 					<Property>

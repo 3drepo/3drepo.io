@@ -97,3 +97,10 @@ export const StyledDialogContent = styled(DialogContent)`
 		margin-bottom: 15px
 	}
 `;
+
+export const ActionsMenuWrapper = styled.div`
+	display: flex;
+	margin-left: 20px;
+	margin-top: -12px;
+	margin-right: -12px;
+`;
