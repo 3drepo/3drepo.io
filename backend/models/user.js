@@ -197,6 +197,61 @@ schema.statics.deleteStarredMetadataTag = async function (username, tag) {
 	return {};
 };
 
+schema.statics.getStarredModels = async function (username) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	const userProfile = await dbCol.findOne({user: username}, {user: 1,
+		"customData.starredModels" : 1
+	});
+
+	return _.get(userProfile, "customData.starredModels") || {};
+};
+
+schema.statics.appendStarredModels = async function (username, ts, modelID) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	const userProfile = await dbCol.findOne({user: username}, {user: 1,
+		"customData.starredModels" : 1
+	});
+
+	const starredModels = 	userProfile.customData.starredModels || {};
+	if(!starredModels[ts]) {
+		starredModels[ts] = [];
+	}
+
+	if(starredModels[ts].indexOf(modelID) === -1) {
+		starredModels[ts].push(modelID);
+		await dbCol.update({user: username}, {$set: { "customData.starredModels" : starredModels } });
+	}
+	return {};
+};
+
+schema.statics.setStarredModels = async function (username, models) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	await dbCol.update({user: username}, {$set: { "customData.starredModels" : models}});
+	return {};
+};
+
+schema.statics.deleteStarredModel = async function (username, ts, modelID) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	const userProfile = await dbCol.findOne({user: username}, {user: 1,
+		"customData.starredModels" : 1
+	});
+
+	if(userProfile.customData.starredModels && userProfile.customData.starredModels[ts]) {
+		if(userProfile.customData.starredModels[ts].length === 1 &&
+			userProfile.customData.starredModels[ts][0] === modelID) {
+			const action = {$unset: {}};
+			action.$unset[`customData.starredModels.${ts}`] = "";
+			await dbCol.update({user: username}, action);
+
+		} else {
+			const action = {$pull: {}};
+			action.$pull[`customData.starredModels.${ts}`] = modelID;
+			await dbCol.update({user: username}, action);
+		}
+	}
+	return {};
+};
+
 schema.statics.findByAPIKey = async function (key) {
 	if (!key) {
 		return null;
