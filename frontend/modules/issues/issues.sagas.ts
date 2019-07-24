@@ -266,8 +266,8 @@ export function* removeComment({ teamspace, modelId, issueData }) {
 export function* renderPins() {
 	try {
 		const activeIssueId = yield select(selectActiveIssueId);
-		const filteredIssues = yield select(selectFilteredIssues);
 		const issuesList = yield select(selectIssues);
+		let filteredIssues = yield select(selectFilteredIssues);
 
 		if (activeIssueId) {
 			filteredIssues = filteredIssues.concat(issuesList.filter((issue) => issue._id === activeIssueId));
