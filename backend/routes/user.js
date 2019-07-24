@@ -273,7 +273,11 @@ async function replaceStarredModels(req, res, next) {
 	const username = req.session.user.username;
 	const data = req.body;
 
-	if (!isObject(data)) {
+	const validData = isObject(data) && !isArray(data) &&
+		Object.keys(data).reduce((currRes, key) => currRes && isArray(data[key]) && data[key].every(isString),
+			true);
+
+	if (!validData) {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 		return;
 	}
