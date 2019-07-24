@@ -126,7 +126,8 @@ router.get("/starredModels", middlewares.loggedIn, getStarredModels, onSuccess);
  * @apiParam  {String} tag The tag to be starred
  * @apiParamExample {json} Input
  *    {
- *      "tag": "material"
+ *      "teamspace": "user1",
+ *      "model": "c7d9184a-83d3-4ef0-975c-ba2ced888e79"
  *    }
  *
  * @apiSuccessExample {json} Success
@@ -142,12 +143,12 @@ router.post("/starredModels", middlewares.loggedIn, appendStarredModels, onSucce
  * @apiName SetStarredModels
  * @apiGroup User
  *
- * @apiParam  [String]  An array of tags to be starred
+ * @apiParam  [String]  An array of models to be starred
  * @apiParamExample {json} Input
- *    [
- *    	"material",
- * 	  	"color"
- * 	  ]
+ *    {
+ *     	"user1": ["c7d9184a-83d3-4ef0-975c-ba2ced888e79"],
+ *     	"user2": ["4d17e126-8238-432d-a421-93819373e21a", "0411e74a-0661-48f9-bf4f-8eabe4a673a0"]
+ * 	  }
  *
  * @apiSuccessExample {json} Success
  *    HTTP/1.1 200 OK
@@ -165,7 +166,8 @@ router.put("/starredModels", middlewares.loggedIn, replaceStarredModels, onSucce
  * @apiParam  {String} tag The tag to be starred
  * @apiParamExample {json} Input
  *    {
- *      "tag": "material"
+ *      "teamspace": "user1",
+ *      "model": "c7d9184a-83d3-4ef0-975c-ba2ced888e79"
  *    }
  *
  * @apiSuccessExample {json} Success
