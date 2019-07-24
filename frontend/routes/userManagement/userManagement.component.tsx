@@ -122,6 +122,10 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 			this.props.fetchTeamspaces(currentUser.username);
 		}
 
+		if (selectedTeamspace) {
+			onTeamspaceChange(selectedTeamspace);
+		}
+
 		const changes = {
 			teamspacesItems: teamspaces.map(({ account }) => ({ value: account }))
 		} as any;

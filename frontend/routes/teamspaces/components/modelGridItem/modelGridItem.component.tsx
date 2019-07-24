@@ -27,7 +27,7 @@ import { PERMISSIONS_VIEWS } from '../../../projects/projects.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { ActionsMenu } from '../actionsMenu/actionsMenu.component';
 import FederationDialog from '../federationDialog/federationDialog.container';
-import { RevisionsDialog } from '../revisionsDialog/revisionsDialog.component';
+import RevisionsDialog from '../revisionsDialog/revisionsDialog.container';
 import UploadModelFileDialog from '../uploadModelFileDialog/uploadModelFileDialog.container';
 import {
 	Actions,
@@ -68,6 +68,14 @@ interface IProps {
 export function ModelGridItem(props: IProps) {
 	const isFederation = Boolean(props.federate);
 	const isPending = false;
+
+	useEffect(() => {
+		if (!isFederation) {
+			const modelData = { modelId: props.model, modelName: props.name };
+			props.subscribeOnStatusChange(props.teamspace, props.projectName, modelData);
+			return () => props.unsubscribeOnStatusChange(props.teamspace, props.projectName, modelData);
+		}
+	}, []);
 
 	const renderActions = (actions) => {
 		return actions ? actions.map((actionItem, index) => {
@@ -230,14 +238,6 @@ export function ModelGridItem(props: IProps) {
 	}, ...sharedActions];
 
 	const rowActions = isFederation ? federationActions : modelActions;
-
-	useEffect(() => {
-			if (!isFederation) {
-				const modelData = { modelId: props.model, modelName: props.name };
-				props.subscribeOnStatusChange(props.teamspace, props.projectName, modelData);
-				return () => props.unsubscribeOnStatusChange(props.teamspace, props.projectName, modelData);
-			}
-	}, []);
 
 	return (
 		<Container

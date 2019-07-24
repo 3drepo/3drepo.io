@@ -31,10 +31,9 @@ import { PERMISSIONS_VIEWS } from '../projects/projects.component';
 import FederationDialog from './components/federationDialog/federationDialog.container';
 import { ModelDialog } from './components/modelDialog/modelDialog.component';
 import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
+import ModelGridItem from './components/modelGridItem/modelGridItem.container';
 import ProjectDialog from './components/projectDialog/projectDialog.container';
 import ProjectItem from './components/projectItem/projectItem.container';
-import ModelGridItem from './components/modelGridItem/modelGridItem.container';
-import ModelListItem from './components/modelListItem/modelListItem.container';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
 import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
 import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
@@ -165,11 +164,16 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public createShareModelHandler = (props) => (event) => {
+	public openFederationDialog = (event, teamspace = '', project) => {
 		event.stopPropagation();
-		console.log('Share model', props);
+
+		this.props.showDialog({
+			title: 'New federation',
+			template: FederationDialog,
+			data: { teamspace, project }
+		});
 	}
-/*
+
 	public openModelDialog =
 		(teamspaceName = '', projectName = '', modelName = '', modelId = '') => (event) => {
 		event.stopPropagation();
@@ -189,7 +193,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				this.props.createModel(teamspace, modelData);
 			}
 		});
-	}*/
+	}
 
 	private handleVisibilityChange = ({ id: itemId, nested = []}) => {
 		this.setState((prevState) => {
