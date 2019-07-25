@@ -138,7 +138,7 @@ export function ModelGridItem(props: IProps) {
 
 	const handleShare = (event) => {
 		event.stopPropagation();
-		console.log('Share model', props);
+		console.info('Share model', props);
 	};
 
 	const handleDelete = () => {
@@ -206,7 +206,7 @@ export function ModelGridItem(props: IProps) {
 	};
 
 	const handleStarClick = () => {
-		console.log('star click');
+		console.info('star click');
 	};
 
 	const sharedActions = [{

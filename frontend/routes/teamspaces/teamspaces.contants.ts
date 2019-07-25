@@ -22,8 +22,8 @@ import Delete from '@material-ui/icons/Delete';
 import Edit from '@material-ui/icons/Edit';
 import People from '@material-ui/icons/People';
 import Settings from '@material-ui/icons/Settings';
-import Share from '@material-ui/icons/Share';
 import SettingsBackupRestore from '@material-ui/icons/SettingsBackupRestore';
+import Share from '@material-ui/icons/Share';
 
 export const ROW_ACTIONS = {
 	UPLOAD_FILE: {

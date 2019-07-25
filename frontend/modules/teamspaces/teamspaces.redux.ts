@@ -53,13 +53,6 @@ export const INITIAL_STATE = {
 };
 
 const fetchTeamspacesSuccess = (state = INITIAL_STATE, { entities }) => {
-	const teamspacesList = Object.keys(entities.teamspaces);
-
-	// teamspacesList.forEach((user) => {
-	// 	return teamspaces[user].projects = sortByField(entities.teamspaces[user].projects,
-	// 		{ order: 'asc', config: { field: 'name' } });
-	// });
-
 	return { ...state, ...entities };
 };
 

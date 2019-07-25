@@ -165,4 +165,4 @@ export const ModelDialog = (props: IProps) => {
 			</Form>
 		</Formik>
 	);
-}
+};

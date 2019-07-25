@@ -16,7 +16,7 @@
  */
 
 import { normalize } from 'normalizr';
-import { put, takeLatest, select } from 'redux-saga/effects';
+import { put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { values, pick, pickBy } from 'lodash';
+import { pick, pickBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { LIST_ITEMS_TYPES } from '../../routes/teamspaces/teamspaces.contants';
 import { extendTeamspacesInfo } from './teamspaces.helpers';
