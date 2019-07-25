@@ -21,8 +21,6 @@ import { SelectField as SelectFieldComponent } from '../../../../../components/s
 
 import { COLOR } from '../../../../../../styles';
 
-export const Container = styled.div``;
-
 export const SelectField = styled(SelectFieldComponent).attrs({
 	classes: {
 		select: 'select'
@@ -31,6 +29,13 @@ export const SelectField = styled(SelectFieldComponent).attrs({
 	&& .select {
 		padding-right: 23px;
 	}
+
+	&& .select > div {
+		max-width: 122px;
+		text-overflow: ellipsis;
+		overflow: hidden;
+	}
+
 
 	&& {
 		min-width: 80px;

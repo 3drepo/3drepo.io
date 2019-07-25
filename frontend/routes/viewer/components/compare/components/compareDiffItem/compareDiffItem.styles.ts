@@ -17,6 +17,11 @@
 
 import styled from 'styled-components';
 import { COLOR } from '../../../../../../styles';
+import { Tooltip } from '@material-ui/core';
+import { omit } from 'lodash';
+import * as React from 'react';
+import { TooltipProps } from '@material-ui/core/Tooltip';
+import { bool } from 'prop-types';
 
 interface IContainer {
 	disabled: boolean;
@@ -54,8 +59,22 @@ export const CurrentRevision = styled.div<ICurrentRevision>`
 	font-size: 14px;
 	width: 142px;
 	display: inline-block;
+	text-overflow: ellipsis;
+    overflow: hidden;
 `;
 
+export const RevisionTooltip =  styled((prop: TooltipProps) => {
+	const props = omit(prop, ['className', 'hidden']);
+	props.classes = { popper: prop.className, tooltip: 'tooltip' };
+
+	return React.createElement(Tooltip, props);
+})`
+	.tooltip {
+		font-size: 12px;
+		margin: 0;
+		visibility:  ${(props) => props.hidden ? 'hidden' : 'visible'}
+	}
+`;
 export const Revisions = styled.div`
 	display: flex;
 	width: 100%;

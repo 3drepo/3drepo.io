@@ -21,6 +21,7 @@ import { DateTime } from '../../../../../components/dateTime/dateTime.component'
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { SelectField, MenuItem, Name, Date } from './revisionsSelect.styles';
 import { formatShortDate, NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
+import { RevisionTooltip } from '../compareDiffItem/compareDiffItem.styles';
 
 interface IProps {
 	revisions: any[];
@@ -33,11 +34,13 @@ interface IProps {
 
 interface IState {
 	value: string;
+	tooltipHidden?: boolean;
 }
 
 export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 	public state = {
-		value: null
+		value: null,
+		tooltipHidden: false
 	};
 
 	public static defaultProps = {
@@ -61,20 +64,23 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 		const { revisions, disabled } = this.props;
 
 		return (
-			<SelectField
-				value={this.state.value}
-				readOnly={revisions.length < 2}
-				disabled={disabled}
-				renderValue={this.renderValue}
-				onChange={this.handleChange}
-			>
-				{revisions.map((revision) => (
-					<MenuItem key={revision._id} value={revision}>
-						{this.renderName(revision)}
-						{this.renderDate(revision.timestamp)}
-					</MenuItem>
-				))}
-			</SelectField>
+			<RevisionTooltip  title={this.value} hidden={this.state.tooltipHidden} >
+				<SelectField
+					value={this.state.value}
+					readOnly={revisions.length < 2}
+					disabled={disabled}
+					renderValue={this.renderValue}
+					onChange={this.handleChange}
+					MenuProps={({onEntered: this.handleOpen, onExit: this.handleClose})}
+				>
+					{revisions.map((revision) => (
+						<MenuItem key={revision._id} value={revision}>
+							{this.renderName(revision)}
+							{this.renderDate(revision.timestamp)}
+						</MenuItem>
+					))}
+				</SelectField>
+			</RevisionTooltip>
 		);
 	});
 
@@ -111,6 +117,14 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 		}, () => {
 			this.props.onChange(e.target.value);
 		});
+	}
+
+	private handleOpen = (e) => {
+		this.setState({ tooltipHidden: true });
+	}
+
+	private handleClose = (e) => {
+		this.setState({ tooltipHidden: false });
 	}
 
 	private getRevisionName = (revision) => {
