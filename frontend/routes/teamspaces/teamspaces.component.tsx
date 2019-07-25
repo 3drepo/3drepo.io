@@ -188,16 +188,16 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	private renderModels = (models, areVisible) => renderWhenTrue(() => (
-		<GridContainer>
+	private renderModels = (models, projectId) => renderWhenTrue(() => (
+		<GridContainer key={`container-${projectId}`}>
 			{models.map((props) => (
 				<ModelGridItem key={props.model} {...props} />
 			))}
 		</GridContainer>
-	))(models.length && areVisible)
+	))(models.length && this.state.visibleItems[projectId])
 
-	private renderProject = (props) => (
-		<>
+	private renderProject = (props) => ([
+		(
 			<ProjectItem
 				{...props}
 				key={props._id}
@@ -205,9 +205,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				disabled={!props.models.length}
 				onClick={this.handleVisibilityChange}
 			/>
-			{this.renderModels(props.models, this.state.visibleItems[props._id])}
-		</>
-	)
+		),
+		this.renderModels(props.models, props._id)
+	])
 
 	private renderTeamspace = (props) => (
 		<TeamspaceItem

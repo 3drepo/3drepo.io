@@ -251,7 +251,7 @@ export function ModelGridItem(props: IProps) {
 			<Header>
 				<NameWrapper>
 					<StarIcon
-						active={isFederation}
+						active={Number(isFederation)}
 						activeColor={COLOR.SUNGLOW}
 						onClick={handleStarClick}
 					/>
