@@ -47,36 +47,16 @@ interface IProps {
 	history: any;
 	location: any;
 	teamspaces: any;
-	projects: any;
 	currentTeamspace: string;
 	items: any[];
 	isPending: boolean;
-	activeTeamspace: string;
-	activeProject: string;
+	visibleItems: any[];
 	showDialog: (config) => void;
-	showConfirmDialog: (config) => void;
-
 	fetchTeamspaces: (username) => void;
-
-	createProject: (teamspace, projectData) => void;
-	updateProject: (teamspace, projectName, projectData) => void;
-	removeProject: (teamspace, projectName) => void;
-
-	createModel: (teamspace, modelData) => void;
-
-	onModelUpload: () => void;
-	onSettingsClick: () => void;
-	onDeleteClick: () => void;
-	onEditClick: () => void;
-	onRevisionsClick: () => void;
-	onDownloadClick: () => void;
-	onUploadClick: () => void;
 	setState: (componentState: any) => void;
 }
 
 interface IState {
-	activeTeamspace: string;
-	activeProject: string;
 	teamspacesItems: any[];
 	visibleItems: any;
 }
@@ -87,42 +67,29 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	};
 
 	public state = {
-		activeTeamspace: '',
-		activeProject: '',
 		teamspacesItems: [],
 		visibleItems: {}
 	};
 
-	public get activeTeamspace() {
-		return this.props.match.params.teamspace || this.state.activeTeamspace;
-	}
-
 	public componentDidMount() {
-		const {items, fetchTeamspaces, currentTeamspace} = this.props;
+		const {items, fetchTeamspaces, currentTeamspace, visibleItems} = this.props;
 		if (!items.length) {
 			fetchTeamspaces(currentTeamspace);
+		}
+
+		if (!isEmpty(visibleItems)) {
+			this.setState({visibleItems});
 		}
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
 		const changes = {} as IState;
-		const { isPending, teamspaces, currentTeamspace, activeProject, projects } = this.props;
+		const { isPending, currentTeamspace } = this.props;
 
 		const isPendingChanged = isPending !== prevProps.isPending;
 		if (isPendingChanged) {
-			const activeTeamspace = this.props.activeTeamspace || currentTeamspace;
 			const visibleItems = { ...prevState.visibleItems };
-
-			if (activeTeamspace && teamspaces[activeTeamspace]) {
-				visibleItems[activeTeamspace] = true;
-			}
-
-			if (activeProject && projects[activeProject]) {
-				visibleItems[activeProject] = true;
-			}
-
-			changes.activeTeamspace = activeTeamspace;
-			changes.activeProject = activeProject;
+			visibleItems[currentTeamspace] = true;
 			changes.visibleItems = visibleItems;
 		}
 
@@ -132,11 +99,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
-		this.props.setState({
-			activeTeamspace: this.state.activeTeamspace,
-			activeProject: this.state.activeProject,
-			visibleItems: this.state.visibleItems
-		});
+		this.props.setState({ visibleItems: this.state.visibleItems });
 	}
 
 	private shouldBeVisible = cond([
@@ -145,7 +108,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		[stubTrue, () => false]
 	]);
 
-	public openProjectDialog = (event, teamspaceName = '', projectId?, projectName = '') => {
+	private openProjectDialog = (event, teamspaceName = '', projectId?, projectName = '') => {
 		event.stopPropagation();
 
 		this.props.showDialog({
@@ -159,14 +122,14 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public openFederationDialog = () => {
+	private openFederationDialog = () => {
 		this.props.showDialog({
 			title: 'New federation',
 			template: FederationDialog
 		});
 	}
 
-	public openModelDialog = () => {
+	private openModelDialog = () => {
 		this.props.showDialog({
 			title: 'New model',
 			template: ModelDialog
@@ -201,7 +164,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			<ProjectItem
 				{...props}
 				key={props._id}
-				onEditClick={this.openProjectDialog}
 				disabled={!props.models.length}
 				onClick={this.handleVisibilityChange}
 			/>

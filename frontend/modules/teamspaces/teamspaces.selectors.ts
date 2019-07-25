@@ -109,10 +109,6 @@ export const selectComponentState = createSelector(
 	selectTeamspacesDomain, (state) => state.componentState
 );
 
-export const selectActiveTeamspace = createSelector(
-	selectComponentState, (state) => state.activeTeamspace
-);
-
-export const selectActiveProject = createSelector(
-	selectComponentState, (state) => state.activeProject
+export const selectVisibleItems = createSelector(
+	selectComponentState, (state) => state.visibleItems
 );

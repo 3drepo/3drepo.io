@@ -93,8 +93,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public toggleActionsMenuOpen = (event) => {
-		event.stopPropagation();
+	public toggleActionsMenuOpen = () => {
 		this.setState({actionsMenuOpen: !this.state.actionsMenuOpen});
 	}
 
