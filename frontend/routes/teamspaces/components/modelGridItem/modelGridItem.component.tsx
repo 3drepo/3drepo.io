@@ -56,12 +56,9 @@ interface IProps {
 	canUpload: boolean;
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
-	updateModel: (teamspace, modelName, modelData) => void;
 	removeModel: (teamspace, modelData) => void;
 	downloadModel: (teamspace, modelId) => void;
 	onShareClick: () => void;
-	onModelUpload: () => void;
-	onRevisionsClick: () => void;
 	subscribeOnStatusChange: (teamspace, projectName, modelData) => void;
 	unsubscribeOnStatusChange: (teamspace, projectName, modelData) => void;
 	showSnackbar: (text) => void;

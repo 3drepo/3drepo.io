@@ -29,7 +29,7 @@ interface IStyledGrid {
 export const Container = styled.div``;
 
 export const StyledGrid = styled(Grid)<IStyledGrid>`
-	&& {
+  && {
     width: 100%;
     height: 100%;
     position: absolute;
@@ -38,7 +38,7 @@ export const StyledGrid = styled(Grid)<IStyledGrid>`
     background: ${(props) => props.theme.federate ? COLOR.ALICE_BLUE : COLOR.WHITE};
     position: absolute;
     z-index: 0;
-	}
+  }
 
   transition: opacity 200ms ease-in-out;
   opacity: ${(props) => props.theme.opened ? 1 : 0};
