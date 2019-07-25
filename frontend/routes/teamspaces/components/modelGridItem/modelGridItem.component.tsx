@@ -75,10 +75,13 @@ export function ModelGridItem(props: IProps) {
 			props.subscribeOnStatusChange(props.teamspace, props.projectName, modelData);
 			return () => props.unsubscribeOnStatusChange(props.teamspace, props.projectName, modelData);
 		}
-	}, []);
+	}, [props.teamspace, props.projectName, props.model, props.name]);
 
 	const renderActions = (actions) => {
-		return actions ? actions.map((actionItem, index) => {
+		if (!actions) {
+			return null;
+		}
+		return actions.map((actionItem) => {
 			const {label, action, Icon, color, isHidden = false, requiredPermissions = ''} = actionItem;
 			const iconProps = {color, fontSize: 'small'} as any;
 			const ActionsIconButton = () => (<Icon {...iconProps} />);
@@ -94,7 +97,7 @@ export function ModelGridItem(props: IProps) {
 					/>
 				))(hasPermissions(requiredPermissions, props.permissions));
 			}
-		}) : null;
+		});
 	};
 
 	const handlePermissionsClick = (event) => {
@@ -169,7 +172,7 @@ export function ModelGridItem(props: IProps) {
 
 	const handleUploadModelFile = (event) => {
 		event.stopPropagation();
-		const { teamspace, name, model, canUpload, project } = props;
+		const { teamspace, name, model, canUpload, projectName } = props;
 
 		props.showDialog({
 			title: `Upload Model`,
@@ -179,7 +182,7 @@ export function ModelGridItem(props: IProps) {
 				modelName: name,
 				modelId: model,
 				canUpload,
-				project
+				project: projectName
 			}
 		});
 	};
