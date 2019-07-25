@@ -136,7 +136,7 @@ export default ({ mainTree, subTrees, subModels, modelsWithMeshes }) => new Prom
 		const { data: nodesList } = getFlattenNested(mainTree);
 		const meshesByModelId = getMeshesByModelId(modelsWithMeshes);
 		const auxiliaryMaps = getAuxiliaryMaps(nodesList);
-		console.log('nodesList',nodesList);
+
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.timeEnd('TREE PROCESSING NEW');
 		resolve({ nodesList, meshesByModelId, ...auxiliaryMaps });
