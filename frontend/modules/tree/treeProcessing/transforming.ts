@@ -1,6 +1,6 @@
-import { VISIBILITY_STATES, SELECTION_STATES, BACKEND_VISIBILITY_STATES } from '../../../constants/tree';
+import { VISIBILITY_STATES, SELECTION_STATES, BACKEND_VISIBILITY_STATES, NODE_TYPES } from '../../../constants/tree';
 import { IS_DEVELOPMENT } from '../../../constants/environment';
-import { INode } from './treeProcessing.constants';
+import { INode, DEFAULT_NODE_NAME } from './treeProcessing.constants';
 
 const isModelNode = (level, isFederation, hasFederationAsParent?) => {
 	return (level === 1 && !isFederation) || (level === 2 && hasFederationAsParent);
@@ -13,7 +13,7 @@ const getNamespacedId = (node) => {
 
 const getTransformedNodeData = (node) => ({
 	_id: node._id,
-	name: node.name || node._id,
+	name: node.type === NODE_TYPES.TRANSFORMATION && !node.name ? DEFAULT_NODE_NAME : node.name,
 	type: node.type,
 	teamspace: node.account,
 	meta: node.meta || [],
@@ -39,6 +39,8 @@ const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null)
 	const dataToFlatten = [] as any;
 
 	if (tree.children) {
+		const hasChildren = tree.children.some((child) => Boolean(child.name));
+		rowData.hasChildren = hasChildren;
 		rootParentId = rowData.isModel ? rowData._id : rootParentId;
 
 		for (let index = 0; index < tree.children.length; index++) {
@@ -114,7 +116,7 @@ export default ({ mainTree, subTrees, subModels, modelsWithMeshes }) => new Prom
 			if (subModel) {
 					child.name = [modelTeamspace, subModel.name].join(':');
 			} else {
-					child.name = child.name || child._id;
+					child.name = child.name || DEFAULT_NODE_NAME;
 			}
 
 			if (subModel && child.children && child.children[0]) {
@@ -134,6 +136,7 @@ export default ({ mainTree, subTrees, subModels, modelsWithMeshes }) => new Prom
 		const { data: nodesList } = getFlattenNested(mainTree);
 		const meshesByModelId = getMeshesByModelId(modelsWithMeshes);
 		const auxiliaryMaps = getAuxiliaryMaps(nodesList);
+		console.log('nodesList',nodesList);
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.timeEnd('TREE PROCESSING NEW');
 		resolve({ nodesList, meshesByModelId, ...auxiliaryMaps });

@@ -34,3 +34,5 @@ export interface ITreeProcessingData {
 	meshesByModelId: any;
 	nodesBySharedIdsMap: any;
 }
+
+export const DEFAULT_NODE_NAME = '(No Name)';
