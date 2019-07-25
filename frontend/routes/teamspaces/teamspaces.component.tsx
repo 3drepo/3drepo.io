@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cond, isEmpty, matches, stubTrue, pick } from 'lodash';
+import { cond, isEmpty, matches, stubTrue } from 'lodash';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
-import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 
 import MenuItem from '@material-ui/core/MenuItem';
 import Add from '@material-ui/icons/Add';
@@ -27,18 +26,14 @@ import { renderWhenTrue } from '../../helpers/rendering';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
-import { PERMISSIONS_VIEWS } from '../projects/projects.component';
 import FederationDialog from './components/federationDialog/federationDialog.container';
-import { ModelDialog } from './components/modelDialog/modelDialog.component';
-import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
+import ModelDialog from './components/modelDialog/modelDialog.container';
 import ModelGridItem from './components/modelGridItem/modelGridItem.container';
 import ProjectDialog from './components/projectDialog/projectDialog.container';
 import ProjectItem from './components/projectItem/projectItem.container';
-import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
 import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
-import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
-import { FEDERATION_TYPE, LIST_ITEMS_TYPES, MODEL_TYPE } from './teamspaces.contants';
-import { Head, List, LoaderContainer, MenuButton, GridContainer } from './teamspaces.styles';
+import { LIST_ITEMS_TYPES } from './teamspaces.contants';
+import { GridContainer, Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -164,34 +159,17 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public openFederationDialog = (event, teamspace = '', project) => {
-		event.stopPropagation();
-
+	public openFederationDialog = () => {
 		this.props.showDialog({
 			title: 'New federation',
-			template: FederationDialog,
-			data: { teamspace, project }
+			template: FederationDialog
 		});
 	}
 
-	public openModelDialog =
-		(teamspaceName = '', projectName = '', modelName = '', modelId = '') => (event) => {
-		event.stopPropagation();
-		const { teamspacesItems } = this.state as IState;
-		const teamspaces = teamspacesItems.filter((teamspace) => teamspace.projects.length);
-
+	public openModelDialog = () => {
 		this.props.showDialog({
 			title: 'New model',
-			template: ModelDialog,
-			data: {
-				modelName,
-				teamspace: teamspaceName,
-				project: projectName,
-				modelId
-			},
-			onConfirm: ({ teamspace, ...modelData }) => {
-				this.props.createModel(teamspace, modelData);
-			}
+			template: ModelDialog
 		});
 	}
 

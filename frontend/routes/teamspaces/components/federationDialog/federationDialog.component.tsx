@@ -23,7 +23,6 @@ import ArrowBack from '@material-ui/icons/ArrowBack';
 import ArrowForward from '@material-ui/icons/ArrowForward';
 import { Field, Form, Formik } from 'formik';
 import { differenceBy, includes, isEmpty, values } from 'lodash';
-import memoizeOne from 'memoize-one';
 import React from 'react';
 import * as Yup from 'yup';
 import {
@@ -39,6 +38,7 @@ import { CellSelect } from '../../../components/customTable/components/cellSelec
 import { LoadingDialog } from './../../../../routes/components/dialogContainer/components';
 import { SubModelsField } from './components/subModelsField/subModelsField.component';
 
+import { getTeamspacesList, getTeamspaceProjects } from '../../../../helpers/model';
 import { FieldWrapper, Row, SelectWrapper, StyledDialogContent } from './federationDialog.styles';
 
 const FederationSchema = Yup.object().shape({
@@ -81,19 +81,6 @@ interface IState {
 	selectedAvailableModels: any[];
 	availableMap: any;
 }
-
-const getTeamspacesList = memoizeOne((teamspaces) => {
-	return values(teamspaces).map(({ account }) => ({ value: account }));
-});
-
-const getTeamspaceProjects = memoizeOne((teamspaceName, teamspaces, projects) => {
-	const selectedTeamspace = teamspaces[teamspaceName];
-	return selectedTeamspace.projects.map((projectId) => ({
-		name: projects[projectId].name,
-		value: projects[projectId]._id,
-		models: projects[projectId].models
-	}));
-});
 
 const getModelsName = (models) => models.map(({ name}) => name);
 
