@@ -56,29 +56,29 @@ export const ISSUE_PRIORITIES = [
 
 export const ISSUE_COLORS = {
 	[PRIORITIES.NONE]: {
-		color: COLOR.DARK_GRAY,
-		pinColor: PIN_COLORS.DARK_GRAY,
-		selectedColor: PIN_COLORS.DARK_GRAY
+		color: COLOR.SOFT_BLUE,
+		pinColor: PIN_COLORS.SOFT_BLUE,
+		selectedColor: PIN_COLORS.VIVID_NAVY
 	},
 	[PRIORITIES.LOW]: {
-		color: COLOR.LEMON_CHIFFON,
-		pinColor: PIN_COLORS.LEMON_CHIFFON,
-		selectedColor: PIN_COLORS.LIGHT_YELLOW
+		color: COLOR.LIGHT_ORANGE,
+		pinColor: PIN_COLORS.LIGHT_ORANGE,
+		selectedColor: PIN_COLORS.VIVID_YELLOW
 	},
 	[PRIORITIES.MEDIUM]: {
-		color: COLOR.DARK_ORANGE,
-		pinColor: PIN_COLORS.DARK_ORANGE,
-		selectedColor: PIN_COLORS.ORANGE
+		color: COLOR.BRIGHT_ORANGE,
+		pinColor: PIN_COLORS.BRIGHT_ORANGE,
+		selectedColor: PIN_COLORS.VIVID_ORANGE
 	},
 	[PRIORITIES.HIGH]: {
-		color: COLOR.MAROON,
-		pinColor: PIN_COLORS.MAROON,
-		selectedColor: PIN_COLORS.RED
+		color: COLOR.DUSTY_RED,
+		pinColor: PIN_COLORS.DUSTY_RED,
+		selectedColor: PIN_COLORS.CORAL_RED
 	},
 	[STATUSES.CLOSED]: {
-		color: COLOR.GREEN,
-		pinColor: PIN_COLORS.GREEN,
-		selectedColor: PIN_COLORS.MED_SEA_GREEN
+		color: COLOR.BRIGHT_GREEN,
+		pinColor: PIN_COLORS.BRIGHT_GREEN,
+		selectedColor: PIN_COLORS.STRONG_GREEN
 	}
 };
 

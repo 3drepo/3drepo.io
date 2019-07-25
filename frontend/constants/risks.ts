@@ -82,9 +82,9 @@ export const RISK_LEVELS_ICONS = {
 
 export const RISK_LEVELS_COLOURS = {
 	[LEVELS.UNSET]: {
-		color: COLOR.DARK_GRAY,
-		pinColor: PIN_COLORS.DARK_GRAY,
-		selectedColor: PIN_COLORS.DARK_GRAY
+		color: COLOR.SOFT_BLUE,
+		pinColor: PIN_COLORS.SOFT_BLUE,
+		selectedColor: PIN_COLORS.VIVID_NAVY
 	},
 	[LEVELS.VERY_LOW]: {
 		color: COLOR.GREEN,

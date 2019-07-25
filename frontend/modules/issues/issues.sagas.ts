@@ -113,7 +113,7 @@ function* updateIssuePin({issue}) {
 		const { _id } = yield select(selectActiveIssueDetails);
 
 		const isSelectedPin = _id && issue._id === _id;
-		const pinColor = isSelectedPin ? PIN_COLORS.YELLOW : PIN_COLORS.BLUE;
+		const pinColor = getIssuePinColor(issue.status, issue.priority, isSelectedPin);
 
 		Viewer.addPin({
 			id: issue._id,
