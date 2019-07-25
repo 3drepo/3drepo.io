@@ -21,6 +21,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { DialogActions } from '../../../../modules/dialog';
 import { ModelActions } from '../../../../modules/model';
+import { SnackbarActions } from '../../../../modules/snackbar';
 import { TeamspacesActions } from '../../../../modules/teamspaces';
 import { ModelGridItem } from './modelGridItem.component';
 
@@ -34,6 +35,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateModel: TeamspacesActions.updateModel,
 	removeModel: TeamspacesActions.removeModel,
 	downloadModel: ModelActions.downloadModel,
+	showSnackbar: SnackbarActions.show
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelGridItem));

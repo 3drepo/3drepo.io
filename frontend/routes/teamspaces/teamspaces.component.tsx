@@ -77,24 +77,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			fetchTeamspaces(currentTeamspace);
 		}
 
-		if (!isEmpty(visibleItems)) {
-			this.setState({visibleItems});
-		}
-	}
-
-	public componentDidUpdate(prevProps, prevState) {
-		const changes = {} as IState;
-		const { isPending, currentTeamspace } = this.props;
-
-		const isPendingChanged = isPending !== prevProps.isPending;
-		if (isPendingChanged) {
-			const visibleItems = { ...prevState.visibleItems };
+		if (isEmpty(visibleItems)) {
 			visibleItems[currentTeamspace] = true;
-			changes.visibleItems = visibleItems;
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
+			this.setState({visibleItems});
 		}
 	}
 

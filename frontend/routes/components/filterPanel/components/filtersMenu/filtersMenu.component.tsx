@@ -18,9 +18,7 @@
 import DayJsUtils from '@date-io/dayjs';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import React from 'react';
-
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-
 import List from '@material-ui/core/List';
 import ArrowRight from '@material-ui/icons/ArrowRight';
 import Check from '@material-ui/icons/Check';

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import copy from 'copy-to-clipboard';
 import React, { useEffect } from 'react';
 import { ROUTES } from '../../../../constants/routes';
 import { hasPermissions } from '../../../../helpers/permissions';
@@ -63,6 +64,7 @@ interface IProps {
 	onRevisionsClick: () => void;
 	subscribeOnStatusChange: (teamspace, projectName, modelData) => void;
 	unsubscribeOnStatusChange: (teamspace, projectName, modelData) => void;
+	showSnackbar: (text) => void;
 }
 
 export function ModelGridItem(props: IProps) {
@@ -123,7 +125,6 @@ export function ModelGridItem(props: IProps) {
 	};
 
 	const handleRevisionsClick = () => {
-		event.stopPropagation();
 		const { teamspace, model, name } = props;
 
 		props.showDialog({
@@ -136,13 +137,13 @@ export function ModelGridItem(props: IProps) {
 		});
 	};
 
-	const handleShare = (event) => {
-		event.stopPropagation();
-		console.info('Share model', props);
+	const handleShare = () => {
+		const url = `${location.hostname}${ROUTES.VIEWER}/${props.teamspace}/${props.model}`;
+		copy(url);
+		props.showSnackbar('Share link copied to clipboard');
 	};
 
 	const handleDelete = () => {
-		event.stopPropagation();
 
 		const { teamspace, showConfirmDialog, name, model, project, removeModel } = props;
 		const type = isFederation ? 'federation' : 'model';
@@ -160,7 +161,6 @@ export function ModelGridItem(props: IProps) {
 	};
 
 	const handleClick = () => {
-		event.stopPropagation();
 		const { history, teamspace, timestamp, model } = props;
 		if (timestamp) {
 			history.push(`${ROUTES.VIEWER}/${teamspace}/${model}`);
