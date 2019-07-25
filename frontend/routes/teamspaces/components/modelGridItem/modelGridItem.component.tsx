@@ -110,7 +110,7 @@ export function ModelGridItem(props: IProps) {
 		event.stopPropagation();
 		const { history, projectName, teamspace, model } = props;
 		history.push({
-			pathname: `${ROUTES.MODEL_SETTINGS}/${teamspace}/models/${model}`,
+			pathname: `${ROUTES.TEAMSPACES}/${teamspace}/models/${model}`,
 			search: `?project=${projectName}`
 		});
 	};

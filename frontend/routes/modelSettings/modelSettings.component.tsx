@@ -202,15 +202,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleBackLink = () => {
-		const { history, location, match } = this.props;
-		const queryParams = queryString.parse(location.search);
-		const { project } = queryParams;
-		const { teamspace } = match.params;
-
-		history.push({
-			pathname: ROUTES.TEAMSPACES,
-			search: `?teamspace=${teamspace}&project=${project}`
-		});
+		this.props.history.push({ pathname: ROUTES.TEAMSPACES });
 	}
 
 	public renderTitleWithBackLink = () => (
