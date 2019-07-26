@@ -24,7 +24,7 @@ import { IconWrapper } from './starIcon.styles';
 
 interface IProps {
 	active: number;
-	activeColor: string;
+	activeColor?: string;
 	onClick: () => void;
 }
 
