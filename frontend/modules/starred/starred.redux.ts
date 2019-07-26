@@ -20,89 +20,70 @@ import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: StarredTypes, Creators: StarredActions } = createActions({
 	fetchStarredMeta: [],
-	setStarredMeta: ['starredMeta'],
-	addToStarredMeta: ['metaRecordKey'],
-	removeFromStarredMeta: ['metaRecordKey'],
-	addToStarredMetaSuccess: ['metaRecord'],
-	removeFromStarredMetaSuccess: ['metaRecord'],
+	setStarredMeta: ['records'],
+	addToStarredMeta: ['recordKey'],
+	removeFromStarredMeta: ['recordKey'],
+	addToStarredMetaSuccess: ['recordKey'],
+	removeFromStarredMetaSuccess: ['recordKey'],
 	clearStarredMeta: [],
 
-	fetchStarredTeamspaceItems: [],
-	setStarredTeamspaceItems: ['starredTeamspaceItems'],
-	addToStarredTeamspaceItems: ['teamspaceItemKey'],
-	removeFromStarredTeamspaceItems: ['teamspaceItemKey'],
-	addToStarredTeamspaceItemsSuccess: ['teamspaceItem'],
-	removeFromStarredTeamspaceItemsSuccess: ['teamspaceItem'],
-	clearStarredTeamspaceItems: []
+	fetchStarredModels: [],
+	setStarredModels: ['records'],
+	addToStarredModels: ['modelData'],
+	removeFromStarredModels: ['modelData'],
+	addToStarredModelsSuccess: ['recordKey'],
+	removeFromStarredModelsSuccess: ['recordKey']
 }, { prefix: 'STARRED/' });
 
 export interface IStarredState {
 	starredMetaMap: any;
-	starredTeamspaceItemsMap: any;
+	starredModelsMap: any;
 }
 
 export const INITIAL_STATE: IStarredState = {
 	starredMetaMap: {},
-	starredTeamspaceItemsMap: {}
+	starredModelsMap: {}
 };
 
-const setStarredMeta = (state = INITIAL_STATE, { starredMeta }) => {
-	const starredMetaMap =  starredMeta.reduce((metaMap, tag) => {
+const addToStarred = (type) => (state = INITIAL_STATE, { recordKey }) => {
+	return {
+		...state,
+		[type]: {
+			...state[type],
+			[recordKey]: true
+		}
+	};
+};
+
+const setStarred = (type) => (state = INITIAL_STATE, { records }) => {
+	const starredRecords = records.reduce((metaMap, tag) => {
 		metaMap[tag] = true;
 		return metaMap;
 	}, {});
 
-	return { ...state, starredMetaMap };
+	return { ...state, [type]: starredRecords };
 };
 
-const addToStarredMetaSuccess = (state = INITIAL_STATE, { metaRecord }) => {
+const removeFromStarred = (type) => (state = INITIAL_STATE, { recordKey }) => {
 	return {
 		...state,
-		starredMetaMap: {
-			...state.starredMetaMap,
-			[metaRecord]: true
-		}
+		[type]: omit(state[type], recordKey)
 	};
 };
 
-const removeFromStarredMetaSuccess = (state = INITIAL_STATE, { metaRecord }) => {
-	return {
-		...state,
-		starredMetaMap: omit(state.starredMetaMap, metaRecord)
-	};
-};
+const setStarredMeta = setStarred('starredMetaMap');
+const addToStarredMetaSuccess = addToStarred('starredMetaMap');
+const removeFromStarredMetaSuccess = removeFromStarred('starredMetaMap');
 
-const setStarredTeamspaceItems = (state = INITIAL_STATE, { starredTeamspaceItems }) => {
-	const starredTeamspaceItemsMap =  starredTeamspaceItems.reduce((teamspaceItemsMap, tag) => {
-		teamspaceItemsMap[tag] = true;
-		return teamspaceItemsMap;
-	}, {});
-
-	return { ...state, starredTeamspaceItemsMap };
-};
-
-const addToStarredTeamspaceItemsSuccess = (state = INITIAL_STATE, { teamspaceItem }) => {
-	return {
-		...state,
-		starredTeamspaceItemsMap: {
-			...state.starredTeamspaceItemsMap,
-			[teamspaceItem]: true
-		}
-	};
-};
-
-const removeFromStarredTeamspaceItemsMapSuccess = (state = INITIAL_STATE, { teamspaceItem }) => {
-	return {
-		...state,
-		starredTeamspaceItemsMap: omit(state.starredTeamspaceItemsMap, teamspaceItem)
-	};
-};
+const setStarredModels = setStarred('starredModelsMap');
+const addToStarredModelsSuccess = addToStarred('starredModelsMap');
+const removeFromStarredModelsSuccess = removeFromStarred('starredModelsMap');
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[StarredTypes.SET_STARRED_META]: setStarredMeta,
 	[StarredTypes.ADD_TO_STARRED_META_SUCCESS]: addToStarredMetaSuccess,
 	[StarredTypes.REMOVE_FROM_STARRED_META_SUCCESS]: removeFromStarredMetaSuccess,
-	[StarredTypes.SET_STARRED_TEAMSPACE_ITEMS]: setStarredTeamspaceItems,
-	[StarredTypes.ADD_TO_STARRED_TEAMSPACE_ITEMS_SUCCESS]: addToStarredTeamspaceItemsSuccess,
-	[StarredTypes.REMOVE_FROM_STARRED_TEAMSPACE_ITEMS_SUCCESS]: removeFromStarredTeamspaceItemsMapSuccess
+	[StarredTypes.SET_STARRED_MODELS]: setStarredModels,
+	[StarredTypes.ADD_TO_STARRED_MODELS_SUCCESS]: addToStarredModelsSuccess,
+	[StarredTypes.REMOVE_FROM_STARRED_MODELS_SUCCESS]: removeFromStarredModelsSuccess
 });

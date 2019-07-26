@@ -18,22 +18,16 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-
 import { selectCurrentTeamspace } from '../../modules/currentUser';
 import { DialogActions } from '../../modules/dialog';
-import {
-	selectStarredTeamspaceItems,
-	StarredActions
-} from '../../modules/starred';
+import { StarredActions } from '../../modules/starred';
 import {
 	selectFlattenTeamspaces,
 	selectIsPending,
-	selectProjects,
 	selectTeamspaces,
 	selectVisibleItems,
 	TeamspacesActions,
 } from '../../modules/teamspaces';
-
 import { Teamspaces } from './teamspaces.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -42,16 +36,14 @@ const mapStateToProps = createStructuredSelector({
 	isPending: selectIsPending,
 	visibleItems: selectVisibleItems,
 	teamspaces: selectTeamspaces,
-	starredTeamspaceItemsMap: selectStarredTeamspaceItems
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showDialog: DialogActions.showDialog,
 	createModel: TeamspacesActions.createModel,
 	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
+	fetchStarredModels: StarredActions.fetchStarredModels,
 	setState: TeamspacesActions.setComponentState,
-	addToStarred: StarredActions.addToStarredTeamspaceItems,
-	removeFromStarred: StarredActions.removeFromStarredTeamspaceItems
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Teamspaces);

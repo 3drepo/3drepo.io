@@ -22,10 +22,13 @@ import { createStructuredSelector } from 'reselect';
 import { DialogActions } from '../../../../modules/dialog';
 import { ModelActions } from '../../../../modules/model';
 import { SnackbarActions } from '../../../../modules/snackbar';
+import { selectIsStarredModel, StarredActions } from '../../../../modules/starred';
 import { TeamspacesActions } from '../../../../modules/teamspaces';
 import { ModelGridItem } from './modelGridItem.component';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	isStarred: selectIsStarredModel
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showDialog: DialogActions.showDialog,
@@ -35,7 +38,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateModel: TeamspacesActions.updateModel,
 	removeModel: TeamspacesActions.removeModel,
 	downloadModel: ModelActions.downloadModel,
-	showSnackbar: SnackbarActions.show
+	showSnackbar: SnackbarActions.show,
+	addToStarred: StarredActions.addToStarredModels,
+	removeFromStarred: StarredActions.removeFromStarredModels
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelGridItem));

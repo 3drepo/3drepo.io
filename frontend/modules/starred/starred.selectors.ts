@@ -16,6 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
+import { getStarredModelKey } from './starred.contants';
 
 export const selectStarredDomain = (state) => ({...state.starred});
 
@@ -23,6 +24,16 @@ export const selectStarredMeta = createSelector(
 	selectStarredDomain, (state) => state.starredMetaMap
 );
 
-export const selectStarredTeamspaceItems = createSelector(
-	selectStarredDomain, (state) => state.starredTeamspaceItemsMap
+export const selectStarredModels = createSelector(
+	selectStarredDomain, (state) => state.starredModelsMap
+);
+
+const selectModelKey = (state, ownProps = {} as any) => {
+	return getStarredModelKey(ownProps);
+};
+
+export const selectIsStarredModel = createSelector(
+	selectStarredModels, selectModelKey, (starredModelsMap, modelKey) => {
+		return !!starredModelsMap[modelKey];
+	}
 );

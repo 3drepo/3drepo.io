@@ -14,14 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { put, select, takeLatest } from 'redux-saga/effects';
+import { mapValues, values } from 'lodash';
+import { put, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
+import { getStarredModelKey } from './starred.contants';
 import { StarredActions, StarredTypes } from './starred.redux';
-import { selectStarredTeamspaceItems } from './starred.selectors';
 
 export function* fetchStarredMeta() {
 	try {
@@ -32,21 +32,21 @@ export function* fetchStarredMeta() {
 	}
 }
 
-export function* addToStarredMeta({ metaRecordKey }) {
+export function* addToStarredMeta({ recordKey }) {
 	try {
-		yield API.addStarredMeta(metaRecordKey);
-		yield put(StarredActions.addToStarredMetaSuccess(metaRecordKey));
-		yield put(SnackbarActions.show(`Meta key ${metaRecordKey} added to starred`));
+		yield API.addStarredMeta(recordKey);
+		yield put(StarredActions.addToStarredMetaSuccess(recordKey));
+		yield put(SnackbarActions.show(`Meta key ${recordKey} added to starred`));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('add', 'starred meta', error));
 	}
 }
 
-export function* removeFromStarredMeta({ metaRecordKey }) {
+export function* removeFromStarredMeta({ recordKey }) {
 	try {
-		yield API.removeStarredMeta(metaRecordKey);
-		yield put(StarredActions.removeFromStarredMetaSuccess(metaRecordKey));
-		yield put(SnackbarActions.show(`Meta key ${metaRecordKey} removed from starred`));
+		yield API.removeStarredMeta(recordKey);
+		yield put(StarredActions.removeFromStarredMetaSuccess(recordKey));
+		yield put(SnackbarActions.show(`Meta key ${recordKey} removed from starred`));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'starred meta', error));
 	}
@@ -61,44 +61,40 @@ export function* clearStarredMeta() {
 	}
 }
 
-//
-
-export function* fetchStarredTeamspaceItems() {
+export function* fetchStarredModels() {
 	try {
-		// const { data: starredTeamspaceItems } = yield API.getStarredTeamspaceItems();
-		const starredTeamspaceItems = yield select(selectStarredTeamspaceItems);
-		yield put(StarredActions.setStarredTeamspaceItems(starredTeamspaceItems));
+		const { data: starredModels } = yield API.getStarredModels();
+		const starredItems = (values(mapValues(starredModels, (models, teamspace) => {
+			return models.map((model) => getStarredModelKey({ teamspace, model }));
+		})) as any).flat();
+
+		yield put(StarredActions.setStarredModels(starredItems));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'starred teamspace items', error));
 	}
 }
 
-export function* addToStarredTeamspaceItems({ teamspaceItemKey }) {
+export function* addToStarredModels({ modelData }) {
 	try {
-		// yield API.addStarredTeamspaceItem(teamspaceItemKey);
-		yield put(StarredActions.addToStarredTeamspaceItemsSuccess(teamspaceItemKey));
-		yield put(SnackbarActions.show(`Teamspace item key ${teamspaceItemKey} added to starred`));
+		const starredEntity = { teamspace: modelData.teamspace, model: modelData.model };
+		yield API.addStarredModel(starredEntity);
+
+		yield put(StarredActions.addToStarredModelsSuccess(getStarredModelKey(starredEntity)));
+		yield put(SnackbarActions.show(`${modelData.name} added to starred`));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('add', 'starred teamspace items', error));
 	}
 }
 
-export function* removeFromStarredTeamspaceItems({ teamspaceItemKey }) {
+export function* removeFromStarredModels({ modelData }) {
 	try {
-		// yield API.removeStarredTeamspaceItem(teamspaceItemKey);
-		yield put(StarredActions.removeFromStarredTeamspaceItemsSuccess(teamspaceItemKey));
-		yield put(SnackbarActions.show(`Teamspace item key ${teamspaceItemKey} removed from starred`));
+		const starredEntity = { teamspace: modelData.teamspace, model: modelData.model };
+		yield API.removeStarredModel(starredEntity);
+
+		yield put(StarredActions.removeFromStarredModelsSuccess(getStarredModelKey(starredEntity)));
+		yield put(SnackbarActions.show(`${modelData.name} removed from starred`));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'starred teamspace items', error));
-	}
-}
-
-export function* clearStarredTeamspaceItems() {
-	try {
-		yield API.overrideStarredMeta([]);
-		yield put(StarredActions.setStarredTeamspaceItems([]));
-	} catch (error) {
-		yield put(DialogActions.showEndpointErrorDialog('override', 'starred teamspace items', error));
 	}
 }
 
@@ -108,8 +104,7 @@ export default function* StarredMetaSaga() {
 	yield takeLatest(StarredTypes.REMOVE_FROM_STARRED_META, removeFromStarredMeta);
 	yield takeLatest(StarredTypes.CLEAR_STARRED_META, clearStarredMeta);
 
-	yield takeLatest(StarredTypes.FETCH_STARRED_TEAMSPACE_ITEMS, fetchStarredTeamspaceItems);
-	yield takeLatest(StarredTypes.ADD_TO_STARRED_TEAMSPACE_ITEMS, addToStarredTeamspaceItems);
-	yield takeLatest(StarredTypes.REMOVE_FROM_STARRED_TEAMSPACE_ITEMS, removeFromStarredTeamspaceItems);
-	yield takeLatest(StarredTypes.CLEAR_STARRED_TEAMSPACE_ITEMS, clearStarredTeamspaceItems);
+	yield takeLatest(StarredTypes.FETCH_STARRED_MODELS, fetchStarredModels);
+	yield takeLatest(StarredTypes.ADD_TO_STARRED_MODELS, addToStarredModels);
+	yield takeLatest(StarredTypes.REMOVE_FROM_STARRED_MODELS, removeFromStarredModels);
 }
