@@ -270,8 +270,8 @@ export function* renderPins() {
 		let filteredIssues = yield select(selectFilteredIssues);
 
 		if (activeIssueId) {
-			filteredIssues = filteredIssues.concat(issuesList.filter((issue) =>
-				issue._id === activeIssueId && issue.status === STATUSES.CLOSED)
+			filteredIssues = filteredIssues.concat(differenceBy(issuesList, filteredIssues, '_id')
+				.filter((issue) => issue._id === activeIssueId)
 			);
 		}
 
