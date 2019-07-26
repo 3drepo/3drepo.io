@@ -19,6 +19,8 @@ import { orderBy, pick, pickBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { LIST_ITEMS_TYPES } from '../../routes/teamspaces/teamspaces.contants';
 import { extendTeamspacesInfo } from './teamspaces.helpers';
+import { selectStarredModels } from '../starred';
+import { getStarredModelKey } from '../starred/starred.contants';
 
 export const selectTeamspacesDomain = (state) => ({ ...state.teamspaces });
 
@@ -58,8 +60,21 @@ export const selectFederations = createSelector(
 	selectModels, (models) => pickBy(models, (federate) => !!federate)
 );
 
+export const selectComponentState = createSelector(
+	selectTeamspacesDomain, (state) => state.componentState
+);
+
+export const selectVisibleItems = createSelector(
+	selectComponentState, (state) => state.visibleItems
+);
+
+export const selectShowStarredOnly = createSelector(
+	selectComponentState, (state) => state.showStarredOnly
+);
+
 export const selectFlattenTeamspaces = createSelector(
-	selectTeamspacesList, selectProjects, selectModels, (teamspacesList, projects, models) => {
+	selectTeamspacesList, selectProjects, selectModels, selectShowStarredOnly, selectStarredModels,
+	(teamspacesList, projects, models, showStarredOnly, starredModels) => {
 		const flattenList = [];
 
 		for (let index = 0; index < teamspacesList.length; index++) {
@@ -75,18 +90,26 @@ export const selectFlattenTeamspaces = createSelector(
 			for (let j = 0; j < projectsIds.length; j++) {
 				const project = projects[projectsIds[j]];
 
-				const projectModels = orderBy(project.models.map((modelId) => ({
-					...models[modelId],
-					teamspace: teamspaceName,
-					project: projectsIds[j],
-					projectName: project.name,
-					type: LIST_ITEMS_TYPES.MODEL,
-					id: modelId
-				})), ['federate']);
+				const projectModels = [];
+				for (let m = 0; m < project.models.length; m++) {
+					const modelId = project.models[m];
+					const recordKey = getStarredModelKey({ teamspace: teamspaceName, model: modelId });
+					if (showStarredOnly && !starredModels[recordKey]) {
+						continue;
+					}
+					projectModels.push({
+						...models[modelId],
+						teamspace: teamspaceName,
+						project: projectsIds[j],
+						projectName: project.name,
+						type: LIST_ITEMS_TYPES.MODEL,
+						id: modelId
+					});
+				}
 
 				flattenList.push({
 					...project,
-					models: projectModels,
+					models: orderBy(projectModels, ['federate']),
 					teamspace: teamspaceName,
 					type: LIST_ITEMS_TYPES.PROJECT,
 					id: projectsIds[j]
@@ -103,16 +126,4 @@ export const selectTeamspacesWithAdminAccess = createSelector(
 
 export const selectIsPending = createSelector(
 	selectTeamspacesDomain, (state) => state.isPending
-);
-
-export const selectComponentState = createSelector(
-	selectTeamspacesDomain, (state) => state.componentState
-);
-
-export const selectVisibleItems = createSelector(
-	selectComponentState, (state) => state.visibleItems
-);
-
-export const selectShowStarredOnly = createSelector(
-	selectComponentState, (state) => state.showStarredOnly
 );
