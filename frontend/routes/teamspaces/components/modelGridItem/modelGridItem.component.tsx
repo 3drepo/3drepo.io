@@ -21,6 +21,7 @@ import { ROUTES } from '../../../../constants/routes';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../services/analytics';
+import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { COLOR } from '../../../../styles';
 import { SmallIconButton } from '../../../components/smallIconButon/smallIconButton.component';
 import { StarIcon } from '../../../components/starIcon/starIcon.component';
@@ -54,6 +55,8 @@ interface IProps {
 	timestamp: string;
 	federate: boolean;
 	canUpload: boolean;
+	code?: string;
+	suitabilityCode?: string;
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
 	removeModel: (teamspace, modelData) => void;
@@ -206,6 +209,12 @@ export function ModelGridItem(props: IProps) {
 		console.info('star click');
 	};
 
+	const renderModelCode = renderWhenTrue(<Property>{props.code}</Property>);
+
+	const renderSuitabilityCode = renderWhenTrue(<Property>{props.suitabilityCode}</Property>);
+
+	const renderTimestamp = renderWhenTrue(<Timestamp>{formatDate(props.timestamp, LONG_DATE_TIME_FORMAT)}</Timestamp>);
+
 	const sharedActions = [{
 		...ROW_ACTIONS.PERMISSIONS,
 		action: handlePermissionsClick
@@ -252,7 +261,9 @@ export function ModelGridItem(props: IProps) {
 						activeColor={COLOR.SUNGLOW}
 						onClick={handleStarClick}
 					/>
-					<Name>{props.name}</Name>
+					<Name lines={2}>
+						{props.name}
+					</Name>
 				</NameWrapper>
 				<ActionsMenu disabled={isPending} federate={isFederation}>
 					<Actions>
@@ -262,10 +273,10 @@ export function ModelGridItem(props: IProps) {
 			</Header>
 			<Content>
 				<PropertiesColumn>
-					<Property>MC1</Property> {/* TODO: Model code */}
-					<Property>SC1</Property> {/* TODO: Suitability code */}
+					{renderModelCode(props.code)}
+					{renderSuitabilityCode(props.suitabilityCode)} {/* TODO: check suitability code after backend changes */}
 				</PropertiesColumn>
-				<Timestamp>30/09/2019 16:30</Timestamp> {/* TODO: Last updated */}
+				{renderTimestamp(props.timestamp)}
 			</Content>
 		</Container>
 	);

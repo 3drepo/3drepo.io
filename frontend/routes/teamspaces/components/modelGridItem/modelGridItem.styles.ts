@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Truncate from 'react-truncate';
 import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 
 export const Container = styled.div`
-	box-shadow: 0px 2px 4px 0px ${COLOR.BLACK_20};
+	box-shadow: 0 2px 4px 0 ${COLOR.BLACK_20};
 	background-color: ${(props) => props.federate ? COLOR.ALICE_BLUE : COLOR.WHITE};
 	color: ${COLOR.TUNDORA};
 	display: flex;
@@ -37,10 +38,11 @@ export const Header = styled.div`
 	margin: 0 0 5px;
 `;
 
-export const Name = styled.h3`
+export const Name = styled(Truncate)`
 	margin: 0 0 0 2px;
 	font-weight: ${FONT_WEIGHT.BOLD};
-	word-break: break-all;
+	word-break: break-word;
+	width: 100%;
 `;
 
 export const NameWrapper = styled.div`
@@ -57,6 +59,8 @@ export const Content = styled.div`
 export const PropertiesColumn = styled.div`
 	display: flex;
 	flex-direction: column;
+	height: 25px;
+	justify-content: flex-end;
 `;
 
 export const Property = styled.span`

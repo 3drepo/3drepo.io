@@ -264,11 +264,13 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 									disabled
 								/>
 							)} />
-							<Field name="code" render={ ({ field }) => (
+							<Field name="code" render={ ({ field, form }) => (
 								<StyledTextField
 									{...field}
 									label="Model code"
 									margin="normal"
+									error={Boolean(form.errors.code)}
+									helperText={form.errors.code}
 								/>
 							)} />
 						</FieldsRow>
