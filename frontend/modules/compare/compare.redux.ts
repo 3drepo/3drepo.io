@@ -37,7 +37,7 @@ export const { Types: CompareTypes, Creators: CompareActions } = createActions({
 	setActiveTab: ['activeTab'],
 	setIsPending: ['isPending'],
 	setTargetModel: ['modelId', 'isTarget', 'isTypeChange'],
-	setTargetRevision: ['modelId', 'targetRevision'],
+	setTargetRevision: ['modelId', 'targetRevision', 'isDiff'],
 	resetComponentState: [],
 	resetComponentStateSuccess: []
 }, { prefix: 'COMPARE/' });

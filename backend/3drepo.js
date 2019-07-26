@@ -163,18 +163,10 @@ function setupSubdomain(mainApp, subdomain) {
 		if (!serverConfig.external) {
 
 			// Only load frontend server in maintenance mode
-
-			if(!config.maintenanceMode && serverConfig.service === "chat") {
-
+			if(!config.maintenanceMode || serverConfig.service === "frontend") {
+				logCreateService(serverConfig);
 				// chat server has its own port and can't attach to express
-				logCreateService(serverConfig);
-				createChat(serverConfig);
-
-			}  else if (!config.maintenanceMode || serverConfig.service === "frontend") {
-
-				logCreateService(serverConfig);
-				createService(subDomainApp, serverConfig);
-
+				serverConfig.service === "chat" ? createChat(serverConfig) : createService(subDomainApp, serverConfig);
 			}
 
 		}
