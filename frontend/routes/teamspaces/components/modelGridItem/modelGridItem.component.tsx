@@ -17,7 +17,7 @@
 
 import copy from 'copy-to-clipboard';
 import { pick, startCase } from 'lodash';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ROUTES } from '../../../../constants/routes';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
