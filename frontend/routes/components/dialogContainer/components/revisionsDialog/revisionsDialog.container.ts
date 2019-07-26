@@ -28,7 +28,8 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchModelRevisions: ModelActions.fetchRevisions,
-	resetModelRevisions: ModelActions.resetRevisions
+	resetModelRevisions: ModelActions.resetRevisions,
+	setModelRevisionState: ModelActions.setModelRevisionState,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsDialog));

@@ -21,7 +21,7 @@ import React from 'react';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
-import { TYPES } from './../../../components/dialogContainer/components/revisionsDialog/revisionsDialog.component';
+import { TYPES } from './../../../components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
 import { Container, DisplayedText, ProgressWrapper } from './revisionsSwitch.styles';
 
 interface IProps {

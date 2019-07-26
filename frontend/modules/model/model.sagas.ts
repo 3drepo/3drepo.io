@@ -73,14 +73,30 @@ export function* updateSettings({ modelData: { teamspace, project, modelId }, se
 
 export function* fetchRevisions({ teamspace, modelId }) {
 	try {
+		console.log('fetchRevisions');
 		yield put(ModelActions.setPendingState(true));
 
 		const { data: revisions } = yield API.getModelRevisions(teamspace, modelId);
+		console.log('revisions',revisions);
 
 		yield put(ModelActions.fetchRevisionsSuccess(revisions));
 		yield put(ModelActions.setPendingState(false));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'model revisions', e));
+	}
+}
+
+export function* setModelRevisionState({ teamspace, modelId, revision, isVoid }) {
+	try {
+		console.log('setModelRevisionState', teamspace, modelId, revision, isVoid);
+		yield put(ModelActions.setPendingState(true));
+
+		const response = yield API.setModelRevisionState(teamspace, modelId, revision, isVoid);
+		console.log('response',response);
+
+		yield put(ModelActions.setPendingState(false));
+	} catch (e) {
+		yield put(DialogActions.showEndpointErrorDialog('set', 'model revision state', e));
 	}
 }
 
@@ -214,4 +230,5 @@ export default function* ModelSaga() {
 	yield takeLatest(ModelTypes.UNSUBSCRIBE_ON_STATUS_CHANGE, unsubscribeOnStatusChange);
 	yield takeLatest(ModelTypes.FETCH_MAPS, fetchMaps);
 	yield takeLatest(ModelTypes.WAIT_FOR_SETTINGS_AND_FETCH_REVISIONS, waitForSettingsAndFetchRevisions);
+	yield takeLatest(ModelTypes.SET_MODEL_REVISION_STATE, setModelRevisionState);
 }

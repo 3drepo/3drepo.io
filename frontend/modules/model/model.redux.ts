@@ -25,6 +25,7 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	waitForSettingsAndFetchRevisions: ['teamspace', 'modelId'],
 	fetchRevisions: ['teamspace', 'modelId'],
 	fetchRevisionsSuccess: ['revisions'],
+	setModelRevisionState: ['teamspace', 'modelId', 'revision', 'isVoid'],
 	resetRevisions: [],
 	downloadModel: ['teamspace', 'modelId'],
 	uploadModelFile: ['teamspace', 'project', 'modelData', 'fileData'],

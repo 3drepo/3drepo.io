@@ -27,7 +27,7 @@ import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import { PERMISSIONS_VIEWS } from '../projects/projects.component';
-import { TYPES } from './../components/dialogContainer/components/revisionsDialog/revisionsDialog.component';
+import { TYPES } from './../components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
 import FederationDialog from './components/federationDialog/federationDialog.container';
 import ModelDialog from './components/modelDialog/modelDialog.container';
 import ModelGridItem from './components/modelGridItem/modelGridItem.container';
