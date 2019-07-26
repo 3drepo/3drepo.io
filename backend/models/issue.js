@@ -85,20 +85,9 @@ const statusEnum = {
 	"CLOSED": C.ISSUE_STATUS_CLOSED
 };
 
-function setViewpointScreenshot(dbCol, viewpoint) {
-	if (!viewpoint || !viewpoint.screenshot) {
-		return viewpoint;
-	}
-
-	const issueId = utils.uuidToString(dbCol._id);
-	const viewpointId = utils.uuidToString(viewpoint.guid);
-
-	viewpoint.screenshot = dbCol.account + "/" + dbCol.model + "/issues/" + issueId + "/viewpoints/" + viewpointId + "/screenshot.png";
-	viewpoint.screenshotSmall = dbCol.account + "/" + dbCol.model + "/issues/" + issueId + "/viewpoints/" + viewpointId + "/screenshotSmall.png";
-	return viewpoint;
-}
-
 function clean(dbCol, issueToClean) {
+	dbCol.colName = "issues";
+	dbCol._id = issueToClean._id;
 	const idKeys = ["_id", "rev_id", "parent", "group_id"];
 	const commentIdKeys = ["rev_id", "guid", "viewpoint"];
 	const vpIdKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid", "group_id"];
@@ -123,7 +112,7 @@ function clean(dbCol, issueToClean) {
 			});
 
 			if (issueToClean.viewpoints[i].screenshot) {
-				setViewpointScreenshot(issueToClean, issueToClean.viewpoints[i]);
+				View.setViewpointScreenshot(dbCol, issueToClean.viewpoints[i]);
 			}
 
 			if (0 === i) {
@@ -810,48 +799,6 @@ issue.getThumbnail = function(dbCol, uid) {
 			return foundIssue.thumbnail.content.buffer;
 		}
 	});
-};
-
-issue.addComment = async function(account, model, issueId, user, data) {
-	if ((!data.comment || !data.comment.trim()) && !_.get(data,"viewpoint.screenshot")) {
-		throw { resCode: responseCodes.ISSUE_COMMENT_NO_TEXT};
-	}
-
-	// 1. Fetch comments
-	const _id = utils.stringToUUID(issueId) ;
-	const issues = await db.getCollection(account, model + ".issues");
-	const issuesRes = await issues.find({ _id }, {comments: 1}).toArray();
-	if (issuesRes.length === 0) {
-		throw { resCode: responseCodes.ISSUE_NOT_FOUND };
-	}
-
-	// 2. Seal every comment
-	const comments = issuesRes[0].comments || [];
-	comments.forEach(c => c.sealed = true);
-
-	// 3. Create the comment
-	let viewpoint = null;
-
-	if (data.viewpoint) {
-		viewpoint = await View.clean({account, model}, data.viewpoint, fieldTypes.viewpoint);
-		viewpoint.guid = utils.generateUUID();
-	}
-
-	const comment = Comment.newTextComment(user, data.comment, viewpoint);
-
-	// 4. Append the new comment
-	comments.push(comment);
-
-	// 5. Update the issue.
-	const viewpointPush =  viewpoint ? {$push: { viewpoints: viewpoint }} : {};
-
-	await issues.update({ _id }, {...viewpointPush ,$set : {comments}});
-
-	const dbCol = {account, model, _id: issueId};
-	setViewpointScreenshot(dbCol, viewpoint);
-
-	// 6. Return the new comment.
-	return {...comment, viewpoint, guid: utils.uuidToString(comment.guid)};
 };
 
 issue.deleteComment = async function(account, model, issueID, guid, user) {

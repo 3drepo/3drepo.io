@@ -74,14 +74,6 @@ export const getIssues = (teamspace, modelId, revision?) => {
 	return api.get(`${mainPath}/issues`);
 };
 
-export const addIssueComment = (teamspace, modelId, id, comment) => {
-	return api.post(`${teamspace}/${modelId}/issues/${id}/comments`, comment);
-};
-
-export const deleteIssueComment = (teamspace, modelId, id, guid) => {
-	return api.delete(`${teamspace}/${modelId}/issues/${id}/comments`, {guid});
-};
-
 /**
  * Import BCF
  * @param teamspace
@@ -98,6 +90,36 @@ export const importBCF = (teamspace, modelId, file, revision?) => {
 		return api.post(`${mainPath}/revision/${revision}/issues`, formData);
 	}
 	return api.post(`${mainPath}/issues.bcfzip`, formData);
+};
+
+/**
+ * Post a comment for issues
+ * @param teamspace the teamspace
+ * @param modelId the model id for the model which contains the issue
+ * @param id the issue id
+ * @param comment the comment that the user wants to post with
+ * the format of the comment:
+ * {
+ *    "created":1562583557497,
+ *    "owner":"teamSpace1",
+ *    "comment":"ffff",
+ *    "viewpoint":{...}
+ * }
+ *
+ */
+export const addIssueComment = (teamspace, modelId, id, comment) => {
+	return api.post(`${teamspace}/${modelId}/issues/${id}/comments`, comment);
+};
+
+/**
+ * Deletes a comment from issues
+ * @param teamspace the teamspace
+ * @param modelId the model id for the model which contains the issue
+ * @param id the issue id
+ * @param guid the comment id to be deleted
+ */
+export const deleteIssueComment = (teamspace, modelId, id, guid) => {
+	return api.delete(`${teamspace}/${modelId}/issues/${id}/comments`, {guid});
 };
 
 /**
