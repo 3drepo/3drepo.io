@@ -72,6 +72,10 @@ export const Message = styled.p`
 	margin: 22px 0 0;
 `;
 
+export const LoaderContainer  = styled.div`
+	margin-top: 20px;
+`;
+
 export const StyledDialogActions = styled(DialogActions)`
 	&& {
 		margin: 0;
