@@ -34,6 +34,6 @@ export const IconWrapper = styled(Icon)<IIconWrapper>`
 
 	&& {
 		width: auto;
-    height: auto;
+		height: auto;
 	}
 `;

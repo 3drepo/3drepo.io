@@ -59,7 +59,7 @@ export const Container = styled.div<IContainer>`
 		padding-left: ${(props) => (props.level || 0) * 24}px;
 	}
 
-	& > ${Headline}:hover {
+	& > ${/* sc-selector */ Headline}:hover {
 		background: ${(props) => isActive(props) ? 'transparent' : COLOR.WHITE};
 	}
 `;

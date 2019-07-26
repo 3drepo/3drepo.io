@@ -19,67 +19,67 @@ import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 
 export const Container = styled.div`
-  box-shadow: 0px 2px 4px 0px ${COLOR.BLACK_20};
-  background-color: ${(props) => props.federate ? COLOR.ALICE_BLUE : COLOR.WHITE};
-  color: ${COLOR.TUNDORA};
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  font-size: 12px;
-  padding: 5px;
-  position: relative;
+	box-shadow: 0px 2px 4px 0px ${COLOR.BLACK_20};
+	background-color: ${(props) => props.federate ? COLOR.ALICE_BLUE : COLOR.WHITE};
+	color: ${COLOR.TUNDORA};
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	font-size: 12px;
+	padding: 5px;
+	position: relative;
 `;
 
 export const Header = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-  margin: 0 0 5px;
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	margin: 0 0 5px;
 `;
 
 export const Name = styled.h3`
-  margin: 0 0 0 2px;
-  font-weight: ${FONT_WEIGHT.BOLD};
-  word-break: break-all;
+	margin: 0 0 0 2px;
+	font-weight: ${FONT_WEIGHT.BOLD};
+	word-break: break-all;
 `;
 
 export const NameWrapper = styled.div`
-  align-items: center;
-  display: flex;
+	align-items: center;
+	display: flex;
 `;
 
 export const Content = styled.div`
-  display: flex;
-  justify-content: space-between;
-  padding: 0 4px;
+	display: flex;
+	justify-content: space-between;
+	padding: 0 4px;
 `;
 
 export const PropertiesColumn = styled.div`
-  display: flex;
-  flex-direction: column;
+	display: flex;
+	flex-direction: column;
 `;
 
 export const Property = styled.span`
 `;
 
 export const Timestamp = styled.span`
-  align-self: flex-end;
+	align-self: flex-end;
 `;
 
 export const Actions = styled.div`
-  position: absolute;
-  right: 40px;
-  top: 5px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+	position: absolute;
+	right: 40px;
+	top: 5px;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
 `;
 
 export const ClickableLayer = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	cursor: pointer;
 `;
