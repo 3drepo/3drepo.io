@@ -157,13 +157,13 @@ router.post("/revision/:rid/risks", middlewares.issue.canCreate, storeRisk);
 router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updateRisk);
 
 /**
- * @api {post} /:teamspace/:model/risks/:rid/comments Add an comment for an issue
+ * @api {post} /:teamspace/:model/risks/:riskId/comments Add an comment for an issue
  * @apiName commentIssue
  * @apiGroup Risks
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} rid Unique Issue ID to update.
+ * @apiParam {String} riskId Unique Issue ID to update.
  * @apiParam {Json} PAYLOAD The data with the comment to be added.
  * @apiParamExample {json} PAYLOAD
  *    {
@@ -185,16 +185,16 @@ router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updat
  * @apiError 404 Issue not found
  * @apiError 400 Comment with no text
  * */
-router.post("/risks/:rid/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
+router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {delete} /:teamspace/:model/risks/:rid/comments Deletes an comment from an issue
+ * @api {delete} /:teamspace/:model/risks/:riskId/comments Deletes an comment from an issue
  * @apiName commentIssue
  * @apiGroup Issues
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} rid	 Unique Issue ID to update.
+ * @apiParam {String} riskId	 Unique Issue ID to update.
  * @apiParam {Json} PAYLOAD The data with the comment guid to be deleted.
  * @apiParamExample {json} PAYLOAD
  *    {
@@ -212,7 +212,7 @@ router.post("/risks/:rid/comments", middlewares.issue.canComment, addComment, mi
  * @apiError 400 Issue comment sealed, when the user is trying to delete a comment that is sealed
  * @apiError 400 GUID invalid, when the user sent an invalid guid
  * */
-router.delete("/risks/:rid/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
+router.delete("/risks/:riskId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {delete} /:teamspace/:model/risks/ Delete risks
@@ -351,9 +351,9 @@ function getThumbnail(req, res, next) {
 function addComment(req, res, next) {
 	const user = req.session.user.username;
 	const data =  req.body;
-	const {account, model, rid} = req.params;
+	const {account, model, riskId} = req.params;
 
-	Comment.addComment(account, model, "risks", rid, user, data).then(comment => {
+	Comment.addComment(account, model, "risks", riskId, user, data).then(comment => {
 		req.dataModel = comment;
 		next();
 	}).catch(err => {
@@ -364,9 +364,9 @@ function addComment(req, res, next) {
 function deleteComment(req, res, next) {
 	const user = req.session.user.username;
 	const guid = req.body.guid;
-	const {account, model, rid} = req.params;
+	const {account, model, riskId} = req.params;
 
-	Comment.deleteComment(account, model, "risks", rid, guid, user).then(comment => {
+	Comment.deleteComment(account, model, "risks", riskId, guid, user).then(comment => {
 		req.dataModel = comment;
 		next();
 	}).catch(err => {
