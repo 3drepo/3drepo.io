@@ -112,3 +112,7 @@ export const selectComponentState = createSelector(
 export const selectVisibleItems = createSelector(
 	selectComponentState, (state) => state.visibleItems
 );
+
+export const selectShowStarredOnly = createSelector(
+	selectComponentState, (state) => state.showStarredOnly
+);

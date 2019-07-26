@@ -27,7 +27,6 @@ export const Head = styled.div`
 	align-items: center;
 	justify-content: flex-start;
 	background: ${COLOR.WHITE};
-	padding-left: 24px;
 	border-bottom: 1px solid ${COLOR.BLACK_6};
 	position: relative;
 	z-index: 1;

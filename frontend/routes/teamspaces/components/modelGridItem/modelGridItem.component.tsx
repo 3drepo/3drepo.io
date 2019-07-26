@@ -23,7 +23,6 @@ import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../services/analytics';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
-import { COLOR } from '../../../../styles';
 import { Loader } from '../../../components/loader/loader.component';
 import { SmallIconButton } from '../../../components/smallIconButon/smallIconButton.component';
 import { StarIcon } from '../../../components/starIcon/starIcon.component';

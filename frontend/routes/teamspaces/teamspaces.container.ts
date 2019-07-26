@@ -24,6 +24,7 @@ import { StarredActions } from '../../modules/starred';
 import {
 	selectFlattenTeamspaces,
 	selectIsPending,
+	selectShowStarredOnly,
 	selectTeamspaces,
 	selectVisibleItems,
 	TeamspacesActions,
@@ -36,6 +37,7 @@ const mapStateToProps = createStructuredSelector({
 	isPending: selectIsPending,
 	visibleItems: selectVisibleItems,
 	teamspaces: selectTeamspaces,
+	showStarredOnly: selectShowStarredOnly
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
