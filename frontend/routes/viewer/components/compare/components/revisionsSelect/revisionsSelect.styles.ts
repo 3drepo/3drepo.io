@@ -36,7 +36,6 @@ export const SelectField = styled(SelectFieldComponent).attrs({
 		overflow: hidden;
 	}
 
-
 	&& {
 		min-width: 80px;
 	}

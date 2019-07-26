@@ -60,7 +60,7 @@ export const CurrentRevision = styled.div<ICurrentRevision>`
 	width: 142px;
 	display: inline-block;
 	text-overflow: ellipsis;
-    overflow: hidden;
+	overflow: hidden;
 `;
 
 export const RevisionTooltip =  styled((prop: TooltipProps) => {
