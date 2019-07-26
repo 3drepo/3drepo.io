@@ -270,7 +270,9 @@ export function* renderPins() {
 		let filteredIssues = yield select(selectFilteredIssues);
 
 		if (activeIssueId) {
-			filteredIssues = filteredIssues.concat(issuesList.filter((issue) => issue._id === activeIssueId));
+			filteredIssues = filteredIssues.concat(issuesList.filter((issue) =>
+				issue._id === activeIssueId && issue.status === STATUSES.CLOSED)
+			);
 		}
 
 		const shouldShowPins = yield select(selectShowPins);
