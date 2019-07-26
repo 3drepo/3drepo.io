@@ -61,93 +61,105 @@
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<div class="tsd-panel tsd-typography">
-				<h1 id="3drepo-io-">3drepo.io <img src="https://travis-ci.org/3drepo/3drepo.io.svg?branch=master" alt=""></h1>
-				<p>3drepo.io a web based BIM collaboration platform. It is one of the 4 parts of the 3D Repo ecosystem. </p>
-				<p><img src="https://user-images.githubusercontent.com/11945337/44221768-60634280-a17a-11e8-989e-089a650e3710.png" alt="3drepo"></p>
-				<h2 id="latest-release-api">Latest Release &amp; API</h2>
-				<ul>
-					<li>Latest release: <a href="https://github.com/3drepo/3drepo.io/releases/tag/latest">https://github.com/3drepo/3drepo.io/releases/tag/latest</a></li>
-					<li>Corresponding API docs: <a href="https://3drepo.github.io/3drepo.io/">https://3drepo.github.io/3drepo.io/</a></li>
-				</ul>
-				<h2 id="dependencies">Dependencies</h2>
-				<ul>
-					<li>Node.js (v 8.11.3)</li>
-					<li><a href="https://yarnpkg.com/lang/en/docs/install/">yarn</a></li>
-				</ul>
-				<h2 id="setting-up-your-3d-repo-environment">Setting up your 3D Repo environment</h2>
-				<p>To setup the whole 3D Repo Ecosystem, you will need the following:</p>
-				<ul>
-					<li>A running MongoDB database, with an admin user created;</li>
-					<li>A RabbitMQ server;</li>
-					<li>A running Bouncer Worker service, provided in <a href="https://github.com/3drepo/3drepobouncer">3drepobouncer</a>.</li>
-				</ul>
-				<p>Note: To generate viewable 3D models, you will need 3drepounity to create asset bundles. <strong>This is a closed source project</strong>. Please contact <a href="mailto:sales@3drepo.org">sales@3drepo.org</a> for a business license, alternatively you can use 3drepo.io version v1.12 which uses the old x3dom rendering engine.</p>
-				<h2 id="installation">Installation</h2>
-				<p>Note: If using windows, please ensure cmd.exe was invoked as administrator (i.e. Right click -&gt; Run as Administrator).</p>
-				<ol>
-					<li>Clone the repository: <code>git clone https://github.com/3drepo/3drepo.io.git</code></li>
-					<li>Change directory: <code>cd 3drepo.io</code></li>
-					<li>Check out latest release: <code>git checkout tags/latest</code></li>
-					<li>Setup the configuration file for running the 3D Repo web app as per the <code>Configuration</code> section below.</li>
-					<li>Install the required backend dependencies: <code>cd backend &amp;&amp; yarn install</code></li>
-					<li>Install the required frontend dependencies: <code>cd frontend &amp;&amp; yarn install</code></li>
-					<li>Compile the frontend: <code>cd frontend &amp;&amp; yarn run build</code> (for file watching/live reloading, see <code>Running the application</code> below)</li>
-				</ol>
-				<h2 id="configuration">Configuration</h2>
-				<p>The configuration files are contained in the <code>config</code> folder. Each directory in config represents a different configuration. This allows you to quickly switch between, for example, a development environment and a production environment. Each configuration folder is expected to have a config.js file, which details the configuration settings for the particular environment.</p>
-				<p>In general, to configure a new configuration enviroment called <config_name>:</p>
-				<ol>
-					<li>Change to the configuration directory: <code>cd config</code></li>
-					<li>First create a new directory under config: <code>mkdir &lt;config_name&gt;</code></li>
-					<li>Copy config/sample_config.js to the new directory as config.js: <code>cp config_sample.js &lt;config_name&gt;/config.js</code></li>
-					<li>Edit config.js as described in <a href="https://github.com/3drepo/3drepo.io/wiki/Configuration-File">Configuration File</a></li>
-				</ol>
-				<h2 id="running-the-application">Running the application</h2>
-				<p>The repository includes a script <code>run_app</code> and <code>run_app.cmd</code> specifically for Windows to run the server. It has two arguments:</p>
-				<p><code>./run/run_app &lt;config&gt; [debug]</code></p>
-				<ul>
-					<li><code>config</code> This is the directory under config that the configuration resides in</li>
-					<li><code>debug</code> Type debug here for node.js debugging, or leave it out for none.</li>
-				</ul>
-				<p>Typically you will want to run the server using pm2 (install with <code>npm -g install pm2</code> under the superuser account):</p>
-				<p><code>./run_app_pm2 &lt;config&gt;</code></p>
-				<ul>
-					<li><code>config</code> This is the directory under config that the configuration resides in</li>
-				</ul>
-				<h2 id="file-watching-live-reloading">File Watching &amp; Live Reloading</h2>
-				<p>All frontend files are observed and automatically re-compiled if you run <code>yarn run watch</code>.</p>
-				<p>For live reloading, set <code>development: true</code> in your <code>config.js</code>.</p>
-				<h2 id="locally-running-the-application">Locally running the application</h2>
-				<p>The application requires the use of cookies for tracking user authentication. Some browsers do not
-				allow the use of cookies for the <code>localhost</code> domain. To circumvent this problem, please use the loopback address (127.0.0.1) as your domain name.</p>
-				<p>Alternatively you can modify your hosts file to add a DNS entry to your loopback address. For Windows, you must use an Administrator notepad to edit the file:</p>
-				<p><code>C:\Windows\System32\Drivers\etc\hosts</code></p>
-				<p>For Linux, you must edit the file with Administrator privileges:</p>
-				<p><code>sudo nano /etc/hosts</code></p>
-				<p>Within this file you must append to, or create, a line for the entry for example:</p>
-				<p><code>127.0.0.1 localhost example.org</code></p>
-				<p>In the configuration file for the server, you then set hostname to <code>example.org</code> or whatever host you have redirected.</p>
-				<h2 id="licenses">Licenses</h2>
-				<p>This project is Copyright of <a href="http://3drepo.org">3D Repo Ltd</a>, a company registered in England and Wales No. 09014101, and is released under the open source <a href="http://www.gnu.org/licenses/agpl-3.0.en.html">GNU Affero General Public License v3</a>. Should you require a commercial license, please contact <a href="mailto:support@3drepo.org">support@3drepo.org</a>. All contributors are required to sign either the <a href="https://gist.github.com/jozefdobos/e177af804c9bcd217b73">3D Repo Individual</a> or the <a href="https://gist.github.com/jozefdobos/c7c4c1c18cfb211c45d2">3D Repo Entity</a> <a href="https://en.wikipedia.org/wiki/Contributor_License_Agreement">Contributor License Agreement (CLA)</a>.</p>
-				<h2 id="contributing">Contributing</h2>
-				<p>We very much encourage contributions to the 3D Repo project. Firstly, fork the desired repository and commit your modifications there. Once happy with the changes, you can generate a <a href="https://help.github.com/articles/using-pull-requests/">pull request</a> and our team will integrate it upstream after a review.</p>
-				<p>Your pull requests should:</p>
-				<ol>
-					<li>Follow the style of the existing code</li>
-					<li>One commit should just do one thing, and one thing only</li>
-					<li>Rebase your branch against <a href="https://help.github.com/articles/merging-an-upstream-repository-into-your-fork/">upstream&#39;s master</a> so that we don&#39;t pull redundant commits</li>
-					<li>Sign our <a href="https://gist.github.com/jozefdobos/e177af804c9bcd217b73">3D Repo Individual CLA</a> or if you are representing a legal entity, sign the <a href="https://gist.github.com/jozefdobos/c7c4c1c18cfb211c45d2">3D Repo Entity CLA</a></li>
-				</ol>
-				<h2 id="contact">Contact</h2>
-				<p>If you need any help or want to contribute please contact: <a href="mailto:support@3drepo.org">support@3drepo.org</a>
-				We look forward to hearing from you.</p>
-			</div>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Classes</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-class"><a href="classes/pin.html" class="tsd-kind-icon">Pin</a></li>
+								<li class="tsd-kind-class tsd-is-not-exported"><a href="classes/unityutil.html" class="tsd-kind-icon">Unity<wbr>Util</a></li>
+								<li class="tsd-kind-class"><a href="classes/viewer.html" class="tsd-kind-icon">Viewer</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section tsd-is-not-exported">
+							<h3>Interfaces</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-interface tsd-is-not-exported"><a href="interfaces/iviewerconstructor.html" class="tsd-kind-icon">IViewer<wbr>Constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section tsd-is-not-exported">
+							<h3>Variables</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-variable tsd-is-not-exported"><a href="globals.html#clientconfig" class="tsd-kind-icon">Client<wbr>Config</a></li>
+								<li class="tsd-kind-variable tsd-is-not-exported"><a href="globals.html#module" class="tsd-kind-icon">Module</a></li>
+								<li class="tsd-kind-variable tsd-is-not-exported"><a href="globals.html#sendmessage" class="tsd-kind-icon">Send<wbr>Message</a></li>
+								<li class="tsd-kind-variable tsd-is-not-exported"><a href="globals.html#unityloader" class="tsd-kind-icon">Unity<wbr>Loader</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
+				<h2>Variables</h2>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-is-not-exported">
+					<a name="clientconfig" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> Client<wbr>Config</h3>
+					<div class="tsd-signature tsd-kind-icon">Client<wbr>Config<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/3drepo/3drepo.io/blob/1b0cf9c3a/frontend/globals/viewer.ts#L23">viewer.ts:23</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-is-not-exported">
+					<a name="module" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> Module</h3>
+					<div class="tsd-signature tsd-kind-icon">Module<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/3drepo/3drepo.io/blob/1b0cf9c3a/frontend/globals/unity-util.ts#L17">unity-util.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/3drepo/3drepo.io/blob/1b0cf9c3a/frontend/globals/viewer.ts#L24">viewer.ts:24</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<ul>
+								<li>Copyright (C) 2014 3D Repo Ltd
+								*</li>
+								<li>This program is free software: you can redistribute it and/or modify</li>
+								<li>it under the terms of the GNU Affero General Public License as</li>
+								<li>published by the Free Software Foundation, either version 3 of the</li>
+								<li>License, or (at your option) any later version.
+								*</li>
+								<li>This program is distributed in the hope that it will be useful,</li>
+								<li>but WITHOUT ANY WARRANTY; without even the implied warranty of</li>
+								<li>MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</li>
+								<li>GNU Affero General Public License for more details.
+								*</li>
+								<li>You should have received a copy of the GNU Affero General Public License</li>
+								<li>along with this program.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</li>
+							</ul>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-is-not-exported">
+					<a name="sendmessage" class="tsd-anchor"></a>
+					<h3>Send<wbr>Message</h3>
+					<div class="tsd-signature tsd-kind-icon">Send<wbr>Message<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/3drepo/3drepo.io/blob/1b0cf9c3a/frontend/globals/unity-util.ts#L18">unity-util.ts:18</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-is-not-exported">
+					<a name="unityloader" class="tsd-anchor"></a>
+					<h3>Unity<wbr>Loader</h3>
+					<div class="tsd-signature tsd-kind-icon">Unity<wbr>Loader<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/3drepo/3drepo.io/blob/1b0cf9c3a/frontend/globals/unity-util.ts#L19">unity-util.ts:19</a></li>
+						</ul>
+					</aside>
+				</section>
+			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
+					<li class="globals current ">
 						<a href="globals.html"><em>Globals</em></a>
 					</li>
 				</ul>

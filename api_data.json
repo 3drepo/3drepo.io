@@ -888,57 +888,6 @@
   },
   {
     "type": "post",
-    "url": "/:teamspace/:model/revision/:rid/groups/",
-    "title": "Create a group",
-    "name": "createGroup",
-    "description": "<p>Add a group to the model, in the perspective of the :rid</p>",
-    "group": "Groups",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "type": "Object",
-            "optional": false,
-            "field": "Group",
-            "description": "<p>Created</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{\n  \"_id\":\"efa67a80-0fab-11e9-a0ed-edada3f501fd\",\n  \"name\":\"Group 1\",\"description\":\"\",\n  \"author\":\"username\",\n  \"createdAt\":\"2019-01-03T23:03:37.411Z\",\n  \"color\":[44,50,125],\n  \"objects\":[]\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "routes/group.js",
-    "groupTitle": "Groups"
-  },
-  {
-    "type": "post",
     "url": "/:teamspace/:model/revision/master/head/groups/",
     "title": "Create a group",
     "name": "createGroup",
@@ -1043,6 +992,57 @@
     "groupTitle": "Groups"
   },
   {
+    "type": "post",
+    "url": "/:teamspace/:model/revision/:rid/groups/",
+    "title": "Create a group",
+    "name": "createGroup",
+    "description": "<p>Add a group to the model, in the perspective of the :rid</p>",
+    "group": "Groups",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "Group",
+            "description": "<p>Created</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "HTTP/1.1 200 OK\n{\n  \"_id\":\"efa67a80-0fab-11e9-a0ed-edada3f501fd\",\n  \"name\":\"Group 1\",\"description\":\"\",\n  \"author\":\"username\",\n  \"createdAt\":\"2019-01-03T23:03:37.411Z\",\n  \"color\":[44,50,125],\n  \"objects\":[]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/group.js",
+    "groupTitle": "Groups"
+  },
+  {
     "type": "delete",
     "url": "/:teamspace/:model/groups/",
     "title": "Delete groups",
@@ -1084,6 +1084,71 @@
         {
           "title": "Success-Response",
           "content": "\nHTTP/1.1 200 OK\n{\n  \"status\":\"success\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/group.js",
+    "groupTitle": "Groups"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/revision/master/head/groups/:uid/",
+    "title": "Find group in model",
+    "description": "<p>Find a group using it's Group ID</p>",
+    "name": "findGroup",
+    "group": "Groups",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Group unique ID.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "ifcguids",
+            "description": "<p>Query string ifcguids returns IFC GUIDs if true where available.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Object",
+            "optional": false,
+            "field": "Group",
+            "description": "<p>matching provided ID.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response",
+          "content": "\nHTTP/1.1 200 OK\n{\n  \"_id\": \"group_ID\",\n  \"color\": [\n    121,\n    130,\n    211\n  ],\n  \"objects\": []\n}",
           "type": "json"
         }
       ]
@@ -1161,73 +1226,11 @@
     "groupTitle": "Groups"
   },
   {
-    "type": "get",
-    "url": "/:teamspace/:model/revision/master/head/groups/:uid/",
-    "title": "Find group in model",
-    "description": "<p>Find a group using it's Group ID</p>",
-    "name": "findGroup",
-    "group": "Groups",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "id",
-            "description": "<p>Group unique ID.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "ifcguids",
-            "description": "<p>Query string ifcguids returns IFC GUIDs if true where available.</p>"
-          }
-        ]
-      }
+    "deprecated": {
+      "content": "use {get} /:teamspace/:model/revision/:rid/groups/:uid/ instead"
     },
-    "success": {
-      "fields": {
-        "200": [
-          {
-            "group": "200",
-            "type": "Object",
-            "optional": false,
-            "field": "Group",
-            "description": "<p>matching provided ID.</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "\nHTTP/1.1 200 OK\n{\n  \"_id\": \"group_ID\",\n  \"color\": [\n    121,\n    130,\n    211\n  ],\n  \"objects\": []\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "routes/group.js",
-    "groupTitle": "Groups"
-  },
-  {
     "type": "get",
-    "url": "/:teamspace/:model/revision/:rid/groups/:uid/",
+    "url": "/:teamspace/:model/groups/revision/:rid/:uid/",
     "title": "Find group in model by revision",
     "name": "findGroupByRevision",
     "description": "<p>Find a single group using the unique Group ID and a Revision ID.</p>",
@@ -1310,11 +1313,8 @@
     "groupTitle": "Groups"
   },
   {
-    "deprecated": {
-      "content": "use {get} /:teamspace/:model/revision/:rid/groups/:uid/ instead"
-    },
     "type": "get",
-    "url": "/:teamspace/:model/groups/revision/:rid/:uid/",
+    "url": "/:teamspace/:model/revision/:rid/groups/:uid/",
     "title": "Find group in model by revision",
     "name": "findGroupByRevision",
     "description": "<p>Find a single group using the unique Group ID and a Revision ID.</p>",
@@ -1939,8 +1939,305 @@
     "groupTitle": "Issues_Analytics"
   },
   {
+    "type": "post",
+    "url": "/:teamspace/:model/issues/:issueId/resources",
+    "title": "Attach resources to an issue",
+    "name": "attachResource",
+    "group": "Issues",
+    "description": "<p>Attaches file or url resources to an issue. If the type of the resource is file it should be send as multipart/form-data. Both types at the same time cant be sent. So in order to attach files and urls it should be done with two different requests.</p> <p>This method triggers a chat event</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "issueId",
+            "description": "<p>Issue unique ID</p>"
+          }
+        ],
+        "Request body file resource (multipart/form-data)": [
+          {
+            "group": "Request body file resource (multipart/form-data)",
+            "type": "File[]",
+            "optional": false,
+            "field": "files",
+            "description": "<p>The array of files to be attached</p>"
+          },
+          {
+            "group": "Request body file resource (multipart/form-data)",
+            "type": "String[]",
+            "optional": false,
+            "field": "names",
+            "description": "<p>The names of the files; it should have the same length as the files field and should include the file extension</p>"
+          }
+        ],
+        "Request body url resource": [
+          {
+            "group": "Request body url resource",
+            "type": "String[]",
+            "optional": false,
+            "field": "urls",
+            "description": "<p>The array of urls to be attached</p>"
+          },
+          {
+            "group": "Request body url resource",
+            "type": "String[]",
+            "optional": false,
+            "field": "names",
+            "description": "<p>The names of the urls; it should have the same length as the url field</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success example result after two files has been uploaded",
+          "content": "\n[\n   {\n      \"_id\":\"7617f775-9eb7-4877-8ec3-98ea3457e519\",\n      \"size\":1422,\n      \"issueIds\":[\n         \"3e8a11e0-9812-11e9-9c4d-ebde5888e062\"\n      ],\n      \"name\":\"todo.txt\",\n      \"user\":\"teamSpace1\",\n      \"createdAt\":1561973996461\n   },\n   {\n      \"_id\":\"e25e42d5-c4f0-4fbc-a8f4-bc9899e6662a\",\n      \"size\":2509356,\n      \"issueIds\":[\n         \"3e8a11e0-9812-11e9-9c4d-ebde5888e062\"\n      ],\n      \"name\":\"football.gif\",\n      \"user\":\"teamSpace1\",\n      \"createdAt\":1561973996462\n   }\n]",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "post",
+    "url": "/:teamspace/:model/issues/:issueId/comments",
+    "title": "Add an comment for an issue",
+    "name": "commentIssue",
+    "group": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "issueId",
+            "description": "<p>Unique Issue ID to update.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Json",
+            "optional": false,
+            "field": "PAYLOAD",
+            "description": "<p>The data with the comment to be added.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "PAYLOAD",
+          "content": "{\n  \"comment\": \"This is a commment\",\n  \"viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success",
+          "content": " HTTP/1.1 200 OK\n{\n    guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\",\n    comment: \"This is a commment\",\n    created: 1558534690327,\n    guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\",\n    owner: \"username\",\n    viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "404",
+            "description": "<p>Issue not found</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "400",
+            "description": "<p>Comment with no text</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "delete",
+    "url": "/:teamspace/:model/issues/:issueId/comments",
+    "title": "Deletes an comment from an issue",
+    "name": "commentIssue",
+    "group": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "issueId",
+            "description": "<p>Unique Issue ID to update.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Json",
+            "optional": false,
+            "field": "PAYLOAD",
+            "description": "<p>The data with the comment guid to be deleted.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "PAYLOAD",
+          "content": "{\n   guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success",
+          "content": " HTTP/1.1 200 OK\n{\n    guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "404",
+            "description": "<p>Issue not found</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "401",
+            "description": "<p>Not authorized, when the user is not the owner</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "400",
+            "description": "<p>Issue comment sealed, when the user is trying to delete a comment that is sealed</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "delete",
+    "url": "/:teamspace/:model/issues/:issueId/resources",
+    "title": "Detach a resource from an issue",
+    "name": "detachResource",
+    "group": "Issues",
+    "description": "<p>Detachs a resource from an issue. If the issue is the last entity the resources has been attached to it also deletes the resource from the system. This method triggers a chat event .</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "issueId",
+            "description": "<p>Issue unique ID</p>"
+          }
+        ],
+        "Request body": [
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "_id",
+            "description": "<p>The resource id to be detached</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "{",
+          "content": "\n{\n   \"_id\":\"e25e42d5-c4f0-4fbc-a8f4-bc9899e6662a\",\n   \"size\":2509356,\n   \"issueIds\":[\n   ],\n   \"name\":\"football.gif\",\n   \"user\":\"teamSpace1\",\n   \"createdAt\":1561973996462\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
     "type": "get",
-    "url": "/:teamspace/:model/issues/:uid.json",
+    "url": "/:teamspace/:model/issues/:issueId",
     "title": "Find Issue by ID",
     "name": "findIssueById",
     "group": "Issues",
@@ -2006,7 +2303,7 @@
       "examples": [
         {
           "title": "HTTP/1.1 404 Not Found",
-          "content": "HTTP/1.1 404 Not Found\n{\n\t \"place\": \"GET /issues/issue_ID.json\",\n\t \"status\": 500,\n\t \"message\": \"Issue not found\",\n}",
+          "content": "HTTP/1.1 404 Not Found\n{\n\t \"place\": \"GET /issues/:issueId\",\n\t \"status\": 500,\n\t \"message\": \"Issue not found\",\n}",
           "type": "json"
         }
       ]
@@ -2017,7 +2314,7 @@
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/issues/:uid.json",
+    "url": "/:teamspace/:model/issues/:issueId/thumbnail.png",
     "title": "Get Issue Thumbnail",
     "name": "findIssueById",
     "group": "Issues",
@@ -2057,75 +2354,6 @@
             "optional": false,
             "field": "200",
             "description": "<p>{Object} thumbnail Thumbnail Image</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/revision/:rid/issues.bcfzip",
-    "title": "Get Issues BCF zip file by revision ID",
-    "name": "getIssuesBCF",
-    "group": "Issues",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "id",
-            "description": "<p>Revision unique ID.</p>"
-          }
-        ]
-      }
-    },
-    "description": "<p>Get Issues BCF export based on revision ID.</p>",
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/issues.bcfzip",
-    "title": "Get Issues BCF zip file",
-    "name": "getIssuesBCF",
-    "group": "Issues",
-    "description": "<p>Get a downloaded zip file of all Issues BCF.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
           }
         ]
       }
@@ -2194,7 +2422,76 @@
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/issues/:uid/viewpoints/:vid/screenshotSmall.png",
+    "url": "/:teamspace/:model/issues.bcfzip",
+    "title": "Get Issues BCF zip file",
+    "name": "getIssuesBCF",
+    "group": "Issues",
+    "description": "<p>Get a downloaded zip file of all Issues BCF.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/revision/:rid/issues.bcfzip",
+    "title": "Get Issues BCF zip file by revision ID",
+    "name": "getIssuesBCF",
+    "group": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Revision unique ID.</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Get Issues BCF export based on revision ID.</p>",
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/issues/:issueId/viewpoints/:vid/screenshotSmall.png",
     "title": "Get smaller version of Issue screenshot",
     "name": "getScreenshotSmall",
     "group": "Issues",
@@ -2275,7 +2572,7 @@
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/issues.json",
+    "url": "/:teamspace/:model/issues",
     "title": "Get all Issues",
     "name": "listIssues",
     "group": "Issues",
@@ -2326,7 +2623,7 @@
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/revision/:rid/issues.json",
+    "url": "/:teamspace/:model/revision/:rid/issues",
     "title": "Get all Issues by revision ID",
     "name": "listIssues",
     "group": "Issues",
@@ -2453,7 +2750,7 @@
   },
   {
     "type": "post",
-    "url": "/:teamspace/:model/issues.json",
+    "url": "/:teamspace/:model/issues",
     "title": "Create a new issue.",
     "name": "storeIssue",
     "group": "Issues",
@@ -2484,7 +2781,7 @@
   },
   {
     "type": "post",
-    "url": "/:teamspace/:model/issuesId.json",
+    "url": "/:teamspace/:model/revision/:rid/issues",
     "title": "Store issue based on revision",
     "name": "storeIssue",
     "group": "Issues",
@@ -2521,7 +2818,51 @@
   },
   {
     "type": "put",
-    "url": "/:teamspace/:model/issues.json/issueId.json",
+    "url": "/:teamspace/:model/revision/:rid/issues/:issueId",
+    "title": "Update issue based on revision",
+    "name": "updateIssue",
+    "group": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "rid",
+            "description": "<p>Unique Revision ID to update to.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "issueId",
+            "description": "<p>Unique Issue ID to update.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "patch",
+    "url": "/:teamspace/:model/issues/:issueId",
     "title": "Update an Issue.",
     "name": "updateIssue",
     "group": "Issues",
@@ -2562,50 +2903,6 @@
             "optional": false,
             "field": "Updated",
             "description": "<p>Issue Object.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "put",
-    "url": "/:teamspace/:model/revision/\"rid/issues/:issueId.json",
-    "title": "Update issue based on revision",
-    "name": "updateIssue",
-    "group": "Issues",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "rid",
-            "description": "<p>Unique Revision ID to update to.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "issueId",
-            "description": "<p>Unique Issue ID to update.</p>"
           }
         ]
       }
@@ -2764,36 +3061,6 @@
             "optional": false,
             "field": "teamspace",
             "description": "<p>Name of teamspace</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/job.js",
-    "groupTitle": "Jobs"
-  },
-  {
-    "type": "delete",
-    "url": "/:teamspace/jobs",
-    "title": "Remove a job from a user",
-    "name": "removeUserFromJobs",
-    "group": "Jobs",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Object",
-            "optional": false,
-            "field": "user",
-            "description": "<p>User to remove job from.</p>"
           }
         ]
       }
@@ -3026,36 +3293,6 @@
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/revision/master/head/meta/all.json",
-    "title": "Get all meta data",
-    "name": "getAllMetadata",
-    "group": "Meta",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/meta.js",
-    "groupTitle": "Meta"
-  },
-  {
-    "type": "get",
     "url": "/:teamspace/:model/revision/:rev/meta/all.json",
     "title": "Get all meta data",
     "name": "getAllMetadata",
@@ -3083,6 +3320,36 @@
             "optional": false,
             "field": "rev",
             "description": "<p>Revision to get meta data from</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/meta.js",
+    "groupTitle": "Meta"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/revision/master/head/meta/all.json",
+    "title": "Get all meta data",
+    "name": "getAllMetadata",
+    "group": "Meta",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
           }
         ]
       }
@@ -3222,43 +3489,6 @@
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/revision/:rev/idMap.json",
-    "title": "Get Tree Path",
-    "name": "getIdMap",
-    "group": "Model",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model to ID map for.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "rev",
-            "description": "<p>Revision to use.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/model.js",
-    "groupTitle": "Model"
-  },
-  {
-    "type": "get",
     "url": "/:teamspace/:model/revision/master/head/idMap.json",
     "title": "Get ID Map",
     "name": "getIdMap",
@@ -3289,9 +3519,9 @@
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/revision/master/head/idToMeshes.json",
-    "title": "Get ID Map",
-    "name": "getIdToMeshes",
+    "url": "/:teamspace/:model/revision/:rev/idMap.json",
+    "title": "Get Tree Path",
+    "name": "getIdMap",
     "group": "Model",
     "parameter": {
       "fields": {
@@ -3308,7 +3538,14 @@
             "type": "String",
             "optional": false,
             "field": "model",
-            "description": "<p>Model to get ID Meshes for.</p>"
+            "description": "<p>Model to ID map for.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "rev",
+            "description": "<p>Revision to use.</p>"
           }
         ]
       }
@@ -3356,6 +3593,36 @@
   },
   {
     "type": "get",
+    "url": "/:teamspace/:model/revision/master/head/idToMeshes.json",
+    "title": "Get ID Map",
+    "name": "getIdToMeshes",
+    "group": "Model",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model to get ID Meshes for.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
     "url": "/:teamspace/:model/:uid.json.mpc",
     "title": "Get JSON Mpc",
     "name": "getJsonMpc",
@@ -3383,36 +3650,6 @@
             "optional": false,
             "field": "id",
             "description": "<p>name of the json.mpc file</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/model.js",
-    "groupTitle": "Model"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/revision/master/head/modelProperties.json",
-    "title": "Get ID Map",
-    "name": "getModelProperties",
-    "group": "Model",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model to get properties for.</p>"
           }
         ]
       }
@@ -3460,6 +3697,36 @@
   },
   {
     "type": "get",
+    "url": "/:teamspace/:model/revision/master/head/modelProperties.json",
+    "title": "Get ID Map",
+    "name": "getModelProperties",
+    "group": "Model",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model to get properties for.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
     "url": "/:teamspace/:model.json",
     "title": "Get Model Setting",
     "name": "getModelSetting",
@@ -3480,36 +3747,6 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model to get settings for.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/model.js",
-    "groupTitle": "Model"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/revision/master/head/fulltree.json",
-    "title": "Get Model Tree",
-    "name": "getModelTree",
-    "group": "Model",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model to use.</p>"
           }
         ]
       }
@@ -3547,6 +3784,36 @@
             "optional": false,
             "field": "rev",
             "description": "<p>Revision to use.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/revision/master/head/fulltree.json",
+    "title": "Get Model Tree",
+    "name": "getModelTree",
+    "group": "Model",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model to use.</p>"
           }
         ]
       }
@@ -3600,6 +3867,73 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model to get Permission for.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/revision/master/head/subModelRevisions",
+    "title": "Get revision info from sub models",
+    "name": "getSubModelRevisions",
+    "group": "Model",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model to get properties for.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "rev",
+            "description": "<p>Revision to use.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/revision/master/head/subModelRevisions",
+    "title": "Get revision info from sub models",
+    "name": "getSubRevisionModels",
+    "group": "Model",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model to get properties for.</p>"
           }
         ]
       }
@@ -3976,36 +4310,6 @@
     "groupTitle": "Model"
   },
   {
-    "type": "get",
-    "url": "/:teamspace/:model/download/latest",
-    "title": "Upload Model.",
-    "name": "uploadModel",
-    "group": "Model",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model to download.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/model.js",
-    "groupTitle": "Model"
-  },
-  {
     "type": "post",
     "url": "/:teamspace/upload",
     "title": "Upload Model.",
@@ -4027,6 +4331,36 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model to upload.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/download/latest",
+    "title": "Upload Model.",
+    "name": "uploadModel",
+    "group": "Model",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model to download.</p>"
           }
         ]
       }
@@ -4119,6 +4453,16 @@
         ]
       }
     },
+    "version": "0.0.0",
+    "filename": "routes/notification.js",
+    "groupTitle": "Notification"
+  },
+  {
+    "type": "patch",
+    "url": "/notifications",
+    "title": "Patch all the user notifications",
+    "name": "patchNotification",
+    "group": "Notification",
     "version": "0.0.0",
     "filename": "routes/notification.js",
     "groupTitle": "Notification"
@@ -4377,6 +4721,44 @@
   },
   {
     "type": "get",
+    "url": "/:teamspace/:model/resources/:resourceId",
+    "title": "Get resource file",
+    "name": "getResource",
+    "group": "Resources",
+    "description": "<p>Is the URL for downloading the resource file identified by the resourceId.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "resourceId",
+            "description": "<p>The Id of the resource</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/resources.js",
+    "groupTitle": "Resources"
+  },
+  {
+    "type": "get",
     "url": "/:teamspace/:model/revisions.json",
     "title": "List all revisions",
     "name": "listRevisions",
@@ -4540,7 +4922,7 @@
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/risks/:uid.json",
+    "url": "/:teamspace/:model/risks/:riskId",
     "title": "Find Risk by ID",
     "name": "findRiskById",
     "group": "Risks",
@@ -4577,7 +4959,7 @@
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/risks/:uid/screenshot.png",
+    "url": "/:teamspace/:model/risks/:riskId/screenshot.png",
     "title": "Get Risks Screenshot",
     "name": "getScreenshot",
     "group": "Risks",
@@ -4607,7 +4989,7 @@
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/risks/:uid/screenshotSmall.png",
+    "url": "/:teamspace/:model/risks/:riskId/screenshotSmall.png",
     "title": "Get Small Risks Screenshot",
     "name": "getScreenshotSmall",
     "group": "Risks",
@@ -4644,7 +5026,7 @@
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/risks/:uid/thumbnail.png",
+    "url": "/:teamspace/:model/risks/:riskId/thumbnail.png",
     "title": "Get Risks Thumbnail",
     "name": "getThumbnail",
     "group": "Risks",
@@ -4681,7 +5063,7 @@
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/risks.json",
+    "url": "/:teamspace/:model/risks",
     "title": "List All Risks",
     "name": "listRisks",
     "group": "Risks",
@@ -4711,7 +5093,7 @@
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/risks/:rid/risks.json",
+    "url": "/:teamspace/:model/revision/:rid/risks",
     "title": "List all Risks by revision ID",
     "name": "listRisks",
     "group": "Risks",
@@ -4737,43 +5119,6 @@
             "type": "String",
             "optional": false,
             "field": "id",
-            "description": "<p>Revision ID.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/risk.js",
-    "groupTitle": "Risks"
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/risks.html",
-    "title": "Render all Risks as HTML by revision ID",
-    "name": "renderRisksHTML",
-    "group": "Risks",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "rid",
             "description": "<p>Revision ID.</p>"
           }
         ]
@@ -4814,8 +5159,45 @@
     "groupTitle": "Risks"
   },
   {
+    "type": "get",
+    "url": "/:teamspace/:model/revision/:rid/risks.html",
+    "title": "Render all Risks as HTML by revision ID",
+    "name": "renderRisksHTML",
+    "group": "Risks",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "rid",
+            "description": "<p>Revision ID.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/risk.js",
+    "groupTitle": "Risks"
+  },
+  {
     "type": "post",
-    "url": "/:teamspace/:model/risks.json",
+    "url": "/:teamspace/:model/risks",
     "title": "Store Risks",
     "name": "storeRisk",
     "group": "Risks",
@@ -4852,7 +5234,7 @@
   },
   {
     "type": "post",
-    "url": "/:teamspace/:model/revision/:rid/risks.json",
+    "url": "/:teamspace/:model/revision/:rid/risks",
     "title": "Store risks based on Revision ID",
     "name": "storeRisk",
     "group": "Risks",
@@ -4888,8 +5270,8 @@
     "groupTitle": "Risks"
   },
   {
-    "type": "put",
-    "url": "/:teamspace/:model/revision/:rid/risks/:riskId.json",
+    "type": "patch",
+    "url": "/:teamspace/:model/revision/:rid/risks/:riskId",
     "title": "Update Risk based on revision ID",
     "name": "updateRisk",
     "group": "Risks",
@@ -4932,8 +5314,8 @@
     "groupTitle": "Risks"
   },
   {
-    "type": "put",
-    "url": "/:teamspace/:model/risks/riskId.json",
+    "type": "patch",
+    "url": "/:teamspace/:model/risks/:riskId",
     "title": "Update risks based on revision",
     "name": "updateRisk",
     "group": "Risks",
@@ -4958,7 +5340,7 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "riskId.json",
+            "field": "riskId",
             "description": "<p>Risk ID.</p>"
           }
         ]
@@ -5237,6 +5619,168 @@
     "version": "0.0.0",
     "filename": "routes/teamspace.js",
     "groupTitle": "Teamspace"
+  },
+  {
+    "type": "get",
+    "url": "/starredMeta",
+    "title": "Gets the starred metadata tags for the logged user",
+    "name": "GetStarredMetadataTags",
+    "group": "User",
+    "version": "0.0.0",
+    "filename": "routes/user.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "put",
+    "url": "/starredMeta",
+    "title": "Sets the whole starred metadata tag for the logged user",
+    "name": "SetMetadataTags",
+    "group": "User",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "optional": true,
+            "field": "String",
+            "description": "<p>An array of tags to be starred</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Input",
+          "content": "   [\n   \t\"material\",\n\t  \t\"color\"\n\t  ]",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success",
+          "content": "   HTTP/1.1 200 OK\n\t  {}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "400",
+            "description": "<p>BadRequest The request was malformed</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "post",
+    "url": "/starredMeta",
+    "title": "Adds a starred metadata tag for the logged user",
+    "name": "StarMetadataTags",
+    "group": "User",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "tag",
+            "description": "<p>The tag to be starred</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Input",
+          "content": "{\n  \"tag\": \"material\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success",
+          "content": "   HTTP/1.1 200 OK\n\t  {}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "400",
+            "description": "<p>BadRequest The request was malformed</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "delete",
+    "url": "/starredMeta",
+    "title": "removes a starred metadata tag for the logged user if the tag exists",
+    "name": "UnstarMetadataTags",
+    "group": "User",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "tag",
+            "description": "<p>The tag to be starred</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Input",
+          "content": "{\n  \"tag\": \"material\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success",
+          "content": "   HTTP/1.1 200 OK\n\t  {}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "400",
+            "description": "<p>BadRequest The request was malformed</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/user.js",
+    "groupTitle": "User"
   },
   {
     "type": "delete",
