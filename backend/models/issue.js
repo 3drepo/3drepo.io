@@ -592,46 +592,6 @@ issue.findByUID = async function(account, model, issueId) {
 	return ticket.clean(account, model, foundIssue);
 };
 
-issue.deleteComment = async function(account, model, issueID, guid, user) {
-	// 1. Fetch comments
-	const _id = utils.stringToUUID(issueID) ;
-	const issues = await db.getCollection(account, model + ".issues");
-	const issuesRes = await issues.find({ _id }, {comments: 1}).toArray();
-
-	if (issuesRes.length === 0) {
-		throw { resCode: responseCodes.ISSUE_NOT_FOUND };
-	}
-
-	let comments = issuesRes[0].comments;
-	const count = comments.length;
-	// 3. Filter out the particular comment
-	comments = comments.filter(c => {
-		if(utils.uuidToString(c.guid) !== guid) {
-			return true;
-		}
-
-		if (c.sealed) {
-			throw { resCode: responseCodes.ISSUE_COMMENT_SEALED};
-		}
-
-		if (c.owner !== user) {
-			throw { resCode: responseCodes.NOT_AUTHORIZED};
-		}
-
-		return false;
-	});
-
-	if(count === comments.length) {
-		throw { resCode: responseCodes.ISSUE_COMMENT_INVALID_GUID};
-	}
-
-	// 4. Update the issue;
-	await issues.update({ _id }, {$set : {comments}});
-
-	// 5. Return which comment was deleted
-	return {guid};
-};
-
 issue.isIssueBeingClosed = function(oldIssue, newIssue) {
 	return !!oldIssue && oldIssue.status !== "closed" && newIssue.status === "closed";
 };
