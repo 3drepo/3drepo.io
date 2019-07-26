@@ -73,10 +73,8 @@ export const getStatusIcon = (priority, status) => {
 };
 
 export const getIssuePinColor = (status: string, priority: string, selected: boolean = false) => {
-        const colorToUse = ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS.NONE;
+	const colorToUse = ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS.NONE;
 	return (selected) ? colorToUse.selectedColor : colorToUse.pinColor;
-		? (ISSUE_COLORS[status] ? ISSUE_COLORS[status].selectedColor : ISSUE_COLORS[priority].selectedColor)
-		: (ISSUE_COLORS[status] ? ISSUE_COLORS[status].pinColor : ISSUE_COLORS[priority].pinColor);
 };
 
 const isOpenIssue = (status) => status !== 'closed';
