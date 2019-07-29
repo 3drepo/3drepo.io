@@ -30,7 +30,7 @@ import {
 import { MenuButton as MenuButtonComponent } from '../../../../components/menuButton/menuButton.component';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
 import { DateTime } from '../../../dateTime/dateTime.component';
-import { ACTIONS_MENU, MAKE_ACTIVE_NAME, MAKE_VOID_NAME, SET_LATEST_NAME, TYPES } from './revisionsDialog.constants';
+import { MAKE_ACTIVE_NAME, MAKE_VOID_NAME, SET_LATEST_NAME, TYPES, VOID_ACTIONS, ACTIVE_ACTIONS } from './revisionsDialog.constants';
 import {
 	ActionsMenuWrapper,
 	Column,
@@ -93,9 +93,11 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 	}
 
 	private renderActionsMenu = (menu, revision) =>  {
+		const actions = revision.void ? VOID_ACTIONS : ACTIVE_ACTIONS;
+
 		return(
 			<MenuList>
-				{ACTIONS_MENU.map(({ name, label }) => (
+				{actions.map(({ name, label }) => (
 					<StyledListItem key={name} button onClick={(e) => {
 						this.menuActionsMap[name](revision);
 						menu.close(e);
@@ -107,17 +109,26 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		);
 	}
 
+	public toggleVoid = (revision) => {
+		this.props.setModelRevisionState(this.props.teamspace, this.props.modelId, revision._id, !Boolean(revision.void));
+	}
+
+	public setLatest = (revision) => {
+		this.props.revisions.forEach((rev) => {
+			if (revision.timestamp !== rev.timestamp) {
+				const isOlder = revision.timestamp > rev.timestamp;
+				this.props.setModelRevisionState(this.props.teamspace, this.props.modelId, rev._id, isOlder);
+			} else {
+
+			}
+		});
+	}
+
 	get menuActionsMap() {
 		return {
-			[MAKE_VOID_NAME]: (revision) => {
-				this.props.setModelRevisionState(this.props.teamspace, this.props.modelId, revision, true);
-			},
-			[MAKE_ACTIVE_NAME]: (revision) => {
-				this.props.setModelRevisionState(this.props.teamspace, this.props.modelId, revision, false);
-			},
-			[SET_LATEST_NAME]: (revision) => {
-				// TODO: set latest = set any later revisions void
-			},
+			[MAKE_ACTIVE_NAME]: this.toggleVoid,
+			[MAKE_VOID_NAME]: this.toggleVoid,
+			[SET_LATEST_NAME]:  this.setLatest
 		};
 	}
 
@@ -133,7 +144,8 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 				}
 			},
 			theme: {
-				isActive: isCurrentRevision
+				isCurrent: isCurrentRevision,
+				isVoid: revision.void
 			}
 		};
 
@@ -156,7 +168,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 						<ActionsMenuWrapper>
 							<ButtonMenu
 								renderButton={MenuButton}
-								renderContent={(menu) => this.renderActionsMenu(menu, revision._id)}
+								renderContent={(menu) => this.renderActionsMenu(menu, revision)}
 								PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 								PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
 								ButtonProps={{ disabled: false }}

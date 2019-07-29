@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { cloneDeep } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { sortByField } from '../../helpers/sorting';
 
@@ -26,6 +27,7 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	fetchRevisions: ['teamspace', 'modelId'],
 	fetchRevisionsSuccess: ['revisions'],
 	setModelRevisionState: ['teamspace', 'modelId', 'revision', 'isVoid'],
+	setModelRevisionStateSuccess: ['revision', 'isVoid'],
 	resetRevisions: [],
 	downloadModel: ['teamspace', 'modelId'],
 	uploadModelFile: ['teamspace', 'project', 'modelData', 'fileData'],
@@ -82,6 +84,14 @@ const updateSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
 	return { ...state, settings: { ...state.settings, ...settings} };
 };
 
+const setModelRevisionStateSuccess = (state = INITIAL_STATE, { revision, isVoid }) => {
+	const revisions = cloneDeep(state.revisions);
+	const changedRevisionIndex = revisions.findIndex(((rev) => rev._id === revision));
+
+	revisions[changedRevisionIndex].void = isVoid;
+	return { ...state, revisions };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ModelTypes.FETCH_META_KEYS_SUCCESS]: fetchMetaKeysSuccess,
 	[ModelTypes.FETCH_SETTINGS_SUCCESS]: fetchSettingsSuccess,
@@ -89,5 +99,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ModelTypes.RESET_REVISIONS]: resetRevisions,
 	[ModelTypes.SET_PENDING_STATE]: setPendingState,
 	[ModelTypes.FETCH_MAPS_SUCCESS]: fetchMapsSuccess,
-	[ModelTypes.UPDATE_SETTINGS_SUCCESS]: updateSettingsSuccess
+	[ModelTypes.UPDATE_SETTINGS_SUCCESS]: updateSettingsSuccess,
+	[ModelTypes.SET_MODEL_REVISION_STATE_SUCCESS]: setModelRevisionStateSuccess
 });

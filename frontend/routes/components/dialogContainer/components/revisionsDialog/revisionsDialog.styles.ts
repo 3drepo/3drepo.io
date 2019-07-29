@@ -25,7 +25,8 @@ import { COLOR } from '../../../../../styles/colors';
 
 interface IItem {
 	theme: {
-		isActive?: boolean;
+		isCurrent?: boolean;
+		isVoid?: boolean;
 	};
 }
 
@@ -47,6 +48,30 @@ export const PropertyWrapper = styled.div`
 	}
 `;
 
+const getItemBackgroundColor = (theme) => {
+	if (theme.isCurrent) {
+		return COLOR.WHITE;
+	}
+
+	if (theme.isVoid) {
+		return COLOR.WARNING_LIGHT;
+	}
+
+	return COLOR.BLACK_6;
+};
+
+const getItemHoverBackgroundColor = (theme) => {
+	if (theme.isCurrent) {
+		return COLOR.LIGHT_GRAY;
+	}
+
+	if (theme.isVoid) {
+		return COLOR.WARNING;
+	}
+
+	return COLOR.BLACK_12;
+};
+
 export const Item = styled(ListItem)<IItem>`
 	display: flex;
 	flex-direction: column;
@@ -55,12 +80,16 @@ export const Item = styled(ListItem)<IItem>`
 	&& {
 		justify-content: space-between;
 		padding: 22px 30px;
-		background-color: ${({theme}) => theme.isActive ? COLOR.WHITE : COLOR.BLACK_6};
+		background-color: ${({theme}) => getItemBackgroundColor(theme)};
 		border-bottom: 1px solid ${COLOR.BLACK_20};
+
+		&:hover {
+			background-color: ${({theme}) => getItemHoverBackgroundColor(theme)};
+		}
 	}
 
 	${Property} {
-		font-weight: ${({theme}) => theme.isActive ? FONT_WEIGHT.SEMIBOLD : FONT_WEIGHT.LIGHTER};
+		font-weight: ${({theme}) => theme.isCurrent ? FONT_WEIGHT.SEMIBOLD : FONT_WEIGHT.LIGHTER};
 	}
 `;
 
