@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { pick, pickBy, values } from 'lodash';
+import { orderBy, pick, pickBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { LIST_ITEMS_TYPES } from '../../routes/teamspaces/teamspaces.contants';
 import { extendTeamspacesInfo } from './teamspaces.helpers';
@@ -75,14 +75,14 @@ export const selectFlattenTeamspaces = createSelector(
 			for (let j = 0; j < projectsIds.length; j++) {
 				const project = projects[projectsIds[j]];
 
-				const projectModels = project.models.map((modelId) => ({
+				const projectModels = orderBy(project.models.map((modelId) => ({
 					...models[modelId],
 					teamspace: teamspaceName,
 					project: projectsIds[j],
 					projectName: project.name,
 					type: LIST_ITEMS_TYPES.MODEL,
 					id: modelId
-				}));
+				})), ['federate']);
 
 				flattenList.push({
 					...project,
