@@ -118,7 +118,7 @@ export const selectFlattenTeamspaces = createSelector(
 					...teamspacesList[index],
 					type: LIST_ITEMS_TYPES.TEAMSPACE,
 					id: teamspacesList[index].account
-				}, ...orderBy(teamspaceProjects, ['name']);
+				}, ...orderBy(teamspaceProjects, ['name']));
 			}
 		}
 		return flattenList;
