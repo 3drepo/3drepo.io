@@ -26,7 +26,7 @@ interface IProps {
 	open?: boolean;
 	disabled?: boolean;
 	forceOpen?: boolean;
-	toggleForceOpen?: () => void;
+	toggleForceOpen?: (event) => void;
 }
 
 interface IState {
