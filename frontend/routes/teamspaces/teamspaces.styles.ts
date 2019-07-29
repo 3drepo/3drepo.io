@@ -50,8 +50,8 @@ export const LoaderContainer = styled.div`
 
 export const GridContainer = styled.div`
 	display: grid;
-	grid-template-columns: repeat(auto-fit, 200px);
-	grid-gap: 10px;
+	grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+	grid-gap: 15px;
 	padding: 10px 15px;
 `;
 
