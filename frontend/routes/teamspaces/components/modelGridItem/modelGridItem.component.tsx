@@ -16,6 +16,7 @@
  */
 
 import copy from 'copy-to-clipboard';
+import { startCase } from 'lodash';
 import React, { useEffect } from 'react';
 import { ROUTES } from '../../../../constants/routes';
 import { hasPermissions } from '../../../../helpers/permissions';
@@ -23,6 +24,7 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../services/analytics';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { COLOR } from '../../../../styles';
+import { Loader } from '../../../components/loader/loader.component';
 import { SmallIconButton } from '../../../components/smallIconButon/smallIconButton.component';
 import { StarIcon } from '../../../components/starIcon/starIcon.component';
 import { PERMISSIONS_VIEWS } from '../../../projects/projects.component';
@@ -38,6 +40,7 @@ import {
 	Header, Name, NameWrapper,
 	PropertiesColumn,
 	Property,
+	Status,
 	Timestamp
 } from './modelGridItem.styles';
 
@@ -69,7 +72,9 @@ interface IProps {
 
 export function ModelGridItem(props: IProps) {
 	const isFederation = Boolean(props.federate);
-	const isPending = false;
+	const isPendingStatus = () =>
+		props.status && props.status === 'uploading' || props.status === 'queued' || props.status === 'processing';
+	const isPending = isPendingStatus();
 
 	useEffect(() => {
 		if (!isFederation) {
@@ -162,11 +167,13 @@ export function ModelGridItem(props: IProps) {
 
 	const handleClick = () => {
 		const { history, teamspace, timestamp, model } = props;
-		if (timestamp) {
-			history.push(`${ROUTES.VIEWER}/${teamspace}/${model}`);
-			analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
-		} else {
-			handleUploadModelFile(event);
+		if (!isPending) {
+			if (timestamp) {
+				history.push(`${ROUTES.VIEWER}/${teamspace}/${model}`);
+				analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
+			} else {
+				handleUploadModelFile(event);
+			}
 		}
 	};
 
@@ -209,12 +216,6 @@ export function ModelGridItem(props: IProps) {
 		console.info('star click');
 	};
 
-	const renderModelCode = renderWhenTrue(<Property>{props.code}</Property>);
-
-	const renderSuitabilityCode = renderWhenTrue(<Property>{props.suitabilityCode}</Property>);
-
-	const renderTimestamp = renderWhenTrue(<Timestamp>{formatDate(props.timestamp, LONG_DATE_TIME_FORMAT)}</Timestamp>);
-
 	const sharedActions = [{
 		...ROW_ACTIONS.PERMISSIONS,
 		action: handlePermissionsClick
@@ -248,12 +249,32 @@ export function ModelGridItem(props: IProps) {
 
 	const rowActions = isFederation ? federationActions : modelActions;
 
+	const renderModelCode = renderWhenTrue(<Property>{props.code}</Property>);
+
+	const renderSuitabilityCode = renderWhenTrue(<Property>{props.suitabilityCode}</Property>);
+
+	const renderTimestamp = renderWhenTrue(<Timestamp>{formatDate(props.timestamp, LONG_DATE_TIME_FORMAT)}</Timestamp>);
+
+	const renderPendingStatus = renderWhenTrue(
+		<Status>
+			<Loader content={`${startCase(props.status)}...`} size={20} horizontal />
+		</Status>
+	);
+
+	const renderActionsMenu = () => (
+		<ActionsMenu isPending={isPending} federate={isFederation}>
+			<Actions>
+				{renderActions(rowActions)}
+			</Actions>
+		</ActionsMenu>
+	);
+
 	return (
 		<Container
 			federate={isFederation}
 			className={props.className}
 		>
-			<ClickableLayer onClick={handleClick} />
+			<ClickableLayer onClick={handleClick} isPending={isPending} />
 			<Header>
 				<NameWrapper>
 					<StarIcon
@@ -265,18 +286,15 @@ export function ModelGridItem(props: IProps) {
 						{props.name}
 					</Name>
 				</NameWrapper>
-				<ActionsMenu disabled={isPending} federate={isFederation}>
-					<Actions>
-						{renderActions(rowActions)}
-					</Actions>
-				</ActionsMenu>
+				{renderActionsMenu()}
 			</Header>
 			<Content>
 				<PropertiesColumn>
 					{renderModelCode(props.code)}
 					{renderSuitabilityCode(props.suitabilityCode)} {/* TODO: check suitability code after backend changes */}
 				</PropertiesColumn>
-				{renderTimestamp(props.timestamp)}
+				{renderTimestamp(!isPending && props.timestamp)}
+				{renderPendingStatus(isPending)}
 			</Content>
 		</Container>
 	);

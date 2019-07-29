@@ -85,5 +85,15 @@ export const ClickableLayer = styled.div`
 	left: 0;
 	width: 100%;
 	height: 100%;
-	cursor: pointer;
+	cursor: ${(props) => props.isPending ? 'default' : 'pointer'};
+`;
+
+export const Status = styled.span`
+	align-items: center;
+	justify-content: flex-end;
+	display: flex;
+	width: 100%;
+	font-weight: 400;
+	color: ${COLOR.BLACK_40};
+	font-size: 12px;
 `;

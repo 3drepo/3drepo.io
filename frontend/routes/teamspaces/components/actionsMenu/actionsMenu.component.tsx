@@ -23,14 +23,14 @@ import { ActionsButton, Container, StyledGrid } from './actionsMenu.styles';
 
 interface IProps {
 	className?: string;
-	disabled: boolean;
+	isPending: boolean;
 	federate: boolean;
 	children: any;
 }
 
 const MoreIcon = () => <MoreVert fontSize="small" />;
 
-export function ActionsMenu({federate, disabled, children}: IProps) {
+export function ActionsMenu({federate, isPending, children}: IProps) {
 	const [open, setOpen] = useState(false);
 	const [toggleForceOpen, setToggleForceOpen] = useState(false);
 	const opened = open || toggleForceOpen;
@@ -49,7 +49,7 @@ export function ActionsMenu({federate, disabled, children}: IProps) {
 					ariaLabel={'Toggle actions menu'}
 					Icon={MoreIcon}
 					onClick={toggleForceOpenHandler}
-					disabled={disabled}
+					disabled={isPending}
 				/>
 			</ActionsButton>
 			<StyledGrid

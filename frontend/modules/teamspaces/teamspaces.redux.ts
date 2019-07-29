@@ -121,13 +121,14 @@ const removeModelSuccess = (state = INITIAL_STATE, { teamspace, modelData }) => 
 	return { ...state, models, projects };
 };
 
-const setModelUploadStatus = (state = INITIAL_STATE, { modelData }) => {
-	const model = { ...state.models[modelData.model], status: modelData.status };
+const setModelUploadStatus = (state = INITIAL_STATE, { model, modelData }) => {
+	const uploadedModel = { ...state.models[model], status: modelData.status };
+
 	if (modelData.timestamp) {
-		model.timestamp = modelData.timestamp;
+		uploadedModel.timestamp = modelData.timestamp;
 	}
 
-	const models = { ...state.models, [modelData.model]: model };
+	const models = { ...state.models, [model]: uploadedModel };
 	return { ...state, models };
 };
 
