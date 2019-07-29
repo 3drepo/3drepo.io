@@ -78,14 +78,9 @@ export const selectFlattenTeamspaces = createSelector(
 		const flattenList = [];
 
 		for (let index = 0; index < teamspacesList.length; index++) {
-			flattenList.push({
-				...teamspacesList[index],
-				type: LIST_ITEMS_TYPES.TEAMSPACE,
-				id: teamspacesList[index].account
-			});
-
 			const teamspaceName = teamspacesList[index].account;
 			const projectsIds = teamspacesList[index].projects;
+			const teamspaceProjects = [];
 
 			for (let j = 0; j < projectsIds.length; j++) {
 				const project = projects[projectsIds[j]];
@@ -107,13 +102,23 @@ export const selectFlattenTeamspaces = createSelector(
 					});
 				}
 
+				if (!showStarredOnly || projectModels.length) {
+					teamspaceProjects.push({
+						...project,
+						models: projectModels,
+						teamspace: teamspaceName,
+						type: LIST_ITEMS_TYPES.PROJECT,
+						id: projectsIds[j]
+					});
+				}
+			}
+
+			if (!showStarredOnly || teamspaceProjects.length) {
 				flattenList.push({
-					...project,
-					models: orderBy(projectModels, ['federate']),
-					teamspace: teamspaceName,
-					type: LIST_ITEMS_TYPES.PROJECT,
-					id: projectsIds[j]
-				});
+					...teamspacesList[index],
+					type: LIST_ITEMS_TYPES.TEAMSPACE,
+					id: teamspacesList[index].account
+				}, ...orderBy(teamspaceProjects, ['name']);
 			}
 		}
 		return flattenList;
