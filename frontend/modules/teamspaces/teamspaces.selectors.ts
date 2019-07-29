@@ -18,9 +18,9 @@
 import { orderBy, pick, pickBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { LIST_ITEMS_TYPES } from '../../routes/teamspaces/teamspaces.contants';
-import { extendTeamspacesInfo } from './teamspaces.helpers';
 import { selectStarredModels } from '../starred';
 import { getStarredModelKey } from '../starred/starred.contants';
+import { extendTeamspacesInfo } from './teamspaces.helpers';
 
 export const selectTeamspacesDomain = (state) => ({ ...state.teamspaces });
 
