@@ -93,14 +93,15 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderListChildItem = (index, item) => (subItem) => {
+		const name = subItem.label || subItem.value;
 		return (
 			<StyledListItem
 				button
 				onClick={this.toggleSelectItem(item, subItem)}
-				key={`${subItem.label}-${index}`}
+				key={`${name}-${index}`}
 			>
 				<StyledItemText>
-					{subItem.label}
+					{name}
 					{item.type === DATA_TYPES.DATE &&
 						<StyledDatePicker
 							value={subItem.value.value ? this.state[subItem.value.value] : null}

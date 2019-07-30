@@ -49,7 +49,9 @@ export const INITIAL_STATE = {
 		showStarredOnly: false,
 		visibleItems: {},
 		starredVisibleItems: {},
-		teamspacesItems: []
+		teamspacesItems: [],
+		searchEnabled: false,
+		selectedFilters: []
 	}
 };
 

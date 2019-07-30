@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { orderBy, pick, pickBy, values } from 'lodash';
+import { compact, map, orderBy, pick, pickBy, uniq, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { LIST_ITEMS_TYPES } from '../../routes/teamspaces/teamspaces.contants';
 import { selectStarredModels } from '../starred';
@@ -60,6 +60,14 @@ export const selectFederations = createSelector(
 	selectModels, (models) => pickBy(models, (federate) => !!federate)
 );
 
+export const selectModelCodes = createSelector(
+	selectModels, (models) => compact(uniq(map(values(models), 'code')))
+);
+
+export const selectModelTypes = createSelector(
+	selectModels, (models) => compact(uniq(map(values(models), 'modelType')))
+);
+
 export const selectComponentState = createSelector(
 	selectTeamspacesDomain, (state) => state.componentState
 );
@@ -74,6 +82,14 @@ export const selectStarredVisibleItems = createSelector(
 
 export const selectShowStarredOnly = createSelector(
 	selectComponentState, (state) => state.showStarredOnly
+);
+
+export const selectSearchEnabled = createSelector(
+	selectComponentState, (state) => state.searchEnabled
+);
+
+export const selectSelectedFilters = createSelector(
+	selectComponentState, (state) => state.selectedFilters
 );
 
 export const selectFlattenTeamspaces = createSelector(

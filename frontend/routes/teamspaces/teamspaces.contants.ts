@@ -24,6 +24,7 @@ import People from '@material-ui/icons/People';
 import Settings from '@material-ui/icons/Settings';
 import SettingsBackupRestore from '@material-ui/icons/SettingsBackupRestore';
 import Share from '@material-ui/icons/Share';
+import { DATA_TYPES } from '../components/filterPanel/filterPanel.component';
 
 export const ROW_ACTIONS = {
 	UPLOAD_FILE: {
@@ -81,6 +82,30 @@ export const MODEL_SUBTYPES = [
 	{ value: 'Structural' },
 	{ value: 'Other' }
 ];
+
+export const TEAMSPACE_FILTER_RELATED_FIELDS = {
+	DATA_TYPE: 'type',
+	MODEL_TYPE: 'modelType',
+	MODEL_CODE: 'code'
+};
+
+export const TEAMSPACES_FILTERS = [
+	{
+		label: 'By data type',
+		relatedField: TEAMSPACE_FILTER_RELATED_FIELDS.DATA_TYPE,
+		type: DATA_TYPES.UNDEFINED
+	},
+	{
+		label: 'By model type',
+		relatedField: TEAMSPACE_FILTER_RELATED_FIELDS.MODEL_TYPE,
+		type: DATA_TYPES.UNDEFINED
+	},
+	{
+		label: 'By model code',
+		relatedField: TEAMSPACE_FILTER_RELATED_FIELDS.MODEL_CODE,
+		type: DATA_TYPES.UNDEFINED
+	}
+] as any;
 
 export const LIST_ITEMS_TYPES = {
 	TEAMSPACE: 'TEAMSPACE',

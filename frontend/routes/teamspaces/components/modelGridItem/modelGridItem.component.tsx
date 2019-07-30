@@ -73,9 +73,7 @@ interface IProps {
 
 export function ModelGridItem(props: IProps) {
 	const isFederation = Boolean(props.federate);
-	const isPendingStatus = () =>
-		props.status && props.status === 'uploading' || props.status === 'queued' || props.status === 'processing';
-	const isPending = isPendingStatus();
+	const isPending = ['uploading', 'queued', 'processing'].includes(props.status);
 
 	const [hasDelayedClick, setHasDelayedClick] = useState(false);
 	const starClickTimeout = useRef(null);

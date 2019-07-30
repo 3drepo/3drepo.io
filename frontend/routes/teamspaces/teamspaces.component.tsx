@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CancelIcon from '@material-ui/icons/Cancel';
+import SearchIcon from '@material-ui/icons/Search';
 import { cond, isEmpty, matches, stubTrue } from 'lodash';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
@@ -24,15 +26,17 @@ import Add from '@material-ui/icons/Add';
 
 import { renderWhenTrue } from '../../helpers/rendering';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
+import { FilterPanel } from '../components/filterPanel/filterPanel.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
+import { ViewerPanel } from '../viewerGui/components/viewerPanel/viewerPanel.component';
 import FederationDialog from './components/federationDialog/federationDialog.container';
 import ModelDialog from './components/modelDialog/modelDialog.container';
 import ModelGridItem from './components/modelGridItem/modelGridItem.container';
 import ProjectDialog from './components/projectDialog/projectDialog.container';
 import ProjectItem from './components/projectItem/projectItem.container';
 import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
-import { LIST_ITEMS_TYPES } from './teamspaces.contants';
+import { LIST_ITEMS_TYPES, TEAMSPACE_FILTER_RELATED_FIELDS, MODEL_SUBTYPES, TEAMSPACES_FILTERS } from './teamspaces.contants';
 import {
 	AddModelButton,
 	AddModelButtonOption,
@@ -42,13 +46,6 @@ import {
 	LoaderContainer,
 	MenuButton
 } from './teamspaces.styles';
-
-const PANEL_PROPS = {
-	title: 'Teamspaces',
-	paperProps: {
-		height: '100%'
-	}
-};
 
 interface IProps {
 	match: any;
@@ -64,6 +61,9 @@ interface IProps {
 	showStarredOnly: boolean;
 	starredModelsMap: any;
 	modelsMap: any;
+	searchEnabled: boolean;
+	selectedFilters: any[];
+	modelCodes: string[];
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
 	showRevisionsDialog: (config) => void;
@@ -89,6 +89,23 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		visibleItems: {},
 		lastVisibleItems: {}
 	};
+
+	private get filtersValuesMap() {
+		const { modelCodes } = this.props;
+		return {
+			[TEAMSPACE_FILTER_RELATED_FIELDS.DATA_TYPE]: [],
+			[TEAMSPACE_FILTER_RELATED_FIELDS.MODEL_TYPE]: MODEL_SUBTYPES,
+			[TEAMSPACE_FILTER_RELATED_FIELDS .MODEL_CODE]: modelCodes.map((code) => ({ value: code })),
+		};
+	}
+
+	private get filters() {
+		const filterValuesMap = this.filtersValuesMap;
+		return TEAMSPACES_FILTERS.map((teamspaceFilter) => {
+			teamspaceFilter.values = filterValuesMap[teamspaceFilter.relatedField] || [];
+			return teamspaceFilter;
+		});
+	}
 
 	public componentDidMount() {
 		const {
@@ -187,6 +204,13 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public getSearchButton = () => {
+		if (this.props.searchEnabled) {
+			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
+		}
+		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
+	}
+
 	private getStarredVisibleItems = () => {
 		const starredVisibleItems = new Set();
 		const visibleItemsMap = {};
@@ -234,6 +258,32 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			>Federation</AddModelButtonOption>
 		</AddModelButton>
 	)
+
+    private handleCloseSearchMode = () => {
+        this.props.setState({ searchEnabled: false, selectedFilters: [] });
+    }
+
+    private handleOpenSearchMode = () => {
+        this.props.setState({ searchEnabled: true });
+    }
+
+    private handleFilterChange = (selectedFilters) => {
+        this.props.setState({ selectedFilters });
+    }
+
+    private renderActions = () => (
+        <>
+        {this.getSearchButton()}
+        </>
+    )
+
+    private renderFilterPanel = renderWhenTrue(() => (
+        <FilterPanel
+            onChange={this.handleFilterChange}
+            filters={this.filters}
+            selectedFilters={this.props.selectedFilters}
+        />
+    ));
 
 	private renderModels = (models) => renderWhenTrue(() =>
 		models.map((props) => (<ModelGridItem key={props.model} {...props}	/>))
@@ -327,10 +377,15 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	));
 
 	public render() {
-		const { isPending, showStarredOnly } = this.props;
+		const { isPending, showStarredOnly, searchEnabled } = this.props;
 
 		return (
-			<Panel {...PANEL_PROPS}>
+			<ViewerPanel
+				title="Teamspaces"
+				paperProps={{ height: '100%' }}
+				renderActions={this.renderActions}
+			>
+				{this.renderFilterPanel(searchEnabled)}
 				<Head>
 					<Tabs
 						indicatorColor="primary"
@@ -360,7 +415,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					{this.renderLoader(isPending)}
 					{this.renderList(!isPending)}
 				</List>
-			</Panel>
-		);
+			</ViewerPanel>
+		)
 	}
 }

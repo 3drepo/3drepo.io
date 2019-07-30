@@ -26,6 +26,9 @@ import {
 	selectFlattenTeamspaces,
 	selectIsPending,
 	selectModels,
+	selectModelCodes,
+	selectSearchEnabled,
+	selectSelectedFilters,
 	selectShowStarredOnly,
 	selectStarredVisibleItems,
 	selectTeamspaces,
@@ -46,6 +49,9 @@ const mapStateToProps = createStructuredSelector({
 	showStarredOnly: selectShowStarredOnly,
 	starredModelsMap: selectStarredModels,
 	modelsMap: selectModels,
+	searchEnabled: selectSearchEnabled,
+	selectedFilters: selectSelectedFilters,
+	modelCodes: selectModelCodes,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
