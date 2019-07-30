@@ -531,9 +531,8 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 					/>
 					{this.renderCopyButton((!hideMenu && !filters.length) || this.onlyCopyButton)}
 					{this.renderFiltersMenuButton(!hideMenu && filters.length && !this.onlyCopyButton)}
-					{this.renderPlaceholder(!Boolean(value))}
+					{this.renderPlaceholder(!Boolean(value) && !(selectedFilters.length && filtersOpen))}
 				</InputContainer>
-
 			</Container>
 		);
 	}
