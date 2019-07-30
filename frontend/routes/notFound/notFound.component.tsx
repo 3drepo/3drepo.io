@@ -28,8 +28,9 @@ interface IProps {
 export const NotFound = (props: IProps) => {
 	if (props.location.pathname !== ROUTES.HOME) {
 		props.showDialog({
-			title: 'Wrong url',
-			content: 'Test message',
+			title: 'Wrong URL address',
+			content: 'Page not found',
+			closeText: 'Back to teamspaces',
 			onCancel: () => {
 				props.history.push(ROUTES.TEAMSPACES);
 			}

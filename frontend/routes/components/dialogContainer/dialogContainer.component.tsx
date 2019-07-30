@@ -62,7 +62,7 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 
 	public renderActions = renderWhenTrue(() => (
 		<DialogActions>
-			<Button onClick={this.handleClose} color="secondary">Ok</Button>}
+			<Button onClick={this.handleClose} color="secondary">{this.props.config.closeText || 'Ok'}</Button>}
 		</DialogActions>
 	));
 
