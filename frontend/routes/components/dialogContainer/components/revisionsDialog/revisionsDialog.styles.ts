@@ -31,12 +31,10 @@ interface IItem {
 }
 
 export const Property = styled.div`
-	color: ${COLOR.BLACK};
 	width: 'auto';
 `;
 
 export const Tag = styled.div`
-	color: ${COLOR.BLACK};
 	width: 160px;
 `;
 
@@ -76,12 +74,15 @@ export const Item = styled(ListItem)<IItem>`
 	display: flex;
 	flex-direction: column;
 	border-bottom: 1px solid ${COLOR.BLACK_20};
+	color: ${({theme}) => theme.isVoid ? COLOR.BLACK_40 : COLOR.BLACK};
 
 	&& {
+		cursor: pointer;
 		justify-content: space-between;
 		padding: 22px 30px;
 		background-color: ${({theme}) => getItemBackgroundColor(theme)};
 		border-bottom: 1px solid ${COLOR.BLACK_20};
+		transition: background-color 0.25s ease-in-out;
 
 		&:hover {
 			background-color: ${({theme}) => getItemHoverBackgroundColor(theme)};
@@ -132,4 +133,11 @@ export const ActionsMenuWrapper = styled.div`
 	margin-left: 20px;
 	margin-top: -12px;
 	margin-right: -12px;
+`;
+
+export const Container = styled.div`
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 20px 0 0;
 `;

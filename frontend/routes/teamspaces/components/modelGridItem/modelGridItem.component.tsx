@@ -24,6 +24,7 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../services/analytics';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { COLOR } from '../../../../styles';
+import { TYPES } from '../../../components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
 import { Loader } from '../../../components/loader/loader.component';
 import { SmallIconButton } from '../../../components/smallIconButon/smallIconButton.component';
 import { StarIcon } from '../../../components/starIcon/starIcon.component';
@@ -31,7 +32,6 @@ import { PERMISSIONS_VIEWS } from '../../../projects/projects.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { ActionsMenu } from '../actionsMenu/actionsMenu.component';
 import FederationDialog from '../federationDialog/federationDialog.container';
-import RevisionsDialog from '../revisionsDialog/revisionsDialog.container';
 import UploadModelFileDialog from '../uploadModelFileDialog/uploadModelFileDialog.container';
 import {
 	Actions,
@@ -60,8 +60,10 @@ interface IProps {
 	canUpload: boolean;
 	code?: string;
 	suitabilityCode?: string;
+
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
+	showRevisionsDialog: (config) => void;
 	removeModel: (teamspace, modelData) => void;
 	downloadModel: (teamspace, modelId) => void;
 	onShareClick: () => void;
@@ -132,12 +134,13 @@ export function ModelGridItem(props: IProps) {
 	const handleRevisionsClick = () => {
 		const { teamspace, model, name } = props;
 
-		props.showDialog({
+		props.showRevisionsDialog({
 			title: `${name} - Revisions`,
-			template: RevisionsDialog,
 			data: {
+				currentModelName: name,
 				teamspace,
-				modelId: model
+				modelId: model,
+				type: TYPES.TEAMSPACES
 			}
 		});
 	};

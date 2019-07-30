@@ -21,7 +21,7 @@ import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
 
 import { ROUTES } from '../../../../../constants/routes';
-import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../../helpers/rendering';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../../services/analytics';
 import { DATE_TIME_FORMAT } from '../../../../../services/formatting/formatDate';
 import {
@@ -30,10 +30,19 @@ import {
 import { MenuButton as MenuButtonComponent } from '../../../../components/menuButton/menuButton.component';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
 import { DateTime } from '../../../dateTime/dateTime.component';
-import { MAKE_ACTIVE_NAME, MAKE_VOID_NAME, SET_LATEST_NAME, TYPES, VOID_ACTIONS, ACTIVE_ACTIONS } from './revisionsDialog.constants';
+import { Loader } from '../../../loader/loader.component';
+import {
+	ACTIVE_ACTIONS,
+	MAKE_ACTIVE_NAME,
+	MAKE_VOID_NAME,
+	SET_LATEST_NAME,
+	TYPES,
+	VOID_ACTIONS
+} from './revisionsDialog.constants';
 import {
 	ActionsMenuWrapper,
 	Column,
+	Container,
 	Description,
 	Item,
 	Property,
@@ -57,6 +66,7 @@ interface IProps {
 	modelId: string;
 	type: string;
 	history: any;
+	isPending: boolean;
 	resetModelRevisions: () => void;
 	fetchModelRevisions: (teamspace, modelId) => void;
 	setModelRevisionState: (teamspace, modelId, revision, isVoid) => void;
@@ -98,7 +108,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		return(
 			<MenuList>
 				{actions.map(({ name, label }) => (
-					<StyledListItem key={name} button onClick={(e) => {
+					<StyledListItem button key={name} onClick={(e) => {
 						this.menuActionsMap[name](revision);
 						menu.close(e);
 					}}>
@@ -115,12 +125,8 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 
 	public setLatest = (revision) => {
 		this.props.revisions.forEach((rev) => {
-			if (revision.timestamp !== rev.timestamp) {
-				const isOlder = revision.timestamp > rev.timestamp;
-				this.props.setModelRevisionState(this.props.teamspace, this.props.modelId, rev._id, isOlder);
-			} else {
-
-			}
+			const isOlder = revision.timestamp < rev.timestamp;
+			this.props.setModelRevisionState(this.props.teamspace, this.props.modelId, rev._id, isOlder);
 		});
 	}
 
@@ -150,7 +156,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		};
 
 		return (
-			<Item {...props} button divider>
+			<Item {...props} divider>
 				<Row>
 					<PropertyWrapper>
 						<Tag>
@@ -186,17 +192,29 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	public renderRevisions = ({ revisions, currentRevisionId, handleSetNewRevision }) => renderWhenTrue(
-		() => revisions.map((revision) => this.renderRevisionItem(revision, currentRevisionId, handleSetNewRevision))
+	public renderRevisions = ({ revisions, currentRevisionId, handleSetNewRevision }) => renderWhenTrueOtherwise(
+		() => (
+			<StyledList>
+				{revisions.map((revision) => this.renderRevisionItem(revision, currentRevisionId, handleSetNewRevision))}
+			</StyledList>
+		),
+		() => <Container>No revisions present</Container>
 	)(Boolean(revisions.length))
+
+	public renderRevisionsList = renderWhenTrue(() => <>{this.renderRevisions(this.props)}</>);
+
+	public renderLoader = renderWhenTrue(
+		<Container>
+			<Loader content="Loading revisions..." />
+		</Container>
+	);
 
 	public render() {
 		return (
 			<>
 				<StyledDialogContent>
-					<StyledList>
-						{this.renderRevisions(this.props)}
-					</StyledList>
+					{this.renderRevisionsList(!this.props.isPending)}
+					{this.renderLoader(this.props.isPending)}
 				</StyledDialogContent>
 				<DialogActions>
 					<Button onClick={this.props.handleClose} variant="raised" color="secondary">Cancel</Button>;

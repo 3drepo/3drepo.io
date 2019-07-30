@@ -29,6 +29,7 @@ import { TeamspacesActions } from '../teamspaces';
 import { SnackbarActions } from './../snackbar';
 import { uploadFileStatuses } from './model.helpers';
 import { ModelActions, ModelTypes } from './model.redux';
+import { selectRevisions } from './model.selectors';
 
 export function* fetchSettings({ teamspace, modelId }) {
 	try {
@@ -87,9 +88,13 @@ export function* fetchRevisions({ teamspace, modelId }) {
 export function* setModelRevisionState({ teamspace, modelId, revision, isVoid }) {
 	try {
 		yield put(ModelActions.setPendingState(true));
+		const revisions = yield select(selectRevisions);
+		const changedRevision = revisions.find((rev) => rev._id === revision);
 
-		yield API.setModelRevisionState(teamspace, modelId, revision, isVoid);
-		yield put(ModelActions.setModelRevisionStateSuccess(revision, isVoid));
+		if (Boolean(changedRevision.void) !== isVoid) {
+			yield API.setModelRevisionState(teamspace, modelId, revision, isVoid);
+			yield put(ModelActions.setModelRevisionStateSuccess(revision, isVoid));
+		}
 		yield put(ModelActions.setPendingState(false));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('set', 'model revision state', e));

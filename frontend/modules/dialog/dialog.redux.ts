@@ -16,9 +16,9 @@
  */
 
 import { get, omit } from 'lodash';
-import { createActions, createReducer } from 'reduxsauce'
+import { createActions, createReducer } from 'reduxsauce';
 import * as Dialogs from '../../routes/components/dialogContainer/components';
-// @ts-ignore
+// tslint:disable-next-line
 import RevisionsDialog from '../../routes/components/dialogContainer/components/revisionsDialog/revisionsDialog.container';
 import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
 
