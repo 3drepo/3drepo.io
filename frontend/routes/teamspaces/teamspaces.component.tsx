@@ -94,8 +94,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		const { modelCodes } = this.props;
 		return {
 			[TEAMSPACE_FILTER_RELATED_FIELDS.DATA_TYPE]: [],
-			[TEAMSPACE_FILTER_RELATED_FIELDS.MODEL_TYPE]: MODEL_SUBTYPES,
-			[TEAMSPACE_FILTER_RELATED_FIELDS .MODEL_CODE]: modelCodes.map((code) => ({ value: code })),
+			[TEAMSPACE_FILTER_RELATED_FIELDS.MODEL_TYPE]: MODEL_SUBTYPES.map(({ value }) => ({ value, label: value })),
+			[TEAMSPACE_FILTER_RELATED_FIELDS .MODEL_CODE]: modelCodes.map((code) => ({ value: code, label: code })),
 		};
 	}
 
@@ -277,13 +277,13 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
         </>
     )
 
-    private renderFilterPanel = renderWhenTrue(() => (
-        <FilterPanel
-            onChange={this.handleFilterChange}
-            filters={this.filters}
-            selectedFilters={this.props.selectedFilters}
-        />
-    ));
+	private renderFilterPanel = renderWhenTrue(() => (
+		<FilterPanel
+			onChange={this.handleFilterChange}
+			filters={this.filters}
+			selectedFilters={this.props.selectedFilters}
+		left/>
+	));
 
 	private renderModels = (models) => renderWhenTrue(() =>
 		models.map((props) => (<ModelGridItem key={props.model} {...props}	/>))

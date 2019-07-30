@@ -42,6 +42,7 @@ import {
 interface IProps {
 	items: any[];
 	selectedItems: any[];
+	left?: boolean;
 	onToggleFilter: (property, value) => void;
 }
 
@@ -116,7 +117,7 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderChildItems = (index, item) => renderWhenTrue(() => (
-		<ChildMenu>
+		<ChildMenu left={this.props.left}>
 			<List>{item.values.map(this.renderListChildItem(index, item))}</List>
 		</ChildMenu>
 	))(index === this.state.activeItem)

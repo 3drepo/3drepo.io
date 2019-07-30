@@ -76,6 +76,7 @@ interface IProps {
 	hideMenu?: boolean;
 	className?: string;
 	autoFocus?: boolean;
+	left?: boolean;
 }
 
 interface IState {
@@ -214,6 +215,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 			items={this.props.filters}
 			selectedItems={this.state.selectedFilters}
 			onToggleFilter={this.onToggleFilter}
+			left={this.props.left}
 		/>
 	)
 
