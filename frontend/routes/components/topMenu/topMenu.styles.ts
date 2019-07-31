@@ -27,7 +27,7 @@ export const Container = styled.div`
 	position: relative;
 	padding-right: 10px;
 	height: 80px;
-	z-index: 1;
+	z-index: 2;
 	margin-top: 5px;
 	visibility: ${({ hidden }) => hidden ? 'hidden' : 'initial'};
 
