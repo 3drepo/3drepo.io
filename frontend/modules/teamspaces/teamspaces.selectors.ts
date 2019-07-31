@@ -21,6 +21,7 @@ import { LIST_ITEMS_TYPES } from '../../routes/teamspaces/teamspaces.contants';
 import { selectStarredModels } from '../starred';
 import { getStarredModelKey } from '../starred/starred.contants';
 import { extendTeamspacesInfo } from './teamspaces.helpers';
+import { searchByFilters } from '../../helpers/searching';
 
 export const selectTeamspacesDomain = (state) => ({ ...state.teamspaces });
 
@@ -93,9 +94,11 @@ export const selectSelectedFilters = createSelector(
 );
 
 export const selectFlattenTeamspaces = createSelector(
-	selectTeamspacesList, selectProjects, selectModels, selectShowStarredOnly, selectStarredModels,
-	(teamspacesList, projects, models, showStarredOnly, starredModels) => {
+	selectTeamspacesList, selectProjects, selectModels,
+	selectShowStarredOnly, selectStarredModels, selectSelectedFilters,
+	(teamspacesList, projects, models, showStarredOnly, starredModels, filters) => {
 		const flattenList = [];
+		const hasActiveFilters = showStarredOnly || filters.length;
 
 		for (let index = 0; index < teamspacesList.length; index++) {
 			const teamspaceName = teamspacesList[index].account;
@@ -122,10 +125,11 @@ export const selectFlattenTeamspaces = createSelector(
 					});
 				}
 
-				if (!showStarredOnly || projectModels.length) {
+				const filteredModels = searchByFilters(projectModels, filters);
+				if (!hasActiveFilters || filteredModels.length) {
 					teamspaceProjects.push({
 						...project,
-						models: orderBy(projectModels, ['federate']),
+						models: filteredModels,
 						teamspace: teamspaceName,
 						type: LIST_ITEMS_TYPES.PROJECT,
 						id: projectsIds[j]
@@ -133,12 +137,13 @@ export const selectFlattenTeamspaces = createSelector(
 				}
 			}
 
-			if (!showStarredOnly || teamspaceProjects.length) {
+			const filteredProjects = searchByFilters(teamspaceProjects, filters);
+			if (!hasActiveFilters || filteredProjects.length) {
 				flattenList.push({
 					...teamspacesList[index],
 					type: LIST_ITEMS_TYPES.TEAMSPACE,
 					id: teamspacesList[index].account
-				}, ...orderBy(teamspaceProjects, ['name']));
+				}, ...orderBy(filteredProjects, ['name']));
 			}
 		}
 		return flattenList;

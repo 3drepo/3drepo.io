@@ -21,6 +21,7 @@ import React from 'react';
 import Folder from '@material-ui/icons/Folder';
 import FolderOpen from '@material-ui/icons/FolderOpen';
 import { Container, Headline, IconContainer, Title } from './treeList.styles';
+import { Highlight } from '../highlight/highlight.component';
 
 export const TREE_LEVELS = {
 	TEAMSPACE: 1,
@@ -50,7 +51,14 @@ export const DefaultHeadline = ({renderActions, ...props}) => {
 			justify="flex-start"
 			wrap="nowrap">
 			<HeadlineIcon fontSize="small" active={props.active && !props.disabled} {...props.IconProps} />
-			<Title>{props.name} {props.disabled || props.isEmpty ? '(empty)' : ''}</Title>
+			<Title>
+			<Highlight
+				text={props.name}
+				search={props.query}
+				splitQueryToWords
+			/>
+			{props.disabled || props.isEmpty ? ' (empty)' : ''}
+		</Title>
 			{renderActions && renderActions(props)}
 		</Grid>
 	);
@@ -58,6 +66,7 @@ export const DefaultHeadline = ({renderActions, ...props}) => {
 
 interface IProps {
 	name: string;
+	query?: string;
 	level?: number;
 	active?: boolean;
 	disableShadow?: boolean;
@@ -79,6 +88,7 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 		level: TREE_LEVELS.TEAMSPACE,
 		active: false,
 		disabled: false,
+		query: ''
 	};
 
 	public state = {

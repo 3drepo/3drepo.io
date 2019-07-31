@@ -18,6 +18,7 @@
 import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
 import { cond, isEmpty, matches, stubTrue } from 'lodash';
+import memoizeOne from 'memoize-one';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
 
@@ -26,7 +27,7 @@ import Add from '@material-ui/icons/Add';
 
 import { renderWhenTrue } from '../../helpers/rendering';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
-import { FilterPanel } from '../components/filterPanel/filterPanel.component';
+import { DATA_TYPES, FilterPanel } from '../components/filterPanel/filterPanel.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import { ViewerPanel } from '../viewerGui/components/viewerPanel/viewerPanel.component';
@@ -36,7 +37,7 @@ import ModelGridItem from './components/modelGridItem/modelGridItem.container';
 import ProjectDialog from './components/projectDialog/projectDialog.container';
 import ProjectItem from './components/projectItem/projectItem.container';
 import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
-import { LIST_ITEMS_TYPES, TEAMSPACE_FILTER_RELATED_FIELDS, MODEL_SUBTYPES, TEAMSPACES_FILTERS } from './teamspaces.contants';
+import { LIST_ITEMS_TYPES, MODEL_SUBTYPES, TEAMSPACE_FILTER_RELATED_FIELDS, TEAMSPACES_FILTERS } from './teamspaces.contants';
 import {
 	AddModelButton,
 	AddModelButtonOption,
@@ -79,6 +80,13 @@ interface IState {
 	lastVisibleItems: any;
 }
 
+const getSearchQuery = memoizeOne((selectedFilters) => selectedFilters.reduce((query, filter) => {
+	if (filter.type === DATA_TYPES.QUERY) {
+		query = `${query} ${filter.value.value}`;
+	}
+	return query;
+}, '').trim());
+
 export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
 		teamspaces: []
@@ -105,6 +113,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			teamspaceFilter.values = filterValuesMap[teamspaceFilter.relatedField] || [];
 			return teamspaceFilter;
 		});
+	}
+
+	private get searchQuery() {
+		return getSearchQuery(this.props.selectedFilters);
 	}
 
 	public componentDidMount() {
@@ -286,7 +298,11 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	));
 
 	private renderModels = (models) => renderWhenTrue(() =>
-		models.map((props) => (<ModelGridItem key={props.model} {...props}	/>))
+		models.map((props) => (<ModelGridItem
+					{...props}
+					key={props.model}
+					query={this.searchQuery}
+				/>))
 	)(models.length)
 
 	private renderProjectContainer = (models, project) => renderWhenTrue(() => (
@@ -302,6 +318,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				{...props}
 				key={props._id}
 				isEmpty={!props.models.length}
+				query={this.searchQuery}
+				disabled={!props.models.length}
 				onClick={this.handleVisibilityChange}
 			/>
 		),
@@ -309,18 +327,17 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	])
 
 	private renderTeamspace = (props) => {
-		return (
-			<TeamspaceItem
-				{...props}
-				key={props.account}
-				name={props.account}
-				active={this.state.visibleItems[props.account]}
-				isMyTeamspace={this.props.currentTeamspace === props.account}
-				onToggle={this.handleVisibilityChange}
-				onAddProject={this.openProjectDialog}
-				disabled={!props.projects.length}
-			/>
-		);
+		return (<TeamspaceItem
+			{...props}
+			highlightedTextkey={props.account}
+			name={props.account}
+			active={this.state.visibleItems[props.account]&& props.projects.length}
+			isMyTeamspace={this.props.currentTeamspace === props.account}
+			onToggle={this.handleVisibilityChange}
+			onAddProject={this.openProjectDialog}
+			disabled={!props.projects.length}
+		/>
+	);
 	}
 
 	private renderMenuButton = (isPending, props) => (
@@ -416,6 +433,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					{this.renderList(!isPending)}
 				</List>
 			</ViewerPanel>
-		)
+		);
 	}
 }

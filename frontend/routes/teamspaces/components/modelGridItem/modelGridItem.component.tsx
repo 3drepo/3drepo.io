@@ -39,7 +39,8 @@ import {
 	PropertiesColumn,
 	Property,
 	Status,
-	Timestamp
+	Timestamp,
+	TruncatedName
 } from './modelGridItem.styles';
 
 interface IProps {
@@ -47,6 +48,7 @@ interface IProps {
 	history: any;
 	teamspace: string;
 	name: string;
+	query?: string;
 	model: string;
 	permissions: any[];
 	projectName: string;
@@ -76,6 +78,7 @@ export function ModelGridItem(props: IProps) {
 	const isPending = ['uploading', 'queued', 'processing'].includes(props.status);
 
 	const [hasDelayedClick, setHasDelayedClick] = useState(false);
+	const [truncatedName, setTruncatedName] = useState('');
 	const starClickTimeout = useRef(null);
 
 	useEffect(() => {
@@ -303,7 +306,16 @@ export function ModelGridItem(props: IProps) {
 						active={hasDelayedClick ? !props.isStarred : props.isStarred}
 						onClick={handleStarClick}
 					/>
-					<Name lines={2} onClick={handleClick}>{props.name}</Name>
+					<Name
+						onClick={handleClick}
+						isPending={isPending}
+						search={props.query}
+						text={props.name}
+						splitQueryToWords
+					/>
+					<TruncatedName lines={2}>
+						{props.name}
+					</TruncatedName>
 				</NameWrapper>
 				{renderActionsMenu()}
 			</Header>

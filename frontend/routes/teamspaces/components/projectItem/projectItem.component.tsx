@@ -31,6 +31,7 @@ import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 interface IProps {
 	_id: string;
 	name: string;
+	query?: string;
 	models: any[];
 	disabled: boolean;
 	isEmpty: boolean;
@@ -128,9 +129,10 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 	))(this.isProjectAdmin()) as any
 
 	public render() {
-		const { name, disabled, isEmpty } = this.props;
+		const { name, disabled, isEmpty, query } = this.props;
 		return (
 			<TreeList
+				query={query}
 				onClick={this.handleClick}
 				name={name}
 				level={TREE_LEVELS.PROJECT}

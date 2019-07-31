@@ -18,6 +18,7 @@
 import Truncate from 'react-truncate';
 import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
+import { Highlight } from '../../../components/highlight/highlight.component';
 
 export const Container = styled.div`
 	box-shadow: 0 2px 4px 0 ${COLOR.BLACK_20};
@@ -38,7 +39,11 @@ export const Header = styled.div`
 	margin: 0 0 5px;
 `;
 
-export const Name = styled(Truncate)`
+export const TruncatedName = styled(Truncate)`
+	display: none;
+`;
+
+export const Name = styled(Highlight)`
 	margin: 1px 0 0 2px;
 	font-weight: ${FONT_WEIGHT.BOLD};
 	word-break: break-all;
