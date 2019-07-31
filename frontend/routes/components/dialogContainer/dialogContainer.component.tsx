@@ -62,7 +62,12 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 
 	public renderActions = renderWhenTrue(() => (
 		<DialogActions>
-			<Button onClick={this.handleClose} color="secondary">{this.props.config.closeText || 'Ok'}</Button>}
+			<Button
+				onClick={this.handleClose}
+				variant={this.props.config.buttonVariant || 'text'}
+				color="secondary">
+					{this.props.config.closeText || 'Ok'}
+			</Button>
 		</DialogActions>
 	));
 
@@ -98,6 +103,7 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { content, title, template, DialogProps, onCancel } = this.props.config;
+
 		return (
 			<Dialog {...DialogProps} open={this.props.isOpen} onClose={this.handleClose}>
 				{title && <DialogTitle disableTypography>{title}</DialogTitle>}
