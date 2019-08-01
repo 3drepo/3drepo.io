@@ -38,7 +38,6 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	hideDialog: [],
 	setPendingState: ['isPending'],
 	showScreenshotDialog: ['config'],
-	setMuteNotifications: ['muteNotifications'],
 	showNewUpdateDialog: ['config']
 }, { prefix: 'DIALOG/' });
 
@@ -131,10 +130,6 @@ const setPendingState = (state = INITIAL_STATE, {isPending}) => {
 	return { ...state, isPending };
 };
 
-const setMuteNotifications = (state = INITIAL_STATE, { muteNotifications }) => {
-	return { ...state, muteNotifications };
-};
-
 export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.HIDE_DIALOG]: hideDialog,
 	[DialogTypes.SHOW_DIALOG]: showDialog,
@@ -143,7 +138,6 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
 	[DialogTypes.SHOW_REVISIONS_DIALOG]: showRevisionsDialog,
 	[DialogTypes.SET_PENDING_STATE]: setPendingState,
-	[DialogTypes.SET_MUTE_NOTIFICATIONS]: setMuteNotifications,
 	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog,
 	[DialogTypes.SHOW_NEW_UPDATE_DIALOG]: showNewUpdateDialog
 });
