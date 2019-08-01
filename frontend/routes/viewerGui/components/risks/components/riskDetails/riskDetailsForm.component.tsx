@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect, withFormik, Field, Form } from 'formik';
+import { withFormik, Field, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
 import React from 'react';
 import * as Yup from 'yup';
@@ -46,12 +46,15 @@ interface IProps {
 	permissions: any;
 	currentUser: any;
 	myJob: any;
+	isValid: boolean;
+	dirty: boolean;
 	onSubmit: (values) => void;
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
 	handleSubmit: () => void;
 	onSavePin: (position) => void;
 	onChangePin: (pin) => void;
+	setFieldValue: (fieldName, fieldValue) => void;
 	pinId?: string;
 	hasPin: boolean;
 }
@@ -76,24 +79,24 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	};
 
 	public autoSave = debounce(() => {
-		const { formik, handleSubmit } = this.props;
-		if (!formik.isValid) {
+		const { onSubmit, isValid, values } = this.props;
+
+		if (!isValid) {
 			return;
 		}
 
 		this.setState({ isSaving: true }, () => {
-			formik.setFieldValue();
-			handleSubmit();
+			onSubmit(values);
 			this.setState({ isSaving: false });
 		});
 	}, 200);
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
-		const { values, formik } = this.props;
+		const { values, dirty } = this.props;
 		const valuesChanged = !isEqual(prevProps.values, values);
 
-		if (formik.dirty) {
+		if (dirty) {
 			if (valuesChanged && !this.state.isSaving) {
 				const likelihoodChanged = prevProps.values.likelihood !== values.likelihood;
 				const consequenceChanged = prevProps.values.consequence !== values.consequence;
@@ -123,17 +126,17 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	}
 
 	public updateRiskLevel = (likelihoodPath, consequencePath, riskLevelPath) => {
-		const { formik } = this.props;
+		const { values, setFieldValue } = this.props;
 		const levelsOfRisk = {
-			level_of_risk: formik.values.level_of_risk,
-			residual_level_of_risk: formik.values.residual_level_of_risk
+			level_of_risk: values.level_of_risk,
+			residual_level_of_risk: values.residual_level_of_risk
 		};
-		levelsOfRisk[riskLevelPath] = calculateLevelOfRisk(formik.values[likelihoodPath], formik.values[consequencePath]);
-		formik.setFieldValue(riskLevelPath, levelsOfRisk[riskLevelPath]);
+		levelsOfRisk[riskLevelPath] = calculateLevelOfRisk(values[likelihoodPath], values[consequencePath]);
+		setFieldValue(riskLevelPath, levelsOfRisk[riskLevelPath]);
 		if (0 <= levelsOfRisk.residual_level_of_risk) {
-			formik.setFieldValue('overall_level_of_risk', levelsOfRisk.residual_level_of_risk);
+			setFieldValue('overall_level_of_risk', levelsOfRisk.residual_level_of_risk);
 		} else {
-			formik.setFieldValue('overall_level_of_risk', levelsOfRisk.level_of_risk);
+			setFieldValue('overall_level_of_risk', levelsOfRisk.level_of_risk);
 		}
 	}
 
@@ -382,4 +385,4 @@ export const RiskDetailsForm = withFormik({
 	},
 	enableReinitialize: true,
 	validationSchema: RiskSchema
-})(connect(RiskDetailsFormComponent as any)) as any;
+})(RiskDetailsFormComponent as any) as any;

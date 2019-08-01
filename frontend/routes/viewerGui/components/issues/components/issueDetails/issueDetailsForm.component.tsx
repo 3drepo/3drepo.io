@@ -47,6 +47,8 @@ interface IProps {
 	topicTypes: any;
 	currentUser: any;
 	myJob: any;
+	isValid: boolean;
+	dirty: boolean;
 	onSubmit: (values) => void;
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
@@ -66,7 +68,6 @@ const IssueSchema = Yup.object().shape({
 });
 
 class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
-
 	get isNewIssue() {
 		return !this.props.issue._id;
 	}
@@ -75,24 +76,23 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	};
 
 	public autoSave = debounce(() => {
-		const { formik, handleSubmit } = this.props;
-		if (!formik.isValid) {
+		const { onSubmit, isValid, values } = this.props;
+
+		if (!isValid) {
 			return;
 		}
 
 		this.setState({ isSaving: true }, () => {
-			formik.setFieldValue();
-			handleSubmit();
+			onSubmit(values);
 			this.setState({ isSaving: false });
 		});
 	}, 200);
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
-		const { values, formik } = this.props;
+		const { values, dirty } = this.props;
 		const valuesChanged = !isEqual(prevProps.values, values);
-
-		if (formik.dirty) {
+		if (dirty) {
 			if (valuesChanged && !this.state.isSaving) {
 				this.autoSave();
 			}
@@ -234,4 +234,4 @@ export const IssueDetailsForm = withFormik({
 	},
 	enableReinitialize: true,
 	validationSchema: IssueSchema
-})(connect(IssueDetailsFormComponent as any)) as any;
+})(IssueDetailsFormComponent as any) as any;

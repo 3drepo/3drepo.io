@@ -197,7 +197,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public handleIssueFormSubmit = (values) => {
 		const { teamspace, model, updateIssue, updateNewIssue } = this.props;
-
 		if (this.isNewIssue) {
 			updateNewIssue(mergeData(this.issueData, values));
 		} else {
