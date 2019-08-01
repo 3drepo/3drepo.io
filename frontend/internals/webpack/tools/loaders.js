@@ -80,23 +80,6 @@ const HTMLLoader = {
   }
 };
 
-const PugLoader = {
-  test: /\.pug$/,
-  use: [
-    {
-      loader: 'file-loader',
-      options: {
-        outputPath: '../templates/',
-        publicPath: 'templates/',
-        name: '[name].html'
-      }
-    },
-    'extract-loader',
-    'html-loader',
-    'pug-html-loader'
-  ]
-};
-
 const WorkerLoader = {
   test: /\.worker\.ts$/,
   exclude: /node_modules/,

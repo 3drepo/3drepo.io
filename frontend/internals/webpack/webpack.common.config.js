@@ -30,8 +30,7 @@ module.exports = (options) => {
         loaders.CSSExternalLoader,
         loaders.FontLoader,
         loaders.ImageLoader,
-        loaders.HTMLLoader,
-        loaders.PugLoader,
+        loaders.HTMLLoader
       ],
     },
     plugins: [

@@ -99,7 +99,6 @@
     "inquirer-directory": "2.1.0",
     "lodash-ts-imports-loader": "1.2.0",
     "postcss-loader": "3.0.0",
-    "pug-html-loader": "1.1.5",
     "style-loader": "0.23.1",
     "styled-components": "4.3.2",
     "stylelint": "9.8.0",
