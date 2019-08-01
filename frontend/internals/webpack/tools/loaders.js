@@ -100,6 +100,5 @@ module.exports = {
   FontLoader,
   ImageLoader,
   HTMLLoader,
-  PugLoader,
   WorkerLoader
 };
