@@ -276,11 +276,7 @@ export class Viewer {
 	}
 
 	public onModelProgress = (progress) => {
-		if (progress === 1) {
-			this.emit(Viewer.EVENT.MODEL_LOADED, progress);
-		} else {
-			this.emit(Viewer.EVENT.MODEL_LOADING_PROGRESS, progress);
-		}
+		this.emit(Viewer.EVENT.MODEL_LOADING_PROGRESS, progress);
 	}
 
 	public getDefaultHighlightColor() {
