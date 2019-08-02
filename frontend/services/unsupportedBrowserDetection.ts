@@ -5,8 +5,6 @@ const DEFAULT_SUPPORTED_BROWSERS_CONFIG = {
 	desktop: [{
 		browser: 'firefox', minversion: 41,
 	}, {
-		browser: 'ie', versions: ['edge'],
-	}, {
 		browser: 'chrome', minversion: 45,
 	}, {
 		browser: 'edge',
@@ -17,8 +15,6 @@ const DEFAULT_SUPPORTED_BROWSERS_CONFIG = {
 		os: 'ios', minos: '9', browser: 'mobile safari',
 	}, {
 		os: 'android', minos: '5.0', browser: 'chrome',
-	}, {
-		browser: 'ie', versions: ['edge'],
 	}, {
 		browser: 'edge',
 	}],
@@ -43,10 +39,14 @@ export default class UnsupportedBrowserDetection {
 
 	get isInAppBrowser() {
 		return (
-			(this.ua.indexOf('FBAN') > -1) ||
-			(this.ua.indexOf('FBAV') > -1) ||
-			(this.ua.indexOf('Twitter') > -1)
+			this.ua.includes('FBAN') ||
+			this.ua.includes('FBAV') ||
+			this.ua.includes('Twitter')
 		);
+	}
+
+	get isSearchEngineBot() {
+		return this.ua.includes('Google');
 	}
 
 	get device() {
@@ -81,6 +81,10 @@ export default class UnsupportedBrowserDetection {
 	public isSupported() {
 		if (this.isInAppBrowser) {
 			return this.isInAppBrowserSupported;
+		}
+
+		if (this.isSearchEngineBot) {
+			return true;
 		}
 
 		const { version: browserVersion } = this.browser;
