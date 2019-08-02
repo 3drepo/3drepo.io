@@ -75,7 +75,7 @@ export class ViewerService {
 
 		this.viewer.setUnity();
 		try {
-			await this.viewer.unityScriptInserted ? Promise.resolve() : this.viewer.insertUnityLoader(this.memory);
+			await this.viewer.insertUnityLoader(this.memory);
 
 			setTimeout(() => {
 				this.viewer.init({

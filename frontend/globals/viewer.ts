@@ -93,7 +93,6 @@ export class Viewer {
 	public divId = 'unityViewer';
 
 	public unityLoaderPath = 'unity/Build/UnityLoader.js';
-	public unityScriptInserted = false;
 	public viewer: HTMLElement;
 
 	public handle;
@@ -160,7 +159,6 @@ export class Viewer {
 		this.viewer.appendChild(unityHolder);
 
 		this.unityLoaderScript = document.createElement('script');
-
 	}
 
 	public on = (event, fn, ...args) => {
@@ -199,6 +197,9 @@ export class Viewer {
 	}
 
 	public insertUnityLoader(memory) {
+		if (document.querySelector('.unity-loader')) {
+			return Promise.resolve();
+		}
 		return new Promise((resolve, reject) => {
 			this.unityLoaderScript.addEventListener ('load', () => {
 				console.debug('Loaded UnityLoader.js succesfully');
@@ -214,8 +215,8 @@ export class Viewer {
 			this.unityLoaderScript.src = this.unityLoaderPath;
 
 			// This kicks off the actual loading of Unity
-			this.viewer.appendChild(this.unityLoaderScript);
-			this.unityScriptInserted = true;
+			this.unityLoaderScript.setAttribute('class', 'unity-loader');
+			document.body.appendChild(this.unityLoaderScript);
 		});
 	}
 
