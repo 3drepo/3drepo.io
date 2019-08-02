@@ -824,6 +824,14 @@ export class Viewer {
 		UnityUtil.setXRayHighlightOff();
 	}
 
+	public enableCaching() {
+		UnityUtil.enableCaching();
+	}
+
+	public disableCaching() {
+		UnityUtil.disableCaching();
+	}
+
 	public useBoundingBoxFarPlaneAlgorithm() {
 		UnityUtil.useBoundingBoxFarPlaneAlgorithm();
 	}

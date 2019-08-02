@@ -658,10 +658,20 @@ export class ViewerService {
 	}
 
 	public setXray(xray: boolean) {
+		console.log("xray: ", xray);
 		if (xray) {
 			this.viewer.setXRayHighlightOn();
 		} else {
 			this.viewer.setXRayHighlightOff();
+		}
+	}
+
+	public setModelCache(cache: boolean) {
+		console.log("Setting model cachE:", cache);
+		if (cache) {
+			this.viewer.enableCaching();
+		} else {
+			this.viewer.disableCaching();
 		}
 	}
 

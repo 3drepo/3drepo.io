@@ -59,6 +59,12 @@ const BasicSettings = (props) => {
 				<Field name="xray" render={ ({ field }) => (
 					<Switch checked={field.value} {...field} value="true" color="secondary" />)}/>
 			</FormListItem>
+			<FormListItem>
+				Model Caching
+				<Field name="caching" render={ ({ field }) => (
+					<Switch checked={field.value} {...field} value="true" color="secondary" />)}/>
+			</FormListItem>
+
 		</List>);
 };
 

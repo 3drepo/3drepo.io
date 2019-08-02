@@ -82,6 +82,7 @@ class ViewerController implements ng.IController {
 			farPlaneAlgorithm: selectFarPlaneAlgorithm,
 			shadingSetting: selectShadingSetting,
 			xraySetting: selectXraySetting,
+			cacheSetting: selectCacheSetting,
 			farPlaneSamplingPoints: selectFarPlaneSamplingPoints,
 			maxShadowDistance : selectMaxShadowDistance,
 			colorOverrides: selectOverrides
@@ -125,6 +126,8 @@ class ViewerController implements ng.IController {
 		this.$scope.$watch(() => this.shadingSetting, this.ViewerService.setShading.bind(this.ViewerService) );
 
 		this.$scope.$watch(() => this.xraySetting, this.ViewerService.setXray.bind(this.ViewerService));
+
+		this.$scope.$watch(() => this.cacheSetting, this.ViewerService.setModelCache.bind(this.ViewerService));
 
 		this.$scope.$watch(() => this.farPlaneSamplingPoints,
 			this.ViewerService.setFarPlaneSamplingPoints.bind(this.ViewerService));
