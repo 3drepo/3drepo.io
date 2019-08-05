@@ -658,7 +658,6 @@ export class ViewerService {
 	}
 
 	public setXray(xray: boolean) {
-		console.log("xray: ", xray);
 		if (xray) {
 			this.viewer.setXRayHighlightOn();
 		} else {
@@ -667,7 +666,6 @@ export class ViewerService {
 	}
 
 	public setModelCache(cache: boolean) {
-		console.log("Setting model cachE:", cache);
 		if (cache) {
 			this.viewer.enableCaching();
 		} else {
