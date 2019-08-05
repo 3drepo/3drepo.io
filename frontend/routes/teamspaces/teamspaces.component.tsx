@@ -19,7 +19,7 @@ import { cond, isEmpty, matches, stubTrue } from 'lodash';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
 
-import MenuItem from '@material-ui/core/MenuItem';
+import { IconButton, MenuItem, Tab, Tabs } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 
 import { renderWhenTrue } from '../../helpers/rendering';
@@ -51,8 +51,10 @@ interface IProps {
 	items: any[];
 	isPending: boolean;
 	visibleItems: any[];
+	showStarredOnly: boolean;
 	showDialog: (config) => void;
 	fetchTeamspaces: (username) => void;
+	fetchStarredModels: () => void;
 	setState: (componentState: any) => void;
 }
 
@@ -72,9 +74,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-		const {items, fetchTeamspaces, currentTeamspace, visibleItems} = this.props;
+		const {items, fetchTeamspaces, currentTeamspace, visibleItems, fetchStarredModels} = this.props;
 		if (!items.length) {
 			fetchTeamspaces(currentTeamspace);
+			fetchStarredModels();
 		}
 
 		if (isEmpty(visibleItems)) {
@@ -136,10 +139,14 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	private handleTabChange = (event, activeTab) => this.props.setState({
+		showStarredOnly: Boolean(activeTab)
+	})
+
 	private renderModels = (models, projectId) => renderWhenTrue(() => (
 		<GridContainer key={`container-${projectId}`}>
 			{models.map((props) => (
-				<ModelGridItem key={props.model} {...props} />
+				<ModelGridItem key={props.model} {...props}	/>
 			))}
 		</GridContainer>
 	))(models.length && this.state.visibleItems[projectId])
@@ -223,12 +230,20 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	));
 
 	public render() {
-		const { isPending } = this.props;
+		const { isPending, showStarredOnly } = this.props;
 
 		return (
 			<Panel {...PANEL_PROPS}>
 				<Head>
-					3D MODELS & FEDERATIONS
+					<Tabs
+						indicatorColor="primary"
+						textColor="primary"
+						value={Number(showStarredOnly)}
+						onChange={this.handleTabChange}
+					>
+						<Tab label="3D Models & Federations" />
+						<Tab label="Starred" />
+					</Tabs>
 					<ButtonMenu
 						renderButton={this.renderMenuButton.bind(this, isPending)}
 						renderContent={this.renderMenu}

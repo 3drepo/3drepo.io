@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -39,10 +39,14 @@ export const Header = styled.div`
 `;
 
 export const Name = styled(Truncate)`
-	margin: 0 0 0 2px;
+	margin: 1px 0 0 2px;
 	font-weight: ${FONT_WEIGHT.BOLD};
-	word-break: break-word;
-	width: 100%;
+	word-break: break-all;
+	cursor: ${(props) => props.isPending ? 'default' : 'pointer'};
+
+	&:hover {
+		text-decoration: underline;
+	}
 `;
 
 export const NameWrapper = styled.div`
@@ -77,15 +81,6 @@ export const Actions = styled.div`
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: flex-end;
-`;
-
-export const ClickableLayer = styled.div`
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	cursor: ${(props) => props.isPending ? 'default' : 'pointer'};
 `;
 
 export const Status = styled.span`

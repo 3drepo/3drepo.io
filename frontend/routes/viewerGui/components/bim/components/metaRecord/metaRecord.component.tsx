@@ -63,7 +63,7 @@ export class MetaRecord extends React.PureComponent<IProps, IState> {
 				<MetaKey>
 					<StarIconWrapper>
 						<StarIcon
-							active={Number(this.isStarred)}
+							active={this.isStarred}
 							onClick={this.handleStarClick}
 						/>
 					</StarIconWrapper>

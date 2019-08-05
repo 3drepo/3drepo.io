@@ -20,13 +20,18 @@ import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { ModelActions } from '../../../../modules/model';
+import { selectIsStarredModel, StarredActions } from '../../../../modules/starred';
 import { ModelGridItem } from './modelGridItem.component';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	isStarred: selectIsStarredModel
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	subscribeOnStatusChange: ModelActions.subscribeOnStatusChange,
-	unsubscribeOnStatusChange: ModelActions.unsubscribeOnStatusChange
+	unsubscribeOnStatusChange: ModelActions.unsubscribeOnStatusChange,
+	addToStarred: StarredActions.addToStarredTeamspaceItems,
+	removeFromStarred: StarredActions.removeFromStarredTeamspaceItems
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelGridItem));

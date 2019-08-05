@@ -21,13 +21,10 @@ import { COLOR } from '../../../styles';
 
 interface IIconWrapper {
 	active: boolean;
-	theme: {
-		activeColor?: string;
-	};
 }
 
 export const IconWrapper = styled(Icon)<IIconWrapper>`
-	color: ${(props) => props.active ? props.theme.activeColor || COLOR.DARK_ORANGE : COLOR.BLACK_20};
+	color: ${(props) => props.active ? COLOR.SUNGLOW : COLOR.BLACK_20};
 	cursor: pointer;
 	display: flex;
 	align-items: center;

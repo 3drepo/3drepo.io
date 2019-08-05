@@ -23,16 +23,15 @@ import StarBorder from '@material-ui/icons/StarBorder';
 import { IconWrapper } from './starIcon.styles';
 
 interface IProps {
-	active: number;
-	activeColor?: string;
-	onClick: () => void;
+	active: boolean;
+	onClick: (event) => void;
 }
 
-export const StarIcon = ({ active, activeColor, onClick }: IProps) => {
+export const StarIcon = ({ active, onClick }: IProps) => {
 	const IconComponent = active ? Star : StarBorder;
 
 	return (
-		<IconWrapper active={active} theme={{activeColor}}>
+		<IconWrapper active={Number(active)}>
 			<IconComponent onClick={onClick} color="inherit" fontSize="small" />
 		</IconWrapper>
 	);

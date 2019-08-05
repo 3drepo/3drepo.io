@@ -16,14 +16,13 @@
  */
 
 import copy from 'copy-to-clipboard';
-import { startCase } from 'lodash';
-import React, { useEffect } from 'react';
+import { pick, startCase } from 'lodash';
+import React, { useEffect, useRef, useState } from 'react';
 import { ROUTES } from '../../../../constants/routes';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../services/analytics';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
-import { COLOR } from '../../../../styles';
 import { Loader } from '../../../components/loader/loader.component';
 import { SmallIconButton } from '../../../components/smallIconButon/smallIconButton.component';
 import { StarIcon } from '../../../components/starIcon/starIcon.component';
@@ -35,7 +34,6 @@ import RevisionsDialog from '../revisionsDialog/revisionsDialog.container';
 import UploadModelFileDialog from '../uploadModelFileDialog/uploadModelFileDialog.container';
 import {
 	Actions,
-	ClickableLayer,
 	Container, Content,
 	Header, Name, NameWrapper,
 	PropertiesColumn,
@@ -45,7 +43,6 @@ import {
 } from './modelGridItem.styles';
 
 interface IProps {
-	activeTeamspace: string;
 	className?: string;
 	history: any;
 	teamspace: string;
@@ -60,6 +57,7 @@ interface IProps {
 	canUpload: boolean;
 	code?: string;
 	suitabilityCode?: string;
+	isStarred: boolean;
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
 	removeModel: (teamspace, modelData) => void;
@@ -68,6 +66,8 @@ interface IProps {
 	subscribeOnStatusChange: (teamspace, projectName, modelData) => void;
 	unsubscribeOnStatusChange: (teamspace, projectName, modelData) => void;
 	showSnackbar: (text) => void;
+	addToStarred: (modelName) => void;
+	removeFromStarred: (modelName) => void;
 }
 
 export function ModelGridItem(props: IProps) {
@@ -76,6 +76,9 @@ export function ModelGridItem(props: IProps) {
 		props.status && props.status === 'uploading' || props.status === 'queued' || props.status === 'processing';
 	const isPending = isPendingStatus();
 
+	const [hasDelayedClick, setHasDelayedClick] = useState(false);
+	const starClickTimeout = useRef(null);
+
 	useEffect(() => {
 		if (!isFederation) {
 			const modelData = { modelId: props.model, modelName: props.name };
@@ -83,6 +86,14 @@ export function ModelGridItem(props: IProps) {
 			return () => props.unsubscribeOnStatusChange(props.teamspace, props.projectName, modelData);
 		}
 	}, [props.teamspace, props.projectName, props.model, props.name]);
+
+	const resetStarClickTimeout = () => {
+		setHasDelayedClick(false);
+		clearTimeout(starClickTimeout.current);
+		starClickTimeout.current = null;
+	};
+
+	useEffect(resetStarClickTimeout, [props.isStarred]);
 
 	const renderActions = (actions) => {
 		if (!actions) {
@@ -149,7 +160,6 @@ export function ModelGridItem(props: IProps) {
 	};
 
 	const handleDelete = () => {
-
 		const { teamspace, showConfirmDialog, name, model, project, removeModel } = props;
 		const type = isFederation ? 'federation' : 'model';
 
@@ -172,13 +182,12 @@ export function ModelGridItem(props: IProps) {
 				history.push(`${ROUTES.VIEWER}/${teamspace}/${model}`);
 				analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
 			} else {
-				handleUploadModelFile(event);
+				handleUploadModelFile();
 			}
 		}
 	};
 
-	const handleUploadModelFile = (event) => {
-		event.stopPropagation();
+	const handleUploadModelFile = () => {
 		const { teamspace, name, model, canUpload, projectName } = props;
 
 		props.showDialog({
@@ -194,8 +203,7 @@ export function ModelGridItem(props: IProps) {
 		});
 	};
 
-	const handleFederationEdit = (event) => {
-		event.stopPropagation();
+	const handleFederationEdit = () => {
 		const { teamspace, model, name, project } = props;
 
 		props.showDialog({
@@ -213,7 +221,19 @@ export function ModelGridItem(props: IProps) {
 	};
 
 	const handleStarClick = () => {
-		console.info('star click');
+		if (starClickTimeout.current) {
+			resetStarClickTimeout();
+		} else {
+			setHasDelayedClick(true);
+			starClickTimeout.current = setTimeout(() => {
+				const modelData = pick(props, ['model', 'name', 'teamspace']);
+				if (props.isStarred) {
+					props.removeFromStarred(modelData);
+				} else {
+					props.addToStarred(modelData);
+				}
+			}, 2000);
+		}
 	};
 
 	const sharedActions = [{
@@ -270,21 +290,14 @@ export function ModelGridItem(props: IProps) {
 	);
 
 	return (
-		<Container
-			federate={isFederation}
-			className={props.className}
-		>
-			<ClickableLayer onClick={handleClick} isPending={isPending} />
+		<Container federate={isFederation} className={props.className}>
 			<Header>
 				<NameWrapper>
 					<StarIcon
-						active={Number(isFederation)}
-						activeColor={COLOR.SUNGLOW}
+						active={hasDelayedClick ? !props.isStarred : props.isStarred}
 						onClick={handleStarClick}
 					/>
-					<Name lines={2}>
-						{props.name}
-					</Name>
+					<Name lines={2} onClick={handleClick} isPending={isPending}>{props.name}</Name>
 				</NameWrapper>
 				{renderActionsMenu()}
 			</Header>
