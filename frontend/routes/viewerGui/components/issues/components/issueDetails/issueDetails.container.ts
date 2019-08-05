@@ -19,6 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
+import { DialogActions } from '../../../../../../modules/dialog';
 import {
 	selectActiveIssueDetails,
 	selectExpandDetails,
@@ -32,7 +33,6 @@ import { selectSettings, selectTopicTypes } from '../../../../../../modules/mode
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { withViewer } from '../../../../../../services/viewer/viewer';
 import { IssueDetails } from './issueDetails.component';
-import { DialogActions } from '../../../../../../modules/dialog';
 
 const mapStateToProps = createStructuredSelector({
 	issue: selectActiveIssueDetails,

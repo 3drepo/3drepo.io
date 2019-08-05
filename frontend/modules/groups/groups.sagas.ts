@@ -18,7 +18,7 @@
 import { values } from 'lodash';
 import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { calculateTotalMeshes } from '../../helpers/tree';
-import { dispatch } from '../store';
+import { dispatch, getState } from '../store';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { GROUPS_TYPES } from '../../constants/groups';
@@ -32,23 +32,20 @@ import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
-import { getSelectMeshesByNodes, getSelectNodesByIds, getSelectNodesIdsFromSharedIds, TreeActions } from '../tree';
+import { selectGetMeshesByIds, selectGetNodesByIds, selectGetNodesIdsFromSharedIds, TreeActions } from '../tree';
 import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
 import {
 	selectActiveGroupDetails,
+	selectActiveGroupId,
 	selectColorOverrides,
 	selectFilteredGroups,
 	selectGroups,
 	selectGroupsMap,
-	selectIsAllOverriden,
+	selectIsAllOverridden,
 	selectNewGroupDetails,
 	selectSelectedFilters,
-	selectShowDetails,
-	selectActiveGroupId
+	selectShowDetails
 } from './groups.selectors';
-import { prepareGroup, normalizeGroup } from '../../helpers/groups';
-import { TreeActions, selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectGetNodesByIds } from '../tree';
-import { GROUPS_TYPES } from '../../constants/groups';
 
 export function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(true));

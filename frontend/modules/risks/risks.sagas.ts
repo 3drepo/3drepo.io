@@ -356,19 +356,19 @@ function* showMultipleGroups({risk, revision}) {
 				objects.shown = shownGroupData.objects;
 			}
 
-		if (highlightedGroupData) {
-			objects.objects = highlightedGroupData.objects;
-		}
+			if (highlightedGroupData) {
+				objects.objects = highlightedGroupData.objects;
+			}
 	} else {
 		const  groupId =  risk.viewpoint.group_id || risk.group_id;
 		const groupData = yield getRiskGroup(risk, groupId, revision);
 
-			if (groupData.hiddenObjects && !risk.viewpoint.group_id) {
+		if (groupData.hiddenObjects && !risk.viewpoint.group_id) {
 				groupData.hiddenObjects = null;
 				Cache.add('risk.group', groupId, groupData);
 			}
 
-			objects = groupData;
+		objects = groupData;
 		}
 
 		if (objects.hidden) {

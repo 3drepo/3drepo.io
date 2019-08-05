@@ -34,11 +34,11 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel, ISelectedFilter } from '../../../components/filterPanel/filterPanel.component';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
+import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 import { Container, EmptyStateInfo, Tabs } from './bim.styles';
 import { MetaRecord } from './components/metaRecord/metaRecord.component';
-import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 
 interface IProps {
 	className: string;

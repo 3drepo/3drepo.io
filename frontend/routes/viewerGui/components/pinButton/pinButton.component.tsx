@@ -18,8 +18,8 @@
 import React from 'react';
 import { NEW_PIN_ID, VIEWER_EVENTS } from '../../../../constants/viewer';
 import { PIN_COLORS } from '../../../../styles';
-import { Container, PinIcon } from './pinButton.styles';
 import { LabelButton } from '../labelButton/labelButton.styles';
+import { Container, PinIcon } from './pinButton.styles';
 
 interface IProps {
 	viewer: any;

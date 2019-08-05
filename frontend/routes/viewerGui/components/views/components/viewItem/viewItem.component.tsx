@@ -16,8 +16,8 @@
  */
 
 import { Field, Formik } from 'formik';
-import React from 'react';
 import { debounce } from 'lodash';
+import React from 'react';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { Image } from '../../../../../components/image';
@@ -87,11 +87,6 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		}
 	}, 150, { leading: true });
 
-	public handleDelete = (event) => {
-		event.persist();
-		this._handleDelete(event);
-	}
-
 	public renderViewpointForm = renderWhenTrue(() => {
 		return (
 			<Formik
@@ -128,6 +123,11 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	));
 
 	public renderDeleteMessage = renderWhenTrue(() => <ActionMessage content="This view has been deleted" />);
+
+	public handleDelete = (event) => {
+		event.persist();
+		this._handleDelete(event);
+	}
 
 	public handleNameChange = (field) => (event) => {
 		field.onChange(event);

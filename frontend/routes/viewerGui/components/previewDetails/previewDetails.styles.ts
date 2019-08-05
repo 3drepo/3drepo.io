@@ -20,9 +20,9 @@ import styled from 'styled-components';
 
 import {
 	ExpansionPanel,
-	IconButton,
 	ExpansionPanelDetails,
 	ExpansionPanelSummary,
+	IconButton,
 	Typography as TypographyComponent
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';

@@ -15,16 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { LinearProgress } from '@material-ui/core';
-import { RemoveIcon, IconButton,
-	ResourceItemContainer, ResourceLink, PhotoIcon, LinkIcon,
-	DocumentIcon, ResourceLabel, UploadSizeLabel, ResourcesContainer,
-	ActionContainer, ResourceItemRightColumn } from './resources.styles';
-import { LabelButton } from '../../viewer/components/labelButton/labelButton.styles';
-import AttachResourcesDialog from './attachResourcesDialog/attachResourcesDialog.container';
-import { FieldsRow, StyledFormControl } from '../../viewer/components/risks/components/riskDetails/riskDetails.styles';
+import * as React from 'react';
+import { LabelButton } from '../../viewerGui/components/labelButton/labelButton.styles';
+import {
+	FieldsRow,
+	StyledFormControl
+} from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { FieldLabel } from '../textField/textField.styles';
+import AttachResourcesDialog from './attachResourcesDialog/attachResourcesDialog.container';
+import { ActionContainer, DocumentIcon,
+	IconButton, LinkIcon, PhotoIcon, RemoveIcon,
+	ResourcesContainer, ResourceItemContainer, ResourceItemRightColumn, ResourceLabel,
+	ResourceLink, UploadSizeLabel } from './resources.styles';
 
 interface IResource {
 	_id: string;
@@ -69,14 +72,14 @@ const ResourceIcon = ({type}) =>
 
 const ResourceAvailable = ({link, type, name, size, onClickRemove, canEdit}) => (
 	<ResourceItemContainer>
-		<ResourceIcon type={type}/>
+		<ResourceIcon type={type} />
 		<ResourceLink href={link} target="_blank" rel="noopener">
 			{name}
 		</ResourceLink>
 		<ResourceItemRightColumn>
 			{size}
 			<ActionContainer>
-			{canEdit && <RemoveButton onClick={onClickRemove}/>}
+			{canEdit && <RemoveButton onClick={onClickRemove} />}
 			</ActionContainer>
 		</ResourceItemRightColumn>
 	</ResourceItemContainer>
@@ -86,7 +89,7 @@ const ResourceUploading = ({type, name, size,  progress }) => (
 	<>
 		<LinearProgress variant="determinate" value={progress} />
 		<ResourceItemContainer>
-			<ResourceIcon type={type}/>
+			<ResourceIcon type={type} />
 			<ResourceLabel>{name}</ResourceLabel>
 			<UploadSizeLabel>{size}</UploadSizeLabel>
 		</ResourceItemContainer>
@@ -95,8 +98,8 @@ const ResourceUploading = ({type, name, size,  progress }) => (
 
 const ResourceItem = (resource) =>
 	!resource.uploading ?
-		(<ResourceAvailable {...resource}/>) :
-		(<ResourceUploading {...resource}/>)
+		(<ResourceAvailable {...resource} />) :
+		(<ResourceUploading {...resource} />)
 ;
 
 export class Resources extends React.PureComponent<IProps, IState> {
@@ -122,9 +125,16 @@ export class Resources extends React.PureComponent<IProps, IState> {
 		return (
 			<ResourcesContainer>
 				<FieldLabel>Resources</FieldLabel>
-				{resources.map((r) => (<ResourceItem key={r._id} {...r} canEdit={canEdit} onClickRemove={this.onClickRemove(r)}/>))}
+				{resources.map((r) => (
+					<ResourceItem
+						key={r._id}
+						{...r}
+						canEdit={canEdit}
+						onClickRemove={this.onClickRemove(r)}
+					/>
+				))}
 				<FieldsRow container justify="space-between" flex={0.5}>
-					<StyledFormControl/>
+					<StyledFormControl />
 					<StyledFormControl>
 						<span>
 							<LabelButton disabled={!canEdit} onClick={this.onClickAttach}>Attach resource</LabelButton>

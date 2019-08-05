@@ -30,6 +30,7 @@ import {
 	selectSelectedFilters,
 	selectSelectionMap,
 	selectVisibilityMap,
+	selectVisibleTreeNodesIds,
 	selectVisibleTreeNodesList,
 	TreeActions
 } from '../../../../modules/tree';
@@ -40,6 +41,7 @@ const mapStateToProps = createStructuredSelector({
 	selectedFilters: selectSelectedFilters,
 	ifcSpacesHidden: selectIfcSpacesHidden,
 	nodesList: selectVisibleTreeNodesList,
+	visibleNodesIds: selectVisibleTreeNodesIds,
 	expandedNodesMap: selectExpandedNodesMap,
 	nodesSelectionMap: selectSelectionMap,
 	nodesVisibilityMap: selectVisibilityMap,
@@ -54,8 +56,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	isolateSelectedNodes: TreeActions.isolateSelectedNodes,
 	hideIfcSpaces: TreeActions.hideIfcSpaces,
 	setState: TreeActions.setComponentState,
-	selectNode: TreeActions.selectNode,
-	goToParentNode: TreeActions.goToParentNode
+	handleNodesClick: TreeActions.handleNodesClick,
+	goToRootNode: TreeActions.goToRootNode,
+	selectNodes: TreeActions.selectNodes
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Tree);

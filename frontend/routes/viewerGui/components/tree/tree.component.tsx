@@ -18,8 +18,10 @@
 import IconButton from '@material-ui/core/IconButton';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
+import TreeIcon from '@material-ui/icons/DeviceHub';
 import SearchIcon from '@material-ui/icons/Search';
-import React from 'react';
+import { values } from 'lodash';
+import * as React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';
 
@@ -34,9 +36,10 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
+import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { EmptyStateInfo } from '../views/views.styles';
 import TreeNode from './components/treeNode/treeNode.container';
-import { TreeContainer, TreeIcon, TreeNodes, ViewerPanelContent } from './tree.styles';
+import { TreeNodes, ViewerPanelContent } from './tree.styles';
 
 interface IProps {
 	className: string;
@@ -51,12 +54,14 @@ interface IProps {
 	dataRevision: string;
 	activeNode: string;
 	isPending?: boolean;
-	selectNode?: (id) => boolean;
+	visibleNodesIds: any[];
+	handleNodesClick?: (nodes, skipExpand) => boolean;
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
 	isolateSelectedNodes: () => void;
 	hideIfcSpaces: () => void;
-	goToParentNode: (nodeId: boolean) => void;
+	goToRootNode: (nodeId: boolean) => void;
+	selectNodes: (nodesIds: any[]) => void;
 }
 
 interface IState {
@@ -73,7 +78,8 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		return {
 			[TREE_ACTIONS_ITEMS.SHOW_ALL]: this.handleShowAllNodes,
 			[TREE_ACTIONS_ITEMS.ISOLATE_SELECTED]: isolateSelectedNodes,
-			[TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES]: hideIfcSpaces
+			[TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES]: hideIfcSpaces,
+			[TREE_ACTIONS_ITEMS.SELECT_ALL]: this.handleSelectAllNodes
 		};
 	}
 
@@ -159,7 +165,8 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		const { searchEnabled, nodesList, isPending } = this.props;
 
 		return (
-			<TreeContainer
+			<ViewerPanel
+				title="Tree"
 				Icon={<TreeIcon />}
 				renderActions={this.renderActions}
 				pending={isPending}
@@ -169,7 +176,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 					{this.renderNodesList(!isPending && !!nodesList.length)}
 					{this.renderNotFound(!isPending && !nodesList.length)}
 				</ViewerPanelContent>
-			</TreeContainer>
+			</ViewerPanel>
 		);
 	}
 
@@ -177,6 +184,10 @@ export class Tree extends React.PureComponent<IProps, IState> {
 
 	private handleShowAllNodes = () => {
 		this.props.showAllNodes();
+	}
+
+	private handleSelectAllNodes = () => {
+		this.props.selectNodes(this.props.visibleNodesIds);
 	}
 
 	private handleFilterChange = (selectedFilters) => {
@@ -217,12 +228,12 @@ export class Tree extends React.PureComponent<IProps, IState> {
 
 	private handleScrollToTop = (index) => {
 		const treeNode = this.props.nodesList[index];
-		this.props.goToParentNode(treeNode.rootParentId);
+		this.props.goToRootNode(treeNode.rootParentId);
 	}
 
 	private handleNodesClick = (nodeId) => {
 		this.setState({ isScrollToActive: false }, () => {
-			this.props.selectNode(nodeId);
+			this.props.handleNodesClick([nodeId], true);
 		});
 	}
 

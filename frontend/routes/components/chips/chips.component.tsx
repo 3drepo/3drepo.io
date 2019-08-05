@@ -18,7 +18,7 @@
 import { snakeCase } from 'lodash';
 import React from 'react';
 
-import { Input, Chip } from '@material-ui/core';
+import { Chip, Input } from '@material-ui/core';
 import { ENTER_KEY } from '../../../constants/keys';
 import { ChipsContainer, ChipsGrid } from './chips.styles';
 

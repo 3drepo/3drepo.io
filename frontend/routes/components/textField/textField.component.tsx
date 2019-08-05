@@ -22,8 +22,8 @@ import SaveIcon from '@material-ui/icons/Save';
 import React from 'react';
 
 import { Field, Formik } from 'formik';
-import { ActionsLine, Container, StyledIconButton,
-		StyledTextField, StyledLinkableField, FieldLabel, MutableActionsLine } from './textField.styles';
+import { ActionsLine, Container, FieldLabel,
+		MutableActionsLine, StyledIconButton, StyledLinkableField, StyledTextField } from './textField.styles';
 
 interface IProps extends TextFieldProps {
 	className?: string;
@@ -177,14 +177,14 @@ export class TextField extends React.PureComponent<IProps, IState> {
 									onChange={this.onChange(field)}
 									error={Boolean(form.errors[name] || props.error)}
 									helperText={form.errors[name] || props.helperText}
-									autoFocus={true}
+									autoFocus
 								/>
 							);
 						}} />
 					}
 					{!this.isEditMode &&
 						<div>
-							<FieldLabel shrink={true}>{this.props.label}</FieldLabel>
+							<FieldLabel shrink>{this.props.label}</FieldLabel>
 							<StyledLinkableField>{this.state.currentValue}</StyledLinkableField>
 						</div>
 					}

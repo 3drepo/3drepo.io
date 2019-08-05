@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
 import { isNil } from 'lodash';
+import { createSelector } from 'reselect';
 
 const selectCurrentUserDomain = (state) => ({...state.currentUser});
 

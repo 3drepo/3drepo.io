@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import RemoveCircleOutline from '@material-ui/icons/RemoveCircleOutline';
 import IconButtonComponent from '@material-ui/core/IconButton';
-import Photo from '@material-ui/icons/Photo';
-import Link from '@material-ui/icons/Link';
 import Description from '@material-ui/icons/Description';
+import Link from '@material-ui/icons/Link';
+import Photo from '@material-ui/icons/Photo';
+import RemoveCircleOutline from '@material-ui/icons/RemoveCircleOutline';
+import styled from 'styled-components';
 
 import { COLOR } from '../../../styles';
 

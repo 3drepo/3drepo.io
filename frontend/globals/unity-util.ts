@@ -682,9 +682,8 @@ export class UnityUtil {
 						reject(error);
 					}
 				}, i > 0 ? 100 : 0);
-
-				promises.push(promise);
 			});
+			promises.push(promise);
 		}
 
 		return Promise.all(promises);

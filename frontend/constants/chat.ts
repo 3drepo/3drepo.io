@@ -4,5 +4,6 @@ export const CHAT_CHANNELS = {
 	GROUPS: 'groups',
 	VIEWS: 'views',
 	MODEL: 'model',
-	NOTIFICATIONS: 'notifications'
+	NOTIFICATIONS: 'notifications',
+	RESOURCES: 'resources'
 };

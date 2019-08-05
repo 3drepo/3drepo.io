@@ -31,13 +31,13 @@ import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { DateField } from '../../../../../components/dateField/dateField.component';
 import { Image } from '../../../../../components/image';
+import { Resources } from '../../../../../components/resources/resources.component';
 import { TextField } from '../../../../../components/textField/textField.component';
 import PinButton from '../../../pinButton/pinButton.container';
 import {
 	FieldsRow, StyledFormControl
 }	from './../../../risks/components/riskDetails/riskDetails.styles';
 import { DescriptionImage } from './issueDetails.styles';
-import { Resources } from '../../../../../components/resources/resources.component';
 
 interface IProps {
 	issue: any;

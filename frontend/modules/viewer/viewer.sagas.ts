@@ -53,7 +53,6 @@ function* updateSettings({ settings }) {
 	}
 }
 
-
 export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.UPDATE_SETTINGS, updateSettings);
 }

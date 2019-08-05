@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { getState } from './migration';
-import { hexToGLColor } from './colors';
+import { getState } from '../modules/store';
+import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectTreeNodesList } from '../modules/tree';
 import { Viewer } from '../services/viewer/viewer';
-import { selectTreeNodesList, selectGetNodesIdsFromSharedIds, selectGetMeshesByIds } from '../modules/tree';
+import { hexToGLColor } from './colors';
 
 export const getGroupOverride = (overrides, group) => {
 	const color = group.color;

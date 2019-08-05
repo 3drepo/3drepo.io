@@ -63,8 +63,8 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	attachResourcesSuccess: ['resources', 'issueId'],
 	updateResourcesSuccess: ['resourcesIds', 'updates', 'issueId' ],
 	resetComponentState: [],
-    updateIssuePin: ['issue'],
-	showMultipleGroups: ['issue', 'revision']
+	updateIssuePin: ['issue'],
+	showMultipleGroups: ['issue', 'revision'],
 	setNewComment: ['newComment'],
 	saveNewScreenshot: ['teamspace', 'model', 'isNewIssue'],
 }, { prefix: 'ISSUES/' });

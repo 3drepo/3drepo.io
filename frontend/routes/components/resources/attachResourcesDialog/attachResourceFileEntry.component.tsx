@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { TextField } from '@material-ui/core';
 import { Field } from 'formik';
 import { get } from 'lodash';
-import { RemoveButton } from '../resources.component';
+import * as React from 'react';
 import {
-	StyledFormControl,
-	FieldsRow
-} from '../../../viewer/components/risks/components/riskDetails/riskDetails.styles';
+	FieldsRow,
+	StyledFormControl
+} from '../../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { RemoveButton } from '../resources.component';
 import {  ResourceListItem } from './attachResourcesDialog.styles';
 
 export const FileEntry = ({onClickRemove, index, entry}) => {
@@ -46,7 +46,7 @@ export const FileEntry = ({onClickRemove, index, entry}) => {
 				<Field type="hidden" name={fileFieldName} />
 				<ResourceListItem>
 					<span> {entry.file.name} </span>
-					<RemoveButton onClick={onClickRemove}/>
+					<RemoveButton onClick={onClickRemove} />
 				</ResourceListItem>
 			</StyledFormControl>
 		</FieldsRow>

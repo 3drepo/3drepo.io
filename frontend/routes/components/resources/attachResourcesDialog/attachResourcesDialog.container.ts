@@ -15,12 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from '../../../../helpers/migration';
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import {
+	selectCurrentTeamspace,
+	selectSpaceLeft,
+	CurrentUserActions
+} from '../../../../modules/currentUser';
 import { AttachResourcesDialog } from './attachResourcesDialog.component';
-import { CurrentUserActions, selectCurrentTeamspace, selectSpaceLeft } from '../../../../modules/currentUser';
 
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,

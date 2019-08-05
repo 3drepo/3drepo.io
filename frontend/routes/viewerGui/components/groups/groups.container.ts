@@ -30,7 +30,7 @@ import {
 	selectGroups,
 	selectGroupsMap,
 	selectHighlightedGroups,
-    selectIsAllOverridden,
+	selectIsAllOverridden,
 	selectIsPending,
 	selectSearchEnabled,
 	selectSelectedFilters,
@@ -52,7 +52,7 @@ const mapStateToProps = createStructuredSelector({
 	colorOverrides: selectColorOverrides,
 	modelSettings: selectSettings,
 	isModelLoaded: selectIsModelLoaded,
-    isAllOverridden: selectIsAllOverridden
+	isAllOverridden: selectIsAllOverridden
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

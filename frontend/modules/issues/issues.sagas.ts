@@ -16,20 +16,23 @@
  */
 
 import { push } from 'connected-react-router';
+import filesize from 'filesize';
 import { differenceBy, isEmpty, map, omit, pick } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
-import * as filesize from 'filesize';
-import * as API from '../../services/api';
-import * as Exports from '../../services/export';
-import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { DEFAULT_PROPERTIES, PRIORITIES, STATUSES } from '../../constants/issues';
+import { EXTENSION_RE } from '../../constants/resources';
 import { ROUTES } from '../../constants/routes';
 import { NEW_PIN_ID } from '../../constants/viewer';
-import { createAttachResourceComments, createRemoveResourceComment, prepareComment, prepareComments } from '../../helpers/comments';
+import {
+	createAttachResourceComments,
+	createRemoveResourceComment,
+	prepareComment,
+	prepareComments
+} from '../../helpers/comments';
 import { prepareIssue } from '../../helpers/issues';
+import { prepareResources } from '../../helpers/resources';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
 import { Cache } from '../../services/cache';
@@ -37,9 +40,10 @@ import * as Exports from '../../services/export';
 import { Viewer } from '../../services/viewer/viewer';
 import { PIN_COLORS } from '../../styles';
 import { ChatActions } from '../chat';
-import { selectCurrentUser, selectCurrentTeamspace } from '../currentUser';
+import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
+import { selectCurrentModel, selectCurrentModelTeamspace, selectTopicTypes } from '../model';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
@@ -52,9 +56,6 @@ import {
 	selectIssuesMap,
 	selectShowPins
 } from './issues.selectors';
-import { selectTopicTypes, selectCurrentModel, selectCurrentModelTeamspace } from '../model';
-import { prepareResources } from '../../helpers/resources';
-import { EXTENSION_RE } from '../../constants/resources';
 
 function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -117,7 +118,6 @@ const toggleIssuePin = (issue, selected = true) => {
 	}
 };
 
-
 function* updateIssuePin({issue}) {
 	yield Viewer.removePin({ id: issue._id });
 	if (issue && issue.position && issue.position.length > 0 && issue._id) {
@@ -155,9 +155,9 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting })
 
 		viewpoint.hideIfc = ifcSpacesHidden;
 		issueData.rev_id = {
-            ...issueData,
-            rev_id: revision
-        };
+			...issueData,
+			rev_id: revision
+		};
 
 		if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
 			const [highlightedGroup, hiddenGroup] = yield createGroup(issueData, objectInfo, teamspace, model, revision);
@@ -616,10 +616,10 @@ function* subscribeOnIssueChanges({ teamspace, modelId }) {
 		subscribeToUpdated: onUpdateEvent,
 		subscribeToCreated: onCreateEvent
 	}));
-    yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RESOURCES, teamspace, modelId, {
-        subscribeToCreated: onResourcesCreated,
-        subscribeToDeleted: onResourceDeleted
-    }));
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RESOURCES, teamspace, modelId, {
+		subscribeToCreated: onResourcesCreated,
+		subscribeToDeleted: onResourceDeleted
+	}));
 }
 
 function* unsubscribeOnIssueChanges({ teamspace, modelId }) {
@@ -627,10 +627,10 @@ function* unsubscribeOnIssueChanges({ teamspace, modelId }) {
 		unsubscribeFromUpdated: onUpdateEvent,
 		unsubscribeFromCreated: onCreateEvent
 	}));
-    yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RESOURCES, teamspace, modelId, {
-        unsubscribeFromCreated: onResourcesCreated,
-        unsubscribeFromDeleted: onResourceDeleted
-    }));
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RESOURCES, teamspace, modelId, {
+		unsubscribeFromCreated: onResourcesCreated,
+		unsubscribeFromDeleted: onResourceDeleted
+	}));
 }
 
 const onUpdateCommentEvent = (updatedComment) => {

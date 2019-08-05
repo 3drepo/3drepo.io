@@ -16,8 +16,8 @@
  */
 
 import { uniqueId } from 'lodash';
-import { createActions, createReducer } from 'reduxsauce';
 import { uniqueId } from 'lodash';
+import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	fetchFullTree: ['teamspace', 'modelId', 'revision'],

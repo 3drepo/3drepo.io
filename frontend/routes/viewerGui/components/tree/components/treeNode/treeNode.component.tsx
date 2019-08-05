@@ -22,7 +22,7 @@ import RemoveIcon from '@material-ui/icons/Remove';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
-import React from 'react';
+import * as React from 'react';
 
 import {
 	SELECTION_STATES,
@@ -56,6 +56,7 @@ interface IProps {
 	isolateSelectedNodes: (id) => void;
 	onScrollToTop: (index) => void;
 	onClick: (id) => void;
+	zoomToHighlightedNodes: () => void;
 }
 
 interface IState {
@@ -106,6 +107,10 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 		return this.props.selectionMap[this.node._id] === SELECTION_STATES.SELECTED;
 	}
 
+	get isModelRoot() {
+		return !this.props.hasFederationRoot && this.level === 1;
+	}
+
 	public static defaultProps = {
 		visible: false,
 		selected: false,
@@ -149,8 +154,8 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 
 	private renderActions = renderWhenTrue(() => (
 		<Actions>
-			{this.renderOpenModelAction(this.node.isModel)}
-			{this.renderGoTopAction(!this.node.isModel)}
+			{this.renderOpenModelAction(this.node.isModel && !this.isModelRoot)}
+			{this.renderGoTopAction(!this.node.isModel && !this.isModelRoot)}
 			<SmallIconButton
 				Icon={IsolateIcon}
 				tooltip="Isolate"
@@ -164,7 +169,7 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 		</Actions>
 	));
 
-	public getVisibilityIcon(visibility) {
+	public getVisibilityIcon = (visibility) => {
 		if (visibility === VISIBILITY_STATES.VISIBLE) {
 			return VisibleIcon;
 		} else if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
@@ -182,19 +187,26 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 				style={style}
 				key={key}
 				nodeType={this.type}
-				expandable={this.node.hasChildren}
-				selected={!isSearchResult && this.isSelected}
+				expandable={this.node.hasChildren && !this.isModelRoot}
+				selected={this.isSelected}
 				active={active}
-				highlighted={!isSearchResult && this.isHighlighted}
+				highlighted={this.isHighlighted}
 				expanded={isSearchResult && expanded}
 				level={this.level}
 				hasFederationRoot={hasFederationRoot}
 				onClick={this.handleNodeClick}
+				onDoubleClick={this.handleDoubleClick}
 			>
 				{this.renderName()}
 				{this.renderActions(!this.node.isFederation)}
 			</Container>
 		);
+	}
+
+	private handleDoubleClick = () => {
+		if (this.props.visibilityMap[this.node._id] !== VISIBILITY_STATES.INVISIBLE) {
+			this.props.zoomToHighlightedNodes();
+		}
 	}
 
 	private expandNode = (event) => {
@@ -231,8 +243,10 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 	private handleOpenModelClick = () => {
 		const [teamspace, name] = this.node.name.split(':');
 		const { model } = this.props.settings.subModels.find((subModel) => subModel.name === name);
-
-		window.open(`${window.location.origin}/viewer/${teamspace}/${model}`, '_blank', 'noopener');
+		const url = `${window.location.origin}/viewer/${teamspace}/${model}`;
+		const newWindow = window.open() as any;
+		newWindow.opener = null;
+		newWindow.location = url;
 	}
 
 	private handleNodeClick = () => {
@@ -241,7 +255,7 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 
 	private renderName = () => (
 		<NameWrapper>
-			{this.renderExpandableButton(!this.node.isFederation && !this.props.isSearchResult)}
+			{this.renderExpandableButton(!this.node.isFederation && !this.isModelRoot && !this.props.isSearchResult)}
 			<Name nodeType={this.type}>{this.node.name}</Name>
 		</NameWrapper>
 	)

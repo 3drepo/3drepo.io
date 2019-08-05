@@ -48,6 +48,7 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
+import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
@@ -55,7 +56,6 @@ import { EmptyStateInfo } from '../views/views.styles';
 import { ListContainer, Summary } from './../risks/risks.styles';
 import { GroupDetails } from './components/groupDetails';
 import { GroupsContainer, GroupIcon, GroupListItem, StyledIcon } from './groups.styles';
-import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 
 interface IProps {
 	viewer: any;

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,16 +14,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { Button } from '@material-ui/core';
 import styled from 'styled-components';
+import { COLOR } from '../../../../styles';
 
-import { ViewerPanelContent as ViewerPanelContentComponent } from '../viewerPanel/viewerPanel.styles';
+export const LabelButton = styled(Button).attrs({
+	classes: {
+		disabled: 'disabled'
+	}
+})`
+	&& {
+		text-transform: none;
+		padding: 0 13px;
+		min-height: 26px;
+		border-radius: 28px;
+		color: ${COLOR.LIGHT_GRAY};
+		background-color:  ${COLOR.BLACK_26};
 
-export const TreeNodes = styled.ul`
-	margin: 0;
-	padding: 0;
-`;
+		&.disabled {
+			background-color: ${COLOR.BLACK_12};
+			color: ${COLOR.BLACK_26};
+		}
+	}
 
-export const ViewerPanelContent = styled(ViewerPanelContentComponent)`
-	overflow: hidden;
+	&&:hover {
+		background-color: rgba(0, 0, 0, 0.36);
+	}
 `;

@@ -87,7 +87,7 @@ export class Channel {
 		this[CHAT_CHANNELS.RISKS] = new RisksChatEvents(this);
 		this[CHAT_CHANNELS.MODEL] = new ModelChatEvents(this);
 		this[CHAT_CHANNELS.VIEWS] = new ChatEvents(this, 'view');
-		this.resources = new ChatEvents(this, 'resource');
+		this[CHAT_CHANNELS.RESOURCES] = new ChatEvents(this, 'resource');
 		this[CHAT_CHANNELS.NOTIFICATIONS] = new NotificationsChatEvents(this);
 	}
 

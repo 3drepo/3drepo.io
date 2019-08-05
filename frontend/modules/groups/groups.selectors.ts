@@ -17,9 +17,9 @@
 
 import { size, values } from 'lodash';
 import { createSelector } from 'reselect';
+import { getGroupOverride } from '../../helpers/colorOverrides';
 import { searchByFilters } from '../../helpers/searching';
 import GroupsSaga from './groups.sagas';
-import { getGroupOverride } from '../../helpers/colorOverrides';
 
 export const selectGroupsDomain = (state) => ({...state.groups});
 
