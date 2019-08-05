@@ -661,6 +661,7 @@ function _fillInModelDetails(accountName, setting, permissions) {
 		federate: setting.federate,
 		permissions: permissions,
 		model: setting._id,
+		type: setting.type,
 		name: setting.name,
 		status: setting.status,
 		errorReason: setting.errorReason,
