@@ -27,12 +27,10 @@ import SearchIcon from '@material-ui/icons/Search';
 
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
 import { ACTIONS_TYPES } from '../../../../constants/issues';
-import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { searchByFilters } from '../../../../helpers/searching';
 import { sortByDate } from '../../../../helpers/sorting';
-import { Viewer } from '../../../../services/viewer/viewer';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import {
 	IconWrapper,
@@ -41,7 +39,6 @@ import {
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
-import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
 import { PreviewListItem } from '../previewListItem/previewListItem.component';

@@ -48,7 +48,6 @@ import {
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
-import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
@@ -150,22 +149,22 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public renderGroupsList = renderWhenTrue(() => {
 		const Items = this.state.filteredGroups.map((group) => (
-            <GroupListItem
-                {...group}
-                key={group._id}
-                hideThumbnail
-                statusColor={this.getOverriddenColor(group._id, group.color)}
-                highlighted={this.isHighlighted(group)}
-                roleColor={group.color}
-                onItemClick={this.setActiveGroup(group)}
-                onArrowClick={this.handleShowGroupDetails(group)}
-                active={this.isActive(group)}
-                modelLoaded={this.state.modelLoaded}
-                renderActions={this.renderGroupActions(group)}
-                hasViewPermission={stubTrue}
-                panelName={GROUP_PANEL_NAME}
-                extraInfo={this.renderObjectsNumber(group.totalSavedMeshes)}
-            />
+			<GroupListItem
+					{...group}
+					key={group._id}
+					hideThumbnail
+					statusColor={this.getOverriddenColor(group._id, group.color)}
+					highlighted={this.isHighlighted(group)}
+					roleColor={group.color}
+					onItemClick={this.setActiveGroup(group)}
+					onArrowClick={this.handleShowGroupDetails(group)}
+					active={this.isActive(group)}
+					modelLoaded={this.props.isModelLoaded}
+					renderActions={this.renderGroupActions(group)}
+					hasViewPermission={stubTrue}
+					panelName={GROUP_PANEL_NAME}
+					extraInfo={this.renderObjectsNumber(group.totalSavedMeshes)}
+			/>
 		));
 
 		return <ListContainer className="groups-list" ref={this.groupsContainerRef}>{Items}</ListContainer>;

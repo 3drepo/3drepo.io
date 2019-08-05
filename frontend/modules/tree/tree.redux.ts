@@ -16,7 +16,6 @@
  */
 
 import { uniqueId } from 'lodash';
-import { uniqueId } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: TreeTypes, Creators: TreeActions } = createActions({

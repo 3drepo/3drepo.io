@@ -21,12 +21,10 @@ import { all, call, put, select, take, takeLatest } from 'redux-saga/effects';
 import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES, VULNERABLE_PROPS } from '../../constants/compare';
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
 import { VISIBILITY_STATES } from '../../constants/tree';
-import { VISIBILITY_STATES } from '../../constants/tree';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
 import { selectIsFederation, selectRevisions, selectSettings, ModelTypes } from '../model';
-import { selectNodesIndexesMap, selectTreeNodesList, TreeActions } from '../tree';
 import { selectNodesIndexesMap, selectTreeNodesList, TreeActions } from '../tree';
 import { CompareActions, CompareTypes, ICompareComponentState } from './compare.redux';
 import {
