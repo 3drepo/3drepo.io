@@ -99,7 +99,7 @@ export class Log extends React.PureComponent<IProps, any> {
 				{ this.props.viewpoint && this.props.viewpoint.screenshotPath ?
 					<>
 						<Screenshot src={this.props.viewpoint.screenshotPath} enablePreview />
-						{this.renderRemoveButton(!this.props.sealed && !this.props.action)}
+						{this.renderRemoveButton(this.isRemovable)}
 					</>
 				: null }
 			</ScreenshotWrapper>

@@ -49,6 +49,8 @@ export class LinkableField extends React.PureComponent<IProps, null> {
 			return this.props.children;
 		}
 
+		res.push(this.props.children.substring(lastIndex, this.props.children.length));
+
 		return res;
 	}
 

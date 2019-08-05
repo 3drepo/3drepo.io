@@ -98,28 +98,18 @@ function insertModelUpdatedNotificationsLatestReview(account, model) {
 function importSuccess(account, model, sharedSpacePath, user) {
 	setStatus(account, model, "ok", user).then(setting => {
 		if (setting) {
-			if (sharedSpacePath) {
-				const files = function(filePath, fileDir, jsonFile) {
-					return [
-						{desc: "tmp model file", type: "file", path: filePath},
-						{desc: "json file", type: "file", path: jsonFile},
-						{desc: "tmp dir", type: "dir", path: fileDir}
-					];
-				};
+			if (sharedSpacePath && setting.corID) {
+				const path = require("path");
+				const tmpDir = path.join(sharedSpacePath, setting.corID);
+				const tmpModelFile = path.join(sharedSpacePath, `${setting.corID}.json`);
+				const filesToDelete  = [{ type:"file", path: tmpModelFile}];
 
-				const tmpDir = `${sharedSpacePath}/${setting.corID}`;
-				const tmpModelFile = `${sharedSpacePath}/${setting.corID}.json`;
-				fs.stat(tmpModelFile, function(err) {
-					let tmpJsonFile;
-					if (err) {
-						tmpJsonFile = `${tmpDir}/obj.json`;
-					} else {
-						const tmpModelFileData = require(tmpModelFile);
-						tmpJsonFile = tmpModelFileData.file;
-					}
-
-					_deleteFiles(files(tmpModelFile, tmpDir, tmpJsonFile));
+				fs.readdirSync(tmpDir).forEach((file) => {
+					filesToDelete.push({ type: "file", path: path.join(tmpDir, file)});
 				});
+
+				_deleteFiles(filesToDelete);
+				_deleteFiles([{desc: "tmp dir", type: "dir", path: tmpDir}]);
 			}
 			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
 			setting.corID = undefined;
@@ -148,10 +138,11 @@ function importSuccess(account, model, sharedSpacePath, user) {
  * @param {account} acount - User account
  * @param {model} model - Model
  * @param {user} - user who initiated the request
+ * @param {sharedSpacePath} - path to sharedspace
  * @param {errCode} errCode - Defined bouncer error code or IO response code
  * @param {errMsg} errMsg - Verbose error message (errCode.message will be used if undefined)
  */
-function importFail(account, model, user, errCode, errMsg) {
+function importFail(account, model, sharedSpacePath, user, errCode, errMsg) {
 	ModelSetting.findById({account, model}, model).then(setting => {
 		// mark model failed
 		setting.status = "failed";
@@ -172,15 +163,32 @@ function importFail(account, model, user, errCode, errMsg) {
 		if (!errMsg) {
 			errMsg = setting.errorReason.message;
 		}
-
 		if (!translatedError.userErr) {
+
+			const attachments = [];
+			if(setting.corID && sharedSpacePath) {
+				const path = require("path");
+				const sharedDir = path.join(sharedSpacePath, setting.corID);
+				const files = fs.readdirSync(sharedDir);
+				files.forEach((file) => {
+					if(file.endsWith(".log")) {
+						attachments.push({
+							filename: file,
+							path: path.join(sharedDir, file)
+						});
+					}
+				});
+
+			}
+
 			Mailer.sendImportError({
 				account,
 				model,
 				username: user,
 				err: errMsg,
 				corID: setting.corID,
-				bouncerErr: errCode
+				bouncerErr: errCode,
+				attachments
 			}).catch(err => systemLogger.logError(err));
 		}
 
@@ -693,11 +701,8 @@ function _deleteFiles(files) {
 
 		try {
 			deleteFile(file.path);
-			systemLogger.logInfo(`${file.desc} deleted`,{
-				file: file.path
-			});
 		} catch(err) {
-			systemLogger.logError(`error while deleting ${file.desc}`,{
+			systemLogger.logError("error while deleting file",{
 				message: err.message,
 				err: err,
 				file: file.path

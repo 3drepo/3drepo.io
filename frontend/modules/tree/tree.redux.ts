@@ -17,6 +17,7 @@
 
 import { uniqueId } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
+import { uniqueId } from 'lodash';
 
 export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	fetchFullTree: ['teamspace', 'modelId', 'revision'],
@@ -34,8 +35,6 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	setIfcSpacesHidden: ['ifcSpacesHidden'],
 	expandNodes: ['nodesIds'],
 	collapseNodes: ['nodesIds'],
-	selectNode: ['id'],
-	deselectNode: ['id'],
 	setIsPending: ['isPending'],
 	setTreeNodesVisibility: ['nodesIds', 'visibility', 'skipChildren', 'skipParents'],
 	setSelectedNodesVisibility: ['nodeId', 'visibility'],
@@ -46,18 +45,17 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	setNodesSelectionMap: ['nodesSelectionMap'],
 	showNodesBySharedIds: ['objects'],
 	selectNodes: ['nodesIds', 'skipExpand', 'skipChildren', 'colour'],
-	selectNodesSuccess: [],
 	selectNodesBySharedIds: ['objects', 'colour'],
 	deselectNodesBySharedIds: ['objects'],
 	deselectNodes: ['nodesIds'],
 	isolateNodesBySharedIds: ['objects'],
 	hideNodesBySharedIds: ['objects'],
-	isolateNode: ['id'],
 	clearCurrentlySelected: [],
-	setExpanedNodesMap: ['expandedNodesMap'],
+	setExpandedNodesMap: ['expandedNodesMap'],
 	updateDataRevision: [],
 	setActiveNode: ['nodeId'],
-	goToParentNode: ['nodeId']
+	goToRootNode: ['nodeId'],
+	zoomToHighlightedNodes: []
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
@@ -116,7 +114,7 @@ const setAuxiliaryMaps = (state = INITIAL_STATE, { auxiliaryMaps }) => {
 	return { ...state, ...auxiliaryMaps };
 };
 
-const setExpanedNodesMap = (state = INITIAL_STATE, { expandedNodesMap }) => {
+const setExpandedNodesMap = (state = INITIAL_STATE, { expandedNodesMap }) => {
 	return { ...state, expandedNodesMap };
 };
 
@@ -150,7 +148,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.EXPAND_NODES]: expandNodes,
 	[TreeTypes.SET_NODES_SELECTION_MAP]: setNodesSelectionMap,
 	[TreeTypes.SET_AUXILIARY_MAPS]: setAuxiliaryMaps,
-	[TreeTypes.SET_EXPANED_NODES_MAP]: setExpanedNodesMap,
+	[TreeTypes.SET_EXPANDED_NODES_MAP]: setExpandedNodesMap,
 	[TreeTypes.UPDATE_DATA_REVISION]: updateDataRevision,
 	[TreeTypes.SET_ACTIVE_NODE]: setActiveNode
 });

@@ -89,6 +89,7 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 				initialValues={{firstName, lastName, email}}
 				validationSchema={ProfileSchema}
 				onSubmit={this.handleProfileUpdate}
+				enableReinitialize={true}
 			>
 				<Form>
 					<FormContainer container direction="column">

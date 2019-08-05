@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import IconButton from '@material-ui/core/IconButton';
-import TextField from '@material-ui/core/TextField';
 import styled from 'styled-components';
+import { LinkableField } from '../linkableField/linkableField.component';
+import { InputLabel, TextField, IconButton } from '@material-ui/core';
 
 export const Container = styled.div`
 	position: relative;
@@ -25,7 +25,7 @@ export const Container = styled.div`
 
 export const ActionsLine = styled.div`
 	position: absolute;
-	bottom: 9px;
+	bottom: 4px;
 	right: 0;
 `;
 
@@ -45,5 +45,30 @@ export const StyledTextField = styled(TextField)`
 			padding-right: 56px;
 			box-sizing: border-box;
 		}
+	}
+`;
+
+export const StyledLinkableField = styled(LinkableField)`
+	&& {
+		display: block;
+		margin: 8px 0;
+		min-height:14px;
+		font-size: 14px;
+	}
+`;
+
+export const MutableActionsLine = styled(ActionsLine)`
+	&&	 {
+		visibility: hidden;
+
+		${/* sc-selector */ Container}:hover & {
+			visibility: inherit;
+		}
+	}
+`;
+
+export const FieldLabel = styled(InputLabel)`
+	&& {
+		display: block;
 	}
 `;

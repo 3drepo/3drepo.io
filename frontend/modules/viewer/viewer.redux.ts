@@ -24,8 +24,7 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 }, { prefix: 'VIEWER_CANVAS/' });
 
 export const INITIAL_STATE = {
-	settings: window.localStorage.getItem('visualSettings') ?
-			JSON.parse(window.localStorage.getItem('visualSettings')) : DEFAULT_SETTINGS,
+	settings: {...DEFAULT_SETTINGS, ...JSON.parse(window.localStorage.getItem('visualSettings') || '{}')},
 };
 
 const updateSettingsSuccess = (state = INITIAL_STATE, { settings }) => {

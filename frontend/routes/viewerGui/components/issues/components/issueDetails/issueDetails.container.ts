@@ -32,6 +32,7 @@ import { selectSettings, selectTopicTypes } from '../../../../../../modules/mode
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { withViewer } from '../../../../../../services/viewer/viewer';
 import { IssueDetails } from './issueDetails.component';
+import { DialogActions } from '../../../../../../modules/dialog';
 
 const mapStateToProps = createStructuredSelector({
 	issue: selectActiveIssueDetails,
@@ -54,9 +55,13 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	postComment: IssuesActions.postComment,
 	removeComment: IssuesActions.removeComment,
 	showNewPin: IssuesActions.showNewPin,
+	onRemoveResource: IssuesActions.removeResource,
 	subscribeOnIssueCommentsChanges: IssuesActions.subscribeOnIssueCommentsChanges,
 	unsubscribeOnIssueCommentsChanges: IssuesActions.unsubscribeOnIssueCommentsChanges,
 	updateNewIssue: IssuesActions.updateNewIssue,
+	attachFileResources: IssuesActions.attachFileResources,
+	attachLinkResources: IssuesActions.attachLinkResources,
+	showDialog:  DialogActions.showDialog,
 	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
 }, dispatch);
 

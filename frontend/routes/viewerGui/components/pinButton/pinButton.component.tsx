@@ -18,7 +18,8 @@
 import React from 'react';
 import { NEW_PIN_ID, VIEWER_EVENTS } from '../../../../constants/viewer';
 import { PIN_COLORS } from '../../../../styles';
-import { Container, LabelButton, PinIcon } from './pinButton.styles';
+import { Container, PinIcon } from './pinButton.styles';
+import { LabelButton } from '../labelButton/labelButton.styles';
 
 interface IProps {
 	viewer: any;
@@ -74,7 +75,15 @@ export class PinButton extends React.PureComponent<IProps, any> {
 
 	public togglePinListeners = (enabled: boolean) => {
 		const resolver = enabled ? 'on' : 'off';
-		this.props.viewer[resolver](VIEWER_EVENTS.PICK_POINT, this.handlePickPoint);
+		const { viewer } = this.props;
+		viewer[resolver](VIEWER_EVENTS.PICK_POINT, this.handlePickPoint);
+		viewer[resolver](VIEWER_EVENTS.BACKGROUND_SELECTED_PIN_MODE, this.handleClickBackground);
+	}
+
+	public handleClickBackground = (event) => {
+		const { viewer } = this.props;
+		viewer.removePin({id: this.getPinId() });
+		viewer.setPin({data: null});
 	}
 
 	public handlePickPoint = ({ trans, position, normal, selectColour, id }) => {

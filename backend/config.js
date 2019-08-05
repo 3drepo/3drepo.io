@@ -61,33 +61,23 @@ function createRoundRobinAlgorithm(algoConfig) {
 	}
 
 	return roundRobin;
-
 }
 
 /** *****************************************************************************
  * Fill in the details of a server
  * @param {Object} serverObject - The object to populate
  * @param {string} name - The name of the server (also populates sub-domain/sub-directory)
- * @param {boolean} using_ssl - Are we using SSL encryption
- * @param {string} host - A string representing the base host name
- * @param {number} default_http_port - Default HTTP port for the server is none is configured
- * @param {number} default_https_port - Default HTTPS port for the server is none in configured
  *******************************************************************************/
-const fillInServerDetails = function (serverObject, name, using_ssl, host, default_http_port, default_https_port) {
+const fillInServerDetails = function (serverObject, name) {
 	serverObject = coalesce(serverObject, {});
 	serverObject.name = coalesce(serverObject.name, name);
-	serverObject.http_port = coalesce(serverObject.http_port, default_http_port);
-	serverObject.https_port = coalesce(serverObject.https_port, default_https_port);
-	serverObject.port = coalesce(serverObject.port, using_ssl ? serverObject.https_port : serverObject.http_port);
-	serverObject.public_port = coalesce(serverObject.public_port, serverObject.port);
-	serverObject.public_protocol = coalesce(serverObject.public_protocol, using_ssl ? "https" : "http");
-
-	serverObject.hostname = coalesce(serverObject.hostname, serverObject.subdomain ? (serverObject.subdomain + "." + host) : host);
+	serverObject.port = serverObject.port || config.port;
+	serverObject.chatOnPublicPort = serverObject.chatOnPublicPort || false; // used for chat only
+	serverObject.hostname = `${serverObject.subdomain ? serverObject.subdomain + "." : ""}${serverObject.hostname || config.host}`;
 	serverObject.host_dir = serverObject.subdirectory ? ("/" + serverObject.subdirectory) : "/";
 
-	serverObject.base_url = serverObject.public_protocol + "://" + serverObject.hostname + ":" + serverObject.public_port;
-	serverObject.base_url_no_port = serverObject.public_protocol + "://" + serverObject.hostname;
-	// serverObject.location_url = "function(path) { return \"//\" + window.location.host + \"" + serverObject.host_dir + "/\" + path; }";
+	serverObject.base_url_no_port = `${config.public_protocol + "://"}${serverObject.hostname}`;
+	serverObject.base_url = `${serverObject.base_url_no_port}:${config.public_port}`;
 	serverObject.url = serverObject.base_url + serverObject.host_dir;
 
 	serverObject.location_url = serverObject.url;
@@ -120,6 +110,10 @@ config.HTTPSredirect = coalesce(config.HTTPSredirect, false);
 
 config.using_ssl = config.hasOwnProperty("ssl");
 config.port = coalesce(config.port, config.using_ssl ? default_https_port : default_http_port);
+
+config.public_protocol = config.public_protocol || (config.using_ssl ? "https" : "http");
+config.public_using_ssl = config.public_protocol === "https";
+config.public_port = config.public_port || config.port;
 
 config.timeout = coalesce(config.timeout, 30 * 60); // Timeout in seconds
 
@@ -180,7 +174,7 @@ for (let i = 0; i < config.servers.length; i++) {
 	config.subdomains[server.subdomain].push(server);
 
 	if (server.service === "api") {
-		fillInServerDetails(server, "api", config.using_ssl, config.host, default_http_port, default_https_port);
+		fillInServerDetails(server, "api");
 
 		if (!server.type) {
 			server.type = "all";
@@ -209,15 +203,15 @@ for (let i = 0; i < config.servers.length; i++) {
 
 	} else if (server.service === "chat") {
 
-		fillInServerDetails(server, "chat", config.using_ssl, config.host, server.http_port, server.https_port);
-		server.chat_host = server.base_url_no_port + ":" + server.port;
+		fillInServerDetails(server, "chat");
+		server.chat_host = server.chatOnPublicPort ? server.base_url : server.base_url_no_port + ":" + server.port;
 		config.chat_server = server;
 		config.chat_reconnection_attempts = (typeof server.reconnection_attempts !== "undefined" ? server.reconnection_attempts : config.chat_reconnection_attempts);
 
 	} else if (server.service === "frontend") {
-		fillInServerDetails(server, "server_" + i, config.using_ssl, config.host, default_http_port, default_https_port);
+		fillInServerDetails(server, "server_" + i);
 	} else {
-		fillInServerDetails(server, "server_" + i, config.using_ssl, config.host, default_http_port, default_https_port);
+		fillInServerDetails(server, "server_" + i);
 	}
 }
 
@@ -272,6 +266,7 @@ if(config.paypal) {
 
 // upload size limit
 config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
+config.resourceUploadSizeLimit =  config.resourceUploadSizeLimit || 104857600;
 config.version = VERSION;
 config.userNotice = coalesce(config.userNotice, "");
 
@@ -280,24 +275,14 @@ config.vat = coalesce(config.vat, {});
 config.vat.checkUrl = coalesce(config.vat.checkUrl, "http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl");
 
 // get frontend base url
-config.getBaseURL = function (useNonPublicPort) {
+config.getBaseURL = function (internalAccess) {
+	const ssl = internalAccess ? config.using_ssl : config.public_using_ssl;
 
-	const frontEndServerConfig = config.servers.find(server => server.service === "frontend");
+	const port = internalAccess ? config.port : config.public_port;
 
-	let port = "";
+	const showPort = !(ssl && port === 443 || !ssl && port === 80);
 
-	if (useNonPublicPort) {
-		// use non public port, for html templates generated for phamtom to generate pdf
-		port = ":" + (config.using_ssl ? default_https_port : default_http_port);
-
-	} else if (config.using_ssl && frontEndServerConfig.public_port !== 443 || !config.using_ssl && frontEndServerConfig.public_port !== 80) {
-		// do not show :port in url if port is 80 for http or 443 for https to make the url in email looks pretty
-		port = ":" + frontEndServerConfig.public_port;
-	}
-
-	const baseUrl = (config.using_ssl ? "https://" : "http://") + config.host + port;
-
-	return baseUrl;
+	return `${ssl ? "https://" : "http://"}${config.host}${showPort ? ":" + port : ""}`;
 };
 
 // avatar size limit

@@ -197,7 +197,7 @@ function sendImportError(data) {
 	if(config.contact) {
 		const template = require("./templates/importError");
 		data.domain = config.host;
-		return sendEmail(template, config.contact.email, data);
+		return sendEmail(template, config.contact.email, data, data.attachments);
 	} else {
 		return Promise.reject({ message: "config.mail.sender is not set"});
 	}

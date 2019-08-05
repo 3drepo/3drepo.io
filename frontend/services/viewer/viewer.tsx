@@ -170,7 +170,7 @@ export class ViewerService {
 		this.setPin({ data: null });
 	}
 
-	public async clearHighlights() {
+	public clearHighlights = async () => {
 		await this.isViewerReady();
 		this.viewer.clearHighlights();
 	}
@@ -457,7 +457,7 @@ export class ViewerService {
 	}
 
 	public async zoomToHighlightedMeshes() {
-		await this.isViewerReady();
+		await this.isModelReady();
 		this.viewer.zoomToHighlightedMeshes();
 	}
 

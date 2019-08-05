@@ -53,3 +53,7 @@ export const selectMemory = createSelector(
 export const selectFarPlaneSamplingPoints = createSelector(
 	selectSettings, (state) => state.farPlaneSamplingPoints
 );
+
+export const selectMaxShadowDistance = createSelector(
+    selectSettings, (state) => state.maxShadowDistance
+);

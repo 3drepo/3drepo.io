@@ -466,7 +466,6 @@ export class UnityUtil {
 			model
 		};
 		UnityUtil.toUnity('DiffToolAssignAsComparator', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
-
 	}
 
 	/**
@@ -661,24 +660,34 @@ export class UnityUtil {
 	 * 					or when you want a specific set of objects to stay highlighted when toggle mode is on
 	 */
 	public static highlightObjects(account, model, idArr, color, toggleMode, forceReHighlight) {
-
 		const maxNodesPerReq = 20000;
+		const promises = [];
 		for (let i = 0 ; i < idArr.length; i += maxNodesPerReq) {
-			setTimeout(() => {
-				const endIdx = i + maxNodesPerReq < idArr.length ? i + maxNodesPerReq : idArr.length ;
-				const arr = idArr.slice(i, endIdx);
-				const params: any = {
-					database : account,
-					model,
-					ids : arr,
-					toggle : toggleMode,
-					forceReHighlight,
-					color: color ? color : UnityUtil.defaultHighlightColor
-				};
-				UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
-			}, i > 0 ? 100 : 0);
+			const promise = new Promise((resolve, reject) => {
+				setTimeout(() => {
+					try {
+						const endIdx = i + maxNodesPerReq < idArr.length ? i + maxNodesPerReq : idArr.length ;
+						const arr = idArr.slice(i, endIdx);
+						const params: any = {
+							database : account,
+							model,
+							ids : arr,
+							toggle : toggleMode,
+							forceReHighlight,
+							color: color ? color : UnityUtil.defaultHighlightColor
+						};
+						UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+						resolve();
+					} catch (error) {
+						reject(error);
+					}
+				}, i > 0 ? 100 : 0);
+
+				promises.push(promise);
+			});
 		}
 
+		return Promise.all(promises);
 	}
 
 	/**
@@ -887,10 +896,18 @@ export class UnityUtil {
 
 	/**
 	 * Set the number of samples to take when determining far plane
-	* @param {number[]} value - the number of samples (per edge) the algorithm should sample
+	* @param {number} value - the number of samples (per edge) the algorithm should sample
 	 */
 	public static setFarPlaneSampleSize(value) {
 		UnityUtil.toUnity('FarPlaneSampleSize', UnityUtil.LoadingState.VIEWER_READY, value);
+	}
+
+	/**
+	* Set the maximum rending distance for shadows
+	* @param {number} value - the number of samples (per edge) the algorithm should sample
+	*/
+	public static setMaxShadowDistance(value) {
+		UnityUtil.toUnity('MaxShadowDistance', UnityUtil.LoadingState.VIEWER_READY, value);
 	}
 
 	/**

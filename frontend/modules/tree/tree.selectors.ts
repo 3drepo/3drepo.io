@@ -82,6 +82,10 @@ export const selectSelectedNodesIds = createSelector(
 	selectTreeProccessing, selectDataRevision, (treeProcessingData) => treeProcessingData.selectedNodesIds || []
 );
 
+export const selectFullySelectedNodesIds = createSelector(
+	selectTreeProccessing, selectDataRevision, (treeProcessingData) => treeProcessingData.fullySelectedNodesIds || []
+);
+
 export const selectDefaultVisibilityMap = createSelector(
 	selectTreeProccessing, selectDataRevision,
 	(treeProcessingData) => treeProcessingData.defaultVisibilityMap
@@ -92,9 +96,9 @@ export const selectVisibilityMap = createSelector(
 	(treeProcessingData) => treeProcessingData.visibilityMap
 );
 
-export const selectInvisibleNodesIds = createSelector(
+export const selectHiddenNodesIds = createSelector(
 	selectTreeProccessing, selectDataRevision,
-	(treeProcessingData) => treeProcessingData.invisibleNodesIds || []
+	(treeProcessingData) => treeProcessingData.hiddenNodesIds || []
 );
 
 export const selectNodesIndexesMap = createSelector(
@@ -179,28 +183,14 @@ export const selectVisibleTreeNodesList = createSelector(
 	}
 );
 
-export const getSelectNodesByIds = (nodesIds) => createSelector(
+export const selectGetNodesByIds = (nodesIds) => createSelector(
 	selectTreeNodesList, selectNodesIndexesMap,
 	(treeNodesList, nodesIndexesMap) => {
 		return nodesIds.map((nodeId) => treeNodesList[nodesIndexesMap[nodeId]]);
 	}
 );
 
-export const getSelectChildren = (node) => createSelector(
-	getSelectNodesByIds(node.childrenIds),
-	(children) => {
-		if (!node) {
-			throw new Error('Node does not exist');
-		}
-
-		if (node.hasChildren) {
-			return children;
-		}
-		return [];
-	}
-);
-
-export const getSelectDeepChildren = (nodeId) => createSelector(
+export const selectGetDeepChildren = (nodeId) => createSelector(
 	selectTreeNodesList, selectNodesIndexesMap,
 	(treeNodesList, nodesIndexesMap) => {
 		const nodeIndex = nodesIndexesMap[nodeId];
@@ -209,74 +199,60 @@ export const getSelectDeepChildren = (nodeId) => createSelector(
 	}
 );
 
-export const getSelectParents = (node) => createSelector(
-	selectTreeNodesList, selectNodesIndexesMap,
-	(treeNodesList, nodesIndexesMap) => {
-		const parents = [];
-
-		let nextParentId = node.parentId;
-
-		while (!!nextParentId) {
-			const parentNodeIndex = nodesIndexesMap[nextParentId];
-			const parentNode = treeNodesList[parentNodeIndex];
-			parents.push(parentNode);
-			nextParentId = parentNode.parentId;
-		}
-
-		return parents;
-	}
-);
-
-export const getSelectMeshesByNodes = (nodes = []) => createSelector(
+export const selectGetMeshesByIds = (nodesIds = []) => createSelector(
 	selectTreeNodesList, selectNodesIndexesMap, selectMeshesByModelId,
 	(treeNodesList, nodesIndexesMap, idToMeshes) => {
-		if (!nodes.length) {
+		if (!nodesIds.length) {
 			return [];
 		}
 
 		const childrenMap = {};
 		const meshesByNodes = {};
 
-		let stack = [...nodes];
+		let stack = [...nodesIds];
 		while (stack.length > 0) {
-			const node = stack.pop();
+			const nodeId = stack.pop();
+			const nodeIndex = nodesIndexesMap[nodeId];
+			const node = treeNodesList[nodeIndex] as any;
 
-			if (!meshesByNodes[node.namespacedId]) {
-				meshesByNodes[node.namespacedId] = {
-					modelId: node.model,
-					teamspace: node.teamspace,
-					meshes: []
-				};
-			}
+			if (node) {
+				if (!meshesByNodes[node.namespacedId]) {
+					meshesByNodes[node.namespacedId] = {
+						modelId: node.model,
+						teamspace: node.teamspace,
+						meshes: []
+					};
+				}
 
-			// Check top level and then check if sub model of fed
-			let meshes = node.type === NODE_TYPES.MESH
-				? [node._id]
-				: idToMeshes[node._id];
+				// Check top level and then check if sub model of fed
+				let meshes = node.type === NODE_TYPES.MESH
+					? [node._id]
+					: idToMeshes[node._id];
 
-			if (!meshes && idToMeshes[node.namespacedId]) {
-				meshes = idToMeshes[node.namespacedId][node._id];
-			}
+				if (!meshes && idToMeshes[node.namespacedId]) {
+					meshes = idToMeshes[node.namespacedId][node._id];
+				}
 
-			if (meshes) {
-				meshesByNodes[node.namespacedId].meshes = meshesByNodes[node.namespacedId].meshes.concat(meshes);
-			} else if (!childrenMap[node._id] && node.hasChildren) {
-				// This should only happen in federations.
-				// Traverse down the tree to find submodel nodes
-				const nodeIndex = nodesIndexesMap[node._id];
-				for (let childNumber = 1; childNumber <= node.deepChildrenNumber; childNumber++) {
-					const childNode = treeNodesList[nodeIndex + childNumber];
-					childrenMap[childNode._id] = true;
-					stack = stack.concat([childNode]);
+				if (meshes) {
+					meshesByNodes[node.namespacedId].meshes = meshesByNodes[node.namespacedId].meshes.concat(meshes);
+				} else if (!childrenMap[node._id] && node.hasChildren) {
+					// This should only happen in federations.
+					// Traverse down the tree to find submodel nodes
+					for (let childNumber = 1; childNumber <= node.deepChildrenNumber; childNumber++) {
+						const childNode = treeNodesList[nodeIndex + childNumber];
+						childrenMap[childNode._id] = true;
+						stack = stack.concat([childNode]);
+					}
 				}
 			}
+
 		}
 
 		return values(meshesByNodes);
 	}
 );
 
-export const getSelectNodesIdsFromSharedIds = (objects = []) => createSelector(
+export const selectGetNodesIdsFromSharedIds = (objects = []) => createSelector(
 	selectNodesBySharedIdsMap,
 	(nodesBySharedIds) => {
 		if (!objects.length) {
@@ -287,4 +263,9 @@ export const getSelectNodesIdsFromSharedIds = (objects = []) => createSelector(
 		const nodesIdsBySharedIds = values(pick(nodesBySharedIds, sharedIds));
 		return uniq(nodesIdsBySharedIds);
 	}
+);
+
+export const selectVisibleTreeNodesIds = createSelector(
+	selectVisibleTreeNodesList,
+	(visibleNodes) => visibleNodes.map((visibleNode) => visibleNode._id)
 );

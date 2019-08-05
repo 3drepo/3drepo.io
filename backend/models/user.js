@@ -97,7 +97,7 @@ schema.statics.getTeamspaceSpaceUsed = function (dbName) {
 		return col.find({}, {_id: 1}).toArray().then((settings) => {
 			const spaceUsedProm = [];
 			settings.forEach((setting) => {
-				spaceUsedProm.push(FileRef.getTotalOrgFileSize(dbName, setting._id));
+				spaceUsedProm.push(FileRef.getTotalModelFileSize(dbName, setting._id));
 			});
 
 			return Promise.all(spaceUsedProm).then((spacePerModel) => {
@@ -754,7 +754,6 @@ function _findModelDetails(dbUserCache, username, model) {
 }
 
 function _calSpace(user) {
-
 	const quota = user.customData.billing.getSubscriptionLimits();
 	return User.getTeamspaceSpaceUsed(user.user).then(sizeInBytes => {
 

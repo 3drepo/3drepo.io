@@ -69,7 +69,7 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 				onChange={this.handleChange}
 			>
 				{revisions.map((revision) => (
-					<MenuItem key={revision._id} value={revision} disabled={this.props.baseRevision === revision._id}>
+					<MenuItem key={revision._id} value={revision}>
 						{this.renderName(revision)}
 						{this.renderDate(revision.timestamp)}
 					</MenuItem>

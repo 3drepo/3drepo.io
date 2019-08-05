@@ -108,7 +108,7 @@ const toggleRiskPin = (risk, selected = true) => {
 	}
 };
 
-function* saveRisk({ teamspace, model, riskData, revision }) {
+function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting }) {
 	try {
 		yield Viewer.setPinDropMode(false);
 
@@ -165,6 +165,7 @@ function* saveRisk({ teamspace, model, riskData, revision }) {
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(savedRisk, jobs);
 
+		finishSubmitting();
 		yield put(RisksActions.showDetails(teamspace, model, revision, preparedRisk));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(SnackbarActions.show('Risk created'));
@@ -208,12 +209,13 @@ function* updateNewRisk({ newRisk }) {
 	}
 }
 
-function* postComment({ teamspace, modelId, riskData }) {
+function* postComment({ teamspace, modelId, riskData, finishSubmitting }) {
 	try {
 		const { _id, rev_id } = yield select(selectActiveRiskDetails);
 		const { data: comment } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
 		const preparedComment = yield prepareComment(comment);
 
+		finishSubmitting();
 		yield put(RisksActions.createCommentSuccess(preparedComment, riskData._id));
 		yield put(SnackbarActions.show('Risk comment added'));
 	} catch (error) {
@@ -233,7 +235,7 @@ function* removeComment({ teamspace, modelId, riskData }) {
 		};
 
 		yield API.updateRisk(teamspace, modelId, _id, rev_id, commentData);
-		yield put(RisksActions.deleteCommentSuccess(guid));
+		yield put(RisksActions.deleteCommentSuccess(guid, _id));
 		yield put(SnackbarActions.show('Comment removed'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('remove', 'comment', error));
@@ -354,13 +356,12 @@ function* showMultipleGroups({risk, revision}) {
 				objects.shown = shownGroupData.objects;
 			}
 
-			if (highlightedGroupData) {
-				objects.objects = highlightedGroupData.objects;
-			}
-		} else {
-			const hasViewpointDefaultGroup = risk.viewpoint.group_id;
-			const groupId = hasViewpointDefaultGroup ? risk.viewpoint.group_id : risk.group_id;
-			const groupData = yield getRiskGroup(risk, groupId, revision);
+		if (highlightedGroupData) {
+			objects.objects = highlightedGroupData.objects;
+		}
+	} else {
+		const  groupId =  risk.viewpoint.group_id || risk.group_id;
+		const groupData = yield getRiskGroup(risk, groupId, revision);
 
 			if (groupData.hiddenObjects && !risk.viewpoint.group_id) {
 				groupData.hiddenObjects = null;

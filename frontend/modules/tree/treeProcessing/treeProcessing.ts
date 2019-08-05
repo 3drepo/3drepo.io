@@ -1,29 +1,29 @@
 import { Processing } from './processing';
 import { ITreeProcessingData } from './treeProcessing.constants';
-// tslint:disable-next-line
-const TreeLoaderWorker = require('worker-loader?inline!./workers/loading.worker');
+import transformTree from './transforming';
 
 class TreeProcessing {
-	private resolves = {} as any;
-	private rejects = {} as any;
-	private loaderWorker;
-	private processing = {
-		clearCurrentlySelected: Function.prototype
-	} as Processing;
+	private processing: Processing;
 
 	get data() {
-		return (this.processing) as ITreeProcessingData;
+		return (this.processing || {}) as ITreeProcessingData;
 	}
 
-	public transformData = (payload) => {
-		this.loaderWorker = new TreeLoaderWorker();
-		this.loaderWorker.addEventListener('message', this.handleTransformedData, false);
-		this.loaderWorker.addEventListener('messageerror', this.handleError, false);
+	public transformData = async (payload) => {
+		const { nodesList, ...auxiliaryMaps } = await transformTree(payload) as any;
 
-		return new Promise((resolve) => {
-			this.resolves.transform = resolve;
-			this.loaderWorker.postMessage(payload);
+		console.time('INIT TREE SERVICE');
+		this.processing = new Processing({
+			nodesList,
+			nodesIndexesMap: { ...auxiliaryMaps.nodesIndexesMap },
+			defaultVisibilityMap: { ...auxiliaryMaps.nodesDefaultVisibilityMap },
+			meshesByModelId: { ...auxiliaryMaps.meshesByModelId },
+			visibilityMap: { ...auxiliaryMaps.nodesVisibilityMap },
+			selectionMap: { ...auxiliaryMaps.nodesSelectionMap },
+			nodesBySharedIdsMap: { ...auxiliaryMaps.nodesBySharedIdsMap }
 		});
+		console.timeEnd('INIT TREE SERVICE');
+		return { nodesList, auxiliaryMaps };
 	}
 
 	public selectNodes = (payload) => this.processing.selectNodes(payload);
@@ -39,38 +39,6 @@ class TreeProcessing {
 	public getParents = (node) => this.processing.getParents(node);
 
 	public getChildren = (node) => this.processing.getChildren(node);
-
-	private handleTransformedData = ({ data }) => {
-		const { result: { data: { nodesList, ...auxiliaryMaps } } } = JSON.parse(data);
-
-		this.loaderWorker.terminate();
-		const resolve = this.resolves.transform;
-		resolve({ nodesList, auxiliaryMaps });
-		delete this.resolves.transform;
-
-		console.time('INIT TREE SERVICE');
-		this.processing = new Processing({
-			nodesList,
-			nodesIndexesMap: {...auxiliaryMaps.nodesIndexesMap},
-			defaultVisibilityMap: {...auxiliaryMaps.nodesDefaultVisibilityMap},
-			meshesByModelId: {...auxiliaryMaps.meshesByModelId},
-			visibilityMap: {...auxiliaryMaps.nodesVisibilityMap},
-			selectionMap: {...auxiliaryMaps.nodesSelectionMap},
-			nodesBySharedIdsMap: {...auxiliaryMaps.nodesBySharedIdsMap}
-		});
-		console.timeEnd('INIT TREE SERVICE');
-	}
-
-	private handleError = (e) => {
-		// tslint:disable-next-line
-		console.error('Worker error', e);
-
-		for (const reject in this.rejects) {
-			if (this.rejects.hasOwnProperty(reject)) {
-				this.rejects[reject]();
-			}
-		}
-	}
 }
 
 export default new TreeProcessing();

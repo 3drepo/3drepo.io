@@ -16,6 +16,7 @@ export class ClientConfigService {
 	public POST_API;
 	public VERSION;
 	public userNotice;
+	public resourceUploadSizeLimit;
 	// tslint:disable-next-line
 	public login_check_interval;
 	public ga;

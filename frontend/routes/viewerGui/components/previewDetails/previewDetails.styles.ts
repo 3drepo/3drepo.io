@@ -18,7 +18,13 @@
 import { Form } from 'formik';
 import styled from 'styled-components';
 
-import { ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary, IconButton } from '@material-ui/core';
+import {
+	ExpansionPanel,
+	IconButton,
+	ExpansionPanelDetails,
+	ExpansionPanelSummary,
+	Typography as TypographyComponent
+} from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { COLOR } from './../../../../styles/colors';
@@ -111,3 +117,8 @@ export const ToggleIcon = styled(ExpandMoreIcon)`
 		transform: ${(props: any) => props.active ? `rotate(180deg)` : `rotate(0deg)`};
 	}
 ` as any;
+
+export const Typography = styled(TypographyComponent)`
+	max-height: 40px;
+	overflow: hidden;
+`;

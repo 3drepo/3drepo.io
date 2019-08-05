@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -39,31 +39,6 @@ export const PinIcon = styled(Place).attrs({
 		&.disabled {
 			color: ${COLOR.BLACK_12};
 		}
-	}
-`;
-
-export const LabelButton = styled(Button).attrs({
-	classes: {
-		disabled: 'disabled'
-	}
-})`
-	&& {
-		width: 76px;
-		text-transform: none;
-		padding: 0;
-		min-height: 26px;
-		border-radius: 28px;
-		color: ${COLOR.LIGHT_GRAY};
-		background-color:  ${COLOR.BLACK_26};
-
-		&.disabled {
-			background-color: ${COLOR.BLACK_12};
-			color: ${COLOR.BLACK_26};
-		}
-	}
-
-	&&:hover {
-		background-color: rgba(0, 0, 0, 0.36);
 	}
 `;
 

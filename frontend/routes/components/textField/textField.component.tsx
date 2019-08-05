@@ -17,35 +17,44 @@
 
 import { TextFieldProps } from '@material-ui/core/TextField';
 import CancelIcon from '@material-ui/icons/Cancel';
+import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import React from 'react';
 
 import { Field, Formik } from 'formik';
-import { ActionsLine, Container, StyledIconButton, StyledTextField } from './textField.styles';
+import { ActionsLine, Container, StyledIconButton,
+		StyledTextField, StyledLinkableField, FieldLabel, MutableActionsLine } from './textField.styles';
 
-interface IProps {
+interface IProps extends TextFieldProps {
 	className?: string;
 	requiredConfirm?: boolean;
 	validationSchema?: any;
+	mutable?: boolean;
 	onBeforeConfirmChange?: (event) => void;
 }
 
 interface IState {
 	initialValue: string;
 	currentValue: string;
+	edit: boolean;
 }
 
 const SmallButton = ({ onClick, children}) => (
 	<StyledIconButton onClick={onClick}>{children}</StyledIconButton>
 );
 
-export class TextField extends React.PureComponent<TextFieldProps & IProps, IState> {
+export class TextField extends React.PureComponent<IProps, IState> {
 	public state = {
 		initialValue: '',
-		currentValue: ''
+		currentValue: '',
+		edit: false
 	};
 
 	private inputLocalRef = React.createRef();
+
+	get isEditMode() {
+		return (!this.props.mutable || this.state.edit) && !this.props.disabled;
+	}
 
 	get hasValueChanged() {
 		return this.state.initialValue !== this.state.currentValue;
@@ -69,7 +78,7 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 	public componentDidUpdate(prevProps) {
 		const { value, requiredConfirm } = this.props;
 		if (requiredConfirm && value !== prevProps.value) {
-			this.setState({ initialValue: value, currentValue: value } as IState);
+			this.setState({ initialValue: value, currentValue: value, edit: false } as IState);
 		}
 	}
 
@@ -94,8 +103,12 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 		}
 	}
 
+	public setEditable = () => {
+		this.setState({ edit: true });
+	}
+
 	public declineChange = () => {
-		this.setState((prevState) => ({ currentValue: prevState.initialValue }));
+		this.setState((prevState) => ({ currentValue: prevState.initialValue, edit: false }));
 	}
 
 	public renderActionsLine = () => (
@@ -109,6 +122,24 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 		</ActionsLine>
 	)
 
+	public renderMutableButton = () => (
+		<MutableActionsLine>
+			<SmallButton onClick={this.setEditable}>
+				<EditIcon fontSize="small" />
+			</SmallButton>
+		</MutableActionsLine>
+	)
+
+	public onBlur = (e) => {
+		const currentTarget = e.currentTarget;
+
+		setTimeout(() => {
+			if (!currentTarget.contains(document.activeElement)) {
+				this.declineChange();
+			}
+		}, 0);
+	}
+
 	public render() {
 		const {
 			onBeforeConfirmChange,
@@ -121,7 +152,8 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 			...props
 		} = this.props;
 		const { initialValue, currentValue } = this.state;
-		const shouldRenderActions = this.hasValueChanged;
+		const shouldRenderActions = this.hasValueChanged && this.isEditMode;
+		const shouldRenderMutable = !this.isEditMode && !this.props.disabled;
 
 		return (
 			<Formik
@@ -130,24 +162,34 @@ export class TextField extends React.PureComponent<TextFieldProps & IProps, ISta
 				validationSchema={validationSchema}
 				onSubmit={this.saveChange}
 			>
-				<Container className={className}>
-					<Field name={name} render={({ field, form }) => {
-						const fieldValue = requiredConfirm ? currentValue : value;
+				<Container onBlur={this.onBlur} className={className}>
+					{this.isEditMode &&
+						<Field name={name} render={({ field, form }) => {
+							const fieldValue = requiredConfirm ? currentValue : value;
 
-						return (
-							<StyledTextField
-								{...props}
-								{...field}
-								value={fieldValue}
-								inputRef={this.textFieldRef}
-								fullWidth
-								onChange={this.onChange(field)}
-								error={Boolean(form.errors[name] || props.error)}
-								helperText={form.errors[name] || props.helperText}
-							/>
-						);
-					}} />
+							return (
+								<StyledTextField
+									{...props}
+									{...field}
+									value={fieldValue}
+									inputRef={this.textFieldRef}
+									fullWidth
+									onChange={this.onChange(field)}
+									error={Boolean(form.errors[name] || props.error)}
+									helperText={form.errors[name] || props.helperText}
+									autoFocus={true}
+								/>
+							);
+						}} />
+					}
+					{!this.isEditMode &&
+						<div>
+							<FieldLabel shrink={true}>{this.props.label}</FieldLabel>
+							<StyledLinkableField>{this.state.currentValue}</StyledLinkableField>
+						</div>
+					}
 					{shouldRenderActions && this.renderActionsLine()}
+					{shouldRenderMutable && this.renderMutableButton()}
 				</Container>
 			</Formik>
 		);

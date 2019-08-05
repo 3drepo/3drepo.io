@@ -763,6 +763,10 @@ export class Viewer {
 		UnityUtil.setFarPlaneSampleSize(farplaneSample);
 	}
 
+	public setMaxShadowDistance(value: number) {
+		UnityUtil.setMaxShadowDistance(value);
+	}
+
 	public setRenderingQualityDefault() {
 		UnityUtil.setRenderingQualityDefault();
 	}

@@ -42,7 +42,7 @@ function insertEventQueue(event, emitter, account, model, extraKeys, data) {
 	return Queue.insertEventMessage(msg);
 }
 
-// Notifications
+// Notifications chat events
 function upsertedNotification(session, notification) {
 	const msg = {
 		event : notification.username + "::notificationUpserted",
@@ -64,26 +64,35 @@ const deletedNotification = function(session, notification) {
 	return Queue.insertEventMessage(msg);
 };
 
-// Issues notifications
+// Resources chat events
+function resourcesCreated(emitter, account, model, data) {
+	return insertEventQueue("resource" + eventTypes.CREATED, emitter, account, model, null, data);
+}
+
+function resourceDeleted(emitter, account, model, data) {
+	return insertEventQueue("resource" + eventTypes.DELETED, emitter, account, model, null, data);
+}
+
+// Issues chat events
 function newIssues(emitter, account, model, data) {
 	return insertEventQueue("issue" + eventTypes.CREATED, emitter, account, model, null, data);
 }
 
-function issueChanged(emitter, account, model, issueId, data) {
-	return insertEventQueue("issue" + eventTypes.UPDATED, emitter, account, model, null, data);
+function issueChanged(emitter, account, model, _id, data) {
+	return insertEventQueue("issue" + eventTypes.UPDATED, emitter, account, model, null , {_id,...data});
 }
 
 // comments notifications
-function newComment(emitter, account, model, issueId, data) {
-	return insertEventQueue("comment" + eventTypes.CREATED, emitter, account, model, [utils.uuidToString(issueId)], data);
+function newComment(emitter, account, model, _id, data) {
+	return insertEventQueue("comment" + eventTypes.CREATED, emitter, account, model, [utils.uuidToString(_id)], data);
 }
 
-function commentChanged(emitter, account, model, issueId, data) {
-	return insertEventQueue("comment" + eventTypes.UPDATED, emitter, account, model, [utils.uuidToString(issueId)], data);
+function commentChanged(emitter, account, model, _id, data) {
+	return insertEventQueue("comment" + eventTypes.UPDATED, emitter, account, model, [utils.uuidToString(_id)], data);
 }
 
-function commentDeleted(emitter, account, model, issueId, data) {
-	return insertEventQueue("comment" + eventTypes.DELETED, emitter, account, model, [utils.uuidToString(issueId)], data);
+function commentDeleted(emitter, account, model, _id, data) {
+	return insertEventQueue("comment" + eventTypes.DELETED, emitter, account, model, [utils.uuidToString(_id)], data);
 }
 
 function modelStatusChanged(emitter, account, model, data) {
@@ -95,7 +104,7 @@ function newModel(emitter, account, data) {
 	return insertEventQueue("model" + eventTypes.CREATED, emitter, account, null, null, data);
 }
 
-// Groups notifications
+// Groups chat events
 function newGroups(emitter, account, model, data) {
 	return insertEventQueue("group" + eventTypes.CREATED, emitter, account, model, null, data);
 }
@@ -108,7 +117,7 @@ function groupsDeleted(emitter, account, model, ids) {
 	return insertEventQueue("group" + eventTypes.DELETED, emitter, account, model, null, ids);
 }
 
-// Risks notifications
+// Risks chat events
 function newRisks(emitter, account, model, data) {
 	return insertEventQueue("risk" + eventTypes.CREATED, emitter, account, model, null, data);
 }
@@ -154,5 +163,7 @@ module.exports = {
 	newModel,
 	eventTypes,
 	upsertedNotification,
-	deletedNotification
+	deletedNotification,
+	resourcesCreated,
+	resourceDeleted
 };

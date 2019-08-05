@@ -68,9 +68,9 @@ const putRequest = (url, ...options) => {
 	return axios.put(requestUrl, ...options);
 };
 
-const deleteRequest = (url, ...options) => {
+const deleteRequest = (url, data?) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, url));
-	return axios.delete(requestUrl, ...options);
+	return axios.delete(requestUrl, { data });
 };
 
 const patchRequest = (url, ...options) => {

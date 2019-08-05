@@ -18,12 +18,17 @@
 import { push } from 'connected-react-router';
 import { differenceBy, isEmpty, map, omit, pick } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
+import * as filesize from 'filesize';
+import * as API from '../../services/api';
+import * as Exports from '../../services/export';
+import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { DEFAULT_PROPERTIES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { ROUTES } from '../../constants/routes';
 import { NEW_PIN_ID } from '../../constants/viewer';
-import { prepareComment, prepareComments } from '../../helpers/comments';
+import { createAttachResourceComments, createRemoveResourceComment, prepareComment, prepareComments } from '../../helpers/comments';
 import { prepareIssue } from '../../helpers/issues';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
@@ -32,10 +37,9 @@ import * as Exports from '../../services/export';
 import { Viewer } from '../../services/viewer/viewer';
 import { PIN_COLORS } from '../../styles';
 import { ChatActions } from '../chat';
-import { selectCurrentUser } from '../currentUser';
+import { selectCurrentUser, selectCurrentTeamspace } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
-import { selectTopicTypes } from '../model';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
@@ -48,6 +52,9 @@ import {
 	selectIssuesMap,
 	selectShowPins
 } from './issues.selectors';
+import { selectTopicTypes, selectCurrentModel, selectCurrentModelTeamspace } from '../model';
+import { prepareResources } from '../../helpers/resources';
+import { EXTENSION_RE } from '../../constants/resources';
 
 function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
@@ -71,6 +78,7 @@ function* fetchIssue({teamspace, modelId, issueId}) {
 	try {
 		const {data} = yield API.getIssue(teamspace, modelId, issueId);
 		data.comments = yield prepareComments(data.comments);
+		data.resources = prepareResources(teamspace, modelId, data.resources);
 		yield put(IssuesActions.fetchIssueSuccess(data));
 	} catch (error) {
 		yield put(IssuesActions.fetchIssueFailure());
@@ -109,7 +117,29 @@ const toggleIssuePin = (issue, selected = true) => {
 	}
 };
 
-function* saveIssue({ teamspace, model, issueData, revision }) {
+
+function* updateIssuePin({issue}) {
+	yield Viewer.removePin({ id: issue._id });
+	if (issue && issue.position && issue.position.length > 0 && issue._id) {
+		const { _id } = yield select(selectActiveIssueDetails);
+
+		const isSelectedPin = _id && issue._id === _id;
+		const pinColor = isSelectedPin ? PIN_COLORS.YELLOW : PIN_COLORS.BLUE;
+
+		Viewer.addPin({
+			id: issue._id,
+			type: 'issue',
+			account: issue.account,
+			model: issue.model,
+			pickedPos: issue.position,
+			pickedNorm: issue.norm,
+			colours: pinColor,
+			viewpoint: issue.viewpoint
+		});
+	}
+}
+
+function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting }) {
 	try {
 		const pinData = Viewer.getPinData();
 		Viewer.setPinDropMode(false);
@@ -124,7 +154,10 @@ function* saveIssue({ teamspace, model, issueData, revision }) {
 		]);
 
 		viewpoint.hideIfc = ifcSpacesHidden;
-		issueData.rev_id = revision;
+		issueData.rev_id = {
+            ...issueData,
+            rev_id: revision
+        };
 
 		if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
 			const [highlightedGroup, hiddenGroup] = yield createGroup(issueData, objectInfo, teamspace, model, revision);
@@ -164,6 +197,8 @@ function* saveIssue({ teamspace, model, issueData, revision }) {
 
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(savedIssue, jobs);
+
+		finishSubmitting();
 
 		yield put(IssuesActions.showDetails(teamspace, model, revision, savedIssue));
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
@@ -208,13 +243,14 @@ function* updateNewIssue({ newIssue }) {
 	}
 }
 
-function* postComment({ teamspace, modelId, issueData }) {
+function* postComment({ teamspace, modelId, issueData, finishSubmitting }) {
 	try {
-		const { rev_id, _id} = yield select(selectActiveIssueDetails);
-		const { data: comment } = yield API.updateIssue(teamspace, modelId, _id, rev_id, issueData);
+		const { _id } = yield select(selectActiveIssueDetails);
+		const { data: comment } = yield API.addIssueComment(teamspace, modelId, _id, issueData);
 		const preparedComment = yield prepareComment(comment);
 
-		yield put(IssuesActions.createCommentSuccess(preparedComment, issueData._id));
+		finishSubmitting();
+		yield put(IssuesActions.createCommentSuccess(preparedComment, _id));
 		yield put(SnackbarActions.show('Issue comment added'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('post', 'issue comment', error));
@@ -223,16 +259,9 @@ function* postComment({ teamspace, modelId, issueData }) {
 
 function* removeComment({ teamspace, modelId, issueData }) {
 	try {
-		const { issueNumber, commentIndex, _id, rev_id, guid } = issueData;
-		const commentData = {
-			comment: '',
-			number: issueNumber,
-			delete: true,
-			commentIndex
-		};
-
-		yield API.updateIssue(teamspace, modelId, _id, rev_id, commentData);
-		yield put(IssuesActions.deleteCommentSuccess(guid, issueData._id));
+		const { _id, guid } = issueData;
+		yield API.deleteIssueComment(teamspace, modelId, _id, guid);
+		yield put(IssuesActions.deleteCommentSuccess(guid, _id));
 		yield put(SnackbarActions.show('Comment removed'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'comment', error));
@@ -459,6 +488,17 @@ function* setActiveIssue({ issue, revision }) {
 		const activeIssueId = yield select(selectActiveIssueId);
 		const issuesMap = yield select(selectIssuesMap);
 
+		if (issuesMap[activeIssueId]) {
+			const {account , model } = issuesMap[activeIssueId];
+			yield put(IssuesActions.unsubscribeOnIssueCommentsChanges(account, model, activeIssueId));
+		}
+
+		if (issue) {
+			const {account , model, _id} = issue;
+			yield put(IssuesActions.subscribeOnIssueCommentsChanges(account, model, _id));
+			yield put(IssuesActions.fetchIssue(account , model, _id));
+		}
+
 		if (activeIssueId !== issue._id) {
 			if (activeIssueId) {
 				toggleIssuePin(issuesMap[activeIssueId], false);
@@ -528,7 +568,14 @@ function* showNewPin({ issue, pinData }) {
 
 const onUpdateEvent = (updatedIssue) => {
 	const jobs = selectJobsList(getState());
+	if (updatedIssue.comments) {
+		updatedIssue.comments = prepareComments(updatedIssue.comments);
+	}
+
+	dispatch(IssuesActions.updateIssuePin(updatedIssue));
+
 	if (updatedIssue.status === STATUSES.CLOSED) {
+
 		dispatch(IssuesActions.showCloseInfo(updatedIssue._id));
 		setTimeout(() => {
 			dispatch(IssuesActions.saveIssueSuccess(prepareIssue(updatedIssue, jobs)));
@@ -541,6 +588,27 @@ const onUpdateEvent = (updatedIssue) => {
 const onCreateEvent = (createdIssue) => {
 	const jobs = selectJobsList(getState());
 	dispatch(IssuesActions.saveIssueSuccess(prepareIssue(createdIssue[0], jobs)));
+	dispatch(IssuesActions.updateIssuePin(createdIssue[0]));
+};
+
+const onResourcesCreated = (resources) => {
+	resources = resources.filter((r) => r.issueIds );
+	if (!resources.length) {
+		return;
+	}
+	const currentState = getState();
+	const teamspace = selectCurrentModelTeamspace(currentState);
+	const model = selectCurrentModel(currentState);
+	const issueId =  resources[0].issueIds[0];
+	dispatch(IssuesActions.attachResourcesSuccess(prepareResources(teamspace, model, resources), issueId));
+};
+
+const onResourceDeleted = (resource) => {
+	if (!resource.issueIds) {
+		return;
+	}
+
+	dispatch(IssuesActions.removeResourceSuccess(resource, resource.issueIds[0]));
 };
 
 function* subscribeOnIssueChanges({ teamspace, modelId }) {
@@ -548,6 +616,10 @@ function* subscribeOnIssueChanges({ teamspace, modelId }) {
 		subscribeToUpdated: onUpdateEvent,
 		subscribeToCreated: onCreateEvent
 	}));
+    yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RESOURCES, teamspace, modelId, {
+        subscribeToCreated: onResourcesCreated,
+        subscribeToDeleted: onResourceDeleted
+    }));
 }
 
 function* unsubscribeOnIssueChanges({ teamspace, modelId }) {
@@ -555,6 +627,10 @@ function* unsubscribeOnIssueChanges({ teamspace, modelId }) {
 		unsubscribeFromUpdated: onUpdateEvent,
 		unsubscribeFromCreated: onCreateEvent
 	}));
+    yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RESOURCES, teamspace, modelId, {
+        unsubscribeFromCreated: onResourcesCreated,
+        unsubscribeFromDeleted: onResourceDeleted
+    }));
 }
 
 const onUpdateCommentEvent = (updatedComment) => {
@@ -641,6 +717,89 @@ function* toggleSubmodelsIssues({ showSubmodelIssues }) {
 	}
 }
 
+export function* removeResource({ resource }) {
+	try {
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const issueId = (yield select(selectActiveIssueDetails))._id;
+		const model  = yield select(selectCurrentModel);
+		const username = (yield select(selectCurrentUser)).username;
+
+		yield API.removeResource(teamspace, model, issueId, resource._id);
+		yield put(IssuesActions.removeResourceSuccess(resource, issueId));
+		yield put(IssuesActions.createCommentSuccess(createRemoveResourceComment(username, resource), issueId));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'resource', error));
+	}
+}
+
+export function* attachFileResources({ files }) {
+	const names =  files.map((file) => file.name);
+	files = files.map((file) => file.file);
+
+	const timeStamp = Date.now();
+
+	const tempResources = files.map((f, i) => (
+		{
+			_id: timeStamp + i,
+			name: names[i] + (f.name.match(EXTENSION_RE) || ['', ''])[0].toLowerCase(),
+			uploading: true,
+			progress: 0,
+			size: 0,
+			originalSize: f.size
+		})
+		);
+
+	const resourceIds = tempResources.map((resource) => resource._id);
+	const teamspace = yield select(selectCurrentModelTeamspace);
+	const issueId = (yield select(selectActiveIssueDetails))._id;
+
+	try {
+		const model  = yield select(selectCurrentModel);
+		const username = (yield select(selectCurrentUser)).username;
+
+		yield put(IssuesActions.attachResourcesSuccess( prepareResources(teamspace, model, tempResources), issueId));
+
+		const { data } = yield API.attachFileResources(teamspace, model, issueId, names, files, (progress) => {
+			const updates = tempResources.map((r) => (
+				{
+					progress: progress * 100,
+					size : filesize(r.originalSize * progress, {round: 0}).replace(' ', '')
+				}
+				));
+
+			dispatch(IssuesActions.updateResourcesSuccess(resourceIds, updates, issueId));
+		});
+
+		const resources = prepareResources(teamspace, model, data, { uploading: false});
+
+		yield put(IssuesActions.updateResourcesSuccess(resourceIds, resources, issueId));
+		yield put(IssuesActions.createCommentsSuccess(createAttachResourceComments(username, data), issueId));
+	} catch (error) {
+		for (let i = 0; i < resourceIds.length; ++i) {
+			yield put(IssuesActions.removeResourceSuccess({_id: resourceIds[i]}, issueId));
+		}
+		yield put(DialogActions.showEndpointErrorDialog('attach', 'resource', error));
+	}
+}
+
+export function* attachLinkResources({ links }) {
+	try {
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const issueId = (yield select(selectActiveIssueDetails))._id;
+		const model = yield select(selectCurrentModel);
+		const names = links.map((link) => link.name);
+		const urls = links.map((link) => link.link);
+		const username = (yield select(selectCurrentUser)).username;
+
+		const {data} = yield API.attachLinkResources(teamspace, model, issueId, names, urls);
+		const resources = prepareResources(teamspace, model, data);
+		yield put(IssuesActions.attachResourcesSuccess(resources, issueId));
+		yield put(IssuesActions.createCommentsSuccess(createAttachResourceComments(username, data), issueId));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'resource', error));
+	}
+}
+
 export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.FETCH_ISSUES, fetchIssues);
 	yield takeLatest(IssuesTypes.FETCH_ISSUE, fetchIssue);
@@ -666,5 +825,9 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.UPDATE_NEW_ISSUE, updateNewIssue);
 	yield takeLatest(IssuesTypes.SET_FILTERS, setFilters);
 	yield takeLatest(IssuesTypes.TOGGLE_SUBMODELS_ISSUES, toggleSubmodelsIssues);
+	yield takeLatest(IssuesTypes.REMOVE_RESOURCE, removeResource);
+	yield takeLatest(IssuesTypes.ATTACH_FILE_RESOURCES, attachFileResources);
+	yield takeLatest(IssuesTypes.ATTACH_LINK_RESOURCES, attachLinkResources);
+	yield takeLatest(IssuesTypes.UPDATE_ISSUE_PIN, updateIssuePin);
 	yield takeLatest(IssuesTypes.SHOW_MULTIPLE_GROUPS, showMultipleGroups);
 }

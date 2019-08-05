@@ -1,18 +1,7 @@
-import { intersection, keys, memoize, pickBy } from 'lodash';
-import { NODE_TYPES, SELECTION_STATES, VISIBILITY_STATES } from '../../../constants/tree';
+import { memoize, intersection, keys, pickBy, uniqBy } from 'lodash';
+import { SELECTION_STATES, VISIBILITY_STATES, NODE_TYPES } from '../../../constants/tree';
 
 export class Processing {
-	public get selectedNodesIds() {
-		return keys(pickBy(this.selectionMap, (selectionState) => {
-			return selectionState !== SELECTION_STATES.UNSELECTED;
-		}));
-	}
-
-	public get invisibleNodesIds() {
-		return keys(pickBy(this.visibilityMap, (selectionState) => {
-			return selectionState === VISIBILITY_STATES.INVISIBLE;
-		}));
-	}
 	public nodesList = [];
 	public nodesIndexesMap = {};
 	public defaultVisibilityMap = {};
@@ -20,33 +9,6 @@ export class Processing {
 	public nodesBySharedIdsMap = {};
 	public selectionMap = {};
 	public visibilityMap = {};
-
-	public getDeepChildren = memoize((node) => {
-		const nodeIndex = this.nodesIndexesMap[node._id];
-		return this.nodesList.slice(nodeIndex + 1, nodeIndex + node.deepChildrenNumber + 1);
-	}, (node) => node._id);
-
-	public getParents = memoize((node = {}) => {
-		const parents = [];
-		let nextParentId = node.parentId;
-
-		while (!!nextParentId) {
-			const parentNodeIndex = this.nodesIndexesMap[nextParentId];
-			const parentNode = this.nodesList[parentNodeIndex];
-			parents.push(parentNode);
-			nextParentId = parentNode.parentId;
-		}
-
-		return parents;
-	}, (node = {}) => node._id);
-
-	public getChildren = memoize((node = {}) => {
-		if (node.hasChildren) {
-			return this.getNodesByIds(node.childrenIds);
-		}
-
-		return [];
-	}, (node = {}) => node._id);
 
 	constructor(data) {
 		const {
@@ -60,6 +22,24 @@ export class Processing {
 		this.visibilityMap = visibilityMap;
 		this.selectionMap = selectionMap;
 		this.nodesBySharedIdsMap = nodesBySharedIdsMap;
+	}
+
+	public get selectedNodesIds() {
+		return keys(pickBy(this.selectionMap, (selectionState) => {
+			return selectionState !== SELECTION_STATES.UNSELECTED;
+		}));
+	}
+
+	public get fullySelectedNodesIds() {
+		return keys(pickBy(this.selectionMap, (selectionState) => {
+			return selectionState === SELECTION_STATES.SELECTED;
+		}));
+	}
+
+	public get hiddenNodesIds() {
+		return keys(pickBy(this.visibilityMap, (selectionState) => {
+			return selectionState === VISIBILITY_STATES.INVISIBLE;
+		}));
 	}
 
 	public clearCurrentlySelected = () => {
@@ -104,13 +84,17 @@ export class Processing {
 
 	public deselectNodes = ({ nodesIds = [] }) => {
 		const filteredNodesIds = intersection(nodesIds, this.selectedNodesIds);
-		const nodes = this.getNodesByIds(filteredNodesIds);
+		const nodesWithChildren = [];
+		for (let index = 0, size = filteredNodesIds.length; index < size; index++) {
+			const nodeId = filteredNodesIds[index];
+			const [node] = this.getNodesByIds([nodeId]);
+			nodesWithChildren.push(node);
+			this.selectionMap[nodeId] = SELECTION_STATES.UNSELECTED;
 
-		const children = nodes.map((node) => this.getDeepChildren(node)) as any;
-		const nodesWithChildren = [...nodes, ...children.flat()];
-
-		for (let index = 0; index < filteredNodesIds.length; index++) {
-			this.selectionMap[filteredNodesIds[index]] = SELECTION_STATES.UNSELECTED;
+			if (node.hasChildren) {
+				const deepChildren = (this.getDeepChildren(node) as any).flat();
+				nodesWithChildren.push(...deepChildren);
+			}
 		}
 
 		this.handleToDeselect(nodesWithChildren);
@@ -121,49 +105,47 @@ export class Processing {
 		return { unhighlightedObjects };
 	}
 
-	public isolateNodes = ({ nodesIds = [], ifcSpacesHidden = true }: any) => {
-		const toUnhighlight = [];
-		const toHighlight = [];
+	public isolateNodes = ({ nodesIds = [], ifcSpacesHidden = true, skipChildren = false }: any) => {
 		const meshesToUpdate = [];
+		const parentsMap = {};
 
-		for (let index = 0; index < this.nodesList.length; index++) {
-			const node = this.nodesList[index];
-			const shouldBeVisible = nodesIds.includes(node._id);
-			if (shouldBeVisible) {
-				if (ifcSpacesHidden) {
-					this.visibilityMap[node._id] = ifcSpacesHidden ? this.defaultVisibilityMap[node._id] : VISIBILITY_STATES.VISIBLE;
-				}
+		for (let index = 0; index < nodesIds.length; index++) {
+			const [node] = this.getNodesByIds([nodesIds[index]]);
+			parentsMap[node.parentId] = true;
 
-				if (this.isVisibleNode(node._id)) {
-					toHighlight.push(node);
-					if (node.type === NODE_TYPES.MESH) {
-						meshesToUpdate.push(node);
-					}
-					this.selectionMap[node._id] = SELECTION_STATES.SELECTED;
-				} else {
-					this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
-				}
-			} else if (this.isVisibleNode(node._id)) {
-				toUnhighlight.push(node);
-				this.visibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
-				this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
-				if (node.type === NODE_TYPES.MESH) {
-					meshesToUpdate.push(node);
-				}
+			if (!skipChildren) {
+				const deepChildren = this.getDeepChildren(node);
+				const deepChildrenIds = deepChildren.map(({ _id }) => _id);
+				nodesIds.push(...deepChildrenIds);
 			}
 		}
 
-		const unhighlightedObjects = this.getMeshesByNodes(toUnhighlight);
-		const highlightedObjects = this.getMeshesByNodes(toHighlight);
+		for (let index = this.nodesList.length - 1; index >= 0; index--) {
+			const node = this.nodesList[index];
+			const shouldBeVisible = nodesIds.includes(node._id);
+			let visibilityHasChanged = false;
+			if (shouldBeVisible) {
+				this.visibilityMap[node._id] = ifcSpacesHidden ? this.defaultVisibilityMap[node._id] : VISIBILITY_STATES.VISIBLE;
+				visibilityHasChanged = true;
+			} else if (this.isVisibleNode(node._id) && !parentsMap[node._id]) {
+				this.visibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
+				visibilityHasChanged = true;
+			}
 
+			if (visibilityHasChanged && node.type === NODE_TYPES.MESH) {
+				meshesToUpdate.push(node);
+			}
+			this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
+		}
+
+		this.updateParentsVisibility(this.getNodesByIds(keys(parentsMap)), {
+			visibility: VISIBILITY_STATES.PARENT_OF_INVISIBLE,
+			ifcSpacesHidden
+		});
 		this.selectionMap = { ...this.selectionMap };
 		this.visibilityMap = { ...this.visibilityMap };
 
-		return {
-			unhighlightedObjects,
-			highlightedObjects,
-			meshesToUpdate
-		};
+		return meshesToUpdate;
 	}
 
 	public updateVisibility = ({ nodesIds = [], ...extraData }) => {
@@ -194,11 +176,8 @@ export class Processing {
 	private updateParentsVisibility = (nodes = [], extraData) => {
 		const unhighlightedObjects = [];
 
-		const processedNodes = [];
-
 		while (nodes.length > 0) {
 			const node = nodes.pop();
-			processedNodes.push(node._id);
 
 			if (node.hasChildren) {
 				const children = this.getChildren(node);
@@ -237,7 +216,9 @@ export class Processing {
 					}
 				}
 			} else {
-				this.visibilityMap[node._id] = extraData.visibility;
+					this.visibilityMap[node._id] = extraData.ifcSpacesHidden && extraData.visibility === VISIBILITY_STATES.VISIBLE
+						? this.defaultVisibilityMap[node._id]
+						: extraData.visibility;
 			}
 
 			if (node.parentId) {
@@ -253,17 +234,13 @@ export class Processing {
 		const { ifcSpacesHidden, skipChildren, visibility, skipParents } = extraData;
 
 		const parents = [];
-		const processedNodes = [];
 		const meshesToUpdate = [];
 
 		for (let nodeLoopIndex = 0; nodeLoopIndex < nodes.length; nodeLoopIndex++) {
 			const node = nodes[nodeLoopIndex];
 
 			if (node) {
-				const nodeVisibility = this.visibilityMap[node._id];
-				processedNodes.push(node._id);
-
-				if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE || visibility !== nodeVisibility) {
+				if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE || visibility !== this.visibilityMap[node._id]) {
 					if (node.type === NODE_TYPES.MESH) {
 						meshesToUpdate.push(node);
 					}
@@ -276,16 +253,15 @@ export class Processing {
 
 					for (let index = 0; index < children.length; index++) {
 						const child = children[index];
-						processedNodes.push(child._id);
 
-						if (nodeVisibility !== visibility && child.type === NODE_TYPES.MESH) {
+						if (this.visibilityMap[node._id] !== visibility && child.type === NODE_TYPES.MESH) {
 							meshesToUpdate.push(child);
 						}
 
 						if (visibility === VISIBILITY_STATES.VISIBLE) {
-							if (!(ifcSpacesHidden && this.defaultVisibilityMap[child._id] === VISIBILITY_STATES.INVISIBLE)) {
-								this.visibilityMap[child._id] = VISIBILITY_STATES.VISIBLE;
-							}
+							this.visibilityMap[child._id] = ifcSpacesHidden
+								? this.defaultVisibilityMap[child._id]
+								: VISIBILITY_STATES.VISIBLE;
 						} else {
 							this.selectionMap[child._id] = SELECTION_STATES.UNSELECTED;
 							this.visibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
@@ -313,19 +289,21 @@ export class Processing {
 	}
 
 	private handleToSelect = (toSelect) => {
+		const parents = [];
+
 		for (let index = 0, size = toSelect.length; index < size; index++) {
 			const node = toSelect[index];
 
 			if (this.isVisibleNode(node._id)) {
 				this.selectionMap[node._id] = SELECTION_STATES.SELECTED;
+				const nodeParents = this.getParents(node);
+				parents.push(...nodeParents);
 			}
 		}
 
-		const clickedNode = toSelect[0];
-		const parents = this.getParents(clickedNode);
-
-		if (clickedNode.hasChildren || toSelect.length === 1) {
-			this.updateParentsSelection(parents);
+		if (parents.length) {
+			const uniqueParents = uniqBy(parents, ({ _id}) => _id);
+			this.updateParentsSelection(uniqueParents);
 		}
 	}
 
@@ -333,16 +311,19 @@ export class Processing {
 		if (!toDeselect.length) {
 			return;
 		}
+
+		const parents = [];
 		for (let index = 0, size = toDeselect.length; index < size; index++) {
 			const node = toDeselect[index];
 			this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
+
+			const nodeParents = this.getParents(node);
+			parents.push(...nodeParents);
 		}
 
-		const clickedNode = toDeselect[0];
-		const parents = this.getParents(clickedNode);
-
-		if (clickedNode.hasChildren || toDeselect.length === 1) {
-			this.updateParentsSelection(parents);
+		if (parents.length) {
+			const uniqueParents = uniqBy(parents, ({ _id }) => _id);
+			this.updateParentsSelection(uniqueParents);
 		}
 	}
 
@@ -366,11 +347,38 @@ export class Processing {
 		}
 	}
 
+	public getDeepChildren = memoize((node) => {
+		const nodeIndex = this.nodesIndexesMap[node._id];
+		return this.nodesList.slice(nodeIndex + 1, nodeIndex + node.deepChildrenNumber + 1);
+	}, (node) => node._id);
+
 	private getNodesByIds = (nodesIds) => {
 		return nodesIds.map((nodeId) => {
 			return this.nodesList[this.nodesIndexesMap[nodeId]];
 		});
 	}
+
+	public getParents = memoize((node = {}) => {
+		const parents = [];
+		let nextParentId = node.parentId;
+
+		while (!!nextParentId) {
+			const parentNodeIndex = this.nodesIndexesMap[nextParentId];
+			const parentNode = this.nodesList[parentNodeIndex];
+			parents.push(parentNode);
+			nextParentId = parentNode.parentId;
+		}
+
+		return parents;
+	}, (node = {}) => node._id);
+
+	public getChildren = memoize((node = {}) => {
+		if (node.hasChildren) {
+			return this.getNodesByIds(node.childrenIds);
+		}
+
+		return [];
+	}, (node = {}) => node._id);
 
 	private isVisibleNode = (nodeId) => {
 		return this.visibilityMap[nodeId] !== VISIBILITY_STATES.INVISIBLE;

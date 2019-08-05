@@ -35,12 +35,11 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	highlightGroup: ['group'],
 	dehighlightGroup: ['group'],
 	clearSelectionHighlights: [],
-	addColorOverride: ['groups', 'renderOnly'],
-	removeColorOverride: ['groups', 'renderOnly'],
-	toggleColorOverride: ['group'],
-	addToOverrided: ['groupsMap'],
-	removeFromOverrided: ['groupsIds'],
-	toggleColorOverrideAll: ['overrideAll'],
+	addColorOverride: ['groupId'],
+	removeColorOverride: ['groupId'],
+	setColorOverrides: ['groupIds'],
+	toggleColorOverride: ['groupId'],
+	setOverrideAll: ['overrideAll'],
 	deleteGroups: ['teamspace', 'modelId', 'groups'],
 	showDeleteInfo: ['groupIds'],
 	deleteGroupsSuccess: ['groupIds'],
@@ -76,9 +75,9 @@ export interface IGroupComponentState {
 	updatedGroup: any;
 	selectedFilters: any[];
 	highlightedGroups: any;
-	colorOverrides: any;
 	totalMeshes: number;
 	criteriaFieldState: ICriteriaFieldState;
+	allOverridden: boolean;
 	searchEnabled: boolean;
 }
 
@@ -87,6 +86,7 @@ export interface IGroupState {
 	isPending: boolean;
 	componentState: IGroupComponentState;
 	fieldNames: any[];
+	colorOverrides: any;
 }
 
 export const INITIAL_CRITERIA_FIELD_STATE = {
@@ -111,11 +111,12 @@ export const INITIAL_STATE: IGroupState = {
 		newGroup: {},
 		updatedGroup: {},
 		selectedFilters: [],
-		colorOverrides: {},
 		totalMeshes: 0,
 		criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE,
+		allOverridden: false,
 		searchEnabled: false
 	},
+	colorOverrides: [],
 	fieldNames: []
 };
 
@@ -152,17 +153,35 @@ export const removeFromHighlighted = (state = INITIAL_STATE, { groupId }) => {
 	return { ...state, componentState: { ...state.componentState, highlightedGroups } };
 };
 
-export const addToOverrided = (state = INITIAL_STATE, { groupsMap }) => {
-	const colorOverrides = {
-		...state.componentState.colorOverrides,
-		...groupsMap
-	};
-	return { ...state, componentState: { ...state.componentState, colorOverrides } };
+export const addColorOverride = (state = INITIAL_STATE, { groupId }) => {
+	if (state.colorOverrides.includes(groupId)) {
+		return state;
+	}
+
+	return {...state, colorOverrides: state.colorOverrides.concat(groupId)};
 };
 
-export const removeFromOverrided = (state = INITIAL_STATE, { groupsIds }) => {
-	const colorOverrides = omit({ ...state.componentState.colorOverrides }, groupsIds);
-	return { ...state, componentState: { ...state.componentState, colorOverrides } };
+export const removeColorOverride = (state = INITIAL_STATE, { groupId }) => {
+	const componentState = { ...state.componentState, allOverridden: false };
+	return {...state, componentState, colorOverrides: state.colorOverrides.filter((id) => groupId !== id)};
+};
+
+export const setColorOverrides = (state = INITIAL_STATE, { groupIds }) => {
+	// This is done to keep the relative override order
+	const overridesLeft = state.colorOverrides.filter((groupId) => groupIds.includes(groupId));
+	const newOverrides = groupIds.filter((groupId) =>  !state.colorOverrides.includes(groupId));
+
+	return {...state, colorOverrides: newOverrides.concat(overridesLeft)};
+};
+
+export const setOverrideAll = (state = INITIAL_STATE, { overrideAll }) => {
+	let groupIds = [];
+	if (overrideAll) {
+		groupIds = Object.keys(state.groupsMap);
+	}
+
+	const componentState = { ...state.componentState, allOverridden: overrideAll };
+	return setColorOverrides({...state, componentState}, { groupIds });
 };
 
 export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
@@ -176,6 +195,11 @@ export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
 		newGroup.objects = group.objects;
 		newGroup.totalSavedMeshes = group.totalSavedMeshes;
 	}
+
+	if (state.componentState.allOverridden) {
+		state = addColorOverride(state, { groupId: group._id});
+	}
+
 	return { ...state, groupsMap, componentState: { ...state.componentState, newGroup } };
 };
 
@@ -228,11 +252,13 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.SET_COMPONENT_STATE]: setComponentState,
 	[GroupsTypes.ADD_TO_HIGHLIGHTED]: addToHighlighted,
 	[GroupsTypes.REMOVE_FROM_HIGHLIGHTED]: removeFromHighlighted,
-	[GroupsTypes.ADD_TO_OVERRIDED]: addToOverrided,
-	[GroupsTypes.REMOVE_FROM_OVERRIDED]: removeFromOverrided,
+	[GroupsTypes.ADD_COLOR_OVERRIDE]: addColorOverride,
+	[GroupsTypes.REMOVE_COLOR_OVERRIDE]: removeColorOverride,
+	[GroupsTypes.SET_COLOR_OVERRIDES]: setColorOverrides,
 	[GroupsTypes.UPDATE_GROUP_SUCCESS]: updateGroupSuccess,
 	[GroupsTypes.DELETE_GROUPS_SUCCESS]: deleteGroupsSuccess,
 	[GroupsTypes.SET_CRITERIA_FIELD_STATE]: setCriteriaFieldState,
 	[GroupsTypes.SHOW_UPDATE_INFO]: showUpdateInfo,
-	[GroupsTypes.RESET_COMPONENT_STATE]: resetComponentState
+	[GroupsTypes.RESET_COMPONENT_STATE]: resetComponentState,
+	[GroupsTypes.SET_OVERRIDE_ALL]: setOverrideAll
 });

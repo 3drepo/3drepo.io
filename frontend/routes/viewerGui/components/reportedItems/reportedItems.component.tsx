@@ -40,6 +40,7 @@ import {
 	StyledItemText,
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';

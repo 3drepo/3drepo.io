@@ -143,7 +143,11 @@ function getBCFMarkup(issue, account, model, unit) {
 	} else if (_.get(issue, "extras.DueDate")) {
 		markup.Markup.Topic.DueDate = _.get(issue, "extras.DueDate"); // For backwards compatibility
 	}
-	_.get(issue, "extras.AssignedTo") && (markup.Markup.Topic.AssignedTo = issue.assigned_roles.toString());
+	if (issue.assigned_roles && issue.assigned_roles.length > 0) {
+		markup.Markup.Topic.AssignedTo = issue.assigned_roles.toString();
+	} else if (_.get(issue, "extras.AssignedTo")) {
+		markup.Markup.Topic.AssignedTo = _.get(issue, "extras.AssignedTo");
+	}
 	_.get(issue, "desc") && (markup.Markup.Topic.Description = _.get(issue, "desc"));
 	_.get(issue, "extras.BimSnippet") && (markup.Markup.Topic.BimSnippet = _.get(issue, "extras.BimSnippet"));
 	_.get(issue, "extras.DocumentReference") && (markup.Markup.Topic.DocumentReference = _.get(issue, "extras.DocumentReference"));

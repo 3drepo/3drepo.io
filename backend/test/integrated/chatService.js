@@ -232,6 +232,9 @@ describe("Chat service", function () {
 		});
 	});
 
+
+	let commentGuid = null;
+
 	it("subscribe new comment chat event should succeed", function(done) {
 		const comment = {"comment":"abc123","viewpoint":{"up":[0,1,0],"position":[38,38,125.08011914810137],"look_at":[0,0,-1],"view_dir":[0,0,-1],"right":[1,0,0],"unityHeight":3.598903890627168,"fov":2.127137068283407,"aspect_ratio":0.8810888191084674,"far":244.15656512260063,"near":60.08161739445468,"clippingPlanes":[]}};
 
@@ -250,17 +253,20 @@ describe("Chat service", function () {
 			expect(resComment.viewpoint.near).to.equal(comment.viewpoint.near);
 			expect(resComment.viewpoint.clippingPlanes).to.deep.equal(comment.viewpoint.clippingPlanes);
 
+			commentGuid = resComment.guid;
+
 			done();
 		});
 
 		// console.log('issueId2', issueId);
-		teamSpace1Agent.patch(`/${account}/${model}/issues/${issueId}`)
+		teamSpace1Agent.post(`/${account}/${model}/issues/${issueId}/comments`)
 			.send(comment)
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
 			});
 	});
-
+/*
+	This cant be done from the ui.
 	it("subscribe comment changed chat event should succeed", function(done) {
 		const comment = {"comment":"abc123456","edit":true,"commentIndex":0};
 
@@ -270,22 +276,23 @@ describe("Chat service", function () {
 			done();
 		});
 
-		teamSpace1Agent.patch(`/${account}/${model}/issues/${issueId}`)
+		teamSpace1Agent.post(`/${account}/${model}/issues/${issueId}/comments`)
 			.send(comment)
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
 			});
 	});
+*/
 
 	it("subscribe comment deleted chat event should succeed", function(done) {
-		const comment = {"comment":"","delete":true,"commentIndex":0};
+		const comment = {guid: commentGuid};
 
 		socket.on(`${account}::${model}::${issueId}::commentDeleted`, function(resComment) {
 			expect(resComment).to.exist;
 			done();
 		});
 
-		teamSpace1Agent.patch(`/${account}/${model}/issues/${issueId}`)
+		teamSpace1Agent.delete(`/${account}/${model}/issues/${issueId}/comments`)
 			.send(comment)
 			.expect(200 , function(err, res) {
 				expect(err).to.not.exist;
@@ -562,5 +569,4 @@ describe("Chat service", function () {
 		});
 
 	});
-
 });

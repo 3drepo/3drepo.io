@@ -34,7 +34,7 @@ interface IProps {
 	renderComparisonLoader: () => void;
 	setTargetModel: (modelId, isTarget, isTypeChange?) => void;
 	setComponentState: (state) => void;
-	setTargetRevision: (modelId, targetRevision) => void;
+	setTargetRevision: (modelId, targetRevision, isDiff) => void;
 	handleAllItemsSelect: () => void;
 	handleItemSelect: (modelProps) => (event, selected) => void;
 }
@@ -81,7 +81,7 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 	)
 
 	private handleRevisionChange = (modelProps) => (revision) => {
-		this.props.setTargetRevision(modelProps._id, revision);
+		this.props.setTargetRevision(modelProps._id, revision, false);
 	}
 
 	private renderListItem = (modelProps) => {

@@ -24,12 +24,15 @@ export interface INode {
 
 export interface ITreeProcessingData {
 	selectedNodesIds: string[];
+	fullySelectedNodesIds: string[];
 	visibilityMap: any;
 	selectionMap: any;
-	invisibleNodesIds: any;
+	hiddenNodesIds: any;
 	defaultVisibilityMap: any;
 	nodesList: INode[];
 	nodesIndexesMap: any;
 	meshesByModelId: any;
 	nodesBySharedIdsMap: any;
 }
+
+export const DEFAULT_NODE_NAME = '(No Name)';

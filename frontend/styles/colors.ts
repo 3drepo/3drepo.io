@@ -4,14 +4,17 @@ import { hexToGLColor, hexToRgba } from '../helpers/colors';
 
 export const BLACK = '#00000';
 export const WHITE = '#ffffff';
+const PRIMARY_MAIN = '#0c2f54';
 
 export const COLOR = {
-	PRIMARY_MAIN: '#0c2f54',
+	PRIMARY_MAIN,
 	PRIMARY_LIGHT: '#3c5876',
 	PRIMARY_DARK: '#08203a',
 	SECONDARY_MAIN: '#06563c',
 	SECONDARY_LIGHT: '#377763',
 	SECONDARY_DARK: '#043827',
+	PRIMARY_MAIN_80: hexToRgba(PRIMARY_MAIN, .8),
+	PRIMARY_MAIN_6: hexToRgba(PRIMARY_MAIN, .06),
 
 	WHITE,
 	WHITE_87: hexToRgba(WHITE, 0.87),

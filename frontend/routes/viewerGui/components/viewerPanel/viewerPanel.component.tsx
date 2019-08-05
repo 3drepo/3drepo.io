@@ -54,7 +54,7 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 		</LoaderContainer>
 	));
 
-	public renderTitleActions = () => renderWhenTrue(() => (
+	public renderTitleActions = renderWhenTrue(() => renderWhenTrue(() => (
 		<Actions>
 		{this.props.renderActions()}
 		</Actions>

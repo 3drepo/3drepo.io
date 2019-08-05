@@ -29,6 +29,7 @@ import { Container } from '../../../risks/components/riskDetails/riskDetails.sty
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
+import { exportIssuesToJSON } from '../../../../../../services/export';
 
 interface IProps {
 	viewer: any;
@@ -48,14 +49,18 @@ interface IProps {
 	setState: (componentState) => void;
 	fetchIssue: (teamspace, model, issueId) => void;
 	showNewPin: (issue, pinData) => void;
-	saveIssue: (teamspace, modelId, issue, revision) => void;
+	saveIssue: (teamspace, modelId, issue, revision, finishSubmitting) => void;
 	updateIssue: (teamspace, modelId, issue) => void;
-	postComment: (teamspace, modelId, issueData) => void;
+	postComment: (teamspace, modelId, issueData, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, issueData) => void;
 	subscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	unsubscribeOnIssueCommentsChanges: (teamspace, modelId, issueId) => void;
 	updateNewIssue: (newIssue) => void;
 	setCameraOnViewpoint: (teamspace, modelId, view) => void;
+	onRemoveResource: (resource) => void;
+	attachFileResources: (files) => void;
+	attachLinkResources: (links) => void;
+	showDialog: (config: any) => void;
 }
 
 interface IState {
@@ -162,11 +167,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { teamspace, model, fetchIssue, issue } = this.props;
-
-		if (issue._id !== prevProps.issue._id) {
-			fetchIssue(teamspace, model, issue._id);
-		}
+		const { issue } = this.props;
 
 		if (
 			issue.comments && prevProps.issue.comments &&
@@ -205,7 +206,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderDetailsForm = () => {
-		const { issue } = this.props;
+		const {issue, onRemoveResource, showDialog, topicTypes,
+			currentUser, myJob, attachFileResources, attachLinkResources} = this.props;
 
 		return (
 			<IssueDetailsForm
@@ -214,13 +216,18 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onValueChange={this.handleIssueFormSubmit}
 				onSubmit={this.handleIssueFormSubmit}
 				permissions={this.props.settings.permissions}
-				topicTypes={this.props.topicTypes}
-				currentUser={this.props.currentUser}
-				myJob={this.props.myJob}
+				topicTypes={topicTypes}
+				currentUser={currentUser}
+				myJob={myJob}
 				onChangePin={this.handleChangePin}
 				onSavePin={this.onPositionSave}
 				pinId={issue._id}
 				hasPin={issue.position && issue.position.length}
+				onRemoveResource={onRemoveResource}
+				attachFileResources={attachFileResources}
+				attachLinkResources={attachLinkResources}
+				showDialog={showDialog}
+				canComment={this.userCanComment}
 			/>
 		);
 	}
@@ -282,11 +289,10 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		this.props.showNewPin(this.props.issue, pinData);
 	}
 
-	public postComment = async (teamspace, model, { comment, screenshot }) => {
+	public postComment = async (teamspace, model, { comment, screenshot }, finishSubmitting) => {
 		const viewpoint = await this.props.viewer.getCurrentViewpoint({ teamspace, model });
 		const issueCommentData = {
 			_id: this.issueData._id,
-			rev_id: this.issueData.rev_id,
 			comment,
 			viewpoint: {
 				...viewpoint,
@@ -294,22 +300,23 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			}
 		};
 
-		this.props.postComment(teamspace, model, issueCommentData);
+		this.props.postComment(teamspace, model, issueCommentData, finishSubmitting);
 	}
 
-	public handleSave = (formValues) => {
+	public handleSave = (formValues, finishSubmitting) => {
 		const { teamspace, model, saveIssue, revision } = this.props;
 		if (this.isNewIssue) {
-			saveIssue(teamspace, model, this.issueData, revision);
+			saveIssue(teamspace, model, this.issueData, revision, finishSubmitting);
 		} else {
-			this.postComment(teamspace, model, formValues);
+			this.postComment(teamspace, model, formValues, finishSubmitting);
 		}
 	}
 
 	public onPositionSave = (position) => {
 		const { teamspace, model, viewer } = this.props;
 		if (!this.isNewIssue) {
-			this.props.updateIssue(teamspace, model, { position });
+
+			this.props.updateIssue(teamspace, model, {position: position || []});
 			viewer.setPin(null);
 		} else {
 			viewer.changePinColor({ id: NEW_PIN_ID, colours: PIN_COLORS.YELLOW });

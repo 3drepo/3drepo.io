@@ -205,6 +205,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							multiline
 							label="Description"
 							disabled={!canEditBasicProperty}
+							mutable={!this.isNewRisk}
 						/>
 					)} />
 				</Container>
@@ -281,6 +282,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							multiline
 							label="Mitigation"
 							disabled={!canEditBasicProperty}
+							mutable={!this.isNewRisk}
 						/>
 					)} />
 				</Container>
@@ -352,6 +354,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							multiline
 							label="Residual Risk"
 							disabled={!canEditBasicProperty}
+							mutable={!this.isNewRisk}
 						/>
 					)} />
 				</Container>

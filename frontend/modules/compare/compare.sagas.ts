@@ -38,8 +38,11 @@ import {
 	selectSortType,
 	selectTargetClashModels,
 	selectTargetDiffModels,
-	selectTargetModelsList
+	selectTargetModelsList,
+	selectTargetModels
 } from './compare.selectors';
+import { TreeActions, selectNodesIndexesMap, selectTreeNodesList } from '../tree';
+import { VISIBILITY_STATES } from '../../constants/tree';
 
 const getNextRevision = (revisions, currentRevision) => {
 	if (!currentRevision) {
@@ -209,28 +212,33 @@ function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
 	try {
 		const activeTab = yield select(selectActiveTab);
 		const isDiff = activeTab === DIFF_COMPARE_TYPE;
-
 		const targetDiffModels = yield select(selectTargetDiffModels);
 		const targetClashModels = yield select(selectTargetClashModels);
 		const componentState = {} as ICompareComponentState;
 		const compareModels = yield select(selectCompareModels);
 
 		if (isDiff) {
+			const newModel = {};
+			newModel[modelId] = isTarget;
+
 			componentState.targetDiffModels = {
 				...targetDiffModels,
-					[modelId]: isTarget
+				...newModel
 			};
 		}
 
 		if (!isTarget) {
-			const { baseRevision } = compareModels.find((model) => model._id === modelId);
-			yield put(CompareActions.setTargetRevision(modelId, baseRevision));
+			const { baseRevision } = compareModels.find((comparedModel) => comparedModel._id === modelId);
+			yield put(CompareActions.setTargetRevision(modelId, baseRevision, isDiff));
 		}
 
 		if (!isDiff) {
+			const newModel = {};
+			newModel[modelId] = isTypeChange ? isTarget : false;
+
 			componentState.targetClashModels = {
 				...targetClashModels,
-				[modelId]: isTypeChange ? isTarget : false
+				...newModel
 			};
 		}
 
@@ -240,12 +248,7 @@ function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
 	}
 }
 
-function* changeModelNodesVisibility(nodesIds = [], visible: boolean) {
-	const visibility = visible ? VISIBILITY_STATES.VISIBLE : VISIBILITY_STATES.INVISIBLE;
-	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, false, true));
-}
-
-function* setModelsNodesVisibility(models, isVisible = true) {
+function* setModelsNodesVisibility(models, visibility) {
 	const indexesMap = yield select(selectNodesIndexesMap);
 	const nodesList = yield select(selectTreeNodesList);
 	const nodesIds = models.map(({ _id, name }) => {
@@ -256,7 +259,7 @@ function* setModelsNodesVisibility(models, isVisible = true) {
 		return _id;
 	});
 
-	yield changeModelNodesVisibility(nodesIds, isVisible);
+	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, false, false));
 }
 
 function* startComparisonOfFederation() {
@@ -264,25 +267,30 @@ function* startComparisonOfFederation() {
 	const activeTab = yield select(selectActiveTab);
 	const isDiff = activeTab === DIFF_COMPARE_TYPE;
 
-	const targetModels = yield select(selectTargetModelsList);
-	const baseModels = yield select(selectBaseModelsList);
 	const compareModels = yield select(selectCompareModels);
-	const selectedModels = yield select(selectSelectedModelsMap);
-
-	yield setModelsNodesVisibility(compareModels, false);
-	yield setModelsNodesVisibility(baseModels);
+	const baseModels = yield select(selectBaseModelsList);
+	const selectedModelsMap = yield select(selectSelectedModelsMap);
+	const targetModelsMap = yield select(selectTargetModels);
 
 	const modelsToLoad = [];
-	for (let index = 0; index < targetModels.length; index++) {
-		const model = targetModels[index];
+	const modelsToHide = [];
+	const modelsToShow = [...baseModels];
 
-		if (model && selectedModels[model._id]) {
+	for (let index = 0; index < compareModels.length; index++) {
+		const model = compareModels[index];
+		const isSelectedModel = selectedModelsMap[model._id];
+		const isTargetModel = targetModelsMap[model._id];
+
+		if (isTargetModel && isSelectedModel) {
 			const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
-			const sharedRevisionModel = compareModels.find(({ baseRevision }) => baseRevision.name === targetRevision.name);
-			const canReuseModel = sharedRevisionModel && selectedModels[sharedRevisionModel._id];
+			const canReuseModel = model.baseRevision.name === targetRevision.name && selectedModelsMap[model._id];
 
 			if (canReuseModel) {
-				yield changeModelNodesVisibility([sharedRevisionModel], true);
+				const isAlreadyVisible = modelsToShow.some(({ _id }) => !!model._id);
+
+				if (!isAlreadyVisible) {
+					modelsToShow.push(model);
+				}
 				Viewer.diffToolSetAsComparator(
 					model.teamspace,
 					model._id
@@ -295,9 +303,13 @@ function* startComparisonOfFederation() {
 				);
 				modelsToLoad.push(modelPromise);
 			}
+		} else {
+			modelsToHide.push(model);
 		}
 	}
 
+	yield setModelsNodesVisibility(modelsToHide, VISIBILITY_STATES.INVISIBLE);
+	yield setModelsNodesVisibility(modelsToShow, VISIBILITY_STATES.VISIBLE);
 	yield all(modelsToLoad);
 
 	if (isDiff) {
@@ -311,7 +323,6 @@ function* startComparisonOfModel() {
 	const targetModels = yield select(selectTargetModelsList);
 	const { teamspace, _id } = targetModels[0];
 	const revision = targetModels[0].targetDiffRevision;
-
 	yield Viewer.diffToolLoadComparator(teamspace, _id, revision.name);
 }
 
@@ -388,12 +399,16 @@ function* resetComponentState() {
 	}
 }
 
-function* setTargetRevision({ modelId, targetRevision }) {
+function* setTargetRevision({ modelId, targetRevision, isDiff }) {
 	try {
 		const isCompareActive = yield select(selectIsCompareActive);
 		const componentState = yield select(selectComponentState);
 		const modelIndex = componentState.compareModels.findIndex((model) => model._id === modelId);
-		componentState.compareModels[modelIndex].targetClashRevision = targetRevision;
+		if (isDiff) {
+			componentState.compareModels[modelIndex].targetDiffRevision = targetRevision;
+		} else {
+			componentState.compareModels[modelIndex].targetClashRevision = targetRevision;
+		}
 		yield put(CompareActions.setComponentState(componentState));
 
 		if (isCompareActive) {

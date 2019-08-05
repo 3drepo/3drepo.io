@@ -39,27 +39,32 @@ const getEventName = (teamspace: string, model: string, keys: string, event: str
 
 export class Channel {
 	/**
-	 * This property contains the object to suscribe to the issues and comments for the issues notification events
+	 * This property contains the object to suscribe to the issues and comments for the issues chat events
 	 */
 	public issues: IssuesChatEvents;
 
 	/**
-	 * This property contains the object to suscribe to the risks and comments for the risks notification events
+	 * This property contains the object to suscribe to the risks and comments for the risks chat events
 	 */
 	public risks: RisksChatEvents;
 
 	/**
-	 * This property contains the object to suscribe to the groups notification events
+	 * This property contains the object to suscribe to the groups chat events
 	 */
 	public groups: ChatEvents;
 
 	/**
-	 * This property contains the object to suscribe to the views notification events
+	 * This property contains the object to suscribe to the resources chat events
+	 */
+	public resources: ChatEvents;
+
+	/**
+	 * This property contains the object to suscribe to the views chat events
 	 */
 	public views: ChatEvents;
 
 	/**
-	 * This property contains the object to suscribe to the general modem status notification events
+	 * This property contains the object to suscribe to the general modem status chat events
 	 */
 	public model: ModelChatEvents;
 
@@ -82,6 +87,7 @@ export class Channel {
 		this[CHAT_CHANNELS.RISKS] = new RisksChatEvents(this);
 		this[CHAT_CHANNELS.MODEL] = new ModelChatEvents(this);
 		this[CHAT_CHANNELS.VIEWS] = new ChatEvents(this, 'view');
+		this.resources = new ChatEvents(this, 'resource');
 		this[CHAT_CHANNELS.NOTIFICATIONS] = new NotificationsChatEvents(this);
 	}
 
@@ -126,6 +132,10 @@ export class Channel {
 			this.subscriptions[event] = [];
 		}
 
+		if (this.hasAlreadySubscribed(event, callback, context)) {
+			return;
+		}
+
 		this.subscriptions[event].push({ callback, context });
 	}
 
@@ -144,6 +154,15 @@ export class Channel {
 
 	private hasSubscriptions(event: string) {
 		return (this.subscriptions[event] || []).length > 0;
+	}
+
+	private hasAlreadySubscribed(event, callback, context) {
+		const subscriptions =  this.subscriptions[event];
+
+		if (!subscriptions) {
+			return false;
+		}
+		return subscriptions.some((subscription) =>  subscription.callback === callback &&  subscription.context === context);
 	}
 
 	private performSubscribe(teamspace: string, model: string, keys: any, event: any, callback: any) {

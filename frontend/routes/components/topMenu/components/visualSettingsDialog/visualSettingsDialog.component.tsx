@@ -30,7 +30,8 @@ import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NegativeActionButton
 const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
 	memory: schema.integer(16, 2032),
-	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY)
+	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY),
+	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY)
 });
 
 const BasicSettings = (props) => {
@@ -120,6 +121,19 @@ const AdvancedSettings = (props) => {
 					);
 				}} />
 			</FormListItem>
+			<FormListItem>
+				Maximum Shadow Distance
+				<Field name="maxShadowDistance" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.maxShadowDistance || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.maxShadowDistance)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
 		</List>
 	);
 };
@@ -190,6 +204,7 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 		values.nearPlane = Number(values.nearPlane);
 		values.memory = Number(values.memory);
 		values.farPlaneSamplingPoints = Number(values.farPlaneSamplingPoints);
+		values.maxShadowDistance = Number(values.maxShadowDistance);
 
 		this.props.updateSettings(values);
 

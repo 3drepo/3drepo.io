@@ -182,11 +182,17 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handlePanelScroll = (e) => {
-		if (e.target.scrollTop > 0 && !this.state.scrolled) {
-			this.setState({ scrolled: true });
-		}
-		if (e.target.scrollTop === 0 && this.state.scrolled) {
-			this.setState({ scrolled: false });
+		if (e.target.scrollHeight > e.target.offsetHeight + e.target.scrollTop) {
+			if (e.target.scrollTop > 0 && !this.state.scrolled) {
+				this.setState({ scrolled: true });
+			}
+			if (e.target.scrollTop === 0 && this.state.scrolled) {
+				this.setState({ scrolled: false });
+			}
+		} else {
+			if (this.state.scrolled) {
+				this.setState({ scrolled: false });
+			}
 		}
 	}
 

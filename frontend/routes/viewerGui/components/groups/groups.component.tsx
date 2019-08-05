@@ -55,12 +55,14 @@ import { EmptyStateInfo } from '../views/views.styles';
 import { ListContainer, Summary } from './../risks/risks.styles';
 import { GroupDetails } from './components/groupDetails';
 import { GroupsContainer, GroupIcon, GroupListItem, StyledIcon } from './groups.styles';
+import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 
 interface IProps {
 	viewer: any;
 	teamspace: string;
 	model: any;
 	revision?: string;
+	isAllOverridden: boolean;
 	isPending?: boolean;
 	showDetails?: boolean;
 	groups: any[];
@@ -79,7 +81,7 @@ interface IProps {
 	setActiveGroup: (group, revision?) => void;
 	saveGroup: (teamspace, model, group) => void;
 	toggleColorOverride: (group) => void;
-	toggleColorOverrideAll: (overrideAll) => void;
+	setOverrideAll: (overrideAll) => void;
 	deleteGroups: (teamspace, model, groups) => void;
 	showConfirmDialog: (config) => void;
 	isolateGroup: (group) => void;
@@ -108,9 +110,9 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	get menuActionsMap() {
-		const { toggleColorOverrideAll, teamspace, model, downloadGroups } = this.props;
+		const { setOverrideAll, teamspace, model, downloadGroups, isAllOverridden } = this.props;
 		return {
-			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => toggleColorOverrideAll(!this.overridesAllGroups),
+			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => setOverrideAll(!isAllOverridden),
 			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => this.handleDeleteGroups(),
 			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadGroups(teamspace, model)
 		};
@@ -148,22 +150,22 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public renderGroupsList = renderWhenTrue(() => {
 		const Items = this.state.filteredGroups.map((group) => (
-			<GroupListItem
-				{...group}
-				key={group._id}
-				hideThumbnail
-				statusColor={this.getOverridedColor(group._id, group.color)}
-				highlighted={this.isHighlighted(group)}
-				roleColor={group.color}
-				onItemClick={this.setActiveGroup(group)}
-				onArrowClick={this.handleShowGroupDetails(group)}
-				active={this.isActive(group)}
-				modelLoaded={this.props.isModelLoaded}
-				renderActions={this.renderGroupActions(group)}
-				hasViewPermission={stubTrue}
-				panelName={GROUP_PANEL_NAME}
-				extraInfo={this.renderObjectsNumber(group.totalSavedMeshes)}
-			/>
+            <GroupListItem
+                {...group}
+                key={group._id}
+                hideThumbnail
+                statusColor={this.getOverriddenColor(group._id, group.color)}
+                highlighted={this.isHighlighted(group)}
+                roleColor={group.color}
+                onItemClick={this.setActiveGroup(group)}
+                onArrowClick={this.handleShowGroupDetails(group)}
+                active={this.isActive(group)}
+                modelLoaded={this.state.modelLoaded}
+                renderActions={this.renderGroupActions(group)}
+                hasViewPermission={stubTrue}
+                panelName={GROUP_PANEL_NAME}
+                extraInfo={this.renderObjectsNumber(group.totalSavedMeshes)}
+            />
 		));
 
 		return <ListContainer className="groups-list" ref={this.groupsContainerRef}>{Items}</ListContainer>;
@@ -272,9 +274,9 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		this.props.viewer[eventHandler](VIEWER_EVENTS.BACKGROUND_SELECTED, this.resetActiveGroup);
 	}
 
-	public getOverridedColor = (groupId, color) => {
-		const overrided = this.isOverrided(groupId);
-		return overrided ? hexToRgba(color) : DEFAULT_OVERRIDE_COLOR;
+	public getOverriddenColor = (groupId, color) => {
+		const overridden = this.isOverridden(groupId);
+		return overridden ? hexToRgba(color) : DEFAULT_OVERRIDE_COLOR;
 	}
 
 	public handleCloseSearchMode = () => {
@@ -324,7 +326,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 						<IconWrapper><Icon fontSize="small" /></IconWrapper>
 						<StyledItemText>
 							{label}
-							{(name === GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL && this.overridesAllGroups) && <Check fontSize="small" />}
+							{(name === GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL && this.props.isAllOverridden) && <Check fontSize="small" />}
 						</StyledItemText>
 					</StyledListItem>
 				);
@@ -367,7 +369,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		this.props.showGroupDetails(group, this.props.revision);
 	}
 
-	public isOverrided = (groupId) => Boolean(this.props.colorOverrides[groupId]);
+	public isOverridden = (groupId) => this.props.colorOverrides.includes(groupId);
 
 	public isHighlighted = (group) => {
 		return Boolean(this.props.highlightedGroups[group._id]);
@@ -382,7 +384,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		deleteGroups(teamspace, model, groupId);
 	}
 
-	public handleColorOverride = (group) => () => this.props.toggleColorOverride(group);
+	public handleColorOverride = (group) => () => this.props.toggleColorOverride(group._id);
 
 	public handleGroupIsolate = (group) => () => this.props.isolateGroup(group);
 
@@ -410,7 +412,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	)
 
 	public renderTintIcon = (group) => () => (
-		<StyledIcon color={this.getOverridedColor(group._id, group.color)}>
+		<StyledIcon color={this.getOverriddenColor(group._id, group.color)}>
 			<InvertColors color="inherit" fontSize="inherit" />
 		</StyledIcon>
 	)

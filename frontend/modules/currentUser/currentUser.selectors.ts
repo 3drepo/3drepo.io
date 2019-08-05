@@ -16,6 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
+import { isNil } from 'lodash';
 
 const selectCurrentUserDomain = (state) => ({...state.currentUser});
 
@@ -54,4 +55,9 @@ export const selectCollaboratorLimit = createSelector(
 export const selectSpaceInfo = createSelector(
 	selectCurrentUserDomain,
 	(state) => ({ spaceLimit: state.spaceLimit, spaceUsed: state.spaceUsed })
+);
+
+export const selectSpaceLeft = createSelector(
+	selectSpaceInfo, (state) =>
+		(isNil(state.spaceLimit) ? Infinity : state.spaceLimit) - state.spaceUsed
 );

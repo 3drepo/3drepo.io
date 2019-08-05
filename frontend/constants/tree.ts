@@ -1,11 +1,13 @@
 import IFCSpacesIcon from '@material-ui/icons/ViewAgenda';
 import ShowAllIcon from '@material-ui/icons/Visibility';
 import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
+import SelectAllIcon from '@material-ui/icons/DoneAll';
 
 export const TREE_ACTIONS_ITEMS = {
 	SHOW_ALL: 'showAll',
 	ISOLATE_SELECTED: 'isolateSelected',
-	HIDE_IFC_SPACES: 'hideIfcSpaces'
+	HIDE_IFC_SPACES: 'hideIfcSpaces',
+	SELECT_ALL: 'selectAll'
 };
 
 export const TREE_ACTIONS_MENU = [
@@ -23,6 +25,11 @@ export const TREE_ACTIONS_MENU = [
 		name: TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES,
 		label: 'Hide IFC spaces',
 		Icon: IFCSpacesIcon
+	},
+	{
+		name: TREE_ACTIONS_ITEMS.SELECT_ALL,
+		label: 'Select All',
+		Icon: SelectAllIcon
 	}
 ];
 

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextField, Typography } from '@material-ui/core';
+import { TextField } from '@material-ui/core';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import * as Yup from 'yup';
@@ -36,7 +36,8 @@ import {
 	Summary,
 	ToggleButton,
 	ToggleButtonContainer,
-	ToggleIcon
+	ToggleIcon,
+	Typography
 } from './previewDetails.styles';
 
 interface IProps {
@@ -72,19 +73,11 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	};
 
 	public renderNameWithCounter = renderWhenTrue(() => (
-		<Typography
-			paragraph
-		>
-			{`${this.props.number}. ${this.props.name}`}
-		</Typography>
+		<Typography>{`${this.props.number}. ${this.props.name}`}</Typography>
 	));
 
 	public renderName = renderWhenTrue(() => (
-		<Typography
-			paragraph
-		>
-			{this.props.name}
-		</Typography>
+		<Typography>{this.props.name}</Typography>
 	));
 
 	public renderNameField = renderWhenTrue(() => (

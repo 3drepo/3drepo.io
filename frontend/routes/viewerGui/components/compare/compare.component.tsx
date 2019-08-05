@@ -81,7 +81,7 @@ interface IProps {
 	onRenderingTypeChange: (renderingType) => void;
 	setTargetModel: (modelId, isTarget, isTypeChange?) => void;
 	setComponentState: (state) => void;
-	setTargetRevision: (modelId, targetRevision) => void;
+	setTargetRevision: (modelId, targetRevision, isDiff) => void;
 	getCompareModels: (revision) => void;
 }
 

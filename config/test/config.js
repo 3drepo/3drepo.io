@@ -48,8 +48,7 @@ module.exports = {
 		},
 		{
 			service: "chat",
-			http_port: 3000,
-			https_port: 3000,
+			port: 3000,
 			subdirectory: 'chat'
 		}
 	],
@@ -82,8 +81,10 @@ module.exports = {
 		bucketName: "3drepo-travis"
 	},
 	fs: {
-		path: require("path").resolve(__dirname, '../../submodules/tests/backend/files/')
+		path: require("path").resolve(__dirname, '../../submodules/tests/backend/files/'),
+		levels: 2
 	},
+	defaultStorage: "fs",
 	tokenExpiry: {
 		emailVerify: 336,
 		forgotPassword: 24
