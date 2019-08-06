@@ -15,22 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
-import * as API from '../../services/api';
-import { getAngularService, history } from '../../helpers/migration';
+import { push } from 'connected-react-router';
+import { fork, put, takeLatest } from 'redux-saga/effects';
+
+import { ROUTES } from '../../constants/routes';
 import { NewTermsDialog } from '../../routes/components/newTermsDialog/newTermsDialog.component';
+import { analyticsService } from '../../services/analytics';
+import * as API from '../../services/api';
 import { CurrentUserActions } from '../currentUser';
 import { getAvatarUrl } from '../currentUser/currentUser.sagas';
 import { DialogActions } from '../dialog';
+import { changePasswordMessages, forgotPasswordMessages, verificationMessages } from './auth.helpers';
 import { AuthActions, AuthTypes } from './auth.redux';
-import { verificationMessages, forgotPasswordMessages, changePasswordMessages } from './auth.helpers';
 
-export function* login({ username, password }) {
+function* login({ username, password }) {
 	yield put(AuthActions.setPendingStatus(true));
 
 	try {
 		const { data: { flags }} = yield API.login(username, password);
-
 		if (flags && flags.termsPrompt) {
 			yield put(DialogActions.showDialog({
 				title: 'Terms and Privacy Policy Update',
@@ -38,9 +40,7 @@ export function* login({ username, password }) {
 			}));
 		}
 
-		// TODO: Replace to proper service after migration
-		const AnalyticService = getAngularService('AnalyticService') as any;
-		yield AnalyticService.setUserId(username);
+		yield analyticsService.setUserId(username);
 
 		yield put(CurrentUserActions.fetchUserSuccess({
 			username,
@@ -59,14 +59,9 @@ export function* login({ username, password }) {
 	yield put(AuthActions.setPendingStatus(false));
 }
 
-export function* logout() {
+function* logout() {
 	try {
 		yield API.logout();
-
-		// TODO: Replace to proper service after migration
-		const StateManager = getAngularService('StateManager') as any;
-		StateManager.resetServiceStates();
-
 		yield put({ type: 'RESET_APP' });
 	} catch (e) {
 		if (e.response.status === 401) {
@@ -76,20 +71,17 @@ export function* logout() {
 		}
 	}
 	yield put(AuthActions.setLocalSessionStatus(false));
+	yield put(push(ROUTES.LOGIN));
 }
 
-export function* authenticate() {
-	// TODO: Replace to proper service after migration
-	const AuthService = getAngularService('AuthService') as any;
-
+function* authenticate() {
+	yield put(AuthActions.setPendingStatus(true));
 	try {
 		const { data: { username }} = yield API.authenticate();
 		yield put(CurrentUserActions.fetchUserSuccess({
 			username,
 			avatarUrl: getAvatarUrl(username)
 		}));
-
-		yield AuthService.initialAuthPromise.resolve();
 
 		yield put(AuthActions.loginSuccess());
 	} catch (e) {
@@ -98,17 +90,13 @@ export function* authenticate() {
 		} else {
 			yield put(DialogActions.showEndpointErrorDialog('authenticate', 'user', e));
 		}
-		yield AuthService.initialAuthPromise.reject();
 	}
 }
 
-export function* sessionExpired() {
+function* sessionExpired() {
 	try {
-		// TODO: Replace to proper service after migration
-		const StateManager = getAngularService('StateManager') as any;
-		StateManager.resetServiceStates();
-
 		yield put({ type: 'RESET_APP' });
+		yield put(AuthActions.setLocalSessionStatus(false));
 		yield put(DialogActions.showDialog({
 			title: 'Session expired',
 			content: 'You have been logged out as your session has expired'
@@ -118,7 +106,7 @@ export function* sessionExpired() {
 	}
 }
 
-export function* sendPasswordChangeRequest({ userNameOrEmail }) {
+function* sendPasswordChangeRequest({ userNameOrEmail }) {
 	yield put(AuthActions.setPendingStatus(true));
 
 	try {
@@ -131,7 +119,7 @@ export function* sendPasswordChangeRequest({ userNameOrEmail }) {
 	yield put(AuthActions.setPendingStatus(false));
 }
 
-export function* changePassword({ username, token, password }) {
+function* changePassword({ username, token, password }) {
 	yield put(AuthActions.setPendingStatus(true));
 
 	try {
@@ -144,19 +132,19 @@ export function* changePassword({ username, token, password }) {
 	yield put(AuthActions.setPendingStatus(false));
 }
 
-export function* register({ username, data }) {
+function* register({ username, data }) {
 	yield put(AuthActions.setPendingStatus(true));
 
 	try {
 		yield API.register(username, data);
-		yield history.push('register-request');
+		yield put(push('register-request'));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('register', 'user', e));
 	}
 	yield put(AuthActions.setPendingStatus(false));
 }
 
-export function* verify({ username, token }) {
+function* verify({ username, token }) {
 	yield put(AuthActions.setPendingStatus(true));
 
 	try {

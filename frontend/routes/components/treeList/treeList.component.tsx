@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { isEmpty } from 'lodash';
 import Grid from '@material-ui/core/Grid';
+import { isEmpty } from 'lodash';
+import React from 'react';
 
-import { Container, Headline, Details, Title, IconContainer } from './treeList.styles';
 import Folder from '@material-ui/icons/Folder';
 import FolderOpen from '@material-ui/icons/FolderOpen';
+import { Container, Details, Headline, IconContainer, Title } from './treeList.styles';
 
 export const TREE_LEVELS = {
 	TEAMSPACE: 1,
@@ -44,7 +44,7 @@ const HeadlineIcon = ({IconOpened, IconClosed, active, ...iconProps}) => {
 
 export const DefaultHeadline = ({renderActions, ...props}) => (
 	<Grid
-		container={true}
+		container
 		direction="row"
 		alignItems="center"
 		justify="flex-start"
@@ -66,7 +66,7 @@ interface IProps {
 	renderItem?: (props) => JSX.Element;
 	renderRoot?: (props) => JSX.Element;
 	renderActions?: (props) => (JSX.Element | Element);
-	onRootClick?: (state) => void;
+	onClick?: (state) => void;
 	setActiveProject?: (projectName) => void;
 }
 
@@ -104,8 +104,8 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 
 		if (items.length) {
 			this.setState({ active: !active, name }, () => {
-				if (this.props.onRootClick) {
-					this.props.onRootClick(this.state);
+				if (this.props.onClick) {
+					this.props.onClick(this.state);
 				}
 			});
 		}
@@ -142,7 +142,7 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { items, level, renderRoot, forceActive, ...props } = this.props;
+		const { items, level, renderRoot, forceActive, onClick, ...props } = this.props;
 		const { active, hovered } = this.state;
 		const disabled = !items.length;
 
@@ -166,7 +166,7 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 					{
 						renderRoot
 							? renderRoot(headlineProps)
-							: <DefaultHeadline {...headlineProps}/>
+							: <DefaultHeadline {...headlineProps} />
 					}
 				</Headline>
 				{active ? <Details {...props}>{this.renderItems()}</Details> : null}

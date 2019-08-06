@@ -15,7 +15,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import * as React from 'react';
+import React from 'react';
 
 import { NotificationsPanelItem } from '../../notifications.styles';
 import { INotification, NotificationItem } from '../notificationItem/notificationItem.component';
@@ -48,7 +48,7 @@ export class NotificationsPanel extends React.PureComponent<IProps, any> {
 
 		return (
 			<>
-				<NotificationsPanelHeader labelLeft={labelLeft} labelRight={labelRight}/>
+				<NotificationsPanelHeader labelLeft={labelLeft} labelRight={labelRight} />
 				<NotificationsPanelItem>
 					<List style={{paddingBottom: 0, paddingTop: 0}}>
 						{this.renderNotifications(notifications)}

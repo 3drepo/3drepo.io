@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { Container, Content, Footer } from './userManagementTab.styles';
 
 interface IProps {
 	children: React.ReactChild;
 	footerLabel?: string;
+	withHeader?: boolean;
 }
 
 export const UserManagementTab = (props: IProps) => {
@@ -29,13 +30,14 @@ export const UserManagementTab = (props: IProps) => {
 	return (
 		<>
 			<Container
-				container={true}
+				container
 				direction="column"
 				alignItems="stretch"
 				wrap="nowrap"
+				justify="space-between"
 			>
-				<Content item={true}>{children}</Content>
-				{footerLabel && (<Footer item={true}>{footerLabel}</Footer>)}
+				<Content item withHeader={props.withHeader}>{children}</Content>
+				{footerLabel && (<Footer item>{footerLabel}</Footer>)}
 			</Container>
 		</>
 	);

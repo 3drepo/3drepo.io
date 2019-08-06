@@ -15,24 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import Button from '@material-ui/core/Button';
-
-import { getAngularService } from '../../../../helpers/migration';
-
+import React from 'react';
+import { ROUTES } from '../../../../constants/routes';
+import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../services/analytics';
+import { DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { DateTime } from './../../../components/dateTime/dateTime.component';
 import {
-	Item,
-	Row,
 	Description,
+	Item,
 	Message,
+	Property,
+	PropertyWrapper,
+	Row,
 	StyledDialogActions,
 	StyledDialogContent,
-	StyledList,
-	Property,
-	PropertyWrapper
+	StyledList
 } from './revisionsDialog.styles';
-import { DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 
 interface IProps {
 	fetchModelRevisions: (teamspace, modelId) => void;
@@ -53,13 +52,9 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		const { teamspace, modelId, handleClose, history } = this.props;
 
 		handleClose();
-		history.push(`/viewer/${teamspace}/${modelId}/${tag || _id}`);
-		const analyticService = getAngularService('AnalyticService') as any;
+		history.push(`${ROUTES.VIEWER}/${teamspace}/${modelId}/${tag || _id}`);
 
-		analyticService.sendEvent({
-			eventCategory: 'Model',
-			eventAction: 'view'
-		});
+		analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
 	}
 
 	public render() {
@@ -74,9 +69,9 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 						<StyledList>
 							{revisions && revisions.map((revision, index) => (
 								<Item
-									button={true}
+									button
 									key={revision._id}
-									divider={true}
+									divider
 									onClick={this.revisionClickHandler(revision)}
 									last={index === 0 ? 1 : 0}>
 										<Row>

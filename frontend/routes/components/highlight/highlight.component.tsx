@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as Highlighter from 'react-highlight-words';
 import { trim } from 'lodash';
+import React, { memo } from 'react';
+import Highlighter from 'react-highlight-words';
 
 import { Mark } from './highlight.styles';
 
@@ -28,15 +28,17 @@ interface IProps {
 	caseSensitive?: boolean;
 }
 
-export const Highlight = ({splitQueryToWords, search, text, caseSensitive}: IProps) => {
+const HighlightTag = (props) => <Mark {...props as any} />;
+
+export const Highlight = memo(({splitQueryToWords, search, text, caseSensitive}: IProps) => {
 	const searchWords = splitQueryToWords ? search.split(' ') : [trim(search)];
 	return (
 		<Highlighter
 			searchWords={searchWords}
-			autoEscape={true}
+			autoEscape
 			textToHighlight={text || ''}
-			highlightTag={Mark}
+			highlightTag={HighlightTag}
 			caseSensitive={caseSensitive}
 		/>
 	);
-};
+});

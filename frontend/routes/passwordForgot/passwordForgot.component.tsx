@@ -15,16 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Formik, Form, Field } from 'formik';
-import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
+import { Field, Form, Formik } from 'formik';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-import { Container, Message, Buttons, StyledButton } from './passwordForgot.styles';
-import { Logo } from '../components/logo/logo.component';
 import { Panel } from '../components/panel/panel.component';
 import { SubmitButton } from '../components/submitButton/submitButton.component';
+import { Buttons, Container, Message, StyledButton } from './passwordForgot.styles';
 
 interface IProps {
 	sendRequest: (userNameOrEmail) => void;
@@ -59,7 +58,6 @@ export class PasswordForgot extends React.PureComponent<IProps, IState> {
 				container
 				direction="column"
 				alignItems="center">
-				<Link to="/login"><Logo /></Link>
 				<Grid item xs={9} sm={7} md={5} lg={3} xl={2}>
 					<Panel title="Forgot password">
 						{ message

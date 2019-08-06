@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 
-import { clientConfigService } from '../../../services/clientConfig';
 // @ts-ignore
-import * as DEFAULT_LOGO from '../../../images/3drepo-logo-white.png';
+import DEFAULT_LOGO from '../../../images/3drepo-logo-white.png';
+import { clientConfigService } from '../../../services/clientConfig';
 import { Image } from './logo.styles';
 
 interface IProps {

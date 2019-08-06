@@ -24,7 +24,8 @@ export const { Types: BimTypes, Creators: BimActions } = createActions({
 	setIsPending: ['isPending'],
 	setIsActive: ['isActive'],
 	setComponentState: ['componentState'],
-	setActiveMeta: ['activeMeta']
+	setActiveMeta: ['activeMeta'],
+	resetBimState: [],
 }, { prefix: 'BIM/' });
 
 export interface IMetaRecord {
@@ -74,10 +75,13 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
+const resetBimState = () => INITIAL_STATE;
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[BimTypes.FETCH_METADATA_SUCCESS]: fetchMetadataSuccess,
 	[BimTypes.SET_COMPONENT_STATE]: setComponentState,
 	[BimTypes.SET_IS_PENDING]: setIsPending,
 	[BimTypes.SET_IS_ACTIVE]: setIsActive,
-	[BimTypes.SET_ACTIVE_META]: setActiveMeta
+	[BimTypes.SET_ACTIVE_META]: setActiveMeta,
+	[BimTypes.RESET_BIM_STATE]: resetBimState
 });

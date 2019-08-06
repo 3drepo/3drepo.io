@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createActions, createReducer } from 'reduxsauce';
 import { omit } from 'lodash';
+import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: StarredMetaTypes, Creators: StarredMetaActions } = createActions({
 	fetchStarredMeta: [],

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { ItemLabel } from '../../../components.styles';
 import { NotificationsPanelItem } from '../../notifications.styles';
 import { NotificationsPanelHeaderContainer } from './panelHeader.styles';

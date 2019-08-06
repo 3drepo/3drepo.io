@@ -15,27 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Route, Switch, Link, Redirect } from 'react-router-dom';
-import { isEqual, isEmpty } from 'lodash';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
+import Tab from '@material-ui/core/Tab';
+import Tabs from '@material-ui/core/Tabs';
+import { isEmpty, isEqual } from 'lodash';
+import React from 'react';
+import { Link, Redirect, Route, Switch } from 'react-router-dom';
 
-import Users from '../users/users.container';
-import Jobs from '../jobs/jobs.container';
-import Projects from '../projects/projects.container';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
-import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
+import { TextOverlay } from '../components/textOverlay/textOverlay.component';
+import Jobs from '../jobs/jobs.container';
+import Projects from '../projects/projects.container';
+import Users from '../users/users.container';
 
 import {
 	Header,
+	LoaderContainer,
 	TabContent,
-	TeamspaceSelectContainer,
-	LoaderContainer
+	TeamspaceSelectContainer
 } from './userManagement.styles';
 
 export const USERS_TAB = {
@@ -181,7 +181,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 		return (
 			<Switch>
 				{ TABS_ROUTES.map(({path, component: Component}, index) => (
-					<Route key={index} exact={true} path={`${match.path}/${path}`} component={Component} />
+					<Route key={index} exact path={`${match.path}/${path}`} component={Component} />
 				))}
 			</Switch>
 		);
@@ -196,13 +196,13 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 			<>
 				<Header>
 					<TeamspaceSelectContainer>
-						<FormControl fullWidth={true}>
-							<InputLabel shrink={true} htmlFor="teamspace-select">Teamspace</InputLabel>
+						<FormControl fullWidth>
+							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
 							<CellSelect
 								items={teamspacesItems}
 								value={selectedTeamspace}
 								placeholder="Select teamspace"
-								disabledPlaceholder={true}
+								disabledPlaceholder
 								onChange={this.onTeamspaceChange}
 								inputId="teamspace-select"
 							/>
@@ -244,7 +244,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 				<Switch>
 					<Route path={`${userManagmentMatch.url}/:tab`} render={this.renderUserManagementRoute} />
 					<Redirect
-						exact={true}
+						exact
 						from={`${userManagmentMatch.url}`}
 						to={`${userManagmentMatch.url}/users`}
 					/>

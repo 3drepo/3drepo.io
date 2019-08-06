@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import Grid from '@material-ui/core/Grid';
 
 import { ColorPicker } from '../colorPicker/colorPicker.component';
 import {
 	Container,
-	Title,
 	SaveButton,
 	StyledTextField,
-	StyledTextFieldContainer
+	StyledTextFieldContainer,
+	Title
 } from './newJobForm.styles';
 
 interface IProps {
@@ -65,22 +65,22 @@ export class NewJobForm extends React.PureComponent<IProps, any> {
 		return (
 			<Container>
 				<Grid
-					container={true}
+					container
 					direction="column">
 					<Title>{title}</Title>
 
 					<Grid
-						item={true}
-						container={true}
+						item
+						container
 						direction="row"
 						spacing={16}
 						wrap="nowrap"
 					>
-						<StyledTextFieldContainer item={true}>
+						<StyledTextFieldContainer item>
 							<StyledTextField
-								autoFocus={true}
+								autoFocus
 								placeholder="Set job name"
-								fullWidth={true}
+								fullWidth
 								value={name}
 								onChange={this.handleJobNameChange}
 								InputLabelProps={ {
@@ -88,7 +88,7 @@ export class NewJobForm extends React.PureComponent<IProps, any> {
 								} }
 							/>
 						</StyledTextFieldContainer>
-						<Grid item={true}>
+						<Grid item>
 							<ColorPicker
 								value={color}
 								predefinedColors={colors}

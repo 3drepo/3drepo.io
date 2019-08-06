@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, call, takeEvery } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
+import { call, put, select, takeEvery } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import { UsersTypes, UsersActions } from './users.redux';
+import { UsersActions, UsersTypes } from './users.redux';
 import { selectCachedResponses } from './users.selectors';
 
 const CACHE_RESPONSE_TTL = 4000;

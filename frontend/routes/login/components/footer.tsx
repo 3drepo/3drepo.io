@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Link } from 'react-router-dom';
-import Tooltip from '@material-ui/core/Tooltip';
 import Grid from '@material-ui/core/Grid';
+import Tooltip from '@material-ui/core/Tooltip';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-import { StyledButton, Version, FooterContainer } from '../login.styles';
 import { clientConfigService } from '../../../services/clientConfig';
+import { FooterContainer, StyledButton, Version } from '../login.styles';
 
 const APP_VERSION = clientConfigService.VERSION;
 

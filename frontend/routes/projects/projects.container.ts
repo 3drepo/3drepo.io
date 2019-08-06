@@ -14,17 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
-import { withRouter } from 'react-router';
 
-import { Projects } from './projects.component';
 import {
-	UserManagementActions,
+	selectCurrentProject,
 	selectProjects,
-	selectCurrentProject
+	UserManagementActions
 } from '../../modules/userManagement';
+import { Projects } from './projects.component';
 
 const mapStateToProps = createStructuredSelector({
 	projects: selectProjects,

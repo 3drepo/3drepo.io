@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { Tooltip } from '@material-ui/core';
+import React from 'react';
 import { SmallIconButtonStyled } from './smallIconButton.styles';
 
 interface IProps {

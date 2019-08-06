@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import Icon from '@material-ui/core/Icon';
+import styled from 'styled-components';
 import { MuiTheme } from '../../../styles';
 
 export const IconContainer = styled(Icon).attrs({

@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import IconButton, { IconButtonProps } from '@material-ui/core/IconButton';
 import { IconProps as IIconProps } from '@material-ui/core/Icon';
+import IconButton, { IconButtonProps } from '@material-ui/core/IconButton';
+import React from 'react';
 
 import { StyledPopover } from './buttonMenu.styles';
 
@@ -97,7 +97,7 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 					open={activeMenu}
 					anchorEl={this.buttonRef.current}
 					onClose={this.toggleMenu(false)}
-					disableRestoreFocus={true}
+					disableRestoreFocus
 				>
 					{renderContent({ close: this.toggleMenu(false) })}
 				</StyledPopover>

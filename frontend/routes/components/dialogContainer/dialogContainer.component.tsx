@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { MuiThemeProvider } from '@material-ui/core/styles';
+import React from 'react';
 
-import DialogTitle from '@material-ui/core/DialogTitle';
+import { Button } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
-import { dispatch } from '../../../helpers/migration';
-import { MuiTheme } from '../../../styles';
 import { renderWhenTrue } from '../../../helpers/rendering';
+import { dispatch } from '../../../modules/store';
+import { DialogActions } from './dialogContainer.styles';
 
 interface IProps {
 	config: any;
@@ -38,11 +38,11 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 		isOpen: false
 	};
 
-	public renderContent = renderWhenTrue(
+	public renderContent = renderWhenTrue(() => (
 		<DialogContent>
 			<div dangerouslySetInnerHTML={{ __html: this.props.config.content }} />
 		</DialogContent>
-	);
+	));
 
 	public renderTemplate = renderWhenTrue(() => {
 		const { content, template: DialogTemplate } = this.props.config;
@@ -59,6 +59,23 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 			/>
 		);
 	});
+
+	public renderActions = renderWhenTrue(() => (
+		<DialogActions>
+			<Button
+				onClick={this.handleClose}
+				variant={this.props.config.buttonVariant || 'text'}
+				color="secondary">
+					{this.props.config.closeText || 'Ok'}
+			</Button>
+		</DialogActions>
+	));
+
+	public componentDidUpdate(prevProps) {
+		if (this.props.config && this.props.config.logError && !prevProps.config.logError) {
+			console.error(this.props.config.logError, this.props.config.content);
+		}
+	}
 
 	public handleCallback = (callback) => {
 		const action = callback();
@@ -85,16 +102,15 @@ export class DialogContainer extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { content, title, template, DialogProps } = this.props.config;
+		const { content, title, template, DialogProps, onCancel } = this.props.config;
 
 		return (
-			<MuiThemeProvider theme={MuiTheme}>
-				<Dialog {...DialogProps} open={this.props.isOpen} onClose={this.handleClose}>
-					{title && <DialogTitle disableTypography={true}>{title}</DialogTitle>}
-					{this.renderContent(content && !template)}
-					{this.renderTemplate(this.props.config.template)}
-				</Dialog>
-			</MuiThemeProvider>
+			<Dialog {...DialogProps} open={this.props.isOpen} onClose={this.handleClose}>
+				{title && <DialogTitle disableTypography>{title}</DialogTitle>}
+				{this.renderContent(content && !template)}
+				{this.renderTemplate(template)}
+				{this.renderActions(content && onCancel)}
+			</Dialog>
 		);
 	}
 }

@@ -15,18 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import * as LogoStyles from '../logo/logo.styles';
 import InputIcon from '@material-ui/icons/Input';
+import styled from 'styled-components';
 import { COLOR } from '../../../styles';
+import * as LogoStyles from '../logo/logo.styles';
 
 export const Container = styled.div`
 	display: flex;
 	justify-content: flex-end;
 	align-items: center;
 	position: relative;
-	padding-right: 5px;
+	padding-right: 10px;
 	height: 80px;
+	z-index: 2;
+	margin-top: 5px;
+	visibility: ${({ hidden }) => hidden ? 'hidden' : 'initial'};
 
 	${LogoStyles.Image} {
 		position: absolute;

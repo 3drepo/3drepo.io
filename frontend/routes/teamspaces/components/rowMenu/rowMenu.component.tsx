@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { isEmpty } from 'lodash';
 import IconButton from '@material-ui/core/IconButton';
 import MoreVert from '@material-ui/icons/MoreVert';
+import { isEmpty } from 'lodash';
+import React from 'react';
 
 import { StyledGrid, StyledGrow } from './rowMenu.styles';
 
@@ -73,7 +73,7 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 
 		return (
 			<StyledGrid
-				container={true}
+				container
 				wrap="nowrap"
 				direction="row"
 				alignItems="center"
@@ -84,7 +84,7 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 					{...growProps}
 				>
 					<StyledGrid
-						container={true}
+						container
 						wrap="nowrap"
 						direction="row"
 						alignItems="center"

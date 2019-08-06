@@ -15,15 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
-import ViewList from '@material-ui/icons/ViewList';
+import ContactSupport from '@material-ui/icons/ContactSupport';
 import ExitToApp from '@material-ui/icons/ExitToApp';
 import Settings from '@material-ui/icons/Settings';
-import ContactSupport from '@material-ui/icons/ContactSupport';
+import ViewList from '@material-ui/icons/ViewList';
+import React from 'react';
 
+import { Avatar } from '../../../avatar/avatar.component';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
+import { VisualSettingsDialog } from '../visualSettingsDialog/visualSettingsDialog.component';
 import {
 	MenuContent,
 	MenuIcon,
@@ -33,8 +35,6 @@ import {
 	MenuUser,
 	UserIcon
 } from './userMenu.styles';
-import { Avatar } from '../../../avatar/avatar.component';
-import { VisualSettingsDialog } from '../visualSettingsDialog/visualSettingsDialog.component';
 
 const UserButton = ({ IconProps, Icon, ...props }) => (
 	<IconButton
@@ -48,7 +48,7 @@ const UserButton = ({ IconProps, Icon, ...props }) => (
 
 const UserMenuButton = ({ Icon, ...props }) => {
 	return (
-		<MenuItem button={true} aria-label={props.label} onClick={props.onButtonClick}>
+		<MenuItem button aria-label={props.label} onClick={props.onButtonClick}>
 			<MenuIcon>
 				<Icon />
 			</MenuIcon>
@@ -112,7 +112,6 @@ interface IProps {
 }
 
 export class UserMenu extends React.PureComponent<IProps, any> {
-
 	public openUserManual() {
 		window.open('http://3drepo.org/support/', '_blank');
 	}

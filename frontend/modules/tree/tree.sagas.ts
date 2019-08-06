@@ -14,37 +14,38 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { put, takeLatest, call, select, take, all } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
+import { all, call, put, select, take, takeLatest } from 'redux-saga/effects';
 
-import TreeProcessing from './treeProcessing/treeProcessing';
+import { VIEWER_EVENTS } from '../../constants/viewer';
+import { dispatch } from '../../modules/store';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
-import { VIEWER_EVENTS } from '../../constants/viewer';
-import { dispatch } from '../../helpers/migration';
-import { GroupsActions } from '../groups';
 import { DialogActions } from '../dialog';
+import { GroupsActions } from '../groups';
 import {
-	selectIfcSpacesHidden,
-	selectNodesIndexesMap,
-	selectTreeNodesList,
+	selectActiveNode,
+	selectDefaultHiddenNodesIds,
 	selectExpandedNodesMap,
+	selectFullySelectedNodesIds,
 	selectGetNodesByIds,
 	selectGetNodesIdsFromSharedIds,
 	selectHiddenNodesIds,
-	selectDefaultHiddenNodesIds,
+	selectIfcSpacesHidden,
+	selectNodesIndexesMap,
 	selectSelectionMap,
-	selectVisibilityMap,
-	selectFullySelectedNodesIds,
-	selectActiveNode
+	selectTreeNodesList,
+	selectVisibilityMap
 } from './tree.selectors';
+import TreeProcessing from './treeProcessing/treeProcessing';
 
-import { TreeTypes, TreeActions } from './tree.redux';
-import { selectSettings, ModelTypes } from '../model';
+import { SELECTION_STATES, VISIBILITY_STATES } from '../../constants/tree';
+import { VIEWER_PANELS } from '../../constants/viewerGui';
 import { MultiSelect } from '../../services/viewer/multiSelect';
-import { VISIBILITY_STATES, SELECTION_STATES } from '../../constants/tree';
-import { BimActions, selectIsActive } from '../bim';
-import { ViewerActions } from '../viewer';
+import { selectIsActive, BimActions } from '../bim';
+import { selectSettings, ModelTypes } from '../model';
+import { ViewerGuiActions } from '../viewerGui';
+import { TreeActions, TreeTypes } from './tree.redux';
 
 const unhighlightObjects = (objects = []) => {
 	for (let index = 0, size = objects.length; index < size; index++) {
@@ -88,7 +89,7 @@ function* handleMetadata(node: any) {
 	const isMetadataActive = yield select(selectIsActive);
 	if (node && node.meta && isMetadataActive) {
 		yield put(BimActions.fetchMetadata(node.teamspace, node.model, node.meta[0]));
-		yield put(ViewerActions.setMetadataVisibility(true));
+		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, true));
 	}
 }
 
@@ -217,11 +218,11 @@ function* getSelectedNodes() {
 }
 
 function* clearCurrentlySelected() {
-	yield put(ViewerActions.clearHighlights());
+	Viewer.clearHighlights();
 	yield all([
 		put(TreeActions.setActiveNode(null)),
 		call(TreeProcessing.clearSelected),
-		put(ViewerActions.setMetadataVisibility(false)),
+		put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false)),
 		put(BimActions.setActiveMeta(null))
 	]);
 	yield put(TreeActions.updateDataRevision());
@@ -283,7 +284,7 @@ function* isolateNodes(nodesIds = [], skipChildren = false) {
 			const meshesToUpdate = yield TreeProcessing.isolateNodes({ nodesIds, skipChildren, ifcSpacesHidden });
 			const visibilityMap = yield select(selectVisibilityMap);
 
-			yield put(ViewerActions.clearHighlights());
+			Viewer.clearHighlights();
 			yield put(TreeActions.updateDataRevision());
 			yield updateMeshesVisibility(meshesToUpdate, visibilityMap);
 		}
@@ -328,7 +329,7 @@ function* deselectNodes({ nodesIds = [] }) {
 		unhighlightObjects(result.unhighlightedObjects);
 
 		yield all([
-			put(ViewerActions.setMetadataVisibility(false)),
+			put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false)),
 			put(BimActions.setActiveMeta(null)),
 			put(TreeActions.updateDataRevision())
 		]);
@@ -510,7 +511,7 @@ function* goToRootNode({ nodeId }) {
 function* zoomToHighlightedNodes() {
 	try {
 		yield call(delay, 100);
-		yield put(ViewerActions.zoomToHighlightedMeshes());
+		Viewer.zoomToHighlightedMeshes();
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('zoom', 'highlighted nodes', error));
 	}

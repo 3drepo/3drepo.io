@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { snakeCase } from 'lodash';
+import React from 'react';
 
-import { Input, Chip } from '@material-ui/core';
+import { Chip, Input } from '@material-ui/core';
 import { ENTER_KEY } from '../../../constants/keys';
-import { ChipsGrid, ChipsContainer } from './chips.styles';
+import { ChipsContainer, ChipsGrid } from './chips.styles';
 
 interface IProps {
 	name: string;
@@ -85,7 +85,7 @@ export class Chips extends React.PureComponent<IProps, IState> {
 		const { name, onBlur, value, inputPlaceholder } = this.props;
 
 		return (
-			<ChipsGrid container={true} direction="column">
+			<ChipsGrid container direction="column">
 				<ChipsContainer>
 					{ value.map(
 						(chip, index) => (

@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createActions, createReducer } from 'reduxsauce';
-import { isString } from 'lodash';
 import { SnackbarProps } from '@material-ui/core/Snackbar';
+import { isString } from 'lodash';
+import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: SnackbarTypes, Creators: SnackbarActions } = createActions({
 	show: ['config']

@@ -17,7 +17,7 @@
 
 import { createSelector } from 'reselect';
 
-export const selectNotificationsDomain = (state) => Object.assign({}, state.notifications);
+export const selectNotificationsDomain = (state) => ({...state.notifications});
 
 export const selectNotifications = createSelector(
 	selectNotificationsDomain, (state) => state.notifications

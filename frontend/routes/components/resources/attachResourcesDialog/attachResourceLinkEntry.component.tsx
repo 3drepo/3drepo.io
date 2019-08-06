@@ -14,14 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import * as React from 'react';
+import { TextField } from '@material-ui/core';
 import { Field } from 'formik';
 import { get } from 'lodash';
-import { TextField } from '@material-ui/core';
-import { StyledFormControl,
-	FieldsRow } from '../../../viewer/components/risks/components/riskDetails/riskDetails.styles';
-import { ResourceListLinkItem } from './attachResourcesDialog.styles';
+import * as React from 'react';
+import {
+	FieldsRow,
+	StyledFormControl
+} from '../../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { RemoveButton } from '../resources.component';
+import { ResourceListLinkItem } from './attachResourcesDialog.styles';
 
 export const LinkEntry = ({onClickRemove, index }) => {
 	const nameFieldName = `links.${index}.name`;
@@ -49,7 +51,7 @@ export const LinkEntry = ({onClickRemove, index }) => {
 						helperText={get(form.errors, linkFieldName)}
 					/>
 				)} />
-				<RemoveButton onClick={onClickRemove}/>
+				<RemoveButton onClick={onClickRemove} />
 			</ResourceListLinkItem>
 		</StyledFormControl>
 	</FieldsRow>

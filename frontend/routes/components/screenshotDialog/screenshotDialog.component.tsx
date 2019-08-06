@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 import EventListener from 'react-event-listener';
 
-import { Container, Canvas, BackgroundImage, HiddenCanvas } from './screenshotDialog.styles';
+import { getPointerPosition } from '../../../helpers/events';
+import { loadImage } from '../../../helpers/images';
+import { renderWhenTrue } from '../../../helpers/rendering';
 import { COLOR } from '../../../styles';
 import { Indicator } from './components/indicator/indicator.component';
-import { loadImage } from '../../../helpers/images';
-import { getPointerPosition } from '../../../helpers/events';
-import { renderWhenTrue } from '../../../helpers/rendering';
 import { Tools } from './components/tools/tools.component';
+import { BackgroundImage, Canvas, Container, HiddenCanvas } from './screenshotDialog.styles';
 
 interface IProps {
 	sourceImage: string | Promise<string>;
@@ -34,22 +34,6 @@ interface IProps {
 }
 
 export class ScreenshotDialog extends React.PureComponent<IProps, any> {
-	public state = {
-		color: COLOR.RED,
-		brushSize: 5,
-		brushColor: COLOR.RED,
-		sourceImage: ''
-	};
-
-	public isDrawing;
-	public prevMousePosition = { x: 0, y: 0 };
-	public currMousePosition = { x: 0, y: 0 };
-
-	public containerRef = React.createRef<any>();
-	public canvasRef = React.createRef<any>();
-	public brushRef = React.createRef<any>();
-	public toolsRef = React.createRef<any>();
-	public hiddenCanvasRef = React.createRef<any>();
 
 	get containerElement() {
 		return this.containerRef.current;
@@ -74,6 +58,26 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	get toolsElement() {
 		return this.toolsRef.current;
 	}
+	public state = {
+		color: COLOR.RED,
+		brushSize: 5,
+		brushColor: COLOR.RED,
+		sourceImage: ''
+	};
+
+	public isDrawing;
+	public prevMousePosition = { x: 0, y: 0 };
+	public currMousePosition = { x: 0, y: 0 };
+
+	public containerRef = React.createRef<any>();
+	public canvasRef = React.createRef<any>();
+	public brushRef = React.createRef<any>();
+	public toolsRef = React.createRef<any>();
+	public hiddenCanvasRef = React.createRef<any>();
+
+	public renderIndicator = renderWhenTrue(() => (
+		<Indicator color={this.state.color} size={this.state.brushSize} />
+	));
 
 	public setCanvasSize = () => {
 		const width = this.containerElement.offsetWidth;
@@ -204,13 +208,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		});
 	}
 
-	public renderIndicator = renderWhenTrue(() => (
-		<Indicator color={this.state.color} size={this.state.brushSize} />
-	));
-
 	public renderTools = () => (
 		<Tools
-			innerRef={this.toolsRef}
+			ref={this.toolsRef}
 			size={this.state.brushSize}
 			color={this.state.brushColor}
 			onDrawClick={this.setBrushMode}
@@ -228,14 +228,14 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		const { sourceImage } = this.state;
 
 		return (
-			<Container innerRef={this.containerRef}>
+			<Container ref={this.containerRef}>
 				<EventListener target="window" onResize={this.handleResize} />
-				<HiddenCanvas innerRef={this.hiddenCanvasRef} />
+				<HiddenCanvas ref={this.hiddenCanvasRef} />
 				<BackgroundImage src={sourceImage} />
 				{this.renderIndicator(!this.props.disabled)}
 				{this.renderTools()}
 				<Canvas
-					innerRef={this.canvasRef}
+					ref={this.canvasRef}
 					onMouseDown={this.handleMouseDown}
 					onTouchStart={this.handleMouseDown}
 					onMouseUp={this.handleMouseUp}

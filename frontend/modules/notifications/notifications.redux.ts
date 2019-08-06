@@ -30,7 +30,9 @@ export const { Types: NotificationsTypes, Creators: NotificationsActions } = cre
 	patchAllNotifications: ['notificationPatch'],
 	showUpdatedFailedError: ['errorMessage'],
 	setDrawerPanelState: ['drawerOpened'],
-	sendUpdateAllNotificationsRead: ['read']
+	sendUpdateAllNotificationsRead: ['read'],
+	subscribeOnChanges: ['teamspace', 'modelId'],
+	unsubscribeFromChanges: ['teamspace', 'modelId']
 }, { prefix: 'NOTIFICATIONS/' });
 
 export const INITIAL_STATE = {

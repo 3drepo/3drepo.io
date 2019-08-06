@@ -1,20 +1,27 @@
-import { createStore, applyMiddleware, compose } from 'redux';
+import { routerMiddleware } from 'connected-react-router';
+import { createBrowserHistory } from 'history';
+import { applyMiddleware, compose, createStore } from 'redux';
+
 import createSagaMiddleware from 'redux-saga';
+import { IS_DEVELOPMENT } from '../constants/environment';
 import createReducer from './reducers';
 import rootSaga from './sagas';
-import { IS_DEVELOPMENT } from '../constants/environment';
 
 const sagaMiddleware = createSagaMiddleware();
 
-export default function configureStore(initialState = {}) {
+const initialState = {};
+
+export const history = createBrowserHistory();
+
+function configureStore() {
 	const middlewares = [
-		sagaMiddleware
+		sagaMiddleware,
+		routerMiddleware(history)
 	];
 
 	const enhancers = [];
 
 	if (IS_DEVELOPMENT) {
-		// Uncomment only to check state immutability - it slows down the app a bit
 		// middlewares.unshift(require('redux-immutable-state-invariant').default());
 
 		if (window.__REDUX_DEVTOOLS_EXTENSION__) {
@@ -22,12 +29,13 @@ export default function configureStore(initialState = {}) {
 		}
 	}
 
+	// tslint:disable-next-line: no-shadowed-variable
 	const store = createStore(
 		(state, action) => {
 			if (action.type === 'RESET_APP') {
 				state = undefined;
 			}
-			return createReducer()(state as any, action);
+			return createReducer(history)(state as any, action);
 		},
 		initialState,
 		compose(
@@ -40,3 +48,9 @@ export default function configureStore(initialState = {}) {
 
 	return store;
 }
+
+export const store = configureStore();
+
+export const dispatch = (action) => store.dispatch(action);
+
+export const getState = store.getState;

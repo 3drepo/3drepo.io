@@ -15,8 +15,8 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import EventEmitter from 'eventemitter3';
 import { Viewer } from './viewer';
-import * as EventEmitter from 'eventemitter3';
 
 const EVENTS = {
 	STATE_CHANGE: 'STATE_CHANGE'

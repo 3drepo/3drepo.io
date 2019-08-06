@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Link } from 'react-router-dom';
-import * as Yup from 'yup';
-import { Formik, Field, Form } from 'formik';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
+import { Field, Form, Formik } from 'formik';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import * as Yup from 'yup';
 
 import { clientConfigService } from '../../services/clientConfig';
 import { schema } from '../../services/validation';
-import { Panel } from '../components/panel/panel.component';
 import { Logo } from '../components/logo/logo.component';
+import { Panel } from '../components/panel/panel.component';
 import { SubmitButton } from '../components/submitButton/submitButton.component';
-import { Container, Headline, LoginButtons, StyledButton, UserNotice } from './login.styles';
 import { Footer } from './components/footer';
+import { Container, Headline, LoginButtons, StyledButton, UserNotice } from './login.styles';
 
 const LoginSchema = Yup.object().shape({
 	login: schema.required,
@@ -45,11 +45,11 @@ const DEFAULT_INPUT_PROPS = {
 };
 
 const USER_NOTICE = clientConfigService.userNotice;
+const WELCOME_MESSAGE = clientConfigService.getCustomLoginMessage() || 'Welcome to 3D Repo';
 
 interface IProps {
 	history: any;
 	location: any;
-	headlineText?: string;
 	onLogin: (login, password) => void;
 	isPending: boolean;
 	isAuthenticated: boolean;
@@ -100,7 +100,6 @@ export class Login extends React.PureComponent<IProps, IState> {
 	)
 
 	public render() {
-		const { headlineText } = this.props;
 		const { login, password } = this.state;
 
 		return (
@@ -109,10 +108,9 @@ export class Login extends React.PureComponent<IProps, IState> {
 				direction="column"
 				alignItems="center"
 				wrap="nowrap">
-				<Logo />
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
-					<Panel title="Log in" hiddenScrollbars={true}>
-						<Headline>{headlineText || 'Welcome to 3D Repo'}</Headline>
+					<Panel title="Log in" hiddenScrollbars>
+						<Headline>{WELCOME_MESSAGE}</Headline>
 						{USER_NOTICE && <UserNotice>{USER_NOTICE}</UserNotice>}
 
 						<Formik
@@ -129,7 +127,7 @@ export class Login extends React.PureComponent<IProps, IState> {
 										label="Username"
 										placeholder="Type username..."
 										autoComplete="login"
-										autoFocus={true}
+										autoFocus
 									/>
 								)} />
 								<Field name="password" render={({ field }) => (

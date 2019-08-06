@@ -64,8 +64,10 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	updateResourcesSuccess: ['resourcesIds', 'updates', 'issueId' ],
 	resetComponentState: [],
 	updateIssuePin: ['issue'],
-	showMultipleGroups: ['issue', 'revision']
-}, { prefix: 'ISSUES_' });
+	showMultipleGroups: ['issue', 'revision'],
+	setNewComment: ['newComment'],
+	saveNewScreenshot: ['teamspace', 'model', 'isNewIssue'],
+}, { prefix: 'ISSUES/' });
 
 export const INITIAL_STATE = {
 	issuesMap: {},

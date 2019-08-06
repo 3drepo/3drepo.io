@@ -18,9 +18,9 @@
 import styled from 'styled-components';
 import { COLOR } from '../../../../../../styles';
 
-import TableCell from '@material-ui/core/TableCell';
 import Checkbox from '@material-ui/core/Checkbox';
 import Table from '@material-ui/core/Table';
+import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 
 export const HeaderCheckboxWrapper = styled.div`

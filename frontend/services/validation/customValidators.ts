@@ -5,7 +5,6 @@ const loadPasswordLibrary = () => new Promise((resolve) => {
 		script.src = ZXCVBN_SRC;
 		script.type = 'text/javascript';
 		script.async = true;
-		const first = document.getElementsByTagName('script')[0];
 		document.body.appendChild(script);
 		script.onload = () => resolve(window.zxcvbn);
 	} else {
@@ -13,13 +12,13 @@ const loadPasswordLibrary = () => new Promise((resolve) => {
 	}
 });
 
-// TODO: Should be changed to dynamic import if app is fully migrated
 export const getPasswordStrength = (password) => loadPasswordLibrary().then((zxcvbn: any) => zxcvbn(password).score);
 
 export const differentThan = function(ref: any, message: any) {
 	return this.test({
 		name: 'differentThan',
 		exclusive: false,
+		// tslint:disable-next-line: no-invalid-template-strings
 		message: message || '${path} must be the different than ${reference}',
 		params: {
 			reference: ref.path
@@ -34,6 +33,7 @@ export const equalTo = function(ref: any, message: any) {
 	return this.test({
 		name: 'equalTo',
 		exclusive: false,
+		// tslint:disable-next-line: no-invalid-template-strings
 		message: message || '${path} must be equal to ${reference}',
 		params: {
 			reference: ref.path
@@ -48,9 +48,9 @@ export const strength = function(requiredValue: any, message: any) {
 	return this.test({
 		name: 'strength',
 		exclusive: false,
+		// tslint:disable-next-line: no-invalid-template-strings
 		message: message || '${path} is too weak',
 		async test(value: any) {
-			// TODO: Should be changed to dynamic import if app is fully migrated
 			const result = await getPasswordStrength(value);
 			return result > requiredValue;
 		}

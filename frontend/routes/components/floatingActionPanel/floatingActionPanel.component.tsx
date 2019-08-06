@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 import Tooltip from '@material-ui/core/Tooltip';
 import Add from '@material-ui/icons/Add';
 
-import { Container, Panel, FloatingButtonContainer, FloatingButton } from './floatingActionPanel.styles';
+import { Container, FloatingButton, FloatingButtonContainer, Panel } from './floatingActionPanel.styles';
 
 interface IProps {
 	render: (closePanel: any) => void;
@@ -84,7 +84,7 @@ export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
 							variant="fab"
 							color="secondary"
 							aria-label="Toggle panel"
-							mini={true}
+							mini
 							onClick={this.handleClick}
 							disabled={buttonProps.disabled}
 						>

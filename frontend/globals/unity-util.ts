@@ -54,33 +54,19 @@ export class UnityUtil {
 	public static loadedFlag = false;
 	public static UNITY_GAME_OBJECT = 'WebGLInterface';
 	public static defaultHighlightColor = [1, 1, 0];
+	private static progressCallback = Function.prototype;
+	private static modelLoaderProgressCallback = Function.prototype;
 
-	public static init(
-		errorCallback: any
-	) {
+	public static init(errorCallback: any, progressCallback: any, modelLoaderProgressCallback: any) {
 		UnityUtil.errorCallback = errorCallback;
+		UnityUtil.progressCallback = progressCallback;
+		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
 	}
 
 	public static onProgress(gameInstance, progress: number) {
-
-		const appendTo = 'viewer';
-
-		if (!gameInstance.progress) {
-			gameInstance.progress = document.createElement('div');
-			gameInstance.progress.className = 'unityProgressBar';
-			document.getElementById(appendTo).appendChild(gameInstance.progress);
-		}
-
 		requestAnimationFrame(() => {
-			if (progress === 1) {
-				gameInstance.progress.style.width = 0;
-				gameInstance.progress.style.display = 'none';
-			} else {
-				const width = document.body.clientWidth * (progress);
-				gameInstance.progress.style.width = width + 'px';
-			}
+			UnityUtil.progressCallback(progress);
 		});
-
 	}
 
 	public static loadUnity(divId: any, unityConfig?: string, memory?: number) {
@@ -296,6 +282,10 @@ export class UnityUtil {
 
 	public static loading(bboxStr) {
 		UnityUtil.loadingResolve.resolve();
+	}
+
+	public static loadingProgress(progress) {
+		UnityUtil.modelLoaderProgressCallback(progress);
 	}
 
 	public static navMethodChanged(newNavMode) {
@@ -692,9 +682,8 @@ export class UnityUtil {
 						reject(error);
 					}
 				}, i > 0 ? 100 : 0);
-
-				promises.push(promise);
 			});
+			promises.push(promise);
 		}
 
 		return Promise.all(promises);
@@ -966,6 +955,20 @@ export class UnityUtil {
 	 */
 	public static showHiddenByDefaultObjects() {
 		UnityUtil.toUnity('ShowHiddenByDefaultObjects', UnityUtil.LoadingState.MODEL_LOADED, undefined);
+	}
+
+	/**
+	 * Show progress bar while model is loading
+	 */
+	public static showProgressBar() {
+		UnityUtil.toUnity('ShowProgressBar', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Hide progress bar while model is loading
+	 */
+	public static hideProgressBar() {
+		UnityUtil.toUnity('HideProgressBar', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**

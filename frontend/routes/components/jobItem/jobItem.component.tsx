@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import Grid from '@material-ui/core/Grid';
+import React from 'react';
 
-import { Name, Color } from './jobItem.styles';
+import { Color, Name } from './jobItem.styles';
 
 interface IProps {
 	name: string;
@@ -28,13 +28,13 @@ interface IProps {
 export const JobItem = (props: IProps) => {
 	return (
 		<Grid
-			container={true}
+			container
 			direction="row"
 			justify="flex-start"
 			alignItems="center"
 		>
-			<Color item={true} color={props.color} />
-			<Name item={true}>{props.name}</Name>
+			<Color item color={props.color} />
+			<Name item>{props.name}</Name>
 		</Grid>
 	);
 };

@@ -15,32 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select, all, call, take } from 'redux-saga/effects';
-import { cond, isEqual, curry, keys, intersection } from 'lodash';
+import { cond, curry, intersection, isEqual, keys } from 'lodash';
+import { all, call, put, select, take, takeLatest } from 'redux-saga/effects';
 
-import { CompareTypes, CompareActions, ICompareComponentState } from './compare.redux';
-import { selectRevisions, selectIsFederation, selectSettings, ModelTypes } from '../model';
 import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES, VULNERABLE_PROPS } from '../../constants/compare';
-import { DialogActions } from '../dialog';
-import { Viewer } from '../../services/viewer/viewer';
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
+import { VISIBILITY_STATES } from '../../constants/tree';
 import * as API from '../../services/api';
+import { Viewer } from '../../services/viewer/viewer';
+import { DialogActions } from '../dialog';
+import { selectIsFederation, selectRevisions, selectSettings, ModelTypes } from '../model';
+import { selectNodesIndexesMap, selectTreeNodesList, TreeActions } from '../tree';
+import { CompareActions, CompareTypes, ICompareComponentState } from './compare.redux';
 import {
-	selectSortType,
-	selectSortOrder,
-	selectIsCompareActive,
 	selectActiveTab,
-	selectSelectedModelsMap,
 	selectBaseModelsList,
+	selectCompareModels,
+	selectComponentState,
+	selectIsCompareActive,
+	selectSelectedModelsMap,
+	selectSortOrder,
+	selectSortType,
 	selectTargetClashModels,
 	selectTargetDiffModels,
-	selectTargetModelsList,
-	selectComponentState,
-	selectCompareModels,
-	selectTargetModels
+	selectTargetModels,
+	selectTargetModelsList
 } from './compare.selectors';
-import { TreeActions, selectNodesIndexesMap, selectTreeNodesList } from '../tree';
-import { VISIBILITY_STATES } from '../../constants/tree';
 
 const getNextRevision = (revisions, currentRevision) => {
 	if (!currentRevision) {

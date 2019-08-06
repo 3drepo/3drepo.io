@@ -15,26 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import CloseIcon from '@material-ui/icons/Close';
+import React from 'react';
+import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { TooltipButton } from '../../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
+import { DATE_TIME_FORMAT } from '../../../../../services/formatting/formatDate';
 import { DateTime } from '../../../dateTime/dateTime.component';
 import DynamicUsername from '../../../dynamicUsername/dynamicUsername.container';
+import { Image } from '../../../image';
 import {
 	Container,
-	UserMessage,
-	SystemMessage,
+	Date,
 	Info,
+	MessageContainer,
+	RemoveButtonWrapper,
 	Screenshot,
 	ScreenshotMessage,
 	ScreenshotWrapper,
-	MessageContainer,
-	RemoveButtonWrapper,
-	Date
+	SystemMessage,
+	UserMessage
 } from './log.styles';
-import CloseIcon from '@material-ui/icons/Close';
-import { TooltipButton } from '../../../../../routes/teamspaces/components/tooltipButton/tooltipButton.component';
-import { renderWhenTrue } from '../../../../../helpers/rendering';
-import { Image } from '../../../image';
-import { DATE_TIME_FORMAT } from '../../../../../services/formatting/formatDate';
 
 interface IProps {
 	comment: string;
@@ -68,11 +68,6 @@ export class Log extends React.PureComponent<IProps, any> {
 
 	get isRemovable() {
 		return !this.props.sealed && !this.props.action && this.props.currentUser === this.props.owner;
-	}
-
-	public removeComment = (event) => {
-		event.stopPropagation();
-		this.props.removeLog(this.props.index, this.props.guid);
 	}
 
 	public renderRemoveButton = renderWhenTrue(() => (
@@ -115,6 +110,11 @@ export class Log extends React.PureComponent<IProps, any> {
 	public renderUsername = renderWhenTrue((
 		<DynamicUsername teamspace={this.props.teamspace} name={this.props.owner} />
 	));
+
+	public removeComment = (event) => {
+		event.stopPropagation();
+		this.props.removeLog(this.props.index, this.props.guid);
+	}
 
 	public renderInfo = () => (
 		<Info>

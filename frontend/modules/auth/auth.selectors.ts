@@ -17,7 +17,7 @@
 
 import { createSelector } from 'reselect';
 
-export const selectAuthDomain = (state) => Object.assign({}, state.auth);
+export const selectAuthDomain = (state) => ({...state.auth});
 
 export const selectIsAuthenticated = createSelector(
 	selectAuthDomain, (state) => state.isAuthenticated

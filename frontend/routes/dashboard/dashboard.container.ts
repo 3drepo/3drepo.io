@@ -15,19 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { push } from 'connected-react-router';
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { withRouter } from 'react-router-dom';
-import { connect, addRouting } from '../../helpers/migration';
 
-import { Dashboard } from './dashboard.component';
 import {
 	selectCurrentUser,
-	selectIsInitialised,
 	selectIsAvatarPending,
+	selectIsInitialised,
 	selectIsPending,
 	CurrentUserActions
 } from '../../modules/currentUser';
+import { Dashboard } from './dashboard.component';
 
 const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
@@ -37,7 +37,8 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchUser: CurrentUserActions.fetchUser
+	fetchUser: CurrentUserActions.fetchUser,
+	push
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Dashboard)));
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);

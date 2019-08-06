@@ -16,34 +16,36 @@
  */
 
 import { values } from 'lodash';
-import { put, takeLatest, takeEvery, select, all } from 'redux-saga/effects';
-import { getAngularService, dispatch, getState } from '../../helpers/migration';
+import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { calculateTotalMeshes } from '../../helpers/tree';
+import { dispatch, getState } from '../store';
 
+import { CHAT_CHANNELS } from '../../constants/chat';
+import { GROUPS_TYPES } from '../../constants/groups';
+import { getRandomColor, hexToGLColor } from '../../helpers/colors';
+import { normalizeGroup, prepareGroup } from '../../helpers/groups';
+import { searchByFilters } from '../../helpers/searching';
 import * as API from '../../services/api';
-import { GroupsTypes, GroupsActions, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
+import { MultiSelect } from '../../services/viewer/multiSelect';
+import { Viewer } from '../../services/viewer/viewer';
+import { ChatActions } from '../chat';
+import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
+import { SnackbarActions } from '../snackbar';
+import { selectGetMeshesByIds, selectGetNodesByIds, selectGetNodesIdsFromSharedIds, TreeActions } from '../tree';
+import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
 import {
+	selectActiveGroupDetails,
+	selectActiveGroupId,
 	selectColorOverrides,
+	selectFilteredGroups,
 	selectGroups,
 	selectGroupsMap,
-	selectFilteredGroups,
-	selectNewGroupDetails,
-	selectActiveGroupDetails,
-	selectSelectedFilters,
-	selectShowDetails,
 	selectIsAllOverridden,
-	selectActiveGroupId
+	selectNewGroupDetails,
+	selectSelectedFilters,
+	selectShowDetails
 } from './groups.selectors';
-import { Viewer } from '../../services/viewer/viewer';
-import { MultiSelect } from '../../services/viewer/multiSelect';
-import { prepareGroup, normalizeGroup } from '../../helpers/groups';
-import { selectCurrentUser } from '../currentUser';
-import { getRandomColor, hexToGLColor } from '../../helpers/colors';
-import { SnackbarActions } from '../snackbar';
-import { TreeActions, selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectGetNodesByIds } from '../tree';
-import { searchByFilters } from '../../helpers/searching';
-import { GROUPS_TYPES } from '../../constants/groups';
 
 export function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(true));
@@ -96,8 +98,6 @@ export function* highlightGroup({ group }) {
 		if (group.objects && group.objects.length > 0) {
 			yield put(TreeActions.showNodesBySharedIds(group.objects));
 			yield put(TreeActions.selectNodesBySharedIds(group.objects, color));
-			// TODO Do we need this?
-			// yield put(TreeActions.getSelectedNodes());
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('higlight', 'group', error));
@@ -377,21 +377,19 @@ const onDeleted = (deletedGroupIds) => {
 };
 
 export function* subscribeOnChanges({ teamspace, modelId }) {
-	const ChatService = yield getAngularService('ChatService');
-	const groupsNotifications = yield ChatService.getChannel(teamspace, modelId).groups;
-
-	groupsNotifications.subscribeToUpdated(onUpdated, this);
-	groupsNotifications.subscribeToCreated(onCreated, this);
-	groupsNotifications.subscribeToDeleted(onDeleted, this);
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.GROUPS, teamspace, modelId, {
+		subscribeToUpdated: onUpdated,
+		subscribeToCreated: onCreated,
+		subscribeToDeleted: onDeleted
+	}));
 }
 
 export function* unsubscribeFromChanges({ teamspace, modelId }) {
-	const ChatService = yield getAngularService('ChatService');
-	const groupsNotifications = yield ChatService.getChannel(teamspace, modelId).groups;
-
-	groupsNotifications.unsubscribeFromUpdated(onUpdated);
-	groupsNotifications.unsubscribeFromCreated(onCreated);
-	groupsNotifications.unsubscribeFromDeleted(onDeleted);
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.GROUPS, teamspace, modelId, {
+		unsubscribeToUpdated: onUpdated,
+		unsubscribeToCreated: onCreated,
+		unsubscribeToDeleted: onDeleted
+	}));
 }
 
 export function* resetToSavedSelection({ groupId }) {

@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import Dropzone from 'react-dropzone';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
+import Dropzone from 'react-dropzone';
+import styled from 'styled-components';
 import { COLOR } from '../../styles';
 
 export const FormContainer = styled(Grid)`
@@ -124,7 +124,6 @@ export const DropzoneMessage = styled.div`
 	justify-content: center;
 	text-align: center;
 	padding-bottom: 5px;
-	font-family: 'Material Icons';
 	box-sizing: border-box;
 `;
 

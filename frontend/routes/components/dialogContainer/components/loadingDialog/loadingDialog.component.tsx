@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import DialogContent from '@material-ui/core/DialogContent';
-import { LoaderContainer } from './loadingDialog.styles';
 import { Loader } from '../../../loader/loader.component';
+import { LoaderContainer } from './loadingDialog.styles';
 
 interface IProps {
 	content: string;

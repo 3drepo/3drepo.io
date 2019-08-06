@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Route, Link, Switch, Redirect } from 'react-router-dom';
-import * as queryString from 'query-string';
-import { values } from 'lodash';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
+import { values } from 'lodash';
+import * as queryString from 'query-string';
+import React from 'react';
+import { Link, Redirect, Route, Switch } from 'react-router-dom';
 
 import { Panel } from '../components/panel/panel.component';
-import Subscription from './../subscription/subscription.container';
 import History from './../history/history.container';
+import Subscription from './../subscription/subscription.container';
 import { Header, TabContent } from './billing.styles';
 
 const TABS = {
@@ -109,7 +109,7 @@ export class Billing extends React.PureComponent<IProps, IState> {
 			<Panel title="Billing" paperProps={paperProps}>
 				<Switch>
 					<Route path={`${match.url}/:tab`} render={this.renderRoute} />
-					<Redirect exact={true} from={`${match.url}`} to={`${match.url}/${TABS.SUBSCRIPTION.path}`} />
+					<Redirect exact from={`${match.url}`} to={`${match.url}/${TABS.SUBSCRIPTION.path}`} />
 				</Switch>
 			</Panel>
 		);

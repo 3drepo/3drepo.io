@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isEqual, omitBy, orderBy, values } from 'lodash';
 import { createSelector } from 'reselect';
-import { isEqual, values, orderBy, omitBy, size } from 'lodash';
+import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE } from '../../constants/compare';
 import { searchByFilters } from '../../helpers/searching';
-import { DIFF_COMPARE_TYPE, COMPARE_SORT_TYPES } from '../../constants/compare';
-import { selectIsModelLoaded } from '../viewer';
+import { selectIsModelLoaded } from '../viewerGui';
 
-export const selectCompareDomain = (state) => Object.assign({}, state.compare);
+export const selectCompareDomain = (state) => ({...state.compare});
 
 export const selectComponentState = createSelector(
 	selectCompareDomain, (state) => state.componentState

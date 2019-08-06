@@ -17,15 +17,15 @@
 
 import { Button, InputAdornment, List, MenuItem, Switch } from '@material-ui/core';
 import { Field, Form, Formik } from 'formik';
-import * as React from 'react';
-import * as Yup from 'yup';
-import { schema } from '../../../../../services/validation';
-import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NeutralActionButton, ShortInput,
-		VisualSettingsButtonsContainer, VisualSettingsDialogContent,
-		NegativeActionButton } from './visualSettingsDialog.styles';
 import { isEqual } from 'lodash';
+import React from 'react';
+import * as Yup from 'yup';
 import { DEFAULT_SETTINGS } from '../../../../../constants/viewer';
+import { schema } from '../../../../../services/validation';
 import { SelectField } from '../../../selectField/selectField.component';
+import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NegativeActionButton, NeutralActionButton,
+		ShortInput, VisualSettingsButtonsContainer,
+		VisualSettingsDialogContent } from './visualSettingsDialog.styles';
 
 const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
@@ -57,9 +57,10 @@ const BasicSettings = (props) => {
 			<FormListItem>
 				XRay highlighting
 				<Field name="xray" render={ ({ field }) => (
-					<Switch checked={field.value} {...field} value="true" color="secondary" />)}/>
+					<Switch checked={field.value} {...field} value="true" color="secondary" />)} />
 			</FormListItem>
-		</List>);
+		</List>
+	);
 };
 
 const AdvancedSettings = (props) => {
@@ -69,7 +70,7 @@ const AdvancedSettings = (props) => {
 				Show Statistics
 				<Field name="statistics" render={ ({ field }) => (
 					<Switch checked={field.value} {...field} value="true" color="secondary" />
-				)}/>
+				)} />
 			</FormListItem>
 			<FormListItem>
 				Memory for Unity
@@ -79,7 +80,7 @@ const AdvancedSettings = (props) => {
 					<ShortInput
 						error={Boolean(form.errors.memory)}
 						{...field}
-						endAdornment={<InputAdornment position="end">MB</InputAdornment>}/>
+						endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
 					</ErrorTooltip>
 					);
 				}} />
@@ -104,7 +105,7 @@ const AdvancedSettings = (props) => {
 						<MenuItem value="box">Bounding box</MenuItem>
 						<MenuItem value="sphere">Bounding sphere</MenuItem>
 					</SelectField>
-				)}/>
+				)} />
 			</FormListItem>
 			<FormListItem>
 				Far plane points
@@ -133,7 +134,8 @@ const AdvancedSettings = (props) => {
 					);
 				}} />
 			</FormListItem>
-		</List>);
+		</List>
+	);
 };
 
 const Buttons = (props) => {
@@ -170,7 +172,8 @@ const Buttons = (props) => {
 					</Button>
 			)} />
 
-		</VisualSettingsButtonsContainer>);
+		</VisualSettingsButtonsContainer>
+	);
 };
 
 interface IProps {
@@ -233,7 +236,7 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 				<Formik
 					validationSchema={SettingsSchema}
 					initialValues={visualSettings}
-					enableReinitialize={true}
+					enableReinitialize
 					onSubmit={this.onSubmit}
 					>
 					<Form>

@@ -15,24 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
 import Grid from '@material-ui/core/Grid';
+import { Field, Form, Formik } from 'formik';
+import React from 'react';
+import * as Yup from 'yup';
 
 import { schema } from '../../../services/validation';
 
 import {
+	DropzoneContent,
+	DropzoneMessage,
+	DropzonePreview,
+	DropzoneProgress,
+	FieldsRow,
 	FormContainer,
 	Headline,
+	StyledButton,
 	StyledDropzone,
-	DropzoneMessage,
-	DropzoneProgress,
-	StyledTextField,
-	FieldsRow,
-	DropzoneContent,
-	DropzonePreview,
-	StyledButton
+	StyledTextField
 } from '../profile.styles';
 
 interface IProps {
@@ -89,12 +89,12 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 				initialValues={{firstName, lastName, email}}
 				validationSchema={ProfileSchema}
 				onSubmit={this.handleProfileUpdate}
-				enableReinitialize={true}
+				enableReinitialize
 			>
 				<Form>
-					<FormContainer container={true} direction="column">
+					<FormContainer container direction="column">
 						<Headline color="primary" variant="subheading">Basic Information</Headline>
-						<Grid container={true} direction="row" wrap="nowrap">
+						<Grid container direction="row" wrap="nowrap">
 							<StyledDropzone
 								disabled={isAvatarPending}
 								accept=".gif,.jpg,.png"
@@ -106,14 +106,14 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 									<DropzoneMessage>+</DropzoneMessage>
 								</DropzoneContent>
 							</StyledDropzone>
-							<Grid container={true} direction="column">
-								<FieldsRow container={true} wrap="nowrap">
+							<Grid container direction="column">
+								<FieldsRow container wrap="nowrap">
 									<Field name="firstName" render={ ({ field, form }) => (
 										<StyledTextField
 											{...field}
 											error={Boolean(form.errors.firstName)}
 											helperText={form.errors.firstName}
-											required={true}
+											required
 											label="First name"
 											margin="normal"
 										/>
@@ -123,18 +123,18 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 											{...field}
 											error={Boolean(form.errors.lastName)}
 											helperText={form.errors.lastName}
-											required={true}
+											required
 											label="Last name"
 											margin="normal"
 										/>
 									)} />
 								</FieldsRow>
-								<FieldsRow container={true} wrap="nowrap">
+								<FieldsRow container wrap="nowrap">
 									<StyledTextField
 										value={username}
 										label="Username"
 										margin="normal"
-										disabled={true}
+										disabled
 									/>
 									<Field name="email" render={ ({ field, form }) => (
 										<StyledTextField
@@ -143,7 +143,7 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 											helperText={form.errors.email}
 											label="Email"
 											margin="normal"
-											required={true}
+											required
 										/>
 									)} />
 								</FieldsRow>

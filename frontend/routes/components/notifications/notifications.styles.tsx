@@ -16,7 +16,7 @@
  */
 import styled from 'styled-components';
 
-import { ListItem, List } from '@material-ui/core';
+import { List, ListItem } from '@material-ui/core';
 import Notifications from '@material-ui/icons/Notifications';
 import { COLOR } from '../../../styles';
 import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.component';

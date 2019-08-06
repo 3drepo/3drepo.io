@@ -16,8 +16,8 @@
  */
 
 import { DialogContent, InputAdornment } from '@material-ui/core';
-import styled from 'styled-components';
 import Dropzone from 'react-dropzone';
+import styled from 'styled-components';
 import { COLOR } from '../../../../styles';
 
 const dropZoneColors = (normalColour, dragColour, errorColour) => (props: any) =>

@@ -15,19 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as Yup from 'yup';
-import { Link } from 'react-router-dom';
-import { Formik, Form, Field } from 'formik';
-import * as queryString from 'query-string';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
+import { Field, Form, Formik } from 'formik';
+import * as queryString from 'query-string';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import * as Yup from 'yup';
 
 import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../services/validation';
-import { Logo } from '../components/logo/logo.component';
 import { Panel } from '../components/panel/panel.component';
-import { Container, Message, Buttons, StyledButton } from './passwordChange.styles';
 import { SubmitButton } from '../components/submitButton/submitButton.component';
+import { Buttons, Container, Message, StyledButton } from './passwordChange.styles';
 
 const PasswordChangeSchema = Yup.object().shape({
 	newPassword: schema.password
@@ -170,7 +169,6 @@ export class PasswordChange extends React.PureComponent<IProps, IState> {
 				container
 				direction="column"
 				alignItems="center">
-				<Link to="/login"><Logo /></Link>
 				<Grid item xs={9} sm={7} md={5} lg={3} xl={2}>
 					<Panel title="Forgot password">
 						{ this.props.message

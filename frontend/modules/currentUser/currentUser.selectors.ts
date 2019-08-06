@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
 import { isNil } from 'lodash';
+import { createSelector } from 'reselect';
 
-const selectCurrentUserDomain = (state) => Object.assign({}, state.currentUser);
+const selectCurrentUserDomain = (state) => ({...state.currentUser});
 
 export const selectCurrentTeamspace = createSelector(
 	selectCurrentUserDomain, (state) => state.currentTeamspace

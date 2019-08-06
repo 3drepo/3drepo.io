@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import Grid from '@material-ui/core/Grid';
 import Radio from '@material-ui/core/Radio';
+import styled from 'styled-components';
 
 export const RadioContainer = styled(Grid)`
 	&& {

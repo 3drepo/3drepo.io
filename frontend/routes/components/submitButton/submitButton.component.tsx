@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import React from 'react';
 
-import { StyledButton, LoaderContainer } from './submitButton.styles';
+import { LoaderContainer, StyledButton } from './submitButton.styles';
 
 interface IProps {
 	children: any;

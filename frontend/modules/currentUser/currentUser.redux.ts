@@ -48,18 +48,16 @@ export const INITIAL_STATE = {
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
-	return Object.assign({}, state, { isPending: pendingState });
+	return { ...state, isPending: pendingState };
 };
 
 const setAvatarPendingState = (state = INITIAL_STATE, { pendingState }) => {
-	return Object.assign({}, state, { isAvatarPending: pendingState });
+	return { ...state, isAvatarPending: pendingState };
 };
 
-const setAsInitialised = (state = INITIAL_STATE) => Object.assign({}, state, { isInitialised: true });
+const setAsInitialised = (state = INITIAL_STATE) => ({ ...state, isInitialised: true });
 
-const fetchQuotaInfoSuccess = (state = INITIAL_STATE, { quota }) => {
-	return Object.assign({}, state, { ...quota });
-};
+const fetchQuotaInfoSuccess = (state = INITIAL_STATE, { quota }) => ({ ...state, ...quota });
 
 const fetchUserSuccess = (state = INITIAL_STATE, { userData }) => {
 	return {

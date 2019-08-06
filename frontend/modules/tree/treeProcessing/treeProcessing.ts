@@ -1,6 +1,6 @@
 import { Processing } from './processing';
-import { ITreeProcessingData } from './treeProcessing.constants';
 import transformTree from './transforming';
+import { ITreeProcessingData } from './treeProcessing.constants';
 
 class TreeProcessing {
 	private processing: Processing;

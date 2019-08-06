@@ -14,13 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import filesize from 'filesize';
+import { Field, FieldArray } from 'formik';
 import * as React from 'react';
-import * as filesize from 'filesize';
-import { FieldArray, Field } from 'formik';
-import { ResourcesDropzone } from './attachResourcesDropzone';
-import { ResourcesListContainer, ResourcesListScroller } from './attachResourcesDialog.styles';
 import { EXTENSION_RE } from '../../../../constants/resources';
 import { FileEntry } from './attachResourceFileEntry.component';
+import { ResourcesListContainer, ResourcesListScroller } from './attachResourcesDialog.styles';
+import { ResourcesDropzone } from './attachResourcesDropzone';
 
 interface IProps {
 	files: any[];

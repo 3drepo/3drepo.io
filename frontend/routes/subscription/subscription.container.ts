@@ -15,22 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
 
-import { Subscription } from './subscription.component';
 import {
-	CurrentUserActions,
-	selectCurrentTeamspace,
-	selectSpaceInfo
-} from '../../modules/currentUser';
-import {
-	BillingActions,
-	selectLicencesInfo,
 	selectBillingInfo,
-	selectIsPending
+	selectIsPending,
+	selectLicencesInfo,
+	BillingActions
 } from '../../modules/billing';
+import {
+	selectCurrentTeamspace,
+	selectSpaceInfo,
+	CurrentUserActions
+} from '../../modules/currentUser';
+import { Subscription } from './subscription.component';
 
 const mapStateToProps = createStructuredSelector({
 	billingInfo: selectBillingInfo,

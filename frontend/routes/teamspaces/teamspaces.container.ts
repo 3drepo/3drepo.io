@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
 
-import { Teamspaces } from './teamspaces.component';
 import { selectCurrentTeamspace } from '../../modules/currentUser';
-import { TeamspacesActions,
+import { DialogActions } from '../../modules/dialog';
+import { selectActiveProject,
+	selectActiveTeamspace,
 	selectIsPending,
 	selectTeamspaces,
-	selectActiveProject,
-	selectActiveTeamspace
+	TeamspacesActions
 } from '../../modules/teamspaces';
 import { ModelActions } from './../../modules/model';
-import { DialogActions } from '../../modules/dialog';
+import { Teamspaces } from './teamspaces.component';
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,
 	teamspaces: selectTeamspaces,

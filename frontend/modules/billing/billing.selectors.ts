@@ -17,7 +17,7 @@
 
 import { createSelector } from 'reselect';
 
-export const selectBillingDomain = (state) => Object.assign({}, state.billing);
+export const selectBillingDomain = (state) => ({...state.billing});
 
 export const selectIsPending = createSelector(
 	selectBillingDomain,

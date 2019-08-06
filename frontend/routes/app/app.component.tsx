@@ -15,22 +15,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { runAngularTimeout } from '../../helpers/migration';
-import { DialogContainer } from '../components/dialogContainer';
-import { SnackbarContainer } from '../components/snackbarContainer';
+import { memoize } from 'lodash';
+import React from 'react';
+import { Route, Switch } from 'react-router-dom';
+
+import { PUBLIC_ROUTES, ROUTES } from '../../constants/routes';
+import { renderWhenTrue } from '../../helpers/rendering';
+import { analyticsService } from '../../services/analytics';
 import { clientConfigService } from '../../services/clientConfig';
-import { isStaticRoute } from '../../services/staticPages';
+import { isStaticRoute, STATIC_ROUTES } from '../../services/staticPages';
+import { DialogContainer } from '../components/dialogContainer';
 import { LiveChat } from '../components/liveChat';
+import { PrivateRoute } from '../components/privateRoute';
+import { SnackbarContainer } from '../components/snackbarContainer';
+import StaticPageRoute from '../components/staticPageRoute/staticPageRoute.container';
+import TopMenu from '../components/topMenu/topMenu.container';
+import { Dashboard } from '../dashboard';
+import { Login } from '../login';
+import { NotFound } from '../notFound';
+import { PasswordChange } from '../passwordChange';
+import { PasswordForgot } from '../passwordForgot';
+import RegisterRequest from '../registerRequest/registerRequest.container';
+import { RegisterVerify } from '../registerVerify';
+import { SignUp } from '../signUp';
+import { ViewerCanvas } from '../viewerCanvas';
+import { ViewerGui } from '../viewerGui';
+import { AppContainer } from './app.styles';
 
 interface IProps {
 	location: any;
 	history: any;
 	isAuthenticated: boolean;
 	hasActiveSession: boolean;
+	currentUser: any;
+	isAuthPending: boolean;
 	authenticate: () => void;
 	logout: () => void;
-	currentUser: any;
+	startup: () => void;
 }
 
 interface IState {
@@ -38,45 +59,64 @@ interface IState {
 	autologoutInterval?: number;
 }
 
-const DEFAULT_REDIRECT = '/dashboard/teamspaces';
-const MAIN_ROUTE_PATH = '/';
-const LOGIN_ROUTE_PATH = '/login';
+const DEFAULT_REDIRECT = ROUTES.TEAMSPACES;
 
-const PUBLIC_ROUTES = [
-	'login',
+const ANALYTICS_REFERER_ROUTES = [
 	'sign-up',
-	'register-request',
-	'register-verify',
-	'password-forgot',
-	'password-change'
+	'register-request'
 ] as any;
 
 export class App extends React.PureComponent<IProps, IState> {
+
+	public get hasActiveSession() {
+		return JSON.parse(window.localStorage.getItem('loggedIn'));
+	}
+	private authenticationInterval;
+	private loginInterval;
+
 	public state = {
 		referrer: DEFAULT_REDIRECT,
 		autologoutInterval: clientConfigService.login_check_interval || 4
 	};
 
-	private authenticationInterval;
-	private loginInterval;
+	public renderStaticRoutes = memoize(() => STATIC_ROUTES.map(({ title, path, fileName }) => (
+		<Route key={path} path={path} render={() => <StaticPageRoute title={title} fileName={fileName} />} />
+	)));
+
+	public renderLoginRoute = memoize(() => {
+		return <Route exact path={ROUTES.LOGIN} component={Login} />;
+	});
+
+	public renderHeader = renderWhenTrue(() => (
+		<TopMenu onLogout={this.props.logout} onLogoClick={this.handleLogoClick} />
+	));
+
+	constructor(props) {
+		super(props);
+		props.startup();
+	}
 
 	public isPublicRoute(path) {
-		return PUBLIC_ROUTES.includes(path.replace('/', ''));
+		return PUBLIC_ROUTES.includes(path);
+	}
+
+	public isRefererRoute(path) {
+		return ANALYTICS_REFERER_ROUTES.includes(path.replace('/', ''));
 	}
 
 	public componentDidMount() {
 		this.props.authenticate();
-
 		if (!isStaticRoute(location.pathname)) {
 			this.toggleAutoLogout();
 			this.toggleAutoLogin();
 		}
 
-		const initialReferrer = location.pathname !== MAIN_ROUTE_PATH
+		const initialReferrer = location.pathname !== ROUTES.HOME
 			? `${location.pathname}${location.search}`
 			: DEFAULT_REDIRECT;
 
 		this.setState({ referrer: initialReferrer });
+		this.sendAnalyticsPageView(location);
 	}
 
 	public componentWillUnmount() {
@@ -94,24 +134,31 @@ export class App extends React.PureComponent<IProps, IState> {
 		if (isPrivateRoute && isAuthenticated !== prevProps.isAuthenticated) {
 			if (isAuthenticated) {
 				this.toggleAutoLogin(false);
-				runAngularTimeout(() => {
-					history.push(this.state.referrer);
-				});
+				history.push(this.state.referrer);
 			} else {
 				this.toggleAutoLogout(false);
 				this.toggleAutoLogin();
-				runAngularTimeout(() => {
-					history.push('/login');
-				});
+				history.push(ROUTES.LOGIN);
 			}
 		}
 
 		if (isPublicRoute && isAuthenticated) {
-			const isLoginRoute = LOGIN_ROUTE_PATH === location.pathname;
-			runAngularTimeout(() => {
-				history.push(isLoginRoute ? this.state.referrer : DEFAULT_REDIRECT);
-				this.setState({ referrer: DEFAULT_REDIRECT });
-			});
+			const isLoginRoute = ROUTES.LOGIN === location.pathname;
+			history.push(isLoginRoute ? this.state.referrer : DEFAULT_REDIRECT);
+			this.setState({ referrer: DEFAULT_REDIRECT });
+		}
+
+		if (location.pathname !== prevProps.location.pathname) {
+			this.sendAnalyticsPageView(location);
+		}
+	}
+
+	public sendAnalyticsPageView(location) {
+		const isAnalyticsRefererRoute = this.isRefererRoute(location.pathname);
+		analyticsService.sendPageView(location);
+
+		if (isAnalyticsRefererRoute) {
+			analyticsService.sendPageViewReferer(location);
 		}
 	}
 
@@ -126,30 +173,36 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public toggleAutoLogin = (shouldStart = true) => {
 		if (shouldStart) {
-			this.loginInterval = setInterval(this.handleAutoLogin, 1000);
+			this.loginInterval = setInterval(this.handleAutoLogin, 2000);
 		} else {
 			clearInterval(this.loginInterval);
 			this.loginInterval = null;
 		}
 	}
 
+	public handleLogoClick = () => {
+		const { isAuthenticated, history } = this.props;
+		let path = ROUTES.HOME;
+		if (isAuthenticated) {
+			path = ROUTES.TEAMSPACES;
+		}
+
+		history.push(path);
+	}
+
 	public handleAutoLogout = () => {
 		const { isAuthenticated, logout, history } = this.props;
-		const hasActiveSession = JSON.parse(window.localStorage.getItem('loggedIn'));
-		const isSessionExpired = hasActiveSession !== isAuthenticated;
+		const isSessionExpired = this.hasActiveSession !== isAuthenticated;
 		if (isSessionExpired) {
 			logout();
-			runAngularTimeout(() => {
-				history.push('/login');
-			});
+			history.push(ROUTES.LOGIN);
 		}
 	}
 
 	public handleAutoLogin = () => {
 		const { isAuthenticated } = this.props;
-		const hasActiveSession = JSON.parse(window.localStorage.getItem('loggedIn'));
 
-		if (hasActiveSession && !isAuthenticated) {
+		if (this.hasActiveSession && !isAuthenticated) {
 			this.props.authenticate();
 			if (!this.authenticationInterval) {
 				this.toggleAutoLogout();
@@ -158,13 +211,39 @@ export class App extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		// TODO: In the future it'll return first level routes eg. Dashboard, Login
+		const { isAuthPending } = this.props;
+		if (isAuthPending) {
+			return (
+				<AppContainer>
+					{this.renderHeader(true)}
+					{this.renderLoginRoute()}
+				</AppContainer>
+			);
+		}
+
 		return (
-			<>
-				<DialogContainer />
-				<SnackbarContainer />
-				<LiveChat/>
-			</>
+				<AppContainer>
+					<ViewerCanvas />
+					{this.renderHeader(!isStaticRoute(location.pathname))}
+					<Switch>
+						{this.renderLoginRoute()}
+						<Route exact path={ROUTES.SIGN_UP} component={SignUp} />
+						<Route exact path={ROUTES.PASSWORD_FORGOT} component={PasswordForgot} />
+						<Route exact path={ROUTES.PASSWORD_CHANGE} component={PasswordChange} />
+						<Route exact path={ROUTES.REGISTER_REQUEST} component={RegisterRequest} />
+						<Route exact path={ROUTES.REGISTER_VERIFY} component={RegisterVerify} />
+						<PrivateRoute path={ROUTES.DASHBOARD} component={Dashboard} />
+						<PrivateRoute
+							path={`${ROUTES.VIEWER}/:teamspace/:model/:revision?`}
+							component={ViewerGui}
+						/>
+						{this.renderStaticRoutes()}
+						<Route component={NotFound} />
+					</Switch>
+					<DialogContainer />
+					<SnackbarContainer />
+					<LiveChat />
+				</AppContainer>
 		);
 	}
 }

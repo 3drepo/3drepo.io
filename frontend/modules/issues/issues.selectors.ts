@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
 import { values } from 'lodash';
+import { createSelector } from 'reselect';
 import { STATUSES } from '../../constants/issues';
 import { searchByFilters } from '../../helpers/searching';
 import { selectCurrentModel } from '../model';
 
-export const selectIssuesDomain = (state) => Object.assign({}, state.issues);
+export const selectIssuesDomain = (state) => ({...state.issues});
 
 export const selectComponentState = createSelector(
 	selectIssuesDomain, (state) => state.componentState

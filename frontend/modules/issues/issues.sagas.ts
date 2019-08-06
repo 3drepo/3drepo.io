@@ -15,39 +15,49 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { push } from 'connected-react-router';
+import filesize from 'filesize';
+import { differenceBy, isEmpty, map, omit, pick } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
-import * as filesize from 'filesize';
-import * as API from '../../services/api';
-import * as Exports from '../../services/export';
-import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
-import { prepareIssue } from '../../helpers/issues';
-import { prepareComments, prepareComment, createAttachResourceComments,
-	createRemoveResourceComment } from '../../helpers/comments';
-import { Cache } from '../../services/cache';
-import { Viewer } from '../../services/viewer/viewer';
-import { PRIORITIES, STATUSES, DEFAULT_PROPERTIES } from '../../constants/issues';
-import { PIN_COLORS } from '../../styles';
-import { DialogActions } from '../dialog';
-import { SnackbarActions } from '../snackbar';
-import { selectJobsList, selectMyJob } from '../jobs';
-import { selectCurrentUser, selectCurrentTeamspace } from '../currentUser';
-import {
-	selectActiveIssueId,
-	selectIssues,
-	selectShowPins,
-	selectIssuesMap,
-	selectActiveIssueDetails,
-	selectFilteredIssues
-} from './issues.selectors';
-import { IssuesTypes, IssuesActions } from './issues.redux';
-import { NEW_PIN_ID } from '../../constants/viewer';
-import { selectTopicTypes, selectCurrentModel, selectCurrentModelTeamspace } from '../model';
-import { prepareResources } from '../../helpers/resources';
-import { EXTENSION_RE } from '../../constants/resources';
-import { selectIfcSpacesHidden, TreeActions } from '../tree';
 
-export function* fetchIssues({teamspace, modelId, revision}) {
+import { CHAT_CHANNELS } from '../../constants/chat';
+import { DEFAULT_PROPERTIES, PRIORITIES, STATUSES } from '../../constants/issues';
+import { EXTENSION_RE } from '../../constants/resources';
+import { ROUTES } from '../../constants/routes';
+import { NEW_PIN_ID } from '../../constants/viewer';
+import {
+	createAttachResourceComments,
+	createRemoveResourceComment,
+	prepareComment,
+	prepareComments
+} from '../../helpers/comments';
+import { prepareIssue } from '../../helpers/issues';
+import { prepareResources } from '../../helpers/resources';
+import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
+import * as API from '../../services/api';
+import { Cache } from '../../services/cache';
+import * as Exports from '../../services/export';
+import { Viewer } from '../../services/viewer/viewer';
+import { PIN_COLORS } from '../../styles';
+import { ChatActions } from '../chat';
+import { selectCurrentUser } from '../currentUser';
+import { DialogActions } from '../dialog';
+import { selectJobsList, selectMyJob } from '../jobs';
+import { selectCurrentModel, selectCurrentModelTeamspace, selectTopicTypes } from '../model';
+import { SnackbarActions } from '../snackbar';
+import { dispatch, getState } from '../store';
+import { selectIfcSpacesHidden, TreeActions } from '../tree';
+import { IssuesActions, IssuesTypes } from './issues.redux';
+import {
+	selectActiveIssueDetails,
+	selectActiveIssueId,
+	selectFilteredIssues,
+	selectIssues,
+	selectIssuesMap,
+	selectShowPins
+} from './issues.selectors';
+
+function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(true));
 	try {
 		const { data } = yield API.getIssues(teamspace, modelId, revision);
@@ -63,7 +73,7 @@ export function* fetchIssues({teamspace, modelId, revision}) {
 	yield put(IssuesActions.togglePendingState(false));
 }
 
-export function* fetchIssue({teamspace, modelId, issueId}) {
+function* fetchIssue({teamspace, modelId, issueId}) {
 	yield put(IssuesActions.toggleDetailsPendingState(true));
 
 	try {
@@ -129,10 +139,10 @@ function* updateIssuePin({issue}) {
 	}
 }
 
-export function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting }) {
+function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting }) {
 	try {
 		const pinData = Viewer.getPinData();
-		yield Viewer.setPinDropMode(false);
+		Viewer.setPinDropMode(false);
 		const myJob = yield select(selectMyJob);
 		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 
@@ -143,10 +153,8 @@ export function* saveIssue({ teamspace, model, issueData, revision, finishSubmit
 			myJob
 		]);
 
-		const AnalyticService = getAngularService('AnalyticService') as any;
-
 		viewpoint.hideIfc = ifcSpacesHidden;
-		issueData = {
+		issueData.rev_id = {
 			...issueData,
 			rev_id: revision
 		};
@@ -185,10 +193,7 @@ export function* saveIssue({ teamspace, model, issueData, revision, finishSubmit
 
 		const { data: savedIssue } = yield API.saveIssue(teamspace, model, issue);
 
-		AnalyticService.sendEvent({
-			eventCategory: 'Issue',
-			eventAction: 'create'
-		});
+		analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.CREATE);
 
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(savedIssue, jobs);
@@ -203,15 +208,12 @@ export function* saveIssue({ teamspace, model, issueData, revision, finishSubmit
 	}
 }
 
-export function* updateIssue({ teamspace, modelId, issueData }) {
+function* updateIssue({ teamspace, modelId, issueData }) {
 	try {
 		const { _id, rev_id } = yield select(selectActiveIssueDetails);
 		const { data: updatedIssue } = yield API.updateIssue(teamspace, modelId, _id, rev_id, issueData );
-		const AnalyticService = getAngularService('AnalyticService') as any;
-		yield AnalyticService.sendEvent({
-			eventCategory: 'Issue',
-			eventAction: 'edit'
-		});
+
+		analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.EDIT);
 
 		toggleIssuePin(issueData, true);
 		const jobs = yield select(selectJobsList);
@@ -226,12 +228,12 @@ export function* updateIssue({ teamspace, modelId, issueData }) {
 	}
 }
 
-export function* updateNewIssue({ newIssue }) {
+function* updateNewIssue({ newIssue }) {
 	try {
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(newIssue, jobs);
 
-		const pinData = yield Viewer.getPinData();
+		const pinData = Viewer.getPinData();
 		if (pinData) {
 			yield put(IssuesActions.showNewPin(preparedIssue, pinData));
 		}
@@ -241,7 +243,7 @@ export function* updateNewIssue({ newIssue }) {
 	}
 }
 
-export function* postComment({ teamspace, modelId, issueData, finishSubmitting }) {
+function* postComment({ teamspace, modelId, issueData, finishSubmitting }) {
 	try {
 		const { _id } = yield select(selectActiveIssueDetails);
 		const { data: comment } = yield API.addIssueComment(teamspace, modelId, _id, issueData);
@@ -255,7 +257,7 @@ export function* postComment({ teamspace, modelId, issueData, finishSubmitting }
 	}
 }
 
-export function* removeComment({ teamspace, modelId, issueData }) {
+function* removeComment({ teamspace, modelId, issueData }) {
 	try {
 		const { _id, guid } = issueData;
 		yield API.deleteIssueComment(teamspace, modelId, _id, guid);
@@ -266,7 +268,7 @@ export function* removeComment({ teamspace, modelId, issueData }) {
 	}
 }
 
-export function* renderPins() {
+function* renderPins() {
 	try {
 		const filteredIssues = yield select(selectFilteredIssues);
 		const issuesList = yield select(selectIssues);
@@ -312,7 +314,7 @@ export function* renderPins() {
 	}
 }
 
-export function* downloadIssues({ teamspace, modelId }) {
+function* downloadIssues({ teamspace, modelId }) {
 	try {
 		const filteredIssues = yield select(selectFilteredIssues);
 		const issuesIds = map(filteredIssues, '_id').join(',');
@@ -322,7 +324,7 @@ export function* downloadIssues({ teamspace, modelId }) {
 	}
 }
 
-export function* exportBcf({ teamspace, modelId }) {
+function* exportBcf({ teamspace, modelId }) {
 	try {
 
 		const filteredIssues = yield select(selectFilteredIssues);
@@ -333,7 +335,7 @@ export function* exportBcf({ teamspace, modelId }) {
 	}
 }
 
-export function* importBcf({ teamspace, modelId, file, revision }) {
+function* importBcf({ teamspace, modelId, file, revision }) {
 	yield put(IssuesActions.toggleIsImportingBcf(true));
 
 	try {
@@ -347,7 +349,7 @@ export function* importBcf({ teamspace, modelId, file, revision }) {
 	yield put(IssuesActions.toggleIsImportingBcf(false));
 }
 
-export function* printIssues({ teamspace, modelId }) {
+function* printIssues({ teamspace, modelId }) {
 	try {
 		const filteredIssues = yield select(selectFilteredIssues);
 		const issuesIds = map(filteredIssues, '_id').join(',');
@@ -377,7 +379,7 @@ const getIssueGroup = async (issue, groupId, revision) => {
 	return data;
 };
 
-export function* showMultipleGroups({issue, revision}) {
+function* showMultipleGroups({issue, revision}) {
 	try {
 		const hasViewpointGroups = !isEmpty(pick(issue.viewpoint, [
 			'highlighted_group_id',
@@ -435,7 +437,7 @@ export function* showMultipleGroups({issue, revision}) {
 	}
 }
 
-export function* focusOnIssue({ issue, revision }) {
+function* focusOnIssue({ issue, revision }) {
 	try {
 		yield Viewer.isViewerReady();
 		yield put(IssuesActions.renderPins());
@@ -481,7 +483,7 @@ export function* focusOnIssue({ issue, revision }) {
 	}
 }
 
-export function* setActiveIssue({ issue, revision }) {
+function* setActiveIssue({ issue, revision }) {
 	try {
 		const activeIssueId = yield select(selectActiveIssueId);
 		const issuesMap = yield select(selectIssuesMap);
@@ -512,14 +514,15 @@ export function* setActiveIssue({ issue, revision }) {
 	}
 }
 
-export function* showDetails({ teamspace, model, revision, issue }) {
+function* goToIssue(teamspace, model, revision, issueId?) {
+	const path = [ROUTES.VIEWER, teamspace, model, revision].filter(Boolean).join('/');
+	const query = issueId ? `?issueId=${issueId}` : '';
+	yield put(push(`${path}${query}`));
+}
+
+function* showDetails({ teamspace, model, revision, issue }) {
 	try {
-		runAngularViewerTransition({
-			account: teamspace,
-			model,
-			revision,
-			issueId: issue._id
-		});
+		yield goToIssue(teamspace, model, revision, issue._id);
 
 		yield put(IssuesActions.setActiveIssue(issue, revision));
 		yield put(IssuesActions.setComponentState({ showDetails: true }));
@@ -528,18 +531,13 @@ export function* showDetails({ teamspace, model, revision, issue }) {
 	}
 }
 
-export function* closeDetails({ teamspace, model, revision }) {
+function* closeDetails({ teamspace, model, revision }) {
 	try {
 		const activeIssue = yield select(selectActiveIssueDetails);
 		yield Viewer.removePin({ id: NEW_PIN_ID });
 
 		if (activeIssue) {
-			runAngularViewerTransition({
-				account: teamspace,
-				model,
-				revision,
-				issueId: null
-			});
+			yield goToIssue(teamspace, model, revision);
 		}
 
 		yield put(IssuesActions.setComponentState({ showDetails: false }));
@@ -548,7 +546,7 @@ export function* closeDetails({ teamspace, model, revision }) {
 	}
 }
 
-export function* showNewPin({ issue, pinData }) {
+function* showNewPin({ issue, pinData }) {
 	try {
 		Viewer.removePin({ id: pinData.id });
 		Viewer.setPin(null);
@@ -565,15 +563,6 @@ export function* showNewPin({ issue, pinData }) {
 		Viewer.setPin(data);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('display', 'pin', error));
-	}
-}
-
-export function* toggleShowPins({ showPins }) {
-	try {
-		yield put(IssuesActions.setComponentState({ showPins }));
-		yield put(IssuesActions.renderPins());
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('toggle', 'pins', error));
 	}
 }
 
@@ -622,39 +611,27 @@ const onResourceDeleted = (resource) => {
 	dispatch(IssuesActions.removeResourceSuccess(resource, resource.issueIds[0]));
 };
 
-const getIssuesChannel = (teamspace, modelId) => {
-	const ChatService = getAngularService('ChatService') as any;
-	return ChatService.getChannel(teamspace, modelId).issues;
-};
-
-const getResourcesChannel = (teamspace, modelId) => {
-	const ChatService = getAngularService('ChatService') as any;
-	return ChatService.getChannel(teamspace, modelId).resources;
-};
-
-export function* subscribeOnIssueChanges({ teamspace, modelId }) {
-	const issuesChatEvents = getIssuesChannel(teamspace, modelId);
-	issuesChatEvents.subscribeToUpdated(onUpdateEvent, this);
-	issuesChatEvents.subscribeToCreated(onCreateEvent, this);
-	const resourcesChatEvents = getResourcesChannel(teamspace, modelId);
-	resourcesChatEvents.subscribeToCreated(onResourcesCreated, this);
-	resourcesChatEvents.subscribeToDeleted(onResourceDeleted, this);
+function* subscribeOnIssueChanges({ teamspace, modelId }) {
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.ISSUES, teamspace, modelId, {
+		subscribeToUpdated: onUpdateEvent,
+		subscribeToCreated: onCreateEvent
+	}));
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RESOURCES, teamspace, modelId, {
+		subscribeToCreated: onResourcesCreated,
+		subscribeToDeleted: onResourceDeleted
+	}));
 }
 
-export function* unsubscribeOnIssueChanges({ teamspace, modelId }) {
-	const issuesChatEvents = getIssuesChannel(teamspace, modelId);
-	issuesChatEvents.unsubscribeFromUpdated(onUpdateEvent);
-	issuesChatEvents.unsubscribeFromCreated(onCreateEvent);
-
-	const resourcesChatEvents = getResourcesChannel(teamspace, modelId);
-	resourcesChatEvents.unsubscribeFromCreated(onResourcesCreated);
-	resourcesChatEvents.unsubscribeFromDeleted(onResourceDeleted);
+function* unsubscribeOnIssueChanges({ teamspace, modelId }) {
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.ISSUES, teamspace, modelId, {
+		unsubscribeFromUpdated: onUpdateEvent,
+		unsubscribeFromCreated: onCreateEvent
+	}));
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RESOURCES, teamspace, modelId, {
+		unsubscribeFromCreated: onResourcesCreated,
+		unsubscribeFromDeleted: onResourceDeleted
+	}));
 }
-
-const getCommentsChannel = (teamspace, modelId, issueId) => {
-	const issuesCommentsChatevents = getIssuesChannel(teamspace, modelId);
-	return issuesCommentsChatevents.getCommentsChatEvents(issueId);
-};
 
 const onUpdateCommentEvent = (updatedComment) => {
 	const issueId = selectActiveIssueId(getState());
@@ -672,28 +649,29 @@ const onDeleteCommentEvent = (deletedComment) => {
 	dispatch(IssuesActions.deleteCommentSuccess(deletedComment.guid, issueId));
 };
 
-export function* subscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
-	const commentsChatEvents = getCommentsChannel(teamspace, modelId, issueId);
-	commentsChatEvents.subscribeToCreated(onCreateCommentEvent, this);
-	commentsChatEvents.subscribeToUpdated(onUpdateCommentEvent, this);
-	commentsChatEvents.subscribeToDeleted(onDeleteCommentEvent, this);
+function* subscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
+	yield put(ChatActions.callCommentsChannelActions(CHAT_CHANNELS.ISSUES, teamspace, modelId, issueId, {
+		subscribeToCreated: onCreateCommentEvent,
+		subscribeToUpdated: onUpdateCommentEvent,
+		subscribeToDeleted: onDeleteCommentEvent
+	}));
 }
 
-export function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
-	const commentsChatEvents = getCommentsChannel(teamspace, modelId, issueId);
-	commentsChatEvents.unsubscribeFromCreated(onCreateCommentEvent, this);
-	commentsChatEvents.unsubscribeFromUpdated(onUpdateCommentEvent, this);
-	commentsChatEvents.unsubscribeFromDeleted(onDeleteCommentEvent, this);
+function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
+	yield put(ChatActions.callCommentsChannelActions(CHAT_CHANNELS.ISSUES, teamspace, modelId, issueId, {
+		unsubscribeToCreated: onCreateCommentEvent,
+		unsubscribeToUpdated: onUpdateCommentEvent,
+		unsubscribeToDeleted: onDeleteCommentEvent
+	}));
 }
 
 export function* setNewIssue() {
 	const activeIssue = yield select(selectActiveIssueDetails);
-	const issues = yield select(selectIssues);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
 	const topicTypes: any[] = yield select(selectTopicTypes);
 
-	const topicType =  topicTypes.find((t) => t.value ===  DEFAULT_PROPERTIES.TOPIC_TYPE) ?
+	const topicType =  topicTypes.find((t) => t.value === DEFAULT_PROPERTIES.TOPIC_TYPE) ?
 						DEFAULT_PROPERTIES.TOPIC_TYPE : topicTypes[0].value;
 
 	try {
@@ -721,7 +699,7 @@ export function* setNewIssue() {
 	}
 }
 
-export function* setFilters({ filters }) {
+function* setFilters({ filters }) {
 	try {
 		yield put(IssuesActions.setComponentState({ selectedFilters: filters }));
 		yield put(IssuesActions.renderPins());
@@ -730,7 +708,7 @@ export function* setFilters({ filters }) {
 	}
 }
 
-export function* toggleSubmodelsIssues({ showSubmodelIssues }) {
+function* toggleSubmodelsIssues({ showSubmodelIssues }) {
 	try {
 		yield put(IssuesActions.setComponentState({ showSubmodelIssues }));
 		yield put(IssuesActions.renderPins());

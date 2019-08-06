@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select } from 'redux-saga/effects';
 import { sortBy } from 'lodash';
+import { put, select, takeLatest } from 'redux-saga/effects';
 
-import * as API from '../../services/api';
-import { BimTypes, BimActions } from './bim.redux';
-import { DialogActions } from '../dialog';
 import { prepareMetadata } from '../../helpers/bim';
+import * as API from '../../services/api';
+import { DialogActions } from '../dialog';
+import { BimActions, BimTypes } from './bim.redux';
 
 export function* fetchMetadata({ teamspace, model, metadataId }) {
 	yield put(BimActions.setIsPending(true));

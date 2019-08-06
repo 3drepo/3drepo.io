@@ -19,17 +19,30 @@ export class ClientConfigService {
 	public resourceUploadSizeLimit;
 	// tslint:disable-next-line
 	public login_check_interval;
+	public ga;
+	public userId;
+	public development;
 	// tslint:disable-next-line
 	public captcha_client_key;
 	public legalTemplates;
 	public liveChatLicense;
-	private apiUrls;
+	public tagRegExp;
+	public uploadSizeLimit;
+	public apiUrls;
+	private chatHost;
+	private chatPath;
+	private chatReconnectionAttempts;
 	private apiAlgorithm;
 	private MAP_API;
 	private C;
 	private customLogins;
+	private maintenanceMode;
 
 	constructor() {
+		if (!this.isValid) {
+			console.error('ClientConfig has not been provided...');
+			return;
+		}
 		if (window && window.ClientConfig) {
 			for (const key in window.ClientConfig) {
 				if (key) {
@@ -47,6 +60,22 @@ export class ClientConfigService {
 		this.GET_API = C.GET_API;
 		this.POST_API = (this.apiUrls[C.POST_API]) ? C.POST_API : this.GET_API;
 		this.MAP_API = (this.apiUrls[C.MAP_API]) ? C.MAP_API : this.GET_API;
+	}
+
+	public get isMaintenanceEnabled() {
+		return this.maintenanceMode;
+	}
+
+	public get isValid() {
+		return !!window.ClientConfig;
+	}
+
+	public get chatConfig() {
+		return {
+			host: this.chatHost,
+			path: this.chatPath,
+			reconnectionAttempts: this.chatReconnectionAttempts || Infinity
+		};
 	}
 
 	public createRoundRobinAlgorithm() {
@@ -84,6 +113,52 @@ export class ClientConfigService {
 		}
 
 		return '';
+	}
+
+	public getCustomBackgroundImagePath() {
+		const subdomain = getSubdomain();
+		const custom = this.customLogins && this.customLogins[subdomain];
+
+		if (subdomain && custom && custom.backgroundImage &&
+			typeof custom.backgroundImage === 'string') {
+			return custom.backgroundImage;
+		}
+
+		return '';
+	}
+
+	public getCustomLoginMessage() {
+		const subdomain = getSubdomain();
+		const custom = this.customLogins && this.customLogins[subdomain];
+
+		if (subdomain && custom && custom.loginMessage) {
+			return custom.loginMessage;
+		}
+
+		return '';
+	}
+
+	public injectCustomCSS() {
+		const subdomain = getSubdomain();
+		const custom = this.customLogins && this.customLogins[subdomain];
+
+		if (custom && custom.css) {
+			const link = document.createElement('link');
+			link.setAttribute('rel', 'stylesheet');
+			link.setAttribute('type', 'text/css');
+			link.setAttribute('href', custom.css);
+			document.getElementsByTagName('head')[0].appendChild(link);
+		}
+	}
+
+	public logAppVersion() {
+		if (this.VERSION) {
+			/* tslint:disable */
+			console.log(`===== 3D REPO - Version ${this.VERSION} =====`);
+			/* tslint:enable */
+		} else {
+			console.error('No version number in config...');
+		}
 	}
 }
 

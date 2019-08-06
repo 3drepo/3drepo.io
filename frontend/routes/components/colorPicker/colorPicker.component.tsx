@@ -15,28 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { memoize, identity } from 'lodash';
-import RootRef from '@material-ui/core/RootRef';
-import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
+import Grid from '@material-ui/core/Grid';
+import RootRef from '@material-ui/core/RootRef';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
+import { identity, memoize } from 'lodash';
+import React from 'react';
 
 import {
-	Panel,
-	Dot,
-	ColorSelect,
-	StyledIconButton,
 	BlockCanvas,
-	StripCanvas,
-	Footer,
 	CanvasContainer,
 	ColorPointer,
-	StyledButton,
-	PredefinedColorsContainer,
+	ColorSelect,
+	Dot,
+	Footer,
+	Panel,
 	PredefinedColor,
+	PredefinedColorsContainer,
 	SelectedColor,
 	SelectedHash,
+	StripCanvas,
+	StyledButton,
+	StyledIconButton,
 	StyledStartAdornment
 } from './colorPicker.styles';
 
@@ -302,7 +302,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		return colors.slice(0, 7).map((color, index) => {
 			return (
 				<PredefinedColor
-					item={true}
+					item
 					key={index}
 					color={color}
 					onClick={this.onPredefinedColorClick(color)}
@@ -325,15 +325,15 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 			<>
 				<RootRef rootRef={this.colorSelectRef}>
 					<ColorSelect
-						container={true}
+						container
 						onClick={this.handleClick}
 						direction="row"
 						alignItems="center"
 						justify="flex-start"
 						disabled={disabled}
 					>
-						<Dot item={true} color={value} />
-						<Grid item={true}>
+						<Dot item color={value} />
+						<Grid item>
 							<StyledIconButton aria-label="Toggle picker" disabled={disabled}>
 								<ArrowDropDown />
 							</StyledIconButton>
@@ -350,7 +350,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 					{
 						predefinedColors.length ? (
 							<PredefinedColorsContainer
-								container={true}
+								container
 								direction="row"
 								alignItems="center"
 								justify="flex-start"
@@ -360,14 +360,14 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						) : null
 					}
 					<Grid
-						container={true}
+						container
 						direction="row"
 						alignItems="center"
 						justify="space-between"
 					>
-						<CanvasContainer item={true}>
+						<CanvasContainer item>
 							<BlockCanvas
-								innerRef={this.blockCanvasRef}
+								ref={this.blockCanvasRef}
 								width={185}
 								height={170}
 								onMouseDown={this.onBlockCanvasClick.bind(null, true)}
@@ -375,16 +375,16 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 								onMouseMove={this.onBlockCanvasMove}
 							/>
 							<ColorPointer
-								innerRef={this.pointerRef}
+								ref={this.pointerRef}
 								style={{
 									top: pointerTop,
 									left: pointerLeft
 								}}
 							/>
 						</CanvasContainer>
-						<CanvasContainer item={true}>
+						<CanvasContainer item>
 							<StripCanvas
-								innerRef={this.stripCanvasRef}
+								ref={this.stripCanvasRef}
 								width={23}
 								height={170}
 								onClick={this.onStripCanvasClick}
@@ -392,20 +392,20 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 						</CanvasContainer>
 					</Grid>
 					<Grid
-						container={true}
+						container
 						direction="row"
 						justify="flex-start"
 						alignItems="center"
 					>
-						<Grid item={true}>
+						<Grid item>
 							<SelectedColor color={colorHash} />
 						</Grid>
-						<Grid item={true}>
+						<Grid item>
 							<FormControl>
 								<SelectedHash
 									value={hashInput}
 									onChange={this.handleHashInputChange}
-									startAdornment={<StyledStartAdornment position="start" disableTypography={true}>#</StyledStartAdornment>}
+									startAdornment={<StyledStartAdornment position="start" disableTypography>#</StyledStartAdornment>}
 								/>
 							</FormControl>
 						</Grid>

@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import AddCircle from '@material-ui/icons/AddCircle';
+import CloudDownload from '@material-ui/icons/CloudDownload';
+import CloudUpload from '@material-ui/icons/CloudUpload';
+import Delete from '@material-ui/icons/Delete';
+import Edit from '@material-ui/icons/Edit';
 import People from '@material-ui/icons/People';
 import Settings from '@material-ui/icons/Settings';
-import Delete from '@material-ui/icons/Delete';
-import CloudUpload from '@material-ui/icons/CloudUpload';
 import SettingsBackupRestore from '@material-ui/icons/SettingsBackupRestore';
-import CloudDownload from '@material-ui/icons/CloudDownload';
-import AddCircle from '@material-ui/icons/AddCircle';
-import Edit from '@material-ui/icons/Edit';
 
 export const ROW_ACTIONS = {
 	PERMISSIONS: {

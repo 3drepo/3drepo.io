@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { createSelector } from 'reselect';
 import { values } from 'lodash';
+import { createSelector } from 'reselect';
 
-export const selectViewpointsDomain = (state) => Object.assign({}, state.viewpoints);
+export const selectViewpointsDomain = (state) => ({...state.viewpoints});
 
 export const selectIsPending = createSelector(
 	selectViewpointsDomain, (state) => state.isPending

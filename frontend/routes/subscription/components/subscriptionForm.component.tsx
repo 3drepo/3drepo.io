@@ -15,30 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Formik, Field } from 'formik';
-import * as Yup from 'yup';
+import { Field, Formik } from 'formik';
 import { isEmpty, isEqual } from 'lodash';
+import React from 'react';
+import * as Yup from 'yup';
 
-import { schema } from '../../../services/validation';
 import { formatBytesGB } from '../../../services/formatting/formatCapacity';
+import { schema } from '../../../services/validation';
 
 import {
-	StyledTextField,
+	ConfirmContainer,
+	FieldsColumn,
+	FieldsRow,
+	FormContainer,
+	FormFooter,
+	FormInfo,
+	FormInfoContainer,
+	PayPalLogo,
+	StyledButton,
+	StyledForm,
+	StyledFormControl,
+	StyledInputLabel,
 	StyledSelectField,
 	StyledSelectItem,
-	StyledInputLabel,
-	StyledFormControl,
-	StyledButton,
-	FormContainer,
-	FieldsRow,
-	FieldsColumn,
-	FormFooter,
-	FormInfoContainer,
-	ConfirmContainer,
-	FormInfo,
-	PayPalLogo,
-	StyledForm
+	StyledTextField
 } from '../subscription.styles';
 
 const SubscriptionSchema = Yup.object().shape({
@@ -153,13 +153,13 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 			>
 				<StyledForm>
 					<FormContainer
-						container={true}
+						container
 						direction="column"
 						wrap="nowrap"
 					>
-						<FieldsRow container={true} wrap="nowrap">
+						<FieldsRow container wrap="nowrap">
 							<FieldsColumn>
-								<FieldsRow container={true} wrap="nowrap">
+								<FieldsRow container wrap="nowrap">
 									<Field
 										name="licences"
 										render={ ({ field }) => (
@@ -167,7 +167,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 												{...field}
 												label="Licences"
 												margin="normal"
-												required={true}
+												required
 												type="number"
 												value={numLicences}
 												inputProps={{ min: '0', max: '1000' }}
@@ -182,10 +182,10 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 												{...field}
 												label="Payment (£ / month)"
 												margin="normal"
-												required={true}
+												required
 												type="number"
 												value={this.state.payment}
-												disabled={true}
+												disabled
 											/>
 										)}
 									/>
@@ -199,7 +199,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 											helperText={form.errors.firstName}
 											label="First Name"
 											margin="normal"
-											required={true}
+											required
 											type="text"
 										/>
 									)}
@@ -224,7 +224,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 											helperText={form.errors.address}
 											label="Address"
 											margin="normal"
-											required={true}
+											required
 											type="text"
 										/>
 									)}
@@ -242,7 +242,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 								/>
 							</FieldsColumn>
 							<FieldsColumn>
-								<FieldsRow container={true} wrap="nowrap">
+								<FieldsRow container wrap="nowrap">
 									<Field
 										name="quotaAvailable"
 										render={ ({ field }) => (
@@ -251,7 +251,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 												label="Quota available"
 												margin="normal"
 												type="text"
-												disabled={true}
+												disabled
 												value={`${formatBytesGB(spaceLimit)}`}
 											/>
 										)}
@@ -265,7 +265,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 												margin="normal"
 												type="text"
 												value={`${formatBytesGB(spaceUsed)}`}
-												disabled={true}
+												disabled
 											/>
 										)}
 									/>
@@ -279,7 +279,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 											helperText={form.errors.lastName}
 											label="Last name"
 											margin="normal"
-											required={true}
+											required
 											type="text"
 										/>
 									)}
@@ -304,7 +304,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 											error={Boolean(form.errors.city)}
 											helperText={form.errors.city}
 											margin="normal"
-											required={true}
+											required
 											type="text"
 										/>
 									)}
@@ -318,7 +318,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 											helperText={form.errors.postalCode}
 											label="Postal code"
 											margin="normal"
-											required={true}
+											required
 											type="text"
 										/>
 									)}
@@ -328,7 +328,7 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 									<Field
 										name="countryCode"
 										render={ ({ field }) => (
-											<StyledSelectField {...field} type="text" disabled={true}>
+											<StyledSelectField {...field} type="text" disabled>
 												{ countries.map((country) => (
 													<StyledSelectItem
 														key={country.code}

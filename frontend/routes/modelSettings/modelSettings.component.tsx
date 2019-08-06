@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as Yup from 'yup';
-import * as queryString from 'query-string';
+import { Field, Formik } from 'formik';
 import { isEmpty } from 'lodash';
-import { Formik, Field } from 'formik';
+import * as queryString from 'query-string';
+import React from 'react';
+import * as Yup from 'yup';
 
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -27,26 +27,26 @@ import InputLabel from '@material-ui/core/InputLabel';
 
 import { Loader } from '../components/loader/loader.component';
 
-import { schema } from '../../services/validation';
-import { runAngularTimeout } from '../../helpers/migration';
 import { clientConfigService } from '../../services/clientConfig';
+import { schema } from '../../services/validation';
 
-import { Panel } from '../components/panel/panel.component';
-import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { Chips } from '../components/chips/chips.component';
+import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+import { Panel } from '../components/panel/panel.component';
 
+import { ROUTES } from '../../constants/routes';
+import { convertPositionToDirectX, convertPositionToOpenGL } from '../../helpers/model';
 import {
+	BackButton,
 	FieldsRow,
-	StyledTextField,
+	GridColumn,
+	Headline,
+	LoaderContainer,
 	SelectWrapper,
 	StyledForm,
-	Headline,
-	GridColumn,
 	StyledIcon,
-	BackButton,
-	LoaderContainer
+	StyledTextField
 } from './modelSettings.styles';
-import { convertPositionToOpenGL, convertPositionToDirectX } from '../../helpers/model';
 
 const ModelSettingsSchema = Yup.object().shape({
 	code: Yup.string()
@@ -207,11 +207,9 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		const { project } = queryParams;
 		const { teamspace } = match.params;
 
-		runAngularTimeout(() => {
-			history.push({
-				pathname: '/dashboard/teamspaces',
-				search: `?teamspace=${teamspace}&project=${project}`
-			});
+		history.push({
+			pathname: ROUTES.TEAMSPACES,
+			search: `?teamspace=${teamspace}&project=${project}`
 		});
 	}
 
@@ -246,13 +244,13 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 				<StyledForm>
 					<Headline color="primary" variant="subheading">Model Information</Headline>
 					<Grid>
-						<FieldsRow container={true} wrap="nowrap">
+						<FieldsRow container wrap="nowrap">
 							<Field name="id" render={ ({ field }) => (
 								<StyledTextField
 									{...field}
 									label="Model ID"
 									margin="normal"
-									disabled={true}
+									disabled
 								/>
 							)} />
 							<Field name="name" render={ ({ field, form }) => (
@@ -265,13 +263,13 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								/>
 							)} />
 						</FieldsRow>
-						<FieldsRow container={true} wrap="nowrap">
+						<FieldsRow container wrap="nowrap">
 							<Field name="type" render={ ({ field }) => (
 								<StyledTextField
 									{...field}
 									label="Model type"
 									margin="normal"
-									disabled={true}
+									disabled
 								/>
 							)} />
 							<Field name="code" render={ ({ field }) => (
@@ -282,7 +280,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 								/>
 							)} />
 						</FieldsRow>
-						<FieldsRow container={true} wrap="nowrap">
+						<FieldsRow container wrap="nowrap">
 							<Field name="fourDSequenceTag" render={ ({ field }) => (
 								<StyledTextField
 									{...field}
@@ -290,14 +288,14 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 									margin="normal"
 								/>
 							)} />
-							<SelectWrapper fullWidth={true}>
-								<InputLabel shrink={true} htmlFor="unit-select">Unit</InputLabel>
+							<SelectWrapper fullWidth>
+								<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
 								<Field name="unit" render={ ({ field }) => (
 									<CellSelect
 										{...field}
 										items={clientConfigService.units}
 										inputId="unit-select"
-										disabled={true}
+										disabled
 									/>
 								)} />
 							</SelectWrapper>
@@ -305,9 +303,9 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 						<Field name="topicTypes" render={({ field }) => <Chips {...field} inputPlaceholder={'Enter topic types'} />} />
 					</Grid>
 					<Headline color="primary" variant="subheading">GIS Reference Information</Headline>
-					<Grid container={true} direction="column" wrap="nowrap">
-						<Grid container={true} direction="row" wrap="nowrap">
-							<GridColumn container={true} direction="column" wrap="nowrap">
+					<Grid container direction="column" wrap="nowrap">
+						<Grid container direction="row" wrap="nowrap">
+							<GridColumn container direction="column" wrap="nowrap">
 								<Headline color="textPrimary" variant="subheading">Survey Point</Headline>
 								<Field name="latitude" render={ ({ field, form }) => (
 									<StyledTextField
@@ -332,7 +330,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 										{...field}
 										label="Elevation"
 										margin="normal"
-										disabled={true}
+										disabled
 										error={Boolean(form.errors.elevation)}
 										helperText={form.errors.elevation}
 									/>
@@ -347,7 +345,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 									/>
 								)} />
 							</GridColumn>
-							<GridColumn container={true} direction="column" wrap="nowrap">
+							<GridColumn container direction="column" wrap="nowrap">
 								<Headline color="textPrimary" variant="subheading">Project Point</Headline>
 								<Field name="axisX" render={ ({ field, form }) => (
 									<StyledTextField
@@ -380,7 +378,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 							</GridColumn>
 						</Grid>
 					</Grid>
-					<Grid container={true} direction="column" alignItems="flex-end">
+					<Grid container direction="column" alignItems="flex-end">
 						<Field render={ ({ form }) =>
 							<Button
 								type="submit"
