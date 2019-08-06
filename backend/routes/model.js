@@ -594,7 +594,7 @@ function getHeaders(cache = false) {
 	if(cache) {
 		headers["Cache-Control"] = "private, max-age=" + config.cachePolicy.maxAge;
 	}
-
+	return headers;
 }
 
 function getIdMap(req, res, next) {
@@ -607,7 +607,7 @@ function getIdMap(req, res, next) {
 		req.session.user.username
 	).then(file => {
 
-		const headers = getHeaders(revId);
+		const headers = getHeaders(false);
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 
 	}).catch(err => {
@@ -624,7 +624,7 @@ function getIdToMeshes(req, res, next) {
 		revId,
 		req.session.user.username
 	).then(file => {
-		const headers = getHeaders(revId);
+		const headers = getHeaders(false);
 
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 	}).catch(err => {
@@ -657,7 +657,7 @@ function getModelProperties(req, res, next) {
 		revId,
 		req.session.user.username
 	).then(file => {
-		const headers = getHeaders(revId);
+		const headers = getHeaders(false);
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 
 	}).catch(err => {
@@ -674,7 +674,7 @@ function getTreePath(req, res, next) {
 		revId,
 		req.session.user.username
 	).then(file => {
-		const headers = getHeaders(revId);
+		const headers = getHeaders(false);
 
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 	}).catch(err => {
