@@ -17,107 +17,13 @@
 
 import DialogContent from '@material-ui/core/DialogContent';
 import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
 import styled from 'styled-components';
-
-import { FONT_WEIGHT } from '../../../../../styles';
-import { COLOR } from '../../../../../styles/colors';
-
-interface IItem {
-	theme: {
-		isCurrent?: boolean;
-		isVoid?: boolean;
-	};
-}
-
-export const Property = styled.div`
-	width: 'auto';
-`;
-
-export const Tag = styled.div`
-	width: 160px;
-`;
-
-export const PropertyWrapper = styled.div`
-	display: flex;
-
-	${Property} {
-		margin-right: 30px;
-	}
-`;
-
-const getItemBackgroundColor = (theme) => {
-	if (theme.isCurrent) {
-		return COLOR.WHITE;
-	}
-
-	if (theme.isVoid) {
-		return COLOR.WARNING_LIGHT;
-	}
-
-	return COLOR.BLACK_6;
-};
-
-const getItemHoverBackgroundColor = (theme) => {
-	if (theme.isCurrent) {
-		return COLOR.LIGHT_GRAY;
-	}
-
-	if (theme.isVoid) {
-		return COLOR.WARNING;
-	}
-
-	return COLOR.BLACK_12;
-};
-
-export const Item = styled(ListItem)<IItem>`
-	display: flex;
-	flex-direction: column;
-	border-bottom: 1px solid ${COLOR.BLACK_20};
-	color: ${({theme}) => theme.isVoid ? COLOR.BLACK_40 : COLOR.BLACK};
-
-	&& {
-		cursor: pointer;
-		justify-content: space-between;
-		padding: 22px 30px;
-		background-color: ${({theme}) => getItemBackgroundColor(theme)};
-		border-bottom: 1px solid ${COLOR.BLACK_20};
-		transition: background-color 0.25s ease-in-out;
-
-		&:hover {
-			background-color: ${({theme}) => getItemHoverBackgroundColor(theme)};
-		}
-	}
-
-	${Property} {
-		font-weight: ${({theme}) => theme.isCurrent ? FONT_WEIGHT.SEMIBOLD : FONT_WEIGHT.LIGHTER};
-	}
-`;
-
-export const Row = styled.div`
-	display: flex;
-	flex-direction: row;
-	width: 100%;
-	justify-content: space-between;
-`;
-
-export const Column = styled.div`
-	display: flex;
-	flex-direction: column;
-	align-self: flex-start;
-	margin-top: 10px;
-`;
-
-export const Description = styled.div`
-	color: ${COLOR.BLACK_40};
-	align-self: flex-start;
-	margin-top: 10px;
-`;
 
 export const StyledList = styled(List)`
 	&& {
 		padding-bottom: 0;
 		padding-top: 0;
+		min-width: 550px;
 	}
 `;
 
@@ -126,13 +32,6 @@ export const StyledDialogContent = styled(DialogContent)`
 		padding: 0;
 		margin-bottom: 15px
 	}
-`;
-
-export const ActionsMenuWrapper = styled.div`
-	display: flex;
-	margin-left: 20px;
-	margin-top: -12px;
-	margin-right: -12px;
 `;
 
 export const Container = styled.div`

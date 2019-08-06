@@ -30,7 +30,7 @@ interface IProps {
 
 const MoreIcon = () => <MoreVert fontSize="small" />;
 
-export function ActionsMenu({federate, isPending, children}: IProps) {
+export const ActionsMenu = ({federate, isPending, children}: IProps) => {
 	const [open, setOpen] = useState(false);
 	const [toggleForceOpen, setToggleForceOpen] = useState(false);
 	const opened = open || toggleForceOpen;

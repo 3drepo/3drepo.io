@@ -23,14 +23,13 @@ import DialogActions from '@material-ui/core/DialogActions';
 import { ROUTES } from '../../../../../constants/routes';
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../../helpers/rendering';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../../services/analytics';
-import { DATE_TIME_FORMAT } from '../../../../../services/formatting/formatDate';
 import {
 	MenuList, StyledItemText, StyledListItem
 } from '../../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { MenuButton as MenuButtonComponent } from '../../../../components/menuButton/menuButton.component';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
-import { DateTime } from '../../../dateTime/dateTime.component';
 import { Loader } from '../../../loader/loader.component';
+import { RevisionsListItem } from '../../../revisionsListItem/revisionsListItem.component';
 import {
 	ACTIVE_ACTIONS,
 	MAKE_ACTIVE_NAME,
@@ -40,17 +39,9 @@ import {
 	VOID_ACTIONS
 } from './revisionsDialog.constants';
 import {
-	ActionsMenuWrapper,
-	Column,
 	Container,
-	Description,
-	Item,
-	Property,
-	PropertyWrapper,
-	Row,
 	StyledDialogContent,
-	StyledList,
-	Tag
+	StyledList
 } from './revisionsDialog.styles';
 
 const MenuButton = (props) => (
@@ -87,14 +78,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public setNewRevision = (handler, revision, isTheSameRevision) => {
-		if (isTheSameRevision) {
-			return;
-		}
-		handler(revision);
-	}
-
-	public revisionClickHandler = ({ tag, _id }) => {
+	private revisionClickHandler = ({ tag, _id }) => {
 		const { teamspace, modelId, handleClose, history } = this.props;
 		handleClose();
 		history.push(`${ROUTES.VIEWER}/${teamspace}/${modelId}/${tag || _id}`);
@@ -119,11 +103,11 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	public toggleVoid = (revision) => {
+	private toggleVoid = (event, revision) => {
 		this.props.setModelRevisionState(this.props.teamspace, this.props.modelId, revision._id, !Boolean(revision.void));
 	}
 
-	public setLatest = (revision) => {
+	private setLatest = (event, revision) => {
 		this.props.revisions.forEach((rev) => {
 			const isOlder = revision.timestamp < rev.timestamp;
 			this.props.setModelRevisionState(this.props.teamspace, this.props.modelId, rev._id, isOlder);
@@ -138,86 +122,64 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		};
 	}
 
-	public renderRevisionItem = (revision, currentRevisionId, handleSetNewRevision) => {
-		const isCurrentRevision = currentRevisionId === revision._id;
-		const props = {
-			key: revision._id,
-			onClick: () => {
-				if (this.props.type === TYPES.VIEWER) {
-					this.setNewRevision(handleSetNewRevision, revision, isCurrentRevision);
-				} else {
-					this.revisionClickHandler(revision);
-				}
-			},
-			theme: {
-				isCurrent: isCurrentRevision,
-				isVoid: revision.void
+	private onRevisionItemClick = (event, revision) => {
+		const { handleSetNewRevision, currentRevisionId } = this.props;
+		if (this.props.type === TYPES.VIEWER) {
+			const isCurrentRevision = currentRevisionId === revision._id;
+			if (!isCurrentRevision) {
+				handleSetNewRevision(revision);
 			}
-		};
+		} else {
+			this.revisionClickHandler(revision);
+		}
+	}
 
+	private renderRevisionItem = (revision) => {
+		debugger;
+		const isCurrentRevision = this.props.currentRevisionId === revision._id;
 		return (
-			<Item {...props} divider>
-				<Row>
-					<PropertyWrapper>
-						<Tag>
-							{revision.tag || '(no tag)'}
-						</Tag>
-						<Property>
-							{isCurrentRevision && '(current revision)'}
-						</Property>
-					</PropertyWrapper>
-					<Property>
-						<DateTime value={revision.timestamp} format={DATE_TIME_FORMAT} />
-					</Property>
-
-					{this.props.type === TYPES.TEAMSPACES &&
-						<ActionsMenuWrapper>
-							<ButtonMenu
-								renderButton={MenuButton}
-								renderContent={(menu) => this.renderActionsMenu(menu, revision)}
-								PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-								PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-								ButtonProps={{ disabled: false }}
-							/>
-						</ActionsMenuWrapper>
-					}
-				</Row>
-				<Column>
-					<Property>
-						{revision.author}
-					</Property>
-					<Description>{revision.desc || '(no description)'}</Description>
-				</Column>
-			</Item>
+			<RevisionsListItem
+				key={revision._id}
+				data={revision}
+				current={isCurrentRevision}
+				onClick={this.onRevisionItemClick}
+				onSetLatest={this.setLatest}
+				onToggleVoid={this.toggleVoid}
+			/>
 		);
 	}
 
-	public renderRevisions = ({ revisions, currentRevisionId, handleSetNewRevision }) => renderWhenTrueOtherwise(
-		() => (
-			<StyledList>
-				{revisions.map((revision) => this.renderRevisionItem(revision, currentRevisionId, handleSetNewRevision))}
-			</StyledList>
-		),
-		() => <Container>No revisions present</Container>
-	)(Boolean(revisions.length))
+	private renderRevisionsList = renderWhenTrue(() => (
+		<StyledList>
+			{this.props.revisions.map(this.renderRevisionItem)}
+		</StyledList>
+	));
 
-	public renderRevisionsList = renderWhenTrue(() => <>{this.renderRevisions(this.props)}</>);
+	private renderEmptyState = renderWhenTrue(() => (
+		<Container>No revisions present</Container>
+	));
 
-	public renderLoader = renderWhenTrue(
+	private renderLoader = renderWhenTrue(
 		<Container>
 			<Loader content="Loading revisions..." />
 		</Container>
 	);
 
 	public render() {
+		const { revisions } = this.props;
 		return (
 			<>
 				<StyledDialogContent>
-					{this.renderRevisionsList(!this.props.isPending)}
+					{this.renderRevisionsList(!this.props.isPending && !!revisions.length)}
+					{this.renderEmptyState(!this.props.isPending && !revisions.length)}
 					{this.renderLoader(this.props.isPending)}
 				</StyledDialogContent>
 				<DialogActions>
-					<Button onClick={this.props.handleClose} variant="raised" color="secondary">Cancel</Button>;
+					<Button
+						onClick={this.props.handleClose}
+						variant="raised"
+						color="secondary"
+					>Ok</Button>
 				</DialogActions>
 			</>
 		);
