@@ -382,7 +382,7 @@
 	 * @param {any} extraInfo
 	 * @param {any} format
 	 */
-	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format) {
+	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache) {
 
 		resCode = utils.mongoErrorToResCode(resCode);
 
@@ -423,6 +423,13 @@
 				.send(responseObject);
 
 		} else {
+
+			if(cache) {
+				res.setHeader("Cache-Control", `private, max-age=${cache.maxAge || config.cachePolicy.maxAge}`);
+				if (cache.etag) {
+					res.setHeader("etag", cache.etag);
+				}
+			}
 
 			if (Buffer.isBuffer(extraInfo)) {
 

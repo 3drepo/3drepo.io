@@ -26,6 +26,7 @@ const C = require("../constants");
 const ModelHelpers = require("../models/helper/model");
 const UnityAssets = require("../models/unityAssets");
 const JSONAssets = require("../models/jsonAssets");
+const config = require("../config");
 
 function getDbColOptions(req) {
 	return {account: req.params.account, model: req.params.model};
@@ -585,6 +586,17 @@ function deleteModel(req, res, next) {
 	});
 }
 
+function getHeaders(cache = false) {
+	const headers = {
+		"Content-Type" : "application/json"
+	};
+
+	if(cache) {
+		headers["Cache-Control"] = "private, max-age=" + config.cachePolicy.maxAge;
+	}
+
+}
+
 function getIdMap(req, res, next) {
 	const revId = req.params.rev;
 	JSONAssets.getIdMap(
@@ -595,9 +607,7 @@ function getIdMap(req, res, next) {
 		req.session.user.username
 	).then(file => {
 
-		const headers = {
-			"Content-Type" : "application/json"
-		};
+		const headers = getHeaders(revId);
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 
 	}).catch(err => {
@@ -614,10 +624,8 @@ function getIdToMeshes(req, res, next) {
 		revId,
 		req.session.user.username
 	).then(file => {
+		const headers = getHeaders(revId);
 
-		const headers = {
-			"Content-Type" : "application/json"
-		};
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -632,10 +640,7 @@ function getModelTree(req, res, next) {
 		revId ? undefined : C.MASTER_BRANCH_NAME,
 		revId
 	).then(file => {
-
-		const headers = {
-			"Content-Type" : "application/json"
-		};
+		const headers = getHeaders(revId);
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 
 	}).catch(err => {
@@ -652,10 +657,7 @@ function getModelProperties(req, res, next) {
 		revId,
 		req.session.user.username
 	).then(file => {
-
-		const headers = {
-			"Content-Type" : "application/json"
-		};
+		const headers = getHeaders(revId);
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 
 	}).catch(err => {
@@ -672,10 +674,8 @@ function getTreePath(req, res, next) {
 		revId,
 		req.session.user.username
 	).then(file => {
+		const headers = getHeaders(revId);
 
-		const headers = {
-			"Content-Type" : "application/json"
-		};
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -875,7 +875,7 @@ function getUnityAssets(req, res, next) {
 	}
 
 	UnityAssets.getAssetList(account, model, branch, req.params.rev, username).then(obj => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
@@ -887,7 +887,7 @@ function getJsonMpc(req, res, next) {
 	const id = req.params.uid;
 
 	JSONAssets.getSuperMeshMapping(account, model, id).then(file => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file);
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
@@ -902,7 +902,7 @@ function getSubModelRevisions(req, res, next) {
 	const username = req.session.user.username;
 
 	ModelHelpers.getSubModelRevisions(account, model, username, branch, revId).then((result) => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result);
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result, undefined, req.param.rev ? config.cachePolicy : undefined);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
@@ -916,7 +916,7 @@ function getUnityBundle(req, res, next) {
 
 	UnityAssets.getUnityBundle(account, model, id).then(file => {
 		req.params.format = "unity3d";
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file);
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

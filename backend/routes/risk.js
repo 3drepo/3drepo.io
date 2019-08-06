@@ -25,6 +25,7 @@ const responseCodes = require("../response_codes.js");
 const Risk = require("../models/risk");
 const utils = require("../utils");
 const Comment = require("../models/comment");
+const config = require("../config");
 
 /**
  * @api {get} /:teamspace/:model/risks/:riskId Find Risk by ID
@@ -320,7 +321,7 @@ function getScreenshot(req, res, next) {
 	const dbCol = {account: req.params.account, model: req.params.model};
 
 	Risk.getScreenshot(dbCol, req.params.riskId, req.params.vid).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});
@@ -331,7 +332,7 @@ function getScreenshotSmall(req, res, next) {
 	const dbCol = {account: req.params.account, model: req.params.model};
 
 	Risk.getSmallScreenshot(dbCol, req.params.riskId, req.params.vid).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});
@@ -342,7 +343,7 @@ function getThumbnail(req, res, next) {
 	const dbCol = {account: req.params.account, model: req.params.model};
 
 	Risk.getThumbnail(dbCol, req.params.riskId).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});
