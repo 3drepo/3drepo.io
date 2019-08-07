@@ -613,7 +613,6 @@ export class UnityUtil {
 	 * Enable model caching
 	 */
 	public static enableCaching() {
-		console.log("Enabling cache...");
 		UnityUtil.toUnity('EnableCaching', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
@@ -621,7 +620,6 @@ export class UnityUtil {
 	 * Disable model caching
 	 */
 	public static disableCaching() {
-		console.log("Disabling cache...");
 		UnityUtil.toUnity('DisableCaching', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
