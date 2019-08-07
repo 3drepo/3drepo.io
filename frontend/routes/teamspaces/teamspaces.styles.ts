@@ -71,6 +71,49 @@ export const MenuButton = styled(Button).attrs({
 	}
 `;
 
-export const MyTeamspace = styled.div`
+export const AddModelButtonOption = styled(Button)`
+	&& {
+		flex: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0;
+		margin: 0;
+		border-radius: 0;
+	}
 
+	&:not(:last-child) {
+		border-right: 1px solid ${COLOR.BLACK_12};
+	}
+`;
+
+export const AddModelButton = styled.div`
+	color: ${COLOR.BLACK_20};
+	border: 2px dashed currentColor;
+  display: flex;
+	position: relative;
+
+	&:after {
+		left: 0;
+		top: 0;
+		width: 100%;
+		content: '+';
+		align-self: center;
+		text-align: center;
+		font-size: 35px;
+	}
+
+	${AddModelButtonOption} {
+		display: none;
+	}
+
+	&:hover {
+		&:after {
+			display: none;
+		}
+
+		${AddModelButtonOption} {
+			display: block;
+		}
+	}
 `;

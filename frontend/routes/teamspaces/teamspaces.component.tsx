@@ -33,7 +33,7 @@ import ProjectDialog from './components/projectDialog/projectDialog.container';
 import ProjectItem from './components/projectItem/projectItem.container';
 import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
 import { LIST_ITEMS_TYPES } from './teamspaces.contants';
-import { GridContainer, Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
+import { GridContainer, Head, List, LoaderContainer, MenuButton, AddModelButton, AddModelButtonOption } from './teamspaces.styles';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -110,17 +110,25 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	private openFederationDialog = () => {
+	private openFederationDialog = ({ project, teamspace }: { project?: string, teamspace?: string }) => {
 		this.props.showDialog({
 			title: 'New federation',
-			template: FederationDialog
+			template: FederationDialog,
+			data: {
+				teamspace,
+				project
+			}
 		});
 	}
 
-	private openModelDialog = () => {
+	private openModelDialog = ({ project, teamspace }: { project?: string, teamspace?: string }) => {
 		this.props.showDialog({
 			title: 'New model',
-			template: ModelDialog
+			template: ModelDialog,
+			data: {
+				teamspace,
+				project
+			}
 		});
 	}
 
@@ -143,13 +151,25 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		showStarredOnly: Boolean(activeTab)
 	})
 
-	private renderModels = (models, projectId) => renderWhenTrue(() => (
-		<GridContainer key={`container-${projectId}`}>
+	private renderAddModelGridItem = (teamspace, project) => (
+		<AddModelButton>
+			<AddModelButtonOption
+				onClick={() => this.openModelDialog({ teamspace, project })}
+			>Model</AddModelButtonOption>
+			<AddModelButtonOption
+				onClick={() => this.openFederationDialog({ teamspace, project })}
+			>Federation</AddModelButtonOption>
+		</AddModelButton>
+	)
+
+	private renderModels = (models, project) => renderWhenTrue(() => (
+		<GridContainer key={`container-${project.id}`}>
+			{this.renderAddModelGridItem(project.teamspace, project.id)}
 			{models.map((props) => (
 				<ModelGridItem key={props.model} {...props}	/>
 			))}
 		</GridContainer>
-	))(models.length && this.state.visibleItems[projectId])
+	))(models.length && this.state.visibleItems[project.id])
 
 	private renderProject = (props) => ([
 		(
@@ -160,7 +180,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				onClick={this.handleVisibilityChange}
 			/>
 		),
-		this.renderModels(props.models, props._id)
+		this.renderModels(props.models, props)
 	])
 
 	private renderTeamspace = (props) => (
