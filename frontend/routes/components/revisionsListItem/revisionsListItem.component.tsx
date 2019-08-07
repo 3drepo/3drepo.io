@@ -17,21 +17,20 @@
 
 import React from 'react';
 
+import { renderWhenTrue } from '../../../helpers/rendering';
+import { LONG_DATE_TIME_FORMAT } from '../../../services/formatting/formatDate';
+import { DateTime } from '../dateTime/dateTime.component';
 import {
-	ActionsMenuWrapper,
-	Column,
+	Button,
 	Container,
 	Description,
+	FileType,
 	Property,
 	PropertyWrapper,
 	Row,
-	Tag
+	Tag,
+	Toolbar
 } from './revisionsListItem.styles';
-
-import { LONG_DATE_TIME_FORMAT } from '../../../services/formatting/formatDate';
-import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
-import { DateTime } from '../dateTime/dateTime.component';
-import { MenuButton } from '../menuButton/menuButton.component';
 
 interface IProps {
 	data: {
@@ -40,6 +39,7 @@ interface IProps {
 		timestamp?: string;
 		desc?: string;
 		void?: boolean;
+		type?: string;
 	};
 	current?: boolean;
 	editable?: boolean;
@@ -49,16 +49,29 @@ interface IProps {
 	onToggleVoid: (event, revision) => void;
 }
 
-const menuStyles = {
-	overflow: 'initial',
-	boxShadow: 'none'
-};
-
 export const RevisionsListItem = (props: IProps) => {
-	const { tag, timestamp, desc, author } = props.data;
+	const { tag, timestamp, desc, author, type } = props.data;
 	const { current } = props;
 
 	const handleClick = (event) => props.onClick(event, props.data);
+	const handleSetLatest = (event) => props.onSetLatest(event, props.data);
+	const handleToggleVoid = (event) => props.onToggleVoid(event, props.data);
+
+	const renderToolbar = renderWhenTrue(() => {
+		return (
+			<Toolbar>
+				<Button onClick={handleSetLatest}>
+					Set as {props.data.void ? 'active' : 'void'}
+				</Button>
+				<Button
+					disabled={props.current}
+					onClick={handleToggleVoid}
+				>
+					Set as latest
+				</Button>
+			</Toolbar>
+		);
+	});
 
 	return (
 		<Container
@@ -69,29 +82,18 @@ export const RevisionsListItem = (props: IProps) => {
 		>
 			<Row>
 				<PropertyWrapper>
-					<Tag>{tag || '(no tag)'}</Tag>
-					<Property active={current}>{props.current && '(current revision)'}</Property>
+					<Tag>{tag || '(no name)'}</Tag>
+					<Property>{author}</Property>
 				</PropertyWrapper>
-				<Property active={current}>
+				<Property>
 					<DateTime value={timestamp} format={LONG_DATE_TIME_FORMAT} />
 				</Property>
-
-				{props.editable &&
-					<ActionsMenuWrapper>
-						<ButtonMenu
-							renderButton={MenuButton}
-							renderContent={(menu) => this.renderActionsMenu(menu, revision)}
-							PaperProps={{ style: menuStyles }}
-							PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-							ButtonProps={{ disabled: false }}
-						/>
-					</ActionsMenuWrapper>
-				}
 			</Row>
-			<Column>
-				<Property active={current}>{author}</Property>
+			<Row>
 				<Description>{desc || '(no description)'}</Description>
-			</Column>
+				<FileType>{type || '(unknown type)'}</FileType>
+			</Row>
+			{renderToolbar(props.editable)}
 		</Container>
 	);
 };

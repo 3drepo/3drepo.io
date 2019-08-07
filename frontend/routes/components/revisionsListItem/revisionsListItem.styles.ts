@@ -15,16 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ListItem from '@material-ui/core/ListItem';
+import { Button as ButtonComponent, ListItem } from '@material-ui/core';
 import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../styles';
-
-interface IContainer {
-	theme: {
-		isCurrent?: boolean;
-		isVoid?: boolean;
-	};
-}
 
 export const ActionsMenuWrapper = styled.div`
 	display: flex;
@@ -35,8 +28,10 @@ export const ActionsMenuWrapper = styled.div`
 
 export const Property = styled.div`
 	width: 'auto';
+`;
 
-	font-weight: ${({ active }) => active ? FONT_WEIGHT.SEMIBOLD : FONT_WEIGHT.LIGHTER};
+export const FileType = styled(Property)`
+	margin-top: 8px;
 `;
 
 export const Tag = styled.div`
@@ -51,47 +46,68 @@ export const PropertyWrapper = styled.div`
 	}
 `;
 
-const getItemBackgroundColor = (theme) => {
-	if (theme.isCurrent) {
+export const Toolbar = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	width: 100%;
+	height: 26px;
+	margin-top: 12px;
+`;
+
+export const Button = styled(ButtonComponent).attrs({
+	color: 'secondary'
+})`
+	&& {
+		padding: 8px;
+	}
+	&:last-child {
+		margin-right: -8px;
+	}
+`;
+
+const getItemBackgroundColor = (props) => {
+	if (props.current) {
 		return COLOR.WHITE;
 	}
 
-	if (theme.isVoid) {
+	if (props.void) {
 		return COLOR.WARNING_LIGHT;
 	}
 
 	return COLOR.BLACK_6;
 };
 
-const getItemHoverBackgroundColor = (theme) => {
-	if (theme.isCurrent) {
+const getItemHoverBackgroundColor = (props) => {
+	if (props.current) {
 		return COLOR.LIGHT_GRAY;
 	}
 
-	if (theme.isVoid) {
+	if (props.void) {
 		return COLOR.WARNING;
 	}
 
 	return COLOR.BLACK_12;
 };
 
-export const Container = styled(ListItem)<IContainer>`
+export const Container = styled(ListItem)`
 	display: flex;
 	flex-direction: column;
 	border-bottom: 1px solid ${COLOR.BLACK_20};
 	color: ${({ theme }) => theme.isVoid ? COLOR.BLACK_40 : COLOR.BLACK};
 	font-size: 14px;
+	font-weight: ${({ current }) => current ? FONT_WEIGHT.SEMIBOLD : FONT_WEIGHT.NORMAL};
 
 	&& {
 		cursor: pointer;
 		justify-content: space-between;
-		padding: 24px;
-		background-color: ${({ theme }) => getItemBackgroundColor(theme)};
+		padding: 18px 24px;
+		background-color: ${getItemBackgroundColor};
 		border-bottom: 1px solid ${COLOR.BLACK_20};
 		transition: background-color 0.25s ease-in-out;
 
 		&:hover {
-			background-color: ${({ theme }) => getItemHoverBackgroundColor(theme)};
+			background-color: ${getItemHoverBackgroundColor};
 		}
 	}
 `;
@@ -101,13 +117,6 @@ export const Row = styled.div`
 	flex-direction: row;
 	width: 100%;
 	justify-content: space-between;
-`;
-
-export const Column = styled.div`
-	display: flex;
-	flex-direction: column;
-	align-self: flex-start;
-	margin-top: 8px;
 `;
 
 export const Description = styled.div`

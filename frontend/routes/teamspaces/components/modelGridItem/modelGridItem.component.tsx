@@ -133,7 +133,6 @@ export function ModelGridItem(props: IProps) {
 
 	const handleRevisionsClick = () => {
 		const { teamspace, model, name } = props;
-		debugger;
 		props.showRevisionsDialog({
 			title: `Revisions: ${name}`,
 			data: {

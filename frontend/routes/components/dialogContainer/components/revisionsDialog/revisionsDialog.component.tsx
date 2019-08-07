@@ -15,38 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { get } from 'lodash';
+import memoizeOne from 'memoize-one';
 import React from 'react';
 
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
 
 import { ROUTES } from '../../../../../constants/routes';
-import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../../helpers/rendering';
+import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../../services/analytics';
-import {
-	MenuList, StyledItemText, StyledListItem
-} from '../../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
-import { MenuButton as MenuButtonComponent } from '../../../../components/menuButton/menuButton.component';
-import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
 import { Loader } from '../../../loader/loader.component';
 import { RevisionsListItem } from '../../../revisionsListItem/revisionsListItem.component';
-import {
-	ACTIVE_ACTIONS,
-	MAKE_ACTIVE_NAME,
-	MAKE_VOID_NAME,
-	SET_LATEST_NAME,
-	TYPES,
-	VOID_ACTIONS
-} from './revisionsDialog.constants';
+import { TYPES } from './revisionsDialog.constants';
 import {
 	Container,
 	StyledDialogContent,
 	StyledList
 } from './revisionsDialog.styles';
 
-const MenuButton = (props) => (
-	<MenuButtonComponent ariaLabel="Show menu" {...props} />
-);
+const getCurrentRevisionId = memoizeOne((revisions) => {
+	const activeRevisions = revisions.filter((revision) => !revision.void);
+	return get(activeRevisions[0], '_id');
+});
 
 interface IProps {
 	currentRevisionName: string;
@@ -86,46 +77,27 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
 	}
 
-	private renderActionsMenu = (menu, revision) =>  {
-		const actions = revision.void ? VOID_ACTIONS : ACTIVE_ACTIONS;
-
-		return(
-			<MenuList>
-				{actions.map(({ name, label }) => (
-					<StyledListItem button key={name} onClick={(e) => {
-						this.menuActionsMap[name](revision);
-						menu.close(e);
-					}}>
-						<StyledItemText>{label}</StyledItemText>
-					</StyledListItem>
-				))}
-			</MenuList>
-		);
-	}
-
 	private toggleVoid = (event, revision) => {
+		event.stopPropagation();
 		this.props.setModelRevisionState(this.props.teamspace, this.props.modelId, revision._id, !Boolean(revision.void));
 	}
 
 	private setLatest = (event, revision) => {
+		event.stopPropagation();
 		this.props.revisions.forEach((rev) => {
 			const isOlder = revision.timestamp < rev.timestamp;
 			this.props.setModelRevisionState(this.props.teamspace, this.props.modelId, rev._id, isOlder);
 		});
 	}
 
-	get menuActionsMap() {
-		return {
-			[MAKE_ACTIVE_NAME]: this.toggleVoid,
-			[MAKE_VOID_NAME]: this.toggleVoid,
-			[SET_LATEST_NAME]:  this.setLatest
-		};
+	get currentRevisionId() {
+		return this.props.currentRevisionId || getCurrentRevisionId(this.props.revisions);
 	}
 
 	private onRevisionItemClick = (event, revision) => {
-		const { handleSetNewRevision, currentRevisionId } = this.props;
+		const { handleSetNewRevision } = this.props;
 		if (this.props.type === TYPES.VIEWER) {
-			const isCurrentRevision = currentRevisionId === revision._id;
+			const isCurrentRevision = this.currentRevisionId === revision._id;
 			if (!isCurrentRevision) {
 				handleSetNewRevision(revision);
 			}
@@ -135,13 +107,13 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 	}
 
 	private renderRevisionItem = (revision) => {
-		debugger;
-		const isCurrentRevision = this.props.currentRevisionId === revision._id;
+		const isCurrentRevision = this.currentRevisionId === revision._id;
 		return (
 			<RevisionsListItem
 				key={revision._id}
 				data={revision}
 				current={isCurrentRevision}
+				editable={this.props.type === TYPES.TEAMSPACES}
 				onClick={this.onRevisionItemClick}
 				onSetLatest={this.setLatest}
 				onToggleVoid={this.toggleVoid}
