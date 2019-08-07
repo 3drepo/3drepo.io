@@ -33,7 +33,15 @@ import ProjectDialog from './components/projectDialog/projectDialog.container';
 import ProjectItem from './components/projectItem/projectItem.container';
 import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
 import { LIST_ITEMS_TYPES } from './teamspaces.contants';
-import { GridContainer, Head, List, LoaderContainer, MenuButton, AddModelButton, AddModelButtonOption } from './teamspaces.styles';
+import {
+	AddModelButton,
+	AddModelButtonOption,
+	GridContainer,
+	Head,
+	List,
+	LoaderContainer,
+	MenuButton
+} from './teamspaces.styles';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
