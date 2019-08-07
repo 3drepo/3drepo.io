@@ -154,13 +154,11 @@ export function ModelGridItem(props: IProps) {
 
 	const handleClick = () => {
 		const { history, teamspace, timestamp, model } = props;
-		if (!isPending) {
-			if (timestamp) {
-				history.push(`${ROUTES.VIEWER}/${teamspace}/${model}`);
-				analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
-			} else {
-				handleUploadModelFile();
-			}
+		if (timestamp) {
+			history.push(`${ROUTES.VIEWER}/${teamspace}/${model}`);
+			analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
+		} else {
+			handleUploadModelFile();
 		}
 	};
 
@@ -302,7 +300,7 @@ export function ModelGridItem(props: IProps) {
 						active={hasDelayedClick ? !props.isStarred : props.isStarred}
 						onClick={handleStarClick}
 					/>
-					<Name lines={2} onClick={handleClick} isPending={isPending}>{props.name}</Name>
+					<Name lines={2} onClick={handleClick}>{props.name}</Name>
 				</NameWrapper>
 				{renderActionsMenu()}
 			</Header>
