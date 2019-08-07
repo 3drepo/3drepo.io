@@ -95,29 +95,6 @@ export function ModelGridItem(props: IProps) {
 
 	useEffect(resetStarClickTimeout, [props.isStarred]);
 
-	const renderActions = (actions) => {
-		if (!actions) {
-			return null;
-		}
-		return actions.map((actionItem) => {
-			const {label, action, Icon, color, isHidden = false, requiredPermissions = ''} = actionItem;
-			const iconProps = {color, fontSize: 'small'} as any;
-			const ActionsIconButton = () => (<Icon {...iconProps} />);
-
-			if (!isHidden) {
-				return renderWhenTrue((
-					<SmallIconButton
-						key={label}
-						aria-label={label}
-						onClick={action}
-						Icon={ActionsIconButton}
-						tooltip={label}
-					/>
-				))(hasPermissions(requiredPermissions, props.permissions));
-			}
-		});
-	};
-
 	const handlePermissionsClick = (event) => {
 		event.stopPropagation();
 		const { history, projectName, teamspace, model } = props;
@@ -281,8 +258,36 @@ export function ModelGridItem(props: IProps) {
 		</Status>
 	);
 
+	const renderActions = (actions) => {
+		if (!actions) {
+			return null;
+		}
+		return actions.map((actionItem) => {
+			const { label, action, Icon, color, isHidden = false, requiredPermissions = '' } = actionItem;
+			const iconProps = { fontSize: 'small' } as any;
+			const disabled = isPending && [ROW_ACTIONS.UPLOAD_FILE.label, ROW_ACTIONS.DELETE.label].includes(label);
+			if (!disabled) {
+				iconProps.color = color;
+			}
+			const ActionsIconButton = () => (<Icon {...iconProps} />);
+
+			if (!isHidden) {
+				return renderWhenTrue((
+					<SmallIconButton
+						key={label}
+						aria-label={label}
+						onClick={action}
+						Icon={ActionsIconButton}
+						tooltip={label}
+						disabled={disabled}
+					/>
+				))(hasPermissions(requiredPermissions, props.permissions));
+			}
+		});
+	};
+
 	const renderActionsMenu = () => (
-		<ActionsMenu isPending={isPending} federate={isFederation}>
+		<ActionsMenu federate={isFederation}>
 			<Actions>
 				{renderActions(rowActions)}
 			</Actions>

@@ -23,7 +23,7 @@ import { ActionsButton, Container, StyledGrid } from './actionsMenu.styles';
 
 interface IProps {
 	className?: string;
-	isPending: boolean;
+	isPending?: boolean;
 	federate: boolean;
 	children: any;
 }
