@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
-import { renderWhenTrue } from '../../../helpers/rendering';
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFileOutlined';
+import PersonIcon from '@material-ui/icons/Person';
+import React, { useMemo } from 'react';
+import { CUSTOM_FILE_EXTS_NAMES } from '../../../constants/revisions';
 import { LONG_DATE_TIME_FORMAT } from '../../../services/formatting/formatDate';
 import { DateTime } from '../dateTime/dateTime.component';
 import {
@@ -53,14 +54,13 @@ export const RevisionsListItem = (props: IProps) => {
 	const { current } = props;
 
 	const handleClick = (event) => props.onClick(event, props.data);
-	const handleSetLatest = (event) => props.onSetLatest(event, props.data);
 	const handleToggleVoid = (event) => props.onToggleVoid(event, props.data);
+	const themeProps = useMemo(() => ({ current, void: props.data.void }), [props.data.void, current]);
 
 	return (
 		<Container
 			onClick={handleClick}
-			void={props.data.void}
-			current={current}
+			theme={themeProps}
 			divider
 		>
 			<Row>
@@ -72,25 +72,19 @@ export const RevisionsListItem = (props: IProps) => {
 				</Property>
 			</Row>
 			<Row>
-				<Property>{author}</Property>
-				<ToggleButton
-					onClick={handleToggleVoid}
-					active={!props.data.void}
-				>
+				<Property>
+					<PersonIcon />
+					{author}
+				</Property>
+				<FileType>
+					<InsertDriveFileIcon />
+					{CUSTOM_FILE_EXTS_NAMES[fileType] || fileType || '(unknown type)'}
+				</FileType>
+				<ToggleButton onClick={handleToggleVoid} theme={themeProps}>
 					{props.data.void ? 'Void' : 'Active'}
 				</ToggleButton>
 			</Row>
-			<Row>
-				<FileType>{fileType || '(unknown type)'}</FileType>
-				<ToggleButton
-					disabled={props.current}
-					active={props.current}
-					onClick={handleSetLatest}
-				>Current</ToggleButton>
-			</Row>
-			<Row>
-				<Description>{desc || '(no description)'}</Description>
-			</Row>
+			<Description>{desc || '(no description)'}</Description>
 		</Container>
 	);
 };

@@ -15,12 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button as ButtonComponent, ButtonBase, ListItem } from '@material-ui/core';
-import styled from 'styled-components';
+import { ButtonBase, ListItem } from '@material-ui/core';
+import styled, { css } from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../styles';
 
 export const Property = styled.div`
-	width: 'auto';
+	display: flex;
+	align-items: center;
+
+	svg {
+		margin-left: -3px;
+		margin-right: 6px;
+	}
 `;
 
 export const FileType = styled(Property)``;
@@ -37,35 +43,18 @@ export const PropertyWrapper = styled.div`
 	}
 `;
 
-const getItemBackgroundColor = (props) => {
-	if (props.current) {
-		return COLOR.WHITE;
-	}
-
-	if (props.void) {
-		return COLOR.WARNING_LIGHT;
-	}
-
-	return COLOR.BLACK_6;
-};
-
-const getItemHoverBackgroundColor = (props) => {
-	if (props.current) {
-		return COLOR.LIGHT_GRAY;
-	}
-
-	if (props.void) {
-		return COLOR.WARNING;
-	}
-
-	return COLOR.BLACK_12;
-};
+export const Description = styled.div`
+	color: ${COLOR.BLACK_40};
+	align-self: flex-start;
+	width: 100%;
+	margin-top: 5px;
+`;
 
 export const Container = styled(ListItem)`
 	display: flex;
 	flex-direction: column;
 	border-bottom: 1px solid ${COLOR.BLACK_20};
-	color: ${({ theme }) => theme.void ? COLOR.BLACK_40 : COLOR.BLACK};
+	color: ${({ theme }) => theme.void ? COLOR.BLACK_20 : COLOR.BLACK};
 	font-size: 14px;
 	font-weight: ${({ current }) => current ? FONT_WEIGHT.SEMIBOLD : FONT_WEIGHT.NORMAL};
 
@@ -73,13 +62,19 @@ export const Container = styled(ListItem)`
 		cursor: pointer;
 		justify-content: space-between;
 		padding: 18px 24px;
-		background-color: ${getItemBackgroundColor};
+		background-color: ${COLOR.BLACK_6};
 		border-bottom: 1px solid ${COLOR.BLACK_20};
 		transition: background-color 0.25s ease-in-out;
 
 		&:hover {
-			background-color: ${getItemHoverBackgroundColor};
+			background-color: ${COLOR.BLACK_12};
 		}
+	}
+
+	${Description} {
+		${({ theme }) => theme.void ? css`
+			color: ${COLOR.BLACK_20};
+		` : ''}
 	}
 `;
 
@@ -95,20 +90,15 @@ export const Row = styled.div`
 	}
 `;
 
-export const Description = styled.div`
-	color: ${COLOR.BLACK_40};
-	align-self: flex-start;
-`;
-
 interface IStateSwitch {
-	active?: boolean;
+	void?: boolean;
 }
 
 export const ToggleButton = styled(ButtonBase)<IStateSwitch>`
 	&& {
 		font-size: 14px;
 		color: ${COLOR.WHITE};
-		background-color: ${(props) => props.active ? COLOR.SECONDARY_MAIN : COLOR.BLACK_30};
+		background-color: ${({ theme }) => !theme.void ? COLOR.SECONDARY_MAIN : COLOR.BLACK_30};
 		cursor: pointer;
 		box-sizing: border-box;
 		width: 85px;
@@ -120,7 +110,7 @@ export const ToggleButton = styled(ButtonBase)<IStateSwitch>`
 		justify-content: center;
 
 		&:disabled {
-			background-color: ${(props) => props.active ? COLOR.SECONDARY_MAIN_54 : COLOR.BLACK_16};
+			background-color: ${({ theme }) => !theme.void ? COLOR.SECONDARY_MAIN_54 : COLOR.BLACK_16};
 			cursor: default;
 		}
 	}
