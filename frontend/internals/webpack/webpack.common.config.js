@@ -20,7 +20,7 @@ module.exports = (options) => {
     }, identity),
     output: Object.assign({
       path: PATHS.DIST_DIR,
-      filename: '[name].[chunkhash].js'
+      filename: '[name].[contenthash].js'
     }, options.output),
     module: {
       rules: [

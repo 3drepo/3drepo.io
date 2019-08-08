@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { get } from 'lodash';
-import memoizeOne from 'memoize-one';
 import React from 'react';
 
 import Button from '@material-ui/core/Button';
@@ -24,6 +22,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 
 import { ROUTES } from '../../../../../constants/routes';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { getCurrentRevisionId } from '../../../../../helpers/revisions';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../../services/analytics';
 import { Loader } from '../../../loader/loader.component';
 import { RevisionsListItem } from '../../../revisionsListItem/revisionsListItem.component';
@@ -33,11 +32,6 @@ import {
 	StyledDialogContent,
 	StyledList
 } from './revisionsDialog.styles';
-
-const getCurrentRevisionId = memoizeOne((revisions) => {
-	const activeRevisions = revisions.filter((revision) => !revision.void);
-	return get(activeRevisions[0], '_id');
-});
 
 interface IProps {
 	currentRevisionName: string;
@@ -49,6 +43,7 @@ interface IProps {
 	type: string;
 	history: any;
 	isPending: boolean;
+	showOnlyActive: boolean;
 	resetModelRevisions: () => void;
 	fetchModelRevisions: (teamspace, modelId) => void;
 	setModelRevisionState: (teamspace, modelId, revision, isVoid) => void;
@@ -67,6 +62,20 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		if (this.props.type === TYPES.TEAMSPACES) {
 			this.props.resetModelRevisions();
 		}
+	}
+
+	get revisions() {
+		let revisions = this.props.revisions || [];
+
+		if (this.props.showOnlyActive) {
+			revisions = revisions.filter((revision) => !revision.void);
+		}
+
+		return revisions;
+	}
+
+	get currentRevisionId() {
+		return this.props.currentRevisionId || getCurrentRevisionId(this.revisions);
 	}
 
 	private revisionClickHandler = ({ tag, _id }) => {
@@ -88,10 +97,6 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 			const isOlder = revision.timestamp < rev.timestamp;
 			this.props.setModelRevisionState(this.props.teamspace, this.props.modelId, rev._id, isOlder);
 		});
-	}
-
-	get currentRevisionId() {
-		return this.props.currentRevisionId || getCurrentRevisionId(this.props.revisions);
 	}
 
 	private onRevisionItemClick = (event, revision) => {
@@ -123,7 +128,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 
 	private renderRevisionsList = renderWhenTrue(() => (
 		<StyledList>
-			{this.props.revisions.map(this.renderRevisionItem)}
+			{this.revisions.map(this.renderRevisionItem)}
 		</StyledList>
 	));
 
@@ -138,7 +143,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 	);
 
 	public render() {
-		const { revisions } = this.props;
+		const { revisions } = this;
 		return (
 			<>
 				<StyledDialogContent>

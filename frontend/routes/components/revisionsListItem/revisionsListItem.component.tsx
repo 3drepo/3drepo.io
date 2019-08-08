@@ -21,7 +21,6 @@ import { renderWhenTrue } from '../../../helpers/rendering';
 import { LONG_DATE_TIME_FORMAT } from '../../../services/formatting/formatDate';
 import { DateTime } from '../dateTime/dateTime.component';
 import {
-	Button,
 	Container,
 	Description,
 	FileType,
@@ -29,7 +28,7 @@ import {
 	PropertyWrapper,
 	Row,
 	Tag,
-	Toolbar
+	ToggleButton
 } from './revisionsListItem.styles';
 
 interface IProps {
@@ -39,7 +38,7 @@ interface IProps {
 		timestamp?: string;
 		desc?: string;
 		void?: boolean;
-		type?: string;
+		fileType?: string;
 	};
 	current?: boolean;
 	editable?: boolean;
@@ -50,28 +49,12 @@ interface IProps {
 }
 
 export const RevisionsListItem = (props: IProps) => {
-	const { tag, timestamp, desc, author, type } = props.data;
+	const { tag, timestamp, desc, author, fileType } = props.data;
 	const { current } = props;
 
 	const handleClick = (event) => props.onClick(event, props.data);
 	const handleSetLatest = (event) => props.onSetLatest(event, props.data);
 	const handleToggleVoid = (event) => props.onToggleVoid(event, props.data);
-
-	const renderToolbar = renderWhenTrue(() => {
-		return (
-			<Toolbar>
-				<Button onClick={handleSetLatest}>
-					Set as {props.data.void ? 'active' : 'void'}
-				</Button>
-				<Button
-					disabled={props.current}
-					onClick={handleToggleVoid}
-				>
-					Set as latest
-				</Button>
-			</Toolbar>
-		);
-	});
 
 	return (
 		<Container
@@ -83,17 +66,31 @@ export const RevisionsListItem = (props: IProps) => {
 			<Row>
 				<PropertyWrapper>
 					<Tag>{tag || '(no name)'}</Tag>
-					<Property>{author}</Property>
 				</PropertyWrapper>
 				<Property>
 					<DateTime value={timestamp} format={LONG_DATE_TIME_FORMAT} />
 				</Property>
 			</Row>
 			<Row>
-				<Description>{desc || '(no description)'}</Description>
-				<FileType>{type || '(unknown type)'}</FileType>
+				<Property>{author}</Property>
+				<ToggleButton
+					onClick={handleToggleVoid}
+					active={!props.data.void}
+				>
+					{props.data.void ? 'Void' : 'Active'}
+				</ToggleButton>
 			</Row>
-			{renderToolbar(props.editable)}
+			<Row>
+				<FileType>{fileType || '(unknown type)'}</FileType>
+				<ToggleButton
+					disabled={props.current}
+					active={props.current}
+					onClick={handleSetLatest}
+				>Current</ToggleButton>
+			</Row>
+			<Row>
+				<Description>{desc || '(no description)'}</Description>
+			</Row>
 		</Container>
 	);
 };

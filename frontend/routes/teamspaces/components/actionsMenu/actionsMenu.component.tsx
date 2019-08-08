@@ -64,4 +64,4 @@ export const ActionsMenu = ({federate, isPending, children}: IProps) => {
 			</StyledGrid>
 		</Container>
 	);
-}
+};

@@ -19,7 +19,9 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import ArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import React from 'react';
 
+import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { getActiveRevisions } from '../../../../helpers/revisions';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { TYPES } from './../../../components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
 import { Container, DisplayedText, ProgressWrapper } from './revisionsSwitch.styles';
@@ -60,7 +62,8 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 	}
 
 	private get currentRevisionName() {
-		return this.props.urlParams.revision || this.getRevisionDisplayedName(this.props.revisions[0]);
+		const activeRevisions = getActiveRevisions(this.props.revisions);
+		return this.props.urlParams.revision || this.getRevisionDisplayedName(activeRevisions[0]);
 	}
 
 	private get currentRevisionId() {
@@ -81,10 +84,8 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 	}
 
 	private setNewRevision = (revision) => {
-		const { pathname } = this.props.location;
-		const [, , , , currentRevisionInPath] = pathname.split('/');
-		const newPathnameBase = currentRevisionInPath ? pathname.substr(0, pathname.lastIndexOf('\/')) : pathname;
-		const newPathname = `${newPathnameBase}/${revision.tag || revision._id}`;
+		const { teamspace, model } = this.props.urlParams;
+		const newPathname = `${ROUTES.VIEWER}/${teamspace}/${model}/${revision.tag || revision._id}`;
 
 		this.props.history.push(newPathname);
 		this.props.hideDialog();
@@ -96,13 +97,14 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 		}
 
 		this.props.showRevisionsDialog({
-			title: `${this.props.modelSettings.name} - Revisions`,
+			title: `Revisions: ${this.props.modelSettings.name}`,
 			data: {
 				currentRevisionName: this.currentRevisionName,
 				currentRevisionId: this.currentRevisionId,
 				currentModelName: this.props.modelSettings.name,
 				revisions: this.props.revisions,
 				handleSetNewRevision: this.setNewRevision,
+				showOnlyActive: true,
 				type: TYPES.VIEWER
 			}
 		});

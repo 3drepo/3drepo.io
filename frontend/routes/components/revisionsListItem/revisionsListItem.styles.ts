@@ -15,24 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button as ButtonComponent, ListItem } from '@material-ui/core';
+import { Button as ButtonComponent, ButtonBase, ListItem } from '@material-ui/core';
 import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../styles';
-
-export const ActionsMenuWrapper = styled.div`
-	display: flex;
-	margin-left: 20px;
-	margin-top: -12px;
-	margin-right: -12px;
-`;
 
 export const Property = styled.div`
 	width: 'auto';
 `;
 
-export const FileType = styled(Property)`
-	margin-top: 8px;
-`;
+export const FileType = styled(Property)``;
 
 export const Tag = styled.div`
 	width: 160px;
@@ -43,26 +34,6 @@ export const PropertyWrapper = styled.div`
 
 	${Property} {
 		margin-right: 30px;
-	}
-`;
-
-export const Toolbar = styled.div`
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
-	width: 100%;
-	height: 26px;
-	margin-top: 12px;
-`;
-
-export const Button = styled(ButtonComponent).attrs({
-	color: 'secondary'
-})`
-	&& {
-		padding: 8px;
-	}
-	&:last-child {
-		margin-right: -8px;
 	}
 `;
 
@@ -94,7 +65,7 @@ export const Container = styled(ListItem)`
 	display: flex;
 	flex-direction: column;
 	border-bottom: 1px solid ${COLOR.BLACK_20};
-	color: ${({ theme }) => theme.isVoid ? COLOR.BLACK_40 : COLOR.BLACK};
+	color: ${({ theme }) => theme.void ? COLOR.BLACK_40 : COLOR.BLACK};
 	font-size: 14px;
 	font-weight: ${({ current }) => current ? FONT_WEIGHT.SEMIBOLD : FONT_WEIGHT.NORMAL};
 
@@ -117,10 +88,40 @@ export const Row = styled.div`
 	flex-direction: row;
 	width: 100%;
 	justify-content: space-between;
+	align-items: center;
+
+	&:not(:last-child) {
+		margin-bottom: 8px;
+	}
 `;
 
 export const Description = styled.div`
 	color: ${COLOR.BLACK_40};
 	align-self: flex-start;
-	margin-top: 8px;
+`;
+
+interface IStateSwitch {
+	active?: boolean;
+}
+
+export const ToggleButton = styled(ButtonBase)<IStateSwitch>`
+	&& {
+		font-size: 14px;
+		color: ${COLOR.WHITE};
+		background-color: ${(props) => props.active ? COLOR.SECONDARY_MAIN : COLOR.BLACK_30};
+		cursor: pointer;
+		box-sizing: border-box;
+		width: 85px;
+		height: 20px;
+		padding: 0 9px;
+		border-radius: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		&:disabled {
+			background-color: ${(props) => props.active ? COLOR.SECONDARY_MAIN_54 : COLOR.BLACK_16};
+			cursor: default;
+		}
+	}
 `;
