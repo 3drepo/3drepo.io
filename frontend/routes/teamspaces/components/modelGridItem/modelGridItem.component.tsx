@@ -168,6 +168,9 @@ export function ModelGridItem(props: IProps) {
 		props.showDialog({
 			title: `Upload Model`,
 			template: UploadModelFileDialog,
+			DialogProps: {
+				disableRestoreFocus: true
+			},
 			data: {
 				teamspaceName: teamspace,
 				modelName: name,
