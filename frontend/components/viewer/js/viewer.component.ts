@@ -53,7 +53,7 @@ class ViewerController implements ng.IController {
 	private cacheSetting: boolean;
 	private farPlaneSamplingPoints: number;
 	private maxShadowDistance: number;
-	private maxCacheThreads: number;
+	private numCacheThreads: number;
 	private colorOverrides: any[] = [];
 
 	constructor(
