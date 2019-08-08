@@ -70,7 +70,7 @@ export const DEFAULT_SETTINGS = {
 	shading: 'standard',
 	shadows: 'none',
 	xray: true,
-	caching: true,
+	caching: false,
 	statistics: false,
 	memory: 2032,
 	nearPlane: 10,
