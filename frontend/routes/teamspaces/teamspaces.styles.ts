@@ -90,7 +90,7 @@ export const AddModelButtonOption = styled(Button)`
 export const AddModelButton = styled.div`
 	color: ${COLOR.BLACK_20};
 	border: 2px dashed currentColor;
-  display: flex;
+	display: flex;
 	position: relative;
 
 	&:after {
