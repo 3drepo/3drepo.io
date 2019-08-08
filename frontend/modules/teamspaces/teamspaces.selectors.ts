@@ -105,7 +105,7 @@ export const selectFlattenTeamspaces = createSelector(
 				if (!showStarredOnly || projectModels.length) {
 					teamspaceProjects.push({
 						...project,
-						models: projectModels,
+						models: orderBy(projectModels, ['federate']),
 						teamspace: teamspaceName,
 						type: LIST_ITEMS_TYPES.PROJECT,
 						id: projectsIds[j]
