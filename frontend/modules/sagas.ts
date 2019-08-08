@@ -13,7 +13,7 @@ import measureSaga from './measure/measure.sagas';
 import modelSaga from './model/model.sagas';
 import notificationsSaga from './notifications/notifications.sagas';
 import risksSaga from './risks/risks.sagas';
-import starredMetaSaga from './starredMeta/starredMeta.sagas';
+import starredSaga from './starred/starred.sagas';
 import startupSaga from './startup/startup.sagas';
 import staticPagesSaga from './staticPages/staticPages.sagas';
 import teamspacesSaga from './teamspaces/teamspaces.sagas';
@@ -45,7 +45,7 @@ export default function* rootSaga() {
 		fork(groupsSaga),
 		fork(treeSaga),
 		fork(bimSaga),
-		fork(starredMetaSaga),
+		fork(starredSaga),
 		fork(measureSaga),
 		fork(issuesSaga),
 		fork(compareSaga),

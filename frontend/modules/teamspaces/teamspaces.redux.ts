@@ -46,6 +46,7 @@ export const INITIAL_STATE = {
 	projects: {},
 	models: {},
 	componentState: {
+		showStarredOnly: false,
 		visibleItems: {},
 		teamspacesItems: []
 	}

@@ -19,7 +19,7 @@ import { cond, isEmpty, matches, stubTrue } from 'lodash';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
 
-import MenuItem from '@material-ui/core/MenuItem';
+import { IconButton, MenuItem, Tab, Tabs } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 
 import { renderWhenTrue } from '../../helpers/rendering';
@@ -33,7 +33,15 @@ import ProjectDialog from './components/projectDialog/projectDialog.container';
 import ProjectItem from './components/projectItem/projectItem.container';
 import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
 import { LIST_ITEMS_TYPES } from './teamspaces.contants';
-import { GridContainer, Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
+import {
+	AddModelButton,
+	AddModelButtonOption,
+	GridContainer,
+	Head,
+	List,
+	LoaderContainer,
+	MenuButton
+} from './teamspaces.styles';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -54,12 +62,13 @@ interface IProps {
 	activeTeamspace: string;
 	activeProject: string;
 	revisions?: any[];
-
+	showStarredOnly: boolean;
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
 	showRevisionsDialog: (config) => void;
 	hideDialog: () => void;
 	fetchTeamspaces: (username) => void;
+	fetchStarredModels: () => void;
 	setState: (componentState: any) => void;
 }
 
@@ -79,9 +88,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-		const {items, fetchTeamspaces, currentTeamspace, visibleItems} = this.props;
+		const {items, fetchTeamspaces, currentTeamspace, visibleItems, fetchStarredModels} = this.props;
 		if (!items.length) {
 			fetchTeamspaces(currentTeamspace);
+			fetchStarredModels();
 		}
 
 		if (isEmpty(visibleItems)) {
@@ -114,17 +124,25 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	private openFederationDialog = () => {
+	private openFederationDialog = ({ project, teamspace }: { project?: string, teamspace?: string }) => {
 		this.props.showDialog({
 			title: 'New federation',
-			template: FederationDialog
+			template: FederationDialog,
+			data: {
+				teamspace,
+				project
+			}
 		});
 	}
 
-	private openModelDialog = () => {
+	private openModelDialog = ({ project, teamspace }: { project?: string, teamspace?: string }) => {
 		this.props.showDialog({
 			title: 'New model',
-			template: ModelDialog
+			template: ModelDialog,
+			data: {
+				teamspace,
+				project
+			}
 		});
 	}
 
@@ -143,13 +161,29 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	private renderModels = (models, projectId) => renderWhenTrue(() => (
-		<GridContainer key={`container-${projectId}`}>
+	private handleTabChange = (event, activeTab) => this.props.setState({
+		showStarredOnly: Boolean(activeTab)
+	})
+
+	private renderAddModelGridItem = (teamspace, project) => (
+		<AddModelButton>
+			<AddModelButtonOption
+				onClick={() => this.openModelDialog({ teamspace, project })}
+			>Model</AddModelButtonOption>
+			<AddModelButtonOption
+				onClick={() => this.openFederationDialog({ teamspace, project })}
+			>Federation</AddModelButtonOption>
+		</AddModelButton>
+	)
+
+	private renderModels = (models, project) => renderWhenTrue(() => (
+		<GridContainer key={`container-${project.id}`}>
+			{this.renderAddModelGridItem(project.teamspace, project.id)}
 			{models.map((props) => (
-				<ModelGridItem key={props.model} {...props} />
+				<ModelGridItem key={props.model} {...props}	/>
 			))}
 		</GridContainer>
-	))(models.length && this.state.visibleItems[projectId])
+	))(models.length && this.state.visibleItems[project.id])
 
 	private renderProject = (props) => ([
 		(
@@ -160,7 +194,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				onClick={this.handleVisibilityChange}
 			/>
 		),
-		this.renderModels(props.models, props._id)
+		this.renderModels(props.models, props)
 	])
 
 	private renderTeamspace = (props) => (
@@ -230,12 +264,20 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	));
 
 	public render() {
-		const { isPending } = this.props;
+		const { isPending, showStarredOnly } = this.props;
 
 		return (
 			<Panel {...PANEL_PROPS}>
 				<Head>
-					3D MODELS & FEDERATIONS
+					<Tabs
+						indicatorColor="primary"
+						textColor="primary"
+						value={Number(showStarredOnly)}
+						onChange={this.handleTabChange}
+					>
+						<Tab label="3D Models & Federations" />
+						<Tab label="Starred" />
+					</Tabs>
 					<ButtonMenu
 						renderButton={this.renderMenuButton.bind(this, isPending)}
 						renderContent={this.renderMenu}

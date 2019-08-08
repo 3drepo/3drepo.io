@@ -45,23 +45,25 @@ const ModelSchema = Yup.object().shape({
 interface IProps {
 	teamspaces: any;
 	projects: any;
+	project?: string;
+	teamspace?: string;
 	handleResolve: (model) => void;
 	handleClose: () => void;
 	createModel: (teamspace, data) => void;
 }
 
 export const ModelDialog = (props: IProps) => {
-	const { teamspaces, projects, handleClose, createModel } = props;
+	const { teamspaces, projects, handleClose, createModel, project, teamspace } = props;
 
 	const handleModelSave = useCallback((values) => {
-		const project = projects[values.project].name;
-		createModel(values.teamspace, { ...values, project });
+		const selectedProject = projects[values.project].name;
+		createModel(values.teamspace, { ...values, project: selectedProject });
 		handleClose();
 	}, [projects, handleClose, createModel]);
 
 	return (
 		<Formik
-			initialValues={{}}
+			initialValues={{ project, teamspace }}
 			validationSchema={ModelSchema}
 			onSubmit={handleModelSave}
 		>

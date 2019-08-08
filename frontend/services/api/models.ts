@@ -171,3 +171,35 @@ export const deleteModelViewpoint = (teamspace, modelId, viewId) => {
 export const updateModelViewpoint = (teamspace, modelId, viewId, newName) => {
 	return api.put(`${teamspace}/${modelId}/viewpoints/${viewId}`, { name: newName });
 };
+
+/**
+ * Get starred models
+ */
+export const getStarredModels = () => {
+	return api.get('starredModels');
+};
+
+/**
+ * Add starred model
+ * @param modelId
+ */
+export const addStarredModel = (model) => {
+	return api.post('starredModels', model);
+};
+
+/**
+ * Remove starred model
+ * @param modelId
+ */
+export const removeStarredModel = (model) => {
+	return api.delete('starredModels', { data: model });
+};
+
+/**
+ * Override starred model
+ * @param starredModel
+ *
+ */
+export const overrideStarredModel = (starredModelsByTeamspace) => {
+	return api.put('starredModels', starredModelsByTeamspace);
+};

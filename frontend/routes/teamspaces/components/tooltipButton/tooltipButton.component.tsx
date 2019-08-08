@@ -28,6 +28,7 @@ interface IProps {
 	className?: string;
 	active?: boolean;
 	placement?: TooltipProps['placement'];
+	disableFocusListener?: TooltipProps['disableFocusListener'];
 	action?: (event) => void;
 	onClick?: (event) => void;
 }
@@ -42,12 +43,18 @@ export const TooltipButton = (props: IProps) => {
 		disabled = false,
 		className,
 		active = false,
-		placement
+		placement,
+		disableFocusListener
 	} = props;
 	const iconProps = { color, fontSize: 'small' } as any;
 
 	return (
-		<Tooltip title={label} disableHoverListener={disabled} placement={placement}>
+		<Tooltip
+			title={label}
+			disableHoverListener={disabled}
+			placement={placement}
+			disableFocusListener={disableFocusListener}
+		>
 			<span>
 				<StyledIconButton
 					aria-label={label}
