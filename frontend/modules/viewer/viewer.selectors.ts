@@ -64,6 +64,10 @@ export const selectMaxShadowDistance = createSelector(
 	selectSettings, (state) => state.maxShadowDistance
 );
 
+export const selectNumCacheThreads = createSelector(
+	selectSettings, (state) => state.numCacheThreads
+);
+
 export const selectNavigationMode = createSelector(
 	selectViewerDomain, (state) => state.navigationMode
 );

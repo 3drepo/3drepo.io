@@ -635,6 +635,11 @@ export class ViewerService {
 		this.viewer.setMaxShadowDistance(value);
 	}
 
+	public setNumCacheThreads(value: number) {
+		if (value === undefined) { return; }
+		this.viewer.setNumCacheThreads(value);
+	}
+
 	public setFarPlaneAlgorithm(algorithm: string) {
 		switch (algorithm) {
 			case 'box':

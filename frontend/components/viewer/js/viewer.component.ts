@@ -16,7 +16,7 @@
  */
 import { subscribe } from '../../../helpers/migration';
 import { selectShadowSetting, selectStatsSetting, selectNearPlaneSetting,
-	selectFarPlaneAlgorithm, selectMaxShadowDistance, selectShadingSetting, selectXraySetting,
+	selectFarPlaneAlgorithm, selectMaxShadowDistance, selectNumCacheThreads, selectShadingSetting, selectXraySetting,
 	selectCacheSetting, selectFarPlaneSamplingPoints} from '../../../modules/viewer';
 import { selectOverrides } from '../../../modules/groups';
 import { overridesDiff,
@@ -53,6 +53,7 @@ class ViewerController implements ng.IController {
 	private cacheSetting: boolean;
 	private farPlaneSamplingPoints: number;
 	private maxShadowDistance: number;
+	private maxCacheThreads: number;
 	private colorOverrides: any[] = [];
 
 	constructor(
@@ -86,6 +87,7 @@ class ViewerController implements ng.IController {
 			cacheSetting: selectCacheSetting,
 			farPlaneSamplingPoints: selectFarPlaneSamplingPoints,
 			maxShadowDistance : selectMaxShadowDistance,
+			numCacheThreads : selectNumCacheThreads,
 			colorOverrides: selectOverrides
 		});
 	}
@@ -135,6 +137,9 @@ class ViewerController implements ng.IController {
 
 		this.$scope.$watch(() => this.maxShadowDistance,
 			this.ViewerService.setMaxShadowDistance.bind(this.ViewerService));
+
+		this.$scope.$watch(() => this.numCacheThreads,
+			this.ViewerService.setNumCacheThreads.bind(this.ViewerService));
 
 		this.$scope.$watch(() => this.colorOverrides,  async (overrides, prevOverrides) => {
 			const toAdd = overridesDiff(overrides, prevOverrides);

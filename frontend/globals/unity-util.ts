@@ -626,7 +626,7 @@ export class UnityUtil {
 	/**
 	 * Set the number of simultaneously threads for cache access
 	 */
-	public static setNumCachingThread(thread) {
+	public static setNumCacheThreads(thread) {
 		UnityUtil.toUnity('SetSimultaneousCacheAccess', UnityUtil.LoadingState.VIEWER_READY, thread);
 	}
 

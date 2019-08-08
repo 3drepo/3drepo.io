@@ -808,6 +808,10 @@ export class Viewer {
 		UnityUtil.setMaxShadowDistance(value);
 	}
 
+	public setNumCacheThreads(value: number) {
+		UnityUtil.setNumCacheThreads(value);
+	}
+
 	public setRenderingQualityDefault() {
 		UnityUtil.setRenderingQualityDefault();
 	}
