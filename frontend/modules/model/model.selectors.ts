@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector, createSelectorCreator } from 'reselect';
+import { createSelector } from 'reselect';
 
 export const selectModelDomain = (state) => state.model;
 
