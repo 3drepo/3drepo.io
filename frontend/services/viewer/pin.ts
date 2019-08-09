@@ -20,7 +20,7 @@ import { PIN_COLORS } from '../../styles';
 export class Pin {
 	public id: number;
 	public type: string;
-	public position: string;
+	public position;
 	public highlighted: boolean;
 	public norm;
 	public colours;
@@ -37,7 +37,7 @@ export class Pin {
 	public coneDepth;
 
 	constructor(
-		id: number, type: string,  position: string, norm, colors, viewpoint,
+		id: number, type: string,  position , norm, colors, viewpoint,
 		account: string, model: string
 	) {
 
