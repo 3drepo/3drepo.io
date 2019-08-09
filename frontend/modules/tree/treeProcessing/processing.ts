@@ -232,7 +232,7 @@ export class Processing {
 					this.visibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
 					const meshesByNodes = this.getMeshesByNodes([node]);
 					const meshesData = meshesByNodes[0];
-					unhighlightedObjects.push(...meshesData);
+					unhighlightedObjects.push({ ...meshesData });
 				} else {
 					// Part of children is invisible
 					const hasSelectedChildren = node.childrenIds.some(this.isSelectedNode);
