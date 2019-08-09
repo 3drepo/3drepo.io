@@ -3,7 +3,9 @@ import transformTree from './transforming';
 import { ITreeProcessingData } from './treeProcessing.constants';
 
 class TreeProcessing {
-	private processing: Processing;
+	private processing = {
+		clearCurrentlySelected: Function.prototype
+	} as Processing;
 
 	get data() {
 		return (this.processing || {}) as ITreeProcessingData;

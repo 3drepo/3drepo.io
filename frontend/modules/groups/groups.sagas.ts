@@ -47,7 +47,7 @@ import {
 	selectShowDetails
 } from './groups.selectors';
 
-export function* fetchGroups({teamspace, modelId, revision}) {
+function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(true));
 	try {
 		const {data} = yield API.getGroups(teamspace, modelId, revision);
@@ -59,7 +59,7 @@ export function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(false));
 }
 
-export function* setActiveGroup({ group, revision }) {
+function* setActiveGroup({ group, revision }) {
 	try {
 		const filteredGroups = yield select(selectFilteredGroups);
 		const activeGroupId = yield select(selectActiveGroupId);
@@ -77,7 +77,7 @@ export function* setActiveGroup({ group, revision }) {
 	}
 }
 
-export function* resetActiveGroup() {
+function* resetActiveGroup() {
 	try {
 		const showDetailsEnabled = yield select(selectShowDetails);
 		yield all([
@@ -89,7 +89,7 @@ export function* resetActiveGroup() {
 	}
 }
 
-export function* highlightGroup({ group }) {
+function* highlightGroup({ group }) {
 	try {
 		const color = group.color ? hexToGLColor(group.color) :
 		Viewer.getDefaultHighlightColor();
@@ -104,7 +104,7 @@ export function* highlightGroup({ group }) {
 	}
 }
 
-export function* dehighlightGroup({ group }) {
+function* dehighlightGroup({ group }) {
 	try {
 		yield put(GroupsActions.removeFromHighlighted(group._id));
 		yield put(TreeActions.deselectNodesBySharedIds(group.objects));
@@ -113,7 +113,7 @@ export function* dehighlightGroup({ group }) {
 	}
 }
 
-export function* clearSelectionHighlights() {
+function* clearSelectionHighlights() {
 	try {
 		yield put(GroupsActions.setComponentState({ highlightedGroups: [] }));
 		yield put(TreeActions.clearCurrentlySelected());
@@ -122,7 +122,7 @@ export function* clearSelectionHighlights() {
 	}
 }
 
-export function* selectGroup({ group = {} }) {
+function* selectGroup({ group = {} }) {
 	try {
 		yield Viewer.isViewerReady();
 
@@ -144,7 +144,7 @@ export function* selectGroup({ group = {} }) {
 	}
 }
 
-export function* toggleColorOverride({ groupId }) {
+function* toggleColorOverride({ groupId }) {
 	try {
 		const colorOverrides = yield select(selectColorOverrides);
 		const hasColorOverride = colorOverrides.includes(groupId);
@@ -159,7 +159,7 @@ export function* toggleColorOverride({ groupId }) {
 	}
 }
 
-export function* deleteGroups({ teamspace, modelId, groups }) {
+function* deleteGroups({ teamspace, modelId, groups }) {
 	try {
 		yield API.deleteGroups(teamspace, modelId, groups);
 
@@ -187,7 +187,7 @@ export function* deleteGroups({ teamspace, modelId, groups }) {
 	}
 }
 
-export function* isolateGroup({ group }) {
+function* isolateGroup({ group }) {
 	try {
 		yield put(GroupsActions.clearSelectionHighlights());
 		yield put(TreeActions.isolateNodesBySharedIds(group.objects));
@@ -196,7 +196,7 @@ export function* isolateGroup({ group }) {
 	}
 }
 
-export function* downloadGroups({ teamspace, modelId }) {
+function* downloadGroups({ teamspace, modelId }) {
 	try {
 		const groups = yield select(selectGroups);
 		const filters = yield select(selectSelectedFilters);
@@ -212,7 +212,7 @@ export function* downloadGroups({ teamspace, modelId }) {
 	}
 }
 
-export function* showDetails({ group, revision }) {
+function* showDetails({ group, revision }) {
 	try {
 		yield put(GroupsActions.clearSelectionHighlights());
 		const objectsStatus = yield Viewer.getObjectsStatus();
@@ -239,7 +239,7 @@ export function* showDetails({ group, revision }) {
 	}
 }
 
-export function* closeDetails() {
+function* closeDetails() {
 	try {
 		const activeGroup = yield select(selectActiveGroupDetails);
 		yield put(GroupsActions.highlightGroup(activeGroup));
@@ -249,7 +249,7 @@ export function* closeDetails() {
 	}
 }
 
-export function* createGroup({ teamspace, modelId, revision }) {
+function* createGroup({ teamspace, modelId, revision }) {
 	try {
 		const isAllOverridden = yield select(selectIsAllOverridden);
 		const currentUser = yield select(selectCurrentUser);
@@ -287,7 +287,7 @@ export function* createGroup({ teamspace, modelId, revision }) {
 	}
 }
 
-export function* updateGroup({ teamspace, modelId, revision, groupId }) {
+function* updateGroup({ teamspace, modelId, revision, groupId }) {
 	try {
 		const groupDetails = yield select(selectActiveGroupDetails);
 
@@ -318,7 +318,7 @@ export function* updateGroup({ teamspace, modelId, revision, groupId }) {
 	}
 }
 
-export function* setNewGroup() {
+function* setNewGroup() {
 	const currentUser = yield select(selectCurrentUser);
 	const groups = yield select(selectGroups);
 	const groupNumber = groups.length + 1;
@@ -376,7 +376,7 @@ const onDeleted = (deletedGroupIds) => {
 	}, 5000);
 };
 
-export function* subscribeOnChanges({ teamspace, modelId }) {
+function* subscribeOnChanges({ teamspace, modelId }) {
 	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.GROUPS, teamspace, modelId, {
 		subscribeToUpdated: onUpdated,
 		subscribeToCreated: onCreated,
@@ -384,7 +384,7 @@ export function* subscribeOnChanges({ teamspace, modelId }) {
 	}));
 }
 
-export function* unsubscribeFromChanges({ teamspace, modelId }) {
+function* unsubscribeFromChanges({ teamspace, modelId }) {
 	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.GROUPS, teamspace, modelId, {
 		unsubscribeToUpdated: onUpdated,
 		unsubscribeToCreated: onCreated,
@@ -392,7 +392,7 @@ export function* unsubscribeFromChanges({ teamspace, modelId }) {
 	}));
 }
 
-export function* resetToSavedSelection({ groupId }) {
+function* resetToSavedSelection({ groupId }) {
 	const groups = yield select(selectGroupsMap);
 	const activeGroup = yield select(selectActiveGroupDetails);
 	const initialGroupState = groups[groupId] || activeGroup;

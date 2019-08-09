@@ -24,8 +24,8 @@ export const getGroupOverride = (overrides, group) => {
 	group.objects.forEach((object) => {
 		object.shared_ids.forEach((sharedId) => {
 			overrides[sharedId] = color;
-			});
 		});
+	});
 	return overrides;
 };
 
@@ -58,7 +58,8 @@ export const addColorOverrides = async (overrides) => {
 	if (!overrides.length) {
 		return;
 	}
-	const treeNodes = selectTreeNodesList(getState());
+	const state = getState();
+	const treeNodes = selectTreeNodesList(state);
 
 	for (let i = 0; i < overrides.length; i++) {
 		const override = overrides[i];
@@ -66,12 +67,11 @@ export const addColorOverrides = async (overrides) => {
 
 		if (treeNodes.length) {
 			const selectNodes = selectGetNodesIdsFromSharedIds([override]);
-			const nodes = selectNodes(getState());
+			const nodes = selectNodes(state);
 
 			if (nodes) {
 				const filteredNodes = nodes.filter((n) => n !== undefined);
-				const selectMeshes = selectGetMeshesByIds(filteredNodes);
-				const modelsList = selectMeshes(getState());
+				const modelsList = selectGetMeshesByIds(filteredNodes)(state);
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;
@@ -87,19 +87,19 @@ export const removeColorOverrides =  async (overrides) => {
 		return;
 	}
 
-	const treeNodes = selectTreeNodesList(getState());
+	const state = getState();
+	const treeNodes = selectTreeNodesList(state);
 
 	for (let i = 0; i < overrides.length; i++) {
 		const override = overrides[i];
 
 		if (treeNodes.length) {
 			const selectNodes = selectGetNodesIdsFromSharedIds([override]);
-			const nodes = selectNodes(getState());
+			const nodes = selectNodes(state);
 
 			if (nodes) {
 				const filteredNodes = nodes.filter((n) => n !== undefined);
-				const selectMeshes = selectGetMeshesByIds(filteredNodes);
-				const modelsList = selectMeshes(getState());
+				const modelsList = selectGetMeshesByIds(filteredNodes)(state);
 
 				for (let j = 0; j < modelsList.length; j++) {
 					const { meshes, teamspace, modelId } = modelsList[j] as any;

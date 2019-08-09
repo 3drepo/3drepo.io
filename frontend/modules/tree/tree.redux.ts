@@ -54,7 +54,8 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	updateDataRevision: [],
 	setActiveNode: ['nodeId'],
 	goToRootNode: ['nodeId'],
-	zoomToHighlightedNodes: []
+	zoomToHighlightedNodes: [],
+	handleColorOverridesChange: ['currentOverrides', 'previousOverrides']
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {

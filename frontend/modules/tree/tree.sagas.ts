@@ -41,6 +41,7 @@ import TreeProcessing from './treeProcessing/treeProcessing';
 
 import { SELECTION_STATES, VISIBILITY_STATES } from '../../constants/tree';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
+import { addColorOverrides, overridesDiff, removeColorOverrides } from '../../helpers/colorOverrides';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { selectIsActive, BimActions } from '../bim';
 import { selectSettings, ModelTypes } from '../model';
@@ -517,6 +518,14 @@ function* zoomToHighlightedNodes() {
 	}
 }
 
+function* handleColorOverridesChange({ currentOverrides, previousOverrides }) {
+	const toAdd = overridesDiff(currentOverrides, previousOverrides);
+	const toRemove = overridesDiff(previousOverrides, currentOverrides);
+
+	yield removeColorOverrides(toRemove);
+	yield addColorOverrides(toAdd);
+}
+
 export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.FETCH_FULL_TREE, fetchFullTree);
 	yield takeLatest(TreeTypes.START_LISTEN_ON_SELECTIONS, startListenOnSelections);
@@ -542,4 +551,5 @@ export default function* TreeSaga() {
 	yield takeLatest(TreeTypes.COLLAPSE_NODES, collapseNodes);
 	yield takeLatest(TreeTypes.GO_TO_ROOT_NODE, goToRootNode);
 	yield takeLatest(TreeTypes.ZOOM_TO_HIGHLIGHTED_NODES, zoomToHighlightedNodes);
+	yield takeLatest(TreeTypes.HANDLE_COLOR_OVERRIDES_CHANGE, handleColorOverridesChange);
 }

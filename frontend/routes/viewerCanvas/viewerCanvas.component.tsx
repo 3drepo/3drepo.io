@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
+import { usePrevious } from '../../hooks';
 import { Container } from './viewerCanvas.styles';
 
 interface IProps {
@@ -29,23 +30,30 @@ interface IProps {
 			revision?: string;
 		}
 	};
+	colorOverrides: any;
+	handleColorOverridesChange: (currentOvverides, previousOverrides) => void;
 }
 
-export class ViewerCanvas extends React.PureComponent<IProps, any> {
-	private containerRef = React.createRef<HTMLElement>();
+export const ViewerCanvas = (props: IProps) => {
+	const containerRef = useRef();
+	const previousColorOverrides = usePrevious(props.colorOverrides);
 
-	public componentDidMount() {
-		const { viewer } = this.props;
-		viewer.setupInstance(this.containerRef.current);
-	}
+	useEffect(() => {
+		const { viewer } = props;
+		viewer.setupInstance(containerRef.current);
+	}, [containerRef.current]);
 
-	public render() {
-		return (
-			<Container
-				id="viewer"
-				ref={this.containerRef}
-				className={this.props.className}
-			/>
-		);
-	}
-}
+	useEffect(() => {
+		if (props.colorOverrides !== previousColorOverrides && previousColorOverrides) {
+			props.handleColorOverridesChange(props.colorOverrides, previousColorOverrides);
+		}
+	}, [props.colorOverrides]);
+
+	return (
+		<Container
+			id="viewer"
+			ref={containerRef}
+			className={props.className}
+		/>
+	);
+};
