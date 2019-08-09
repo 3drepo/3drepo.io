@@ -42,7 +42,7 @@ export class UnityUtil {
 	 * @example UnityUtil.viewer = {
 	 * 		numClipPlanesUpdated = (nPlanes) => console.log(\`Current no. planes: ${nPlanes}\`}
 	 */
-	public static viewer: object;
+	public static viewer: any;
 
 	/** @hidden */
 	public static LoadingState = {
