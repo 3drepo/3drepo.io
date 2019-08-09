@@ -343,7 +343,7 @@ export class UnityUtil {
 	 * This function is called to notify the viewer what is the state of the current clipping planes.
 	 * @param clipInfo an object containing an array of clipping plane information
 	 */
-	public static clipBroadcast(clipInfo: object) {
+	public static clipBroadcast(clipInfo: string) {
 		if (UnityUtil.viewer && UnityUtil.viewer.clipBroadcast) {
 			UnityUtil.viewer.clipBroadcast(JSON.parse(clipInfo));
 		}
