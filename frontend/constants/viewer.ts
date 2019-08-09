@@ -70,12 +70,14 @@ export const DEFAULT_SETTINGS = {
 	shading: 'standard',
 	shadows: 'none',
 	xray: true,
+	caching: false,
 	statistics: false,
 	memory: 2032,
 	nearPlane: 10,
 	farPlaneSamplingPoints: 5,
 	farPlaneAlgorithm: 'box',
-	maxShadowDistance: 10000
+	maxShadowDistance: 10000,
+	numCacheThreads: 3
 };
 
 export const VIEWER_PANELS = {

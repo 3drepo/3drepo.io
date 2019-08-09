@@ -290,4 +290,6 @@ config.avatarSizeLimit = coalesce(config.avatarSizeLimit, 1048576);
 
 config.liveChatLicense = config.liveChatLicense || 0;
 
+config.cachePolicy = config.cachePolicy || {maxAge: 60 * 60 * 24 * 30};
+
 module.exports = config;

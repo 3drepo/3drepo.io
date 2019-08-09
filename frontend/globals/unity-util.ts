@@ -286,6 +286,8 @@ export class UnityUtil {
 	}
 
 	public static loaded(bboxStr) {
+		// tslint:disable-next-line
+		console.log(`[${new Date()}]Loading model done. `);
 		const res = {
 			bbox: JSON.parse(bboxStr)
 		};
@@ -608,6 +610,27 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Enable model caching
+	 */
+	public static enableCaching() {
+		UnityUtil.toUnity('EnableCaching', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Disable model caching
+	 */
+	public static disableCaching() {
+		UnityUtil.toUnity('DisableCaching', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Set the number of simultaneously threads for cache access
+	 */
+	public static setNumCacheThreads(thread) {
+		UnityUtil.toUnity('SetSimultaneousCacheAccess', UnityUtil.LoadingState.VIEWER_READY, thread);
+	}
+
+	/**
 	 * Get Object Status within the viewer. This will return you the list of
 	 * objects that are currently set invisible, and a list of object that are
 	 * currently highlighted.
@@ -727,6 +750,8 @@ export class UnityUtil {
 		}
 
 		UnityUtil.onLoaded();
+		// tslint:disable-next-line
+		console.log(`[${new Date()}]Loading model: `, params);
 		UnityUtil.toUnity('LoadModel', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
 		return UnityUtil.onLoading();
