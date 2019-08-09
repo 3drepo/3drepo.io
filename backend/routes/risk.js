@@ -24,6 +24,8 @@ const C = require("../constants");
 const responseCodes = require("../response_codes.js");
 const Risk = require("../models/risk");
 const utils = require("../utils");
+const Comment = require("../models/comment");
+const config = require("../config");
 
 /**
  * @api {get} /:teamspace/:model/risks/:riskId Find Risk by ID
@@ -156,6 +158,64 @@ router.post("/revision/:rid/risks", middlewares.issue.canCreate, storeRisk);
 router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updateRisk);
 
 /**
+ * @api {post} /:teamspace/:model/risks/:riskId/comments Add an comment for an issue
+ * @apiName commentIssue
+ * @apiGroup Risks
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {String} riskId Unique Issue ID to update.
+ * @apiParam {Json} PAYLOAD The data with the comment to be added.
+ * @apiParamExample {json} PAYLOAD
+ *    {
+ *      "comment": "This is a commment",
+ *      "viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
+ *    }
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *   {
+ *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
+ *       comment: "This is a commment",
+ *       created: 1558534690327,
+ *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
+ *       owner: "username",
+ *       viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
+ *   }
+ *
+ * @apiError 404 Issue not found
+ * @apiError 400 Comment with no text
+ * */
+router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {delete} /:teamspace/:model/risks/:riskId/comments Deletes an comment from an issue
+ * @apiName commentIssue
+ * @apiGroup Issues
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {String} riskId	 Unique Issue ID to update.
+ * @apiParam {Json} PAYLOAD The data with the comment guid to be deleted.
+ * @apiParamExample {json} PAYLOAD
+ *    {
+ *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
+ *    }
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *   {
+ *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
+ *   }
+ *
+ * @apiError 404 Issue not found
+ * @apiError 401 Not authorized, when the user is not the owner
+ * @apiError 400 Issue comment sealed, when the user is trying to delete a comment that is sealed
+ * @apiError 400 GUID invalid, when the user sent an invalid guid
+ * */
+router.delete("/risks/:riskId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
+
+/**
  * @api {delete} /:teamspace/:model/risks/ Delete risks
  * @apiName deleteRisks
  * @apiGroup Risks
@@ -261,7 +321,7 @@ function getScreenshot(req, res, next) {
 	const dbCol = {account: req.params.account, model: req.params.model};
 
 	Risk.getScreenshot(dbCol, req.params.riskId, req.params.vid).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});
@@ -272,7 +332,7 @@ function getScreenshotSmall(req, res, next) {
 	const dbCol = {account: req.params.account, model: req.params.model};
 
 	Risk.getSmallScreenshot(dbCol, req.params.riskId, req.params.vid).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});
@@ -283,9 +343,35 @@ function getThumbnail(req, res, next) {
 	const dbCol = {account: req.params.account, model: req.params.model};
 
 	Risk.getThumbnail(dbCol, req.params.riskId).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
+	});
+}
+
+function addComment(req, res, next) {
+	const user = req.session.user.username;
+	const data =  req.body;
+	const {account, model, riskId} = req.params;
+
+	Comment.addComment(account, model, "risks", riskId, user, data).then(comment => {
+		req.dataModel = comment;
+		next();
+	}).catch(err => {
+		responseCodes.onError(req, res, err);
+	});
+}
+
+function deleteComment(req, res, next) {
+	const user = req.session.user.username;
+	const guid = req.body.guid;
+	const {account, model, riskId} = req.params;
+
+	Comment.deleteComment(account, model, "risks", riskId, guid, user).then(comment => {
+		req.dataModel = comment;
+		next();
+	}).catch(err => {
+		responseCodes.onError(req, res, err);
 	});
 }
 

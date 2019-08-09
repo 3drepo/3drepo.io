@@ -211,35 +211,28 @@ function* updateNewRisk({ newRisk }) {
 
 function* postComment({ teamspace, modelId, riskData, finishSubmitting }) {
 	try {
-		const { _id, rev_id } = yield select(selectActiveRiskDetails);
-		const { data: comment } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
+		const { _id } = yield select(selectActiveRiskDetails);
+		const { data: comment } = yield API.addRiskComment(teamspace, modelId, _id, riskData);
 		const preparedComment = yield prepareComment(comment);
 
 		finishSubmitting();
 		yield put(RisksActions.createCommentSuccess(preparedComment, riskData._id));
 		yield put(SnackbarActions.show('Risk comment added'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('post', 'risk comment', error));
+		yield put(DialogActions.showEndpointErrorDialog('post', 'risk comment', error));
 	}
 }
 
 function* removeComment({ teamspace, modelId, riskData }) {
 	try {
-		const { commentIndex, _id, rev_id, guid } = riskData;
-		const commentData = {
-			comment: '',
-			delete: true,
-			commentIndex,
-			_id,
-			rev_id
-		};
-
-		yield API.updateRisk(teamspace, modelId, _id, rev_id, commentData);
+		const { _id, guid } = riskData;
+		yield API.deleteRiskComment(teamspace, modelId, _id, guid);
 		yield put(RisksActions.deleteCommentSuccess(guid, _id));
 		yield put(SnackbarActions.show('Comment removed'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('remove', 'comment', error));
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'comment', error));
 	}
+
 }
 
 function* renderPins() {

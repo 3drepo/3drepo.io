@@ -1,0 +1,34 @@
+md-chips(ng-model="vm.chips"
+	md-transform-chip="vm.transformChip($chip)"
+	md-separator-keys="vm.chipSeparators"
+	ng-class="{ 'collapsed' : vm.collapsed && vm.chips.length>0 }"
+	)
+
+	md-autocomplete(
+		md-selected-item="vm.selectedItem"
+		md-search-text="vm.searchText"
+		md-items="item in vm.querySearch(vm.searchText)"
+		md-item-text="item.name"
+		placeholder="{{vm.placeHolder}}"
+		ng-paste="vm.onPaste($event)"
+		ng-show="!vm.collapsed || vm.chips.length === 0")
+
+		span(md-highlight-text="vm.searchText") {{item.nameType}}:{{item.name}}
+
+	md-chip-template
+		span {{ vm.formatChip($chip) }}
+
+
+md-button.md-icon-button#additionalInfoButton(aria-label="Collapse Toggle" class="collapse-button" ng-show="vm.chips.length>0" ng-click="vm.collapsed = !vm.collapsed")
+	md-icon.angular-material-icons(ng-if="vm.collapsed") keyboard_arrow_right
+	md-icon.angular-material-icons(ng-if="!vm.collapsed") keyboard_arrow_down
+	md-tooltip(ng-if="vm.collapsed") Expand
+	md-tooltip(ng-if="!vm.collapsed") Collapse
+
+input.clipboard-target(id="clipboard-target-{{vm.$scope.$id}}" value="{{vm.chips.map(vm.formatChip).join(',')}}")
+button.md-button.md-mini.md-fab.copy-button(ngclipboard data-clipboard-target="#clipboard-target-{{vm.$scope.$id}}" ng-show="!vm.collapsed && vm.chips.length>0 " href="")
+	md-icon.angular-material-icons(md-svg-src="icons/clippy.svg" alt="copy")
+	md-tooltip Copy
+
+
+

@@ -1,0 +1,10 @@
+.homeUserContent(layout="row", layout-align="center", flex)
+	md-content.md-whiteframe-1dp(aria-label="Payment", flex="30")
+		md-toolbar
+			.md-toolbar-tools
+				h2 Payment
+		.userContent(layout="column", layout-align="start")
+			h3 Thank you.
+			h3 You may now login to your account.
+			div(layout="row")
+				md-button.md-raised.md-accent(ng-click="vm.goToLoginPage()") Go To Login Page

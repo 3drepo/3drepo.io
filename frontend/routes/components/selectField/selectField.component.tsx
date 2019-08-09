@@ -81,14 +81,18 @@ export class SelectField extends React.PureComponent<SelectProps, any> {
 		}
 	}
 
-	public handleOpen = (menuWrapper) => {
+	public handleOpen = (menuWrapper, isAppearing) => {
 		this.menuWrapper = menuWrapper;
 		this.menuItems = Array.from(this.menuWrapper.querySelectorAll('[data-value]'));
 		this.menuWrapper.addEventListener('keypress', this.handleKeyPress);
 		this.menuWrapper.addEventListener('mousemove', this.handleMouseMove);
+
+		if ((this.props.MenuProps || {}).onEntered) {
+			this.props.MenuProps.onEntered(menuWrapper, isAppearing);
+		}
 	}
 
-	public handleClose = () => {
+	public handleClose = (node) => {
 		if (this.menuWrapper) {
 			this.menuWrapper.removeEventListener('keypress', this.handleKeyPress);
 			this.menuWrapper.removeEventListener('mousemove', this.handleMouseMove);
@@ -96,6 +100,10 @@ export class SelectField extends React.PureComponent<SelectProps, any> {
 		this.menuItems = null;
 		this.menuWrapper = null;
 		this.selectedItem = null;
+
+		if ((this.props.MenuProps || {}).onExit) {
+			this.props.MenuProps.onExit(node);
+		}
 	}
 
 	public render() {

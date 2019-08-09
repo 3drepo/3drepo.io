@@ -22,7 +22,15 @@ import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { formatShortDate } from '../../../../../../services/formatting/formatDate';
 import { ArrowsAltH } from '../../../../../components/fontAwesomeIcon';
 import { RevisionsSelect } from '../revisionsSelect/revisionsSelect.component';
-import { CompareIconWrapper, Container, CurrentRevision, ModelData, Name, Revisions } from './compareDiffItem.styles';
+import {
+	CompareIconWrapper,
+	Container,
+	CurrentRevision,
+	ModelData,
+	Name,
+	Revisions,
+	RevisionTooltip
+} from './compareDiffItem.styles';
 
 interface IProps {
 	className?: string;
@@ -88,7 +96,9 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 			<ModelData>
 				<Name disabled={!selected}>{name}</Name>
 				<Revisions>
-					<CurrentRevision disabled={!selected}>{this.currentRevisionName}</CurrentRevision>
+					<RevisionTooltip title={this.currentRevisionName} >
+						<CurrentRevision disabled={!selected}>{this.currentRevisionName}</CurrentRevision>
+					</RevisionTooltip>
 					{this.renderRevisionsSettings(this.props.selected && this.props.revisions.length > 1)}
 				</Revisions>
 			</ModelData>

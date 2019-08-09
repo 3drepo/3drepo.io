@@ -551,6 +551,24 @@ export class ViewerService {
 		await this.isViewerReady();
 		this.viewer.mapStop();
 	}
+
+	public setNumCacheThreads(value: number) {
+		if (value === undefined) { return; }
+		this.viewer.setNumCacheThreads(value);
+	}
+
+	public setMaxShadowDistance(value: number) {
+		if (value === undefined) { return; }
+		this.viewer.setMaxShadowDistance(value);
+	}
+
+	public setModelCache(cache: boolean) {
+		if (cache) {
+			this.viewer.enableCaching();
+		} else {
+			this.viewer.disableCaching();
+		}
+	}
 }
 
 export const Viewer = new ViewerService();

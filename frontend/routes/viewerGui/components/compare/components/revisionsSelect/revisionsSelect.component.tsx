@@ -20,6 +20,7 @@ import React from 'react';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { formatShortDate, NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
 import { DateTime } from '../../../../../components/dateTime/dateTime.component';
+import { RevisionTooltip } from '../compareDiffItem/compareDiffItem.styles';
 import { Date, MenuItem, Name, SelectField } from './revisionsSelect.styles';
 
 interface IProps {
@@ -33,10 +34,10 @@ interface IProps {
 
 interface IState {
 	value: string;
+	tooltipHidden?: boolean;
 }
 
 export class RevisionsSelect extends React.PureComponent<IProps, IState> {
-
 	get defaultValue() {
 		const { defaultValue, revisions } = this.props;
 		return defaultValue || revisions[0]._id;
@@ -53,28 +54,33 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
 		disabled: false
 	};
+
 	public state = {
-		value: null
+		value: null,
+		tooltipHidden: false
 	};
 
 	private renderSelect = renderWhenTrue(() => {
 		const { revisions, disabled } = this.props;
 
 		return (
-			<SelectField
-				value={this.state.value}
-				readOnly={revisions.length < 2}
-				disabled={disabled}
-				renderValue={this.renderValue}
-				onChange={this.handleChange}
-			>
-				{revisions.map((revision) => (
-					<MenuItem key={revision._id} value={revision}>
-						{this.renderName(revision)}
-						{this.renderDate(revision.timestamp)}
-					</MenuItem>
-				))}
-			</SelectField>
+			<RevisionTooltip title={this.value} hidden={this.state.tooltipHidden}>
+				<SelectField
+					value={this.state.value}
+					readOnly={revisions.length < 2}
+					disabled={disabled}
+					renderValue={this.renderValue}
+					onChange={this.handleChange}
+					MenuProps={({onEntered: this.handleOpen, onExit: this.handleClose})}
+				>
+					{revisions.map((revision) => (
+						<MenuItem key={revision._id} value={revision}>
+							{this.renderName(revision)}
+							{this.renderDate(revision.timestamp)}
+						</MenuItem>
+					))}
+				</SelectField>
+			</RevisionTooltip>
 		);
 	});
 
@@ -111,6 +117,14 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 		}, () => {
 			this.props.onChange(e.target.value);
 		});
+	}
+
+	private handleOpen = (e) => {
+		this.setState({ tooltipHidden: true });
+	}
+
+	private handleClose = (e) => {
+		this.setState({ tooltipHidden: false });
 	}
 
 	private getRevisionName = (revision) => {

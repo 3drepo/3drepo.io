@@ -31,7 +31,8 @@ const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
 	memory: schema.integer(16, 2032),
 	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY),
-	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY)
+	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY),
+	numCacheThreads: schema.integer(1, 15)
 });
 
 const BasicSettings = (props) => {
@@ -57,7 +58,14 @@ const BasicSettings = (props) => {
 			<FormListItem>
 				XRay highlighting
 				<Field name="xray" render={ ({ field }) => (
-					<Switch checked={field.value} {...field} value="true" color="secondary" />)} />
+					<Switch checked={field.value} {...field} value="true" color="secondary" />
+				)} />
+			</FormListItem>
+			<FormListItem>
+				Model Caching
+				<Field name="caching" render={ ({ field }) => (
+					<Switch checked={field.value} {...field} value="true" color="secondary" />
+				)} />
 			</FormListItem>
 		</List>
 	);
@@ -81,6 +89,19 @@ const AdvancedSettings = (props) => {
 						error={Boolean(form.errors.memory)}
 						{...field}
 						endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				Number of Caching Threads
+				<Field name="numCacheThreads" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.numCacheThreads || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.numCacheThreads)}
+						{...field}
+						/>
 					</ErrorTooltip>
 					);
 				}} />

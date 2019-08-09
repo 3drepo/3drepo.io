@@ -29,7 +29,10 @@ const updateHandlers = {
 	shading: Viewer.setShading,
 	shadows: Viewer.setShadows,
 	statistics: Viewer.setStats,
-	xray: Viewer.setXray
+	caching: Viewer.setModelCache,
+	maxShadowDistance: Viewer.setMaxShadowDistance,
+	xray: Viewer.setXray,
+	numCacheThreads: Viewer.setNumCacheThreads
 };
 
 const callUpdateHandlers = (oldSettings, settings) => {

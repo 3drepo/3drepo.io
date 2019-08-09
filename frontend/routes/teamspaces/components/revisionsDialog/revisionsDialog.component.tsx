@@ -20,10 +20,12 @@ import React from 'react';
 import { ROUTES } from '../../../../constants/routes';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../services/analytics';
 import { DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
+import { Loader } from '../../../components/loader/loader.component';
 import { DateTime } from './../../../components/dateTime/dateTime.component';
 import {
 	Description,
 	Item,
+	LoaderContainer,
 	Message,
 	Property,
 	PropertyWrapper,
@@ -41,6 +43,7 @@ interface IProps {
 	modelId: string;
 	location: any;
 	history: any;
+	isPending: boolean;
 }
 
 export class RevisionsDialog extends React.PureComponent<IProps, any> {
@@ -57,12 +60,22 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
 	}
 
+	public get noRevisions() {
+		return this.props.revisions.length === 0;
+	}
+
 	public render() {
-		const { handleClose, revisions } = this.props;
+		const { handleClose, revisions, isPending } = this.props;
 
 		return (
 			<StyledDialogContent>
-				{ !revisions.length ?
+				{isPending &&
+					<LoaderContainer>
+						<Loader content="Loading revisions..." />
+					</LoaderContainer>
+				}
+				{ !isPending &&
+				(this.noRevisions ?
 					<Message>No Revisions Present</Message>
 					:
 					<>
@@ -93,7 +106,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 							) }
 						</StyledList>
 					</>
-				}
+				)}
 				<StyledDialogActions>
 					<Button variant="raised" color="secondary" onClick={handleClose}>
 						Cancel

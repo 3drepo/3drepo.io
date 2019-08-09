@@ -767,6 +767,10 @@ export class Viewer {
 		UnityUtil.setMaxShadowDistance(value);
 	}
 
+	public setNumCacheThreads(value: number) {
+		UnityUtil.setNumCacheThreads(value);
+	}
+
 	public setRenderingQualityDefault() {
 		UnityUtil.setRenderingQualityDefault();
 	}
@@ -781,6 +785,14 @@ export class Viewer {
 
 	public setXRayHighlightOff() {
 		UnityUtil.setXRayHighlightOff();
+	}
+
+	public enableCaching() {
+		UnityUtil.enableCaching();
+	}
+
+	public disableCaching() {
+		UnityUtil.disableCaching();
 	}
 
 	public useBoundingBoxFarPlaneAlgorithm() {
