@@ -18,7 +18,7 @@ import { UnityUtil } from '../../globals/unity-util';
 import { PIN_COLORS } from '../../styles';
 
 export class Pin {
-	public id;
+	public id: string;
 	public type: string;
 	public position;
 	public highlighted: boolean;
@@ -37,7 +37,7 @@ export class Pin {
 	public coneDepth;
 
 	constructor(
-		id: , type: string,  position , norm, colors, viewpoint,
+		id: string, type: string,  position , norm, colors, viewpoint,
 		account: string, model: string
 	) {
 
