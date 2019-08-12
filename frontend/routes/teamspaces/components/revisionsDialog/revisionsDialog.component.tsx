@@ -30,9 +30,11 @@ import {
 	StyledDialogContent,
 	StyledList,
 	Property,
-	PropertyWrapper
+	PropertyWrapper,
+	LoaderContainer
 } from './revisionsDialog.styles';
 import { DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
+import { Loader } from '../../../components/loader/loader.component';
 
 interface IProps {
 	fetchModelRevisions: (teamspace, modelId) => void;
@@ -42,6 +44,7 @@ interface IProps {
 	modelId: string;
 	location: any;
 	history: any;
+	isPending: boolean;
 }
 
 export class RevisionsDialog extends React.PureComponent<IProps, any> {
@@ -62,12 +65,22 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 		});
 	}
 
+	public get noRevisions() {
+		return this.props.revisions.length === 0;
+	}
+
 	public render() {
-		const { handleClose, revisions } = this.props;
+		const { handleClose, revisions, isPending } = this.props;
 
 		return (
 			<StyledDialogContent>
-				{ !revisions.length ?
+				{isPending &&
+					<LoaderContainer>
+						<Loader content="Loading revisions..." />
+					</LoaderContainer>
+				}
+				{ !isPending &&
+				(this.noRevisions ?
 					<Message>No Revisions Present</Message>
 					:
 					<>
@@ -98,7 +111,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 							) }
 						</StyledList>
 					</>
-				}
+				)}
 				<StyledDialogActions>
 					<Button variant="raised" color="secondary" onClick={handleClose}>
 						Cancel

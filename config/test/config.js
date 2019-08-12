@@ -48,8 +48,7 @@ module.exports = {
 		},
 		{
 			service: "chat",
-			http_port: 3000,
-			https_port: 3000,
+			port: 3000,
 			subdirectory: 'chat'
 		}
 	],

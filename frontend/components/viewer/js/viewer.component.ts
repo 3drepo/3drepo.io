@@ -14,11 +14,13 @@
  *	You should have received a copy of the GNU Affero General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import { subscribe } from '../../../helpers/migration';
 import { selectShadowSetting, selectStatsSetting, selectNearPlaneSetting,
-		selectFarPlaneAlgorithm, selectMaxShadowDistance, selectShadingSetting, selectXraySetting,
-		selectFarPlaneSamplingPoints} from '../../../modules/viewer';
+	selectFarPlaneAlgorithm, selectMaxShadowDistance, selectNumCacheThreads, selectShadingSetting, selectXraySetting,
+	selectCacheSetting, selectFarPlaneSamplingPoints} from '../../../modules/viewer';
+import { selectOverrides } from '../../../modules/groups';
+import { overridesDiff,
+	removeColorOverrides, addColorOverrides } from '../../../helpers/colorOverrides';
 
 class ViewerController implements ng.IController {
 
@@ -48,8 +50,11 @@ class ViewerController implements ng.IController {
 	private farPlaneAlgorithm: string;
 	private shadingSetting: string;
 	private xraySetting: boolean;
+	private cacheSetting: boolean;
 	private farPlaneSamplingPoints: number;
 	private maxShadowDistance: number;
+	private numCacheThreads: number;
+	private colorOverrides: any[] = [];
 
 	constructor(
 		private $scope: ng.IScope,
@@ -79,8 +84,11 @@ class ViewerController implements ng.IController {
 			farPlaneAlgorithm: selectFarPlaneAlgorithm,
 			shadingSetting: selectShadingSetting,
 			xraySetting: selectXraySetting,
+			cacheSetting: selectCacheSetting,
 			farPlaneSamplingPoints: selectFarPlaneSamplingPoints,
-			maxShadowDistance : selectMaxShadowDistance
+			maxShadowDistance : selectMaxShadowDistance,
+			numCacheThreads : selectNumCacheThreads,
+			colorOverrides: selectOverrides
 		});
 	}
 
@@ -122,11 +130,25 @@ class ViewerController implements ng.IController {
 
 		this.$scope.$watch(() => this.xraySetting, this.ViewerService.setXray.bind(this.ViewerService));
 
+		this.$scope.$watch(() => this.cacheSetting, this.ViewerService.setModelCache.bind(this.ViewerService));
+
 		this.$scope.$watch(() => this.farPlaneSamplingPoints,
 			this.ViewerService.setFarPlaneSamplingPoints.bind(this.ViewerService));
 
 		this.$scope.$watch(() => this.maxShadowDistance,
 			this.ViewerService.setMaxShadowDistance.bind(this.ViewerService));
+
+		this.$scope.$watch(() => this.numCacheThreads,
+			this.ViewerService.setNumCacheThreads.bind(this.ViewerService));
+
+		this.$scope.$watch(() => this.colorOverrides,  async (overrides, prevOverrides) => {
+			const toAdd = overridesDiff(overrides, prevOverrides);
+			const toRemove = overridesDiff(prevOverrides, overrides );
+
+			removeColorOverrides(toRemove);
+			addColorOverrides(toAdd);
+		});
+
 	}
 }
 

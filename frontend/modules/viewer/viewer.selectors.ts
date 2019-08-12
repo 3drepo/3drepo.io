@@ -48,6 +48,10 @@ export const selectXraySetting = createSelector(
 	selectSettings, (state) => state.xray
 );
 
+export const selectCacheSetting = createSelector(
+	selectSettings, (state) => state.caching
+);
+
 export const selectMemory = createSelector(
 	selectSettings, (state) => state.memory
 );
@@ -58,6 +62,10 @@ export const selectFarPlaneSamplingPoints = createSelector(
 
 export const selectMaxShadowDistance = createSelector(
 	selectSettings, (state) => state.maxShadowDistance
+);
+
+export const selectNumCacheThreads = createSelector(
+	selectSettings, (state) => state.numCacheThreads
 );
 
 export const selectNavigationMode = createSelector(

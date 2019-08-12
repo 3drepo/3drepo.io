@@ -1,66 +1,112 @@
-/**
- **  Copyright (C) 2014 3D Repo Ltd
- **
- **  This program is free software: you can redistribute it and/or modify
- **  it under the terms of the GNU Affero General Public License as
- **  published by the Free Software Foundation, either version 3 of the
- **  License, or (at your option) any later version.
- **
- **  This program is distributed in the hope that it will be useful,
- **  but WITHOUT ANY WARRANTY; without even the implied warranty of
- **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- **  GNU Affero General Public License for more details.
- **
- **  You should have received a copy of the GNU Affero General Public License
- **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- **/
+/*
+ * Copyright (C) 2017 3D Repo Ltd
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 declare var Module;
 declare var SendMessage;
 declare var UnityLoader;
 
 export class UnityUtil {
-
+	/** @hidden */
 	public static errorCallback: any;
+	/**
+	 * viewer can be assigned, containing any callback function the user wishes to hook onto.
+	 * The following functions are supported:
+	 *
+	 * **viewer.clipBroadcast(**_object_**)**: Called when a clipping plane broadcast occurs with
+	 * the new clipping plane information
+	 *
+	 * **viewer.numClipPlanesUpdated(**_int_**)**: Called when the number of clipping planes changed,
+	 * with the latest number of clipping planes in place
+	 *
+	 * **viewer.objectSelected(**_object_**)**: Notify the user which object/pin is clicked after a mouse event
+	 *
+	 * **viewer.objectsSelected(**_object_**)**: Notify the user which objects is selected after
+	 * a rectangular select event
+	 *
+	 * **viewer.pickPointEvent(**_object_**)**: Notify the user what position within the 3D world was
+	 * clicked after a mouse event.
+	 *
+	 * @example UnityUtil.viewer = {
+	 * 		numClipPlanesUpdated = (nPlanes) => console.log(\`Current no. planes: ${nPlanes}\`}
+	 */
 	public static viewer: any;
 
+	/** @hidden */
 	public static LoadingState = {
-		VIEWER_READY : 1,  // Viewer has been loaded
+		VIEWER_READY : 1, // Viewer has been loaded
 		MODEL_LOADING : 2, // model information has been fetched, world offset determined, model starts loading
 		MODEL_LOADED : 3 // Models
 	};
 
+	/** @hidden */
 	public static unityInstance;
 
-	public static readyPromise;
+	/** @hidden */
+	public static readyPromise: Promise<void>;
+	/** @hidden */
 	public static readyResolve;
 
+	/** @hidden */
 	public static loadedPromise;
+	/** @hidden */
 	public static loadedResolve;
 
+	/** @hidden */
 	public static loadingPromise;
+	/** @hidden */
 	public static loadingResolve;
 
 	// Diff promises
+	/** @hidden */
 	public static loadComparatorResolve;
+	/** @hidden */
 	public static loadComparatorPromise;
 
+	/** @hidden */
 	public static unityHasErrored = false;
 
+	/** @hidden */
 	public static initialLoad = true;
 
+	/** @hidden */
 	public static screenshotPromises = [];
+	/** @hidden */
 	public static viewpointsPromises = [];
+	/** @hidden */
 	public static objectStatusPromises = [];
+	/** @hidden */
 	public static loadedFlag = false;
+	/** @hidden */
 	public static UNITY_GAME_OBJECT = 'WebGLInterface';
+	/** @hidden */
 	public static defaultHighlightColor = [1, 1, 0];
 
+	/**
+	 * Initialise Unity.
+	 * @category Configurations
+	 * @param errorCallback - function to call when an error occurs.
+	 * 						 This function should take a string(message), boolean(requires reload), boolean(came from unity).
+	 */
 	public static init(
-		errorCallback: any
+		errorCallback?: any
 	) {
 		UnityUtil.errorCallback = errorCallback;
 	}
 
+	/** @hidden */
 	public static onProgress(gameInstance, progress: number) {
 
 		const appendTo = 'viewer';
@@ -83,8 +129,16 @@ export class UnityUtil {
 
 	}
 
-	public static loadUnity(divId: any, unityConfig?: string, memory?: number) {
-		const unityJsonPath = unityConfig || 'unity/Build/unity.json';
+	/**
+	 * Launch the Unity Game.
+ 	 * @category Configurations
+	 * @param divId - the html div tag this game should be loaded into.
+	 * @param unityConfig - url to find the game configuration
+	 * @param memory - Amount of memory the game should start with (in bytes)
+	 * @return returns a promise which resolves when the game is loaded.
+	 *
+	 */
+	public static loadUnity(divId: string, unityConfig = 'unity/Build/unity.json', memory?: number): Promise<void> {
 		memory = memory || 2130706432;
 
 		const unitySettings: any = {
@@ -99,20 +153,23 @@ export class UnityUtil {
 			unitySettings.Module.TOTAL_MEMORY = memory;
 			UnityUtil.unityInstance = UnityLoader.instantiate(
 				divId,
-				unityJsonPath,
+				unityConfig,
 				unitySettings
 			);
 		} else {
 			UnityUtil.unityInstance = UnityLoader.instantiate(
 				divId,
-				unityJsonPath
+				unityConfig
 			);
 		}
 
+		return UnityUtil.onReady();
 	}
 
 	/**
-	 * Cancel the loading of model.
+	 * @hidden
+	 * @category To Unity
+	 * Cancels any model that is currently loading. This will reject any model promises with "cancel" as the message
 	 */
 	public static cancelLoadModel() {
 		if (UnityUtil.initialLoad) {
@@ -130,6 +187,7 @@ export class UnityUtil {
 	}
 
 	/**
+	 * @hidden
 	 * Check if an error is Unity related
 	 */
 	public static isUnityError(err) {
@@ -142,6 +200,7 @@ export class UnityUtil {
 	}
 
 	/**
+	 * @hidden
 	 * Handle a error from Unity
 	 */
 	public static onUnityError(errorObject) {
@@ -155,7 +214,7 @@ export class UnityUtil {
 			reload = true;
 			conf = `Your browser has failed to load 3D Repo's model viewer. The following occured:
 					<br><br> <code>Error ${err} occured at line ${line}</code>
-					<br><br>  This may due to insufficient memory. Please ensure you are using a modern 64bit web browser
+					<br><br> This may due to insufficient memory. Please ensure you are using a modern 64bit web browser
 					(such as Chrome or Firefox), reduce your memory usage and try again.
 					If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error.
 					<br><md-container>`;
@@ -172,7 +231,13 @@ export class UnityUtil {
 		return true;
 	}
 
-	public static onLoaded() {
+	/**
+	 * Returns a promise that lets you know when the model has finished loading.
+	 * @Category State Queries
+	 * @return returns a Promise that resolves when the model has finished loading.
+	 *         The Promise returns the bounding box of the model.
+	 */
+	public static onLoaded(): Promise<object> {
 		if (!UnityUtil.loadedPromise) {
 			UnityUtil.loadedPromise = new Promise((resolve, reject) => {
 				UnityUtil.loadedResolve = {resolve, reject};
@@ -182,7 +247,12 @@ export class UnityUtil {
 
 	}
 
-	public static onLoading() {
+	/**
+	 * Returns a promise that lets you know when the model has started to load
+	 * @Category State Queries
+	 * @return returns a Promise that resolves when the model has started to load
+	 */
+	public static onLoading(): Promise<void> {
 		if (!UnityUtil.loadingPromise) {
 			UnityUtil.loadingPromise = new Promise((resolve, reject) => {
 				UnityUtil.loadingResolve = {resolve, reject};
@@ -192,8 +262,12 @@ export class UnityUtil {
 
 	}
 
-	public static onReady() {
-
+	/**
+	 * Returns a promise that lets you know when the game is loaded.
+	 * @Category State Queries
+	 * @return returns a Promise that resolves when the game is loaded.
+	 */
+	public static onReady(): Promise<void> {
 		if (!UnityUtil.readyPromise) {
 			UnityUtil.readyPromise	= new Promise((resolve, reject) => {
 				UnityUtil.readyResolve = {resolve, reject};
@@ -204,6 +278,7 @@ export class UnityUtil {
 
 	}
 
+	/** @hidden */
 	public static userAlert(message, reload, isUnity) {
 
 		if (!UnityUtil.unityHasErrored) {
@@ -211,11 +286,14 @@ export class UnityUtil {
 			// Unity can error multiple times, we don't want
 			// to keep annoying the user
 			UnityUtil.unityHasErrored = true;
-			UnityUtil.errorCallback(message, reload, isUnity);
+			if (UnityUtil.errorCallback) {
+				UnityUtil.errorCallback(message, reload, isUnity);
+			}
 		}
 
 	}
 
+	/** @hidden*/
 	public static toUnity(methodName, requireStatus, params?) {
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
@@ -260,18 +338,25 @@ export class UnityUtil {
 	 * =============== FROM UNITY ====================
 	 */
 
-	public static clipBroadcast(clipInfo) {
+	/**
+	 * @hidden
+	 * This function is called to notify the viewer what is the state of the current clipping planes.
+	 * @param clipInfo an object containing an array of clipping plane information
+	 */
+	public static clipBroadcast(clipInfo: string) {
 		if (UnityUtil.viewer && UnityUtil.viewer.clipBroadcast) {
 			UnityUtil.viewer.clipBroadcast(JSON.parse(clipInfo));
 		}
 	}
 
+	/** @hidden */
 	public static clipUpdated(nPlanes) {
 		if (UnityUtil.viewer && UnityUtil.viewer.numClipPlanesUpdated) {
 			UnityUtil.viewer.numClipPlanesUpdated(nPlanes);
 		}
 	}
 
+	/** @hidden */
 	public static currentPointInfo(pointInfo) {
 		const point = JSON.parse(pointInfo);
 		if (UnityUtil.viewer && UnityUtil.viewer.objectSelected) {
@@ -279,13 +364,17 @@ export class UnityUtil {
 		}
 	}
 
+	/** @hidden */
 	public static comparatorLoaded() {
 		UnityUtil.loadComparatorResolve.resolve();
 		UnityUtil.loadComparatorPromise = null;
 		UnityUtil.loadComparatorResolve = null;
 	}
 
+	/** @hidden */
 	public static loaded(bboxStr) {
+		// tslint:disable-next-line
+		console.log(`[${new Date()}]Loading model done. `);
 		const res = {
 			bbox: JSON.parse(bboxStr)
 		};
@@ -294,20 +383,24 @@ export class UnityUtil {
 		UnityUtil.initialLoad = false;
 	}
 
+	/** @hidden */
 	public static loading(bboxStr) {
 		UnityUtil.loadingResolve.resolve();
 	}
 
+	/** @hidden */
 	public static navMethodChanged(newNavMode) {
 		if (UnityUtil.viewer && UnityUtil.viewer.navMethodChanged) {
 			UnityUtil.viewer.navMethodChanged(newNavMode);
 		}
 	}
 
+	/** @hidden */
 	public static objectsSelectedAlert(nodeInfo) {
 		UnityUtil.viewer.objectsSelected(JSON.parse(nodeInfo).nodes);
 	}
 
+	/** @hidden */
 	public static objectStatusBroadcast(nodeInfo) {
 		try {
 			UnityUtil.objectStatusPromises.forEach((promise) => {
@@ -322,6 +415,7 @@ export class UnityUtil {
 		UnityUtil.objectStatusPromises = [];
 	}
 
+	/** @hidden */
 	public static ready() {
 		// Overwrite the Send Message function to make it run quicker
 		// This shouldn't need to be done in the future when the
@@ -329,6 +423,7 @@ export class UnityUtil {
 		UnityUtil.readyResolve.resolve();
 	}
 
+	/** @hidden */
 	public static pickPointAlert(pointInfo) {
 		const point = JSON.parse(pointInfo);
 		if (UnityUtil.viewer && UnityUtil.viewer.pickPointEvent) {
@@ -336,6 +431,7 @@ export class UnityUtil {
 		}
 	}
 
+	/** @hidden */
 	public static screenshotReady(screenshot) {
 		try {
 			const ssJSON = JSON.parse(screenshot);
@@ -352,6 +448,7 @@ export class UnityUtil {
 		UnityUtil.screenshotPromises = [];
 	}
 
+	/** @hidden */
 	public static viewpointReturned(vpInfo) {
 		try {
 			const viewpoint = JSON.parse(vpInfo);
@@ -374,10 +471,11 @@ export class UnityUtil {
 	 */
 
 	/**
-	 * Centres the viewpoint to the object
-	 * @param {Object[]}  - array of json objects each recording {model: <account.modelID>, meshID: [array of mesh IDs]}
+	 * Move the pivot point to eh centre of the objects provided
+	 * @category Navigations
+	 * @param meshIDs - array of json objects each recording { model: <account.modelID>, meshID: [array of mesh IDs] }
 	 */
-	public static centreToPoint(meshIDs) {
+	public static centreToPoint(meshIDs: [object]) {
 		const params = {
 			groups: meshIDs
 		};
@@ -385,12 +483,13 @@ export class UnityUtil {
 	}
 
 	/**
-	 *  Change the colour of an existing pin
-	 *  @param {string} id - ID of the pin
-	 *  @param {number[]} colour - colour RGB value of the colour to change to.
+	 * Change the colour of an existing pin
+	 * @category Pins
+	 * @param id - ID of the pin
+	 * @param colour - colour RGB value of the colour to change to. e.g. [1, 0, 0]
 	 */
-	public static changePinColour(id, colour) {
-		const params =  {
+	public static changePinColour(id: string, colour: [number]) {
+		const params = {
 			color : colour,
 			pinName : id
 		};
@@ -399,52 +498,59 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Clear all highlighting.
+	 * Clear all highlighting on currently highlighted objects
+	 * @category Object Highlighting
 	 */
 	public static clearHighlights() {
 		UnityUtil.toUnity('ClearHighlighting', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
-	* Visualise the difference view
-	* i.e. models will be rendered in greyscale, detailing the difference/clash
+	* When Compare tool is enabled, visalise in differencing view
+	* Models will be rendered in greyscale, detailing the difference/clash
+	* @category Compare Tool
 	*/
 	public static diffToolDiffView() {
 		UnityUtil.toUnity('DiffToolShowDiff', undefined, undefined);
 	}
 
 	/**
-	* Disable diff tool
+	* Disable compare tool
 	* This also unloads the comparator models
+	* @category Compare Tool
 	*/
 	public static diffToolDisableAndClear() {
 		UnityUtil.toUnity('DiffToolDisable', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
-	* Enable diff tool
-	* This starts the diff tool in diff mode
+	* Enable compare tool
+	* This starts the compare tool in diff mode
+	* @category Compare Tool
 	*/
 	public static diffToolEnableWithDiffMode() {
 		UnityUtil.toUnity('DiffToolStartDiffMode', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
-	* Enable diff tool
-	* This starts the diff tool in clash mode
+	* Enable compare tool
+	* This starts the compare tool in clash mode
+	* @category Compare Tool
 	*/
 	public static diffToolEnableWithClashMode() {
 		UnityUtil.toUnity('DiffToolStartClashMode', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
-	 * Load comparator model for diff tool
+	 * Load comparator model for compare tool
 	 * This returns a promise which will be resolved when the comparator model is loaded
-	 * @param {string} account - name of teamspace
-	 * @param {string} model - model ID
-	 * @param {revision=} revision - revision ID/tag to load
+	 * @category Compare Tool
+	 * @param account - teamspace
+	 * @param model - model ID
+	 * @param revision - Specific revision ID/tag to load
+	 * @return returns a promise that resolves upon comparator model finished loading.
 	 */
-	public static diffToolLoadComparator(account, model, revision) {
+	public static diffToolLoadComparator(account: string, model: string, revision = 'head'): Promise<void> {
 
 		const params: any = {
 			database : account,
@@ -467,8 +573,9 @@ export class UnityUtil {
 	/**
 	 * Set an existing submodel/model as a comparator model
 	 * This will return as a base model when you have cleared the comparator (i.e. disabled diff)
-	 * @param {string} account - name of teamspace
-	 * @param {string} model - model ID
+	 * @category Compare Tool
+	 * @param account - name of teamspace
+	 * @param model - model ID
 	 */
 	public static diffToolSetAsComparator(account: string, model: string) {
 		const params: any = {
@@ -480,10 +587,12 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Set tolerance threshold
-	 * @param {string} theshold - tolerance level for diffing/clashing
+	 * Set tolerance threshold.
+	 * In general you should not need to tweak this, but if the differencing looks off, this is the value to tweak
+	 * @category Compare Tool
+	 * @param theshold - tolerance level for diffing/clashing
 	 */
-	public static diffToolSetThreshold(theshold) {
+	public static diffToolSetThreshold(theshold: number) {
 		UnityUtil.toUnity('DiffToolSetThreshold', UnityUtil.LoadingState.MODEL_LOADED, theshold);
 
 	}
@@ -491,6 +600,7 @@ export class UnityUtil {
 	/**
 	* Only show the comparator model
 	* i.e. Only show the model you are trying to compare with, not the base model
+	* @category Compare Tool
 	*/
 	public static diffToolShowComparatorModel() {
 		UnityUtil.toUnity('DiffToolShowComparatorModel', undefined, undefined);
@@ -499,6 +609,7 @@ export class UnityUtil {
 	/**
 	* Only show the base model
 	* i.e. It will show only the original model, not the comparator nor the diff view
+	 * @category Compare Tool
 	*/
 	public static diffToolShowBaseModel() {
 		UnityUtil.toUnity('DiffToolShowBaseModel', undefined, undefined);
@@ -506,6 +617,7 @@ export class UnityUtil {
 
 	/**
 	* Compare transparent objects as if they are opaque objects
+	* @category Compare Tool
 	*/
 	public static diffToolRenderTransAsOpaque() {
 		UnityUtil.toUnity('DiffToolRenderTransAsOpaque', undefined, undefined);
@@ -513,6 +625,7 @@ export class UnityUtil {
 
 	/**
 	* Ignore semi-transparent objects in diff
+	* @category Compare Tool
 	*/
 	public static diffToolRenderTransAsInvisible() {
 		UnityUtil.toUnity('DiffToolRenderTransAsInvisible', undefined, undefined);
@@ -520,34 +633,39 @@ export class UnityUtil {
 
 	/**
 	* Compare transparent objects as of normal
+	* @category Compare Tool
 	*/
 	public static diffToolRenderTransAsDefault() {
 		UnityUtil.toUnity('DiffToolRenderTransAsDefault', undefined, undefined);
 	}
 
 	/**
-	*  Start clip editing in single plane mode
+	* Start clip editing in single plane mode
+	* @category Clipping Plane
 	*/
 	public static startSingleClip() {
 		UnityUtil.toUnity('StartSingleClip', undefined, undefined);
 	}
 
 	/**
-	*  Start clip editing in box mode
+	* Start clip editing in box mode
+	* @category Clipping Plane
 	*/
 	public static startBoxClip() {
 		UnityUtil.toUnity('StartBoxClip', undefined, undefined);
 	}
 
 	/**
-	*  Start editing mode with current clip plane state
+	* Start editing mode with current clip plane state
+	* @category Clipping Plane
 	*/
 	public static startClipEdit() {
 		UnityUtil.toUnity('StartClipEdit', undefined, undefined);
 	}
 
 	/**
-	*  Stop editing mode
+	* Stop editing mode
+	* @category Clipping Plane
 	*/
 	public static stopClipEdit() {
 		UnityUtil.toUnity('StopClipEdit', undefined, undefined);
@@ -555,6 +673,7 @@ export class UnityUtil {
 
 	/**
 	 * Disable the Measuring tool.
+	 * @category Measuring tool
 	 */
 	public static disableMeasuringTool() {
 		UnityUtil.toUnity('StopMeasuringTool', UnityUtil.LoadingState.MODEL_LOADING, undefined);
@@ -562,13 +681,14 @@ export class UnityUtil {
 
 	/**
 	 * Add a pin
-	 * @param {string} id - Identifier for the pin
-	 * @param {string} type - Identifier for the pin type
-	 * @param {number[]} position - point in space where the pin should generate
-	 * @param {number[]} normal - normal vector for the pin (note: this is no longer used)
-	 * @param {number[]} colour - RGB value for the colour of the pin
+	 * @category Pins
+	 * @param id - Identifier for the pin
+	 * @param type - Identifier for the pin type ("issue" or risk")
+	 * @param position - point in space where the pin should generate
+	 * @param normal - normal vector for the pin (note: this is no longer used)
+	 * @param colour - RGB value for the colour of the pin
 	 */
-	public static dropPin(id, type, position, normal, colour) {
+	public static dropPin(id: string, type: string, position: [number], normal: [number], colour: [number]) {
 		const params = {
 			id,
 			type,
@@ -581,6 +701,7 @@ export class UnityUtil {
 
 	/**
 	 * Enable measuring tool. This will allow you to start measuring by clicking on the model
+	 * @category Measuring tool
 	 */
 	public static enableMeasuringTool() {
 		UnityUtil.toUnity('StartMeasuringTool', UnityUtil.LoadingState.MODEL_LOADING, undefined);
@@ -588,6 +709,7 @@ export class UnityUtil {
 
 	/**
 	 * Enable soft shadows - the highest shadow quality
+	 * @category Configurations
 	 */
 	public static enableSoftShadows() {
 		UnityUtil.toUnity('EnableSoftShadows', UnityUtil.LoadingState.VIEWER_READY, undefined);
@@ -595,6 +717,7 @@ export class UnityUtil {
 
 	/**
 	 * Enable hard shadows
+	 * @category Configurations
 	 */
 	public static enableHardShadows() {
 		UnityUtil.toUnity('EnableHardShadows', UnityUtil.LoadingState.VIEWER_READY, undefined);
@@ -602,9 +725,34 @@ export class UnityUtil {
 
 	/**
 	 * Disable shadows
+	 * @category Configurations
 	 */
 	public static disableShadows() {
 		UnityUtil.toUnity('DisableShadows', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Enable model caching
+ 	 * @category Configurations
+	 */
+	public static enableCaching() {
+		UnityUtil.toUnity('EnableCaching', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Disable model caching
+ 	 * @category Configurations
+	 */
+	public static disableCaching() {
+		UnityUtil.toUnity('DisableCaching', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Set the number of simultaneously threads for cache access
+ 	 * @category Configurations
+	 */
+	public static setNumCacheThreads(thread) {
+		UnityUtil.toUnity('SetSimultaneousCacheAccess', UnityUtil.LoadingState.VIEWER_READY, thread);
 	}
 
 	/**
@@ -613,11 +761,11 @@ export class UnityUtil {
 	 * currently highlighted.
 	 *
 	 * The object status will be returned via the promise provided.
-	 * @param {string} account - name of teamspace
-	 * @param {string} model - name of the model
-	 * @param {object} promise - promise that the function will resolve with the object status info.
+	 * @category Model Interactions
+	 * @param account - name of teamspace
+	 * @param model - name of the model
 	 */
-	public static getObjectsStatus(account, model) {
+	public static getObjectsStatus(account: string, model: string): Promise<object> {
 		const newObjectStatusPromise = new Promise((resolve, reject) => {
 			this.objectStatusPromises.push({ resolve, reject });
 		});
@@ -629,12 +777,9 @@ export class UnityUtil {
 		return newObjectStatusPromise;
 	}
 
-	public static getPointInfo() {
-		UnityUtil.toUnity('GetPointInfo', false, 0);
-	}
-
 	/**
 	 * Decrease the speed of Helicopter navigation (by x0.75)
+	 * @category Navigations
 	 */
 	public static helicopterSpeedDown() {
 		UnityUtil.toUnity('HelicopterSpeedDown', UnityUtil.LoadingState.VIEWER_READY, undefined);
@@ -642,6 +787,7 @@ export class UnityUtil {
 
 	/**
 	 * Increase the speed of Helicopter navigation (by x1.25)
+	 * @category Navigations
 	 */
 	public static helicopterSpeedUp() {
 		UnityUtil.toUnity('HelicopterSpeedUp', UnityUtil.LoadingState.VIEWER_READY, undefined);
@@ -649,28 +795,41 @@ export class UnityUtil {
 
 	/**
 	 * Reset the speed of Helicopter navigation
+	 * @category Navigations
 	 */
 	public static helicopterSpeedReset() {
 		UnityUtil.toUnity('HelicopterSpeedReset', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
+	/**
+	 * Hide objects that are hidden by default (e.g. IFCSpaces)
+	 * @category Model Interactions
+	 */
 	public static hideHiddenByDefaultObjects() {
 		UnityUtil.toUnity('HideHiddenByDefaultObjects', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
-	 *  Highlight objects
-	 *  @param {string} account - name of teamspace
-	 *  @param {string} model - name of model
-	 *  @param {string[]} idArr - array of unique IDs associated with the objects to highlight
-	 *  @param {number[]} color - RGB value of the highlighting colour
-	 *  @param {bool} toggleMode - If set to true, existing highlighted objects will stay highlighted.
-	 *  				Also any objects that are already highlighted will be unhighlighted
-	 *  @param {bool} forceReHighlight - If set to true, existing highlighted objects will be forced
+	 * Highlight objects
+	 * @category Object Highlighting
+	 * @param account - name of teamspace
+	 * @param model - name of model
+	 * @param idArr - array of unique IDs associated with the objects to highlight
+	 * @param color - RGB value of the highlighting colour
+	 * @param toggleMode - If set to true, existing highlighted objects will stay highlighted.
+	 * 				Also any objects that are already highlighted will be unhighlighted
+	 * @param forceReHighlight - If set to true, existing highlighted objects will be forced
 	 * 					to re-highlight itself. This is typically used for re-colouring a highlight ]
 	 * 					or when you want a specific set of objects to stay highlighted when toggle mode is on
 	 */
-	public static highlightObjects(account, model, idArr, color, toggleMode, forceReHighlight) {
+	public static highlightObjects(
+		account: string,
+		model: string,
+		idArr: [string],
+		color: [number],
+		toggleMode: boolean,
+		forceReHighlight: boolean
+	) {
 
 		const maxNodesPerReq = 20000;
 		for (let i = 0 ; i < idArr.length; i += maxNodesPerReq) {
@@ -692,12 +851,13 @@ export class UnityUtil {
 	}
 
 	/**
-	 *  Unhighlight objects
-	 *  @param {string} account - name of teamspace
-	 *  @param {string} model - name of model
-	 *  @param {string[]} idArr - array of unique IDs associated with the objects to highlight
+	 * Unhighlight objects
+	 * @category Object Highlighting
+	 * @param account - name of teamspace
+	 * @param model - name of model
+	 * @param idArr - array of unique IDs associated with the objects to highlight
 	 */
-	public static unhighlightObjects(account, model, idArr) {
+	public static unhighlightObjects(account: string, model: string, idArr: [string]) {
 		const params: any = {
 			database : account,
 			model,
@@ -710,12 +870,15 @@ export class UnityUtil {
 	/**
 	 * Loading another model. NOTE: this will also clear the canvas of existing models
 	 * Use branch = master and revision = head to get the latest revision.
-	 *  @param {string} account - name of teamspace
-	 *  @param {string} model - name of model
-	 *  @param {string=} branch - ID of the branch (optional)
-	 *  @param {string} revision - ID of revision
+	 * If you want to know when the model finishes loading, use [[onLoaded]]
+	 * @category Configurations
+	 * @param account - name of teamspace
+	 * @param model - name of model
+	 * @param branch - ID of the branch (deprecated value)
+	 * @param revision - ID of revision
+	 * @return returns a promise that resolves when the model start loading.
 	 */
-	public static loadModel(account, model, branch, revision) {
+	public static loadModel(account: string, model: string, branch = '', revision = 'head'): Promise<void> {
 		UnityUtil.reset();
 		const params: any = {
 			database : account,
@@ -727,13 +890,17 @@ export class UnityUtil {
 		}
 
 		UnityUtil.onLoaded();
+		// tslint:disable-next-line
+		console.log(`[${new Date()}]Loading model: `, params);
 		UnityUtil.toUnity('LoadModel', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
 		return UnityUtil.onLoading();
 	}
 
 	/**
-	 * Reset map sources.
+	 * Reset map sources. This removes all currently displayed maps
+	 * @category GIS
+	 * @param account - name of teamspace
 	 */
 	public static resetMapSources() {
 		UnityUtil.toUnity('ResetMapSources', UnityUtil.LoadingState.VIEWER_READY, undefined);
@@ -741,30 +908,34 @@ export class UnityUtil {
 
 	/**
 	 * Add map source.
-	 * @param {string} mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 * @category GIS
+	 * @param mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
 	 */
-	public static addMapSource(mapSource) {
+	public static addMapSource(mapSource: string) {
 		UnityUtil.toUnity('AddMapSource', UnityUtil.LoadingState.VIEWER_READY, mapSource);
 	}
 
 	/**
 	 * Remove map source.
-	 * @param {string} mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
+	 * @category GIS
+	 * @param mapSource - This can be "OSM", "HERE", "HERE_AERIAL", "HERE_TRAFFIC", "HERE_TRAFFIC_FLOW"
 	 */
-	public static removeMapSource(mapSource) {
+	public static removeMapSource(mapSource: string) {
 		UnityUtil.toUnity('RemoveMapSource', UnityUtil.LoadingState.VIEWER_READY, mapSource);
 	}
 
 	/**
-	 * Initialise map creator within unity
-	 * @param {Object[]} surveyingInfo - array of survey points and it's respective latitude and longitude value
+	 * Initialise map tiles within unity
+	 * @category GIS
+	 * @param surveyingInfo - array of survey points and it's respective latitude and longitude value
 	 */
-	public static mapInitialise(surveyingInfo) {
+	public static mapInitialise(surveyingInfo: [object]) {
 		UnityUtil.toUnity('MapsInitiate', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(surveyingInfo));
 	}
 
 	/**
 	 * Start map generation
+	 * @category GIS
 	 */
 	public static mapStart() {
 		UnityUtil.toUnity('ShowMap', UnityUtil.LoadingState.MODEL_LOADED, undefined);
@@ -772,22 +943,24 @@ export class UnityUtil {
 
 	/**
 	 * Stop map generation
+	 * @category GIS
 	 */
 	public static mapStop() {
 		UnityUtil.toUnity('HideMap', UnityUtil.LoadingState.MODEL_LOADED, undefined);
 	}
 
 	/**
-	 * Override the diffuse colour of the given meshes
-	 * @param {string} account - teamspace the meshes resides in
-	 * @param {string} model - model ID the meshes resides in
-	 * @param {string[]} meshIDs - unique IDs of the meshes to operate on
-	 * @param {number[]} color - RGB value of the override color (note: alpha will be ignored)
+	 * Override the colour of given object(s)
+	 * @category Object Highlighting
+	 * @param account - teamspace the meshes resides in
+	 * @param model - model ID the meshes resides in
+	 * @param meshIDs - unique IDs of the meshes to operate on
+	 * @param color - RGB value of the override color (note: alpha will be ignored)
 	 */
-	public static overrideMeshColor(account, model, meshIDs, color) {
+	public static overrideMeshColor(account: string, model: string, meshIDs: [string], color: [number]) {
 		const param: any = {};
 		if (account && model) {
-			param.nameSpace = account + '.'  + model;
+			param.nameSpace = account + '.' + model;
 		}
 		param.ids = meshIDs;
 		param.color = color;
@@ -796,14 +969,15 @@ export class UnityUtil {
 
 	/**
 	 * Restore the meshes to its original color values
-	 * @param {string} account - teamspace the meshes resides in
-	 * @param {string} model - model ID the meshes resides in
-	 * @param {string[]} meshIDs - unique IDs of the meshes to operate on
+	 * @category Object Highlighting
+	 * @param account - teamspace the meshes resides in
+	 * @param model - model ID the meshes resides in
+	 * @param meshIDs - unique IDs of the meshes to operate on
 	 */
-	public static resetMeshColor(account, model, meshIDs) {
+	public static resetMeshColor(account: string, model: string, meshIDs: [string]) {
 		const param: any = {};
 		if (account && model) {
-			param.nameSpace = account + '.'  + model;
+			param.nameSpace = account + '.' + model;
 		}
 		param.ids = meshIDs;
 		UnityUtil.toUnity('ResetMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
@@ -811,14 +985,16 @@ export class UnityUtil {
 
 	/**
 	 * Remove a pin from the viewer
-	 * @param {string} id - pin identifier
+	 * @category Pins
+	 * @param id - pin identifier
 	 */
-	public static removePin(id) {
+	public static removePin(id: string) {
 		UnityUtil.toUnity('RemovePin', UnityUtil.LoadingState.MODEL_LOADING, id);
 	}
 
 	/**
 	 * Clear the canvas and reset all settings
+	 * @category Configurations
 	 */
 	public static reset() {
 		UnityUtil.cancelLoadModel();
@@ -836,6 +1012,7 @@ export class UnityUtil {
 
 	/**
 	 * Reset the viewpoint to ISO view.
+	 * @category Navigations
 	 */
 	public static resetCamera() {
 		UnityUtil.toUnity('ResetCamera', UnityUtil.LoadingState.VIEWER_READY, undefined);
@@ -845,9 +1022,10 @@ export class UnityUtil {
 	 * Request a screenshot. The screenshot will be returned as a JSON
 	 * object with a single field, ssByte, containing the screenshot in
 	 * base64.
-	 * @param {object} promise - promise that will be resolved, returning with the screenshot
+	 * @category Model Interactions
+	 * @return returns a promise which will resolve with an object with a screenshot in base64 format
 	 */
-	public static requestScreenShot() {
+	public static requestScreenShot(): Promise<object> {
 		const newScreenshotPromise = new Promise((resolve, reject) => {
 			this.screenshotPromises.push({ resolve, reject});
 		});
@@ -858,11 +1036,12 @@ export class UnityUtil {
 
 	/**
 	 * Request the information of the current viewpoint
-	 *  @param {string} account - name of teamspace
-	 *  @param {string} model - name of model
-	 *  @param {Object} promise - promises where the viewpoint will be returned when the promise resolves
+	 * @category Model Interactions
+	 * @param account - name of teamspace
+	 * @param model - name of model
+	 * @return returns a promises which will resolve with the viewpoint information
 	 */
-	public static requestViewpoint(account, model) {
+	public static requestViewpoint(account: string, model: string): Promise<object> {
 		const newViewpointPromise = new Promise((resolve, reject) => {
 			this.viewpointsPromises.push({ resolve, reject });
 		});
@@ -880,39 +1059,44 @@ export class UnityUtil {
 
 	/**
 	 * Set API host urls. This is needs to be called before loading model.
-	 * @param {string[]} hostname - list of API names to use. (e.g https://api1.www.3drepo.io/api/)
+	 * @category Configurations
+	 * @param hostname - list of API names to use. (e.g ["https://api1.www.3drepo.io/api/"])
 	 */
-	public static setAPIHost(hostname) {
+	public static setAPIHost(hostname: [string]) {
 		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostname));
 	}
 
 	/**
 	 * Set the default near plane value. This can be use to tweak situations where
 	 * geometry closest to you are being clipped
-	* @param {number} value - the closest distance the camera will render. (default is 0.1)
+	 * @category Configurations
+	* @param value - the closest distance (in model units) the camera will render.
 	 */
-	public static setDefaultNearPlane(value) {
+	public static setDefaultNearPlane(value: number) {
 		UnityUtil.toUnity('DefaultNearPlaneValue', UnityUtil.LoadingState.VIEWER_READY, value);
 	}
 
 	/**
+	 * @hidden
 	 * Set the number of samples to take when determining far plane
-	* @param {number} value - the number of samples (per edge) the algorithm should sample
+ 	 * @param {number} value - the number of samples (per edge) the algorithm should sample
 	 */
-	public static setFarPlaneSampleSize(value) {
+	public static setFarPlaneSampleSize(value: number) {
 		UnityUtil.toUnity('FarPlaneSampleSize', UnityUtil.LoadingState.VIEWER_READY, value);
 	}
 
 	/**
-	* Set the maximum rending distance for shadows
-	* @param {number} value - the number of samples (per edge) the algorithm should sample
+	* Set the maximum rending distance for shadows. Smaller value may increase shadow quality.
+	* @category Configurations
+	* @param value - The maximum distance (in model units) the renderer will render shadows for
 	*/
-	public static setMaxShadowDistance(value) {
+	public static setMaxShadowDistance(value: number) {
 		UnityUtil.toUnity('MaxShadowDistance', UnityUtil.LoadingState.VIEWER_READY, value);
 	}
 
 	/**
 	 * Set navigation mode.
+	 * @category Navigations
 	 * @param {string} navMode - This can be either "HELICOPTER" or "TURNTABLE"
 	 */
 	public static setNavigation(navMode) {
@@ -921,7 +1105,8 @@ export class UnityUtil {
 
 	/**
 	 * Set the units
-	 * By default, units are set to mm.
+	 * By default, units are set to mm. This is used for GIS and measuring tool.
+	 * @category Configurations
 	 * @param {string} units - i.e. "m", "mm", "ft" etc.
 	 */
 	public static setUnits(units) {
@@ -929,16 +1114,24 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Move viewpoint to the specified paramters
+	 * Change the camera configuration
 	 * teamspace and model is only needed if the viewpoint is relative to a model
-	 * @param {number[]} pos - 3D point in space where the camera should be
-	 * @param {number[]} up - Up vector
-	 * @param {number[]} forward - forward vector
-	 * @param {number[]} lookAt - point in space the camera is looking at. (pivot point)
-	 * @param {string=} account - name of teamspace
-	 * @param {string=} model - name of model
+	 * @category Navigations
+	 * @param pos - 3D point in space where the camera should be
+	 * @param up - Up vector
+	 * @param forward - forward vector
+	 * @param lookAt - point in space the camera is looking at. (pivot point)
+	 * @param account - name of teamspace
+	 * @param model - name of model
 	 */
-	public static setViewpoint(pos, up, forward, lookAt, account, model) {
+	public static setViewpoint(
+		pos: [number],
+		up: [number],
+		forward: [number],
+		lookAt: [number],
+		account?: string,
+		model?: string
+	) {
 		const param: any = {};
 		if (account && model) {
 			param.nameSpace = account + '.' + model;
@@ -953,7 +1146,8 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Make all hidden by default objects visible
+	 * Make all hidden by default objects visible (typically IFC Spaces)
+	 * @category Model Interactions
 	 */
 	public static showHiddenByDefaultObjects() {
 		UnityUtil.toUnity('ShowHiddenByDefaultObjects', UnityUtil.LoadingState.MODEL_LOADED, undefined);
@@ -961,6 +1155,7 @@ export class UnityUtil {
 
 	/**
 	 * Start rectangular select
+	 * @category Object Highlighting
 	 */
 	public static startAreaSelection() {
 		UnityUtil.toUnity('StartRectangularSelect', UnityUtil.LoadingState.MODEL_LOADING, undefined);
@@ -968,6 +1163,7 @@ export class UnityUtil {
 
 	/**
 	 * Stop rectangular select
+	 * @category Object Highlighting
 	 */
 	public static stopAreaSelection() {
 		UnityUtil.toUnity('StopRectangularSelect', UnityUtil.LoadingState.MODEL_LOADING, undefined);
@@ -976,6 +1172,7 @@ export class UnityUtil {
 	/**
 	 * Toggle on/off rendering statistics.
 	 * When it is toggled on, list of stats will be displayed in the top left corner of the viewer.
+	 * @category Configurations
 	 */
 	public static toggleStats() {
 		UnityUtil.toUnity('ShowStats', UnityUtil.LoadingState.VIEWER_READY, undefined);
@@ -983,12 +1180,13 @@ export class UnityUtil {
 
 	/**
 	 * Toggle visibility of the given list of objects
-	 *  @param {string} account - name of teamspace
-	 *  @param {string} model - name of model
-	 *  @param {string[]} ids - list of unique ids to toggle visibility
-	 *  @param {bool} visibility - true = toggle visible, false = toggle invisible
+	 * @category Model Interactions
+	 * @param account - name of teamspace
+	 * @param model - name of model
+	 * @param ids - list of unique ids to toggle visibility
+	 * @param visibility - true = visible, false = invisible
 	 */
-	public static toggleVisibility(account, model, ids, visibility) {
+	public static toggleVisibility(account: string, model: string, ids: [string], visibility: boolean) {
 		const param: any = {};
 		if (account && model) {
 			param.nameSpace = account + '.' + model;
@@ -1001,6 +1199,7 @@ export class UnityUtil {
 	}
 
 	/**
+	 * @hidden
 	 * Use bounding sphere to determine far plane (instead of bounding box)
 	 * Switch this one if you find objects far away from you are being clipped
 	 */
@@ -1009,6 +1208,7 @@ export class UnityUtil {
 	}
 
 	/**
+	 * @hidden
 	 * Use bounding box to determine far plane (instead of bounding sphere)
 	 * This is the default algorithm.
 	 * You should only need to call this if you have called useBoundingSphereFarPlaneAlgorithm previously.
@@ -1020,16 +1220,16 @@ export class UnityUtil {
 	/**
 	 * Update the clipping plane to the given direction
 	 * teamspace and model is only needed if the viewpoint is relative to a model
-	 * @example
-	 * //Clipping plane is defined by the plane normal, distance from origin and it's direction
-	 * //direction = -1 means it will clip anything above the plane, 1 otherwise.
-	 * UnityUtil.updateClippingPlanes({normal : [0,-1,0], distance: 10, clipDirection: -1}, false)
-	 * @param {Object} clipPlane - object containing the clipping plane
-	 * @param {bool} requireBroadcast - if set to true, UnityUtil.clipBroadcast will be called after it is set.
-	 * @param {string=} account - name of teamspace
-	 * @param {string=} model - name of model
+	 * Clipping plane is defined by the plane normal, distance from origin and it's direction
+	 * direction = -1 means it will clip anything above the plane, 1 otherwise.
+	 * @category Model Interactions
+	 * @example UnityUtil.updateClippingPlanes([{normal : [0,-1,0], distance: 10, clipDirection: -1}], false)
+	 * @param clipPlane - object containing the clipping plane
+	 * @param requireBroadcast - if set to true, A callback to [[viewer]].clipBroadcast will be called after it is set.
+	 * @param account - name of teamspace
+	 * @param model - name of model
 	 */
-	public static updateClippingPlanes(clipPlane, requireBroadcast, account, model) {
+	public static updateClippingPlanes(clipPlane: object, requireBroadcast: boolean, account?: string, model?: string) {
 		const param: any = {};
 		param.clip = clipPlane;
 		if (account && model) {
@@ -1042,6 +1242,7 @@ export class UnityUtil {
 	/**
 	 * Reset clipping plane
 	 * This will also toggle edit mode to false
+	 * @category Model Interactions
 	 */
 	public static disableClippingPlanes() {
 		UnityUtil.toUnity('DisableClip', undefined, undefined);
@@ -1049,6 +1250,7 @@ export class UnityUtil {
 
 	/**
 	 * Zoom to highlighted meshes
+	 * @category Model Interactions
 	 */
 	public static zoomToHighlightedMeshes() {
 		UnityUtil.toUnity('ZoomToHighlightedMeshes', UnityUtil.LoadingState.MODEL_LOADING, undefined);
@@ -1056,6 +1258,7 @@ export class UnityUtil {
 
 	/**
 	 * Sets the render quality to default
+	 * @category Configurations
 	 */
 	public static setRenderingQualityDefault() {
 		UnityUtil.toUnity('SetRenderingQualityDefault', UnityUtil.LoadingState.VIEWER_READY);
@@ -1063,6 +1266,7 @@ export class UnityUtil {
 
 	/**
 	 * Sets the render quality to high
+	 * @category Model Interactions
 	 */
 	public static setRenderingQualityHigh() {
 		UnityUtil.toUnity('SetRenderingQualityHigh', UnityUtil.LoadingState.VIEWER_READY);
@@ -1070,6 +1274,7 @@ export class UnityUtil {
 
 	/**
 	 * Sets the highlighting to show xray
+	 * @category Model Interactions
 	 */
 	public static setXRayHighlightOn(): any {
 		UnityUtil.toUnity('SetXRayHighlightOn', UnityUtil.LoadingState.VIEWER_READY);
@@ -1077,6 +1282,7 @@ export class UnityUtil {
 
 	/**
 	 * Sets the highlighting to show xray
+	 * @category Model Interactions
 	 */
 	public static setXRayHighlightOff(): any {
 		UnityUtil.toUnity('SetXRayHighlightOff', UnityUtil.LoadingState.VIEWER_READY);

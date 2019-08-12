@@ -129,6 +129,7 @@ function listMaps(req, res) {
 
 function requestMapTile(req, res, domain, uri) {
 	httpsGet.get(domain, uri).then(image =>{
+		res.setHeader("Cache-Control", `private, max-age=${config.cachePolicy.maxAge}`);
 		res.writeHead(200, {"Content-Type": "image/png" });
 		res.write(image);
 		res.end();
@@ -197,6 +198,7 @@ function getHereBaseInfo(req, res) {
 	let uri = "/maptile/2.1/info";
 	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
 	httpsGet.get(domain, uri).then(info =>{
+		res.setHeader("Cache-Control", `private, max-age=${config.cachePolicy.maxAge}`);
 		res.write(info);
 		res.end();
 	}).catch(err => {

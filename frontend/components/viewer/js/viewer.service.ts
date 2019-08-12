@@ -635,6 +635,11 @@ export class ViewerService {
 		this.viewer.setMaxShadowDistance(value);
 	}
 
+	public setNumCacheThreads(value: number) {
+		if (value === undefined) { return; }
+		this.viewer.setNumCacheThreads(value);
+	}
+
 	public setFarPlaneAlgorithm(algorithm: string) {
 		switch (algorithm) {
 			case 'box':
@@ -662,6 +667,14 @@ export class ViewerService {
 			this.viewer.setXRayHighlightOn();
 		} else {
 			this.viewer.setXRayHighlightOff();
+		}
+	}
+
+	public setModelCache(cache: boolean) {
+		if (cache) {
+			this.viewer.enableCaching();
+		} else {
+			this.viewer.disableCaching();
 		}
 	}
 

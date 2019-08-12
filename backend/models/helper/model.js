@@ -98,7 +98,7 @@ function insertModelUpdatedNotificationsLatestReview(account, model) {
 function importSuccess(account, model, sharedSpacePath, user) {
 	setStatus(account, model, "ok", user).then(setting => {
 		if (setting) {
-			if (sharedSpacePath) {
+			if (sharedSpacePath && setting.corID) {
 				const path = require("path");
 				const tmpDir = path.join(sharedSpacePath, setting.corID);
 				const tmpModelFile = path.join(sharedSpacePath, `${setting.corID}.json`);
