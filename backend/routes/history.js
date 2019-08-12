@@ -100,22 +100,6 @@ router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
 
 router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevisionsByBranch);
 
-/**
- * @api {put} /:teamspace/:model/revisions/:id/tag Update Revision Tag
- * @apiName updateRevisionTag
- * @apiGroup Revisions
- *
- * @apiDescription Update revision tag
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} id Unique Revision ID
- * @apiParam {String} tag Tag to update
- *
- */
-
-router.put("/revisions/:id/tag", middlewares.hasReadAccessToModel, updateRevisionTag);
-
 function listRevisions(req, res, next) {
 
 	const place = utils.APIInfo(req);
@@ -155,26 +139,6 @@ function listRevisionsByBranch(req, res, next) {
 
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
-	});
-}
-
-function updateRevisionTag(req, res, next) {
-
-	const place = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
-
-	History.findByUID({account, model}, req.params.id, {_id : 1, tag: 1}).then(history => {
-		if (!history) {
-			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
-		} else {
-			history.tag = req.body.tag;
-			return history.save();
-		}
-	}).then(history => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, history.clean());
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err, err);
 	});
 }
 
