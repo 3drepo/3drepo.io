@@ -18,7 +18,7 @@ import { UnityUtil } from '../../globals/unity-util';
 import { PIN_COLORS } from '../../styles';
 
 export class Pin {
-	public id: ;
+	public id;
 	public type: string;
 	public position;
 	public highlighted: boolean;
