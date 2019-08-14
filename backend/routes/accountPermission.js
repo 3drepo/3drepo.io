@@ -35,7 +35,7 @@
 	 * @apiSuccess (200) {String} user User
 	 * @apiSuccess (200) {String[]} permissions Account level permissions
 	 *
-	 * @apiExample {post} Example usage:
+	 * @apiExample {get} Example usage:
 	 * GET /acme/permissions HTTP/1.1
 	 *
 	 * @apiSuccessExample {json} Success-Response:
