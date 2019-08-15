@@ -17,7 +17,6 @@
 "use strict";
 const _ = require("lodash");
 
-const ModelSetting = require("./modelSetting");
 const Project = require("./project");
 const View = require("./viewpoint");
 const User = require("./user");
@@ -121,7 +120,6 @@ class Ticket {
 			uid = utils.stringToUUID(uid);
 		}
 
-		const settings = await ModelSetting.findById({account}, model);
 		const tickets = await db.getCollection(account, model + "." + this.collName);
 		const foundTicket = await tickets.findOne({ _id: uid }, projection);
 
@@ -142,15 +140,6 @@ class Ticket {
 
 			foundTicket.resources = resources;
 			delete foundTicket.refs;
-		}
-
-		if (!foundTicket.typePrefix) {
-			foundTicket.typePrefix = settings.type || "";
-		}
-
-		if (!foundTicket.modelCode) {
-			foundTicket.modelCode = (settings.properties && settings.properties.code) ?
-				settings.properties.code : "";
 		}
 
 		return foundTicket;
