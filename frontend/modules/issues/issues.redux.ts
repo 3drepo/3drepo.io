@@ -81,7 +81,8 @@ export const INITIAL_STATE = {
 		isImportingBCF: false,
 		showSubmodelIssues: false,
 		sortOrder: 'desc',
-		failedToLoad: false
+		failedToLoad: false,
+		savedPin: null
 	}
 };
 

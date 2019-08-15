@@ -16,7 +16,7 @@
  */
 
 import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { isEmpty, omit, pick, map } from 'lodash';
+import { isEmpty, omit, pick, map, isEqual } from 'lodash';
 import * as filesize from 'filesize';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
@@ -30,13 +30,14 @@ import { PRIORITIES, STATUSES, DEFAULT_PROPERTIES } from '../../constants/issues
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { selectJobsList, selectMyJob } from '../jobs';
-import { selectCurrentUser, selectCurrentTeamspace } from '../currentUser';
+import { selectCurrentUser } from '../currentUser';
 import {
 	selectActiveIssueId,
 	selectIssues,
 	selectIssuesMap,
 	selectActiveIssueDetails,
-	selectFilteredIssues
+	selectFilteredIssues,
+	selectComponentState
 } from './issues.selectors';
 import { IssuesTypes, IssuesActions } from './issues.redux';
 import { selectTopicTypes, selectCurrentModel, selectCurrentModelTeamspace } from '../model';
@@ -160,7 +161,7 @@ export function* saveIssue({ teamspace, model, issueData, revision, finishSubmit
 
 export function* updateIssue({ teamspace, modelId, issueData }) {
 	try {
-		const { _id, rev_id } = yield select(selectActiveIssueDetails);
+		const { _id, rev_id, position } = yield select(selectActiveIssueDetails);
 		const { data: updatedIssue } = yield API.updateIssue(teamspace, modelId, _id, rev_id, issueData );
 		const AnalyticService = getAngularService('AnalyticService') as any;
 		yield AnalyticService.sendEvent({
@@ -171,6 +172,8 @@ export function* updateIssue({ teamspace, modelId, issueData }) {
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(updatedIssue, jobs);
 		preparedIssue.comments = yield prepareComments(preparedIssue.comments);
+
+		yield put(IssuesActions.setComponentState({ savedPin: position }));
 
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue updated'));
@@ -415,7 +418,7 @@ export function* showDetails({ teamspace, model, revision, issue }) {
 		});
 
 		yield put(IssuesActions.setActiveIssue(issue, revision));
-		yield put(IssuesActions.setComponentState({ showDetails: true }));
+		yield put(IssuesActions.setComponentState({ showDetails: true, savedPin: issue.position }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('display', 'issue details', error));
 	}
@@ -424,6 +427,7 @@ export function* showDetails({ teamspace, model, revision, issue }) {
 export function* closeDetails({ teamspace, model, revision }) {
 	try {
 		const activeIssue = yield select(selectActiveIssueDetails);
+		const componentState = yield select(selectComponentState);
 
 		if (activeIssue) {
 			runAngularViewerTransition({
@@ -434,7 +438,11 @@ export function* closeDetails({ teamspace, model, revision }) {
 			});
 		}
 
-		yield put(IssuesActions.setComponentState({ showDetails: false }));
+		if (!isEqual(activeIssue.position, componentState.savedPin)) {
+			yield put(IssuesActions.updateSelectedIssuePin(componentState.savedPin));
+		}
+
+		yield put(IssuesActions.setComponentState({ showDetails: false, savedPin: null }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('close', 'issue details', error));
 	}
