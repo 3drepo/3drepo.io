@@ -181,6 +181,8 @@ class Ticket {
 			projAdmin
 		] = results;
 
+		job = (job || {})._id;
+
 		const accountPerm = dbUser.customData.permissions.findByUser(user);
 		const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 		const isAdmin = projAdmin || tsAdmin;
