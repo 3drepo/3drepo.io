@@ -46,7 +46,6 @@ interface IProps {
 	failedToLoad: boolean;
 	setState: (componentState) => void;
 	fetchRisk: (teamspace, model, riskId) => void;
-	showNewPin: (risk, pinData) => void;
 	saveRisk: (teamspace, modelId, risk, revision, finishSubmitting) => void;
 	updateRisk: (teamspace, modelId, risk) => void;
 	postComment: (teamspace, modelId, riskData, finishSubmitting) => void;
@@ -55,6 +54,7 @@ interface IProps {
 	unsubscribeOnRiskCommentsChanges: (teamspace, modelId, riskId) => void;
 	updateNewRisk: (newRisk) => void;
 	setCameraOnViewpoint: (teamspace, modelId, view) => void;
+	updateSelectedRiskPin: (position) => void;
 }
 
 interface IState {
@@ -157,7 +157,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				permissions={this.props.modelSettings.permissions}
 				currentUser={this.props.currentUser}
 				myJob={this.props.myJob}
-				onChangePin={this.handleChangePin}
+				onChangePin={this.props.updateSelectedRiskPin}
 				onSavePin={this.onPositionSave}
 				pinId={this.riskData._id}
 				hasPin={this.riskData.position && this.riskData.position.length}
@@ -267,10 +267,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleChangePin = (pinData) => {
-		this.props.showNewPin(this.props.risk, pinData);
-	}
-
 	public postComment = async (teamspace, model, { comment, screenshot }, finishSubmitting) => {
 		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
 
@@ -304,15 +300,11 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public onPositionSave = (position) => {
+	public onPositionSave = () => {
 		const { teamspace, model, risk, updateRisk } = this.props;
 
 		if (risk._id) {
-			updateRisk(teamspace, model, { position });
-			Viewer.setPin(null);
-		} else {
-			const colours = getRiskPinColor(risk.overall_level_of_risk, true);
-			Viewer.changePinColor({ id: NEW_PIN_ID, colours});
+			updateRisk(teamspace, model, { position: risk.position });
 		}
 	}
 

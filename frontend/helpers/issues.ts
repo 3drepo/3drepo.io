@@ -72,7 +72,8 @@ export const getStatusIcon = (priority, status) => {
 	return {...statusIcon};
 };
 
-export const getIssuePinColor = (status: string, priority: string, selected: boolean = false) => {
+export const getIssuePinColor = (issue: any, selected: boolean = false) => {
+	const {status, priority} = issue;
 	const colorToUse = ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS.NONE;
 	return (selected) ? colorToUse.selectedColor : colorToUse.pinColor;
 };

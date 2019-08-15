@@ -21,7 +21,7 @@ import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
-import { getRiskPinColor, prepareRisk } from '../../helpers/risks';
+import { prepareRisk } from '../../helpers/risks';
 import { prepareComments, prepareComment } from '../../helpers/comments';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
@@ -33,14 +33,11 @@ import { selectCurrentUser } from '../currentUser';
 import {
 	selectActiveRiskId,
 	selectRisks,
-	selectShowPins,
 	selectRisksMap,
 	selectActiveRiskDetails,
 	selectFilteredRisks
 } from './risks.selectors';
 import { RisksActions, RisksTypes } from './risks.redux';
-import { NEW_PIN_ID } from '../../constants/viewer';
-import { PIN_COLORS } from '../../styles';
 
 export function* fetchRisks({teamspace, modelId, revision}) {
 	yield put(RisksActions.togglePendingState(true));
@@ -51,7 +48,6 @@ export function* fetchRisks({teamspace, modelId, revision}) {
 		const preparedRisks = data.map((risk) => prepareRisk(risk, jobs));
 
 		yield put(RisksActions.fetchRisksSuccess(preparedRisks));
-		yield put(RisksActions.renderPins());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'risks', error));
 	}
@@ -93,19 +89,8 @@ const createGroup = (risk, objectInfo, teamspace, model, revision) => {
 	]);
 };
 
-const toggleRiskPin = (risk, selected = true) => {
-	if (risk && risk.position && risk.position.length > 0 && risk._id) {
-		Viewer.changePinColor({
-			id: risk._id,
-			colours: getRiskPinColor(risk.overall_level_of_risk, selected)
-		});
-	}
-};
-
 export function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting }) {
 	try {
-		yield Viewer.setPinDropMode(false);
-
 		const myJob = yield select(selectMyJob);
 
 		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
@@ -148,13 +133,6 @@ export function* saveRisk({ teamspace, model, riskData, revision, finishSubmitti
 			scale: 1.0
 		};
 
-		const pinData = Viewer.getPinData();
-		if (pinData !== null) {
-			risk.pickedPos = pinData.pickedPos;
-			risk.pickedNorm = pinData.pickedNorm;
-			Viewer.setPin(null);
-		}
-
 		const { data: savedRisk } = yield API.saveRisk(teamspace, model, risk);
 
 		AnalyticService.sendEvent({
@@ -184,13 +162,11 @@ export function* updateRisk({ teamspace, modelId, riskData }) {
 			eventAction: 'edit'
 		});
 
-		toggleRiskPin(riskData, true);
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(updatedRisk, jobs);
 		preparedRisk.comments = yield prepareComments(preparedRisk.comments);
 
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
-		yield put(RisksActions.renderPins());
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'risk', error));
@@ -202,10 +178,6 @@ export function* updateNewRisk({ newRisk }) {
 		const jobs = yield select(selectJobsList);
 		const preparedRisk = prepareRisk(newRisk, jobs);
 
-		const pinData = yield Viewer.getPinData();
-		if (pinData) {
-			yield put(RisksActions.showNewPin(preparedRisk, pinData));
-		}
 		yield put(RisksActions.setComponentState({ newRisk: preparedRisk }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'new risk', error));
@@ -236,51 +208,6 @@ export function* removeComment({ teamspace, modelId, riskData }) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'comment', error));
 	}
 
-}
-
-export function* renderPins() {
-	try {
-		const filteredRisks = yield select(selectFilteredRisks);
-		const risksList = yield select(selectRisks);
-		const shouldShowPins = yield select(selectShowPins);
-		const invisibleRisks = risksList.length !== filteredRisks.length
-			? differenceBy(risksList, filteredRisks, '_id')
-			: [] ;
-
-		const activeRiskId = yield select(selectActiveRiskId);
-		const removePins = (risks) => risks.forEach((risk) => {
-			Viewer.removePin({ id: risk._id });
-		});
-
-		yield Viewer.removePin({ id: NEW_PIN_ID });
-		yield removePins(!shouldShowPins ? risksList : invisibleRisks);
-
-		if (shouldShowPins) {
-			for (let index = 0; index < filteredRisks.length; index++) {
-				const risk = filteredRisks[index];
-
-				const pinPosition = risk.position && risk.position.length;
-
-				if (pinPosition) {
-					const levelOfRisk = (risk.overall_level_of_risk !== undefined) ? risk.overall_level_of_risk : 4;
-					const isSelectedPin = activeRiskId && risk._id === activeRiskId;
-					const pinColor = getRiskPinColor(levelOfRisk, isSelectedPin);
-					Viewer.addPin({
-						id: risk._id,
-						type: 'risk',
-						account: risk.account,
-						model: risk.model,
-						pickedPos: risk.position,
-						pickedNorm: risk.norm,
-						colours: pinColor,
-						viewpoint: risk.viewpoint
-					});
-				}
-			}
-		}
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('show', 'pins', error));
-	}
 }
 
 export function* downloadRisks({ teamspace, modelId }) {
@@ -383,7 +310,6 @@ const showMultipleGroups = async (risk, revision) => {
 export function* focusOnRisk({ risk, revision }) {
 	try {
 		yield Viewer.isViewerReady();
-		yield put(RisksActions.renderPins());
 		const TreeService = getAngularService('TreeService') as any;
 
 		// Remove highlight from any multi objects
@@ -428,15 +354,6 @@ export function* focusOnRisk({ risk, revision }) {
 
 export function* setActiveRisk({ risk, revision }) {
 	try {
-		const activeRiskId = yield select(selectActiveRiskId);
-		const risksMap = yield select(selectRisksMap);
-
-		if (activeRiskId !== risk._id) {
-			if (activeRiskId) {
-				toggleRiskPin(risksMap[activeRiskId], false);
-			}
-			toggleRiskPin(risk, true);
-		}
 		yield all([
 			put(RisksActions.focusOnRisk(risk, revision)),
 			put(RisksActions.setComponentState({ activeRisk: risk._id, expandDetails: true }))
@@ -465,7 +382,6 @@ export function* showDetails({ teamspace, model, revision, risk }) {
 export function* closeDetails({ teamspace, model, revision }) {
 	try {
 		const activeRisk = yield select(selectActiveRiskDetails);
-		yield Viewer.removePin({ id: NEW_PIN_ID });
 
 		if (activeRisk) {
 			runAngularViewerTransition({
@@ -480,35 +396,6 @@ export function* closeDetails({ teamspace, model, revision }) {
 		yield put(RisksActions.setComponentState({ showDetails: false }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('close', 'risk details', error));
-	}
-}
-
-export function* showNewPin({ risk, pinData }) {
-	try {
-		Viewer.removePin({ id: pinData.id });
-		Viewer.setPin(null);
-
-		const data = {
-			...pinData,
-			account: risk.account,
-			model: risk.model,
-			colours: PIN_COLORS.SUNGLOW,
-			type: 'risk'
-		};
-
-		Viewer.addPin(data);
-		Viewer.setPin(data);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('display', 'pin', error));
-	}
-}
-
-export function* toggleShowPins({ showPins }) {
-	try {
-		yield put(RisksActions.setComponentState({ showPins }));
-		yield put(RisksActions.renderPins());
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('toggle', 'pins', error));
 	}
 }
 
@@ -621,7 +508,6 @@ export function* setNewRisk() {
 export function* setFilters({ filters }) {
 	try {
 		yield put(RisksActions.setComponentState({ selectedFilters: filters }));
-		yield put(RisksActions.renderPins());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'filters', error));
 	}
@@ -634,14 +520,11 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.UPDATE_RISK, updateRisk);
 	yield takeLatest(RisksTypes.POST_COMMENT, postComment);
 	yield takeLatest(RisksTypes.REMOVE_COMMENT, removeComment);
-	yield takeLatest(RisksTypes.RENDER_PINS, renderPins);
 	yield takeLatest(RisksTypes.DOWNLOAD_RISKS, downloadRisks);
 	yield takeLatest(RisksTypes.PRINT_RISKS, printRisks);
 	yield takeLatest(RisksTypes.SET_ACTIVE_RISK, setActiveRisk);
 	yield takeLatest(RisksTypes.SHOW_DETAILS, showDetails);
 	yield takeLatest(RisksTypes.CLOSE_DETAILS, closeDetails);
-	yield takeLatest(RisksTypes.SHOW_NEW_PIN, showNewPin);
-	yield takeLatest(RisksTypes.TOGGLE_SHOW_PINS, toggleShowPins);
 	yield takeLatest(RisksTypes.SUBSCRIBE_ON_RISK_CHANGES, subscribeOnRiskChanges);
 	yield takeLatest(RisksTypes.UNSUBSCRIBE_ON_RISK_CHANGES, unsubscribeOnRiskChanges);
 	yield takeLatest(RisksTypes.FOCUS_ON_RISK, focusOnRisk);

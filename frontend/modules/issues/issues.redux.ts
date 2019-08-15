@@ -147,7 +147,6 @@ export const updateSelectedIssuePin =  (state = INITIAL_STATE, { position }) => 
 	}
 
 	return state;
-
 };
 
 const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {

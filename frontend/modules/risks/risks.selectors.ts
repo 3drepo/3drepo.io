@@ -19,6 +19,7 @@ import { createSelector } from 'reselect';
 import { values } from 'lodash';
 import { searchByFilters } from '../../helpers/searching';
 import { RISK_LEVELS } from '../../constants/risks';
+import { riskToPin, hasPin } from '../../helpers/pins';
 
 export const selectRisksDomain = (state) => Object.assign({}, state.risks);
 
@@ -100,3 +101,27 @@ export const selectSortOrder = createSelector(
 export const selectFailedToLoad = createSelector(
 	selectComponentState, (state) => state.failedToLoad
 );
+
+export const selectPins = createSelector(
+	selectFilteredRisks, selectComponentState, selectActiveRiskDetails, selectShowPins,
+	(risks: any, componentState, detailedRisk, showPins) => {
+
+	if (!showPins) {
+		return [];
+	}
+
+	const pinsToShow =  risks.reduce((pins, risk) => {
+		if (!hasPin(risk)) {
+			return pins;
+		}
+
+		pins.push(riskToPin(risk, componentState.activeRisk === risk._id ));
+		return pins;
+	} , []);
+
+	if (componentState.showDetails && detailedRisk && hasPin(detailedRisk)) {
+		pinsToShow.push(riskToPin(detailedRisk, true));
+	}
+
+	return pinsToShow;
+});
