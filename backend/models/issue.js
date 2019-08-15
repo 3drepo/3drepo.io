@@ -31,7 +31,6 @@ const ChatEvent = require("./chatEvent");
 const config = require("../config.js");
 
 const systemLogger = require("../logger.js").systemLogger;
-const Comment = require("./comment");
 const Group = require("./group");
 const User = require("./user");
 const Ticket = require("./ticket");
@@ -110,19 +109,6 @@ function toDirectXCoords(issueData) {
 	}
 
 	return viewpoint;
-}
-
-function addSystemComment(account, model, sessionId, issueId, owner, property, oldValue, newValue) {
-	const systemComment = Comment.newSystemComment(
-		owner,
-		property,
-		oldValue,
-		newValue
-	);
-
-	ChatEvent.newComment(sessionId, account, model, issueId, systemComment);
-
-	return systemComment;
 }
 
 issue.setGroupIssueId = function(dbCol, data, issueId) {
@@ -645,7 +631,7 @@ issue.addRefsToIssue = async function(account, model, issueId, username, session
 	const ref_ids = [];
 
 	refs.forEach(ref => {
-		comments.push(addSystemComment(account, model, sessionId, issueId, username, "resource", null, ref.name));
+		comments.push(ticket.createSystemComment(account, model, sessionId, issueId, username, "resource", null, ref.name));
 		ref_ids.push(ref._id);
 	});
 
@@ -702,7 +688,7 @@ issue.detachResource =  async function(account, model, issueId, resourceId, user
 	}
 
 	const comments = issueFound.comments;
-	comments.push(await addSystemComment(account, model, sessionId, issueId, username, "resource", ref.name, null));
+	comments.push(await ticket.createSystemComment(account, model, sessionId, issueId, username, "resource", ref.name, null));
 	await issues.update(issueQuery, {$set: {comments}, $pull: { refs: resourceId } });
 
 	if(ref.type !== "http") {

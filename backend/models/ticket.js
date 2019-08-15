@@ -145,7 +145,7 @@ class Ticket {
 		return foundTicket;
 	}
 
-	addSystemComment(account, model, sessionId, ticketId, owner, property, oldValue, newValue) {
+	createSystemComment(account, model, sessionId, ticketId, owner, property, oldValue, newValue) {
 		const systemComment = Comment.newSystemComment(
 			owner,
 			property,
@@ -212,7 +212,7 @@ class Ticket {
 				return;
 			}
 
-			const comment = this.addSystemComment(
+			const comment = this.createSystemComment(
 				account,
 				model,
 				sessionId,
