@@ -16,18 +16,17 @@
  */
 
 import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { differenceBy, isEmpty, omit, pick, map, groupBy } from 'lodash';
+import { isEmpty, omit, pick, map } from 'lodash';
 import * as filesize from 'filesize';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
 import { getAngularService, dispatch, getState, runAngularViewerTransition } from '../../helpers/migration';
-import { getIssuePinColor, prepareIssue } from '../../helpers/issues';
+import {  prepareIssue } from '../../helpers/issues';
 import { prepareComments, prepareComment, createAttachResourceComments,
 	createRemoveResourceComment} from '../../helpers/comments';
 import { Cache } from '../../services/cache';
 import { Viewer } from '../../services/viewer/viewer';
 import { PRIORITIES, STATUSES, DEFAULT_PROPERTIES } from '../../constants/issues';
-import { PIN_COLORS } from '../../styles';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { selectJobsList, selectMyJob } from '../jobs';
@@ -35,13 +34,11 @@ import { selectCurrentUser, selectCurrentTeamspace } from '../currentUser';
 import {
 	selectActiveIssueId,
 	selectIssues,
-	selectShowPins,
 	selectIssuesMap,
 	selectActiveIssueDetails,
 	selectFilteredIssues
 } from './issues.selectors';
 import { IssuesTypes, IssuesActions } from './issues.redux';
-import { NEW_PIN_ID } from '../../constants/viewer';
 import { selectTopicTypes, selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { prepareResources } from '../../helpers/resources';
 import { EXTENSION_RE } from '../../constants/resources';
@@ -55,7 +52,6 @@ export function* fetchIssues({teamspace, modelId, revision}) {
 		const preparedIssues = data.map((issue) => prepareIssue(issue, jobs));
 
 		yield put(IssuesActions.fetchIssuesSuccess(preparedIssues));
-		yield put(IssuesActions.renderPins());
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'issues', error));
 	}
@@ -98,40 +94,8 @@ const createGroup = (issue, objectInfo, teamspace, model, revision) => {
 	]);
 };
 
-const toggleIssuePin = (issue, selected = true) => {
-	if (issue && issue.position && issue.position.length > 0 && issue._id) {
-		Viewer.changePinColor({
-			id: issue._id,
-			colours: getIssuePinColor(issue.status, issue.priority, selected)
-		});
-	}
-};
-
-function* updateIssuePin({issue}) {
-	yield Viewer.removePin({ id: issue._id });
-	if (issue && issue.position && issue.position.length > 0 && issue._id) {
-		const { _id } = yield select(selectActiveIssueDetails);
-
-		const isSelectedPin = _id && issue._id === _id;
-		const pinColor = getIssuePinColor(issue.status, issue.priority, isSelectedPin);
-
-		Viewer.addPin({
-			id: issue._id,
-			type: 'issue',
-			account: issue.account,
-			model: issue.model,
-			pickedPos: issue.position,
-			pickedNorm: issue.norm,
-			colours: pinColor,
-			viewpoint: issue.viewpoint
-		});
-	}
-}
-
 export function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting }) {
 	try {
-		const pinData = Viewer.getPinData();
-		yield Viewer.setPinDropMode(false);
 		const myJob = yield select(selectMyJob);
 
 		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
@@ -174,12 +138,6 @@ export function* saveIssue({ teamspace, model, issueData, revision, finishSubmit
 			scale: 1.0
 		};
 
-		if (pinData !== null) {
-			issue.pickedPos = pinData.pickedPos;
-			issue.pickedNorm = pinData.pickedNorm;
-			Viewer.setPin(null);
-		}
-
 		const { data: savedIssue } = yield API.saveIssue(teamspace, model, issue);
 
 		AnalyticService.sendEvent({
@@ -210,13 +168,11 @@ export function* updateIssue({ teamspace, modelId, issueData }) {
 			eventAction: 'edit'
 		});
 
-		toggleIssuePin(issueData, true);
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(updatedIssue, jobs);
 		preparedIssue.comments = yield prepareComments(preparedIssue.comments);
 
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
-		yield put(IssuesActions.renderPins());
 		yield put(SnackbarActions.show('Issue updated'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'issue', error));
@@ -227,11 +183,6 @@ export function* updateNewIssue({ newIssue }) {
 	try {
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(newIssue, jobs);
-
-		const pinData = yield Viewer.getPinData();
-		if (pinData) {
-			yield put(IssuesActions.showNewPin(preparedIssue, pinData));
-		}
 		yield put(IssuesActions.setComponentState({ newIssue: preparedIssue }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'new issue', error));
@@ -263,59 +214,6 @@ export function* removeComment({ teamspace, modelId, issueData }) {
 	}
 }
 
-export function* renderPins() {
-	try {
-		const activeIssueId = yield select(selectActiveIssueId);
-		const issuesList = yield select(selectIssues);
-		let filteredIssues = yield select(selectFilteredIssues);
-
-		if (activeIssueId) {
-			filteredIssues = filteredIssues.concat(differenceBy(issuesList, filteredIssues, '_id')
-				.filter((issue) => issue._id === activeIssueId)
-			);
-		}
-
-		const shouldShowPins = yield select(selectShowPins);
-		const invisibleIssues = issuesList.length !== filteredIssues.length
-			? differenceBy(issuesList, filteredIssues, '_id')
-			: [];
-
-		const removePins = (issues) => issues.forEach((issue) => {
-			Viewer.removePin({ id: issue._id });
-		});
-
-		yield removePins(!shouldShowPins ? issuesList : invisibleIssues);
-
-		if (shouldShowPins) {
-			for (let index = 0; index < filteredIssues.length; index++) {
-				const issue = filteredIssues[index];
-
-				const pinPosition = issue.position && issue.position.length;
-
-				if (pinPosition) {
-					const isSelectedPin = activeIssueId && issue._id === activeIssueId;
-					const pinColor = getIssuePinColor(issue.status, issue.priority, isSelectedPin);
-
-					Viewer.addPin({
-						id: issue._id,
-						type: 'issue',
-						account: issue.account,
-						model: issue.model,
-						pickedPos: issue.position,
-						pickedNorm: issue.norm,
-						colours: pinColor,
-						viewpoint: issue.viewpoint
-					});
-				}
-			}
-		}
-
-		yield Viewer.removePin({ id: NEW_PIN_ID });
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('show', 'pins', error));
-	}
-}
-
 export function* downloadIssues({ teamspace, modelId }) {
 	try {
 		const filteredIssues = yield select(selectFilteredIssues);
@@ -328,7 +226,6 @@ export function* downloadIssues({ teamspace, modelId }) {
 
 export function* exportBcf({ teamspace, modelId }) {
 	try {
-
 		const filteredIssues = yield select(selectFilteredIssues);
 		const issuesIds = map(filteredIssues, '_id').join(',');
 		Exports.exportBCF(teamspace, modelId, issuesIds);
@@ -441,7 +338,6 @@ const showMultipleGroups = async (issue, revision) => {
 export function* focusOnIssue({ issue, revision }) {
 	try {
 		yield Viewer.isViewerReady();
-		yield put(IssuesActions.renderPins());
 		const TreeService = getAngularService('TreeService') as any;
 
 		// Remove highlight from any multi objects
@@ -500,12 +396,6 @@ export function* setActiveIssue({ issue, revision }) {
 			yield put(IssuesActions.fetchIssue(account , model, _id));
 		}
 
-		if (activeIssueId !== issue._id) {
-			if (activeIssueId) {
-				toggleIssuePin(issuesMap[activeIssueId], false);
-			}
-			toggleIssuePin(issue, true);
-		}
 		yield all([
 			put(IssuesActions.focusOnIssue(issue, revision)),
 			put(IssuesActions.setComponentState({ activeIssue: issue._id, expandDetails: true }))
@@ -534,7 +424,6 @@ export function* showDetails({ teamspace, model, revision, issue }) {
 export function* closeDetails({ teamspace, model, revision }) {
 	try {
 		const activeIssue = yield select(selectActiveIssueDetails);
-		yield Viewer.removePin({ id: NEW_PIN_ID });
 
 		if (activeIssue) {
 			runAngularViewerTransition({
@@ -551,42 +440,11 @@ export function* closeDetails({ teamspace, model, revision }) {
 	}
 }
 
-export function* showNewPin({ issue, pinData }) {
-	try {
-		Viewer.removePin({ id: pinData.id });
-		Viewer.setPin(null);
-
-		const data = {
-			...pinData,
-			account: issue.account,
-			model: issue.model,
-			colours: PIN_COLORS.SUNGLOW,
-			type: 'issue'
-		};
-
-		Viewer.addPin(data);
-		Viewer.setPin(data);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('display', 'pin', error));
-	}
-}
-
-export function* toggleShowPins({ showPins }) {
-	try {
-		yield put(IssuesActions.setComponentState({ showPins }));
-		yield put(IssuesActions.renderPins());
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('toggle', 'pins', error));
-	}
-}
-
 const onUpdateEvent = (updatedIssue) => {
 	const jobs = selectJobsList(getState());
 	if (updatedIssue.comments) {
 		updatedIssue.comments = prepareComments(updatedIssue.comments);
 	}
-
-	dispatch(IssuesActions.updateIssuePin(updatedIssue));
 
 	if (updatedIssue.status === STATUSES.CLOSED) {
 
@@ -602,7 +460,6 @@ const onUpdateEvent = (updatedIssue) => {
 const onCreateEvent = (createdIssue) => {
 	const jobs = selectJobsList(getState());
 	dispatch(IssuesActions.saveIssueSuccess(prepareIssue(createdIssue[0], jobs)));
-	dispatch(IssuesActions.updateIssuePin(createdIssue[0]));
 };
 
 const onResourcesCreated = (resources) => {
@@ -690,7 +547,6 @@ export function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId
 }
 
 export function* setNewIssue() {
-	const activeIssue = yield select(selectActiveIssueDetails);
 	const issues = yield select(selectIssues);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
@@ -700,10 +556,6 @@ export function* setNewIssue() {
 						DEFAULT_PROPERTIES.TOPIC_TYPE : topicTypes[0].value;
 
 	try {
-		if (activeIssue) {
-			toggleIssuePin(activeIssue, false);
-		}
-
 		const newIssue = prepareIssue({
 			name: 'Untitled Issue',
 			assigned_roles: [],
@@ -727,7 +579,6 @@ export function* setNewIssue() {
 export function* setFilters({ filters }) {
 	try {
 		yield put(IssuesActions.setComponentState({ selectedFilters: filters }));
-		yield put(IssuesActions.renderPins());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'filters', error));
 	}
@@ -736,7 +587,6 @@ export function* setFilters({ filters }) {
 export function* toggleSubmodelsIssues({ showSubmodelIssues }) {
 	try {
 		yield put(IssuesActions.setComponentState({ showSubmodelIssues }));
-		yield put(IssuesActions.renderPins());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('toggle', 'submodels issues', error));
 	}
@@ -832,13 +682,11 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.UPDATE_ISSUE, updateIssue);
 	yield takeLatest(IssuesTypes.POST_COMMENT, postComment);
 	yield takeLatest(IssuesTypes.REMOVE_COMMENT, removeComment);
-	yield takeLatest(IssuesTypes.RENDER_PINS, renderPins);
 	yield takeLatest(IssuesTypes.DOWNLOAD_ISSUES, downloadIssues);
 	yield takeLatest(IssuesTypes.PRINT_ISSUES, printIssues);
 	yield takeLatest(IssuesTypes.SET_ACTIVE_ISSUE, setActiveIssue);
 	yield takeLatest(IssuesTypes.SHOW_DETAILS, showDetails);
 	yield takeLatest(IssuesTypes.CLOSE_DETAILS, closeDetails);
-	yield takeLatest(IssuesTypes.SHOW_NEW_PIN, showNewPin);
 	yield takeLatest(IssuesTypes.SUBSCRIBE_ON_ISSUE_CHANGES, subscribeOnIssueChanges);
 	yield takeLatest(IssuesTypes.UNSUBSCRIBE_ON_ISSUE_CHANGES, unsubscribeOnIssueChanges);
 	yield takeLatest(IssuesTypes.FOCUS_ON_ISSUE, focusOnIssue);
@@ -853,5 +701,4 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.REMOVE_RESOURCE, removeResource);
 	yield takeLatest(IssuesTypes.ATTACH_FILE_RESOURCES, attachFileResources);
 	yield takeLatest(IssuesTypes.ATTACH_LINK_RESOURCES, attachLinkResources);
-	yield takeLatest(IssuesTypes.UPDATE_ISSUE_PIN, updateIssuePin);
 }

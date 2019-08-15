@@ -21,6 +21,8 @@ import { selectShadowSetting, selectStatsSetting, selectNearPlaneSetting,
 import { selectOverrides } from '../../../modules/groups';
 import { overridesDiff,
 	removeColorOverrides, addColorOverrides } from '../../../helpers/colorOverrides';
+import { selectPins } from '../../../modules/issues';
+import { pinsDiff } from '../../../helpers/pins';
 
 class ViewerController implements ng.IController {
 
@@ -55,6 +57,7 @@ class ViewerController implements ng.IController {
 	private maxShadowDistance: number;
 	private numCacheThreads: number;
 	private colorOverrides: any[] = [];
+	private issuePins: any[] = [];
 
 	constructor(
 		private $scope: ng.IScope,
@@ -88,7 +91,8 @@ class ViewerController implements ng.IController {
 			farPlaneSamplingPoints: selectFarPlaneSamplingPoints,
 			maxShadowDistance : selectMaxShadowDistance,
 			numCacheThreads : selectNumCacheThreads,
-			colorOverrides: selectOverrides
+			colorOverrides: selectOverrides,
+			issuePins: selectPins
 		});
 	}
 
@@ -143,12 +147,19 @@ class ViewerController implements ng.IController {
 
 		this.$scope.$watch(() => this.colorOverrides,  async (overrides, prevOverrides) => {
 			const toAdd = overridesDiff(overrides, prevOverrides);
-			const toRemove = overridesDiff(prevOverrides, overrides );
+			const toRemove = overridesDiff(prevOverrides, overrides);
 
 			removeColorOverrides(toRemove);
 			addColorOverrides(toAdd);
 		});
 
+		this.$scope.$watch(() => this.issuePins,  async (issuePins, prevIssuePins) => {
+			const toAdd = pinsDiff(issuePins, prevIssuePins);
+			const toRemove = pinsDiff(prevIssuePins, issuePins);
+
+			toRemove.forEach(this.ViewerService.removePin.bind(this.ViewerService));
+			toAdd.forEach(this.ViewerService.addPin.bind(this.ViewerService));
+		});
 	}
 }
 

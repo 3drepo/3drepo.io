@@ -48,7 +48,7 @@ interface IProps {
 	failedToLoad: boolean;
 	setState: (componentState) => void;
 	fetchIssue: (teamspace, model, issueId) => void;
-	showNewPin: (issue, pinData) => void;
+	updateSelectedIssuePin: (position) => void;
 	saveIssue: (teamspace, modelId, issue, revision, finishSubmitting) => void;
 	updateIssue: (teamspace, modelId, issue) => void;
 	postComment: (teamspace, modelId, issueData, finishSubmitting) => void;
@@ -137,7 +137,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public renderDetailsForm = () => {
 		const {issue, onRemoveResource, showDialog, topicTypes,
-			currentUser, myJob, attachFileResources, attachLinkResources} = this.props;
+			currentUser, myJob, attachFileResources, attachLinkResources,
+			updateSelectedIssuePin } = this.props;
 
 		return (
 			<IssueDetailsForm
@@ -149,7 +150,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				topicTypes={topicTypes}
 				currentUser={currentUser}
 				myJob={myJob}
-				onChangePin={this.handleChangePin}
+				onChangePin={updateSelectedIssuePin}
 				onSavePin={this.onPositionSave}
 				pinId={issue._id}
 				hasPin={issue.position && issue.position.length}
@@ -265,10 +266,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleChangePin = (pinData) => {
-		this.props.showNewPin(this.props.issue, pinData);
-	}
-
 	public postComment = async (teamspace, model, { comment, screenshot }, finishSubmitting) => {
 		const viewpoint = await Viewer.getCurrentViewpoint({ teamspace, model });
 		const issueCommentData = {
@@ -296,11 +293,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		const { teamspace, model, issue, updateIssue } = this.props;
 
 		if (!this.isNewIssue) {
-			updateIssue(teamspace, model, {position: position || []});
-			Viewer.setPin(null);
-		} else {
-			const colours = getIssuePinColor(issue.status, issue.priority, true);
-			Viewer.changePinColor({ id: NEW_PIN_ID, colours});
+			updateIssue(teamspace, model, {position: issue.position || []});
 		}
 	}
 

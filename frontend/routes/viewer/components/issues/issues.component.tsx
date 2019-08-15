@@ -74,7 +74,6 @@ interface IProps {
 	exportBCF: (teamspace, modelId) => void;
 	toggleSortOrder: () => void;
 	setFilters: (filters) => void;
-	renderPins: () => void;
 }
 
 const UNASSIGNED_JOB = {
@@ -205,7 +204,6 @@ export class Issues extends React.PureComponent<IProps, any> {
 	public closeIssueDetails = () => {
 		const { teamspace, model, revision } = this.props;
 		this.props.closeDetails(teamspace, model, revision);
-		this.props.renderPins();
 	}
 
 	public getFilterValues(property) {

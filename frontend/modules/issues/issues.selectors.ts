@@ -20,6 +20,8 @@ import { values } from 'lodash';
 import { STATUSES } from '../../constants/issues';
 import { searchByFilters } from '../../helpers/searching';
 import { selectCurrentModel } from '../model';
+import { getIssuePinColor } from '../../helpers/issues';
+import { issueToPin } from '../../helpers/pins';
 
 export const selectIssuesDomain = (state) => Object.assign({}, state.issues);
 
@@ -112,4 +114,26 @@ export const selectSortOrder = createSelector(
 
 export const selectFailedToLoad = createSelector(
 	selectComponentState, (state) => state.failedToLoad
+);
+
+export const selectPins =  createSelector(
+	selectFilteredIssues, selectComponentState, selectActiveIssueDetails, (issues: any, componentState, detailedIssue) => {
+
+	const hasPin = (issue) => issue.position && issue.position.length === 3;
+
+	const pinsToShow =  issues.reduce((pins, issue) => {
+		if (!hasPin(issue)) {
+			return pins;
+		}
+
+		pins.push(issueToPin(issue, componentState.activeIssue === issue._id ));
+		return pins;
+	} , []);
+
+	if (componentState.showDetails && detailedIssue && hasPin(detailedIssue)) {
+		pinsToShow.push(issueToPin(detailedIssue, true));
+	}
+
+	return pinsToShow;
+}
 );
