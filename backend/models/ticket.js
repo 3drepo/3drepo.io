@@ -158,20 +158,30 @@ class Ticket {
 	}
 
 	async update(attributeBlacklist, user, sessionId, account, model, id, data, beforeUpdate = _.identity) {
+		const results = await Promise.all([
+			// 1. Get old ticket
+			this.findByUID(account, model, id, {}, true),
+			// 2. Get user permissions
+			User.findByUserName(account),
+			Job.findByUser(account, user),
+			Project.isProjectAdmin(
+				account,
+				model,
+				user
+			)
+		]);
 
-		// 1. Get old ticket
-		let oldTicket = await this.findByUID(account, model, id, {}, true);
+		let [
+			oldTicket,
+			// eslint-disable-next-line prefer-const
+			dbUser,
+			// eslint-disable-next-line prefer-const
+			job,
+			// eslint-disable-next-line prefer-const
+			projAdmin
+		] = results;
 
-		// 2. Get user permissions
-		const dbUser = await User.findByUserName(account);
-		const job = (await Job.findByUser(account, user) || {})._id;
 		const accountPerm = dbUser.customData.permissions.findByUser(user);
-		const projAdmin = await Project.isProjectAdmin(
-			account,
-			model,
-			user
-		);
-
 		const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
 		const isAdmin = projAdmin || tsAdmin;
 		const hasOwnerJob = oldTicket.creator_role === job;
