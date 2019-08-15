@@ -174,7 +174,6 @@ export function* updateIssue({ teamspace, modelId, issueData }) {
 		preparedIssue.comments = yield prepareComments(preparedIssue.comments);
 
 		yield put(IssuesActions.setComponentState({ savedPin: position }));
-
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue updated'));
 	} catch (error) {
@@ -410,12 +409,19 @@ export function* setActiveIssue({ issue, revision }) {
 
 export function* showDetails({ teamspace, model, revision, issue }) {
 	try {
+		const activeIssue = yield select(selectActiveIssueDetails);
+		const componentState = yield select(selectComponentState);
+
 		runAngularViewerTransition({
 			account: teamspace,
 			model,
 			revision,
 			issueId: issue._id
 		});
+
+		if (componentState.showDetails && !isEqual(activeIssue.position, componentState.savedPin)) {
+			yield put(IssuesActions.updateSelectedIssuePin(componentState.savedPin));
+		}
 
 		yield put(IssuesActions.setActiveIssue(issue, revision));
 		yield put(IssuesActions.setComponentState({ showDetails: true, savedPin: issue.position }));

@@ -16,7 +16,7 @@
  */
 
 import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { differenceBy, isEmpty, omit, pick, map } from 'lodash';
+import { differenceBy, isEmpty, omit, pick, map, isEqual } from 'lodash';
 
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
@@ -35,7 +35,8 @@ import {
 	selectRisks,
 	selectRisksMap,
 	selectActiveRiskDetails,
-	selectFilteredRisks
+	selectFilteredRisks,
+	selectComponentState
 } from './risks.selectors';
 import { RisksActions, RisksTypes } from './risks.redux';
 
@@ -154,7 +155,7 @@ export function* saveRisk({ teamspace, model, riskData, revision, finishSubmitti
 
 export function* updateRisk({ teamspace, modelId, riskData }) {
 	try {
-		const { _id, rev_id } = yield select(selectActiveRiskDetails);
+		const { _id, rev_id, position } = yield select(selectActiveRiskDetails);
 		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, rev_id, riskData);
 		const AnalyticService = getAngularService('AnalyticService') as any;
 		yield AnalyticService.sendEvent({
@@ -166,6 +167,7 @@ export function* updateRisk({ teamspace, modelId, riskData }) {
 		const preparedRisk = prepareRisk(updatedRisk, jobs);
 		preparedRisk.comments = yield prepareComments(preparedRisk.comments);
 
+		yield put(RisksActions.setComponentState({ savedPin: position }));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
@@ -365,6 +367,9 @@ export function* setActiveRisk({ risk, revision }) {
 
 export function* showDetails({ teamspace, model, revision, risk }) {
 	try {
+		const activeRisk = yield select(selectActiveRiskDetails);
+		const componentState = yield select(selectComponentState);
+
 		runAngularViewerTransition({
 			account: teamspace,
 			model,
@@ -372,8 +377,12 @@ export function* showDetails({ teamspace, model, revision, risk }) {
 			riskId: risk._id
 		});
 
+		if (componentState.showDetails && !isEqual(activeRisk.position, componentState.savedPin)) {
+			yield put(RisksActions.updateSelectedRiskPin(componentState.savedPin));
+		}
+
 		yield put(RisksActions.setActiveRisk(risk, revision));
-		yield put(RisksActions.setComponentState({ showDetails: true }));
+		yield put(RisksActions.setComponentState({ showDetails: true, savedPin: risk.position }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('display', 'risk details', error));
 	}
@@ -382,6 +391,7 @@ export function* showDetails({ teamspace, model, revision, risk }) {
 export function* closeDetails({ teamspace, model, revision }) {
 	try {
 		const activeRisk = yield select(selectActiveRiskDetails);
+		const componentState = yield select(selectComponentState);
 
 		if (activeRisk) {
 			runAngularViewerTransition({
@@ -393,7 +403,11 @@ export function* closeDetails({ teamspace, model, revision }) {
 			});
 		}
 
-		yield put(RisksActions.setComponentState({ showDetails: false }));
+		if (!isEqual(activeRisk.position, componentState.savedPin)) {
+			yield put(RisksActions.updateSelectedRiskPin(componentState.savedPin));
+		}
+
+		yield put(RisksActions.setComponentState({ showDetails: false, savedPin: null }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('close', 'risk details', error));
 	}

@@ -106,18 +106,18 @@ export const selectPins = createSelector(
 	selectFilteredRisks, selectComponentState, selectActiveRiskDetails, selectShowPins,
 	(risks: any, componentState, detailedRisk, showPins) => {
 
-	if (!showPins) {
-		return [];
-	}
+	let pinsToShow = [];
 
-	const pinsToShow =  risks.reduce((pins, risk) => {
-		if (!hasPin(risk)) {
+	if (showPins) {
+		pinsToShow = risks.reduce((pins, risk) => {
+			if (!hasPin(risk)) {
+				return pins;
+			}
+
+			pins.push(riskToPin(risk, componentState.activeRisk === risk._id ));
 			return pins;
-		}
-
-		pins.push(riskToPin(risk, componentState.activeRisk === risk._id ));
-		return pins;
-	} , []);
+		} , []);
+	}
 
 	if (componentState.showDetails && detailedRisk && hasPin(detailedRisk)) {
 		pinsToShow.push(riskToPin(detailedRisk, true));
