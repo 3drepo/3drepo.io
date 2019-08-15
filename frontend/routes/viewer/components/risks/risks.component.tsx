@@ -113,7 +113,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 		return [{
 			...RISKS_ACTIONS_MENU.PRINT,
 			onClick: () => printRisks(teamspace, model)
-		}, , {
+		}, {
 			...RISKS_ACTIONS_MENU.SHOW_PINS,
 			enabled: this.props.showPins,
 			onClick: () => toggleShowPins(!showPins)

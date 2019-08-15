@@ -5,6 +5,7 @@ import AdjustIcon from '@material-ui/icons/Adjust';
 import Print from '@material-ui/icons/Print';
 import Download from '@material-ui/icons/CloudDownload';
 import Upload from '@material-ui/icons/CloudUpload';
+import Pins from '@material-ui/icons/PinDrop';
 import { SortAmountUp, SortAmountDown } from '../routes/components/fontAwesomeIcon';
 
 import ViewModule from '@material-ui/icons/ViewModule';
@@ -159,6 +160,11 @@ export const ISSUES_ACTIONS_MENU = {
 			ASC: SortAmountUp,
 			DESC: SortAmountDown
 		}
+	},
+	SHOW_PINS: {
+		label:  'Show Pins',
+		Icon: Pins,
+		enabled:  true
 	},
 	SHOW_SUBMODEL_ISSUES: {
 		label: 'Show sub model issues',

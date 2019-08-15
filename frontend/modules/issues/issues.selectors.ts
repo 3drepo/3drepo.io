@@ -119,18 +119,18 @@ export const selectPins = createSelector(
 	selectFilteredIssues, selectComponentState, selectActiveIssueDetails, selectShowPins,
 	(issues: any, componentState, detailedIssue, showPins) => {
 
-	if (!showPins) {
-		return [];
-	}
+	let pinsToShow = [];
 
-	const pinsToShow =  issues.reduce((pins, issue) => {
-		if (!hasPin(issue)) {
+	if (showPins) {
+		pinsToShow =  issues.reduce((pins, issue) => {
+			if (!hasPin(issue)) {
+				return pins;
+			}
+
+			pins.push(issueToPin(issue, componentState.activeIssue === issue._id ));
 			return pins;
-		}
-
-		pins.push(issueToPin(issue, componentState.activeIssue === issue._id ));
-		return pins;
-	} , []);
+		} , []);
+	}
 
 	if (componentState.showDetails && detailedIssue && hasPin(detailedIssue)) {
 		pinsToShow.push(issueToPin(detailedIssue, true));
