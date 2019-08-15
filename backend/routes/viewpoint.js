@@ -25,6 +25,7 @@ const responseCodes = require("../response_codes.js");
 const Viewpoint = require("../models/viewpoint");
 const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
+const config = require("../config");
 
 /**
  * @api {get} /:teamspace/:model/viewpoints List all Viewpoints
@@ -197,7 +198,7 @@ function getViewpointThumbnail(req, res, next) {
 	const place = utils.APIInfo(req);
 
 	Viewpoint.getThumbnail(dbCol, req.params.uid).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png" , config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});

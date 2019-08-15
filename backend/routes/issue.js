@@ -684,7 +684,7 @@ function getScreenshot(req, res, next) {
 	const dbCol = { account: req.params.account, model: req.params.model };
 
 	Issue.getScreenshot(dbCol, req.params.issueId, req.params.vid).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});
@@ -695,7 +695,7 @@ function getScreenshotSmall(req, res, next) {
 	const dbCol = { account: req.params.account, model: req.params.model };
 
 	Issue.getSmallScreenshot(dbCol, req.params.issueId, req.params.vid).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});
@@ -706,7 +706,7 @@ function getThumbnail(req, res, next) {
 	const dbCol = { account: req.params.account, model: req.params.model };
 
 	Issue.getThumbnail(dbCol, req.params.issueId).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});

@@ -25,6 +25,7 @@
 	const middlewares = require("../middlewares/middlewares");
 	const utils = require("../utils");
 	const C = require("../constants");
+	const config = require("../config");
 
 	// Get meta data
 
@@ -139,7 +140,9 @@
 					res,
 					next,
 					responseCodes.OK,
-					{ meta: [meta] }
+					{ meta: [meta] },
+					undefined,
+					{maxAge: 60 * 60 * 24}
 				);
 			})
 			.catch(err => {
@@ -156,7 +159,7 @@
 
 		ModelHelpers.getAllMetadata(req.params.account, req.params.model, branch, req.params.rev)
 			.then(obj => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
 			})
 			.catch(err => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -172,7 +175,7 @@
 
 		ModelHelpers.getAllIdsWith4DSequenceTag(req.params.account, req.params.model, branch, req.params.rev)
 			.then(obj => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
 			})
 			.catch(err => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -188,7 +191,7 @@
 
 		ModelHelpers.getAllIdsWithMetadataField(req.params.account, req.params.model, branch, req.params.rev, req.params.metaKey)
 			.then(obj => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined, req.param.rev ? config.cachePolicy : undefined);
 			})
 			.catch(err => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -200,7 +203,7 @@
 
 		Meta.getMetadataFields(dbCol.account, dbCol.model)
 			.then(obj => {
-				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj, undefined,  {maxAge: 360});
 			})
 			.catch(err => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
