@@ -72,7 +72,7 @@
 	 * @apiExample {post} Example usage:
 	 * POST /acme/permissions HTTP/1.1
 	 * {
-	 * 	"user": "bob"
+	 * 	"user": "bob",
 	 * 	"permissions": [
 	 * 		"create_project"
 	 * 	]
