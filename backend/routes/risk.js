@@ -132,7 +132,7 @@ router.post("/risks", middlewares.issue.canCreate, storeRisk);
  * @apiParam {String} model Model ID
  * @apiParam {String} riskId Risk ID.
  */
-router.patch("/risks/:riskId", middlewares.issue.canComment, updateRisk);
+router.patch("/risks/:riskId", middlewares.issue.canComment, updateRisk,  middlewares.chat.onUpdateRisk,responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /:teamspace/:model/revision/:rid/risks	Store risks based on Revision ID
@@ -155,7 +155,65 @@ router.post("/revision/:rid/risks", middlewares.issue.canCreate, storeRisk);
  * @apiParam {String} rid Revision ID.
  * @apiParam {String} riskId Risk ID.
  */
-router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updateRisk);
+router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updateRisk, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {post} /:teamspace/:model/risks/:riskId/comments Add an comment for an issue
+ * @apiName commentIssue
+ * @apiGroup Risks
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {String} riskId Unique Issue ID to update.
+ * @apiParam {Json} PAYLOAD The data with the comment to be added.
+ * @apiParamExample {json} PAYLOAD
+ *    {
+ *      "comment": "This is a commment",
+ *      "viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
+ *    }
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *   {
+ *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
+ *       comment: "This is a commment",
+ *       created: 1558534690327,
+ *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
+ *       owner: "username",
+ *       viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
+ *   }
+ *
+ * @apiError 404 Issue not found
+ * @apiError 400 Comment with no text
+ * */
+router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {delete} /:teamspace/:model/risks/:riskId/comments Deletes an comment from an issue
+ * @apiName commentIssue
+ * @apiGroup Issues
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {String} riskId	 Unique Issue ID to update.
+ * @apiParam {Json} PAYLOAD The data with the comment guid to be deleted.
+ * @apiParamExample {json} PAYLOAD
+ *    {
+ *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
+ *    }
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *   {
+ *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
+ *   }
+ *
+ * @apiError 404 Issue not found
+ * @apiError 401 Not authorized, when the user is not the owner
+ * @apiError 400 Issue comment sealed, when the user is trying to delete a comment that is sealed
+ * @apiError 400 GUID invalid, when the user sent an invalid guid
+ * */
+router.delete("/risks/:riskId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {post} /:teamspace/:model/risks/:riskId/comments Add an comment for an issue
@@ -240,21 +298,18 @@ function storeRisk(req, res, next) {
 
 function updateRisk(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model};
-	const data = req.body;
+	const { account, model, riskId } = req.params;
+	const updateData = req.body;
 
-	data.owner = req.session.user.username;
-	data.requester = req.session.user.username;
-	data.revId = req.params.rid;
-	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const user = req.session.user.username;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	const riskId = req.params.riskId;
-
-	return Risk.updateAttrs(dbCol, riskId, data).then((risk) => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, risk);
-
+	return Risk.update(user, sessionId, account, model, riskId, updateData).then(({updatedTicket, oldTicket, data}) => {
+		req.dataModel = updatedTicket;
+		req.oldDataModel = oldTicket;
+		req.data = data;
+		next();
 	}).catch((err) => {
-
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
