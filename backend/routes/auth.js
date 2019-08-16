@@ -501,13 +501,21 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
  * @apiParam {String} user User account
  * @apiParam (Request body) {String} oldPassword Old password
  * @apiParam (Request body) {String} newPassword New password
+ * @apiParam (Request body) {String} token Password reset token
  * @apiSuccess (200) account Account username
  * @apiError TOKEN_INVALID Token is invalid or has expired
  *
- * @apiExample {post} Example usage:
- * PUT /user/password HTTP/1.1
+ * @apiExample {post} Example usage (with old password):
+ * PUT /alice/password HTTP/1.1
  * {
  * 	"oldPassword":"AW96B6",
+ * 	"newPassword":"TrustNo1"
+ * }
+ *
+ * @apiExample {post} Example usage (with token):
+ * PUT /alice/password HTTP/1.1
+ * {
+ * 	"token":"1234567890",
  * 	"newPassword":"TrustNo1"
  * }
  *
