@@ -122,8 +122,8 @@ function newRisks(emitter, account, model, data) {
 	return insertEventQueue("risk" + eventTypes.CREATED, emitter, account, model, null, data);
 }
 
-function riskChanged(emitter, account, model, data) {
-	return insertEventQueue("risk" + eventTypes.UPDATED, emitter, account, model, null, data);
+function riskChanged(emitter, account, model, _id, data) {
+	return insertEventQueue("risk" + eventTypes.UPDATED, emitter, account, model, null, {_id, ...data});
 }
 
 function risksDeleted(emitter, account, model, ids) {
