@@ -604,8 +604,8 @@ describe("Risks", function () {
 		});
 
 		describe("and then commenting", function() {
-
 			let riskId;
+			let commentId = null
 
 			before(function(done) {
 
@@ -641,7 +641,7 @@ describe("Risks", function () {
 
 				async.series([
 					function(done) {
-						agent.patch(`/${username}/${model}/risks/${riskId}`)
+						agent.post(`/${username}/${model}/risks/${riskId}/comments`)
 							.send(comment)
 							.expect(200 , done);
 					},
@@ -654,6 +654,7 @@ describe("Risks", function () {
 							expect(res.body.comments[0].comment).to.equal(comment.comment);
 							expect(res.body.comments[0].owner).to.equal(username);
 							expect(res.body.comments[0].viewpoint).to.deep.equal(comment.viewpoint);
+							commentId = res.body.comments[0].guid;
 
 							done(err);
 						});
@@ -662,36 +663,12 @@ describe("Risks", function () {
 
 			});
 
-			it("should succeed if editing an existing comment", function(done) {
-
-				const comment = { comment: "hello world 2", commentIndex: 0, edit: true };
-
-				async.series([
-					function(done) {
-						agent.patch(`/${username}/${model}/risks/${riskId}`)
-							.send(comment)
-							.expect(200 , done);
-					},
-
-					function(done) {
-						agent.get(`/${username}/${model}/risks/${riskId}`).expect(200, function(err , res) {
-
-							expect(res.body.comments.length).to.equal(1);
-							expect(res.body.comments[0].comment).to.equal(comment.comment);
-							expect(res.body.comments[0].owner).to.equal(username);
-
-							done(err);
-						});
-					}
-				], done);
-
-			});
 
 			it("should fail if comment is empty", function(done) {
 
 				const comment = { comment: "" };
 
-				agent.patch(`/${username}/${model}/risks/${riskId}`)
+				agent.post(`/${username}/${model}/risks/${riskId}/comments`)
 					.send(comment)
 					.expect(400 , function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_NO_TEXT.value);
@@ -700,11 +677,8 @@ describe("Risks", function () {
 			});
 
 			it("should succeed if removing an existing comment", function(done) {
-
-				const comment = { commentIndex: 0, delete: true };
-
-				agent.patch(`/${username}/${model}/risks/${riskId}`)
-					.send(comment)
+				agent.delete(`/${username}/${model}/risks/${riskId}/comments`)
+					.send({guid:commentId})
 					.expect(200 , function(err, res) {
 						done(err);
 					});
