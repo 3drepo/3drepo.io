@@ -173,7 +173,12 @@ router.get("/version", printVersion);
  * that the user has access to.
  *
  * @apiParam {String} user User
- * @apiSuccess (200) {Object[]} User account
+ * @apiSuccess (200) {Object[]} accounts User account
+ * @apiSuccess (200) {Object} billingInfo Billing information
+ * @apiSuccess (200) {String} email User e-mail address
+ * @apiSuccess (200) {String} firstName First name
+ * @apiSuccess (200) {String} lastName Surname
+ * @apiSuccess (200) {Boolean} hasAvatar True if user account has an avatar
  *
  * @apiExample {delete} Example usage:
  * GET /alice.json HTTP/1.1
@@ -290,7 +295,6 @@ router.get("/version", printVersion);
  * 			]
  * 		}
  * 	],
- * 	"email": "test3drepo@mailinator.com",
  * 	"billingInfo": {
  * 		"countryCode": "US",
  * 		"postalCode": "0",
@@ -299,10 +303,11 @@ router.get("/version", printVersion);
  * 		"line1": "123",
  * 		"vat": "000",
  * 		"company": "Universal Pictures",
- * 		"lastName": "Maddox",
- * 		"firstName": "Otto",
  * 		"_id": "59145aedf4f613668fba0f98"
  * 	},
+ * 	"email":"alice@acme.co.uk",
+ * 	"firstName":"Alice",
+ * 	"lastName":"Allen",
  * 	"hasAvatar": true,
  * 	"jobs": [
  * 		{
