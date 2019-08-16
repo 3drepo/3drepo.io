@@ -28,192 +28,274 @@ const systemLogger = require("../logger.js").systemLogger;
 
 /**
  * @apiDeprecated use {get} /:teamspace/:model/revision/master/head/groups instead
- * @api {get} /:teamspace/:model/groups/revision/master/head
+ * @api {get} /:teamspace/:model/groups/revision/master/head List all groups
+ * @apiVersion 3.4.0
  * @apiName listGroups
  * @apiGroup Groups
+ * @apiDescription List all groups associated with the model.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
+ * @apiSuccess (200) {String} author Username of group creator
+ * @apiSuccess (200) {Number[]} color RGB colour values
+ * @apiSuccess (200) {Number} createdAt Group creation timestamp in milliseconds
+ * @apiSuccess (200) {String} description Group description
+ * @apiSuccess (200) {String} name Group name
+ * @apiSuccess (200) {Object[]} objects List of objects in group
+ * @apiSuccess (200) {Object[]} rules List of rules in group
+ * @apiSuccess (200) {Number} updatedAt Group update timestamp in milliseconds
+ * @apiSuccess (200) {Number} updatedBy Username of last user to amend group
+ * @apiSuccess (200) {String} _id Unique ID of group
  *
- * @apiDescription Get all groups for current model.
+ * @apiExample {put} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/groups/revision/master/head HTTP/1.1
  *
- * @apiSuccess (200) {Object[]} List of all Groups
  * @apiSuccessExample {json} Success-Response
- *
  * HTTP/1.1 200 OK
- * {
- *   "_id":"model_ID",
- *   "__v":0,
- *   "name":"Changed",
- *   "author":"username",
- *   "createdAt":1536747251756,
- *   "updatedBy":"username",
- *   "updatedAt":1536747551043,
- *   "color":[152,233,75],
- *   "objects":[]
- * }
+ * [
+ * 	{
+ * 		"author":"alice",
+ * 		"color":[255,0,0],
+ * 		"createdAt":1552128300000,
+ * 		"description":"",
+ * 		"name":"Group 1",
+ * 		"objects":[],
+ * 		"updatedAt":1552128300000,
+ * 		"updatedBy":"alice",
+ * 		"_id":"00000000-0000-0000-0000-000000000001"
+ * 	},
+ * 	{
+ * 		"author":"alice",
+ * 		"color":[0,255,0],
+ * 		"createdAt":1552128300000,
+ * 		"description":"",
+ * 		"name":"Group 2",
+ * 		"objects":[],
+ * 		"rules":[],
+ * 		"updatedAt":1552128300000,
+ * 		"updatedBy":"alice",
+ * 		"_id":"00000000-0000-0000-0000-000000000002"
+ * 	}
+ * ]
  */
 router.get("/groups/revision/master/head/", middlewares.issue.canView, listGroups);
 
 /**
- * @api {get} /:teamspace/:model/revision/master/head/groups/ List model groups
+ * @api {get} /:teamspace/:model/revision/master/head/groups List all groups
+ * @apiVersion 3.12.0
  * @apiName listGroups
  * @apiGroup Groups
+ * @apiDescription List all groups associated with the model.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
+ * @apiSuccess (200) {String} author Username of group creator
+ * @apiSuccess (200) {Number[]} color RGB colour values
+ * @apiSuccess (200) {Number} createdAt Group creation timestamp in milliseconds
+ * @apiSuccess (200) {String} description Group description
+ * @apiSuccess (200) {String} name Group name
+ * @apiSuccess (200) {Object[]} objects List of objects in group
+ * @apiSuccess (200) {Object[]} rules List of rules in group
+ * @apiSuccess (200) {Number} updatedAt Group update timestamp in milliseconds
+ * @apiSuccess (200) {Number} updatedBy Username of last user to amend group
+ * @apiSuccess (200) {String} _id Unique ID of group
  *
- * @apiDescription Get all groups for current model.
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/groups HTTP/1.1
  *
- * @apiSuccess (200) {Object[]} List of all Groups
  * @apiSuccessExample {json} Success-Response
- *
  * HTTP/1.1 200 OK
- * {
- *   "_id":"model_ID",
- *   "__v":0,
- *   "name":"Changed",
- *   "author":"username",
- *   "createdAt":1536747251756,
- *   "updatedBy":"username",
- *   "updatedAt":1536747551043,
- *   "color":[152,233,75],
- *   "objects":[]
- * }
+ * [
+ * 	{
+ * 		"author":"alice",
+ * 		"color":[255,0,0],
+ * 		"createdAt":1552128300000,
+ * 		"description":"",
+ * 		"name":"Group 1",
+ * 		"objects":[],
+ * 		"updatedAt":1552128300000,
+ * 		"updatedBy":"alice",
+ * 		"_id":"00000000-0000-0000-0000-000000000001"
+ * 	},
+ * 	{
+ * 		"author":"alice",
+ * 		"color":[0,255,0],
+ * 		"createdAt":1552128300000,
+ * 		"description":"",
+ * 		"name":"Group 2",
+ * 		"objects":[],
+ * 		"rules":[],
+ * 		"updatedAt":1552128300000,
+ * 		"updatedBy":"alice",
+ * 		"_id":"00000000-0000-0000-0000-000000000002"
+ * 	}
+ * ]
  */
 router.get("/revision/master/head/groups", middlewares.issue.canView, listGroups);
 
 /**
  * @apiDeprecated Use /:teamspace/:model/revision/:rid/groups/ instead
- * @apiDescription List all groups using the revision ID
+ * @apiVersion 3.4.0
  * @apiName listGroupsByRevision
  * @apiGroup Groups
- *
- * @apiDescription List all groups using based on which revision is currently selected.
+ * @apiDescription List all groups associated with a model and revision.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} id Revision unique ID.
+ * @apiParam {String} id Revision unique ID
+ * @apiSuccess (200) {String} author Username of group creator
+ * @apiSuccess (200) {Number[]} color RGB colour values
+ * @apiSuccess (200) {Number} createdAt Group creation timestamp in milliseconds
+ * @apiSuccess (200) {String} description Group description
+ * @apiSuccess (200) {String} name Group name
+ * @apiSuccess (200) {Object[]} objects List of objects in group
+ * @apiSuccess (200) {Object[]} rules List of rules in group
+ * @apiSuccess (200) {Number} updatedAt Group update timestamp in milliseconds
+ * @apiSuccess (200) {Number} updatedBy Username of last user to amend group
+ * @apiSuccess (200) {String} _id Unique ID of group
  *
- * @apiSuccess (200) {Object[]} List of all Groups based on Revision ID.
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/groups HTTP/1.1
+ *
  * @apiSuccessExample {json} Success-Response
- *
  * HTTP/1.1 200 OK
  * [
- *   {
- *     "_id": "model_ID",
- *     "name": "Group 1",
- *     "description": "This is test group for revision 2",
- *     "author": "username",
- *     "updatedBy": "username",
- *     "updatedAt": 1546537564888,
- *     "createdAt": 1546537564888,
- *     "__v": 0,
- *     "color": [
- *       121,
- *       130,
- *       211
- *     ],
- *     "objects": []
- *   }
+ * 	{
+ * 		"author":"alice",
+ * 		"color":[255,0,0],
+ * 		"createdAt":1552128300000,
+ * 		"description":"",
+ * 		"name":"Group 1",
+ * 		"objects":[],
+ * 		"updatedAt":1552128300000,
+ * 		"updatedBy":"alice",
+ * 		"_id":"00000000-0000-0000-0000-000000000001"
+ * 	}
  * ]
  */
-
 router.get("/groups/revision/:rid/", middlewares.issue.canView, listGroups);
 
 /**
  * @api {get} /:teamspace/:model/revision/:rid/groups/ List model groups by revision
- * @apiDescription List all groups using the revision ID
+ * @apiVersion 3.12.0
  * @apiName listGroupsByRevision
  * @apiGroup Groups
- *
- * @apiDescription List all groups using based on which revision is currently selected.
+ * @apiDescription List all groups associated with a model and revision.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} id Revision unique ID.
+ * @apiParam {String} id Revision unique ID
+ * @apiSuccess (200) {String} author Username of group creator
+ * @apiSuccess (200) {Number[]} color RGB colour values
+ * @apiSuccess (200) {Number} createdAt Group creation timestamp in milliseconds
+ * @apiSuccess (200) {String} description Group description
+ * @apiSuccess (200) {String} name Group name
+ * @apiSuccess (200) {Object[]} objects List of objects in group
+ * @apiSuccess (200) {Object[]} rules List of rules in group
+ * @apiSuccess (200) {Number} updatedAt Group update timestamp in milliseconds
+ * @apiSuccess (200) {Number} updatedBy Username of last user to amend group
+ * @apiSuccess (200) {String} _id Unique ID of group
  *
- * @apiSuccess (200) {Object[]} List of all Groups based on Revision ID.
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/groups HTTP/1.1
+ *
  * @apiSuccessExample {json} Success-Response
- *
  * HTTP/1.1 200 OK
  * [
- *   {
- *     "_id": "model_ID",
- *     "name": "Group 1",
- *     "description": "This is test group for revision 2",
- *     "author": "username",
- *     "updatedBy": "username",
- *     "updatedAt": 1546537564888,
- *     "createdAt": 1546537564888,
- *     "__v": 0,
- *     "color": [
- *       121,
- *       130,
- *       211
- *     ],
- *     "objects": []
- *   }
+ * 	{
+ * 		"author":"alice",
+ * 		"color":[255,0,0],
+ * 		"createdAt":1552128300000,
+ * 		"description":"",
+ * 		"name":"Group 1",
+ * 		"objects":[],
+ * 		"updatedAt":1552128300000,
+ * 		"updatedBy":"alice",
+ * 		"_id":"00000000-0000-0000-0000-000000000001"
+ * 	}
  * ]
  */
 
 router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups);
 
 /**
- * @apiDeprecated /:teamspace/:model/groups/revision/master/head/groups/:uid/
- * @api {get} /:teamspace/:model/groups/revision/master/head/:uid/ Find group in model
- * @apiDescription Find a group by model using the group ID
+ * @apiDeprecated Use /:teamspace/:model/groups/revision/master/head/groups/:uid instead
+ * @api {get} /:teamspace/:model/groups/revision/master/head/:uid Find group by ID
+ * @apiVersion 3.4.0
  * @apiName findGroup
  * @apiGroup Groups
+ * @apiDescription Find group by ID.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} id Group unique ID.
  * @apiParam {String} ifcguids Query string ifcguids returns IFC GUIDs if true where available.
+ * @apiSuccess (200) {String} author Username of group creator
+ * @apiSuccess (200) {Number[]} color RGB colour values
+ * @apiSuccess (200) {Number} createdAt Group creation timestamp in milliseconds
+ * @apiSuccess (200) {String} description Group description
+ * @apiSuccess (200) {String} name Group name
+ * @apiSuccess (200) {Object[]} objects List of objects in group
+ * @apiSuccess (200) {Object[]} rules List of rules in group
+ * @apiSuccess (200) {Number} updatedAt Group update timestamp in milliseconds
+ * @apiSuccess (200) {Number} updatedBy Username of last user to amend group
+ * @apiSuccess (200) {String} _id Unique ID of group
  *
- * @apiDescription Find a group using it's Group ID
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/groups/revision/master/head/00000000-0000-0000-0000-000000000001 HTTP/1.1
  *
- * @apiSuccess (200) {Object} Group matching provided ID.
  * @apiSuccessExample {json} Success-Response
- *
  * HTTP/1.1 200 OK
  * {
- *   "_id": "group_ID",
- *   "color": [
- *     121,
- *     130,
- *     211
- *   ],
- *   "objects": []
+ * 	"author":"alice",
+ * 	"color":[255,0,0],
+ * 	"createdAt":1552128300000,
+ * 	"description":"",
+ * 	"name":"Group 1",
+ * 	"objects":[],
+ * 	"updatedAt":1552128300000,
+ * 	"updatedBy":"alice",
+ * 	"_id":"00000000-0000-0000-0000-000000000001"
  * }
  */
 router.get("/groups/revision/master/head/:uid", middlewares.issue.canView, findGroup);
 
 /**
- * @api {get} /:teamspace/:model/revision/master/head/groups/:uid/ Find group in model
- * @apiDescription Find a group by model using the group ID
+ * @api {get} /:teamspace/:model/revision/master/head/groups/:uid Find group by ID
+ * @apiVersion 3.12.0
  * @apiName findGroup
  * @apiGroup Groups
+ * @apiDescription Find group by ID.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} id Group unique ID.
- * @apiParam {String} ifcguids Query string ifcguids returns IFC GUIDs if true where available.
+ * @apiParam {String} uid Group ID
+ * @apiSuccess (200) {String} author Username of group creator
+ * @apiSuccess (200) {Number[]} color RGB colour values
+ * @apiSuccess (200) {Number} createdAt Group creation timestamp in milliseconds
+ * @apiSuccess (200) {String} description Group description
+ * @apiSuccess (200) {String} name Group name
+ * @apiSuccess (200) {Object[]} objects List of objects in group
+ * @apiSuccess (200) {Object[]} rules List of rules in group
+ * @apiSuccess (200) {Number} updatedAt Group update timestamp in milliseconds
+ * @apiSuccess (200) {Number} updatedBy Username of last user to amend group
+ * @apiSuccess (200) {String} _id Unique ID of group
  *
- * @apiDescription Find a group using it's Group ID
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/groups/00000000-0000-0000-0000-000000000001 HTTP/1.1
  *
- * @apiSuccess (200) {Object} Group matching provided ID.
  * @apiSuccessExample {json} Success-Response
- *
  * HTTP/1.1 200 OK
  * {
- *   "_id": "group_ID",
- *   "color": [
- *     121,
- *     130,
- *     211
- *   ],
- *   "objects": []
+ * 	"author":"alice",
+ * 	"color":[255,0,0],
+ * 	"createdAt":1552128300000,
+ * 	"description":"",
+ * 	"name":"Group 1",
+ * 	"objects":[],
+ * 	"updatedAt":1552128300000,
+ * 	"updatedBy":"alice",
+ * 	"_id":"00000000-0000-0000-0000-000000000001"
  * }
  */
 router.get("/revision/master/head/groups/:uid", middlewares.issue.canView, findGroup);
