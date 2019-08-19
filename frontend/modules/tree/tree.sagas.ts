@@ -147,6 +147,7 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 
 function* startListenOnSelections() {
 	Viewer.on(VIEWER_EVENTS.OBJECT_SELECTED, (object) => {
+		debugger;
 		dispatch(TreeActions.handleNodesClick([object.id]));
 	});
 

@@ -114,9 +114,9 @@ export default ({ mainTree, subTrees, subModels, modelsWithMeshes }) => new Prom
 			const subModel = subModels.find((m) => m.model === model);
 
 			if (subModel) {
-					child.name = [modelTeamspace, subModel.name].join(':');
+				child.name = [modelTeamspace, subModel.name].join(':');
 			} else {
-					child.name = child.name || DEFAULT_NODE_NAME;
+				child.name = child.name || DEFAULT_NODE_NAME;
 			}
 
 			if (subModel && child.children && child.children[0]) {

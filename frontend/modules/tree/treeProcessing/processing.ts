@@ -2,7 +2,6 @@ import { intersection, keys, memoize, pickBy, uniqBy } from 'lodash';
 import { NODE_TYPES, SELECTION_STATES, VISIBILITY_STATES } from '../../../constants/tree';
 
 export class Processing {
-
 	public get selectedNodesIds() {
 		return keys(pickBy(this.selectionMap, (selectionState) => {
 			return selectionState !== SELECTION_STATES.UNSELECTED;
@@ -79,6 +78,7 @@ export class Processing {
 	}
 
 	public selectNodes = ({ nodesIds = [], ...extraData }) => {
+		console.time('selectNodes');
 		const visibleNodesIds = nodesIds.filter((nodeId) => this.visibilityMap[nodeId] !== VISIBILITY_STATES.INVISIBLE);
 
 		if (!visibleNodesIds.length) {
@@ -106,6 +106,8 @@ export class Processing {
 		const highlightedObjects = this.getMeshesByNodes(nodes);
 
 		this.selectionMap = { ...this.selectionMap };
+		console.timeEnd('selectNodes');
+
 		return { highlightedObjects };
 	}
 
