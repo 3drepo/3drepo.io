@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
-import { usePrevious } from '../../hooks';
 import { Container } from './viewerCanvas.styles';
 
 interface IProps {
@@ -34,26 +33,28 @@ interface IProps {
 	handleColorOverridesChange: (currentOvverides, previousOverrides) => void;
 }
 
-export const ViewerCanvas = (props: IProps) => {
-	const containerRef = useRef();
-	const previousColorOverrides = usePrevious(props.colorOverrides);
+export class ViewerCanvas extends React.PureComponent<IProps, any> {
+	private containerRef = React.createRef<HTMLElement>();
 
-	useEffect(() => {
-		const { viewer } = props;
-		viewer.setupInstance(containerRef.current);
-	}, [containerRef.current]);
+	public componentDidMount() {
+		const { viewer } = this.props;
+		viewer.setupInstance(this.containerRef.current);
+	}
 
-	useEffect(() => {
-		if (props.colorOverrides !== previousColorOverrides && previousColorOverrides) {
-			props.handleColorOverridesChange(props.colorOverrides, previousColorOverrides);
+	public componentDidUpdate(prevProps) {
+		const { colorOverrides, handleColorOverridesChange } = this.props;
+		if (colorOverrides !== prevProps.colorOverrides && prevProps.colorOverrides) {
+			handleColorOverridesChange(colorOverrides, prevProps.colorOverrides);
 		}
-	}, [props.colorOverrides]);
+	}
 
-	return (
-		<Container
-			id="viewer"
-			ref={containerRef}
-			className={props.className}
-		/>
-	);
-};
+	public render() {
+		return (
+			<Container
+				id="viewer"
+				ref={this.containerRef}
+				className={this.props.className}
+			/>
+		);
+	}
+}
