@@ -43,9 +43,10 @@ interface IProps {
 	type: string;
 	history: any;
 	isPending: boolean;
+	pendingRevision: string;
 	showOnlyActive: boolean;
 	resetModelRevisions: () => void;
-	fetchModelRevisions: (teamspace, modelId) => void;
+	fetchModelRevisions: (teamspace, modelId, showVoid) => void;
 	setModelRevisionState: (teamspace, modelId, revision, isVoid) => void;
 	handleSetNewRevision: (revision) => void;
 	handleClose: () => void;
@@ -54,7 +55,7 @@ interface IProps {
 export class RevisionsDialog extends React.PureComponent<IProps, any> {
 	public componentDidMount() {
 		if (this.props.type === TYPES.TEAMSPACES) {
-			this.props.fetchModelRevisions(this.props.teamspace, this.props.modelId);
+			this.props.fetchModelRevisions(this.props.teamspace, this.props.modelId, true);
 		}
 	}
 
@@ -113,6 +114,8 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 
 	private renderRevisionItem = (revision) => {
 		const isCurrentRevision = this.currentRevisionId === revision._id;
+		const isPendingRevision = this.props.pendingRevision === revision._id;
+
 		return (
 			<RevisionsListItem
 				key={revision._id}
@@ -122,6 +125,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 				onClick={this.onRevisionItemClick}
 				onSetLatest={this.setLatest}
 				onToggleVoid={this.toggleVoid}
+				isPending={isPendingRevision}
 			/>
 		);
 	}
@@ -144,12 +148,13 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { revisions } = this;
+
 		return (
 			<>
 				<StyledDialogContent>
 					{this.renderRevisionsList(!this.props.isPending && !!revisions.length)}
 					{this.renderEmptyState(!this.props.isPending && !revisions.length)}
-					{this.renderLoader(this.props.isPending)}
+					{this.renderLoader(this.props.isPending && !revisions.length)}
 				</StyledDialogContent>
 				<DialogActions>
 					<Button

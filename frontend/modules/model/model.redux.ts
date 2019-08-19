@@ -24,10 +24,11 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	fetchSettingsSuccess: ['settings', 'metaKeys'],
 	updateSettings: ['modelData', 'settings'],
 	waitForSettingsAndFetchRevisions: ['teamspace', 'modelId'],
-	fetchRevisions: ['teamspace', 'modelId'],
+	fetchRevisions: ['teamspace', 'modelId', 'showVoid'],
 	fetchRevisionsSuccess: ['revisions'],
 	setModelRevisionState: ['teamspace', 'modelId', 'revision', 'isVoid'],
 	setModelRevisionStateSuccess: ['revision', 'isVoid'],
+	setPendingRevision: ['revision'],
 	resetRevisions: [],
 	downloadModel: ['teamspace', 'modelId'],
 	uploadModelFile: ['teamspace', 'project', 'modelData', 'fileData'],
@@ -47,11 +48,16 @@ export const INITIAL_STATE = {
 	metaKeys: [],
 	revisions: [],
 	isPending: true,
+	pendingRevision: null,
 	maps: []
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return { ...state, isPending: pendingState };
+};
+
+const setPendingRevision = (state = INITIAL_STATE, { revision }) => {
+	return { ...state, pendingRevision: revision };
 };
 
 const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
@@ -98,6 +104,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ModelTypes.FETCH_REVISIONS_SUCCESS]: fetchRevisionsSuccess,
 	[ModelTypes.RESET_REVISIONS]: resetRevisions,
 	[ModelTypes.SET_PENDING_STATE]: setPendingState,
+	[ModelTypes.SET_PENDING_REVISION]: setPendingRevision,
 	[ModelTypes.FETCH_MAPS_SUCCESS]: fetchMapsSuccess,
 	[ModelTypes.UPDATE_SETTINGS_SUCCESS]: updateSettingsSuccess,
 	[ModelTypes.SET_MODEL_REVISION_STATE_SUCCESS]: setModelRevisionStateSuccess

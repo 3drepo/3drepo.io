@@ -21,7 +21,6 @@ import React from 'react';
 
 import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { getActiveRevisions } from '../../../../helpers/revisions';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { TYPES } from './../../../components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
 import { Container, DisplayedText, ProgressWrapper } from './revisionsSwitch.styles';
@@ -62,8 +61,7 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 	}
 
 	private get currentRevisionName() {
-		const activeRevisions = getActiveRevisions(this.props.revisions);
-		return this.props.urlParams.revision || this.getRevisionDisplayedName(activeRevisions[0]);
+		return this.props.urlParams.revision || this.getRevisionDisplayedName(this.props.revisions[0]);
 	}
 
 	private get currentRevisionId() {

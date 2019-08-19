@@ -41,7 +41,7 @@ const UploadSchema = Yup.object().shape({
 interface IProps {
 	uploadModelFile: (teamspace, projectName, modelData, fileData) => void;
 	fetchModelSettings: (teamspace, modelId) => void;
-	fetchRevisions: (teamspace, modelId) => void;
+	fetchRevisions: (teamspace, modelId, showVoid) => void;
 	handleClose: () => void;
 	modelSettings: any;
 	revisions: any[];
@@ -63,7 +63,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		const { modelId, teamspaceName, fetchModelSettings, fetchRevisions } = this.props;
-		fetchRevisions(teamspaceName, modelId);
+		fetchRevisions(teamspaceName, modelId, true);
 		fetchModelSettings(teamspaceName, modelId);
 	}
 

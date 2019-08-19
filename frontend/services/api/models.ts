@@ -94,8 +94,8 @@ export const editModelSettings = (teamspace, modelId, settings) => {
  * @param teamspace
  * @param modelId
  */
-export const getModelRevisions = (teamspace, modelId) => {
-	return api.get(`${teamspace}/${modelId}/revisions.json?showVoid`);
+export const getModelRevisions = (teamspace, modelId, showVoid) => {
+	return api.get(`${teamspace}/${modelId}/revisions.json${showVoid ? '?showVoid' : ''}`);
 };
 
 /**

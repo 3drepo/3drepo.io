@@ -18,13 +18,18 @@
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFileOutlined';
 import PersonIcon from '@material-ui/icons/Person';
 import React, { useMemo } from 'react';
+
 import { CUSTOM_FILE_EXTS_NAMES } from '../../../constants/revisions';
+import { renderWhenTrue } from '../../../helpers/rendering';
 import { LONG_DATE_TIME_FORMAT } from '../../../services/formatting/formatDate';
 import { DateTime } from '../dateTime/dateTime.component';
+import { Loader } from '../loader/loader.component';
 import {
 	Container,
 	Description,
 	FileType,
+	GoToButton,
+	LoaderContainer,
 	Property,
 	PropertyWrapper,
 	Row,
@@ -44,25 +49,36 @@ interface IProps {
 	current?: boolean;
 	editable?: boolean;
 	className?: string;
+	isPending?: boolean;
 	onClick: (event, revision) => void;
 	onSetLatest: (event, revision) => void;
 	onToggleVoid: (event, revision) => void;
 }
 
+const renderLoader = renderWhenTrue(<LoaderContainer><Loader /></LoaderContainer>);
+
 export const RevisionsListItem = (props: IProps) => {
 	const { tag, timestamp, desc, author, fileType } = props.data;
-	const { current } = props;
+	const { current, isPending } = props;
 
 	const handleClick = (event) => props.onClick(event, props.data);
 	const handleToggleVoid = (event) => props.onToggleVoid(event, props.data);
-	const themeProps = useMemo(() => ({ current, void: props.data.void }), [props.data.void, current]);
+	const themeProps = useMemo(() =>
+		({ current, void: props.data.void, isPending }), [isPending, props.data.void, current]
+	);
+
+	const renderGoToRevisionButton = renderWhenTrue(
+		<GoToButton onClick={handleClick} theme={themeProps}>
+			Go to revision
+		</GoToButton>
+	);
 
 	return (
 		<Container
-			onClick={handleClick}
 			theme={themeProps}
 			divider
 		>
+			{renderLoader(isPending)}
 			<Row>
 				<PropertyWrapper>
 					<Tag>{tag || '(no name)'}</Tag>
@@ -84,7 +100,10 @@ export const RevisionsListItem = (props: IProps) => {
 					{props.data.void ? 'Void' : 'Active'}
 				</ToggleButton>
 			</Row>
-			<Description>{desc || '(no description)'}</Description>
+			<Row>
+				<Description>{desc || '(no description)'}</Description>
+				{renderGoToRevisionButton(!props.data.void)}
+			</Row>
 		</Container>
 	);
 };

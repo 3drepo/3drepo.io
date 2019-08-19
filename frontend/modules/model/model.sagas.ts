@@ -72,11 +72,11 @@ export function* updateSettings({ modelData: { teamspace, project, modelId }, se
 	}
 }
 
-export function* fetchRevisions({ teamspace, modelId }) {
+export function* fetchRevisions({ teamspace, modelId, showVoid = false }) {
 	try {
 		yield put(ModelActions.setPendingState(true));
 
-		const { data: revisions } = yield API.getModelRevisions(teamspace, modelId);
+		const { data: revisions } = yield API.getModelRevisions(teamspace, modelId, showVoid);
 
 		yield put(ModelActions.fetchRevisionsSuccess(revisions));
 		yield put(ModelActions.setPendingState(false));
@@ -87,7 +87,7 @@ export function* fetchRevisions({ teamspace, modelId }) {
 
 export function* setModelRevisionState({ teamspace, modelId, revision, isVoid }) {
 	try {
-		yield put(ModelActions.setPendingState(true));
+		yield put(ModelActions.setPendingRevision(revision));
 		const revisions = yield select(selectRevisions);
 		const changedRevision = revisions.find((rev) => rev._id === revision);
 
@@ -95,7 +95,7 @@ export function* setModelRevisionState({ teamspace, modelId, revision, isVoid })
 			yield API.setModelRevisionState(teamspace, modelId, revision, isVoid);
 			yield put(ModelActions.setModelRevisionStateSuccess(revision, isVoid));
 		}
-		yield put(ModelActions.setPendingState(false));
+		yield put(ModelActions.setPendingRevision(null));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('set', 'model revision state', e));
 	}
@@ -104,7 +104,7 @@ export function* setModelRevisionState({ teamspace, modelId, revision, isVoid })
 export function* waitForSettingsAndFetchRevisions({ teamspace, modelId }) {
 	try {
 		yield take(ModelTypes.FETCH_SETTINGS_SUCCESS);
-		yield put(ModelActions.fetchRevisions(teamspace, modelId));
+		yield put(ModelActions.fetchRevisions(teamspace, modelId, false));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'model revisions', e));
 	}

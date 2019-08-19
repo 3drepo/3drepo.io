@@ -21,7 +21,6 @@ import { all, call, put, select, take, takeLatest } from 'redux-saga/effects';
 import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES, VULNERABLE_PROPS } from '../../constants/compare';
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
 import { VISIBILITY_STATES } from '../../constants/tree';
-import { getActiveRevisions } from '../../helpers/revisions';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
@@ -58,15 +57,14 @@ const getNextRevision = (revisions, currentRevision) => {
 };
 
 const prepareModelToCompare = (teamspace, modelId, name, isFederation, revisions, currentRevision?) => {
-	const activeRevisions = getActiveRevisions(revisions);
 	const baseRevision = isFederation || !currentRevision
-		? activeRevisions[0]
-		: activeRevisions.find((rev) => rev.tag === currentRevision || rev._id === currentRevision) || activeRevisions[0];
+		? revisions[0]
+		: revisions.find((rev) => rev.tag === currentRevision || rev._id === currentRevision) || revisions[0];
 
-	const targetRevision = getNextRevision(activeRevisions, baseRevision);
+	const targetRevision = getNextRevision(revisions, baseRevision);
 	const revisionData = currentRevision
-		? activeRevisions.find((revision) => revision.tag === currentRevision)
-		: activeRevisions[0];
+		? revisions.find((revision) => revision.tag === currentRevision)
+		: revisions[0];
 
 	return {
 		_id: modelId,
@@ -76,7 +74,7 @@ const prepareModelToCompare = (teamspace, modelId, name, isFederation, revisions
 		currentRevision: revisionData,
 		targetDiffRevision: targetRevision,
 		targetClashRevision: baseRevision,
-		revisions: activeRevisions
+		revisions
 	};
 };
 

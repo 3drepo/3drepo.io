@@ -54,12 +54,11 @@ export const Container = styled(ListItem)`
 	display: flex;
 	flex-direction: column;
 	border-bottom: 1px solid ${COLOR.BLACK_20};
-	color: ${({ theme }) => theme.void ? COLOR.BLACK_20 : COLOR.BLACK};
+	color: ${({ theme }) => theme.void || theme.isPending ? COLOR.BLACK_20 : COLOR.BLACK};
 	font-size: 14px;
-	font-weight: ${({ current }) => current ? FONT_WEIGHT.SEMIBOLD : FONT_WEIGHT.NORMAL};
+	font-weight: ${({ theme }) => theme.current ? FONT_WEIGHT.SEMIBOLD : FONT_WEIGHT.NORMAL};
 
 	&& {
-		cursor: pointer;
 		justify-content: space-between;
 		padding: 18px 24px;
 		background-color: ${COLOR.BLACK_6};
@@ -72,7 +71,7 @@ export const Container = styled(ListItem)`
 	}
 
 	${Description} {
-		${({ theme }) => theme.void ? css`
+		${({ theme }) => theme.void || theme.isPending ? css`
 			color: ${COLOR.BLACK_20};
 		` : ''}
 	}
@@ -94,24 +93,44 @@ interface IStateSwitch {
 	void?: boolean;
 }
 
-export const ToggleButton = styled(ButtonBase)<IStateSwitch>`
+const StyledButtonBase = styled(ButtonBase)`
 	&& {
 		font-size: 14px;
 		color: ${COLOR.WHITE};
 		background-color: ${({ theme }) => !theme.void ? COLOR.SECONDARY_MAIN : COLOR.BLACK_30};
 		cursor: pointer;
 		box-sizing: border-box;
-		width: 85px;
 		height: 20px;
-		padding: 0 9px;
+		padding: 0 10px;
 		border-radius: 10px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
+		white-space: nowrap;
 
 		&:disabled {
 			background-color: ${({ theme }) => !theme.void ? COLOR.SECONDARY_MAIN_54 : COLOR.BLACK_16};
 			cursor: default;
 		}
 	}
+`;
+
+export const ToggleButton = styled(StyledButtonBase)<IStateSwitch>`
+	&& {
+		width: 80px;
+	}
+`;
+
+export const GoToButton = styled(StyledButtonBase)<IStateSwitch>`
+	&& {
+		padding: 0 20px;
+	}
+`;
+
+export const LoaderContainer = styled.div`
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 `;
