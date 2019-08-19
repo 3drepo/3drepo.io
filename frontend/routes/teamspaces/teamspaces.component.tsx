@@ -100,7 +100,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	private shouldBeVisible = cond([
 		[matches({ type: LIST_ITEMS_TYPES.TEAMSPACE }), stubTrue],
-		[matches({ type: LIST_ITEMS_TYPES.PROJECT }), ({ teamspace }) => this.state.visibleItems[teamspace]],
+		[matches({ type: LIST_ITEMS_TYPES.PROJECT }), ({ teamspace }) => this.isVisibleItem(teamspace)],
 		[stubTrue, () => false]
 	]);
 
@@ -170,6 +170,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		</AddModelButton>
 	)
 
+	private isVisibleItem = (itemId) => this.state.visibleItems[itemId] || this.props.showStarredOnly;
+
 	private renderModels = (models, project) => renderWhenTrue(() => (
 		<GridContainer key={`container-${project.id}`}>
 			{this.renderAddModelGridItem(project.teamspace, project.id)}
@@ -177,7 +179,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				<ModelGridItem key={props.model} {...props}	/>
 			))}
 		</GridContainer>
-	))(models.length && this.state.visibleItems[project.id])
+	))(models.length && this.isVisibleItem(project.id))
 
 	private renderProject = (props) => ([
 		(
@@ -196,7 +198,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			{...props}
 			key={props.account}
 			name={props.account}
-			active={this.state.visibleItems[props.account]}
+			active={this.isVisibleItem(props.account)}
 			isMyTeamspace={this.props.currentTeamspace === props.account}
 			onToggle={this.handleVisibilityChange}
 			onAddProject={this.openProjectDialog}
