@@ -52,7 +52,6 @@ const BLACK_LIST = [
 async function apiKeyCheck(req, res, next) {
 	if (req.query.key) {
 		const path = getPath(req);
-		console.log(path);
 		if  (matchPaths(path, BLACK_LIST)) {
 			next();
 			return;
