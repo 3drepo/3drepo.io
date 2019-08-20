@@ -18,7 +18,7 @@
 "use strict";
 
 const User = require("../models/user");
-const getPath = require("../utils").APIInfo;
+const getPath = (req) => `${req.method} ${req.originalUrl}`;
 
 const matchPath = (path1, path2) => {
 	path1 = path1.split("/");
