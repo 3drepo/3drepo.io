@@ -61,7 +61,7 @@ export const Container = styled(ListItem)`
 	&& {
 		justify-content: space-between;
 		padding: 18px 24px;
-		background-color: ${COLOR.BLACK_6};
+		background-color: ${({ theme }) => theme.current ? COLOR.WHITE_87 : COLOR.BLACK_6};
 		border-bottom: 1px solid ${COLOR.BLACK_20};
 		transition: background-color 0.25s ease-in-out;
 
@@ -118,10 +118,8 @@ export const ToggleButton = styled(StyledButtonBase)<IStateSwitch>`
 	}
 `;
 
-export const GoToButton = styled(StyledButtonBase)<IStateSwitch>`
-	&& {
-		padding: 0 20px;
-	}
+export const LinkWrapper = styled.span`
+	margin-left: 10px;
 `;
 
 export const LoaderContainer = styled.div`

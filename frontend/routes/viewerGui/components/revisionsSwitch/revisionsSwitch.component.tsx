@@ -67,7 +67,8 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 	private get currentRevisionId() {
 		const currentRevision = this.props.revisions.find((revision) =>
 			this.currentRevisionName === revision.tag ||
-			this.currentRevisionName === formatDate(revision.timestamp, LONG_DATE_TIME_FORMAT)
+			this.currentRevisionName === formatDate(revision.timestamp, LONG_DATE_TIME_FORMAT) ||
+			this.currentRevisionName === revision._id
 		);
 
 		return currentRevision._id;
