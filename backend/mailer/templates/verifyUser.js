@@ -1043,8 +1043,9 @@ For any queries please contact our support team at <a href="mailto:support@3drep
 <br>
 <strong>Our mailing address is:</strong><br>
 3D Repo<br>
-20 Eastbourne Terrace<br>
-London, W2 6LG<br>
+307 Euston Road<br>
+Bloomsbury<br>
+London, NW1 3AD<br>
 United Kingdom</span></span>
                         </td>
                     </tr>
