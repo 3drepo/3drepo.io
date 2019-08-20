@@ -256,6 +256,9 @@
 	 * @apiName addTeamMember
 	 *
 	 * @api {post} /:teamspace/members Add a team member
+	 *
+	 * @apiDescription Adds a user to a teamspace and assign it a job.
+	 *
 	 * @apiPermission teamSpaceAdmin
 	 *
 	 * @apiParam {String} teamspace Name of teamspace

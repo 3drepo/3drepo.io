@@ -40,7 +40,7 @@ const multer = require("multer");
  * To authentication subsequent API calls using cookie-based authentication,
  * simply put the following into the HTTP header:
  * `Cookie: connect.sid=:sessionId`
- * 
+ *
  * NOTE: If you use a modern browser’s XMLHttpRequest object to make API calls,
  * you don’t need to take care of the authentication process after calling /login.
  *
