@@ -27,11 +27,10 @@
 	const utils = require("../utils");
 
 	/**
-	 * @apiGroup Teamspace
-	 * @apiName getQuotaInfo
 	 *
 	 * @api {get} /:teamspace/quota Get Quota Information
-	 *
+	 * @apiName getQuotaInfo
+	 * @apiGroup Teamspace
 	 * @apiDescription It returns the quota information. Each teamspace has a space limit and a limit of collaborators.
 	 * The values returned are  space used (both these values are in bytes) and the collaborator limit.
 	 * If spaceLimit or collaboratorLimit are nulled it means that there are no space limit/member limit.
@@ -55,11 +54,10 @@
 	router.get("/quota", middlewares.isAccountAdmin, getQuotaInfo);
 
 	/**
-	 * @apiGroup Teamspace
-	 * @apiName getMemberList
 	 *
 	 * @api {get} /:teamspace/members Get members list
-	 *
+	 * @apiName getMemberList
+	 * @apiGroup Teamspace
 	 * @apiDescription It returns a list of members identifying which of them are teamspace administrators, and their jobs.
 	 *
 	 * @apiPermission teamSpaceMember
@@ -109,11 +107,10 @@
 	router.get("/members", middlewares.isTeamspaceMember, getMemberList);
 
 	/**
-	 * @apiGroup Teamspace
-	 * @apiName getBillingInfo
 	 *
 	 * @api {get} /:teamspace/billingInfo Get billing info
-	 *
+	 * @apiName getBillingInfo
+	 * @apiGroup Teamspace
 	 * @apiDescription It returns the teamspace billing info.
 	 *
 	 * @apiPermission teamSpaceAdmin
@@ -140,11 +137,10 @@
 	router.get("/billingInfo", middlewares.isAccountAdmin, getBillingInfo);
 
 	/**
-	 * @apiGroup Teamspace
-	 * @apiName getMemberInfo
 	 *
 	 * @api {get} /:teamspace/members/:user Get member's info
-	 *
+	 * @apiName getMemberInfo
+	 * @apiGroup Teamspace
 	 * @apiDescription It returns the teamspace's member small info .
 	 *
 	 * @apiPermission teamSpaceMember
@@ -166,10 +162,12 @@
 	router.get("/members/:user", middlewares.isTeamspaceMember, getTeamMemberInfo);
 
 	/**
-	 * @apiGroup Teamspace
-	 * @apiName removeTeamMember
 	 *
-	 * @api {delete} /:teamspace/members/:user Removes a user from the teamspace
+	 * @api {delete} /:teamspace/members/:user Remove from the teamspace
+	 * @apiName removeTeamMember
+	 * @apiGroup Teamspace
+	 * @apiDescription Removes a user from the teampspace.
+	 *
 	 * @apiPermission teamSpaceAdmin
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
@@ -186,14 +184,11 @@
 	 */
 	router.delete("/members/:user", middlewares.isAccountAdmin, removeTeamMember);
 
-	// 	 * /teamSpace1/members/search/imProjectAdmin@3drepo.org
-
 	/**
-	 * @apiGroup Teamspace
-	 * @apiName findUsersWithoutMembership
 	 *
 	 * @api {get} /:teamspace/members/search/:searchString Search for non-members
-	 *
+	 * @apiName findUsersWithoutMembership
+	 * @apiGroup Teamspace
 	 * @apiDescription It returns a list of users that dont belong to the teamspace and that their usernames matches partially with the string and if entered an email
 	 * it only matches if the string is the entire email address.
 	 *
@@ -252,11 +247,9 @@
 	router.get("/members/search/:searchString", middlewares.isAccountAdmin, findUsersWithoutMembership);
 
 	/**
-	 * @apiGroup Teamspace
-	 * @apiName addTeamMember
-	 *
 	 * @api {post} /:teamspace/members Add a team member
-	 *
+	 * @apiName addTeamMember
+	 * @apiGroup Teamspace
 	 * @apiDescription Adds a user to a teamspace and assign it a job.
 	 *
 	 * @apiPermission teamSpaceAdmin
