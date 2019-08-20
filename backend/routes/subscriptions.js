@@ -26,14 +26,33 @@ const config = require("../config");
 const utils = require("../utils");
 
 /**
- * @api {get} /:teamspace/subscriptions List all subscriptions
+ * @api {get} /:teamspace/subscriptions List subscriptions
  * @apiName listSubscriptions
  * @apiGroup Subscription
  *
  * @apiDescription List all subscriptions for current user if applicable.
  *
+ * @apiPermission teamSpaceAdmin
  *
  * @apiParam {String} teamspace Name of teamspace
+ *
+ * @apiExample {get} Example usage:
+ * GET /teamSpace1/subscriptions HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ *    basic: {
+ *       collaborators: 0,
+ *       data: 200
+ *    },
+ *    discretionary: {
+ *       collaborators: "unlimited",
+ *       data: 10240,
+ *       expiryDate: null
+ *    }
+ * }
+ *
  * @apiError (401) NOT_AUTHORIZED Not Authorized
  * @apiErrorExample {json} Error-Response
  * HTTP/1.1 401 Not Authorized
@@ -42,18 +61,11 @@ const utils = require("../utils");
  *	"status":401,"code":
  *	"NOT_AUTHORIZED",
  *	"value":9,
- *	"place":"GET /nabile/subscriptions"
+ *	"place":"GET /teamSpace1/subscriptions"
  * }
  */
 router.get("/subscriptions", middlewares.isAccountAdmin, listSubscriptions);
 
-/**
- * @api {get} /:teamspace/subscriptions Update a subscription
- * @apiName updateSubscription
- * @apiGroup Subscription
- *
- * @apiParam {String} teamspace Name of teamspace
- */
 router.post("/subscriptions", middlewares.isAccountAdmin, updateSubscription);
 
 function updateSubscription(req, res, next) {
