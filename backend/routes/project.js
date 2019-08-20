@@ -32,7 +32,6 @@
 	 *
 	 * @apiParam {String} teamspace Name of the teamspace
 	 */
-
 	router.post("/projects", middlewares.project.canCreate, createProject);
 
 	/**
@@ -43,7 +42,6 @@
 	 * @apiParam {String} teamspace Name of the teamspace
 	 * @apiParam {String} project Project to update
 	 */
-
 	router.put("/projects/:project", middlewares.project.canUpdate, updateProject);
 
 	/**

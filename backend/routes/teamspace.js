@@ -255,37 +255,28 @@
 	 * @apiPermission teamSpaceAdmin
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
-	 * @apiParam {String} searchString Search string required to find team member.
+	 * @apiParam (Request body) {String} job The job that the users going to have assigned
+	 * @apiParam (Request body) {String} user The username of the user to become a member
+	 * @apiParam (Request body) {[]String} permissions The permisions to be assigned to the member it can be an empty array or have a "teamspace_admin" value.
 	 *
 	 * @apiExample {post} Example usage:
 	 * POST /teamSpace1/members HTTP/1.1
 	 * {
 	 *    job: "jobA",
 	 *    user: "projectshared",
-	 *    permissions: [
-	 *    ]
+	 *    permissions: []
 	 * }
 	 *
 	 * @apiSuccessExample {json} Success
 	 * {
 	 *    job: "jobA",
-	 *    permissions: [
-	 *    ],
+	 *    permissions: [],
 	 *    user: "projectshared",
 	 *    firstName: "Drink",
 	 *    lastName: "Coffee",
 	 *    company: null
 	 * }
 	 *
-	 * @apiError User not found The <code>searchString</code> of the User was not found.
-	 * @apiErrorExample Error
-	 * {
-	 *		message: "User not found",
-	 *		status: 404,
-	 *		code: "USER_NOT_FOUND",
-	 *		value: 1,
-	 *		place: "POST /members"
-	 * }
 	 */
 	router.post("/members", middlewares.isAccountAdmin, addTeamMember);
 
