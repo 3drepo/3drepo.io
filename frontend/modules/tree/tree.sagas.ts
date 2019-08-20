@@ -220,13 +220,14 @@ function* getSelectedNodes() {
 
 function* clearCurrentlySelected() {
 	Viewer.clearHighlights();
+	yield TreeProcessing.clearSelected();
+	yield put(TreeActions.updateDataRevision());
+
 	yield all([
 		put(TreeActions.setActiveNode(null)),
-		call(TreeProcessing.clearSelected),
 		put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false)),
 		put(BimActions.setActiveMeta(null))
 	]);
-	yield put(TreeActions.updateDataRevision());
 }
 
 /**
