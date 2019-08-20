@@ -135,8 +135,7 @@ export const fetchRiskFailure = (state = INITIAL_STATE) => {
 };
 
 export const saveRiskSuccess = (state = INITIAL_STATE, { risk }) => {
-	const risksMap = cloneDeep(state.risksMap);
-	risksMap[risk._id] = risk;
+	const risksMap = updateRiskProps(state.risksMap, risk._id, risk);
 
 	return {
 		...state,

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { get, omit } from 'lodash';
+import { get } from 'lodash';
 import {
 	LEVELS,
 	RISK_CONSEQUENCES,
@@ -26,49 +26,74 @@ import {
 } from '../constants/risks';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
-import { sortByDate } from './sorting';
+
+const renameFieldIfExists = (risk, fieldName, newFieldName) => {
+	if (risk[fieldName] !== null || risk[fieldName] !== undefined) {
+		risk[newFieldName] = risk[fieldName];
+	}
+};
 
 export const prepareRisk = (risk, jobs = []) => {
-	const thumbnail = getAPIUrl(risk.thumbnail);
-	const descriptionThumbnail = risk.viewpoint && risk.viewpoint.screenshot
-		? getAPIUrl(risk.viewpoint.screenshot)
-		: (risk.descriptionThumbnail || '');
+	const preparedRisk = {...risk};
 
-	const residualLikelihood = getValidNumber(risk.residual_likelihood, risk.likelihood);
-	const residualConsequence = getValidNumber(risk.residual_consequence, risk.consequence);
+	if (preparedRisk.thumbnail) {
+		preparedRisk.thumbnail = getAPIUrl(preparedRisk.thumbnail);
+	}
 
-	const levelOfRisk = getValidNumber(risk.level_of_risk, calculateLevelOfRisk(risk.likelihood, risk.consequence));
-	const residualLevelOfRisk = getValidNumber(
-		risk.residual_level_of_risk,
-		calculateLevelOfRisk(residualLikelihood, residualConsequence)
-	);
+	const descriptionThumbnail = preparedRisk.viewpoint && preparedRisk.viewpoint.screenshot
+		? getAPIUrl(preparedRisk.viewpoint.screenshot)
+		: (preparedRisk.descriptionThumbnail || '');
 
-	const overallLevelOfRisk = getValidNumber(
-		risk.overall_level_of_risk,
-		getValidNumber(residualLevelOfRisk, levelOfRisk)
-	);
+	if (descriptionThumbnail) {
+		preparedRisk.descriptionThumbnail = descriptionThumbnail;
+	}
 
-	const { Icon, color } = getRiskStatus(overallLevelOfRisk, risk.mitigation_status);
-	const roleColor = get(jobs.find((job) => job.name === get(risk.assigned_roles, '[0]')), 'color');
+	if (preparedRisk.residual_likelihood || preparedRisk.likelihood) {
+		preparedRisk.residual_likelihood  = getValidNumber(preparedRisk.residual_likelihood, preparedRisk.likelihood);
+	}
 
-	return {
-		...risk,
-		defaultHidden: risk.mitigation_status === RISK_LEVELS.AGREED_FULLY,
-		description: risk.desc,
-		author: risk.owner,
-		createdDate: risk.created,
-		thumbnail,
-		descriptionThumbnail,
-		StatusIconComponent: Icon,
-		statusColor: color,
-		roleColor,
-		residual_likelihood: residualLikelihood,
-		residual_consequence: residualConsequence,
-		level_of_risk: levelOfRisk,
-		overall_level_of_risk: overallLevelOfRisk,
-		residual_level_of_risk: residualLevelOfRisk,
-		comments: risk.comments || []
-	};
+	if (preparedRisk.residual_consequence ||  preparedRisk.consequence) {
+		preparedRisk.residual_consequence = getValidNumber(preparedRisk.residual_consequence, preparedRisk.consequence);
+	}
+
+	if (preparedRisk.residual_likelihood || preparedRisk.residual_consequence ) {
+		preparedRisk.residual_level_of_risk  = getValidNumber(
+			preparedRisk.residual_level_of_risk,
+			calculateLevelOfRisk(preparedRisk.residual_likelihood , preparedRisk.residual_consequence )
+		);
+	}
+
+	if (preparedRisk.level_of_risk || preparedRisk.likelihood || preparedRisk.consequence) {
+		preparedRisk.level_of_risk = getValidNumber(preparedRisk.level_of_risk,
+			calculateLevelOfRisk(preparedRisk.likelihood, preparedRisk.consequence));
+	}
+
+	if (preparedRisk.overall_level_of_risk || preparedRisk.residual_level_of_risk  || preparedRisk.level_of_risk) {
+		preparedRisk.overall_level_of_risk = getValidNumber(
+			preparedRisk.overall_level_of_risk,
+			getValidNumber(preparedRisk.residual_level_of_risk , preparedRisk.level_of_risk)
+		);
+	}
+
+	if (preparedRisk.overall_level_of_risk && preparedRisk.mitigation_status) {
+		const { Icon, color } = getRiskStatus(preparedRisk.overall_level_of_risk, preparedRisk.mitigation_status);
+		preparedRisk.StatusIconComponent = Icon;
+		preparedRisk.statusColor = color;
+	}
+
+	if (preparedRisk.assigned_roles) {
+		preparedRisk.roleColor = get(jobs.find((job) => job.name === get(preparedRisk.assigned_roles, '[0]')), 'color');
+	}
+
+	if (preparedRisk.mitigation_status) {
+		preparedRisk.defaultHidden = preparedRisk.mitigation_status === RISK_LEVELS.AGREED_FULLY;
+	}
+
+	renameFieldIfExists(preparedRisk, 'desc', 'description');
+	renameFieldIfExists(preparedRisk, 'owner', 'author');
+	renameFieldIfExists(preparedRisk, 'created', 'createdDate');
+
+	return preparedRisk;
 };
 
 export const calculateLevelOfRisk = (likelihood: any, consequence: any): number => {

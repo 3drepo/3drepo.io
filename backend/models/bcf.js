@@ -582,7 +582,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 								owner: requester.user
 							};
 							saveIssueProms.push(
-								Issue.findByUID({account, model}, issue._id, {}, true).then(matchingIssue => {
+								Issue.findByUID(account, model, issue._id, {}, true).then(matchingIssue => {
 									const toChange = {};
 									toChange.comments = matchingIssue.comments;
 									toChange.comments.push(bcfImportNotification);
