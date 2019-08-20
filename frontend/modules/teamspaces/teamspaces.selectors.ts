@@ -68,6 +68,10 @@ export const selectVisibleItems = createSelector(
 	selectComponentState, (state) => state.visibleItems
 );
 
+export const selectStarredVisibleItems = createSelector(
+	selectComponentState, (state) => state.starredVisibleItems
+);
+
 export const selectShowStarredOnly = createSelector(
 	selectComponentState, (state) => state.showStarredOnly
 );

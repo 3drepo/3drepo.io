@@ -48,6 +48,7 @@ export const INITIAL_STATE = {
 	componentState: {
 		showStarredOnly: false,
 		visibleItems: {},
+		starredVisibleItems: {},
 		teamspacesItems: []
 	}
 };

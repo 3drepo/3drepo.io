@@ -19,7 +19,7 @@ import { cond, isEmpty, matches, stubTrue } from 'lodash';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
 
-import { IconButton, MenuItem, Tab, Tabs } from '@material-ui/core';
+import { MenuItem, Tab, Tabs } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 
 import { renderWhenTrue } from '../../helpers/rendering';
@@ -59,7 +59,10 @@ interface IProps {
 	items: any[];
 	isPending: boolean;
 	visibleItems: any[];
+	starredVisibleItems: any[];
 	showStarredOnly: boolean;
+	starredModelsMap: any;
+	modelsMap: any;
 	showDialog: (config) => void;
 	fetchTeamspaces: (username) => void;
 	fetchStarredModels: () => void;
@@ -69,6 +72,7 @@ interface IProps {
 interface IState {
 	teamspacesItems: any[];
 	visibleItems: any;
+	lastVisibleItems: any;
 }
 
 export class Teamspaces extends React.PureComponent<IProps, IState> {
@@ -78,11 +82,21 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	public state = {
 		teamspacesItems: [],
-		visibleItems: {}
+		visibleItems: {},
+		lastVisibleItems: {}
 	};
 
 	public componentDidMount() {
-		const {items, fetchTeamspaces, currentTeamspace, visibleItems, fetchStarredModels} = this.props;
+		const {
+			items,
+			fetchTeamspaces,
+			currentTeamspace,
+			visibleItems,
+			starredVisibleItems,
+			fetchStarredModels,
+			showStarredOnly
+		} = this.props;
+
 		if (!items.length) {
 			fetchTeamspaces(currentTeamspace);
 			fetchStarredModels();
@@ -91,16 +105,30 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		if (isEmpty(visibleItems)) {
 			visibleItems[currentTeamspace] = true;
 			this.setState({visibleItems});
+		} else {
+			this.setState({
+				visibleItems: showStarredOnly ? starredVisibleItems : visibleItems,
+				lastVisibleItems: visibleItems
+			});
 		}
 	}
 
 	public componentWillUnmount() {
-		this.props.setState({ visibleItems: this.state.visibleItems });
+		if (this.props.showStarredOnly) {
+			this.props.setState({
+				starredVisibleItems: this.state.visibleItems
+			});
+		} else {
+			this.props.setState({
+				visibleItems: this.state.lastVisibleItems
+			});
+		}
+
 	}
 
 	private shouldBeVisible = cond([
 		[matches({ type: LIST_ITEMS_TYPES.TEAMSPACE }), stubTrue],
-		[matches({ type: LIST_ITEMS_TYPES.PROJECT }), ({ teamspace }) => this.isVisibleItem(teamspace)],
+		[matches({ type: LIST_ITEMS_TYPES.PROJECT }), ({ teamspace }) => this.state.visibleItems[teamspace]],
 		[stubTrue, () => false]
 	]);
 
@@ -155,9 +183,40 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	private handleTabChange = (event, activeTab) => this.props.setState({
-		showStarredOnly: Boolean(activeTab)
-	})
+	private getStarredVisibleItems = () => {
+		const starredVisibleItems = new Set();
+		const visibleItemsMap = {};
+
+		Object.keys(this.props.starredModelsMap).forEach((starredKey) => {
+			const [ teamspace, modelId ] = starredKey.split('/');
+			starredVisibleItems.add(teamspace);
+			starredVisibleItems.add(this.props.modelsMap[modelId].projectName);
+		});
+
+		starredVisibleItems.forEach((item) => {
+			visibleItemsMap[item] = true;
+		});
+
+		return visibleItemsMap;
+	}
+
+	private handleTabChange = (event, activeTab) => {
+		const starredVisibleItems = this.getStarredVisibleItems();
+
+		this.props.setState({
+			showStarredOnly: Boolean(activeTab),
+		});
+
+		if (activeTab) {
+			this.setState({
+				lastVisibleItems: this.state.visibleItems,
+			});
+		}
+
+		this.setState({
+			visibleItems: activeTab ? starredVisibleItems : this.state.lastVisibleItems
+		});
+	}
 
 	private renderAddModelGridItem = (teamspace, project) => (
 		<AddModelButton>
@@ -170,8 +229,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		</AddModelButton>
 	)
 
-	private isVisibleItem = (itemId) => this.state.visibleItems[itemId] || this.props.showStarredOnly;
-
 	private renderModels = (models, project) => renderWhenTrue(() => (
 		<GridContainer key={`container-${project.id}`}>
 			{this.renderAddModelGridItem(project.teamspace, project.id)}
@@ -179,7 +236,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				<ModelGridItem key={props.model} {...props}	/>
 			))}
 		</GridContainer>
-	))(models.length && this.isVisibleItem(project.id))
+	))(models.length && this.state.visibleItems[project.id])
 
 	private renderProject = (props) => ([
 		(
@@ -193,18 +250,20 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		this.renderModels(props.models, props)
 	])
 
-	private renderTeamspace = (props) => (
-		<TeamspaceItem
-			{...props}
-			key={props.account}
-			name={props.account}
-			active={this.isVisibleItem(props.account)}
-			isMyTeamspace={this.props.currentTeamspace === props.account}
-			onToggle={this.handleVisibilityChange}
-			onAddProject={this.openProjectDialog}
-			disabled={!props.projects.length}
-		/>
-	)
+	private renderTeamspace = (props) => {
+		return (
+			<TeamspaceItem
+				{...props}
+				key={props.account}
+				name={props.account}
+				active={this.state.visibleItems[props.account]}
+				isMyTeamspace={this.props.currentTeamspace === props.account}
+				onToggle={this.handleVisibilityChange}
+				onAddProject={this.openProjectDialog}
+				disabled={!props.projects.length}
+			/>
+		);
+	}
 
 	private renderMenuButton = (isPending, props) => (
 		<MenuButton
