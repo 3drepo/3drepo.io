@@ -59,11 +59,15 @@ interface IProps {
 	items: any[];
 	isPending: boolean;
 	visibleItems: any[];
+	revisions?: any[];
 	starredVisibleItems: any[];
 	showStarredOnly: boolean;
 	starredModelsMap: any;
 	modelsMap: any;
 	showDialog: (config) => void;
+	showConfirmDialog: (config) => void;
+	showRevisionsDialog: (config) => void;
+	hideDialog: () => void;
 	fetchTeamspaces: (username) => void;
 	fetchStarredModels: () => void;
 	setState: (componentState: any) => void;

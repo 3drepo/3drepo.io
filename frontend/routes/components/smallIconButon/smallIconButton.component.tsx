@@ -16,6 +16,7 @@
  */
 
 import { Tooltip } from '@material-ui/core';
+import { TooltipProps } from '@material-ui/core/Tooltip';
 import React from 'react';
 import { renderWhenTrueOtherwise } from '../../../helpers/rendering';
 import { SmallIconButtonStyled } from './smallIconButton.styles';
@@ -26,11 +27,16 @@ interface IProps {
 	ariaLabel?: string;
 	tooltip?: string;
 	disabled?: boolean;
+	tooltipPlacement?: TooltipProps['placement'];
 }
 
 export class SmallIconButton extends React.PureComponent<IProps, any> {
+	public static defaultProps = {
+		tooltipPlacement: 'bottom'
+	};
+
 	public renderButtonConditionally = renderWhenTrueOtherwise(() => (
-		<Tooltip title={this.props.tooltip}>
+		<Tooltip title={this.props.tooltip} placement={this.props.tooltipPlacement}>
 			{this.renderButton()}
 		</Tooltip>
 	), () => this.renderButton());

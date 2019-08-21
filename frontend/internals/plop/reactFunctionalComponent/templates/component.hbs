@@ -23,10 +23,10 @@ interface IProps {
 	className?: string;
 }
 
-export function {{ pascalCase name }}(props: IProps) {
+export const {{ pascalCase name }} = (props: IProps) => {
   return (
     <Container className={props.className}>
-				{{ pascalCase name }} component
+			{{ pascalCase name }} component
 		</Container>
   );
 }

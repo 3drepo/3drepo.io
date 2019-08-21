@@ -16,6 +16,7 @@
  */
 
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { selectCurrentTeamspace } from '../../modules/currentUser';
@@ -31,6 +32,7 @@ import {
 	selectVisibleItems,
 	TeamspacesActions,
 } from '../../modules/teamspaces';
+import { selectRevisions, ModelActions } from './../../modules/model';
 import { Teamspaces } from './teamspaces.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -38,6 +40,7 @@ const mapStateToProps = createStructuredSelector({
 	items: selectFlattenTeamspaces,
 	isPending: selectIsPending,
 	visibleItems: selectVisibleItems,
+	revisions: selectRevisions,
 	starredVisibleItems: selectStarredVisibleItems,
 	teamspaces: selectTeamspaces,
 	showStarredOnly: selectShowStarredOnly,
@@ -47,10 +50,17 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showDialog: DialogActions.showDialog,
+	showConfirmDialog: DialogActions.showConfirmDialog,
+	showRevisionsDialog: DialogActions.showRevisionsDialog,
+	hideDialog: DialogActions.hideDialog,
+	createProject: TeamspacesActions.createProject,
+	updateProject: TeamspacesActions.updateProject,
+	removeProject: TeamspacesActions.removeProject,
 	createModel: TeamspacesActions.createModel,
 	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
-	fetchStarredModels: StarredActions.fetchStarredModels,
 	setState: TeamspacesActions.setComponentState,
+	downloadModel: ModelActions.downloadModel,
+	fetchStarredModels: StarredActions.fetchStarredModels,
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Teamspaces);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Teamspaces));
