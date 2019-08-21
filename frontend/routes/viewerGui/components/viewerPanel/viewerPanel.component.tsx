@@ -30,7 +30,7 @@ import {
 
 const ViewerPanelTitle = ({title, Icon, renderActions}) => (
 	<TitleContainer>
-		<Title> {Icon && <TitleIcon>{Icon}</TitleIcon>} {title} </Title>
+		<Title><TitleIcon>{Icon}</TitleIcon>{title}</Title>
 		{renderActions && renderActions()}
 	</TitleContainer>
 );
