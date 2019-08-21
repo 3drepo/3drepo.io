@@ -37,7 +37,12 @@ import ModelGridItem from './components/modelGridItem/modelGridItem.container';
 import ProjectDialog from './components/projectDialog/projectDialog.container';
 import ProjectItem from './components/projectItem/projectItem.container';
 import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
-import { LIST_ITEMS_TYPES, MODEL_SUBTYPES, TEAMSPACE_FILTER_RELATED_FIELDS, TEAMSPACES_FILTERS } from './teamspaces.contants';
+import {
+	LIST_ITEMS_TYPES,
+	MODEL_SUBTYPES,
+	TEAMSPACE_FILTER_RELATED_FIELDS,
+	TEAMSPACES_FILTERS
+} from './teamspaces.contants';
 import {
 	AddModelButton,
 	AddModelButtonOption,

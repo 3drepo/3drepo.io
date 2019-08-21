@@ -17,11 +17,12 @@
 
 import { compact, map, orderBy, pick, pickBy, uniq, values } from 'lodash';
 import { createSelector } from 'reselect';
+import { searchByFilters } from '../../helpers/searching';
+import { DATA_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
 import { LIST_ITEMS_TYPES } from '../../routes/teamspaces/teamspaces.contants';
 import { selectStarredModels } from '../starred';
 import { getStarredModelKey } from '../starred/starred.contants';
 import { extendTeamspacesInfo } from './teamspaces.helpers';
-import { searchByFilters } from '../../helpers/searching';
 
 export const selectTeamspacesDomain = (state) => ({ ...state.teamspaces });
 
@@ -99,6 +100,7 @@ export const selectFlattenTeamspaces = createSelector(
 	(teamspacesList, projects, models, showStarredOnly, starredModels, filters) => {
 		const flattenList = [];
 		const hasActiveFilters = showStarredOnly || filters.length;
+		const textFilters = filters.filter(({ type }) => type === DATA_TYPES.QUERY);
 
 		for (let index = 0; index < teamspacesList.length; index++) {
 			const teamspaceName = teamspacesList[index].account;
@@ -107,7 +109,6 @@ export const selectFlattenTeamspaces = createSelector(
 
 			for (let j = 0; j < projectsIds.length; j++) {
 				const project = projects[projectsIds[j]];
-
 				const projectModels = [];
 				for (let m = 0; m < project.models.length; m++) {
 					const modelId = project.models[m];
@@ -126,24 +127,36 @@ export const selectFlattenTeamspaces = createSelector(
 				}
 
 				const filteredModels = searchByFilters(projectModels, filters);
-				if (!hasActiveFilters || filteredModels.length) {
-					teamspaceProjects.push({
-						...project,
-						models: filteredModels,
-						teamspace: teamspaceName,
-						type: LIST_ITEMS_TYPES.PROJECT,
-						id: projectsIds[j]
-					});
+
+				const processedProject = {
+					...project,
+					models: filteredModels,
+					teamspace: teamspaceName,
+					type: LIST_ITEMS_TYPES.PROJECT,
+					id: projectsIds[j]
+				};
+
+				// Show all models if no result (but project is collapsed)
+				const [shouldBeVisible] = searchByFilters([processedProject], textFilters);
+				if (!showStarredOnly && !filteredModels.length && projectModels.length && shouldBeVisible) {
+					processedProject.collapsed = true;
+					processedProject.models = processedProject.models.concat(projectModels);
+				}
+
+				const shouldAddProject = !hasActiveFilters || processedProject.models.length || processedProject.collapsed &&
+					((showStarredOnly && shouldBeVisible) || !showStarredOnly);
+
+				if (shouldAddProject) {
+					teamspaceProjects.push(processedProject);
 				}
 			}
 
-			const filteredProjects = searchByFilters(teamspaceProjects, filters);
-			if (!hasActiveFilters || filteredProjects.length) {
+			if (!hasActiveFilters || teamspaceProjects.length) {
 				flattenList.push({
 					...teamspacesList[index],
 					type: LIST_ITEMS_TYPES.TEAMSPACE,
 					id: teamspacesList[index].account
-				}, ...orderBy(filteredProjects, ['name']));
+				}, ...orderBy(teamspaceProjects, ['name']));
 			}
 		}
 		return flattenList;
