@@ -339,6 +339,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		(
 			<ProjectItem
 				{...props}
+				active={this.state.visibleItems[props.id] && props.models.length}
 				key={props._id}
 				isEmpty={!props.models.length}
 				query={this.searchQuery}

@@ -38,6 +38,7 @@ interface IProps {
 	permissions: any[];
 	teamspace: string;
 	history: any;
+	active?: boolean;
 	renderChildItem: () => JSX.Element;
 	removeProject: (teamspace, projectId) => void;
 	showConfirmDialog: (config) => void;
@@ -129,7 +130,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 	))(this.isProjectAdmin()) as any
 
 	public render() {
-		const { name, disabled, isEmpty, query } = this.props;
+		const { name, disabled, isEmpty, query, active } = this.props;
 		return (
 			<TreeList
 				query={query}
@@ -138,6 +139,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 				level={TREE_LEVELS.PROJECT}
 				disabled={disabled}
 				isEmpty={isEmpty}
+				active={active}
 				IconProps={{
 					IconClosed: Label,
 					IconOpened: LabelOutlined

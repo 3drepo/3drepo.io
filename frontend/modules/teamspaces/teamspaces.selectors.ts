@@ -18,7 +18,7 @@
 import { compact, map, orderBy, pick, pickBy, uniq, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { searchByFilters } from '../../helpers/searching';
-import { FILTER_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
+import { FILTER_TYPES, DATA_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
 import { LIST_ITEMS_TYPES } from '../../routes/teamspaces/teamspaces.contants';
 import { selectStarredModels } from '../starred';
 import { getStarredModelKey } from '../starred/starred.contants';
@@ -100,11 +100,16 @@ export const selectSelectedDataTypes = createSelector(
 
 export const selectFlattenTeamspaces = createSelector(
 	selectTeamspacesList, selectProjects, selectModels,
-	selectShowStarredOnly, selectStarredModels, selectSelectedFilters,
-	(teamspacesList, projects, models, showStarredOnly, starredModels, filters) => {
+	selectShowStarredOnly, selectStarredModels,
+	selectSelectedFilters, selectSelectedDataTypes,
+	(teamspacesList, projects, models, showStarredOnly, starredModels, filters, filterableDataTypes) => {
 		const flattenList = [];
 		const hasActiveFilters = showStarredOnly || filters.length;
 		const textFilters = filters.filter(({ type }) => type === FILTER_TYPES.QUERY);
+
+		const shouldFilterProjects = filterableDataTypes.includes(DATA_TYPES.PROJECTS);
+		const shouldFilterModels = filterableDataTypes.includes(DATA_TYPES.MODELS);
+		const shouldFilterFederations = filterableDataTypes.includes(DATA_TYPES.FEDERATIONS);
 
 		for (let index = 0; index < teamspacesList.length; index++) {
 			const teamspaceName = teamspacesList[index].account;
@@ -114,37 +119,50 @@ export const selectFlattenTeamspaces = createSelector(
 			for (let j = 0; j < projectsIds.length; j++) {
 				const project = projects[projectsIds[j]];
 				const projectModels = [];
+				const projectFederations = [];
 				for (let m = 0; m < project.models.length; m++) {
 					const modelId = project.models[m];
 					const recordKey = getStarredModelKey({ teamspace: teamspaceName, model: modelId });
 					if (showStarredOnly && !starredModels[recordKey]) {
 						continue;
 					}
-					projectModels.push({
+
+					const processedModel = {
 						...models[modelId],
 						teamspace: teamspaceName,
 						project: projectsIds[j],
 						projectName: project.name,
 						type: LIST_ITEMS_TYPES.MODEL,
 						id: modelId
-					});
+					};
+
+					if (processedModel.federate) {
+						projectFederations.push(processedModel);
+					} else {
+						projectModels.push(processedModel);
+					}
 				}
 
-				const filteredModels = searchByFilters(projectModels, filters);
+				const filteredModels = shouldFilterModels ? searchByFilters(projectModels, filters) : projectModels;
+				const filteredFederations = shouldFilterFederations
+					? searchByFilters(projectFederations, filters)
+					: projectFederations;
+
+				const filteredModelsAndFederations = filteredFederations.concat(filteredModels);
 
 				const processedProject = {
 					...project,
-					models: filteredModels,
+					models: filteredModelsAndFederations,
 					teamspace: teamspaceName,
 					type: LIST_ITEMS_TYPES.PROJECT,
 					id: projectsIds[j]
 				};
 
 				// Show all models if no result (but project is collapsed)
-				const [shouldBeVisible] = searchByFilters([processedProject], textFilters);
-				if (!showStarredOnly && !filteredModels.length && projectModels.length && shouldBeVisible) {
+				const shouldBeVisible = shouldFilterProjects ? searchByFilters([processedProject], textFilters)[0] : true;
+				if (!showStarredOnly && !filteredModelsAndFederations.length && project.models.length && shouldBeVisible) {
 					processedProject.collapsed = true;
-					processedProject.models = processedProject.models.concat(projectModels);
+					processedProject.models = processedProject.models.concat(projectModels).concat(projectFederations);
 				}
 
 				const shouldAddProject = !hasActiveFilters || processedProject.models.length || processedProject.collapsed &&

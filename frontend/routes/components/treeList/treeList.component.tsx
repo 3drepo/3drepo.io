@@ -96,8 +96,18 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 		hovered: false
 	};
 
+	public componentDidMount() {
+		this.setState({ active: this.props.active });
+	}
+
+	public componentDidUpdate(prevProps) {
+		if (prevProps.active !== this.props.active) {
+			this.setState({ active: this.props.active });
+		}
+	}
+
 	private get isActive() {
-		return this.props.active || this.state.active;
+		return this.state.active;
 	}
 
 	private handleRootClick = () => {
