@@ -151,6 +151,22 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public componentDidUpdate(prevProps) {
+		const { items, searchEnabled, selectedFilters} = this.props;
+
+		if (searchEnabled && selectedFilters.length && prevProps.items && prevProps.items !== items) {
+			const visibleItems = { ...this.state.visibleItems };
+			items.forEach(({ collapsed, id }) => {
+				if (collapsed) {
+					delete visibleItems[id];
+				} else {
+					visibleItems[id] = true;
+				}
+			});
+			this.setState({	visibleItems });
+		}
+	}
+
 	public componentWillUnmount() {
 		if (this.props.showStarredOnly) {
 			this.props.setState({
