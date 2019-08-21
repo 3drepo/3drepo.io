@@ -28,7 +28,6 @@ import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { FILTER_TYPES } from '../../filterPanel.component';
 
 import {
-	CheckableText,
 	ChildMenu,
 	CopyItem,
 	CopyText,
@@ -132,12 +131,18 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 	))(index === this.state.activeItem)
 
 	public renderMenuItems = (items) => {
-		return items.map((item, index) => (
-			<NestedWrapper key={`${item.label}-${index}`} onMouseLeave={this.hideSubMenu}>
-				{this.renderListParentItem(index, item)}
-				{this.renderChildItems(index, item)}
-			</NestedWrapper>
-		));
+		return (
+			<List>
+				{
+					items.map((item, index) => (
+						<NestedWrapper key={`${item.label}-${index}`} onMouseLeave={this.hideSubMenu}>
+							{this.renderListParentItem(index, item)}
+							{this.renderChildItems(index, item)}
+						</NestedWrapper>
+					))
+				}
+			</List>
+		);
 	}
 
 	public renderMenuDataTypes = renderWhenTrue(() => {
@@ -150,12 +155,12 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 							return (
 
 								<StyledListItem button key={`${item.label}-${index}`} onClick={this.toggleSelectDataType(item.type)}>
-									<StyledItemText withCheck>
+									<StyledItemText>
+										{item.label}
 										{isSelected && <Check fontSize={'small'} />}
-										<CheckableText checked={isSelected}>{item.label}</CheckableText>
 									</StyledItemText>
 								</StyledListItem>
-							)
+							);
 						})
 					}
 				</List>

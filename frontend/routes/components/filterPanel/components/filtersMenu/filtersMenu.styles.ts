@@ -28,6 +28,11 @@ export const MenuList = styled(List)`
 	max-width: 300px;
 	box-shadow: 0 1px 3px 0 ${COLOR.BLACK_20};
 	border-radius: 2px;
+
+	&& {
+		padding-top: 4px;
+    padding-bottom: 4px;
+	}
 `;
 
 export const NestedWrapper = styled.div`
@@ -53,13 +58,9 @@ export const StyledItemText = styled.div`
 	color: ${COLOR.BLACK_60};
 	font-size: 12px;
 	display: flex;
-	justify-content: ${(props) => props.withCheck ? 'align-left' : 'space-between'};
+	justify-content: space-between;
 	width: 100%;
 	align-items: center;
-`;
-
-export const CheckableText = styled.span`
-	margin-left: ${(props) => props.checked ? '5px' : '25px'};
 `;
 
 export const IconWrapper = styled.div`
@@ -98,8 +99,8 @@ export const CopyText = styled.span`
 
 export const MenuFooter = styled.div`
 	border-top: 1px solid ${COLOR.BLACK_20};
-	margin-top: 8px;
 	padding-top: 8px;
+	padding-bottom: 8px;
 `;
 
 export const DataTypesWrapper = styled.div`
