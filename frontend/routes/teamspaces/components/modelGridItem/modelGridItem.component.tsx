@@ -206,6 +206,7 @@ export function ModelGridItem(props: IProps) {
 			setHasDelayedClick(true);
 			starClickTimeout.current = setTimeout(() => {
 				const modelData = pick(props, ['model', 'name', 'teamspace']);
+
 				if (props.isStarred) {
 					props.removeFromStarred(modelData);
 				} else {
@@ -311,7 +312,7 @@ export function ModelGridItem(props: IProps) {
 			<Content>
 				<PropertiesColumn>
 					{renderModelCode(props.code)}
-					{renderSuitabilityCode(props.suitabilityCode)} {/* TODO: check suitability code after backend changes */}
+					{renderSuitabilityCode(props.suitabilityCode)}
 				</PropertiesColumn>
 				{renderTimestamp(!isPending && props.timestamp)}
 				{renderPendingStatus(isPending)}
