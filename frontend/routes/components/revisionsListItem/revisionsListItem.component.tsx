@@ -89,7 +89,7 @@ export const RevisionsListItem = (props: IProps) => {
 			{renderLoader(isPending)}
 			<Row>
 				<PropertyWrapper>
-					<Tag>{tag || '(no name)'} {renderGoToRevisionButton(!props.data.void && props.editable)}</Tag>
+					<Tag>{tag || '(no name)'} {renderGoToRevisionButton(!props.data.void)}</Tag>
 				</PropertyWrapper>
 				<Property>
 					<DateTime value={timestamp} format={LONG_DATE_TIME_FORMAT} />
