@@ -147,6 +147,7 @@ export const selectFlattenTeamspaces = createSelector(
 					((showStarredOnly && shouldBeVisible) || !showStarredOnly);
 
 				if (shouldAddProject) {
+					processedProject.models = orderBy(processedProject.models, ['federate', 'name']);
 					teamspaceProjects.push(processedProject);
 				}
 			}
