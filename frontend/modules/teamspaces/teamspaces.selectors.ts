@@ -18,7 +18,7 @@
 import { compact, map, orderBy, pick, pickBy, uniq, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { searchByFilters } from '../../helpers/searching';
-import { DATA_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
+import { FILTER_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
 import { LIST_ITEMS_TYPES } from '../../routes/teamspaces/teamspaces.contants';
 import { selectStarredModels } from '../starred';
 import { getStarredModelKey } from '../starred/starred.contants';
@@ -94,13 +94,17 @@ export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
 
+export const selectSelectedDataTypes = createSelector(
+	selectComponentState, (state) => state.selectedDataTypes
+);
+
 export const selectFlattenTeamspaces = createSelector(
 	selectTeamspacesList, selectProjects, selectModels,
 	selectShowStarredOnly, selectStarredModels, selectSelectedFilters,
 	(teamspacesList, projects, models, showStarredOnly, starredModels, filters) => {
 		const flattenList = [];
 		const hasActiveFilters = showStarredOnly || filters.length;
-		const textFilters = filters.filter(({ type }) => type === DATA_TYPES.QUERY);
+		const textFilters = filters.filter(({ type }) => type === FILTER_TYPES.QUERY);
 
 		for (let index = 0; index < teamspacesList.length; index++) {
 			const teamspaceName = teamspacesList[index].account;

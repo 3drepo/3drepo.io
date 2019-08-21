@@ -28,6 +28,7 @@ import {
 	selectModels,
 	selectModelCodes,
 	selectSearchEnabled,
+	selectSelectedDataTypes,
 	selectSelectedFilters,
 	selectShowStarredOnly,
 	selectStarredVisibleItems,
@@ -51,6 +52,7 @@ const mapStateToProps = createStructuredSelector({
 	modelsMap: selectModels,
 	searchEnabled: selectSearchEnabled,
 	selectedFilters: selectSelectedFilters,
+	selectedDataTypes: selectSelectedDataTypes,
 	modelCodes: selectModelCodes,
 });
 

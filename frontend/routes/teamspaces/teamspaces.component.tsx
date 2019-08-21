@@ -27,9 +27,8 @@ import Add from '@material-ui/icons/Add';
 
 import { renderWhenTrue } from '../../helpers/rendering';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
-import { DATA_TYPES, FilterPanel } from '../components/filterPanel/filterPanel.component';
+import { FilterPanel, FILTER_TYPES } from '../components/filterPanel/filterPanel.component';
 import { Loader } from '../components/loader/loader.component';
-import { Panel } from '../components/panel/panel.component';
 import { ViewerPanel } from '../viewerGui/components/viewerPanel/viewerPanel.component';
 import FederationDialog from './components/federationDialog/federationDialog.container';
 import ModelDialog from './components/modelDialog/modelDialog.container';
@@ -38,10 +37,7 @@ import ProjectDialog from './components/projectDialog/projectDialog.container';
 import ProjectItem from './components/projectItem/projectItem.container';
 import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
 import {
-	LIST_ITEMS_TYPES,
-	MODEL_SUBTYPES,
-	TEAMSPACE_FILTER_RELATED_FIELDS,
-	TEAMSPACES_FILTERS
+	LIST_ITEMS_TYPES, MODEL_SUBTYPES, TEAMSPACE_FILTER_RELATED_FIELDS, TEAMSPACES_DATA_TYPES, TEAMSPACES_FILTERS
 } from './teamspaces.contants';
 import {
 	AddModelButton,
@@ -69,6 +65,7 @@ interface IProps {
 	modelsMap: any;
 	searchEnabled: boolean;
 	selectedFilters: any[];
+	selectedDataTypes: any[];
 	modelCodes: string[];
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
@@ -86,7 +83,7 @@ interface IState {
 }
 
 const getSearchQuery = memoizeOne((selectedFilters) => selectedFilters.reduce((query, filter) => {
-	if (filter.type === DATA_TYPES.QUERY) {
+	if (filter.type === FILTER_TYPES.QUERY) {
 		query = `${query} ${filter.value.value}`;
 	}
 	return query;
@@ -304,18 +301,23 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
         this.props.setState({ selectedFilters });
     }
 
-    private renderActions = () => (
-        <>
-        {this.getSearchButton()}
-        </>
-    )
+	private handleDataTypeChange = (selectedDataTypes) => {
+		this.props.setState({ selectedDataTypes });
+	}private renderActions = () => (
+		<>
+			{this.getSearchButton()}
+		</>
+	)
 
 	private renderFilterPanel = renderWhenTrue(() => (
 		<FilterPanel
 			onChange={this.handleFilterChange}
+			onDataTypeChange={this.handleDataTypeChange}
 			filters={this.filters}
 			selectedFilters={this.props.selectedFilters}
-		left/>
+			selectedDataTypes={this.props.selectedDataTypes}
+			dataTypes={TEAMSPACES_DATA_TYPES}left
+		/>
 	));
 
 	private renderModels = (models) => renderWhenTrue(() =>

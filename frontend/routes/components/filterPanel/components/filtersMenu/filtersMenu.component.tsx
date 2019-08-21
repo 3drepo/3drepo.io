@@ -25,12 +25,14 @@ import React from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
-import { DATA_TYPES } from '../../filterPanel.component';
+import { FILTER_TYPES } from '../../filterPanel.component';
 
 import {
+	CheckableText,
 	ChildMenu,
 	CopyItem,
 	CopyText,
+	DataTypesWrapper,
 	MenuFooter,
 	MenuList,
 	NestedWrapper,
@@ -42,8 +44,11 @@ import {
 interface IProps {
 	items: any[];
 	selectedItems: any[];
+	dataTypes?: any[];
+	selectedDataTypes?: any[];
 	left?: boolean;
 	onToggleFilter: (property, value) => void;
+	onToggleDataType: (value) => void;
 }
 
 interface IState {
@@ -71,6 +76,10 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 
 	public toggleSelectItem = (itemParent, item) => () => {
 		this.props.onToggleFilter(itemParent, item);
+	}
+
+	public toggleSelectDataType = (type) => () => {
+		this.props.onToggleDataType(type);
 	}
 
 	public isSelectedItem = (parentLabel, itemValue) =>
@@ -103,7 +112,7 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 			>
 				<StyledItemText>
 					{name}
-					{item.type === DATA_TYPES.DATE &&
+					{item.type === FILTER_TYPES.DATE &&
 						<StyledDatePicker
 							value={subItem.value.value ? this.state[subItem.value.value] : null}
 							placeholder="Select date"
@@ -131,6 +140,29 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 		));
 	}
 
+	public renderMenuDataTypes = renderWhenTrue(() => {
+		return (
+			<DataTypesWrapper>
+				<List>
+					{
+						this.props.dataTypes.map((item, index) => {
+							const isSelected = this.props.selectedDataTypes.includes(item.type);
+							return (
+
+								<StyledListItem button key={`${item.label}-${index}`} onClick={this.toggleSelectDataType(item.type)}>
+									<StyledItemText withCheck>
+										{isSelected && <Check fontSize={'small'} />}
+										<CheckableText checked={isSelected}>{item.label}</CheckableText>
+									</StyledItemText>
+								</StyledListItem>
+							)
+						})
+					}
+				</List>
+			</DataTypesWrapper>
+		);
+	});
+
 	public renderFooter = () => (
 		<MenuFooter>
 			<StyledListItem button disabled={!this.props.selectedItems.length}>
@@ -150,6 +182,7 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 		return (
 			<MuiPickersUtilsProvider utils={DayJsUtils}>
 				<MenuList>
+					{this.renderMenuDataTypes(this.props.dataTypes.length)}
 					{this.renderMenuItems(this.props.items)}
 					{this.renderFooter()}
 				</MenuList>

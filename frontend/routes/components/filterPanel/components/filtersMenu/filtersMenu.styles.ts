@@ -53,9 +53,13 @@ export const StyledItemText = styled.div`
 	color: ${COLOR.BLACK_60};
 	font-size: 12px;
 	display: flex;
-	justify-content: space-between;
+	justify-content: ${(props) => props.withCheck ? 'align-left' : 'space-between'};
 	width: 100%;
 	align-items: center;
+`;
+
+export const CheckableText = styled.span`
+	margin-left: ${(props) => props.checked ? '5px' : '25px'};
 `;
 
 export const IconWrapper = styled.div`
@@ -96,4 +100,8 @@ export const MenuFooter = styled.div`
 	border-top: 1px solid ${COLOR.BLACK_20};
 	margin-top: 8px;
 	padding-top: 8px;
+`;
+
+export const DataTypesWrapper = styled.div`
+	border-bottom: 1px solid ${COLOR.BLACK_20};
 `;
