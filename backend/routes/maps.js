@@ -28,42 +28,444 @@ const hereBaseDomain = ".base.maps.cit.api.here.com";
 const hereAerialDomain = ".aerial.maps.cit.api.here.com";
 const hereTrafficDomain = ".traffic.maps.cit.api.here.com";
 
+/**
+ * @apiDefine Maps Maps
+ * Geographic information system (GIS) resources from
+ * Open Street Maps (OSM) and Here are supported.
+ * Please note that an app_id and app_code from Here are
+ * required to access Here resources.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ */
+
+/**
+ * @apiDefine MapTile
+ *
+ * @apiParam {Number} zoomLevel Zoom level
+ * @apiParam {Number} gridx Longitudinal (X) grid reference
+ * @apiParam {Number} gridy Latitudinal (Y) grid reference
+ * @apiSuccess {png} image Map tile image
+ *
+ * @apiSuccessExample {png} Success-Response
+ * HTTP/1.1 200 OK
+ * <binary image>
+ */
+
+/**
+ * @apiDefine HereOptions
+ *
+ * @apiParam (Query) {Boolean} [congestion] Flag that enables congestion and environmental
+ * zone display
+ * @apiParam (Query) {String} [lg] MARC three-letter language code for labels
+ * @apiParam (Query) {String} [lg2] Secondary MARC three-letter language code for labels
+ * @apiParam (Query) {String} [pois] Mask for Here Maps POIs categories
+ * @apiParam (Query) {Number} [ppi] Tile resolution in pixels per inch (72, 250, 320, 500)
+ * @apiParam (Query) {String} [pview] Render map boundaries based on internal or local views
+ * @apiParam (Query) {String} [style] Select style used to render map tile
+ */
+
+/**
+ * @apiDefine HereTrafficOptions
+ *
+ * @apiParam (Query) {String} [min_traffic_congestion] Specifies the minimum traffic
+ * congestion level to use for rendering traffic flow (free, heavy, queuing, blocked)
+ * @apiParam (Query) {DateTime} [time] Date and time for showing historical traffic patterns
+ */
+
+/**
+ * @api {get} /:teamspace/:model/maps List maps
+ * @apiName listMaps
+ * @apiGroup Maps
+ * @apiDescription List the available geographic information system (GIS) sources and
+ * map layers.
+ *
+ * @apiUse Maps
+ * @apiSuccess {Object[]} maps List of available map objects
+ * @apiSuccess (Map object) {String} name Name of map provider
+ * @apiSuccess (Map object) {Object[]} layers List of available map layer objects
+ * @apiSuccess (Layer object) {String} name Name of map layer
+ * @apiSuccess (Layer object) {String} source Map source identifier
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * 	"maps":[
+ * 		{
+ * 			"name":"Open Street Map",
+ * 			"layers":[
+ * 				{
+ * 					"name":"Map Tiles",
+ * 					"source":"OSM"
+ * 				}
+ * 			]
+ * 		},
+ * 		{
+ * 			"name":"Here",
+ * 			"layers":[
+ * 				{
+ * 					"name":"Map Tiles",
+ * 					"source":"HERE"
+ * 				},
+ * 				{
+ * 					"name":"Traffic Flow",
+ * 					"source":"HERE_TRAFFIC_FLOW"
+ * 				},
+ * 				{
+ * 					"name":"Truck Restrictions",
+ * 					"source":"HERE_TRUCK_OVERLAY"
+ * 				}
+ * 			]
+ * 		}
+ * 	]
+ * }
+ */
 router.get("/:model/maps/", listMaps);
 
+/**
+ * @api {get} /:teamspace/:model/maps/osm/:zoomLevel/:gridx/:gridy.png OSM map tile
+ * @apiName getOSMTile
+ * @apiGroup Maps
+ * @apiDescription Retrieve an Open Street Map (OSM) map tile image.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/osm/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/osm/:zoomLevel/:gridx/:gridy.png", getOSMTile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/hereinfo Here Maps options
+ * @apiName getHereBaseInfo
+ * @apiGroup Maps
+ * @apiDescription Get Here Maps service options.
+ *
+ * @apiUse Maps
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/ HTTP/1.1
+ *
+ * @apiSuccessExample {xml} Success-Response
+ * HTTP/1.1 200 OK
+ * <response>
+ * 	<maps>
+ * 		<map region="all" id="newest" />
+ * 	</maps>
+ * 	<resolutions>
+ * 		<resolution id="512" height="512" width="512" />
+ * 	</resolutions>
+ * 	<formats>
+ * 		<format encoding="png" bbp="24" id="png" />
+ * 	</formats>
+ * 	<schemes>
+ * 		<scheme id="normal.day" />
+ * 		<scheme id="normal.night" />
+ * 	</schemes>
+ * 	<style id="alps">
+ * 		<scheme id="normal.day" />
+ * 		<scheme id="normal.night" />
+ * 	</style>
+ * 	<style id="minis">
+ * 		<scheme id="normal.day" />
+ * 		<scheme id="carnav.day.grey" />
+ * 	</style>
+ * 	<tiletypes>
+ * 		<tiletype id="maptile" />
+ * 		<tiletype id="basetile" />
+ * 	</tiletypes>
+ * 	<languages>
+ * 		<language id="ARA" />
+ * 		<language id="CHI" />
+ * 		<language id="ENG" />
+ * 		<language id="GER" />
+ * 		<language id="SPA" />
+ * 	</languages>
+ * 	<zoomLevels min="0" max="20" />
+ * </response>
+ */
 router.get("/:model/maps/hereinfo/", middlewares.isHereEnabled, getHereBaseInfo);
 
+/**
+ * @api {get} /:teamspace/:model/maps/here/:zoomLevel/:gridx/:gridy.png?[query] Here map tile
+ * @apiName getHereMapsTile
+ * @apiGroup Maps
+ * @apiDescription Retrieve a Here Maps map tile image.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ * @apiUse HereOptions
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/here/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/here/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereMapsTile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/hereaerial/:zoomLevel/:gridx/:gridy.png?[query] Here aerial tile
+ * @apiName getHereAerialMapsTile
+ * @apiGroup Maps
+ * @apiDescription Retrieve a Here Maps aerial map tile image.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ * @apiUse HereOptions
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/hereaerial/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/hereaerial/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereAerialMapsTile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/heretraffic/:zoomLevel/:gridx/:gridy.png?[query] Here traffic tile
+ * @apiName getHereTrafficTile
+ * @apiGroup Maps
+ * @apiDescription Retrieve a Here Maps traffic map tile image.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ * @apiUse HereOptions
+ * @apiUse HereTrafficOptions
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/heretraffic/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/heretraffic/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTrafficTile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png?[query] Here traffic layer
+ * @apiName getHereTrafficFlowTile
+ * @apiGroup Maps
+ * @apiDescription Retrieve a Here Maps traffic flow overlay tile image.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ * @apiUse HereOptions
+ * @apiUse HereTrafficOptions
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/heretrafficflow/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTrafficFlowTile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/hereterrain/:zoomLevel/:gridx/:gridy.png?[query] Here terrain tile
+ * @apiName getHereTerrainTile
+ * @apiGroup Maps
+ * @apiDescription Retrieve a Here Maps terrain map tile image.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ * @apiUse HereOptions
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/hereterrain/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/hereterrain/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTerrainTile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/herehybrid/:zoomLevel/:gridx/:gridy.png?[query] Here hybrid tile
+ * @apiName getHereHybridTile
+ * @apiGroup Maps
+ * @apiDescription Retrieve a Here Maps hybrid map tile image.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ * @apiUse HereOptions
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/herehybrid/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/herehybrid/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereHybridTile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/heregrey/:zoomLevel/:gridx/:gridy.png?[query] Here grey tile
+ * @apiName getHereGreyTile
+ * @apiGroup Maps
+ * @apiDescription Retrieve a Here Maps grey map tile image.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ * @apiUse HereOptions
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/heregrey/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/heregrey/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereGreyTile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/heregreytransit/:zoomLevel/:gridx/:gridy.png?[query] Here transit (grey) tile
+ * @apiName getHereGreyTransitTile
+ * @apiGroup Maps
+ * @apiDescription Retrieve a Here Maps grey transit map tile image.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ * @apiUse HereOptions
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/heregreytransit/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/heregreytransit/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereGreyTransitTile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/heretruck/:zoomLevel/:gridx/:gridy.png?[query] Here truck restrictions tile
+ * @apiName getHereTruckRestrictionsTile
+ * @apiGroup Maps
+ * @apiDescription Retrieve a Here Maps truck restrictions map tile image.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ * @apiUse HereOptions
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/heretruck/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/heretruck/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTruckRestrictionsTile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/heretruckoverlay/:zoomLevel/:gridx/:gridy.png?[query] Here truck restrictions layer
+ * @apiName getHereTruckRestrictionsOverlayTile
+ * @apiGroup Maps
+ * @apiDescription Retrieve a Here Maps truck restrictions overlay tile image.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ * @apiUse HereOptions
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/heretruckoverlay/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/heretruckoverlay/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTruckRestrictionsOverlayTile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/hereadminlabeloverlay/:zoomLevel/:gridx/:gridy.png?[query] Here admin layer
+ * @apiName getHereAdminOverlayTile
+ * @apiGroup Maps
+ * @apiDescription Retrieve a Here Maps administrative labels overlay tile image.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ * @apiUse HereOptions
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/hereadminlabeloverlay/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/hereadminlabeloverlay/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereAdminLabelOverlayTile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/herelabeloverlay/:zoomLevel/:gridx/:gridy.png?[query] Here label layer
+ * @apiName getHereLabelOverlayTile
+ * @apiGroup Maps
+ * @apiDescription Retrieve a Here Maps label overlay tile image.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ * @apiUse HereOptions
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/herelabeloverlay/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/herelabeloverlay/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereLabelOverlayTile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/herelinelabeloverlay/:zoomLevel/:gridx/:gridy.png?[query] Here line & label layer
+ * @apiName getHereLineLabelOverlayTile
+ * @apiGroup Maps
+ * @apiDescription Retrieve a Here Maps line and label overlay tile image of street lines, city centre labels,
+ * and item labels.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ * @apiUse HereOptions
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/herelinelabeloverlay/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/herelinelabeloverlay/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereLineLabelOverlayTile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/heretollzone/:zoomLevel/:gridx/:gridy.png?[query] Here toll zone tile
+ * @apiName getHereTollZoneTile
+ * @apiGroup Maps
+ * @apiDescription Retrieve a Here Maps toll zone map tile image.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ * @apiUse HereOptions
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/heretollzone/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/heretollzone/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTollZoneTile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/herepoi/:zoomLevel/:gridx/:gridy.png?[query] Here POI tile
+ * @apiName getHerePOITile
+ * @apiGroup Maps
+ * @apiDescription Retrieve a Here Maps point-of-interest (POI) map tile image.
+ *
+ * @apiUse Maps
+ * @apiUse MapTile
+ * @apiUse HereOptions
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/herepoi/17/65485/43574.png HTTP/1.1
+ */
 router.get("/:model/maps/herepoi/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHerePOITile);
 
+/**
+ * @api {get} /:teamspace/:model/maps/herebuildings/:lat/:long/tile.json Here building elevation
+ * @apiName getHereBuildingsFromLongLat
+ * @apiGroup Maps
+ * @apiDescription Retrieve building elevation information from Here Maps.
+ *
+ * @apiUse Maps
+ * @apiParam {Number} lat Latitude
+ * @apiParam {Number} long Longitude
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/maps/herebuildings/51.524575/-0.139088/tile.json HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * 	"Rows":[
+ * 		{
+ * 			"BUILDING_ID":"700567270",
+ * 			"FACE_ID":"700567270",
+ * 			"FEATURE_TYPE":"2005700",
+ * 			"HEIGHT":"22",
+ * 			"GROUND_CLEARANCE":null,
+ * 			"CF_ID":"1400645341",
+ * 			"HAS_3DLM":"N",
+ * 			"NAME":null,
+ * 			"LAT":"5150745,9,-12,-4,10,-5,2",
+ * 			"LON":"-14284,18,14,-9,-12,-9,-2",
+ * 			"INNER_LAT":null,
+ * 			"INNER_LON":null
+ * 		},
+ * 		{
+ * 			"BUILDING_ID":"700567273",
+ * 			"FACE_ID":"700567273",
+ * 			"FEATURE_TYPE":"2005700",
+ * 			"HEIGHT":"11",
+ * 			"GROUND_CLEARANCE":null,
+ * 			"CF_ID":"1400645344",
+ * 			"HAS_3DLM":"N",
+ * 			"NAME":null,
+ * 			"LAT":"5150742,-12,-4,-4,11,5,4",
+ * 			"LON":"-14252,14,-9,-8,-14,8,9",
+ * 			"INNER_LAT":null,
+ * 			"INNER_LON":null
+ * 		}
+ * 	]
+ * }
+ */
 router.get("/:model/maps/herebuildings/:lat/:long/tile.json", middlewares.isHereEnabled, getHereBuildingsFromLongLat);
 
 function listMaps(req, res) {
