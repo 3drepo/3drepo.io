@@ -17,7 +17,7 @@ import { reducer as modelReducer } from './model/model.redux';
 import { reducer as notificationsReducer } from './notifications/notifications.redux';
 import { reducer as risksReducer } from './risks/risks.redux';
 import { reducer as snackbarReducer } from './snackbar/snackbar.redux';
-import { reducer as starredMetaReducer } from './starredMeta/starredMeta.redux';
+import { reducer as starredReducer } from './starred/starred.redux';
 import { reducer as staticPagesReducer } from './staticPages/staticPages.redux';
 import { reducer as teamspacesReducer } from './teamspaces/teamspaces.redux';
 import { reducer as treeReducer } from './tree/tree.redux';
@@ -50,7 +50,7 @@ export default function createReducer(history) {
 		groups: groupsReducer,
 		tree: treeReducer,
 		bim: bimReducer,
-		starredMeta: starredMetaReducer,
+		starred: starredReducer,
 		measure: measureReducer,
 		issues: issuesReducer,
 		compare: compareReducer,

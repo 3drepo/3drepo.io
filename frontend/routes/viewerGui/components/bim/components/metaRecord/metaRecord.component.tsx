@@ -17,9 +17,7 @@
 
 import React from 'react';
 
-import Star from '@material-ui/icons/Star';
-import StarBorder from '@material-ui/icons/StarBorder';
-
+import { StarIcon } from '../../../../../components/starIcon/starIcon.component';
 import { Container, MetaKey, MetaKeyText, MetaValue, StarIconWrapper  } from './metaRecord.styles';
 
 interface IProps {
@@ -33,15 +31,6 @@ interface IProps {
 interface IState {
 	hasDelayedClick: boolean;
 }
-
-const StarIcon = ({ active, onClick }) => {
-	const IconComponent = active ? Star : StarBorder;
-	return (
-		<StarIconWrapper active={active}>
-			<IconComponent onClick={onClick} color="inherit" fontSize="small" />
-		</StarIconWrapper>
-	);
-};
 
 export class MetaRecord extends React.PureComponent<IProps, IState> {
 	public state = {
@@ -72,10 +61,12 @@ export class MetaRecord extends React.PureComponent<IProps, IState> {
 		return (
 			<Container className={this.props.className}>
 				<MetaKey>
-					<StarIcon
-						active={Number(this.isStarred)}
-						onClick={this.handleStarClick}
-					/>
+					<StarIconWrapper>
+						<StarIcon
+							active={this.isStarred}
+							onClick={this.handleStarClick}
+						/>
+					</StarIconWrapper>
 					<MetaKeyText>{name}</MetaKeyText>
 				</MetaKey>
 				<MetaValue>{value}</MetaValue>

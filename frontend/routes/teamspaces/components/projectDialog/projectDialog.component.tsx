@@ -22,8 +22,8 @@ import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import TextField from '@material-ui/core/TextField';
 import { Field, Form, Formik } from 'formik';
-import React from 'react';
 import memoizeOne from 'memoize-one';
+import React from 'react';
 
 import * as Yup from 'yup';
 

@@ -17,14 +17,13 @@
 
 import Label from '@material-ui/icons/Label';
 import LabelOutlined from '@material-ui/icons/LabelOutlined';
-import { groupBy, isEmpty, isEqual } from 'lodash';
 import React from 'react';
 
 import { ROUTES } from '../../../../constants/routes';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
-import { FEDERATION_TYPE, MODEL_TYPE, ROW_ACTIONS  } from '../../teamspaces.contants';
+import { ROW_ACTIONS  } from '../../teamspaces.contants';
 import ProjectDialog from '../projectDialog/projectDialog.container';
 import { RowMenu } from '../rowMenu/rowMenu.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
@@ -33,8 +32,8 @@ interface IProps {
 	_id: string;
 	name: string;
 	models: any[];
-	active: boolean;
 	disabled: boolean;
+	isEmpty: boolean;
 	permissions: any[];
 	teamspace: string;
 	history: any;
@@ -43,62 +42,17 @@ interface IProps {
 	showConfirmDialog: (config) => void;
 	showDialog: (config) => void;
 	onPermissionsClick: (event) => void;
-	onRootClick: (projectName) => void;
+	onClick: (projectName) => void;
 }
 
 interface IState {
-	items: any[];
 	actionsMenuOpen: boolean;
 }
 
-const splitModels = (modelsList = []) => {
-	const { federations = [], models = [] } = groupBy(modelsList, ({ federate }) => {
-		return federate ? 'federations' : 'models';
-	});
-
-	return { federations, models };
-};
-
-const getProjectItems = (modelsList, projectName) => {
-	const { federations = [], models = [] } = splitModels(modelsList);
-
-	return [{
-		name: 'Federations',
-		items: federations,
-		type: FEDERATION_TYPE,
-		projectName
-	}, {
-		name: 'Models',
-		items: models,
-		type: MODEL_TYPE,
-		projectName
-	}];
-};
-
 export class ProjectItem extends React.PureComponent<IProps, IState> {
 	public state = {
-		items: [],
 		actionsMenuOpen: false
 	};
-
-	public componentDidMount() {
-		this.setState({
-			items: getProjectItems(this.props.models, this.props.name)
-		});
-	}
-
-	public componentDidUpdate(prevProps: IProps) {
-		const changes = {} as IState;
-
-		const modelsChanged = !isEqual(this.props.models, prevProps.models);
-		if (modelsChanged) {
-			changes.items = getProjectItems(this.props.models, this.props.name);
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
-		}
-	}
 
 	public handleRemove = (event) => {
 		event.stopPropagation();
@@ -140,19 +94,24 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 	}
 
 	public toggleActionsMenuOpen = (event) => {
+		event.preventDefault();
 		event.stopPropagation();
 		this.setState({actionsMenuOpen: !this.state.actionsMenuOpen});
 	}
 
 	private handleClick = () => {
-		const { _id, name, models } = this.props;
-		this.props.onRootClick({ id: _id,	name, models });
+		const { _id } = this.props;
+		this.props.onClick({ id: _id });
 	}
 
 	public isProjectAdmin = () => hasPermissions('admin_project', this.props.permissions);
 
 	public renderProjectActions = ({ hovered }) => renderWhenTrue(() => (
-		<RowMenu open={hovered} forceOpen={this.state.actionsMenuOpen} toggleForceOpen={this.toggleActionsMenuOpen}>
+		<RowMenu
+			open={hovered}
+			forceOpen={this.state.actionsMenuOpen}
+			toggleForceOpen={this.toggleActionsMenuOpen}
+		>
 			<TooltipButton
 				{...ROW_ACTIONS.EDIT}
 				action={this.handleEditClick}
@@ -169,19 +128,19 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 	))(this.isProjectAdmin()) as any
 
 	public render() {
-		const { name, active, disabled, _id } = this.props;
+		const { name, disabled, isEmpty } = this.props;
 		return (
 			<TreeList
 				onClick={this.handleClick}
 				name={name}
 				level={TREE_LEVELS.PROJECT}
 				disabled={disabled}
-				IconProps={ {
+				isEmpty={isEmpty}
+				IconProps={{
 					IconClosed: Label,
 					IconOpened: LabelOutlined
 				}}
 				renderActions={this.renderProjectActions}
-				active={active}
 			/>
 		);
 	}

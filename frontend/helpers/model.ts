@@ -14,6 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { values } from 'lodash';
+import memoizeOne from 'memoize-one';
 
 const negatePositionYZ = (position = []) => {
 	const [x, y, z] = position.map(Number);
@@ -23,3 +25,21 @@ const negatePositionYZ = (position = []) => {
 export const convertPositionToOpenGL = negatePositionYZ;
 
 export const convertPositionToDirectX = negatePositionYZ;
+
+export const getTeamspacesList = memoizeOne((teamspaces) => {
+	return values(teamspaces).map(({ account }) => ({ value: account }));
+});
+
+export const getTeamspaceProjects = memoizeOne((teamspaceName, teamspaces, projects) => {
+	const selectedTeamspace = teamspaces[teamspaceName];
+
+	if (!selectedTeamspace) {
+		return [];
+	}
+
+	return selectedTeamspace.projects.map((projectId) => ({
+		name: projects[projectId].name,
+		value: projects[projectId]._id,
+		models: projects[projectId].models
+	}));
+});

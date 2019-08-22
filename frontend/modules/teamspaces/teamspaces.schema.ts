@@ -3,7 +3,13 @@ import { schema } from 'normalizr';
 const idAttribute = (field = '_id') => (data) => data[field];
 
 const model = new schema.Entity('models', {}, {
-	idAttribute: idAttribute('model')
+	idAttribute: idAttribute('model'),
+	processStrategy: (value, parent) => {
+		return {
+			...value,
+			projectName: parent._id
+		};
+	}
 });
 
 const project = new schema.Entity('projects', {

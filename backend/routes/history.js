@@ -148,7 +148,7 @@ function listRevisions(req, res, next) {
 	const branch = req.params.branch;
 	const showVoid = req.query.showVoid !== undefined;
 
-	const projection = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1, void: 1};
+	const projection = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1, void: 1, rFile: 1};
 
 	History.listByBranch({account, model}, branch || null, projection, showVoid).then(histories => {
 
@@ -156,6 +156,11 @@ function listRevisions(req, res, next) {
 
 		histories.forEach(function(history) {
 			history.branch = history.branch || branch || C.MASTER_BRANCH_NAME;
+			if(history.rFile && history.rFile.length > 0) {
+				const orgFileArr = history.rFile[0].split("_");
+				history.fileType = orgFileArr[orgFileArr.length - 1].toUpperCase();
+			}
+			delete history.rFile;
 		});
 
 		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);

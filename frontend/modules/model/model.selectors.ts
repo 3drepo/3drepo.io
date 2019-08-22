@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector, createSelectorCreator } from 'reselect';
+import { createSelector } from 'reselect';
 
-export const selectModelDomain = (state) => ({...state.model});
+export const selectModelDomain = (state) => state.model;
 
 export const selectSettings = createSelector(
 	selectModelDomain, (state) => state.settings
@@ -29,6 +29,10 @@ export const selectRevisions = createSelector(
 
 export const selectIsPending = createSelector(
 	selectModelDomain, (state) => state.isPending
+);
+
+export const selectPendingRevision = createSelector(
+	selectModelDomain, (state) => state.pendingRevision
 );
 
 export const selectUploadStatus = createSelector(

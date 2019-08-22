@@ -62,13 +62,12 @@ export const TeamspaceItem = (props: IProps) => {
 		/>
 	))(hasPermissions('create_project', permissions)) as any;
 
-	const handleClick = (...args) => {
-		onToggle({ ...args, name, projects });
+	const handleClick = () => {
+		onToggle({ id: name, nested: projects });
 	};
 
 	return (
 		<TreeList
-			id={name}
 			name={name}
 			disabled={disabled}
 			level={TREE_LEVELS.TEAMSPACE}

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { cloneDeep } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { sortByField } from '../../helpers/sorting';
 
@@ -23,8 +24,12 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	fetchSettingsSuccess: ['settings', 'metaKeys'],
 	updateSettings: ['modelData', 'settings'],
 	waitForSettingsAndFetchRevisions: ['teamspace', 'modelId'],
-	fetchRevisions: ['teamspace', 'modelId'],
+	fetchRevisions: ['teamspace', 'modelId', 'showVoid'],
 	fetchRevisionsSuccess: ['revisions'],
+	setModelRevisionState: ['teamspace', 'modelId', 'revision', 'isVoid'],
+	setModelRevisionStateSuccess: ['revision', 'isVoid'],
+	setPendingRevision: ['revision'],
+	resetRevisions: [],
 	downloadModel: ['teamspace', 'modelId'],
 	uploadModelFile: ['teamspace', 'project', 'modelData', 'fileData'],
 	setPendingState: ['pendingState'],
@@ -43,11 +48,16 @@ export const INITIAL_STATE = {
 	metaKeys: [],
 	revisions: [],
 	isPending: true,
+	pendingRevision: null,
 	maps: []
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return { ...state, isPending: pendingState };
+};
+
+const setPendingRevision = (state = INITIAL_STATE, { revision }) => {
+	return { ...state, pendingRevision: revision };
 };
 
 const fetchSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
@@ -68,6 +78,10 @@ const fetchRevisionsSuccess = (state = INITIAL_STATE, { revisions }) => {
 	return { ...state, revisions };
 };
 
+const resetRevisions = (state = INITIAL_STATE) => {
+	return { ...state, revisions: INITIAL_STATE.revisions };
+};
+
 const fetchMapsSuccess = (state = INITIAL_STATE, { maps }) => {
 	return { ...state, maps };
 };
@@ -76,11 +90,22 @@ const updateSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
 	return { ...state, settings: { ...state.settings, ...settings} };
 };
 
+const setModelRevisionStateSuccess = (state = INITIAL_STATE, { revision, isVoid }) => {
+	const revisions = cloneDeep(state.revisions);
+	const changedRevisionIndex = revisions.findIndex(((rev) => rev._id === revision));
+
+	revisions[changedRevisionIndex].void = isVoid;
+	return { ...state, revisions };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ModelTypes.FETCH_META_KEYS_SUCCESS]: fetchMetaKeysSuccess,
 	[ModelTypes.FETCH_SETTINGS_SUCCESS]: fetchSettingsSuccess,
 	[ModelTypes.FETCH_REVISIONS_SUCCESS]: fetchRevisionsSuccess,
+	[ModelTypes.RESET_REVISIONS]: resetRevisions,
 	[ModelTypes.SET_PENDING_STATE]: setPendingState,
+	[ModelTypes.SET_PENDING_REVISION]: setPendingRevision,
 	[ModelTypes.FETCH_MAPS_SUCCESS]: fetchMapsSuccess,
-	[ModelTypes.UPDATE_SETTINGS_SUCCESS]: updateSettingsSuccess
+	[ModelTypes.UPDATE_SETTINGS_SUCCESS]: updateSettingsSuccess,
+	[ModelTypes.SET_MODEL_REVISION_STATE_SUCCESS]: setModelRevisionStateSuccess
 });
