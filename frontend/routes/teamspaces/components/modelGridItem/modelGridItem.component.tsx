@@ -155,6 +155,7 @@ export function ModelGridItem(props: IProps) {
 	};
 
 	const handleClick = () => {
+		debugger;
 		const { history, teamspace, timestamp, model } = props;
 		if (timestamp) {
 			history.push(`${ROUTES.VIEWER}/${teamspace}/${model}`);
@@ -306,16 +307,17 @@ export function ModelGridItem(props: IProps) {
 						active={hasDelayedClick ? !props.isStarred : props.isStarred}
 						onClick={handleStarClick}
 					/>
-					<Name
-						onClick={handleClick}
-						isPending={isPending}
-						search={props.query}
-						text={props.name}
-						splitQueryToWords
-					/>
-					<TruncatedName lines={2}>
-						{props.name}
-					</TruncatedName>
+					<div onClick={handleClick}>
+						<Name
+							isPending={isPending}
+							search={props.query}
+							text={props.name}
+							splitQueryToWords
+						/>
+						<TruncatedName lines={2}>
+							{props.name}
+						</TruncatedName>
+					</div>
 				</NameWrapper>
 				{renderActionsMenu()}
 			</Header>

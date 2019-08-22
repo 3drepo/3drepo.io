@@ -27,7 +27,8 @@ import { ROW_ACTIONS  } from '../../teamspaces.contants';
 import ProjectDialog from '../projectDialog/projectDialog.container';
 import { RowMenu } from '../rowMenu/rowMenu.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
-import { Content } from './projectItem.styles';
+import { Content, Actions, Title, Container, Empty } from './projectItem.styles';
+import { Highlight } from '../../../components/highlight/highlight.component';
 
 interface IProps {
 	_id: string;
@@ -130,6 +131,22 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 		</RowMenu>
 	))(this.isProjectAdmin()) as any
 
+	public renderRoot = (props) => {
+		return (
+			<Container>
+				<Title>
+					<Highlight
+						text={props.name}
+						search={props.query}
+						splitQueryToWords
+					/>
+					{props.disabled ? <Empty>(empty)</Empty> : null}
+				</Title>
+				<Actions>{this.renderProjectActions(props)}</Actions>
+			</Container>
+		);
+	}
+
 	public render() {
 		const { name, disabled, isEmpty, query, active } = this.props;
 		return (
@@ -141,10 +158,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 				disabled={disabled}
 				isEmpty={isEmpty}
 				active={active}
-				IconProps={{
-					IconClosed: Label,
-					IconOpened: LabelOutlined
-				}}
+				renderRoot={this.renderRoot}
 			>
 				{(props) => <Content>{this.renderProjectActions(props)}</Content>}
 			</TreeList>

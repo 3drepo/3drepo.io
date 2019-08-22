@@ -18,8 +18,6 @@
 import Grid from '@material-ui/core/Grid';
 import React from 'react';
 
-import Folder from '@material-ui/icons/Folder';
-import FolderOpen from '@material-ui/icons/FolderOpen';
 import { Highlight } from '../highlight/highlight.component';
 import { ChildrenContainer, Container, Headline, IconContainer, Title } from './treeList.styles';
 
@@ -30,10 +28,14 @@ export const TREE_LEVELS = {
 };
 
 const HeadlineIcon = ({IconOpened, IconClosed, active, ...iconProps}) => {
-	let Icon = IconClosed || Folder;
+	let Icon = IconClosed;
 
 	if (active) {
-		Icon = IconOpened || IconClosed || FolderOpen;
+		Icon = IconOpened || IconClosed;
+	}
+
+	if (!Icon) {
+		return null;
 	}
 	return (
 		<IconContainer>
@@ -42,7 +44,7 @@ const HeadlineIcon = ({IconOpened, IconClosed, active, ...iconProps}) => {
 	);
 };
 
-export const DefaultHeadline = ({children, ...props}) => {
+export const DefaultHeadline = ({children = Function.prototype, ...props}) => {
 	return (
 		<Grid
 			container
@@ -60,7 +62,7 @@ export const DefaultHeadline = ({children, ...props}) => {
 			{props.disabled || props.isEmpty ? ' (empty)' : ''}
 		</Title>
 		<ChildrenContainer>
-			{children && children(props)}</ChildrenContainer>
+			{children(props)}</ChildrenContainer>
 	</Grid>
 );};
 
@@ -73,8 +75,8 @@ interface IProps {
 	disabled?: boolean;
 	isEmpty?: boolean;
 	IconProps?: any;
+	children?: (props) => JSX.Element;
 	renderRoot?: (props) => JSX.Element;
-	renderActions?: (props) => (JSX.Element | Element);
 	onClick?: () => void;
 }
 
@@ -134,7 +136,6 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 			active,
 			disabled,
 			hovered,
-			renderActions: this.props.renderActions
 		};
 
 		return (

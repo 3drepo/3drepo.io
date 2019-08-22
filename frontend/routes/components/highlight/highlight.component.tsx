@@ -31,10 +31,11 @@ interface IProps {
 
 const HighlightTag = (props) => <Mark {...props as any} />;
 
-export const Highlight = memo(({splitQueryToWords, search, text, caseSensitive, className}: IProps) => {
+export const Highlight = memo(({splitQueryToWords, search, text, caseSensitive, className, onClick}: IProps) => {
 	const searchWords = splitQueryToWords ? search.split(' ') : [trim(search)];
 	return (
 		<Highlighter
+			onClick={onClick}
 			className={className}
 			searchWords={searchWords}
 			autoEscape
