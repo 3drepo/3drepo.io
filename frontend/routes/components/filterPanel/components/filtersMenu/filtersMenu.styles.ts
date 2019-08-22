@@ -31,7 +31,7 @@ export const MenuList = styled(List)`
 
 	&& {
 		padding-top: 4px;
-    padding-bottom: 4px;
+		padding-bottom: 4px;
 	}
 `;
 
