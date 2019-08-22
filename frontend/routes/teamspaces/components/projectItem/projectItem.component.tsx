@@ -17,14 +17,13 @@
 
 import Label from '@material-ui/icons/Label';
 import LabelOutlined from '@material-ui/icons/LabelOutlined';
-import { groupBy, isEmpty, isEqual } from 'lodash';
 import React from 'react';
 
 import { ROUTES } from '../../../../constants/routes';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
-import { FEDERATION_TYPE, MODEL_TYPE, ROW_ACTIONS  } from '../../teamspaces.contants';
+import { ROW_ACTIONS  } from '../../teamspaces.contants';
 import ProjectDialog from '../projectDialog/projectDialog.container';
 import { RowMenu } from '../rowMenu/rowMenu.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
@@ -34,6 +33,7 @@ interface IProps {
 	name: string;
 	models: any[];
 	disabled: boolean;
+	isEmpty: boolean;
 	permissions: any[];
 	teamspace: string;
 	history: any;
@@ -128,13 +128,14 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 	))(this.isProjectAdmin()) as any
 
 	public render() {
-		const { name, disabled } = this.props;
+		const { name, disabled, isEmpty } = this.props;
 		return (
 			<TreeList
 				onClick={this.handleClick}
 				name={name}
 				level={TREE_LEVELS.PROJECT}
 				disabled={disabled}
+				isEmpty={isEmpty}
 				IconProps={{
 					IconClosed: Label,
 					IconOpened: LabelOutlined

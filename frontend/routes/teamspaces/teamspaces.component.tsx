@@ -235,25 +235,27 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		</AddModelButton>
 	)
 
-	private renderModels = (models, project) => renderWhenTrue(() => (
+	private renderModels = (models) => renderWhenTrue(() =>
+		models.map((props) => (<ModelGridItem key={props.model} {...props}	/>))
+	)(models.length)
+
+	private renderProjectContainer = (models, project) => renderWhenTrue(() => (
 		<GridContainer key={`container-${project.id}`}>
 			{this.renderAddModelGridItem(project.teamspace, project.id)}
-			{models.map((props) => (
-				<ModelGridItem key={props.model} {...props}	/>
-			))}
+			{this.renderModels(models)}
 		</GridContainer>
-	))(models.length && this.state.visibleItems[project.id])
+	))(this.state.visibleItems[project.id])
 
 	private renderProject = (props) => ([
 		(
 			<ProjectItem
 				{...props}
 				key={props._id}
-				disabled={!props.models.length}
+				isEmpty={!props.models.length}
 				onClick={this.handleVisibilityChange}
 			/>
 		),
-		this.renderModels(props.models, props)
+		this.renderProjectContainer(props.models, props),
 	])
 
 	private renderTeamspace = (props) => {

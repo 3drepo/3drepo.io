@@ -41,18 +41,20 @@ const HeadlineIcon = ({IconOpened, IconClosed, active, ...iconProps}) => {
 	);
 };
 
-export const DefaultHeadline = ({renderActions, ...props}) => (
-	<Grid
-		container
-		direction="row"
-		alignItems="center"
-		justify="flex-start"
-		wrap="nowrap">
-		<HeadlineIcon fontSize="small" active={props.active && !props.disabled} {...props.IconProps} />
-		<Title>{props.name} {props.disabled ? '(empty)' : ''}</Title>
-		{renderActions && renderActions(props)}
-	</Grid>
-);
+export const DefaultHeadline = ({renderActions, ...props}) => {
+	return (
+		<Grid
+			container
+			direction="row"
+			alignItems="center"
+			justify="flex-start"
+			wrap="nowrap">
+			<HeadlineIcon fontSize="small" active={props.active && !props.disabled} {...props.IconProps} />
+			<Title>{props.name} {props.disabled || props.isEmpty ? '(empty)' : ''}</Title>
+			{renderActions && renderActions(props)}
+		</Grid>
+	);
+};
 
 interface IProps {
 	name: string;
@@ -60,6 +62,7 @@ interface IProps {
 	active?: boolean;
 	disableShadow?: boolean;
 	disabled?: boolean;
+	isEmpty?: boolean;
 	IconProps?: any;
 	renderRoot?: (props) => JSX.Element;
 	renderActions?: (props) => (JSX.Element | Element);
@@ -104,7 +107,6 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 		const { level, renderRoot, onClick, disabled, ...props } = this.props;
 		const { hovered } = this.state;
 		const active = this.isActive;
-
 		const containerProps = { active, level, disabled, hovered };
 
 		const headlineProps = {

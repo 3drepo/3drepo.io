@@ -92,6 +92,7 @@ export const AddModelButton = styled.div`
 	border: 2px dashed currentColor;
 	display: flex;
 	position: relative;
+	min-height: 74px;
 
 	&:after {
 		left: 0;
