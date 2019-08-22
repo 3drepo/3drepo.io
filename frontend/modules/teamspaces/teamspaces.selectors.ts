@@ -18,7 +18,7 @@
 import { compact, map, orderBy, pick, pickBy, uniq, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { searchByFilters } from '../../helpers/searching';
-import { FILTER_TYPES, DATA_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
+import { DATA_TYPES, FILTER_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
 import { LIST_ITEMS_TYPES } from '../../routes/teamspaces/teamspaces.contants';
 import { selectStarredModels } from '../starred';
 import { getStarredModelKey } from '../starred/starred.contants';

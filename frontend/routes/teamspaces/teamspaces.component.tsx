@@ -150,17 +150,28 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps) {
 		const { items, searchEnabled, selectedFilters} = this.props;
+		const filtersCleared = !selectedFilters.length && prevProps.selectedFilters.length;
+		const itemsChanged = prevProps.items && prevProps.items !== items;
 
-		if (searchEnabled && selectedFilters.length && prevProps.items && prevProps.items !== items) {
+		if (searchEnabled && (selectedFilters.length || filtersCleared) && itemsChanged) {
 			const visibleItems = { ...this.state.visibleItems };
-			items.forEach(({ collapsed, id }) => {
-				if (collapsed) {
-					delete visibleItems[id];
-				} else {
-					visibleItems[id] = true;
-				}
+			const defaultVisibleItems = {
+				[this.props.currentTeamspace]: true
+			};
+
+			if (!filtersCleared) {
+				items.forEach(({ collapsed, id }) => {
+					if (collapsed) {
+						delete visibleItems[id];
+					} else {
+						visibleItems[id] = true;
+					}
+				});
+			}
+
+			this.setState({
+				visibleItems: !filtersCleared ? visibleItems : defaultVisibleItems
 			});
-			this.setState({	visibleItems });
 		}
 	}
 

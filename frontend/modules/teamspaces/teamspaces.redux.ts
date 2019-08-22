@@ -17,7 +17,7 @@
 
 import { omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
-import { sortByField } from '../../helpers/sorting';
+import { DATA_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetchTeamspaces: ['username'],
@@ -52,7 +52,7 @@ export const INITIAL_STATE = {
 		teamspacesItems: [],
 		searchEnabled: false,
 		selectedFilters: [],
-		selectedDataTypes: [],
+		selectedDataTypes: [DATA_TYPES.MODELS, DATA_TYPES.FEDERATIONS, DATA_TYPES.PROJECTS],
 	}
 };
 
