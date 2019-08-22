@@ -15,15 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { values } from 'lodash';
+import { orderBy, pick, pickBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { LIST_ITEMS_TYPES } from '../../routes/teamspaces/teamspaces.contants';
+import { selectStarredModels } from '../starred';
+import { getStarredModelKey } from '../starred/starred.contants';
 import { extendTeamspacesInfo } from './teamspaces.helpers';
 
 export const selectTeamspacesDomain = (state) => ({ ...state.teamspaces });
 
+export const selectTeamspaces = createSelector(
+	selectTeamspacesDomain, (state) => state.teamspaces
+);
+
 export const selectTeamspacesList = createSelector(
-	selectTeamspacesDomain, (state) => values(state.teamspaces)
+	selectTeamspaces, (teamspaces) => values(teamspaces)
 );
 
 export const selectProjects = createSelector(
@@ -31,8 +37,18 @@ export const selectProjects = createSelector(
 );
 
 export const selectProjectsList = createSelector(
-	selectProjects, (projects) => {
-		return Object.values(projects);
+	selectProjects, (projects) => Object.values(projects)
+);
+
+const selectTeamspaceName = (state, ownProps) => ownProps.teamspace;
+
+export const selectProjectsByTeamspace = createSelector(
+	selectTeamspaces, selectProjects, selectTeamspaceName,
+	(teamspaces, projects, teamspace) => {
+		if (!teamspaces[teamspace]) {
+			return {};
+		}
+		return pick(projects, teamspaces[teamspace].projects);
 	}
 );
 
@@ -40,34 +56,73 @@ export const selectModels = createSelector(
 	selectTeamspacesDomain, (state) => state.models
 );
 
+export const selectFederations = createSelector(
+	selectModels, (models) => pickBy(models, (federate) => !!federate)
+);
+
+export const selectComponentState = createSelector(
+	selectTeamspacesDomain, (state) => state.componentState
+);
+
+export const selectVisibleItems = createSelector(
+	selectComponentState, (state) => state.visibleItems
+);
+
+export const selectStarredVisibleItems = createSelector(
+	selectComponentState, (state) => state.starredVisibleItems
+);
+
+export const selectShowStarredOnly = createSelector(
+	selectComponentState, (state) => state.showStarredOnly
+);
+
 export const selectFlattenTeamspaces = createSelector(
-	selectTeamspacesList, selectProjects, selectModels, (teamspacesList, projects, models) => {
+	selectTeamspacesList, selectProjects, selectModels, selectShowStarredOnly, selectStarredModels,
+	(teamspacesList, projects, models, showStarredOnly, starredModels) => {
 		const flattenList = [];
 
 		for (let index = 0; index < teamspacesList.length; index++) {
-			flattenList.push({
-				...teamspacesList[index],
-				type: LIST_ITEMS_TYPES.TEAMSPACE,
-				id: teamspacesList[index].name
-			});
+			const teamspaceName = teamspacesList[index].account;
 			const projectsIds = teamspacesList[index].projects;
+			const teamspaceProjects = [];
 
 			for (let j = 0; j < projectsIds.length; j++) {
 				const project = projects[projectsIds[j]];
-				flattenList.push({
-					...project,
-					type: LIST_ITEMS_TYPES.PROJECT,
-					id: projectsIds[j]
-				});
-				const modelsIds = project.models;
 
-				for (let m = 0; m < modelsIds.length; m++) {
-					flattenList.push({
-						...models[modelsIds[m]],
+				const projectModels = [];
+				for (let m = 0; m < project.models.length; m++) {
+					const modelId = project.models[m];
+					const recordKey = getStarredModelKey({ teamspace: teamspaceName, model: modelId });
+					if (showStarredOnly && !starredModels[recordKey]) {
+						continue;
+					}
+					projectModels.push({
+						...models[modelId],
+						teamspace: teamspaceName,
+						project: projectsIds[j],
+						projectName: project.name,
 						type: LIST_ITEMS_TYPES.MODEL,
-						id: modelsIds[m]
+						id: modelId
 					});
 				}
+
+				if (!showStarredOnly || projectModels.length) {
+					teamspaceProjects.push({
+						...project,
+						models: orderBy(projectModels, ['federate']),
+						teamspace: teamspaceName,
+						type: LIST_ITEMS_TYPES.PROJECT,
+						id: projectsIds[j]
+					});
+				}
+			}
+
+			if (!showStarredOnly || teamspaceProjects.length) {
+				flattenList.push({
+					...teamspacesList[index],
+					type: LIST_ITEMS_TYPES.TEAMSPACE,
+					id: teamspacesList[index].account
+				}, ...orderBy(teamspaceProjects, ['name']));
 			}
 		}
 		return flattenList;
@@ -80,16 +135,4 @@ export const selectTeamspacesWithAdminAccess = createSelector(
 
 export const selectIsPending = createSelector(
 	selectTeamspacesDomain, (state) => state.isPending
-);
-
-export const selectComponentState = createSelector(
-	selectTeamspacesDomain, (state) => state.componentState
-);
-
-export const selectActiveTeamspace = createSelector(
-	selectComponentState, (state) => state.activeTeamspace
-);
-
-export const selectActiveProject = createSelector(
-	selectComponentState, (state) => state.activeProject
 );

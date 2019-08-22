@@ -41,26 +41,28 @@ const HeadlineIcon = ({IconOpened, IconClosed, active, ...iconProps}) => {
 	);
 };
 
-export const DefaultHeadline = ({renderActions, ...props}) => (
-	<Grid
-		container
-		direction="row"
-		alignItems="center"
-		justify="flex-start"
-		wrap="nowrap">
-		<HeadlineIcon fontSize="small" active={props.active && !props.disabled} {...props.IconProps} />
-		<Title>{props.name} {props.disabled ? '(empty)' : ''}</Title>
-		{renderActions && renderActions(props)}
-	</Grid>
-);
+export const DefaultHeadline = ({renderActions, ...props}) => {
+	return (
+		<Grid
+			container
+			direction="row"
+			alignItems="center"
+			justify="flex-start"
+			wrap="nowrap">
+			<HeadlineIcon fontSize="small" active={props.active && !props.disabled} {...props.IconProps} />
+			<Title>{props.name} {props.disabled || props.isEmpty ? '(empty)' : ''}</Title>
+			{renderActions && renderActions(props)}
+		</Grid>
+	);
+};
 
 interface IProps {
-	id: string;
 	name: string;
 	level?: number;
 	active?: boolean;
 	disableShadow?: boolean;
 	disabled?: boolean;
+	isEmpty?: boolean;
 	IconProps?: any;
 	renderRoot?: (props) => JSX.Element;
 	renderActions?: (props) => (JSX.Element | Element);
@@ -68,6 +70,7 @@ interface IProps {
 }
 
 interface IState {
+	active: boolean;
 	hovered: boolean;
 }
 
@@ -79,25 +82,31 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 	};
 
 	public state = {
+		active: false,
 		hovered: false
 	};
 
-	public handleRootClick = () => {
-		const { id, name, disabled, onClick } = this.props;
+	private get isActive() {
+		return this.props.active || this.state.active;
+	}
+
+	private handleRootClick = () => {
+		const { disabled, onClick } = this.props;
 
 		if (!disabled && onClick) {
+			this.setState(({active}) => ({ active: !active }));
 			this.props.onClick();
 		}
 	}
 
-	public createHoverHandler = (hovered) => () => {
+	private createHoverHandler = (hovered) => () => {
 		this.setState({ hovered });
 	}
 
 	public render() {
-		const { level, renderRoot, onClick, active, disabled, ...props } = this.props;
+		const { level, renderRoot, onClick, disabled, ...props } = this.props;
 		const { hovered } = this.state;
-
+		const active = this.isActive;
 		const containerProps = { active, level, disabled, hovered };
 
 		const headlineProps = {

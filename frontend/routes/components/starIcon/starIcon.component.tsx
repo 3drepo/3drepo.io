@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export {
-	StarredMetaTypes,
-	StarredMetaActions
-} from './starredMeta.redux';
+import React from 'react';
 
-export * from './starredMeta.selectors';
+import Star from '@material-ui/icons/Star';
+import StarBorder from '@material-ui/icons/StarBorder';
+
+import { IconWrapper } from './starIcon.styles';
+
+interface IProps {
+	active: boolean;
+	onClick: (event) => void;
+}
+
+export const StarIcon = ({ active, onClick }: IProps) => {
+	const IconComponent = active ? Star : StarBorder;
+
+	return (
+		<IconWrapper active={Number(active)}>
+			<IconComponent onClick={onClick} color="inherit" fontSize="small" />
+		</IconWrapper>
+	);
+};

@@ -19,16 +19,24 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectIsPending, selectRevisions, ModelActions } from './../../../../modules/model';
+import {
+	selectIsPending,
+	selectPendingRevision,
+	selectRevisions,
+	ModelActions
+} from './../../../../../modules/model';
 import { RevisionsDialog } from './revisionsDialog.component';
 
 const mapStateToProps = createStructuredSelector({
 	revisions: selectRevisions,
 	isPending: selectIsPending
+	pendingRevision: selectPendingRevision
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchModelRevisions: ModelActions.fetchRevisions
+	fetchModelRevisions: ModelActions.fetchRevisions,
+	resetModelRevisions: ModelActions.resetRevisions,
+	setModelRevisionState: ModelActions.setModelRevisionState,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsDialog));

@@ -34,7 +34,7 @@ import { MeasureActions } from '../measure';
 import { selectCurrentRevisionId, selectRevisions, selectSettings, ModelActions, ModelTypes } from '../model';
 import { selectRisksMap, RisksActions } from '../risks';
 import { selectUrlParams } from '../router/router.selectors';
-import { StarredMetaActions } from '../starredMeta';
+import { StarredActions } from '../starred';
 import { dispatch } from '../store';
 import { TreeActions } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
@@ -71,7 +71,7 @@ function* fetchData({ teamspace, model }) {
 			put(RisksActions.fetchRisks(teamspace, model, revision)),
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),
 			put(ViewerGuiActions.getHelicopterSpeed(teamspace, model)),
-			put(StarredMetaActions.fetchStarredMeta())
+			put(StarredActions.fetchStarredMeta())
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'initial model data', error));

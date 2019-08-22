@@ -1,23 +1,28 @@
-export const getAvailableModels = (project) =>
-	project.models.filter((model) => !model.federate).map(({ name }) => ({ name }));
+import { keyBy } from 'lodash';
 
-export const getFederatedModels = (project, name) =>
-	project.models.find((model) => model.name === name).subModels.map((subModel) => {
-		return { name: subModel.name };
-	});
+export const getAvailableModels = (project, models) => {
+	return project.models.reduce((availableModels, modelId, index) => {
+		if (models[modelId] && !models[modelId].federate) {
+			availableModels.push({ ...models[modelId], index });
+		}
 
-export const getModelsMap = (project) => {
-	const availableModels = project.models.filter((model) => !model.federate).map((model, index) => {
-		return { ...model, index };
-	});
-
-	return availableModels.reduce(
-		(models, model) => ({
-			...models, [model.name]: { id: model.model, index: model.index }
-	}), {});
+		return availableModels;
+	}, []);
 };
 
-export const getProject = (projectItems, projectName) => projectItems.find((project) => project.value === projectName);
+export const getFederatedModels = (project, name, models) => {
+	const federation = project.models.find((modelId) => models[modelId].name === name);
+
+	if (!federation) {
+		return [];
+	}
+
+	return models[federation].subModels.map((subModel) => ({ name: subModel.name }));
+};
+
+export const getModelsMap = (models) => keyBy(models, 'name');
+
+export const getProject = (projects, projectId) => projects[projectId];
 
 export const getNewSelectedModels = (selectedModels, name) => {
 	const selectedIndex = selectedModels.indexOf(name);

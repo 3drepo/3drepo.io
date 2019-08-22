@@ -30,10 +30,6 @@ export const Headline = styled.div`
 	justify-content: flex-start;
 	padding-left: 24px;
 	padding-right: 13px;
-
-	&:hover {
-		background: ${COLOR.WHITE};
-	}
 `;
 
 export const Details = styled.div`
@@ -42,17 +38,29 @@ export const Details = styled.div`
 	box-shadow: 0 12px 30px ${(props: any) => props.disableShadow ? 'none' : 'currentColor'};
 `;
 
-export const Container = styled.div`
+interface IContainer {
+	active: boolean;
+	disabled: boolean;
+	disableShadow: boolean;
+}
+
+const getShadowColor = (props) => props.active && !props.disableShadow ? 'currentColor' : 'transparent';
+
+export const Container = styled.div<IContainer>`
 	overflow: hidden;
 	border-bottom: 1px solid ${COLOR.BLACK_6};
-	background: ${(props: any) => props.active ? COLOR.GRAY : 'rgba(250, 250, 250)'};
+	background: ${(props) => props.active ? COLOR.GRAY : 'rgba(250, 250, 250)'};
+	box-shadow: inset 0 -15px 30px -27px ${getShadowColor};
 	transition: background 150ms ease-in-out;
-	color: ${(props: any) => props.disabled ? COLOR.BLACK_30 : COLOR.BLACK_60};
+	color: ${(props) => props.disabled ? COLOR.BLACK_30 : COLOR.BLACK_60};
 	user-select: none;
 
 	& > ${Headline} {
-		padding-left: ${(props: any) => (props.level || 0) * 24}px;
-		background: ${(props: any) => isActive(props) ? COLOR.WHITE : 'transparent'};
+		padding-left: ${(props) => (props.level || 0) * 24}px;
+	}
+
+	& > ${/* sc-selector */ Headline}:hover {
+		background: ${(props) => isActive(props) ? 'transparent' : COLOR.WHITE};
 	}
 
 	width: calc(100% - 1px);

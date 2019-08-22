@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -21,19 +21,27 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { DialogActions } from '../../../../modules/dialog';
 import { ModelActions } from '../../../../modules/model';
+import { SnackbarActions } from '../../../../modules/snackbar';
+import { selectIsStarredModel, StarredActions } from '../../../../modules/starred';
 import { TeamspacesActions } from '../../../../modules/teamspaces';
-import { ModelItem } from './modelItem.component';
+import { ModelGridItem } from './modelGridItem.component';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	isStarred: selectIsStarredModel
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showDialog: DialogActions.showDialog,
 	showConfirmDialog: DialogActions.showConfirmDialog,
+	showRevisionsDialog: DialogActions.showRevisionsDialog,
 	subscribeOnStatusChange: ModelActions.subscribeOnStatusChange,
 	unsubscribeOnStatusChange: ModelActions.unsubscribeOnStatusChange,
 	updateModel: TeamspacesActions.updateModel,
 	removeModel: TeamspacesActions.removeModel,
 	downloadModel: ModelActions.downloadModel,
+	showSnackbar: SnackbarActions.show,
+	addToStarred: StarredActions.addToStarredModels,
+	removeFromStarred: StarredActions.removeFromStarredModels
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelItem));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelGridItem));

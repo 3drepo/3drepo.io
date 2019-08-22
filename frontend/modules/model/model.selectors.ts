@@ -19,7 +19,7 @@ import { createSelector } from 'reselect';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../services/formatting/formatDate';
 import { selectUrlParams } from '../router/router.selectors';
 
-export const selectModelDomain = (state) => ({...state.model});
+export const selectModelDomain = (state) => state.model;
 
 export const selectSettings = createSelector(
 	selectModelDomain, (state) => state.settings
@@ -45,6 +45,10 @@ export const selectCurrentRevisionId = createSelector(
 
 export const selectIsPending = createSelector(
 	selectModelDomain, (state) => state.isPending
+);
+
+export const selectPendingRevision = createSelector(
+	selectModelDomain, (state) => state.pendingRevision
 );
 
 export const selectUploadStatus = createSelector(

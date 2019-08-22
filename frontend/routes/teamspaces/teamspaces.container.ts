@@ -16,34 +16,51 @@
  */
 
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-
 import { selectCurrentTeamspace } from '../../modules/currentUser';
 import { DialogActions } from '../../modules/dialog';
-import { selectActiveProject,
-	selectActiveTeamspace,
+import { selectStarredModels, StarredActions } from '../../modules/starred';
+import {
 	selectFlattenTeamspaces,
 	selectIsPending,
+	selectModels,
+	selectShowStarredOnly,
+	selectStarredVisibleItems,
+	selectTeamspaces,
+	selectVisibleItems,
 	TeamspacesActions,
 } from '../../modules/teamspaces';
-import { ModelActions } from './../../modules/model';
+import { selectRevisions, ModelActions } from './../../modules/model';
 import { Teamspaces } from './teamspaces.component';
 
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,
 	items: selectFlattenTeamspaces,
 	isPending: selectIsPending,
-	activeProject: selectActiveProject,
-	activeTeamspace: selectActiveTeamspace
+	visibleItems: selectVisibleItems,
+	revisions: selectRevisions,
+	starredVisibleItems: selectStarredVisibleItems,
+	teamspaces: selectTeamspaces,
+	showStarredOnly: selectShowStarredOnly,
+	starredModelsMap: selectStarredModels,
+	modelsMap: selectModels,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showDialog: DialogActions.showDialog,
 	showConfirmDialog: DialogActions.showConfirmDialog,
+	showRevisionsDialog: DialogActions.showRevisionsDialog,
+	hideDialog: DialogActions.hideDialog,
+	createProject: TeamspacesActions.createProject,
+	updateProject: TeamspacesActions.updateProject,
+	removeProject: TeamspacesActions.removeProject,
 	createModel: TeamspacesActions.createModel,
 	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
-	setState: TeamspacesActions.setComponentState
+	setState: TeamspacesActions.setComponentState,
+	downloadModel: ModelActions.downloadModel,
+	fetchStarredModels: StarredActions.fetchStarredModels,
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Teamspaces);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Teamspaces));
