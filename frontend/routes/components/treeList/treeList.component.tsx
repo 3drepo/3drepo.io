@@ -20,8 +20,8 @@ import React from 'react';
 
 import Folder from '@material-ui/icons/Folder';
 import FolderOpen from '@material-ui/icons/FolderOpen';
-import { Container, Headline, IconContainer, Title } from './treeList.styles';
 import { Highlight } from '../highlight/highlight.component';
+import { Container, Headline, IconContainer, Title } from './treeList.styles';
 
 export const TREE_LEVELS = {
 	TEAMSPACE: 1,

@@ -24,7 +24,7 @@ import People from '@material-ui/icons/People';
 import Settings from '@material-ui/icons/Settings';
 import SettingsBackupRestore from '@material-ui/icons/SettingsBackupRestore';
 import Share from '@material-ui/icons/Share';
-import { FILTER_TYPES, DATA_TYPES } from '../components/filterPanel/filterPanel.component';
+import { DATA_TYPES, FILTER_TYPES } from '../components/filterPanel/filterPanel.component';
 
 export const ROW_ACTIONS = {
 	UPLOAD_FILE: {
