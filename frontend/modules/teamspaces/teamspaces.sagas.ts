@@ -16,11 +16,12 @@
  */
 
 import { normalize } from 'normalizr';
-import { put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
+import { selectStarredModels, StarredActions } from '../starred';
 import { TeamspacesActions, TeamspacesTypes } from './teamspaces.redux';
 import { teamspacesSchema } from './teamspaces.schema';
 import { selectProjects } from './teamspaces.selectors';
@@ -69,7 +70,29 @@ export function* updateProject({ teamspace, projectId, projectData }) {
 export function* removeProject({ teamspace, projectId }) {
 	try {
 		const projects = yield select(selectProjects);
-		yield API.removeProject(teamspace, projects[projectId].name);
+		const projectDetails = projects[projectId];
+
+		yield API.removeProject(teamspace, projectDetails.name);
+
+		if (projectDetails.models.length) {
+			const starredModelsMap = yield select(selectStarredModels);
+
+			const starredModelsToRemove = [];
+			projectDetails.models.forEach((model) => {
+				const isStarredModel = starredModelsMap[`${teamspace}/${model}`];
+
+				if (isStarredModel) {
+					const starredModel = { model, teamspace };
+					starredModelsToRemove.push(starredModel);
+				}
+			});
+
+			if (starredModelsToRemove.length) {
+				yield all(starredModelsToRemove.map((model) => {
+					return put(StarredActions.removeFromStarredModels(model));
+				}));
+			}
+		}
 
 		yield put(SnackbarActions.show('Project removed'));
 		yield put(TeamspacesActions.removeProjectSuccess(teamspace, projectId));
@@ -116,6 +139,19 @@ export function* updateModel({ teamspace, modelId, modelData }) {
 export function* removeModel({ teamspace, modelData }) {
 	try {
 		const { data: removedModel } = yield API.removeModel(teamspace, modelData.id);
+		const starredModelsMap = yield select(selectStarredModels);
+		const isStarredModel = starredModelsMap[`${teamspace}/${modelData.id}`];
+
+		if (isStarredModel) {
+			const starredModel = {
+				model: modelData.id,
+				name: modelData.name,
+				teamspace
+			};
+
+			yield put(StarredActions.removeFromStarredModels(starredModel));
+		}
+
 		const projects = yield select(selectProjects);
 
 		yield put(SnackbarActions.show(`${removedModel.federate ? 'Federation' : 'Model'} removed`));

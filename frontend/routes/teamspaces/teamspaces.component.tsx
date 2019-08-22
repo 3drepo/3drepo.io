@@ -194,7 +194,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		Object.keys(this.props.starredModelsMap).forEach((starredKey) => {
 			const [ teamspace, modelId ] = starredKey.split('/');
 			starredVisibleItems.add(teamspace);
-			starredVisibleItems.add(this.props.modelsMap[modelId].projectName);
+			if (this.props.modelsMap[modelId]) {
+				starredVisibleItems.add(this.props.modelsMap[modelId].projectName);
+			}
 		});
 
 		starredVisibleItems.forEach((item) => {

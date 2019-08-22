@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { mapValues, values } from 'lodash';
-import { put, takeLatest } from 'redux-saga/effects';
+import { put, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
@@ -106,5 +106,5 @@ export default function* StarredMetaSaga() {
 
 	yield takeLatest(StarredTypes.FETCH_STARRED_MODELS, fetchStarredModels);
 	yield takeLatest(StarredTypes.ADD_TO_STARRED_MODELS, addToStarredModels);
-	yield takeLatest(StarredTypes.REMOVE_FROM_STARRED_MODELS, removeFromStarredModels);
+	yield takeEvery(StarredTypes.REMOVE_FROM_STARRED_MODELS, removeFromStarredModels);
 }
