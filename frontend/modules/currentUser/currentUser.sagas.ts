@@ -24,8 +24,6 @@ import { SnackbarActions } from '../snackbar';
 import { CurrentUserActions, CurrentUserTypes } from './currentUser.redux';
 import { selectCurrentUser } from './currentUser.selectors';
 
-export const getAvatarUrl = (username) => API.getAPIUrl(`${username}/avatar?${Date.now()}`);
-
 export function* fetchUser({ username }) {
 	try {
 		yield put(CurrentUserActions.setPendingState(true));
@@ -37,7 +35,7 @@ export function* fetchUser({ username }) {
 			put(CurrentUserActions.fetchUserSuccess({
 				...data,
 				username,
-				avatarUrl: getAvatarUrl(username)
+				avatarUrl: API.getAvatarUrl(username)
 			})),
 			put(CurrentUserActions.setAsInitialised())
 		]);
@@ -101,7 +99,7 @@ export function* uploadAvatar({ file }) {
 			formData.append('file', file);
 			yield API.uploadAvatar(username, formData);
 
-			const avatarUrl = getAvatarUrl(username);
+			const avatarUrl = API.getAvatarUrl(username);
 			yield put(CurrentUserActions.refreshAvatar(avatarUrl));
 			yield put(SnackbarActions.show('Avatar updated'));
 		} else {

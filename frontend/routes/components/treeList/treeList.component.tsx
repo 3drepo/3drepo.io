@@ -21,7 +21,7 @@ import React from 'react';
 import Folder from '@material-ui/icons/Folder';
 import FolderOpen from '@material-ui/icons/FolderOpen';
 import { Highlight } from '../highlight/highlight.component';
-import { Container, Headline, IconContainer, Title } from './treeList.styles';
+import { ChildrenContainer, Container, Headline, IconContainer, Title } from './treeList.styles';
 
 export const TREE_LEVELS = {
 	TEAMSPACE: 1,
@@ -33,7 +33,7 @@ const HeadlineIcon = ({IconOpened, IconClosed, active, ...iconProps}) => {
 	let Icon = IconClosed || Folder;
 
 	if (active) {
-		Icon = IconOpened || FolderOpen;
+		Icon = IconOpened || IconClosed || FolderOpen;
 	}
 	return (
 		<IconContainer>
@@ -42,7 +42,7 @@ const HeadlineIcon = ({IconOpened, IconClosed, active, ...iconProps}) => {
 	);
 };
 
-export const DefaultHeadline = ({renderActions, ...props}) => {
+export const DefaultHeadline = ({children, ...props}) => {
 	return (
 		<Grid
 			container
@@ -59,10 +59,10 @@ export const DefaultHeadline = ({renderActions, ...props}) => {
 			/>
 			{props.disabled || props.isEmpty ? ' (empty)' : ''}
 		</Title>
-			{renderActions && renderActions(props)}
-		</Grid>
-	);
-};
+		<ChildrenContainer>
+			{children && children(props)}</ChildrenContainer>
+	</Grid>
+);};
 
 interface IProps {
 	name: string;

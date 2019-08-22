@@ -883,6 +883,9 @@ function _createAccounts(roles, userName) {
 				const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
 				const account = {
 					account: user.user,
+					firstName: user.customData.firstName,
+					lastName: user.customData.lastName,
+					hasAvatar: !!user.customData.avatar,
 					projects: [],
 					models: [],
 					fedModels: [],

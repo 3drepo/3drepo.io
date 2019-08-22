@@ -70,10 +70,20 @@ export const HeadlineContainer = styled(Grid)`
 
 export const Title = styled.div`
 	font-size: 14px;
-	${ellipsis('100%')}
+	margin-right: 10px;
+	max-width: 200px;
+	${ellipsis('30%')}
 `;
 
 export const IconContainer = styled.div`
 	margin-right: 12px;
 	display: flex;
+`;
+
+export const ChildrenContainer = styled.div`
+	font-size: 14px;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 `;

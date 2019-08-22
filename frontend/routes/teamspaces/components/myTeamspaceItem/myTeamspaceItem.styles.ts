@@ -21,9 +21,11 @@ import { COLOR } from '../../../../styles';
 export const Container = styled.div`
 	width: 100%;
 	padding-top: 13px;
+	padding-bottom: 2px;
 `;
 
 export const Subtitle = styled.div`
 	font-size: 12px;
 	color: ${COLOR.BLACK_30};
+	margin-bottom: 5px;
 `;

@@ -27,6 +27,7 @@ import { ROW_ACTIONS  } from '../../teamspaces.contants';
 import ProjectDialog from '../projectDialog/projectDialog.container';
 import { RowMenu } from '../rowMenu/rowMenu.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
+import { Content } from './projectItem.styles';
 
 interface IProps {
 	_id: string;
@@ -144,8 +145,9 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 					IconClosed: Label,
 					IconOpened: LabelOutlined
 				}}
-				renderActions={this.renderProjectActions}
-			/>
+			>
+				{(props) => <Content>{this.renderProjectActions(props)}</Content>}
+			</TreeList>
 		);
 	}
 }
