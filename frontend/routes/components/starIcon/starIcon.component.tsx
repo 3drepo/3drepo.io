@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 
 import Star from '@material-ui/icons/Star';
 import StarBorder from '@material-ui/icons/StarBorder';
@@ -27,7 +27,7 @@ interface IProps {
 	onClick: (event) => void;
 }
 
-export const StarIcon = ({ active, onClick }: IProps) => {
+export const StarIcon = memo(({ active, onClick }: IProps) => {
 	const IconComponent = active ? Star : StarBorder;
 
 	return (
@@ -35,4 +35,4 @@ export const StarIcon = ({ active, onClick }: IProps) => {
 			<IconComponent onClick={onClick} color="inherit" fontSize="small" />
 		</IconWrapper>
 	);
-};
+});

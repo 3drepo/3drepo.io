@@ -374,17 +374,15 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	));
 
 	private getStarredVisibleItems = () => {
-		const starredVisibleItems = new Set();
 		const visibleItemsMap = {};
 
 		Object.keys(this.props.starredModelsMap).forEach((starredKey) => {
 			const [ teamspace, modelId ] = starredKey.split('/');
-			starredVisibleItems.add(teamspace);
-if (this.props.modelsMap[modelId]) {			starredVisibleItems.add(this.props.modelsMap[modelId].projectName);}
-		});
+			visibleItemsMap[teamspace] = true;
 
-		starredVisibleItems.forEach((item) => {
-			visibleItemsMap[item] = true;
+			if (this.props.modelsMap[modelId]) {
+				visibleItemsMap[this.props.modelsMap[modelId].projectName] = true;
+			}
 		});
 
 		return visibleItemsMap;
@@ -422,7 +420,7 @@ if (this.props.modelsMap[modelId]) {			starredVisibleItems.add(this.props.models
 	private renderModels = (models) => renderWhenTrue(() => {
         const sortedModels = sortModels(models, this.props.activeSorting, this.props.activeSortingDirection);
 
-        returnsortedModels.map((props) => (
+        returnsortedModels.map((props: any) => (
             <ModelGridItem
                 {...props}
                 key={props.model}

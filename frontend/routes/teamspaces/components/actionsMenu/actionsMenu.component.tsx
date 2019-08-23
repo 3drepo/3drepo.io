@@ -16,9 +16,10 @@
  */
 
 import MoreVert from '@material-ui/icons/MoreVert';
-import React, { useState } from 'react';
-import { SmallIconButton } from './../../../components/smallIconButon/smallIconButton.component';
+import React, { useState, useCallback, useRef } from 'react';
 
+import { useOnScreen } from '../../../../hooks';
+import { SmallIconButton } from '../../../components/smallIconButon/smallIconButton.component';
 import { ActionsButton, Container, StyledGrid } from './actionsMenu.styles';
 
 interface IProps {
@@ -31,37 +32,35 @@ interface IProps {
 const MoreIcon = () => <MoreVert fontSize="small" />;
 
 export const ActionsMenu = ({federate, isPending, children}: IProps) => {
-	const [open, setOpen] = useState(false);
-	const [toggleForceOpen, setToggleForceOpen] = useState(false);
-	const opened = open || toggleForceOpen;
+	const ref = useRef();
+	const [forceOpen, setForceOpen] = useState(false);
+	const isOnScreen = useOnScreen(ref, '0px', true);
 
-	const toggleForceOpenHandler = (event) => {
+	const forceOpenHandler = useCallback((event) => {
 		event.stopPropagation();
-		setToggleForceOpen(!toggleForceOpen);
-	};
-	const closeHandler = () => setOpen(false);
-	const openHandler = () => setOpen(true);
+		setForceOpen(!forceOpen);
+	}, [forceOpen]);
 
 	return (
-		<Container onMouseLeave={closeHandler} opened={opened}>
-			<ActionsButton onMouseEnter={openHandler}>
+		<Container ref={ref}>
+			<ActionsButton>
 				<SmallIconButton
-					ariaLabel={'Toggle actions menu'}
+					ariaLabel="Toggle actions menu"
 					Icon={MoreIcon}
-					onClick={toggleForceOpenHandler}
+					onClick={forceOpenHandler}
 					disabled={isPending}
 				/>
 			</ActionsButton>
-			<StyledGrid
+			{isOnScreen && (<StyledGrid
 				container
 				wrap="wrap"
 				direction="row"
 				alignItems="center"
 				justify="flex-start"
-				theme={{ opened, federate }}
+				theme={{ forceOpen, federate }}
 			>
 				{children}
-			</StyledGrid>
+			</StyledGrid>)}
 		</Container>
 	);
 };

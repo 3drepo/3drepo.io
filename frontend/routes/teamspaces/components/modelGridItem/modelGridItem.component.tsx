@@ -17,7 +17,7 @@
 
 import copy from 'copy-to-clipboard';
 import { pick, startCase } from 'lodash';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback, memo } from 'react';
 import { ROUTES } from '../../../../constants/routes';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -39,8 +39,7 @@ import {
 	PropertiesColumn,
 	Property,
 	Status,
-	Timestamp,
-	TruncatedName
+	Timestamp
 } from './modelGridItem.styles';
 
 interface IProps {
@@ -154,7 +153,7 @@ export function ModelGridItem(props: IProps) {
 		});
 	};
 
-	const handleClick = () => {
+	const handleClick = useCallback(() => {
 		const { history, teamspace, timestamp, model } = props;
 		if (timestamp) {
 			history.push(`${ROUTES.VIEWER}/${teamspace}/${model}`);
@@ -162,7 +161,7 @@ export function ModelGridItem(props: IProps) {
 		} else {
 			handleUploadModelFile();
 		}
-	};
+	}, [props.history, props.teamspace, props.timestamp, props.model]);
 
 	const handleUploadModelFile = () => {
 		const { teamspace, name, model, canUpload, projectName } = props;
@@ -183,7 +182,7 @@ export function ModelGridItem(props: IProps) {
 		});
 	};
 
-	const handleFederationEdit = () => {
+	const handleFederationEdit = useCallback(() => {
 		const { teamspace, model, name, project } = props;
 
 		props.showDialog({
@@ -198,9 +197,9 @@ export function ModelGridItem(props: IProps) {
 				modelId: model
 			}
 		});
-	};
+	}, [props.teamspace, props.model, props.name, props.project]);
 
-	const handleStarClick = () => {
+	const handleStarClick = useCallback(() => {
 		if (starClickTimeout.current) {
 			resetStarClickTimeout();
 		} else {
@@ -215,7 +214,7 @@ export function ModelGridItem(props: IProps) {
 				}
 			}, 2000);
 		}
-	};
+	}, [starClickTimeout.current, props.isStarred, props.model]);
 
 	const sharedActions = [{
 		...ROW_ACTIONS.PERMISSIONS,
@@ -262,10 +261,7 @@ export function ModelGridItem(props: IProps) {
 		</Status>
 	);
 
-	const renderActions = (actions) => {
-		if (!actions) {
-			return null;
-		}
+	const renderActions = (actions = []) => {
 		return actions.map((actionItem) => {
 			const { label, action, Icon, color, isHidden = false, requiredPermissions = '' } = actionItem;
 			const iconProps = { fontSize: 'small' } as any;
@@ -313,9 +309,6 @@ export function ModelGridItem(props: IProps) {
 							text={props.name}
 							splitQueryToWords
 						/>
-						<TruncatedName lines={2}>
-							{props.name}
-						</TruncatedName>
 					</div>
 				</NameWrapper>
 				{renderActionsMenu()}

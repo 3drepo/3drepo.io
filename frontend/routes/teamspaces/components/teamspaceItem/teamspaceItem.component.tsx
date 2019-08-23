@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useMemo } from 'react';
+import { memoize } from 'lodash';
+import React from 'react';
 
 import { getAvatarUrl } from '../../../../services/api';
 import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
@@ -23,12 +24,8 @@ import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { MyTeamspaceItem } from '../myTeamspaceItem/myTeamspaceItem.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 
-import StorageNormal from '@material-ui/icons/Storage';
-import StorageOutlined from '@material-ui/icons/StorageOutlined';
-
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
-import { ProjectDialog } from '../projectDialog/projectDialog.component';
 import { Avatar, OwnerData } from './teamspaceItem.styles';
 
 interface IProps {
@@ -45,6 +42,8 @@ interface IProps {
 	onAddProject: (event, teamspaceName) => void;
 }
 
+const getMemoizedAvatarUrl = memoize(getAvatarUrl);
+
 export const TeamspaceItem = (props: IProps) => {
 	const {
 		name,
@@ -60,7 +59,7 @@ export const TeamspaceItem = (props: IProps) => {
 		hasAvatar,
 	} = props;
 
-	const avatarUrl = useMemo(() => hasAvatar ? getAvatarUrl(name) : null, [hasAvatar, name]);
+	const avatarUrl = getMemoizedAvatarUrl(name);
 	const teamspaceInitials = name.split(' ').slice(0, 2).map((text) => text[0]).join('').trim().toUpperCase();
 
 	const handleAddNewProject = (event) => onAddProject(event, name);

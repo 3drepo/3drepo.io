@@ -16,36 +16,46 @@
  */
 
 import Grid from '@material-ui/core/Grid';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { COLOR } from '../../../../styles';
 
 interface IStyledGrid {
 	theme: {
-		opened: boolean,
+		forceOpen: boolean,
 		federate: boolean
 	};
 }
 
 export const Container = styled.div``;
 
+const openMenuStyles = css`
+	opacity: 1;
+	pointer-events: all;
+`;
+
 export const StyledGrid = styled(Grid)<IStyledGrid>`
 	&& {
 		width: 100%;
-		height: 100%;
 		position: absolute;
 		right: 0;
 		top: 0;
 		background: ${(props) => props.theme.federate ? COLOR.ALICE_BLUE : COLOR.WHITE};
 		z-index: 0;
+		height: 100%;
 	}
 
 	transition: opacity 200ms ease-in-out;
-	opacity: ${(props) => props.theme.opened ? 1 : 0};
-	pointer-events: ${(props) => props.theme.opened ? 'all' : 'none'};
+	opacity: 0;
+	pointer-events: none;
+
+	${(props) => props.theme.forceOpen ? openMenuStyles : ''};
+	&:hover {
+		${openMenuStyles}
+	}
 `;
 
 export const ActionsButton = styled.div`
-	&:hover ${StyledGrid} {
-		opacity: 1;
+	&:hover + ${StyledGrid} {
+		${openMenuStyles}
 	}
 `;

@@ -39,10 +39,6 @@ export const Header = styled.div`
 	margin: 0 0 5px;
 `;
 
-export const TruncatedName = styled(Truncate)`
-	display: none;
-`;
-
 export const Name = styled(Highlight)`
 	margin: 1px 0 0 2px;
 	font-weight: ${FONT_WEIGHT.BOLD};
