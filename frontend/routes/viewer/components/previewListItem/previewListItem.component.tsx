@@ -39,9 +39,9 @@ import { ActionMessage } from '../../../components/actionMessage/actionMessage.c
 interface IProps {
 	className?: string;
 	name: string;
-	desc: string;
-	owner: string;
-	created: number;
+	desc?: string;
+	owner?: string;
+	created?: number;
 	thumbnail: string;
 	roleColor: string;
 	StatusIconComponent: any;

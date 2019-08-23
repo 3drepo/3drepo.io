@@ -10,7 +10,10 @@ export const prepareGroup = (group) => {
 	const type = isSmartGroup ? GROUPS_TYPES.SMART : GROUPS_TYPES.NORMAL;
 
 	return {
-		...group,
+		...omit(group, 'author', 'createdDate', 'description'),
+		owner: group.author,
+		created: group.createdDate,
+		desc: group.description,
 		type,
 		createdDate: group.createdAt,
 		updateDate: group.updateAt,
