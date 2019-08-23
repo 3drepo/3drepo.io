@@ -170,7 +170,7 @@ export function* saveRisk({ teamspace, model, riskData, revision, finishSubmitti
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(SnackbarActions.show('Risk created'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('save', 'risk', error));
+		yield put(DialogActions.showEndpointErrorDialog('save', 'risk', error));
 	}
 }
 
@@ -193,7 +193,7 @@ export function* updateRisk({ teamspace, modelId, riskData }) {
 		yield put(RisksActions.renderPins());
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'risk', error));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'risk', error));
 	}
 }
 
