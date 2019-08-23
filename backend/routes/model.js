@@ -1171,7 +1171,6 @@ router.get("/:model/revision/master/head/fulltree.json", middlewares.hasReadAcce
  * GET /teamSpace1/5ce7dd19-1252-4548-a9c9-4a5414f2e0c5/revision/master/head/tree_path.json HTTP/1.1
  *
  * @apiSuccessExample {json} Success:
- * @apiSuccessExample {json} Success:
  * {
  *    mainTree: {
  *       idToPath: {
