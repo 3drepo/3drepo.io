@@ -86,3 +86,4 @@ npm-debug.log.*
 .vscode/
 *.swo
 
+submodules/tests
