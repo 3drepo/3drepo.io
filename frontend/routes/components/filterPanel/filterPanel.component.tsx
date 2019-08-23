@@ -395,7 +395,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	}
 
 	public onSearchSubmit = (event) => {
-		if (event.key === ENTER_KEY) {
+		if (event.key === ENTER_KEY && event.target.value) {
 			event.preventDefault();
 			const queryValue = event.target.value;
 			const newFilter = {
