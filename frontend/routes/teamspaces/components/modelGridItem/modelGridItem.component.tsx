@@ -155,7 +155,6 @@ export function ModelGridItem(props: IProps) {
 	};
 
 	const handleClick = () => {
-		debugger;
 		const { history, teamspace, timestamp, model } = props;
 		if (timestamp) {
 			history.push(`${ROUTES.VIEWER}/${teamspace}/${model}`);

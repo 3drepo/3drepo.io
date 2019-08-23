@@ -34,3 +34,9 @@ export const Title = styled.div`
 export const Empty = styled.div`
 	margin-left: 5px;
 `;
+
+export const Content = styled.div`
+	display: flex;
+	flex: 1;
+	justify-content: flex-end;
+`;

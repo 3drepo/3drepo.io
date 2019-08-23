@@ -15,20 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Label from '@material-ui/icons/Label';
-import LabelOutlined from '@material-ui/icons/LabelOutlined';
 import React from 'react';
 
 import { ROUTES } from '../../../../constants/routes';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { Highlight } from '../../../components/highlight/highlight.component';
 import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
 import { ROW_ACTIONS  } from '../../teamspaces.contants';
 import ProjectDialog from '../projectDialog/projectDialog.container';
 import { RowMenu } from '../rowMenu/rowMenu.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
-import { Content, Actions, Title, Container, Empty } from './projectItem.styles';
-import { Highlight } from '../../../components/highlight/highlight.component';
+import { Actions, Container, Content, Empty, Title } from './projectItem.styles';
 
 interface IProps {
 	_id: string;

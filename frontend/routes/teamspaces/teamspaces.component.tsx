@@ -17,7 +17,7 @@
 
 import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
-import { cond, isEmpty, matches, stubTrue } from 'lodash';
+import { cond, isEmpty, matches, orderBy, stubTrue } from 'lodash';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
@@ -27,6 +27,7 @@ import Add from '@material-ui/icons/Add';
 import Check from '@material-ui/icons/Check';
 
 import { renderWhenTrue } from '../../helpers/rendering';
+import { sortModels } from '../../modules/teamspaces/teamspaces.helpers';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import {
 	MenuList,
@@ -84,6 +85,7 @@ interface IProps {
 	starredModelsMap: any;
 	modelsMap: any;
 	activeSorting: string;
+	activeSortingDirection: string;
 	nameSortingDescending: boolean;
 	dateSortingDescending: boolean;
 	showDialog: (config) => void;
@@ -417,13 +419,17 @@ if (this.props.modelsMap[modelId]) {			starredVisibleItems.add(this.props.models
 		</AddModelButton>
 	)
 
-	private renderModels = (models) => renderWhenTrue(() =>
-		models.map((props) => (<ModelGridItem
-					{...props}
-					key={props.model}
-					query={this.searchQuery}
-				/>))
-	)(models.length)
+	private renderModels = (models) => renderWhenTrue(() => {
+        const sortedModels = sortModels(models, this.props.activeSorting, this.props.activeSortingDirection);
+
+        returnsortedModels.map((props) => (
+            <ModelGridItem
+                {...props}
+                key={props.model}
+                query={this.searchQuery}
+            />
+        ))
+    })(models.length)
 
 	private renderProjectContainer = (models, project) => renderWhenTrue(() => (
 		<GridContainer key={`container-${project.id}`}>

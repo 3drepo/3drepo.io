@@ -18,8 +18,11 @@
 import { compact, map, orderBy, pick, pickBy, uniq, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { searchByFilters } from '../../helpers/searching';
+import { sortModels } from '../../modules/teamspaces/teamspaces.helpers';
 import { DATA_TYPES, FILTER_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
-import { LIST_ITEMS_TYPES } from '../../routes/teamspaces/teamspaces.contants';
+import {
+	ASCENDING_SORTING, DESCENDING_SORTING, LIST_ITEMS_TYPES, SORTING_BY_LAST_UPDATED, SORTING_BY_NAME,
+} from '../../routes/teamspaces/teamspaces.contants';
 import { selectStarredModels } from '../starred';
 import { getStarredModelKey } from '../starred/starred.contants';
 import { extendTeamspacesInfo } from './teamspaces.helpers';
@@ -110,11 +113,24 @@ export const selectDateSortingDescending = createSelector(
 	selectComponentState, (state) => state.dateSortingDescending
 );
 
+export const selectActiveSortingDirection = createSelector(
+	selectNameSortingDescending, selectDateSortingDescending,
+	(nameSortingDescending, dateSortingDescending) => {
+		const sortingDirection = {
+			[SORTING_BY_NAME]: nameSortingDescending ? DESCENDING_SORTING : ASCENDING_SORTING,
+			[SORTING_BY_LAST_UPDATED]: dateSortingDescending ? DESCENDING_SORTING : ASCENDING_SORTING
+		};
+		return sortingDirection;
+	}
+);
+
 export const selectFlattenTeamspaces = createSelector(
 	selectTeamspacesList, selectProjects, selectModels,
 	selectShowStarredOnly, selectStarredModels,
 	selectSelectedFilters, selectSelectedDataTypes,
-	(teamspacesList, projects, models, showStarredOnly, starredModels, filters, filterableDataTypes) => {
+	selectActiveSorting, selectActiveSortingDirection,
+	(teamspacesList, projects, models, showStarredOnly, starredModels,
+		filters, filterableDataTypes, activeSorting, activeSortingDirection) => {
 		const flattenList = [];
 		const hasActiveFilters = showStarredOnly || filters.length;
 		const textFilters = filters.filter(({ type }) => type === FILTER_TYPES.QUERY);
@@ -181,7 +197,7 @@ export const selectFlattenTeamspaces = createSelector(
 					((showStarredOnly && shouldBeVisible) || !showStarredOnly);
 
 				if (shouldAddProject) {
-					processedProject.models = orderBy(processedProject.models, ['federate', 'name']);
+					processedProject.models = sortModels(processedProject.models, activeSorting, activeSortingDirection);
 					teamspaceProjects.push(processedProject);
 				}
 			}

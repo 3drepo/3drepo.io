@@ -24,6 +24,7 @@ import { DialogActions } from '../../modules/dialog';
 import { selectStarredModels, StarredActions } from '../../modules/starred';
 import {
 	selectActiveSorting,
+	selectActiveSortingDirection,
 	selectDateSortingDescending,
 	selectFlattenTeamspaces,
 	selectIsPending,
@@ -58,6 +59,7 @@ const mapStateToProps = createStructuredSelector({
 	selectedDataTypes: selectSelectedDataTypes,
 	modelCodes: selectModelCodes,
 	activeSorting: selectActiveSorting,
+	activeSortingDirection: selectActiveSortingDirection,
 	nameSortingDescending: selectNameSortingDescending,
 	dateSortingDescending: selectDateSortingDescending,
 });
