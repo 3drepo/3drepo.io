@@ -150,7 +150,7 @@ function Utils() {
 	 * @return {String} string describing an API's method and pathname
 	 */
 	this.APIInfo = function(req) {
-		return `${req.method} ${req._parsedUrl.pathname}`;
+		return `${req.method} ${req.originalUrl}`;
 	};
 
 	/**
