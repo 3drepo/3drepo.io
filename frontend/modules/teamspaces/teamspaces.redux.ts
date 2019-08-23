@@ -18,6 +18,7 @@
 import { omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { DATA_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
+import { SORTING_BY_NAME } from '../../routes/teamspaces/teamspaces.contants';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetchTeamspaces: ['username'],
@@ -53,6 +54,9 @@ export const INITIAL_STATE = {
 		searchEnabled: false,
 		selectedFilters: [],
 		selectedDataTypes: [DATA_TYPES.MODELS, DATA_TYPES.FEDERATIONS, DATA_TYPES.PROJECTS],
+		activeSorting: SORTING_BY_NAME,
+		nameSortingDescending: true,
+		dateSortingDescending: false,
 	}
 };
 

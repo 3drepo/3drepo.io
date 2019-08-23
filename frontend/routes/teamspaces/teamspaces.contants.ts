@@ -24,6 +24,7 @@ import People from '@material-ui/icons/People';
 import Settings from '@material-ui/icons/Settings';
 import SettingsBackupRestore from '@material-ui/icons/SettingsBackupRestore';
 import Share from '@material-ui/icons/Share';
+import { SortAmountDown, SortAmountUp } from '../../routes/components/fontAwesomeIcon';
 import { DATA_TYPES, FILTER_TYPES } from '../components/filterPanel/filterPanel.component';
 
 export const ROW_ACTIONS = {
@@ -123,3 +124,28 @@ export const TEAMSPACES_DATA_TYPES = [
 		type: DATA_TYPES.PROJECTS
 	}
 ] as any;
+
+export const SORTING_BY_NAME = 'name';
+export const SORTING_BY_LAST_UPDATED = 'lastUpdated';
+
+export const ASCENDING_SORTING = 'ASC';
+export const DESCENDING_SORTING = 'DESC';
+
+export const TEAMSPACES_PANEL_ACTIONS_MENU = [
+	{
+		label: 'Sort by name',
+		sortingType: SORTING_BY_NAME,
+		Icon: {
+			ASC: SortAmountUp,
+			DESC: SortAmountDown
+		}
+	},
+	{
+		label: 'Sort by last updated',
+		sortingType: SORTING_BY_LAST_UPDATED,
+		Icon: {
+			ASC: SortAmountUp,
+			DESC: SortAmountDown
+		}
+	},
+];

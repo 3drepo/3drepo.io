@@ -78,10 +78,6 @@ export const selectVisibleItems = createSelector(
 	selectComponentState, (state) => state.visibleItems
 );
 
-export const selectStarredVisibleItems = createSelector(
-	selectComponentState, (state) => state.starredVisibleItems
-);
-
 export const selectShowStarredOnly = createSelector(
 	selectComponentState, (state) => state.showStarredOnly
 );
@@ -96,6 +92,22 @@ export const selectSelectedFilters = createSelector(
 
 export const selectSelectedDataTypes = createSelector(
 	selectComponentState, (state) => state.selectedDataTypes
+);
+
+export const selectStarredVisibleItems = createSelector(
+	selectComponentState, (state) => state.starredVisibleItems
+);
+
+export const selectActiveSorting = createSelector(
+	selectComponentState, (state) => state.activeSorting
+);
+
+export const selectNameSortingDescending = createSelector(
+	selectComponentState, (state) => state.nameSortingDescending
+);
+
+export const selectDateSortingDescending = createSelector(
+	selectComponentState, (state) => state.dateSortingDescending
 );
 
 export const selectFlattenTeamspaces = createSelector(

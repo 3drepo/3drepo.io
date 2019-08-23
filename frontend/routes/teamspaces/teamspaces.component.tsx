@@ -24,11 +24,18 @@ import SimpleBar from 'simplebar-react';
 
 import { MenuItem, Tab, Tabs } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
+import Check from '@material-ui/icons/Check';
 
 import { renderWhenTrue } from '../../helpers/rendering';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
+import {
+	MenuList,
+	StyledItemText,
+	StyledListItem
+} from '../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel, FILTER_TYPES } from '../components/filterPanel/filterPanel.component';
 import { Loader } from '../components/loader/loader.component';
+import { MenuButton as MenuButtonComponent } from '../components/menuButton/menuButton.component';
 import { ViewerPanel } from '../viewerGui/components/viewerPanel/viewerPanel.component';
 import FederationDialog from './components/federationDialog/federationDialog.container';
 import ModelDialog from './components/modelDialog/modelDialog.container';
@@ -37,13 +44,22 @@ import ProjectDialog from './components/projectDialog/projectDialog.container';
 import ProjectItem from './components/projectItem/projectItem.container';
 import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
 import {
-	LIST_ITEMS_TYPES, MODEL_SUBTYPES, TEAMSPACE_FILTER_RELATED_FIELDS, TEAMSPACES_DATA_TYPES, TEAMSPACES_FILTERS
+	LIST_ITEMS_TYPES,
+	MODEL_SUBTYPES,
+	SORTING_BY_LAST_UPDATED,
+	SORTING_BY_NAME,
+	TEAMSPACE_FILTER_RELATED_FIELDS,
+	TEAMSPACES_DATA_TYPES,
+	TEAMSPACES_FILTERS,
+	TEAMSPACES_PANEL_ACTIONS_MENU,
 } from './teamspaces.contants';
 import {
+	Action,
 	AddModelButton,
 	AddModelButtonOption,
 	GridContainer,
 	Head,
+	Label,
 	List,
 	LoaderContainer,
 	MenuButton
@@ -61,12 +77,15 @@ interface IProps {
 	revisions?: any[];
 	starredVisibleItems: any[];
 	showStarredOnly: boolean;
-	starredModelsMap: any;
-	modelsMap: any;
 	searchEnabled: boolean;
 	selectedFilters: any[];
 	selectedDataTypes: any[];
 	modelCodes: string[];
+	starredModelsMap: any;
+	modelsMap: any;
+	activeSorting: string;
+	nameSortingDescending: boolean;
+	dateSortingDescending: boolean;
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
 	showRevisionsDialog: (config) => void;
@@ -89,6 +108,14 @@ const getSearchQuery = memoizeOne((selectedFilters) => selectedFilters.reduce((q
 	return query;
 }, '').trim());
 
+const PanelMenuButton = (props) => <MenuButtonComponent ariaLabel="Show Teamspaces menu" {...props} />;
+
+const SortingIcon = ({Icon, isDesc}) => {
+	if (isDesc) {
+		return <Icon.DESC IconProps={{ fontSize: 'small' }} />;
+	}
+	return <Icon.ASC IconProps={{ fontSize: 'small' }} />;
+};
 export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
 		teamspaces: []
@@ -245,12 +272,104 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public getSearchButton = () => {
+	private getSearchButton = () => {
 		if (this.props.searchEnabled) {
 			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
 		}
 		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
 	}
+
+	private handleSortingItemClick = (sortingType, isNameSortingActive) => {
+		const { nameSortingDescending, dateSortingDescending } = this.props;
+		const newState = {} as any;
+		const isNameSortingClicked = sortingType === SORTING_BY_NAME;
+
+		newState.activeSorting = sortingType;
+
+		if (isNameSortingClicked) {
+			newState.nameSortingDescending = isNameSortingActive ? !nameSortingDescending : nameSortingDescending;
+		} else {
+			newState.dateSortingDescending = !isNameSortingActive ? !dateSortingDescending : dateSortingDescending;
+		}
+
+		this.props.setState(newState);
+	}
+
+	private renderActionsMenu = () =>  {
+		const { activeSorting, nameSortingDescending, dateSortingDescending } = this.props;
+		const isNameSortingActive = activeSorting === SORTING_BY_NAME;
+
+		return(
+			<MenuList>
+				{TEAMSPACES_PANEL_ACTIONS_MENU.map(({ sortingType, label, Icon }) => {
+					const isDesc = {
+						[SORTING_BY_NAME]: nameSortingDescending,
+						[SORTING_BY_LAST_UPDATED]: dateSortingDescending
+					};
+
+					return(
+						<StyledListItem key={label} button onClick={() => this.handleSortingItemClick(sortingType, isNameSortingActive)}>
+							<StyledItemText>
+								<Action>
+									<SortingIcon Icon={Icon} isDesc={isDesc[sortingType]} />
+									<Label>{label}</Label>
+								</Action>
+								{(activeSorting === sortingType) && <Check fontSize="small" />}
+							</StyledItemText>
+						</StyledListItem>
+					);
+				})}
+			</MenuList>
+		);
+	}
+
+	public getPanelMenuButton = () => {
+		return (
+			<ButtonMenu
+				renderButton={PanelMenuButton}
+				renderContent={() => {
+					return this.renderActionsMenu();
+				}}
+			/>
+		);
+	}
+
+	private handleCloseSearchMode = () => {
+		this.props.setState({ searchEnabled: false, selectedFilters: [] });
+	}
+
+	private handleOpenSearchMode = () => {
+		this.props.setState({ searchEnabled: true });
+	}
+
+	private handleFilterChange = (selectedFilters) => {
+		this.props.setState({ selectedFilters });
+	}
+
+	private handleDataTypeChange = (selectedDataTypes) => {
+		this.props.setState({ selectedDataTypes });
+	}
+
+	private renderActions = () => {
+		return (
+			<>
+				{this.getSearchButton()}
+				{this.getPanelMenuButton()}
+			</>
+		);
+	}
+
+	private renderFilterPanel = renderWhenTrue(() => (
+		<FilterPanel
+			onChange={this.handleFilterChange}
+			onDataTypeChange={this.handleDataTypeChange}
+			filters={this.filters}
+			selectedFilters={this.props.selectedFilters}
+			selectedDataTypes={this.props.selectedDataTypes}
+			dataTypes={TEAMSPACES_DATA_TYPES}
+			left
+		/>
+	));
 
 	private getStarredVisibleItems = () => {
 		const starredVisibleItems = new Set();
@@ -297,37 +416,6 @@ if (this.props.modelsMap[modelId]) {			starredVisibleItems.add(this.props.models
 			>Federation</AddModelButtonOption>
 		</AddModelButton>
 	)
-
-    private handleCloseSearchMode = () => {
-        this.props.setState({ searchEnabled: false, selectedFilters: [] });
-    }
-
-    private handleOpenSearchMode = () => {
-        this.props.setState({ searchEnabled: true });
-    }
-
-    private handleFilterChange = (selectedFilters) => {
-        this.props.setState({ selectedFilters });
-    }
-
-	private handleDataTypeChange = (selectedDataTypes) => {
-		this.props.setState({ selectedDataTypes });
-	}private renderActions = () => (
-		<>
-			{this.getSearchButton()}
-		</>
-	)
-
-	private renderFilterPanel = renderWhenTrue(() => (
-		<FilterPanel
-			onChange={this.handleFilterChange}
-			onDataTypeChange={this.handleDataTypeChange}
-			filters={this.filters}
-			selectedFilters={this.props.selectedFilters}
-			selectedDataTypes={this.props.selectedDataTypes}
-			dataTypes={TEAMSPACES_DATA_TYPES}left
-		/>
-	));
 
 	private renderModels = (models) => renderWhenTrue(() =>
 		models.map((props) => (<ModelGridItem
