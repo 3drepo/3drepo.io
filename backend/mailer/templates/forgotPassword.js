@@ -1046,8 +1046,9 @@ This password reset is only valid for 24 hours.</span>
 <br>
 <strong>Our mailing address is:</strong><br>
 3D Repo<br>
-20 Eastbourne Terrace<br>
-London, W2 6LG<br>
+307 Euston Road<br>
+Bloomsbury<br>
+London, NW1 3AD<br>
 United Kingdom</span></span>
                         </td>
                     </tr>

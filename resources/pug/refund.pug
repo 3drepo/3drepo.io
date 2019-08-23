@@ -98,9 +98,10 @@ html(lang="en" ng-app="3drepo")
 
 					div(layout="column", class="layout-column flex-45", flex="45")
 						p.companyTitle 3D Repo
-						p 20 Eastbourne Terrace
+						p 307 Euston Road
+						p Bloomsbury
 						p London
-						p W2 6LG
+						p NW1 3AD
 						p United Kingdom
 						p VAT registration: GB 206 9090 15
 						p
@@ -120,7 +121,7 @@ html(lang="en" ng-app="3drepo")
 					if !billing.pending
 						br
 						p
-							| PayPal transaction ID: 
+							| PayPal transaction ID:
 							a(href="https://www.paypal.com/activity/payment/#{billing.transactionId}") #{billing.transactionId}
 
 			table(cellspacing="0")
