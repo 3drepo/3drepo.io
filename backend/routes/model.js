@@ -1219,42 +1219,131 @@ router.get("/:model/revision/master/head/fulltree.json", middlewares.hasReadAcce
 router.get("/:model/revision/master/head/tree_path.json", middlewares.hasReadAccessToModel, getTreePath);
 
 /**
- * @api {get} /:teamspace/:model/revision/master/head/idMap.json Get ID Map
+ * @api {get} /:teamspace/:model/revision/master/head/idMap.json Get ID map
  * @apiName getIdMap
  * @apiGroup Model
  *
  * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model to Get ID Map for.
+ * @apiParam {String} model Model id to Get ID Map for.
+ *
+ * @apiExample {get} Example usage (federation):
+ * GET /teamSpace1/5ce7dd19-1252-4548-a9c9-4a5414f2e0c5/revision/master/head/idMap.json HTTP/1.1
+ *
+ * @apiExample {get} Example usage (model):
+ * GET /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/revision/master/head/idMap.json HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success (federation):
+ * {
+ *    mainTree: {
+ *       idMap: {
+ *          261bf9df-64d7-4642-8bb2-0a79abd370ec: "d86573c9-beec-4f06-b194-18b6983a3d71",
+ *          528c62e6-5cf8-4868-b5ff-733c128b4b4e: "6047f788-8317-45ff-b692-29e03071ec63",
+ *          7d5ce878-6ec9-4c11-a96d-12b68c9e9c7c: "7d9eefe0-2b8a-4de3-9acb-c216c9b48c9f",
+ *          95744e20-4b4d-4fc1-8ba7-1f31ebf772b6: "d2c0e845-b392-429e-86bd-6c7453b78654",
+ *          71634e9c-da2c-4ea7-bd04-44971d3fd8dc: "6e40ecbc-bb2f-4504-8f00-80b12fb04443",
+ *          a70dd58c-c09e-4ed4-ac7e-914dbd145302: "f1a14ded-6528-4937-b31d-ce4b3ca813d8",
+ *          d68cf5e7-4d0f-4702-8a92-c81b72928c54: "d012d6ba-01d2-4460-921e-72539a1ac197"
+ *       }
+ *    },
+ *    subModels: [
+ *       {
+ *          account: "teamSpace1",
+ *          model: "b1fceab8-b0e9-4e45-850b-b9888efd6521",
+ *          idMap: {
+ *             a82a3b7f-bcd9-4487-8f94-370fa1f2ea4e: "57b0969f-6009-4e32-9153-2b17d3a3628b",
+ *             33c36fee-622d-46a5-8be1-a1bd295aa7d1: "1e47d53e-cad8-489b-89ea-7c6c7b8d0e6c"
+ *          }
+ *       },
+ *       {
+ *          account: "teamSpace1",
+ *          model: "7cf61b4f-acdf-4295-b2d0-9b45f9f27418",
+ *          idMap: {
+ *             8a1f9cad-18d8-47ce-9cbd-08ba53858ced: "60286d41-d897-4de6-a0ed-0929fa68be96",
+ *             ea37c2ed-39d4-4236-843c-332d52876c96: "9c4be293-0d8f-4e37-b115-d2c752824bfe"
+ *          }
+ *       },
+ *       {
+ *          account: "teamSpace1",
+ *          model: "2710bd65-37d3-4e7f-b2e0-ffe743ce943f",
+ *          idMap: {
+ *             8ef1c52e-8838-46dc-9825-efe46aa10041: "a4a14ee6-aa44-4f36-96bd-f80dbabf8ead",
+ *             ecc25d63-87e0-4600-ae60-f38f766bc9e4: "ffd49cfd-57fb-4c31-84f7-02b41352b54f",
+ *             3abc5450-5db8-459b-80ea-cb9fca9ccedd: "a6947de3-25f4-4c2c-a150-22f0ed9ce4dd"
+ *          }
+ *       }
+ *    ]
+ * }
+ *
+ * @apiSuccessExample {json} Success (model):
+ * {
+ *    mainTree: {
+ *       idMap: {
+ *          a82a3b7f-bcd9-4487-8f94-370fa1f2ea4e: "57b0969f-6009-4e32-9153-2b17d3a3628b",
+ *          33c36fee-622d-46a5-8be1-a1bd295aa7d1: "1e47d53e-cad8-489b-89ea-7c6c7b8d0e6c"
+ *       }
+ *    },
+ *    subModels: []
+ * }
+ *
  */
 
 router.get("/:model/revision/master/head/idMap.json", middlewares.hasReadAccessToModel, getIdMap);
 
 /**
- * @api {get} /:teamspace/:model/revision/master/head/idToMeshes.json Get ID Map
+ * @api {get} /:teamspace/:model/revision/master/head/idToMeshes.json Get ID to meshes
  * @apiName getIdToMeshes
  * @apiGroup Model
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get ID Meshes for.
+ *
+ * @apiExample {get} Example usage:
+ * GET /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/revision/master/head/idToMeshes.json HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *    mainTree: {
+ *       a82a3b7f-bcd9-4487-8f94-370fa1f2ea4e: [
+ *          "a82a3b7f-bcd9-4487-8f94-370fa1f2ea4e"
+ *       ],
+ *       33c36fee-622d-46a5-8be1-a1bd295aa7d1: [
+ *          "a82a3b7f-bcd9-4487-8f94-370fa1f2ea4e"
+ *       ]
+ *    },
+ *    subModels: []
+ * }
  */
 
 router.get("/:model/revision/master/head/idToMeshes.json", middlewares.hasReadAccessToModel, getIdToMeshes);
 
 /**
- * @api {get} /:teamspace/:model/revision/master/head/modelProperties.json Get ID Map
+ * @api {get} /:teamspace/:model/revision/master/head/modelProperties.json Get model properties
  * @apiName getModelProperties
  * @apiGroup Model
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get properties for.
+ *
+ * @apiExample {get} Example usage:
+ * GET /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/revision/master/head/modelProperties.json HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *    properties: {
+ *       hiddenNodes: []
+ *    },
+ *    subModels: []
+ * }
+ *
  */
 
 router.get("/:model/revision/master/head/modelProperties.json", middlewares.hasReadAccessToModel, getModelProperties);
 
 /**
- * @api {get} /:teamspace/:model/revision/:rev/fulltree.json Get ID Map
- * @apiName getModelTree
+ * @api {get} /:teamspace/:model/revision/:rev/fulltree.json Get tree by revision
+ * @apiName getRevModelTree
  * @apiGroup Model
+ * @apiDescription Get full tree by revision. See more details <a href='#api-Model-getModelTree'>here</a>.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get Tree for.
@@ -1264,9 +1353,10 @@ router.get("/:model/revision/master/head/modelProperties.json", middlewares.hasR
 router.get("/:model/revision/:rev/fulltree.json", middlewares.hasReadAccessToModel, getModelTree);
 
 /**
- * @api {get} /:teamspace/:model/revision/:rev/tree_path.json Get Tree Path
- * @apiName getTreePath
+ * @api {get} /:teamspace/:model/revision/:rev/tree_path.json Get tree path by revision
+ * @apiName getTreePathByRevision
  * @apiGroup Model
+ * @apiDescription Get tree path by revision. See more details <a href='#api-Model-getTreePath'>here</a>.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get tree path for.
@@ -1276,9 +1366,10 @@ router.get("/:model/revision/:rev/fulltree.json", middlewares.hasReadAccessToMod
 router.get("/:model/revision/:rev/tree_path.json", middlewares.hasReadAccessToModel, getTreePath);
 
 /**
- * @api {get} /:teamspace/:model/revision/:rev/idMap.json Get Tree Path
- * @apiName getIdMap
+ * @api {get} /:teamspace/:model/revision/:rev/idMap.json Get tree path by revision
+ * @apiName getRevIdMap
  * @apiGroup Model
+ * @apiDescription Get tree path by revision. See more details <a href='#api-Model-getTreePath'>here</a>.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to ID map for.
@@ -1288,9 +1379,10 @@ router.get("/:model/revision/:rev/tree_path.json", middlewares.hasReadAccessToMo
 router.get("/:model/revision/:rev/idMap.json", middlewares.hasReadAccessToModel, getIdMap);
 
 /**
- * @api {get} /:teamspace/:model/revision/:rev/idToMeshes.json Get ID Meshes
- * @apiName getIdToMeshes
+ * @api {get} /:teamspace/:model/revision/:rev/idToMeshes.json Get ID Meshes by revision
+ * @apiName getRevIdToMeshes
  * @apiGroup Model
+ * @apiDescription Get ID Meshes by revision. See more details <a href='#api-Model-getTreePath'>here</a>.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to use.
@@ -1300,9 +1392,10 @@ router.get("/:model/revision/:rev/idMap.json", middlewares.hasReadAccessToModel,
 router.get("/:model/revision/:rev/idToMeshes.json", middlewares.hasReadAccessToModel, getIdToMeshes);
 
 /**
- * @api {get} /:teamspace/:model/revision/:rev/modelProperties.json Get ID Meshes
- * @apiName getModelProperties
+ * @api {get} /:teamspace/:model/revision/:rev/modelProperties.json Get model properties by revision
+ * @apiName getRevModelProperties
  * @apiGroup Model
+ * @apiDescription Get model properties by revision. See more details <a href='#api-Model-getModelProperties'>here</a>.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to use.
