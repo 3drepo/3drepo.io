@@ -176,8 +176,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			handleHeaderClick
 		} = this.props;
 
-		const createdAt = !editable ? created : null;
-
 		return (
 			<Container className={className}>
 				{this.renderUpdateMessage(willBeUpdated)}
@@ -197,7 +195,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 					<Details>
 						<PreviewItemInfo
 							author={owner}
-							createdAt={createdAt}
+							createdAt={created}
 							StatusIconComponent={StatusIconComponent}
 							statusColor={statusColor}
 						/>
