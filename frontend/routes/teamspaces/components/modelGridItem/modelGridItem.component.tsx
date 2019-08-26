@@ -17,7 +17,7 @@
 
 import copy from 'copy-to-clipboard';
 import { pick, startCase } from 'lodash';
-import React, { useEffect, useRef, useState, useMemo, useCallback, memo } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ROUTES } from '../../../../constants/routes';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -77,7 +77,6 @@ export function ModelGridItem(props: IProps) {
 	const isPending = ['uploading', 'queued', 'processing'].includes(props.status);
 
 	const [hasDelayedClick, setHasDelayedClick] = useState(false);
-	const [truncatedName, setTruncatedName] = useState('');
 	const starClickTimeout = useRef(null);
 
 	useEffect(() => {

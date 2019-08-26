@@ -16,7 +16,7 @@
  */
 
 import MoreVert from '@material-ui/icons/MoreVert';
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 import { useOnScreen } from '../../../../hooks';
 import { SmallIconButton } from '../../../components/smallIconButon/smallIconButton.component';

@@ -79,7 +79,7 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 				alignItems="center"
 				justify="flex-start"
 			>
-				{/* <StyledGrow
+				<StyledGrow
 					appear={!disabled}
 					{...growProps}
 				>
@@ -92,7 +92,7 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 					>
 					{children}
 					</StyledGrid>
-				</StyledGrow> */}
+				</StyledGrow>
 				<IconButton aria-label="Toggle menu" onClick={toggleForceOpen} disabled={disabled}>
 					<MoreVert fontSize="small" />
 				</IconButton>

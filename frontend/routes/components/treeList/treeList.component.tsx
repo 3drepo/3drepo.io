@@ -44,16 +44,16 @@ const HeadlineIcon = ({IconOpened, IconClosed, active, ...iconProps}) => {
 	);
 };
 
-export const DefaultHeadline = ({children = Function.prototype, ...props}) => {
-	return (
-		<Grid
-			container
-			direction="row"
-			alignItems="center"
-			justify="flex-start"
-			wrap="nowrap">
-			<HeadlineIcon fontSize="small" active={props.active && !props.disabled} {...props.IconProps} />
-			<Title>
+export const DefaultHeadline = ({children = Function.prototype, ...props}) => (
+	<Grid
+		container
+		direction="row"
+		alignItems="center"
+		justify="flex-start"
+		wrap="nowrap"
+	>
+		<HeadlineIcon fontSize="small" active={props.active && !props.disabled} {...props.IconProps} />
+		<Title>
 			<Highlight
 				text={props.name}
 				search={props.query}
@@ -61,10 +61,9 @@ export const DefaultHeadline = ({children = Function.prototype, ...props}) => {
 			/>
 			{props.disabled || props.isEmpty ? ' (empty)' : ''}
 		</Title>
-		<ChildrenContainer>
-			{children(props)}</ChildrenContainer>
+		<ChildrenContainer>{children(props)}</ChildrenContainer>
 	</Grid>
-);};
+);
 
 interface IProps {
 	name: string;

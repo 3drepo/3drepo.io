@@ -17,12 +17,12 @@
 
 import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
-import { cond, isEmpty, matches, orderBy, stubTrue } from 'lodash';
+import { cond, isEmpty, matches, stubTrue } from 'lodash';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
 
-import { MenuItem, Tab, Tabs } from '@material-ui/core';
+import { IconButton, MenuItem, Tab, Tabs } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import Check from '@material-ui/icons/Check';
 
@@ -418,16 +418,15 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	)
 
 	private renderModels = (models) => renderWhenTrue(() => {
-        const sortedModels = sortModels(models, this.props.activeSorting, this.props.activeSortingDirection);
-
-        returnsortedModels.map((props: any) => (
-            <ModelGridItem
-                {...props}
-                key={props.model}
-                query={this.searchQuery}
-            />
-        ))
-    })(models.length)
+		const sortedModels = sortModels(models, this.props.activeSorting, this.props.activeSortingDirection);
+		return sortedModels.map((props: any) => (
+			<ModelGridItem
+				{...props}
+				key={props.model}
+				query={this.searchQuery}
+			/>
+		));
+	})(models.length)
 
 	private renderProjectContainer = (models, project) => renderWhenTrue(() => (
 		<GridContainer key={`container-${project.id}`}>
@@ -440,30 +439,29 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		(
 			<ProjectItem
 				{...props}
-				active={this.state.visibleItems[props.id] && props.models.length}
+				active={this.state.visibleItems[props.id]}
 				key={props._id}
 				isEmpty={!props.models.length}
 				query={this.searchQuery}
-				disabled={!props.models.length}
 				onClick={this.handleVisibilityChange}
 			/>
 		),
 		this.renderProjectContainer(props.models, props),
 	])
 
-	private renderTeamspace = (props) => {
-		return (<TeamspaceItem
+	private renderTeamspace = (props) => (
+		<TeamspaceItem
 			{...props}
+			key={props.account}
 			highlightedTextkey={props.account}
 			name={props.account}
-			active={this.state.visibleItems[props.account]&& props.projects.length}
+			active={this.state.visibleItems[props.account] && props.projects.length}
 			isMyTeamspace={this.props.currentTeamspace === props.account}
 			onToggle={this.handleVisibilityChange}
 			onAddProject={this.openProjectDialog}
 			disabled={!props.projects.length}
 		/>
-	);
-	}
+	)
 
 	private renderMenuButton = (isPending, props) => (
 		<MenuButton

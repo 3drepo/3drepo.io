@@ -140,7 +140,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 					/>
 					{props.disabled ? <Empty>(empty)</Empty> : null}
 				</Title>
-				{/* <Actions>{this.renderProjectActions(props)}</Actions> */}
+				<Actions>{this.renderProjectActions(props)}</Actions>
 			</Container>
 		);
 	}
@@ -157,9 +157,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 				isEmpty={isEmpty}
 				active={active}
 				renderRoot={this.renderRoot}
-			>
-				{/* {(props) => <Content>{this.renderProjectActions(props)}</Content>} */}
-			</TreeList>
+			/>
 		);
 	}
 }
