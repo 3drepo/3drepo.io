@@ -20,7 +20,6 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
 import TreeIcon from '@material-ui/icons/DeviceHub';
 import SearchIcon from '@material-ui/icons/Search';
-import { values } from 'lodash';
 import * as React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';

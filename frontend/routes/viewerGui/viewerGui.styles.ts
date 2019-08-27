@@ -58,3 +58,8 @@ export const LeftPanelsButtons = styled.div`
 	width: 90px;
 	position: relative;
 `;
+
+export const GuiContainer = styled.div`
+	overflow: hidden;
+	height: 100%;
+`;

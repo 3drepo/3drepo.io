@@ -33,7 +33,7 @@ import Toolbar from './components/toolbar/toolbar.container';
 import { Tree } from './components/tree';
 import { ViewerLoader } from './components/viewerLoader';
 import { Views } from './components/views';
-import { Container, LeftPanels, LeftPanelsButtons, RightPanels } from './viewerGui.styles';
+import { Container, LeftPanels, LeftPanelsButtons, RightPanels, GuiContainer } from './viewerGui.styles';
 
 interface IProps {
 	viewer: any;
@@ -144,7 +144,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		const { visiblePanels, isFocusMode, viewer } = this.props;
 
 		return (
-			<>
+			<GuiContainer>
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
 				<Container className={this.props.className} hidden={isFocusMode}>
 					<RevisionsSwitch />
@@ -154,7 +154,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 					{this.renderRightPanels(visiblePanels)}
 					{this.renderViewerLoader(viewer.hasInstance)}
 				</Container>
-			</>
+			</GuiContainer>
 		);
 	}
 
