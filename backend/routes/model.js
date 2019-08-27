@@ -1405,46 +1405,126 @@ router.get("/:model/revision/:rev/idToMeshes.json", middlewares.hasReadAccessToM
 router.get("/:model/revision/:rev/modelProperties.json", middlewares.hasReadAccessToModel, getModelProperties);
 
 /**
- * @api {get} /:teamspace/:model/revision/master/head/searchtree.json Search model tree using model as reference.
+ *
+ *
+ * @api {get} /:teamspace/:model/revision/master/head/searchtree.json?searchString=[searchString] Search model tree
  * @apiName searchModelTree
  * @apiGroup Model
+ * @apiDescription Searches the model (or models if it is a federation) tree and returns the objects matching their names with the searchString param.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to use.
+ *
+ * @apiParam (Query) {String} searchString The string to use for search tree objects
+ *
+ * @apiExample {get} Example usage:
+ * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/searchtree.json?searchString=fou HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success:
+ * [
+ *    {
+ *       "_id": "33fe7c13-17a4-43d6-af03-ceae6880322f",
+ *       "name": "Fouliiferous Tree H64_2",
+ *       "account": "teamSpace1",
+ *       "model": "3549ddf6-885d-4977-87f1-eeac43a0e818"
+ *    },
+ *    {
+ *       "_id": "ce413e99-8469-4ed0-86e3-ff50bf4fed89",
+ *       "name": "Fouliiferous Tree H64",
+ *       "account": "teamSpace1",
+ *       "model": "3549ddf6-885d-4977-87f1-eeac43a0e818"
+ *    }
+ * ]
+ *
  */
 
 router.get("/:model/revision/master/head/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
 
 /**
- * @api {get} /:teamspace/:model/revision/:rev/searchtree.json Search model tree using revision and model to reference.
- * @apiName searchModelTree
+ * @api {get} /:teamspace/:model/revision/:rev/searchtree.json?searchString=[searchString] Search model tree by revision
+ * @apiName searchModelTreeRev
  * @apiGroup Model
+ * @apiDescription Searches the model (or models if it is a federation) tree and returns the objects matching their names with the searchString param.
+ * See more details <a href='#api-Model-searchModelTree'>here</a>
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to use.
  * @apiParam {String} rev	Revision to use.
+ *
+ * @apiParam (Query) {String} searchString The string to use for search tree objects
  */
 
 router.get("/:model/revision/:rev/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
 
 /**
- * @api {get} /:teamspace/:model/revision/master/head/subModelRevisions Get revision info from sub models
+ * @api {get} /:teamspace/:model/revision/master/head/subModelRevisions Get submodels revisions
  * @apiName getSubRevisionModels
  * @apiGroup Model
+ * @apiDescription In a federation it returns the submodels revisions of the latest federation revision.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get properties for.
+ *
+ * @apiExample {get} Example usage:
+ * GET /teamSpace1/5ce7dd19-1252-4548-a9c9-4a5414f2e0c5/revision/master/head/subModelRevisions HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *    "b1fceab8-b0e9-4e45-850b-b9888efd6521": {
+ *       "name": "block",
+ *       "revisions": [
+ *          {
+ *             "_id": "ddcc3213-af61-4d30-921f-e502d1c2199c",
+ *             "author": "teamSpace1",
+ *             "tag": "block",
+ *             "timestamp": "2019-05-02T16:16:49.000Z",
+ *             "name": "ddcc3213-af61-4d30-921f-e502d1c2199c",
+ *             "branch": "master"
+ *          }
+ *       ]
+ *    },
+ *    "7cf61b4f-acdf-4295-b2d0-9b45f9f27418": {
+ *       "name": "letters",
+ *       "revisions": [
+ *          {
+ *             "_id": "a1bcfa72-ff37-41ac-95ab-66e450a37896",
+ *             "author": "teamSpace1",
+ *             "tag": "letters",
+ *             "timestamp": "2019-05-02T16:16:32.000Z",
+ *             "name": "a1bcfa72-ff37-41ac-95ab-66e450a37896",
+ *             "branch": "master"
+ *          }
+ *       ]
+ *    },
+ *    "2710bd65-37d3-4e7f-b2e0-ffe743ce943f": {
+ *       "name": "pipes",
+ *       "revisions": [
+ *          {
+ *             "_id": "9ee1190b-cd25-4467-8d38-5af7c77cab5a",
+ *             "author": "teamSpace1",
+ *             "tag": "pipes",
+ *             "timestamp": "2019-05-02T16:17:04.000Z",
+ *             "name": "9ee1190b-cd25-4467-8d38-5af7c77cab5a",
+ *             "branch": "master"
+ *          }
+ *       ]
+ *    }
+ * }
+ *
  */
 router.get("/:model/revision/master/head/subModelRevisions", middlewares.hasReadAccessToModel, getSubModelRevisions);
 
 /**
- * @api {get} /:teamspace/:model/revision/master/head/subModelRevisions Get revision info from sub models
- * @apiName getSubModelRevisions
+ * @api {get} /:teamspace/:model/revision/master/head/subModelRevisions Get submodel revisions by rev
+ * @apiName getSubModelRevisionsByRev
  * @apiGroup Model
+ * @apiDescription In a federation it returns the submodels revisions of a particular federation revision.
+ * See more details <a href='#api-Model-getSubRevisionModels'>here</a>
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get properties for.
  * @apiParam {String} rev	Revision to use.
+ *
  */
 router.get("/:model/revision/:revId/subModelRevisions", middlewares.hasReadAccessToModel, getSubModelRevisions);
 
@@ -1455,6 +1535,16 @@ router.get("/:model/revision/:revId/subModelRevisions", middlewares.hasReadAcces
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to delete.
+ *
+ * @apiExample {delete} Example usage:
+ * DELETE /teamSpace1/17d09947-368e-4748-877f-d105842c6681 HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *    "account": "teamSpace1",
+ *    "model": "17d09947-368e-4748-877f-d105842c6681"
+ * }
+ *
  */
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 
@@ -1462,19 +1552,62 @@ router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
  * @api {post} /:teamspace/upload Upload Model.
  * @apiName uploadModel
  * @apiGroup Model
+ * @apiDescription It uploads a model file and creates a new revision for that model.
  *
  * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model to upload.
+ * @apiParam {String} model Model id to upload.
+ * @apiParam (Request body) {String} tag the tag name for the new revision
+ * @apiParam (Request body) {String} desc the description for the new revision
+ *
+ * @apiParam (Request body: Attachment) {binary} FILE the file to be uploaded
+ *
+ * @apiExample {get} Example usage:
+ * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload HTTP/1.1
+ * Content-Type: multipart/form-data; boundary=----WebKitFormBoundarySos0xligf1T8Sy8I
+ *
+ * ------WebKitFormBoundarySos0xligf1T8Sy8I
+ * Content-Disposition: form-data; name="file"; filename="3DrepoBIM.obj"
+ * Content-Type: application/octet-stream
+ *
+ * <binary content>
+ * ------WebKitFormBoundarySos0xligf1T8Sy8I
+ * Content-Disposition: form-data; name="tag"
+ *
+ * rev1
+ * ------WebKitFormBoundarySos0xligf1T8Sy8I
+ * Content-Disposition: form-data; name="desc"
+ *
+ * el paso
+ * ------WebKitFormBoundarySos0xligf1T8Sy8I-- *
+ *
  */
 router.post("/:model/upload", middlewares.hasUploadAccessToModel, uploadModel);
 
 /**
- * @api {get} /:teamspace/:model/download/latest Upload Model.
- * @apiName uploadModel
+ * @api {get} /:teamspace/:model/download/latest Download model
+ * @apiName downloadModel
  * @apiGroup Model
+ * @apiDescription It returns the model file using the latest revision.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to download.
+ *
+ * @apiExample {get} Example usage:
+ * GET /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/download/latest HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success (with headers):
+ *
+ * HTTP/1.1 200 OK
+ * X-Powered-By: Express
+ * Vary: Origin
+ * Access-Control-Allow-Credentials: true
+ * Content-Length: 11964
+ * Content-Disposition: attachment;filename=3DrepoBIM_blocks.obj
+ * set-cookie: connect.sid=s%3Ax4mDfLE-NqmPUO5tSSxPAyMjgov6YRge.bVSUoML3obJNp1XuObpbtXY44RjgEhJtsTz%2FwhwIckE; Domain=local.3drepo.io; Path=/; Expires=Tue, 27 Aug 2019 12:18:34 GMT; HttpOnly
+ * Date: Tue, 27 Aug 2019 11:18:34 GMT
+ * Connection: keep-alive
+ *
+ * /***** FILE CONTENTS ******\
  */
 
 router.get("/:model/download/latest", middlewares.hasDownloadAccessToModel, downloadLatest);
