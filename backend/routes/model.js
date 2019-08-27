@@ -1561,7 +1561,7 @@ router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
  *
  * @apiParam (Request body: Attachment) {binary} FILE the file to be uploaded
  *
- * @apiExample {get} Example usage:
+ * @apiExample {post} Example usage:
  * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload HTTP/1.1
  * Content-Type: multipart/form-data; boundary=----WebKitFormBoundarySos0xligf1T8Sy8I
  *

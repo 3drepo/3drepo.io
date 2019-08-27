@@ -331,13 +331,175 @@ router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
 /**
- * @api {post} /:teamspace/:model/issues Create a new issue.
- * @apiName  storeIssue
+ * @api {post} /:teamspace/:model/issues Create issue
+ * @apiName  newIssue
  * @apiGroup Issues
+ * @apiDescription Creates a new issue.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiDescription Create a new issue. This is the same endpoint as listIssues, but a post request is required.
+ *
+ * @apiParam (Request body) {String} name The name of the issue
+ * @apiParam (Request body) {[]String} assigned_roles The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
+ * @apiParam (Request body) {String} status The status of the issue. It can have a value of "open","in_progress","for_approval" or "closed".
+ * @apiParam (Request body) {String} topic_type Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
+ * @apiParam (Request body) {Viewpoint} viewpoint The viewpoint of the issue, defining the position of the camera and the screenshot for that position.
+ * @apiParam (Request body) {String} owner The username of the user that created the issue
+ * @apiParam (Request body) {String} desc The description of the created issue
+ * @apiParam (Request body) {String} creator_role The job of the user that created the issue
+ * @apiParam (Request body) {[3]Number} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
+ * @apiParam (Request body) {[3]Number} norm The normal vector for the pin of the issue. Its not actually being used right now it it ca alwasy be of value [0,0,0].
+ *
+ * @apiParam (Request body: Viewpoint) {[3]Number} right The right vector of the viewpoint indicating the direction of right in relative coordinates.
+ * @apiParam (Request body: Viewpoint) {[3]Number} up The up vector of the viewpoint indicating the direction of up in relative coordinates.
+ * @apiParam (Request body: Viewpoint) {[3]Number} position The position vector indicates where in the world the viewpoint is positioned.
+ * @apiParam (Request body: Viewpoint) {[3]Number} look_at The vector indicating where in the world the viewpoint is looking at.
+ * @apiParam (Request body: Viewpoint) {[3]Number} view_dir The vector indicating where is the viewpoint is looking at in relative coordinates.
+ * @apiParam (Request body: Viewpoint) {Number} near The vector indicating the near plane.
+ * @apiParam (Request body: Viewpoint) {Number} far The vector indicating the far plane.
+ * @apiParam (Request body: Viewpoint) {Number} fov The angle of the field of view.
+ * @apiParam (Request body: Viewpoint) {Number} aspect_ratio The aspect ratio of the fustrum.
+ * @apiParam (Request body: Viewpoint) {String} highlighted_group_id If the issue is associated with one or more objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (Request body: Viewpoint) {Boolean} hide_IFC A flag to hide the IFC
+ * @apiParam (Request body: Viewpoint) {String} screenshot A string in base64 representing the screenshot associated with the issue
+ *
+ *
+ * @apiExample {post} Example usage:
+ * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues HTTP/1.1
+ * {
+ *    "name": "Amazing issue",
+ *    "assigned_roles": [
+ *       "jobA"
+ *    ],
+ *    "status": "open",
+ *    "priority": "none",
+ *    "topic_type": "for_information",
+ *    "viewpoint": {
+ *       "right": [
+ *          0.8471935391426086,
+ *          -2.2351741790771484e-8,
+ *          0.5312844514846802
+ *       ],
+ *       "up": [
+ *          0.14098820090293884,
+ *          0.9641460180282593,
+ *          -0.22482173144817352
+ *       ],
+ *       "position": [
+ *          -5828.818359375,
+ *          5268.15625,
+ *          7829.76171875
+ *       ],
+ *       "look_at": [
+ *          -2445.6826171875,
+ *          3515.4658203125,
+ *          2434.966552734375
+ *       ],
+ *       "view_dir": [
+ *          0.5122357606887817,
+ *          -0.2653723657131195,
+ *          -0.8168182373046875
+ *       ],
+ *       "near": 20.835742950439453,
+ *       "far": 10417.87109375,
+ *       "fov": 1.0471975803375244,
+ *       "aspect_ratio": 4.031496047973633,
+ *       "clippingPlanes": [],
+ *       "highlighted_group_id": "",
+ *       "hideIfc": true,
+ *       "screenshot": "iVBORw0KGgoAAAANSUhEUgAACAAAA...ggg=="
+ *    },
+ *    "owner": "teamSpace1",
+ *    "desc": "This is the most awesome issue ever",
+ *    "creator_role": "jobA",
+ *    "scale": 1,
+ *    "position": [
+ *       -3960.10205078125,
+ *       4487.1552734375,
+ *       3326.732177734375
+ *    ],
+ *    "norm": [
+ *       0,
+ *       0,
+ *       0
+ *    ]
+ * }
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *    "name": "Amazing issue",
+ *    "assigned_roles": [
+ *       "jobA"
+ *    ],
+ *    "status": "open",
+ *    "priority": "none",
+ *    "topic_type": "for_information",
+ *    "owner": "teamSpace1",
+ *    "desc": "This is the most awesome issue ever",
+ *    "rev_id": "330f909b-9279-41aa-a87c-1c46f53a8e93",
+ *    "creator_role": "jobA",
+ *    "scale": 1,
+ *    "position": [
+ *       -3960.10205078125,
+ *       4487.1552734375,
+ *       3326.732177734375
+ *    ],
+ *    "norm": [
+ *       0,
+ *       0,
+ *       0
+ *    ],
+ *    "_id": "9ba5fb10-c8db-11e9-8f2a-ada77612c97e",
+ *    "created": 1566918114625,
+ *    "number": 1,
+ *    "thumbnail": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/thumbnail.png",
+ *    "typePrefix": "Structural",
+ *    "modelCode": "",
+ *    "account": "teamSpace1",
+ *    "model": "3549ddf6-885d-4977-87f1-eeac43a0e818",
+ *    "viewpoint": {
+ *       "right": [
+ *          0.8471935391426086,
+ *          -2.2351741790771484e-8,
+ *          0.5312844514846802
+ *       ],
+ *       "up": [
+ *          0.14098820090293884,
+ *          0.9641460180282593,
+ *          -0.22482173144817352
+ *       ],
+ *       "position": [
+ *          -5828.818359375,
+ *          5268.15625,
+ *          7829.76171875
+ *       ],
+ *       "look_at": [
+ *          -2445.6826171875,
+ *          3515.4658203125,
+ *          2434.966552734375
+ *       ],
+ *       "view_dir": [
+ *          0.5122357606887817,
+ *          -0.2653723657131195,
+ *          -0.8168182373046875
+ *       ],
+ *       "near": 20.835742950439453,
+ *       "far": 10417.87109375,
+ *       "fov": 1.0471975803375244,
+ *       "aspect_ratio": 4.031496047973633,
+ *       "clippingPlanes": [],
+ *       "highlighted_group_id": "",
+ *       "hideIfc": true,
+ *       "screenshot": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/viewpoints/125ce196-852c-49ed-9a2f-f9a77aa03390/screenshot.png",
+ *       "guid": "125ce196-852c-49ed-9a2f-f9a77aa03390",
+ *       "screenshotSmall": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/viewpoints/125ce196-852c-49ed-9a2f-f9a77aa03390/screenshotSmall.png"
+ *    },
+ *    "comments": [],
+ *    "extras": {
+ *    }
+ * }
+ *
+ *
  */
 router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
@@ -369,7 +531,7 @@ router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, midd
 router.post("/revision/:rid/issues", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {put} /:teamspace/:model/revision/:rid/issues/:issueId Update issue based on revision
+ * @api {patch} /:teamspace/:model/revision/:rid/issues/:issueId Update issue based on revision
  * @apiName updateIssue
  * @apiGroup Issues
  *
