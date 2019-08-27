@@ -17,15 +17,13 @@
 
 import copy from 'copy-to-clipboard';
 import { pick, startCase } from 'lodash';
-import React, { useCallback, useEffect, useRef, useState, useMemo, memo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ROUTES } from '../../../../constants/routes';
-import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../services/analytics';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { TYPES } from '../../../components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
 import { Loader } from '../../../components/loader/loader.component';
-import { SmallIconButton } from '../../../components/smallIconButon/smallIconButton.component';
 import { StarIcon } from '../../../components/starIcon/starIcon.component';
 import { PERMISSIONS_VIEWS } from '../../../projects/projects.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
@@ -33,7 +31,6 @@ import { ActionsMenu } from '../actionsMenu/actionsMenu.component';
 import FederationDialog from '../federationDialog/federationDialog.container';
 import UploadModelFileDialog from '../uploadModelFileDialog/uploadModelFileDialog.container';
 import {
-	Actions,
 	Container, Content,
 	Header, Name, NameWrapper,
 	PropertiesColumn,
@@ -78,13 +75,13 @@ export const ModelGridItem = memo((props: IProps) => {
 	const [hasDelayedClick, setHasDelayedClick] = useState(false);
 	const starClickTimeout = useRef(null);
 
-	// useEffect(() => {
-	// 	if (!isFederation) {
-	// 		const modelData = { modelId: props.model, modelName: props.name };
-	// 		props.subscribeOnStatusChange(props.teamspace, props.projectName, modelData);
-	// 		return () => props.unsubscribeOnStatusChange(props.teamspace, props.projectName, modelData);
-	// 	}
-	// }, []);
+	useEffect(() => {
+		if (!isFederation) {
+			const modelData = { modelId: props.model, modelName: props.name };
+			props.subscribeOnStatusChange(props.teamspace, props.projectName, modelData);
+			return () => props.unsubscribeOnStatusChange(props.teamspace, props.projectName, modelData);
+		}
+	}, []);
 
 	const resetStarClickTimeout = () => {
 		setHasDelayedClick(false);

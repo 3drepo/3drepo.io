@@ -90,7 +90,7 @@ interface IProps {
 	autoFocus?: boolean;
 	left?: boolean;
 	onChange: (selectedFilters) => void;
-	onDataTypeChange: (selectedDataTypes) => void;
+	onDataTypeChange?: (selectedDataTypes) => void;
 }
 
 interface IState {
