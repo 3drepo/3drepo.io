@@ -128,9 +128,6 @@ export const TEAMSPACES_DATA_TYPES = [
 export const SORTING_BY_NAME = 'name';
 export const SORTING_BY_LAST_UPDATED = 'timestamp';
 
-export const ASCENDING_SORTING = 'asc';
-export const DESCENDING_SORTING = 'desc';
-
 export const TEAMSPACES_PANEL_ACTIONS_MENU = [
 	{
 		label: 'Sort by name',

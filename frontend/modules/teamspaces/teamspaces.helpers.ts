@@ -19,6 +19,7 @@ import { orderBy } from 'lodash';
 import memoizeOne from 'memoize-one';
 
 import { PROJECT_ROLES_TYPES } from '../../constants/project-permissions';
+import { SORT_ORDER_TYPES } from '../../constants/sorting';
 
 export const extendTeamspacesInfo = memoizeOne((teamspaces = [], projects = {}) => {
 	return teamspaces.reduce((teamspacesWithAdminAccess, account) => {
@@ -44,16 +45,13 @@ export const extendTeamspacesInfo = memoizeOne((teamspaces = [], projects = {}) 
 	}, []);
 });
 
-export const sortModels = (models, activeSorting, sortingDirection) => {
-	return orderBy(
-		orderBy(models,
-			[
-				(model) => model[activeSorting] ?
-				model[activeSorting].toLowerCase() :
-				model[activeSorting]
-			],
-			sortingDirection[activeSorting]
-		),
-		'federate'
+export const sortModels = (models, sortingField, sortingDirection) => {
+	const getSortingFieldValue = (model) => model[sortingField]
+		? model[sortingField].toLowerCase()
+		: model[sortingField];
+
+	return orderBy(models,
+		['federate', getSortingFieldValue],
+		[SORT_ORDER_TYPES.ASCENDING, sortingDirection[sortingField]]
 	);
 };

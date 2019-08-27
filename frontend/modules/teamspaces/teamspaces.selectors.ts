@@ -17,11 +17,12 @@
 
 import { compact, map, orderBy, pick, pickBy, uniq, values } from 'lodash';
 import { createSelector } from 'reselect';
+import { SORT_ORDER_TYPES } from '../../constants/sorting';
 import { searchByFilters } from '../../helpers/searching';
 import { sortModels } from '../../modules/teamspaces/teamspaces.helpers';
 import { DATA_TYPES, FILTER_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
 import {
-	ASCENDING_SORTING, DESCENDING_SORTING, LIST_ITEMS_TYPES, SORTING_BY_LAST_UPDATED, SORTING_BY_NAME,
+	LIST_ITEMS_TYPES, SORTING_BY_LAST_UPDATED, SORTING_BY_NAME,
 } from '../../routes/teamspaces/teamspaces.contants';
 import { selectStarredModels } from '../starred';
 import { getStarredModelKey } from '../starred/starred.contants';
@@ -117,8 +118,8 @@ export const selectActiveSortingDirection = createSelector(
 	selectNameSortingDescending, selectDateSortingDescending,
 	(nameSortingDescending, dateSortingDescending) => {
 		const sortingDirection = {
-			[SORTING_BY_NAME]: nameSortingDescending ? DESCENDING_SORTING : ASCENDING_SORTING,
-			[SORTING_BY_LAST_UPDATED]: dateSortingDescending ? DESCENDING_SORTING : ASCENDING_SORTING
+			[SORTING_BY_NAME]: nameSortingDescending ? SORT_ORDER_TYPES.DESCENDING : SORT_ORDER_TYPES.ASCENDING,
+			[SORTING_BY_LAST_UPDATED]: dateSortingDescending ? SORT_ORDER_TYPES.DESCENDING : SORT_ORDER_TYPES.ASCENDING
 		};
 		return sortingDirection;
 	}
