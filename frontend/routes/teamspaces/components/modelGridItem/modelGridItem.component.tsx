@@ -78,13 +78,13 @@ export const ModelGridItem = memo((props: IProps) => {
 	const [hasDelayedClick, setHasDelayedClick] = useState(false);
 	const starClickTimeout = useRef(null);
 
-	useEffect(() => {
-		if (!isFederation) {
-			const modelData = { modelId: props.model, modelName: props.name };
-			props.subscribeOnStatusChange(props.teamspace, props.projectName, modelData);
-			return () => props.unsubscribeOnStatusChange(props.teamspace, props.projectName, modelData);
-		}
-	}, [props.teamspace, props.projectName, props.model, props.name]);
+	// useEffect(() => {
+	// 	if (!isFederation) {
+	// 		const modelData = { modelId: props.model, modelName: props.name };
+	// 		props.subscribeOnStatusChange(props.teamspace, props.projectName, modelData);
+	// 		return () => props.unsubscribeOnStatusChange(props.teamspace, props.projectName, modelData);
+	// 	}
+	// }, []);
 
 	const resetStarClickTimeout = () => {
 		setHasDelayedClick(false);
@@ -214,38 +214,42 @@ export const ModelGridItem = memo((props: IProps) => {
 		}
 	}, [starClickTimeout.current, props.isStarred, props.model]);
 
-	const sharedActions = useMemo(() => [{
-		...ROW_ACTIONS.PERMISSIONS,
-		onClick: handlePermissionsClick
-	}, {
-		...ROW_ACTIONS.SHARE,
-		onClick: handleShare
-	}, {
-		...ROW_ACTIONS.SETTINGS,
-		onClick: handleSettingsClick
-	}, {
-		...ROW_ACTIONS.DELETE,
-		onClick: handleDelete
-	}], [props.name]);
+	const getRowActions = () => {
+		const sharedActions = [{
+			...ROW_ACTIONS.PERMISSIONS,
+			onClick: handlePermissionsClick
+		}, {
+			...ROW_ACTIONS.SHARE,
+			onClick: handleShare
+		}, {
+			...ROW_ACTIONS.SETTINGS,
+			onClick: handleSettingsClick
+		}, {
+			...ROW_ACTIONS.DELETE,
+			onClick: handleDelete
+		}];
 
-	const modelActions = useMemo(() => [{
-		...ROW_ACTIONS.UPLOAD_FILE,
-		onClick: handleUploadModelFile
-	}, {
-		...ROW_ACTIONS.REVISIONS,
-		onClick: handleRevisionsClick
-	}, {
-		...ROW_ACTIONS.DOWNLOAD,
-		onClick: handleDownloadClick,
-		isHidden: !Boolean(props.timestamp)
-	}, ...sharedActions], [sharedActions]);
+		if (isFederation) {
+			return [{
+				...ROW_ACTIONS.EDIT,
+				onClick: handleFederationEdit
+			}, ...sharedActions];
+		}
 
-	const federationActions = useMemo(() => [{
-		...ROW_ACTIONS.EDIT,
-		onClick: handleFederationEdit
-	}, ...sharedActions], [sharedActions]);
+		return [{
+			...ROW_ACTIONS.UPLOAD_FILE,
+			onClick: handleUploadModelFile
+		}, {
+			...ROW_ACTIONS.REVISIONS,
+			onClick: handleRevisionsClick
+		}, {
+			...ROW_ACTIONS.DOWNLOAD,
+			onClick: handleDownloadClick,
+			isHidden: !Boolean(props.timestamp)
+		}, ...sharedActions];
+	};
 
-	const rowActions = useMemo(() => isFederation ? federationActions : modelActions, [isFederation]);
+	const rowActions = useMemo(getRowActions, [isFederation]);
 
 	const renderModelCode = renderWhenTrue(<Property>{props.code}</Property>);
 
@@ -257,35 +261,6 @@ export const ModelGridItem = memo((props: IProps) => {
 		<Status>
 			<Loader content={`${startCase(props.status)}...`} size={20} horizontal />
 		</Status>
-	);
-
-	// const renderActions = (actions = []) => {
-	// 	return actions.map((actionItem) => {
-	// 		const { label, action, Icon, color, isHidden = false, requiredPermissions = '' } = actionItem;
-	// 		const iconProps = { fontSize: 'small' } as any;
-	// 		const disabled = isPending && [ROW_ACTIONS.UPLOAD_FILE.label, ROW_ACTIONS.DELETE.label].includes(label);
-	// 		if (!disabled) {
-	// 			iconProps.color = color;
-	// 		}
-	// 		const ActionsIconButton = () => (<Icon {...iconProps} />);
-
-	// 		if (!isHidden) {
-	// 			return renderWhenTrue((
-	// 				<SmallIconButton
-	// 					key={label}
-	// 					aria-label={label}
-	// 					onClick={action}
-	// 					Icon={ActionsIconButton}
-	// 					tooltip={label}
-	// 					disabled={disabled}
-	// 				/>
-	// 			))(hasPermissions(requiredPermissions, props.permissions));
-	// 		}
-	// 	});
-	// };
-
-	const renderActionsMenu = () => (
-		<ActionsMenu federate={isFederation} actions={rowActions} />
 	);
 
 	return (
@@ -305,7 +280,11 @@ export const ModelGridItem = memo((props: IProps) => {
 						/>
 					</div>
 				</NameWrapper>
-				{renderActionsMenu()}
+				<ActionsMenu
+					federate={isFederation}
+					actions={rowActions}
+					permissions={props.permissions}
+				/>
 			</Header>
 			<Content>
 				<PropertiesColumn>

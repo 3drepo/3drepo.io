@@ -16,14 +16,14 @@
  */
 
 import MoreVert from '@material-ui/icons/MoreVert';
-import React, { useCallback, useRef, useState, memo } from 'react';
+import React, { memo, useCallback, useRef, useState } from 'react';
 
+import { hasPermissions } from '../../../../helpers/permissions';
+import { renderWhenTrue } from '../../../../helpers/rendering';
 import { useOnScreen } from '../../../../hooks';
 import { SmallIconButton } from '../../../components/smallIconButon/smallIconButton.component';
-import { ActionsButton, Container, StyledGrid, Actions } from './actionsMenu.styles';
-import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
-import { hasPermissions } from '../../../../helpers/permissions';
+import { Actions, ActionsButton, Container, StyledGrid } from './actionsMenu.styles';
 
 interface IAction {
 	label: string;
@@ -39,6 +39,7 @@ interface IProps {
 	isPending?: boolean;
 	federate: boolean;
 	actions: any[];
+	permissions: any[];
 }
 
 const MoreIcon = () => <MoreVert fontSize="small" />;
@@ -67,10 +68,10 @@ const renderActions = (actions = [], isPending, permissions = []) => {
 	});
 };
 
-export const ActionsMenu = memo(({federate, isPending, actions = []}: IProps) => {
+export const ActionsMenu = memo(({federate, isPending, actions = [], permissions = []}: IProps) => {
 	const ref = useRef();
 	const [forceOpen, setForceOpen] = useState(false);
-	// const isOnScreen = useOnScreen(ref, '0px', true);
+	const isOnScreen = useOnScreen(ref, '0px', true);
 
 	const forceOpenHandler = useCallback((event) => {
 		event.stopPropagation();
@@ -79,7 +80,7 @@ export const ActionsMenu = memo(({federate, isPending, actions = []}: IProps) =>
 
 	return (
 		<Container ref={ref}>
-			{/* <ActionsButton>
+			<ActionsButton>
 				<SmallIconButton
 					ariaLabel="Toggle actions menu"
 					Icon={MoreIcon}
@@ -87,7 +88,7 @@ export const ActionsMenu = memo(({federate, isPending, actions = []}: IProps) =>
 					disabled={isPending}
 				/>
 			</ActionsButton>
-			{isOnScreen && (<StyledGrid
+			<StyledGrid
 				container
 				wrap="wrap"
 				direction="row"
@@ -95,10 +96,8 @@ export const ActionsMenu = memo(({federate, isPending, actions = []}: IProps) =>
 				justify="flex-start"
 				theme={{ forceOpen, federate }}
 			>
-				<Actions>
-					test
-				</Actions>
-			</StyledGrid>)} */}
+				{isOnScreen && <Actions>{renderActions(actions, isPending, permissions)}</Actions>}
+			</StyledGrid>
 		</Container>
 	);
 });
