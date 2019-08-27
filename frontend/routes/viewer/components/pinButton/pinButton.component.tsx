@@ -18,16 +18,14 @@
 import * as React from 'react';
 import { Viewer } from '../../../../services/viewer/viewer';
 import { VIEWER_EVENTS, NEW_PIN_ID } from '../../../../constants/viewer';
-import { PIN_COLORS } from '../../../../styles';
 import { PinIcon, Container } from './pinButton.styles';
 import { LabelButton } from '../labelButton/labelButton.styles';
 
 interface IProps {
 	onChange: (pin) => void;
-	onSave: (position) => void;
+	onSave: () => void;
 	hasPin: boolean;
 	disabled?: boolean;
-	pinId?: string;
 	disableMeasure: (isDisabled) => void;
 	deactivateMeasure: () => void;
 }
@@ -40,7 +38,7 @@ export class PinButton extends React.PureComponent<IProps, any> {
 
 	public onClickButton = (e) => {
 		const active = !this.state.active;
-		this.handleChangePin(active);
+		this.handleChangeEditMode(active);
 		this.setState({ active });
 	}
 
@@ -48,25 +46,20 @@ export class PinButton extends React.PureComponent<IProps, any> {
 		this.togglePinListeners(false);
 	}
 
-	public getPinId = () =>  this.props.hasPin ? this.props.pinId : NEW_PIN_ID;
-
-	public handleChangePin = (active) => {
+	public handleChangeEditMode = (active) => {
 		if (active) {
 			Viewer.setPinDropMode(true);
 			this.props.deactivateMeasure();
 			this.props.disableMeasure(true);
 			this.togglePinListeners(true);
-			Viewer.changePinColor({ id: this.getPinId(), colours: PIN_COLORS.SUNGLOW });
 		} else {
 			Viewer.setPinDropMode(false);
 			this.props.disableMeasure(false);
 			this.togglePinListeners(false);
-			const pinData = Viewer.getPinData();
 
-			if (pinData) {
-				this.props.onSave(pinData.pickedPos);
+			if (this.props.onSave) {
+				this.props.onSave();
 			}
-
 		}
 	}
 
@@ -77,16 +70,10 @@ export class PinButton extends React.PureComponent<IProps, any> {
 	}
 
 	public handleClickBackground = (event) => {
-		Viewer.removePin({id: this.getPinId() });
-		Viewer.setPin({data: null});
-
+		this.props.onChange([]);
 	}
 
-	public handlePickPoint = ({ trans, position, normal, selectColour, id }) => {
-		if (id) {
-			return null;
-		}
-
+	public handlePickPoint = ({ trans, position }) => {
 		this.setState({wasPinDropped: true});
 
 		if (trans) {
@@ -94,13 +81,7 @@ export class PinButton extends React.PureComponent<IProps, any> {
 		}
 
 		if (this.props.onChange) {
-			this.props.onChange({
-				id: this.getPinId(),
-				pickedNorm: normal,
-				pickedPos: position,
-				selectedObjectId: id,
-				selectColor: selectColour
-			});
+			this.props.onChange(position);
 		}
 	}
 

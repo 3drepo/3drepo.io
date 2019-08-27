@@ -140,7 +140,9 @@ export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => 
 	return statusIcon;
 };
 
-export const getRiskPinColor = (levelOfRisk: number, selected: boolean = false) => {
+export const getRiskPinColor = (risk, selected: boolean = false) => {
+	const levelOfRisk = (risk.overall_level_of_risk !== undefined) ? risk.overall_level_of_risk : 4;
+
 	return (selected)
 		? RISK_LEVELS_COLOURS[levelOfRisk].selectedColor
 		: RISK_LEVELS_COLOURS[levelOfRisk].pinColor;

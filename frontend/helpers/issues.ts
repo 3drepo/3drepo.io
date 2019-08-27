@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { getAPIUrl } from '../services/api';
-import { STATUSES_COLOURS, STATUSES_ICONS, STATUSES } from '../constants/issues';
+import { ISSUE_COLORS, STATUSES_ICONS, STATUSES } from '../constants/issues';
 import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
 
 const renameFieldIfExists = (issue, fieldName, newFieldName) => {
@@ -63,12 +63,18 @@ export const prepareIssue = (issue, jobs = []) => {
 };
 
 export const getStatusIcon = (priority, status) => {
-  const statusIcon = {
-    Icon: STATUSES_ICONS[status] || null,
-    color: STATUSES_COLOURS[status] || STATUSES_COLOURS[priority] || null
-  };
+	const statusIcon = {
+		Icon: STATUSES_ICONS[status] || null,
+		color: (ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS.NONE).color
+	};
 
-  return {...statusIcon};
+	return {...statusIcon};
+};
+
+export const getIssuePinColor = (issue: any, selected: boolean = false) => {
+	const {status, priority} = issue;
+	const colorToUse = ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS.NONE;
+	return (selected) ? colorToUse.selectedColor : colorToUse.pinColor;
 };
 
 const isOpenIssue = (status) => status !== 'closed';

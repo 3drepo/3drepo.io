@@ -46,6 +46,7 @@ interface IProps {
 	fetchingDetailsIsPending?: boolean;
 	activeIssueId?: string;
 	showDetails?: boolean;
+	showPins: boolean;
 	issueDetails?: any;
 	isImportingBCF?: boolean;
 	searchEnabled: boolean;
@@ -67,6 +68,7 @@ interface IProps {
 	setActiveIssue: (issue, revision?) => void;
 	showIssueDetails: (teamspace, model, revision, issue) => void;
 	closeDetails: (teamspace, model, revision) => void;
+	toggleShowPins: (showPins: boolean) => void;
 	toggleSubmodelsIssues: (showSubmodelIssues: boolean) => void;
 	subscribeOnIssueChanges: (teamspace, modelId) => void;
 	unsubscribeOnIssueChanges: (teamspace, modelId) => void;
@@ -74,7 +76,6 @@ interface IProps {
 	exportBCF: (teamspace, modelId) => void;
 	toggleSortOrder: () => void;
 	setFilters: (filters) => void;
-	renderPins: () => void;
 }
 
 const UNASSIGNED_JOB = {
@@ -130,7 +131,9 @@ export class Issues extends React.PureComponent<IProps, any> {
 			model,
 			revision,
 			showSubmodelIssues,
-			toggleSubmodelsIssues
+			toggleSubmodelsIssues,
+			toggleShowPins,
+			showPins
 		} = this.props;
 
 		return [{
@@ -154,6 +157,10 @@ export class Issues extends React.PureComponent<IProps, any> {
 			onClick: () => {
 				this.props.toggleSortOrder();
 			}
+		}, {
+			...ISSUES_ACTIONS_MENU.SHOW_PINS,
+			enabled: this.props.showPins,
+			onClick: () => toggleShowPins(!showPins)
 		}, {
 			...ISSUES_ACTIONS_MENU.SHOW_SUBMODEL_ISSUES,
 			enabled: showSubmodelIssues,
@@ -205,7 +212,6 @@ export class Issues extends React.PureComponent<IProps, any> {
 	public closeIssueDetails = () => {
 		const { teamspace, model, revision } = this.props;
 		this.props.closeDetails(teamspace, model, revision);
-		this.props.renderPins();
 	}
 
 	public getFilterValues(property) {

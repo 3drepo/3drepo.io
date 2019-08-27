@@ -71,7 +71,6 @@ interface IProps {
 	saveRisk: (teamspace, modelId, risk) => void;
 	toggleSortOrder: () => void;
 	setFilters: (filters) => void;
-	renderPins: () => void;
 }
 
 const UNASSIGNED_JOB = {
@@ -114,7 +113,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 		return [{
 			...RISKS_ACTIONS_MENU.PRINT,
 			onClick: () => printRisks(teamspace, model)
-		}, , {
+		}, {
 			...RISKS_ACTIONS_MENU.SHOW_PINS,
 			enabled: this.props.showPins,
 			onClick: () => toggleShowPins(!showPins)
@@ -173,7 +172,6 @@ export class Risks extends React.PureComponent<IProps, any> {
 	public closeRiskDetails = () => {
 		const { teamspace, model, revision } = this.props;
 		this.props.closeDetails(teamspace, model, revision);
-		this.props.renderPins();
 	}
 
 	public getFilterValues(property) {
