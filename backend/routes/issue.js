@@ -341,7 +341,8 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  *
  * @apiParam (Request body) {String} name The name of the issue
  * @apiParam (Request body) {[]String} assigned_roles The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
- * @apiParam (Request body) {String} status The status of the issue. It can have a value of "open","in_progress","for_approval" or "closed".
+ * @apiParam (Request body) {String} status The status of the issue. It can have a value of "open","in progress","for approval" or "closed".
+ * @apiParam (Request body) {String} priority The priority of the issue. It can have a value of "none", "low", "medium" or "high".
  * @apiParam (Request body) {String} topic_type Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
  * @apiParam (Request body) {Viewpoint} viewpoint The viewpoint of the issue, defining the position of the camera and the screenshot for that position.
  * @apiParam (Request body) {String} owner The username of the user that created the issue
@@ -504,15 +505,128 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
 router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {patch} /:teamspace/:model/issues/:issueId Update an Issue.
+ * @api {patch} /:teamspace/:model/issues/:issueId Update Issue.
  * @apiName  updateIssue
  * @apiGroup Issues
+ * @apiDescription Updates an issue. It takes the part of the issue that can be updated.
+ * The system will create a system comment withing the issue describing which values were changed.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} id Issue unique ID.
  *
- * @apiDescription Update an issue with an existing Issue ID
+ * @apiParam (Request body) {[]String} [assigned_roles] The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
+ * @apiParam (Request body) {String} [desc] The description of the issue
+ * @apiParam (Request body) {String} [status] The status of the issue. It can have a value of "open","in progress","for approval" or "closed".
+ * @apiParam (Request body) {String} [topic_type] Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
+ * @apiParam (Request body) {[3]Number} [position] The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
+ * @apiParam (Request body) {Number} [due_date] A timestamp depicting the due date of issue.
+ * @apiParam (Request body) {String} [priority] The priority of the issue. It can have a value of "none", "low", "medium" or "high".
+ * @apiParam (Request body) {Number} [scale] The scale of the issue.
+ * @apiParam (Request body) {Number} [viewCount] The viewcount of the issue.
+ * @apiParam (Request body) {Object} [extras] A field containing any extras that wanted to be saved in the issue. This is normally used by BCF.
+ *
+ * @apiExample {patch} Example usage:
+ * PATCH /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e HTTP/1.1
+ * {"status":"in progress"}
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *    "_id": "98c39770-c8e2-11e9-8f2a-ada77612c97e",
+ *    "name": "issue 2",
+ *    "assigned_roles": [
+ *       "jobC"
+ *    ],
+ *    "status": "in progress",
+ *    "priority": "none",
+ *    "topic_type": "for_information",
+ *    "owner": "teamSpace1",
+ *    "rev_id": "330f909b-9279-41aa-a87c-1c46f53a8e93",
+ *    "creator_role": "jobA",
+ *    "scale": 1,
+ *    "created": 1566921116263,
+ *    "desc": "(No Description)",
+ *    "number": 2,
+ *    "thumbnail": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e/thumbnail.png",
+ *    "comments": [
+ *       {
+ *          "guid": "febbe083-5a98-4711-8d60-d2ac06721f83",
+ *          "created": 1566924049774,
+ *          "owner": "teamSpace1",
+ *          "action": {
+ *             "property": "assigned_roles",
+ *             "from": "",
+ *             "to": "jobB"
+ *          },
+ *          "sealed": true
+ *       },
+ *       {
+ *          "guid": "e8ba32b2-d58e-4c33-90f7-c6e0404ef1ee",
+ *          "created": 1566924062287,
+ *          "owner": "teamSpace1",
+ *          "action": {
+ *             "property": "assigned_roles",
+ *             "from": "jobB",
+ *             "to": "jobC"
+ *          },
+ *          "sealed": true
+ *       },
+ *       {
+ *          "guid": "83117273-2698-4d2d-bd47-7cd31e6a7b14",
+ *          "created": 1566924080277,
+ *          "owner": "teamSpace1",
+ *          "action": {
+ *             "property": "status",
+ *             "from": "open",
+ *             "to": "in progress"
+ *          }
+ *       }
+ *    ],
+ *    "status_last_changed": 1566924080277,
+ *    "account": "teamSpace1",
+ *    "model": "3549ddf6-885d-4977-87f1-eeac43a0e818",
+ *    "viewpoint": {
+ *       "right": [
+ *          0.9953137040138245,
+ *          -4.656612873077393e-10,
+ *          0.09669896215200424
+ *       ],
+ *       "up": [
+ *          0.005437099374830723,
+ *          0.9984180331230164,
+ *          -0.05596357211470604
+ *       ],
+ *       "position": [
+ *          -3083.33251953125,
+ *          3886.8251953125,
+ *          8998.2783203125
+ *       ],
+ *       "look_at": [
+ *          -2445.680419921875,
+ *          3515.46533203125,
+ *          2434.984130859375
+ *       ],
+ *       "view_dir": [
+ *          0.0965459868311882,
+ *          -0.05622706934809685,
+ *          -0.9937390685081482
+ *       ],
+ *       "near": 20.835796356201172,
+ *       "far": 10417.8984375,
+ *       "fov": 1.0471975803375244,
+ *       "aspect_ratio": 3.1459293365478516,
+ *       "clippingPlanes": [],
+ *       "highlighted_group_id": "98b9d370-c8e2-11e9-8f2a-ada77612c97e",
+ *       "hideIfc": true,
+ *       "screenshot": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e/viewpoints/a1167d5f-2434-4a50-a158-d6a6745e7d6a/screenshot.png",
+ *       "guid": "a1167d5f-2434-4a50-a158-d6a6745e7d6a",
+ *       "screenshotSmall": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e/viewpoints/a1167d5f-2434-4a50-a158-d6a6745e7d6a/screenshotSmall.png"
+ *    },
+ *    "norm": [],
+ *    "position": [],
+ *    "extras": {
+ *    }
+ * }
  *
  * @apiSuccess (200) {Object} Updated Issue Object.
  *
@@ -520,9 +634,10 @@ router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.noti
 router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.chat.onUpdateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {post} /:teamspace/:model/revision/:rid/issues Store issue based on revision
- * @apiName storeIssue
+ * @api {post} /:teamspace/:model/revision/:rid/issues Create issue on revision
+ * @apiName newIssueRev
  * @apiGroup Issues
+ * @apiDescription Creates a new issue for a particular revision. See <a href="#api-Issues-newIssue">here</a> for more details.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
@@ -531,9 +646,10 @@ router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, midd
 router.post("/revision/:rid/issues", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {patch} /:teamspace/:model/revision/:rid/issues/:issueId Update issue based on revision
- * @apiName updateIssue
+ * @api {patch} /:teamspace/:model/revision/:rid/issues/:issueId Update issue on revision
+ * @apiName updateIssueRev
  * @apiGroup Issues
+ * @apiDescription Updates an issue for a particular revision. See <a href="#api-Issues-updateIssue">here</a> for more details.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
@@ -543,7 +659,7 @@ router.post("/revision/:rid/issues", middlewares.issue.canCreate, storeIssue, re
 router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {post} /:teamspace/:model/issues/:issueId/comments Add an comment for an issue
+ * @api {post} /:teamspace/:model/issues/:issueId/comments Add comment to issue
  * @apiName commentIssue
  * @apiGroup Issues
  *
