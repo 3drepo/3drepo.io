@@ -11,6 +11,7 @@ export const prepareGroup = (group) => {
 
 	return {
 		...omit(group, 'author', 'createdDate', 'description'),
+		_id: group._id,
 		owner: group.author,
 		created: group.createdAt,
 		desc: group.description,
