@@ -16,25 +16,61 @@
  */
 
 import MoreVert from '@material-ui/icons/MoreVert';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, memo } from 'react';
 
 import { useOnScreen } from '../../../../hooks';
 import { SmallIconButton } from '../../../components/smallIconButon/smallIconButton.component';
-import { ActionsButton, Container, StyledGrid } from './actionsMenu.styles';
+import { ActionsButton, Container, StyledGrid, Actions } from './actionsMenu.styles';
+import { renderWhenTrue } from '../../../../helpers/rendering';
+import { ROW_ACTIONS } from '../../teamspaces.contants';
+import { hasPermissions } from '../../../../helpers/permissions';
+
+interface IAction {
+	label: string;
+	color: string;
+	Icon: any;
+	isHidden?: boolean;
+	requiredPermissions?: string;
+	onClick: () => void;
+}
 
 interface IProps {
 	className?: string;
 	isPending?: boolean;
 	federate: boolean;
-	children: any;
+	actions: any[];
 }
 
 const MoreIcon = () => <MoreVert fontSize="small" />;
 
-export const ActionsMenu = ({federate, isPending, children}: IProps) => {
+const renderActions = (actions = [], isPending, permissions = []) => {
+	return actions.map(({ label, onClick, Icon, color, isHidden = false, requiredPermissions = '' }: IAction) => {
+		const iconProps = { fontSize: 'small' } as any;
+		const disabled = isPending && [ROW_ACTIONS.UPLOAD_FILE.label, ROW_ACTIONS.DELETE.label].includes(label);
+		if (!disabled) {
+			iconProps.color = color;
+		}
+		const ActionsIconButton = () => (<Icon {...iconProps} />);
+
+		if (!isHidden) {
+			return renderWhenTrue((
+				<SmallIconButton
+					key={label}
+					aria-label={label}
+					onClick={onClick}
+					Icon={ActionsIconButton}
+					tooltip={label}
+					disabled={disabled}
+				/>
+			))(hasPermissions(requiredPermissions, permissions));
+		}
+	});
+};
+
+export const ActionsMenu = memo(({federate, isPending, actions = []}: IProps) => {
 	const ref = useRef();
 	const [forceOpen, setForceOpen] = useState(false);
-	const isOnScreen = useOnScreen(ref, '0px', true);
+	// const isOnScreen = useOnScreen(ref, '0px', true);
 
 	const forceOpenHandler = useCallback((event) => {
 		event.stopPropagation();
@@ -43,7 +79,7 @@ export const ActionsMenu = ({federate, isPending, children}: IProps) => {
 
 	return (
 		<Container ref={ref}>
-			<ActionsButton>
+			{/* <ActionsButton>
 				<SmallIconButton
 					ariaLabel="Toggle actions menu"
 					Icon={MoreIcon}
@@ -59,8 +95,10 @@ export const ActionsMenu = ({federate, isPending, children}: IProps) => {
 				justify="flex-start"
 				theme={{ forceOpen, federate }}
 			>
-				{children}
-			</StyledGrid>)}
+				<Actions>
+					test
+				</Actions>
+			</StyledGrid>)} */}
 		</Container>
 	);
-};
+});

@@ -75,15 +75,6 @@ export const Timestamp = styled.span`
 	align-self: flex-end;
 `;
 
-export const Actions = styled.div`
-	position: absolute;
-	right: 40px;
-	top: 5px;
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: flex-end;
-`;
-
 export const Status = styled.span`
 	align-items: center;
 	justify-content: flex-end;

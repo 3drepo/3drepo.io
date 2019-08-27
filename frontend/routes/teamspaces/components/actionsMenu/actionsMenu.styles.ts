@@ -59,3 +59,12 @@ export const ActionsButton = styled.div`
 		${openMenuStyles}
 	}
 `;
+
+export const Actions = styled.div`
+	position: absolute;
+	right: 40px;
+	top: 5px;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+`;

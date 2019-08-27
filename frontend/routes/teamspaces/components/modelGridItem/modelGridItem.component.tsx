@@ -17,7 +17,7 @@
 
 import copy from 'copy-to-clipboard';
 import { pick, startCase } from 'lodash';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo, memo } from 'react';
 import { ROUTES } from '../../../../constants/routes';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -43,7 +43,6 @@ import {
 } from './modelGridItem.styles';
 
 interface IProps {
-	className?: string;
 	history: any;
 	teamspace: string;
 	name: string;
@@ -72,7 +71,7 @@ interface IProps {
 	removeFromStarred: (modelName) => void;
 }
 
-export function ModelGridItem(props: IProps) {
+export const ModelGridItem = memo((props: IProps) => {
 	const isFederation = Boolean(props.federate);
 	const isPending = ['uploading', 'queued', 'processing'].includes(props.status);
 
@@ -215,38 +214,38 @@ export function ModelGridItem(props: IProps) {
 		}
 	}, [starClickTimeout.current, props.isStarred, props.model]);
 
-	const sharedActions = [{
+	const sharedActions = useMemo(() => [{
 		...ROW_ACTIONS.PERMISSIONS,
-		action: handlePermissionsClick
+		onClick: handlePermissionsClick
 	}, {
 		...ROW_ACTIONS.SHARE,
-		action: handleShare
+		onClick: handleShare
 	}, {
 		...ROW_ACTIONS.SETTINGS,
-		action: handleSettingsClick
+		onClick: handleSettingsClick
 	}, {
 		...ROW_ACTIONS.DELETE,
-		action: handleDelete
-	}];
+		onClick: handleDelete
+	}], [props.name]);
 
-	const modelActions = [{
+	const modelActions = useMemo(() => [{
 		...ROW_ACTIONS.UPLOAD_FILE,
-		action: handleUploadModelFile
+		onClick: handleUploadModelFile
 	}, {
 		...ROW_ACTIONS.REVISIONS,
-		action: handleRevisionsClick
+		onClick: handleRevisionsClick
 	}, {
 		...ROW_ACTIONS.DOWNLOAD,
-		action: handleDownloadClick,
+		onClick: handleDownloadClick,
 		isHidden: !Boolean(props.timestamp)
-	}, ...sharedActions];
+	}, ...sharedActions], [sharedActions]);
 
-	const federationActions = [{
+	const federationActions = useMemo(() => [{
 		...ROW_ACTIONS.EDIT,
-		action: handleFederationEdit
-	}, ...sharedActions];
+		onClick: handleFederationEdit
+	}, ...sharedActions], [sharedActions]);
 
-	const rowActions = isFederation ? federationActions : modelActions;
+	const rowActions = useMemo(() => isFederation ? federationActions : modelActions, [isFederation]);
 
 	const renderModelCode = renderWhenTrue(<Property>{props.code}</Property>);
 
@@ -260,41 +259,37 @@ export function ModelGridItem(props: IProps) {
 		</Status>
 	);
 
-	const renderActions = (actions = []) => {
-		return actions.map((actionItem) => {
-			const { label, action, Icon, color, isHidden = false, requiredPermissions = '' } = actionItem;
-			const iconProps = { fontSize: 'small' } as any;
-			const disabled = isPending && [ROW_ACTIONS.UPLOAD_FILE.label, ROW_ACTIONS.DELETE.label].includes(label);
-			if (!disabled) {
-				iconProps.color = color;
-			}
-			const ActionsIconButton = () => (<Icon {...iconProps} />);
+	// const renderActions = (actions = []) => {
+	// 	return actions.map((actionItem) => {
+	// 		const { label, action, Icon, color, isHidden = false, requiredPermissions = '' } = actionItem;
+	// 		const iconProps = { fontSize: 'small' } as any;
+	// 		const disabled = isPending && [ROW_ACTIONS.UPLOAD_FILE.label, ROW_ACTIONS.DELETE.label].includes(label);
+	// 		if (!disabled) {
+	// 			iconProps.color = color;
+	// 		}
+	// 		const ActionsIconButton = () => (<Icon {...iconProps} />);
 
-			if (!isHidden) {
-				return renderWhenTrue((
-					<SmallIconButton
-						key={label}
-						aria-label={label}
-						onClick={action}
-						Icon={ActionsIconButton}
-						tooltip={label}
-						disabled={disabled}
-					/>
-				))(hasPermissions(requiredPermissions, props.permissions));
-			}
-		});
-	};
+	// 		if (!isHidden) {
+	// 			return renderWhenTrue((
+	// 				<SmallIconButton
+	// 					key={label}
+	// 					aria-label={label}
+	// 					onClick={action}
+	// 					Icon={ActionsIconButton}
+	// 					tooltip={label}
+	// 					disabled={disabled}
+	// 				/>
+	// 			))(hasPermissions(requiredPermissions, props.permissions));
+	// 		}
+	// 	});
+	// };
 
 	const renderActionsMenu = () => (
-		<ActionsMenu federate={isFederation}>
-			<Actions>
-				{renderActions(rowActions)}
-			</Actions>
-		</ActionsMenu>
+		<ActionsMenu federate={isFederation} actions={rowActions} />
 	);
 
 	return (
-		<Container federate={isFederation} className={props.className}>
+		<Container federate={isFederation}>
 			<Header>
 				<NameWrapper>
 					<StarIcon
@@ -322,4 +317,4 @@ export function ModelGridItem(props: IProps) {
 			</Content>
 		</Container>
 	);
-}
+});

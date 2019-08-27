@@ -419,6 +419,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	private renderModels = (models) => renderWhenTrue(() => {
 		const sortedModels = sortModels(models, this.props.activeSorting, this.props.activeSortingDirection);
+
 		return sortedModels.map((props: any) => (
 			<ModelGridItem
 				{...props}
