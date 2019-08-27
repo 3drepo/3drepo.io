@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IconButton, List, ListItem, MenuItem } from '@material-ui/core';
+import { IconButton, MenuItem } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import BuildIcon from '@material-ui/icons/Build';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import { includes, isEmpty } from 'lodash';
@@ -24,6 +25,12 @@ import React from 'react';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
+import {
+	IconWrapper,
+	MenuList,
+	StyledItemText,
+	StyledListItem
+} from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { MenuButton as MenuButtonComponent } from '../../../components/menuButton/menuButton.component';
 import { Settings } from './components/settings/settings.component';
 import {
@@ -160,9 +167,14 @@ export class Gis extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderMenuContent = () => (
-		<List>
-			<ListItem onClick={this.handleToggleSettings} button>Settings</ListItem>
-		</List>
+		<MenuList>
+			<StyledListItem onClick={this.handleToggleSettings} button>
+				<IconWrapper><BuildIcon fontSize="small" /></IconWrapper>
+				<StyledItemText>
+					Settings
+				</StyledItemText>
+			</StyledListItem>
+		</MenuList>
 	)
 
 	public getMenuButton = () => 	(
