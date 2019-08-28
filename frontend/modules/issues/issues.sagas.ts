@@ -159,10 +159,10 @@ export function* saveIssue({ teamspace, model, issueData, revision, finishSubmit
 	}
 }
 
-export function* updateIssue({ teamspace, modelId, issueData }) {
+export function* updateIssue({ issueData }) {
 	try {
-		const { _id, rev_id, position } = yield select(selectActiveIssueDetails);
-		const { data: updatedIssue } = yield API.updateIssue(teamspace, modelId, _id, rev_id, issueData );
+		const { _id, rev_id, model, account, position } = yield select(selectActiveIssueDetails);
+		const { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, issueData );
 		const AnalyticService = getAngularService('AnalyticService') as any;
 		yield AnalyticService.sendEvent({
 			eventCategory: 'Issue',
@@ -191,10 +191,10 @@ export function* updateNewIssue({ newIssue }) {
 	}
 }
 
-export function* postComment({ teamspace, modelId, issueData, finishSubmitting }) {
+export function* postComment({ issueData, finishSubmitting }) {
 	try {
-		const { _id } = yield select(selectActiveIssueDetails);
-		const { data: comment } = yield API.addIssueComment(teamspace, modelId, _id, issueData);
+		const { _id, model, account } = yield select(selectActiveIssueDetails);
+		const { data: comment } = yield API.addIssueComment(account, model, _id, issueData);
 		const preparedComment = yield prepareComment(comment);
 
 		finishSubmitting();
@@ -205,10 +205,12 @@ export function* postComment({ teamspace, modelId, issueData, finishSubmitting }
 	}
 }
 
-export function* removeComment({ teamspace, modelId, issueData }) {
+export function* removeComment({ issueData }) {
 	try {
-		const { _id, guid } = issueData;
-		yield API.deleteIssueComment(teamspace, modelId, _id, guid);
+		const { guid } = issueData;
+		const { _id, model, account } = yield select(selectActiveIssueDetails);
+
+		yield API.deleteIssueComment(account, model, _id, guid);
 		yield put(IssuesActions.deleteCommentSuccess(guid, _id));
 		yield put(SnackbarActions.show('Comment removed'));
 	} catch (error) {

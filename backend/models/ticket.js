@@ -46,7 +46,9 @@ class Ticket {
 		const vpIdKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid", "group_id"];
 
 		ticketToClean.account = account;
-		ticketToClean.model = ticketToClean.origin_model ||  model;
+		model = ticketToClean.model || ticketToClean.origin_model ||  model;
+		ticketToClean.model = model;
+
 		const id = utils.uuidToString(ticketToClean._id);
 
 		idKeys.concat(vpIdKeys).forEach((key) => {
