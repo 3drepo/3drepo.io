@@ -5,11 +5,13 @@ import AdjustIcon from '@material-ui/icons/Adjust';
 import Print from '@material-ui/icons/Print';
 import Download from '@material-ui/icons/CloudDownload';
 import Upload from '@material-ui/icons/CloudUpload';
+import Pins from '@material-ui/icons/PinDrop';
 import { SortAmountUp, SortAmountDown } from '../routes/components/fontAwesomeIcon';
 
 import ViewModule from '@material-ui/icons/ViewModule';
 
 import { DATA_TYPES } from '../routes/components/filterPanel/filterPanel.component';
+import { COLOR, PIN_COLORS } from '../styles';
 
 export const ISSUE_PANEL_NAME = 'issue';
 
@@ -53,12 +55,32 @@ export const ISSUE_PRIORITIES = [
 	{ value: PRIORITIES.HIGH, name: 'High' }
 ];
 
-export const STATUSES_COLOURS = {
-	[PRIORITIES.NONE]: '#777777',
-	[PRIORITIES.LOW]: '#4CAF50',
-	[PRIORITIES.MEDIUM]: '#FF9800',
-	[PRIORITIES.HIGH]: '#F44336',
-	[STATUSES.CLOSED]: '#0C2F54'
+export const ISSUE_COLORS = {
+	[PRIORITIES.NONE]: {
+		color: COLOR.SOFT_BLUE,
+		pinColor: PIN_COLORS.SOFT_BLUE,
+		selectedColor: PIN_COLORS.VIVID_NAVY
+	},
+	[PRIORITIES.LOW]: {
+		color: COLOR.LIGHT_GRAYISH_YELLOW,
+		pinColor: PIN_COLORS.LIGHT_GRAYISH_YELLOW,
+		selectedColor: PIN_COLORS.VIVID_YELLOW
+	},
+	[PRIORITIES.MEDIUM]: {
+		color: COLOR.LIGHT_ORANGE,
+		pinColor: PIN_COLORS.LIGHT_ORANGE,
+		selectedColor: PIN_COLORS.VIVID_ORANGE
+	},
+	[PRIORITIES.HIGH]: {
+		color: COLOR.SOFT_RED,
+		pinColor: PIN_COLORS.SOFT_RED,
+		selectedColor: PIN_COLORS.VIVID_RED
+	},
+	[STATUSES.CLOSED]: {
+		color: COLOR.LIGHT_GRAYISH_GREEN,
+		pinColor: PIN_COLORS.LIGHT_GRAYISH_GREEN,
+		selectedColor: PIN_COLORS.DARK_GREEN
+	}
 };
 
 export const STATUSES_ICONS = {
@@ -138,6 +160,11 @@ export const ISSUES_ACTIONS_MENU = {
 			ASC: SortAmountUp,
 			DESC: SortAmountDown
 		}
+	},
+	SHOW_PINS: {
+		label:  'Show Pins',
+		Icon: Pins,
+		enabled:  true
 	},
 	SHOW_SUBMODEL_ISSUES: {
 		label: 'Show sub model issues',

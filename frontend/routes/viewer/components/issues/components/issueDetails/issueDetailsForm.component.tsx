@@ -196,7 +196,6 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							<PinButton
 								onChange={this.props.onChangePin}
 								onSave={this.props.onSavePin}
-								pinId={this.props.pinId}
 								hasPin={this.props.hasPin}
 								disabled={!this.isNewIssue && !canEditBasicProperty}
 							/>

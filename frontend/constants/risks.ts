@@ -82,34 +82,34 @@ export const RISK_LEVELS_ICONS = {
 
 export const RISK_LEVELS_COLOURS = {
 	[LEVELS.UNSET]: {
-		color: COLOR.DARK_GRAY,
-		pinColor: PIN_COLORS.DARK_GRAY,
-		selectedColor: PIN_COLORS.DARK_GRAY
+		color: COLOR.SOFT_BLUE,
+		pinColor: PIN_COLORS.SOFT_BLUE,
+		selectedColor: PIN_COLORS.VIVID_NAVY
 	},
 	[LEVELS.VERY_LOW]: {
-		color: COLOR.GREEN,
-		pinColor: PIN_COLORS.GREEN,
-		selectedColor: PIN_COLORS.MED_SEA_GREEN
+		color: COLOR.LIGHT_GRAYISH_GREEN,
+		pinColor: PIN_COLORS.LIGHT_GRAYISH_GREEN,
+		selectedColor: PIN_COLORS.GREEN
 	},
 	[LEVELS.LOW]: {
-		color: COLOR.LIME_GREEN,
-		pinColor: PIN_COLORS.LIME_GREEN,
-		selectedColor: PIN_COLORS.LIGHT_GREEN
+		color: COLOR.SOFT_YELLOW_GREEN,
+		pinColor: PIN_COLORS.SOFT_YELLOW_GREEN,
+		selectedColor: PIN_COLORS.LIME_GREEN
 	},
 	[LEVELS.MODERATE]: {
-		color: COLOR.LEMON_CHIFFON,
+		color: COLOR.LIGHT_YELLOW,
 		pinColor: PIN_COLORS.LIGHT_YELLOW,
 		selectedColor: PIN_COLORS.LEMON_CHIFFON
 	},
 	[LEVELS.HIGH]: {
-		color: COLOR.DARK_ORANGE,
-		pinColor: PIN_COLORS.DARK_ORANGE,
-		selectedColor: PIN_COLORS.ORANGE
+		color: COLOR.LIGHT_ORANGE,
+		pinColor: PIN_COLORS.LIGHT_ORANGE,
+		selectedColor: PIN_COLORS.VIVID_ORANGE
 	},
 	[LEVELS.VERY_HIGH]: {
-		color: COLOR.MAROON,
-		pinColor: PIN_COLORS.MAROON,
-		selectedColor: PIN_COLORS.RED
+		color: COLOR.SOFT_RED,
+		pinColor: PIN_COLORS.SOFT_RED,
+		selectedColor: PIN_COLORS.VIVID_RED
 	}
 };
 

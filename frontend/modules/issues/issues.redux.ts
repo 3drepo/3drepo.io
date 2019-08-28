@@ -30,13 +30,11 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	removeComment: ['teamspace', 'modelId', 'issueData'],
 	saveIssueSuccess: ['issue'],
 	setNewIssue: [],
-	renderPins: [],
 	printIssues: ['teamspace', 'modelId'],
 	downloadIssues: ['teamspace', 'modelId'],
 	showDetails: ['teamspace', 'model', 'revision', 'issue'],
 	closeDetails: ['teamspace', 'model', 'revision'],
 	setActiveIssue: ['issue', 'revision'],
-	showNewPin: ['issue', 'pinData'],
 	togglePendingState: ['isPending'],
 	toggleDetailsPendingState: ['isPending'],
 	subscribeOnIssueChanges: ['teamspace', 'modelId'],
@@ -63,7 +61,8 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	attachResourcesSuccess: ['resources', 'issueId'],
 	updateResourcesSuccess: ['resourcesIds', 'updates', 'issueId' ],
 	resetComponentState: [],
-	updateIssuePin: ['issue']
+	updateSelectedIssuePin: ['position'],
+	toggleShowPins: ['showPins']
 }, { prefix: 'ISSUES_' });
 
 export const INITIAL_STATE = {
@@ -82,7 +81,8 @@ export const INITIAL_STATE = {
 		isImportingBCF: false,
 		showSubmodelIssues: false,
 		sortOrder: 'desc',
-		failedToLoad: false
+		failedToLoad: false,
+		savedPin: null
 	}
 };
 
@@ -131,6 +131,22 @@ export const saveIssueSuccess = (state = INITIAL_STATE, { issue }) => {
 		issuesMap,
 		componentState: { ...state.componentState, newIssue: {} }
 	};
+};
+
+export const updateSelectedIssuePin =  (state = INITIAL_STATE, { position }) => {
+	if (state.componentState.activeIssue) {
+		return saveIssueSuccess(state, { issue: {_id: state.componentState.activeIssue, position} });
+	}
+
+	if (state.componentState.newIssue) {
+		const componentState = state.componentState;
+
+		return {...state,
+			componentState: { ...componentState , newIssue: { ...componentState.newIssue, position } }
+		};
+	}
+
+	return state;
 };
 
 const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
@@ -210,6 +226,10 @@ const updateResourcesSuccess = (state = INITIAL_STATE, { resourcesIds, updates, 
 	return { ...state, issuesMap};
 };
 
+const toggleShowPins = (state = INITIAL_STATE, { showPins }) => {
+	return setComponentState(state, { componentState: { showPins } });
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess,
 	[IssuesTypes.FETCH_ISSUE_SUCCESS]: fetchIssueSuccess,
@@ -228,5 +248,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.RESET_COMPONENT_STATE]: resetComponentState,
 	[IssuesTypes.REMOVE_RESOURCE_SUCCESS]: removeResourceSuccess,
 	[IssuesTypes.ATTACH_RESOURCES_SUCCESS]: attachResourcesSuccess,
-	[IssuesTypes.UPDATE_RESOURCES_SUCCESS]: updateResourcesSuccess
+	[IssuesTypes.UPDATE_RESOURCES_SUCCESS]: updateResourcesSuccess,
+	[IssuesTypes.UPDATE_SELECTED_ISSUE_PIN]: updateSelectedIssuePin,
+	[IssuesTypes.TOGGLE_SHOW_PINS]: toggleShowPins
 });
