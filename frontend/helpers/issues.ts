@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { get, omit } from 'lodash';
-import { STATUSES, STATUSES_COLOURS, STATUSES_ICONS } from '../constants/issues';
+import { ISSUE_COLORS, STATUSES, STATUSES_ICONS } from '../constants/issues';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 
@@ -66,8 +65,14 @@ export const prepareIssue = (issue, jobs = []) => {
 
 export const getStatusIcon = (priority, status) => ({
 	Icon: STATUSES_ICONS[status] || null,
-	color: STATUSES_COLOURS[status] || STATUSES_COLOURS[priority] || null
+	color:  (ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS.NONE).color
 });
+
+export const getIssuePinColor = (issue: any, selected: boolean = false) => {
+	const {status, priority} = issue;
+	const colorToUse = ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS.NONE;
+	return (selected) ? colorToUse.selectedColor : colorToUse.pinColor;
+};
 
 const isOpenIssue = (status) => status !== 'closed';
 

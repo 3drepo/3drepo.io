@@ -16,8 +16,7 @@
  */
 
 import React from 'react';
-import { NEW_PIN_ID, VIEWER_EVENTS } from '../../../../constants/viewer';
-import { PIN_COLORS } from '../../../../styles';
+import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { LabelButton } from '../labelButton/labelButton.styles';
 import { Container, PinIcon } from './pinButton.styles';
 
@@ -28,7 +27,7 @@ interface IProps {
 	pinId?: string;
 	pinData: any;
 	onChange: (pin) => void;
-	onSave: (position) => void;
+	onSave: () => void;
 	disableMeasure: (isDisabled) => void;
 	deactivateMeasure: () => void;
 }
@@ -41,7 +40,7 @@ export class PinButton extends React.PureComponent<IProps, any> {
 
 	public onClickButton = (e) => {
 		const active = !this.state.active;
-		this.handleChangePin(active);
+		this.handleChangeEditMode(active);
 		this.setState({ active });
 	}
 
@@ -49,27 +48,21 @@ export class PinButton extends React.PureComponent<IProps, any> {
 		this.togglePinListeners(false);
 	}
 
-	public getPinId = () =>  this.props.hasPin ? this.props.pinId : NEW_PIN_ID;
-
-	public handleChangePin = (active) => {
-		const { deactivateMeasure, disableMeasure, viewer } = this.props;
+	public handleChangeEditMode = (active) => {
+		const { deactivateMeasure, disableMeasure, viewer, onSave } = this.props;
 		if (active) {
 			viewer.setPinDropMode(true);
 			deactivateMeasure();
 			disableMeasure(true);
 			this.togglePinListeners(true);
-			viewer.changePinColor({ id: this.getPinId(), colours: PIN_COLORS.SUNGLOW });
 		} else {
 			viewer.setPinDropMode(false);
 			disableMeasure(false);
 			this.togglePinListeners(false);
 
-			const pinData = viewer.getPinData();
-
-			if (pinData) {
-				this.props.onSave(pinData.pickedPos);
+			if (onSave) {
+				onSave();
 			}
-
 		}
 	}
 
@@ -81,30 +74,18 @@ export class PinButton extends React.PureComponent<IProps, any> {
 	}
 
 	public handleClickBackground = (event) => {
-		const { viewer } = this.props;
-		viewer.removePin({id: this.getPinId() });
-		viewer.setPin({data: null});
+		this.props.onChange([]);
 	}
 
 	public handlePickPoint = ({ trans, position, normal, selectColour, id }) => {
-		if (id) {
-			return null;
-		}
-
-		this.setState({ wasPinDropped: true });
+		this.setState({wasPinDropped: true});
 
 		if (trans) {
 			position = trans.inverse().multMatrixPnt(position);
 		}
 
 		if (this.props.onChange) {
-			this.props.onChange({
-				id: this.getPinId(),
-				pickedNorm: normal,
-				pickedPos: position,
-				selectedObjectId: id,
-				selectColor: selectColour
-			});
+			this.props.onChange(position);
 		}
 	}
 

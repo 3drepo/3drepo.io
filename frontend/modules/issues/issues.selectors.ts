@@ -18,6 +18,7 @@
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
 import { STATUSES } from '../../constants/issues';
+import { hasPin, issueToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
 import { selectCurrentModel } from '../model';
 
@@ -113,3 +114,27 @@ export const selectSortOrder = createSelector(
 export const selectFailedToLoad = createSelector(
 	selectComponentState, (state) => state.failedToLoad
 );
+
+export const selectPins = createSelector(
+	selectFilteredIssues, selectComponentState, selectActiveIssueDetails, selectShowPins,
+	(issues: any, componentState, detailedIssue, showPins) => {
+
+	let pinsToShow = [];
+
+	if (showPins) {
+		pinsToShow =  issues.reduce((pins, issue) => {
+			if (!hasPin(issue)) {
+				return pins;
+			}
+
+			pins.push(issueToPin(issue, componentState.activeIssue === issue._id ));
+			return pins;
+		} , []);
+	}
+
+	if (componentState.showDetails && detailedIssue && hasPin(detailedIssue)) {
+		pinsToShow.push(issueToPin(detailedIssue, true));
+	}
+
+	return pinsToShow;
+});

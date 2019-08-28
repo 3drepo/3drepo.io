@@ -17,12 +17,10 @@
 
 import React from 'react';
 
-import { NEW_PIN_ID } from '../../../../../../constants/viewer';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { exportIssuesToJSON } from '../../../../../../services/export';
-import { PIN_COLORS } from '../../../../../../styles';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
@@ -48,7 +46,7 @@ interface IProps {
 	failedToLoad: boolean;
 	setState: (componentState) => void;
 	fetchIssue: (teamspace, model, issueId) => void;
-	showNewPin: (issue, pinData) => void;
+	updateSelectedIssuePin: (position) => void;
 	saveIssue: (teamspace, modelId, issue, revision, finishSubmitting) => void;
 	updateIssue: (teamspace, modelId, issue) => void;
 	postComment: (teamspace, modelId, issueData, finishSubmitting) => void;
@@ -207,7 +205,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public renderDetailsForm = () => {
 		const {issue, onRemoveResource, showDialog, topicTypes,
-			currentUser, myJob, attachFileResources, attachLinkResources} = this.props;
+			currentUser, myJob, attachFileResources, attachLinkResources, updateSelectedIssuePin } = this.props;
 
 		return (
 			<IssueDetailsForm
@@ -219,9 +217,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				topicTypes={topicTypes}
 				currentUser={currentUser}
 				myJob={myJob}
-				onChangePin={this.handleChangePin}
+				onChangePin={updateSelectedIssuePin}
 				onSavePin={this.onPositionSave}
-				pinId={issue._id}
 				hasPin={issue.position && issue.position.length}
 				onRemoveResource={onRemoveResource}
 				attachFileResources={attachFileResources}
@@ -285,10 +282,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleChangePin = (pinData) => {
-		this.props.showNewPin(this.props.issue, pinData);
-	}
-
 	public postComment = async (teamspace, model, { comment, screenshot }, finishSubmitting) => {
 		const viewpoint = await this.props.viewer.getCurrentViewpoint({ teamspace, model });
 		const issueCommentData = {
@@ -312,14 +305,11 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public onPositionSave = (position) => {
-		const { teamspace, model, viewer } = this.props;
-		if (!this.isNewIssue) {
+	public onPositionSave = () => {
+		const { teamspace, model, issue, updateIssue } = this.props;
 
-			this.props.updateIssue(teamspace, model, {position: position || []});
-			viewer.setPin(null);
-		} else {
-			viewer.changePinColor({ id: NEW_PIN_ID, colours: PIN_COLORS.YELLOW });
+		if (!this.isNewIssue) {
+			updateIssue(teamspace, model, {position: issue.position || []});
 		}
 	}
 

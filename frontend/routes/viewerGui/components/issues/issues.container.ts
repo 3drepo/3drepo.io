@@ -62,6 +62,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	printIssues: IssuesActions.printIssues,
 	setActiveIssue: IssuesActions.setActiveIssue,
 	showIssueDetails: IssuesActions.showDetails,
+	toggleShowPins: IssuesActions.toggleShowPins,
 	subscribeOnIssueChanges: IssuesActions.subscribeOnIssueChanges,
 	unsubscribeOnIssueChanges: IssuesActions.unsubscribeOnIssueChanges,
 	closeDetails: IssuesActions.closeDetails,
@@ -70,7 +71,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	exportBCF: IssuesActions.exportBcf,
 	toggleSortOrder: IssuesActions.toggleSortOrder,
 	setFilters: IssuesActions.setFilters,
-	renderPins: IssuesActions.renderPins
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Issues);

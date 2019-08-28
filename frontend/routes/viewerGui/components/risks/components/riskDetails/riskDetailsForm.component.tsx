@@ -55,7 +55,6 @@ interface IProps {
 	onSavePin: (position) => void;
 	onChangePin: (pin) => void;
 	setFieldValue: (fieldName, fieldValue) => void;
-	pinId?: string;
 	hasPin: boolean;
 }
 
@@ -262,10 +261,10 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							)} />
 						</StyledFormControl>
 						<StyledFormControl>
-							<PinButton onChange={this.props.onChangePin}
+							<PinButton
+								onChange={this.props.onChangePin}
 								onSave={this.props.onSavePin}
 								disabled={!this.isNewRisk && !canEditBasicProperty}
-								pinId={this.props.pinId}
 								hasPin={this.props.hasPin}
 							/>
 						</StyledFormControl>

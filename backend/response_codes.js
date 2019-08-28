@@ -473,7 +473,7 @@
 		let response = responseCodes.OK;
 
 		readStream.on("error", error => {
-			req[C.REQ_REPO].logger.logInfo(`Stream failed: [${error.code} - ${error.message}]`);
+			req[C.REQ_REPO].logger.logInfo(`Stream failed: [${error.code} - ${error.message}]`, {place});
 			response = responseCodes.NO_FILE_FOUND;
 			res.status(response.status);
 			res.end();
@@ -488,7 +488,8 @@
 			length += data.length;
 		}).on("end", () => {
 			res.end();
-			req[C.REQ_REPO].logger.logInfo("Responded with " + response.status, {
+			req[C.REQ_REPO].logger.logInfo(response.status, {
+				place,
 				httpCode: response.status,
 				contentLength: length
 			});
