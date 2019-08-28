@@ -510,6 +510,11 @@ router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.noti
  * @apiGroup Issues
  * @apiDescription Updates an issue. It takes the part of the issue that can be updated.
  * The system will create a system comment withing the issue describing which values were changed.
+ * The user needs to be the teamspace administrator, or the project administrator, or has the same job as the creator of the issue, or has the issue assigned. In the case that the issue has been assigned to the user, the user cant change it to the "close status".
+ *
+ * If the issue is being updated to assigned to a job, and the status of the issue has the value "for_approval" then the status of the issue is automtically changed to "in_progress".
+ *
+ * If the user is changing the issue to the "for_approval" status, the issue will be assigned to the job that the creator of the issue has.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
