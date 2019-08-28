@@ -54,7 +54,9 @@ const showDialog = (state = INITIAL_STATE, action) => {
 	return { ...state, config, data: action.config.data, isOpen: true };
 };
 
-const showErrorDialog = (state = INITIAL_STATE, { method, dataType, message, status }) => {
+const showErrorDialog = (state = INITIAL_STATE, action) => {
+	const { method, dataType, message, status } = action;
+	const messageText = typeof message === 'object' && message.message ? message.message : message;
 	const config = {
 		title: 'Error',
 		template: Dialogs.ErrorDialog,
@@ -62,7 +64,7 @@ const showErrorDialog = (state = INITIAL_STATE, { method, dataType, message, sta
 			method,
 			dataType,
 			status,
-			message
+			message: messageText
 		}
 	};
 
