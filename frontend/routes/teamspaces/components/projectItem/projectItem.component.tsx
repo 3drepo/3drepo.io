@@ -16,6 +16,8 @@
  */
 
 import React from 'react';
+import Label from '@material-ui/icons/Label';
+import LabelOutlined from '@material-ui/icons/LabelOutlined';
 
 import { ROUTES } from '../../../../constants/routes';
 import { hasPermissions } from '../../../../helpers/permissions';
@@ -149,15 +151,20 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 		const { name, disabled, isEmpty, query, active } = this.props;
 		return (
 			<TreeList
+				active={active}
 				query={query}
 				onClick={this.handleClick}
 				name={name}
 				level={TREE_LEVELS.PROJECT}
 				disabled={disabled}
 				isEmpty={isEmpty}
-				active={active}
-				renderRoot={this.renderRoot}
-			/>
+				IconProps={{
+					IconClosed: Label,
+					IconOpened: LabelOutlined
+				}}
+			>
+				{this.renderProjectActions}
+			</TreeList>
 		);
 	}
 }

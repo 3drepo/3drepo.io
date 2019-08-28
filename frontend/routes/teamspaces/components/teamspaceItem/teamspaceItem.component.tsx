@@ -91,12 +91,7 @@ export const TeamspaceItem = (props: IProps) => {
 			renderRoot={isMyTeamspace ? MyTeamspaceItem : null}
 			IconProps={{ IconClosed: renderAvatar }}
 		>
-			{() => (
-				<>
-					<OwnerData>{firstName} {lastName}</OwnerData>
-					{renderActions()}
-				</>
-			)}
+			{renderActions}
 		</TreeList>
 	);
 };
