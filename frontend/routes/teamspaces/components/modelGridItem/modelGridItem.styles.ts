@@ -41,9 +41,12 @@ export const Header = styled.div`
 
 export const Name = styled(Highlight)`
 	margin: 1px 0 0 2px;
-	font-weight: ${FONT_WEIGHT.BOLD};
 	word-break: break-all;
 	cursor: ${(props) => props.isPending ? 'default' : 'pointer'};
+
+	&, mark {
+		font-weight: ${FONT_WEIGHT.BOLD};
+	}
 
 	&:hover {
 		text-decoration: underline;
