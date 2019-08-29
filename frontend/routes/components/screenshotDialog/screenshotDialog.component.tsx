@@ -115,7 +115,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			this.prevMousePosition.x = this.currMousePosition.x = x;
 			this.prevMousePosition.y = this.currMousePosition.y = y;
 			this.isDrawing = true;
-			debugger;
 			this.toolsElement.style.pointerEvents = 'none';
 			this.toolsElement.style.opacity = .2;
 		}
