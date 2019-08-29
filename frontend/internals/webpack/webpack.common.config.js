@@ -6,8 +6,6 @@ const PATHS = require('./tools/paths');
 
 const transpileOnly = process.argv.includes('--no-type-checking');
 
-console.log('transpileOnly', transpileOnly);
-
 module.exports = (options) => {
   const config = {
     mode: options.mode || MODES.DEVELOPMENT,
