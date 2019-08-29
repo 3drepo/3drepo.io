@@ -30,7 +30,7 @@ import { Eraser } from '../../../fontAwesomeIcon';
 import { OptionsDivider, StyledButton, ToolsContainer } from './tools.styles';
 
 interface IProps {
-	ref: any;
+	innerRef: any;
 	size: number;
 	color: string;
 	disabled?: boolean;
@@ -119,10 +119,10 @@ export class Tools extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { ref, disabled, onCancel } = this.props;
+		const { innerRef, disabled, onCancel } = this.props;
 
 		return (
-			<ToolsContainer ref={ref} disabled={disabled}>
+			<ToolsContainer ref={innerRef} disabled={disabled}>
 				{this.renderToolset(!disabled)}
 				<StyledButton onClick={onCancel} color="primary">Cancel</StyledButton>
 				{this.renderSaveButton(!disabled)}

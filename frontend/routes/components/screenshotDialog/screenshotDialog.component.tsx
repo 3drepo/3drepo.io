@@ -34,7 +34,6 @@ interface IProps {
 }
 
 export class ScreenshotDialog extends React.PureComponent<IProps, any> {
-
 	get containerElement() {
 		return this.containerRef.current;
 	}
@@ -116,7 +115,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			this.prevMousePosition.x = this.currMousePosition.x = x;
 			this.prevMousePosition.y = this.currMousePosition.y = y;
 			this.isDrawing = true;
-
+			debugger;
 			this.toolsElement.style.pointerEvents = 'none';
 			this.toolsElement.style.opacity = .2;
 		}
@@ -210,7 +209,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public renderTools = () => (
 		<Tools
-			ref={this.toolsRef}
+			innerRef={this.toolsRef}
 			size={this.state.brushSize}
 			color={this.state.brushColor}
 			onDrawClick={this.setBrushMode}
