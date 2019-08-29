@@ -16,7 +16,7 @@ addons:
       - mongodb-3.2-precise
 
    packages:
-      - expect-dev   
+      - expect-dev
 
   chrome: stable
   hosts:
@@ -42,7 +42,7 @@ install:
     - cd ./../frontend
     - yarn install
     - yarn lint
-    - yarn build
+    - yarn build:test
 
 cache:
   yarn: true
