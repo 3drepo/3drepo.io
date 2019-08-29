@@ -184,7 +184,7 @@ export function* deleteGroups({ teamspace, modelId, groups }) {
 			];
 
 			if (overriddenGroup) {
-				actions.push(put(GroupsActions.removeColorOverride([overriddenGroup])));
+				actions.push(put(GroupsActions.removeColorOverride(groupId)));
 			}
 
 			return actions;
@@ -223,6 +223,7 @@ export function* downloadGroups({ teamspace, modelId }) {
 export function* showDetails({ group, revision }) {
 	try {
 		yield put(GroupsActions.clearSelectionHighlights());
+		yield put(GroupsActions.highlightGroup(group));
 		const objectsStatus = yield Viewer.getObjectsStatus();
 
 		if (group.objects && objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
@@ -230,13 +231,6 @@ export function* showDetails({ group, revision }) {
 			group.objects = objectsStatus.highlightedNodes;
 		}
 
-		const colorOverrides = yield select(selectColorOverrides);
-		const overriddenGroup = colorOverrides[group._id];
-		if (overriddenGroup) {
-			yield put(GroupsActions.removeColorOverride([overriddenGroup], true));
-		}
-
-		yield put(GroupsActions.setActiveGroup(group, revision));
 		yield put(GroupsActions.setComponentState({
 			showDetails: true,
 			newGroup: group,
@@ -252,6 +246,7 @@ export function* closeDetails() {
 		const activeGroup = yield select(selectActiveGroupDetails);
 		yield put(GroupsActions.highlightGroup(activeGroup));
 		yield put(GroupsActions.setComponentState({ showDetails: false }));
+
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('close', 'group details', error));
 	}
