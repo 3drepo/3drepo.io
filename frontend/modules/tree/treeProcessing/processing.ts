@@ -91,12 +91,13 @@ export class Processing {
 		});
 
 		if (!skipChildren) {
-			const compactNodes = [];
+			let compactNodes = [];
 
 			for (let index = 0, size = nodes.length; index < size; index++) {
 				const node = nodes[index];
 				const children = this.getDeepChildren(node);
-				compactNodes.push(node, ...children);
+				compactNodes.push(node);
+				compactNodes = compactNodes.concat(children);
 			}
 
 			nodes = compactNodes;
