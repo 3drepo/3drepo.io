@@ -109,10 +109,6 @@ export function* sessionExpired() {
 		StateManager.resetServiceStates();
 
 		yield put({ type: 'RESET_APP' });
-		yield put(DialogActions.showDialog({
-			title: 'Session expired',
-			content: 'You have been logged out as your session has expired'
-		}));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('verify', 'user session', e));
 	}
