@@ -28,255 +28,390 @@ const Comment = require("../models/comment");
 const config = require("../config");
 
 /**
- * @api {get} /:teamspace/:model/risks/:riskId Find Risk by ID
- * @apiName findRiskById
- * @apiGroup Risks
+ * @apiDefine Risks Risks
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} id Risk ID.
+ */
+
+/**
+ * @api {get} /:teamspace/:model/risks/:riskId Get a risk
+ * @apiName findRiskById
+ * @apiGroup Risks
+ * @apiDescription Retrieve a risk. The response includes all comments
+ * and screenshot URLs.
+ *
+ * @apiUse Risks
+ *
+ * @apiParam {String} riskId Risk ID
+ * @apiSuccess {Object} issue The Issue matching the Issue ID
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000001 HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response.
+ * HTTP/1.1 200 OK
+ * {
+ * }
  */
 router.get("/risks/:riskId", middlewares.issue.canView, findRiskById);
 
 /**
- * @api {get} /:teamspace/:model/risks/:riskId/thumbnail.png Get Risks Thumbnail
+ * @api {get} /:teamspace/:model/risks/:riskId/thumbnail.png Get risk thumbnail
  * @apiName getThumbnail
  * @apiGroup Risks
+ * @apiDescription Retrieve a risk thumbnail image.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} id Risk ID.
+ * @apiUse Risks
+ *
+ * @apiParam {String} riskId Risk ID
+ * @apiSuccess {png} image Thumbnail image
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000001/thumbnail.png HTTP/1.1
+ *
+ * @apiSuccessExample {png} Success-Response
+ * HTTP/1.1 200 OK
+ * <binary image>
  */
 router.get("/risks/:riskId/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 /**
- * @api {get} /:teamspace/:model/risks List All Risks
+ * @api {get} /:teamspace/:model/risks List all risks
  * @apiName listRisks
  * @apiGroup Risks
+ * @apiDescription Retrieve all model risks.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
+ * @apiUse Risks
+ *
+ * @apiSuccess (200) {Object[]} risks Risk objects
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/risks HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * [
+ * ]
  */
 router.get("/risks", middlewares.issue.canView, listRisks);
 
 /**
- * @api {get} /:teamspace/:model/risks/:riskId/screenshot.png	Get Risks Screenshot
+ * @api {get} /:teamspace/:model/risks/:riskId/screenshot.png Get risk screenshot
  * @apiName getScreenshot
  * @apiGroup Risks
+ * @apiDescription Retrieve a risk screenshot image.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
+ * @apiUse Risks
+ *
+ * @apiParam {String} riskId Risk ID
+ * @apiSuccess {png} image Screenshot image
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000001/screenshot.png HTTP/1.1
+ *
+ * @apiSuccessExample {png} Success-Response
+ * HTTP/1.1 200 OK
+ * <binary image>
  */
 router.get("/risks/:riskId/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
 
 /**
- * @api {get} /:teamspace/:model/risks/:riskId/screenshotSmall.png  Get Small Risks Screenshot
+ * @api {get} /:teamspace/:model/risks/:riskId/screenshotSmall.png Get low-res screenshot
  * @apiName getScreenshotSmall
  * @apiGroup Risks
+ * @apiDescription Retrieve a low-resolution risk screenshot image.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} id Risk ID.
+ * @apiUse Risks
+ *
+ * @apiParam {String} riskId Risk ID
+ * @apiSuccess {png} image Small screenshot image
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000001/screenshotSmall.png HTTP/1.1
+ *
+ * @apiSuccessExample {png} Success-Response
+ * HTTP/1.1 200 OK
+ * <binary image>
  */
 router.get("/risks/:riskId/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
 
 /**
- * @api {get} /:teamspace/:model/revision/:rid/risks	List all Risks by revision ID
- * @apiName listRisks
+ * @api {get} /:teamspace/:model/revision/:revId/risks List all revision risks
+ * @apiName listRisksByRevision
  * @apiGroup Risks
+ * @apiDescription Retrieve all risks associated with a model revision.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} id Revision ID.
+ * @apiUse Risks
+ *
+ * @apiParam {String} revId Revision ID
+ * @apiSuccess (200) {Object[]} risks Risk objects
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * [
+ * ]
  */
 router.get("/revision/:rid/risks", middlewares.issue.canView, listRisks);
 
 /**
- * @api {get} /:teamspace/:model/risks.html  Render all Risks as HTML
+ * @api {get} /:teamspace/:model/risks.html Render risks as HTML
  * @apiName renderRisksHTML
  * @apiGroup Risks
+ * @apiDescription Retrieve HTML page of all risks.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
+ * @apiUse Risks
+ *
+ * @apiParam (Query) {String} ids Risk IDs to show
+ * @apiSuccess (200) {Object[]} risks Risk objects
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/risks.html?[query] HTTP/1.1
+ *
+ * @apiSuccessExample {html} Success-Response
+ * HTTP/1.1 200 OK
+ * <html page>
  */
 router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
 
 /**
- * @api {get} /:teamspace/:model/revision/:rid/risks.html  Render all Risks as HTML by revision ID
- * @apiName renderRisksHTML
+ * @api {get} /:teamspace/:model/revision/:revId/risks.html  Render revision risks as HTML
+ * @apiName renderRisksHTMLBRevision
  * @apiGroup Risks
+ * @apiDescription Retrieve HTML page of all risks associated with a model revision.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} rid Revision ID.
+ * @apiUse Risks
+ *
+ * @apiParam {String} revId Revision ID
+ * @apiParam (Query) {String} ids Risk IDs to show
+ * @apiSuccess (200) {Object[]} risks Risk objects
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks.html?[query] HTTP/1.1
+ *
+ * @apiSuccessExample {html} Success-Response
+ * HTTP/1.1 200 OK
+ * <html page>
  */
 router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHTML);
 
 /**
- * @api {post} /:teamspace/:model/risks  Store Risks
+ * @api {post} /:teamspace/:model/risks Create a risk
  * @apiName storeRisk
  * @apiGroup Risks
+ * @apiDescription Create a model risk.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} id Revision ID.
+ * @apiUse Risks
+ *
+ * @apiExample {post} Example usage:
+ * POST /acme/00000000-0000-0000-0000-000000000000/risks HTTP/1.1
+ * {
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * }
  */
 router.post("/risks", middlewares.issue.canCreate, storeRisk);
 
 /**
- * @api {patch} /:teamspace/:model/risks/:riskId	Update risks based on revision
+ * @api {patch} /:teamspace/:model/risks/:riskId Update risk
  * @apiName updateRisk
  * @apiGroup Risks
+ * @apiDescription Update model risk.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} riskId Risk ID.
+ * @apiUse Risks
+ *
+ * @apiParam {String} riskId Risk ID
+ *
+ * @apiExample {put} Example usage:
+ * PUT /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000001 HTTP/1.1
+ * {
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * }
  */
 router.patch("/risks/:riskId", middlewares.issue.canComment, updateRisk,  middlewares.chat.onUpdateRisk,responseCodes.onSuccessfulOperation);
 
 /**
- * @api {post} /:teamspace/:model/revision/:rid/risks	Store risks based on Revision ID
- * @apiName storeRisk
+ * @api {post} /:teamspace/:model/revision/:revId/risks Create a risk on revision
+ * @apiName storeRiskByRevision
  * @apiGroup Risks
+ * @apiDescription Create a model risk on a revision.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} rid Revision ID.
+ * @apiUse Risks
+ *
+ * @apiParam {String} revId Revision ID
+ *
+ * @apiExample {post} Example usage:
+ * PUT /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks HTTP/1.1
+ * {
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * }
  */
 router.post("/revision/:rid/risks", middlewares.issue.canCreate, storeRisk);
 
 /**
- * @api {patch} /:teamspace/:model/revision/:rid/risks/:riskId  Update Risk based on revision ID
- * @apiName  updateRisk
+ * @api {patch} /:teamspace/:model/revision/:revId/risks/:riskId Update risk on revision
+ * @apiName  updateRiskByRevision
  * @apiGroup Risks
+ * @apiDescription Update model risk.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} rid Revision ID.
- * @apiParam {String} riskId Risk ID.
+ * @apiUse Risks
+ *
+ * @apiParam {String} revId Revision ID
+ * @apiParam {String} riskId Risk ID
+ *
+ * @apiExample {put} Example usage:
+ * PUT /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks/00000000-0000-0000-0000-000000000002 HTTP/1.1
+ * {
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * }
  */
 router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updateRisk, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {post} /:teamspace/:model/risks/:riskId/comments Add an comment for an issue
- * @apiName commentIssue
+ * @api {post} /:teamspace/:model/risks/:riskId/comments Add a comment
+ * @apiName commentRisk
  * @apiGroup Risks
+ * @apiDescription Create a comment in a risk.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} riskId Unique Issue ID to update.
+ * @apiUse Risks
+ *
+ * @apiParam {String} riskId Risk ID
  * @apiParam {Json} PAYLOAD The data with the comment to be added.
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/risks HTTP/1.1
+ *
  * @apiParamExample {json} PAYLOAD
- *    {
- *      "comment": "This is a commment",
- *      "viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
- *    }
+ * {
+ * 	"comment": "This is a commment",
+ * 	"viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
+ * }
  *
  * @apiSuccessExample {json} Success
- *    HTTP/1.1 200 OK
- *   {
- *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
- *       comment: "This is a commment",
- *       created: 1558534690327,
- *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
- *       owner: "username",
- *       viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
- *   }
- *
- * @apiError 404 Issue not found
- * @apiError 400 Comment with no text
- * */
+ * HTTP/1.1 200 OK
+ * {
+ * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
+ * 	comment: "This is a commment",
+ * 	created: 1558534690327,
+ * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
+ * 	owner: "username",
+ * 	viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
+ * }
+ **/
 router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {delete} /:teamspace/:model/risks/:riskId/comments Deletes an comment from an issue
- * @apiName commentIssue
- * @apiGroup Issues
+ * @api {delete} /:teamspace/:model/risks/:riskId/comments Deletes a comment
+ * @apiName deleteComment
+ * @apiGroup Risks
+ * @apiDescription Delete a risk comment.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} riskId	 Unique Issue ID to update.
+ * @apiUse Risks
+ *
+ * @apiParam {String} riskId Risk ID
  * @apiParam {Json} PAYLOAD The data with the comment guid to be deleted.
+ *
  * @apiParamExample {json} PAYLOAD
- *    {
- *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
- *    }
+ * {
+ * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
+ * }
  *
  * @apiSuccessExample {json} Success
- *    HTTP/1.1 200 OK
- *   {
- *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
- *   }
+ * HTTP/1.1 200 OK
+ * {
+ * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
+ * }
+ **/
+router.delete("/risks/:riskId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {post} /:teamspace/:model/risks/:riskId/comments Add a comment
+ * @apiName commentIssue
+ * @apiGroup Risks
+ * @apiDescription Add a model risk comment.
  *
- * @apiError 404 Issue not found
- * @apiError 401 Not authorized, when the user is not the owner
- * @apiError 400 Issue comment sealed, when the user is trying to delete a comment that is sealed
- * @apiError 400 GUID invalid, when the user sent an invalid guid
+ * @apiUse Risks
+ *
+ * @apiParam {String} riskId Unique Issue ID to update.
+ * @apiParam {Json} PAYLOAD The data with the comment to be added.
+ *
+ * @apiParamExample {json} PAYLOAD
+ * {
+ * 	"comment": "This is a commment",
+ * 	"viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
+ * }
+ *
+ * @apiSuccessExample {json} Success
+ * HTTP/1.1 200 OK
+ * {
+ * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
+ * 	comment: "This is a commment",
+ * 	created: 1558534690327,
+ * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
+ * 	owner: "username",
+ * 	viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
+ * }
+ **/
+router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {delete} /:teamspace/:model/risks/:riskId/comments Delete a comment
+ * @apiName deleteRiskComment
+ * @apiGroup Issues
+ * @apiDescription Delete a risk comment.
+ *
+ * @apiUse Risks
+ *
+ * @apiParam {String} riskId Risk ID
+ * @apiParam {Json} PAYLOAD The data with the comment guid to be deleted.
+ *
+ * @apiParamExample {json} PAYLOAD
+ * {
+ * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
+ * }
+ *
+ * @apiSuccessExample {json} Success
+ * HTTP/1.1 200 OK
+ * {
+ * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
+ * }
  * */
 router.delete("/risks/:riskId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {post} /:teamspace/:model/risks/:riskId/comments Add an comment for an issue
- * @apiName commentIssue
- * @apiGroup Risks
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} riskId Unique Issue ID to update.
- * @apiParam {Json} PAYLOAD The data with the comment to be added.
- * @apiParamExample {json} PAYLOAD
- *    {
- *      "comment": "This is a commment",
- *      "viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
- *    }
- *
- * @apiSuccessExample {json} Success
- *    HTTP/1.1 200 OK
- *   {
- *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
- *       comment: "This is a commment",
- *       created: 1558534690327,
- *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
- *       owner: "username",
- *       viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
- *   }
- *
- * @apiError 404 Issue not found
- * @apiError 400 Comment with no text
- * */
-router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
-
-/**
- * @api {delete} /:teamspace/:model/risks/:riskId/comments Deletes an comment from an issue
- * @apiName commentIssue
- * @apiGroup Issues
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} riskId	 Unique Issue ID to update.
- * @apiParam {Json} PAYLOAD The data with the comment guid to be deleted.
- * @apiParamExample {json} PAYLOAD
- *    {
- *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
- *    }
- *
- * @apiSuccessExample {json} Success
- *    HTTP/1.1 200 OK
- *   {
- *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
- *   }
- *
- * @apiError 404 Issue not found
- * @apiError 401 Not authorized, when the user is not the owner
- * @apiError 400 Issue comment sealed, when the user is trying to delete a comment that is sealed
- * @apiError 400 GUID invalid, when the user sent an invalid guid
- * */
-router.delete("/risks/:riskId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
-
-/**
- * @api {delete} /:teamspace/:model/risks/ Delete risks
+ * @api {delete} /:teamspace/:model/risks?ids=:ids Delete risks
  * @apiName deleteRisks
  * @apiGroup Risks
+ * @apiDescription Delete model risks.
+ *
+ * @apiUse Risks
+ *
+ * @apiParam (Query) {String} ids Comma separated list of IDs of risks to delete
+ *
+ * @apiExample {delete} Example usage:
+ * DELETE /acme/00000000-0000-0000-0000-000000000000/risks?ids=00000000-0000-0000-0000-000000000001 HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {}
  */
 router.delete("/risks/", middlewares.issue.canCreate, deleteRisks);
 

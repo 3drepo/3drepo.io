@@ -37,7 +37,7 @@ const Comment = require("../models/comment");
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {Number} id Issue ID.
+ * @apiParam {Number} issueId Issue ID
  *
  * @apiDescription Find an issue with the requested Issue ID.
  *
