@@ -563,7 +563,6 @@ export function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId
 }
 
 export function* setNewIssue() {
-	const issues = yield select(selectIssues);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
 	const topicTypes: any[] = yield select(selectTopicTypes);
