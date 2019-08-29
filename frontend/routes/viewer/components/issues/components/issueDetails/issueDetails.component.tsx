@@ -27,10 +27,8 @@ import { canComment, getIssuePinColor } from '../../../../../../helpers/issues';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 import { EmptyStateInfo } from '../../../views/views.styles';
-import { timingSafeEqual } from 'crypto';
 import { NEW_PIN_ID } from '../../../../../../constants/viewer';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
-import { exportIssuesToJSON } from '../../../../../../services/export';
 
 interface IProps {
 	jobs: any[];

@@ -18,12 +18,6 @@ import { getAPIUrl } from '../services/api';
 import { ISSUE_COLORS, STATUSES_ICONS, STATUSES } from '../constants/issues';
 import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
 
-const renameFieldIfExists = (issue, fieldName, newFieldName) => {
-	if (issue[fieldName]) {
-		issue[newFieldName] = issue[fieldName];
-	}
-};
-
 export const prepareIssue = (issue, jobs = []) => {
 	const preparedIssue = {...issue};
 	if (issue.thumbnail) {
@@ -54,10 +48,6 @@ export const prepareIssue = (issue, jobs = []) => {
 	if (issue.status) {
 		preparedIssue.defaultHidden = issue.status === STATUSES.CLOSED;
 	}
-
-	renameFieldIfExists(preparedIssue, 'desc', 'description');
-	renameFieldIfExists(preparedIssue, 'owner', 'author');
-	renameFieldIfExists(preparedIssue, 'created', 'createdDate');
 
 	return preparedIssue;
 };
