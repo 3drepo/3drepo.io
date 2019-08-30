@@ -23,11 +23,10 @@ import { Container } from './riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { RiskDetailsForm } from './riskDetailsForm.component';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
-import { canComment, getRiskPinColor } from '../../../../../../helpers/risks';
+import { canComment } from '../../../../../../helpers/risks';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 import { EmptyStateInfo } from '../../../views/views.styles';
-import { NEW_PIN_ID } from '../../../../../../constants/viewer';
 import { mergeData, diffData } from '../../../../../../helpers/forms';
 
 interface IProps {
@@ -221,6 +220,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					}
 				}}
 				scrolled={this.state.scrolled}
+				isNew={this.isNewRisk}
 			/>
 		);
 	});

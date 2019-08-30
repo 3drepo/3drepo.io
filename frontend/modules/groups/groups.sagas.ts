@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { values } from 'lodash';
-import { put, takeLatest, takeEvery, select, all } from 'redux-saga/effects';
+import { put, takeLatest, select, all } from 'redux-saga/effects';
 import { getAngularService, dispatch, getState } from '../../helpers/migration';
 import { calculateTotalMeshes } from '../../helpers/tree';
 

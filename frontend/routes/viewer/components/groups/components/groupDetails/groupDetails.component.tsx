@@ -193,6 +193,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			panelName={GROUP_PANEL_NAME}
 			StatusIconComponent={GROUP_TYPES_ICONS[this.groupData.type]}
 			scrolled={this.state.scrolled}
+			isNew={this.isNewGroup}
 		/>
 	));
 
