@@ -246,7 +246,7 @@ class ModelController implements ng.IController {
 	}
 
 	private handleModelSettingsChange = async (settings) => {
-		await this.setupViewer(settings);
+		this.setupViewer(settings);
 		if (!this.ViewerService.currentModel.model) {
 			if (this.ViewerService.viewer) {
 				try {

@@ -44,8 +44,8 @@ interface IProps {
 	roleColor: string;
 	name: string;
 	number: number;
-	author: string;
-	createdDate: string;
+	owner: string;
+	created: string;
 	StatusIconComponent: any;
 	statusColor: string;
 	defaultExpanded: boolean;
@@ -178,8 +178,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			roleColor,
 			// tslint:disable-next-line
 			number,
-			author,
-			createdDate,
+			owner,
+			created,
 			StatusIconComponent,
 			statusColor,
 			editable,
@@ -190,8 +190,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			renderNotCollapsable,
 			handleHeaderClick
 		} = this.props;
-
-		const createdAt = !editable ? createdDate : null;
 
 		return (
 			<Container className={className}>
@@ -211,8 +209,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 				<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
 					<Details>
 						<PreviewItemInfo
-							author={author}
-							createdAt={createdAt}
+							author={owner}
+							createdAt={created}
 							StatusIconComponent={StatusIconComponent}
 							statusColor={statusColor}
 						/>

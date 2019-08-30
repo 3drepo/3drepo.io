@@ -17,8 +17,8 @@
 
 import styled from 'styled-components';
 import FormControl from '@material-ui/core/FormControl';
+import TextField from '@material-ui/core/TextField';
 
-import { TextField } from '../../../../../components/textField/textField.component';
 import { COLOR } from '../../../../../../styles';
 import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
 
@@ -30,7 +30,7 @@ export const Container = styled.div`
 export const FieldsRow = styled.div`
 	display: flex;
 	align-items: center;
-	margin-top: 10px;
+	margin: 10px 0;
 `;
 
 export const StyledTextField = styled(TextField)`

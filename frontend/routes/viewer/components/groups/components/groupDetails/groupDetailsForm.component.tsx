@@ -105,8 +105,10 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { group: { updateDate, type, description, name, color, rules, totalSavedMeshes } } = this.props;
-		const initialValues = { type, description, name, color, rules };
+		const {
+			group: { updatedAt, type, desc: description, name, color, rules, totalSavedMeshes }
+		} = this.props;
+		const initialValues = { type, description , name, color, rules };
 
 		return (
 			<Formik
@@ -126,7 +128,7 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 						/>
 						<StyledTextField
 							label="Last updated"
-							value={formatDateTime(updateDate)}
+							value={formatDateTime(updatedAt)}
 							disabled
 						/>
 						<StyledFormControl>

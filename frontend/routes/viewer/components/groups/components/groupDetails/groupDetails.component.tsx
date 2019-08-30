@@ -131,7 +131,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	public renderGroupForm = () => (
 		<GroupDetailsForm
 			ref={this.formRef}
-			key={`${this.groupData._id}.${this.groupData.updateDate}`}
+			key={`${this.groupData._id}.${this.groupData.updatedAt}`}
 			group={this.groupData}
 			onSubmit={this.handleGroupFormSubmit}
 			currentUser={this.props.currentUser}
@@ -184,7 +184,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			key={this.groupData._id}
 			{...this.groupData}
 			roleColor={this.groupData.color}
-			createdDate={this.groupData.createdDate}
+			created={this.groupData.createdAt}
 			editable={this.props.canUpdate}
 			onNameChange={this.handleFieldChange}
 			renderCollapsable={this.renderGroupForm}
