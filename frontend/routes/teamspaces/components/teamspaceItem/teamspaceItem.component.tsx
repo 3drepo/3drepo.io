@@ -16,7 +16,7 @@
  */
 
 import { memoize } from 'lodash';
-import React from 'react';
+import React, { memo } from 'react';
 
 import { getAvatarUrl } from '../../../../services/api';
 import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
@@ -26,7 +26,7 @@ import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
-import { Avatar, OwnerData } from './teamspaceItem.styles';
+import { Avatar } from './teamspaceItem.styles';
 
 interface IProps {
 	name: string;
@@ -44,7 +44,7 @@ interface IProps {
 
 const getMemoizedAvatarUrl = memoize(getAvatarUrl);
 
-export const TeamspaceItem = (props: IProps) => {
+export const TeamspaceItem = memo((props: IProps) => {
 	const {
 		name,
 		projects,
@@ -54,8 +54,6 @@ export const TeamspaceItem = (props: IProps) => {
 		onAddProject,
 		permissions,
 		disabled,
-		firstName,
-		lastName,
 		hasAvatar,
 	} = props;
 
@@ -94,4 +92,4 @@ export const TeamspaceItem = (props: IProps) => {
 			{renderActions}
 		</TreeList>
 	);
-};
+});

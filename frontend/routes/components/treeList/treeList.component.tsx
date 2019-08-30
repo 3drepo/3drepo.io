@@ -130,24 +130,28 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 		const active = this.isActive;
 		const containerProps = { active, level, disabled, hovered };
 
-		const headlineProps = {
+		const rootProps = {
 			...props,
 			active,
 			disabled,
 			hovered,
 		};
 
+		const headlineProps = level === TREE_LEVELS.PROJECT ? {
+			onMouseEnter: this.createHoverHandler(true),
+			onMouseLeave: this.createHoverHandler(false)
+		} : {};
+
 		return (
 			<Container {...containerProps}>
 				<Headline
 					onClick={this.handleRootClick}
-					onMouseEnter={this.createHoverHandler(true)}
-					onMouseLeave={this.createHoverHandler(false)}
+					{...headlineProps}
 				>
 					{
 						renderRoot
-							? renderRoot(headlineProps)
-							: <DefaultHeadline {...headlineProps} />
+							? renderRoot(rootProps)
+							: <DefaultHeadline {...rootProps} />
 					}
 				</Headline>
 			</Container>

@@ -65,7 +65,6 @@ import {
 	LoaderContainer,
 	MenuButton
 } from './teamspaces.styles';
-
 interface IProps {
 	match: any;
 	history: any;
@@ -182,25 +181,22 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		const filtersCleared = !selectedFilters.length && prevProps.selectedFilters.length;
 		const itemsChanged = prevProps.items && prevProps.items !== items;
 
-		if (searchEnabled && (selectedFilters.length || filtersCleared) && itemsChanged) {
-			const visibleItems = { ...this.state.visibleItems };
-			const defaultVisibleItems = {
+		if (filtersCleared) {
+			const visibleItems = {
 				[this.props.currentTeamspace]: true
 			};
+			this.setState({ visibleItems });
+		} else if (searchEnabled && (selectedFilters.length) && itemsChanged) {
+			const visibleItems = { ...this.state.visibleItems };
 
-			if (!filtersCleared) {
-				items.forEach(({ collapsed, id }) => {
-					if (collapsed) {
-						delete visibleItems[id];
-					} else {
-						visibleItems[id] = true;
-					}
-				});
-			}
-
-			this.setState({
-				visibleItems: !filtersCleared ? visibleItems : defaultVisibleItems
+			items.forEach(({ collapsed, id }) => {
+				if (collapsed) {
+					delete visibleItems[id];
+				} else {
+					visibleItems[id] = true;
+				}
 			});
+			this.setState({ visibleItems });
 		}
 	}
 
