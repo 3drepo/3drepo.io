@@ -17,17 +17,18 @@
 
 import * as React from 'react';
 import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 
 import {
 	HeaderCell,
 	HeaderCheckboxWrapper,
+	ModelName,
 	StyledCheckbox,
 	StyledTable,
-	StyledTableHead
+	StyledTableHead,
+	TableCell,
+	TableRow
 } from './subModelsTable.styles';
 
 interface IProps {
@@ -88,7 +89,8 @@ export const SubModelsTable = (props: IProps) => {
 								onClick={handleItemClick(model.name)}
 							>
 								<TableCell padding="none">
-									<StyledCheckbox checked={isModelSelected} /> {model.name}
+									<StyledCheckbox checked={isModelSelected} />
+									<ModelName>{model.name}</ModelName>
 								</TableCell>
 							</TableRow>
 						);

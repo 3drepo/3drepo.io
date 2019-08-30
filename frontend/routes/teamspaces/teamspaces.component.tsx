@@ -242,23 +242,26 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			this.props.showDialog({
 				title: modelName ? 'Edit federation' : 'New federation',
 				template: FederationDialog,
-				data: {name: modelName,
-				modelName,
-				teamspace: teamspaceName,
-				teamspaces,
-				project:  projectName ,
-				projects: teamspaceName ? this.getTeamspaceProjects(teamspaceName) : [],
-
-				editMode: !!modelName,
-				modelId
-			},
-			onConfirm: ({ teamspace, ...modelData }) => {
-				if (isNewModel) {
-					this.props.createModel(teamspace, modelData);
-				} else {
-					this.props.updateModel(teamspace, modelId, modelData);
+				data: {
+					name: modelName,
+					modelName,
+					teamspace: teamspaceName,
+					teamspaces,
+					project:  projectName ,
+					projects: teamspaceName ? this.getTeamspaceProjects(teamspaceName) : [],
+					editMode: !!modelName,
+					modelId
+				},
+				DialogProps: {
+					maxWidth: 'lg'
+				},
+				onConfirm: ({ teamspace, ...modelData }) => {
+					if (isNewModel) {
+						this.props.createModel(teamspace, modelData);
+					} else {
+						this.props.updateModel(teamspace, modelId, modelData);
+					}
 				}
-			}
 		});
 	}
 
