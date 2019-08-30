@@ -96,15 +96,16 @@ export const selectCriteriaFieldState = createSelector(
 );
 
 export const selectOverrides = createSelector(
-	selectColorOverrides, selectFilteredGroups, (groupOverrides, groups) => {
-		const groupsMap = groups.reduce((map, group) => {
+	selectColorOverrides, selectFilteredGroups, selectComponentState, (groupOverrides, filteredGroups, componentState) => {
+		const filteredGroupsMap = filteredGroups.reduce((map, group) => {
 			map[group._id] = group;
 			return map;
 		} , {});
 
 		return groupOverrides.reduce((overrides, groupId) => {
-			if (groupsMap[groupId]) {
-				getGroupOverride(overrides, groupsMap[groupId]);
+			// filter out the filtered groups and if its showing details the selected group
+			if (filteredGroupsMap[groupId] && (!componentState.showDetails || componentState.activeGroup !== groupId)) {
+				getGroupOverride(overrides, filteredGroupsMap[groupId]);
 			}
 			return overrides;
 		}, {});
