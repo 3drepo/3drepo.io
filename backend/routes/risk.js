@@ -47,11 +47,56 @@ const config = require("../config");
  * @apiSuccess {Object} issue The Issue matching the Issue ID
  *
  * @apiExample {get} Example usage:
- * GET /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000001 HTTP/1.1
+ * GET /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002 HTTP/1.1
  *
  * @apiSuccessExample {json} Success-Response.
  * HTTP/1.1 200 OK
  * {
+ * 	"name":"Risk 1",
+ * 	"associated_activity":"",
+ * 	"assigned_roles":[
+ * 		"Job1"
+ * 	],
+ * 	"category":"safety_fall",
+ * 	"comments":[],
+ * 	"safetibase_id":"",
+ * 	"likelihood":0,
+ * 	"consequence":0,
+ * 	"residual_likelihood":-1,
+ * 	"residual_consequence":-1,
+ * 	"mitigation_status":"",
+ * 	"mitigation_desc":"",
+ * 	"residual_risk":"",
+ * 	"owner":"alice",
+ * 	"thumbnail":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png",
+ * 	"desc":"Risk description that describes the risk",
+ * 	"creator_role":"Job4",
+ * 	"position":[55000.0,80000.0,-10000.0],
+ * 	"norm":[0,0,0],
+ * 	"_id":"00000000-0000-0000-0000-000000000002",
+ * 	"created":1567156228976,
+ * 	"rev_id":"00000000-0000-0000-0000-000000000001",
+ * 	"account":"acme",
+ * 	"model":"00000000-0000-0000-0000-000000000000",
+ * 	"viewpoint":{
+ * 		"right":[0.8,-0.3,0.6],
+ * 		"up":[0.3,0.9,-0.3],
+ * 		"position":[-70000.0,120000.0,150000.0],
+ * 		"look_at":[35000.0,40000.0,8000.0],
+ * 		"view_dir":[0.5,-0.4,-0.7],
+ * 		"near":600.0,
+ * 		"far":300000,
+ * 		"fov":1.05,
+ * 		"aspect_ratio":1.4,
+ * 		"clippingPlanes":[],
+ * 		"hideIfc":true,
+ * 		"screenshot":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png",
+ * 		"guid":"00000000-0000-0000-0000-000000000004",
+ * 		"screenshotSmall":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png"
+ * 	},
+ * 	"level_of_risk":0,
+ * 	"residual_level_of_risk":-1,
+ * 	"overall_level_of_risk":0
  * }
  */
 router.get("/risks/:riskId", middlewares.issue.canView, findRiskById);
@@ -68,7 +113,7 @@ router.get("/risks/:riskId", middlewares.issue.canView, findRiskById);
  * @apiSuccess {png} image Thumbnail image
  *
  * @apiExample {get} Example usage:
- * GET /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000001/thumbnail.png HTTP/1.1
+ * GET /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png HTTP/1.1
  *
  * @apiSuccessExample {png} Success-Response
  * HTTP/1.1 200 OK
@@ -77,21 +122,72 @@ router.get("/risks/:riskId", middlewares.issue.canView, findRiskById);
 router.get("/risks/:riskId/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 /**
- * @api {get} /:teamspace/:model/risks List all risks
+ * @api {get} /:teamspace/:model[/revision/:revId]/risks List all risks
  * @apiName listRisks
  * @apiGroup Risks
  * @apiDescription Retrieve all model risks.
  *
  * @apiUse Risks
  *
+ * @apiParam {String} [revId] Revision ID
  * @apiSuccess (200) {Object[]} risks Risk objects
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/risks HTTP/1.1
  *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks HTTP/1.1
+ *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * [
+ * 	{
+ * 		"name":"Risk 1",
+ * 		"associated_activity":"",
+ * 		"assigned_roles":[
+ * 			"Job1"
+ * 		],
+ * 		"category":"safety_fall",
+ * 		"comments":[],
+ * 		"safetibase_id":"",
+ * 		"likelihood":0,
+ * 		"consequence":0,
+ * 		"residual_likelihood":-1,
+ * 		"residual_consequence":-1,
+ * 		"mitigation_status":"",
+ * 		"mitigation_desc":"",
+ * 		"residual_risk":"",
+ * 		"owner":"alice",
+ * 		"thumbnail":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png",
+ * 		"desc":"Risk description that describes the risk",
+ * 		"creator_role":"Job4",
+ * 		"position":[55000.0,80000.0,-10000.0],
+ * 		"norm":[0,0,0],
+ * 		"_id":"00000000-0000-0000-0000-000000000002",
+ * 		"created":1567156228976,
+ * 		"rev_id":"00000000-0000-0000-0000-000000000001",
+ * 		"account":"acme",
+ * 		"model":"00000000-0000-0000-0000-000000000000",
+ * 		"viewpoint":{
+ * 			"right":[0.8,-0.3,0.6],
+ * 			"up":[0.3,0.9,-0.3],
+ * 			"position":[-70000.0,120000.0,150000.0],
+ * 			"look_at":[35000.0,40000.0,8000.0],
+ * 			"view_dir":[0.5,-0.4,-0.7],
+ * 			"near":600.0,
+ * 			"far":300000,
+ * 			"fov":1.05,
+ * 			"aspect_ratio":1.4,
+ * 			"clippingPlanes":[],
+ * 			"hideIfc":true,
+ * 			"screenshot":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png",
+ * 			"guid":"00000000-0000-0000-0000-000000000004",
+ * 			"screenshotSmall":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png"
+ * 		},
+ * 		"level_of_risk":0,
+ * 		"residual_level_of_risk":-1,
+ * 		"overall_level_of_risk":0
+ * 	}
  * ]
  */
 router.get("/risks", middlewares.issue.canView, listRisks);
@@ -108,7 +204,7 @@ router.get("/risks", middlewares.issue.canView, listRisks);
  * @apiSuccess {png} image Screenshot image
  *
  * @apiExample {get} Example usage:
- * GET /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000001/screenshot.png HTTP/1.1
+ * GET /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/screenshot.png HTTP/1.1
  *
  * @apiSuccessExample {png} Success-Response
  * HTTP/1.1 200 OK
@@ -128,7 +224,7 @@ router.get("/risks/:riskId/viewpoints/:vid/screenshot.png", middlewares.issue.ca
  * @apiSuccess {png} image Small screenshot image
  *
  * @apiExample {get} Example usage:
- * GET /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000001/screenshotSmall.png HTTP/1.1
+ * GET /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/screenshotSmall.png HTTP/1.1
  *
  * @apiSuccessExample {png} Success-Response
  * HTTP/1.1 200 OK
@@ -136,58 +232,22 @@ router.get("/risks/:riskId/viewpoints/:vid/screenshot.png", middlewares.issue.ca
  */
 router.get("/risks/:riskId/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshotSmall);
 
-/**
- * @api {get} /:teamspace/:model/revision/:revId/risks List all revision risks
- * @apiName listRisksByRevision
- * @apiGroup Risks
- * @apiDescription Retrieve all risks associated with a model revision.
- *
- * @apiUse Risks
- *
- * @apiParam {String} revId Revision ID
- * @apiSuccess (200) {Object[]} risks Risk objects
- *
- * @apiExample {get} Example usage:
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks HTTP/1.1
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * [
- * ]
- */
 router.get("/revision/:rid/risks", middlewares.issue.canView, listRisks);
 
 /**
- * @api {get} /:teamspace/:model/risks.html Render risks as HTML
+ * @api {get} /:teamspace/:model[/revision/:revId]/risks.html Render risks as HTML
  * @apiName renderRisksHTML
  * @apiGroup Risks
  * @apiDescription Retrieve HTML page of all risks.
  *
  * @apiUse Risks
  *
+ * @apiParam {String} [revId] Revision ID
  * @apiParam (Query) {String} ids Risk IDs to show
  * @apiSuccess (200) {Object[]} risks Risk objects
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/risks.html?[query] HTTP/1.1
- *
- * @apiSuccessExample {html} Success-Response
- * HTTP/1.1 200 OK
- * <html page>
- */
-router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
-
-/**
- * @api {get} /:teamspace/:model/revision/:revId/risks.html  Render revision risks as HTML
- * @apiName renderRisksHTMLBRevision
- * @apiGroup Risks
- * @apiDescription Retrieve HTML page of all risks associated with a model revision.
- *
- * @apiUse Risks
- *
- * @apiParam {String} revId Revision ID
- * @apiParam (Query) {String} ids Risk IDs to show
- * @apiSuccess (200) {Object[]} risks Risk objects
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks.html?[query] HTTP/1.1
@@ -196,93 +256,233 @@ router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
  * HTTP/1.1 200 OK
  * <html page>
  */
+router.get("/risks.html", middlewares.issue.canView, renderRisksHTML);
+
 router.get("/revision/:rid/risks.html", middlewares.issue.canView, renderRisksHTML);
 
 /**
- * @api {post} /:teamspace/:model/risks Create a risk
+ * @api {post} /:teamspace/:model[/revision/:revId]/risks Create a risk
  * @apiName storeRisk
  * @apiGroup Risks
  * @apiDescription Create a model risk.
  *
  * @apiUse Risks
  *
+ * @apiParam {String} [revId] Revision ID
+ *
  * @apiExample {post} Example usage:
  * POST /acme/00000000-0000-0000-0000-000000000000/risks HTTP/1.1
  * {
+ * 	"name":"Risk 1",
+ * 	"associated_activity":"",
+ * 	"assigned_roles":[
+ * 		"Job1"
+ * 	],
+ * 	"category":"safety_fall",
+ * 	"comments":[],
+ * 	"safetibase_id":"",
+ * 	"likelihood":0,
+ * 	"consequence":0,
+ * 	"level_of_risk":0,
+ * 	"overall_level_of_risk":0,
+ * 	"residual_likelihood":-1,
+ * 	"residual_consequence":-1,
+ * 	"residual_level_of_risk":-1,
+ * 	"mitigation_status":"",
+ * 	"mitigation_desc":"",
+ * 	"residual_risk":"",
+ * 	"viewpoint":{
+ * 		"right":[0.8,-0.3,0.6],
+ * 		"up":[0.3,0.9,-0.3],
+ * 		"position":[-70000.0,120000.0,150000.0],
+ * 		"look_at":[35000.0,40000.0,8000.0],
+ * 		"view_dir":[0.5,-0.4,-0.7],
+ * 		"near":600.0,
+ * 		"far":300000,
+ * 		"fov":1.05,
+ * 		"aspect_ratio":1.4,
+ * 		"clippingPlanes":[],
+ * 		"highlighted_group_id":"",
+ * 		"hideIfc":true,
+ * 		"screenshot":<base64 image>
+ * 	},
+ * 	"desc":"Risk description that describes the risk",
+ * 	"creator_role":"Job4",
+ * 	"position":[55000.0,80000.0,-10000.0],
+ * 	"norm":[0,0,0]
+ * }
+ *
+ * @apiExample {post} Example usage:
+ * POST /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks HTTP/1.1
+ * {
+ * 	"name":"Risk 1",
+ * 	"associated_activity":"",
+ * 	"assigned_roles":[
+ * 		"Job1"
+ * 	],
+ * 	"category":"safety_fall",
+ * 	"comments":[],
+ * 	"safetibase_id":"",
+ * 	"likelihood":0,
+ * 	"consequence":0,
+ * 	"level_of_risk":0,
+ * 	"overall_level_of_risk":0,
+ * 	"residual_likelihood":-1,
+ * 	"residual_consequence":-1,
+ * 	"residual_level_of_risk":-1,
+ * 	"mitigation_status":"",
+ * 	"mitigation_desc":"",
+ * 	"residual_risk":"",
+ * 	"viewpoint":{
+ * 		"right":[0.8,-0.3,0.6],
+ * 		"up":[0.3,0.9,-0.3],
+ * 		"position":[-70000.0,120000.0,150000.0],
+ * 		"look_at":[35000.0,40000.0,8000.0],
+ * 		"view_dir":[0.5,-0.4,-0.7],
+ * 		"near":600.0,
+ * 		"far":300000,
+ * 		"fov":1.05,
+ * 		"aspect_ratio":1.4,
+ * 		"clippingPlanes":[],
+ * 		"highlighted_group_id":"",
+ * 		"hideIfc":true,
+ * 		"screenshot":<base64 image>
+ * 	},
+ * 	"desc":"Risk description that describes the risk",
+ * 	"creator_role":"Job4",
+ * 	"position":[55000.0,80000.0,-10000.0],
+ * 	"norm":[0,0,0]
  * }
  *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
+ * 	"name":"Risk 1",
+ * 	"associated_activity":"",
+ * 	"assigned_roles":[
+ * 		"Job1"
+ * 	],
+ * 	"category":"safety_fall",
+ * 	"comments":[],
+ * 	"safetibase_id":"",
+ * 	"likelihood":0,
+ * 	"consequence":0,
+ * 	"residual_likelihood":-1,
+ * 	"residual_consequence":-1,
+ * 	"mitigation_status":"",
+ * 	"mitigation_desc":"",
+ * 	"residual_risk":"",
+ * 	"owner":"alice",
+ * 	"thumbnail":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png",
+ * 	"desc":"Risk description that describes the risk",
+ * 	"creator_role":"Job4",
+ * 	"position":[55000.0,80000.0,-10000.0],
+ * 	"norm":[0,0,0],
+ * 	"_id":"00000000-0000-0000-0000-000000000002",
+ * 	"created":1567156228976,
+ * 	"rev_id":"00000000-0000-0000-0000-000000000001",
+ * 	"account":"acme",
+ * 	"model":"00000000-0000-0000-0000-000000000000",
+ * 	"viewpoint":{
+ * 		"right":[0.8,-0.3,0.6],
+ * 		"up":[0.3,0.9,-0.3],
+ * 		"position":[-70000.0,120000.0,150000.0],
+ * 		"look_at":[35000.0,40000.0,8000.0],
+ * 		"view_dir":[0.5,-0.4,-0.7],
+ * 		"near":600.0,
+ * 		"far":300000,
+ * 		"fov":1.05,
+ * 		"aspect_ratio":1.4,
+ * 		"clippingPlanes":[],
+ * 		"hideIfc":true,
+ * 		"screenshot":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png",
+ * 		"guid":"00000000-0000-0000-0000-000000000004",
+ * 		"screenshotSmall":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png"
+ * 	},
+ * 	"level_of_risk":0,
+ * 	"residual_level_of_risk":-1,
+ * 	"overall_level_of_risk":0
  * }
  */
 router.post("/risks", middlewares.issue.canCreate, storeRisk);
 
 /**
- * @api {patch} /:teamspace/:model/risks/:riskId Update risk
+ * @api {patch} /:teamspace/:model[/revision/:revId]/risks/:riskId Update risk
  * @apiName updateRisk
  * @apiGroup Risks
  * @apiDescription Update model risk.
  *
  * @apiUse Risks
  *
+ * @apiParam {String} [revId] Revision ID
  * @apiParam {String} riskId Risk ID
  *
- * @apiExample {put} Example usage:
- * PUT /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000001 HTTP/1.1
+ * @apiExample {patch} Example usage:
+ * PATCH /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002 HTTP/1.1
  * {
+ * 	"residual_likelihood":1
+ * }
+ *
+ * @apiExample {patch} Example usage:
+ * PATCH /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks/00000000-0000-0000-0000-000000000002 HTTP/1.1
+ * {
+ * 	"residual_likelihood":1
  * }
  *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
  * {
+ * 	"name":"Risk 1",
+ * 	"associated_activity":"",
+ * 	"assigned_roles":[
+ * 		"Job1"
+ * 	],
+ * 	"category":"safety_fall",
+ * 	"comments":[],
+ * 	"safetibase_id":"",
+ * 	"likelihood":0,
+ * 	"consequence":0,
+ * 	"residual_likelihood":1,
+ * 	"residual_consequence":-1,
+ * 	"mitigation_status":"",
+ * 	"mitigation_desc":"",
+ * 	"residual_risk":"",
+ * 	"owner":"alice",
+ * 	"thumbnail":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png",
+ * 	"desc":"Risk description that describes the risk",
+ * 	"creator_role":"Job4",
+ * 	"position":[55000.0,80000.0,-10000.0],
+ * 	"norm":[0,0,0],
+ * 	"_id":"00000000-0000-0000-0000-000000000002",
+ * 	"created":1567156228976,
+ * 	"rev_id":"00000000-0000-0000-0000-000000000001",
+ * 	"account":"acme",
+ * 	"model":"00000000-0000-0000-0000-000000000000",
+ * 	"viewpoint":{
+ * 		"right":[0.8,-0.3,0.6],
+ * 		"up":[0.3,0.9,-0.3],
+ * 		"position":[-70000.0,120000.0,150000.0],
+ * 		"look_at":[35000.0,40000.0,8000.0],
+ * 		"view_dir":[0.5,-0.4,-0.7],
+ * 		"near":600.0,
+ * 		"far":300000,
+ * 		"fov":1.05,
+ * 		"aspect_ratio":1.4,
+ * 		"clippingPlanes":[],
+ * 		"hideIfc":true,
+ * 		"screenshot":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png",
+ * 		"guid":"00000000-0000-0000-0000-000000000004",
+ * 		"screenshotSmall":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png"
+ * 	},
+ * 	"level_of_risk":0,
+ * 	"residual_level_of_risk":-1,
+ * 	"overall_level_of_risk":0
  * }
  */
 router.patch("/risks/:riskId", middlewares.issue.canComment, updateRisk,  middlewares.chat.onUpdateRisk,responseCodes.onSuccessfulOperation);
 
-/**
- * @api {post} /:teamspace/:model/revision/:revId/risks Create a risk on revision
- * @apiName storeRiskByRevision
- * @apiGroup Risks
- * @apiDescription Create a model risk on a revision.
- *
- * @apiUse Risks
- *
- * @apiParam {String} revId Revision ID
- *
- * @apiExample {post} Example usage:
- * PUT /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks HTTP/1.1
- * {
- * }
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {
- * }
- */
 router.post("/revision/:rid/risks", middlewares.issue.canCreate, storeRisk);
 
-/**
- * @api {patch} /:teamspace/:model/revision/:revId/risks/:riskId Update risk on revision
- * @apiName  updateRiskByRevision
- * @apiGroup Risks
- * @apiDescription Update model risk.
- *
- * @apiUse Risks
- *
- * @apiParam {String} revId Revision ID
- * @apiParam {String} riskId Risk ID
- *
- * @apiExample {put} Example usage:
- * PUT /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks/00000000-0000-0000-0000-000000000002 HTTP/1.1
- * {
- * }
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {
- * }
- */
 router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updateRisk, responseCodes.onSuccessfulOperation);
 
 /**
@@ -294,32 +494,66 @@ router.patch("/revision/:rid/risks/:riskId", middlewares.issue.canComment, updat
  * @apiUse Risks
  *
  * @apiParam {String} riskId Risk ID
- * @apiParam {Json} PAYLOAD The data with the comment to be added.
+ * @apiParam (Request body) {String} _id Risk ID
+ * @apiParam (Request body) {String} rev_id Revision ID
+ * @apiParam (Request body) {String} comment Comment text
+ * @apiParam (Request body) {Object} viewpoint Viewpoint object
+ * @apiSuccess {String} guid Comment ID
+ * @apiSuccess {Number} created Comment creation timestamp
+ * @apiSuccess {String} owner Comment owner
+ * @apiSuccess {String} comment Comment text
+ * @apiSuccess {Object} viewpoint Viewpoint object
  *
- * @apiExample {get} Example usage:
- * GET /acme/00000000-0000-0000-0000-000000000000/risks HTTP/1.1
- *
- * @apiParamExample {json} PAYLOAD
+ * @apiExample {post} Example usage:
+ * POST /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/comments HTTP/1.1
  * {
- * 	"comment": "This is a commment",
- * 	"viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
+ * 	"_id":"00000000-0000-0000-0000-000000000002",
+ * 	"rev_id":"00000000-0000-0000-0000-000000000001",
+ * 	"comment":"Comment 1",
+ * 	"viewpoint":{
+ * 		"right":[0.5,-0.1,0.5],
+ * 		"up":[0.3,0.9,-0.3],
+ * 		"position":[-50000.0,100000.0,150000.0],
+ * 		"look_at":[35000.0,50000.0,9000.0],
+ * 		"view_dir":[0.5,-0.5,-1.0],
+ * 		"near":500.0,
+ * 		"far":300000,
+ * 		"fov":1.05,
+ * 		"aspect_ratio":1.5,
+ * 		"clippingPlanes":[],
+ * 		"highlighted_group_id":"",
+ * 		"screenshot":<base64 image>
+ * 	}
  * }
  *
- * @apiSuccessExample {json} Success
+ * @apiSuccessExample {json} Success-Response.
  * HTTP/1.1 200 OK
  * {
- * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
- * 	comment: "This is a commment",
- * 	created: 1558534690327,
- * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
- * 	owner: "username",
- * 	viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
+ * 	"guid":"00000000-0000-0000-0000-000000000007",
+ * 	"created":1567172228143,
+ * 	"owner":"alice",
+ * 	"comment":"Comment 1",
+ * 	"viewpoint":{
+ * 		"right":[0.5,-0.1,0.5],
+ * 		"up":[0.3,0.9,-0.3],
+ * 		"position":[-50000.0,100000.0,150000.0],
+ * 		"look_at":[35000.0,50000.0,9000.0],
+ * 		"view_dir":[0.5,-0.5,-1.0],
+ * 		"near":500.0,
+ * 		"far":300000,
+ * 		"fov":1.05,
+ * 		"aspect_ratio":1.5,
+ * 		"clippingPlanes":[],
+ * 		"screenshot":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000005/screenshot.png",
+ * 		"guid":"00000000-0000-0000-0000-000000000006",
+ * 		"screenshotSmall":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000005/screenshotSmall.png"
+ * 	}
  * }
  **/
 router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {delete} /:teamspace/:model/risks/:riskId/comments Deletes a comment
+ * @api {delete} /:teamspace/:model/risks/:riskId/comments Delete a comment
  * @apiName deleteComment
  * @apiGroup Risks
  * @apiDescription Delete a risk comment.
@@ -327,73 +561,20 @@ router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment,
  * @apiUse Risks
  *
  * @apiParam {String} riskId Risk ID
- * @apiParam {Json} PAYLOAD The data with the comment guid to be deleted.
+ * @apiParam (Request body) {String} guid Comment ID
  *
- * @apiParamExample {json} PAYLOAD
+ * @apiExample {delete} Example usage:
+ * DELETE /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/comments HTTP/1.1
  * {
- * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
+ * 	"guid":"00000000-0000-0000-0000-000000000007",
  * }
  *
- * @apiSuccessExample {json} Success
+ * @apiSuccessExample {json} Success-Response.
  * HTTP/1.1 200 OK
  * {
- * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
+ * 	"guid":"00000000-0000-0000-0000-000000000007",
  * }
  **/
-router.delete("/risks/:riskId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
-
-/**
- * @api {post} /:teamspace/:model/risks/:riskId/comments Add a comment
- * @apiName commentIssue
- * @apiGroup Risks
- * @apiDescription Add a model risk comment.
- *
- * @apiUse Risks
- *
- * @apiParam {String} riskId Unique Issue ID to update.
- * @apiParam {Json} PAYLOAD The data with the comment to be added.
- *
- * @apiParamExample {json} PAYLOAD
- * {
- * 	"comment": "This is a commment",
- * 	"viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
- * }
- *
- * @apiSuccessExample {json} Success
- * HTTP/1.1 200 OK
- * {
- * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
- * 	comment: "This is a commment",
- * 	created: 1558534690327,
- * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e",
- * 	owner: "username",
- * 	viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
- * }
- **/
-router.post("/risks/:riskId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
-
-/**
- * @api {delete} /:teamspace/:model/risks/:riskId/comments Delete a comment
- * @apiName deleteRiskComment
- * @apiGroup Issues
- * @apiDescription Delete a risk comment.
- *
- * @apiUse Risks
- *
- * @apiParam {String} riskId Risk ID
- * @apiParam {Json} PAYLOAD The data with the comment guid to be deleted.
- *
- * @apiParamExample {json} PAYLOAD
- * {
- * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
- * }
- *
- * @apiSuccessExample {json} Success
- * HTTP/1.1 200 OK
- * {
- * 	guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
- * }
- * */
 router.delete("/risks/:riskId/comments", middlewares.issue.canComment, deleteComment, middlewares.chat.onCommentDeleted, responseCodes.onSuccessfulOperation);
 
 /**
@@ -407,7 +588,7 @@ router.delete("/risks/:riskId/comments", middlewares.issue.canComment, deleteCom
  * @apiParam (Query) {String} ids Comma separated list of IDs of risks to delete
  *
  * @apiExample {delete} Example usage:
- * DELETE /acme/00000000-0000-0000-0000-000000000000/risks?ids=00000000-0000-0000-0000-000000000001 HTTP/1.1
+ * DELETE /acme/00000000-0000-0000-0000-000000000000/risks?ids=00000000-0000-0000-0000-000000000002 HTTP/1.1
  *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK
