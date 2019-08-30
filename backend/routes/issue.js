@@ -188,7 +188,7 @@ router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 /**
  * @api {get} /:teamspace/:model/issues.bcfzip Get Issue Screenshot
  * @apiName getScreenshot
- * @apiGroup Issue.
+ * @apiGroup Issues
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
