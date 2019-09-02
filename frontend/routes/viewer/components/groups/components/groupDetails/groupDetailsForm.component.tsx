@@ -65,29 +65,15 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 	}
 
 	public areSharedIdsChanged = (selectedNodes = [], groupObjects = []) => {
-		if (!selectedNodes.length && !groupObjects.length) {
-			return false;
-		}
+		const toFullIdsDict = (dict, val) => {
+			val.shared_ids.forEach((e) => dict[val.account + '.' + val.model + '.' + e] = true);
+			return dict;
+		};
 
-		if (!selectedNodes.length) {
-			return groupObjects.reduce((acc, curr) => {
-				return curr.shared_ids ? acc + curr.shared_ids.length : 0;
-			}, 0);
-		}
+		selectedNodes = selectedNodes.reduce(toFullIdsDict, {});
+		groupObjects = groupObjects.reduce(toFullIdsDict, {});
 
-		if (!groupObjects.length) {
-			return selectedNodes.reduce((acc, curr) => {
-				return curr.shared_ids ? acc + curr.shared_ids.length : 0;
-			}	, 0);
-		}
-
-		return selectedNodes.every((selectedNode) =>
-			groupObjects.every((groupObject) => !isEqual(
-					selectedNode.shared_ids && selectedNode.shared_ids.length ? selectedNode.shared_ids.sort() : [],
-					groupObject.shared_ids && groupObject.shared_ids.length ? groupObject.shared_ids.sort() : []
-				)
-			)
-		);
+		return !isEqual(selectedNodes, groupObjects);
 	}
 
 	public handleFieldChange = (onChange, form) => (event) => {
