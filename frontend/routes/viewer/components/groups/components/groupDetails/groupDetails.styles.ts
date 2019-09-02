@@ -17,10 +17,10 @@
 
 import styled from 'styled-components';
 import FormControl from '@material-ui/core/FormControl';
-import TextField from '@material-ui/core/TextField';
 
 import { COLOR } from '../../../../../../styles';
 import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
+import { TextField } from '../../../../../components/textField/textField.component';
 
 export const Container = styled.div`
 	display: flex;
