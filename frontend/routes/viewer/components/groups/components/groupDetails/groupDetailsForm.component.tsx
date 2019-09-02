@@ -12,11 +12,23 @@ import { FieldsRow, StyledFormControl, StyledTextField, Description, LongLabel }
 import { formatDateTime } from '../../../../../../services/formatting/formatDate';
 
 const GroupSchema = Yup.object().shape({
-	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+	desc: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 
+interface IGroup {
+	_id: string;
+	updatedAt: number;
+	type: string;
+	desc: string;
+	name: string;
+	color: string;
+	rules: any[];
+	totalSavedMeshes: number;
+	objects: object[];
+}
+
 interface IProps {
-	group: any;
+	group: IGroup;
 	currentUser: any;
 	totalMeshes: number;
 	canUpdate: boolean;
@@ -40,8 +52,8 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { name, description, color, rules, type, objects } = this.props.group;
-		const currentValues = { name, description, color, rules, type };
+		const { name, desc, color, rules, type, objects } = this.props.group;
+		const currentValues = { name, desc, color, rules, type };
 		const initialValues = this.formikRef.current.initialValues;
 		const groupChanged = !isEqual(this.props.group, prevProps.group);
 		const isNormalGroup = this.props.group.type === GROUPS_TYPES.NORMAL;
@@ -106,9 +118,9 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const {
-			group: { updatedAt, type, desc: description, name, color, rules, totalSavedMeshes }
+			group: { updatedAt, type, desc, name, color, rules, totalSavedMeshes }
 		} = this.props;
-		const initialValues = { type, description , name, color, rules };
+		const initialValues = { type, desc , name, color, rules };
 
 		return (
 			<Formik
@@ -144,7 +156,7 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 							)} />
 						</StyledFormControl>
 					</FieldsRow>
-					<Field name="description" render={({ field, form }) => (
+					<Field name="desc" render={({ field, form }) => (
 						<Description
 							{...field}
 							onChange={this.handleFieldChange(field.onChange, form)}
@@ -152,8 +164,8 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 							fullWidth
 							multiline
 							label="Description"
-							error={Boolean(form.errors.description)}
-							helperText={form.errors.description}
+							error={Boolean(form.errors.desc)}
+							helperText={form.errors.desc}
 							disabled={!this.props.canUpdate}
 						/>
 					)} />
