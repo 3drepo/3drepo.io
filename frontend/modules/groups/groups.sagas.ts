@@ -299,7 +299,7 @@ export function* updateGroup({ teamspace, modelId, revision, groupId }) {
 
 		const isNormalGroup = groupDetails.type === GROUPS_TYPES.NORMAL;
 		const objectsStatus = yield Viewer.getObjectsStatus();
-		if (isNormalGroup && objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
+		if (isNormalGroup) {
 			groupToSave.totalSavedMeshes = calculateTotalMeshes(objectsStatus.highlightedNodes);
 			groupToSave.objects = objectsStatus.highlightedNodes;
 		}

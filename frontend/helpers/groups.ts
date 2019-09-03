@@ -28,7 +28,8 @@ export const prepareGroup = (group) => {
 export const normalizeGroup = (group) => {
 	const normalizedGroup = {
 		color: hexToArray(group.color),
-		...pick(group, ['name', 'author', '_id', 'description'])
+		...pick(group, ['name', 'author', '_id']),
+		description: group.desc || group.description
 	} as any;
 
 	if (group.type === GROUPS_TYPES.SMART) {
