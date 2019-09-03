@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isEqual } from 'lodash';
 import React from 'react';
-
 import { pinsDiff } from '../../helpers/pins';
 import { Container } from './viewerCanvas.styles';
 
@@ -56,7 +56,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 	public componentDidUpdate(prevProps) {
 		const { colorOverrides, issuePins, riskPins, handleColorOverridesChange } = this.props;
-		if (colorOverrides !== prevProps.colorOverrides && prevProps.colorOverrides) {
+		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			handleColorOverridesChange(colorOverrides, prevProps.colorOverrides);
 		}
 

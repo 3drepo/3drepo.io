@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { size, values } from 'lodash';
+import { values } from 'lodash';
 import { createSelector } from 'reselect';
 import { getGroupOverride } from '../../helpers/colorOverrides';
 import { searchByFilters } from '../../helpers/searching';
-import GroupsSaga from './groups.sagas';
 
 export const selectGroupsDomain = (state) => ({...state.groups});
 

@@ -34,7 +34,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	removeFromHighlighted: ['groupId'],
 	highlightGroup: ['group'],
 	dehighlightGroup: ['group'],
-	clearSelectionHighlights: [],
+	clearSelectionHighlights: ['shouldClearTree'],
 	addColorOverride: ['groupId'],
 	removeColorOverride: ['groupId'],
 	setColorOverrides: ['groupIds'],

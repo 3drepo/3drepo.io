@@ -43,9 +43,9 @@ import { SELECTION_STATES, VISIBILITY_STATES } from '../../constants/tree';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 import { addColorOverrides, overridesDiff, removeColorOverrides } from '../../helpers/colorOverrides';
 import { MultiSelect } from '../../services/viewer/multiSelect';
-import { selectIsActive, BimActions } from '../bim';
+import { selectActiveMeta, selectIsActive, BimActions } from '../bim';
 import { selectSettings, ModelTypes } from '../model';
-import { ViewerGuiActions } from '../viewerGui';
+import { selectIsMetadataVisible, ViewerGuiActions } from '../viewerGui';
 import { TreeActions, TreeTypes } from './tree.redux';
 
 const unhighlightObjects = (objects = []) => {
@@ -171,14 +171,21 @@ function* stopListenOnSelections() {
 
 function* handleBackgroundClick() {
 	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
-	const activeNode = yield select(selectActiveNode);
 
-	if (fullySelectedNodes.length || activeNode) {
+	if (fullySelectedNodes.length) {
 		yield all([
 			clearCurrentlySelected(),
-			put(GroupsActions.clearSelectionHighlights()),
-			put(TreeActions.setActiveNode(null))
+			put(GroupsActions.clearSelectionHighlights(false))
 		]);
+	}
+
+	const activeNode = yield select(selectActiveNode);
+
+	if (activeNode) {
+		yield put(TreeActions.setActiveNode(null));
+	}
+
+	if (fullySelectedNodes.length || activeNode) {
 		yield put(TreeActions.updateDataRevision());
 	}
 }
@@ -223,11 +230,21 @@ function* clearCurrentlySelected() {
 	yield TreeProcessing.clearSelected();
 	yield put(TreeActions.updateDataRevision());
 
-	yield all([
-		put(TreeActions.setActiveNode(null)),
-		put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false)),
-		put(BimActions.setActiveMeta(null))
-	]);
+	const isBimVisible = yield select(selectIsMetadataVisible);
+	const activeMeta = yield select(selectActiveMeta);
+	const activeNode = yield select(selectActiveNode);
+
+	if (isBimVisible) {
+		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false));
+	}
+
+	if (activeMeta) {
+		yield put(BimActions.setActiveMeta(null));
+	}
+
+	if (activeNode) {
+		yield put(TreeActions.setActiveNode(null));
+	}
 }
 
 /**

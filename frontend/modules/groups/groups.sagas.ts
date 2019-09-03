@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { values } from 'lodash';
-import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { calculateTotalMeshes } from '../../helpers/tree';
 import { dispatch, getState } from '../store';
 
@@ -32,7 +31,7 @@ import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
-import { selectGetMeshesByIds, selectGetNodesByIds, selectGetNodesIdsFromSharedIds, TreeActions } from '../tree';
+import { TreeActions } from '../tree';
 import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
 import {
 	selectActiveGroupDetails,
@@ -82,7 +81,7 @@ function* resetActiveGroup() {
 		const showDetailsEnabled = yield select(selectShowDetails);
 		yield all([
 			!showDetailsEnabled ? put(GroupsActions.setComponentState({ activeGroup: null })) : null,
-			put(GroupsActions.clearSelectionHighlights())
+			put(GroupsActions.clearSelectionHighlights(true))
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', ' active group', error));
@@ -113,10 +112,12 @@ function* dehighlightGroup({ group }) {
 	}
 }
 
-function* clearSelectionHighlights() {
+function* clearSelectionHighlights({ shouldClearTree = true }) {
 	try {
 		yield put(GroupsActions.setComponentState({ highlightedGroups: [] }));
-		yield put(TreeActions.clearCurrentlySelected());
+		if (shouldClearTree) {
+			yield put(TreeActions.clearCurrentlySelected());
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('clear', 'highlighted groups', error));
 	}
@@ -131,7 +132,7 @@ function* selectGroup({ group = {} }) {
 		const multiSelect = addGroup || removeGroup;
 
 		if (!multiSelect) {
-			yield put(GroupsActions.clearSelectionHighlights());
+			yield put(GroupsActions.clearSelectionHighlights(true));
 		}
 
 		if (removeGroup) {
@@ -189,7 +190,7 @@ function* deleteGroups({ teamspace, modelId, groups }) {
 
 function* isolateGroup({ group }) {
 	try {
-		yield put(GroupsActions.clearSelectionHighlights());
+		yield put(GroupsActions.clearSelectionHighlights(true));
 		yield put(TreeActions.isolateNodesBySharedIds(group.objects));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('delete', 'groups', error));
@@ -214,7 +215,7 @@ function* downloadGroups({ teamspace, modelId }) {
 
 function* showDetails({ group, revision }) {
 	try {
-		yield put(GroupsActions.clearSelectionHighlights());
+		yield put(GroupsActions.clearSelectionHighlights(true));
 		const objectsStatus = yield Viewer.getObjectsStatus();
 
 		if (group.objects && objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
