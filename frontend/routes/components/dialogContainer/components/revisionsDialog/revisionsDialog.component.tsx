@@ -17,7 +17,6 @@ import {
 } from './revisionsDialog.styles';
 
 interface IProps {
-	currentRevisionName: string;
 	currentRevisionId: string;
 	currentModelName: string;
 	revisions: any[];

@@ -32,12 +32,13 @@ interface IProps {
 	location: any;
 	hideDialog: () => void;
 	showRevisionsDialog: (config) => void;
+	currentRevision: any;
 }
 
 export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 	public renderCurrentSwitchState = renderWhenTrue(() => (
 		<DisplayedText>
-			{`${this.props.modelSettings.name} - ${this.currentRevisionName}`}
+			{`${this.props.modelSettings.name} - ${this.revisionName}`}
 			{this.props.revisions.length > 1 && <ArrowDownIcon fontSize="small" />}
 		</DisplayedText>
 	));
@@ -58,24 +59,12 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	private get currentRevisionName() {
-		return this.props.urlParams.revision || this.getRevisionDisplayedName(this.props.revisions[0]);
-	}
-
-	private get currentRevisionId() {
-		const currentRevision = this.props.revisions.find((revision) =>
-			this.currentRevisionName === revision.tag ||
-			this.currentRevisionName === formatDate(revision.timestamp, LONG_DATE_TIME_FORMAT)
-		);
-
-		return currentRevision._id;
-	}
-
 	private get revisionDataExists() {
-		return Boolean(this.props.modelSettings.name && this.props.revisions.length && this.currentRevisionName);
+		return Boolean(this.props.modelSettings.name && this.props.revisions.length && this.props.currentRevision);
 	}
 
-	private getRevisionDisplayedName = (revision) => {
+	get revisionName() {
+		const { currentRevision: revision } =  this.props;
 		return revision.tag || formatDate(revision.timestamp, LONG_DATE_TIME_FORMAT);
 	}
 
@@ -97,8 +86,7 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 		this.props.showRevisionsDialog({
 			title: `Revisions - ${this.props.modelSettings.name}`,
 			data: {
-				currentRevisionName: this.currentRevisionName,
-				currentRevisionId: this.currentRevisionId,
+				currentRevisionId: this.props.currentRevision._id,
 				currentModelName: this.props.modelSettings.name,
 				revisions: this.props.revisions,
 				handleSetNewRevision: this.setNewRevision

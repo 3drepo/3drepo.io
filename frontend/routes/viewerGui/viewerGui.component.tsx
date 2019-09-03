@@ -56,7 +56,7 @@ interface IProps {
 	stopListenOnSelections: () => void;
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
-	fetchData: (teamspace, model, revision?) => void;
+	fetchData: (teamspace, model) => void;
 	loadModel: () => void;
 	resetPanelsStates: () => void;
 	setPanelVisibility: (panelName, visibility) => void;
@@ -97,7 +97,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 			}
 		}
 
-		this.props.fetchData(params.teamspace, params.model, params.revision);
+		this.props.fetchData(params.teamspace, params.model);
 	}
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
@@ -117,7 +117,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		}
 
 		if (teamspaceChanged || modelChanged || revisionChanged) {
-			this.props.fetchData(params.teamspace, params.model, params.revision);
+			this.props.fetchData(params.teamspace, params.model);
 		}
 
 		const settingsChanged = modelSettings._id !== prevState.loadedModelId;
