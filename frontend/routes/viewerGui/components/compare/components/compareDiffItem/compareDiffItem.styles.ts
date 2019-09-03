@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { COLOR } from '../../../../../../styles';
 import { Tooltip } from '@material-ui/core';
+import { TooltipProps } from '@material-ui/core/Tooltip';
 import { omit } from 'lodash';
 import * as React from 'react';
-import { TooltipProps } from '@material-ui/core/Tooltip';
-import { bool } from 'prop-types';
+import styled from 'styled-components';
+import { COLOR } from '../../../../../../styles';
 
 interface IContainer {
 	disabled: boolean;

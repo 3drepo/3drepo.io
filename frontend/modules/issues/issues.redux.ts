@@ -68,7 +68,6 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	toggleShowPins: ['showPins']
 }, { prefix: 'ISSUES/' });
 
-
 export const INITIAL_STATE = {
 	issuesMap: {},
 	isPending: true,

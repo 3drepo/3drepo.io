@@ -159,7 +159,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 			...ISSUES_ACTIONS_MENU.SHOW_PINS,
 			enabled: this.props.showPins,
 			onClick: () => toggleShowPins(!showPins)
-		},];
+		}];
 	}
 
 	get toggleSubmodelsMenuItem() {

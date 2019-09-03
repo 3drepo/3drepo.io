@@ -33,7 +33,7 @@ import Toolbar from './components/toolbar/toolbar.container';
 import { Tree } from './components/tree';
 import { ViewerLoader } from './components/viewerLoader';
 import { Views } from './components/views';
-import { Container, LeftPanels, LeftPanelsButtons, RightPanels, GuiContainer } from './viewerGui.styles';
+import { Container, GuiContainer, LeftPanels, LeftPanelsButtons, RightPanels } from './viewerGui.styles';
 
 interface IProps {
 	viewer: any;
