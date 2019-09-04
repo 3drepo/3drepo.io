@@ -211,6 +211,7 @@ interface IProps {
 	handleClose: () => void;
 	updateSettings: (settings: any) => void;
 	visualSettings: any;
+	currentUser: string;
 }
 
 interface IState {
@@ -237,12 +238,14 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public onSubmit = (values, { resetForm }) => {
+		const { updateSettings, currentUser} = this.props;
+
 		values.nearPlane = Number(values.nearPlane);
 		values.memory = Number(values.memory);
 		values.farPlaneSamplingPoints = Number(values.farPlaneSamplingPoints);
 		values.maxShadowDistance = Number(values.maxShadowDistance);
 
-		this.props.updateSettings(values);
+		updateSettings(currentUser, values);
 
 		if (values.memory !== this.props.visualSettings.memory) {
 			location.reload();
