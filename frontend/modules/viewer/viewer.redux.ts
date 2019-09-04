@@ -28,9 +28,9 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	mapStart: [],
 	mapStop: [],
 	getScreenshot: [],
-	updateSettings: ['settings'],
+	updateSettings: ['username', 'settings'],
 	saveSettings: ['settings'],
-	loadSettings: [],
+	fetchSettings: [],
 	setNavigationMode: ['mode'],
 	setNavigationModeSuccess: ['mode'],
 	initialiseToolbar: [],
@@ -59,7 +59,7 @@ export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 }, { prefix: 'VIEWER/' });
 
 export const INITIAL_STATE = {
-	settings: {...DEFAULT_SETTINGS, ...JSON.parse(window.localStorage.getItem('visualSettings') || '{}')},
+	settings: {...DEFAULT_SETTINGS},
 	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
 	clippingMode: null,
 	helicopterSpeed: INITIAL_HELICOPTER_SPEED,
@@ -72,9 +72,8 @@ export const INITIAL_STATE = {
 	isModelLoaded: false
 };
 
-const updateSettings = (state = INITIAL_STATE, {settings}) => {
-	window.localStorage.setItem('visualSettings', JSON.stringify(settings));
-	INITIAL_STATE.settings = settings;
+const updateSettings = (state = INITIAL_STATE, {username, settings}) => {
+	window.localStorage.setItem(`${username}.visualSettings`, JSON.stringify(settings));
 	return { ...state, settings };
 };
 

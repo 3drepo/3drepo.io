@@ -118,13 +118,14 @@ export class UserMenu extends React.PureComponent<IProps, any> {
 	}
 
 	public openSettingsDialog = () => {
-		const {visualSettings, updateSettings} = this.props;
+		const {visualSettings, updateSettings, currentUser} = this.props;
 		this.props.showDialog({
 				title: 'Visual Settings',
 				template: VisualSettingsDialog,
 				data: {
 					visualSettings,
-					updateSettings
+					updateSettings,
+					currentUser: currentUser.username
 				}
 		});
 	}
