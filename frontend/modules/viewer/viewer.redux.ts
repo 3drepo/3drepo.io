@@ -74,6 +74,7 @@ export const INITIAL_STATE = {
 
 const updateSettings = (state = INITIAL_STATE, {settings}) => {
 	window.localStorage.setItem('visualSettings', JSON.stringify(settings));
+	INITIAL_STATE.settings = settings;
 	return { ...state, settings };
 };
 
