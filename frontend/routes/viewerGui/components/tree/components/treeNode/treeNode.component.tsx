@@ -175,7 +175,6 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 		} else if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
 			return ParentOfVisibleIcon;
 		}
-
 		return InvisibleIcon;
 	}
 

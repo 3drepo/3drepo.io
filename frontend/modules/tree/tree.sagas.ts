@@ -61,26 +61,21 @@ const unhighlightObjects = (objects = []) => {
 };
 
 const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
-	const promises = [];
+	let promises = [];
 
 	for (let index = 0, size = objects.length; index < size; index++) {
 		const { meshes, teamspace, modelId } = objects[index];
-
-		if (meshes.length) {
-			const filterdMeshes = meshes.filter((mesh) => nodesSelectionMap[mesh] === SELECTION_STATES.SELECTED);
-			if (meshes.length > 0) {
-				promises.push(
-					Viewer.highlightObjects({
-						account: teamspace,
-						ids: filterdMeshes,
-						colour,
-						model: modelId,
-						multi: true,
-						source: 'tree',
-						forceReHighlight: true
-					})
-				);
-			}
+		const filteredMeshes = meshes.filter((mesh) => nodesSelectionMap[mesh] === SELECTION_STATES.SELECTED);
+		if (filteredMeshes.length) {
+			promises = promises.concat(Viewer.highlightObjects({
+				account: teamspace,
+				ids: filteredMeshes,
+				colour,
+				model: modelId,
+				multi: true,
+				source: 'tree',
+				forceReHighlight: true
+			}));
 		}
 	}
 	return Promise.all(promises);
@@ -346,12 +341,18 @@ function* deselectNodes({ nodesIds = [] }) {
 	try {
 		const result = yield TreeProcessing.deselectNodes({ nodesIds });
 		unhighlightObjects(result.unhighlightedObjects);
+		const isBimVisible = yield select(selectIsMetadataVisible);
+		const activeMeta = yield select(selectActiveMeta);
 
-		yield all([
-			put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false)),
-			put(BimActions.setActiveMeta(null)),
-			put(TreeActions.updateDataRevision())
-		]);
+		if (isBimVisible) {
+			yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, false));
+		}
+
+		if (activeMeta) {
+			yield put(BimActions.setActiveMeta(null));
+		}
+
+		yield put(TreeActions.updateDataRevision());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('deselect', 'node', error));
 	}
@@ -367,6 +368,7 @@ function* deselectNodesBySharedIds({ objects = [] }) {
  */
 function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false, colour }) {
 	try {
+		console.time('selectNodes');
 		const lastNodeId = nodesIds[nodesIds.length - 1];
 		const [lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
 
@@ -384,6 +386,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 
 		yield put(TreeActions.setActiveNode(lastNodeId));
 		yield put(TreeActions.updateDataRevision());
+		console.timeEnd('selectNodes');
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
 	}

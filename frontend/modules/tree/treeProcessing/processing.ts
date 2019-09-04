@@ -84,21 +84,19 @@ export class Processing {
 			return { highlightedObjects: [] };
 		}
 
-		const { skipChildren } = extraData;
-		let nodes = this.getNodesByIds(visibleNodesIds).filter((node) => {
-			return this.visibilityMap[node._id] !== VISIBILITY_STATES.INVISIBLE;
-		});
+		let nodes = this.getNodesByIds(visibleNodesIds).filter((node) =>
+			this.visibilityMap[node._id] !== VISIBILITY_STATES.INVISIBLE
+		);
 
-		if (!skipChildren) {
+		if (!extraData.skipChildren) {
 			let compactNodes = [];
 
 			for (let index = 0, size = nodes.length; index < size; index++) {
 				const node = nodes[index];
 				const children = this.getDeepChildren(node);
-				compactNodes.push(node);
+				compactNodes[index] = node;
 				compactNodes = compactNodes.concat(children);
 			}
-
 			nodes = compactNodes;
 		}
 
@@ -106,7 +104,6 @@ export class Processing {
 		const highlightedObjects = this.getMeshesByNodes(nodes);
 
 		this.selectionMap = { ...this.selectionMap };
-
 		return { highlightedObjects };
 	}
 
@@ -253,12 +250,12 @@ export class Processing {
 				nodes.push(parentNode);
 			}
 		}
+
 		return { unhighlightedObjects };
 	}
 
 	private handleNodesVisibility = (nodes, extraData) => {
 		const { ifcSpacesHidden, skipChildren, visibility, skipParents } = extraData;
-
 		const parents = [];
 		const meshesToUpdate = [];
 
@@ -315,7 +312,7 @@ export class Processing {
 	}
 
 	private handleToSelect = (toSelect) => {
-		const parents = [];
+		const parentsSet = new Set();
 
 		for (let index = 0, size = toSelect.length; index < size; index++) {
 			const node = toSelect[index];
@@ -323,13 +320,15 @@ export class Processing {
 			if (this.isVisibleNode(node._id)) {
 				this.selectionMap[node._id] = SELECTION_STATES.SELECTED;
 				const nodeParents = this.getParents(node);
-				parents.push(...nodeParents);
+				for (let j = 0; j < nodeParents.length; j++) {
+					parentsSet.add(nodeParents[j]);
+				}
 			}
 		}
+		const parents = [...parentsSet];
 
 		if (parents.length) {
-			const uniqueParents = uniqBy(parents, ({ _id}) => _id);
-			this.updateParentsSelection(uniqueParents);
+			this.updateParentsSelection(parents);
 		}
 	}
 
@@ -379,13 +378,9 @@ export class Processing {
 		});
 	}
 
-	private isVisibleNode = (nodeId) => {
-		return this.visibilityMap[nodeId] !== VISIBILITY_STATES.INVISIBLE;
-	}
+	private isVisibleNode = (nodeId) => this.visibilityMap[nodeId] !== VISIBILITY_STATES.INVISIBLE;
 
-	private isSelectedNode = (nodeId) => {
-		return this.selectionMap[nodeId] !== SELECTION_STATES.UNSELECTED;
-	}
+	private isSelectedNode = (nodeId) => this.selectionMap[nodeId] !== SELECTION_STATES.UNSELECTED;
 
 	private getMeshesByNodes = (nodes = []) => {
 		if (!nodes.length) {

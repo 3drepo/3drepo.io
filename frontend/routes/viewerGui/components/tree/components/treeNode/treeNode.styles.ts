@@ -103,6 +103,7 @@ export const Container = styled.li<IContainer>`
 	align-items: center;
 	height: ${TREE_ITEM_SIZE}px;
 	box-sizing: border-box;
+	cursor: pointer;
 
 	&:hover ${Actions} {
 		display: block;
