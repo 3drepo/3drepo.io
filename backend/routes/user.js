@@ -28,6 +28,17 @@ const { isString, isArray } = require("lodash");
 /**
  * @api {get} /me Gets the profile for the logged user
  * @apiName getProfile
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *    {
+ *       username: "jasonv",
+ *       firstName: "Jason",
+ *       lastName: "Voorhees",
+ *       email: "jason@vorhees.com",
+ *       hasAvatar: true
+ *    }
+ *
  * @apiGroup User
  * */
 router.get("/me", middlewares.loggedIn, getProfile, onSuccess);
@@ -35,6 +46,13 @@ router.get("/me", middlewares.loggedIn, getProfile, onSuccess);
 /**
  * @api {post} /apikey Generates an apikey for the logged user
  * @apiName generateApiKey
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *    {
+ *       apiKey:"20f947a673dce5419ce187ca7998a68f"
+ *    }
+ *
  * @apiGroup User
  * */
 router.post("/apikey", middlewares.loggedIn, generateApiKey, onSuccess);
@@ -42,12 +60,26 @@ router.post("/apikey", middlewares.loggedIn, generateApiKey, onSuccess);
 /**
  * @api {delete} /apikey Deletes the current apikey for the logged user
  * @apiName deleteApiKey
+ *    HTTP/1.1 200 OK
+ *    {}
+ *
  * @apiGroup User
  * */
 router.delete("/apikey", middlewares.loggedIn, deleteApiKey, onSuccess);
 
 /**
  * @api {get} /starredMeta Gets the starred metadata tags for the logged user
+ * @apiDescription This endpoint returns the starred metadata tags. You can manage
+ * the starred metadata in the frontend from BIM (i) icon in the viewer.
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *    [
+ *       "material",
+ *       "color",
+ *       "base offset"
+ *    ]
+ *
  * @apiName GetStarredMetadataTags
  * @apiGroup User
  * */
@@ -58,7 +90,7 @@ router.get("/starredMeta", middlewares.loggedIn, getStarredMetadataTags, onSucce
  * @apiName StarMetadataTags
  * @apiGroup User
  *
- * @apiParam  {String} tag The tag to be starred
+ * @apiParam (Request body) {String} tag The tag to be starred
  * @apiParamExample {json} Input
  *    {
  *      "tag": "material"
@@ -73,11 +105,11 @@ router.get("/starredMeta", middlewares.loggedIn, getStarredMetadataTags, onSucce
 router.post("/starredMeta", middlewares.loggedIn, appendStarredMetadataTag, onSuccess);
 
 /**
- * @api {put} /starredMeta Sets the whole starred metadata tag for the logged user
+ * @api {put} /starredMeta Replaces the whole starred metadata tags array for the logged user
  * @apiName SetMetadataTags
  * @apiGroup User
  *
- * @apiParam  [String]  An array of tags to be starred
+ * @apiParam  [String] (Request body) An array of tags to be starred
  * @apiParamExample {json} Input
  *    [
  *    	"material",
@@ -97,7 +129,7 @@ router.put("/starredMeta", middlewares.loggedIn, replaceStarredMetadataTags, onS
  * @apiName UnstarMetadataTags
  * @apiGroup User
  *
- * @apiParam  {String} tag The tag to be starred
+ * @apiParam (Request body) {String} tag The tag to be starred
  * @apiParamExample {json} Input
  *    {
  *      "tag": "material"
