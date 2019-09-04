@@ -65,8 +65,8 @@ const BasicSettings = (props) => {
 				<Field name="caching" render={ ({ field }) => (
 					<Switch onClick={props.onCacheChange} checked={field.value} {...field} value="true" color="secondary" />)}/>
 			</FormListItem>
-
-		</List>);
+		</List>
+	);
 };
 
 const AdvancedSettings = (props) => {
@@ -153,7 +153,8 @@ const AdvancedSettings = (props) => {
 					);
 				}} />
 			</FormListItem>
-		</List>);
+		</List>
+	);
 };
 
 const CacheWarning = (props) => {
@@ -202,14 +203,14 @@ const Buttons = (props) => {
 						Save
 					</Button>
 			)} />
-
-		</VisualSettingsButtonsContainer>);
+		</VisualSettingsButtonsContainer>
+	);
 };
 
 interface IProps {
 	handleResolve: () => void;
 	handleClose: () => void;
-	updateSettings: (settings: any) => void;
+	updateSettings: (username: string, settings: any) => void;
 	visualSettings: any;
 	currentUser: string;
 }
