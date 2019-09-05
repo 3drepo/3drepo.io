@@ -132,6 +132,7 @@ export const selectFlattenTeamspaces = createSelector(
 	selectActiveSorting, selectActiveSortingDirection,
 	(teamspacesList, projects, models, showStarredOnly, starredModels,
 		filters, filterableDataTypes, activeSorting, activeSortingDirection) => {
+
 		const flattenList = [];
 		const hasActiveFilters = showStarredOnly || filters.length;
 		const textFilters = filters.filter(({ type }) => type === FILTER_TYPES.QUERY);
@@ -217,13 +218,13 @@ export const selectFlattenTeamspaces = createSelector(
 					}
 				}
 
-				const isSomethingSelected = shouldFilterProjects || shouldFilterModels || shouldFilterFederations;
+				const isFilterSelected = shouldFilterProjects || shouldFilterModels || shouldFilterFederations;
 
 				const shouldAddProject =
 					!hasActiveFilters || (processedProject.models.length || shouldBeVisible) || processedProject.collapsed &&
 					((showStarredOnly && shouldBeVisible) || !showStarredOnly);
 
-				if (isSomethingSelected && shouldAddProject) {
+				if (isFilterSelected && shouldAddProject) {
 					processedProject.models = sortModels(processedProject.models, activeSorting, activeSortingDirection);
 					teamspaceProjects.push(processedProject);
 				}
