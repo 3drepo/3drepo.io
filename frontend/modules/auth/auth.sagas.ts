@@ -24,6 +24,7 @@ import { getAvatarUrl } from '../currentUser/currentUser.sagas';
 import { DialogActions } from '../dialog';
 import { AuthActions, AuthTypes } from './auth.redux';
 import { verificationMessages, forgotPasswordMessages, changePasswordMessages } from './auth.helpers';
+import { ViewerActions } from '../viewer';
 
 export function* login({ username, password }) {
 	yield put(AuthActions.setPendingStatus(true));

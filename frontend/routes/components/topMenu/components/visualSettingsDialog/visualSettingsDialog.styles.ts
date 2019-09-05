@@ -20,7 +20,7 @@ import styled from 'styled-components';
 import { Button, DialogContent, ListItem, Tooltip, Input, Tabs, Tab } from '@material-ui/core';
 import { TooltipProps } from '@material-ui/core/Tooltip';
 import { omit } from 'lodash';
-import { COLOR } from '../../../../../styles';
+import { COLOR, FONT_WEIGHT } from '../../../../../styles';
 
 export const NegativeActionButton = styled(Button)`
 	&& {
@@ -43,6 +43,13 @@ export const NeutralActionButton = styled(Button)`
 		color: ${COLOR.BLACK_80};
 		background-color:  ${COLOR.TRANSPARENT};
 	}
+`;
+
+export const WarningMessage = styled.div`
+	text-align: left;
+	color: ${COLOR.VIVID_RED};
+	font-size: 12px;
+	font-weight: ${FONT_WEIGHT.SEMIBOLD}
 `;
 
 export const VisualSettingsButtonsContainer = styled.div`

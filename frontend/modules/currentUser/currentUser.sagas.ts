@@ -23,6 +23,7 @@ import { CurrentUserTypes, CurrentUserActions } from './currentUser.redux';
 import { selectCurrentUser } from './currentUser.selectors';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
+import { ViewerActions } from '../viewer';
 
 export const getAvatarUrl = (username) => API.getAPIUrl(`${username}/avatar?${Date.now()}`);
 
@@ -41,6 +42,8 @@ export function* fetchUser({ username }) {
 			})),
 			put(CurrentUserActions.setAsInitialised())
 		]);
+
+		yield put(ViewerActions.fetchSettings());
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'user data', e));
 	}
