@@ -179,25 +179,42 @@ export const selectFlattenTeamspaces = createSelector(
 
 				const filteredModelsAndFederations = filteredFederations.concat(filteredModels);
 
+				const modelsAndFederations =
+					shouldFilterModels && shouldFilterFederations ?
+						filteredModelsAndFederations :
+						shouldFilterModels ? filteredModels :
+						shouldFilterFederations ? filteredFederations :
+						[];
+
 				const processedProject = {
 					...project,
-					models: filteredModelsAndFederations,
+					models: modelsAndFederations,
 					teamspace: teamspaceName,
 					type: LIST_ITEMS_TYPES.PROJECT,
 					id: projectsIds[j]
 				};
 
 				// Show all models if no result (but project is collapsed)
-				const shouldBeVisible = shouldFilterProjects ? searchByFilters([processedProject], textFilters)[0] : true;
+				const shouldFilterOnlyProjects = !shouldFilterModels && !shouldFilterFederations && shouldFilterProjects;
+				const shouldFilterOnlyModelsAndFederations =
+					(shouldFilterModels || shouldFilterFederations) && !shouldFilterProjects;
+
+				const shouldBeVisible =
+					shouldFilterProjects ? searchByFilters([processedProject], textFilters)[0] : !shouldFilterOnlyModelsAndFederations;
+
+				processedProject.collapsed = shouldFilterOnlyProjects ? shouldBeVisible : false;
+
 				if (!showStarredOnly && !filteredModelsAndFederations.length && project.models.length && shouldBeVisible) {
 					processedProject.collapsed = true;
 					processedProject.models = processedProject.models.concat(projectModels).concat(projectFederations);
 				}
 
+				const isSomethingSelected = shouldFilterProjects || shouldFilterModels || shouldFilterFederations;
+
 				const shouldAddProject = !hasActiveFilters || processedProject.models.length || processedProject.collapsed &&
 					((showStarredOnly && shouldBeVisible) || !showStarredOnly);
 
-				if (shouldAddProject) {
+				if (isSomethingSelected && shouldAddProject) {
 					processedProject.models = sortModels(processedProject.models, activeSorting, activeSortingDirection);
 					teamspaceProjects.push(processedProject);
 				}
