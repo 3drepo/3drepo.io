@@ -129,11 +129,6 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 			disabled,
 		};
 
-		const headlineProps = level === TREE_LEVELS.PROJECT ? {
-			// onMouseEnter: this.createHoverHandler(true),
-			// onMouseLeave: this.createHoverHandler(false)
-		} : {};
-
 		return (
 			<Container {...containerProps}>
 				<Headline
