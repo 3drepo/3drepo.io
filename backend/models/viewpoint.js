@@ -107,6 +107,19 @@ view.listViewpoints = function (dbCol) {
 
 };
 
+view.setViewpointScreenshot = function(collName, account, model, id, viewpoint) {
+	if (!viewpoint || !viewpoint.screenshot) {
+		return viewpoint;
+	}
+
+	id = utils.uuidToString(id);
+	const viewpointId = utils.uuidToString(viewpoint.guid);
+
+	viewpoint.screenshot = account + "/" + model + "/" + collName + "/" + id + "/viewpoints/" + viewpointId + "/screenshot.png";
+	viewpoint.screenshotSmall = account + "/" + model + "/" + collName + "/" + id + "/viewpoints/" + viewpointId + "/screenshotSmall.png";
+	return viewpoint;
+};
+
 view.getThumbnail = function (dbColOptions, uid) {
 
 	return this.findByUID(dbColOptions, uid, { "screenshot.buffer": 1 }).then(vp => {

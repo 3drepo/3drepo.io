@@ -17,6 +17,11 @@
 
 import styled from 'styled-components';
 import { COLOR } from '../../../../../../styles';
+import { Tooltip } from '@material-ui/core';
+import { omit } from 'lodash';
+import * as React from 'react';
+import { TooltipProps } from '@material-ui/core/Tooltip';
+import { bool } from 'prop-types';
 
 interface IContainer {
 	disabled: boolean;
@@ -35,7 +40,7 @@ export const Container = styled.div<IContainer>`
 	align-items: center;
 	border-bottom: 1px solid ${COLOR.BLACK_6};
 	height: 80px;
-	padding-right: 30px;
+	padding-right: 10px;
 `;
 
 export const ModelData = styled.div`
@@ -52,21 +57,34 @@ export const Name = styled.div<IName>`
 export const CurrentRevision = styled.div<ICurrentRevision>`
 	color: ${(props) => props.disabled ? COLOR.BLACK_20 : '#757575'};
 	font-size: 14px;
+	width: 142px;
+	display: inline-block;
+	text-overflow: ellipsis;
+	overflow: hidden;
 `;
 
+export const RevisionTooltip =  styled((prop: TooltipProps) => {
+	const props = omit(prop, ['className', 'hidden']);
+	props.classes = { popper: prop.className, tooltip: 'tooltip' };
+
+	return React.createElement(Tooltip, props);
+})`
+	.tooltip {
+		font-size: 12px;
+		margin: 0;
+		visibility:  ${(props) => props.hidden ? 'hidden' : 'visible'}
+	}
+`;
 export const Revisions = styled.div`
 	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
 	width: 100%;
 	height: 20px;
-	align-items: center;
 	overflow: hidden;
 	margin-top: 6px;
 `;
 
 export const CompareIconWrapper = styled.div`
-	position: absolute;
-	left: calc(50% - 8px);
-	transform: translateX(-50%);
+	display: inline-block;
+	width: 20px;
+	padding-top: 1px;
 `;

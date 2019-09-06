@@ -18,7 +18,7 @@
 import { put, select, takeLatest } from 'redux-saga/effects';
 import { getAngularService, dispatch } from '../../helpers/migration';
 import * as API from '../../services/api';
-import { VIEWER_EVENTS, VIEWER_PANELS, INITIAL_HELICOPTER_SPEED } from '../../constants/viewer';
+import { VIEWER_EVENTS, VIEWER_PANELS, INITIAL_HELICOPTER_SPEED, DEFAULT_SETTINGS } from '../../constants/viewer';
 
 import { ViewerTypes, ViewerActions } from './viewer.redux';
 import { DialogActions } from '../dialog';
@@ -32,6 +32,7 @@ import { Viewer } from '../../services/viewer/viewer';
 import { VIEWER_CLIP_MODES } from '../../constants/viewer';
 import { MeasureActions } from '../measure';
 import { BimActions } from '../bim';
+import { selectCurrentUser } from '../currentUser';
 
 export const getViewer = () => {
 	const ViewerService = getAngularService('ViewerService') as any;
@@ -330,6 +331,22 @@ export function* setMeasureVisibility({ visible }) {
 	}
 }
 
+export function* fetchSettings() {
+	const { username } = yield select(selectCurrentUser);
+	const currentSettings  = {
+								...DEFAULT_SETTINGS,
+								...JSON.parse(window.localStorage.getItem(`${username}.visualSettings`) ||
+								// If a user has already saved settings in a prev version lets load these settings the first time
+										window.localStorage.getItem('visualSettings') ||
+										'{}')
+							};
+
+	// We have our settings ready to be saved to the new user local storage settings key, so we get rid of the old setting
+	window.localStorage.setItem('visualSettings', null);
+
+	yield put(ViewerActions.updateSettings(username, currentSettings));
+}
+
 export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.WAIT_FOR_VIEWER, waitForViewer);
 	yield takeLatest(ViewerTypes.MAP_INITIALISE, mapInitialise);
@@ -355,4 +372,5 @@ export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.STOP_LISTEN_ON_NUM_CLIP, stopListenOnNumClip);
 	yield takeLatest(ViewerTypes.START_LISTEN_ON_MODEL_LOADED, startListenOnModelLoaded);
 	yield takeLatest(ViewerTypes.STOP_LISTEN_ON_MODEL_LOADED, stopListenOnModelLoaded);
+	yield takeLatest(ViewerTypes.FETCH_SETTINGS, fetchSettings);
 }

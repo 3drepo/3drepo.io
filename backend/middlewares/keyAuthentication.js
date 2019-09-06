@@ -18,7 +18,7 @@
 "use strict";
 
 const User = require("../models/user");
-const getPath = require("../utils").APIInfo;
+const getPath = (req) => `${req.method} ${req._parsedUrl.pathname}`;
 
 const matchPath = (path1, path2) => {
 	path1 = path1.split("/");
@@ -52,7 +52,6 @@ const BLACK_LIST = [
 async function apiKeyCheck(req, res, next) {
 	if (req.query.key) {
 		const path = getPath(req);
-
 		if  (matchPaths(path, BLACK_LIST)) {
 			next();
 			return;

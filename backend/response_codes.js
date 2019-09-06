@@ -382,7 +382,7 @@
 	 * @param {any} extraInfo
 	 * @param {any} format
 	 */
-	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format) {
+	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache) {
 
 		resCode = utils.mongoErrorToResCode(resCode);
 
@@ -423,6 +423,13 @@
 				.send(responseObject);
 
 		} else {
+
+			if(cache) {
+				res.setHeader("Cache-Control", `private, max-age=${cache.maxAge || config.cachePolicy.maxAge}`);
+				if (cache.etag) {
+					res.setHeader("etag", cache.etag);
+				}
+			}
 
 			if (Buffer.isBuffer(extraInfo)) {
 
@@ -466,7 +473,7 @@
 		let response = responseCodes.OK;
 
 		readStream.on("error", error => {
-			req[C.REQ_REPO].logger.logInfo(`Stream failed: [${error.code} - ${error.message}]`);
+			req[C.REQ_REPO].logger.logInfo(`Stream failed: [${error.code} - ${error.message}]`, {place});
 			response = responseCodes.NO_FILE_FOUND;
 			res.status(response.status);
 			res.end();
@@ -481,7 +488,8 @@
 			length += data.length;
 		}).on("end", () => {
 			res.end();
-			req[C.REQ_REPO].logger.logInfo("Responded with " + response.status, {
+			req[C.REQ_REPO].logger.logInfo(response.status, {
+				place,
 				httpCode: response.status,
 				contentLength: length
 			});

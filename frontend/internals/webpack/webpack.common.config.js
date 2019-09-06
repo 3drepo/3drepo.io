@@ -4,6 +4,8 @@ const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
 const loaders = require('./tools/loaders');
 const PATHS = require('./tools/paths');
 
+const transpileOnly = process.argv.includes('--no-type-checking');
+
 module.exports = (options) => {
   const config = {
     mode: options.mode || MODES.DEVELOPMENT,
@@ -15,7 +17,7 @@ module.exports = (options) => {
     }, options.output),
     module: {
       rules: [
-        loaders.TSLoader(options),
+        loaders.TSLoader({transpileOnly}),
         loaders.LodashTSLoader,
         loaders.CSSLoader,
         loaders.CSSExternalLoader,

@@ -36,7 +36,7 @@ module.exports = {
 		const comment = req.dataModel;
 		const account = req.params.account;
 		const model = req.params.model;
-		const _id = req.params.issueId;
+		const _id = req.params.issueId || req.params.riskId;
 
 		chatEvent.newComment(sessionId, account, model, _id, comment);
 		next();
@@ -47,7 +47,7 @@ module.exports = {
 		const comment = req.dataModel;
 		const account = req.params.account;
 		const model = req.params.model;
-		const _id = req.params.issueId;
+		const _id = req.params.issueId || req.params.riskId;
 
 		chatEvent.commentDeleted (sessionId, account, model, _id, comment);
 		next();
@@ -68,6 +68,26 @@ module.exports = {
 		const resource = req.dataModel;
 
 		chatEvent.resourceDeleted(sessionId, account, model, resource);
+		next();
+	},
+
+	onUpdateIssue: function(req, res, next) {
+		const sessionId = req.headers[C.HEADER_SOCKET_ID];
+		const {account, model} = req.params;
+		const issue = req.dataModel;
+		const data = req.data;
+
+		chatEvent.issueChanged(sessionId, account, model, issue._id, data);
+		next();
+	},
+
+	onUpdateRisk: function(req, res, next) {
+		const sessionId = req.headers[C.HEADER_SOCKET_ID];
+		const {account, model} = req.params;
+		const risk = req.dataModel;
+		const data = req.data;
+
+		chatEvent.riskChanged(sessionId, account, model, risk._id, data);
 		next();
 	}
 };

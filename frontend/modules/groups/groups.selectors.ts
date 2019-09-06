@@ -18,6 +18,8 @@
 import { createSelector } from 'reselect';
 import { size, values } from 'lodash';
 import { searchByFilters } from '../../helpers/searching';
+import GroupsSaga from './groups.sagas';
+import { getGroupOverride } from '../../helpers/colorOverrides';
 
 export const selectGroupsDomain = (state) => Object.assign({}, state.groups);
 
@@ -69,6 +71,10 @@ export const selectSelectedFilters = createSelector(
 	selectComponentState, (state) => state.selectedFilters
 );
 
+export const selectIsAllOverridden = createSelector(
+	selectComponentState, (state) => state.allOverridden
+);
+
 export const selectFilteredGroups = createSelector(
 	selectGroups, selectSelectedFilters, (issues, selectedFilters) => {
 		return searchByFilters(issues, selectedFilters);
@@ -76,7 +82,9 @@ export const selectFilteredGroups = createSelector(
 );
 
 export const selectColorOverrides = createSelector(
-	selectComponentState, (state) => state.colorOverrides
+	selectGroupsDomain, (state) => {
+		return state.colorOverrides;
+	}
 );
 
 export const selectTotalMeshes = createSelector(
@@ -87,6 +95,19 @@ export const selectCriteriaFieldState = createSelector(
 	selectComponentState, (state) => state.criteriaFieldState
 );
 
-export const selectIsAllOverrided = createSelector(
-	selectGroupsDomain, (state) => size(state.componentState.colorOverrides) === size(state.groupsMap)
+export const selectOverrides = createSelector(
+	selectColorOverrides, selectFilteredGroups, selectComponentState, (groupOverrides, filteredGroups, componentState) => {
+		const filteredGroupsMap = filteredGroups.reduce((map, group) => {
+			map[group._id] = group;
+			return map;
+		} , {});
+
+		return groupOverrides.reduce((overrides, groupId) => {
+			// filter out the filtered groups and if its showing details the selected group
+			if (filteredGroupsMap[groupId] && (!componentState.showDetails || componentState.activeGroup !== groupId)) {
+				getGroupOverride(overrides, filteredGroupsMap[groupId]);
+			}
+			return overrides;
+		}, {});
+	}
 );

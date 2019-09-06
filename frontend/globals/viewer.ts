@@ -650,13 +650,6 @@ export class Viewer {
 		if (this.pins.hasOwnProperty(id)) {
 			const pin = this.pins[id];
 
-			// this.highlightPin(id); This was preventing changing the colour of the pin
-			// Replace with
-			this.emit(Viewer.EVENT.CHANGE_PIN_COLOUR, {
-				colours: Pin.pinColours.yellow,
-				id
-			});
-
 			this.emit(Viewer.EVENT.SET_CAMERA, {
 				account: pin.account,
 				model: pin.model,
@@ -808,6 +801,10 @@ export class Viewer {
 		UnityUtil.setMaxShadowDistance(value);
 	}
 
+	public setNumCacheThreads(value: number) {
+		UnityUtil.setNumCacheThreads(value);
+	}
+
 	public setRenderingQualityDefault() {
 		UnityUtil.setRenderingQualityDefault();
 	}
@@ -822,6 +819,14 @@ export class Viewer {
 
 	public setXRayHighlightOff() {
 		UnityUtil.setXRayHighlightOff();
+	}
+
+	public enableCaching() {
+		UnityUtil.enableCaching();
+	}
+
+	public disableCaching() {
+		UnityUtil.disableCaching();
 	}
 
 	public useBoundingBoxFarPlaneAlgorithm() {

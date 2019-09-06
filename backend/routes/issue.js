@@ -28,6 +28,7 @@ const utils = require("../utils");
 const multer = require("multer");
 const config = require("../config.js");
 const ModelSetting = require("../models/modelSetting");
+const Comment = require("../models/comment");
 
 /**
  * @api {get} /:teamspace/:model/issues/:issueId Find Issue by ID
@@ -36,7 +37,7 @@ const ModelSetting = require("../models/modelSetting");
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {Number} id Issue ID.
+ * @apiParam {Number} issueId Issue ID
  *
  * @apiDescription Find an issue with the requested Issue ID.
  *
@@ -187,7 +188,7 @@ router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 /**
  * @api {get} /:teamspace/:model/issues.bcfzip Get Issue Screenshot
  * @apiName getScreenshot
- * @apiGroup Issue.
+ * @apiGroup Issues
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
@@ -330,36 +331,318 @@ router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
 /**
- * @api {post} /:teamspace/:model/issues Create a new issue.
- * @apiName  storeIssue
+ * @api {post} /:teamspace/:model/issues Create issue
+ * @apiName  newIssue
  * @apiGroup Issues
+ * @apiDescription Creates a new issue.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiDescription Create a new issue. This is the same endpoint as listIssues, but a post request is required.
+ *
+ * @apiParam (Request body) {String} name The name of the issue
+ * @apiParam (Request body) {[]String} assigned_roles The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
+ * @apiParam (Request body) {String} status The status of the issue. It can have a value of "open","in progress","for approval" or "closed".
+ * @apiParam (Request body) {String} priority The priority of the issue. It can have a value of "none", "low", "medium" or "high".
+ * @apiParam (Request body) {String} topic_type Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
+ * @apiParam (Request body) {Viewpoint} viewpoint The viewpoint of the issue, defining the position of the camera and the screenshot for that position.
+ * @apiParam (Request body) {String} owner The username of the user that created the issue
+ * @apiParam (Request body) {String} desc The description of the created issue
+ * @apiParam (Request body) {String} creator_role The job of the user that created the issue
+ * @apiParam (Request body) {[3]Number} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
+ * @apiParam (Request body) {[3]Number} norm The normal vector for the pin of the issue. Its not actually being used right now it it ca alwasy be of value [0,0,0].
+ *
+ * @apiParam (Request body: Viewpoint) {[3]Number} right The right vector of the viewpoint indicating the direction of right in relative coordinates.
+ * @apiParam (Request body: Viewpoint) {[3]Number} up The up vector of the viewpoint indicating the direction of up in relative coordinates.
+ * @apiParam (Request body: Viewpoint) {[3]Number} position The position vector indicates where in the world the viewpoint is positioned.
+ * @apiParam (Request body: Viewpoint) {[3]Number} look_at The vector indicating where in the world the viewpoint is looking at.
+ * @apiParam (Request body: Viewpoint) {[3]Number} view_dir The vector indicating where is the viewpoint is looking at in relative coordinates.
+ * @apiParam (Request body: Viewpoint) {Number} near The vector indicating the near plane.
+ * @apiParam (Request body: Viewpoint) {Number} far The vector indicating the far plane.
+ * @apiParam (Request body: Viewpoint) {Number} fov The angle of the field of view.
+ * @apiParam (Request body: Viewpoint) {Number} aspect_ratio The aspect ratio of the fustrum.
+ * @apiParam (Request body: Viewpoint) {String} highlighted_group_id If the issue is associated with one or more objects from the model this field has the value of a group id generated to hold those objects
+ * @apiParam (Request body: Viewpoint) {Boolean} hide_IFC A flag to hide the IFC
+ * @apiParam (Request body: Viewpoint) {String} screenshot A string in base64 representing the screenshot associated with the issue
+ *
+ *
+ * @apiExample {post} Example usage:
+ * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues HTTP/1.1
+ * {
+ *    "name": "Amazing issue",
+ *    "assigned_roles": [
+ *       "jobA"
+ *    ],
+ *    "status": "open",
+ *    "priority": "none",
+ *    "topic_type": "for_information",
+ *    "viewpoint": {
+ *       "right": [
+ *          0.8471935391426086,
+ *          -2.2351741790771484e-8,
+ *          0.5312844514846802
+ *       ],
+ *       "up": [
+ *          0.14098820090293884,
+ *          0.9641460180282593,
+ *          -0.22482173144817352
+ *       ],
+ *       "position": [
+ *          -5828.818359375,
+ *          5268.15625,
+ *          7829.76171875
+ *       ],
+ *       "look_at": [
+ *          -2445.6826171875,
+ *          3515.4658203125,
+ *          2434.966552734375
+ *       ],
+ *       "view_dir": [
+ *          0.5122357606887817,
+ *          -0.2653723657131195,
+ *          -0.8168182373046875
+ *       ],
+ *       "near": 20.835742950439453,
+ *       "far": 10417.87109375,
+ *       "fov": 1.0471975803375244,
+ *       "aspect_ratio": 4.031496047973633,
+ *       "clippingPlanes": [],
+ *       "highlighted_group_id": "",
+ *       "hideIfc": true,
+ *       "screenshot": "iVBORw0KGgoAAAANSUhEUgAACAAAA...ggg=="
+ *    },
+ *    "owner": "teamSpace1",
+ *    "desc": "This is the most awesome issue ever",
+ *    "creator_role": "jobA",
+ *    "scale": 1,
+ *    "position": [
+ *       -3960.10205078125,
+ *       4487.1552734375,
+ *       3326.732177734375
+ *    ],
+ *    "norm": [
+ *       0,
+ *       0,
+ *       0
+ *    ]
+ * }
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *    "name": "Amazing issue",
+ *    "assigned_roles": [
+ *       "jobA"
+ *    ],
+ *    "status": "open",
+ *    "priority": "none",
+ *    "topic_type": "for_information",
+ *    "owner": "teamSpace1",
+ *    "desc": "This is the most awesome issue ever",
+ *    "rev_id": "330f909b-9279-41aa-a87c-1c46f53a8e93",
+ *    "creator_role": "jobA",
+ *    "scale": 1,
+ *    "position": [
+ *       -3960.10205078125,
+ *       4487.1552734375,
+ *       3326.732177734375
+ *    ],
+ *    "norm": [
+ *       0,
+ *       0,
+ *       0
+ *    ],
+ *    "_id": "9ba5fb10-c8db-11e9-8f2a-ada77612c97e",
+ *    "created": 1566918114625,
+ *    "number": 1,
+ *    "thumbnail": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/thumbnail.png",
+ *    "typePrefix": "Structural",
+ *    "modelCode": "",
+ *    "account": "teamSpace1",
+ *    "model": "3549ddf6-885d-4977-87f1-eeac43a0e818",
+ *    "viewpoint": {
+ *       "right": [
+ *          0.8471935391426086,
+ *          -2.2351741790771484e-8,
+ *          0.5312844514846802
+ *       ],
+ *       "up": [
+ *          0.14098820090293884,
+ *          0.9641460180282593,
+ *          -0.22482173144817352
+ *       ],
+ *       "position": [
+ *          -5828.818359375,
+ *          5268.15625,
+ *          7829.76171875
+ *       ],
+ *       "look_at": [
+ *          -2445.6826171875,
+ *          3515.4658203125,
+ *          2434.966552734375
+ *       ],
+ *       "view_dir": [
+ *          0.5122357606887817,
+ *          -0.2653723657131195,
+ *          -0.8168182373046875
+ *       ],
+ *       "near": 20.835742950439453,
+ *       "far": 10417.87109375,
+ *       "fov": 1.0471975803375244,
+ *       "aspect_ratio": 4.031496047973633,
+ *       "clippingPlanes": [],
+ *       "highlighted_group_id": "",
+ *       "hideIfc": true,
+ *       "screenshot": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/viewpoints/125ce196-852c-49ed-9a2f-f9a77aa03390/screenshot.png",
+ *       "guid": "125ce196-852c-49ed-9a2f-f9a77aa03390",
+ *       "screenshotSmall": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/viewpoints/125ce196-852c-49ed-9a2f-f9a77aa03390/screenshotSmall.png"
+ *    },
+ *    "comments": [],
+ *    "extras": {
+ *    }
+ * }
+ *
+ *
  */
 router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {patch} /:teamspace/:model/issues/:issueId Update an Issue.
+ * @api {patch} /:teamspace/:model/issues/:issueId Update Issue.
  * @apiName  updateIssue
  * @apiGroup Issues
+ * @apiDescription Updates an issue. It takes the part of the issue that can be updated.
+ * The system will create a system comment withing the issue describing which values were changed.
+ * The user needs to be the teamspace administrator, or the project administrator, or has the same job as the creator of the issue, or has the issue assigned. In the case that the issue has been assigned to the user, the user cant change it to the "close status".
+ *
+ * If the issue is being updated to assigned to a job, and the status of the issue has the value "for_approval" then the status of the issue is automtically changed to "in_progress".
+ *
+ * If the user is changing the issue to the "for_approval" status, the issue will be assigned to the job that the creator of the issue has.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  * @apiParam {String} id Issue unique ID.
  *
- * @apiDescription Update an issue with an existing Issue ID
+ * @apiParam (Request body) {[]String} [assigned_roles] The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
+ * @apiParam (Request body) {String} [desc] The description of the issue
+ * @apiParam (Request body) {String} [status] The status of the issue. It can have a value of "open","in progress","for approval" or "closed".
+ * @apiParam (Request body) {String} [topic_type] Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
+ * @apiParam (Request body) {[3]Number} [position] The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
+ * @apiParam (Request body) {Number} [due_date] A timestamp depicting the due date of issue.
+ * @apiParam (Request body) {String} [priority] The priority of the issue. It can have a value of "none", "low", "medium" or "high".
+ * @apiParam (Request body) {Number} [scale] The scale of the issue.
+ * @apiParam (Request body) {Number} [viewCount] The viewcount of the issue.
+ * @apiParam (Request body) {Object} [extras] A field containing any extras that wanted to be saved in the issue. This is normally used by BCF.
+ *
+ * @apiExample {patch} Example usage:
+ * PATCH /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e HTTP/1.1
+ * {"status":"in progress"}
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *    "_id": "98c39770-c8e2-11e9-8f2a-ada77612c97e",
+ *    "name": "issue 2",
+ *    "assigned_roles": [
+ *       "jobC"
+ *    ],
+ *    "status": "in progress",
+ *    "priority": "none",
+ *    "topic_type": "for_information",
+ *    "owner": "teamSpace1",
+ *    "rev_id": "330f909b-9279-41aa-a87c-1c46f53a8e93",
+ *    "creator_role": "jobA",
+ *    "scale": 1,
+ *    "created": 1566921116263,
+ *    "desc": "(No Description)",
+ *    "number": 2,
+ *    "thumbnail": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e/thumbnail.png",
+ *    "comments": [
+ *       {
+ *          "guid": "febbe083-5a98-4711-8d60-d2ac06721f83",
+ *          "created": 1566924049774,
+ *          "owner": "teamSpace1",
+ *          "action": {
+ *             "property": "assigned_roles",
+ *             "from": "",
+ *             "to": "jobB"
+ *          },
+ *          "sealed": true
+ *       },
+ *       {
+ *          "guid": "e8ba32b2-d58e-4c33-90f7-c6e0404ef1ee",
+ *          "created": 1566924062287,
+ *          "owner": "teamSpace1",
+ *          "action": {
+ *             "property": "assigned_roles",
+ *             "from": "jobB",
+ *             "to": "jobC"
+ *          },
+ *          "sealed": true
+ *       },
+ *       {
+ *          "guid": "83117273-2698-4d2d-bd47-7cd31e6a7b14",
+ *          "created": 1566924080277,
+ *          "owner": "teamSpace1",
+ *          "action": {
+ *             "property": "status",
+ *             "from": "open",
+ *             "to": "in progress"
+ *          }
+ *       }
+ *    ],
+ *    "status_last_changed": 1566924080277,
+ *    "account": "teamSpace1",
+ *    "model": "3549ddf6-885d-4977-87f1-eeac43a0e818",
+ *    "viewpoint": {
+ *       "right": [
+ *          0.9953137040138245,
+ *          -4.656612873077393e-10,
+ *          0.09669896215200424
+ *       ],
+ *       "up": [
+ *          0.005437099374830723,
+ *          0.9984180331230164,
+ *          -0.05596357211470604
+ *       ],
+ *       "position": [
+ *          -3083.33251953125,
+ *          3886.8251953125,
+ *          8998.2783203125
+ *       ],
+ *       "look_at": [
+ *          -2445.680419921875,
+ *          3515.46533203125,
+ *          2434.984130859375
+ *       ],
+ *       "view_dir": [
+ *          0.0965459868311882,
+ *          -0.05622706934809685,
+ *          -0.9937390685081482
+ *       ],
+ *       "near": 20.835796356201172,
+ *       "far": 10417.8984375,
+ *       "fov": 1.0471975803375244,
+ *       "aspect_ratio": 3.1459293365478516,
+ *       "clippingPlanes": [],
+ *       "highlighted_group_id": "98b9d370-c8e2-11e9-8f2a-ada77612c97e",
+ *       "hideIfc": true,
+ *       "screenshot": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e/viewpoints/a1167d5f-2434-4a50-a158-d6a6745e7d6a/screenshot.png",
+ *       "guid": "a1167d5f-2434-4a50-a158-d6a6745e7d6a",
+ *       "screenshotSmall": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e/viewpoints/a1167d5f-2434-4a50-a158-d6a6745e7d6a/screenshotSmall.png"
+ *    },
+ *    "norm": [],
+ *    "position": [],
+ *    "extras": {
+ *    }
+ * }
  *
  * @apiSuccess (200) {Object} Updated Issue Object.
  *
  */
-router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
+router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.chat.onUpdateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {post} /:teamspace/:model/revision/:rid/issues Store issue based on revision
- * @apiName storeIssue
+ * @api {post} /:teamspace/:model/revision/:rid/issues Create issue on revision
+ * @apiName newIssueRev
  * @apiGroup Issues
+ * @apiDescription Creates a new issue for a particular revision. See <a href="#api-Issues-newIssue">here</a> for more details.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
@@ -368,9 +651,10 @@ router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, midd
 router.post("/revision/:rid/issues", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {put} /:teamspace/:model/revision/:rid/issues/:issueId Update issue based on revision
- * @apiName updateIssue
+ * @api {patch} /:teamspace/:model/revision/:rid/issues/:issueId Update issue on revision
+ * @apiName updateIssueRev
  * @apiGroup Issues
+ * @apiDescription Updates an issue for a particular revision. See <a href="#api-Issues-updateIssue">here</a> for more details.
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
@@ -380,7 +664,7 @@ router.post("/revision/:rid/issues", middlewares.issue.canCreate, storeIssue, re
 router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {post} /:teamspace/:model/issues/:issueId/comments Add an comment for an issue
+ * @api {post} /:teamspace/:model/issues/:issueId/comments Add comment to issue
  * @apiName commentIssue
  * @apiGroup Issues
  *
@@ -531,18 +815,16 @@ function storeIssue(req, res, next) {
 
 function updateIssue(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = { account: req.params.account, model: req.params.model };
-	const data = req.body;
+	const { account, model, issueId } = req.params;
+	const updateData = req.body;
 
-	data.requester = req.session.user.username;
-	data.revId = req.params.rid;
-	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const user = req.session.user.username;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	const issueId = req.params.issueId;
-
-	return Issue.update(dbCol, issueId, data).then(({newIssue, oldIssue}) => {
-		req.dataModel = newIssue;
-		req.oldDataModel = oldIssue;
+	return Issue.update(user, sessionId, account, model, issueId, updateData).then(({updatedTicket, oldTicket, data}) => {
+		req.dataModel = updatedTicket;
+		req.oldDataModel = oldTicket;
+		req.data = data;
 		next();
 	}).catch((err) => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -607,11 +889,10 @@ function getIssuesBCF(req, res, next) {
 }
 
 function findIssueById(req, res, next) {
-	const params = req.params;
 	const place = utils.APIInfo(req);
-	const dbCol = { account: req.params.account, model: req.params.model };
+	const {account, model, issueId} = req.params;
 
-	Issue.findByUID(dbCol, params.issueId).then(issue => {
+	Issue.findByUID(account, model, issueId).then(issue => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issue);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -686,7 +967,7 @@ function getScreenshot(req, res, next) {
 	const dbCol = { account: req.params.account, model: req.params.model };
 
 	Issue.getScreenshot(dbCol, req.params.issueId, req.params.vid).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});
@@ -697,7 +978,7 @@ function getScreenshotSmall(req, res, next) {
 	const dbCol = { account: req.params.account, model: req.params.model };
 
 	Issue.getSmallScreenshot(dbCol, req.params.issueId, req.params.vid).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});
@@ -708,7 +989,7 @@ function getThumbnail(req, res, next) {
 	const dbCol = { account: req.params.account, model: req.params.model };
 
 	Issue.getThumbnail(dbCol, req.params.issueId).then(buffer => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png");
+		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});
@@ -719,7 +1000,7 @@ function addComment(req, res, next) {
 	const data =  req.body;
 	const {account, model, issueId} = req.params;
 
-	Issue.addComment(account, model, issueId, user, data).then(comment => {
+	Comment.addComment(account, model, "issues", issueId, user, data).then(comment => {
 		req.dataModel = comment;
 		next();
 	}).catch(err => {
@@ -732,7 +1013,7 @@ function deleteComment(req, res, next) {
 	const guid = req.body.guid;
 	const {account, model, issueId} = req.params;
 
-	Issue.deleteComment(account, model, issueId, guid, user).then(comment => {
+	Comment.deleteComment(account, model, "issues", issueId, guid, user).then(comment => {
 		req.dataModel = comment;
 		next();
 	}).catch(err => {

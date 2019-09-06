@@ -26,129 +26,116 @@
 	const _ = require("lodash");
 
 	/**
-	 * @api {get} /:teamspace/permissions/ List all permissions
+	 * @api {get} /:teamspace/permissions List all permissions
 	 * @apiName listPermissions
 	 * @apiGroup Account Permission
+	 * @apiDescription Get a list of all account permission objects for a teamspace
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
-	 *
-	 * @apiDescription List all account level permissions
-	 * @apiSuccess (200) {String} user Current user account
+	 * @apiSuccess (200) {String} user User
 	 * @apiSuccess (200) {String[]} permissions Account level permissions
 	 *
-	 * @apiSuccessExample {json} Success-Response:
-	 *  HTTP/1.1 200 OK
-	 *	[
-	 *	   {
-	 *		 "user": "username",
-	 *		 "permissions": [
-	 *			 "teamspace_admin"
-	 *		 ]
-	 *	   }
-	 *	]
+	 * @apiExample {get} Example usage:
+	 * GET /acme/permissions HTTP/1.1
 	 *
-	  * @apiError NOT_AUTHORIZED Not Authorized
-	 * @apiErrorExample {json} Error-Example
-	 * HTTP/1.1 401 Unauthorized
-	 *	{
-	 *	  "message": "Not Authorized",
-	 *	  "status": 401,
-	 *	  "code": "NOT_AUTHORIZED",
-	 *	  "value": 9,
-	 *	  "place": "GET /permissions"
-	 *	}
+	 * @apiSuccessExample {json} Success-Response:
+	 * HTTP/1.1 200 OK
+	 * [
+	 * 	{
+	 * 		"user": "alice",
+	 * 		"permissions": [
+	 * 			"teamspace_admin"
+	 * 		]
+	 * 	},
+	 * 	{
+	 * 		"user": "bob",
+	 * 		"permissions": [
+	 * 			"create_project"
+	 * 		]
+	 * 	}
+	 * ]
 	 */
-
 	router.get("/permissions", middlewares.isAccountAdmin, listPermissions);
 
 	/**
-	 * @api {post} /:teamspace/permissions/ Create a permission
+	 * @api {post} /:teamspace/permissions Assign permissions
 	 * @apiName createPermission
 	 * @apiGroup Account Permission
+	 * @apiDescription Assign account level permission to a user
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
-	 *
-	 * @apiDescription Create a new account permissions
+	 * @apiParam (Request body) {String} user User to assign permissions to
+	 * @apiParam (Request body) {String[]} permissions List of account level permissions
+	 * @apiSuccess (200) {String} user User
 	 * @apiSuccess (200) {String[]} permissions Account Level Permission types
 	 *
-	 * @apiSuccessExample {json} Success-Response:
-	 *  HTTP/1.1 200 OK
-	 *	[
-	 *	   {
-	 *		 "user": "username1",
-	 *		 "permissions": [
-	 *			 "permission_type"
-	 *		 ]
-	 *	   }
-	 *	]
+	 * @apiExample {post} Example usage:
+	 * POST /acme/permissions HTTP/1.1
+	 * {
+	 * 	"user": "bob",
+	 * 	"permissions": [
+	 * 		"create_project"
+	 * 	]
+	 * }
 	 *
-	 * @apiError Missing or invalid arguments
-	 * @apiErrorExample {json} Error-Response
-	 * HTTP/1.1 400 Bad Request
-	 *	{
-	 *	  "message": "Missing or invalid arguments",
-	 *	  "status": 400,
-	 *	  "code": "INVALID_ARGUMENTS",
-	 *	  "value": 10,
-	 *	  "place": "POST /permissions"
-	 *	}
+	 * @apiSuccessExample {json} Success-Response:
+	 * HTTP/1.1 200 OK
+	 * [
+	 * 	{
+	 * 		"user": "bob",
+	 * 		"permissions": [
+	 * 			"create_project"
+	 * 		]
+	 * 	}
+	 * ]
 	 */
 	router.post("/permissions", middlewares.isAccountAdmin, createPermission);
 
 	/**
-	 * @api {put} /:teamspace/permissions/:user Update a permission
+	 * @api {put} /:teamspace/permissions/:user Update permissions
 	 * @apiName updatePermission
 	 * @apiGroup Account Permission
-	 *
-	 * @apiDescription Create a new account level permission for a user.
+	 * @apiDescription Update permissions assignment for a user.
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} user User to update
-	 * @apiSuccessExample {json} Success-Response
+	 * @apiParam (Request body) {String[]} permissions List of account level permissions
+	 * @apiSuccess {String[]} permissions List of account level permissions
 	 *
+	 * @apiExample {put} Example usage:
+	 * PUT /acme/permissions/alice HTTP/1.1
+	 * {
+	 * 	"permissions": [
+	 * 		"teamspace_admin"
+	 * 	]
+	 * }
+	 *
+	 * @apiSuccessExample {json} Success-Response
 	 * HTTP/1.1 200 OK
-	 * [
-	 *	 {
-	 *	  "model": "model_ID",
-	 *	  "name": "model_name",
-	 *	  "permissions": [
-	 *		  {
-	 *			  "user": "username1"
-	 *		  },
-	 *		  {
-	 *			  "user": "username2"
-	 *		  }
-	 *	  ],
-	 *	  "subModels": []
-	 *	 }
-	 * ]
+	 * {
+	 *	"permissions": [
+	 *		"teamspace_admin"
+	 * 	]
+	 * }
 	 */
-
 	router.put("/permissions/:user", middlewares.isAccountAdmin, updatePermission);
 
 	/**
-	 * @api {delete} /:teamspace/permissions/:user Delete a permission
+	 * @api {delete} /:teamspace/permissions/:user Revoke permissions
 	 * @apiName deletePermission
 	 * @apiGroup Account Permission
+	 * @apiDescription Revoke all permissions from a user.
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} user User to delete
 	 *
-	 * @apiDescription Update an existing permission for a teamspace member.
+	 * @apiExample {delete} Example usage:
+	 * DELETE /acme/permissions/alice HTTP/1.1
 	 *
-	 * @apiError Missing or invalid arguments
-	 * @apiErrorExample
-	 *
-	 * HTTP/1.1 401 Unauth­orized
-	 *	{
-	 *	  "message": "Missing or invalid arguments",
-	 *	  "status": 401,
-	 *	  "code": "NOT_AUTHORIZED",
-	 *	  "value": 9,
-	 *	  "place": "GET /permissions"
-	 *	}
+	 * @apiSuccessExample {json} Success-Response
+	 * HTTP/1.1 200 OK
+	 * {}
 	 */
-
 	router.delete("/permissions/:user", middlewares.isAccountAdmin, deletePermission);
 
 	function listPermissions(req, res, next) {

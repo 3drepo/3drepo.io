@@ -30,12 +30,9 @@ const ChatEvent = require("./chatEvent");
 const systemLogger = require("../logger.js").systemLogger;
 const Comment = require("./comment");
 const Group = require("./group");
-const Job = require("./job");
-const Project = require("./project");
-const User = require("./user");
 const View = require("./viewpoint");
 
-const C = require("../constants");
+const Ticket = require("./ticket");
 
 const risk = {};
 
@@ -76,6 +73,8 @@ const LEVELS = {
 	HIGH: 3,
 	VERY_HIGH: 4
 };
+
+const ticket = new Ticket("risks", "RISK", fieldTypes, []);
 
 function clean(dbCol, riskToClean) {
 	const idKeys = ["_id", "rev_id", "parent"];
@@ -136,18 +135,25 @@ function clean(dbCol, riskToClean) {
 		riskToClean.thumbnail = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/thumbnail.png";
 	}
 
-	riskToClean.level_of_risk = calculateLevelOfRisk(riskToClean.likelihood, riskToClean.consequence);
-	riskToClean.residual_level_of_risk = calculateLevelOfRisk(riskToClean.residual_likelihood, riskToClean.residual_consequence);
-
-	if (0 <= riskToClean.residual_level_of_risk) {
-		riskToClean.overall_level_of_risk = riskToClean.residual_level_of_risk;
-	} else {
-		riskToClean.overall_level_of_risk = riskToClean.level_of_risk;
-	}
+	riskToClean = { ...riskToClean, ...getLevelOfRisk(riskToClean) };
 
 	delete riskToClean.viewpoints;
 
 	return riskToClean;
+}
+
+function getLevelOfRisk(riskData) {
+	const level_of_risk = calculateLevelOfRisk(riskData.likelihood, riskData.consequence);
+	const residual_level_of_risk = calculateLevelOfRisk(riskData.residual_likelihood, riskData.residual_consequence);
+
+	let overall_level_of_risk;
+	if (0 <= residual_level_of_risk) {
+		overall_level_of_risk = residual_level_of_risk;
+	} else {
+		overall_level_of_risk = level_of_risk;
+	}
+
+	return {level_of_risk, residual_level_of_risk, overall_level_of_risk};
 }
 
 function toDirectXCoords(entry) {
@@ -200,71 +206,6 @@ function addRiskMitigationComment(account, model, sessionId, riskId, comments, d
 
 		ChatEvent.newComment(sessionId, account, model, riskId, mitigationComment);
 	}
-
-	return comments;
-}
-
-function updateTextComments(account, model, sessionId, riskId, comments, data, viewpoint) {
-	if (!comments) {
-		comments = [];
-	}
-
-	if (data.edit && data.commentIndex >= 0 && comments.length > data.commentIndex) {
-		if (!comments[data.commentIndex].sealed) {
-			const textComment = Comment.newTextComment(data.owner, data.comment, viewpoint, data.position);
-
-			comments[data.commentIndex] = textComment;
-
-			ChatEvent.commentChanged(sessionId, account, model, riskId, data);
-		} else {
-			throw responseCodes.ISSUE_COMMENT_SEALED;
-		}
-	} else if (data.sealed && data.commentIndex >= 0 && comments.length > data.commentIndex) {
-		comments[data.commentIndex].sealed = true;
-	} else if (data.delete && data.commentIndex >= 0 && comments.length > data.commentIndex) {
-		if (!comments[data.commentIndex].sealed) {
-			comments.splice(data.commentIndex, 1);
-
-			ChatEvent.commentDeleted(sessionId, account, model, riskId, data);
-		} else {
-			throw responseCodes.ISSUE_COMMENT_SEALED;
-		}
-	} else if ((data.edit || data.delete) && comments.length <= data.commentIndex) {
-		throw responseCodes.ISSUE_COMMENT_INVALID_GUID;
-	} else {
-		comments.forEach((comment) => {
-			comment.sealed = true;
-		});
-
-		const textComment = Comment.newTextComment(data.owner, data.comment, viewpoint, data.position);
-
-		comments.push(textComment);
-
-		ChatEvent.newComment(sessionId, account, model, riskId, textComment);
-	}
-
-	return comments;
-}
-
-function addSystemComment(account, model, sessionId, riskId, comments, owner, property, oldValue, newValue) {
-	if (!comments) {
-		comments = [];
-	}
-
-	comments.forEach((comment) => {
-		comment.sealed = true;
-	});
-
-	const systemComment = Comment.newSystemComment(
-		owner,
-		property,
-		oldValue,
-		newValue
-	);
-
-	comments.push(systemComment);
-
-	ChatEvent.newComment(sessionId, account, model, riskId, systemComment);
 
 	return comments;
 }
@@ -439,189 +380,69 @@ risk.createRisk = function(dbCol, newRisk) {
 	});
 };
 
-risk.updateAttrs = function(dbCol, uid, data) {
+risk.createViewPoint = async (account, model, viewpoint) => {
+	let newViewpoint = null;
 
-	const sessionId = data.sessionId;
-
-	if ("[object String]" === Object.prototype.toString.call(uid)) {
-		uid = utils.stringToUUID(uid);
+	if (viewpoint) {
+		newViewpoint = {...viewpoint};
+		if (Object.prototype.toString.call(viewpoint) === fieldTypes["viewpoint"]) {
+			newViewpoint.guid = utils.generateUUID();
+			newViewpoint = await View.clean({account, model}, newViewpoint, fieldTypes.viewpoint);
+		} else {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
 	}
 
-	return this.findByUID(dbCol, uid, {}, true).then((oldRisk) => {
-		if (oldRisk) {
-			let typeCorrect = true;
+	return newViewpoint;
+};
 
-			let newRisk = _.cloneDeep(oldRisk);
+risk.onBeforeUpdate = (account, model, sessionId, residualData) => async function(data, oldRisk) {
+	if (residualData.residual) {
+		const updatedComments = addRiskMitigationComment(
+			account,
+			model,
+			sessionId,
+			oldRisk._id,
+			oldRisk.comments,
+			data,
+			this.createViewPoint(residualData.viewpoint)
+		);
 
-			const userPermissionsPromise = User.findByUserName(dbCol.account).then((dbUser) => {
+		data.comments = updatedComments;
+	}
 
-				return Job.findByUser(dbUser.user, data.requester).then((_job) => {
-					const job = _job ?  _job._id : null;
-					const accountPerm = dbUser.customData.permissions.findByUser(data.requester);
-					const userIsAdmin = Project.isProjectAdmin(
-						dbCol.account,
-						dbCol.model,
-						data.requester
-					);
+	return data;
+};
 
-					return userIsAdmin.then(projAdmin => {
+risk.update = async function(user, sessionId, account, model, issueId, data) {
+	// 0. Set the black list for attributes
+	const attributeBlacklist = [
+		"_id",
+		"comments",
+		"created",
+		"creator_role",
+		"name",
+		"norm",
+		"number",
+		"owner",
+		"rev_id",
+		"status",
+		"thumbnail",
+		"viewpoint",
+		"viewpoints"
+	];
 
-						const tsAdmin = accountPerm && accountPerm.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
-						const isAdmin = projAdmin || tsAdmin;
-						const hasOwnerJob = oldRisk.creator_role === job;
-						const hasAssignedJob = job === oldRisk.assigned_roles[0];
+	const residualData = _.pick(data, ["viewpoint", "residual"]);
+	const beforeUpdate =  this.onBeforeUpdate(account, model, sessionId, residualData).bind(this);
 
-						return {
-							isAdmin,
-							hasOwnerJob,
-							hasAssignedJob
-						};
+	data = _.omit(data, ["viewpoint", "residual"]);
+	const updatedRisk = await ticket.update(attributeBlacklist, user, sessionId, account, model, issueId, data, beforeUpdate);
 
-					});
-				});
-			});
+	const levelOfRisk = getLevelOfRisk(updatedRisk.updatedTicket);
+	updatedRisk.updatedTicket = {...updatedRisk.updatedTicket, ...levelOfRisk};
+	updatedRisk.data = {...updatedRisk.data, ...levelOfRisk};
 
-			let newViewpointPromise;
-
-			if (data["viewpoint"]) {
-				if (Object.prototype.toString.call(data["viewpoint"]) === fieldTypes["viewpoint"]) {
-					data.viewpoint.guid = utils.generateUUID();
-
-					newViewpointPromise = View.clean(dbCol, data["viewpoint"], fieldTypes["viewpoint"]);
-				} else {
-					typeCorrect = false;
-				}
-			}
-
-			return Promise.all([userPermissionsPromise, newViewpointPromise]).then(([user, newViewpoint]) => {
-				const toUpdate = {};
-				const attributeBlacklist = [
-					"_id",
-					"comments",
-					"created",
-					"creator_role",
-					"name",
-					"norm",
-					"number",
-					"owner",
-					"rev_id",
-					"status",
-					"thumbnail",
-					"viewpoint",
-					"viewpoints"
-				];
-				const ownerPrivilegeAttributes = [];
-				const fieldsCanBeUpdated = Object.keys(fieldTypes).filter(attr => !attributeBlacklist.includes(attr));
-
-				if (newViewpoint) {
-					if (!newRisk["viewpoints"]) {
-						newRisk.viewpoints = [];
-					}
-
-					toUpdate.viewpoints = newRisk.viewpoints.concat();
-
-					toUpdate.viewpoints.push(newViewpoint);
-					newRisk.viewpoints.push(newViewpoint);
-				}
-
-				fieldsCanBeUpdated.forEach((key) => {
-					if (data[key] !== undefined &&
-						(("[object Object]" !== fieldTypes[key] && "[object Array]" !== fieldTypes[key] && data[key] !== newRisk[key])
-						|| !_.isEqual(newRisk[key], data[key]))) {
-						if (null === data[key] || Object.prototype.toString.call(data[key]) === fieldTypes[key]) {
-							if ("comment" === key || "commentIndex" === key) {
-								if ("commentIndex" !== key || -1 === Object.keys(data).indexOf("comment")) {
-									const updatedComments = updateTextComments(
-										dbCol.account,
-										dbCol.model,
-										data.sessionId,
-										newRisk._id,
-										newRisk.comments,
-										data,
-										newViewpoint
-									);
-
-									toUpdate.comments = updatedComments;
-									newRisk.comments = updatedComments;
-								}
-							} else if ("residual" === key) {
-								const updatedComments = addRiskMitigationComment(
-									dbCol.account,
-									dbCol.model,
-									data.sessionId,
-									newRisk._id,
-									newRisk.comments,
-									data,
-									newViewpoint
-								);
-
-								toUpdate.comments = updatedComments;
-								newRisk.comments = updatedComments;
-							} else {
-								if (-1 === ownerPrivilegeAttributes.indexOf(key) || (user.isAdmin || user.hasOwnerJob)) {
-									const updatedComments = addSystemComment(
-										dbCol.account,
-										dbCol.model,
-										data.sessionId,
-										newRisk._id,
-										newRisk.comments,
-										data.owner,
-										key,
-										newRisk[key],
-										data[key]
-									);
-
-									toUpdate.comments = updatedComments;
-									newRisk.comments = updatedComments;
-
-									toUpdate[key] = data[key];
-									newRisk[key] = data[key];
-								} else {
-									return Promise.reject(responseCodes.RISK_UPDATE_PERMISSION_DECLINED);
-								}
-							}
-						} else {
-							typeCorrect = false;
-						}
-					}
-				});
-
-				if (!typeCorrect) {
-					return Promise.reject(responseCodes.INVALID_ARGUMENTS);
-				} else if (0 === Object.keys(toUpdate).length) {
-					return (data.comment) ?
-						Promise.resolve(data) :
-						Promise.resolve(oldRisk);
-				} else {
-					return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
-						return _dbCol.update({_id: uid}, {$set: toUpdate}).then(() => {
-							newRisk = clean(dbCol, newRisk);
-
-							if (data.hasOwnProperty("comment")) {
-								if (!data.edit && !data.delete &&
-									newRisk.comments && newRisk.comments.length > 0) {
-									return newRisk.comments[newRisk.comments.length - 1];
-								}
-
-								return data;
-							} else {
-								ChatEvent.riskChanged(sessionId, dbCol.account, dbCol.model, newRisk);
-								return newRisk;
-							}
-						});
-					});
-				}
-			}).catch((err) => {
-				if (err) {
-					return Promise.reject(err);
-				} else {
-					return Promise.reject(responseCodes.RISK_UPDATE_FAILED);
-				}
-			});
-		} else {
-			return Promise.reject({ resCode: responseCodes.RISK_NOT_FOUND });
-		}
-	});
+	return updatedRisk;
 };
 
 risk.deleteRisks = function(dbCol, sessionId, ids) {

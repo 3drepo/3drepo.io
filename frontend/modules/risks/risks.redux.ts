@@ -31,13 +31,11 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	removeComment: ['teamspace', 'modelId', 'riskData'],
 	saveRiskSuccess: ['risk'],
 	setNewRisk: [],
-	renderPins: [],
 	printRisks: ['teamspace', 'modelId'],
 	downloadRisks: ['teamspace', 'modelId'],
 	showDetails: ['teamspace', 'model', 'revision', 'risk'],
 	closeDetails: ['teamspace', 'model', 'revision'],
 	setActiveRisk: ['risk', 'revision'],
-	showNewPin: ['risk', 'pinData'],
 	togglePendingState: ['isPending'],
 	toggleDetailsPendingState: ['isPending'],
 	subscribeOnRiskChanges: ['teamspace', 'modelId'],
@@ -53,7 +51,8 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	updateNewRisk: ['newRisk'],
 	setFilters: ['filters'],
 	showCloseInfo: ['riskId'],
-	resetComponentState: []
+	resetComponentState: [],
+	updateSelectedRiskPin: ['position']
 }, { prefix: 'RISKS/' });
 
 export interface IRisksComponentState {
@@ -134,14 +133,30 @@ export const fetchRiskFailure = (state = INITIAL_STATE) => {
 };
 
 export const saveRiskSuccess = (state = INITIAL_STATE, { risk }) => {
-	const risksMap = cloneDeep(state.risksMap);
-	risksMap[risk._id] = risk;
+	const risksMap = updateRiskProps(state.risksMap, risk._id, risk);
 
 	return {
 		...state,
 		risksMap,
 		componentState: { ...state.componentState, newRisk: {}}
 	};
+};
+
+export const updateSelectedRiskPin =  (state = INITIAL_STATE, { position }) => {
+	if (state.componentState.activeRisk) {
+		const risk = state.risksMap[state.componentState.activeRisk];
+		return saveRiskSuccess(state, { risk: {...risk, position} });
+	}
+
+	if (state.componentState.newRisk) {
+		const componentState = state.componentState;
+
+		return {...state,
+			componentState: { ...componentState , newRisk: { ...componentState.newRisk, position } }
+		};
+	}
+
+	return state;
 };
 
 export const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
@@ -191,6 +206,10 @@ const showCloseInfo = (state = INITIAL_STATE, { riskId }) => {
 	return { ...state, risksMap };
 };
 
+const toggleShowPins = (state = INITIAL_STATE, { showPins }) => {
+	return setComponentState(state, { componentState: {showPins} });
+};
+
 export const resetComponentState = (state = INITIAL_STATE) => {
 	return { ...state, componentState: INITIAL_STATE.componentState };
 };
@@ -208,5 +227,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
 	[RisksTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
 	[RisksTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
-	[RisksTypes.SHOW_CLOSE_INFO]: showCloseInfo
+	[RisksTypes.SHOW_CLOSE_INFO]: showCloseInfo,
+	[RisksTypes.UPDATE_SELECTED_RISK_PIN]: updateSelectedRiskPin,
+	[RisksTypes.TOGGLE_SHOW_PINS]: toggleShowPins
 });

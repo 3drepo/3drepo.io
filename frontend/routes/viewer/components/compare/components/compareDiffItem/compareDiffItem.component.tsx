@@ -20,7 +20,8 @@ import * as React from 'react';
 import { ArrowsAltH } from '../../../../../components/fontAwesomeIcon';
 import Checkbox from '@material-ui/core/Checkbox';
 import { RevisionsSelect } from '../revisionsSelect/revisionsSelect.component';
-import { Container, ModelData, Name, Revisions, CurrentRevision, CompareIconWrapper } from './compareDiffItem.styles';
+import { Container, ModelData, Name, Revisions,
+	CurrentRevision, CompareIconWrapper, RevisionTooltip } from './compareDiffItem.styles';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { formatShortDate } from '../../../../../../services/formatting/formatDate';
 
@@ -88,7 +89,9 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 			<ModelData>
 				<Name disabled={!selected}>{name}</Name>
 				<Revisions>
-					<CurrentRevision disabled={!selected}>{this.currentRevisionName}</CurrentRevision>
+					<RevisionTooltip title={this.currentRevisionName} >
+						<CurrentRevision disabled={!selected}>{this.currentRevisionName}</CurrentRevision>
+					</RevisionTooltip>
 					{this.renderRevisionsSettings(this.props.selected && this.props.revisions.length > 1)}
 				</Revisions>
 			</ModelData>

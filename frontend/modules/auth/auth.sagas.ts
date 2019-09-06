@@ -24,6 +24,7 @@ import { getAvatarUrl } from '../currentUser/currentUser.sagas';
 import { DialogActions } from '../dialog';
 import { AuthActions, AuthTypes } from './auth.redux';
 import { verificationMessages, forgotPasswordMessages, changePasswordMessages } from './auth.helpers';
+import { ViewerActions } from '../viewer';
 
 export function* login({ username, password }) {
 	yield put(AuthActions.setPendingStatus(true));
@@ -109,10 +110,6 @@ export function* sessionExpired() {
 		StateManager.resetServiceStates();
 
 		yield put({ type: 'RESET_APP' });
-		yield put(DialogActions.showDialog({
-			title: 'Session expired',
-			content: 'You have been logged out as your session has expired'
-		}));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('verify', 'user session', e));
 	}

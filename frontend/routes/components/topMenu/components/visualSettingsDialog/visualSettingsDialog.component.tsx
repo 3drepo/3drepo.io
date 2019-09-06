@@ -22,7 +22,7 @@ import * as Yup from 'yup';
 import { schema } from '../../../../../services/validation';
 import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NeutralActionButton, ShortInput,
 		VisualSettingsButtonsContainer, VisualSettingsDialogContent,
-		NegativeActionButton } from './visualSettingsDialog.styles';
+		NegativeActionButton, WarningMessage } from './visualSettingsDialog.styles';
 import { isEqual } from 'lodash';
 import { DEFAULT_SETTINGS } from '../../../../../constants/viewer';
 import { SelectField } from '../../../selectField/selectField.component';
@@ -31,7 +31,8 @@ const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
 	memory: schema.integer(16, 2032),
 	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY),
-	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY)
+	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY),
+	numCacheThreads: schema.integer(1, 15)
 });
 
 const BasicSettings = (props) => {
@@ -59,7 +60,13 @@ const BasicSettings = (props) => {
 				<Field name="xray" render={ ({ field }) => (
 					<Switch checked={field.value} {...field} value="true" color="secondary" />)}/>
 			</FormListItem>
-		</List>);
+			<FormListItem>
+				Model Caching (Beta)
+				<Field name="caching" render={ ({ field }) => (
+					<Switch onClick={props.onCacheChange} checked={field.value} {...field} value="true" color="secondary" />)}/>
+			</FormListItem>
+		</List>
+	);
 };
 
 const AdvancedSettings = (props) => {
@@ -80,6 +87,19 @@ const AdvancedSettings = (props) => {
 						error={Boolean(form.errors.memory)}
 						{...field}
 						endAdornment={<InputAdornment position="end">MB</InputAdornment>}/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				Number of Caching Threads
+				<Field name="numCacheThreads" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.numCacheThreads || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.numCacheThreads)}
+						{...field}
+						/>
 					</ErrorTooltip>
 					);
 				}} />
@@ -133,7 +153,21 @@ const AdvancedSettings = (props) => {
 					);
 				}} />
 			</FormListItem>
-		</List>);
+		</List>
+	);
+};
+
+const CacheWarning = (props) => {
+	return (
+		<List>
+			<FormListItem>
+				<WarningMessage>
+					Warning: Enabling model caching will save model data to your browser cache.
+					If you are sharing a computer, please clear the cache before logging out.
+				</WarningMessage>
+			</FormListItem>
+		</List>
+	);
 };
 
 const Buttons = (props) => {
@@ -169,41 +203,50 @@ const Buttons = (props) => {
 						Save
 					</Button>
 			)} />
-
-		</VisualSettingsButtonsContainer>);
+		</VisualSettingsButtonsContainer>
+	);
 };
 
 interface IProps {
 	handleResolve: () => void;
 	handleClose: () => void;
-	updateSettings: (settings: any) => void;
+	updateSettings: (username: string, settings: any) => void;
 	visualSettings: any;
+	currentUser: string;
 }
 
 interface IState {
 	selectedTab: number;
 	visualSettings: any;
 	flag: boolean;
+	showCacheWarning: boolean;
 }
 
 export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 	public state = {
 		selectedTab: 0,
 		visualSettings: null,
-		flag: false
+		flag: false,
+		showCacheWarning: false
 	};
 
 	public handleTabChange = (event, selectedTab) => {
 		this.setState({ selectedTab });
 	}
 
+	public onCacheChange = (event) => {
+		this.setState({showCacheWarning : event.target.checked});
+	}
+
 	public onSubmit = (values, { resetForm }) => {
+		const { updateSettings, currentUser} = this.props;
+
 		values.nearPlane = Number(values.nearPlane);
 		values.memory = Number(values.memory);
 		values.farPlaneSamplingPoints = Number(values.farPlaneSamplingPoints);
 		values.maxShadowDistance = Number(values.maxShadowDistance);
 
-		this.props.updateSettings(values);
+		updateSettings(currentUser, values);
 
 		if (values.memory !== this.props.visualSettings.memory) {
 			location.reload();
@@ -216,7 +259,7 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {selectedTab} = this.state;
+		const {selectedTab, showCacheWarning} = this.state;
 		const {visualSettings, handleClose} =  this.props;
 
 		return (
@@ -237,8 +280,9 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 					onSubmit={this.onSubmit}
 					>
 					<Form>
-						{selectedTab === 0 && <BasicSettings />}
+						{selectedTab === 0 && <BasicSettings onCacheChange={this.onCacheChange}/>}
 						{selectedTab === 1 && <AdvancedSettings />}
+						{selectedTab === 0 && showCacheWarning && <CacheWarning />}
 						<Buttons onClickCancel={handleClose} />
 					</Form>
 				</Formik>

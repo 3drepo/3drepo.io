@@ -1,11 +1,11 @@
 const MODES = require('./modes');
 
-const TSLoader = (options) => ({
+const TSLoader = ({ transpileOnly }) => ({
   test: /\.(ts|tsx)$/,
   loader: 'ts-loader',
   exclude: /node_modules/,
   options: {
-    transpileOnly: options.mode !== MODES.PRODUCTION
+    transpileOnly
   }
 })
 

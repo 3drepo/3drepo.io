@@ -10,10 +10,12 @@ export const prepareGroup = (group) => {
 	const type = isSmartGroup ? GROUPS_TYPES.SMART : GROUPS_TYPES.NORMAL;
 
 	return {
-		...group,
+		...omit(group, 'author', 'createdDate', 'description'),
+		_id: group._id,
+		owner: group.author,
+		created: group.createdAt,
+		desc: group.description,
 		type,
-		createdDate: group.createdAt,
-		updateDate: group.updateAt,
 		StatusIconComponent: GROUP_TYPES_ICONS[type],
 		statusColor: COLOR.BLACK_54,
 		color: getGroupHexColor(group.color),
@@ -26,9 +28,8 @@ export const prepareGroup = (group) => {
 export const normalizeGroup = (group) => {
 	const normalizedGroup = {
 		color: hexToArray(group.color),
-		createdAt: group.createdDate,
-		updatedAt: group.updateDate,
-		...pick(group, ['name', 'author', '_id', 'description'])
+		...pick(group, ['name', 'author', '_id']),
+		description: group.desc || group.description
 	} as any;
 
 	if (group.type === GROUPS_TYPES.SMART) {

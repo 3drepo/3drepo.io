@@ -226,7 +226,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									items={RISK_LIKELIHOODS}
 									inputId="likelihood"
 									disabled={!canEditBasicProperty}
-									readOnly={!this.isNewRisk}
 								/>
 							)} />
 						</StyledFormControl>
@@ -239,7 +238,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									items={RISK_CONSEQUENCES}
 									inputId="consequence"
 									disabled={!canEditBasicProperty}
-									readOnly={!this.isNewRisk}
 								/>
 							)} />
 						</StyledFormControl>
@@ -254,15 +252,15 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									items={LEVELS_OF_RISK}
 									inputId="level_of_risk"
 									disabled={true}
-									readOnly
+									readOnly={true}
 								/>
 							)} />
 						</StyledFormControl>
 						<StyledFormControl>
-							<PinButton onChange={this.props.onChangePin}
+							<PinButton
+								onChange={this.props.onChangePin}
 								onSave={this.props.onSavePin}
 								disabled={!this.isNewRisk && !canEditBasicProperty}
-								pinId={this.props.pinId}
 								hasPin={this.props.hasPin}
 							/>
 						</StyledFormControl>

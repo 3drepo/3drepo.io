@@ -44,8 +44,8 @@ interface IProps {
 	roleColor: string;
 	name: string;
 	number: number;
-	author: string;
-	createdDate: string;
+	owner: string;
+	created: string;
 	StatusIconComponent: any;
 	statusColor: string;
 	defaultExpanded: boolean;
@@ -55,6 +55,7 @@ interface IProps {
 	willBeUpdated?: boolean;
 	panelName?: string;
 	scrolled?: boolean;
+	isNew?: boolean;
 	handleHeaderClick?: (event) => void;
 	onExpandChange?: (event, expaned: boolean) => void;
 	onNameChange?: (event, name: string) => void;
@@ -94,20 +95,31 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	}
 
 	public renderNameWithCounter = renderWhenTrue(() => (
-		<Typography
-			paragraph={true}
-		>
+		<Typography paragraph>
 			{`${this.props.number}. ${this.props.name}`}
 		</Typography>
 	));
 
 	public renderName = renderWhenTrue(() => (
-		<Typography
-			paragraph={true}
-		>
+		<Typography paragraph>
 			{this.props.name}
 		</Typography>
 	));
+
+	public handleFocusName = (field, form) => {
+		const nameChanged = form.initialValues.name !== field.value;
+
+		if (this.props.isNew) {
+			form.setFieldValue('name', nameChanged ? field.value : '');
+		}
+	}
+
+	public handleBlurName = (field, form) => {
+		const nameChanged = this.props.name !== field.value;
+		if (this.props.isNew) {
+			form.setFieldValue('name', nameChanged && field.value ? field.value : this.props.name);
+		}
+	}
 
 	public renderNameField = renderWhenTrue(() => (
 		<Formik
@@ -121,12 +133,15 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 						{...field}
 						autoFocus
 						fullWidth
-						placeholder="Title"
+						placeholder={this.props.isNew ? this.props.name : 'Name'}
 						onChange={this.handleNameChange(field)}
-						error={Boolean(form.errors.name)}
+						error={Boolean(form.errors.name) && !this.props.name}
 						helperText={form.errors.name}
-						inputProps={
-							{maxLength: 120}}
+						inputProps={{
+							maxLength: 120,
+							onFocus: () => this.handleFocusName(field, form),
+							onBlur: () => this.handleBlurName(field, form)
+						}}
 					/>
 				)} />
 			</StyledForm>
@@ -163,8 +178,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			roleColor,
 			// tslint:disable-next-line
 			number,
-			author,
-			createdDate,
+			owner,
+			created,
 			StatusIconComponent,
 			statusColor,
 			editable,
@@ -175,8 +190,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			renderNotCollapsable,
 			handleHeaderClick
 		} = this.props;
-
-		const createdAt = !editable ? createdDate : null;
 
 		return (
 			<Container className={className}>
@@ -196,8 +209,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 				<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
 					<Details>
 						<PreviewItemInfo
-							author={author}
-							createdAt={createdAt}
+							author={owner}
+							createdAt={created}
 							StatusIconComponent={StatusIconComponent}
 							statusColor={statusColor}
 						/>
