@@ -135,18 +135,25 @@ function clean(dbCol, riskToClean) {
 		riskToClean.thumbnail = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/thumbnail.png";
 	}
 
-	riskToClean.level_of_risk = calculateLevelOfRisk(riskToClean.likelihood, riskToClean.consequence);
-	riskToClean.residual_level_of_risk = calculateLevelOfRisk(riskToClean.residual_likelihood, riskToClean.residual_consequence);
-
-	if (0 <= riskToClean.residual_level_of_risk) {
-		riskToClean.overall_level_of_risk = riskToClean.residual_level_of_risk;
-	} else {
-		riskToClean.overall_level_of_risk = riskToClean.level_of_risk;
-	}
+	riskToClean = { ...riskToClean, ...getLevelOfRisk(riskToClean) };
 
 	delete riskToClean.viewpoints;
 
 	return riskToClean;
+}
+
+function getLevelOfRisk(riskData) {
+	const level_of_risk = calculateLevelOfRisk(riskData.likelihood, riskData.consequence);
+	const residual_level_of_risk = calculateLevelOfRisk(riskData.residual_likelihood, riskData.residual_consequence);
+
+	let overall_level_of_risk;
+	if (0 <= residual_level_of_risk) {
+		overall_level_of_risk = residual_level_of_risk;
+	} else {
+		overall_level_of_risk = level_of_risk;
+	}
+
+	return {level_of_risk, residual_level_of_risk, overall_level_of_risk};
 }
 
 function toDirectXCoords(entry) {
@@ -431,15 +438,9 @@ risk.update = async function(user, sessionId, account, model, issueId, data) {
 	data = _.omit(data, ["viewpoint", "residual"]);
 	const updatedRisk = await ticket.update(attributeBlacklist, user, sessionId, account, model, issueId, data, beforeUpdate);
 
-	const cleanedRisk = clean({account, model}, updatedRisk.updatedTicket);
-
-	updatedRisk.updatedTicket.level_of_risk = cleanedRisk.level_of_risk;
-	updatedRisk.updatedTicket.residual_level_of_risk = cleanedRisk.residual_level_of_risk;
-	updatedRisk.updatedTicket.overall_level_of_risk = cleanedRisk.overall_level_of_risk;
-
-	updatedRisk.data.level_of_risk = cleanedRisk.level_of_risk;
-	updatedRisk.data.residual_level_of_risk = cleanedRisk.residual_level_of_risk;
-	updatedRisk.data.overall_level_of_risk = cleanedRisk.overall_level_of_risk;
+	const levelOfRisk = getLevelOfRisk(updatedRisk.updatedTicket);
+	updatedRisk.updatedTicket = {...updatedRisk.updatedTicket, ...levelOfRisk};
+	updatedRisk.data = {...updatedRisk.data, ...levelOfRisk};
 
 	return updatedRisk;
 };
