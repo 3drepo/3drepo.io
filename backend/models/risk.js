@@ -429,7 +429,19 @@ risk.update = async function(user, sessionId, account, model, issueId, data) {
 	const beforeUpdate =  this.onBeforeUpdate(account, model, sessionId, residualData).bind(this);
 
 	data = _.omit(data, ["viewpoint", "residual"]);
-	return await ticket.update(attributeBlacklist, user, sessionId, account, model, issueId, data, beforeUpdate);
+	const updatedRisk = await ticket.update(attributeBlacklist, user, sessionId, account, model, issueId, data, beforeUpdate);
+
+	const cleanedRisk = clean({account, model}, updatedRisk.updatedTicket);
+
+	updatedRisk.updatedTicket.level_of_risk = cleanedRisk.level_of_risk;
+	updatedRisk.updatedTicket.residual_level_of_risk = cleanedRisk.residual_level_of_risk;
+	updatedRisk.updatedTicket.overall_level_of_risk = cleanedRisk.overall_level_of_risk;
+
+	updatedRisk.data.level_of_risk = cleanedRisk.level_of_risk;
+	updatedRisk.data.residual_level_of_risk = cleanedRisk.residual_level_of_risk;
+	updatedRisk.data.overall_level_of_risk = cleanedRisk.overall_level_of_risk;
+
+	return updatedRisk;
 };
 
 risk.deleteRisks = function(dbCol, sessionId, ids) {
