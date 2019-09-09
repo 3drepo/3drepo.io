@@ -35,7 +35,8 @@ import {
 	selectNodesIndexesMap,
 	selectSelectionMap,
 	selectTreeNodesList,
-	selectVisibilityMap
+	selectVisibilityMap,
+	selectSelectedNodesIds
 } from './tree.selectors';
 import TreeProcessing from './treeProcessing/treeProcessing';
 
@@ -224,7 +225,11 @@ function* getSelectedNodes() {
 
 function* clearCurrentlySelected() {
 	Viewer.clearHighlights();
-	yield TreeProcessing.clearSelected();
+	const selectedNodesIds = yield select(selectSelectedNodesIds);
+
+	if (selectedNodesIds.length) {
+		yield TreeProcessing.clearSelected();
+	}
 	yield put(TreeActions.updateDataRevision());
 
 	const isBimVisible = yield select(selectIsMetadataVisible);

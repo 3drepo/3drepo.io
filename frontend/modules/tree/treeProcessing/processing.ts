@@ -96,19 +96,17 @@ export class Processing {
 		for (let index = 0, size = selectedNodesIds.length; index < size; index++) {
 			this.selectionMap[selectedNodesIds[index]] = SELECTION_STATES.UNSELECTED;
 		}
-
 		this.selectionMap = {...this.selectionMap};
 	}
 
 	public selectNodes = ({ nodesIds = [], ...extraData }) => {
 		const visibleNodesIds = nodesIds.filter((nodeId) => this.visibilityMap[nodeId] !== VISIBILITY_STATES.INVISIBLE);
+
 		if (!visibleNodesIds.length) {
 			return { highlightedObjects: [] };
 		}
 
-		let nodes = this.getNodesByIds(visibleNodesIds).filter((node) =>
-			this.visibilityMap[node._id] !== VISIBILITY_STATES.INVISIBLE
-		);
+		let nodes = this.getNodesByIds(visibleNodesIds);
 
 		if (!extraData.skipChildren) {
 			let compactNodes = [];
@@ -126,6 +124,7 @@ export class Processing {
 		const highlightedObjects = this.getMeshesByNodes(nodes);
 
 		this.selectionMap = { ...this.selectionMap };
+
 		return { highlightedObjects };
 	}
 
