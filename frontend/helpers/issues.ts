@@ -57,7 +57,8 @@ export const prepareIssue = (issue, jobs = []) => {
 export const getStatusIcon = (priority, status) => {
 	const statusIcon = {
 		Icon: STATUSES_ICONS[status] || null,
-		color: (ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS.NONE).color
+		color: (ISSUE_COLORS[status] ? ISSUE_COLORS[status].color : null) ||
+			(ISSUE_COLORS[priority] ? ISSUE_COLORS[priority].color : null) || null
 	};
 
 	return {...statusIcon};
