@@ -111,9 +111,9 @@ export const selectNodesBySharedIdsMap = createSelector(
 	(treeProcessingData) => treeProcessingData.nodesBySharedIdsMap
 );
 
-export const selectMeshesByModelId = createSelector(
+export const selectMeshesByNodeId = createSelector(
 	selectTreeProccessing, selectDataRevision,
-	(treeProcessingData) => treeProcessingData.meshesByModelId
+	(treeProcessingData) => treeProcessingData.meshesByNodeId
 );
 
 export const selectSelectedFilters = createSelector(
@@ -200,7 +200,7 @@ export const selectGetDeepChildren = (nodeId) => createSelector(
 );
 
 export const selectGetMeshesByIds = (nodesIds = []) => createSelector(
-	selectTreeNodesList, selectNodesIndexesMap, selectMeshesByModelId,
+	selectTreeNodesList, selectNodesIndexesMap, selectMeshesByNodeId,
 	(treeNodesList, nodesIndexesMap, idToMeshes) => {
 		if (!nodesIds.length) {
 			return [];

@@ -36,3 +36,13 @@ export const getFullTree = (teamspace, modelId, revision?) => {
 export const getIdToMeshesMap = (teamspace, modelId, revision?) => {
 	return api.get(`${teamspace}/${modelId}/revision/${revision || 'master/head'}/idToMeshes.json`);
 };
+
+/**
+ * Get map of models and meshes ids
+ * @param teamspace
+ * @param modelId
+ * @param revision
+ */
+export const getTreePath = (teamspace, modelId, revision?) => {
+	return api.get(`${teamspace}/${modelId}/revision/${revision || 'master/head'}/tree_path.json`);
+};

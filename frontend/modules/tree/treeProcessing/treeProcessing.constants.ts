@@ -31,7 +31,7 @@ export interface ITreeProcessingData {
 	defaultVisibilityMap: any;
 	nodesList: INode[];
 	nodesIndexesMap: any;
-	meshesByModelId: any;
+	meshesByNodeId: any;
 	nodesBySharedIdsMap: any;
 }
 

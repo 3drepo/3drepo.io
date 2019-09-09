@@ -37,17 +37,19 @@ const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null)
 	};
 
 	const dataToFlatten = [] as any;
-
 	if (tree.children) {
+
 		const hasChildren = tree.children.some((child) => Boolean(child.name));
 		rowData.hasChildren = hasChildren;
 		rootParentId = rowData.isModel ? rowData._id : rootParentId;
 
 		for (let index = 0; index < tree.children.length; index++) {
+
 			const subTree = tree.children[index];
 			subTree.isModel = isModelNode(level + 1, subTree.isFederation, tree.isFederation);
 
-			const { data: nestedData, deepChildrenNumber } = getFlattenNested(subTree, level + 1, tree._id, rootParentId);
+			const { data: nestedData, deepChildrenNumber } =
+				getFlattenNested(subTree, level + 1, tree._id, rootParentId);
 			rowData.deepChildrenNumber += deepChildrenNumber;
 			rowData.childrenIds.push(subTree._id);
 			dataToFlatten.push(nestedData);
@@ -60,11 +62,13 @@ const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null)
 				rowData.defaultVisibility = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
 			}
 		}
+
 	}
 
 	dataToFlatten.unshift(rowData);
 
 	const data = dataToFlatten.flat();
+
 	return { data, deepChildrenNumber: data.length };
 };
 
@@ -92,19 +96,19 @@ const getAuxiliaryMaps = (nodesList) => {
 	}, initialState);
 };
 
-const getMeshesByModelId = (modelsWithMeshes) => {
-	const meshesByModelId = {};
+const getMeshesByNodeId = (modelsWithMeshes) => {
+	const meshesByNodeId = {};
 	for (let index = 0; index < modelsWithMeshes.length; index++) {
 		const modelWithMeshes = modelsWithMeshes[index];
 		const { account, model: modelId } = modelWithMeshes;
 		delete modelWithMeshes.account;
 		delete modelWithMeshes.model;
-		meshesByModelId[`${account}@${modelId}`] = modelWithMeshes;
+		meshesByNodeId[`${account}@${modelId}`] = modelWithMeshes;
 	}
-	return meshesByModelId;
+	return meshesByNodeId;
 };
 
-export default ({ mainTree, subTrees, subModels, modelsWithMeshes }) => new Promise((resolve, reject) => {
+export default ({ mainTree, subTrees, subModels, modelsWithMeshes, treePath }) => new Promise((resolve, reject) => {
 	try {
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.time('TREE PRE-PROCESSING NEW');
@@ -128,18 +132,18 @@ export default ({ mainTree, subTrees, subModels, modelsWithMeshes }) => new Prom
 				child.children[0].children = [subTree.nodes];
 			}
 		}
+
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.timeEnd('TREE PRE-PROCESSING NEW');
 
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.time('TREE PROCESSING NEW');
 		const { data: nodesList } = getFlattenNested(mainTree);
-		const meshesByModelId = getMeshesByModelId(modelsWithMeshes);
+		const meshesByNodeId = getMeshesByNodeId(modelsWithMeshes);
 		const auxiliaryMaps = getAuxiliaryMaps(nodesList);
-
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.timeEnd('TREE PROCESSING NEW');
-		resolve({ nodesList, meshesByModelId, ...auxiliaryMaps });
+		resolve({ nodesList, meshesByNodeId, treePath, ...auxiliaryMaps });
 	} catch (error) {
 		reject(error);
 	}

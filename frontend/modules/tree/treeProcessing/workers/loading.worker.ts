@@ -90,16 +90,16 @@ const getAuxiliaryMaps = (nodesList) => {
 	}, initialState);
 };
 
-const getMeshesByModelId = (modelsWithMeshes) => {
-	const meshesByModelId = {};
+const getMeshesByNodeId = (modelsWithMeshes) => {
+	const meshesByNodeId = {};
 	for (let index = 0; index < modelsWithMeshes.length; index++) {
 		const modelWithMeshes = modelsWithMeshes[index];
 		const { account, model: modelId } = modelWithMeshes;
 		delete modelWithMeshes.account;
 		delete modelWithMeshes.model;
-		meshesByModelId[`${account}@${modelId}`] = modelWithMeshes;
+		meshesByNodeId[`${account}@${modelId}`] = modelWithMeshes;
 	}
-	return meshesByModelId;
+	return meshesByNodeId;
 };
 
 self.addEventListener('message', ({ data }) => {
@@ -131,9 +131,9 @@ self.addEventListener('message', ({ data }) => {
 	// tslint:disable-next-line
 	IS_DEVELOPMENT && console.time('TREE PROCESSING');
 	const { data: nodesList } = getFlattenNested(mainTree);
-	const meshesByModelId = getMeshesByModelId(modelsWithMeshes);
+	const meshesByNodeId = getMeshesByNodeId(modelsWithMeshes);
 	const auxiliaryMaps = getAuxiliaryMaps(nodesList);
-	const result = { data: { nodesList, meshesByModelId, ...auxiliaryMaps } };
+	const result = { data: { nodesList, meshesByNodeId, ...auxiliaryMaps } };
 	// tslint:disable-next-line
 	IS_DEVELOPMENT && console.timeEnd('TREE PROCESSING');
 

@@ -12,20 +12,20 @@ class TreeProcessing {
 	}
 
 	public transformData = async (payload) => {
-		const { nodesList, ...auxiliaryMaps } = await transformTree(payload) as any;
-
+		const { nodesList, treePath, ...auxiliaryMaps } = await transformTree(payload) as any;
 		console.time('INIT TREE SERVICE');
 		this.processing = new Processing({
 			nodesList,
+			treePath,
 			nodesIndexesMap: { ...auxiliaryMaps.nodesIndexesMap },
 			defaultVisibilityMap: { ...auxiliaryMaps.nodesDefaultVisibilityMap },
-			meshesByModelId: { ...auxiliaryMaps.meshesByModelId },
+			meshesByNodeId: { ...auxiliaryMaps.meshesByNodeId },
 			visibilityMap: { ...auxiliaryMaps.nodesVisibilityMap },
 			selectionMap: { ...auxiliaryMaps.nodesSelectionMap },
 			nodesBySharedIdsMap: { ...auxiliaryMaps.nodesBySharedIdsMap }
 		});
 		console.timeEnd('INIT TREE SERVICE');
-		return { nodesList, auxiliaryMaps };
+		return { nodesList, treePath, auxiliaryMaps };
 	}
 
 	public selectNodes = (payload) => this.processing.selectNodes(payload);

@@ -22,10 +22,11 @@ export class Processing {
 	public nodesList = [];
 	public nodesIndexesMap = {};
 	public defaultVisibilityMap = {};
-	public meshesByModelId = {};
+	public meshesByNodeId = {};
 	public nodesBySharedIdsMap = {};
 	public selectionMap = {};
 	public visibilityMap = {};
+	public treePath = {} as any;
 
 	public getDeepChildren = memoize((node) => {
 		const nodeIndex = this.nodesIndexesMap[node._id];
@@ -42,8 +43,28 @@ export class Processing {
 			parents.push(parentNode);
 			nextParentId = parentNode.parentId;
 		}
-
 		return parents;
+	}, (node = {}) => node._id);
+
+	public getParentsByPath = memoize((node = {}) => {
+		const parents = [];
+		const subModel = this.treePath.subModels.find((s) => s.model === node.model);
+		const idToPath = subModel ? subModel.idToPath : this.treePath.mainTree.idToPath;
+		let path = idToPath[node._id];
+		const parentsIds = path.split('__');
+		const lastParentId = this.nodesList[this.nodesIndexesMap[parentsIds[0]]].parentId;
+		const rootPath = this.treePath.mainTree.idToPath[lastParentId];
+		path = rootPath ? `${rootPath}__${path}` : path;
+		const parentsPath = path.split('__');
+
+		for (let j = 0; j < parentsPath.length; j++) {
+			const parentIndex = this.nodesIndexesMap[parentsPath[j]];
+			if (this.nodesList[parentIndex].type !== 'mesh') {
+				parents.push(this.nodesList[parentIndex]);
+			}
+		}
+
+		return parents.reverse();
 	}, (node = {}) => node._id);
 
 	public getChildren = memoize((node = {}) => {
@@ -57,15 +78,17 @@ export class Processing {
 	constructor(data) {
 		const {
 			nodesList, nodesIndexesMap, defaultVisibilityMap,
-			meshesByModelId, nodesBySharedIdsMap, visibilityMap, selectionMap
+			meshesByNodeId, nodesBySharedIdsMap, visibilityMap, selectionMap,
+			treePath
 		} = data;
 		this.nodesList = nodesList;
 		this.nodesIndexesMap = nodesIndexesMap;
 		this.defaultVisibilityMap = defaultVisibilityMap;
-		this.meshesByModelId = meshesByModelId;
+		this.meshesByNodeId = meshesByNodeId;
 		this.visibilityMap = visibilityMap;
 		this.selectionMap = selectionMap;
 		this.nodesBySharedIdsMap = nodesBySharedIdsMap;
+		this.treePath = treePath;
 	}
 
 	public clearCurrentlySelected = () => {
@@ -79,7 +102,6 @@ export class Processing {
 
 	public selectNodes = ({ nodesIds = [], ...extraData }) => {
 		const visibleNodesIds = nodesIds.filter((nodeId) => this.visibilityMap[nodeId] !== VISIBILITY_STATES.INVISIBLE);
-
 		if (!visibleNodesIds.length) {
 			return { highlightedObjects: [] };
 		}
@@ -312,20 +334,16 @@ export class Processing {
 	}
 
 	private handleToSelect = (toSelect) => {
-		const parentsSet = new Set();
+		const firstNode = toSelect[0];
 
 		for (let index = 0, size = toSelect.length; index < size; index++) {
 			const node = toSelect[index];
 
 			if (this.isVisibleNode(node._id)) {
 				this.selectionMap[node._id] = SELECTION_STATES.SELECTED;
-				const nodeParents = this.getParents(node);
-				for (let j = 0; j < nodeParents.length; j++) {
-					parentsSet.add(nodeParents[j]);
-				}
 			}
 		}
-		const parents = [...parentsSet];
+		const parents = this.getParentsByPath(firstNode);
 
 		if (parents.length) {
 			this.updateParentsSelection(parents);
@@ -337,18 +355,15 @@ export class Processing {
 			return;
 		}
 
-		const parents = [];
 		for (let index = 0, size = toDeselect.length; index < size; index++) {
 			const node = toDeselect[index];
 			this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
-
-			const nodeParents = this.getParents(node);
-			parents.push(...nodeParents);
 		}
 
+		const parents = this.getParentsByPath(toDeselect[0]);
+
 		if (parents.length) {
-			const uniqueParents = uniqBy(parents, ({ _id }) => _id);
-			this.updateParentsSelection(uniqueParents);
+			this.updateParentsSelection(parents);
 		}
 	}
 
@@ -387,28 +402,28 @@ export class Processing {
 			return [];
 		}
 
-		const meshesByNodesIndexes = {};
+		const meshesByNodesIndices = {};
 		const meshesByNodesList = [];
 
 		for (let index = 0; index < nodes.length; index++) {
 			const node = nodes[index];
 
 			if (node) {
-				if (meshesByNodesIndexes[node.namespacedId] === undefined) {
+				if (meshesByNodesIndices[node.namespacedId] === undefined) {
 					meshesByNodesList.push({
 						modelId: node.model,
 						teamspace: node.teamspace,
 						meshes: []
 					});
-					meshesByNodesIndexes[node.namespacedId] = meshesByNodesList.length - 1;
+					meshesByNodesIndices[node.namespacedId] = meshesByNodesList.length - 1;
 				}
 
 				const meshes = node.type === NODE_TYPES.MESH
 					? [node._id]
-					: this.meshesByModelId[node._id];
+					: this.meshesByNodeId[node._id];
 
 				if (meshes) {
-					const meshesByNodesIndex = meshesByNodesIndexes[node.namespacedId];
+					const meshesByNodesIndex = meshesByNodesIndices[node.namespacedId];
 					meshesByNodesList[meshesByNodesIndex].meshes = meshesByNodesList[meshesByNodesIndex].meshes.concat(meshes);
 				}
 			}

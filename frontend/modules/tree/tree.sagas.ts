@@ -111,9 +111,10 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 	try {
 		yield take(ModelTypes.FETCH_SETTINGS_SUCCESS);
 
-		const [{ data: fullTree }, { data: modelsWithMeshes }] = yield all([
+		const [{ data: fullTree }, { data: modelsWithMeshes }, { data: treePath }] = yield all([
 			API.getFullTree(teamspace, modelId, revision),
-			API.getIdToMeshesMap(teamspace, modelId, revision)
+			API.getIdToMeshesMap(teamspace, modelId, revision),
+			API.getTreePath(teamspace, modelId, revision),
 		]);
 
 		const dataToProcessed = {
@@ -122,6 +123,7 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 			subModels: [],
 			modelsWithMeshes: modelsWithMeshes.subModels
 		};
+
 		const modelSettings = yield select(selectSettings);
 		dataToProcessed.mainTree.name = modelSettings.name;
 		dataToProcessed.mainTree.isFederation = modelSettings.federate;
@@ -130,7 +132,7 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 			? yield all(fullTree.subTrees.map(({ url }) => API.default.get(url)))
 			: [];
 		dataToProcessed.subTrees = subTreesData.map(({ data }) => data.mainTree);
-
+		dataToProcessed.treePath = treePath;
 		yield TreeProcessing.transformData(dataToProcessed);
 		yield put(TreeActions.updateDataRevision());
 	} catch (error) {
