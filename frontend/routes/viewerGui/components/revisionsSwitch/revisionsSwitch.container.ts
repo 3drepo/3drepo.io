@@ -21,14 +21,13 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { DialogActions } from '../../../../modules/dialog';
-import { selectRevisions, selectSettings } from '../../../../modules/model';
-import { selectUrlParams } from '../../../../modules/router/router.selectors';
+import { selectCurrentRevision, selectRevisions, selectSettings } from '../../../../modules/model';
 import { RevisionsSwitch } from './revisionsSwitch.component';
 
 const mapStateToProps = createStructuredSelector({
 	revisions: selectRevisions,
 	modelSettings: selectSettings,
-	urlParams: selectUrlParams
+	currentRevision: selectCurrentRevision
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

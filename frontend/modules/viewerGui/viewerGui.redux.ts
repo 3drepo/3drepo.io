@@ -20,7 +20,7 @@ import { INITIAL_HELICOPTER_SPEED, VIEWER_NAV_MODES } from '../../constants/view
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 
 export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActions({
-	fetchData: ['teamspace', 'model', 'revision'],
+	fetchData: ['teamspace', 'model'],
 	resetPanelsStates: [],
 	setPanelVisibility: ['panelName', 'visibility'],
 	setMeasureVisibility: ['visible'],

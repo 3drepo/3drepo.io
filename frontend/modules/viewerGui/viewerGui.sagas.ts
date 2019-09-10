@@ -16,7 +16,7 @@
  */
 
 import { push } from 'connected-react-router';
-import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { ROUTES } from '../../constants/routes';
 import { INITIAL_HELICOPTER_SPEED, NEW_PIN_ID, VIEWER_CLIP_MODES, VIEWER_EVENTS } from '../../constants/viewer';
@@ -32,7 +32,7 @@ import { GroupsActions } from '../groups';
 import { selectIssuesMap, IssuesActions } from '../issues';
 import { JobsActions } from '../jobs';
 import { MeasureActions } from '../measure';
-import { selectRevisions, selectSettings, ModelActions } from '../model';
+import { selectCurrentRevisionId, selectRevisions, selectSettings, ModelActions, ModelTypes } from '../model';
 import { selectRisksMap, RisksActions } from '../risks';
 import { selectUrlParams } from '../router/router.selectors';
 import { StarredMetaActions } from '../starredMeta';
@@ -47,7 +47,7 @@ import {
 	selectIsMetadataVisible
 } from './viewerGui.selectors';
 
-function* fetchData({ teamspace, model, revision }) {
+function* fetchData({ teamspace, model }) {
 	try {
 		const { username } = yield select(selectCurrentUser);
 		yield all([
@@ -59,7 +59,12 @@ function* fetchData({ teamspace, model, revision }) {
 			put(ViewerGuiActions.startListenOnModelLoaded()),
 			put(ModelActions.fetchSettings(teamspace, model)),
 			put(ModelActions.fetchMetaKeys(teamspace, model)),
-			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model)),
+			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model))]);
+
+		yield take(ModelTypes.FETCH_REVISIONS_SUCCESS);
+		const revision = yield select(selectCurrentRevisionId);
+
+		yield all([
 			put(TreeActions.fetchFullTree(teamspace, model, revision)),
 			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
 			put(IssuesActions.fetchIssues(teamspace, model, revision)),
@@ -345,7 +350,8 @@ function* removeUnsavedPin() {
 
 function* loadModel() {
 	try {
-		const { teamspace, model, revision } = yield select(selectUrlParams);
+		const { teamspace, model } = yield select(selectUrlParams);
+		const revision = yield select(selectCurrentRevisionId);
 		const modelSettings = yield select(selectSettings);
 
 		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head');
