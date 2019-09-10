@@ -229,7 +229,7 @@ export const selectFlattenTeamspaces = createSelector(
 					teamspaceProjects.push(processedProject);
 				}
 
-				if (shouldFilterProjects) {
+				if (processedProject.type === 'PROJECT' && processedProject.collapsed && shouldFilterProjects) {
 					let allProjectModels = [];
 
 					if (shouldFilterModels && !shouldFilterFederations) {
