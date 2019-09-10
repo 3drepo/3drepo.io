@@ -33,10 +33,10 @@ import {
 	selectHiddenNodesIds,
 	selectIfcSpacesHidden,
 	selectNodesIndexesMap,
+	selectSelectedNodesIds,
 	selectSelectionMap,
 	selectTreeNodesList,
-	selectVisibilityMap,
-	selectSelectedNodesIds
+	selectVisibilityMap
 } from './tree.selectors';
 import TreeProcessing from './treeProcessing/treeProcessing';
 
@@ -122,7 +122,8 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 			mainTree: fullTree.mainTree.nodes,
 			subTrees: [],
 			subModels: [],
-			modelsWithMeshes: modelsWithMeshes.subModels
+			modelsWithMeshes: modelsWithMeshes.subModels,
+			treePath: {}
 		};
 
 		const modelSettings = yield select(selectSettings);
