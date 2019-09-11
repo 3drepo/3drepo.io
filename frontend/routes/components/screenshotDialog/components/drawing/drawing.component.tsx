@@ -17,9 +17,12 @@
 
 import * as React from 'react';
 import { Image } from 'react-konva';
+import { MODE_OPERATION } from '../../screenshotDialog.helpers';
 
 interface IProps {
-	color?: string;
+	color: string;
+	size: number;
+	mode: string;
 	height: number;
 	width: number;
 }
@@ -27,13 +30,16 @@ interface IProps {
 export class Drawing extends React.PureComponent <IProps, any> {
 	public state = {
 		isDrawing: false,
-		mode: 'brush',
 		canvas: {} as any,
 		context: {} as any
 	};
 
 	public imageRef: any = React.createRef();
 	public lastPointerPosition: any = { x: 0, y: 0 };
+
+	get stage() {
+		return this.imageRef.current.parent.parent;
+	}
 
 	public componentDidMount() {
 		const canvas = document.createElement('canvas');
@@ -47,9 +53,7 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	public handleMouseDown = () => {
 		this.setState({ isDrawing: true });
 
-		// TODO: improve
-		const stage = this.imageRef.current.parent.parent;
-		this.lastPointerPosition = stage.getPointerPosition();
+		this.lastPointerPosition = this.stage.getPointerPosition();
 	}
 
 	public handleMouseUp = () => {
@@ -57,44 +61,42 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	}
 
 	public handleMouseMove = () => {
-		const { context, isDrawing, mode } = this.state;
+		const { context, isDrawing } = this.state;
+		const { color, size, mode } = this.props;
 
 		if (isDrawing) {
+
 			// TODO: Don't always get a new context
-			context.strokeStyle = '#df4b26';
+			context.strokeStyle = color;
 			context.lineJoin = 'round';
-			context.lineWidth = 5;
+			context.lineWidth = size;
+			context.globalCompositeOperation = MODE_OPERATION[mode];
 
-			if (mode === 'brush') {
-				context.globalCompositeOperation = 'source-over';
-			} else if (mode === 'eraser') {
-				context.globalCompositeOperation = 'destination-out';
-			}
-			context.beginPath();
-
-			let localPosition = {
+			const startPosition = {
 				x: this.lastPointerPosition.x - this.imageRef.current.x(),
 				y: this.lastPointerPosition.y - this.imageRef.current.y()
 			};
 
-			context.moveTo(localPosition.x, localPosition.y);
-
-			// TODO: improve
-			const stage = this.imageRef.current.parent.parent;
-
-			const position = stage.getPointerPosition();
-			localPosition = {
-				x: position.x - this.imageRef.current.x(),
-				y: position.y - this.imageRef.current.y()
-			};
-
-			context.lineTo(localPosition.x, localPosition.y);
-			context.closePath();
-			context.stroke();
-
-			this.lastPointerPosition = position;
-			this.imageRef.current.getLayer().draw();
+			this.drawLine(context, startPosition);
 		}
+	}
+
+	public drawLine = (context, startPosition) => {
+		context.beginPath();
+		context.moveTo(startPosition.x, startPosition.y);
+
+		const position = this.stage.getPointerPosition();
+		const localPosition = {
+			x: position.x - this.imageRef.current.x(),
+			y: position.y - this.imageRef.current.y()
+		};
+
+		context.lineTo(localPosition.x, localPosition.y);
+		context.closePath();
+		context.stroke();
+
+		this.lastPointerPosition = position;
+		this.imageRef.current.getLayer().draw();
 	}
 
 	public render() {
