@@ -205,7 +205,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 		const { issues, selectedFilters, activeIssueId, showDetails, revision, teamspace, model } = this.props;
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
 
-		if (issues.length && !filtersChanged && location.search && !activeIssueId && !prevProps.showDetails && !showDetails) {
+/*		if (issues.length && !filtersChanged && location.search && !activeIssueId && !prevProps.showDetails && !showDetails) {
 			const { issueId } = queryString.parse(location.search);
 			if (issueId) {
 				const foundIssue = issues.find((issue) => issue._id === issueId);
@@ -215,6 +215,8 @@ export class Issues extends React.PureComponent<IProps, any> {
 				}
 			}
 		}
+*/
+
 	}
 
 	public componentWillUnmount() {

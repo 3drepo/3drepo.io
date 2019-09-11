@@ -51,6 +51,6 @@ function configureStore() {
 
 export const store = configureStore();
 
-export const dispatch = (action) => store.dispatch(action);
+export const dispatch = store.dispatch;
 
 export const getState = store.getState;

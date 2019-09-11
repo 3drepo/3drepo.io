@@ -63,6 +63,7 @@ function* logout() {
 	try {
 		yield API.logout();
 		yield put({ type: 'RESET_APP' });
+		yield put(AuthActions.loginFailure());
 	} catch (e) {
 		if (e.response.status === 401) {
 			yield put({ type: 'RESET_APP' });
@@ -71,7 +72,7 @@ function* logout() {
 		}
 	}
 	yield put(AuthActions.setLocalSessionStatus(false));
-	yield put(push(ROUTES.LOGIN));
+
 }
 
 function* authenticate() {

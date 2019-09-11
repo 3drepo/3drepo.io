@@ -17,7 +17,7 @@
 
 import { memoize } from 'lodash';
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { PUBLIC_ROUTES, ROUTES } from '../../constants/routes';
 import { renderWhenTrue } from '../../helpers/rendering';
@@ -46,7 +46,6 @@ interface IProps {
 	location: any;
 	history: any;
 	isAuthenticated: boolean;
-	hasActiveSession: boolean;
 	currentUser: any;
 	isAuthPending: boolean;
 	authenticate: () => void;
@@ -67,12 +66,6 @@ const ANALYTICS_REFERER_ROUTES = [
 ] as any;
 
 export class App extends React.PureComponent<IProps, IState> {
-
-	public get hasActiveSession() {
-		return JSON.parse(window.localStorage.getItem('loggedIn'));
-	}
-	private authenticationInterval;
-	private loginInterval;
 
 	public state = {
 		referrer: DEFAULT_REDIRECT,
@@ -106,48 +99,10 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		this.props.authenticate();
-		if (!isStaticRoute(location.pathname)) {
-			this.toggleAutoLogout();
-			this.toggleAutoLogin();
-		}
-
-		const initialReferrer = location.pathname !== ROUTES.HOME
-			? `${location.pathname}${location.search}`
-			: DEFAULT_REDIRECT;
-
-		this.setState({ referrer: initialReferrer });
 		this.sendAnalyticsPageView(location);
 	}
 
-	public componentWillUnmount() {
-		this.toggleAutoLogout(false);
-		this.toggleAutoLogin(false);
-	}
-
 	public componentDidUpdate(prevProps) {
-		const { location, history, isAuthenticated } = this.props;
-		const isStatic = isStaticRoute(location.pathname);
-		const isPublicRoute = this.isPublicRoute(location.pathname);
-
-		const isPrivateRoute = !isStatic && !isPublicRoute;
-
-		if (isPrivateRoute && isAuthenticated !== prevProps.isAuthenticated) {
-			if (isAuthenticated) {
-				this.toggleAutoLogin(false);
-				history.push(this.state.referrer);
-			} else {
-				this.toggleAutoLogout(false);
-				this.toggleAutoLogin();
-				history.push(ROUTES.LOGIN);
-			}
-		}
-
-		if (isPublicRoute && isAuthenticated) {
-			const isLoginRoute = ROUTES.LOGIN === location.pathname;
-			history.push(isLoginRoute ? this.state.referrer : DEFAULT_REDIRECT);
-			this.setState({ referrer: DEFAULT_REDIRECT });
-		}
-
 		if (location.pathname !== prevProps.location.pathname) {
 			this.sendAnalyticsPageView(location);
 		}
@@ -162,65 +117,12 @@ export class App extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public toggleAutoLogout = (shouldStart = true) => {
-		if (shouldStart) {
-			this.authenticationInterval = setInterval(this.handleAutoLogout, this.state.autologoutInterval * 1000);
-		} else {
-			clearInterval(this.authenticationInterval);
-			this.authenticationInterval = null;
-		}
-	}
-
-	public toggleAutoLogin = (shouldStart = true) => {
-		if (shouldStart) {
-			this.loginInterval = setInterval(this.handleAutoLogin, 2000);
-		} else {
-			clearInterval(this.loginInterval);
-			this.loginInterval = null;
-		}
-	}
-
 	public handleLogoClick = () => {
-		const { isAuthenticated, history } = this.props;
-		let path = ROUTES.HOME;
-		if (isAuthenticated) {
-			path = ROUTES.TEAMSPACES;
-		}
-
-		history.push(path);
-	}
-
-	public handleAutoLogout = () => {
-		const { isAuthenticated, logout, history } = this.props;
-		const isSessionExpired = this.hasActiveSession !== isAuthenticated;
-		if (isSessionExpired) {
-			logout();
-			history.push(ROUTES.LOGIN);
-		}
-	}
-
-	public handleAutoLogin = () => {
-		const { isAuthenticated } = this.props;
-
-		if (this.hasActiveSession && !isAuthenticated) {
-			this.props.authenticate();
-			if (!this.authenticationInterval) {
-				this.toggleAutoLogout();
-			}
-		}
+		const { history } = this.props;
+		history.push(ROUTES.HOME);
 	}
 
 	public render() {
-		const { isAuthPending } = this.props;
-		if (isAuthPending) {
-			return (
-				<AppContainer>
-					{this.renderHeader(true)}
-					{this.renderLoginRoute()}
-				</AppContainer>
-			);
-		}
-
 		return (
 				<AppContainer>
 					<ViewerCanvas />
@@ -232,6 +134,7 @@ export class App extends React.PureComponent<IProps, IState> {
 						<Route exact path={ROUTES.PASSWORD_CHANGE} component={PasswordChange} />
 						<Route exact path={ROUTES.REGISTER_REQUEST} component={RegisterRequest} />
 						<Route exact path={ROUTES.REGISTER_VERIFY} component={RegisterVerify} />
+						<Redirect exact from={ROUTES.HOME} to={ROUTES.TEAMSPACES} />
 						<PrivateRoute path={ROUTES.DASHBOARD} component={Dashboard} />
 						<PrivateRoute
 							path={`${ROUTES.VIEWER}/:teamspace/:model/:revision?`}
