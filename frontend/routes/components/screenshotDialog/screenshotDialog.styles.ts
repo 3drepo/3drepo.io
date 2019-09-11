@@ -16,6 +16,9 @@
  */
 
 import styled from 'styled-components';
+import {
+	Stage as KonvaStage
+} from 'react-konva';
 
 export const Container = styled.div`
 	height: 100%;
@@ -27,16 +30,6 @@ export const Container = styled.div`
 	justify-content: center;
 `;
 
-export const HiddenCanvas = styled.canvas`
-	position: absolute;
-	z-index: -1;
-`;
-
-export const Canvas = styled.canvas`
-	position: absolute;
-	z-index: 2;
-`;
-
 export const BackgroundImage = styled.img`
 	width: 100%;
 	text-align: center;
@@ -46,4 +39,10 @@ export const BackgroundImage = styled.img`
 	bottom: 0;
 	top: 0;
 	user-select: none;
+`;
+
+export const Stage = styled(KonvaStage)`
+	position: absolute;
+	left: 0;
+	top: 0;
 `;
