@@ -34,6 +34,7 @@ import RiskDetails from './components/riskDetails/riskDetails.container';
 import { RisksContainer } from './risks.styles';
 
 interface IProps {
+	selectedRisk: any;
 	history: any;
 	location: any;
 	teamspace: string;
@@ -60,8 +61,9 @@ interface IProps {
 	downloadRisks: (teamspace, model) => void;
 	printRisks: (teamspace, model) => void;
 	setActiveRisk: (risk, revision?) => void;
-	showRiskDetails: (teamspace, model, revision, risk) => void;
-	closeDetails: (teamspace, model, revision) => void;
+	showRiskDetails: (revision, riskId) => void;
+	goToRisk: (risk) => void;
+	closeDetails: () => void;
 	toggleShowPins: (showPins: boolean) => void;
 	subscribeOnRiskChanges: (teamspace, modelId) => void;
 	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
@@ -143,21 +145,14 @@ export class Risks extends React.PureComponent<IProps, any> {
 
 	public componentDidMount() {
 		this.props.subscribeOnRiskChanges(this.props.teamspace, this.props.model);
+		this.handleSelectedIssue();
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { risks, selectedFilters, activeRiskId, showDetails, teamspace, model, revision } = this.props;
-		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
+		const {selectedRisk} = this.props;
 
-		if (risks.length && !filtersChanged && location.search && !activeRiskId && !prevProps.showDetails && !showDetails) {
-			const { riskId } = queryString.parse(location.search);
-			if (riskId) {
-				const foundRisk = risks.find((risk) => risk._id === riskId);
-
-				if (foundRisk) {
-					this.props.showRiskDetails(teamspace, model, revision, foundRisk);
-				}
-			}
+		if (prevProps.selectedRisk !== selectedRisk) {
+			this.handleSelectedIssue();
 		}
 	}
 
@@ -167,16 +162,6 @@ export class Risks extends React.PureComponent<IProps, any> {
 
 	public setActiveRisk = (item) => {
 		this.props.setActiveRisk(item, this.props.revision);
-	}
-
-	public showRiskDetails = (item) => {
-		const { teamspace, model, revision } = this.props;
-		this.props.showRiskDetails(teamspace, model, revision, item);
-	}
-
-	public closeRiskDetails = () => {
-		const { teamspace, model, revision } = this.props;
-		this.props.closeDetails(teamspace, model, revision);
 	}
 
 	public getFilterValues(property) {
@@ -195,6 +180,19 @@ export class Risks extends React.PureComponent<IProps, any> {
 			changes.selectedFilters = [];
 		}
 		this.props.setState(changes);
+	}
+
+	public closeDetails = () => {
+		this.props.goToRisk(null);
+	}
+
+	public handleSelectedIssue() {
+		const { selectedRisk, revision } = this.props;
+		if (selectedRisk) {
+			this.props.showRiskDetails(revision, selectedRisk._id);
+		} else {
+			this.props.closeDetails();
+		}
 	}
 
 	public render() {
@@ -218,8 +216,8 @@ export class Risks extends React.PureComponent<IProps, any> {
 				onChangeFilters={this.props.setFilters}
 				onActiveItem={this.setActiveRisk}
 				onNewItem={this.props.setNewRisk}
-				onShowDetails={this.showRiskDetails}
-				onCloseDetails={this.closeRiskDetails}
+				onShowDetails={this.props.goToRisk}
+				onCloseDetails={this.closeDetails}
 
 				renderDetailsView={this.renderDetailsView}
 			/>

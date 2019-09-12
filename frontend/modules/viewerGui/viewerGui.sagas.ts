@@ -20,7 +20,6 @@ import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { ROUTES } from '../../constants/routes';
 import { INITIAL_HELICOPTER_SPEED, NEW_PIN_ID, VIEWER_CLIP_MODES, VIEWER_EVENTS } from '../../constants/viewer';
-import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Viewer } from '../../services/viewer/viewer';
@@ -131,15 +130,11 @@ function* handlePinClick({ id }) {
 	try {
 		const risksMap = yield select(selectRisksMap);
 		const issuesMap = yield select(selectIssuesMap);
-		const revisions = yield select(selectRevisions);
-		const defaultRevision = revisions[0].tag || revisions[0]._id;
-		const { teamspace, model, revision = defaultRevision } = yield select(selectUrlParams);
 		const risk = risksMap[id];
 		const issue = issuesMap[id];
 
 		if (risk) {
-			yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.RISKS, true));
-			yield put(RisksActions.showDetails(teamspace, model, revision, risk));
+			yield put(RisksActions.goToRisk(risk));
 		}
 
 		if (issue) {

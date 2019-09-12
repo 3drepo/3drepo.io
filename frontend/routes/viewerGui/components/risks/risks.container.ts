@@ -30,11 +30,13 @@ import {
 	selectRisks,
 	selectSearchEnabled,
 	selectSelectedFilters,
+	selectSelectedRisk,
 	selectShowDetails,
 	selectShowPins,
 	selectSortOrder,
 	RisksActions
 } from '../../../../modules/risks';
+import { selectQueryParams } from '../../../../modules/router/router.selectors';
 import { Risks } from './risks.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -49,7 +51,8 @@ const mapStateToProps = createStructuredSelector({
 	selectedFilters: selectSelectedFilters,
 	isPending: selectIsRisksPending,
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
-	sortOrder: selectSortOrder
+	sortOrder: selectSortOrder,
+	selectedRisk: selectSelectedRisk
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -60,6 +63,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	printRisks: RisksActions.printRisks,
 	setActiveRisk: RisksActions.setActiveRisk,
 	showRiskDetails: RisksActions.showDetails,
+	goToRisk: RisksActions.goToRisk,
 	toggleShowPins: RisksActions.toggleShowPins,
 	subscribeOnRiskChanges: RisksActions.subscribeOnRiskChanges,
 	unsubscribeOnRiskChanges: RisksActions.unsubscribeOnRiskChanges,

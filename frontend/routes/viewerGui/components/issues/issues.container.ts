@@ -27,12 +27,12 @@ import {
 	selectIsIssuesPending,
 	selectSearchEnabled,
 	selectSelectedFilters,
+	selectSelectedIssue,
 	selectShowDetails,
 	selectShowPins,
 	selectShowSubmodelIssues,
 	selectSortOrder,
-	IssuesActions,
-	selectSelectedIssue
+	IssuesActions
 } from '../../../../modules/issues';
 import { selectJobsList } from '../../../../modules/jobs';
 import { selectSettings, selectTopicTypes } from '../../../../modules/model';

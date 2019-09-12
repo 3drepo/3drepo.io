@@ -204,9 +204,11 @@ export class Issues extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps: IProps) {
-		const { selectedIssue, revision } = this.props;
+		const { selectedIssue } = this.props;
+		const issueId = (selectedIssue || {})._id;
+		const previssueId = (prevProps.selectedIssue || {})._id;
 
-		if (prevProps.selectedIssue !== selectedIssue) {
+		if (issueId !== previssueId) {
 			this.handleSelectedIssue();
 		}
 
