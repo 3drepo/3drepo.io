@@ -22,6 +22,7 @@ import ClearIcon from '@material-ui/icons/Clear';
 import { range } from 'lodash';
 import React from 'react';
 import TextIcon from '@material-ui/icons/TextFields';
+import ChangeHistoryIcon from '@material-ui/icons/ChangeHistory';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
@@ -56,7 +57,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 
 	public renderToolset = renderWhenTrue(() => {
 		const {
-			size, color, onDrawClick, onEraseClick, onTextClick, onClearClick, onColorChange, onBrushSizeChange
+			size, color, onDrawClick, onEraseClick, onTextClick, onShapeClick, onClearClick, onColorChange, onBrushSizeChange
 		} = this.props;
 
 		return (
@@ -102,6 +103,12 @@ export class Tools extends React.PureComponent<IProps, any> {
 					color={this.getToolColor(MODES.TEXT)}
 					action={this.handleToolClick(MODES.TEXT, onTextClick)}
 					Icon={TextIcon}
+				/>
+				<TooltipButton
+					label="Add shape"
+					color={this.getToolColor(MODES.SHAPE)}
+					action={this.handleToolClick(MODES.SHAPE, onShapeClick)}
+					Icon={ChangeHistoryIcon}
 				/>
 				<TooltipButton label="Clear" action={onClearClick} Icon={ClearIcon} />
 				<OptionsDivider />

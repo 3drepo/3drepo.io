@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { Layer, Text, Group } from 'react-konva';
+import { Layer, Text, Group, Rect } from 'react-konva';
 
 import { Container, BackgroundImage, Stage, Textarea } from './screenshotDialog.styles';
 import { COLOR } from '../../../styles';
@@ -29,6 +29,13 @@ import { renderWhenTrue } from '../../../helpers/rendering';
 
 const Konva = window.Konva;
 
+const INITIAL_VALUES = {
+	color: COLOR.RED,
+	brushColor: COLOR.RED,
+	brushSize: 20,
+	mode: MODES.BRUSH
+};
+
 interface IProps {
 	sourceImage: string | Promise<string>;
 	disabled?: boolean;
@@ -38,10 +45,10 @@ interface IProps {
 
 export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public state = {
-		color: COLOR.RED,
-		brushSize: 20,
-		brushColor: COLOR.RED,
-		mode: MODES.BRUSH,
+		color: INITIAL_VALUES.color,
+		brushSize: INITIAL_VALUES.brushSize,
+		brushColor: INITIAL_VALUES.color,
+		mode: INITIAL_VALUES.mode,
 		sourceImage: '',
 		stage: {
 			height: 0,
@@ -137,7 +144,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public setShapeMode = () => {
-		this.setMode(MODES.SHAPE);
+		this.setState({ mode: MODES.SHAPE }, () => {
+			this.addNewFigure();
+		});
 	}
 
 	public handleTextDoubleClick = ({target}) => {
@@ -150,8 +159,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			height: `${target.height() - target.padding() * 2}px`,
 			textAlign: target.align(),
 			lineHeight: target.lineHeight(),
-			top: textPosition.y - 2 + 'px',
-			left: textPosition.x + 'px'
+			top: `${textPosition.y - 2}px`,
+			left: `${textPosition.x}px`
 		} as any;
 
 		if (target.parent.attrs.rotation) {
@@ -235,7 +244,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public addNewText = () => {
 		const newText = {
 			type: 'text',
-			text: 'Some text',
+			text: 'New text',
 			color: this.state.color,
 			name: `text-${this.state.shapes.length}`,
 			width: 300,
@@ -248,12 +257,29 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		});
 	}
 
+	public addNewFigure = () => {
+		const newFigure = {
+			type: 'figure',
+			color: this.state.color,
+			name: `figure-${this.state.shapes.length}`,
+			width: 200,
+			height: 200
+		};
+
+		this.setState({
+			shapes: [...this.state.shapes, newFigure]
+		});
+	}
+
 	public renderShapes = () => {
 		return (
 			<>
 				{this.state.shapes.map((shape, index) => {
-					const { color, text, type, width, fontSize, name } = shape;
-					const isVisible = !(this.state.textEditable.visible && this.state.selectedShapeName === `text-${index}`);
+					const { color, text, type, width, fontSize, height } = shape;
+					const { textEditable, selectedShapeName } = this.state;
+					const textIndex = `text-${index}`;
+					const figureIndex = `figure-${index}`;
+					const isVisible = !(textEditable.visible && selectedShapeName === textIndex || selectedShapeName === figureIndex);
 
 					return (
 						<Group key={index}>
@@ -273,12 +299,23 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 										fill={color}
 										onDblClick={this.handleTextDoubleClick}
 										visible={isVisible}
-									/> : null
+									/> :
+									<Rect
+										name={`figure-${index}`}
+										width={width}
+										height={height}
+										stroke={color}
+										borderStroke={color}
+									/>
 								}
 							</Group>
-							<TransformerComponent selectedShapeName={this.state.selectedShapeName} visible={isVisible} />
+							<TransformerComponent
+								selectedShapeName={selectedShapeName}
+								visible={isVisible}
+								shapeType={type}
+							/>
 						</Group>
-					)
+					);
 				}
 				)}
 			</>

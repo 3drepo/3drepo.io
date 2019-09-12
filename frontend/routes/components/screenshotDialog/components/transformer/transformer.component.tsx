@@ -20,6 +20,7 @@ import { Transformer } from 'react-konva';
 
 interface IProps {
 	visible: boolean;
+	shapeType: string;
 	selectedShapeName: any;
 }
 
@@ -74,7 +75,7 @@ export class TransformerComponent extends React.PureComponent <IProps, any> {
 				transformstart={this.onTransformStart}
 				transform={this.onTransform}
 				transformend={this.onTransformEnd}
-				enabledAnchors={[]}
+				resizeEnabled={this.props.shapeType !== 'text'}
 				visible={this.props.visible}
 			/>
 		);
