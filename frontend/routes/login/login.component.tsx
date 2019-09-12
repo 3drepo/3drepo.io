@@ -71,9 +71,6 @@ export class Login extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevPops) {
 		const { isAuthenticated } = prevPops;
-		if (this.props.isAuthenticated && !isAuthenticated) {
-			this.formRef.current.handleReset();
-		}
 	}
 
 	public handleSubmit = (data) => {

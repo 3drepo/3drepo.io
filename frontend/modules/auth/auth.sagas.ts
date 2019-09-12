@@ -67,6 +67,7 @@ function* logout() {
 	} catch (e) {
 		if (e.response.status === 401) {
 			yield put({ type: 'RESET_APP' });
+			yield put(AuthActions.loginFailure());
 		} else {
 			yield put(DialogActions.showEndpointErrorDialog('logout', 'user', e));
 		}
@@ -98,6 +99,7 @@ function* sessionExpired() {
 	try {
 		yield put({ type: 'RESET_APP' });
 		yield put(AuthActions.setLocalSessionStatus(false));
+		yield put(AuthActions.loginFailure());
 		yield put(DialogActions.showDialog({
 			title: 'Session expired',
 			content: 'You have been logged out as your session has expired'

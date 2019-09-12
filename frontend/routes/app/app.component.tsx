@@ -89,10 +89,6 @@ export class App extends React.PureComponent<IProps, IState> {
 		props.startup();
 	}
 
-	public isPublicRoute(path) {
-		return PUBLIC_ROUTES.includes(path);
-	}
-
 	public isRefererRoute(path) {
 		return ANALYTICS_REFERER_ROUTES.includes(path.replace('/', ''));
 	}
