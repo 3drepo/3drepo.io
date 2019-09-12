@@ -16,13 +16,18 @@
  */
 
 import * as React from 'react';
-import { Layer } from 'react-konva';
+import { Layer, Text, Group } from 'react-konva';
 
-import { Container, BackgroundImage, Stage } from './screenshotDialog.styles';
+import { Container, BackgroundImage, Stage, Textarea } from './screenshotDialog.styles';
 import { COLOR } from '../../../styles';
 import { Drawing } from './components/drawing/drawing.component';
+import { Portal } from './components/portal/portal.component';
+import { TransformerComponent } from './components/transformer/transformer.component';
 import { Tools } from './components/tools/tools.component';
 import { MODES } from './screenshotDialog.helpers';
+import { renderWhenTrue } from '../../../helpers/rendering';
+
+const Konva = window.Konva;
 
 interface IProps {
 	sourceImage: string | Promise<string>;
@@ -34,20 +39,39 @@ interface IProps {
 export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public state = {
 		color: COLOR.RED,
-		brushSize: 5,
+		brushSize: 20,
 		brushColor: COLOR.RED,
 		mode: MODES.BRUSH,
 		sourceImage: '',
 		stage: {
 			height: 0,
 			width: 0
+		},
+		shapes: [],
+		selectedShapeName: '',
+		lastSelectedShapeName: '',
+		textEditable: {
+			visible: false,
+			value: '',
+			styles: {}
 		}
 	};
 
 	public containerRef = React.createRef<any>();
+	public layerRef = React.createRef<any>();
+	public stageRef = React.createRef<any>();
+	public editableTextareaRef = React.createRef<any>();
 
-	get containerElement() {
+	public get containerElement() {
 		return this.containerRef.current;
+	}
+
+	public get layer() {
+		return this.layerRef.current;
+	}
+
+	public get stage() {
+		return this.stageRef.current;
 	}
 
 	public setStageSize = () => {
@@ -67,31 +91,221 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleBrushSizeChange = (event) => {
-		this.setState({ brushSize: event.target.value });
+		const newState = {} as any;
+		newState.brushSize = event.target.value;
+
+		if (this.state.selectedShapeName) {
+			const selectedShapeIndex = this.state.shapes.findIndex((shape) => shape.name === this.state.selectedShapeName);
+			const updatedShapes = [...this.state.shapes];
+
+			updatedShapes[selectedShapeIndex].fontSize = event.target.value;
+			newState.shapes = updatedShapes;
+		}
+
+		this.setState(newState);
 	}
 
 	public handleColorChange = (color) => {
-		this.setState({ color, brushColor: color });
+		const newState = {} as any;
+
+		newState.color = color;
+		newState.brushColor = color;
+
+		if (this.state.selectedShapeName) {
+			const selectedShapeIndex = this.state.shapes.findIndex((shape) => shape.name === this.state.selectedShapeName);
+			const updatedShapes = [...this.state.shapes];
+
+			updatedShapes[selectedShapeIndex].color = color;
+			newState.shapes = updatedShapes;
+		}
+
+		this.setState(newState);
 	}
 
 	public clearCanvas = () => {};
 
 	public handleSave = async () => {};
 
-	public setMode = (mode) => {
-		this.setState({ mode });
+	public setMode = (mode) => { this.setState({ mode }); };
+
+	public setBrushMode = () => {
+		this.setMode(MODES.BRUSH);
 	}
 
-	public renderDrawing = (height, width) => {
-		if (height && width) {
-			return (
-				<Drawing
-					height={height}
-					width={width}
-					size={this.state.brushSize}
-					color={this.state.brushColor}
-					mode={this.state.mode}
-				/>
+	public setEraserMode = () => {
+		this.setMode(MODES.ERASER);
+	}
+
+	public setShapeMode = () => {
+		this.setMode(MODES.SHAPE);
+	}
+
+	public handleTextDoubleClick = ({target}) => {
+		const textPosition = target.getAbsolutePosition();
+		const styles = {
+			color: target.attrs.fill,
+			fontSize: target.attrs.fontSize,
+			fontFamily: target.attrs.fontFamily,
+			width: `${target.width() - target.padding() * 2}px`,
+			height: `${target.height() - target.padding() * 2}px`,
+			textAlign: target.align(),
+			lineHeight: target.lineHeight(),
+			top: textPosition.y - 2 + 'px',
+			left: textPosition.x + 'px'
+		} as any;
+
+		if (target.parent.attrs.rotation) {
+			styles.transform = `rotateZ(${target.parent.attrs.rotation}deg)`;
+		}
+
+		this.setState({
+			textEditable: {
+				visible: true,
+				value: target.attrs.text,
+				styles
+			}
+		}, () => {
+			setTimeout(() => {
+				window.addEventListener('click', this.handleOutsideClick);
+			});
+		});
+	}
+
+	public handleOutsideClick = (e) => {
+		if (e.target.name !== 'editable-textarea') {
+			const newState = {} as any;
+
+			newState.textEditable = {
+				...this.state.textEditable,
+				visible: false
+			};
+
+			if (this.state.lastSelectedShapeName && this.state.shapes.length) {
+				const updatedShapes = [...this.state.shapes];
+				const shapeIndex = this.state.shapes.findIndex((s) => s.name === this.state.lastSelectedShapeName);
+				updatedShapes[shapeIndex].text = this.state.textEditable.value;
+
+				newState.shapes = updatedShapes;
+			}
+
+			this.setState(newState, () => {
+				setTimeout(() => {
+					window.removeEventListener('click', this.handleOutsideClick);
+				});
+			});
+		}
+	}
+
+	public handleTextEdit = (e) => {
+		this.setState({
+			textEditable: {
+				...this.state.textEditable,
+				value: e.target.value
+			}
+		});
+	}
+
+	public handleTextareaKeyDown = (e) => {
+		if (e.keyCode === 13) {
+			const newState = {} as any;
+
+			newState.textEditable = {
+				...this.state.textEditable,
+				visible: false
+			};
+
+			if (this.state.lastSelectedShapeName && this.state.shapes.length) {
+				const updatedShapes = [...this.state.shapes];
+				const shapeIndex = this.state.shapes.findIndex((s) => s.name === this.state.lastSelectedShapeName);
+				updatedShapes[shapeIndex].text = this.state.textEditable.value;
+
+				newState.shapes = updatedShapes;
+			}
+
+			this.setState(newState);
+		}
+	}
+
+	public handleToolTextClick = () => {
+		this.setState({ mode: MODES.TEXT }, () => {
+			this.addNewText();
+		});
+	}
+
+	public addNewText = () => {
+		const newText = {
+			type: 'text',
+			text: 'Some text',
+			color: this.state.color,
+			name: `text-${this.state.shapes.length}`,
+			width: 300,
+			height: 100,
+			fontSize: this.state.brushSize
+		};
+
+		this.setState({
+			shapes: [...this.state.shapes, newText]
+		});
+	}
+
+	public renderShapes = () => {
+		return (
+			<>
+				{this.state.shapes.map((shape, index) => {
+					const { color, text, type, width, fontSize, name } = shape;
+					const isVisible = !(this.state.textEditable.visible && this.state.selectedShapeName === `text-${index}`);
+
+					return (
+						<Group key={index}>
+							<Group
+								name="group"
+								x={this.stage.attrs.width / 2 - width / 2}
+								y={this.stage.attrs.height / 2 - 50}
+								draggable
+							>
+								{ type === 'text' ?
+									<Text
+										name={`text-${index}`}
+										fontFamily={'Arial'}
+										fontSize={fontSize}
+										width={width}
+										text={text}
+										fill={color}
+										onDblClick={this.handleTextDoubleClick}
+										visible={isVisible}
+									/> : null
+								}
+							</Group>
+							<TransformerComponent selectedShapeName={this.state.selectedShapeName} visible={isVisible} />
+						</Group>
+					)
+				}
+				)}
+			</>
+		);
+	}
+
+	public renderDrawing = () => {
+		return (
+			<Drawing
+				height={this.state.stage.height}
+				width={this.state.stage.width}
+				size={this.state.brushSize}
+				color={this.state.brushColor}
+				mode={this.state.mode}
+			/>
+		);
+	}
+
+	public renderLayerContent = () => {
+		const { stage } = this.state;
+
+		if (stage.width && stage.height) {
+			return(
+				<>
+					{this.renderDrawing()}
+					{this.renderShapes()}
+				</>
 			);
 		}
 	}
@@ -100,8 +314,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		<Tools
 			size={this.state.brushSize}
 			color={this.state.brushColor}
-			onDrawClick={() => this.setMode(MODES.BRUSH)}
-			onEraseClick={() => this.setMode(MODES.EARSER)}
+			onDrawClick={this.setBrushMode}
+			onEraseClick={this.setEraserMode}
+			onTextClick={this.handleToolTextClick}
+			onShapeClick={this.setShapeMode}
 			onClearClick={this.clearCanvas}
 			onBrushSizeChange={this.handleBrushSizeChange}
 			onColorChange={this.handleColorChange}
@@ -111,20 +327,65 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		/>
 	)
 
+	public handleStageMouseDown = ({ target }) => {
+		if (target === target.getStage()) {
+			this.setState({
+				selectedShapeName: ''
+			});
+			return;
+		}
+
+		const clickedOnTransformer = target.getParent().className === 'Transformer';
+
+		if (clickedOnTransformer) {
+			return;
+		}
+
+		const shape = this.state.shapes.find((s) => s.name === target.name());
+		const newState = {} as any;
+
+		const selectedShapeName = shape ? shape.name : '';
+		newState.selectedShapeName = selectedShapeName;
+		if (selectedShapeName) {
+			newState.lastSelectedShapeName = selectedShapeName;
+		}
+
+		this.setState(newState);
+	}
+
+	public getEditableTextareaStyles = () => {
+
+		return {
+			display: this.state.textEditable.visible ? 'block' : 'none',
+			...this.state.textEditable.styles
+		};
+	}
+
 	public render() {
 		const { sourceImage, stage, color } = this.state;
 
 		return (
 			<Container innerRef={this.containerRef}>
 				<BackgroundImage src={sourceImage} />
-
 				{this.renderTools()}
-
-				<Stage height={stage.height} width={stage.width}>
-					<Layer>
-						{this.renderDrawing(stage.height, stage.width)}
+				<Stage innerRef={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
+					<Layer ref={this.layerRef}>
+						{this.renderLayerContent()}
 					</Layer>
 				</Stage>
+				{this.state.textEditable.value ?
+					<Textarea
+						name={'editable-textarea'}
+						value={this.state.textEditable.value}
+						style={this.getEditableTextareaStyles()}
+						onChange={this.handleTextEdit}
+						onKeyDown={this.handleTextareaKeyDown}
+						ref={this.editableTextareaRef}
+						rows={4}
+						autoFocus
+					/> : null
+				}
+
 			</Container>
 		);
 	}

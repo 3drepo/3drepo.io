@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import { Image } from 'react-konva';
-import { MODE_OPERATION } from '../../screenshotDialog.helpers';
+import { MODE_OPERATION, MODES } from '../../screenshotDialog.helpers';
 
 interface IProps {
 	color: string;
@@ -29,7 +29,7 @@ interface IProps {
 
 export class Drawing extends React.PureComponent <IProps, any> {
 	public state = {
-		isDrawing: false,
+		isCurrentlyDrawn: false,
 		canvas: {} as any,
 		context: {} as any
 	};
@@ -39,6 +39,10 @@ export class Drawing extends React.PureComponent <IProps, any> {
 
 	get stage() {
 		return this.imageRef.current.parent.parent;
+	}
+
+	get isDrawingMode() {
+		return this.props.mode === MODES.BRUSH || this.props.mode === MODES.ERASER;
 	}
 
 	public componentDidMount() {
@@ -51,21 +55,20 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	}
 
 	public handleMouseDown = () => {
-		this.setState({ isDrawing: true });
+		this.setState({ isCurrentlyDrawn: true });
 
 		this.lastPointerPosition = this.stage.getPointerPosition();
 	}
 
 	public handleMouseUp = () => {
-		this.setState({ isDrawing: false });
+		this.setState({ isCurrentlyDrawn: false });
 	}
 
 	public handleMouseMove = () => {
-		const { context, isDrawing } = this.state;
+		const { context, isCurrentlyDrawn } = this.state;
 		const { color, size, mode } = this.props;
 
-		if (isDrawing) {
-
+		if (isCurrentlyDrawn && this.isDrawingMode) {
 			// TODO: Don't always get a new context
 			context.strokeStyle = color;
 			context.lineJoin = 'round';

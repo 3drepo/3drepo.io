@@ -46,3 +46,20 @@ export const Stage = styled(KonvaStage)`
 	left: 0;
 	top: 0;
 `;
+
+export const Textarea = styled.textarea`
+	background: none;
+	position: absolute;
+	border: none;
+	padding: 0;
+	margin: 0;
+	resize: none;
+	outline: none;
+	border: none;
+	overflow: hidden;
+	transform-origin: left top;
+
+	&:focus {
+		outline: none;
+	}
+`;

@@ -21,6 +21,8 @@ import BorderColorIcon from '@material-ui/icons/BorderColor';
 import ClearIcon from '@material-ui/icons/Clear';
 import { range } from 'lodash';
 import React from 'react';
+import TextIcon from '@material-ui/icons/TextFields';
+import MenuItem from '@material-ui/core/MenuItem';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { FONT_WEIGHT } from '../../../../../styles';
@@ -28,6 +30,9 @@ import { TooltipButton } from '../../../../teamspaces/components/tooltipButton/t
 import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { Eraser } from '../../../fontAwesomeIcon';
 import { OptionsDivider, StyledButton, ToolsContainer } from './tools.styles';
+import { FONT_WEIGHT } from '../../../../../styles';
+import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { MODES } from '../../screenshotDialog.helpers';
 
 interface IProps {
 	size: number;
@@ -35,6 +40,8 @@ interface IProps {
 	disabled?: boolean;
 	onDrawClick: () => void;
 	onEraseClick: () => void;
+	onTextClick: () => void;
+	onShapeClick: () => void;
 	onClearClick: () => void;
 	onColorChange: (color) => void;
 	onBrushSizeChange: (size) => void;
@@ -42,18 +49,16 @@ interface IProps {
 	onSave: () => void;
 }
 
-const TOOL_TYPES = {
-	BRUSH: 1,
-	ERASER: 2
-};
-
 export class Tools extends React.PureComponent<IProps, any> {
 	public state = {
-		activeTool: TOOL_TYPES.BRUSH
+		activeTool: MODES.BRUSH
 	};
 
 	public renderToolset = renderWhenTrue(() => {
-		const { size, color, onDrawClick, onEraseClick, onClearClick, onColorChange, onBrushSizeChange } = this.props;
+		const {
+			size, color, onDrawClick, onEraseClick, onTextClick, onClearClick, onColorChange, onBrushSizeChange
+		} = this.props;
+
 		return (
 			<>
 				<ColorPicker disableUnderline value={color} onChange={onColorChange} />
@@ -82,15 +87,21 @@ export class Tools extends React.PureComponent<IProps, any> {
 				<OptionsDivider />
 				<TooltipButton
 					label="Draw"
-					color={this.getToolColor(TOOL_TYPES.BRUSH)}
-					action={this.handleToolClick(TOOL_TYPES.BRUSH, onDrawClick)}
+					color={this.getToolColor(MODES.BRUSH)}
+					action={this.handleToolClick(MODES.BRUSH, onDrawClick)}
 					Icon={BorderColorIcon}
 				/>
 				<TooltipButton
 					label="Erase"
-					color={this.getToolColor(TOOL_TYPES.ERASER)}
-					action={this.handleToolClick(TOOL_TYPES.ERASER, onEraseClick)}
+					color={this.getToolColor(MODES.ERASER)}
+					action={this.handleToolClick(MODES.ERASER, onEraseClick)}
 					Icon={(props) => <Eraser IconProps={props} />}
+				/>
+				<TooltipButton
+					label="Add text"
+					color={this.getToolColor(MODES.TEXT)}
+					action={this.handleToolClick(MODES.TEXT, onTextClick)}
+					Icon={TextIcon}
 				/>
 				<TooltipButton label="Clear" action={onClearClick} Icon={ClearIcon} />
 				<OptionsDivider />

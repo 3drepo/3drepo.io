@@ -17,12 +17,12 @@
 
 export const MODES = {
 	BRUSH: 'brush',
-	EARSER: 'earser',
+	ERASER: 'eraser',
 	TEXT: 'text',
 	SHAPE: 'shape'
 };
 
 export const MODE_OPERATION = {
 	brush: 'source-over',
-	earser: 'destination-out'
+	eraser: 'destination-out'
 };
