@@ -21,6 +21,7 @@ import { STATUSES } from '../../constants/issues';
 import { hasPin, issueToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
 import { selectCurrentModel } from '../model';
+import { selectQueryParams } from '../router/router.selectors';
 
 export const selectIssuesDomain = (state) => ({...state.issues});
 
@@ -113,6 +114,10 @@ export const selectSortOrder = createSelector(
 
 export const selectFailedToLoad = createSelector(
 	selectComponentState, (state) => state.failedToLoad
+);
+
+export const selectSelectedIssue = createSelector(
+	selectIssuesMap, selectQueryParams, (issues,  {issueId}) => issues[issueId]
 );
 
 export const selectPins = createSelector(

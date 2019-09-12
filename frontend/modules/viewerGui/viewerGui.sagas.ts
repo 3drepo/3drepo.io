@@ -134,15 +134,16 @@ function* handlePinClick({ id }) {
 		const revisions = yield select(selectRevisions);
 		const defaultRevision = revisions[0].tag || revisions[0]._id;
 		const { teamspace, model, revision = defaultRevision } = yield select(selectUrlParams);
+		const risk = risksMap[id];
+		const issue = issuesMap[id];
 
-		if (risksMap[id]) {
+		if (risk) {
 			yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.RISKS, true));
-			yield put(RisksActions.showDetails(teamspace, model, revision, risksMap[id]));
+			yield put(RisksActions.showDetails(teamspace, model, revision, risk));
 		}
 
-		if (issuesMap[id]) {
-			yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.ISSUES, true));
-			yield put(IssuesActions.showDetails(teamspace, model, revision, issuesMap[id]));
+		if (issue) {
+			yield put(IssuesActions.goToIssue(issue));
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('handle', 'pin click', error));
