@@ -102,7 +102,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
 		const changes = {} as IState;
-		const { modelSettings, isModelPending, match: { params }, queryParams } = this.props;
+		const { match: { params }, queryParams } = this.props;
 		const teamspaceChanged = params.teamspace !== prevProps.match.params.teamspace;
 		const modelChanged = params.model !== prevProps.match.params.model;
 		const revisionChanged = params.revision !== prevProps.match.params.revision;
@@ -118,13 +118,6 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 		if (teamspaceChanged || modelChanged || revisionChanged) {
 			this.props.fetchData(params.teamspace, params.model);
-		}
-
-		const settingsChanged = modelSettings._id !== prevState.loadedModelId;
-
-		if (!isModelPending && (settingsChanged || revisionChanged)) {
-			changes.loadedModelId = modelSettings._id;
-			this.handleModelSettingsChange();
 		}
 
 		if (!isEmpty(changes)) {
@@ -156,10 +149,6 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 				</Container>
 			</GuiContainer>
 		);
-	}
-
-	private handleModelSettingsChange() {
-		this.props.loadModel();
 	}
 
 	private handleTogglePanel = (panelType) => {

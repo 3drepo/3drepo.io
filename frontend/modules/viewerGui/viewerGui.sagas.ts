@@ -65,6 +65,7 @@ function* fetchData({ teamspace, model }) {
 		const revision = yield select(selectCurrentRevisionId);
 
 		yield all([
+			put(ViewerGuiActions.loadModel()),
 			put(TreeActions.fetchFullTree(teamspace, model, revision)),
 			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
 			put(IssuesActions.fetchIssues(teamspace, model, revision)),
