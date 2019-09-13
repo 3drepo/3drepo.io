@@ -35,7 +35,8 @@ export const { Types: ModelTypes, Creators: ModelActions } = createActions({
 	fetchMapsSuccess: ['maps'],
 	updateSettingsSuccess: ['settings'],
 	fetchMetaKeys: ['teamspace', 'modelId'],
-	fetchMetaKeysSuccess: ['metaKeys']
+	fetchMetaKeysSuccess: ['metaKeys'],
+	reset: []
 }, { prefix: 'MODEL/' });
 
 export const INITIAL_STATE = {
@@ -76,11 +77,14 @@ const updateSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
 	return { ...state, settings: { ...state.settings, ...settings} };
 };
 
+const reset = (state = INITIAL_STATE) => ({...INITIAL_STATE});
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ModelTypes.FETCH_META_KEYS_SUCCESS]: fetchMetaKeysSuccess,
 	[ModelTypes.FETCH_SETTINGS_SUCCESS]: fetchSettingsSuccess,
 	[ModelTypes.FETCH_REVISIONS_SUCCESS]: fetchRevisionsSuccess,
 	[ModelTypes.SET_PENDING_STATE]: setPendingState,
 	[ModelTypes.FETCH_MAPS_SUCCESS]: fetchMapsSuccess,
-	[ModelTypes.UPDATE_SETTINGS_SUCCESS]: updateSettingsSuccess
+	[ModelTypes.UPDATE_SETTINGS_SUCCESS]: updateSettingsSuccess,
+	[ModelTypes.RESET]: reset
 });

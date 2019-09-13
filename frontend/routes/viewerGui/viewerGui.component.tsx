@@ -59,6 +59,7 @@ interface IProps {
 	fetchData: (teamspace, model) => void;
 	loadModel: () => void;
 	resetPanelsStates: () => void;
+	resetModel: () => void;
 	setPanelVisibility: (panelName, visibility) => void;
 }
 
@@ -131,6 +132,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		this.props.stopListenOnClickPin();
 		this.props.resetPanelsStates();
 		this.props.viewer.destroy();
+		this.props.resetModel();
 	}
 
 	public render() {
