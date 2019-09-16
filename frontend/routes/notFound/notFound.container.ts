@@ -19,10 +19,13 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { selectIsAuthenticated } from '../../modules/auth';
 import { DialogActions } from '../../modules/dialog';
 import { NotFound } from './notFound.component';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	isAuthenticated: selectIsAuthenticated
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showDialog: DialogActions.showDialog
