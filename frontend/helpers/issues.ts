@@ -15,10 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { getAPIUrl } from '../services/api';
-import { ISSUE_COLORS, STATUSES_ICONS, STATUSES } from '../constants/issues';
+import { ISSUE_COLORS, STATUSES_ICONS, STATUSES, PRIORITIES } from '../constants/issues';
 import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
-// FIXME revert later
-import { PIN_COLORS } from '../styles';
 
 export const prepareIssue = (issue, jobs = []) => {
 	const preparedIssue = {...issue};
@@ -57,8 +55,7 @@ export const prepareIssue = (issue, jobs = []) => {
 export const getStatusIcon = (priority, status) => {
 	const statusIcon = {
 		Icon: STATUSES_ICONS[status] || null,
-		color: (ISSUE_COLORS[status] ? ISSUE_COLORS[status].color : null) ||
-			(ISSUE_COLORS[priority] ? ISSUE_COLORS[priority].color : null) || null
+		color: (ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS[PRIORITIES.NONE]).color
 	};
 
 	return {...statusIcon};
@@ -66,10 +63,8 @@ export const getStatusIcon = (priority, status) => {
 
 export const getIssuePinColor = (issue: any, selected: boolean = false) => {
 	const {status, priority} = issue;
-	const colorToUse = ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS.NONE;
-	// FIXME revert later
-	// return (selected) ? colorToUse.selectedColor : colorToUse.pinColor;
-	return (selected) ? PIN_COLORS.YELLOW : PIN_COLORS.PRIMARY_MAIN;
+	const colorToUse = ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS[PRIORITIES.NONE];
+	return (selected) ? colorToUse.selectedColor : colorToUse.pinColor;
 };
 
 const isOpenIssue = (status) => status !== 'closed';
