@@ -666,7 +666,6 @@ function uploadFile(req) {
 
 					if(sizeInMB > space) {
 						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
-						importFail(account, model, user, responseCodes.SIZE_LIMIT_PAY);
 					} else {
 						cb(null, true);
 					}
