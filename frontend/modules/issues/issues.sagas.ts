@@ -17,9 +17,10 @@
 
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
-import { differenceBy, isEmpty, isEqual, map, omit, pick } from 'lodash';
+import { isEmpty, isEqual, map, omit, pick } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
+import * as queryString from 'query-string';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { DEFAULT_PROPERTIES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { EXTENSION_RE } from '../../constants/resources';
@@ -42,7 +43,7 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectTopicTypes } from '../model';
-import { selectUrlParams } from '../router/router.selectors';
+import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
@@ -415,9 +416,17 @@ function* setActiveIssue({ issue, revision }) {
 
 function* goToIssue({ issue }) {
 	const {teamspace, model, revision} = yield select(selectUrlParams);
+	let queryParams =  yield select(selectQueryParams);
+
 	const issueId = (issue || {})._id;
 	const path = [ROUTES.VIEWER, teamspace, model, revision].filter(Boolean).join('/');
-	const query = issueId ? `?issueId=${issueId}` : '';
+
+	queryParams = issueId ?  {... queryParams, issueId} : omit(queryParams, 'issueId');
+	let query = queryString.stringify(queryParams);
+	if (query) {
+		query = '?' + query;
+	}
+
 	yield put(push(`${path}${query}`));
 }
 

@@ -19,6 +19,7 @@ import { push } from 'connected-react-router';
 import {  isEmpty, isEqual, map, omit, pick } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
+import * as queryString from 'query-string';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { RISK_LEVELS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
@@ -33,7 +34,7 @@ import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
-import { selectUrlParams } from '../router/router.selectors';
+import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
@@ -369,9 +370,17 @@ function* setActiveRisk({ risk, revision }) {
 
 function* goToRisk({ risk }) {
 	const {teamspace, model, revision} = yield select(selectUrlParams);
+	let queryParams =  yield select(selectQueryParams);
+
 	const riskId = (risk || {})._id;
 	const path = [ROUTES.VIEWER, teamspace, model, revision].filter(Boolean).join('/');
-	const query = riskId ? `?riskId=${riskId}` : '';
+
+	queryParams = riskId ?  {... queryParams, riskId} : omit(queryParams, 'riskId');
+	let query = queryString.stringify(queryParams);
+	if (query) {
+		query = '?' + query;
+	}
+
 	yield put(push(`${path}${query}`));
 }
 
