@@ -89,13 +89,11 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 		viewer.init();
 
-		if (issueId || riskId) {
-			if (issueId) {
-				this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
-			}
-			if (riskId) {
-				this.props.setPanelVisibility(VIEWER_PANELS.RISKS, true);
-			}
+		if (issueId || !riskId) {
+			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
+		}
+		if (riskId) {
+			this.props.setPanelVisibility(VIEWER_PANELS.RISKS, true);
 		}
 
 		this.props.fetchData(params.teamspace, params.model);
