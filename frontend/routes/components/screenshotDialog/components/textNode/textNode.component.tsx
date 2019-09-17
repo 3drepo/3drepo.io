@@ -18,21 +18,13 @@
 import * as React from 'react';
 import { Layer, Text, Group, Rect } from 'react-konva';
 
-import { Container, BackgroundImage, Stage, Textarea } from './screenshotDialog.styles';
-import { COLOR } from '../../../styles';
-import { Drawing } from './components/drawing/drawing.component';
-import { Portal } from './components/portal/portal.component';
-import { TransformerComponent } from './components/transformer/transformer.component';
-import { Tools } from './components/tools/tools.component';
-import { MODES } from './screenshotDialog.helpers';
-import { renderWhenTrue } from '../../../helpers/rendering';
+import { Container, Stage, Textarea, BackgroundImage } from './textNode.styles';
+import { COLOR } from '../../../../../styles';
+import { Drawing } from '../drawing/drawing.component';
+import { TransformerComponent } from '../transformer/transformer.component';
+import { MODES } from '../../screenshotDialog.helpers';
 
-const INITIAL_VALUES = {
-	color: COLOR.RED,
-	brushColor: COLOR.RED,
-	brushSize: 20,
-	mode: MODES.BRUSH
-};
+const Konva = window.Konva;
 
 interface IProps {
 	sourceImage: string | Promise<string>;
@@ -41,18 +33,9 @@ interface IProps {
 	handleClose: () => void;
 }
 
-export class ScreenshotDialog extends React.PureComponent<IProps, any> {
+export class Paint extends React.PureComponent<IProps, any> {
 	public state = {
-		color: INITIAL_VALUES.color,
-		brushSize: INITIAL_VALUES.brushSize,
-		brushColor: INITIAL_VALUES.color,
-		mode: INITIAL_VALUES.mode,
-		sourceImage: '',
-		stage: {
-			height: 0,
-			width: 0
-		},
-		objects: [],
+		shapes: [],
 		selectedShapeName: '',
 		lastSelectedShapeName: '',
 		textEditable: {
@@ -62,13 +45,11 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	};
 
-	public containerRef = React.createRef<any>();
 	public layerRef = React.createRef<any>();
-	public stageRef = React.createRef<any>();
 	public editableTextareaRef = React.createRef<any>();
 
 	public get containerElement() {
-		return this.containerRef.current;
+		return this.props.containerRef.current;
 	}
 
 	public get layer() {
@@ -76,23 +57,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public get stage() {
-		return this.stageRef.current;
-	}
-
-	public setStageSize = () => {
-		const height = this.containerElement.offsetHeight;
-		const width = this.containerElement.offsetWidth;
-		const stage = { height, width };
-
-		this.setState({ stage });
-	}
-
-	public async componentDidMount() {
-		const sourceImage = await Promise.resolve(this.props.sourceImage);
-
-		this.setState({ sourceImage }, () => {
-			this.setStageSize();
-		});
+		return this.props.stageRef.current;
 	}
 
 	public handleBrushSizeChange = (event) => {
@@ -100,11 +65,11 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		newState.brushSize = event.target.value;
 
 		if (this.state.selectedShapeName) {
-			const selectedShapeIndex = this.state.objects.findIndex((shape) => shape.name === this.state.selectedShapeName);
-			const updatedShapes = [...this.state.objects];
+			const selectedShapeIndex = this.state.shapes.findIndex((shape) => shape.name === this.state.selectedShapeName);
+			const updatedShapes = [...this.state.shapes];
 
 			updatedShapes[selectedShapeIndex].fontSize = event.target.value;
-			newState.objects = updatedShapes;
+			newState.shapes = updatedShapes;
 		}
 
 		this.setState(newState);
@@ -112,39 +77,22 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public handleColorChange = (color) => {
 		const newState = {} as any;
+
 		newState.color = color;
 		newState.brushColor = color;
 
 		if (this.state.selectedShapeName) {
-			const selectedShapeIndex = this.state.objects.findIndex((shape) => shape.name === this.state.selectedShapeName);
-			const updatedShapes = [...this.state.objects];
+			const selectedShapeIndex = this.state.shapes.findIndex((shape) => shape.name === this.state.selectedShapeName);
+			const updatedShapes = [...this.state.shapes];
 
 			updatedShapes[selectedShapeIndex].color = color;
-			newState.objects = updatedShapes;
+			newState.shapes = updatedShapes;
 		}
 
 		this.setState(newState);
 	}
 
 	public clearCanvas = () => {};
-
-	public handleSave = async () => {};
-
-	public setMode = (mode) => { this.setState({ mode }); };
-
-	public setBrushMode = () => {
-		this.setMode(MODES.BRUSH);
-	}
-
-	public setEraserMode = () => {
-		this.setMode(MODES.ERASER);
-	}
-
-	public setShapeMode = () => {
-		this.setState({ mode: MODES.SHAPE }, () => {
-			this.addNewFigure();
-		});
-	}
 
 	public handleTextDoubleClick = ({target}) => {
 		const textPosition = target.getAbsolutePosition();
@@ -186,12 +134,12 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				visible: false
 			};
 
-			if (this.state.lastSelectedShapeName && this.state.objects.length) {
-				const updatedShapes = [...this.state.objects];
-				const shapeIndex = this.state.objects.findIndex((s) => s.name === this.state.lastSelectedShapeName);
+			if (this.state.lastSelectedShapeName && this.state.shapes.length) {
+				const updatedShapes = [...this.state.shapes];
+				const shapeIndex = this.state.shapes.findIndex((s) => s.name === this.state.lastSelectedShapeName);
 				updatedShapes[shapeIndex].text = this.state.textEditable.value;
 
-				newState.objects = updatedShapes;
+				newState.shapes = updatedShapes;
 			}
 
 			this.setState(newState, () => {
@@ -220,12 +168,12 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				visible: false
 			};
 
-			if (this.state.lastSelectedShapeName && this.state.objects.length) {
-				const updatedShapes = [...this.state.objects];
-				const shapeIndex = this.state.objects.findIndex((s) => s.name === this.state.lastSelectedShapeName);
+			if (this.state.lastSelectedShapeName && this.state.shapes.length) {
+				const updatedShapes = [...this.state.shapes];
+				const shapeIndex = this.state.shapes.findIndex((s) => s.name === this.state.lastSelectedShapeName);
 				updatedShapes[shapeIndex].text = this.state.textEditable.value;
 
-				newState.objects = updatedShapes;
+				newState.shapes = updatedShapes;
 			}
 
 			this.setState(newState);
@@ -242,37 +190,42 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		const newText = {
 			type: 'text',
 			text: 'New text',
-			color: this.state.color,
-			name: `text-${this.state.objects.length}`,
+			color: this.props.color,
+			name: `text-${this.state.shapes.length}`,
 			width: 300,
 			height: 100,
-			fontSize: this.state.brushSize
+			fontSize: this.props.brushSize
 		};
 
-		this.setState({ objects: [...this.state.objects, newText] });
+		this.setState({
+			shapes: [...this.state.shapes, newText]
+		});
 	}
 
 	public addNewFigure = () => {
 		const newFigure = {
 			type: 'figure',
-			color: this.state.color,
-			name: `figure-${this.state.objects.length}`,
+			color: this.props.color,
+			name: `figure-${this.state.shapes.length}`,
 			width: 200,
 			height: 200
 		};
 
-		this.setState({ objects: [...this.state.objects, newFigure] });
+		this.setState({
+			shapes: [...this.state.shapes, newFigure]
+		});
 	}
 
-	public renderObjects = () => {
+	public renderShapes = () => {
+    console.log('render shapes',this.state.shapes)
 		return (
 			<>
-				{this.state.objects.map((shape, index) => {
+				{this.state.shapes.map((shape, index) => {
 					const { color, text, type, width, fontSize, height } = shape;
 					const { textEditable, selectedShapeName } = this.state;
 					const textIndex = `text-${index}`;
 					const figureIndex = `figure-${index}`;
-					const isVisible = selectedShapeName === textIndex || !(textEditable.visible && selectedShapeName === figureIndex);
+					const isVisible = !(textEditable.visible && selectedShapeName === textIndex || selectedShapeName === figureIndex);
 
 					return (
 						<Group key={index}>
@@ -284,7 +237,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 							>
 								{ type === 'text' ?
 									<Text
-										name={textIndex}
+										name={`text-${index}`}
 										fontFamily={'Arial'}
 										fontSize={fontSize}
 										width={width}
@@ -294,7 +247,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 										visible={isVisible}
 									/> :
 									<Rect
-										name={figureIndex}
+										name={`figure-${index}`}
 										width={width}
 										height={height}
 										stroke={color}
@@ -311,8 +264,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 					);
 				}
 				)}
-
-				{/* <Shape /> */}
 			</>
 		);
 	}
@@ -320,46 +271,25 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public renderDrawing = () => {
 		return (
 			<Drawing
-				height={this.state.stage.height}
-				width={this.state.stage.width}
-				size={this.state.brushSize}
-				color={this.state.brushColor}
-				mode={this.state.mode}
-				layer={this.layerRef}
-				stage={this.stage}
+				height={this.props.height}
+				width={this.props.width}
+				size={this.props.brushSize}
+				color={this.props.brushColor}
+				mode={this.props.mode}
 			/>
 		);
 	}
 
 	public renderLayerContent = () => {
-		const { stage } = this.state;
-
-		if (stage.width && stage.height) {
+		if (this.props.width && this.props.height) {
 			return(
 				<>
 					{this.renderDrawing()}
-					{this.renderObjects()}
+					{this.renderShapes()}
 				</>
 			);
 		}
 	}
-
-	public renderTools = () => (
-		<Tools
-			size={this.state.brushSize}
-			color={this.state.brushColor}
-			onDrawClick={this.setBrushMode}
-			onEraseClick={this.setEraserMode}
-			onTextClick={this.handleToolTextClick}
-			onShapeClick={this.setShapeMode}
-			onClearClick={this.clearCanvas}
-			onBrushSizeChange={this.handleBrushSizeChange}
-			onColorChange={this.handleColorChange}
-			onCancel={this.props.handleClose}
-			onSave={this.handleSave}
-			disabled={this.props.disabled}
-		/>
-	)
 
 	public handleStageMouseDown = ({ target }) => {
 		if (target === target.getStage()) {
@@ -375,7 +305,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			return;
 		}
 
-		const shape = this.state.objects.find((s) => s.name === target.name());
+		const shape = this.state.shapes.find((s) => s.name === target.name());
 		const newState = {} as any;
 
 		const selectedShapeName = shape ? shape.name : '';
@@ -388,37 +318,37 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public getEditableTextareaStyles = () => {
+
 		return {
 			display: this.state.textEditable.visible ? 'block' : 'none',
 			...this.state.textEditable.styles
 		};
 	}
 
-	public renderEditableTextarea = renderWhenTrue(() => (
-		<Textarea
-			name={'editable-textarea'}
-			value={this.state.textEditable.value}
-			style={this.getEditableTextareaStyles()}
-			onChange={this.handleTextEdit}
-			onKeyDown={this.handleTextareaKeyDown}
-			ref={this.editableTextareaRef}
-			autoFocus
-		/>
-	));
-
 	public render() {
-		const { sourceImage, stage, color } = this.state;
+		const { width, height, stageRef, sourceImage } = this.props;
 
 		return (
-			<Container innerRef={this.containerRef}>
-				<BackgroundImage src={sourceImage} />
+			<Container>
+        <BackgroundImage src={sourceImage} />
 				{this.renderTools()}
-				<Stage innerRef={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
+				<Stage innerRef={stageRef} height={height} width={width} onMouseDown={this.handleStageMouseDown}>
 					<Layer ref={this.layerRef}>
 						{this.renderLayerContent()}
 					</Layer>
 				</Stage>
-				{this.renderEditableTextarea(this.state.textEditable.value)}
+				{this.state.textEditable.value ?
+					<Textarea
+						name={'editable-textarea'}
+						value={this.state.textEditable.value}
+						style={this.getEditableTextareaStyles()}
+						onChange={this.handleTextEdit}
+						onKeyDown={this.handleTextareaKeyDown}
+						ref={this.editableTextareaRef}
+						rows={4}
+						autoFocus
+					/> : null
+				}
 			</Container>
 		);
 	}

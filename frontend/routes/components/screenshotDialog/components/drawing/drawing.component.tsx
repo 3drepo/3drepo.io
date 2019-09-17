@@ -16,48 +16,55 @@
  */
 
 import * as React from 'react';
-import { Image } from 'react-konva';
+// import Konva from 'konva';
+import { Image, Line } from 'react-konva';
 import { MODE_OPERATION, MODES } from '../../screenshotDialog.helpers';
 
+const Konva = window.Konva;
 interface IProps {
 	color: string;
 	size: number;
 	mode: string;
 	height: number;
 	width: number;
+	layer: any;
+	stage: any;
 }
 
 export class Drawing extends React.PureComponent <IProps, any> {
 	public state = {
-		isCurrentlyDrawn: false,
-		canvas: {} as any,
-		context: {} as any
+		isCurrentlyDrawn: false
 	};
 
-	public imageRef: any = React.createRef();
 	public lastPointerPosition: any = { x: 0, y: 0 };
-
-	get stage() {
-		return this.imageRef.current.parent.parent;
-	}
+	public lastLine: any = {};
 
 	get isDrawingMode() {
 		return this.props.mode === MODES.BRUSH || this.props.mode === MODES.ERASER;
 	}
 
-	public componentDidMount() {
-		const canvas = document.createElement('canvas');
-		canvas.width = this.props.width;
-		canvas.height = this.props.height;
-		const context = canvas.getContext('2d');
+	get layer() {
+		return this.props.layer.current.getLayer();
+	}
 
-		this.setState({ canvas, context });
+	public componentDidMount() {
+		this.props.stage.on('mousemove', this.handleMouseMove);
+		this.props.stage.on('mouseup', this.handleMouseUp);
+		this.props.stage.on('mousedown', this.handleMouseDown);
 	}
 
 	public handleMouseDown = () => {
 		this.setState({ isCurrentlyDrawn: true });
 
-		this.lastPointerPosition = this.stage.getPointerPosition();
+		this.lastPointerPosition = this.props.stage.getPointerPosition();
+		this.lastLine = new Konva.Line({
+			stroke: this.props.color,
+			strokeWidth: this.props.size,
+			globalCompositeOperation: MODE_OPERATION[this.props.mode],
+			points: [this.lastPointerPosition.x, this.lastPointerPosition.y],
+			lineCap: 'round'
+		});
+		this.layer.add(this.lastLine);
 	}
 
 	public handleMouseUp = () => {
@@ -65,56 +72,27 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	}
 
 	public handleMouseMove = () => {
-		const { context, isCurrentlyDrawn } = this.state;
-		const { color, size, mode } = this.props;
+		const { isCurrentlyDrawn } = this.state;
 
 		if (isCurrentlyDrawn && this.isDrawingMode) {
-			// TODO: Don't always get a new context
-			context.strokeStyle = color;
-			context.lineJoin = 'round';
-			context.lineWidth = size;
-			context.globalCompositeOperation = MODE_OPERATION[mode];
-
-			const startPosition = {
-				x: this.lastPointerPosition.x - this.imageRef.current.x(),
-				y: this.lastPointerPosition.y - this.imageRef.current.y()
-			};
-
-			this.drawLine(context, startPosition);
+			this.drawLine();
 		}
 	}
 
-	public drawLine = (context, startPosition) => {
-		context.beginPath();
-		context.moveTo(startPosition.x, startPosition.y);
-
-		const position = this.stage.getPointerPosition();
+	public drawLine = () => {
+		const position = this.props.stage.getPointerPosition();
 		const localPosition = {
-			x: position.x - this.imageRef.current.x(),
-			y: position.y - this.imageRef.current.y()
+			x: position.x - this.props.layer.current.x(),
+			y: position.y - this.props.layer.current.y()
 		};
+		const newPoints = this.lastLine.points().concat([localPosition.x, localPosition.y]);
 
-		context.lineTo(localPosition.x, localPosition.y);
-		context.closePath();
-		context.stroke();
-
+		this.lastLine.points(newPoints);
 		this.lastPointerPosition = position;
-		this.imageRef.current.getLayer().draw();
+		this.layer.draw();
 	}
 
 	public render() {
-		const { canvas } = this.state;
-
-		return (
-			<Image
-				image={canvas}
-				ref={this.imageRef}
-				width={this.props.width}
-				height={this.props.height}
-				onMouseDown={this.handleMouseDown}
-				onMouseUp={this.handleMouseUp}
-				onMouseMove={this.handleMouseMove}
-			/>
-		);
+		return null;
 	}
 }

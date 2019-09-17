@@ -48,11 +48,16 @@ export class TransformerComponent extends React.PureComponent <IProps, any> {
 	}
 
 	public checkNode() {
-		const stage = this.nodeRef.current.getStage();
+		const currentNode = this.nodeRef.current;
+
+		const stage = currentNode.getStage();
 		const { selectedShapeName } = this.props;
 
 		let selectedNode = stage.findOne('.' + selectedShapeName);
-		if (selectedNode === this.nodeRef.current.node()) {
+		console.log('selectedShapeName',selectedShapeName);
+		console.log('this.nodeRef.current',currentNode);
+		console.log('selectedNode',selectedNode);
+		if (selectedNode === currentNode.node()) {
 			return;
 		}
 		if (selectedNode) {
@@ -60,12 +65,12 @@ export class TransformerComponent extends React.PureComponent <IProps, any> {
 			if ( type !== 'Group') {
 				selectedNode = selectedNode.findAncestor('Group');
 			}
-			this.nodeRef.current.attachTo(selectedNode);
+			currentNode.attachTo(selectedNode);
 		} else {
-			this.nodeRef.current.detach();
+			currentNode.detach();
 		}
 
-		this.nodeRef.current.getLayer().batchDraw();
+		currentNode.getLayer().batchDraw();
 	}
 
 	public render() {
