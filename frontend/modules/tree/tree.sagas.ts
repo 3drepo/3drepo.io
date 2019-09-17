@@ -110,7 +110,12 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 	yield put(TreeActions.setIsPending(true));
 
 	try {
-		yield take(ModelTypes.FETCH_SETTINGS_SUCCESS);
+		let modelSettings = yield select(selectSettings);
+
+		if (!modelSettings || !modelSettings.name) { // In case the model settings didnt load yet
+			yield take(ModelTypes.FETCH_SETTINGS_SUCCESS);
+			modelSettings = yield select(selectSettings);
+		}
 
 		const [{ data: fullTree }, { data: modelsWithMeshes }, { data: treePath }] = yield all([
 			API.getFullTree(teamspace, modelId, revision),
@@ -126,7 +131,6 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 			treePath: {}
 		};
 
-		const modelSettings = yield select(selectSettings);
 		dataToProcessed.mainTree.name = modelSettings.name;
 		dataToProcessed.mainTree.isFederation = modelSettings.federate;
 		dataToProcessed.subModels = modelSettings.subModels;
