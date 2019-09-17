@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Label, LabelOutlined } from '@material-ui/icons';
+import Label from '@material-ui/icons/Label';
+import LabelOutlined from '@material-ui/icons/LabelOutlined';
 import React from 'react';
 
 import { ROUTES } from '../../../../constants/routes';
