@@ -168,12 +168,11 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting })
 	}
 }
 
-function* updateIssue({ teamspace, modelId, issueData }) {
+function* updateIssue({ issueData }) {
 	try {
-		const { _id, rev_id, position } = yield select(selectActiveIssueDetails);
-		const { data: updatedIssue } = yield API.updateIssue(teamspace, modelId, _id, rev_id, issueData );
-
-		analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.EDIT);
+		const { _id, rev_id, model, account, position } = yield select(selectActiveIssueDetails);
+		const { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, issueData );
+		yield analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.EDIT);
 
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareIssue(updatedIssue, jobs);
@@ -197,10 +196,10 @@ function* updateNewIssue({ newIssue }) {
 	}
 }
 
-function* postComment({ teamspace, modelId, issueData, finishSubmitting }) {
+function* postComment({ issueData, finishSubmitting }) {
 	try {
-		const { _id } = yield select(selectActiveIssueDetails);
-		const { data: comment } = yield API.addIssueComment(teamspace, modelId, _id, issueData);
+		const { _id, model, account } = yield select(selectActiveIssueDetails);
+		const { data: comment } = yield API.addIssueComment(account, model, _id, issueData);
 		const preparedComment = yield prepareComment(comment);
 
 		finishSubmitting();
@@ -211,10 +210,12 @@ function* postComment({ teamspace, modelId, issueData, finishSubmitting }) {
 	}
 }
 
-function* removeComment({ teamspace, modelId, issueData }) {
+function* removeComment({ issueData }) {
 	try {
-		const { _id, guid } = issueData;
-		yield API.deleteIssueComment(teamspace, modelId, _id, guid);
+		const { guid } = issueData;
+		const { _id, model, account } = yield select(selectActiveIssueDetails);
+
+		yield API.deleteIssueComment(account, model, _id, guid);
 		yield put(IssuesActions.deleteCommentSuccess(guid, _id));
 		yield put(SnackbarActions.show('Comment removed'));
 	} catch (error) {
@@ -560,7 +561,6 @@ function* unsubscribeOnIssueCommentsChanges({ teamspace, modelId, issueId }) {
 }
 
 export function* setNewIssue() {
-	const activeIssue = yield select(selectActiveIssueDetails);
 	const jobs = yield select(selectJobsList);
 	const currentUser = yield select(selectCurrentUser);
 	const topicTypes: any[] = yield select(selectTopicTypes);

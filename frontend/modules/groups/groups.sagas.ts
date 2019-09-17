@@ -178,7 +178,7 @@ function* deleteGroups({ teamspace, modelId, groups }) {
 			];
 
 			if (overriddenGroup) {
-				actions.push(put(GroupsActions.removeColorOverride([overriddenGroup])));
+				actions.push(put(GroupsActions.removeColorOverride(groupId)));
 			}
 
 			return actions;
@@ -215,7 +215,8 @@ function* downloadGroups({ teamspace, modelId }) {
 
 function* showDetails({ group, revision }) {
 	try {
-		yield put(GroupsActions.clearSelectionHighlights(true));
+		yield put(GroupsActions.clearSelectionHighlights());
+		yield put(GroupsActions.highlightGroup(group));
 		const objectsStatus = yield Viewer.getObjectsStatus();
 
 		if (group.objects && objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
@@ -223,13 +224,6 @@ function* showDetails({ group, revision }) {
 			group.objects = objectsStatus.highlightedNodes;
 		}
 
-		const colorOverrides = yield select(selectColorOverrides);
-		const overriddenGroup = colorOverrides[group._id];
-		if (overriddenGroup) {
-			yield put(GroupsActions.removeColorOverride([overriddenGroup], true));
-		}
-
-		yield put(GroupsActions.setActiveGroup(group, revision));
 		yield put(GroupsActions.setComponentState({
 			showDetails: true,
 			newGroup: group,
@@ -245,6 +239,7 @@ function* closeDetails() {
 		const activeGroup = yield select(selectActiveGroupDetails);
 		yield put(GroupsActions.highlightGroup(activeGroup));
 		yield put(GroupsActions.setComponentState({ showDetails: false }));
+
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('close', 'group details', error));
 	}
@@ -298,7 +293,7 @@ function* updateGroup({ teamspace, modelId, revision, groupId }) {
 
 		const isNormalGroup = groupDetails.type === GROUPS_TYPES.NORMAL;
 		const objectsStatus = yield Viewer.getObjectsStatus();
-		if (isNormalGroup && objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
+		if (isNormalGroup) {
 			groupToSave.totalSavedMeshes = calculateTotalMeshes(objectsStatus.highlightedNodes);
 			groupToSave.objects = objectsStatus.highlightedNodes;
 		}

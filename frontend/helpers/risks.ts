@@ -27,12 +27,6 @@ import {
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 
-const renameFieldIfExists = (risk, fieldName, newFieldName) => {
-	if (risk[fieldName] !== null || risk[fieldName] !== undefined) {
-		risk[newFieldName] = risk[fieldName];
-	}
-};
-
 export const prepareRisk = (risk, jobs = []) => {
 	const preparedRisk = {...risk};
 
@@ -88,10 +82,6 @@ export const prepareRisk = (risk, jobs = []) => {
 	if (preparedRisk.mitigation_status) {
 		preparedRisk.defaultHidden = preparedRisk.mitigation_status === RISK_LEVELS.AGREED_FULLY;
 	}
-
-	renameFieldIfExists(preparedRisk, 'desc', 'description');
-	renameFieldIfExists(preparedRisk, 'owner', 'author');
-	renameFieldIfExists(preparedRisk, 'created', 'createdDate');
 
 	return preparedRisk;
 };

@@ -30,7 +30,7 @@ export const Container = styled.div`
 export const FieldsRow = styled.div`
 	display: flex;
 	align-items: center;
-	margin-top: 10px;
+	margin: 10px 0;
 `;
 
 export const StyledTextField = styled(TextField)`

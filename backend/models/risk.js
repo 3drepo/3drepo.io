@@ -135,18 +135,25 @@ function clean(dbCol, riskToClean) {
 		riskToClean.thumbnail = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/thumbnail.png";
 	}
 
-	riskToClean.level_of_risk = calculateLevelOfRisk(riskToClean.likelihood, riskToClean.consequence);
-	riskToClean.residual_level_of_risk = calculateLevelOfRisk(riskToClean.residual_likelihood, riskToClean.residual_consequence);
-
-	if (0 <= riskToClean.residual_level_of_risk) {
-		riskToClean.overall_level_of_risk = riskToClean.residual_level_of_risk;
-	} else {
-		riskToClean.overall_level_of_risk = riskToClean.level_of_risk;
-	}
+	riskToClean = { ...riskToClean, ...getLevelOfRisk(riskToClean) };
 
 	delete riskToClean.viewpoints;
 
 	return riskToClean;
+}
+
+function getLevelOfRisk(riskData) {
+	const level_of_risk = calculateLevelOfRisk(riskData.likelihood, riskData.consequence);
+	const residual_level_of_risk = calculateLevelOfRisk(riskData.residual_likelihood, riskData.residual_consequence);
+
+	let overall_level_of_risk;
+	if (0 <= residual_level_of_risk) {
+		overall_level_of_risk = residual_level_of_risk;
+	} else {
+		overall_level_of_risk = level_of_risk;
+	}
+
+	return {level_of_risk, residual_level_of_risk, overall_level_of_risk};
 }
 
 function toDirectXCoords(entry) {
@@ -429,7 +436,13 @@ risk.update = async function(user, sessionId, account, model, issueId, data) {
 	const beforeUpdate =  this.onBeforeUpdate(account, model, sessionId, residualData).bind(this);
 
 	data = _.omit(data, ["viewpoint", "residual"]);
-	return await ticket.update(attributeBlacklist, user, sessionId, account, model, issueId, data, beforeUpdate);
+	const updatedRisk = await ticket.update(attributeBlacklist, user, sessionId, account, model, issueId, data, beforeUpdate);
+
+	const levelOfRisk = getLevelOfRisk(updatedRisk.updatedTicket);
+	updatedRisk.updatedTicket = {...updatedRisk.updatedTicket, ...levelOfRisk};
+	updatedRisk.data = {...updatedRisk.data, ...levelOfRisk};
+
+	return updatedRisk;
 };
 
 risk.deleteRisks = function(dbCol, sessionId, ids) {

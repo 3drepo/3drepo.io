@@ -81,6 +81,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 		return this.state.isFormDirty && this.state.isFormValid && this.hasValidRules;
 	}
+
 	public state = {
 		isFormValid: false,
 		isFormDirty: false,
@@ -110,7 +111,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			key={this.groupData._id}
 			{...this.groupData}
 			roleColor={this.groupData.color}
-			createdDate={this.groupData.createdDate}
+			created={this.groupData.createdAt}
 			editable={this.props.canUpdate}
 			onNameChange={this.handleFieldChange}
 			renderCollapsable={this.renderGroupForm}
@@ -119,6 +120,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			panelName={GROUP_PANEL_NAME}
 			StatusIconComponent={GROUP_TYPES_ICONS[this.groupData.type]}
 			scrolled={this.state.scrolled}
+			isNew={this.isNewGroup}
 		/>
 	));
 
@@ -132,9 +134,9 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 	public handleGroupFormSubmit = () => {
 		const { teamspace, model, revision, updateGroup, createGroup } = this.props;
-		const { name, description, type, color, rules } = this.groupData;
+		const { name, desc, type, color, rules } = this.groupData;
 
-		this.formRef.current.formikRef.current.resetForm({name, description, type, color, rules});
+		this.formRef.current.formikRef.current.resetForm({name, desc, type, color, rules});
 		if (this.isNewGroup) {
 			createGroup(teamspace, model, revision);
 		} else {
@@ -163,7 +165,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	public renderGroupForm = () => (
 		<GroupDetailsForm
 			ref={this.formRef}
-			key={`${this.groupData._id}.${this.groupData.updateDate}`}
+			key={`${this.groupData._id}.${this.groupData.updatedAt}`}
 			group={this.groupData}
 			onSubmit={this.handleGroupFormSubmit}
 			currentUser={this.props.currentUser}

@@ -21,6 +21,7 @@ import { all, call, put, select, takeLatest } from 'redux-saga/effects';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
+import { ViewerActions } from '../viewer';
 import { CurrentUserActions, CurrentUserTypes } from './currentUser.redux';
 import { selectCurrentUser } from './currentUser.selectors';
 
@@ -41,6 +42,8 @@ export function* fetchUser({ username }) {
 			})),
 			put(CurrentUserActions.setAsInitialised())
 		]);
+
+		yield put(ViewerActions.fetchSettings());
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'user data', e));
 	}

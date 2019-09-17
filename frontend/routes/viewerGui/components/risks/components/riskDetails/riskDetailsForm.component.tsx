@@ -228,7 +228,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									items={RISK_LIKELIHOODS}
 									inputId="likelihood"
 									disabled={!canEditBasicProperty}
-									readOnly={!this.isNewRisk}
 								/>
 							)} />
 						</StyledFormControl>
@@ -241,7 +240,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									items={RISK_CONSEQUENCES}
 									inputId="consequence"
 									disabled={!canEditBasicProperty}
-									readOnly={!this.isNewRisk}
 								/>
 							)} />
 						</StyledFormControl>

@@ -19,15 +19,16 @@ import { createActions, createReducer } from 'reduxsauce';
 import { DEFAULT_SETTINGS } from '../../constants/viewer';
 
 export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
-	updateSettings: ['settings'],
-	updateSettingsSuccess: ['settings']
+	updateSettings: ['username', 'settings'],
+	updateSettingsSuccess: ['settings'],
+	fetchSettings: [],
 }, { prefix: 'VIEWER_CANVAS/' });
 
 export const INITIAL_STATE = {
-	settings: {...DEFAULT_SETTINGS, ...JSON.parse(window.localStorage.getItem('visualSettings') || '{}')},
+	settings: {...DEFAULT_SETTINGS },
 };
 
-const updateSettingsSuccess = (state = INITIAL_STATE, { settings }) => {
+const updateSettingsSuccess = (state = INITIAL_STATE, {username,  settings }) => {
 	return { ...state, settings };
 };
 

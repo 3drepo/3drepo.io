@@ -15,15 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ISSUE_COLORS, STATUSES, STATUSES_ICONS } from '../constants/issues';
+import { ISSUE_COLORS, PRIORITIES, STATUSES, STATUSES_ICONS } from '../constants/issues';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
-
-const renameFieldIfExists = (issue, fieldName, newFieldName) => {
-	if (issue[fieldName]) {
-		issue[newFieldName] = issue[fieldName];
-	}
-};
 
 export const prepareIssue = (issue, jobs = []) => {
 	const preparedIssue = {...issue};
@@ -56,21 +50,21 @@ export const prepareIssue = (issue, jobs = []) => {
 		preparedIssue.defaultHidden = issue.status === STATUSES.CLOSED;
 	}
 
-	renameFieldIfExists(preparedIssue, 'desc', 'description');
-	renameFieldIfExists(preparedIssue, 'owner', 'author');
-	renameFieldIfExists(preparedIssue, 'created', 'createdDate');
-
 	return preparedIssue;
 };
 
-export const getStatusIcon = (priority, status) => ({
-	Icon: STATUSES_ICONS[status] || null,
-	color:  (ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS.NONE).color
-});
+export const getStatusIcon = (priority, status) => {
+	const statusIcon = {
+		Icon: STATUSES_ICONS[status] || null,
+		color: (ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS[PRIORITIES.NONE]).color
+	};
+
+	return {...statusIcon};
+};
 
 export const getIssuePinColor = (issue: any, selected: boolean = false) => {
 	const {status, priority} = issue;
-	const colorToUse = ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS.NONE;
+	const colorToUse = ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS[PRIORITIES.NONE];
 	return (selected) ? colorToUse.selectedColor : colorToUse.pinColor;
 };
 

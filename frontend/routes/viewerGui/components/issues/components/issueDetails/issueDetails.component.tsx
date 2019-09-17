@@ -20,7 +20,6 @@ import React from 'react';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { exportIssuesToJSON } from '../../../../../../services/export';
 import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
@@ -127,6 +126,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 					}
 				}}
 				scrolled={this.state.scrolled}
+				isNew={this.isNewIssue}
 			/>
 		);
 	});

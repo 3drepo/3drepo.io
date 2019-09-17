@@ -45,8 +45,8 @@ interface IProps {
 	roleColor: string;
 	name: string;
 	number: number;
-	author: string;
-	createdDate: string;
+	owner: string;
+	created: string;
 	StatusIconComponent: any;
 	statusColor: string;
 	defaultExpanded: boolean;
@@ -56,6 +56,7 @@ interface IProps {
 	willBeUpdated?: boolean;
 	panelName?: string;
 	scrolled?: boolean;
+	isNew?: boolean;
 	handleHeaderClick?: (event) => void;
 	onExpandChange?: (event, expaned: boolean) => void;
 	onNameChange?: (event, name: string) => void;
@@ -73,11 +74,15 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	};
 
 	public renderNameWithCounter = renderWhenTrue(() => (
-		<Typography>{`${this.props.number}. ${this.props.name}`}</Typography>
+		<Typography paragraph>
+			{`${this.props.number}. ${this.props.name}`}
+		</Typography>
 	));
 
 	public renderName = renderWhenTrue(() => (
-		<Typography>{this.props.name}</Typography>
+		<Typography paragraph>
+			{this.props.name}
+		</Typography>
 	));
 
 	public renderNameField = renderWhenTrue(() => (
@@ -89,27 +94,30 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			<StyledForm>
 				<Field name="name" render={({ field, form }) => (
 					<TextField
-						{...field}
+					{...field}
 						autoFocus
 						fullWidth
-						placeholder="Title"
+						placeholder={this.props.isNew ? this.props.name : 'Name'}
 						onChange={this.handleNameChange(field)}
-						error={Boolean(form.errors.name)}
+						error={Boolean(form.errors.name) && !this.props.name}
 						helperText={form.errors.name}
-						inputProps={
-							{maxLength: 120}}
-					/>
-				)} />
+						inputProps={{
+							maxLength: 120,
+							onFocus: () => this.handleFocusName(field, form),
+							onBlur: () => this.handleBlurName(field, form)
+						}}
+						/>
+						)} />
 			</StyledForm>
 		</Formik>
 	));
 
 	public renderExpandIcon = renderWhenTrue(() => (
 		<ToggleIcon active={Number(this.state.expanded)} />
-	));
+		));
 
-	public renderCollapsable = renderWhenTrue(() => (
-		<CollapsableContent>
+		public renderCollapsable = renderWhenTrue(() => (
+			<CollapsableContent>
 			{this.props.renderCollapsable()}
 		</CollapsableContent>
 	));
@@ -121,11 +129,11 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	));
 
 	public renderUpdateMessage = renderWhenTrue(() =>
-		<ActionMessage content={`This ${this.props.panelName} has been updated by someone else`} />
+	<ActionMessage content={`This ${this.props.panelName} has been updated by someone else`} />
 	);
 
 	public renderDeleteMessage = renderWhenTrue(() =>
-		<ActionMessage content={`This ${this.props.panelName} has been deleted by someone else`} />
+	<ActionMessage content={`This ${this.props.panelName} has been deleted by someone else`} />
 	);
 
 	public componentDidMount() {
@@ -150,14 +158,29 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		});
 	}
 
+	public handleFocusName = (field, form) => {
+		const nameChanged = form.initialValues.name !== field.value;
+
+		if (this.props.isNew) {
+			form.setFieldValue('name', nameChanged ? field.value : '');
+		}
+	}
+
+	public handleBlurName = (field, form) => {
+		const nameChanged = this.props.name !== field.value;
+		if (this.props.isNew) {
+			form.setFieldValue('name', nameChanged && field.value ? field.value : this.props.name);
+		}
+	}
+
 	public render() {
 		const {
 			className,
 			roleColor,
 			// tslint:disable-next-line
 			number,
-			author,
-			createdDate,
+			owner,
+			created,
 			StatusIconComponent,
 			statusColor,
 			editable,
@@ -168,8 +191,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			renderNotCollapsable,
 			handleHeaderClick
 		} = this.props;
-
-		const createdAt = !editable ? createdDate : null;
 
 		return (
 			<Container className={className}>
@@ -189,8 +210,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 				<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
 					<Details>
 						<PreviewItemInfo
-							author={author}
-							createdAt={createdAt}
+							author={owner}
+							createdAt={created}
 							StatusIconComponent={StatusIconComponent}
 							statusColor={statusColor}
 						/>

@@ -20,15 +20,16 @@ import { COLOR } from '../../../../../../styles';
 
 import Checkbox from '@material-ui/core/Checkbox';
 import Table from '@material-ui/core/Table';
-import TableCell from '@material-ui/core/TableCell';
+import TableCellComponent from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
+import TableRowComponent from '@material-ui/core/TableRow';
 
 export const HeaderCheckboxWrapper = styled.div`
 	display: flex;
 	align-items: center;
 `;
 
-export const HeaderCell = styled(TableCell)`
+export const HeaderCell = styled(TableCellComponent)`
 	&& {
 		display: flex;
 		align-items: center;
@@ -68,5 +69,23 @@ export const StyledTable = styled(Table)`
 export const StyledTableHead = styled(TableHead)`
 	tr {
 		height: auto;
+	}
+`;
+
+export const ModelName = styled.span`
+	word-break: break-word;
+`;
+
+export const TableCell = styled(TableCellComponent)`
+	&& {
+		display: flex;
+		align-items: center;
+	}
+`;
+
+export const TableRow = styled(TableRowComponent)`
+	&& {
+		display: flex;
+		align-items: center;
 	}
 `;

@@ -68,6 +68,10 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		return this.textFieldRef.current;
 	}
 
+	get fieldValue() {
+		return this.props.requiredConfirm ? this.state.currentValue : this.props.value;
+	}
+
 	public componentDidMount() {
 		const { value, requiredConfirm } = this.props;
 		if (requiredConfirm && value) {
@@ -164,14 +168,12 @@ export class TextField extends React.PureComponent<IProps, IState> {
 			>
 				<Container onBlur={this.onBlur} className={className}>
 					{this.isEditMode &&
-						<Field name={name} render={({ field, form }) => {
-							const fieldValue = requiredConfirm ? currentValue : value;
-
-							return (
+						<Field name={name} render={({ field, form }) =>
+							(
 								<StyledTextField
 									{...props}
 									{...field}
-									value={fieldValue}
+									value={this.fieldValue}
 									inputRef={this.textFieldRef}
 									fullWidth
 									onChange={this.onChange(field)}
@@ -179,13 +181,13 @@ export class TextField extends React.PureComponent<IProps, IState> {
 									helperText={form.errors[name] || props.helperText}
 									autoFocus
 								/>
-							);
-						}} />
+							)}
+						/>
 					}
 					{!this.isEditMode &&
 						<div>
 							<FieldLabel shrink>{this.props.label}</FieldLabel>
-							<StyledLinkableField>{this.state.currentValue}</StyledLinkableField>
+							<StyledLinkableField>{this.fieldValue.toString()}</StyledLinkableField>
 						</div>
 					}
 					{shouldRenderActions && this.renderActionsLine()}

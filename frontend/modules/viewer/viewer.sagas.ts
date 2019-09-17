@@ -17,7 +17,9 @@
 
 import { keys } from 'lodash';
 import { put, select, takeLatest } from 'redux-saga/effects';
+import { DEFAULT_SETTINGS } from '../../constants/viewer';
 import { Viewer } from '../../services/viewer/viewer';
+import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { ViewerActions, ViewerTypes } from './viewer.redux';
 import { selectSettings } from './viewer.selectors';
@@ -44,18 +46,35 @@ const callUpdateHandlers = (oldSettings, settings) => {
 	});
 };
 
-function* updateSettings({ settings }) {
+function* updateSettings({username,  settings }) {
 	try {
 		const oldSettings = yield select(selectSettings);
 		callUpdateHandlers(oldSettings, settings);
 
-		window.localStorage.setItem('visualSettings', JSON.stringify(settings));
+		window.localStorage.setItem(`${username}.visualSettings`, JSON.stringify(settings));
 		yield put(ViewerActions.updateSettingsSuccess(settings));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('initialise', 'viewer', error));
 	}
 }
 
+export function* fetchSettings() {
+	const { username } = yield select(selectCurrentUser);
+	const currentSettings  = {
+								...DEFAULT_SETTINGS,
+								...JSON.parse(window.localStorage.getItem(`${username}.visualSettings`) ||
+								// If a user has already saved settings in a prev version lets load these settings the first time
+										window.localStorage.getItem('visualSettings') ||
+										'{}')
+							};
+
+	// We have our settings ready to be saved to the new user local storage settings key, so we get rid of the old setting
+	window.localStorage.setItem('visualSettings', null);
+
+	yield put(ViewerActions.updateSettings(username, currentSettings));
+}
+
 export default function* ViewerSaga() {
 	yield takeLatest(ViewerTypes.UPDATE_SETTINGS, updateSettings);
+	yield takeLatest(ViewerTypes.FETCH_SETTINGS, fetchSettings);
 }

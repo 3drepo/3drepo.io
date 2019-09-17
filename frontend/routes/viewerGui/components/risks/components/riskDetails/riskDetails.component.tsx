@@ -122,6 +122,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					}
 				}}
 				scrolled={this.state.scrolled}
+				isNew={this.isNewRisk}
 			/>
 		);
 	});

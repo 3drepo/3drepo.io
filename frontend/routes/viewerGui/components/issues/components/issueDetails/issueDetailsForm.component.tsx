@@ -16,16 +16,14 @@
  */
 
 import DayJsUtils from '@date-io/dayjs';
-import { connect, withFormik, Field, Form } from 'formik';
+import { withFormik, Field, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import React from 'react';
 import * as Yup from 'yup';
 
 import InputLabel from '@material-ui/core/InputLabel';
-import {
-	DEFAULT_PROPERTIES, ISSUE_PRIORITIES, ISSUE_STATUSES
-} from '../../../../../../constants/issues';
+import { ISSUE_PRIORITIES, ISSUE_STATUSES } from '../../../../../../constants/issues';
 import { canChangeAssigned, canChangeBasicProperty, canChangeStatus } from '../../../../../../helpers/issues';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
