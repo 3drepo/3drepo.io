@@ -188,6 +188,9 @@ export const selectFlattenTeamspaces = createSelector(
 						shouldFilterFederations ? filteredFederations :
 						[];
 
+				const projectMatched =
+					shouldFilterProjects && filters.find((f) => project.name.toLowerCase().includes(f.value.value.toLowerCase()));
+
 				const processedProject = {
 					...project,
 					models: modelsAndFederations,
@@ -229,7 +232,10 @@ export const selectFlattenTeamspaces = createSelector(
 					teamspaceProjects.push(processedProject);
 				}
 
-				if (processedProject.type === 'PROJECT' && processedProject.collapsed && shouldFilterProjects) {
+				if (
+					processedProject.type === 'PROJECT' && processedProject.collapsed && shouldFilterProjects ||
+					(projectMatched && shouldFilterProjects)
+					) {
 					let allProjectModels = [];
 
 					if (shouldFilterModels && !shouldFilterFederations) {
@@ -239,7 +245,6 @@ export const selectFlattenTeamspaces = createSelector(
 					} else {
 						allProjectModels = [...projectModels, ...projectFederations];
 					}
-
 					processedProject.models = allProjectModels;
 				}
 			}
