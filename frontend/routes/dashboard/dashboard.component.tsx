@@ -93,7 +93,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 				to={`${ROUTES.USER_MANAGEMENT_MAIN}/${currentUser.username}`}
 			/>
 		</Switch>
-	)
+		)
 
 	public render() {
 		const { match, currentUser, isPending, isInitialised, isAvatarPending } = this.props;

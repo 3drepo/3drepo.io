@@ -19,22 +19,22 @@ import { push } from 'connected-react-router';
 import {  isEmpty, isEqual, map, omit, pick } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
+import * as queryString from 'query-string';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { RISK_LEVELS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
-import { NEW_PIN_ID } from '../../constants/viewer';
 import { prepareComment, prepareComments } from '../../helpers/comments';
-import { getRiskPinColor, prepareRisk } from '../../helpers/risks';
+import { prepareRisk } from '../../helpers/risks';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
 import { Cache } from '../../services/cache';
 import * as Exports from '../../services/export';
 import { Viewer } from '../../services/viewer/viewer';
-import { PIN_COLORS } from '../../styles';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
+import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
@@ -44,7 +44,8 @@ import {
 	selectActiveRiskId,
 	selectComponentState,
 	selectFilteredRisks,
-	selectRisks
+	selectRisks,
+	selectRisksMap
 } from './risks.selectors';
 
 function* fetchRisks({teamspace, modelId, revision}) {
@@ -146,7 +147,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting }) {
 		const preparedRisk = prepareRisk(savedRisk, jobs);
 
 		finishSubmitting();
-		yield put(RisksActions.showDetails(teamspace, model, revision, preparedRisk));
+		yield put(RisksActions.showDetails(revision, preparedRisk._id));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(SnackbarActions.show('Risk created'));
 	} catch (error) {
@@ -367,18 +368,29 @@ function* setActiveRisk({ risk, revision }) {
 	}
 }
 
-function* goToRisk(teamspace, model, revision, riskId?) {
+function* goToRisk({ risk }) {
+	const {teamspace, model, revision} = yield select(selectUrlParams);
+	let queryParams =  yield select(selectQueryParams);
+
+	const riskId = (risk || {})._id;
 	const path = [ROUTES.VIEWER, teamspace, model, revision].filter(Boolean).join('/');
-	const query = riskId ? `?riskId=${riskId}` : '';
+
+	queryParams = riskId ?  {... queryParams, riskId} : omit(queryParams, 'riskId');
+	let query = queryString.stringify(queryParams);
+	if (query) {
+		query = '?' + query;
+	}
+
 	yield put(push(`${path}${query}`));
 }
 
-function* showDetails({ teamspace, model, revision, risk }) {
+function* showDetails({ revision, riskId }) {
 	try {
-		yield goToRisk(teamspace, model, revision, risk._id);
-
 		const activeRisk = yield select(selectActiveRiskDetails);
 		const componentState = yield select(selectComponentState);
+		const risksMap = yield select(selectRisksMap);
+		const risk = risksMap[riskId];
+
 		if (componentState.showDetails && !isEqual(activeRisk.position, componentState.savedPin)) {
 			yield put(RisksActions.updateSelectedRiskPin(componentState.savedPin));
 		}
@@ -390,14 +402,10 @@ function* showDetails({ teamspace, model, revision, risk }) {
 	}
 }
 
-function* closeDetails({ teamspace, model, revision }) {
+function* closeDetails() {
 	try {
 		const activeRisk = yield select(selectActiveRiskDetails);
 		const componentState = yield select(selectComponentState);
-
-		if (activeRisk) {
-			yield goToRisk(teamspace, model, revision);
-		}
 
 		if (!isEqual(activeRisk.position, componentState.savedPin)) {
 			yield put(RisksActions.updateSelectedRiskPin(componentState.savedPin));
@@ -538,4 +546,5 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.UPDATE_NEW_RISK, updateNewRisk);
 	yield takeLatest(RisksTypes.SET_FILTERS, setFilters);
 	yield takeLatest(RisksTypes.SHOW_MULTIPLE_GROUPS, showMultipleGroups);
+	yield takeLatest(RisksTypes.GO_TO_RISK, goToRisk);
 }

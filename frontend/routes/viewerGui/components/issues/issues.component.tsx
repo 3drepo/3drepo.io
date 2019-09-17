@@ -17,7 +17,6 @@
 
 // @ts-ignore
 import * as fileDialog from 'file-dialog';
-import * as queryString from 'query-string';
 import React from 'react';
 
 import {
@@ -33,6 +32,7 @@ import IssueDetails from './components/issueDetails/issueDetails.container';
 import { IssuesContainer } from './issues.styles';
 
 interface IProps {
+	selectedIssue: any;
 	history: any;
 	location: any;
 	topicTypes: any[];
@@ -66,8 +66,9 @@ interface IProps {
 	downloadIssues: (teamspace, model) => void;
 	printIssues: (teamspace, model) => void;
 	setActiveIssue: (issue, revision?) => void;
-	showIssueDetails: (teamspace, model, revision, issue) => void;
-	closeDetails: (teamspace, model, revision) => void;
+	showIssueDetails: (revision, issueId ) => void;
+	goToIssue: (issue) => void;
+	closeDetails: () => void;
 	toggleShowPins: (showPins: boolean) => void;
 	toggleSubmodelsIssues: (showSubmodelIssues: boolean) => void;
 	subscribeOnIssueChanges: (teamspace, modelId) => void;
@@ -199,22 +200,18 @@ export class Issues extends React.PureComponent<IProps, any> {
 
 	public componentDidMount() {
 		this.props.subscribeOnIssueChanges(this.props.teamspace, this.props.model);
+		this.handleSelectedIssue();
 	}
 
-	public componentDidUpdate(prevProps) {
-		const { issues, selectedFilters, activeIssueId, showDetails, revision, teamspace, model } = this.props;
-		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
+	public componentDidUpdate(prevProps: IProps) {
+		const { selectedIssue } = this.props;
+		const issueId = (selectedIssue || {})._id;
+		const previssueId = (prevProps.selectedIssue || {})._id;
 
-		if (issues.length && !filtersChanged && location.search && !activeIssueId && !prevProps.showDetails && !showDetails) {
-			const { issueId } = queryString.parse(location.search);
-			if (issueId) {
-				const foundIssue = issues.find((issue) => issue._id === issueId);
-
-				if (foundIssue) {
-					this.props.showIssueDetails(teamspace, model, revision, foundIssue);
-				}
-			}
+		if (issueId !== previssueId) {
+			this.handleSelectedIssue();
 		}
+
 	}
 
 	public componentWillUnmount() {
@@ -223,16 +220,6 @@ export class Issues extends React.PureComponent<IProps, any> {
 
 	public setActiveIssue = (item) => {
 		this.props.setActiveIssue(item, this.props.revision);
-	}
-
-	public showIssueDetails = (item) => {
-		const { teamspace, model, revision } = this.props;
-		this.props.showIssueDetails(teamspace, model, revision, item);
-	}
-
-	public closeIssueDetails = () => {
-		const { teamspace, model, revision } = this.props;
-		this.props.closeDetails(teamspace, model, revision);
 	}
 
 	public getFilterValues(property) {
@@ -251,6 +238,19 @@ export class Issues extends React.PureComponent<IProps, any> {
 			changes.selectedFilters = [];
 		}
 		this.props.setState(changes);
+	}
+
+	public closeDetails = () => {
+		this.props.goToIssue(null);
+	}
+
+	public handleSelectedIssue() {
+		const { selectedIssue, revision } = this.props;
+		if (selectedIssue) {
+			this.props.showIssueDetails(revision, selectedIssue._id);
+		} else {
+			this.props.closeDetails();
+		}
 	}
 
 	public render() {
@@ -275,9 +275,8 @@ export class Issues extends React.PureComponent<IProps, any> {
 				onChangeFilters={this.props.setFilters}
 				onActiveItem={this.setActiveIssue}
 				onNewItem={this.props.setNewIssue}
-				onShowDetails={this.showIssueDetails}
-				onCloseDetails={this.closeIssueDetails}
-
+				onShowDetails={this.props.goToIssue}
+				onCloseDetails={this.closeDetails}
 				renderDetailsView={this.renderDetailsView}
 			/>
 		);

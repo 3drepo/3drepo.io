@@ -27,6 +27,7 @@ import {
 	selectIsIssuesPending,
 	selectSearchEnabled,
 	selectSelectedFilters,
+	selectSelectedIssue,
 	selectShowDetails,
 	selectShowPins,
 	selectShowSubmodelIssues,
@@ -35,6 +36,7 @@ import {
 } from '../../../../modules/issues';
 import { selectJobsList } from '../../../../modules/jobs';
 import { selectSettings, selectTopicTypes } from '../../../../modules/model';
+import { selectQueryParams } from '../../../../modules/router/router.selectors';
 import { Issues } from './issues.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -51,7 +53,8 @@ const mapStateToProps = createStructuredSelector({
 	showSubmodelIssues: selectShowSubmodelIssues,
 	isImportingBCF: selectIsImportingBCF,
 	sortOrder: selectSortOrder,
-	topicTypes: selectTopicTypes
+	topicTypes: selectTopicTypes,
+	selectedIssue: selectSelectedIssue
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -62,6 +65,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	printIssues: IssuesActions.printIssues,
 	setActiveIssue: IssuesActions.setActiveIssue,
 	showIssueDetails: IssuesActions.showDetails,
+	goToIssue: IssuesActions.goToIssue,
 	toggleShowPins: IssuesActions.toggleShowPins,
 	subscribeOnIssueChanges: IssuesActions.subscribeOnIssueChanges,
 	unsubscribeOnIssueChanges: IssuesActions.unsubscribeOnIssueChanges,

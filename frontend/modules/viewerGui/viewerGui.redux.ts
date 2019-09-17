@@ -74,9 +74,7 @@ export interface IViewerGuiState {
 }
 
 export const INITIAL_STATE: IViewerGuiState = {
-	visiblePanels: {
-		[VIEWER_PANELS.ISSUES]: true
-	},
+	visiblePanels: {},
 	isModelLoaded: false,
 	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
 	clippingMode: null,

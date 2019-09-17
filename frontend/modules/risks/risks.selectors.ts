@@ -20,6 +20,7 @@ import { createSelector } from 'reselect';
 import { RISK_LEVELS } from '../../constants/risks';
 import { hasPin, riskToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
+import { selectQueryParams } from '../router/router.selectors';
 
 export const selectRisksDomain = (state) => ({...state.risks});
 
@@ -100,6 +101,10 @@ export const selectSortOrder = createSelector(
 
 export const selectFailedToLoad = createSelector(
 	selectComponentState, (state) => state.failedToLoad
+);
+
+export const selectSelectedRisk = createSelector(
+	selectRisksMap, selectQueryParams, (risks,  {riskId}) => risks[riskId]
 );
 
 export const selectPins = createSelector(

@@ -17,9 +17,10 @@
 
 import { push } from 'connected-react-router';
 import filesize from 'filesize';
-import { differenceBy, isEmpty, isEqual, map, omit, pick } from 'lodash';
+import { isEmpty, isEqual, map, omit, pick } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
+import * as queryString from 'query-string';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { DEFAULT_PROPERTIES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { EXTENSION_RE } from '../../constants/resources';
@@ -37,12 +38,12 @@ import * as API from '../../services/api';
 import { Cache } from '../../services/cache';
 import * as Exports from '../../services/export';
 import { Viewer } from '../../services/viewer/viewer';
-import { PIN_COLORS } from '../../styles';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentModel, selectCurrentModelTeamspace, selectTopicTypes } from '../model';
+import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectIfcSpacesHidden, TreeActions } from '../tree';
@@ -159,7 +160,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting })
 
 		finishSubmitting();
 
-		yield put(IssuesActions.showDetails(teamspace, model, revision, savedIssue));
+		yield put(IssuesActions.goToIssue(savedIssue));
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue created'));
 	} catch (error) {
@@ -413,18 +414,28 @@ function* setActiveIssue({ issue, revision }) {
 	}
 }
 
-function* goToIssue(teamspace, model, revision, issueId?) {
+function* goToIssue({ issue }) {
+	const {teamspace, model, revision} = yield select(selectUrlParams);
+	let queryParams =  yield select(selectQueryParams);
+
+	const issueId = (issue || {})._id;
 	const path = [ROUTES.VIEWER, teamspace, model, revision].filter(Boolean).join('/');
-	const query = issueId ? `?issueId=${issueId}` : '';
+
+	queryParams = issueId ?  {... queryParams, issueId} : omit(queryParams, 'issueId');
+	let query = queryString.stringify(queryParams);
+	if (query) {
+		query = '?' + query;
+	}
+
 	yield put(push(`${path}${query}`));
 }
 
-function* showDetails({ teamspace, model, revision, issue }) {
+function* showDetails({ revision, issueId }) {
 	try {
-		yield goToIssue(teamspace, model, revision, issue._id);
-
 		const activeIssue = yield select(selectActiveIssueDetails);
 		const componentState = yield select(selectComponentState);
+		const issuesMap = yield select(selectIssuesMap);
+		const issue = issuesMap[issueId];
 
 		if (componentState.showDetails && !isEqual(activeIssue.position, componentState.savedPin)) {
 			yield put(IssuesActions.updateSelectedIssuePin(componentState.savedPin));
@@ -437,14 +448,10 @@ function* showDetails({ teamspace, model, revision, issue }) {
 	}
 }
 
-function* closeDetails({ teamspace, model, revision }) {
+function* closeDetails() {
 	try {
 		const activeIssue = yield select(selectActiveIssueDetails);
 		const componentState = yield select(selectComponentState);
-
-		if (activeIssue) {
-			yield goToIssue(teamspace, model, revision);
-		}
 
 		if (!isEqual(activeIssue.position, componentState.savedPin)) {
 			yield put(IssuesActions.updateSelectedIssuePin(componentState.savedPin));
@@ -708,4 +715,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.ATTACH_FILE_RESOURCES, attachFileResources);
 	yield takeLatest(IssuesTypes.ATTACH_LINK_RESOURCES, attachLinkResources);
 	yield takeLatest(IssuesTypes.SHOW_MULTIPLE_GROUPS, showMultipleGroups);
+	yield takeLatest(IssuesTypes.GO_TO_ISSUE, goToIssue);
 }

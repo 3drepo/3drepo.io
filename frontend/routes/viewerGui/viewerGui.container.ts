@@ -20,7 +20,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { selectCurrentUser } from '../../modules/currentUser';
-import { selectIsPending, selectSettings } from '../../modules/model';
+import { selectIsPending, selectSettings, ModelActions } from '../../modules/model';
 import { selectQueryParams } from '../../modules/router/router.selectors';
 import { TreeActions } from '../../modules/tree';
 import { selectIsFocusMode, selectVisiblePanels, ViewerGuiActions } from '../../modules/viewerGui';
@@ -43,7 +43,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	loadModel: ViewerGuiActions.loadModel,
 	stopListenOnSelections: TreeActions.stopListenOnSelections,
 	stopListenOnModelLoaded: ViewerGuiActions.stopListenOnModelLoaded,
-	stopListenOnClickPin: ViewerGuiActions.stopListenOnClickPin
+	stopListenOnClickPin: ViewerGuiActions.stopListenOnClickPin,
+	resetModel: ModelActions.reset
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerGui));

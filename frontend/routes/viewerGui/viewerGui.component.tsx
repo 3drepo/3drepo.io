@@ -59,6 +59,7 @@ interface IProps {
 	fetchData: (teamspace, model) => void;
 	loadModel: () => void;
 	resetPanelsStates: () => void;
+	resetModel: () => void;
 	setPanelVisibility: (panelName, visibility) => void;
 }
 
@@ -88,13 +89,11 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 		viewer.init();
 
-		if (issueId || riskId) {
-			if (issueId) {
-				this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
-			}
-			if (riskId) {
-				this.props.setPanelVisibility(VIEWER_PANELS.RISKS, true);
-			}
+		if (issueId || !riskId) {
+			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
+		}
+		if (riskId) {
+			this.props.setPanelVisibility(VIEWER_PANELS.RISKS, true);
 		}
 
 		this.props.fetchData(params.teamspace, params.model);
@@ -102,29 +101,22 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
 		const changes = {} as IState;
-		const { modelSettings, isModelPending, match: { params }, queryParams } = this.props;
+		const { match: { params }, queryParams } = this.props;
 		const teamspaceChanged = params.teamspace !== prevProps.match.params.teamspace;
 		const modelChanged = params.model !== prevProps.match.params.model;
 		const revisionChanged = params.revision !== prevProps.match.params.revision;
 
 		const { issueId, riskId } = queryParams;
 
-		if (issueId !== prevProps.queryParams.issueId) {
+		if (issueId !== prevProps.queryParams.issueId && issueId) {
 			this.props.setPanelVisibility(VIEWER_PANELS.ISSUES, true);
 		}
-		if (riskId !== prevProps.queryParams.riskId) {
+		if (riskId !== prevProps.queryParams.riskId && riskId) {
 			this.props.setPanelVisibility(VIEWER_PANELS.RISKS, true);
 		}
 
 		if (teamspaceChanged || modelChanged || revisionChanged) {
 			this.props.fetchData(params.teamspace, params.model);
-		}
-
-		const settingsChanged = modelSettings._id !== prevState.loadedModelId;
-
-		if (!isModelPending && (settingsChanged || revisionChanged)) {
-			changes.loadedModelId = modelSettings._id;
-			this.handleModelSettingsChange();
 		}
 
 		if (!isEmpty(changes)) {
@@ -138,6 +130,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		this.props.stopListenOnClickPin();
 		this.props.resetPanelsStates();
 		this.props.viewer.destroy();
+		this.props.resetModel();
 	}
 
 	public render() {
@@ -156,10 +149,6 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 				</Container>
 			</GuiContainer>
 		);
-	}
-
-	private handleModelSettingsChange() {
-		this.props.loadModel();
 	}
 
 	private handleTogglePanel = (panelType) => {

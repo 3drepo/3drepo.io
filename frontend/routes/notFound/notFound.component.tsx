@@ -23,14 +23,17 @@ interface IProps {
 		push: (routeName) => void;
 	};
 	showDialog: (config) => void;
+	isAuthenticated: boolean;
 }
 
 export const NotFound = (props: IProps) => {
 	if (props.location.pathname !== ROUTES.HOME) {
+		const closeText = 'Back to ' + ( props.isAuthenticated ? 'teamspaces' : 'login');
+
 		props.showDialog({
 			title: 'Wrong URL address',
 			content: 'Page not found',
-			closeText: 'Back to teamspaces',
+			closeText,
 			buttonVariant: 'raised',
 			onCancel: () => {
 				props.history.push(ROUTES.TEAMSPACES);

@@ -63,15 +63,17 @@ function* logout() {
 	try {
 		yield API.logout();
 		yield put({ type: 'RESET_APP' });
+		yield put(AuthActions.loginFailure());
 	} catch (e) {
 		if (e.response.status === 401) {
 			yield put({ type: 'RESET_APP' });
+			yield put(AuthActions.loginFailure());
 		} else {
 			yield put(DialogActions.showEndpointErrorDialog('logout', 'user', e));
 		}
 	}
 	yield put(AuthActions.setLocalSessionStatus(false));
-	yield put(push(ROUTES.LOGIN));
+
 }
 
 function* authenticate() {
@@ -97,10 +99,7 @@ function* sessionExpired() {
 	try {
 		yield put({ type: 'RESET_APP' });
 		yield put(AuthActions.setLocalSessionStatus(false));
-		yield put(DialogActions.showDialog({
-			title: 'Session expired',
-			content: 'You have been logged out as your session has expired'
-		}));
+		yield put(AuthActions.loginFailure());
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('verify', 'user session', e));
 	}
