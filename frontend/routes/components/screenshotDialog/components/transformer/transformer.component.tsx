@@ -20,8 +20,8 @@ import { Transformer } from 'react-konva';
 
 interface IProps {
 	visible: boolean;
-	shapeType: string;
-	selectedShapeName: any;
+	objectType: string;
+	selectedObjectName: any;
 }
 
 export class TransformerComponent extends React.PureComponent <IProps, any> {
@@ -51,10 +51,10 @@ export class TransformerComponent extends React.PureComponent <IProps, any> {
 		const currentNode = this.nodeRef.current;
 
 		const stage = currentNode.getStage();
-		const { selectedShapeName } = this.props;
+		const { selectedObjectName } = this.props;
 
-		let selectedNode = stage.findOne('.' + selectedShapeName);
-		console.log('selectedShapeName',selectedShapeName);
+		let selectedNode = stage.findOne('.' + selectedObjectName);
+		console.log('selectedShapeName',selectedObjectName);
 		console.log('this.nodeRef.current',currentNode);
 		console.log('selectedNode',selectedNode);
 		if (selectedNode === currentNode.node()) {
@@ -80,7 +80,7 @@ export class TransformerComponent extends React.PureComponent <IProps, any> {
 				transformstart={this.onTransformStart}
 				transform={this.onTransform}
 				transformend={this.onTransformEnd}
-				resizeEnabled={this.props.shapeType !== 'text'}
+				resizeEnabled={this.props.objectType !== 'text'}
 				visible={this.props.visible}
 			/>
 		);

@@ -15,10 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import * as React from 'react';
 import { Rect, Transformer } from 'react-konva';
 
-const Rectangle = ({ shapeProps, isSelected, onSelect, onChange }) => {
+interface IProps {
+	object: any;
+	isSelected: boolean;
+	onSelect: (props: any) => void;
+	onChange: (props: any) => void;
+}
+
+export const Shape = ({ object, isSelected, onSelect, onChange }: IProps) => {
+	const { color, ...objectProps } = object;
 	const shape = React.useRef<any>();
 	const transformer = React.useRef<any>();
 
@@ -29,16 +37,19 @@ const Rectangle = ({ shapeProps, isSelected, onSelect, onChange }) => {
 		}
 	}, [isSelected]);
 
+	const Component = Rect;
+
 	return (
-		<React.Fragment>
-			<Rect
+		<>
+			<Component
 				onClick={onSelect}
 				ref={shape}
-				{...shapeProps}
+				{...objectProps}
+				stroke={color}
 				draggable
 				onDragEnd={(e) => {
 					onChange({
-						...shapeProps,
+						...object,
 						x: e.target.x(),
 						y: e.target.y()
 					});
@@ -51,7 +62,7 @@ const Rectangle = ({ shapeProps, isSelected, onSelect, onChange }) => {
 					node.scaleY(1);
 
 					onChange({
-						...shapeProps,
+						...object,
 						x: node.x(),
 						y: node.y(),
 						width: node.width() * scaleX,
@@ -60,8 +71,6 @@ const Rectangle = ({ shapeProps, isSelected, onSelect, onChange }) => {
 				}}
 			/>
 			{isSelected && <Transformer ref={transformer} />}
-		</React.Fragment>
+		</>
 	);
 };
-
-export default Rectangle;
