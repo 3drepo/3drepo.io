@@ -20,6 +20,7 @@ import React from 'react';
 
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
 import { renderWhenTrue } from '../../helpers/rendering';
+import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Bim } from './components/bim';
 import { CloseFocusModeButton } from './components/closeFocusModeButton';
 import { Compare } from './components/compare';
@@ -96,7 +97,8 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 			this.props.setPanelVisibility(VIEWER_PANELS.RISKS, true);
 		}
 
-		this.props.fetchData(params.teamspace, params.model);
+		MultiSelect.initKeyWatchers();
+		this.props.fetchData(params.teamspace, params.model, params.revision);
 	}
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {
@@ -125,6 +127,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
+		MultiSelect.removeKeyWatchers();
 		this.props.stopListenOnSelections();
 		this.props.stopListenOnModelLoaded();
 		this.props.stopListenOnClickPin();

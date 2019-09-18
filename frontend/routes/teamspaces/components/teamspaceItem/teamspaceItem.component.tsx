@@ -15,24 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { memoize } from 'lodash';
+import React, { memo } from 'react';
 
+import { getAvatarUrl } from '../../../../services/api';
 import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { MyTeamspaceItem } from '../myTeamspaceItem/myTeamspaceItem.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 
-import StorageNormal from '@material-ui/icons/Storage';
-import StorageOutlined from '@material-ui/icons/StorageOutlined';
-
 import { hasPermissions } from '../../../../helpers/permissions';
-import { renderWhenTrue } from '../../../../helpers/rendering';
-import { ProjectDialog } from '../projectDialog/projectDialog.component';
+import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
+import { Avatar } from './teamspaceItem.styles';
 
 interface IProps {
 	name: string;
+	firstName: string;
+	lastName: string;
 	projects: any[];
 	active: boolean;
+	hasAvatar: boolean;
 	isMyTeamspace: boolean;
 	disabled: boolean;
 	permissions: any[];
@@ -40,7 +42,9 @@ interface IProps {
 	onAddProject: (event, teamspaceName) => void;
 }
 
-export const TeamspaceItem = (props: IProps) => {
+const getMemoizedAvatarUrl = memoize(getAvatarUrl);
+
+export const TeamspaceItem = memo((props: IProps) => {
 	const {
 		name,
 		projects,
@@ -49,8 +53,12 @@ export const TeamspaceItem = (props: IProps) => {
 		isMyTeamspace,
 		onAddProject,
 		permissions,
-		disabled
+		disabled,
+		hasAvatar,
 	} = props;
+
+	const avatarUrl = getMemoizedAvatarUrl(name);
+	const teamspaceInitials = name.split(' ').slice(0, 2).map((text) => text[0]).join('').trim().toUpperCase();
 
 	const handleAddNewProject = (event) => onAddProject(event, name);
 
@@ -66,6 +74,11 @@ export const TeamspaceItem = (props: IProps) => {
 		onToggle({ id: name, nested: projects });
 	};
 
+	const renderAvatar = () => renderWhenTrueOtherwise(
+		() => <Avatar src={avatarUrl} size="35" />,
+		() => <Avatar size="35">{teamspaceInitials}</Avatar>
+	)(hasAvatar);
+
 	return (
 		<TreeList
 			name={name}
@@ -74,11 +87,9 @@ export const TeamspaceItem = (props: IProps) => {
 			onClick={handleClick}
 			active={active}
 			renderRoot={isMyTeamspace ? MyTeamspaceItem : null}
-			IconProps={{
-				IconOpened: StorageOutlined,
-				IconClosed: StorageNormal
-			}}
-			renderActions={renderActions}
-		/>
+			IconProps={{ IconClosed: renderAvatar }}
+		>
+			{renderActions}
+		</TreeList>
 	);
-};
+});

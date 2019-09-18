@@ -18,6 +18,7 @@
 import Truncate from 'react-truncate';
 import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
+import { Highlight } from '../../../components/highlight/highlight.component';
 
 export const Container = styled.div`
 	box-shadow: 0 2px 4px 0 ${COLOR.BLACK_20};
@@ -38,11 +39,14 @@ export const Header = styled.div`
 	margin: 0 0 5px;
 `;
 
-export const Name = styled(Truncate)`
+export const Name = styled(Highlight)`
 	margin: 1px 0 0 2px;
-	font-weight: ${FONT_WEIGHT.BOLD};
 	word-break: break-all;
 	cursor: ${(props) => props.isPending ? 'default' : 'pointer'};
+
+	&, mark {
+		font-weight: ${FONT_WEIGHT.BOLD};
+	}
 
 	&:hover {
 		text-decoration: underline;
@@ -72,15 +76,6 @@ export const Property = styled.span`
 
 export const Timestamp = styled.span`
 	align-self: flex-end;
-`;
-
-export const Actions = styled.div`
-	position: absolute;
-	right: 40px;
-	top: 5px;
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: flex-end;
 `;
 
 export const Status = styled.span`

@@ -120,3 +120,11 @@ export const AddModelButton = styled.div`
 		}
 	}
 `;
+
+export const Action = styled.div`
+	display: flex;
+`;
+
+export const Label = styled.span`
+	margin-left: 6px;
+`;

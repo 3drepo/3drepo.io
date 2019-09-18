@@ -16,39 +16,75 @@
  */
 
 import MoreVert from '@material-ui/icons/MoreVert';
-import React, { useState } from 'react';
-import { SmallIconButton } from './../../../components/smallIconButon/smallIconButton.component';
+import React, { memo, useCallback, useRef, useState } from 'react';
 
-import { ActionsButton, Container, StyledGrid } from './actionsMenu.styles';
+import { hasPermissions } from '../../../../helpers/permissions';
+import { renderWhenTrue } from '../../../../helpers/rendering';
+import { useOnScreen } from '../../../../hooks';
+import { SmallIconButton } from '../../../components/smallIconButon/smallIconButton.component';
+import { ROW_ACTIONS } from '../../teamspaces.contants';
+import { Actions, ActionsButton, Container, StyledGrid } from './actionsMenu.styles';
+
+interface IAction {
+	label: string;
+	color: string;
+	Icon: any;
+	isHidden?: boolean;
+	requiredPermissions?: string;
+	onClick: () => void;
+}
 
 interface IProps {
 	className?: string;
 	isPending?: boolean;
 	federate: boolean;
-	children: any;
+	actions: any[];
+	permissions: any[];
 }
 
 const MoreIcon = () => <MoreVert fontSize="small" />;
 
-export const ActionsMenu = ({federate, isPending, children}: IProps) => {
-	const [open, setOpen] = useState(false);
-	const [toggleForceOpen, setToggleForceOpen] = useState(false);
-	const opened = open || toggleForceOpen;
+const renderActions = (actions = [], isPending, permissions = []) => {
+	return actions.map(({ label, onClick, Icon, color, isHidden = false, requiredPermissions = '' }: IAction) => {
+		const iconProps = { fontSize: 'small' } as any;
+		const disabled = isPending && [ROW_ACTIONS.UPLOAD_FILE.label, ROW_ACTIONS.DELETE.label].includes(label);
+		if (!disabled) {
+			iconProps.color = color;
+		}
+		const ActionsIconButton = () => (<Icon {...iconProps} />);
 
-	const toggleForceOpenHandler = (event) => {
+		if (!isHidden) {
+			return renderWhenTrue((
+				<SmallIconButton
+					key={label}
+					aria-label={label}
+					onClick={onClick}
+					Icon={ActionsIconButton}
+					tooltip={label}
+					disabled={disabled}
+				/>
+			))(hasPermissions(requiredPermissions, permissions));
+		}
+	});
+};
+
+export const ActionsMenu = memo(({federate, isPending, actions = [], permissions = []}: IProps) => {
+	const ref = useRef();
+	const [forceOpen, setForceOpen] = useState(false);
+	const isOnScreen = useOnScreen(ref, '0px', true);
+
+	const forceOpenHandler = useCallback((event) => {
 		event.stopPropagation();
-		setToggleForceOpen(!toggleForceOpen);
-	};
-	const closeHandler = () => setOpen(false);
-	const openHandler = () => setOpen(true);
+		setForceOpen(!forceOpen);
+	}, [forceOpen]);
 
 	return (
-		<Container onMouseLeave={closeHandler} opened={opened}>
-			<ActionsButton onMouseEnter={openHandler}>
+		<Container ref={ref}>
+			<ActionsButton>
 				<SmallIconButton
-					ariaLabel={'Toggle actions menu'}
+					ariaLabel="Toggle actions menu"
 					Icon={MoreIcon}
-					onClick={toggleForceOpenHandler}
+					onClick={forceOpenHandler}
 					disabled={isPending}
 				/>
 			</ActionsButton>
@@ -58,10 +94,10 @@ export const ActionsMenu = ({federate, isPending, children}: IProps) => {
 				direction="row"
 				alignItems="center"
 				justify="flex-start"
-				theme={{ opened, federate }}
+				theme={{ forceOpen, federate }}
 			>
-				{children}
+				{isOnScreen && <Actions>{renderActions(actions, isPending, permissions)}</Actions>}
 			</StyledGrid>
 		</Container>
 	);
-};
+});

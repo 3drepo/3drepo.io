@@ -14,8 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { orderBy } from 'lodash';
 import memoizeOne from 'memoize-one';
+
 import { PROJECT_ROLES_TYPES } from '../../constants/project-permissions';
+import { SORT_ORDER_TYPES } from '../../constants/sorting';
 
 export const extendTeamspacesInfo = memoizeOne((teamspaces = [], projects = {}) => {
 	return teamspaces.reduce((teamspacesWithAdminAccess, account) => {
@@ -40,3 +44,14 @@ export const extendTeamspacesInfo = memoizeOne((teamspaces = [], projects = {}) 
 		return teamspacesWithAdminAccess;
 	}, []);
 });
+
+export const sortModels = (models, sortingField, sortingDirection) => {
+	const getSortingFieldValue = (model) => model[sortingField]
+		? model[sortingField].toLowerCase()
+		: model[sortingField];
+
+	return orderBy(models,
+		['federate', getSortingFieldValue],
+		[SORT_ORDER_TYPES.ASCENDING, sortingDirection[sortingField]]
+	);
+};

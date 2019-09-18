@@ -15,42 +15,57 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CancelIcon from '@material-ui/icons/Cancel';
+import SearchIcon from '@material-ui/icons/Search';
 import { cond, isEmpty, matches, stubTrue } from 'lodash';
+import memoizeOne from 'memoize-one';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
 
-import { MenuItem, Tab, Tabs } from '@material-ui/core';
+import { IconButton, MenuItem, Tab, Tabs } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
+import Check from '@material-ui/icons/Check';
 
 import { renderWhenTrue } from '../../helpers/rendering';
+import { sortModels } from '../../modules/teamspaces/teamspaces.helpers';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import { Body, BodyWrapper } from '../components/customTable/customTable.styles';
+import {
+	MenuList,
+	StyledItemText,
+	StyledListItem
+} from '../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { FilterPanel, FILTER_TYPES } from '../components/filterPanel/filterPanel.component';
 import { Loader } from '../components/loader/loader.component';
-import { Panel } from '../components/panel/panel.component';
+import { MenuButton as MenuButtonComponent } from '../components/menuButton/menuButton.component';
+import { ViewerPanel } from '../viewerGui/components/viewerPanel/viewerPanel.component';
 import FederationDialog from './components/federationDialog/federationDialog.container';
 import ModelDialog from './components/modelDialog/modelDialog.container';
 import ModelGridItem from './components/modelGridItem/modelGridItem.container';
 import ProjectDialog from './components/projectDialog/projectDialog.container';
 import ProjectItem from './components/projectItem/projectItem.container';
 import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
-import { LIST_ITEMS_TYPES } from './teamspaces.contants';
 import {
+	LIST_ITEMS_TYPES,
+	MODEL_SUBTYPES,
+	SORTING_BY_LAST_UPDATED,
+	SORTING_BY_NAME,
+	TEAMSPACE_FILTER_RELATED_FIELDS,
+	TEAMSPACES_DATA_TYPES,
+	TEAMSPACES_FILTERS,
+	TEAMSPACES_PANEL_ACTIONS_MENU,
+} from './teamspaces.contants';
+import {
+	Action,
 	AddModelButton,
 	AddModelButtonOption,
 	GridContainer,
 	Head,
+	Label,
 	List,
 	LoaderContainer,
 	MenuButton
 } from './teamspaces.styles';
-
-const PANEL_PROPS = {
-	title: 'Teamspaces',
-	paperProps: {
-		height: '100%'
-	}
-};
-
 interface IProps {
 	match: any;
 	history: any;
@@ -63,8 +78,16 @@ interface IProps {
 	revisions?: any[];
 	starredVisibleItems: any[];
 	showStarredOnly: boolean;
+	searchEnabled: boolean;
+	selectedFilters: any[];
+	selectedDataTypes: any[];
+	modelCodes: string[];
 	starredModelsMap: any;
 	modelsMap: any;
+	activeSorting: string;
+	activeSortingDirection: string;
+	nameSortingDescending: boolean;
+	dateSortingDescending: boolean;
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
 	showRevisionsDialog: (config) => void;
@@ -80,6 +103,21 @@ interface IState {
 	lastVisibleItems: any;
 }
 
+const getSearchQuery = memoizeOne((selectedFilters) => selectedFilters.reduce((query, filter) => {
+	if (filter.type === FILTER_TYPES.QUERY) {
+		query = `${query} ${filter.value.value}`;
+	}
+	return query;
+}, '').trim());
+
+const PanelMenuButton = (props) => <MenuButtonComponent ariaLabel="Show Teamspaces menu" {...props} />;
+
+const SortingIcon = ({Icon, isDesc}) => {
+	if (isDesc) {
+		return <Icon.DESC IconProps={{ fontSize: 'small' }} />;
+	}
+	return <Icon.ASC IconProps={{ fontSize: 'small' }} />;
+};
 export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
 		teamspaces: []
@@ -90,6 +128,27 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		visibleItems: {},
 		lastVisibleItems: {}
 	};
+
+	private get filtersValuesMap() {
+		const { modelCodes } = this.props;
+		return {
+			[TEAMSPACE_FILTER_RELATED_FIELDS.DATA_TYPE]: [],
+			[TEAMSPACE_FILTER_RELATED_FIELDS.MODEL_TYPE]: MODEL_SUBTYPES.map(({ value }) => ({ value, label: value })),
+			[TEAMSPACE_FILTER_RELATED_FIELDS .MODEL_CODE]: modelCodes.map((code) => ({ value: code, label: code })),
+		};
+	}
+
+	private get filters() {
+		const filterValuesMap = this.filtersValuesMap;
+		return TEAMSPACES_FILTERS.map((teamspaceFilter) => {
+			teamspaceFilter.values = filterValuesMap[teamspaceFilter.relatedField] || [];
+			return teamspaceFilter;
+		});
+	}
+
+	private get searchQuery() {
+		return getSearchQuery(this.props.selectedFilters);
+	}
 
 	public componentDidMount() {
 		const {
@@ -115,6 +174,30 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				visibleItems: showStarredOnly ? starredVisibleItems : visibleItems,
 				lastVisibleItems: visibleItems
 			});
+		}
+	}
+
+	public componentDidUpdate(prevProps) {
+		const { items, searchEnabled, selectedFilters} = this.props;
+		const filtersCleared = !selectedFilters.length && prevProps.selectedFilters.length;
+		const itemsChanged = prevProps.items && prevProps.items !== items;
+
+		if (filtersCleared) {
+			const visibleItems = {
+				[this.props.currentTeamspace]: true
+			};
+			this.setState({ visibleItems });
+		} else if (searchEnabled && (selectedFilters.length) && itemsChanged) {
+			const visibleItems = { ...this.state.visibleItems };
+
+			items.forEach(({ collapsed, id }) => {
+				if (collapsed) {
+					delete visibleItems[id];
+				} else {
+					visibleItems[id] = true;
+				}
+			});
+			this.setState({ visibleItems });
 		}
 	}
 
@@ -221,20 +304,115 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	private getSearchButton = () => {
+		if (this.props.searchEnabled) {
+			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
+		}
+		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
+	}
+
+	private handleSortingItemClick = (sortingType, isNameSortingActive) => {
+		const { nameSortingDescending, dateSortingDescending } = this.props;
+		const newState = {} as any;
+		const isNameSortingClicked = sortingType === SORTING_BY_NAME;
+
+		newState.activeSorting = sortingType;
+
+		if (isNameSortingClicked) {
+			newState.nameSortingDescending = isNameSortingActive ? !nameSortingDescending : nameSortingDescending;
+		} else {
+			newState.dateSortingDescending = !isNameSortingActive ? !dateSortingDescending : dateSortingDescending;
+		}
+
+		this.props.setState(newState);
+	}
+
+	private renderActionsMenu = () =>  {
+		const { activeSorting, nameSortingDescending, dateSortingDescending } = this.props;
+		const isNameSortingActive = activeSorting === SORTING_BY_NAME;
+
+		return(
+			<MenuList>
+				{TEAMSPACES_PANEL_ACTIONS_MENU.map(({ sortingType, label, Icon }) => {
+					const isDesc = {
+						[SORTING_BY_NAME]: nameSortingDescending,
+						[SORTING_BY_LAST_UPDATED]: dateSortingDescending
+					};
+
+					return(
+						<StyledListItem key={label} button onClick={() => this.handleSortingItemClick(sortingType, isNameSortingActive)}>
+							<StyledItemText>
+								<Action>
+									<SortingIcon Icon={Icon} isDesc={isDesc[sortingType]} />
+									<Label>{label}</Label>
+								</Action>
+								{(activeSorting === sortingType) && <Check fontSize="small" />}
+							</StyledItemText>
+						</StyledListItem>
+					);
+				})}
+			</MenuList>
+		);
+	}
+
+	public getPanelMenuButton = () => {
+		return (
+			<ButtonMenu
+				renderButton={PanelMenuButton}
+				renderContent={() => {
+					return this.renderActionsMenu();
+				}}
+			/>
+		);
+	}
+
+	private handleCloseSearchMode = () => {
+		this.props.setState({ searchEnabled: false, selectedFilters: [] });
+	}
+
+	private handleOpenSearchMode = () => {
+		this.props.setState({ searchEnabled: true });
+	}
+
+	private handleFilterChange = (selectedFilters) => {
+		this.props.setState({ selectedFilters });
+	}
+
+	private handleDataTypeChange = (selectedDataTypes) => {
+		this.props.setState({ selectedDataTypes });
+	}
+
+	private renderActions = () => {
+		return (
+			<>
+				{this.getSearchButton()}
+				{this.getPanelMenuButton()}
+			</>
+		);
+	}
+
+	private renderFilterPanel = renderWhenTrue(() => (
+		<FilterPanel
+			onChange={this.handleFilterChange}
+			onDataTypeChange={this.handleDataTypeChange}
+			filters={this.filters}
+			selectedFilters={this.props.selectedFilters}
+			selectedDataTypes={this.props.selectedDataTypes}
+			dataTypes={TEAMSPACES_DATA_TYPES}
+			left
+		/>
+	));
+
 	private getStarredVisibleItems = () => {
-		const starredVisibleItems = new Set();
 		const visibleItemsMap = {};
 
 		Object.keys(this.props.starredModelsMap).forEach((starredKey) => {
 			const [ teamspace, modelId ] = starredKey.split('/');
-			starredVisibleItems.add(teamspace);
-			if (this.props.modelsMap[modelId]) {
-				starredVisibleItems.add(this.props.modelsMap[modelId].projectName);
-			}
-		});
+			visibleItemsMap[teamspace] = true;
 
-		starredVisibleItems.forEach((item) => {
-			visibleItemsMap[item] = true;
+			if (this.props.modelsMap[modelId]) {
+				visibleItemsMap[this.props.modelsMap[modelId].projectName] = true;
+			}
 		});
 
 		return visibleItemsMap;
@@ -269,9 +447,17 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		</AddModelButton>
 	)
 
-	private renderModels = (models) => renderWhenTrue(() =>
-		models.map((props) => (<ModelGridItem key={props.model} {...props}	/>))
-	)(models.length)
+	private renderModels = (models) => renderWhenTrue(() => {
+		const sortedModels = sortModels(models, this.props.activeSorting, this.props.activeSortingDirection);
+
+		return sortedModels.map((props: any) => (
+			<ModelGridItem
+				{...props}
+				key={props.model}
+				query={this.searchQuery}
+			/>
+		));
+	})(models.length)
 
 	private renderProjectContainer = (models, project) => renderWhenTrue(() => (
 		<GridContainer key={`container-${project.id}`}>
@@ -284,28 +470,29 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		(
 			<ProjectItem
 				{...props}
+				active={this.state.visibleItems[props.id]}
 				key={props._id}
 				isEmpty={!props.models.length}
+				query={this.searchQuery}
 				onClick={this.handleVisibilityChange}
 			/>
 		),
 		this.renderProjectContainer(props.models, props),
 	])
 
-	private renderTeamspace = (props) => {
-		return (
-			<TeamspaceItem
-				{...props}
-				key={props.account}
-				name={props.account}
-				active={this.state.visibleItems[props.account]}
-				isMyTeamspace={this.props.currentTeamspace === props.account}
-				onToggle={this.handleVisibilityChange}
-				onAddProject={this.openProjectDialog}
-				disabled={!props.projects.length}
-			/>
-		);
-	}
+	private renderTeamspace = (props) => (
+		<TeamspaceItem
+			{...props}
+			key={props.account}
+			highlightedTextkey={props.account}
+			name={props.account}
+			active={this.state.visibleItems[props.account] && props.projects.length}
+			isMyTeamspace={this.props.currentTeamspace === props.account}
+			onToggle={this.handleVisibilityChange}
+			onAddProject={this.openProjectDialog}
+			disabled={!props.projects.length}
+		/>
+	)
 
 	private renderMenuButton = (isPending, props) => (
 		<MenuButton
@@ -367,10 +554,15 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	));
 
 	public render() {
-		const { isPending, showStarredOnly } = this.props;
+		const { isPending, showStarredOnly, searchEnabled } = this.props;
 
 		return (
-			<Panel {...PANEL_PROPS}>
+			<ViewerPanel
+				title="Teamspaces"
+				paperProps={{ height: '100%' }}
+				renderActions={this.renderActions}
+			>
+				{this.renderFilterPanel(searchEnabled)}
 				<Head>
 					<Tabs
 						indicatorColor="primary"
@@ -400,7 +592,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					{this.renderLoader(isPending)}
 					{this.renderList(!isPending)}
 				</List>
-			</Panel>
+			</ViewerPanel>
 		);
 	}
 }

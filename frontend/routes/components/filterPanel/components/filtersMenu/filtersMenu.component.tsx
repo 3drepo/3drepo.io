@@ -25,12 +25,13 @@ import React from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
-import { DATA_TYPES } from '../../filterPanel.component';
+import { FILTER_TYPES } from '../../filterPanel.component';
 
 import {
 	ChildMenu,
 	CopyItem,
 	CopyText,
+	DataTypesWrapper,
 	MenuFooter,
 	MenuList,
 	NestedWrapper,
@@ -42,7 +43,11 @@ import {
 interface IProps {
 	items: any[];
 	selectedItems: any[];
+	dataTypes?: any[];
+	selectedDataTypes?: any[];
+	left?: boolean;
 	onToggleFilter: (property, value) => void;
+	onToggleDataType: (value) => void;
 }
 
 interface IState {
@@ -72,6 +77,10 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 		this.props.onToggleFilter(itemParent, item);
 	}
 
+	public toggleSelectDataType = (type) => () => {
+		this.props.onToggleDataType(type);
+	}
+
 	public isSelectedItem = (parentLabel, itemValue) =>
 		!!this.props.selectedItems.find((filter) => filter.label === parentLabel && filter.value.value === itemValue)
 
@@ -93,15 +102,16 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderListChildItem = (index, item) => (subItem) => {
+		const name = subItem.label || subItem.value;
 		return (
 			<StyledListItem
 				button
 				onClick={this.toggleSelectItem(item, subItem)}
-				key={`${subItem.label}-${index}`}
+				key={`${name}-${index}`}
 			>
 				<StyledItemText>
-					{subItem.label}
-					{item.type === DATA_TYPES.DATE &&
+					{name}
+					{item.type === FILTER_TYPES.DATE &&
 						<StyledDatePicker
 							value={subItem.value.value ? this.state[subItem.value.value] : null}
 							placeholder="Select date"
@@ -115,19 +125,48 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderChildItems = (index, item) => renderWhenTrue(() => (
-		<ChildMenu>
+		<ChildMenu left={this.props.left}>
 			<List>{item.values.map(this.renderListChildItem(index, item))}</List>
 		</ChildMenu>
 	))(index === this.state.activeItem)
 
 	public renderMenuItems = (items) => {
-		return items.map((item, index) => (
-			<NestedWrapper key={`${item.label}-${index}`} onMouseLeave={this.hideSubMenu}>
-				{this.renderListParentItem(index, item)}
-				{this.renderChildItems(index, item)}
-			</NestedWrapper>
-		));
+		return (
+			<List>
+				{
+					items.map((item, index) => (
+						<NestedWrapper key={`${item.label}-${index}`} onMouseLeave={this.hideSubMenu}>
+							{this.renderListParentItem(index, item)}
+							{this.renderChildItems(index, item)}
+						</NestedWrapper>
+					))
+				}
+			</List>
+		);
 	}
+
+	public renderMenuDataTypes = renderWhenTrue(() => {
+		return (
+			<DataTypesWrapper>
+				<List>
+					{
+						this.props.dataTypes.map((item, index) => {
+							const isSelected = this.props.selectedDataTypes.includes(item.type);
+							return (
+
+								<StyledListItem button key={`${item.label}-${index}`} onClick={this.toggleSelectDataType(item.type)}>
+									<StyledItemText>
+										{item.label}
+										{isSelected && <Check fontSize={'small'} />}
+									</StyledItemText>
+								</StyledListItem>
+							);
+						})
+					}
+				</List>
+			</DataTypesWrapper>
+		);
+	});
 
 	public renderFooter = () => (
 		<MenuFooter>
@@ -148,6 +187,7 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 		return (
 			<MuiPickersUtilsProvider utils={DayJsUtils}>
 				<MenuList>
+					{this.renderMenuDataTypes(this.props.dataTypes.length)}
 					{this.renderMenuItems(this.props.items)}
 					{this.renderFooter()}
 				</MenuList>

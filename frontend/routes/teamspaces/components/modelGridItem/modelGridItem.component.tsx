@@ -17,15 +17,13 @@
 
 import copy from 'copy-to-clipboard';
 import { pick, startCase } from 'lodash';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ROUTES } from '../../../../constants/routes';
-import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../services/analytics';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { TYPES } from '../../../components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
 import { Loader } from '../../../components/loader/loader.component';
-import { SmallIconButton } from '../../../components/smallIconButon/smallIconButton.component';
 import { StarIcon } from '../../../components/starIcon/starIcon.component';
 import { PERMISSIONS_VIEWS } from '../../../projects/projects.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
@@ -33,7 +31,6 @@ import { ActionsMenu } from '../actionsMenu/actionsMenu.component';
 import FederationDialog from '../federationDialog/federationDialog.container';
 import UploadModelFileDialog from '../uploadModelFileDialog/uploadModelFileDialog.container';
 import {
-	Actions,
 	Container, Content,
 	Header, Name, NameWrapper,
 	PropertiesColumn,
@@ -43,10 +40,10 @@ import {
 } from './modelGridItem.styles';
 
 interface IProps {
-	className?: string;
 	history: any;
 	teamspace: string;
 	name: string;
+	query?: string;
 	model: string;
 	permissions: any[];
 	projectName: string;
@@ -71,11 +68,9 @@ interface IProps {
 	removeFromStarred: (modelName) => void;
 }
 
-export function ModelGridItem(props: IProps) {
+export const ModelGridItem = memo((props: IProps) => {
 	const isFederation = Boolean(props.federate);
-	const isPendingStatus = () =>
-		props.status && props.status === 'uploading' || props.status === 'queued' || props.status === 'processing';
-	const isPending = isPendingStatus();
+	const isPending = ['uploading', 'queued', 'processing'].includes(props.status);
 
 	const [hasDelayedClick, setHasDelayedClick] = useState(false);
 	const starClickTimeout = useRef(null);
@@ -86,7 +81,7 @@ export function ModelGridItem(props: IProps) {
 			props.subscribeOnStatusChange(props.teamspace, props.projectName, modelData);
 			return () => props.unsubscribeOnStatusChange(props.teamspace, props.projectName, modelData);
 		}
-	}, [props.teamspace, props.projectName, props.model, props.name]);
+	}, []);
 
 	const resetStarClickTimeout = () => {
 		setHasDelayedClick(false);
@@ -153,7 +148,7 @@ export function ModelGridItem(props: IProps) {
 		});
 	};
 
-	const handleClick = () => {
+	const handleClick = useCallback(() => {
 		const { history, teamspace, timestamp, model } = props;
 		if (timestamp) {
 			history.push(`${ROUTES.VIEWER}/${teamspace}/${model}`);
@@ -161,7 +156,7 @@ export function ModelGridItem(props: IProps) {
 		} else {
 			handleUploadModelFile();
 		}
-	};
+	}, [props.history, props.teamspace, props.timestamp, props.model]);
 
 	const handleUploadModelFile = () => {
 		const { teamspace, name, model, canUpload, projectName } = props;
@@ -182,7 +177,7 @@ export function ModelGridItem(props: IProps) {
 		});
 	};
 
-	const handleFederationEdit = () => {
+	const handleFederationEdit = useCallback(() => {
 		const { teamspace, model, name, project } = props;
 
 		props.showDialog({
@@ -197,9 +192,9 @@ export function ModelGridItem(props: IProps) {
 				modelId: model
 			}
 		});
-	};
+	}, [props.teamspace, props.model, props.name, props.project]);
 
-	const handleStarClick = () => {
+	const handleStarClick = useCallback(() => {
 		if (starClickTimeout.current) {
 			resetStarClickTimeout();
 		} else {
@@ -214,40 +209,44 @@ export function ModelGridItem(props: IProps) {
 				}
 			}, 2000);
 		}
+	}, [starClickTimeout.current, props.isStarred, props.model]);
+
+	const getRowActions = () => {
+		const sharedActions = [{
+			...ROW_ACTIONS.PERMISSIONS,
+			onClick: handlePermissionsClick
+		}, {
+			...ROW_ACTIONS.SHARE,
+			onClick: handleShare
+		}, {
+			...ROW_ACTIONS.SETTINGS,
+			onClick: handleSettingsClick
+		}, {
+			...ROW_ACTIONS.DELETE,
+			onClick: handleDelete
+		}];
+
+		if (isFederation) {
+			return [{
+				...ROW_ACTIONS.EDIT,
+				onClick: handleFederationEdit
+			}, ...sharedActions];
+		}
+
+		return [{
+			...ROW_ACTIONS.UPLOAD_FILE,
+			onClick: handleUploadModelFile
+		}, {
+			...ROW_ACTIONS.REVISIONS,
+			onClick: handleRevisionsClick
+		}, {
+			...ROW_ACTIONS.DOWNLOAD,
+			onClick: handleDownloadClick,
+			isHidden: !Boolean(props.timestamp)
+		}, ...sharedActions];
 	};
 
-	const sharedActions = [{
-		...ROW_ACTIONS.PERMISSIONS,
-		action: handlePermissionsClick
-	}, {
-		...ROW_ACTIONS.SHARE,
-		action: handleShare
-	}, {
-		...ROW_ACTIONS.SETTINGS,
-		action: handleSettingsClick
-	}, {
-		...ROW_ACTIONS.DELETE,
-		action: handleDelete
-	}];
-
-	const modelActions = [{
-		...ROW_ACTIONS.UPLOAD_FILE,
-		action: handleUploadModelFile
-	}, {
-		...ROW_ACTIONS.REVISIONS,
-		action: handleRevisionsClick
-	}, {
-		...ROW_ACTIONS.DOWNLOAD,
-		action: handleDownloadClick,
-		isHidden: !Boolean(props.timestamp)
-	}, ...sharedActions];
-
-	const federationActions = [{
-		...ROW_ACTIONS.EDIT,
-		action: handleFederationEdit
-	}, ...sharedActions];
-
-	const rowActions = isFederation ? federationActions : modelActions;
+	const rowActions = useMemo(getRowActions, [isFederation]);
 
 	const renderModelCode = renderWhenTrue(<Property>{props.code}</Property>);
 
@@ -261,53 +260,28 @@ export function ModelGridItem(props: IProps) {
 		</Status>
 	);
 
-	const renderActions = (actions) => {
-		if (!actions) {
-			return null;
-		}
-		return actions.map((actionItem) => {
-			const { label, action, Icon, color, isHidden = false, requiredPermissions = '' } = actionItem;
-			const iconProps = { fontSize: 'small' } as any;
-			const disabled = isPending && [ROW_ACTIONS.UPLOAD_FILE.label, ROW_ACTIONS.DELETE.label].includes(label);
-			if (!disabled) {
-				iconProps.color = color;
-			}
-			const ActionsIconButton = () => (<Icon {...iconProps} />);
-
-			if (!isHidden) {
-				return renderWhenTrue((
-					<SmallIconButton
-						key={label}
-						aria-label={label}
-						onClick={action}
-						Icon={ActionsIconButton}
-						tooltip={label}
-						disabled={disabled}
-					/>
-				))(hasPermissions(requiredPermissions, props.permissions));
-			}
-		});
-	};
-
-	const renderActionsMenu = () => (
-		<ActionsMenu federate={isFederation}>
-			<Actions>
-				{renderActions(rowActions)}
-			</Actions>
-		</ActionsMenu>
-	);
-
 	return (
-		<Container federate={isFederation} className={props.className}>
+		<Container federate={isFederation}>
 			<Header>
 				<NameWrapper>
 					<StarIcon
 						active={hasDelayedClick ? !props.isStarred : props.isStarred}
 						onClick={handleStarClick}
 					/>
-					<Name lines={2} onClick={handleClick}>{props.name}</Name>
+					<div onClick={handleClick}>
+						<Name
+							isPending={isPending}
+							search={props.query}
+							text={props.name}
+							splitQueryToWords
+						/>
+					</div>
 				</NameWrapper>
-				{renderActionsMenu()}
+				<ActionsMenu
+					federate={isFederation}
+					actions={rowActions}
+					permissions={props.permissions}
+				/>
 			</Header>
 			<Content>
 				<PropertiesColumn>
@@ -319,4 +293,4 @@ export function ModelGridItem(props: IProps) {
 			</Content>
 		</Container>
 	);
-}
+});

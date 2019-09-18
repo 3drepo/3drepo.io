@@ -21,7 +21,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { DialogActions } from '../../../../modules/dialog';
-import { selectTeamspacesList, TeamspacesActions } from '../../../../modules/teamspaces';
+import { TeamspacesActions } from '../../../../modules/teamspaces';
 import { ProjectItem } from './projectItem.component';
 
 const mapStateToProps = createStructuredSelector({

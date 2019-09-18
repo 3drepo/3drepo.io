@@ -23,14 +23,22 @@ import { selectCurrentTeamspace } from '../../modules/currentUser';
 import { DialogActions } from '../../modules/dialog';
 import { selectStarredModels, StarredActions } from '../../modules/starred';
 import {
+	selectActiveSorting,
+	selectActiveSortingDirection,
+	selectDateSortingDescending,
 	selectFlattenTeamspaces,
 	selectIsPending,
 	selectModels,
+	selectModelCodes,
+	selectNameSortingDescending,
+	selectSearchEnabled,
+	selectSelectedDataTypes,
+	selectSelectedFilters,
 	selectShowStarredOnly,
 	selectStarredVisibleItems,
 	selectTeamspaces,
 	selectVisibleItems,
-	TeamspacesActions,
+	TeamspacesActions
 } from '../../modules/teamspaces';
 import { selectRevisions, ModelActions } from './../../modules/model';
 import { Teamspaces } from './teamspaces.component';
@@ -46,6 +54,14 @@ const mapStateToProps = createStructuredSelector({
 	showStarredOnly: selectShowStarredOnly,
 	starredModelsMap: selectStarredModels,
 	modelsMap: selectModels,
+	searchEnabled: selectSearchEnabled,
+	selectedFilters: selectSelectedFilters,
+	selectedDataTypes: selectSelectedDataTypes,
+	modelCodes: selectModelCodes,
+	activeSorting: selectActiveSorting,
+	activeSortingDirection: selectActiveSortingDirection,
+	nameSortingDescending: selectNameSortingDescending,
+	dateSortingDescending: selectDateSortingDescending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

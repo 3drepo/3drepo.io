@@ -89,6 +89,10 @@ export const TitleIcon = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: center;
+
+	&:empty {
+		width: 16px;
+	}
 `;
 
 export const ViewerPanelContent = styled.div<IViewerPanelContent>`

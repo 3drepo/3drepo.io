@@ -661,6 +661,7 @@ function _fillInModelDetails(accountName, setting, permissions) {
 		federate: setting.federate,
 		permissions: permissions,
 		model: setting._id,
+		type: setting.type,
 		name: setting.name,
 		status: setting.status,
 		errorReason: setting.errorReason,
@@ -881,6 +882,9 @@ function _createAccounts(roles, userName) {
 				const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
 				const account = {
 					account: user.user,
+					firstName: user.customData.firstName,
+					lastName: user.customData.lastName,
+					hasAvatar: !!user.customData.avatar,
 					projects: [],
 					models: [],
 					fedModels: [],

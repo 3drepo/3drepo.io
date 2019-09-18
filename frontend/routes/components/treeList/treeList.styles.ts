@@ -79,3 +79,10 @@ export const IconContainer = styled.div`
 	margin-right: 12px;
 	display: flex;
 `;
+
+export const ChildrenContainer = styled.div`
+	font-size: 14px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+`;

@@ -15,9 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { orderBy, pick, pickBy, values } from 'lodash';
+import { compact, map, orderBy, pick, pickBy, uniq, values } from 'lodash';
 import { createSelector } from 'reselect';
-import { LIST_ITEMS_TYPES } from '../../routes/teamspaces/teamspaces.contants';
+import { SORT_ORDER_TYPES } from '../../constants/sorting';
+import { searchByFilters } from '../../helpers/searching';
+import { sortModels } from '../../modules/teamspaces/teamspaces.helpers';
+import { DATA_TYPES, FILTER_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
+import {
+	LIST_ITEMS_TYPES, SORTING_BY_LAST_UPDATED, SORTING_BY_NAME,
+} from '../../routes/teamspaces/teamspaces.contants';
 import { selectStarredModels } from '../starred';
 import { getStarredModelKey } from '../starred/starred.contants';
 import { extendTeamspacesInfo } from './teamspaces.helpers';
@@ -60,6 +66,14 @@ export const selectFederations = createSelector(
 	selectModels, (models) => pickBy(models, (federate) => !!federate)
 );
 
+export const selectModelCodes = createSelector(
+	selectModels, (models) => compact(uniq(map(values(models), 'code')))
+);
+
+export const selectModelTypes = createSelector(
+	selectModels, (models) => compact(uniq(map(values(models), 'modelType')))
+);
+
 export const selectComponentState = createSelector(
 	selectTeamspacesDomain, (state) => state.componentState
 );
@@ -68,18 +82,64 @@ export const selectVisibleItems = createSelector(
 	selectComponentState, (state) => state.visibleItems
 );
 
-export const selectStarredVisibleItems = createSelector(
-	selectComponentState, (state) => state.starredVisibleItems
-);
-
 export const selectShowStarredOnly = createSelector(
 	selectComponentState, (state) => state.showStarredOnly
 );
 
+export const selectSearchEnabled = createSelector(
+	selectComponentState, (state) => state.searchEnabled
+);
+
+export const selectSelectedFilters = createSelector(
+	selectComponentState, (state) => state.selectedFilters
+);
+
+export const selectSelectedDataTypes = createSelector(
+	selectComponentState, (state) => state.selectedDataTypes
+);
+
+export const selectStarredVisibleItems = createSelector(
+	selectComponentState, (state) => state.starredVisibleItems
+);
+
+export const selectActiveSorting = createSelector(
+	selectComponentState, (state) => state.activeSorting
+);
+
+export const selectNameSortingDescending = createSelector(
+	selectComponentState, (state) => state.nameSortingDescending
+);
+
+export const selectDateSortingDescending = createSelector(
+	selectComponentState, (state) => state.dateSortingDescending
+);
+
+export const selectActiveSortingDirection = createSelector(
+	selectNameSortingDescending, selectDateSortingDescending,
+	(nameSortingDescending, dateSortingDescending) => {
+		const sortingDirection = {
+			[SORTING_BY_NAME]: nameSortingDescending ? SORT_ORDER_TYPES.DESCENDING : SORT_ORDER_TYPES.ASCENDING,
+			[SORTING_BY_LAST_UPDATED]: dateSortingDescending ? SORT_ORDER_TYPES.DESCENDING : SORT_ORDER_TYPES.ASCENDING
+		};
+		return sortingDirection;
+	}
+);
+
 export const selectFlattenTeamspaces = createSelector(
-	selectTeamspacesList, selectProjects, selectModels, selectShowStarredOnly, selectStarredModels,
-	(teamspacesList, projects, models, showStarredOnly, starredModels) => {
+	selectTeamspacesList, selectProjects, selectModels,
+	selectShowStarredOnly, selectStarredModels,
+	selectSelectedFilters, selectSelectedDataTypes,
+	selectActiveSorting, selectActiveSortingDirection,
+	(teamspacesList, projects, models, showStarredOnly, starredModels,
+		filters, filterableDataTypes, activeSorting, activeSortingDirection) => {
+
 		const flattenList = [];
+		const hasActiveFilters = showStarredOnly || filters.length;
+		const textFilters = filters.filter(({ type }) => type === FILTER_TYPES.QUERY);
+
+		const shouldFilterProjects = filterableDataTypes.includes(DATA_TYPES.PROJECTS);
+		const shouldFilterModels = filterableDataTypes.includes(DATA_TYPES.MODELS);
+		const shouldFilterFederations = filterableDataTypes.includes(DATA_TYPES.FEDERATIONS);
 
 		for (let index = 0; index < teamspacesList.length; index++) {
 			const teamspaceName = teamspacesList[index].account;
@@ -88,36 +148,108 @@ export const selectFlattenTeamspaces = createSelector(
 
 			for (let j = 0; j < projectsIds.length; j++) {
 				const project = projects[projectsIds[j]];
-
 				const projectModels = [];
+				const projectFederations = [];
+
 				for (let m = 0; m < project.models.length; m++) {
 					const modelId = project.models[m];
 					const recordKey = getStarredModelKey({ teamspace: teamspaceName, model: modelId });
 					if (showStarredOnly && !starredModels[recordKey]) {
 						continue;
 					}
-					projectModels.push({
+
+					const processedModel = {
 						...models[modelId],
 						teamspace: teamspaceName,
 						project: projectsIds[j],
 						projectName: project.name,
 						type: LIST_ITEMS_TYPES.MODEL,
 						id: modelId
-					});
+					};
+
+					if (processedModel.federate) {
+						projectFederations.push(processedModel);
+					} else {
+						projectModels.push(processedModel);
+					}
 				}
 
-				if (!showStarredOnly || projectModels.length) {
-					teamspaceProjects.push({
-						...project,
-						models: orderBy(projectModels, ['federate']),
-						teamspace: teamspaceName,
-						type: LIST_ITEMS_TYPES.PROJECT,
-						id: projectsIds[j]
-					});
+				const filteredModels = shouldFilterModels ? searchByFilters(projectModels, filters) : projectModels;
+				const filteredFederations = shouldFilterFederations
+					? searchByFilters(projectFederations, filters)
+					: projectFederations;
+
+				const filteredModelsAndFederations = filteredFederations.concat(filteredModels);
+
+				const modelsAndFederations =
+					shouldFilterModels && shouldFilterFederations ?
+						filteredModelsAndFederations :
+						shouldFilterModels ? filteredModels :
+						shouldFilterFederations ? filteredFederations :
+						[];
+
+				const projectMatched =
+					shouldFilterProjects && filters.find((f) => project.name.toLowerCase().includes(f.value.value.toLowerCase()));
+
+				const processedProject = {
+					...project,
+					models: modelsAndFederations,
+					teamspace: teamspaceName,
+					type: LIST_ITEMS_TYPES.PROJECT,
+					id: projectsIds[j]
+				};
+
+				// Show all models if no result (but project is collapsed)
+				const shouldFilterOnlyProjects = !shouldFilterModels && !shouldFilterFederations && shouldFilterProjects;
+				const shouldFilterOnlyModelsAndFederations =
+					(shouldFilterModels || shouldFilterFederations) && !shouldFilterProjects;
+
+				const shouldBeVisible =
+					shouldFilterProjects ? searchByFilters([processedProject], textFilters)[0] : !shouldFilterOnlyModelsAndFederations;
+
+				processedProject.collapsed = shouldFilterOnlyProjects ? shouldBeVisible : false;
+
+				if ((!showStarredOnly && !filteredModelsAndFederations.length && project.models.length && shouldBeVisible)) {
+					processedProject.collapsed = true;
+
+					if (shouldFilterFederations) {
+						processedProject.models = processedProject.models.concat(projectFederations);
+					}
+
+					if (shouldFilterModels) {
+						processedProject.models = processedProject.models.concat(projectModels);
+					}
+				}
+
+				const isFilterSelected = shouldFilterProjects || shouldFilterModels || shouldFilterFederations;
+
+				const shouldAddProject =
+					!hasActiveFilters || (processedProject.models.length || shouldBeVisible) || processedProject.collapsed &&
+					((showStarredOnly && shouldBeVisible) || !showStarredOnly);
+
+				if (isFilterSelected && shouldAddProject) {
+					processedProject.models = sortModels(processedProject.models, activeSorting, activeSortingDirection);
+					teamspaceProjects.push(processedProject);
+				}
+
+				if (
+					processedProject.type === 'PROJECT' && processedProject.collapsed && shouldFilterProjects ||
+					(projectMatched && shouldFilterProjects)
+					) {
+					let allProjectModels = [];
+
+					if (shouldFilterModels && !shouldFilterFederations) {
+						allProjectModels = projectModels;
+					} else if (!shouldFilterModels && shouldFilterFederations) {
+						allProjectModels = projectFederations;
+					} else {
+						allProjectModels = [...projectModels, ...projectFederations];
+					}
+					processedProject.models = allProjectModels;
 				}
 			}
 
-			if (!showStarredOnly || teamspaceProjects.length) {
+			if (!hasActiveFilters || teamspaceProjects.length) {
 				flattenList.push({
 					...teamspacesList[index],
 					type: LIST_ITEMS_TYPES.TEAMSPACE,

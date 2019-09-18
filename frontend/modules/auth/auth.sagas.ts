@@ -23,7 +23,6 @@ import { NewTermsDialog } from '../../routes/components/newTermsDialog/newTermsD
 import { analyticsService } from '../../services/analytics';
 import * as API from '../../services/api';
 import { CurrentUserActions } from '../currentUser';
-import { getAvatarUrl } from '../currentUser/currentUser.sagas';
 import { DialogActions } from '../dialog';
 import { changePasswordMessages, forgotPasswordMessages, verificationMessages } from './auth.helpers';
 import { AuthActions, AuthTypes } from './auth.redux';
@@ -44,7 +43,7 @@ function* login({ username, password }) {
 
 		yield put(CurrentUserActions.fetchUserSuccess({
 			username,
-			avatarUrl: getAvatarUrl(username)
+			avatarUrl: API.getAvatarUrl(username)
 		}));
 		yield put(AuthActions.loginSuccess());
 	} catch (e) {
@@ -82,7 +81,7 @@ function* authenticate() {
 		const { data: { username }} = yield API.authenticate();
 		yield put(CurrentUserActions.fetchUserSuccess({
 			username,
-			avatarUrl: getAvatarUrl(username)
+			avatarUrl: API.getAvatarUrl(username)
 		}));
 
 		yield put(AuthActions.loginSuccess());

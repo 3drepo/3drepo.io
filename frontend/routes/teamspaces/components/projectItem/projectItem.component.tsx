@@ -31,12 +31,14 @@ import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 interface IProps {
 	_id: string;
 	name: string;
+	query?: string;
 	models: any[];
 	disabled: boolean;
 	isEmpty: boolean;
 	permissions: any[];
 	teamspace: string;
 	history: any;
+	active?: boolean;
 	renderChildItem: () => JSX.Element;
 	removeProject: (teamspace, projectId) => void;
 	showConfirmDialog: (config) => void;
@@ -128,9 +130,11 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 	))(this.isProjectAdmin()) as any
 
 	public render() {
-		const { name, disabled, isEmpty } = this.props;
+		const { name, disabled, isEmpty, query, active } = this.props;
 		return (
 			<TreeList
+				active={active}
+				query={query}
 				onClick={this.handleClick}
 				name={name}
 				level={TREE_LEVELS.PROJECT}
@@ -140,8 +144,9 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 					IconClosed: Label,
 					IconOpened: LabelOutlined
 				}}
-				renderActions={this.renderProjectActions}
-			/>
+			>
+				{this.renderProjectActions}
+			</TreeList>
 		);
 	}
 }
