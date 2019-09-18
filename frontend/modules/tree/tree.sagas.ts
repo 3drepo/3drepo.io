@@ -518,7 +518,7 @@ function* collapseNodes({ nodesIds }) {
 					expandedNodesMap[currentNode._id] = false;
 					i++;
 				} else {
-					// This node is already collapsed, skip it's children.
+					// This node is already collapsed, skip its children.
 					i += currentNode.deepChildrenNumber ? currentNode.deepChildrenNumber : 1;
 				}
 			}
