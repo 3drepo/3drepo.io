@@ -158,15 +158,13 @@ export const selectVisibleTreeNodesList = createSelector(
 		const visibleNodes = [];
 		const indexesByRootParentIds = {};
 
-		for (let index = 0; index < treeNodesList.length; index++) {
+		const isSearchActive = searchEnabled && selectedFilters.length;
+		let index = 0;
+		while (index < treeNodesList.length) {
 			const treeNode = { ...treeNodesList[index] };
 
-			const isSearchActive = searchEnabled && selectedFilters.length;
-			const isFirstLevel = treeNode.level === 1;
-			const isSecondLevel = treeNode.level === 2;
-
 			treeNode.isSearchResult = isSearchActive && !treeNode.isFederation && !treeNode.isModel;
-			treeNode.isRegularNode = !isSearchActive && (isFirstLevel || isSecondLevel || expandedNodesMap[treeNode.parentId]);
+			treeNode.isRegularNode = !isSearchActive && (treeNode.level <= 2 || expandedNodesMap[treeNode.parentId]);
 			if (treeNode.isSearchResult || treeNode.isRegularNode) {
 				visibleNodes.push(treeNode);
 
@@ -175,10 +173,16 @@ export const selectVisibleTreeNodesList = createSelector(
 				} else {
 					treeNode.rootParentIndex = indexesByRootParentIds[treeNode.rootParentId];
 				}
+				++index;
+			} else if (!treeNode.isSearchResult && treeNode.deepChildrenNumber) {
+				// If we are not showing search result and this node isn't a regular node,
+				// Then we are certain we won't be showing its children, skip them.
+				index += treeNode.deepChildrenNumber;
+			} else {
+				++index;
 			}
 
 		}
-
 		return visibleNodes;
 	}
 );
