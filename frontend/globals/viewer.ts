@@ -412,6 +412,7 @@ export class Viewer {
 
 	public clearHighlights() {
 		UnityUtil.clearHighlights();
+		this.emit(Viewer.EVENT.CLEAR_HIGHLIGHT_OBJECTS, {});
 	}
 
 	public unhighlightObjects(account, model, idsIn) {
@@ -420,6 +421,7 @@ export class Viewer {
 			const uniqueIds = Array.from(new Set(idsIn));
 			if (uniqueIds.length) {
 				UnityUtil.unhighlightObjects(account, model, uniqueIds);
+				this.emit(Viewer.EVENT.UNHIGHLIGHT_OBJECTS, {account, model, uniqueIds });
 				return;
 			}
 		}
@@ -436,6 +438,8 @@ export class Viewer {
 				const uniqueIds = Array.from(new Set(idsIn));
 				if (uniqueIds.length) {
 					UnityUtil.highlightObjects(account, model, uniqueIds, colour, multiOverride, forceReHighlight);
+
+					this.emit(Viewer.EVENT.HIGHLIGHT_OBJECTS, {account, model, uniqueIds });
 					return;
 				}
 			}
