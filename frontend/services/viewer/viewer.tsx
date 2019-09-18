@@ -562,7 +562,7 @@ export class ViewerService {
 		this.viewer.setMaxShadowDistance(value);
 	}
 
-	public setModelCache(cache: boolean) {
+	public setModelCache = (cache: boolean) => {
 		if (cache) {
 			this.viewer.enableCaching();
 		} else {

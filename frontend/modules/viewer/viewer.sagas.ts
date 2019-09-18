@@ -41,6 +41,10 @@ const callUpdateHandlers = (oldSettings, settings) => {
 	keys(oldSettings).forEach((key) => {
 		if (oldSettings[key] !== settings[key]) {
 			const update = updateHandlers[key];
+			if (!update) {
+				return;
+			}
+
 			update(settings[key]);
 		}
 	});
