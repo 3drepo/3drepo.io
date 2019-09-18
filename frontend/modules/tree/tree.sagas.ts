@@ -511,9 +511,15 @@ function* collapseNodes({ nodesIds }) {
 		const node = nodesList[nodeIndex];
 
 		if (node.deepChildrenNumber) {
-			for (let i = nodeIndex; i < nodeIndex + node.deepChildrenNumber; i++) {
-				if (expandedNodesMap[nodesList[i]._id]) {
-					expandedNodesMap[nodesList[i]._id] = false;
+			let i = nodeIndex;
+			while (i < nodeIndex + node.deepChildrenNumber) {
+				const currentNode = nodesList[i];
+				if (expandedNodesMap[currentNode._id]) {
+					expandedNodesMap[currentNode._id] = false;
+					i++;
+				} else {
+					// This node is already collapsed, skip it's children.
+					i += currentNode.deepChildrenNumber ? currentNode.deepChildrenNumber : 1;
 				}
 			}
 		} else {
