@@ -18,7 +18,7 @@ const getTransformedNodeData = (node) => ({
 	teamspace: node.account,
 	meta: node.meta || [],
 	model: node.model || node.project,
-	shared_ids: node.shared_id ? [node.shared_id] : node.shared_ids,
+	shared_id: node.shared_id,
 	defaultVisibility: BACKEND_VISIBILITY_STATES[node.toggleState]
 });
 
@@ -80,11 +80,7 @@ const getAuxiliaryMaps = (nodesList) => {
 		maps.nodesVisibilityMap[node._id] = node.defaultVisibility || VISIBILITY_STATES.VISIBLE;
 		maps.nodesDefaultVisibilityMap[node._id] = node.defaultVisibility;
 		maps.nodesSelectionMap[node._id] = SELECTION_STATES.UNSELECTED;
-
-		for (let sharedIndex = 0; sharedIndex < node.shared_ids.length; sharedIndex++) {
-			const sharedId = node.shared_ids[sharedIndex];
-			maps.nodesBySharedIdsMap[sharedId] = node._id;
-		}
+		maps.nodesBySharedIdsMap[node.shared_id] = node._id;
 
 		return maps;
 	}, initialState);

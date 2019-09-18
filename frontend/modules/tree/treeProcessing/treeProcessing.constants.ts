@@ -8,6 +8,7 @@ export const ACTION_TYPES = {
 
 export interface INode {
 	_id: string;
+	shared_id: string;
 	namespacedId: string;
 	name: string;
 	level: number;
@@ -16,7 +17,6 @@ export interface INode {
 	deepChildrenNumber: number;
 	isFederation?: boolean;
 	isModel?: boolean;
-	shared_ids?: string[];
 	defaultVisibility: string;
 	childrenIds: string[];
 	rootParentId?: string;
