@@ -19,7 +19,8 @@ const getTransformedNodeData = (node) => ({
 	meta: node.meta || [],
 	model: node.model || node.project,
 	shared_id: node.shared_id,
-	defaultVisibility: BACKEND_VISIBILITY_STATES[node.toggleState]
+	defaultVisibility: node.toggleState && BACKEND_VISIBILITY_STATES[node.toggleState]
+		? BACKEND_VISIBILITY_STATES[node.toggleState] : VISIBILITY_STATES.VISIBLE;
 });
 
 const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null) => {
@@ -43,8 +44,8 @@ const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null)
 		rowData.hasChildren = hasChildren;
 		rootParentId = rowData.isModel ? rowData._id : rootParentId;
 
-		rowData.defaultVisibility = VISIBILITY_STATES.VISIBLE;
 		let nHiddenChildren = 0;
+		rowData.defaultVisibility = rowData.defaultVisibility || VISIBILITY_STATES.VISIBLE;
 		for (let index = 0; index < tree.children.length; index++) {
 
 			const subTree = tree.children[index];
@@ -58,15 +59,15 @@ const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null)
 
 			if (visibility === VISIBILITY_STATES.INVISIBLE) {
 				++nHiddenChildren;
-				rowData.defaultVisibility = VISIBILITY_STATES.PARENT_OF_INVISIBILE;
-			} else if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBILE) {
-				rowData.defaultVisibility = VISIBILITY_STATES.PARENT_OF_INVISIBILE;
+				rowData.defaultVisibility = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
+			} else if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
+				rowData.defaultVisibility = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
 			}
 
 		}
 
-		if (nHiddenChildren === tree.children.length) {
-			rowData.defaultVisibility = VISIBILITY_STATES.INVISIBILE;
+		if (hasChildren && nHiddenChildren === tree.children.length) {
+			rowData.defaultVisibility = VISIBILITY_STATES.INVISIBLE;
 		}
 
 	}
@@ -75,7 +76,7 @@ const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null)
 
 	const data = dataToFlatten.flat();
 
-	return { data, deepChildrenNumber: data.length, visibility: rowData.defaultVisbiility };
+	return { data, deepChildrenNumber: data.length, visibility: rowData.defaultVisibility };
 };
 
 const getAuxiliaryMaps = (nodesList) => {
@@ -89,7 +90,7 @@ const getAuxiliaryMaps = (nodesList) => {
 
 	return nodesList.reduce((maps, node: INode, index) => {
 		maps.nodesIndexesMap[node._id] = index;
-		maps.nodesVisibilityMap[node._id] = node.defaultVisibility || VISIBILITY_STATES.VISIBLE;
+		maps.nodesVisibilityMap[node._id] = node.defaultVisibility;
 		maps.nodesDefaultVisibilityMap[node._id] = node.defaultVisibility;
 		maps.nodesSelectionMap[node._id] = SELECTION_STATES.UNSELECTED;
 		maps.nodesBySharedIdsMap[node.shared_id] = node._id;
