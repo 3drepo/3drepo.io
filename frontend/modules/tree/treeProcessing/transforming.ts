@@ -78,7 +78,7 @@ const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null)
 };
 
 const getAuxiliaryMaps = (nodesList) => {
-	const initialState = {
+	const maps = {
 		nodesIndexesMap: {},
 		nodesVisibilityMap: {},
 		nodesSelectionMap: {},
@@ -86,15 +86,16 @@ const getAuxiliaryMaps = (nodesList) => {
 		nodesDefaultVisibilityMap: {}
 	} as any;
 
-	return nodesList.reduce((maps, node: INode, index) => {
-		maps.nodesIndexesMap[node._id] = index;
+	for (let i = 0; i < nodesList.length; ++i ) {
+		const node = nodesList[i];
+		maps.nodesIndexesMap[node._id] = i;
 		maps.nodesVisibilityMap[node._id] = node.defaultVisibility;
 		maps.nodesDefaultVisibilityMap[node._id] = node.defaultVisibility;
 		maps.nodesSelectionMap[node._id] = SELECTION_STATES.UNSELECTED;
 		maps.nodesBySharedIdsMap[node.shared_id] = node._id;
+	}
 
-		return maps;
-	}, initialState);
+	return maps;
 };
 
 const getMeshesByNodeId = (modelsWithMeshes) => {
