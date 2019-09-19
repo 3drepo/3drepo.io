@@ -37,7 +37,7 @@ const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null)
 		childrenIds: []
 	};
 
-	const dataToFlatten = [] as any;
+	const dataToFlatten = [rowData] as any;
 	if (tree.children) {
 
 		const hasChildren = tree.children.some((child) => Boolean(child.name));
@@ -71,8 +71,6 @@ const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null)
 		}
 
 	}
-
-	dataToFlatten.unshift(rowData);
 
 	const data = dataToFlatten.flat();
 
