@@ -43,24 +43,30 @@ const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null)
 		rowData.hasChildren = hasChildren;
 		rootParentId = rowData.isModel ? rowData._id : rootParentId;
 
+		rowData.defaultVisibility = VISIBILITY_STATES.VISIBLE;
+		let nHiddenChildren = 0;
 		for (let index = 0; index < tree.children.length; index++) {
 
 			const subTree = tree.children[index];
 			subTree.isModel = isModelNode(level + 1, subTree.isFederation, tree.isFederation);
 
-			const { data: nestedData, deepChildrenNumber } =
+			const { data: nestedData, deepChildrenNumber, visibility } =
 				getFlattenNested(subTree, level + 1, tree._id, rootParentId);
 			rowData.deepChildrenNumber += deepChildrenNumber;
 			rowData.childrenIds.push(subTree._id);
 			dataToFlatten.push(nestedData);
 
-			const someOfNestedIsInvisible = nestedData.some((node: INode) => {
-				return node.defaultVisibility !== VISIBILITY_STATES.VISIBLE;
-			});
-
-			if (someOfNestedIsInvisible) {
-				rowData.defaultVisibility = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
+			if (visibility === VISIBILITY_STATES.INVISIBLE) {
+				++nHiddenChildren;
+				rowData.defaultVisibility = VISIBILITY_STATES.PARENT_OF_INVISIBILE;
+			} else if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBILE) {
+				rowData.defaultVisibility = VISIBILITY_STATES.PARENT_OF_INVISIBILE;
 			}
+
+		}
+
+		if (nHiddenChildren === tree.children.length) {
+			rowData.defaultVisibility = VISIBILITY_STATES.INVISIBILE;
 		}
 
 	}
@@ -69,7 +75,7 @@ const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null)
 
 	const data = dataToFlatten.flat();
 
-	return { data, deepChildrenNumber: data.length };
+	return { data, deepChildrenNumber: data.length, visibility: rowData.defaultVisbiility };
 };
 
 const getAuxiliaryMaps = (nodesList) => {
