@@ -120,7 +120,7 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 		return (
 			<MenuItemContainer
 				className={className}
-				expired={this.isExpiredDate}
+				expired={this.isExpiredDate ? 'true' : 'false'}
 				onClick={onItemClick}
 				disabled={willBeRemoved}
 			>

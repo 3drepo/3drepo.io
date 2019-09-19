@@ -47,7 +47,12 @@ export class Pin {
 		this.viewpoint = viewpoint;
 		this.account = account;
 		this.model = model;
-		UnityUtil.dropPin(id, type, position, norm, colors);
+		if (type === 'risk') {
+			UnityUtil.dropRiskPin(id, position, norm, colors);
+		} else {
+			UnityUtil.dropIssuePin(id, position, norm, colors);
+		}
+
 	}
 
 	public remove(id) {
