@@ -33,10 +33,11 @@ export const pinsDiff = (pinsA: any[], pinsB: any[]): any[] => {
 
 export const hasPin = (ticket) => ticket.position && ticket.position.length === 3;
 
-export const ticketToPin = (ticket, type, color) =>
+export const ticketToPin = (ticket, type, isSelected, color) =>
 	({
 		id: ticket._id || 'newPin',
 		type,
+		isSelected,
 		account: ticket.account,
 		model: ticket.model,
 		pickedPos: ticket.position,
@@ -45,7 +46,7 @@ export const ticketToPin = (ticket, type, color) =>
 	});
 
 export const issueToPin = (issue, isSelectedPin ) =>
-	ticketToPin(issue, 'issue', getIssuePinColor(issue, isSelectedPin));
+	ticketToPin(issue, 'issue', isSelectedPin, getIssuePinColor(issue, isSelectedPin));
 
 export const riskToPin = (risk, isSelectedPin ) =>
-	ticketToPin(risk, 'risk', getRiskPinColor(risk, isSelectedPin));
+	ticketToPin(risk, 'risk', isSelectedPin, getRiskPinColor(risk, isSelectedPin));

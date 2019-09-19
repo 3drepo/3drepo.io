@@ -196,6 +196,9 @@ export class ViewerService {
 				params.colours,
 				params.viewpoint
 			);
+			if (params.isSelected) {
+				this.viewer.selectPin(params.id);
+			}
 		});
 	}
 

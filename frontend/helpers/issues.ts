@@ -62,9 +62,10 @@ export const getStatusIcon = (priority, status) => {
 };
 
 export const getIssuePinColor = (issue: any, selected: boolean = false) => {
+	// FIXME
 	const {status, priority} = issue;
 	const colorToUse = ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS[PRIORITIES.NONE];
-	return (selected) ? colorToUse.selectedColor : colorToUse.pinColor;
+	return colorToUse.pinColor;
 };
 
 const isOpenIssue = (status) => status !== 'closed';

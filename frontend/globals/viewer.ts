@@ -645,6 +645,10 @@ export class Viewer {
 		// }
 	}
 
+	public selectPin(id) {
+		UnityUtil.selectPin(id);
+	}
+
 	public clickPin(id) {
 
 		if (this.pins.hasOwnProperty(id)) {

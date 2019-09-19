@@ -699,6 +699,14 @@ export class UnityUtil {
 		UnityUtil.toUnity('DropPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
+	public static selectPin(id: string) {
+		UnityUtil.toUnity('SelectPin', UnityUtil.LoadingState.MODEL_LOADING, id);
+	}
+
+	public static deselectPin(id: string) {
+		UnityUtil.toUnity('DeselectPin', UnityUtil.LoadingState.MODEL_LOADING, id);
+	}
+
 	/**
 	 * Enable measuring tool. This will allow you to start measuring by clicking on the model
 	 * @category Measuring tool
