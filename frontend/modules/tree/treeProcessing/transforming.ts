@@ -23,7 +23,7 @@ const getTransformedNodeData = (node) => ({
 		? BACKEND_VISIBILITY_STATES[node.toggleState] : VISIBILITY_STATES.VISIBLE
 });
 
-const getFlattenNested = (tree, maps, idx = 0, level = 1, parentId = null, rootParentId = null) => {
+const getFlattenNested = (tree, maps, data = [], idx = 0, level = 1, parentId = null, rootParentId = null) => {
 	const rowData: INode = {
 		...getTransformedNodeData(tree),
 		namespacedId: getNamespacedId(tree),
@@ -38,7 +38,7 @@ const getFlattenNested = (tree, maps, idx = 0, level = 1, parentId = null, rootP
 	};
 
 	const nodeID = rowData._id;
-	const dataToFlatten = [rowData] as any;
+	data.push(rowData);
 	maps.nodesIndexesMap[nodeID] = idx++;
 	if (tree.children) {
 
@@ -53,12 +53,11 @@ const getFlattenNested = (tree, maps, idx = 0, level = 1, parentId = null, rootP
 			const subTree = tree.children[index];
 			subTree.isModel = isModelNode(level + 1, subTree.isFederation, tree.isFederation);
 
-			const { data: nestedData, deepChildrenNumber, visibility, nextIdx } =
-				getFlattenNested(subTree, maps, idx, level + 1, nodeID, rootParentId);
+			const { deepChildrenNumber, visibility, nextIdx } =
+				getFlattenNested(subTree, maps, data, idx, level + 1, nodeID, rootParentId);
 			rowData.deepChildrenNumber += deepChildrenNumber;
 			idx = nextIdx;
 			rowData.childrenIds.push(subTree._id);
-			dataToFlatten.push(nestedData);
 
 			if (visibility === VISIBILITY_STATES.INVISIBLE) {
 				++nHiddenChildren;
@@ -78,8 +77,6 @@ const getFlattenNested = (tree, maps, idx = 0, level = 1, parentId = null, rootP
 	maps.nodesVisibilityMap[nodeID] = maps.nodesDefaultVisibilityMap[nodeID] = rowData.defaultVisibility;
 	maps.nodesSelectionMap[nodeID] = SELECTION_STATES.UNSELECTED;
 	maps.nodesBySharedIdsMap[rowData.shared_id] = nodeID;
-
-	const data = dataToFlatten.flat();
 
 	return { data, deepChildrenNumber: data.length, visibility: rowData.defaultVisibility, nextIdx: idx };
 };
@@ -133,18 +130,12 @@ export default ({ mainTree, subTrees, subModels, modelsWithMeshes, treePath }) =
 		IS_DEVELOPMENT && console.timeEnd('TREE PRE-PROCESSING NEW');
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.time('TREE PROCESSING NEW');
-		// tslint:disable-next-line
-		IS_DEVELOPMENT && console.time('Flatten Tree');
 		const { data: nodesList } = getFlattenNested(mainTree, auxiliaryMaps);
-		// tslint:disable-next-line
-		IS_DEVELOPMENT && console.timeEnd('Flatten Tree');
 		const meshesByNodeId = getMeshesByNodeId(modelsWithMeshes);
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.timeEnd('TREE PROCESSING NEW');
 		resolve({ nodesList, meshesByNodeId, treePath, ...auxiliaryMaps });
 	} catch (error) {
-		// tslint:disable-next-line
-		console.log(error);
 		reject(error);
 	}
 });
