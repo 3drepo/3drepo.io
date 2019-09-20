@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { Layer, Text, Group, Rect } from 'react-konva';
+import { Layer } from 'react-konva';
 
 import { Container, BackgroundImage, Stage, Textarea } from './screenshotDialog.styles';
 import { COLOR } from '../../../styles';
@@ -331,7 +331,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			if (object.fontSize) {
 				newState.brushSize = object.fontSize;
 			}
-			// this.setState(newState);
+			this.setState(newState);
 	}
 
 	public handleChangeObject = (index, attrs) => {
