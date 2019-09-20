@@ -22,23 +22,32 @@ import { SmallIconButtonStyled } from './smallIconButton.styles';
 interface IProps {
 	onClick?: (event: React.SyntheticEvent) => void;
 	Icon: React.ComponentType;
-	tooltip: string;
+	tooltip?: string;
 	disabled?: boolean;
 }
 
 export class SmallIconButton extends React.PureComponent<IProps, any> {
-	public render() {
+	public renderButton = () => {
 		const { Icon, tooltip, onClick, disabled = false } = this.props;
+
 		return (
-			<Tooltip title={tooltip}>
-				<SmallIconButtonStyled
-					component="span"
-					aria-label={tooltip}
-					onClick={onClick}
-					disabled={disabled}
-					>
-					<Icon />
-				</SmallIconButtonStyled>
+			<SmallIconButtonStyled
+				component="span"
+				aria-label={tooltip}
+				onClick={onClick}
+				disabled={disabled}
+				>
+				<Icon />
+			</SmallIconButtonStyled>
+		);
+	}
+	public render() {
+		if (!this.props.tooltip) {
+			return this.renderButton();
+		}
+		return (
+			<Tooltip title={this.props.tooltip}>
+				{this.renderButton()}
 			</Tooltip>
 		);
 	}

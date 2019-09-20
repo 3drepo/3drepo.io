@@ -15,40 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
+import * as React from 'react';
+import { range } from 'lodash';
 import BorderColorIcon from '@material-ui/icons/BorderColor';
 import ClearIcon from '@material-ui/icons/Clear';
-import { range } from 'lodash';
-import React from 'react';
 import TextIcon from '@material-ui/icons/TextFields';
-import ChangeHistoryIcon from '@material-ui/icons/ChangeHistory';
-import CropSquareIcon from '@material-ui/icons/CropSquare';
-import CloudQueueIcon from '@material-ui/icons/CloudQueue';
-import RemoveIcon from '@material-ui/icons/Remove';
-import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
-import MenuItem from '@material-ui/core/MenuItem';
+import { MenuItem, Tooltip, Select } from '@material-ui/core';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { FONT_WEIGHT } from '../../../../../styles';
+import { Eraser } from '../../../fontAwesomeIcon';
+import { ToolsContainer, OptionsDivider, StyledButton, IconButton } from './tools.styles';
 import { TooltipButton } from '../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { Eraser } from '../../../fontAwesomeIcon';
 import { OptionsDivider, StyledButton, ToolsContainer } from './tools.styles';
-import { FONT_WEIGHT } from '../../../../../styles';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { MODES } from '../../screenshotDialog.helpers';
-import { IconButton, Tooltip } from '@material-ui/core';
-import MoreIcon from '@material-ui/icons/MoreVert';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
-import { MenuList, StyledListItem, StyledItemText } from '../../../filterPanel/components/filtersMenu/filtersMenu.styles';
+import { MenuList } from '../../../filterPanel/components/filtersMenu/filtersMenu.styles';
 import { SmallIconButton } from '../../../smallIconButon/smallIconButton.component';
+import { SHAPES_MENU, activeShapeIcon } from './tools.helpers.tsx';
 import { SHAPE_TYPES } from '../shape/shape.constants';
 
 interface IProps {
 	size: number;
 	color: string;
 	disabled?: boolean;
+	activeShape: number;
+	selectedObjectName: string;
 	onDrawClick: () => void;
 	onEraseClick: () => void;
 	onTextClick: () => void;
@@ -60,37 +55,37 @@ interface IProps {
 	onSave: () => void;
 }
 
-const SHAPES_MENU = [
-	{
-		name: SHAPE_TYPES.RECTANGLE,
-		Icon: CropSquareIcon
-	},
-	{
-		name: SHAPE_TYPES.TRIANGLE,
-		Icon: ChangeHistoryIcon
-	},
-	{
-		name: SHAPE_TYPES.CIRCLE,
-		Icon: PanoramaFishEyeIcon
-	},
-	{
-		name: SHAPE_TYPES.LINE,
-		Icon: RemoveIcon
-	},
-	{
-		name: SHAPE_TYPES.CLOUD,
-		Icon: CloudQueueIcon
-	}
-];
-
 export class Tools extends React.PureComponent<IProps, any> {
 	public state = {
 		activeTool: MODES.BRUSH
 	};
 
+	public get isTextSelected() {
+		return this.props.selectedObjectName.includes('text');
+	}
+
+	public get isShapeSelected() {
+		return this.props.selectedObjectName.includes('shape');
+	}
+
+	public handleToolClick = (activeTool, callback?) => () => {
+		this.setState({ activeTool }, callback);
+	}
+
+	public renderBrushSizes = () => range(56, 1).map((size, index) => (
+		<MenuItem key={index} value={size}>{size}</MenuItem>
+	))
+
+	public getToolColor = (toolType) => {
+		if (this.state.activeTool === toolType) {
+			return 'secondary';
+		}
+		return 'action';
+	}
+
 	public renderToolset = renderWhenTrue(() => {
 		const {
-			size, color, onDrawClick, onEraseClick, onTextClick, onShapeClick, onClearClick, onColorChange, onBrushSizeChange
+			size, color, onDrawClick, onEraseClick, onTextClick, onClearClick, onColorChange, onBrushSizeChange
 		} = this.props;
 
 		return (
@@ -100,6 +95,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 					disableUnderline
 					value={size}
 					onChange={onBrushSizeChange}
+					disabled={this.isShapeSelected}
 					MenuProps={{
 						MenuListProps: {
 							style: {
@@ -133,22 +129,26 @@ export class Tools extends React.PureComponent<IProps, any> {
 				/>
 				<TooltipButton
 					label="Add text"
-					color={this.getToolColor(MODES.TEXT)}
+					color={this.isTextSelected ? this.getToolColor(MODES.TEXT) : 'action'}
 					action={this.handleToolClick(MODES.TEXT, onTextClick)}
 					Icon={TextIcon}
 				/>
 				<ButtonMenu
-					renderButton={({ IconProps, Icon, ...props }) => (
-						<Tooltip title={'Add shape'}>
-							<IconButton
-								{...props}
-								aria-label="Show filters menu"
-								aria-haspopup="true"
-							>
-								<ChangeHistoryIcon {...IconProps} />
-							</IconButton>
-						</Tooltip>
-					)}
+					renderButton={({ IconProps, Icon, ...props }) => {
+						const ActiveIcon = activeShapeIcon(this.props.activeShape || SHAPE_TYPES.RECTANGLE);
+						return (
+							<Tooltip title={'Add shape'}>
+								<IconButton
+									{...props}
+									aria-label="Show filters menu"
+									aria-haspopup="true"
+									color={this.isShapeSelected ? 'secondary' : 'action'}
+								>
+									<ActiveIcon {...IconProps} />
+								</IconButton>
+							</Tooltip>
+						);
+					}}
 					renderContent={this.renderActionsMenu}
 					PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 					PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'center' } }}

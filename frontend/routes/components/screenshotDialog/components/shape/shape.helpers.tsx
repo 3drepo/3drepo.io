@@ -7,31 +7,33 @@ import {
 	RegularPolygon as PolygonComponent
 } from 'react-konva';
 
-const TriangleComponent = React.forwardRef((props, ref) => {
+const TriangleComponent = React.forwardRef((props: any, ref: any) => {
 	return (
 		<PolygonComponent
-			sides={3}
 			{...props}
 			ref={ref}
+			sides={3}
 		/>
 	);
 });
 
-const LineComponent = React.forwardRef((props, ref) => {
-	return (<RectangleComponent
-		{...props}
-		ref={ref}
-		height={0}
-		fill={props.color}
-	/>);
-});
-
-const CloudComponent = React.forwardRef((props, ref) => {
+const LineComponent = React.forwardRef((props: any, ref: any) => {
 	return (
-		<ShapeComponent
-			sceneFunc={drawCloud}
+		<RectangleComponent
 			{...props}
 			ref={ref}
+			height={0}
+			fill={props.color}
+		/>
+	);
+});
+
+const CloudComponent = React.forwardRef((props: any, ref: any) => {
+	return (
+		<ShapeComponent
+			{...props}
+			ref={ref}
+			sceneFunc={drawCloud}
 		/>
 	);
 });

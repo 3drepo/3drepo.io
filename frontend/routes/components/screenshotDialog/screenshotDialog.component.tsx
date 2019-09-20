@@ -23,16 +23,16 @@ import { COLOR } from '../../../styles';
 import { Drawing } from './components/drawing/drawing.component';
 import { Shape } from './components/shape/shape.component';
 import { TextNode } from './components/textNode/textNode.component';
-import { TransformerComponent } from './components/transformer/transformer.component';
 import { Tools } from './components/tools/tools.component';
 import { MODES } from './screenshotDialog.helpers';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { SHAPE_TYPES } from './components/shape/shape.constants';
+import { Indicator } from './components/indicator/indicator.component';
 
 const INITIAL_VALUES = {
-	color: COLOR.RED,
-	brushColor: COLOR.RED,
-	brushSize: 20,
+	color: COLOR.PRIMARY_DARK,
+	brushColor: COLOR.PRIMARY_DARK,
+	brushSize: 5,
 	mode: MODES.BRUSH
 };
 
@@ -49,7 +49,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		brushSize: INITIAL_VALUES.brushSize,
 		brushColor: INITIAL_VALUES.color,
 		mode: INITIAL_VALUES.mode,
-		activeShape: SHAPE_TYPES.RECTANGLE,
+		activeShape: null,
 		sourceImage: '',
 		stage: {
 			height: 0,
@@ -80,6 +80,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public get stage() {
 		return this.stageRef.current;
+	}
+
+	public get isDrawingMode() {
+		return this.state.mode === MODES.BRUSH || this.state.mode === MODES.ERASER;
 	}
 
 	public setStageSize = () => {
@@ -129,18 +133,38 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.setState(newState);
 	}
 
-	public clearCanvas = () => {};
+	public clearCanvas = () => {
+		this.stage.clear();
+		this.layer.clear();
+		this.stage.clearCache();
+		this.layer.clearCache();
+		this.layer.destroyChildren();
+	}
 
 	public handleSave = async () => {};
 
-	public setMode = (mode) => { this.setState({ mode }); };
-
 	public setBrushMode = () => {
-		this.setMode(MODES.BRUSH);
+		const newState = {
+			mode: this.state.mode === MODES.BRUSH ? '' : MODES.BRUSH
+		} as any;
+
+		if (this.state.selectedObjectName) {
+			newState.selectedObjectName = '';
+		}
+
+		this.setState(newState);
 	}
 
 	public setEraserMode = () => {
-		this.setMode(MODES.ERASER);
+		const newState = {
+			mode: this.state.mode === MODES.ERASER ? '' : MODES.ERASER
+		} as any;
+
+		if (this.state.selectedObjectName) {
+			newState.selectedObjectName = '';
+		}
+
+		this.setState(newState);
 	}
 
 	public setShapeMode = (shape) => {
@@ -255,11 +279,18 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			text: 'New text',
 			color: this.state.color,
 			name: `text-${this.state.objects.length}`,
-			fontSize: this.state.brushSize,
-			fontFamily: 'Arial'
+			fontSize: 20,
+			fontFamily: 'Arial',
+			x: this.stage.attrs.width / 2 - 200 / 2,
+			y: this.stage.attrs.height / 2 - 50
 		};
 
-		this.setState({ objects: [...this.state.objects, newText] });
+		this.setState({
+			objects: [...this.state.objects, newText],
+			selectedObjectName: newText.name,
+			mode: MODES.TEXT,
+			brushSize: newText.fontSize
+		});
 	}
 
 	public addNewShape = (shape) => {
@@ -282,20 +313,25 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			newShape.width = 264;
 		}
 
-		this.setState({ objects: [...this.state.objects, newShape] });
+		this.setState({
+			objects: [...this.state.objects, newShape],
+			selectedObjectName: newShape.name,
+			mode: MODES.SHAPE
+		});
 	}
 
 	public handleSelectObject = (object) => {
-		const newState = {
-			selectedObjectName: object.name,
-			brushColor: object.color,
-			color: object.color
-		} as any;
+			const newState = {
+				selectedObjectName: object.name,
+				brushColor: object.color,
+				color: object.color,
+				mode: MODES.SHAPE
+			} as any;
 
-		if (object.fontSize) {
-			newState.brushSize = object.fontSize;
-		}
-		this.setState(newState);
+			if (object.fontSize) {
+				newState.brushSize = object.fontSize;
+			}
+			// this.setState(newState);
 	}
 
 	public handleChangeObject = (index, attrs) => {
@@ -336,7 +372,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 						}
 
 						return (
-							<Shape key={index} {...commonProps} />
+							<Shape key={index} {...commonProps} isDrawingMode={this.isDrawingMode} />
 						);
 					}
 				)}
@@ -385,6 +421,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			onCancel={this.props.handleClose}
 			onSave={this.handleSave}
 			disabled={this.props.disabled}
+			activeShape={this.state.activeShape}
+			selectedObjectName={this.state.selectedObjectName}
 		/>
 	)
 
@@ -433,12 +471,17 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		/>
 	));
 
+	public renderIndicator = renderWhenTrue(() => (
+		<Indicator color={this.state.color} size={this.state.brushSize} />
+	));
+
 	public render() {
-		const { sourceImage, stage, color } = this.state;
+		const { sourceImage, stage } = this.state;
 
 		return (
 			<Container innerRef={this.containerRef}>
 				<BackgroundImage src={sourceImage} />
+				{this.renderIndicator(!this.props.disabled && this.isDrawingMode)}
 				{this.renderTools()}
 				<Stage innerRef={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
 					<Layer ref={this.layerRef}>

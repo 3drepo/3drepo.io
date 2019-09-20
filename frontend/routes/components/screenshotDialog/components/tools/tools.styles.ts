@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
+import { Divider, Button, IconButton as IconButtonComponent } from '@material-ui/core';
 
 import { COLOR } from '../../../../../styles';
 import * as ColorPickerStyles from '../../../../components/colorPicker/colorPicker.styles';
@@ -66,5 +65,25 @@ export const OptionsDivider = styled(Divider)`
 		height: 48px;
 		width: 1px;
 		opacity: 0.5;
+	}
+`;
+
+export const IconButton = styled(IconButtonComponent).attrs({
+	classes: {
+		iconButton: 'tools_button'
+	}
+})`
+	.tools_button {
+		background: ${COLOR.BLACK_60};
+		opacity: 1;
+
+		&&::after {
+			content: " 🦄";
+			position: absolute;
+			left: 0;
+			top: -3px;
+			height: 3px;
+			width: 100%;
+		}
 	}
 `;

@@ -23,17 +23,18 @@ import { SHAPE_COMPONENTS, SHAPE_TYPES } from './shape.constants';
 interface IProps {
 	object: any;
 	isSelected: boolean;
+	isDrawingMode: boolean;
 	handleSelect: (props: any) => void;
 	handleChange: (props: any) => void;
 }
 
-export const Shape = ({ object, isSelected, handleSelect, handleChange }: IProps) => {
+export const Shape = ({ object, isSelected, handleSelect, handleChange, isDrawingMode }: IProps) => {
 	const { color, figure, ...objectProps } = object;
 	const shape = React.useRef<any>();
 	const transformer = React.useRef<any>();
 
 	React.useEffect(() => {
-		if (isSelected) {
+		if (isSelected && !isDrawingMode) {
 			transformer.current.setNode(shape.current);
 			transformer.current.getLayer().batchDraw();
 		}
@@ -78,23 +79,28 @@ export const Shape = ({ object, isSelected, handleSelect, handleChange }: IProps
 		}
 	};
 
+	const handleClick = (e) => {
+		handleSelect(e);
+	};
+
 	const Component = SHAPE_COMPONENTS[figure];
 	const transformerProps = isLine ? { enabledAnchors: ['top-left', 'top-right'] } : {};
 
 	return (
 		<React.Fragment>
 			<Component
-				onClick={handleSelect}
 				ref={shape}
 				{...objectProps}
 				stroke={color}
 				strokeWidth={5}
-				draggable
+				draggable={!isDrawingMode}
+				transformer={transformer}
+				onClick={handleClick}
+				onDragStart={handleClick}
 				onDragEnd={handleDragEnd}
 				onTransformEnd={handleTransformEnd}
-				transformer={transformer}
 			/>
-			{isSelected && <Transformer ref={transformer} {...transformerProps} keepRatio centeredScaling />}
+			{(isSelected && !isDrawingMode) && <Transformer ref={transformer} {...transformerProps} keepRatio centeredScaling />}
 		</React.Fragment>
 	);
 };
