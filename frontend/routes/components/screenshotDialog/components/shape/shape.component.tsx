@@ -16,17 +16,19 @@
  */
 
 import * as React from 'react';
-import { Rect, Transformer } from 'react-konva';
+import { Transformer } from 'react-konva';
+import { drawCloud } from './shape.helpers';
+import { SHAPE_COMPONENTS, SHAPE_TYPES } from './shape.constants';
 
 interface IProps {
 	object: any;
 	isSelected: boolean;
-	onSelect: (props: any) => void;
-	onChange: (props: any) => void;
+	handleSelect: (props: any) => void;
+	handleChange: (props: any) => void;
 }
 
-export const Shape = ({ object, isSelected, onSelect, onChange }: IProps) => {
-	const { color, ...objectProps } = object;
+export const Shape = ({ object, isSelected, handleSelect, handleChange }: IProps) => {
+	const { color, figure, ...objectProps } = object;
 	const shape = React.useRef<any>();
 	const transformer = React.useRef<any>();
 
@@ -37,40 +39,62 @@ export const Shape = ({ object, isSelected, onSelect, onChange }: IProps) => {
 		}
 	}, [isSelected]);
 
-	const Component = Rect;
+	const isLine = figure === SHAPE_TYPES.LINE;
+
+	const handleDragEnd = (e) => {
+		handleChange({
+			...object,
+			x: e.target.x(),
+			y: e.target.y()
+		});
+	};
+
+	const handleTransformEnd = () => {
+		const node = shape.current;
+		const scaleX = node.scaleX();
+		const scaleY = node.scaleY();
+
+		if (isLine) {
+			node.scaleX(1);
+			node.scaleY(1);
+		} else {
+			node.scaleX(scaleX);
+			node.scaleY(scaleY);
+		}
+
+		if (figure === SHAPE_TYPES.CLOUD) {
+			handleChange({
+				...object,
+				sceneFunc: drawCloud
+			});
+		} else {
+			handleChange({
+				...object,
+				x: node.x(),
+				y: node.y(),
+				width: isLine ? node.width() * scaleX : node.width(),
+				height: isLine ? node.height() * scaleY : node.height()
+			});
+		}
+	};
+
+	const Component = SHAPE_COMPONENTS[figure];
+	const transformerProps = isLine ? { enabledAnchors: ['top-left', 'top-right'] } : {};
 
 	return (
-		<>
+		<React.Fragment>
 			<Component
-				onClick={onSelect}
+				onClick={handleSelect}
 				ref={shape}
 				{...objectProps}
 				stroke={color}
+				strokeWidth={5}
 				draggable
-				onDragEnd={(e) => {
-					onChange({
-						...object,
-						x: e.target.x(),
-						y: e.target.y()
-					});
-				}}
-				onTransformEnd={() => {
-					const node = shape.current;
-					const scaleX = node.scaleX();
-					const scaleY = node.scaleY();
-					node.scaleX(1);
-					node.scaleY(1);
-
-					onChange({
-						...object,
-						x: node.x(),
-						y: node.y(),
-						width: node.width() * scaleX,
-						height: node.height() * scaleY
-					});
-				}}
+				onDragEnd={handleDragEnd}
+				onTransformEnd={handleTransformEnd}
+				transformer={transformer}
 			/>
-			{isSelected && <Transformer ref={transformer} />}
-		</>
+			{isSelected && <Transformer ref={transformer} {...transformerProps} keepRatio centeredScaling />}
+		</React.Fragment>
 	);
 };

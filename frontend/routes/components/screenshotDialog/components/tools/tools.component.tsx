@@ -23,6 +23,10 @@ import { range } from 'lodash';
 import React from 'react';
 import TextIcon from '@material-ui/icons/TextFields';
 import ChangeHistoryIcon from '@material-ui/icons/ChangeHistory';
+import CropSquareIcon from '@material-ui/icons/CropSquare';
+import CloudQueueIcon from '@material-ui/icons/CloudQueue';
+import RemoveIcon from '@material-ui/icons/Remove';
+import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
@@ -34,6 +38,12 @@ import { OptionsDivider, StyledButton, ToolsContainer } from './tools.styles';
 import { FONT_WEIGHT } from '../../../../../styles';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { MODES } from '../../screenshotDialog.helpers';
+import { IconButton, Tooltip } from '@material-ui/core';
+import MoreIcon from '@material-ui/icons/MoreVert';
+import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
+import { MenuList, StyledListItem, StyledItemText } from '../../../filterPanel/components/filtersMenu/filtersMenu.styles';
+import { SmallIconButton } from '../../../smallIconButon/smallIconButton.component';
+import { SHAPE_TYPES } from '../shape/shape.constants';
 
 interface IProps {
 	size: number;
@@ -42,13 +52,36 @@ interface IProps {
 	onDrawClick: () => void;
 	onEraseClick: () => void;
 	onTextClick: () => void;
-	onShapeClick: () => void;
+	onShapeClick: (shapeName) => void;
 	onClearClick: () => void;
 	onColorChange: (color) => void;
 	onBrushSizeChange: (size) => void;
 	onCancel: () => void;
 	onSave: () => void;
 }
+
+const SHAPES_MENU = [
+	{
+		name: SHAPE_TYPES.RECTANGLE,
+		Icon: CropSquareIcon
+	},
+	{
+		name: SHAPE_TYPES.TRIANGLE,
+		Icon: ChangeHistoryIcon
+	},
+	{
+		name: SHAPE_TYPES.CIRCLE,
+		Icon: PanoramaFishEyeIcon
+	},
+	{
+		name: SHAPE_TYPES.LINE,
+		Icon: RemoveIcon
+	},
+	{
+		name: SHAPE_TYPES.CLOUD,
+		Icon: CloudQueueIcon
+	}
+];
 
 export class Tools extends React.PureComponent<IProps, any> {
 	public state = {
@@ -104,17 +137,42 @@ export class Tools extends React.PureComponent<IProps, any> {
 					action={this.handleToolClick(MODES.TEXT, onTextClick)}
 					Icon={TextIcon}
 				/>
-				<TooltipButton
-					label="Add shape"
-					color={this.getToolColor(MODES.SHAPE)}
-					action={this.handleToolClick(MODES.SHAPE, onShapeClick)}
-					Icon={ChangeHistoryIcon}
+				<ButtonMenu
+					renderButton={({ IconProps, Icon, ...props }) => (
+						<Tooltip title={'Add shape'}>
+							<IconButton
+								{...props}
+								aria-label="Show filters menu"
+								aria-haspopup="true"
+							>
+								<ChangeHistoryIcon {...IconProps} />
+							</IconButton>
+						</Tooltip>
+					)}
+					renderContent={this.renderActionsMenu}
+					PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+					PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'center' } }}
+					ButtonProps={{ disabled: false }}
 				/>
 				<TooltipButton label="Clear" action={onClearClick} Icon={ClearIcon} />
 				<OptionsDivider />
 			</>
 		);
 	});
+
+	public renderActionsMenu = () =>  {
+		return(
+			<MenuList>
+				{SHAPES_MENU.map(({ name, Icon }) => (
+					<SmallIconButton
+						Icon={Icon}
+						key={name}
+						onClick={this.handleToolClick(MODES.SHAPE, () => this.props.onShapeClick(name))}
+					/>
+				))}
+			</MenuList>
+		);
+	}
 
 	public renderSaveButton = renderWhenTrue(() => (
 		<StyledButton onClick={this.props.onSave} color="secondary" variant="raised">Save</StyledButton>

@@ -22,12 +22,12 @@ interface IProps {
 	object: any;
 	isSelected: boolean;
 	isVisible: boolean;
-	onSelect: (props: any) => void;
-	onChange: (props: any) => void;
+	handleSelect: (props: any) => void;
+	handleChange: (props: any) => void;
 	handleDoubleClick: (props: any) => void;
 }
 
-export const TextNode = ({ object, isSelected, onSelect, onChange, handleDoubleClick, isVisible }: IProps) => {
+export const TextNode = ({ object, isSelected, handleSelect, handleChange, handleDoubleClick, isVisible }: IProps) => {
 	const { color, ...objectProps } = object;
 	const shape = React.useRef<any>();
 	const transformer = React.useRef<any>();
@@ -42,7 +42,7 @@ export const TextNode = ({ object, isSelected, onSelect, onChange, handleDoubleC
 	return (
 		<>
 			<Text
-				onClick={onSelect}
+				onClick={handleSelect}
 				ref={shape}
 				{...objectProps}
 				fill={color}
@@ -50,7 +50,7 @@ export const TextNode = ({ object, isSelected, onSelect, onChange, handleDoubleC
 				visible={isVisible}
 				onDblClick={handleDoubleClick}
 				onDragEnd={(e) => {
-					onChange({
+					handleChange({
 						...object,
 						x: e.target.x(),
 						y: e.target.y()
@@ -62,7 +62,7 @@ export const TextNode = ({ object, isSelected, onSelect, onChange, handleDoubleC
 					const scaleY = node.scaleY();
 					node.scaleX(1);
 					node.scaleY(1);
-					onChange({
+					handleChange({
 						...object,
 						x: node.x(),
 						y: node.y(),

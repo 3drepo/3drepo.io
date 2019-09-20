@@ -27,6 +27,7 @@ import { TransformerComponent } from './components/transformer/transformer.compo
 import { Tools } from './components/tools/tools.component';
 import { MODES } from './screenshotDialog.helpers';
 import { renderWhenTrue } from '../../../helpers/rendering';
+import { SHAPE_TYPES } from './components/shape/shape.constants';
 
 const INITIAL_VALUES = {
 	color: COLOR.RED,
@@ -48,6 +49,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		brushSize: INITIAL_VALUES.brushSize,
 		brushColor: INITIAL_VALUES.color,
 		mode: INITIAL_VALUES.mode,
+		activeShape: SHAPE_TYPES.RECTANGLE,
 		sourceImage: '',
 		stage: {
 			height: 0,
@@ -141,9 +143,17 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.setMode(MODES.ERASER);
 	}
 
-	public setShapeMode = () => {
-		this.setState({ mode: MODES.SHAPE }, () => {
-			this.addNewFigure();
+	public setShapeMode = (shape) => {
+		const newState = {
+			activeShape: shape
+		} as any;
+
+		if (this.state.mode !== MODES.SHAPE) {
+			newState.mode = MODES.SHAPE;
+		}
+
+		this.setState(newState, () => {
+			this.addNewShape(shape);
 		});
 	}
 
@@ -252,10 +262,11 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.setState({ objects: [...this.state.objects, newText] });
 	}
 
-	public addNewFigure = () => {
-		const newFigure = {
-			type: 'figure',
-			name: `figure-${this.state.objects.length}`,
+	public addNewShape = (shape) => {
+		const newShape = {
+			type: 'shape',
+			figure: shape,
+			name: `shape-${this.state.objects.length}`,
 			width: 200,
 			height: 200,
 			color: this.state.color,
@@ -263,7 +274,34 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			y: this.stage.attrs.height / 2 - 50
 		};
 
-		this.setState({ objects: [...this.state.objects, newFigure] });
+		if (shape === SHAPE_TYPES.LINE) {
+			newShape.height = 0;
+			newShape.width = 300;
+		} else if (shape === SHAPE_TYPES.CLOUD) {
+			newShape.height = 150;
+			newShape.width = 264;
+		}
+
+		this.setState({ objects: [...this.state.objects, newShape] });
+	}
+
+	public handleSelectObject = (object) => {
+		const newState = {
+			selectedObjectName: object.name,
+			brushColor: object.color,
+			color: object.color
+		} as any;
+
+		if (object.fontSize) {
+			newState.brushSize = object.fontSize;
+		}
+		this.setState(newState);
+	}
+
+	public handleChangeObject = (index, attrs) => {
+		const objects = this.state.objects.slice();
+		objects[index] = attrs;
+		this.setState({ objects });
 	}
 
 	public renderObjects = () => {
@@ -274,24 +312,16 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				{
 					this.state.objects.map((object, index) => {
 						const textIndex = `text-${index}`;
-						const figureIndex = `figure-${index}`;
+						const shapeIndex = `shape-${index}`;
 						const isSelectedText = selectedObjectName === textIndex;
-						const isSelectedFigure = selectedObjectName === figureIndex;
-						const isVisible = isSelectedFigure || !(textEditable.visible && isSelectedText);
+						const isSelectedShape = selectedObjectName === shapeIndex;
+						const isVisible = isSelectedShape || !(textEditable.visible && isSelectedText);
 
 						const commonProps = {
 							object,
 							isSelected: object.name === selectedObjectName,
-							onSelect: () => {
-								this.setState({
-									selectedObjectName: object.name
-								});
-							},
-							onChange: (newAttrs) => {
-								const objects = this.state.objects.slice();
-								objects[index] = newAttrs;
-								this.setState({ objects });
-							}
+							handleSelect: () => this.handleSelectObject(object),
+							handleChange: (newAttrs) => this.handleChangeObject(index, newAttrs)
 						};
 
 						if (object.type === 'text') {
