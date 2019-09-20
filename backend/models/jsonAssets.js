@@ -28,18 +28,19 @@ const Stream = require("stream");
 
 const JSONAssets = {};
 
-function getSubTreeInfo(account, model, currentIds) {
-	return Ref.getRefNodes(account, model, currentIds).then((subModelRefs) => {
-		const subTreeInfo = [];
-		subModelRefs.forEach((ref) => {
-			subTreeInfo.push({
-				_id: utils.uuidToString(ref._id),
-				rid: utils.uuidToString(ref._rid),
-				teamspace:ref.owner,
-				model: ref.project});
-		});
-		return subTreeInfo;
+async function getSubTreeInfo(account, model, currentIds) {
+	const subModelRefs = await Ref.getRefNodes(account, model, currentIds);
+	const subTreeInfo = [];
+	subModelRefs.forEach((ref) => {
+		const prom = History.findLatest({account: ref.owner, model: ref.project}, {_id: 1}).then((rev) => ({
+			_id: utils.uuidToString(ref._id),
+			rid: utils.uuidToString(rev ? rev._id : ref._rid),
+			teamspace:ref.owner,
+			model: ref.project
+		}));
+		subTreeInfo.push(prom);
 	});
+	return Promise.all(subTreeInfo);
 }
 
 function getFileFromSubModels(account, model, currentIds, username, filename) {
@@ -180,6 +181,7 @@ JSONAssets.getTree = function(account, model, branch, rev) {
 			const treeFileName = `${revId}/fulltree.json`;
 			const mainTreePromise = FileRef.getJSONFileStream(account, model, treeFileName);
 			const subTreesPromise = getSubTreeInfo(account, model, history.current);
+			let isFed = false;
 
 			return mainTreePromise.then((file) => {
 				const outStream = Stream.PassThrough();
@@ -194,6 +196,7 @@ JSONAssets.getTree = function(account, model, branch, rev) {
 				}).then(() => {
 					return subTreesPromise.then((subTreeInfo) => {
 						outStream.write(", \"subTrees\":[");
+						isFed = !!subTreeInfo.length;
 						for(let i = 0; i < subTreeInfo.length; ++i) {
 							if(subTreeInfo[i]) {
 								if(i > 0) {
@@ -214,7 +217,8 @@ JSONAssets.getTree = function(account, model, branch, rev) {
 					outStream.emit("error", err);
 					outStream.end();
 				});
-				return file;
+
+				return { file, isFed } ;
 
 			});
 		} else {
