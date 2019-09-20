@@ -40,6 +40,8 @@ const getFlattenNested = (tree, maps, data = [], idx = 0, level = 1, parentId = 
 	const nodeID = rowData._id;
 	data.push(rowData);
 	maps.nodesIndexesMap[nodeID] = idx++;
+	const currentNodeIdx = idx;
+
 	if (tree.children) {
 
 		const hasChildren = tree.children.some((child) => Boolean(child.name));
@@ -78,7 +80,7 @@ const getFlattenNested = (tree, maps, data = [], idx = 0, level = 1, parentId = 
 	maps.nodesSelectionMap[nodeID] = SELECTION_STATES.UNSELECTED;
 	maps.nodesBySharedIdsMap[rowData.shared_id] = nodeID;
 
-	return { data, deepChildrenNumber: data.length, visibility: rowData.defaultVisibility, nextIdx: idx };
+	return { data, deepChildrenNumber: data.length - currentNodeIdx, visibility: rowData.defaultVisibility, nextIdx: idx };
 };
 
 const getMeshesByNodeId = (modelsWithMeshes) => {
