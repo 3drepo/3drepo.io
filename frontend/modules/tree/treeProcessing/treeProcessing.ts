@@ -17,12 +17,12 @@ class TreeProcessing {
 		this.processing = new Processing({
 			nodesList,
 			treePath,
-			nodesIndexesMap: { ...auxiliaryMaps.nodesIndexesMap },
-			defaultVisibilityMap: { ...auxiliaryMaps.nodesDefaultVisibilityMap },
-			meshesByNodeId: { ...auxiliaryMaps.meshesByNodeId },
-			visibilityMap: { ...auxiliaryMaps.nodesVisibilityMap },
-			selectionMap: { ...auxiliaryMaps.nodesSelectionMap },
-			nodesBySharedIdsMap: { ...auxiliaryMaps.nodesBySharedIdsMap }
+			nodesIndexesMap: auxiliaryMaps.nodesIndexesMap,
+			defaultVisibilityMap: auxiliaryMaps.nodesDefaultVisibilityMap,
+			meshesByNodeId: auxiliaryMaps.meshesByNodeId,
+			visibilityMap: auxiliaryMaps.nodesVisibilityMap,
+			selectionMap: auxiliaryMaps.nodesSelectionMap,
+			nodesBySharedIdsMap: auxiliaryMaps.nodesBySharedIdsMap
 		});
 		console.timeEnd('INIT TREE SERVICE');
 		return { nodesList, treePath, auxiliaryMaps };
