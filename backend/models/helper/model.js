@@ -309,9 +309,9 @@ function createNewModel(teamspace, modelName, data) {
 	});
 }
 
-function createNewFederation(teamspace, modelName, data, toyFed) {
+function createNewFederation(teamspace, modelName, username, data, toyFed) {
 	return createNewModel(teamspace, modelName, data).then((modelInfo) => {
-		return createFederatedModel(teamspace, modelInfo.settings._id, data.subModels, modelInfo.settings, toyFed).then(() => {
+		return createFederatedModel(teamspace, modelInfo.settings._id, username, data.subModels, modelInfo.settings, toyFed).then(() => {
 			return modelInfo;
 		});
 	});
@@ -408,7 +408,7 @@ function importToyModel(account, username, modelName, modelDirName, project, sub
 	});
 }
 
-function createFederatedModel(account, model, subModels, modelSettings, toyFed) {
+function createFederatedModel(account, model, username, subModels, modelSettings, toyFed) {
 
 	const addSubModelsPromise = [];
 	const subModelArr = [];
@@ -450,17 +450,19 @@ function createFederatedModel(account, model, subModels, modelSettings, toyFed) 
 	return Promise.all(addSubModelsPromise).then(() => {
 		return fedSettings.then((settings) => {
 			return createCorrelationId(settings, true).then(correlationId => {
-				const federatedJSON = {
-					database: account,
-					project: model,
-					subProjects: subModelArr
-				};
+				setStatus(account, model, "queued", username).then(() => {
+					const federatedJSON = {
+						database: account,
+						project: model,
+						subProjects: subModelArr
+					};
 
-				if(toyFed) {
-					federatedJSON.toyFed = toyFed;
-				}
+					if(toyFed) {
+						federatedJSON.toyFed = toyFed;
+					}
 
-				return importQueue.createFederatedModel(correlationId, account, federatedJSON);
+					return importQueue.createFederatedModel(correlationId, account, federatedJSON);
+				});
 			});
 		});
 

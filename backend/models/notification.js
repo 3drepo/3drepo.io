@@ -106,7 +106,7 @@ const extractTeamSpaceInfo = function(notifications) {
 	return _.mapValues(_.groupBy(notifications, "teamSpace"), (notification) => _.map(notification, v => v.modelId));
 };
 
-const fillModelNames = function(fullNotifications) {
+const fillModelData = function(fullNotifications) {
 	let notifications = [];
 
 	// this handles then  the fullNotifications areW
@@ -119,11 +119,11 @@ const fillModelNames = function(fullNotifications) {
 	}
 
 	const teamSpaces = extractTeamSpaceInfo(notifications);
-	return  modelSettings.getModelsName(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
+	return  modelSettings.getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
 		notifications.forEach (notification => {
 			const teamSpace = (modelsData[notification.teamSpace] || {});
-			const modelName = teamSpace[notification.modelId];
-			Object.assign(notification, {modelName});
+			const {name, federate} = teamSpace[notification.modelId];
+			Object.assign(notification, {modelName: name, federation: federate});
 		});
 
 		return fullNotifications;
@@ -257,7 +257,7 @@ module.exports = {
 			rs.users.map(createAssignedIssueNotification(username, teamSpace, modelId, issue._id, notifications))
 		);
 
-		notifications =  await fillModelNames(notifications);
+		notifications =  await fillModelData(notifications);
 		return notifications;
 	},
 
@@ -286,7 +286,7 @@ module.exports = {
 			return ({username, notification});
 		}));
 
-		return await fillModelNames(notifications);
+		return await fillModelData(notifications);
 	},
 
 	/**
@@ -302,7 +302,7 @@ module.exports = {
 		const data = {teamSpace,  modelId, errorMessage};
 		const notification = await insertNotification(username, types.MODEL_UPDATED_FAILED, data);
 		const notifications = [{username, notification}];
-		return fillModelNames(notifications);
+		return fillModelData(notifications);
 	},
 
 	removeAssignedNotifications : function(username, teamSpace, modelId, issue) {
@@ -326,7 +326,7 @@ module.exports = {
 						Object.assign({username:u}, n))))
 					.then(notifications => notifications.reduce((a,c) => ! c.notification ? a : a.concat(c), []))
 					.then(usersNotifications => {
-						return fillModelNames(usersNotifications);
+						return fillModelData(usersNotifications);
 					});
 			});
 	},
@@ -354,7 +354,7 @@ module.exports = {
 			})).then(notifications => notifications.reduce((a, c) => !c.notification ? a : a.concat(c), []));
 
 		// Fill model names for the deleted, issues/notifications.
-		return await fillModelNames(filterRolesToNotifications);
+		return await fillModelData(filterRolesToNotifications);
 	},
 
 	upsertIssueClosedNotifications: async function (username, teamSpace, modelId, issue) {
@@ -384,7 +384,7 @@ module.exports = {
 				});
 		}));
 
-		return await fillModelNames(userNotifications);
+		return await fillModelData(userNotifications);
 	},
 
 	/**
@@ -399,6 +399,6 @@ module.exports = {
 		}
 
 		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) => collection.find(criteria, {sort: {timestamp: -1}}).toArray())
-			.then(fillModelNames);
+			.then(fillModelData);
 	}
 };

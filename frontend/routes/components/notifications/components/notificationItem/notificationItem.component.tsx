@@ -42,6 +42,7 @@ export interface INotification {
 	revisions?: string[];
 	timestamp: number;
 	errorMessage?: string;
+	federation?: boolean;
 }
 
 const TYPES = {
@@ -100,24 +101,37 @@ const getIcon = (notification) => {
 	}
 };
 
+const getModelUpdatedDetails = (notification: IProps) => {
+	if (notification.revision && !notification.revisions ||
+		(!notification.revision && notification.revisions && notification.revisions.length === 1)
+		) {
+		const revision =  notification.revision || notification.revisions[0];
+		return `Revision ${revision} uploaded`;
+	}
+
+	if (notification.revisions && notification.revisions.length) {
+		const revisionsCount = notification.revisions.length + (notification.revision ? 1 : 0);
+		return `${revisionsCount} revisions has been uploaded`;
+	}
+
+	return 'New revision uploaded';
+};
+
+const getFederationUpdatedDetails = ({modelName}: IProps) => {
+	return `The federation was updated`;
+};
+
 const getDetails = (notification: IProps) => {
 	switch (notification.type) {
 		case TYPES.ISSUE_ASSIGNED:
 			return `${notification.issuesId.length} assigned issues `;
 		case TYPES.MODEL_UPDATED:
-			if (notification.revision && !notification.revisions ||
-				(!notification.revision && notification.revisions && notification.revisions.length === 1)
-				) {
-				const revision =  notification.revision || notification.revisions[0];
-				return `Revision ${revision} uploaded`;
+			if (!notification.federation) {
+				return getModelUpdatedDetails(notification);
+			} else {
+				return getFederationUpdatedDetails(notification);
 			}
 
-			if (notification.revisions && notification.revisions.length) {
-				const revisionsCount = notification.revisions.length + (notification.revision ? 1 : 0);
-				return `${revisionsCount} revisions has been uploaded`;
-			}
-
-			return 'New revision uploaded';
 		case TYPES.MODEL_UPDATED_FAILED:
 			return 'New revision failed to import';
 		case TYPES.ISSUE_CLOSED:
