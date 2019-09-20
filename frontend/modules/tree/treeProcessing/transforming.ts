@@ -23,7 +23,7 @@ const getTransformedNodeData = (node) => ({
 		? BACKEND_VISIBILITY_STATES[node.toggleState] : VISIBILITY_STATES.VISIBLE
 });
 
-const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null) => {
+const getFlattenNested = (tree, maps, idx = 0, level = 1, parentId = null, rootParentId = null) => {
 	const rowData: INode = {
 		...getTransformedNodeData(tree),
 		namespacedId: getNamespacedId(tree),
@@ -37,12 +37,14 @@ const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null)
 		childrenIds: []
 	};
 
+	const nodeID = rowData._id;
 	const dataToFlatten = [rowData] as any;
+	maps.nodesIndexesMap[nodeID] = idx++;
 	if (tree.children) {
 
 		const hasChildren = tree.children.some((child) => Boolean(child.name));
 		rowData.hasChildren = hasChildren;
-		rootParentId = rowData.isModel ? rowData._id : rootParentId;
+		rootParentId = rowData.isModel ? nodeID : rootParentId;
 
 		let nHiddenChildren = 0;
 		rowData.defaultVisibility = rowData.defaultVisibility || VISIBILITY_STATES.VISIBLE;
@@ -51,9 +53,10 @@ const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null)
 			const subTree = tree.children[index];
 			subTree.isModel = isModelNode(level + 1, subTree.isFederation, tree.isFederation);
 
-			const { data: nestedData, deepChildrenNumber, visibility } =
-				getFlattenNested(subTree, level + 1, tree._id, rootParentId);
+			const { data: nestedData, deepChildrenNumber, visibility, nextIdx } =
+				getFlattenNested(subTree, maps, idx, level + 1, nodeID, rootParentId);
 			rowData.deepChildrenNumber += deepChildrenNumber;
+			idx = nextIdx;
 			rowData.childrenIds.push(subTree._id);
 			dataToFlatten.push(nestedData);
 
@@ -72,30 +75,13 @@ const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null)
 
 	}
 
+	maps.nodesVisibilityMap[nodeID] = maps.nodesDefaultVisibilityMap[nodeID] = rowData.defaultVisibility;
+	maps.nodesSelectionMap[nodeID] = SELECTION_STATES.UNSELECTED;
+	maps.nodesBySharedIdsMap[rowData.shared_id] = nodeID;
+
 	const data = dataToFlatten.flat();
 
-	return { data, deepChildrenNumber: data.length, visibility: rowData.defaultVisibility };
-};
-
-const getAuxiliaryMaps = (nodesList) => {
-	const maps = {
-		nodesIndexesMap: {},
-		nodesVisibilityMap: {},
-		nodesSelectionMap: {},
-		nodesBySharedIdsMap: {},
-		nodesDefaultVisibilityMap: {}
-	} as any;
-
-	for (let i = 0; i < nodesList.length; ++i ) {
-		const node = nodesList[i];
-		maps.nodesIndexesMap[node._id] = i;
-		maps.nodesVisibilityMap[node._id] = node.defaultVisibility;
-		maps.nodesDefaultVisibilityMap[node._id] = node.defaultVisibility;
-		maps.nodesSelectionMap[node._id] = SELECTION_STATES.UNSELECTED;
-		maps.nodesBySharedIdsMap[node.shared_id] = node._id;
-	}
-
-	return maps;
+	return { data, deepChildrenNumber: data.length, visibility: rowData.defaultVisibility, nextIdx: idx };
 };
 
 const getMeshesByNodeId = (modelsWithMeshes) => {
@@ -135,30 +121,30 @@ export default ({ mainTree, subTrees, subModels, modelsWithMeshes, treePath }) =
 			}
 		}
 
+		const auxiliaryMaps = {
+			nodesIndexesMap: {},
+			nodesVisibilityMap: {},
+			nodesSelectionMap: {},
+			nodesBySharedIdsMap: {},
+			nodesDefaultVisibilityMap: {}
+		} as any;
+
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.timeEnd('TREE PRE-PROCESSING NEW');
-
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.time('TREE PROCESSING NEW');
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.time('Flatten Tree');
-		const { data: nodesList } = getFlattenNested(mainTree);
+		const { data: nodesList } = getFlattenNested(mainTree, auxiliaryMaps);
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.timeEnd('Flatten Tree');
-		// tslint:disable-next-line
-		IS_DEVELOPMENT && console.time('meshByID');
 		const meshesByNodeId = getMeshesByNodeId(modelsWithMeshes);
-		// tslint:disable-next-line
-		IS_DEVELOPMENT && console.timeEnd('meshByID');
-		// tslint:disable-next-line
-		IS_DEVELOPMENT && console.time('aux maps');
-		const auxiliaryMaps = getAuxiliaryMaps(nodesList);
-		// tslint:disable-next-line
-		IS_DEVELOPMENT && console.timeEnd('aux maps');
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.timeEnd('TREE PROCESSING NEW');
 		resolve({ nodesList, meshesByNodeId, treePath, ...auxiliaryMaps });
 	} catch (error) {
+		// tslint:disable-next-line
+		console.log(error);
 		reject(error);
 	}
 });
