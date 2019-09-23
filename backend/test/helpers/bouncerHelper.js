@@ -38,12 +38,15 @@ function handleMessage(cmd, rid, callback){
 		const cmdDatabase = cmdFile.database;
 		const cmdProject = cmdFile.project;
 		const user = cmdFile.owner;
-		callback(JSON.stringify({
-			value: 0,
-			database: cmdDatabase,
-			project: cmdProject,
-			user
-		}), true);
+
+		setTimeout(() => {
+			callback(JSON.stringify({
+				value: 0,
+				database: cmdDatabase,
+				project: cmdProject,
+				user
+			}), true);
+		}, 10000);
 	} else {
 		const cmdArr = cmd.split(' ');
 		const cmdFile = require(cmdArr[2]);

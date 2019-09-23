@@ -121,8 +121,8 @@ const fillModelData = function(fullNotifications) {
 	const teamSpaces = extractTeamSpaceInfo(notifications);
 	return  modelSettings.getModelsData(teamSpaces).then((modelsData) => { // fills out the models name with data from the database
 		notifications.forEach (notification => {
-			const teamSpace = (modelsData[notification.teamSpace] || {});
-			const {name, federate} = teamSpace[notification.modelId];
+			const teamSpace = modelsData[notification.teamSpace] || {};
+			const {name, federate} = teamSpace[notification.modelId] || {};
 			Object.assign(notification, {modelName: name, federation: federate});
 		});
 
