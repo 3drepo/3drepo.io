@@ -2,6 +2,7 @@ import { intersection, keys, memoize, pickBy, uniqBy } from 'lodash';
 import { NODE_TYPES, SELECTION_STATES, VISIBILITY_STATES } from '../../../constants/tree';
 
 export class Processing {
+	// FIXME:
 	public get selectedNodesIds() {
 		return keys(pickBy(this.selectionMap, (selectionState) => {
 			return selectionState !== SELECTION_STATES.UNSELECTED;
@@ -92,14 +93,28 @@ export class Processing {
 	}
 
 	public clearCurrentlySelected = () => {
-		const selectedNodesIds = this.selectedNodesIds;
-		for (let index = 0, size = selectedNodesIds.length; index < size; index++) {
-			this.selectionMap[selectedNodesIds[index]] = SELECTION_STATES.UNSELECTED;
+		console.time('Actual clear nodes');
+
+		let index = 0;
+
+		while (index < this.nodesList.length) {
+			const node = this.nodesList[index];
+			const id = node._id;
+			if (selectionMap[id] !== SELECTION_STATES.UNSELECTED) {
+				this.selectionMap[id] = SELECTION_STATES.UNSELECTED;
+				++index;
+			} else {
+				index += node.deepChildrenNumber > 0 ? node.deepChildrenNumber : 1;
+			}
 		}
-		this.selectionMap = {...this.selectionMap};
+
+		console.timeEnd("Actual clear nodes");
 	}
 
 	public selectNodes = ({ nodesIds = [], ...extraData }) => {
+		console.log('@SelectNodes', nodesIds, extraData);
+
+		console.time('[A] Select');
 		const visibleNodesIds = nodesIds.filter((nodeId) => this.visibilityMap[nodeId] !== VISIBILITY_STATES.INVISIBLE);
 
 		if (!visibleNodesIds.length) {
@@ -108,6 +123,9 @@ export class Processing {
 
 		let nodes = this.getNodesByIds(visibleNodesIds);
 
+		console.timeEnd('[A] Select');
+
+		console.time('[B] Select');
 		if (!extraData.skipChildren) {
 			let compactNodes = [];
 
@@ -119,11 +137,16 @@ export class Processing {
 			}
 			nodes = compactNodes;
 		}
+		console.timeEnd('[B] Select');
 
+		console.time('[C] Select');
 		this.handleToSelect(nodes);
+		console.timeEnd('[C] Select');
+		console.time('[D] Select');
 		const highlightedObjects = this.getMeshesByNodes(nodes);
-
-		this.selectionMap = { ...this.selectionMap };
+		console.timeEnd('[D] Select');
+		console.time('[E] Select');
+		console.timeEnd('[E] Select');
 
 		return { highlightedObjects };
 	}

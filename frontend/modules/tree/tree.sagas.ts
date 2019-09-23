@@ -200,20 +200,25 @@ function* handleBackgroundClick() {
 }
 
 function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = false }) {
+	console.log("HandleNodesClick", nodesIds, skipExpand, skipChildren);
 	const addGroup = MultiSelect.isAccumMode();
 	const removeGroup = MultiSelect.isDecumMode();
 	const isMultiSelectMode = addGroup || removeGroup;
 
+	console.time("Handle Deselection");
 	if (!isMultiSelectMode) {
 		yield put(TreeActions.clearCurrentlySelected());
 		yield take(TreeTypes.UPDATE_DATA_REVISION);
 	}
+	console.timeEnd("Handle Deselection");
 
+	console.time("Select/deselect nodes");
 	if (removeGroup) {
 		yield put(TreeActions.deselectNodes(nodesIds));
 	} else {
 		yield put(TreeActions.selectNodes(nodesIds, skipExpand, skipChildren));
 	}
+	console.timeEnd("Select/deselect nodes");
 }
 
 function* handleNodesClickBySharedIds({ objects = [] }) {
@@ -236,11 +241,8 @@ function* getSelectedNodes() {
 
 function* clearCurrentlySelected() {
 	Viewer.clearHighlights();
-	const selectedNodesIds = yield select(selectSelectedNodesIds);
 
-	if (selectedNodesIds.length) {
-		yield TreeProcessing.clearSelected();
-	}
+	yield TreeProcessing.clearSelected();
 	yield put(TreeActions.updateDataRevision());
 
 	const isBimVisible = yield select(selectIsMetadataVisible);
