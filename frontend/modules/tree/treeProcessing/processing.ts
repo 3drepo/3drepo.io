@@ -93,10 +93,7 @@ export class Processing {
 	}
 
 	public clearCurrentlySelected = () => {
-		console.time('Actual clear nodes');
-
 		let index = 0;
-
 		while (index < this.nodesList.length) {
 			const node = this.nodesList[index];
 			const id = node._id;
@@ -107,21 +104,23 @@ export class Processing {
 				index += node.deepChildrenNumber > 0 ? node.deepChildrenNumber : 1;
 			}
 		}
-
-		console.timeEnd("Actual clear nodes");
 	}
 
 	public selectNodes = ({ nodesIds = [], ...extraData }) => {
 		console.log('@SelectNodes', nodesIds, extraData);
 
 		console.time('[A] Select');
-		const visibleNodesIds = nodesIds.filter((nodeId) => this.visibilityMap[nodeId] !== VISIBILITY_STATES.INVISIBLE);
+		// FIXME: this should be const
+		let nodes = [];
+		nodesIds.forEach((id) => {
+			if (this.visibilityMap[id] !== VISIBILITY_STATES.INVISIBLE) {
+				nodes.push(this.nodesList[this.nodesIndexesMap[id]]);
+			}
+		});
 
-		if (!visibleNodesIds.length) {
+		if (!nodes.length) {
 			return { highlightedObjects: [] };
 		}
-
-		let nodes = this.getNodesByIds(visibleNodesIds);
 
 		console.timeEnd('[A] Select');
 
@@ -145,8 +144,6 @@ export class Processing {
 		console.time('[D] Select');
 		const highlightedObjects = this.getMeshesByNodes(nodes);
 		console.timeEnd('[D] Select');
-		console.time('[E] Select');
-		console.timeEnd('[E] Select');
 
 		return { highlightedObjects };
 	}
