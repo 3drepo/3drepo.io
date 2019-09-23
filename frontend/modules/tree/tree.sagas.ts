@@ -93,16 +93,19 @@ function* handleMetadata(node: any) {
 function* expandToNode(node: any) {
 	if (node) {
 		const expandedNodesMap = {...(yield select(selectExpandedNodesMap))};
+		if (expandedNodesMap[node._id]) {
+			// already expanded
+			return;
+		}
+		const nodesList = yield select(selectTreeNodesList);
 
 		const parents = TreeProcessing.getParentsID(node);
 		for (let index = parents.length - 1; index >= 0; --index) {
 			if (expandedNodesMap[parents[index]]) {
-				// If this is already expanded then its parents must be expanded too.
 				break;
 			}
 			expandedNodesMap[parents[index]] = true;
 		}
-
 		yield put(TreeActions.setExpandedNodesMap(expandedNodesMap));
 	}
 }
@@ -201,7 +204,7 @@ function* handleBackgroundClick() {
 }
 
 function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = false }) {
-	console.log("HandleNodesClick", nodesIds, skipExpand, skipChildren);
+	console.log("andleNodesClick", nodesIds, skipExpand, skipChildren);
 	const addGroup = MultiSelect.isAccumMode();
 	const removeGroup = MultiSelect.isDecumMode();
 	const isMultiSelectMode = addGroup || removeGroup;
