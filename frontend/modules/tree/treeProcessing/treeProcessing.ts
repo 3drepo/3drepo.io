@@ -38,7 +38,9 @@ class TreeProcessing {
 
 	public clearSelected = () => this.processing.clearCurrentlySelected();
 
-	public getParents = (node) => this.processing.getParents(node);
+	public getParents = (node) => this.processing.getParentsByPath(node);
+
+	public getParentsID = (node) => this.processing.getParentsID(node);
 
 	public getChildren = (node) => this.processing.getChildren(node);
 }

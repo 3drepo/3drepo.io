@@ -90,20 +90,17 @@ function* handleMetadata(node: any) {
 	}
 }
 
-function* expandToNode(nodeId: string) {
-	if (nodeId) {
-		const treeNodesList = yield select(selectTreeNodesList);
-		const nodesIndexesMap = yield select(selectNodesIndexesMap);
+function* expandToNode(node: any) {
+	if (node) {
 		const expandedNodesMap = {...(yield select(selectExpandedNodesMap))};
-		const node = treeNodesList[nodesIndexesMap[nodeId]];
 
-		const parents = [node, ...TreeProcessing.getParents(node)];
-		for (let index = 0, size = parents.length; index < size; index++) {
-			if (expandedNodesMap[parents[index]._id]) {
+		const parents = TreeProcessing.getParentsID(node);
+		for (let index = parents.length - 1; index >= 0; --index) {
+			if (expandedNodesMap[parents[index]]) {
 				// If this is already expanded then its parents must be expanded too.
 				break;
 			}
-			expandedNodesMap[parents[index]._id] = true;
+			expandedNodesMap[parents[index]] = true;
 		}
 
 		yield put(TreeActions.setExpandedNodesMap(expandedNodesMap));
@@ -405,17 +402,16 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 		]);
 		console.timeEnd('ProcessSelection');
 
-
 		console.time('SelectionMap');
 		const selectionMap = yield select(selectSelectionMap);
 		console.timeEnd('SelectionMap');
 		console.time('HighlightObjects');
-		yield call(highlightObjects, result.highlightedObjects, selectionMap, colour);
+		highlightObjects(result.highlightedObjects, selectionMap, colour);
 		console.timeEnd('HighlightObjects');
 
 		if (!skipExpand) {
 			console.time('Expand');
-			yield call(expandToNode, lastNodeId);
+			yield call(expandToNode, lastNode);
 			console.timeEnd('Expand');
 		}
 
@@ -425,6 +421,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 		yield put(TreeActions.updateDataRevision());
 		console.timeEnd('selectNodes');
 	} catch (error) {
+		console.log(error);
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
 	}
 }

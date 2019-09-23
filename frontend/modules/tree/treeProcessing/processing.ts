@@ -34,19 +34,6 @@ export class Processing {
 		return this.nodesList.slice(nodeIndex + 1, nodeIndex + node.deepChildrenNumber + 1);
 	}, (node) => node._id);
 
-	public getParents = memoize((node = {}) => {
-		const parents = [];
-		let nextParentId = node.parentId;
-
-		while (!!nextParentId) {
-			const parentNodeIndex = this.nodesIndexesMap[nextParentId];
-			const parentNode = this.nodesList[parentNodeIndex];
-			parents.push(parentNode);
-			nextParentId = parentNode.parentId;
-		}
-		return parents;
-	}, (node = {}) => node._id);
-
 	public getParentsByPath = memoize((node = {}) => {
 		const parents = [];
 		const subModel = this.treePath.subModels.find((s) => s.model === node.model);
@@ -66,6 +53,18 @@ export class Processing {
 		}
 
 		return parents.reverse();
+	}, (node = {}) => node._id);
+
+	public getParentsID = memoize((node = {}) => {
+		const subModel = this.treePath.subModels.find((s) => s.model === node.model);
+		const idToPath = subModel ? subModel.idToPath : this.treePath.mainTree.idToPath;
+		let parentsIds = idToPath[node._id].split('__');
+		if (subModel) {
+			const lastParentId = this.nodesList[this.nodesIndexesMap[parentsIds[0]]].parentId;
+			const rootPath = this.treePath.mainTree.idToPath[lastParentId];
+			parentsIds = [...rootPath.split('__'), ...parentsIds];
+		}
+		return parentsIds;
 	}, (node = {}) => node._id);
 
 	public getChildren = memoize((node = {}) => {
