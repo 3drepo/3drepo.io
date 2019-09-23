@@ -62,13 +62,13 @@ const unhighlightObjects = (objects = []) => {
 };
 
 const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
-	let promises = [];
+	const promises = [];
 
 	for (let index = 0, size = objects.length; index < size; index++) {
 		const { meshes, teamspace, modelId } = objects[index];
 		const filteredMeshes = meshes.filter((mesh) => nodesSelectionMap[mesh] === SELECTION_STATES.SELECTED);
 		if (filteredMeshes.length) {
-			promises = promises.concat(Viewer.highlightObjects({
+			promises.push(Viewer.highlightObjects({
 				account: teamspace,
 				ids: filteredMeshes,
 				colour,
@@ -99,6 +99,10 @@ function* expandToNode(nodeId: string) {
 
 		const parents = [node, ...TreeProcessing.getParents(node)];
 		for (let index = 0, size = parents.length; index < size; index++) {
+			if (expandedNodesMap[parents[index]._id]) {
+				// If this is already expanded then its parents must be expanded too.
+				break;
+			}
 			expandedNodesMap[parents[index]._id] = true;
 		}
 
@@ -389,22 +393,35 @@ function* deselectNodesBySharedIds({ objects = [] }) {
 function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false, colour }) {
 	try {
 		console.time('selectNodes');
+		console.time('getLastNodes');
 		const lastNodeId = nodesIds[nodesIds.length - 1];
 		const [lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
+		console.timeEnd('getLastNodes');
 
+		console.time('ProcessSelection');
 		const [result] = yield all([
 			call(TreeProcessing.selectNodes, { nodesIds, skipChildren }),
 			call(handleMetadata, lastNode)
 		]);
+		console.timeEnd('ProcessSelection');
 
+
+		console.time('SelectionMap');
 		const selectionMap = yield select(selectSelectionMap);
+		console.timeEnd('SelectionMap');
+		console.time('HighlightObjects');
 		yield call(highlightObjects, result.highlightedObjects, selectionMap, colour);
+		console.timeEnd('HighlightObjects');
 
 		if (!skipExpand) {
+			console.time('Expand');
 			yield call(expandToNode, lastNodeId);
+			console.timeEnd('Expand');
 		}
 
+		console.time('ActiveNode');
 		yield put(TreeActions.setActiveNode(lastNodeId));
+		console.timeEnd('ActiveNode');
 		yield put(TreeActions.updateDataRevision());
 		console.timeEnd('selectNodes');
 	} catch (error) {
