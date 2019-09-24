@@ -51,7 +51,7 @@ export const COLOR = {
 	SOFT_RED: '#c27676',
 	DARK_ORANGE: '#f97807',
 	ORANGE: '#fa9034',
-	VIVID_ORANGE: '#ff5b00',
+	VIVID_ORANGE: '#ff8800',
 	BRIGHT_ORANGE: '#fd8d49',
 	LIGHT_ORANGE: '#f7bb83',
 	SUNGLOW: '#ffca28',

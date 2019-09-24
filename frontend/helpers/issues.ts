@@ -61,10 +61,10 @@ export const getStatusIcon = (priority, status) => {
 	return {...statusIcon};
 };
 
-export const getIssuePinColor = (issue: any, selected: boolean = false) => {
-	const {status, priority} = issue;
-	const colorToUse = ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS[PRIORITIES.NONE];
-	return (selected) ? colorToUse.selectedColor : colorToUse.pinColor;
+export const getIssuePinColor = (issue: any) => {
+	const {priority} = issue;
+	const colorToUse = ISSUE_COLORS[priority] || ISSUE_COLORS[PRIORITIES.NONE];
+	return colorToUse.pinColor;
 };
 
 const isOpenIssue = (status) => status !== 'closed';

@@ -124,7 +124,7 @@ export class ViewerService {
 
 	public async addPin(params) {
 		await this.isViewerReady();
-		return this.viewer.addPin(
+		this.viewer.addPin(
 			params.account,
 			params.model,
 			params.id,
@@ -134,6 +134,10 @@ export class ViewerService {
 			params.colours,
 			params.viewpoint
 		);
+
+		if (params.isSelected) {
+			this.viewer.selectPin(params.id);
+		}
 	}
 
 	public async removePin(params) {

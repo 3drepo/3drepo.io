@@ -680,23 +680,47 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Add a pin
+	 * Add a Risk pin
 	 * @category Pins
 	 * @param id - Identifier for the pin
-	 * @param type - Identifier for the pin type ("issue" or risk")
 	 * @param position - point in space where the pin should generate
 	 * @param normal - normal vector for the pin (note: this is no longer used)
 	 * @param colour - RGB value for the colour of the pin
 	 */
-	public static dropPin(id: string, type: string, position: [number], normal: [number], colour: [number]) {
+	public static dropRiskPin(id: string, position: [number], normal: [number], colour: [number]) {
 		const params = {
 			id,
-			type,
 			position,
 			normal,
 			color : colour
 		};
-		UnityUtil.toUnity('DropPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+		UnityUtil.toUnity('DropRiskPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+	}
+
+	/**
+	 * Add an issue pin
+	 * @category Pins
+	 * @param id - Identifier for the pin
+	 * @param position - point in space where the pin should generate
+	 * @param normal - normal vector for the pin (note: this is no longer used)
+	 * @param colour - RGB value for the colour of the pin
+	 */
+	public static dropIssuePin(id: string, position: [number], normal: [number], colour: [number]) {
+		const params = {
+			id,
+			position,
+			normal,
+			color : colour
+		};
+		UnityUtil.toUnity('DropIssuePin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+	}
+
+	public static selectPin(id: string) {
+		UnityUtil.toUnity('SelectPin', UnityUtil.LoadingState.MODEL_LOADING, id);
+	}
+
+	public static deselectPin(id: string) {
+		UnityUtil.toUnity('DeselectPin', UnityUtil.LoadingState.MODEL_LOADING, id);
 	}
 
 	/**
