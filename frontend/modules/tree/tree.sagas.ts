@@ -32,18 +32,29 @@ export function* startListenOnSelections() {
 
 		Viewer.on(VIEWER_EVENTS.OBJECT_SELECTED, (object) => {
 			TreeService.nodesClickedByIds([object.id]);
-			dispatch(TreeActions.getSelectedNodes());
 		});
 
 		Viewer.on(VIEWER_EVENTS.MULTI_OBJECTS_SELECTED, (object) => {
 			TreeService.nodesClickedBySharedIds(object.selectedNodes);
-			dispatch(TreeActions.getSelectedNodes());
 		});
 
 		Viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => {
 			dispatch(TreeActions.clearSelectedNodes());
 			dispatch(GroupsActions.clearSelectionHighlights());
 		});
+
+		Viewer.on(VIEWER_EVENTS.HIGHLIGHT_OBJECTS, (object) => {
+			dispatch(TreeActions.getSelectedNodes());
+		});
+
+		Viewer.on(VIEWER_EVENTS.UNHIGHLIGHT_OBJECTS, (object) => {
+			dispatch(TreeActions.getSelectedNodes());
+		});
+
+		Viewer.on(VIEWER_EVENTS.CLEAR_HIGHLIGHT_OBJECTS, (object) => {
+			dispatch(TreeActions.getSelectedNodes());
+		});
+
 	} catch (error) {
 		console.error(error);
 	}
