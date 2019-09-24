@@ -82,6 +82,15 @@ export class Tools extends React.PureComponent<IProps, any> {
 		this.props.onRedo();
 	}
 
+	public shapeClickCallback = (shapeName, menu, e) => {
+		menu.close(e);
+		this.props.onShapeClick(shapeName);
+	}
+
+	public handleShapeClick = (shapeName, menu, e) => {
+		this.setState({ activeTool: MODES.SHAPE }, () => this.shapeClickCallback(shapeName, menu, e));
+	}
+
 	public renderBrushSizes = () => range(56, 1).map((size, index) => (
 		<MenuItem key={index} value={size}>{size}</MenuItem>
 	))
@@ -176,14 +185,14 @@ export class Tools extends React.PureComponent<IProps, any> {
 		);
 	});
 
-	public renderActionsMenu = () =>  {
+	public renderActionsMenu = (menu) =>  {
 		return(
 			<MenuList>
 				{SHAPES_MENU.map(({ name, Icon }) => (
 					<SmallIconButton
 						Icon={Icon}
 						key={name}
-						onClick={this.handleToolClick(MODES.SHAPE, () => this.props.onShapeClick(name))}
+						onClick={(e) => this.handleShapeClick(name, menu, e)}
 					/>
 				))}
 			</MenuList>

@@ -43,12 +43,10 @@ export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawi
 	const isLine = figure === SHAPE_TYPES.LINE;
 
 	const handleDragEnd = (e) => {
-		console.log('handleDragEnd e',e.target)
 		handleChange({
 			...element,
 			x: e.target.x(),
 			y: e.target.y()
-
 		});
 	};
 
@@ -56,7 +54,6 @@ export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawi
 		const node = shape.current;
 		const scaleX = node.scaleX();
 		const scaleY = node.scaleY();
-		console.log('handleTransformEnd node',node)
 
 		if (isLine) {
 			node.scaleX(1);
@@ -71,7 +68,8 @@ export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawi
 				...element,
 				sceneFunc: drawCloud,
 				scaleX,
-				scaleY
+				scaleY,
+				rotation: node.rotation()
 			});
 		} else {
 			handleChange({
@@ -80,6 +78,7 @@ export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawi
 				y: node.y(),
 				scaleX,
 				scaleY,
+				rotation: node.rotation(),
 				width: isLine ? node.width() * scaleX : node.width(),
 				height: isLine ? node.height() * scaleY : node.height()
 			});
@@ -87,6 +86,8 @@ export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawi
 	};
 
 	const handleClick = (e) => {
+		console.log('click', e)
+
 		handleSelect(e);
 	};
 
@@ -100,14 +101,14 @@ export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawi
 				{...elementProps}
 				stroke={color}
 				strokeWidth={5}
-				draggable={!isDrawingMode}
 				transformer={transformer}
 				onClick={handleClick}
 				onDragStart={handleClick}
 				onDragEnd={handleDragEnd}
 				onTransformEnd={handleTransformEnd}
+				draggable={isSelected && !isDrawingMode}
 			/>
-			{(isSelected && !isDrawingMode) && <Transformer ref={transformer} {...transformerProps} keepRatio centeredScaling />}
+			{(isSelected && !isDrawingMode) && <Transformer ref={transformer} {...transformerProps} keepRatio />}
 		</React.Fragment>
 	);
 };

@@ -297,22 +297,23 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		});
 	}
 
-	public addNewShape = (shape) => {
+	public addNewShape = (figure) => {
 		const newShape = {
 			type: 'shape',
-			figure: shape,
+			figure,
 			name: `shape-${this.props.canvasElements.length}`,
-			width: shape.width || 200,
-			height: shape.height || 200,
+			width: 200,
+			height: 200,
 			color: this.state.color,
 			x: this.stage.attrs.width / 2 - 200 / 2,
-			y: this.stage.attrs.height / 2 - 50
+			y: this.stage.attrs.height / 2 - 50,
+			rotation: 0
 		};
 
-		if (shape === SHAPE_TYPES.LINE) {
+		if (figure === SHAPE_TYPES.LINE) {
 			newShape.height = 0;
 			newShape.width = 300;
-		} else if (shape === SHAPE_TYPES.CLOUD) {
+		} else if (figure === SHAPE_TYPES.CLOUD) {
 			newShape.height = 150;
 			newShape.width = 264;
 		}
@@ -322,6 +323,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.setState({
 			selectedObjectName: newShape.name,
 			mode: MODES.SHAPE
+		}, () => {
+			console.log('element', this.props.canvasElements.find((el) => el.name === newShape.name));
+			console.log('active!', newShape.name);
 		});
 	}
 
@@ -340,11 +344,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleChangeObject = (index, attrs) => {
-		console.log('handle change object index', index);
-		console.log('handle change object attrs', attrs);
-		// const objects = this.state.objects.slice();
-		// objects[index] = attrs;
-		// this.setState({ objects });
+		console.log('attrs', attrs);
 		this.props.updateElement(attrs.name, attrs);
 	}
 
@@ -489,6 +489,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { sourceImage, stage } = this.state;
+		console.log('render elements', this.props.canvasElements);
 
 		return (
 			<Container innerRef={this.containerRef}>
