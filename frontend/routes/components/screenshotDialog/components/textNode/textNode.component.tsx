@@ -19,7 +19,7 @@ import * as React from 'react';
 import { Text, Transformer } from 'react-konva';
 
 interface IProps {
-	object: any;
+	element: any;
 	isSelected: boolean;
 	isVisible: boolean;
 	handleSelect: (props: any) => void;
@@ -27,8 +27,8 @@ interface IProps {
 	handleDoubleClick: (props: any) => void;
 }
 
-export const TextNode = ({ object, isSelected, handleSelect, handleChange, handleDoubleClick, isVisible }: IProps) => {
-	const { color, ...objectProps } = object;
+export const TextNode = ({ element, isSelected, handleSelect, handleChange, handleDoubleClick, isVisible }: IProps) => {
+	const { color, ...elementProps } = element;
 	const shape = React.useRef<any>();
 	const transformer = React.useRef<any>();
 
@@ -44,14 +44,14 @@ export const TextNode = ({ object, isSelected, handleSelect, handleChange, handl
 			<Text
 				onClick={handleSelect}
 				ref={shape}
-				{...objectProps}
+				{...elementProps}
 				fill={color}
 				draggable
 				visible={isVisible}
 				onDblClick={handleDoubleClick}
 				onDragEnd={(e) => {
 					handleChange({
-						...object,
+						...element,
 						x: e.target.x(),
 						y: e.target.y()
 					});
@@ -63,7 +63,7 @@ export const TextNode = ({ object, isSelected, handleSelect, handleChange, handl
 					node.scaleX(1);
 					node.scaleY(1);
 					handleChange({
-						...object,
+						...element,
 						x: node.x(),
 						y: node.y(),
 						width: node.width() * scaleX,

@@ -21,15 +21,15 @@ import { drawCloud } from './shape.helpers';
 import { SHAPE_COMPONENTS, SHAPE_TYPES } from './shape.constants';
 
 interface IProps {
-	object: any;
+	element: any;
 	isSelected: boolean;
 	isDrawingMode: boolean;
 	handleSelect: (props: any) => void;
 	handleChange: (props: any) => void;
 }
 
-export const Shape = ({ object, isSelected, handleSelect, handleChange, isDrawingMode }: IProps) => {
-	const { color, figure, ...objectProps } = object;
+export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawingMode }: IProps) => {
+	const { color, figure, ...elementProps } = element;
 	const shape = React.useRef<any>();
 	const transformer = React.useRef<any>();
 
@@ -43,10 +43,12 @@ export const Shape = ({ object, isSelected, handleSelect, handleChange, isDrawin
 	const isLine = figure === SHAPE_TYPES.LINE;
 
 	const handleDragEnd = (e) => {
+		console.log('handleDragEnd e',e.target)
 		handleChange({
-			...object,
+			...element,
 			x: e.target.x(),
 			y: e.target.y()
+
 		});
 	};
 
@@ -54,6 +56,7 @@ export const Shape = ({ object, isSelected, handleSelect, handleChange, isDrawin
 		const node = shape.current;
 		const scaleX = node.scaleX();
 		const scaleY = node.scaleY();
+		console.log('handleTransformEnd node',node)
 
 		if (isLine) {
 			node.scaleX(1);
@@ -65,14 +68,18 @@ export const Shape = ({ object, isSelected, handleSelect, handleChange, isDrawin
 
 		if (figure === SHAPE_TYPES.CLOUD) {
 			handleChange({
-				...object,
-				sceneFunc: drawCloud
+				...element,
+				sceneFunc: drawCloud,
+				scaleX,
+				scaleY
 			});
 		} else {
 			handleChange({
-				...object,
+				...element,
 				x: node.x(),
 				y: node.y(),
+				scaleX,
+				scaleY,
 				width: isLine ? node.width() * scaleX : node.width(),
 				height: isLine ? node.height() * scaleY : node.height()
 			});
@@ -90,7 +97,7 @@ export const Shape = ({ object, isSelected, handleSelect, handleChange, isDrawin
 		<React.Fragment>
 			<Component
 				ref={shape}
-				{...objectProps}
+				{...elementProps}
 				stroke={color}
 				strokeWidth={5}
 				draggable={!isDrawingMode}

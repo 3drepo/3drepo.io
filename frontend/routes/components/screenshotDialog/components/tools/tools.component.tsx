@@ -20,17 +20,15 @@ import { range } from 'lodash';
 import BorderColorIcon from '@material-ui/icons/BorderColor';
 import ClearIcon from '@material-ui/icons/Clear';
 import TextIcon from '@material-ui/icons/TextFields';
+import UndoIcon from '@material-ui/icons/Undo';
+import RedoIcon from '@material-ui/icons/Redo';
 import { MenuItem, Tooltip, Select } from '@material-ui/core';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { FONT_WEIGHT } from '../../../../../styles';
-import { Eraser } from '../../../fontAwesomeIcon';
 import { ToolsContainer, OptionsDivider, StyledButton, IconButton } from './tools.styles';
 import { TooltipButton } from '../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ColorPicker } from '../../../colorPicker/colorPicker.component';
-import { Eraser } from '../../../fontAwesomeIcon';
-import { OptionsDivider, StyledButton, ToolsContainer } from './tools.styles';
-import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { MODES } from '../../screenshotDialog.helpers';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
 import { MenuList } from '../../../filterPanel/components/filtersMenu/filtersMenu.styles';
@@ -44,6 +42,8 @@ interface IProps {
 	disabled?: boolean;
 	activeShape: number;
 	selectedObjectName: string;
+	areFutureElements: boolean;
+	arePastElements: boolean;
 	onDrawClick: () => void;
 	onEraseClick: () => void;
 	onTextClick: () => void;
@@ -51,6 +51,8 @@ interface IProps {
 	onClearClick: () => void;
 	onColorChange: (color) => void;
 	onBrushSizeChange: (size) => void;
+	onUndo: () => void;
+	onRedo: () => void;
 	onCancel: () => void;
 	onSave: () => void;
 }
@@ -70,6 +72,14 @@ export class Tools extends React.PureComponent<IProps, any> {
 
 	public handleToolClick = (activeTool, callback?) => () => {
 		this.setState({ activeTool }, callback);
+	}
+
+	public handleUndo = () => () => {
+		this.props.onUndo();
+	}
+
+	public handleRedo = () => () => {
+		this.props.onRedo();
 	}
 
 	public renderBrushSizes = () => range(56, 1).map((size, index) => (
@@ -122,12 +132,6 @@ export class Tools extends React.PureComponent<IProps, any> {
 					Icon={BorderColorIcon}
 				/>
 				<TooltipButton
-					label="Erase"
-					color={this.getToolColor(MODES.ERASER)}
-					action={this.handleToolClick(MODES.ERASER, onEraseClick)}
-					Icon={(props) => <Eraser IconProps={props} />}
-				/>
-				<TooltipButton
 					label="Add text"
 					color={this.isTextSelected ? this.getToolColor(MODES.TEXT) : 'action'}
 					action={this.handleToolClick(MODES.TEXT, onTextClick)}
@@ -154,7 +158,19 @@ export class Tools extends React.PureComponent<IProps, any> {
 					PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'center' } }}
 					ButtonProps={{ disabled: false }}
 				/>
-				<TooltipButton label="Clear" action={onClearClick} Icon={ClearIcon} />
+				<TooltipButton label="Clear all" action={onClearClick} Icon={ClearIcon} />
+				<TooltipButton
+					label="Undo"
+					action={this.handleUndo()}
+					Icon={UndoIcon}
+					disabled={!this.props.arePastElements}
+				/>
+				<TooltipButton
+					label="Redo"
+					action={this.handleRedo()}
+					Icon={RedoIcon}
+					disabled={!this.props.areFutureElements}
+				/>
 				<OptionsDivider />
 			</>
 		);

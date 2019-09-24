@@ -39,8 +39,16 @@ const INITIAL_VALUES = {
 interface IProps {
 	sourceImage: string | Promise<string>;
 	disabled?: boolean;
+	canvasElements: any[];
+	arePastElements: boolean;
+	areFutureElements: boolean;
 	handleResolve: (screenshot) => void;
 	handleClose: () => void;
+	addElement: (element) => void;
+	updateElement: (elementName, property) => void;
+	removeElement: (elementName) => void;
+	undo: () => void;
+	redo: () => void;
 }
 
 export class ScreenshotDialog extends React.PureComponent<IProps, any> {
@@ -55,7 +63,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			height: 0,
 			width: 0
 		},
-		objects: [],
 		selectedObjectName: '',
 		lastSelectedObjectName: '',
 		textEditable: {
@@ -100,6 +107,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.setState({ sourceImage }, () => {
 			this.setStageSize();
 		});
+
 	}
 
 	public handleBrushSizeChange = (event) => {
@@ -107,11 +115,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		newState.brushSize = event.target.value;
 
 		if (this.state.selectedObjectName) {
-			const selectedObjectIndex = this.state.objects.findIndex((object) => object.name === this.state.selectedObjectName);
-			const updatedObjects = [...this.state.objects];
-
-			updatedObjects[selectedObjectIndex].fontSize = event.target.value;
-			newState.objects = updatedObjects;
+			const fontSize = event.target.value;
+			this.props.updateElement(this.state.selectedObjectName, { fontSize });
 		}
 
 		this.setState(newState);
@@ -123,11 +128,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		newState.brushColor = color;
 
 		if (this.state.selectedObjectName) {
-			const selectedObjectIndex = this.state.objects.findIndex((object) => object.name === this.state.selectedObjectName);
-			const updatedObjects = [...this.state.objects];
-
-			updatedObjects[selectedObjectIndex].color = color;
-			newState.objects = updatedObjects;
+			this.props.updateElement(this.state.selectedObjectName, { color });
 		}
 
 		this.setState(newState);
@@ -139,6 +140,14 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.stage.clearCache();
 		this.layer.clearCache();
 		this.layer.destroyChildren();
+	}
+
+	public handleUndo = () => {
+		this.props.undo();
+	}
+
+	public handleRedo = () => {
+		this.props.redo();
 	}
 
 	public handleSave = async () => {};
@@ -221,12 +230,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				visible: false
 			};
 
-			if (this.state.lastSelectedObjectName && this.state.objects.length) {
-				const updatedObjects = [...this.state.objects];
-				const objectIndex = this.state.objects.findIndex((s) => s.name === this.state.lastSelectedObjectName);
-				updatedObjects[objectIndex].text = this.state.textEditable.value;
-
-				newState.objects = updatedObjects;
+			if (this.state.lastSelectedObjectName && this.props.canvasElements.length) {
+				const text = this.state.textEditable.value;
+				this.props.updateElement(this.state.lastSelectedObjectName, { text });
 			}
 
 			this.setState(newState, () => {
@@ -255,12 +261,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				visible: false
 			};
 
-			if (this.state.lastSelectedObjectName && this.state.objects.length) {
-				const updatedObjects = [...this.state.objects];
-				const objectIndex = this.state.objects.findIndex((s) => s.name === this.state.lastSelectedObjectName);
-				updatedObjects[objectIndex].text = this.state.textEditable.value;
-
-				newState.objects = updatedObjects;
+			if (this.state.lastSelectedObjectName && this.props.canvasElements.length) {
+				const text = this.state.textEditable.value;
+				this.props.updateElement(this.state.lastSelectedObjectName, { text });
 			}
 
 			this.setState(newState);
@@ -278,15 +281,16 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			type: 'text',
 			text: 'New text',
 			color: this.state.color,
-			name: `text-${this.state.objects.length}`,
+			name: `text-${this.props.canvasElements.length}`,
 			fontSize: 20,
 			fontFamily: 'Arial',
 			x: this.stage.attrs.width / 2 - 200 / 2,
 			y: this.stage.attrs.height / 2 - 50
 		};
 
+		this.props.addElement(newText);
+
 		this.setState({
-			objects: [...this.state.objects, newText],
 			selectedObjectName: newText.name,
 			mode: MODES.TEXT,
 			brushSize: newText.fontSize
@@ -297,9 +301,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		const newShape = {
 			type: 'shape',
 			figure: shape,
-			name: `shape-${this.state.objects.length}`,
-			width: 200,
-			height: 200,
+			name: `shape-${this.props.canvasElements.length}`,
+			width: shape.width || 200,
+			height: shape.height || 200,
 			color: this.state.color,
 			x: this.stage.attrs.width / 2 - 200 / 2,
 			y: this.stage.attrs.height / 2 - 50
@@ -313,8 +317,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			newShape.width = 264;
 		}
 
+		this.props.addElement(newShape);
+
 		this.setState({
-			objects: [...this.state.objects, newShape],
 			selectedObjectName: newShape.name,
 			mode: MODES.SHAPE
 		});
@@ -335,9 +340,12 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleChangeObject = (index, attrs) => {
-		const objects = this.state.objects.slice();
-		objects[index] = attrs;
-		this.setState({ objects });
+		console.log('handle change object index', index);
+		console.log('handle change object attrs', attrs);
+		// const objects = this.state.objects.slice();
+		// objects[index] = attrs;
+		// this.setState({ objects });
+		this.props.updateElement(attrs.name, attrs);
 	}
 
 	public renderObjects = () => {
@@ -346,7 +354,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		return (
 			<>
 				{
-					this.state.objects.map((object, index) => {
+					this.props.canvasElements.map((element, index) => {
 						const textIndex = `text-${index}`;
 						const shapeIndex = `shape-${index}`;
 						const isSelectedText = selectedObjectName === textIndex;
@@ -354,13 +362,13 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 						const isVisible = isSelectedShape || !(textEditable.visible && isSelectedText);
 
 						const commonProps = {
-							object,
-							isSelected: object.name === selectedObjectName,
-							handleSelect: () => this.handleSelectObject(object),
+							element,
+							isSelected: element.name === selectedObjectName,
+							handleSelect: () => this.handleSelectObject(element),
 							handleChange: (newAttrs) => this.handleChangeObject(index, newAttrs)
 						};
 
-						if (object.type === 'text') {
+						if (element.type === 'text') {
 							return (
 								<TextNode
 									key={index}
@@ -419,10 +427,14 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			onBrushSizeChange={this.handleBrushSizeChange}
 			onColorChange={this.handleColorChange}
 			onCancel={this.props.handleClose}
+			onUndo={this.props.undo}
+			onRedo={this.props.redo}
 			onSave={this.handleSave}
 			disabled={this.props.disabled}
 			activeShape={this.state.activeShape}
 			selectedObjectName={this.state.selectedObjectName}
+			arePastElements={this.props.arePastElements}
+			areFutureElements={this.props.areFutureElements}
 		/>
 	)
 
@@ -440,7 +452,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			return;
 		}
 
-		const object = this.state.objects.find((s) => s.name === target.name());
+		const object = this.props.canvasElements.find((s) => s.name === target.name());
 		const newState = {} as any;
 
 		const selectedObjectName = object ? object.name : '';

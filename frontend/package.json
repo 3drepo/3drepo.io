@@ -81,6 +81,7 @@
     "redux": "4.0.0",
     "redux-immutable-state-invariant": "^2.1.0",
     "redux-saga": "0.16.0",
+    "redux-undo": "^1.0.0-beta7",
     "reduxsauce": "1.0.0",
     "reselect": "3.0.1",
     "semver-compare": "1.0.0",
@@ -88,6 +89,8 @@
     "simplebar-react": "1.0.0",
     "socket.io-client": "2.0.4",
     "worker-loader": "2.0.0",
+    "sw-precache": "5.2.0",
+    "uuid": "^3.3.3",
     "yup": "0.26.10",
     "zxcvbn": "4.4.2"
   },

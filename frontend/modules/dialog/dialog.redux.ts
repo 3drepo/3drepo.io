@@ -18,7 +18,6 @@
 import { get, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import * as Dialogs from '../../routes/components/dialogContainer/components';
-import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
 
 interface IDialogConfig {
 	title: string;
@@ -100,7 +99,7 @@ const showRevisionsDialog = (state = INITIAL_STATE, action) => {
 const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 	const config = {
 		title: action.config.title || 'Screenshot',
-		template: ScreenshotDialog,
+		template: action.config.template,
 		onConfirm: action.config.onSave,
 		data: {
 			disabled: action.config.disabled,
