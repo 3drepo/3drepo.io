@@ -1727,6 +1727,7 @@ function createModel(req, res, next) {
 			(!req.body.project || Object.prototype.toString.call(req.body.project) === "[object String]")) {
 		const modelName = req.body.modelName;
 		const account = req.params.account;
+		const username = req.session.user.username;
 
 		const data = {
 			desc: req.body.desc,
@@ -1742,7 +1743,7 @@ function createModel(req, res, next) {
 
 		let createModelPromise;
 		if (req.body.subModels) {
-			createModelPromise = ModelHelpers.createNewFederation(account, modelName, data);
+			createModelPromise = ModelHelpers.createNewFederation(account, modelName, username, data);
 		} else {
 			createModelPromise = ModelHelpers.createNewModel(account, modelName, data);
 		}
@@ -1765,6 +1766,7 @@ function updateModel(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	const account = req.params.account;
 	const model = req.params.model;
+	const username = req.session.user.username;
 
 	let promise = null;
 	let setting;
@@ -1780,7 +1782,7 @@ function updateModel(req, res, next) {
 				} else if (!setting.federate) {
 					return Promise.reject(responseCodes.MODEL_IS_NOT_A_FED);
 				} else {
-					return ModelHelpers.createFederatedModel(account, model, req.body.subModels);
+					return ModelHelpers.createFederatedModel(account, model, username, req.body.subModels);
 				}
 
 			}).then(() => {

@@ -112,10 +112,8 @@ export class ModelItem extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount = () => {
 		const { activeTeamspace, projectName, model, subscribeOnStatusChange, name, federate } = this.props;
-		if (!federate) {
-			const modelData = { modelId: model, modelName: name };
-			subscribeOnStatusChange(activeTeamspace, projectName, modelData);
-		}
+		const modelData = { modelId: model, modelName: name };
+		subscribeOnStatusChange(activeTeamspace, projectName, modelData);
 	}
 
 	public componentWillUnmount = () => {
