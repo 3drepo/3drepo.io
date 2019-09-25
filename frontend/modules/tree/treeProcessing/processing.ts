@@ -126,7 +126,7 @@ export class Processing {
 
 		console.timeEnd('[A] Select');
 		console.time('[C] Select');
-		const highlightedObjects = this.handleToSelect(nodes);
+		const highlightedObjects = this.handleSelection(nodes, SELECTION_STATES.SELECTED);
 		console.timeEnd('[C] Select');
 		this.selectionMap = { ...this.selectionMap };
 
@@ -134,24 +134,26 @@ export class Processing {
 	}
 
 	public deselectNodes = ({ nodesIds = [] }) => {
-		const filteredNodesIds = intersection(nodesIds, this.selectedNodesIds);
-		let nodesWithChildren = [];
-		for (let index = 0, size = filteredNodesIds.length; index < size; index++) {
-			const nodeId = filteredNodesIds[index];
-			const [node] = this.getNodesByIds([nodeId]);
-			nodesWithChildren.push(node);
-			this.selectionMap[nodeId] = SELECTION_STATES.UNSELECTED;
-
-			if (node.hasChildren) {
-				const deepChildren = (this.getDeepChildren(node) as any).flat();
-				nodesWithChildren = nodesWithChildren.concat(deepChildren);
+		console.time('[B]');
+		const nodes = [];
+		for (let index = 0, size = nodesIds.length; index < size; index++) {
+			const nodeId = nodesIds[index];
+			if (this.selectionMap[nodeId] !== SELECTION_STATES.UNSELECTED) {
+				this.selectionMap[nodeId] = SELECTION_STATES.UNSELECTED;
+				const [node] = this.getNodesByIds([nodeId]);
+				nodes.push(node);
 			}
 		}
 
-		this.handleToDeselect(nodesWithChildren);
-		this.selectionMap = { ...this.selectionMap };
+		if (!nodes.length) {
+			return { unhighlightedObjects: [] };
+		}
+		console.timeEnd('[B]');
 
-		const unhighlightedObjects = this.getMeshesByNodes(nodesWithChildren);
+		console.time('[C]');
+		const unhighlightedObjects = this.handleSelection(nodes, SELECTION_STATES.UNSELECTED);
+		console.timeEnd('[C]');
+		this.selectionMap = { ...this.selectionMap };
 		return { unhighlightedObjects };
 	}
 
@@ -337,14 +339,14 @@ export class Processing {
 		return result;
 	}
 
-	private handleToSelect = (toSelect) => {
+	private handleSelection = (toSelect, desiredState) => {
 		const meshes = this.getMeshesByNodes(toSelect);
 		const parentNodesByLevel = [];
 		for (const ns in meshes) {
 			meshes[ns].meshes.forEach((meshId) => {
 				const meshNode = this.nodesList[this.nodesIndexesMap[meshId]];
-				if (this.isVisibleNode(meshId) && this.selectionMap[meshId] !== SELECTION_STATES.SELECTED) {
-					this.selectionMap[meshId] = SELECTION_STATES.SELECTED;
+				if (this.isVisibleNode(meshId) && this.selectionMap[meshId] !== desiredState) {
+					this.selectionMap[meshId] = desiredState;
 					const parents = this.getParentsByPath(meshNode);
 					for (let index = 0; index < parents.length ; ++index) {
 						const parentLevel = parents.length - index - 1;
@@ -362,23 +364,6 @@ export class Processing {
 			this.updateParentsSelection(parentNodesByLevel[i]);
 		}
 		return meshes;
-	}
-
-	private handleToDeselect = (toDeselect) => {
-		if (!toDeselect.length) {
-			return;
-		}
-
-		for (let index = 0, size = toDeselect.length; index < size; index++) {
-			const node = toDeselect[index];
-			this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
-		}
-
-		const parents = this.getParentsByPath(toDeselect[0]);
-
-		if (parents.length) {
-			this.updateParentsSelection(parents);
-		}
 	}
 
 	private updateParentsSelection = (parents) => {
