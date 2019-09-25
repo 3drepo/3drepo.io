@@ -335,23 +335,18 @@ export class Processing {
 	private handleToSelect = (toSelect) => {
 		const meshes = this.getMeshesByNodes(toSelect);
 		const parentNodesByLevel = [];
-
-		//use mesh ID instead
-		//use parent id?
-		//use sets
 		for (const ns in meshes) {
 			meshes[ns].meshes.forEach((meshId) => {
 				const meshNode = this.nodesList[this.nodesIndexesMap[meshId]];
 				if (this.isVisibleNode(meshId) && this.selectionMap[meshId] !== SELECTION_STATES.SELECTED) {
 					this.selectionMap[meshId] = SELECTION_STATES.SELECTED;
 					const parents = this.getParentsByPath(meshNode);
-					const meshLevel = meshNode.level;
 					for (let index = 0; index < parents.length ; ++index) {
 						const parentLevel = parents.length - index - 1;
 						if (parentNodesByLevel[parentLevel]) {
-							parentNodesByLevel[parentLevel].push(parents[index]);
+							parentNodesByLevel[parentLevel].add(parents[index]);
 						} else {
-							parentNodesByLevel[parentLevel] = [parents[index]];
+							parentNodesByLevel[parentLevel] = new Set([parents[index]]);
 						}
 					}
 				}
@@ -382,13 +377,13 @@ export class Processing {
 	}
 
 	private updateParentsSelection = (parents) => {
-		for (let i = 0; i < parents.length; i++) {
-			const parentId = parents[i]._id;
+		parents.forEach((parentNode) => {
+			const parentId = parentNode._id;
 			const everyChildrenSelected =
-				parents[i].childrenIds.every((childId) => this.selectionMap[childId] === SELECTION_STATES.SELECTED);
+				parentNode.childrenIds.every((childId) => this.selectionMap[childId] === SELECTION_STATES.SELECTED);
 
 			const everyChildrenUnselected =
-				parents[i].childrenIds.every((childId) => this.selectionMap[childId] === SELECTION_STATES.UNSELECTED);
+				parentNode.childrenIds.every((childId) => this.selectionMap[childId] === SELECTION_STATES.UNSELECTED);
 
 			if (everyChildrenSelected) {
 				this.selectionMap[parentId] = SELECTION_STATES.SELECTED;
@@ -397,7 +392,7 @@ export class Processing {
 			} else {
 				this.selectionMap[parentId] = SELECTION_STATES.PARENT_OF_UNSELECTED;
 			}
-		}
+		});
 	}
 
 	private getNodesByIds = (nodesIds) => {
