@@ -98,7 +98,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 		}
 
 		MultiSelect.initKeyWatchers();
-		this.props.fetchData(params.teamspace, params.model, params.revision);
+		this.props.fetchData(params.teamspace, params.model);
 	}
 
 	public componentDidUpdate(prevProps: IProps, prevState: IState) {

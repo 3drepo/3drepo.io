@@ -229,7 +229,6 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false}) {
 		yield put(TreeActions.clearCurrentlySelected(false));
 		yield take(TreeTypes.UPDATE_DATA_REVISION);
 	}
-
 	if (removeGroup) {
 		yield put(TreeActions.deselectNodes(nodesIds));
 	} else {

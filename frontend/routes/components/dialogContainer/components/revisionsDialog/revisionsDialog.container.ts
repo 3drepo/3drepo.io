@@ -29,7 +29,7 @@ import { RevisionsDialog } from './revisionsDialog.component';
 
 const mapStateToProps = createStructuredSelector({
 	revisions: selectRevisions,
-	isPending: selectIsPending
+	isPending: selectIsPending,
 	pendingRevision: selectPendingRevision
 });
 

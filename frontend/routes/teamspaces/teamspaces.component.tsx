@@ -256,39 +256,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	// public openFederationDialog =
-	// 	(teamspaceName = '', projectName = '', modelName = '', modelId = '') => (event) => {
-	// 		event.stopPropagation();
-	// 		const { teamspacesItems } = this.state as IState;
-	// 		const isNewModel = !modelName.length;
-	// 		const teamspaces = teamspacesItems.filter((teamspace) => teamspace.projects.length);
-
-	// 		this.props.showDialog({
-	// 			title: modelName ? 'Edit federation' : 'New federation',
-	// 			template: FederationDialog,
-	// 			data: {
-	// 				name: modelName,
-	// 				modelName,
-	// 				teamspace: teamspaceName,
-	// 				teamspaces,
-	// 				project:  projectName ,
-	// 				projects: teamspaceName ? this.getTeamspaceProjects(teamspaceName) : [],
-	// 				editMode: !!modelName,
-	// 				modelId
-	// 			},
-	// 			DialogProps: {
-	// 				maxWidth: 'lg'
-	// 			},
-	// 			onConfirm: ({ teamspace, ...modelData }) => {
-	// 				if (isNewModel) {
-	// 					this.props.createModel(teamspace, modelData);
-	// 				} else {
-	// 					this.props.updateModel(teamspace, modelId, modelData);
-	// 				}
-	// 			}
-	// 		})
-	// 	};
-
 	private handleVisibilityChange = ({ id: itemId, nested = []}) => {
 		this.setState((prevState) => {
 			const visibleItems = { ...prevState.visibleItems };
