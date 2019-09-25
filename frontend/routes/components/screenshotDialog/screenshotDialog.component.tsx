@@ -217,7 +217,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		const styles = getTextStyles(target);
 		const visible = true;
 		const value = target.attrs.text;
-
 		this.setState({
 			textEditable: { visible, value, styles }
 		}, () => {
@@ -230,7 +229,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public handleOutsideClick = (e) => {
 		if (e.target.name !== EDITABLE_TEXTAREA_NAME) {
 			const newState = {} as any;
-
 			newState.textEditable = {
 				...this.state.textEditable,
 				visible: false
@@ -252,7 +250,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public handleTextEdit = ({target: {value}}) => {
 		const [textAreaWidth] = this.state.textEditable.styles.width.split('px');
 		const width = Number(textAreaWidth);
-
 		this.setState({
 			textEditable: {
 				...this.state.textEditable,
@@ -268,7 +265,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public handleTextareaKeyDown = (e) => {
 		if (e.keyCode === 13) {
 			const newState = {} as any;
-
 			newState.textEditable = {
 				...this.state.textEditable,
 				visible: false
@@ -324,7 +320,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.setState(newState);
 	}
 
-	public handleChangeObject = (index, attrs) => {
+	public handleChangeObject = (attrs) => {
 		this.props.updateElement(attrs.name, attrs);
 	}
 
@@ -341,51 +337,23 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public renderObjects = () => {
-		const { textEditable, selectedObjectName } = this.state;
+	public renderObjects = () => this.props.canvasElements.map((element, index) => {
+		const isTextVisible = element.type === ELEMENT_TYPES.TEXT && !this.state.textEditable.visible;
+		const commonProps = {
+			element,
+			isSelected: element.name === this.state.selectedObjectName,
+			isVisible: element.type === ELEMENT_TYPES.TEXT ? isTextVisible : true,
+			handleSelect: () => this.handleSelectObject(element),
+			handleChange: (newAttrs) => this.handleChangeObject(newAttrs)
+		};
 
-		return (
-			<>
-				{
-					this.props.canvasElements.map((element, index) => {
-						const textIndex = `${ELEMENT_TYPES.TEXT}-${index}`;
-						const shapeIndex = `${ELEMENT_TYPES.SHAPE}-${index}`;
-						const isSelectedText = selectedObjectName === textIndex;
-						const isSelectedShape = selectedObjectName === shapeIndex;
-						const isVisible = isSelectedShape || !(textEditable.visible && isSelectedText);
-						const commonProps = {
-							element,
-							isSelected: element.name === selectedObjectName,
-							handleSelect: () => this.handleSelectObject(element),
-							handleChange: (newAttrs) => this.handleChangeObject(index, newAttrs)
-						};
-
-						if (element.type === ELEMENT_TYPES.TEXT) {
-							return (
-								<TextNode
-									key={index}
-									handleDoubleClick={this.handleTextDoubleClick}
-									isVisible={isVisible}
-									{...commonProps}
-								/>
-							);
-						} else if (element.type === ELEMENT_TYPES.DRAWING) {
-							return(
-								<DrawnLine
-									key={index}
-									isVisible={isVisible}
-									{...commonProps}
-								/>
-							);
-						}
-						return (
-							<Shape key={index} {...commonProps} isDrawingMode={this.isDrawingMode} />
-						);
-					}
-				)}
-			</>
-		);
-	}
+		if (element.type === ELEMENT_TYPES.TEXT) {
+			return (<TextNode	key={index} {...commonProps} handleDoubleClick={this.handleTextDoubleClick} />);
+		} else if (element.type === ELEMENT_TYPES.DRAWING) {
+			return(<DrawnLine key={index} {...commonProps} />);
+		}
+		return (<Shape key={index} {...commonProps} isDrawingMode={this.isDrawingMode} />);
+	})
 
 	public renderDrawing = () => {
 		return (
@@ -455,7 +423,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 		const object = this.props.canvasElements.find((s) => s.name === target.name());
 		const newState = {} as any;
-
 		const selectedObjectName = object ? object.name : '';
 		newState.selectedObjectName = selectedObjectName;
 

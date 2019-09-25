@@ -21,12 +21,11 @@ import { Line, Transformer } from 'react-konva';
 interface IProps {
 	element: any;
 	isSelected: boolean;
-	isVisible: boolean;
 	handleSelect: (props: any) => void;
 	handleChange: (props: any) => void;
 }
 
-export const DrawnLine = ({ element, isSelected, handleSelect, isVisible, handleChange }: IProps) => {
+export const DrawnLine = ({ element, isSelected, handleSelect, handleChange }: IProps) => {
 	const { color, ...elementProps } = element;
 	const line = React.useRef<any>();
 	const transformer = React.useRef<any>();
@@ -57,9 +56,8 @@ export const DrawnLine = ({ element, isSelected, handleSelect, isVisible, handle
 				onDragEnd={handleDragEnd}
 				onTransformEnd={handleTransformEnd}
 				draggable
-				visible={isVisible}
 			/>
-			{(isVisible && isSelected) && <Transformer ref={transformer} />}
+			{(isSelected) && <Transformer ref={transformer} />}
 		</>
 	);
 };
