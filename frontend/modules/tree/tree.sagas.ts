@@ -204,25 +204,20 @@ function* handleBackgroundClick() {
 }
 
 function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = false }) {
-	console.log("andleNodesClick", nodesIds, skipExpand, skipChildren);
 	const addGroup = MultiSelect.isAccumMode();
 	const removeGroup = MultiSelect.isDecumMode();
 	const isMultiSelectMode = addGroup || removeGroup;
 
-	console.time("Handle Deselection");
 	if (!isMultiSelectMode) {
 		yield put(TreeActions.clearCurrentlySelected(false));
 		yield take(TreeTypes.UPDATE_DATA_REVISION);
 	}
-	console.timeEnd("Handle Deselection");
 
-	console.time("Select/deselect nodes");
 	if (removeGroup) {
 		yield put(TreeActions.deselectNodes(nodesIds));
 	} else {
 		yield put(TreeActions.selectNodes(nodesIds, skipExpand, skipChildren));
 	}
-	console.timeEnd("Select/deselect nodes");
 }
 
 function* handleNodesClickBySharedIds({ objects = [] }) {
@@ -392,39 +387,24 @@ function* deselectNodesBySharedIds({ objects = [] }) {
  */
 function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false, colour }) {
 	try {
-		console.time('selectNodes');
-		console.time('getLastNodes');
 		const lastNodeId = nodesIds[nodesIds.length - 1];
 		const [lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
-		console.timeEnd('getLastNodes');
 
-		console.time('ProcessSelection');
 		const [result] = yield all([
 			call(TreeProcessing.selectNodes, { nodesIds, skipChildren }),
 			call(handleMetadata, lastNode)
 		]);
-		console.timeEnd('ProcessSelection');
 
-		console.time('SelectionMap');
 		const selectionMap = yield select(selectSelectionMap);
-		console.timeEnd('SelectionMap');
-		console.time('HighlightObjects');
 		highlightObjects(result.highlightedObjects, selectionMap, colour);
-		console.timeEnd('HighlightObjects');
 
 		if (!skipExpand) {
-			console.time('Expand');
 			yield call(expandToNode, lastNode);
-			console.timeEnd('Expand');
 		}
 
-		console.time('ActiveNode');
 		yield put(TreeActions.setActiveNode(lastNodeId));
-		console.timeEnd('ActiveNode');
 		yield put(TreeActions.updateDataRevision());
-		console.timeEnd('selectNodes');
 	} catch (error) {
-		console.log(error);
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
 	}
 }

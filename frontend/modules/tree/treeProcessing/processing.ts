@@ -110,9 +110,6 @@ export class Processing {
 	}
 
 	public selectNodes = ({ nodesIds = [], ...extraData }) => {
-		console.log('@SelectNodes', nodesIds, extraData);
-
-		console.time('[A] Select');
 		const nodes = [];
 		nodesIds.forEach((id) => {
 			if (this.visibilityMap[id] !== VISIBILITY_STATES.INVISIBLE) {
@@ -124,17 +121,13 @@ export class Processing {
 			return { highlightedObjects: [] };
 		}
 
-		console.timeEnd('[A] Select');
-		console.time('[C] Select');
 		const highlightedObjects = this.handleSelection(nodes, SELECTION_STATES.SELECTED);
-		console.timeEnd('[C] Select');
 		this.selectionMap = { ...this.selectionMap };
 
 		return { highlightedObjects };
 	}
 
 	public deselectNodes = ({ nodesIds = [] }) => {
-		console.time('[B]');
 		const nodes = [];
 		for (let index = 0, size = nodesIds.length; index < size; index++) {
 			const nodeId = nodesIds[index];
@@ -148,11 +141,8 @@ export class Processing {
 		if (!nodes.length) {
 			return { unhighlightedObjects: [] };
 		}
-		console.timeEnd('[B]');
 
-		console.time('[C]');
 		const unhighlightedObjects = this.handleSelection(nodes, SELECTION_STATES.UNSELECTED);
-		console.timeEnd('[C]');
 		this.selectionMap = { ...this.selectionMap };
 		return { unhighlightedObjects };
 	}
