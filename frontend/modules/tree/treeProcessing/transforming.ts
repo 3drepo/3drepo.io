@@ -41,7 +41,7 @@ const getFlattenNested = (tree, maps, data = [], idx = 0, level = 1, parentId = 
 	data.push(rowData);
 	maps.nodesIndexesMap[nodeID] = idx++;
 	const currentNodeIdx = idx;
-
+	let subTreeRoots = [];
 	if (tree.children) {
 
 		const hasChildren = tree.children.some((child) => Boolean(child.name));
@@ -55,7 +55,7 @@ const getFlattenNested = (tree, maps, data = [], idx = 0, level = 1, parentId = 
 			const subTree = tree.children[index];
 			subTree.isModel = isModelNode(level + 1, subTree.isFederation, tree.isFederation);
 
-			const { deepChildrenNumber, visibility, nextIdx } =
+			const { deepChildrenNumber, visibility, nextIdx, subTreeRoots: childrenSubTreeRoots } =
 				getFlattenNested(subTree, maps, data, idx, level + 1, nodeID, rootParentId);
 			rowData.deepChildrenNumber += deepChildrenNumber;
 			idx = nextIdx;
@@ -68,6 +68,12 @@ const getFlattenNested = (tree, maps, data = [], idx = 0, level = 1, parentId = 
 				rowData.defaultVisibility = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
 			}
 
+			subTreeRoots = [...subTreeRoots, ...childrenSubTreeRoots];
+			const childNS = getNamespacedId(subTree);
+			if (childNS !== rowData.namespacedId) {
+				subTreeRoots.push(subTree._id);
+			}
+
 		}
 
 		if (hasChildren && nHiddenChildren === tree.children.length) {
@@ -76,11 +82,13 @@ const getFlattenNested = (tree, maps, data = [], idx = 0, level = 1, parentId = 
 
 	}
 
+	rowData.subTreeRoots = subTreeRoots;
 	maps.nodesVisibilityMap[nodeID] = maps.nodesDefaultVisibilityMap[nodeID] = rowData.defaultVisibility;
 	maps.nodesSelectionMap[nodeID] = SELECTION_STATES.UNSELECTED;
 	maps.nodesBySharedIdsMap[rowData.shared_id] = nodeID;
 
-	return { data, deepChildrenNumber: data.length - currentNodeIdx, visibility: rowData.defaultVisibility, nextIdx: idx };
+	return { data, deepChildrenNumber: data.length - currentNodeIdx,
+		visibility: rowData.defaultVisibility, nextIdx: idx, subTreeRoots };
 };
 
 const getMeshesByNodeId = (modelsWithMeshes) => {

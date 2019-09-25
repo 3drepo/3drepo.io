@@ -96,7 +96,7 @@ export class Processing {
 		while (index < this.nodesList.length) {
 			const node = this.nodesList[index];
 			const id = node._id;
-			if (selectionMap[id] !== SELECTION_STATES.UNSELECTED) {
+			if (this.selectionMap[id] !== SELECTION_STATES.UNSELECTED) {
 				this.selectionMap[id] = SELECTION_STATES.UNSELECTED;
 				++index;
 			} else {
@@ -109,8 +109,7 @@ export class Processing {
 		console.log('@SelectNodes', nodesIds, extraData);
 
 		console.time('[A] Select');
-		// FIXME: this should be const
-		let nodes = [];
+		const nodes = [];
 		nodesIds.forEach((id) => {
 			if (this.visibilityMap[id] !== VISIBILITY_STATES.INVISIBLE) {
 				nodes.push(this.nodesList[this.nodesIndexesMap[id]]);
@@ -122,27 +121,9 @@ export class Processing {
 		}
 
 		console.timeEnd('[A] Select');
-
-		console.time('[B] Select');
-		if (!extraData.skipChildren) {
-			let compactNodes = [];
-
-			for (let index = 0, size = nodes.length; index < size; index++) {
-				const node = nodes[index];
-				const children = this.getDeepChildren(node);
-				compactNodes[index] = node;
-				compactNodes = compactNodes.concat(children);
-			}
-			nodes = compactNodes;
-		}
-		console.timeEnd('[B] Select');
-
 		console.time('[C] Select');
-		this.handleToSelect(nodes);
+		const highlightedObjects = this.handleToSelect(nodes);
 		console.timeEnd('[C] Select');
-		console.time('[D] Select');
-		const highlightedObjects = this.getMeshesByNodes(nodes);
-		console.timeEnd('[D] Select');
 
 		return { highlightedObjects };
 	}
@@ -352,20 +333,35 @@ export class Processing {
 	}
 
 	private handleToSelect = (toSelect) => {
-		const firstNode = toSelect[0];
+		const meshes = this.getMeshesByNodes(toSelect);
+		const parentNodesByLevel = [];
 
-		for (let index = 0, size = toSelect.length; index < size; index++) {
-			const node = toSelect[index];
-
-			if (this.isVisibleNode(node._id)) {
-				this.selectionMap[node._id] = SELECTION_STATES.SELECTED;
-			}
+		//use mesh ID instead
+		//use parent id?
+		//use sets
+		for (const ns in meshes) {
+			meshes[ns].meshes.forEach((meshId) => {
+				const meshNode = this.nodesList[this.nodesIndexesMap[meshId]];
+				if (this.isVisibleNode(meshId) && this.selectionMap[meshId] !== SELECTION_STATES.SELECTED) {
+					this.selectionMap[meshId] = SELECTION_STATES.SELECTED;
+					const parents = this.getParentsByPath(meshNode);
+					const meshLevel = meshNode.level;
+					for (let index = 0; index < parents.length ; ++index) {
+						const parentLevel = parents.length - index - 1;
+						if (parentNodesByLevel[parentLevel]) {
+							parentNodesByLevel[parentLevel].push(parents[index]);
+						} else {
+							parentNodesByLevel[parentLevel] = [parents[index]];
+						}
+					}
+				}
+			});
 		}
-		const parents = this.getParentsByPath(firstNode);
 
-		if (parents.length) {
-			this.updateParentsSelection(parents);
+		for (let i =  parentNodesByLevel.length - 1 ; i >= 0; --i) {
+			this.updateParentsSelection(parentNodesByLevel[i]);
 		}
+		return meshes;
 	}
 
 	private handleToDeselect = (toDeselect) => {
@@ -388,7 +384,6 @@ export class Processing {
 	private updateParentsSelection = (parents) => {
 		for (let i = 0; i < parents.length; i++) {
 			const parentId = parents[i]._id;
-
 			const everyChildrenSelected =
 				parents[i].childrenIds.every((childId) => this.selectionMap[childId] === SELECTION_STATES.SELECTED);
 
@@ -420,33 +415,47 @@ export class Processing {
 			return [];
 		}
 
-		const meshesByNodesIndices = {};
-		const meshesByNodesList = [];
+		const meshList = {};
 
-		for (let index = 0; index < nodes.length; index++) {
+		for (let index = 0; index < nodes.length; ++index) {
 			const node = nodes[index];
-
-			if (node) {
-				if (meshesByNodesIndices[node.namespacedId] === undefined) {
-					meshesByNodesList.push({
-						modelId: node.model,
-						teamspace: node.teamspace,
-						meshes: []
-					});
-					meshesByNodesIndices[node.namespacedId] = meshesByNodesList.length - 1;
-				}
-
-				const meshes = node.type === NODE_TYPES.MESH
-					? [node._id]
-					: this.meshesByNodeId[node._id];
-
-				if (meshes) {
-					const meshesByNodesIndex = meshesByNodesIndices[node.namespacedId];
-					meshesByNodesList[meshesByNodesIndex].meshes = meshesByNodesList[meshesByNodesIndex].meshes.concat(meshes);
+			if (node.subTreeRoots.length) {
+				// This is a fed node
+				node.subTreeRoots.forEach((subTreeRootID) => {
+					const stRoot = this.nodesList[this.nodesIndexesMap[subTreeRootID]];
+					const meshes = this.meshesByNodeId[stRoot.namespacedId][stRoot._id];
+					if (meshes && meshes.length) {
+						if (!meshList[stRoot.namespacedId]) {
+							meshList[stRoot.namespacedId] = {
+								modelId: stRoot.model,
+								teamspace: stRoot.teamspace,
+								meshes
+							};
+						} else {
+							meshList[stRoot.namespacedId].meshes = meshList[stRoot.namespacedId].meshes.concat(meshes);
+						}
+					}
+				});
+			} else {
+				const meshes = this.meshesByNodeId[node.namespacedId][node._id];
+				if (meshes && meshes.length) {
+					if (!meshList[node.namespacedId]) {
+						meshList[node.namespacedId] = {
+							modelId: node.model,
+							teamspace: node.teamspace,
+							meshes
+						};
+					} else {
+						meshList[node.namespacedId].meshes = meshList[node.namespacedId].meshes.concat(meshes);
+					}
 				}
 			}
 		}
 
-		return meshesByNodesList as any;
+		const results = [];
+		for (const key in meshList) {
+			results.push(meshList[key]);
+		}
+		return results;
 	}
 }
