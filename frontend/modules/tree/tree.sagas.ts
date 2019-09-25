@@ -211,7 +211,7 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = f
 
 	console.time("Handle Deselection");
 	if (!isMultiSelectMode) {
-		yield put(TreeActions.clearCurrentlySelected());
+		yield put(TreeActions.clearCurrentlySelected(false));
 		yield take(TreeTypes.UPDATE_DATA_REVISION);
 	}
 	console.timeEnd("Handle Deselection");
@@ -243,10 +243,10 @@ function* getSelectedNodes() {
 	}
 }
 
-function* clearCurrentlySelected() {
+function* clearCurrentlySelected(triggerUpdate = true) {
 	Viewer.clearHighlights();
 
-	yield TreeProcessing.clearSelected();
+	yield TreeProcessing.clearSelected(triggerUpdate);
 	yield put(TreeActions.updateDataRevision());
 
 	const isBimVisible = yield select(selectIsMetadataVisible);

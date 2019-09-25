@@ -91,7 +91,7 @@ export class Processing {
 		this.treePath = treePath;
 	}
 
-	public clearCurrentlySelected = () => {
+	public clearCurrentlySelected = (triggerUpdate) => {
 		let index = 0;
 		while (index < this.nodesList.length) {
 			const node = this.nodesList[index];
@@ -102,6 +102,10 @@ export class Processing {
 			} else {
 				index += node.deepChildrenNumber > 0 ? node.deepChildrenNumber : 1;
 			}
+		}
+
+		if (triggerUpdate) {
+			this.selectionMap = {...this.selectionMap};
 		}
 	}
 

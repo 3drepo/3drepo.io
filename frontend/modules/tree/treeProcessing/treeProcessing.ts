@@ -36,7 +36,7 @@ class TreeProcessing {
 
 	public isolateNodes = (payload) => this.processing.isolateNodes(payload);
 
-	public clearSelected = () => this.processing.clearCurrentlySelected();
+	public clearSelected = (triggerUpdate) => this.processing.clearCurrentlySelected(triggerUpdate);
 
 	public getParents = (node) => this.processing.getParentsByPath(node);
 
