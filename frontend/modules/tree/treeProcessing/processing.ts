@@ -124,6 +124,7 @@ export class Processing {
 		console.time('[C] Select');
 		const highlightedObjects = this.handleToSelect(nodes);
 		console.timeEnd('[C] Select');
+		this.selectionMap = { ...this.selectionMap };
 
 		return { highlightedObjects };
 	}
