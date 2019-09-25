@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { Text, Transformer } from 'react-konva';
+import { Line, Transformer } from 'react-konva';
 
 interface IProps {
 	element: any;
@@ -24,58 +24,42 @@ interface IProps {
 	isVisible: boolean;
 	handleSelect: (props: any) => void;
 	handleChange: (props: any) => void;
-	handleDoubleClick: (props: any) => void;
 }
 
-export const TextNode = ({ element, isSelected, handleSelect, handleChange, handleDoubleClick, isVisible }: IProps) => {
+export const DrawnLine = ({ element, isSelected, handleSelect, isVisible, handleChange }: IProps) => {
 	const { color, ...elementProps } = element;
-	const shape = React.useRef<any>();
+	const line = React.useRef<any>();
 	const transformer = React.useRef<any>();
 
 	React.useEffect(() => {
 		if (isSelected) {
-			transformer.current.setNode(shape.current);
+			transformer.current.setNode(line.current);
 			transformer.current.getLayer().batchDraw();
 		}
 	}, [isSelected]);
 
+	const handleDragEnd = (e) => {
+		const {x, y, scaleX, scaleY, points, rotation} = e.target.attrs;
+		handleChange({ ...element, points, scaleX, scaleY, rotation, x, y });
+	};
+
+	const handleTransformEnd = (e) => {
+		const {scaleX, scaleY, rotation, points, x, y} = e.target.attrs;
+		handleChange({ ...element, scaleX, scaleY, points, rotation, x, y });
+	};
+
 	return (
 		<>
-			<Text
-				onClick={handleSelect}
-				ref={shape}
+			<Line
+				ref={line}
 				{...elementProps}
-				fill={color}
+				onClick={handleSelect}
+				onDragEnd={handleDragEnd}
+				onTransformEnd={handleTransformEnd}
 				draggable
 				visible={isVisible}
-				onDblClick={handleDoubleClick}
-				onDragEnd={(e) => {
-					handleChange({
-						...element,
-						x: e.target.x(),
-						y: e.target.y()
-					});
-				}}
-				onTransformEnd={() => {
-					const node = shape.current;
-					const scaleX = node.scaleX();
-					const scaleY = node.scaleY();
-					node.scaleX(1);
-					node.scaleY(1);
-
-					handleChange({
-						...element,
-						x: node.x(),
-						y: node.y(),
-						scaleX,
-						scaleY,
-						rotation: node.rotation(),
-						width: node.width() * scaleX,
-						height: node.height() * scaleY
-					});
-				}}
 			/>
-			{(isVisible && isSelected) && <Transformer ref={transformer} resizeEnabled={false} />}
+			{(isVisible && isSelected) && <Transformer ref={transformer} />}
 		</>
 	);
 };

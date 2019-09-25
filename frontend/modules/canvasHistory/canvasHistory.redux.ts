@@ -16,13 +16,14 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { ELEMENT_TYPES } from '../../routes/components/screenshotDialog/screenshotDialog.helpers';
 
 export const { Types: CanvasHistoryTypes, Creators: CanvasHistoryActions } = createActions({
 	setActiveSuccess: ['isActive'],
 	setDisabledSuccess: ['isDisabled'],
 	add: ['element'],
 	remove: ['elementName'],
-	update: ['elementName', 'property'],
+	update: ['elementName', 'properties'],
 	undo: [],
 	redo: [],
 	clearHistory: []
@@ -39,15 +40,21 @@ export const add = (state = INITIAL_STATE, { element }) => {
 	return { ...state, elements };
 };
 
-export const update = (state = INITIAL_STATE, { elementName, property }) => {
+export const update = (state = INITIAL_STATE, { elementName, properties }) => {
 	const selectedIndex = state.elements.findIndex((el) => el.name === elementName);
 	const elements = [...state.elements];
-	const fill = property.fill !== 'transparent' ? property.color : 'transparent';
-	property.fill = fill;
+	const [elementType] = elementName.split('-');
+
+	if (elementType === ELEMENT_TYPES.SHAPE) {
+		const propertiesNotFilled = !properties.fill && elements[selectedIndex].fill !== 'transparent';
+		const elementNotFilled = properties.fill === 'transparent' && !elements[selectedIndex].fill;
+		const fill = propertiesNotFilled || elementNotFilled ? properties.color : properties.fill;
+		properties.fill = fill;
+	}
 
 	elements[selectedIndex] = {
 		...elements[selectedIndex],
-		...property
+		...properties
 	};
 	return { ...state, elements };
 };

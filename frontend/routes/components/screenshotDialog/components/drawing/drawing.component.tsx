@@ -16,8 +16,6 @@
  */
 
 import * as React from 'react';
-// import Konva from 'konva';
-import { Image, Line } from 'react-konva';
 import { MODE_OPERATION, MODES } from '../../screenshotDialog.helpers';
 
 const Konva = window.Konva;
@@ -29,6 +27,7 @@ interface IProps {
 	width: number;
 	layer: any;
 	stage: any;
+	handleNewDrawnLine: (line) => void;
 }
 
 export class Drawing extends React.PureComponent <IProps, any> {
@@ -53,8 +52,27 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		this.props.stage.on('mousedown', this.handleMouseDown);
 	}
 
+	public componentWillMount() {
+		this.props.stage.off('mousemove', this.handleMouseMove);
+		this.props.stage.off('mouseup', this.handleMouseUp);
+		this.props.stage.off('mousedown', this.handleMouseDown);
+	}
+
+	public componentDidUpdate() {
+		if (this.props.mode === MODES.BRUSH) {
+			this.props.stage.on('mousemove', this.handleMouseMove);
+			this.props.stage.on('mouseup', this.handleMouseUp);
+			this.props.stage.on('mousedown', this.handleMouseDown);
+		} else {
+			this.props.stage.off('mousemove', this.handleMouseMove);
+			this.props.stage.off('mouseup', this.handleMouseUp);
+			this.props.stage.off('mousedown', this.handleMouseDown);
+		}
+	}
+
 	public handleMouseDown = () => {
 		this.setState({ isCurrentlyDrawn: true });
+		this.layer.clearBeforeDraw();
 
 		this.lastPointerPosition = this.props.stage.getPointerPosition();
 		this.lastLine = new Konva.Line({
@@ -69,6 +87,12 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	}
 
 	public handleMouseUp = () => {
+		this.layer.clear();
+		this.layer.clearCache();
+		this.layer.destroyChildren();
+		this.layer.batchDraw();
+
+		this.props.handleNewDrawnLine(this.lastLine);
 		this.setState({ isCurrentlyDrawn: false });
 	}
 
@@ -87,7 +111,6 @@ export class Drawing extends React.PureComponent <IProps, any> {
 			y: position.y - this.props.layer.current.y()
 		};
 		const newPoints = this.lastLine.points().concat([localPosition.x, localPosition.y]);
-
 		this.lastLine.points(newPoints);
 		this.lastPointerPosition = position;
 		this.layer.batchDraw();

@@ -66,7 +66,3 @@ export const MenuButton = styled(Button).attrs({
 		right: 14px;
 	}
 `;
-
-export const MyTeamspace = styled.div`
-
-`;

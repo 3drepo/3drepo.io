@@ -5,7 +5,8 @@ export const SHAPE_TYPES = {
 	TRIANGLE: 2,
 	CIRCLE: 3,
 	LINE: 4,
-	CLOUD: 5
+	CLOUD: 5,
+	DRAWING: 6
 };
 
 export const SHAPE_COMPONENTS = {
@@ -13,5 +14,6 @@ export const SHAPE_COMPONENTS = {
 	[SHAPE_TYPES.TRIANGLE]: Triangle,
 	[SHAPE_TYPES.CIRCLE]: Circle,
 	[SHAPE_TYPES.LINE]: Line,
-	[SHAPE_TYPES.CLOUD]: Cloud
+	[SHAPE_TYPES.CLOUD]: Cloud,
+	[SHAPE_TYPES.DRAWING]: Line
 };

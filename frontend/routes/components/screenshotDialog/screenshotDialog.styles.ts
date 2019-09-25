@@ -55,7 +55,6 @@ export const Textarea = styled.textarea`
 	margin: 0;
 	resize: none;
 	outline: none;
-	border: none;
 	overflow: hidden;
 	transform-origin: left top;
 

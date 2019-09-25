@@ -19,22 +19,16 @@ import * as React from 'react';
 import { Layer } from 'react-konva';
 
 import { Container, BackgroundImage, Stage, Textarea } from './screenshotDialog.styles';
-import { COLOR } from '../../../styles';
 import { Drawing } from './components/drawing/drawing.component';
 import { Shape } from './components/shape/shape.component';
 import { TextNode } from './components/textNode/textNode.component';
+import { DrawnLine } from './components/drawnLine/drawnLine.component';
 import { Tools } from './components/tools/tools.component';
-import { MODES } from './screenshotDialog.helpers';
+import {
+	MODES, ELEMENT_TYPES, INITIAL_VALUES, getNewShape, getNewDrawnLine, getNewText, getTextStyles, EDITABLE_TEXTAREA_NAME
+} from './screenshotDialog.helpers';
 import { renderWhenTrue } from '../../../helpers/rendering';
-import { SHAPE_TYPES } from './components/shape/shape.constants';
 import { Indicator } from './components/indicator/indicator.component';
-
-const INITIAL_VALUES = {
-	color: COLOR.PRIMARY_DARK,
-	brushColor: COLOR.PRIMARY_DARK,
-	brushSize: 5,
-	mode: MODES.BRUSH
-};
 
 interface IProps {
 	sourceImage: string | Promise<string>;
@@ -49,6 +43,7 @@ interface IProps {
 	removeElement: (elementName) => void;
 	undo: () => void;
 	redo: () => void;
+	clearHistory: () => void;
 }
 
 export class ScreenshotDialog extends React.PureComponent<IProps, any> {
@@ -69,11 +64,12 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			visible: false,
 			value: '',
 			styles: {}
-		}
+		} as any
 	};
 
 	public containerRef = React.createRef<any>();
 	public layerRef = React.createRef<any>();
+	public drawingLayerRef = React.createRef<any>();
 	public stageRef = React.createRef<any>();
 	public editableTextareaRef = React.createRef<any>();
 
@@ -85,6 +81,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		return this.layerRef.current;
 	}
 
+	public get drawingLayer() {
+		return this.drawingLayerRef.current;
+	}
+
 	public get stage() {
 		return this.stageRef.current;
 	}
@@ -93,17 +93,20 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		return this.state.mode === MODES.BRUSH || this.state.mode === MODES.ERASER;
 	}
 
+	public get selectedElementType() {
+		const [elementType] = this.state.selectedObjectName.split('-');
+		return elementType;
+	}
+
 	public setStageSize = () => {
 		const height = this.containerElement.offsetHeight;
 		const width = this.containerElement.offsetWidth;
 		const stage = { height, width };
-
 		this.setState({ stage });
 	}
 
 	public async componentDidMount() {
 		const sourceImage = await Promise.resolve(this.props.sourceImage);
-
 		this.setState({ sourceImage }, () => {
 			this.setStageSize();
 		});
@@ -120,8 +123,15 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		newState.brushSize = event.target.value;
 
 		if (this.state.selectedObjectName) {
-			const fontSize = event.target.value;
-			this.props.updateElement(this.state.selectedObjectName, { fontSize });
+			const size = event.target.value;
+			const changedProperties = {} as any;
+
+			if (this.selectedElementType === ELEMENT_TYPES.TEXT) {
+				changedProperties.fontSize = size;
+			} else {
+				changedProperties.strokeWidth = size;
+			}
+			this.props.updateElement(this.state.selectedObjectName, changedProperties);
 		}
 
 		this.setState(newState);
@@ -133,18 +143,27 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		newState.brushColor = color;
 
 		if (this.state.selectedObjectName) {
-			this.props.updateElement(this.state.selectedObjectName, { color });
-		}
+			const changedProperties = {} as any;
 
+			if (this.selectedElementType === ELEMENT_TYPES.DRAWING) {
+				changedProperties.stroke = color;
+			}
+			changedProperties.color = color;
+			this.props.updateElement(this.state.selectedObjectName, changedProperties);
+		}
 		this.setState(newState);
 	}
 
 	public clearCanvas = () => {
 		this.stage.clear();
 		this.layer.clear();
+		this.drawingLayer.clear();
 		this.stage.clearCache();
 		this.layer.clearCache();
+		this.drawingLayer.clearCache();
 		this.layer.destroyChildren();
+		this.drawingLayer.destroyChildren();
+		this.props.clearHistory();
 	}
 
 	public handleUndo = () => {
@@ -165,7 +184,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		if (this.state.selectedObjectName) {
 			newState.selectedObjectName = '';
 		}
-
 		this.setState(newState);
 	}
 
@@ -196,29 +214,12 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleTextDoubleClick = ({target}) => {
-		const textPosition = target.getAbsolutePosition();
-		const styles = {
-			color: target.attrs.fill,
-			fontSize: target.attrs.fontSize,
-			fontFamily: target.attrs.fontFamily,
-			width: `${target.width() - target.padding() * 2}px`,
-			height: `${target.height() - target.padding() * 2}px`,
-			textAlign: target.align(),
-			lineHeight: target.lineHeight(),
-			top: `${textPosition.y - 2}px`,
-			left: `${textPosition.x}px`
-		} as any;
-
-		if (target.attrs.rotation) {
-			styles.transform = `rotateZ(${target.attrs.rotation}deg)`;
-		}
+		const styles = getTextStyles(target);
+		const visible = true;
+		const value = target.attrs.text;
 
 		this.setState({
-			textEditable: {
-				visible: true,
-				value: target.attrs.text,
-				styles
-			}
+			textEditable: { visible, value, styles }
 		}, () => {
 			setTimeout(() => {
 				window.addEventListener('click', this.handleOutsideClick);
@@ -227,7 +228,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleOutsideClick = (e) => {
-		if (e.target.name !== 'editable-textarea') {
+		if (e.target.name !== EDITABLE_TEXTAREA_NAME) {
 			const newState = {} as any;
 
 			newState.textEditable = {
@@ -248,11 +249,18 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public handleTextEdit = (e) => {
+	public handleTextEdit = ({target: {value}}) => {
+		const [textAreaWidth] = this.state.textEditable.styles.width.split('px');
+		const width = Number(textAreaWidth);
+
 		this.setState({
 			textEditable: {
 				...this.state.textEditable,
-				value: e.target.value
+				value,
+				styles: {
+					...this.state.textEditable.styles,
+					width: `${width + width / value.length}px`
+				}
 			}
 		});
 	}
@@ -282,70 +290,38 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public addNewText = () => {
-		const newText = {
-			type: 'text',
-			text: 'New text',
-			color: this.state.color,
-			name: `text-${this.props.canvasElements.length}`,
-			fontSize: 26,
-			fontFamily: 'Arial',
-			x: this.stage.attrs.width / 2 - 200 / 2,
-			y: this.stage.attrs.height / 2 - 50
-		};
-
+		const newText = getNewText(this.stage, this.state.color);
+		const selectedObjectName = newText.name;
 		this.props.addElement(newText);
+		this.setState({ selectedObjectName, mode: MODES.TEXT, brushSize: newText.fontSize });
+	}
 
-		this.setState({
-			selectedObjectName: newText.name,
-			mode: MODES.TEXT,
-			brushSize: newText.fontSize
-		});
+	public addNewDrawnLine = (line) => {
+		const newLine = getNewDrawnLine(line.attrs, this.state.color);
+		const selectedObjectName = newLine.name;
+		this.props.addElement(newLine);
+		this.setState({ selectedObjectName, mode: MODES.SHAPE });
 	}
 
 	public addNewShape = (figure) => {
-		const newShape = {
-			type: 'shape',
-			figure,
-			name: `shape-${this.props.canvasElements.length}`,
-			width: 200,
-			height: 200,
-			color: this.state.color,
-			x: this.stage.attrs.width / 2 - 200 / 2,
-			y: this.stage.attrs.height / 2 - 50,
-			rotation: 0,
-			fill: 'transparent'
-		};
-
-		if (figure === SHAPE_TYPES.LINE) {
-			newShape.height = 0;
-			newShape.width = 300;
-		} else if (figure === SHAPE_TYPES.CLOUD) {
-			newShape.height = 150;
-			newShape.width = 264;
-		}
-
+		const newShape = getNewShape(this.stage, figure, this.state.color);
+		const selectedObjectName = newShape.name;
 		this.props.addElement(newShape);
-
-		this.setState({
-			selectedObjectName: newShape.name,
-			mode: MODES.SHAPE
-		}, () => {
-			console.log('active element', this.props.canvasElements.find((el) => el.name === newShape.name));
-		});
+		this.setState({ selectedObjectName, mode: MODES.SHAPE });
 	}
 
 	public handleSelectObject = (object) => {
-			const newState = {
-				selectedObjectName: object.name,
-				brushColor: object.color,
-				color: object.color,
-				mode: MODES.SHAPE
-			} as any;
+		const newState = {
+			selectedObjectName: object.name,
+			brushColor: object.color || object.stroke,
+			color: object.color || object.stroke,
+			mode: object.type
+		} as any;
 
-			if (object.fontSize) {
-				newState.brushSize = object.fontSize;
-			}
-			this.setState(newState);
+		if (object.fontSize) {
+			newState.brushSize = object.fontSize;
+		}
+		this.setState(newState);
 	}
 
 	public handleChangeObject = (index, attrs) => {
@@ -353,7 +329,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleKeyDown = (e) => {
-		if (this.state.selectedObjectName) {
+		if (this.state.selectedObjectName && !this.state.textEditable.visible) {
 			if (e.keyCode === 8) {
 				this.props.removeElement(this.state.selectedObjectName);
 				this.setState({
@@ -372,12 +348,11 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			<>
 				{
 					this.props.canvasElements.map((element, index) => {
-						const textIndex = `text-${index}`;
-						const shapeIndex = `shape-${index}`;
+						const textIndex = `${ELEMENT_TYPES.TEXT}-${index}`;
+						const shapeIndex = `${ELEMENT_TYPES.SHAPE}-${index}`;
 						const isSelectedText = selectedObjectName === textIndex;
 						const isSelectedShape = selectedObjectName === shapeIndex;
 						const isVisible = isSelectedShape || !(textEditable.visible && isSelectedText);
-
 						const commonProps = {
 							element,
 							isSelected: element.name === selectedObjectName,
@@ -385,7 +360,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 							handleChange: (newAttrs) => this.handleChangeObject(index, newAttrs)
 						};
 
-						if (element.type === 'text') {
+						if (element.type === ELEMENT_TYPES.TEXT) {
 							return (
 								<TextNode
 									key={index}
@@ -394,8 +369,15 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 									{...commonProps}
 								/>
 							);
+						} else if (element.type === ELEMENT_TYPES.DRAWING) {
+							return(
+								<DrawnLine
+									key={index}
+									isVisible={isVisible}
+									{...commonProps}
+								/>
+							);
 						}
-
 						return (
 							<Shape key={index} {...commonProps} isDrawingMode={this.isDrawingMode} />
 						);
@@ -413,20 +395,23 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				size={this.state.brushSize}
 				color={this.state.brushColor}
 				mode={this.state.mode}
-				layer={this.layerRef}
+				layer={this.drawingLayerRef}
 				stage={this.stage}
+				handleNewDrawnLine={this.addNewDrawnLine}
 			/>
 		);
 	}
 
-	public renderLayerContent = () => {
-		const { stage } = this.state;
-
-		if (stage.width && stage.height) {
-			return(
+	public renderLayers = () => {
+		if (this.state.stage.width && this.state.stage.height) {
+			return (
 				<>
-					{this.renderDrawing()}
-					{this.renderObjects()}
+					<Layer ref={this.layerRef}>
+						{this.renderObjects()}
+					</Layer>
+					<Layer ref={this.drawingLayerRef}>
+						{this.renderDrawing()}
+					</Layer>
 				</>
 			);
 		}
@@ -448,6 +433,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			onRedo={this.props.redo}
 			onSave={this.handleSave}
 			disabled={this.props.disabled}
+			mode={this.state.mode}
 			activeShape={this.state.activeShape}
 			selectedObjectName={this.state.selectedObjectName}
 			arePastElements={this.props.arePastElements}
@@ -457,9 +443,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public handleStageMouseDown = ({ target }) => {
 		if (target === target.getStage()) {
-			this.setState({
-				selectedObjectName: ''
-			});
+			this.setState({ selectedObjectName: '' });
 			return;
 		}
 
@@ -474,6 +458,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 		const selectedObjectName = object ? object.name : '';
 		newState.selectedObjectName = selectedObjectName;
+
 		if (selectedObjectName) {
 			newState.lastSelectedObjectName = selectedObjectName;
 		}
@@ -490,7 +475,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public renderEditableTextarea = renderWhenTrue(() => (
 		<Textarea
-			name={'editable-textarea'}
+			name={EDITABLE_TEXTAREA_NAME}
 			value={this.state.textEditable.value}
 			style={this.getEditableTextareaStyles()}
 			onChange={this.handleTextEdit}
@@ -514,9 +499,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				{this.renderIndicator(!this.props.disabled && this.isDrawingMode)}
 				{this.renderTools()}
 				<Stage innerRef={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
-					<Layer ref={this.layerRef}>
-						{this.renderLayerContent()}
-					</Layer>
+					{this.renderLayers()}
 				</Stage>
 				{this.renderEditableTextarea(this.state.textEditable.value)}
 			</Container>

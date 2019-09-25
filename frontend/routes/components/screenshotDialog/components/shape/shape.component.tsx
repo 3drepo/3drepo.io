@@ -85,7 +85,7 @@ export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawi
 		}
 	};
 
-	const handleDoubleClick = () => {
+	const handleDoubleClick = (e) => {
 		const { fill } = element;
 		handleChange({
 			...element,

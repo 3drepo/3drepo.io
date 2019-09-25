@@ -44,6 +44,7 @@ interface IProps {
 	selectedObjectName: string;
 	areFutureElements: boolean;
 	arePastElements: boolean;
+	mode: string;
 	onDrawClick: () => void;
 	onEraseClick: () => void;
 	onTextClick: () => void;
@@ -58,20 +59,12 @@ interface IProps {
 }
 
 export class Tools extends React.PureComponent<IProps, any> {
-	public state = {
-		activeTool: MODES.BRUSH
-	};
-
 	public get isTextSelected() {
 		return this.props.selectedObjectName.includes('text');
 	}
 
 	public get isShapeSelected() {
 		return this.props.selectedObjectName.includes('shape');
-	}
-
-	public handleToolClick = (activeTool, callback?) => () => {
-		this.setState({ activeTool }, callback);
 	}
 
 	public handleUndo = () => () => {
@@ -82,13 +75,9 @@ export class Tools extends React.PureComponent<IProps, any> {
 		this.props.onRedo();
 	}
 
-	public shapeClickCallback = (shapeName, menu, e) => {
+	public handleShapeClick = (shapeName, menu, e) => {
 		menu.close(e);
 		this.props.onShapeClick(shapeName);
-	}
-
-	public handleShapeClick = (shapeName, menu, e) => {
-		this.setState({ activeTool: MODES.SHAPE }, () => this.shapeClickCallback(shapeName, menu, e));
 	}
 
 	public renderBrushSizes = () => range(56, 1).map((size, index) => (
@@ -96,7 +85,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 	))
 
 	public getToolColor = (toolType) => {
-		if (this.state.activeTool === toolType) {
+		if (this.props.mode === toolType) {
 			return 'secondary';
 		}
 		return 'action';
@@ -137,13 +126,13 @@ export class Tools extends React.PureComponent<IProps, any> {
 				<TooltipButton
 					label="Draw"
 					color={this.getToolColor(MODES.BRUSH)}
-					action={this.handleToolClick(MODES.BRUSH, onDrawClick)}
+					action={onDrawClick}
 					Icon={BorderColorIcon}
 				/>
 				<TooltipButton
 					label="Add text"
 					color={this.isTextSelected ? this.getToolColor(MODES.TEXT) : 'action'}
-					action={this.handleToolClick(MODES.TEXT, onTextClick)}
+					action={onTextClick}
 					Icon={TextIcon}
 				/>
 				<ButtonMenu
@@ -167,7 +156,6 @@ export class Tools extends React.PureComponent<IProps, any> {
 					PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'center' } }}
 					ButtonProps={{ disabled: false }}
 				/>
-				<TooltipButton label="Clear all" action={onClearClick} Icon={ClearIcon} />
 				<TooltipButton
 					label="Undo"
 					action={this.handleUndo()}
@@ -179,6 +167,12 @@ export class Tools extends React.PureComponent<IProps, any> {
 					action={this.handleRedo()}
 					Icon={RedoIcon}
 					disabled={!this.props.areFutureElements}
+				/>
+				<TooltipButton
+					label="Clear all"
+					action={onClearClick}
+					Icon={ClearIcon}
+					disabled={!this.props.arePastElements && !this.props.areFutureElements}
 				/>
 				<OptionsDivider />
 			</>
