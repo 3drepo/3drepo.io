@@ -108,6 +108,11 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			this.setStageSize();
 		});
 
+		document.addEventListener('keydown', this.handleKeyDown);
+	}
+
+	public componentWillUnmount() {
+		document.removeEventListener('keydown', this.handleKeyDown);
 	}
 
 	public handleBrushSizeChange = (event) => {
@@ -282,7 +287,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			text: 'New text',
 			color: this.state.color,
 			name: `text-${this.props.canvasElements.length}`,
-			fontSize: 20,
+			fontSize: 26,
 			fontFamily: 'Arial',
 			x: this.stage.attrs.width / 2 - 200 / 2,
 			y: this.stage.attrs.height / 2 - 50
@@ -307,7 +312,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			color: this.state.color,
 			x: this.stage.attrs.width / 2 - 200 / 2,
 			y: this.stage.attrs.height / 2 - 50,
-			rotation: 0
+			rotation: 0,
+			fill: 'transparent'
 		};
 
 		if (figure === SHAPE_TYPES.LINE) {
@@ -324,8 +330,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			selectedObjectName: newShape.name,
 			mode: MODES.SHAPE
 		}, () => {
-			console.log('element', this.props.canvasElements.find((el) => el.name === newShape.name));
-			console.log('active!', newShape.name);
+			console.log('active element', this.props.canvasElements.find((el) => el.name === newShape.name));
 		});
 	}
 
@@ -344,8 +349,20 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleChangeObject = (index, attrs) => {
-		console.log('attrs', attrs);
 		this.props.updateElement(attrs.name, attrs);
+	}
+
+	public handleKeyDown = (e) => {
+		if (this.state.selectedObjectName) {
+			if (e.keyCode === 8) {
+				this.props.removeElement(this.state.selectedObjectName);
+				this.setState({
+					selectedObjectName: ''
+				}, () => {
+					document.body.style.cursor = 'default';
+				});
+			}
+		}
 	}
 
 	public renderObjects = () => {
@@ -479,6 +496,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			onChange={this.handleTextEdit}
 			onKeyDown={this.handleTextareaKeyDown}
 			ref={this.editableTextareaRef}
+			placeholder={'New text'}
 			autoFocus
 		/>
 	));
@@ -489,7 +507,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { sourceImage, stage } = this.state;
-		console.log('render elements', this.props.canvasElements);
 
 		return (
 			<Container innerRef={this.containerRef}>

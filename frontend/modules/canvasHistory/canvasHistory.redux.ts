@@ -42,6 +42,9 @@ export const add = (state = INITIAL_STATE, { element }) => {
 export const update = (state = INITIAL_STATE, { elementName, property }) => {
 	const selectedIndex = state.elements.findIndex((el) => el.name === elementName);
 	const elements = [...state.elements];
+	const fill = property.fill !== 'transparent' ? property.color : 'transparent';
+	property.fill = fill;
+
 	elements[selectedIndex] = {
 		...elements[selectedIndex],
 		...property

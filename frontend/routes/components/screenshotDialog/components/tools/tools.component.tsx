@@ -104,7 +104,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 
 	public renderToolset = renderWhenTrue(() => {
 		const {
-			size, color, onDrawClick, onEraseClick, onTextClick, onClearClick, onColorChange, onBrushSizeChange
+			size, color, onDrawClick, onTextClick, onClearClick, onColorChange, onBrushSizeChange
 		} = this.props;
 
 		return (

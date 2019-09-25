@@ -85,9 +85,26 @@ export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawi
 		}
 	};
 
-	const handleClick = (e) => {
-		console.log('click', e)
+	const handleDoubleClick = () => {
+		const { fill } = element;
+		handleChange({
+			...element,
+			fill: fill === 'transparent' ? element.color : 'transparent'
+		});
+	};
 
+	const handleMouseOver = () => {
+		if (isSelected) {
+			document.body.style.cursor = 'move';
+		}
+	};
+
+	const handleMouseOut = () => {
+		document.body.style.cursor = 'default';
+	};
+
+	const handleClick = (e) => {
+		document.body.style.cursor = 'move';
 		handleSelect(e);
 	};
 
@@ -106,7 +123,11 @@ export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawi
 				onDragStart={handleClick}
 				onDragEnd={handleDragEnd}
 				onTransformEnd={handleTransformEnd}
+				onDblClick={handleDoubleClick}
+				onMouseOver={handleMouseOver}
+				onMouseOut={handleMouseOut}
 				draggable={isSelected && !isDrawingMode}
+				perfectDrawEnabled={false}
 			/>
 			{(isSelected && !isDrawingMode) && <Transformer ref={transformer} {...transformerProps} keepRatio />}
 		</React.Fragment>

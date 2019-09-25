@@ -62,7 +62,8 @@ export class Drawing extends React.PureComponent <IProps, any> {
 			strokeWidth: this.props.size,
 			globalCompositeOperation: MODE_OPERATION[this.props.mode],
 			points: [this.lastPointerPosition.x, this.lastPointerPosition.y],
-			lineCap: 'round'
+			lineCap: 'round',
+			draggable: true
 		});
 		this.layer.add(this.lastLine);
 	}
@@ -89,7 +90,7 @@ export class Drawing extends React.PureComponent <IProps, any> {
 
 		this.lastLine.points(newPoints);
 		this.lastPointerPosition = position;
-		this.layer.draw();
+		this.layer.batchDraw();
 	}
 
 	public render() {
