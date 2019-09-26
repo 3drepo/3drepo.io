@@ -17,6 +17,7 @@
 
 import * as React from 'react';
 import { Text, Transformer } from 'react-konva';
+import { EDITABLE_TEXTAREA_PLACEHOLDER } from '../../screenshotDialog.helpers';
 
 interface IProps {
 	element: any;
@@ -33,7 +34,7 @@ export const TextNode = ({ element, isSelected, handleSelect, handleChange, hand
 	const transformer = React.useRef<any>();
 
 	React.useEffect(() => {
-		if (isSelected) {
+		if (isSelected && isVisible) {
 			transformer.current.setNode(shape.current);
 			transformer.current.getLayer().batchDraw();
 		}
@@ -45,6 +46,7 @@ export const TextNode = ({ element, isSelected, handleSelect, handleChange, hand
 				onClick={handleSelect}
 				ref={shape}
 				{...elementProps}
+				text={elementProps.text || EDITABLE_TEXTAREA_PLACEHOLDER}
 				fill={color}
 				draggable
 				visible={isVisible}

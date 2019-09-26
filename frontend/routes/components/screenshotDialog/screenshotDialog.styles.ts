@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import {
 	Stage as KonvaStage
 } from 'react-konva';
+import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
 	height: 100%;
@@ -57,8 +58,15 @@ export const Textarea = styled.textarea`
 	outline: none;
 	overflow: hidden;
 	transform-origin: left top;
+	z-index: 3;
 
 	&:focus {
 		outline: none;
 	}
+`;
+
+export const TextPlaceholder = styled.span`
+	color: ${COLOR.BLACK_54};
+	position: absolute;
+	z-index: 1;
 `;

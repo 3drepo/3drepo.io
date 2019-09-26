@@ -18,7 +18,7 @@
 import * as React from 'react';
 import { Layer } from 'react-konva';
 
-import { Container, BackgroundImage, Stage, Textarea } from './screenshotDialog.styles';
+import { Container, BackgroundImage, Stage } from './screenshotDialog.styles';
 import { Drawing } from './components/drawing/drawing.component';
 import { Shape } from './components/shape/shape.component';
 import { TextNode } from './components/textNode/textNode.component';
@@ -29,6 +29,7 @@ import {
 } from './screenshotDialog.helpers';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { Indicator } from './components/indicator/indicator.component';
+import { EditableText } from './components/editableText/editableText.component';
 
 interface IProps {
 	sourceImage: string | Promise<string>;
@@ -63,7 +64,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		textEditable: {
 			visible: false,
 			value: '',
-			styles: {}
+			styles: {},
+			elementName: ''
 		} as any
 	};
 
@@ -71,7 +73,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public layerRef = React.createRef<any>();
 	public drawingLayerRef = React.createRef<any>();
 	public stageRef = React.createRef<any>();
-	public editableTextareaRef = React.createRef<any>();
 
 	public get containerElement() {
 		return this.containerRef.current;
@@ -217,8 +218,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		const styles = getTextStyles(target);
 		const visible = true;
 		const value = target.attrs.text;
+		const name = this.state.selectedObjectName;
 		this.setState({
-			textEditable: { visible, value, styles }
+			textEditable: { visible, value, styles, name }
 		}, () => {
 			setTimeout(() => {
 				window.addEventListener('click', this.handleOutsideClick);
@@ -231,7 +233,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			const newState = {} as any;
 			newState.textEditable = {
 				...this.state.textEditable,
-				visible: false
+				visible: false,
+				name: ''
 			};
 
 			if (this.state.lastSelectedObjectName && this.props.canvasElements.length) {
@@ -250,13 +253,14 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public handleTextEdit = ({target: {value}}) => {
 		const [textAreaWidth] = this.state.textEditable.styles.width.split('px');
 		const width = Number(textAreaWidth);
+
 		this.setState({
 			textEditable: {
 				...this.state.textEditable,
 				value,
 				styles: {
 					...this.state.textEditable.styles,
-					width: `${width + width / value.length}px`
+					width: `${width + (this.state.textEditable.styles.fontSize * 0.7)}px`
 				}
 			}
 		});
@@ -267,7 +271,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			const newState = {} as any;
 			newState.textEditable = {
 				...this.state.textEditable,
-				visible: false
+				visible: false,
+				name: false
 			};
 
 			if (this.state.lastSelectedObjectName && this.props.canvasElements.length) {
@@ -338,11 +343,12 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public renderObjects = () => this.props.canvasElements.map((element, index) => {
-		const isTextVisible = element.type === ELEMENT_TYPES.TEXT && !this.state.textEditable.visible;
+		const isTextEditing = this.state.textEditable.name === element.name;
+		const isSelected = this.state.selectedObjectName === element.name;
 		const commonProps = {
 			element,
-			isSelected: element.name === this.state.selectedObjectName,
-			isVisible: element.type === ELEMENT_TYPES.TEXT ? isTextVisible : true,
+			isSelected,
+			isVisible: element.type === ELEMENT_TYPES.TEXT ? !isTextEditing : true,
 			handleSelect: () => this.handleSelectObject(element),
 			handleChange: (newAttrs) => this.handleChangeObject(newAttrs)
 		};
@@ -441,15 +447,11 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public renderEditableTextarea = renderWhenTrue(() => (
-		<Textarea
-			name={EDITABLE_TEXTAREA_NAME}
+		<EditableText
 			value={this.state.textEditable.value}
-			style={this.getEditableTextareaStyles()}
-			onChange={this.handleTextEdit}
-			onKeyDown={this.handleTextareaKeyDown}
-			ref={this.editableTextareaRef}
-			placeholder={'New text'}
-			autoFocus
+			styles={this.getEditableTextareaStyles()}
+			handleTextEdit={this.handleTextEdit}
+			handleTextareaKeyDown={this.handleTextareaKeyDown}
 		/>
 	));
 
@@ -468,7 +470,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				<Stage innerRef={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
 					{this.renderLayers()}
 				</Stage>
-				{this.renderEditableTextarea(this.state.textEditable.value)}
+				{this.renderEditableTextarea(this.state.textEditable.visible)}
 			</Container>
 		);
 	}

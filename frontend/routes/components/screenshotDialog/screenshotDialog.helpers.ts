@@ -92,13 +92,13 @@ export const getNewText = (stage, color) => {
 	const name = createUniqueName(ELEMENT_TYPES.TEXT);
 	const newText = {
 		type: ELEMENT_TYPES.TEXT,
-		text: 'Text',
+		text: '',
 		color,
 		name,
 		fontSize: 32,
 		fontFamily: 'Arial',
 		x: stage.attrs.width / 2 - 200 / 2,
-		y: stage.attrs.height / 2 - 50
+		y: stage.attrs.height / 2 - 51.5
 	};
 
 	return newText;
@@ -126,3 +126,4 @@ export const getTextStyles = (target) => {
 };
 
 export const EDITABLE_TEXTAREA_NAME = 'editable-textarea';
+export const EDITABLE_TEXTAREA_PLACEHOLDER = 'Sample text';
