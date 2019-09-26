@@ -146,13 +146,13 @@ export const selectDefaultHiddenNodesIds = createSelector(
 );
 
 export const selectExpandedNodesMap = createSelector(
-	selectTreeDomain, (state) => state.expandedNodesMap
+	selectTreeDomain, selectDataRevision, (state) => state.expandedNodesMap
 );
 
 export const selectVisibleTreeNodesList = createSelector(
 	[
 		selectFilteredNodesList, selectSelectedFilters,
-		selectExpandedNodesMap, selectSearchEnabled
+		selectExpandedNodesMap, selectSearchEnabled, selectDataRevision
 	],
 	(treeNodesList, selectedFilters, expandedNodesMap, searchEnabled) => {
 		const visibleNodes = [];

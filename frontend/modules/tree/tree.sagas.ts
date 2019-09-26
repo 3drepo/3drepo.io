@@ -106,7 +106,8 @@ function* expandToNode(node: any) {
 			}
 			expandedNodesMap[parents[index]] = true;
 		}
-		yield put(TreeActions.setExpandedNodesMap({...expandedNodesMap}));
+		yield put(TreeActions.setExpandedNodesMap(expandedNodesMap));
+		yield put(TreeActions.updateDataRevision());
 	}
 }
 
