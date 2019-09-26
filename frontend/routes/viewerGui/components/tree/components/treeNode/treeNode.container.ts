@@ -21,6 +21,7 @@ import { createStructuredSelector } from 'reselect';
 
 import { selectSettings } from '../../../../../../modules/model';
 import {
+	selectDataRevision,
 	selectSelectionMap,
 	selectVisibilityMap,
 	TreeActions
@@ -30,7 +31,8 @@ import { TreeNode } from './treeNode.component';
 const mapStateToProps = createStructuredSelector({
 	settings: selectSettings,
 	visibilityMap: selectVisibilityMap,
-	selectionMap: selectSelectionMap
+	selectionMap: selectSelectionMap,
+	rev: selectDataRevision
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

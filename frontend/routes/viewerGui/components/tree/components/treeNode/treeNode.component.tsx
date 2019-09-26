@@ -44,6 +44,7 @@ interface IProps {
 	isSearchResult?: boolean;
 	visibilityMap: any;
 	selectionMap: any;
+	rev: any;
 	highlighted?: boolean;
 	expanded?: boolean;
 	selected?: boolean;

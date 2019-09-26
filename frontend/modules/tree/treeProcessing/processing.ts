@@ -104,9 +104,9 @@ export class Processing {
 			}
 		}
 
-		if (triggerUpdate) {
+			/*		if (triggerUpdate) {
 			this.selectionMap = {...this.selectionMap};
-		}
+		}*/
 	}
 
 	public selectNodes = ({ nodesIds = [], ...extraData }) => {
@@ -122,7 +122,7 @@ export class Processing {
 		}
 
 		const highlightedObjects = this.handleSelection(nodes, SELECTION_STATES.SELECTED);
-		this.selectionMap = { ...this.selectionMap };
+		//		this.selectionMap = { ...this.selectionMap };
 
 		return { highlightedObjects };
 	}
@@ -143,7 +143,7 @@ export class Processing {
 		}
 
 		const unhighlightedObjects = this.handleSelection(nodes, SELECTION_STATES.UNSELECTED);
-		this.selectionMap = { ...this.selectionMap };
+		//		this.selectionMap = { ...this.selectionMap };
 		return { unhighlightedObjects };
 	}
 
