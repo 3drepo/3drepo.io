@@ -184,24 +184,19 @@ function* stopListenOnSelections() {
 }
 
 function* handleBackgroundClick() {
-	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
 
-	if (fullySelectedNodes.length) {
-		yield all([
-			clearCurrentlySelected(),
-			put(GroupsActions.clearSelectionHighlights(false))
-		]);
-	}
+	yield all([
+		clearCurrentlySelected(),
+		put(GroupsActions.clearSelectionHighlights(false))
+	]);
 
 	const activeNode = yield select(selectActiveNode);
 
 	if (activeNode) {
 		yield put(TreeActions.setActiveNode(null));
-	}
-
-	if (fullySelectedNodes.length || activeNode) {
 		yield put(TreeActions.updateDataRevision());
 	}
+
 }
 
 function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = false }) {
