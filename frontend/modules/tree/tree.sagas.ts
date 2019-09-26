@@ -92,7 +92,7 @@ function* handleMetadata(node: any) {
 
 function* expandToNode(node: any) {
 	if (node) {
-		const expandedNodesMap = {...(yield select(selectExpandedNodesMap))};
+		const expandedNodesMap = yield select(selectExpandedNodesMap);
 		if (expandedNodesMap[node._id]) {
 			// already expanded
 			return;
@@ -106,7 +106,7 @@ function* expandToNode(node: any) {
 			}
 			expandedNodesMap[parents[index]] = true;
 		}
-		yield put(TreeActions.setExpandedNodesMap(expandedNodesMap));
+		yield put(TreeActions.setExpandedNodesMap({...expandedNodesMap}));
 	}
 }
 
@@ -238,10 +238,10 @@ function* getSelectedNodes() {
 	}
 }
 
-function* clearCurrentlySelected(triggerUpdate = true) {
+function* clearCurrentlySelected() {
 	Viewer.clearHighlights();
 
-	yield TreeProcessing.clearSelected(triggerUpdate);
+	yield TreeProcessing.clearSelected();
 	yield put(TreeActions.updateDataRevision());
 
 	const isBimVisible = yield select(selectIsMetadataVisible);

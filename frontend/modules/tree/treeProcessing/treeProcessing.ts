@@ -13,7 +13,6 @@ class TreeProcessing {
 
 	public transformData = async (payload) => {
 		const { nodesList, treePath, ...auxiliaryMaps } = await transformTree(payload) as any;
-		console.time('INIT TREE SERVICE');
 		this.processing = new Processing({
 			nodesList,
 			treePath,
@@ -24,7 +23,6 @@ class TreeProcessing {
 			selectionMap: auxiliaryMaps.nodesSelectionMap,
 			nodesBySharedIdsMap: auxiliaryMaps.nodesBySharedIdsMap
 		});
-		console.timeEnd('INIT TREE SERVICE');
 		return { nodesList, treePath, auxiliaryMaps };
 	}
 
@@ -36,7 +34,7 @@ class TreeProcessing {
 
 	public isolateNodes = (payload) => this.processing.isolateNodes(payload);
 
-	public clearSelected = (triggerUpdate) => this.processing.clearCurrentlySelected(triggerUpdate);
+	public clearSelected = () => this.processing.clearCurrentlySelected();
 
 	public getParents = (node) => this.processing.getParentsByPath(node);
 

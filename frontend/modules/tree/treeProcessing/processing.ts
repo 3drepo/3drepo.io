@@ -91,7 +91,7 @@ export class Processing {
 		this.treePath = treePath;
 	}
 
-	public clearCurrentlySelected = (triggerUpdate) => {
+	public clearCurrentlySelected = () => {
 		let index = 0;
 		while (index < this.nodesList.length) {
 			const node = this.nodesList[index];
@@ -103,10 +103,6 @@ export class Processing {
 				index += node.deepChildrenNumber > 0 ? node.deepChildrenNumber : 1;
 			}
 		}
-
-			/*		if (triggerUpdate) {
-			this.selectionMap = {...this.selectionMap};
-		}*/
 	}
 
 	public selectNodes = ({ nodesIds = [], ...extraData }) => {
@@ -122,7 +118,6 @@ export class Processing {
 		}
 
 		const highlightedObjects = this.handleSelection(nodes, SELECTION_STATES.SELECTED);
-		//		this.selectionMap = { ...this.selectionMap };
 
 		return { highlightedObjects };
 	}
@@ -143,7 +138,6 @@ export class Processing {
 		}
 
 		const unhighlightedObjects = this.handleSelection(nodes, SELECTION_STATES.UNSELECTED);
-		//		this.selectionMap = { ...this.selectionMap };
 		return { unhighlightedObjects };
 	}
 
