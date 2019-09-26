@@ -38,11 +38,6 @@ interface IProps {
 }
 
 export class RevisionsSwitch extends React.PureComponent<IProps, any> {
-	get revisionName() {
-		const { currentRevision: revision } =  this.props;
-		return revision.tag || formatDate(revision.timestamp, LONG_DATE_TIME_FORMAT);
-	}
-
 	public renderCurrentSwitchState = renderWhenTrue(() => (
 		<DisplayedText>
 			{`${this.props.modelSettings.name} - ${this.revisionName}`}
@@ -66,31 +61,20 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	private get currentRevisionName() {
-		return this.props.urlParams.revision || this.getRevisionDisplayedName(this.props.revisions[0]);
+	private get revisionDataExists() {
+		return Boolean(this.props.modelSettings.name && this.props.revisions.length && this.props.currentRevision);
 	}
 
-	private get currentRevisionId() {
-		const currentRevision = this.props.revisions.find((revision) =>
-			this.currentRevisionName === revision.tag ||
-			this.currentRevisionName === formatDate(revision.timestamp, LONG_DATE_TIME_FORMAT) ||
-			this.currentRevisionName === revision._id
-		);
-
-		return currentRevision._id;
-	}
-
-	private getRevisionDisplayedName = (revision) => {
+	get revisionName() {
+		const { currentRevision: revision } =  this.props;
 		return revision.tag || formatDate(revision.timestamp, LONG_DATE_TIME_FORMAT);
 	}
 
-	private get revisionDataExists() {
-		return Boolean(this.props.modelSettings.name && this.props.revisions.length && this.currentRevisionName);
-	}
-
 	private setNewRevision = (revision) => {
-		const { teamspace, model } = this.props.urlParams;
-		const newPathname = `${ROUTES.VIEWER}/${teamspace}/${model}/${revision.tag || revision._id}`;
+		const { pathname } = this.props.location;
+		const [, , , , currentRevisionInPath] = pathname.split('/');
+		const newPathnameBase = currentRevisionInPath ? pathname.substr(0, pathname.lastIndexOf('\/')) : pathname;
+		const newPathname = `${newPathnameBase}/${revision.tag || revision._id}`;
 
 		this.props.history.push(newPathname);
 		this.props.hideDialog();
@@ -102,16 +86,13 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 		}
 
 		this.props.showRevisionsDialog({
-			title: `Revisions: ${this.props.modelSettings.name}`,
+			title: `Revisions - ${this.props.modelSettings.name}`,
 			data: {
 				currentRevisionId: this.props.currentRevision._id,
 				currentModelName: this.props.modelSettings.name,
 				revisions: this.props.revisions,
-				handleSetNewRevision: this.setNewRevision,
-				showOnlyActive: true,
-				type: TYPES.VIEWER
+				handleSetNewRevision: this.setNewRevision
 			}
 		});
 	}
-
 }
