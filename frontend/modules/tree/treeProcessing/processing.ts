@@ -317,8 +317,7 @@ export class Processing {
 
 	public showAllNodes = (ifcSpacesHidden) => {
 		const root = this.nodesList[0];
-		const listToShow = root.isFederation ? root.childrenIds : root;
-		return this.showNodes(listToShow, ifcSpacesHidden);
+		return this.showNodes(root.childrenIds, ifcSpacesHidden);
 	}
 
 	public updateVisibility = ({ nodesIds = [], ifcSpacesHidden, skipChildren, visibility, skipParents }) => {
