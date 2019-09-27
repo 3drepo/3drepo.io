@@ -208,6 +208,12 @@ FileRef.getJSONFile = function(account, model, fileName) {
 	return fetchFile(account, model, JSON_FILE_REF_EXT, fileName);
 };
 
+/**
+ * @param {*} account
+ * @param {*} model
+ * @param {*} fileName
+ * @returns {{readStream: stream.Readable , size: Number}}
+ */
 FileRef.getResourceFile = function(account, model, fileName) {
 	return fetchFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true);
 };
