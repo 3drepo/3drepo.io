@@ -843,7 +843,7 @@ async function idsToSharedIds(account, model, ids, convertSharedIDsToString) {
 			if (convertSharedIDsToString) {
 				shared_ids.push(utils.uuidToString(shared_id));
 			} else {
-				shared_ids.push(shared_ids);
+				shared_ids.push(shared_id);
 			}
 		}
 	}
@@ -928,6 +928,12 @@ async function getRuleQueryResults(account, model, idToMeshesDict, revisionEleme
 	return ids;
 }
 
+async function getIFCGuids(account, model, shared_ids) {
+	const sceneCol =  await db.getCollection(account, model + ".scene");
+	const results = await sceneCol.find({ "parents":{ $in: shared_ids } , "type":"meta"}, {"metadata.IFC GUID":1, "_id":0}).toArray();
+	return results.map(r => r.metadata["IFC GUID"]);
+}
+
 async function findObjectIDsByRules(account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
 	const objectIdPromises = [];
 
@@ -948,40 +954,26 @@ async function findObjectIDsByRules(account, model, rules, branch, revId, conver
 			const _branch = (model === modelID) ? branch : "master";
 			const _revId = (model === modelID) ? revId : null;
 
-			// if (showIfcGuids) { // TODO: refactor this
-			// 	objectIdPromises.push(findObjectsByQuery(
-			// 		objectId.account,
-			// 		objectId.model,
-			// 		query
-			// 	).then(objectIdResults => {
-			// 		if(!objectIdResults.length) {
-			// 			return undefined;
-			// 		}
-
-			// 		for (let j = 0; j < objectIdResults.length; j++) {
-			// 			objectIdsSet.add(objectIdResults[j].metadata["IFC GUID"]);
-			// 		}
-
-			// 		if (objectIdsSet.size > 0) {
-			// 			objectId.ifc_guids = [];
-			// 			objectIdsSet.forEach(id => {
-			// 				objectId.ifc_guids.push(id);
-			// 			});
-			// 		}
-
-			// 		return objectId;
-			// 	}));
-			// } else {
 			objectIdPromises.push(findModelSharedIDsByRulesQueries(
 				account,
 				model,
 				queries,
 				_branch,
 				_revId,
-				convertSharedIDsToString
+				convertSharedIDsToString && !showIfcGuids // in the case of ifcguids I need the uuid for querying and geting the ifcguids
 			).then(shared_ids => {
 				if(!shared_ids.length) {
 					return undefined;
+				}
+
+				if (showIfcGuids) {
+					return getIFCGuids(account, model, shared_ids).then(ifc_guids => {
+						if(convertSharedIDsToString) {
+							shared_ids = shared_ids.map(utils.uuidToString);
+						}
+
+						return {account, model, shared_ids, ifc_guids};
+					});
 				}
 
 				return {account, model, shared_ids};
