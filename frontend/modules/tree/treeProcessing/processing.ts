@@ -323,7 +323,7 @@ export class Processing {
 
 	private updateParentsVisibility = (nodes) => {
 		nodes.forEach((node) => {
-			const hasVisibleChildren = node.childrenIds.every((id) => this.visibilityMap[id] !== VISIBILITY_STATES.INVISIBLE);
+			const hasVisibleChildren = node.childrenIds.every((id) => this.visibilityMap[id] === VISIBILITY_STATES.VISIBLE);
 			const hasInvisibleChildren = node.childrenIds.every((id) => this.visibilityMap[id] === VISIBILITY_STATES.INVISIBLE);
 
 			if (hasVisibleChildren) {
