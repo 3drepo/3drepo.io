@@ -18,7 +18,7 @@
 import * as React from 'react';
 import { Layer } from 'react-konva';
 
-import { Container, BackgroundImage, Stage } from './screenshotDialog.styles';
+import { Container, Stage } from './screenshotDialog.styles';
 import { Drawing } from './components/drawing/drawing.component';
 import { Shape } from './components/shape/shape.component';
 import { TextNode } from './components/textNode/textNode.component';
@@ -30,6 +30,8 @@ import {
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { Indicator } from './components/indicator/indicator.component';
 import { EditableText } from './components/editableText/editableText.component';
+
+const Konva = window.Konva;
 
 interface IProps {
 	sourceImage: string | Promise<string>;
@@ -46,13 +48,12 @@ interface IProps {
 	redo: () => void;
 	clearHistory: () => void;
 }
-
 export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public state = {
 		color: INITIAL_VALUES.color,
 		brushSize: INITIAL_VALUES.brushSize,
 		brushColor: INITIAL_VALUES.color,
-		mode: INITIAL_VALUES.mode,
+		mode: null,
 		activeShape: null,
 		sourceImage: '',
 		stage: {
@@ -73,6 +74,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public layerRef = React.createRef<any>();
 	public drawingLayerRef = React.createRef<any>();
 	public stageRef = React.createRef<any>();
+	public hiddenCanvasRef = React.createRef<any>();
 
 	public get containerElement() {
 		return this.containerRef.current;
@@ -88,6 +90,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public get stage() {
 		return this.stageRef.current;
+	}
+
+	public get hiddenCanvas() {
+		return this.hiddenCanvasRef.current as any;
 	}
 
 	public get isDrawingMode() {
@@ -108,7 +114,13 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public async componentDidMount() {
 		const sourceImage = await Promise.resolve(this.props.sourceImage);
-		this.setState({ sourceImage }, () => {
+
+		Konva.Image.fromURL(sourceImage, (image) => {
+			this.layer.add(image);
+			this.layer.batchDraw();
+		});
+
+		this.setState({ sourceImage, mode: INITIAL_VALUES.mode }, () => {
 			this.setStageSize();
 		});
 
@@ -175,7 +187,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.props.redo();
 	}
 
-	public handleSave = async () => {};
+	public handleSave = async () => {
+		const screenshot = this.stage.toDataURL();
+		this.props.handleResolve(screenshot);
+	}
 
 	public setBrushMode = () => {
 		const newState = {
@@ -460,11 +475,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	));
 
 	public render() {
-		const { sourceImage, stage } = this.state;
+		const { stage } = this.state;
 
 		return (
 			<Container innerRef={this.containerRef}>
-				<BackgroundImage src={sourceImage} />
 				{this.renderIndicator(!this.props.disabled && this.isDrawingMode)}
 				{this.renderTools()}
 				<Stage innerRef={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>

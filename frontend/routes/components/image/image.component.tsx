@@ -18,6 +18,7 @@
 import React from 'react';
 
 import { Container, StyledImage } from './image.styles';
+import { ScreenshotDialog } from '../screenshotDialog';
 
 interface IProps {
 	src: string;
@@ -31,7 +32,7 @@ export class Image extends React.PureComponent<IProps, any> {
 	public handlePreview = () => {
 		const { src, enablePreview, showScreenshotDialog } = this.props;
 		if (enablePreview && src) {
-			showScreenshotDialog({ sourceImage: src, disabled: true });
+			showScreenshotDialog({ sourceImage: src, disabled: true, template: ScreenshotDialog });
 		}
 	}
 

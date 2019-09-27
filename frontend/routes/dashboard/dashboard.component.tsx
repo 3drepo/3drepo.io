@@ -94,6 +94,13 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 			/>
 		</Switch>
 		)
+	)
+
+	public renderDashboardRoute = ({match}) => (
+		<Content>
+			{this.renderRoutes(match, this.props.currentUser)}
+		</Content>
+	)
 
 	public render() {
 		const { match, currentUser, isPending, isInitialised, isAvatarPending } = this.props;
@@ -114,6 +121,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 				<Content>
 					{this.renderRoutes(match, this.props.currentUser)}
 				</Content>
+				<Route path={`${match.url}dashboard`} render={this.renderDashboardRoute} />
 			</Container>
 		);
 	}

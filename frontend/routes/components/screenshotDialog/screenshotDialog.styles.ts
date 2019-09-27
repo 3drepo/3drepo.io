@@ -16,9 +16,7 @@
  */
 
 import styled from 'styled-components';
-import {
-	Stage as KonvaStage
-} from 'react-konva';
+import {Stage as KonvaStage } from 'react-konva';
 import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
@@ -29,17 +27,6 @@ export const Container = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: center;
-`;
-
-export const BackgroundImage = styled.img`
-	width: 100%;
-	text-align: center;
-	margin: auto;
-	padding: 0;
-	position: absolute;
-	bottom: 0;
-	top: 0;
-	user-select: none;
 `;
 
 export const Stage = styled(KonvaStage)`

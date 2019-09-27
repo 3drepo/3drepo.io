@@ -42,6 +42,8 @@ import {
 	StyledTextField,
 	TextFieldWrapper
 } from './newCommentForm.styles';
+import { VIEWER_EVENTS } from '../../../../constants/viewer';
+import { ScreenshotDialog } from '../../../components/screenshotDialog';
 
 interface IProps {
 	formRef: any;
@@ -92,6 +94,45 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		newScreenshot: '',
 		isResidualRiskInputActive: this.props.showResidualRiskInput
 	};
+
+	public componentDidUpdate = (prevProps) => {
+		if (prevProps.screenshot !== this.props.screenshot) {
+			this.setState({
+				newScreenshot: this.props.screenshot
+			});
+			this.props.innerRef.current.setFieldValue('screenshot', this.props.screenshot);
+		}
+	}
+
+	public componentWillUnmount() {
+		Viewer.setPinDropMode(false);
+		this.props.setDisabled(false);
+	}
+
+	public handleSave = (values, form) => {
+		const screenshot = values.screenshot.substring(values.screenshot.indexOf(',') + 1);
+		const commentValues = { ...values, screenshot };
+		this.props.onSave(commentValues, () => {
+			form.resetForm();
+		});
+		this.setState({ newScreenshot: ''});
+	}
+
+	public handleNewScreenshot = async () => {
+		const { showScreenshotDialog, onTakeScreenshot } = this.props;
+
+		showScreenshotDialog({
+			sourceImage: Viewer.getScreenshot(),
+			template: ScreenshotDialog,
+			onSave: (screenshot) => onTakeScreenshot(screenshot)
+		});
+	}
+
+	public handleChangeCommentType = () => {
+		const isResidualRiskInputActive = !this.state.isResidualRiskInputActive;
+
+		this.setState({ isResidualRiskInputActive });
+	}
 
 	public renderScreenshotButton = renderWhenTrue(() => (
 		<TooltipButton
