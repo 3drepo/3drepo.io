@@ -323,7 +323,6 @@ function* isolateNodes(nodesIds = [], skipChildren = false) {
 			const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 			const result = yield TreeProcessing.isolateNodes({ nodesIds, skipChildren, ifcSpacesHidden });
 
-			console.log(result);
 			if (result.unhighlightedObjects && result.unhighlightedObjects.length) {
 				unhighlightObjects(result.unhighlightedObjects);
 			}
@@ -334,17 +333,16 @@ function* isolateNodes(nodesIds = [], skipChildren = false) {
 			yield put(TreeActions.updateDataRevision());
 		}
 	} catch (error) {
-		console.log(error);
 		yield put(DialogActions.showErrorDialog('isolate', 'selected nodes', error));
 	}
 }
 
-function* isolateSelectedNodes({ nodeId = null }) {
-	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
-	if (fullySelectedNodes.length) {
-		yield isolateNodes(fullySelectedNodes, true);
-	} else {
+function* isolateSelectedNodes({ nodeId }) {
+	if (nodeId) {
 		yield isolateNodes([nodeId]);
+	} else {
+		const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
+		yield isolateNodes(fullySelectedNodes, true);
 	}
 }
 

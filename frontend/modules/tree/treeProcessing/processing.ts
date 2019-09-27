@@ -141,8 +141,7 @@ export class Processing {
 		return { unhighlightedObjects };
 	}
 
-	public isolateNodes = ({ nodesIds = [], ifcSpacesHidden = true, skipChildren = false }: any) => {
-		console.log("isolateNodes", nodesIds);
+	public isolateNodes = ({ nodesIds = [], ifcSpacesHidden = true}: any) => {
 		const meshesToUpdate = {};
 		const parentNodesByLevel = [];
 		const toIsolate = {};
@@ -189,7 +188,7 @@ export class Processing {
 		}
 
 		const { unhighlightedObjects, meshesToUpdate: meshToHide } = this.hideNodes(toHide, true);
-		const { meshesToUpdate: meshToShow }  = this.showNodes(toShow);
+		const { meshesToUpdate: meshToShow }  = this.showNodes(toShow, ifcSpacesHidden);
 
 		for (let i =  parentNodesByLevel.length - 1 ; i >= 0; --i) {
 			this.updateParentsVisibility(parentNodesByLevel[i]);

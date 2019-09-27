@@ -80,7 +80,7 @@ interface IProps {
 	resetHelicopterSpeed: (teamspace, modelId, updateDefaultSpeed) => void;
 	showAllNodes: (shouldUpdateModel) => void;
 	hideSelectedNodes: () => void;
-	isolateSelectedNodes: () => void;
+	isolateSelectedNodes: (nodeId) => void;
 	setIsFocusMode: (isFocusMode) => void;
 	setClippingMode: (clippingMode) => void;
 	setClipEdit: (isClipEdit) => void;
@@ -174,7 +174,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			{
 				label: VIEWER_TOOLBAR_ITEMS.ISOLATE,
 				Icon: IsolateIcon,
-				action: this.props.isolateSelectedNodes
+				action: () => this.props.isolateSelectedNodes(undefined)
 			},
 			{
 				label: VIEWER_TOOLBAR_ITEMS.FOCUS,
