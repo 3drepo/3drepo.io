@@ -142,49 +142,64 @@ export class Processing {
 	}
 
 	public isolateNodes = ({ nodesIds = [], ifcSpacesHidden = true, skipChildren = false }: any) => {
-		const meshesToUpdate = [];
-		const parentsMap = {};
+		console.log("isolateNodes", nodesIds);
+		const meshesToUpdate = {};
+		const parentNodesByLevel = [];
+		const toIsolate = {};
+		const isParent = {};
+		const toShow = [];
+		const toHide = [];
 
-		for (let index = 0; index < nodesIds.length; index++) {
-			const [node] = this.getNodesByIds([nodesIds[index]]);
-			parentsMap[node.parentId] = true;
+		nodesIds.forEach((id) => {
+			const [node] = this.getNodesByIds([id]);
+			toIsolate[id] = 1;
 
-			if (!skipChildren) {
-				const deepChildren = this.getDeepChildren(node);
-				const deepChildrenIds = deepChildren.map(({ _id }) => _id);
-				nodesIds.push(...deepChildrenIds);
+			if (this.visibilityMap[id] !== VISIBILITY_STATES.VISIBLE) {
+				toShow.push(id);
+			} else {
+				const parents = this.getParentsByPath(node);
+				for (let index = 0; index < parents.length ; ++index) {
+					const parentLevel = parents.length - index - 1;
+					if (parentNodesByLevel[parentLevel]) {
+						parentNodesByLevel[parentLevel].add(parents[index]);
+					} else {
+						parentNodesByLevel[parentLevel] = new Set([parents[index]]);
+					}
+					isParent[parents[index]._id] = 1;
+				}
 			}
-		}
-
-		for (let index = this.nodesList.length - 1; index >= 0; index--) {
-			const node = this.nodesList[index];
-			const shouldBeVisible = nodesIds.includes(node._id);
-			let visibilityHasChanged = false;
-			if (shouldBeVisible) {
-				this.visibilityMap[node._id] = ifcSpacesHidden ? this.defaultVisibilityMap[node._id] : VISIBILITY_STATES.VISIBLE;
-				visibilityHasChanged = true;
-			} else if (this.isVisibleNode(node._id) && !parentsMap[node._id]) {
-				this.visibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
-				visibilityHasChanged = true;
-			}
-
-			if (visibilityHasChanged && node.type === NODE_TYPES.MESH) {
-				meshesToUpdate.push(node);
-			}
-			this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
-		}
-
-		this.updateParentsVisibility(this.getNodesByIds(keys(parentsMap)), {
-			visibility: VISIBILITY_STATES.PARENT_OF_INVISIBLE,
-			ifcSpacesHidden
 		});
-		this.selectionMap = { ...this.selectionMap };
-		this.visibilityMap = { ...this.visibilityMap };
 
-		return meshesToUpdate;
+		let nodeIdx = 0;
+
+		while (nodeIdx < this.nodesList.length) {
+			const node = this.nodesList[nodeIdx];
+			const nodeID = node._id;
+			if (toIsolate[nodeID]) {
+				// We hit a node we want to isolate skip its children
+				nodeIdx += node.deepChildrenNumber;
+			} else if (!isParent[nodeID]) {
+				if (this.visibilityMap[nodeID] !== VISIBILITY_STATES.INVISIBLE) {
+					toHide.push(nodeID);
+				}
+				// We hit a branch that we wish to hide. Skip its children
+				nodeIdx += node.deepChildrenNumber;
+			}
+			++nodeIdx;
+		}
+
+		const { unhighlightedObjects, meshesToUpdate: meshToHide } = this.hideNodes(toHide, true);
+		const { meshesToUpdate: meshToShow }  = this.showNodes(toShow);
+
+		for (let i =  parentNodesByLevel.length - 1 ; i >= 0; --i) {
+			this.updateParentsVisibility(parentNodesByLevel[i]);
+			this.updateParentsSelection(parentNodesByLevel[i]);
+		}
+
+		return { unhighlightedObjects, meshToHide, meshToShow};
 	}
 
-	private hideNodes = (nodesId) => {
+	private hideNodes = (nodesId, skipParent = false) => {
 		const toDeselect = [];
 		const toGetMeshes = [];
 		const parentNodesByLevel = [];
@@ -218,13 +233,15 @@ export class Processing {
 					}
 				}
 
-				const parents = this.getParentsByPath(node);
-				for (let index = 0; index < parents.length ; ++index) {
-					const parentLevel = parents.length - index - 1;
-					if (parentNodesByLevel[parentLevel]) {
-						parentNodesByLevel[parentLevel].add(parents[index]);
-					} else {
-						parentNodesByLevel[parentLevel] = new Set([parents[index]]);
+				if (!skipParent) {
+					const parents = this.getParentsByPath(node);
+					for (let index = 0; index < parents.length ; ++index) {
+						const parentLevel = parents.length - index - 1;
+						if (parentNodesByLevel[parentLevel]) {
+							parentNodesByLevel[parentLevel].add(parents[index]);
+						} else {
+							parentNodesByLevel[parentLevel] = new Set([parents[index]]);
+						}
 					}
 				}
 			}

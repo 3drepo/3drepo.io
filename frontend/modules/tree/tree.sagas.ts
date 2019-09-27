@@ -82,6 +82,17 @@ const highlightObjects = (objects = [], nodesSelectionMap = {}, colour?) => {
 	return Promise.all(promises);
 };
 
+const toggleMeshesVisibility = (meshes, visibility) => {
+	meshes.forEach((entry) => {
+		Viewer.switchObjectVisibility(
+			entry.teamspace,
+			entry.modelId,
+			entry.meshes,
+			visibility
+		);
+	});
+};
+
 function* handleMetadata(node: any) {
 	const isMetadataActive = yield select(selectIsActive);
 	if (node && node.meta && isMetadataActive) {
@@ -310,14 +321,20 @@ function* isolateNodes(nodesIds = [], skipChildren = false) {
 	try {
 		if (nodesIds.length) {
 			const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
-			const meshesToUpdate = yield TreeProcessing.isolateNodes({ nodesIds, skipChildren, ifcSpacesHidden });
-			const visibilityMap = yield select(selectVisibilityMap);
+			const result = yield TreeProcessing.isolateNodes({ nodesIds, skipChildren, ifcSpacesHidden });
 
-			Viewer.clearHighlights();
+			console.log(result);
+			if (result.unhighlightedObjects && result.unhighlightedObjects.length) {
+				unhighlightObjects(result.unhighlightedObjects);
+			}
+
+			toggleMeshesVisibility(result.meshToHide, false);
+			toggleMeshesVisibility(result.meshToShow, true);
+
 			yield put(TreeActions.updateDataRevision());
-			yield updateMeshesVisibility(meshesToUpdate, visibilityMap);
 		}
 	} catch (error) {
+		console.log(error);
 		yield put(DialogActions.showErrorDialog('isolate', 'selected nodes', error));
 	}
 }
@@ -436,7 +453,7 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 			console.timeEnd('[B]');
 
 			console.time('[C] !!!');
-			yield toggleMeshesVisibility(result.meshesToUpdate, visibility === VISIBILITY_STATES.VISIBLE);
+			toggleMeshesVisibility(result.meshesToUpdate, visibility === VISIBILITY_STATES.VISIBLE);
 			console.timeEnd('[C] !!!');
 			yield put(TreeActions.updateDataRevision());
 			console.timeEnd('Change visibility');
@@ -473,17 +490,6 @@ function* updateMeshesVisibility(meshes, nodesVisibilityMap) {
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'meshes visibility', error));
 	}
-}
-
-function* toggleMeshesVisibility(meshes, visibility) {
-	meshes.forEach((entry) => {
-		Viewer.switchObjectVisibility(
-			entry.teamspace,
-			entry.modelId,
-			entry.meshes,
-			visibility
-		);
-	});
 }
 
 function* handleMeshesVisibility(meshes, visibility) {
