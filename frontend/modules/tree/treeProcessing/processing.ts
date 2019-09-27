@@ -10,9 +10,20 @@ export class Processing {
 	}
 
 	public get fullySelectedNodesIds() {
-		return keys(pickBy(this.selectionMap, (selectionState) => {
-			return selectionState === SELECTION_STATES.SELECTED;
-		}));
+		const res = [];
+		let nodeIdx = 0;
+		while (nodeIdx < this.nodesList.length) {
+			const node = this.nodesList[nodeIdx];
+			const nodeID = node._id;
+			if (this.selectionMap[nodeID] === SELECTION_STATES.SELECTED) {
+				res.push(nodeID);
+				nodeIdx += node.deepChildrenNumber;
+			} else if (this.selectionMap[nodeID] === SELECTION_STATES.UNSELECTED) {
+				nodeIdx += node.deepChildrenNumber;
+			}
+			++nodeIdx;
+		}
+		return res;
 	}
 
 	public get hiddenNodesIds() {
