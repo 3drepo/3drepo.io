@@ -103,7 +103,7 @@ const getMeshesByNodeId = (modelsWithMeshes) => {
 	return meshesByNodeId;
 };
 
-export default ({ mainTree, subTrees, subModels, modelsWithMeshes, treePath }) => new Promise((resolve, reject) => {
+export default ({ mainTree, subTrees, subModels, meshMap, treePath }) => new Promise((resolve, reject) => {
 	try {
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.time('TREE PRE-PROCESSING NEW');
@@ -141,7 +141,7 @@ export default ({ mainTree, subTrees, subModels, modelsWithMeshes, treePath }) =
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.time('TREE PROCESSING NEW');
 		const { data: nodesList } = getFlattenNested(mainTree, auxiliaryMaps);
-		const meshesByNodeId = getMeshesByNodeId(modelsWithMeshes);
+		const meshesByNodeId = getMeshesByNodeId(meshMap);
 		// tslint:disable-next-line
 		IS_DEVELOPMENT && console.timeEnd('TREE PROCESSING NEW');
 		resolve({ nodesList, meshesByNodeId, treePath, ...auxiliaryMaps });

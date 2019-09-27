@@ -149,11 +149,17 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 			API.getTreePath(teamspace, modelId, revision),
 		]);
 
+		modelsWithMeshes.mainTree.account = teamspace;
+		modelsWithMeshes.mainTree.model = modelId;
+
+		const meshMap = modelsWithMeshes.subModels.length ? modelsWithMeshes.subModels :
+			[ modelsWithMeshes.mainTree];
+
 		const dataToProcessed = {
 			mainTree: fullTree.mainTree.nodes,
 			subTrees,
 			subModels: [],
-			modelsWithMeshes: modelsWithMeshes.subModels,
+			meshMap,
 			treePath: {}
 		};
 
