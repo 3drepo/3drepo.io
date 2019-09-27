@@ -68,22 +68,7 @@ export const OptionsDivider = styled(Divider)`
 	}
 `;
 
-export const IconButton = styled(IconButtonComponent).attrs({
-	classes: {
-		iconButton: 'tools_button'
-	}
-})`
-	.tools_button {
-		background: ${COLOR.BLACK_60};
-		opacity: 1;
-
-		&&::after {
-			content: " 🦄";
-			position: absolute;
-			left: 0;
-			top: -3px;
-			height: 3px;
-			width: 100%;
-		}
-	}
+export const IconButton = styled(IconButtonComponent)`
+	background: ${COLOR.BLACK_60};
+	opacity: 1;
 `;

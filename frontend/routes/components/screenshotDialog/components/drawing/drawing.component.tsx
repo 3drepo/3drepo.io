@@ -16,9 +16,9 @@
  */
 
 import * as React from 'react';
+import * as Konva from 'konva';
 import { MODE_OPERATION, MODES } from '../../screenshotDialog.helpers';
 
-const Konva = window.Konva;
 interface IProps {
 	color: string;
 	size: number;

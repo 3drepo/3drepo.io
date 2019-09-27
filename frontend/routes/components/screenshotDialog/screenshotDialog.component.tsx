@@ -16,6 +16,7 @@
  */
 
 import * as React from 'react';
+import * as Konva from 'konva';
 import { Layer } from 'react-konva';
 
 import { Container, Stage } from './screenshotDialog.styles';
@@ -30,8 +31,6 @@ import {
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { Indicator } from './components/indicator/indicator.component';
 import { EditableText } from './components/editableText/editableText.component';
-
-const Konva = window.Konva;
 
 interface IProps {
 	sourceImage: string | Promise<string>;

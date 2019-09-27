@@ -85,7 +85,10 @@ export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawi
 		}
 	};
 
-	const handleDoubleClick = (e) => {
+	const handleDoubleClick = () => {
+		if (!isSelected) {
+			return;
+		}
 		const { fill } = element;
 		handleChange({
 			...element,
@@ -104,6 +107,9 @@ export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawi
 	};
 
 	const handleClick = (e) => {
+		if (!isSelected) {
+			return;
+		}
 		document.body.style.cursor = 'move';
 		handleSelect(e);
 	};

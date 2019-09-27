@@ -17,7 +17,6 @@
 
 import * as React from 'react';
 import { Image as ImageComponent } from 'react-konva';
-import { loadImage } from '../../../../../helpers/images';
 
 interface IProps {
 	src?: string;

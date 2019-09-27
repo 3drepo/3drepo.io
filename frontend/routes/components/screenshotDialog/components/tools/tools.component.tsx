@@ -144,7 +144,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 									{...props}
 									aria-label="Show filters menu"
 									aria-haspopup="true"
-									color={this.isShapeSelected ? 'secondary' : 'action'}
+									color={this.isShapeSelected ? 'secondary' : 'default'}
 								>
 									<ActiveIcon {...IconProps} />
 								</IconButton>
