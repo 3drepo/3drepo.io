@@ -32,6 +32,8 @@ class TreeProcessing {
 
 	public updateVisibility = (payload) => this.processing.updateVisibility(payload);
 
+	public showAllNodes = (ifcSpacesHidden) => this.processing.showAllNodes(ifcSpacesHidden);
+
 	public isolateNodes = (payload) => this.processing.isolateNodes(payload);
 
 	public clearSelected = () => this.processing.clearCurrentlySelected();

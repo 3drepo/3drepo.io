@@ -273,8 +273,9 @@ function* clearCurrentlySelected() {
  */
 function* showAllNodes() {
 	try {
-		const nodesIds = yield select(selectHiddenNodesIds);
-		yield showTreeNodes(nodesIds, true);
+		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
+		const result  = yield TreeProcessing.showAllNodes(ifcSpacesHidden);
+		toggleMeshesVisibility(result.meshesToUpdate, true);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('show', 'all nodes', error));
 	}

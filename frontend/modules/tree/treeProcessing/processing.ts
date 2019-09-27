@@ -274,7 +274,7 @@ export class Processing {
 		for (let nodeIdx = 0; nodeIdx < nodesIds.length; ++nodeIdx) {
 			const nodeID = nodesIds[nodeIdx];
 			const currentState = this.visibilityMap[nodeID];
-			if (currentState && currentState !== VISIBILITY_STATES.VISIBLE) {
+			if (currentState !== VISIBILITY_STATES.VISIBLE) {
 				const node = this.nodesList[this.nodesIndexesMap[nodeID]];
 				filteredNodes.push(node);
 			}
@@ -313,6 +313,12 @@ export class Processing {
 		}
 
 		return { meshesToUpdate };
+	}
+
+	public showAllNodes = (ifcSpacesHidden) => {
+		const root = this.nodesList[0];
+		const listToShow = root.isFederation ? root.childrenIds : root;
+		return this.showNodes(listToShow, ifcSpacesHidden);
 	}
 
 	public updateVisibility = ({ nodesIds = [], ifcSpacesHidden, skipChildren, visibility, skipParents }) => {

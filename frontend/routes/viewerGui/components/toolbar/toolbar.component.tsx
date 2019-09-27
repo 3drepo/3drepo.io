@@ -78,7 +78,7 @@ interface IProps {
 	increaseHelicopterSpeed: (teamspace, modelId) => void;
 	decreaseHelicopterSpeed: (teamspace, modelId) => void;
 	resetHelicopterSpeed: (teamspace, modelId, updateDefaultSpeed) => void;
-	showAllNodes: (shouldUpdateModel) => void;
+	showAllNodes: () => void;
 	hideSelectedNodes: () => void;
 	isolateSelectedNodes: (nodeId) => void;
 	setIsFocusMode: (isFocusMode) => void;
@@ -164,7 +164,7 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 			{
 				label: VIEWER_TOOLBAR_ITEMS.SHOW_ALL,
 				Icon: ShowAllIcon,
-				action: () => this.props.showAllNodes(true)
+				action: this.props.showAllNodes
 			},
 			{
 				label: VIEWER_TOOLBAR_ITEMS.HIDE,

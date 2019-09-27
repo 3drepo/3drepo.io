@@ -25,7 +25,7 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	clearSelectedNodes: [],
 	getSelectedNodes: [],
 	getSelectedNodesSuccess: ['selectedNodes'],
-	showAllNodes: ['shouldUpdateModel'],
+	showAllNodes: [],
 	hideSelectedNodes: [],
 	isolateSelectedNodes: ['nodeId'],
 	hideIfcSpaces: [],
