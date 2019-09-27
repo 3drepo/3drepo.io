@@ -242,6 +242,52 @@ export class Processing {
 
 	}
 
+	private showNodes = (nodesIds, ifcSpacesHidden) => {
+		const filteredNodes = [];
+		for (let nodeIdx = 0; nodeIdx < nodesIds.length; ++nodeIdx) {
+			const nodeID = nodesIds[nodeIdx];
+			const currentState = this.visibilityMap[nodeID];
+			if (currentState && currentState !== VISIBILITY_STATES.VISIBLE) {
+				const node = this.nodesList[this.nodesIndexesMap[nodeID]];
+				filteredNodes.push(node);
+			}
+		}
+		const meshesToCheck = this.getMeshesByNodes(filteredNodes);
+		const meshesToUpdate = [];
+		const parentNodesByLevel = [];
+
+		for (const ns in meshesToCheck) {
+			const entry = {...meshesToCheck[ns]};
+			entry.meshes = [];
+			meshesToCheck[ns].meshes.forEach((meshId) => {
+				const currentState = this.visibilityMap[meshId];
+				const desiredState = ifcSpacesHidden ?  this.defaultVisibilityMap[meshId] : VISIBILITY_STATES.VISIBLE;
+				if (currentState !== desiredState) {
+					this.visibilityMap[meshId] = desiredState;
+					entry.meshes.push(meshId);
+					const [meshNode] = this.getNodesByIds([meshId]);
+					const parents = this.getParentsByPath(meshNode);
+					for (let index = 0; index < parents.length ; ++index) {
+						const parentLevel = parents.length - index - 1;
+						if (parentNodesByLevel[parentLevel]) {
+							parentNodesByLevel[parentLevel].add(parents[index]);
+						} else {
+							parentNodesByLevel[parentLevel] = new Set([parents[index]]);
+						}
+					}
+				}
+			});
+
+			meshesToUpdate.push(entry);
+		}
+
+		for (let i =  parentNodesByLevel.length - 1 ; i >= 0; --i) {
+			this.updateParentsVisibility(parentNodesByLevel[i]);
+		}
+
+		return { meshesToUpdate };
+	}
+
 	public updateVisibility = ({ nodesIds = [], ifcSpacesHidden, skipChildren, visibility, skipParents }) => {
 
 		console.time('HandleVisibility');
@@ -250,52 +296,7 @@ export class Processing {
 		if (visibility === VISIBILITY_STATES.INVISIBLE) {
 			return this.hideNodes(nodesIds);
 		} else {
-
-			const parents = [];
-			const meshesToUpdate = [];
-			const toUnselect = [];
-
-			for (let nodeLoopIndex = 0; nodeLoopIndex < nodesIds.length; nodeLoopIndex++) {
-				const nodeId = nodes[nodeLoopIndex];
-				const node = this.getNodesByIds(nodeId);
-
-				if (node) {
-					if (visibility !== this.visibilityMap[node._id]) {
-
-						for (let index = 0; index < children.length; index++) {
-							const child = children[index];
-
-							if (this.visibilityMap[node._id] !== visibility && child.type === NODE_TYPES.MESH) {
-								meshesToUpdate.push(child);
-							}
-
-							if (visibility === VISIBILITY_STATES.VISIBLE) {
-								this.visibilityMap[child._id] = ifcSpacesHidden
-									? this.defaultVisibilityMap[child._id]
-									: VISIBILITY_STATES.VISIBLE;
-							} else {
-								this.selectionMap[child._id] = SELECTION_STATES.UNSELECTED;
-								this.visibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
-							}
-						}
-
-						if (!skipParents) {
-							parents.push(node);
-						}
-					}
-				}
-			}
-
-			const result = {
-				meshesToUpdate,
-				unhighlightedObjects: []
-			};
-
-			if (!skipParents) {
-				const parentsResult = this.updateParentsVisibility(parents, extraData);
-				result.unhighlightedObjects = parentsResult.unhighlightedObjects;
-			}
-
+			return this.showNodes(nodesIds, ifcSpacesHidden);
 		}
 
 		console.timeEnd('[A][3]');

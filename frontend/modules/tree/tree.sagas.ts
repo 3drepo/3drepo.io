@@ -430,7 +430,9 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 			console.timeEnd('[A]');
 
 			console.time('[B]');
-			unhighlightObjects(result.unhighlightedObjects);
+			if (result.unhighlightedObjects && result.unhighlightedObjects.length) {
+				unhighlightObjects(result.unhighlightedObjects);
+			}
 			console.timeEnd('[B]');
 
 			console.time('[C] !!!');
