@@ -173,15 +173,12 @@ export const selectVisibleTreeNodesList = createSelector(
 				} else {
 					treeNode.rootParentIndex = indexesByRootParentIds[treeNode.rootParentId];
 				}
-				++index;
 			} else if (!treeNode.isSearchResult && treeNode.deepChildrenNumber) {
 				// If we are not showing search result and this node isn't a regular node,
 				// Then we are certain we won't be showing its children, skip them.
 				index += treeNode.deepChildrenNumber;
-			} else {
-				++index;
 			}
-
+			++index;
 		}
 		return visibleNodes;
 	}
@@ -242,7 +239,7 @@ export const selectGetMeshesByIds = (nodesIds = []) => createSelector(
 				} else if (!childrenMap[node._id] && node.hasChildren) {
 					// This should only happen in federations.
 					// Traverse down the tree to find submodel nodes
-					for (let childNumber = 1; childNumber <= node.deepChildrenNumber; childNumber++) {
+					for (let childNumber = 1; childNumber <= node.deepChildrenNumber; ++childNumber) {
 						const childNode = treeNodesList[nodeIndex + childNumber];
 						childrenMap[childNode._id] = true;
 						stack = stack.concat([childNode]);

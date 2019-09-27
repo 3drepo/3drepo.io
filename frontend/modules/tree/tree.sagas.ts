@@ -415,9 +415,11 @@ function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], col
  */
 function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, skipParents = false }) {
 	try {
+		console.time('Change visibility');
 		if (nodesIds.length) {
 			const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 
+			console.time('[A]');
 			const result = yield TreeProcessing.updateVisibility({
 				nodesIds,
 				visibility,
@@ -425,12 +427,19 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 				skipChildren,
 				skipParents
 			});
+			console.timeEnd('[A]');
 
+			console.log(result);
+
+			console.time('[B]');
 			unhighlightObjects(result.unhighlightedObjects);
-			const visibilityMap = yield select(selectVisibilityMap);
+			console.timeEnd('[B]');
 
-			yield updateMeshesVisibility(result.meshesToUpdate, visibilityMap);
+			console.time('[C] !!!');
+			yield toggleMeshesVisibility(result.meshesToUpdate, visibility === VISIBILITY_STATES.VISIBLE);
+			console.timeEnd('[C] !!!');
 			yield put(TreeActions.updateDataRevision());
+			console.timeEnd('Change visibility');
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'tree node visibility', error));
@@ -464,6 +473,17 @@ function* updateMeshesVisibility(meshes, nodesVisibilityMap) {
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'meshes visibility', error));
 	}
+}
+
+function* toggleMeshesVisibility(meshes, visibility) {
+	meshes.forEach((entry) => {
+		Viewer.switchObjectVisibility(
+			entry.teamspace,
+			entry.modelId,
+			entry.meshes,
+			visibility
+		);
+	});
 }
 
 function* handleMeshesVisibility(meshes, visibility) {
@@ -507,15 +527,15 @@ function* collapseNodes({ nodesIds }) {
 
 		if (node.deepChildrenNumber) {
 			let i = nodeIndex;
-			while (i < nodeIndex + node.deepChildrenNumber) {
+			while (i < nodeIndex + node.deepChildrenNumber + 1) {
 				const currentNode = nodesList[i];
 				if (expandedNodesMap[currentNode._id]) {
 					expandedNodesMap[currentNode._id] = false;
-					i++;
 				} else {
 					// This node is already collapsed, skip its children.
-					i += currentNode.deepChildrenNumber ? currentNode.deepChildrenNumber : 1;
+					i += currentNode.deepChildrenNumber;
 				}
+				++i;
 			}
 		} else {
 			expandedNodesMap[nodeId] = false;

@@ -98,10 +98,10 @@ export class Processing {
 			const id = node._id;
 			if (this.selectionMap[id] !== SELECTION_STATES.UNSELECTED) {
 				this.selectionMap[id] = SELECTION_STATES.UNSELECTED;
-				++index;
 			} else {
-				index += node.deepChildrenNumber > 0 ? node.deepChildrenNumber : 1;
+				index += node.deepChildrenNumber;
 			}
+			++index;
 		}
 	}
 
@@ -184,143 +184,140 @@ export class Processing {
 		return meshesToUpdate;
 	}
 
-	public updateVisibility = ({ nodesIds = [], ...extraData }) => {
-		const shouldBeInvisible = extraData.visibility === VISIBILITY_STATES.INVISIBLE;
-		const nodes = this.getNodesByIds(nodesIds);
+	private hideNodes = (nodesId) => {
+		const toDeselect = [];
+		const toGetMeshes = [];
+		const parentNodesByLevel = [];
+		for (let nodeIdx = 0; nodeIdx < nodesId.length; ++nodeIdx) {
+			const nodeID = nodesId[nodeIdx];
+			const currentState = this.visibilityMap[nodeID];
+			let idxToList = this.nodesIndexesMap[nodeID];
+			const node = this.nodesList[idxToList];
+			if (currentState && currentState !== VISIBILITY_STATES.INVISIBLE) {
+				if (SELECTION_STATES.UNSELECTED !== this.selectionMap[nodeID]) {
+					this.selectionMap[nodeID] = SELECTION_STATES.UNSELECTED;
+					toDeselect.push(node);
+				}
 
-		if (shouldBeInvisible) {
-			const filteredNodesIds = intersection(nodesIds, this.selectedNodesIds);
+				toGetMeshes.push(node);
 
-			for (let index = 0; index < filteredNodesIds.length; index++) {
-				const nodeId = filteredNodesIds[index];
-				this.selectionMap[nodeId] = SELECTION_STATES.UNSELECTED;
+				this.visibilityMap[nodeID] = VISIBILITY_STATES.INVISIBLE;
+
+				if (node.hasChildren) {
+					const lastIdx = idxToList + node.deepChildrenNumber + 1;
+					// Hide all children
+					while  (++idxToList < lastIdx) {
+						const descendent = this.nodesList[idxToList];
+						if (this.visibilityMap[descendent._id] === VISIBILITY_STATES.INVISIBLE) {
+							// Already hidden, skip its children
+							idxToList += descendent.deepChildrenNumber;
+						} else {
+							this.selectionMap[descendent._id] = SELECTION_STATES.UNSELECTED;
+							this.visibilityMap[descendent._id] = VISIBILITY_STATES.INVISIBLE;
+						}
+					}
+				}
+
+				const parents = this.getParentsByPath(node);
+				for (let index = 0; index < parents.length ; ++index) {
+					const parentLevel = parents.length - index - 1;
+					if (parentNodesByLevel[parentLevel]) {
+						parentNodesByLevel[parentLevel].add(parents[index]);
+					} else {
+						parentNodesByLevel[parentLevel] = new Set([parents[index]]);
+					}
+				}
 			}
 		}
 
-		const result = this.handleNodesVisibility(nodes, extraData);
-		const unhighlightedObjects = [
-			...result.unhighlightedObjects,
-			...this.getMeshesByNodes(nodes)
-		];
+		for (let i =  parentNodesByLevel.length - 1 ; i >= 0; --i) {
+			this.updateParentsVisibility(parentNodesByLevel[i]);
+		}
 
-		this.selectionMap = { ...this.selectionMap };
-		this.visibilityMap = { ...this.visibilityMap };
+		const unhighlightedObjects = this.handleSelection(toDeselect, SELECTION_STATES.UNSELECTED);
+		const meshesToUpdate = this.getMeshesByNodes(toGetMeshes);
 
+		return { unhighlightedObjects, meshesToUpdate };
+
+	}
+
+	public updateVisibility = ({ nodesIds = [], ifcSpacesHidden, skipChildren, visibility, skipParents }) => {
+
+		console.time('HandleVisibility');
+		console.time('[A][3]');
+
+		if (visibility === VISIBILITY_STATES.INVISIBLE) {
+			return this.hideNodes(nodesIds);
+		} else {
+
+			const parents = [];
+			const meshesToUpdate = [];
+			const toUnselect = [];
+
+			for (let nodeLoopIndex = 0; nodeLoopIndex < nodesIds.length; nodeLoopIndex++) {
+				const nodeId = nodes[nodeLoopIndex];
+				const node = this.getNodesByIds(nodeId);
+
+				if (node) {
+					if (visibility !== this.visibilityMap[node._id]) {
+
+						for (let index = 0; index < children.length; index++) {
+							const child = children[index];
+
+							if (this.visibilityMap[node._id] !== visibility && child.type === NODE_TYPES.MESH) {
+								meshesToUpdate.push(child);
+							}
+
+							if (visibility === VISIBILITY_STATES.VISIBLE) {
+								this.visibilityMap[child._id] = ifcSpacesHidden
+									? this.defaultVisibilityMap[child._id]
+									: VISIBILITY_STATES.VISIBLE;
+							} else {
+								this.selectionMap[child._id] = SELECTION_STATES.UNSELECTED;
+								this.visibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
+							}
+						}
+
+						if (!skipParents) {
+							parents.push(node);
+						}
+					}
+				}
+			}
+
+			const result = {
+				meshesToUpdate,
+				unhighlightedObjects: []
+			};
+
+			if (!skipParents) {
+				const parentsResult = this.updateParentsVisibility(parents, extraData);
+				result.unhighlightedObjects = parentsResult.unhighlightedObjects;
+			}
+
+		}
+
+		console.timeEnd('[A][3]');
+
+		console.timeEnd('HandleVisibility');
 		return { unhighlightedObjects, meshesToUpdate: result.meshesToUpdate };
 	}
 
-	private updateParentsVisibility = (nodes = [], extraData) => {
-		const unhighlightedObjects = [];
+	private updateParentsVisibility = (nodes) => {
+		nodes.forEach((node) => {
+			const hasVisibleChildren = node.childrenIds.every((id) => this.visibilityMap[id] !== VISIBILITY_STATES.INVISIBLE);
+			const hasInvisibleChildren = node.childrenIds.every((id) => this.visibilityMap[id] === VISIBILITY_STATES.INVISIBLE);
 
-		while (nodes.length > 0) {
-			const node = nodes.pop();
-
-			if (node.hasChildren) {
-				const children = this.getChildren(node);
-				let visibleChildCount = 0;
-				let hasParentOfInvisibleChild = false;
-
-				for (let i = 0, size = node.childrenIds.length; i < size; i++) {
-					const childId = node.childrenIds[i];
-					if (this.visibilityMap[childId] === VISIBILITY_STATES.PARENT_OF_INVISIBLE) {
-						hasParentOfInvisibleChild = true;
-						break;
-					}
-
-					if (this.isVisibleNode(childId)) {
-						visibleChildCount++;
-					}
-				}
-
-				if (children.length && children.length === visibleChildCount) {
-					// All children are visible
-					this.visibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
-				} else if (!hasParentOfInvisibleChild && !visibleChildCount) {
-					// All children are invisible
-					this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
-					this.visibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
-					const meshesByNodes = this.getMeshesByNodes([node]);
-					const meshesData = meshesByNodes[0];
-					unhighlightedObjects.push({ ...meshesData });
-				} else {
-					// Part of children is invisible
-					const hasSelectedChildren = node.childrenIds.some(this.isSelectedNode);
-					this.visibilityMap[node._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
-
-					if (!hasSelectedChildren) {
-						this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
-					}
-				}
+			console.log(node, hasVisibleChildren, hasInvisibleChildren);
+			if (hasVisibleChildren) {
+				this.visibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
+			} else if (hasInvisibleChildren) {
+				this.visibilityMap[node._id] = VISIBILITY_STATES.INVISIBLE;
+				this.selectionMap[node._id] = SELECTION_STATES.UNSELECTED;
 			} else {
-					this.visibilityMap[node._id] = extraData.ifcSpacesHidden && extraData.visibility === VISIBILITY_STATES.VISIBLE
-						? this.defaultVisibilityMap[node._id]
-						: extraData.visibility;
+				this.visibilityMap[node._id] = VISIBILITY_STATES.PARENT_OF_INVISIBLE;
 			}
-
-			if (node.parentId) {
-				const parentNode = this.nodesList[this.nodesIndexesMap[node.parentId]];
-				nodes.push(parentNode);
-			}
-		}
-
-		return { unhighlightedObjects };
-	}
-
-	private handleNodesVisibility = (nodes, extraData) => {
-		const { ifcSpacesHidden, skipChildren, visibility, skipParents } = extraData;
-		const parents = [];
-		const meshesToUpdate = [];
-
-		for (let nodeLoopIndex = 0; nodeLoopIndex < nodes.length; nodeLoopIndex++) {
-			const node = nodes[nodeLoopIndex];
-
-			if (node) {
-				if (visibility === VISIBILITY_STATES.PARENT_OF_INVISIBLE || visibility !== this.visibilityMap[node._id]) {
-					if (node.type === NODE_TYPES.MESH) {
-						meshesToUpdate.push(node);
-					}
-
-					const children = node.hasChildren && !skipChildren ? this.getDeepChildren(node) : [];
-
-					if (skipChildren && skipParents) {
-						children.push(node);
-					}
-
-					for (let index = 0; index < children.length; index++) {
-						const child = children[index];
-
-						if (this.visibilityMap[node._id] !== visibility && child.type === NODE_TYPES.MESH) {
-							meshesToUpdate.push(child);
-						}
-
-						if (visibility === VISIBILITY_STATES.VISIBLE) {
-							this.visibilityMap[child._id] = ifcSpacesHidden
-								? this.defaultVisibilityMap[child._id]
-								: VISIBILITY_STATES.VISIBLE;
-						} else {
-							this.selectionMap[child._id] = SELECTION_STATES.UNSELECTED;
-							this.visibilityMap[child._id] = VISIBILITY_STATES.INVISIBLE;
-						}
-					}
-
-					if (!skipParents) {
-						parents.push(node);
-					}
-				}
-			}
-		}
-
-		const result = {
-			meshesToUpdate,
-			unhighlightedObjects: []
-		};
-
-		if (!skipParents) {
-			const parentsResult = this.updateParentsVisibility(parents, extraData);
-			result.unhighlightedObjects = parentsResult.unhighlightedObjects;
-		}
-
-		return result;
+		});
 	}
 
 	private handleSelection = (toSelect, desiredState) => {
