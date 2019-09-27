@@ -71,6 +71,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public containerRef = React.createRef<any>();
 	public layerRef = React.createRef<any>();
+	public imageLayerRef = React.createRef<any>();
 	public drawingLayerRef = React.createRef<any>();
 	public stageRef = React.createRef<any>();
 	public hiddenCanvasRef = React.createRef<any>();
@@ -81,6 +82,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public get layer() {
 		return this.layerRef.current;
+	}
+
+	public get imageLayer() {
+		return this.imageLayerRef.current;
 	}
 
 	public get drawingLayer() {
@@ -115,8 +120,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		const sourceImage = await Promise.resolve(this.props.sourceImage);
 
 		Konva.Image.fromURL(sourceImage, (image) => {
-			this.layer.add(image);
-			this.layer.batchDraw();
+			this.imageLayer.add(image);
+			this.imageLayer.batchDraw();
 		});
 
 		this.setState({ sourceImage, mode: INITIAL_VALUES.mode }, () => {
@@ -167,7 +172,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public clearCanvas = () => {
-		this.stage.clear();
 		this.layer.clear();
 		this.drawingLayer.clear();
 		this.stage.clearCache();
@@ -394,6 +398,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		if (this.state.stage.width && this.state.stage.height) {
 			return (
 				<>
+					<Layer ref={this.imageLayerRef} />
 					<Layer ref={this.layerRef}>
 						{this.renderObjects()}
 					</Layer>
