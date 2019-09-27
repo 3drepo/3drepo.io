@@ -232,6 +232,7 @@ export class Processing {
 
 		for (let i =  parentNodesByLevel.length - 1 ; i >= 0; --i) {
 			this.updateParentsVisibility(parentNodesByLevel[i]);
+			this.updateParentsSelection(parentNodesByLevel[i]);
 		}
 
 		const unhighlightedObjects = this.handleSelection(toDeselect, SELECTION_STATES.UNSELECTED);
@@ -308,7 +309,6 @@ export class Processing {
 			const hasVisibleChildren = node.childrenIds.every((id) => this.visibilityMap[id] !== VISIBILITY_STATES.INVISIBLE);
 			const hasInvisibleChildren = node.childrenIds.every((id) => this.visibilityMap[id] === VISIBILITY_STATES.INVISIBLE);
 
-			console.log(node, hasVisibleChildren, hasInvisibleChildren);
 			if (hasVisibleChildren) {
 				this.visibilityMap[node._id] = VISIBILITY_STATES.VISIBLE;
 			} else if (hasInvisibleChildren) {
