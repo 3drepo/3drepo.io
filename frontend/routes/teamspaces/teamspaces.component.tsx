@@ -468,13 +468,23 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 						} }
 					/>
 				</Head>
-				<BodyWrapper>
-					<Body>
-					<SimpleBar>
-						{this.renderTeamspaces(this.props.teamspaces)}
-					</SimpleBar>
-					</Body>
-				</BodyWrapper>
+					{
+						isPending ? (
+							<List>
+								<LoaderContainer>
+									<Loader content="Loading teamspaces..." />
+								</LoaderContainer>
+							</List>
+						) : (
+							<BodyWrapper>
+								<Body>
+									<SimpleBar>
+										{this.renderTeamspaces(this.props.teamspaces)}
+									</SimpleBar>
+								</Body>
+							</BodyWrapper>
+						)
+					}
 			</Panel>
 		);
 	}
