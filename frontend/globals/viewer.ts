@@ -638,12 +638,8 @@ export class Viewer {
 		// }
 	}
 
-	public setPinVisibility(id, visibility) {
-		if (this.pins.hasOwnProperty(id)) {
-			const pin = this.pins[id];
-
-			pin.setAttribute('render', visibility.toString());
-		}
+	public selectPin(id) {
+		UnityUtil.selectPin(id);
 	}
 
 	public removePin(id) {
