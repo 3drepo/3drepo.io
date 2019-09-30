@@ -219,7 +219,6 @@ export class ViewerService {
 			params.colours,
 			params.viewpoint
 		);
-		console.log('@addPin', params);
 		if (params.isSelected) {
 			this.viewer.selectPin(params.id);
 		}
