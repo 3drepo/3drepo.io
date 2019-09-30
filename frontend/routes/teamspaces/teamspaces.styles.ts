@@ -34,8 +34,10 @@ export const Head = styled.div`
 `;
 
 export const List = styled.div`
-	overflow: auto;
+	overflow: hidden;
 	position: relative;
+	width: 100%;
+	height: 100%;
 `;
 
 export const LoaderContainer = styled.div`
