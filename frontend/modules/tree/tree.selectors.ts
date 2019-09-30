@@ -138,10 +138,24 @@ export const selectIfcSpacesHidden = createSelector(
 );
 
 export const selectDefaultHiddenNodesIds = createSelector(
-	selectDefaultVisibilityMap, (nodesVisibilityMap) => {
-		return keys(pickBy(nodesVisibilityMap, (selectionState) => {
-			return selectionState === VISIBILITY_STATES.INVISIBLE;
-		}));
+	selectTreeNodesList, selectDefaultVisibilityMap, (nodes, nodesVisibilityMap) => {
+		let idx = 0;
+		const res = [];
+
+		while (idx < nodes.length) {
+			const node = nodes[idx];
+			const nodeID = node._id;
+			if (node.type === 'mesh' && nodesVisibilityMap[nodeID] === VISIBILITY_STATES.INVISIBLE) {
+				res.push(nodeID);
+			} else if (nodesVisibilityMap[nodeID] === VISIBILITY_STATES.VISIBLE) {
+				idx += node.deepChildrenNumber;
+			}
+
+			++idx;
+		}
+
+		return res;
+
 	}
 );
 

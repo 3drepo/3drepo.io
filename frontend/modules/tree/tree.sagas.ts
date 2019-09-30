@@ -104,7 +104,7 @@ function* handleMetadata(node: any) {
 function* expandToNode(node: any) {
 	if (node) {
 		const expandedNodesMap = yield select(selectExpandedNodesMap);
-		if (expandedNodesMap[node._id]) {
+		if (expandedNodesMap[node.parentId]) {
 			// already expanded
 			return;
 		}
