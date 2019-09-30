@@ -17,15 +17,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { deleteNotifications, fetchNotification } = require("../helpers/notifications");
+const { createModel, createFederation, updateFederation } = require("../helpers/models");
 const request = require("supertest");
 const bouncerHelper = require("../helpers/bouncerHelper");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const async = require("async");
+const {v4: newId} = require("node-uuid");
+
 
 const agents = {};
 
 describe("Notifications", function() {
+	this.timeout(60000);
+
 	let server;
 	const NOTIFICATIONS_URL = "/notifications";
 
@@ -94,7 +99,6 @@ describe("Notifications", function() {
 					async.parallel(
 						usernames.map(username => next => {
 							const agent = request.agent(server);
-
 							agent.post("/login")
 								.send({ username, password})
 								.expect(200, function(err, res) {
@@ -107,7 +111,7 @@ describe("Notifications", function() {
 				deleteAllNotifications]
 			,done);
 		});
-	});
+	})
 
 	after(function(done) {
 		server.close(function() {
@@ -369,8 +373,8 @@ describe("Notifications", function() {
 				next => {
 					agents.adminTeamspace1JobA.delete(NOTIFICATIONS_URL)
 						.expect(200, () => {
-next();
-});
+							next();
+						});
 				},
 				fetchNotification(agents.adminTeamspace1JobA),
 				(notifications, next) => {
@@ -457,8 +461,6 @@ next();
 
 		describe("when a issue has been closed", () => {
 			before(done => {
-				console.log("only assign job C to " + issuesId[0]);
-
 				async.series([
 					updateIssue(model,
 						Object.assign({...issue, name:"updated issue"}, {"assigned_roles": ["jobC"]}),
@@ -636,8 +638,34 @@ next();
 					expect(notifications.length).to.equal(0);
 					done(err);
 				});
-		});
+			});
+
+
+		it("should have a notification when a federation has been updated", done => {
+			bouncerHelper.startBouncerWorker(() => {
+
+				pollForNotification("MODEL_UPDATED", (notifications, next) => {
+					notifications = notifications.filter(n => (n.modelName || '').includes('myNewFed'));
+					if (notifications.length !== 1) return;
+					const notification =  notifications[0];
+					expect(notification.federation, 'Should be a federation').to.equal(true);
+					bouncerHelper.stopBouncerWorker();
+					next();
+				})('teamSpace1')(done);
+
+
+				Promise.all([
+					createModel(agents.teamSpace1, 'teamSpace1','oneModel.' + newId()),
+					createModel(agents.teamSpace1, 'teamSpace1','anotherModel.' + newId())
+				])
+					.then(resArr => resArr.map(r=> ({database: r.body.account, model: r.body.model})))
+					.then(subModels => createFederation(agents.teamSpace1,'teamSpace1', 'myNewFed.' + newId(), subModels)
+						.then(resFederation => updateFederation(agents.teamSpace1, 'teamSpace1',resFederation.body.model,[subModels[0]]))
+					);
+			});
+		})
 	});
+
 
 	describe("of type model update failed", ()=> {
 		it("should be created for the user that uploaded the model", done => {
@@ -746,7 +774,6 @@ next();
 			], done);
 
 		}).timeout(60000);
-
 	});
 
 });

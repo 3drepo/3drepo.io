@@ -425,7 +425,6 @@ function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 		yield put(TreeActions.setActiveNode(lastNodeId));
 		yield put(TreeActions.updateDataRevision());
 	} catch (error) {
-		console.log(error);
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
 	}
 }

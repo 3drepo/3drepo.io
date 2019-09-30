@@ -153,6 +153,7 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 							error={Boolean(form.errors.desc)}
 							helperText={form.errors.desc}
 							disabled={!this.props.canUpdate}
+							mutable={!this.isNewGroup}
 						/>
 					)} />
 				</Form>

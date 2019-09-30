@@ -98,7 +98,6 @@ export function* updateModel({ teamspace, modelId, modelData }) {
 			subModels: modelData.subModels
 		};
 
-		yield put(SnackbarActions.show(`${modelData.federate ? 'Federation' : 'Model'} updated`));
 		yield put(TeamspacesActions.updateModelSuccess(teamspace, modelId, updatedModel));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'model', e));
