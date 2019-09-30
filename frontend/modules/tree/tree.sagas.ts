@@ -30,10 +30,8 @@ import {
 	selectFullySelectedNodesIds,
 	selectGetNodesByIds,
 	selectGetNodesIdsFromSharedIds,
-	selectHiddenNodesIds,
 	selectIfcSpacesHidden,
 	selectNodesIndexesMap,
-	selectSelectedNodesIds,
 	selectSelectionMap,
 	selectTreeNodesList,
 	selectVisibilityMap
@@ -216,7 +214,7 @@ function* handleBackgroundClick() {
 
 }
 
-function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = false }) {
+function* handleNodesClick({ nodesIds = [], skipExpand = false}) {
 	const addGroup = MultiSelect.isAccumMode();
 	const removeGroup = MultiSelect.isDecumMode();
 	const isMultiSelectMode = addGroup || removeGroup;
@@ -229,7 +227,7 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false, skipChildren = f
 	if (removeGroup) {
 		yield put(TreeActions.deselectNodes(nodesIds));
 	} else {
-		yield put(TreeActions.selectNodes(nodesIds, skipExpand, skipChildren));
+		yield put(TreeActions.selectNodes(nodesIds, skipExpand));
 	}
 }
 
@@ -324,11 +322,11 @@ function* hideTreeNodes(nodesIds = [], skipNested = false) {
 /**
  * ISOLATE NODES
  */
-function* isolateNodes(nodesIds = [], skipChildren = false) {
+function* isolateNodes(nodesIds = []) {
 	try {
 		if (nodesIds.length) {
 			const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
-			const result = yield TreeProcessing.isolateNodes({ nodesIds, skipChildren, ifcSpacesHidden });
+			const result = yield TreeProcessing.isolateNodes({ nodesIds, ifcSpacesHidden });
 
 			if (result.unhighlightedObjects && result.unhighlightedObjects.length) {
 				unhighlightObjects(result.unhighlightedObjects);
@@ -403,17 +401,17 @@ function* deselectNodesBySharedIds({ objects = [] }) {
 /**
  * SELECT NODES
  */
-function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false, colour }) {
+function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 	try {
 		let lastNodeId = nodesIds[nodesIds.length - 1];
 		let [lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
-		if (lastNode.type === 'mesh' && !lastNode.name) {
+		if (lastNode && lastNode.type === 'mesh' && !lastNode.name) {
 			lastNodeId = lastNode.parentId;
 			[lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
 		}
 
 		const [result] = yield all([
-			call(TreeProcessing.selectNodes, { nodesIds, skipChildren }),
+			call(TreeProcessing.selectNodes, { nodesIds }),
 			call(handleMetadata, lastNode)
 		]);
 
@@ -427,6 +425,7 @@ function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false,
 		yield put(TreeActions.setActiveNode(lastNodeId));
 		yield put(TreeActions.updateDataRevision());
 	} catch (error) {
+		console.log(error);
 		yield put(DialogActions.showErrorDialog('select', 'nodes', error));
 	}
 }
@@ -439,7 +438,7 @@ function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], col
 /**
  * SET VISIBILITY
  */
-function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, skipParents = false }) {
+function* setTreeNodesVisibility({ nodesIds, visibility}) {
 	try {
 		if (nodesIds.length) {
 			const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
@@ -448,8 +447,6 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 				nodesIds,
 				visibility,
 				ifcSpacesHidden,
-				skipChildren,
-				skipParents
 			});
 
 			if (result.unhighlightedObjects && result.unhighlightedObjects.length) {
@@ -469,57 +466,6 @@ function* setSelectedNodesVisibility({ nodeId, visibility }) {
 	const hasSelectedNodes = !!fullySelectedNodes.length;
 	const nodesIds = hasSelectedNodes ? fullySelectedNodes : [nodeId];
 	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, hasSelectedNodes));
-}
-
-function* updateMeshesVisibility(meshes, nodesVisibilityMap) {
-	try {
-		const hiddenMeshes = [];
-		const shownMeshes = [];
-
-		for (let i = 0; i < meshes.length; i++) {
-			const mesh = meshes[i];
-
-			if (nodesVisibilityMap[mesh._id] === VISIBILITY_STATES.INVISIBLE) {
-				hiddenMeshes.push(mesh);
-			} else {
-				shownMeshes.push(mesh);
-			}
-		}
-
-		yield handleMeshesVisibility(hiddenMeshes, false);
-		yield handleMeshesVisibility(shownMeshes, true);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'meshes visibility', error));
-	}
-}
-
-function* handleMeshesVisibility(meshes, visibility) {
-	try {
-		const objectIds = {};
-		const alreadyProcessed = {};
-
-		for (let index = 0; index < meshes.length; index++) {
-			const node = meshes[index];
-			const { namespacedId, _id, teamspace, model } = node;
-			if (!objectIds[namespacedId]) {
-				objectIds[namespacedId] = [];
-			}
-
-			objectIds[namespacedId].push(_id);
-
-			if (!alreadyProcessed[namespacedId]) {
-				Viewer.switchObjectVisibility(
-					teamspace,
-					model,
-					objectIds[namespacedId],
-					visibility
-				);
-				alreadyProcessed[namespacedId] = true;
-			}
-		}
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('handle', 'meshes visibility', error));
-	}
 }
 
 function* collapseNodes({ nodesIds }) {

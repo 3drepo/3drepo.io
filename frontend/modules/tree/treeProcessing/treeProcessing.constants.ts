@@ -23,11 +23,9 @@ export interface INode {
 }
 
 export interface ITreeProcessingData {
-	selectedNodesIds: string[];
 	fullySelectedNodesIds: string[];
 	visibilityMap: any;
 	selectionMap: any;
-	hiddenNodesIds: any;
 	defaultVisibilityMap: any;
 	nodesList: INode[];
 	nodesIndexesMap: any;

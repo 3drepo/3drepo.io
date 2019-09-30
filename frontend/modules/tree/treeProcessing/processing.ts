@@ -2,13 +2,6 @@ import { intersection, keys, memoize, pickBy, uniqBy } from 'lodash';
 import { NODE_TYPES, SELECTION_STATES, VISIBILITY_STATES } from '../../../constants/tree';
 
 export class Processing {
-	// FIXME:
-	public get selectedNodesIds() {
-		return keys(pickBy(this.selectionMap, (selectionState) => {
-			return selectionState !== SELECTION_STATES.UNSELECTED;
-		}));
-	}
-
 	public get fullySelectedNodesIds() {
 		const res = [];
 		let nodeIdx = 0;
@@ -26,11 +19,6 @@ export class Processing {
 		return res;
 	}
 
-	public get hiddenNodesIds() {
-		return keys(pickBy(this.visibilityMap, (selectionState) => {
-			return selectionState === VISIBILITY_STATES.INVISIBLE;
-		}));
-	}
 	public nodesList = [];
 	public nodesIndexesMap = {};
 	public defaultVisibilityMap = {};
@@ -39,11 +27,6 @@ export class Processing {
 	public selectionMap = {};
 	public visibilityMap = {};
 	public treePath = {} as any;
-
-	public getDeepChildren = memoize((node) => {
-		const nodeIndex = this.nodesIndexesMap[node._id];
-		return this.nodesList.slice(nodeIndex + 1, nodeIndex + node.deepChildrenNumber + 1);
-	}, (node) => node._id);
 
 	public getParentsByPath = memoize((node = {}) => {
 		const parents = [];
@@ -329,7 +312,7 @@ export class Processing {
 		return this.showNodes(root.childrenIds, ifcSpacesHidden);
 	}
 
-	public updateVisibility = ({ nodesIds = [], ifcSpacesHidden, skipChildren, visibility, skipParents }) => {
+	public updateVisibility = ({ nodesIds = [], ifcSpacesHidden, visibility}) => {
 
 		if (visibility === VISIBILITY_STATES.INVISIBLE) {
 			return this.hideNodes(nodesIds);
