@@ -25,6 +25,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Add from '@material-ui/icons/Add';
 
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
+import { Body, BodyWrapper } from '../components/customTable/customTable.styles';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import { PERMISSIONS_VIEWS } from '../projects/projects.component';
@@ -36,7 +37,6 @@ import { ProjectDialog } from './components/projectDialog/projectDialog.componen
 import { ProjectItem } from './components/projectItem/projectItem.component';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
 import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
-import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
 import { FEDERATION_TYPE, MODEL_TYPE } from './teamspaces.contants';
 import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 
@@ -465,19 +465,23 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 						} }
 					/>
 				</Head>
-				<List>
 					{
 						isPending ? (
-							<LoaderContainer>
-								<Loader content="Loading teamspaces..." />
-							</LoaderContainer>
+							<List>
+								<LoaderContainer>
+									<Loader content="Loading teamspaces..." />
+								</LoaderContainer>
+							</List>
 						) : (
-							<SimpleBar>
-								{this.renderTeamspaces(this.props.teamspaces)}
-							</SimpleBar>
+							<BodyWrapper>
+								<Body>
+									<SimpleBar>
+										{this.renderTeamspaces(this.props.teamspaces)}
+									</SimpleBar>
+								</Body>
+							</BodyWrapper>
 						)
 					}
-				</List>
 			</Panel>
 		);
 	}

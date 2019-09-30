@@ -1,4 +1,4 @@
-{
+	{
   "name": "3drepo.io-frontend",
   "version": "1.0.0",
   "description": "The frontend for 3drepo.io",
@@ -80,9 +80,9 @@
     "redux-saga": "0.16.0",
     "reduxsauce": "1.0.0",
     "reselect": "3.0.1",
-    "semver-compare": "^1.0.0",
-    "simplebar": "3.0.0-beta.4",
-    "simplebar-react": "0.0.1-beta.3",
+    "semver-compare": "1.0.0",
+    "simplebar": "4.0.0",
+    "simplebar-react": "1.0.0",
     "socket.io-client": "2.0.4",
     "worker-loader": "2.0.0",
     "yup": "0.26.10",

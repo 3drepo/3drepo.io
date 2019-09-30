@@ -54,6 +54,8 @@ export const Container = styled.div`
 		padding-left: ${(props: any) => (props.level || 0) * 24}px;
 		background: ${(props: any) => isActive(props) ? COLOR.WHITE : 'transparent'};
 	}
+
+	width: calc(100% - 1px);
 `;
 
 export const HeadlineContainer = styled(Grid)`
