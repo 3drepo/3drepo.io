@@ -33,7 +33,8 @@ const getFlattenNested = (tree, level = 1, parentId = null, rootParentId = null)
 		rootParentId,
 		hasChildren: Boolean(tree.children),
 		deepChildrenNumber: 0,
-		childrenIds: []
+		childrenIds: [],
+		subTreeRoots: []
 	};
 
 	const dataToFlatten = [] as any;
