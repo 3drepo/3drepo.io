@@ -20,6 +20,8 @@ export interface INode {
 	defaultVisibility: string;
 	childrenIds: string[];
 	rootParentId?: string;
+	type: string;
+	subTreeRoots: string[];
 }
 
 export interface ITreeProcessingData {

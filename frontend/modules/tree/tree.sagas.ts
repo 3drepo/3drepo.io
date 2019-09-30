@@ -347,7 +347,7 @@ function* isolateSelectedNodes({ nodeId }) {
 		yield isolateNodes([nodeId]);
 	} else {
 		const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
-		yield isolateNodes(fullySelectedNodes, true);
+		yield isolateNodes(fullySelectedNodes);
 	}
 }
 

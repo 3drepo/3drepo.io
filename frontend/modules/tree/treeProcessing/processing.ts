@@ -319,8 +319,6 @@ export class Processing {
 		} else {
 			return this.showNodes(nodesIds, ifcSpacesHidden);
 		}
-
-		return { unhighlightedObjects, meshesToUpdate: result.meshesToUpdate };
 	}
 
 	private updateParentsVisibility = (nodes) => {
