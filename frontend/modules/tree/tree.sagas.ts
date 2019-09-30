@@ -405,8 +405,12 @@ function* deselectNodesBySharedIds({ objects = [] }) {
  */
 function* selectNodes({ nodesIds = [], skipExpand = false, skipChildren = false, colour }) {
 	try {
-		const lastNodeId = nodesIds[nodesIds.length - 1];
-		const [lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
+		let lastNodeId = nodesIds[nodesIds.length - 1];
+		let [lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
+		if (lastNode.type === 'mesh' && !lastNode.name) {
+			lastNodeId = lastNode.parentId;
+			[lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
+		}
 
 		const [result] = yield all([
 			call(TreeProcessing.selectNodes, { nodesIds, skipChildren }),

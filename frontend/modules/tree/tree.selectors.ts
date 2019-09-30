@@ -179,7 +179,8 @@ export const selectVisibleTreeNodesList = createSelector(
 
 			treeNode.isSearchResult = isSearchActive && !treeNode.isFederation && !treeNode.isModel;
 			treeNode.isRegularNode = !isSearchActive && (treeNode.level <= 2 || expandedNodesMap[treeNode.parentId]);
-			if (treeNode.isSearchResult || treeNode.isRegularNode) {
+			const isNamelessMesh = treeNode.type === 'mesh' && !treeNode.name;
+			if (!isNamelessMesh && (treeNode.isSearchResult || treeNode.isRegularNode)) {
 				visibleNodes.push(treeNode);
 
 				if (!treeNode.rootParentId) {

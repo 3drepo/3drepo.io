@@ -120,7 +120,12 @@ export class Processing {
 		const nodes = [];
 		nodesIds.forEach((id) => {
 			if (this.visibilityMap[id] !== VISIBILITY_STATES.INVISIBLE) {
-				nodes.push(this.nodesList[this.nodesIndexesMap[id]]);
+				const node = this.nodesList[this.nodesIndexesMap[id]];
+				if (node.type === 'mesh' && !node.name) {
+					nodes.push(this.nodesList[this.nodesIndexesMap[node.parentId]]);
+				} else {
+					nodes.push(node);
+				}
 			}
 		});
 
@@ -140,7 +145,11 @@ export class Processing {
 			if (this.selectionMap[nodeId] !== SELECTION_STATES.UNSELECTED) {
 				this.selectionMap[nodeId] = SELECTION_STATES.UNSELECTED;
 				const [node] = this.getNodesByIds([nodeId]);
-				nodes.push(node);
+				if (node.type === 'mesh' && !node.name) {
+					nodes.push(this.nodesList[this.nodesIndexesMap[node.parentId]]);
+				} else {
+					nodes.push(node);
+				}
 			}
 		}
 
