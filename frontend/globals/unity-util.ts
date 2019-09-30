@@ -892,6 +892,14 @@ export class UnityUtil {
 		UnityUtil.toUnity('UnhighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 	}
 
+	public static pauseRendering() {
+		UnityUtil.toUnity('PauseRendering', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	public static resumeRendering() {
+		UnityUtil.toUnity('ResumeRendering', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
 	/**
 	 * Loading another model. NOTE: this will also clear the canvas of existing models
 	 * Use branch = master and revision = head to get the latest revision.
