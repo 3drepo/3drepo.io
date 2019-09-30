@@ -331,18 +331,12 @@ export class Processing {
 
 	public updateVisibility = ({ nodesIds = [], ifcSpacesHidden, skipChildren, visibility, skipParents }) => {
 
-		console.time('HandleVisibility');
-		console.time('[A][3]');
-
 		if (visibility === VISIBILITY_STATES.INVISIBLE) {
 			return this.hideNodes(nodesIds);
 		} else {
 			return this.showNodes(nodesIds, ifcSpacesHidden);
 		}
 
-		console.timeEnd('[A][3]');
-
-		console.timeEnd('HandleVisibility');
 		return { unhighlightedObjects, meshesToUpdate: result.meshesToUpdate };
 	}
 

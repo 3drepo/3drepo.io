@@ -441,11 +441,9 @@ function* selectNodesBySharedIds({ objects = [], colour }: { objects: any[], col
  */
 function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, skipParents = false }) {
 	try {
-		console.time('Change visibility');
 		if (nodesIds.length) {
 			const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 
-			console.time('[A]');
 			const result = yield TreeProcessing.updateVisibility({
 				nodesIds,
 				visibility,
@@ -453,19 +451,13 @@ function* setTreeNodesVisibility({ nodesIds, visibility, skipChildren = false, s
 				skipChildren,
 				skipParents
 			});
-			console.timeEnd('[A]');
 
-			console.time('[B]');
 			if (result.unhighlightedObjects && result.unhighlightedObjects.length) {
 				unhighlightObjects(result.unhighlightedObjects);
 			}
-			console.timeEnd('[B]');
 
-			console.time('[C] !!!');
 			toggleMeshesVisibility(result.meshesToUpdate, visibility === VISIBILITY_STATES.VISIBLE);
-			console.timeEnd('[C] !!!');
 			yield put(TreeActions.updateDataRevision());
-			console.timeEnd('Change visibility');
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'tree node visibility', error));
