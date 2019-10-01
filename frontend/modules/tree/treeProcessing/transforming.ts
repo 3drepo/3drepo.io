@@ -35,7 +35,7 @@ const getFlattenNested = (tree, maps, data = [], idx = 0, level = 1, parentId = 
 		hasChildren: Boolean(tree.children),
 		deepChildrenNumber: 0,
 		childrenIds: [],
-		subTreeRoots: [];
+		subTreeRoots: []
 	};
 
 	const nodeID = rowData._id;

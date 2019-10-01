@@ -37,6 +37,7 @@ import { ProjectDialog } from './components/projectDialog/projectDialog.componen
 import { ProjectItem } from './components/projectItem/projectItem.component';
 import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
 import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
+import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
 import { FEDERATION_TYPE, MODEL_TYPE } from './teamspaces.contants';
 import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 
