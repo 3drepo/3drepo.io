@@ -47,6 +47,7 @@ interface IProps {
 	undo: () => void;
 	redo: () => void;
 	clearHistory: () => void;
+	initHistory: () => void;
 }
 export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public state = {
@@ -133,12 +134,14 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 		// TODO: It has to be migrated after merging Tree PR
 		Viewer.pauseRendering();
+		this.clearCanvas();
 	}
 
 	public componentWillUnmount() {
 		// TODO: It has to be migrated after merging Tree PR
 		Viewer.resumeRendering();
 		document.removeEventListener('keydown', this.handleKeyDown);
+		this.clearCanvas();
 	}
 
 	public handleBrushSizeChange = (event) => {
@@ -185,6 +188,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.drawingLayer.clearCache();
 		this.layer.destroyChildren();
 		this.drawingLayer.destroyChildren();
+
+		// init before clear - it's on puporse because of library's bug;
+		// the library doesn't clear current state, only past and future
+		this.props.initHistory();
 		this.props.clearHistory();
 	}
 
@@ -194,6 +201,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public handleRedo = () => {
 		this.props.redo();
+	}
+
+	public handleClose = () => {
+		this.props.handleClose();
 	}
 
 	public handleSave = async () => {
@@ -427,7 +438,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			onClearClick={this.clearCanvas}
 			onBrushSizeChange={this.handleBrushSizeChange}
 			onColorChange={this.handleColorChange}
-			onCancel={this.props.handleClose}
+			onCancel={this.handleClose}
 			onUndo={this.props.undo}
 			onRedo={this.props.redo}
 			onSave={this.handleSave}

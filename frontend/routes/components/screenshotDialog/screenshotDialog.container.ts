@@ -39,7 +39,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	removeElement: CanvasHistoryActions.remove,
 	undo: CanvasHistoryActions.undo,
 	redo: CanvasHistoryActions.redo,
-	clearHistory: CanvasHistoryActions.clearHistory
+	clearHistory: CanvasHistoryActions.clearHistory,
+	initHistory: CanvasHistoryActions.initHistory
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(ScreenshotDialog);

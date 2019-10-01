@@ -26,7 +26,8 @@ export const { Types: CanvasHistoryTypes, Creators: CanvasHistoryActions } = cre
 	update: ['elementName', 'properties'],
 	undo: [],
 	redo: [],
-	clearHistory: []
+	clearHistory: [],
+	initHistory: []
 }, { prefix: 'CANVAS_HISTORY/' });
 
 export const INITIAL_STATE = {
@@ -78,12 +79,17 @@ export const clear = (state = INITIAL_STATE, {}) => {
 	return { ...state };
 };
 
+export const init = (state = INITIAL_STATE, {}) => {
+	return { elements: [] };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[CanvasHistoryTypes.SET_ACTIVE_SUCCESS]: setActiveSuccess,
 	[CanvasHistoryTypes.SET_DISABLED_SUCCESS]: setDisabledSuccess,
 	[CanvasHistoryTypes.UNDO]: undo,
 	[CanvasHistoryTypes.REDO]: redo,
 	[CanvasHistoryTypes.CLEAR_HISTORY]: clear,
+	[CanvasHistoryTypes.INIT_HISTORY]: init,
 	[CanvasHistoryTypes.ADD]: add,
 	[CanvasHistoryTypes.UPDATE]: update,
 	[CanvasHistoryTypes.REMOVE]: remove
