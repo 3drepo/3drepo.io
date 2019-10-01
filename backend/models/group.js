@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -31,6 +32,7 @@ const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 const FileRef = require("./fileRef");
 const {union, multiIntersection} = require("./helper/set");
+const { batchPromises } = require("./helper/promises");
 
 const ruleOperators = {
 	"IS_EMPTY":	0,
@@ -155,7 +157,6 @@ groupSchema.statics.uuidToIfcGuids = function (obj) {
 	const account = obj.account;
 	const model = obj.model;
 
-	// @ts-ignore
 	const uid = ("[object String]" !== Object.prototype.toString.call(uid)) ? utils.uuidToString(uid) : obj.shared_id;
 	const parent = utils.stringToUUID(uid);
 
@@ -784,40 +785,9 @@ function findObjectsByQuery(account, model, query) {
  */
 async function getIdToMeshesDict(account, model, revId) {
 	const treeFileName = `${revId}/idToMeshes.json`;
-	const {readStream: fileStream} = await FileRef.getJSONFileStream(account, model, treeFileName);
-
-	const idToMeshes =  await new Promise((resolve, reject) => {
-		let treeStr = "";
-		try {
-			fileStream.on("data", (chunk) => {
-				treeStr += chunk;
-			});
-
-			fileStream.on("end", () => {
-				try {
-					resolve(JSON.parse(treeStr));
-				} catch(e) {
-					reject(e);
-				}
-
-			});
-		} catch(e) {
-			reject(e);
-		}
-	});
-
-	return idToMeshes;
+	return JSON.parse(await FileRef.getJSONFile(account, model, treeFileName));
 }
 
-function batchPromises(promiseGenerator, dataToBatch, size) {
-	const promises = [];
-	for(let i = 0; i < dataToBatch.length; i = i + size) {
-		const endIndex = Math.min(i + size , dataToBatch.length);
-		const batchedData = dataToBatch.slice(i, endIndex);
-		promises.push(promiseGenerator(batchedData));
-	}
-	return Promise.all(promises);
-}
 /**
  *
  * @param {string} account

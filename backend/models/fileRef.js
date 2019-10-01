@@ -208,16 +208,16 @@ FileRef.getJSONFile = function(account, model, fileName) {
 	return fetchFile(account, model, JSON_FILE_REF_EXT, fileName);
 };
 
-/**
- * @param {*} account
- * @param {*} model
- * @param {*} fileName
- * @returns {{readStream: stream.Readable , size: Number}}
- */
 FileRef.getResourceFile = function(account, model, fileName) {
 	return fetchFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true);
 };
 
+/**
+ * @param {*} account
+ * @param {*} model
+ * @param {*} fileName
+ * @returns { Promise<{readStream: stream.Readable , size: Number}>}
+ */
 FileRef.getJSONFileStream = function(account, model, fileName) {
 	return fetchFileStream(account, model, JSON_FILE_REF_EXT, fileName);
 };
