@@ -31,6 +31,7 @@ import {
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { Indicator } from './components/indicator/indicator.component';
 import { EditableText } from './components/editableText/editableText.component';
+import { Viewer } from '../../../services/viewer/viewer';
 
 interface IProps {
 	sourceImage: string | Promise<string>;
@@ -129,9 +130,14 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		});
 
 		document.addEventListener('keydown', this.handleKeyDown);
+
+		// TODO: It has to be migrated after merging Tree PR
+		Viewer.pauseRendering();
 	}
 
 	public componentWillUnmount() {
+		// TODO: It has to be migrated after merging Tree PR
+		Viewer.resumeRendering();
 		document.removeEventListener('keydown', this.handleKeyDown);
 	}
 

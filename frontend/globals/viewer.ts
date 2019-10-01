@@ -803,4 +803,11 @@ export class Viewer {
 		UnityUtil.useBoundingSphereFarPlaneAlgorithm();
 	}
 
+	public pauseRendering() {
+		UnityUtil.pauseRendering();
+	}
+
+	public resumeRendering() {
+		UnityUtil.resumeRendering();
+	}
 }
