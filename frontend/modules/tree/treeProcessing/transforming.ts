@@ -106,8 +106,6 @@ const getMeshesByNodeId = (modelsWithMeshes) => {
 
 export default ({ mainTree, subTrees, subModels, meshMap, treePath }) => new Promise((resolve, reject) => {
 	try {
-		// tslint:disable-next-line
-		IS_DEVELOPMENT && console.time('TREE PRE-PROCESSING NEW');
 		for (let index = 0; index < mainTree.children.length; index++) {
 			const child = mainTree.children[index];
 			const [modelTeamspace, model] = (child.name || '').split(':');
@@ -115,7 +113,7 @@ export default ({ mainTree, subTrees, subModels, meshMap, treePath }) => new Pro
 
 			if (subModel) {
 				child.name = [modelTeamspace, subModel.name].join(':');
-			} else {
+			} else if (child.type !== 'mesh') {
 				child.name = child.name || DEFAULT_NODE_NAME;
 			}
 
@@ -137,14 +135,8 @@ export default ({ mainTree, subTrees, subModels, meshMap, treePath }) => new Pro
 			nodesDefaultVisibilityMap: {}
 		} as any;
 
-		// tslint:disable-next-line
-		IS_DEVELOPMENT && console.timeEnd('TREE PRE-PROCESSING NEW');
-		// tslint:disable-next-line
-		IS_DEVELOPMENT && console.time('TREE PROCESSING NEW');
 		const { data: nodesList } = getFlattenNested(mainTree, auxiliaryMaps);
 		const meshesByNodeId = getMeshesByNodeId(meshMap);
-		// tslint:disable-next-line
-		IS_DEVELOPMENT && console.timeEnd('TREE PROCESSING NEW');
 		resolve({ nodesList, meshesByNodeId, treePath, ...auxiliaryMaps });
 	} catch (error) {
 		reject(error);
