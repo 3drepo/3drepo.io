@@ -51,9 +51,9 @@ const getBackgroundColor = (props) => cond([
 		[matches(TREE_ITEM_MODEL_TYPE), constant(COLOR.GRAY)],
 		[matches(TREE_ITEM_OBJECT_TYPE), () => {
 				if (props.highlighted) {
-					return '#D8E6FF';
+					return '#B6C4DE';
 				} else if (props.selected) {
-					return '#F4F8FF';
+					return '#D8E6FF';
 				}
 				return COLOR.WHITE;
 			}
