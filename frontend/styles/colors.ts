@@ -41,7 +41,7 @@ export const COLOR = {
 	LIGHT_GRAY: '#fafafa',
 	WARNING_LIGHT: '#ffefef',
 	WARNING: '#ffd5d5',
-	VIVID_NAVY: '#1805db',
+	VIVID_NAVY: '#3452ff',
 	SOFT_BLUE: '#4e7496',
 	MAROON: '#c9241c',
 	CRIMSON: '#dc143c',
