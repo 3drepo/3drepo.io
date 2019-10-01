@@ -123,11 +123,17 @@ function* expandToNode(node: any) {
 function* getAllTrees(teamspace, modelId, revision) {
 	const fullTree = yield API.getFullTree(teamspace, modelId, revision);
 
-	const subTreesData = fullTree.data.subTrees.length
-		? yield all(fullTree.data.subTrees.map(({ url }) => API.default.get(url)))
-		: [];
-	const subTrees = subTreesData.map(({ data }) => data.mainTree);
-	return { fullTree: fullTree.data, subTrees};
+	const proms = [];
+	for (let i = 0; i < fullTree.data.subTrees.length; ++i) {
+		proms.push(
+			API.default.get(fullTree.data.subTrees[i].url)
+				.then(({data}) => data.mainTree)
+				.catch(() => {})
+		);
+	}
+
+	const subTrees = yield all(proms);
+	return { fullTree: fullTree.data, subTrees: subTrees.filter((data) => !!data)};
 }
 
 function* fetchFullTree({ teamspace, modelId, revision }) {

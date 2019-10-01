@@ -123,7 +123,7 @@ export default ({ mainTree, subTrees, subModels, meshMap, treePath }) => new Pro
 
 			if (subTrees.length) {
 				const subTree = subTrees.find(({ nodes }) => nodes.project === model);
-				child.children[0].children = [subTree.nodes];
+				child.children[0].children = subTree ? [subTree.nodes] : [];
 			}
 		}
 
