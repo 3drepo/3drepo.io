@@ -956,7 +956,7 @@ async function findObjectIDsByRules(account, model, rules, branch, revId, conver
 
 			objectIdPromises.push(findModelSharedIDsByRulesQueries(
 				account,
-				model,
+				modelID,
 				queries,
 				_branch,
 				_revId,
