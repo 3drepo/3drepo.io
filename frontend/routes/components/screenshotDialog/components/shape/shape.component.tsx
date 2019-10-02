@@ -27,7 +27,7 @@ interface IProps {
 	handleChange: (props: any) => void;
 }
 
-export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawingMode }: IProps) => {
+export const Shape = ({ element, isSelected, handleChange, isDrawingMode }: IProps) => {
 	const { color, figure, ...elementProps } = element;
 	const shape = React.useRef<any>();
 	const transformer = React.useRef<any>();
@@ -79,14 +79,6 @@ export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawi
 		document.body.style.cursor = 'default';
 	};
 
-	const handleClick = (e) => {
-		if (!isSelected) {
-			return;
-		}
-		document.body.style.cursor = 'move';
-		handleSelect(e);
-	};
-
 	const Component = SHAPE_COMPONENTS[figure];
 	const transformerProps = isLine ? { enabledAnchors: ['top-left', 'top-right'] } : {};
 
@@ -98,8 +90,6 @@ export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawi
 				stroke={color}
 				strokeWidth={5}
 				transformer={transformer}
-				onClick={handleClick}
-				onDragStart={handleClick}
 				onDragEnd={handleDragEnd}
 				onTransformEnd={handleTransformEnd}
 				onDblClick={handleDoubleClick}

@@ -219,9 +219,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.props.handleResolve(screenshot);
 	}
 
-	public setBrushMode = () => {
+	public setMode = (mode) => {
 		const newState = {
-			mode: this.state.mode === MODES.BRUSH ? '' : MODES.BRUSH
+			mode: this.state.mode === mode ? '' : mode
 		} as any;
 
 		if (this.state.selectedObjectName) {
@@ -230,17 +230,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.setState(newState);
 	}
 
-	public setEraserMode = () => {
-		const newState = {
-			mode: this.state.mode === MODES.ERASER ? '' : MODES.ERASER
-		} as any;
+	public setBrushMode = () => this.setMode(MODES.BRUSH);
 
-		if (this.state.selectedObjectName) {
-			newState.selectedObjectName = '';
-		}
-
-		this.setState(newState);
-	}
+	public setEraserMode = () => this.setMode(MODES.ERASER);
 
 	public setShapeMode = (shape) => {
 		const newState = {
@@ -348,10 +340,11 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public addNewDrawnLine = (line) => {
 		if (!this.state.selectedObjectName) {
+			const isErasing = this.state.mode === MODES.ERASER;
 			const newLine = getNewDrawnLine(line.attrs, this.state.color);
-			const selectedObjectName = newLine.name;
+			const selectedObjectName = isErasing ? '' : newLine.name;
 			this.props.addElement(newLine);
-			this.setState({ selectedObjectName, mode: MODES.BRUSH });
+			this.setState(({ mode }) => ({ selectedObjectName, mode }));
 		}
 	}
 
@@ -413,7 +406,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			element,
 			isSelected,
 			isVisible: element.type === ELEMENT_TYPES.TEXT ? !isTextEditing : true,
-			handleSelect: () => this.handleSelectObject(element),
 			handleChange: (newAttrs) => this.handleChangeObject(newAttrs)
 		};
 
@@ -484,27 +476,27 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	)
 
 	public handleStageMouseDown = ({ target }) => {
-		if (target === target.getStage()) {
+		//if (target === target.getStage()) {
 			this.setState({ selectedObjectName: '' });
 			return;
-		}
+		//}
 
-		const clickedOnTransformer = target.getParent().className === 'Transformer';
+		// const clickedOnTransformer = target.getParent().className === 'Transformer';
 
-		if (clickedOnTransformer) {
-			return;
-		}
+		// if (clickedOnTransformer) {
+		// 	return;
+		// }
 
-		const object = this.props.canvasElements.find((s) => s.name === target.name());
-		const newState = {} as any;
-		const selectedObjectName = object ? object.name : '';
-		newState.selectedObjectName = selectedObjectName;
+		// const object = this.props.canvasElements.find((s) => s.name === target.name());
+		// const newState = {} as any;
+		// const selectedObjectName = object ? object.name : '';
+		// newState.selectedObjectName = selectedObjectName;
 
-		if (selectedObjectName) {
-			newState.lastSelectedObjectName = selectedObjectName;
-		}
+		// if (selectedObjectName) {
+		// 	newState.lastSelectedObjectName = selectedObjectName;
+		// }
 
-		this.setState(newState);
+		//this.setState(newState);
 	}
 
 	public getEditableTextareaStyles = () => {

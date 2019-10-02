@@ -174,6 +174,7 @@ export class Drawing extends React.PureComponent <IProps, any> {
 			y: position.y - this.props.layer.current.y()
 		};
 		const newPoints = this.lastLine.points().concat([localPosition.x, localPosition.y]);
+
 		this.lastLine.points(newPoints);
 		this.lastPointerPosition = position;
 		this.layer.batchDraw();

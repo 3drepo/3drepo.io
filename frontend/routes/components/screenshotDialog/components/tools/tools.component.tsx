@@ -28,12 +28,13 @@ import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { FONT_WEIGHT } from '../../../../../styles';
 import { ToolsContainer, OptionsDivider, StyledButton, IconButton } from './tools.styles';
 import { TooltipButton } from '../../../../teamspaces/components/tooltipButton/tooltipButton.component';
+import { Eraser } from '../../../fontAwesomeIcon';
 import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { MODES } from '../../screenshotDialog.helpers';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
 import { MenuList } from '../../../filterPanel/components/filtersMenu/filtersMenu.styles';
 import { SmallIconButton } from '../../../smallIconButon/smallIconButton.component';
-import { SHAPES_MENU, activeShapeIcon } from './tools.helpers.tsx';
+import { SHAPES_MENU, activeShapeIcon } from './tools.helpers';
 import { SHAPE_TYPES } from '../shape/shape.constants';
 
 interface IProps {
@@ -93,7 +94,8 @@ export class Tools extends React.PureComponent<IProps, any> {
 
 	public renderToolset = renderWhenTrue(() => {
 		const {
-			size, color, onDrawClick, onTextClick, onClearClick, onColorChange, onBrushSizeChange
+			size, color, onDrawClick, onTextClick, onClearClick,
+			onColorChange, onBrushSizeChange, onEraseClick
 		} = this.props;
 
 		return (
@@ -161,6 +163,13 @@ export class Tools extends React.PureComponent<IProps, any> {
 					PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'center' } }}
 					ButtonProps={{ disabled: false }}
 				/>
+				<TooltipButton
+					label="Erase"
+					color={this.getToolColor(MODES.ERASER)}
+					action={onEraseClick}
+					Icon={(props) => <Eraser IconProps={props} />}
+				/>
+				<OptionsDivider />
 				<TooltipButton
 					label="Undo"
 					action={this.handleUndo()}

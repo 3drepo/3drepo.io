@@ -69,6 +69,7 @@ export const getNewDrawnLine = (lineAttrs, color) => {
 		points: lineAttrs.points,
 		lineCap: lineAttrs.lineCap,
 		strokeWidth: lineAttrs.strokeWidth,
+		globalCompositeOperation: lineAttrs.globalCompositeOperation,
 		x: 0,
 		y: 0
 	};

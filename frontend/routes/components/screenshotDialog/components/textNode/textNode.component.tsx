@@ -23,12 +23,11 @@ interface IProps {
 	element: any;
 	isSelected: boolean;
 	isVisible: boolean;
-	handleSelect: (props: any) => void;
 	handleChange: (props: any) => void;
 	handleDoubleClick: (props: any) => void;
 }
 
-export const TextNode = ({ element, isSelected, handleSelect, handleChange, handleDoubleClick, isVisible }: IProps) => {
+export const TextNode = ({ element, isSelected, handleChange, handleDoubleClick, isVisible }: IProps) => {
 	const { color, ...elementProps } = element;
 	const shape = React.useRef<any>();
 	const transformer = React.useRef<any>();
@@ -43,7 +42,6 @@ export const TextNode = ({ element, isSelected, handleSelect, handleChange, hand
 	return (
 		<>
 			<Text
-				onClick={handleSelect}
 				ref={shape}
 				{...elementProps}
 				text={elementProps.text || EDITABLE_TEXTAREA_PLACEHOLDER}
