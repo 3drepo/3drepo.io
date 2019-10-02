@@ -98,7 +98,11 @@ export class Tools extends React.PureComponent<IProps, any> {
 
 		return (
 			<>
-				<ColorPicker disableUnderline value={color} onChange={onColorChange} />
+				<ColorPicker
+					value={color}
+					onChange={onColorChange}
+					disableUnderline
+				/>
 				<Select
 					disableUnderline
 					value={size}
