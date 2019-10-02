@@ -355,13 +355,22 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public addNewShape = (figure, attrs) => {
+	public addNewShape = (figure, { attrs }) => {
 		if (!this.state.selectedObjectName) {
-			const newShape = getNewShape(figure, this.state.color, attrs);
+			const correctCircle = figure === SHAPE_TYPES.CIRCLE && attrs.radius > 1;
+			const correctTriangle = figure === SHAPE_TYPES.TRIANGLE && attrs.radius > 1;
+			const correctRectangle =
+				figure === SHAPE_TYPES.RECTANGLE && (Math.abs(attrs.height) > 1 || Math.abs(attrs.width) > 1);
+			const correctLine = figure === SHAPE_TYPES.LINE && attrs.points && attrs.points.length;
+			const correctCloud = figure === SHAPE_TYPES.CLOUD && (Math.abs(attrs.scaleX) > 0 || Math.abs(attrs.scaleY) > 0);
 
-			const selectedObjectName = newShape.name;
-			this.props.addElement(newShape);
-			this.setState({ selectedObjectName });
+			if (correctCircle || correctTriangle || correctRectangle || correctLine || correctCloud) {
+				const newShape = getNewShape(figure, this.state.color, attrs);
+				const selectedObjectName = newShape.name;
+				this.props.addElement(newShape);
+				this.setState({ selectedObjectName });
+			}
+
 			document.body.style.cursor = 'crosshair';
 		}
 	}

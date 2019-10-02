@@ -8,14 +8,8 @@ const triangleProps = { sides: 3 };
 
 const rectangleProps = { height: 1, width: 1 };
 
-const cloud1Props = {
+const cloudProps = {
 	data: firstCloud.path,
-	scaleX: 0,
-	scaleY: 0
-};
-
-const cloud2Props = {
-	data: secondCloud.path,
 	scaleX: 0,
 	scaleY: 0
 };
@@ -40,15 +34,10 @@ export const createShape = (shapeType, commonProps, initialPositionProps) => {
 		[SHAPE_TYPES.LINE]: new Konva.Line({
 			...commonProps
 		}),
-		[SHAPE_TYPES.CLOUD1]: new Konva.Path({
+		[SHAPE_TYPES.CLOUD]: new Konva.Path({
 			...commonProps,
 			...initialPositionProps,
-			...cloud1Props
-		}),
-		[SHAPE_TYPES.CLOUD2]: new Konva.Path({
-			...commonProps,
-			...initialPositionProps,
-			...cloud2Props
+			...cloudProps
 		})
 	};
 
@@ -81,7 +70,7 @@ export const getDrawDunction = (shapeType, shape, initialPos, currentPos) => {
 		[SHAPE_TYPES.LINE]: () => {
 			shape.points([initialPos.x, initialPos.y, currentPos.x, currentPos.y]);
 		},
-		[SHAPE_TYPES.CLOUD1]: () => {
+		[SHAPE_TYPES.CLOUD]: () => {
 			const scaleX = Math.abs(initialPos.x - currentPos.x) / firstCloud.width;
 			const scaleY = Math.abs(initialPos.y - currentPos.y) / firstCloud.height;
 			shape.scale({
@@ -89,14 +78,6 @@ export const getDrawDunction = (shapeType, shape, initialPos, currentPos) => {
 				y: currentPos.y > initialPos.y ? scaleY : -scaleY
 			});
 		},
-		[SHAPE_TYPES.CLOUD2]: () => {
-			const scaleX = Math.abs(initialPos.x - currentPos.x) / secondCloud.width;
-			const scaleY = Math.abs(initialPos.y - currentPos.y) / secondCloud.height;
-			shape.scale({
-				x: currentPos.x > initialPos.x ? scaleX : -scaleX,
-				y: currentPos.y > initialPos.y ? scaleY : -scaleY
-			});
-		}
 	};
 
 	return map[shapeType];

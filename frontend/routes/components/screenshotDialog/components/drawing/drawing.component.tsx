@@ -18,6 +18,7 @@
 import * as React from 'react';
 import { MODES } from '../../screenshotDialog.helpers';
 import { createShape, getDrawDunction, createDrawnLine } from './drawing.helpers';
+import { SHAPE_TYPES } from '../shape/shape.constants';
 
 interface IProps {
 	color: string;

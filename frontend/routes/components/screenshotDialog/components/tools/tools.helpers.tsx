@@ -8,7 +8,7 @@ import { SHAPE_TYPES } from '../shape/shape.constants';
 import { COLOR } from '../../../../../styles';
 import { firstCloud, secondCloud } from '../shape/shape.helpers';
 
-const Cloud1Icon = (props) => {
+const CloudIcon = (props) => {
 	return (
 		<SvgIcon>
 			<g>
@@ -23,21 +23,7 @@ const Cloud1Icon = (props) => {
 			</g>
 		</SvgIcon>
 	);
-}
-const Cloud2Icon = () => (
-	<SvgIcon>
-		<g>
-			<path
-				fill={'none'}
-				stroke={COLOR.BLACK_54}
-				strokeWidth={15}
-				paintOrder={'fill stroke markers'}
-				d={secondCloud.path}
-				transform={`scale(0.045)`}
-			/>
-		</g>
-	</SvgIcon>
-);
+};
 
 const RECTANGLE_ITEM = {
 	name: SHAPE_TYPES.RECTANGLE,
@@ -59,14 +45,9 @@ const LINE_ITEM = {
 	Icon: RemoveIcon
 };
 
-const CLOUD1_ITEM = {
-	name: SHAPE_TYPES.CLOUD1,
-	Icon: Cloud1Icon
-};
-
-const CLOUD2_ITEM = {
-	name: SHAPE_TYPES.CLOUD2,
-	Icon: Cloud2Icon
+const CLOUD_ITEM = {
+	name: SHAPE_TYPES.CLOUD,
+	Icon: CloudIcon
 };
 
 export const SHAPES_MENU = [
@@ -74,8 +55,7 @@ export const SHAPES_MENU = [
 	TRIANGLE_ITEM,
 	CIRCLE_ITEM,
 	LINE_ITEM,
-	CLOUD1_ITEM,
-	CLOUD2_ITEM
+	CLOUD_ITEM
 ];
 
 const SHAPE_ICONS = {
@@ -83,8 +63,7 @@ const SHAPE_ICONS = {
 	[SHAPE_TYPES.TRIANGLE]: ChangeHistoryIcon,
 	[SHAPE_TYPES.CIRCLE]: PanoramaFishEyeIcon,
 	[SHAPE_TYPES.LINE]: RemoveIcon,
-	[SHAPE_TYPES.CLOUD1]: Cloud1Icon,
-	[SHAPE_TYPES.CLOUD2]: Cloud2Icon
+	[SHAPE_TYPES.CLOUD]: CloudIcon
 };
 
 export const activeShapeIcon = (activeShape) => SHAPE_ICONS[activeShape];
