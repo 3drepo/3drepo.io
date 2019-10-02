@@ -49,7 +49,7 @@ const union = (setA, setB) => {
  *
  * @returns {Set} A new set is the result of setA ∩ setB
  */
-const intersection = (setA, setB) => {
+const _intersection = (setA, setB) => {
 	let iterating = null;
 	let otherSet = null;
 	const result = new Set();
@@ -71,6 +71,28 @@ const intersection = (setA, setB) => {
 	return result;
 };
 
+const _difference = (setA, setB) => {
+	let result = new Set();
+
+	if (setA.size > setB.size) {
+		for (const elem of setB) {
+			if (setA.has(elem)) {
+				setA.delete(elem);
+			}
+		}
+
+		result = setA;
+	} else {
+		for (const elem of setA) {
+			if (!setB.has(elem)) {
+				result.add(elem);
+			}
+		}
+	}
+
+	return result;
+};
+
 /**
  * The intersection of an array of  sets
  *
@@ -78,7 +100,7 @@ const intersection = (setA, setB) => {
  *
  * @returns {Set} A new set is the result of setA ∩ setB
  */
-const multiIntersection = (sets) => {
+const intersection = (sets) => {
 	if (sets.length === 1) {
 		return sets[0];
 	}
@@ -93,14 +115,22 @@ const multiIntersection = (sets) => {
 			return;
 		}
 
-		intersectedSet = intersection(intersectedSet, set);
+		intersectedSet = _intersection(intersectedSet, set);
 	});
 
 	return intersectedSet;
 };
 
+const difference = (set, setsTosubtract) => {
+	for (const setTosubtract of setsTosubtract) {
+		set = _difference(set, setTosubtract);
+	}
+
+	return set;
+};
+
 module.exports = {
 	union,
 	intersection,
-	multiIntersection
+	difference
 };

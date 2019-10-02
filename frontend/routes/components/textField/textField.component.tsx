@@ -186,7 +186,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 					{!this.isEditMode &&
 						<div>
 							<FieldLabel shrink={true}>{this.props.label}</FieldLabel>
-							<StyledLinkableField>{this.fieldValue.toString()}</StyledLinkableField>
+							<StyledLinkableField>{this.fieldValue}</StyledLinkableField>
 						</div>
 					}
 					{shouldRenderActions && this.renderActionsLine()}

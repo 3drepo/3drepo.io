@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  *  Copyright (C) 2014 3D Repo Ltd
  *
@@ -31,7 +30,7 @@ const Ref = require("./ref");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 const FileRef = require("./fileRef");
-const {union, multiIntersection} = require("./helper/set");
+const {union, intersection, difference} = require("./helper/set");
 const { batchPromises } = require("./helper/promises");
 
 const ruleOperators = {
@@ -52,12 +51,13 @@ const ruleOperators = {
 	"NOT_IN_RANGE":	2
 };
 
-const notOperators = [
-	"IS_NOT",
-	"NOT_CONTAINS",
-	"NOT_EQUALS",
-	"NOT_IN_RANGE"
-];
+const notOperators = {
+	"IS_NOT": "IS",
+	"NOT_CONTAINS": "CONTAINS",
+	"NOT_EQUALS": "EQUALS",
+	"NOT_IN_RANGE": "IN_RANGE",
+	"IS_EMPTY": "IS_NOT_EMPTY"
+};
 
 const fieldTypes = {
 	"description": "[object String]",
@@ -662,112 +662,79 @@ function isValidRule(rule) {
 }
 
 function buildRule(rule) {
-	const clauses = [];
-	let expression = {};
+	let operation = {};
 
 	if (isValidRule(rule)) {
 		const fieldName = "metadata." + rule.field;
-		const operatorPerClause =  ruleOperators[rule.operator];
-		const clausesCount = rule.values && rule.values.length > 0 && operatorPerClause > 0 ?
-			rule.values.length / operatorPerClause :
-			1;
+		const value = rule.values[0];
 
-		for (let i = 0; i < clausesCount; i++) {
-			let operation;
+		switch (rule.operator) {
+			case "IS_NOT_EMPTY":
+				operation = { $exists: true };
+				break;
+			case "IS":
+				operation = value;
+				break;
+			case "CONTAINS":
+				operation = {$or: rule.values.map(val => ({[fieldName]: { $regex: new RegExp(utils.sanitizeString(val)), $options: "i" }}))};
+				break;
+			case "REGEX":
+				operation = { $regex: new RegExp(value) };
+				break;
+			case "EQUALS":
+				operation = { $eq: Number(value) };
+				break;
+			case "GT":
+				operation = { $gt: Number(value) };
+				break;
+			case "GTE":
+				operation = { $gte: Number(value) };
+				break;
+			case "LT":
+				operation = { $lt: Number(value) };
+				break;
+			case "LTE":
+				operation = { $lte: Number(value) };
+				break;
+			case "IN_RANGE":
+				{
+					const rangeVal1 = Number(rule.values[0]);
+					const rangeVal2 = Number(rule.values[1]);
+					const rangeLowerOp = {};
+					rangeLowerOp[fieldName] = { $gte: Math.min(rangeVal1, rangeVal2) };
+					const rangeUpperOp = {};
+					rangeUpperOp[fieldName] = { $lte: Math.max(rangeVal1, rangeVal2) };
 
-			switch (rule.operator) {
-				case "IS_EMPTY":
-					operation = { $exists: false };
-					break;
-				case "IS_NOT_EMPTY":
-					operation = { $exists: true };
-					break;
-				case "IS":
-					operation = rule.values[i];
-					break;
-				case "IS_NOT":
-					operation = { $ne: rule.values[i] };
-					break;
-				case "CONTAINS":
-					operation = { $regex: new RegExp(utils.sanitizeString(rule.values[i])), $options: "i" };
-					break;
-				case "NOT_CONTAINS":
-					operation = { $regex: new RegExp("^((?!" + utils.sanitizeString(rule.values[i]) + ").)*$"), $options: "i" };
-					break;
-				case "REGEX":
-					operation = { $regex: new RegExp(rule.values[i]) };
-					break;
-				case "EQUALS":
-					operation = { $eq: Number(rule.values[i]) };
-					break;
-				case "NOT_EQUALS":
-					operation = { $ne: Number(rule.values[i]) };
-					break;
-				case "GT":
-					operation = { $gt: Number(rule.values[i]) };
-					break;
-				case "GTE":
-					operation = { $gte: Number(rule.values[i]) };
-					break;
-				case "LT":
-					operation = { $lt: Number(rule.values[i]) };
-					break;
-				case "LTE":
-					operation = { $lte: Number(rule.values[i]) };
-					break;
-				case "IN_RANGE":
-					{
-						const rangeVal1 = Number(rule.values[i * operatorPerClause]);
-						const rangeVal2 = Number(rule.values[i * operatorPerClause + 1]);
-						const rangeLowerOp = {};
-						rangeLowerOp[fieldName] = { $gte: Math.min(rangeVal1, rangeVal2) };
-						const rangeUpperOp = {};
-						rangeUpperOp[fieldName] = { $lte: Math.max(rangeVal1, rangeVal2) };
-
-						operation = undefined;
-						clauses.push({ $and: [rangeLowerOp, rangeUpperOp]});
-					}
-					break;
-				case "NOT_IN_RANGE":
-					{
-						const exRangeVal1 = Number(rule.values[i * operatorPerClause]);
-						const exRangeVal2 = Number(rule.values[i * operatorPerClause + 1]);
-						const exRangeLowerOp = {};
-						exRangeLowerOp[fieldName] = { $lt: Math.min(exRangeVal1, exRangeVal2) };
-						const exRangeUpperOp = {};
-						exRangeUpperOp[fieldName] = { $gt: Math.max(exRangeVal1, exRangeVal2) };
-
-						operation = undefined;
-						clauses.push({ $or: [exRangeLowerOp, exRangeUpperOp]});
-					}
-					break;
-			}
-
-			if (operation) {
-				const clause = {};
-				clause[fieldName] = operation;
-				clauses.push(clause);
-			}
+					operation = { $and: [rangeLowerOp, rangeUpperOp]};
+				}
+				break;
 		}
+
+		if (!["CONTAINS", "IN_RANGE"].includes(rule.operator)) {
+			operation = { [fieldName]: operation};
+		}
+
 	} else {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	if (clauses.length > 1) {
-		if (notOperators.includes(rule.operator)) {
-			expression = { $and: clauses };
-		} else {
-			expression = { $or: clauses };
-		}
-	} else if (clauses.length === 1) {
-		expression = clauses[0];
-	}
-
-	return expression;
+	return operation;
 }
 
-function rulesToQueries(rules) {
-	return rules.map(buildRule);
+function positiveRulesToQueries(rules) {
+	return rules.filter(r=> !notOperators[r.operator]).map(buildRule);
+}
+
+function negativeRulesToQueries(rules) {
+	return rules.filter(r=> notOperators[r.operator]).map(({field, values, operator}) => {
+		const negRule = {
+			field,
+			values,
+			operator: notOperators[operator]
+		};
+
+		return buildRule(negRule);
+	});
 }
 
 function findObjectsByQuery(account, model, query) {
@@ -825,14 +792,14 @@ async function idsToSharedIds(account, model, ids, convertSharedIDsToString) {
  * Return shared ids resulted of applying all the queries at once
  * @param {string} account
  * @param {string} model
- * @param {Array<object>} ruleQueries
+ * @param {Array<object>} posRuleQueries
  * @param {string} branch
  * @param {string} revId
  * @param {Boolean} revId
  *
  * @returns {Promise<Array<string | object>>}
  */
-async function findModelSharedIDsByRulesQueries(account, model, ruleQueries, branch, revId, convertSharedIDsToString) {
+async function findModelSharedIDsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId, convertSharedIDsToString) {
 	const history = await History.getHistory({ account, model }, branch, revId);
 
 	if (!history) {
@@ -840,10 +807,19 @@ async function findModelSharedIDsByRulesQueries(account, model, ruleQueries, bra
 	}
 
 	const idToMeshesDict = await getIdToMeshesDict(account, model, utils.uuidToString(history._id));
+	let allRulesResults = null;
 
-	const eachRuleResults = await Promise.all(ruleQueries.map(ruleQuery => getRuleQueryResults(account, model, idToMeshesDict, history.current, ruleQuery)));
+	if (posRuleQueries.length !== 0) {
+		const eachPosRuleResults = await Promise.all(posRuleQueries.map(ruleQuery => getRuleQueryResults(account, model, idToMeshesDict, history.current, ruleQuery)));
+		allRulesResults = intersection(eachPosRuleResults);
+	} else {
+		const rootQuery =  { _id: { $in: history.current }, "parents": {$exists: false} };
+		const rootId = (await findObjectsByQuery(account, model, rootQuery))[0]._id;
+		allRulesResults = idToMeshesDict[utils.uuidToString(rootId)];
+	}
 
-	const allRulesResults = multiIntersection(eachRuleResults);
+	const eachNegRuleResults = await Promise.all(negRuleQueries.map(ruleQuery => getRuleQueryResults(account, model, idToMeshesDict, history.current, ruleQuery)));
+	allRulesResults = difference(allRulesResults, eachNegRuleResults);
 
 	const ids = [];
 	for (const id of allRulesResults) {
@@ -907,7 +883,8 @@ async function getIFCGuids(account, model, shared_ids) {
 async function findObjectIDsByRules(account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
 	const objectIdPromises = [];
 
-	const queries = rulesToQueries(rules);
+	const positiveQueries = positiveRulesToQueries(rules);
+	const negativeQueries = negativeRulesToQueries(rules);
 
 	const models = new Set();
 	models.add(model);
@@ -927,7 +904,8 @@ async function findObjectIDsByRules(account, model, rules, branch, revId, conver
 			objectIdPromises.push(findModelSharedIDsByRulesQueries(
 				account,
 				modelID,
-				queries,
+				positiveQueries,
+				negativeQueries,
 				_branch,
 				_revId,
 				convertSharedIDsToString && !showIfcGuids // in the case of ifcguids I need the uuid for querying and geting the ifcguids
