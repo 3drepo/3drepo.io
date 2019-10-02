@@ -28,7 +28,7 @@ interface IProps {
 	layer: any;
 	stage: any;
 	activeShape: number;
-	selected: boolean;
+	selected: string;
 	handleNewDrawnLine: (line) => void;
 	handleNewDrawnShape: (shape, attrs) => void;
 }
