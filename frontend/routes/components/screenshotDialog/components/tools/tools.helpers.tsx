@@ -6,7 +6,7 @@ import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
 import SvgIcon from '@material-ui/core/SvgIcon';
 import { SHAPE_TYPES } from '../shape/shape.constants';
 import { COLOR } from '../../../../../styles';
-import { firstCloud, secondCloud } from '../shape/shape.helpers';
+import { cloud } from '../shape/shape.helpers';
 
 const CloudIcon = (props) => {
 	return (
@@ -17,7 +17,7 @@ const CloudIcon = (props) => {
 					stroke={COLOR.BLACK_54}
 					strokeWidth={15}
 					paintOrder={'fill stroke markers'}
-					d={firstCloud.path}
+					d={cloud.path}
 					transform={`scale(0.045)`}
 				/>
 			</g>

@@ -105,7 +105,7 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	public handleMouseMoveShape = () => {
 		const { isCurrentlyDrawn } = this.state;
 
-		if (isCurrentlyDrawn && this.isDrawingMode) {
+		if (isCurrentlyDrawn && this.isDrawingMode && !this.props.selected) {
 			this.drawShape();
 		}
 	}
@@ -116,7 +116,6 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		this.layer.destroyChildren();
 		this.layer.batchDraw();
 		this.props.handleNewDrawnShape(this.props.activeShape, this.lastShape);
-
 		this.setState({ isCurrentlyDrawn: false });
 	}
 

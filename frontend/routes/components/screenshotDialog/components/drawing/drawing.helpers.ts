@@ -1,6 +1,6 @@
 import * as Konva from 'konva';
 import { SHAPE_TYPES } from '../shape/shape.constants';
-import { firstCloud, secondCloud } from '../shape/shape.helpers';
+import { cloud } from '../shape/shape.helpers';
 
 const circleProps = { radius: 1 };
 
@@ -9,7 +9,7 @@ const triangleProps = { sides: 3 };
 const rectangleProps = { height: 1, width: 1 };
 
 const cloudProps = {
-	data: firstCloud.path,
+	data: cloud.path,
 	scaleX: 0,
 	scaleY: 0
 };
@@ -71,13 +71,13 @@ export const getDrawDunction = (shapeType, shape, initialPos, currentPos) => {
 			shape.points([initialPos.x, initialPos.y, currentPos.x, currentPos.y]);
 		},
 		[SHAPE_TYPES.CLOUD]: () => {
-			const scaleX = Math.abs(initialPos.x - currentPos.x) / firstCloud.width;
-			const scaleY = Math.abs(initialPos.y - currentPos.y) / firstCloud.height;
+			const scaleX = Math.abs(initialPos.x - currentPos.x) / cloud.width;
+			const scaleY = Math.abs(initialPos.y - currentPos.y) / cloud.height;
 			shape.scale({
 				x: currentPos.x > initialPos.x ? scaleX : -scaleX,
 				y: currentPos.y > initialPos.y ? scaleY : -scaleY
 			});
-		},
+		}
 	};
 
 	return map[shapeType];
