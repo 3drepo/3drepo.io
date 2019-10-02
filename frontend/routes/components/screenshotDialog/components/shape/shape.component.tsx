@@ -17,7 +17,6 @@
 
 import * as React from 'react';
 import { Transformer } from 'react-konva';
-import { drawCloud } from './shape.helpers';
 import { SHAPE_COMPONENTS, SHAPE_TYPES } from './shape.constants';
 
 interface IProps {
@@ -55,34 +54,8 @@ export const Shape = ({ element, isSelected, handleSelect, handleChange, isDrawi
 		const scaleX = node.scaleX();
 		const scaleY = node.scaleY();
 
-		if (isLine) {
-			node.scaleX(1);
-			node.scaleY(1);
-		} else {
-			node.scaleX(scaleX);
-			node.scaleY(scaleY);
-		}
-
-		if (figure === SHAPE_TYPES.CLOUD) {
-			handleChange({
-				...element,
-				sceneFunc: drawCloud,
-				scaleX,
-				scaleY,
-				rotation: node.rotation()
-			});
-		} else {
-			handleChange({
-				...element,
-				x: node.x(),
-				y: node.y(),
-				scaleX,
-				scaleY,
-				rotation: node.rotation(),
-				width: isLine ? node.width() * scaleX : node.width(),
-				height: isLine ? node.height() * scaleY : node.height()
-			});
-		}
+		node.scaleX(scaleX);
+		node.scaleY(scaleY);
 	};
 
 	const handleDoubleClick = () => {

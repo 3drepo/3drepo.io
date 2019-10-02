@@ -131,7 +131,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 				/>
 				<TooltipButton
 					label="Add text"
-					color={this.isTextSelected ? this.getToolColor(MODES.TEXT) : 'action'}
+					color={this.getToolColor(MODES.TEXT)}
 					action={onTextClick}
 					Icon={TextIcon}
 				/>
@@ -144,7 +144,8 @@ export class Tools extends React.PureComponent<IProps, any> {
 									{...props}
 									aria-label="Show filters menu"
 									aria-haspopup="true"
-									color={this.isShapeSelected ? 'secondary' : 'default'}
+									color={this.getToolColor(MODES.SHAPE)}
+									// color={this.isShapeSelected ? 'secondary' : 'default'}
 								>
 									<ActiveIcon {...IconProps} />
 								</IconButton>

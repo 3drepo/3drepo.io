@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SHAPE_TYPES } from './components/shape/shape.constants';
 import { COLOR } from '../../../styles';
 
 export const MODES = {
@@ -45,28 +44,17 @@ export const ELEMENT_TYPES = {
 
 const createUniqueName = (type) => `${type}-${(Number(String(Math.random()).slice(2)) + Date.now()).toString(36)}`;
 
-export const getNewShape = (stage, figure, color) => {
+export const getNewShape = (figure, color, attrs) => {
 	const name = createUniqueName(ELEMENT_TYPES.SHAPE);
 	const newShape = {
 		type: ELEMENT_TYPES.SHAPE,
 		figure,
 		name,
-		width: 200,
-		height: 200,
 		color,
-		x: stage.attrs.width / 2 - 200 / 2,
-		y: stage.attrs.height / 2 - 50,
 		rotation: 0,
-		fill: 'transparent'
+		fill: 'transparent',
+		...attrs
 	};
-
-	if (figure === SHAPE_TYPES.LINE) {
-		newShape.height = 0;
-		newShape.width = 300;
-	} else if (figure === SHAPE_TYPES.CLOUD) {
-		newShape.height = 150;
-		newShape.width = 264;
-	}
 
 	return newShape;
 };
@@ -88,7 +76,7 @@ export const getNewDrawnLine = (lineAttrs, color) => {
 	return newLine;
 };
 
-export const getNewText = (stage, color) => {
+export const getNewText = (color, position) => {
 	const name = createUniqueName(ELEMENT_TYPES.TEXT);
 	const newText = {
 		type: ELEMENT_TYPES.TEXT,
@@ -97,8 +85,7 @@ export const getNewText = (stage, color) => {
 		name,
 		fontSize: 32,
 		fontFamily: 'Arial',
-		x: stage.attrs.width / 2 - 200 / 2,
-		y: stage.attrs.height / 2 - 51.5
+		...position
 	};
 
 	return newText;

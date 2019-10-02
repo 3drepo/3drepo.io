@@ -16,8 +16,8 @@
  */
 
 import * as React from 'react';
-import * as Konva from 'konva';
-import { MODE_OPERATION, MODES } from '../../screenshotDialog.helpers';
+import { MODES } from '../../screenshotDialog.helpers';
+import { createShape, getDrawDunction, createDrawnLine } from './drawing.helpers';
 
 interface IProps {
 	color: string;
@@ -27,7 +27,10 @@ interface IProps {
 	width: number;
 	layer: any;
 	stage: any;
+	activeShape: number;
+	selected: boolean;
 	handleNewDrawnLine: (line) => void;
+	handleNewDrawnShape: (shape, attrs) => void;
 }
 
 export class Drawing extends React.PureComponent <IProps, any> {
@@ -35,11 +38,13 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		isCurrentlyDrawn: false
 	};
 
+	public initialPointerPosition: any = { x: 0, y: 0 };
 	public lastPointerPosition: any = { x: 0, y: 0 };
 	public lastLine: any = {};
+	public lastShape: any = {};
 
 	get isDrawingMode() {
-		return this.props.mode === MODES.BRUSH || this.props.mode === MODES.ERASER;
+		return this.props.mode === MODES.BRUSH || this.props.mode === MODES.ERASER || this.props.mode === MODES.SHAPE;
 	}
 
 	get layer() {
@@ -47,56 +52,114 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	}
 
 	public componentDidMount() {
-		this.props.stage.on('mousemove', this.handleMouseMove);
-		this.props.stage.on('mouseup', this.handleMouseUp);
-		this.props.stage.on('mousedown', this.handleMouseDown);
+		this.subscribeDrawingLineEvents();
 	}
 
 	public componentWillMount() {
-		this.props.stage.off('mousemove', this.handleMouseMove);
-		this.props.stage.off('mouseup', this.handleMouseUp);
-		this.props.stage.off('mousedown', this.handleMouseDown);
+		this.unsubscribeDrawingLineEvents();
 	}
 
-	public componentDidUpdate() {
-		if (this.props.mode === MODES.BRUSH) {
-			this.props.stage.on('mousemove', this.handleMouseMove);
-			this.props.stage.on('mouseup', this.handleMouseUp);
-			this.props.stage.on('mousedown', this.handleMouseDown);
-		} else {
-			this.props.stage.off('mousemove', this.handleMouseMove);
-			this.props.stage.off('mouseup', this.handleMouseUp);
-			this.props.stage.off('mousedown', this.handleMouseDown);
+	public componentDidUpdate(prevProps) {
+		if (this.props.mode === MODES.BRUSH && prevProps.mode !== MODES.BRUSH && !this.props.selected) {
+			this.subscribeDrawingLineEvents();
+		}
+
+		if (this.props.mode === MODES.SHAPE && prevProps.mode !== MODES.SHAPE) {
+			this.subscribeDrawingShapeEvents();
+		}
+
+		if (this.props.mode !== MODES.BRUSH && prevProps.mode === MODES.BRUSH) {
+			this.unsubscribeDrawingLineEvents();
+		}
+
+		if (this.props.mode !== MODES.SHAPE && prevProps.mode === MODES.SHAPE) {
+			this.unsubscribeDrawingShapeEvents();
 		}
 	}
 
-	public handleMouseDown = () => {
+	public subscribeDrawingLineEvents = () => {
+		this.props.stage.on('mousemove', this.handleMouseMoveLine);
+		this.props.stage.on('mouseup', this.handleMouseUpLine);
+		this.props.stage.on('mousedown', this.handleMouseDownLine);
+	}
+
+	public unsubscribeDrawingLineEvents = () => {
+		this.props.stage.off('mousemove', this.handleMouseMoveLine);
+		this.props.stage.off('mouseup', this.handleMouseUpLine);
+		this.props.stage.off('mousedown', this.handleMouseDownLine);
+	}
+
+	public subscribeDrawingShapeEvents = () => {
+		this.props.stage.on('mousemove', this.handleMouseMoveShape);
+		this.props.stage.on('mouseup', this.handleMouseUpShape);
+		this.props.stage.on('mousedown', this.handleMouseDownShape);
+	}
+
+	public unsubscribeDrawingShapeEvents = () => {
+		this.props.stage.off('mousemove', this.handleMouseMoveShape);
+		this.props.stage.off('mouseup', this.handleMouseUpShape);
+		this.props.stage.off('mousedown', this.handleMouseDownShape);
+	}
+
+	public handleMouseMoveShape = () => {
+		const { isCurrentlyDrawn } = this.state;
+
+		if (isCurrentlyDrawn && this.isDrawingMode) {
+			this.drawShape();
+		}
+	}
+
+	public handleMouseUpShape = () => {
+		this.layer.clear();
+		this.layer.clearCache();
+		this.layer.destroyChildren();
+		this.layer.batchDraw();
+		this.props.handleNewDrawnShape(this.props.activeShape, this.lastShape);
+
+		this.setState({ isCurrentlyDrawn: false });
+	}
+
+	public handleMouseDownShape = () => {
 		this.setState({ isCurrentlyDrawn: true });
 		this.layer.clearBeforeDraw();
+		this.lastPointerPosition = this.initialPointerPosition = this.props.stage.getPointerPosition();
 
-		this.lastPointerPosition = this.props.stage.getPointerPosition();
-		this.lastLine = new Konva.Line({
+		const initialPositionProps = {
+			x: this.initialPointerPosition.x,
+			y: this.initialPointerPosition.y
+		};
+
+		const commonProps = {
 			stroke: this.props.color,
 			strokeWidth: this.props.size,
-			globalCompositeOperation: MODE_OPERATION[this.props.mode],
-			points: [this.lastPointerPosition.x, this.lastPointerPosition.y],
-			lineCap: 'round',
 			draggable: true
-		});
+		};
+
+		this.lastShape = createShape(this.props.activeShape, commonProps, initialPositionProps);
+		this.layer.add(this.lastShape);
+	}
+
+	public handleMouseDownLine = () => {
+		this.setState({ isCurrentlyDrawn: true });
+		this.layer.clearBeforeDraw();
+		this.lastPointerPosition = this.props.stage.getPointerPosition();
+		this.lastLine = createDrawnLine(this.props.color, this.props.size, this.lastPointerPosition);
 		this.layer.add(this.lastLine);
 	}
 
-	public handleMouseUp = () => {
+	public handleMouseUpLine = () => {
 		this.layer.clear();
 		this.layer.clearCache();
 		this.layer.destroyChildren();
 		this.layer.batchDraw();
 
-		this.props.handleNewDrawnLine(this.lastLine);
+		if (this.lastLine.attrs.points.length > 6) {
+			this.props.handleNewDrawnLine(this.lastLine);
+		}
 		this.setState({ isCurrentlyDrawn: false });
 	}
 
-	public handleMouseMove = () => {
+	public handleMouseMoveLine = () => {
 		const { isCurrentlyDrawn } = this.state;
 
 		if (isCurrentlyDrawn && this.isDrawingMode) {
@@ -113,6 +176,13 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		const newPoints = this.lastLine.points().concat([localPosition.x, localPosition.y]);
 		this.lastLine.points(newPoints);
 		this.lastPointerPosition = position;
+		this.layer.batchDraw();
+	}
+
+	public drawShape = () => {
+		const position = this.props.stage.getPointerPosition();
+		const draw = getDrawDunction(this.props.activeShape, this.lastShape, this.initialPointerPosition, position);
+		draw();
 		this.layer.batchDraw();
 	}
 

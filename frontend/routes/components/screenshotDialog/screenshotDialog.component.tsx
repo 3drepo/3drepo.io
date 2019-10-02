@@ -32,6 +32,7 @@ import { renderWhenTrue } from '../../../helpers/rendering';
 import { Indicator } from './components/indicator/indicator.component';
 import { EditableText } from './components/editableText/editableText.component';
 import { Viewer } from '../../../services/viewer/viewer';
+import { SHAPE_TYPES } from './components/shape/shape.constants';
 
 interface IProps {
 	sourceImage: string | Promise<string>;
@@ -128,6 +129,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 		this.setState({ sourceImage, mode: INITIAL_VALUES.mode }, () => {
 			this.setStageSize();
+			this.stage.addEventListener('click', this.handleStageClick);
 		});
 
 		document.addEventListener('keydown', this.handleKeyDown);
@@ -137,11 +139,24 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.clearCanvas();
 	}
 
+	public async componentDidUpdate(prevProps, prevState) {
+		if (this.state.mode === MODES.SHAPE && prevState.mode !== MODES.SHAPE) {
+			document.body.style.cursor = 'crosshair';
+		}
+	}
+
 	public componentWillUnmount() {
 		// TODO: It has to be migrated after merging Tree PR
 		Viewer.resumeRendering();
 		document.removeEventListener('keydown', this.handleKeyDown);
 		this.clearCanvas();
+	}
+
+	public handleStageClick = () => {
+		if (this.state.mode === MODES.TEXT && !this.state.selectedObjectName && !this.state.textEditable.visible) {
+			const position = this.stage.getPointerPosition();
+			this.addNewText(position);
+		}
 	}
 
 	public handleBrushSizeChange = (event) => {
@@ -195,14 +210,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.props.clearHistory();
 	}
 
-	public handleUndo = () => {
-		this.props.undo();
-	}
-
-	public handleRedo = () => {
-		this.props.redo();
-	}
-
 	public handleClose = () => {
 		this.props.handleClose();
 	}
@@ -245,7 +252,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 
 		this.setState(newState, () => {
-			this.addNewShape(shape);
+			// this.addNewShape(shape);
 		});
 	}
 
@@ -320,30 +327,43 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleToolTextClick = () => {
-		this.setState({ mode: MODES.TEXT }, () => {
-			this.addNewText();
-		});
+		if (this.state.mode !==  MODES.TEXT) {
+			this.setState({ mode: MODES.TEXT }, () => {
+				document.body.style.cursor = 'crosshair';
+			});
+		} else {
+			this.setState({ mode: '' }, () => {
+				document.body.style.cursor = 'default';
+			});
+		}
 	}
 
-	public addNewText = () => {
-		const newText = getNewText(this.stage, this.state.color);
+	public addNewText = (position) => {
+		const newText = getNewText(this.state.color, position);
 		const selectedObjectName = newText.name;
 		this.props.addElement(newText);
 		this.setState({ selectedObjectName, mode: MODES.TEXT, brushSize: newText.fontSize });
+		document.body.style.cursor = 'crosshair';
 	}
 
 	public addNewDrawnLine = (line) => {
-		const newLine = getNewDrawnLine(line.attrs, this.state.color);
-		const selectedObjectName = newLine.name;
-		this.props.addElement(newLine);
-		this.setState({ selectedObjectName, mode: MODES.SHAPE });
+		if (!this.state.selectedObjectName) {
+			const newLine = getNewDrawnLine(line.attrs, this.state.color);
+			const selectedObjectName = newLine.name;
+			this.props.addElement(newLine);
+			this.setState({ selectedObjectName, mode: MODES.BRUSH });
+		}
 	}
 
-	public addNewShape = (figure) => {
-		const newShape = getNewShape(this.stage, figure, this.state.color);
-		const selectedObjectName = newShape.name;
-		this.props.addElement(newShape);
-		this.setState({ selectedObjectName, mode: MODES.SHAPE });
+	public addNewShape = (figure, attrs) => {
+		if (!this.state.selectedObjectName) {
+			const newShape = getNewShape(figure, this.state.color, attrs);
+
+			const selectedObjectName = newShape.name;
+			this.props.addElement(newShape);
+			this.setState({ selectedObjectName });
+			document.body.style.cursor = 'crosshair';
+		}
 	}
 
 	public handleSelectObject = (object) => {
@@ -407,6 +427,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				layer={this.drawingLayerRef}
 				stage={this.stage}
 				handleNewDrawnLine={this.addNewDrawnLine}
+				handleNewDrawnShape={this.addNewShape}
+				selected={this.state.selectedObjectName}
+				activeShape={this.state.activeShape}
 			/>
 		);
 	}
@@ -497,10 +520,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { stage } = this.state;
-
 		return (
 			<Container innerRef={this.containerRef}>
-				{this.renderIndicator(!this.props.disabled && this.isDrawingMode)}
+				{this.renderIndicator(!this.props.disabled && this.isDrawingMode && !this.state.selectedObjectName)}
 				{this.renderTools()}
 				<Stage innerRef={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
 					{this.renderLayers()}
