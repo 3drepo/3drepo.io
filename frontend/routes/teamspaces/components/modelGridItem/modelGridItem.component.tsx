@@ -32,7 +32,7 @@ import FederationDialog from '../federationDialog/federationDialog.container';
 import UploadModelFileDialog from '../uploadModelFileDialog/uploadModelFileDialog.container';
 import {
 	Container, Content,
-	Header, ModelLink, Name, NameWithCode, NameWrapper,
+	Header, ModelCode, ModelLink, Name, NameWithCode, NameWrapper,
 	PropertiesColumn,
 	Property,
 	Status,
@@ -249,7 +249,7 @@ export const ModelGridItem = memo((props: IProps) => {
 
 	const rowActions = useMemo(getRowActions, [isFederation]);
 
-	const renderModelCode = renderWhenTrue(<Property>{props.code}</Property>);
+	const renderModelCode = renderWhenTrue(<ModelCode><Property>{props.code}</Property></ModelCode>);
 
 	const renderRevisionsNumber = renderWhenTrue(
 		<Property>

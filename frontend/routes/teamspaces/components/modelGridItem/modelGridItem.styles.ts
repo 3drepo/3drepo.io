@@ -103,4 +103,10 @@ export const ModelLink = styled.div`
 export const NameWithCode = styled.div`
 	display: flex;
 	flex-direction: column;
+	position: relative;
+`;
+
+export const ModelCode = styled.span`
+	position: absolute;
+	top: 100%;
 `;
