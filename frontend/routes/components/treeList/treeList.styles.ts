@@ -19,6 +19,7 @@ import Grid from '@material-ui/core/Grid';
 import styled from 'styled-components';
 
 import { ellipsis, COLOR } from '../../../styles';
+import { TREE_LEVELS } from './treeList.component';
 
 const isActive = (props) => props.active && !props.disabled;
 
@@ -30,6 +31,7 @@ export const Headline = styled.div`
 	justify-content: flex-start;
 	padding-left: 24px;
 	padding-right: 13px;
+	background: ${(props) => props.active || props.level === TREE_LEVELS.PROJECT ? COLOR.WHITE : 'transparent'};
 `;
 
 export const Details = styled.div`

@@ -38,6 +38,7 @@ interface IProps {
 	isMyTeamspace: boolean;
 	disabled: boolean;
 	permissions: any[];
+	showStarredOnly: boolean;
 	onToggle: (state) => void;
 	onAddProject: (event, teamspaceName) => void;
 }
@@ -88,6 +89,7 @@ export const TeamspaceItem = memo((props: IProps) => {
 			active={active}
 			renderRoot={isMyTeamspace ? MyTeamspaceItem : null}
 			IconProps={{ IconClosed: renderAvatar }}
+			showStarredOnly={props.showStarredOnly}
 		>
 			{renderActions}
 		</TreeList>

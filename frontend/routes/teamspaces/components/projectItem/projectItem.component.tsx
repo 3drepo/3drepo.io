@@ -39,6 +39,7 @@ interface IProps {
 	teamspace: string;
 	history: any;
 	active?: boolean;
+	showStarredOnly?: boolean;
 	renderChildItem: () => JSX.Element;
 	removeProject: (teamspace, projectId) => void;
 	showConfirmDialog: (config) => void;
@@ -130,7 +131,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 	))(this.isProjectAdmin()) as any
 
 	public render() {
-		const { name, disabled, isEmpty, query, active } = this.props;
+		const { name, disabled, isEmpty, query, active, showStarredOnly } = this.props;
 		return (
 			<TreeList
 				active={active}
@@ -144,6 +145,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 					IconClosed: Label,
 					IconOpened: LabelOutlined
 				}}
+				showStarredOnly={showStarredOnly}
 			>
 				{this.renderProjectActions}
 			</TreeList>

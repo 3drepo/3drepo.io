@@ -50,7 +50,7 @@ import {
 
 const ModelSettingsSchema = Yup.object().shape({
 	code: Yup.string()
-		.max(5)
+		.max(50)
 		.matches(/^[A-Za-z0-9]+$/),
 	longitude: schema.measureNumberDecimal,
 	latitude: schema.measureNumberDecimal,

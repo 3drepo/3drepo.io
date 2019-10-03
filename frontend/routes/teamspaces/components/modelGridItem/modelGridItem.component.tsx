@@ -32,7 +32,7 @@ import FederationDialog from '../federationDialog/federationDialog.container';
 import UploadModelFileDialog from '../uploadModelFileDialog/uploadModelFileDialog.container';
 import {
 	Container, Content,
-	Header, Name, NameWrapper,
+	Header, ModelLink, Name, NameWrapper,
 	PropertiesColumn,
 	Property,
 	Status,
@@ -148,7 +148,10 @@ export const ModelGridItem = memo((props: IProps) => {
 		});
 	};
 
-	const handleClick = useCallback(() => {
+	const handleClick = useCallback((e) => {
+		console.log('handleClick!');
+
+		return;
 		const { history, teamspace, timestamp, model } = props;
 		if (timestamp) {
 			history.push(`${ROUTES.VIEWER}/${teamspace}/${model}`);
@@ -262,20 +265,19 @@ export const ModelGridItem = memo((props: IProps) => {
 
 	return (
 		<Container federate={isFederation}>
+			<ModelLink onClick={handleClick} />
 			<Header>
 				<NameWrapper>
 					<StarIcon
 						active={hasDelayedClick ? !props.isStarred : props.isStarred}
 						onClick={handleStarClick}
 					/>
-					<div onClick={handleClick}>
-						<Name
-							isPending={isPending}
-							search={props.query}
-							text={props.name}
-							splitQueryToWords
-						/>
-					</div>
+					<Name
+						isPending={isPending}
+						search={props.query}
+						text={props.name}
+						splitQueryToWords
+					/>
 				</NameWrapper>
 				<ActionsMenu
 					federate={isFederation}

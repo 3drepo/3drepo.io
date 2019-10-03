@@ -442,6 +442,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				isEmpty={!props.models.length}
 				query={this.searchQuery}
 				onClick={this.handleVisibilityChange}
+				showStarredOnly={this.props.showStarredOnly}
 			/>
 		),
 		this.renderProjectContainer(props.models, props),
@@ -458,6 +459,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			onToggle={this.handleVisibilityChange}
 			onAddProject={this.openProjectDialog}
 			disabled={!props.projects.length}
+			showStarredOnly={this.props.showStarredOnly}
 		/>
 	)
 

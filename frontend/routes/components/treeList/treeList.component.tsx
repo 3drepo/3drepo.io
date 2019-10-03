@@ -74,6 +74,7 @@ interface IProps {
 	disabled?: boolean;
 	isEmpty?: boolean;
 	IconProps?: any;
+	showStarredOnly?: boolean;
 	children?: (props) => JSX.Element;
 	renderRoot?: (props) => JSX.Element;
 	onClick?: () => void;
@@ -88,7 +89,8 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 		level: TREE_LEVELS.TEAMSPACE,
 		active: false,
 		disabled: false,
-		query: ''
+		query: '',
+		showStarredOnly: false
 	};
 
 	public state = {
@@ -129,10 +131,16 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 			disabled,
 		};
 
+		if (this.props.isEmpty && this.props.showStarredOnly) {
+			return null;
+		}
+
 		return (
 			<Container {...containerProps}>
 				<Headline
 					onClick={this.handleRootClick}
+					active={active}
+					level={level}
 				>
 					{
 						renderRoot

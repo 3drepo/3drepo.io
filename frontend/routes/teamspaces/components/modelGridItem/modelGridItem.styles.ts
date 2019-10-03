@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Truncate from 'react-truncate';
 import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 import { Highlight } from '../../../components/highlight/highlight.component';
@@ -72,10 +71,15 @@ export const PropertiesColumn = styled.div`
 `;
 
 export const Property = styled.span`
+	max-width: 162px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
 `;
 
 export const Timestamp = styled.span`
 	align-self: flex-end;
+	text-align: right;
 `;
 
 export const Status = styled.span`
@@ -86,4 +90,12 @@ export const Status = styled.span`
 	font-weight: 400;
 	color: ${COLOR.BLACK_40};
 	font-size: 12px;
+`;
+
+export const ModelLink = styled.div`
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
 `;
