@@ -18,7 +18,7 @@
 import * as React from 'react';
 
 interface IProps {
-	children?: string;
+	children?: any;
 	className?: string;
 }
 

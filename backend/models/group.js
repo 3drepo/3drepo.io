@@ -661,68 +661,95 @@ function isValidRule(rule) {
 		rule.values.length % ruleOperators[rule.operator] === 0);
 }
 
-function buildRule(rule) {
-	let operation = {};
+function buildQueryFromRule(rule) {
+	const clauses = [];
+	let expression = {};
 
 	if (isValidRule(rule)) {
 		const fieldName = "metadata." + rule.field;
-		const value = rule.values[0];
+		const operatorPerClause =  ruleOperators[rule.operator];
+		const clausesCount = rule.values && rule.values.length > 0 && operatorPerClause > 0 ?
+			rule.values.length / operatorPerClause :
+			1;
 
-		switch (rule.operator) {
-			case "IS_NOT_EMPTY":
-				operation = { $exists: true };
-				break;
-			case "IS":
-				operation = value;
-				break;
-			case "CONTAINS":
-				operation = {$or: rule.values.map(val => ({[fieldName]: { $regex: new RegExp(utils.sanitizeString(val)), $options: "i" }}))};
-				break;
-			case "REGEX":
-				operation = { $regex: new RegExp(value) };
-				break;
-			case "EQUALS":
-				operation = { $eq: Number(value) };
-				break;
-			case "GT":
-				operation = { $gt: Number(value) };
-				break;
-			case "GTE":
-				operation = { $gte: Number(value) };
-				break;
-			case "LT":
-				operation = { $lt: Number(value) };
-				break;
-			case "LTE":
-				operation = { $lte: Number(value) };
-				break;
-			case "IN_RANGE":
-				{
-					const rangeVal1 = Number(rule.values[0]);
-					const rangeVal2 = Number(rule.values[1]);
-					const rangeLowerOp = {};
-					rangeLowerOp[fieldName] = { $gte: Math.min(rangeVal1, rangeVal2) };
-					const rangeUpperOp = {};
-					rangeUpperOp[fieldName] = { $lte: Math.max(rangeVal1, rangeVal2) };
+		for (let i = 0; i < clausesCount; i++) {
+			let operation;
 
-					operation = { $and: [rangeLowerOp, rangeUpperOp]};
-				}
-				break;
+			switch (rule.operator) {
+				case "IS_NOT_EMPTY":
+					operation = { $exists: true };
+					break;
+				case "IS":
+					operation = rule.values[i];
+					break;
+				case "CONTAINS":
+					operation = { $regex: new RegExp(utils.sanitizeString(rule.values[i])), $options: "i" };
+					break;
+				case "REGEX":
+					operation = { $regex: new RegExp(rule.values[i]) };
+					break;
+				case "EQUALS":
+					operation = { $eq: Number(rule.values[i]) };
+					break;
+				case "GT":
+					operation = { $gt: Number(rule.values[i]) };
+					break;
+				case "GTE":
+					operation = { $gte: Number(rule.values[i]) };
+					break;
+				case "LT":
+					operation = { $lt: Number(rule.values[i]) };
+					break;
+				case "LTE":
+					operation = { $lte: Number(rule.values[i]) };
+					break;
+				case "IN_RANGE":
+					{
+						const rangeVal1 = Number(rule.values[i * operatorPerClause]);
+						const rangeVal2 = Number(rule.values[i * operatorPerClause + 1]);
+						const rangeLowerOp = {};
+						rangeLowerOp[fieldName] = { $gte: Math.min(rangeVal1, rangeVal2) };
+						const rangeUpperOp = {};
+						rangeUpperOp[fieldName] = { $lte: Math.max(rangeVal1, rangeVal2) };
+
+						operation = undefined;
+						clauses.push({ $and: [rangeLowerOp, rangeUpperOp]});
+					}
+					break;
+			}
+
+			if (operation) {
+				const clause = {};
+				clause[fieldName] = operation;
+				clauses.push(clause);
+			}
 		}
-
-		if (!["CONTAINS", "IN_RANGE"].includes(rule.operator)) {
-			operation = { [fieldName]: operation};
-		}
-
 	} else {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	return operation;
+	if (clauses.length > 1) {
+		expression = { $or: clauses };
+	} else if (clauses.length === 1) {
+		expression = clauses[0];
+	}
+
+	return expression;
 }
 
 function positiveRulesToQueries(rules) {
-	return rules.filter(r=> !notOperators[r.operator]).map(buildRule);
+	const posRules = rules.filter(r=> !notOperators[r.operator]).map(buildQueryFromRule);
+
+	// Except IS_EMPTY every neg rule needs that the field exists
+	//
+	rules.forEach(({field, operator})=> {
+		if (notOperators[operator] && operator !== "IS_EMPTY") {
+			const rule = { field, operator: "IS_NOT_EMPTY" };
+			posRules.push(buildQueryFromRule(rule));
+		}
+	});
+
+	return posRules;
 }
 
 function negativeRulesToQueries(rules) {
@@ -733,7 +760,7 @@ function negativeRulesToQueries(rules) {
 			operator: notOperators[operator]
 		};
 
-		return buildRule(negRule);
+		return buildQueryFromRule(negRule);
 	});
 }
 
