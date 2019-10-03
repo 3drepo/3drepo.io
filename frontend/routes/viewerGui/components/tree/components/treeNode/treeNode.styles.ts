@@ -47,7 +47,7 @@ interface IExpandableButton {
 }
 
 const getBackgroundColor = (props) => cond([
-		[matches(TREE_ITEM_FEDERATION_TYPE), constant(COLOR.GRAY_60)],
+		[matches(TREE_ITEM_FEDERATION_TYPE), constant(COLOR.GRAY_50)],
 		[matches(TREE_ITEM_MODEL_TYPE), constant(COLOR.GRAY)],
 		[matches(TREE_ITEM_OBJECT_TYPE), () => {
 				if (props.highlighted) {
