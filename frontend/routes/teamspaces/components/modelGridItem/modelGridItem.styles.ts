@@ -99,3 +99,8 @@ export const ModelLink = styled.div`
 	top: 0;
 	left: 0;
 `;
+
+export const NameWithCode = styled.div`
+	display: flex;
+	flex-direction: column;
+`;

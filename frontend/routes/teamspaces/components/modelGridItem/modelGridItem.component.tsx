@@ -32,7 +32,7 @@ import FederationDialog from '../federationDialog/federationDialog.container';
 import UploadModelFileDialog from '../uploadModelFileDialog/uploadModelFileDialog.container';
 import {
 	Container, Content,
-	Header, ModelLink, Name, NameWrapper,
+	Header, ModelLink, Name, NameWithCode, NameWrapper,
 	PropertiesColumn,
 	Property,
 	Status,
@@ -276,12 +276,15 @@ export const ModelGridItem = memo((props: IProps) => {
 						active={hasDelayedClick ? !props.isStarred : props.isStarred}
 						onClick={handleStarClick}
 					/>
-					<Name
-						isPending={isPending}
-						search={props.query}
-						text={props.name}
-						splitQueryToWords
-					/>
+					<NameWithCode>
+						<Name
+							isPending={isPending}
+							search={props.query}
+							text={props.name}
+							splitQueryToWords
+						/>
+						{renderModelCode(props.code)}
+					</NameWithCode>
 				</NameWrapper>
 				<ActionsMenu
 					federate={isFederation}
@@ -291,7 +294,6 @@ export const ModelGridItem = memo((props: IProps) => {
 			</Header>
 			<Content>
 				<PropertiesColumn>
-					{renderModelCode(props.code)}
 					{renderRevisionsNumber(!isFederation)}
 					{renderSuitabilityCode(props.suitabilityCode)}
 				</PropertiesColumn>
