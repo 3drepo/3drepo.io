@@ -24,7 +24,7 @@ interface IProps {
 	handleChange: (props: any) => void;
 }
 
-export const DrawnLine = ({ element, isSelected, handleSelect, handleChange }: IProps) => {
+export const DrawnLine = ({ element, isSelected, handleChange }: IProps) => {
 	const { color, isEraser, ...elementProps } = element;
 	const line = React.useRef<any>();
 	const transformer = React.useRef<any>();

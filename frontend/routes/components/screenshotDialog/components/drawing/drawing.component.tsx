@@ -18,7 +18,6 @@
 import * as React from 'react';
 import { MODES } from '../../screenshotDialog.helpers';
 import { createShape, getDrawDunction, createDrawnLine } from './drawing.helpers';
-import { SHAPE_TYPES } from '../shape/shape.constants';
 
 interface IProps {
 	color: string;
@@ -48,6 +47,10 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		return this.props.mode === MODES.BRUSH || this.props.mode === MODES.ERASER || this.props.mode === MODES.SHAPE;
 	}
 
+	get isDrawingLineMode() {
+		return this.props.mode === MODES.BRUSH || this.props.mode === MODES.ERASER;
+	}
+
 	get layer() {
 		return this.props.layer.current.getLayer();
 	}
@@ -61,7 +64,8 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		if (this.props.mode === MODES.BRUSH && prevProps.mode !== MODES.BRUSH && !this.props.selected) {
+		if (this.isDrawingLineMode && prevProps.mode !== MODES.BRUSH
+			&& prevProps.mode !== MODES.ERASER && !this.props.selected) {
 			this.subscribeDrawingLineEvents();
 		}
 
@@ -69,7 +73,7 @@ export class Drawing extends React.PureComponent <IProps, any> {
 			this.subscribeDrawingShapeEvents();
 		}
 
-		if (this.props.mode !== MODES.BRUSH && prevProps.mode === MODES.BRUSH) {
+		if (!this.isDrawingLineMode && (prevProps.mode === MODES.BRUSH || prevProps.mode === MODES.ERASER)) {
 			this.unsubscribeDrawingLineEvents();
 		}
 
@@ -143,7 +147,7 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		this.setState({ isCurrentlyDrawn: true });
 		this.layer.clearBeforeDraw();
 		this.lastPointerPosition = this.props.stage.getPointerPosition();
-		this.lastLine = createDrawnLine(this.props.color, this.props.size, this.lastPointerPosition);
+		this.lastLine = createDrawnLine(this.props.color, this.props.size, this.lastPointerPosition, this.props.mode);
 		this.layer.add(this.lastLine);
 	}
 

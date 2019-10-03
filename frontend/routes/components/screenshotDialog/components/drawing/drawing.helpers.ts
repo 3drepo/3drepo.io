@@ -1,6 +1,7 @@
 import * as Konva from 'konva';
 import { SHAPE_TYPES } from '../shape/shape.constants';
 import { cloud } from '../shape/shape.helpers';
+import { MODE_OPERATION } from '../../screenshotDialog.helpers';
 
 const circleProps = { radius: 1 };
 
@@ -44,12 +45,13 @@ export const createShape = (shapeType, commonProps, initialPositionProps) => {
 	return map[shapeType];
 };
 
-export const createDrawnLine = (stroke, strokeWidth, position) => {
+export const createDrawnLine = (stroke, strokeWidth, position, mode) => {
 	return new Konva.Line({
 		stroke,
 		strokeWidth,
 		points: [position.x, position.y],
 		lineCap: 'round',
+		globalCompositeOperation: MODE_OPERATION[mode],
 		draggable: true
 	});
 };

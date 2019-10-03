@@ -23,7 +23,6 @@ interface IProps {
 	element: any;
 	isSelected: boolean;
 	isDrawingMode: boolean;
-	handleSelect: (props: any) => void;
 	handleChange: (props: any) => void;
 }
 

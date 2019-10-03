@@ -344,7 +344,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			const newLine = getNewDrawnLine(line.attrs, this.state.color);
 			const selectedObjectName = isErasing ? '' : newLine.name;
 			this.props.addElement(newLine);
-			this.setState(({ mode }) => ({ selectedObjectName, mode }));
+			this.setState(({ mode }) => ({ selectedObjectName, mode: isErasing ? mode : null }));
 		}
 	}
 
@@ -476,27 +476,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	)
 
 	public handleStageMouseDown = ({ target }) => {
-		//if (target === target.getStage()) {
+		if (target.attrs.name !== this.state.selectedObjectName && target.getParent().className !== 'Transformer') {
 			this.setState({ selectedObjectName: '' });
 			return;
-		//}
-
-		// const clickedOnTransformer = target.getParent().className === 'Transformer';
-
-		// if (clickedOnTransformer) {
-		// 	return;
-		// }
-
-		// const object = this.props.canvasElements.find((s) => s.name === target.name());
-		// const newState = {} as any;
-		// const selectedObjectName = object ? object.name : '';
-		// newState.selectedObjectName = selectedObjectName;
-
-		// if (selectedObjectName) {
-		// 	newState.lastSelectedObjectName = selectedObjectName;
-		// }
-
-		//this.setState(newState);
+		}
 	}
 
 	public getEditableTextareaStyles = () => {
