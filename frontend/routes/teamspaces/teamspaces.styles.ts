@@ -54,6 +54,7 @@ export const GridContainer = styled.div`
 	grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 	grid-gap: 15px;
 	padding: 10px 15px;
+	background-color: ${COLOR.WHITE};
 `;
 
 export const MenuButton = styled(Button).attrs({

@@ -66,7 +66,7 @@ export const Content = styled.div`
 export const PropertiesColumn = styled.div`
 	display: flex;
 	flex-direction: column;
-	height: 25px;
+	height: 36px;
 	justify-content: flex-end;
 `;
 
@@ -83,13 +83,13 @@ export const Timestamp = styled.span`
 `;
 
 export const Status = styled.span`
-	align-items: center;
 	justify-content: flex-end;
 	display: flex;
 	width: 100%;
 	font-weight: 400;
 	color: ${COLOR.BLACK_40};
 	font-size: 12px;
+	align-items: flex-end;
 `;
 
 export const ModelLink = styled.div`

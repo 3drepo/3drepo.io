@@ -34,7 +34,7 @@ export const StyledGrid = styled(Grid)`
 		justify-content: flex-end;
 		z-index: 1;
 		left: 0;
-		padding: 0px 15px;
+		padding: 0 15px;
 
 		&:hover {
 			${StyledGridActions} {

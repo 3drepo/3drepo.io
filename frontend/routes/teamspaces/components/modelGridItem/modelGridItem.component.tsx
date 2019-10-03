@@ -55,6 +55,7 @@ interface IProps {
 	code?: string;
 	suitabilityCode?: string;
 	isStarred: boolean;
+	nRevisions?: number;
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
 	showRevisionsDialog: (config) => void;
@@ -149,9 +150,6 @@ export const ModelGridItem = memo((props: IProps) => {
 	};
 
 	const handleClick = useCallback((e) => {
-		console.log('handleClick!');
-
-		return;
 		const { history, teamspace, timestamp, model } = props;
 		if (timestamp) {
 			history.push(`${ROUTES.VIEWER}/${teamspace}/${model}`);
@@ -253,6 +251,12 @@ export const ModelGridItem = memo((props: IProps) => {
 
 	const renderModelCode = renderWhenTrue(<Property>{props.code}</Property>);
 
+	const renderRevisionsNumber = renderWhenTrue(
+		<Property>
+			{`${props.nRevisions} ${props.nRevisions === 1 ? 'revision' : 'revisions'}`}
+		</Property>
+	);
+
 	const renderSuitabilityCode = renderWhenTrue(<Property>{props.suitabilityCode}</Property>);
 
 	const renderTimestamp = renderWhenTrue(<Timestamp>{formatDate(props.timestamp, LONG_DATE_TIME_FORMAT)}</Timestamp>);
@@ -288,6 +292,7 @@ export const ModelGridItem = memo((props: IProps) => {
 			<Content>
 				<PropertiesColumn>
 					{renderModelCode(props.code)}
+					{renderRevisionsNumber(!isFederation)}
 					{renderSuitabilityCode(props.suitabilityCode)}
 				</PropertiesColumn>
 				{renderTimestamp(!isPending && props.timestamp)}

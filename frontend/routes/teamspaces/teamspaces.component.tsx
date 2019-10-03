@@ -62,7 +62,6 @@ import {
 	GridContainer,
 	Head,
 	Label,
-	List,
 	LoaderContainer,
 	MenuButton
 } from './teamspaces.styles';
