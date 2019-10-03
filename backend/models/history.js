@@ -21,7 +21,7 @@ const ModelFactory = require("./factory/modelFactory");
 const utils = require("../utils");
 const C = require("../constants");
 const ResponseCodes = require("../response_codes");
-
+const db = require("../handler/db");
 const stringToUUID = utils.stringToUUID;
 const uuidToString = utils.uuidToString;
 
@@ -103,6 +103,12 @@ historySchema.statics.findByBranch = function(dbColOptions, branch, projection) 
 		projection,
 		{sort: {timestamp: -1}}
 	);
+};
+
+historySchema.statics.revisionCount = async function(teamspace, account) {
+	const query = {"incomplete": {"$exists": false}, "void": {"$ne": true}};
+	const col = await db.getCollection(teamspace, account + ".history");
+	return col.find(query, {}).count();
 };
 
 // get the head of default branch (master)

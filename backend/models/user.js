@@ -26,6 +26,7 @@ const crypto = require("crypto");
 const utils = require("../utils");
 const Role = require("./role");
 const Job = require("./job");
+const History = require("./history");
 const Mailer = require("../mailer/mailer");
 
 const systemLogger = require("../logger.js").systemLogger;
@@ -651,7 +652,7 @@ schema.statics.getForgotPasswordToken = function (userNameOrEmail) {
 
 };
 
-function _fillInModelDetails(accountName, setting, permissions) {
+async function _fillInModelDetails(accountName, setting, permissions) {
 
 	if (permissions.indexOf(C.PERM_MANAGE_MODEL_PERMISSION) !== -1) {
 		permissions = C.MODEL_PERM_LIST.slice(0);
@@ -671,30 +672,11 @@ function _fillInModelDetails(accountName, setting, permissions) {
 
 	};
 
+	const nRev = await History.revisionCount(accountName, setting._id);
+
+	model.nRevisions = nRev;
+
 	return Promise.resolve(model);
-
-	// the following is not needed any more after caching timestamp and submodels in model settings
-
-	// return History.findByBranch({account: accountName, model: model.model}, C.MASTER_BRANCH_NAME).then(history => {
-
-	// 	if(history){
-	// 		model.timestamp = history.timestamp;
-	// 	} else {
-	// 		model.timestamp = null;
-	// 	}
-
-	// 	if(setting.federate){
-
-	// 		//list all sub models of a fed model
-	// 		return ModelHelper.listSubModels(accountName, model.model, C.MASTER_BRANCH_NAME).then(subModels => {
-	// 			model.subModels = subModels;
-	// 		}).then(() => model);
-
-	// 	}
-
-	// 	return model;
-	// });
-
 }
 // list all models in an account
 function _getModels(accountName, ids, permissions) {
