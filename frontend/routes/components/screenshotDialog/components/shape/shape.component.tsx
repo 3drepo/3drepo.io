@@ -78,6 +78,12 @@ export const Shape = ({ element, isSelected, handleChange, isDrawingMode }: IPro
 		document.body.style.cursor = 'default';
 	};
 
+	const handleTransformerMouseOver = (e) => {
+		if (e.target.attrs.name === 'rotater _anchor') {
+			document.querySelector('.konvajs-content').style.cursor = 'url("/images/rotate-cursor.png"), auto';
+		}
+	};
+
 	const Component = SHAPE_COMPONENTS[figure];
 	const transformerProps = isLine ? { enabledAnchors: ['top-left', 'top-right'] } : {};
 
@@ -97,7 +103,9 @@ export const Shape = ({ element, isSelected, handleChange, isDrawingMode }: IPro
 				draggable={isSelected && !isDrawingMode}
 				perfectDrawEnabled={false}
 			/>
-			{(isSelected && !isDrawingMode) && <Transformer ref={transformer} {...transformerProps} keepRatio />}
+			{(isSelected && !isDrawingMode) &&
+				<Transformer ref={transformer} {...transformerProps} keepRatio onMouseEnter={handleTransformerMouseOver} />
+			}
 		</React.Fragment>
 	);
 };

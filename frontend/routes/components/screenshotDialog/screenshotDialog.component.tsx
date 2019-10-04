@@ -243,9 +243,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			newState.mode = MODES.SHAPE;
 		}
 
-		this.setState(newState, () => {
-			// this.addNewShape(shape);
-		});
+		this.setState(newState);
 	}
 
 	public handleTextDoubleClick = ({target}) => {
