@@ -18,6 +18,7 @@
 import * as React from 'react';
 import * as Konva from 'konva';
 import { Layer } from 'react-konva';
+import EventListener from 'react-event-listener';
 
 import { Container, Stage } from './screenshotDialog.styles';
 import { Drawing } from './components/drawing/drawing.component';
@@ -123,6 +124,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		const sourceImage = await Promise.resolve(this.props.sourceImage);
 
 		Konva.Image.fromURL(sourceImage, (image) => {
+			this.scaleStage(image);
 			this.imageLayer.add(image);
 			this.imageLayer.batchDraw();
 		});
@@ -156,6 +158,33 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		if (this.state.mode === MODES.TEXT && !this.state.selectedObjectName && !this.state.textEditable.visible) {
 			const position = this.stage.getPointerPosition();
 			this.addNewText(position);
+		}
+	}
+
+	public handleResize = () => {
+		this.setStageSize();
+		const backgroundImage = this.imageLayer.children[0];
+		this.scaleStage(backgroundImage);
+	}
+
+	public scaleStage = (image) => {
+		const scale = Math.min(
+			this.stage.width() / (image.attrs.image.naturalWidth),
+			this.stage.height() / (image.attrs.image.naturalWidth)
+		);
+		if (image.attrs.image.naturalWidth > this.stage.attrs.width) {
+			image.setAttrs({
+				width: this.stage.attrs.width,
+				scaleY: scale,
+				x: 0,
+				y: (this.stage.attrs.height - (image.attrs.image.naturalHeight * scale)) / 2
+			});
+		} else {
+			const diff = this.stage.attrs.width - image.attrs.image.naturalWidth;
+			image.setAttrs({
+				x: diff / 2,
+				width: image.attrs.image.naturalWidth
+			});
 		}
 	}
 
@@ -506,6 +535,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 		return (
 			<Container innerRef={this.containerRef}>
+				<EventListener
+					target="window"
+					onResize={this.handleResize}
+				/>
 				{this.renderIndicator(!this.props.disabled && this.isDrawingMode && !this.state.selectedObjectName)}
 				{this.renderTools()}
 				<Stage innerRef={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
