@@ -38,6 +38,7 @@ import { ProjectItem } from './components/projectItem/projectItem.component';
 import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
 import { MODEL_TYPE, FEDERATION_TYPE } from './teamspaces.contants';
 import { PERMISSIONS_VIEWS } from '../projects/projects.component';
+import { BodyWrapper, Body } from '../components/customTable/customTable.styles';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -467,19 +468,23 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 						} }
 					/>
 				</Head>
-				<List>
 					{
 						isPending ? (
-							<LoaderContainer>
-								<Loader content="Loading teamspaces..." />
-							</LoaderContainer>
+							<List>
+								<LoaderContainer>
+									<Loader content="Loading teamspaces..." />
+								</LoaderContainer>
+							</List>
 						) : (
-							<SimpleBar>
-								{this.renderTeamspaces(this.props.teamspaces)}
-							</SimpleBar>
+							<BodyWrapper>
+								<Body>
+									<SimpleBar>
+										{this.renderTeamspaces(this.props.teamspaces)}
+									</SimpleBar>
+								</Body>
+							</BodyWrapper>
 						)
 					}
-				</List>
 			</Panel>
 		);
 	}
