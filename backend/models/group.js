@@ -29,6 +29,9 @@ const History = require("./history");
 const Ref = require("./ref");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
+const FileRef = require("./fileRef");
+const {union, intersection, difference} = require("./helper/set");
+const { batchPromises } = require("./helper/promises");
 
 const ruleOperators = {
 	"IS_EMPTY":	0,
@@ -48,12 +51,13 @@ const ruleOperators = {
 	"NOT_IN_RANGE":	2
 };
 
-const notOperators = [
-	"IS_NOT",
-	"NOT_CONTAINS",
-	"NOT_EQUALS",
-	"NOT_IN_RANGE"
-];
+const notOperators = {
+	"IS_NOT": "IS",
+	"NOT_CONTAINS": "CONTAINS",
+	"NOT_EQUALS": "EQUALS",
+	"NOT_IN_RANGE": "IN_RANGE",
+	"IS_EMPTY": "IS_NOT_EMPTY"
+};
 
 const fieldTypes = {
 	"description": "[object String]",
@@ -74,7 +78,7 @@ const embeddedObjectFields = {
 	"rules" : ["field", "operator", "values"]
 };
 
-const groupSchema = Schema({
+const groupSchema = new Schema({
 	_id: Object,
 	name: String,
 	author: String,
@@ -152,6 +156,7 @@ groupSchema.statics.ifcGuidsToUUIDs = function (account, model, ifcGuids, branch
 groupSchema.statics.uuidToIfcGuids = function (obj) {
 	const account = obj.account;
 	const model = obj.model;
+
 	const uid = ("[object String]" !== Object.prototype.toString.call(uid)) ? utils.uuidToString(uid) : obj.shared_id;
 	const parent = utils.stringToUUID(uid);
 
@@ -656,7 +661,7 @@ function isValidRule(rule) {
 		rule.values.length % ruleOperators[rule.operator] === 0);
 }
 
-function buildRule(rule) {
+function buildQueryFromRule(rule) {
 	const clauses = [];
 	let expression = {};
 
@@ -671,32 +676,20 @@ function buildRule(rule) {
 			let operation;
 
 			switch (rule.operator) {
-				case "IS_EMPTY":
-					operation = { $exists: false };
-					break;
 				case "IS_NOT_EMPTY":
 					operation = { $exists: true };
 					break;
 				case "IS":
 					operation = rule.values[i];
 					break;
-				case "IS_NOT":
-					operation = { $ne: rule.values[i] };
-					break;
 				case "CONTAINS":
 					operation = { $regex: new RegExp(utils.sanitizeString(rule.values[i])), $options: "i" };
-					break;
-				case "NOT_CONTAINS":
-					operation = { $regex: new RegExp("^((?!" + utils.sanitizeString(rule.values[i]) + ").)*$"), $options: "i" };
 					break;
 				case "REGEX":
 					operation = { $regex: new RegExp(rule.values[i]) };
 					break;
 				case "EQUALS":
 					operation = { $eq: Number(rule.values[i]) };
-					break;
-				case "NOT_EQUALS":
-					operation = { $ne: Number(rule.values[i]) };
 					break;
 				case "GT":
 					operation = { $gt: Number(rule.values[i]) };
@@ -723,19 +716,6 @@ function buildRule(rule) {
 						clauses.push({ $and: [rangeLowerOp, rangeUpperOp]});
 					}
 					break;
-				case "NOT_IN_RANGE":
-					{
-						const exRangeVal1 = Number(rule.values[i * operatorPerClause]);
-						const exRangeVal2 = Number(rule.values[i * operatorPerClause + 1]);
-						const exRangeLowerOp = {};
-						exRangeLowerOp[fieldName] = { $lt: Math.min(exRangeVal1, exRangeVal2) };
-						const exRangeUpperOp = {};
-						exRangeUpperOp[fieldName] = { $gt: Math.max(exRangeVal1, exRangeVal2) };
-
-						operation = undefined;
-						clauses.push({ $or: [exRangeLowerOp, exRangeUpperOp]});
-					}
-					break;
 			}
 
 			if (operation) {
@@ -749,11 +729,7 @@ function buildRule(rule) {
 	}
 
 	if (clauses.length > 1) {
-		if (notOperators.includes(rule.operator)) {
-			expression = { $and: clauses };
-		} else {
-			expression = { $or: clauses };
-		}
+		expression = { $or: clauses };
 	} else if (clauses.length === 1) {
 		expression = clauses[0];
 	}
@@ -761,21 +737,31 @@ function buildRule(rule) {
 	return expression;
 }
 
-function rulesToQuery(rules) {
-	const query = { type: "meta" };
-	const expressions = [];
+function positiveRulesToQueries(rules) {
+	const posRules = rules.filter(r=> !notOperators[r.operator]).map(buildQueryFromRule);
 
-	for (let i = 0; i < rules.length; i++) {
-		expressions.push(buildRule(rules[i]));
-	}
+	// Except IS_EMPTY every neg rule needs that the field exists
+	//
+	rules.forEach(({field, operator})=> {
+		if (notOperators[operator] && operator !== "IS_EMPTY") {
+			const rule = { field, operator: "IS_NOT_EMPTY" };
+			posRules.push(buildQueryFromRule(rule));
+		}
+	});
 
-	if (expressions.length > 1) {
-		Object.assign(query, { $and: expressions });
-	} else if (expressions.length === 1) {
-		Object.assign(query, expressions[0]);
-	}
+	return posRules;
+}
 
-	return query;
+function negativeRulesToQueries(rules) {
+	return rules.filter(r=> notOperators[r.operator]).map(({field, values, operator}) => {
+		const negRule = {
+			field,
+			values,
+			operator: notOperators[operator]
+		};
+
+		return buildQueryFromRule(negRule);
+	});
 }
 
 function findObjectsByQuery(account, model, query) {
@@ -785,46 +771,147 @@ function findObjectsByQuery(account, model, query) {
 	});
 }
 
-function findModelSharedIDsByQuery(account, model, query, branch, revId) {
-	return findObjectsByQuery(account, model, query).then((results) => {
-		if (results && results.length > 0) {
-			return History.getHistory({ account, model }, branch, revId).then((history) => {
-				if (!history) {
-					return Promise.reject(responseCodes.INVALID_TAG_NAME);
-				} else {
-					return db.getCollection(account, model + ".scene").then((dbCol) => {
-						const parents = results.map(x => x = x.parents).reduce((acc, val) => acc.concat(val), []);
-
-						// NOTE: we've seen parents.length >15000 has caused a failure on the database. so I added
-						// a loop to restrict the length of parents per query. This needs to be revisited when
-						// we've done the optimisation for revId
-						const entryPerQuery = 7000;
-						const queryPromise = [];
-						for(let i = 0; i < parents.length; i = i + entryPerQuery) {
-							const endIndex = i + entryPerQuery < parents.length ? i + entryPerQuery : parents.length;
-							const parentsForQuery = parents.slice(i, endIndex);
-							const meshQuery = { _id: { $in: history.current }, shared_id: { $in: parentsForQuery }, type : "mesh"};
-							const meshProject = { shared_id: 1, _id: 0 };
-							queryPromise.push(dbCol.find(meshQuery, meshProject).toArray());
-						}
-
-						return Promise.all(queryPromise).then((res) => {
-							return res.reduce((acc, val) => acc.concat(val), []);
-						});
-
-					});
-				}
-			});
-		} else {
-			return Promise.resolve([]);
-		}
-	});
+/**
+ *
+ * @param {string} account
+ * @param {string} model
+ * @param {string} revId
+ */
+async function getIdToMeshesDict(account, model, revId) {
+	const treeFileName = `${revId}/idToMeshes.json`;
+	return JSON.parse(await FileRef.getJSONFile(account, model, treeFileName));
 }
 
-function findObjectIDsByRules(account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
+/**
+ *
+ * @param {string} account
+ * @param {string} model
+ * @param {Array<object>} ids
+ * @param {boolean} convertSharedIDsToString
+ *
+ * @returns {Promise<Array<string | object>>}
+ */
+async function idsToSharedIds(account, model, ids, convertSharedIDsToString) {
+	const sceneCol = await db.getCollection(account, model + ".scene");
+
+	const treeItems = await batchPromises((_idsForquery) => {
+		return sceneCol.find({_id: {$in : _idsForquery}}, {shared_id:1 , _id:0}).toArray();
+	}, ids , 7000);
+
+	const shared_ids = [];
+
+	for (let i = 0; i < treeItems.length ; i++) {
+		const treeItemsBatch = treeItems[i];
+		for (let j = 0; j < treeItemsBatch.length ; j++) {
+			const { shared_id } = treeItemsBatch[j];
+			if (convertSharedIDsToString) {
+				shared_ids.push(utils.uuidToString(shared_id));
+			} else {
+				shared_ids.push(shared_id);
+			}
+		}
+	}
+
+	return shared_ids;
+}
+
+/**
+ * Return shared ids resulted of applying all the queries at once
+ * @param {string} account
+ * @param {string} model
+ * @param {Array<object>} posRuleQueries
+ * @param {string} branch
+ * @param {string} revId
+ * @param {Boolean} revId
+ *
+ * @returns {Promise<Array<string | object>>}
+ */
+async function findModelSharedIDsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId, convertSharedIDsToString) {
+	const history = await History.getHistory({ account, model }, branch, revId);
+
+	if (!history) {
+		return Promise.reject(responseCodes.INVALID_TAG_NAME);
+	}
+
+	const idToMeshesDict = await getIdToMeshesDict(account, model, utils.uuidToString(history._id));
+	let allRulesResults = null;
+
+	if (posRuleQueries.length !== 0) {
+		const eachPosRuleResults = await Promise.all(posRuleQueries.map(ruleQuery => getRuleQueryResults(account, model, idToMeshesDict, history.current, ruleQuery)));
+		allRulesResults = intersection(eachPosRuleResults);
+	} else {
+		const rootQuery =  { _id: { $in: history.current }, "parents": {$exists: false} };
+		const rootId = (await findObjectsByQuery(account, model, rootQuery))[0]._id;
+		allRulesResults = idToMeshesDict[utils.uuidToString(rootId)];
+	}
+
+	const eachNegRuleResults = await Promise.all(negRuleQueries.map(ruleQuery => getRuleQueryResults(account, model, idToMeshesDict, history.current, ruleQuery)));
+	allRulesResults = difference(allRulesResults, eachNegRuleResults);
+
+	const ids = [];
+	for (const id of allRulesResults) {
+		ids.push(utils.stringToUUID(id));
+	}
+
+	return await idsToSharedIds(account, model, ids, convertSharedIDsToString) ;
+}
+
+/**
+ *
+ * @param {string} account
+ * @param {string} model
+ * @param {object} idToMeshesDict
+ * @param {Array<object>} revisionElementsIds
+ * @param {object} query
+ *
+ * @returns {Promise<Set<string>>} Is a set of the ids that that matches the particular query rule
+ */
+async function getRuleQueryResults(account, model, idToMeshesDict, revisionElementsIds, query) {
+	const metaResults = await findObjectsByQuery(account, model, {type:"meta", ...query});
+	if (metaResults.length === 0) {
+		return new Set();
+	}
+
+	const sceneCol = await db.getCollection(account, model + ".scene");
+	const parents = metaResults.reduce((acc, val) => {
+		Array.prototype.push.apply(acc, val.parents);
+		return acc;
+	} ,[]);
+
+	const res = await batchPromises((parentsForQuery) => {
+		const meshQuery = { _id: { $in: revisionElementsIds }, shared_id: { $in: parentsForQuery }, type: { $in: ["transformation", "mesh"]}};
+		const meshProject = { _id: 1, type: 1 };
+		return sceneCol.find(meshQuery, meshProject).toArray();
+	}, parents, 7000);
+
+	let ids = new Set();
+
+	for (let i = 0; i < res.length ; i++) {
+		const resBatch = res[i];
+		for (let j = 0; j < resBatch.length ; j++) {
+			const element = resBatch[j];
+			if (element.type === "transformation") {
+				ids = union(ids, new Set(idToMeshesDict[utils.uuidToString(element._id)]));
+			} else {
+				ids.add(utils.uuidToString(element._id));
+			}
+		}
+	}
+
+	return ids;
+}
+
+async function getIFCGuids(account, model, shared_ids) {
+	const sceneCol =  await db.getCollection(account, model + ".scene");
+	const results = await sceneCol.find({ "parents":{ $in: shared_ids } , "type":"meta"}, {"metadata.IFC GUID":1, "_id":0}).toArray();
+	return results.map(r => r.metadata["IFC GUID"]);
+}
+
+async function findObjectIDsByRules(account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false) {
 	const objectIdPromises = [];
 
-	const query = rulesToQuery(rules);
+	const positiveQueries = positiveRulesToQueries(rules);
+	const negativeQueries = negativeRulesToQueries(rules);
 
 	const models = new Set();
 	models.add(model);
@@ -838,71 +925,34 @@ function findObjectIDsByRules(account, model, rules, branch, revId, convertShare
 		const modelsIter = models.values();
 
 		for (const modelID of modelsIter) {
-			const objectIdsSet = new Set();
+			const _branch = (model === modelID) ? branch : "master";
+			const _revId = (model === modelID) ? revId : null;
 
-			const objectId = {};
-			objectId.account = account;
-			objectId.model = modelID;
+			objectIdPromises.push(findModelSharedIDsByRulesQueries(
+				account,
+				modelID,
+				positiveQueries,
+				negativeQueries,
+				_branch,
+				_revId,
+				convertSharedIDsToString && !showIfcGuids // in the case of ifcguids I need the uuid for querying and geting the ifcguids
+			).then(shared_ids => {
+				if(!shared_ids.length) {
+					return undefined;
+				}
 
-			const _branch = (model === objectId.model) ? branch : "master";
-			const _revId = (model === objectId.model) ? revId : null;
-
-			if (showIfcGuids) {
-				objectIdPromises.push(findObjectsByQuery(
-					objectId.account,
-					objectId.model,
-					query
-				).then(objectIdResults => {
-					if(!objectIdResults.length) {
-						return undefined;
-					}
-
-					for (let j = 0; j < objectIdResults.length; j++) {
-						objectIdsSet.add(objectIdResults[j].metadata["IFC GUID"]);
-					}
-
-					if (objectIdsSet.size > 0) {
-						objectId.ifc_guids = [];
-						objectIdsSet.forEach(id => {
-							objectId.ifc_guids.push(id);
-						});
-					}
-
-					return objectId;
-				}));
-			} else {
-				objectIdPromises.push(findModelSharedIDsByQuery(
-					objectId.account,
-					objectId.model,
-					query,
-					_branch,
-					_revId
-				).then(sharedIdResults => {
-
-					if(!sharedIdResults.length) {
-						return undefined;
-					}
-
-					for (let j = 0; j < sharedIdResults.length; j++) {
-						if ("[object String]" !== Object.prototype.toString.call(sharedIdResults[j].shared_id)) {
-							sharedIdResults[j].shared_id = utils.uuidToString(sharedIdResults[j].shared_id);
+				if (showIfcGuids) {
+					return getIFCGuids(account, model, shared_ids).then(ifc_guids => {
+						if(convertSharedIDsToString) {
+							shared_ids = shared_ids.map(utils.uuidToString);
 						}
-						objectIdsSet.add(sharedIdResults[j].shared_id);
-					}
 
-					if (objectIdsSet.size > 0) {
-						objectId.shared_ids = [];
-						objectIdsSet.forEach(id => {
-							if (!convertSharedIDsToString) {
-								id = utils.stringToUUID(id);
-							}
-							objectId.shared_ids.push(id);
-						});
-					}
+						return {account, model, shared_ids, ifc_guids};
+					});
+				}
 
-					return objectId;
-				}));
-			}
+				return {account, model, shared_ids};
+			}));
 		}
 
 		return Promise.all(objectIdPromises).then(objectIds => {

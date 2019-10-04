@@ -409,6 +409,7 @@ describe("Groups", function () {
 
 		it("color with wrong type should fail", function(done) {
 			const newGroup = Object.assign({}, data);
+			// @ts-ignore
 			newGroup.color = true;
 			agent.post(`/${username}/${model}/groups/`)
 				.send(newGroup)
@@ -495,6 +496,7 @@ describe("Groups", function () {
 
 		it("objects with wrong type should fail", function(done) {
 			const newGroup = Object.assign({}, data);
+			// @ts-ignore
 			newGroup.objects = true;
 			agent.post(`/${username}/${model}/groups/`)
 				.send(newGroup)
@@ -722,7 +724,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(98);
+							expect(res.body.objects[0].shared_ids.length).to.equal(74);
 							done(err);
 						});
 				}
@@ -827,9 +829,9 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Workset",
+						field: "Name",
 						operator: "IS_NOT",
-						values: ["Revit Link"]
+						values: ["Level 2"]
 					}];
 					agent.post(`/${username}/${model}/groups/`)
 						.send(newGroup)
@@ -842,7 +844,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(156);
+							expect(res.body.objects[0].shared_ids.length).to.equal(957);
 							done(err);
 						});
 				}
@@ -857,9 +859,9 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Workset",
+						field: "Name",
 						operator: "IS_NOT",
-						values: ["Revit Link", "Envelope"]
+						values: ["Level 2", "Level 4"]
 					}];
 					agent.post(`/${username}/${model}/groups/`)
 						.send(newGroup)
@@ -872,7 +874,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(71);
+							expect(res.body.objects[0].shared_ids.length).to.equal(828);
 							done(err);
 						});
 				}
@@ -959,7 +961,7 @@ describe("Groups", function () {
 					newGroup.rules = [{
 						field: "Type",
 						operator: "NOT_CONTAINS",
-						values: ["Mast"]
+						values: ["Generator"]
 					}];
 					agent.post(`/${username}/${model}/groups/`)
 						.send(newGroup)
@@ -972,7 +974,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(1073);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1102);
 							done(err);
 						});
 				}
@@ -1002,7 +1004,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(459);
+							expect(res.body.objects[0].shared_ids.length).to.equal(454);
 							done(err);
 						});
 				}
@@ -1078,7 +1080,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(368);
+							expect(res.body.objects[0].shared_ids.length).to.equal(375);
 							done(err);
 						});
 				}
@@ -1174,7 +1176,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(1096);
+							expect(res.body.objects[0].shared_ids.length).to.equal(178);
 							done(err);
 						});
 				}
@@ -1204,7 +1206,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(947);
+							expect(res.body.objects[0].shared_ids.length).to.equal(29);
 							done(err);
 						});
 				}
@@ -1235,6 +1237,7 @@ describe("Groups", function () {
 						.expect(200 , function(err, res) {
 							const expectedSharedIds = [
 								'99579903-b5e7-485d-8c44-09ab25cab0dc',
+								'9928686a-beb0-4141-99da-21c5e0442834',
 								'13d63580-4dd8-4a10-b841-1c588e5faa9f',
 								'51b795b7-4790-4376-ad5c-6eaf7fa28fc8',
 								'c4271f23-970d-498a-b778-a94dec376a5d',
@@ -1275,6 +1278,7 @@ describe("Groups", function () {
 						.expect(200 , function(err, res) {
 							const expectedSharedIds = [
 								'99579903-b5e7-485d-8c44-09ab25cab0dc',
+								'9928686a-beb0-4141-99da-21c5e0442834',
 								'13d63580-4dd8-4a10-b841-1c588e5faa9f',
 								'51b795b7-4790-4376-ad5c-6eaf7fa28fc8',
 								'c4271f23-970d-498a-b778-a94dec376a5d',
@@ -1606,6 +1610,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							const expectedSharedIds = [
+								'9928686a-beb0-4141-99da-21c5e0442834',
 								'13d63580-4dd8-4a10-b841-1c588e5faa9f',
 								'ccd7d618-b0de-4517-8ad0-ed597c7de3df',
 								'03d0e634-d37e-4765-a06c-d0636136e1db',
@@ -1690,6 +1695,50 @@ describe("Groups", function () {
 				}
 			], done);
 		});
+
+
+		it("with mix of IS and NOT_IS should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [
+						{
+						   "field":"Name",
+						   "operator":"IS",
+						   "values":[
+							  "Level 3",
+							  "Level 1"
+						   ]
+						},
+						{
+						   "field":"Category",
+						   "operator":"IS_NOT",
+						   "values":[
+							  "Windows"
+						   ]
+						}
+					 ];
+					agent.post(`/${username}/${model}/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(200);
+							done(err);
+						});
+				}
+			], done);
+		});
+
 	});
 
 	describe("Updating a group ", function() {
