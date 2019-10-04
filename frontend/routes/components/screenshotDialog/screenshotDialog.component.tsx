@@ -429,6 +429,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				handleNewDrawnShape={this.addNewShape}
 				selected={this.state.selectedObjectName}
 				activeShape={this.state.activeShape}
+				disabled={this.props.disabled}
 			/>
 		);
 	}
@@ -502,6 +503,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const { stage } = this.state;
+
 		return (
 			<Container innerRef={this.containerRef}>
 				{this.renderIndicator(!this.props.disabled && this.isDrawingMode && !this.state.selectedObjectName)}

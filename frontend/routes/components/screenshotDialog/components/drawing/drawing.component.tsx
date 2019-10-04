@@ -29,6 +29,7 @@ interface IProps {
 	stage: any;
 	activeShape: number;
 	selected: string;
+	disabled: boolean;
 	handleNewDrawnLine: (line) => void;
 	handleNewDrawnShape: (shape, attrs) => void;
 }
@@ -56,7 +57,9 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	}
 
 	public componentDidMount() {
-		this.subscribeDrawingLineEvents();
+		if (!this.props.disabled) {
+			this.subscribeDrawingLineEvents();
+		}
 	}
 
 	public componentWillMount() {
@@ -64,21 +67,23 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		if (this.isDrawingLineMode && prevProps.mode !== MODES.BRUSH
-			&& prevProps.mode !== MODES.ERASER && !this.props.selected) {
-			this.subscribeDrawingLineEvents();
-		}
+		if (!this.props.disabled) {
+			if (this.isDrawingLineMode && prevProps.mode !== MODES.BRUSH
+				&& prevProps.mode !== MODES.ERASER && !this.props.selected) {
+				this.subscribeDrawingLineEvents();
+			}
 
-		if (this.props.mode === MODES.SHAPE && prevProps.mode !== MODES.SHAPE) {
-			this.subscribeDrawingShapeEvents();
-		}
+			if (this.props.mode === MODES.SHAPE && prevProps.mode !== MODES.SHAPE) {
+				this.subscribeDrawingShapeEvents();
+			}
 
-		if (!this.isDrawingLineMode && (prevProps.mode === MODES.BRUSH || prevProps.mode === MODES.ERASER)) {
-			this.unsubscribeDrawingLineEvents();
-		}
+			if (!this.isDrawingLineMode && (prevProps.mode === MODES.BRUSH || prevProps.mode === MODES.ERASER)) {
+				this.unsubscribeDrawingLineEvents();
+			}
 
-		if (this.props.mode !== MODES.SHAPE && prevProps.mode === MODES.SHAPE) {
-			this.unsubscribeDrawingShapeEvents();
+			if (this.props.mode !== MODES.SHAPE && prevProps.mode === MODES.SHAPE) {
+				this.unsubscribeDrawingShapeEvents();
+			}
 		}
 	}
 
