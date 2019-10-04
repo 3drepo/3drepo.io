@@ -41,7 +41,7 @@ export const Header = styled.div`
 export const Name = styled(Highlight)`
 	margin: 1px 0 0 2px;
 	word-break: break-all;
-	cursor: ${(props) => props.isPending ? 'default' : 'pointer'};
+	cursor: ${(props) => props.isPending ? 'inherit' : 'pointer'};
 
 	&, mark {
 		font-weight: ${FONT_WEIGHT.BOLD};
@@ -94,13 +94,14 @@ export const ModelLink = styled.div`
 	position: absolute;
 	top: 0;
 	left: 0;
-	cursor: ${(props) => props.isPending ? 'default' : 'pointer'};
+	cursor: pointer;
 `;
 
 export const NameWithCode = styled.div`
 	display: flex;
 	flex-direction: column;
 	position: relative;
+	cursor: pointer;
 `;
 
 export const ModelCode = styled.span`
