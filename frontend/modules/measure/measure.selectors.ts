@@ -17,7 +17,7 @@
 
 import { createSelector } from 'reselect';
 
-export const selectMeasureDomain = (state) => Object.assign({}, state.measure);
+export const selectMeasureDomain = (state) => ({...state.measure});
 
 export const selectIsMeasureActive = createSelector(
 	selectMeasureDomain, (state) => state.isActive

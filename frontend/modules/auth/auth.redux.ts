@@ -42,12 +42,12 @@ export const INITIAL_STATE = {
 
 export const loginSuccess = (state = INITIAL_STATE) => {
 	setLocalSessionStatus(state, { status: true });
-	return { ...state, isAuthenticated: true };
+	return { ...state, isAuthenticated: true, isPending: false };
 };
 
 export const loginFailure = (state = INITIAL_STATE) => {
 	setLocalSessionStatus(state, { status: false });
-	return { ...state, isAuthenticated: false };
+	return { ...state, isAuthenticated: false, isPending: false };
 };
 
 export const setPendingStatus = (state = INITIAL_STATE, { isPending }) => {

@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { withRouter } from 'react-router';
-import { connect } from '../../helpers/migration';
 
-import { Users } from './users.component';
 import {
-	UserManagementActions,
-	selectUsersSuggestions,
+	selectCollaboratorLimit,
 	selectUsers,
-	selectCollaboratorLimit
+	selectUsersSuggestions,
+	UserManagementActions
 } from '../../modules/userManagement';
+import { Users } from './users.component';
 
 import { selectJobs } from '../../modules/jobs';
 import { TeamspacesActions } from '../../modules/teamspaces';

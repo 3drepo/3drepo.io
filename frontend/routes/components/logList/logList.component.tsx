@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 
+import { Loader } from '../../components/loader/loader.component';
 import { Log } from './components/log/log.component';
 import { Container, LoaderContainer } from './logList.styles';
-import { Loader } from '../../components/loader/loader.component';
 
 interface IProps {
 	items: any[];
 	isPending: boolean;
 	currentUser: string;
 	teamspace: string;
-	innerRef?: any;
+	commentsRef?: any;
 	removeLog: (index, guid) => void;
 	setCameraOnViewpoint: (viewpoint) => void;
 }
@@ -56,7 +56,7 @@ export class LogList extends React.PureComponent<IProps, any> {
 
 	public render() {
 		return (
-			<Container innerRef={this.props.innerRef}>
+			<Container ref={this.props.commentsRef}>
 				{this.props.isPending ? this.renderLoader() : this.props.items.map(this.renderLogItem)}
 			</Container>
 		);

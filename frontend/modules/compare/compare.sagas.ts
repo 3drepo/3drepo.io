@@ -15,29 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select, all, call, take } from 'redux-saga/effects';
-import { cond, isEqual, curry, keys, intersection } from 'lodash';
+import { cond, curry, intersection, isEqual, keys } from 'lodash';
+import { all, call, put, select, take, takeLatest } from 'redux-saga/effects';
 
-import { CompareTypes, CompareActions, ICompareComponentState } from './compare.redux';
-import { selectRevisions, selectIsFederation, selectSettings, ModelTypes } from '../model';
 import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES, VULNERABLE_PROPS } from '../../constants/compare';
-import { DialogActions } from '../dialog';
-import { Viewer } from '../../services/viewer/viewer';
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
+import { VISIBILITY_STATES } from '../../constants/tree';
 import * as API from '../../services/api';
-import { getAngularService } from '../../helpers/migration';
+import { Viewer } from '../../services/viewer/viewer';
+import { DialogActions } from '../dialog';
+import { selectIsFederation, selectRevisions, selectSettings, ModelTypes } from '../model';
+import { selectNodesIndexesMap, selectTreeNodesList, TreeActions } from '../tree';
+import { CompareActions, CompareTypes, ICompareComponentState } from './compare.redux';
 import {
-	selectSortType,
-	selectSortOrder,
-	selectIsCompareActive,
 	selectActiveTab,
-	selectSelectedModelsMap,
 	selectBaseModelsList,
+	selectCompareModels,
+	selectComponentState,
+	selectIsCompareActive,
+	selectSelectedModelsMap,
+	selectSortOrder,
+	selectSortType,
 	selectTargetClashModels,
 	selectTargetDiffModels,
-	selectTargetModelsList,
-	selectComponentState,
-	selectCompareModels
+	selectTargetModels,
+	selectTargetModelsList
 } from './compare.selectors';
 
 const getNextRevision = (revisions, currentRevision) => {
@@ -244,28 +246,18 @@ function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
 	}
 }
 
-function changeModelNodesVisibility(nodeName: string, visible: boolean) {
-	const TreeService = getAngularService('TreeService') as any;
-	const tree = TreeService.getAllNodes();
-	if (tree.children) {
-		for (let index = 0; index < tree.children.length; index++) {
-			const node = tree.children[index];
-			if (node.name === nodeName) {
-				if (visible) {
-					TreeService.showTreeNodes([node]);
-				} else {
-					TreeService.hideTreeNodes([node]);
-				}
-			}
+function* setModelsNodesVisibility(models, visibility) {
+	const indexesMap = yield select(selectNodesIndexesMap);
+	const nodesList = yield select(selectTreeNodesList);
+	const nodesIds = models.map(({ _id, name }) => {
+		if (!indexesMap[_id]) {
+			const modelByName = nodesList.find((node) => node.name === name);
+			return modelByName._id;
 		}
-	}
-}
+		return _id;
+	});
 
-function setModelsNodesVisibility(models, isVisible = true) {
-	for (let index = 0; index < models.length; index++) {
-		const model = models[index];
-		changeModelNodesVisibility(`${model.teamspace}:${model.name}`, isVisible);
-	}
+	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, false, false));
 }
 
 function* startComparisonOfFederation() {
@@ -273,26 +265,30 @@ function* startComparisonOfFederation() {
 	const activeTab = yield select(selectActiveTab);
 	const isDiff = activeTab === DIFF_COMPARE_TYPE;
 
-	const targetModels = yield select(selectTargetModelsList);
-	const baseModels = yield select(selectBaseModelsList);
 	const compareModels = yield select(selectCompareModels);
-	const selectedModels = yield select(selectSelectedModelsMap);
-
-	setModelsNodesVisibility(compareModels, false);
-	setModelsNodesVisibility(baseModels);
+	const baseModels = yield select(selectBaseModelsList);
+	const selectedModelsMap = yield select(selectSelectedModelsMap);
+	const targetModelsMap = yield select(selectTargetModels);
 
 	const modelsToLoad = [];
-	for (let index = 0; index < targetModels.length; index++) {
-		const model = targetModels[index];
+	const modelsToHide = [];
+	const modelsToShow = [...baseModels];
 
-		if (model && selectedModels[model._id]) {
+	for (let index = 0; index < compareModels.length; index++) {
+		const model = compareModels[index];
+		const isSelectedModel = selectedModelsMap[model._id];
+		const isTargetModel = targetModelsMap[model._id];
+
+		if (isTargetModel && isSelectedModel) {
 			const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
-			const sharedRevisionModel = compareModels.find(({ baseRevision }) => baseRevision.name === targetRevision.name);
-			const canReuseModel = sharedRevisionModel && selectedModels[sharedRevisionModel._id];
+			const canReuseModel = model.baseRevision.name === targetRevision.name && selectedModelsMap[model._id];
 
 			if (canReuseModel) {
-				const { teamspace, name } = sharedRevisionModel;
-				changeModelNodesVisibility(`${teamspace}:${name}`, true);
+				const isAlreadyVisible = modelsToShow.some(({ _id }) => !!model._id);
+
+				if (!isAlreadyVisible) {
+					modelsToShow.push(model);
+				}
 				Viewer.diffToolSetAsComparator(
 					model.teamspace,
 					model._id
@@ -305,9 +301,13 @@ function* startComparisonOfFederation() {
 				);
 				modelsToLoad.push(modelPromise);
 			}
+		} else {
+			modelsToHide.push(model);
 		}
 	}
 
+	yield setModelsNodesVisibility(modelsToHide, VISIBILITY_STATES.INVISIBLE);
+	yield setModelsNodesVisibility(modelsToShow, VISIBILITY_STATES.VISIBLE);
 	yield all(modelsToLoad);
 
 	if (isDiff) {

@@ -15,23 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { pick, isEqual, isEmpty, memoize } from 'lodash';
 import Radio from '@material-ui/core/Radio';
 import Tooltip from '@material-ui/core/Tooltip';
+import { isEmpty, isEqual, memoize, pick } from 'lodash';
+import React from 'react';
 
 // @ts-ignore
-import * as AdminIconSrc from '../../../icons/how_to_reg.svg';
+import AdminIconSrc from '../../../icons/how_to_reg.svg';
 
 import { MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
-import { CELL_TYPES, CustomTable, CheckboxField } from '../customTable/customTable.component';
 import { CellUserSearch } from '../customTable/components/cellUserSearch/cellUserSearch.component';
 import { TableHeadingRadio } from '../customTable/components/tableHeadingRadio/tableHeadingRadio.component';
+import { CheckboxField, CustomTable, CELL_TYPES } from '../customTable/customTable.component';
 import { UserItem } from '../userItem/userItem.component';
 
 import {
-	PermissionsCellContainer,
-	DisabledCheckbox
+	DisabledCheckbox,
+	PermissionsCellContainer
 } from './permissionsTable.styles';
 
 const PermissionsCell = ({ disabled, checked, onChange }) => {

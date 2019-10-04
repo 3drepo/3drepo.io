@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { upperCase } from 'lodash';
+import React from 'react';
 
 import Grid from '@material-ui/core/Grid';
 import { Highlight } from '../highlight/highlight.component';
-import { Name, Detail } from './userItem.styles';
+import { Detail, Name } from './userItem.styles';
 
 interface IProps {
 	firstName?: string;
@@ -37,24 +37,24 @@ export const UserItem = (props: IProps) => {
 
 	return (
 		<Grid
-			container={true}
+			container
 			direction="column"
 			justify="center"
 			alignItems="flex-start"
 		>
-			<Name item={true}>
+			<Name item>
 				<Highlight
 					{...highlightProps}
 					text={`${upperCase(props.lastName)}, ${props.firstName}`}
 				/>
 			</Name>
-			<Detail item={true}>
+			<Detail item>
 				<Highlight
 					{...highlightProps}
 					text={props.user}
 				/>
 			</Detail>
-			<Detail item={true}>
+			<Detail item>
 				<Highlight
 					{...highlightProps}
 					text={props.company || ''}

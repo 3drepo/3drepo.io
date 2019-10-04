@@ -16,12 +16,13 @@
  */
 
 import { put, takeLatest } from 'redux-saga/effects';
-import { getAngularService, dispatch } from '../../helpers/migration';
+import { CHAT_CHANNELS } from '../../constants/chat';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
-import { ViewpointsTypes, ViewpointsActions } from './viewpoints.redux';
+import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
-import { getScreenshot } from '../viewer/viewer.sagas';
+import { dispatch } from '../store';
+import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
 
 export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
 
@@ -42,19 +43,9 @@ export function* fetchViewpoints({ teamspace, modelId }) {
 	}
 }
 
-function defer() {
-	const deferred = {} as any;
-	const promise = new Promise((resolve, reject) => {
-			deferred.resolve = resolve;
-			deferred.reject  = reject;
-	});
-	deferred.promise = promise;
-	return deferred;
-}
-
 export function* generateViewpointObject(teamspace, modelId, viewName) {
 	try {
-		const screenshot = yield getScreenshot();
+		const screenshot = yield Viewer.getScreenshot();
 		const { clippingPlanes, ...viewpoint } = yield Viewer.getCurrentViewpoint({
 			teamspace,
 			model: modelId
@@ -108,41 +99,37 @@ export function* deleteViewpoint({teamspace, modelId, viewpointId}) {
 	}
 }
 
+const onUpdated = (updatedView) => dispatch(ViewpointsActions.updateViewpointSuccess(updatedView));
+
+const onDeleted = (deletedView) => {
+	dispatch(ViewpointsActions.showDeleteInfo(deletedView));
+
+	setTimeout(() => {
+		dispatch(ViewpointsActions.deleteViewpointSuccess(deletedView));
+	}, 5000);
+};
+
+const onCreated = (createdView) => {
+	if (createdView.screenshot.thumbnail) {
+		createdView.screenshot.thumbnailUrl = getThumbnailUrl(createdView.screenshot.thumbnail);
+	}
+	dispatch(ViewpointsActions.createViewpointSuccess(createdView));
+};
+
 export function* subscribeOnViewpointChanges({ teamspace, modelId }) {
-	const ChatService = yield getAngularService('ChatService');
-	const viewsNotifications = yield ChatService.getChannel(teamspace, modelId).views;
-
-	const onUpdated = (updatedView) => dispatch(ViewpointsActions.updateViewpointSuccess(updatedView));
-	const onDeleted = (deletedView) => {
-		dispatch(ViewpointsActions.showDeleteInfo(deletedView));
-
-		setTimeout(() => {
-			dispatch(ViewpointsActions.deleteViewpointSuccess(deletedView));
-		}, 5000);
-	};
-	const onCreated = (createdView) => {
-		if (createdView.screenshot.thumbnail) {
-			createdView.screenshot.thumbnailUrl = getThumbnailUrl(createdView.screenshot.thumbnail);
-		}
-		dispatch(ViewpointsActions.createViewpointSuccess(createdView));
-	};
-
-	viewsNotifications.subscribeToUpdated(onUpdated, this);
-	viewsNotifications.subscribeToCreated(onCreated, this);
-	viewsNotifications.subscribeToDeleted(onDeleted, this);
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.VIEWS, teamspace, modelId, {
+		subscribeToUpdated: onUpdated,
+		subscribeToCreated: onCreated,
+		subscribeToDeleted: onDeleted
+	}));
 }
 
 export function* unsubscribeOnViewpointChanges({ teamspace, modelId }) {
-	const ChatService = yield getAngularService('ChatService');
-	const viewsNotifications = yield ChatService.getChannel(teamspace, modelId).views;
-
-	const onUpdated = (updatedView) => dispatch(ViewpointsActions.updateViewpointSuccess(updatedView));
-	const onCreated = (createdView) => dispatch(ViewpointsActions.createViewpointSuccess(createdView));
-	const onDeleted = (deletedView) => dispatch(ViewpointsActions.deleteViewpointSuccess(deletedView));
-
-	viewsNotifications.unsubscribeFromUpdated(onUpdated);
-	viewsNotifications.unsubscribeFromCreated(onCreated);
-	viewsNotifications.unsubscribeFromDeleted(onDeleted);
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.VIEWS, teamspace, modelId, {
+		unsubscribeToUpdated: onUpdated,
+		unsubscribeToCreated: onCreated,
+		unsubscribeToDeleted: onDeleted
+	}));
 }
 
 export function* setCameraOnViewpoint({ teamspace, modelId, view }) {

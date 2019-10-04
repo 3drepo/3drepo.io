@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as Autosuggest from 'react-autosuggest';
-import MenuItem from '@material-ui/core/MenuItem';
-import Paper from '@material-ui/core/Paper';
+import { MenuItem, Paper } from '@material-ui/core';
+import React from 'react';
+import Autosuggest from 'react-autosuggest';
 import { Highlight } from '../highlight/highlight.component';
 
-import { Container, SuggestionsList, StyledTextField } from './autosuggestField.styles';
+import { Container, StyledTextField, SuggestionsList } from './autosuggestField.styles';
 
 interface IProps {
 	suggestions: any[];
@@ -105,7 +104,7 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 			placement="bottom"
 		>
 			<Paper
-				square={true}
+				square
 				{...options.containerProps}
 				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
 			>

@@ -15,21 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
-import { omit } from 'lodash';
+import { Button } from '@material-ui/core';
+import { Form } from 'formik';
+import React from 'react';
 
 import {
+	DeleteButton,
+	FieldsRow,
 	FormContainer,
 	Headline,
-	StyledTextField,
-	FieldsRow,
-	StyledButton,
 	StyledButtonContainer,
-	DeleteButton
+	StyledTextField
 } from '../profile.styles';
-import { Grid, Button } from '@material-ui/core';
 
 interface IProps {
 	apiKey: string;
@@ -42,38 +39,39 @@ export class APIKeyForm extends React.PureComponent<IProps> {
 		const apiKey =  this.props.apiKey || '';
 		return (
 			<Form>
-					<FormContainer container={true} direction="column">
-						<Headline color="primary" variant="subheading">Api Key</Headline>
-						<FieldsRow container={true} wrap="nowrap">
-							<StyledTextField
-								value={apiKey}
-								inputProps={{
-									readOnly: true
-								}}
-								margin="normal"
-							/>
-						</FieldsRow>
-						<StyledButtonContainer>
-							<Button
-								color="secondary"
-								variant="raised"
-								disabled={false}
-								type="button"
-								onClick={this.onClickGenerate}
-							>
-								Generate
-							</Button>
-							<DeleteButton
-								variant="raised"
-								disabled={!apiKey}
-								type="button"
-								onClick={this.onClickDelete}
-							>
-								Delete
-							</DeleteButton>
-						</StyledButtonContainer>
-					</FormContainer>
-				</Form>);
+				<FormContainer container direction="column">
+					<Headline color="primary" variant="subheading">Api Key</Headline>
+					<FieldsRow container wrap="nowrap">
+						<StyledTextField
+							value={apiKey}
+							inputProps={{
+								readOnly: true
+							}}
+							margin="normal"
+						/>
+					</FieldsRow>
+					<StyledButtonContainer>
+						<Button
+							color="secondary"
+							variant="raised"
+							disabled={false}
+							type="button"
+							onClick={this.onClickGenerate}
+						>
+							Generate
+						</Button>
+						<DeleteButton
+							variant="raised"
+							disabled={!apiKey}
+							type="button"
+							onClick={this.onClickDelete}
+						>
+							Delete
+						</DeleteButton>
+					</StyledButtonContainer>
+				</FormContainer>
+			</Form>
+		);
 	}
 
 	private onClickGenerate = (e: React.SyntheticEvent) => {

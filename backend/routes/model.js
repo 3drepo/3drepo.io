@@ -1871,8 +1871,8 @@ function getModelTree(req, res, next) {
 		req.params.model,
 		revId ? undefined : C.MASTER_BRANCH_NAME,
 		revId
-	).then(file => {
-		const headers = getHeaders(revId);
+	).then(({ file, isFed }) => {
+		const headers = getHeaders(revId && !isFed);
 		responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, file.readStream, headers);
 
 	}).catch(err => {

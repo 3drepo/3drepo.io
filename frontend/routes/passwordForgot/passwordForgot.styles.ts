@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
+import styled from 'styled-components';
 
-import * as PanelStyles from '../components/panel/panel.styles';
 import { COLOR } from '../../styles';
+import * as PanelStyles from '../components/panel/panel.styles';
 
 export const Container = styled(Grid)`
 	&& {
 		height: 100%;
-		padding-top: 30px;
+		z-index: 1;
 	}
 
 	${PanelStyles.Container} {

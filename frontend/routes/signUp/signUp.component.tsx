@@ -15,34 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as Yup from 'yup';
-import { Link } from 'react-router-dom';
+import { Field, Form, Formik } from 'formik';
 import { omit } from 'lodash';
-import { Formik, Field, Form } from 'formik';
+import React from 'react';
+import * as Yup from 'yup';
 
 import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../services/validation';
 import { clientConfigService } from './../../services/clientConfig';
 
-import { Panel } from '../components/panel/panel.component';
-import { Logo } from '../components/logo/logo.component';
-import { Footer } from './components/footer';
-import { SubmitButton } from '../components/submitButton/submitButton.component';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
+import { Panel } from '../components/panel/panel.component';
+import { SubmitButton } from '../components/submitButton/submitButton.component';
+import { Footer } from './components/footer';
 import { ReCaptcha } from './components/reCaptcha/reCaptcha.component';
 
+import { COOKIES_PAGE, PRIVACY_PAGE, TERMS_PAGE } from '../../services/staticPages';
+import { SelectField } from '../components/selectField/selectField.component';
+import { FieldsRow, StyledTextField } from '../profile/profile.styles';
 import {
+	ButtonContainer,
 	Container,
 	Headline,
-	StyledGrid,
 	StyledFormControl,
-	ButtonContainer
+	StyledGrid,
+	TermLink
 } from './signUp.styles';
-import { FieldsRow, StyledTextField } from '../profile/profile.styles';
-import { SelectField } from '../components/selectField/selectField.component';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -107,6 +107,14 @@ interface IState {
 	countries: any[];
 }
 
+const TermsLabel = () => (
+		<>
+			I agree to the <TermLink href={TERMS_PAGE.path} target="_blank">{TERMS_PAGE.title}</TermLink>&nbsp;
+			and I have read the <TermLink href={PRIVACY_PAGE.path} target="_blank">{PRIVACY_PAGE.title}</TermLink> policy
+			and the <TermLink href={COOKIES_PAGE.path} target="_blank">{COOKIES_PAGE.title}</TermLink> policy.
+		</>
+);
+
 export class SignUp extends React.PureComponent<IProps, IState> {
 	public state = {
 		passwordStrengthMessage: '',
@@ -162,15 +170,15 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const {isPending} = this.props;
+
 		return (
 			<Container
 				container
 				direction="column"
 				alignItems="center"
 				wrap="nowrap">
-				<Link to="/login"><Logo /></Link>
 				<StyledGrid item xs={9} sm={6} md={6} lg={6} xl={2}>
-					<Panel title="Sign up" hiddenScrollbars={true}>
+					<Panel title="Sign up" hiddenScrollbars>
 						<Headline>Creating a 3D Repo account is free</Headline>
 						<Formik
 							initialValues={RegistrationInitialValues}
@@ -187,7 +195,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										helperText={form.touched.username && (form.errors.username || '')}
 										label="Username"
 										disabled={isPending}
-										fullWidth={true}
+										fullWidth
 									/>
 								)} />
 								<FieldsRow container wrap="nowrap">
@@ -307,7 +315,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											value={field.value ? '1' : '0'}
 											disabled={isPending}
 											control={<Checkbox color="secondary" checked={field.value} />}
-											label="I agree to the Terms & Conditions and I have read the Privacy policy and the Cookies policy."
+											label={<TermsLabel />}
 										/>
 									)}
 								/>

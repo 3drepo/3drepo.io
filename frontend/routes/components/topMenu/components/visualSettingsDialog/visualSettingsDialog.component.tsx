@@ -17,15 +17,15 @@
 
 import { Button, InputAdornment, List, MenuItem, Switch } from '@material-ui/core';
 import { Field, Form, Formik } from 'formik';
+import { isEqual } from 'lodash';
 import * as React from 'react';
 import * as Yup from 'yup';
-import { schema } from '../../../../../services/validation';
-import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NeutralActionButton, ShortInput,
-		VisualSettingsButtonsContainer, VisualSettingsDialogContent,
-		NegativeActionButton, WarningMessage } from './visualSettingsDialog.styles';
-import { isEqual } from 'lodash';
 import { DEFAULT_SETTINGS } from '../../../../../constants/viewer';
+import { schema } from '../../../../../services/validation';
 import { SelectField } from '../../../selectField/selectField.component';
+import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NegativeActionButton, NeutralActionButton,
+		ShortInput, VisualSettingsButtonsContainer,
+		VisualSettingsDialogContent, WarningMessage } from './visualSettingsDialog.styles';
 
 const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
@@ -58,12 +58,14 @@ const BasicSettings = (props) => {
 			<FormListItem>
 				XRay highlighting
 				<Field name="xray" render={ ({ field }) => (
-					<Switch checked={field.value} {...field} value="true" color="secondary" />)}/>
+					<Switch checked={field.value} {...field} value="true" color="secondary" />
+				)} />
 			</FormListItem>
 			<FormListItem>
 				Model Caching (Beta)
 				<Field name="caching" render={ ({ field }) => (
-					<Switch onClick={props.onCacheChange} checked={field.value} {...field} value="true" color="secondary" />)}/>
+					<Switch onClick={props.onCacheChange} checked={field.value} {...field} value="true" color="secondary" />
+				)} />
 			</FormListItem>
 		</List>
 	);
@@ -76,7 +78,7 @@ const AdvancedSettings = (props) => {
 				Show Statistics
 				<Field name="statistics" render={ ({ field }) => (
 					<Switch checked={field.value} {...field} value="true" color="secondary" />
-				)}/>
+				)} />
 			</FormListItem>
 			<FormListItem>
 				Memory for Unity
@@ -86,7 +88,7 @@ const AdvancedSettings = (props) => {
 					<ShortInput
 						error={Boolean(form.errors.memory)}
 						{...field}
-						endAdornment={<InputAdornment position="end">MB</InputAdornment>}/>
+						endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
 					</ErrorTooltip>
 					);
 				}} />
@@ -124,7 +126,7 @@ const AdvancedSettings = (props) => {
 						<MenuItem value="box">Bounding box</MenuItem>
 						<MenuItem value="sphere">Bounding sphere</MenuItem>
 					</SelectField>
-				)}/>
+				)} />
 			</FormListItem>
 			<FormListItem>
 				Far plane points
@@ -276,11 +278,11 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 				<Formik
 					validationSchema={SettingsSchema}
 					initialValues={visualSettings}
-					enableReinitialize={true}
+					enableReinitialize
 					onSubmit={this.onSubmit}
 					>
 					<Form>
-						{selectedTab === 0 && <BasicSettings onCacheChange={this.onCacheChange}/>}
+						{selectedTab === 0 && <BasicSettings onCacheChange={this.onCacheChange} />}
 						{selectedTab === 1 && <AdvancedSettings />}
 						{selectedTab === 0 && showCacheWarning && <CacheWarning />}
 						<Buttons onClickCancel={handleClose} />

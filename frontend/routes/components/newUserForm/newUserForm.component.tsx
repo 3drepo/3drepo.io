@@ -15,22 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as Autosuggest from 'react-autosuggest';
+import React from 'react';
+import Autosuggest from 'react-autosuggest';
 
-import Grid from '@material-ui/core/Grid';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Grid from '@material-ui/core/Grid';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
 
 import { JobItem } from '../jobItem/jobItem.component';
 import { UserItem } from '../userItem/userItem.component';
 
 import {
-	Container, Title, SaveButton, StyledTextField, StyledSelect, SuggestionsList, EmptySelectValue
+	Container, EmptySelectValue, SaveButton, StyledSelect, StyledTextField, SuggestionsList, Title
 } from './newUserForm.styles';
 
 interface IProps {
@@ -85,7 +85,7 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 
 		return (
 			<StyledTextField
-				fullWidth={true}
+				fullWidth
 				InputProps={ {
 					inputRef: (node) => {
 						ref(node);
@@ -112,7 +112,7 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 	public renderUserSuggestion = (suggestion, {query, isHighlighted}) => {
 		return (
 			<MenuItem selected={isHighlighted} component="div">
-				<UserItem {...suggestion} searchText={query}/>
+				<UserItem {...suggestion} searchText={query} />
 			</MenuItem>
 		);
 	}
@@ -124,7 +124,7 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 			placement="bottom"
 		>
 			<Paper
-				square={true}
+				square
 				{...options.containerProps}
 				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
 			>
@@ -138,11 +138,11 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 		return (
 			<Container>
 				<Grid
-					container={true}
+					container
 					direction="column">
 					<Title>{title}</Title>
 
-					<FormControl required={true}>
+					<FormControl required>
 						<Autosuggest
 							suggestions={users}
 							onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
@@ -164,10 +164,10 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 					</FormControl>
 
 					<FormControl>
-						<InputLabel shrink={true} htmlFor="job">Job</InputLabel>
+						<InputLabel shrink htmlFor="job">Job</InputLabel>
 						<StyledSelect
 							value={this.state.job}
-							displayEmpty={true}
+							displayEmpty
 							inputProps={ {
 								id: 'job'
 							} }
@@ -190,7 +190,7 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 					/>
 
 					<Grid
-						container={true}
+						container
 						direction="row">
 						<SaveButton
 							variant="contained"

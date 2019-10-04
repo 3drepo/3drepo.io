@@ -15,19 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import * as Yup from 'yup';
-import { strength, differentThan, equalTo } from './customValidators';
+import { differentThan, equalTo, strength } from './customValidators';
 import { getPasswordStrength } from './customValidators';
 
 export const VALIDATIONS_MESSAGES = {
 	REQUIRED: 'This field is required',
+	// tslint:disable-next-line: no-invalid-template-strings
 	TOO_SHORT_STRING: 'Must be at least ${min} characters',
+	// tslint:disable-next-line: no-invalid-template-strings
 	TOO_LONG_STRING: 'Must be at most ${max} characters',
 	NOT_ALPHANUMERIC: 'Must use alphanumeric characters',
 	DECIMAL: 'Must be a decimal number or integer',
 	INTEGER: 'Must be an integer',
 	USERNAME_CHARS: 'Must use only letters, numbers, hypens or underscores',
 	NOT_NUMBER: 'Must be a number',
-	MUST_BE_GREATER: 'Must be greater than or equal to  ${min}',
+	// tslint:disable-next-line: no-invalid-template-strings
+	MUST_BE_GREATER: 'Must be greater than or equal to ${min}',
+	// tslint:disable-next-line: no-invalid-template-strings
 	MUST_BE_LOWER: 'Must be lower than or equal to ${max}'
 };
 

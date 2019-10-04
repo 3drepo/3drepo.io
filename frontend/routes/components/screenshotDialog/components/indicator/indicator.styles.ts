@@ -21,6 +21,7 @@ import { COLOR } from '../../../../../styles';
 export const StyledIndicator = styled.div`
 	border-radius: 100%;
 	width: ${(props: any) => props.size}px;
+	min-width: ${(props: any) => props.size}px;
 	height: ${(props: any) => props.size}px;
 	color: ${(props: any) => props.color || COLOR.WHITE};
 	border: 2px solid currentColor;

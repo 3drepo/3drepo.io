@@ -1,14 +1,14 @@
 import { values } from 'lodash';
 
-import NewReleases from '@material-ui/icons/NewReleases';
-import ErrorOutline from '@material-ui/icons/ErrorOutline';
-import ErrorSolid from '@material-ui/icons/Error';
 import CheckCircle from '@material-ui/icons/CheckCircle';
-import SyncProblem from '@material-ui/icons/SyncProblem';
-import Print from '@material-ui/icons/Print';
 import Download from '@material-ui/icons/CloudDownload';
+import ErrorSolid from '@material-ui/icons/Error';
+import ErrorOutline from '@material-ui/icons/ErrorOutline';
+import NewReleases from '@material-ui/icons/NewReleases';
 import Pins from '@material-ui/icons/PinDrop';
-import { SortAmountUp, SortAmountDown } from '../routes/components/fontAwesomeIcon';
+import Print from '@material-ui/icons/Print';
+import SyncProblem from '@material-ui/icons/SyncProblem';
+import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
 
 import { DATA_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 import { COLOR, PIN_COLORS } from '../styles';

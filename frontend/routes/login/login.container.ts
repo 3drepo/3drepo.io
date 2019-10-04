@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { withRouter } from 'react-router-dom';
-import { connect, addRouting } from '../../helpers/migration';
 
+import { selectIsAuthenticated, selectIsPending, AuthActions } from '../../modules/auth';
 import { Login } from './login.component';
-import { AuthActions, selectIsAuthenticated, selectIsPending } from '../../modules/auth';
 
 const mapStateToProps = createStructuredSelector({
 	isAuthenticated: selectIsAuthenticated,
@@ -32,4 +32,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onLogin: AuthActions.login
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(Login)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Login));

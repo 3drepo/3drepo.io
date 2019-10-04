@@ -15,34 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import React from 'react';
+import { Redirect, Route, Switch } from 'react-router-dom';
 
-import Teamspaces from '../teamspaces/teamspaces.container';
-import ModelSettings from '../modelSettings/modelSettings.container';
-import UserManagement from '../userManagement/userManagement.container';
-import Profile from '../profile/profile.container';
+import { ROUTES } from '../../constants/routes';
 import Billing from '../billing/billing.container';
-import { Container, Sidebar, Content } from './dashboard.styles';
 import { UserInfo } from '../components/userInfo/userInfo.component';
-import { RoutePlaceholder } from './components/routePlaceholder/routePlaceholder.component';
+import ModelSettings from '../modelSettings/modelSettings.container';
+import Profile from '../profile/profile.container';
+import Teamspaces from '../teamspaces/teamspaces.container';
+import UserManagement from '../userManagement/userManagement.container';
+import { Container, Content, Sidebar } from './dashboard.styles';
 
 const MENU_ITEMS = [
 	{
 		title: 'Teamspaces',
-		path: 'dashboard/teamspaces'
+		path: ROUTES.TEAMSPACES
 	},
 	{
 		title: 'User Management',
-		path: 'dashboard/user-management'
+		path: ROUTES.USER_MANAGEMENT_MAIN
 	},
 	{
 		title: 'Profile',
-		path: 'dashboard/profile'
+		path: ROUTES.PROFILE
 	},
 	{
 		title: 'Billing',
-		path: 'dashboard/billing'
+		path: ROUTES.BILLING
 	}
 ];
 
@@ -53,6 +53,7 @@ interface IProps {
 	isAvatarPending: boolean;
 	currentUser: any;
 	fetchUser: (username) => void;
+	push: (path) => void;
 }
 
 export class Dashboard extends React.PureComponent<IProps, any> {
@@ -63,48 +64,42 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 	public renderRoutes = (match, currentUser) => (
 		<Switch>
 			<Route
-				exact={true}
-				path={`${match.url}/teamspaces`}
+				exact
+				path={ROUTES.TEAMSPACES}
 				component={Teamspaces}
 			/>
 			<Route
-				exact={true}
-				path={`${match.url}/teamspaces/:teamspace/models/:modelId`}
+				exact
+				path={ROUTES.MODEL_SETTINGS}
 				component={ModelSettings}
 			/>
 			<Route
-				path={`${match.url}/user-management/:teamspace`}
+				path={ROUTES.USER_MANAGEMENT_TEAMSPACE}
 				component={UserManagement}
 			/>
 			<Route
-				exact={true}
-				path={`${match.url}/profile`}
+				exact
+				path={ROUTES.PROFILE}
 				component={Profile}
 			/>
 			<Route
-				path={`${match.url}/billing`}
+				path={ROUTES.BILLING}
 				component={Billing}
 			/>
-			<Redirect exact={true} from={match.url} to={`${match.url}/teamspaces`} />
+			<Redirect exact from={match.url} to={ROUTES.TEAMSPACES} />
 			<Redirect
-				exact={true}
-				from={`${match.url}/user-management`}
-				to={`${match.url}/user-management/${currentUser.username}`}
+				exact
+				from={ROUTES.USER_MANAGEMENT_MAIN}
+				to={`${ROUTES.USER_MANAGEMENT_MAIN}/${currentUser.username}`}
 			/>
 		</Switch>
-	)
-
-	public renderDashboardRoute = ({match}) => (
-		<Content>
-			{this.renderRoutes(match, this.props.currentUser)}
-		</Content>
-	)
+		)
 
 	public render() {
 		const { match, currentUser, isPending, isInitialised, isAvatarPending } = this.props;
 		return (
 			<Container
-				container={true}
+				container
 				direction="row"
 				justify="space-between"
 				alignContent="flex-start"
@@ -116,7 +111,9 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 						items={MENU_ITEMS}
 					/>
 				</Sidebar>
-				<Route path={`${match.url}dashboard`} render={this.renderDashboardRoute} />
+				<Content>
+					{this.renderRoutes(match, this.props.currentUser)}
+				</Content>
 			</Container>
 		);
 	}

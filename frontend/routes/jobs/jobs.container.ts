@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from '../../helpers/migration';
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { Jobs } from './jobs.component';
 
-import { selectCurrentTeamspace } from '../../modules/userManagement/userManagement.selectors';
 import {
-	JobsActions,
+	selectJobs,
 	selectJobsColors,
-	selectJobs
+	JobsActions
 } from '../../modules/jobs';
+import { selectCurrentTeamspace } from '../../modules/userManagement/userManagement.selectors';
 
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,

@@ -1,8 +1,8 @@
 import Download from '@material-ui/icons/CloudDownload';
 import Delete from '@material-ui/icons/Delete';
+import InvertColors from '@material-ui/icons/InvertColors';
 import OfflineBolt from '@material-ui/icons/OfflineBolt';
 import PanTool from '@material-ui/icons/PanTool';
-import InvertColors from '@material-ui/icons/InvertColors';
 
 import { capitalize } from 'lodash';
 

@@ -15,20 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import ChipComponent from '@material-ui/core/Chip';
-import IconButtonComponent from '@material-ui/core/IconButton';
-import FormControlComponent from '@material-ui/core/FormControl';
+import {
+	Chip as ChipComponent,
+	FormControl as FormControlComponent,
+	IconButton as IconButtonComponent,
+	InputLabel as InputLabelComponent,
+	List as ListComponent,
+	ListSubheader,
+	MenuItem as MenuItemComponent
+} from '@material-ui/core';
 import MoreIcon from '@material-ui/icons/MoreVert';
-import InputLabelComponent from '@material-ui/core/InputLabel';
+import styled, { css } from 'styled-components';
 
-import ListComponent from '@material-ui/core/List';
-import MenuItemComponent from '@material-ui/core/MenuItem';
-import ListSubheader from '@material-ui/core/ListSubheader';
-
-import { SelectField as SelectFieldComponent } from '../selectField/selectField.component';
-import { COLOR } from '../../../styles';
 import { hexToRgba } from '../../../helpers/colors';
+import { COLOR } from '../../../styles';
+import { SelectField as SelectFieldComponent } from '../selectField/selectField.component';
 
 export const Container = styled.div`
 	border-top: 1px solid ${COLOR.BLACK_20};

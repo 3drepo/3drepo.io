@@ -1,5 +1,5 @@
 import { API } from './default';
-export { getAPIUrl, getResponseCode } from './default';
+export { getAPIUrl, getResponseCode, setSocketIdHeader } from './default';
 
 export * from './auth';
 export * from './users';
@@ -15,5 +15,6 @@ export * from './viewer';
 export * from './groups';
 export * from './meta';
 export * from './issues';
+export * from './tree';
 
 export default API;

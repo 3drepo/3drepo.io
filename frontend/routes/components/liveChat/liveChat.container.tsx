@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../../helpers/migration';
 
-import { LiveChat } from './liveChat.component';
 import { selectIsAuthenticated } from '../../../modules/auth';
 import { selectCurrentUser } from '../../../modules/currentUser';
+import { LiveChat } from './liveChat.component';
 
 const mapStateToProps = createStructuredSelector({
 	isAuthenticated: selectIsAuthenticated,

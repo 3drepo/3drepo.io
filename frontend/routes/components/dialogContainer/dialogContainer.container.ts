@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from '../../../helpers/migration';
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { DialogContainer } from './dialogContainer.component';
 import {
-	DialogActions,
 	selectDialogConfig,
 	selectDialogData,
-	selectIsOpen
+	selectIsOpen,
+	DialogActions
 } from '../../../modules/dialog';
+import { DialogContainer } from './dialogContainer.component';
 
 const mapStateToProps = createStructuredSelector({
 	isOpen: selectIsOpen,

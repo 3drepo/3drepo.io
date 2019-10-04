@@ -14,27 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import * as React from 'react';
-import { groupBy, sortBy, toArray } from 'lodash';
+import Badge from '@material-ui/core/Badge';
+import Drawer from '@material-ui/core/Drawer';
+import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import Drawer from '@material-ui/core/Drawer';
-import Badge from '@material-ui/core/Badge';
 import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import MoreVert from '@material-ui/icons/MoreVert';
 import Close from '@material-ui/icons/Close';
+import MoreVert from '@material-ui/icons/MoreVert';
+import { groupBy, sortBy, toArray } from 'lodash';
+import React from 'react';
 
+import { renderWhenTrue } from '../../../helpers/rendering';
 import { simpleDate } from '../../../services/formatting/formatDate';
-import { getAngularService } from '../../../helpers/migration';
 import { BarIconButton } from '../components.styles';
 import { ListSubheaderToolbar } from '../listSubheaderToolbar/listSubheaderToolbar.component';
-import { INotification } from './components/notificationItem/notificationItem.component';
 import { NotificationEmptyItem } from './components/emptyItem/emptyItem.component';
+import { INotification } from './components/notificationItem/notificationItem.component';
 import { NotificationsPanel } from './components/panel/panel.component';
 import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.component';
-import { NotificationsList, NotificationsIcon, NotificationWeekHeader } from './notifications.styles';
-import { renderWhenTrue } from '../../../helpers/rendering';
+import { NotificationsIcon, NotificationsList, NotificationWeekHeader } from './notifications.styles';
 
 /**
  * Gets the date of the sunday thats away from the offset .
@@ -59,8 +58,8 @@ interface IProps {
 	sendUpdateAllNotificationsRead: (read: boolean) => void;
 	showUpdatedFailedError: (errorMessage: string) => void;
 	sendDeleteNotification: (id: string) => void;
-	deleteNotification: (notification: any) => void;
-	upsertNotification: (notification: any) => void;
+	subscribeOnChanges: () => void;
+	unsubscribeFromChanges: () => void;
 	setDrawerPanelState: (open: boolean) => void;
 }
 
@@ -70,7 +69,7 @@ const NotificationButton = ({ unreadCount, onClick }) => (
 			badgeContent={unreadCount}
 			color={unreadCount > 0 ? 'primary' : 'secondary'}
 		>
-			<NotificationsIcon fontSize="small"/>
+			<NotificationsIcon fontSize="small" />
 		</Badge>
 	</IconButton>
 );
@@ -85,8 +84,6 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		open: false,
 		menuElement: null
 	};
-
-	private chatService = getAngularService('ChatService') as any;
 
 	get today() {
 		return simpleDate(new Date());
@@ -133,16 +130,11 @@ export class Notifications extends React.PureComponent<IProps, any> {
 
 	public componentDidMount() {
 		this.props.sendGetNotifications();
-
-		const chatChannel = this.chatService.getChannel(this.props.currentUser.username);
-		chatChannel.notifications.subscribeToUpserted(this.props.upsertNotification, this);
-		chatChannel.notifications.subscribeToDeleted(this.props.deleteNotification, this);
+		this.props.subscribeOnChanges();
 	}
 
 	public componentWillUnmount() {
-		const chatChannel = this.chatService.getChannel(this.props.currentUser.username);
-		chatChannel.notifications.unsubscribeFromUpserted(this.props.upsertNotification);
-		chatChannel.notifications.unsubscribeFromDeleted(this.props.deleteNotification);
+		this.props.unsubscribeFromChanges();
 	}
 
 	public toggleDrawer = () => {
@@ -178,8 +170,8 @@ export class Notifications extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps: IProps) {
-		if (prevProps.notifications !== this.props.notifications) {
-			const unreadCount =  this.props.notifications.filter((n) => !n.read).length;
+		if (prevProps.notifications !== this.props.notifications && this.props.notifications.length) {
+			const unreadCount = this.props.notifications.filter((n) => !n.read).length;
 			const groupedByTeamspace = { thisWeek: [], lastWeek: [], older: []};
 
 			const thisWeek = this.thisWeeksNotifications(this.props.notifications);

@@ -1,12 +1,12 @@
-import LensIcon from '@material-ui/icons/Lens';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
 import AdjustIcon from '@material-ui/icons/Adjust';
-import Print from '@material-ui/icons/Print';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import Download from '@material-ui/icons/CloudDownload';
 import Upload from '@material-ui/icons/CloudUpload';
+import LensIcon from '@material-ui/icons/Lens';
+import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
 import Pins from '@material-ui/icons/PinDrop';
-import { SortAmountUp, SortAmountDown } from '../routes/components/fontAwesomeIcon';
+import Print from '@material-ui/icons/Print';
+import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
 
 import ViewModule from '@material-ui/icons/ViewModule';
 

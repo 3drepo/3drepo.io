@@ -15,20 +15,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import * as React from 'react';
 import { Tooltip } from '@material-ui/core';
 import Avatar from '@material-ui/core/Avatar';
 import Place from '@material-ui/icons/Place';
+import React from 'react';
 
-import PanoramaFishEye from '@material-ui/icons/PanoramaFishEye';
-import Lens from '@material-ui/icons/Lens';
-import Clear from '@material-ui/icons/Clear';
 import ChangeHistory from '@material-ui/icons/ChangeHistory';
+import Clear from '@material-ui/icons/Clear';
+import Lens from '@material-ui/icons/Lens';
+import PanoramaFishEye from '@material-ui/icons/PanoramaFishEye';
 
 import { FONT_WEIGHT } from '../../../../../styles';
 import { SmallIconButton } from '../../../../components/smallIconButon/smallIconButton.component';
-import { Item, Container, ItemText, ItemSecondaryAction } from './notificationItem.styles';
 import notificationsContainer from '../../notifications.container';
+import { Container, Item, ItemSecondaryAction, ItemText } from './notificationItem.styles';
 
 export interface INotification {
 	_id: string;
@@ -94,10 +94,10 @@ const getIcon = (notification) => {
 	switch (notification.type) {
 		case TYPES.ISSUE_CLOSED:
 		case TYPES.ISSUE_ASSIGNED:
-			return (<Place/>);
+			return (<Place />);
 		case TYPES.MODEL_UPDATED:
 		case TYPES.MODEL_UPDATED_FAILED:
-			return (<ChangeHistory/>);
+			return (<ChangeHistory />);
 	}
 };
 

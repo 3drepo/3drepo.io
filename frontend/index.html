@@ -15,14 +15,18 @@
 
     <!-- Styling used in the Angular Material demos-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
-
   </head>
   <body class="threeDRepo">
 
     <!-- Inline CSS if CSS fails, also faster-->
     <style>
-
-      body .notSupported {
+      html, body {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+      }
+  
+      body .unsupported-page {
       	max-width: 100%;
       	max-height: 100%;
       	overflow: hidden;
@@ -38,17 +42,17 @@
       	font-size: 20px;
       }
 
-      body .notSupported a {
+      body .unsupported-page a {
       	color: #289874;
       }
 
-      body .notSupported img {
+      body .unsupported-page img {
       	margin: 4%;
       	width: 90%;
       	max-width: 500px;
       }
 
-      body .notSupported div {
+      body .unsupported-page div {
       	margin: 4%;
       	text-align: center;
       }
@@ -56,24 +60,42 @@
     </style>
 
     <noscript>
-      <div class="notSupported" aria-label="Not Supported">
-        <div><img src="images/3drepo-logo-white.png" longdesc="3DRepoBuildingInformationModellingSoftware" alt="3D Repo"></div>
+      <div class="unsupported-page" aria-label="Not Supported">
+        <div>
+          <img
+            src="images/3drepo-logo-white.png" 
+            longdesc="3DRepoBuildingInformationModellingSoftware"
+            alt="3D Repo"
+          />
+        </div>
         <div>JavaScript is currently disabled, this site requires JavaScript to run!</div>
       </div>
     </noscript>
 
-    <div class="notSupported" style="visibility:hidden;" aria-label="Not Supported">
-      <div><img id="notSupportedLogo" src="images/3drepo-logo-white.png" longdesc="3DRepoBuildingInformationModellingSoftware" alt="3D Repo"></div>
+    <div class="unsupported-page" style="visibility: hidden;" aria-label="Not Supported">
+      <div>
+        <img
+          src="images/3drepo-logo-white.png"
+          longdesc="3DRepoBuildingInformationModellingSoftware"
+          alt="3D Repo"
+        />
+      </div>
       <div>
         Your browser is not supported.
         Please upgrade to the latest version of
-        <a id="notSupportedChrome" href="https://www.google.co.uk/chrome" rel="noopener" target="_blank">Chrome</a> or
-        <a id="notSupportedFirefox" href="https://www.mozilla.org/firefox" rel="noopener" target="_blank">FireFox</a>
+        <a href="https://www.google.co.uk/chrome" rel="noopener" target="_blank">Chrome</a> or
+        <a href="https://www.mozilla.org/firefox" rel="noopener" target="_blank">FireFox</a>
         <br><br><br>
-
-        <input id="notSupportedButton" type="button" value="OK" style="padding:10px 60px; font-size:14px;" onclick="document.getElementById(&quot;notSupported&quot;).style.visibility=&quot;hidden&quot;">
+    
+        <input
+          class="unsupported-button"
+          type="button"
+          value="OK"
+          style="padding:10px 60px; font-size:14px;"
+        >
       </div>
     </div>
+
 
     <div id="maintenanceMode" style='height: 100%; display: none; background-color:rgb(12,47,84); color: white; overflow-y: hidden;'>
       <div style='width:100%; height:100%; margin: 0; text-align: center;'>
@@ -98,40 +120,7 @@
       </div>
     </div>
 
-    <!-- Handle Internet Explorer -->
-    <script>
-
-      if (window && window.navigator && window.navigator.userAgent) {
-
-        var ua = window.navigator.userAgent;
-        var ie = false;
-
-        var msie = ua.indexOf('MSIE ');
-        if (msie > 0) {
-            // IE 10 or older => return version number
-            ie = true;
-        }
-
-        var trident = ua.indexOf('Trident/');
-        if (trident > 0) {
-            // IE 11 => return version number
-            ie = true;
-        }
-
-        if (ie === true) {
-          document.querySelector('.notSupported').style.visibility='visible';
-          document.querySelector('.notSupportedButton').style.display = 'visible';
-        }
-
-      }
-
-    </script>
-
-
-
-    <!-- Entry point for all components-->
-    <div ui-view="main" flex layout="column"></div>
-    <app />
+    <div id="app"></div>
 
     <!-- CSS AND JAVASCRIPT -->
 

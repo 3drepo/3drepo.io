@@ -18,9 +18,9 @@
 import { put, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import { TeamspacesTypes, TeamspacesActions } from './teamspaces.redux';
-import { SnackbarActions } from '../snackbar';
 import { DialogActions } from '../dialog';
+import { SnackbarActions } from '../snackbar';
+import { TeamspacesActions, TeamspacesTypes } from './teamspaces.redux';
 
 export function* fetchTeamspaces({ username }) {
 	try {

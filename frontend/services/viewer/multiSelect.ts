@@ -121,7 +121,7 @@ export class MultiSelectService {
 			groupElements[i].style.cursor = panelIcon;
 		}
 
-		const treeNodeElements: any = document.getElementsByClassName('tree-node');
+		const treeNodeElements: any = document.getElementsByClassName('tree-list');
 		for (let i = 0; i < treeNodeElements.length; ++i) {
 			treeNodeElements[i].style.cursor = panelIcon;
 		}

@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
 import { values } from 'lodash';
-import { searchByFilters } from '../../helpers/searching';
+import { createSelector } from 'reselect';
 import { RISK_LEVELS } from '../../constants/risks';
-import { riskToPin, hasPin } from '../../helpers/pins';
+import { hasPin, riskToPin } from '../../helpers/pins';
+import { searchByFilters } from '../../helpers/searching';
+import { selectQueryParams } from '../router/router.selectors';
 
-export const selectRisksDomain = (state) => Object.assign({}, state.risks);
+export const selectRisksDomain = (state) => ({...state.risks});
 
 export const selectRisks = createSelector(
 	selectRisksDomain, (state) => values(state.risksMap)
@@ -100,6 +101,10 @@ export const selectSortOrder = createSelector(
 
 export const selectFailedToLoad = createSelector(
 	selectComponentState, (state) => state.failedToLoad
+);
+
+export const selectSelectedRisk = createSelector(
+	selectRisksMap, selectQueryParams, (risks,  {riskId}) => risks[riskId]
 );
 
 export const selectPins = createSelector(

@@ -32,7 +32,7 @@ export const setPendingState = (state = INITIAL_STATE, { isPending }) => ({...st
 
 export const loadTemplateSuccess = (state = INITIAL_STATE, { path, template }) => ({
 	...state,
-	templates: Object.assign({}, state.templates, { [path]: template })
+	templates: {...state.templates,  [path]: template}
 });
 
 export const reducer = createReducer(INITIAL_STATE, {

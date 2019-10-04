@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../../helpers/migration';
 
+import { selectUserDetails, UsersActions } from '../../../modules/users';
 import { DynamicUsername } from './dynamicUsername.component';
-import { UsersActions, selectUserDetails } from '../../../modules/users';
 
 const mapStateToProps = ({}, { teamspace, name }) => createStructuredSelector({
 	userDetails: selectUserDetails(teamspace, name)

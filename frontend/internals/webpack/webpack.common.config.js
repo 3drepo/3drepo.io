@@ -1,8 +1,12 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
-const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
-const loaders = require('./tools/loaders');
+const OfflinePlugin = require('offline-plugin');
+const pickBy = require('lodash/pickBy');
+const identity = require('lodash/identity');
+
 const PATHS = require('./tools/paths');
+const MODES = require('./tools/modes');
+const loaders = require('./tools/loaders');
 
 const transpileOnly = process.argv.includes('--no-type-checking');
 
@@ -10,10 +14,15 @@ module.exports = (options) => {
   const config = {
     mode: options.mode || MODES.DEVELOPMENT,
     context: PATHS.APP_DIR,
-    entry: options.entry || './main.ts',
+    entry: pickBy({
+      maintenance: './maintenance.ts',
+      support: './support.ts',
+      main: './main.tsx',
+      ...options.entry
+    }, identity),
     output: Object.assign({
       path: PATHS.DIST_DIR,
-      filename: 'three_d_repo.[hash].js'
+      filename: '[name].[chunkhash].js'
     }, options.output),
     module: {
       rules: [
@@ -23,11 +32,9 @@ module.exports = (options) => {
         loaders.CSSExternalLoader,
         loaders.FontLoader,
         loaders.ImageLoader,
-        loaders.HTMLLoader,
-        loaders.PugLoader
+        loaders.HTMLLoader
       ],
     },
-
     plugins: [
       new CopyWebpackPlugin([
         { from: 'node_modules/zxcvbn/dist/zxcvbn.js' },
@@ -36,24 +43,22 @@ module.exports = (options) => {
         { from: 'icons/*', to: '../' },
         { from: 'unity/**', to: '../' },
         { from: 'manifest-icons/*', to: '../' },
+        { from: 'serviceWorkerExtras.js', to: '../' },
         { context: '../resources', from: '**/*.html', to: '../templates' }
       ], options),
       new HTMLWebpackPlugin({
         template: './index.html',
-        filename: '../index.html'
-      }),
-      new SWPrecacheWebpackPlugin({
-        filename: '../service-worker.js',
-        staticFileGlobs: [
-          '../../public/index.html',
-          '../../public/templates/.{html}',
-          '../../public/dist/**/*.{js,css}',
-          '../../public/dist/**/*.{svg,eot,ttf,woff,woff2}',
-          '../../public/icons/**/*.{svg}',
-          '../../public/images/**/*.{png,jpg}',
-          '../../public/unity/**/*.{js,html,data,mem,css,png,jpg}',
-        ],
-        stripPrefix: '../../public/'
+        filename: '../index.html',
+        removeComments: true,
+        collapseWhitespace: true,
+        removeRedundantAttributes: true,
+        useShortDoctype: true,
+        removeEmptyAttributes: true,
+        removeStyleLinkTypeAttributes: true,
+        keepClosingSlash: true,
+        minifyJS: true,
+        minifyCSS: true,
+        minifyURLs: true,
       }),
       ...(options.plugins || [])
     ],
@@ -67,6 +72,18 @@ module.exports = (options) => {
     target: 'web',
 
     stats: options.stats
+  }
+
+  if (options.mode !== MODES.DEVELOPMENT) {
+    config.plugins.push(
+      new OfflinePlugin({
+        ServiceWorker: {
+          output: '../sw.js',
+          entry: './serviceWorkerExtras.js'
+        },
+        excludes: ['**/*.map']
+      })
+    );
   }
 
   return config;

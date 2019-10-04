@@ -15,23 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import { isEmpty, pick } from 'lodash';
 import * as queryString from 'query-string';
-import { pick, isEmpty } from 'lodash';
+import React from 'react';
 import SimpleBar from 'simplebar-react';
 
 import { MODEL_ROLES_LIST } from '../../constants/model-permissions';
-import { CELL_TYPES, CustomTable } from '../components/customTable/customTable.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
+import { CustomTable, CELL_TYPES } from '../components/customTable/customTable.component';
 import { ModelItem } from '../components/modelItem/modelItem.component';
-import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 import { PermissionsTable } from '../components/permissionsTable/permissionsTable.component';
+import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 
 import {
 	Container,
 	ModelsContainer,
-	PermissionsContainer,
-	OverflowWrapper
+	OverflowWrapper,
+	PermissionsContainer
 } from './modelsPermissions.styles';
 
 const MODEL_TABLE_CELLS = [{
@@ -179,11 +179,11 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Container
-				container={true}
+				container
 				direction="row"
 				wrap="nowrap"
 			>
-				<ModelsContainer item={true}>
+				<ModelsContainer item>
 					<CustomTable
 						cells={MODEL_TABLE_CELLS}
 						rows={modelRows}
@@ -195,9 +195,9 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 							null
 					}
 				</ModelsContainer>
-				<PermissionsContainer item={true}>
+				<PermissionsContainer item>
 					<OverflowWrapper>
-						<SimpleBar data-simplebar-y-hidden={true}>
+						<SimpleBar data-simplebar-y-hidden>
 							<PermissionsTable
 								key={permissionsRevision}
 								permissions={permissions}

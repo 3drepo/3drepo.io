@@ -15,19 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { range } from 'lodash';
+import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import BorderColorIcon from '@material-ui/icons/BorderColor';
 import ClearIcon from '@material-ui/icons/Clear';
-import MenuItem from '@material-ui/core/MenuItem';
+import { range } from 'lodash';
+import React from 'react';
 
-import { Eraser } from '../../../fontAwesomeIcon';
-import { ToolsContainer, OptionsDivider, StyledButton } from './tools.styles';
+import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { FONT_WEIGHT } from '../../../../../styles';
 import { TooltipButton } from '../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ColorPicker } from '../../../colorPicker/colorPicker.component';
-import { FONT_WEIGHT } from '../../../../../styles';
-import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { Eraser } from '../../../fontAwesomeIcon';
+import { OptionsDivider, StyledButton, ToolsContainer } from './tools.styles';
 
 interface IProps {
 	innerRef: any;
@@ -53,26 +53,11 @@ export class Tools extends React.PureComponent<IProps, any> {
 		activeTool: TOOL_TYPES.BRUSH
 	};
 
-	public handleToolClick = (type, callback?) => () => {
-		this.setState({ activeTool: type }, callback);
-	}
-
-	public renderBrushSizes = () => range(56, 1).map((size, index) => (
-		<MenuItem key={index} value={size}>{size}</MenuItem>
-	))
-
-	public getToolColor = (toolType) => {
-		if (this.state.activeTool === toolType) {
-			return 'secondary';
-		}
-		return 'action';
-	}
-
 	public renderToolset = renderWhenTrue(() => {
 		const { size, color, onDrawClick, onEraseClick, onClearClick, onColorChange, onBrushSizeChange } = this.props;
 		return (
 			<>
-				<ColorPicker disableUnderline={true} value={color} onChange={onColorChange} />
+				<ColorPicker disableUnderline value={color} onChange={onColorChange} />
 				<Select
 					disableUnderline
 					value={size}
@@ -118,11 +103,26 @@ export class Tools extends React.PureComponent<IProps, any> {
 		<StyledButton onClick={this.props.onSave} color="secondary" variant="raised">Save</StyledButton>
 	));
 
+	public handleToolClick = (type, callback?) => () => {
+		this.setState({ activeTool: type }, callback);
+	}
+
+	public renderBrushSizes = () => range(56, 1).map((size, index) => (
+		<MenuItem key={index} value={size}>{size}</MenuItem>
+	))
+
+	public getToolColor = (toolType) => {
+		if (this.state.activeTool === toolType) {
+			return 'secondary';
+		}
+		return 'action';
+	}
+
 	public render() {
 		const { innerRef, disabled, onCancel } = this.props;
 
 		return (
-			<ToolsContainer innerRef={innerRef} disabled={disabled}>
+			<ToolsContainer ref={innerRef} disabled={disabled}>
 				{this.renderToolset(!disabled)}
 				<StyledButton onClick={onCancel} color="primary">Cancel</StyledButton>
 				{this.renderSaveButton(!disabled)}

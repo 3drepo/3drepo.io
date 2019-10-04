@@ -15,15 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as queryString from 'query-string';
 import Grid from '@material-ui/core/Grid';
+import * as queryString from 'query-string';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { Panel } from '../components/panel/panel.component';
-import { Logo } from '../components/logo/logo.component';
-
-import { Container, Paragraph, Buttons, StyledButton  } from './registerVerify.styles';
+import { Buttons, Container, Paragraph, StyledButton  } from './registerVerify.styles';
 
 interface IProps {
 	match: any;
@@ -82,7 +80,6 @@ export class RegisterVerify extends React.PureComponent<IProps, IState> {
 				alignItems="center"
 				wrap="nowrap"
 			>
-				<Logo />
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Registered for 3D Repo">
 						{message && <Paragraph> {message} </Paragraph>}

@@ -17,7 +17,7 @@
 
 import { createSelector } from 'reselect';
 
-export const selectSnackbarDomain = (state) => Object.assign({}, state.snackbar);
+export const selectSnackbarDomain = (state) => ({...state.snackbar});
 
 export const selectSnackConfig = createSelector(
 	selectSnackbarDomain, (state) => state.snackConfig

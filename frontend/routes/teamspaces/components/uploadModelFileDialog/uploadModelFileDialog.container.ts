@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
-import { connect, addRouting } from '../../../../helpers/migration';
 import { createStructuredSelector } from 'reselect';
-import { ModelActions, selectSettings, selectRevisions, selectIsPending } from './../../../../modules/model';
+import { selectIsPending, selectRevisions, selectSettings, ModelActions } from './../../../../modules/model';
 import { UploadModelFileDialog } from './uploadModelFileDialog.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -34,4 +34,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchRevisions: ModelActions.fetchRevisions
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(UploadModelFileDialog)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(UploadModelFileDialog));

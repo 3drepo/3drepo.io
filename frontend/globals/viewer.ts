@@ -14,9 +14,9 @@
  **  You should have received a copy of the GNU Affero General Public License
  **  along with this program.  If not, see <http=//www.gnu.org/licenses/>.
  **/
-import * as EventEmitter from 'eventemitter3';
+import EventEmitter from 'eventemitter3';
 
-import { VIEWER_NAV_MODES, VIEWER_MAP_SOURCES, VIEWER_EVENTS, VIEWER_ERRORS } from '../constants/viewer';
+import { VIEWER_ERRORS, VIEWER_EVENTS, VIEWER_MAP_SOURCES, VIEWER_NAV_MODES } from '../constants/viewer';
 
 declare const Pin;
 declare const UnityUtil;
@@ -93,13 +93,10 @@ export class Viewer {
 	public divId = 'unityViewer';
 
 	public unityLoaderPath = 'unity/Build/UnityLoader.js';
-	public unityScriptInserted = false;
 	public viewer: HTMLElement;
 
 	public handle;
 	public unityLoaderReady: boolean;
-	public loadingDiv: HTMLElement;
-	public loadingDivText: HTMLElement;
 
 	public options;
 	public Module;
@@ -133,25 +130,15 @@ export class Viewer {
 			this.name = config.name;
 		}
 
-		this.callback = config.onEvent;
 		this.errCallback = config.onError;
 
-		UnityUtil.init(config.onError);
+		UnityUtil.init(config.onError, this.onUnityProgress, this.onModelProgress);
+		UnityUtil.hideProgressBar();
 
 		this.unityLoaderReady = false;
 
 		this.viewer = document.createElement('div');
 		this.viewer.className = 'viewer';
-
-		this.loadingDiv = document.createElement('div');
-		this.loadingDivText = document.createElement('p');
-
-		this.loadingDivText.innerHTML = '';
-
-		this.loadingDiv.className += 'loadingViewer';
-		this.loadingDivText.className += 'loadingViewerText';
-
-		this.loadingDiv.appendChild(this.loadingDivText);
 
 		const unityHolder = document.createElement('div');
 		unityHolder.className = 'emscripten';
@@ -170,10 +157,8 @@ export class Viewer {
 
 		this.element.appendChild(this.viewer);
 		this.viewer.appendChild(unityHolder);
-		this.viewer.appendChild(this.loadingDiv);
 
 		this.unityLoaderScript = document.createElement('script');
-
 	}
 
 	public on = (event, fn, ...args) => {
@@ -189,10 +174,6 @@ export class Viewer {
 	}
 
 	public emit = (event, ...args) => {
-		if (this.callback) {
-			this.callback(event, ...args);
-		}
-
 		this.emitter.emit(event, ...args);
 	}
 
@@ -216,6 +197,9 @@ export class Viewer {
 	}
 
 	public insertUnityLoader(memory) {
+		if (document.querySelector('.unity-loader')) {
+			return Promise.resolve();
+		}
 		return new Promise((resolve, reject) => {
 			this.unityLoaderScript.addEventListener ('load', () => {
 				console.debug('Loaded UnityLoader.js succesfully');
@@ -231,8 +215,8 @@ export class Viewer {
 			this.unityLoaderScript.src = this.unityLoaderPath;
 
 			// This kicks off the actual loading of Unity
-			this.viewer.appendChild(this.unityLoaderScript);
-			this.unityScriptInserted = true;
+			this.unityLoaderScript.setAttribute('class', 'unity-loader');
+			document.body.appendChild(this.unityLoaderScript);
 		});
 	}
 
@@ -246,8 +230,7 @@ export class Viewer {
 
 			// Set option param from viewerDirective
 			this.options = options;
-			this.loadingDivText.style.display = 'block';
-			this.loadingDivText.innerHTML = 'Loading Viewer...';
+			this.emit(Viewer.EVENT.VIEWER_INIT);
 			document.body.style.cursor = 'wait';
 
 			// Shouldn't need this, but for something it is not being recognised from unitySettings!
@@ -270,21 +253,31 @@ export class Viewer {
 
 			UnityUtil.onReady().then(() => {
 				this.initialized = true;
-				this.loadingDivText.style.display = 'none';
 				this.emit(Viewer.EVENT.UNITY_READY, {
 					model: this.modelString,
 					name: this.name
 				});
 				resolve();
 			}).catch((error) => {
-				this.loadingDivText.innerHTML = 'Loading Viewer Failed!';
-				this.loadingDivText.style.display = 'block';
+				this.emit(Viewer.EVENT.VIEWER_INIT, error);
 				console.error('UnityUtil.onReady failed: ', error);
 				reject(error);
 			});
 
 		});
 
+	}
+
+	public onUnityProgress = (progress) => {
+		if (progress === 1) {
+			this.emit(Viewer.EVENT.VIEWER_INIT_SUCCESS, progress);
+		} else {
+			this.emit(Viewer.EVENT.VIEWER_INIT_PROGRESS, progress);
+		}
+	}
+
+	public onModelProgress = (progress) => {
+		this.emit(Viewer.EVENT.MODEL_LOADING_PROGRESS, progress);
 	}
 
 	public getDefaultHighlightColor() {
@@ -296,7 +289,8 @@ export class Viewer {
 	}
 
 	public destroy() {
-		UnityUtil.reset();
+		this.emitter.removeAllListeners();
+		this.reset();
 	}
 
 	public showAll() {
@@ -348,7 +342,6 @@ export class Viewer {
 	}
 
 	public pickPointEvent(pointInfo) {
-
 		// User clicked a mesh
 		this.emit(Viewer.EVENT.PICK_POINT, {
 			id : pointInfo.id,
@@ -369,7 +362,6 @@ export class Viewer {
 	}
 
 	public objectSelected(pointInfo) {
-
 		if (!this.selectionDisabled && !this.pinDropMode && !this.measureMode) {
 			if (pointInfo.id) {
 				if (pointInfo.pin) {
@@ -377,7 +369,6 @@ export class Viewer {
 					this.emit(Viewer.EVENT.CLICK_PIN, {
 						id: pointInfo.id
 					});
-
 				} else {
 					this.emit(Viewer.EVENT.OBJECT_SELECTED, {
 						account: pointInfo.database,
@@ -388,12 +379,10 @@ export class Viewer {
 				}
 			} else {
 				this.emit(Viewer.EVENT.BACKGROUND_SELECTED);
-				this.emitter.emit(Viewer.EVENT.BACKGROUND_SELECTED);
 			}
 		} else {
 			if (!pointInfo.id) {
 				this.emit(Viewer.EVENT.BACKGROUND_SELECTED_PIN_MODE);
-				this.emitter.emit(Viewer.EVENT.BACKGROUND_SELECTED_PIN_MODE);
 			}
 		}
 
@@ -492,7 +481,6 @@ export class Viewer {
 	public reset() {
 		this.setMeasureMode(false);
 		this.setPinDropMode(false);
-		this.loadingDivText.style.display = 'none';
 		this.initialized = false;
 		UnityUtil.reset();
 	}
@@ -500,6 +488,7 @@ export class Viewer {
 	public cancelLoadModel() {
 		document.body.style.cursor = 'initial';
 		UnityUtil.cancelLoadModel();
+		this.emit(Viewer.EVENT.MODEL_LOADING_CANCEL);
 	}
 
 	public async isModelLoaded() {
@@ -509,12 +498,12 @@ export class Viewer {
 
 	public async loadModel(account, model, branch, revision) {
 		await UnityUtil.onReady();
+		this.emit(Viewer.EVENT.MODEL_LOADING_START);
 		this.initialized = true;
 		this.account = account;
 		this.model = model;
 		this.branch = branch;
 		this.revision = revision;
-		this.loadingDivText.style.display = 'none';
 		document.body.style.cursor = 'wait';
 
 		UnityUtil.loadModel(account, model, branch, revision);
@@ -522,7 +511,7 @@ export class Viewer {
 		UnityUtil.onLoaded().then((bbox) => {
 			document.body.style.cursor = 'initial';
 
-			this.emit(Viewer.EVENT.MODEL_LOADED);
+			this.emit(Viewer.EVENT.MODEL_LOADED, 1);
 			this.emit(Viewer.EVENT.BBOX_READY, bbox);
 		}).catch((error) => {
 			document.body.style.cursor = 'initial';
@@ -651,37 +640,6 @@ export class Viewer {
 
 	public selectPin(id) {
 		UnityUtil.selectPin(id);
-	}
-
-	public clickPin(id) {
-
-		if (this.pins.hasOwnProperty(id)) {
-			const pin = this.pins[id];
-
-			this.emit(Viewer.EVENT.SET_CAMERA, {
-				account: pin.account,
-				model: pin.model,
-				position : pin.viewpoint.position,
-				up: pin.viewpoint.up,
-				view_dir : pin.viewpoint.view_dir
-			});
-
-			this.emit(Viewer.EVENT.UPDATE_CLIPPING_PLANES, {
-				account: pin.account,
-				clippingPlanes: pin.viewpoint.clippingPlanes,
-				fromClipPanel: false,
-				model: pin.model
-			});
-		}
-
-	}
-
-	public setPinVisibility(id, visibility) {
-		if (this.pins.hasOwnProperty(id)) {
-			const pin = this.pins[id];
-
-			pin.setAttribute('render', visibility.toString());
-		}
 	}
 
 	public removePin(id) {

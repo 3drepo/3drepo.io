@@ -17,7 +17,7 @@
 
 import { createSelector } from 'reselect';
 
-export const selectJobsDomain = (state) => Object.assign({}, state.jobs);
+export const selectJobsDomain = (state) => ({...state.jobs});
 
 export const selectJobs = createSelector(
 	selectJobsDomain, (state) => state.jobs

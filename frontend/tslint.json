@@ -8,8 +8,14 @@
         "no-console": [true, "log", "warning"],
         "object-literal-sort-keys": false,
         "no-empty": false,
-        "ordered-imports": false,
-        "trailing-comma":  [true, {"multiline": "never", "singleline": "never"}],
+        "ordered-imports": [
+            true,
+            {
+                "named-imports-order": "lowercase-first",
+                "module-source-path": "full"
+            }
+        ],
+        "trailing-comma": true,
         "forin": false,
         "no-bitwise": false,
         "quotemark": [true, "single", "jsx-double"],
@@ -17,14 +23,10 @@
             true,
             {
                 "order": [
-                    "public-static-field",
-                    "private-static-field",
-                    "private-instance-field",
-                    "private-constructor",
-                    "public-constructor",
-                    "public-instance-method",
-                    "protected-instance-method",
-                    "private-instance-method"
+                    "static-field",
+                    "instance-field",
+                    "constructor",
+                    "instance-method"
                 ]
             }
         ],
@@ -33,6 +35,22 @@
         "jsx-no-lambda": false,
         "jsx-curly-spacing": [true, "never"],
         "jsx-equals-spacing": [true, "never"],
-        "jsx-boolean-value": false
+        "jsx-no-string-ref": true,
+        "jsx-self-close": true,
+        "jsx-space-before-trailing-slash": true,
+        "jsx-no-bind": true,
+        "jsx-boolean-value": [true, "never"],
+        "no-invalid-template-strings": true,
+        "prefer-object-spread": true,
+        "radix": true,
+        "unnecessary-constructor": true,
+        "max-classes-per-file": [
+            true,
+            1
+        ],
+        "no-irregular-whitespace": true,
+        "no-empty-interface": true,
+        "curly": true,
+        "no-async-without-await": true
     }
 }

@@ -17,7 +17,7 @@
 
 import { createSelector } from 'reselect';
 
-export const selectUsersDomain = (state) => Object.assign({}, state.users);
+export const selectUsersDomain = (state) => ({...state.users});
 
 export const selectCachedResponses = createSelector(
 	selectUsersDomain, (state) => state.cachedResponses

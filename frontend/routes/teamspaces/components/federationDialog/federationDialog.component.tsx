@@ -15,23 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import Button from '@material-ui/core/Button';
+import DialogActions from '@material-ui/core/DialogActions';
+import InputLabel from '@material-ui/core/InputLabel';
+import TextField from '@material-ui/core/TextField';
+import ArrowBack from '@material-ui/icons/ArrowBack';
+import ArrowForward from '@material-ui/icons/ArrowForward';
+import { Field, Form, Formik } from 'formik';
+import { differenceBy, includes, isEmpty } from 'lodash';
+import React from 'react';
 import * as Yup from 'yup';
-import { Formik, Form, Field } from 'formik';
-import { isEmpty, includes, differenceBy } from 'lodash';
 import {
 	getAvailableModels,
 	getFederatedModels,
 	getModelsMap,
-	getProject,
-	getNewSelectedModels
+	getNewSelectedModels,
+	getProject
 } from './federationDialog.helpers';
-import DialogActions from '@material-ui/core/DialogActions';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import InputLabel from '@material-ui/core/InputLabel';
-import ArrowForward from '@material-ui/icons/ArrowForward';
-import ArrowBack from '@material-ui/icons/ArrowBack';
 
 import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
@@ -39,7 +39,7 @@ import { CellSelect } from '../../../components/customTable/components/cellSelec
 import { LoadingDialog } from './../../../../routes/components/dialogContainer/components';
 import { SubModelsField } from './components/subModelsField/subModelsField.component';
 
-import { Row, SelectWrapper, FieldWrapper, StyledDialogContent } from './federationDialog.styles';
+import { FieldWrapper, Row, SelectWrapper, StyledDialogContent } from './federationDialog.styles';
 
 const FederationSchema = Yup.object().shape({
 	modelName: schema.firstName.min(2).max(120).required(),
@@ -290,8 +290,8 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 			>
 				<Form>
 					<StyledDialogContent>
-						<SelectWrapper fullWidth={true} required={true}>
-							<InputLabel shrink={true} htmlFor="teamspace-select">Teamspace</InputLabel>
+						<SelectWrapper fullWidth required>
+							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
 							<Field name="teamspace" render={ ({ field, form }) => (
 								<CellSelect
 									{...field}
@@ -300,15 +300,15 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 									items={teamspaces}
 									placeholder="Select teamspace"
 									disabled={Boolean(teamspace)}
-									disabledPlaceholder={true}
+									disabledPlaceholder
 									inputId="teamspace-select"
 									value={teamspace}
 									onChange={this.handleTeamspaceChange(field.onChange)}
 								/>
 							)} />
 						</SelectWrapper>
-						<SelectWrapper fullWidth={true} required={true}>
-							<InputLabel shrink={true} htmlFor="project-select">Project</InputLabel>
+						<SelectWrapper fullWidth required>
+							<InputLabel shrink htmlFor="project-select">Project</InputLabel>
 							<Field name="project" render={ ({ field, form }) => (
 								<CellSelect
 									{...field}
@@ -317,7 +317,7 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 									items={projectsItems}
 									placeholder="Select project"
 									disabled={Boolean(project)}
-									disabledPlaceholder={true}
+									disabledPlaceholder
 									inputId="project-select"
 									value={project}
 									onChange={this.handleProjectChange(field.onChange)}
@@ -334,21 +334,21 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 										label="Federation Name"
 										margin="normal"
 										disabled={editMode}
-										required={true}
-										fullWidth={true}
+										required
+										fullWidth
 										value={this.state.name}
 										onChange={this.handleNameChange(field.onChange)}
 									/>
 								)} />
 							</FieldWrapper>
-							<SelectWrapper fullWidth={true} required={true}>
-								<InputLabel shrink={true} htmlFor="unit-select">Unit</InputLabel>
+							<SelectWrapper fullWidth required>
+								<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
 								<Field name="unit" render={ ({ field }) => (
 									<CellSelect
 										{...field}
 										placeholder="Select unit"
-										disabledPlaceholder={true}
-										required={true}
+										disabledPlaceholder
+										required
 										items={clientConfigService.units}
 										value={unit}
 										disabled={editMode}

@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, all, call, select } from 'redux-saga/effects';
 import { get } from 'lodash';
+import { all, call, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
-import { CurrentUserTypes, CurrentUserActions } from './currentUser.redux';
-import { selectCurrentUser } from './currentUser.selectors';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { ViewerActions } from '../viewer';
+import { CurrentUserActions, CurrentUserTypes } from './currentUser.redux';
+import { selectCurrentUser } from './currentUser.selectors';
 
 export const getAvatarUrl = (username) => API.getAPIUrl(`${username}/avatar?${Date.now()}`);
 

@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import Tooltip from '@material-ui/core/Tooltip';
-import { Container, Username, TooltipText, FullName, CompanyName } from './dynamicUsername.styles';
+import React from 'react';
+import { CompanyName, Container, FullName, TooltipText, Username } from './dynamicUsername.styles';
 
 interface IProps {
 	name: string;

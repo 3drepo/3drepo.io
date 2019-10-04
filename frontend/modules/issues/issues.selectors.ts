@@ -15,14 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
 import { values } from 'lodash';
+import { createSelector } from 'reselect';
 import { STATUSES } from '../../constants/issues';
+import { hasPin, issueToPin } from '../../helpers/pins';
 import { searchByFilters } from '../../helpers/searching';
 import { selectCurrentModel } from '../model';
-import { issueToPin, hasPin } from '../../helpers/pins';
+import { selectQueryParams } from '../router/router.selectors';
 
-export const selectIssuesDomain = (state) => Object.assign({}, state.issues);
+export const selectIssuesDomain = (state) => ({...state.issues});
 
 export const selectComponentState = createSelector(
 	selectIssuesDomain, (state) => state.componentState
@@ -113,6 +114,10 @@ export const selectSortOrder = createSelector(
 
 export const selectFailedToLoad = createSelector(
 	selectComponentState, (state) => state.failedToLoad
+);
+
+export const selectSelectedIssue = createSelector(
+	selectIssuesMap, selectQueryParams, (issues,  {issueId}) => issues[issueId]
 );
 
 export const selectPins = createSelector(

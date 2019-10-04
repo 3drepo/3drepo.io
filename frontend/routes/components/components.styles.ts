@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { Button, IconButton } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
+import styled from 'styled-components';
 import { COLOR } from '../../styles';
-import { IconButton, Button } from '@material-ui/core';
 
 const BaseStyles = styled(Grid)`
 	white-space: nowrap;

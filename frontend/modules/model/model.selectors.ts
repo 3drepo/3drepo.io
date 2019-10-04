@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector, createSelectorCreator } from 'reselect';
+import { createSelector } from 'reselect';
+import { formatDate, LONG_DATE_TIME_FORMAT } from '../../services/formatting/formatDate';
+import { selectUrlParams } from '../router/router.selectors';
 
-export const selectModelDomain = (state) => Object.assign({}, state.model);
+export const selectModelDomain = (state) => ({...state.model});
 
 export const selectSettings = createSelector(
 	selectModelDomain, (state) => state.settings
@@ -25,6 +27,20 @@ export const selectSettings = createSelector(
 
 export const selectRevisions = createSelector(
 	selectModelDomain, (state) => state.revisions
+);
+
+export const selectCurrentRevision = createSelector(
+	selectRevisions, selectUrlParams , (revisions, params) => {
+		const paramRevision = params.revision ?
+			revisions.find((revision) => revision.tag === params.revision ||  revision._id === params.revision)
+			: null;
+
+		return  paramRevision || revisions[0];
+	}
+);
+
+export const selectCurrentRevisionId = createSelector(
+	selectCurrentRevision, (revision = {}) => revision.tag || revision._id
 );
 
 export const selectIsPending = createSelector(
@@ -41,6 +57,10 @@ export const selectMaps = createSelector(
 
 export const selectCurrentModel = createSelector(
 	selectSettings, (state) => state.model
+);
+
+export const selectCurrentModelName = createSelector(
+	selectSettings, (state) => state.name
 );
 
 export const selectMetaKeys = createSelector(

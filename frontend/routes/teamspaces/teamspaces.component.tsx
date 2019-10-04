@@ -15,30 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import SimpleBar from 'simplebar-react';
-import * as queryString from 'query-string';
 import { isEmpty, isEqual } from 'lodash';
-import Add from '@material-ui/icons/Add';
+import * as queryString from 'query-string';
+import React from 'react';
+import SimpleBar from 'simplebar-react';
+import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
+
 import MenuItem from '@material-ui/core/MenuItem';
+import Add from '@material-ui/icons/Add';
 
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
+import { Body, BodyWrapper } from '../components/customTable/customTable.styles';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
-import ModelItem from './components/modelItem/modelItem.container';
-import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
-import { getAngularService, runAngularTimeout } from '../../helpers/migration';
-import { ProjectDialog } from './components/projectDialog/projectDialog.component';
-import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
-import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
-import { ModelDialog } from './components/modelDialog/modelDialog.component';
-import FederationDialog from './components/federationDialog/federationDialog.container';
-import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
-import { ProjectItem } from './components/projectItem/projectItem.component';
-import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
-import { MODEL_TYPE, FEDERATION_TYPE } from './teamspaces.contants';
 import { PERMISSIONS_VIEWS } from '../projects/projects.component';
-import { BodyWrapper, Body } from '../components/customTable/customTable.styles';
+import FederationDialog from './components/federationDialog/federationDialog.container';
+import { ModelDialog } from './components/modelDialog/modelDialog.component';
+import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
+import ModelItem from './components/modelItem/modelItem.container';
+import { ProjectDialog } from './components/projectDialog/projectDialog.component';
+import { ProjectItem } from './components/projectItem/projectItem.component';
+import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
+import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
+import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
+import { FEDERATION_TYPE, MODEL_TYPE } from './teamspaces.contants';
+import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
 
 const PANEL_PROPS = {
 	title: 'Teamspaces',
@@ -148,8 +149,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		this.props.history.push({ pathname, search: `?${queryString.stringify(params)}` });
 	}
 
-	public onTeamspaceClick = (teamspace) => {
-		this.setState({ activeTeamspace: teamspace.account });
+	public onTeamspaceClick = ({ name }) => {
+		this.setState({ activeTeamspace: name });
 	}
 
 	/**
@@ -299,12 +300,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		const { activeTeamspace } = this.state;
 		if (props.timestamp) {
 			event.persist();
-			runAngularTimeout(() => {
-				this.createRouteHandler(`/viewer/${activeTeamspace}/${props.model}`)(event);
-			});
+			this.createRouteHandler(`/viewer/${activeTeamspace}/${props.model}`)(event);
 
-			const analyticService = getAngularService('AnalyticService') as any;
-			analyticService.sendEvent({ eventCategory: 'Model', eventAction: 'view' });
+			analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
 		} else {
 			this.openUploadModelFileDialog(activeTeamspace, props)(event);
 		}
@@ -329,7 +327,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				activeTeamspace={activeTeamspace}
 				actions={[]}
 				onModelItemClick={this.createModelItemClickHandler(props)}
-				onPermissionsClick={ this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
+				onPermissionsClick={this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
 					project: props.projectName,
 					view: PERMISSIONS_VIEWS.MODELS,
 					modelId: props.model
@@ -406,7 +404,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			active={this.isActiveTeamspace(teamspace.account)}
 			isMyTeamspace={index === 0}
 			renderChildItem={this.renderProject}
-			onToggle={this.onTeamspaceClick.bind(this, teamspace)}
+			onToggle={this.onTeamspaceClick}
 			onAddProject={this.openProjectDialog(teamspace.account)}
 		/>
 	))
@@ -418,7 +416,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			color="secondary"
 			aria-label="Toggle menu"
 			aria-haspopup="true"
-			mini={true}
+			mini
 			onClick={props.onClick}
 			disabled={isPending}
 		>

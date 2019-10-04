@@ -15,16 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Route, Redirect } from 'react-router-dom';
+import React from 'react';
+import { Redirect, Route } from 'react-router-dom';
+import { ROUTES } from '../../../constants/routes';
 
-export const PrivateRoute = ({ component: Component, isAuthenticated, ...routeProps }) => (
-	<Route {...routeProps} render={(props) => (
-		isAuthenticated === true
-			? <Component {...props} />
-			: <Redirect to={{
-				pathname: '/login',
-				state: { from: props.location }
-			}} />
-	)} />
-);
+export const PrivateRoute = ({ component: Component, isAuthenticated, onLogout, push, ...routeProps }) => {
+	if (isAuthenticated === null) {
+		return null;
+	}
+
+	const redirect = (props) => (
+		<Redirect to={{
+			pathname: ROUTES.LOGIN,
+			state: { from: props.location }
+		}} />
+	);
+	const renderComponent = (props) => <Component {...props} />;
+
+	const renderRoute = (props) => isAuthenticated ? renderComponent(props) : redirect(props);
+	return <Route {...routeProps} render={renderRoute} />;
+};

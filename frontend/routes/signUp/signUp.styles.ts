@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import FormControl from '@material-ui/core/FormControl';
+import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select';
+import styled from 'styled-components';
 
 import { COLOR, FONT_WEIGHT } from '../../styles';
 import * as PanelStyles from '../components/panel/panel.styles';
@@ -35,7 +35,7 @@ export const StyledSelect = styled(Select)`
 export const Container = styled(Grid)`
 	&& {
 		height: 100%;
-		padding-top: 30px;
+		z-index: 1;
 	}
 
 	${PanelStyles.Container} {
@@ -105,4 +105,8 @@ export const ButtonContainer = styled.div`
 	display: flex;
 	justify-content: flex-end;
 	margin: 12px 0 24px;
+`;
+
+export const TermLink = styled.a`
+	color: ${COLOR.PRIMARY_MAIN};
 `;

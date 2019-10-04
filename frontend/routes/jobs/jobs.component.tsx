@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { isEqual, isEmpty } from 'lodash';
 import RemoveCircle from '@material-ui/icons/RemoveCircle';
+import { isEmpty, isEqual } from 'lodash';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
+import { ColorPicker } from '../components/colorPicker/colorPicker.component';
+import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
+import { CustomTable, CELL_TYPES, TableButton } from '../components/customTable/customTable.component';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
 import { NewJobForm } from '../components/newJobForm/newJobForm.component';
-import { CELL_TYPES, CustomTable, TableButton } from '../components/customTable/customTable.component';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
-import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
-import { ColorPicker } from '../components/colorPicker/colorPicker.component';
 import { Container } from './jobs.styles';
 
 const JOBS_TABLE_CELLS = [{

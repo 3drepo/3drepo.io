@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
+import { Field, Form, Formik } from 'formik';
 import { omit } from 'lodash';
+import React from 'react';
+import * as Yup from 'yup';
 
 import {
+	FieldsRow,
 	FormContainer,
 	Headline,
-	StyledTextField,
-	FieldsRow,
-	StyledButton
+	StyledButton,
+	StyledTextField
 } from '../profile.styles';
 
 import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../../services/validation';
@@ -86,9 +86,9 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 				onSubmit={this.handlePasswordUpdate}
 			>
 				<Form>
-					<FormContainer container={true} direction="column">
+					<FormContainer container direction="column">
 						<Headline color="primary" variant="subheading">Password Settings</Headline>
-						<FieldsRow container={true} wrap="nowrap">
+						<FieldsRow container wrap="nowrap">
 							<Field name="oldPassword" render={ ({ field, form }) => (
 								<StyledTextField
 									{...field}
@@ -96,7 +96,7 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 									helperText={form.touched.oldPassword && (form.errors.oldPassword || '')}
 									label="Old password"
 									margin="normal"
-									required={true}
+									required
 									type="password"
 								/>
 							)} />
@@ -108,7 +108,7 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 									helperText={form.touched.newPassword && (form.errors.newPassword || '')}
 									label={`New password${this.state.newPasswordStrengthMessage}`}
 									margin="normal"
-									required={true}
+									required
 									type="password"
 									onChange={this.handleNewPasswordChange(field.onChange)}
 								/>
@@ -120,7 +120,7 @@ export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
 									helperText={form.touched.newPasswordConfirm && (form.errors.newPasswordConfirm || '')}
 									label="New password confirmation"
 									margin="normal"
-									required={true}
+									required
 									type="password"
 									onChange={this.handleNewPasswordChange(field.onChange)}
 								/>

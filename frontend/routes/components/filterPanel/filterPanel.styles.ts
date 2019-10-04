@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { COLOR } from './../../../styles/colors';
-import Popper from '@material-ui/core/Popper';
-import TextField from '@material-ui/core/TextField';
 import Chip from '@material-ui/core/Chip';
 import IconButton from '@material-ui/core/IconButton';
-import More from '@material-ui/icons/MoreVert';
+import Popper from '@material-ui/core/Popper';
+import TextField from '@material-ui/core/TextField';
 import Copy from '@material-ui/icons/FileCopy';
+import More from '@material-ui/icons/MoreVert';
+import styled, { css } from 'styled-components';
+import { COLOR } from './../../../styles/colors';
 
 interface IContainer {
 	filtersOpen: boolean;
@@ -66,7 +66,7 @@ export const InputContainer = styled.div<IInputContainer>`
 	justify-content: flex-end;
 	position: relative;
 	margin: 0;
-	min-height: ${(props) => props.menuHidden ? `52px` : '0'};
+	min-height: ${(props) => props.menuHidden ? `50px` : '0'};
 
 	.react-autosuggest__container {
 		height: 100%;
@@ -193,7 +193,7 @@ export const Chips = styled.div<IChips>`
 
 export const Placeholder = styled.div`
 	position: absolute;
-	left: 48px;
+	left: 12px;
 	color: ${COLOR.BLACK_60};
 	font-size: 14px;
 	top: 50%;

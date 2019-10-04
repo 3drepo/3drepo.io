@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect, addRouting } from '../../helpers/migration';
 
-import { UserManagement } from './userManagement.component';
 import {
-	UserManagementActions,
 	selectCurrentTeamspace,
 	selectIsPending,
-	selectIsTeamspaceAdmin
+	selectIsTeamspaceAdmin,
+	UserManagementActions
 } from '../../modules/userManagement';
+import { UserManagement } from './userManagement.component';
 
 import { selectTeamspacesWithAdminAccess } from '../../modules/teamspaces/teamspaces.selectors';
 
@@ -50,4 +50,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onTeamspaceChange: UserManagementActions.fetchTeamspaceDetails
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(UserManagement);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(UserManagement));

@@ -18,11 +18,11 @@
 import styled from 'styled-components';
 import { COLOR } from '../../../../../../styles';
 
-import TableCellComponent from '@material-ui/core/TableCell';
-import TableRowComponent from '@material-ui/core/TableRow';
 import Checkbox from '@material-ui/core/Checkbox';
 import Table from '@material-ui/core/Table';
+import TableCellComponent from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
+import TableRowComponent from '@material-ui/core/TableRow';
 
 export const HeaderCheckboxWrapper = styled.div`
 	display: flex;

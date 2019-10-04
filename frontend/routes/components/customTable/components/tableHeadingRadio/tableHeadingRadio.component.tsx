@@ -15,15 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import Radio from '@material-ui/core/Radio';
-import Tooltip from '@material-ui/core/Tooltip';
-import Grid from '@material-ui/core/Grid';
+import { Grid, Tooltip } from '@material-ui/core';
+import React from 'react';
 
-import { RadioContainer, RadioButton } from './tableHeadingRadio.styles';
 import { SortLabel } from '../tableHeading/tableHeading.styles';
-import { SORT_ORDER_TYPES } from '../../../../../constants/sorting';
+import { RadioButton, RadioContainer } from './tableHeadingRadio.styles';
 
 interface IProps {
 	label: string;
@@ -58,13 +54,13 @@ export class TableHeadingRadio extends React.PureComponent<IProps, any> {
 		return (
 			<Tooltip title={tooltipText}>
 				<RadioContainer
-					container={true}
+					container
 					direction="column"
 					justify="center"
 					alignItems="center"
 					{...RadioContainerProps}
 				>
-					<Grid item={true}>
+					<Grid item>
 						<SortLabel
 							active={activeSort}
 							direction={sortOrder}
@@ -73,7 +69,7 @@ export class TableHeadingRadio extends React.PureComponent<IProps, any> {
 							{label}
 						</SortLabel>
 					</Grid>
-					<Grid item={true}>
+					<Grid item>
 						<RadioButton
 							checked={checked}
 							name={name || label}

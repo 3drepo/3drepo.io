@@ -15,14 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 
-import { MuiThemeProvider } from '@material-ui/core/styles';
-import { ThemeProvider } from 'styled-components';
-import { MuiTheme, theme } from '../../../styles';
-import { Container, Title, Content, ContentWrapper } from './panel.styles';
+import { Container, Content, ContentWrapper, Title } from './panel.styles';
 
 interface IProps {
+	className?: string;
 	title?: string | JSX.Element;
 	children: any;
 	paperProps?: any;
@@ -30,16 +28,12 @@ interface IProps {
 }
 
 export const Panel = (props: IProps) => (
-	<ThemeProvider theme={theme}>
-		<MuiThemeProvider theme={MuiTheme}>
-			<Container {...props.paperProps}>
-				<Title>{props.title}</Title>
-				<Content>
-					<ContentWrapper hiddenScrollbars={props.hiddenScrollbars}>
-						{props.children}
-					</ContentWrapper>
-				</Content>
-			</Container>
-		</MuiThemeProvider>
-	</ThemeProvider>
+	<Container {...props.paperProps} className={props.className}>
+		<Title>{props.title}</Title>
+		<Content>
+			<ContentWrapper hiddenScrollbars={props.hiddenScrollbars}>
+				{props.children}
+			</ContentWrapper>
+		</Content>
+	</Container>
 );

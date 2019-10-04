@@ -15,40 +15,40 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as Autosuggest from 'react-autosuggest';
-import { omit, isNil, uniqBy, keyBy } from 'lodash';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import CollapseIcon from '@material-ui/icons/ExpandMore';
 import ExpandIcon from '@material-ui/icons/ChevronRight';
+import CollapseIcon from '@material-ui/icons/ExpandMore';
+import { isNil, keyBy, omit, uniqBy } from 'lodash';
+import React from 'react';
+import Autosuggest from 'react-autosuggest';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
-import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import SearchIcon from '@material-ui/icons/Search';
+import { BACKSPACE, ENTER_KEY } from '../../../constants/keys';
+import { renderWhenTrue } from '../../../helpers/rendering';
+import { compareStrings } from '../../../helpers/searching';
+import { formatShortDate } from '../../../services/formatting/formatDate';
+import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { Highlight } from '../highlight/highlight.component';
-import { ENTER_KEY, BACKSPACE } from '../../../constants/keys';
 import { FiltersMenu } from './components/filtersMenu/filtersMenu.component';
 import {
-	Container,
-	SelectedFilters,
-	InputContainer,
-	SuggestionsList,
-	StyledTextField,
-	StyledChip,
-	FiltersButton,
 	ButtonContainer,
-	StyledIconButton,
-	MoreIcon,
-	CopyIcon,
 	ButtonWrapper,
 	Chips,
+	Container,
+	CopyIcon,
+	FiltersButton,
+	InputContainer,
+	MoreIcon,
 	Placeholder,
-	PlaceholderText
+	PlaceholderText,
+	SelectedFilters,
+	StyledChip,
+	StyledIconButton,
+	StyledTextField,
+	SuggestionsList
 } from './filterPanel.styles';
-import { compareStrings } from '../../../helpers/searching';
-import { renderWhenTrue } from '../../../helpers/rendering';
-import { formatShortDate } from '../../../services/formatting/formatDate';
 
 export const DATA_TYPES = {
 	UNDEFINED: 1,
@@ -139,6 +139,16 @@ const mapFiltersToSuggestions = (filters, selectedFilters) => {
 };
 
 export class FilterPanel extends React.PureComponent<IProps, IState> {
+
+	public get onlyCopyButton() {
+		const onlyQueryFilters = this.props.filters.every((filter) => filter.type === DATA_TYPES.QUERY);
+		return onlyQueryFilters;
+	}
+
+	public static defaultProps = {
+		filters: [],
+		autoFocus: true
+	};
 	public state = {
 		selectedFilters: [],
 		value: '',
@@ -147,14 +157,38 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		removableFilterIndex: null
 	};
 
-	public static defaultProps = {
-		filters: [],
-		autoFocus: true
-	};
-
 	private popperNode = null;
 	private filterSuggestions = [];
 	private input = null;
+
+	public renderCopyButton = renderWhenTrue(() => (
+		<CopyToClipboard text={JSON.stringify(this.props.selectedFilters)}>
+			<ButtonContainer>
+				<CopyButton IconProps={{size: 'small'}} disabled={!this.props.selectedFilters.length} />
+			</ButtonContainer>
+		</CopyToClipboard>
+	));
+
+	public renderFiltersMenuButton = renderWhenTrue(() => (
+		<ButtonContainer>
+			<ButtonMenu
+				renderButton={MoreButton}
+				renderContent={this.renderFiltersMenu}
+				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
+				ButtonProps={{ disabled: false }}
+			/>
+		</ButtonContainer>
+	));
+
+	public renderPlaceholder = renderWhenTrue(() => (
+		<Placeholder onClick={this.handlePlaceholderClick}>
+			<SearchIcon />
+			<PlaceholderText>
+				Search
+			</PlaceholderText>
+		</Placeholder>
+	));
 
 	public componentDidMount = () => {
 		this.setState({ selectedFilters: this.props.selectedFilters });
@@ -175,13 +209,13 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-  public renderFiltersMenu = () => (
-    <FiltersMenu
+	public renderFiltersMenu = () => (
+		<FiltersMenu
 			items={this.props.filters}
 			selectedItems={this.state.selectedFilters}
 			onToggleFilter={this.onToggleFilter}
-    />
-  )
+		/>
+	)
 
 	public onDeselectFilter = (selectedFilter) => {
 		this.setState({
@@ -305,7 +339,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 			placement="bottom"
 		>
 			<Paper
-				square={true}
+				square
 				{...options.containerProps}
 				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
 			>
@@ -465,40 +499,6 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 			autoSuggestComponent.input.addEventListener('keyup', this.handleKeyUp);
 		}
 	}
-
-	public renderCopyButton = renderWhenTrue(() => (
-		<CopyToClipboard text={JSON.stringify(this.props.selectedFilters)}>
-			<ButtonContainer>
-				<CopyButton IconProps={{size: 'small'}} disabled={!this.props.selectedFilters.length} />
-			</ButtonContainer>
-		</CopyToClipboard>
-	));
-
-	public renderFiltersMenuButton = renderWhenTrue(() => (
-		<ButtonContainer>
-			<ButtonMenu
-				renderButton={MoreButton}
-				renderContent={this.renderFiltersMenu}
-				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-				ButtonProps={{ disabled: false }}
-			/>
-		</ButtonContainer>
-	));
-
-	public get onlyCopyButton() {
-		const onlyQueryFilters = this.props.filters.every((filter) => filter.type === DATA_TYPES.QUERY);
-		return onlyQueryFilters;
-	}
-
-	public renderPlaceholder = renderWhenTrue(() => (
-		<Placeholder onClick={this.handlePlaceholderClick}>
-			<SearchIcon />
-			<PlaceholderText>
-				Search
-			</PlaceholderText>
-		</Placeholder>
-	));
 
 	public render() {
 		const { value, suggestions, selectedFilters, filtersOpen } = this.state;

@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createActions, createReducer } from 'reduxsauce';
 import { keyBy, omit } from 'lodash';
+import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	fetchGroups: ['teamspace', 'modelId', 'revision'],
@@ -34,7 +34,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	removeFromHighlighted: ['groupId'],
 	highlightGroup: ['group'],
 	dehighlightGroup: ['group'],
-	clearSelectionHighlights: [],
+	clearSelectionHighlights: ['shouldClearTree'],
 	addColorOverride: ['groupId'],
 	removeColorOverride: ['groupId'],
 	setColorOverrides: ['groupIds'],
@@ -78,6 +78,7 @@ export interface IGroupComponentState {
 	totalMeshes: number;
 	criteriaFieldState: ICriteriaFieldState;
 	allOverridden: boolean;
+	searchEnabled: boolean;
 }
 
 export interface IGroupState {
@@ -112,7 +113,8 @@ export const INITIAL_STATE: IGroupState = {
 		selectedFilters: [],
 		totalMeshes: 0,
 		criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE,
-		allOverridden: false
+		allOverridden: false,
+		searchEnabled: false
 	},
 	colorOverrides: [],
 	fieldNames: []

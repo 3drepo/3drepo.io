@@ -14,9 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { ISSUE_COLORS, PRIORITIES, STATUSES, STATUSES_ICONS } from '../constants/issues';
 import { getAPIUrl } from '../services/api';
-import { ISSUE_COLORS, STATUSES_ICONS, STATUSES, PRIORITIES } from '../constants/issues';
-import { isAdmin, hasPermissions, PERMISSIONS } from './permissions';
+import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 
 export const prepareIssue = (issue, jobs = []) => {
 	const preparedIssue = {...issue};

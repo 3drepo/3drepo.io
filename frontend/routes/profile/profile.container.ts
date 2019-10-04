@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { connect } from '../../helpers/migration';
 
+import { selectCurrentUser, selectIsAvatarPending, CurrentUserActions } from '../../modules/currentUser';
 import { Profile } from './profile.component';
-import { CurrentUserActions, selectCurrentUser, selectIsAvatarPending } from '../../modules/currentUser';
 
 const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,

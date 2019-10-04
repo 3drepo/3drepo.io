@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { COLOR } from './../../../../styles/colors';
-import { Field } from 'formik';
-import { CustomTable } from '../../../components/customTable/customTable.component';
 import FormControl from '@material-ui/core/FormControl';
 import TableCell from '@material-ui/core/TableCell';
+import { Field } from 'formik';
+import styled from 'styled-components';
+import { CustomTable } from '../../../components/customTable/customTable.component';
+import { COLOR } from './../../../../styles/colors';
 
 export const StyledField = styled(Field)`
 	margin-right: 10px;

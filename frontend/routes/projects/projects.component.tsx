@@ -15,19 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import * as queryString from 'query-string';
-import { Route } from 'react-router-dom';
-import {isEqual, isEmpty} from 'lodash';
-import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
+import Grid from '@material-ui/core/Grid';
 import InputLabel from '@material-ui/core/InputLabel';
+import {isEmpty, isEqual} from 'lodash';
+import * as queryString from 'query-string';
+import React from 'react';
+import { Route } from 'react-router-dom';
 
-import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
-import { ProjectsPermissions } from '../projectsPermissions';
-import { ModelsPermissions } from '../modelsPermissions';
-import { Container, Options, SelectContainer, SwitchButton, IconLeft, IconRight } from './projects.styles';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
+import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
+import { ModelsPermissions } from '../modelsPermissions';
+import { ProjectsPermissions } from '../projectsPermissions';
+import { Container, IconLeft, IconRight, Options, SelectContainer, SwitchButton } from './projects.styles';
 
 export const PERMISSIONS_VIEWS = {
 	PROJECTS: 0,
@@ -75,7 +75,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 
 	public updateUrlParams = (params) => {
 		const {location: {pathname, search}} = this.props;
-		const queryParams = Object.assign({}, queryString.parse(search), params);
+		const queryParams = { ...queryString.parse(search), ...params };
 		const updatedQueryString = queryString.stringify(queryParams);
 		this.props.history.push(`${pathname}?${updatedQueryString}`);
 	}
@@ -141,6 +141,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 
 	public renderPermissionsView = () => {
 		const { currentView } = this.state;
+		const { location } = this.props;
 
 		return (
 			<>
@@ -156,30 +157,30 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		const footerLabel = this.getFooterLabel(currentView);
 		return (
 			<Container>
-				<UserManagementTab footerLabel={footerLabel}>
+				<UserManagementTab footerLabel={footerLabel} withHeader>
 					<>
 						<Options
-							container={true}
+							container
 							direction="row"
 							justify="space-between"
 							alignContent="center"
 						>
-							<SelectContainer item={true}>
-								<FormControl fullWidth={true}>
-									<InputLabel shrink={true} htmlFor="project">
+							<SelectContainer item>
+								<FormControl fullWidth>
+									<InputLabel shrink htmlFor="project">
 										Project
 									</InputLabel>
 									<CellSelect
 										items={projectsItems}
 										value={selectedProject}
 										placeholder="Select a project"
-										disabledPlaceholder={true}
+										disabledPlaceholder
 										onChange={this.onProjectChange}
 										inputId="project"
 									/>
 								</FormControl>
 							</SelectContainer>
-							<Grid item={true}>
+							<Grid item>
 								<SwitchButton
 									color="secondary"
 									onClick={this.handleViewChange}
@@ -190,7 +191,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 								</SwitchButton>
 							</Grid>
 						</Options>
-						<Route path={match.url} render={this.renderPermissionsView}/>
+						<Route path={match.url} render={this.renderPermissionsView} />
 					</>
 				</UserManagementTab>
 			</Container>

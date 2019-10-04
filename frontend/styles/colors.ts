@@ -1,6 +1,6 @@
 import { mapValues } from 'lodash';
 
-import { hexToRgba, hexToGLColor } from '../helpers/colors';
+import { hexToGLColor, hexToRgba } from '../helpers/colors';
 
 export const BLACK = '#00000';
 export const WHITE = '#ffffff';
@@ -38,6 +38,7 @@ export const COLOR = {
 	DARK_GRAY: '#bfbfbf',
 	GRAY: '#f0f0f0',
 	GRAY_60: 'rgba(189, 189, 189, .6)',
+	GRAY_50: 'rgba(189, 189, 189, .5)',
 	LIGHT_GRAY: '#fafafa',
 	WARNING_LIGHT: '#ffefef',
 	WARNING: '#ffd5d5',
@@ -74,7 +75,9 @@ export const COLOR = {
 	NEGATIVE: 'rgba(234, 57, 57, 1)',
 	NEGATIVE_87: 'rgba(234, 57, 57, 0.87)',
 	REGENT_GRAY: '#8397AC',
-	SILVER_CHALICE: '#A8A8A8'
+	SILVER_CHALICE: '#A8A8A8',
+	LIGHT_BLUE: '#6788ab',
+	CLOUD: '#cfcdcc'
 };
 
 export const PIN_COLORS = mapValues(COLOR, hexToGLColor);

@@ -32,8 +32,8 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	setNewIssue: [],
 	printIssues: ['teamspace', 'modelId'],
 	downloadIssues: ['teamspace', 'modelId'],
-	showDetails: ['teamspace', 'model', 'revision', 'issue'],
-	closeDetails: ['teamspace', 'model', 'revision'],
+	showDetails: ['revision', 'issueId'],
+	closeDetails: [],
 	setActiveIssue: ['issue', 'revision'],
 	togglePendingState: ['isPending'],
 	toggleDetailsPendingState: ['isPending'],
@@ -61,9 +61,13 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	attachResourcesSuccess: ['resources', 'issueId'],
 	updateResourcesSuccess: ['resourcesIds', 'updates', 'issueId' ],
 	resetComponentState: [],
+	goToIssue: ['issue'],
+	showMultipleGroups: ['issue', 'revision'],
+	setNewComment: ['newComment'],
+	saveNewScreenshot: ['teamspace', 'model', 'isNewIssue'],
 	updateSelectedIssuePin: ['position'],
 	toggleShowPins: ['showPins']
-}, { prefix: 'ISSUES_' });
+}, { prefix: 'ISSUES/' });
 
 export const INITIAL_STATE = {
 	issuesMap: {},

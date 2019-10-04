@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { SubscriptionForm } from './components/subscriptionForm.component';
-import { clientConfigService } from './../../services/clientConfig';
-import { Container } from './subscription.styles';
-import { Loader } from '../components/loader/loader.component';
+import React from 'react';
 import { LoaderContainer } from '../billing/billing.styles';
+import { Loader } from '../components/loader/loader.component';
+import { clientConfigService } from './../../services/clientConfig';
+import { SubscriptionForm } from './components/subscriptionForm.component';
+import { Container } from './subscription.styles';
 
 interface IProps {
 	billingInfo: any;

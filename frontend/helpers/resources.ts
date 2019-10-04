@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as filesize from 'filesize';
+import filesize from 'filesize';
+import { EXTENSION_RE } from '../constants/resources';
 import * as API from '../services/api';
 import { sortByDate } from './sorting';
-import { EXTENSION_RE } from '../constants/resources';
 
 export const prepareResource = (teamspace, modelId, resource, propertyOverride = {}) => {
 	if (!resource.link) {

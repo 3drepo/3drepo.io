@@ -15,20 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { withRouter } from 'react-router-dom';
-import { connect, addRouting } from '../../../helpers/migration';
 
-import { TopMenu } from './topMenu.component';
+import { selectIsAuthenticated, AuthActions } from '../../../modules/auth';
 import { selectCurrentUser } from '../../../modules/currentUser';
-import { AuthActions } from '../../../modules/auth';
 import { DialogActions } from '../../../modules/dialog';
 import { selectSettings, ViewerActions } from '../../../modules/viewer';
+import { selectIsFocusMode } from '../../../modules/viewerGui';
+import { TopMenu } from './topMenu.component';
 
 const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
-	visualSettings: selectSettings
+	visualSettings: selectSettings,
+	isFocusMode: selectIsFocusMode,
+	isAuthenticated: selectIsAuthenticated,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -37,4 +40,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateSettings: ViewerActions.updateSettings
 }, dispatch);
 
-export default addRouting(withRouter(connect(mapStateToProps, mapDispatchToProps)(TopMenu)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(TopMenu));

@@ -1,5 +1,5 @@
-import styled from 'styled-components';
 import MaterialList from '@material-ui/core/List';
+import styled from 'styled-components';
 
 export const List = styled(MaterialList)`
 	&& {

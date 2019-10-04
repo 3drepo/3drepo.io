@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import Bookmarks from '@material-ui/icons/Bookmarks';
 import BookmarksOutlined from '@material-ui/icons/BookmarksOutlined';
+import React from 'react';
 
-import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
-import { TooltipButton } from '../tooltipButton/tooltipButton.component';
-import { ROW_ACTIONS } from '../../teamspaces.contants';
-import { renderWhenTrue } from '../../../../helpers/rendering';
 import { hasPermissions } from '../../../../helpers/permissions';
+import { renderWhenTrue } from '../../../../helpers/rendering';
+import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
+import { ROW_ACTIONS } from '../../teamspaces.contants';
+import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 
 interface IProps {
 	name: string;
@@ -53,9 +53,9 @@ export const ModelDirectoryItem = (props: IProps) => {
 			items={items}
 			level={TREE_LEVELS.MODEL}
 			renderItem={renderChildItem}
-			active={true}
-			disableShadow={true}
-			forceActive={true}
+			active
+			disableShadow
+			forceActive
 			IconProps={ {
 				IconOpened: BookmarksOutlined,
 				IconClosed: Bookmarks

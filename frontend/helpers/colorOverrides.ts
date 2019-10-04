@@ -14,17 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { getAngularService } from './migration';
-import { hexToGLColor } from './colors';
+import { getState } from '../modules/store';
+import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectTreeNodesList } from '../modules/tree';
 import { Viewer } from '../services/viewer/viewer';
+import { hexToGLColor } from './colors';
 
 export const getGroupOverride = (overrides, group) => {
 	const color = group.color;
 	group.objects.forEach((object) => {
 		object.shared_ids.forEach((sharedId) => {
 			overrides[sharedId] = color;
-			});
 		});
+	});
 	return overrides;
 };
 
@@ -57,26 +58,24 @@ export const addColorOverrides = async (overrides) => {
 	if (!overrides.length) {
 		return;
 	}
+	const state = getState();
+	const treeNodes = selectTreeNodesList(state);
 
-	const TreeService = getAngularService('TreeService') as any;
 	for (let i = 0; i < overrides.length; i++) {
 		const override = overrides[i];
 		const color = hexToGLColor(override.color);
-		const treeMap = await TreeService.getMap();
 
-		if (treeMap) {
-			const nodes = await TreeService.getNodesFromSharedIds([override]);
+		if (treeNodes.length) {
+			const selectNodes = selectGetNodesIdsFromSharedIds([override]);
+			const nodes = selectNodes(state);
 
 			if (nodes) {
 				const filteredNodes = nodes.filter((n) => n !== undefined);
-				const modelsMap = await TreeService.getMeshMapFromNodes(filteredNodes);
-				const modelsList = Object.keys(modelsMap);
+				const modelsList = selectGetMeshesByIds(filteredNodes)(state);
 
 				for (let j = 0; j < modelsList.length; j++) {
-					const modelKey = modelsList[j];
-					const meshIds = modelsMap[modelKey].meshes;
-					const [account, model] = modelKey.split('@');
-					Viewer.overrideMeshColor(account, model, meshIds, color);
+					const { meshes, teamspace, modelId } = modelsList[j] as any;
+					Viewer.overrideMeshColor(teamspace, modelId, meshes, color);
 				}
 			}
 		}
@@ -88,25 +87,23 @@ export const removeColorOverrides =  async (overrides) => {
 		return;
 	}
 
-	const TreeService = getAngularService('TreeService') as any;
+	const state = getState();
+	const treeNodes = selectTreeNodesList(state);
+
 	for (let i = 0; i < overrides.length; i++) {
 		const override = overrides[i];
-		const color = hexToGLColor(override.color);
-		const treeMap = await TreeService.getMap();
 
-		if (treeMap) {
-			const nodes = await TreeService.getNodesFromSharedIds([override]);
+		if (treeNodes.length) {
+			const selectNodes = selectGetNodesIdsFromSharedIds([override]);
+			const nodes = selectNodes(state);
 
 			if (nodes) {
 				const filteredNodes = nodes.filter((n) => n !== undefined);
-				const modelsMap = await TreeService.getMeshMapFromNodes(filteredNodes);
-				const modelsList = Object.keys(modelsMap);
+				const modelsList = selectGetMeshesByIds(filteredNodes)(state);
 
 				for (let j = 0; j < modelsList.length; j++) {
-					const modelKey = modelsList[j];
-					const meshIds = modelsMap[modelKey].meshes;
-					const [account, model] = modelKey.split('@');
-					Viewer.resetMeshColor(account, model, meshIds);
+					const { meshes, teamspace, modelId } = modelsList[j] as any;
+					Viewer.resetMeshColor(teamspace, modelId, meshes);
 				}
 			}
 		}

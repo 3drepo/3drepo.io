@@ -15,48 +15,65 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { MuiThemeProvider } from '@material-ui/core';
+import React from 'react';
 
-import { MuiTheme } from '../../../styles';
-import { UserMenu } from './components/userMenu/userMenu.component';
+import { ROUTES } from '../../../constants/routes';
+import { renderWhenTrue } from '../../../helpers/rendering';
+import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Logo } from '../logo/logo.component';
 import Notifications from '../notifications/notifications.container';
-import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
-import { runAngularTimeout } from '../../../helpers/migration';
-import { Container, BackIcon } from './topMenu.styles';
+import { ExtrasMenu } from './components/extrasMenu/extrasMenu.component';
+import { UserMenu } from './components/userMenu/userMenu.component';
+import { BackIcon, Container } from './topMenu.styles';
 
 interface IProps {
 	currentUser: any;
-	logoUrl?: string;
 	history: any;
+	isFocusMode: boolean;
+	isAuthenticated: boolean;
 	visualSettings?: any;
+	logoUrl?: string;
 	onLogout?: () => void;
 	onLogoClick?: () => void;
 	updateSettings?: (settings: any) => void;
 }
 
 export class TopMenu extends React.PureComponent<IProps, any> {
-	public render() {
-		const { logoUrl, onLogoClick, ...userMenuProps } = this.props;
-
+	public renderUserMenu = renderWhenTrue(() => {
+		const { logoUrl, onLogoClick, isFocusMode, isAuthenticated, ...userMenuProps } = this.props;
 		return (
-			<MuiThemeProvider theme={MuiTheme}>
-				<Container>
-					<Logo onClick={onLogoClick} />
-
-					<TooltipButton
-						label="Back to teamspaces"
-						Icon={BackIcon}
-						action={this.props.onLogoClick}
-					/>
-					<Notifications />
-					<UserMenu
-						{...userMenuProps}
-						onTeamspacesClick={this.props.onLogoClick}
-					/>
-				</Container>
-			</MuiThemeProvider>
+			<>
+				<TooltipButton
+					label="Back to teamspaces"
+					Icon={BackIcon}
+					action={this.handleBackToTeamspaces}
+				/>
+				<Notifications />
+				<UserMenu
+					{...userMenuProps}
+					onTeamspacesClick={this.props.onLogoClick}
+				/>
+			</>
 		);
+	});
+
+	public render() {
+		const { logoUrl, onLogoClick, isFocusMode, isAuthenticated, ...userMenuProps } = this.props;
+		return (
+			<Container hidden={isFocusMode}>
+				<Logo onClick={onLogoClick} />
+
+				{this.renderUserMenu(isAuthenticated)}
+
+				<ExtrasMenu
+					{...userMenuProps}
+					onTeamspacesClick={this.props.onLogoClick}
+				/>
+			</Container>
+		);
+	}
+
+	private handleBackToTeamspaces = () => {
+		this.props.history.push(ROUTES.TEAMSPACES);
 	}
 }

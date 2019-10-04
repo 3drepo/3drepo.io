@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { BrowserRouter as Router, withRouter } from 'react-router-dom';
+import React from 'react';
 
-import { ListItemLink } from './components/listItemLink/listItemLink.component';
-import { Container, UserContainer, UserData, UserName, UserEmail, StyledList, LoadingText } from './userInfo.styles';
-import { Panel } from '../panel/panel.component';
 import { Avatar } from '../avatar/avatar.component';
+import { Panel } from '../panel/panel.component';
+import { ListItemLink } from './components/listItemLink/listItemLink.component';
+import { Container, LoadingText, StyledList, UserContainer, UserData, UserEmail, UserName } from './userInfo.styles';
 
 interface IMenuItem {
 	title: string;
@@ -29,7 +28,6 @@ interface IMenuItem {
 }
 
 interface IProps {
-	match: any;
 	items: IMenuItem[];
 	loading: boolean;
 	firstName: string;
@@ -39,43 +37,40 @@ interface IProps {
 	avatarUrl: string;
 }
 
-const renderItems = (items, match) => items.map((item) => (
+const renderItems = (items) => items.map((item) => (
 	<ListItemLink
-		to={`${match.url}${item.path}`}
+		to={item.path}
 		key={item.title}
 		title={item.title}
 	/>
 ));
 
 const UserInfoComponent = (props: IProps) => {
-	const { match, items, loading, firstName, lastName, username, email, avatarUrl } = props;
+	const { items, loading, firstName, lastName, username, email, avatarUrl } = props;
 	const name = firstName || lastName ? `${firstName || ''} ${lastName || ''}`.trim() : username;
-
 	return (
-		<Router>
-			<Container>
-				<Panel title={username}>
-						<StyledList>
-							<UserContainer>
-								<Avatar
-									name={name}
-									url={avatarUrl}
-									loading={loading}
-								/>
-								{ loading
-									? <LoadingText>Loading...</LoadingText>
-									: <UserData>
-											<UserName>{firstName} {lastName}</UserName>
-											<UserEmail>{email}</UserEmail>
-										</UserData>
-								}
-							</UserContainer>
-							{renderItems(items, match)}
-						</StyledList>
-				</Panel>
-			</Container>
-		</Router>
+		<Container>
+			<Panel title={username}>
+					<StyledList>
+						<UserContainer>
+							<Avatar
+								name={name}
+								url={avatarUrl}
+								loading={loading}
+							/>
+							{ loading
+								? <LoadingText>Loading...</LoadingText>
+								: <UserData>
+										<UserName>{firstName} {lastName}</UserName>
+										<UserEmail>{email}</UserEmail>
+									</UserData>
+							}
+						</UserContainer>
+						{renderItems(items)}
+					</StyledList>
+			</Panel>
+		</Container>
 	);
 };
 
-export const UserInfo = withRouter(UserInfoComponent);
+export const UserInfo = UserInfoComponent;

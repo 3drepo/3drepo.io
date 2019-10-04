@@ -1,17 +1,8 @@
-import { isArray, groupBy, map, get } from 'lodash';
+import { get, groupBy, isArray, map } from 'lodash';
 import { DATA_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 
 export const compareStrings = (string1, string2) => {
 	return (string1 || '').toLowerCase().includes((string2 || '').toLowerCase());
-};
-
-// DEPRECATED
-export const stringSearch = (superString: string, subString: string) => {
-	if (!superString) {
-		return false;
-	}
-
-	return (superString.toLowerCase().indexOf(subString.toLowerCase()) !== -1);
 };
 
 export const searchByFilters = (
@@ -21,11 +12,12 @@ export const searchByFilters = (
 		queryFields = ['name', 'desc']
 	) => {
 	const prefilteredItems = !returnDefaultHidden ? items.filter(({defaultHidden}) => !defaultHidden) : items;
-	const groupedFilters = groupBy(filters, 'relatedField');
 
 	if (!filters.length) {
 		return prefilteredItems;
 	}
+
+	const groupedFilters = groupBy(filters, 'relatedField');
 	return prefilteredItems.filter((item) => {
 		const filteringResults: any = map(groupedFilters, (selectedFilters: any) => {
 			const filterType = get(selectedFilters[0], 'type', DATA_TYPES.UNDEFINED);

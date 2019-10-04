@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import Input from '@material-ui/core/Input';
 import { Item, StyledSelect } from './cellSelect.styles';
@@ -72,7 +72,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 				>
 					{
 						TemplateComponent ?
-							(<TemplateComponent {...item}/>) :
+							(<TemplateComponent {...item} />) :
 							item[labelName] || item.value
 					}
 				</Item>
@@ -110,7 +110,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 				name={name}
 				readOnly={readOnly}
 				disabled={readOnly || disabled || hasNoOptions}
-				displayEmpty={true}
+				displayEmpty
 				input={<Input id={inputId} readOnly={readOnly} />}
 				value={selectedValue}
 				onChange={this.handleChange}

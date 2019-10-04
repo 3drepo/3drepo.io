@@ -15,36 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, select, all } from 'redux-saga/effects';
-import { getAngularService, dispatch, getState } from '../../helpers/migration';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { calculateTotalMeshes } from '../../helpers/tree';
+import { dispatch, getState } from '../store';
 
-import * as API from '../../services/api';
-import { GroupsTypes, GroupsActions, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
-import { DialogActions } from '../dialog';
-import {
-	selectColorOverrides,
-	selectGroups,
-	selectGroupsMap,
-	selectFilteredGroups,
-	selectNewGroupDetails,
-	selectActiveGroupDetails,
-	selectSelectedFilters,
-	selectShowDetails,
-	selectIsAllOverridden,
-	selectActiveGroupId
-} from './groups.selectors';
-import { Viewer } from '../../services/viewer/viewer';
-import { MultiSelect } from '../../services/viewer/multiSelect';
-import { prepareGroup, normalizeGroup } from '../../helpers/groups';
-import { selectCurrentUser } from '../currentUser';
+import { CHAT_CHANNELS } from '../../constants/chat';
+import { GROUPS_TYPES } from '../../constants/groups';
 import { getRandomColor, hexToGLColor } from '../../helpers/colors';
+import { normalizeGroup, prepareGroup } from '../../helpers/groups';
+import { searchByFilters } from '../../helpers/searching';
+import * as API from '../../services/api';
+import { MultiSelect } from '../../services/viewer/multiSelect';
+import { Viewer } from '../../services/viewer/viewer';
+import { ChatActions } from '../chat';
+import { selectCurrentUser } from '../currentUser';
+import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { TreeActions } from '../tree';
-import { searchByFilters } from '../../helpers/searching';
-import { GROUPS_TYPES } from '../../constants/groups';
+import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
+import {
+	selectActiveGroupDetails,
+	selectActiveGroupId,
+	selectColorOverrides,
+	selectFilteredGroups,
+	selectGroups,
+	selectGroupsMap,
+	selectIsAllOverridden,
+	selectNewGroupDetails,
+	selectSelectedFilters,
+	selectShowDetails
+} from './groups.selectors';
 
-export function* fetchGroups({teamspace, modelId, revision}) {
+function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(true));
 	try {
 		const {data} = yield API.getGroups(teamspace, modelId, revision);
@@ -56,7 +58,7 @@ export function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(false));
 }
 
-export function* setActiveGroup({ group, revision }) {
+function* setActiveGroup({ group, revision }) {
 	try {
 		const filteredGroups = yield select(selectFilteredGroups);
 		const activeGroupId = yield select(selectActiveGroupId);
@@ -74,61 +76,54 @@ export function* setActiveGroup({ group, revision }) {
 	}
 }
 
-export function* resetActiveGroup() {
+function* resetActiveGroup() {
 	try {
 		const showDetailsEnabled = yield select(selectShowDetails);
 		yield all([
 			!showDetailsEnabled ? put(GroupsActions.setComponentState({ activeGroup: null })) : null,
-			put(GroupsActions.clearSelectionHighlights())
+			put(GroupsActions.clearSelectionHighlights(true))
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', ' active group', error));
 	}
 }
 
-export function* highlightGroup({ group }) {
+function* highlightGroup({ group }) {
 	try {
 		const color = group.color ? hexToGLColor(group.color) :
 		Viewer.getDefaultHighlightColor();
 		yield put(GroupsActions.addToHighlighted(group._id));
 
 		if (group.objects && group.objects.length > 0) {
-			const TreeService = getAngularService('TreeService') as any;
-
-			yield TreeService.showNodesBySharedIds(group.objects);
-			yield TreeService.selectNodesBySharedIds(group.objects, color);
-			yield put(TreeActions.getSelectedNodes());
+			yield put(TreeActions.showNodesBySharedIds(group.objects));
+			yield put(TreeActions.selectNodesBySharedIds(group.objects, color));
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('higlight', 'group', error));
 	}
 }
 
-export function* dehighlightGroup({ group }) {
+function* dehighlightGroup({ group }) {
 	try {
 		yield put(GroupsActions.removeFromHighlighted(group._id));
-
-		const TreeService = getAngularService('TreeService') as any;
-		const nodes = yield TreeService.getNodesFromSharedIds(group.objects);
-
-		yield TreeService.deselectNodes(nodes);
+		yield put(TreeActions.deselectNodesBySharedIds(group.objects));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('dehiglight', 'group', error));
 	}
 }
 
-export function* clearSelectionHighlights() {
+function* clearSelectionHighlights({ shouldClearTree = true }) {
 	try {
 		yield put(GroupsActions.setComponentState({ highlightedGroups: [] }));
-		const TreeService = getAngularService('TreeService') as any;
-		yield TreeService.clearCurrentlySelected();
-		yield put(TreeActions.clearSelectedNodes());
+		if (shouldClearTree) {
+			yield put(TreeActions.clearCurrentlySelected());
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('clear', 'highlighted groups', error));
 	}
 }
 
-export function* selectGroup({ group = {} }) {
+function* selectGroup({ group = {} }) {
 	try {
 		yield Viewer.isViewerReady();
 
@@ -137,7 +132,7 @@ export function* selectGroup({ group = {} }) {
 		const multiSelect = addGroup || removeGroup;
 
 		if (!multiSelect) {
-			yield put(GroupsActions.clearSelectionHighlights());
+			yield put(GroupsActions.clearSelectionHighlights(true));
 		}
 
 		if (removeGroup) {
@@ -150,7 +145,7 @@ export function* selectGroup({ group = {} }) {
 	}
 }
 
-export function* toggleColorOverride({ groupId }) {
+function* toggleColorOverride({ groupId }) {
 	try {
 		const colorOverrides = yield select(selectColorOverrides);
 		const hasColorOverride = colorOverrides.includes(groupId);
@@ -165,7 +160,7 @@ export function* toggleColorOverride({ groupId }) {
 	}
 }
 
-export function* deleteGroups({ teamspace, modelId, groups }) {
+function* deleteGroups({ teamspace, modelId, groups }) {
 	try {
 		yield API.deleteGroups(teamspace, modelId, groups);
 
@@ -193,17 +188,16 @@ export function* deleteGroups({ teamspace, modelId, groups }) {
 	}
 }
 
-export function* isolateGroup({ group }) {
+function* isolateGroup({ group }) {
 	try {
-		yield put(GroupsActions.clearSelectionHighlights());
-		const TreeService = getAngularService('TreeService') as any;
-		TreeService.isolateNodesBySharedIds(group.objects);
+		yield put(GroupsActions.clearSelectionHighlights(true));
+		yield put(TreeActions.isolateNodesBySharedIds(group.objects));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('delete', 'groups', error));
 	}
 }
 
-export function* downloadGroups({ teamspace, modelId }) {
+function* downloadGroups({ teamspace, modelId }) {
 	try {
 		const groups = yield select(selectGroups);
 		const filters = yield select(selectSelectedFilters);
@@ -219,7 +213,7 @@ export function* downloadGroups({ teamspace, modelId }) {
 	}
 }
 
-export function* showDetails({ group, revision }) {
+function* showDetails({ group, revision }) {
 	try {
 		yield put(GroupsActions.clearSelectionHighlights());
 		yield put(GroupsActions.highlightGroup(group));
@@ -240,7 +234,7 @@ export function* showDetails({ group, revision }) {
 	}
 }
 
-export function* closeDetails() {
+function* closeDetails() {
 	try {
 		const activeGroup = yield select(selectActiveGroupDetails);
 		yield put(GroupsActions.highlightGroup(activeGroup));
@@ -251,7 +245,7 @@ export function* closeDetails() {
 	}
 }
 
-export function* createGroup({ teamspace, modelId, revision }) {
+function* createGroup({ teamspace, modelId, revision }) {
 	try {
 		const isAllOverridden = yield select(selectIsAllOverridden);
 		const currentUser = yield select(selectCurrentUser);
@@ -289,7 +283,7 @@ export function* createGroup({ teamspace, modelId, revision }) {
 	}
 }
 
-export function* updateGroup({ teamspace, modelId, revision, groupId }) {
+function* updateGroup({ teamspace, modelId, revision, groupId }) {
 	try {
 		const groupDetails = yield select(selectActiveGroupDetails);
 
@@ -320,7 +314,7 @@ export function* updateGroup({ teamspace, modelId, revision, groupId }) {
 	}
 }
 
-export function* setNewGroup() {
+function* setNewGroup() {
 	const currentUser = yield select(selectCurrentUser);
 	const groups = yield select(selectGroups);
 	const groupNumber = groups.length + 1;
@@ -378,25 +372,23 @@ const onDeleted = (deletedGroupIds) => {
 	}, 5000);
 };
 
-export function* subscribeOnChanges({ teamspace, modelId }) {
-	const ChatService = yield getAngularService('ChatService');
-	const groupsNotifications = yield ChatService.getChannel(teamspace, modelId).groups;
-
-	groupsNotifications.subscribeToUpdated(onUpdated, this);
-	groupsNotifications.subscribeToCreated(onCreated, this);
-	groupsNotifications.subscribeToDeleted(onDeleted, this);
+function* subscribeOnChanges({ teamspace, modelId }) {
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.GROUPS, teamspace, modelId, {
+		subscribeToUpdated: onUpdated,
+		subscribeToCreated: onCreated,
+		subscribeToDeleted: onDeleted
+	}));
 }
 
-export function* unsubscribeFromChanges({ teamspace, modelId }) {
-	const ChatService = yield getAngularService('ChatService');
-	const groupsNotifications = yield ChatService.getChannel(teamspace, modelId).groups;
-
-	groupsNotifications.unsubscribeFromUpdated(onUpdated);
-	groupsNotifications.unsubscribeFromCreated(onCreated);
-	groupsNotifications.unsubscribeFromDeleted(onDeleted);
+function* unsubscribeFromChanges({ teamspace, modelId }) {
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.GROUPS, teamspace, modelId, {
+		unsubscribeToUpdated: onUpdated,
+		unsubscribeToCreated: onCreated,
+		unsubscribeToDeleted: onDeleted
+	}));
 }
 
-export function* resetToSavedSelection({ groupId }) {
+function* resetToSavedSelection({ groupId }) {
 	const groups = yield select(selectGroupsMap);
 	const activeGroup = yield select(selectActiveGroupDetails);
 	const initialGroupState = groups[groupId] || activeGroup;

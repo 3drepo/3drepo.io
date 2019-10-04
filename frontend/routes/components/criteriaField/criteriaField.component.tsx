@@ -15,31 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-import { uniqBy, isEqual } from 'lodash';
+import { isEqual, uniqBy } from 'lodash';
+import React from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
+import { getCriteriaLabel, getUpdatedCriteria, prepareCriterion } from '../../../helpers/criteria';
+import { renderWhenTrue } from '../../../helpers/rendering';
 import {
-	Container,
-	InputLabel,
+	ButtonContainer,
+	Chip,
 	ChipsContainer,
 	ChipsDeselectCatcher,
-	ButtonContainer,
-	IconButton,
-	StyledMoreIcon,
-	SelectedCriteria,
+	Container,
 	FormContainer,
+	IconButton,
+	InputLabel,
 	MenuItem,
 	OptionsList,
 	Placeholder,
-	Chip
+	SelectedCriteria,
+	StyledMoreIcon
 } from './criteriaField.styles';
-import { renderWhenTrue } from '../../../helpers/rendering';
-import { getCriteriaLabel, prepareCriterion, getUpdatedCriteria } from '../../../helpers/criteria';
 
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
-import { NewCriterionForm } from './newCriterionForm.component';
 import { CriteriaPasteField } from './components/criteriaPasteField/criteriaPasteField.components';
+import { NewCriterionForm } from './newCriterionForm.component';
 
 interface IProps {
 	className?: string;
@@ -84,6 +84,39 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		selectedCriteria: [],
 		criterionForm: { ...emptyCriterion }
 	};
+
+	public renderPlaceholder = renderWhenTrue(() => (
+		<Placeholder>{this.props.placeholder}</Placeholder>
+	));
+
+	public renderCriteriaPasteField = renderWhenTrue(() => (
+		<CriteriaPasteField
+			name="pasteField"
+			initialValue={this.props.pastedCriteria}
+			onChange={this.handlePaste}
+			setState={this.handlePasteFieldChange}
+			onCancel={this.togglePasteMode}
+		/>
+	));
+
+	public renderCriteriaChips = renderWhenTrue(() => (
+		<ChipsContainer>
+			<ChipsDeselectCatcher onClick={this.deselectCriterion} />
+			{this.state.selectedCriteria.map(this.renderCriterion)}
+		</ChipsContainer>
+	));
+
+	public renderOptionsMenu = renderWhenTrue(() => (
+		<ButtonContainer>
+			<ButtonMenu
+				renderButton={MenuButton}
+				renderContent={this.renderOptions}
+				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
+				ButtonProps={{ disabled: false }}
+			/>
+		</ButtonContainer>
+	));
 
 	public componentDidMount() {
 		const { value, criterionForm, selectedCriterion } = this.props;
@@ -201,10 +234,6 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		return criterion._id === selectedCriterion;
 	}
 
-	public renderPlaceholder = renderWhenTrue(() => (
-		<Placeholder>{this.props.placeholder}</Placeholder>
-	));
-
 	public renderCriterion = (criterion) => (
 		<Chip
 			key={criterion._id}
@@ -215,23 +244,6 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 			clickable
 		/>
 	)
-
-	public renderCriteriaPasteField = renderWhenTrue(() => (
-		<CriteriaPasteField
-			name="pasteField"
-			initialValue={this.props.pastedCriteria}
-			onChange={this.handlePaste}
-			setState={this.handlePasteFieldChange}
-			onCancel={this.togglePasteMode}
-		/>
-	));
-
-	public renderCriteriaChips = renderWhenTrue(() => (
-		<ChipsContainer>
-			<ChipsDeselectCatcher onClick={this.deselectCriterion} />
-			{this.state.selectedCriteria.map(this.renderCriterion)}
-		</ChipsContainer>
-	));
 
 	public renderCopyOption = (props) => (
 		<CopyToClipboard text={JSON.stringify(this.props.value)}>
@@ -263,18 +275,6 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 			</OptionsList>
 		);
 	}
-
-	public renderOptionsMenu = renderWhenTrue(() => (
-		<ButtonContainer>
-			<ButtonMenu
-				renderButton={MenuButton}
-				renderContent={this.renderOptions}
-				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-				ButtonProps={{ disabled: false }}
-			/>
-		</ButtonContainer>
-	));
 
 	public renderForm = () => (
 		<FormContainer>

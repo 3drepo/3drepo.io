@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
-import { MyTeamspaceItem } from '../myTeamspaceItem/myTeamspaceItem.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
+import { MyTeamspaceItem } from '../myTeamspaceItem/myTeamspaceItem.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 
 import StorageNormal from '@material-ui/icons/Storage';
@@ -33,10 +33,10 @@ interface IProps {
 	projects: any[];
 	active: boolean;
 	isMyTeamspace: boolean;
-	onToggle: () => void;
+	permissions: any[];
+	onToggle: (state) => void;
 	renderChildItem: () => JSX.Element;
 	onAddProject: () => void;
-	permissions: any[];
 }
 
 export const TeamspaceItem = (props: IProps) => {
@@ -64,7 +64,7 @@ export const TeamspaceItem = (props: IProps) => {
 			name={account}
 			level={TREE_LEVELS.TEAMSPACE}
 			items={projects}
-			onRootClick={onToggle}
+			onClick={onToggle}
 			active={active}
 			renderItem={renderChildItem}
 			renderRoot={isMyTeamspace ? MyTeamspaceItem : null}

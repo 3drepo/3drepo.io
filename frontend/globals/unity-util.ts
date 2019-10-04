@@ -93,40 +93,28 @@ export class UnityUtil {
 	public static UNITY_GAME_OBJECT = 'WebGLInterface';
 	/** @hidden */
 	public static defaultHighlightColor = [1, 1, 0];
+	private static progressCallback = Function.prototype;
+	private static modelLoaderProgressCallback = Function.prototype;
 
 	/**
-	 * Initialise Unity.
-	 * @category Configurations
-	 * @param errorCallback - function to call when an error occurs.
-	 * 						 This function should take a string(message), boolean(requires reload), boolean(came from unity).
-	 */
-	public static init(
-		errorCallback?: any
-	) {
+	* Initialise Unity.
+	* @category Configurations
+	* @param errorCallback - function to call when an error occurs.
+	* 						 This function should take a string(message), boolean(requires reload), boolean(came from unity).
+	* @param progressCallback
+	* @param modelLoaderProgressCallback
+	*/
+	public static init(errorCallback: any, progressCallback: any, modelLoaderProgressCallback: any) {
 		UnityUtil.errorCallback = errorCallback;
+		UnityUtil.progressCallback = progressCallback;
+		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
 	}
 
 	/** @hidden */
 	public static onProgress(gameInstance, progress: number) {
-
-		const appendTo = 'viewer';
-
-		if (!gameInstance.progress) {
-			gameInstance.progress = document.createElement('div');
-			gameInstance.progress.className = 'unityProgressBar';
-			document.getElementById(appendTo).appendChild(gameInstance.progress);
-		}
-
 		requestAnimationFrame(() => {
-			if (progress === 1) {
-				gameInstance.progress.style.width = 0;
-				gameInstance.progress.style.display = 'none';
-			} else {
-				const width = document.body.clientWidth * (progress);
-				gameInstance.progress.style.width = width + 'px';
-			}
+			UnityUtil.progressCallback(progress);
 		});
-
 	}
 
 	/**
@@ -388,6 +376,11 @@ export class UnityUtil {
 		UnityUtil.loadingResolve.resolve();
 	}
 
+/** @hidden */
+	public static loadingProgress(progress) {
+		UnityUtil.modelLoaderProgressCallback(progress);
+	}
+
 	/** @hidden */
 	public static navMethodChanged(newNavMode) {
 		if (UnityUtil.viewer && UnityUtil.viewer.navMethodChanged) {
@@ -583,7 +576,6 @@ export class UnityUtil {
 			model
 		};
 		UnityUtil.toUnity('DiffToolAssignAsComparator', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
-
 	}
 
 	/**
@@ -798,7 +790,7 @@ export class UnityUtil {
 
 		UnityUtil.toUnity('GetObjectsStatus', UnityUtil.LoadingState.MODEL_LOADED, nameSpace);
 
-		return newObjectStatusPromise;
+		return newObjectStatusPromise as Promise<object>;
 	}
 
 	/**
@@ -854,24 +846,33 @@ export class UnityUtil {
 		toggleMode: boolean,
 		forceReHighlight: boolean
 	) {
-
 		const maxNodesPerReq = 20000;
+		const promises = [];
 		for (let i = 0 ; i < idArr.length; i += maxNodesPerReq) {
-			setTimeout(() => {
-				const endIdx = i + maxNodesPerReq < idArr.length ? i + maxNodesPerReq : idArr.length ;
-				const arr = idArr.slice(i, endIdx);
-				const params: any = {
-					database : account,
-					model,
-					ids : arr,
-					toggle : toggleMode,
-					forceReHighlight,
-					color: color ? color : UnityUtil.defaultHighlightColor
-				};
-				UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
-			}, i > 0 ? 100 : 0);
+			const promise = new Promise((resolve, reject) => {
+				setTimeout(() => {
+					try {
+						const endIdx = i + maxNodesPerReq < idArr.length ? i + maxNodesPerReq : idArr.length ;
+						const arr = idArr.slice(i, endIdx);
+						const params: any = {
+							database : account,
+							model,
+							ids : arr,
+							toggle : toggleMode,
+							forceReHighlight,
+							color: color ? color : UnityUtil.defaultHighlightColor
+						};
+						UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+						resolve();
+					} catch (error) {
+						reject(error);
+					}
+				}, i > 0 ? 100 : 0);
+			});
+			promises.push(promise);
 		}
 
+		return Promise.all(promises);
 	}
 
 	/**
@@ -1055,7 +1056,7 @@ export class UnityUtil {
 		});
 		UnityUtil.toUnity('RequestScreenShot', UnityUtil.LoadingState.VIEWER_READY, undefined);
 
-		return newScreenshotPromise;
+		return newScreenshotPromise as Promise<object>;
 	}
 
 	/**
@@ -1077,8 +1078,7 @@ export class UnityUtil {
 
 		UnityUtil.toUnity('RequestViewpoint', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
 
-		return newViewpointPromise;
-
+		return newViewpointPromise as Promise<object>;
 	}
 
 	/**
@@ -1175,6 +1175,20 @@ export class UnityUtil {
 	 */
 	public static showHiddenByDefaultObjects() {
 		UnityUtil.toUnity('ShowHiddenByDefaultObjects', UnityUtil.LoadingState.MODEL_LOADED, undefined);
+	}
+
+	/**
+	 * Show progress bar while model is loading
+	 */
+	public static showProgressBar() {
+		UnityUtil.toUnity('ShowProgressBar', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Hide progress bar while model is loading
+	 */
+	public static hideProgressBar() {
+		UnityUtil.toUnity('HideProgressBar', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**

@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
 import Paper from '@material-ui/core/Paper';
+import styled from 'styled-components';
 
-import { FONT_WEIGHT, COLOR } from '../../../styles';
+import { COLOR, FONT_WEIGHT } from '../../../styles';
 
 export const Container = styled(Paper)`
 	&& {

@@ -14,12 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import * as React from 'react';
 import { FieldArray } from 'formik';
-import { ResourcesListContainer,
-	AddLinkContainer, ResourcesListScroller } from './attachResourcesDialog.styles';
-import { LabelButton } from '../../../viewer/components/labelButton/labelButton.styles';
+import * as React from 'react';
+import { LabelButton } from '../../../viewerGui/components/labelButton/labelButton.styles';
 import { LinkEntry } from './attachResourceLinkEntry.component';
+import {
+	AddLinkContainer,
+	ResourcesListContainer,
+	ResourcesListScroller
+} from './attachResourcesDialog.styles';
 
 interface IProps {
 	links: any[];

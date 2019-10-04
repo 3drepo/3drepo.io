@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { selectSettings } from './model.selectors';
 import { createSelector } from 'reselect';
-import { isAdmin, hasPermissions, PERMISSIONS } from '../../helpers/permissions';
+import { hasPermissions, isAdmin, PERMISSIONS } from '../../helpers/permissions';
+import { selectSettings } from './model.selectors';
 
 export const selectPermissions = createSelector(
 	selectSettings, (state) => state.permissions

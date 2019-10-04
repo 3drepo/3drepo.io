@@ -15,10 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createSelector } from 'reselect';
-import { VIEWER_PANELS } from '../../constants/viewer';
-import * as Bim from '../bim';
 
-export const selectViewerDomain = (state) => Object.assign({}, state.viewer);
+export const selectViewerDomain = (state) => ({...state.viewer});
 
 export const selectSettings = createSelector(
 	selectViewerDomain, (state) => state.settings
@@ -62,45 +60,4 @@ export const selectFarPlaneSamplingPoints = createSelector(
 
 export const selectMaxShadowDistance = createSelector(
 	selectSettings, (state) => state.maxShadowDistance
-);
-
-export const selectNumCacheThreads = createSelector(
-	selectSettings, (state) => state.numCacheThreads
-);
-
-export const selectNavigationMode = createSelector(
-	selectViewerDomain, (state) => state.navigationMode
-);
-
-export const selectHelicopterSpeed = createSelector(
-	selectViewerDomain, (state) => state.helicopterSpeed
-);
-
-export const selectIsFocusMode = createSelector(
-	selectViewerDomain, (state) => state.isFocusMode
-);
-
-export const selectClippingMode = createSelector(
-	selectViewerDomain, (state) => state.clippingMode
-);
-
-export const selectIsClipEdit = createSelector(
-	selectViewerDomain, (state) => state.isClipEdit
-);
-
-export const selectClipNumber = createSelector(
-	selectViewerDomain, (state) => state.clipNumber
-);
-
-export const selectVisiblePanels = createSelector(
-	selectViewerDomain, (state) => state.visiblePanels
-);
-
-export const selectIsMetadataVisible = createSelector(
-	selectVisiblePanels, Bim.selectIsPending,
-	(state, isPending) => state[VIEWER_PANELS.METADATA] && !isPending
-);
-
-export const selectIsModelLoaded = createSelector(
-	selectViewerDomain, (state) => state.isModelLoaded
 );
