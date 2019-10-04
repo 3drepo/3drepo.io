@@ -31,7 +31,7 @@ export const Headline = styled.div`
 	justify-content: flex-start;
 	padding-left: 24px;
 	padding-right: 13px;
-	background: ${(props) => props.active || props.level === TREE_LEVELS.PROJECT ? COLOR.WHITE : 'transparent'};
+	background: ${(props) => props.active || props.level === TREE_LEVELS.PROJECT && COLOR.WHITE};
 `;
 
 export const Details = styled.div`

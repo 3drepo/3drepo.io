@@ -269,15 +269,16 @@ export const ModelGridItem = memo((props: IProps) => {
 
 	return (
 		<Container federate={isFederation}>
-			<ModelLink onClick={handleClick} />
+			<ModelLink onClick={handleClick} isPending={isPending} />
 			<Header>
 				<NameWrapper>
 					<StarIcon
 						active={hasDelayedClick ? !props.isStarred : props.isStarred}
 						onClick={handleStarClick}
 					/>
-					<NameWithCode>
+					<NameWithCode onClick={handleClick}>
 						<Name
+							onClick={handleClick}
 							isPending={isPending}
 							search={props.query}
 							text={props.name}

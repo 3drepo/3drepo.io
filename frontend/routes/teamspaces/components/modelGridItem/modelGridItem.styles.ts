@@ -46,10 +46,6 @@ export const Name = styled(Highlight)`
 	&, mark {
 		font-weight: ${FONT_WEIGHT.BOLD};
 	}
-
-	&:hover {
-		text-decoration: underline;
-	}
 `;
 
 export const NameWrapper = styled.div`
@@ -98,6 +94,7 @@ export const ModelLink = styled.div`
 	position: absolute;
 	top: 0;
 	left: 0;
+	cursor: ${(props) => props.isPending ? 'default' : 'pointer'};
 `;
 
 export const NameWithCode = styled.div`
