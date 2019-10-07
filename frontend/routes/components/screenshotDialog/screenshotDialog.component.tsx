@@ -34,6 +34,7 @@ import { Indicator } from './components/indicator/indicator.component';
 import { EditableText } from './components/editableText/editableText.component';
 import { Viewer } from '../../../services/viewer/viewer';
 import { SHAPE_TYPES } from './components/shape/shape.constants';
+import { Erasing } from './components/erasing/erasing.component';
 
 interface IProps {
 	sourceImage: string | Promise<string>;
@@ -105,7 +106,11 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public get isDrawingMode() {
-		return this.state.mode === MODES.BRUSH || this.state.mode === MODES.ERASER;
+		return this.state.mode === MODES.BRUSH;
+	}
+
+	public get isErasing() {
+		return this.state.mode === MODES.ERASER;
 	}
 
 	public get selectedElementType() {
@@ -368,6 +373,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public addNewDrawnLine = (line) => {
 		if (!this.state.selectedObjectName) {
 			const isErasing = this.state.mode === MODES.ERASER;
+			console.log('isErasing')
 			const newLine = getNewDrawnLine(line.attrs, this.state.color);
 			const selectedObjectName = isErasing ? '' : newLine.name;
 			this.props.addElement(newLine);
@@ -444,7 +450,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		return (<Shape key={index} {...commonProps} isDrawingMode={this.isDrawingMode} />);
 	})
 
-	public renderDrawing = () => {
+	public renderDrawing = renderWhenTrue(() => {
 		return (
 			<Drawing
 				height={this.state.stage.height}
@@ -461,7 +467,21 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				disabled={this.props.disabled}
 			/>
 		);
-	}
+	});
+
+	public renderErasing = renderWhenTrue(() => {
+		return (
+			<Erasing
+				height={this.state.stage.height}
+				width={this.state.stage.width}
+				size={this.state.brushSize}
+				color={this.state.brushColor}
+				mode={this.state.mode}
+				layer={this.layerRef}
+				stage={this.stage}
+			/>
+		);
+	});
 
 	public renderLayers = () => {
 		if (this.state.stage.width && this.state.stage.height) {
@@ -470,9 +490,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 					<Layer ref={this.imageLayerRef} />
 					<Layer ref={this.layerRef}>
 						{this.renderObjects()}
+						{this.renderErasing(this.isErasing)}
 					</Layer>
 					<Layer ref={this.drawingLayerRef}>
-						{this.renderDrawing()}
+						{this.renderDrawing(this.isDrawingMode)}
 					</Layer>
 				</>
 			);

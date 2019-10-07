@@ -17,7 +17,7 @@
 
 import * as React from 'react';
 import { MODES } from '../../screenshotDialog.helpers';
-import { createShape, getDrawDunction, createDrawnLine } from './drawing.helpers';
+import { createShape, getDrawFunction, createDrawnLine } from './drawing.helpers';
 
 interface IProps {
 	color: string;
@@ -152,6 +152,7 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		this.setState({ isCurrentlyDrawn: true });
 		this.layer.clearBeforeDraw();
 		this.lastPointerPosition = this.props.stage.getPointerPosition();
+		console.log('this.props.mode', this.props.mode)
 		this.lastLine = createDrawnLine(this.props.color, this.props.size, this.lastPointerPosition, this.props.mode);
 		this.layer.add(this.lastLine);
 	}
@@ -191,7 +192,7 @@ export class Drawing extends React.PureComponent <IProps, any> {
 
 	public drawShape = () => {
 		const position = this.props.stage.getPointerPosition();
-		const draw = getDrawDunction(this.props.activeShape, this.lastShape, this.initialPointerPosition, position);
+		const draw = getDrawFunction(this.props.activeShape, this.lastShape, this.initialPointerPosition, position);
 		draw();
 		this.layer.batchDraw();
 	}

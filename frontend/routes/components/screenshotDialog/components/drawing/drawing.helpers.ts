@@ -56,7 +56,7 @@ export const createDrawnLine = (stroke, strokeWidth, position, mode) => {
 	});
 };
 
-export const getDrawDunction = (shapeType, shape, initialPos, currentPos) => {
+export const getDrawFunction = (shapeType, shape, initialPos, currentPos) => {
 	const distance = Math.hypot(initialPos.x - currentPos.x, initialPos.y - currentPos.y);
 	const map = {
 		[SHAPE_TYPES.CIRCLE]: () => {

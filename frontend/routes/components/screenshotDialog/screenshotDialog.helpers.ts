@@ -60,6 +60,7 @@ export const getNewShape = (figure, color, attrs) => {
 };
 
 export const getNewDrawnLine = (lineAttrs, color) => {
+	console.log('global', lineAttrs.globalCompositeOperation);
 	const name = createUniqueName(ELEMENT_TYPES.DRAWING);
 	const newLine = {
 		type: ELEMENT_TYPES.DRAWING,
