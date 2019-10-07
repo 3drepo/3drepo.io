@@ -89,8 +89,6 @@ interface IProps {
 	dateSortingDescending: boolean;
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
-	showRevisionsDialog: (config) => void;
-	hideDialog: () => void;
 	fetchTeamspaces: (username) => void;
 	fetchStarredModels: () => void;
 	setState: (componentState: any) => void;

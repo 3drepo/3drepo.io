@@ -67,8 +67,6 @@ const mapStateToProps = createStructuredSelector({
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showDialog: DialogActions.showDialog,
 	showConfirmDialog: DialogActions.showConfirmDialog,
-	showRevisionsDialog: DialogActions.showRevisionsDialog,
-	hideDialog: DialogActions.hideDialog,
 	createProject: TeamspacesActions.createProject,
 	updateProject: TeamspacesActions.updateProject,
 	removeProject: TeamspacesActions.removeProject,
