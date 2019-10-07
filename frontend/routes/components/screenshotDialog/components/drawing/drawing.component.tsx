@@ -152,7 +152,6 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		this.setState({ isCurrentlyDrawn: true });
 		this.layer.clearBeforeDraw();
 		this.lastPointerPosition = this.props.stage.getPointerPosition();
-		console.log('this.props.mode', this.props.mode)
 		this.lastLine = createDrawnLine(this.props.color, this.props.size, this.lastPointerPosition, this.props.mode);
 		this.layer.add(this.lastLine);
 	}

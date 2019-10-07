@@ -57,3 +57,8 @@ export const TextPlaceholder = styled.span`
 	position: absolute;
 	z-index: 1;
 `;
+
+// export const Layer = styled(KonvaLayer)`
+// 	display: ${({ inactive }) => inactive ? 'none' : 'block'};
+// 	pointer-events: ${({ inactive }) => inactive ? 'none' : 'all'};
+// `;

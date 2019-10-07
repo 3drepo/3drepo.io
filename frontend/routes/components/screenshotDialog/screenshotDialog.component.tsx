@@ -20,6 +20,8 @@ import * as Konva from 'konva';
 import { Layer } from 'react-konva';
 import EventListener from 'react-event-listener';
 
+import { Viewer } from '../../../services/viewer/viewer';
+import { renderWhenTrue } from '../../../helpers/rendering';
 import { Container, Stage } from './screenshotDialog.styles';
 import { Drawing } from './components/drawing/drawing.component';
 import { Shape } from './components/shape/shape.component';
@@ -29,10 +31,8 @@ import { Tools } from './components/tools/tools.component';
 import {
 	MODES, ELEMENT_TYPES, INITIAL_VALUES, getNewShape, getNewDrawnLine, getNewText, getTextStyles, EDITABLE_TEXTAREA_NAME
 } from './screenshotDialog.helpers';
-import { renderWhenTrue } from '../../../helpers/rendering';
 import { Indicator } from './components/indicator/indicator.component';
 import { EditableText } from './components/editableText/editableText.component';
-import { Viewer } from '../../../services/viewer/viewer';
 import { SHAPE_TYPES } from './components/shape/shape.constants';
 import { Erasing } from './components/erasing/erasing.component';
 
@@ -106,7 +106,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public get isDrawingMode() {
-		return this.state.mode === MODES.BRUSH;
+		return this.state.mode === MODES.BRUSH || this.state.mode === MODES.ERASER;
 	}
 
 	public get isErasing() {
@@ -261,12 +261,14 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		if (this.state.selectedObjectName) {
 			newState.selectedObjectName = '';
 		}
-		this.setState(newState);
+		this.setState(() => newState);
 	}
 
 	public setBrushMode = () => this.setMode(MODES.BRUSH);
 
-	public setEraserMode = () => this.setMode(MODES.ERASER);
+	public setEraserMode = () => {
+		this.setMode(MODES.ERASER);
+	}
 
 	public setShapeMode = (shape) => {
 		const newState = {
@@ -372,12 +374,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public addNewDrawnLine = (line) => {
 		if (!this.state.selectedObjectName) {
-			const isErasing = this.state.mode === MODES.ERASER;
-			console.log('isErasing')
 			const newLine = getNewDrawnLine(line.attrs, this.state.color);
-			const selectedObjectName = isErasing ? '' : newLine.name;
+			const selectedObjectName = this.isErasing ? '' : newLine.name;
 			this.props.addElement(newLine);
-			this.setState(({ mode }) => ({ selectedObjectName, mode: isErasing ? mode : null }));
+			this.setState(({ mode }) => ({ selectedObjectName, mode: this.isErasing ? mode : null }));
 		}
 	}
 
@@ -450,7 +450,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		return (<Shape key={index} {...commonProps} isDrawingMode={this.isDrawingMode} />);
 	})
 
-	public renderDrawing = renderWhenTrue(() => {
+	public renderDrawing = () => {
 		return (
 			<Drawing
 				height={this.state.stage.height}
@@ -467,7 +467,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				disabled={this.props.disabled}
 			/>
 		);
-	});
+	}
 
 	public renderErasing = renderWhenTrue(() => {
 		return (
@@ -493,7 +493,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 						{this.renderErasing(this.isErasing)}
 					</Layer>
 					<Layer ref={this.drawingLayerRef}>
-						{this.renderDrawing(this.isDrawingMode)}
+						{this.renderDrawing()}
 					</Layer>
 				</>
 			);
