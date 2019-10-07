@@ -21,6 +21,7 @@ import { createStructuredSelector } from 'reselect';
 
 import { selectActiveSession, selectIsAuthenticated, selectIsPending, AuthActions } from '../../modules/auth';
 import { selectCurrentUser } from '../../modules/currentUser';
+import { DialogActions } from '../../modules/dialog/dialog.redux';
 import { StartupActions } from '../../modules/startup/startup.redux';
 import { App } from './app.component';
 
@@ -34,7 +35,8 @@ const mapStateToProps = createStructuredSelector({
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	authenticate: AuthActions.authenticate,
 	logout: AuthActions.logout,
-	startup: StartupActions.startup
+	startup: StartupActions.startup,
+	showNewUpdateDialog: DialogActions.showNewUpdateDialog
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

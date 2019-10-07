@@ -24,9 +24,9 @@ interface IDialogConfig {
 	title: string;
 	template?: JSX.Element;
 	content?: string;
+	data?: any;
 	onConfirm?: () => void;
 	onCancel?: () => void;
-	data?: any;
 }
 
 export const { Types: DialogTypes, Creators: DialogActions } = createActions({
@@ -117,7 +117,7 @@ const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 const showNewUpdateDialog = (state = INITIAL_STATE, action) => {
 	const config = {
 		title: 'Update Available',
-		template: Dialogs.NewUpdateDialogDialog,
+		template: Dialogs.NewUpdateDialog,
 		onConfirm: action.config.onConfirm
 	};
 

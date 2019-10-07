@@ -19,7 +19,7 @@ import { memoize } from 'lodash';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
-import { PUBLIC_ROUTES, ROUTES } from '../../constants/routes';
+import { ROUTES } from '../../constants/routes';
 import { renderWhenTrue } from '../../helpers/rendering';
 import { analyticsService } from '../../services/analytics';
 import { clientConfigService } from '../../services/clientConfig';
@@ -48,6 +48,7 @@ interface IProps {
 	isAuthenticated: boolean;
 	currentUser: any;
 	isAuthPending: boolean;
+	showNewUpdateDialog: (config) => void;
 	authenticate: () => void;
 	logout: () => void;
 	startup: () => void;
@@ -96,6 +97,18 @@ export class App extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		this.props.authenticate();
 		this.sendAnalyticsPageView(location);
+
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.addEventListener('message', (event) => {
+				if (event.data.type === 'UPDATE') {
+					this.props.showNewUpdateDialog({
+						onConfirm: () => {
+							location.reload();
+						}
+					});
+				}
+			});
+		}
 	}
 
 	public componentDidUpdate(prevProps) {

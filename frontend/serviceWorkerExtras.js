@@ -16,3 +16,13 @@ self.addEventListener('fetch', function (event) {
 		);
 	}
 });
+
+self.addEventListener('install', event => event.waitUntil(self.skipWaiting()));
+
+self.addEventListener('activate', function(event) {
+	event.waitUntil(self.clients.claim());
+	self.clients.matchAll().then(clients => {
+		clients.forEach(client => client.postMessage({type: 'UPDATE'}));
+	})
+});
+
