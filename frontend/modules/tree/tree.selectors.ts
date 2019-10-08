@@ -276,3 +276,7 @@ export const selectVisibleTreeNodesIds = createSelector(
 	selectVisibleTreeNodesList,
 	(visibleNodes) => visibleNodes.map((visibleNode) => visibleNode._id)
 );
+
+export const selectIsTreeProcessed = createSelector(
+	selectTreeDomain, (state) => state.isTreeProcessed
+);

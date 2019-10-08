@@ -58,7 +58,8 @@ function* fetchData({ teamspace, model }) {
 			put(ViewerGuiActions.startListenOnModelLoaded()),
 			put(ModelActions.fetchSettings(teamspace, model)),
 			put(ModelActions.fetchMetaKeys(teamspace, model)),
-			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model))]);
+			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model)),
+			put(TreeActions.setIsTreeProcessed(false))]);
 
 		yield take(ModelTypes.FETCH_REVISIONS_SUCCESS);
 		const revision = yield select(selectCurrentRevisionId);
