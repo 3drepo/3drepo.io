@@ -32,7 +32,11 @@ function* login({ username, password }) {
 	yield put(AuthActions.setPendingStatus(true));
 
 	try {
-		const { data: { flags }} = yield API.login(username, password);
+		// tslint:disable-next-line:no-shadowed-variable
+		const {data} = yield API.login(username, password);
+		const flags = data.flags;
+		username = data.username;
+
 		if (flags && flags.termsPrompt) {
 			yield put(DialogActions.showDialog({
 				title: 'Terms and Privacy Policy Update',
