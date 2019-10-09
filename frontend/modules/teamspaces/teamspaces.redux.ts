@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { omit } from 'lodash';
+import { cloneDeep, keyBy, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { DATA_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
 import { SORTING_BY_LAST_UPDATED } from '../../routes/teamspaces/teamspaces.contants';
@@ -26,6 +26,8 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	setPendingState: ['pendingState'],
 	setModelUploadStatus: ['teamspace', 'project', 'model', 'modelData'],
 	setComponentState: ['componentState'],
+	removeTeamspaceSuccess: ['teamspace'],
+	leaveTeamspace: ['teamspace'],
 	// Projects
 	createProject: ['teamspace', 'projectData'],
 	updateProject: ['teamspace', 'projectId', 'projectData'],
@@ -39,7 +41,7 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	removeModel: ['teamspace', 'modelData'],
 	createModelSuccess: ['teamspace', 'modelData'],
 	updateModelSuccess: ['teamspace', 'modelId', 'modelData'],
-	removeModelSuccess: ['teamspace', 'modelData']
+	removeModelSuccess: ['teamspace', 'modelData'],
 }, { prefix: 'TEAMSPACES/' });
 
 export const INITIAL_STATE = {
@@ -141,6 +143,10 @@ const setModelUploadStatus = (state = INITIAL_STATE, { model, modelData }) => {
 	return { ...state, models };
 };
 
+const removeTeamspaceSuccess = (state = INITIAL_STATE, { teamspace }) => {
+	return {...state,  teamspaces: omit(state.teamspaces, teamspace)};
+};
+
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return {...state,  isPending: pendingState};
 };
@@ -154,6 +160,8 @@ export const reducer = createReducer({ ...INITIAL_STATE }, {
 	[TeamspacesTypes.SET_MODEL_UPLOAD_STATUS]: setModelUploadStatus,
 	[TeamspacesTypes.SET_PENDING_STATE]: setPendingState,
 	[TeamspacesTypes.SET_COMPONENT_STATE]: setComponentState,
+	[TeamspacesTypes.REMOVE_TEAMSPACE_SUCCESS]: removeTeamspaceSuccess,
+
 	// Projects
 	[TeamspacesTypes.UPDATE_PROJECT_SUCCESS]: updateProjectSuccess,
 	[TeamspacesTypes.CREATE_PROJECT_SUCCESS]: createProjectSuccess,

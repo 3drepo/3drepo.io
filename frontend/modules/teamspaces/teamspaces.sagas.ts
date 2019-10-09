@@ -19,9 +19,11 @@ import { normalize } from 'normalizr';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
+import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { selectStarredModels, StarredActions } from '../starred';
+import { UserManagementActions } from '../userManagement';
 import { TeamspacesActions, TeamspacesTypes } from './teamspaces.redux';
 import { teamspacesSchema } from './teamspaces.schema';
 import { selectProjects } from './teamspaces.selectors';
@@ -38,6 +40,18 @@ export function* fetchTeamspaces({ username }) {
 	}
 
 	yield put(TeamspacesActions.setPendingState(false));
+}
+
+export function* leaveTeamspace({ teamspace }) {
+	try {
+		const { username } = yield select( selectCurrentUser );
+		yield API.removeUserCascade(teamspace, username);
+		yield put(UserManagementActions.removeUserSuccess(username));
+		yield put(TeamspacesActions.removeTeamspaceSuccess(teamspace));
+		yield put(SnackbarActions.show('Teamspace left'));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('leave', 'teamspace', error));
+	}
 }
 
 // Projects
@@ -168,6 +182,7 @@ export function* removeModel({ teamspace, modelData }) {
 
 export default function* TeamspacesSaga() {
 	yield takeLatest(TeamspacesTypes.FETCH_TEAMSPACES, fetchTeamspaces);
+	yield takeLatest(TeamspacesTypes.LEAVE_TEAMSPACE, leaveTeamspace);
 
 	// Projects
 	yield takeLatest(TeamspacesTypes.CREATE_PROJECT, createProject);

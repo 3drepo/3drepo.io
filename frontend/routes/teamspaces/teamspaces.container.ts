@@ -75,6 +75,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setState: TeamspacesActions.setComponentState,
 	downloadModel: ModelActions.downloadModel,
 	fetchStarredModels: StarredActions.fetchStarredModels,
+	leaveTeamspace:  TeamspacesActions.leaveTeamspace
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Teamspaces));
