@@ -1041,10 +1041,10 @@ async function getSubModelRevisions(account, model, user, branch, rev) {
 		}));
 	});
 
-	promises.push(ModelSetting.getModelsName(param).then((modelNameResult) => {
+	promises.push(ModelSetting.getModelsData(param).then((modelNameResult) => {
 		const lookUp = modelNameResult[account];
 		modelIds.forEach((modelId) => {
-			results[modelId].name = lookUp[modelId];
+			results[modelId].name = lookUp[modelId].name;
 		});
 	}));
 
