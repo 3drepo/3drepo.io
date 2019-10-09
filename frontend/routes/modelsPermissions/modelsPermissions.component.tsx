@@ -196,8 +196,6 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 					}
 				</ModelsContainer>
 				<PermissionsContainer item={true}>
-					<OverflowWrapper>
-						<SimpleBar data-simplebar-y-hidden={true}>
 							<PermissionsTable
 								key={permissionsRevision}
 								permissions={permissions}
@@ -205,8 +203,6 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 								onPermissionsChange={this.handlePermissionsChange}
 								rowStateInterceptor={this.hasDisabledPermissions}
 							/>
-						</SimpleBar>
-					</OverflowWrapper>
 					{
 						!selectedModels.length ?
 							<TextOverlay content="Select a model to view the users' permissions" /> :
