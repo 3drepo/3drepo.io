@@ -65,7 +65,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			width: 0
 		},
 		selectedObjectName: '',
-		lastSelectedObjectName: '',
 		textEditable: {
 			visible: false,
 			value: '',
@@ -144,6 +143,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		// TODO: It has to be migrated after merging Tree PR
 		Viewer.pauseRendering();
 		this.clearCanvas();
+		// const diff = this.stage.attrs.width - this.imageLayer.children[0].attrs.image.naturalWidth;
 	}
 
 	public async componentDidUpdate(prevProps, prevState) {
@@ -173,24 +173,21 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public scaleStage = (image) => {
-		const scale = Math.min(
-			this.stage.width() / (image.attrs.image.naturalWidth),
-			this.stage.height() / (image.attrs.image.naturalWidth)
-		);
-		if (image.attrs.image.naturalWidth > this.stage.attrs.width) {
-			image.setAttrs({
-				width: this.stage.attrs.width,
-				scaleY: scale,
-				x: 0,
-				y: (this.stage.attrs.height - (image.attrs.image.naturalHeight * scale)) / 2
-			});
-		} else {
-			const diff = this.stage.attrs.width - image.attrs.image.naturalWidth;
-			image.setAttrs({
-				x: diff / 2,
-				width: image.attrs.image.naturalWidth
-			});
-		}
+		const diff = this.stage.attrs.width - image.attrs.image.naturalWidth;
+
+		image.setAttrs({
+			height: this.stage.attrs.height,
+			x: diff / 2,
+			y: 0
+		});
+
+		// TODO: calculate layer position
+		// if (this.layer.children.length) {
+		// 	this.layer.setAttrs({
+		// 		x: diff / 2,
+		// 		y: 0
+		// 	});
+		// }
 	}
 
 	public handleBrushSizeChange = (event) => {
@@ -305,9 +302,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				name: ''
 			};
 
-			if (this.state.lastSelectedObjectName && this.props.canvasElements.length) {
+			if (this.state.textEditable.name && this.props.canvasElements.length) {
 				const text = this.state.textEditable.value;
-				this.props.updateElement(this.state.lastSelectedObjectName, { text });
+				this.props.updateElement(this.state.textEditable.name, { text });
 			}
 
 			this.setState(newState, () => {
@@ -343,9 +340,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				name: false
 			};
 
-			if (this.state.lastSelectedObjectName && this.props.canvasElements.length) {
+			if (this.state.textEditable.name && this.props.canvasElements.length) {
 				const text = this.state.textEditable.value;
-				this.props.updateElement(this.state.lastSelectedObjectName, { text });
+				this.props.updateElement(this.state.textEditable.name, { text });
 			}
 
 			this.setState(newState);

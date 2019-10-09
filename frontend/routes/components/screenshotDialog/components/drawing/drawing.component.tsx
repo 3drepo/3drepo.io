@@ -171,7 +171,6 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	public handleMouseMoveLine = () => {
 		const { isCurrentlyDrawn } = this.state;
 		if (isCurrentlyDrawn && this.isDrawingMode) {
-
 			this.drawLine();
 		}
 	}

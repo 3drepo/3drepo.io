@@ -46,7 +46,7 @@ export const TextNode = ({ element, isSelected, handleChange, handleDoubleClick,
 				{...elementProps}
 				text={elementProps.text || EDITABLE_TEXTAREA_PLACEHOLDER}
 				fill={color}
-				draggable
+				draggable={isSelected && isVisible}
 				visible={isVisible}
 				onDblClick={handleDoubleClick}
 				onDragEnd={(e) => {
