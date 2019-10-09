@@ -121,7 +121,7 @@ export class App extends React.PureComponent<IProps, IState> {
 	public render() {
 		return (
 				<AppContainer>
-					<ViewerCanvas />
+					<Route component={ViewerCanvas} />
 					{this.renderHeader(!isStaticRoute(location.pathname))}
 					<Switch>
 						{this.renderLoginRoute()}
