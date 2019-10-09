@@ -62,6 +62,7 @@ import {
 	GridContainer,
 	Head,
 	Label,
+	List,
 	LoaderContainer,
 	MenuButton
 } from './teamspaces.styles';
@@ -502,21 +503,19 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	]);
 
 	private renderLoader = renderWhenTrue(() => (
-        <List>
-            <LoaderContainer>
-                <Loader content="Loading teamspaces..." />
-            </LoaderContainer>
-        </List>
+		<LoaderContainer>
+				<Loader content="Loading teamspaces..." />
+		</LoaderContainer>
 	));
 
 	private renderList = renderWhenTrue(() => (
-        <BodyWrapper>
-            <Body>
-                <SimpleBar>
-                    {this.props.items.filter(this.shouldBeVisible).map(this.renderListItem)}
-                </SimpleBar>
-            </Body>
-        </BodyWrapper>
+		<BodyWrapper>
+			<Body>
+				<SimpleBar>
+						{this.props.items.filter(this.shouldBeVisible).map(this.renderListItem)}
+				</SimpleBar>
+			</Body>
+		</BodyWrapper>
 	));
 
 	public render() {
