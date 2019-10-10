@@ -24,17 +24,23 @@ import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../s
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { TYPES } from '../../../components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
 import { Loader } from '../../../components/loader/loader.component';
-import { StarIcon } from '../../../components/starIcon/starIcon.component';
 import { PERMISSIONS_VIEWS } from '../../../projects/projects.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { ActionsMenu } from '../actionsMenu/actionsMenu.component';
 import FederationDialog from '../federationDialog/federationDialog.container';
 import UploadModelFileDialog from '../uploadModelFileDialog/uploadModelFileDialog.container';
 import {
-	Container, Content,
-	Header, ModelCode, ModelLink, Name, NameWithCode, NameWrapper,
+	Container,
+	Content,
+	Header,
+	ModelCode,
+	ModelLink,
+	Name,
+	NameWithCode,
+	NameWrapper,
 	PropertiesColumn,
 	Property,
+	StarIcon,
 	Status,
 	Timestamp
 } from './modelGridItem.styles';

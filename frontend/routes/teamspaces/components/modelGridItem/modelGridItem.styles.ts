@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 import { Highlight } from '../../../components/highlight/highlight.component';
+import { StarIcon as StarIconComponent } from '../../../components/starIcon/starIcon.component';
 
 export const Container = styled.div`
 	box-shadow: 0 2px 4px 0 ${COLOR.BLACK_20};
@@ -46,6 +47,10 @@ export const Name = styled(Highlight)`
 	&, mark {
 		font-weight: ${FONT_WEIGHT.BOLD};
 	}
+`;
+
+export const StarIcon = styled(StarIconComponent)`
+	z-index: 1;
 `;
 
 export const NameWrapper = styled.div`
