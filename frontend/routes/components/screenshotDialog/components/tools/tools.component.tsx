@@ -156,7 +156,6 @@ export class Tools extends React.PureComponent<IProps, any> {
 										aria-label="Show filters menu"
 										aria-haspopup="true"
 										color={this.getToolColor(MODES.SHAPE)}
-										// color={this.isShapeSelected ? 'secondary' : 'default'}
 										onClick={this.setDefaultShape}
 									>
 										<ActiveIcon {...IconProps} />
