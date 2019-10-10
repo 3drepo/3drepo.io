@@ -39,7 +39,7 @@ const ModelSchema = Yup.object().shape({
 	project: Yup.string().required(),
 	unit: Yup.string().required(),
 	type: Yup.string().required(),
-	code: Yup.string().max(5).matches(/^[A-Za-z0-9]+$/)
+	code: Yup.string().max(50).matches(/^[A-Za-z0-9]+$/)
 });
 
 interface IProps {
