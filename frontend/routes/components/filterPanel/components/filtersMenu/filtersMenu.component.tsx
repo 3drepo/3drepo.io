@@ -187,7 +187,7 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 		return (
 			<MuiPickersUtilsProvider utils={DayJsUtils}>
 				<MenuList>
-					{this.renderMenuDataTypes(this.props.dataTypes.length)}
+					{this.renderMenuDataTypes(this.props.dataTypes && this.props.dataTypes.length)}
 					{this.renderMenuItems(this.props.items)}
 					{this.renderFooter()}
 				</MenuList>
