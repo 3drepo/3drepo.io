@@ -72,3 +72,7 @@ export const IconButton = styled(IconButtonComponent)`
 	background: ${COLOR.BLACK_60};
 	opacity: 1;
 `;
+
+export const ShapeMenuButton = styled.div`
+	margin-left: -10px;
+`;

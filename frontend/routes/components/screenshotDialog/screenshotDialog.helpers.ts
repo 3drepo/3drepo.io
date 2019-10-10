@@ -77,15 +77,15 @@ export const getNewDrawnLine = (lineAttrs, color) => {
 	return newLine;
 };
 
-export const getNewText = (color, position) => {
+export const getNewText = (color, size, position) => {
 	const name = createUniqueName(ELEMENT_TYPES.TEXT);
 	const newText = {
 		type: ELEMENT_TYPES.TEXT,
 		text: '',
 		color,
 		name,
-		fontSize: 32,
 		fontFamily: 'Arial',
+		fontSize: size,
 		...position
 	};
 

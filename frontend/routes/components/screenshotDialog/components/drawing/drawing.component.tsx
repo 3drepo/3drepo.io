@@ -135,12 +135,12 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		const { x, y } = this.props.stage.getPointerPosition();
 
 		this.lastPointerPosition = this.initialPointerPosition = {
-			x: this.layer.attrs.x ? x - this.layer.attrs.x : x,
+			x,
 			y
 		};
 
 		const initialPositionProps = {
-			x: this.initialPointerPosition.x,
+			x: this.lastPointerPosition.x,
 			y: this.initialPointerPosition.y
 		};
 

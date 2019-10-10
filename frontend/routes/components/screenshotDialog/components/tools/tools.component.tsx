@@ -22,11 +22,12 @@ import ClearIcon from '@material-ui/icons/Clear';
 import TextIcon from '@material-ui/icons/TextFields';
 import UndoIcon from '@material-ui/icons/Undo';
 import RedoIcon from '@material-ui/icons/Redo';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import { MenuItem, Tooltip, Select } from '@material-ui/core';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { FONT_WEIGHT } from '../../../../../styles';
-import { ToolsContainer, OptionsDivider, StyledButton, IconButton } from './tools.styles';
+import { ToolsContainer, OptionsDivider, StyledButton, IconButton, ShapeMenuButton } from './tools.styles';
 import { TooltipButton } from '../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Eraser } from '../../../fontAwesomeIcon';
 import { ColorPicker } from '../../../colorPicker/colorPicker.component';
@@ -49,7 +50,7 @@ interface IProps {
 	onDrawClick: () => void;
 	onEraseClick: () => void;
 	onTextClick: () => void;
-	onShapeClick: (shapeName) => void;
+	onShapeClick: (shapeName?) => void;
 	onClearClick: () => void;
 	onColorChange: (color) => void;
 	onBrushSizeChange: (size) => void;
@@ -81,6 +82,10 @@ export class Tools extends React.PureComponent<IProps, any> {
 		this.props.onShapeClick(shapeName);
 	}
 
+	public setDefaultShape = () => {
+		this.props.onShapeClick(this.props.activeShape || SHAPE_TYPES.RECTANGLE);
+	}
+
 	public renderBrushSizes = () => range(56, 1).map((size, index) => (
 		<MenuItem key={index} value={size}>{size}</MenuItem>
 	))
@@ -109,7 +114,6 @@ export class Tools extends React.PureComponent<IProps, any> {
 					disableUnderline
 					value={size}
 					onChange={onBrushSizeChange}
-					disabled={this.isShapeSelected}
 					MenuProps={{
 						MenuListProps: {
 							style: {
@@ -145,17 +149,26 @@ export class Tools extends React.PureComponent<IProps, any> {
 					renderButton={({ IconProps, Icon, ...props }) => {
 						const ActiveIcon = activeShapeIcon(this.props.activeShape || SHAPE_TYPES.RECTANGLE);
 						return (
-							<Tooltip title={'Add shape'}>
-								<IconButton
-									{...props}
-									aria-label="Show filters menu"
-									aria-haspopup="true"
-									color={this.getToolColor(MODES.SHAPE)}
-									// color={this.isShapeSelected ? 'secondary' : 'default'}
-								>
-									<ActiveIcon {...IconProps} />
-								</IconButton>
-							</Tooltip>
+							<>
+								<Tooltip title={'Add shape'}>
+									<IconButton
+										{...props}
+										aria-label="Show filters menu"
+										aria-haspopup="true"
+										color={this.getToolColor(MODES.SHAPE)}
+										// color={this.isShapeSelected ? 'secondary' : 'default'}
+										onClick={this.setDefaultShape}
+									>
+										<ActiveIcon {...IconProps} />
+									</IconButton>
+								</Tooltip>
+								<ShapeMenuButton>
+									<SmallIconButton
+										Icon={ArrowDropDownIcon}
+										onClick={props.onClick}
+									/>
+								</ShapeMenuButton>
+							</>
 						);
 					}}
 					renderContent={this.renderActionsMenu}

@@ -365,10 +365,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public addNewText = (position) => {
-		const newText = getNewText(this.state.color, position);
+		const newText = getNewText(this.state.color, this.state.brushSize, position);
 		const selectedObjectName = newText.name;
 		this.props.addElement(newText);
-		this.setState({ selectedObjectName, mode: MODES.TEXT, brushSize: newText.fontSize });
+		this.setState({ selectedObjectName, mode: MODES.TEXT });
 		document.body.style.cursor = 'crosshair';
 	}
 
@@ -377,7 +377,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			const newLine = getNewDrawnLine(line.attrs, this.state.color);
 			const selectedObjectName = this.isErasing ? '' : newLine.name;
 			this.props.addElement(newLine);
-			this.setState(({ mode }) => ({ selectedObjectName, mode: this.isErasing ? mode : null }));
+			this.setState(({ mode }) => ({ selectedObjectName, mode: this.isErasing ? mode : MODES.BRUSH }));
 		}
 	}
 
@@ -525,7 +525,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	)
 
 	public handleStageMouseDown = ({ target }) => {
-		if (target.attrs.name !== this.state.selectedObjectName && target.getParent().className !== 'Transformer') {
+		if (target.attrs.name !== this.state.selectedObjectName &&
+			(target.getParent() && target.getParent().className !== 'Transformer')) {
 			this.setState({ selectedObjectName: '' });
 			return;
 		}

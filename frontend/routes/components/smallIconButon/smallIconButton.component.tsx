@@ -45,6 +45,7 @@ export class SmallIconButton extends React.PureComponent<IProps, any> {
 		if (!this.props.tooltip) {
 			return this.renderButton();
 		}
+
 		return (
 			<Tooltip title={this.props.tooltip}>
 				{this.renderButton()}

@@ -93,7 +93,6 @@ export const Shape = ({ element, isSelected, handleChange, isDrawingMode }: IPro
 				ref={shape}
 				{...elementProps}
 				stroke={color}
-				strokeWidth={5}
 				transformer={transformer}
 				onDragEnd={handleDragEnd}
 				onTransformEnd={handleTransformEnd}
