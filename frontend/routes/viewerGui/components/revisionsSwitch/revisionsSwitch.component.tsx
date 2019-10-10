@@ -91,7 +91,9 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 				currentRevisionId: this.props.currentRevision._id,
 				currentModelName: this.props.modelSettings.name,
 				revisions: this.props.revisions,
-				handleSetNewRevision: this.setNewRevision
+				handleSetNewRevision: this.setNewRevision,
+				teamspace: this.props.modelSettings.account,
+				modelId: this.props.modelSettings.model
 			}
 		});
 	}

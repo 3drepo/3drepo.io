@@ -40,7 +40,7 @@ export const StyledGrid = styled(Grid)<IStyledGrid>`
 		right: 0;
 		top: 0;
 		background: ${(props) => props.theme.federate ? COLOR.ALICE_BLUE : COLOR.WHITE};
-		z-index: 0;
+		z-index: 2;
 		height: 100%;
 	}
 
@@ -55,6 +55,9 @@ export const StyledGrid = styled(Grid)<IStyledGrid>`
 `;
 
 export const ActionsButton = styled.div`
+	z-index: 3;
+	position: relative;
+
 	&:hover + ${StyledGrid} {
 		${openMenuStyles}
 	}
@@ -63,8 +66,11 @@ export const ActionsButton = styled.div`
 export const Actions = styled.div`
 	position: absolute;
 	right: 40px;
+	left: auto;
+	height: auto;
 	top: 5px;
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: flex-end;
+	width: auto;
 `;
