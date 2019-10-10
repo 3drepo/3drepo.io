@@ -259,7 +259,7 @@ export const ModelGridItem = memo((props: IProps) => {
 
 	const renderRevisionsNumber = renderWhenTrue(
 		<Property>
-			{`${props.nRevisions} ${props.nRevisions === 1 ? 'revision' : 'revisions'}`}
+			{`${props.nRevisions || 0} ${props.nRevisions === 1 ? 'revision' : 'revisions'}`}
 		</Property>
 	);
 
