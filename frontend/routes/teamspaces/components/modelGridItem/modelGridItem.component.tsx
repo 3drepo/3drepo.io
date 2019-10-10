@@ -40,6 +40,7 @@ import {
 	NameWrapper,
 	PropertiesColumn,
 	Property,
+	RevisionsNumber,
 	StarIcon,
 	Status,
 	Timestamp
@@ -258,9 +259,9 @@ export const ModelGridItem = memo((props: IProps) => {
 	const renderModelCode = renderWhenTrue(<ModelCode><Property>{props.code}</Property></ModelCode>);
 
 	const renderRevisionsNumber = renderWhenTrue(
-		<Property>
+		<RevisionsNumber onClick={handleRevisionsClick}>
 			{`${props.nRevisions || 0} ${props.nRevisions === 1 ? 'revision' : 'revisions'}`}
-		</Property>
+		</RevisionsNumber>
 	);
 
 	const renderSuitabilityCode = renderWhenTrue(<Property>{props.suitabilityCode}</Property>);

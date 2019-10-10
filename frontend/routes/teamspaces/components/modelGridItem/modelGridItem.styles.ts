@@ -78,6 +78,15 @@ export const Property = styled.span`
 	overflow: hidden;
 `;
 
+export const RevisionsNumber = styled(Property)`
+	z-index: 1;
+
+	&:hover {
+		text-decoration: underline;
+		cursor: pointer;
+	}
+`;
+
 export const Timestamp = styled.span`
 	align-self: flex-end;
 	text-align: right;
