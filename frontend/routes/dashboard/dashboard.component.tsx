@@ -93,7 +93,6 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 				to={`${ROUTES.USER_MANAGEMENT_MAIN}/${currentUser.username}`}
 			/>
 		</Switch>
-		)
 	)
 
 	public renderDashboardRoute = ({match}) => (

@@ -124,6 +124,7 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		this.layer.clearCache();
 		this.layer.destroyChildren();
 		this.layer.batchDraw();
+
 		this.props.handleNewDrawnShape(this.props.activeShape, this.lastShape);
 		this.setState({ isCurrentlyDrawn: false });
 	}
@@ -131,7 +132,12 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	public handleMouseDownShape = () => {
 		this.setState({ isCurrentlyDrawn: true });
 		this.layer.clearBeforeDraw();
-		this.lastPointerPosition = this.initialPointerPosition = this.props.stage.getPointerPosition();
+		const { x, y } = this.props.stage.getPointerPosition();
+
+		this.lastPointerPosition = this.initialPointerPosition = {
+			x: this.layer.attrs.x ? x - this.layer.attrs.x : x,
+			y
+		};
 
 		const initialPositionProps = {
 			x: this.initialPointerPosition.x,
@@ -151,7 +157,13 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	public handleMouseDownLine = () => {
 		this.setState({ isCurrentlyDrawn: true });
 		this.layer.clearBeforeDraw();
-		this.lastPointerPosition = this.props.stage.getPointerPosition();
+		const { x, y } = this.props.stage.getPointerPosition();
+
+		this.lastPointerPosition = {
+			x: this.layer.attrs.x ? x - this.layer.attrs.x : x,
+			y
+		};
+
 		this.lastLine = createDrawnLine(this.props.color, this.props.size, this.lastPointerPosition, this.props.mode);
 		this.layer.add(this.lastLine);
 	}
@@ -165,6 +177,7 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		if (this.lastLine.attrs.points.length > 6) {
 			this.props.handleNewDrawnLine(this.lastLine);
 		}
+
 		this.setState({ isCurrentlyDrawn: false });
 	}
 

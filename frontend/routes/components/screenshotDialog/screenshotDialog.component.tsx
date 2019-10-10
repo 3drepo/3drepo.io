@@ -80,6 +80,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public stageRef = React.createRef<any>();
 	public hiddenCanvasRef = React.createRef<any>();
 
+	public lastImageCanvasWidth = null;
+
 	public get containerElement() {
 		return this.containerRef.current;
 	}
@@ -131,6 +133,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			this.scaleStage(image);
 			this.imageLayer.add(image);
 			this.imageLayer.batchDraw();
+			this.lastImageCanvasWidth = this.imageLayer.canvas.width;
 		});
 
 		this.setState({ sourceImage, mode: INITIAL_VALUES.mode }, () => {
@@ -143,7 +146,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		// TODO: It has to be migrated after merging Tree PR
 		Viewer.pauseRendering();
 		this.clearCanvas();
-		// const diff = this.stage.attrs.width - this.imageLayer.children[0].attrs.image.naturalWidth;
 	}
 
 	public async componentDidUpdate(prevProps, prevState) {
@@ -173,21 +175,22 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public scaleStage = (image) => {
-		const diff = this.stage.attrs.width - image.attrs.image.naturalWidth;
+		const imageX = (this.stage.attrs.width - image.attrs.image.naturalWidth) / 2;
 
 		image.setAttrs({
 			height: this.stage.attrs.height,
-			x: diff / 2,
+			x: imageX,
 			y: 0
 		});
 
-		// TODO: calculate layer position
-		// if (this.layer.children.length) {
-		// 	this.layer.setAttrs({
-		// 		x: diff / 2,
-		// 		y: 0
-		// 	});
-		// }
+		if (this.lastImageCanvasWidth) {
+			const x = (this.imageLayer.canvas.width - this.lastImageCanvasWidth) / 2;
+
+			this.layer.setAttrs({ x });
+			this.drawingLayer.setAttrs({ x });
+		} else {
+			this.lastImageCanvasWidth = this.imageLayer.canvas.width;
+		}
 	}
 
 	public handleBrushSizeChange = (event) => {
