@@ -1,12 +1,11 @@
-import * as Konva from 'konva';
 import { MODE_OPERATION } from '../../screenshotDialog.helpers';
 import { SHAPE_TYPES } from '../shape/shape.constants';
 import { cloud } from '../shape/shape.helpers';
 
+declare const Konva;
+
 const circleProps = { radius: 1 };
-
 const triangleProps = { sides: 3 };
-
 const rectangleProps = { height: 1, width: 1 };
 
 const cloudProps = {

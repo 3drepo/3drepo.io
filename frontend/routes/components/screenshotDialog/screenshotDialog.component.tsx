@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as Konva from 'konva';
 import * as React from 'react';
 import EventListener from 'react-event-listener';
 import { Layer } from 'react-konva';
@@ -34,6 +33,8 @@ import {
 	getNewDrawnLine, getNewShape, getNewText, getTextStyles, EDITABLE_TEXTAREA_NAME, ELEMENT_TYPES, INITIAL_VALUES, MODES
 } from './screenshotDialog.helpers';
 import { Container, Stage } from './screenshotDialog.styles';
+
+declare const Konva;
 
 interface IProps {
 	sourceImage: string | Promise<string>;

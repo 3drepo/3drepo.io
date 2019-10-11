@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as Konva from 'konva';
 import * as React from 'react';
 import { MODE_OPERATION } from '../../screenshotDialog.helpers';
+
+declare const Konva;
 
 interface IProps {
 	color: string;
