@@ -80,7 +80,8 @@ export const Shape = ({ element, isSelected, handleChange, isDrawingMode }: IPro
 
 	const handleTransformerMouseOver = (e) => {
 		if (e.target.attrs.name === 'rotater _anchor') {
-			document.querySelector('.konvajs-content').style.cursor = 'url("/images/rotate-cursor.png"), auto';
+			const konvaContent = document.querySelector('.konvajs-content') as any;
+			konvaContent.style.cursor = 'url("/images/rotate-cursor.png"), auto';
 		}
 	};
 
