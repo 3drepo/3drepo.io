@@ -39,7 +39,6 @@ import {
 	StyledIconButton,
 	StyledStartAdornment
 } from './colorPicker.styles';
-import { renderWhenTrue } from '../../../helpers/rendering';
 
 const COLORS = {
 	RED: 'rgba(255,0,0,1)',
@@ -156,6 +155,24 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		this.props.onChange(this.state.colorHash);
 		this.handleClose();
 	}
+
+	public renderFooter = () => (
+		<Footer>
+			<StyledButton
+				variant="raised"
+				color="secondary"
+				onClick={this.handleSave}
+			>
+				Save
+			</StyledButton>
+			<StyledButton
+				color="primary"
+				onClick={this.handleClose}
+			>
+				Cancel
+			</StyledButton>
+		</Footer>
+	)
 
 	public componentDidUpdate(prevProps, prevState) {
 		if (prevState.open !== this.state.open && !this.state.open) {
@@ -323,24 +340,6 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public renderFooter = renderWhenTrue((
-		<Footer>
-			<StyledButton
-				variant="raised"
-				color="secondary"
-				onClick={this.handleSave}
-			>
-				Save
-			</StyledButton>
-			<StyledButton
-				color="primary"
-				onClick={this.handleClose}
-			>
-				Cancel
-			</StyledButton>
-		</Footer>
-	));
-
 	public render() {
 		const {value, predefinedColors, disabled, disableButtons} = this.props;
 		const {open, pointerLeft, pointerTop, colorHash, hashInput} = this.state;
@@ -434,7 +433,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 							</FormControl>
 						</Grid>
 					</Grid>
-					{this.renderFooter(!disableButtons)}
+					{!disableButtons && this.renderFooter()}
 				</Panel>
 			</>
 		);

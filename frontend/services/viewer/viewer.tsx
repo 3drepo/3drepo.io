@@ -572,6 +572,14 @@ export class ViewerService {
 			this.viewer.disableCaching();
 		}
 	}
+
+	public pauseRendering = () => {
+		this.viewer.pauseRendering();
+	}
+
+	public resumeRendering = () => {
+		this.viewer.resumeRendering();
+	}
 }
 
 export const Viewer = new ViewerService();

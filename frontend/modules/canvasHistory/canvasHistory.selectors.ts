@@ -17,7 +17,7 @@
 
 import { createSelector } from 'reselect';
 
-export const selectCanvasHistoryDomain = (state) => Object.assign({}, state.canvasHistory);
+export const selectCanvasHistoryDomain = (state) => ({...state.canvasHistory});
 
 export const selectCanvasElements = createSelector(
 	selectCanvasHistoryDomain, (state) => {

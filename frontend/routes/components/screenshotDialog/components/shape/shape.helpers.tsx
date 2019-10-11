@@ -1,10 +1,10 @@
 import * as React from 'react';
 import {
-	Rect as RectangleComponent,
 	Circle as CircleComponent,
-	RegularPolygon as PolygonComponent,
 	Line as LineComponent,
-	Path
+	Path,
+	Rect as RectangleComponent,
+	RegularPolygon as PolygonComponent
 } from 'react-konva';
 
 export const cloud = {

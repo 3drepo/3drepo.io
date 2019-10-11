@@ -1,11 +1,12 @@
 import * as React from 'react';
+
+import SvgIcon from '@material-ui/core/SvgIcon';
 import ChangeHistoryIcon from '@material-ui/icons/ChangeHistory';
 import CropSquareIcon from '@material-ui/icons/CropSquare';
-import RemoveIcon from '@material-ui/icons/Remove';
 import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
-import SvgIcon from '@material-ui/core/SvgIcon';
-import { SHAPE_TYPES } from '../shape/shape.constants';
+import RemoveIcon from '@material-ui/icons/Remove';
 import { COLOR } from '../../../../../styles';
+import { SHAPE_TYPES } from '../shape/shape.constants';
 import { cloud } from '../shape/shape.helpers';
 
 const CloudIcon = (props) => {

@@ -1,7 +1,7 @@
 import * as Konva from 'konva';
+import { MODE_OPERATION } from '../../screenshotDialog.helpers';
 import { SHAPE_TYPES } from '../shape/shape.constants';
 import { cloud } from '../shape/shape.helpers';
-import { MODE_OPERATION } from '../../screenshotDialog.helpers';
 
 const circleProps = { radius: 1 };
 

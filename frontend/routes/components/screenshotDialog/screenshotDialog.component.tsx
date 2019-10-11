@@ -15,26 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import * as Konva from 'konva';
-import { Layer } from 'react-konva';
+import * as React from 'react';
 import EventListener from 'react-event-listener';
+import { Layer } from 'react-konva';
 
-import { Viewer } from '../../../services/viewer/viewer';
 import { renderWhenTrue } from '../../../helpers/rendering';
-import { Container, Stage } from './screenshotDialog.styles';
 import { Drawing } from './components/drawing/drawing.component';
-import { Shape } from './components/shape/shape.component';
-import { TextNode } from './components/textNode/textNode.component';
 import { DrawnLine } from './components/drawnLine/drawnLine.component';
+import { EditableText } from './components/editableText/editableText.component';
+import { Erasing } from './components/erasing/erasing.component';
+import { Indicator } from './components/indicator/indicator.component';
+import { Shape } from './components/shape/shape.component';
+import { SHAPE_TYPES } from './components/shape/shape.constants';
+import { TextNode } from './components/textNode/textNode.component';
 import { Tools } from './components/tools/tools.component';
 import {
-	MODES, ELEMENT_TYPES, INITIAL_VALUES, getNewShape, getNewDrawnLine, getNewText, getTextStyles, EDITABLE_TEXTAREA_NAME
+	getNewDrawnLine, getNewShape, getNewText, getTextStyles, EDITABLE_TEXTAREA_NAME, ELEMENT_TYPES, INITIAL_VALUES, MODES
 } from './screenshotDialog.helpers';
-import { Indicator } from './components/indicator/indicator.component';
-import { EditableText } from './components/editableText/editableText.component';
-import { SHAPE_TYPES } from './components/shape/shape.constants';
-import { Erasing } from './components/erasing/erasing.component';
+import { Container, Stage } from './screenshotDialog.styles';
 
 interface IProps {
 	sourceImage: string | Promise<string>;
@@ -42,6 +41,7 @@ interface IProps {
 	canvasElements: any[];
 	arePastElements: boolean;
 	areFutureElements: boolean;
+	viewer: any;
 	handleResolve: (screenshot) => void;
 	handleClose: () => void;
 	addElement: (element) => void;
@@ -78,7 +78,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public imageLayerRef = React.createRef<any>();
 	public drawingLayerRef = React.createRef<any>();
 	public stageRef = React.createRef<any>();
-	public hiddenCanvasRef = React.createRef<any>();
 
 	public lastImageCanvasWidth = null;
 
@@ -102,10 +101,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		return this.stageRef.current;
 	}
 
-	public get hiddenCanvas() {
-		return this.hiddenCanvasRef.current as any;
-	}
-
 	public get isDrawingMode() {
 		return this.state.mode === MODES.BRUSH || this.state.mode === MODES.ERASER;
 	}
@@ -119,6 +114,33 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		return elementType;
 	}
 
+	public renderEditableTextarea = renderWhenTrue(() => (
+		<EditableText
+			value={this.state.textEditable.value}
+			styles={this.getEditableTextareaStyles()}
+			handleTextEdit={this.handleTextEdit}
+			handleTextareaKeyDown={this.handleTextareaKeyDown}
+		/>
+	));
+
+	public renderIndicator = renderWhenTrue(() => (
+		<Indicator color={this.state.color} size={this.state.brushSize} />
+	));
+
+	public renderErasing = renderWhenTrue(() => {
+		return (
+			<Erasing
+				height={this.state.stage.height}
+				width={this.state.stage.width}
+				size={this.state.brushSize}
+				color={this.state.brushColor}
+				mode={this.state.mode}
+				layer={this.layerRef}
+				stage={this.stage}
+			/>
+		);
+	});
+
 	public setStageSize = () => {
 		const height = this.containerElement.offsetHeight;
 		const width = this.containerElement.offsetWidth;
@@ -131,6 +153,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 		Konva.Image.fromURL(sourceImage, (image) => {
 			this.scaleStage(image);
+
 			this.imageLayer.add(image);
 			this.imageLayer.batchDraw();
 			this.lastImageCanvasWidth = this.imageLayer.canvas.width;
@@ -142,21 +165,18 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		});
 
 		document.addEventListener('keydown', this.handleKeyDown);
-
-		// TODO: It has to be migrated after merging Tree PR
-		Viewer.pauseRendering();
+		this.props.viewer.pauseRendering();
 		this.clearCanvas();
 	}
 
-	public async componentDidUpdate(prevProps, prevState) {
+	public componentDidUpdate(prevProps, prevState) {
 		if (this.state.mode === MODES.SHAPE && prevState.mode !== MODES.SHAPE) {
 			document.body.style.cursor = 'crosshair';
 		}
 	}
 
 	public componentWillUnmount() {
-		// TODO: It has to be migrated after merging Tree PR
-		Viewer.resumeRendering();
+		this.props.viewer.resumeRendering();
 		document.removeEventListener('keydown', this.handleKeyDown);
 		this.clearCanvas();
 	}
@@ -249,7 +269,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleSave = async () => {
-		const screenshot = this.stage.toDataURL();
+		const screenshot = await this.stage.toDataURL();
 		this.props.handleResolve(screenshot);
 	}
 
@@ -469,20 +489,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	public renderErasing = renderWhenTrue(() => {
-		return (
-			<Erasing
-				height={this.state.stage.height}
-				width={this.state.stage.width}
-				size={this.state.brushSize}
-				color={this.state.brushColor}
-				mode={this.state.mode}
-				layer={this.layerRef}
-				stage={this.stage}
-			/>
-		);
-	});
-
 	public renderLayers = () => {
 		if (this.state.stage.width && this.state.stage.height) {
 			return (
@@ -539,31 +545,18 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		};
 	}
 
-	public renderEditableTextarea = renderWhenTrue(() => (
-		<EditableText
-			value={this.state.textEditable.value}
-			styles={this.getEditableTextareaStyles()}
-			handleTextEdit={this.handleTextEdit}
-			handleTextareaKeyDown={this.handleTextareaKeyDown}
-		/>
-	));
-
-	public renderIndicator = renderWhenTrue(() => (
-		<Indicator color={this.state.color} size={this.state.brushSize} />
-	));
-
 	public render() {
 		const { stage } = this.state;
 
 		return (
-			<Container innerRef={this.containerRef}>
+			<Container ref={this.containerRef}>
 				<EventListener
 					target="window"
 					onResize={this.handleResize}
 				/>
 				{this.renderIndicator(!this.props.disabled && this.isDrawingMode && !this.state.selectedObjectName)}
 				{this.renderTools()}
-				<Stage innerRef={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
+				<Stage ref={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
 					{this.renderLayers()}
 				</Stage>
 				{this.renderEditableTextarea(this.state.textEditable.visible)}

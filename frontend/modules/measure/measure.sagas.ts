@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest, all } from 'redux-saga/effects';
+import { all, put, takeLatest } from 'redux-saga/effects';
 
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
-import { MeasureTypes, MeasureActions } from './';
+import { MeasureActions, MeasureTypes } from './';
 
 export function* activateMeasure() {
 	try {

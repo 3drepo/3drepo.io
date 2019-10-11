@@ -15,28 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
 import { range } from 'lodash';
+import * as React from 'react';
+
+import { MenuItem, Select, Tooltip } from '@material-ui/core';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import BorderColorIcon from '@material-ui/icons/BorderColor';
 import ClearIcon from '@material-ui/icons/Clear';
+import RedoIcon from '@material-ui/icons/Redo';
 import TextIcon from '@material-ui/icons/TextFields';
 import UndoIcon from '@material-ui/icons/Undo';
-import RedoIcon from '@material-ui/icons/Redo';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import { MenuItem, Tooltip, Select } from '@material-ui/core';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { FONT_WEIGHT } from '../../../../../styles';
-import { ToolsContainer, OptionsDivider, StyledButton, IconButton, ShapeMenuButton } from './tools.styles';
 import { TooltipButton } from '../../../../teamspaces/components/tooltipButton/tooltipButton.component';
-import { Eraser } from '../../../fontAwesomeIcon';
-import { ColorPicker } from '../../../colorPicker/colorPicker.component';
-import { MODES } from '../../screenshotDialog.helpers';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
+import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { MenuList } from '../../../filterPanel/components/filtersMenu/filtersMenu.styles';
+import { Eraser } from '../../../fontAwesomeIcon';
 import { SmallIconButton } from '../../../smallIconButon/smallIconButton.component';
-import { SHAPES_MENU, activeShapeIcon } from './tools.helpers';
+import { MODES } from '../../screenshotDialog.helpers';
 import { SHAPE_TYPES } from '../shape/shape.constants';
+import { activeShapeIcon, SHAPES_MENU } from './tools.helpers';
+import { IconButton, OptionsDivider, ShapeMenuButton, StyledButton, ToolsContainer } from './tools.styles';
 
 interface IProps {
 	size: number;
@@ -67,34 +68,6 @@ export class Tools extends React.PureComponent<IProps, any> {
 
 	public get isShapeSelected() {
 		return this.props.selectedObjectName.includes('shape');
-	}
-
-	public handleUndo = () => () => {
-		this.props.onUndo();
-	}
-
-	public handleRedo = () => () => {
-		this.props.onRedo();
-	}
-
-	public handleShapeClick = (shapeName, menu, e) => {
-		menu.close(e);
-		this.props.onShapeClick(shapeName);
-	}
-
-	public setDefaultShape = () => {
-		this.props.onShapeClick(this.props.activeShape || SHAPE_TYPES.RECTANGLE);
-	}
-
-	public renderBrushSizes = () => range(56, 1).map((size, index) => (
-		<MenuItem key={index} value={size}>{size}</MenuItem>
-	))
-
-	public getToolColor = (toolType) => {
-		if (this.props.mode === toolType) {
-			return 'secondary';
-		}
-		return 'action';
 	}
 
 	public renderToolset = renderWhenTrue(() => {
@@ -205,6 +178,38 @@ export class Tools extends React.PureComponent<IProps, any> {
 		);
 	});
 
+	public renderSaveButton = renderWhenTrue(() => (
+		<StyledButton onClick={this.props.onSave} color="secondary" variant="raised">Save</StyledButton>
+	));
+
+	public handleUndo = () => () => {
+		this.props.onUndo();
+	}
+
+	public handleRedo = () => () => {
+		this.props.onRedo();
+	}
+
+	public handleShapeClick = (shapeName, menu, e) => {
+		menu.close(e);
+		this.props.onShapeClick(shapeName);
+	}
+
+	public setDefaultShape = () => {
+		this.props.onShapeClick(this.props.activeShape || SHAPE_TYPES.RECTANGLE);
+	}
+
+	public renderBrushSizes = () => range(56, 1).map((size, index) => (
+		<MenuItem key={index} value={size}>{size}</MenuItem>
+	))
+
+	public getToolColor = (toolType) => {
+		if (this.props.mode === toolType) {
+			return 'secondary';
+		}
+		return 'action';
+	}
+
 	public renderActionsMenu = (menu) =>  {
 		return(
 			<MenuList>
@@ -219,23 +224,8 @@ export class Tools extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	public renderSaveButton = renderWhenTrue(() => (
-		<StyledButton onClick={this.props.onSave} color="secondary" variant="raised">Save</StyledButton>
-	));
-
 	public handleToolClick = (type, callback?) => () => {
 		this.setState({ activeTool: type }, callback);
-	}
-
-	public renderBrushSizes = () => range(56, 1).map((size, index) => (
-		<MenuItem key={index} value={size}>{size}</MenuItem>
-	))
-
-	public getToolColor = (toolType) => {
-		if (this.state.activeTool === toolType) {
-			return 'secondary';
-		}
-		return 'action';
 	}
 
 	public render() {

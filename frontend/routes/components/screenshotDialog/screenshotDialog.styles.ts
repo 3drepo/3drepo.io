@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Stage as KonvaStage } from 'react-konva';
 import styled from 'styled-components';
-import {Stage as KonvaStage } from 'react-konva';
 import { COLOR } from '../../../styles';
 
 export const Container = styled.div`

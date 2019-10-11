@@ -1,4 +1,4 @@
-import { Rectangle, Circle, Triangle, Line, Cloud } from './shape.helpers';
+import { Circle, Cloud, Line, Rectangle, Triangle } from './shape.helpers';
 
 export const SHAPE_TYPES = {
 	RECTANGLE: 1,

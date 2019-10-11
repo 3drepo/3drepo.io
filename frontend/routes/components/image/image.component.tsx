@@ -17,8 +17,8 @@
 
 import React from 'react';
 
-import { Container, StyledImage } from './image.styles';
 import { ScreenshotDialog } from '../screenshotDialog';
+import { Container, StyledImage } from './image.styles';
 
 interface IProps {
 	src: string;

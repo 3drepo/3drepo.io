@@ -18,14 +18,15 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { withViewer } from '../../../services/viewer/viewer';
 
-import { ScreenshotDialog } from './screenshotDialog.component';
 import {
-	CanvasHistoryActions,
-	selectCanvasElements,
 	selectAreFutureElements,
-	selectArePastElements
+	selectArePastElements,
+	selectCanvasElements,
+	CanvasHistoryActions
 } from '../../../modules/canvasHistory';
+import { ScreenshotDialog } from './screenshotDialog.component';
 
 const mapStateToProps = createStructuredSelector({
 	canvasElements: selectCanvasElements,
@@ -43,4 +44,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	initHistory: CanvasHistoryActions.initHistory
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(ScreenshotDialog);
+export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ScreenshotDialog));

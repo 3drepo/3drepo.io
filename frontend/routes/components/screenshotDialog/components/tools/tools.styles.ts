@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Button, Divider, IconButton as IconButtonComponent } from '@material-ui/core';
 import styled from 'styled-components';
-import { Divider, Button, IconButton as IconButtonComponent } from '@material-ui/core';
-
 import { COLOR } from '../../../../../styles';
 import * as ColorPickerStyles from '../../../../components/colorPicker/colorPicker.styles';
 
