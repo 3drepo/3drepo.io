@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { formatDate, LONG_DATE_TIME_FORMAT } from '../../services/formatting/formatDate';
+import { getActiveRevisions } from '../../helpers/revisions';
 import { selectUrlParams } from '../router/router.selectors';
 
 export const selectModelDomain = (state) => state.model;
@@ -30,12 +30,12 @@ export const selectRevisions = createSelector(
 );
 
 export const selectCurrentRevision = createSelector(
-	selectRevisions, selectUrlParams , (revisions, params) => {
+	selectRevisions, selectUrlParams, (revisions, params) => {
 		const paramRevision = params.revision ?
 			revisions.find((revision) => revision.tag === params.revision ||  revision._id === params.revision)
 			: null;
 
-		return  paramRevision || revisions[0];
+		return paramRevision || getActiveRevisions(revisions)[0];
 	}
 );
 

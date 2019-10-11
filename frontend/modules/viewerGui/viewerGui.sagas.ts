@@ -31,7 +31,7 @@ import { GroupsActions } from '../groups';
 import { selectIssuesMap, IssuesActions } from '../issues';
 import { JobsActions } from '../jobs';
 import { MeasureActions } from '../measure';
-import { selectCurrentRevisionId, selectRevisions, selectSettings, ModelActions, ModelTypes } from '../model';
+import { selectCurrentRevisionId, selectSettings, ModelActions, ModelTypes } from '../model';
 import { selectRisksMap, RisksActions } from '../risks';
 import { selectUrlParams } from '../router/router.selectors';
 import { StarredActions } from '../starred';

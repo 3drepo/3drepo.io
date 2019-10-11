@@ -22,7 +22,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 
 import { ROUTES } from '../../../../../constants/routes';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
-import { getCurrentRevisionId } from '../../../../../helpers/revisions';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../../services/analytics';
 import { Loader } from '../../../loader/loader.component';
 import { RevisionsListItem } from '../../../revisionsListItem/revisionsListItem.component';
@@ -75,7 +74,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 	}
 
 	get currentRevisionId() {
-		return this.props.currentRevisionId || getCurrentRevisionId(this.revisions);
+		return this.props.currentRevisionId;
 	}
 
 	private revisionClickHandler = ({ tag, _id }) => {
