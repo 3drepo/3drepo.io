@@ -6,8 +6,10 @@ export 	const getTeamspaceProjects = (teamspaces, teamspaceName) => {
 	const selectedTeamspace = teamspaces.find((ts) => ts.account === teamspaceName);
 	const projectPlaceholder = { name: 'Select project', disabled: true };
 	const teamspaceProjects = selectedTeamspace && selectedTeamspace.projects.length ? selectedTeamspace.projects : [];
-	const projects = [projectPlaceholder, ...teamspaceProjects]
-	return projects.map(({ name, disabled }) => ({ name, disabled }));
+	const projects = [projectPlaceholder, ...teamspaceProjects];
+	
+	return projects.map(({ name, disabled }) => 
+		({ value: name, displayName: name, disabled }));
 };
 
 export const getProjectModels = (teamspaces, currentTeamspace, projectName) => {
@@ -15,9 +17,12 @@ export const getProjectModels = (teamspaces, currentTeamspace, projectName) => {
 	if (selectedTeamspace) {
 		const selectedProject = selectedTeamspace.projects.find((p) => p.name === projectName);
 		const modelPlaceholder = { name: 'Select model', disabled: true };
-		const projectModels = selectedProject && selectedProject.models.length ? selectedProject.models : [];
+		const projectModels = selectedProject && selectedProject.models.length ?
+			selectedProject.models : [];
 		const models = [modelPlaceholder, ...projectModels];
-		return models.map(({ name, disabled }) => ({ name, disabled }));
+
+		return models.filter((m) => m.model).map(({ model, name, disabled }) =>
+			({ value: model, displayName: name, disabled }));
 	}
 	return [];
 };

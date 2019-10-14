@@ -15,22 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { ConfigSelect, ConfigSelectItem } from '../board.styles';
+import { createActions, createReducer } from 'reduxsauce';
 
-export const ConfigSelectComponent = ({value, items, handleChange}) => {
-	return (
-		<ConfigSelect
-			value={value || (items.length ? items[0].value : '')}
-			onChange={handleChange}
-			disabled={!items.length}>
-			{ items.length &&
-				items.map((p, index) => (
-					<ConfigSelectItem key={index} value={p.value} disabled={p.disabled}>
-						{p.displayName}
-					</ConfigSelectItem>
-				))
-			}
-		</ConfigSelect>
-	);
+export const { Types: BoardTypes, Creators: BoardActions } = createActions({
+	fetchIssues: ['teamspace', 'revision'],
+	fetchIssuesSuccess: []
+}, { prefix: 'BOARD/' });
+
+export const INITIAL_STATE = {
+	isPending: false
 };
+
+const fetchIssuesSuccess = (state = INITIAL_STATE) => {
+	return { ...state, isPending: false };
+};
+
+export const reducer = createReducer({...INITIAL_STATE}, {
+	[BoardTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess
+});

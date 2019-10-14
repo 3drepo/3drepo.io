@@ -15,22 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { ConfigSelect, ConfigSelectItem } from '../board.styles';
+import { createSelector } from 'reselect';
 
-export const ConfigSelectComponent = ({value, items, handleChange}) => {
-	return (
-		<ConfigSelect
-			value={value || (items.length ? items[0].value : '')}
-			onChange={handleChange}
-			disabled={!items.length}>
-			{ items.length &&
-				items.map((p, index) => (
-					<ConfigSelectItem key={index} value={p.value} disabled={p.disabled}>
-						{p.displayName}
-					</ConfigSelectItem>
-				))
-			}
-		</ConfigSelect>
-	);
-};
+export const selectBoardDomain = (state) => ({...state.board});

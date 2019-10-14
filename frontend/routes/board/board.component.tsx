@@ -78,8 +78,13 @@ export function Board(props: IProps) {
 
 		if (teamspace && project && modelId) {
 			console.log(teamspace, project, modelId, 'Fetch ', type);
+			if (type === 'issues') {
+				props.fetchIssues(teamspace, modelId);
+			} else {
+				props.fetchRisks(teamspace, modelId);
+			}
 		}
-	}, [teamspace, project, modelId]);
+	}, [teamspace, project, modelId, type]);
 
 	const handleTypeChange = (e) => {
 		const url = `${ROUTES.BOARD_MAIN}/${e.target.value}/${teamspace}${projectParam}${modelParam}`;
