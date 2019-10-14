@@ -20,6 +20,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { ROUTES } from '../../constants/routes';
 import Billing from '../billing/billing.container';
+import Board from '../board/board.container';
 import { UserInfo } from '../components/userInfo/userInfo.component';
 import ModelSettings from '../modelSettings/modelSettings.container';
 import Profile from '../profile/profile.container';
@@ -31,6 +32,10 @@ const MENU_ITEMS = [
 	{
 		title: 'Teamspaces',
 		path: ROUTES.TEAMSPACES
+	},
+	{
+		title: 'Board',
+		path: ROUTES.BOARD
 	},
 	{
 		title: 'User Management',
@@ -67,6 +72,11 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 				exact
 				path={ROUTES.TEAMSPACES}
 				component={Teamspaces}
+			/>
+			<Route
+				exact
+				path={ROUTES.BOARD}
+				component={Board}
 			/>
 			<Route
 				exact

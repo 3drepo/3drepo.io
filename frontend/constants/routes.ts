@@ -13,7 +13,8 @@ export const ROUTES = {
 	USER_MANAGEMENT_MAIN: '/dashboard/user-management',
 	USER_MANAGEMENT_TEAMSPACE: '/dashboard/user-management/:teamspace',
 	PROFILE: '/dashboard/profile',
-	BILLING: '/dashboard/billing'
+	BILLING: '/dashboard/billing',
+	BOARD: '/dashboard/board'
 };
 
 export const PUBLIC_ROUTES = [
