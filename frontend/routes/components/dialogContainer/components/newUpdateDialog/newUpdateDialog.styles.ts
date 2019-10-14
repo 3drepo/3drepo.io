@@ -17,10 +17,15 @@
 
 import DialogActionsComponent from '@material-ui/core/DialogActions';
 import styled from 'styled-components';
+import { COLOR } from '../../../../../styles';
 
 export const DialogActions = styled(DialogActionsComponent)`
 	&& {
 		margin-left: 7px;
 		justify-content: space-between;
 	}
+`;
+
+export const Link = styled.a`
+	color: ${COLOR.PRIMARY_MAIN};
 `;
