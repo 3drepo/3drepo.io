@@ -15,9 +15,59 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
 import styled from 'styled-components';
+import { COLOR } from '../../styles';
 
 export const Container = styled.div`
 	height: 100%;
 	width: 100%;
+
+	.react-trello-board {
+		background-color: initial;
+		height: auto;
+    padding: 0;
+	}
+`;
+
+export const BoardContainer = styled.div`
+	padding: 15px;
+`;
+
+export const Config = styled.div`
+	background-color: ${COLOR.BLACK_12};
+`;
+
+export const TitleActions = styled.div`
+	display: flex;
+`;
+
+export const StyledItem = styled(MenuItem)``;
+
+export const StyledSelect = styled(Select)``;
+
+export const TitleContainer = styled.div`
+	align-items: center;
+	color: ${COLOR.WHITE_87};
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
+
+	${StyledSelect} {
+		div {
+			color: ${COLOR.WHITE_87};
+			font-size: 20px;
+			display: flex;
+			align-items: center;
+		}
+
+		svg {
+			color: ${COLOR.WHITE_87};
+		}
+	}
+`;
+
+export const SelectContainer = styled.div`
+
 `;

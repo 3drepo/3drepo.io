@@ -15,16 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { capitalize } from 'lodash';
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useRouteMatch } from 'react-router-dom';
 import Board from 'react-trello';
+import { ROUTES } from '../../constants/routes';
 import { Panel } from '../components/panel/panel.component';
-import { Container } from './board.styles';
+import {
+	BoardContainer,
+	Config,
+	Container,
+	SelectContainer,
+	StyledItem,
+	StyledSelect,
+	TitleActions,
+	TitleContainer
+} from './board.styles';
 interface IProps {
+	history: any;
 }
 
 const PANEL_PROPS = {
-	title: 'Board',
 	paperProps: {
 		height: '100%'
 	}
@@ -38,7 +49,7 @@ const data = {
 			label: '2/2',
 			cards: [
 				{id: 'Card1', title: 'Write Blog', description: 'Can AI make memes', label: '30 mins', draggable: false},
-				{id: 'Card2', title: 'Pay Rent', description: 'Transfer via NEFT', label: '5 mins', metadata: {sha: 'be312a1'}, draggable: true}
+				{id: 'Card2', title: 'Pay Rent', description: 'Transfer via NEFT', label: '5 mins', metadata: {sha: 'be312a1'}}
 			],
 		},
 		{
@@ -50,18 +61,45 @@ const data = {
 	]
 };
 
+const types = ['issues', 'risks'];
+
 export function Board(props: IProps) {
 	const { type, teamspace, project, modelId } = useParams();
+	const match = useRouteMatch();
+
+	const handleChangeType = (e) => {
+		const projectParam = `${project ? `/${project}` : ''}`;
+		const modelParam = `${modelId ? `/${modelId}` : ''}`;
+		const url = `${ROUTES.BOARD_MAIN}/${e.target.value}/${teamspace}${projectParam}${modelParam}`;
+		props.history.push(url);
+	};
+
+	const BoardTitle = (
+		<TitleContainer>
+			<SelectContainer>
+				<StyledSelect value={type} onChange={handleChangeType}>
+					{types.map((t) => (<StyledItem key={t} value={t}>Project {`${capitalize(t)}`}</StyledItem>))}
+				</StyledSelect>
+			</SelectContainer>
+			<TitleActions>
+				<div>Search</div>
+				<div>Menu</div>
+			</TitleActions>
+		</TitleContainer>
+	);
 
 	return (
-		<Panel {...PANEL_PROPS}>
+		<Panel {...PANEL_PROPS} title={BoardTitle}>
 			<Container>
-				<div>Type: {type}</div>
-				<div>Teamspace: {teamspace}</div>
-				<div>Project: {project}</div>
-				<div>Model: {modelId}</div>
-
-				<Board data={data} />
+				<Config>
+					<div>Type: {type}</div>
+					<div>Teamspace: {teamspace}</div>
+					<div>Project: {project}</div>
+					<div>Model: {modelId}</div>
+				</Config>
+				<BoardContainer>
+					<Board data={data} />
+				</BoardContainer>
 			</Container>
 		</Panel>
 	);
