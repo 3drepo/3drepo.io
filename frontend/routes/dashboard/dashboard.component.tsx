@@ -35,7 +35,7 @@ const MENU_ITEMS = [
 	},
 	{
 		title: 'Board',
-		path: ROUTES.BOARD
+		path: ROUTES.BOARD_MAIN
 	},
 	{
 		title: 'User Management',
@@ -75,7 +75,7 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 			/>
 			<Route
 				exact
-				path={ROUTES.BOARD}
+				path={ROUTES.BOARD_SPECIFIC}
 				component={Board}
 			/>
 			<Route
@@ -101,6 +101,10 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 				exact
 				from={ROUTES.USER_MANAGEMENT_MAIN}
 				to={`${ROUTES.USER_MANAGEMENT_MAIN}/${currentUser.username}`}
+			/>
+			<Redirect
+				from={ROUTES.BOARD_MAIN}
+				to={`${ROUTES.BOARD_MAIN}/issues/${currentUser.username}`}
 			/>
 		</Switch>
 		)

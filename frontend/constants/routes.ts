@@ -14,7 +14,8 @@ export const ROUTES = {
 	USER_MANAGEMENT_TEAMSPACE: '/dashboard/user-management/:teamspace',
 	PROFILE: '/dashboard/profile',
 	BILLING: '/dashboard/billing',
-	BOARD: '/dashboard/board'
+	BOARD_MAIN: '/dashboard/board',
+	BOARD_SPECIFIC: '/dashboard/board/:type(\\issues|risks)/:teamspace/:project?/:modelId?'
 };
 
 export const PUBLIC_ROUTES = [

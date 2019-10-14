@@ -16,10 +16,9 @@
  */
 
 import React from 'react';
-
+import { useParams } from 'react-router-dom';
 import { Panel } from '../components/panel/panel.component';
 import { Container } from './board.styles';
-
 interface IProps {
 }
 
@@ -30,15 +29,17 @@ const PANEL_PROPS = {
 	}
 };
 
-export class Board extends React.PureComponent<IProps, any> {
-	public render() {
-		console.log('Board');
-		return (
-			<Panel {...PANEL_PROPS}>
-				<Container>
-					Board
-				</Container>
-			</Panel>
-		);
-	}
+export function Board(props: IProps) {
+	const { type, teamspace, project, modelId } = useParams();
+
+	return (
+		<Panel {...PANEL_PROPS}>
+			<Container>
+				<div>Type: {type}</div>
+				<div>Teamspace: {teamspace}</div>
+				<div>Project: {project}</div>
+				<div>Model: {modelId}</div>
+			</Container>
+		</Panel>
+	);
 }
