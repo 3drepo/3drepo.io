@@ -48,7 +48,14 @@ export const Title = styled.h2`
 export const Content = styled.div`
 	padding: 10px 50px;
 	overflow: auto;
-	height: calc(100vh - 80px);
+	@media screen {
+		height: calc(100vh - 84px);
+	}
+
+	@media print {
+		height: 100%;
+	}
+
 	color: ${COLOR.BLACK_80};
 	background-color: rgb(250,250,250);
 `;

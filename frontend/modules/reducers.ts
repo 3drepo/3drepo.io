@@ -18,7 +18,6 @@ import { reducer as notificationsReducer } from './notifications/notifications.r
 import { reducer as risksReducer } from './risks/risks.redux';
 import { reducer as snackbarReducer } from './snackbar/snackbar.redux';
 import { reducer as starredMetaReducer } from './starredMeta/starredMeta.redux';
-import { reducer as staticPagesReducer } from './staticPages/staticPages.redux';
 import { reducer as teamspacesReducer } from './teamspaces/teamspaces.redux';
 import { reducer as treeReducer } from './tree/tree.redux';
 import { reducer as userManagementReducer } from './userManagement/userManagement.redux';
@@ -41,7 +40,6 @@ export default function createReducer(history) {
 		model: modelReducer,
 		auth: authReducer,
 		notifications: notificationsReducer,
-		staticPages: staticPagesReducer,
 		users: usersReducer,
 		gis: gisReducer,
 		viewer: viewerReducer,

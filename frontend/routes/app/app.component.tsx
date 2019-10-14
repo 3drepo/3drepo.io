@@ -28,7 +28,7 @@ import { DialogContainer } from '../components/dialogContainer';
 import { LiveChat } from '../components/liveChat';
 import { PrivateRoute } from '../components/privateRoute';
 import { SnackbarContainer } from '../components/snackbarContainer';
-import StaticPageRoute from '../components/staticPageRoute/staticPageRoute.container';
+import StaticPageRoute from '../components/staticPageRoute/staticPageRoute.component';
 import TopMenu from '../components/topMenu/topMenu.container';
 import { Dashboard } from '../dashboard';
 import { Login } from '../login';
