@@ -3,10 +3,13 @@
 	html, body, home, .homeContainer,
 	#homeLegalContainer, #legal, #legalText,
 	#terms, #privacy, #cookies {
-		overflow: visible !important;
-		height: 100% !important;
+		overflow: inherit !important;
+		height: inherit !important;
 	}
 
+	#legalLinks {
+		display: none;
+	}
 }
 
 #terms, #privacy, #cookies {

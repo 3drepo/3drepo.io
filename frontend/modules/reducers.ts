@@ -10,7 +10,6 @@ import { reducer as teamspacesReducer } from './teamspaces/teamspaces.redux';
 import { reducer as modelReducer } from './model/model.redux';
 import { reducer as authReducer } from './auth/auth.redux';
 import { reducer as notificationsReducer } from './notifications/notifications.redux';
-import { reducer as staticPagesReducer } from './staticPages/staticPages.redux';
 import { reducer as usersReducer } from './users/users.redux';
 import { reducer as gisReducer } from './gis/gis.redux';
 import { reducer as viewerReducer } from './viewer/viewer.redux';
@@ -37,7 +36,6 @@ export default function createReducer() {
 		model: modelReducer,
 		auth: authReducer,
 		notifications: notificationsReducer,
-		staticPages: staticPagesReducer,
 		users: usersReducer,
 		gis: gisReducer,
 		viewer: viewerReducer,

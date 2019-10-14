@@ -20,22 +20,28 @@ import { MuiThemeProvider } from '@material-ui/core/styles';
 import { ThemeProvider } from 'styled-components';
 import { MuiTheme, theme } from './../../../../styles';
 import { Container, Content, Header, Logo, Title } from './pageTemplate.styles';
+import { getStaticFile } from '../../../../services/staticPages';
 
 interface IProps {
 	title: string;
 	fileName: string;
-	isPending: boolean;
-	templates: object;
-	loadTemplate: (fileName) => void;
 }
 
-export class PageTemplate extends React.PureComponent<IProps, any> {
-	public async componentDidMount() {
-		this.props.loadTemplate(this.props.fileName);
+interface IState {
+	fileContent: string;
+}
+
+export default class PageTemplate extends React.PureComponent<IProps, IState> {
+	public state = {
+		fileContent: ''
+	};
+
+	public componentDidMount() {
+		getStaticFile(this.props.fileName).then(({data}) => this.setState({fileContent: data}));
 	}
 
 	public render() {
-		const { templates, fileName } = this.props;
+		const { fileContent } =  this.state;
 		return (
 			<ThemeProvider theme={theme}>
 				<MuiThemeProvider theme={MuiTheme}>
@@ -44,7 +50,7 @@ export class PageTemplate extends React.PureComponent<IProps, any> {
 							<Title>{this.props.title}</Title>
 							<Logo src="images/3drepo-logo-white.png" alt="3D Repo" />
 						</Header>
-						<Content dangerouslySetInnerHTML={{ __html: templates[fileName] }} />
+						<Content dangerouslySetInnerHTML={{ __html: fileContent }} />
 					</Container>
 				</MuiThemeProvider>
 			</ThemeProvider>
