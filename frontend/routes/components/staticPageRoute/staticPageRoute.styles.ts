@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { COLOR } from '../../../styles/colors';
 import { FONT_WEIGHT } from '../../../styles/fonts';
+import { ExtrasMenu } from '../topMenu/components/extrasMenu/extrasMenu.component';
 
 export const Container = styled.div``;
 
@@ -58,4 +59,9 @@ export const Content = styled.div`
 
 	color: ${COLOR.BLACK_80};
 	background-color: rgb(250,250,250);
+`;
+
+export const MenuContainer = styled.div`
+	position: absolute;
+	right: 10px;
 `;
