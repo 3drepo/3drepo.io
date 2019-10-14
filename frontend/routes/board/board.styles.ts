@@ -57,6 +57,9 @@ export const ConfigSelect = styled(Select).attrs({
 	}
 })`
 	&& {
+		margin-right: 10px;
+		width: 150px;
+
 		.select--disabled {
 			color: ${COLOR.BLACK_40};
 		}

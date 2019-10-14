@@ -15,24 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { capitalize } from 'lodash';
 import React, { useEffect } from 'react';
-import { useParams, useRouteMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Board from 'react-trello';
 import { ROUTES } from '../../constants/routes';
 import { Panel } from '../components/panel/panel.component';
+import { getProjectModels, getTeamspaceProjects } from './board.helpers';
 import {
 	BoardContainer,
 	Config,
 	ConfigSelect,
 	ConfigSelectItem,
-	Container,
-	SelectContainer,
-	TitleActions,
-	TitleContainer,
-	TypesItem,
-	TypesSelect
+	Container
 } from './board.styles';
+import { BoardTitleComponent } from './components/boardTitleComponent.component';
+import { ConfigSelectComponent } from './components/configSelect.component';
 
 interface IProps {
 	currentTeamspace: string;
@@ -69,17 +66,20 @@ const data = {
 	]
 };
 
-const types = ['issues', 'risks'];
-
 export function Board(props: IProps) {
 	const { type, teamspace, project, modelId } = useParams();
-	const match = useRouteMatch();
 	const projectParam = `${project ? `/${project}` : ''}`;
 	const modelParam = `${modelId ? `/${modelId}` : ''}`;
 
 	useEffect(() => {
-		props.fetchTeamspaces(props.currentTeamspace);
-	}, [teamspace]);
+		if (!props.teamspaces.length) {
+			props.fetchTeamspaces(props.currentTeamspace);
+		}
+
+		if (teamspace && project && modelId) {
+			console.log(teamspace, project, modelId, 'Fetch ', type);
+		}
+	}, [teamspace, project, modelId]);
 
 	const handleTypeChange = (e) => {
 		const url = `${ROUTES.BOARD_MAIN}/${e.target.value}/${teamspace}${projectParam}${modelParam}`;
@@ -87,23 +87,19 @@ export function Board(props: IProps) {
 	};
 
 	const handleTeamspaceChange = (e) => {
-		const url = `${ROUTES.BOARD_MAIN}/${type}/${e.target.value}${projectParam}${modelParam}`;
+		const url = `${ROUTES.BOARD_MAIN}/${type}/${e.target.value}`;
 		props.history.push(url);
 	};
 
-	const BoardTitle = (
-		<TitleContainer>
-			<SelectContainer>
-				<TypesSelect value={type} onChange={handleTypeChange}>
-					{types.map((t) => (<TypesItem key={t} value={t}>Project {`${capitalize(t)}`}</TypesItem>))}
-				</TypesSelect>
-			</SelectContainer>
-			<TitleActions>
-				<div>Search</div>
-				<div>Menu</div>
-			</TitleActions>
-		</TitleContainer>
-	);
+	const handleProjectChange = (e) => {
+		const url = `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${e.target.value}`;
+		props.history.push(url);
+	};
+
+	const handleModelChange = (e) => {
+		const url = `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${project}/${e.target.value}`;
+		props.history.push(url);
+	};
 
 	const renderTeamspacesSelect = () => (
 		<ConfigSelect value={teamspace} onChange={handleTeamspaceChange} disabled={!props.teamspaces.length}>
@@ -117,11 +113,25 @@ export function Board(props: IProps) {
 		</ConfigSelect>
 	);
 
+	const renderProjectsSelect = () => {
+		const projects = getTeamspaceProjects(props.teamspaces, teamspace);
+		return (<ConfigSelectComponent value={project} items={projects} handleChange={handleProjectChange} />);
+	};
+
+	const renderModelsSelect = () => {
+		const models = getProjectModels(props.teamspaces, teamspace, project);
+		return (<ConfigSelectComponent value={modelId} items={models} handleChange={handleModelChange} />);
+	};
+
+	const BoardTitle = (<BoardTitleComponent type={type} handleTypeChange={handleTypeChange} />);
+
 	return (
 		<Panel {...PANEL_PROPS} title={BoardTitle}>
 			<Container>
 				<Config>
 					{renderTeamspacesSelect()}
+					{renderProjectsSelect()}
+					{renderModelsSelect()}
 				</Config>
 				<BoardContainer>
 					<Board data={data} />
