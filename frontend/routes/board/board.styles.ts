@@ -37,15 +37,31 @@ export const BoardContainer = styled.div`
 
 export const Config = styled.div`
 	background-color: ${COLOR.BLACK_12};
+	min-height: 30px;
+	padding: 5px 15px;
 `;
 
 export const TitleActions = styled.div`
 	display: flex;
 `;
 
-export const StyledItem = styled(MenuItem)``;
+export const TypesItem = styled(MenuItem)``;
 
-export const StyledSelect = styled(Select)``;
+export const TypesSelect = styled(Select)``;
+
+export const ConfigSelectItem = styled(MenuItem)``;
+
+export const ConfigSelect = styled(Select).attrs({
+	classes: {
+		disabled: 'select--disabled'
+	}
+})`
+	&& {
+		.select--disabled {
+			color: ${COLOR.BLACK_40};
+		}
+	}
+`;
 
 export const TitleContainer = styled.div`
 	align-items: center;
@@ -54,7 +70,7 @@ export const TitleContainer = styled.div`
 	justify-content: space-between;
 	width: 100%;
 
-	${StyledSelect} {
+	${TypesSelect} {
 		div {
 			color: ${COLOR.WHITE_87};
 			font-size: 20px;
@@ -68,6 +84,4 @@ export const TitleContainer = styled.div`
 	}
 `;
 
-export const SelectContainer = styled.div`
-
-`;
+export const SelectContainer = styled.div``;

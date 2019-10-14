@@ -18,13 +18,18 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { selectCurrentTeamspace } from '../../modules/currentUser';
+import { selectTeamspaces, TeamspacesActions } from '../../modules/teamspaces';
 
 import { Board } from './board.component';
 
 const mapStateToProps = createStructuredSelector({
+	currentTeamspace: selectCurrentTeamspace,
+	teamspaces: selectTeamspaces
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Board);

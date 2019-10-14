@@ -16,7 +16,7 @@
  */
 
 import { capitalize } from 'lodash';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useRouteMatch } from 'react-router-dom';
 import Board from 'react-trello';
 import { ROUTES } from '../../constants/routes';
@@ -24,15 +24,23 @@ import { Panel } from '../components/panel/panel.component';
 import {
 	BoardContainer,
 	Config,
+	ConfigSelect,
+	ConfigSelectItem,
 	Container,
 	SelectContainer,
-	StyledItem,
-	StyledSelect,
 	TitleActions,
-	TitleContainer
+	TitleContainer,
+	TypesItem,
+	TypesSelect
 } from './board.styles';
+
 interface IProps {
+	currentTeamspace: string;
 	history: any;
+	location: any;
+	match: any;
+	teamspaces: any[];
+	fetchTeamspaces: (currentTeamspace) => void;
 }
 
 const PANEL_PROPS = {
@@ -66,20 +74,29 @@ const types = ['issues', 'risks'];
 export function Board(props: IProps) {
 	const { type, teamspace, project, modelId } = useParams();
 	const match = useRouteMatch();
+	const projectParam = `${project ? `/${project}` : ''}`;
+	const modelParam = `${modelId ? `/${modelId}` : ''}`;
 
-	const handleChangeType = (e) => {
-		const projectParam = `${project ? `/${project}` : ''}`;
-		const modelParam = `${modelId ? `/${modelId}` : ''}`;
+	useEffect(() => {
+		props.fetchTeamspaces(props.currentTeamspace);
+	}, [teamspace]);
+
+	const handleTypeChange = (e) => {
 		const url = `${ROUTES.BOARD_MAIN}/${e.target.value}/${teamspace}${projectParam}${modelParam}`;
+		props.history.push(url);
+	};
+
+	const handleTeamspaceChange = (e) => {
+		const url = `${ROUTES.BOARD_MAIN}/${type}/${e.target.value}${projectParam}${modelParam}`;
 		props.history.push(url);
 	};
 
 	const BoardTitle = (
 		<TitleContainer>
 			<SelectContainer>
-				<StyledSelect value={type} onChange={handleChangeType}>
-					{types.map((t) => (<StyledItem key={t} value={t}>Project {`${capitalize(t)}`}</StyledItem>))}
-				</StyledSelect>
+				<TypesSelect value={type} onChange={handleTypeChange}>
+					{types.map((t) => (<TypesItem key={t} value={t}>Project {`${capitalize(t)}`}</TypesItem>))}
+				</TypesSelect>
 			</SelectContainer>
 			<TitleActions>
 				<div>Search</div>
@@ -88,14 +105,23 @@ export function Board(props: IProps) {
 		</TitleContainer>
 	);
 
+	const renderTeamspacesSelect = () => (
+		<ConfigSelect value={teamspace} onChange={handleTeamspaceChange} disabled={!props.teamspaces.length}>
+			{ props.teamspaces.length ?
+				props.teamspaces.map((ts, index) => (
+					<ConfigSelectItem key={index} value={ts.account}>
+						{ts.account}
+					</ConfigSelectItem>
+				)) : <ConfigSelectItem value={teamspace}>{teamspace}</ConfigSelectItem>
+			}
+		</ConfigSelect>
+	);
+
 	return (
 		<Panel {...PANEL_PROPS} title={BoardTitle}>
 			<Container>
 				<Config>
-					<div>Type: {type}</div>
-					<div>Teamspace: {teamspace}</div>
-					<div>Project: {project}</div>
-					<div>Model: {modelId}</div>
+					{renderTeamspacesSelect()}
 				</Config>
 				<BoardContainer>
 					<Board data={data} />
