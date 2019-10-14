@@ -42,7 +42,6 @@ interface IProps {
 	history: any;
 	isPending: boolean;
 	pendingRevision: string;
-	showOnlyActive: boolean;
 	resetModelRevisions: () => void;
 	fetchModelRevisions: (teamspace, modelId, showVoid) => void;
 	setModelRevisionState: (teamspace, modelId, revision, isVoid) => void;
@@ -64,13 +63,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 	}
 
 	get revisions() {
-		let revisions = this.props.revisions || [];
-
-		if (this.props.showOnlyActive) {
-			revisions = revisions.filter((revision) => !revision.void);
-		}
-
-		return revisions;
+		return this.props.revisions || [];
 	}
 
 	get currentRevisionId() {
