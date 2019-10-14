@@ -18,7 +18,9 @@ export const NewUpdateDialog = (props: IProps) => {
 				A new version of 3D Repo is available!
 				<br />
 				Please reload the page for the latest version.
-				See the latest changelog <Link href="https://github.com/3drepo/3drepo.io/releases/latest">here</Link>.
+				See the latest changelog <Link href="https://github.com/3drepo/3drepo.io/releases/latest" target="_blank">
+					here
+				</Link>.
 			</DialogContent>
 
 			<DialogActions>
