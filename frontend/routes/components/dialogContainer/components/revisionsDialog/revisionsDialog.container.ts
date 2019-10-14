@@ -34,7 +34,6 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchModelRevisions: ModelActions.fetchRevisions,
 	resetModelRevisions: ModelActions.resetRevisions,
 	setModelRevisionState: ModelActions.setModelRevisionState,
 }, dispatch);

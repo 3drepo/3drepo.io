@@ -5,6 +5,7 @@ import bimSaga from './bim/bim.sagas';
 import chatSaga from './chat/chat.sagas';
 import compareSaga from './compare/compare.sagas';
 import currentUserSaga from './currentUser/currentUser.sagas';
+import dialogSaga from './dialog/dialog.sagas';
 import gisSaga from './gis/gis.sagas';
 import groupsSaga from './groups/groups.sagas';
 import issuesSaga from './issues/issues.sagas';
@@ -50,6 +51,7 @@ export default function* rootSaga() {
 		fork(issuesSaga),
 		fork(compareSaga),
 		fork(chatSaga),
-		fork(viewerGuiSaga)// <-- INJECT MODULE SAGA -->
+		fork(viewerGuiSaga),
+		fork(dialogSaga) // <-- INJECT MODULE SAGA -->
 	]);
 }

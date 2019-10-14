@@ -50,12 +50,6 @@ interface IProps {
 }
 
 export class RevisionsDialog extends React.PureComponent<IProps, any> {
-	public componentDidMount() {
-		if (this.props.type === TYPES.TEAMSPACES) {
-			this.props.fetchModelRevisions(this.props.teamspace, this.props.modelId, true);
-		}
-	}
-
 	public componentWillUnmount() {
 		if (this.props.type === TYPES.TEAMSPACES) {
 			this.props.resetModelRevisions();
