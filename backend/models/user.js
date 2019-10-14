@@ -107,36 +107,47 @@ schema.statics.getTeamspaceSpaceUsed = function (dbName) {
 	});
 };
 
-schema.statics.authenticate = function (logger, username, password) {
-
+schema.statics.authenticate =  async function (logger, username, password) {
 	if (!username || !password) {
-		return Promise.reject({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
+		throw({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
 	}
 
+	let user = null;
 	let authDB = null;
-	return DB.getAuthDB().then(_authDB => {
-		authDB = _authDB;
-		return authDB.authenticate(username, password);
-	}).then(() => {
+	try {
+		if (C.EMAIL_REGEXP.test(username)) { // if the submited username is the email
+			user = await this.findByEmail(username);
+			if (!user) {
+				throw ({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
+			}
+
+			username = user.user;
+		}
+
+		authDB = await DB.getAuthDB();
+		await authDB.authenticate(username, password);
 		authDB.close();
-		return this.findByUserName(username);
-	}).then(user => {
+
+		if (!user)  {
+			user = await this.findByUserName(username);
+		}
+
 		if (user.customData && user.customData.inactive) {
-			return Promise.reject({ resCode: responseCodes.USER_NOT_VERIFIED });
+			throw ({ resCode: responseCodes.USER_NOT_VERIFIED });
 		}
 
 		if (!user.customData) {
 			user.customData = {};
 		}
 
-		return user.save();
-
-	}).catch(err => {
+		return await user.save();
+	} catch(err) {
 		if (authDB) {
 			authDB.close();
 		}
-		return Promise.reject(err.resCode ? err : { resCode: utils.mongoErrorToResCode(err) });
-	});
+
+		throw (err.resCode ? err : { resCode: utils.mongoErrorToResCode(err) });
+	}
 };
 
 schema.statics.findByUserName = function (user) {
@@ -274,7 +285,7 @@ schema.statics.checkUserNameAvailableAndValid = function (username) {
 };
 
 schema.statics.findByEmail = function (email) {
-	return this.findOne({ account: "admin" }, { "customData.email": email });
+	return this.findOne({ account: "admin" }, { "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
 };
 
 schema.statics.findByPaypalPaymentToken = function (token) {
