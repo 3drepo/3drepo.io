@@ -18,7 +18,7 @@
 import * as React from 'react';
 import { Route } from 'react-router-dom';
 
-import PageTemplate from './components/pageTemplate/pageTemplate.container';
+import PageTemplate from './components/pageTemplate/pageTemplate.component';
 import { STATIC_ROUTES } from '../../services/staticPages';
 
 export const StaticPageViewer = () => {
