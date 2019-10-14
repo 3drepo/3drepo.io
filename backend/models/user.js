@@ -285,7 +285,7 @@ schema.statics.checkUserNameAvailableAndValid = function (username) {
 };
 
 schema.statics.findByEmail = function (email) {
-	return this.findOne({ account: "admin" }, { "customData.email": email });
+	return this.findOne({ account: "admin" }, { "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
 };
 
 schema.statics.findByPaypalPaymentToken = function (token) {

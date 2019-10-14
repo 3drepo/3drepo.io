@@ -85,11 +85,10 @@ describe("Login", function () {
 		}, 200000).then(emailVerifyToken => {
 			return User.verify(username, emailVerifyToken.token, true);
 		}).then(user => {
-
 			return new Promise((resolve, reject) => {
 				request(server)
 					.post("/login")
-					.send({ username: email("mail_success"), password })
+					.send({ username: email("mail_success").toUpperCase() , password }) // toUpperCase is to test case insentive mail
 					.expect(200, function(err, res) {
 						expect(res.body.username).to.equal(username);
 						err ? reject(err) : resolve();
