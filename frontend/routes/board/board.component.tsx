@@ -25,6 +25,7 @@ import { renderWhenTrue } from '../../helpers/rendering';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
+import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
 import RiskDetails from '../viewerGui/components/risks/components/riskDetails/riskDetails.container';
 import { getProjectModels, getTeamspaceProjects } from './board.helpers';
 import {
@@ -37,11 +38,11 @@ import {
 	DataConfig,
 	FormWrapper,
 	LoaderContainer,
+	NoDataMessage,
 	ViewConfig
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
 import { ConfigSelectComponent } from './components/configSelect.component';
-import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
 
 interface ICard {
 	id: string;
@@ -65,6 +66,7 @@ interface IProps {
 	match: any;
 	lanes: ILane[];
 	teamspaces: any[];
+	isPending: boolean;
 	fetchData: (boardType, teamspace, project, modelId) => void;
 	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
 	showDialog: (config: any) => void;
@@ -109,20 +111,23 @@ export function Board(props: IProps) {
 		props.history.push(url);
 	};
 
-	const handleOpenDialog = useCallback((cardId, metadata, laneId) => {
+	const handleOpenDialog = useCallback((cardId?, metadata?, laneId?) => {
 		if (cardId) {
 			props.fetchCardData(type, teamspace, modelId, cardId);
 		}
 
-		const dataType = isIssuesBoard ? 'issue' : 'risk';
 		const TemplateComponent = isIssuesBoard ? IssueDetails : RiskDetails;
+		const dataType = isIssuesBoard ? 'issue' : 'risk';
+		const size = cardId && metadata.commentCount ? 'lg' : 'sm';
+		const titlePrefix = cardId ? 'Edit' : 'Add new';
+
 		const Form = (formProps: any) => (
-			<FormWrapper size="lg">
+			<FormWrapper size={size}>
 				<TemplateComponent {...formProps} />
 			</FormWrapper>
 		);
 		const config = {
-			title: `Add new ${dataType}`,
+			title: `${titlePrefix} ${dataType}`,
 			template: Form,
 			data: {
 				teamspace,
@@ -131,24 +136,26 @@ export function Board(props: IProps) {
 				horizontal: true
 			},
 			DialogProps: {
-				maxWidth: 'lg'
+				maxWidth: size
 			}
 		};
 
 		props.showDialog(config);
 	}, [type, props.fetchCardData]);
 
-	const renderTeamspacesSelect = () => (
-		<ConfigSelect value={teamspace} onChange={handleTeamspaceChange} disabled={!props.teamspaces.length}>
-			{ props.teamspaces.length ?
-				props.teamspaces.map((ts, index) => (
-					<ConfigSelectItem key={index} value={ts.account}>
-						{ts.account}
-					</ConfigSelectItem>
-				)) : <ConfigSelectItem value={teamspace}>{teamspace}</ConfigSelectItem>
-			}
-		</ConfigSelect>
-	);
+	const renderTeamspacesSelect = () => {
+		return (
+			<ConfigSelect value={teamspace} onChange={handleTeamspaceChange} disabled={!props.teamspaces.length}>
+				{ props.teamspaces.length ?
+					props.teamspaces.map((ts, index) => (
+						<ConfigSelectItem key={index} value={ts.account}>
+							{ts.account}
+						</ConfigSelectItem>
+					)) : <ConfigSelectItem value={teamspace}>{teamspace}</ConfigSelectItem>
+				}
+			</ConfigSelect>
+		)
+	};
 
 	const renderProjectsSelect = () => {
 		const projects = getTeamspaceProjects(props.teamspaces, teamspace);
@@ -166,7 +173,7 @@ export function Board(props: IProps) {
 			color="secondary"
 			aria-label="Add new card"
 			aria-haspopup="true"
-			onClick={handleOpenDialog}
+			onClick={() => handleOpenDialog()}
 		>
 			<Add />
 		</AddButton>
@@ -201,6 +208,30 @@ export function Board(props: IProps) {
 		</LoaderContainer>
 	));
 
+	const renderNoData = renderWhenTrue(() => (
+		<LoaderContainer>
+			<NoDataMessage>No {type} have been created yet.</NoDataMessage>
+		</LoaderContainer>
+	));
+
+	const renderNoSelected = renderWhenTrue(() => {
+		const noModelAndProject = !modelId && !project;
+		const noModel = !modelId;
+		const messagePrefix = 'You have to choose';
+		const messageSufix = noModelAndProject ? 'project and model' : noModel ? 'model' : 'project';
+		const chooseMessage = `${messagePrefix} ${messageSufix} to show board.`;
+		const areModels = getProjectModels(props.teamspaces, teamspace, project).length > 1;
+
+		return (
+			<LoaderContainer>
+				<NoDataMessage>
+					{(!project || !modelId) && areModels && chooseMessage}
+					{project && !areModels && `There is no models in ${project} project. Try another one, or add new model.`}
+				</NoDataMessage>
+			</LoaderContainer>
+		);
+	});
+
 	return (
 		<Panel {...PANEL_PROPS} title={BoardTitle}>
 			<Container>
@@ -214,8 +245,10 @@ export function Board(props: IProps) {
 						{renderAddButton()}
 					</ViewConfig>
 				</Config>
-				{renderBoard(props.lanes.length)}
-				{renderLoader(!props.lanes.length)}
+				{renderLoader(props.isPending)}
+				{renderBoard(!props.isPending && Boolean(props.lanes.length))}
+				{renderNoData(!props.isPending && !Boolean(props.lanes.length) && teamspace && project && modelId)}
+				{renderNoSelected(!props.isPending && !Boolean(props.lanes.length) && (!project || !modelId))}
 			</Container>
 		</Panel>
 	);

@@ -23,6 +23,10 @@ import { BOARD_TYPES } from './board.constants';
 
 export const selectBoardDomain = (state) => ({...state.board});
 
+export const selectIsPending = createSelector(
+	selectBoardDomain, (state) => state.isPending
+);
+
 export const selectFilterProp = createSelector(
 	selectBoardDomain, (state) => state.filterProp
 );
@@ -53,7 +57,7 @@ export const selectLanes = createSelector(
 			const lane = {} as any;
 			lane.id = groupsKeys[i];
 			lane.title = `${groupsKeys[i]} ${filterProp}`;
-			lane.label = 'label test';
+			lane.label = `${groups[i].length} ${boardType}`;
 			lane.cards = groups[i];
 			lanes.push(lane);
 		}

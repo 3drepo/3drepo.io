@@ -15,23 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { selectCurrentTeamspace } from '../currentUser';
 import { DialogActions } from '../dialog';
-import { IssuesActions } from '../issues';
+import { IssuesActions, IssuesTypes } from '../issues';
 import { selectCurrentModel, ModelActions } from '../model';
-import { RisksActions } from '../risks';
+import { RisksActions, RisksTypes } from '../risks';
 import { selectTeamspaces, TeamspacesActions } from '../teamspaces';
-import { BoardTypes } from './board.redux';
+import { BoardActions, BoardTypes } from './board.redux';
 
 function* fetchData({ boardType, teamspace, project, modelId }) {
 	try {
+		yield put(BoardActions.setIsPending(true));
 		const teamspaces = yield select(selectTeamspaces);
 		const currentTeamspace = yield select(selectCurrentTeamspace);
 		const currentModel = yield select(selectCurrentModel);
 
-		if (modelId !== currentModel) {
+		if (modelId && modelId !== currentModel) {
 			yield put(ModelActions.fetchSettings(teamspace, modelId));
 		}
 
@@ -42,13 +43,16 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 		if (teamspace && project && modelId) {
 			if (boardType === 'issues') {
 				yield put(IssuesActions.fetchIssues(teamspace, modelId));
+				yield take(IssuesTypes.FETCH_ISSUES_SUCCESS);
 			} else {
 				yield put(RisksActions.fetchRisks(teamspace, modelId));
+				yield take(RisksTypes.FETCH_RISKS_SUCCESS);
 			}
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'board data', error));
 	}
+	yield put(BoardActions.setIsPending(false));
 }
 
 function* fetchCardData({ boardType, teamspace, modelId, cardId }) {

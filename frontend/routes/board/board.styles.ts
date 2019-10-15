@@ -37,7 +37,7 @@ export const BoardContainer = styled.div`
 	}
 
 	.react-trello-lane {
-		max-width: 400px;
+		width: 350px;
 	}
 `;
 
@@ -49,6 +49,8 @@ export const Config = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	position: relative;
+	z-index: 1;
 `;
 
 export const DataConfig = styled.div``;
@@ -128,4 +130,9 @@ export const LoaderContainer = styled.div`
 
 export const FormWrapper = styled.div`
 	width: ${(props: any) => props.size === 'sm' ? 400 : 800}px;
+`;
+
+export const NoDataMessage = styled.div`
+	align-self: center;
+	color: ${COLOR.BLACK_54};
 `;

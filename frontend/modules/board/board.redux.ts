@@ -25,7 +25,7 @@ export const { Types: BoardTypes, Creators: BoardActions } = createActions({
 }, { prefix: 'BOARD/' });
 
 export const INITIAL_STATE = {
-	isPending: false,
+	isPending: true,
 	boardType: BOARD_TYPES.ISSUES,
 	filterProp: FILTER_PROPS.STATUS,
 	lanes: []

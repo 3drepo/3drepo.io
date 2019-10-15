@@ -117,6 +117,7 @@ export const Description = styled.div`
 	line-height: 1.25;
 	margin-top: 3px;
 	color: ${COLOR.BLACK_60};
+	white-space: normal;
 `;
 
 export const RoleIndicator = styled.div`
