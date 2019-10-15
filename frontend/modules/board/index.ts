@@ -18,6 +18,6 @@
 export {
 	BoardTypes,
 	BoardActions
-} from './board.redux;
+} from './board.redux';
 
-export * from './board.selectors;
+export * from './board.selectors';

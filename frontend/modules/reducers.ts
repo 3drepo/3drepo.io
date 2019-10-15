@@ -4,6 +4,7 @@ import { combineReducers } from 'redux';
 import { reducer as authReducer } from './auth/auth.redux';
 import { reducer as billingReducer } from './billing/billing.redux';
 import { reducer as bimReducer } from './bim/bim.redux';
+import { reducer as boardReducer } from './board/board.redux';
 import { reducer as chatReducer } from './chat/chat.redux';
 import { reducer as compareReducer } from './compare/compare.redux';
 import { reducer as currentUserReducer } from './currentUser/currentUser.redux';
@@ -53,6 +54,7 @@ export default function createReducer(history) {
 		issues: issuesReducer,
 		compare: compareReducer,
 		chat: chatReducer,
-		viewerGui: viewerGuiReducer// <-- INJECT MODULE REDUCER -->
+		viewerGui: viewerGuiReducer,
+		board: boardReducer // <-- INJECT MODULE REDUCER -->
 	});
 }

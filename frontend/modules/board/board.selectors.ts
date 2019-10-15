@@ -18,3 +18,11 @@
 import { createSelector } from 'reselect';
 
 export const selectBoardDomain = (state) => ({...state.board});
+
+export const selectIssues = createSelector(
+	selectBoardDomain, (state) => state.issues
+);
+
+export const selectRisks = createSelector(
+	selectBoardDomain, (state) => state.risks
+);

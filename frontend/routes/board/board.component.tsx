@@ -19,6 +19,7 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Board from 'react-trello';
 import { ROUTES } from '../../constants/routes';
+import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import { getProjectModels, getTeamspaceProjects } from './board.helpers';
 import {
@@ -26,7 +27,8 @@ import {
 	Config,
 	ConfigSelect,
 	ConfigSelectItem,
-	Container
+	Container,
+	LoaderContainer
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
 import { ConfigSelectComponent } from './components/configSelect.component';
@@ -37,7 +39,7 @@ interface IProps {
 	location: any;
 	match: any;
 	teamspaces: any[];
-	fetchTeamspaces: (currentTeamspace) => void;
+	fetchData: (type, teamspace, project, modelId) => void;
 }
 
 const PANEL_PROPS = {
@@ -50,17 +52,20 @@ const data = {
 	lanes: [
 		{
 			id: 'lane1',
-			title: 'Planned Tasks',
-			label: '2/2',
-			cards: [
-				{id: 'Card1', title: 'Write Blog', description: 'Can AI make memes', label: '30 mins', draggable: false},
-				{id: 'Card2', title: 'Pay Rent', description: 'Transfer via NEFT', label: '5 mins', metadata: {sha: 'be312a1'}}
-			],
+			title: 'High Priority',
+			label: '2 issues',
+			cards: [],
 		},
 		{
 			id: 'lane2',
-			title: 'Completed',
-			label: '0/0',
+			title: 'Medium Priority',
+			label: '0 issues',
+			cards: []
+		},
+		{
+			id: 'lane3',
+			title: 'Low Priority',
+			label: '0 issues',
 			cards: []
 		}
 	]
@@ -70,21 +75,13 @@ export function Board(props: IProps) {
 	const { type, teamspace, project, modelId } = useParams();
 	const projectParam = `${project ? `/${project}` : ''}`;
 	const modelParam = `${modelId ? `/${modelId}` : ''}`;
-
 	useEffect(() => {
-		if (!props.teamspaces.length) {
-			props.fetchTeamspaces(props.currentTeamspace);
-		}
+		console.log('useEffect', type, teamspace, project, modelId);
 
-		if (teamspace && project && modelId) {
-			console.log(teamspace, project, modelId, 'Fetch ', type);
-			if (type === 'issues') {
-				props.fetchIssues(teamspace, modelId);
-			} else {
-				props.fetchRisks(teamspace, modelId);
-			}
-		}
-	}, [teamspace, project, modelId, type]);
+		props.fetchData(type, teamspace, project, modelId);
+	}, [type, teamspace, project, modelId]);
+
+	console.log('props.teamspaces', props.teamspaces);
 
 	const handleTypeChange = (e) => {
 		const url = `${ROUTES.BOARD_MAIN}/${e.target.value}/${teamspace}${projectParam}${modelParam}`;
@@ -138,9 +135,10 @@ export function Board(props: IProps) {
 					{renderProjectsSelect()}
 					{renderModelsSelect()}
 				</Config>
-				<BoardContainer>
-					<Board data={data} />
-				</BoardContainer>
+					<BoardContainer>
+						<Board data={data} />
+					</BoardContainer>
+					{/* <LoaderContainer><Loader size={20} /></LoaderContainer> */}
 			</Container>
 		</Panel>
 	);

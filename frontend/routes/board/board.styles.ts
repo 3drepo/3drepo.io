@@ -23,16 +23,18 @@ import { COLOR } from '../../styles';
 export const Container = styled.div`
 	height: 100%;
 	width: 100%;
+	position: relative;
+`;
+
+export const BoardContainer = styled.div`
+	height: 100%;
+	padding: 15px;
 
 	.react-trello-board {
 		background-color: initial;
 		height: auto;
     padding: 0;
 	}
-`;
-
-export const BoardContainer = styled.div`
-	padding: 15px;
 `;
 
 export const Config = styled.div`
@@ -88,3 +90,14 @@ export const TitleContainer = styled.div`
 `;
 
 export const SelectContainer = styled.div``;
+
+export const LoaderContainer = styled.div`
+	display: flex;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	justify-content: center;
+	overflow: hidden;
+	top: 0;
+	left: 0;
+`;

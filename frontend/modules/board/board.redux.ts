@@ -18,18 +18,18 @@
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: BoardTypes, Creators: BoardActions } = createActions({
-	fetchIssues: ['teamspace', 'revision'],
-	fetchIssuesSuccess: []
+	fetchData: ['type', 'teamspace', 'project', 'modelId'],
+	setIsPending: ['isPending'],
 }, { prefix: 'BOARD/' });
 
 export const INITIAL_STATE = {
 	isPending: false
 };
 
-const fetchIssuesSuccess = (state = INITIAL_STATE) => {
-	return { ...state, isPending: false };
+const setIsPending = (state = INITIAL_STATE, { isPending }) => {
+	return { ...state, isPending };
 };
 
 export const reducer = createReducer({...INITIAL_STATE}, {
-	[BoardTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess
+	[BoardTypes.SET_IS_PENDING]: setIsPending
 });

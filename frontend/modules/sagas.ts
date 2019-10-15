@@ -2,6 +2,7 @@ import { all, fork } from 'redux-saga/effects';
 import authSaga from './auth/auth.sagas';
 import billingSaga from './billing/billing.sagas';
 import bimSaga from './bim/bim.sagas';
+import boardSaga from './board/board.sagas';
 import chatSaga from './chat/chat.sagas';
 import compareSaga from './compare/compare.sagas';
 import currentUserSaga from './currentUser/currentUser.sagas';
@@ -50,6 +51,7 @@ export default function* rootSaga() {
 		fork(compareSaga),
 		fork(chatSaga),
 		fork(viewerGuiSaga),
-		fork(dialogSaga) // <-- INJECT MODULE SAGA -->
+		fork(dialogSaga),
+		fork(boardSaga) // <-- INJECT MODULE SAGA -->
 	]);
 }
