@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
+import { Button, MenuItem, Select } from '@material-ui/core';
 import styled from 'styled-components';
 import { COLOR } from '../../styles';
 
@@ -41,6 +40,26 @@ export const Config = styled.div`
 	background-color: ${COLOR.BLACK_12};
 	min-height: 30px;
 	padding: 5px 15px;
+	padding-left: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+`;
+
+export const DataConfig = styled.div``;
+
+export const ViewConfig = styled.div``;
+
+export const AddButton = styled(Button).attrs({
+	mini: true,
+	classes: {
+		disabled: 'button--disabled'
+	}
+})`
+	&&.button--disabled {
+		background: #d9d9d9;
+		color: #868686;
+	}
 `;
 
 export const TitleActions = styled.div`

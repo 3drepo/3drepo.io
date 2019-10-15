@@ -15,20 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect } from 'react';
+import Add from '@material-ui/icons/Add';
+import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Board from 'react-trello';
+
 import { ROUTES } from '../../constants/routes';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import { getProjectModels, getTeamspaceProjects } from './board.helpers';
 import {
+	AddButton,
 	BoardContainer,
 	Config,
 	ConfigSelect,
 	ConfigSelectItem,
 	Container,
-	LoaderContainer
+	DataConfig,
+	LoaderContainer,
+	ViewConfig
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
 import { ConfigSelectComponent } from './components/configSelect.component';
@@ -103,6 +108,10 @@ export function Board(props: IProps) {
 		props.history.push(url);
 	};
 
+	const handleAddNewCard = useCallback((e) => {
+
+	}, []);
+
 	const renderTeamspacesSelect = () => (
 		<ConfigSelect value={teamspace} onChange={handleTeamspaceChange} disabled={!props.teamspaces.length}>
 			{ props.teamspaces.length ?
@@ -125,15 +134,33 @@ export function Board(props: IProps) {
 		return (<ConfigSelectComponent value={modelId} items={models} handleChange={handleModelChange} />);
 	};
 
+	const renderAddButton = () => (
+		<AddButton
+			variant="fab"
+			color="secondary"
+			aria-label="Toggle menu"
+			aria-haspopup="true"
+			onClick={handleAddNewCard}
+			Icon={Add}
+		>
+			<Add />
+		</AddButton>
+	);
+
 	const BoardTitle = (<BoardTitleComponent type={type} handleTypeChange={handleTypeChange} />);
 
 	return (
 		<Panel {...PANEL_PROPS} title={BoardTitle}>
 			<Container>
 				<Config>
-					{renderTeamspacesSelect()}
-					{renderProjectsSelect()}
-					{renderModelsSelect()}
+					<DataConfig>
+						{renderTeamspacesSelect()}
+						{renderProjectsSelect()}
+						{renderModelsSelect()}
+					</DataConfig>
+					<ViewConfig>
+						{renderAddButton()}
+					</ViewConfig>
 				</Config>
 					<BoardContainer>
 						<Board data={data} />
