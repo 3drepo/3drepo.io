@@ -15,14 +15,49 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { groupBy, keys, values } from 'lodash';
 import { createSelector } from 'reselect';
+import { selectIssues, selectIssuesMap } from '../issues';
+import { selectRisks } from '../risks';
+import { BOARD_TYPES } from './board.constants';
 
 export const selectBoardDomain = (state) => ({...state.board});
 
-export const selectIssues = createSelector(
-	selectBoardDomain, (state) => state.issues
+export const selectFilterProp = createSelector(
+	selectBoardDomain, (state) => state.filterProp
 );
 
-export const selectRisks = createSelector(
-	selectBoardDomain, (state) => state.risks
+export const selectLanes = createSelector(
+	selectBoardDomain,
+	selectIssues,
+	selectRisks,
+	({ filterProp, boardType }, issues, risks) => {
+		const lanes = [];
+		const dataMap = {
+			[BOARD_TYPES.ISSUES]: issues,
+			[BOARD_TYPES.RISKS]: risks
+		};
+		const preparedData = issues.map((issue, index) => {
+			return {
+				id: issue._id,
+				[filterProp]: issue[filterProp],
+				metadata: {
+					...issue
+				}
+			};
+		});
+		const groups = values(groupBy(preparedData, filterProp));
+		const groupsKeys = keys(groupBy(dataMap[boardType], filterProp));
+
+		for (let i = 0 ; i < groups.length; i++) {
+			const lane = {} as any;
+			lane.id = groupsKeys[i];
+			lane.title = `${groupsKeys[i]} ${filterProp}`;
+			lane.label = 'label test';
+			lane.cards = groups[i];
+			lanes.push(lane);
+		}
+
+		return lanes;
+	}
 );

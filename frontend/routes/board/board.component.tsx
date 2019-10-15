@@ -41,16 +41,32 @@ import {
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
 import { ConfigSelectComponent } from './components/configSelect.component';
+import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
+
+interface ICard {
+	id: string;
+	title: string;
+	description: string;
+	label: string;
+	draggable: boolean;
+	metadata: any;
+}
+interface ILane {
+	id: string;
+	title: string;
+	label: string;
+	cards: ICard[];
+}
 
 interface IProps {
 	currentTeamspace: string;
 	history: any;
 	location: any;
 	match: any;
+	lanes: ILane[];
 	teamspaces: any[];
 	fetchData: (boardType, teamspace, project, modelId) => void;
 	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
-	fetchTeamspaces: (currentTeamspace) => void;
 	showDialog: (config: any) => void;
 }
 
@@ -60,37 +76,18 @@ const PANEL_PROPS = {
 	}
 };
 
-const data = {
-	lanes: [
-		{
-			id: 'lane1',
-			title: 'High Priority',
-			label: '2 issues',
-			cards: [{
-				id: 123,
-				title: 'test'
-			}],
-		},
-		{
-			id: 'lane2',
-			title: 'Medium Priority',
-			label: '0 issues',
-			cards: []
-		},
-		{
-			id: 'lane3',
-			title: 'Low Priority',
-			label: '0 issues',
-			cards: []
-		}
-	]
-};
-
 export function Board(props: IProps) {
 	const { type, teamspace, project, modelId } = useParams();
 	const projectParam = `${project ? `/${project}` : ''}`;
 	const modelParam = `${modelId ? `/${modelId}` : ''}`;
 	const isIssuesBoard = type === 'issues';
+	const boardData = {
+		lanes: props.lanes
+	};
+
+	useEffect(() => {
+		console.log('Did mount ', type, teamspace, project, modelId)
+	}, []);
 
 	useEffect(() => {
 		props.fetchData(type, teamspace, project, modelId);
@@ -182,24 +179,31 @@ export function Board(props: IProps) {
 
 	const BoardTitle = (<BoardTitleComponent type={type} handleTypeChange={handleTypeChange} />);
 
+	const BoardCard = (cardProps: any) => {
+		return (
+			<PreviewListItem {...cardProps.metadata} />
+		);
+	};
+
+	const components = {
+		Card: BoardCard
+	};
+
 	const renderBoard = renderWhenTrue(() => (
 		<BoardContainer>
 			<TrelloBoard
-				data={data}
+				data={boardData}
 				hideCardDeleteIcon
 				onCardClick={handleOpenDialog}
+				components={components}
 			/>
 		</BoardContainer>
 	));
 
 	const renderLoader = renderWhenTrue(() => (
-		<BoardContainer>
-			<TrelloBoard
-				data={data}
-				hideCardDeleteIcon
-				onCardClick={handleOpenDialog}
-			/>
-		</BoardContainer>
+		<LoaderContainer>
+			<Loader size={18} />
+		</LoaderContainer>
 	));
 
 	return (

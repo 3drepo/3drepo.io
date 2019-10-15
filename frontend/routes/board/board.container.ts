@@ -18,13 +18,14 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { BoardActions } from '../../modules/board';
+import { selectLanes, BoardActions } from '../../modules/board';
 import { DialogActions } from '../../modules/dialog';
 import { selectTeamspaces } from '../../modules/teamspaces';
 import { Board } from './board.component';
 
 const mapStateToProps = createStructuredSelector({
-	teamspaces: selectTeamspaces
+	teamspaces: selectTeamspaces,
+	lanes: selectLanes
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

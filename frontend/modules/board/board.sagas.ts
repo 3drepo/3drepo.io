@@ -20,14 +20,20 @@ import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { selectCurrentTeamspace } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { IssuesActions } from '../issues';
+import { selectCurrentModel, ModelActions } from '../model';
 import { RisksActions } from '../risks';
 import { selectTeamspaces, TeamspacesActions } from '../teamspaces';
-import { BoardActions, BoardTypes } from './board.redux';
+import { BoardTypes } from './board.redux';
 
 function* fetchData({ boardType, teamspace, project, modelId }) {
 	try {
 		const teamspaces = yield select(selectTeamspaces);
 		const currentTeamspace = yield select(selectCurrentTeamspace);
+		const currentModel = yield select(selectCurrentModel);
+
+		if (modelId !== currentModel) {
+			yield put(ModelActions.fetchSettings(teamspace, modelId));
+		}
 
 		if (!teamspaces.length) {
 			yield put(TeamspacesActions.fetchTeamspaces(currentTeamspace));

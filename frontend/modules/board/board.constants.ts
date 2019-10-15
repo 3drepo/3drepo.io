@@ -15,26 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createActions, createReducer } from 'reduxsauce';
-import { BOARD_TYPES, FILTER_PROPS } from './board.constants';
-
-export const { Types: BoardTypes, Creators: BoardActions } = createActions({
-	fetchData: ['boardType', 'teamspace', 'project', 'modelId'],
-	fetchCardData: ['boardType', 'teamspace', 'modelId', 'cardId'],
-	setIsPending: ['isPending']
-}, { prefix: 'BOARD/' });
-
-export const INITIAL_STATE = {
-	isPending: false,
-	boardType: BOARD_TYPES.ISSUES,
-	filterProp: FILTER_PROPS.STATUS,
-	lanes: []
+export const BOARD_TYPES = {
+	ISSUES: 'issues',
+	RISKS: 'risks'
 };
 
-const setIsPending = (state = INITIAL_STATE, { isPending }) => {
-	return { ...state, isPending };
+export const FILTER_PROPS = {
+	STATUS: 'status',
+	PRIORITY: 'priority',
+	TYPE: 'topic_type',
+	ASSIGNED_TO: 'assigned_roles',
+	CREATED_BY: 'owner',
 };
-
-export const reducer = createReducer({...INITIAL_STATE}, {
-	[BoardTypes.SET_IS_PENDING]: setIsPending
-});
