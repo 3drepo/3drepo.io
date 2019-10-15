@@ -45,6 +45,17 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 	}
 }
 
+function* fetchCardData({ boardType, teamspace, modelId, cardId }) {
+	try {
+		const getCardData = boardType === 'issues' ? IssuesActions.fetchIssue : RisksActions.fetchRisk;
+
+		yield put(getCardData({ account: teamspace, model: modelId, _id: cardId }));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('fetch', 'card data', error));
+	}
+}
+
 export default function* BoardSaga() {
 	yield takeLatest(BoardTypes.FETCH_DATA, fetchData);
+	yield takeLatest(BoardTypes.FETCH_CARD_DATA, fetchCardData);
 }
