@@ -26,13 +26,18 @@ export const Container = styled.div`
 `;
 
 export const BoardContainer = styled.div`
-	height: 100%;
+	height: calc(100% - 50px);
 	padding: 15px;
+	box-sizing: border-box;
 
 	.react-trello-board {
 		background-color: initial;
-		height: auto;
+		height: 100%;
     padding: 0;
+	}
+
+	.react-trello-lane {
+		max-width: 400px;
 	}
 `;
 

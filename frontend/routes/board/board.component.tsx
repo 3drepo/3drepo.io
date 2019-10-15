@@ -86,10 +86,6 @@ export function Board(props: IProps) {
 	};
 
 	useEffect(() => {
-		console.log('Did mount ', type, teamspace, project, modelId)
-	}, []);
-
-	useEffect(() => {
 		props.fetchData(type, teamspace, project, modelId);
 	}, [type, teamspace, project, modelId]);
 
@@ -115,14 +111,13 @@ export function Board(props: IProps) {
 
 	const handleOpenDialog = useCallback((cardId, metadata, laneId) => {
 		if (cardId) {
-			// props.fetchCardData(type, teamspace, modelId, cardId);
-			props.fetchCardData(type, 'demo_3DRepo', 'b9aca152-61a5-4e00-953d-d88339e44fef', '7604e450-9e5d-11e9-986e-b38c09172988');
+			props.fetchCardData(type, teamspace, modelId, cardId);
 		}
 
 		const dataType = isIssuesBoard ? 'issue' : 'risk';
 		const TemplateComponent = isIssuesBoard ? IssueDetails : RiskDetails;
 		const Form = (formProps: any) => (
-			<FormWrapper size="sm">
+			<FormWrapper size="lg">
 				<TemplateComponent {...formProps} />
 			</FormWrapper>
 		);
@@ -130,13 +125,13 @@ export function Board(props: IProps) {
 			title: `Add new ${dataType}`,
 			template: Form,
 			data: {
-				teamspace: 'demo_3DRepo',
-				model: 'b9aca152-61a5-4e00-953d-d88339e44fef', // modelId,
+				teamspace,
+				model: modelId,
 				disableViewer: true,
 				horizontal: true
 			},
 			DialogProps: {
-				maxWidth: 'sm'
+				maxWidth: 'lg'
 			}
 		};
 
@@ -181,7 +176,7 @@ export function Board(props: IProps) {
 
 	const BoardCard = (cardProps: any) => {
 		return (
-			<PreviewListItem {...cardProps.metadata} />
+			<PreviewListItem {...cardProps.metadata} onItemClick={cardProps.onClick} />
 		);
 	};
 
@@ -219,8 +214,8 @@ export function Board(props: IProps) {
 						{renderAddButton()}
 					</ViewConfig>
 				</Config>
-				{renderBoard(true)}
-				{renderLoader(false)}
+				{renderBoard(props.lanes.length)}
+				{renderLoader(!props.lanes.length)}
 			</Container>
 		</Panel>
 	);
