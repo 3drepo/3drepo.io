@@ -59,5 +59,6 @@ export const AvatarPlaceholder = styled(StyledAvatar)`
 		z-index: 1;
 		height: calc(100% + 2px);
 		width: calc(100% + 1px);
+		text-align: center;
 	}
 `;
