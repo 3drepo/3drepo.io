@@ -18,11 +18,13 @@
 import Add from '@material-ui/icons/Add';
 import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import Board from 'react-trello';
+import TrelloBoard from 'react-trello';
 
 import { ROUTES } from '../../constants/routes';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
+import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
+import RiskDetails from '../viewerGui/components/risks/components/riskDetails/riskDetails.container';
 import { getProjectModels, getTeamspaceProjects } from './board.helpers';
 import {
 	AddButton,
@@ -32,6 +34,7 @@ import {
 	ConfigSelectItem,
 	Container,
 	DataConfig,
+	FormWrapper,
 	LoaderContainer,
 	ViewConfig
 } from './board.styles';
@@ -45,6 +48,8 @@ interface IProps {
 	match: any;
 	teamspaces: any[];
 	fetchData: (type, teamspace, project, modelId) => void;
+	fetchTeamspaces: (currentTeamspace) => void;
+	showDialog: (config: any) => void;
 }
 
 const PANEL_PROPS = {
@@ -80,6 +85,8 @@ export function Board(props: IProps) {
 	const { type, teamspace, project, modelId } = useParams();
 	const projectParam = `${project ? `/${project}` : ''}`;
 	const modelParam = `${modelId ? `/${modelId}` : ''}`;
+	const isIssuesBoard = type === 'issues';
+
 	useEffect(() => {
 		console.log('useEffect', type, teamspace, project, modelId);
 
@@ -108,9 +115,30 @@ export function Board(props: IProps) {
 		props.history.push(url);
 	};
 
-	const handleAddNewCard = useCallback((e) => {
+	const handleOpenDialog = useCallback(() => {
+		const dataType = isIssuesBoard ? 'issue' : 'risk';
+		const TemplateComponent = isIssuesBoard ? IssueDetails : RiskDetails;
+		const Form = (formProps: any) => (
+			<FormWrapper size="sm">
+				<TemplateComponent {...formProps} />
+			</FormWrapper>
+		);
+		const config = {
+			title: `Add new ${dataType}`,
+			template: Form,
+			data: {
+				teamspace: 'demo_3DRepo',
+				model: 'b9aca152-61a5-4e00-953d-d88339e44fef', // modelId,
+				disableViewer: true,
+				horizontal: true
+			},
+			DialogProps: {
+				maxWidth: 'sm'
+			}
+		};
 
-	}, []);
+		props.showDialog(config);
+	}, [type]);
 
 	const renderTeamspacesSelect = () => (
 		<ConfigSelect value={teamspace} onChange={handleTeamspaceChange} disabled={!props.teamspaces.length}>
@@ -138,10 +166,9 @@ export function Board(props: IProps) {
 		<AddButton
 			variant="fab"
 			color="secondary"
-			aria-label="Toggle menu"
+			aria-label="Add new card"
 			aria-haspopup="true"
-			onClick={handleAddNewCard}
-			Icon={Add}
+			onClick={handleOpenDialog}
 		>
 			<Add />
 		</AddButton>
@@ -162,11 +189,15 @@ export function Board(props: IProps) {
 						{renderAddButton()}
 					</ViewConfig>
 				</Config>
-					<BoardContainer>
-						<Board data={data} />
-					</BoardContainer>
-					{/* <LoaderContainer><Loader size={20} /></LoaderContainer> */}
-			</Container>
-		</Panel>
+				<BoardContainer>
+					<TrelloBoard
+						data={data}
+						laneDraggable="false"
+						hideCardDeleteIcon
+						onCardClick={handleOpenDialog}
+					/>
+				</BoardContainer>
+			</Container>;
+		</Panel >
 	);
 }

@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
+import React, { Fragment } from 'react';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
@@ -26,6 +25,7 @@ import { PreviewDetails } from '../../../previewDetails/previewDetails.component
 import { Container } from '../../../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
+import { HorizontalView } from './issueDetails.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
 
 interface IProps {
@@ -43,6 +43,8 @@ interface IProps {
 	currentUser: any;
 	settings: any;
 	failedToLoad: boolean;
+	disableViewer: boolean;
+	horizontal: boolean;
 	setState: (componentState) => void;
 	fetchIssue: (teamspace, model, issueId) => void;
 	updateSelectedIssuePin: (position) => void;
@@ -107,27 +109,30 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderPreview = renderWhenTrue(() => {
-		const { expandDetails } = this.props;
+		const { expandDetails, horizontal } = this.props;
 		const { comments } = this.issueData;
+		const isIssueWithComments = comments && !!comments.length && !this.isNewIssue;
+		const PreviewWrapper = horizontal && isIssueWithComments ? HorizontalView : Fragment;
 
 		return (
-			<PreviewDetails
-				{...this.issueData}
-				key={this.issueData._id}
-				defaultExpanded={expandDetails}
-				editable={!this.issueData._id}
-				onNameChange={this.handleNameChange}
-				onExpandChange={this.handleExpandChange}
-				renderCollapsable={this.renderDetailsForm}
-				renderNotCollapsable={() => this.renderLogList(comments && !!comments.length && !this.isNewIssue)}
-				handleHeaderClick={() => {
-					if (!this.isNewIssue) { // if its a new issue it shouldnt go to the viewpoint
-						this.setCameraOnViewpoint({ viewpoint: this.issueData.viewpoint });
-					}
-				}}
-				scrolled={this.state.scrolled}
-				isNew={this.isNewIssue}
-			/>
+			<PreviewWrapper>
+				<PreviewDetails
+					{...this.issueData}
+					key={this.issueData._id}
+					defaultExpanded={expandDetails}
+					editable={!this.issueData._id}
+					onNameChange={this.handleNameChange}
+					onExpandChange={this.handleExpandChange}
+					renderCollapsable={this.renderDetailsForm}
+					renderNotCollapsable={() => {
+						return this.renderLogList(!horizontal && isIssueWithComments);
+					}}
+					handleHeaderClick={this.handleHeaderClick}
+					scrolled={this.state.scrolled}
+					isNew={this.isNewIssue}
+				/>
+				{this.renderLogList(horizontal && isIssueWithComments)}
+			</PreviewWrapper>
 		);
 	});
 
@@ -182,6 +187,12 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 					behavior: 'smooth'
 				});
 			}
+		}
+	}
+
+	public handleHeaderClick = () => {
+		if (!this.isNewIssue) { // if its a new issue it shouldnt go to the viewpoint
+			this.setCameraOnViewpoint({ viewpoint: this.issueData.viewpoint });
 		}
 	}
 

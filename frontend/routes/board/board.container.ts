@@ -19,6 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { BoardActions } from '../../modules/board';
+import { DialogActions } from '../../modules/dialog';
 import { selectTeamspaces } from '../../modules/teamspaces';
 import { Board } from './board.component';
 
@@ -27,7 +28,8 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchData: BoardActions.fetchData
+	fetchData: BoardActions.fetchData,
+	showDialog: DialogActions.showDialog
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Board);

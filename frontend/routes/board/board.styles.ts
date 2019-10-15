@@ -120,3 +120,7 @@ export const LoaderContainer = styled.div`
 	top: 0;
 	left: 0;
 `;
+
+export const FormWrapper = styled.div`
+	width: ${(props: any) => props.size === 'sm' ? 400 : 800}px;
+`;
