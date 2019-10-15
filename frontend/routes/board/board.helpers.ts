@@ -7,8 +7,8 @@ export 	const getTeamspaceProjects = (teamspaces, teamspaceName) => {
 	const projectPlaceholder = { name: 'Select project', disabled: true };
 	const teamspaceProjects = selectedTeamspace && selectedTeamspace.projects.length ? selectedTeamspace.projects : [];
 	const projects = [projectPlaceholder, ...teamspaceProjects];
-	
-	return projects.map(({ name, disabled }) => 
+
+	return projects.map(({ name, disabled }) =>
 		({ value: name, displayName: name, disabled }));
 };
 
@@ -19,10 +19,11 @@ export const getProjectModels = (teamspaces, currentTeamspace, projectName) => {
 		const modelPlaceholder = { name: 'Select model', disabled: true };
 		const projectModels = selectedProject && selectedProject.models.length ?
 			selectedProject.models : [];
-		const models = [modelPlaceholder, ...projectModels];
+		const filteredModels = projectModels.filter((m) => m.model);
+		const models = [modelPlaceholder, ...filteredModels];
 
-		return models.filter((m) => m.model).map(({ model, name, disabled }) =>
-			({ value: model, displayName: name, disabled }));
+		return models.map(({ model, name, disabled }) =>
+			({ value: model || true, displayName: name, disabled }));
 	}
 	return [];
 };
