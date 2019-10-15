@@ -24,9 +24,8 @@ import { RisksActions } from '../risks';
 import { selectTeamspaces, TeamspacesActions } from '../teamspaces';
 import { BoardActions, BoardTypes } from './board.redux';
 
-function* fetchData({ type, teamspace, project, modelId }) {
+function* fetchData({ boardType, teamspace, project, modelId }) {
 	try {
-		console.log('fetchData', type, teamspace, project, modelId);
 		const teamspaces = yield select(selectTeamspaces);
 		const currentTeamspace = yield select(selectCurrentTeamspace);
 
@@ -35,7 +34,7 @@ function* fetchData({ type, teamspace, project, modelId }) {
 		}
 
 		if (teamspace && project && modelId) {
-			if (type === 'issues') {
+			if (boardType === 'issues') {
 				yield put(IssuesActions.fetchIssues(teamspace, modelId));
 			} else {
 				yield put(RisksActions.fetchRisks(teamspace, modelId));

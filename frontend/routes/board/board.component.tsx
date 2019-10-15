@@ -40,6 +40,7 @@ import {
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
 import { ConfigSelectComponent } from './components/configSelect.component';
+import { renderWhenTrue } from '../../helpers/rendering';
 
 interface IProps {
 	currentTeamspace: string;
@@ -47,7 +48,7 @@ interface IProps {
 	location: any;
 	match: any;
 	teamspaces: any[];
-	fetchData: (type, teamspace, project, modelId) => void;
+	fetchData: (boardType, teamspace, project, modelId) => void;
 	fetchTeamspaces: (currentTeamspace) => void;
 	showDialog: (config: any) => void;
 }
@@ -88,12 +89,8 @@ export function Board(props: IProps) {
 	const isIssuesBoard = type === 'issues';
 
 	useEffect(() => {
-		console.log('useEffect', type, teamspace, project, modelId);
-
 		props.fetchData(type, teamspace, project, modelId);
 	}, [type, teamspace, project, modelId]);
-
-	console.log('props.teamspaces', props.teamspaces);
 
 	const handleTypeChange = (e) => {
 		const url = `${ROUTES.BOARD_MAIN}/${e.target.value}/${teamspace}${projectParam}${modelParam}`;
@@ -176,6 +173,26 @@ export function Board(props: IProps) {
 
 	const BoardTitle = (<BoardTitleComponent type={type} handleTypeChange={handleTypeChange} />);
 
+	const renderBoard = renderWhenTrue(() => (
+		<BoardContainer>
+			<TrelloBoard
+				data={data}
+				hideCardDeleteIcon
+				onCardClick={handleOpenDialog}
+			/>
+		</BoardContainer>
+	));
+
+	const renderLoader = renderWhenTrue(() => (
+		<BoardContainer>
+			<TrelloBoard
+				data={data}
+				hideCardDeleteIcon
+				onCardClick={handleOpenDialog}
+			/>
+		</BoardContainer>
+	));
+
 	return (
 		<Panel {...PANEL_PROPS} title={BoardTitle}>
 			<Container>
@@ -189,14 +206,8 @@ export function Board(props: IProps) {
 						{renderAddButton()}
 					</ViewConfig>
 				</Config>
-				<BoardContainer>
-					<TrelloBoard
-						data={data}
-						laneDraggable="false"
-						hideCardDeleteIcon
-						onCardClick={handleOpenDialog}
-					/>
-				</BoardContainer>
+				{renderBoard(true)}
+				{renderLoader(false)}
 			</Container>;
 		</Panel >
 	);

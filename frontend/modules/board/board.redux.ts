@@ -18,7 +18,7 @@
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: BoardTypes, Creators: BoardActions } = createActions({
-	fetchData: ['type', 'teamspace', 'project', 'modelId'],
+	fetchData: ['boardType', 'teamspace', 'project', 'modelId'],
 	setIsPending: ['isPending'],
 }, { prefix: 'BOARD/' });
 
