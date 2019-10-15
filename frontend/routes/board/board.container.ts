@@ -29,6 +29,7 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchData: BoardActions.fetchData,
+	fetchCardData: BoardActions.fetchCardData,
 	showDialog: DialogActions.showDialog
 }, dispatch);
 

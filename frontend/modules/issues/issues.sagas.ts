@@ -390,7 +390,7 @@ function* focusOnIssue({ issue, revision }) {
 	}
 }
 
-function* setActiveIssue({ issue, revision }) {
+function* setActiveIssue({ issue, revision, omitViewer = false }) {
 	try {
 		const activeIssueId = yield select(selectActiveIssueId);
 		const issuesMap = yield select(selectIssuesMap);
@@ -407,7 +407,7 @@ function* setActiveIssue({ issue, revision }) {
 		}
 
 		yield all([
-			put(IssuesActions.focusOnIssue(issue, revision)),
+			!omitViewer ? put(IssuesActions.focusOnIssue(issue, revision)) : null,
 			put(IssuesActions.setComponentState({ activeIssue: issue._id, expandDetails: true }))
 		]);
 	} catch (error) {

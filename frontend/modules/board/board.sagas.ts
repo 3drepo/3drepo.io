@@ -47,9 +47,10 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 
 function* fetchCardData({ boardType, teamspace, modelId, cardId }) {
 	try {
-		const getCardData = boardType === 'issues' ? IssuesActions.fetchIssue : RisksActions.fetchRisk;
+		const getCardData = boardType === 'issues' ? IssuesActions.setActiveIssue : RisksActions.setActiveRisk;
+		const cardData = { account: teamspace, model: modelId, _id: cardId };
 
-		yield put(getCardData({ account: teamspace, model: modelId, _id: cardId }));
+		yield put(getCardData(cardData, null, true));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'card data', error));
 	}

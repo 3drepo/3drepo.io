@@ -21,6 +21,7 @@ import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
 
 import { ROUTES } from '../../constants/routes';
+import { renderWhenTrue } from '../../helpers/rendering';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
@@ -40,7 +41,6 @@ import {
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
 import { ConfigSelectComponent } from './components/configSelect.component';
-import { renderWhenTrue } from '../../helpers/rendering';
 
 interface IProps {
 	currentTeamspace: string;
@@ -49,6 +49,7 @@ interface IProps {
 	match: any;
 	teamspaces: any[];
 	fetchData: (boardType, teamspace, project, modelId) => void;
+	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
 	fetchTeamspaces: (currentTeamspace) => void;
 	showDialog: (config: any) => void;
 }
@@ -65,7 +66,10 @@ const data = {
 			id: 'lane1',
 			title: 'High Priority',
 			label: '2 issues',
-			cards: [],
+			cards: [{
+				id: 123,
+				title: 'test'
+			}],
 		},
 		{
 			id: 'lane2',
@@ -112,7 +116,12 @@ export function Board(props: IProps) {
 		props.history.push(url);
 	};
 
-	const handleOpenDialog = useCallback(() => {
+	const handleOpenDialog = useCallback((cardId, metadata, laneId) => {
+		if (cardId) {
+			// props.fetchCardData(type, teamspace, modelId, cardId);
+			props.fetchCardData(type, 'demo_3DRepo', 'b9aca152-61a5-4e00-953d-d88339e44fef', '7604e450-9e5d-11e9-986e-b38c09172988');
+		}
+
 		const dataType = isIssuesBoard ? 'issue' : 'risk';
 		const TemplateComponent = isIssuesBoard ? IssueDetails : RiskDetails;
 		const Form = (formProps: any) => (
@@ -135,7 +144,7 @@ export function Board(props: IProps) {
 		};
 
 		props.showDialog(config);
-	}, [type]);
+	}, [type, props.fetchCardData]);
 
 	const renderTeamspacesSelect = () => (
 		<ConfigSelect value={teamspace} onChange={handleTeamspaceChange} disabled={!props.teamspaces.length}>
@@ -208,7 +217,7 @@ export function Board(props: IProps) {
 				</Config>
 				{renderBoard(true)}
 				{renderLoader(false)}
-			</Container>;
-		</Panel >
+			</Container>
+		</Panel>
 	);
 }

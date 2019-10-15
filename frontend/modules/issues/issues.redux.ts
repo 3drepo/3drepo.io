@@ -34,7 +34,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	downloadIssues: ['teamspace', 'modelId'],
 	showDetails: ['revision', 'issueId'],
 	closeDetails: [],
-	setActiveIssue: ['issue', 'revision'],
+	setActiveIssue: ['issue', 'revision', 'omitViewer'],
 	togglePendingState: ['isPending'],
 	toggleDetailsPendingState: ['isPending'],
 	subscribeOnIssueChanges: ['teamspace', 'modelId'],
