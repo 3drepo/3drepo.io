@@ -19,13 +19,11 @@ import React, { Fragment } from 'react';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
-import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
 import { Container } from '../../../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
-import { HorizontalView } from './issueDetails.styles';
+import { HorizontalView, LogList, PreviewDetails } from './issueDetails.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
 
 interface IProps {
@@ -43,8 +41,8 @@ interface IProps {
 	currentUser: any;
 	settings: any;
 	failedToLoad: boolean;
-	disableViewer: boolean;
-	horizontal: boolean;
+	disableViewer?: boolean;
+	horizontal?: boolean;
 	setState: (componentState) => void;
 	fetchIssue: (teamspace, model, issueId) => void;
 	updateSelectedIssuePin: (position) => void;
@@ -110,25 +108,27 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, horizontal } = this.props;
-		const { comments } = this.issueData;
-		const isIssueWithComments = comments && !!comments.length && !this.isNewIssue;
+		const { commentCount } = this.issueData;
+		const isIssueWithComments = commentCount && !this.isNewIssue;
 		const PreviewWrapper = horizontal && isIssueWithComments ? HorizontalView : Fragment;
+
+		const renderNotCollapsable = () => {
+			return this.renderLogList(!horizontal && isIssueWithComments);
+		};
 
 		return (
 			<PreviewWrapper>
 				<PreviewDetails
 					{...this.issueData}
 					key={this.issueData._id}
-					defaultExpanded={expandDetails}
+					defaultExpanded={horizontal || expandDetails}
 					editable={!this.issueData._id}
 					onNameChange={this.handleNameChange}
 					onExpandChange={this.handleExpandChange}
 					renderCollapsable={this.renderDetailsForm}
-					renderNotCollapsable={() => {
-						return this.renderLogList(!horizontal && isIssueWithComments);
-					}}
+					renderNotCollapsable={!horizontal ? renderNotCollapsable : null}
 					handleHeaderClick={this.handleHeaderClick}
-					scrolled={this.state.scrolled}
+					scrolled={this.state.scrolled && !horizontal}
 					isNew={this.isNewIssue}
 				/>
 				{this.renderLogList(horizontal && isIssueWithComments)}
@@ -139,6 +139,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center" padding="0">
 			<NewCommentForm
+				disableViewer={this.props.disableViewer}
 				comment={this.props.newComment.comment}
 				screenshot={this.props.newComment.screenshot}
 				viewpoint={this.props.newComment.viewpoint}
@@ -147,6 +148,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onSave={this.handleSave}
 				canComment={this.userCanComment()}
 				hideComment={this.isNewIssue}
+				hideScreenshot={this.props.disableViewer}
+				hideUploadButton={!this.props.disableViewer}
 			/>
 		</ViewerPanelFooter>
 	));

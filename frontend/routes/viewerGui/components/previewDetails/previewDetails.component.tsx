@@ -116,25 +116,36 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		<ToggleIcon active={Number(this.state.expanded)} />
 		));
 
-		public renderCollapsable = renderWhenTrue(() => (
-			<CollapsableContent>
+	public renderCollapsable = renderWhenTrue(() => (
+		<CollapsableContent>
 			{this.props.renderCollapsable()}
 		</CollapsableContent>
 	));
 
-	public renderNotCollapsable = renderWhenTrue(() => (
-		<Content>
-			{this.props.renderNotCollapsable()}
-		</Content>
-	));
-
 	public renderUpdateMessage = renderWhenTrue(() =>
-	<ActionMessage content={`This ${this.props.panelName} has been updated by someone else`} />
+		<ActionMessage content={`This ${this.props.panelName} has been updated by someone else`} />
 	);
 
 	public renderDeleteMessage = renderWhenTrue(() =>
-	<ActionMessage content={`This ${this.props.panelName} has been deleted by someone else`} />
+		<ActionMessage content={`This ${this.props.panelName} has been deleted by someone else`} />
 	);
+
+	public renderNotCollapsableContent = renderWhenTrue(() => {
+		return (
+			<>
+				<ToggleButtonContainer onClick={this.handleToggle} expanded={this.state.expanded}>
+					<ToggleButton>
+						{this.renderExpandIcon(!this.props.editable)}
+					</ToggleButton>
+				</ToggleButtonContainer>
+				<NotCollapsableContent>
+					<Content>
+						{this.props.renderNotCollapsable()}
+					</Content>
+				</NotCollapsableContent>
+			</>
+		);
+	});
 
 	public componentDidMount() {
 		const { editable, defaultExpanded } = this.props;
@@ -218,14 +229,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 						{this.renderCollapsable(Boolean(renderCollapsable))}
 					</Details>
 				</Collapsable>
-				<ToggleButtonContainer onClick={this.handleToggle} expanded={this.state.expanded}>
-					<ToggleButton>
-						{this.renderExpandIcon(!editable)}
-					</ToggleButton>
-				</ToggleButtonContainer>
-				<NotCollapsableContent>
-					{this.renderNotCollapsable(Boolean(renderNotCollapsable))}
-				</NotCollapsableContent>
+				{this.renderNotCollapsableContent(!!renderNotCollapsable)}
 			</Container>
 		);
 	}

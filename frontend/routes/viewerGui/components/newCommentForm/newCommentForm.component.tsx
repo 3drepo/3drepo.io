@@ -17,6 +17,7 @@
 
 import InputLabel from '@material-ui/core/InputLabel';
 import CameraIcon from '@material-ui/icons/AddAPhoto';
+import AddPhoto from '@material-ui/icons/AddPhotoAlternate';
 import ReportProblemIcon from '@material-ui/icons/ReportProblem';
 import SaveIcon from '@material-ui/icons/Save';
 import ShortTextIcon from '@material-ui/icons/ShortText';
@@ -51,6 +52,7 @@ interface IProps {
 	viewpoint?: any;
 	hideComment?: boolean;
 	hideScreenshot?: boolean;
+	hideUploadButton?: boolean;
 	showResidualRiskInput?: boolean;
 	viewer: any;
 	onSave: (commentData, finishSubmitting) => void;
@@ -97,6 +99,15 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		<TooltipButton
 			Icon={CameraIcon}
 			label="Take a screenshot"
+			action={this.handleNewScreenshot}
+			disabled={!this.props.canComment}
+		/>
+	));
+
+	public renderUploadImageButton = renderWhenTrue(() => (
+		<TooltipButton
+			Icon={AddPhoto}
+			label="Upload image"
 			action={this.handleNewScreenshot}
 			disabled={!this.props.canComment}
 		/>
@@ -218,6 +229,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		const {
 			hideComment,
 			hideScreenshot,
+			hideUploadButton,
 			showResidualRiskInput,
 			formRef,
 			canComment
@@ -238,6 +250,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 						<Actions>
 							<ActionsGroup>
 								{this.renderScreenshotButton(!hideScreenshot)}
+								{this.renderUploadImageButton(!hideUploadButton)}
 								{this.renderCommentTypeToggle(!hideComment && showResidualRiskInput)}
 							</ActionsGroup>
 							<Field render={({ form }) => (

@@ -16,8 +16,13 @@
  */
 
 import styled from 'styled-components';
+import { LogList as LogListBase } from '../../../../../components/logList/logList.component';
+import { PreviewDetails as PreviewDetailsBase } from '../../../previewDetails/previewDetails.component';
 
 export const Container = styled.div``;
+
+export const LogList = styled(LogListBase)``;
+export const PreviewDetails = styled(PreviewDetailsBase)``;
 
 export const DescriptionImage = styled.div`
 	max-height: 250px;
@@ -29,9 +34,16 @@ export const HorizontalView = styled.div`
 	flex: 1;
 	align-items: flex-start;
 	justify-content: flex-start;
+	overflow: hidden;
 
-	> * {
+	${PreviewDetails}, ${LogList} {
 		width: 50%;
+		max-height: 60vh;
 		position: relative;
+		overflow: auto;
+	}
+
+	${LogList}:before {
+		box-shadow: none;
 	}
 `;

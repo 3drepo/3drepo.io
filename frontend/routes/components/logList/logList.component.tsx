@@ -22,6 +22,7 @@ import { Log } from './components/log/log.component';
 import { Container, LoaderContainer } from './logList.styles';
 
 interface IProps {
+	className: string;
 	items: any[];
 	isPending: boolean;
 	currentUser: string;
@@ -56,7 +57,7 @@ export class LogList extends React.PureComponent<IProps, any> {
 
 	public render() {
 		return (
-			<Container ref={this.props.commentsRef}>
+			<Container className={this.props.className} ref={this.props.commentsRef}>
 				{this.props.isPending ? this.renderLoader() : this.props.items.map(this.renderLogItem)}
 			</Container>
 		);
