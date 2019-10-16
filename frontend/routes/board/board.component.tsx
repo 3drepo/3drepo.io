@@ -225,7 +225,8 @@ export function Board(props: IProps) {
 		return (
 			<LoaderContainer>
 				<NoDataMessage>
-					{(!project || !modelId) && areModels && chooseMessage}
+					{(!modelId && areModels) && chooseMessage}
+					{(!modelId && !project) && `${messagePrefix} project and model to show board.`}
 					{project && !areModels && `There is no models in ${project} project. Try another one, or add new model.`}
 				</NoDataMessage>
 			</LoaderContainer>
