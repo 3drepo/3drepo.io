@@ -23,14 +23,18 @@ import { IssuesActions, IssuesTypes } from '../issues';
 import { selectCurrentModel, ModelActions } from '../model';
 import { RisksActions, RisksTypes } from '../risks';
 import { selectTeamspaces, TeamspacesActions } from '../teamspaces';
+import { selectUsers, UserManagementActions, UserManagementTypes } from '../userManagement';
 import { BoardActions, BoardTypes } from './board.redux';
+import { selectFetchedTeamspace } from './board.selectors';
 
 function* fetchData({ boardType, teamspace, project, modelId }) {
 	try {
 		yield put(BoardActions.setIsPending(true));
 		const teamspaces = yield select(selectTeamspaces);
 		const currentTeamspace = yield select(selectCurrentTeamspace);
+		const alreadyFetchedTeamspace = yield select(selectFetchedTeamspace);
 		const currentModel = yield select(selectCurrentModel);
+		const users = yield select(selectUsers);
 
 		if (modelId && modelId !== currentModel) {
 			yield put(ModelActions.fetchSettings(teamspace, modelId));
@@ -38,6 +42,11 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 
 		if (!teamspaces.length) {
 			yield put(TeamspacesActions.fetchTeamspaces(currentTeamspace));
+		}
+
+		if (teamspace && (teamspace !== alreadyFetchedTeamspace || !users.length)) {
+			yield put(UserManagementActions.fetchTeamspaceDetails(teamspace));
+			yield take(UserManagementTypes.FETCH_TEAMSPACE_DETAILS_SUCCESS);
 		}
 
 		if (teamspace && project && modelId) {
@@ -48,6 +57,10 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 				yield put(RisksActions.fetchRisks(teamspace, modelId));
 				yield take(RisksTypes.FETCH_RISKS_SUCCESS);
 			}
+		}
+
+		if (teamspace) {
+			yield put(BoardActions.fetchDataSuccess(teamspace));
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'board data', error));

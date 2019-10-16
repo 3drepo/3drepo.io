@@ -15,15 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { values } from 'lodash';
+
 export const BOARD_TYPES = {
 	ISSUES: 'issues',
 	RISKS: 'risks'
 };
 
 export const FILTER_PROPS = {
-	STATUS: 'status',
-	PRIORITY: 'priority',
-	TYPE: 'topic_type',
-	ASSIGNED_TO: 'assigned_roles',
-	CREATED_BY: 'owner',
+	status: {
+		value: 'status',
+		name: 'Status'
+	},
+	priority: {
+		value: 'priority',
+		name: 'Priority'
+	},
+	topic_type: {
+		value: 'topic_type',
+		name: 'Topic Type'
+	},
+	assigned_roles: {
+		value: 'assigned_roles',
+		name: 'Assigned To'
+	},
+	owner: {
+		value: 'owner',
+		name: 'Created By'
+	},
 };
+
+export const FILTERS = values(FILTER_PROPS);

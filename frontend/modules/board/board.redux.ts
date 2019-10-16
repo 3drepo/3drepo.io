@@ -21,20 +21,39 @@ import { BOARD_TYPES, FILTER_PROPS } from './board.constants';
 export const { Types: BoardTypes, Creators: BoardActions } = createActions({
 	fetchData: ['boardType', 'teamspace', 'project', 'modelId'],
 	fetchCardData: ['boardType', 'teamspace', 'modelId', 'cardId'],
-	setIsPending: ['isPending']
+	setIsPending: ['isPending'],
+	setFilterProp: ['filterProp'],
+	setBoardType: ['boardType'],
+	fetchDataSuccess: ['teamspace']
 }, { prefix: 'BOARD/' });
 
 export const INITIAL_STATE = {
 	isPending: true,
 	boardType: BOARD_TYPES.ISSUES,
-	filterProp: FILTER_PROPS.STATUS,
-	lanes: []
+	filterProp: FILTER_PROPS.status.value,
+	lanes: [],
+	teamspace: null
 };
 
 const setIsPending = (state = INITIAL_STATE, { isPending }) => {
 	return { ...state, isPending };
 };
 
+const setFilterProp = (state = INITIAL_STATE, { filterProp }) => {
+	return { ...state, filterProp };
+};
+
+const setBoardType = (state = INITIAL_STATE, { boardType }) => {
+	return { ...state, boardType };
+};
+
+const fetchDataSuccess = (state = INITIAL_STATE, { teamspace }) => {
+	return { ...state, teamspace };
+};
+
 export const reducer = createReducer({...INITIAL_STATE}, {
-	[BoardTypes.SET_IS_PENDING]: setIsPending
+	[BoardTypes.SET_IS_PENDING]: setIsPending,
+	[BoardTypes.SET_FILTER_PROP]: setFilterProp,
+	[BoardTypes.SET_BOARD_TYPE]: setBoardType,
+	[BoardTypes.FETCH_DATA_SUCCESS]: fetchDataSuccess
 });

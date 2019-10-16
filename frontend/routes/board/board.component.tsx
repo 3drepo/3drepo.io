@@ -22,6 +22,7 @@ import TrelloBoard from 'react-trello';
 
 import { ROUTES } from '../../constants/routes';
 import { renderWhenTrue } from '../../helpers/rendering';
+import { FILTERS } from '../../modules/board/board.constants';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
@@ -36,6 +37,8 @@ import {
 	ConfigSelectItem,
 	Container,
 	DataConfig,
+	Filters,
+	FilterButton,
 	FormWrapper,
 	LoaderContainer,
 	NoDataMessage,
@@ -67,9 +70,13 @@ interface IProps {
 	lanes: ILane[];
 	teamspaces: any[];
 	isPending: boolean;
+	filterProp: string;
+	boardType: string;
 	fetchData: (boardType, teamspace, project, modelId) => void;
 	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
 	showDialog: (config: any) => void;
+	setFilterProp: (filterProp: string) => void;
+	setBoardType: (boardType: string) => void;
 }
 
 const PANEL_PROPS = {
@@ -88,12 +95,19 @@ export function Board(props: IProps) {
 	};
 
 	useEffect(() => {
+		if (type !== props.boardType) {
+			props.setBoardType(type);
+		}
+	}, []);
+
+	useEffect(() => {
 		props.fetchData(type, teamspace, project, modelId);
 	}, [type, teamspace, project, modelId]);
 
 	const handleTypeChange = (e) => {
 		const url = `${ROUTES.BOARD_MAIN}/${e.target.value}/${teamspace}${projectParam}${modelParam}`;
 		props.history.push(url);
+		props.setBoardType(e.target.value);
 	};
 
 	const handleTeamspaceChange = (e) => {
@@ -154,7 +168,7 @@ export function Board(props: IProps) {
 					)) : <ConfigSelectItem value={teamspace}>{teamspace}</ConfigSelectItem>
 				}
 			</ConfigSelect>
-		)
+		);
 	};
 
 	const renderProjectsSelect = () => {
@@ -177,6 +191,26 @@ export function Board(props: IProps) {
 		>
 			<Add />
 		</AddButton>
+	);
+
+	const handleFilterClick = (filterProp) => {
+		if (props.filterProp !== filterProp) {
+			props.setFilterProp(filterProp);
+		}
+	};
+
+	const renderFilters = () => (
+		<Filters>
+			{ FILTERS.map((filter) => (
+				<FilterButton
+					key={filter.value}
+					active={props.filterProp === filter.value}
+					disabled={!project && !modelId}
+					onClick={() => handleFilterClick(filter.value)}>
+					{filter.name}
+				</FilterButton>
+			)) }
+		</Filters>
 	);
 
 	const BoardTitle = (<BoardTitleComponent type={type} handleTypeChange={handleTypeChange} />);
@@ -243,13 +277,14 @@ export function Board(props: IProps) {
 						{renderModelsSelect()}
 					</DataConfig>
 					<ViewConfig>
+						{renderFilters()}
 						{renderAddButton()}
 					</ViewConfig>
 				</Config>
 				{renderLoader(props.isPending)}
-				{renderBoard(!props.isPending && Boolean(props.lanes.length))}
+				{renderBoard(!props.isPending && Boolean(props.lanes.length) && modelId && project)}
 				{renderNoData(!props.isPending && !Boolean(props.lanes.length) && teamspace && project && modelId)}
-				{renderNoSelected(!props.isPending && !Boolean(props.lanes.length) && (!project || !modelId))}
+				{renderNoSelected(!props.isPending && (!Boolean(props.lanes.length) || (!project || !modelId)))}
 			</Container>
 		</Panel>
 	);

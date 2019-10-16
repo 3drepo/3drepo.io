@@ -15,11 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { groupBy, keys, values } from 'lodash';
+import { groupBy, keys, keyBy, values } from 'lodash';
 import { createSelector } from 'reselect';
+import { PRIORITIES, STATUSES } from '../../constants/issues';
 import { selectIssues, selectIssuesMap } from '../issues';
+import { selectJobs } from '../jobs';
+import { selectTopicTypes } from '../model';
 import { selectRisks } from '../risks';
-import { BOARD_TYPES } from './board.constants';
+import { selectUsers } from '../userManagement';
+import { BOARD_TYPES, FILTER_PROPS } from './board.constants';
 
 export const selectBoardDomain = (state) => ({...state.board});
 
@@ -31,34 +35,53 @@ export const selectFilterProp = createSelector(
 	selectBoardDomain, (state) => state.filterProp
 );
 
+export const selectBoardType = createSelector(
+	selectBoardDomain, (state) => state.boardType
+);
+
+export const selectFetchedTeamspace = createSelector(
+	selectBoardDomain, (state) => state.teamspace
+);
+
 export const selectLanes = createSelector(
 	selectBoardDomain,
 	selectIssues,
 	selectRisks,
-	({ filterProp, boardType }, issues, risks) => {
+	selectTopicTypes,
+	selectJobs,
+	selectUsers,
+	({ filterProp, boardType }, issues, risks, topicTypes, jobs, users) => {
+		const filtersMap = {
+			[FILTER_PROPS.status.value]: STATUSES,
+			[FILTER_PROPS.priority.value]: PRIORITIES,
+			[FILTER_PROPS.topic_type.value]: Object.assign({}, ...topicTypes.map((t) => ({[t.value]: t.label}))),
+			[FILTER_PROPS.owner.value]: Object.assign({}, ...users.map((u) => ({[u.user]: `${u.firstName}`}))),
+			[FILTER_PROPS.assigned_roles.value]: Object.assign({}, ...jobs.map((j) => ({[j._id]: j._id})))
+		};
 		const lanes = [];
 		const dataMap = {
 			[BOARD_TYPES.ISSUES]: issues,
 			[BOARD_TYPES.RISKS]: risks
 		};
-		const preparedData = issues.map((issue, index) => {
+		const preparedData = dataMap[boardType].map((item) => {
 			return {
-				id: issue._id,
-				[filterProp]: issue[filterProp],
-				metadata: {
-					...issue
-				}
+				id: item._id,
+				[filterProp]: item[filterProp],
+				metadata: { ...item }
 			};
 		});
-		const groups = values(groupBy(preparedData, filterProp));
-		const groupsKeys = keys(groupBy(dataMap[boardType], filterProp));
 
-		for (let i = 0 ; i < groups.length; i++) {
+		const groups = values(groupBy(preparedData, filterProp));
+		const isPrefixTitle = filterProp === FILTER_PROPS.owner.value || filterProp === FILTER_PROPS.assigned_roles.value;
+		const name = FILTER_PROPS[filterProp].name;
+		const dataset = filtersMap[filterProp];
+
+		for (let i = 0 ; i < values(dataset).length; i++) {
 			const lane = {} as any;
-			lane.id = groupsKeys[i];
-			lane.title = `${groupsKeys[i]} ${filterProp}`;
-			lane.label = `${groups[i].length} ${boardType}`;
-			lane.cards = groups[i];
+			lane.id = keys(dataset)[i];
+			lane.title = isPrefixTitle ? `${name} ${keys(dataset)[i]}` : `${keys(dataset)[i]} ${name}`;
+			lane.label = `${groups[i] ? groups[i].length : 0} ${boardType}`;
+			lane.cards = groups[i] ? groups[i] : [];
 			lanes.push(lane);
 		}
 

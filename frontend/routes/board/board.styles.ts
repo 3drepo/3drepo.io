@@ -57,7 +57,10 @@ export const Config = styled.div`
 
 export const DataConfig = styled.div``;
 
-export const ViewConfig = styled.div``;
+export const ViewConfig = styled.div`
+	align-items: center;
+	display: flex;
+`;
 
 export const AddButton = styled(Button).attrs({
 	mini: true,
@@ -137,4 +140,22 @@ export const FormWrapper = styled.div`
 export const NoDataMessage = styled.div`
 	align-self: center;
 	color: ${COLOR.BLACK_54};
+`;
+
+export const Filters = styled.div`
+	display: flex;
+`;
+
+export const FilterButton = styled.button`
+	background-color: ${(props: any) => props.active ? COLOR.BLACK_16 : COLOR.WHITE};
+	color: ${(props: any) => props.active ? COLOR.WHITE : COLOR.BLACK_54};
+	border: none;
+	border-radius: 14px;
+	display: block;
+	font-size: 12px;
+	margin: 0 6px;
+	padding: 2px 8px;
+	outline: none;
+	white-space: nowrap;
+	cursor: ${(props: any) => props.disabled ? 'not-allowed' : 'pointer'};
 `;
