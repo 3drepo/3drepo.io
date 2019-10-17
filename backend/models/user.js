@@ -40,6 +40,7 @@ const permissionTemplate = require("./permissionTemplate");
 const accountPermission = require("./accountPermission");
 const Project = require("./project");
 const FileRef = require("./fileRef");
+const invitations =  require("./invitations");
 
 const schema = mongoose.Schema({
 	_id: String,
@@ -1182,7 +1183,11 @@ schema.methods.addTeamMember = function (user, job, permissions) {
 		} else {
 			return User.findByUserName(user).then((userEntry) => {
 				if (!userEntry) {
-					return Promise.reject(responseCodes.USER_NOT_FOUND);
+					if (C.EMAIL_REGEXP.test(user)) {
+						return invitations.create(user, this.user, job, permissions);
+					} else {
+						return Promise.reject(responseCodes.USER_NOT_FOUND);
+					}
 				}
 
 				if (!job) {
