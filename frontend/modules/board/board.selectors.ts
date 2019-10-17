@@ -54,8 +54,8 @@ export const selectLanes = createSelector(
 		const filtersMap = {
 			[FILTER_PROPS.status.value]: STATUSES,
 			[FILTER_PROPS.priority.value]: PRIORITIES,
-			[FILTER_PROPS.topic_type.value]: Object.assign({}, ...topicTypes.map((t) => ({[t.value]: t.label}))),
-			[FILTER_PROPS.owner.value]: Object.assign({}, ...users.map((u) => ({[u.user]: `${u.firstName}`}))),
+			[FILTER_PROPS.topic_type.value]: Object.assign({}, ...topicTypes.map((t) => ({[t.value]: t.value}))),
+			[FILTER_PROPS.owner.value]: Object.assign({}, ...users.map((u) => ({[u.user]: `${u.user}`}))),
 			[FILTER_PROPS.assigned_roles.value]: Object.assign({}, ...jobs.map((j) => ({[j._id]: j._id})))
 		};
 		const lanes = [];
@@ -71,17 +71,18 @@ export const selectLanes = createSelector(
 			};
 		});
 
-		const groups = values(groupBy(preparedData, filterProp));
+		const groups = groupBy(preparedData, filterProp);
 		const isPrefixTitle = filterProp === FILTER_PROPS.owner.value || filterProp === FILTER_PROPS.assigned_roles.value;
 		const name = FILTER_PROPS[filterProp].name;
 		const dataset = filtersMap[filterProp];
 
-		for (let i = 0 ; i < values(dataset).length; i++) {
+		for (let i = 0; i < values(dataset).length; i++) {
 			const lane = {} as any;
-			lane.id = keys(dataset)[i];
-			lane.title = isPrefixTitle ? `${name} ${keys(dataset)[i]}` : `${keys(dataset)[i]} ${name}`;
-			lane.label = `${groups[i] ? groups[i].length : 0} ${boardType}`;
-			lane.cards = groups[i] ? groups[i] : [];
+			const id = values(dataset)[i];
+			lane.id = id;
+			lane.title = isPrefixTitle ? `${name} ${id}` : `${id} ${name}`;
+			lane.label = `${groups[id] ? groups[id].length : 0} ${boardType}`;
+			lane.cards = groups[id] ? groups[id] : [];
 			lanes.push(lane);
 		}
 

@@ -171,7 +171,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting })
 function* updateIssue({ issueData }) {
 	try {
 		const { _id, rev_id, model, account, position } = yield select(selectActiveIssueDetails);
-		const { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, issueData );
+		const { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, issueData);
 		yield analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.EDIT);
 
 		const jobs = yield select(selectJobsList);
@@ -183,6 +183,20 @@ function* updateIssue({ issueData }) {
 		yield put(SnackbarActions.show('Issue updated'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'issue', error));
+	}
+}
+
+function* updateBoardIssue({ teamspace, modelId, issueData }) {
+	try {
+		const { _id, ...changedData } = issueData;
+		const { data: updatedIssue } = yield API.updateIssue(teamspace, modelId, _id, null, changedData);
+		const jobs = yield select(selectJobsList);
+		const preparedIssue = prepareIssue(updatedIssue, jobs);
+		preparedIssue.comments = yield prepareComments(preparedIssue.comments);
+		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
+		yield put(SnackbarActions.show('Issue updated'));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('update', 'board issue', error));
 	}
 }
 
@@ -716,4 +730,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.ATTACH_LINK_RESOURCES, attachLinkResources);
 	yield takeLatest(IssuesTypes.SHOW_MULTIPLE_GROUPS, showMultipleGroups);
 	yield takeLatest(IssuesTypes.GO_TO_ISSUE, goToIssue);
+	yield takeLatest(IssuesTypes.UPDATE_BOARD_ISSUE, updateBoardIssue);
 }

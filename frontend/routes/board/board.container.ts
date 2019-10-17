@@ -20,6 +20,8 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { selectBoardType, selectFilterProp, selectIsPending, selectLanes, BoardActions } from '../../modules/board';
 import { DialogActions } from '../../modules/dialog';
+import { IssuesActions } from '../../modules/issues';
+import { RisksActions } from '../../modules/risks';
 import { selectTeamspaces } from '../../modules/teamspaces';
 import { Board } from './board.component';
 
@@ -36,7 +38,9 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchCardData: BoardActions.fetchCardData,
 	setFilterProp: BoardActions.setFilterProp,
 	setBoardType: BoardActions.setBoardType,
-	showDialog: DialogActions.showDialog
+	showDialog: DialogActions.showDialog,
+	updateIssue: IssuesActions.updateBoardIssue,
+	updateRisk: RisksActions.updateBoardRisk
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Board);

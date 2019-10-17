@@ -77,6 +77,8 @@ interface IProps {
 	showDialog: (config: any) => void;
 	setFilterProp: (filterProp: string) => void;
 	setBoardType: (boardType: string) => void;
+	updateIssue: (teamspace, model, issueData: any) => void;
+	updateRisk: (teamspace, model, riskData: any) => void;
 }
 
 const PANEL_PROPS = {
@@ -157,8 +159,12 @@ export function Board(props: IProps) {
 		props.showDialog(config);
 	}, [type, props.fetchCardData]);
 
-	const handleCardMove = (fromLaneId, toLaneId, cardId, index) => {
-		console.log('handleCardMove', fromLaneId, toLaneId, cardId, index);
+	const handleCardMove = (fromLaneId, toLaneId, cardId) => {
+		if (isIssuesBoard) {
+			props.updateIssue(teamspace, modelId, { _id: cardId, [props.filterProp]: toLaneId });
+		} else {
+			props.updateRisk(teamspace, modelId, { _id: cardId, [props.filterProp]: toLaneId });
+		}
 	};
 
 	const renderTeamspacesSelect = () => {

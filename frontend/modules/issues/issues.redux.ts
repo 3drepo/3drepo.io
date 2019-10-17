@@ -26,6 +26,7 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	setComponentState: ['componentState'],
 	saveIssue: ['teamspace', 'model', 'issueData', 'revision', 'finishSubmitting'],
 	updateIssue: ['teamspace', 'modelId', 'issueData'],
+	updateBoardIssue: ['teamspace', 'modelId', 'issueData'],
 	postComment: ['teamspace', 'modelId', 'issueData', 'finishSubmitting'],
 	removeComment: ['teamspace', 'modelId', 'issueData'],
 	saveIssueSuccess: ['issue'],

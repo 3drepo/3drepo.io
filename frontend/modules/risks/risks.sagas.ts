@@ -174,6 +174,20 @@ function* updateRisk({ teamspace, modelId, riskData }) {
 	}
 }
 
+function* updateBoardRisk({ teamspace, modelId, riskData }) {
+	try {
+		const { _id, ...changedData } = riskData;
+		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, null, changedData);
+		const jobs = yield select(selectJobsList);
+		const preparedIssue = prepareRisk(updatedRisk, jobs);
+		preparedIssue.comments = yield prepareComments(preparedIssue.comments);
+		yield put(RisksActions.saveIssueSuccess(preparedIssue));
+		yield put(SnackbarActions.show('Issue updated'));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('update', 'board issue', error));
+	}
+}
+
 function* updateNewRisk({ newRisk }) {
 	try {
 		const jobs = yield select(selectJobsList);
@@ -547,4 +561,5 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.SET_FILTERS, setFilters);
 	yield takeLatest(RisksTypes.SHOW_MULTIPLE_GROUPS, showMultipleGroups);
 	yield takeLatest(RisksTypes.GO_TO_RISK, goToRisk);
+	yield takeLatest(RisksTypes.UPDATE_BOARD_RISK, updateBoardRisk);
 }
