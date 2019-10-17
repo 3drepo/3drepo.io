@@ -17,7 +17,8 @@
 
 import React from 'react';
 import { getStaticFile } from '../../../services/staticPages';
-import { Container, Content, Header, Logo, Title } from './staticPageRoute.styles';
+import { ExtrasMenu } from '../topMenu/components/extrasMenu/extrasMenu.component';
+import { Container, Content, Header, Logo, MenuContainer, Title } from './staticPageRoute.styles';
 
 interface IProps {
 	title: string;
@@ -44,6 +45,7 @@ export default class PageTemplate extends React.PureComponent<IProps, IState> {
 				<Header>
 					<Title>{this.props.title}</Title>
 					<Logo src="images/3drepo-logo-white.png" alt="3D Repo" />
+					<MenuContainer><ExtrasMenu /></MenuContainer>
 				</Header>
 				<Content dangerouslySetInnerHTML={{ __html: fileContent }} />
 			</Container>
