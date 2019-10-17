@@ -35,11 +35,16 @@ export const BoardContainer = styled.div`
 	.react-trello-board {
 		background-color: initial;
 		height: 100%;
-    padding: 0;
+		padding: 0;
+		overflow: scroll;
 	}
 
 	.react-trello-lane {
 		width: 350px;
+	}
+
+	.smooth-dnd-draggable-wrapper {
+		margin-bottom: 10px;
 	}
 `;
 

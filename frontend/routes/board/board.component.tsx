@@ -157,6 +157,10 @@ export function Board(props: IProps) {
 		props.showDialog(config);
 	}, [type, props.fetchCardData]);
 
+	const handleCardMove = (fromLaneId, toLaneId, cardId, index) => {
+		console.log('handleCardMove', fromLaneId, toLaneId, cardId, index);
+	};
+
 	const renderTeamspacesSelect = () => {
 		return (
 			<ConfigSelect value={teamspace} onChange={handleTeamspaceChange} disabled={!props.teamspaces.length}>
@@ -231,6 +235,7 @@ export function Board(props: IProps) {
 				data={boardData}
 				hideCardDeleteIcon
 				onCardClick={handleOpenDialog}
+				onCardMoveAcrossLanes={handleCardMove}
 				components={components}
 			/>
 		</BoardContainer>
