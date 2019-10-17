@@ -40,7 +40,7 @@ const permissionTemplate = require("./permissionTemplate");
 const accountPermission = require("./accountPermission");
 const Project = require("./project");
 const FileRef = require("./fileRef");
-const invitations =  require("./invitations");
+const Invitations =  require("./invitations");
 
 const schema = mongoose.Schema({
 	_id: String,
@@ -503,7 +503,7 @@ schema.statics.createUser = function (logger, username, password, customData, to
 				}).then(user => {
 					user.customData.billing.billingInfo.changeBillingAddress(billingInfo);
 					return user.save();
-				}).then(() => {
+				}).then(user => Invitations.unpack(user)).then(() => {
 					return Promise.resolve(cleanedCustomData.emailVerifyToken);
 				});
 			});
@@ -1184,7 +1184,7 @@ schema.methods.addTeamMember = function (user, job, permissions) {
 			return User.findByUserName(user).then((userEntry) => {
 				if (!userEntry) {
 					if (C.EMAIL_REGEXP.test(user)) {
-						return invitations.create(user, this.user, job, permissions);
+						return Invitations.create(user, this.user, job, permissions);
 					} else {
 						return Promise.reject(responseCodes.USER_NOT_FOUND);
 					}

@@ -33,7 +33,7 @@ invitations.create = async (email, teamSpace, job, permissions = []) => {
 	email = email.toLowerCase();
 	const coll = await getCollection();
 	const result = await coll.findOne({_id:email});
-	const data = { [teamSpace] : { job , permissions}};
+	const data = { [teamSpace] : { job , permissions: { teamspace: permissions }}};
 
 	if (result) {
 		const invitation = {teamSpaces: {...(result.teamSpaces), ...data }};
@@ -67,8 +67,24 @@ invitations.setModelPermission = (email, teamSpace, model, permission) => {
 
 };
 
-invitations.unpack = (email, username) => {
+invitations.unpack = async (user) => {
+	const User = require("./user");
 
+	const coll = await getCollection();
+	const result = await coll.findOne({_id: user.customData.email});
+
+	if (!result) {
+		return {};
+	}
+
+	await Promise.all(Object.keys(result.teamSpaces).map(
+		async teamspace => {
+			const teamspaceUser = await User.findByUserName(teamspace);
+			const {job, permissions} = result.teamSpaces[teamspace];
+			return await teamspaceUser.addTeamMember(user.user, job, permissions.teamspace);
+		}));
+
+	await coll.deleteOne({_id: user.customData.email});
 };
 
 invitations.getTeamspaceInvitations = (teamSpace) => {
