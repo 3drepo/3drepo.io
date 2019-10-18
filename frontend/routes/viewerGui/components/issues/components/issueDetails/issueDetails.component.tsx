@@ -218,7 +218,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderDetailsForm = () => {
-		const {issue, onRemoveResource, showDialog, topicTypes,
+		const { issue, onRemoveResource, showDialog, topicTypes, disableViewer,
 			currentUser, myJob, attachFileResources, attachLinkResources, updateSelectedIssuePin } = this.props;
 
 		return (
@@ -233,7 +233,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				myJob={myJob}
 				onChangePin={updateSelectedIssuePin}
 				onSavePin={this.onPositionSave}
-				hasPin={issue.position && issue.position.length}
+				hasPin={!disableViewer && issue.position && issue.position.length}
 				onRemoveResource={onRemoveResource}
 				attachFileResources={attachFileResources}
 				attachLinkResources={attachLinkResources}

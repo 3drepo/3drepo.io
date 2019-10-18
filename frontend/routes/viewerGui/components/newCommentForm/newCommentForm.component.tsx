@@ -18,6 +18,7 @@
 import InputLabel from '@material-ui/core/InputLabel';
 import CameraIcon from '@material-ui/icons/AddAPhoto';
 import AddPhoto from '@material-ui/icons/AddPhotoAlternate';
+import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
 import ReportProblemIcon from '@material-ui/icons/ReportProblem';
 import SaveIcon from '@material-ui/icons/Save';
 import ShortTextIcon from '@material-ui/icons/ShortText';
@@ -39,6 +40,8 @@ import {
 	Actions,
 	ActionsGroup,
 	Container,
+	FileUploadContainer,
+	FileUploadInvoker,
 	StyledForm,
 	StyledTextField,
 	TextFieldWrapper
@@ -95,6 +98,8 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		isResidualRiskInputActive: this.props.showResidualRiskInput
 	};
 
+	public fileInputRef = React.createRef<HTMLInputElement>();
+
 	public renderScreenshotButton = renderWhenTrue(() => (
 		<TooltipButton
 			Icon={CameraIcon}
@@ -105,11 +110,22 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderUploadImageButton = renderWhenTrue(() => (
+		<FileUploadContainer>
+			<TooltipButton
+				Icon={AddPhoto}
+				label="Upload image"
+				action={this.handleUploadImageClick}
+				disabled={!this.props.canComment}
+			/>
+			<FileUploadInvoker ref={this.fileInputRef} onChange={this.handleFileUpload} />
+		</FileUploadContainer>
+	));
+
+	public renderViewModel = renderWhenTrue(() => (
 		<TooltipButton
-			Icon={AddPhoto}
-			label="Upload image"
+			Icon={OpenInBrowser}
+			label="View model"
 			action={this.handleNewScreenshot}
-			disabled={!this.props.canComment}
 		/>
 	));
 
@@ -219,6 +235,26 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		});
 	}
 
+	public handleFileUpload = (event) => {
+		const file = event.target.files[0];
+		const reader = new FileReader();
+		const { onTakeScreenshot } = this.props;
+
+		reader.addEventListener('load', () => {
+			onTakeScreenshot(reader.result);
+		}, false);
+
+		reader.readAsDataURL(file);
+	}
+
+	public handleUploadImageClick = () => {
+		if (this.fileInputRef.current && document.createEvent) {
+			const evt = document.createEvent('MouseEvents');
+			evt.initEvent('click', true, false);
+			this.fileInputRef.current.dispatchEvent(evt);
+		}
+	}
+
 	public handleChangeCommentType = () => {
 		const isResidualRiskInputActive = !this.state.isResidualRiskInputActive;
 
@@ -251,6 +287,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 							<ActionsGroup>
 								{this.renderScreenshotButton(!hideScreenshot)}
 								{this.renderUploadImageButton(!hideUploadButton)}
+								{this.renderViewModel(!hideUploadButton)}
 								{this.renderCommentTypeToggle(!hideComment && showResidualRiskInput)}
 							</ActionsGroup>
 							<Field render={({ form }) => (
