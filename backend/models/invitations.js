@@ -17,6 +17,7 @@
 "use strict";
 
 const db = require("../handler/db");
+const { omit } = require("lodash");
 
 const getCollection = async () => {
 	return await db.getCollection("admin", "invitations");
@@ -47,8 +48,24 @@ invitations.create = async (email, teamSpace, job, permissions = []) => {
 	return {email, job, permissions};
 };
 
-invitations.removeTeamspaceFromInvitation = (email, teamSpace) => {
+invitations.removeTeamspaceFromInvitation = async (email, teamSpace) => {
+	email = email.toLowerCase();
+	const coll = await getCollection();
+	const result = await coll.findOne({_id:email});
 
+	if (!result) {
+		return null;
+	}
+
+	const data =  { _id: email, teamSpaces: omit(result.teamSpaces,  teamSpace)};
+
+	if (Object.keys(data.teamSpaces).length === 0) {
+		await coll.deleteOne({_id: email});
+		return {};
+	} else {
+		await coll.updateOne({_id:email}, { $set: data });
+		return {};
+	}
 };
 
 invitations.setJob = (email, teamSpace, job) => {
@@ -81,14 +98,25 @@ invitations.unpack = async (user) => {
 		async teamspace => {
 			const teamspaceUser = await User.findByUserName(teamspace);
 			const {job, permissions} = result.teamSpaces[teamspace];
+
+			// TODO: should send an email to the teamspace adming
 			return await teamspaceUser.addTeamMember(user.user, job, permissions.teamspace);
 		}));
 
 	await coll.deleteOne({_id: user.customData.email});
 };
 
-invitations.getTeamspaceInvitations = (teamSpace) => {
-
+invitations.getTeamspaceInvitationsAsUsers = async (teamspace) => {
+	const queryField = "teamSpaces." + teamspace ;
+	const coll = await getCollection();
+	const results = await coll.find({ [queryField]: {$exists:true}}, {[queryField]: true, job: true}).toArray();
+	return results.map(invitationEntry => {
+		const user = invitationEntry._id;
+		const teamspaceData =  invitationEntry.teamSpaces[teamspace];
+		const permissions = teamspaceData.permissions.teamspace;
+		const job = teamspaceData.job;
+		return {user, isInvitation: true, isCurrentUser: false, permissions, job};
+	});
 };
 
 module.exports = invitations;

@@ -1126,6 +1126,10 @@ schema.methods.removeTeamMember = function (username, cascadeRemove) {
 		return Promise.reject(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF);
 	}
 
+	if (C.EMAIL_REGEXP.test(username)) {
+		return Invitations.removeTeamspaceFromInvitation(username, this.user);
+	}
+
 	const teamspacePerm = this.customData.permissions.findByUser(username);
 	// check if they have any permissions assigned
 	return Project.find({ account: this.user }, { "permissions.user": username }).then(projects => {
@@ -1250,14 +1254,17 @@ schema.statics.getMembers = function (teamspace) {
 	const getTeamspacePermissions = User.findByUserName(teamspace)
 		.then(user => user.toObject().customData.permissions);
 
+	const getInvitations = Invitations.getTeamspaceInvitationsAsUsers(teamspace);
+
 	promises.push(
 		getTeamspaceMembers,
 		getTeamspacePermissions,
-		getJobInfo
+		getJobInfo,
+		getInvitations
 	);
 
 	return Promise.all(promises)
-		.then(([members = [], teamspacePermissions, memToJob = {}]) => {
+		.then(([members = [], teamspacePermissions, memToJob = {}, invitations]) => {
 			return members.map(({user, customData}) => {
 				const permissions = _.find(teamspacePermissions, {user});
 
@@ -1269,14 +1276,14 @@ schema.statics.getMembers = function (teamspace) {
 					permissions: _.get(permissions, "permissions", []),
 					job: _.get(memToJob, user)
 				};
-			});
+			}).concat(invitations);
 		});
 };
 
 schema.statics.getAllUsersInTeamspace = function (teamspace) {
 	return this.findUsersInTeamspace(teamspace, {user: 1}).then(users => {
 		const results = users.map(({user}) => user);
-		return Promise.resolve(results);
+		return results;
 	});
 };
 
