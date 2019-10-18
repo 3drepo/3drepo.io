@@ -46,3 +46,5 @@ export const FILTER_PROPS = {
 };
 
 export const FILTERS = values(FILTER_PROPS);
+
+export const NOT_DEFINED_PROP = 'not defined';

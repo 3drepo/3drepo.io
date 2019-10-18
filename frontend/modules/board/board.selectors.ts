@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { groupBy, keys, keyBy, values } from 'lodash';
+import { groupBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { PRIORITIES, STATUSES } from '../../constants/issues';
-import { selectIssues, selectIssuesMap } from '../issues';
+import { selectIssues } from '../issues';
 import { selectJobs } from '../jobs';
 import { selectTopicTypes } from '../model';
 import { selectRisks } from '../risks';
 import { selectUsers } from '../userManagement';
-import { BOARD_TYPES, FILTER_PROPS } from './board.constants';
+import { BOARD_TYPES, FILTER_PROPS, NOT_DEFINED_PROP } from './board.constants';
 
 export const selectBoardDomain = (state) => ({...state.board});
 
@@ -64,10 +64,14 @@ export const selectLanes = createSelector(
 			[BOARD_TYPES.RISKS]: risks
 		};
 		const preparedData = dataMap[boardType].map((item) => {
+			const isDefined = Boolean(item[filterProp] && ((typeof item[filterProp] === 'string' && item[filterProp]) ||
+				(typeof item[filterProp] !== 'string' && item[filterProp].length)));
+
 			return {
 				id: item._id,
-				[filterProp]: item[filterProp],
-				metadata: { ...item }
+				[filterProp]: isDefined ? item[filterProp] : NOT_DEFINED_PROP,
+				metadata: { ...item },
+				prop: filterProp
 			};
 		});
 
@@ -75,6 +79,19 @@ export const selectLanes = createSelector(
 		const isPrefixTitle = filterProp === FILTER_PROPS.owner.value || filterProp === FILTER_PROPS.assigned_roles.value;
 		const name = FILTER_PROPS[filterProp].name;
 		const dataset = filtersMap[filterProp];
+		const notDefinedGroup = groups[NOT_DEFINED_PROP];
+
+		if (notDefinedGroup && notDefinedGroup.length) {
+			const propertyName = notDefinedGroup[0].prop;
+			const notDefinedLane = {
+				id: propertyName,
+				title: propertyName === FILTER_PROPS.assigned_roles.value ?
+					'Unassigned' : `Not defined ${FILTER_PROPS[propertyName].name}`,
+				label: `${notDefinedGroup.length} ${boardType}`,
+				cards: notDefinedGroup
+			};
+			lanes.push(notDefinedLane);
+		}
 
 		for (let i = 0; i < values(dataset).length; i++) {
 			const lane = {} as any;
