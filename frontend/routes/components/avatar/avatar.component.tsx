@@ -18,6 +18,7 @@
 import { memoize } from 'lodash';
 import React from 'react';
 
+import Person from '@material-ui/icons/Person';
 import { AvatarPlaceholder, Container, StyledAvatar, StyledIcon } from './avatar.styles';
 
 interface IProps {
@@ -53,7 +54,9 @@ export class Avatar extends React.PureComponent<IProps, IState> {
 
 	public renderPlaceholder = () => (
 		<AvatarPlaceholder>
-			<StyledIcon>person</StyledIcon>
+			<StyledIcon>
+				<Person />
+			</StyledIcon>
 		</AvatarPlaceholder>
 	)
 

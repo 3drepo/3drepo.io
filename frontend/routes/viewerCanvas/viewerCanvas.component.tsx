@@ -17,10 +17,12 @@
 
 import { isEqual } from 'lodash';
 import React from 'react';
+import { ROUTES } from '../../constants/routes';
 import { pinsDiff } from '../../helpers/pins';
 import { Container } from './viewerCanvas.styles';
 
 interface IProps {
+	location: any;
 	className?: string;
 	viewer: any;
 	match: {
@@ -38,6 +40,10 @@ interface IProps {
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	private containerRef = React.createRef<HTMLElement>();
+
+	public get shouldBeVisible() {
+		return this.props.location.pathname.includes(ROUTES.VIEWER);
+	}
 
 	public componentDidMount() {
 		const { viewer } = this.props;
@@ -72,6 +78,7 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	public render() {
 		return (
 			<Container
+				visible={this.shouldBeVisible}
 				id="viewer"
 				ref={this.containerRef}
 				className={this.props.className}

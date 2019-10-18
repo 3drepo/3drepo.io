@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { COLOR } from '../../../styles/colors';
 import { FONT_WEIGHT } from '../../../styles/fonts';
+import { ExtrasMenu } from '../topMenu/components/extrasMenu/extrasMenu.component';
 
 export const Container = styled.div``;
 
@@ -48,7 +49,19 @@ export const Title = styled.h2`
 export const Content = styled.div`
 	padding: 10px 50px;
 	overflow: auto;
-	height: calc(100vh - 80px);
+	@media screen {
+		height: calc(100vh - 84px);
+	}
+
+	@media print {
+		height: 100%;
+	}
+
 	color: ${COLOR.BLACK_80};
 	background-color: rgb(250,250,250);
+`;
+
+export const MenuContainer = styled.div`
+	position: absolute;
+	right: 10px;
 `;

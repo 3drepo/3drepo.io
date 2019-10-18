@@ -29,14 +29,7 @@ const OPTIONS_HEIGHT = '100px';
 export const Container = styled.div`
 	width: 100%;
 	height: 100%;
-	display: flex;
-	flex-direction: column;
-
-	${UserManagementTab.Content} {
-		display: flex;
-		flex: 1;
-		flex-direction: column;
-	}
+	display: block;
 `;
 
 export const Options = styled(Grid)`

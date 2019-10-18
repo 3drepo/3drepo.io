@@ -307,6 +307,7 @@ function* updateGroup({ teamspace, modelId, revision, groupId }) {
 
 		yield put(TreeActions.getSelectedNodes());
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
+		yield put(TreeActions.clearCurrentlySelected());
 		yield put(GroupsActions.highlightGroup(preparedGroup));
 		yield put(SnackbarActions.show('Group updated'));
 	} catch (error) {

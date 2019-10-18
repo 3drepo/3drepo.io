@@ -16,7 +16,6 @@ import notificationsSaga from './notifications/notifications.sagas';
 import risksSaga from './risks/risks.sagas';
 import starredSaga from './starred/starred.sagas';
 import startupSaga from './startup/startup.sagas';
-import staticPagesSaga from './staticPages/staticPages.sagas';
 import teamspacesSaga from './teamspaces/teamspaces.sagas';
 import treeSaga from './tree/tree.sagas';
 import userManagementSaga from './userManagement/userManagement.sagas';
@@ -37,7 +36,6 @@ export default function* rootSaga() {
 		fork(modelSaga),
 		fork(authSaga),
 		fork(notificationsSaga),
-		fork(staticPagesSaga),
 		fork(usersSaga),
 		fork(gisSaga),
 		fork(viewerSaga),

@@ -128,8 +128,8 @@ export class Login extends React.PureComponent<IProps, IState> {
 									<TextField
 										{...DEFAULT_INPUT_PROPS}
 										{...field}
-										label="Username"
-										placeholder="Type username..."
+										label="Username or email"
+										placeholder="Type username or email..."
 										autoComplete="login"
 										autoFocus
 									/>
