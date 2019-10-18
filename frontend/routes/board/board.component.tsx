@@ -22,7 +22,7 @@ import TrelloBoard from 'react-trello';
 
 import { ROUTES } from '../../constants/routes';
 import { renderWhenTrue } from '../../helpers/rendering';
-import { FILTERS } from '../../modules/board/board.constants';
+import { FILTERS, FILTER_PROPS } from '../../modules/board/board.constants';
 import { Loader } from '../components/loader/loader.component';
 import { Panel } from '../components/panel/panel.component';
 import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
@@ -160,10 +160,14 @@ export function Board(props: IProps) {
 	}, [type, props.fetchCardData, project, teamspace, modelId]);
 
 	const handleCardMove = (fromLaneId, toLaneId, cardId) => {
+		const updatedProp = {
+			[props.filterProp]: props.filterProp === FILTER_PROPS.assigned_roles.value ? [toLaneId] : toLaneId
+		};
+
 		if (isIssuesBoard) {
-			props.updateIssue(teamspace, modelId, { _id: cardId, [props.filterProp]: toLaneId });
+			props.updateIssue(teamspace, modelId, { _id: cardId, ...updatedProp });
 		} else {
-			props.updateRisk(teamspace, modelId, { _id: cardId, [props.filterProp]: toLaneId });
+			props.updateRisk(teamspace, modelId, { _id: cardId, ...updatedProp });
 		}
 	};
 
