@@ -605,7 +605,6 @@ export function* setNewIssue() {
 
 function* setFilters({ filters }) {
 	try {
-		console.log('setFilters', filters)
 		yield put(IssuesActions.setComponentState({ selectedFilters: filters }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'filters', error));

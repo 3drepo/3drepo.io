@@ -19,7 +19,7 @@ import fileDialog from 'file-dialog';
 import React from 'react';
 
 import { ISSUE_FILTERS, ISSUES_ACTIONS_MENU, STATUSES } from '../../../../constants/issues';
-import { filtersValuesMap } from '../../../../helpers/issues';
+import { filtersValuesMap, headerMenuItems } from '../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import IssueDetails from './components/issueDetails/issueDetails.container';
 import { IssuesContainer } from './issues.styles';
@@ -90,36 +90,23 @@ export class Issues extends React.PureComponent<IProps, any> {
 			teamspace,
 			model,
 			revision,
+			toggleSortOrder,
 			toggleShowPins,
 			showPins
 		} = this.props;
 
-		return [{
-			...ISSUES_ACTIONS_MENU.PRINT,
-			onClick: () => printIssues(teamspace, model)
-		}, {
-			...ISSUES_ACTIONS_MENU.IMPORT_BCF,
-			onClick: () => {
-				fileDialog({ accept: '.zip,.bcfzip,.bcf' }, (files) => {
-					importBCF(teamspace, model, files[0], revision);
-				});
-			}
-		}, {
-			...ISSUES_ACTIONS_MENU.EXPORT_BCF,
-			onClick: () => exportBCF(teamspace, model)
-		}, {
-			...ISSUES_ACTIONS_MENU.DOWNLOAD,
-			onClick: () => downloadIssues(teamspace, model)
-		}, {
-			...ISSUES_ACTIONS_MENU.SORT_BY_DATE,
-			onClick: () => {
-				this.props.toggleSortOrder();
-			}
-		}, {
-			...ISSUES_ACTIONS_MENU.SHOW_PINS,
-			enabled: this.props.showPins,
-			onClick: () => toggleShowPins(!showPins)
-		}];
+		return headerMenuItems(
+			teamspace,
+			model,
+			revision,
+			printIssues,
+			downloadIssues,
+			importBCF,
+			exportBCF,
+			toggleSortOrder,
+			toggleShowPins,
+			showPins
+		);
 	}
 
 	get toggleSubmodelsMenuItem() {

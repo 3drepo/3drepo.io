@@ -17,9 +17,9 @@
 
 import React from 'react';
 
-import { RISK_FILTERS, RISK_LEVELS,	RISKS_ACTIONS_MENU } from '../../../../constants/risks';
+import { RISK_FILTERS, RISK_LEVELS } from '../../../../constants/risks';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { filtersValuesMap } from '../../../../helpers/risks';
+import { filtersValuesMap, headerMenuItems } from '../../../../helpers/risks';
 import RiskDetails from './components/riskDetails/riskDetails.container';
 import { RisksContainer } from './risks.styles';
 
@@ -72,23 +72,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 
 	get headerMenuItems() {
 		const { printRisks, downloadRisks, toggleShowPins, teamspace, model, showPins } = this.props;
-
-		return [{
-			...RISKS_ACTIONS_MENU.PRINT,
-			onClick: () => printRisks(teamspace, model)
-		}, , {
-			...RISKS_ACTIONS_MENU.SHOW_PINS,
-			enabled: this.props.showPins,
-			onClick: () => toggleShowPins(!showPins)
-		}, {
-			...RISKS_ACTIONS_MENU.DOWNLOAD,
-			onClick: () => downloadRisks(teamspace, model)
-		}, {
-			...RISKS_ACTIONS_MENU.SORT_BY_DATE,
-			onClick: () => {
-				this.props.toggleSortOrder();
-			}
-		}];
+		return headerMenuItems(teamspace, model, printRisks, downloadRisks, toggleShowPins, showPins);
 	}
 
 	get showDefaultHiddenItems() {

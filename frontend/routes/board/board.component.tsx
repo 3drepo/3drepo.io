@@ -18,15 +18,16 @@
 import IconButton from '@material-ui/core/IconButton';
 import Add from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
+import Check from '@material-ui/icons/Check';
 import SearchIcon from '@material-ui/icons/Search';
 import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
 
 import { ROUTES } from '../../constants/routes';
-import { filtersValuesMap as issuesFilters } from '../../helpers/issues';
+import { filtersValuesMap as issuesFilters, headerMenuItems as issueMenuItems } from '../../helpers/issues';
 import { renderWhenTrue } from '../../helpers/rendering';
-import { filtersValuesMap as risksFilters } from '../../helpers/risks';
+import { filtersValuesMap as risksFilters,  headerMenuItems as risksMenuItems  } from '../../helpers/risks';
 import { FILTER_PROPS, FILTERS } from '../../modules/board/board.constants';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import { Loader } from '../components/loader/loader.component';
@@ -57,7 +58,7 @@ import {
 	IconWrapper, MenuList, StyledItemText, StyledListItem
 } from '../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel } from '../components/filterPanel/filterPanel.component';
-import { ISSUE_FILTERS } from '../../constants/issues';
+import { ISSUE_FILTERS, ACTIONS_TYPES } from '../../constants/issues';
 import { RISK_FILTERS } from '../../constants/risks';
 
 interface ICard {
@@ -90,6 +91,7 @@ interface IProps {
 	topicTypes: any[];
 	selectedIssueFilters: any[];
 	selectedRiskFilters: any[];
+	sortOrder: string;
 	fetchData: (boardType, teamspace, project, modelId) => void;
 	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
 	showDialog: (config: any) => void;
@@ -98,8 +100,12 @@ interface IProps {
 	updateIssue: (teamspace, model, issueData: any) => void;
 	updateRisk: (teamspace, model, riskData: any) => void;
 	toggleSearchEnabled: () => void;
-	setIssuesFilters: (filters) => void;
-	setRisksFilters: (filters) => void;
+	setFilters: (filters) => void;
+	importBCF: (teamspace, modelId, file, revision) => void;
+	exportBCF: (eamspace, modelId) => void;
+	printItems: (teamspace, model) => void;
+	downloadItems: (teamspace, model) => void;
+	toggleSortOrder: () => void;
 }
 
 const PANEL_PROPS = {
@@ -122,7 +128,7 @@ export function Board(props: IProps) {
 		}
 
 		return () => {
-			onChangeFilters([]);
+			props.setFilters([]);
 		};
 	}, []);
 
@@ -204,7 +210,7 @@ export function Board(props: IProps) {
 
 	const handleSearchClose = () => {
 		props.toggleSearchEnabled();
-		onChangeFilters([]);
+		props.setFilters([]);
 	};
 
 	const renderTeamspacesSelect = () => {
@@ -320,14 +326,6 @@ export function Board(props: IProps) {
 		});
 	};
 
-	const onChangeFilters = (filters) => {
-		if (isIssuesBoard) {
-			props.setIssuesFilters(filters);
-		} else {
-			props.setRisksFilters(filters);
-		}
-	};
-
 	const getSearchButton = () => {
 		if (props.searchEnabled) {
 			return <IconButton disabled={!project || !modelId} onClick={handleSearchClose}><CancelIcon /></IconButton>;
@@ -335,16 +333,28 @@ export function Board(props: IProps) {
 		return <IconButton disabled={!project || !modelId} onClick={props.toggleSearchEnabled}><SearchIcon /></IconButton>;
 	};
 
-	const MENU = [];
+	const headerMenu = isIssuesBoard ?
+		issueMenuItems(teamspace, modelId, null, props.printItems, props.downloadItems, props.importBCF, props.exportBCF, props.toggleSortOrder) :
+		risksMenuItems(teamspace, modelId, props.printItems, props.downloadItems, props.toggleSortOrder);
+
+	const renderSortIcon = (Icon) => {
+		if (props.sortOrder === 'asc') {
+			return <Icon.ASC IconProps={{ fontSize: 'small' }} /> ;
+		}
+		return <Icon.DESC IconProps={{ fontSize: 'small' }} /> ;
+	};
 
 	const renderActionsMenu = () => (
 		<MenuList>
-			{MENU.map(({ name, Icon, label }) => {
+			{headerMenu.map(({ label, Icon, onClick, enabled, type }, index) => {
 				return (
-					<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
-						<IconWrapper><Icon fontSize="small" /></IconWrapper>
+					<StyledListItem key={index} button onClick={onClick}>
+						<IconWrapper>
+							{type === ACTIONS_TYPES.SORT ?  renderSortIcon(Icon) : <Icon fontSize="small" />}
+						</IconWrapper>
 						<StyledItemText>
-							Test1
+							{label}
+							{enabled && <Check fontSize="small" />}
 						</StyledItemText>
 					</StyledListItem>
 				);
@@ -376,7 +386,7 @@ export function Board(props: IProps) {
 
 		return (
 			<FilterPanel
-				onChange={onChangeFilters}
+				onChange={props.setFilters}
 				filters={filters}
 				selectedFilters={selectedFilters}
 				submenuLeftAligned

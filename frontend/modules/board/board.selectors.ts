@@ -47,6 +47,10 @@ export const selectSearchEnabled = createSelector(
 	selectBoardDomain, (state) => state.searchEnabled
 );
 
+export const selectSortOrder = createSelector(
+	selectBoardDomain, (state) => state.sortOrder
+);
+
 export const selectLanes = createSelector(
 	selectBoardDomain,
 	selectFilteredIssues,

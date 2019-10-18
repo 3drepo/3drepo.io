@@ -19,14 +19,23 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import {
-	selectBoardType, selectFilterProp, selectIsPending, selectLanes, selectSearchEnabled,
-	BoardActions
+	selectBoardType,
+	selectFilterProp,
+	selectIsPending,
+	selectLanes,
+	selectSearchEnabled,
+	selectSortOrder,
+	BoardActions,
 } from '../../modules/board';
 import { DialogActions } from '../../modules/dialog';
-import { selectSelectedFilters as selectSelectedIssueFilters, IssuesActions } from '../../modules/issues';
+import {
+	selectSelectedFilters as selectSelectedIssueFilters,
+	IssuesActions } from '../../modules/issues';
 import { selectJobsList } from '../../modules/jobs';
 import { selectTopicTypes } from '../../modules/model';
-import { selectSelectedFilters as selectSelectedRiskFilters, RisksActions } from '../../modules/risks';
+import {
+	selectSelectedFilters as selectSelectedRiskFilters,
+	RisksActions } from '../../modules/risks';
 import { selectTeamspaces } from '../../modules/teamspaces';
 import { Board } from './board.component';
 
@@ -40,7 +49,8 @@ const mapStateToProps = createStructuredSelector({
 	topicTypes: selectTopicTypes,
 	jobs: selectJobsList,
 	selectedIssueFilters: selectSelectedIssueFilters,
-	selectedRisksFilters: selectSelectedRiskFilters
+	selectedRisksFilters: selectSelectedRiskFilters,
+	sortOrder: selectSortOrder
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -52,8 +62,12 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateIssue: IssuesActions.updateBoardIssue,
 	updateRisk: RisksActions.updateBoardRisk,
 	toggleSearchEnabled: BoardActions.toggleSearchEnabled,
-	setIssuesFilters: IssuesActions.setFilters,
-	setRisksFilters: RisksActions.setFilters
+	setFilters: BoardActions.setFilters,
+	printItems: BoardActions.printItems,
+	downloadItems: BoardActions.downloadItems,
+	importBCF: IssuesActions.importBcf,
+	exportBCF: IssuesActions.exportBcf,
+	toggleSortOrder: BoardActions.toggleSortOrder
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Board);

@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ISSUE_COLORS, PRIORITIES, STATUSES, STATUSES_ICONS, ISSUE_FILTER_RELATED_FIELDS, ISSUE_STATUSES, ISSUE_PRIORITIES } from '../constants/issues';
+import * as fileDialog from 'file-dialog';
+import { ISSUE_COLORS, PRIORITIES, STATUSES, STATUSES_ICONS, ISSUE_FILTER_RELATED_FIELDS, ISSUE_STATUSES, ISSUE_PRIORITIES, ISSUES_ACTIONS_MENU } from '../constants/issues';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 import { UNASSIGNED_JOB, getFilterValues } from '../constants/reportedItems';
@@ -151,4 +152,52 @@ export const filtersValuesMap = (jobs, topicTypes) => {
 			}
 		}]
 	};
+};
+
+export const headerMenuItems = (
+	teamspace,
+	model,
+	revision,
+	printIssues,
+	downloadIssues,
+	importBCF,
+	exportBCF,
+	toggleSortOrder,
+	toggleShowPins?,
+	showPins?
+) => {
+	const items = [
+		{
+			...ISSUES_ACTIONS_MENU.PRINT,
+			onClick: () => printIssues(teamspace, model)
+		}, {
+			...ISSUES_ACTIONS_MENU.IMPORT_BCF,
+			onClick: () => {
+				fileDialog({ accept: '.zip,.bcfzip,.bcf' }, (files) => {
+					importBCF(teamspace, model, files[0], revision);
+				});
+			}
+		}, {
+			...ISSUES_ACTIONS_MENU.EXPORT_BCF,
+			onClick: () => exportBCF(teamspace, model)
+		}, {
+			...ISSUES_ACTIONS_MENU.DOWNLOAD,
+			onClick: () => downloadIssues(teamspace, model)
+		}, {
+			...ISSUES_ACTIONS_MENU.SORT_BY_DATE,
+			onClick: () => {
+				toggleSortOrder();
+			}
+		}
+	];
+
+	const togglePinItem = {
+		...ISSUES_ACTIONS_MENU.SHOW_PINS,
+		enabled: showPins,
+		onClick: () => toggleShowPins(!showPins)
+	};
+
+	const menuItems = showPins ? [...items, {...togglePinItem}] : [...items];
+
+	return menuItems;
 };

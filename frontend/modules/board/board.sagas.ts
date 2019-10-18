@@ -25,7 +25,7 @@ import { RisksActions, RisksTypes } from '../risks';
 import { selectTeamspaces, TeamspacesActions } from '../teamspaces';
 import { selectUsers, UserManagementActions, UserManagementTypes } from '../userManagement';
 import { BoardActions, BoardTypes } from './board.redux';
-import { selectFetchedTeamspace } from './board.selectors';
+import { selectBoardType, selectFetchedTeamspace } from './board.selectors';
 
 function* fetchData({ boardType, teamspace, project, modelId }) {
 	try {
@@ -79,7 +79,66 @@ function* fetchCardData({ boardType, teamspace, modelId, cardId }) {
 	}
 }
 
+function* setFilters({ filters }) {
+	try {
+		const boardType = yield select(selectBoardType);
+
+		if (boardType === 'issues') {
+			yield put(IssuesActions.setFilters(filters));
+		} else {
+			yield put(RisksActions.setFilters(filters));
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('fetch', 'card data', error));
+	}
+}
+
+function* printItems({ teamspace, modelId }) {
+	try {
+		const boardType = yield select(selectBoardType);
+
+		if (boardType === 'issues') {
+			yield put(IssuesActions.printIssues(teamspace, modelId));
+		} else {
+			yield put(RisksActions.printRisks(teamspace, modelId));
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('fetch', 'card data', error));
+	}
+}
+
+function* downloadItems({ teamspace, modelId }) {
+	try {
+		const boardType = yield select(selectBoardType);
+
+		if (boardType === 'issues') {
+			yield put(IssuesActions.downloadIssues(teamspace, modelId));
+		} else {
+			yield put(RisksActions.downloadRisks(teamspace, modelId));
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('fetch', 'card data', error));
+	}
+}
+
+function* toggleSortOrder() {
+	try {
+		const boardType = yield select(selectBoardType);
+
+		if (boardType === 'issues') {
+			yield put(IssuesActions.downloadIssues(teamspace, modelId));
+		} else {
+			yield put(RisksActions.downloadRisks(teamspace, modelId));
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('fetch', 'card data', error));
+	}
+}
+
 export default function* BoardSaga() {
 	yield takeLatest(BoardTypes.FETCH_DATA, fetchData);
 	yield takeLatest(BoardTypes.FETCH_CARD_DATA, fetchCardData);
+	yield takeLatest(BoardTypes.SET_FILTERS, setFilters);
+	yield takeLatest(BoardTypes.PRINT_ITEMS, printItems);
+	yield takeLatest(BoardTypes.DOWNLOAD_ITEMS, downloadItems);
 }

@@ -25,7 +25,11 @@ export const { Types: BoardTypes, Creators: BoardActions } = createActions({
 	setFilterProp: ['filterProp'],
 	setBoardType: ['boardType'],
 	fetchDataSuccess: ['teamspace'],
-	toggleSearchEnabled: []
+	toggleSearchEnabled: [],
+	setFilters: ['filters'],
+	printItems: ['teamspace', 'modelId'],
+	downloadItems: ['teamspace', 'modelId'],
+	toggleSortOrder: [],
 }, { prefix: 'BOARD/' });
 
 export const INITIAL_STATE = {
@@ -34,7 +38,8 @@ export const INITIAL_STATE = {
 	filterProp: FILTER_PROPS.status.value,
 	lanes: [],
 	teamspace: null,
-	searchEnabled: false
+	searchEnabled: false,
+	sortOrder: 'desc',
 };
 
 const setIsPending = (state = INITIAL_STATE, { isPending }) => {
@@ -57,10 +62,17 @@ const toggleSearchEnabled = (state = INITIAL_STATE) => {
 	return { ...state, searchEnabled: !state.searchEnabled };
 };
 
+const toggleSortOrder = (state = INITIAL_STATE) => {
+	return {
+		...state, sortOrder: state.sortOrder === 'asc' ? 'desc' : 'asc'
+	};
+};
+
 export const reducer = createReducer({...INITIAL_STATE}, {
 	[BoardTypes.SET_IS_PENDING]: setIsPending,
 	[BoardTypes.SET_FILTER_PROP]: setFilterProp,
 	[BoardTypes.SET_BOARD_TYPE]: setBoardType,
 	[BoardTypes.FETCH_DATA_SUCCESS]: fetchDataSuccess,
-	[BoardTypes.TOGGLE_SEARCH_ENABLED]: toggleSearchEnabled
+	[BoardTypes.TOGGLE_SEARCH_ENABLED]: toggleSearchEnabled,
+	[BoardTypes.TOGGLE_SORT_ORDER]: toggleSortOrder
 });

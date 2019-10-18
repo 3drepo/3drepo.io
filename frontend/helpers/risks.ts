@@ -26,7 +26,8 @@ import {
 	RISK_FILTER_RELATED_FIELDS,
 	RISK_CATEGORIES,
 	LEVELS_OF_RISK,
-	RISK_MITIGATION_STATUSES
+	RISK_MITIGATION_STATUSES,
+	RISKS_ACTIONS_MENU
 } from '../constants/risks';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
@@ -218,4 +219,31 @@ export const filtersValuesMap = (jobs) => {
 		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
 		[RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK)
 	};
-}
+};
+
+export const headerMenuItems = (
+		teamspace, model, printRisks, downloadRisks, toggleSortOrder, toggleShowPins?, showPins?
+	) => {
+	const items = [{
+		...RISKS_ACTIONS_MENU.PRINT,
+		onClick: () => printRisks(teamspace, model)
+	}, {
+		...RISKS_ACTIONS_MENU.DOWNLOAD,
+		onClick: () => downloadRisks(teamspace, model)
+	}, {
+		...RISKS_ACTIONS_MENU.SORT_BY_DATE,
+		onClick: () => {
+			toggleSortOrder();
+		}
+	}];
+
+	const togglePinItem = {
+		...RISKS_ACTIONS_MENU.SHOW_PINS,
+		enabled: showPins,
+		onClick: () => toggleShowPins(!showPins)
+	};
+
+	const menuItems = showPins ? [...items, {...togglePinItem}] : [...items];
+
+	return menuItems;
+};
