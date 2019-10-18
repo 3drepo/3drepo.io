@@ -18,6 +18,10 @@
 
 const db = require("../handler/db");
 const { omit } = require("lodash");
+const responseCodes = require("../response_codes.js");
+const C = require("../constants");
+
+
 
 const getCollection = async () => {
 	return await db.getCollection("admin", "invitations");
@@ -29,7 +33,7 @@ invitations.create = async (email, teamSpace, job, permissions = []) => {
 	// 1 - find if there is already and invitation with that email
 	// 2 - if there is update the invitation with the new teamspace data
 	// 2.5 - if there is not, create an entry with that email and job/permission
-	// 3 - send an email invitaion
+	// 3 - send an email invitation
 	// 4 - return the invitation for that teamspace ({email, job, permissions:[]})
 	email = email.toLowerCase();
 	const coll = await getCollection();
@@ -68,8 +72,12 @@ invitations.removeTeamspaceFromInvitation = async (email, teamSpace) => {
 	}
 };
 
-invitations.setJob = (email, teamSpace, job) => {
-
+invitations.setJob = async (email, teamspace, job) => {
+	const coll = await getCollection();
+	const invitation = await coll.findOne({_id:email});
+	invitation.teamSpaces[teamspace].job = job;
+	await coll.updateOne({_id:email}, { $set: invitation });
+	return true;
 };
 
 invitations.setTeamspacePermission = (email, teamSpace, permission) => {
@@ -82,6 +90,18 @@ invitations.setProjectPermission = (email, teamSpace, project, permission) => {
 
 invitations.setModelPermission = (email, teamSpace, model, permission) => {
 
+};
+
+invitations.teamspaceInvitationCheck = async (email, teamspace) => {
+	const queryField = "teamSpaces." + teamspace ;
+	const coll = await getCollection();
+	const invitation = await coll.findOne({_id:email, [queryField]: {$exists:true}}, {_id: true});
+
+	if (!invitation) {
+		throw responseCodes.USER_NOT_FOUND;
+	}
+
+	return true;
 };
 
 invitations.unpack = async (user) => {
@@ -117,6 +137,10 @@ invitations.getTeamspaceInvitationsAsUsers = async (teamspace) => {
 		const job = teamspaceData.job;
 		return {user, isInvitation: true, isCurrentUser: false, permissions, job};
 	});
+};
+
+invitations.isInvitation = (user) => {
+	return C.EMAIL_REGEXP.test(user);
 };
 
 module.exports = invitations;

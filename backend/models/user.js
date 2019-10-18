@@ -117,7 +117,7 @@ schema.statics.authenticate =  async function (logger, username, password) {
 	let user = null;
 	let authDB = null;
 	try {
-		if (C.EMAIL_REGEXP.test(username)) { // if the submited username is the email
+		if (Invitations.isInvitation(username)) { // if the submited username is the email
 			user = await this.findByEmail(username);
 			if (!user) {
 				throw ({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
@@ -1126,7 +1126,7 @@ schema.methods.removeTeamMember = function (username, cascadeRemove) {
 		return Promise.reject(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF);
 	}
 
-	if (C.EMAIL_REGEXP.test(username)) {
+	if (Invitations.isInvitation(username)) {
 		return Invitations.removeTeamspaceFromInvitation(username, this.user);
 	}
 
@@ -1293,6 +1293,10 @@ schema.statics.findUsersInTeamspace = function (teamspace, fields) {
 };
 
 schema.statics.teamspaceMemberCheck = function (teamspace, user) {
+	if (Invitations.isInvitation(user)) {
+		return Invitations.teamspaceInvitationCheck(user, teamspace);
+	}
+
 	return User.findByUserName(user).then((userEntry) => {
 		if (!userEntry) {
 			return Promise.reject(responseCodes.USER_NOT_FOUND);
