@@ -81,6 +81,8 @@ export const AddButton = styled(Button).attrs({
 
 export const TitleActions = styled.div`
 	display: flex;
+	right: -15px;
+	position: relative;
 `;
 
 export const TypesItem = styled(MenuItem)``;
@@ -118,10 +120,10 @@ export const TitleContainer = styled.div`
 			display: flex;
 			align-items: center;
 		}
+	}
 
-		svg {
-			color: ${COLOR.WHITE_87};
-		}
+	svg {
+		color: ${COLOR.WHITE_87};
 	}
 `;
 

@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ISSUE_COLORS, PRIORITIES, STATUSES, STATUSES_ICONS } from '../constants/issues';
+import { ISSUE_COLORS, PRIORITIES, STATUSES, STATUSES_ICONS, ISSUE_FILTER_RELATED_FIELDS, ISSUE_STATUSES, ISSUE_PRIORITIES } from '../constants/issues';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
+import { UNASSIGNED_JOB, getFilterValues } from '../constants/reportedItems';
 
 export const prepareIssue = (issue, jobs = []) => {
 	const preparedIssue = {...issue};
@@ -123,4 +124,31 @@ export const canComment = (issueData, userJob, permissions, currentUser) => {
 		canCommentIssue(permissions);
 
 	return ableToComment && isNotClosed;
+};
+
+export const filtersValuesMap = (jobs, topicTypes) => {
+	const jobsList = [...jobs, UNASSIGNED_JOB];
+
+	return {
+		[ISSUE_FILTER_RELATED_FIELDS.STATUS]: getFilterValues(ISSUE_STATUSES),
+		[ISSUE_FILTER_RELATED_FIELDS.CREATED_BY]: getFilterValues(jobs),
+		[ISSUE_FILTER_RELATED_FIELDS.ASSIGNED_TO]: getFilterValues(jobsList),
+		[ISSUE_FILTER_RELATED_FIELDS.PRIORITY]: getFilterValues(ISSUE_PRIORITIES),
+		[ISSUE_FILTER_RELATED_FIELDS.TYPE]: getFilterValues(topicTypes),
+		[ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE]: [{
+			label: 'From',
+			value: {
+				label: 'From',
+				value: 'from',
+				date: null
+			}
+		}, {
+			label: 'To',
+			value: {
+				label: 'To',
+				value: 'to',
+				date: null
+			}
+		}]
+	};
 };

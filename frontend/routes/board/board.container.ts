@@ -18,10 +18,15 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectBoardType, selectFilterProp, selectIsPending, selectLanes, BoardActions } from '../../modules/board';
+import {
+	selectBoardType, selectFilterProp, selectIsPending, selectLanes, selectSearchEnabled,
+	BoardActions
+} from '../../modules/board';
 import { DialogActions } from '../../modules/dialog';
-import { IssuesActions } from '../../modules/issues';
-import { RisksActions } from '../../modules/risks';
+import { selectSelectedFilters as selectSelectedIssueFilters, IssuesActions } from '../../modules/issues';
+import { selectJobsList } from '../../modules/jobs';
+import { selectTopicTypes } from '../../modules/model';
+import { selectSelectedFilters as selectSelectedRiskFilters, RisksActions } from '../../modules/risks';
 import { selectTeamspaces } from '../../modules/teamspaces';
 import { Board } from './board.component';
 
@@ -30,7 +35,12 @@ const mapStateToProps = createStructuredSelector({
 	lanes: selectLanes,
 	isPending: selectIsPending,
 	filterProp: selectFilterProp,
-	bpardType: selectBoardType
+	bpardType: selectBoardType,
+	searchEnabled: selectSearchEnabled,
+	topicTypes: selectTopicTypes,
+	jobs: selectJobsList,
+	selectedIssueFilters: selectSelectedIssueFilters,
+	selectedRisksFilters: selectSelectedRiskFilters
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -40,7 +50,10 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setBoardType: BoardActions.setBoardType,
 	showDialog: DialogActions.showDialog,
 	updateIssue: IssuesActions.updateBoardIssue,
-	updateRisk: RisksActions.updateBoardRisk
+	updateRisk: RisksActions.updateBoardRisk,
+	toggleSearchEnabled: BoardActions.toggleSearchEnabled,
+	setIssuesFilters: IssuesActions.setFilters,
+	setRisksFilters: RisksActions.setFilters
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Board);

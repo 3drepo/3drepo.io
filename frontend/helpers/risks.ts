@@ -22,10 +22,15 @@ import {
 	RISK_LEVELS,
 	RISK_LEVELS_COLOURS,
 	RISK_LEVELS_ICONS,
-	RISK_LIKELIHOODS
+	RISK_LIKELIHOODS,
+	RISK_FILTER_RELATED_FIELDS,
+	RISK_CATEGORIES,
+	LEVELS_OF_RISK,
+	RISK_MITIGATION_STATUSES
 } from '../constants/risks';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
+import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 
 export const prepareRisk = (risk, jobs = []) => {
 	const preparedRisk = {...risk};
@@ -196,3 +201,21 @@ export const canComment = (riskData, userJob, permissions, currentUser) => {
 
 	return ableToComment;
 };
+
+export const filtersValuesMap = (jobs) => {
+	const jobsList = [...jobs, UNASSIGNED_JOB];
+
+	return {
+		[RISK_FILTER_RELATED_FIELDS.CATEGORY]: getFilterValues(RISK_CATEGORIES),
+		[RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS]: getFilterValues(RISK_MITIGATION_STATUSES),
+		[RISK_FILTER_RELATED_FIELDS.CREATED_BY]: getFilterValues(jobs),
+		[RISK_FILTER_RELATED_FIELDS.RISK_OWNER]: getFilterValues(jobsList),
+		[RISK_FILTER_RELATED_FIELDS.RISK_CONSEQUENCE]: getFilterValues(RISK_CONSEQUENCES),
+		[RISK_FILTER_RELATED_FIELDS.RISK_LIKELIHOOD]: getFilterValues(RISK_LIKELIHOODS),
+		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_CONSEQUENCE]: getFilterValues(RISK_CONSEQUENCES),
+		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LIKELIHOOD]: getFilterValues(RISK_LIKELIHOODS),
+		[RISK_FILTER_RELATED_FIELDS.LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
+		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
+		[RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK)
+	};
+}

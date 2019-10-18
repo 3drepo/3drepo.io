@@ -15,21 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as queryString from 'query-string';
 import React from 'react';
 
-import {
-	LEVELS_OF_RISK,
-	RISK_CATEGORIES,
-	RISK_CONSEQUENCES,
-	RISK_FILTER_RELATED_FIELDS,
-	RISK_FILTERS,
-	RISK_LEVELS,
-	RISK_LIKELIHOODS,
-	RISK_MITIGATION_STATUSES,
-	RISKS_ACTIONS_MENU
-} from '../../../../constants/risks';
+import { RISK_FILTERS, RISK_LEVELS,	RISKS_ACTIONS_MENU } from '../../../../constants/risks';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { filtersValuesMap } from '../../../../helpers/risks';
 import RiskDetails from './components/riskDetails/riskDetails.container';
 import { RisksContainer } from './risks.styles';
 
@@ -71,35 +61,9 @@ interface IProps {
 	toggleSortOrder: () => void;
 	setFilters: (filters) => void;
 }
-
-const UNASSIGNED_JOB = {
-	name: 'Unassigned',
-	value: ''
-};
-
 export class Risks extends React.PureComponent<IProps, any> {
-	get jobsList() {
-		return [...this.props.jobs, UNASSIGNED_JOB];
-	}
-
-	get filtersValuesMap() {
-		return {
-			[RISK_FILTER_RELATED_FIELDS.CATEGORY]: this.getFilterValues(RISK_CATEGORIES),
-			[RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS]: this.getFilterValues(RISK_MITIGATION_STATUSES),
-			[RISK_FILTER_RELATED_FIELDS.CREATED_BY]: this.getFilterValues(this.props.jobs),
-			[RISK_FILTER_RELATED_FIELDS.RISK_OWNER]: this.getFilterValues(this.jobsList),
-			[RISK_FILTER_RELATED_FIELDS.RISK_CONSEQUENCE]: this.getFilterValues(RISK_CONSEQUENCES),
-			[RISK_FILTER_RELATED_FIELDS.RISK_LIKELIHOOD]: this.getFilterValues(RISK_LIKELIHOODS),
-			[RISK_FILTER_RELATED_FIELDS.RESIDUAL_CONSEQUENCE]: this.getFilterValues(RISK_CONSEQUENCES),
-			[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LIKELIHOOD]: this.getFilterValues(RISK_LIKELIHOODS),
-			[RISK_FILTER_RELATED_FIELDS.LEVEL_OF_RISK]: this.getFilterValues(LEVELS_OF_RISK),
-			[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LEVEL_OF_RISK]: this.getFilterValues(LEVELS_OF_RISK),
-			[RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK]: this.getFilterValues(LEVELS_OF_RISK)
-		};
-	}
-
 	get filters() {
-		const filterValuesMap = this.filtersValuesMap;
+		const filterValuesMap = filtersValuesMap(this.props.jobs);
 		return RISK_FILTERS.map((riskFilter) => {
 			riskFilter.values = filterValuesMap[riskFilter.relatedField];
 			return riskFilter;
@@ -162,15 +126,6 @@ export class Risks extends React.PureComponent<IProps, any> {
 
 	public setActiveRisk = (item) => {
 		this.props.setActiveRisk(item, this.props.revision);
-	}
-
-	public getFilterValues(property) {
-		return property.map(({value, name}) => {
-			return {
-				label: name,
-				value
-			};
-		});
 	}
 
 	public handleToggleFilters = (searchEnabled) => {

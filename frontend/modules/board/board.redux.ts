@@ -24,7 +24,8 @@ export const { Types: BoardTypes, Creators: BoardActions } = createActions({
 	setIsPending: ['isPending'],
 	setFilterProp: ['filterProp'],
 	setBoardType: ['boardType'],
-	fetchDataSuccess: ['teamspace']
+	fetchDataSuccess: ['teamspace'],
+	toggleSearchEnabled: []
 }, { prefix: 'BOARD/' });
 
 export const INITIAL_STATE = {
@@ -32,7 +33,8 @@ export const INITIAL_STATE = {
 	boardType: BOARD_TYPES.ISSUES,
 	filterProp: FILTER_PROPS.status.value,
 	lanes: [],
-	teamspace: null
+	teamspace: null,
+	searchEnabled: false
 };
 
 const setIsPending = (state = INITIAL_STATE, { isPending }) => {
@@ -51,9 +53,14 @@ const fetchDataSuccess = (state = INITIAL_STATE, { teamspace }) => {
 	return { ...state, teamspace };
 };
 
+const toggleSearchEnabled = (state = INITIAL_STATE) => {
+	return { ...state, searchEnabled: !state.searchEnabled };
+};
+
 export const reducer = createReducer({...INITIAL_STATE}, {
 	[BoardTypes.SET_IS_PENDING]: setIsPending,
 	[BoardTypes.SET_FILTER_PROP]: setFilterProp,
 	[BoardTypes.SET_BOARD_TYPE]: setBoardType,
-	[BoardTypes.FETCH_DATA_SUCCESS]: fetchDataSuccess
+	[BoardTypes.FETCH_DATA_SUCCESS]: fetchDataSuccess,
+	[BoardTypes.TOGGLE_SEARCH_ENABLED]: toggleSearchEnabled
 });

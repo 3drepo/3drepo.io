@@ -18,10 +18,10 @@
 import { groupBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { PRIORITIES, STATUSES } from '../../constants/issues';
-import { selectIssues } from '../issues';
+import { selectIssues, selectFilteredIssues } from '../issues';
 import { selectJobs } from '../jobs';
 import { selectTopicTypes } from '../model';
-import { selectRisks } from '../risks';
+import { selectRisks, selectFilteredRisks } from '../risks';
 import { selectUsers } from '../userManagement';
 import { BOARD_TYPES, FILTER_PROPS, NOT_DEFINED_PROP } from './board.constants';
 
@@ -43,10 +43,14 @@ export const selectFetchedTeamspace = createSelector(
 	selectBoardDomain, (state) => state.teamspace
 );
 
+export const selectSearchEnabled = createSelector(
+	selectBoardDomain, (state) => state.searchEnabled
+);
+
 export const selectLanes = createSelector(
 	selectBoardDomain,
-	selectIssues,
-	selectRisks,
+	selectFilteredIssues,
+	selectFilteredRisks,
 	selectTopicTypes,
 	selectJobs,
 	selectUsers,

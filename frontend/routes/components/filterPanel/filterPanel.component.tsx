@@ -134,7 +134,7 @@ const getSelectedFilterLabel = (filter) => {
 const mapFiltersToSuggestions = (filters, selectedFilters) => {
 	const selectedFiltersMap = keyBy(selectedFilters, ({ label, value }) => `${label}:${value.label}`);
 	return filters.reduce((suggestions, currentFilter) => {
-		if (currentFilter.type !== FILTER_TYPES.DATE) {
+		if (currentFilter.type !== DATA_TYPES.DATE && currentFilter.values) {
 			for (let index = 0; index < currentFilter.values.length; index++) {
 				const value = currentFilter.values[index];
 				const name = `${currentFilter.label}:${value.label}`;
@@ -162,6 +162,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 	public static defaultProps = {
 		filters: [],
+		selectedFilters: [],
 		autoFocus: true
 	};
 	public state = {

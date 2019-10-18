@@ -21,7 +21,7 @@ import { SelectContainer, TitleActions, TitleContainer, TypesItem, TypesSelect }
 
 const types = ['issues', 'risks'];
 
-export const BoardTitleComponent = ({type, handleTypeChange}) => (
+export const BoardTitleComponent = ({type, handleTypeChange, renderActions}) => (
 	<TitleContainer>
 		<SelectContainer>
 			<TypesSelect value={type} onChange={handleTypeChange}>
@@ -29,8 +29,7 @@ export const BoardTitleComponent = ({type, handleTypeChange}) => (
 			</TypesSelect>
 		</SelectContainer>
 		<TitleActions>
-			<div>Search</div>
-			<div>Menu</div>
+			{renderActions()}
 		</TitleActions>
 	</TitleContainer>
 );

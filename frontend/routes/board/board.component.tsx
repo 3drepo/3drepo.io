@@ -15,15 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import IconButton from '@material-ui/core/IconButton';
 import Add from '@material-ui/icons/Add';
+import CancelIcon from '@material-ui/icons/Cancel';
+import SearchIcon from '@material-ui/icons/Search';
 import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
 
 import { ROUTES } from '../../constants/routes';
+import { filtersValuesMap as issuesFilters } from '../../helpers/issues';
 import { renderWhenTrue } from '../../helpers/rendering';
-import { FILTERS, FILTER_PROPS } from '../../modules/board/board.constants';
+import { filtersValuesMap as risksFilters } from '../../helpers/risks';
+import { FILTER_PROPS, FILTERS } from '../../modules/board/board.constants';
+import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import { Loader } from '../components/loader/loader.component';
+import { MenuButton } from '../components/menuButton/menuButton.component';
 import { Panel } from '../components/panel/panel.component';
 import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
 import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
@@ -46,6 +53,12 @@ import {
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
 import { ConfigSelectComponent } from './components/configSelect.component';
+import {
+	IconWrapper, MenuList, StyledItemText, StyledListItem
+} from '../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { FilterPanel } from '../components/filterPanel/filterPanel.component';
+import { ISSUE_FILTERS } from '../../constants/issues';
+import { RISK_FILTERS } from '../../constants/risks';
 
 interface ICard {
 	id: string;
@@ -72,6 +85,11 @@ interface IProps {
 	isPending: boolean;
 	filterProp: string;
 	boardType: string;
+	searchEnabled: boolean;
+	jobs: any[];
+	topicTypes: any[];
+	selectedIssueFilters: any[];
+	selectedRiskFilters: any[];
 	fetchData: (boardType, teamspace, project, modelId) => void;
 	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
 	showDialog: (config: any) => void;
@@ -79,6 +97,9 @@ interface IProps {
 	setBoardType: (boardType: string) => void;
 	updateIssue: (teamspace, model, issueData: any) => void;
 	updateRisk: (teamspace, model, riskData: any) => void;
+	toggleSearchEnabled: () => void;
+	setIssuesFilters: (filters) => void;
+	setRisksFilters: (filters) => void;
 }
 
 const PANEL_PROPS = {
@@ -92,14 +113,17 @@ export function Board(props: IProps) {
 	const projectParam = `${project ? `/${project}` : ''}`;
 	const modelParam = `${modelId ? `/${modelId}` : ''}`;
 	const isIssuesBoard = type === 'issues';
-	const boardData = {
-		lanes: props.lanes
-	};
+	const boardData = { lanes: props.lanes };
+	const selectedFilters = isIssuesBoard ? props.selectedIssueFilters : props.selectedRiskFilters;
 
 	useEffect(() => {
 		if (type !== props.boardType) {
 			props.setBoardType(type);
 		}
+
+		return () => {
+			onChangeFilters([]);
+		};
 	}, []);
 
 	useEffect(() => {
@@ -127,6 +151,12 @@ export function Board(props: IProps) {
 		props.history.push(url);
 	};
 
+	const handleFilterClick = (filterProp) => {
+		if (props.filterProp !== filterProp) {
+			props.setFilterProp(filterProp);
+		}
+	};
+
 	const handleOpenDialog = useCallback((cardId?, metadata?, laneId?) => {
 		if (cardId) {
 			props.fetchCardData(type, teamspace, modelId, cardId);
@@ -142,6 +172,7 @@ export function Board(props: IProps) {
 				<TemplateComponent {...formProps} />
 			</FormWrapper>
 		);
+
 		const config = {
 			title: `${titlePrefix} ${dataType}`,
 			template: Form,
@@ -169,6 +200,11 @@ export function Board(props: IProps) {
 		} else {
 			props.updateRisk(teamspace, modelId, { _id: cardId, ...updatedProp });
 		}
+	};
+
+	const handleSearchClose = () => {
+		props.toggleSearchEnabled();
+		onChangeFilters([]);
 	};
 
 	const renderTeamspacesSelect = () => {
@@ -207,12 +243,6 @@ export function Board(props: IProps) {
 		</AddButton>
 	);
 
-	const handleFilterClick = (filterProp) => {
-		if (props.filterProp !== filterProp) {
-			props.setFilterProp(filterProp);
-		}
-	};
-
 	const renderFilters = () => (
 		<Filters>
 			{ FILTERS.map((filter) => (
@@ -226,8 +256,6 @@ export function Board(props: IProps) {
 			)) }
 		</Filters>
 	);
-
-	const BoardTitle = (<BoardTitleComponent type={type} handleTypeChange={handleTypeChange} />);
 
 	const BoardCard = (cardProps: any) => {
 		return (
@@ -282,9 +310,83 @@ export function Board(props: IProps) {
 		);
 	});
 
+	const filterItems = () => {
+		const filterValuesMap = isIssuesBoard ? issuesFilters(props.jobs, props.topicTypes) : risksFilters(props.jobs);
+		const FILTER_ITEMS = isIssuesBoard ? ISSUE_FILTERS : RISK_FILTERS;
+
+		return FILTER_ITEMS.map((issueFilter) => {
+			issueFilter.values = filterValuesMap[issueFilter.relatedField];
+			return issueFilter;
+		});
+	};
+
+	const onChangeFilters = (filters) => {
+		if (isIssuesBoard) {
+			props.setIssuesFilters(filters);
+		} else {
+			props.setRisksFilters(filters);
+		}
+	};
+
+	const getSearchButton = () => {
+		if (props.searchEnabled) {
+			return <IconButton disabled={!project || !modelId} onClick={handleSearchClose}><CancelIcon /></IconButton>;
+		}
+		return <IconButton disabled={!project || !modelId} onClick={props.toggleSearchEnabled}><SearchIcon /></IconButton>;
+	};
+
+	const MENU = [];
+
+	const renderActionsMenu = () => (
+		<MenuList>
+			{MENU.map(({ name, Icon, label }) => {
+				return (
+					<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+						<IconWrapper><Icon fontSize="small" /></IconWrapper>
+						<StyledItemText>
+							Test1
+						</StyledItemText>
+					</StyledListItem>
+				);
+			})}
+		</MenuList>
+	);
+
+	const getMenuButton = () => (
+		<ButtonMenu
+			renderButton={MenuButton}
+			renderContent={renderActionsMenu}
+			PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+			PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
+			ButtonProps={{ disabled: !project || !modelId }}
+		/>
+	);
+
+	const renderActions = () => {
+		return (
+			<>
+				{getSearchButton()}
+				{getMenuButton()}
+			</>
+		);
+	};
+
+	const renderSearchPanel = renderWhenTrue(() => {
+		const filters = filterItems();
+
+		return (
+			<FilterPanel onChange={onChangeFilters} filters={filters} selectedFilters={selectedFilters} />
+		);
+	});
+
+	const BoardTitle = (
+		<BoardTitleComponent type={type} handleTypeChange={handleTypeChange} renderActions={renderActions} />
+	);
+
 	return (
 		<Panel {...PANEL_PROPS} title={BoardTitle}>
 			<Container>
+				{renderSearchPanel(props.searchEnabled)}
 				<Config>
 					<DataConfig>
 						{renderTeamspacesSelect()}
