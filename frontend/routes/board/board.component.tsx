@@ -375,7 +375,12 @@ export function Board(props: IProps) {
 		const filters = filterItems();
 
 		return (
-			<FilterPanel onChange={onChangeFilters} filters={filters} selectedFilters={selectedFilters} />
+			<FilterPanel
+				onChange={onChangeFilters}
+				filters={filters}
+				selectedFilters={selectedFilters}
+				submenuLeftAligned
+			/>
 		);
 	});
 
