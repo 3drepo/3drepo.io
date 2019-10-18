@@ -157,7 +157,7 @@ export function Board(props: IProps) {
 		};
 
 		props.showDialog(config);
-	}, [type, props.fetchCardData]);
+	}, [type, props.fetchCardData, project, teamspace, modelId]);
 
 	const handleCardMove = (fromLaneId, toLaneId, cardId) => {
 		if (isIssuesBoard) {

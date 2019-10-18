@@ -17,10 +17,12 @@
 
 import { get, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
+import uuid from 'uuidv4';
 import * as Dialogs from '../../routes/components/dialogContainer/components';
 import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
 
 interface IDialogConfig {
+	id: number;
 	title: string;
 	template?: JSX.Element;
 	content?: string;
@@ -29,29 +31,35 @@ interface IDialogConfig {
 	onCancel?: () => void;
 }
 
+interface IDialogState {
+	dialogs: IDialogConfig[];
+}
+
 export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showDialog: ['config'],
 	showEndpointErrorDialog: ['method', 'dataType', 'error'],
 	showErrorDialog: ['method', 'dataType', 'message', 'status'],
 	showConfirmDialog: ['config'],
 	showRevisionsDialog: ['config'],
-	hideDialog: [],
+	hideDialog: ['dialogId'],
 	setPendingState: ['isPending'],
 	showScreenshotDialog: ['config'],
 	showNewUpdateDialog: ['config']
 }, { prefix: 'DIALOG/' });
 
 export const INITIAL_STATE = {
-	isOpen: false,
-	isPending: false,
-	config: {},
-	data: null,
-	muteNotifications: false
-};
+	dialogs: []
+} as IDialogState;
 
 const showDialog = (state = INITIAL_STATE, action) => {
 	const config = omit(action.config, 'data') as IDialogConfig;
-	return { ...state, config, data: action.config.data, isOpen: true };
+	const dialog = {
+		id: uuid(),
+		config,
+		data: action.config.data,
+	};
+	const dialogs = [...state.dialogs, dialog];
+	return { ...state, dialogs };
 };
 
 const showErrorDialog = (state = INITIAL_STATE, action) => {
@@ -124,12 +132,9 @@ const showNewUpdateDialog = (state = INITIAL_STATE, action) => {
 	return showDialog(state, { config });
 };
 
-const hideDialog = (state = INITIAL_STATE) => {
-	return { ...state, isOpen: false, isPending: false };
-};
-
-const setPendingState = (state = INITIAL_STATE, {isPending}) => {
-	return { ...state, isPending };
+const hideDialog = (state = INITIAL_STATE, { dialogId }) => {
+	const dialogs = state.dialogs.filter(({ id }) => (id !== dialogId));
+	return { ...state, dialogs };
 };
 
 export const reducer = createReducer({...INITIAL_STATE}, {
@@ -139,7 +144,6 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.SHOW_ENDPOINT_ERROR_DIALOG]: showEndpointErrorDialog,
 	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
 	[DialogTypes.SHOW_REVISIONS_DIALOG]: showRevisionsDialog,
-	[DialogTypes.SET_PENDING_STATE]: setPendingState,
 	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog,
 	[DialogTypes.SHOW_NEW_UPDATE_DIALOG]: showNewUpdateDialog
 });

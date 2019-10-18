@@ -88,6 +88,7 @@
     "simplebar": "4.0.0",
     "simplebar-react": "1.0.0",
     "socket.io-client": "2.0.4",
+    "uuidv4": "^5.0.1",
     "worker-loader": "2.0.0",
     "yup": "0.26.10",
     "zxcvbn": "4.4.2"
