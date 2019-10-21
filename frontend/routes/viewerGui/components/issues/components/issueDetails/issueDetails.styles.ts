@@ -20,7 +20,6 @@ import { LogList as LogListBase } from '../../../../../components/logList/logLis
 import { PreviewDetails as PreviewDetailsBase } from '../../../previewDetails/previewDetails.component';
 
 export const Container = styled.div``;
-
 export const LogList = styled(LogListBase)``;
 export const PreviewDetails = styled(PreviewDetailsBase)``;
 
@@ -43,7 +42,9 @@ export const HorizontalView = styled.div`
 		overflow: auto;
 	}
 
-	${LogList}:before {
-		box-shadow: none;
+	${LogList} {
+		:before {
+			box-shadow: none;
+		}
 	}
 `;

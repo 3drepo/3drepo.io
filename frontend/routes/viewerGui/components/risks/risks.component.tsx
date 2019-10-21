@@ -71,8 +71,8 @@ export class Risks extends React.PureComponent<IProps, any> {
 	}
 
 	get headerMenuItems() {
-		const { printRisks, downloadRisks, toggleShowPins, teamspace, model, showPins } = this.props;
-		return getHeaderMenuItems(teamspace, model, printRisks, downloadRisks, toggleShowPins, showPins);
+		const { printRisks, downloadRisks, toggleSortOrder, toggleShowPins, teamspace, model, showPins } = this.props;
+		return getHeaderMenuItems(teamspace, model, printRisks, downloadRisks, toggleSortOrder, toggleShowPins, showPins);
 	}
 
 	get showDefaultHiddenItems() {
