@@ -78,6 +78,7 @@ function* fetchIssue({teamspace, modelId, issueId}) {
 		const {data} = yield API.getIssue(teamspace, modelId, issueId);
 		data.comments = yield prepareComments(data.comments);
 		data.resources = prepareResources(teamspace, modelId, data.resources);
+
 		yield put(IssuesActions.fetchIssueSuccess(data));
 	} catch (error) {
 		yield put(IssuesActions.fetchIssueFailure());

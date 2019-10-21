@@ -174,7 +174,7 @@ export function Board(props: IProps) {
 
 		const TemplateComponent = isIssuesBoard ? IssueDetails : RiskDetails;
 		const dataType = isIssuesBoard ? 'issue' : 'risk';
-		const size = cardId && metadata.commentCount ? 'lg' : 'sm';
+		const size = cardId && (metadata.commentCount || (metadata.comments && metadata.comments.length)) ? 'lg' : 'sm';
 		const titlePrefix = cardId ? 'Edit' : 'Add new';
 
 		const Form = (formProps: any) => (
@@ -247,7 +247,7 @@ export function Board(props: IProps) {
 			color="secondary"
 			aria-label="Add new card"
 			aria-haspopup="true"
-			onClick={() => handleOpenDialog()}
+			onClick={handleOpenDialog}
 		>
 			<Add />
 		</AddButton>

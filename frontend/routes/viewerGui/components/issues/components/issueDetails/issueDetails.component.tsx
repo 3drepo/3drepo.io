@@ -108,10 +108,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, horizontal } = this.props;
-		const { commentCount } = this.issueData;
-		const isIssueWithComments = commentCount && !this.isNewIssue;
+		const { commentCount, comments } = this.issueData;
+		const isIssueWithComments = Boolean((commentCount || (comments && comments.length)) && !this.isNewIssue);
 		const PreviewWrapper = horizontal && isIssueWithComments ? HorizontalView : Fragment;
-
 		const renderNotCollapsable = () => {
 			return this.renderLogList(!horizontal && isIssueWithComments);
 		};
@@ -282,7 +281,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public handleNewScreenshot = async (screenshot) => {
 		const { teamspace, model, viewer } = this.props;
-		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
+		const isViewerInitialized =  viewer.viewer.initialized;
+		const viewpoint = isViewerInitialized ? await viewer.getCurrentViewpoint({ teamspace, model }) : null;
 
 		if (this.isNewIssue) {
 			this.props.setState({
@@ -292,7 +292,11 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				}
 			});
 		} else {
-			this.setCommentData({ screenshot, viewpoint });
+			if (viewpoint) {
+				this.setCommentData({ screenshot, viewpoint });
+			} else {
+				this.setCommentData({ screenshot });
+			}
 		}
 	}
 
