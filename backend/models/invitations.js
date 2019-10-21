@@ -21,8 +21,6 @@ const { omit } = require("lodash");
 const responseCodes = require("../response_codes.js");
 const C = require("../constants");
 
-
-
 const getCollection = async () => {
 	return await db.getCollection("admin", "invitations");
 };
@@ -80,8 +78,12 @@ invitations.setJob = async (email, teamspace, job) => {
 	return true;
 };
 
-invitations.setTeamspacePermission = (email, teamSpace, permission) => {
-
+invitations.setTeamspacePermission = async (email, teamspace, permissions) => {
+	await invitations.teamspaceInvitationCheck(email, teamspace);
+	const permissionsField = "teamSpaces." + teamspace + ".permissions.teamspace";
+	const coll = await getCollection();
+	await coll.updateOne({}, { $set: { [permissionsField]: permissions } });
+	return {user:email, permissions};
 };
 
 invitations.setProjectPermission = (email, teamSpace, project, permission) => {
