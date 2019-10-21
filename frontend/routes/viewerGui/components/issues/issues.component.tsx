@@ -19,7 +19,7 @@ import fileDialog from 'file-dialog';
 import React from 'react';
 
 import { ISSUE_FILTERS, ISSUES_ACTIONS_MENU, STATUSES } from '../../../../constants/issues';
-import { filtersValuesMap, headerMenuItems } from '../../../../helpers/issues';
+import { filtersValuesMap, getHeaderMenuItems } from '../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import IssueDetails from './components/issueDetails/issueDetails.container';
 import { IssuesContainer } from './issues.styles';
@@ -95,7 +95,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 			showPins
 		} = this.props;
 
-		return headerMenuItems(
+		return getHeaderMenuItems(
 			teamspace,
 			model,
 			revision,

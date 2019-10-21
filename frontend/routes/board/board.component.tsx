@@ -24,15 +24,22 @@ import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
 
+import { ACTIONS_TYPES, ISSUE_FILTERS } from '../../constants/issues';
+import { RISK_FILTERS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
-import { filtersValuesMap as issuesFilters, headerMenuItems as issueMenuItems } from '../../helpers/issues';
+import { filtersValuesMap as issuesFilters, getHeaderMenuItems as getIssueMenuItems } from '../../helpers/issues';
 import { renderWhenTrue } from '../../helpers/rendering';
-import { filtersValuesMap as risksFilters,  headerMenuItems as risksMenuItems  } from '../../helpers/risks';
+import { filtersValuesMap as risksFilters,  getHeaderMenuItems as getRisksMenuItems  } from '../../helpers/risks';
 import { FILTER_PROPS, FILTERS } from '../../modules/board/board.constants';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
+import {
+	IconWrapper, MenuList, StyledItemText, StyledListItem
+} from '../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { Loader } from '../components/loader/loader.component';
 import { MenuButton } from '../components/menuButton/menuButton.component';
 import { Panel } from '../components/panel/panel.component';
+
+import { FilterPanel } from '../components/filterPanel/filterPanel.component';
 import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
 import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
 import RiskDetails from '../viewerGui/components/risks/components/riskDetails/riskDetails.container';
@@ -54,12 +61,6 @@ import {
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
 import { ConfigSelectComponent } from './components/configSelect.component';
-import {
-	IconWrapper, MenuList, StyledItemText, StyledListItem
-} from '../components/filterPanel/components/filtersMenu/filtersMenu.styles';
-import { FilterPanel } from '../components/filterPanel/filterPanel.component';
-import { ISSUE_FILTERS, ACTIONS_TYPES } from '../../constants/issues';
-import { RISK_FILTERS } from '../../constants/risks';
 
 interface ICard {
 	id: string;
@@ -91,7 +92,8 @@ interface IProps {
 	topicTypes: any[];
 	selectedIssueFilters: any[];
 	selectedRiskFilters: any[];
-	sortOrder: string;
+	issuesSortOrder: string;
+	risksSortOrder: string;
 	fetchData: (boardType, teamspace, project, modelId) => void;
 	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
 	showDialog: (config: any) => void;
@@ -105,7 +107,8 @@ interface IProps {
 	exportBCF: (eamspace, modelId) => void;
 	printItems: (teamspace, model) => void;
 	downloadItems: (teamspace, model) => void;
-	toggleSortOrder: () => void;
+	toggleIssuesSortOrder: () => void;
+	toggleRisksSortOrder: () => void;
 }
 
 const PANEL_PROPS = {
@@ -121,6 +124,7 @@ export function Board(props: IProps) {
 	const isIssuesBoard = type === 'issues';
 	const boardData = { lanes: props.lanes };
 	const selectedFilters = isIssuesBoard ? props.selectedIssueFilters : props.selectedRiskFilters;
+	const { printItems, downloadItems, importBCF, exportBCF, toggleIssuesSortOrder, toggleRisksSortOrder } = props;
 
 	useEffect(() => {
 		if (type !== props.boardType) {
@@ -334,11 +338,13 @@ export function Board(props: IProps) {
 	};
 
 	const headerMenu = isIssuesBoard ?
-		issueMenuItems(teamspace, modelId, null, props.printItems, props.downloadItems, props.importBCF, props.exportBCF, props.toggleSortOrder) :
-		risksMenuItems(teamspace, modelId, props.printItems, props.downloadItems, props.toggleSortOrder);
+		getIssueMenuItems(teamspace, modelId, null, printItems, downloadItems, importBCF, exportBCF, toggleIssuesSortOrder) :
+		getRisksMenuItems(teamspace, modelId, printItems, downloadItems, toggleRisksSortOrder);
+
+	const sortOrder = isIssuesBoard ? props.issuesSortOrder : props.risksSortOrder;
 
 	const renderSortIcon = (Icon) => {
-		if (props.sortOrder === 'asc') {
+		if (sortOrder === 'asc') {
 			return <Icon.ASC IconProps={{ fontSize: 'small' }} /> ;
 		}
 		return <Icon.DESC IconProps={{ fontSize: 'small' }} /> ;
@@ -346,15 +352,14 @@ export function Board(props: IProps) {
 
 	const renderActionsMenu = () => (
 		<MenuList>
-			{headerMenu.map(({ label, Icon, onClick, enabled, type }, index) => {
+			{headerMenu.map(({ label, Icon, onClick, isSorting }, index) => {
 				return (
 					<StyledListItem key={index} button onClick={onClick}>
 						<IconWrapper>
-							{type === ACTIONS_TYPES.SORT ?  renderSortIcon(Icon) : <Icon fontSize="small" />}
+							{isSorting ? renderSortIcon(Icon) : <Icon fontSize="small" />}
 						</IconWrapper>
 						<StyledItemText>
 							{label}
-							{enabled && <Check fontSize="small" />}
 						</StyledItemText>
 					</StyledListItem>
 				);

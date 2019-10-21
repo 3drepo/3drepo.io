@@ -18,10 +18,11 @@
 import { groupBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { PRIORITIES, STATUSES } from '../../constants/issues';
-import { selectIssues, selectFilteredIssues } from '../issues';
+import { sortByDate } from '../../helpers/sorting';
+import { selectFilteredIssues, selectSortOrder as selectIssuesSortOrder } from '../issues';
 import { selectJobs } from '../jobs';
 import { selectTopicTypes } from '../model';
-import { selectRisks, selectFilteredRisks } from '../risks';
+import { selectFilteredRisks,  selectSortOrder as selectRisksSortOrder } from '../risks';
 import { selectUsers } from '../userManagement';
 import { BOARD_TYPES, FILTER_PROPS, NOT_DEFINED_PROP } from './board.constants';
 
@@ -47,10 +48,6 @@ export const selectSearchEnabled = createSelector(
 	selectBoardDomain, (state) => state.searchEnabled
 );
 
-export const selectSortOrder = createSelector(
-	selectBoardDomain, (state) => state.sortOrder
-);
-
 export const selectLanes = createSelector(
 	selectBoardDomain,
 	selectFilteredIssues,
@@ -58,7 +55,9 @@ export const selectLanes = createSelector(
 	selectTopicTypes,
 	selectJobs,
 	selectUsers,
-	({ filterProp, boardType }, issues, risks, topicTypes, jobs, users) => {
+	selectIssuesSortOrder,
+	selectRisksSortOrder,
+	({ filterProp, boardType }, issues, risks, topicTypes, jobs, users, issuesSortOrder, risksSortOrder) => {
 		const filtersMap = {
 			[FILTER_PROPS.status.value]: STATUSES,
 			[FILTER_PROPS.priority.value]: PRIORITIES,
@@ -68,8 +67,8 @@ export const selectLanes = createSelector(
 		};
 		const lanes = [];
 		const dataMap = {
-			[BOARD_TYPES.ISSUES]: issues,
-			[BOARD_TYPES.RISKS]: risks
+			[BOARD_TYPES.ISSUES]: sortByDate(issues, { order: issuesSortOrder }),
+			[BOARD_TYPES.RISKS]: sortByDate(risks, { order: risksSortOrder })
 		};
 		const preparedData = dataMap[boardType].map((item) => {
 			const isDefined = Boolean(item[filterProp] && ((typeof item[filterProp] === 'string' && item[filterProp]) ||

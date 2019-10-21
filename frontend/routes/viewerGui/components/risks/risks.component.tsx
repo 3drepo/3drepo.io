@@ -19,7 +19,7 @@ import React from 'react';
 
 import { RISK_FILTERS, RISK_LEVELS } from '../../../../constants/risks';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { filtersValuesMap, headerMenuItems } from '../../../../helpers/risks';
+import { filtersValuesMap, getHeaderMenuItems } from '../../../../helpers/risks';
 import RiskDetails from './components/riskDetails/riskDetails.container';
 import { RisksContainer } from './risks.styles';
 
@@ -72,7 +72,7 @@ export class Risks extends React.PureComponent<IProps, any> {
 
 	get headerMenuItems() {
 		const { printRisks, downloadRisks, toggleShowPins, teamspace, model, showPins } = this.props;
-		return headerMenuItems(teamspace, model, printRisks, downloadRisks, toggleShowPins, showPins);
+		return getHeaderMenuItems(teamspace, model, printRisks, downloadRisks, toggleShowPins, showPins);
 	}
 
 	get showDefaultHiddenItems() {

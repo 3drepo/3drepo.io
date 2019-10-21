@@ -24,18 +24,21 @@ import {
 	selectIsPending,
 	selectLanes,
 	selectSearchEnabled,
-	selectSortOrder,
 	BoardActions,
 } from '../../modules/board';
 import { DialogActions } from '../../modules/dialog';
 import {
 	selectSelectedFilters as selectSelectedIssueFilters,
-	IssuesActions } from '../../modules/issues';
+	selectSortOrder as selectIssuesSortOrder,
+	IssuesActions
+} from '../../modules/issues';
 import { selectJobsList } from '../../modules/jobs';
 import { selectTopicTypes } from '../../modules/model';
 import {
 	selectSelectedFilters as selectSelectedRiskFilters,
-	RisksActions } from '../../modules/risks';
+	selectSortOrder as selectRisksSortOrder,
+	RisksActions
+} from '../../modules/risks';
 import { selectTeamspaces } from '../../modules/teamspaces';
 import { Board } from './board.component';
 
@@ -50,7 +53,8 @@ const mapStateToProps = createStructuredSelector({
 	jobs: selectJobsList,
 	selectedIssueFilters: selectSelectedIssueFilters,
 	selectedRisksFilters: selectSelectedRiskFilters,
-	sortOrder: selectSortOrder
+	issuesSortOrder: selectIssuesSortOrder,
+	risksSortOrder: selectRisksSortOrder
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -67,7 +71,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	downloadItems: BoardActions.downloadItems,
 	importBCF: IssuesActions.importBcf,
 	exportBCF: IssuesActions.exportBcf,
-	toggleSortOrder: BoardActions.toggleSortOrder
+	toggleIssuesSortOrder: IssuesActions.toggleSortOrder,
+	toggleRisksSortOrder: RisksActions.toggleSortOrder
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Board);

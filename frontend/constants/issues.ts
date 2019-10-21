@@ -146,16 +146,16 @@ export const ISSUES_ACTIONS_MENU = {
 	},
 	SORT_BY_DATE: {
 		label: 'Sort by date',
-		type: ACTIONS_TYPES.SORT,
+		isSorting: true,
 		Icon: {
 			ASC: SortAmountUp,
 			DESC: SortAmountDown
 		}
 	},
 	SHOW_PINS: {
-		label:  'Show Pins',
+		label: 'Show Pins',
 		Icon: Pins,
-		enabled:  true
+		enabled: true
 	},
 	SHOW_SUBMODEL_ISSUES: {
 		label: 'Show sub model issues',

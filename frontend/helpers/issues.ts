@@ -16,10 +16,19 @@
  */
 
 import * as fileDialog from 'file-dialog';
-import { ISSUE_COLORS, PRIORITIES, STATUSES, STATUSES_ICONS, ISSUE_FILTER_RELATED_FIELDS, ISSUE_STATUSES, ISSUE_PRIORITIES, ISSUES_ACTIONS_MENU } from '../constants/issues';
+import {
+	ISSUE_COLORS,
+	ISSUE_FILTER_RELATED_FIELDS,
+	ISSUE_PRIORITIES,
+	ISSUE_STATUSES,
+	ISSUES_ACTIONS_MENU,
+	PRIORITIES,
+	STATUSES,
+	STATUSES_ICONS
+} from '../constants/issues';
+import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
-import { UNASSIGNED_JOB, getFilterValues } from '../constants/reportedItems';
 
 export const prepareIssue = (issue, jobs = []) => {
 	const preparedIssue = {...issue};
@@ -154,7 +163,7 @@ export const filtersValuesMap = (jobs, topicTypes) => {
 	};
 };
 
-export const headerMenuItems = (
+export const getHeaderMenuItems = (
 	teamspace,
 	model,
 	revision,

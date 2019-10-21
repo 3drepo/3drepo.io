@@ -53,8 +53,8 @@ interface IHeaderMenuItem {
 	label: string;
 	enabled?: boolean;
 	Icon?: any;
+	isSorting?: boolean;
 	onClick?: (event?) => void;
-	type: string;
 }
 
 interface IProps {
@@ -326,11 +326,11 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public renderActionsMenu = () => (
 		<MenuList>
-			{this.props.headerMenuItems.map(({ label, Icon, onClick, enabled, type }, index) => {
+			{this.props.headerMenuItems.map(({ label, Icon, onClick, enabled, isSorting }, index) => {
 				return (
 					<StyledListItem key={index} button onClick={onClick}>
 						<IconWrapper>
-							{type === ACTIONS_TYPES.SORT ?  this.renderSortIcon(Icon) : <Icon fontSize="small" />}
+							{isSorting ?  this.renderSortIcon(Icon) : <Icon fontSize="small" />}
 						</IconWrapper>
 						<StyledItemText>
 							{label}

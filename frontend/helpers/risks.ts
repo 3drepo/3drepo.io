@@ -16,22 +16,22 @@
  */
 
 import { get } from 'lodash';
+import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 import {
 	LEVELS,
+	LEVELS_OF_RISK,
+	RISK_CATEGORIES,
 	RISK_CONSEQUENCES,
+	RISK_FILTER_RELATED_FIELDS,
 	RISK_LEVELS,
 	RISK_LEVELS_COLOURS,
 	RISK_LEVELS_ICONS,
 	RISK_LIKELIHOODS,
-	RISK_FILTER_RELATED_FIELDS,
-	RISK_CATEGORIES,
-	LEVELS_OF_RISK,
 	RISK_MITIGATION_STATUSES,
 	RISKS_ACTIONS_MENU
 } from '../constants/risks';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
-import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 
 export const prepareRisk = (risk, jobs = []) => {
 	const preparedRisk = {...risk};
@@ -221,7 +221,7 @@ export const filtersValuesMap = (jobs) => {
 	};
 };
 
-export const headerMenuItems = (
+export const getHeaderMenuItems = (
 		teamspace, model, printRisks, downloadRisks, toggleSortOrder, toggleShowPins?, showPins?
 	) => {
 	const items = [{
