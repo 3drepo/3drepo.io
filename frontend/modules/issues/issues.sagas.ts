@@ -162,8 +162,9 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 		finishSubmitting();
 
 		if (!ignoreViewer) {
-			debugger;
 			yield put(IssuesActions.goToIssue(savedIssue));
+		} else {
+			yield put(DialogActions.hideDialog());
 		}
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue created'));

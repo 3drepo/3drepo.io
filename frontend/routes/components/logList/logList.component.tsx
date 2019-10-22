@@ -17,9 +17,10 @@
 
 import React from 'react';
 
+import { renderWhenTrue } from '../../../helpers/rendering';
 import { Loader } from '../../components/loader/loader.component';
 import { Log } from './components/log/log.component';
-import { Container, LoaderContainer } from './logList.styles';
+import { Container, EmptyStateInfo, LoaderContainer } from './logList.styles';
 
 interface IProps {
 	className: string;
@@ -33,6 +34,12 @@ interface IProps {
 }
 
 export class LogList extends React.PureComponent<IProps, any> {
+	public renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>
+			No comments
+		</EmptyStateInfo>
+	));
+
 	public renderLogItem = (item, index) => {
 		return (
 			<Log
@@ -59,6 +66,7 @@ export class LogList extends React.PureComponent<IProps, any> {
 		return (
 			<Container className={this.props.className} ref={this.props.commentsRef}>
 				{this.props.isPending ? this.renderLoader() : this.props.items.map(this.renderLogItem)}
+				{this.renderEmptyState(!this.props.isPending && !this.props.items.length)}
 			</Container>
 		);
 	}

@@ -133,7 +133,7 @@ const showNewUpdateDialog = (state = INITIAL_STATE, action) => {
 };
 
 const hideDialog = (state = INITIAL_STATE, { dialogId }) => {
-	const dialogs = state.dialogs.filter(({ id }) => (id !== dialogId));
+	const dialogs = dialogId ? state.dialogs.filter(({ id }) => (id !== dialogId)) : [];
 	return { ...state, dialogs };
 };
 
