@@ -21,6 +21,7 @@ import { BOARD_TYPES, ISSUE_FILTER_PROPS } from './board.constants';
 export const { Types: BoardTypes, Creators: BoardActions } = createActions({
 	fetchData: ['boardType', 'teamspace', 'project', 'modelId'],
 	fetchCardData: ['boardType', 'teamspace', 'modelId', 'cardId'],
+	resetCardData: ['boardType'],
 	setIsPending: ['isPending'],
 	setFilterProp: ['filterProp'],
 	setBoardType: ['boardType'],

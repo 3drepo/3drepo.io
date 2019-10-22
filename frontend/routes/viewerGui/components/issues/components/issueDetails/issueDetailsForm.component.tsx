@@ -25,6 +25,7 @@ import * as Yup from 'yup';
 import InputLabel from '@material-ui/core/InputLabel';
 import { ISSUE_PRIORITIES, ISSUE_STATUSES } from '../../../../../../constants/issues';
 import { canChangeAssigned, canChangeBasicProperty, canChangeStatus } from '../../../../../../helpers/issues';
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { DateField } from '../../../../../components/dateField/dateField.component';
@@ -58,6 +59,7 @@ interface IProps {
 	attachFileResources: () => void;
 	attachLinkResources: () => void;
 	showDialog: (config: any) => void;
+	hidePin?: boolean;
 	hasPin: boolean;
 	canComment: boolean;
 }
@@ -90,6 +92,17 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			this.setState({ isSaving: false });
 		});
 	}, 200);
+
+	public renderPinButton = renderWhenTrue(() => (
+		<StyledFormControl>
+			<PinButton
+				onChange={this.props.onChangePin}
+				onSave={this.props.onSavePin}
+				hasPin={this.props.hasPin}
+				disabled={!this.isNewIssue && !canEditBasicProperty}
+			/>
+		</StyledFormControl>
+	))
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
@@ -189,14 +202,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									placeholder="Choose a due date" />}
 								/>
 						</StyledFormControl>
-						<StyledFormControl>
-							<PinButton
-								onChange={this.props.onChangePin}
-								onSave={this.props.onSavePin}
-								hasPin={this.props.hasPin}
-								disabled={!this.isNewIssue && !canEditBasicProperty}
-							/>
-						</StyledFormControl>
+						{this.renderPinButton(!this.props.hidePin)}
 					</FieldsRow>
 					<Field name="desc" render={({ field }) => (
 						<TextField

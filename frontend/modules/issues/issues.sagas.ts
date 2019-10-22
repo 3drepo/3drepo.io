@@ -108,17 +108,17 @@ const createGroup = (issue, objectInfo, teamspace, model, revision) => {
 	]);
 };
 
-function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting }) {
+function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, ignoreViewer = false }) {
 	try {
 		const myJob = yield select(selectMyJob);
 		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 
-		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
+		const [viewpoint, objectInfo, screenshot, userJob] = !ignoreViewer ? yield all([
 			Viewer.getCurrentViewpoint({ teamspace, model }),
 			Viewer.getObjectsStatus(),
 			issueData.descriptionThumbnail || Viewer.getScreenshot(),
 			myJob
-		]);
+		]) : [{}, null, issueData.descriptionThumbnail || '', myJob];
 
 		viewpoint.hideIfc = ifcSpacesHidden;
 		issueData.rev_id = {
@@ -126,7 +126,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting })
 			rev_id: revision
 		};
 
-		if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
+		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
 			const [highlightedGroup, hiddenGroup] = yield createGroup(issueData, objectInfo, teamspace, model, revision);
 
 			if (highlightedGroup) {
@@ -161,7 +161,10 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting })
 
 		finishSubmitting();
 
-		yield put(IssuesActions.goToIssue(savedIssue));
+		if (!ignoreViewer) {
+			debugger;
+			yield put(IssuesActions.goToIssue(savedIssue));
+		}
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue created'));
 	} catch (error) {
@@ -405,7 +408,7 @@ function* focusOnIssue({ issue, revision }) {
 	}
 }
 
-function* setActiveIssue({ issue, revision, omitViewer = false }) {
+function* setActiveIssue({ issue, revision, ignoreViewer = false }) {
 	try {
 		const activeIssueId = yield select(selectActiveIssueId);
 		const issuesMap = yield select(selectIssuesMap);
@@ -422,7 +425,7 @@ function* setActiveIssue({ issue, revision, omitViewer = false }) {
 		}
 
 		yield all([
-			!omitViewer ? put(IssuesActions.focusOnIssue(issue, revision)) : null,
+			!ignoreViewer ? put(IssuesActions.focusOnIssue(issue, revision)) : null,
 			put(IssuesActions.setComponentState({ activeIssue: issue._id, expandDetails: true }))
 		]);
 	} catch (error) {

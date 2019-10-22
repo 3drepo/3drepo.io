@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, take, takeLatest } from 'redux-saga/effects';
+import { put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { selectCurrentTeamspace } from '../currentUser';
 import { DialogActions } from '../dialog';
@@ -79,6 +79,16 @@ function* fetchCardData({ boardType, teamspace, modelId, cardId }) {
 	}
 }
 
+function* resetCardData() {
+	try {
+		const boardType = yield select(selectBoardType);
+		const resetData = boardType === 'issues' ? IssuesActions.setNewIssue : RisksActions.setNewRisk;
+		yield put(resetData());
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('reset', 'card data', error));
+	}
+}
+
 function* setFilters({ filters }) {
 	try {
 		const boardType = yield select(selectBoardType);
@@ -138,6 +148,7 @@ function* toggleSortOrder() {
 export default function* BoardSaga() {
 	yield takeLatest(BoardTypes.FETCH_DATA, fetchData);
 	yield takeLatest(BoardTypes.FETCH_CARD_DATA, fetchCardData);
+	yield takeLatest(BoardTypes.RESET_CARD_DATA, resetCardData);
 	yield takeLatest(BoardTypes.SET_FILTERS, setFilters);
 	yield takeLatest(BoardTypes.PRINT_ITEMS, printItems);
 	yield takeLatest(BoardTypes.DOWNLOAD_ITEMS, downloadItems);

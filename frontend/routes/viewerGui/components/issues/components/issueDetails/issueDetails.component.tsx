@@ -46,7 +46,7 @@ interface IProps {
 	setState: (componentState) => void;
 	fetchIssue: (teamspace, model, issueId) => void;
 	updateSelectedIssuePin: (position) => void;
-	saveIssue: (teamspace, modelId, issue, revision, finishSubmitting) => void;
+	saveIssue: (teamspace, modelId, issue, revision, finishSubmitting, disableViewer) => void;
 	updateIssue: (teamspace, modelId, issue) => void;
 	postComment: (teamspace, modelId, issueData, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, issueData) => void;
@@ -113,7 +113,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, horizontal } = this.props;
 		const { commentCount, comments } = this.issueData;
-		const isIssueWithComments = Boolean((commentCount || (comments && comments.length)) && !this.isNewIssue);
+		const isIssueWithComments = Boolean((comments && comments.length || horizontal) && !this.isNewIssue);
 		const PreviewWrapper = horizontal && isIssueWithComments ? HorizontalView : Fragment;
 		const renderNotCollapsable = () => {
 			return this.renderLogList(!horizontal && isIssueWithComments);
@@ -237,6 +237,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onChangePin={updateSelectedIssuePin}
 				onSavePin={this.onPositionSave}
 				hasPin={!disableViewer && issue.position && issue.position.length}
+				hidePin={disableViewer}
 				onRemoveResource={onRemoveResource}
 				attachFileResources={attachFileResources}
 				attachLinkResources={attachLinkResources}
@@ -318,9 +319,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSave = (formValues, finishSubmitting) => {
-		const { teamspace, model, saveIssue, revision } = this.props;
+		const { teamspace, model, saveIssue, revision, disableViewer} = this.props;
 		if (this.isNewIssue) {
-			saveIssue(teamspace, model, this.issueData, revision, finishSubmitting);
+			saveIssue(teamspace, model, this.issueData, revision, finishSubmitting, disableViewer);
 		} else {
 			this.postComment(teamspace, model, formValues, finishSubmitting);
 		}

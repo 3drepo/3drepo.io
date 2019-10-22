@@ -47,7 +47,7 @@ const mapStateToProps = createStructuredSelector({
 	lanes: selectLanes,
 	isPending: selectIsPending,
 	filterProp: selectFilterProp,
-	bpardType: selectBoardType,
+	boardType: selectBoardType,
 	searchEnabled: selectSearchEnabled,
 	topicTypes: selectTopicTypes,
 	jobs: selectJobsList,
@@ -60,6 +60,7 @@ const mapStateToProps = createStructuredSelector({
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchData: BoardActions.fetchData,
 	fetchCardData: BoardActions.fetchCardData,
+	resetCardData: BoardActions.resetCardData,
 	setFilterProp: BoardActions.setFilterProp,
 	setBoardType: BoardActions.setBoardType,
 	showDialog: DialogActions.showDialog,

@@ -97,6 +97,7 @@ interface IProps {
 	risksSortOrder: string;
 	fetchData: (boardType, teamspace, project, modelId) => void;
 	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
+	resetCardData: () => void;
 	showDialog: (config: any) => void;
 	setFilterProp: (filterProp: string) => void;
 	setBoardType: (boardType: string) => void;
@@ -181,11 +182,16 @@ export function Board(props: IProps) {
 
 		const TemplateComponent = isIssuesBoard ? IssueDetails : RiskDetails;
 		const dataType = isIssuesBoard ? 'issue' : 'risk';
-		const size = cardId && (metadata.commentCount || (metadata.comments && metadata.comments.length)) ? 'lg' : 'sm';
+		const size = cardId ? 'lg' : 'sm';
 		const titlePrefix = cardId ? 'Edit' : 'Add new';
+
+		if (!cardId) {
+			props.resetCardData();
+		}
+
 		const Form = (formProps: any) => (
 			<FormWrapper size={size}>
-				<TemplateComponent {...formProps} />
+				<TemplateComponent {...formProps} disableViewer />
 			</FormWrapper>
 		);
 
@@ -196,7 +202,7 @@ export function Board(props: IProps) {
 				teamspace,
 				model: modelId,
 				disableViewer: true,
-				horizontal: true
+				horizontal: true,
 			},
 			DialogProps: {
 				maxWidth: size
@@ -205,6 +211,10 @@ export function Board(props: IProps) {
 
 		props.showDialog(config);
 	}, [type, props.fetchCardData, project, teamspace, modelId]);
+
+	const handleAddNewCard = () => {
+		handleOpenDialog();
+	};
 
 	const handleCardMove = (fromLaneId, toLaneId, cardId) => {
 		const updatedProp = {
@@ -253,7 +263,7 @@ export function Board(props: IProps) {
 			color="secondary"
 			aria-label="Add new card"
 			aria-haspopup="true"
-			onClick={handleOpenDialog}
+			onClick={handleAddNewCard}
 		>
 			<Add />
 		</AddButton>

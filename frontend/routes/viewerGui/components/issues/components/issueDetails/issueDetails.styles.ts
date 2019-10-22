@@ -36,6 +36,7 @@ export const HorizontalView = styled.div`
 	overflow: hidden;
 
 	${PreviewDetails}, ${LogList} {
+		min-width: 50%;
 		width: 50%;
 		max-height: 60vh;
 		position: relative;
