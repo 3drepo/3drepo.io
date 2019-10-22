@@ -171,7 +171,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public renderHeaderNavigation = renderWhenTrue(() => {
 		const initialIndex = this.state.filteredItems.findIndex(({ _id }) => this.props.activeItemId === _id);
-
 		return (
 			<ListNavigation
 				initialIndex={initialIndex}

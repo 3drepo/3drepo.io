@@ -165,3 +165,12 @@ export const selectLanes = createSelector(
 		return lanes;
 	}
 );
+
+export const selectCards = createSelector(
+	selectLanes,
+	(lanes) => {
+		const cards = [];
+		lanes.forEach((lane) => cards.push(...lane.cards));
+		return cards;
+	}
+);

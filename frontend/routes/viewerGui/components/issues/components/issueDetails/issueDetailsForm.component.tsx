@@ -76,6 +76,12 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	get isNewIssue() {
 		return !this.props.issue._id;
 	}
+
+	get canEditBasicProperty() {
+		const { issue, myJob, permissions, currentUser } = this.props;
+		return this.isNewIssue || canChangeBasicProperty(issue, myJob, permissions, currentUser);
+	}
+
 	public state = {
 		isSaving: false
 	};
@@ -99,7 +105,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				onChange={this.props.onChangePin}
 				onSave={this.props.onSavePin}
 				hasPin={this.props.hasPin}
-				disabled={!this.isNewIssue && !canEditBasicProperty}
+				disabled={!this.isNewIssue && !this.canEditBasicProperty}
 			/>
 		</StyledFormControl>
 	))
@@ -136,8 +142,6 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				topicTypes, currentUser, onRemoveResource,
 				attachFileResources, attachLinkResources, showDialog,
 				canComment } = this.props;
-		const newIssue = !issue._id;
-		const canEditBasicProperty = newIssue || canChangeBasicProperty(issue, myJob, permissions, currentUser);
 
 		return (
 			<MuiPickersUtilsProvider utils={DayJsUtils}>
@@ -150,7 +154,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									{...field}
 									items={ISSUE_PRIORITIES}
 									inputId="priority"
-									disabled={!canEditBasicProperty}
+									disabled={!this.canEditBasicProperty}
 								/>
 							)} />
 						</StyledFormControl>
@@ -161,7 +165,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									{...field}
 									items={ISSUE_STATUSES}
 									inputId="status"
-									disabled={!(newIssue || canChangeStatus(issue, myJob, permissions, currentUser))}
+									disabled={!(this.isNewIssue || canChangeStatus(issue, myJob, permissions, currentUser))}
 								/>
 							)} />
 						</StyledFormControl>
@@ -174,7 +178,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									{...field}
 									items={this.props.jobs}
 									inputId="assigned_roles"
-									disabled={!(newIssue || canChangeAssigned(issue, myJob, permissions, currentUser))}
+									disabled={!(this.isNewIssue || canChangeAssigned(issue, myJob, permissions, currentUser))}
 								/>
 							)} />
 						</StyledFormControl>
@@ -186,7 +190,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 									items={topicTypes}
 									labelName="label"
 									inputId="topic_type"
-									disabled={!canEditBasicProperty}
+									disabled={!this.canEditBasicProperty}
 								/>
 							)} />
 						</StyledFormControl>
@@ -198,7 +202,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								<DateField
 									{...field}
 									format={this.getDueDateFormat(field.value)}
-									disabled={!canEditBasicProperty}
+									disabled={!this.canEditBasicProperty}
 									placeholder="Choose a due date" />}
 								/>
 						</StyledFormControl>
@@ -211,7 +215,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							fullWidth
 							multiline
 							label="Description"
-							disabled={!canEditBasicProperty}
+							disabled={!this.canEditBasicProperty}
 							validationSchema={IssueSchema}
 							mutable={!this.isNewIssue}
 						/>

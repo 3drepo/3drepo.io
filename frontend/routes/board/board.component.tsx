@@ -49,6 +49,7 @@ import { getProjectModels, getTeamspaceProjects } from './board.helpers';
 import {
 	AddButton,
 	BoardContainer,
+	BoardDialogTitle,
 	Config,
 	ConfigSelect,
 	ConfigSelectItem,
@@ -59,6 +60,7 @@ import {
 	FormWrapper,
 	LoaderContainer,
 	NoDataMessage,
+	Title,
 	ViewConfig
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
@@ -96,6 +98,7 @@ interface IProps {
 	selectedRiskFilters: any[];
 	issuesSortOrder: string;
 	risksSortOrder: string;
+	cards: ICard[];
 	fetchData: (boardType, teamspace, project, modelId) => void;
 	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
 	resetCardData: () => void;
@@ -176,6 +179,12 @@ export function Board(props: IProps) {
 		}
 	};
 
+	const handleNavigationChange = (newIndex) => {
+		const newCardId = props.cards[newIndex].id;
+		props.resetCardData();
+		props.fetchCardData(type, teamspace, modelId, newCardId);
+	};
+
 	const handleOpenDialog = useCallback((cardId?, metadata?, laneId?) => {
 		if (cardId) {
 			props.fetchCardData(type, teamspace, modelId, cardId);
@@ -185,6 +194,7 @@ export function Board(props: IProps) {
 		const dataType = isIssuesBoard ? 'issue' : 'risk';
 		const size = cardId ? 'lg' : 'sm';
 		const titlePrefix = cardId ? 'Edit' : 'Add new';
+		const initialIndex = props.cards.findIndex((card) => card.id === cardId);
 
 		if (!cardId) {
 			props.resetCardData();
@@ -196,13 +206,19 @@ export function Board(props: IProps) {
 			</FormWrapper>
 		);
 
+		const DialogTitle = cardId ? (
+			<BoardDialogTitle>
+				<Title>{titlePrefix} {dataType}</Title>
+				<ListNavigation
+					initialIndex={initialIndex}
+					lastIndex={props.cards.length - 1}
+					onChange={handleNavigationChange}
+				/>
+			</BoardDialogTitle>
+		) : `${titlePrefix} ${dataType}`;
+
 		const config = {
-			title: (
-				<Fragment>
-					{titlePrefix} {dataType}
-					<ListNavigation />
-				</Fragment>
-			),
+			title: DialogTitle,
 			template: Form,
 			data: {
 				teamspace,
@@ -216,7 +232,7 @@ export function Board(props: IProps) {
 		};
 
 		props.showDialog(config);
-	}, [type, props.fetchCardData, project, teamspace, modelId]);
+	}, [type, props.fetchCardData, project, teamspace, modelId, props.cards]);
 
 	const handleAddNewCard = () => {
 		handleOpenDialog();
@@ -315,7 +331,7 @@ export function Board(props: IProps) {
 
 	const renderLoader = renderWhenTrue(() => (
 		<LoaderContainer>
-			<Loader size={18} />
+			<Loader size={20} />
 		</LoaderContainer>
 	));
 

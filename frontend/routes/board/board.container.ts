@@ -19,9 +19,12 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import {
+	selectBoardItems,
 	selectBoardType,
+	selectCards,
 	selectFilterProp,
 	selectIsPending,
+	selectItemsCount,
 	selectLanes,
 	selectSearchEnabled,
 	BoardActions,
@@ -54,7 +57,8 @@ const mapStateToProps = createStructuredSelector({
 	selectedIssueFilters: selectSelectedIssueFilters,
 	selectedRisksFilters: selectSelectedRiskFilters,
 	issuesSortOrder: selectIssuesSortOrder,
-	risksSortOrder: selectRisksSortOrder
+	risksSortOrder: selectRisksSortOrder,
+	cards: selectCards
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

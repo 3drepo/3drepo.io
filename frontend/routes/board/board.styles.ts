@@ -166,3 +166,16 @@ export const FilterButton = styled.button`
 	white-space: nowrap;
 	cursor: ${(props: any) => props.disabled ? 'not-allowed' : 'pointer'};
 `;
+
+export const BoardDialogTitle = styled.div`
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+
+	svg {
+		color: ${COLOR.WHITE_87};
+	}
+`;
+
+export const Title = styled.div``;
