@@ -15,18 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { DialogProps as IDialogProps } from '@material-ui/core/Dialog';
 import { get, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
 import * as Dialogs from '../../routes/components/dialogContainer/components';
 import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
 
-interface IDialogConfig {
+export interface IDialogConfig {
 	id: number;
-	title: string;
+	title: JSX.Element | string;
 	template?: JSX.Element;
 	content?: string;
 	data?: any;
+	logError?: string;
+	DialogProps?: IDialogProps;
+	buttonVariant?: string;
+	closeText?: string;
 	onConfirm?: () => void;
 	onCancel?: () => void;
 }

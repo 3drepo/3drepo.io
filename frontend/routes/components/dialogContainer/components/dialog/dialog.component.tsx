@@ -22,13 +22,14 @@ import DialogBase from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
-import { renderWhenTrue } from '../../../../../helpers/rendering';
+import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../../helpers/rendering';
+import { IDialogConfig } from '../../../../../modules/dialog/dialog.redux';
 import { dispatch } from '../../../../../modules/store';
 import { DialogActions } from './dialog.styles';
 
 interface IProps {
 	id: number;
-	config: any;
+	config: IDialogConfig;
 	data?: any;
 	hide: (dialogId) => void;
 }

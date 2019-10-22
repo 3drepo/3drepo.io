@@ -19,7 +19,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Add from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, Fragment } from 'react';
 import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
 
@@ -44,6 +44,7 @@ import { FilterPanel } from '../components/filterPanel/filterPanel.component';
 import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
 import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
 import RiskDetails from '../viewerGui/components/risks/components/riskDetails/riskDetails.container';
+import { ListNavigation } from '../viewerGui/components/listNavigation/listNavigation.component';
 import { getProjectModels, getTeamspaceProjects } from './board.helpers';
 import {
 	AddButton,
@@ -196,7 +197,12 @@ export function Board(props: IProps) {
 		);
 
 		const config = {
-			title: `${titlePrefix} ${dataType}`,
+			title: (
+				<Fragment>
+					{titlePrefix} {dataType}
+					<ListNavigation />
+				</Fragment>
+			),
 			template: Form,
 			data: {
 				teamspace,
