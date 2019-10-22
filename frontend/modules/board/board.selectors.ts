@@ -18,13 +18,14 @@
 import { groupBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { PRIORITIES, STATUSES } from '../../constants/issues';
+import { LEVELS_LIST, RISK_CATEGORIES, RISK_MITIGATION_STATUSES } from '../../constants/risks';
 import { sortByDate } from '../../helpers/sorting';
 import { selectFilteredIssues, selectSortOrder as selectIssuesSortOrder } from '../issues';
 import { selectJobs } from '../jobs';
 import { selectTopicTypes } from '../model';
 import { selectFilteredRisks,  selectSortOrder as selectRisksSortOrder } from '../risks';
 import { selectUsers } from '../userManagement';
-import { BOARD_TYPES, FILTER_PROPS, NOT_DEFINED_PROP } from './board.constants';
+import { BOARD_TYPES, ISSUE_FILTER_PROPS, NOT_DEFINED_PROP, RISK_FILTER_PROPS } from './board.constants';
 
 export const selectBoardDomain = (state) => ({...state.board});
 
@@ -58,21 +59,36 @@ export const selectLanes = createSelector(
 	selectIssuesSortOrder,
 	selectRisksSortOrder,
 	({ filterProp, boardType }, issues, risks, topicTypes, jobs, users, issuesSortOrder, risksSortOrder) => {
-		const filtersMap = {
-			[FILTER_PROPS.status.value]: STATUSES,
-			[FILTER_PROPS.priority.value]: PRIORITIES,
-			[FILTER_PROPS.topic_type.value]: Object.assign({}, ...topicTypes.map((t) => ({[t.value]: t.value}))),
-			[FILTER_PROPS.owner.value]: Object.assign({}, ...users.map((u) => ({[u.user]: `${u.user}`}))),
-			[FILTER_PROPS.assigned_roles.value]: Object.assign({}, ...jobs.map((j) => ({[j._id]: j._id})))
+		const isIssueBoardType = boardType === 'issues';
+		const issueFiltersMap = {
+			[ISSUE_FILTER_PROPS.status.value]: values(STATUSES),
+			[ISSUE_FILTER_PROPS.priority.value]: values(PRIORITIES),
+			[ISSUE_FILTER_PROPS.topic_type.value]: topicTypes.map((t) => t.value),
+			[ISSUE_FILTER_PROPS.owner.value]: users.map((u) => u.user),
+			[ISSUE_FILTER_PROPS.assigned_roles.value]: jobs.map((j) => j._id)
 		};
+
+		const riskFiltersMap = {
+			[RISK_FILTER_PROPS.level_of_risk.value]: LEVELS_LIST.map((l) => l.value),
+			[RISK_FILTER_PROPS.residual_level_of_risk.value]: LEVELS_LIST.map((l) => l.value),
+			[RISK_FILTER_PROPS.category.value]: RISK_CATEGORIES.map((c) => c.value),
+			[RISK_FILTER_PROPS.mitigation_status.value]: RISK_MITIGATION_STATUSES.map((m) => m.value),
+			[ISSUE_FILTER_PROPS.owner.value]: users.map((u) => u.user),
+		};
+
+		const FILTER_PROPS = isIssueBoardType ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS;
+
+		const filtersMap = isIssueBoardType ? issueFiltersMap : riskFiltersMap;
+
 		const lanes = [];
 		const dataMap = {
 			[BOARD_TYPES.ISSUES]: sortByDate(issues, { order: issuesSortOrder }),
 			[BOARD_TYPES.RISKS]: sortByDate(risks, { order: risksSortOrder })
 		};
+
 		const preparedData = dataMap[boardType].map((item) => {
 			const isDefined = Boolean(item[filterProp] && ((typeof item[filterProp] === 'string' && item[filterProp]) ||
-				(typeof item[filterProp] !== 'string' && item[filterProp].length)));
+				(typeof item[filterProp] !== 'string' && item[filterProp].length))) || typeof item[filterProp] === 'number';
 
 			return {
 				id: item._id,
@@ -83,8 +99,10 @@ export const selectLanes = createSelector(
 		});
 
 		const groups = groupBy(preparedData, filterProp);
-		const isPrefixTitle = filterProp === FILTER_PROPS.owner.value || filterProp === FILTER_PROPS.assigned_roles.value;
-		const name = FILTER_PROPS[filterProp].name;
+		const isPrefixTitle =
+			filterProp === ISSUE_FILTER_PROPS.owner.value || filterProp === ISSUE_FILTER_PROPS.assigned_roles.value;
+
+		const name = FILTER_PROPS[filterProp] ? FILTER_PROPS[filterProp].name : '';
 		const dataset = filtersMap[filterProp];
 		const notDefinedGroup = groups[NOT_DEFINED_PROP];
 
@@ -92,22 +110,28 @@ export const selectLanes = createSelector(
 			const propertyName = notDefinedGroup[0].prop;
 			const notDefinedLane = {
 				id: propertyName,
-				title: propertyName === FILTER_PROPS.assigned_roles.value ?
-					'Unassigned' : `Not defined ${FILTER_PROPS[propertyName].name}`,
+				title: propertyName === ISSUE_FILTER_PROPS.assigned_roles.value ?
+					'Unassigned' : `Not defined ${FILTER_PROPS[propertyName] ? FILTER_PROPS[propertyName].name : ''}`,
 				label: `${notDefinedGroup.length} ${boardType}`,
 				cards: notDefinedGroup
 			};
 			lanes.push(notDefinedLane);
 		}
 
-		for (let i = 0; i < values(dataset).length; i++) {
-			const lane = {} as any;
-			const id = values(dataset)[i];
-			lane.id = id;
-			lane.title = isPrefixTitle ? `${name} ${id}` : `${id} ${name}`;
-			lane.label = `${groups[id] ? groups[id].length : 0} ${boardType}`;
-			lane.cards = groups[id] ? groups[id] : [];
-			lanes.push(lane);
+		if (dataset) {
+			for (let i = 0; i < dataset.length; i++) {
+				const lane = {} as any;
+				const id = dataset[i];
+
+				if (id !== null && id !== '') {
+					lane.id = `${id}`;
+					lane.title = isPrefixTitle ? `${name} ${id}` : `${id} ${name}`;
+					lane.label = `${groups[id] ? groups[id].length : 0} ${boardType}`;
+					lane.cards = groups[id] ? groups[id] : [];
+
+					lanes.push(lane);
+				}
+			}
 		}
 
 		return lanes;

@@ -22,7 +22,7 @@ export const BOARD_TYPES = {
 	RISKS: 'risks'
 };
 
-export const FILTER_PROPS = {
+export const ISSUE_FILTER_PROPS = {
 	status: {
 		value: 'status',
 		name: 'Status'
@@ -45,6 +45,30 @@ export const FILTER_PROPS = {
 	},
 };
 
-export const FILTERS = values(FILTER_PROPS);
+export const RISK_FILTER_PROPS = {
+	level_of_risk: {
+		value: 'level_of_risk',
+		name: 'Level of risk'
+	},
+	residual_level_of_risk: {
+		value: 'residual_level_of_risk',
+		name: 'Level of mitigated risk'
+	},
+	category: {
+		value: 'category',
+		name: 'Category'
+	},
+	mitigation_status: {
+		value: 'mitigation_status',
+		name: 'Mitigation status'
+	},
+	owner: {
+		value: 'owner',
+		name: 'Created By'
+	},
+};
+
+export const ISSUE_FILTER_VALUES = values(ISSUE_FILTER_PROPS);
+export const RISK_FILTER_VALUES = values(RISK_FILTER_PROPS);
 
 export const NOT_DEFINED_PROP = 'not defined';

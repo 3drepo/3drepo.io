@@ -18,19 +18,18 @@
 import IconButton from '@material-ui/core/IconButton';
 import Add from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
-import Check from '@material-ui/icons/Check';
 import SearchIcon from '@material-ui/icons/Search';
 import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
 
-import { ACTIONS_TYPES, ISSUE_FILTERS } from '../../constants/issues';
+import { ISSUE_FILTERS } from '../../constants/issues';
 import { RISK_FILTERS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
 import { filtersValuesMap as issuesFilters, getHeaderMenuItems as getIssueMenuItems } from '../../helpers/issues';
 import { renderWhenTrue } from '../../helpers/rendering';
 import { filtersValuesMap as risksFilters,  getHeaderMenuItems as getRisksMenuItems  } from '../../helpers/risks';
-import { FILTER_PROPS, FILTERS } from '../../modules/board/board.constants';
+import { ISSUE_FILTER_PROPS, ISSUE_FILTER_VALUES, RISK_FILTER_VALUES, RISK_FILTER_PROPS } from '../../modules/board/board.constants';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import {
 	IconWrapper, MenuList, StyledItemText, StyledListItem
@@ -129,12 +128,18 @@ export function Board(props: IProps) {
 	useEffect(() => {
 		if (type !== props.boardType) {
 			props.setBoardType(type);
+
+			if (!isIssuesBoard) {
+				props.setFilterProp(RISK_FILTER_PROPS.level_of_risk.value);
+			} else {
+				props.setFilterProp(ISSUE_FILTER_PROPS.status.value);
+			}
 		}
 
 		return () => {
 			props.setFilters([]);
 		};
-	}, []);
+	}, [type]);
 
 	useEffect(() => {
 		props.fetchData(type, teamspace, project, modelId);
@@ -202,7 +207,7 @@ export function Board(props: IProps) {
 
 	const handleCardMove = (fromLaneId, toLaneId, cardId) => {
 		const updatedProp = {
-			[props.filterProp]: props.filterProp === FILTER_PROPS.assigned_roles.value ? [toLaneId] : toLaneId
+			[props.filterProp]: props.filterProp === ISSUE_FILTER_PROPS.assigned_roles.value ? [toLaneId] : toLaneId
 		};
 
 		if (isIssuesBoard) {
@@ -253,9 +258,11 @@ export function Board(props: IProps) {
 		</AddButton>
 	);
 
+	const FILTER_VALUES = isIssuesBoard ? ISSUE_FILTER_VALUES : RISK_FILTER_VALUES;
+
 	const renderFilters = () => (
 		<Filters>
-			{ FILTERS.map((filter) => (
+			{ FILTER_VALUES.map((filter) => (
 				<FilterButton
 					key={filter.value}
 					active={props.filterProp === filter.value}
@@ -320,9 +327,10 @@ export function Board(props: IProps) {
 		);
 	});
 
+	const FILTER_ITEMS = isIssuesBoard ? ISSUE_FILTERS : RISK_FILTERS;
+
 	const filterItems = () => {
 		const filterValuesMap = isIssuesBoard ? issuesFilters(props.jobs, props.topicTypes) : risksFilters(props.jobs);
-		const FILTER_ITEMS = isIssuesBoard ? ISSUE_FILTERS : RISK_FILTERS;
 
 		return FILTER_ITEMS.map((issueFilter) => {
 			issueFilter.values = filterValuesMap[issueFilter.relatedField];

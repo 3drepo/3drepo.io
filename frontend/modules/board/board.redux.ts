@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { BOARD_TYPES, FILTER_PROPS } from './board.constants';
+import { BOARD_TYPES, ISSUE_FILTER_PROPS } from './board.constants';
 
 export const { Types: BoardTypes, Creators: BoardActions } = createActions({
 	fetchData: ['boardType', 'teamspace', 'project', 'modelId'],
@@ -34,7 +34,7 @@ export const { Types: BoardTypes, Creators: BoardActions } = createActions({
 export const INITIAL_STATE = {
 	isPending: true,
 	boardType: BOARD_TYPES.ISSUES,
-	filterProp: FILTER_PROPS.status.value,
+	filterProp: ISSUE_FILTER_PROPS.status.value,
 	lanes: [],
 	teamspace: null,
 	searchEnabled: false
