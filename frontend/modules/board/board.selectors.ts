@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { groupBy, values } from 'lodash';
+import { groupBy, startCase, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { PRIORITIES, STATUSES } from '../../constants/issues';
 import { LEVELS_LIST, RISK_CATEGORIES, RISK_MITIGATION_STATUSES } from '../../constants/risks';
@@ -60,20 +60,48 @@ export const selectLanes = createSelector(
 	selectRisksSortOrder,
 	({ filterProp, boardType }, issues, risks, topicTypes, jobs, users, issuesSortOrder, risksSortOrder) => {
 		const isIssueBoardType = boardType === 'issues';
+
+		const usersValues = users.map((u) => {
+			return {
+				value: u.user,
+				name: `${u.firstName} ${u.lastName}`
+			};
+		});
+
 		const issueFiltersMap = {
-			[ISSUE_FILTER_PROPS.status.value]: values(STATUSES),
-			[ISSUE_FILTER_PROPS.priority.value]: values(PRIORITIES),
-			[ISSUE_FILTER_PROPS.topic_type.value]: topicTypes.map((t) => t.value),
-			[ISSUE_FILTER_PROPS.owner.value]: users.map((u) => u.user),
-			[ISSUE_FILTER_PROPS.assigned_roles.value]: jobs.map((j) => j._id)
+			[ISSUE_FILTER_PROPS.status.value]: values(STATUSES).map((s) => {
+				return {
+					name: startCase(s),
+					value: s
+				};
+			}),
+			[ISSUE_FILTER_PROPS.priority.value]: values(PRIORITIES).map((p) => {
+				return {
+					name: startCase(p),
+					value: p
+				};
+			}),
+			[ISSUE_FILTER_PROPS.topic_type.value]: topicTypes.map((t) => {
+				return {
+					name: t.label,
+					value: t.value
+				};
+			}),
+			[ISSUE_FILTER_PROPS.owner.value]: usersValues,
+			[ISSUE_FILTER_PROPS.assigned_roles.value]: jobs.map((j) => {
+				return {
+					name: j._id,
+					value: j._id,
+				};
+			})
 		};
 
 		const riskFiltersMap = {
-			[RISK_FILTER_PROPS.level_of_risk.value]: LEVELS_LIST.map((l) => l.value),
-			[RISK_FILTER_PROPS.residual_level_of_risk.value]: LEVELS_LIST.map((l) => l.value),
-			[RISK_FILTER_PROPS.category.value]: RISK_CATEGORIES.map((c) => c.value),
-			[RISK_FILTER_PROPS.mitigation_status.value]: RISK_MITIGATION_STATUSES.map((m) => m.value),
-			[ISSUE_FILTER_PROPS.owner.value]: users.map((u) => u.user),
+			[RISK_FILTER_PROPS.level_of_risk.value]: LEVELS_LIST,
+			[RISK_FILTER_PROPS.residual_level_of_risk.value]: LEVELS_LIST,
+			[RISK_FILTER_PROPS.category.value]: RISK_CATEGORIES,
+			[RISK_FILTER_PROPS.mitigation_status.value]: RISK_MITIGATION_STATUSES,
+			[ISSUE_FILTER_PROPS.owner.value]: usersValues,
 		};
 
 		const FILTER_PROPS = isIssueBoardType ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS;
@@ -121,11 +149,11 @@ export const selectLanes = createSelector(
 		if (dataset) {
 			for (let i = 0; i < dataset.length; i++) {
 				const lane = {} as any;
-				const id = dataset[i];
+				const id = dataset[i].value;
 
 				if (id !== null && id !== '') {
 					lane.id = `${id}`;
-					lane.title = isPrefixTitle ? `${name} ${id}` : `${id} ${name}`;
+					lane.title = isPrefixTitle ? `${name} ${dataset[i].name}` : `${name} ${dataset[i].name}`;
 					lane.label = `${groups[id] ? groups[id].length : 0} ${boardType}`;
 					lane.cards = groups[id] ? groups[id] : [];
 
