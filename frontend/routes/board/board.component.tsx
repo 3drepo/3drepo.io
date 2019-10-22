@@ -183,7 +183,6 @@ export function Board(props: IProps) {
 		const dataType = isIssuesBoard ? 'issue' : 'risk';
 		const size = cardId && (metadata.commentCount || (metadata.comments && metadata.comments.length)) ? 'lg' : 'sm';
 		const titlePrefix = cardId ? 'Edit' : 'Add new';
-
 		const Form = (formProps: any) => (
 			<FormWrapper size={size}>
 				<TemplateComponent {...formProps} />
