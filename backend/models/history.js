@@ -86,9 +86,15 @@ historySchema.statics.listByBranch = function(dbColOptions, branch, projection, 
 };
 
 // get the head of a branch
-historySchema.statics.findByBranch = function(dbColOptions, branch, projection) {
+// FIXME: findByBranch and listByBranch seem to be doing similar things
+// FIXME: maybe findByBranch can just take the 1st elem of listByBranch
+historySchema.statics.findByBranch = function(dbColOptions, branch, projection, showVoid = false) {
 
 	const query = { "incomplete": {"$exists": false}};
+
+	if(!showVoid) {
+		query.void = {"$ne" : true};
+	}
 
 	projection = projection || {};
 
