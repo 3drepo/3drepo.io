@@ -22,7 +22,6 @@
 	const responseCodes = require("../response_codes");
 	const middlewares = require("../middlewares/middlewares");
 	const User = require("../models/user");
-	const Invitations = require("../models/invitations");
 	const utils = require("../utils");
 	const _ = require("lodash");
 
@@ -178,11 +177,7 @@
 			} else {
 				User.findByUserName(req.params.account)
 					.then(user => {
-						if (Invitations.isInvitation(req.body.user)) {
-							return Invitations.setTeamspacePermission(req.body.user, req.params.account, req.body.permissions);
-						} else {
-							return user.customData.permissions.add(req.body);
-						}
+						return user.customData.permissions.add(req.body);
 					})
 					.then(permission => {
 						responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);

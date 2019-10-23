@@ -117,7 +117,7 @@ schema.statics.authenticate =  async function (logger, username, password) {
 	let user = null;
 	let authDB = null;
 	try {
-		if (Invitations.isInvitation(username)) { // if the submited username is the email
+		if (C.EMAIL_REGEXP.test(username)) { // if the submited username is the email
 			user = await this.findByEmail(username);
 			if (!user) {
 				throw ({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
@@ -1126,10 +1126,6 @@ schema.methods.removeTeamMember = function (username, cascadeRemove) {
 		return Promise.reject(responseCodes.SUBSCRIPTION_CANNOT_REMOVE_SELF);
 	}
 
-	if (Invitations.isInvitation(username)) {
-		return Invitations.removeTeamspaceFromInvitation(username, this.user);
-	}
-
 	const teamspacePerm = this.customData.permissions.findByUser(username);
 	// check if they have any permissions assigned
 	return Project.find({ account: this.user }, { "permissions.user": username }).then(projects => {
@@ -1187,11 +1183,7 @@ schema.methods.addTeamMember = function (user, job, permissions) {
 		} else {
 			return User.findByUserName(user).then((userEntry) => {
 				if (!userEntry) {
-					if (C.EMAIL_REGEXP.test(user)) {
-						return Invitations.create(user, this.user, job, permissions);
-					} else {
-						return Promise.reject(responseCodes.USER_NOT_FOUND);
-					}
+					return Promise.reject(responseCodes.USER_NOT_FOUND);
 				}
 
 				if (!job) {
@@ -1254,17 +1246,14 @@ schema.statics.getMembers = function (teamspace) {
 	const getTeamspacePermissions = User.findByUserName(teamspace)
 		.then(user => user.toObject().customData.permissions);
 
-	const getInvitations = Invitations.getTeamspaceInvitationsAsUsers(teamspace);
-
 	promises.push(
 		getTeamspaceMembers,
 		getTeamspacePermissions,
-		getJobInfo,
-		getInvitations
+		getJobInfo
 	);
 
 	return Promise.all(promises)
-		.then(([members = [], teamspacePermissions, memToJob = {}, invitations]) => {
+		.then(([members = [], teamspacePermissions, memToJob = {}]) => {
 			return members.map(({user, customData}) => {
 				const permissions = _.find(teamspacePermissions, {user});
 
@@ -1276,7 +1265,7 @@ schema.statics.getMembers = function (teamspace) {
 					permissions: _.get(permissions, "permissions", []),
 					job: _.get(memToJob, user)
 				};
-			}).concat(invitations);
+			});
 		});
 };
 
@@ -1293,10 +1282,6 @@ schema.statics.findUsersInTeamspace = function (teamspace, fields) {
 };
 
 schema.statics.teamspaceMemberCheck = function (teamspace, user) {
-	if (Invitations.isInvitation(user)) {
-		return Invitations.teamspaceInvitationCheck(user, teamspace);
-	}
-
 	return User.findByUserName(user).then((userEntry) => {
 		if (!userEntry) {
 			return Promise.reject(responseCodes.USER_NOT_FOUND);

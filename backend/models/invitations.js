@@ -17,17 +17,18 @@
 "use strict";
 
 const db = require("../handler/db");
-const { omit } = require("lodash");
 const responseCodes = require("../response_codes.js");
 const C = require("../constants");
 
 const getCollection = async () => {
-	return await db.getCollection("admin", "invitations");
+	const coll = await db.getCollection("admin", "invitations");
+	coll.createIndex({ "teamSpaces.teamspace": 1 }, { "unique": true, "background": true, "w":1 });
+	return coll;
 };
 
 const invitations = {};
 
-invitations.create = async (email, teamSpace, job, permissions = []) => {
+invitations.create = async (email, teamspace, job, permissions = []) => {
 	// 1 - find if there is already and invitation with that email
 	// 2 - if there is update the invitation with the new teamspace data
 	// 2.5 - if there is not, create an entry with that email and job/permission
@@ -36,13 +37,15 @@ invitations.create = async (email, teamSpace, job, permissions = []) => {
 	email = email.toLowerCase();
 	const coll = await getCollection();
 	const result = await coll.findOne({_id:email});
-	const data = { [teamSpace] : { job , permissions: { teamspace: permissions }}};
+	const teamspaceEntry = { teamspace, job, permissions: {teamspace: permissions} };
 
 	if (result) {
-		const invitation = {teamSpaces: {...(result.teamSpaces), ...data }};
+		const teamSpaces = result.teamSpaces.filter(entry => entry.teamspace !== teamspace);
+		teamSpaces.push(teamspaceEntry);
+		const invitation = { teamSpaces };
 		await coll.updateOne({_id:email}, { $set: invitation });
 	} else {
-		const invitation = {_id:email ,teamSpaces: data };
+		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
 		await coll.insertOne(invitation);
 	}
 
@@ -50,7 +53,7 @@ invitations.create = async (email, teamSpace, job, permissions = []) => {
 	return {email, job, permissions};
 };
 
-invitations.removeTeamspaceFromInvitation = async (email, teamSpace) => {
+invitations.removeTeamspaceFromInvitation = async (email, teamspace) => {
 	email = email.toLowerCase();
 	const coll = await getCollection();
 	const result = await coll.findOne({_id:email});
@@ -59,9 +62,9 @@ invitations.removeTeamspaceFromInvitation = async (email, teamSpace) => {
 		return null;
 	}
 
-	const data =  { _id: email, teamSpaces: omit(result.teamSpaces,  teamSpace)};
+	const data =  { _id: email, teamSpaces: result.teamSpaces.filter(teamspaceEntry => teamspaceEntry === teamspace) };
 
-	if (Object.keys(data.teamSpaces).length === 0) {
+	if (data.teamSpaces.length === 0) {
 		await coll.deleteOne({_id: email});
 		return {};
 	} else {
@@ -84,14 +87,6 @@ invitations.setTeamspacePermission = async (email, teamspace, permissions) => {
 	const coll = await getCollection();
 	await coll.updateOne({}, { $set: { [permissionsField]: permissions } });
 	return {user:email, permissions};
-};
-
-invitations.setProjectPermission = (email, teamSpace, project, permission) => {
-
-};
-
-invitations.setModelPermission = (email, teamSpace, model, permission) => {
-
 };
 
 invitations.teamspaceInvitationCheck = async (email, teamspace) => {
@@ -128,16 +123,13 @@ invitations.unpack = async (user) => {
 	await coll.deleteOne({_id: user.customData.email});
 };
 
-invitations.getTeamspaceInvitationsAsUsers = async (teamspace) => {
-	const queryField = "teamSpaces." + teamspace ;
+invitations.getInvitationsByTeamspace = async (teamspaceName) => {
 	const coll = await getCollection();
-	const results = await coll.find({ [queryField]: {$exists:true}}, {[queryField]: true, job: true}).toArray();
+	const results = await coll.find({ "teamSpaces.teamspace": teamspaceName}).toArray();
 	return results.map(invitationEntry => {
 		const user = invitationEntry._id;
-		const teamspaceData =  invitationEntry.teamSpaces[teamspace];
-		const permissions = teamspaceData.permissions.teamspace;
-		const job = teamspaceData.job;
-		return {user, isInvitation: true, isCurrentUser: false, permissions, job};
+		const teamspaceData =  invitationEntry.teamSpaces.find(({teamspace}) => teamspace === teamspaceName);
+		return {user,...teamspaceData};
 	});
 };
 

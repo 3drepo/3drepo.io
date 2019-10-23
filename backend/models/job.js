@@ -21,7 +21,6 @@ const {map, compact, uniq} = require("lodash");
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const responseCodes = require("../response_codes.js");
-const Invitations = require("./invitations");
 const C = require("../constants.js");
 const schema = mongoose.Schema({
 	_id: String,
@@ -95,10 +94,6 @@ schema.statics.addUserToJob = function(teamspace, user, jobName) {
 		return Job.findByJob(teamspace, jobName).then((job) => {
 			if(!job) {
 				return Promise.reject(responseCodes.JOB_NOT_FOUND);
-			}
-
-			if (Invitations.isInvitation(user)) {
-				return Invitations.setJob(user, teamspace, jobName);
 			}
 
 			return Job.removeUserFromAnyJob(teamspace, user).then(() => {
