@@ -25,7 +25,7 @@ import TextField from '@material-ui/core/TextField';
 import { Form } from 'formik';
 import styled from 'styled-components';
 
-import { COLOR } from '../../styles';
+import { COLOR, FONT_WEIGHT } from '../../styles';
 
 export const Container = styled.div`
 	height: 100%;
@@ -95,9 +95,13 @@ export const FormFooter = styled.div`
 export const ConfirmContainer = styled.div`
 	display: flex;
 	align-items: center;
+	margin-left: auto;
+	width: 190px;
 `;
 
 export const FormInfoContainer = styled.div``;
+
+export const PayPalInfoContainer = styled.div``;
 
 export const FormInfo = styled.p`
 	margin: 0 0 5px;
@@ -111,4 +115,12 @@ export const PayPalLogo = styled.img`
 
 export const StyledForm = styled(Form)`
 	height: 100%;
+`;
+
+export const PayPalWarning = styled.p`
+	margin-top: 2px;
+	font-size: 12px;
+	color: ${COLOR.RED};
+	font-weight: ${FONT_WEIGHT.BOLD};
+	width: 220px;
 `;
