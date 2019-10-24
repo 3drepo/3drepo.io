@@ -121,8 +121,8 @@ function* expandToNode(node: any) {
 }
 
 function* getAllTrees(teamspace, modelId, revision) {
-	const fullTree = yield API.getFullTree(teamspace, modelId, revision);
 	yield put(TreeActions.resetComponentState());
+	const fullTree = yield API.getFullTree(teamspace, modelId, revision);
 
 	const proms = [];
 	for (let i = 0; i < fullTree.data.subTrees.length; ++i) {
