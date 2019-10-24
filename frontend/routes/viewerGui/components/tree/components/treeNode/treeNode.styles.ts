@@ -46,19 +46,24 @@ interface IExpandableButton {
 	expanded: boolean;
 }
 
-const getBackgroundColor = (props) => cond([
-		[matches(TREE_ITEM_FEDERATION_TYPE), constant(COLOR.GRAY_50)],
-		[matches(TREE_ITEM_MODEL_TYPE), constant(COLOR.GRAY)],
-		[matches(TREE_ITEM_OBJECT_TYPE), () => {
-				if (props.highlighted) {
-					return '#B6C4DE';
-				} else if (props.selected) {
-					return '#D8E6FF';
-				}
-				return COLOR.WHITE;
-			}
-		]
-	])(props.nodeType);
+const getBackgroundColor = (props) => {
+	if (props.highlighted) {
+		return '#B6C4DE';
+	} else if (props.selected) {
+		return '#D8E6FF';
+	}
+
+	switch (props.nodeType) {
+		case TREE_ITEM_FEDERATION_TYPE:
+			return  COLOR.GRAY_50;
+			break;
+		case TREE_ITEM_MODEL_TYPE:
+			return COLOR.GRAY;
+			break;
+		default:
+			return COLOR.WHITE;
+	}
+};
 
 const getButtonBackgroundColor = (props) => {
 	if (props.hasChildren) {
