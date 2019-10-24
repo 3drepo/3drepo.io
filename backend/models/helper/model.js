@@ -36,7 +36,7 @@ const fs = require("fs");
 const ChatEvent = require("../chatEvent");
 const Project = require("../project");
 const _ = require("lodash");
-const uuid = require("node-uuid");
+const nodeuuid = require("uuid/v1");
 const FileRef = require("../fileRef");
 const notifications = require("../notification");
 
@@ -231,7 +231,7 @@ function setStatus(account, model, status, user) {
  * @param {addTimestamp} - add a timestamp to the model settings while you're at it
  */
 function createCorrelationId(setting, addTimestamp = false) {
-	const correlationId = uuid.v1();
+	const correlationId = nodeuuid();
 
 	if(setting) {
 		setting.corID = correlationId;

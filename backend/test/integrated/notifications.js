@@ -23,7 +23,7 @@ const bouncerHelper = require("../helpers/bouncerHelper");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const async = require("async");
-const {v4: newId} = require("node-uuid");
+const newId = require("uuid/v1");
 
 
 const agents = {};

@@ -17,7 +17,7 @@
 "use strict";
 
 const utils = require("../utils");
-const uuid = require("node-uuid");
+const nodeuuid = require("uuid/v1");
 const responseCodes = require("../response_codes.js");
 const db = require("../handler/db");
 
@@ -157,7 +157,7 @@ issue.createIssue = function(dbCol, newIssue) {
 		return Promise.reject({ resCode: responseCodes.ISSUE_NO_NAME });
 	}
 
-	newIssue._id = utils.stringToUUID(newIssue._id ? newIssue._id : uuid.v1());
+	newIssue._id = utils.stringToUUID(newIssue._id ? newIssue._id : nodeuuid());
 	newIssue.created = parseInt(newIssue.created ? newIssue.created : (new Date()).getTime());
 
 	// Assign issue number
