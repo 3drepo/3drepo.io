@@ -30,6 +30,7 @@ import {
 	RISK_CONSEQUENCES,
 	RISK_LIKELIHOODS
 } from '../../../../constants/risks';
+import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Image } from '../../../components/image';
@@ -59,6 +60,8 @@ interface IProps {
 	hideViewOnModel?: boolean;
 	showResidualRiskInput?: boolean;
 	viewer: any;
+	history: any;
+	urlParams: any;
 	onSave: (commentData, finishSubmitting) => void;
 	onTakeScreenshot: (screenshot) => void;
 	showScreenshotDialog: (options) => void;
@@ -126,7 +129,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		<TooltipButton
 			Icon={OpenInBrowser}
 			label="View model"
-			action={this.handleNewScreenshot}
+			action={this.handleGoToModel}
 		/>
 	));
 
@@ -260,6 +263,11 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		const isResidualRiskInputActive = !this.state.isResidualRiskInputActive;
 
 		this.setState({ isResidualRiskInputActive });
+	}
+
+	public handleGoToModel = () => {
+		const { teamspace, modelId } = this.props.urlParams;
+		this.props.history.push(`${ROUTES.VIEWER}/${teamspace}/${modelId}`);
 	}
 
 	public render() {

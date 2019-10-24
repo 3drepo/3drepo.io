@@ -36,7 +36,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	authenticate: AuthActions.authenticate,
 	logout: AuthActions.logout,
 	startup: StartupActions.startup,
-	showNewUpdateDialog: DialogActions.showNewUpdateDialog
+	showNewUpdateDialog: DialogActions.showNewUpdateDialog,
+	hideDialog: DialogActions.hideDialog
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

@@ -46,7 +46,7 @@ export const selectUrlParams = createSelector(
 		const viewerParams = matchPath(location.pathname, { path: viewerPath });
 		const boardParams = matchPath(location.pathname, { path: boardPath });
 
-		return (viewerParams || boardParams).params;
+		return (viewerParams || boardParams || {}).params;
 	}
 );
 

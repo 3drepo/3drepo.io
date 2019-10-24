@@ -52,6 +52,7 @@ interface IProps {
 	authenticate: () => void;
 	logout: () => void;
 	startup: () => void;
+	hideDialog: () => void;
 }
 
 interface IState {
@@ -114,6 +115,7 @@ export class App extends React.PureComponent<IProps, IState> {
 	public componentDidUpdate(prevProps) {
 		if (location.pathname !== prevProps.location.pathname) {
 			this.sendAnalyticsPageView(location);
+			this.props.hideDialog();
 		}
 	}
 
