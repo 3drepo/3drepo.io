@@ -727,15 +727,7 @@ function _handleUpload(correlationId, account, model, username, file, data) {
 		null,
 		data.tag,
 		data.desc
-	).then(() => {
-
-		systemLogger.logInfo(`Job ${correlationId} imported without error`,{
-			account,
-			model,
-			username
-		});
-
-	});
+	);
 }
 
 function importModel(account, model, username, modelSetting, source, data) {
