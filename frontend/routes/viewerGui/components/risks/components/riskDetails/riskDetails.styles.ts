@@ -18,10 +18,14 @@
 import FormControl from '@material-ui/core/FormControl';
 import Grid from '@material-ui/core/Grid';
 import styled from 'styled-components';
+import { LogList as LogListBase } from '../../../../../components/logList/logList.component';
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
+import { PreviewDetails as PreviewDetailsBase } from '../../../previewDetails/previewDetails.component';
 
 export const StyledFormControl = styled(FormControl)`
 `;
+export const LogList = styled(LogListBase)``;
+export const PreviewDetails = styled(PreviewDetailsBase)``;
 
 export const Container = styled.div`
 	display: flex;
@@ -75,4 +79,27 @@ export const FieldsRow = styled(Grid)`
 export const DescriptionImage = styled.div`
 	max-height: 250px;
 	overflow: hidden;
+`;
+
+
+export const HorizontalView = styled.div`
+	display: flex;
+	flex: 1;
+	align-items: flex-start;
+	justify-content: flex-start;
+	overflow: hidden;
+
+	${PreviewDetails}, ${LogList} {
+		min-width: 50%;
+		width: 50%;
+		max-height: 60vh;
+		position: relative;
+		overflow: auto;
+	}
+
+	${LogList} {
+		:before {
+			box-shadow: none;
+		}
+	}
 `;

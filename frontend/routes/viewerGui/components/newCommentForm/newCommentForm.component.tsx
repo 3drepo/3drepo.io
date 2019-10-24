@@ -56,6 +56,7 @@ interface IProps {
 	hideComment?: boolean;
 	hideScreenshot?: boolean;
 	hideUploadButton?: boolean;
+	hideViewOnModel?: boolean;
 	showResidualRiskInput?: boolean;
 	viewer: any;
 	onSave: (commentData, finishSubmitting) => void;
@@ -266,6 +267,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 			hideComment,
 			hideScreenshot,
 			hideUploadButton,
+			hideViewOnModel,
 			showResidualRiskInput,
 			formRef,
 			canComment
@@ -287,7 +289,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 							<ActionsGroup>
 								{this.renderScreenshotButton(!hideScreenshot)}
 								{this.renderUploadImageButton(!hideUploadButton)}
-								{this.renderViewModel(!hideUploadButton)}
+								{this.renderViewModel(!hideViewOnModel)}
 								{this.renderCommentTypeToggle(!hideComment && showResidualRiskInput)}
 							</ActionsGroup>
 							<Field render={({ form }) => (

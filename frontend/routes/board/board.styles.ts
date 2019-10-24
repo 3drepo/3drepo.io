@@ -41,6 +41,10 @@ export const BoardContainer = styled.div`
 
 	.react-trello-lane {
 		width: 350px;
+
+		> div {
+			width: 100%;
+		}
 	}
 
 	.smooth-dnd-draggable-wrapper {

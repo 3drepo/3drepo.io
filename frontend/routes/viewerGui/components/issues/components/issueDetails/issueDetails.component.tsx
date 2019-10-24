@@ -112,7 +112,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public renderPreview = renderWhenTrue(() => {
 		const { expandDetails, horizontal } = this.props;
-		const { commentCount, comments } = this.issueData;
+		const { comments } = this.issueData;
 		const isIssueWithComments = Boolean((comments && comments.length || horizontal) && !this.isNewIssue);
 		const PreviewWrapper = horizontal && isIssueWithComments ? HorizontalView : Fragment;
 		const renderNotCollapsable = () => {
@@ -153,6 +153,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				hideComment={this.isNewIssue}
 				hideScreenshot={this.props.disableViewer}
 				hideUploadButton={!this.props.disableViewer}
+				hideViewOnModel={!this.props.disableViewer || this.isNewIssue}
 			/>
 		</ViewerPanelFooter>
 	));

@@ -98,22 +98,22 @@ const createGroup = (risk, objectInfo, teamspace, model, revision) => {
 	]);
 };
 
-function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting }) {
+function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ignoreViewer = false  }) {
 	try {
 		const myJob = yield select(selectMyJob);
 		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 
-		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
+		const [viewpoint, objectInfo, screenshot, userJob] = !ignoreViewer ? yield all([
 			Viewer.getCurrentViewpoint({ teamspace, model }),
 			Viewer.getObjectsStatus(),
 			riskData.descriptionThumbnail || Viewer.getScreenshot(),
 			myJob
-		]);
+		]) : [{}, null, riskData.descriptionThumbnail || '', myJob];
 
 		viewpoint.hideIfc = ifcSpacesHidden;
 		riskData.rev_id = revision;
 
-		if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
+		if (objectInfo && objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
 			const [highlightedGroup, hiddenGroup] = yield createGroup(riskData, objectInfo, teamspace, model, revision);
 
 			if (highlightedGroup) {
@@ -147,6 +147,13 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting }) {
 		const preparedRisk = prepareRisk(savedRisk, jobs);
 
 		finishSubmitting();
+
+		if (!ignoreViewer) {
+			yield put(RisksActions.showDetails(revision, preparedRisk._id));
+		} else {
+			yield put(DialogActions.hideDialog());
+		}
+
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(RisksActions.goToRisk(preparedRisk));
 		yield put(SnackbarActions.show('Risk created'));
@@ -371,10 +378,10 @@ function* focusOnRisk({ risk, revision }) {
 	}
 }
 
-function* setActiveRisk({ risk, revision }) {
+function* setActiveRisk({ risk, revision, ignoreViewer = false }) {
 	try {
 		yield all([
-			put(RisksActions.focusOnRisk(risk, revision)),
+			!ignoreViewer ? put(RisksActions.focusOnRisk(risk, revision)) : null,
 			put(RisksActions.setComponentState({ activeRisk: risk._id, expandDetails: true }))
 		]);
 	} catch (error) {

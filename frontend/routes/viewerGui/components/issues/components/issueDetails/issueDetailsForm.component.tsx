@@ -108,7 +108,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 				disabled={!this.isNewIssue && !this.canEditBasicProperty}
 			/>
 		</StyledFormControl>
-	))
+	));
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;

@@ -23,7 +23,7 @@ import { Log } from './components/log/log.component';
 import { Container, EmptyStateInfo, LoaderContainer } from './logList.styles';
 
 interface IProps {
-	className: string;
+	className?: string;
 	items: any[];
 	isPending: boolean;
 	currentUser: string;
@@ -34,6 +34,10 @@ interface IProps {
 }
 
 export class LogList extends React.PureComponent<IProps, any> {
+	public static defaultProps = {
+		items: []
+	};
+
 	public renderEmptyState = renderWhenTrue(() => (
 		<EmptyStateInfo>
 			No comments

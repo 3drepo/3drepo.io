@@ -36,6 +36,7 @@ import { Image } from '../../../../../components/image';
 import { TextField } from '../../../../../components/textField/textField.component';
 import PinButton from '../../../pinButton/pinButton.container';
 import { Container, DescriptionImage, FieldsContainer, FieldsRow, StyledFormControl } from './riskDetails.styles';
+import { renderWhenTrue } from '../../../../../../helpers/rendering';
 
 interface IProps {
 	risk: any;
@@ -56,6 +57,7 @@ interface IProps {
 	onChangePin: (pin) => void;
 	setFieldValue: (fieldName, fieldValue) => void;
 	hasPin: boolean;
+	hidePin?: boolean;
 }
 
 interface IState {
@@ -89,6 +91,17 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 			this.setState({ isSaving: false });
 		});
 	}, 200);
+
+	public renderPinButton = renderWhenTrue(() => (
+		<StyledFormControl>
+			<PinButton
+				onChange={this.props.onChangePin}
+				onSave={this.props.onSavePin}
+				disabled={!this.isNewRisk && !canEditBasicProperty}
+				hasPin={this.props.hasPin}
+			/>
+		</StyledFormControl>
+	))
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as IState;
@@ -258,14 +271,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 								/>
 							)} />
 						</StyledFormControl>
-						<StyledFormControl>
-							<PinButton
-								onChange={this.props.onChangePin}
-								onSave={this.props.onSavePin}
-								disabled={!this.isNewRisk && !canEditBasicProperty}
-								hasPin={this.props.hasPin}
-							/>
-						</StyledFormControl>
+						{this.renderPinButton(!this.props.hidePin)}
 					</FieldsContainer>
 				</FieldsRow>
 

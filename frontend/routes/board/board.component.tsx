@@ -42,9 +42,9 @@ import { Panel } from '../components/panel/panel.component';
 
 import { FilterPanel } from '../components/filterPanel/filterPanel.component';
 import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
+import { ListNavigation } from '../viewerGui/components/listNavigation/listNavigation.component';
 import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
 import RiskDetails from '../viewerGui/components/risks/components/riskDetails/riskDetails.container';
-import { ListNavigation } from '../viewerGui/components/listNavigation/listNavigation.component';
 import { getProjectModels, getTeamspaceProjects } from './board.helpers';
 import {
 	AddButton,

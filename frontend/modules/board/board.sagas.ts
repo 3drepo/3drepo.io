@@ -68,12 +68,17 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 	yield put(BoardActions.setIsPending(false));
 }
 
-function* fetchCardData({ boardType, teamspace, modelId, cardId }) {
+function* fetchCardData({ teamspace, modelId, cardId }) {
 	try {
-		const getCardData = boardType === 'issues' ? IssuesActions.setActiveIssue : RisksActions.setActiveRisk;
+		const boardType = yield select(selectBoardType);
 		const cardData = { account: teamspace, model: modelId, _id: cardId };
 
-		yield put(getCardData(cardData, null, true));
+		if (boardType === 'issues') {
+			yield put(IssuesActions.setActiveIssue(cardData, null, true));
+		} else {
+			yield put(RisksActions.setActiveRisk(cardData, null, true));
+			yield put(RisksActions.fetchRisk(teamspace, modelId, cardId));
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'card data', error));
 	}
