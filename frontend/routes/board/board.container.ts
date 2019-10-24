@@ -19,12 +19,10 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import {
-	selectBoardItems,
 	selectBoardType,
 	selectCards,
 	selectFilterProp,
 	selectIsPending,
-	selectItemsCount,
 	selectLanes,
 	selectSearchEnabled,
 	BoardActions,

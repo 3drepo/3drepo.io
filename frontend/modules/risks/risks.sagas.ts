@@ -113,7 +113,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 		viewpoint.hideIfc = ifcSpacesHidden;
 		riskData.rev_id = revision;
 
-		if (objectInfo && objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
+		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
 			const [highlightedGroup, hiddenGroup] = yield createGroup(riskData, objectInfo, teamspace, model, revision);
 
 			if (highlightedGroup) {

@@ -88,6 +88,10 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
+	get isViewerInitialized() {
+		return this.props.viewer.viewer.initialized;
+	}
+
 	public commentRef = React.createRef<any>();
 
 	public renderLogList = renderWhenTrue(() => (
@@ -275,7 +279,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public handleNewScreenshot = async (screenshot) => {
 		const { teamspace, model, viewer } = this.props;
-		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
+		const viewpoint = this.isViewerInitialized ? await viewer.getCurrentViewpoint({ teamspace, model }) : null;
 
 		if (this.isNewRisk) {
 			this.props.setState({ newRisk: {
