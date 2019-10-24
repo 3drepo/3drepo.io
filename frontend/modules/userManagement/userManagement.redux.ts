@@ -23,7 +23,7 @@ import { sortByField } from '../../helpers/sorting';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
 	fetchTeamspaceDetails: ['teamspace'],
-	fetchTeamspaceDetailsSuccess: ['teamspace', 'users', 'currentUser', 'collaboratorLimit'],
+	fetchTeamspaceDetailsSuccess: ['teamspace', 'users', 'invitations', 'currentUser', 'collaboratorLimit'],
 	setPendingState: ['isPending'],
 	addUser: ['user'],
 	addUserSuccess: ['user', 'currentUser'],
@@ -100,12 +100,13 @@ export const setProjectPermissionsToUsers = (state, { projectPermissions }) => {
 };
 
 export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
-	const { teamspace, currentUser } = action;
+	const { teamspace, currentUser, invitations } = action;
 	const users = action.users.map(prepareUserData.bind(null, teamspace.name, currentUser));
 
 	return {
 		...INITIAL_STATE,
 		users,
+		invitations,
 		isPending: false,
 		...pick(teamspace, ['models', 'permissions', 'isAdmin', 'fedModels']),
 		projects: sortByField(teamspace.projects, { order: 'asc', config: { field: 'name' } }),

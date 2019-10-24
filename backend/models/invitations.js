@@ -18,6 +18,7 @@
 
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
+const { omit } = require("lodash");
 const C = require("../constants");
 
 const getCollection = async () => {
@@ -127,9 +128,9 @@ invitations.getInvitationsByTeamspace = async (teamspaceName) => {
 	const coll = await getCollection();
 	const results = await coll.find({ "teamSpaces.teamspace": teamspaceName}).toArray();
 	return results.map(invitationEntry => {
-		const user = invitationEntry._id;
-		const teamspaceData =  invitationEntry.teamSpaces.find(({teamspace}) => teamspace === teamspaceName);
-		return {user,...teamspaceData};
+		const email = invitationEntry._id;
+		const teamspaceData =  omit(invitationEntry.teamSpaces.find(({teamspace}) => teamspace === teamspaceName), "teamspace");
+		return { email, ...teamspaceData };
 	});
 };
 

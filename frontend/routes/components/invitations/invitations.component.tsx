@@ -15,30 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import RemoveCircle from '@material-ui/icons/RemoveCircle';
 import React from 'react';
-
-import { Container, Content, Footer } from './userManagementTab.styles';
+import ReactDOM from 'react-dom';
 
 interface IProps {
-	children: React.ReactChild;
-	footerLabel?: string | JSX.Element;
-	withHeader?: boolean;
+	invitations: any[];
 }
 
-export const UserManagementTab = (props: IProps) => {
-	const {footerLabel, children} = props;
-	return (
-		<>
-			<Container
-				container
-				direction="column"
-				alignItems="stretch"
-				wrap="nowrap"
-				justify="space-between"
-			>
-				<Content item withHeader={props.withHeader}>{children}</Content>
-				{footerLabel && (<Footer item>{footerLabel}</Footer>)}
-			</Container>
-		</>
-	);
-};
+interface IState {
+	stuff: string;
+}
+
+const InvitationsList = ({ invitations }) => invitations.map(({ email }, index) => (<p key={email}>{email}</p>));
+
+export class Invitations extends React.PureComponent<IProps, IState> {
+	public render() {
+		const { invitations } = this.props;
+
+		return ( <div style={{width: 300, height: 300}}> <InvitationsList invitations={invitations} /></div>);
+	}
+}

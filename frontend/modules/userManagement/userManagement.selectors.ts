@@ -79,3 +79,15 @@ export const selectIsTeamspaceAdmin = createSelector(
 export const selectCollaboratorLimit = createSelector(
 	selectUserManagementDomain, (state) => state.collaboratorLimit
 );
+
+export const selectInvitations = createSelector(
+	selectUserManagementDomain, (state) => state.invitations
+);
+
+export const selectLicensesCount = createSelector(
+	selectUsers, selectInvitations , (users, invitations) => users.length + invitations.length
+);
+
+export const selectInvitationsCount = createSelector(
+	selectInvitations , (invitations) => invitations.length
+);

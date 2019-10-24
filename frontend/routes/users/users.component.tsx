@@ -37,6 +37,7 @@ import {
 	TableButton
 } from '../components/customTable/customTable.component';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
+import Invitations from '../components/invitations/invitations.container';
 import { JobItem } from '../components/jobItem/jobItem.component';
 import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 import { UserItem } from '../components/userItem/userItem.component';
@@ -78,12 +79,15 @@ interface IProps {
 	usersSuggestions: any[];
 	limit: any;
 	jobs: any[];
+	licencesCount: number;
+	invitationsCount: number;
 	addUser: (user) => void;
 	removeUser: (username) => void;
 	updateJob: (username, job) => void;
 	updatePermissions: (permissions) => void;
 	onUsersSearch: (searchText) => void;
 	clearUsersSuggestions: () => void;
+	showDialog: (config: any) => void;
 }
 
 interface IState {
@@ -221,7 +225,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 		const { users, usersSuggestions, clearUsersSuggestions, onUsersSearch } = this.props;
 
 		const formProps = {
-			title: this.getFooterLabel(users, limit),
+			title: this.getFooterLabel(),
 			jobs: this.state.jobs,
 			users: usersSuggestions,
 			onSave: this.onSave,
@@ -253,13 +257,39 @@ export class Users extends React.PureComponent<IProps, IState> {
 	/**
 	 * Generate licences summary
 	 */
-	public getFooterLabel = (users = [], limit = 0) => {
-		if (!users) {
+	public getFooterLabel = () => {
+		const { licencesCount , invitationsCount, showDialog } = this.props;
+		const { limit } = this.state;
+
+		if (!licencesCount) {
 			return '';
 		}
 
 		const limitValue = isNumber(limit) ? limit : 'unlimited';
-		return `Assigned licences: ${users.length} out of ${limitValue}`;
+		const invitationsLabel = `${invitationsCount} invitations`;
+
+		const onClick = (e: any ) => {
+			e.preventDefault();
+			e.stopPropagation();
+			showDialog({
+				title: 'Invitations',
+				template: Invitations,
+				data: {
+				}
+			});
+		};
+
+		return (
+			<>Assigned licences: {licencesCount} out of {limitValue}
+			{invitationsCount > 0 &&
+				(
+					<>
+						( <a href="#" onClick={onClick}>{invitationsLabel}</a> )
+					</>
+				)
+			}
+			</>
+			);
 	}
 
 	public render() {
@@ -268,7 +298,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 
 		return (
 			<>
-				<UserManagementTab footerLabel={this.getFooterLabel(users, limit)}>
+				<UserManagementTab footerLabel={this.getFooterLabel()}>
 					<CustomTable cells={USERS_TABLE_CELLS} rows={rows} />
 				</UserManagementTab>
 				{containerElement && this.renderNewUserForm(containerElement)}

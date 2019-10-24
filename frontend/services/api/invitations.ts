@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,30 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import api from './';
 
-import { Container, Content, Footer } from './userManagementTab.styles';
-
-interface IProps {
-	children: React.ReactChild;
-	footerLabel?: string | JSX.Element;
-	withHeader?: boolean;
-}
-
-export const UserManagementTab = (props: IProps) => {
-	const {footerLabel, children} = props;
-	return (
-		<>
-			<Container
-				container
-				direction="column"
-				alignItems="stretch"
-				wrap="nowrap"
-				justify="space-between"
-			>
-				<Content item withHeader={props.withHeader}>{children}</Content>
-				{footerLabel && (<Footer item>{footerLabel}</Footer>)}
-			</Container>
-		</>
-	);
+/**
+ * Get invitations
+ * @param teamspace
+ */
+export const fetchInvitations = (teamspace) => {
+	return api.get(`${teamspace}/invitations`).then(({ data: {invitations} }) => {
+		return invitations;
+	});
 };

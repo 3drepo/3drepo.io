@@ -34,7 +34,7 @@ import {
 } from './newUserForm.styles';
 
 interface IProps {
-	title: string;
+	title: string | JSX.Element;
 	jobs: any[];
 	users: any[];
 	onSave: (user) => void;
