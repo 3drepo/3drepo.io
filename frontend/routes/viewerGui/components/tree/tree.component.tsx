@@ -57,7 +57,7 @@ interface IProps {
 	handleNodesClick?: (nodes, skipExpand) => boolean;
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
-	isolateSelectedNodes: () => void;
+	isolateSelectedNodes: (nodeIds: any[]) => void;
 	hideIfcSpaces: () => void;
 	goToRootNode: (nodeId: boolean) => void;
 	selectNodes: (nodesIds: any[]) => void;
@@ -76,7 +76,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		const { isolateSelectedNodes, hideIfcSpaces } = this.props;
 		return {
 			[TREE_ACTIONS_ITEMS.SHOW_ALL]: this.handleShowAllNodes,
-			[TREE_ACTIONS_ITEMS.ISOLATE_SELECTED]: isolateSelectedNodes,
+			[TREE_ACTIONS_ITEMS.ISOLATE_SELECTED]: () => isolateSelectedNodes(undefined),
 			[TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES]: hideIfcSpaces,
 			[TREE_ACTIONS_ITEMS.SELECT_ALL]: this.handleSelectAllNodes
 		};
