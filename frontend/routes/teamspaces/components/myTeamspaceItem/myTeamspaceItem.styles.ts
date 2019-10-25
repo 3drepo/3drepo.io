@@ -21,7 +21,7 @@ import { COLOR, FONT_WEIGHT } from '../../../../styles';
 export const Container = styled.div`
 	width: 100%;
 	padding-top: 13px;
-	padding-bottom: 2px;
+	padding-bottom: 10px;
 `;
 
 export const Subtitle = styled.div`

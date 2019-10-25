@@ -75,8 +75,8 @@ export const TeamspaceItem = memo((props: IProps) => {
 	};
 
 	const renderAvatar = () => renderWhenTrueOtherwise(
-		() => <Avatar src={avatarUrl} size="35" />,
-		() => <Avatar size="35">{teamspaceInitials}</Avatar>
+		() => <Avatar src={avatarUrl} size="50" />,
+		() => <Avatar size="50">{teamspaceInitials}</Avatar>
 	)(hasAvatar);
 
 	return (

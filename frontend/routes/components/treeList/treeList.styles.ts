@@ -25,13 +25,13 @@ const isActive = (props) => props.active && !props.disabled;
 
 export const Headline = styled.div`
 	cursor: pointer;
-	min-height: 50px;
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
 	padding-left: 24px;
 	padding-right: 13px;
 	background: ${(props) => props.active || props.level === TREE_LEVELS.PROJECT && COLOR.WHITE};
+	min-height: ${(props) => (props.level === TREE_LEVELS.TEAMSPACE) ? '65px' : '50px'};
 `;
 
 export const Details = styled.div`
