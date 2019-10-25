@@ -431,7 +431,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			{this.renderAddModelGridItem(project.teamspace, project.id)}
 			{this.renderModels(models)}
 		</GridContainer>
-	))(this.state.visibleItems[project.id])
+	))(this.state.visibleItems[project.id] && (!this.props.showStarredOnly || project.models.length))
 
 	private renderProject = (props) => ([
 		(
