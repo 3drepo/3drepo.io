@@ -64,7 +64,8 @@ import {
 	Label,
 	List,
 	LoaderContainer,
-	MenuButton
+	MenuButton,
+	OtherTeamspacesLabel
 } from './teamspaces.styles';
 interface IProps {
 	match: any;
@@ -108,13 +109,15 @@ const getSearchQuery = memoizeOne((selectedFilters) => selectedFilters.reduce((q
 	return query;
 }, '').trim());
 
+const iconProps = { fontSize: 'small' };
+
 const PanelMenuButton = (props) => <MenuButtonComponent ariaLabel="Show Teamspaces menu" {...props} />;
 
 const SortingIcon = ({Icon, isDesc}) => {
 	if (isDesc) {
-		return <Icon.DESC IconProps={{ fontSize: 'small' }} />;
+		return <Icon.DESC IconProps={iconProps} />;
 	}
-	return <Icon.ASC IconProps={{ fontSize: 'small' }} />;
+	return <Icon.ASC IconProps={iconProps} />;
 };
 export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
@@ -146,6 +149,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	private get searchQuery() {
 		return getSearchQuery(this.props.selectedFilters);
+	}
+
+	private get myTeamspace() {
+		return this.props.items[0];
 	}
 
 	public componentDidMount() {
@@ -508,11 +515,31 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		</LoaderContainer>
 	));
 
+	public renderMyTeamspace = () => {
+		return this.props.items
+			.slice(0, this.myTeamspace.projects.length + 1)
+			.filter(this.shouldBeVisible)
+			.map(this.renderListItem);
+	}
+
+	public renderOtherTeamspaces = () => {
+		return (
+			<>
+				<OtherTeamspacesLabel>Other teamspaces:</OtherTeamspacesLabel>
+				{this.props.items
+					.slice(this.myTeamspace.projects.length + 1)
+					.filter(this.shouldBeVisible)
+					.map(this.renderListItem)}
+			</>
+		);
+	}
+
 	private renderList = renderWhenTrue(() => (
 		<BodyWrapper>
 			<Body>
 				<SimpleBar>
-						{this.props.items.filter(this.shouldBeVisible).map(this.renderListItem)}
+					{this.renderMyTeamspace()}
+					{this.renderOtherTeamspaces()}
 				</SimpleBar>
 			</Body>
 		</BodyWrapper>
@@ -555,7 +582,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				</Head>
 				<List>
 					{this.renderLoader(isPending)}
-					{this.renderList(!isPending)}
+					{this.renderList(!isPending && this.props.items.length)}
 				</List>
 			</ViewerPanel>
 		);

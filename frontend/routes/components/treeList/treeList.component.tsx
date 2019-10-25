@@ -66,6 +66,7 @@ export const DefaultHeadline = ({children = Function.prototype, ...props}) => (
 );
 
 interface IProps {
+	className?: string;
 	name: string;
 	query?: string;
 	level?: number;
@@ -121,9 +122,9 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { level, renderRoot, onClick, disabled, ...props } = this.props;
+		const { level, renderRoot, onClick, disabled, className, ...props } = this.props;
 		const active = this.isActive;
-		const containerProps = { active, level, disabled };
+		const containerProps = { active, level, disabled, className };
 
 		const rootProps = {
 			...props,

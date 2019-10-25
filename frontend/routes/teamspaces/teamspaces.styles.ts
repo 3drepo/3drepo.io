@@ -129,3 +129,12 @@ export const Action = styled.div`
 export const Label = styled.span`
 	margin-left: 6px;
 `;
+
+export const OtherTeamspacesLabel = styled.div`
+	padding: 10px 23px;
+	font-size: 12px;
+	color: ${COLOR.BLACK_30};
+	margin-bottom: 0px;
+	font-weight: 400;
+	border-bottom: 1px solid ${COLOR.BLACK_6};
+`;

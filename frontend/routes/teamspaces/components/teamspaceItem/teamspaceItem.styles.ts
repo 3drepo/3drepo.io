@@ -1,6 +1,7 @@
 import { Avatar as AvatarComponent } from '@material-ui/core';
 import styled from 'styled-components';
-import { COLOR } from '../../../../styles';
+import { COLOR, FONT_WEIGHT } from '../../../../styles';
+import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
 
 const DEFAULT_AVATAR_SIZE = 30;
 
@@ -18,4 +19,10 @@ export const Avatar = styled(AvatarComponent)`
 		color: ${COLOR.WHITE};
 		font-size: ${(props) => Math.round((props.size || DEFAULT_AVATAR_SIZE) * 14 / DEFAULT_AVATAR_SIZE)}px;
 	}
+`;
+
+export const Container = styled(TreeList).attrs({
+	level: TREE_LEVELS.TEAMSPACE
+})`
+	font-weight: ${FONT_WEIGHT.BOLD};
 `;

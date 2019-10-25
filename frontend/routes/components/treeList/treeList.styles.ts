@@ -56,6 +56,7 @@ export const Container = styled.div<IContainer>`
 	transition: background 150ms ease-in-out;
 	color: ${(props) => props.disabled ? COLOR.BLACK_30 : COLOR.BLACK_60};
 	user-select: none;
+	position: relative;
 
 	& > ${Headline} {
 		padding-left: ${(props) => (props.level || 0) * 24}px;

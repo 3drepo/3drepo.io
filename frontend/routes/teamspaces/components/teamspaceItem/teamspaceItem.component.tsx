@@ -19,14 +19,13 @@ import { memoize } from 'lodash';
 import React, { memo } from 'react';
 
 import { getAvatarUrl } from '../../../../services/api';
-import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { MyTeamspaceItem } from '../myTeamspaceItem/myTeamspaceItem.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
-import { Avatar } from './teamspaceItem.styles';
+import { Avatar, Container } from './teamspaceItem.styles';
 
 interface IProps {
 	name: string;
@@ -81,10 +80,9 @@ export const TeamspaceItem = memo((props: IProps) => {
 	)(hasAvatar);
 
 	return (
-		<TreeList
+		<Container
 			name={name}
 			disabled={disabled}
-			level={TREE_LEVELS.TEAMSPACE}
 			onClick={handleClick}
 			active={active}
 			renderRoot={isMyTeamspace ? MyTeamspaceItem : null}
@@ -92,6 +90,6 @@ export const TeamspaceItem = memo((props: IProps) => {
 			showStarredOnly={props.showStarredOnly}
 		>
 			{renderActions}
-		</TreeList>
+		</Container>
 	);
 });
