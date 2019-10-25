@@ -1294,6 +1294,10 @@ export class UnityUtil {
 		UnityUtil.toUnity('ZoomToHighlightedMeshes', UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
+	public static zoomToObjects(meshEntries: object[]) {
+		UnityUtil.toUnity('ZoomToObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(meshEntries));
+	}
+
 	/**
 	 * Sets the render quality to default
 	 * @category Configurations

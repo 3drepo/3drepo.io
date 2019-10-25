@@ -352,6 +352,8 @@ function* isolateNodes(nodesIds = []) {
 function* isolateSelectedNodes({ nodeId }) {
 	if (nodeId) {
 		yield isolateNodes([nodeId]);
+		const meshes = yield TreeProcessing.getMeshesByNodeIds([nodeId]);
+		Viewer.zoomToObjects({entries: meshes});
 	} else {
 		const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
 		yield isolateNodes(fullySelectedNodes);
