@@ -17,7 +17,7 @@
 
 import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
-import { cond, isEmpty, matches, stubTrue } from 'lodash';
+import { cond, matches, stubTrue } from 'lodash';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
@@ -171,15 +171,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			fetchStarredModels();
 		}
 
-		if (isEmpty(visibleItems)) {
-			visibleItems[currentTeamspace] = true;
-			this.setState({visibleItems});
-		} else {
-			this.setState({
-				visibleItems: showStarredOnly ? starredVisibleItems : visibleItems,
-				lastVisibleItems: visibleItems
-			});
-		}
+		this.setState({
+			visibleItems: showStarredOnly ? starredVisibleItems : visibleItems,
+			lastVisibleItems: visibleItems
+		});
 	}
 
 	public componentDidUpdate(prevProps) {
