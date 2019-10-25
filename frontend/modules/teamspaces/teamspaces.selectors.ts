@@ -249,7 +249,10 @@ export const selectFlattenTeamspaces = createSelector(
 				}
 			}
 
-			if (!hasActiveFilters || teamspaceProjects.length) {
+			const emptyProjects = teamspaceProjects.filter((item) => !item.models.length).length;
+			const hasOnlyEmptyProjects = showStarredOnly && emptyProjects === teamspaceProjects.length;
+
+			if ((!hasActiveFilters || teamspaceProjects.length) && !hasOnlyEmptyProjects ) {
 				flattenList.push({
 					...teamspacesList[index],
 					type: LIST_ITEMS_TYPES.TEAMSPACE,
