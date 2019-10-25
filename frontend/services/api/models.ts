@@ -192,7 +192,7 @@ export const addStarredModel = (model) => {
  * @param modelId
  */
 export const removeStarredModel = (model) => {
-	return api.delete('starredModels', { data: model });
+	return api.delete('starredModels', model);
 };
 
 /**

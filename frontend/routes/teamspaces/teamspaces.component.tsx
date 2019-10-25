@@ -520,7 +520,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public renderOtherTeamspaces = () => {
 		return (
 			<>
-				<OtherTeamspacesLabel>Other teamspaces:</OtherTeamspacesLabel>
+				<OtherTeamspacesLabel>Other Teamspaces:</OtherTeamspacesLabel>
 				{this.props.items
 					.slice(this.myTeamspace.projects.length + 1)
 					.filter(this.shouldBeVisible)
