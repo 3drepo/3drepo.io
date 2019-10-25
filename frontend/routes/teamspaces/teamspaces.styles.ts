@@ -27,7 +27,6 @@ export const Head = styled.div`
 	align-items: center;
 	justify-content: flex-start;
 	background: ${COLOR.WHITE};
-	padding-left: 24px;
 	border-bottom: 1px solid ${COLOR.BLACK_6};
 	position: relative;
 	z-index: 1;
@@ -50,6 +49,14 @@ export const LoaderContainer = styled.div`
 	box-sizing: border-box;
 `;
 
+export const GridContainer = styled.div`
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+	grid-gap: 15px;
+	padding: 10px 15px;
+	background-color: ${COLOR.WHITE};
+`;
+
 export const MenuButton = styled(Button).attrs({
 	classes: {
 		disabled: 'button--disabled'
@@ -67,6 +74,67 @@ export const MenuButton = styled(Button).attrs({
 	}
 `;
 
-export const MyTeamspace = styled.div`
+export const AddModelButtonOption = styled(Button)`
+	&& {
+		flex: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0;
+		margin: 0;
+		border-radius: 0;
+	}
 
+	&:not(:last-child) {
+		border-right: 1px solid ${COLOR.BLACK_12};
+	}
+`;
+
+export const AddModelButton = styled.div`
+	color: ${COLOR.BLACK_20};
+	border: 2px dashed currentColor;
+	display: flex;
+	position: relative;
+	min-height: 74px;
+
+	&:after {
+		left: 0;
+		top: 0;
+		width: 100%;
+		content: '+';
+		align-self: center;
+		text-align: center;
+		font-size: 35px;
+	}
+
+	${AddModelButtonOption} {
+		display: none;
+	}
+
+	&:hover {
+		&:after {
+			display: none;
+		}
+
+		${AddModelButtonOption} {
+			display: block;
+		}
+	}
+`;
+
+export const Action = styled.div`
+	display: flex;
+`;
+
+export const Label = styled.span`
+	margin-left: 6px;
+`;
+
+export const OtherTeamspacesLabel = styled.div`
+	padding: 10px 23px;
+	font-size: 12px;
+	color: ${COLOR.BLACK_30};
+	margin-bottom: 0;
+	font-weight: 400;
+	border-bottom: 1px solid ${COLOR.BLACK_6};
 `;

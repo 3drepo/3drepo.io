@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,10 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
 
-export const selectStarredMetaDomain = (state) => ({...state.starredMeta});
+import { DialogActions } from '../../../../modules/dialog';
+import { TeamspaceItem } from './teamspaceItem.component';
 
-export const selectStarredMeta = createSelector(
-	selectStarredMetaDomain, (state) => state.starredMetaMap
-);
+const mapStateToProps = createStructuredSelector({});
+
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	showDialog: DialogActions.showDialog,
+}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(TeamspaceItem);

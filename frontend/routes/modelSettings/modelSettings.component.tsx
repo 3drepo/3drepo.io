@@ -50,7 +50,7 @@ import {
 
 const ModelSettingsSchema = Yup.object().shape({
 	code: Yup.string()
-		.max(5)
+		.max(50)
 		.matches(/^[A-Za-z0-9]+$/),
 	longitude: schema.measureNumberDecimal,
 	latitude: schema.measureNumberDecimal,
@@ -202,15 +202,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleBackLink = () => {
-		const { history, location, match } = this.props;
-		const queryParams = queryString.parse(location.search);
-		const { project } = queryParams;
-		const { teamspace } = match.params;
-
-		history.push({
-			pathname: ROUTES.TEAMSPACES,
-			search: `?teamspace=${teamspace}&project=${project}`
-		});
+		this.props.history.push({ pathname: ROUTES.TEAMSPACES });
 	}
 
 	public renderTitleWithBackLink = () => (
@@ -272,11 +264,13 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 									disabled
 								/>
 							)} />
-							<Field name="code" render={ ({ field }) => (
+							<Field name="code" render={ ({ field, form }) => (
 								<StyledTextField
 									{...field}
 									label="Model code"
 									margin="normal"
+									error={Boolean(form.errors.code)}
+									helperText={form.errors.code}
 								/>
 							)} />
 						</FieldsRow>

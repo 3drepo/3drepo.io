@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,30 +16,47 @@
  */
 
 import { Tooltip } from '@material-ui/core';
+import { TooltipProps } from '@material-ui/core/Tooltip';
 import React from 'react';
+import { renderWhenTrueOtherwise } from '../../../helpers/rendering';
 import { SmallIconButtonStyled } from './smallIconButton.styles';
 
 interface IProps {
 	onClick?: (event: React.SyntheticEvent) => void;
 	Icon: React.ComponentType;
-	tooltip: string;
+	ariaLabel?: string;
+	tooltip?: string;
 	disabled?: boolean;
+	tooltipPlacement?: TooltipProps['placement'];
 }
 
 export class SmallIconButton extends React.PureComponent<IProps, any> {
-	public render() {
-		const { Icon, tooltip, onClick, disabled = false } = this.props;
+	public static defaultProps = {
+		tooltipPlacement: 'bottom'
+	};
+
+	public renderButtonConditionally = renderWhenTrueOtherwise(() => (
+		<Tooltip title={this.props.tooltip} placement={this.props.tooltipPlacement}>
+			{this.renderButton()}
+		</Tooltip>
+	), () => this.renderButton());
+
+	public renderButton = () => {
+		const { Icon, ariaLabel, tooltip, onClick, disabled = false } = this.props;
+
 		return (
-			<Tooltip title={tooltip}>
-				<SmallIconButtonStyled
-					component="span"
-					aria-label={tooltip}
-					onClick={onClick}
-					disabled={disabled}
-					>
-					<Icon />
-				</SmallIconButtonStyled>
-			</Tooltip>
+			<SmallIconButtonStyled
+				component="span"
+				aria-label={ariaLabel || tooltip}
+				onClick={onClick}
+				disabled={disabled}
+			>
+				<Icon />
+			</SmallIconButtonStyled>
 		);
+	}
+
+	public render() {
+		return this.renderButtonConditionally(this.props.tooltip);
 	}
 }

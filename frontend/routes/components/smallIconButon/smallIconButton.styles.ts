@@ -22,5 +22,6 @@ export const SmallIconButtonStyled = styled(IconButton)`
 	&& {
 		width: 10px;
 		height: 10px;
+		z-index: 1;
 	}
 `;

@@ -1,7 +1,7 @@
 const path = require('path');
 
 const templatesPath = path.join(__dirname, 'templates');
-const componentTemplatesPath = path.join(__dirname, '../reactComponent/templates');
+const componentTemplatesPath = path.join(__dirname, '../reactClassComponent/templates');
 
 module.exports = (plop) => {
   const containerDirectory = 'routes/{{ directory }}/{{ camelCase name }}';

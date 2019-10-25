@@ -10,7 +10,7 @@ import Print from '@material-ui/icons/Print';
 import SyncProblem from '@material-ui/icons/SyncProblem';
 import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
 
-import { DATA_TYPES } from '../routes/components/filterPanel/filterPanel.component';
+import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 import { COLOR, PIN_COLORS } from '../styles';
 
 export const RISK_PANEL_NAME = 'risk';
@@ -107,9 +107,9 @@ export const RISK_LEVELS_COLOURS = {
 	}
 };
 
-export const RISK_FILTER_DATA_TYPES = {
-	NORMAL: DATA_TYPES.UNDEFINED,
-	QUERY: DATA_TYPES.QUERY
+export const RISK_FILTER_FILTER_TYPES = {
+	NORMAL: FILTER_TYPES.UNDEFINED,
+	QUERY: FILTER_TYPES.QUERY
 };
 
 export const RISK_FILTER_RELATED_FIELDS = {
@@ -130,57 +130,57 @@ export const RISK_FILTERS = [
 	{
 		label: 'Category',
 		relatedField: RISK_FILTER_RELATED_FIELDS.CATEGORY,
-		type: RISK_FILTER_DATA_TYPES.NORMAL
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
 	{
 		label: 'Mitigation Status',
 		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS,
-		type: RISK_FILTER_DATA_TYPES.NORMAL
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
 	{
 		label: 'Created by',
 		relatedField: RISK_FILTER_RELATED_FIELDS.CREATED_BY,
-		type: RISK_FILTER_DATA_TYPES.NORMAL
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
 	{
 		label: 'Risk owner',
 		relatedField: RISK_FILTER_RELATED_FIELDS.RISK_OWNER,
-		type: RISK_FILTER_DATA_TYPES.NORMAL
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
 	{
 		label: 'Risk likelihood',
 		relatedField: RISK_FILTER_RELATED_FIELDS.RISK_LIKELIHOOD,
-		type: RISK_FILTER_DATA_TYPES.NORMAL
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
 	{
 		label: 'Risk consequence',
 		relatedField: RISK_FILTER_RELATED_FIELDS.RISK_CONSEQUENCE,
-		type: RISK_FILTER_DATA_TYPES.NORMAL
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
 	{
 		label: 'Level of risk',
 		relatedField: RISK_FILTER_RELATED_FIELDS.LEVEL_OF_RISK,
-		type: RISK_FILTER_DATA_TYPES.NORMAL
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
 	{
 		label: 'Residual likelihood',
 		relatedField: RISK_FILTER_RELATED_FIELDS.RESIDUAL_LIKELIHOOD,
-		type: RISK_FILTER_DATA_TYPES.NORMAL
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
 	{
 		label: 'Residual consequence',
 		relatedField: RISK_FILTER_RELATED_FIELDS.RESIDUAL_CONSEQUENCE,
-		type: RISK_FILTER_DATA_TYPES.NORMAL
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
 	{
 		label: 'Residual level of risk',
 		relatedField: RISK_FILTER_RELATED_FIELDS.RESIDUAL_LEVEL_OF_RISK,
-		type: RISK_FILTER_DATA_TYPES.NORMAL
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	},
 	{
 		label: 'Overall level of risk',
 		relatedField: RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK,
-		type: RISK_FILTER_DATA_TYPES.NORMAL
+		type: RISK_FILTER_FILTER_TYPES.NORMAL
 	}
 ] as any;
 

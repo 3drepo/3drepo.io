@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import api from './';
+import api, { getAPIUrl } from './';
 
 /**
  * Get users
@@ -109,3 +109,5 @@ export const updateUser = (teamspace, user) => {
 export const uploadAvatar = (teamspace, formData) => {
 	return api.post(`${teamspace}/avatar`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 };
+
+export const getAvatarUrl = (username) => getAPIUrl(`${username}/avatar?${Date.now()}`);

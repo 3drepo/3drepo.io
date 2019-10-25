@@ -32,7 +32,7 @@ import { Bim } from './bim.component';
 
 import { DialogActions } from '../../../../modules/dialog';
 import { selectMetaKeys } from '../../../../modules/model';
-import { selectStarredMeta, StarredMetaActions } from '../../../../modules/starredMeta';
+import { selectStarredMeta, StarredActions } from '../../../../modules/starred';
 
 const mapStateToProps = createStructuredSelector({
 	metadata: selectFilteredMetadata,
@@ -48,9 +48,9 @@ const mapStateToProps = createStructuredSelector({
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchMetadata: BimActions.fetchMetadata,
 	setComponentState: BimActions.setComponentState,
-	clearStarredMetadata: StarredMetaActions.clearStarredMeta,
-	addMetaRecordToStarred: StarredMetaActions.addToStarredMeta,
-	removeMetaRecordFromStarred: StarredMetaActions.removeFromStarredMeta,
+	clearStarredMetadata: StarredActions.clearStarredMeta,
+	addMetaRecordToStarred: StarredActions.addToStarredMeta,
+	removeMetaRecordFromStarred: StarredActions.removeFromStarredMeta,
 	showConfirmDialog: DialogActions.showConfirmDialog
 }, dispatch);
 

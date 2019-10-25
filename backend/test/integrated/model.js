@@ -226,7 +226,7 @@ describe("Model", function () {
 				updateModelCode("$", done);
 			},
 			function(done) {
-				updateModelCode("123456", done);
+				updateModelCode("zudmylysljfa31fx0aww1d8l3gkq6r82hplcdfx7zhslrmz6ygppj1fhg4e", done);
 			}
 		], done);
 
