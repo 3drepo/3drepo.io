@@ -46,7 +46,10 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	fetchModelPermissionsSuccess: ['selectedModels'],
 	updateModelsPermissions: ['modelsWithPermissions', 'permissions'],
 	updateModelsPermissionsPre: ['modelsWithPermissions', 'permissions'],
-	updateModelPermissionsSuccess: ['updatedModels', 'permissions']
+	updateModelPermissionsSuccess: ['updatedModels', 'permissions'],
+	removeInvitation: ['email'],
+	removeInvitationSuccess: ['email']
+
 }, { prefix: 'USER_MANAGEMENT/' });
 
 export const INITIAL_STATE = {
@@ -56,6 +59,7 @@ export const INITIAL_STATE = {
 	models: [],
 	fedModels: [],
 	users: [],
+	invitations: [],
 	usersSuggestions: [],
 	usersPermissions: [],
 	jobs: [],
@@ -133,6 +137,13 @@ export const removeUserSuccess = (state = INITIAL_STATE, { username }) => {
 		return user !== username;
 	});
 	return {...state, users};
+};
+
+export const removeInvitationSuccess = (state = INITIAL_STATE, { email }) => {
+	const invitations = state.invitations.filter(({email}) => {
+		return email !== email;
+	});
+	return {...state, invitations};
 };
 
 export const setTeamspace = (state = INITIAL_STATE, { teamspace }) => {
@@ -238,6 +249,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.UPDATE_PERMISSIONS_SUCCESS]: updatePermissionsSuccess,
 	[UserManagementTypes.GET_USERS_SUGGESTIONS_SUCCESS]: getUsersSuggestionsSuccess,
 	[UserManagementTypes.CLEAR_USERS_SUGGESTIONS]: clearUsersSuggestions,
+	[UserManagementTypes.REMOVE_INVITATION_SUCCESS]: removeInvitationSuccess,
 
 	// Project
 	[UserManagementTypes.SET_PROJECT]: setProject,

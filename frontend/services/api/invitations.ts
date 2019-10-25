@@ -26,3 +26,11 @@ export const fetchInvitations = (teamspace) => {
 		return invitations;
 	});
 };
+
+/**
+ * Delete invitation
+ * @param teamspace
+ */
+export const removeInvitation = (teamspace, email) => {
+	return api.delete(`${teamspace}/invitations/${email}`);
+};

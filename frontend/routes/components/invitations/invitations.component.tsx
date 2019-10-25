@@ -21,18 +21,40 @@ import ReactDOM from 'react-dom';
 
 interface IProps {
 	invitations: any[];
+	removeInvitation: (email) => void;
 }
 
 interface IState {
 	stuff: string;
 }
 
-const InvitationsList = ({ invitations }) => invitations.map(({ email }, index) => (<p key={email}>{email}</p>));
+const Invitation = ({email, removeInvitation}) => {
+	const onClick = (e: any) => {
+		e.preventDefault();
+		console.log("delete" + email);
+		removeInvitation(email);
+	};
+
+	return (
+		<>
+			<p key={email}>{email}</p>
+			<a href="" onClick={onClick}>x</a>
+		</>
+	);
+};
+
+const InvitationsList = ({invitations, removeInvitation}) =>
+	invitations.map(({email}, index) =>
+		(<Invitation key={email} removeInvitation={removeInvitation} email={email} />));
 
 export class Invitations extends React.PureComponent<IProps, IState> {
 	public render() {
-		const { invitations } = this.props;
+		const { invitations, removeInvitation } = this.props;
 
-		return ( <div style={{width: 300, height: 300}}> <InvitationsList invitations={invitations} /></div>);
+		return (
+			<div style={{width: 300, height: 300}}>
+				<InvitationsList invitations={invitations} removeInvitation={removeInvitation} />
+			</div>
+			);
 	}
 }

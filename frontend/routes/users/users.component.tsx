@@ -293,8 +293,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { rows, containerElement, limit } = this.state;
-		const { users } = this.props;
+		const { rows, containerElement } = this.state;
 
 		return (
 			<>

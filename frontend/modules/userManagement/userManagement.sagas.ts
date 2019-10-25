@@ -81,6 +81,16 @@ export function* addUser({ user }) {
 	}
 }
 
+export function* removeInvitation({ email }) {
+	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		yield API.removeInvitation(teamspace, email);
+		yield put(UserManagementActions.removeInvitationSuccess(email));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'invitation', error));
+	}
+}
+
 export function* removeUser({ username }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
@@ -270,6 +280,7 @@ export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.UPDATE_PERMISSIONS, updatePermissions);
 	yield takeLatest(UserManagementTypes.GET_USERS_SUGGESTIONS, getUsersSuggestions);
 	yield takeLatest(UserManagementTypes.UPDATE_JOB, updateUserJob);
+	yield takeLatest(UserManagementTypes.REMOVE_INVITATION, removeInvitation);
 
 	// Models
 	yield takeLatest(UserManagementTypes.FETCH_MODELS_PERMISSIONS, fetchModelsPermissions);

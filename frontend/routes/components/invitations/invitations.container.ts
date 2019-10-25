@@ -22,6 +22,7 @@ import { createStructuredSelector } from 'reselect';
 
 import {
 	selectInvitations,
+	UserManagementActions
 } from '../../../modules/userManagement';
 import { Invitations } from './invitations.component';
 
@@ -30,6 +31,7 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	removeInvitation: UserManagementActions.removeInvitation
 }, dispatch);
 
 export default withRouter(

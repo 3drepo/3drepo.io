@@ -45,6 +45,8 @@ router.get("/invitations", middlewares.isTeamspaceMember, getInvitations);
 
 router.post("/invitations",  middlewares.isTeamspaceMember, sendInvitation);
 
+router.delete("/invitations/:email", middlewares.isTeamspaceMember, removeInvitation);
+
 function getInvitations(req, res, next) {
 	Invitations.getInvitationsByTeamspace(req.params.account).then(invitations => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {invitations});
@@ -64,4 +66,13 @@ function sendInvitation(req, res, next) {
 	});
 }
 
+function removeInvitation(req, res, next) {
+	const { account, email } = req.params;
+
+	Invitations.removeTeamspaceFromInvitation(email, account).then(() => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {email});
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
 module.exports = router;
