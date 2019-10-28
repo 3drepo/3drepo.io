@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,17 +16,21 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { ModelActions } from './../../../../modules/model';
-import { ModelItem } from './modelItem.component';
 
-const mapStateToProps = createStructuredSelector({});
+import { DialogActions } from '../../../../modules/dialog';
+import { TeamspacesActions } from '../../../../modules/teamspaces';
+import { ProjectItem } from './projectItem.component';
+
+const mapStateToProps = createStructuredSelector({
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	subscribeOnStatusChange: ModelActions.subscribeOnStatusChange,
-	unsubscribeOnStatusChange: ModelActions.unsubscribeOnStatusChange
+	removeProject: TeamspacesActions.removeProject,
+	showConfirmDialog: DialogActions.showConfirmDialog,
+	showDialog: DialogActions.showDialog,
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelItem));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ProjectItem));

@@ -17,7 +17,7 @@
 "use strict";
 
 const utils = require("../utils");
-const uuid = require("node-uuid");
+const nodeuuid = require("uuid/v1");
 const responseCodes = require("../response_codes.js");
 const db = require("../handler/db");
 
@@ -278,7 +278,7 @@ risk.createRisk = function(dbCol, newRisk) {
 		return Promise.reject({ resCode: responseCodes.RISK_NO_NAME });
 	}
 
-	newRisk._id = utils.stringToUUID(uuid.v1());
+	newRisk._id = utils.stringToUUID(nodeuuid());
 	newRisk.created = (new Date()).getTime();
 
 	if (!newRisk.desc || newRisk.desc === "") {

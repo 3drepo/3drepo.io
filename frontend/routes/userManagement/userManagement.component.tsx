@@ -100,7 +100,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	};
 
 	public handleChange = (event, activeTab) => {
-		this.setState({activeTab});
+		this.setState({ activeTab });
 	}
 
 	public onTeamspaceChange = (event, teamspace) => {
@@ -114,7 +114,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const { teamspaces, defaultTeamspace, match, history, currentUser } = this.props;
+		const { teamspaces, match, history, currentUser, onTeamspaceChange } = this.props;
 		const { activeTab } = this.state;
 		const selectedTeamspace = match.params.teamspace;
 
@@ -122,12 +122,15 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 			this.props.fetchTeamspaces(currentUser.username);
 		}
 
+		if (selectedTeamspace) {
+			onTeamspaceChange(selectedTeamspace);
+		}
+
 		const changes = {
 			teamspacesItems: teamspaces.map(({ account }) => ({ value: account }))
 		} as any;
 
 		const teamspaceData = teamspaces.find(({ account }) => account === selectedTeamspace);
-		const teamspace = teamspaceData ? selectedTeamspace : defaultTeamspace;
 
 		// Redirect to projects tab if user has not admin rights
 		if (teamspaceData && !teamspaceData.isAdmin && ADMIN_TABS.includes(activeTab)) {
@@ -137,7 +140,6 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 			changes.activeTab = location.pathname.replace(`${match.url}/`, '');
 		}
 
-		this.props.onTeamspaceChange(teamspace);
 		this.setState(changes);
 	}
 

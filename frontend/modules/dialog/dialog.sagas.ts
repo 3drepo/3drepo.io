@@ -15,20 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { selectIsPending, selectRevisions, ModelActions } from './../../../../modules/model';
-import { RevisionsDialog } from './revisionsDialog.component';
+import { put, takeLatest } from 'redux-saga/effects';
+import { ModelActions } from '../model';
+import { TYPES } from './../../routes/components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
+import { DialogActions, DialogTypes } from './dialog.redux';
 
-const mapStateToProps = createStructuredSelector({
-	revisions: selectRevisions,
-	isPending: selectIsPending
-});
+function* showRevisionsDialog({ config }) {
+	try {
+		const { teamspace, modelId, type } = config.data;
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchModelRevisions: ModelActions.fetchRevisions
-}, dispatch);
+		if (type === TYPES.TEAMSPACES) {
+			yield put(ModelActions.fetchRevisions(teamspace, modelId, true));
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('show', 'revisions dialog', error));
+	}
+}
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsDialog));
+export default function* DialogSaga() {
+	yield takeLatest(DialogTypes.SHOW_REVISIONS_DIALOG, showRevisionsDialog);
+}

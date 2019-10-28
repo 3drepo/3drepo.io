@@ -16,18 +16,31 @@
  */
 
 import Grid from '@material-ui/core/Grid';
-import Grow from '@material-ui/core/Grow';
 import styled from 'styled-components';
+
+export const StyledGridActions = styled.div`
+	display: flex;
+	opacity: ${(props) => props.opened ? 1 : 0};
+	transform-origin: right;
+	transition: opacity 200ms ease-in-out;
+`;
 
 export const StyledGrid = styled(Grid)`
 	&& {
-		width: auto;
-		position: relative;
-	}
-`;
+		position: absolute;
+		background: transparent;
+		width: 100%;
+		display: flex;
+		justify-content: flex-end;
+		z-index: 1;
+		left: 0;
+		top: 0;
+		padding: 0 13px;
 
-export const StyledGrow = styled(Grow)`
-	&& {
-		transform-origin: right;
+		&:hover {
+			${StyledGridActions} {
+				opacity: 1;
+			}
+		}
 	}
 `;

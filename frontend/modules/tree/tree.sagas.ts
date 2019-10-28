@@ -121,6 +121,7 @@ function* expandToNode(node: any) {
 }
 
 function* getAllTrees(teamspace, modelId, revision) {
+	yield put(TreeActions.resetComponentState());
 	const fullTree = yield API.getFullTree(teamspace, modelId, revision);
 
 	const proms = [];
@@ -229,7 +230,6 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false}) {
 		yield put(TreeActions.clearCurrentlySelected(false));
 		yield take(TreeTypes.UPDATE_DATA_REVISION);
 	}
-
 	if (removeGroup) {
 		yield put(TreeActions.deselectNodes(nodesIds));
 	} else {
@@ -351,6 +351,8 @@ function* isolateNodes(nodesIds = []) {
 function* isolateSelectedNodes({ nodeId }) {
 	if (nodeId) {
 		yield isolateNodes([nodeId]);
+		const meshes = yield TreeProcessing.getMeshesByNodeIds([nodeId]);
+		Viewer.zoomToObjects({entries: meshes});
 	} else {
 		const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
 		yield isolateNodes(fullySelectedNodes);

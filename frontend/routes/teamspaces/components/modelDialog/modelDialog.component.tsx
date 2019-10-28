@@ -16,7 +16,7 @@
  */
 
 import { Field, Form, Formik } from 'formik';
-import React from 'react';
+import React, { useCallback } from 'react';
 import * as Yup from 'yup';
 
 import Button from '@material-ui/core/Button';
@@ -29,6 +29,7 @@ import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 
+import { getTeamspacesList, getTeamspaceProjects } from '../../../../helpers/model';
 import { MODEL_SUBTYPES } from './../../teamspaces.contants';
 import { FieldWrapper, Row, SelectWrapper } from './modelDialog.styles';
 
@@ -38,213 +39,132 @@ const ModelSchema = Yup.object().shape({
 	project: Yup.string().required(),
 	unit: Yup.string().required(),
 	type: Yup.string().required(),
-	code: Yup.string().max(5).matches(/^[A-Za-z0-9]+$/)
+	code: Yup.string().max(50).matches(/^[A-Za-z0-9]+$/)
 });
 
 interface IProps {
-	modelName?: string;
-	teamspace?: string;
+	teamspaces: any;
+	projects: any;
 	project?: string;
-	teamspaces: any[];
-	projects?: any[];
+	teamspace?: string;
 	handleResolve: (model) => void;
 	handleClose: () => void;
-	modelId: string;
+	createModel: (teamspace, data) => void;
 }
 
-interface IState {
-	selectedTeamspace: string;
-	selectedProject: string;
-	projectsItems: any[];
-	modelName: string;
-	unit: string;
-}
+export const ModelDialog = (props: IProps) => {
+	const { teamspaces, projects, handleClose, createModel, project, teamspace } = props;
 
-export class ModelDialog extends React.PureComponent<IProps, IState> {
-	public static getDerivedStateFromProps(nextProps: IProps) {
-		const newState = {} as any;
+	const handleModelSave = useCallback((values) => {
+		const selectedProject = projects[values.project].name;
+		createModel(values.teamspace, { ...values, project: selectedProject });
+		handleClose();
+	}, [projects, handleClose, createModel]);
 
-		if (Boolean(nextProps.teamspace)) {
-			newState.selectedTeamspace = nextProps.teamspace;
-		}
-
-		if (Boolean(nextProps.project) && Boolean(nextProps.projects)) {
-			newState.selectedProject = nextProps.project;
-			newState.projectsItems = nextProps.projects;
-		}
-
-		return newState;
-	}
-
-	public state = {
-		selectedTeamspace: '',
-		projectsItems: [],
-		selectedProject: '',
-		modelName: '',
-		unit: ''
-	};
-
-	public componentDidMount() {
-		const { modelName } = this.props;
-
-		if (modelName.length) {
-			this.setState({ modelName });
-		}
-	}
-
-	public handleModelSave = (values) => {
-		this.props.handleResolve({...values});
-	}
-
-	public handleTeamspaceChange = (onChange) => (event, teamspaceName) => {
-		this.setState({
-			selectedTeamspace: teamspaceName,
-			projectsItems: this.getTeamspaceProjects(teamspaceName)
-		});
-
-		onChange(event, teamspaceName);
-	}
-
-	public handleUnitChange = (onChange) => (event, unit) => {
-		this.setState({ unit });
-
-		onChange(event);
-	}
-
-	public handleProjectChange = (onChange) => (event, projectName) => {
-		this.setState({ selectedProject: projectName });
-
-		onChange(event, projectName);
-	}
-
-	public handleNameChange = (onChange) => (event) => {
-		this.setState({ modelName: event.currentTarget.value });
-
-		onChange(event);
-	}
-
-	public getTeamspaceProjects = (teamspaceName) => {
-		const selectedTeamspace = this.props.teamspaces.find((teamspace) => teamspace.value === teamspaceName);
-		return selectedTeamspace.projects.map(({ name, models }) => ({ value: name, models }));
-	}
-
-	public render() {
-		const { teamspace, project, teamspaces, handleClose } = this.props;
-		const { modelName, projectsItems, unit } = this.state;
-
-		return (
-			<Formik
-				initialValues={{ teamspace, project, modelName, unit, desc: '', code: '', type: '' }}
-				validationSchema={ModelSchema}
-				onSubmit={this.handleModelSave}
-			>
-				<Form>
-					<DialogContent>
+	return (
+		<Formik
+			initialValues={{ project, teamspace }}
+			validationSchema={ModelSchema}
+			onSubmit={handleModelSave}
+		>
+			<Form>
+				<DialogContent>
+					<SelectWrapper fullWidth required>
+						<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
+						<Field name="teamspace" render={ ({ field, form }) => (
+							<CellSelect
+								{...field}
+								error={Boolean(form.touched.teamspace && form.errors.teamspace)}
+								helperText={form.touched.teamspace && (form.errors.teamspace || '')}
+								items={getTeamspacesList(teamspaces)}
+								placeholder="Select teamspace"
+								disabledPlaceholder
+								inputId="teamspace-select"
+							/>
+						)} />
+					</SelectWrapper>
+					<SelectWrapper fullWidth required>
+						<InputLabel shrink htmlFor="project-select">Project</InputLabel>
+						<Field name="project" render={ ({ field, form }) => (
+							<CellSelect
+								{...field}
+								error={Boolean(form.touched.project && form.errors.project)}
+								helperText={form.touched.project && (form.errors.project || '')}
+								items={getTeamspaceProjects(form.values.teamspace, teamspaces, projects)}
+								placeholder="Select project"
+								disabledPlaceholder
+								inputId="project-select"
+							/>
+						)} />
+					</SelectWrapper>
+					<Row>
+						<FieldWrapper>
+							<Field name="modelName" render={({ field, form }) => (
+								<TextField
+									{...field}
+									error={Boolean(form.touched.modelName && form.errors.modelName)}
+									helperText={form.touched.modelName && (form.errors.modelName || '')}
+									label="Model Name"
+									margin="normal"
+									required
+									fullWidth
+								/>
+							)} />
+						</FieldWrapper>
 						<SelectWrapper fullWidth required>
-							<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
-							<Field name="teamspace" render={ ({ field, form }) => (
+							<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
+							<Field name="unit" render={({ field }) => (
 								<CellSelect
 									{...field}
-									error={Boolean(form.touched.teamspace && form.errors.teamspace)}
-									helperText={form.touched.teamspace && (form.errors.teamspace || '')}
-									items={teamspaces}
-									placeholder="Select teamspace"
-									disabled={Boolean(teamspace)}
+									placeholder="Select unit"
 									disabledPlaceholder
-									inputId="teamspace-select"
-									value={teamspace}
-									onChange={this.handleTeamspaceChange(field.onChange)}
+									required
+									items={clientConfigService.units}
+									inputId="unit-select"
 								/>
 							)} />
 						</SelectWrapper>
+					</Row>
+					<Row>
+						<FieldWrapper>
+							<Field name="code" render={({ field, form }) => (
+								<TextField
+									{...field}
+									error={Boolean(form.touched.code && form.errors.code)}
+									helperText={form.touched.code && (form.errors.code || '')}
+									label="Model Code (optional)"
+									margin="normal"
+									fullWidth
+								/>
+							)} />
+						</FieldWrapper>
 						<SelectWrapper fullWidth required>
-							<InputLabel shrink htmlFor="project-select">Project</InputLabel>
-							<Field name="project" render={ ({ field, form }) => (
+							<InputLabel shrink htmlFor="type-select">Model Type</InputLabel>
+							<Field name="type" render={ ({ field }) => (
 								<CellSelect
 									{...field}
-									error={Boolean(form.touched.project && form.errors.project)}
-									helperText={form.touched.project && (form.errors.project || '')}
-									items={projectsItems}
-									placeholder="Select project"
-									disabled={Boolean(project)}
+									placeholder="Select model type"
 									disabledPlaceholder
-									inputId="project-select"
-									value={project}
-									onChange={this.handleProjectChange(field.onChange)}
+									items={MODEL_SUBTYPES}
+									required
+									inputId="type-select"
 								/>
 							)} />
 						</SelectWrapper>
-						<Row>
-							<FieldWrapper>
-								<Field name="modelName" render={ ({ field, form }) => (
-									<TextField
-										{...field}
-										error={Boolean(form.touched.modelName && form.errors.modelName)}
-										helperText={form.touched.modelName && (form.errors.modelName || '')}
-										label="Model Name"
-										margin="normal"
-										required
-										fullWidth
-										value={this.state.modelName}
-										onChange={this.handleNameChange(field.onChange)}
-									/>
-								)} />
-							</FieldWrapper>
-							<SelectWrapper fullWidth required>
-								<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
-								<Field name="unit" render={ ({ field }) => (
-									<CellSelect
-										{...field}
-										placeholder="Select unit"
-										disabledPlaceholder
-										required
-										items={clientConfigService.units}
-										value={unit}
-										onChange={this.handleUnitChange(field.onChange)}
-										inputId="unit-select"
-									/>
-								)} />
-							</SelectWrapper>
-						</Row>
-						<Row>
-							<FieldWrapper>
-								<Field name="code" render={ ({ field }) => (
-									<TextField
-										{...field}
-										label="Model Code (optional)"
-										margin="normal"
-										fullWidth
-									/>
-								)} />
-							</FieldWrapper>
-							<SelectWrapper fullWidth required>
-								<InputLabel shrink htmlFor="type-select">Model Type</InputLabel>
-								<Field name="type" render={ ({ field }) => (
-									<CellSelect
-										{...field}
-										placeholder="Select model type"
-										disabledPlaceholder
-										items={MODEL_SUBTYPES}
-										required
-										inputId="type-select"
-									/>
-								)} />
-							</SelectWrapper>
-						</Row>
-					</DialogContent>
-					<DialogActions>
-						<Button onClick={handleClose} color="secondary">Cancel</Button>
-						<Field render={ ({ form }) =>
-							<Button
-								type="submit"
-								variant="raised"
-								color="secondary"
-								disabled={(!form.isValid || form.isValidating)}>
-								Save
-							</Button>} />
-					</DialogActions>
-				</Form>
-			</Formik>
-		);
-	}
-}
+					</Row>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={handleClose} color="secondary">Cancel</Button>
+					<Field render={({ form }) =>
+						<Button
+							type="submit"
+							variant="raised"
+							color="secondary"
+							disabled={(!form.isValid || form.isValidating)}>
+							Save
+						</Button>} />
+				</DialogActions>
+			</Form>
+		</Formik>
+	);
+};

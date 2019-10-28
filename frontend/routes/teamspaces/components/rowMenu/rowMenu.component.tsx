@@ -20,7 +20,7 @@ import MoreVert from '@material-ui/icons/MoreVert';
 import { isEmpty } from 'lodash';
 import React from 'react';
 
-import { StyledGrid, StyledGrow } from './rowMenu.styles';
+import { StyledGrid, StyledGridActions } from './rowMenu.styles';
 
 interface IProps {
 	open?: boolean;
@@ -30,22 +30,16 @@ interface IProps {
 }
 
 interface IState {
-	open: boolean;
 	pointerEvents: boolean;
 }
 
 export class RowMenu extends React.PureComponent<IProps, IState> {
 	public state = {
-		open: false,
 		pointerEvents: false
 	};
 
 	public componentDidUpdate(prevProps: IProps) {
 		const changes = {} as IState;
-
-		if (this.props.open !== prevProps.open) {
-			changes.open = this.props.open;
-		}
 
 		if (!isEmpty(changes)) {
 			this.setState(changes);
@@ -62,14 +56,6 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { children, disabled, forceOpen, toggleForceOpen } = this.props;
-		const { open } = this.state;
-
-		const growProps = !disabled && {
-			in: open || forceOpen,
-			onEnter: this.onMenuEnter,
-			onEntered: this.onMenuEntered,
-			timeout: 300
-		};
 
 		return (
 			<StyledGrid
@@ -79,20 +65,16 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 				alignItems="center"
 				justify="flex-start"
 			>
-				<StyledGrow
-					appear={!disabled}
-					{...growProps}
+				<StyledGridActions
+					container
+					wrap="nowrap"
+					direction="row"
+					alignItems="center"
+					justify="flex-start"
+					opened={forceOpen}
 				>
-					<StyledGrid
-						container
-						wrap="nowrap"
-						direction="row"
-						alignItems="center"
-						justify="flex-start"
-					>
 					{children}
-					</StyledGrid>
-				</StyledGrow>
+				</StyledGridActions>
 				<IconButton aria-label="Toggle menu" onClick={toggleForceOpen} disabled={disabled}>
 					<MoreVert fontSize="small" />
 				</IconButton>

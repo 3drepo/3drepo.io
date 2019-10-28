@@ -1,5 +1,5 @@
 import { get, groupBy, isArray, map } from 'lodash';
-import { DATA_TYPES } from '../routes/components/filterPanel/filterPanel.component';
+import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 
 export const compareStrings = (string1, string2) => {
 	return (string1 || '').toLowerCase().includes((string2 || '').toLowerCase());
@@ -20,10 +20,10 @@ export const searchByFilters = (
 	const groupedFilters = groupBy(filters, 'relatedField');
 	return prefilteredItems.filter((item) => {
 		const filteringResults: any = map(groupedFilters, (selectedFilters: any) => {
-			const filterType = get(selectedFilters[0], 'type', DATA_TYPES.UNDEFINED);
+			const filterType = get(selectedFilters[0], 'type', FILTER_TYPES.UNDEFINED);
 
 			switch (filterType) {
-				case DATA_TYPES.UNDEFINED:
+				case FILTER_TYPES.UNDEFINED:
 					return selectedFilters.some((filter) => {
 						const filterValue =
 							isArray(item[filter.relatedField]) && !item[filter.relatedField].length ? [''] : item[filter.relatedField];
@@ -40,7 +40,7 @@ export const searchByFilters = (
 						});
 					});
 					break;
-				case DATA_TYPES.QUERY:
+				case FILTER_TYPES.QUERY:
 					return selectedFilters.some((filter) => {
 						const logFound = item.comments && item.comments.length ? item.comments.some(({ comment }) => {
 							if (comment) {
@@ -54,7 +54,7 @@ export const searchByFilters = (
 						});
 					});
 					break;
-				case DATA_TYPES.DATE:
+				case FILTER_TYPES.DATE:
 					return selectedFilters.every((filter) => {
 						const itemValue = item[filter.relatedField];
 						if (!itemValue) {

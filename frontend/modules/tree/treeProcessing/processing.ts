@@ -144,6 +144,11 @@ export class Processing {
 		return { unhighlightedObjects };
 	}
 
+	public getMeshesByNodeIds = (nodeIds = []) => {
+		const nodes = this.getNodesByIds(nodeIds);
+		return this.getMeshesByNodes(nodes);
+	}
+
 	public isolateNodes = ({ nodesIds = [], ifcSpacesHidden = true}: any) => {
 		const meshesToUpdate = {};
 		const parentNodesByLevel = [];

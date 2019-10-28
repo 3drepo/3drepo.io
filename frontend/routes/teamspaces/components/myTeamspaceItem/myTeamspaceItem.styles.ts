@@ -16,14 +16,17 @@
  */
 
 import styled from 'styled-components';
-import { COLOR } from '../../../../styles';
+import { COLOR, FONT_WEIGHT } from '../../../../styles';
 
 export const Container = styled.div`
 	width: 100%;
 	padding-top: 13px;
+	padding-bottom: 10px;
 `;
 
 export const Subtitle = styled.div`
 	font-size: 12px;
 	color: ${COLOR.BLACK_30};
+	margin-bottom: 5px;
+	font-weight: ${FONT_WEIGHT.NORMAL};
 `;

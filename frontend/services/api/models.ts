@@ -94,8 +94,21 @@ export const editModelSettings = (teamspace, modelId, settings) => {
  * @param teamspace
  * @param modelId
  */
-export const getModelRevisions = (teamspace, modelId) => {
-	return api.get(`${teamspace}/${modelId}/revisions.json`);
+export const getModelRevisions = (teamspace, modelId, showVoid) => {
+	return api.get(`${teamspace}/${modelId}/revisions.json${showVoid ? '?showVoid' : ''}`);
+};
+
+/**
+ * Set model's revision state
+ * @param teamspace
+ * @param modelId
+ * @param revision
+ * @param isVoid
+ */
+export const setModelRevisionState = (teamspace, modelId, revision, isVoid) => {
+	return api.patch(`${teamspace}/${modelId}/revisions/${revision}`, {
+		void: isVoid
+	});
 };
 
 /**
@@ -157,4 +170,36 @@ export const deleteModelViewpoint = (teamspace, modelId, viewId) => {
  */
 export const updateModelViewpoint = (teamspace, modelId, viewId, newName) => {
 	return api.put(`${teamspace}/${modelId}/viewpoints/${viewId}`, { name: newName });
+};
+
+/**
+ * Get starred models
+ */
+export const getStarredModels = () => {
+	return api.get('starredModels');
+};
+
+/**
+ * Add starred model
+ * @param modelId
+ */
+export const addStarredModel = (model) => {
+	return api.post('starredModels', model);
+};
+
+/**
+ * Remove starred model
+ * @param modelId
+ */
+export const removeStarredModel = (model) => {
+	return api.delete('starredModels', model);
+};
+
+/**
+ * Override starred model
+ * @param starredModel
+ *
+ */
+export const overrideStarredModel = (starredModelsByTeamspace) => {
+	return api.put('starredModels', starredModelsByTeamspace);
 };

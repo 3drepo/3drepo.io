@@ -5,6 +5,7 @@ import bimSaga from './bim/bim.sagas';
 import chatSaga from './chat/chat.sagas';
 import compareSaga from './compare/compare.sagas';
 import currentUserSaga from './currentUser/currentUser.sagas';
+import dialogSaga from './dialog/dialog.sagas';
 import gisSaga from './gis/gis.sagas';
 import groupsSaga from './groups/groups.sagas';
 import issuesSaga from './issues/issues.sagas';
@@ -13,7 +14,7 @@ import measureSaga from './measure/measure.sagas';
 import modelSaga from './model/model.sagas';
 import notificationsSaga from './notifications/notifications.sagas';
 import risksSaga from './risks/risks.sagas';
-import starredMetaSaga from './starredMeta/starredMeta.sagas';
+import starredSaga from './starred/starred.sagas';
 import startupSaga from './startup/startup.sagas';
 import teamspacesSaga from './teamspaces/teamspaces.sagas';
 import treeSaga from './tree/tree.sagas';
@@ -43,11 +44,12 @@ export default function* rootSaga() {
 		fork(groupsSaga),
 		fork(treeSaga),
 		fork(bimSaga),
-		fork(starredMetaSaga),
+		fork(starredSaga),
 		fork(measureSaga),
 		fork(issuesSaga),
 		fork(compareSaga),
 		fork(chatSaga),
-		fork(viewerGuiSaga)// <-- INJECT MODULE SAGA -->
+		fork(viewerGuiSaga),
+		fork(dialogSaga) // <-- INJECT MODULE SAGA -->
 	]);
 }

@@ -74,7 +74,6 @@ const getFlattenNested = (tree, maps, data = [], idx = 0, level = 1, parentId = 
 			if (childNS !== rowData.namespacedId) {
 				subTreeRoots.push(subTree._id);
 			}
-
 		}
 
 		if (hasChildren && nHiddenChildren === tree.children.length) {

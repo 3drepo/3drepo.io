@@ -16,7 +16,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { put, select, take, takeLatest } from 'redux-saga/effects';
+import { put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
 import * as API from '../../services/api';
@@ -29,6 +29,7 @@ import { TeamspacesActions } from '../teamspaces';
 import { SnackbarActions } from './../snackbar';
 import { uploadFileStatuses } from './model.helpers';
 import { ModelActions, ModelTypes } from './model.redux';
+import { selectRevisions } from './model.selectors';
 
 export function* fetchSettings({ teamspace, modelId }) {
 	try {
@@ -71,11 +72,11 @@ export function* updateSettings({ modelData: { teamspace, project, modelId }, se
 	}
 }
 
-export function* fetchRevisions({ teamspace, modelId }) {
+export function* fetchRevisions({ teamspace, modelId, showVoid = false }) {
 	try {
 		yield put(ModelActions.setPendingState(true));
 
-		const { data: revisions } = yield API.getModelRevisions(teamspace, modelId);
+		const { data: revisions } = yield API.getModelRevisions(teamspace, modelId, showVoid);
 
 		yield put(ModelActions.fetchRevisionsSuccess(revisions));
 		yield put(ModelActions.setPendingState(false));
@@ -84,10 +85,26 @@ export function* fetchRevisions({ teamspace, modelId }) {
 	}
 }
 
+export function* setModelRevisionState({ teamspace, modelId, revision, isVoid }) {
+	try {
+		yield put(ModelActions.setPendingRevision(revision));
+		const revisions = yield select(selectRevisions);
+		const changedRevision = revisions.find((rev) => rev._id === revision);
+
+		if (Boolean(changedRevision.void) !== isVoid) {
+			yield API.setModelRevisionState(teamspace, modelId, revision, isVoid);
+			yield put(ModelActions.setModelRevisionStateSuccess(revision, isVoid));
+		}
+		yield put(ModelActions.setPendingRevision(null));
+	} catch (e) {
+		yield put(DialogActions.showEndpointErrorDialog('set', 'model revision state', e));
+	}
+}
+
 export function* waitForSettingsAndFetchRevisions({ teamspace, modelId }) {
 	try {
 		yield take(ModelTypes.FETCH_SETTINGS_SUCCESS);
-		yield put(ModelActions.fetchRevisions(teamspace, modelId));
+		yield put(ModelActions.fetchRevisions(teamspace, modelId, false));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'model revisions', e));
 	}
@@ -135,6 +152,7 @@ export function* subscribeOnStatusChange({ teamspace, project, modelData }) {
 
 export function* unsubscribeOnStatusChange({ teamspace, project, modelData }) {
 	const { modelId, modelName } = modelData;
+
 	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.MODEL, teamspace, modelId, {
 		unsubscribeToStatusChanged: onChanged(teamspace, project, modelId, modelName)
 	}));
@@ -213,4 +231,5 @@ export default function* ModelSaga() {
 	yield takeLatest(ModelTypes.UNSUBSCRIBE_ON_STATUS_CHANGE, unsubscribeOnStatusChange);
 	yield takeLatest(ModelTypes.FETCH_MAPS, fetchMaps);
 	yield takeLatest(ModelTypes.WAIT_FOR_SETTINGS_AND_FETCH_REVISIONS, waitForSettingsAndFetchRevisions);
+	yield takeEvery(ModelTypes.SET_MODEL_REVISION_STATE, setModelRevisionState);
 }

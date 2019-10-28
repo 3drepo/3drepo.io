@@ -36,6 +36,8 @@ class TreeProcessing {
 
 	public isolateNodes = (payload) => this.processing.isolateNodes(payload);
 
+	public getMeshesByNodeIds = (payload) => this.processing.getMeshesByNodeIds(payload);
+
 	public clearSelected = () => this.processing.clearCurrentlySelected();
 
 	public getParents = (node) => this.processing.getParentsByPath(node);

@@ -22,7 +22,7 @@ import TextField from '@material-ui/core/TextField';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import ArrowForward from '@material-ui/icons/ArrowForward';
 import { Field, Form, Formik } from 'formik';
-import { differenceBy, includes, isEmpty } from 'lodash';
+import { differenceBy, includes, isEmpty, values } from 'lodash';
 import React from 'react';
 import * as Yup from 'yup';
 import {
@@ -30,7 +30,6 @@ import {
 	getFederatedModels,
 	getModelsMap,
 	getNewSelectedModels,
-	getProject
 } from './federationDialog.helpers';
 
 import { clientConfigService } from '../../../../services/clientConfig';
@@ -39,12 +38,13 @@ import { CellSelect } from '../../../components/customTable/components/cellSelec
 import { LoadingDialog } from './../../../../routes/components/dialogContainer/components';
 import { SubModelsField } from './components/subModelsField/subModelsField.component';
 
+import { getTeamspacesList, getTeamspaceProjects } from '../../../../helpers/model';
 import { FieldWrapper, Row, SelectWrapper, StyledDialogContent } from './federationDialog.styles';
 
 const FederationSchema = Yup.object().shape({
 	modelName: schema.firstName.min(2).max(120).required(),
 	teamspace: Yup.string().required(),
-	project: Yup.string().required(),
+	projectName: Yup.string().required(),
 	unit: Yup.string().required(),
 	subModels: Yup.array().required()
 });
@@ -53,17 +53,20 @@ interface IProps {
 	name?: string;
 	modelName?: string;
 	teamspace?: string;
-	project?: string;
 	teamspaces: any[];
+	project?: string;
 	projects?: any[];
-	handleResolve: (model) => void;
-	handleClose: () => void;
+	models?: any[];
+	federations?: any[];
 	type: string;
 	settings: any;
-	fetchModelSettings: (teamspace, modelId) => void;
 	editMode: boolean;
 	isPending: boolean;
 	modelId: string;
+	fetchModelSettings: (teamspace, modelId) => void;
+	handleClose: () => void;
+	createModel: (teamspace, data) => void;
+	updateModel: (teamspace, id, data) => void;
 }
 
 interface IState {
@@ -79,23 +82,14 @@ interface IState {
 	availableMap: any;
 }
 
+const getModelsName = (models) => models.map(({ name}) => name);
+
 export class FederationDialog extends React.PureComponent<IProps, IState> {
-	public static defaultProps = { name: '', teamspace: '', project: '' };
-
-	public static getDerivedStateFromProps(nextProps: IProps) {
-		const newState = {} as any;
-
-		if (Boolean(nextProps.teamspace)) {
-			newState.selectedTeamspace = nextProps.teamspace;
-		}
-
-		if (Boolean(nextProps.project) && Boolean(nextProps.projects)) {
-			newState.selectedProject = nextProps.project;
-			newState.projectsItems = nextProps.projects;
-		}
-
-		return newState;
-	}
+	public static defaultProps = {
+		name: '',
+		teamspace: '',
+		project: ''
+	};
 
 	public state = {
 		selectedTeamspace: '',
@@ -112,31 +106,42 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		const { editMode, modelId, name, teamspace, fetchModelSettings, project } = this.props;
+		const changes = {} as IState;
 
 		if (name.length) {
-			this.setState({ name });
+			changes.name = name;
 		}
+
+		if (teamspace) {
+			changes.selectedTeamspace = teamspace;
+		}
+
 		if (editMode) {
 			fetchModelSettings(teamspace, modelId);
 		}
 		if (project) {
-			this.setInitialAvailableModels(project);
+			changes.selectedProject = project;
+			this.setInitialAvailableModels(teamspace, project);
+		}
+
+		if (!isEmpty(changes)) {
+			this.setState(changes);
 		}
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
 		const changes = {} as any;
-		const { editMode, settings, projects, project, modelName } = this.props;
+		const { editMode, settings, projects, project, modelName, models } = this.props;
 
 		if ((editMode && settings && prevProps.settings !== settings)) {
 			changes.unit = settings.properties.unit;
 		}
 
 		if (editMode && !prevState.federatedModels.length && !prevState.availableModels.length) {
-			const selectedProject = getProject(projects, project);
-			const federatedModels = getFederatedModels(selectedProject, modelName);
+			const selectedProject = projects[project];
+			const federatedModels = getFederatedModels(selectedProject, modelName, models);
 			const availableModels = differenceBy(this.state.availableModels, federatedModels, 'name');
-			const availableMap = getModelsMap(selectedProject);
+			const availableMap = getModelsMap(this.state.availableModels);
 
 			changes.federatedModels = federatedModels;
 			changes.availableModels = availableModels;
@@ -148,32 +153,45 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleModelSave = (values) => {
-		const subModels = this.state.federatedModels.map((model) => {
-			return {
-				database: this.state.selectedTeamspace,
-				modelIndex: this.state.availableMap[model.name].index,
-				model: this.state.availableMap[model.name].id,
-				name: model.name
-			};
-		});
-		const federationValues = {
-			...values,
-			project: this.state.selectedProject,
-			teamspace: this.state.selectedTeamspace,
-			subModels,
-			modelName: values.modelName,
-			name: values.modelName,
-			federate: true
-		};
-		this.props.handleResolve(federationValues);
+	private get projectName() {
+		return (this.props.projects[this.props.project] || {}).name;
 	}
 
-	public handleTeamspaceChange = (onChange) => (event, teamspaceName) => {
+	public handleModelSave = (fedValues) => {
+		const { modelId, editMode, projects, createModel, updateModel, handleClose } = this.props;
+		const { selectedTeamspace, availableMap, federatedModels, selectedProject } = this.state;
+		const subModels = federatedModels.map((model) => ({
+			database: selectedTeamspace,
+			modelIndex: availableMap[model.name].index,
+			model: availableMap[model.name].model,
+			name: model.name
+		}));
+
+		const federationValues = {
+			project: projects[selectedProject].name,
+			subModels,
+			modelName: fedValues.modelName,
+			name: fedValues.modelName,
+			unit: fedValues.unit,
+			federate: true
+		};
+
+		if (!editMode) {
+			createModel(selectedTeamspace, federationValues);
+		} else {
+			updateModel(selectedTeamspace, modelId, federationValues);
+		}
+
+		handleClose();
+	}
+
+	public handleTeamspaceChange = (field) => (event, teamspaceName) => {
+		const { teamspaces, projects } = this.props;
 		this.setState({
-			selectedTeamspace: teamspaceName, projectsItems: this.getTeamspaceProjects(teamspaceName)
+			selectedTeamspace: teamspaceName,
+			projectsItems: getTeamspaceProjects(teamspaceName, teamspaces, projects)
 		});
-		onChange(event, teamspaceName);
+		field.onChange(event, teamspaceName);
 	}
 
 	public handleUnitChange = (onChange) => (event, unit) => {
@@ -183,17 +201,23 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 
 	public handleProjectChange = (onChange) => (event, projectName) => {
 		this.setState({ selectedProject: projectName });
-		this.setInitialAvailableModels(projectName);
+		this.setInitialAvailableModels(this.state.selectedTeamspace, projectName);
 		onChange(event, projectName);
 	}
 
-	public setInitialAvailableModels = (projectName) => {
-		const selectedProject = getProject(this.state.projectsItems, projectName);
-		const availableModels = getAvailableModels(selectedProject);
-		const availableMap = getModelsMap(selectedProject);
+	public setInitialAvailableModels = (teamspace, project) => {
+		const { projects, models, teamspaces } = this.props;
+		const projectsItems = getTeamspaceProjects(teamspace, teamspaces, projects);
+		const availableModels = getAvailableModels(projects[project], models);
+		const availableMap = getModelsMap(availableModels);
 
 		this.setState({
-			availableMap, availableModels, federatedModels: [], selectedAvailableModels: [], selectedFederatedModels: []
+			projectsItems,
+			availableMap,
+			availableModels,
+			federatedModels: [],
+			selectedAvailableModels: [],
+			selectedFederatedModels: []
 		});
 	}
 
@@ -202,31 +226,18 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 		onChange(event);
 	}
 
-	public getTeamspaceProjects = (teamspaceName) => {
-		const selectedTeamspace = this.props.teamspaces.find((teamspace) => teamspace.value === teamspaceName);
-		return selectedTeamspace.projects.map(({ name, models }) => ({ value: name, models }));
-	}
-
 	public handleSelectAllAvailableClick = (event) => {
-		if (event.target.checked) {
-			this.setState((state) =>
-				({ selectedAvailableModels: state.availableModels.map((model) => model.name) }));
-			return;
-		}
-		this.setState({
-			selectedAvailableModels: []
-		});
+		const isChecked = event.target.checked;
+		this.setState((state) => ({
+			selectedAvailableModels: getModelsName(isChecked ? state.availableModels : [])
+		}));
 	}
 
 	public handleSelectAllFederatedClick = (event) => {
-		if (event.target.checked) {
-			this.setState((state) =>
-				({ selectedFederatedModels: state.federatedModels.map((model) => model.name) }));
-			return;
-		}
-		this.setState({
-			selectedFederatedModels: []
-		});
+		const isChecked = event.target.checked;
+		this.setState((state) => ({
+			selectedFederatedModels: getModelsName(isChecked ? state.federatedModels : [])
+		}));
 	}
 
 	public moveToFederated = () => {
@@ -274,9 +285,11 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { modelName, teamspace, project, teamspaces, handleClose, editMode, isPending } = this.props;
-		const { name, projectsItems, selectedProject, unit, availableModels, federatedModels,
-			selectedFederatedModels, selectedAvailableModels } = this.state;
+		const { modelName, teamspace, teamspaces, handleClose, editMode, isPending } = this.props;
+		const {
+			name, projectsItems, selectedProject, unit, availableModels, federatedModels,
+			selectedFederatedModels, selectedAvailableModels
+		} = this.state;
 
 		if (editMode && isPending) {
 			return (<LoadingDialog content={`Loading ${modelName} data...`} />);
@@ -284,7 +297,15 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 
 		return (
 			<Formik
-				initialValues={{ teamspace, project, name, modelName, unit, desc: '', subModels: federatedModels }}
+				initialValues={{
+					teamspace,
+					projectName: this.projectName,
+					name,
+					modelName,
+					unit,
+					desc: '',
+					subModels: federatedModels
+				}}
 				validationSchema={FederationSchema}
 				onSubmit={this.handleModelSave}
 			>
@@ -297,29 +318,29 @@ export class FederationDialog extends React.PureComponent<IProps, IState> {
 									{...field}
 									error={Boolean(form.touched.teamspace && form.errors.teamspace)}
 									helperText={form.touched.teamspace && (form.errors.teamspace || '')}
-									items={teamspaces}
+									items={getTeamspacesList(teamspaces)}
 									placeholder="Select teamspace"
-									disabled={Boolean(teamspace)}
+									disabled={editMode}
 									disabledPlaceholder
 									inputId="teamspace-select"
 									value={teamspace}
-									onChange={this.handleTeamspaceChange(field.onChange)}
+									onChange={this.handleTeamspaceChange(field)}
 								/>
 							)} />
 						</SelectWrapper>
 						<SelectWrapper fullWidth required>
 							<InputLabel shrink htmlFor="project-select">Project</InputLabel>
-							<Field name="project" render={ ({ field, form }) => (
+							<Field name="projectName" render={ ({ field, form }) => (
 								<CellSelect
 									{...field}
-									error={Boolean(form.touched.project && form.errors.project)}
-									helperText={form.touched.project && (form.errors.project || '')}
+									error={Boolean(form.touched.projectName && form.errors.projectName)}
+									helperText={form.touched.projectName && (form.errors.projectName || '')}
 									items={projectsItems}
 									placeholder="Select project"
-									disabled={Boolean(project)}
+									disabled={editMode}
 									disabledPlaceholder
 									inputId="project-select"
-									value={project}
+									value={selectedProject}
 									onChange={this.handleProjectChange(field.onChange)}
 								/>
 							)} />

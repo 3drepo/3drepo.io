@@ -20,7 +20,7 @@ const { hasWriteAccessToModelHelper, hasReadAccessToModelHelper } = require("../
 const modelSettings = require("../models/modelSetting");
 const job = require("./job");
 const utils = require("../utils");
-const uuid = require("node-uuid");
+const nodeuuid = require("uuid/v1");
 const db = require("../handler/db");
 const _ = require("lodash");
 const User = require("./user");
@@ -36,7 +36,7 @@ const NOTIFICATIONS_DB = "notifications";
 
 const generateNotification = function(type, data) {
 	const timestamp = (new Date()).getTime();
-	return Object.assign({_id:utils.stringToUUID(uuid.v1()), read:false, type, timestamp}, data);
+	return Object.assign({_id:utils.stringToUUID(nodeuuid()), read:false, type, timestamp}, data);
 };
 
 // if opts.duplicates == true then array values can contain duplicates.

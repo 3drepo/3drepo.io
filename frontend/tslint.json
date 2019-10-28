@@ -24,7 +24,6 @@
             {
                 "order": [
                     "static-field",
-                    "instance-field",
                     "constructor",
                     "instance-method"
                 ]

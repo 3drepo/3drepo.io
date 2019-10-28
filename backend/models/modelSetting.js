@@ -91,7 +91,7 @@ schema.path("properties.topicTypes").get(function(v) {
 
 schema.set("toObject", { getters: true });
 
-schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,5}$/;
+schema.statics.modelCodeRegExp = /^[a-zA-Z0-9]{0,50}$/;
 
 schema.methods.updateProperties = function(updateObj) {
 	Object.keys(updateObj).forEach(key => {

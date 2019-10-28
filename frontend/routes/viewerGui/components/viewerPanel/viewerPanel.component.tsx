@@ -30,7 +30,7 @@ import {
 
 const ViewerPanelTitle = ({title, Icon, renderActions}) => (
 	<TitleContainer>
-		<Title> {Icon && <TitleIcon>{Icon}</TitleIcon>} {title} </Title>
+		<Title><TitleIcon>{Icon}</TitleIcon>{title}</Title>
 		{renderActions && renderActions()}
 	</TitleContainer>
 );
@@ -40,6 +40,7 @@ interface IProps {
 	className?: string;
 	Icon?: JSX.Element;
 	pending?: boolean;
+	paperProps?: any;
 	renderActions?: () => JSX.Element | JSX.Element[];
 }
 
@@ -69,10 +70,15 @@ export class ViewerPanel extends React.PureComponent<IProps, any> {
 	)
 
 	public render() {
-		const { pending, className } = this.props;
+		const { pending, className, paperProps } = this.props;
 
 		return (
-			<Panel className={className} isPending={pending} title={this.renderTitle()}>
+			<Panel
+				className={className}
+				isPending={pending}
+				title={this.renderTitle()}
+				paperProps={paperProps}
+			>
 				{this.renderLoader(pending)}
 				{this.renderContent(!pending)}
 			</Panel>

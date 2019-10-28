@@ -17,6 +17,12 @@
 
 import { Viewer } from './viewer';
 
+const SHIFT_KEY = 16;
+const CTRL_KEY = 17;
+const ALT_KEY = 18;
+const COMMAND_CHROME_KEY = 91;
+const COMMAND_FF_KEY = 224;
+
 export class MultiSelectService {
 	private isMac = (navigator.platform.indexOf('Mac') !== -1);
 	private accumMode = false;
@@ -33,39 +39,39 @@ export class MultiSelectService {
 		nonePanel: 'pointer'
 	};
 
-	constructor() {
-		this.initKeyWatchers();
+	public initKeyWatchers() {
+		document.addEventListener('keydown', this.keyDownHandler);
+		document.addEventListener('keyup', this.keyUpHandler);
 	}
 
-	public initKeyWatchers() {
-		document.addEventListener('keydown', (event) => {
-			this.handleKey(event.which, true);
-		});
+	public removeKeyWatchers() {
+		document.removeEventListener('keydown', this.keyDownHandler);
+		document.removeEventListener('keyup', this.keyUpHandler);
+	}
 
-		document.addEventListener('keyup', (event) => {
-			this.handleKey(event.which, false);
-		});
+	public keyDownHandler = (event) => {
+		this.handleKey(event.which, true);
+	}
+
+	public keyUpHandler = (event) => {
+		this.handleKey(event.which, false);
 	}
 
 	public handleKey(key: number, keyDown: boolean) {
 		switch (key) {
-			case 16:
-				// Shift
+			case SHIFT_KEY:
 				this.toggleAreaSelect(keyDown);
 				break;
-			case 17:
-				// Ctrl
+			case CTRL_KEY:
 				if (!this.isMac) {
 					this.setAccumMode(keyDown);
 				}
 				break;
-			case 18:
-				// Alt
+			case ALT_KEY:
 				this.setDecumMode(keyDown);
 				break;
-			case 91:
-			case 224:
-				// Command key(Mac)
+			case COMMAND_CHROME_KEY:
+			case COMMAND_FF_KEY:
 				if (this.isMac) {
 					this.setAccumMode(keyDown);
 				}

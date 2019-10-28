@@ -31,7 +31,9 @@ import {
 	FormFooter,
 	FormInfo,
 	FormInfoContainer,
+	PayPalInfoContainer,
 	PayPalLogo,
+	PayPalWarning,
 	StyledButton,
 	StyledForm,
 	StyledFormControl,
@@ -352,18 +354,23 @@ export class SubscriptionForm extends React.PureComponent<IProps, IState> {
 								<FormInfo>* Required field</FormInfo>
 								<FormInfo>** Subject to VAT where applicable</FormInfo>
 							</FormInfoContainer>
-							<ConfirmContainer>
-								<PayPalLogo src="/images/paypal.png" />
-								<Field render={ ({ form }) =>
-										<StyledButton
-											color="secondary"
-											variant="raised"
-											disabled={!form.isValid || form.isValidating || !form.dirty}
-											type="submit">
-											Confirm
-										</StyledButton>}
-								/>
-							</ConfirmContainer>
+							<PayPalInfoContainer>
+								<ConfirmContainer>
+									<PayPalLogo src="/images/paypal.png" />
+									<StyledButton
+										color="secondary"
+										variant="raised"
+										disabled
+										type="submit">
+										Confirm
+									</StyledButton>
+								</ConfirmContainer>
+								<PayPalWarning>
+									Paypal payment is currently unavailable
+									please <a target="_blank" href="https://3drepo.com/contact/">contact us</a> if you
+									would like to purchase a license.
+								</PayPalWarning>
+							</PayPalInfoContainer>
 						</FormFooter>
 					</FormContainer>
 				</StyledForm>
