@@ -132,7 +132,9 @@ export class Viewer {
 
 		this.errCallback = config.onError;
 
+		console.log('constructor', UnityUtil, this.onModelProgress.toString())
 		UnityUtil.init(config.onError, this.onUnityProgress, this.onModelProgress);
+
 		UnityUtil.hideProgressBar();
 
 		this.unityLoaderReady = false;
@@ -162,6 +164,7 @@ export class Viewer {
 	}
 
 	public on = (event, fn, ...args) => {
+		console.log('on event')
 		this.emitter.on(event, fn, ...args);
 	}
 
@@ -174,6 +177,8 @@ export class Viewer {
 	}
 
 	public emit = (event, ...args) => {
+		console.log('on event', event)
+
 		this.emitter.emit(event, ...args);
 	}
 
@@ -269,6 +274,7 @@ export class Viewer {
 	}
 
 	public onUnityProgress = (progress) => {
+		console.log('onUnityProgress', progress)
 		if (progress === 1) {
 			this.emit(Viewer.EVENT.VIEWER_INIT_SUCCESS, progress);
 		} else {
@@ -277,6 +283,7 @@ export class Viewer {
 	}
 
 	public onModelProgress = (progress) => {
+		console.log('onModelProgress', progress)
 		this.emit(Viewer.EVENT.MODEL_LOADING_PROGRESS, progress);
 	}
 

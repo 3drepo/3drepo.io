@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { Container } from './viewerLoader.styles';
@@ -25,56 +25,50 @@ interface IProps {
 	className?: string;
 }
 
-export class ViewerLoader extends React.PureComponent<IProps, any> {
-	public state = {
-		isVisible: false,
-		message: '',
-		progress: 0
+export const ViewerLoader = (props: IProps) => {
+	const [isVisible, setIsVisible] = useState(false);
+	const [message, setMessage] = useState('');
+	const [progress, setProgress] = useState(0);
+
+	const messageLabel = useMemo(() => `${message} (${progress}%)`, [message, progress]);
+
+	const handleUnmount = () => {
+		props.viewer.off(VIEWER_EVENTS.VIEWER_INIT);
+		props.viewer.off(VIEWER_EVENTS.VIEWER_INIT_PROGRESS);
+		props.viewer.off(VIEWER_EVENTS.VIEWER_INIT_SUCCESS);
+		props.viewer.off(VIEWER_EVENTS.MODEL_LOADED);
 	};
 
-	public componentDidMount() {
-		this.props.viewer.on(VIEWER_EVENTS.VIEWER_INIT, this.setProgressState('Loading viewer'));
-		this.props.viewer.on(VIEWER_EVENTS.VIEWER_INIT_PROGRESS, this.setProgressState('Loading viewer'));
-		this.props.viewer.on(VIEWER_EVENTS.MODEL_LOADING_START, this.setProgressState('Loading model'));
-		this.props.viewer.on(VIEWER_EVENTS.MODEL_LOADING_PROGRESS, this.setProgressState('Loading model'));
-		this.props.viewer.on(VIEWER_EVENTS.MODEL_LOADING_CANCEL, this.setProgressState('Loading model'));
-		this.props.viewer.on(VIEWER_EVENTS.MODEL_LOADED, this.setProgressState(''));
-	}
+	const setProgressState = (updatedMessageLabel) => (updatedProgress = 0) => {
+		console.log('progress', updatedMessageLabel, updatedProgress);
+		const isVisibleUpdated = progress !== 1;
+		const percentageProgress = Number((updatedProgress * 100).toFixed(0));
+		setMessage(updatedMessageLabel);
+		setProgress(percentageProgress);
+		setIsVisible(isVisibleUpdated);
+	};
 
-	public componentWillUnmount() {
-		this.props.viewer.off(VIEWER_EVENTS.VIEWER_INIT);
-		this.props.viewer.off(VIEWER_EVENTS.VIEWER_INIT_PROGRESS);
-		this.props.viewer.off(VIEWER_EVENTS.VIEWER_INIT_SUCCESS);
-		this.props.viewer.off(VIEWER_EVENTS.MODEL_LOADED);
-	}
+	useEffect(() => {
+		if (!isVisible) {
+			setTimeout(() => {
+				setMessage('');
+				setProgress(0);
+			}, 250);
+		}
+	}, [isVisible]);
 
-	public render() {
-		return (
-			<Container shouldHide={!this.state.isVisible}>{this.message}</Container>
-		);
-	}
+	useEffect(() => {
+		props.viewer.on(VIEWER_EVENTS.VIEWER_INIT, setProgressState('Loading viewer'));
+		props.viewer.on(VIEWER_EVENTS.VIEWER_INIT_PROGRESS, setProgressState('Loading viewer'));
+		props.viewer.on(VIEWER_EVENTS.MODEL_LOADING_START, setProgressState('Loading model'));
+		props.viewer.on(VIEWER_EVENTS.MODEL_LOADING_PROGRESS, setProgressState('Loading model'));
+		props.viewer.on(VIEWER_EVENTS.MODEL_LOADING_CANCEL, setProgressState('Loading model'));
+		props.viewer.on(VIEWER_EVENTS.MODEL_LOADED, setProgressState(''));
 
-	private get message() {
-		const { message, progress } = this.state;
-		return `${message} (${progress}%)`;
-	}
+		return handleUnmount;
+	}, []);
 
-	private setProgressState = (message) => (progress = 0) => {
-		const isVisible = progress !== 1;
-		const percentageProgress = (progress * 100).toFixed(0);
-		this.setState(() => ({
-			isVisible,
-			message,
-			progress: percentageProgress
-		}), () => {
-			if (!isVisible) {
-				setTimeout(() => {
-					this.setState({
-						message: '',
-						progress: 0
-					});
-				}, 250);
-			}
-		});
-	}
-}
+	return (
+		<Container shouldHide={!isVisible}>{messageLabel}</Container>
+	);
+};

@@ -105,6 +105,7 @@ export class UnityUtil {
 	* @param modelLoaderProgressCallback
 	*/
 	public static init(errorCallback: any, progressCallback: any, modelLoaderProgressCallback: any) {
+		console.log('INIT', progressCallback.toString(), modelLoaderProgressCallback.toString());
 		UnityUtil.errorCallback = errorCallback;
 		UnityUtil.progressCallback = progressCallback;
 		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
@@ -376,8 +377,9 @@ export class UnityUtil {
 		UnityUtil.loadingResolve.resolve();
 	}
 
-/** @hidden */
+	/** @hidden */
 	public static loadingProgress(progress) {
+		console.log('Loading progress', progress);
 		UnityUtil.modelLoaderProgressCallback(progress);
 	}
 

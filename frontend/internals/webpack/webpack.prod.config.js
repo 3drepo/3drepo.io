@@ -6,7 +6,7 @@ const outputNames = {
   main: 'three_d_repo.min.js',
   support: 'support.min.js',
   maintenance: 'maintenance.min.js',
-  unity: '../unity/unity-util.js'
+  //unity: '../unity/unity-util.js'
 };
 
 module.exports = getWebpackConfig({
