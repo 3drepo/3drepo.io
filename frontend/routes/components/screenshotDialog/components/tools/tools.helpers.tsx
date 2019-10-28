@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import SvgIcon from '@material-ui/core/SvgIcon';
+import ArrowIcon from '@material-ui/icons/ArrowRightAlt';
 import ChangeHistoryIcon from '@material-ui/icons/ChangeHistory';
 import CropSquareIcon from '@material-ui/icons/CropSquare';
 import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
@@ -51,12 +52,18 @@ const CLOUD_ITEM = {
 	Icon: CloudIcon
 };
 
+const ARROW_ITEM = {
+	name: SHAPE_TYPES.ARROW,
+	Icon: ArrowIcon
+};
+
 export const SHAPES_MENU = [
 	RECTANGLE_ITEM,
 	TRIANGLE_ITEM,
 	CIRCLE_ITEM,
 	LINE_ITEM,
-	CLOUD_ITEM
+	CLOUD_ITEM,
+	ARROW_ITEM
 ];
 
 const SHAPE_ICONS = {
@@ -64,7 +71,8 @@ const SHAPE_ICONS = {
 	[SHAPE_TYPES.TRIANGLE]: ChangeHistoryIcon,
 	[SHAPE_TYPES.CIRCLE]: PanoramaFishEyeIcon,
 	[SHAPE_TYPES.LINE]: RemoveIcon,
-	[SHAPE_TYPES.CLOUD]: CloudIcon
+	[SHAPE_TYPES.CLOUD]: CloudIcon,
+	[SHAPE_TYPES.ARROW]: ArrowIcon
 };
 
 export const activeShapeIcon = (activeShape) => SHAPE_ICONS[activeShape];

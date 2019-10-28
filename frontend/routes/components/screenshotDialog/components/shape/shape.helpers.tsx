@@ -1,10 +1,11 @@
 import * as React from 'react';
 import {
+	Arrow as ArrowComponent,
 	Circle as CircleComponent,
 	Line as LineComponent,
 	Path,
 	Rect as RectangleComponent,
-	RegularPolygon as PolygonComponent
+	RegularPolygon as PolygonComponent,
 } from 'react-konva';
 
 export const cloud = {
@@ -34,6 +35,7 @@ const PathComponent = React.forwardRef((props: any, ref: any) => {
 	);
 });
 
+export const Arrow = ArrowComponent;
 export const Circle = CircleComponent;
 export const Rectangle = RectangleComponent;
 export const Triangle = TriangleComponent;

@@ -408,7 +408,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			const correctTriangle = figure === SHAPE_TYPES.TRIANGLE && attrs.radius > 1;
 			const correctRectangle =
 				figure === SHAPE_TYPES.RECTANGLE && (Math.abs(attrs.height) > 1 || Math.abs(attrs.width) > 1);
-			const correctLine = figure === SHAPE_TYPES.LINE && attrs.points && attrs.points.length;
+			const correctLine = [SHAPE_TYPES.LINE, SHAPE_TYPES.ARROW].includes(figure) && attrs.points && attrs.points.length;
 			const correctCloud = figure === SHAPE_TYPES.CLOUD && (Math.abs(attrs.scaleX) > 0 || Math.abs(attrs.scaleY) > 0);
 
 			if (correctCircle || correctTriangle || correctRectangle || correctLine || correctCloud) {

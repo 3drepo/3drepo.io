@@ -30,6 +30,7 @@ export const Shape = ({ element, isSelected, handleChange, isDrawingMode }: IPro
 	const { color, figure, ...elementProps } = element;
 	const shape = React.useRef<any>();
 	const transformer = React.useRef<any>();
+	const hasLineLikeBehavior = [SHAPE_TYPES.LINE, SHAPE_TYPES.ARROW].includes(figure);
 
 	React.useEffect(() => {
 		if (isSelected && !isDrawingMode) {
@@ -37,8 +38,6 @@ export const Shape = ({ element, isSelected, handleChange, isDrawingMode }: IPro
 			transformer.current.getLayer().batchDraw();
 		}
 	}, [isSelected]);
-
-	const isLine = figure === SHAPE_TYPES.LINE;
 
 	const handleDragEnd = (e) => {
 		handleChange({
@@ -86,7 +85,7 @@ export const Shape = ({ element, isSelected, handleChange, isDrawingMode }: IPro
 	};
 
 	const Component = SHAPE_COMPONENTS[figure];
-	const transformerProps = isLine ? { enabledAnchors: ['top-left', 'top-right'] } : {};
+	const transformerProps = hasLineLikeBehavior ? { enabledAnchors: ['top-left', 'top-right'] } : {};
 
 	return (
 		<React.Fragment>

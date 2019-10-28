@@ -38,6 +38,9 @@ export const createShape = (shapeType, commonProps, initialPositionProps) => {
 			...commonProps,
 			...initialPositionProps,
 			...cloudProps
+		}),
+		[SHAPE_TYPES.ARROW]: new Konva.Arrow({
+			...commonProps
 		})
 	};
 
@@ -78,7 +81,10 @@ export const getDrawFunction = (shapeType, shape, initialPos, currentPos) => {
 				x: currentPos.x > initialPos.x ? scaleX : -scaleX,
 				y: currentPos.y > initialPos.y ? scaleY : -scaleY
 			});
-		}
+		},
+		[SHAPE_TYPES.ARROW]: () => {
+			shape.points([initialPos.x, initialPos.y, currentPos.x, currentPos.y]);
+		},
 	};
 
 	return map[shapeType];

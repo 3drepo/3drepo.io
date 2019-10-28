@@ -157,13 +157,13 @@ export class Tools extends React.PureComponent<IProps, any> {
 				<OptionsDivider />
 				<TooltipButton
 					label="Undo"
-					action={this.handleUndo()}
+					action={this.handleUndo}
 					Icon={UndoIcon}
 					disabled={!this.props.arePastElements}
 				/>
 				<TooltipButton
 					label="Redo"
-					action={this.handleRedo()}
+					action={this.handleRedo}
 					Icon={RedoIcon}
 					disabled={!this.props.areFutureElements}
 				/>
@@ -182,11 +182,11 @@ export class Tools extends React.PureComponent<IProps, any> {
 		<StyledButton onClick={this.props.onSave} color="secondary" variant="raised">Save</StyledButton>
 	));
 
-	public handleUndo = () => () => {
+	public handleUndo = () => {
 		this.props.onUndo();
 	}
 
-	public handleRedo = () => () => {
+	public handleRedo = () => {
 		this.props.onRedo();
 	}
 
