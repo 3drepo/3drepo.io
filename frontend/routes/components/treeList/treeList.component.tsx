@@ -16,12 +16,10 @@
  */
 
 import Grid from '@material-ui/core/Grid';
-import { isEmpty } from 'lodash';
 import React from 'react';
 
-import Folder from '@material-ui/icons/Folder';
-import FolderOpen from '@material-ui/icons/FolderOpen';
-import { Container, Details, Headline, IconContainer, Title } from './treeList.styles';
+import { Highlight } from '../highlight/highlight.component';
+import { ChildrenContainer, Container, Headline, IconContainer, Title } from './treeList.styles';
 
 export const TREE_LEVELS = {
 	TEAMSPACE: 1,
@@ -30,10 +28,14 @@ export const TREE_LEVELS = {
 };
 
 const HeadlineIcon = ({IconOpened, IconClosed, active, ...iconProps}) => {
-	let Icon = IconClosed || Folder;
+	let Icon = IconClosed;
 
 	if (active) {
-		Icon = IconOpened || FolderOpen;
+		Icon = IconOpened || IconClosed;
+	}
+
+	if (!Icon) {
+		return null;
 	}
 	return (
 		<IconContainer>
@@ -42,134 +44,111 @@ const HeadlineIcon = ({IconOpened, IconClosed, active, ...iconProps}) => {
 	);
 };
 
-export const DefaultHeadline = ({renderActions, ...props}) => (
+export const DefaultHeadline = ({children = Function.prototype, ...props}) => (
 	<Grid
 		container
 		direction="row"
 		alignItems="center"
 		justify="flex-start"
-		wrap="nowrap">
-		<HeadlineIcon fontSize="small" active={props.active} {...props.IconProps} />
-		<Title>{props.name} {props.disabled ? '(empty)' : ''}</Title>
-		{renderActions && renderActions(props)}
+		wrap="nowrap"
+	>
+		<HeadlineIcon fontSize="small" active={props.active && !props.disabled} {...props.IconProps} />
+		<Title>
+			<Highlight
+				text={props.name}
+				search={props.query}
+				splitQueryToWords
+			/>
+			{props.disabled || props.isEmpty ? ' (empty)' : ''}
+		</Title>
+		<ChildrenContainer>{children(props)}</ChildrenContainer>
 	</Grid>
 );
 
 interface IProps {
+	className?: string;
 	name: string;
-	items: any[];
+	query?: string;
 	level?: number;
 	active?: boolean;
 	disableShadow?: boolean;
-	forceActive?: boolean;
+	disabled?: boolean;
+	isEmpty?: boolean;
 	IconProps?: any;
-	renderItem?: (props) => JSX.Element;
+	showStarredOnly?: boolean;
+	children?: (props) => JSX.Element;
 	renderRoot?: (props) => JSX.Element;
-	renderActions?: (props) => (JSX.Element | Element);
-	onClick?: (state) => void;
-	setActiveProject?: (projectName) => void;
+	onClick?: () => void;
 }
 
 interface IState {
 	active: boolean;
-	hovered: boolean;
-	name: string;
 }
 
 export class TreeList extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
-		items: [],
 		level: TREE_LEVELS.TEAMSPACE,
-		active: false
+		active: false,
+		disabled: false,
+		query: '',
+		showStarredOnly: false
 	};
 
 	public state = {
 		active: false,
-		hovered: false,
-		name: ''
 	};
 
-	public renderItems = () => {
-		return this.props.items.map((itemProps, index) => {
-			return this.props.renderItem({
-				key: index,
-				...itemProps
-			});
-		});
-	}
-
-	public handleRootClick = () => {
-		const { active } = this.state;
-		const { items, name } = this.props;
-
-		if (items.length) {
-			this.setState({ active: !active, name }, () => {
-				if (this.props.onClick) {
-					this.props.onClick(this.state);
-				}
-			});
-		}
-	}
-
 	public componentDidMount() {
-		const changes = {} as IState;
+		this.setState({ active: this.props.active });
+	}
 
-		if (this.props.active) {
-			changes.active = true;
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
+	public componentDidUpdate(prevProps) {
+		if (prevProps.active !== this.props.active) {
+			this.setState({ active: this.props.active });
 		}
 	}
 
-	public componentDidUpdate = (prevProps) => {
-		const changes = {} as IState;
-		const { active, items } = this.props;
-
-		const activeChanged = active !== prevProps.active;
-		if (activeChanged) {
-			changes.active = active && Boolean(items.length);
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
-		}
+	private get isActive() {
+		return this.state.active;
 	}
 
-	public createHoverHandler = (hovered) => () => {
-		this.setState({ hovered });
+	private handleRootClick = () => {
+		const { disabled, onClick } = this.props;
+
+		if (!disabled && onClick) {
+			this.setState(({active}) => ({ active: !active }));
+			this.props.onClick();
+		}
 	}
 
 	public render() {
-		const { items, level, renderRoot, forceActive, onClick, ...props } = this.props;
-		const { active, hovered } = this.state;
-		const disabled = !items.length;
+		const { level, renderRoot, onClick, disabled, className, ...props } = this.props;
+		const active = this.isActive;
+		const containerProps = { active, level, disabled, className };
 
-		const containerProps = { active, level, disabled, hovered, forceActive };
-
-		const headlineProps = {
+		const rootProps = {
 			...props,
 			active,
 			disabled,
-			hovered,
-			renderActions: this.props.renderActions
 		};
+
+		if (this.props.isEmpty && this.props.showStarredOnly) {
+			return null;
+		}
 
 		return (
 			<Container {...containerProps}>
 				<Headline
 					onClick={this.handleRootClick}
-					onMouseEnter={this.createHoverHandler(true)}
-					onMouseLeave={this.createHoverHandler(false)}
+					active={active}
+					level={level}
 				>
 					{
 						renderRoot
-							? renderRoot(headlineProps)
-							: <DefaultHeadline {...headlineProps} />
+							? renderRoot(rootProps)
+							: <DefaultHeadline {...rootProps} />
 					}
 				</Headline>
-				{active ? <Details {...props}>{this.renderItems()}</Details> : null}
 			</Container>
 		);
 	}

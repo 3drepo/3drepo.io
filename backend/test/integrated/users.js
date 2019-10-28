@@ -17,6 +17,7 @@
 const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
+const responseCodes = require("../../response_codes");
 const async = require("async");
 
 
@@ -229,6 +230,229 @@ describe('User ', () => {
 								next(err);
 							})
 				], done)
+		});
+
+	});
+
+	describe('Starring models', () => {
+		const FAVOURITE_URL = "/starredModels";
+
+
+		it("should show an empty object when no models have been starred", done => {
+			teamSpace1.get(FAVOURITE_URL)
+				.send({})
+				.expect(200, function(err, res) {
+					expect(res.body).to.eql({});
+					done(err);
+				});
+		});
+
+
+		it ("should overwrite the models list if sent the whole information", done => {
+			const data = {
+				"teamSpace1" : ["7418c82c-7562-4226-a7d3-880a76bffc1d", "8bb5cb46-c655-416a-8025-8d1e4f3c254e"],
+				"teamSpace2" : ["a35e82fb-1063-483a-8131-d4e6310fee0c"]
+			}
+			async.series([
+				next => teamSpace1.put(FAVOURITE_URL)
+					.send(data)
+				.expect(200, function(err, res) {
+						next(err);
+					}),
+				next => teamSpace1.get(FAVOURITE_URL)
+					.expect(200, function(err, res) {
+						expect(res.body).to.deep.equal(data);
+						next(err);
+					})
+			], done);
+		})
+
+		it ("should fail if the format is incorrect", done => {
+			async.series([
+				next => teamSpace1.put(FAVOURITE_URL)
+					.send([])
+					.expect(400, function(err, res) {
+						expect(res.body.code).to.equal(responseCodes.INVALID_ARGUMENTS.code);
+						next(err);
+				}),
+				next => teamSpace1.put(FAVOURITE_URL)
+					.send({"a": 1})
+					.expect(400, function(err, res) {
+						expect(res.body.code).to.equal(responseCodes.INVALID_ARGUMENTS.code);
+						next(err);
+				}),
+				next => teamSpace1.put(FAVOURITE_URL)
+					.send({"a": [1]})
+					.expect(400, function(err, res) {
+						expect(res.body.code).to.equal(responseCodes.INVALID_ARGUMENTS.code);
+						next(err);
+				})
+
+
+			], done);
+		})
+		it ("should set the model list to empty if an empty object is sent", done => {
+			async.series([
+				next => teamSpace1.put(FAVOURITE_URL)
+					.send({})
+					.expect(200, function(err, res) {
+						next(err);
+					}),
+				next => teamSpace1.get(FAVOURITE_URL)
+					.expect(200, function(err, res) {
+						expect(res.body).to.eql({});
+						next(err);
+					})
+			], done);
+		})
+
+		it("should add a model when starred", done => {
+			const data = {
+				"teamspace" : "teamSpace1",
+				"model" : "a35e82fb-1063-483a-8131-d4e6310fee0c"
+			}
+
+			const expectedData = {
+				"teamSpace1" : ["a35e82fb-1063-483a-8131-d4e6310fee0c"]
+			}
+
+			async.series([
+				next => teamSpace1.post(FAVOURITE_URL)
+					.send(data)
+					.expect(200, function(err, res) {
+						next(err);
+					}),
+				next => teamSpace1.get(FAVOURITE_URL)
+					.expect(200, function(err, res) {
+						const favourites = res.body;
+						expect(favourites).to.deep.equal(expectedData);
+						next(err);
+					})
+			], done);
+		});
+
+		it("should NOT add an entry if it already exists", done => {
+			const data = {
+				"teamspace" : "teamSpace1",
+				"model" : "a35e82fb-1063-483a-8131-d4e6310fee0c"
+			}
+
+			const expectedData = {
+				"teamSpace1" : ["a35e82fb-1063-483a-8131-d4e6310fee0c"]
+			}
+
+			async.series([
+				next => teamSpace1.post(FAVOURITE_URL)
+					.send(data)
+					.expect(200, function(err, res) {
+						next(err);
+					}),
+				next => teamSpace1.get(FAVOURITE_URL)
+					.expect(200, function(err, res) {
+						const favourites = res.body;
+						expect(favourites).to.deep.equal(expectedData);
+						next(err);
+					})
+			], done);
+		});
+
+		it("should append tags when a second modelID is added", done => {
+			const data = {
+				"teamspace" : "teamSpace1",
+				"model" : "020d2fcb-9053-4ffb-953d-4de4f1c285a5"
+			}
+
+			const expectedData = {
+				"teamSpace1" : ["a35e82fb-1063-483a-8131-d4e6310fee0c", "020d2fcb-9053-4ffb-953d-4de4f1c285a5"]
+			}
+
+			async.series([
+				next => teamSpace1.post(FAVOURITE_URL)
+					.send(data)
+					.expect(200, function(err, res) {
+						next(err);
+					}),
+				next => teamSpace1.get(FAVOURITE_URL)
+					.expect(200, function(err, res) {
+						const favourites = res.body;
+						expect(favourites).to.deep.equal(expectedData);
+						next(err);
+					})
+			], done);
+		});
+
+		it("should append tags correctly if another modelID from a different teamspace is added", done => {
+			const data = {
+				"teamspace" : "teamSpace2",
+				"model" : "020d2fcb-9053-4ffb-953d-4de4f1c285a5"
+			}
+
+			const expectedData = {
+				"teamSpace1" : ["a35e82fb-1063-483a-8131-d4e6310fee0c", "020d2fcb-9053-4ffb-953d-4de4f1c285a5"],
+				"teamSpace2" : ["020d2fcb-9053-4ffb-953d-4de4f1c285a5"]
+			}
+
+			async.series([
+				next => teamSpace1.post(FAVOURITE_URL)
+					.send(data)
+					.expect(200, function(err, res) {
+						next(err);
+					}),
+				next => teamSpace1.get(FAVOURITE_URL)
+					.expect(200, function(err, res) {
+						const favourites = res.body;
+						expect(favourites).to.deep.equal(expectedData);
+						next(err);
+					})
+			], done);
+		});
+
+		it ("should delete a model when unstarred", done => {
+			const data = {
+				"teamspace" : "teamSpace2",
+				"model" : "020d2fcb-9053-4ffb-953d-4de4f1c285a5"
+			}
+
+			const expectedData = {
+				"teamSpace1" : ["a35e82fb-1063-483a-8131-d4e6310fee0c", "020d2fcb-9053-4ffb-953d-4de4f1c285a5"]
+			}
+			async.series([
+				next => teamSpace1.delete(FAVOURITE_URL)
+					.send(data)
+					.expect(200, function(err, res) {
+						next(err);
+				}),
+				next => teamSpace1.get(FAVOURITE_URL)
+					.expect(200, function(err, res) {
+						const favourites = res.body;
+						expect(favourites).to.deep.equal(expectedData);
+						next(err);
+					})
+			], done);
+		});
+
+		it ("should not change the data if the the modelID did not exist", done => {
+			const data = {
+				"teamspace" : "teamSpace2",
+				"model" : "020d2fcb-9053-4ffb-953d-4de4f1c285a5"
+			}
+
+			const expectedData = {
+				"teamSpace1" : ["a35e82fb-1063-483a-8131-d4e6310fee0c", "020d2fcb-9053-4ffb-953d-4de4f1c285a5"]
+			}
+			async.series([
+				next => teamSpace1.delete(FAVOURITE_URL)
+					.send(data)
+					.expect(200, function(err, res) {
+						next(err);
+				}),
+				next => teamSpace1.get(FAVOURITE_URL)
+					.expect(200, function(err, res) {
+						const favourites = res.body;
+						expect(favourites).to.deep.equal(expectedData);
+						next(err);
+					})
+			], done);
 		});
 
 	});

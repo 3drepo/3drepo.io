@@ -50,10 +50,16 @@ import {
 	SuggestionsList
 } from './filterPanel.styles';
 
-export const DATA_TYPES = {
+export const FILTER_TYPES = {
 	UNDEFINED: 1,
 	DATE: 2,
 	QUERY: 3
+};
+
+export const DATA_TYPES = {
+	MODELS: 1,
+	FEDERATIONS: 2,
+	PROJECTS: 3
 };
 
 export interface IFilter {
@@ -69,17 +75,27 @@ export interface ISelectedFilter {
 	type?: number;
 }
 
+export interface IDataType {
+	label?: string;
+	type?: number;
+}
+
 interface IProps {
 	filters?: IFilter[];
-	onChange: (selectedFilters) => void;
+	dataTypes?: IDataType[];
 	selectedFilters: any[];
+	selectedDataTypes?: any[];
 	hideMenu?: boolean;
 	className?: string;
 	autoFocus?: boolean;
+	left?: boolean;
+	onChange: (selectedFilters) => void;
+	onDataTypeChange?: (selectedDataTypes) => void;
 }
 
 interface IState {
 	selectedFilters: any[];
+	selectedDataTypes: any[];
 	value: any;
 	suggestions: any[];
 	filtersOpen: boolean;
@@ -108,7 +124,7 @@ const getFilterName = (filterLabel, valueLabel) => {
 };
 
 const getSelectedFilterLabel = (filter) => {
-	if (filter.type !== DATA_TYPES.QUERY) {
+	if (filter.type !== FILTER_TYPES.QUERY) {
 		return `${filter.label}: ${filter.value.label}`;
 	}
 
@@ -118,7 +134,7 @@ const getSelectedFilterLabel = (filter) => {
 const mapFiltersToSuggestions = (filters, selectedFilters) => {
 	const selectedFiltersMap = keyBy(selectedFilters, ({ label, value }) => `${label}:${value.label}`);
 	return filters.reduce((suggestions, currentFilter) => {
-		if (currentFilter.type !== DATA_TYPES.DATE) {
+		if (currentFilter.type !== FILTER_TYPES.DATE) {
 			for (let index = 0; index < currentFilter.values.length; index++) {
 				const value = currentFilter.values[index];
 				const name = `${currentFilter.label}:${value.label}`;
@@ -139,9 +155,8 @@ const mapFiltersToSuggestions = (filters, selectedFilters) => {
 };
 
 export class FilterPanel extends React.PureComponent<IProps, IState> {
-
 	public get onlyCopyButton() {
-		const onlyQueryFilters = this.props.filters.every((filter) => filter.type === DATA_TYPES.QUERY);
+		const onlyQueryFilters = this.props.filters.every((filter) => filter.type === FILTER_TYPES.QUERY);
 		return onlyQueryFilters;
 	}
 
@@ -151,6 +166,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	};
 	public state = {
 		selectedFilters: [],
+		selectedDataTypes: [],
 		value: '',
 		suggestions: [],
 		filtersOpen: false,
@@ -191,7 +207,10 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	));
 
 	public componentDidMount = () => {
-		this.setState({ selectedFilters: this.props.selectedFilters });
+		this.setState({
+			selectedFilters: this.props.selectedFilters,
+			selectedDataTypes: this.props.selectedDataTypes
+		});
 		this.filterSuggestions = mapFiltersToSuggestions(
 			this.props.filters,
 			this.state.selectedFilters
@@ -214,6 +233,10 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 			items={this.props.filters}
 			selectedItems={this.state.selectedFilters}
 			onToggleFilter={this.onToggleFilter}
+			onToggleDataType={this.onToggleDataType}
+			left={this.props.left}
+			dataTypes={this.props.dataTypes}
+			selectedDataTypes={this.state.selectedDataTypes}
 		/>
 	)
 
@@ -255,12 +278,12 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 			}
 		};
 
-		if (parent.type === DATA_TYPES.DATE && child.date) {
+		if (parent.type === FILTER_TYPES.DATE && child.date) {
 			newSelectedFilter.value.date = child.date;
 			this.onSelectDateFilter(newSelectedFilter, child);
 		}
 
-		if (!found && parent.type !== DATA_TYPES.DATE) {
+		if (!found && parent.type !== FILTER_TYPES.DATE) {
 			this.setState((prevState) => ({
 				selectedFilters: [...prevState.selectedFilters, newSelectedFilter]
 			}), this.handleFiltersChange);
@@ -272,10 +295,20 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 			filter.label === parent.label && filter.value.value === child.value
 		);
 
-		if (foundFilter && parent.type !== DATA_TYPES.DATE) {
+		if (foundFilter && parent.type !== FILTER_TYPES.DATE) {
 			this.onDeselectFilter(foundFilter);
 		} else {
 			this.onSelectFilter(parent, child, foundFilter);
+		}
+	}
+
+	public onToggleDataType = (dataType) => {
+		if (this.state.selectedDataTypes.includes(dataType)) {
+			const selectedDataTypes = this.state.selectedDataTypes.filter((item) => item !== dataType);
+			this.setState({ selectedDataTypes }, this.handleDataTypeChange);
+		} else {
+			const selectedDataTypes =  [...this.state.selectedDataTypes, dataType];
+			this.setState({ selectedDataTypes }, this.handleDataTypeChange);
 		}
 	}
 
@@ -357,13 +390,17 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		this.resetRemovableFilterIndex();
 	}
 
+	public handleDataTypeChange = () => {
+		this.props.onDataTypeChange(this.state.selectedDataTypes);
+	}
+
 	public onSearchSubmit = (event) => {
-		if (event.key === ENTER_KEY) {
+		if (event.key === ENTER_KEY && event.target.value) {
 			event.preventDefault();
 			const queryValue = event.target.value;
 			const newFilter = {
 				label: queryValue,
-				type: DATA_TYPES.QUERY,
+				type: FILTER_TYPES.QUERY,
 				value: {
 					value: queryValue
 				}
@@ -531,9 +568,8 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 					/>
 					{this.renderCopyButton((!hideMenu && !filters.length) || this.onlyCopyButton)}
 					{this.renderFiltersMenuButton(!hideMenu && filters.length && !this.onlyCopyButton)}
-					{this.renderPlaceholder(!Boolean(value))}
+					{this.renderPlaceholder(!Boolean(value) && !(selectedFilters.length && filtersOpen))}
 				</InputContainer>
-
 			</Container>
 		);
 	}
