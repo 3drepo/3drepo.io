@@ -24,7 +24,7 @@ import * as React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';
 
-import { TREE_ACTIONS_ITEMS, TREE_ACTIONS_MENU, TREE_ITEM_SIZE } from '../../../../constants/tree';
+import { TREE_ACTIONS_ITEMS, TREE_ACTIONS_MENU, TREE_ITEM_SIZE, TREE_MAX_HEIGHT } from '../../../../constants/tree';
 import { VIEWER_PANEL_TITLE_HEIGHT } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
@@ -157,10 +157,9 @@ export class Tree extends React.PureComponent<IProps, IState> {
 	public render() {
 		const { searchEnabled, nodesList, isPending } = this.props;
 		const size = nodesList.length;
-		const maxHeight = 842;
 
 		const treeHeight = TREE_ITEM_SIZE * size;
-		const panelHeight = Math.min(maxHeight, treeHeight) + VIEWER_PANEL_TITLE_HEIGHT  + 1;
+		const panelHeight = Math.min(TREE_MAX_HEIGHT, treeHeight) + VIEWER_PANEL_TITLE_HEIGHT  + 1;
 
 		return (
 			<ViewerPanel
