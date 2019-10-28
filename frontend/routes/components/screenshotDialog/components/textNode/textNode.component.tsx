@@ -24,20 +24,19 @@ interface IProps {
 	isSelected: boolean;
 	isVisible: boolean;
 	handleChange: (props: any) => void;
-	handleDoubleClick: (props: any) => void;
+	onEdit: (props: any) => void;
 }
 
-export const TextNode = ({ element, isSelected, handleChange, handleDoubleClick, isVisible }: IProps) => {
+export const TextNode = ({ element, isSelected, handleChange, onEdit, isVisible }: IProps) => {
 	const { color, ...elementProps } = element;
-	const shape = React.useRef<any>();
+	const shape = React.useRef<any>(null);
 	const transformer = React.useRef<any>();
 
 	React.useEffect(() => {
-		if (isSelected && isVisible) {
-			transformer.current.setNode(shape.current);
-			transformer.current.getLayer().batchDraw();
+		if (shape.current) {
+			onEdit(shape.current);
 		}
-	}, [isSelected]);
+	}, [shape]);
 
 	return (
 		<>
@@ -48,7 +47,6 @@ export const TextNode = ({ element, isSelected, handleChange, handleDoubleClick,
 				fill={color}
 				draggable={isSelected && isVisible}
 				visible={isVisible}
-				onDblClick={handleDoubleClick}
 				onDragEnd={(e) => {
 					handleChange({
 						...element,

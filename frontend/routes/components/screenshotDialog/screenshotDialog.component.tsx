@@ -58,6 +58,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		color: INITIAL_VALUES.color,
 		brushSize: INITIAL_VALUES.brushSize,
 		brushColor: INITIAL_VALUES.color,
+		textSize: INITIAL_VALUES.textSize,
 		mode: null,
 		activeShape: null,
 		sourceImage: '',
@@ -303,7 +304,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.setState(newState);
 	}
 
-	public handleTextDoubleClick = ({target}) => {
+	public handleOnEdit = (target) => {
 		const styles = getTextStyles(target);
 		const visible = true;
 		const value = target.attrs.text;
@@ -386,7 +387,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public addNewText = (position) => {
-		const newText = getNewText(this.state.color, this.state.brushSize, position);
+		const newText = getNewText(this.state.color, this.state.textSize, position);
 		const selectedObjectName = newText.name;
 		this.props.addElement(newText);
 		this.setState({ selectedObjectName, mode: MODES.TEXT });
@@ -464,7 +465,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		};
 
 		if (element.type === ELEMENT_TYPES.TEXT) {
-			return (<TextNode	key={index} {...commonProps} handleDoubleClick={this.handleTextDoubleClick} />);
+			return (<TextNode	key={index} {...commonProps} onEdit={this.handleOnEdit} />);
 		} else if (element.type === ELEMENT_TYPES.DRAWING) {
 			return(<DrawnLine key={index} {...commonProps} />);
 		}

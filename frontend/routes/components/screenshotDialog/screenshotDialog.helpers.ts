@@ -28,6 +28,7 @@ export const INITIAL_VALUES = {
 	color: COLOR.PRIMARY_DARK,
 	brushColor: COLOR.PRIMARY_DARK,
 	brushSize: 5,
+	textSize: 12,
 	mode: MODES.BRUSH
 };
 
