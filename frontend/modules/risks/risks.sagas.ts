@@ -188,10 +188,10 @@ function* updateBoardRisk({ teamspace, modelId, riskData }) {
 		const jobs = yield select(selectJobsList);
 		const preparedIssue = prepareRisk(updatedRisk, jobs);
 		preparedIssue.comments = yield prepareComments(preparedIssue.comments);
-		yield put(RisksActions.saveIssueSuccess(preparedIssue));
-		yield put(SnackbarActions.show('Issue updated'));
+		yield put(RisksActions.saveRiskSuccess(preparedIssue));
+		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
-		yield put(DialogActions.showEndpointErrorDialog('update', 'board issue', error));
+		yield put(DialogActions.showEndpointErrorDialog('update', 'board risk', error));
 	}
 }
 

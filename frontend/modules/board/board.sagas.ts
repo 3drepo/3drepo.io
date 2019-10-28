@@ -104,7 +104,7 @@ function* setFilters({ filters }) {
 			yield put(RisksActions.setFilters(filters));
 		}
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('fetch', 'card data', error));
+		yield put(DialogActions.showErrorDialog('set', 'board filters', error));
 	}
 }
 
@@ -118,7 +118,7 @@ function* printItems({ teamspace, modelId }) {
 			yield put(RisksActions.printRisks(teamspace, modelId));
 		}
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('fetch', 'card data', error));
+		yield put(DialogActions.showErrorDialog('print', 'board items', error));
 	}
 }
 
@@ -132,21 +132,7 @@ function* downloadItems({ teamspace, modelId }) {
 			yield put(RisksActions.downloadRisks(teamspace, modelId));
 		}
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('fetch', 'card data', error));
-	}
-}
-
-function* toggleSortOrder() {
-	try {
-		const boardType = yield select(selectBoardType);
-
-		if (boardType === 'issues') {
-			yield put(IssuesActions.downloadIssues(teamspace, modelId));
-		} else {
-			yield put(RisksActions.downloadRisks(teamspace, modelId));
-		}
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('fetch', 'card data', error));
+		yield put(DialogActions.showErrorDialog('download', 'board items', error));
 	}
 }
 

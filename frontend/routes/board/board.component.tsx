@@ -137,12 +137,12 @@ export function Board(props: IProps) {
 	useEffect(() => {
 		if (type !== props.boardType) {
 			props.setBoardType(type);
+		}
 
-			if (!isIssuesBoard) {
-				props.setFilterProp(RISK_FILTER_PROPS.level_of_risk.value);
-			} else {
-				props.setFilterProp(ISSUE_FILTER_PROPS.status.value);
-			}
+		if (!isIssuesBoard) {
+			props.setFilterProp(RISK_FILTER_PROPS.level_of_risk.value);
+		} else {
+			props.setFilterProp(ISSUE_FILTER_PROPS.status.value);
 		}
 
 		return () => {
@@ -241,14 +241,16 @@ export function Board(props: IProps) {
 	};
 
 	const handleCardMove = (fromLaneId, toLaneId, cardId) => {
-		const updatedProp = {
-			[props.filterProp]: props.filterProp === ISSUE_FILTER_PROPS.assigned_roles.value ? [toLaneId] : toLaneId
+		const isLevelValue = props.filterProp === 'level_of_risk' || props.filterProp === 'residual_level_of_risk';
+		const updatedValue = isLevelValue ? parseInt(toLaneId, 10) : toLaneId;
+		const updatedProps = {
+			[props.filterProp]: props.filterProp === ISSUE_FILTER_PROPS.assigned_roles.value ? [toLaneId] : updatedValue
 		};
 
 		if (isIssuesBoard) {
-			props.updateIssue(teamspace, modelId, { _id: cardId, ...updatedProp });
+			props.updateIssue(teamspace, modelId, { _id: cardId, ...updatedProps });
 		} else {
-			props.updateRisk(teamspace, modelId, { _id: cardId, ...updatedProp });
+			props.updateRisk(teamspace, modelId, { _id: cardId, ...updatedProps });
 		}
 	};
 

@@ -20,10 +20,10 @@ import { createSelector } from 'reselect';
 import { PRIORITIES, STATUSES } from '../../constants/issues';
 import { LEVELS_LIST, RISK_CATEGORIES, RISK_MITIGATION_STATUSES } from '../../constants/risks';
 import { sortByDate } from '../../helpers/sorting';
-import { selectFilteredIssues, selectSortOrder as selectIssuesSortOrder } from '../issues';
+import { selectAllFilteredIssues, selectSortOrder as selectIssuesSortOrder } from '../issues';
 import { selectJobs } from '../jobs';
 import { selectTopicTypes } from '../model';
-import { selectFilteredRisks,  selectSortOrder as selectRisksSortOrder } from '../risks';
+import { selectAllFilteredRisks, selectSortOrder as selectRisksSortOrder } from '../risks';
 import { selectUsers } from '../userManagement';
 import { BOARD_TYPES, ISSUE_FILTER_PROPS, NOT_DEFINED_PROP, RISK_FILTER_PROPS } from './board.constants';
 
@@ -51,8 +51,8 @@ export const selectSearchEnabled = createSelector(
 
 export const selectLanes = createSelector(
 	selectBoardDomain,
-	selectFilteredIssues,
-	selectFilteredRisks,
+	selectAllFilteredIssues,
+	selectAllFilteredRisks,
 	selectTopicTypes,
 	selectJobs,
 	selectUsers,

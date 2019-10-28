@@ -96,6 +96,11 @@ export const selectFilteredIssues = createSelector(
 	}
 );
 
+export const selectAllFilteredIssues = createSelector(
+	selectIssues, selectSelectedFilters, (issues, selectedFilters) =>
+		searchByFilters(issues, selectedFilters, true)
+);
+
 export const selectShowPins = createSelector(
 	selectComponentState, (state) => state.showPins
 );
