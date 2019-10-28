@@ -1777,7 +1777,7 @@ describe("Groups", function () {
 
 			async.series([
 				function(done) {
-					agent.put(`/${username}/${model}/groups/${goldenData._id}`)
+					agent.put(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.send(newRules)
 						.expect(200 , function(err, res) {
 							done(err);
