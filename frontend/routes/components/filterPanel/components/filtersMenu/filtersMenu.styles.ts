@@ -44,7 +44,6 @@ const getDirection = ({ left }) => left ? 'right: 100%' : 'right: 100%';
 export const ChildMenu = styled.div`
 	background-color: ${COLOR.WHITE};
 	position: absolute;
-	left: ${(props: any) => props.leftAligned ? '-100%' : '100%'};
 	top: 0;
 	z-index: 1;
 	min-width: 160px;

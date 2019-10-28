@@ -99,6 +99,8 @@ interface IProps {
 	issuesSortOrder: string;
 	risksSortOrder: string;
 	cards: ICard[];
+	projectsMap: any;
+	modelsMap: any;
 	fetchData: (boardType, teamspace, project, modelId) => void;
 	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
 	resetCardData: () => void;
@@ -270,12 +272,12 @@ export function Board(props: IProps) {
 	};
 
 	const renderProjectsSelect = () => {
-		const projects = getTeamspaceProjects(props.teamspaces, teamspace);
+		const projects = getTeamspaceProjects(props.teamspaces, props.projectsMap, teamspace);
 		return (<ConfigSelectComponent value={project} items={projects} handleChange={handleProjectChange} />);
 	};
 
 	const renderModelsSelect = () => {
-		const models = getProjectModels(props.teamspaces, teamspace, project);
+		const models = getProjectModels(props.teamspaces, props.projectsMap, props.modelsMap, teamspace, project);
 		return (<ConfigSelectComponent value={modelId} items={models} handleChange={handleModelChange} />);
 	};
 
@@ -347,7 +349,8 @@ export function Board(props: IProps) {
 		const messagePrefix = 'You have to choose';
 		const messageSufix = noModelAndProject ? 'project and model' : noModel ? 'model' : 'project';
 		const chooseMessage = `${messagePrefix} ${messageSufix} to show board.`;
-		const areModels = getProjectModels(props.teamspaces, teamspace, project).length > 1;
+		const areModels =
+			getProjectModels(props.teamspaces, props.projectsMap, props.modelsMap, teamspace, project).length > 1;
 
 		return (
 			<LoaderContainer>
@@ -435,7 +438,6 @@ export function Board(props: IProps) {
 				onChange={props.setFilters}
 				filters={filters}
 				selectedFilters={selectedFilters}
-				submenuLeftAligned
 			/>
 		);
 	});

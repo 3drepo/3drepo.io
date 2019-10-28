@@ -40,11 +40,11 @@ import {
 	selectSortOrder as selectRisksSortOrder,
 	RisksActions
 } from '../../modules/risks';
-import { selectTeamspaces } from '../../modules/teamspaces';
+import { selectModels, selectProjects, selectTeamspacesList } from '../../modules/teamspaces';
 import { Board } from './board.component';
 
 const mapStateToProps = createStructuredSelector({
-	teamspaces: selectTeamspaces,
+	teamspaces: selectTeamspacesList,
 	lanes: selectLanes,
 	isPending: selectIsPending,
 	filterProp: selectFilterProp,
@@ -56,7 +56,9 @@ const mapStateToProps = createStructuredSelector({
 	selectedRisksFilters: selectSelectedRiskFilters,
 	issuesSortOrder: selectIssuesSortOrder,
 	risksSortOrder: selectRisksSortOrder,
-	cards: selectCards
+	cards: selectCards,
+	projectsMap: selectProjects,
+	modelsMap: selectModels
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

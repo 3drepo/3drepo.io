@@ -46,7 +46,6 @@ interface IProps {
 	dataTypes?: any[];
 	selectedDataTypes?: any[];
 	left?: boolean;
-	submenuLeftAligned: boolean;
 	onToggleFilter: (property, value) => void;
 	onToggleDataType: (value) => void;
 }
@@ -126,7 +125,7 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderChildItems = (index, item) => renderWhenTrue(() => (
-		<ChildMenu leftAligned={this.props.submenuLeftAligned}>
+		<ChildMenu>
 			<List>{item.values.map(this.renderListChildItem(index, item))}</List>
 		</ChildMenu>
 	))(index === this.state.activeItem && item.values)

@@ -25,6 +25,7 @@ import People from '@material-ui/icons/People';
 import Settings from '@material-ui/icons/Settings';
 import SettingsBackupRestore from '@material-ui/icons/SettingsBackupRestore';
 import Share from '@material-ui/icons/Share';
+import Board from '@material-ui/icons/TableChart';
 import { SortAmountDown, SortAmountUp } from '../../routes/components/fontAwesomeIcon';
 import { DATA_TYPES, FILTER_TYPES } from '../components/filterPanel/filterPanel.component';
 
@@ -75,6 +76,10 @@ export const ROW_ACTIONS = {
 		label: 'Edit',
 		Icon: Edit,
 		requiredPermissions: 'edit_federation'
+	},
+	BOARD: {
+		label: 'Board',
+		Icon: Board
 	}
 };
 

@@ -89,7 +89,6 @@ interface IProps {
 	className?: string;
 	autoFocus?: boolean;
 	left?: boolean;
-	submenuLeftAligned?: boolean;
 	onChange: (selectedFilters) => void;
 	onDataTypeChange?: (selectedDataTypes) => void;
 }
@@ -164,8 +163,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
 		filters: [],
 		selectedFilters: [],
-		autoFocus: true,
-		submenuLeftAligned: false
+		autoFocus: true
 	};
 
 	public state = {
@@ -241,7 +239,6 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 			left={this.props.left}
 			dataTypes={this.props.dataTypes}
 			selectedDataTypes={this.state.selectedDataTypes}
-			submenuLeftAligned={this.props.submenuLeftAligned}
 		/>
 	)
 
