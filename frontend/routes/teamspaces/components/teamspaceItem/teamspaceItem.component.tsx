@@ -72,7 +72,13 @@ export const TeamspaceItem = memo((props: IProps) => {
 				action={handleAddNewProject}
 			/>
 
-			{!isMyTeamspace && <button onClick={onLeaveTeamspace}>leave</button>}
+			{!isMyTeamspace &&
+				<TooltipButton
+					{...ROW_ACTIONS.LEAVE}
+					label="Leave teamspace"
+					action={onLeaveTeamspace}
+				/>
+			}
 		</>
 	))(hasPermissions('create_project', permissions)) as any;
 
