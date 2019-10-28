@@ -66,3 +66,5 @@ export const VIEWER_LEFT_PANELS = [
 export const VIEWER_RIGHT_PANELS = [
 	VIEWER_PANELS.BIM
 ].map(getPanelConfig);
+
+export const VIEWER_PANEL_TITLE_HEIGHT = 40;

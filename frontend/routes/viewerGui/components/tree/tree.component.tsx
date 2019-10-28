@@ -25,6 +25,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';
 
 import { TREE_ACTIONS_ITEMS, TREE_ACTIONS_MENU, TREE_ITEM_SIZE } from '../../../../constants/tree';
+import { VIEWER_PANEL_TITLE_HEIGHT } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import {
@@ -38,7 +39,6 @@ import { MenuButton as MenuButtonComponent } from '../../../components/menuButto
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { EmptyStateInfo } from '../views/views.styles';
 import TreeNode from './components/treeNode/treeNode.container';
-import { TreeNodes, ViewerPanelContent } from './tree.styles';
 
 interface IProps {
 	className: string;
@@ -117,20 +117,15 @@ export class Tree extends React.PureComponent<IProps, IState> {
 	public renderNodesList = renderWhenTrue(() => {
 		const { nodesList, dataRevision } = this.props;
 		const size = nodesList.length;
-		const maxHeight = 842;
-
-		const treeHeight = TREE_ITEM_SIZE * size;
-		const treeNodesHeight = treeHeight > maxHeight ?	maxHeight : treeHeight;
 
 		return (
-			<TreeNodes className="tree-list" style={{ height: treeNodesHeight }}>
 				<AutoSizer>
 					{({ width, height }) => (
 						<List
 							dataRevision={dataRevision}
 							ref={this.nodeListRef}
-							height={height}
-							width={width}
+							height={height - 1}
+							width={width - 1}
 							itemData={nodesList}
 							itemCount={size}
 							itemSize={TREE_ITEM_SIZE}
@@ -140,7 +135,6 @@ export class Tree extends React.PureComponent<IProps, IState> {
 						</List>
 					)}
 				</AutoSizer>
-			</TreeNodes>
 		);
 	});
 
@@ -162,6 +156,11 @@ export class Tree extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { searchEnabled, nodesList, isPending } = this.props;
+		const size = nodesList.length;
+		const maxHeight = 842;
+
+		const treeHeight = TREE_ITEM_SIZE * size;
+		const panelHeight = Math.min(maxHeight, treeHeight) + VIEWER_PANEL_TITLE_HEIGHT  + 1;
 
 		return (
 			<ViewerPanel
@@ -169,12 +168,12 @@ export class Tree extends React.PureComponent<IProps, IState> {
 				Icon={<TreeIcon />}
 				renderActions={this.renderActions}
 				pending={isPending}
+
+				paperProps={{style: {height: panelHeight}}}
 			>
 				{this.renderFilterPanel(searchEnabled)}
-				<ViewerPanelContent>
 					{this.renderNodesList(!isPending && !!nodesList.length)}
 					{this.renderNotFound(!isPending && !nodesList.length)}
-				</ViewerPanelContent>
 			</ViewerPanel>
 		);
 	}
