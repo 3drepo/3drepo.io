@@ -37,9 +37,18 @@ export const BoardContainer = styled.div`
 		height: 100%;
 		padding: 0;
 		overflow: scroll;
+
+		> div {
+			height: 100%;
+		}
+	}
+
+	.smooth-dnd-container {
+		height: 100%;
 	}
 
 	.react-trello-lane {
+		height: 100%;
 		width: 350px;
 
 		> div {
