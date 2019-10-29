@@ -48,7 +48,7 @@ export function* leaveTeamspace({ teamspace }) {
 		yield API.removeUserCascade(teamspace, username);
 		yield put(UserManagementActions.removeUserSuccess(username));
 		yield put(TeamspacesActions.removeTeamspaceSuccess(teamspace));
-		yield put(SnackbarActions.show('Teamspace left'));
+		yield put(SnackbarActions.show(`User removed from ${teamspace} successfully.`));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('leave', 'teamspace', error));
 	}
