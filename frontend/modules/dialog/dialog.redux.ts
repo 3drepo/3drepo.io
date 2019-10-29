@@ -25,12 +25,12 @@ import { ScreenshotDialog } from '../../routes/components/screenshotDialog/scree
 export interface IDialogConfig {
 	id: number;
 	title: JSX.Element | string;
-	template?: JSX.Element;
+	template?: () => JSX.Element;
 	content?: string;
 	data?: any;
 	logError?: string;
 	DialogProps?: IDialogProps;
-	buttonVariant?: string;
+	buttonVariant?: 'text' | 'flat' | 'outlined' | 'contained' | 'raised' | 'fab' | 'extendedFab';
 	closeText?: string;
 	onConfirm?: () => void;
 	onCancel?: () => void;

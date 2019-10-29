@@ -19,7 +19,8 @@ import IconButton from '@material-ui/core/IconButton';
 import Add from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
-import React, { useCallback, useEffect, Fragment } from 'react';
+import * as fileDialog from 'file-dialog';
+import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
 
@@ -391,8 +392,12 @@ export function Board(props: IProps) {
 	};
 
 	const headerMenu = isIssuesBoard ?
-		getIssueMenuItems(teamspace, modelId, null, printItems, downloadItems, importBCF, exportBCF, toggleIssuesSortOrder) :
-		getRisksMenuItems(teamspace, modelId, printItems, downloadItems, toggleRisksSortOrder);
+		getIssueMenuItems(
+			teamspace, modelId, null, printItems, downloadItems, importBCF, exportBCF, fileDialog, toggleIssuesSortOrder
+		) :
+		getRisksMenuItems(
+			teamspace, modelId, printItems, downloadItems, toggleRisksSortOrder
+		);
 
 	const sortOrder = isIssuesBoard ? props.issuesSortOrder : props.risksSortOrder;
 
@@ -405,7 +410,7 @@ export function Board(props: IProps) {
 
 	const renderActionsMenu = () => (
 		<MenuList>
-			{headerMenu.map(({ label, Icon, onClick, isSorting }, index) => {
+			{(headerMenu as any).map(({ label, Icon, onClick, isSorting }, index) => {
 				return (
 					<StyledListItem key={index} button onClick={onClick}>
 						<IconWrapper>

@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as fileDialog from 'file-dialog';
 import {
 	ISSUE_COLORS,
 	ISSUE_FILTER_RELATED_FIELDS,
@@ -172,6 +171,7 @@ export const getHeaderMenuItems = (
 	importBCF,
 	exportBCF,
 	toggleSortOrder,
+	fileDialog,
 	toggleShowPins?,
 	showPins?
 ) => {
