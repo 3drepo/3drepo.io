@@ -8,7 +8,7 @@ import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
 import RemoveIcon from '@material-ui/icons/Remove';
 import { COLOR } from '../../../../../styles';
 import { SHAPE_TYPES } from '../shape/shape.constants';
-import { cloud } from '../shape/shape.helpers';
+import { cloud, cloudline } from '../shape/shape.helpers';
 
 const CloudIcon = (props) => {
 	return (
@@ -20,7 +20,23 @@ const CloudIcon = (props) => {
 					strokeWidth={15}
 					paintOrder={'fill stroke markers'}
 					d={cloud.path}
-					transform={`scale(0.045)`}
+					transform="scale(0.045)"
+				/>
+			</g>
+		</SvgIcon>
+	);
+};
+
+const CloudlineIcon = (props) => {
+	return (
+		<SvgIcon viewBox="0, 0, 75, 16">
+			<g>
+				<path
+					fill={'none'}
+					stroke={COLOR.BLACK_54}
+					strokeWidth={3}
+					paintOrder={'fill stroke markers'}
+					d={cloudline.path}
 				/>
 			</g>
 		</SvgIcon>
@@ -57,13 +73,19 @@ const ARROW_ITEM = {
 	Icon: ArrowIcon
 };
 
+const CLOUDLINE_ITEM = {
+	name: SHAPE_TYPES.CLOUDLINE,
+	Icon: CloudlineIcon
+};
+
 export const SHAPES_MENU = [
 	RECTANGLE_ITEM,
 	TRIANGLE_ITEM,
 	CIRCLE_ITEM,
 	LINE_ITEM,
 	CLOUD_ITEM,
-	ARROW_ITEM
+	ARROW_ITEM,
+	CLOUDLINE_ITEM,
 ];
 
 const SHAPE_ICONS = {
@@ -72,7 +94,8 @@ const SHAPE_ICONS = {
 	[SHAPE_TYPES.CIRCLE]: PanoramaFishEyeIcon,
 	[SHAPE_TYPES.LINE]: RemoveIcon,
 	[SHAPE_TYPES.CLOUD]: CloudIcon,
-	[SHAPE_TYPES.ARROW]: ArrowIcon
+	[SHAPE_TYPES.ARROW]: ArrowIcon,
+	[SHAPE_TYPES.CLOUDLINE]: CloudlineIcon
 };
 
 export const activeShapeIcon = (activeShape) => SHAPE_ICONS[activeShape];

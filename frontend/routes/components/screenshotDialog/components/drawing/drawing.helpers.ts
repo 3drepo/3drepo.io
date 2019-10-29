@@ -1,6 +1,6 @@
 import { MODE_OPERATION } from '../../screenshotDialog.helpers';
 import { SHAPE_TYPES } from '../shape/shape.constants';
-import { cloud } from '../shape/shape.helpers';
+import { cloud, cloudline } from '../shape/shape.helpers';
 
 declare const Konva;
 
@@ -10,6 +10,12 @@ const rectangleProps = { height: 1, width: 1 };
 
 const cloudProps = {
 	data: cloud.path,
+	scaleX: 0,
+	scaleY: 0
+};
+
+const cloudlineProps = {
+	data: cloudline.path,
 	scaleX: 0,
 	scaleY: 0
 };
@@ -38,6 +44,11 @@ export const createShape = (shapeType, commonProps, initialPositionProps) => {
 			...commonProps,
 			...initialPositionProps,
 			...cloudProps
+		}),
+		[SHAPE_TYPES.CLOUDLINE]: new Konva.Path({
+			...commonProps,
+			...initialPositionProps,
+			...cloudlineProps
 		}),
 		[SHAPE_TYPES.ARROW]: new Konva.Arrow({
 			...commonProps
@@ -77,6 +88,14 @@ export const getDrawFunction = (shapeType, shape, initialPos, currentPos) => {
 		[SHAPE_TYPES.CLOUD]: () => {
 			const scaleX = Math.abs(initialPos.x - currentPos.x) / cloud.width;
 			const scaleY = Math.abs(initialPos.y - currentPos.y) / cloud.height;
+			shape.scale({
+				x: currentPos.x > initialPos.x ? scaleX : -scaleX,
+				y: currentPos.y > initialPos.y ? scaleY : -scaleY
+			});
+		},
+		[SHAPE_TYPES.CLOUDLINE]: () => {
+			const scaleX = Math.abs(initialPos.x - currentPos.x) / cloudline.width;
+			const scaleY = Math.abs(initialPos.y - currentPos.y) / cloudline.height;
 			shape.scale({
 				x: currentPos.x > initialPos.x ? scaleX : -scaleX,
 				y: currentPos.y > initialPos.y ? scaleY : -scaleY
