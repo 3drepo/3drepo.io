@@ -20,7 +20,9 @@ declare var UnityLoader;
 
 export class UnityUtil {
 	/** @hidden */
-	public static errorCallback: any;
+	private static errorCallback: any;
+	private static progressCallback: any;
+	private static modelLoaderProgressCallback: any;
 	/**
 	 * viewer can be assigned, containing any callback function the user wishes to hook onto.
 	 * The following functions are supported:
@@ -93,8 +95,6 @@ export class UnityUtil {
 	public static UNITY_GAME_OBJECT = 'WebGLInterface';
 	/** @hidden */
 	public static defaultHighlightColor = [1, 1, 0];
-	private static progressCallback = Function.prototype;
-	private static modelLoaderProgressCallback = Function.prototype;
 
 	/**
 	* Initialise Unity.
@@ -105,7 +105,6 @@ export class UnityUtil {
 	* @param modelLoaderProgressCallback
 	*/
 	public static init(errorCallback: any, progressCallback: any, modelLoaderProgressCallback: any) {
-		console.log('INIT', progressCallback.toString(), modelLoaderProgressCallback.toString());
 		UnityUtil.errorCallback = errorCallback;
 		UnityUtil.progressCallback = progressCallback;
 		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
@@ -379,7 +378,6 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static loadingProgress(progress) {
-		console.log('Loading progress', progress);
 		UnityUtil.modelLoaderProgressCallback(progress);
 	}
 

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { Container } from './viewerLoader.styles';
@@ -40,9 +40,9 @@ export const ViewerLoader = (props: IProps) => {
 	};
 
 	const setProgressState = (updatedMessageLabel) => (updatedProgress = 0) => {
-		console.log('progress', updatedMessageLabel, updatedProgress);
-		const isVisibleUpdated = progress !== 1;
+		const isVisibleUpdated = updatedProgress !== 1;
 		const percentageProgress = Number((updatedProgress * 100).toFixed(0));
+
 		setMessage(updatedMessageLabel);
 		setProgress(percentageProgress);
 		setIsVisible(isVisibleUpdated);
