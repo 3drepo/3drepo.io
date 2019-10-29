@@ -20,6 +20,7 @@ import CloudDownload from '@material-ui/icons/CloudDownload';
 import CloudUpload from '@material-ui/icons/CloudUpload';
 import Delete from '@material-ui/icons/Delete';
 import Edit from '@material-ui/icons/Edit';
+import ExitToApp from '@material-ui/icons/ExitToApp';
 import People from '@material-ui/icons/People';
 import Settings from '@material-ui/icons/Settings';
 import SettingsBackupRestore from '@material-ui/icons/SettingsBackupRestore';
@@ -65,6 +66,10 @@ export const ROW_ACTIONS = {
 	ADD_NEW: {
 		label: 'Add new item',
 		Icon: AddCircle
+	},
+	LEAVE: {
+		label: 'Leave teamspace',
+		Icon: ExitToApp
 	},
 	EDIT: {
 		label: 'Edit',

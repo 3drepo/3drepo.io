@@ -40,6 +40,7 @@ interface IProps {
 	showStarredOnly: boolean;
 	onToggle: (state) => void;
 	onAddProject: (event, teamspaceName) => void;
+	onLeaveTeamspace: (event) => void;
 }
 
 const getMemoizedAvatarUrl = memoize(getAvatarUrl);
@@ -55,6 +56,7 @@ export const TeamspaceItem = memo((props: IProps) => {
 		permissions,
 		disabled,
 		hasAvatar,
+		onLeaveTeamspace
 	} = props;
 
 	const avatarUrl = getMemoizedAvatarUrl(name);
@@ -62,13 +64,21 @@ export const TeamspaceItem = memo((props: IProps) => {
 
 	const handleAddNewProject = (event) => onAddProject(event, name);
 
-	const renderActions = () => renderWhenTrue(() => (
+	const RenderNewProjectAction = () => renderWhenTrue(() => (
 		<TooltipButton
 			{...ROW_ACTIONS.ADD_NEW}
 			label="Add new project"
 			action={handleAddNewProject}
 		/>
 	))(hasPermissions('create_project', permissions)) as any;
+
+	const RenderLeaveAction = () => renderWhenTrue(() => (
+		<TooltipButton
+			{...ROW_ACTIONS.LEAVE}
+			label="Leave teamspace"
+			action={onLeaveTeamspace}
+		/>
+	))(!isMyTeamspace) as any;
 
 	const handleClick = () => {
 		onToggle({ id: name, nested: projects });
@@ -89,7 +99,12 @@ export const TeamspaceItem = memo((props: IProps) => {
 			IconProps={{ IconClosed: renderAvatar }}
 			showStarredOnly={props.showStarredOnly}
 		>
-			{renderActions}
+		{() => (
+			<>
+				<RenderNewProjectAction />
+				<RenderLeaveAction />
+			</>
+		)}
 		</Container>
 	);
 });

@@ -93,6 +93,7 @@ interface IProps {
 	showConfirmDialog: (config) => void;
 	fetchTeamspaces: (username) => void;
 	fetchStarredModels: () => void;
+	leaveTeamspace: (Teamspace) => void;
 	setState: (componentState: any) => void;
 }
 
@@ -254,6 +255,22 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				project
 			}
 		});
+	}
+
+	public onLeaveTeamspace = (teamspace) => (event) => {
+		event.stopPropagation();
+		this.props.showConfirmDialog({
+			title: 'Leave teamspace',
+			content: `
+				Do you really want to leave teamspace <b>${teamspace}</b>? <br /><br />
+				This will remove you from the teamspace,
+				and you wont have any access to it's projects and models!
+			`,
+			onConfirm: () => {
+				this.props.leaveTeamspace(teamspace);
+			}
+		});
+
 	}
 
 	private handleVisibilityChange = ({ id: itemId, nested = []}) => {
@@ -460,6 +477,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			onAddProject={this.openProjectDialog}
 			disabled={!props.projects.length}
 			showStarredOnly={this.props.showStarredOnly}
+			onLeaveTeamspace={this.onLeaveTeamspace(props.account)}
 		/>
 	)
 
