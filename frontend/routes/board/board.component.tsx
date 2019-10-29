@@ -154,6 +154,11 @@ export function Board(props: IProps) {
 		props.fetchData(type, teamspace, project, modelId);
 	}, [type, teamspace, project, modelId]);
 
+	const isDraggable =
+		props.filterProp !== 'owner' &&
+		props.filterProp !== 'level_of_risk' &&
+		props.filterProp !== 'residual_level_of_risk';
+
 	const handleTypeChange = (e) => {
 		const url = `${ROUTES.BOARD_MAIN}/${e.target.value}/${teamspace}${projectParam}${modelParam}`;
 		props.history.push(url);
@@ -241,10 +246,8 @@ export function Board(props: IProps) {
 	};
 
 	const handleCardMove = (fromLaneId, toLaneId, cardId) => {
-		const isLevelValue = props.filterProp === 'level_of_risk' || props.filterProp === 'residual_level_of_risk';
-		const updatedValue = isLevelValue ? parseInt(toLaneId, 10) : toLaneId;
 		const updatedProps = {
-			[props.filterProp]: props.filterProp === ISSUE_FILTER_PROPS.assigned_roles.value ? [toLaneId] : updatedValue
+			[props.filterProp]: props.filterProp === ISSUE_FILTER_PROPS.assigned_roles.value ? [toLaneId] : toLaneId
 		};
 
 		if (isIssuesBoard) {
@@ -313,7 +316,10 @@ export function Board(props: IProps) {
 
 	const BoardCard = (cardProps: any) => {
 		return (
-			<PreviewListItem {...cardProps.metadata} onItemClick={cardProps.onClick} />
+			<PreviewListItem
+				{...cardProps.metadata}
+				onItemClick={cardProps.onClick}
+			/>
 		);
 	};
 
@@ -329,6 +335,7 @@ export function Board(props: IProps) {
 				onCardClick={handleOpenDialog}
 				onCardMoveAcrossLanes={handleCardMove}
 				components={components}
+				cardDraggable={isDraggable}
 			/>
 		</BoardContainer>
 	));
