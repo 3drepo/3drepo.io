@@ -65,7 +65,7 @@ export const createDrawnLine = (stroke, strokeWidth, position, mode) => {
 		points: [position.x, position.y],
 		lineCap: 'round',
 		globalCompositeOperation: MODE_OPERATION[mode],
-		draggable: true
+		draggable: true,
 	});
 };
 

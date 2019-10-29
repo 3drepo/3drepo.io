@@ -1,3 +1,4 @@
+import { concat, range } from 'lodash';
 import * as React from 'react';
 
 import SvgIcon from '@material-ui/core/SvgIcon';
@@ -99,3 +100,18 @@ const SHAPE_ICONS = {
 };
 
 export const activeShapeIcon = (activeShape) => SHAPE_ICONS[activeShape];
+
+export const BRUSH_SIZES = concat(
+		range(56, 26, -10),
+		range(24, 4, -4),
+		range(7, 0, -1)
+);
+
+export const TEXT_SIZES = concat(
+		range(56, 26, -10),
+		range(24, 4, -4)
+);
+
+export const MAX_TOOL_ICON_SIZE = 28;
+export const MIN_BRUSH_ICON_SIZE = 5;
+export const MIN_TEXT_ICON_SIZE = 10;

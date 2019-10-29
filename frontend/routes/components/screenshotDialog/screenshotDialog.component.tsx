@@ -234,6 +234,16 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.setState(newState);
 	}
 
+	public handleTextSizeChange = ({ target: { value } }) => {
+		if (this.state.selectedObjectName) {
+			this.props.updateElement(this.state.selectedObjectName, { fontSize: value });
+		}
+
+		this.setState({
+			textSize: value,
+		});
+	}
+
 	public handleColorChange = (color) => {
 		const newState = {} as any;
 		newState.color = color;
@@ -513,6 +523,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public renderTools = () => (
 		<Tools
 			size={this.state.brushSize}
+			textSize={this.state.textSize}
 			color={this.state.brushColor}
 			onDrawClick={this.setBrushMode}
 			onEraseClick={this.setEraserMode}
@@ -520,6 +531,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			onShapeClick={this.setShapeMode}
 			onClearClick={this.clearCanvas}
 			onBrushSizeChange={this.handleBrushSizeChange}
+			onTextSizeChange={this.handleTextSizeChange}
 			onColorChange={this.handleColorChange}
 			onCancel={this.handleClose}
 			onUndo={this.props.undo}
