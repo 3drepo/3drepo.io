@@ -13,8 +13,9 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
+import fileDialog from 'file-dialog';
 import {
 	ISSUE_COLORS,
 	ISSUE_FILTER_RELATED_FIELDS,
@@ -171,7 +172,6 @@ export const getHeaderMenuItems = (
 	importBCF,
 	exportBCF,
 	toggleSortOrder,
-	fileDialog,
 	toggleShowPins?,
 	showPins?
 ) => {

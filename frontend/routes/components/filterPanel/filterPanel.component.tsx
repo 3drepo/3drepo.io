@@ -134,7 +134,7 @@ const getSelectedFilterLabel = (filter) => {
 const mapFiltersToSuggestions = (filters, selectedFilters) => {
 	const selectedFiltersMap = keyBy(selectedFilters, ({ label, value }) => `${label}:${value.label}`);
 	return filters.reduce((suggestions, currentFilter) => {
-		if (currentFilter.type !== DATA_TYPES.DATE && currentFilter.values) {
+		if (currentFilter.type !== FILTER_TYPES.DATE && currentFilter.values) {
 			for (let index = 0; index < currentFilter.values.length; index++) {
 				const value = currentFilter.values[index];
 				const name = `${currentFilter.label}:${value.label}`;
