@@ -41,11 +41,11 @@ const utils = require("../utils");
  * HTTP/1.1 200 OK
  *
  */
-router.get("/invitations", middlewares.isTeamspaceMember, getInvitations);
+router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
 
-router.post("/invitations",  middlewares.isTeamspaceMember, sendInvitation);
+router.post("/invitations",  middlewares.isAccountAdmin, sendInvitation);
 
-router.delete("/invitations/:email", middlewares.isTeamspaceMember, removeInvitation);
+router.delete("/invitations/:email", middlewares.isAccountAdmin, removeInvitation);
 
 function getInvitations(req, res, next) {
 	Invitations.getInvitationsByTeamspace(req.params.account).then(invitations => {
@@ -59,8 +59,8 @@ function sendInvitation(req, res, next) {
 	const { account } = req.params;
 	const { email, job, permissions } = req.body;
 
-	Invitations.create(account, email, job, permissions).then(invitation=> {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {invitation});
+	Invitations.create(email, account, job, permissions).then(invitation=> {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, invitation);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});

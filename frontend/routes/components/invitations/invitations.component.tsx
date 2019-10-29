@@ -31,7 +31,6 @@ interface IState {
 const Invitation = ({email, removeInvitation}) => {
 	const onClick = (e: any) => {
 		e.preventDefault();
-		console.log("delete" + email);
 		removeInvitation(email);
 	};
 

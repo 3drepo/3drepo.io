@@ -140,8 +140,8 @@ export const removeUserSuccess = (state = INITIAL_STATE, { username }) => {
 };
 
 export const removeInvitationSuccess = (state = INITIAL_STATE, { email }) => {
-	const invitations = state.invitations.filter(({email}) => {
-		return email !== email;
+	const invitations = state.invitations.filter(({inviteEmail}) => {
+		return inviteEmail !== email;
 	});
 	return {...state, invitations};
 };
