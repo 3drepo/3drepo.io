@@ -40,7 +40,6 @@ const permissionTemplate = require("./permissionTemplate");
 const accountPermission = require("./accountPermission");
 const Project = require("./project");
 const FileRef = require("./fileRef");
-const Invitations =  require("./invitations");
 
 const schema = mongoose.Schema({
 	_id: String,
@@ -429,6 +428,7 @@ schema.statics.updatePassword = function (logger, username, oldPassword, token, 
 schema.statics.usernameRegExp = /^[a-zA-Z][\w]{1,63}$/;
 
 schema.statics.createUser = function (logger, username, password, customData, tokenExpiryTime) {
+	const Invitations =  require("./invitations");
 
 	if (customData) {
 		const validityChecks = [

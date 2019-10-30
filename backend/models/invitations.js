@@ -17,6 +17,11 @@
 "use strict";
 
 const db = require("../handler/db");
+const User = require("./user");
+const Job = require("./job");
+const Project = require("./project");
+const { contains: setContains } = require("./helper/set");
+
 const responseCodes = require("../response_codes.js");
 const { omit } = require("lodash");
 const C = require("../constants");
@@ -29,29 +34,66 @@ const getCollection = async () => {
 
 const invitations = {};
 
-invitations.create = async (email, teamspace, job, permissions = []) => {
+const validateModels = (projectsPermissions, projectsData) => {
+	return projectsPermissions.every((project, index) => {
+		const models = new Set((project.models || []).map(m=> m.id));
+		const allModels = new Set(projectsData[index].models);
+		return setContains(allModels, models);
+	});
+};
+
+invitations.create = async (email, teamspace, job, permissions = {}) => {
 	// 1 - find if there is already and invitation with that email
 	// 2 - if there is update the invitation with the new teamspace data
 	// 2.5 - if there is not, create an entry with that email and job/permission
 	// 3 - send an email invitation
 	// 4 - return the invitation for that teamspace ({email, job, permissions:[]})
-	email = email.toLowerCase();
-	const coll = await getCollection();
-	const result = await coll.findOne({_id:email});
-	const teamspaceEntry = { teamspace, job, permissions: {teamspace: permissions} };
 
-	if (result) {
-		const teamSpaces = result.teamSpaces.filter(entry => entry.teamspace !== teamspace);
-		teamSpaces.push(teamspaceEntry);
-		const invitation = { teamSpaces };
-		await coll.updateOne({_id:email}, { $set: invitation });
-	} else {
-		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
-		await coll.insertOne(invitation);
+	permissions.projects = permissions.projects || [];
+
+	const projectNames = permissions.projects.map(pr => pr.name);
+
+	const [emailUser, teamspaceJob, projects] = await Promise.all([
+		User.findByEmail(email),
+		Job.findByJob(teamspace, job),
+		Project.findByNames(teamspace, projectNames)
+	]);
+
+	if (emailUser) { // If there is already a user registered with that email
+		throw responseCodes.EMAIL_INVALID;
 	}
 
-	// TODO: should send an email with the invitation
-	return {email, job, permissions};
+	if (!teamspaceJob) { // If there is no job in that teamspace with the name
+		throw responseCodes.JOB_NOT_FOUND;
+	}
+
+	if (projects.length !== projectNames.length) {
+		throw responseCodes.INVALID_PROJECT_NAME;
+	}
+
+	if (!validateModels(permissions.projects, projects)) {
+		throw responseCodes.INVALID_MODEL_ID;
+	}
+
+	//		Project.findByNames(projects)
+
+	// email = email.toLowerCase();
+	// const coll = await getCollection();
+	// const result = await coll.findOne({_id:email});
+	// const teamspaceEntry = { teamspace, job, permissions: {teamspace: permissions} };
+
+	// if (result) {
+	// 	const teamSpaces = result.teamSpaces.filter(entry => entry.teamspace !== teamspace);
+	// 	teamSpaces.push(teamspaceEntry);
+	// 	const invitation = { teamSpaces };
+	// 	await coll.updateOne({_id:email}, { $set: invitation });
+	// } else {
+	// 	const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
+	// 	await coll.insertOne(invitation);
+	// }
+
+	// // TODO: should send an email with the invitation
+	// return {email, job, permissions};
 };
 
 invitations.removeTeamspaceFromInvitation = async (email, teamspace) => {
@@ -103,8 +145,6 @@ invitations.teamspaceInvitationCheck = async (email, teamspace) => {
 };
 
 invitations.unpack = async (user) => {
-	const User = require("./user");
-
 	const coll = await getCollection();
 	const result = await coll.findOne({_id: user.customData.email});
 

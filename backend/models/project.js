@@ -229,6 +229,10 @@
 		});
 	};
 
+	schema.statics.findByNames = function(account, projectNames) {
+		return Project.find({account}, { name: { $in:projectNames } });
+	};
+
 	schema.statics.populateUsers = function(userList, project) {
 
 		userList.forEach(user => {
