@@ -1,4 +1,3 @@
-import { IS_DEVELOPMENT } from '../../../constants/environment';
 import { BACKEND_VISIBILITY_STATES, NODE_TYPES, SELECTION_STATES, VISIBILITY_STATES } from '../../../constants/tree';
 import { DEFAULT_NODE_NAME, INode } from './treeProcessing.constants';
 

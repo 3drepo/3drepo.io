@@ -18,6 +18,7 @@
 import { createSelector } from 'reselect';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as Bim from '../bim';
+import { selectIsTreeProcessed } from '../tree';
 
 export const selectViewerGuiDomain = (state) => ({...state.viewerGui});
 
@@ -31,7 +32,8 @@ export const selectIsMetadataVisible = createSelector(
 );
 
 export const selectIsModelLoaded = createSelector(
-	selectViewerGuiDomain, (state) => state.isModelLoaded
+	selectViewerGuiDomain, selectIsTreeProcessed, (state, isTreeProcessed) =>
+		state.isModelLoaded && isTreeProcessed
 );
 
 export const selectNavigationMode = createSelector(

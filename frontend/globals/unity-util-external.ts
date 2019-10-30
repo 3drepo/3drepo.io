@@ -1,3 +1,5 @@
 import {UnityUtil} from './unity-util';
 
-(window as any).UnityUtil = UnityUtil;
+if (window && !window.UnityUtil) {
+	(window as any).UnityUtil = UnityUtil;
+}

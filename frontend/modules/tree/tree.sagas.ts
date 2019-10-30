@@ -33,8 +33,7 @@ import {
 	selectIfcSpacesHidden,
 	selectNodesIndexesMap,
 	selectSelectionMap,
-	selectTreeNodesList,
-	selectVisibilityMap
+	selectTreeNodesList
 } from './tree.selectors';
 import TreeProcessing from './treeProcessing/treeProcessing';
 
@@ -106,7 +105,6 @@ function* expandToNode(node: any) {
 			// already expanded
 			return;
 		}
-		const nodesList = yield select(selectTreeNodesList);
 
 		const parents = TreeProcessing.getParentsID(node);
 		for (let index = parents.length - 1; index >= 0; --index) {
@@ -136,6 +134,10 @@ function* getAllTrees(teamspace, modelId, revision) {
 	const subTrees = yield all(proms);
 	return { fullTree: fullTree.data, subTrees: subTrees.filter((data) => !!data)};
 }
+
+const setIsTreeProcessed = (isProcessed) => {
+	dispatch(TreeActions.setIsTreeProcessed(isProcessed));
+};
 
 function* fetchFullTree({ teamspace, modelId, revision }) {
 	yield put(TreeActions.setIsPending(true));
@@ -172,7 +174,8 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 		dataToProcessed.mainTree.isFederation = modelSettings.federate;
 		dataToProcessed.subModels = modelSettings.subModels;
 		dataToProcessed.treePath = treePath;
-		yield TreeProcessing.transformData(dataToProcessed);
+
+		yield TreeProcessing.transformData(dataToProcessed, setIsTreeProcessed);
 		yield put(TreeActions.updateDataRevision());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'full tree', error));
