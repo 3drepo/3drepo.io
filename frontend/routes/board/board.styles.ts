@@ -53,7 +53,6 @@ export const BoardContainer = styled.div`
 		height: 100%;
 		width: 300px;
 		padding: 10px 8px;
-		margin: 4px;
 
 		> div {
 			width: 100%;
@@ -65,7 +64,7 @@ export const BoardContainer = styled.div`
 	}
 
 	.smooth-dnd-draggable-wrapper {
-		margin-bottom: 10px;
+		margin-bottom: 6px;
 		border: 1px solid ${COLOR.BLACK_12};
 	}
 `;
