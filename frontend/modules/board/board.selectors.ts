@@ -127,9 +127,6 @@ export const selectLanes = createSelector(
 		});
 
 		const groups = groupBy(preparedData, filterProp);
-		const isPrefixTitle =
-			filterProp === ISSUE_FILTER_PROPS.owner.value || filterProp === ISSUE_FILTER_PROPS.assigned_roles.value;
-
 		const name = FILTER_PROPS[filterProp] ? FILTER_PROPS[filterProp].name : '';
 		const dataset = filtersMap[filterProp];
 		const notDefinedGroup = groups[NOT_DEFINED_PROP];
@@ -153,7 +150,7 @@ export const selectLanes = createSelector(
 
 				if (id !== null && id !== '') {
 					lane.id = `${id}`;
-					lane.title = isPrefixTitle ? `${name} ${dataset[i].name}` : `${name} ${dataset[i].name}`;
+					lane.title = dataset[i].name;
 					lane.label = `${groups[id] ? groups[id].length : 0} ${boardType}`;
 					lane.cards = groups[id] ? groups[id] : [];
 

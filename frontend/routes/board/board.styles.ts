@@ -48,21 +48,30 @@ export const BoardContainer = styled.div`
 	}
 
 	.react-trello-lane {
+		background-color: ${COLOR.BLACK_6};
+		border: 1px solid ${COLOR.BLACK_12};
 		height: 100%;
-		width: 350px;
+		width: 300px;
+		padding: 10px 8px;
+		margin: 4px;
 
 		> div {
 			width: 100%;
+		}
+
+		header {
+			color: ${COLOR.BLACK_70};
 		}
 	}
 
 	.smooth-dnd-draggable-wrapper {
 		margin-bottom: 10px;
+		border: 1px solid ${COLOR.BLACK_12};
 	}
 `;
 
 export const Config = styled.div`
-	background-color: ${COLOR.BLACK_12};
+	background-color: ${COLOR.BLACK_6};
 	min-height: 30px;
 	padding: 5px 15px;
 	padding-left: 15px;
