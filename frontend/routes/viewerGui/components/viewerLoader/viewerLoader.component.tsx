@@ -20,6 +20,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { Container } from './viewerLoader.styles';
 
+const LOADING_VIEWER_TEXT = 'Loading viewer';
+const LOADING_MODEL_TEXT = 'Loading model';
+
 interface IProps {
 	viewer: any;
 	className?: string;
@@ -39,13 +42,15 @@ export const ViewerLoader = (props: IProps) => {
 		props.viewer.off(VIEWER_EVENTS.MODEL_LOADED);
 	};
 
-	const setProgressState = (updatedMessageLabel) => (updatedProgress = 0) => {
-		const isVisibleUpdated = updatedProgress !== 1;
-		const percentageProgress = Number((updatedProgress * 100).toFixed(0));
+	const setProgressState = (updatedMessageLabel) => (updatedProgress) => {
+		if (updatedProgress !== undefined) {
+			const isVisibleUpdated = updatedProgress !== 1;
+			const percentageProgress = Number((updatedProgress * 100).toFixed(0));
 
-		setMessage(updatedMessageLabel);
-		setProgress(percentageProgress);
-		setIsVisible(isVisibleUpdated);
+			setMessage(updatedMessageLabel);
+			setProgress(percentageProgress);
+			setIsVisible(isVisibleUpdated);
+		}
 	};
 
 	useEffect(() => {
@@ -58,11 +63,12 @@ export const ViewerLoader = (props: IProps) => {
 	}, [isVisible]);
 
 	useEffect(() => {
-		props.viewer.on(VIEWER_EVENTS.VIEWER_INIT, setProgressState('Loading viewer'));
-		props.viewer.on(VIEWER_EVENTS.VIEWER_INIT_PROGRESS, setProgressState('Loading viewer'));
-		props.viewer.on(VIEWER_EVENTS.MODEL_LOADING_START, setProgressState('Loading model'));
-		props.viewer.on(VIEWER_EVENTS.MODEL_LOADING_PROGRESS, setProgressState('Loading model'));
-		props.viewer.on(VIEWER_EVENTS.MODEL_LOADING_CANCEL, setProgressState('Loading model'));
+		props.viewer.on(VIEWER_EVENTS.VIEWER_INIT, setProgressState(LOADING_VIEWER_TEXT));
+		props.viewer.on(VIEWER_EVENTS.VIEWER_INIT_PROGRESS, setProgressState(LOADING_VIEWER_TEXT));
+		props.viewer.on(VIEWER_EVENTS.VIEWER_INIT_SUCCESS, setProgressState(LOADING_VIEWER_TEXT));
+		props.viewer.on(VIEWER_EVENTS.MODEL_LOADING_START, setProgressState(LOADING_MODEL_TEXT));
+		props.viewer.on(VIEWER_EVENTS.MODEL_LOADING_PROGRESS, setProgressState(LOADING_MODEL_TEXT));
+		props.viewer.on(VIEWER_EVENTS.MODEL_LOADING_CANCEL, setProgressState(LOADING_MODEL_TEXT));
 		props.viewer.on(VIEWER_EVENTS.MODEL_LOADED, setProgressState(''));
 
 		return handleUnmount;
