@@ -139,9 +139,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 					</ToggleButton>
 				</ToggleButtonContainer>
 				<NotCollapsableContent>
-					<Content>
-						{this.props.renderNotCollapsable()}
-					</Content>
+					{this.props.renderNotCollapsable()}
 				</NotCollapsableContent>
 			</>
 		);

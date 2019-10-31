@@ -84,7 +84,6 @@ export const DescriptionImage = styled.div`
 export const HorizontalView = styled.div`
 	display: flex;
 	flex: 1;
-	align-items: flex-start;
 	justify-content: flex-start;
 	overflow: hidden;
 

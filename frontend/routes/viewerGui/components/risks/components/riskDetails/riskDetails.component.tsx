@@ -114,6 +114,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		const renderNotCollapsable = () => {
 			return this.renderLogList(!horizontal && isRiskWithComments);
 		};
+
 		return (
 			<PreviewWrapper>
 				<PreviewDetails

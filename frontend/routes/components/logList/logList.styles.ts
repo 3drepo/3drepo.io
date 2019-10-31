@@ -21,6 +21,7 @@ import { COLOR } from '../../../styles';
 export const Container = styled.div`
 	min-height: 55px;
 	position: relative;
+	background-color: ${COLOR.BLACK_6};
 
 	&:before {
 		position: absolute;
