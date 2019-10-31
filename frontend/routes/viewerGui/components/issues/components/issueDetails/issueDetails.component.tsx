@@ -23,7 +23,7 @@ import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
 import { Container } from '../../../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
-import { HorizontalView, LogList, PreviewDetails } from './issueDetails.styles';
+import { HorizontalView, LogsContainer, LogList, PreviewDetails } from './issueDetails.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
 
 interface IProps {
@@ -111,7 +111,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderPreview = renderWhenTrue(() => {
-		const { expandDetails, horizontal } = this.props;
+		const { expandDetails, horizontal, failedToLoad } = this.props;
 		const { comments } = this.issueData;
 		const isIssueWithComments = Boolean((comments && comments.length || horizontal) && !this.isNewIssue);
 		const PreviewWrapper = horizontal && isIssueWithComments ? HorizontalView : Fragment;
@@ -134,7 +134,10 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 					scrolled={this.state.scrolled && !horizontal}
 					isNew={this.isNewIssue}
 				/>
-				{this.renderLogList(horizontal && isIssueWithComments)}
+				<LogsContainer>
+					{this.renderLogList(horizontal && isIssueWithComments)}
+					{this.renderFooter(horizontal && !failedToLoad)}
+				</LogsContainer>
 			</PreviewWrapper>
 		);
 	});
@@ -337,7 +340,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { failedToLoad, issue } = this.props;
+		const { failedToLoad, issue, horizontal } = this.props;
 		return (
 			<Container>
 				<ViewerPanelContent
@@ -347,7 +350,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 					{this.renderFailedState(failedToLoad)}
 					{this.renderPreview(!failedToLoad && issue)}
 				</ViewerPanelContent>
-				{this.renderFooter(!failedToLoad)}
+				{this.renderFooter(!failedToLoad && !horizontal)}
 			</Container>
 		);
 	}

@@ -24,7 +24,17 @@ import { PreviewDetails as PreviewDetailsBase } from '../../../previewDetails/pr
 
 export const StyledFormControl = styled(FormControl)`
 `;
-export const LogList = styled(LogListBase)``;
+
+export const LogList = styled(LogListBase)`
+	height: 100%;
+`;
+
+export const LogsContainer = styled.div`
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+`;
+
 export const PreviewDetails = styled(PreviewDetailsBase)``;
 
 export const Container = styled.div`
@@ -87,7 +97,7 @@ export const HorizontalView = styled.div`
 	justify-content: flex-start;
 	overflow: hidden;
 
-	${PreviewDetails}, ${LogList} {
+	${PreviewDetails}, ${LogsContainer} {
 		min-width: 50%;
 		width: 50%;
 		max-height: 60vh;
