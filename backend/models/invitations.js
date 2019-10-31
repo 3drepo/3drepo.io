@@ -26,9 +26,11 @@ const responseCodes = require("../response_codes.js");
 const { omit } = require("lodash");
 const C = require("../constants");
 
+const MODELS_PERMISSION_ROLES = ["admin", "collaborator", "commenter", "viewer"];
+
 const getCollection = async () => {
 	const coll = await db.getCollection("admin", "invitations");
-	coll.createIndex({ "teamSpaces.teamspace": 1 }, { "unique": true, "background": true, "w":1 });
+	coll.createIndex({ "teamSpaces.teamspace": 1 }, { "background": true, "w":1 });
 	return coll;
 };
 
@@ -36,10 +38,35 @@ const invitations = {};
 
 const validateModels = (projectsPermissions, projectsData) => {
 	return projectsPermissions.every((project, index) => {
-		const models = new Set((project.models || []).map(m=> m.id));
+		const models = new Set((project.models || []).map(m=> m.model));
 		const allModels = new Set(projectsData[index].models);
 		return setContains(allModels, models);
 	});
+};
+
+const validateModelsPermissions =  (projectsPermissions = []) => {
+	return projectsPermissions.every(({models = []}) => models.every(({role}) =>
+		MODELS_PERMISSION_ROLES.includes(role)
+	));
+};
+
+const cleanModelPermissions = modelPermissions => modelPermissions.map(({model, role}) => ({model, role}));
+
+const cleanPermissions = (permissions) => {
+	if (permissions.team_admin) { // if the invitation will be teamspace admin , ignore the rest of the permissions that might be sent
+		return { team_admin: true };
+	}
+
+	let projectsPermissions = permissions.projects || [];
+	projectsPermissions = projectsPermissions.map(({project, project_admin, models})=> {
+		if (project_admin) {
+			return { project, project_admin };
+		}
+
+		return {project, models: cleanModelPermissions(models)};
+	});
+
+	return { projects: projectsPermissions};
 };
 
 invitations.create = async (email, teamspace, job, permissions = {}) => {
@@ -49,9 +76,9 @@ invitations.create = async (email, teamspace, job, permissions = {}) => {
 	// 3 - send an email invitation
 	// 4 - return the invitation for that teamspace ({email, job, permissions:[]})
 
-	permissions.projects = permissions.projects || [];
+	const projectsPermissions = permissions.projects || [];
 
-	const projectNames = permissions.projects.map(pr => pr.name);
+	const projectNames = projectsPermissions.map(pr => pr.project);
 
 	const [emailUser, teamspaceJob, projects] = await Promise.all([
 		User.findByEmail(email),
@@ -71,29 +98,33 @@ invitations.create = async (email, teamspace, job, permissions = {}) => {
 		throw responseCodes.INVALID_PROJECT_NAME;
 	}
 
-	if (!validateModels(permissions.projects, projects)) {
+	if (!validateModelsPermissions(projectsPermissions)) {
+		throw responseCodes.INVALID_MODEL_PERMISSION_ROLE;
+	}
+
+	if (!validateModels(projectsPermissions, projects)) {
 		throw responseCodes.INVALID_MODEL_ID;
 	}
 
-	//		Project.findByNames(projects)
+	permissions = cleanPermissions(permissions);
 
-	// email = email.toLowerCase();
-	// const coll = await getCollection();
-	// const result = await coll.findOne({_id:email});
-	// const teamspaceEntry = { teamspace, job, permissions: {teamspace: permissions} };
+	email = email.toLowerCase();
+	const coll = await getCollection();
+	const result = await coll.findOne({_id:email});
+	const teamspaceEntry = { teamspace, job, permissions };
 
-	// if (result) {
-	// 	const teamSpaces = result.teamSpaces.filter(entry => entry.teamspace !== teamspace);
-	// 	teamSpaces.push(teamspaceEntry);
-	// 	const invitation = { teamSpaces };
-	// 	await coll.updateOne({_id:email}, { $set: invitation });
-	// } else {
-	// 	const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
-	// 	await coll.insertOne(invitation);
-	// }
+	if (result) {
+		const teamSpaces = result.teamSpaces.filter(entry => entry.name !== teamspace);
+		teamSpaces.push(teamspaceEntry);
+		const invitation = { teamSpaces };
+		await coll.updateOne({_id:email}, { $set: invitation });
+	} else {
+		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
+		await coll.insertOne(invitation);
+	}
 
 	// // TODO: should send an email with the invitation
-	// return {email, job, permissions};
+	return {email, job, permissions};
 };
 
 invitations.removeTeamspaceFromInvitation = async (email, teamspace) => {

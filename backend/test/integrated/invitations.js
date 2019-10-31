@@ -18,14 +18,17 @@
  */
 
 const { loginUsers } = require("../helpers/users.js");
-const { expect } = require("chai");
-const { EMAIL_INVALID, JOB_NOT_FOUND, INVALID_PROJECT_NAME, INVALID_MODEL_ID } = require("../../response_codes.js");
+const { expect, AssertionError } = require("chai");
+const { EMAIL_INVALID, JOB_NOT_FOUND, INVALID_PROJECT_NAME,
+	INVALID_MODEL_ID, NOT_AUTHORIZED, INVALID_MODEL_PERMISSION_ROLE } = require("../../response_codes.js");
 
 
 const inviteUrl = (account) => `/${account}/invitations`;
 
+
 describe("Invitations ", function () {
 	const usernames = [ "adminTeamspace1JobA",
+		"collaboratorTeamspace1Model1JobA",
 		"teamSpace1"];
 
 	const password = "password";
@@ -79,9 +82,9 @@ describe("Invitations ", function () {
 	it("send invitation with a non existen model should fail", function(done) {
 		const email = '19bd030fee094@email.com';
 		const job = 'jobA';
-		const modelsPermissions = [{ id : '1cb3e38c4f7644b', role: 'admin' }]
-		const projectPermission = { name: 'project1', models: modelsPermissions };
-		const inviteTeamPermission = { 'team_admin': false, projects: [projectPermission] };
+		const modelsPermissions = [{ model : '1cb3e38c4f7644b', role: 'admin' }]
+		const projectPermission = { project: 'project1', models: modelsPermissions };
+		const inviteTeamPermission = { team_admin: false, projects: [projectPermission] };
 
 		agents.teamSpace1.post(inviteUrl(account))
 			.send({ email, job, permissions: inviteTeamPermission})
@@ -112,7 +115,7 @@ describe("Invitations ", function () {
 	it("send invitations with project admin should work for the teamspace admin", function(done) {
 		const inviteEmail = '93393d28f953@mail.com';
 		const inviteJob = 'jobA';
-		const inviteTeamPermission =  { projects: [{name: 'project1', project_admin: true}] };
+		const inviteTeamPermission =  { projects: [{project: 'project1', project_admin: true}] };
 
 		agents.teamSpace1.post(inviteUrl(account))
 			.send({ email: inviteEmail, job: inviteJob, permissions: inviteTeamPermission})
@@ -120,53 +123,88 @@ describe("Invitations ", function () {
 				const {email, job, permissions} = res.body;
 				expect(email).to.equal(inviteEmail);
 				expect(job).to.equal(inviteJob);
-				expect(permissions.team_admin).to.equal(true);
 				expect(permissions.projects).to.be.an('array').and.to.have.length(1);
 
 				const projectPerm = permissions.projects[0];
-				expect(projectPerm.name).to.equal('project1');
+				expect(projectPerm.project).to.equal('project1');
 				expect(projectPerm.project_admin).to.equal(true);
 
 				done();
 			});
 	});
 
-	it("send invitations with model admin should work for the teamspace admin", function(done) {
+	it("send invitations with admin permission role for models should work for the teamspace admin", function(done) {
 		const inviteEmail = '48bc8da2f3bc@mail.com';
 		const inviteJob = 'jobA';
-		const modelsPermissions = [{ id : '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', role: 'admin' }];
-		const inviteTeamPermission =  { projects: [{name: 'project1', models: modelsPermissions}] };
+		const modelsPermissions = [{ model : '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', role: 'admin' }];
+		const inviteTeamPermission =  { projects: [{project: 'project1', models: modelsPermissions}] };
 
 		agents.teamSpace1.post(inviteUrl(account))
 			.send({ email: inviteEmail, job: inviteJob, permissions: inviteTeamPermission})
 			.expect(200, (err, res) => {
+				AssertionError.includeStack = true;
+
 				const {email, job, permissions} = res.body;
+
 				expect(email).to.equal(inviteEmail);
 				expect(job).to.equal(inviteJob);
-				expect(permissions.team_admin).to.equal(true);
-				expect(permissions.projects).to.be.an('array').and.to.have.length(1);
 
-				const projectPerm = permissions.projects[0];
-				expect(projectPerm.name).to.equal('project1');
-				expect(projectPerm.project_admin).to.equal(true);
+				const { projects } = permissions;
+				expect(projects).to.be.an('array').and.to.have.length(1);
+
+				const {project, models} = projects[0];
+				expect(project).to.equal('project1');
+
+				expect(models).to.be.an('array').and.to.have.length(1);
+				const {model, role} = models[0];
+				expect(model).to.equal('00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5');
+				expect(role).to.equal('admin');
 
 				done();
 			});
 	});
 
 
+	it("send invitations with nonexistent permission role for model should fail", function(done) {
+		const inviteEmail = '4oj1i2393bc@mail.com';
+		const inviteJob = 'jobA';
+		const modelsPermissions = [{ model : '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', role: 'crazyrole' }];
+		const inviteTeamPermission =  { projects: [{project: 'project1', models: modelsPermissions}] };
 
-	// it("get invitations should work for the teamspace admin", function(done) {
-	// 	const inviteEmail = 'nonexitentmail@mail.com';
-	// 	const inviteJob = 'jobA';
-	// 	const inviteTeamPermission = ['team_admin'];
+		agents.teamSpace1.post(inviteUrl(account))
+			.send({ email: inviteEmail, job: inviteJob, permissions: inviteTeamPermission})
+			.expect(INVALID_MODEL_PERMISSION_ROLE.status, (err, res) => {
+				expect(res.body.message).to.equal(INVALID_MODEL_PERMISSION_ROLE.message);
+				done();
+			});
+	});
 
-	// 	agents.teamSpace1.get(inviteUrl(account))
-	// 		.expect(200, (err, res) => {
-	// 			console.log(res.body);
-	// 			done();
-	// 		});
-	// });
+	it("send invitations not being a the teamspace admin should fail", function(done) {
+		const inviteEmail = '7e634bae01db4f@mail.com';
+		const inviteJob = 'jobA';
+		const inviteTeamPermission =  { team_admin: true };
+
+		agents.collaboratorTeamspace1Model1JobA.post(inviteUrl(account))
+			.send({ email: inviteEmail, job: inviteJob, permissions: inviteTeamPermission})
+			.expect(NOT_AUTHORIZED.status, (err, res) => {
+ 				expect(res.body.message).to.equal(NOT_AUTHORIZED.message);
+				done();
+			});
+	});
+
+
+
+	it("get invitations should work for the teamspace admin", function(done) {
+		const inviteEmail = 'nonexitentmail@mail.com';
+		const inviteJob = 'jobA';
+		const inviteTeamPermission = ['team_admin'];
+
+		agents.teamSpace1.get(inviteUrl(account))
+			.expect(200, (err, res) => {
+				console.log(res.body);
+				done();
+			});
+	});
 
 	after(() => agents.done);
 });
