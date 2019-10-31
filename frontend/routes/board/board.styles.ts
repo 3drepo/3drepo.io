@@ -70,9 +70,9 @@ export const BoardContainer = styled.div`
 `;
 
 export const Config = styled.div`
-	background-color: ${COLOR.BLACK_6};
+	background-color: ${COLOR.WHITE};
 	min-height: 30px;
-	padding: 5px 15px;
+	padding: 10px 15px;
 	padding-left: 15px;
 	display: flex;
 	align-items: center;

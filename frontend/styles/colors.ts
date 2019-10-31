@@ -43,6 +43,7 @@ export const COLOR = {
 	GRAY_60: 'rgba(189, 189, 189, .6)',
 	GRAY_50: 'rgba(189, 189, 189, .5)',
 	LIGHT_GRAY: '#fafafa',
+	LIGHT_GRAY_89: 'rgba(250, 250, 250, .89)',
 	WARNING_LIGHT: '#ffefef',
 	WARNING: '#ffd5d5',
 	VIVID_NAVY: '#3452ff',
