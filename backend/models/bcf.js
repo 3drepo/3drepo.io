@@ -607,6 +607,11 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 									const complexAttrs = ["comments", "viewpoints"];
 									for (const complexAttrIndex in complexAttrs) {
 										const complexAttr = complexAttrs[complexAttrIndex];
+										if(!matchingIssue[complexAttr]) {
+											matchingIssue[complexAttr] = issue[complexAttr];
+											toChange[complexAttr] = matchingIssue[complexAttr];
+											continue;
+										}
 										for (let i = 0; i < issue[complexAttr].length; i++) {
 											if (-1 === matchingIssue[complexAttr].findIndex(attr =>
 												utils.uuidToString(attr.guid) === utils.uuidToString(issue[complexAttr][i].guid))) {
