@@ -411,7 +411,7 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 	if (ids) {
 
 		if (useIssueNumber) {
-			filter.number = {"$in": ids};
+			filter.number = {"$in": ids.map((x) => parseInt(x))};
 		} else {
 			ids.forEach((id, i) => {
 				ids[i] = utils.stringToUUID(id);
@@ -453,29 +453,31 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 					return Ref.find(dbCol, {type: "ref", _id: {"$in": historySearchResults.current}}).then((refs) => {
 						const subModelsPromises = [];
 
-						refs.forEach((ref) => {
-							const subDbCol = {
-								account: dbCol.account,
-								model: ref.project
-							};
-							subModelsPromises.push(
-								this.findIssuesByModelName(subDbCol, username, "master", null, projection, ids, true).then((subIssues) => {
-									subIssues.forEach((subIssue) => {
-										subIssue.origin_account = subDbCol.account;
-										subIssue.origin_model = subDbCol.model;
-									});
-
-									return subIssues;
-								}).catch((err) => {
-									// Skip sub-model errors to allow working sub-models to load
-									systemLogger.logError("Error while retrieving sub-model issues",
-										{
-											subDbCol,
-											err: err
+						if(!useIssueNumber) {
+							refs.forEach((ref) => {
+								const subDbCol = {
+									account: dbCol.account,
+									model: ref.project
+								};
+								subModelsPromises.push(
+									this.findIssuesByModelName(subDbCol, username, "master", null, projection, ids, true).then((subIssues) => {
+										subIssues.forEach((subIssue) => {
+											subIssue.origin_account = subDbCol.account;
+											subIssue.origin_model = subDbCol.model;
 										});
-								})
-							);
-						});
+
+										return subIssues;
+									}).catch((err) => {
+										// Skip sub-model errors to allow working sub-models to load
+										systemLogger.logError("Error while retrieving sub-model issues",
+											{
+												subDbCol,
+												err: err
+											});
+									})
+								);
+							});
+						}
 
 						return Promise.all(subModelsPromises).then((subModelsIssues) => {
 							if (subModelsIssues) {
@@ -490,7 +492,6 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 							if (!noClean) {
 								mainIssues = mainIssues.map(x => ticket.clean(dbCol.account, dbCol.model, x));
 							}
-
 							return mainIssues;
 						});
 					});
