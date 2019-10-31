@@ -167,7 +167,7 @@ issue.createIssue = function(dbCol, newIssue) {
 			_dbCol.find({}, {number: 1}).sort({ number: -1 }).limit(1).toArray().then((res) => {
 				newIssue.number = (res.length > 0) ? res[0].number + 1 : 1;
 			});
-		}).catch((err) => {
+		}).catch(() => {
 			newIssue.number = 1;
 		})
 	);
