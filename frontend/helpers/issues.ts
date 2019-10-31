@@ -32,9 +32,13 @@ import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 
 export const prepareIssue = (issue, jobs = []) => {
 	const preparedIssue = {...issue};
+<<<<<<< HEAD
 	if (issue.thumbnail) {
 		preparedIssue.thumbnail = issue.thumbnail.length ? getAPIUrl(issue.thumbnail) : '';
 	}
+=======
+	preparedIssue.thumbnail = issue.thumbnail && issue.thumbnail.length ? getAPIUrl(issue.thumbnail) : '';
+>>>>>>> ISSUE #1738 - Rearrange Board Header
 
 	const descriptionThumbnail = issue.viewpoint && issue.viewpoint.screenshot
 		? getAPIUrl(issue.viewpoint.screenshot)

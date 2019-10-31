@@ -119,7 +119,7 @@ export const ConfigSelect = styled(Select).attrs({
 })`
 	&& {
 		margin-right: 10px;
-		width: 150px;
+		width: ${(props) => props.theme.small ? '95px' : '150px'};
 
 		.select--disabled {
 			color: ${COLOR.BLACK_40};
@@ -148,7 +148,17 @@ export const TitleContainer = styled.div`
 	}
 `;
 
-export const SelectContainer = styled.div``;
+export const SelectContainer = styled.div`
+	align-items: center;
+	display: flex;
+`;
+
+export const SelectLabel = styled.div`
+	color: ${COLOR.BLACK_60};
+	font-size: 14px;
+	margin-bottom: 3px;
+	margin-right: 3px;
+`;
 
 export const LoaderContainer = styled.div`
 	display: flex;

@@ -53,7 +53,6 @@ function* fetchRisks({teamspace, modelId, revision}) {
 	try {
 		const {data} = yield API.getRisks(teamspace, modelId, revision);
 		const jobs = yield select(selectJobsList);
-
 		const preparedRisks = data.map((risk) => prepareRisk(risk, jobs));
 
 		yield put(RisksActions.fetchRisksSuccess(preparedRisks));

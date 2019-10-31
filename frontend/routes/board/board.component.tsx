@@ -19,6 +19,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Add from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
+import { capitalize } from 'lodash';
 import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
@@ -60,11 +61,15 @@ import {
 	FormWrapper,
 	LoaderContainer,
 	NoDataMessage,
+	SelectContainer,
+	SelectLabel,
 	Title,
 	ViewConfig
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
 import { ConfigSelectComponent } from './components/configSelect.component';
+
+const types = ['issues', 'risks'];
 
 interface ICard {
 	id: string;
@@ -180,9 +185,9 @@ export function Board(props: IProps) {
 		props.history.push(url);
 	};
 
-	const handleFilterClick = (filterProp) => {
-		if (props.filterProp !== filterProp) {
-			props.setFilterProp(filterProp);
+	const handleFilterClick = ({target: {value}}) => {
+		if (props.filterProp !== value) {
+			props.setFilterProp(value);
 		}
 	};
 
@@ -300,25 +305,35 @@ export function Board(props: IProps) {
 
 	const FILTER_VALUES = isIssuesBoard ? ISSUE_FILTER_VALUES : RISK_FILTER_VALUES;
 
-	const renderFilters = () => (
-		<Filters>
-			{ FILTER_VALUES.map((filter) => (
-				<FilterButton
-					key={filter.value}
-					active={props.filterProp === filter.value}
-					disabled={!project && !modelId}
-					onClick={() => handleFilterClick(filter.value)}>
-					{filter.name}
-				</FilterButton>
-			)) }
-		</Filters>
-	);
+	const renderFilters = () => {
+		return (
+			<>
+				<SelectContainer>
+					<SelectLabel>Show</SelectLabel>
+					<ConfigSelect value={type} onChange={handleTypeChange} theme={{ small: true }}>
+						{types.map((t) => (<ConfigSelectItem key={t} value={t}>{`${capitalize(t)}`}</ConfigSelectItem>))}
+					</ConfigSelect>
+				</SelectContainer>
+				<SelectContainer>
+					<SelectLabel>Sort by</SelectLabel>
+					<ConfigSelect value={props.filterProp} onChange={handleFilterClick} theme={{ small: true }}>
+						{ FILTER_VALUES.map((filter, index) => (
+								<ConfigSelectItem key={index} value={filter.value}>
+									{filter.name}
+								</ConfigSelectItem>
+							))
+						}
+					</ConfigSelect>
+				</SelectContainer>
+			</>
+		);
+	};
 
-	const BoardCard = (cardProps: any) => {
+	const BoardCard = ({ metadata, onClick }: any) => {
 		return (
 			<PreviewListItem
-				{...cardProps.metadata}
-				onItemClick={cardProps.onClick}
+				{...metadata}
+				onItemClick={onClick}
 			/>
 		);
 	};
@@ -334,6 +349,7 @@ export function Board(props: IProps) {
 				hideCardDeleteIcon
 				onCardClick={handleOpenDialog}
 				onCardMoveAcrossLanes={handleCardMove}
+				handleDragStart={handleDragStart}
 				components={components}
 				cardDraggable={isDraggable}
 			/>
@@ -455,9 +471,7 @@ export function Board(props: IProps) {
 		);
 	});
 
-	const BoardTitle = (
-		<BoardTitleComponent type={type} handleTypeChange={handleTypeChange} renderActions={renderActions} />
-	);
+	const BoardTitle = (<BoardTitleComponent renderActions={renderActions} />);
 
 	return (
 		<Panel {...PANEL_PROPS} title={BoardTitle}>

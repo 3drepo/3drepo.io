@@ -15,19 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {capitalize} from 'lodash';
 import React from 'react';
-import { SelectContainer, TitleActions, TitleContainer, TypesItem, TypesSelect } from '../board.styles';
+import { TitleActions, TitleContainer } from '../board.styles';
 
-const types = ['issues', 'risks'];
-
-export const BoardTitleComponent = ({type, handleTypeChange, renderActions}) => (
+export const BoardTitleComponent = ({renderActions}) => (
 	<TitleContainer>
-		<SelectContainer>
-			<TypesSelect value={type} onChange={handleTypeChange}>
-				{types.map((t) => (<TypesItem key={t} value={t}>Project {`${capitalize(t)}`}</TypesItem>))}
-			</TypesSelect>
-		</SelectContainer>
+		Kanban Board
 		<TitleActions>
 			{renderActions()}
 		</TitleActions>

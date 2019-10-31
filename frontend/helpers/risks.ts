@@ -35,8 +35,8 @@ import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 
 export const prepareRisk = (risk, jobs = []) => {
 	const preparedRisk = {...risk};
-
-	preparedRisk.thumbnail = preparedRisk.thumbnail.length ? getAPIUrl(preparedRisk.thumbnail) : '';
+	preparedRisk.thumbnail =
+		preparedRisk.thumbnail && preparedRisk.thumbnail.length ? getAPIUrl(preparedRisk.thumbnail) : '';
 
 	const descriptionThumbnail = preparedRisk.viewpoint && preparedRisk.viewpoint.screenshot
 		? getAPIUrl(preparedRisk.viewpoint.screenshot)

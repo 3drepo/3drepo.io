@@ -78,7 +78,7 @@ export const ROW_ACTIONS = {
 		requiredPermissions: 'edit_federation'
 	},
 	BOARD: {
-		label: 'Board',
+		label: 'Kanban Board',
 		Icon: Board
 	}
 };
