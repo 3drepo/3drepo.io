@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// @ts-ignore
-import { default as fileDialog} from 'file-dialog';
+import fileDialog from 'file-dialog';
 import React from 'react';
 
 import {
