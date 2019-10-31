@@ -163,16 +163,17 @@ issue.createIssue = function(dbCol, newIssue) {
 	// Assign issue number
 	issueAttrPromises.push(
 		db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
-			_dbCol.stats().then((stats) => {
-				newIssue.number = (stats) ? stats.count + 1 : 1;
-			}).catch(() => {
-				newIssue.number = 1;
+
+			_dbCol.find({}, {number: 1}).sort({ number: -1 }).limit(1).toArray().then((res) => {
+				newIssue.number = (res.length > 0) ? res[0].number + 1 : 1;
 			});
+		}).catch((err) => {
+			newIssue.number = 1;
 		})
 	);
 
 	if (!newIssue.desc || newIssue.desc === "") {
-		newIssue.desc = "(No Description)"; // TODO do we really want this stored?
+		newIssue.desc = "(No Description)";
 	}
 
 	if (!newIssue.revId) {
@@ -400,7 +401,7 @@ issue.getIssuesList = function(dbCol, username, branch, revision, ids, sort, con
 	});
 };
 
-issue.findIssuesByModelName = function(dbCol, username, branch, revId, projection, ids, noClean = false) {
+issue.findIssuesByModelName = function(dbCol, username, branch, revId, projection, ids, noClean = false, useIssueNumber = false) {
 	const account = dbCol.account;
 	const model = dbCol.model;
 
@@ -408,10 +409,15 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 	let historySearch = Promise.resolve();
 
 	if (ids) {
-		ids.forEach((id, i) => {
-			ids[i] = utils.stringToUUID(id);
-		});
-		filter._id = {"$in": ids};
+
+		if (useIssueNumber) {
+			filter.number = {"$in": ids};
+		} else {
+			ids.forEach((id, i) => {
+				ids[i] = utils.stringToUUID(id);
+			});
+			filter._id = {"$in": ids};
+		}
 	}
 
 	if (branch || revId) {

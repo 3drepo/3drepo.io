@@ -1,7 +1,7 @@
 import * as API from '../services/api';
 
 export const exportBCF = (teamspace, model, issuesIds) => {
-	const exportUrl = API.getAPIUrl(`${teamspace}/${model}/issues.bcfzip?ids=${issuesIds}`);
+	const exportUrl = API.getAPIUrl(`${teamspace}/${model}/issues.bcfzip?numbers=${issuesIds}`);
 	window.open(exportUrl, '_blank');
 };
 

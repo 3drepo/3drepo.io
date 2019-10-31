@@ -408,7 +408,7 @@ function getBCFMarkup(issue, account, model, unit) {
 	});
 }
 
-bcf.getBCFZipReadStream = function(account, model, username, branch, revId, ids) {
+bcf.getBCFZipReadStream = function(account, model, username, branch, revId, ids, useIssueNumbers = false) {
 
 	const zip = archiver.create("zip");
 
@@ -423,7 +423,7 @@ bcf.getBCFZipReadStream = function(account, model, username, branch, revId, ids)
 	return ModelSetting.findById({account, model}, model).then(_settings => {
 
 		settings = _settings;
-		return Issue.findIssuesByModelName({account, model}, username, branch, revId, projection, ids, noClean);
+		return Issue.findIssuesByModelName({account, model}, username, branch, revId, projection, ids, noClean, useIssueNumbers);
 
 	}).then(issues => {
 
