@@ -141,7 +141,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 		}, {
 			...ISSUES_ACTIONS_MENU.IMPORT_BCF,
 			onClick: () => {
-				fileDialog({ accept: '.zip,.bcfzip,.bcf' }, (files) => {
+				fileDialog.default({ accept: '.zip,.bcfzip,.bcf' }, (files) => {
 					importBCF(teamspace, model, files[0], revision);
 				});
 			}

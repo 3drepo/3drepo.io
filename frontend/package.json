@@ -47,7 +47,7 @@
     "copy-to-clipboard": "^3.2.0",
     "dayjs": "1.8.11",
     "eventemitter3": "3.1.0",
-    "file-dialog": "^0.0.7",
+    "file-dialog": "0.0.7",
     "file-loader": "2.0.0",
     "filesize": "4.1.2",
     "font-awesome": "4.7.0",
