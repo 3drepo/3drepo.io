@@ -1136,23 +1136,25 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 					});
 
 					return Promise.all(groupPromises).then(() => {
-						// take the first screenshot as thumbnail
-						return utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).then((image) => {
-							if (image) {
-								issue.thumbnail = {
-									flag: 1,
-									content: image
-								};
-							}
-						}).catch(err => {
-							systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-								account,
-								model,
-								issueId: utils.uuidToString(issue._id),
-								viewpointId: vpGuids[0],
-								err: err
+						if (viewpoints[vpGuids[0]].snapshot) {
+							// take the first screenshot as thumbnail
+							return utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).then((image) => {
+								if (image) {
+									issue.thumbnail = {
+										flag: 1,
+										content: image
+									};
+								}
+							}).catch(err => {
+								systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+									account,
+									model,
+									issueId: utils.uuidToString(issue._id),
+									viewpointId: vpGuids[0],
+									err: err
+								});
 							});
-						});
+						}
 					}).then(() => {
 						return issue;
 					});
