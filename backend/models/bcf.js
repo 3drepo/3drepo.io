@@ -342,7 +342,7 @@ function getBCFMarkup(issue, account, model, unit) {
 			viewpointsPromises.push(
 				Promise.all(componentsPromises).then(() => {
 					_.get(vp, "extras.OrthogonalCamera") && (viewpointXmlObj.VisualizationInfo.OrthogonalCamera = _.get(vp, "extras.OrthogonalCamera"));
-					if(!_.get(vp, "extras._noPerspective") && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >= 3) {
+					if(!_.get(vp, "extras._noPerspective") && vp.position && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >= 3) {
 
 						viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
 							CameraViewPoint:{
