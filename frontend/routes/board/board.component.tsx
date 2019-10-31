@@ -349,7 +349,6 @@ export function Board(props: IProps) {
 				hideCardDeleteIcon
 				onCardClick={handleOpenDialog}
 				onCardMoveAcrossLanes={handleCardMove}
-				handleDragStart={handleDragStart}
 				components={components}
 				cardDraggable={isDraggable}
 			/>
