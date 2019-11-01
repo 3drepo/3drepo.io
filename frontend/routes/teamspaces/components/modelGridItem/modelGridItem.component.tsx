@@ -298,6 +298,7 @@ export const ModelGridItem = memo((props: IProps) => {
 					federate={isFederation}
 					actions={rowActions}
 					permissions={props.permissions}
+					isPending={isPending}
 				/>
 			</Header>
 			<Content>
