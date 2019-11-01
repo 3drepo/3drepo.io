@@ -140,7 +140,7 @@ const setModelUploadStatus = (state = INITIAL_STATE, { model, modelData, increme
 	}
 
 	if (incrementRev) {
-		++uploadedModel.nRevisions;
+		uploadedModel.nRevisions = uploadedModel.nRevisions ? uploadedModel.nRevisions + 1 : 1;
 	}
 
 	const models = { ...state.models, [model]: uploadedModel };
