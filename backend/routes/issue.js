@@ -859,7 +859,7 @@ function getIssuesBCF(req, res, next) {
 	if (req.query.numbers) {
 		ids = req.query.numbers.split(",");
 		useIssueNumbers = true;
-	} else if (req.query.numbers) {
+	} else if (req.query.ids) {
 		ids = req.query.ids.split(",");
 	}
 
