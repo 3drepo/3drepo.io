@@ -24,8 +24,7 @@ import * as React from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';
 
-import { TREE_ACTIONS_ITEMS, TREE_ACTIONS_MENU, TREE_ITEM_SIZE, TREE_MAX_HEIGHT } from '../../../../constants/tree';
-import { VIEWER_PANEL_TITLE_HEIGHT } from '../../../../constants/viewerGui';
+import { TREE_ACTIONS_ITEMS, TREE_ACTIONS_MENU, TREE_ITEM_SIZE } from '../../../../constants/tree';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ButtonMenu } from '../../../components/buttonMenu/buttonMenu.component';
 import {
@@ -117,15 +116,20 @@ export class Tree extends React.PureComponent<IProps, IState> {
 	public renderNodesList = renderWhenTrue(() => {
 		const { nodesList, dataRevision } = this.props;
 		const size = nodesList.length;
+		const maxHeight = 842;
+
+		const treeHeight = TREE_ITEM_SIZE * size;
+		const treeNodesHeight = treeHeight > maxHeight ?	maxHeight : treeHeight;
 
 		return (
+			<div style={{ height: treeNodesHeight }}>
 				<AutoSizer>
 					{({ width, height }) => (
 						<List
 							dataRevision={dataRevision}
 							ref={this.nodeListRef}
-							height={height - 1}
-							width={width - 1}
+							height={height}
+							width={width}
 							itemData={nodesList}
 							itemCount={size}
 							itemSize={TREE_ITEM_SIZE}
@@ -135,6 +139,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 						</List>
 					)}
 				</AutoSizer>
+			</div>
 		);
 	});
 
@@ -156,10 +161,6 @@ export class Tree extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { searchEnabled, nodesList, isPending } = this.props;
-		const size = nodesList.length;
-
-		const treeHeight = TREE_ITEM_SIZE * size;
-		const panelHeight = Math.min(TREE_MAX_HEIGHT, treeHeight) + VIEWER_PANEL_TITLE_HEIGHT  + 1;
 
 		return (
 			<ViewerPanel
@@ -167,12 +168,10 @@ export class Tree extends React.PureComponent<IProps, IState> {
 				Icon={<TreeIcon />}
 				renderActions={this.renderActions}
 				pending={isPending}
-
-				paperProps={{style: {height: panelHeight}}}
 			>
 				{this.renderFilterPanel(searchEnabled)}
-					{this.renderNodesList(!isPending && !!nodesList.length)}
-					{this.renderNotFound(!isPending && !nodesList.length)}
+				{this.renderNodesList(!isPending && !!nodesList.length)}
+				{this.renderNotFound(!isPending && !nodesList.length)}
 			</ViewerPanel>
 		);
 	}
