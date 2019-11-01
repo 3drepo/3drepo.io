@@ -1,13 +1,13 @@
 import * as API from '../services/api';
 
 export const exportBCF = (teamspace, model, issuesIds) => {
-	const exportUrl = API.getAPIUrl(`${teamspace}/${model}/issues.bcfzip?ids=${issuesIds}`);
-	window.open(exportUrl, '_blank');
+	const exportUrl = API.getAPIUrl(`${teamspace}/${model}/issues.bcfzip?numbers=${issuesIds}`);
+	window.open(exportUrl, '_blank', 'noopener');
 };
 
 const handlePrint = (dataType) => (teamspace, model, dataIds) => {
 	const printUrl = API.getAPIUrl(`${teamspace}/${model}/${dataType}.html?ids=${dataIds}`);
-	window.open(printUrl, '_blank');
+	window.open(printUrl, '_blank', 'noopener');
 };
 
 export const printIssues = handlePrint('issues');

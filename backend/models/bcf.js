@@ -342,7 +342,7 @@ function getBCFMarkup(issue, account, model, unit) {
 			viewpointsPromises.push(
 				Promise.all(componentsPromises).then(() => {
 					_.get(vp, "extras.OrthogonalCamera") && (viewpointXmlObj.VisualizationInfo.OrthogonalCamera = _.get(vp, "extras.OrthogonalCamera"));
-					if(!_.get(vp, "extras._noPerspective") && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >= 3) {
+					if(!_.get(vp, "extras._noPerspective") && vp.position && vp.position.length >= 3 && vp.view_dir.length >= 3 && vp.up.length >= 3) {
 
 						viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
 							CameraViewPoint:{
@@ -408,7 +408,7 @@ function getBCFMarkup(issue, account, model, unit) {
 	});
 }
 
-bcf.getBCFZipReadStream = function(account, model, username, branch, revId, ids) {
+bcf.getBCFZipReadStream = function(account, model, username, branch, revId, ids, useIssueNumbers = false) {
 
 	const zip = archiver.create("zip");
 
@@ -423,7 +423,7 @@ bcf.getBCFZipReadStream = function(account, model, username, branch, revId, ids)
 	return ModelSetting.findById({account, model}, model).then(_settings => {
 
 		settings = _settings;
-		return Issue.findIssuesByModelName({account, model}, username, branch, revId, projection, ids, noClean);
+		return Issue.findIssuesByModelName({account, model}, username, branch, revId, projection, ids, noClean, useIssueNumbers);
 
 	}).then(issues => {
 
@@ -607,6 +607,11 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 									const complexAttrs = ["comments", "viewpoints"];
 									for (const complexAttrIndex in complexAttrs) {
 										const complexAttr = complexAttrs[complexAttrIndex];
+										if(!matchingIssue[complexAttr]) {
+											matchingIssue[complexAttr] = issue[complexAttr];
+											toChange[complexAttr] = matchingIssue[complexAttr];
+											continue;
+										}
 										for (let i = 0; i < issue[complexAttr].length; i++) {
 											if (-1 === matchingIssue[complexAttr].findIndex(attr =>
 												utils.uuidToString(attr.guid) === utils.uuidToString(issue[complexAttr][i].guid))) {
@@ -1136,23 +1141,25 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 					});
 
 					return Promise.all(groupPromises).then(() => {
-						// take the first screenshot as thumbnail
-						return utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).then((image) => {
-							if (image) {
-								issue.thumbnail = {
-									flag: 1,
-									content: image
-								};
-							}
-						}).catch(err => {
-							systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-								account,
-								model,
-								issueId: utils.uuidToString(issue._id),
-								viewpointId: vpGuids[0],
-								err: err
+						if (viewpoints[vpGuids[0]].snapshot) {
+							// take the first screenshot as thumbnail
+							return utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).then((image) => {
+								if (image) {
+									issue.thumbnail = {
+										flag: 1,
+										content: image
+									};
+								}
+							}).catch(err => {
+								systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+									account,
+									model,
+									issueId: utils.uuidToString(issue._id),
+									viewpointId: vpGuids[0],
+									err: err
+								});
 							});
-						});
+						}
 					}).then(() => {
 						return issue;
 					});

@@ -236,7 +236,7 @@ export function* downloadIssues({ teamspace, modelId }) {
 function* exportBcf({ teamspace, modelId }) {
 	try {
 		const filteredIssues = yield select(selectFilteredIssues);
-		const issuesIds = map(filteredIssues, '_id').join(',');
+		const issuesIds = map(filteredIssues, 'number').join(',');
 		Exports.exportBCF(teamspace, modelId, issuesIds);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('export', 'BCF', error));

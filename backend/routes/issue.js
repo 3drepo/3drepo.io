@@ -855,16 +855,20 @@ function getIssuesBCF(req, res, next) {
 	const dbCol =  {account: account, model: model};
 
 	let ids;
-	if (req.query.ids) {
+	let useIssueNumbers = false;
+	if (req.query.numbers) {
+		ids = req.query.numbers.split(",");
+		useIssueNumbers = true;
+	} else if (req.query.ids) {
 		ids = req.query.ids.split(",");
 	}
 
 	let getBCFZipRS;
 
 	if (req.params.rid) {
-		getBCFZipRS = BCF.getBCFZipReadStream(account, model, req.session.user.username, null, req.params.rid, ids);
+		getBCFZipRS = BCF.getBCFZipReadStream(account, model, req.session.user.username, null, req.params.rid, ids, useIssueNumbers);
 	} else {
-		getBCFZipRS = BCF.getBCFZipReadStream(account, model, req.session.user.username, "master", null, ids);
+		getBCFZipRS = BCF.getBCFZipReadStream(account, model, req.session.user.username, "master", null, ids, useIssueNumbers);
 	}
 
 	getBCFZipRS.then(zipRS => {
