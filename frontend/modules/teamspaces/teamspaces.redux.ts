@@ -24,7 +24,7 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	fetchTeamspaces: ['username'],
 	fetchTeamspacesSuccess: ['entities'],
 	setPendingState: ['pendingState'],
-	setModelUploadStatus: ['teamspace', 'project', 'model', 'modelData'],
+	setModelUploadStatus: ['teamspace', 'project', 'model', 'modelData', 'incrementRev'],
 	setComponentState: ['componentState'],
 	removeTeamspaceSuccess: ['teamspace'],
 	leaveTeamspace: ['teamspace'],
@@ -132,11 +132,15 @@ const removeModelSuccess = (state = INITIAL_STATE, { teamspace, modelData }) => 
 	return { ...state, models, projects };
 };
 
-const setModelUploadStatus = (state = INITIAL_STATE, { model, modelData }) => {
+const setModelUploadStatus = (state = INITIAL_STATE, { model, modelData, incrementRev = false }) => {
 	const uploadedModel = { ...state.models[model], status: modelData.status };
 
 	if (modelData.timestamp) {
 		uploadedModel.timestamp = modelData.timestamp;
+	}
+
+	if (incrementRev) {
+		++uploadedModel.nRevisions;
 	}
 
 	const models = { ...state.models, [model]: uploadedModel };

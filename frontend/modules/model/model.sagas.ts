@@ -119,8 +119,12 @@ export function* downloadModel({ teamspace, modelId }) {
 	}
 }
 
-export function* onModelStatusChanged({ modelData, teamspace, project, modelId, modelName }) {
-	yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, modelData));
+export function* onModelStatusChanged({ modelData, teamspace, project, modelId, modelName}) {
+	yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelId, modelData,
+		!modelData._id && modelData.status === uploadFileStatuses.ok));
+	/* FIXME: this is hacky. At the moment there's no way to differentiate a model
+	 * change triggered by chat and a model changed because model settings data got modified...
+	 * If the modelData doesnt' have an id, we know it came from chat... very hacky. */
 
 	const currentUser = yield select(selectCurrentUser);
 	if (modelData.user !== currentUser.username) {
@@ -129,8 +133,7 @@ export function* onModelStatusChanged({ modelData, teamspace, project, modelId, 
 
 	if (modelData.status === uploadFileStatuses.ok) {
 		yield put(SnackbarActions.show(`Model ${modelName} uploaded successfully`));
-	}
-	if (modelData.status === uploadFileStatuses.failed) {
+	} else if (modelData.status === uploadFileStatuses.failed) {
 		if (modelData.hasOwnProperty('errorReason') && modelData.errorReason.message) {
 			yield put(SnackbarActions.show(`Failed to import ${modelName} model: ${modelData.errorReason.message}`));
 		} else {
