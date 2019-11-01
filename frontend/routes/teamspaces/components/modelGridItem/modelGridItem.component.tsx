@@ -157,8 +157,8 @@ export const ModelGridItem = memo((props: IProps) => {
 	};
 
 	const handleClick = useCallback((e) => {
-		const { history, teamspace, nRevisions, model } = props;
-		if (nRevisions > 0) {
+		const { history, teamspace, timestamp, nRevisions, model } = props;
+		if (timestamp || nRevisions > 0 ) {
 			history.push(`${ROUTES.VIEWER}/${teamspace}/${model}`);
 			analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
 		} else {
