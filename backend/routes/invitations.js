@@ -49,7 +49,7 @@ router.delete("/invitations/:email", middlewares.isAccountAdmin, removeInvitatio
 
 function getInvitations(req, res, next) {
 	Invitations.getInvitationsByTeamspace(req.params.account).then(invitations => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {invitations});
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, invitations);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});

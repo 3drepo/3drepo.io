@@ -31,10 +31,10 @@ const loginUsers = async (usernames, passwords) => {
 	});
 
 	const agents = { server };
-	agents.done = new Promise((resolve) => {
+	agents.done = () => new Promise((resolve) => {
 		server.close(() => {
-			console.log("API test server is closed");
-			resolve();
+			console.log("API Server is closed");
+			resolve(true);
 		});
 	 });
 

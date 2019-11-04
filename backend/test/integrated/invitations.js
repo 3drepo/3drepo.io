@@ -38,7 +38,10 @@ describe("Invitations ", function () {
 
 	before(() => loginUsers(usernames, password).then(loggedInAgents => agents = loggedInAgents));
 
-	it("send invitation with a registered email should fail", function(done) {
+	after(() => agents.done());
+
+
+	it("sent with a registered email should fail", function(done) {
 		const inviteEmail = 'mail@teamspace1.com';
 		const inviteJob = 'jobA';
 		const permissions = { team_admin: true };
@@ -52,7 +55,7 @@ describe("Invitations ", function () {
 	});
 
 
-	it("send invitation with a non existent job should fail", function(done) {
+	it("sent with a non existent job should fail", function(done) {
 		const inviteEmail = '5122a304d9df4@email.com';
 		const inviteJob = 'nonExistentJob';
 		const inviteTeamPermission = { team_admin: true };
@@ -65,7 +68,7 @@ describe("Invitations ", function () {
 			});
 	});
 
-	it("send invitation with a non existen project should fail", function(done) {
+	it("sent with a non existen project should fail", function(done) {
 		const email = '19bd030fee094@email.com';
 		const job = 'jobA';
 		const projectPermission = { name: 'nonexistenProject', project_admin: true };
@@ -79,7 +82,7 @@ describe("Invitations ", function () {
 			});
 	});
 
-	it("send invitation with a non existen model should fail", function(done) {
+	it("sent with a non existen model should fail", function(done) {
 		const email = '19bd030fee094@email.com';
 		const job = 'jobA';
 		const modelsPermissions = [{ model : '1cb3e38c4f7644b', role: 'admin' }]
@@ -94,7 +97,7 @@ describe("Invitations ", function () {
 			});
 	});
 
-	it("send invitations with teamspace admin should work for the teamspace admin", function(done) {
+	it("sents with teamspace admin should work for the teamspace admin", function(done) {
 		const inviteEmail = '7e634bae01db4f@mail.com';
 		const inviteJob = 'jobA';
 		const inviteTeamPermission =  { team_admin: true };
@@ -112,7 +115,7 @@ describe("Invitations ", function () {
 	});
 
 
-	it("send invitations with project admin should work for the teamspace admin", function(done) {
+	it("sents with project admin should work for the teamspace admin", function(done) {
 		const inviteEmail = '93393d28f953@mail.com';
 		const inviteJob = 'jobA';
 		const inviteTeamPermission =  { projects: [{project: 'project1', project_admin: true}] };
@@ -133,7 +136,7 @@ describe("Invitations ", function () {
 			});
 	});
 
-	it("send invitations with admin permission role for models should work for the teamspace admin", function(done) {
+	it("sents with admin permission role for models should work for the teamspace admin", function(done) {
 		const inviteEmail = '48bc8da2f3bc@mail.com';
 		const inviteJob = 'jobA';
 		const modelsPermissions = [{ model : '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', role: 'admin' }];
@@ -165,7 +168,7 @@ describe("Invitations ", function () {
 	});
 
 
-	it("send invitations with nonexistent permission role for model should fail", function(done) {
+	it("sent with nonexistent permission role for model should fail", function(done) {
 		const inviteEmail = '4oj1i2393bc@mail.com';
 		const inviteJob = 'jobA';
 		const modelsPermissions = [{ model : '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', role: 'crazyrole' }];
@@ -179,7 +182,7 @@ describe("Invitations ", function () {
 			});
 	});
 
-	it("send invitations not being a the teamspace admin should fail", function(done) {
+	it("sent by a non teamspace admin should fail", function(done) {
 		const inviteEmail = '7e634bae01db4f@mail.com';
 		const inviteJob = 'jobA';
 		const inviteTeamPermission =  { team_admin: true };
@@ -192,19 +195,40 @@ describe("Invitations ", function () {
 			});
 	});
 
-
-
-	it("get invitations should work for the teamspace admin", function(done) {
-		const inviteEmail = 'nonexitentmail@mail.com';
-		const inviteJob = 'jobA';
-		const inviteTeamPermission = ['team_admin'];
-
+	it("should be able to be retrieved by the teamspace admin", function(done) {
 		agents.teamSpace1.get(inviteUrl(account))
 			.expect(200, (err, res) => {
-				console.log(res.body);
+				expect(res.body).to.be.an('array').and.to.have.lengthOf.above(0);
 				done();
 			});
 	});
 
-	after(() => agents.done);
+	it("should be able to be revoked by the teamspace admin", async function() {
+		const deleteUrl = (email) => inviteUrl(account) + "/" + email;
+
+		var { body: invitations } = await agents.teamSpace1.get(inviteUrl(account)).expect(200);
+		expect(invitations).to.be.an('array').and.to.have.lengthOf.above(0);
+
+		await Promise.all(invitations.map(({ email }) => agents.teamSpace1.delete(deleteUrl(email)) ));
+
+		var { body: invitations } = await agents.teamSpace1.get(inviteUrl(account)).expect(200);
+		expect(invitations).to.be.an('array').and.to.have.length(0);
+	});
+
+
+	// it("should assign the invitations permissions and jobs", function(done) {
+	// 	const inviteEmail = 'inviteeUser@mail.com';
+
+
+	// 	agents.teamSpace1.post(inviteUrl(account))
+	// 		.send({ email: inviteEmail, job: inviteJob, permissions: inviteTeamPermission})
+	// 		.expect(NOT_AUTHORIZED.status, (err, res) => {
+ 	// 			expect(res.body.message).to.equal(NOT_AUTHORIZED.message);
+	// 			done();
+	// 		});
+	// });
+
+
+	// TODO: test licence limit
+	// TODO: update invitations permissions
 });
