@@ -16,5 +16,6 @@ export const SHAPE_COMPONENTS = {
 	[SHAPE_TYPES.CIRCLE]: Circle,
 	[SHAPE_TYPES.LINE]: Line,
 	[SHAPE_TYPES.CLOUD]: Cloud,
+	[SHAPE_TYPES.ARROW]: Arrow,
 	[SHAPE_TYPES.CLOUDLINE]: Cloudline,
 };

@@ -130,6 +130,10 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	}
 
 	public handleMouseDownShape = () => {
+		if (this.props.selected) {
+			return;
+		}
+
 		this.setState({ isCurrentlyDrawn: true });
 		this.layer.clearBeforeDraw();
 		const { x, y } = this.props.stage.getPointerPosition();

@@ -425,7 +425,12 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 					.includes(figure) && (Math.abs(attrs.scaleX) > 0 || Math.abs(attrs.scaleY) > 0);
 
 			if (correctCircle || correctTriangle || correctRectangle || correctLineShape || correctCustomShape) {
-				const newShape = getNewShape(figure, this.state.color, attrs);
+				const { scaleX, scaleY, ...attributes } = attrs;
+				const newShape = getNewShape(figure, this.state.color, {
+					...attributes,
+					initScaleX: scaleX,
+					initScaleY: scaleY,
+				});
 				const selectedObjectName = newShape.name;
 				this.props.addElement(newShape);
 				this.setState({ selectedObjectName });
@@ -473,7 +478,12 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			element,
 			isSelected,
 			isVisible: element.type === ELEMENT_TYPES.TEXT ? !isTextEditing : true,
-			handleChange: (newAttrs) => this.handleChangeObject(newAttrs)
+			handleChange: (newAttrs) => this.handleChangeObject(newAttrs),
+			setShapeMode: () => {
+				this.setState({
+					mode: MODES.SHAPE
+				});
+			}
 		};
 
 		if (element.type === ELEMENT_TYPES.TEXT) {
@@ -481,7 +491,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		} else if (element.type === ELEMENT_TYPES.DRAWING) {
 			return(<DrawnLine key={index} {...commonProps} />);
 		}
-		return (<Shape key={index} {...commonProps} isDrawingMode={this.isDrawingMode} />);
+		return (<Shape key={index} {...commonProps} />);
 	})
 
 	public renderDrawing = () => {
@@ -547,8 +557,11 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	)
 
 	public handleStageMouseDown = ({ target }) => {
-		if (target.attrs.name !== this.state.selectedObjectName &&
-			(target.getParent() && target.getParent().className !== 'Transformer')) {
+		const isAnchor = target && target.attrs.name && target.attrs.name.includes('anchor');
+		const isSelectedObject = target.parent && (target.parent.attrs.name !== this.state.selectedObjectName);
+		const isDrawnLine = target.attrs.type !== 'drawing' && target.attrs.name !== this.state.selectedObjectName;
+
+		if (!target.parent || (isSelectedObject && isDrawnLine && !isAnchor)) {
 			this.setState({ selectedObjectName: '' });
 			return;
 		}

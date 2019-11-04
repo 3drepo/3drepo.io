@@ -16,44 +16,80 @@
  */
 
 import * as React from 'react';
-import { Transformer } from 'react-konva';
+import { Group, Rect, Transformer } from 'react-konva';
 import { SHAPE_COMPONENTS, SHAPE_TYPES } from './shape.constants';
 
 interface IProps {
 	element: any;
 	isSelected: boolean;
-	isDrawingMode: boolean;
 	handleChange: (props: any) => void;
 }
 
-export const Shape = ({ element, isSelected, handleChange, isDrawingMode }: IProps) => {
-	const { color, figure, ...elementProps } = element;
+export const Shape = ({ element, isSelected, handleChange }: IProps) => {
+	const {
+		color, figure, draggable, groupX, groupY, rotation, initScaleX, initScaleY, scaleX, scaleY, ...elementProps
+	} = element;
 	const shape = React.useRef<any>();
 	const transformer = React.useRef<any>();
+	const rect = React.useRef<any>(null);
+	const group = React.useRef<any>(null);
 	const hasLineLikeBehavior = [SHAPE_TYPES.LINE, SHAPE_TYPES.ARROW].includes(figure);
+	const hasCustomShapeBehavior = [SHAPE_TYPES.CLOUDLINE, SHAPE_TYPES.CLOUD].includes(figure);
 
 	React.useEffect(() => {
-		if (isSelected && !isDrawingMode) {
-			transformer.current.setNode(shape.current);
+		if (isSelected && transformer.current) {
+			transformer.current.attachTo(group.current);
 			transformer.current.getLayer().batchDraw();
 		}
-	}, [isSelected]);
+	}, [transformer.current, isSelected]);
 
-	const handleDragEnd = (e) => {
+	React.useEffect(() => {
+		if (shape.current) {
+			const currentShape = shape.current;
+			const selfRect = shape.current.getSelfRect();
+			const width = shape.current.width() || selfRect.width;
+			const height = shape.current.height() || selfRect.height;
+			const { x, y } = shape.current.getAbsolutePosition();
+
+			if (figure === SHAPE_TYPES.CLOUD) {
+				rect.current.x(x);
+				rect.current.y(y);
+			} else {
+				rect.current.x(x + selfRect.x);
+				rect.current.y(y + selfRect.y);
+			}
+			rect.current.width(width * currentShape.scaleX());
+			rect.current.height(height * currentShape.scaleY());
+		}
+	}, [shape.current]);
+
+	const handleDragEnd = ({ currentTarget }) => {
+		const { x, y } = currentTarget.getAbsolutePosition();
 		handleChange({
 			...element,
-			x: e.target.x(),
-			y: e.target.y()
+			groupX: x,
+			groupY: y,
 		});
 	};
 
-	const handleTransformEnd = () => {
-		const node = shape.current;
-		const scaleX = node.scaleX();
-		const scaleY = node.scaleY();
+	const handleTransformEnd = ({ currentTarget }) => {
+		const { x, y } = currentTarget.getAbsolutePosition();
+		const { attrs } = currentTarget;
+		const node = group.current;
+		const nodeScaleX = node.scaleX();
+		const nodeScaleY = node.scaleY();
 
-		node.scaleX(scaleX);
-		node.scaleY(scaleY);
+		node.scaleX(nodeScaleX);
+		node.scaleY(nodeScaleY);
+
+		handleChange({
+			...element,
+			groupX: x,
+			groupY: y,
+			rotation: attrs.rotation,
+			scaleX: attrs.scaleX,
+			scaleY: attrs.scaleY,
+		});
 	};
 
 	const handleDoubleClick = () => {
@@ -84,26 +120,52 @@ export const Shape = ({ element, isSelected, handleChange, isDrawingMode }: IPro
 		}
 	};
 
+	const additionalGroupProps = ({
+		x: groupX || 0,
+		y: groupY || 0,
+		rotation,
+		scaleX,
+		scaleY,
+	});
+
+	const additionalComponentProps = ({
+		scaleX: initScaleX,
+		scaleY: initScaleY,
+	});
+
 	const Component = SHAPE_COMPONENTS[figure];
 	const transformerProps = hasLineLikeBehavior ? { enabledAnchors: ['top-left', 'top-right'] } : {};
 
 	return (
 		<React.Fragment>
-			<Component
-				ref={shape}
-				{...elementProps}
-				stroke={color}
-				transformer={transformer}
-				onDragEnd={handleDragEnd}
-				onTransformEnd={handleTransformEnd}
-				onDblClick={handleDoubleClick}
-				onMouseOver={handleMouseOver}
-				onMouseOut={handleMouseOut}
-				draggable={isSelected && !isDrawingMode}
-				perfectDrawEnabled={false}
+			<Group
+					ref={group}
+					{...additionalGroupProps}
+					name={elementProps.name}
+					transformer={transformer}
+					onDragEnd={handleDragEnd}
+					onTransformEnd={handleTransformEnd}
+					onDblClick={handleDoubleClick}
+					onMouseOver={handleMouseOver}
+					onMouseOut={handleMouseOut}
+					draggable={isSelected}
+			>
+				<Rect ref={rect} />
+				<Component
+						ref={shape}
+						{...elementProps}
+						{...additionalComponentProps}
+						stroke={color}
+						perfectDrawEnabled={false}
+				/>
+			</Group>
+			{ isSelected &&
+			<Transformer
+				ref={transformer}
+				{...transformerProps}
+				keepRatio
+				onMouseEnter={handleTransformerMouseOver}
 			/>
-			{(isSelected && !isDrawingMode) &&
-				<Transformer ref={transformer} {...transformerProps} keepRatio onMouseEnter={handleTransformerMouseOver} />
 			}
 		</React.Fragment>
 	);
