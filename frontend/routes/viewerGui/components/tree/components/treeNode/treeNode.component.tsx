@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Tooltip } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import UpIcon from '@material-ui/icons/KeyboardArrowUp';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -175,23 +176,25 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		const { expanded, isSearchResult, style, key, active, hasFederationRoot } = this.props;
 
 		return (
-			<Container
-				style={style}
-				key={key}
-				nodeType={this.type}
-				expandable={this.node.hasChildren && !this.isModelRoot}
-				selected={this.isSelected}
-				active={active}
-				highlighted={this.isHighlighted}
-				expanded={isSearchResult && expanded}
-				level={this.level}
-				hasFederationRoot={hasFederationRoot}
-				onClick={this.handleNodeClick}
-				onDoubleClick={this.handleDoubleClick}
-			>
-				{this.renderName()}
-				{this.renderActions(!this.node.isFederation)}
-			</Container>
+			<Tooltip title={this.node.name} placement="bottom">
+				<Container
+					style={style}
+					key={key}
+					nodeType={this.type}
+					expandable={this.node.hasChildren && !this.isModelRoot}
+					selected={this.isSelected}
+					active={active}
+					highlighted={this.isHighlighted}
+					expanded={isSearchResult && expanded}
+					level={this.level}
+					hasFederationRoot={hasFederationRoot}
+					onClick={this.handleNodeClick}
+					onDoubleClick={this.handleDoubleClick}
+				>
+					{this.renderName()}
+					{this.renderActions(!this.node.isFederation)}
+				</Container>
+			</Tooltip>
 		);
 	}
 

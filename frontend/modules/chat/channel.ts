@@ -64,7 +64,7 @@ export class Channel {
 	public views: ChatEvents;
 
 	/**
-	 * This property contains the object to suscribe to the general modem status chat events
+	 * This property contains the object to suscribe to the general model status chat events
 	 */
 	public model: ModelChatEvents;
 
