@@ -5,7 +5,7 @@
   },
   "navis" :{
 	"current" : "3.12.0",
-	"supported": []
+	"supported": ["4.0.0"]
   },
   "unitydll" : {
 	"current": "2.8.0",
