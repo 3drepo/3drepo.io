@@ -19,13 +19,13 @@ import { compact, map, orderBy, pick, pickBy, uniq, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
 import { searchByFilters } from '../../helpers/searching';
-import { sortModels } from '../../modules/teamspaces/teamspaces.helpers';
 import { DATA_TYPES, FILTER_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
 import {
 	LIST_ITEMS_TYPES, SORTING_BY_LAST_UPDATED, SORTING_BY_NAME,
 } from '../../routes/teamspaces/teamspaces.contants';
 import { selectStarredModels } from '../starred';
 import { getStarredModelKey } from '../starred/starred.contants';
+import { sortModels } from './teamspaces.helpers';
 import { extendTeamspacesInfo } from './teamspaces.helpers';
 
 export const selectTeamspacesDomain = (state) => ({ ...state.teamspaces });
@@ -135,8 +135,6 @@ export const selectFlattenTeamspaces = createSelector(
 
 		const flattenList = [];
 		const hasActiveFilters = showStarredOnly || filters.length;
-		const textFilters = filters.filter(({ type }) => type === FILTER_TYPES.QUERY);
-
 		const shouldFilterProjects = filterableDataTypes.includes(DATA_TYPES.PROJECTS);
 		const shouldFilterModels = filterableDataTypes.includes(DATA_TYPES.MODELS);
 		const shouldFilterFederations = filterableDataTypes.includes(DATA_TYPES.FEDERATIONS);
@@ -163,6 +161,7 @@ export const selectFlattenTeamspaces = createSelector(
 						teamspace: teamspaceName,
 						project: projectsIds[j],
 						projectName: project.name,
+						modelType: models[modelId].type,
 						type: LIST_ITEMS_TYPES.MODEL,
 						id: modelId
 					};
@@ -205,7 +204,7 @@ export const selectFlattenTeamspaces = createSelector(
 					(shouldFilterModels || shouldFilterFederations) && !shouldFilterProjects;
 
 				const shouldBeVisible =
-					shouldFilterProjects ? searchByFilters([processedProject], textFilters)[0] : !shouldFilterOnlyModelsAndFederations;
+					shouldFilterProjects ? searchByFilters([processedProject], filters)[0] : !shouldFilterOnlyModelsAndFederations;
 
 				processedProject.collapsed = shouldFilterOnlyProjects ? shouldBeVisible : false;
 
