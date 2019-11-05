@@ -72,13 +72,10 @@ function fetchFile(account, model, ext, fileName, metadata = false) {
 	});
 }
 
-function fetchFileStream(account, model, ext, fileName, imposeModelRoute = true) {
+function fetchFileStream(account, model, ext, fileName) {
 	const collection = model + ext;
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
-			if (imposeModelRoute) {
-				systemLogger.logInfo("imposeModelRoute: ", imposeModelRoute);
-			}
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
 		return ExternalServices.getFileStream(account, collection, entry.type, entry.link).then((stream) => {
@@ -173,7 +170,7 @@ async function removeResource(account, model,  resourceId, property, propertyId)
 const FileRef = {};
 
 FileRef.getOriginalFile = function(account, model, fileName) {
-	return fetchFileStream(account, model, ORIGINAL_FILE_REF_EXT, fileName, false);
+	return fetchFileStream(account, model, ORIGINAL_FILE_REF_EXT, fileName);
 };
 
 FileRef.getTotalModelFileSize = function(account, model) {
