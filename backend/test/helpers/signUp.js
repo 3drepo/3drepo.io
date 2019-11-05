@@ -26,13 +26,13 @@ function signUpAndLogin(params) {
 	const username = params.username;
 	const password = params.password;
 	const email = params.email;
-	const done = params.done;
+	const done = params.done || (() => {});
 	let agent = params.agent;
 	const expect = params.expect;
 	const noBasicPlan = params.noBasicPlan;
 
 	// hack: by starting the server earlier all the mongoose models like User will be connected to db without any configuration
-	request(server).get("/info").end(() => {
+	return request(server).get("/info").end(() => {
 
 		agent = request.agent(server);
 
@@ -42,9 +42,8 @@ function signUpAndLogin(params) {
 		}, 200000).then(emailVerifyToken => {
 			return User.verify(username, emailVerifyToken.token, {skipImportToyModel : true, skipCreateBasicPlan: noBasicPlan});
 		}).then(user => {
-
 			// login
-			agent.post("/login")
+			return agent.post("/login")
 				.send({ username, password })
 				.expect(200, function(err, res) {
 					expect(res.body.username).to.equal(username);
@@ -79,7 +78,7 @@ function signUpAndLoginAndCreateModel(params) {
 	const noBasicPlan = params.noBasicPlan;
 	const unit = params.unit;
 
-	signUpAndLogin({
+	return signUpAndLogin({
 		server, request, agent, expect, User, systemLogger,
 		username, password, email, noBasicPlan,
 		done: function(err, _agent) {
@@ -91,7 +90,7 @@ function signUpAndLoginAndCreateModel(params) {
 			}
 
 			// create a model
-			agent.post(`/${username}/${model}`)
+			return agent.post(`/${username}/${model}`)
 				.send({ type, desc, unit })
 				.expect(200, function(err, res) {
 					done(err, agent);

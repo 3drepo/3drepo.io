@@ -81,7 +81,7 @@ export const selectCollaboratorLimit = createSelector(
 );
 
 export const selectInvitations = createSelector(
-	selectUserManagementDomain, (state) => state.invitations
+	selectUserManagementDomain, (state) => state.invitations || []
 );
 
 export const selectLicensesCount = createSelector(

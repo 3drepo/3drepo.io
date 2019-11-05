@@ -21,15 +21,20 @@ const { loginUsers } = require("../helpers/users.js");
 const { expect, AssertionError } = require("chai");
 const { EMAIL_INVALID, JOB_NOT_FOUND, INVALID_PROJECT_NAME,
 	INVALID_MODEL_ID, NOT_AUTHORIZED, INVALID_MODEL_PERMISSION_ROLE } = require("../../response_codes.js");
+const { signUpAndLogin } = require("../helpers/signUp.js");
+
 
 
 const inviteUrl = (account) => `/${account}/invitations`;
+const membersUrl = (account) => `/${account}/members`;
 
 
 describe("Invitations ", function () {
-	const usernames = [ "adminTeamspace1JobA",
+	const usernames = [
 		"collaboratorTeamspace1Model1JobA",
-		"teamSpace1"];
+		"teamSpace1",
+		"sub_paypal"
+	];
 
 	const password = "password";
 	const account = "teamSpace1";
@@ -167,7 +172,6 @@ describe("Invitations ", function () {
 			});
 	});
 
-
 	it("sent with nonexistent permission role for model should fail", function(done) {
 		const inviteEmail = '4oj1i2393bc@mail.com';
 		const inviteJob = 'jobA';
@@ -215,20 +219,65 @@ describe("Invitations ", function () {
 		expect(invitations).to.be.an('array').and.to.have.length(0);
 	});
 
+	it("that are unpacked should generate the proper user permissions", async function() {
+		AssertionError.includeStack = true;
+		const username = 'invitedUser';
+		const email = '7556155d71@mail.com';
+		const inviteJob = 'jobA';
 
-	// it("should assign the invitations permissions and jobs", function(done) {
-	// 	const inviteEmail = 'inviteeUser@mail.com';
+		const selectInvitedUser = ({ user }) => user === username;
+		const selectModel = (selectedModel) => ({model}) => model === selectedModel;
+
+		const modelsPermsUrl = (account, models) => `/${account}/models/permissions?models=${models.join(',')}`;
+
+		const team1Perm = {
+			projects:
+			[
+				{
+					project: 'project1',
+					models: [
+						{ model: '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac', role:'viewer'},
+						{ model: '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', role:'commenter'},
+					]
+				}
+			]
+		};
+
+		await agents.sub_paypal.post(inviteUrl("sub_paypal"))
+			.send({ email, job: inviteJob, permissions: {team_admin: true}})
+			.expect(200);
+
+		await agents.teamSpace1.post(inviteUrl("teamSpace1"))
+			.send({ email, job: inviteJob, permissions: team1Perm })
+			.expect(200);
+
+		const User = require("../../models/user");
+		const { token } = await User.createUser(null, username, 'password', {email}, 200000);
+		await User.verify(username, token, {skipImportToyModel : true, skipCreateBasicPlan: true});
 
 
-	// 	agents.teamSpace1.post(inviteUrl(account))
-	// 		.send({ email: inviteEmail, job: inviteJob, permissions: inviteTeamPermission})
-	// 		.expect(NOT_AUTHORIZED.status, (err, res) => {
- 	// 			expect(res.body.message).to.equal(NOT_AUTHORIZED.message);
-	// 			done();
-	// 		});
+		const { body: {members}} = await agents.sub_paypal.get(membersUrl('sub_paypal'));
+		let invited = members.find(selectInvitedUser);
+		expect(invited.permissions[0],'invited user should be a teamspace admin').to.equal("teamspace_admin");
+
+		const models =  team1Perm.projects[0].models.map(({model}) => model);
+
+		const { body: modelPerms } = await agents.teamSpace1.get(modelsPermsUrl('teamSpace1', models));
+
+		let permsForModel = modelPerms.find(selectModel(models[0])).permissions.find(selectInvitedUser);
+		expect(permsForModel.permission, 'should be viewer for this model').to.equal('viewer');
+
+		permsForModel = modelPerms.find(selectModel(models[1])).permissions.find(selectInvitedUser);
+		expect(permsForModel.permission, 'should be a commenter for this model').to.equal('commenter');
+	});
+
+	// TODO: test project permission
+	// ---
+	// TODO: test licences and invitations
+	// it("should be taken in consideration for licence limit", async function() {
+	// 	AssertionError.includeStack = true;
+
+
 	// });
 
-
-	// TODO: test licence limit
-	// TODO: update invitations permissions
 });

@@ -43,7 +43,7 @@ const utils = require("../utils");
  */
 router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
 
-router.post("/invitations",  middlewares.isAccountAdmin, sendInvitation);
+router.post("/invitations", middlewares.isAccountAdmin, sendInvitation);
 
 router.delete("/invitations/:email", middlewares.isAccountAdmin, removeInvitation);
 

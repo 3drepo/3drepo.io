@@ -20,6 +20,8 @@ const db = require("../handler/db");
 const User = require("./user");
 const Job = require("./job");
 const Project = require("./project");
+const ModelSetting = require("./modelSetting");
+
 const { contains: setContains } = require("./helper/set");
 
 const responseCodes = require("../response_codes.js");
@@ -175,24 +177,42 @@ invitations.teamspaceInvitationCheck = async (email, teamspace) => {
 	return true;
 };
 
-invitations.unpack = async (user) => {
+invitations.unpack = async (invitedUser) => {
 	const coll = await getCollection();
-	const result = await coll.findOne({_id: user.customData.email});
+	const result = await coll.findOne({_id: invitedUser.customData.email});
 
 	if (!result) {
 		return {};
 	}
 
-	await Promise.all(Object.keys(result.teamSpaces).map(
-		async teamspace => {
+	await Promise.all(result.teamSpaces.map(
+		async ({ teamspace, job, permissions  }) => {
 			const teamspaceUser = await User.findByUserName(teamspace);
-			const {job, permissions} = result.teamSpaces[teamspace];
+			const teamPerms = permissions.team_admin ? ["teamspace_admin"] : [];
 
-			// TODO: should send an email to the teamspace adming
-			return await teamspaceUser.addTeamMember(user.user, job, permissions.teamspace);
+			// TODO: should send an email to the teamspace admin
+			await teamspaceUser.addTeamMember(invitedUser.user, job, teamPerms);
+
+			if (!permissions.team_admin) {
+				await Promise.all(permissions.projects.map(async ({ project_admin , project, models}) => {
+					if (project_admin) {
+						const projectObj = await Project.findOne({ account: teamspace }, {name: project});
+						const projectPermission = { user: invitedUser.user, permissions: ["project_admin"]};
+
+						projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
+					} else {
+						const modelsIds = models.map(({model}) => model);
+						const modelsList = await ModelSetting.find({ account: teamspace }, {"_id" : {"$in" : modelsIds}});
+						await Promise.all(modelsList.map(async modelSetting=> {
+							const {role: permission} = models.find(({model}) => model === modelSetting._id);
+							return await modelSetting.changePermissions(modelSetting.permissions.concat({user: invitedUser.user, permission}), teamspace);
+						}));
+					}
+				}));
+			}
 		}));
 
-	await coll.deleteOne({_id: user.customData.email});
+	await coll.deleteOne({_id: invitedUser.customData.email});
 };
 
 invitations.getInvitationsByTeamspace = async (teamspaceName) => {
