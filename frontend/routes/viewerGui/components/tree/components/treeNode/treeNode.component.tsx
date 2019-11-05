@@ -61,7 +61,7 @@ interface IProps {
 	zoomToHighlightedNodes: () => void;
 }
 
-const CollapseButton = ({ Icon, onClick, expanded, expandable, hasChildren, nodeType }) => (
+const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
 	<StyledExpandableButton
 		onClick={onClick}
 		expanded={expanded}
