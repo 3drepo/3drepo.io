@@ -953,6 +953,8 @@ async function findObjectIDsByRules(account, model, rules, branch, revId, conver
 
 				return {account, model, shared_ids};
 			}).catch(() => {
+				// If search on a submodel failed (usually due to no revision in the submodel), it should not
+				// fail the whole API request.
 				return undefined;
 			}));
 		}
