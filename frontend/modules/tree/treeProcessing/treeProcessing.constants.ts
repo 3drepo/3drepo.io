@@ -13,6 +13,7 @@ export interface INode {
 	name: string;
 	level: number;
 	parentId: number;
+	expandable: boolean;
 	hasChildren: boolean;
 	deepChildrenNumber: number;
 	isFederation?: boolean;

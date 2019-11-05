@@ -61,14 +61,6 @@ export class Processing {
 		return parentsIds;
 	}, (node = {}) => node._id);
 
-	public getChildren = memoize((node = {}) => {
-		if (node.hasChildren) {
-			return this.getNodesByIds(node.childrenIds);
-		}
-
-		return [];
-	}, (node = {}) => node._id);
-
 	constructor(data) {
 		const {
 			nodesList, nodesIndexesMap, defaultVisibilityMap,

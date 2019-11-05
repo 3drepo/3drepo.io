@@ -114,6 +114,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 		highlighted: false,
 		expanded: false,
 		hasChildren: false,
+		expandable: false,
 		childrenNumber: 0
 	};
 
@@ -123,9 +124,9 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 			<CollapseButton
 				nodeType={this.type}
 				expanded={expanded}
-				hasChildren={this.node.hasChildren}
-				Icon={!expanded && this.node.hasChildren ? AddIcon : RemoveIcon}
-				onClick={!expanded && this.node.hasChildren ? this.expandNode : this.collapseNode}
+				hasChildren={this.node.expandable}
+				Icon={!expanded && this.node.expandable ? AddIcon : RemoveIcon}
+				onClick={!expanded && this.node.expandable ? this.expandNode : this.collapseNode}
 			/>
 		);
 	});
@@ -181,7 +182,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 					style={style}
 					key={key}
 					nodeType={this.type}
-					expandable={this.node.hasChildren && !this.isModelRoot}
+					expandable={this.node.expandable && !this.isModelRoot}
 					selected={this.isSelected}
 					active={active}
 					highlighted={this.isHighlighted}
@@ -212,7 +213,7 @@ export class TreeNode extends React.PureComponent<IProps, any> {
 	private collapseNode = (event) => {
 		event.stopPropagation();
 
-		if (this.node.hasChildren) {
+		if (this.node.expandable) {
 			this.props.collapseNodes([this.node._id]);
 		}
 		return;
