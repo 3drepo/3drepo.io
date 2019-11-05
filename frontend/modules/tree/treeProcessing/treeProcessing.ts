@@ -44,8 +44,6 @@ class TreeProcessing {
 	public getParents = (node) => this.processing.getParentsByPath(node);
 
 	public getParentsID = (node) => this.processing.getParentsID(node);
-
-	public getChildren = (node) => this.processing.getChildren(node);
 }
 
 export default new TreeProcessing();
