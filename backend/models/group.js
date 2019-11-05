@@ -952,6 +952,8 @@ async function findObjectIDsByRules(account, model, rules, branch, revId, conver
 				}
 
 				return {account, model, shared_ids};
+			}).catch(() => {
+				return undefined;
 			}));
 		}
 
