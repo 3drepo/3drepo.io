@@ -276,7 +276,7 @@ function* increaseHelicopterSpeed() {
 	}
 }
 
-function* decreaseHelicopterSpeed(}) {
+function* decreaseHelicopterSpeed() {
 	try {
 		const helicopterSpeed = yield select(selectHelicopterSpeed);
 		const speed = helicopterSpeed - 1;
