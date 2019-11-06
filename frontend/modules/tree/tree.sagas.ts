@@ -31,6 +31,7 @@ import {
 	selectGetNodesByIds,
 	selectGetNodesIdsFromSharedIds,
 	selectIfcSpacesHidden,
+	selectIsTreeProcessed,
 	selectNodesIndexesMap,
 	selectSelectionMap,
 	selectTreeNodesList
@@ -414,8 +415,15 @@ function* deselectNodesBySharedIds({ objects = [] }) {
  */
 function* selectNodes({ nodesIds = [], skipExpand = false, colour }) {
 	try {
+		const isTreeProcessed = yield select(selectIsTreeProcessed);
+
+		if (!isTreeProcessed) {
+			return;
+		}
+
 		let lastNodeId = nodesIds[nodesIds.length - 1];
 		let [lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
+
 		if (lastNode && lastNode.type === 'mesh' && !lastNode.name) {
 			lastNodeId = lastNode.parentId;
 			[lastNode] = yield select(selectGetNodesByIds([lastNodeId]));
