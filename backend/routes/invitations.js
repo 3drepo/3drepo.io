@@ -69,7 +69,7 @@ const utils = require("../utils");
  *           "models": [
  *             {
  *               "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f",
- *               "role": "collaborator"
+ *               "permission": "collaborator"
  *             }
  *           ]
  *         }
