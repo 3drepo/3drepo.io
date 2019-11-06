@@ -227,12 +227,11 @@ function* setNavigationMode({mode}) {
 	}
 }
 
-function* resetHelicopterSpeed({updateDefaultSpeed}) {
+function* resetHelicopterSpeed({teamspace, modelId, updateDefaultSpeed}) {
 	try {
 		yield Viewer.helicopterSpeedReset();
 		if (updateDefaultSpeed) {
-			const { teamspace, model } = yield select(selectUrlParams);
-			yield API.editHelicopterSpeed(teamspace, model, INITIAL_HELICOPTER_SPEED);
+			yield API.editHelicopterSpeed(teamspace, modelId, INITIAL_HELICOPTER_SPEED);
 		}
 		yield put(ViewerGuiActions.setHelicopterSpeed(INITIAL_HELICOPTER_SPEED));
 	} catch (error) {
@@ -240,7 +239,7 @@ function* resetHelicopterSpeed({updateDefaultSpeed}) {
 	}
 }
 
-function* getHelicopterSpeed({teamspace, modelId}) {
+function* getHelicopterSpeed({ teamspace, modelId }) {
 	try {
 		yield Viewer.isViewerReady();
 		const { data: { heliSpeed } } = yield API.getHelicopterSpeed(teamspace, modelId);
@@ -262,28 +261,26 @@ function* getHelicopterSpeed({teamspace, modelId}) {
 	}
 }
 
-function* increaseHelicopterSpeed() {
+function* increaseHelicopterSpeed({ teamspace, modelId }) {
 	try {
 		const helicopterSpeed = yield select(selectHelicopterSpeed);
 		const speed = helicopterSpeed + 1;
-		const { teamspace, model } = yield select(selectUrlParams);
 
 		yield Viewer.helicopterSpeedUp();
-		yield API.editHelicopterSpeed(teamspace, model, speed);
+		yield API.editHelicopterSpeed(teamspace, modelId, speed);
 		yield put(ViewerGuiActions.setHelicopterSpeed(speed));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('increase', 'helicopter speed', error));
 	}
 }
 
-function* decreaseHelicopterSpeed() {
+function* decreaseHelicopterSpeed({ teamspace, modelId }) {
 	try {
 		const helicopterSpeed = yield select(selectHelicopterSpeed);
 		const speed = helicopterSpeed - 1;
-		const { teamspace, model } = yield select(selectUrlParams);
 
 		yield Viewer.helicopterSpeedDown();
-		yield API.editHelicopterSpeed(teamspace, model, speed);
+		yield API.editHelicopterSpeed(teamspace, modelId, speed);
 		yield put(ViewerGuiActions.setHelicopterSpeed(speed));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('decrease', 'helicopter speed', error));
