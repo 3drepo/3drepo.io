@@ -318,7 +318,7 @@ function* setNewGroup() {
 			author: currentUser.username,
 			name: `Untitled group ${groupNumber}`,
 			color: getRandomColor(),
-			description: '(No description)'
+			description: ''
 		});
 
 		yield put(GroupsActions.setComponentState({
