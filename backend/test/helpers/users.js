@@ -50,8 +50,9 @@ const loginUsers = async (usernames, passwords) => {
 				.expect(200, function(err, res) {
 					if (err)
 						rejectLogin(err);
-					else
+					else {
 						resolveLogin(agent);
+					}
 				});
 
 			agents[username] = agent;

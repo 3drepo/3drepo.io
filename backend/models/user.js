@@ -1175,10 +1175,8 @@ schema.methods.removeTeamMember = function (username, cascadeRemove) {
 };
 
 schema.methods.addTeamMember = function (user, job, permissions) {
-	return User.getAllUsersInTeamspace(this.user).then((userArr) => {
-		const limits = this.customData.billing.getSubscriptionLimits();
-
-		if (limits.collaboratorLimit !== "unlimited" && userArr.length >= limits.collaboratorLimit) {
+	return  this.hasReachedLicenceLimit().then((reachedLimit) => {
+		if (reachedLimit) {
 			return Promise.reject(responseCodes.LICENCE_LIMIT_REACHED);
 		} else {
 			return User.findByUserName(user).then((userEntry) => {
@@ -1232,6 +1230,19 @@ schema.statics.getQuotaInfo = function (teamspace) {
 
 		return _calSpace(user);
 	});
+};
+
+schema.methods.hasReachedLicenceLimit = async function () {
+	const Invitations =  require("./invitations");
+	const [userArr, invitations] = await Promise.all([
+		User.getAllUsersInTeamspace(this.user),
+		Invitations.getInvitationsByTeamspace(this.user)
+	]);
+
+	const limits = this.customData.billing.getSubscriptionLimits();
+
+	const seatedLicences = userArr.length + invitations.length;
+	return (limits.collaboratorLimit !== "unlimited" &&  seatedLicences >= limits.collaboratorLimit);
 };
 
 schema.statics.getMembers = function (teamspace) {

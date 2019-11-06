@@ -20,20 +20,21 @@
 const { loginUsers } = require("../helpers/users.js");
 const { expect, AssertionError } = require("chai");
 const { EMAIL_INVALID, JOB_NOT_FOUND, INVALID_PROJECT_NAME,
-	INVALID_MODEL_ID, NOT_AUTHORIZED, INVALID_MODEL_PERMISSION_ROLE } = require("../../response_codes.js");
-const { signUpAndLogin } = require("../helpers/signUp.js");
-
-
+	INVALID_MODEL_ID, NOT_AUTHORIZED, INVALID_MODEL_PERMISSION_ROLE,
+	LICENCE_LIMIT_REACHED } = require("../../response_codes.js");
 
 const inviteUrl = (account) => `/${account}/invitations`;
 const membersUrl = (account) => `/${account}/members`;
 
 
 describe("Invitations ", function () {
+	this.timeout(60000);
+
 	const usernames = [
 		"collaboratorTeamspace1Model1JobA",
 		"teamSpace1",
-		"sub_paypal"
+		"sub_paypal",
+		"sub_all"
 	];
 
 	const password = "password";
@@ -44,7 +45,6 @@ describe("Invitations ", function () {
 	before(() => loginUsers(usernames, password).then(loggedInAgents => agents = loggedInAgents));
 
 	after(() => agents.done());
-
 
 	it("sent with a registered email should fail", function(done) {
 		const inviteEmail = 'mail@teamspace1.com';
@@ -219,7 +219,7 @@ describe("Invitations ", function () {
 		expect(invitations).to.be.an('array').and.to.have.length(0);
 	});
 
-	it("that are unpacked should generate the proper user permissions", async function() {
+	it("that are unpacked should generate the proper user permissions for two teamspaces", async function() {
 		AssertionError.includeStack = true;
 		const username = 'invitedUser';
 		const email = '7556155d71@mail.com';
@@ -243,7 +243,7 @@ describe("Invitations ", function () {
 			]
 		};
 
-		await agents.sub_paypal.post(inviteUrl("sub_paypal"))
+		await agents.sub_all.post(inviteUrl("sub_all"))
 			.send({ email, job: inviteJob, permissions: {team_admin: true}})
 			.expect(200);
 
@@ -256,7 +256,7 @@ describe("Invitations ", function () {
 		await User.verify(username, token, {skipImportToyModel : true, skipCreateBasicPlan: true});
 
 
-		const { body: {members}} = await agents.sub_paypal.get(membersUrl('sub_paypal'));
+		const { body: {members}} = await agents.sub_all.get(membersUrl('sub_all'));
 		let invited = members.find(selectInvitedUser);
 		expect(invited.permissions[0],'invited user should be a teamspace admin').to.equal("teamspace_admin");
 
@@ -271,13 +271,72 @@ describe("Invitations ", function () {
 		expect(permsForModel.permission, 'should be a commenter for this model').to.equal('commenter');
 	});
 
-	// TODO: test project permission
-	// ---
-	// TODO: test licences and invitations
-	// it("should be taken in consideration for licence limit", async function() {
-	// 	AssertionError.includeStack = true;
+	it("that are unpacked with a project_admin should have the correct permission", async function() {
+		AssertionError.includeStack = true;
+		const username = 'projectAdminInvited';
+		const email = 'projectAdminInvited@mail.com';
+		const inviteJob = 'jobA';
 
+		const selectInvitedUser = ({ user }) => user === username;
 
-	// });
+		const team1Perm = {
+			projects:
+			[
+				{
+					project: 'project1',
+					project_admin : true
+				}
+			]
+		};
+
+		await agents.teamSpace1.post(inviteUrl("teamSpace1"))
+			.send({ email, job: inviteJob, permissions: team1Perm })
+			.expect(200);
+
+		expect(true).to.equal(true);
+
+		const User = require("../../models/user");
+		const { token } = await User.createUser(null, username, 'password', {email}, 200000);
+		await User.verify(username, token, {skipImportToyModel : true, skipCreateBasicPlan: true});
+
+		const { body: { permissions } } = await agents.teamSpace1.get('/teamSpace1/projects/project1').expect(200);
+
+		const invitedPermission = permissions.find(selectInvitedUser);
+	 	expect(invitedPermission.permissions[0], 'should be a project admin').to.equal('admin_project');
+
+	});
+
+	it("should fail when trying to invite by email after the limit has been reached by invitations", async function() {
+		AssertionError.includeStack = true;
+		const inviteJob = 'jobA';
+
+		// sub_paypal has licence limit of 2
+		await agents.sub_paypal.post(inviteUrl("sub_paypal"))
+				.send({ email:'last_liscenavailable@mail.com', job: inviteJob, permissions: {team_admin: true}})
+				.expect(200);
+
+		const res = await agents.sub_paypal.post(inviteUrl("sub_paypal"))
+				.send({ email:'failedInvitation@mail.com', job: inviteJob, permissions: {team_admin: true}})
+				.expect(LICENCE_LIMIT_REACHED.status);
+
+		expect(res.body.message).to.equal(LICENCE_LIMIT_REACHED.message);
+	});
+
+	it("should fail when trying to add a registered user to the teamspace after the limit has been reached by invitations", async function() {
+		AssertionError.includeStack = true;
+		const inviteJob = 'jobA';
+
+		// sub_paypal has licence limit of 2
+		// one seat is taken by sub_paypal and the other by the previous invitation last_liscenavailable@mail.com
+		const res = await agents.sub_paypal.post('/sub_paypal/members')
+				.send({
+					    job: inviteJob,
+					    user: "teamSpace1",
+					    permissions: []
+					})
+				.expect(LICENCE_LIMIT_REACHED.status);
+
+		expect(res.body.message).to.equal(LICENCE_LIMIT_REACHED.message);
+	});
 
 });

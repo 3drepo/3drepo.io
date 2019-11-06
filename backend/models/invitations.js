@@ -82,10 +82,11 @@ invitations.create = async (email, teamspace, job, permissions = {}) => {
 
 	const projectNames = projectsPermissions.map(pr => pr.project);
 
-	const [emailUser, teamspaceJob, projects] = await Promise.all([
+	const [emailUser, teamspaceJob, projects, teamspaceObject] = await Promise.all([
 		User.findByEmail(email),
 		Job.findByJob(teamspace, job),
-		Project.findByNames(teamspace, projectNames)
+		Project.findByNames(teamspace, projectNames),
+		User.findByUserName(teamspace)
 	]);
 
 	if (emailUser) { // If there is already a user registered with that email
@@ -106,6 +107,10 @@ invitations.create = async (email, teamspace, job, permissions = {}) => {
 
 	if (!validateModels(projectsPermissions, projects)) {
 		throw responseCodes.INVALID_MODEL_ID;
+	}
+
+	if (await teamspaceObject.hasReachedLicenceLimit()) {
+		throw responseCodes.LICENCE_LIMIT_REACHED;
 	}
 
 	permissions = cleanPermissions(permissions);
@@ -179,10 +184,10 @@ invitations.teamspaceInvitationCheck = async (email, teamspace) => {
 
 invitations.unpack = async (invitedUser) => {
 	const coll = await getCollection();
-	const result = await coll.findOne({_id: invitedUser.customData.email});
+	const result = await coll.findOne({_id: invitedUser.customData.email.toLowerCase()});
 
-	if (!result) {
-		return {};
+	if (!result || !result.teamSpaces) {
+		return invitedUser;
 	}
 
 	await Promise.all(result.teamSpaces.map(
@@ -197,7 +202,7 @@ invitations.unpack = async (invitedUser) => {
 				await Promise.all(permissions.projects.map(async ({ project_admin , project, models}) => {
 					if (project_admin) {
 						const projectObj = await Project.findOne({ account: teamspace }, {name: project});
-						const projectPermission = { user: invitedUser.user, permissions: ["project_admin"]};
+						const projectPermission = { user: invitedUser.user, permissions: ["admin_project"]};
 
 						projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
 					} else {
@@ -213,6 +218,7 @@ invitations.unpack = async (invitedUser) => {
 		}));
 
 	await coll.deleteOne({_id: invitedUser.customData.email});
+	return invitedUser;
 };
 
 invitations.getInvitationsByTeamspace = async (teamspaceName) => {
