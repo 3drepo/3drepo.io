@@ -261,6 +261,12 @@
 		return hasProjectPermissions && project.permissions[0].permissions.includes(C.PERM_PROJECT_ADMIN);
 	};
 
+	schema.statics.setUserAsProjectAdmin = async function(teamspace, project, user) {
+		const projectObj = await Project.findOne({ account: teamspace }, {name: project});
+		const projectPermission = { user, permissions: ["admin_project"]};
+		return await projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
+	};
+
 	const Project = ModelFactory.createClass(
 		"Project",
 		schema,

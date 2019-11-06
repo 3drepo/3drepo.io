@@ -27,24 +27,171 @@ const utils = require("../utils");
  *
  * @api {get} /:teamspace/invitations Get invitations list
  * @apiName getInvitations
- * @apiGroup Teamspace
+ * @apiGroup Invitations
  * @apiDescription It returns a list of invitations with their permissions and their jobs.
  *
- * @apiPermission teamSpaceMember
+ * @apiPermission teamSpaceAdmin
  *
  * @apiParam {String} teamspace Name of teamspace
  *
  * @apiExample {get} Example usage:
- * GET /teamSpace1/members HTTP/1.1
+ * GET /teamSpace1/invitations HTTP/1.1
  *
  * @apiSuccessExample {json} Success
  * HTTP/1.1 200 OK
+ * [
+ *   {
+ *     "email": "7e634bae01db4f@mail.com",
+ *     "job": "jobA",
+ *     "permissions": {
+ *       "teamspace_admin": true
+ *     }
+ *   },
+ *   {
+ *     "email": "93393d28f953@mail.com",
+ *     "job": "jobA",
+ *     "permissions": {
+ *       "projects": [
+ *         {
+ *           "project": "Bim Logo",
+ *           "project_admin": true
+ *         }
+ *       ]
+ *     }
+ *   },
+ *   {
+ *     "email": "48bc8da2f3bc@mail.com",
+ *     "job": "jobA",
+ *     "permissions": {
+ *       "projects": [
+ *         {
+ *           "project": "Bim Logo",
+ *           "models": [
+ *             {
+ *               "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f",
+ *               "role": "collaborator"
+ *             }
+ *           ]
+ *         }
+ *       ]
+ *     }
+ *   }
+ * ]
  *
  */
 router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
 
+/**
+ *
+ * @api {post} /:teamspace/invitations Create/Update invitation
+ * @apiName createInvitation
+ * @apiGroup Invitations
+ * @apiDescription It creates or updates an invitation with the permissions  and a job assigned to the invited email
+ *
+ * @apiPermission teamSpaceAdmin
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ *
+ * @apiParam (Request body) {String} email The email to which the invitation will be sent
+ * @apiParam (Request body) {String} job An existing job for the teamspace
+ * @apiParam (Request body) {Permissions} permissions Valid permissions for the invited. If there is a teamspace_admin: true the rest of the permissions for that teamspace are ignored.
+ *
+ * @apiParam (Request body: Permisssions) {Boolean} [teamspace_admin] Flag indicating if the invited user will become a teamspace administrator. If this flag is true the rest of the permissions are ignored.
+ * @apiParam (Request body: Permisssions) {ProjectPermissions[]} [projects]  Permissions for projects and their models.
+ *
+ * @apiParam (Request body: ProjectPermissions) {String} project The name of the project in which the project permissions will be applied for the invited user.
+ * @apiParam (Request body: ProjectPermissions) {Boolean} [project_admin] Flag indicating if the invited user will become a teamspace administrator. If this flag is true the rest of the permissions are ignored.
+ * @apiParam (Request body: ProjectPermissions) {ModelPermissions[]} [models] An array indicating the permissions for the models.
+ *
+ * @apiParam (Request body: ModelPermissions) {String} model The id of the model that will have the permission applied for the invited user.
+ * @apiParam (Request body: ModelPermissions) {String} permission The type of permission applied for the invited user. Valid values are 'viewer', 'commenter' or 'collaborator'
+ *
+ * @apiExample {post} Example usage (with projects and models, permissions):
+ * POST /teamSpace1/invitations HTTP/1.1
+ *	{
+ *		email:'invited@enterprise.com'
+ *		job: 'jobA',
+ *		permissions:{
+ *			projects:[
+ *				{
+ *					project: 'project1',
+ *					models: [
+ *						{ model: '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac', permission:'viewer'},
+ *						{ model: '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', permission:'commenter'},
+ *					]
+ *				},
+ *				{
+ *					project: 'Bim Logo',
+ *					project_admin: true
+ *				}
+ *			]
+ *		}
+ *	}
+ *
+ * @apiExample {post} Example usage (with teamspace admin):
+ * POST /teamSpace1/invitations HTTP/1.1
+ *	{
+ *		email:'anotherinvited@enterprise.com'
+ *		job: 'jobA',
+ *		permissions: {
+ *			teamspace_admin: true
+ *		}
+ *	}
+ *
+ * @apiSuccessExample {json} Success (with projects and models, permissions)
+ * HTTP/1.1 200 OK
+ *	{
+ *		email:'invited@enterprise.com'
+ *		job: 'jobA',
+ *		permissions:{
+ *			projects:[
+ *				{
+ *					project: 'project1',
+ *					models: [
+ *						{ model: '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac', permission:'viewer'},
+ *						{ model: '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', permission:'commenter'},
+ *					]
+ *				},
+ *				{
+ *					project: 'Bim Logo',
+ *					project_admin: true
+ *				}
+ *			]
+ *		}
+ *	}
+ *
+ * @apiSuccessExample {json} Success (with teamspace admin)
+ * HTTP/1.1 200 OK
+ *	{
+ *		email:'anotherinvited@enterprise.com'
+ *		job: 'jobA',
+ *		permissions: {
+ *			teamspace_admin: true
+ *		}
+ *	}
+ *
+ */
 router.post("/invitations", middlewares.isAccountAdmin, sendInvitation);
 
+/**
+ *
+ * @api {delete} /:teamspace/invitations/:email Revokes an invitation
+ * @apiName removeInvitation
+ * @apiGroup Invitations
+ * @apiDescription It revokes an invitation for a teamspace
+ *
+ * @apiPermission teamSpaceAdmin
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} email Email of the user invitation that you wish to revoke
+ *
+ * @apiExample {delete} Example usage:
+ * DELETE /teamSpace1/invitations/invited@enterprise.com HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success
+ * HTTP/1.1 200 OK
+ * {}
+ */
 router.delete("/invitations/:email", middlewares.isAccountAdmin, removeInvitation);
 
 function getInvitations(req, res, next) {

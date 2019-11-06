@@ -20,7 +20,7 @@
 const { loginUsers } = require("../helpers/users.js");
 const { expect, AssertionError } = require("chai");
 const { EMAIL_INVALID, JOB_NOT_FOUND, INVALID_PROJECT_NAME,
-	INVALID_MODEL_ID, NOT_AUTHORIZED, INVALID_MODEL_PERMISSION_ROLE,
+	INVALID_MODEL_ID, NOT_AUTHORIZED, INVALID_MODEL_PERMISSION,
 	LICENCE_LIMIT_REACHED } = require("../../response_codes.js");
 
 const inviteUrl = (account) => `/${account}/invitations`;
@@ -49,7 +49,7 @@ describe("Invitations ", function () {
 	it("sent with a registered email should fail", function(done) {
 		const inviteEmail = 'mail@teamspace1.com';
 		const inviteJob = 'jobA';
-		const permissions = { team_admin: true };
+		const permissions = { teamspace_admin: true };
 
 		agents.teamSpace1.post(inviteUrl(account))
 			.send({ email: inviteEmail, job: inviteJob, permissions })
@@ -63,7 +63,7 @@ describe("Invitations ", function () {
 	it("sent with a non existent job should fail", function(done) {
 		const inviteEmail = '5122a304d9df4@email.com';
 		const inviteJob = 'nonExistentJob';
-		const inviteTeamPermission = { team_admin: true };
+		const inviteTeamPermission = { teamspace_admin: true };
 
 		agents.teamSpace1.post(inviteUrl(account))
 			.send({ email: inviteEmail, job: inviteJob, permissions: inviteTeamPermission})
@@ -77,7 +77,7 @@ describe("Invitations ", function () {
 		const email = '19bd030fee094@email.com';
 		const job = 'jobA';
 		const projectPermission = { name: 'nonexistenProject', project_admin: true };
-		const inviteTeamPermission = { team_admin: false, projects: [projectPermission] };
+		const inviteTeamPermission = { teamspace_admin: false, projects: [projectPermission] };
 
 		agents.teamSpace1.post(inviteUrl(account))
 			.send({ email, job, permissions: inviteTeamPermission})
@@ -90,9 +90,9 @@ describe("Invitations ", function () {
 	it("sent with a non existen model should fail", function(done) {
 		const email = '19bd030fee094@email.com';
 		const job = 'jobA';
-		const modelsPermissions = [{ model : '1cb3e38c4f7644b', role: 'admin' }]
+		const modelsPermissions = [{ model : '1cb3e38c4f7644b', permission: 'collaborator' }]
 		const projectPermission = { project: 'project1', models: modelsPermissions };
-		const inviteTeamPermission = { team_admin: false, projects: [projectPermission] };
+		const inviteTeamPermission = { teamspace_admin: false, projects: [projectPermission] };
 
 		agents.teamSpace1.post(inviteUrl(account))
 			.send({ email, job, permissions: inviteTeamPermission})
@@ -105,7 +105,7 @@ describe("Invitations ", function () {
 	it("sents with teamspace admin should work for the teamspace admin", function(done) {
 		const inviteEmail = '7e634bae01db4f@mail.com';
 		const inviteJob = 'jobA';
-		const inviteTeamPermission =  { team_admin: true };
+		const inviteTeamPermission =  { teamspace_admin: true };
 
 		agents.teamSpace1.post(inviteUrl(account))
 			.send({ email: inviteEmail, job: inviteJob, permissions: inviteTeamPermission})
@@ -113,7 +113,7 @@ describe("Invitations ", function () {
 				const {email, job, permissions} = res.body;
 				expect(email).to.equal(inviteEmail);
 				expect(job).to.equal(inviteJob);
-				expect(permissions.team_admin).to.equal(true);
+				expect(permissions.teamspace_admin).to.equal(true);
 				expect(permissions.projects).to.be.undefined;
 				done();
 			});
@@ -144,7 +144,7 @@ describe("Invitations ", function () {
 	it("sents with admin permission role for models should work for the teamspace admin", function(done) {
 		const inviteEmail = '48bc8da2f3bc@mail.com';
 		const inviteJob = 'jobA';
-		const modelsPermissions = [{ model : '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', role: 'admin' }];
+		const modelsPermissions = [{ model : '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', permission: 'collaborator' }];
 		const inviteTeamPermission =  { projects: [{project: 'project1', models: modelsPermissions}] };
 
 		agents.teamSpace1.post(inviteUrl(account))
@@ -164,9 +164,9 @@ describe("Invitations ", function () {
 				expect(project).to.equal('project1');
 
 				expect(models).to.be.an('array').and.to.have.length(1);
-				const {model, role} = models[0];
+				const {model, permission} = models[0];
 				expect(model).to.equal('00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5');
-				expect(role).to.equal('admin');
+				expect(permission).to.equal('collaborator');
 
 				done();
 			});
@@ -175,13 +175,13 @@ describe("Invitations ", function () {
 	it("sent with nonexistent permission role for model should fail", function(done) {
 		const inviteEmail = '4oj1i2393bc@mail.com';
 		const inviteJob = 'jobA';
-		const modelsPermissions = [{ model : '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', role: 'crazyrole' }];
+		const modelsPermissions = [{ model : '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', permission: 'crazypermission' }];
 		const inviteTeamPermission =  { projects: [{project: 'project1', models: modelsPermissions}] };
 
 		agents.teamSpace1.post(inviteUrl(account))
 			.send({ email: inviteEmail, job: inviteJob, permissions: inviteTeamPermission})
-			.expect(INVALID_MODEL_PERMISSION_ROLE.status, (err, res) => {
-				expect(res.body.message).to.equal(INVALID_MODEL_PERMISSION_ROLE.message);
+			.expect(INVALID_MODEL_PERMISSION.status, (err, res) => {
+				expect(res.body.message).to.equal(INVALID_MODEL_PERMISSION.message);
 				done();
 			});
 	});
@@ -189,7 +189,7 @@ describe("Invitations ", function () {
 	it("sent by a non teamspace admin should fail", function(done) {
 		const inviteEmail = '7e634bae01db4f@mail.com';
 		const inviteJob = 'jobA';
-		const inviteTeamPermission =  { team_admin: true };
+		const inviteTeamPermission =  { teamspace_admin: true };
 
 		agents.collaboratorTeamspace1Model1JobA.post(inviteUrl(account))
 			.send({ email: inviteEmail, job: inviteJob, permissions: inviteTeamPermission})
@@ -236,15 +236,15 @@ describe("Invitations ", function () {
 				{
 					project: 'project1',
 					models: [
-						{ model: '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac', role:'viewer'},
-						{ model: '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', role:'commenter'},
+						{ model: '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac', permission:'viewer'},
+						{ model: '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', permission:'commenter'},
 					]
 				}
 			]
 		};
 
 		await agents.sub_all.post(inviteUrl("sub_all"))
-			.send({ email, job: inviteJob, permissions: {team_admin: true}})
+			.send({ email, job: inviteJob, permissions: {teamspace_admin: true}})
 			.expect(200);
 
 		await agents.teamSpace1.post(inviteUrl("teamSpace1"))
@@ -312,11 +312,11 @@ describe("Invitations ", function () {
 
 		// sub_paypal has licence limit of 2
 		await agents.sub_paypal.post(inviteUrl("sub_paypal"))
-				.send({ email:'last_liscenavailable@mail.com', job: inviteJob, permissions: {team_admin: true}})
+				.send({ email:'last_liscenavailable@mail.com', job: inviteJob, permissions: {teamspace_admin: true}})
 				.expect(200);
 
 		const res = await agents.sub_paypal.post(inviteUrl("sub_paypal"))
-				.send({ email:'failedInvitation@mail.com', job: inviteJob, permissions: {team_admin: true}})
+				.send({ email:'failedInvitation@mail.com', job: inviteJob, permissions: {teamspace_admin: true}})
 				.expect(LICENCE_LIMIT_REACHED.status);
 
 		expect(res.body.message).to.equal(LICENCE_LIMIT_REACHED.message);

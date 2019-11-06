@@ -21,6 +21,7 @@ const User = require("./user");
 const Job = require("./job");
 const Project = require("./project");
 const ModelSetting = require("./modelSetting");
+const systemLogger = require("../logger.js").systemLogger;
 
 const { contains: setContains } = require("./helper/set");
 
@@ -28,7 +29,7 @@ const responseCodes = require("../response_codes.js");
 const { omit } = require("lodash");
 const C = require("../constants");
 
-const MODELS_PERMISSION_ROLES = ["admin", "collaborator", "commenter", "viewer"];
+const MODELS_PERMISSION = ["collaborator", "commenter", "viewer"];
 
 const getCollection = async () => {
 	const coll = await db.getCollection("admin", "invitations");
@@ -47,16 +48,16 @@ const validateModels = (projectsPermissions, projectsData) => {
 };
 
 const validateModelsPermissions =  (projectsPermissions = []) => {
-	return projectsPermissions.every(({models = []}) => models.every(({role}) =>
-		MODELS_PERMISSION_ROLES.includes(role)
+	return projectsPermissions.every(({models = []}) => models.every(({permission}) =>
+		MODELS_PERMISSION.includes(permission)
 	));
 };
 
-const cleanModelPermissions = modelPermissions => modelPermissions.map(({model, role}) => ({model, role}));
+const cleanModelPermissions = modelPermissions => modelPermissions.map(({model, permission}) => ({model, permission}));
 
 const cleanPermissions = (permissions) => {
-	if (permissions.team_admin) { // if the invitation will be teamspace admin , ignore the rest of the permissions that might be sent
-		return { team_admin: true };
+	if (permissions.teamspace_admin) { // if the invitation will be teamspace admin , ignore the rest of the permissions that might be sent
+		return { teamspace_admin: true };
 	}
 
 	let projectsPermissions = permissions.projects || [];
@@ -102,7 +103,7 @@ invitations.create = async (email, teamspace, job, permissions = {}) => {
 	}
 
 	if (!validateModelsPermissions(projectsPermissions)) {
-		throw responseCodes.INVALID_MODEL_PERMISSION_ROLE;
+		throw responseCodes.INVALID_MODEL_PERMISSION;
 	}
 
 	if (!validateModels(projectsPermissions, projects)) {
@@ -126,11 +127,11 @@ invitations.create = async (email, teamspace, job, permissions = {}) => {
 		const invitation = { teamSpaces };
 		await coll.updateOne({_id:email}, { $set: invitation });
 	} else {
+		// TODO: should send an email with the invitation
 		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
 		await coll.insertOne(invitation);
 	}
 
-	// // TODO: should send an email with the invitation
 	return {email, job, permissions};
 };
 
@@ -182,42 +183,49 @@ invitations.teamspaceInvitationCheck = async (email, teamspace) => {
 	return true;
 };
 
+const applyModelPermissions = (teamspace, invitedUser, modelsPermissions) => async modelSetting=> {
+	const {permission} = modelsPermissions.find(({model}) => model === modelSetting._id);
+	return await modelSetting.changePermissions(modelSetting.permissions.concat({user: invitedUser, permission}), teamspace);
+};
+
+const applyProjectPermissions = (teamspace, invitedUser) => async ({ project_admin , project, models}) => {
+	if (project_admin) {
+		await Project.setUserAsProjectAdmin(teamspace, project, invitedUser);
+	} else {
+		const modelsIds = models.map(({model}) => model);
+		const modelsList = await ModelSetting.find({ account: teamspace }, {"_id" : {"$in" : modelsIds}});
+		await Promise.all(modelsList.map(applyModelPermissions(teamspace, invitedUser, models)));
+	}
+};
+
+const applyTeamspacePermissions = (invitedUser) => async ({ teamspace, job, permissions  }) => {
+	const teamspaceUser = await User.findByUserName(teamspace);
+	const teamPerms = permissions.teamspace_admin ? ["teamspace_admin"] : [];
+
+	try {
+		await teamspaceUser.addTeamMember(invitedUser, job, teamPerms);
+
+		if (!permissions.teamspace_admin) {
+			await Promise.all(permissions.projects.map(applyProjectPermissions(teamspace, invitedUser)));
+		}
+	} catch(err) {
+		systemLogger.logError("Something failed when unpacking invitation: " + err.stack);
+	}
+};
+
 invitations.unpack = async (invitedUser) => {
 	const coll = await getCollection();
-	const result = await coll.findOne({_id: invitedUser.customData.email.toLowerCase()});
+	const email = invitedUser.customData.email.toLowerCase();
+	const username = invitedUser.user;
+	const result = await coll.findOne({_id: email});
 
 	if (!result || !result.teamSpaces) {
 		return invitedUser;
 	}
 
-	await Promise.all(result.teamSpaces.map(
-		async ({ teamspace, job, permissions  }) => {
-			const teamspaceUser = await User.findByUserName(teamspace);
-			const teamPerms = permissions.team_admin ? ["teamspace_admin"] : [];
+	await Promise.all(result.teamSpaces.map(applyTeamspacePermissions(username)));
 
-			// TODO: should send an email to the teamspace admin
-			await teamspaceUser.addTeamMember(invitedUser.user, job, teamPerms);
-
-			if (!permissions.team_admin) {
-				await Promise.all(permissions.projects.map(async ({ project_admin , project, models}) => {
-					if (project_admin) {
-						const projectObj = await Project.findOne({ account: teamspace }, {name: project});
-						const projectPermission = { user: invitedUser.user, permissions: ["admin_project"]};
-
-						projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
-					} else {
-						const modelsIds = models.map(({model}) => model);
-						const modelsList = await ModelSetting.find({ account: teamspace }, {"_id" : {"$in" : modelsIds}});
-						await Promise.all(modelsList.map(async modelSetting=> {
-							const {role: permission} = models.find(({model}) => model === modelSetting._id);
-							return await modelSetting.changePermissions(modelSetting.permissions.concat({user: invitedUser.user, permission}), teamspace);
-						}));
-					}
-				}));
-			}
-		}));
-
-	await coll.deleteOne({_id: invitedUser.customData.email});
+	await coll.deleteOne({_id: email});
 	return invitedUser;
 };
 
