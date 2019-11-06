@@ -22,9 +22,7 @@ import api from './';
  * @param teamspace
  */
 export const fetchInvitations = (teamspace) => {
-	return api.get(`${teamspace}/invitations`).then(({ data: {invitations} }) => {
-		return invitations;
-	});
+	return api.get(`${teamspace}/invitations`);
 };
 
 /**

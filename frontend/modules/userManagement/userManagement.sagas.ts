@@ -58,7 +58,7 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 		yield put(UserManagementActions.fetchTeamspaceDetailsSuccess(
 			teamspaceDetails,
 			users.data,
-			invitations,
+			invitations.data,
 			currentUser.username,
 			quota.data.collaboratorLimit
 		));
