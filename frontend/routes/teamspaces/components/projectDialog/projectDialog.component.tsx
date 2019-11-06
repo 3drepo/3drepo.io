@@ -27,10 +27,14 @@ import React from 'react';
 
 import * as Yup from 'yup';
 
+import { VALIDATIONS_MESSAGES } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 
 const ProjectSchema = Yup.object().shape({
-	name: Yup.string().required().matches(/^[^/?=#+]{0,119}[^/?=#+ ]{1}$/),
+	name: Yup.string()
+		.required()
+		.max(120, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+		.matches(/^[^/?=#+]{0,119}[^/?=#+ ]{1}$/, 'Name should not contain special characters: "/", "?", "=", "#", "+".'),
 	teamspace: Yup.string().required()
 });
 
@@ -42,7 +46,6 @@ interface IProps {
 	handleClose: () => void;
 	createProject: (teamspace, projectData) => void;
 	updateProject: (teamspace, projectName, projectData) => void;
-
 }
 
 const getTeamspacesItems = memoizeOne((teamspaces) => teamspaces.map(({ account }) => ({
