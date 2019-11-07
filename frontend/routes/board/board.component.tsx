@@ -19,7 +19,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Add from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
-import { capitalize } from 'lodash';
+import { capitalize, get } from 'lodash';
 import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
@@ -160,10 +160,11 @@ export function Board(props: IProps) {
 		props.fetchData(type, teamspace, project, modelId);
 	}, [type, teamspace, project, modelId]);
 
-	const isDraggable =
-		props.filterProp !== 'creator_role' &&
-		props.filterProp !== 'level_of_risk' &&
-		props.filterProp !== 'residual_level_of_risk';
+	const isDraggable = get(
+		isIssuesBoard ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS,
+		[props.filterProp, 'draggable'],
+		false
+	);
 
 	const handleTypeChange = (e) => {
 		const url = `${ROUTES.BOARD_MAIN}/${e.target.value}/${teamspace}${projectParam}${modelParam}`;

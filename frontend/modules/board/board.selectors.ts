@@ -15,7 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { groupBy, startCase, values } from 'lodash';
+import dayjs from 'dayjs';
+import isBetween from 'dayjs/plugin/isBetween';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import { groupBy, memoize, startCase, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { PRIORITIES, STATUSES } from '../../constants/issues';
 import { LEVELS_LIST, RISK_CATEGORIES, RISK_MITIGATION_STATUSES } from '../../constants/risks';
@@ -24,8 +28,11 @@ import { selectAllFilteredIssues, selectSortOrder as selectIssuesSortOrder } fro
 import { selectJobs } from '../jobs';
 import { selectTopicTypes } from '../model';
 import { selectAllFilteredRisks, selectSortOrder as selectRisksSortOrder } from '../risks';
-import { selectUsers } from '../userManagement';
 import { BOARD_TYPES, ISSUE_FILTER_PROPS, NOT_DEFINED_PROP, RISK_FILTER_PROPS } from './board.constants';
+
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isBetween);
 
 export const selectBoardDomain = (state) => ({...state.board});
 
@@ -49,24 +56,39 @@ export const selectSearchEnabled = createSelector(
 	selectBoardDomain, (state) => state.searchEnabled
 );
 
+const getNextWeekTimestamp = memoize((nextWeekNumber = 1) => {
+	return dayjs().startOf('day').add(7 * nextWeekNumber, 'day').valueOf();
+});
+
+const getProp = (item, prop) => {
+	if (prop === ISSUE_FILTER_PROPS.due_date.value) {
+		const dueDate = dayjs(item[prop]);
+		if (Number(!!(new Date().valueOf() >= dueDate.valueOf()))) {
+			return 'overdue';
+		}
+		const secondWeekDate = getNextWeekTimestamp(2);
+		const firstWeekDate = getNextWeekTimestamp();
+		if (dueDate.isSameOrBefore(firstWeekDate, 'day')) {
+			return firstWeekDate;
+		}
+		if (dueDate.isBetween(firstWeekDate, secondWeekDate, 'day', '[)')) {
+			return secondWeekDate;
+		}
+		return getNextWeekTimestamp(3);;
+	}
+	return item[prop];
+};
+
 export const selectLanes = createSelector(
 	selectBoardDomain,
 	selectAllFilteredIssues,
 	selectAllFilteredRisks,
 	selectTopicTypes,
 	selectJobs,
-	selectUsers,
 	selectIssuesSortOrder,
 	selectRisksSortOrder,
-	({ filterProp, boardType }, issues, risks, topicTypes, jobs, users, issuesSortOrder, risksSortOrder) => {
+	({ filterProp, boardType }, issues, risks, topicTypes, jobs, issuesSortOrder, risksSortOrder) => {
 		const isIssueBoardType = boardType === 'issues';
-
-		const usersValues = users.map((u) => {
-			return {
-				value: u.user,
-				name: `${u.firstName} ${u.lastName}`
-			};
-		});
 
 		const jobsValues = jobs.map((j) => {
 			return {
@@ -74,6 +96,25 @@ export const selectLanes = createSelector(
 				value: j._id,
 			};
 		});
+
+		const FILTER_PROPS = isIssueBoardType ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS;
+
+		const datesValues = [{
+			name: FILTER_PROPS.due_date.notDefinedLabel,
+			value: FILTER_PROPS.due_date.notDefinedLabel
+		}, {
+			name: 'Overdue',
+			value: 'overdue'
+		}, {
+			name: 'in 1 week',
+			value: getNextWeekTimestamp()
+		}, {
+			name: 'in 2 weeks',
+			value: getNextWeekTimestamp(2)
+		}, {
+			name: 'in 3 weeks+',
+			value: getNextWeekTimestamp(3)
+		}];
 
 		const issueFiltersMap = {
 			[ISSUE_FILTER_PROPS.status.value]: values(STATUSES).map((s) => {
@@ -95,7 +136,8 @@ export const selectLanes = createSelector(
 				};
 			}),
 			[ISSUE_FILTER_PROPS.creator_role.value]: jobsValues,
-			[ISSUE_FILTER_PROPS.assigned_roles.value]: jobsValues
+			[ISSUE_FILTER_PROPS.assigned_roles.value]: jobsValues,
+			[ISSUE_FILTER_PROPS.due_date.value]: datesValues,
 		};
 
 		const riskFiltersMap = {
@@ -103,10 +145,8 @@ export const selectLanes = createSelector(
 			[RISK_FILTER_PROPS.residual_level_of_risk.value]: LEVELS_LIST,
 			[RISK_FILTER_PROPS.category.value]: RISK_CATEGORIES,
 			[RISK_FILTER_PROPS.mitigation_status.value]: RISK_MITIGATION_STATUSES,
-			[ISSUE_FILTER_PROPS.creator_role.value]: usersValues,
+			[ISSUE_FILTER_PROPS.creator_role.value]: jobsValues,
 		};
-
-		const FILTER_PROPS = isIssueBoardType ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS;
 
 		const filtersMap = isIssueBoardType ? issueFiltersMap : riskFiltersMap;
 
@@ -122,14 +162,13 @@ export const selectLanes = createSelector(
 
 			return {
 				id: item._id,
-				[filterProp]: isDefined ? item[filterProp] : NOT_DEFINED_PROP,
+				[filterProp]: isDefined ? getProp(item, filterProp) : FILTER_PROPS[filterProp].notDefinedLabel || NOT_DEFINED_PROP,
 				metadata: { ...item },
 				prop: filterProp
 			};
 		});
 
 		const groups = groupBy(preparedData, filterProp);
-		const name = FILTER_PROPS[filterProp] ? FILTER_PROPS[filterProp].name : '';
 		const dataset = filtersMap[filterProp];
 		const notDefinedGroup = groups[NOT_DEFINED_PROP];
 

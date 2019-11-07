@@ -22,33 +22,44 @@ export const BOARD_TYPES = {
 	RISKS: 'risks'
 };
 
+export const NOT_DEFINED_PROP = 'not defined';
+
 export const ISSUE_FILTER_PROPS = {
 	status: {
 		value: 'status',
-		name: 'Status'
+		name: 'Status',
+		draggable: true
 	},
 	priority: {
 		value: 'priority',
-		name: 'Priority'
+		name: 'Priority',
+		draggable: true
 	},
 	topic_type: {
 		value: 'topic_type',
-		name: 'Topic Type'
+		name: 'Topic Type',
+		draggable: true
 	},
 	assigned_roles: {
 		value: 'assigned_roles',
-		name: 'Assigned To'
+		name: 'Assigned To',
+		draggable: true
 	},
 	creator_role: {
 		value: 'creator_role',
-		name: 'Created By'
+		name: 'Created By',
 	},
+	due_date: {
+		value: 'due_date',
+		name: 'Due date',
+		notDefinedLabel: 'No due date'
+	}
 };
 
 export const RISK_FILTER_PROPS = {
 	level_of_risk: {
 		value: 'level_of_risk',
-		name: 'Level of risk'
+		name: 'Level of risk',
 	},
 	residual_level_of_risk: {
 		value: 'residual_level_of_risk',
@@ -56,19 +67,19 @@ export const RISK_FILTER_PROPS = {
 	},
 	category: {
 		value: 'category',
-		name: 'Category'
+		name: 'Category',
+		draggable: true
 	},
 	mitigation_status: {
 		value: 'mitigation_status',
-		name: 'Mitigation status'
+		name: 'Mitigation status',
+		draggable: true
 	},
 	creator_role: {
 		value: 'creator_role',
 		name: 'Created By'
-	},
+	}
 };
 
 export const ISSUE_FILTER_VALUES = values(ISSUE_FILTER_PROPS);
 export const RISK_FILTER_VALUES = values(RISK_FILTER_PROPS);
-
-export const NOT_DEFINED_PROP = 'not defined';
