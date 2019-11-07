@@ -39,8 +39,8 @@ export const ISSUE_FILTER_PROPS = {
 		value: 'assigned_roles',
 		name: 'Assigned To'
 	},
-	owner: {
-		value: 'owner',
+	creator_role: {
+		value: 'creator_role',
 		name: 'Created By'
 	},
 };
@@ -62,8 +62,8 @@ export const RISK_FILTER_PROPS = {
 		value: 'mitigation_status',
 		name: 'Mitigation status'
 	},
-	owner: {
-		value: 'owner',
+	creator_role: {
+		value: 'creator_role',
 		name: 'Created By'
 	},
 };

@@ -18,6 +18,7 @@
 import { Button, MenuItem, Select } from '@material-ui/core';
 import styled from 'styled-components';
 import { COLOR } from '../../styles';
+import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
 
 export const Container = styled.div`
 	height: 100%;
@@ -61,11 +62,6 @@ export const BoardContainer = styled.div`
 		header {
 			color: ${COLOR.BLACK_70};
 		}
-	}
-
-	.smooth-dnd-draggable-wrapper {
-		margin-bottom: 6px;
-		border: 1px solid ${COLOR.BLACK_12};
 	}
 `;
 
@@ -210,3 +206,10 @@ export const BoardDialogTitle = styled.div`
 `;
 
 export const Title = styled.div``;
+
+export const BoardItem = styled(PreviewListItem)`
+	&& {
+		margin-bottom: 6px;
+		border: 1px solid ${COLOR.BLACK_12};
+	}
+`;

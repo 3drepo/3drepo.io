@@ -64,7 +64,8 @@ import {
 	SelectContainer,
 	SelectLabel,
 	Title,
-	ViewConfig
+	ViewConfig,
+	BoardItem
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
 import { ConfigSelectComponent } from './components/configSelect.component';
@@ -160,7 +161,7 @@ export function Board(props: IProps) {
 	}, [type, teamspace, project, modelId]);
 
 	const isDraggable =
-		props.filterProp !== 'owner' &&
+		props.filterProp !== 'creator_role' &&
 		props.filterProp !== 'level_of_risk' &&
 		props.filterProp !== 'residual_level_of_risk';
 
@@ -331,7 +332,7 @@ export function Board(props: IProps) {
 
 	const BoardCard = ({ metadata, onClick }: any) => {
 		return (
-			<PreviewListItem
+			<BoardItem
 				{...metadata}
 				onItemClick={onClick}
 			/>

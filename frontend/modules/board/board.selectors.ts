@@ -68,6 +68,13 @@ export const selectLanes = createSelector(
 			};
 		});
 
+		const jobsValues = jobs.map((j) => {
+			return {
+				name: j._id,
+				value: j._id,
+			};
+		});
+
 		const issueFiltersMap = {
 			[ISSUE_FILTER_PROPS.status.value]: values(STATUSES).map((s) => {
 				return {
@@ -87,13 +94,8 @@ export const selectLanes = createSelector(
 					value: t.value
 				};
 			}),
-			[ISSUE_FILTER_PROPS.owner.value]: usersValues,
-			[ISSUE_FILTER_PROPS.assigned_roles.value]: jobs.map((j) => {
-				return {
-					name: j._id,
-					value: j._id,
-				};
-			})
+			[ISSUE_FILTER_PROPS.creator_role.value]: jobsValues,
+			[ISSUE_FILTER_PROPS.assigned_roles.value]: jobsValues
 		};
 
 		const riskFiltersMap = {
@@ -101,7 +103,7 @@ export const selectLanes = createSelector(
 			[RISK_FILTER_PROPS.residual_level_of_risk.value]: LEVELS_LIST,
 			[RISK_FILTER_PROPS.category.value]: RISK_CATEGORIES,
 			[RISK_FILTER_PROPS.mitigation_status.value]: RISK_MITIGATION_STATUSES,
-			[ISSUE_FILTER_PROPS.owner.value]: usersValues,
+			[ISSUE_FILTER_PROPS.creator_role.value]: usersValues,
 		};
 
 		const FILTER_PROPS = isIssueBoardType ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS;
