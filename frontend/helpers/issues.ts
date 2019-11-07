@@ -22,8 +22,7 @@ import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 export const prepareIssue = (issue, jobs = []) => {
 	const preparedIssue = {...issue};
 	if (issue.thumbnail) {
-		const thumbnail = getAPIUrl(issue.thumbnail);
-		preparedIssue.thumbnail = thumbnail;
+		preparedIssue.thumbnail = issue.thumbnail && issue.thumbnail.length ? getAPIUrl(issue.thumbnail) : '';
 	}
 
 	const descriptionThumbnail = issue.viewpoint && issue.viewpoint.screenshot

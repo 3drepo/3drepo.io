@@ -27,7 +27,6 @@ import { UserManagementActions } from '../userManagement';
 import { TeamspacesActions, TeamspacesTypes } from './teamspaces.redux';
 import { teamspacesSchema } from './teamspaces.schema';
 import { selectProjects } from './teamspaces.selectors';
-import { ModelTypes } from '../model';
 
 export function* fetchTeamspaces({ username }) {
 	try {
