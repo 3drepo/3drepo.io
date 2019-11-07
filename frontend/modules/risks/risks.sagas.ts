@@ -147,8 +147,8 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting }) {
 		const preparedRisk = prepareRisk(savedRisk, jobs);
 
 		finishSubmitting();
-		yield put(RisksActions.showDetails(revision, preparedRisk._id));
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
+		yield put(RisksActions.goToRisk(preparedRisk));
 		yield put(SnackbarActions.show('Risk created'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('save', 'risk', error));
