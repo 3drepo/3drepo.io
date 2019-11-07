@@ -107,7 +107,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderPreview = renderWhenTrue(() => {
-		const { expandDetails, horizontal, failedToLoad } = this.props;
+		const { expandDetails, horizontal, failedToLoad, disableViewer } = this.props;
 		const { comments } = this.riskData;
 		const isRiskWithComments = Boolean((comments && comments.length || horizontal) && !this.isNewRisk);
 		const PreviewWrapper = horizontal && isRiskWithComments ? HorizontalView : Fragment;
@@ -129,6 +129,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					handleHeaderClick={this.handleHeaderClick}
 					scrolled={this.state.scrolled && !horizontal}
 					isNew={this.isNewRisk}
+					showModelButton={disableViewer && !this.isNewRisk}
 				/>
 				<LogsContainer>
 					{this.renderLogList(horizontal && isRiskWithComments)}
@@ -152,7 +153,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				hideComment={this.isNewRisk}
 				hideScreenshot={this.props.disableViewer}
 				hideUploadButton={!this.props.disableViewer}
-				hideViewOnModel={!this.props.disableViewer || this.isNewRisk}
 			/>
 		</ViewerPanelFooter>
 	));

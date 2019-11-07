@@ -111,7 +111,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderPreview = renderWhenTrue(() => {
-		const { expandDetails, horizontal, failedToLoad } = this.props;
+		const { expandDetails, horizontal, failedToLoad, disableViewer } = this.props;
 		const { comments } = this.issueData;
 		const isIssueWithComments = Boolean((comments && comments.length || horizontal) && !this.isNewIssue);
 		const PreviewWrapper = horizontal && isIssueWithComments ? HorizontalView : Fragment;
@@ -133,6 +133,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 					handleHeaderClick={this.handleHeaderClick}
 					scrolled={this.state.scrolled && !horizontal}
 					isNew={this.isNewIssue}
+					showModelButton={disableViewer && !this.isNewIssue}
 				/>
 				<LogsContainer>
 					{this.renderLogList(horizontal && isIssueWithComments)}
@@ -156,7 +157,6 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				hideComment={this.isNewIssue}
 				hideScreenshot={this.props.disableViewer}
 				hideUploadButton={!this.props.disableViewer}
-				hideViewOnModel={!this.props.disableViewer || this.isNewIssue}
 			/>
 		</ViewerPanelFooter>
 	));

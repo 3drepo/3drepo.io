@@ -20,7 +20,7 @@ import Grid from '@material-ui/core/Grid';
 import styled from 'styled-components';
 import { LogList as LogListBase } from '../../../../../components/logList/logList.component';
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
-import { PreviewDetails as PreviewDetailsBase } from '../../../previewDetails/previewDetails.component';
+import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
 
 export const StyledFormControl = styled(FormControl)`
 `;

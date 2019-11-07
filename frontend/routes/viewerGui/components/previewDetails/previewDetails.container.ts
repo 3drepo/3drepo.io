@@ -16,21 +16,17 @@
  */
 
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { DialogActions } from '../../../../modules/dialog';
+import { selectUrlParams } from '../../../../modules/router/router.selectors';
+import { PreviewDetails } from './previewDetails.component';
 
-import { MeasureActions } from '../../../../modules/measure';
-import { withViewer } from '../../../../services/viewer/viewer';
-import { NewCommentForm } from './newCommentForm.component';
+const mapStateToProps = createStructuredSelector({
+	urlParams: selectUrlParams,
+});
 
-const mapStateToProps = createStructuredSelector({});
+export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	showScreenshotDialog: DialogActions.showScreenshotDialog,
-	setDisabled: MeasureActions.setDisabled,
-	deactivateMeasure: MeasureActions.deactivateMeasure,
-}, dispatch);
-
-export default withViewer(connect(mapStateToProps, mapDispatchToProps)(NewCommentForm));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(PreviewDetails));

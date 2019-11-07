@@ -16,22 +16,25 @@
  */
 
 import { TextField } from '@material-ui/core';
+import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import * as Yup from 'yup';
 
+import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
+import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
 import {
 	Collapsable,
 	CollapsableContent,
 	Container,
-	Content,
 	Details,
 	NotCollapsableContent,
+	ShowModelButtonContainer,
 	StyledForm,
 	Summary,
 	ToggleButton,
@@ -57,6 +60,9 @@ interface IProps {
 	panelName?: string;
 	scrolled?: boolean;
 	isNew?: boolean;
+	showModelButton?: boolean;
+	history: any;
+	urlParams: any;
 	handleHeaderClick?: (event) => void;
 	onExpandChange?: (event, expaned: boolean) => void;
 	onNameChange?: (event, name: string) => void;
@@ -106,8 +112,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 							onFocus: () => this.handleFocusName(field, form),
 							onBlur: () => this.handleBlurName(field, form)
 						}}
-						/>
-						)} />
+					/>
+				)} />
 			</StyledForm>
 		</Formik>
 	));
@@ -182,6 +188,21 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		}
 	}
 
+	public handleGoToModel = () => {
+		const { teamspace, modelId } = this.props.urlParams;
+		this.props.history.push(`${ROUTES.VIEWER}/${teamspace}/${modelId}`);
+	}
+
+	public renderViewModel = renderWhenTrue(() => (
+		<ShowModelButtonContainer>
+			<TooltipButton
+				Icon={OpenInBrowser}
+				label="View model"
+				action={this.handleGoToModel}
+			/>
+		</ShowModelButtonContainer>
+	));
+
 	public render() {
 		const {
 			className,
@@ -198,7 +219,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			willBeRemoved,
 			renderCollapsable,
 			renderNotCollapsable,
-			handleHeaderClick
+			handleHeaderClick,
+			showModelButton
 		} = this.props;
 
 		return (
@@ -210,11 +232,12 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 					onClick={handleHeaderClick}
 					scrolled={this.props.scrolled ? 1 : 0}
 				>
-						<RoleIndicator color={roleColor} />
-						{this.renderNameWithCounter(!editable && number)}
-						{this.renderName(!editable && !number)}
-						{this.renderNameField(editable)}
-					</Summary>
+					<RoleIndicator color={roleColor} />
+					{this.renderNameWithCounter(!editable && number)}
+					{this.renderName(!editable && !number)}
+					{this.renderNameField(editable)}
+					{this.renderViewModel(showModelButton)}
+				</Summary>
 
 				<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
 					<Details>

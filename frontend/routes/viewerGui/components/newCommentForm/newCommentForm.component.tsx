@@ -57,11 +57,8 @@ interface IProps {
 	hideComment?: boolean;
 	hideScreenshot?: boolean;
 	hideUploadButton?: boolean;
-	hideViewOnModel?: boolean;
 	showResidualRiskInput?: boolean;
 	viewer: any;
-	history: any;
-	urlParams: any;
 	onSave: (commentData, finishSubmitting) => void;
 	onTakeScreenshot: (screenshot) => void;
 	showScreenshotDialog: (options) => void;
@@ -123,14 +120,6 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 			/>
 			<FileUploadInvoker ref={this.fileInputRef} onChange={this.handleFileUpload} />
 		</FileUploadContainer>
-	));
-
-	public renderViewModel = renderWhenTrue(() => (
-		<TooltipButton
-			Icon={OpenInBrowser}
-			label="View model"
-			action={this.handleGoToModel}
-		/>
 	));
 
 	public renderCommentTypeToggle = renderWhenTrue(() => (
@@ -265,17 +254,11 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		this.setState({ isResidualRiskInputActive });
 	}
 
-	public handleGoToModel = () => {
-		const { teamspace, modelId } = this.props.urlParams;
-		this.props.history.push(`${ROUTES.VIEWER}/${teamspace}/${modelId}`);
-	}
-
 	public render() {
 		const {
 			hideComment,
 			hideScreenshot,
 			hideUploadButton,
-			hideViewOnModel,
 			showResidualRiskInput,
 			formRef,
 			canComment
@@ -297,7 +280,6 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 							<ActionsGroup>
 								{this.renderScreenshotButton(!hideScreenshot)}
 								{this.renderUploadImageButton(!hideUploadButton)}
-								{this.renderViewModel(!hideViewOnModel)}
 								{this.renderCommentTypeToggle(!hideComment && showResidualRiskInput)}
 							</ActionsGroup>
 							<Field render={({ form }) => (

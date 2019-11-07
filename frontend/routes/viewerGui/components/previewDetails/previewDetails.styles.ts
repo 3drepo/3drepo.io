@@ -122,3 +122,13 @@ export const Typography = styled(TypographyComponent)`
 	max-height: 40px;
 	overflow: hidden;
 `;
+
+export const ShowModelButtonContainer = styled.div`
+	&& {
+		position: absolute;
+    z-index: 10;
+    top: 3px;
+    right: 3px;
+		padding: 0 !important;
+	}
+`;
