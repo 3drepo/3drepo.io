@@ -67,8 +67,11 @@ export const GridColumn = styled(Grid)`
 
 export const StyledForm = styled(Form)`
 	padding: 24px;
+	padding-bottom: 80px;
 	box-sizing: border-box;
-	overflow: scroll;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	height: inherit;
 `;
 
 export const Headline = styled(Typography)``;
@@ -99,4 +102,22 @@ export const LoaderContainer = styled.div`
 	align-items: flex-start;
 	padding-top: 100px;
 	box-sizing: border-box;
+`;
+
+export const Container = styled.div`
+	position: relative;
+	height: 100%;
+	overflow: hidden;
+	flex: none;
+`;
+
+export const ButtonContainer = styled(Grid)`
+	position: absolute;
+	flex: none;
+	bottom: 0;
+	right: 40px;
+	width: 100%;
+	background: ${COLOR.LIGHT_GRAY};
+	height: 80px;
+	justify-content: center;
 `;
