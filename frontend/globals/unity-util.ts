@@ -378,7 +378,9 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static loadingProgress(progress) {
-		UnityUtil.modelLoaderProgressCallback(progress);
+		if (UnityUtil.modelLoaderProgressCallback) {
+			UnityUtil.modelLoaderProgressCallback(progress);
+		}
 	}
 
 	/** @hidden */
