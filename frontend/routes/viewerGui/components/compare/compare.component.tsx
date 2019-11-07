@@ -42,6 +42,7 @@ import {
 import { SortAmountDown, SortAmountUp } from '../../../components/fontAwesomeIcon';
 import { Loader } from '../../../components/loader/loader.component';
 import { ViewerPanelButton, ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
+import { EmptyStateInfo } from '../views/views.styles';
 import {
 	CompareContainer,
 	CompareIcon,
@@ -100,6 +101,10 @@ export class Compare extends React.PureComponent<IProps, any> {
 		return this.props.activeTab === DIFF_COMPARE_TYPE;
 	}
 
+	get modelsWithRevision() {
+		return this.props.compareModels.filter(({ baseRevision }) => !!baseRevision);
+	}
+
 	get headerMenuItems() {
 		const menuItems = [{
 			...COMPARE_ACTIONS_MENU.SORT_BY_NAME,
@@ -118,12 +123,19 @@ export class Compare extends React.PureComponent<IProps, any> {
 
 	get tabProps() {
 		return {
-			compareModels: this.props.compareModels,
+			compareModels: this.modelsWithRevision,
 			handleItemSelect: this.handleItemSelect,
 			handleAllItemsSelect: this.handleAllItemsSelect,
 			renderComparisonLoader: () => this.renderComparisonLoader(this.props.isCompareProcessed)
 		};
 	}
+
+	public renderEmptyState = renderWhenTrue(() => (
+			<ViewerPanelContent>
+				<EmptyStateInfo>No models that can be compared have been created yet</EmptyStateInfo>
+			</ViewerPanelContent>
+	));
+
 	public renderComparisonLoader = renderWhenTrue(() => (
 		<ComparisonLoader>
 			<Loader content="Loading comparison" />
@@ -153,7 +165,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	public render() {
+	public renderPanelContent = renderWhenTrue(() => {
 		const {
 			activeTab,
 			isActive,
@@ -165,11 +177,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 		} = this.props;
 
 		return (
-			<CompareContainer
-				Icon={<CompareIcon />}
-				renderActions={this.renderHeaderButtons}
-				pending={this.props.isPending}
-			>
+			<>
 				<ViewerPanelContent scrollDisabled>
 					<Tabs
 						value={activeTab}
@@ -207,6 +215,21 @@ export class Compare extends React.PureComponent<IProps, any> {
 						<CompareIcon />
 					</ViewerPanelButton>
 				</ViewerPanelFooter>
+			</>
+		);
+	});
+
+	public render() {
+		const { isPending } = this.props;
+		return (
+			<CompareContainer
+				Icon={<CompareIcon />}
+				renderActions={this.renderHeaderButtons}
+				pending={isPending}
+				empty={!isPending && !this.modelsWithRevision.length}
+			>
+				{this.renderEmptyState(!this.modelsWithRevision.length)}
+				{this.renderPanelContent(this.modelsWithRevision.length)}
 			</CompareContainer>
 		);
 	}

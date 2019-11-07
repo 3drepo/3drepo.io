@@ -49,6 +49,7 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 			{this.props.compareModels.map(this.renderListItem)}
 		</List>
 	));
+
 	public handleFilterChange = (selectedFilters) => {
 		this.props.setComponentState({ selectedFilters });
 	}
@@ -82,6 +83,7 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 	private renderListItem = (modelProps) => {
 		const { selectedItemsMap } = this.props;
 		const isSelected = selectedItemsMap[modelProps._id];
+
 		return (
 			<CompareDiffItem
 				key={modelProps._id}
