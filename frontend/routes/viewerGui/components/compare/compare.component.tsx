@@ -101,10 +101,6 @@ export class Compare extends React.PureComponent<IProps, any> {
 		return this.props.activeTab === DIFF_COMPARE_TYPE;
 	}
 
-	get modelsWithRevision() {
-		return this.props.compareModels.filter(({ baseRevision }) => !!baseRevision);
-	}
-
 	get headerMenuItems() {
 		const menuItems = [{
 			...COMPARE_ACTIONS_MENU.SORT_BY_NAME,
@@ -123,7 +119,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 
 	get tabProps() {
 		return {
-			compareModels: this.modelsWithRevision,
+			compareModels: this.props.compareModels,
 			handleItemSelect: this.handleItemSelect,
 			handleAllItemsSelect: this.handleAllItemsSelect,
 			renderComparisonLoader: () => this.renderComparisonLoader(this.props.isCompareProcessed)
@@ -220,16 +216,16 @@ export class Compare extends React.PureComponent<IProps, any> {
 	});
 
 	public render() {
-		const { isPending } = this.props;
+		const { isPending, compareModels } = this.props;
 		return (
 			<CompareContainer
 				Icon={<CompareIcon />}
 				renderActions={this.renderHeaderButtons}
 				pending={isPending}
-				empty={!isPending && !this.modelsWithRevision.length}
+				empty={!isPending && !compareModels.length}
 			>
-				{this.renderEmptyState(!this.modelsWithRevision.length)}
-				{this.renderPanelContent(this.modelsWithRevision.length)}
+				{this.renderEmptyState(!compareModels.length)}
+				{this.renderPanelContent(compareModels.length)}
 			</CompareContainer>
 		);
 	}

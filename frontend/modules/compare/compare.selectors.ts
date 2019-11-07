@@ -52,7 +52,9 @@ export const selectIsModelVisible = createSelector(
 );
 
 export const selectCompareModels = createSelector(
-	selectComponentState, (state) => state.compareModels
+	selectComponentState,
+		(state) => state.compareModels
+			.filter(({ baseRevision }) => !!baseRevision)
 );
 
 export const selectSelectedFilters = createSelector(
