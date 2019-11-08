@@ -16,12 +16,13 @@
  */
 
 import IconButton from '@material-ui/core/IconButton';
+import InputLabel from '@material-ui/core/InputLabel';
 import Add from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
 import SearchIcon from '@material-ui/icons/Search';
 import { capitalize, get } from 'lodash';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
 
@@ -42,6 +43,7 @@ import { Loader } from '../components/loader/loader.component';
 import { MenuButton } from '../components/menuButton/menuButton.component';
 import { Panel } from '../components/panel/panel.component';
 
+import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { FilterPanel } from '../components/filterPanel/filterPanel.component';
 import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
 import { ListNavigation } from '../viewerGui/components/listNavigation/listNavigation.component';
@@ -53,22 +55,19 @@ import {
 	BoardDialogTitle,
 	BoardItem,
 	Config,
-	ConfigSelect,
-	ConfigSelectItem,
 	Container,
 	DataConfig,
+	FormControl,
 	FormWrapper,
 	LoaderContainer,
 	NoDataMessage,
 	SelectContainer,
-	SelectLabel,
 	Title,
 	ViewConfig
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
-import { ConfigSelectComponent } from './components/configSelect.component';
 
-const types = ['issues', 'risks'];
+const types = [{ value: 'issues', name: 'Issues' } , { value: 'risks', name: 'Risks' }];
 
 interface ICard {
 	id: string;
@@ -174,6 +173,8 @@ export function Board(props: IProps) {
 		[props.filterProp, 'draggable'],
 		false
 	);
+
+	const teamspacesItems = useMemo(() => props.teamspaces.map(({ account }) => ({ value: account })), [props.teamspaces]);
 
 	const handleTypeChange = (e) => {
 		const url = `${ROUTES.BOARD_MAIN}/${e.target.value}/${teamspace}${projectParam}${modelParam}`;
@@ -282,28 +283,55 @@ export function Board(props: IProps) {
 		props.setFilters([]);
 	};
 
-	const renderTeamspacesSelect = () => {
-		return (
-			<ConfigSelect value={teamspace} onChange={handleTeamspaceChange} disabled={!props.teamspaces.length}>
-				{ props.teamspaces.length ?
-					props.teamspaces.map((ts, index) => (
-						<ConfigSelectItem key={index} value={ts.account}>
-							{ts.account}
-						</ConfigSelectItem>
-					)) : <ConfigSelectItem value={teamspace}>{teamspace}</ConfigSelectItem>
-				}
-			</ConfigSelect>
-		);
-	};
+	const renderTeamspacesSelect = () => (
+		<FormControl>
+			<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
+			<CellSelect
+				placeholder="Select teamspace"
+				items={teamspacesItems}
+				value={!props.isPending ? teamspace : ''}
+				onChange={handleTeamspaceChange}
+				disabled={!teamspacesItems.length}
+				disabledPlaceholder
+				inputId="teamspace-select"
+			/>
+		</FormControl>
+	);
 
 	const renderProjectsSelect = () => {
 		const projects = getTeamspaceProjects(props.teamspaces, props.projectsMap, teamspace);
-		return (<ConfigSelectComponent value={project} items={projects} handleChange={handleProjectChange} />);
+		return (
+			<FormControl>
+				<InputLabel shrink htmlFor="project-select">Project</InputLabel>
+				<CellSelect
+					placeholder="Select project"
+					items={projects}
+					value={!props.isPending ? project : ''}
+					onChange={handleProjectChange}
+					disabled={!projects.length}
+					disabledPlaceholder
+					inputId="project-select"
+				/>
+			</FormControl>
+		);
 	};
 
 	const renderModelsSelect = () => {
 		const models = getProjectModels(props.teamspaces, props.projectsMap, props.modelsMap, teamspace, project);
-		return (<ConfigSelectComponent value={modelId} items={models} handleChange={handleModelChange} />);
+		return (
+			<FormControl>
+				<InputLabel shrink htmlFor="model-select">Model</InputLabel>
+				<CellSelect
+					placeholder="Select model"
+					items={models}
+					value={!props.isPending ? modelId : ''}
+					onChange={handleModelChange}
+					disabled={!models.length}
+					disabledPlaceholder
+					inputId="model-select"
+				/>
+			</FormControl>
+		);
 	};
 
 	const renderAddButton = () => (
@@ -323,22 +351,34 @@ export function Board(props: IProps) {
 	const renderFilters = () => {
 		return (
 			<>
+
 				<SelectContainer>
-					<SelectLabel>Show</SelectLabel>
-					<ConfigSelect value={type} onChange={handleTypeChange} theme={{ small: true }}>
-						{types.map((t) => (<ConfigSelectItem key={t} value={t}>{`${capitalize(t)}`}</ConfigSelectItem>))}
-					</ConfigSelect>
+					<FormControl>
+						<InputLabel shrink htmlFor="type-select">Show</InputLabel>
+						<CellSelect
+							placeholder="Select type"
+							items={types}
+							value={type}
+							onChange={handleTypeChange}
+							disabled={!types.length}
+							disabledPlaceholder
+							inputId="type-select"
+						/>
+					</FormControl>
 				</SelectContainer>
 				<SelectContainer>
-					<SelectLabel>Sort by</SelectLabel>
-					<ConfigSelect value={props.filterProp} onChange={handleFilterClick} theme={{ small: true }}>
-						{ FILTER_VALUES.map((filter, index) => (
-								<ConfigSelectItem key={index} value={filter.value}>
-									{filter.name}
-								</ConfigSelectItem>
-							))
-						}
-					</ConfigSelect>
+					<FormControl>
+						<InputLabel shrink htmlFor="group-select">Group by</InputLabel>
+						<CellSelect
+							placeholder="Select grouping type"
+							items={FILTER_VALUES}
+							value={props.filterProp}
+							onChange={handleFilterClick}
+							disabled={!FILTER_VALUES.length}
+							disabledPlaceholder
+							inputId="group-select"
+						/>
+					</FormControl>
 				</SelectContainer>
 			</>
 		);

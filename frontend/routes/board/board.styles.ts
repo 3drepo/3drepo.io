@@ -15,7 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button, MenuItem, Select } from '@material-ui/core';
+import Button from '@material-ui/core/Button';
+import FormControlBase from '@material-ui/core/FormControl';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
 import styled from 'styled-components';
 import { COLOR } from '../../styles';
 import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
@@ -32,6 +35,7 @@ export const BoardContainer = styled.div`
 	height: calc(100% - 50px);
 	padding: 15px;
 	box-sizing: border-box;
+	border-top: 1px solid ${COLOR.BLACK_6};
 
 	.react-trello-board {
 		background-color: initial;
@@ -162,8 +166,8 @@ export const SelectContainer = styled.div`
 export const SelectLabel = styled.div`
 	color: ${COLOR.BLACK_60};
 	font-size: 14px;
-	margin-bottom: 3px;
 	margin-right: 3px;
+	margin-bottom: 2px;
 `;
 
 export const LoaderContainer = styled.div`
@@ -221,5 +225,11 @@ export const BoardItem = styled(PreviewListItem)`
 	&& {
 		margin-bottom: 6px;
 		border: 1px solid ${COLOR.BLACK_12};
+	}
+`;
+
+export const FormControl = styled(FormControlBase)`
+	&& {
+		margin-right: 15px;
 	}
 `;

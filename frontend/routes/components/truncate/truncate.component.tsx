@@ -16,7 +16,7 @@
  */
 
 import Tooltip from '@material-ui/core/Tooltip';
-import React, { useState } from 'react';
+import React, { memo } from 'react';
 import TruncateBase from 'react-truncate';
 
 import { Container } from './truncate.styles';
@@ -31,7 +31,7 @@ interface IProps {
 	onTruncate?: () => void;
 }
 
-export const Truncate = (props: IProps) => {
+export const Truncate = memo((props: IProps) => {
 	const { children, ...truncateProps } = props;
 
 	return (
@@ -41,4 +41,4 @@ export const Truncate = (props: IProps) => {
 			</Tooltip>
 		</Container>
 	);
-};
+});

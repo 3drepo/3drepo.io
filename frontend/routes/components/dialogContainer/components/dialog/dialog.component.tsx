@@ -17,15 +17,17 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { Button } from '@material-ui/core';
+import Button from '@material-ui/core/Button';
 import DialogBase from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 
-import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../../helpers/rendering';
+import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { IDialogConfig } from '../../../../../modules/dialog/dialog.redux';
 import { dispatch } from '../../../../../modules/store';
-import { DialogActions } from './dialog.styles';
+import { COLOR } from '../../../../../styles';
+import { DialogActions, DialogTitle } from './dialog.styles';
 
 interface IProps {
 	id: number;
@@ -61,6 +63,10 @@ export const Dialog = (props: IProps) => {
 			/>
 		);
 	});
+
+	const renderCloseButton = () => (
+		<IconButton onClick={handleClose}><CloseIcon nativeColor={COLOR.WHITE} /></IconButton>
+	);
 
 	const renderActions = renderWhenTrue(() => (
 		<DialogActions>
@@ -108,7 +114,7 @@ export const Dialog = (props: IProps) => {
 
 	return (
 		<DialogBase {...DialogProps} open={isOpen} onClose={handleClose}>
-			{title && <DialogTitle disableTypography>{title}</DialogTitle>}
+			<DialogTitle disableTypography>{renderCloseButton()} {title}</DialogTitle>
 			{renderContent(content && !DialogTemplate)}
 			{renderTemplate(!!DialogTemplate)}
 			{renderActions(content && onCancel)}
