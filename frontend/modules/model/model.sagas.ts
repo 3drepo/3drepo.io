@@ -58,13 +58,12 @@ export function* updateSettings({ modelData: { teamspace, project, modelId }, se
 
 		yield API.editModelSettings(teamspace, modelId, modifiedSettings);
 
-		if (settings.name) {
-			yield put(
-				TeamspacesActions.updateModelSuccess(
-					teamspace, modelId, { project, model: modelId, name: settings.name }
-				)
-			);
-		}
+		yield put(
+			TeamspacesActions.updateModelSuccess(
+				teamspace, modelId, { project, model: modelId, name: modifiedSettings.name, code: modifiedSettings.code }
+			)
+		);
+
 		yield put(ModelActions.updateSettingsSuccess(settings));
 		yield put(SnackbarActions.show('Updated model settings'));
 	} catch (e) {

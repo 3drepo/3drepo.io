@@ -144,7 +144,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
 				<Container className={this.props.className} hidden={isFocusMode}>
 					<RevisionsSwitch />
-					<Toolbar {...this.urlParams.teamspace} />
+					<Toolbar {...this.urlParams} />
 					{this.renderLeftPanelsButtons()}
 					{this.renderLeftPanels(visiblePanels)}
 					{this.renderRightPanels(visiblePanels)}

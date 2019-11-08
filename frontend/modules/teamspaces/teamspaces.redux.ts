@@ -104,7 +104,7 @@ const getProject = (state, teamspaceName, projectName) => {
 
 // Models
 const updateModelSuccess = (state = INITIAL_STATE, { modelId, modelData }) => {
-	const model = { ...state.models[modelId], name: modelData.name };
+	const model = { ...state.models[modelId], name: modelData.name, code: modelData.code };
 	if (modelData.federate) {
 		model.subModels = modelData.subModels;
 		model.timestamp = modelData.timestamp;

@@ -27,7 +27,7 @@ export const VALIDATIONS_MESSAGES = {
 	NOT_ALPHANUMERIC: 'Must use alphanumeric characters',
 	DECIMAL: 'Must be a decimal number or integer',
 	INTEGER: 'Must be an integer',
-	USERNAME_CHARS: 'Must use only letters, numbers, hypens or underscores',
+	USERNAME_CHARS: 'Must use only letters, numbers or underscores',
 	NOT_NUMBER: 'Must be a number',
 	// tslint:disable-next-line: no-invalid-template-strings
 	MUST_BE_GREATER: 'Must be greater than or equal to ${min}',
@@ -71,7 +71,7 @@ export const schema = {
 		.matches(/^[A-Za-z0-9_]+$/, VALIDATIONS_MESSAGES.NOT_ALPHANUMERIC),
 
 	username: Yup.string()
-		.matches(/^[A-Za-z0-9_-]+$/, VALIDATIONS_MESSAGES.USERNAME_CHARS)
+		.matches(/^[a-zA-Z][\w]{1,63}$/, VALIDATIONS_MESSAGES.USERNAME_CHARS)
 		.required(VALIDATIONS_MESSAGES.REQUIRED),
 
 	required: Yup.string()
