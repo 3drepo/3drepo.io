@@ -29,7 +29,8 @@ export const { Types: BoardTypes, Creators: BoardActions } = createActions({
 	toggleSearchEnabled: [],
 	setFilters: ['filters'],
 	printItems: ['teamspace', 'modelId'],
-	downloadItems: ['teamspace', 'modelId']
+	downloadItems: ['teamspace', 'modelId'],
+	toggleClosedIssues: []
 }, { prefix: 'BOARD/' });
 
 export const INITIAL_STATE = {
@@ -38,7 +39,8 @@ export const INITIAL_STATE = {
 	filterProp: ISSUE_FILTER_PROPS.status.value,
 	lanes: [],
 	teamspace: null,
-	searchEnabled: false
+	searchEnabled: false,
+	showClosedIssues: false,
 };
 
 const setIsPending = (state = INITIAL_STATE, { isPending }) => {
@@ -61,10 +63,15 @@ const toggleSearchEnabled = (state = INITIAL_STATE) => {
 	return { ...state, searchEnabled: !state.searchEnabled };
 };
 
+const toggleClosedIssues = (state = INITIAL_STATE) => {
+	return { ...state, showClosedIssues: !state.showClosedIssues };
+};
+
 export const reducer = createReducer({...INITIAL_STATE}, {
 	[BoardTypes.SET_IS_PENDING]: setIsPending,
 	[BoardTypes.SET_FILTER_PROP]: setFilterProp,
 	[BoardTypes.SET_BOARD_TYPE]: setBoardType,
 	[BoardTypes.FETCH_DATA_SUCCESS]: fetchDataSuccess,
-	[BoardTypes.TOGGLE_SEARCH_ENABLED]: toggleSearchEnabled
+	[BoardTypes.TOGGLE_SEARCH_ENABLED]: toggleSearchEnabled,
+	[BoardTypes.TOGGLE_CLOSED_ISSUES]: toggleClosedIssues
 });

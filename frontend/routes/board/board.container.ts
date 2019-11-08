@@ -25,6 +25,7 @@ import {
 	selectIsPending,
 	selectLanes,
 	selectSearchEnabled,
+	selectShowClosedIssues,
 	BoardActions,
 } from '../../modules/board';
 import { DialogActions } from '../../modules/dialog';
@@ -58,7 +59,8 @@ const mapStateToProps = createStructuredSelector({
 	risksSortOrder: selectRisksSortOrder,
 	cards: selectCards,
 	projectsMap: selectProjects,
-	modelsMap: selectModels
+	modelsMap: selectModels,
+	showClosedIssues: selectShowClosedIssues
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -71,6 +73,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateIssue: IssuesActions.updateBoardIssue,
 	updateRisk: RisksActions.updateBoardRisk,
 	toggleSearchEnabled: BoardActions.toggleSearchEnabled,
+	toggleClosedIssues: BoardActions.toggleClosedIssues,
 	setFilters: BoardActions.setFilters,
 	printItems: BoardActions.printItems,
 	downloadItems: BoardActions.downloadItems,

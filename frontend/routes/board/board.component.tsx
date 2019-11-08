@@ -18,13 +18,14 @@
 import IconButton from '@material-ui/core/IconButton';
 import Add from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
+import Check from '@material-ui/icons/Check';
 import SearchIcon from '@material-ui/icons/Search';
 import { capitalize, get } from 'lodash';
 import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
 
-import { ISSUE_FILTERS } from '../../constants/issues';
+import { ISSUE_FILTERS, ISSUES_ACTIONS_MENU } from '../../constants/issues';
 import { RISK_FILTERS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
 import { filtersValuesMap as issuesFilters, getHeaderMenuItems as getIssueMenuItems } from '../../helpers/issues';
@@ -44,28 +45,25 @@ import { Panel } from '../components/panel/panel.component';
 import { FilterPanel } from '../components/filterPanel/filterPanel.component';
 import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
 import { ListNavigation } from '../viewerGui/components/listNavigation/listNavigation.component';
-import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
 import RiskDetails from '../viewerGui/components/risks/components/riskDetails/riskDetails.container';
 import { getProjectModels, getTeamspaceProjects } from './board.helpers';
 import {
 	AddButton,
 	BoardContainer,
 	BoardDialogTitle,
+	BoardItem,
 	Config,
 	ConfigSelect,
 	ConfigSelectItem,
 	Container,
 	DataConfig,
-	Filters,
-	FilterButton,
 	FormWrapper,
 	LoaderContainer,
 	NoDataMessage,
 	SelectContainer,
 	SelectLabel,
 	Title,
-	ViewConfig,
-	BoardItem
+	ViewConfig
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
 import { ConfigSelectComponent } from './components/configSelect.component';
@@ -107,6 +105,7 @@ interface IProps {
 	cards: ICard[];
 	projectsMap: any;
 	modelsMap: any;
+	showClosedIssues: boolean;
 	fetchData: (boardType, teamspace, project, modelId) => void;
 	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
 	resetCardData: () => void;
@@ -123,6 +122,7 @@ interface IProps {
 	downloadItems: (teamspace, model) => void;
 	toggleIssuesSortOrder: () => void;
 	toggleRisksSortOrder: () => void;
+	toggleClosedIssues: () => void;
 }
 
 const PANEL_PROPS = {
@@ -138,7 +138,16 @@ export function Board(props: IProps) {
 	const isIssuesBoard = type === 'issues';
 	const boardData = { lanes: props.lanes };
 	const selectedFilters = isIssuesBoard ? props.selectedIssueFilters : props.selectedRiskFilters;
-	const { printItems, downloadItems, importBCF, exportBCF, toggleIssuesSortOrder, toggleRisksSortOrder } = props;
+	const {
+		printItems,
+		downloadItems,
+		importBCF,
+		exportBCF,
+		toggleIssuesSortOrder,
+		toggleRisksSortOrder,
+		toggleClosedIssues,
+		showClosedIssues
+	} = props;
 
 	useEffect(() => {
 		if (type !== props.boardType) {
@@ -409,7 +418,17 @@ export function Board(props: IProps) {
 
 	const headerMenu = isIssuesBoard ?
 		getIssueMenuItems(
-			teamspace, modelId, null, printItems, downloadItems, importBCF, exportBCF, toggleIssuesSortOrder
+			teamspace,
+			modelId,
+			null,
+			printItems,
+			downloadItems,
+			importBCF,
+			exportBCF,
+			toggleIssuesSortOrder,
+			null, null,
+			toggleClosedIssues,
+			showClosedIssues
 		) :
 		getRisksMenuItems(
 			teamspace, modelId, printItems, downloadItems, toggleRisksSortOrder
@@ -419,10 +438,12 @@ export function Board(props: IProps) {
 
 	const renderSortIcon = (Icon) => {
 		if (sortOrder === 'asc') {
-			return <Icon.ASC IconProps={{ fontSize: 'small' }} /> ;
+			return <Icon.ASC IconProps={{ fontSize: 'small' }} />;
 		}
-		return <Icon.DESC IconProps={{ fontSize: 'small' }} /> ;
+		return <Icon.DESC IconProps={{ fontSize: 'small' }} />;
 	};
+
+	const renderCheckIcon = renderWhenTrue(() => <Check fontSize="small" />);
 
 	const renderActionsMenu = () => (
 		<MenuList>
@@ -434,6 +455,7 @@ export function Board(props: IProps) {
 						</IconWrapper>
 						<StyledItemText>
 							{label}
+							{renderCheckIcon(label === ISSUES_ACTIONS_MENU.SHOW_CLOSED_ISSUES.label && props.showClosedIssues)}
 						</StyledItemText>
 					</StyledListItem>
 				);

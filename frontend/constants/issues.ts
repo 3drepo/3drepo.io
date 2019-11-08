@@ -160,5 +160,9 @@ export const ISSUES_ACTIONS_MENU = {
 	SHOW_SUBMODEL_ISSUES: {
 		label: 'Show sub model issues',
 		Icon: ViewModule
+	},
+	SHOW_CLOSED_ISSUES: {
+		label: 'Show closed issues',
+		Icon: ViewModule
 	}
 };

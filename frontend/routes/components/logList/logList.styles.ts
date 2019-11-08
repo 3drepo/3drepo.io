@@ -22,6 +22,7 @@ export const Container = styled.div`
 	min-height: 55px;
 	position: relative;
 	background-color: ${COLOR.BLACK_6};
+	overflow: auto;
 
 	&:before {
 		position: absolute;

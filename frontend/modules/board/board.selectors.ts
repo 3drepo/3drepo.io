@@ -56,6 +56,10 @@ export const selectSearchEnabled = createSelector(
 	selectBoardDomain, (state) => state.searchEnabled
 );
 
+export const selectShowClosedIssues = createSelector(
+	selectBoardDomain, (state) => state.showClosedIssues
+);
+
 const getNextWeekTimestamp = memoize((nextWeekNumber = 1) => {
 	return dayjs().startOf('day').add(7 * nextWeekNumber, 'day').valueOf();
 });
@@ -87,15 +91,11 @@ export const selectLanes = createSelector(
 	selectJobs,
 	selectIssuesSortOrder,
 	selectRisksSortOrder,
-	({ filterProp, boardType }, issues, risks, topicTypes, jobs, issuesSortOrder, risksSortOrder) => {
+	selectShowClosedIssues,
+	({ filterProp, boardType }, issues, risks, topicTypes, jobs, issuesSortOrder, risksSortOrder, showClosedIssues) => {
 		const isIssueBoardType = boardType === 'issues';
 
-		const jobsValues = jobs.map((j) => {
-			return {
-				name: j._id,
-				value: j._id,
-			};
-		});
+		const jobsValues = jobs.map(({ _id }) => ({ name: _id, value: _id }));
 
 		const FILTER_PROPS = isIssueBoardType ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS;
 
@@ -151,8 +151,14 @@ export const selectLanes = createSelector(
 		const filtersMap = isIssueBoardType ? issueFiltersMap : riskFiltersMap;
 
 		const lanes = [];
+
+		const activeIssues = issues.filter(({ status }) => {
+			const activeGroupingByStatus = filterProp === ISSUE_FILTER_PROPS.status.value;
+			return showClosedIssues || activeGroupingByStatus || status !== STATUSES.CLOSED;
+		});
+
 		const dataMap = {
-			[BOARD_TYPES.ISSUES]: sortByDate(issues, { order: issuesSortOrder }),
+			[BOARD_TYPES.ISSUES]: sortByDate(activeIssues, { order: issuesSortOrder }),
 			[BOARD_TYPES.RISKS]: sortByDate(risks, { order: risksSortOrder })
 		};
 

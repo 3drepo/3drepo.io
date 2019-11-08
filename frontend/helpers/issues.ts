@@ -177,7 +177,9 @@ export const getHeaderMenuItems = (
 	exportBCF,
 	toggleSortOrder,
 	toggleShowPins?,
-	showPins?
+	showPins?,
+	toggleClosedIssues?,
+	showClosedIssues?,
 ) => {
 	const items = [
 		{
@@ -204,13 +206,23 @@ export const getHeaderMenuItems = (
 		}
 	];
 
-	const togglePinItem = {
-		...ISSUES_ACTIONS_MENU.SHOW_PINS,
-		enabled: showPins,
-		onClick: () => toggleShowPins(!showPins)
-	};
+	const extraItems = [];
 
-	const menuItems = showPins ? [...items, {...togglePinItem}] : [...items];
+	if (showPins) {
+		extraItems.push({
+			...ISSUES_ACTIONS_MENU.SHOW_PINS,
+			enabled: showPins,
+			onClick: () => toggleShowPins(!showPins)
+		});
+	}
 
-	return menuItems;
+	if (toggleClosedIssues) {
+		extraItems.push({
+			...ISSUES_ACTIONS_MENU.SHOW_CLOSED_ISSUES,
+			enabled: showClosedIssues,
+			onClick: toggleClosedIssues
+		});
+	}
+
+	return [...items, ...extraItems];
 };
