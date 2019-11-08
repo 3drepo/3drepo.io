@@ -78,6 +78,11 @@ export const RISK_FILTER_PROPS = {
 	creator_role: {
 		value: 'creator_role',
 		name: 'Created By'
+	},
+	owner: {
+		value: 'owner',
+		name: 'Owner',
+		notDefinedLabel: 'No owner'
 	}
 };
 

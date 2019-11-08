@@ -19,7 +19,7 @@ import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import { groupBy, memoize, startCase, values } from 'lodash';
+import { capitalize, groupBy, memoize, sortBy, startCase, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { PRIORITIES, STATUSES } from '../../constants/issues';
 import { LEVELS_LIST, RISK_CATEGORIES, RISK_MITIGATION_STATUSES } from '../../constants/risks';
@@ -28,6 +28,7 @@ import { selectAllFilteredIssues, selectSortOrder as selectIssuesSortOrder } fro
 import { selectJobs } from '../jobs';
 import { selectTopicTypes } from '../model';
 import { selectAllFilteredRisks, selectSortOrder as selectRisksSortOrder } from '../risks';
+import { selectUsers } from '../userManagement';
 import { BOARD_TYPES, ISSUE_FILTER_PROPS, NOT_DEFINED_PROP, RISK_FILTER_PROPS } from './board.constants';
 
 dayjs.extend(isSameOrBefore);
@@ -83,19 +84,49 @@ const getProp = (item, prop) => {
 	return item[prop];
 };
 
-export const selectLanes = createSelector(
+const selectUsersValues = createSelector(
+	selectUsers, (users) => {
+	const usersValues = users.map((u) => ({
+		value: u.user,
+		name: `${capitalize(u.firstName)} ${capitalize(u.lastName)}`
+	}));
+	return sortBy(usersValues, 'name');
+});
+
+const selectJobsValues = createSelector(
+	selectJobs, (jobs) => {
+	return jobs.map(({ _id }) => ({ name: _id, value: _id }));
+});
+
+const selectRawCardData = createSelector(
 	selectBoardDomain,
 	selectAllFilteredIssues,
 	selectAllFilteredRisks,
-	selectTopicTypes,
-	selectJobs,
+	selectShowClosedIssues,
 	selectIssuesSortOrder,
 	selectRisksSortOrder,
-	selectShowClosedIssues,
-	({ filterProp, boardType }, issues, risks, topicTypes, jobs, issuesSortOrder, risksSortOrder, showClosedIssues) => {
-		const isIssueBoardType = boardType === 'issues';
+	({ filterProp }, issues, risks, showClosedIssues, issuesSortOrder, risksSortOrder) => {
+		const activeIssues = issues.filter(({ status }) => {
+			const activeGroupingByStatus = filterProp === ISSUE_FILTER_PROPS.status.value;
+			return showClosedIssues || activeGroupingByStatus || status !== STATUSES.CLOSED;
+		});
 
-		const jobsValues = jobs.map(({ _id }) => ({ name: _id, value: _id }));
+		return {
+			[BOARD_TYPES.ISSUES]: sortByDate(activeIssues, { order: issuesSortOrder }),
+			[BOARD_TYPES.RISKS]: sortByDate(risks, { order: risksSortOrder })
+		};
+});
+
+export const selectLanes = createSelector(
+	selectBoardDomain,
+	selectRawCardData,
+	selectTopicTypes,
+	selectJobsValues,
+	selectUsersValues,
+	selectIssuesSortOrder,
+	selectRisksSortOrder,
+	({ filterProp, boardType }, rawCardData, topicTypes, jobsValues, usersValues) => {
+		const isIssueBoardType = boardType === 'issues';
 
 		const FILTER_PROPS = isIssueBoardType ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS;
 
@@ -145,24 +176,15 @@ export const selectLanes = createSelector(
 			[RISK_FILTER_PROPS.residual_level_of_risk.value]: LEVELS_LIST,
 			[RISK_FILTER_PROPS.category.value]: RISK_CATEGORIES,
 			[RISK_FILTER_PROPS.mitigation_status.value]: RISK_MITIGATION_STATUSES,
-			[ISSUE_FILTER_PROPS.creator_role.value]: jobsValues,
+			[RISK_FILTER_PROPS.creator_role.value]: jobsValues,
+			[RISK_FILTER_PROPS.owner.value]: usersValues,
 		};
 
 		const filtersMap = isIssueBoardType ? issueFiltersMap : riskFiltersMap;
 
 		const lanes = [];
 
-		const activeIssues = issues.filter(({ status }) => {
-			const activeGroupingByStatus = filterProp === ISSUE_FILTER_PROPS.status.value;
-			return showClosedIssues || activeGroupingByStatus || status !== STATUSES.CLOSED;
-		});
-
-		const dataMap = {
-			[BOARD_TYPES.ISSUES]: sortByDate(activeIssues, { order: issuesSortOrder }),
-			[BOARD_TYPES.RISKS]: sortByDate(risks, { order: risksSortOrder })
-		};
-
-		const preparedData = dataMap[boardType].map((item) => {
+		const preparedData = rawCardData[boardType].map((item) => {
 			const isDefined = Boolean(item[filterProp] && ((typeof item[filterProp] === 'string' && item[filterProp]) ||
 				(typeof item[filterProp] !== 'string' && item[filterProp].length))) || typeof item[filterProp] === 'number';
 

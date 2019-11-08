@@ -69,6 +69,7 @@ export const BoardContainer = styled.div`
 			}
 			> span:nth-child(2) {
 				font-size: 12px;
+				line-height: 1;
 			}
 		}
 	}
