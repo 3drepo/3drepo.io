@@ -41,6 +41,7 @@ import {
 	selectSortOrder as selectRisksSortOrder,
 	RisksActions
 } from '../../modules/risks';
+import { SnackbarActions } from '../../modules/snackbar';
 import { selectModels, selectProjects, selectTeamspacesList } from '../../modules/teamspaces';
 import { Board } from './board.component';
 
@@ -80,7 +81,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	importBCF: IssuesActions.importBcf,
 	exportBCF: IssuesActions.exportBcf,
 	toggleIssuesSortOrder: IssuesActions.toggleSortOrder,
-	toggleRisksSortOrder: RisksActions.toggleSortOrder
+	toggleRisksSortOrder: RisksActions.toggleSortOrder,
+	showSnackbar: SnackbarActions.show,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Board);

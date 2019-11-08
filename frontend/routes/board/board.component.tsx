@@ -122,6 +122,7 @@ interface IProps {
 	toggleIssuesSortOrder: () => void;
 	toggleRisksSortOrder: () => void;
 	toggleClosedIssues: () => void;
+	showSnackbar: (text) => void;
 }
 
 const PANEL_PROPS = {
@@ -278,6 +279,13 @@ export function Board(props: IProps) {
 		}
 	};
 
+	const handleCardDrop = () => {
+		if (!isDraggable) {
+			props.showSnackbar('Insufficient permissions to perform this action');
+		}
+		return isDraggable;
+	};
+
 	const handleSearchClose = () => {
 		props.toggleSearchEnabled();
 		props.setFilters([]);
@@ -402,10 +410,11 @@ export function Board(props: IProps) {
 			<TrelloBoard
 				data={boardData}
 				hideCardDeleteIcon
+				handleDragEnd={handleCardDrop}
 				onCardClick={handleOpenDialog}
 				onCardMoveAcrossLanes={handleCardMove}
 				components={components}
-				cardDraggable={isDraggable}
+				cardDraggable
 			/>
 		</BoardContainer>
 	));
