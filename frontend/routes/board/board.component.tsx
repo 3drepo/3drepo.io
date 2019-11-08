@@ -262,6 +262,10 @@ export function Board(props: IProps) {
 	};
 
 	const handleCardMove = (fromLaneId, toLaneId, cardId) => {
+		if (fromLaneId === toLaneId) {
+			return;
+		}
+
 		const updatedProps = {
 			[props.filterProp]: props.filterProp === ISSUE_FILTER_PROPS.assigned_roles.value ? [toLaneId] : toLaneId
 		};
