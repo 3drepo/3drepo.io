@@ -16,15 +16,14 @@
  */
 
 import { TextField } from '@material-ui/core';
-import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import * as Yup from 'yup';
 
-import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
+import OpenInViewerButton from '../../../components/openInViewerButton/openInViewerButton.container';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
@@ -34,7 +33,6 @@ import {
 	Container,
 	Details,
 	NotCollapsableContent,
-	ShowModelButtonContainer,
 	StyledForm,
 	Summary,
 	ToggleButton,
@@ -46,6 +44,8 @@ import {
 interface IProps {
 	className?: string;
 	roleColor: string;
+	type?: string;
+	id?: string;
 	name: string;
 	number: number;
 	owner: string;
@@ -188,20 +188,17 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public handleGoToModel = () => {
+	public renderViewModel = renderWhenTrue(() => {
+		const { type, id } = this.props;
 		const { teamspace, modelId } = this.props.urlParams;
-		this.props.history.push(`${ROUTES.VIEWER}/${teamspace}/${modelId}`);
-	}
-
-	public renderViewModel = renderWhenTrue(() => (
-		<ShowModelButtonContainer>
-			<TooltipButton
-				Icon={OpenInBrowser}
-				label="View model"
-				action={this.handleGoToModel}
+		return (
+			<OpenInViewerButton
+				teamspace={teamspace}
+				model={modelId}
+				query={`${type}Id=${id}`}
 			/>
-		</ShowModelButtonContainer>
-	));
+		);
+	});
 
 	public render() {
 		const {

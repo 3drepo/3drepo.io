@@ -191,7 +191,14 @@ export const selectLanes = createSelector(
 			return {
 				id: item._id,
 				[filterProp]: isDefined ? getProp(item, filterProp) : FILTER_PROPS[filterProp].notDefinedLabel || NOT_DEFINED_PROP,
-				metadata: { ...item },
+				metadata: {
+					...item,
+					id: item._id,
+					teamspace: item.account,
+					model: item.model,
+					type: boardType,
+					showModelButton: true
+				},
 				prop: filterProp
 			};
 		});

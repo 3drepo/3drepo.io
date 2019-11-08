@@ -22,6 +22,7 @@ import ArrowIcon from '@material-ui/icons/ArrowForward';
 import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../styles/colors';
+import OpenInViewerButtonComponent from '../../../components/openInViewerButton/openInViewerButton.container';
 
 export const MenuItemContainer = styled(MenuItem)`
 	position: relative;
@@ -136,4 +137,11 @@ export const Actions = styled.div`
 	top: 0;
 	display: flex;
 	align-items: center;
+`;
+
+export const OpenInViewerButton = styled(OpenInViewerButtonComponent)`
+	&& {
+		top: -6px;
+		right: -3px;
+	}
 `;

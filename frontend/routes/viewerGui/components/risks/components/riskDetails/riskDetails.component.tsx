@@ -119,6 +119,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 			<PreviewWrapper>
 				<PreviewDetails
 					{...this.riskData}
+					id={this.riskData._id}
+					type="risk"
 					key={this.riskData._id}
 					defaultExpanded={horizontal || expandDetails}
 					editable={!this.riskData._id}

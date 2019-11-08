@@ -30,6 +30,7 @@ import {
 	Description,
 	MenuItemContainer,
 	Name,
+	OpenInViewerButton,
 	RoleIndicator,
 	StyledArrowIcon,
 	Thumbnail,
@@ -40,6 +41,10 @@ import {
 interface IProps {
 	className?: string;
 	name: string;
+	type?: string;
+	id?: string;
+	teamspace?: string;
+	model?: string;
 	desc?: string;
 	owner?: string;
 	created?: number;
@@ -56,6 +61,7 @@ interface IProps {
 	willBeRemoved?: boolean;
 	panelName?: string;
 	extraInfo?: string;
+	showModelButton?: boolean;
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
 	renderActions?: () => JSX.Element[];
@@ -98,6 +104,17 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 		<ActionMessage content={`This ${this.props.panelName || 'item'} has been deleted`} />
 	);
 
+	public renderViewModel = renderWhenTrue(() => {
+		const { type, id, teamspace, model } = this.props;
+		return (
+			<OpenInViewerButton
+				teamspace={teamspace}
+				model={model}
+				query={`${type === 'issues' ? 'issueId' : 'riskId'}=${id}`}
+			/>
+		);
+	});
+
 	public render() {
 		const {
 			roleColor,
@@ -114,7 +131,8 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 			className,
 			renderActions,
 			willBeRemoved,
-			willBeClosed
+			willBeClosed,
+			showModelButton
 		} = this.props;
 
 		const shouldRenderActions = renderActions && active;
@@ -136,6 +154,7 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 					<Content>
 						{this.renderNameWithCounter(number)}
 						{this.renderName(!(number))}
+						{this.renderViewModel(showModelButton)}
 
 						<PreviewItemInfo
 							author={owner}

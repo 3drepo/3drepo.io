@@ -22,7 +22,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
 import SearchIcon from '@material-ui/icons/Search';
 import { capitalize, get } from 'lodash';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, memo } from 'react';
 import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
 
@@ -130,6 +130,14 @@ const PANEL_PROPS = {
 		height: '100%'
 	}
 };
+
+const BoardCard = memo(({ metadata, onClick }: any) => (
+	<BoardItem
+		key={metadata.id}
+		{...metadata}
+		onItemClick={onClick}
+	/>
+));
 
 export function Board(props: IProps) {
 	const { type, teamspace, project, modelId } = useParams();
@@ -297,7 +305,7 @@ export function Board(props: IProps) {
 			<CellSelect
 				placeholder="Select teamspace"
 				items={teamspacesItems}
-				value={!props.isPending ? teamspace : ''}
+				value={teamspacesItems.length ? teamspace : ''}
 				onChange={handleTeamspaceChange}
 				disabled={!teamspacesItems.length}
 				disabledPlaceholder
@@ -314,7 +322,7 @@ export function Board(props: IProps) {
 				<CellSelect
 					placeholder="Select project"
 					items={projects}
-					value={!props.isPending ? project : ''}
+					value={projects.length ? project : ''}
 					onChange={handleProjectChange}
 					disabled={!projects.length}
 					disabledPlaceholder
@@ -332,7 +340,7 @@ export function Board(props: IProps) {
 				<CellSelect
 					placeholder="Select model"
 					items={models}
-					value={!props.isPending ? modelId : ''}
+					value={models.length ? modelId : ''}
 					onChange={handleModelChange}
 					disabled={!models.length}
 					disabledPlaceholder
@@ -359,7 +367,6 @@ export function Board(props: IProps) {
 	const renderFilters = () => {
 		return (
 			<>
-
 				<SelectContainer>
 					<FormControl>
 						<InputLabel shrink htmlFor="type-select">Show</InputLabel>
@@ -389,15 +396,6 @@ export function Board(props: IProps) {
 					</FormControl>
 				</SelectContainer>
 			</>
-		);
-	};
-
-	const BoardCard = ({ metadata, onClick }: any) => {
-		return (
-			<BoardItem
-				{...metadata}
-				onItemClick={onClick}
-			/>
 		);
 	};
 

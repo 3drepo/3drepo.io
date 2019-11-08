@@ -123,6 +123,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			<PreviewWrapper>
 				<PreviewDetails
 					{...this.issueData}
+					id={this.issueData._id}
+					type="issue"
 					key={this.issueData._id}
 					defaultExpanded={horizontal || expandDetails}
 					editable={!this.issueData._id}
