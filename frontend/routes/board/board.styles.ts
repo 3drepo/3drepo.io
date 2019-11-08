@@ -61,6 +61,15 @@ export const BoardContainer = styled.div`
 
 		header {
 			color: ${COLOR.BLACK_70};
+			display: flex;
+			align-items: center;
+
+			> span:nth-child(1) {
+				font-size: 14px;
+			}
+			> span:nth-child(2) {
+				font-size: 12px;
+			}
 		}
 	}
 `;
