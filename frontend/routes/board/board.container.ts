@@ -83,6 +83,10 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	toggleIssuesSortOrder: IssuesActions.toggleSortOrder,
 	toggleRisksSortOrder: RisksActions.toggleSortOrder,
 	showSnackbar: SnackbarActions.show,
+	subscribeOnIssueChanges: IssuesActions.subscribeOnIssueChanges,
+	unsubscribeOnIssueChanges: IssuesActions.unsubscribeOnIssueChanges,
+	subscribeOnRiskChanges: RisksActions.subscribeOnRiskChanges,
+	unsubscribeOnRiskChanges: RisksActions.unsubscribeOnRiskChanges,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Board);

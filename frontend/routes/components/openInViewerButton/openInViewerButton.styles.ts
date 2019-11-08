@@ -22,9 +22,9 @@ export const Container = styled.div``;
 export const ShowModelButtonContainer = styled.div`
 	&& {
 		position: absolute;
-    z-index: 10;
-    top: 3px;
-    right: 3px;
+		z-index: 10;
+		top: 3px;
+		right: 3px;
 		padding: 0 !important;
 	}
 `;

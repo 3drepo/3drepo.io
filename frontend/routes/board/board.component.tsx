@@ -123,6 +123,10 @@ interface IProps {
 	toggleRisksSortOrder: () => void;
 	toggleClosedIssues: () => void;
 	showSnackbar: (text) => void;
+	subscribeOnIssueChanges: (teamspace, modelId) => void;
+	unsubscribeOnIssueChanges: (teamspace, modelId) => void;
+	subscribeOnRiskChanges: (teamspace, modelId) => void;
+	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
 }
 
 const PANEL_PROPS = {
@@ -164,11 +168,18 @@ export function Board(props: IProps) {
 
 		if (!isIssuesBoard) {
 			props.setFilterProp(RISK_FILTER_PROPS.level_of_risk.value);
+			props.subscribeOnRiskChanges(teamspace, modelId);
 		} else {
+			props.subscribeOnIssueChanges(teamspace, modelId);
 			props.setFilterProp(ISSUE_FILTER_PROPS.status.value);
 		}
 
 		return () => {
+			if (!isIssuesBoard) {
+				props.unsubscribeOnRiskChanges(teamspace, modelId);
+			} else {
+				props.unsubscribeOnIssueChanges(teamspace, modelId);
+			}
 			props.setFilters([]);
 		};
 	}, [type]);
