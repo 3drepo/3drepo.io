@@ -34,7 +34,7 @@ const ProjectSchema = Yup.object().shape({
 	name: Yup.string()
 		.required()
 		.max(120, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
-		.matches(/^[^/?=#+]{0,119}[^/?=#+ ]{1}$/, 'Name should not contain special characters: "/", "?", "=", "#", "+".'),
+		.matches(/^[^/?=#+]{0,119}[^/?=#+]{1}$/, 'Name should not contain special characters: "/", "?", "=", "#", "+".'),
 	teamspace: Yup.string().required()
 });
 
@@ -70,7 +70,7 @@ export class ProjectDialog extends React.PureComponent<IProps, any> {
 
 	public handleProjectSave = ({ teamspace, name }) => {
 		const { createProject, updateProject, handleClose } = this.props;
-		const updatedProject = { ...this.data, name };
+		const updatedProject = { ...this.data, name: name.trim() };
 
 		if (this.isNewProject) {
 			createProject(teamspace, updatedProject);
