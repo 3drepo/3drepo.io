@@ -38,7 +38,7 @@ export const Canvas = styled.canvas`
 `;
 
 export const BackgroundImage = styled.img`
-	width: 100%;
+	height: 100%;
 	text-align: center;
 	margin: auto;
 	padding: 0;
