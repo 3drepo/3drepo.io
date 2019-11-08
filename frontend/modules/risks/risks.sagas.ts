@@ -24,6 +24,8 @@ import { CHAT_CHANNELS } from '../../constants/chat';
 import { RISK_LEVELS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
 import { prepareComment, prepareComments } from '../../helpers/comments';
+
+import { prepareResources } from '../../helpers/resources';
 import { prepareRisk } from '../../helpers/risks';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 import * as API from '../../services/api';
@@ -68,6 +70,7 @@ function* fetchRisk({teamspace, modelId, riskId}) {
 	try {
 		const {data} = yield API.getRisk(teamspace, modelId, riskId);
 		data.comments = yield prepareComments(data.comments);
+		data.resources = prepareResources(teamspace, modelId, data.resources);
 		yield put(RisksActions.fetchRiskSuccess(data));
 	} catch (error) {
 		yield put(RisksActions.fetchRiskFailure());

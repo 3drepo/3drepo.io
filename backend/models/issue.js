@@ -580,10 +580,7 @@ issue.getThumbnail = function(dbCol, uid) {
 	});
 };
 
-issue.findByUID = async function(account, model, issueId) {
-	const foundIssue = await ticket.findByUID(account, model, issueId);
-	return ticket.clean(account, model, foundIssue);
-};
+issue.findByUID = ticket.findCleanedByUID.bind(ticket);
 
 issue.isIssueBeingClosed = function(oldIssue, newIssue) {
 	return !!oldIssue && oldIssue.status !== "closed" && newIssue.status === "closed";

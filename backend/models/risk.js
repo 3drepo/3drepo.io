@@ -568,27 +568,7 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 	});
 };
 
-risk.findByUID = function(dbCol, uid, projection, noClean = false) {
-
-	if ("[object String]" === Object.prototype.toString.call(uid)) {
-		uid = utils.stringToUUID(uid);
-	}
-
-	return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
-		return _dbCol.findOne({ _id: uid }, projection).then((foundRisk) => {
-
-			if (!foundRisk) {
-				return Promise.reject(responseCodes.RISK_NOT_FOUND);
-			}
-
-			if (!noClean) {
-				foundRisk = clean(dbCol, foundRisk);
-			}
-
-			return foundRisk;
-		});
-	});
-};
+risk.findByUID = ticket.findCleanedByUID.bind(ticket);
 
 risk.getScreenshot = function(dbCol, uid, vid) {
 
@@ -600,7 +580,7 @@ risk.getScreenshot = function(dbCol, uid, vid) {
 		vid = utils.stringToUUID(vid);
 	}
 
-	return this.findByUID(dbCol, uid, { viewpoints: { $elemMatch: { guid: vid } },
+	return ticket.findByUID(dbCol, uid, { viewpoints: { $elemMatch: { guid: vid } },
 		"viewpoints.screenshot.resizedContent": 0
 	}, true).then((foundRisk) => {
 		if (!_.get(foundRisk, "viewpoints[0].screenshot.content.buffer")) {
@@ -621,7 +601,7 @@ risk.getSmallScreenshot = function(dbCol, uid, vid) {
 		vid = utils.stringToUUID(vid);
 	}
 
-	return this.findByUID(dbCol, uid, { viewpoints: { $elemMatch: { guid: vid } } }, true)
+	return ticket.findByUID(dbCol, uid, { viewpoints: { $elemMatch: { guid: vid } } }, true)
 		.then((foundRisk) => {
 			if (_.get(foundRisk, "viewpoints[0].screenshot.resizedContent.buffer")) {
 				return foundRisk.viewpoints[0].screenshot.resizedContent.buffer;
@@ -658,7 +638,7 @@ risk.getThumbnail = function(dbCol, uid) {
 		uid = utils.stringToUUID(uid);
 	}
 
-	return this.findByUID(dbCol, uid, { thumbnail: 1 }, true).then((foundRisk) => {
+	return ticket.findByUID(dbCol, uid, { thumbnail: 1 }, true).then((foundRisk) => {
 		if (!_.get(foundRisk, "thumbnail.content.buffer")) {
 			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 		} else {

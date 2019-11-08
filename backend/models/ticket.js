@@ -148,6 +148,11 @@ class Ticket {
 		return foundTicket;
 	}
 
+	async findCleanedByUID(account, model, uid, projection) {
+		const ticket =  await this.findByUID(account, model, uid, projection);
+		return this.clean(account, model, ticket);
+	}
+
 	createSystemComment(account, model, sessionId, ticketId, owner, property, oldValue, newValue) {
 		const systemComment = Comment.newSystemComment(
 			owner,
@@ -260,6 +265,23 @@ class Ticket {
 
 		return {oldTicket, updatedTicket, data};
 	}
+
+	// missing:
+	/*
+
+setGroupTicketId
+createTicket
+onBeforeUpdate
+getReport
+getList
+findByModelName
+getScreenshot
+getSmallScreenshot
+getThumbnail
+
+practically all of resources stuff
+
+	*/
 }
 
 module.exports = Ticket;

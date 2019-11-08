@@ -37,6 +37,7 @@ import { Image } from '../../../../../components/image';
 import { TextField } from '../../../../../components/textField/textField.component';
 import PinButton from '../../../pinButton/pinButton.container';
 import { Container, DescriptionImage, FieldsContainer, FieldsRow, StyledFormControl } from './riskDetails.styles';
+import { Resources } from '../../../../../components/resources/resources.component';
 
 interface IProps {
 	risk: any;
@@ -235,6 +236,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					</DescriptionImage>
 				)}
 
+
 				<FieldsRow container alignItems="center" justify="space-between">
 					<FieldsContainer>
 						<StyledFormControl>
@@ -277,6 +279,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						</StyledFormControl>
 						{this.renderPinButton(!this.props.hidePin)}
 					</FieldsContainer>
+
 				</FieldsRow>
 
 				<Container>
@@ -365,6 +368,14 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						/>
 					)} />
 				</Container>
+				{!this.isNewRisk &&
+					<Resources showDialog={() => {}}
+						resources={[]}
+						onSaveFiles={() => {}}
+						onSaveLinks={() => {}}
+						onRemoveResource={() => {}}
+						canEdit={canEditBasicProperty}
+					/>}
 			</Form>
 		);
 	}
