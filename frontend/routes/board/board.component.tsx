@@ -22,7 +22,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
 import SearchIcon from '@material-ui/icons/Search';
 import { capitalize, get } from 'lodash';
-import React, { useCallback, useEffect, useMemo, memo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
 
