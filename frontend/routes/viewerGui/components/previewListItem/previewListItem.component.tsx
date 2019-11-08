@@ -16,12 +16,12 @@
  */
 
 import React from 'react';
-import Truncate from 'react-truncate';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
+import { Truncate } from '../../../components/truncate/truncate.component';
 import {
 	Actions,
 	ArrowButton,
@@ -75,8 +75,8 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 	));
 
 	public renderNameWithCounter = renderWhenTrue(() =>
-		<Name>{`${this.props.number} ${this.props.name}`}</Name>);
-	public renderName = renderWhenTrue(() => <Name>{this.props.name}</Name>);
+		<Name as="div"><Truncate lines={1}>{`${this.props.number} ${this.props.name}`}</Truncate></Name>);
+	public renderName = renderWhenTrue(() => <Name as="div"><Truncate lines={1}>{this.props.name}</Truncate></Name>);
 	public renderClosedMessage = renderWhenTrue(() => <ActionMessage content="This issue is now closed" />);
 
 	public renderThumbnail = renderWhenTrue(() => (

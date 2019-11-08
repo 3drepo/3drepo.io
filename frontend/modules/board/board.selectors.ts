@@ -74,7 +74,7 @@ const getProp = (item, prop) => {
 		if (dueDate.isBetween(firstWeekDate, secondWeekDate, 'day', '[)')) {
 			return secondWeekDate;
 		}
-		return getNextWeekTimestamp(3);;
+		return getNextWeekTimestamp(3);
 	}
 	return item[prop];
 };
@@ -100,8 +100,8 @@ export const selectLanes = createSelector(
 		const FILTER_PROPS = isIssueBoardType ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS;
 
 		const datesValues = [{
-			name: FILTER_PROPS.due_date.notDefinedLabel,
-			value: FILTER_PROPS.due_date.notDefinedLabel
+			name: ISSUE_FILTER_PROPS.due_date.notDefinedLabel,
+			value: ISSUE_FILTER_PROPS.due_date.notDefinedLabel
 		}, {
 			name: 'Overdue',
 			value: 'overdue'
