@@ -17,7 +17,6 @@
 "use strict";
 
 const utils = require("../utils");
-const nodeuuid = require("uuid/v1");
 const responseCodes = require("../response_codes.js");
 const db = require("../handler/db");
 
@@ -75,7 +74,7 @@ const ownerPrivilegeAttributes = [
 	"priority"
 ];
 
-const ticket =  new Ticket("issues", "ISSUE", fieldTypes,ownerPrivilegeAttributes);
+const ticket =  new Ticket("issues", "issue_id", "ISSUE", fieldTypes,ownerPrivilegeAttributes);
 
 const statusEnum = {
 	"OPEN": C.ISSUE_STATUS_OPEN,
@@ -143,142 +142,23 @@ issue.setGroupIssueId = function(dbCol, data, issueId) {
 	return Promise.all(groupUpdatePromises);
 };
 
-issue.createIssue = function(dbCol, newIssue) {
-	const sessionId = newIssue.sessionId;
-	const attributeBlacklist = [
-		"viewpoint"
-	];
-	const issueAttributes = Object.keys(fieldTypes).filter(attr => !attributeBlacklist.includes(attr));
-	const issueAttrPromises = [];
-
-	let branch;
-
-	if (!newIssue.name) {
-		return Promise.reject({ resCode: responseCodes.ISSUE_NO_NAME });
+issue.createIssue = async function(account, model, newIssue, sessionId) {
+	// Sets the issue number
+	const coll = await db.getCollection(account, model + ".issues");
+	try {
+		const issues = await coll.find({}, {number: 1}).sort({ number: -1 }).limit(1).toArray();
+		newIssue.number = (issues.length > 0) ? issues[0].number + 1 : 1;
+	} catch(e) {
+		newIssue.number = 1;
 	}
 
-	newIssue._id = utils.stringToUUID(newIssue._id ? newIssue._id : nodeuuid());
-	newIssue.created = parseInt(newIssue.created ? newIssue.created : (new Date()).getTime());
+	newIssue =  await ticket.create(account, model, newIssue);
 
-	// Assign issue number
-	issueAttrPromises.push(
-		db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
-
-			_dbCol.find({}, {number: 1}).sort({ number: -1 }).limit(1).toArray().then((res) => {
-				newIssue.number = (res.length > 0) ? res[0].number + 1 : 1;
-			});
-		}).catch(() => {
-			newIssue.number = 1;
-		})
-	);
-
-	if (!newIssue.desc || newIssue.desc === "") {
-		newIssue.desc = "(No Description)";
+	if (sessionId) {
+		ChatEvent.newIssues(sessionId, account, model, [newIssue]);
 	}
 
-	if (!newIssue.revId) {
-		branch = "master";
-	}
-
-	if(!newIssue.assigned_roles) {
-		newIssue.assigned_roles = [];
-	}
-
-	// Assign rev_id for issue
-	issueAttrPromises.push(
-		History.getHistory(dbCol, branch, newIssue.revId, { _id: 1 }).then((history) => {
-			if (!history && newIssue.revId) {
-				return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
-			} else if (history) {
-				newIssue.rev_id = history._id;
-			}
-		})
-	);
-
-	return Promise.all(issueAttrPromises).then(() => {
-
-		if (newIssue.viewpoint) {
-			newIssue.viewpoint.guid = utils.generateUUID();
-
-			if (newIssue.viewpoint.highlighted_group_id) {
-				newIssue.viewpoint.highlighted_group_id = utils.stringToUUID(newIssue.viewpoint.highlighted_group_id);
-			}
-
-			if (newIssue.viewpoint.hidden_group_id) {
-				newIssue.viewpoint.hidden_group_id = utils.stringToUUID(newIssue.viewpoint.hidden_group_id);
-			}
-
-			if (newIssue.viewpoint.shown_group_id) {
-				newIssue.viewpoint.shown_group_id = utils.stringToUUID(newIssue.viewpoint.shown_group_id);
-			}
-
-			if (newIssue.viewpoint.screenshot) {
-				newIssue.viewpoint.screenshot = {
-					content: new Buffer.from(newIssue.viewpoint.screenshot, "base64"),
-					flag: 1
-				};
-
-				return utils.resizeAndCropScreenshot(newIssue.viewpoint.screenshot.content, 120, 120, true).catch((err) => {
-					systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-						account: dbCol.account,
-						model: dbCol.model,
-						issueId: utils.uuidToString(newIssue._id),
-						viewpointId: utils.uuidToString(newIssue.viewpoint.guid),
-						err
-					});
-				});
-			}
-		}
-
-	}).then((image) => {
-		if (image) {
-			newIssue.thumbnail = {
-				flag: 1,
-				content: image
-			};
-		}
-
-		return this.setGroupIssueId(dbCol, newIssue, newIssue._id);
-	}).then(() => {
-		newIssue.viewpoints = newIssue.viewpoints ? newIssue.viewpoints : [newIssue.viewpoint];
-
-		let typeCorrect = true;
-		Object.keys(newIssue).forEach((key) => {
-			if (issueAttributes.includes(key)) {
-				if (fieldTypes[key] && newIssue[key] && Object.prototype.toString.call(newIssue[key]) !== fieldTypes[key]) {
-					systemLogger.error(`Type check failed: ${key} is expected to be type ${fieldTypes[key]} but it is `, Object.prototype.toString.call(newIssue[key]));
-					typeCorrect = false;
-				}
-			} else {
-				delete newIssue[key];
-			}
-		});
-
-		if (typeCorrect) {
-			return ModelSetting.findById(dbCol, dbCol.model).then((settings) => {
-				return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
-					return _dbCol.insert(newIssue).then(() => {
-						if (!newIssue.typePrefix) {
-							newIssue.typePrefix = (settings.type) ? settings.type : "";
-						}
-
-						if (!newIssue.modelCode) {
-							// FIXME: I don't understand why we write model code into issues - CF
-							newIssue.modelCode = (settings.properties && settings.properties.code) ?
-								settings.properties.code : "";
-						}
-
-						newIssue = ticket.clean(dbCol.account, dbCol.model, newIssue);
-						ChatEvent.newIssues(sessionId, dbCol.account, dbCol.model, [newIssue]);
-
-						return Promise.resolve(newIssue);
-					});
-				});
-			});
-		} else {
-			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
-		}
-	});
+	return newIssue;
 };
 
 issue.updateFromBCF = function(dbCol, issueToUpdate, changeSet) {
@@ -580,7 +460,7 @@ issue.getThumbnail = function(dbCol, uid) {
 	});
 };
 
-issue.findByUID = ticket.findCleanedByUID.bind(ticket);
+issue.findByUID = ticket.findByUID.bind(ticket);
 
 issue.isIssueBeingClosed = function(oldIssue, newIssue) {
 	return !!oldIssue && oldIssue.status !== "closed" && newIssue.status === "closed";

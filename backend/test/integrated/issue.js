@@ -191,7 +191,7 @@ describe("Issues", function () {
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.ISSUE_NO_NAME.value);
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -576,8 +576,6 @@ describe("Issues", function () {
 						.send(comment)
 						.expect(200 , (err, res) => {
 							const comment = res.body;
-							console.log(comment);
-							console.log()
 							expect(comment.viewpoint.screenshot).to.exist
 								.and.to.be.not.equal(pngBase64);
 							expect(comment.viewpoint.screenshotSmall).to.exist;
@@ -590,9 +588,6 @@ describe("Issues", function () {
 						.send(data)
 						.expect(200, (err, res) => {
 							const comment = res.body.comments.filter(c=> c.guid == commentId)[0];
-							console.log(comment);
-
-
 							expect(comment.viewpoint.screenshot).to.exist
 								.and.to.be.not.equal(pngBase64);
 							expect(comment.viewpoint.screenshotSmall).to.exist;

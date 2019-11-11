@@ -801,11 +801,13 @@ router.delete("/issues/:issueId/resources",middlewares.issue.canComment, detachR
 
 function storeIssue(req, res, next) {
 	const data = req.body;
-	data.owner = req.session.user.username;
-	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
-	data.revId = req.params.rid;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	Issue.createIssue({ account: req.params.account, model: req.params.model }, data).then(issue => {
+	data.owner = req.session.user.username;
+	data.revId = req.params.rid;
+	const {account, model} = req.params;
+
+	Issue.createIssue(account, model, data, sessionId).then(issue => {
 		req.dataModel = issue;
 		next();
 	}).catch(err => {

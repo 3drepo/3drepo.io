@@ -18,26 +18,34 @@
 const _ = require("lodash");
 
 const Project = require("./project");
-const View = require("./viewpoint");
+const Viewpoint = require("./viewpoint");
 const User = require("./user");
 const Job = require("./job");
+const Group = require("./group");
+const History = require("./history");
+
+const ModelSetting = require("./modelSetting");
 
 const utils = require("../utils");
 const responseCodes = require("../response_codes.js");
 const C = require("../constants");
 const db = require("../handler/db");
 
-const Comment = require("./comment");
 const ChatEvent = require("./chatEvent");
+const { systemLogger } = require("../logger.js");
+
+const nodeuuid = require("uuid/v1");
+const Comment = require("./comment");
 
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
 class Ticket {
-	constructor(collName, responseCodeType, fieldTypes, ownerPrivilegeAttributes) {
+	constructor(collName, groupField, responseCodeType, fieldTypes, ownerPrivilegeAttributes) {
 		this.collName = collName;
 		this.response = getResponse(responseCodeType);
 		this.fieldTypes = fieldTypes;
 		this.ownerPrivilegeAttributes = ownerPrivilegeAttributes;
+		this.groupField = groupField;
 	}
 
 	clean(account, model, ticketToClean) {
@@ -66,7 +74,7 @@ class Ticket {
 				});
 
 				if (viewpoint.screenshot) {
-					View.setViewpointScreenshot(this.collName, account, model, id, viewpoint);
+					Viewpoint.setViewpointScreenshot(this.collName, account, model, id, viewpoint);
 				}
 
 				if (0 === i) {
@@ -118,7 +126,7 @@ class Ticket {
 		return ticketToClean;
 	}
 
-	async findByUID(account, model, uid, projection) {
+	async findByUID(account, model, uid, projection, noClean = false) {
 		if ("[object String]" === Object.prototype.toString.call(uid)) {
 			uid = utils.stringToUUID(uid);
 		}
@@ -145,12 +153,11 @@ class Ticket {
 			delete foundTicket.refs;
 		}
 
-		return foundTicket;
-	}
+		if (!noClean) {
+			return this.clean(account, model, foundTicket);
+		}
 
-	async findCleanedByUID(account, model, uid, projection) {
-		const ticket =  await this.findByUID(account, model, uid, projection);
-		return this.clean(account, model, ticket);
+		return foundTicket;
 	}
 
 	createSystemComment(account, model, sessionId, ticketId, owner, property, oldValue, newValue) {
@@ -205,8 +212,7 @@ class Ticket {
 		}
 
 		// 3. Filter out blacklisted attributes and leave proper attrs
-		data = _.omit(data, attributeBlacklist);
-		data = _.pick(data, Object.keys(this.fieldTypes));
+		data = this.filterFields(data, attributeBlacklist);
 
 		if (_.isEmpty(data)) {
 			throw responseCodes.INVALID_ARGUMENTS;
@@ -266,22 +272,146 @@ class Ticket {
 		return {oldTicket, updatedTicket, data};
 	}
 
+	filterFields(data, blackList) {
+		data = _.omit(data, blackList);
+		return _.pick(data, Object.keys(this.fieldTypes));
+	}
+
+	setGroupTicketId(account, model, newTicket) {
+		const updateGroup = function(group_id) {
+			// TODO - Do we need to find group first? Can we just patch?
+			return Group.findByUID({account, model}, utils.uuidToString(group_id), null, utils.uuidToString(newTicket.rev_id)).then((group) => {
+				const ticketIdData = {
+					[this.groupField] :  utils.stringToUUID(newTicket._id)
+				};
+
+				return group.updateAttrs({account, model}, ticketIdData);
+			});
+		};
+
+		const groupUpdatePromises = [];
+
+		if (newTicket.viewpoint) {
+			if (newTicket.viewpoint.highlighted_group_id) {
+				groupUpdatePromises.push(updateGroup(newTicket.viewpoint.highlighted_group_id));
+			}
+
+			if (newTicket.viewpoint.hidden_group_id) {
+				groupUpdatePromises.push(updateGroup(newTicket.viewpoint.hidden_group_id));
+			}
+
+			if (newTicket.viewpoint.shown_group_id) {
+				groupUpdatePromises.push(updateGroup(newTicket.viewpoint.shown_group_id));
+			}
+		}
+
+		return Promise.all(groupUpdatePromises);
+	}
+
+	/*
+	* @param {string} account
+	* @param {string} model
+	* @param {object} newTicket
+	*/
+	async create(account, model, newTicket) {
+		// const sessionId = newTicket.sessionId;
+		if (!newTicket.name) {
+			return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });
+		}
+
+		const branch = newTicket.revId || "master";
+		newTicket.assigned_roles = newTicket.assigned_roles || [];
+		newTicket._id = utils.stringToUUID(newTicket._id || nodeuuid());
+		newTicket.created = parseInt(newTicket.created || (new Date()).getTime());
+		newTicket.desc = newTicket.desc || "(No Description)";
+		let imagePromise = Promise.resolve();
+		if (newTicket.viewpoint) {
+			newTicket.viewpoint.guid = utils.generateUUID();
+
+			if (newTicket.viewpoint.highlighted_group_id) {
+				newTicket.viewpoint.highlighted_group_id = utils.stringToUUID(newTicket.viewpoint.highlighted_group_id);
+			}
+
+			if (newTicket.viewpoint.hidden_group_id) {
+				newTicket.viewpoint.hidden_group_id = utils.stringToUUID(newTicket.viewpoint.hidden_group_id);
+			}
+
+			if (newTicket.viewpoint.shown_group_id) {
+				newTicket.viewpoint.shown_group_id = utils.stringToUUID(newTicket.viewpoint.shown_group_id);
+			}
+
+			if (newTicket.viewpoint.screenshot) {
+				newTicket.viewpoint.screenshot = {
+					content: new Buffer.from(newTicket.viewpoint.screenshot, "base64"),
+					flag: 1
+				};
+
+				imagePromise = utils.resizeAndCropScreenshot(newTicket.viewpoint.screenshot.content, 120, 120, true).catch((err) => {
+					systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+						account,
+						model,
+						type: this.collName,
+						ticketId: utils.uuidToString(newTicket._id),
+						viewpointId: utils.uuidToString(newTicket.viewpoint.guid),
+						err
+					});
+				});
+			}
+
+			newTicket.viewpoints = [newTicket.viewpoint];
+		}
+
+		newTicket = this.filterFields(newTicket, ["viewpoint"]);
+
+		Object.keys(newTicket).forEach((key) => {
+			if (Object.prototype.toString.call(newTicket[key]) !== this.fieldTypes[key]) {
+				systemLogger.logError(`Type check failed: ${key} is expected to be type ${this.fieldTypes[key]} but it is `, Object.prototype.toString.call(newTicket[key]));
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
+		});
+
+		await this.setGroupTicketId(account, model, newTicket);
+
+		// Assign rev_id for issue
+		const [history, image] = await Promise.all([
+			History.getHistory({account, model}, branch, newTicket.revId, { _id: 1 }),
+			imagePromise
+		]);
+
+		if (!history && newTicket.revId) {
+			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
+		} else if (history) {
+			newTicket.rev_id = history._id;
+		}
+
+		if (image) {
+			newTicket.thumbnail = {
+				flag: 1,
+				content: image
+			};
+		}
+
+		const [settings, coll] = await Promise.all([
+			ModelSetting.findById({account, model}, model),
+			db.getCollection(account, model + "." + this.collName)
+		]);
+
+		await coll.insert(newTicket);
+		newTicket.typePrefix = newTicket.typePrefix || settings.type || "";
+		newTicket = this.clean(account, model, newTicket);
+		return newTicket;
+	}
+
 	// missing:
 	/*
-
-setGroupTicketId
-createTicket
-onBeforeUpdate
 getReport
 getList
 findByModelName
 getScreenshot
 getSmallScreenshot
 getThumbnail
-
 practically all of resources stuff
-
-	*/
+*/
 }
 
 module.exports = Ticket;

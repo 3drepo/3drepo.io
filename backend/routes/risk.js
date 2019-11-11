@@ -598,14 +598,14 @@ router.delete("/risks/", middlewares.issue.canCreate, deleteRisks);
 
 function storeRisk(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model};
+	const { account, model } = req.params;
 	const data = req.body;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	data.owner = req.session.user.username;
-	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
 	data.revId = req.params.rid;
 
-	Risk.createRisk(dbCol, data).then(risk => {
+	Risk.createRisk(account, model, data, sessionId).then(risk => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risk);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -667,9 +667,9 @@ function listRisks(req, res, next) {
 function findRiskById(req, res, next) {
 	const params = req.params;
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model};
+	const {account, model} =  req.params;
 
-	Risk.findByUID(dbCol, params.riskId).then(risk => {
+	Risk.findByUID(account, model, params.riskId).then(risk => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risk);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -689,9 +689,9 @@ function renderRisksHTML(req, res, next) {
 
 function getScreenshot(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model};
+	const {account, model, riskId, vid} = req.params;
 
-	Risk.getScreenshot(dbCol, req.params.riskId, req.params.vid).then(buffer => {
+	Risk.getScreenshot(account, model, riskId, vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
@@ -700,9 +700,9 @@ function getScreenshot(req, res, next) {
 
 function getScreenshotSmall(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model};
+	const { account, model, riskId, vid } = req.params;
 
-	Risk.getSmallScreenshot(dbCol, req.params.riskId, req.params.vid).then(buffer => {
+	Risk.getSmallScreenshot(account, model, riskId, vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
@@ -711,9 +711,9 @@ function getScreenshotSmall(req, res, next) {
 
 function getThumbnail(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model};
+	const { account, model, riskId } = req.params;
 
-	Risk.getThumbnail(dbCol, req.params.riskId).then(buffer => {
+	Risk.getThumbnail(account, model, riskId).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
