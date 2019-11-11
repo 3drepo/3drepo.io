@@ -402,14 +402,89 @@ class Ticket {
 		return newTicket;
 	}
 
+	getScreenshot(account, model, uid, vid) {
+		if ("[object String]" === Object.prototype.toString.call(uid)) {
+			uid = utils.stringToUUID(uid);
+		}
+
+		if ("[object String]" === Object.prototype.toString.call(vid)) {
+			vid = utils.stringToUUID(vid);
+		}
+
+		return this.findByUID(account, model, uid, { viewpoints: { $elemMatch: { guid: vid } },
+			"viewpoints.screenshot.resizedContent": 0
+		}, true).then((foundRisk) => {
+			if (!_.get(foundRisk, "viewpoints[0].screenshot.content.buffer")) {
+				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
+			} else {
+				return foundRisk.viewpoints[0].screenshot.content.buffer;
+			}
+		});
+	}
+
+	getSmallScreenshot(account, model, uid, vid) {
+		if ("[object String]" === Object.prototype.toString.call(uid)) {
+			uid = utils.stringToUUID(uid);
+		}
+
+		if ("[object String]" === Object.prototype.toString.call(vid)) {
+			vid = utils.stringToUUID(vid);
+		}
+
+		return this.findByUID(account, model, uid, { viewpoints: { $elemMatch: { guid: vid } } }, true)
+			.then((foundRisk) => {
+				if (_.get(foundRisk, "viewpoints[0].screenshot.resizedContent.buffer")) {
+					return foundRisk.viewpoints[0].screenshot.resizedContent.buffer;
+				} else if (!_.get(foundRisk, "viewpoints[0].screenshot.content.buffer")) {
+					return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
+				} else {
+					return utils.resizeAndCropScreenshot(foundRisk.viewpoints[0].screenshot.content.buffer, 365)
+						.then((resized) => {
+							db.getCollection(account, model + ".risks").then((_dbCol) => {
+								_dbCol.update({
+									_id: uid,
+									"viewpoints.guid": vid
+								},{
+									$set: {"viewpoints.$.screenshot.resizedContent": resized}
+								}).catch((err) => {
+									systemLogger.logError("Error while saving resized screenshot",
+										{
+											riskId: utils.uuidToString(uid),
+											viewpointId: utils.uuidToString(vid),
+											err: err
+										});
+								});
+							});
+
+							return resized;
+						});
+				}
+			});
+	}
+
+	getThumbnail(account, model, uid) {
+		if ("[object String]" === Object.prototype.toString.call(uid)) {
+			uid = utils.stringToUUID(uid);
+		}
+
+		return this.findByUID(account, model, uid, { thumbnail: 1 }, true).then((foundRisk) => {
+			if (!_.get(foundRisk, "thumbnail.content.buffer")) {
+				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
+			} else {
+				return foundRisk.thumbnail.content.buffer;
+			}
+		});
+	}
+
+	// findByModelName(acc9unt, model, username, branch, revId, projection, ids, noClean = false, useIssueNumber = false) {
+
+	// }
+
 	// missing:
 	/*
 getReport
 getList
 findByModelName
-getScreenshot
-getSmallScreenshot
-getThumbnail
 practically all of resources stuff
 */
 }

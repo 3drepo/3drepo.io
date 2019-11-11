@@ -1220,28 +1220,6 @@ describe("Issues", function () {
 
 			});
 
-
-			/*
-			The UI doesnt support this
-
-			it("should succeed", function(done) {
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
-					.send({sealed: true, commentIndex: 0})
-					.expect(200, function(err, res) {
-						done(err);
-					});
-			});
-
-			it("should fail if editing a sealed comment", function(done) {
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
-					.send({comment: "abcd", commentIndex: 0, edit: true})
-					.expect(400, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
-						done(err);
-					});
-			});
-			*/
-
 		});
 
 		describe("and then commenting", function() {
@@ -1312,36 +1290,6 @@ describe("Issues", function () {
 				], done);
 
 			});
-
-
-			/*
-			There is no way of doing this through the ui
-
-			it("should succeed if editing an existing comment", function(done) {
-
-				const comment = { comment: "hello world 2", commentIndex: 0, edit: true };
-
-				async.series([
-					function(done) {
-						agent.patch(`/${username}/${model}/issues/${issueId}`)
-							.send(comment)
-							.expect(200 , done);
-					},
-
-					function(done) {
-						agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err , res) {
-
-							expect(res.body.comments.length).to.equal(1);
-							expect(res.body.comments[0].comment).to.equal(comment.comment);
-							expect(res.body.comments[0].owner).to.equal(username);
-
-							done(err);
-						});
-					}
-				], done);
-
-			});
-			*/
 
 			it("should fail if comment is empty", function(done) {
 
@@ -1420,45 +1368,6 @@ describe("Issues", function () {
 
 					});
 			});
-
-			// it('should fail if adding a comment', function(done){
-			// 	let comment = { comment: 'hello world' };
-
-			// 	agent.patch(`/${username}/${model}/issues/${issueId}`)
-			// 	.send(comment)
-			// 	.expect(400 , function(err, res){
-
-			// 		expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
-			// 		return done(err);
-
-			// 	});
-			// });
-
-			// it('should fail if removing a comment', function(done){
-			// 	let comment = { commentIndex: 0, delete: true };
-
-			// 	agent.patch(`/${username}/${model}/issues/${issueId}`)
-			// 	.send(comment)
-			// 	.expect(400 , function(err, res){
-
-			// 		expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
-			// 		return done(err);
-
-			// 	});
-			// });
-
-			// it('should fail if editing a comment', function(done){
-			// 	let comment = { comment: 'hello world 2', commentIndex: 0, edit: true };
-
-			// 	agent.patch(`/${username}/${model}/issues/${issueId}`)
-			// 	.send(comment)
-			// 	.expect(400 , function(err, res){
-
-			// 		expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
-			// 		return done(err);
-
-			// 	});
-			// });
 
 			it("should succeed if reopening", function(done) {
 

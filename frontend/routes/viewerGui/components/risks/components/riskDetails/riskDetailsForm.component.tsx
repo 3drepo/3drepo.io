@@ -34,10 +34,10 @@ import { canChangeAssigned, canChangeBasicProperty, canChangeStatus } from '../.
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Image } from '../../../../../components/image';
+import { Resources } from '../../../../../components/resources/resources.component';
 import { TextField } from '../../../../../components/textField/textField.component';
 import PinButton from '../../../pinButton/pinButton.container';
 import { Container, DescriptionImage, FieldsContainer, FieldsRow, StyledFormControl } from './riskDetails.styles';
-import { Resources } from '../../../../../components/resources/resources.component';
 
 interface IProps {
 	risk: any;
@@ -235,7 +235,6 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						/>
 					</DescriptionImage>
 				)}
-
 
 				<FieldsRow container alignItems="center" justify="space-between">
 					<FieldsContainer>

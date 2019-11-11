@@ -970,9 +970,9 @@ function importBCF(req, res, next) {
 
 function getScreenshot(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = { account: req.params.account, model: req.params.model };
+	const {account, model, issueId, vid} = req.params;
 
-	Issue.getScreenshot(dbCol, req.params.issueId, req.params.vid).then(buffer => {
+	Issue.getScreenshot(account, model, issueId, vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
@@ -981,9 +981,9 @@ function getScreenshot(req, res, next) {
 
 function getScreenshotSmall(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = { account: req.params.account, model: req.params.model };
+	const { account, model, issueId, vid } = req.params;
 
-	Issue.getSmallScreenshot(dbCol, req.params.issueId, req.params.vid).then(buffer => {
+	Issue.getSmallScreenshot(account, model, issueId, vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
@@ -992,9 +992,9 @@ function getScreenshotSmall(req, res, next) {
 
 function getThumbnail(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = { account: req.params.account, model: req.params.model };
+	const { account, model, issueId } = req.params;
 
-	Issue.getThumbnail(dbCol, req.params.issueId).then(buffer => {
+	Issue.getThumbnail(account, model, issueId).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);

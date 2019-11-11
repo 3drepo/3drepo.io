@@ -657,8 +657,6 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 						const notifications = [];
 
 						savedIssues.forEach(issue => {
-							issue && Issue.setGroupIssueId({account, model}, issue, issue._id);
-
 							if (issue && issue.clean) {
 								notifications.push(issue.clean(settings.type));
 							}

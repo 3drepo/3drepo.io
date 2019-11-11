@@ -23,14 +23,12 @@ const db = require("../handler/db");
 const ModelSetting = require("./modelSetting");
 const History = require("./history");
 const Ref = require("./ref");
-const _ = require("lodash");
 const FileRef = require("./fileRef");
 
 const ChatEvent = require("./chatEvent");
 const config = require("../config.js");
 
 const systemLogger = require("../logger.js").systemLogger;
-const Group = require("./group");
 const User = require("./user");
 const Ticket = require("./ticket");
 
@@ -110,38 +108,6 @@ function toDirectXCoords(issueData) {
 	return viewpoint;
 }
 
-issue.setGroupIssueId = function(dbCol, data, issueId) {
-
-	const updateGroup = function(group_id) {
-		// TODO - Do we need to find group first? Can we just patch?
-		return Group.findByUID(dbCol, utils.uuidToString(group_id), null, utils.uuidToString(data.rev_id)).then((group) => {
-			const issueIdData = {
-				issue_id: utils.stringToUUID(issueId)
-			};
-
-			return group.updateAttrs(dbCol, issueIdData);
-		});
-	};
-
-	const groupUpdatePromises = [];
-
-	if (data.viewpoint) {
-		if (data.viewpoint.highlighted_group_id) {
-			groupUpdatePromises.push(updateGroup(data.viewpoint.highlighted_group_id));
-		}
-
-		if (data.viewpoint.hidden_group_id) {
-			groupUpdatePromises.push(updateGroup(data.viewpoint.hidden_group_id));
-		}
-
-		if (data.viewpoint.shown_group_id) {
-			groupUpdatePromises.push(updateGroup(data.viewpoint.shown_group_id));
-		}
-	}
-
-	return Promise.all(groupUpdatePromises);
-};
-
 issue.createIssue = async function(account, model, newIssue, sessionId) {
 	// Sets the issue number
 	const coll = await db.getCollection(account, model + ".issues");
@@ -154,10 +120,7 @@ issue.createIssue = async function(account, model, newIssue, sessionId) {
 
 	newIssue =  await ticket.create(account, model, newIssue);
 
-	if (sessionId) {
-		ChatEvent.newIssues(sessionId, account, model, [newIssue]);
-	}
-
+	ChatEvent.newIssues(sessionId, account, model, [newIssue]);
 	return newIssue;
 };
 
@@ -288,6 +251,7 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 	const filter = {};
 	let historySearch = Promise.resolve();
 
+	// Creates the id/number filter from the ids param
 	if (ids) {
 
 		if (useIssueNumber) {
@@ -306,7 +270,6 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 				return History.find(dbCol, {timestamp: {"$gt": history.timestamp}}, {_id: 1, current: 1})
 					.then((revIds) => {
 						revIds = revIds.map(r => r._id);
-
 						return {current: history.current, revIds};
 					});
 			}
@@ -383,82 +346,9 @@ issue.findIssuesByModelName = function(dbCol, username, branch, revId, projectio
 	});
 };
 
-issue.getScreenshot = function(dbCol, uid, vid) {
-
-	if ("[object String]" === Object.prototype.toString.call(uid)) {
-		uid = utils.stringToUUID(uid);
-	}
-
-	if ("[object String]" === Object.prototype.toString.call(vid)) {
-		vid = utils.stringToUUID(vid);
-	}
-
-	return ticket.findByUID(dbCol.account, dbCol.model, uid, { viewpoints: { $elemMatch: { guid: vid } },
-		"viewpoints.screenshot.resizedContent": 0
-	}, true).then((foundIssue) => {
-		if (!_.get(foundIssue, "viewpoints[0].screenshot.content.buffer")) {
-			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
-		} else {
-			return foundIssue.viewpoints[0].screenshot.content.buffer;
-		}
-	});
-};
-
-issue.getSmallScreenshot = function(dbCol, uid, vid) {
-
-	if ("[object String]" === Object.prototype.toString.call(uid)) {
-		uid = utils.stringToUUID(uid);
-	}
-
-	if ("[object String]" === Object.prototype.toString.call(vid)) {
-		vid = utils.stringToUUID(vid);
-	}
-
-	return ticket.findByUID(dbCol.account, dbCol.model, uid, { viewpoints: { $elemMatch: { guid: vid } } })
-		.then((foundIssue) => {
-			if (_.get(foundIssue, "viewpoints[0].screenshot.resizedContent.buffer")) {
-				return foundIssue.viewpoints[0].screenshot.resizedContent.buffer;
-			} else if (!_.get(foundIssue, "viewpoints[0].screenshot.content.buffer")) {
-				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
-			} else {
-				return utils.resizeAndCropScreenshot(foundIssue.viewpoints[0].screenshot.content.buffer, 365)
-					.then((resized) => {
-						db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
-							_dbCol.update({
-								_id: uid,
-								"viewpoints.guid": vid
-							},{
-								$set: {"viewpoints.$.screenshot.resizedContent": resized}
-							}).catch((err) => {
-								systemLogger.logError("Error while saving resized screenshot",
-									{
-										issueId: utils.uuidToString(uid),
-										viewpointId: utils.uuidToString(vid),
-										err: err
-									});
-							});
-						});
-
-						return resized;
-					});
-			}
-		});
-};
-
-issue.getThumbnail = function(dbCol, uid) {
-
-	if ("[object String]" === Object.prototype.toString.call(uid)) {
-		uid = utils.stringToUUID(uid);
-	}
-
-	return ticket.findByUID(dbCol.account, dbCol.model, uid, { thumbnail: 1 }).then((foundIssue) => {
-		if (!_.get(foundIssue, "thumbnail.content.buffer")) {
-			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
-		} else {
-			return foundIssue.thumbnail.content.buffer;
-		}
-	});
-};
+issue.getScreenshot = ticket.getScreenshot.bind(ticket);
+issue.getSmallScreenshot = ticket.getSmallScreenshot.bind(ticket);
+issue.getThumbnail = ticket.getThumbnail.bind(ticket);
 
 issue.findByUID = ticket.findByUID.bind(ticket);
 

@@ -26,7 +26,6 @@ const _ = require("lodash");
 
 const ChatEvent = require("./chatEvent");
 
-const systemLogger = require("../logger.js").systemLogger;
 const Comment = require("./comment");
 const Group = require("./group");
 const View = require("./viewpoint");
@@ -265,10 +264,7 @@ risk.setGroupRiskId = function(dbCol, data, riskId) {
 risk.createRisk = async function(account, model, newRisk, sessionId) {
 	newRisk = await ticket.create(account, model, newRisk);
 	newRisk = { ...newRisk, ...getLevelOfRisk(newRisk) };
-
-	if (sessionId) {
-		ChatEvent.newRisks(sessionId, account, model, [newRisk]);
-	}
+	ChatEvent.newRisks(sessionId, account, model, [newRisk]);
 
 	return newRisk;
 };
@@ -426,7 +422,7 @@ risk.findRisksByModelName = function(dbCol, username, branch, revId, projection,
 			if (!history) {
 				return Promise.reject(responseCodes.INVALID_TAG_NAME);
 			} else {
-				return History.find(dbCol, {timestamp: {"$gt": history.timestamp}}, {_id: 1, current: 1})
+				return History.find({account, model}, {timestamp: {"$gt": history.timestamp}}, {_id: 1, current: 1})
 					.then((revIds) => {
 						revIds = revIds.map(r => r._id);
 
@@ -470,81 +466,8 @@ risk.findByUID = async function(account, model, uid, projection, noClean = false
 	return riskFound;
 };
 
-risk.getScreenshot = function(account, model, uid, vid) {
-
-	if ("[object String]" === Object.prototype.toString.call(uid)) {
-		uid = utils.stringToUUID(uid);
-	}
-
-	if ("[object String]" === Object.prototype.toString.call(vid)) {
-		vid = utils.stringToUUID(vid);
-	}
-
-	return ticket.findByUID(account, model, uid, { viewpoints: { $elemMatch: { guid: vid } },
-		"viewpoints.screenshot.resizedContent": 0
-	}, true).then((foundRisk) => {
-		if (!_.get(foundRisk, "viewpoints[0].screenshot.content.buffer")) {
-			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
-		} else {
-			return foundRisk.viewpoints[0].screenshot.content.buffer;
-		}
-	});
-};
-
-risk.getSmallScreenshot = function(account, model, uid, vid) {
-
-	if ("[object String]" === Object.prototype.toString.call(uid)) {
-		uid = utils.stringToUUID(uid);
-	}
-
-	if ("[object String]" === Object.prototype.toString.call(vid)) {
-		vid = utils.stringToUUID(vid);
-	}
-
-	return ticket.findByUID(account, model, uid, { viewpoints: { $elemMatch: { guid: vid } } }, true)
-		.then((foundRisk) => {
-			if (_.get(foundRisk, "viewpoints[0].screenshot.resizedContent.buffer")) {
-				return foundRisk.viewpoints[0].screenshot.resizedContent.buffer;
-			} else if (!_.get(foundRisk, "viewpoints[0].screenshot.content.buffer")) {
-				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
-			} else {
-				return utils.resizeAndCropScreenshot(foundRisk.viewpoints[0].screenshot.content.buffer, 365)
-					.then((resized) => {
-						db.getCollection(account, model + ".risks").then((_dbCol) => {
-							_dbCol.update({
-								_id: uid,
-								"viewpoints.guid": vid
-							},{
-								$set: {"viewpoints.$.screenshot.resizedContent": resized}
-							}).catch((err) => {
-								systemLogger.logError("Error while saving resized screenshot",
-									{
-										riskId: utils.uuidToString(uid),
-										viewpointId: utils.uuidToString(vid),
-										err: err
-									});
-							});
-						});
-
-						return resized;
-					});
-			}
-		});
-};
-
-risk.getThumbnail = function(account, model, uid) {
-
-	if ("[object String]" === Object.prototype.toString.call(uid)) {
-		uid = utils.stringToUUID(uid);
-	}
-
-	return ticket.findByUID(account, model, uid, { thumbnail: 1 }, true).then((foundRisk) => {
-		if (!_.get(foundRisk, "thumbnail.content.buffer")) {
-			return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
-		} else {
-			return foundRisk.thumbnail.content.buffer;
-		}
-	});
-};
+risk.getScreenshot = ticket.getScreenshot.bind(ticket);
+risk.getSmallScreenshot = ticket.getSmallScreenshot.bind(ticket);
+risk.getThumbnail = ticket.getThumbnail.bind(ticket);
 
 module.exports = risk;
