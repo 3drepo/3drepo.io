@@ -76,6 +76,30 @@ describe("Login", function () {
 
 	});
 
+	it("with correct password and email and verified should login successfully", function () {
+		const username = "email_user"
+
+		// create a user
+		return User.createUser(systemLogger, username, password, {
+			email: email("mail_success")
+		}, 200000).then(emailVerifyToken => {
+			return User.verify(username, emailVerifyToken.token, true);
+		}).then(user => {
+			return new Promise((resolve, reject) => {
+				request(server)
+					.post("/login")
+					.send({ username: email("mail_success").toUpperCase() , password }) // toUpperCase is to test case insentive mail
+					.expect(200, function(err, res) {
+						expect(res.body.username).to.equal(username);
+						err ? reject(err) : resolve();
+					});
+			});
+
+		});
+
+	});
+
+
 	it("with correct password and username but not yet verified should fail", function () {
 
 		// create a user
@@ -96,6 +120,17 @@ describe("Login", function () {
 
 		});
 
+	});
+
+	it("with incorrect email should fail", function(done) {
+		request(server)
+			.post("/login")
+			.send({ username: email("nonexistent"), password })
+			.expect(400, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
+				done(err);
+
+			});
 	});
 
 	it("with incorrect password should fail", function(done) {
@@ -186,5 +221,7 @@ describe("Login", function () {
 
 			});
 	});
+
+
 
 });

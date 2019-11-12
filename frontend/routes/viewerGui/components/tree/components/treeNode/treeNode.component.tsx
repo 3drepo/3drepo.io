@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Tooltip } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import UpIcon from '@material-ui/icons/KeyboardArrowUp';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -60,10 +61,6 @@ interface IProps {
 	zoomToHighlightedNodes: () => void;
 }
 
-interface IState {
-	hovered: boolean;
-}
-
 const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
 	<StyledExpandableButton
 		onClick={onClick}
@@ -78,8 +75,7 @@ const ParentOfVisibleIcon = () => <ParentOfVisible><VisibilityIcon color="inheri
 const VisibleIcon = () => <VisibilityIcon color="primary" />;
 const InvisibleIcon = () => <VisibilityOffIcon color="action" />;
 
-export class TreeNode extends React.PureComponent<IProps, IState> {
-
+export class TreeNode extends React.PureComponent<IProps, any> {
 	get node() {
 		return this.props.data;
 	}
@@ -118,10 +114,8 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 		highlighted: false,
 		expanded: false,
 		hasChildren: false,
+		expandable: false,
 		childrenNumber: 0
-	};
-	public state = {
-		hovered: false
 	};
 
 	private renderExpandableButton = renderWhenTrue(() => {
@@ -130,9 +124,9 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 			<CollapseButton
 				nodeType={this.type}
 				expanded={expanded}
-				hasChildren={this.node.hasChildren}
-				Icon={!expanded && this.node.hasChildren ? AddIcon : RemoveIcon}
-				onClick={!expanded && this.node.hasChildren ? this.expandNode : this.collapseNode}
+				hasChildren={this.node.expandable}
+				Icon={!expanded && this.node.expandable ? AddIcon : RemoveIcon}
+				onClick={!expanded && this.node.expandable ? this.expandNode : this.collapseNode}
 			/>
 		);
 	});
@@ -183,23 +177,25 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 		const { expanded, isSearchResult, style, key, active, hasFederationRoot } = this.props;
 
 		return (
-			<Container
-				style={style}
-				key={key}
-				nodeType={this.type}
-				expandable={this.node.hasChildren && !this.isModelRoot}
-				selected={this.isSelected}
-				active={active}
-				highlighted={this.isHighlighted}
-				expanded={isSearchResult && expanded}
-				level={this.level}
-				hasFederationRoot={hasFederationRoot}
-				onClick={this.handleNodeClick}
-				onDoubleClick={this.handleDoubleClick}
-			>
-				{this.renderName()}
-				{this.renderActions(!this.node.isFederation)}
-			</Container>
+			<Tooltip title={this.node.name} placement="bottom">
+				<Container
+					style={style}
+					key={key}
+					nodeType={this.type}
+					expandable={this.node.expandable && !this.isModelRoot}
+					selected={this.isSelected}
+					active={active}
+					highlighted={this.isHighlighted}
+					expanded={isSearchResult && expanded}
+					level={this.level}
+					hasFederationRoot={hasFederationRoot}
+					onClick={this.handleNodeClick}
+					onDoubleClick={this.handleDoubleClick}
+				>
+					{this.renderName()}
+					{this.renderActions(!this.node.isFederation)}
+				</Container>
+			</Tooltip>
 		);
 	}
 
@@ -217,7 +213,7 @@ export class TreeNode extends React.PureComponent<IProps, IState> {
 	private collapseNode = (event) => {
 		event.stopPropagation();
 
-		if (this.node.hasChildren) {
+		if (this.node.expandable) {
 			this.props.collapseNodes([this.node._id]);
 		}
 		return;

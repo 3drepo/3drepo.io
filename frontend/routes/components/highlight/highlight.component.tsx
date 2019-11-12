@@ -24,16 +24,18 @@ import { Mark } from './highlight.styles';
 interface IProps {
 	text: string;
 	search: string;
+	className?: string;
 	splitQueryToWords?: boolean;
 	caseSensitive?: boolean;
 }
 
 const HighlightTag = (props) => <Mark {...props as any} />;
 
-export const Highlight = memo(({splitQueryToWords, search, text, caseSensitive}: IProps) => {
+export const Highlight = memo(({splitQueryToWords, search, text, caseSensitive, className}: IProps) => {
 	const searchWords = splitQueryToWords ? search.split(' ') : [trim(search)];
 	return (
 		<Highlighter
+			className={className}
 			searchWords={searchWords}
 			autoEscape
 			textToHighlight={text || ''}

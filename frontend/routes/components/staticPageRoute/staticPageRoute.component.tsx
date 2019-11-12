@@ -16,30 +16,38 @@
  */
 
 import React from 'react';
-import { Container, Content, Header, Logo, Title } from './staticPageRoute.styles';
+import { getStaticFile } from '../../../services/staticPages';
+import { ExtrasMenu } from '../topMenu/components/extrasMenu/extrasMenu.component';
+import { Container, Content, Header, Logo, MenuContainer, Title } from './staticPageRoute.styles';
 
 interface IProps {
 	title: string;
 	fileName: string;
-	isPending: boolean;
-	templates: object;
-	loadTemplate: (fileName) => void;
 }
 
-export class PageTemplate extends React.PureComponent<IProps, any> {
+interface IState {
+	fileContent: string;
+}
+
+export default class PageTemplate extends React.PureComponent<IProps, IState> {
+	public state = {
+		fileContent: ''
+	};
+
 	public componentDidMount() {
-		this.props.loadTemplate(this.props.fileName);
+		getStaticFile(this.props.fileName).then(({data}) => this.setState({fileContent: data}));
 	}
 
 	public render() {
-		const { templates, fileName } = this.props;
+		const { fileContent } =  this.state;
 		return (
 			<Container>
 				<Header>
 					<Title>{this.props.title}</Title>
 					<Logo src="images/3drepo-logo-white.png" alt="3D Repo" />
+					<MenuContainer><ExtrasMenu /></MenuContainer>
 				</Header>
-				<Content dangerouslySetInnerHTML={{ __html: templates[fileName] }} />
+				<Content dangerouslySetInnerHTML={{ __html: fileContent }} />
 			</Container>
 		);
 	}

@@ -18,7 +18,7 @@
 "use strict";
 
 const utils = require("../utils");
-const uuid = require("node-uuid");
+const nodeuuid = require("uuid/v1");
 const responseCodes = require("../response_codes.js");
 const systemLogger = require("../logger.js").systemLogger;
 const db = require("../handler/db");
@@ -170,7 +170,7 @@ view.createViewpoint = function (dbCol, sessionId, data) {
 
 		return cropped.then((croppedScreenshot) => {
 
-			const id = utils.stringToUUID(uuid.v1());
+			const id = utils.stringToUUID(nodeuuid());
 
 			if (croppedScreenshot) {
 				// Remove the base64 version of the screenshotgetViewpointThumbnail

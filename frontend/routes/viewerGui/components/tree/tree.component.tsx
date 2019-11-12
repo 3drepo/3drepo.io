@@ -38,7 +38,6 @@ import { MenuButton as MenuButtonComponent } from '../../../components/menuButto
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { EmptyStateInfo } from '../views/views.styles';
 import TreeNode from './components/treeNode/treeNode.container';
-import { TreeNodes, ViewerPanelContent } from './tree.styles';
 
 interface IProps {
 	className: string;
@@ -57,7 +56,7 @@ interface IProps {
 	handleNodesClick?: (nodes, skipExpand) => boolean;
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
-	isolateSelectedNodes: () => void;
+	isolateSelectedNodes: (nodeIds: any[]) => void;
 	hideIfcSpaces: () => void;
 	goToRootNode: (nodeId: boolean) => void;
 	selectNodes: (nodesIds: any[]) => void;
@@ -76,7 +75,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		const { isolateSelectedNodes, hideIfcSpaces } = this.props;
 		return {
 			[TREE_ACTIONS_ITEMS.SHOW_ALL]: this.handleShowAllNodes,
-			[TREE_ACTIONS_ITEMS.ISOLATE_SELECTED]: isolateSelectedNodes,
+			[TREE_ACTIONS_ITEMS.ISOLATE_SELECTED]: () => isolateSelectedNodes(undefined),
 			[TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES]: hideIfcSpaces,
 			[TREE_ACTIONS_ITEMS.SELECT_ALL]: this.handleSelectAllNodes
 		};
@@ -120,17 +119,17 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		const maxHeight = 842;
 
 		const treeHeight = TREE_ITEM_SIZE * size;
-		const treeNodesHeight = treeHeight > maxHeight ?	maxHeight : treeHeight;
+		const treeNodesHeight = Math.min(maxHeight, treeHeight) + 1;
 
 		return (
-			<TreeNodes className="tree-list" style={{ height: treeNodesHeight }}>
+			<div style={{ height: treeNodesHeight }}>
 				<AutoSizer>
 					{({ width, height }) => (
 						<List
 							dataRevision={dataRevision}
 							ref={this.nodeListRef}
-							height={height}
-							width={width}
+							height={height - 1}
+							width={width - 1}
 							itemData={nodesList}
 							itemCount={size}
 							itemSize={TREE_ITEM_SIZE}
@@ -140,7 +139,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 						</List>
 					)}
 				</AutoSizer>
-			</TreeNodes>
+			</div>
 		);
 	});
 
@@ -171,10 +170,8 @@ export class Tree extends React.PureComponent<IProps, IState> {
 				pending={isPending}
 			>
 				{this.renderFilterPanel(searchEnabled)}
-				<ViewerPanelContent>
-					{this.renderNodesList(!isPending && !!nodesList.length)}
-					{this.renderNotFound(!isPending && !nodesList.length)}
-				</ViewerPanelContent>
+				{this.renderNodesList(!isPending && !!nodesList.length)}
+				{this.renderNotFound(!isPending && !nodesList.length)}
 			</ViewerPanel>
 		);
 	}

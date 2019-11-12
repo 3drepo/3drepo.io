@@ -38,6 +38,8 @@ import { ROUTES } from '../../constants/routes';
 import { convertPositionToDirectX, convertPositionToOpenGL } from '../../helpers/model';
 import {
 	BackButton,
+	ButtonContainer,
+	Container,
 	FieldsRow,
 	GridColumn,
 	Headline,
@@ -50,7 +52,7 @@ import {
 
 const ModelSettingsSchema = Yup.object().shape({
 	code: Yup.string()
-		.max(5)
+		.max(50)
 		.matches(/^[A-Za-z0-9]+$/),
 	longitude: schema.measureNumberDecimal,
 	latitude: schema.measureNumberDecimal,
@@ -202,15 +204,7 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleBackLink = () => {
-		const { history, location, match } = this.props;
-		const queryParams = queryString.parse(location.search);
-		const { project } = queryParams;
-		const { teamspace } = match.params;
-
-		history.push({
-			pathname: ROUTES.TEAMSPACES,
-			search: `?teamspace=${teamspace}&project=${project}`
-		});
+		this.props.history.push({ pathname: ROUTES.TEAMSPACES });
 	}
 
 	public renderTitleWithBackLink = () => (
@@ -233,165 +227,170 @@ export class ModelSettings extends React.PureComponent<IProps, IState> {
 		const { latitude, longitude, axisX, axisY, axisZ, angleFromNorth, elevation, topicTypes } = this.state;
 
 		return	(
-			<Formik
-				initialValues={ {
-					id, name, type: federate ? 'Federation' : type, code: properties.code, unit: properties.unit, fourDSequenceTag,
-					latitude, longitude, axisX, axisY, axisZ, elevation, angleFromNorth, topicTypes
-				} }
-				validationSchema={ModelSettingsSchema}
-				onSubmit={this.handleUpdateSettings}
-			>
-				<StyledForm>
-					<Headline color="primary" variant="subheading">Model Information</Headline>
-					<Grid>
-						<FieldsRow container wrap="nowrap">
-							<Field name="id" render={ ({ field }) => (
-								<StyledTextField
-									{...field}
-									label="Model ID"
-									margin="normal"
-									disabled
-								/>
-							)} />
-							<Field name="name" render={ ({ field, form }) => (
-								<StyledTextField
-									{...field}
-									error={Boolean(form.errors.name)}
-									helperText={form.errors.name}
-									label="Model name"
-									margin="normal"
-								/>
-							)} />
-						</FieldsRow>
-						<FieldsRow container wrap="nowrap">
-							<Field name="type" render={ ({ field }) => (
-								<StyledTextField
-									{...field}
-									label="Model type"
-									margin="normal"
-									disabled
-								/>
-							)} />
-							<Field name="code" render={ ({ field }) => (
-								<StyledTextField
-									{...field}
-									label="Model code"
-									margin="normal"
-								/>
-							)} />
-						</FieldsRow>
-						<FieldsRow container wrap="nowrap">
-							<Field name="fourDSequenceTag" render={ ({ field }) => (
-								<StyledTextField
-									{...field}
-									label="4D Sequence Tag"
-									margin="normal"
-								/>
-							)} />
-							<SelectWrapper fullWidth>
-								<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
-								<Field name="unit" render={ ({ field }) => (
-									<CellSelect
+			<Container>
+				<Formik
+					initialValues={ {
+						id, name, type: federate ? 'Federation' : type, code: properties.code, unit: properties.unit, fourDSequenceTag,
+						latitude, longitude, axisX, axisY, axisZ, elevation, angleFromNorth, topicTypes
+					} }
+					validationSchema={ModelSettingsSchema}
+					onSubmit={this.handleUpdateSettings}
+				>
+					<StyledForm>
+						<Headline color="primary" variant="subheading">Model Information</Headline>
+						<Grid>
+							<FieldsRow container wrap="nowrap">
+								<Field name="id" render={ ({ field }) => (
+									<StyledTextField
 										{...field}
-										items={clientConfigService.units}
-										inputId="unit-select"
+										label="Model ID"
+										margin="normal"
+										disabled
+									/>
+								)} />
+								<Field name="name" render={ ({ field, form }) => (
+									<StyledTextField
+										{...field}
+										error={Boolean(form.errors.name)}
+										helperText={form.errors.name}
+										label="Model name"
+										margin="normal"
+									/>
+								)} />
+							</FieldsRow>
+							<FieldsRow container wrap="nowrap">
+								<Field name="type" render={ ({ field }) => (
+									<StyledTextField
+										{...field}
+										label="Model type"
+										margin="normal"
 										disabled
 									/>
 								)} />
-							</SelectWrapper>
-						</FieldsRow>
-						<Field name="topicTypes" render={({ field }) => <Chips {...field} inputPlaceholder={'Enter topic types'} />} />
-					</Grid>
-					<Headline color="primary" variant="subheading">GIS Reference Information</Headline>
-					<Grid container direction="column" wrap="nowrap">
-						<Grid container direction="row" wrap="nowrap">
-							<GridColumn container direction="column" wrap="nowrap">
-								<Headline color="textPrimary" variant="subheading">Survey Point</Headline>
-								<Field name="latitude" render={ ({ field, form }) => (
+								<Field name="code" render={ ({ field, form }) => (
 									<StyledTextField
 										{...field}
-										label="Latitude (Decimal)"
+										label="Model code"
 										margin="normal"
-										error={Boolean(form.errors.latitude)}
-										helperText={form.errors.latitude}
+										error={Boolean(form.errors.code)}
+										helperText={form.errors.code}
 									/>
 								)} />
-								<Field name="longitude" render={ ({ field, form }) => (
+							</FieldsRow>
+							<FieldsRow container wrap="nowrap">
+								<Field name="fourDSequenceTag" render={ ({ field }) => (
 									<StyledTextField
 										{...field}
-										label="Longitude"
+										label="4D Sequence Tag"
 										margin="normal"
-										error={Boolean(form.errors.longitude)}
-										helperText={form.errors.longitude}
 									/>
 								)} />
-								<Field name="elevation" render={ ({ field, form }) => (
-									<StyledTextField
-										{...field}
-										label="Elevation"
-										margin="normal"
-										disabled
-										error={Boolean(form.errors.elevation)}
-										helperText={form.errors.elevation}
-									/>
-								)} />
-								<Field name="angleFromNorth" render={ ({ field, form }) => (
-									<StyledTextField
-										{...field}
-										label="Angle from North (Clockwise Degrees)"
-										margin="normal"
-										error={Boolean(form.errors.angleFromNorth)}
-										helperText={form.errors.angleFromNorth}
-									/>
-								)} />
-							</GridColumn>
-							<GridColumn container direction="column" wrap="nowrap">
-								<Headline color="textPrimary" variant="subheading">Project Point</Headline>
-								<Field name="axisX" render={ ({ field, form }) => (
-									<StyledTextField
-										{...field}
-										label={`x (${properties.unit})`}
-										margin="normal"
-										error={Boolean(form.errors.axisX)}
-										helperText={form.errors.axisX}
-									/>
-								)} />
-								<Field name="axisY" render={ ({ field, form }) => (
-									<StyledTextField
-										{...field}
-										name="axisY"
-										label={`y (${properties.unit})`}
-										margin="normal"
-										error={Boolean(form.errors.axisY)}
-										helperText={form.errors.axisY}
-									/>
-								)} />
-								<Field name="axisZ" render={ ({ field, form }) => (
-									<StyledTextField
-										{...field}
-										label={`z (${properties.unit})`}
-										margin="normal"
-										error={Boolean(form.errors.axisZ)}
-										helperText={form.errors.axisZ}
-									/>
-								)} />
-							</GridColumn>
+								<SelectWrapper fullWidth>
+									<InputLabel shrink htmlFor="unit-select">Unit</InputLabel>
+									<Field name="unit" render={ ({ field }) => (
+										<CellSelect
+											{...field}
+											items={clientConfigService.units}
+											inputId="unit-select"
+											disabled
+										/>
+									)} />
+								</SelectWrapper>
+							</FieldsRow>
+							<Field name="topicTypes" render={({ field }) => <Chips {...field} inputPlaceholder={'Enter topic types'} />} />
 						</Grid>
-					</Grid>
-					<Grid container direction="column" alignItems="flex-end">
-						<Field render={ ({ form }) =>
-							<Button
-								type="submit"
-								variant="raised"
-								color="secondary"
-								disabled={!form.isValid || form.isValidating}
-							>
-								Save
-							</Button>}
-						/>
-					</Grid>
-				</StyledForm>
-			</Formik>
+						<Headline color="primary" variant="subheading">GIS Reference Information</Headline>
+						<Grid container direction="column" wrap="nowrap">
+							<Grid container direction="row" wrap="nowrap">
+								<GridColumn container direction="column" wrap="nowrap">
+									<Headline color="textPrimary" variant="subheading">Survey Point</Headline>
+									<Field name="latitude" render={ ({ field, form }) => (
+										<StyledTextField
+											{...field}
+											label="Latitude (Decimal)"
+											margin="normal"
+											error={Boolean(form.errors.latitude)}
+											helperText={form.errors.latitude}
+										/>
+									)} />
+									<Field name="longitude" render={ ({ field, form }) => (
+										<StyledTextField
+											{...field}
+											label="Longitude"
+											margin="normal"
+											error={Boolean(form.errors.longitude)}
+											helperText={form.errors.longitude}
+										/>
+									)} />
+									<Field name="elevation" render={ ({ field, form }) => (
+										<StyledTextField
+											{...field}
+											label="Elevation"
+											margin="normal"
+											disabled
+											error={Boolean(form.errors.elevation)}
+											helperText={form.errors.elevation}
+										/>
+									)} />
+									<Field name="angleFromNorth" render={ ({ field, form }) => (
+										<StyledTextField
+											{...field}
+											label="Angle from North (Clockwise Degrees)"
+											margin="normal"
+											error={Boolean(form.errors.angleFromNorth)}
+											helperText={form.errors.angleFromNorth}
+										/>
+									)} />
+								</GridColumn>
+								<GridColumn container direction="column" wrap="nowrap">
+									<Headline color="textPrimary" variant="subheading">Project Point</Headline>
+									<Field name="axisX" render={ ({ field, form }) => (
+										<StyledTextField
+											{...field}
+											label={`x (${properties.unit})`}
+											margin="normal"
+											error={Boolean(form.errors.axisX)}
+											helperText={form.errors.axisX}
+										/>
+									)} />
+									<Field name="axisY" render={ ({ field, form }) => (
+										<StyledTextField
+											{...field}
+											name="axisY"
+											label={`y (${properties.unit})`}
+											margin="normal"
+											error={Boolean(form.errors.axisY)}
+											helperText={form.errors.axisY}
+										/>
+									)} />
+									<Field name="axisZ" render={ ({ field, form }) => (
+										<StyledTextField
+											{...field}
+											label={`z (${properties.unit})`}
+											margin="normal"
+											error={Boolean(form.errors.axisZ)}
+											helperText={form.errors.axisZ}
+										/>
+									)} />
+								</GridColumn>
+							</Grid>
+						</Grid>
+						<ButtonContainer container direction="column" alignItems="flex-end">
+							<Field render={ ({ form }) =>
+								<Button
+									type="submit"
+									variant="raised"
+									color="secondary"
+									disabled={!form.isValid || form.isValidating}
+								>
+									Save
+								</Button>}
+							/>
+						</ButtonContainer>
+					</StyledForm>
+				</Formik>
+
+			</Container>
 		);
 	}
 

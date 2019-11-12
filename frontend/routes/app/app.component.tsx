@@ -19,7 +19,7 @@ import { memoize } from 'lodash';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
-import { PUBLIC_ROUTES, ROUTES } from '../../constants/routes';
+import { ROUTES } from '../../constants/routes';
 import { renderWhenTrue } from '../../helpers/rendering';
 import { analyticsService } from '../../services/analytics';
 import { clientConfigService } from '../../services/clientConfig';
@@ -28,7 +28,7 @@ import { DialogContainer } from '../components/dialogContainer';
 import { LiveChat } from '../components/liveChat';
 import { PrivateRoute } from '../components/privateRoute';
 import { SnackbarContainer } from '../components/snackbarContainer';
-import StaticPageRoute from '../components/staticPageRoute/staticPageRoute.container';
+import StaticPageRoute from '../components/staticPageRoute/staticPageRoute.component';
 import TopMenu from '../components/topMenu/topMenu.container';
 import { Dashboard } from '../dashboard';
 import { Login } from '../login';
@@ -48,6 +48,7 @@ interface IProps {
 	isAuthenticated: boolean;
 	currentUser: any;
 	isAuthPending: boolean;
+	showNewUpdateDialog: (config) => void;
 	authenticate: () => void;
 	logout: () => void;
 	startup: () => void;
@@ -96,6 +97,18 @@ export class App extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		this.props.authenticate();
 		this.sendAnalyticsPageView(location);
+
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.addEventListener('message', (event) => {
+				if (event.data.type === 'UPDATE') {
+					this.props.showNewUpdateDialog({
+						onConfirm: () => {
+							location.reload();
+						}
+					});
+				}
+			});
+		}
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -121,7 +134,7 @@ export class App extends React.PureComponent<IProps, IState> {
 	public render() {
 		return (
 				<AppContainer>
-					<ViewerCanvas />
+					<Route component={ViewerCanvas} />
 					{this.renderHeader(!isStaticRoute(location.pathname))}
 					<Switch>
 						{this.renderLoginRoute()}

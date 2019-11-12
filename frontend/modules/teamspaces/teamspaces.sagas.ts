@@ -15,24 +15,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { normalize } from 'normalizr';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
+import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
+import { selectStarredModels, StarredActions } from '../starred';
+import { UserManagementActions } from '../userManagement';
 import { TeamspacesActions, TeamspacesTypes } from './teamspaces.redux';
+import { teamspacesSchema } from './teamspaces.schema';
+import { selectProjects } from './teamspaces.selectors';
 
 export function* fetchTeamspaces({ username }) {
 	try {
 		yield put(TeamspacesActions.setPendingState(true));
-		const accounts = (yield API.fetchTeamspace(username)).data.accounts;
+		const teamspaces = (yield API.fetchTeamspace(username)).data.accounts;
+		const normalizedData = normalize(teamspaces, [teamspacesSchema]);
 
-		yield put(TeamspacesActions.setTeamspaces(accounts));
+		yield put(TeamspacesActions.fetchTeamspacesSuccess(normalizedData.entities));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('fetch', 'team spaces', e));
 	}
 
 	yield put(TeamspacesActions.setPendingState(false));
+}
+
+export function* leaveTeamspace({ teamspace }) {
+	try {
+		const { username } = yield select( selectCurrentUser );
+		yield API.removeUserCascade(teamspace, username);
+		yield put(UserManagementActions.removeUserSuccess(username));
+		yield put(TeamspacesActions.removeTeamspaceSuccess(teamspace));
+		yield put(SnackbarActions.show(`User removed from ${teamspace} successfully.`));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('leave', 'teamspace', error));
+	}
 }
 
 // Projects
@@ -48,23 +67,49 @@ export function* createProject({ teamspace, projectData }) {
 	}
 }
 
-export function* updateProject({ teamspace, projectName, projectData }) {
+export function* updateProject({ teamspace, projectId, projectData }) {
 	try {
-		yield API.updateProject(teamspace, projectName, projectData);
+		const projects = yield select(selectProjects);
+		yield API.updateProject(teamspace, projects[projectId].name, projectData);
+
+		const updatedProject = { ...projects[projectData._id], ...projectData };
 
 		yield put(SnackbarActions.show('Project updated'));
-		yield put(TeamspacesActions.updateProjectSuccess(teamspace, projectName, projectData));
+		yield put(TeamspacesActions.updateProjectSuccess(updatedProject));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'project', e));
 	}
 }
 
-export function* removeProject({ teamspace, projectName }) {
+export function* removeProject({ teamspace, projectId }) {
 	try {
-		yield API.removeProject(teamspace, projectName);
+		const projects = yield select(selectProjects);
+		const projectDetails = projects[projectId];
+
+		yield API.removeProject(teamspace, projectDetails.name);
+
+		if (projectDetails.models.length) {
+			const starredModelsMap = yield select(selectStarredModels);
+
+			const starredModelsToRemove = [];
+			projectDetails.models.forEach((model) => {
+				const isStarredModel = starredModelsMap[`${teamspace}/${model}`];
+
+				if (isStarredModel) {
+					const starredModel = { model, teamspace };
+					starredModelsToRemove.push(starredModel);
+				}
+			});
+
+			if (starredModelsToRemove.length) {
+				yield all(starredModelsToRemove.map((model) => {
+					return put(StarredActions.removeFromStarredModels(model));
+				}));
+			}
+		}
 
 		yield put(SnackbarActions.show('Project removed'));
-		yield put(TeamspacesActions.removeProjectSuccess(teamspace, projectName));
+		yield put(TeamspacesActions.removeProjectSuccess(teamspace, projectId));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'project', e));
 	}
@@ -106,12 +151,29 @@ export function* updateModel({ teamspace, modelId, modelData }) {
 
 export function* removeModel({ teamspace, modelData }) {
 	try {
-		const response = yield API.removeModel(teamspace, modelData.id);
-		const removedModel = response.data;
+		const { data: removedModel } = yield API.removeModel(teamspace, modelData.id);
+		const starredModelsMap = yield select(selectStarredModels);
+		const isStarredModel = starredModelsMap[`${teamspace}/${modelData.id}`];
+
+		if (isStarredModel) {
+			const starredModel = {
+				model: modelData.id,
+				name: modelData.name,
+				teamspace
+			};
+
+			yield put(StarredActions.removeFromStarredModels(starredModel));
+		}
+
+		const projects = yield select(selectProjects);
 
 		yield put(SnackbarActions.show(`${removedModel.federate ? 'Federation' : 'Model'} removed`));
 		yield put(TeamspacesActions.removeModelSuccess(
-			teamspace, { ...removedModel, projectName: modelData.project, name: modelData.name })
+			teamspace, {
+				...removedModel,
+				projectName: projects[modelData.project].name,
+				name: modelData.name
+			})
 		);
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'model', e));
@@ -120,6 +182,7 @@ export function* removeModel({ teamspace, modelData }) {
 
 export default function* TeamspacesSaga() {
 	yield takeLatest(TeamspacesTypes.FETCH_TEAMSPACES, fetchTeamspaces);
+	yield takeLatest(TeamspacesTypes.LEAVE_TEAMSPACE, leaveTeamspace);
 
 	// Projects
 	yield takeLatest(TeamspacesTypes.CREATE_PROJECT, createProject);

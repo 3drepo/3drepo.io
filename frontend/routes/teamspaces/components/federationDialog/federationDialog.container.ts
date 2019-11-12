@@ -19,16 +19,29 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import {
+	selectFederations,
+	selectModels,
+	selectProjects,
+	selectTeamspaces,
+	TeamspacesActions,
+} from '../../../../modules/teamspaces';
 import { selectIsPending, selectSettings, ModelActions } from './../../../../modules/model';
 import { FederationDialog } from './federationDialog.component';
 
 const mapStateToProps = createStructuredSelector({
 	settings: selectSettings,
-	isPending: selectIsPending
+	isPending: selectIsPending,
+	teamspaces: selectTeamspaces,
+	projects: selectProjects,
+	models: selectModels,
+	federations: selectFederations,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchModelSettings: ModelActions.fetchSettings
+	fetchModelSettings: ModelActions.fetchSettings,
+	createModel: TeamspacesActions.createModel,
+	updateModel: TeamspacesActions.updateModel,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(FederationDialog));

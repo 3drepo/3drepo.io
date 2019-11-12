@@ -20,6 +20,7 @@ import React from 'react';
 
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
 import { renderWhenTrue } from '../../helpers/rendering';
+import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Bim } from './components/bim';
 import { CloseFocusModeButton } from './components/closeFocusModeButton';
 import { Compare } from './components/compare';
@@ -96,6 +97,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 			this.props.setPanelVisibility(VIEWER_PANELS.RISKS, true);
 		}
 
+		MultiSelect.initKeyWatchers();
 		this.props.fetchData(params.teamspace, params.model);
 	}
 
@@ -125,6 +127,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
+		MultiSelect.removeKeyWatchers();
 		this.props.stopListenOnSelections();
 		this.props.stopListenOnModelLoaded();
 		this.props.stopListenOnClickPin();
@@ -141,7 +144,7 @@ export class ViewerGui extends React.PureComponent<IProps, IState> {
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
 				<Container className={this.props.className} hidden={isFocusMode}>
 					<RevisionsSwitch />
-					<Toolbar {...this.urlParams.teamspace} />
+					<Toolbar {...this.urlParams} />
 					{this.renderLeftPanelsButtons()}
 					{this.renderLeftPanels(visiblePanels)}
 					{this.renderRightPanels(visiblePanels)}

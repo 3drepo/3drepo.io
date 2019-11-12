@@ -20,7 +20,8 @@ const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const utils = require("../utils");
 const C = require("../constants");
-
+const ResponseCodes = require("../response_codes");
+const db = require("../handler/db");
 const stringToUUID = utils.stringToUUID;
 const uuidToString = utils.uuidToString;
 
@@ -41,7 +42,8 @@ const historySchema = Schema({
 	incomplete: Number,
 	coordOffset: [],
 	current: [],
-	rFile: []
+	rFile: [],
+	void: Boolean
 });
 
 historySchema.statics.getHistory = function(dbColOptions, branch, revId, projection) {
@@ -61,9 +63,13 @@ historySchema.statics.getHistory = function(dbColOptions, branch, revId, project
 
 historySchema.statics.tagRegExp = /^[a-zA-Z0-9_-]{1,20}$/;
 // list revisions by branch
-historySchema.statics.listByBranch = function(dbColOptions, branch, projection) {
+historySchema.statics.listByBranch = function(dbColOptions, branch, projection, showVoid = false) {
 
 	const query = {"incomplete": {"$exists": false}};
+
+	if(!showVoid) {
+		query.void = {"$ne" : true};
+	}
 
 	if(branch === C.MASTER_BRANCH_NAME) {
 		query.shared_id = stringToUUID(C.MASTER_BRANCH);
@@ -80,9 +86,15 @@ historySchema.statics.listByBranch = function(dbColOptions, branch, projection) 
 };
 
 // get the head of a branch
-historySchema.statics.findByBranch = function(dbColOptions, branch, projection) {
+// FIXME: findByBranch and listByBranch seem to be doing similar things
+// FIXME: maybe findByBranch can just take the 1st elem of listByBranch
+historySchema.statics.findByBranch = function(dbColOptions, branch, projection, showVoid = false) {
 
 	const query = { "incomplete": {"$exists": false}};
+
+	if(!showVoid) {
+		query.void = {"$ne" : true};
+	}
 
 	projection = projection || {};
 
@@ -99,6 +111,12 @@ historySchema.statics.findByBranch = function(dbColOptions, branch, projection) 
 	);
 };
 
+historySchema.statics.revisionCount = async function(teamspace, account) {
+	const query = {"incomplete": {"$exists": false}, "void": {"$ne": true}};
+	const col = await db.getCollection(teamspace, account + ".history");
+	return col.find(query, {}).count();
+};
+
 // get the head of default branch (master)
 historySchema.statics.findLatest = function(dbColOptions, projection) {
 	return this.findByBranch(dbColOptions, null, projection);
@@ -109,6 +127,27 @@ historySchema.statics.findByUID = function(dbColOptions, revId, projection) {
 	projection = projection || {};
 	return History.findOne(dbColOptions, { _id: stringToUUID(revId)}, projection);
 
+};
+
+historySchema.statics.updateRevision = async function(dbColOptions, modelId, data) {
+	if(data.hasOwnProperty("void") &&
+		Object.prototype.toString.call(data.void) === "[object Boolean]") {
+		const rev = await History.findByUID(dbColOptions, modelId);
+		if(!rev) {
+			return Promise.reject(ResponseCodes.MODEL_HISTORY_NOT_FOUND);
+		}
+
+		if(data.void) {
+			rev.void = true;
+		} else {
+			rev.void = undefined;
+		}
+
+		return rev.save().then(() => ResponseCodes.OK);
+
+	} else {
+		return Promise.reject(ResponseCodes.INVALID_ARGUMENTS);
+	}
 };
 
 historySchema.statics.findByTag = function(dbColOptions, tag, projection) {

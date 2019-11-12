@@ -217,16 +217,9 @@ function* showDetails({ group, revision }) {
 	try {
 		yield put(GroupsActions.clearSelectionHighlights());
 		yield put(GroupsActions.highlightGroup(group));
-		const objectsStatus = yield Viewer.getObjectsStatus();
-
-		if (group.objects && objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
-			group.totalSavedMeshes = calculateTotalMeshes(objectsStatus.highlightedNodes);
-			group.objects = objectsStatus.highlightedNodes;
-		}
-
 		yield put(GroupsActions.setComponentState({
 			showDetails: true,
-			newGroup: group,
+			newGroup: {...group},
 			criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
 		}));
 	} catch (error) {
@@ -325,7 +318,7 @@ function* setNewGroup() {
 			author: currentUser.username,
 			name: `Untitled group ${groupNumber}`,
 			color: getRandomColor(),
-			description: '(No description)'
+			description: ''
 		});
 
 		yield put(GroupsActions.setComponentState({

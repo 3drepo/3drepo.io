@@ -90,7 +90,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 	public renderViewpointForm = renderWhenTrue(() => {
 		return (
 			<Formik
-				initialValues={{ newName: this.props.viewpoint.name }}
+				initialValues={{ newName: this.props.viewpoint._id ? this.props.viewpoint.name : '' }}
 				onSubmit={this.props.onSaveEdit}>
 				<StyledForm>
 					<Field name="newName" render={({ field, form }) => (
@@ -101,6 +101,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 							error={Boolean(form.errors.name)}
 							helperText={form.errors.name}
 							label="View name"
+							placeholder={this.props.viewpoint.name}
 							autoFocus
 						/>
 					)} />

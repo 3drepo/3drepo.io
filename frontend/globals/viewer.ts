@@ -203,7 +203,7 @@ export class Viewer {
 		return new Promise((resolve, reject) => {
 			this.unityLoaderScript.addEventListener ('load', () => {
 				console.debug('Loaded UnityLoader.js succesfully');
-				UnityUtil.loadUnity(this.divId, undefined, memory);
+				UnityUtil.loadUnity(this.divId, undefined, memory, this.onUnityProgress);
 				resolve();
 			}, false);
 			this.unityLoaderScript.addEventListener ('error', (error) => {
@@ -580,6 +580,10 @@ export class Viewer {
 
 	public zoomToHighlightedMeshes() {
 		UnityUtil.zoomToHighlightedMeshes();
+	}
+
+	public zoomToObjects(meshes) {
+		UnityUtil.zoomToObjects(meshes);
 	}
 
 	/****************************************************************************

@@ -11,7 +11,7 @@ class TreeProcessing {
 		return (this.processing || {}) as ITreeProcessingData;
 	}
 
-	public transformData = async (payload) => {
+	public transformData = async (payload, setIsProcessed) => {
 		const { nodesList, treePath, ...auxiliaryMaps } = await transformTree(payload) as any;
 		this.processing = new Processing({
 			nodesList,
@@ -23,6 +23,7 @@ class TreeProcessing {
 			selectionMap: auxiliaryMaps.nodesSelectionMap,
 			nodesBySharedIdsMap: auxiliaryMaps.nodesBySharedIdsMap
 		});
+		setIsProcessed(true);
 		return { nodesList, treePath, auxiliaryMaps };
 	}
 
@@ -36,13 +37,13 @@ class TreeProcessing {
 
 	public isolateNodes = (payload) => this.processing.isolateNodes(payload);
 
+	public getMeshesByNodeIds = (payload) => this.processing.getMeshesByNodeIds(payload);
+
 	public clearSelected = () => this.processing.clearCurrentlySelected();
 
 	public getParents = (node) => this.processing.getParentsByPath(node);
 
 	public getParentsID = (node) => this.processing.getParentsID(node);
-
-	public getChildren = (node) => this.processing.getChildren(node);
 }
 
 export default new TreeProcessing();

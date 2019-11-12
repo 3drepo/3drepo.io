@@ -61,7 +61,7 @@ describe("Groups", function () {
 			agent = request.agent(server);
 			agent.post("/login")
 				.send({ username, password })
-				.expect(200, function(err, res) {
+                .expect(200, function (err, res) {
 					expect(res.body.username).to.equal(username);
 					done(err);
 				});
@@ -172,7 +172,7 @@ describe("Groups", function () {
 
 			async.series([
 				function(done) {
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(data)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -203,7 +203,7 @@ describe("Groups", function () {
 						operator: "GTE",
 						values: [1]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -234,7 +234,7 @@ describe("Groups", function () {
 						operator: "IS_EMPTY",
 						values: []
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -265,7 +265,7 @@ describe("Groups", function () {
 						operator: "IN_RANGE",
 						values: [1, 2]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -296,7 +296,7 @@ describe("Groups", function () {
 						operator: "EQUALS",
 						values: [1, 2, 3]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -327,7 +327,7 @@ describe("Groups", function () {
 						operator: "NOT_IN_RANGE",
 						values: [1, 2, 3, 4]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -362,7 +362,7 @@ describe("Groups", function () {
 						operator: "IS_EMPTY",
 						values: []
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -388,7 +388,7 @@ describe("Groups", function () {
 				function(done) {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.color;
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -411,7 +411,7 @@ describe("Groups", function () {
 			const newGroup = Object.assign({}, data);
 			// @ts-ignore
 			newGroup.color = true;
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -423,7 +423,7 @@ describe("Groups", function () {
 		it("without rules or objects field should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			delete newGroup.objects;
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -438,7 +438,7 @@ describe("Groups", function () {
 				operator: "GTE",
 				values: [1]
 			}];
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -454,7 +454,7 @@ describe("Groups", function () {
 				operator: "GT",
 				values: []
 			}];
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -470,7 +470,7 @@ describe("Groups", function () {
 				operator: "NOT_IN_RANGE",
 				values: [1]
 			}];
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -486,7 +486,7 @@ describe("Groups", function () {
 				operator: "NOT_IN_RANGE",
 				values: [1, 2, 3]
 			}];
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -498,7 +498,7 @@ describe("Groups", function () {
 			const newGroup = Object.assign({}, data);
 			// @ts-ignore
 			newGroup.objects = true;
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -513,7 +513,7 @@ describe("Groups", function () {
 				function(done) {
 					const newGroup = Object.assign({}, data);
 					newGroup.object = [];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -535,7 +535,7 @@ describe("Groups", function () {
 		it("name with wrong type should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			newGroup.name = true;
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -546,7 +546,7 @@ describe("Groups", function () {
 		it("issue_id with wrong type should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			newGroup.issue_id = true;
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -567,7 +567,7 @@ describe("Groups", function () {
 				values: [1]
 			}];
 
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -583,7 +583,7 @@ describe("Groups", function () {
 				values: [1]
 			}];
 
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -599,7 +599,7 @@ describe("Groups", function () {
 				values: []
 			}];
 
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -615,7 +615,7 @@ describe("Groups", function () {
 				values: [2]
 			}];
 
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -631,7 +631,7 @@ describe("Groups", function () {
 				values: [2, 3, 4]
 			}];
 
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -647,7 +647,7 @@ describe("Groups", function () {
 				values: ["one"]
 			}];
 
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -663,7 +663,7 @@ describe("Groups", function () {
 				values: ["abc"]
 			}];
 
-			agent.post(`/${username}/${model}/groups/`)
+            agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -683,7 +683,7 @@ describe("Groups", function () {
 						operator: "IS_NOT_EMPTY",
 						values: []
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -713,7 +713,7 @@ describe("Groups", function () {
 						operator: "IS_EMPTY",
 						values: []
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -743,7 +743,7 @@ describe("Groups", function () {
 						operator: "IS_NOT_EMPTY",
 						values: []
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -773,7 +773,7 @@ describe("Groups", function () {
 						operator: "IS",
 						values: ["IfcStairFlight"]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -803,7 +803,7 @@ describe("Groups", function () {
 						operator: "IS",
 						values: ["IfcStairFlight", "IfcSlab"]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -833,7 +833,7 @@ describe("Groups", function () {
 						operator: "IS_NOT",
 						values: ["Level 2"]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -863,7 +863,7 @@ describe("Groups", function () {
 						operator: "IS_NOT",
 						values: ["Level 2", "Level 4"]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -893,7 +893,7 @@ describe("Groups", function () {
 						operator: "CONTAINS",
 						values: ["Flue"]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -933,7 +933,7 @@ describe("Groups", function () {
 						operator: "CONTAINS",
 						values: ["Flue", "Panel"]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -963,7 +963,7 @@ describe("Groups", function () {
 						operator: "NOT_CONTAINS",
 						values: ["Generator"]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -993,7 +993,7 @@ describe("Groups", function () {
 						operator: "NOT_CONTAINS",
 						values: ["Mast", "Infill", "Concept"]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1023,7 +1023,7 @@ describe("Groups", function () {
 						operator: "REGEX",
 						values: ["Concept.*Door.*"]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1069,7 +1069,7 @@ describe("Groups", function () {
 						operator: "REGEX",
 						values: ["Concept.*Door.*", ".*mm$"]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1099,7 +1099,7 @@ describe("Groups", function () {
 						operator: "EQUALS",
 						values: [0.28757]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1130,7 +1130,7 @@ describe("Groups", function () {
 						operator: "EQUALS",
 						values: [0.28757, 0.194819]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1165,7 +1165,7 @@ describe("Groups", function () {
 						operator: "NOT_EQUALS",
 						values: [0]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1195,7 +1195,7 @@ describe("Groups", function () {
 						operator: "NOT_EQUALS",
 						values: [0, 2700, 900]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1225,7 +1225,7 @@ describe("Groups", function () {
 						operator: "GT",
 						values: [500]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1266,7 +1266,7 @@ describe("Groups", function () {
 						operator: "GT",
 						values: [500, 600]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1307,7 +1307,7 @@ describe("Groups", function () {
 						operator: "GTE",
 						values: [750]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1353,7 +1353,7 @@ describe("Groups", function () {
 						operator: "GTE",
 						values: [750, 800]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1399,7 +1399,7 @@ describe("Groups", function () {
 						operator: "LT",
 						values: [1]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1429,7 +1429,7 @@ describe("Groups", function () {
 						operator: "LT",
 						values: [180, 200]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1459,7 +1459,7 @@ describe("Groups", function () {
 						operator: "LTE",
 						values: [0.5]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1499,7 +1499,7 @@ describe("Groups", function () {
 						operator: "LTE",
 						values: [0.5, 1]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1539,7 +1539,7 @@ describe("Groups", function () {
 						operator: "IN_RANGE",
 						values: [4520, 4530]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1569,7 +1569,7 @@ describe("Groups", function () {
 						operator: "IN_RANGE",
 						values: [4520, 4530, 200, 3000]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1599,7 +1599,7 @@ describe("Groups", function () {
 						operator: "NOT_IN_RANGE",
 						values: [0, 1000]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1636,7 +1636,7 @@ describe("Groups", function () {
 						operator: "NOT_IN_RANGE",
 						values: [0, 1000, 1000, 1650]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1675,7 +1675,7 @@ describe("Groups", function () {
 						operator: "LT",
 						values: [238000]
 					}];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1721,7 +1721,7 @@ describe("Groups", function () {
 						   ]
 						}
 					 ];
-					agent.post(`/${username}/${model}/groups/`)
+                    agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
 							groupId = res.body._id;
@@ -1747,7 +1747,7 @@ describe("Groups", function () {
 
 			async.series([
 				function(done) {
-					agent.put(`/${username}/${model}/groups/${goldenData._id}`)
+                    agent.put(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.send(newObjects)
 						.expect(200 , function(err, res) {
 							done(err);
@@ -1777,7 +1777,7 @@ describe("Groups", function () {
 
 			async.series([
 				function(done) {
-					agent.put(`/${username}/${model}/groups/${goldenData._id}`)
+					agent.put(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.send(newRules)
 						.expect(200 , function(err, res) {
 							done(err);
@@ -1801,7 +1801,7 @@ describe("Groups", function () {
 
 			async.series([
 				function(done) {
-					agent.put(`/${username}/${model}/groups/${goldenData._id}`)
+					agent.put(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.send(newName)
 						.expect(200 , function(err, res) {
 							done(err);
@@ -1825,7 +1825,7 @@ describe("Groups", function () {
 
 			async.series([
 				function(done) {
-					agent.put(`/${username}/${model}/groups/${goldenData._id}`)
+					agent.put(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.send(newColor)
 						.expect(200 , function(err, res) {
 							done(err);
@@ -1849,7 +1849,7 @@ describe("Groups", function () {
 
 			async.series([
 				function(done) {
-					agent.put(`/${username}/${model}/groups/${goldenData._id}`)
+					agent.put(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.send(newDesc)
 						.expect(200 , function(err, res) {
 							done(err);
@@ -1884,7 +1884,7 @@ describe("Groups", function () {
 				}]
 			};
 
-			agent.put(`/${username}/${model}/groups/${goldenData._id}`)
+			agent.put(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 				.send(badUpdate)
 				.expect(400 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -1893,7 +1893,7 @@ describe("Groups", function () {
 		});
 
 		it("updating invalid group ID should fail", function(done) {
-			agent.put(`/${username}/${model}/groups/invalidID`)
+			agent.put(`/${username}/${model}/revision/master/head/groups/invalidID`)
 				.send({objects: []})
 				.expect(404 , function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.GROUP_NOT_FOUND.value);
@@ -1906,7 +1906,7 @@ describe("Groups", function () {
 		it("delete group with valid group ID should succeed", function(done) {
 			async.series([
 				function(done) {
-					agent.delete(`/${username}/${model}/groups/${goldenData._id}`)
+					agent.delete(`/${username}/${model}/groups?ids=${goldenData._id}`)
 						.expect(200 , function(err, res) {
 							done(err);
 						});
@@ -1923,7 +1923,7 @@ describe("Groups", function () {
 		});
 
 		it("delete invalid group ID should succeed", function(done) {
-			agent.delete(`/${username}/${model}/groups/invalidID`)
+			agent.delete(`/${username}/${model}/groups?ids=invalidID`)
 				.expect(200 , function(err, res) {
 					done(err);
 				});
@@ -1933,14 +1933,14 @@ describe("Groups", function () {
 
 	describe("Delete groups ", function() {
 		it("delete group no query string should succeed", function(done) {
-				agent.delete(`/${username}/${model}/groups/${goldenData._id}/`)
+				agent.delete(`/${username}/${model}/groups?ids=${goldenData._id}/`)
 					.expect(200 , function(err, res) {
 						done(err);
 					});
 		});
 
 		it("delete group invalid group ID should succeed", function(done) {
-			agent.delete(`/${username}/${model}/groups/invalidID?ids=a,b,c,d,e`)
+			agent.delete(`/${username}/${model}/groups?ids=a,b,c,d,e`)
 				.send({objects: []})
 				.expect(200 , function(err, res) {
 					done(err);
@@ -1959,7 +1959,7 @@ describe("Groups", function () {
 						});
 				},
 				function(done) {
-					agent.delete(`/${username}/${model}/groups/?ids=${idsString}`)
+					agent.delete(`/${username}/${model}/groups?ids=${idsString}`)
 						.expect(200 , function(err, res) {
 							done(err);
 						});

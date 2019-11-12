@@ -20,7 +20,9 @@ declare var UnityLoader;
 
 export class UnityUtil {
 	/** @hidden */
-	public static errorCallback: any;
+	private static errorCallback: any;
+	private static progressCallback: any;
+	private static modelLoaderProgressCallback: any;
 	/**
 	 * viewer can be assigned, containing any callback function the user wishes to hook onto.
 	 * The following functions are supported:
@@ -93,8 +95,6 @@ export class UnityUtil {
 	public static UNITY_GAME_OBJECT = 'WebGLInterface';
 	/** @hidden */
 	public static defaultHighlightColor = [1, 1, 0];
-	private static progressCallback = Function.prototype;
-	private static modelLoaderProgressCallback = Function.prototype;
 
 	/**
 	* Initialise Unity.
@@ -376,9 +376,11 @@ export class UnityUtil {
 		UnityUtil.loadingResolve.resolve();
 	}
 
-/** @hidden */
+	/** @hidden */
 	public static loadingProgress(progress) {
-		UnityUtil.modelLoaderProgressCallback(progress);
+		if (UnityUtil.modelLoaderProgressCallback) {
+			UnityUtil.modelLoaderProgressCallback(progress);
+		}
 	}
 
 	/** @hidden */
@@ -1300,6 +1302,10 @@ export class UnityUtil {
 	 */
 	public static zoomToHighlightedMeshes() {
 		UnityUtil.toUnity('ZoomToHighlightedMeshes', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	public static zoomToObjects(meshEntries: object[]) {
+		UnityUtil.toUnity('ZoomToObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(meshEntries));
 	}
 
 	/**

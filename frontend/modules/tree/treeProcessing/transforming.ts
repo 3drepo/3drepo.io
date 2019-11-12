@@ -1,4 +1,3 @@
-import { IS_DEVELOPMENT } from '../../../constants/environment';
 import { BACKEND_VISIBILITY_STATES, NODE_TYPES, SELECTION_STATES, VISIBILITY_STATES } from '../../../constants/tree';
 import { DEFAULT_NODE_NAME, INode } from './treeProcessing.constants';
 
@@ -33,6 +32,7 @@ const getFlattenNested = (tree, maps, data = [], idx = 0, level = 1, parentId = 
 		parentId,
 		rootParentId,
 		hasChildren: Boolean(tree.children),
+		expandable: false,
 		deepChildrenNumber: 0,
 		childrenIds: [],
 		subTreeRoots: []
@@ -45,8 +45,9 @@ const getFlattenNested = (tree, maps, data = [], idx = 0, level = 1, parentId = 
 	let subTreeRoots = [];
 	if (tree.children) {
 
-		const hasChildren = tree.children.some((child) => Boolean(child.name));
+		const hasChildren = tree.children.length;
 		rowData.hasChildren = hasChildren;
+		rowData.expandable = tree.children.some((child) => Boolean(child.name));
 		rootParentId = rowData.isModel ? nodeID : rootParentId;
 
 		let nHiddenChildren = 0;
@@ -74,7 +75,6 @@ const getFlattenNested = (tree, maps, data = [], idx = 0, level = 1, parentId = 
 			if (childNS !== rowData.namespacedId) {
 				subTreeRoots.push(subTree._id);
 			}
-
 		}
 
 		if (hasChildren && nHiddenChildren === tree.children.length) {

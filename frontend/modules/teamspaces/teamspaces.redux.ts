@@ -15,137 +15,140 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cloneDeep, keyBy } from 'lodash';
+import { cloneDeep, keyBy, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
-import { sortByField } from '../../helpers/sorting';
+import { DATA_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
+import { SORTING_BY_LAST_UPDATED } from '../../routes/teamspaces/teamspaces.contants';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetchTeamspaces: ['username'],
-	setTeamspaces: ['teamspaces'],
+	fetchTeamspacesSuccess: ['entities'],
 	setPendingState: ['pendingState'],
-	setModelUploadStatus: ['teamspace', 'project', 'model', 'modelData'],
+	setModelUploadStatus: ['teamspace', 'project', 'model', 'modelData', 'incrementRev'],
 	setComponentState: ['componentState'],
+	removeTeamspaceSuccess: ['teamspace'],
+	leaveTeamspace: ['teamspace'],
 	// Projects
 	createProject: ['teamspace', 'projectData'],
-	updateProject: ['teamspace', 'projectName', 'projectData'],
-	removeProject: ['teamspace', 'projectName'],
+	updateProject: ['teamspace', 'projectId', 'projectData'],
+	removeProject: ['teamspace', 'projectId'],
 	createProjectSuccess: ['teamspace', 'projectData'],
-	updateProjectSuccess: ['teamspace', 'projectName', 'projectData'],
-	removeProjectSuccess: ['teamspace', 'projectName'],
+	updateProjectSuccess: ['projectData'],
+	removeProjectSuccess: ['teamspace', 'projectId'],
 	// Models
 	createModel: ['teamspace', 'modelData'],
 	updateModel: ['teamspace', 'modelId', 'modelData'],
 	removeModel: ['teamspace', 'modelData'],
 	createModelSuccess: ['teamspace', 'modelData'],
 	updateModelSuccess: ['teamspace', 'modelId', 'modelData'],
-	removeModelSuccess: ['teamspace', 'modelData']
+	removeModelSuccess: ['teamspace', 'modelData'],
 }, { prefix: 'TEAMSPACES/' });
 
 export const INITIAL_STATE = {
 	teamspaces: {},
+	projects: {},
+	models: {},
 	componentState: {
-		activeTeamspace: '',
-		activeProject: '',
-		teamspacesItems: []
+		showStarredOnly: false,
+		visibleItems: {},
+		starredVisibleItems: {},
+		teamspacesItems: [],
+		searchEnabled: false,
+		selectedFilters: [],
+		selectedDataTypes: [DATA_TYPES.MODELS, DATA_TYPES.FEDERATIONS, DATA_TYPES.PROJECTS],
+		activeSorting: SORTING_BY_LAST_UPDATED,
+		nameSortingDescending: true,
+		dateSortingDescending: true,
 	}
 };
 
-const setTeamspaces = (state = INITIAL_STATE, action) => {
-	const teamspaces = keyBy(action.teamspaces, 'account');
-	const accounts = Object.keys(teamspaces);
-
-	accounts.map((user) => {
-		return teamspaces[user].projects = sortByField(teamspaces[user].projects,
-			{ order: 'asc', config: { field: 'name' } });
-	});
-
-	return {...state, teamspaces};
+const fetchTeamspacesSuccess = (state = INITIAL_STATE, { entities }) => {
+	return { ...state, ...entities };
 };
 
 // Projects
 const updateProjectSuccess = (state = INITIAL_STATE, action) => {
+	const projects = { ...state.projects };
+	projects[action.projectData._id] = action.projectData;
 
-	const teamspaces = cloneDeep(state.teamspaces);
-	const projects = [...state.teamspaces[action.teamspace].projects].map((project) => {
-		if (project.name === action.projectName) {
-			return { ...project, ...action.projectData };
-		}
-		return project;
-	});
-	teamspaces[action.teamspace].projects = projects;
-
-	return { ...state, teamspaces };
+	return { ...state, projects };
 };
 
 const createProjectSuccess = (state = INITIAL_STATE, action) => {
-	const teamspaces = cloneDeep(state.teamspaces);
-	teamspaces[action.teamspace].projects.push(action.projectData);
+	const teamspace = { ...state.teamspaces[action.teamspace] };
+	teamspace.projects = [...teamspace.projects, action.projectData._id];
+	const projects = { ...state.projects };
+	projects[action.projectData._id] = action.projectData;
+	const teamspaces = { ...state.teamspaces, [action.teamspace]: teamspace };
 
-	return { ...state, teamspaces };
+	return { ...state, projects, teamspaces };
 };
 
 const removeProjectSuccess = (state = INITIAL_STATE, action) => {
-	const teamspaces = cloneDeep(state.teamspaces);
-	const projects = [...state.teamspaces[action.teamspace].projects]
-		.filter(({ name }) => name !== action.projectName);
-	teamspaces[action.teamspace].projects = projects;
+	const teamspace = { ...state.teamspaces[action.teamspace] };
+	teamspace.projects = teamspace.projects.filter((id) => id !== action.projectId);
+	const teamspaces = { ...state.teamspaces, [action.teamspace]: teamspace };
+	const projects = { ...state.projects };
+	delete projects[action.projectId];
 
-	return { ...state, teamspaces };
+	return { ...state, teamspaces, projects };
 };
 
-const getModelData = (state, teamspace, projectName) => {
-	const teamspaces = cloneDeep(state.teamspaces);
-	const projects = [...state.teamspaces[teamspace].projects];
-	const projectIndex = projects.findIndex((project) => project.name === projectName);
-	const foundProject = projects[projectIndex];
-
-	return { projectIndex, foundProject, teamspaces };
+const getProject = (state, teamspaceName, projectName) => {
+	const projects = { ...state.projects };
+	const projectId = state.teamspaces[teamspaceName].projects.find((project) => {
+		return projects[project].name === projectName;
+	});
+	return { ...projects[projectId] };
 };
 
 // Models
-const updateModelSuccess = (state = INITIAL_STATE, action) => {
-	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.modelData.project);
-
-	const modelIndex = foundProject.models.findIndex((model) => model.model === action.modelId);
-	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].name = action.modelData.name;
-	if (action.modelData.federate) {
-		teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].subModels = action.modelData.subModels;
-		teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].timestamp = action.modelData.timestamp;
+const updateModelSuccess = (state = INITIAL_STATE, { modelId, modelData }) => {
+	const model = { ...state.models[modelId], name: modelData.name, code: modelData.code };
+	if (modelData.federate) {
+		model.subModels = modelData.subModels;
+		model.timestamp = modelData.timestamp;
 	}
 
-	return { ...state, teamspaces };
+	const models = { ...state.models, [modelId]: model };
+	return { ...state, models };
 };
 
-const createModelSuccess = (state = INITIAL_STATE, action) => {
-	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.modelData.projectName);
-	const targetModels = foundProject.models;
-	const createdModel = action.modelData;
+const createModelSuccess = (state = INITIAL_STATE, { teamspace, modelData }) => {
+	const project = getProject(state, teamspace, modelData.projectName);
+	project.models = [...project.models, modelData.model];
 
-	if (action.modelData.federate && action.modelData.timestamp) {
-		createdModel.timestamp = action.modelData.timestamp;
+	const projects = { ...state.projects, [project._id]: project };
+	const models = { ...state.models, [modelData.model]: modelData };
+	return { ...state, models, projects };
+};
+
+const removeModelSuccess = (state = INITIAL_STATE, { teamspace, modelData }) => {
+	const project = getProject(state, teamspace, modelData.projectName);
+	project.models = project.models.filter((modelId) => modelId !== modelData.model);
+
+	const projects = { ...state.projects, [project._id]: project };
+	const models = omit(state.models, modelData.model);
+	return { ...state, models, projects };
+};
+
+const setModelUploadStatus = (state = INITIAL_STATE, { model, modelData, incrementRev = false }) => {
+	const uploadedModel = { ...state.models[model], status: modelData.status };
+
+	if (modelData.timestamp) {
+		uploadedModel.timestamp = modelData.timestamp;
 	}
 
-	teamspaces[action.teamspace].projects[projectIndex].models = [...targetModels, createdModel];
-
-	return { ...state, teamspaces };
-};
-
-const removeModelSuccess = (state = INITIAL_STATE, action) => {
-	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.modelData.projectName);
-	const models = foundProject.models.filter((model) => model.model !== action.modelData.model);
-	teamspaces[action.teamspace].projects[projectIndex].models = models;
-
-	return { ...state, teamspaces };
-};
-
-const setModelUploadStatus = (state = INITIAL_STATE, action) => {
-	const { projectIndex, foundProject, teamspaces } = getModelData(state, action.teamspace, action.project);
-	const modelIndex = foundProject.models.findIndex((model) => model.model === action.model);
-	teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].status = action.modelData.status;
-	if (action.modelData.timestamp) {
-		teamspaces[action.teamspace].projects[projectIndex].models[modelIndex].timestamp = action.modelData.timestamp;
+	if (incrementRev) {
+		uploadedModel.nRevisions = uploadedModel.nRevisions ? uploadedModel.nRevisions + 1 : 1;
 	}
-	return { ...state, teamspaces };
+
+	const models = { ...state.models, [model]: uploadedModel };
+	return { ...state, models };
+};
+
+const removeTeamspaceSuccess = (state = INITIAL_STATE, { teamspace }) => {
+	return {...state,  teamspaces: omit(state.teamspaces, teamspace)};
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
@@ -157,10 +160,12 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 };
 
 export const reducer = createReducer({ ...INITIAL_STATE }, {
-	[TeamspacesTypes.SET_TEAMSPACES]: setTeamspaces,
+	[TeamspacesTypes.FETCH_TEAMSPACES_SUCCESS]: fetchTeamspacesSuccess,
 	[TeamspacesTypes.SET_MODEL_UPLOAD_STATUS]: setModelUploadStatus,
 	[TeamspacesTypes.SET_PENDING_STATE]: setPendingState,
 	[TeamspacesTypes.SET_COMPONENT_STATE]: setComponentState,
+	[TeamspacesTypes.REMOVE_TEAMSPACE_SUCCESS]: removeTeamspaceSuccess,
+
 	// Projects
 	[TeamspacesTypes.UPDATE_PROJECT_SUCCESS]: updateProjectSuccess,
 	[TeamspacesTypes.CREATE_PROJECT_SUCCESS]: createProjectSuccess,

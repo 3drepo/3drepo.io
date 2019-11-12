@@ -31,10 +31,10 @@ import { GroupsActions } from '../groups';
 import { selectIssuesMap, IssuesActions } from '../issues';
 import { JobsActions } from '../jobs';
 import { MeasureActions } from '../measure';
-import { selectCurrentRevisionId, selectRevisions, selectSettings, ModelActions, ModelTypes } from '../model';
+import { selectCurrentRevisionId, selectSettings, ModelActions, ModelTypes } from '../model';
 import { selectRisksMap, RisksActions } from '../risks';
 import { selectUrlParams } from '../router/router.selectors';
-import { StarredMetaActions } from '../starredMeta';
+import { StarredActions } from '../starred';
 import { dispatch } from '../store';
 import { TreeActions } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
@@ -58,7 +58,8 @@ function* fetchData({ teamspace, model }) {
 			put(ViewerGuiActions.startListenOnModelLoaded()),
 			put(ModelActions.fetchSettings(teamspace, model)),
 			put(ModelActions.fetchMetaKeys(teamspace, model)),
-			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model))]);
+			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model)),
+			put(TreeActions.setIsTreeProcessed(false))]);
 
 		yield take(ModelTypes.FETCH_REVISIONS_SUCCESS);
 		const revision = yield select(selectCurrentRevisionId);
@@ -71,7 +72,7 @@ function* fetchData({ teamspace, model }) {
 			put(RisksActions.fetchRisks(teamspace, model, revision)),
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),
 			put(ViewerGuiActions.getHelicopterSpeed(teamspace, model)),
-			put(StarredMetaActions.fetchStarredMeta())
+			put(StarredActions.fetchStarredMeta())
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'initial model data', error));
@@ -238,7 +239,7 @@ function* resetHelicopterSpeed({teamspace, modelId, updateDefaultSpeed}) {
 	}
 }
 
-function* getHelicopterSpeed({teamspace, modelId}) {
+function* getHelicopterSpeed({ teamspace, modelId }) {
 	try {
 		yield Viewer.isViewerReady();
 		const { data: { heliSpeed } } = yield API.getHelicopterSpeed(teamspace, modelId);
@@ -260,7 +261,7 @@ function* getHelicopterSpeed({teamspace, modelId}) {
 	}
 }
 
-function* increaseHelicopterSpeed({teamspace, modelId}) {
+function* increaseHelicopterSpeed({ teamspace, modelId }) {
 	try {
 		const helicopterSpeed = yield select(selectHelicopterSpeed);
 		const speed = helicopterSpeed + 1;
@@ -273,7 +274,7 @@ function* increaseHelicopterSpeed({teamspace, modelId}) {
 	}
 }
 
-function* decreaseHelicopterSpeed({teamspace, modelId}) {
+function* decreaseHelicopterSpeed({ teamspace, modelId }) {
 	try {
 		const helicopterSpeed = yield select(selectHelicopterSpeed);
 		const speed = helicopterSpeed - 1;

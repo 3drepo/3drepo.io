@@ -73,6 +73,10 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		currentView: PERMISSIONS_VIEWS.PROJECTS
 	};
 
+	public get isProjectViewActive() {
+		return this.state.currentView !== PERMISSIONS_VIEWS.MODELS;
+	}
+
 	public updateUrlParams = (params) => {
 		const {location: {pathname, search}} = this.props;
 		const queryParams = { ...queryString.parse(search), ...params };
@@ -98,7 +102,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	}
 
 	public getFooterLabel = (currentView) => {
-		const type = currentView !== PERMISSIONS_VIEWS.MODELS ? 'project' : 'model and federation';
+		const type = this.isProjectViewActive ? 'project' : 'model and federation';
 		return `Assign ${type} permissions`;
 	}
 
@@ -139,25 +143,20 @@ export class Projects extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public renderPermissionsView = () => {
-		const { currentView } = this.state;
-		const { location } = this.props;
-
-		return (
-			<>
-				{currentView !== PERMISSIONS_VIEWS.MODELS && <ProjectsPermissions />}
-				{currentView === PERMISSIONS_VIEWS.MODELS && <ModelsPermissions />}
-			</>
-		);
-	}
+	public renderPermissionsView = () => (
+		<>
+			{this.isProjectViewActive && <ProjectsPermissions />}
+			{!this.isProjectViewActive && <ModelsPermissions />}
+		</>
+	)
 
 	public render() {
-		const {match} = this.props;
+		const { match } = this.props;
 		const {currentView, selectedProject, projectsItems} = this.state;
 		const footerLabel = this.getFooterLabel(currentView);
 		return (
 			<Container>
-				<UserManagementTab footerLabel={footerLabel} withHeader>
+				<UserManagementTab footerLabel={footerLabel} >
 					<>
 						<Options
 							container

@@ -18,7 +18,8 @@
 "use strict";
 const _ = require("lodash");
 const sharp = require("sharp");
-const nodeuuid = require("node-uuid");
+const nodeuuid = require("uuid/v1");
+const uuidparse = require("uuid-parse");
 const mongo = require("mongodb");
 
 function Utils() {
@@ -44,7 +45,7 @@ function Utils() {
 			return uuid;
 		}
 
-		const bytes = nodeuuid.parse(uuid);
+		const bytes = uuidparse.parse(uuid);
 		const buf   = new Buffer.from(bytes);
 
 		return mongo.Binary(buf, 3);
@@ -57,7 +58,7 @@ function Utils() {
 	*******************************************************************************/
 	this.uuidToString = function(binuuid) {
 		return (!_.isString(binuuid)) ?
-			nodeuuid.unparse(binuuid.buffer) :
+			uuidparse.unparse(binuuid.buffer) :
 			binuuid;
 	};
 
@@ -99,10 +100,10 @@ function Utils() {
 	this.generateUUID = function(options) {
 
 		if(options && options.string) {
-			return nodeuuid.v4();
+			return nodeuuid();
 		}
 
-		return self.stringToUUID(nodeuuid.v4());
+		return self.stringToUUID(nodeuuid());
 	};
 
 	/** *****************************************************************************

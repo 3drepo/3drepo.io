@@ -33,8 +33,7 @@ import {
 	selectIfcSpacesHidden,
 	selectNodesIndexesMap,
 	selectSelectionMap,
-	selectTreeNodesList,
-	selectVisibilityMap
+	selectTreeNodesList
 } from './tree.selectors';
 import TreeProcessing from './treeProcessing/treeProcessing';
 
@@ -106,7 +105,6 @@ function* expandToNode(node: any) {
 			// already expanded
 			return;
 		}
-		const nodesList = yield select(selectTreeNodesList);
 
 		const parents = TreeProcessing.getParentsID(node);
 		for (let index = parents.length - 1; index >= 0; --index) {
@@ -121,6 +119,7 @@ function* expandToNode(node: any) {
 }
 
 function* getAllTrees(teamspace, modelId, revision) {
+	yield put(TreeActions.resetComponentState());
 	const fullTree = yield API.getFullTree(teamspace, modelId, revision);
 
 	const proms = [];
@@ -135,6 +134,10 @@ function* getAllTrees(teamspace, modelId, revision) {
 	const subTrees = yield all(proms);
 	return { fullTree: fullTree.data, subTrees: subTrees.filter((data) => !!data)};
 }
+
+const setIsTreeProcessed = (isProcessed) => {
+	dispatch(TreeActions.setIsTreeProcessed(isProcessed));
+};
 
 function* fetchFullTree({ teamspace, modelId, revision }) {
 	yield put(TreeActions.setIsPending(true));
@@ -171,7 +174,8 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 		dataToProcessed.mainTree.isFederation = modelSettings.federate;
 		dataToProcessed.subModels = modelSettings.subModels;
 		dataToProcessed.treePath = treePath;
-		yield TreeProcessing.transformData(dataToProcessed);
+
+		yield TreeProcessing.transformData(dataToProcessed, setIsTreeProcessed);
 		yield put(TreeActions.updateDataRevision());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('fetch', 'full tree', error));
@@ -229,7 +233,6 @@ function* handleNodesClick({ nodesIds = [], skipExpand = false}) {
 		yield put(TreeActions.clearCurrentlySelected(false));
 		yield take(TreeTypes.UPDATE_DATA_REVISION);
 	}
-
 	if (removeGroup) {
 		yield put(TreeActions.deselectNodes(nodesIds));
 	} else {
@@ -351,6 +354,8 @@ function* isolateNodes(nodesIds = []) {
 function* isolateSelectedNodes({ nodeId }) {
 	if (nodeId) {
 		yield isolateNodes([nodeId]);
+		const meshes = yield TreeProcessing.getMeshesByNodeIds([nodeId]);
+		Viewer.zoomToObjects({entries: meshes});
 	} else {
 		const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
 		yield isolateNodes(fullySelectedNodes);

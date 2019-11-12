@@ -16,25 +16,52 @@
  */
 
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-
 import { selectCurrentTeamspace } from '../../modules/currentUser';
 import { DialogActions } from '../../modules/dialog';
-import { selectActiveProject,
-	selectActiveTeamspace,
+import { selectStarredModels, StarredActions } from '../../modules/starred';
+import {
+	selectActiveSorting,
+	selectActiveSortingDirection,
+	selectDateSortingDescending,
+	selectFlattenTeamspaces,
 	selectIsPending,
+	selectModels,
+	selectModelCodes,
+	selectNameSortingDescending,
+	selectSearchEnabled,
+	selectSelectedDataTypes,
+	selectSelectedFilters,
+	selectShowStarredOnly,
+	selectStarredVisibleItems,
 	selectTeamspaces,
+	selectVisibleItems,
 	TeamspacesActions
 } from '../../modules/teamspaces';
-import { ModelActions } from './../../modules/model';
+import { selectRevisions, ModelActions } from './../../modules/model';
 import { Teamspaces } from './teamspaces.component';
+
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,
-	teamspaces: selectTeamspaces,
+	items: selectFlattenTeamspaces,
 	isPending: selectIsPending,
-	activeProject: selectActiveProject,
-	activeTeamspace: selectActiveTeamspace
+	visibleItems: selectVisibleItems,
+	revisions: selectRevisions,
+	starredVisibleItems: selectStarredVisibleItems,
+	teamspaces: selectTeamspaces,
+	showStarredOnly: selectShowStarredOnly,
+	starredModelsMap: selectStarredModels,
+	modelsMap: selectModels,
+	searchEnabled: selectSearchEnabled,
+	selectedFilters: selectSelectedFilters,
+	selectedDataTypes: selectSelectedDataTypes,
+	modelCodes: selectModelCodes,
+	activeSorting: selectActiveSorting,
+	activeSortingDirection: selectActiveSortingDirection,
+	nameSortingDescending: selectNameSortingDescending,
+	dateSortingDescending: selectDateSortingDescending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -44,11 +71,11 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateProject: TeamspacesActions.updateProject,
 	removeProject: TeamspacesActions.removeProject,
 	createModel: TeamspacesActions.createModel,
-	updateModel: TeamspacesActions.updateModel,
-	removeModel: TeamspacesActions.removeModel,
 	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
+	setState: TeamspacesActions.setComponentState,
 	downloadModel: ModelActions.downloadModel,
-	setState: TeamspacesActions.setComponentState
+	fetchStarredModels: StarredActions.fetchStarredModels,
+	leaveTeamspace:  TeamspacesActions.leaveTeamspace
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Teamspaces);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Teamspaces));

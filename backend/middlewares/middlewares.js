@@ -137,6 +137,15 @@
 		}
 	}
 
+	function isAccountAdminOrSameUser(req, res, next) {
+		if (req.params.user ===  req.session.user.username) {
+			next();
+			return;
+		}
+
+		checkPermissions([C.PERM_TEAMSPACE_ADMIN])(req, res, next);
+	}
+
 	const middlewares = {
 
 		project: require("./project"),
@@ -160,6 +169,7 @@
 		hasEditPermissionsAccessToMulitpleModels: checkMultiplePermissions([C.PERM_MANAGE_MODEL_PERMISSION]),
 
 		isAccountAdmin: checkPermissions([C.PERM_TEAMSPACE_ADMIN]),
+		isAccountAdminOrSameUser,
 		hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],
 		isTeamspaceMember,
 		loggedIn,

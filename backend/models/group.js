@@ -21,7 +21,7 @@ const _ = require("lodash");
 const mongoose = require("mongoose");
 const ModelFactory = require("./factory/modelFactory");
 const utils = require("../utils");
-const uuid = require("node-uuid");
+const nodeuuid = require("uuid/v1");
 const Schema = mongoose.Schema;
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
@@ -571,7 +571,7 @@ groupSchema.statics.createGroup = function (dbCol, sessionId, data, creator = ""
 
 		});
 
-		newGroup._id = utils.stringToUUID(uuid.v1());
+		newGroup._id = utils.stringToUUID(nodeuuid());
 		newGroup.author = creator;
 		newGroup.createdAt = Date.now();
 
@@ -952,6 +952,10 @@ async function findObjectIDsByRules(account, model, rules, branch, revId, conver
 				}
 
 				return {account, model, shared_ids};
+			}).catch(() => {
+				// If search on a submodel failed (usually due to no revision in the submodel), it should not
+				// fail the whole API request.
+				return undefined;
 			}));
 		}
 

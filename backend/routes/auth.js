@@ -588,6 +588,8 @@ function login(req, res, next) {
 
 			user.customData.lastLoginAt = new Date();
 
+			req.body.username = user.user;
+
 			user.save().then(() => {
 				createSession(responsePlace, req, res, next, responseData);
 			});

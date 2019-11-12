@@ -33,6 +33,7 @@ import {
 	RoleIndicator,
 	StyledArrowIcon,
 	Thumbnail,
+	ThumbnailPlaceholder,
 	ThumbnailWrapper
 } from './previewListItem.styles';
 
@@ -80,7 +81,10 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 
 	public renderThumbnail = renderWhenTrue(() => (
 		<ThumbnailWrapper>
-			<Thumbnail src={this.props.thumbnail} />
+			{this.props.thumbnail ?
+				<Thumbnail src={this.props.thumbnail} /> :
+				<ThumbnailPlaceholder>No image</ThumbnailPlaceholder>
+			}
 		</ThumbnailWrapper>
 	));
 

@@ -24,10 +24,10 @@ export const sortByField = (data = [], options: {order: any, config: any}) => {
 	);
 };
 
-export const sortByDate = (data = [], options: {order: any}) => {
+export const sortByDate = (data = [], options: {order: any}, fieldName = 'created') => {
 	return orderBy(
 		data,
-		(item) => (item.created || item.createdAt),
+		(item) => new Date(item[fieldName]),
 		options.order
 	);
 };

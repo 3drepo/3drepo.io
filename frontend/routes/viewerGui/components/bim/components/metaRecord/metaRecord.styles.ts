@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Icon } from '@material-ui/core';
 import styled from 'styled-components';
 import { COLOR } from '../../../../../../styles';
 import { LinkableField } from '../../../../../components/linkableField/linkableField.component';
@@ -54,13 +53,9 @@ export const MetaValue = styled(LinkableField)`
 	word-break: break-word;
 `;
 
-export const StarIconWrapper = styled(Icon)`
-	color: ${(props: any) => props.active ? COLOR.DARK_ORANGE : COLOR.BLACK_20};
+export const StarIconWrapper = styled.div`
 	width: 20px;
 	margin-left: 5px;
 	margin-right: 2px;
 	margin-top: -2px;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
 ` as any;

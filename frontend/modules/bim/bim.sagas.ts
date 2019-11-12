@@ -27,9 +27,11 @@ export function* fetchMetadata({ teamspace, model, metadataId }) {
 	yield put(BimActions.setIsPending(true));
 
 	try {
-		const { data } = yield API.getMetadata(teamspace, model, metadataId);
-		const sortedData = sortBy(prepareMetadata(data.meta[0].metadata), 'key');
-		yield put(BimActions.fetchMetadataSuccess(sortedData));
+		if (metadataId) {
+			const { data } = yield API.getMetadata(teamspace, model, metadataId);
+			const sortedData = sortBy(prepareMetadata(data.meta[0].metadata), 'key');
+			yield put(BimActions.fetchMetadataSuccess(sortedData));
+		}
 		yield put(BimActions.setActiveMeta(metadataId));
 
 	} catch (error) {

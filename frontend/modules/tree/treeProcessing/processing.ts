@@ -61,14 +61,6 @@ export class Processing {
 		return parentsIds;
 	}, (node = {}) => node._id);
 
-	public getChildren = memoize((node = {}) => {
-		if (node.hasChildren) {
-			return this.getNodesByIds(node.childrenIds);
-		}
-
-		return [];
-	}, (node = {}) => node._id);
-
 	constructor(data) {
 		const {
 			nodesList, nodesIndexesMap, defaultVisibilityMap,
@@ -142,6 +134,11 @@ export class Processing {
 
 		const unhighlightedObjects = this.handleSelection(nodes, SELECTION_STATES.UNSELECTED);
 		return { unhighlightedObjects };
+	}
+
+	public getMeshesByNodeIds = (nodeIds = []) => {
+		const nodes = this.getNodesByIds(nodeIds);
+		return this.getMeshesByNodes(nodes);
 	}
 
 	public isolateNodes = ({ nodesIds = [], ifcSpacesHidden = true}: any) => {

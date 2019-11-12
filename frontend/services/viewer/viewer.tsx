@@ -464,6 +464,11 @@ export class ViewerService {
 		this.viewer.zoomToHighlightedMeshes();
 	}
 
+	public async zoomToObjects(meshes) {
+		await this.isModelReady();
+		this.viewer.zoomToObjects(meshes);
+	}
+
 	public setShadows = (type: string) => {
 		switch (type) {
 			case 'soft':

@@ -15,401 +15,473 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEmpty, isEqual } from 'lodash';
-import * as queryString from 'query-string';
+import CancelIcon from '@material-ui/icons/Cancel';
+import SearchIcon from '@material-ui/icons/Search';
+import { cond, matches, stubTrue } from 'lodash';
+import memoizeOne from 'memoize-one';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
-import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
 
-import MenuItem from '@material-ui/core/MenuItem';
+import { IconButton, MenuItem, Tab, Tabs } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
+import Check from '@material-ui/icons/Check';
 
+import { renderWhenTrue } from '../../helpers/rendering';
+import { sortModels } from '../../modules/teamspaces/teamspaces.helpers';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
 import { Body, BodyWrapper } from '../components/customTable/customTable.styles';
+import {
+	MenuList,
+	StyledItemText,
+	StyledListItem
+} from '../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { FilterPanel, FILTER_TYPES } from '../components/filterPanel/filterPanel.component';
 import { Loader } from '../components/loader/loader.component';
-import { Panel } from '../components/panel/panel.component';
-import { PERMISSIONS_VIEWS } from '../projects/projects.component';
+import { MenuButton as MenuButtonComponent } from '../components/menuButton/menuButton.component';
+import { ViewerPanel } from '../viewerGui/components/viewerPanel/viewerPanel.component';
 import FederationDialog from './components/federationDialog/federationDialog.container';
-import { ModelDialog } from './components/modelDialog/modelDialog.component';
-import { ModelDirectoryItem } from './components/modelDirectoryItem/modelDirectoryItem.component';
-import ModelItem from './components/modelItem/modelItem.container';
-import { ProjectDialog } from './components/projectDialog/projectDialog.component';
-import { ProjectItem } from './components/projectItem/projectItem.component';
-import RevisionsDialog from './components/revisionsDialog/revisionsDialog.container';
-import { TeamspaceItem } from './components/teamspaceItem/teamspaceItem.component';
-import UploadModelFileDialog from './components/uploadModelFileDialog/uploadModelFileDialog.container';
-import { FEDERATION_TYPE, MODEL_TYPE } from './teamspaces.contants';
-import { Head, List, LoaderContainer, MenuButton } from './teamspaces.styles';
-
-const PANEL_PROPS = {
-	title: 'Teamspaces',
-	paperProps: {
-		height: '100%'
-	}
-};
-
-const getTeamspacesItems = (teamspaces) => teamspaces.map(({ account, projects }) => ({ value: account, projects }));
-
+import ModelDialog from './components/modelDialog/modelDialog.container';
+import ModelGridItem from './components/modelGridItem/modelGridItem.container';
+import ProjectDialog from './components/projectDialog/projectDialog.container';
+import ProjectItem from './components/projectItem/projectItem.container';
+import TeamspaceItem from './components/teamspaceItem/teamspaceItem.container';
+import {
+	LIST_ITEMS_TYPES,
+	MODEL_SUBTYPES,
+	SORTING_BY_LAST_UPDATED,
+	SORTING_BY_NAME,
+	TEAMSPACE_FILTER_RELATED_FIELDS,
+	TEAMSPACES_DATA_TYPES,
+	TEAMSPACES_FILTERS,
+	TEAMSPACES_PANEL_ACTIONS_MENU,
+} from './teamspaces.contants';
+import {
+	Action,
+	AddModelButton,
+	AddModelButtonOption,
+	GridContainer,
+	Head,
+	Label,
+	List,
+	LoaderContainer,
+	MenuButton,
+	OtherTeamspacesLabel
+} from './teamspaces.styles';
 interface IProps {
 	match: any;
 	history: any;
 	location: any;
+	teamspaces: any;
 	currentTeamspace: string;
-	teamspaces: any[];
+	items: any[];
 	isPending: boolean;
-	activeTeamspace: string;
-	activeProject: string;
+	visibleItems: any[];
+	revisions?: any[];
+	starredVisibleItems: any[];
+	showStarredOnly: boolean;
+	searchEnabled: boolean;
+	selectedFilters: any[];
+	selectedDataTypes: any[];
+	modelCodes: string[];
+	starredModelsMap: any;
+	modelsMap: any;
+	activeSorting: string;
+	activeSortingDirection: string;
+	nameSortingDescending: boolean;
+	dateSortingDescending: boolean;
 	showDialog: (config) => void;
 	showConfirmDialog: (config) => void;
-
 	fetchTeamspaces: (username) => void;
-
-	createProject: (teamspace, projectData) => void;
-	updateProject: (teamspace, projectName, projectData) => void;
-	removeProject: (teamspace, projectName) => void;
-
-	createModel: (teamspace, modelData) => void;
-	updateModel: (teamspace, modelName, modelData) => void;
-	removeModel: (teamspace, modelData) => void;
-	downloadModel: (teamspace, modelId) => void;
-
-	onModelUpload: () => void;
-	onSettingsClick: () => void;
-	onDeleteClick: () => void;
-	onEditClick: () => void;
-	onRevisionsClick: () => void;
-	onDownloadClick: () => void;
-	onUploadClick: () => void;
+	fetchStarredModels: () => void;
+	leaveTeamspace: (Teamspace) => void;
 	setState: (componentState: any) => void;
 }
 
 interface IState {
-	activeTeamspace: string;
-	activeProject: string;
 	teamspacesItems: any[];
+	visibleItems: any;
+	lastVisibleItems: any;
 }
 
+const getSearchQuery = memoizeOne((selectedFilters) => selectedFilters.reduce((query, filter) => {
+	if (filter.type === FILTER_TYPES.QUERY) {
+		query = `${query} ${filter.value.value}`;
+	}
+	return query;
+}, '').trim());
+
+const iconProps = { fontSize: 'small' };
+
+const PanelMenuButton = (props) => <MenuButtonComponent ariaLabel="Show Teamspaces menu" {...props} />;
+
+const SortingIcon = ({Icon, isDesc}) => {
+	if (isDesc) {
+		return <Icon.DESC IconProps={iconProps} />;
+	}
+	return <Icon.ASC IconProps={iconProps} />;
+};
 export class Teamspaces extends React.PureComponent<IProps, IState> {
 	public static defaultProps = {
 		teamspaces: []
 	};
 
 	public state = {
-		activeTeamspace: '',
-		activeProject: '',
-		teamspacesItems: []
+		teamspacesItems: [],
+		visibleItems: {},
+		lastVisibleItems: {}
 	};
 
+	private get filtersValuesMap() {
+		const { modelCodes } = this.props;
+		return {
+			[TEAMSPACE_FILTER_RELATED_FIELDS.DATA_TYPE]: [],
+			[TEAMSPACE_FILTER_RELATED_FIELDS.MODEL_TYPE]: MODEL_SUBTYPES.map(({ value }) => ({ value, label: value })),
+			[TEAMSPACE_FILTER_RELATED_FIELDS .MODEL_CODE]: modelCodes.map((code) => ({ value: code, label: code })),
+		};
+	}
+
+	private get filters() {
+		const filterValuesMap = this.filtersValuesMap;
+		return TEAMSPACES_FILTERS.map((teamspaceFilter) => {
+			teamspaceFilter.values = filterValuesMap[teamspaceFilter.relatedField] || [];
+			return teamspaceFilter;
+		});
+	}
+
+	private get searchQuery() {
+		return getSearchQuery(this.props.selectedFilters);
+	}
+
+	private get myTeamspace() {
+		return this.props.items[0];
+	}
+
 	public componentDidMount() {
-		if (this.props.teamspaces.length === 0 ) {
-			this.props.fetchTeamspaces(this.props.currentTeamspace);
+		const {
+			items,
+			fetchTeamspaces,
+			currentTeamspace,
+			visibleItems,
+			starredVisibleItems,
+			fetchStarredModels,
+			showStarredOnly
+		} = this.props;
+
+		if (!items.length) {
+			fetchTeamspaces(currentTeamspace);
+			fetchStarredModels();
 		}
 
 		this.setState({
-			activeTeamspace: this.props.activeTeamspace || this.props.currentTeamspace,
-			activeProject: this.props.activeProject,
-			teamspacesItems: getTeamspacesItems(this.props.teamspaces)
+			visibleItems: showStarredOnly ? starredVisibleItems : visibleItems,
+			lastVisibleItems: visibleItems
 		});
 	}
 
 	public componentDidUpdate(prevProps) {
-		const changes = {} as IState;
+		const { items, searchEnabled, selectedFilters} = this.props;
+		const filtersCleared = !selectedFilters.length && prevProps.selectedFilters.length;
+		const itemsChanged = prevProps.items && prevProps.items !== items;
 
-		const currentTeamspaceChanged = this.props.currentTeamspace !== prevProps.currentTeamspace;
-		if (currentTeamspaceChanged) {
-			changes.activeTeamspace = this.props.currentTeamspace;
-		}
+		if (filtersCleared) {
+			const visibleItems = {
+				[this.props.currentTeamspace]: true
+			};
+			this.setState({ visibleItems });
+		} else if (searchEnabled && (selectedFilters.length) && itemsChanged) {
+			const visibleItems = { ...this.state.visibleItems };
 
-		const teamspacesChanged = !isEqual(this.props.teamspaces, prevProps.teamspaces);
-
-		if (teamspacesChanged) {
-			changes.teamspacesItems = getTeamspacesItems(this.props.teamspaces);
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
+			items.forEach(({ collapsed, id }) => {
+				if (collapsed) {
+					delete visibleItems[id];
+				} else {
+					visibleItems[id] = true;
+				}
+			});
+			this.setState({ visibleItems });
 		}
 	}
 
 	public componentWillUnmount() {
-		this.props.setState({
-			activeTeamspace: this.state.activeTeamspace,
-			activeProject: this.state.activeProject
-		});
+		if (this.props.showStarredOnly) {
+			this.props.setState({
+				starredVisibleItems: this.state.visibleItems
+			});
+		} else {
+			this.props.setState({
+				visibleItems: this.state.lastVisibleItems
+			});
+		}
+
 	}
 
-	public getTeamspaceProjects = (teamspaceName) => {
-		const teamspace = this.props.teamspaces.find((teamspaceItem) => teamspaceItem.account === teamspaceName);
-		return teamspace.projects.map(({ name, models }) => ({ value: name, models }));
-	}
+	private shouldBeVisible = cond([
+		[matches({ type: LIST_ITEMS_TYPES.TEAMSPACE }), stubTrue],
+		[matches({ type: LIST_ITEMS_TYPES.PROJECT }), ({ teamspace }) => this.state.visibleItems[teamspace]],
+		[stubTrue, () => false]
+	]);
 
-	public createRouteHandler = (pathname, params = {}) => (event) => {
+	private openProjectDialog = (event, teamspaceName = '', projectId?, projectName = '') => {
 		event.stopPropagation();
 
-		this.props.history.push({ pathname, search: `?${queryString.stringify(params)}` });
-	}
-
-	public onTeamspaceClick = ({ name }) => {
-		this.setState({ activeTeamspace: name });
-	}
-
-	/**
-	 * Dialog handlers
-	 */
-	public openProjectDialog = (teamspaceName = '', projectName = '') => (event) => {
-		event.stopPropagation();
-		const { teamspacesItems } = this.state as IState;
-
-		const isNewProject = !projectName.length;
 		this.props.showDialog({
-			title: projectName ? 'Edit project' : 'New project',
+			title: 'New project',
 			template: ProjectDialog,
 			data: {
+				id: projectId,
 				name: projectName,
 				teamspace: teamspaceName,
-				teamspaces: teamspacesItems
 			},
-			onConfirm: ({ teamspace, ...projectData }) => {
-				if (isNewProject) {
-					this.props.createProject(teamspace, projectData);
-				} else {
-					this.props.updateProject(teamspace, projectName, projectData);
-				}
+		});
+	}
+
+	private openFederationDialog = ({ project, teamspace }: { project?: string, teamspace?: string }) => {
+		this.props.showDialog({
+			title: 'New federation',
+			template: FederationDialog,
+			data: {
+				teamspace,
+				project
 			}
 		});
 	}
 
-	public createRemoveProjectHandler = (projectName) => (event) => {
-		event.stopPropagation();
-		this.props.showConfirmDialog({
-			title: 'Delete project',
-			content: `
-				Do you really want to delete project <b>${projectName}</b>? <br /><br />
-				This will remove the project from your teamspace,
-				deleting all the models inside of it!
-			`,
-			onConfirm: () => {
-				this.props.removeProject(this.state.activeTeamspace, projectName);
-			}
-		});
-	}
-
-	public createRemoveModelHandler = (modelName, modelId, projectName, type) => (event) => {
-		event.stopPropagation();
-
-		this.props.showConfirmDialog({
-			title: `Delete ${type}`,
-			content: `
-				Do you really want to delete ${type} <b>${modelName}</b>? <br /><br />
-				Your data will be lost permanently and will not be recoverable.
-			`,
-			onConfirm: () => {
-				this.props.removeModel(this.state.activeTeamspace, {
-					id: modelId, name: modelName, project: projectName
-				});
-			}
-		});
-	}
-
-	public openModelDialog =
-		(teamspaceName = '', projectName = '', modelName = '', modelId = '') => (event) => {
-		event.stopPropagation();
-		const { teamspacesItems } = this.state as IState;
-		const teamspaces = teamspacesItems.filter((teamspace) => teamspace.projects.length);
-
+	private openModelDialog = ({ project, teamspace }: { project?: string, teamspace?: string }) => {
 		this.props.showDialog({
 			title: 'New model',
 			template: ModelDialog,
 			data: {
-				modelName,
-				teamspace: teamspaceName,
-				teamspaces,
-				project: projectName,
-				projects: teamspaceName ? this.getTeamspaceProjects(teamspaceName) : [],
-				modelId
-			},
-			onConfirm: ({ teamspace, ...modelData }) => {
-				this.props.createModel(teamspace, modelData);
+				teamspace,
+				project
 			}
 		});
 	}
 
-	public openFederationDialog =
-		(teamspaceName = '', projectName = '', modelName = '', modelId = '') => (event) => {
-			event.stopPropagation();
-			const { teamspacesItems } = this.state as IState;
-			const isNewModel = !modelName.length;
-			const teamspaces = teamspacesItems.filter((teamspace) => teamspace.projects.length);
-
-			this.props.showDialog({
-				title: modelName ? 'Edit federation' : 'New federation',
-				template: FederationDialog,
-				data: {
-					name: modelName,
-					modelName,
-					teamspace: teamspaceName,
-					teamspaces,
-					project:  projectName ,
-					projects: teamspaceName ? this.getTeamspaceProjects(teamspaceName) : [],
-					editMode: !!modelName,
-					modelId
-				},
-				DialogProps: {
-					maxWidth: 'lg'
-				},
-				onConfirm: ({ teamspace, ...modelData }) => {
-					if (isNewModel) {
-						this.props.createModel(teamspace, modelData);
-					} else {
-						this.props.updateModel(teamspace, modelId, modelData);
-					}
-				}
-		});
-	}
-
-	public openUploadModelFileDialog = (teamspaceName = '', modelProps) => (event) => {
+	public onLeaveTeamspace = (teamspace) => (event) => {
 		event.stopPropagation();
-
-		this.props.showDialog({
-			title: `Upload Model`,
-			template: UploadModelFileDialog,
-			data: {
-				teamspaceName,
-				modelName: modelProps.name,
-				modelId: modelProps.model,
-				canUpload: modelProps.canUpload,
-				projectName: modelProps.projectName
+		this.props.showConfirmDialog({
+			title: 'Leave teamspace',
+			content: `
+				Do you really want to leave teamspace <b>${teamspace}</b>? <br /><br />
+				This will remove you from the teamspace,
+				and you wont have any access to it's projects and models!
+			`,
+			onConfirm: () => {
+				this.props.leaveTeamspace(teamspace);
 			}
+		});
+
+	}
+
+	private handleVisibilityChange = ({ id: itemId, nested = []}) => {
+		this.setState((prevState) => {
+			const visibleItems = { ...prevState.visibleItems };
+			visibleItems[itemId] = !visibleItems[itemId];
+
+			if (!visibleItems[itemId]) {
+				nested.forEach((id) => {
+					visibleItems[id] = visibleItems[itemId];
+				});
+			}
+
+			return { visibleItems };
 		});
 	}
 
-	public openModelRevisionsDialog = (props) => (event) => {
-		event.stopPropagation();
-
-		this.props.showDialog({
-			title: `${props.name} - Revisions`,
-			template: RevisionsDialog,
-			data: {
-				teamspace: this.state.activeTeamspace,
-				modelId: props.model
-			}
-		});
-	}
-
-	public createModelItemClickHandler = (props) => (event) => {
-		const { activeTeamspace } = this.state;
-		if (props.timestamp) {
-			event.persist();
-			this.createRouteHandler(`/viewer/${activeTeamspace}/${props.model}`)(event);
-
-			analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
-		} else {
-			this.openUploadModelFileDialog(activeTeamspace, props)(event);
+	private getSearchButton = () => {
+		if (this.props.searchEnabled) {
+			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
 		}
+		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
 	}
 
-	public createDownloadModelHandler = (activeTeamspace, modelId) => () => {
-		this.props.downloadModel(activeTeamspace, modelId);
+	private handleSortingItemClick = (sortingType, isNameSortingActive) => {
+		const { nameSortingDescending, dateSortingDescending } = this.props;
+		const newState = {} as any;
+		const isNameSortingClicked = sortingType === SORTING_BY_NAME;
+
+		newState.activeSorting = sortingType;
+
+		if (isNameSortingClicked) {
+			newState.nameSortingDescending = isNameSortingActive ? !nameSortingDescending : nameSortingDescending;
+		} else {
+			newState.dateSortingDescending = !isNameSortingActive ? !dateSortingDescending : dateSortingDescending;
+		}
+
+		this.props.setState(newState);
 	}
 
-	/**
-	 * Render methods
-	 */
-	public renderModel = (props) => {
-		const type = props.federate ? FEDERATION_TYPE : MODEL_TYPE;
-		const { activeTeamspace } = this.state;
-		const { match } = this.props;
+	private renderActionsMenu = () =>  {
+		const { activeSorting, nameSortingDescending, dateSortingDescending } = this.props;
+		const isNameSortingActive = activeSorting === SORTING_BY_NAME;
 
+		return(
+			<MenuList>
+				{TEAMSPACES_PANEL_ACTIONS_MENU.map(({ sortingType, label, Icon }) => {
+					const isDesc = {
+						[SORTING_BY_NAME]: nameSortingDescending,
+						[SORTING_BY_LAST_UPDATED]: dateSortingDescending
+					};
+
+					return(
+						<StyledListItem key={label} button onClick={() => this.handleSortingItemClick(sortingType, isNameSortingActive)}>
+							<StyledItemText>
+								<Action>
+									<SortingIcon Icon={Icon} isDesc={isDesc[sortingType]} />
+									<Label>{label}</Label>
+								</Action>
+								{(activeSorting === sortingType) && <Check fontSize="small" />}
+							</StyledItemText>
+						</StyledListItem>
+					);
+				})}
+			</MenuList>
+		);
+	}
+
+	public getPanelMenuButton = () => {
 		return (
-			<ModelItem
-				{...props}
-				key={props.model}
-				activeTeamspace={activeTeamspace}
-				actions={[]}
-				onModelItemClick={this.createModelItemClickHandler(props)}
-				onPermissionsClick={this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
-					project: props.projectName,
-					view: PERMISSIONS_VIEWS.MODELS,
-					modelId: props.model
-				})}
-				onSettingsClick={this.createRouteHandler(`${match.url}/${activeTeamspace}/models/${props.model}`, {
-					project: props.projectName
-				})}
-				onDeleteClick={this.createRemoveModelHandler(props.name, props.model, props.projectName, type)}
-				onDownloadClick={this.createDownloadModelHandler(this.state.activeTeamspace, props.model)}
-				onRevisionsClick={this.openModelRevisionsDialog(props)}
-				onModelUpload={this.openUploadModelFileDialog(this.state.activeTeamspace, props)}
-				onEditClick={this.openFederationDialog(this.state.activeTeamspace, props.projectName, props.name, props.model)}
+			<ButtonMenu
+				renderButton={PanelMenuButton}
+				renderContent={() => {
+					return this.renderActionsMenu();
+				}}
 			/>
 		);
 	}
 
-	public createModelDirectoryAddHandler = (props) => {
-		return props.type === FEDERATION_TYPE
-			? this.openFederationDialog(this.state.activeTeamspace, props.projectName)
-			: this.openModelDialog(this.state.activeTeamspace, props.projectName);
+	private handleCloseSearchMode = () => {
+		this.props.setState({ searchEnabled: false, selectedFilters: [] });
 	}
 
-	public renderModelDirectoryItem = (projectName) =>
-		(modelProps) => this.renderModel({ ...modelProps, projectName })
+	private handleOpenSearchMode = () => {
+		this.props.setState({ searchEnabled: true });
+	}
 
-	public renderModelDirectory = (permissions, props) => (
-		<ModelDirectoryItem
+	private handleFilterChange = (selectedFilters) => {
+		this.props.setState({ selectedFilters });
+	}
+
+	private handleDataTypeChange = (selectedDataTypes) => {
+		this.props.setState({ selectedDataTypes });
+	}
+
+	private renderActions = () => {
+		return (
+			<>
+				{this.getSearchButton()}
+				{this.getPanelMenuButton()}
+			</>
+		);
+	}
+
+	private renderFilterPanel = renderWhenTrue(() => (
+		<FilterPanel
+			onChange={this.handleFilterChange}
+			onDataTypeChange={this.handleDataTypeChange}
+			filters={this.filters}
+			selectedFilters={this.props.selectedFilters}
+			selectedDataTypes={this.props.selectedDataTypes}
+			dataTypes={TEAMSPACES_DATA_TYPES}
+			left
+		/>
+	));
+
+	private getStarredVisibleItems = () => {
+		const visibleItemsMap = {};
+
+		Object.keys(this.props.starredModelsMap).forEach((starredKey) => {
+			const [ teamspace, modelId ] = starredKey.split('/');
+			visibleItemsMap[teamspace] = true;
+
+			if (this.props.modelsMap[modelId]) {
+				visibleItemsMap[this.props.modelsMap[modelId].projectName] = true;
+			}
+		});
+
+		return visibleItemsMap;
+	}
+
+	private handleTabChange = (event, activeTab) => {
+		const starredVisibleItems = this.getStarredVisibleItems();
+
+		this.props.setState({
+			showStarredOnly: Boolean(activeTab),
+		});
+
+		if (activeTab) {
+			this.setState({
+				lastVisibleItems: this.state.visibleItems,
+			});
+		}
+
+		this.setState({
+			visibleItems: activeTab ? starredVisibleItems : this.state.lastVisibleItems
+		});
+	}
+
+	private renderAddModelGridItem = (teamspace, project) => (
+		<AddModelButton>
+			<AddModelButtonOption
+				onClick={() => this.openModelDialog({ teamspace, project })}
+			>Model</AddModelButtonOption>
+			<AddModelButtonOption
+				onClick={() => this.openFederationDialog({ teamspace, project })}
+			>Federation</AddModelButtonOption>
+		</AddModelButton>
+	)
+
+	private renderModels = (models) => renderWhenTrue(() => {
+		const sortedModels = sortModels(models, this.props.activeSorting, this.props.activeSortingDirection);
+
+		return sortedModels.map((props: any) => (
+			<ModelGridItem
+				{...props}
+				key={props.model}
+				query={this.searchQuery}
+			/>
+		));
+	})(models.length)
+
+	private renderProjectContainer = (models, project) => renderWhenTrue(() => (
+		<GridContainer key={`container-${project.id}`}>
+			{this.renderAddModelGridItem(project.teamspace, project.id)}
+			{this.renderModels(models)}
+		</GridContainer>
+	))(this.state.visibleItems[project.id] && (!this.props.showStarredOnly || project.models.length))
+
+	private renderProject = (props) => ([
+		(
+			<ProjectItem
+				{...props}
+				active={this.state.visibleItems[props.id]}
+				key={props._id}
+				isEmpty={!props.models.length}
+				query={this.searchQuery}
+				onClick={this.handleVisibilityChange}
+				showStarredOnly={this.props.showStarredOnly}
+			/>
+		),
+		this.renderProjectContainer(props.models, props),
+	])
+
+	private renderTeamspace = (props) => (
+		<TeamspaceItem
 			{...props}
-			permissions={permissions}
-			renderChildItem={this.renderModelDirectoryItem(props.projectName)}
-			onAddClick={this.createModelDirectoryAddHandler(props)}
+			key={props.account}
+			highlightedTextkey={props.account}
+			name={props.account}
+			active={this.state.visibleItems[props.account] && props.projects.length}
+			isMyTeamspace={this.props.currentTeamspace === props.account}
+			onToggle={this.handleVisibilityChange}
+			onAddProject={this.openProjectDialog}
+			disabled={!props.projects.length}
+			showStarredOnly={this.props.showStarredOnly}
+			onLeaveTeamspace={this.onLeaveTeamspace(props.account)}
 		/>
 	)
 
-	public isActiveProject = (projectName) => projectName === this.props.activeProject;
-
-	public isActiveTeamspace = (account) => {
-		const { teamspace } = this.props.match.params;
-
-		if (teamspace) {
-			return account === teamspace;
-		}
-
-		return account === this.state.activeTeamspace;
-	}
-
-	public renderProject = (props) => {
-		const { activeTeamspace } = this.state;
-
-		return (
-			<ProjectItem
-				{...props}
-				renderChildItem={this.renderModelDirectory.bind(this, props.permissions)}
-				onEditClick={this.openProjectDialog(activeTeamspace, props.name)}
-				onPermissionsClick={
-					this.createRouteHandler(`/dashboard/user-management/${activeTeamspace}/projects`, {
-						project: props.name
-					})}
-				onRemoveClick={this.createRemoveProjectHandler(props.name)}
-				active={this.isActiveProject(props.name)}
-				onRootClick={this.setActiveProject}
-			/>
-		);
-	}
-
-	public setActiveProject = ({active, name}) => {
-		this.setState({ activeProject: active ? name : ''	});
-	}
-
-	public renderTeamspaces = (teamspaces) => teamspaces.map((teamspace, index) => (
-		<TeamspaceItem
-			{...teamspace}
-			key={index}
-			active={this.isActiveTeamspace(teamspace.account)}
-			isMyTeamspace={index === 0}
-			renderChildItem={this.renderProject}
-			onToggle={this.onTeamspaceClick}
-			onAddProject={this.openProjectDialog(teamspace.account)}
-		/>
-	))
-
-	public renderMenuButton = (isPending, props) => (
+	private renderMenuButton = (isPending, props) => (
 		<MenuButton
 			buttonRef={props.buttonRef}
 			variant="fab"
@@ -424,33 +496,88 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		</MenuButton>
 	)
 
-	public renderMenu = ({ close }) => {
+	private renderMenu = ({ close }) => {
 		const createMenuClickHandler = (onClick, onClose) => (event) => {
 			onClick(event);
 			onClose(event);
 		};
 		return (
 			<>
-				<MenuItem onClick={createMenuClickHandler(this.openProjectDialog(), close)}>
+				<MenuItem onClick={createMenuClickHandler(this.openProjectDialog, close)}>
 					Add project
 				</MenuItem>
-				<MenuItem onClick={createMenuClickHandler(this.openModelDialog(), close)}>
+				<MenuItem onClick={createMenuClickHandler(this.openModelDialog, close)}>
 					Add model
 				</MenuItem>
-				<MenuItem onClick={createMenuClickHandler(this.openFederationDialog(), close)}>
+				<MenuItem onClick={createMenuClickHandler(this.openFederationDialog, close)}>
 					Add federation
 				</MenuItem>
 			</>
 		);
 	}
 
+	private renderListItem = cond([
+		[matches({ type: LIST_ITEMS_TYPES.TEAMSPACE }), this.renderTeamspace],
+		[matches({ type: LIST_ITEMS_TYPES.PROJECT }), this.renderProject],
+		[stubTrue, () => null]
+	]);
+
+	private renderLoader = renderWhenTrue(() => (
+		<LoaderContainer>
+				<Loader content="Loading teamspaces..." />
+		</LoaderContainer>
+	));
+
+	public renderMyTeamspace = () => {
+		return this.props.items
+			.slice(0, this.myTeamspace.projects.length + 1)
+			.filter(this.shouldBeVisible)
+			.map(this.renderListItem);
+	}
+
+	public renderOtherTeamspaces = () => {
+		return (
+			<>
+				<OtherTeamspacesLabel>Other Teamspaces:</OtherTeamspacesLabel>
+				{this.props.items
+					.slice(this.myTeamspace.projects.length + 1)
+					.filter(this.shouldBeVisible)
+					.map(this.renderListItem)}
+			</>
+		);
+	}
+
+	private renderList = renderWhenTrue(() => (
+		<BodyWrapper>
+			<Body>
+				<SimpleBar>
+					{this.renderMyTeamspace()}
+					{this.renderOtherTeamspaces()}
+				</SimpleBar>
+			</Body>
+		</BodyWrapper>
+	));
+
 	public render() {
-		const { isPending } = this.props;
+		const { isPending, showStarredOnly, searchEnabled } = this.props;
 
 		return (
-			<Panel {...PANEL_PROPS}>
+			<ViewerPanel
+				title="Teamspaces"
+				paperProps={{ height: '100%' }}
+				renderActions={this.renderActions}
+			>
+				{this.renderFilterPanel(searchEnabled)}
 				<Head>
-					3D MODELS & FEDERATIONS
+					<Tabs
+						indicatorColor="primary"
+						textColor="primary"
+						value={Number(showStarredOnly)}
+						onChange={this.handleTabChange}
+					>
+						<Tab label="3D Models & Federations" />
+						<Tab label="Starred" />
+					</Tabs>
 					<ButtonMenu
 						renderButton={this.renderMenuButton.bind(this, isPending)}
 						renderContent={this.renderMenu}
@@ -466,24 +593,11 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 						} }
 					/>
 				</Head>
-					{
-						isPending ? (
-							<List>
-								<LoaderContainer>
-									<Loader content="Loading teamspaces..." />
-								</LoaderContainer>
-							</List>
-						) : (
-							<BodyWrapper>
-								<Body>
-									<SimpleBar>
-										{this.renderTeamspaces(this.props.teamspaces)}
-									</SimpleBar>
-								</Body>
-							</BodyWrapper>
-						)
-					}
-			</Panel>
+				<List>
+					{this.renderLoader(isPending)}
+					{this.renderList(!isPending && this.props.items.length)}
+				</List>
+			</ViewerPanel>
 		);
 	}
 }

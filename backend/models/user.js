@@ -26,6 +26,7 @@ const crypto = require("crypto");
 const utils = require("../utils");
 const Role = require("./role");
 const Job = require("./job");
+const History = require("./history");
 const Mailer = require("../mailer/mailer");
 
 const systemLogger = require("../logger.js").systemLogger;
@@ -107,36 +108,47 @@ schema.statics.getTeamspaceSpaceUsed = function (dbName) {
 	});
 };
 
-schema.statics.authenticate = function (logger, username, password) {
-
+schema.statics.authenticate =  async function (logger, username, password) {
 	if (!username || !password) {
-		return Promise.reject({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
+		throw({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
 	}
 
+	let user = null;
 	let authDB = null;
-	return DB.getAuthDB().then(_authDB => {
-		authDB = _authDB;
-		return authDB.authenticate(username, password);
-	}).then(() => {
+	try {
+		if (C.EMAIL_REGEXP.test(username)) { // if the submited username is the email
+			user = await this.findByEmail(username);
+			if (!user) {
+				throw ({ resCode: responseCodes.INCORRECT_USERNAME_OR_PASSWORD });
+			}
+
+			username = user.user;
+		}
+
+		authDB = await DB.getAuthDB();
+		await authDB.authenticate(username, password);
 		authDB.close();
-		return this.findByUserName(username);
-	}).then(user => {
+
+		if (!user)  {
+			user = await this.findByUserName(username);
+		}
+
 		if (user.customData && user.customData.inactive) {
-			return Promise.reject({ resCode: responseCodes.USER_NOT_VERIFIED });
+			throw ({ resCode: responseCodes.USER_NOT_VERIFIED });
 		}
 
 		if (!user.customData) {
 			user.customData = {};
 		}
 
-		return user.save();
-
-	}).catch(err => {
+		return await user.save();
+	} catch(err) {
 		if (authDB) {
 			authDB.close();
 		}
-		return Promise.reject(err.resCode ? err : { resCode: utils.mongoErrorToResCode(err) });
-	});
+
+		throw (err.resCode ? err : { resCode: utils.mongoErrorToResCode(err) });
+	}
 };
 
 schema.statics.findByUserName = function (user) {
@@ -194,6 +206,61 @@ schema.statics.setStarredMetadataTags = async function (username, tags) {
 schema.statics.deleteStarredMetadataTag = async function (username, tag) {
 	const dbCol = await DB.getCollection("admin", "system.users");
 	await dbCol.update({user: username}, {$pull: { "customData.StarredMetadataTags" : tag } });
+	return {};
+};
+
+schema.statics.getStarredModels = async function (username) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	const userProfile = await dbCol.findOne({user: username}, {user: 1,
+		"customData.starredModels" : 1
+	});
+
+	return _.get(userProfile, "customData.starredModels") || {};
+};
+
+schema.statics.appendStarredModels = async function (username, ts, modelID) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	const userProfile = await dbCol.findOne({user: username}, {user: 1,
+		"customData.starredModels" : 1
+	});
+
+	const starredModels = 	userProfile.customData.starredModels || {};
+	if(!starredModels[ts]) {
+		starredModels[ts] = [];
+	}
+
+	if(starredModels[ts].indexOf(modelID) === -1) {
+		starredModels[ts].push(modelID);
+		await dbCol.update({user: username}, {$set: { "customData.starredModels" : starredModels } });
+	}
+	return {};
+};
+
+schema.statics.setStarredModels = async function (username, models) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	await dbCol.update({user: username}, {$set: { "customData.starredModels" : models}});
+	return {};
+};
+
+schema.statics.deleteStarredModel = async function (username, ts, modelID) {
+	const dbCol = await DB.getCollection("admin", "system.users");
+	const userProfile = await dbCol.findOne({user: username}, {user: 1,
+		"customData.starredModels" : 1
+	});
+
+	if(userProfile.customData.starredModels && userProfile.customData.starredModels[ts]) {
+		if(userProfile.customData.starredModels[ts].length === 1 &&
+			userProfile.customData.starredModels[ts][0] === modelID) {
+			const action = {$unset: {}};
+			action.$unset[`customData.starredModels.${ts}`] = "";
+			await dbCol.update({user: username}, action);
+
+		} else {
+			const action = {$pull: {}};
+			action.$pull[`customData.starredModels.${ts}`] = modelID;
+			await dbCol.update({user: username}, action);
+		}
+	}
 	return {};
 };
 
@@ -274,7 +341,7 @@ schema.statics.checkUserNameAvailableAndValid = function (username) {
 };
 
 schema.statics.findByEmail = function (email) {
-	return this.findOne({ account: "admin" }, { "customData.email": email });
+	return this.findOne({ account: "admin" }, { "customData.email":  new RegExp("^" + utils.sanitizeString(email) + "$", "i") });
 };
 
 schema.statics.findByPaypalPaymentToken = function (token) {
@@ -596,7 +663,7 @@ schema.statics.getForgotPasswordToken = function (userNameOrEmail) {
 
 };
 
-function _fillInModelDetails(accountName, setting, permissions) {
+async function _fillInModelDetails(accountName, setting, permissions) {
 
 	if (permissions.indexOf(C.PERM_MANAGE_MODEL_PERMISSION) !== -1) {
 		permissions = C.MODEL_PERM_LIST.slice(0);
@@ -606,37 +673,21 @@ function _fillInModelDetails(accountName, setting, permissions) {
 		federate: setting.federate,
 		permissions: permissions,
 		model: setting._id,
+		type: setting.type,
 		name: setting.name,
 		status: setting.status,
 		errorReason: setting.errorReason,
 		subModels: setting.federate && setting.toObject().subModels || undefined,
-		timestamp: setting.timestamp || null
+		timestamp: setting.timestamp || null,
+		code: setting.properties ? setting.properties.code || undefined : undefined
+
 	};
 
+	const nRev = await History.revisionCount(accountName, setting._id);
+
+	model.nRevisions = nRev;
+
 	return Promise.resolve(model);
-
-	// the following is not needed any more after caching timestamp and submodels in model settings
-
-	// return History.findByBranch({account: accountName, model: model.model}, C.MASTER_BRANCH_NAME).then(history => {
-
-	// 	if(history){
-	// 		model.timestamp = history.timestamp;
-	// 	} else {
-	// 		model.timestamp = null;
-	// 	}
-
-	// 	if(setting.federate){
-
-	// 		//list all sub models of a fed model
-	// 		return ModelHelper.listSubModels(accountName, model.model, C.MASTER_BRANCH_NAME).then(subModels => {
-	// 			model.subModels = subModels;
-	// 		}).then(() => model);
-
-	// 	}
-
-	// 	return model;
-	// });
-
 }
 // list all models in an account
 function _getModels(accountName, ids, permissions) {
@@ -824,6 +875,9 @@ function _createAccounts(roles, userName) {
 				const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
 				const account = {
 					account: user.user,
+					firstName: user.customData.firstName,
+					lastName: user.customData.lastName,
+					hasAvatar: !!user.customData.avatar,
 					projects: [],
 					models: [],
 					fedModels: [],

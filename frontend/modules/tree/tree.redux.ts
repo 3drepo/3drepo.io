@@ -55,7 +55,8 @@ export const { Types: TreeTypes, Creators: TreeActions } = createActions({
 	setActiveNode: ['nodeId'],
 	goToRootNode: ['nodeId'],
 	zoomToHighlightedNodes: [],
-	handleColorOverridesChange: ['currentOverrides', 'previousOverrides']
+	handleColorOverridesChange: ['currentOverrides', 'previousOverrides'],
+	setIsTreeProcessed: ['isTreeProcessed']
 }, { prefix: 'TREE/' });
 
 export interface ITreeComponentState {
@@ -71,6 +72,7 @@ export interface ITreeState {
 	expandedNodesMap: any;
 	isPending?: boolean;
 	dataRevision: string;
+	isTreeProcessed: boolean;
 	componentState: ITreeComponentState;
 }
 
@@ -80,6 +82,7 @@ export const INITIAL_STATE: ITreeState = {
 	isPending: true,
 	expandedNodesMap: {},
 	dataRevision: null,
+	isTreeProcessed: false,
 	componentState: {
 		selectedFilters: [],
 		searchEnabled: false,
@@ -138,6 +141,10 @@ const setActiveNode = (state = INITIAL_STATE, { nodeId }) => {
 	return { ...state, activeNode: nodeId };
 };
 
+const setIsTreeProcessed = (state = INITIAL_STATE, { isTreeProcessed }) => {
+	return { ...state, isTreeProcessed };
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.CLEAR_SELECTED_NODES]: clearSelectedNodes,
 	[TreeTypes.GET_SELECTED_NODES_SUCCESS]: getSelectedNodesSuccess,
@@ -150,5 +157,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[TreeTypes.SET_AUXILIARY_MAPS]: setAuxiliaryMaps,
 	[TreeTypes.SET_EXPANDED_NODES_MAP]: setExpandedNodesMap,
 	[TreeTypes.UPDATE_DATA_REVISION]: updateDataRevision,
-	[TreeTypes.SET_ACTIVE_NODE]: setActiveNode
+	[TreeTypes.SET_ACTIVE_NODE]: setActiveNode,
+	[TreeTypes.SET_IS_TREE_PROCESSED]: setIsTreeProcessed
 });

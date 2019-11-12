@@ -15,64 +15,96 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { memoize } from 'lodash';
+import React, { memo } from 'react';
 
-import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
+import { getAvatarUrl } from '../../../../services/api';
 import { ROW_ACTIONS } from '../../teamspaces.contants';
 import { MyTeamspaceItem } from '../myTeamspaceItem/myTeamspaceItem.component';
 import { TooltipButton } from '../tooltipButton/tooltipButton.component';
 
-import StorageNormal from '@material-ui/icons/Storage';
-import StorageOutlined from '@material-ui/icons/StorageOutlined';
-
 import { hasPermissions } from '../../../../helpers/permissions';
-import { renderWhenTrue } from '../../../../helpers/rendering';
+import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
+import { Avatar, Container } from './teamspaceItem.styles';
 
 interface IProps {
-	account: string;
+	name: string;
+	firstName: string;
+	lastName: string;
 	projects: any[];
 	active: boolean;
+	hasAvatar: boolean;
 	isMyTeamspace: boolean;
+	disabled: boolean;
 	permissions: any[];
+	showStarredOnly: boolean;
 	onToggle: (state) => void;
-	renderChildItem: () => JSX.Element;
-	onAddProject: () => void;
+	onAddProject: (event, teamspaceName) => void;
+	onLeaveTeamspace: (event) => void;
 }
 
-export const TeamspaceItem = (props: IProps) => {
+const getMemoizedAvatarUrl = memoize(getAvatarUrl);
+
+export const TeamspaceItem = memo((props: IProps) => {
 	const {
-		account,
+		name,
 		projects,
 		onToggle,
 		active,
-		renderChildItem,
 		isMyTeamspace,
 		onAddProject,
-		permissions
+		permissions,
+		disabled,
+		hasAvatar,
+		onLeaveTeamspace
 	} = props;
 
-	const renderActions = () => renderWhenTrue(() => (
+	const avatarUrl = getMemoizedAvatarUrl(name);
+	const teamspaceInitials = name.split(' ').slice(0, 2).map((text) => text[0]).join('').trim().toUpperCase();
+
+	const handleAddNewProject = (event) => onAddProject(event, name);
+
+	const RenderNewProjectAction = () => renderWhenTrue(() => (
 		<TooltipButton
 			{...ROW_ACTIONS.ADD_NEW}
 			label="Add new project"
-			action={onAddProject}
+			action={handleAddNewProject}
 		/>
 	))(hasPermissions('create_project', permissions)) as any;
 
-	return (
-		<TreeList
-			name={account}
-			level={TREE_LEVELS.TEAMSPACE}
-			items={projects}
-			onClick={onToggle}
-			active={active}
-			renderItem={renderChildItem}
-			renderRoot={isMyTeamspace ? MyTeamspaceItem : null}
-			IconProps={{
-				IconOpened: StorageOutlined,
-				IconClosed: StorageNormal
-			}}
-			renderActions={renderActions}
+	const RenderLeaveAction = () => renderWhenTrue(() => (
+		<TooltipButton
+			{...ROW_ACTIONS.LEAVE}
+			label="Leave teamspace"
+			action={onLeaveTeamspace}
 		/>
+	))(!isMyTeamspace) as any;
+
+	const handleClick = () => {
+		onToggle({ id: name, nested: projects });
+	};
+
+	const renderAvatar = () => renderWhenTrueOtherwise(
+		() => <Avatar src={avatarUrl} size="50" />,
+		() => <Avatar size="50">{teamspaceInitials}</Avatar>
+	)(hasAvatar);
+
+	return (
+		<Container
+			name={name}
+			disabled={disabled}
+			onClick={handleClick}
+			active={active}
+			renderRoot={isMyTeamspace ? MyTeamspaceItem : null}
+			IconProps={{ IconClosed: renderAvatar }}
+			showStarredOnly={props.showStarredOnly}
+		>
+		{() => (
+			<>
+				<RenderNewProjectAction />
+				<RenderLeaveAction />
+			</>
+		)}
+		</Container>
 	);
-};
+});

@@ -181,7 +181,6 @@ JSONAssets.getTree = function(account, model, branch, rev) {
 			const treeFileName = `${revId}/fulltree.json`;
 			const mainTreePromise = FileRef.getJSONFileStream(account, model, treeFileName);
 			const subTreesPromise = getSubTreeInfo(account, model, history.current);
-			let isFed = false;
 
 			return mainTreePromise.then((file) => {
 				const outStream = Stream.PassThrough();
@@ -196,7 +195,6 @@ JSONAssets.getTree = function(account, model, branch, rev) {
 				}).then(() => {
 					return subTreesPromise.then((subTreeInfo) => {
 						outStream.write(", \"subTrees\":[");
-						isFed = !!subTreeInfo.length;
 						for(let i = 0; i < subTreeInfo.length; ++i) {
 							if(subTreeInfo[i]) {
 								if(i > 0) {
@@ -218,7 +216,7 @@ JSONAssets.getTree = function(account, model, branch, rev) {
 					outStream.end();
 				});
 
-				return { file, isFed } ;
+				return subTreesPromise.then((subTreeInfo) => ({ file, isFed: subTreeInfo.length > 0 })) ;
 
 			});
 		} else {

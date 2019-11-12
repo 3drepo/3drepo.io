@@ -18,7 +18,7 @@
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import { DatePicker } from 'material-ui-pickers';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { COLOR } from '../../../../../styles/colors';
 
 export const MenuList = styled(List)`
@@ -28,16 +28,22 @@ export const MenuList = styled(List)`
 	max-width: 300px;
 	box-shadow: 0 1px 3px 0 ${COLOR.BLACK_20};
 	border-radius: 2px;
+
+	&& {
+		padding-top: 4px;
+		padding-bottom: 4px;
+	}
 `;
 
 export const NestedWrapper = styled.div`
 	position: relative;
 `;
 
+const getDirection = ({ left }) => left ? 'right: 100%' : 'right: 100%';
+
 export const ChildMenu = styled.div`
 	background-color: ${COLOR.WHITE};
 	position: absolute;
-	left: 100%;
 	top: 0;
 	z-index: 1;
 	min-width: 160px;
@@ -45,6 +51,7 @@ export const ChildMenu = styled.div`
 	width: 100%;
 	box-shadow: 1px 1px 3px 0 ${COLOR.BLACK_20};
 	border-radius: 0 2px 2px 0;
+	${getDirection}
 `;
 
 export const StyledItemText = styled.div`
@@ -92,6 +99,10 @@ export const CopyText = styled.span`
 
 export const MenuFooter = styled.div`
 	border-top: 1px solid ${COLOR.BLACK_20};
-	margin-top: 8px;
 	padding-top: 8px;
+	padding-bottom: 8px;
+`;
+
+export const DataTypesWrapper = styled.div`
+	border-bottom: 1px solid ${COLOR.BLACK_20};
 `;

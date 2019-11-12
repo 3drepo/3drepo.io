@@ -19,21 +19,19 @@ import Grid from '@material-ui/core/Grid';
 import styled from 'styled-components';
 
 import { ellipsis, COLOR } from '../../../styles';
+import { TREE_LEVELS } from './treeList.component';
 
-const isActive = (props) => props.forceActive && props.active && !props.disabled;
+const isActive = (props) => props.active && !props.disabled;
 
 export const Headline = styled.div`
 	cursor: pointer;
-	min-height: 50px;
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
 	padding-left: 24px;
 	padding-right: 13px;
-
-	&:hover {
-		background: ${COLOR.WHITE};
-	}
+	background: ${(props) => props.active || props.level === TREE_LEVELS.PROJECT && COLOR.WHITE};
+	min-height: ${(props) => (props.level === TREE_LEVELS.TEAMSPACE) ? '65px' : '50px'};
 `;
 
 export const Details = styled.div`
@@ -42,17 +40,30 @@ export const Details = styled.div`
 	box-shadow: 0 12px 30px ${(props: any) => props.disableShadow ? 'none' : 'currentColor'};
 `;
 
-export const Container = styled.div`
+interface IContainer {
+	active: boolean;
+	disabled: boolean;
+	disableShadow: boolean;
+}
+
+const getShadowColor = (props) => props.active && !props.disableShadow ? 'currentColor' : 'transparent';
+
+export const Container = styled.div<IContainer>`
 	overflow: hidden;
 	border-bottom: 1px solid ${COLOR.BLACK_6};
-	background: ${(props: any) => props.active ? COLOR.GRAY : 'rgba(250, 250, 250)'};
+	background: ${(props) => props.active ? COLOR.GRAY : 'rgba(250, 250, 250)'};
+	box-shadow: inset 0 -15px 30px -27px ${getShadowColor};
 	transition: background 150ms ease-in-out;
-	color: ${(props: any) => props.disabled ? COLOR.BLACK_30 : COLOR.BLACK_60};
+	color: ${(props) => props.disabled ? COLOR.BLACK_30 : COLOR.BLACK_60};
 	user-select: none;
+	position: relative;
 
 	& > ${Headline} {
-		padding-left: ${(props: any) => (props.level || 0) * 24}px;
-		background: ${(props: any) => isActive(props) ? COLOR.WHITE : 'transparent'};
+		padding-left: ${(props) => (props.level || 0) * 24}px;
+	}
+
+	& > ${/* sc-selector */ Headline}:hover {
+		background: ${(props) => isActive(props) ? 'transparent' : COLOR.WHITE};
 	}
 
 	width: calc(100% - 1px);
@@ -70,4 +81,11 @@ export const Title = styled.div`
 export const IconContainer = styled.div`
 	margin-right: 12px;
 	display: flex;
+`;
+
+export const ChildrenContainer = styled.div`
+	font-size: 14px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 `;

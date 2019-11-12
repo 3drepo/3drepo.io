@@ -21,7 +21,7 @@ const Mailer = require("../mailer/mailer");
 const ExternalServices = require("../handler/externalServices");
 const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger.js").systemLogger;
-const genUuid = require("node-uuid").v4;
+const nodeuuid = require("uuid/v1");
 
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
@@ -72,13 +72,10 @@ function fetchFile(account, model, ext, fileName, metadata = false) {
 	});
 }
 
-function fetchFileStream(account, model, ext, fileName, imposeModelRoute = true) {
+function fetchFileStream(account, model, ext, fileName) {
 	const collection = model + ext;
 	return getRefEntry(account, collection, fileName).then((entry) => {
 		if(!entry) {
-			if (imposeModelRoute) {
-				systemLogger.logInfo("imposeModelRoute: ", imposeModelRoute);
-			}
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
 		return ExternalServices.getFileStream(account, collection, entry.type, entry.link).then((stream) => {
@@ -173,7 +170,7 @@ async function removeResource(account, model,  resourceId, property, propertyId)
 const FileRef = {};
 
 FileRef.getOriginalFile = function(account, model, fileName) {
-	return fetchFileStream(account, model, ORIGINAL_FILE_REF_EXT, fileName, false);
+	return fetchFileStream(account, model, ORIGINAL_FILE_REF_EXT, fileName);
 };
 
 FileRef.getTotalModelFileSize = function(account, model) {
@@ -244,7 +241,7 @@ FileRef.storeFileAsResource = async function(account, model, user, name, data, e
 };
 
 FileRef.storeUrlAsResource = async function(account, model, user, name, link, extraFields = null) {
-	const refInfo = {_id: genUuid(), link, type: "http", ...extraFields  };
+	const refInfo = {_id: nodeuuid(), link, type: "http", ...extraFields  };
 	const ref = await insertRefInResources(account, model, user, name, refInfo);
 	return ref;
 };

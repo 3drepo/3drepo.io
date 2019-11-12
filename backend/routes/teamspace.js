@@ -182,7 +182,7 @@
 	 *    user: "viewerTeamspace1Model1JobB",
 	 * }
 	 */
-	router.delete("/members/:user", middlewares.isAccountAdmin, removeTeamMember);
+	router.delete("/members/:user", middlewares.isAccountAdminOrSameUser , removeTeamMember);
 
 	/**
 	 *

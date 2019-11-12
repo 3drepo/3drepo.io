@@ -15,22 +15,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { orderBy } from 'lodash';
+import memoizeOne from 'memoize-one';
+
 import { PROJECT_ROLES_TYPES } from '../../constants/project-permissions';
+import { SORT_ORDER_TYPES } from '../../constants/sorting';
 
-export const extendTeamspacesInfo = (teamspaces = []) => teamspaces.reduce((teamspacesWithAdminAccess, account) => {
-	const projects = account.isAdmin ?
-		account.projects :
-		account.projects.reduce((projectsWithAdminAccess, project) => {
-			const hasAdminAccess = project.permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR);
-			if (hasAdminAccess) {
-				projectsWithAdminAccess.push(project);
-			}
-			return projectsWithAdminAccess;
-		}, []);
+export const extendTeamspacesInfo = memoizeOne((teamspaces = [], projects = {}) => {
+	return teamspaces.reduce((teamspacesWithAdminAccess, account) => {
+		const projectWithAdminAceess = account.isAdmin ?
+			account.projects :
+			account.projects.reduce((projectsWithAdminAccess, projectId) => {
+				const hasAdminAccess = projects[projectId].permissions.includes(PROJECT_ROLES_TYPES.ADMINISTRATOR);
+				if (hasAdminAccess) {
+					projectsWithAdminAccess.push(projectId);
+				}
+				return projectsWithAdminAccess;
+			}, []);
 
-	const isProjectAdmin = Boolean(projects.length);
-	if (account.isAdmin || isProjectAdmin) {
-		teamspacesWithAdminAccess.push({ ...account, isProjectAdmin, projects });
-	}
-	return teamspacesWithAdminAccess;
-}, []);
+		const isProjectAdmin = Boolean(projectWithAdminAceess.length);
+		if (account.isAdmin || isProjectAdmin) {
+			teamspacesWithAdminAccess.push({
+				...account,
+				isProjectAdmin,
+				projects: projectWithAdminAceess
+			});
+		}
+		return teamspacesWithAdminAccess;
+	}, []);
+});
+
+export const sortModels = (models, sortingField, sortingDirection) => {
+	const getSortingFieldValue = (model) => model[sortingField]
+		? model[sortingField].toLowerCase()
+		: model[sortingField];
+
+	return orderBy(models,
+		['federate', getSortingFieldValue],
+		[SORT_ORDER_TYPES.ASCENDING, sortingDirection[sortingField]]
+	);
+};

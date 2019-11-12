@@ -19,8 +19,10 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import ArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import React from 'react';
 
+import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
+import { TYPES } from './../../../components/dialogContainer/components/revisionsDialog/revisionsDialog.constants';
 import { Container, DisplayedText, ProgressWrapper } from './revisionsSwitch.styles';
 
 interface IProps {
@@ -89,9 +91,10 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 				currentRevisionId: this.props.currentRevision._id,
 				currentModelName: this.props.modelSettings.name,
 				revisions: this.props.revisions,
-				handleSetNewRevision: this.setNewRevision
+				handleSetNewRevision: this.setNewRevision,
+				teamspace: this.props.modelSettings.account,
+				modelId: this.props.modelSettings.model
 			}
 		});
 	}
-
 }
