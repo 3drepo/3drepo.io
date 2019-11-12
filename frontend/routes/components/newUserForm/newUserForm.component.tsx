@@ -29,15 +29,25 @@ import Paper from '@material-ui/core/Paper';
 import { JobItem } from '../jobItem/jobItem.component';
 import { UserItem } from '../userItem/userItem.component';
 
-import {
-	Container, EmptySelectValue, SaveButton, StyledSelect, StyledTextField, SuggestionsList, Title, UserNotExistsContainer, UserNotExistsButton, InvitationModeLink
-} from './newUserForm.styles';
 import { renderWhenTrue } from '../../../helpers/rendering';
+import {
+	Container,
+	EmptySelectValue,
+	InvitationModeLink,
+	SaveButton,
+	StyledSelect,
+	StyledTextField,
+	SuggestionsList,
+	Title,
+	UserNotExistsButton,
+	UserNotExistsContainer
+} from './newUserForm.styles';
 
 interface IProps {
 	title: string | JSX.Element;
 	jobs: any[];
 	users: any[];
+	onInvitationOpen: (email, job) => void;
 	onSave: (user) => void;
 	onCancel: () => void;
 	clearSuggestions: () => void;
@@ -117,7 +127,7 @@ export class NewUserForm extends React.PureComponent<IProps, IState> {
 	}
 
 	public openInvitationDialog = () => {
-		console.log('Open invitation dialog');
+		this.props.onInvitationOpen(this.state.name, this.state.job);
 	}
 
 	public renderUserSuggestion = (suggestion, {query, isHighlighted}) => {
