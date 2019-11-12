@@ -421,7 +421,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				figure === SHAPE_TYPES.RECTANGLE && (Math.abs(attrs.height) > 1 || Math.abs(attrs.width) > 1);
 			const correctLineShape = [SHAPE_TYPES.LINE, SHAPE_TYPES.ARROW]
 					.includes(figure) && attrs.points && attrs.points.length;
-			const correctCustomShape = [SHAPE_TYPES.CLOUD, SHAPE_TYPES.CLOUDLINE]
+			const correctCustomShape = [SHAPE_TYPES.CLOUD]
 					.includes(figure) && (Math.abs(attrs.scaleX) > 0 || Math.abs(attrs.scaleY) > 0);
 
 			if (correctCircle || correctTriangle || correctRectangle || correctLineShape || correctCustomShape) {

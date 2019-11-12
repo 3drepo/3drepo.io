@@ -34,7 +34,6 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 	const rect = React.useRef<any>(null);
 	const group = React.useRef<any>(null);
 	const hasLineLikeBehavior = [SHAPE_TYPES.LINE, SHAPE_TYPES.ARROW].includes(figure);
-	const hasCustomShapeBehavior = [SHAPE_TYPES.CLOUDLINE, SHAPE_TYPES.CLOUD].includes(figure);
 
 	React.useEffect(() => {
 		if (isSelected && transformer.current) {

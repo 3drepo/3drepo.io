@@ -15,13 +15,6 @@ export const cloud = {
 	width: 500
 };
 
-export const cloudline = {
-	// tslint:disable-next-line
-	path: 'M158.94,10.48A10,10,0,0,0,154.8,5.6c-3.65-1.89-8.41,0-11.65,4.88-.56-1.63-1.83-4.65-4.14-6.16-3.65-2.39-8.41,0-11.65,6.16-2.83-5.86-7.32-8.37-11-6.43-2.81,1.48-4.28,5.07-4.77,6.43-.42-.69-2.56-4.08-6.43-4.76C101.63,5.1,98,7,95.79,10.48c-2-4.68-6.15-7.14-9.9-6.13-4,1.08-5.71,5.62-5.89,6.13A10,10,0,0,0,75.86,5.6c-3.66-1.89-8.41,0-11.65,4.88-.57-1.63-1.84-4.65-4.14-6.16-3.65-2.39-8.41,0-11.65,6.16-2.84-5.86-7.32-8.37-11-6.43-2.81,1.48-4.28,5.07-4.77,6.43-.42-.69-2.56-4.08-6.43-4.76C22.69,5.1,19.09,7,16.85,10.48,14.88,5.8,10.7,3.34,7,4.35c-4,1.08-5.71,5.62-5.89,6.13',
-	height: 9,
-	width: 159
-};
-
 const TriangleComponent = React.forwardRef((props: any, ref: any) => {
 	return (
 		<PolygonComponent
@@ -42,20 +35,9 @@ const CloudComponent = React.forwardRef((props: any, ref: any) => {
 	);
 });
 
-const CloudlineComponent = React.forwardRef((props: any, ref: any) => {
-	return (
-		<Path
-			{...props}
-			ref={ref}
-			data={cloudline.path}
-		/>
-	);
-});
-
 export const Arrow = ArrowComponent;
 export const Circle = CircleComponent;
 export const Rectangle = RectangleComponent;
 export const Triangle = TriangleComponent;
 export const Line = LineComponent;
 export const Cloud = CloudComponent;
-export const Cloudline = CloudlineComponent;
