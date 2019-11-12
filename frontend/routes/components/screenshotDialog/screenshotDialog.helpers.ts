@@ -21,7 +21,8 @@ export const MODES = {
 	BRUSH: 'brush',
 	ERASER: 'eraser',
 	TEXT: 'text',
-	SHAPE: 'shape'
+	SHAPE: 'shape',
+	POLYGON: 'polygon',
 };
 
 export const INITIAL_VALUES = {
@@ -40,7 +41,8 @@ export const MODE_OPERATION = {
 export const ELEMENT_TYPES = {
 	TEXT: 'text',
 	SHAPE: 'shape',
-	DRAWING: 'drawing'
+	DRAWING: 'drawing',
+	POLYGON: 'polygon',
 };
 
 const createUniqueName = (type) => `${type}-${(Number(String(Math.random()).slice(2)) + Date.now()).toString(36)}`;
@@ -60,8 +62,8 @@ export const getNewShape = (figure, color, attrs) => {
 	return newShape;
 };
 
-export const getNewDrawnLine = (lineAttrs, color) => {
-	const name = createUniqueName(ELEMENT_TYPES.DRAWING);
+export const getNewDrawnLine = (lineAttrs, color, type = ELEMENT_TYPES.DRAWING) => {
+	const name = createUniqueName(type);
 	const newLine = {
 		type: ELEMENT_TYPES.DRAWING,
 		name,

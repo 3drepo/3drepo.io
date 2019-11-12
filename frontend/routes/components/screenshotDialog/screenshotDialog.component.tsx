@@ -302,6 +302,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.setMode(MODES.ERASER);
 	}
 
+	public handleToolPolygonClick = () => {
+		this.setMode(MODES.POLYGON);
+	}
+
 	public setShapeMode = (shape) => {
 		const newState = {
 			activeShape: shape
@@ -404,12 +408,16 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		document.body.style.cursor = 'crosshair';
 	}
 
-	public addNewDrawnLine = (line) => {
+	public addNewDrawnLine = (line, type) => {
 		if (!this.state.selectedObjectName) {
-			const newLine = getNewDrawnLine(line.attrs, this.state.color);
+			const newLine = getNewDrawnLine(line.attrs, this.state.color, type);
 			const selectedObjectName = this.isErasing ? '' : newLine.name;
 			this.props.addElement(newLine);
-			this.setState(({ mode }) => ({ selectedObjectName, mode: this.isErasing ? mode : MODES.BRUSH }));
+			if (type !== MODES.POLYGON) {
+				this.setState(({ mode }) => ({ selectedObjectName, mode: this.isErasing ? mode : MODES.BRUSH }));
+			} else {
+				this.setState(({ mode }) => ({ selectedObjectName, mode: MODES.POLYGON }));
+			}
 		}
 	}
 
@@ -538,6 +546,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			onDrawClick={this.setBrushMode}
 			onEraseClick={this.setEraserMode}
 			onTextClick={this.handleToolTextClick}
+			onPolygonClick={this.handleToolPolygonClick}
 			onShapeClick={this.setShapeMode}
 			onClearClick={this.clearCanvas}
 			onBrushSizeChange={this.handleBrushSizeChange}

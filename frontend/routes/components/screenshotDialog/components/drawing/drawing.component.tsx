@@ -16,7 +16,8 @@
  */
 
 import * as React from 'react';
-import { MODES } from '../../screenshotDialog.helpers';
+import { between } from '../../../../../helpers/between';
+import { ELEMENT_TYPES, MODES } from '../../screenshotDialog.helpers';
 import { createDrawnLine, createShape, getDrawFunction } from './drawing.helpers';
 
 interface IProps {
@@ -30,13 +31,13 @@ interface IProps {
 	activeShape: number;
 	selected: string;
 	disabled: boolean;
-	handleNewDrawnLine: (line) => void;
+	handleNewDrawnLine: (line, type?) => void;
 	handleNewDrawnShape: (shape, attrs) => void;
 }
 
 export class Drawing extends React.PureComponent <IProps, any> {
 	public state = {
-		isCurrentlyDrawn: false
+		isCurrentlyDrawn: false,
 	};
 
 	public initialPointerPosition: any = { x: 0, y: 0 };
@@ -50,6 +51,10 @@ export class Drawing extends React.PureComponent <IProps, any> {
 
 	get isDrawingLineMode() {
 		return this.props.mode === MODES.BRUSH || this.props.mode === MODES.ERASER;
+	}
+
+	get isDrawingPolygoneMode() {
+		return this.props.mode === MODES.POLYGON;
 	}
 
 	get layer() {
@@ -77,12 +82,16 @@ export class Drawing extends React.PureComponent <IProps, any> {
 				this.subscribeDrawingShapeEvents();
 			}
 
+			if (this.props.mode === MODES.POLYGON && prevProps.mode !== MODES.POLYGON) {
+				this.subscribeDrawingPolygonEvents();
+			}
+
 			if (!this.isDrawingLineMode && (prevProps.mode === MODES.BRUSH || prevProps.mode === MODES.ERASER)) {
 				this.unsubscribeDrawingLineEvents();
 			}
 
-			if (this.props.mode !== MODES.SHAPE && prevProps.mode === MODES.SHAPE) {
-				this.unsubscribeDrawingShapeEvents();
+			if (this.props.mode !== MODES.POLYGON && prevProps.mode === MODES.POLYGON) {
+				this.unsubscribeDrawingPolygonEvents();
 			}
 		}
 	}
@@ -97,6 +106,18 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		this.props.stage.off('mousemove', this.handleMouseMoveLine);
 		this.props.stage.off('mouseup', this.handleMouseUpLine);
 		this.props.stage.off('mousedown', this.handleMouseDownLine);
+	}
+
+	public subscribeDrawingPolygonEvents = () => {
+		this.props.stage.on('mousemove', this.handleMouseMovePolygon);
+		this.props.stage.on('mouseup', this.handleMouseUpPolygon);
+		this.props.stage.on('mousedown', this.handleMouseDownPolygon);
+	}
+
+	public unsubscribeDrawingPolygonEvents = () => {
+		this.props.stage.off('mousemove', this.handleMouseMovePolygon);
+		this.props.stage.off('mouseup', this.handleMouseUpPolygon);
+		this.props.stage.off('mousedown', this.handleMouseDownPolygon);
 	}
 
 	public subscribeDrawingShapeEvents = () => {
@@ -196,15 +217,75 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		}
 	}
 
+	public handleMouseMovePolygon = () => {
+		return;
+	}
+
+	public handleMouseUpPolygon = () => {
+		return;
+	}
+
+	public handleMouseDownPolygon = () => {
+		if (this.props.selected) {
+			return;
+		}
+
+		if (this.state.isCurrentlyDrawn) {
+			this.drawLine();
+			return;
+		}
+
+		this.setState({ isCurrentlyDrawn: true });
+		this.layer.clearBeforeDraw();
+		const { x, y } = this.props.stage.getPointerPosition();
+
+		this.lastPointerPosition = {
+			x: this.layer.attrs.x ? x - this.layer.attrs.x : x,
+			y
+		};
+
+		this.lastLine = createDrawnLine(this.props.color, this.props.size, this.lastPointerPosition, this.props.mode);
+		this.layer.add(this.lastLine);
+	}
+
+	public handlePolygonCreationEnd = () => {
+		this.layer.clear();
+		this.layer.clearCache();
+		this.layer.destroyChildren();
+		this.layer.batchDraw();
+
+		if (this.lastLine.attrs.points.length > 6) {
+			this.props.handleNewDrawnLine(this.lastLine, ELEMENT_TYPES.POLYGON);
+		}
+
+		this.setState({ isCurrentlyDrawn: false });
+	}
+
 	public drawLine = () => {
 		const position = this.props.stage.getPointerPosition();
 		const localPosition = {
 			x: position.x - this.props.layer.current.x(),
 			y: position.y - this.props.layer.current.y()
 		};
-		const newPoints = this.lastLine.points().concat([localPosition.x, localPosition.y]);
+		if (this.isDrawingPolygoneMode) {
+			const [firstX, firstY] = this.lastLine.points();
+			if (
+					between(localPosition.x, firstX - 10, firstX + 10) &&
+					between(localPosition.y, firstY - 10, firstY + 10)
+			) {
+				const newPoints = this.lastLine.points().concat([firstX, firstY]);
+				this.lastLine.points(newPoints);
+				this.handlePolygonCreationEnd();
+			} else {
+				const newPoints = this.lastLine.points().concat([localPosition.x, localPosition.y]);
+				this.lastLine.points(newPoints);
+			}
 
-		this.lastLine.points(newPoints);
+		} else {
+			const newPoints = this.lastLine.points().concat([localPosition.x, localPosition.y]);
+			this.lastLine.points(newPoints);
+		}
+
 		this.lastPointerPosition = position;
 		this.layer.batchDraw();
 	}
