@@ -196,8 +196,6 @@ issue.update = async function(user, sessionId, account, model, issueId, data) {
 };
 
 issue.getIssuesReport = function(account, model, username, rid, issueIds, res) {
-	const dbCol = { account, model };
-
 	const projection = {
 		extras: 0,
 		"viewpoints.extras": 0,
@@ -210,13 +208,13 @@ issue.getIssuesReport = function(account, model, username, rid, issueIds, res) {
 	const branch = rid ? null : "master";
 
 	const reportGen = require("../models/report").newIssuesReport(account, model, rid);
-	return issue.findIssuesByModelName(dbCol, username, branch, rid, projection, issueIds, false).then(issues => {
+	return issue.findIssuesByModelName(account, model, branch, rid, projection, issueIds, false).then(issues => {
 		reportGen.addEntries(issues);
 		return reportGen.generateReport(res);
 	});
 };
 
-issue.getIssuesList = function(dbCol, username, branch, revision, ids, sort, convertCoords) {
+issue.getIssuesList = function(account, model, branch, revision, ids, sort, convertCoords) {
 
 	const projection = {
 		extras: 0,
@@ -229,8 +227,8 @@ issue.getIssuesList = function(dbCol, username, branch, revision, ids, sort, con
 	};
 
 	return this.findIssuesByModelName(
-		dbCol,
-		username,
+		account,
+		model,
 		branch,
 		revision,
 		projection,
@@ -244,106 +242,27 @@ issue.getIssuesList = function(dbCol, username, branch, revision, ids, sort, con
 	});
 };
 
-issue.findIssuesByModelName = function(dbCol, username, branch, revId, projection, ids, noClean = false, useIssueNumber = false) {
-	const account = dbCol.account;
-	const model = dbCol.model;
-
-	const filter = {};
-	let historySearch = Promise.resolve();
-
-	// Creates the id/number filter from the ids param
-	if (ids) {
-
-		if (useIssueNumber) {
-			filter.number = {"$in": ids.map((x) => parseInt(x))};
-		} else {
-			ids.forEach((id, i) => {
-				ids[i] = utils.stringToUUID(id);
-			});
-			filter._id = {"$in": ids};
-		}
+issue.findIssuesByModelName = async function(account, model, branch, revId, projection, ids, noClean = false, useIssueNumber = false) {
+	if (useIssueNumber) {
+		ids = { numbers : ids.map(parseInt) };
 	}
+
+	let submodels = [];
 
 	if (branch || revId) {
-		historySearch = History.getHistory({account, model}, branch, revId).then((history) => {
-			if (history) {
-				return History.find(dbCol, {timestamp: {"$gt": history.timestamp}}, {_id: 1, current: 1})
-					.then((revIds) => {
-						revIds = revIds.map(r => r._id);
-						return {current: history.current, revIds};
-					});
-			}
-		});
+		// searches for the revision models
+		const { current } = (await History.getHistory({account, model}, branch, revId));
+		submodels = await Ref.find({account, model}, {type: "ref", _id: {"$in": current}}, {project:1});
+		submodels = submodels.map(r => r.project);
 	}
 
-	return historySearch.then((historySearchResults) => {
-		if (historySearchResults) {
-			return ModelSetting.findById(dbCol, dbCol.model).then((settings) => {
-				// Only retrieve issues for current and older revisions
-				filter.rev_id = {"$not" : {"$in": historySearchResults.revIds}};
+	const issues = await ticket.findByModelName(account, model, branch, revId, projection, ids, noClean);
+	const issuesPerSubmodels = await Promise.all(submodels.map(submodel =>
+		this.findIssuesByModelName(account, submodel,"master", null, projection, ids, noClean, useIssueNumber)
+	));
 
-				return db.getCollection(account, model + ".issues").then((_dbCol) => {
-					// Retrieve issues from top level model/federation
-					return _dbCol.find(filter, projection).toArray();
-				}).then((mainIssues) => {
-					mainIssues.forEach((mainIssue) => {
-						mainIssue.typePrefix = (settings.type) ? settings.type : "";
-						mainIssue.modelCode = (settings.properties && settings.properties.code) ?
-							settings.properties.code : "";
-					});
-
-					// Check submodels
-					return Ref.find(dbCol, {type: "ref", _id: {"$in": historySearchResults.current}}).then((refs) => {
-						const subModelsPromises = [];
-
-						if(!useIssueNumber) {
-							refs.forEach((ref) => {
-								const subDbCol = {
-									account: dbCol.account,
-									model: ref.project
-								};
-								subModelsPromises.push(
-									this.findIssuesByModelName(subDbCol, username, "master", null, projection, ids, true).then((subIssues) => {
-										subIssues.forEach((subIssue) => {
-											subIssue.origin_account = subDbCol.account;
-											subIssue.origin_model = subDbCol.model;
-										});
-
-										return subIssues;
-									}).catch((err) => {
-										// Skip sub-model errors to allow working sub-models to load
-										systemLogger.logError("Error while retrieving sub-model issues",
-											{
-												subDbCol,
-												err: err
-											});
-									})
-								);
-							});
-						}
-
-						return Promise.all(subModelsPromises).then((subModelsIssues) => {
-							if (subModelsIssues) {
-								subModelsIssues.forEach((subModelIssues) => {
-									if (subModelIssues) {
-										// Skip concat of undefined subModelIssues
-										//  e.g. from error loading sub-model issue
-										mainIssues = mainIssues.concat(subModelIssues);
-									}
-								});
-							}
-							if (!noClean) {
-								mainIssues = mainIssues.map(x => ticket.clean(dbCol.account, dbCol.model, x));
-							}
-							return mainIssues;
-						});
-					});
-				});
-			});
-		} else {
-			return Promise.resolve([]);
-		}
-	});
+	issuesPerSubmodels.forEach(subIssues => Array.prototype.push.apply(issues, subIssues));
+	return issues;
 };
 
 issue.getScreenshot = ticket.getScreenshot.bind(ticket);

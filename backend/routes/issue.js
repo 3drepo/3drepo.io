@@ -835,14 +835,12 @@ function updateIssue(req, res, next) {
 
 function listIssues(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = { account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger };
-
-	const branch = req.params.rid ? null : "master";
-	const rid = req.params.rid ? req.params.rid : null;
+	const { account, model, rid } = req.params;
+	const branch = rid ? null : "master";
 	const ids = req.query.ids ? req.query.ids.split(",") : null;
 	const convertCoords = !!req.query.convertCoords;
 
-	Issue.getIssuesList(dbCol, req.session.user.username, branch, rid, ids, req.query.sortBy, convertCoords).then(issues => {
+	Issue.getIssuesList(account, model, branch, rid, ids, req.query.sortBy, convertCoords).then(issues => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

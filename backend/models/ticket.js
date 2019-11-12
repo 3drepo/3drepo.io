@@ -476,9 +476,41 @@ class Ticket {
 		});
 	}
 
-	// findByModelName(acc9unt, model, username, branch, revId, projection, ids, noClean = false, useIssueNumber = false) {
+	async findByModelName(account, model, branch, revId, projection, ids, noClean = false) {
+		let filter = {};
 
-	// }
+		if (Array.isArray(ids)) {
+			filter._id = {"$in": ids.map(utils.stringToUUID)};
+		} else {
+			filter = { ...filter, ...(ids || {}) }; // this means that the ids are a different filter;
+		}
+
+		let invalidRevIds = [];
+
+		if (branch || revId) {
+			// searches for the first rev id
+			const history = await History.getHistory({account, model}, branch, revId);
+			if (history) {
+				// Uses the first revsion searched to get all posterior revisions
+				invalidRevIds = await History.find({account, model}, {timestamp: {"$gt": history.timestamp}}, {_id: 1});
+				invalidRevIds = invalidRevIds.map(r => r._id);
+			}
+		}
+
+		const modelSettings = await ModelSetting.findById({account, model}, model);
+		filter.rev_id = {"$not" : {"$in": invalidRevIds}};
+		const coll = await db.getCollection(account, model + "." + this.collName);
+		const tickets = await coll.find(filter, projection).toArray();
+		tickets.forEach((foundTicket, index) => {
+			foundTicket.typePrefix = modelSettings.type || "";
+			foundTicket.modelCode = (modelSettings.properties || {}).code || "";
+			if (!noClean) {
+				tickets[index] = this.clean(account, model, foundTicket);
+			}
+		});
+
+		return tickets;
+	}
 
 	// missing:
 	/*
