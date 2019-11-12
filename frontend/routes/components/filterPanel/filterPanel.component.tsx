@@ -342,7 +342,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 				], (filter) => JSON.stringify(filter))
 			}));
 		} catch (error) {
-			console.error('Unsupported filters format');
+			this.setState({ value: event.clipboardData.getData('text') });
 		}
 	}
 
