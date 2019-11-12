@@ -30,6 +30,7 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	removeUser: ['username'],
 	removeUserCascade: ['username'],
 	removeUserSuccess: ['username'],
+	setUserNotExists: ['userNotExists'],
 	setTeamspace: ['teamspace'],
 	updateJob: ['username', 'job'],
 	updateUserJobSuccess: ['username', 'job'],
@@ -69,7 +70,8 @@ export const INITIAL_STATE = {
 		permissions: [],
 		modelsPermissions: [],
 		currentModels: []
-	}
+	},
+	userNotExists: false
 };
 
 /**
@@ -183,6 +185,10 @@ export const clearUsersSuggestions = (state = INITIAL_STATE, { suggestions }) =>
 	return {...state, usersSuggestions: []};
 };
 
+export const setUserNotExists = (state = INITIAL_STATE, { userNotExists }) => {
+	return {...state, userNotExists};
+};
+
 export const setProject = (state = INITIAL_STATE, { project }) => {
 	const models = get(state.projects.find(({_id}) => project._id === _id), 'models', []);
 	project.models = [...models];
@@ -250,6 +256,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.GET_USERS_SUGGESTIONS_SUCCESS]: getUsersSuggestionsSuccess,
 	[UserManagementTypes.CLEAR_USERS_SUGGESTIONS]: clearUsersSuggestions,
 	[UserManagementTypes.REMOVE_INVITATION_SUCCESS]: removeInvitationSuccess,
+	[UserManagementTypes.SET_USER_NOT_EXISTS]: setUserNotExists,
 
 	// Project
 	[UserManagementTypes.SET_PROJECT]: setProject,

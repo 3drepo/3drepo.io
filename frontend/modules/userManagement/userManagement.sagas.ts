@@ -77,7 +77,11 @@ export function* addUser({ user }) {
 		yield put(UserManagementActions.addUserSuccess(data, currentUser.username));
 		yield put(SnackbarActions.show('User added'));
 	} catch (error) {
-		yield put(DialogActions.showEndpointErrorDialog('add', 'licence', error));
+		if (error.response.status === 404) {
+			yield put(UserManagementActions.setUserNotExists(true));
+		} else {
+			yield put(DialogActions.showEndpointErrorDialog('add', 'licence', error));
+		}
 	}
 }
 

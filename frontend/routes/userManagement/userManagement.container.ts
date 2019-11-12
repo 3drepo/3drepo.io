@@ -42,7 +42,7 @@ const mapStateToProps = createStructuredSelector({
 	teamspaces: selectTeamspacesWithAdminAccess,
 	isTeamspaceAdmin: selectIsTeamspaceAdmin,
 	isLoadingTeamspace: selectIsPending,
-	currentUser: selectCurrentUser
+	currentUser: selectCurrentUser,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

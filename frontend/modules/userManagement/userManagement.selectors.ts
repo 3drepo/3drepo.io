@@ -91,3 +91,7 @@ export const selectLicensesCount = createSelector(
 export const selectInvitationsCount = createSelector(
 	selectInvitations , (invitations) => invitations.length
 );
+
+export const selectUserNotExists = createSelector(
+	selectUserManagementDomain, (state) => state.userNotExists
+);

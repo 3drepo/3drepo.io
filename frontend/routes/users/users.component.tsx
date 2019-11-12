@@ -81,6 +81,7 @@ interface IProps {
 	jobs: any[];
 	licencesCount: number;
 	invitationsCount: number;
+	userNotExists?: boolean;
 	addUser: (user) => void;
 	removeUser: (username) => void;
 	updateJob: (username, job) => void;
@@ -107,6 +108,7 @@ const teamspacePermissions = values(TEAMSPACE_PERMISSIONS).map(
 );
 
 export class Users extends React.PureComponent<IProps, IState> {
+	public formRef = React.createRef<any>();
 	public static defaultProps = {
 		jobs: [],
 		users: []
@@ -215,16 +217,21 @@ export class Users extends React.PureComponent<IProps, IState> {
 			changes.limit = this.props.limit;
 		}
 
+		const userNotExitstsChanged = prevProps.userNotExists !== this.props.userNotExists;
+		if (userNotExitstsChanged && this.formRef.current) {
+			this.formRef.current.setUserNotExists(this.props.userNotExists);
+		}
+
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
 	}
 
 	public renderNewUserFormPanel = ({ closePanel }) => {
-		const { limit } = this.state;
-		const { users, usersSuggestions, clearUsersSuggestions, onUsersSearch } = this.props;
+		const { usersSuggestions, clearUsersSuggestions, onUsersSearch } = this.props;
 
 		const formProps = {
+			ref: this.formRef,
 			title: this.getFooterLabel(),
 			jobs: this.state.jobs,
 			users: usersSuggestions,

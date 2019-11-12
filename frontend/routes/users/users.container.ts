@@ -26,6 +26,7 @@ import {
 	selectLicensesCount,
 	selectUsers,
 	selectUsersSuggestions,
+	selectUserNotExists,
 	UserManagementActions
 } from '../../modules/userManagement';
 import { Users } from './users.component';
@@ -40,7 +41,8 @@ const mapStateToProps = createStructuredSelector({
 	jobs: selectJobs,
 	limit: selectCollaboratorLimit,
 	licencesCount: selectLicensesCount,
-	invitationsCount: selectInvitationsCount
+	invitationsCount: selectInvitationsCount,
+	userNotExists: selectUserNotExists,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
