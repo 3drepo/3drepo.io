@@ -20,7 +20,6 @@ const utils = require("../utils");
 const responseCodes = require("../response_codes.js");
 const db = require("../handler/db");
 
-const ModelSetting = require("./modelSetting");
 const History = require("./history");
 const Ref = require("./ref");
 const FileRef = require("./fileRef");
@@ -28,7 +27,6 @@ const FileRef = require("./fileRef");
 const ChatEvent = require("./chatEvent");
 const config = require("../config.js");
 
-const systemLogger = require("../logger.js").systemLogger;
 const User = require("./user");
 const Ticket = require("./ticket");
 

@@ -361,15 +361,6 @@ class Ticket {
 			newTicket.viewpoints = [newTicket.viewpoint];
 		}
 
-		newTicket = this.filterFields(newTicket, ["viewpoint"]);
-
-		Object.keys(newTicket).forEach((key) => {
-			if (Object.prototype.toString.call(newTicket[key]) !== this.fieldTypes[key]) {
-				systemLogger.logError(`Type check failed: ${key} is expected to be type ${this.fieldTypes[key]} but it is `, Object.prototype.toString.call(newTicket[key]));
-				throw responseCodes.INVALID_ARGUMENTS;
-			}
-		});
-
 		await this.setGroupTicketId(account, model, newTicket);
 
 		// Assign rev_id for issue
@@ -379,7 +370,7 @@ class Ticket {
 		]);
 
 		if (!history && newTicket.revId) {
-			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
+			throw (responseCodes.MODEL_HISTORY_NOT_FOUND);
 		} else if (history) {
 			newTicket.rev_id = history._id;
 		}
@@ -390,6 +381,15 @@ class Ticket {
 				content: image
 			};
 		}
+
+		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
+
+		Object.keys(newTicket).forEach((key) => {
+			if (Object.prototype.toString.call(newTicket[key]) !== this.fieldTypes[key]) {
+				systemLogger.logError(`Type check failed: ${key} is expected to be type ${this.fieldTypes[key]} but it is `, Object.prototype.toString.call(newTicket[key]));
+				throw responseCodes.INVALID_ARGUMENTS;
+			}
+		});
 
 		const [settings, coll] = await Promise.all([
 			ModelSetting.findById({account, model}, model),
