@@ -655,7 +655,7 @@ function listRisks(req, res, next) {
 	const ids = req.query.ids ? req.query.ids.split(",") : null;
 	const convertCoords = !!req.query.convertCoords;
 
-	Risk.getRisksList(account, model, branch, rid, ids, convertCoords).then(risks => {
+	Risk.getList(account, model, branch, rid, ids, convertCoords).then(risks => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risks);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
