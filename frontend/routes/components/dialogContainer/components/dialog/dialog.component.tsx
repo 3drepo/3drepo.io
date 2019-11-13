@@ -114,7 +114,7 @@ export const Dialog = (props: IProps) => {
 
 	return (
 		<DialogBase {...DialogProps} open={isOpen} onClose={handleClose}>
-			<DialogTitle disableTypography>{renderCloseButton()} {title}</DialogTitle>
+			<DialogTitle disableTypography>{title}{renderCloseButton()}</DialogTitle>
 			{renderContent(content && !DialogTemplate)}
 			{renderTemplate(!!DialogTemplate)}
 			{renderActions(content && onCancel)}

@@ -11,6 +11,6 @@ export const DialogActions = styled(DialogActionsComponent)`
 
 export const DialogTitle = styled(DialogTitleComponent)`
 	&& {
-		padding-left: 0;
+		padding-right: 0;
 	}
 `;
