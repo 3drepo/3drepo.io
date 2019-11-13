@@ -605,7 +605,7 @@ function storeRisk(req, res, next) {
 	data.owner = req.session.user.username;
 	data.revId = req.params.rid;
 
-	Risk.createRisk(account, model, data, sessionId).then(risk => {
+	Risk.create(account, model, data, sessionId).then(risk => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risk);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -650,14 +650,12 @@ function deleteRisks(req, res, next) {
 
 function listRisks(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = {account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger};
-
-	const branch = req.params.rid ? null : "master";
-	const rid = req.params.rid ? req.params.rid : null;
+	const { account, model, rid } = req.params;
+	const branch = rid ? null : "master";
 	const ids = req.query.ids ? req.query.ids.split(",") : null;
 	const convertCoords = !!req.query.convertCoords;
 
-	Risk.getRisksList(dbCol, req.session.user.username, branch, rid, ids, convertCoords).then(risks => {
+	Risk.getRisksList(account, model, branch, rid, ids, convertCoords).then(risks => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, risks);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -678,10 +676,9 @@ function findRiskById(req, res, next) {
 
 function renderRisksHTML(req, res, next) {
 	const place = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
-	const rid = req.params.rid;
+	const {account, model, rid} = req.params;
 	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
+
 	Risk.getRisksReport(account, model, req.session.user.username, rid, ids, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

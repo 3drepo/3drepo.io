@@ -807,7 +807,7 @@ function storeIssue(req, res, next) {
 	data.revId = req.params.rid;
 	const {account, model} = req.params;
 
-	Issue.createIssue(account, model, data, sessionId).then(issue => {
+	Issue.create(account, model, data, sessionId).then(issue => {
 		req.dataModel = issue;
 		next();
 	}).catch(err => {
@@ -905,12 +905,10 @@ function findIssueById(req, res, next) {
 
 function renderIssuesHTML(req, res, next) {
 	const place = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
-	const rid = req.params.rid;
+	const {account, model, rid} = req.params;
 	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
 
-	Issue.getIssuesReport(account, model, req.session.user.username, rid, ids, res).catch(err => {
+	Issue.getIssuesReport(account, model, rid, ids, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }

@@ -29,8 +29,6 @@ const View = require("./viewpoint");
 
 const Ticket = require("./ticket");
 
-const risk = {};
-
 const fieldTypes = {
 	"_id": "[object Object]",
 	"assigned_roles": "[object Array]",
@@ -67,8 +65,6 @@ const LEVELS = {
 	HIGH: 3,
 	VERY_HIGH: 4
 };
-
-const ticket = new Ticket("risks", "risk_id", "RISK", fieldTypes, []);
 
 function getLevelOfRisk(riskData) {
 	const level_of_risk = calculateLevelOfRisk(riskData.likelihood, riskData.consequence);
@@ -133,15 +129,7 @@ function calculateLevelOfRisk(likelihood, consequence) {
 	return levelOfRisk;
 }
 
-risk.createRisk = async function(account, model, newRisk, sessionId) {
-	newRisk = await ticket.create(account, model, newRisk);
-	newRisk = { ...newRisk, ...getLevelOfRisk(newRisk) };
-	ChatEvent.newRisks(sessionId, account, model, [newRisk]);
-
-	return newRisk;
-};
-
-risk.createViewPoint = async (account, model, viewpoint) => {
+async function createViewPoint(account, model, viewpoint) {
 	let newViewpoint = null;
 
 	if (viewpoint) {
@@ -155,96 +143,94 @@ risk.createViewPoint = async (account, model, viewpoint) => {
 	}
 
 	return newViewpoint;
-};
+}
 
-risk.onBeforeUpdate = (account, model, sessionId, residualData) => async function(data, oldRisk) {
-	if (residualData.residual) {
-		const updatedComments = addRiskMitigationComment(
-			account,
-			model,
-			sessionId,
-			oldRisk._id,
-			oldRisk.comments,
-			data,
-			this.createViewPoint(residualData.viewpoint)
-		);
-
-		data.comments = updatedComments;
+class Risk extends Ticket {
+	constructor() {
+		super("risks", "risk_id", "RISK", fieldTypes, []);
 	}
 
-	return data;
-};
-
-risk.update = async function(user, sessionId, account, model, issueId, data) {
-	// 0. Set the black list for attributes
-	const attributeBlacklist = [
-		"_id",
-		"comments",
-		"created",
-		"creator_role",
-		"name",
-		"norm",
-		"number",
-		"owner",
-		"rev_id",
-		"status",
-		"thumbnail",
-		"viewpoint",
-		"viewpoints"
-	];
-
-	const residualData = _.pick(data, ["viewpoint", "residual"]);
-	const beforeUpdate =  this.onBeforeUpdate(account, model, sessionId, residualData).bind(this);
-
-	data = _.omit(data, ["viewpoint", "residual"]);
-	const updatedRisk = await ticket.update(attributeBlacklist, user, sessionId, account, model, issueId, data, beforeUpdate);
-
-	const levelOfRisk = getLevelOfRisk(updatedRisk.updatedTicket);
-	updatedRisk.updatedTicket = {...updatedRisk.updatedTicket, ...levelOfRisk};
-	updatedRisk.data = {...updatedRisk.data, ...levelOfRisk};
-
-	return updatedRisk;
-};
-
-risk.deleteRisks = function(dbCol, sessionId, ids) {
-	const riskIdStrings = [].concat(ids);
-
-	for (let i = 0; i < ids.length; i++) {
-		if ("[object String]" === Object.prototype.toString.call(ids[i])) {
-			ids[i] = utils.stringToUUID(ids[i]);
-		}
+	async create(account, model, newRisk, sessionId) {
+		newRisk = await super.create(account, model, newRisk);
+		ChatEvent.newRisks(sessionId, account, model, [newRisk]);
+		return newRisk;
 	}
 
-	return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
-		return _dbCol.remove({ _id: {$in: ids}}).then((deleteResponse) => {
-			if (!deleteResponse.result.ok) {
-				return Promise.reject(responseCodes.RISK_NOT_FOUND);
+	onBeforeUpdate(account, model, sessionId, residualData) {
+		return async function(data, oldRisk) {
+			if (residualData.residual) {
+				const updatedComments = addRiskMitigationComment(
+					account,
+					model,
+					sessionId,
+					oldRisk._id,
+					oldRisk.comments,
+					data,
+					createViewPoint(residualData.viewpoint)
+				);
+
+				data.comments = updatedComments;
 			}
 
-			// Success!
-			ChatEvent.risksDeleted(sessionId, dbCol.account,  dbCol.model, riskIdStrings);
-		});
-	});
-};
-
-risk.getRisksReport = async function(account, model, rid, ids, res) {
-	const reportGen = require("../models/report").newRisksReport(account, model, rid);
-	return ticket.getReport(account, model, rid, ids, res, reportGen);
-};
-
-risk.findByUID = async function(account, model, uid, projection, noClean = false) {
-	const riskFound = await ticket.findByUID.apply(ticket, arguments);
-	if (!noClean) {
-		return { ...riskFound, ...getLevelOfRisk(riskFound) };
+			return data;
+		};
 	}
 
-	return riskFound;
-};
+	async update(user, sessionId, account, model, issueId, data) {
+		// 0. Set the black list for attributes
+		const attributeBlacklist = [
+			"_id",
+			"comments",
+			"created",
+			"creator_role",
+			"name",
+			"norm",
+			"number",
+			"owner",
+			"rev_id",
+			"status",
+			"thumbnail",
+			"viewpoint",
+			"viewpoints"
+		];
 
-risk.getRisksList = ticket.getList.bind(ticket);
+		const residualData = _.pick(data, ["viewpoint", "residual"]);
+		const beforeUpdate =  this.onBeforeUpdate(account, model, sessionId, residualData).bind(this);
 
-risk.getScreenshot = ticket.getScreenshot.bind(ticket);
-risk.getSmallScreenshot = ticket.getSmallScreenshot.bind(ticket);
-risk.getThumbnail = ticket.getThumbnail.bind(ticket);
+		data = _.omit(data, ["viewpoint", "residual"]);
+		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data, beforeUpdate);
+	}
 
-module.exports = risk;
+	deleteRisks(dbCol, sessionId, ids) {
+		const riskIdStrings = [].concat(ids);
+
+		for (let i = 0; i < ids.length; i++) {
+			if ("[object String]" === Object.prototype.toString.call(ids[i])) {
+				ids[i] = utils.stringToUUID(ids[i]);
+			}
+		}
+
+		return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
+			return _dbCol.remove({ _id: {$in: ids}}).then((deleteResponse) => {
+				if (!deleteResponse.result.ok) {
+					return Promise.reject(responseCodes.RISK_NOT_FOUND);
+				}
+
+				// Success!
+				ChatEvent.risksDeleted(sessionId, dbCol.account,  dbCol.model, riskIdStrings);
+			});
+		});
+	}
+
+	async getRisksReport(account, model, rid, ids, res) {
+		const reportGen = require("../models/report").newRisksReport(account, model, rid);
+		return this.getReport(account, model, rid, ids, res, reportGen);
+	}
+
+	clean(account, model, riskToClean) {
+		riskToClean = super.clean(account, model, riskToClean);
+		return { ...riskToClean, ...getLevelOfRisk(riskToClean) };
+	}
+}
+
+module.exports = new Risk();

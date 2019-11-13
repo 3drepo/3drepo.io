@@ -572,11 +572,9 @@ class Ticket {
 		reportGen.addEntries(risks);
 		return reportGen.generateReport(res);
 	}
+
 	// missing:
 	/*
-getReport
-getList
-findByModelName
 practically all of resources stuff
 */
 }

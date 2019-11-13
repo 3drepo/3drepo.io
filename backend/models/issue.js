@@ -32,8 +32,6 @@ const Ticket = require("./ticket");
 
 const C = require("../constants");
 
-const issue = {};
-
 const extensionRe = /\.(\w+)$/;
 
 const fieldTypes = {
@@ -70,8 +68,6 @@ const ownerPrivilegeAttributes = [
 	"priority"
 ];
 
-const ticket =  new Ticket("issues", "issue_id", "ISSUE", fieldTypes,ownerPrivilegeAttributes);
-
 const statusEnum = {
 	"OPEN": C.ISSUE_STATUS_OPEN,
 	"IN_PROGRESS": C.ISSUE_STATUS_IN_PROGRESS,
@@ -79,274 +75,280 @@ const statusEnum = {
 	"CLOSED": C.ISSUE_STATUS_CLOSED
 };
 
-issue.createIssue = async function(account, model, newIssue, sessionId) {
-	// Sets the issue number
-	const coll = await db.getCollection(account, model + ".issues");
-	try {
-		const issues = await coll.find({}, {number: 1}).sort({ number: -1 }).limit(1).toArray();
-		newIssue.number = (issues.length > 0) ? issues[0].number + 1 : 1;
-	} catch(e) {
-		newIssue.number = 1;
+class Issue extends Ticket {
+	constructor() {
+		super("issues", "issue_id", "ISSUE", fieldTypes,ownerPrivilegeAttributes);
 	}
 
-	newIssue =  await ticket.create(account, model, newIssue);
-
-	ChatEvent.newIssues(sessionId, account, model, [newIssue]);
-	return newIssue;
-};
-
-issue.updateFromBCF = function(dbCol, issueToUpdate, changeSet) {
-	return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
-		return _dbCol.update({_id: utils.stringToUUID(issueToUpdate._id)}, {$set: changeSet}).then(() => {
-			const sessionId = issueToUpdate.sessionId;
-			const updatedIssue = ticket.clean(dbCol.account, dbCol.model, issueToUpdate);
-			ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, updatedIssue._id, updatedIssue);
-			return updatedIssue;
-		});
-	});
-};
-
-issue.onBeforeUpdate = async function(data, oldIssue, userPermissions, systemComments) {
-	// 2.6 if the user is trying to change the status and it doesnt have the necessary permissions throw a ISSUE_UPDATE_PERMISSION_DECLINED
-	if (data.status && data.status !== oldIssue.status) {
-		const canChangeStatus = userPermissions.hasAdminPrivileges || (userPermissions.hasAssignedJob && data.status !== statusEnum.CLOSED);
-		if (!canChangeStatus) {
-			throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
+	async createIssue(account, model, newIssue, sessionId) {
+		// Sets the issue number
+		const coll = await db.getCollection(account, model + ".issues");
+		try {
+			const issues = await coll.find({}, {number: 1}).sort({ number: -1 }).limit(1).toArray();
+			newIssue.number = (issues.length > 0) ? issues[0].number + 1 : 1;
+		} catch(e) {
+			newIssue.number = 1;
 		}
+
+		newIssue =  await super.create(account, model, newIssue);
+
+		ChatEvent.newIssues(sessionId, account, model, [newIssue]);
+		return newIssue;
 	}
 
-	const today = (new Date()).getTime();
-
-	// 4.2 If there is a priority change , save the extra field priority_last_changed with todays timestamp
-	if (this.isPriorityChange(oldIssue, data)) {
-		data.priority_last_changed = today;
-	}
-
-	// 4.3 If there is a status change, save the extra field status_last_changed with todays timestamp
-	if (this.isStatusChange(oldIssue, data)) {
-		data.status_last_changed = today;
-	}
-
-	if (this.isIssueAssignment(oldIssue, data) && oldIssue.status === statusEnum.FOR_APPROVAL) {
-		data.status = statusEnum.IN_PROGRESS;
-		const i = systemComments.findIndex((element) => {
-			return element.property === "status";
-		});
-
-		systemComments.splice(i,1);
-	}
-
-	// 4.4 If the status is changed to for_approval, the assigned role goes to the creator_role
-	if (data.status === statusEnum.FOR_APPROVAL) {
-		data.assigned_roles = oldIssue.creator_role ? [oldIssue.creator_role] : [];
-	}
-
-	return data;
-};
-
-issue.update = async function(user, sessionId, account, model, issueId, data) {
-	// 0. Set the black list for attributes
-	const attributeBlacklist = [
-		"_id",
-		"comments",
-		"created",
-		"creator_role",
-		"name",
-		"norm",
-		"number",
-		"owner",
-		"rev_id",
-		"thumbnail",
-		"viewpoint",
-		"viewpoints",
-		"priority_last_changed",
-		"status_last_changed"
-	];
-
-	return await ticket.update(attributeBlacklist, user, sessionId, account, model, issueId, data, this.onBeforeUpdate.bind(this));
-};
-
-issue.getRisksReport = async function(account, model, rid, ids, res) {
-	const reportGen = require("../models/report").newIssuesReport(account, model, rid);
-	return ticket.getReport(account, model, rid, ids, res, reportGen);
-};
-
-issue.getIssuesList = function(account, model, branch, revision, ids, sort, convertCoords) {
-
-	const projection = {
-		extras: 0,
-		"comments": 0,
-		"viewpoints.extras": 0,
-		"viewpoints.scribble": 0,
-		"viewpoints.screenshot.content": 0,
-		"viewpoints.screenshot.resizedContent": 0,
-		"thumbnail.content": 0
-	};
-
-	return this.findIssuesByModelName(
-		account,
-		model,
-		branch,
-		revision,
-		projection,
-		ids,
-		false
-	).then((issues) => {
-		if (convertCoords) {
-			issues.forEach(ticket.toDirectXCoords);
+	async findByModelName(account, model, branch, revId, projection, ids, noClean = false, useIssueNumber = false) {
+		if (useIssueNumber && Array.isArray(ids)) {
+			ids = { number:  {"$in": ids.map(x => parseInt(x))} };
 		}
+
+		const issues = await super.findByModelName(account, model, branch, revId, projection, ids, noClean);
+
+		if (!useIssueNumber) { // useIssueNumber is being used by export bcf and it doesnt export the submodel issues
+			let submodels = [];
+
+			if (branch || revId) {
+				// searches for the revision models
+				const { current } = (await History.getHistory({account, model}, branch, revId)) || {};
+				if (current) {
+					submodels = await Ref.find({account, model}, {type: "ref", _id: {"$in": current}}, {project:1});
+					submodels = submodels.map(r => r.project);
+				}
+			}
+
+			const issuesPerSubmodels = await Promise.all(submodels.map(submodel =>
+				this.findByModelName(account, submodel,"master", null, projection, ids, noClean, useIssueNumber)
+			));
+
+			issuesPerSubmodels.forEach(subIssues => Array.prototype.push.apply(issues, subIssues));
+		}
+
 		return issues;
-	});
-};
-
-issue.findIssuesByModelName = async function(account, model, branch, revId, projection, ids, noClean = false, useIssueNumber = false) {
-	if (useIssueNumber) {
-		ids = { numbers : ids.map(parseInt) };
 	}
 
-	let submodels = [];
-
-	if (branch || revId) {
-		// searches for the revision models
-		const { current } = (await History.getHistory({account, model}, branch, revId));
-		submodels = await Ref.find({account, model}, {type: "ref", _id: {"$in": current}}, {project:1});
-		submodels = submodels.map(r => r.project);
+	updateFromBCF(dbCol, issueToUpdate, changeSet) {
+		return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
+			return _dbCol.update({_id: utils.stringToUUID(issueToUpdate._id)}, {$set: changeSet}).then(() => {
+				const sessionId = issueToUpdate.sessionId;
+				const updatedIssue = this.clean(dbCol.account, dbCol.model, issueToUpdate);
+				ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, updatedIssue._id, updatedIssue);
+				return updatedIssue;
+			});
+		});
 	}
 
-	const issues = await ticket.findByModelName(account, model, branch, revId, projection, ids, noClean);
-	const issuesPerSubmodels = await Promise.all(submodels.map(submodel =>
-		this.findIssuesByModelName(account, submodel,"master", null, projection, ids, noClean, useIssueNumber)
-	));
+	async onBeforeUpdate(data, oldIssue, userPermissions, systemComments) {
+		// 2.6 if the user is trying to change the status and it doesnt have the necessary permissions throw a ISSUE_UPDATE_PERMISSION_DECLINED
+		if (data.status && data.status !== oldIssue.status) {
+			const canChangeStatus = userPermissions.hasAdminPrivileges || (userPermissions.hasAssignedJob && data.status !== statusEnum.CLOSED);
+			if (!canChangeStatus) {
+				throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
+			}
+		}
 
-	issuesPerSubmodels.forEach(subIssues => Array.prototype.push.apply(issues, subIssues));
-	return issues;
-};
+		const today = (new Date()).getTime();
 
-issue.getScreenshot = ticket.getScreenshot.bind(ticket);
-issue.getSmallScreenshot = ticket.getSmallScreenshot.bind(ticket);
-issue.getThumbnail = ticket.getThumbnail.bind(ticket);
+		// 4.2 If there is a priority change , save the extra field priority_last_changed with todays timestamp
+		if (this.isPriorityChange(oldIssue, data)) {
+			data.priority_last_changed = today;
+		}
 
-issue.findByUID = ticket.findByUID.bind(ticket);
+		// 4.3 If there is a status change, save the extra field status_last_changed with todays timestamp
+		if (this.isStatusChange(oldIssue, data)) {
+			data.status_last_changed = today;
+		}
 
-issue.isIssueBeingClosed = function(oldIssue, newIssue) {
-	return !!oldIssue && oldIssue.status !== "closed" && newIssue.status === "closed";
-};
+		if (this.isIssueAssignment(oldIssue, data) && oldIssue.status === statusEnum.FOR_APPROVAL) {
+			data.status = statusEnum.IN_PROGRESS;
+			const i = systemComments.findIndex((element) => {
+				return element.property === "status";
+			});
 
-issue.isIssueBeingReopened = function (oldIssue, newIssue) {
-	return oldIssue && oldIssue.status === "closed" && newIssue.status !== "closed";
-};
+			systemComments.splice(i,1);
+		}
 
-issue.isIssueAssignment = function(oldIssue, newIssue) {
-	if (!newIssue.assigned_roles) {
-		return false;
+		// 4.4 If the status is changed to for_approval, the assigned role goes to the creator_role
+		if (data.status === statusEnum.FOR_APPROVAL) {
+			data.assigned_roles = oldIssue.creator_role ? [oldIssue.creator_role] : [];
+		}
+
+		return data;
 	}
 
-	if (oldIssue) {
-		return oldIssue.assigned_roles[0] !== newIssue.assigned_roles[0];
-	} else {
-		return newIssue.assigned_roles.length > 0; // In case this is a new issue with an assigned role
-	}
-};
+	async update(user, sessionId, account, model, issueId, data) {
+		// 0. Set the black list for attributes
+		const attributeBlacklist = [
+			"_id",
+			"comments",
+			"created",
+			"creator_role",
+			"name",
+			"norm",
+			"number",
+			"owner",
+			"rev_id",
+			"thumbnail",
+			"viewpoint",
+			"viewpoints",
+			"priority_last_changed",
+			"status_last_changed"
+		];
 
-issue.isPriorityChange =  function (oldIssue, newIssue) {
-	if (!newIssue.hasOwnProperty("priority")) {
-		return false;
-	}
-
-	return oldIssue.priority !== newIssue.priority;
-};
-
-issue.isStatusChange =  function (oldIssue, newIssue) {
-	if (!newIssue.hasOwnProperty("status")) {
-		return false;
-	}
-	return oldIssue.status !== newIssue.status;
-};
-
-issue.addRefsToIssue = async function(account, model, issueId, username, sessionId, refs) {
-	if (refs.length === 0) {
-		return [];
+		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data, this.onBeforeUpdate.bind(this));
 	}
 
-	const issues = await db.getCollection(account, model + ".issues");
-	const issueQuery = {_id: utils.stringToUUID(issueId)};
-	const issueFound = await issues.findOne(issueQuery);
-
-	if (!issueFound) {
-		throw responseCodes.ISSUE_NOT_FOUND;
+	async getIssuesReport(account, model, rid, ids, res) {
+		const reportGen = require("../models/report").newIssuesReport(account, model, rid);
+		return super.getReport(account, model, rid, ids, res, reportGen);
 	}
 
-	const comments = issueFound.comments || [];
+	getIssuesList(account, model, branch, revision, ids, sort, convertCoords) {
 
-	const ref_ids = [];
+		const projection = {
+			extras: 0,
+			"comments": 0,
+			"viewpoints.extras": 0,
+			"viewpoints.scribble": 0,
+			"viewpoints.screenshot.content": 0,
+			"viewpoints.screenshot.resizedContent": 0,
+			"thumbnail.content": 0
+		};
 
-	refs.forEach(ref => {
-		comments.push(ticket.createSystemComment(account, model, sessionId, issueId, username, "resource", null, ref.name));
-		ref_ids.push(ref._id);
-	});
-
-	await issues.update(issueQuery, { $set: {comments}, $push: {refs:  {$each: ref_ids}}});
-	return refs;
-};
-
-issue.attachResourceFiles = async function(account, model, issueId, username, sessionId, resourceNames, files) {
-	const quota = await User.getQuotaInfo(account);
-	const spaceLeft = ((quota.spaceLimit === null || quota.spaceLimit === undefined ? Infinity : quota.spaceLimit) - quota.spaceUsed) * 1024 * 1024;
-	const spaceToBeUsed = files.reduce((size, file) => size + file.size,0);
-
-	if (spaceLeft < spaceToBeUsed) {
-		throw responseCodes.SIZE_LIMIT_PAY;
+		return this.findByModelName(
+			account,
+			model,
+			branch,
+			revision,
+			projection,
+			ids,
+			false
+		).then((issues) => {
+			if (convertCoords) {
+				issues.forEach(this.toDirectXCoords);
+			}
+			return issues;
+		});
 	}
 
-	if (!files.every(f => f.size < config.resourceUploadSizeLimit)) {
-		throw responseCodes.SIZE_LIMIT;
+	isIssueBeingClosed(oldIssue, newIssue) {
+		return !!oldIssue && oldIssue.status !== "closed" && newIssue.status === "closed";
 	}
 
-	const refsPromises = files.map((file,i) => {
-		const extension = ((file.originalname.match(extensionRe) || [])[0] || "").toLowerCase();
-		return FileRef.storeFileAsResource(account, model, username, resourceNames[i] + extension, file.buffer, {issueIds:[issueId]});
-	});
-	const refs = await Promise.all(refsPromises);
-	refs.forEach(r => {
-		delete r.link;
-		delete r.type;
-	});
-
-	await this.addRefsToIssue(account, model, issueId, username, sessionId, refs);
-	return refs;
-};
-
-issue.attachResourceUrls = async function(account, model, issueId, username, sessionId, resourceNames, urls) {
-	const refsPromises = urls.map((url, index) =>  FileRef.storeUrlAsResource(account, model, username,resourceNames[index], url,{issueIds:[issueId]}));
-	const refs = await Promise.all(refsPromises);
-	refs.forEach(r => {
-		delete r.type;
-	});
-
-	await this.addRefsToIssue(account, model, issueId, username, sessionId, refs);
-	return refs;
-};
-
-issue.detachResource =  async function(account, model, issueId, resourceId, username, sessionId) {
-	const ref = await FileRef.removeResourceFromIssue(account, model, issueId, resourceId);
-	const issues = await db.getCollection(account, model + ".issues");
-	const issueQuery = {_id: utils.stringToUUID(issueId)};
-	const issueFound = await issues.findOne(issueQuery);
-
-	if (!issueFound) {
-		throw responseCodes.ISSUE_NOT_FOUND;
+	isIssueBeingReopened(oldIssue, newIssue) {
+		return oldIssue && oldIssue.status === "closed" && newIssue.status !== "closed";
 	}
 
-	const comments = issueFound.comments;
-	comments.push(await ticket.createSystemComment(account, model, sessionId, issueId, username, "resource", ref.name, null));
-	await issues.update(issueQuery, {$set: {comments}, $pull: { refs: resourceId } });
+	isIssueAssignment(oldIssue, newIssue) {
+		if (!newIssue.assigned_roles) {
+			return false;
+		}
 
-	if(ref.type !== "http") {
-		delete ref.link;
+		if (oldIssue) {
+			return oldIssue.assigned_roles[0] !== newIssue.assigned_roles[0];
+		} else {
+			return newIssue.assigned_roles.length > 0; // In case this is a new issue with an assigned role
+		}
 	}
-	delete ref.type;
 
-	return ref;
-};
+	isPriorityChange(oldIssue, newIssue) {
+		if (!newIssue.hasOwnProperty("priority")) {
+			return false;
+		}
 
-module.exports = issue;
+		return oldIssue.priority !== newIssue.priority;
+	}
+
+	isStatusChange(oldIssue, newIssue) {
+		if (!newIssue.hasOwnProperty("status")) {
+			return false;
+		}
+		return oldIssue.status !== newIssue.status;
+	}
+
+	async addRefsToIssue(account, model, issueId, username, sessionId, refs) {
+		if (refs.length === 0) {
+			return [];
+		}
+
+		const issues = await db.getCollection(account, model + ".issues");
+		const issueQuery = {_id: utils.stringToUUID(issueId)};
+		const issueFound = await issues.findOne(issueQuery);
+
+		if (!issueFound) {
+			throw responseCodes.ISSUE_NOT_FOUND;
+		}
+
+		const comments = issueFound.comments || [];
+
+		const ref_ids = [];
+
+		refs.forEach(ref => {
+			comments.push(this.createSystemComment(account, model, sessionId, issueId, username, "resource", null, ref.name));
+			ref_ids.push(ref._id);
+		});
+
+		await issues.update(issueQuery, { $set: {comments}, $push: {refs:  {$each: ref_ids}}});
+		return refs;
+	}
+
+	async attachResourceFiles(account, model, issueId, username, sessionId, resourceNames, files) {
+		const quota = await User.getQuotaInfo(account);
+		const spaceLeft = ((quota.spaceLimit === null || quota.spaceLimit === undefined ? Infinity : quota.spaceLimit) - quota.spaceUsed) * 1024 * 1024;
+		const spaceToBeUsed = files.reduce((size, file) => size + file.size,0);
+
+		if (spaceLeft < spaceToBeUsed) {
+			throw responseCodes.SIZE_LIMIT_PAY;
+		}
+
+		if (!files.every(f => f.size < config.resourceUploadSizeLimit)) {
+			throw responseCodes.SIZE_LIMIT;
+		}
+
+		const refsPromises = files.map((file,i) => {
+			const extension = ((file.originalname.match(extensionRe) || [])[0] || "").toLowerCase();
+			return FileRef.storeFileAsResource(account, model, username, resourceNames[i] + extension, file.buffer, {issueIds:[issueId]});
+		});
+		const refs = await Promise.all(refsPromises);
+		refs.forEach(r => {
+			delete r.link;
+			delete r.type;
+		});
+
+		await this.addRefsToIssue(account, model, issueId, username, sessionId, refs);
+		return refs;
+	}
+
+	async attachResourceUrls(account, model, issueId, username, sessionId, resourceNames, urls) {
+		const refsPromises = urls.map((url, index) =>  FileRef.storeUrlAsResource(account, model, username,resourceNames[index], url,{issueIds:[issueId]}));
+		const refs = await Promise.all(refsPromises);
+		refs.forEach(r => {
+			delete r.type;
+		});
+
+		await this.addRefsToIssue(account, model, issueId, username, sessionId, refs);
+		return refs;
+	}
+
+	async detachResource(account, model, issueId, resourceId, username, sessionId) {
+		const ref = await FileRef.removeResourceFromIssue(account, model, issueId, resourceId);
+		const issues = await db.getCollection(account, model + ".issues");
+		const issueQuery = {_id: utils.stringToUUID(issueId)};
+		const issueFound = await issues.findOne(issueQuery);
+
+		if (!issueFound) {
+			throw responseCodes.ISSUE_NOT_FOUND;
+		}
+
+		const comments = issueFound.comments;
+		comments.push(await this.createSystemComment(account, model, sessionId, issueId, username, "resource", ref.name, null));
+		await issues.update(issueQuery, {$set: {comments}, $pull: { refs: resourceId } });
+
+		if(ref.type !== "http") {
+			delete ref.link;
+		}
+		delete ref.type;
+
+		return ref;
+	}
+}
+
+module.exports = new Issue();

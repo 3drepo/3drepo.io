@@ -423,7 +423,7 @@ bcf.getBCFZipReadStream = function(account, model, username, branch, revId, ids,
 	return ModelSetting.findById({account, model}, model).then(_settings => {
 
 		settings = _settings;
-		return Issue.findIssuesByModelName({account, model}, username, branch, revId, projection, ids, noClean, useIssueNumbers);
+		return Issue.findByModelName(account, model, branch, revId, projection, ids, noClean, useIssueNumbers);
 
 	}).then(issues => {
 
@@ -549,7 +549,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 
 				zipfile.on("end", () => {
 
-					Issue.getIssuesList({account, model}, requester.user, branch, revId).then(() => {
+					Issue.getIssuesList(account, model, branch, revId).then(() => {
 						return Promise.all(promises);
 
 					}).then(() => {
