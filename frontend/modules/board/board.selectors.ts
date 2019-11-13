@@ -19,7 +19,7 @@ import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import { capitalize, groupBy, memoize, sortBy, startCase, values } from 'lodash';
+import { groupBy, memoize, sortBy, startCase, uniqBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { PRIORITIES, STATUSES } from '../../constants/issues';
 import { LEVELS_LIST, RISK_CATEGORIES, RISK_MITIGATION_STATUSES } from '../../constants/risks';
@@ -28,7 +28,6 @@ import { selectAllFilteredIssues, selectSortOrder as selectIssuesSortOrder } fro
 import { selectJobs } from '../jobs';
 import { selectTopicTypes } from '../model';
 import { selectAllFilteredRisks, selectSortOrder as selectRisksSortOrder } from '../risks';
-import { selectUsers } from '../userManagement';
 import { BOARD_TYPES, ISSUE_FILTER_PROPS, NOT_DEFINED_PROP, RISK_FILTER_PROPS } from './board.constants';
 
 dayjs.extend(isSameOrBefore);
@@ -84,15 +83,6 @@ const getProp = (item, prop) => {
 	return item[prop];
 };
 
-const selectUsersValues = createSelector(
-	selectUsers, (users) => {
-	const usersValues = users.map((u) => ({
-		value: u.user,
-		name: `${capitalize(u.firstName)} ${capitalize(u.lastName)}`
-	}));
-	return sortBy(usersValues, 'name');
-});
-
 const selectJobsValues = createSelector(
 	selectJobs, (jobs) => {
 	return jobs.map(({ _id }) => ({ name: _id, value: _id }));
@@ -122,10 +112,7 @@ export const selectLanes = createSelector(
 	selectRawCardData,
 	selectTopicTypes,
 	selectJobsValues,
-	selectUsersValues,
-	selectIssuesSortOrder,
-	selectRisksSortOrder,
-	({ filterProp, boardType }, rawCardData, topicTypes, jobsValues, usersValues) => {
+	({ filterProp, boardType }, rawCardData, topicTypes, jobsValues) => {
 		const isIssueBoardType = boardType === 'issues';
 
 		const FILTER_PROPS = isIssueBoardType ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS;
@@ -147,25 +134,24 @@ export const selectLanes = createSelector(
 			value: getNextWeekTimestamp(3)
 		}];
 
+		const usersValues = sortBy(uniqBy(rawCardData[boardType], 'owner'), 'owner').map(({owner}) => ({
+			name: owner,
+			value: owner
+		}));
+
 		const issueFiltersMap = {
-			[ISSUE_FILTER_PROPS.status.value]: values(STATUSES).map((s) => {
-				return {
-					name: startCase(s),
-					value: s
-				};
-			}),
-			[ISSUE_FILTER_PROPS.priority.value]: values(PRIORITIES).map((p) => {
-				return {
-					name: startCase(p),
-					value: p
-				};
-			}),
-			[ISSUE_FILTER_PROPS.topic_type.value]: topicTypes.map((t) => {
-				return {
-					name: t.label,
-					value: t.value
-				};
-			}),
+			[ISSUE_FILTER_PROPS.status.value]: values(STATUSES).map((s) => ({
+				name: startCase(s),
+				value: s
+			})),
+			[ISSUE_FILTER_PROPS.priority.value]: values(PRIORITIES).map((p) => ({
+				name: startCase(p),
+				value: p
+			})),
+			[ISSUE_FILTER_PROPS.topic_type.value]: topicTypes.map((t) => ({
+				name: t.label,
+				value: t.value
+			})),
 			[ISSUE_FILTER_PROPS.creator_role.value]: jobsValues,
 			[ISSUE_FILTER_PROPS.assigned_roles.value]: jobsValues,
 			[ISSUE_FILTER_PROPS.due_date.value]: datesValues,
