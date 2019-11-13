@@ -593,7 +593,7 @@ class Ticket {
 		const ticketFound = await tickets.findOne(ticketQuery);
 
 		if (!ticketFound) {
-			throw responseCodes.ISSUE_NOT_FOUND;
+			throw this.response("NOT_FOUND");
 		}
 
 		const comments = ticketFound.comments || [];
@@ -636,30 +636,30 @@ class Ticket {
 		return refs;
 	}
 
-	async attachResourceUrls(account, model, issueId, username, sessionId, resourceNames, urls) {
-		const refsPromises = urls.map((url, index) =>  FileRef.storeUrlAsResource(account, model, username,resourceNames[index], url,{[this.refIdsField]:[issueId]}));
+	async attachResourceUrls(account, model, id, username, sessionId, resourceNames, urls) {
+		const refsPromises = urls.map((url, index) =>  FileRef.storeUrlAsResource(account, model, username,resourceNames[index], url,{[this.refIdsField]:[id]}));
 		const refs = await Promise.all(refsPromises);
 		refs.forEach(r => {
 			delete r.type;
 		});
 
-		await this.addRefs(account, model, issueId, username, sessionId, refs);
+		await this.addRefs(account, model, id, username, sessionId, refs);
 		return refs;
 	}
 
-	async detachResource(account, model, issueId, resourceId, username, sessionId) {
-		const ref = await FileRef.removeResourceFromIssue(account, model, issueId, resourceId);
-		const issues = await this.getTicketsCollection(account, model);
-		const issueQuery = {_id: utils.stringToUUID(issueId)};
-		const issueFound = await issues.findOne(issueQuery);
+	async detachResource(account, model, id, resourceId, username, sessionId) {
+		const ref = await FileRef.removeResourceFromEntity(account, model, this.refIdsField, id, resourceId);
+		const tickets = await this.getTicketsCollection(account, model);
+		const ticketQuery = {_id: utils.stringToUUID(id)};
+		const ticketFound = await tickets.findOne(ticketQuery);
 
-		if (!issueFound) {
-			throw responseCodes.ISSUE_NOT_FOUND;
+		if (!ticketFound) {
+			throw this.response("NOT_FOUND");
 		}
 
-		const comments = issueFound.comments;
-		comments.push(await this.createSystemComment(account, model, sessionId, issueId, username, "resource", ref.name, null));
-		await issues.update(issueQuery, {$set: {comments}, $pull: { refs: resourceId } });
+		const comments = ticketFound.comments;
+		comments.push(await this.createSystemComment(account, model, sessionId, id, username, "resource", ref.name, null));
+		await tickets.update(ticketQuery, {$set: {comments}, $pull: { refs: resourceId } });
 
 		if(ref.type !== "http") {
 			delete ref.link;
