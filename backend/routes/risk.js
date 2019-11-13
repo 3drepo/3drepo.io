@@ -22,10 +22,11 @@ const middlewares = require("../middlewares/middlewares");
 
 const C = require("../constants");
 const responseCodes = require("../response_codes.js");
-const Risk = require("../models/risk");
-const utils = require("../utils");
 const Comment = require("../models/comment");
+const Risk = require("../models/risk");
 const config = require("../config");
+const utils = require("../utils");
+const multer = require("multer");
 
 /**
  * @apiDefine Risks Risks
@@ -596,6 +597,82 @@ router.delete("/risks/:riskId/comments", middlewares.issue.canComment, deleteCom
  */
 router.delete("/risks/", middlewares.issue.canCreate, deleteRisks);
 
+/**
+ * @api {post} /:teamspace/:model/risks/:riskId/resources Attach resources to a rosl
+ * @apiName attachResourceRisk
+ * @apiGroup Risk
+ * @apiDescription Attaches file or url resources to a risk.
+ * If the type of the resource is file it should be send as multipart/form-data.
+ * Both types at the same time cant be sent. So in order to attach files and urls it should be done
+ * with two different requests.
+ *
+ * This method triggers a chat event
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {String} riskId Risk unique ID
+ *
+ * @apiParam (Request body file resource (multipart/form-data)) {File[]} files The array of files to be attached
+ * @apiParam (Request body file resource (multipart/form-data)) {String[]} names The names of the files; it should have the same length as the files field and should include the file extension
+ * @apiParam (Request body url resource) {String[]} urls The array of urls to be attached
+ * @apiParam (Request body url resource) {String[]} names The names of the urls; it should have the same length as the url field
+ *
+ * @apiSuccessExample {json} Success example result after two files has been uploaded
+ *
+ * [
+ *    {
+ *       "_id":"7617f775-9eb7-4877-8ec3-98ea3457e519",
+ *       "size":1422,
+ *       "riskIds":[
+ *          "3e8a11e0-9812-11e9-9c4d-ebde5888e062"
+ *       ],
+ *       "name":"todo.txt",
+ *       "user":"teamSpace1",
+ *       "createdAt":1561973996461
+ *    },
+ *    {
+ *       "_id":"e25e42d5-c4f0-4fbc-a8f4-bc9899e6662a",
+ *       "size":2509356,
+ *       "riskIds":[
+ *          "3e8a11e0-9812-11e9-9c4d-ebde5888e062"
+ *       ],
+ *       "name":"football.gif",
+ *       "user":"teamSpace1",
+ *       "createdAt":1561973996462
+ *    }
+ * ]
+ */
+router.post("/risks/:riskId/resources",middlewares.issue.canComment, attachResourcesToRisk, middlewares.chat.onResourcesCreated, responseCodes.onSuccessfulOperation);
+
+/**
+ * @api {delete} /:teamspace/:model/issues/:issueId/resources Detach a resource from a risk
+ * @apiName detachResourceRisk
+ * @apiGroup Risks
+ * @apiDescription Detachs a resource from a risk. If the risk is the last entity
+ * the resources has been attached to it also deletes the resource from the system. This
+ * method triggers a chat event .
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
+ * @apiParam {String} riskId Issue unique ID
+ *
+ * @apiParam (Request body) {String} _id The resource id to be detached
+ *
+ * @apiSuccessExample {json}
+ *
+ * {
+ *    "_id":"e25e42d5-c4f0-4fbc-a8f4-bc9899e6662a",
+ *    "size":2509356,
+ *    "riskIds":[
+ *    ],
+ *    "name":"football.gif",
+ *    "user":"teamSpace1",
+ *    "createdAt":1561973996462
+ * }
+ *
+ */
+router.delete("/risks/:riskId/resources", middlewares.issue.canComment, detachResourcefromRisk, middlewares.chat.onResourceDeleted, responseCodes.onSuccessfulOperation);
+
 function storeRisk(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model } = req.params;
@@ -741,6 +818,55 @@ function deleteComment(req, res, next) {
 	}).catch(err => {
 		responseCodes.onError(req, res, err);
 	});
+}
+
+function attachResourcesToRisk(req, res, next) {
+	const place = utils.APIInfo(req);
+	const {account, model, riskId} = req.params;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const user = req.session.user.username;
+	const upload = multer({
+		storage: multer.memoryStorage()
+	});
+
+	upload.array("file")(req, res, function (err) {
+		const names = Array.isArray(req.body.names) ? req.body.names : [req.body.names];
+		const urls = req.body.urls;
+		if (err) {
+			return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
+		} else {
+			let resourcesProm = null;
+
+			if (req.files) {
+				resourcesProm = Risk.attachResourceFiles(account, model, riskId, user, sessionId, names, req.files);
+			} else {
+				resourcesProm = Risk.attachResourceUrls(account, model, riskId, user, sessionId, names, urls);
+			}
+
+			resourcesProm.then(resources => {
+				req.dataModel = resources;
+				next();
+			}).catch(promErr => {
+				responseCodes.respond(place, req, res, next, promErr, promErr);
+			});
+		}
+	});
+}
+
+function detachResourcefromRisk(req, res, next) {
+	const place = utils.APIInfo(req);
+	const {account, model, riskId} = req.params;
+	const resourceId = req.body._id;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const user = req.session.user.username;
+
+	Risk.detachResource(account, model, riskId, resourceId, user, sessionId).then(ref => {
+		req.dataModel = ref;
+		next();
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err, err);
+	});
+
 }
 
 module.exports = router;
