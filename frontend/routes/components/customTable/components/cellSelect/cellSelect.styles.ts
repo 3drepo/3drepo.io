@@ -16,8 +16,8 @@
  */
 
 import MenuItem from '@material-ui/core/MenuItem';
-import styled from 'styled-components';
-import { COLOR } from '../../../../../styles';
+import styled, { css } from 'styled-components';
+import { COLOR, FONT_WEIGHT } from '../../../../../styles';
 import { SelectField } from '../../../selectField/selectField.component';
 
 export const StyledSelect = styled(SelectField).attrs({
@@ -42,6 +42,12 @@ export const Item = styled(MenuItem)`
 	&& {
 		font-size: 14px;
 		color: ${COLOR.BLACK_60};
+
+		${(props: any) => props.group ? css`
+			height: 12px;
+			font-weight: ${FONT_WEIGHT.BOLD};
+			border-top: 1px solid ${COLOR.BLACK_20};
+		` : ''}
 	}
 `;
 

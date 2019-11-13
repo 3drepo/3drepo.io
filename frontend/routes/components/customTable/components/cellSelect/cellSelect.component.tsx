@@ -67,6 +67,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 		return items.map((item, index) => {
 			return (
 				<Item
+					group={item.group}
 					disabled={item.disabled}
 					key={index}
 					value={item.value}

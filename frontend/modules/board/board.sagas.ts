@@ -23,18 +23,15 @@ import { IssuesActions, IssuesTypes } from '../issues';
 import { selectCurrentModel, ModelActions } from '../model';
 import { RisksActions, RisksTypes } from '../risks';
 import { selectTeamspaces, TeamspacesActions } from '../teamspaces';
-import { selectUsers } from '../userManagement';
 import { BoardActions, BoardTypes } from './board.redux';
-import { selectBoardType, selectFetchedTeamspace } from './board.selectors';
+import { selectBoardType } from './board.selectors';
 
 function* fetchData({ boardType, teamspace, project, modelId }) {
 	try {
 		yield put(BoardActions.setIsPending(true));
 		const teamspaces = yield select(selectTeamspaces);
 		const currentTeamspace = yield select(selectCurrentTeamspace);
-		const alreadyFetchedTeamspace = yield select(selectFetchedTeamspace);
 		const currentModel = yield select(selectCurrentModel);
-		const users = yield select(selectUsers);
 
 		if (modelId && modelId !== currentModel) {
 			yield put(ModelActions.fetchSettings(teamspace, modelId));
