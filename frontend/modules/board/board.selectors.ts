@@ -19,7 +19,7 @@ import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import { groupBy, memoize, sortBy, startCase, uniqBy, values } from 'lodash';
+import { get, groupBy, memoize, sortBy, startCase, uniqBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { PRIORITIES, STATUSES } from '../../constants/issues';
 import { LEVELS_LIST, RISK_CATEGORIES, RISK_MITIGATION_STATUSES } from '../../constants/risks';
@@ -174,9 +174,11 @@ export const selectLanes = createSelector(
 			const isDefined = Boolean(item[filterProp] && ((typeof item[filterProp] === 'string' && item[filterProp]) ||
 				(typeof item[filterProp] !== 'string' && item[filterProp].length))) || typeof item[filterProp] === 'number';
 
+			const defaultValue = get(FILTER_PROPS[filterProp], 'notDefinedLabel', NOT_DEFINED_PROP);
+
 			return {
 				id: item._id,
-				[filterProp]: isDefined ? getProp(item, filterProp) : FILTER_PROPS[filterProp].notDefinedLabel || NOT_DEFINED_PROP,
+				[filterProp]: isDefined ? getProp(item, filterProp) : defaultValue,
 				metadata: {
 					...item,
 					id: item._id,
