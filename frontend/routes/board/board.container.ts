@@ -35,7 +35,7 @@ import {
 	IssuesActions
 } from '../../modules/issues';
 import { selectJobsList } from '../../modules/jobs';
-import { selectTopicTypes, selectSettings } from '../../modules/model';
+import { selectSettings, selectTopicTypes } from '../../modules/model';
 import {
 	selectSelectedFilters as selectSelectedRiskFilters,
 	selectSortOrder as selectRisksSortOrder,

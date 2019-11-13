@@ -85,7 +85,6 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	get jobsList() {
-		debugger;
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 

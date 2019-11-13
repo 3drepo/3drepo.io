@@ -21,7 +21,7 @@ import Add from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Check from '@material-ui/icons/Check';
 import SearchIcon from '@material-ui/icons/Search';
-import { capitalize, get } from 'lodash';
+import { get } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
@@ -43,6 +43,7 @@ import { Loader } from '../components/loader/loader.component';
 import { MenuButton } from '../components/menuButton/menuButton.component';
 import { Panel } from '../components/panel/panel.component';
 
+import { isViewer } from '../../helpers/permissions';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { FilterPanel } from '../components/filterPanel/filterPanel.component';
 import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
@@ -66,7 +67,6 @@ import {
 	ViewConfig
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
-import { isViewer } from '../../helpers/permissions';
 
 const types = [{ value: 'issues', name: 'Issues' } , { value: 'risks', name: 'Risks' }];
 
