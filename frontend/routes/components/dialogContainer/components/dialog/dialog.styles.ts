@@ -11,6 +11,8 @@ export const DialogActions = styled(DialogActionsComponent)`
 
 export const DialogTitle = styled(DialogTitleComponent)`
 	&& {
+		align-items: center;
+    justify-content: space-between;
 		padding-right: 0;
 	}
 `;

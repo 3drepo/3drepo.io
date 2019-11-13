@@ -75,14 +75,14 @@ export const RISK_FILTER_PROPS = {
 		name: 'Mitigation status',
 		draggable: true
 	},
+	assigned_roles: {
+		value: 'assigned_roles',
+		name: 'Owner',
+		draggable: true
+	},
 	creator_role: {
 		value: 'creator_role',
 		name: 'Created By'
-	},
-	owner: {
-		value: 'owner',
-		name: 'Owner',
-		notDefinedLabel: 'No owner'
 	}
 };
 

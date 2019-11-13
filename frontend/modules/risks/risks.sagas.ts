@@ -154,7 +154,12 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 		}
 
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
-		yield put(RisksActions.goToRisk(preparedRisk));
+
+		if (!ignoreViewer) {
+			yield put(RisksActions.goToRisk(preparedRisk));
+		} else {
+			yield put(DialogActions.hideDialog());
+		}
 		yield put(SnackbarActions.show('Risk created'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('save', 'risk', error));

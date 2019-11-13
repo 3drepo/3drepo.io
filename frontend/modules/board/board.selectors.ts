@@ -134,11 +134,6 @@ export const selectLanes = createSelector(
 			value: getNextWeekTimestamp(3)
 		}];
 
-		const usersValues = sortBy(uniqBy(rawCardData[boardType], 'owner'), 'owner').map(({owner}) => ({
-			name: owner,
-			value: owner
-		}));
-
 		const issueFiltersMap = {
 			[ISSUE_FILTER_PROPS.status.value]: values(STATUSES).map((s) => ({
 				name: startCase(s),
@@ -163,7 +158,7 @@ export const selectLanes = createSelector(
 			[RISK_FILTER_PROPS.category.value]: RISK_CATEGORIES,
 			[RISK_FILTER_PROPS.mitigation_status.value]: RISK_MITIGATION_STATUSES,
 			[RISK_FILTER_PROPS.creator_role.value]: jobsValues,
-			[RISK_FILTER_PROPS.owner.value]: usersValues,
+			[RISK_FILTER_PROPS.assigned_roles.value]: jobsValues,
 		};
 
 		const filtersMap = isIssueBoardType ? issueFiltersMap : riskFiltersMap;
@@ -199,7 +194,7 @@ export const selectLanes = createSelector(
 			const propertyName = notDefinedGroup[0].prop;
 			const notDefinedLane = {
 				id: propertyName,
-				title: propertyName === ISSUE_FILTER_PROPS.assigned_roles.value ?
+				title: propertyName === FILTER_PROPS.assigned_roles.value ?
 					'Unassigned' : `Not defined ${FILTER_PROPS[propertyName] ? FILTER_PROPS[propertyName].name : ''}`,
 				label: `${notDefinedGroup.length} ${boardType}`,
 				cards: notDefinedGroup

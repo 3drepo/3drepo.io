@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, take, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { selectCurrentTeamspace } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { IssuesActions, IssuesTypes } from '../issues';
+import { JobsActions } from '../jobs';
 import { selectCurrentModel, ModelActions } from '../model';
 import { RisksActions, RisksTypes } from '../risks';
 import { selectTeamspaces, TeamspacesActions } from '../teamspaces';
@@ -32,6 +33,11 @@ function* fetchData({ boardType, teamspace, project, modelId }) {
 		const teamspaces = yield select(selectTeamspaces);
 		const currentTeamspace = yield select(selectCurrentTeamspace);
 		const currentModel = yield select(selectCurrentModel);
+
+		yield all([
+			put(JobsActions.fetchJobs(teamspace)),
+			put(JobsActions.fetchJobsColors(teamspace))
+		]);
 
 		if (modelId && modelId !== currentModel) {
 			yield put(ModelActions.fetchSettings(teamspace, modelId));
