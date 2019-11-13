@@ -347,9 +347,9 @@ export function Board(props: IProps) {
 		const models = getProjectModels(props.teamspaces, props.projectsMap, props.modelsMap, teamspace, project);
 		return (
 			<FormControl>
-				<InputLabel shrink htmlFor="model-select">Model</InputLabel>
+				<InputLabel shrink htmlFor="model-select">Model/Federation</InputLabel>
 				<CellSelect
-					placeholder="Select model"
+					placeholder="Select model/federation"
 					items={models}
 					value={models.length ? modelId : ''}
 					onChange={handleModelChange}
