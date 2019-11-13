@@ -512,6 +512,66 @@ class Ticket {
 		return tickets;
 	}
 
+	toDirectXCoords(entry) {
+		const fieldsToConvert = ["position", "norm"];
+		const vpFieldsToConvert = ["right", "view_dir", "look_at", "position", "up"];
+
+		fieldsToConvert.forEach((rootKey) => {
+			if (entry[rootKey]) {
+				entry[rootKey] = utils.webGLtoDirectX(entry[rootKey]);
+			}
+		});
+
+		const viewpoint = entry.viewpoint;
+		vpFieldsToConvert.forEach((key) => {
+			if (viewpoint[key]) {
+				viewpoint[key] = utils.webGLtoDirectX(viewpoint[key]);
+			}
+		});
+
+		const clippingPlanes = viewpoint.clippingPlanes;
+		if(clippingPlanes) {
+			for (const item in clippingPlanes) {
+				clippingPlanes[item].normal = utils.webGLtoDirectX(clippingPlanes[item].normal);
+			}
+		}
+
+		return viewpoint;
+	}
+
+	async getList(account, model, branch, revision, ids, convertCoords) {
+		const projection = {
+			extras: 0,
+			"comments": 0,
+			"viewpoints.extras": 0,
+			"viewpoints.scribble": 0,
+			"viewpoints.screenshot.content": 0,
+			"viewpoints.screenshot.resizedContent": 0,
+			"thumbnail.content": 0
+		};
+
+		const tickets =  await this.findByModelName(account, model, branch, revision, projection, ids, false);
+		if (convertCoords) {
+			tickets.forEach(this.toDirectXCoords);
+		}
+		return tickets;
+	}
+
+	async getReport(account, model, rid, ids, res, reportGen) {
+		const projection = {
+			extras: 0,
+			"viewpoints.extras": 0,
+			"viewpoints.scribble": 0,
+			"viewpoints.screenshot.content": 0,
+			"viewpoints.screenshot.resizedContent": 0,
+			"thumbnail.content": 0
+		};
+
+		const branch = rid ? null : "master";
+		const risks = await this.findByModelName(account, model, branch, rid, projection, ids, false);
+		reportGen.addEntries(risks);
+		return reportGen.generateReport(res);
+	}
 	// missing:
 	/*
 getReport

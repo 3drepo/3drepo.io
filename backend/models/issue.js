@@ -79,33 +79,6 @@ const statusEnum = {
 	"CLOSED": C.ISSUE_STATUS_CLOSED
 };
 
-function toDirectXCoords(issueData) {
-	const fieldsToConvert = ["position", "norm"];
-	const vpFieldsToConvert = ["right", "view_dir", "look_at", "position", "up"];
-
-	fieldsToConvert.forEach((rootKey) => {
-		if (issueData[rootKey]) {
-			issueData[rootKey] = utils.webGLtoDirectX(issueData[rootKey]);
-		}
-	});
-
-	const viewpoint = issueData.viewpoint;
-	vpFieldsToConvert.forEach((key) => {
-		if (viewpoint[key]) {
-			viewpoint[key] = utils.webGLtoDirectX(viewpoint[key]);
-		}
-	});
-
-	const clippingPlanes = viewpoint.clippingPlanes;
-	if (clippingPlanes) {
-		for (const item in clippingPlanes) {
-			clippingPlanes[item].normal = utils.webGLtoDirectX(clippingPlanes[item].normal);
-		}
-	}
-
-	return viewpoint;
-}
-
 issue.createIssue = async function(account, model, newIssue, sessionId) {
 	// Sets the issue number
 	const coll = await db.getCollection(account, model + ".issues");
@@ -193,23 +166,9 @@ issue.update = async function(user, sessionId, account, model, issueId, data) {
 	return await ticket.update(attributeBlacklist, user, sessionId, account, model, issueId, data, this.onBeforeUpdate.bind(this));
 };
 
-issue.getIssuesReport = function(account, model, username, rid, issueIds, res) {
-	const projection = {
-		extras: 0,
-		"viewpoints.extras": 0,
-		"viewpoints.scribble": 0,
-		"viewpoints.screenshot.content": 0,
-		"viewpoints.screenshot.resizedContent": 0,
-		"thumbnail.content": 0
-	};
-
-	const branch = rid ? null : "master";
-
+issue.getRisksReport = async function(account, model, rid, ids, res) {
 	const reportGen = require("../models/report").newIssuesReport(account, model, rid);
-	return issue.findIssuesByModelName(account, model, branch, rid, projection, issueIds, false).then(issues => {
-		reportGen.addEntries(issues);
-		return reportGen.generateReport(res);
-	});
+	return ticket.getReport(account, model, rid, ids, res, reportGen);
 };
 
 issue.getIssuesList = function(account, model, branch, revision, ids, sort, convertCoords) {
@@ -234,7 +193,7 @@ issue.getIssuesList = function(account, model, branch, revision, ids, sort, conv
 		false
 	).then((issues) => {
 		if (convertCoords) {
-			issues.forEach((x) => toDirectXCoords(x));
+			issues.forEach(ticket.toDirectXCoords);
 		}
 		return issues;
 	});

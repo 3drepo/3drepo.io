@@ -20,14 +20,11 @@ const utils = require("../utils");
 const responseCodes = require("../response_codes.js");
 const db = require("../handler/db");
 
-const ModelSetting = require("./modelSetting");
-const History = require("./history");
 const _ = require("lodash");
 
 const ChatEvent = require("./chatEvent");
 
 const Comment = require("./comment");
-const Group = require("./group");
 const View = require("./viewpoint");
 
 const Ticket = require("./ticket");
@@ -73,72 +70,6 @@ const LEVELS = {
 
 const ticket = new Ticket("risks", "risk_id", "RISK", fieldTypes, []);
 
-function clean(dbCol, riskToClean) {
-	const idKeys = ["_id", "rev_id", "parent"];
-	const commentIdKeys = ["rev_id", "guid", "viewpoint"];
-	const vpIdKeys = ["hidden_group_id", "highlighted_group_id", "shown_group_id", "guid"];
-
-	riskToClean.account = dbCol.account;
-	riskToClean.model = (riskToClean.origin_model) ? riskToClean.origin_model : dbCol.model;
-
-	idKeys.concat(vpIdKeys).forEach((key) => {
-		if (riskToClean[key]) {
-			riskToClean[key] = utils.uuidToString(riskToClean[key]);
-		}
-	});
-
-	if (riskToClean.viewpoints) {
-		riskToClean.viewpoints.forEach((viewpoint, i) => {
-			vpIdKeys.forEach((key) => {
-				if (riskToClean.viewpoints[i] && riskToClean.viewpoints[i][key]) {
-					riskToClean.viewpoints[i][key] = utils.uuidToString(riskToClean.viewpoints[i][key]);
-				} else {
-					delete riskToClean.viewpoints[i][key];
-				}
-			});
-
-			if (riskToClean.viewpoints[i].screenshot) {
-				riskToClean.viewpoints[i].screenshot = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/viewpoints/" + riskToClean.viewpoints[i].guid + "/screenshot.png";
-				riskToClean.viewpoints[i].screenshotSmall = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/viewpoints/" + riskToClean.viewpoints[i].guid + "/screenshotSmall.png";
-			}
-
-			if (0 === i) {
-				riskToClean.viewpoint = riskToClean.viewpoints[i];
-			}
-		});
-	}
-
-	if (riskToClean.comments) {
-		riskToClean.comments.forEach((comment, i) => {
-			commentIdKeys.forEach((key) => {
-				if (riskToClean.comments[i] && riskToClean.comments[i][key]) {
-					riskToClean.comments[i][key] = utils.uuidToString(riskToClean.comments[i][key]);
-				}
-			});
-
-			if (riskToClean.comments[i].viewpoint) {
-				const commentViewpoint = riskToClean.viewpoints.find((vp) =>
-					vp.guid === riskToClean.comments[i].viewpoint
-				);
-
-				if (commentViewpoint) {
-					riskToClean.comments[i].viewpoint = commentViewpoint;
-				}
-			}
-		});
-	}
-
-	if (riskToClean.thumbnail && riskToClean.thumbnail.flag) {
-		riskToClean.thumbnail = riskToClean.account + "/" + riskToClean.model + "/risks/" + riskToClean._id + "/thumbnail.png";
-	}
-
-	riskToClean = { ...riskToClean, ...getLevelOfRisk(riskToClean) };
-
-	delete riskToClean.viewpoints;
-
-	return riskToClean;
-}
-
 function getLevelOfRisk(riskData) {
 	const level_of_risk = calculateLevelOfRisk(riskData.likelihood, riskData.consequence);
 	const residual_level_of_risk = calculateLevelOfRisk(riskData.residual_likelihood, riskData.residual_consequence);
@@ -151,33 +82,6 @@ function getLevelOfRisk(riskData) {
 	}
 
 	return {level_of_risk, residual_level_of_risk, overall_level_of_risk};
-}
-
-function toDirectXCoords(entry) {
-	const fieldsToConvert = ["position", "norm"];
-	const vpFieldsToConvert = ["right", "view_dir", "look_at", "position", "up"];
-
-	fieldsToConvert.forEach((rootKey) => {
-		if (entry[rootKey]) {
-			entry[rootKey] = utils.webGLtoDirectX(entry[rootKey]);
-		}
-	});
-
-	const viewpoint = entry.viewpoint;
-	vpFieldsToConvert.forEach((key) => {
-		if (viewpoint[key]) {
-			viewpoint[key] = utils.webGLtoDirectX(viewpoint[key]);
-		}
-	});
-
-	const clippingPlanes = viewpoint.clippingPlanes;
-	if(clippingPlanes) {
-		for (const item in clippingPlanes) {
-			clippingPlanes[item].normal = utils.webGLtoDirectX(clippingPlanes[item].normal);
-		}
-	}
-
-	return viewpoint;
 }
 
 function addRiskMitigationComment(account, model, sessionId, riskId, comments, data, viewpoint) {
@@ -228,38 +132,6 @@ function calculateLevelOfRisk(likelihood, consequence) {
 
 	return levelOfRisk;
 }
-
-risk.setGroupRiskId = function(dbCol, data, riskId) {
-
-	const updateGroup = function(group_id) {
-		// TODO - Do we need to find group first? Can we just patch?
-		return Group.findByUID(dbCol, utils.uuidToString(group_id), null, utils.uuidToString(data.rev_id)).then((group) => {
-			const riskIdData = {
-				risk_id: riskId
-			};
-
-			return group.updateAttrs(dbCol, riskIdData);
-		});
-	};
-
-	const groupUpdatePromises = [];
-
-	if (data.viewpoint) {
-		if (data.viewpoint.highlighted_group_id) {
-			groupUpdatePromises.push(updateGroup(data.viewpoint.highlighted_group_id));
-		}
-
-		if (data.viewpoint.hidden_group_id) {
-			groupUpdatePromises.push(updateGroup(data.viewpoint.hidden_group_id));
-		}
-
-		if (data.viewpoint.shown_group_id) {
-			groupUpdatePromises.push(updateGroup(data.viewpoint.shown_group_id));
-		}
-	}
-
-	return Promise.all(groupUpdatePromises);
-};
 
 risk.createRisk = async function(account, model, newRisk, sessionId) {
 	newRisk = await ticket.create(account, model, newRisk);
@@ -355,106 +227,9 @@ risk.deleteRisks = function(dbCol, sessionId, ids) {
 	});
 };
 
-risk.getRisksReport = function(account, model, username, rid, ids, res) {
-	const dbCol = { account, model};
-
-	const projection = {
-		extras: 0,
-		"viewpoints.extras": 0,
-		"viewpoints.scribble": 0,
-		"viewpoints.screenshot.content": 0,
-		"viewpoints.screenshot.resizedContent": 0,
-		"thumbnail.content": 0
-	};
-
-	const branch = rid ? null : "master";
-
+risk.getRisksReport = async function(account, model, rid, ids, res) {
 	const reportGen = require("../models/report").newRisksReport(account, model, rid);
-	return risk.findRisksByModelName(dbCol, username, branch, rid, projection, ids, false).then(risks => {
-		reportGen.addEntries(risks);
-		return reportGen.generateReport(res);
-	});
-};
-
-risk.getRisksList = function(dbColOptions, user, branch, revision, ids, convertCoords) {
-	const projection = {
-		extras: 0,
-		"comments": 0,
-		"viewpoints.extras": 0,
-		"viewpoints.scribble": 0,
-		"viewpoints.screenshot.content": 0,
-		"viewpoints.screenshot.resizedContent": 0,
-		"thumbnail.content": 0
-	};
-
-	return risk.findRisksByModelName(
-		dbColOptions,
-		user,
-		branch,
-		revision,
-		projection,
-		ids,
-		false
-	).then((risks) => {
-		if (convertCoords) {
-			risks.forEach((entry) => toDirectXCoords(entry));
-		}
-		return risks;
-	});
-};
-
-risk.findRisksByModelName = function(dbCol, username, branch, revId, projection, ids, noClean = false) {
-	const account = dbCol.account;
-	const model = dbCol.model;
-
-	const filter = {};
-	let historySearch = Promise.resolve();
-
-	if (ids) {
-		ids.forEach((id, i) => {
-			ids[i] = utils.stringToUUID(id);
-		});
-		filter._id = {"$in": ids};
-	}
-
-	if (branch || revId) {
-		historySearch = History.getHistory({account, model}, branch, revId).then((history) => {
-			if (!history) {
-				return Promise.reject(responseCodes.INVALID_TAG_NAME);
-			} else {
-				return History.find({account, model}, {timestamp: {"$gt": history.timestamp}}, {_id: 1, current: 1})
-					.then((revIds) => {
-						revIds = revIds.map(r => r._id);
-
-						return {current: history.current, revIds};
-					});
-			}
-		});
-	}
-
-	return ModelSetting.findById(dbCol, dbCol.model).then((settings) => {
-		return historySearch.then((historySearchResults) => {
-			// Only retrieve risks for current and older revisions
-			filter.rev_id = {"$not" : {"$in": historySearchResults.revIds}};
-
-			return db.getCollection(account, model + ".risks").then((_dbCol) => {
-				// Retrieve risks from top level model/federation
-				return _dbCol.find(filter, projection).toArray();
-			}).then((mainRisks) => {
-				mainRisks.forEach((mainRisk) => {
-					mainRisk.typePrefix = (settings.type) ? settings.type : "";
-					mainRisk.modelCode = (settings.properties && settings.properties.code) ?
-						settings.properties.code : "";
-				});
-
-				if (!noClean) {
-					mainRisks = mainRisks.map(r => clean(dbCol, r));
-				}
-
-				return mainRisks;
-			});
-		});
-	});
+	return ticket.getReport(account, model, rid, ids, res, reportGen);
 };
 
 risk.findByUID = async function(account, model, uid, projection, noClean = false) {
@@ -465,6 +240,8 @@ risk.findByUID = async function(account, model, uid, projection, noClean = false
 
 	return riskFound;
 };
+
+risk.getRisksList = ticket.getList.bind(ticket);
 
 risk.getScreenshot = ticket.getScreenshot.bind(ticket);
 risk.getSmallScreenshot = ticket.getSmallScreenshot.bind(ticket);
