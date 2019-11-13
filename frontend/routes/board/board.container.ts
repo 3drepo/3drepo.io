@@ -35,7 +35,7 @@ import {
 	IssuesActions
 } from '../../modules/issues';
 import { selectJobsList } from '../../modules/jobs';
-import { selectTopicTypes } from '../../modules/model';
+import { selectTopicTypes, selectSettings } from '../../modules/model';
 import {
 	selectSelectedFilters as selectSelectedRiskFilters,
 	selectSortOrder as selectRisksSortOrder,
@@ -61,7 +61,8 @@ const mapStateToProps = createStructuredSelector({
 	cards: selectCards,
 	projectsMap: selectProjects,
 	modelsMap: selectModels,
-	showClosedIssues: selectShowClosedIssues
+	showClosedIssues: selectShowClosedIssues,
+	modelSettings: selectSettings,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

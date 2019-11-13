@@ -66,6 +66,7 @@ import {
 	ViewConfig
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
+import { isViewer } from '../../helpers/permissions';
 
 const types = [{ value: 'issues', name: 'Issues' } , { value: 'risks', name: 'Risks' }];
 
@@ -105,6 +106,7 @@ interface IProps {
 	projectsMap: any;
 	modelsMap: any;
 	showClosedIssues: boolean;
+	modelSettings: any;
 	fetchData: (boardType, teamspace, project, modelId) => void;
 	fetchCardData: (boardType, teamspace, modelId, cardId) => void;
 	resetCardData: () => void;
@@ -188,7 +190,9 @@ export function Board(props: IProps) {
 		props.fetchData(type, teamspace, project, modelId);
 	}, [type, teamspace, project, modelId]);
 
-	const isDraggable = get(
+	const hasViewerPermissions = isViewer(props.modelSettings.permissions);
+
+	const isDraggable = !hasViewerPermissions && get(
 		isIssuesBoard ? ISSUE_FILTER_PROPS : RISK_FILTER_PROPS,
 		[props.filterProp, 'draggable'],
 		false
