@@ -22,17 +22,12 @@ const db = require("../handler/db");
 
 const History = require("./history");
 const Ref = require("./ref");
-const FileRef = require("./fileRef");
 
 const ChatEvent = require("./chatEvent");
-const config = require("../config.js");
 
-const User = require("./user");
 const Ticket = require("./ticket");
 
 const C = require("../constants");
-
-const extensionRe = /\.(\w+)$/;
 
 const fieldTypes = {
 	"_id": "[object Object]",
@@ -77,10 +72,10 @@ const statusEnum = {
 
 class Issue extends Ticket {
 	constructor() {
-		super("issues", "issue_id", "ISSUE", fieldTypes,ownerPrivilegeAttributes);
+		super("issues", "issue_id", "issueIds", "ISSUE", fieldTypes,ownerPrivilegeAttributes);
 	}
 
-	async createIssue(account, model, newIssue, sessionId) {
+	async create(account, model, newIssue, sessionId) {
 		// Sets the issue number
 		const coll = await db.getCollection(account, model + ".issues");
 		try {
@@ -262,92 +257,6 @@ class Issue extends Ticket {
 			return false;
 		}
 		return oldIssue.status !== newIssue.status;
-	}
-
-	async addRefsToIssue(account, model, issueId, username, sessionId, refs) {
-		if (refs.length === 0) {
-			return [];
-		}
-
-		const issues = await db.getCollection(account, model + ".issues");
-		const issueQuery = {_id: utils.stringToUUID(issueId)};
-		const issueFound = await issues.findOne(issueQuery);
-
-		if (!issueFound) {
-			throw responseCodes.ISSUE_NOT_FOUND;
-		}
-
-		const comments = issueFound.comments || [];
-
-		const ref_ids = [];
-
-		refs.forEach(ref => {
-			comments.push(this.createSystemComment(account, model, sessionId, issueId, username, "resource", null, ref.name));
-			ref_ids.push(ref._id);
-		});
-
-		await issues.update(issueQuery, { $set: {comments}, $push: {refs:  {$each: ref_ids}}});
-		return refs;
-	}
-
-	async attachResourceFiles(account, model, issueId, username, sessionId, resourceNames, files) {
-		const quota = await User.getQuotaInfo(account);
-		const spaceLeft = ((quota.spaceLimit === null || quota.spaceLimit === undefined ? Infinity : quota.spaceLimit) - quota.spaceUsed) * 1024 * 1024;
-		const spaceToBeUsed = files.reduce((size, file) => size + file.size,0);
-
-		if (spaceLeft < spaceToBeUsed) {
-			throw responseCodes.SIZE_LIMIT_PAY;
-		}
-
-		if (!files.every(f => f.size < config.resourceUploadSizeLimit)) {
-			throw responseCodes.SIZE_LIMIT;
-		}
-
-		const refsPromises = files.map((file,i) => {
-			const extension = ((file.originalname.match(extensionRe) || [])[0] || "").toLowerCase();
-			return FileRef.storeFileAsResource(account, model, username, resourceNames[i] + extension, file.buffer, {issueIds:[issueId]});
-		});
-		const refs = await Promise.all(refsPromises);
-		refs.forEach(r => {
-			delete r.link;
-			delete r.type;
-		});
-
-		await this.addRefsToIssue(account, model, issueId, username, sessionId, refs);
-		return refs;
-	}
-
-	async attachResourceUrls(account, model, issueId, username, sessionId, resourceNames, urls) {
-		const refsPromises = urls.map((url, index) =>  FileRef.storeUrlAsResource(account, model, username,resourceNames[index], url,{issueIds:[issueId]}));
-		const refs = await Promise.all(refsPromises);
-		refs.forEach(r => {
-			delete r.type;
-		});
-
-		await this.addRefsToIssue(account, model, issueId, username, sessionId, refs);
-		return refs;
-	}
-
-	async detachResource(account, model, issueId, resourceId, username, sessionId) {
-		const ref = await FileRef.removeResourceFromIssue(account, model, issueId, resourceId);
-		const issues = await db.getCollection(account, model + ".issues");
-		const issueQuery = {_id: utils.stringToUUID(issueId)};
-		const issueFound = await issues.findOne(issueQuery);
-
-		if (!issueFound) {
-			throw responseCodes.ISSUE_NOT_FOUND;
-		}
-
-		const comments = issueFound.comments;
-		comments.push(await this.createSystemComment(account, model, sessionId, issueId, username, "resource", ref.name, null));
-		await issues.update(issueQuery, {$set: {comments}, $pull: { refs: resourceId } });
-
-		if(ref.type !== "http") {
-			delete ref.link;
-		}
-		delete ref.type;
-
-		return ref;
 	}
 }
 

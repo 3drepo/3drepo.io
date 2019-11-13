@@ -37,15 +37,20 @@ const { systemLogger } = require("../logger.js");
 const nodeuuid = require("uuid/v1");
 const Comment = require("./comment");
 
+const FileRef = require("./fileRef");
+const config = require("../config.js");
+const extensionRe = /\.(\w+)$/;
+
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
 class Ticket {
-	constructor(collName, groupField, responseCodeType, fieldTypes, ownerPrivilegeAttributes) {
+	constructor(collName, groupField, refIdsField, responseCodeType, fieldTypes, ownerPrivilegeAttributes) {
 		this.collName = collName;
 		this.response = getResponse(responseCodeType);
 		this.fieldTypes = fieldTypes;
 		this.ownerPrivilegeAttributes = ownerPrivilegeAttributes;
 		this.groupField = groupField;
+		this.refIdsField = refIdsField;
 	}
 
 	clean(account, model, ticketToClean) {
@@ -126,12 +131,16 @@ class Ticket {
 		return ticketToClean;
 	}
 
+	getTicketsCollection(account, model) {
+		return db.getCollection(account, model + "." + this.collName);
+	}
+
 	async findByUID(account, model, uid, projection, noClean = false) {
 		if ("[object String]" === Object.prototype.toString.call(uid)) {
 			uid = utils.stringToUUID(uid);
 		}
 
-		const tickets = await db.getCollection(account, model + "." + this.collName);
+		const tickets = await this.getTicketsCollection(account, model);
 		const foundTicket = await tickets.findOne({ _id: uid }, projection);
 
 		if (!foundTicket) {
@@ -261,7 +270,7 @@ class Ticket {
 		// 6. Update the data
 		const _id = utils.stringToUUID(id);
 
-		const tickets = await db.getCollection(account, model + "." + this.collName);
+		const tickets = await this.getTicketsCollection(account, model);
 		await tickets.update({_id}, {$set: data});
 
 		// 7. Return the updated data and the old ticket
@@ -393,7 +402,7 @@ class Ticket {
 
 		const [settings, coll] = await Promise.all([
 			ModelSetting.findById({account, model}, model),
-			db.getCollection(account, model + "." + this.collName)
+			this.getTicketsCollection(account, model)
 		]);
 
 		await coll.insert(newTicket);
@@ -413,11 +422,11 @@ class Ticket {
 
 		return this.findByUID(account, model, uid, { viewpoints: { $elemMatch: { guid: vid } },
 			"viewpoints.screenshot.resizedContent": 0
-		}, true).then((foundRisk) => {
-			if (!_.get(foundRisk, "viewpoints[0].screenshot.content.buffer")) {
+		}, true).then((foundTicket) => {
+			if (!_.get(foundTicket, "viewpoints[0].screenshot.content.buffer")) {
 				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 			} else {
-				return foundRisk.viewpoints[0].screenshot.content.buffer;
+				return foundTicket.viewpoints[0].screenshot.content.buffer;
 			}
 		});
 	}
@@ -432,15 +441,15 @@ class Ticket {
 		}
 
 		return this.findByUID(account, model, uid, { viewpoints: { $elemMatch: { guid: vid } } }, true)
-			.then((foundRisk) => {
-				if (_.get(foundRisk, "viewpoints[0].screenshot.resizedContent.buffer")) {
-					return foundRisk.viewpoints[0].screenshot.resizedContent.buffer;
-				} else if (!_.get(foundRisk, "viewpoints[0].screenshot.content.buffer")) {
+			.then((foundTicket) => {
+				if (_.get(foundTicket, "viewpoints[0].screenshot.resizedContent.buffer")) {
+					return foundTicket.viewpoints[0].screenshot.resizedContent.buffer;
+				} else if (!_.get(foundTicket, "viewpoints[0].screenshot.content.buffer")) {
 					return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 				} else {
-					return utils.resizeAndCropScreenshot(foundRisk.viewpoints[0].screenshot.content.buffer, 365)
+					return utils.resizeAndCropScreenshot(foundTicket.viewpoints[0].screenshot.content.buffer, 365)
 						.then((resized) => {
-							db.getCollection(account, model + ".risks").then((_dbCol) => {
+							this.getTicketsCollection(account, model).then((_dbCol) => {
 								_dbCol.update({
 									_id: uid,
 									"viewpoints.guid": vid
@@ -449,7 +458,8 @@ class Ticket {
 								}).catch((err) => {
 									systemLogger.logError("Error while saving resized screenshot",
 										{
-											riskId: utils.uuidToString(uid),
+											collName: this.collName,
+											ticketId: utils.uuidToString(uid),
 											viewpointId: utils.uuidToString(vid),
 											err: err
 										});
@@ -467,11 +477,11 @@ class Ticket {
 			uid = utils.stringToUUID(uid);
 		}
 
-		return this.findByUID(account, model, uid, { thumbnail: 1 }, true).then((foundRisk) => {
-			if (!_.get(foundRisk, "thumbnail.content.buffer")) {
+		return this.findByUID(account, model, uid, { thumbnail: 1 }, true).then((foundTicket) => {
+			if (!_.get(foundTicket, "thumbnail.content.buffer")) {
 				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
 			} else {
-				return foundRisk.thumbnail.content.buffer;
+				return foundTicket.thumbnail.content.buffer;
 			}
 		});
 	}
@@ -499,7 +509,7 @@ class Ticket {
 
 		const modelSettings = await ModelSetting.findById({account, model}, model);
 		filter.rev_id = {"$not" : {"$in": invalidRevIds}};
-		const coll = await db.getCollection(account, model + "." + this.collName);
+		const coll = await this.getTicketsCollection(account, model);
 		const tickets = await coll.find(filter, projection).toArray();
 		tickets.forEach((foundTicket, index) => {
 			foundTicket.typePrefix = modelSettings.type || "";
@@ -550,7 +560,7 @@ class Ticket {
 			"thumbnail.content": 0
 		};
 
-		const tickets =  await this.findByModelName(account, model, branch, revision, projection, ids, false);
+		const tickets = await this.findByModelName(account, model, branch, revision, projection, ids, false);
 		if (convertCoords) {
 			tickets.forEach(this.toDirectXCoords);
 		}
@@ -568,15 +578,96 @@ class Ticket {
 		};
 
 		const branch = rid ? null : "master";
-		const risks = await this.findByModelName(account, model, branch, rid, projection, ids, false);
-		reportGen.addEntries(risks);
+		const tickets = await this.findByModelName(account, model, branch, rid, projection, ids, false);
+		reportGen.addEntries(tickets);
 		return reportGen.generateReport(res);
 	}
 
-	// missing:
-	/*
-practically all of resources stuff
-*/
+	async addRefs(account, model, id, username, sessionId, refs) {
+		if (refs.length === 0) {
+			return [];
+		}
+
+		const tickets = await this.getTicketsCollection(account, model);
+		const ticketQuery = {_id: utils.stringToUUID(id)};
+		const ticketFound = await tickets.findOne(ticketQuery);
+
+		if (!ticketFound) {
+			throw responseCodes.ISSUE_NOT_FOUND;
+		}
+
+		const comments = ticketFound.comments || [];
+
+		const ref_ids = [];
+
+		refs.forEach(ref => {
+			comments.push(this.createSystemComment(account, model, sessionId, id, username, "resource", null, ref.name));
+			ref_ids.push(ref._id);
+		});
+
+		await tickets.update(ticketQuery, { $set: {comments}, $push: {refs:  {$each: ref_ids}}});
+		return refs;
+	}
+
+	async attachResourceFiles(account, model, id, username, sessionId, resourceNames, files) {
+		const quota = await User.getQuotaInfo(account);
+		const spaceLeft = ((quota.spaceLimit === null || quota.spaceLimit === undefined ? Infinity : quota.spaceLimit) - quota.spaceUsed) * 1024 * 1024;
+		const spaceToBeUsed = files.reduce((size, file) => size + file.size,0);
+
+		if (spaceLeft < spaceToBeUsed) {
+			throw responseCodes.SIZE_LIMIT_PAY;
+		}
+
+		if (!files.every(f => f.size < config.resourceUploadSizeLimit)) {
+			throw responseCodes.SIZE_LIMIT;
+		}
+
+		const refsPromises = files.map((file,i) => {
+			const extension = ((file.originalname.match(extensionRe) || [])[0] || "").toLowerCase();
+			return FileRef.storeFileAsResource(account, model, username, resourceNames[i] + extension, file.buffer, {[this.refIdsField]:[id]});
+		});
+		const refs = await Promise.all(refsPromises);
+		refs.forEach(r => {
+			delete r.link;
+			delete r.type;
+		});
+
+		await this.addRefs(account, model, id, username, sessionId, refs);
+		return refs;
+	}
+
+	async attachResourceUrls(account, model, issueId, username, sessionId, resourceNames, urls) {
+		const refsPromises = urls.map((url, index) =>  FileRef.storeUrlAsResource(account, model, username,resourceNames[index], url,{[this.refIdsField]:[issueId]}));
+		const refs = await Promise.all(refsPromises);
+		refs.forEach(r => {
+			delete r.type;
+		});
+
+		await this.addRefs(account, model, issueId, username, sessionId, refs);
+		return refs;
+	}
+
+	async detachResource(account, model, issueId, resourceId, username, sessionId) {
+		const ref = await FileRef.removeResourceFromIssue(account, model, issueId, resourceId);
+		const issues = await this.getTicketsCollection(account, model);
+		const issueQuery = {_id: utils.stringToUUID(issueId)};
+		const issueFound = await issues.findOne(issueQuery);
+
+		if (!issueFound) {
+			throw responseCodes.ISSUE_NOT_FOUND;
+		}
+
+		const comments = issueFound.comments;
+		comments.push(await this.createSystemComment(account, model, sessionId, issueId, username, "resource", ref.name, null));
+		await issues.update(issueQuery, {$set: {comments}, $pull: { refs: resourceId } });
+
+		if(ref.type !== "http") {
+			delete ref.link;
+		}
+		delete ref.type;
+
+		return ref;
+	}
 }
 
 module.exports = Ticket;

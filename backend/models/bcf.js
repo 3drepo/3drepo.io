@@ -642,7 +642,7 @@ bcf.importBCF = function(requester, account, model, revId, zipPath) {
 							const savedIssues = [] ;
 							const issuesCreatedProm = issuesToCreate.reduce((promise, item) => {
 								return promise.then(() => {
-									return Issue.createIssue(account, model, item).then((issue) => {
+									return Issue.create(account, model, item).then((issue) => {
 										savedIssues.push(issue);
 									});
 								});

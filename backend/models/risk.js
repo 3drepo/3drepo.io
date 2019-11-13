@@ -147,7 +147,7 @@ async function createViewPoint(account, model, viewpoint) {
 
 class Risk extends Ticket {
 	constructor() {
-		super("risks", "risk_id", "RISK", fieldTypes, []);
+		super("risks", "risk_id", "issueIds", "RISK", fieldTypes, []);
 	}
 
 	async create(account, model, newRisk, sessionId) {
