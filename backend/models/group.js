@@ -924,13 +924,13 @@ async function findObjectIDsByRules(account, model, rules, branch, revId, conver
 
 		const modelsIter = models.values();
 
-		for (const modelID of modelsIter) {
-			const _branch = (model === modelID) ? branch : "master";
-			const _revId = (model === modelID) ? revId : null;
+		for (const submodel of modelsIter) {
+			const _branch = (model === submodel) ? branch : "master";
+			const _revId = (model === submodel) ? revId : null;
 
 			objectIdPromises.push(findModelSharedIDsByRulesQueries(
 				account,
-				modelID,
+				submodel,
 				positiveQueries,
 				negativeQueries,
 				_branch,
@@ -942,16 +942,25 @@ async function findObjectIDsByRules(account, model, rules, branch, revId, conver
 				}
 
 				if (showIfcGuids) {
-					return getIFCGuids(account, model, shared_ids).then(ifc_guids => {
+					return getIFCGuids(account, submodel, shared_ids).then(ifc_guids => {
 						if(convertSharedIDsToString) {
 							shared_ids = shared_ids.map(utils.uuidToString);
 						}
 
-						return {account, model, shared_ids, ifc_guids};
+						return {
+							account,
+							model: submodel,
+							shared_ids,
+							ifc_guids
+						};
 					});
 				}
 
-				return {account, model, shared_ids};
+				return {
+					account,
+					model: submodel,
+					shared_ids
+				};
 			}).catch(() => {
 				// If search on a submodel failed (usually due to no revision in the submodel), it should not
 				// fail the whole API request.
