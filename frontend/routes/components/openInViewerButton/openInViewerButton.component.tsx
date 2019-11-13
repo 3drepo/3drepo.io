@@ -31,9 +31,10 @@ interface IProps {
 }
 
 export const OpenInViewerButton = memo((props: IProps) => {
-	const handleGoToModel = () => {
+	const handleGoToModel = (event) => {
+		event.stopPropagation();
 		const { teamspace, model, query } = props;
-		props.history.push(`${ROUTES.VIEWER}/${teamspace}/${model}?${query || ''}`);
+		window.open(`${window.location.origin}${ROUTES.VIEWER}/${teamspace}/${model}?${query || ''}`, '_blank', 'noopener');
 	};
 
 	return (
