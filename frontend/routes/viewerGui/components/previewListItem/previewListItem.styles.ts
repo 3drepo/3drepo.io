@@ -24,6 +24,18 @@ import styled, { css } from 'styled-components';
 import { COLOR } from '../../../../styles/colors';
 import OpenInViewerButtonComponent from '../../../components/openInViewerButton/openInViewerButton.container';
 
+export const OpenInViewerButton = styled(OpenInViewerButtonComponent)`
+	&& {
+		display: none;
+		top: -6px;
+		right: -3px;
+
+		&:hover {
+			display: block;
+		}
+	}
+`;
+
 export const MenuItemContainer = styled(MenuItem)`
 	position: relative;
 
@@ -35,6 +47,10 @@ export const MenuItemContainer = styled(MenuItem)`
 
 		&:hover {
 			background-color: ${(props: any) => props.expired ? COLOR.WARNING : COLOR.GRAY};
+
+			${OpenInViewerButton} {
+				display: block;
+			}
 		}
 	}
 ` as any;
@@ -137,11 +153,4 @@ export const Actions = styled.div`
 	top: 0;
 	display: flex;
 	align-items: center;
-`;
-
-export const OpenInViewerButton = styled(OpenInViewerButtonComponent)`
-	&& {
-		top: -6px;
-		right: -3px;
-	}
 `;
