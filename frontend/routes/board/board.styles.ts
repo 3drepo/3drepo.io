@@ -33,7 +33,6 @@ export const Container = styled.div`
 
 export const BoardContainer = styled.div`
 	height: calc(100% - 50px);
-	padding: 15px;
 	box-sizing: border-box;
 	border-top: 1px solid ${COLOR.BLACK_6};
 
@@ -41,10 +40,14 @@ export const BoardContainer = styled.div`
 		background-color: initial;
 		height: 100%;
 		padding: 0;
-		overflow: scroll;
+		padding: 16px 12px;
+		overflow-y: hidden;
+		overflow-x: auto;
+		box-sizing: border-box;
 
 		> div {
 			height: 100%;
+			min-width: 100%;
 		}
 	}
 
@@ -55,8 +58,12 @@ export const BoardContainer = styled.div`
 	.react-trello-lane {
 		background-color: ${COLOR.BLACK_6};
 		border: 1px solid ${COLOR.BLACK_12};
-		height: 100%;
-		width: 300px;
+		min-height: 100%;
+		max-height: none;
+		height: inherit;
+		margin: 0 5px;
+		min-width: 300px;
+		width: calc((100% / 4) - 2 * 5px);
 		padding: 10px 8px;
 
 		> div {
