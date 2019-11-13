@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { ReactNodeArray } from 'react';
 import Autosuggest from 'react-autosuggest';
 
 import Checkbox from '@material-ui/core/Checkbox';
@@ -44,7 +44,7 @@ import {
 } from './newUserForm.styles';
 
 interface IProps {
-	title: string | JSX.Element;
+	title: string | ReactNodeArray;
 	jobs: any[];
 	users: any[];
 	onInvitationOpen: (email, job) => void;

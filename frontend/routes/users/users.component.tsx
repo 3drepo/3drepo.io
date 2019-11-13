@@ -43,6 +43,7 @@ import { JobItem } from '../components/jobItem/jobItem.component';
 import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 import { UserItem } from '../components/userItem/userItem.component';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
+import { PendingInvites } from './users.styles';
 
 const USERS_TABLE_CELLS = [
 	{
@@ -271,21 +272,9 @@ export class Users extends React.PureComponent<IProps, IState> {
 		);
 	}
 
-	/**
-	 * Generate licences summary
-	 */
-	public getFooterLabel = () => {
-		const { licencesCount , invitationsCount, showDialog } = this.props;
-		const { limit } = this.state;
-
-		if (!licencesCount) {
-			return '';
-		}
-
-		const limitValue = isNumber(limit) ? limit : 'unlimited';
-		const invitationsLabel = `${invitationsCount} invitations`;
-
-		const onClick = (e: any ) => {
+	public renderPendingInvites = () => {
+		const { invitationsCount, showDialog } = this.props;
+		const onClick = (e: any) => {
 			e.preventDefault();
 			e.stopPropagation();
 			showDialog({
@@ -295,18 +284,27 @@ export class Users extends React.PureComponent<IProps, IState> {
 				}
 			});
 		};
+		return ['(', <PendingInvites key="pending" onClick={onClick}>{invitationsCount} pending</PendingInvites>, ')'];
+	}
 
-		return (
-			<>Assigned licences: {licencesCount} out of {limitValue}
-			{invitationsCount > 0 &&
-				(
-					<>
-						( <a href="#" onClick={onClick}>{invitationsLabel}</a> )
-					</>
-				)
-			}
-			</>
-			);
+	/**
+	 * Generate licences summary
+	 */
+	public getFooterLabel = (withInvitations = false) => {
+		const { licencesCount, users } = this.props;
+		const { limit } = this.state;
+
+		if (!licencesCount) {
+			return '';
+		}
+
+		const limitValue = isNumber(limit) ? limit : 'unlimited';
+
+		return [
+			`Assigned licences: ${users.length} `,
+			withInvitations ? this.renderPendingInvites() : null,
+			` out of ${limitValue}`
+		];
 	}
 
 	public render() {
@@ -314,7 +312,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 
 		return (
 			<>
-				<UserManagementTab footerLabel={this.getFooterLabel()}>
+				<UserManagementTab footerLabel={this.getFooterLabel(true)}>
 					<CustomTable cells={USERS_TABLE_CELLS} rows={rows} />
 				</UserManagementTab>
 				{containerElement && this.renderNewUserForm(containerElement)}
