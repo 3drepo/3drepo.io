@@ -22,9 +22,19 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import { Field, Form, Formik } from 'formik';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
+import * as yup from 'yup';
+import { MODEL_ROLES_LIST } from '../../../constants/model-permissions';
+import { schema } from '../../../services/validation';
+import { CellSelect } from '../customTable/components/cellSelect/cellSelect.component';
 import { JobItem } from '../jobItem/jobItem.component';
-import { Container, EmptySelectValue, StyledSelect, TextField } from './invitationDialog.styles';
+import { PermissionsTable, PermissionsTableContexts } from '../permissionsTable/permissionsTable.component';
+import { Container, TextField } from './invitationDialog.styles';
+
+const invitationSchema = yup.object().shape({
+	email: schema.email,
+	job: yup.string(),
+});
 
 interface IProps {
 	className?: string;
@@ -49,58 +59,71 @@ export const InvitationDialog = (props: IProps) => {
 		});
 	}, [props.jobs]);
 
+	const renderForm = () => (
+		<Form>
+			<Container className={props.className}>
+				<Field name="email" render={({ field }) => (
+					<TextField
+						label="Email"
+						required
+						{...field}
+					/>
+				)} />
+				<Field name="job" render={({ field }) => (
+					<FormControl>
+						<InputLabel shrink htmlFor="job">Job</InputLabel>
+						<CellSelect
+							{...field}
+							items={props.jobs}
+							displayEmpty
+							placeholder="Unassigned"
+							inputId="job"
+							itemTemplate={JobItem}
+						/>
+					</FormControl>
+				)} />
+				<Field name="isAdmin" render={({ field }) => (
+					<FormControlLabel
+						control={
+							<Checkbox
+								checked={field.value}
+								{...field}
+								color="secondary"
+							/>
+						}
+						label="Teamspace Admin"
+					/>
+				)} />
+
+				<Field name="permissions" render={() => (
+					<PermissionsTable
+						context={PermissionsTableContexts.MODELS}
+						permissions={[]}
+						roles={MODEL_ROLES_LIST}
+						onPermissionsChange={this.handlePermissionsChange}
+						rowStateInterceptor={this.hasDisabledPermissions}
+					/>
+				)} />
+				<Field render={({ form }) => (
+					<Button
+						type="submit"
+						variant="raised"
+						color="secondary"
+						disabled={!form.isValid || form.isValidating}
+					>
+						Invite
+					</Button>
+				)} />
+			</Container>
+		</Form>
+	);
+
 	return (
 		<Formik
+			validationSchema={invitationSchema}
 			onSubmit={handleSubmit}
 			initialValues={{ email: props.email, job: props.job, isAdmin: props.isAdmin }}
-		>
-			<Form>
-				<Container className={props.className}>
-					<Field name="email" render={({ field }) => (
-						<TextField
-							label="Email"
-							{...field}
-						/>
-					)} />
-					<Field name="job" render={({ field }) => (
-						<FormControl>
-							<InputLabel shrink htmlFor="job">Job</InputLabel>
-							<StyledSelect
-								{...field}
-								displayEmpty
-								inputProps={{
-									id: 'job'
-								}}
-							>
-								<EmptySelectValue value="">Unassigned</EmptySelectValue>
-								{jobs}
-							</StyledSelect>
-						</FormControl>
-					)} />
-					<Field name="isAdmin" render={({ field }) => (
-						<FormControlLabel
-							control={
-								<Checkbox
-									checked={field.value}
-									{...field}
-									color="secondary"
-								/>
-							}
-							label="Teamspace Admin"
-						/>
-					)} />
-					<Field render={({ form }) => (
-						<Button
-							type="submit"
-							variant="raised"
-							color="secondary"
-							disabled={!form.isValid || form.isValidating}
-						>
-							Invite
-						</Button>
-					)} />
-				</Container>
-			</Form>
-		</Formik>
+			render={renderForm}
+		/>
 	);
 };

@@ -69,8 +69,7 @@ const AdminIcon = ({ isTeamspaceAdmin, isProjectAdmin }) => {
 
 const UNDEFINED_PERMISSIONS = 'undefined';
 
-const PERMISSIONS_TABLE_CELLS = [{
-	name: 'User',
+const SHARED_TABLE_CELLS_PROPS = {
 	type: CELL_TYPES.USER,
 	HeadingComponent: CellUserSearch,
 	HeadingProps: {
@@ -88,12 +87,24 @@ const PERMISSIONS_TABLE_CELLS = [{
 			flex: null
 		}
 	},
+};
+
+const USERS_PERMISSIONS_TABLE_CELLS = [{
+	name: 'User',
+	...SHARED_TABLE_CELLS_PROPS,
 	searchBy: ['firstName', 'lastName', 'user', 'company']
+}];
+
+const MODEL_PERMISSIONS_TABLE_CELLS = [{
+	name: 'Model',
+	...SHARED_TABLE_CELLS_PROPS,
+	searchBy: ['model']
 }];
 
 interface IProps {
 	permissions: any[];
 	roles: any[];
+	context?: string;
 	onSelectionChange?: (selectedUsers) => void;
 	onPermissionsChange?: (permissions) => void;
 	rowStateInterceptor?: (props) => void;
@@ -107,7 +118,16 @@ interface IState {
 	currentUser: any;
 }
 
+export const PermissionsTableContexts = {
+	USERS: 'USERS',
+	MODELS: 'MODELS'
+};
+
 export class PermissionsTable extends React.PureComponent<IProps, IState> {
+	public static defaultProps = {
+		context: PermissionsTableContexts.USERS
+	};
+
 	public state = {
 		rows: [],
 		cells: [],
@@ -115,6 +135,18 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 		selectedGlobalPermissions: UNDEFINED_PERMISSIONS,
 		currentUser: {}
 	};
+
+	public get permissionsCells() {
+		if (this.props.context === PermissionsTableContexts.USERS) {
+			return USERS_PERMISSIONS_TABLE_CELLS;
+		}
+
+		return MODEL_PERMISSIONS_TABLE_CELLS;
+	}
+
+	public get activeSelection() {
+		return !!this.props.onSelectionChange;
+	}
 
 	public onGlobalPermissionsChange = (event, value) => {
 		this.setState({ selectedGlobalPermissions: value });
@@ -178,10 +210,13 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 		});
 
 		return [
-			...PERMISSIONS_TABLE_CELLS,
+			...this.permissionsCells,
 			...cells
 		];
 	}
+
+	public getUserCell = (userPermissions) => pick(userPermissions, ['firstName', 'lastName', 'company', 'user']);
+	public getModeCell = (modelPermissions) => pick(modelPermissions, ['model']);
 
 	public getTableRows = (permissions = [], roles = [], selectedUsers = []) => {
 		return permissions.map((userPermissions) => {
@@ -205,9 +240,11 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
+		const rows = this.getTableRows(this.props.permissions, this.props.roles, []);
 		this.setState({
 			cells: this.getTableCells(this.props.roles),
-			rows: this.getTableRows(this.props.permissions, this.props.roles, [])
+			rows,
+			selectedUsers: this.activeSelection ? [] : rows
 		});
 	}
 
@@ -255,14 +292,14 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const {rows, cells } = this.state;
-
+		const onSelectionChange = this.activeSelection ? this.handleSelectionChange : null;
 		return (
 			<>
 				{ cells.length ? (
 					<CustomTable
 						cells={cells}
 						rows={rows}
-						onSelectionChange={this.handleSelectionChange}
+						onSelectionChange={onSelectionChange}
 						renderCheckbox={this.renderCustomCheckbox}
 					/>
 				) : null }

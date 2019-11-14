@@ -47,7 +47,7 @@ interface IProps {
 	title: string | ReactNodeArray;
 	jobs: any[];
 	users: any[];
-	onInvitationOpen: (email, job) => void;
+	onInvitationOpen: (email, job, isAdmin) => void;
 	onSave: (user) => void;
 	onCancel: () => void;
 	clearSuggestions: () => void;

@@ -33,16 +33,3 @@ export const TextField = styled(TextFieldBase)`
 		margin-bottom: 10px;
 	}
 `;
-
-export const StyledSelect = styled(SelectBase)`
-	&& {
-		/* margin-bottom: 10px; */
-	}
-`;
-
-export const EmptySelectValue = styled(MenuItemBase)`
-	&& {
-		font-size: 14px;
-		color: ${COLOR.BLACK_60};
-	}
-`;
