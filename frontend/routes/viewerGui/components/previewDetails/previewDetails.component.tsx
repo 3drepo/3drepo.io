@@ -23,13 +23,14 @@ import * as Yup from 'yup';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
+import OpenInViewerButton from '../../../components/openInViewerButton/openInViewerButton.container';
+import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
 import {
 	Collapsable,
 	CollapsableContent,
 	Container,
-	Content,
 	Details,
 	NotCollapsableContent,
 	StyledForm,
@@ -43,6 +44,8 @@ import {
 interface IProps {
 	className?: string;
 	roleColor: string;
+	type?: string;
+	id?: string;
 	name: string;
 	number: number;
 	owner: string;
@@ -57,6 +60,9 @@ interface IProps {
 	panelName?: string;
 	scrolled?: boolean;
 	isNew?: boolean;
+	showModelButton?: boolean;
+	history: any;
+	urlParams: any;
 	handleHeaderClick?: (event) => void;
 	onExpandChange?: (event, expaned: boolean) => void;
 	onNameChange?: (event, name: string) => void;
@@ -106,8 +112,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 							onFocus: () => this.handleFocusName(field, form),
 							onBlur: () => this.handleBlurName(field, form)
 						}}
-						/>
-						)} />
+					/>
+				)} />
 			</StyledForm>
 		</Formik>
 	));
@@ -116,25 +122,34 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		<ToggleIcon active={Number(this.state.expanded)} />
 		));
 
-		public renderCollapsable = renderWhenTrue(() => (
-			<CollapsableContent>
+	public renderCollapsable = renderWhenTrue(() => (
+		<CollapsableContent>
 			{this.props.renderCollapsable()}
 		</CollapsableContent>
 	));
 
-	public renderNotCollapsable = renderWhenTrue(() => (
-		<Content>
-			{this.props.renderNotCollapsable()}
-		</Content>
-	));
-
 	public renderUpdateMessage = renderWhenTrue(() =>
-	<ActionMessage content={`This ${this.props.panelName} has been updated by someone else`} />
+		<ActionMessage content={`This ${this.props.panelName} has been updated by someone else`} />
 	);
 
 	public renderDeleteMessage = renderWhenTrue(() =>
-	<ActionMessage content={`This ${this.props.panelName} has been deleted by someone else`} />
+		<ActionMessage content={`This ${this.props.panelName} has been deleted by someone else`} />
 	);
+
+	public renderNotCollapsableContent = renderWhenTrue(() => {
+		return (
+			<>
+				<ToggleButtonContainer onClick={this.handleToggle} expanded={this.state.expanded}>
+					<ToggleButton>
+						{this.renderExpandIcon(!this.props.editable)}
+					</ToggleButton>
+				</ToggleButtonContainer>
+				<NotCollapsableContent>
+					{this.props.renderNotCollapsable()}
+				</NotCollapsableContent>
+			</>
+		);
+	});
 
 	public componentDidMount() {
 		const { editable, defaultExpanded } = this.props;
@@ -173,6 +188,18 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		}
 	}
 
+	public renderViewModel = renderWhenTrue(() => {
+		const { type, id } = this.props;
+		const { teamspace, modelId } = this.props.urlParams;
+		return (
+			<OpenInViewerButton
+				teamspace={teamspace}
+				model={modelId}
+				query={`${type}Id=${id}`}
+			/>
+		);
+	});
+
 	public render() {
 		const {
 			className,
@@ -189,7 +216,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			willBeRemoved,
 			renderCollapsable,
 			renderNotCollapsable,
-			handleHeaderClick
+			handleHeaderClick,
+			showModelButton
 		} = this.props;
 
 		return (
@@ -201,11 +229,12 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 					onClick={handleHeaderClick}
 					scrolled={this.props.scrolled ? 1 : 0}
 				>
-						<RoleIndicator color={roleColor} />
-						{this.renderNameWithCounter(!editable && number)}
-						{this.renderName(!editable && !number)}
-						{this.renderNameField(editable)}
-					</Summary>
+					<RoleIndicator color={roleColor} />
+					{this.renderNameWithCounter(!editable && number)}
+					{this.renderName(!editable && !number)}
+					{this.renderNameField(editable)}
+					{this.renderViewModel(showModelButton)}
+				</Summary>
 
 				<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
 					<Details>
@@ -218,14 +247,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 						{this.renderCollapsable(Boolean(renderCollapsable))}
 					</Details>
 				</Collapsable>
-				<ToggleButtonContainer onClick={this.handleToggle} expanded={this.state.expanded}>
-					<ToggleButton>
-						{this.renderExpandIcon(!editable)}
-					</ToggleButton>
-				</ToggleButtonContainer>
-				<NotCollapsableContent>
-					{this.renderNotCollapsable(Boolean(renderNotCollapsable))}
-				</NotCollapsableContent>
+				{this.renderNotCollapsableContent(!!renderNotCollapsable)}
 			</Container>
 		);
 	}

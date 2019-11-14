@@ -125,10 +125,10 @@ export class FiltersMenu extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderChildItems = (index, item) => renderWhenTrue(() => (
-		<ChildMenu left={this.props.left}>
+		<ChildMenu>
 			<List>{item.values.map(this.renderListChildItem(index, item))}</List>
 		</ChildMenu>
-	))(index === this.state.activeItem)
+	))(index === this.state.activeItem && item.values)
 
 	public renderMenuItems = (items) => {
 		return (

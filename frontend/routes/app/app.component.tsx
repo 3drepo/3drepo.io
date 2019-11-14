@@ -52,6 +52,7 @@ interface IProps {
 	authenticate: () => void;
 	logout: () => void;
 	startup: () => void;
+	hideDialog: () => void;
 }
 
 interface IState {
@@ -114,6 +115,7 @@ export class App extends React.PureComponent<IProps, IState> {
 	public componentDidUpdate(prevProps) {
 		if (location.pathname !== prevProps.location.pathname) {
 			this.sendAnalyticsPageView(location);
+			this.props.hideDialog();
 		}
 	}
 
@@ -133,29 +135,29 @@ export class App extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		return (
-				<AppContainer>
-					<Route component={ViewerCanvas} />
-					{this.renderHeader(!isStaticRoute(location.pathname))}
-					<Switch>
-						{this.renderLoginRoute()}
-						<Route exact path={ROUTES.SIGN_UP} component={SignUp} />
-						<Route exact path={ROUTES.PASSWORD_FORGOT} component={PasswordForgot} />
-						<Route exact path={ROUTES.PASSWORD_CHANGE} component={PasswordChange} />
-						<Route exact path={ROUTES.REGISTER_REQUEST} component={RegisterRequest} />
-						<Route exact path={ROUTES.REGISTER_VERIFY} component={RegisterVerify} />
-						<Redirect exact from={ROUTES.HOME} to={ROUTES.TEAMSPACES} />
-						<PrivateRoute path={ROUTES.DASHBOARD} component={Dashboard} />
-						<PrivateRoute
-							path={`${ROUTES.VIEWER}/:teamspace/:model/:revision?`}
-							component={ViewerGui}
-						/>
-						{this.renderStaticRoutes()}
-						<Route component={NotFound} />
-					</Switch>
-					<DialogContainer />
-					<SnackbarContainer />
-					<LiveChat />
-				</AppContainer>
+			<AppContainer>
+				<Route component={ViewerCanvas} />
+				{this.renderHeader(!isStaticRoute(location.pathname))}
+				<Switch>
+					{this.renderLoginRoute()}
+					<Route exact path={ROUTES.SIGN_UP} component={SignUp} />
+					<Route exact path={ROUTES.PASSWORD_FORGOT} component={PasswordForgot} />
+					<Route exact path={ROUTES.PASSWORD_CHANGE} component={PasswordChange} />
+					<Route exact path={ROUTES.REGISTER_REQUEST} component={RegisterRequest} />
+					<Route exact path={ROUTES.REGISTER_VERIFY} component={RegisterVerify} />
+					<Redirect exact from={ROUTES.HOME} to={ROUTES.TEAMSPACES} />
+					<PrivateRoute path={ROUTES.DASHBOARD} component={Dashboard} />
+					<PrivateRoute
+						path={`${ROUTES.VIEWER}/:teamspace/:model/:revision?`}
+						component={ViewerGui}
+					/>
+					{this.renderStaticRoutes()}
+					<Route component={NotFound} />
+				</Switch>
+				<DialogContainer />
+				<SnackbarContainer />
+				<LiveChat />
+			</AppContainer>
 		);
 	}
 }

@@ -19,18 +19,6 @@ import { createSelector } from 'reselect';
 
 export const selectDialogDomain = (state) => ({...state.dialog});
 
-export const selectIsOpen = createSelector(
-	selectDialogDomain, (state) => state.isOpen
-);
-
-export const selectDialogConfig = createSelector(
-	selectDialogDomain, (state) => state.config
-);
-
-export const selectDialogData = createSelector(
-	selectDialogDomain, (state) => state.data
-);
-
-export const selectMuteNotifications = createSelector(
-	selectDialogDomain, (state) => state.muteNotifications
+export const selectDialogs = createSelector(
+	selectDialogDomain, (state) => state.dialogs
 );

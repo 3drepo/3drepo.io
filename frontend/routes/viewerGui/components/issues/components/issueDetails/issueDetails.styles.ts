@@ -16,10 +16,45 @@
  */
 
 import styled from 'styled-components';
+import { LogList as LogListBase } from '../../../../../components/logList/logList.component';
+import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
 
 export const Container = styled.div``;
+
+export const LogList = styled(LogListBase)`
+	height: 100%;
+`;
+
+export const LogsContainer = styled.div`
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+`;
+
+export const PreviewDetails = styled(PreviewDetailsBase)``;
 
 export const DescriptionImage = styled.div`
 	max-height: 250px;
 	overflow: hidden;
+`;
+
+export const HorizontalView = styled.div`
+	display: flex;
+	flex: 1;
+	justify-content: flex-start;
+	overflow: hidden;
+
+	${PreviewDetails}, ${LogsContainer} {
+		min-width: 50%;
+		width: 50%;
+		max-height: 60vh;
+		position: relative;
+		overflow: auto;
+	}
+
+	${LogList} {
+		:before {
+			box-shadow: none;
+		}
+	}
 `;

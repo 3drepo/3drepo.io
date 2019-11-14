@@ -99,6 +99,14 @@ export const ModelGridItem = memo((props: IProps) => {
 
 	useEffect(resetStarClickTimeout, [props.isStarred]);
 
+	const handleGoToBoard = (event) => {
+		event.stopPropagation();
+		const { history, projectName, teamspace, model } = props;
+		history.push({
+			pathname: `${ROUTES.BOARD_MAIN}/issues/${teamspace}/${projectName}/${model}`
+		});
+	};
+
 	const handlePermissionsClick = (event) => {
 		event.stopPropagation();
 		const { history, projectName, teamspace, model } = props;
@@ -236,12 +244,18 @@ export const ModelGridItem = memo((props: IProps) => {
 
 		if (isFederation) {
 			return [{
+				...ROW_ACTIONS.BOARD,
+				onClick: handleGoToBoard
+			}, {
 				...ROW_ACTIONS.EDIT,
 				onClick: handleFederationEdit
 			}, ...sharedActions];
 		}
 
 		return [{
+			...ROW_ACTIONS.BOARD,
+			onClick: handleGoToBoard
+		}, {
 			...ROW_ACTIONS.UPLOAD_FILE,
 			onClick: handleUploadModelFile
 		}, {

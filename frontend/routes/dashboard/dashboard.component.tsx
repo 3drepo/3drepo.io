@@ -20,6 +20,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { ROUTES } from '../../constants/routes';
 import Billing from '../billing/billing.container';
+import Board from '../board/board.container';
 import { UserInfo } from '../components/userInfo/userInfo.component';
 import ModelSettings from '../modelSettings/modelSettings.container';
 import Profile from '../profile/profile.container';
@@ -31,6 +32,10 @@ const MENU_ITEMS = [
 	{
 		title: 'Teamspaces',
 		path: ROUTES.TEAMSPACES
+	},
+	{
+		title: 'Kanban Board',
+		path: ROUTES.BOARD_MAIN
 	},
 	{
 		title: 'User Management',
@@ -70,6 +75,11 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 			/>
 			<Route
 				exact
+				path={ROUTES.BOARD_SPECIFIC}
+				component={Board}
+			/>
+			<Route
+				exact
 				path={ROUTES.MODEL_SETTINGS}
 				component={ModelSettings}
 			/>
@@ -91,6 +101,10 @@ export class Dashboard extends React.PureComponent<IProps, any> {
 				exact
 				from={ROUTES.USER_MANAGEMENT_MAIN}
 				to={`${ROUTES.USER_MANAGEMENT_MAIN}/${currentUser.username}`}
+			/>
+			<Redirect
+				from={ROUTES.BOARD_MAIN}
+				to={`${ROUTES.BOARD_MAIN}/issues/${currentUser.username}`}
 			/>
 		</Switch>
 		)

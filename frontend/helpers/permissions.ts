@@ -14,3 +14,7 @@ export const hasPermissions = (requiredPerm = '', permissions = []) => {
 export const isAdmin = (permissions) => {
 	return hasPermissions(PERMISSIONS.MANAGE_MODEL_PERMISSION, permissions);
 };
+
+export const isViewer = (permissions) => {
+	return permissions && !hasPermissions(PERMISSIONS.COMMENT_ISSUE, permissions);
+};
