@@ -180,6 +180,18 @@ function sendPaymentErrorEmail(data) {
 	return sendEmail(template, config.contact.email, data);
 }
 
+function sendTeamspaceInvitation(to, data) {
+
+	data.url = getURL("signup");
+
+	if(!data.url) {
+		return rejectNoUrl("model");
+	}
+
+	const template = require("./templates/invitedToModel");
+	return sendEmail(template, to, data);
+}
+
 function sendModelInvitation(to, data) {
 
 	data.url = getURL("model", { account: data.account, model: data.model });
@@ -227,5 +239,6 @@ module.exports = {
 	sendImportError,
 	sendNewUser,
 	sendQueueFailedEmail,
-	sendFileMissingError
+	sendFileMissingError,
+	sendTeamspaceInvitation
 };

@@ -533,7 +533,8 @@
 	define("MAIL_URLS",{
 		"forgotPassword": data => `/password-change?username=${data.username}&token=${data.token}`,
 		"verify": data => `/register-verify?username=${data.username}&token=${data.token}` + (data.pay ? "&pay=true" : ""),
-		"model": data => `/viewer/${data.model}`
+		"model": data => `/viewer/${data.model}`,
+		"signup": () => "/sign-up"
 	});
 
 	define("DEFAULT_JOBS",[

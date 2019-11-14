@@ -22,6 +22,7 @@ const Job = require("./job");
 const Project = require("./project");
 const ModelSetting = require("./modelSetting");
 const systemLogger = require("../logger.js").systemLogger;
+const Mailer = require("../mailer/mailer");
 
 const { contains: setContains } = require("./helper/set");
 
@@ -124,10 +125,16 @@ invitations.create = async (email, teamspace, job, permissions = {}) => {
 	if (result) {
 		const teamSpaces = result.teamSpaces.filter(entry => entry.name !== teamspace);
 		teamSpaces.push(teamspaceEntry);
+
+		// if its a new teamspace that the user has been invited send an invitation email
+		if (result.teamSpaces.every(t=> t.name !== teamspace)) {
+			Mailer.sendTeamspaceInvitation(email, {teamspace});
+		}
+
 		const invitation = { teamSpaces };
 		await coll.updateOne({_id:email}, { $set: invitation });
 	} else {
-		// TODO: should send an email with the invitation
+		Mailer.sendTeamspaceInvitation(email, {teamspace});
 		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
 		await coll.insertOne(invitation);
 	}
