@@ -37,6 +37,7 @@ import {
 	TableButton
 } from '../components/customTable/customTable.component';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
+import { InvitationDialog } from '../components/invitationDialog/invitationDialog.component';
 import Invitations from '../components/invitations/invitations.container';
 import { InvitationsDialog } from '../components/invitationsDialog/invitationsDialog.component';
 import { JobItem } from '../components/jobItem/jobItem.component';
@@ -232,8 +233,8 @@ export class Users extends React.PureComponent<IProps, IState> {
 	public handleInvitationOpen = (email, job) => {
 		this.props.showDialog({
 			title: 'Invite user',
-			template: InvitationsDialog,
-			data: { email, job }
+			template: InvitationDialog,
+			data: { email, job, jobs: this.state.jobs, }
 		});
 	}
 
