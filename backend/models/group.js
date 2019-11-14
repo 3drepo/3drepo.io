@@ -943,14 +943,9 @@ async function findObjectIDsByRules(account, model, rules, branch, revId, conver
 
 				if (showIfcGuids) {
 					return getIFCGuids(account, submodel, shared_ids).then(ifc_guids => {
-						if(convertSharedIDsToString) {
-							shared_ids = shared_ids.map(utils.uuidToString);
-						}
-
 						return {
 							account,
 							model: submodel,
-							shared_ids,
 							ifc_guids
 						};
 					});
