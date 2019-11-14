@@ -129,7 +129,7 @@ export const deleteIssueComment = (teamspace, modelId, id, guid) => {
  * @param issueId
  * @param resourceId
  */
-export const removeResource = (teamspace, modelId, issueId, resourceId ) => {
+export const removeResourceFromIssue = (teamspace, modelId, issueId, resourceId ) => {
 	return api.delete(`${teamspace}/${modelId}/issues/${issueId}/resources`, {_id: resourceId});
 };
 
@@ -141,7 +141,8 @@ export const removeResource = (teamspace, modelId, issueId, resourceId ) => {
  * @param names
  * @param files
  */
-export const attachFileResources = (teamspace, modelId, issueId, names: any[], files: any[], percentageCallback ) => {
+// tslint:disable-next-line:max-line-length
+export const attachFileResourcesToIssue = (teamspace, modelId, issueId, names: any[], files: any[], percentageCallback ) => {
 	const headers = { headers: { 'Content-Type': 'multipart/form-data' }};
 	const formData = new FormData();
 	files.forEach((f) => formData.append('file', f));
@@ -164,6 +165,6 @@ export const attachFileResources = (teamspace, modelId, issueId, names: any[], f
  * @param names
  * @param urls
  */
-export const attachLinkResources = (teamspace, modelId, issueId, names: any[], urls: any[] ) => {
+export const attachLinkResourcesToIssue = (teamspace, modelId, issueId, names: any[], urls: any[] ) => {
 	return api.post(`${teamspace}/${modelId}/issues/${issueId}/resources`, {names, urls});
 };

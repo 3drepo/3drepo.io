@@ -631,7 +631,7 @@ export function* removeResource({ resource }) {
 		const model  = yield select(selectCurrentModel);
 		const username = (yield select(selectCurrentUser)).username;
 
-		yield API.removeResource(teamspace, model, issueId, resource._id);
+		yield API.removeResourceFromIssue(teamspace, model, issueId, resource._id);
 		yield put(IssuesActions.removeResourceSuccess(resource, issueId));
 		yield put(IssuesActions.createCommentSuccess(createRemoveResourceComment(username, resource), issueId));
 	} catch (error) {
@@ -666,7 +666,7 @@ export function* attachFileResources({ files }) {
 
 		yield put(IssuesActions.attachResourcesSuccess( prepareResources(teamspace, model, tempResources), issueId));
 
-		const { data } = yield API.attachFileResources(teamspace, model, issueId, names, files, (progress) => {
+		const { data } = yield API.attachFileResourcesToIssue(teamspace, model, issueId, names, files, (progress) => {
 			const updates = tempResources.map((r) => (
 				{
 					progress: progress * 100,
@@ -698,7 +698,7 @@ export function* attachLinkResources({ links }) {
 		const urls = links.map((link) => link.link);
 		const username = (yield select(selectCurrentUser)).username;
 
-		const {data} = yield API.attachLinkResources(teamspace, model, issueId, names, urls);
+		const {data} = yield API.attachLinkResourcesToIssue(teamspace, model, issueId, names, urls);
 		const resources = prepareResources(teamspace, model, data);
 		yield put(IssuesActions.attachResourcesSuccess(resources, issueId));
 		yield put(IssuesActions.createCommentsSuccess(createAttachResourceComments(username, data), issueId));

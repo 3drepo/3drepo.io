@@ -16,15 +16,21 @@
  */
 
 import { push } from 'connected-react-router';
+import filesize from 'filesize';
 import {  isEmpty, isEqual, map, omit, pick } from 'lodash';
-import { all, put, select, takeLatest } from 'redux-saga/effects';
-
 import * as queryString from 'query-string';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { RISK_LEVELS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
-import { prepareComment, prepareComments } from '../../helpers/comments';
+import {
+	createAttachResourceComments,
+	createRemoveResourceComment,
+	prepareComment,
+	prepareComments
+} from '../../helpers/comments';
 
+import { EXTENSION_RE } from '../../constants/resources';
 import { prepareResources } from '../../helpers/resources';
 import { prepareRisk } from '../../helpers/risks';
 import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../services/analytics';
@@ -36,6 +42,7 @@ import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
+import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
@@ -553,6 +560,94 @@ function* setFilters({ filters }) {
 	}
 }
 
+export function* removeResource({ resource }) {
+	try {
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const issueId = (yield select(selectActiveRiskDetails))._id;
+		const model  = yield select(selectCurrentModel);
+		const username = (yield select(selectCurrentUser)).username;
+
+		yield API.removeResourceFromRisk(teamspace, model, issueId, resource._id);
+		yield put(RisksActions.removeResourceSuccess(resource, issueId));
+		yield put(RisksActions.createCommentSuccess(createRemoveResourceComment(username, resource), issueId));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'resource', error));
+	}
+}
+
+export function* attachFileResources({ files }) {
+	const names =  files.map((file) => file.name);
+	files = files.map((file) => file.file);
+
+	const timeStamp = Date.now();
+
+	const tempResources = files.map((f, i) => (
+		{
+			_id: timeStamp + i,
+			name: names[i] + (f.name.match(EXTENSION_RE) || ['', ''])[0].toLowerCase(),
+			uploading: true,
+			progress: 0,
+			size: 0,
+			originalSize: f.size
+		})
+		);
+
+	const resourceIds = tempResources.map((resource) => resource._id);
+	const teamspace = yield select(selectCurrentModelTeamspace);
+	const issueId = (yield select(selectActiveRiskDetails))._id;
+
+	try {
+		const model  = yield select(selectCurrentModel);
+		const username = (yield select(selectCurrentUser)).username;
+
+		yield put(RisksActions.attachResourcesSuccess( prepareResources(teamspace, model, tempResources), issueId));
+
+		const { data } = yield API.attachFileResourcesToRisk(teamspace, model, issueId, names, files, (progress) => {
+			const updates = tempResources.map((r) => (
+				{
+					progress: progress * 100,
+					size : filesize(r.originalSize * progress, {round: 0}).replace(' ', '')
+				}
+				));
+
+			dispatch(RisksActions.updateResourcesSuccess(resourceIds, updates, issueId));
+		});
+
+		const resources = prepareResources(teamspace, model, data, { uploading: false});
+
+		yield put(RisksActions.updateResourcesSuccess(resourceIds, resources, issueId));
+
+		const comments = createAttachResourceComments(username, data);
+
+		yield all(comments.map((c) => put(RisksActions.createCommentSuccess(c, issueId))));
+	} catch (error) {
+		for (let i = 0; i < resourceIds.length; ++i) {
+			yield put(RisksActions.removeResourceSuccess({_id: resourceIds[i]}, issueId));
+		}
+		yield put(DialogActions.showEndpointErrorDialog('attach', 'resource', error));
+	}
+}
+
+export function* attachLinkResources({ links }) {
+	try {
+		const teamspace = yield select(selectCurrentModelTeamspace);
+		const issueId = (yield select(selectActiveRiskDetails))._id;
+		const model = yield select(selectCurrentModel);
+		const names = links.map((link) => link.name);
+		const urls = links.map((link) => link.link);
+		const username = (yield select(selectCurrentUser)).username;
+
+		const {data} = yield API.attachLinkResourcesToRisk(teamspace, model, issueId, names, urls);
+		const resources = prepareResources(teamspace, model, data);
+		yield put(RisksActions.attachResourcesSuccess(resources, issueId));
+
+		const comments = createAttachResourceComments(username, data);
+		yield all(comments.map((c) => put(RisksActions.createCommentSuccess(c, issueId))));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'resource', error));
+	}
+}
+
 export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.FETCH_RISKS, fetchRisks);
 	yield takeLatest(RisksTypes.FETCH_RISK, fetchRisk);
@@ -576,4 +671,7 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.SHOW_MULTIPLE_GROUPS, showMultipleGroups);
 	yield takeLatest(RisksTypes.GO_TO_RISK, goToRisk);
 	yield takeLatest(RisksTypes.UPDATE_BOARD_RISK, updateBoardRisk);
+	yield takeLatest(RisksTypes.REMOVE_RESOURCE, removeResource);
+	yield takeLatest(RisksTypes.ATTACH_FILE_RESOURCES, attachFileResources);
+	yield takeLatest(RisksTypes.ATTACH_LINK_RESOURCES, attachLinkResources);
 }

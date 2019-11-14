@@ -57,6 +57,11 @@ interface IProps {
 	onSavePin: (position) => void;
 	onChangePin: (pin) => void;
 	setFieldValue: (fieldName, fieldValue) => void;
+	onRemoveResource: (resource) => void;
+	attachFileResources: () => void;
+	attachLinkResources: () => void;
+	showDialog: (config: any) => void;
+	canComment: boolean;
 	hasPin: boolean;
 	hidePin?: boolean;
 }
@@ -159,7 +164,9 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { risk, myJob, permissions, currentUser } = this.props;
+		const { risk, myJob, permissions, currentUser, onRemoveResource,
+			attachFileResources, attachLinkResources, showDialog,
+			canComment } = this.props;
 		const newRisk = !risk._id;
 		const canEditRiskStatus = newRisk || canChangeStatus(risk, myJob, permissions, currentUser);
 
@@ -368,13 +375,14 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 					)} />
 				</Container>
 				{!this.isNewRisk &&
-					<Resources showDialog={() => {}}
-						resources={[]}
-						onSaveFiles={() => {}}
-						onSaveLinks={() => {}}
-						onRemoveResource={() => {}}
-						canEdit={canEditBasicProperty}
-					/>}
+					<Resources showDialog={showDialog}
+							resources={risk.resources}
+							onSaveFiles={attachFileResources}
+							onSaveLinks={attachLinkResources}
+							onRemoveResource={onRemoveResource}
+							canEdit={canComment}
+					/>
+				}
 			</Form>
 		);
 	}
