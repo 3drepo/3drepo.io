@@ -44,6 +44,7 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	public lastPointerPosition: any = { x: 0, y: 0 };
 	public lastLine: any = {};
 	public lastShape: any = {};
+	public isAfterPolygonCreated: boolean = false;
 
 	get isDrawingMode() {
 		return this.props.mode === MODES.BRUSH || this.props.mode === MODES.ERASER || this.props.mode === MODES.SHAPE;
@@ -53,7 +54,7 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		return this.props.mode === MODES.BRUSH || this.props.mode === MODES.ERASER;
 	}
 
-	get isDrawingPolygoneMode() {
+	get isDrawingPolygonMode() {
 		return this.props.mode === MODES.POLYGON;
 	}
 
@@ -90,6 +91,10 @@ export class Drawing extends React.PureComponent <IProps, any> {
 				this.unsubscribeDrawingLineEvents();
 			}
 
+			if (this.props.mode !== MODES.SHAPE && prevProps.mode === MODES.SHAPE) {
+				this.unsubscribeDrawingShapeEvents();
+			}
+
 			if (this.props.mode !== MODES.POLYGON && prevProps.mode === MODES.POLYGON) {
 				this.unsubscribeDrawingPolygonEvents();
 			}
@@ -112,12 +117,15 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		this.props.stage.on('mousemove', this.handleMouseMovePolygon);
 		this.props.stage.on('mouseup', this.handleMouseUpPolygon);
 		this.props.stage.on('mousedown', this.handleMouseDownPolygon);
+		this.props.stage.on('dblclick', this.handleDoubleClickPolygon);
 	}
 
 	public unsubscribeDrawingPolygonEvents = () => {
 		this.props.stage.off('mousemove', this.handleMouseMovePolygon);
 		this.props.stage.off('mouseup', this.handleMouseUpPolygon);
 		this.props.stage.off('mousedown', this.handleMouseDownPolygon);
+		this.props.stage.off('dblclick', this.handleDoubleClickPolygon);
+		this.isAfterPolygonCreated = false;
 	}
 
 	public subscribeDrawingShapeEvents = () => {
@@ -218,7 +226,13 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	}
 
 	public handleMouseMovePolygon = () => {
-		return;
+		if (this.state.isCurrentlyDrawn && this.lastLine.attrs) {
+			const position = this.props.stage.getPointerPosition();
+			const pointsCopy = this.lastLine.points().slice(0, -2);
+
+			this.lastLine.points(pointsCopy.concat([position.x, position.y]));
+			this.layer.batchDraw();
+		}
 	}
 
 	public handleMouseUpPolygon = () => {
@@ -227,6 +241,11 @@ export class Drawing extends React.PureComponent <IProps, any> {
 
 	public handleMouseDownPolygon = () => {
 		if (this.props.selected) {
+			return;
+		}
+
+		if (this.isAfterPolygonCreated) {
+			this.isAfterPolygonCreated = false;
 			return;
 		}
 
@@ -244,8 +263,15 @@ export class Drawing extends React.PureComponent <IProps, any> {
 			y
 		};
 
-		this.lastLine = createDrawnLine(this.props.color, this.props.size, this.lastPointerPosition, this.props.mode);
+		this.lastLine = createDrawnLine(this.props.color, this.props.size, this.lastPointerPosition, this.props.mode, false);
+		const newPoints = this.lastLine.points().concat([this.lastPointerPosition.x, this.lastPointerPosition.y]);
+
+		this.lastLine.points(newPoints);
 		this.layer.add(this.lastLine);
+	}
+
+	public handleDoubleClickPolygon = () => {
+		this.handlePolygonCreationEnd();
 	}
 
 	public handlePolygonCreationEnd = () => {
@@ -258,32 +284,46 @@ export class Drawing extends React.PureComponent <IProps, any> {
 			this.props.handleNewDrawnLine(this.lastLine, ELEMENT_TYPES.POLYGON);
 		}
 
+		this.isAfterPolygonCreated = true;
 		this.setState({ isCurrentlyDrawn: false });
+	}
+
+	public get localPosition() {
+		const position = this.props.stage.getPointerPosition();
+		const currentLayer = this.props.layer.current;
+		return {
+			x: position.x - currentLayer.x(),
+			y: position.y - currentLayer.y()
+		};
+	}
+
+	public isNearbyFirstPoint = () => {
+		const pullAreaRadius = this.props.size ? 5 + this.props.size : 10;
+		const [firstX, firstY] = this.lastLine.points();
+
+		return between(this.localPosition.x, firstX - pullAreaRadius, firstX + pullAreaRadius) &&
+				between(this.localPosition.y, firstY - pullAreaRadius, firstY + pullAreaRadius);
+	}
+
+	public updateLastLinePoint = () => {
+		const newPoints = this.lastLine.points().concat([this.localPosition.x, this.localPosition.y]);
+		this.lastLine.points(newPoints);
 	}
 
 	public drawLine = () => {
 		const position = this.props.stage.getPointerPosition();
-		const localPosition = {
-			x: position.x - this.props.layer.current.x(),
-			y: position.y - this.props.layer.current.y()
-		};
-		if (this.isDrawingPolygoneMode) {
-			const [firstX, firstY] = this.lastLine.points();
-			if (
-					between(localPosition.x, firstX - 10, firstX + 10) &&
-					between(localPosition.y, firstY - 10, firstY + 10)
-			) {
-				const newPoints = this.lastLine.points().concat([firstX, firstY]);
-				this.lastLine.points(newPoints);
+		if (this.isDrawingPolygonMode) {
+			if (this.isNearbyFirstPoint()) {
+				const [firstX, firstY] = this.lastLine.points();
+				const newPoints = this.lastLine.points().slice(0, -2);
+
+				this.lastLine.points(newPoints.concat([firstX, firstY]));
 				this.handlePolygonCreationEnd();
 			} else {
-				const newPoints = this.lastLine.points().concat([localPosition.x, localPosition.y]);
-				this.lastLine.points(newPoints);
+				this.updateLastLinePoint();
 			}
-
 		} else {
-			const newPoints = this.lastLine.points().concat([localPosition.x, localPosition.y]);
-			this.lastLine.points(newPoints);
+			this.updateLastLinePoint();
 		}
 
 		this.lastPointerPosition = position;

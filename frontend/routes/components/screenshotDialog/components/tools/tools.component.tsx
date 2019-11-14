@@ -22,7 +22,6 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import BorderColorIcon from '@material-ui/icons/BorderColor';
 import ClearIcon from '@material-ui/icons/Clear';
 import DotIcon from '@material-ui/icons/FiberManualRecord';
-import PolygonIcon from '@material-ui/icons/LabelOutlined';
 import RedoIcon from '@material-ui/icons/Redo';
 import TextIcon from '@material-ui/icons/TextFields';
 import UndoIcon from '@material-ui/icons/Undo';
@@ -49,6 +48,9 @@ import {
 } from './tools.helpers';
 import { Badge, IconButton, OptionsDivider, ShapeMenuButton, StyledButton, ToolsContainer } from './tools.styles';
 
+const ACTIVE_COLOR = 'secondary';
+const DEFAULT_COLOR = 'action';
+
 interface IProps {
 	size: number;
 	textSize: number;
@@ -62,7 +64,6 @@ interface IProps {
 	onDrawClick: () => void;
 	onEraseClick: () => void;
 	onTextClick: () => void;
-	onPolygonClick: () => void;
 	onShapeClick: (shapeName?) => void;
 	onClearClick: () => void;
 	onColorChange: (color) => void;
@@ -86,7 +87,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 	public renderToolset = renderWhenTrue(() => {
 		const {
 			size, textSize, color, onDrawClick, onTextClick, onClearClick,
-			onColorChange, onBrushSizeChange, onEraseClick, onTextSizeChange, onPolygonClick
+			onColorChange, onBrushSizeChange, onEraseClick, onTextSizeChange
 		} = this.props;
 
 		return (
@@ -111,12 +112,6 @@ export class Tools extends React.PureComponent<IProps, any> {
 					action={onTextClick}
 					Icon={TextIcon}
 				/>
-				<TooltipButton
-					label="Add polygon"
-					color={this.getToolColor(MODES.POLYGON)}
-					action={onPolygonClick}
-					Icon={PolygonIcon}
-				/>
 				<ButtonMenu
 					renderButton={({ IconProps, Icon, ...props }) => {
 						const ActiveIcon = activeShapeIcon(this.props.activeShape || SHAPE_TYPES.RECTANGLE);
@@ -125,9 +120,9 @@ export class Tools extends React.PureComponent<IProps, any> {
 								<Tooltip title={'Add shape'}>
 									<IconButton
 										{...props}
-										aria-label="Show filters menu"
+										aria-label="Show shapes menu"
 										aria-haspopup="true"
-										color={this.getToolColor(MODES.SHAPE)}
+										color={this.getShapeToolColor()}
 										onClick={this.setDefaultShape}
 									>
 										<ActiveIcon {...IconProps} />
@@ -272,9 +267,13 @@ export class Tools extends React.PureComponent<IProps, any> {
 
 	public getToolColor = (toolType) => {
 		if (this.props.mode === toolType) {
-			return 'secondary';
+			return ACTIVE_COLOR;
 		}
-		return 'action';
+		return DEFAULT_COLOR;
+	}
+
+	public getShapeToolColor = () => {
+		return [MODES.SHAPE, MODES.POLYGON].includes(this.props.mode) ? ACTIVE_COLOR : DEFAULT_COLOR;
 	}
 
 	public renderActionsMenu = (menu) =>  {

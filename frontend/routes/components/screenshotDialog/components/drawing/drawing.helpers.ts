@@ -47,14 +47,14 @@ export const createShape = (shapeType, commonProps, initialPositionProps) => {
 	return map[shapeType];
 };
 
-export const createDrawnLine = (stroke, strokeWidth, position, mode) => {
+export const createDrawnLine = (stroke, strokeWidth, position, mode, draggable = true) => {
 	return new Konva.Line({
 		stroke,
 		strokeWidth,
 		points: [position.x, position.y],
 		lineCap: 'round',
 		globalCompositeOperation: MODE_OPERATION[mode],
-		draggable: true,
+		draggable,
 	});
 };
 

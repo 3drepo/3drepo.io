@@ -5,6 +5,7 @@ import SvgIcon from '@material-ui/core/SvgIcon';
 import ArrowIcon from '@material-ui/icons/ArrowRightAlt';
 import ChangeHistoryIcon from '@material-ui/icons/ChangeHistory';
 import CropSquareIcon from '@material-ui/icons/CropSquare';
+import PolygonIcon from '@material-ui/icons/FolderOutlined';
 import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
 import RemoveIcon from '@material-ui/icons/Remove';
 import { COLOR } from '../../../../../styles';
@@ -58,6 +59,11 @@ const ARROW_ITEM = {
 	Icon: ArrowIcon
 };
 
+const POLYGON_ITEM = {
+	name: SHAPE_TYPES.POLYGON,
+	Icon: PolygonIcon
+};
+
 export const SHAPES_MENU = [
 	RECTANGLE_ITEM,
 	TRIANGLE_ITEM,
@@ -65,6 +71,7 @@ export const SHAPES_MENU = [
 	LINE_ITEM,
 	CLOUD_ITEM,
 	ARROW_ITEM,
+	POLYGON_ITEM,
 ];
 
 const SHAPE_ICONS = {
@@ -74,6 +81,7 @@ const SHAPE_ICONS = {
 	[SHAPE_TYPES.LINE]: RemoveIcon,
 	[SHAPE_TYPES.CLOUD]: CloudIcon,
 	[SHAPE_TYPES.ARROW]: ArrowIcon,
+	[SHAPE_TYPES.POLYGON]: PolygonIcon,
 };
 
 export const activeShapeIcon = (activeShape) => SHAPE_ICONS[activeShape];

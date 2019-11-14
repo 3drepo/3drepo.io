@@ -7,6 +7,7 @@ export const SHAPE_TYPES = {
 	LINE: 4,
 	CLOUD: 5,
 	ARROW: 6,
+	POLYGON: 7,
 };
 
 export const SHAPE_COMPONENTS = {

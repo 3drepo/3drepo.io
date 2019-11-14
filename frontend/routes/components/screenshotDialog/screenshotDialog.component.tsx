@@ -53,6 +53,7 @@ interface IProps {
 	clearHistory: () => void;
 	initHistory: () => void;
 }
+
 export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public state = {
 		color: INITIAL_VALUES.color,
@@ -302,11 +303,15 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.setMode(MODES.ERASER);
 	}
 
-	public handleToolPolygonClick = () => {
-		this.setMode(MODES.POLYGON);
-	}
-
 	public setShapeMode = (shape) => {
+		if (shape === SHAPE_TYPES.POLYGON) {
+			this.setState({
+				activeShape: shape,
+				mode: MODES.POLYGON,
+			});
+			return;
+		}
+
 		const newState = {
 			activeShape: shape
 		} as any;
@@ -416,7 +421,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			if (type !== MODES.POLYGON) {
 				this.setState(({ mode }) => ({ selectedObjectName, mode: this.isErasing ? mode : MODES.BRUSH }));
 			} else {
-				this.setState(({ mode }) => ({ selectedObjectName, mode: MODES.POLYGON }));
+				this.setState({ selectedObjectName, mode: MODES.POLYGON });
 			}
 		}
 	}
@@ -546,7 +551,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			onDrawClick={this.setBrushMode}
 			onEraseClick={this.setEraserMode}
 			onTextClick={this.handleToolTextClick}
-			onPolygonClick={this.handleToolPolygonClick}
 			onShapeClick={this.setShapeMode}
 			onClearClick={this.clearCanvas}
 			onBrushSizeChange={this.handleBrushSizeChange}
