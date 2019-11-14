@@ -36,7 +36,7 @@ export const TextField = styled(TextFieldBase)`
 
 export const StyledSelect = styled(SelectBase)`
 	&& {
-		margin-bottom: 10px;
+		/* margin-bottom: 10px; */
 	}
 `;
 

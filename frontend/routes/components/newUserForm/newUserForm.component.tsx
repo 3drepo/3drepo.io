@@ -127,7 +127,7 @@ export class NewUserForm extends React.PureComponent<IProps, IState> {
 	}
 
 	public openInvitationDialog = () => {
-		this.props.onInvitationOpen(this.state.name, this.state.job);
+		this.props.onInvitationOpen(this.state.name, this.state.job, this.state.isAdmin);
 	}
 
 	public renderUserSuggestion = (suggestion, {query, isHighlighted}) => {

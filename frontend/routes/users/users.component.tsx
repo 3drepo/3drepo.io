@@ -230,11 +230,11 @@ export class Users extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleInvitationOpen = (email, job) => {
+	public handleInvitationOpen = (email, job, isAdmin) => {
 		this.props.showDialog({
 			title: 'Invite user',
 			template: InvitationDialog,
-			data: { email, job, jobs: this.state.jobs, }
+			data: { email, job, isAdmin, jobs: this.state.jobs, }
 		});
 	}
 

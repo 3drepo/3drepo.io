@@ -16,7 +16,9 @@
  */
 
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
 import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import { Field, Form, Formik } from 'formik';
@@ -28,6 +30,7 @@ interface IProps {
 	className?: string;
 	email?: string;
 	job?: string;
+	isAdmin?: boolean;
 	jobs: any[];
 }
 
@@ -49,7 +52,7 @@ export const InvitationDialog = (props: IProps) => {
 	return (
 		<Formik
 			onSubmit={handleSubmit}
-			initialValues={{ email: props.email, job: props.job }}
+			initialValues={{ email: props.email, job: props.job, isAdmin: props.isAdmin }}
 		>
 			<Form>
 				<Container className={props.className}>
@@ -73,6 +76,18 @@ export const InvitationDialog = (props: IProps) => {
 								{jobs}
 							</StyledSelect>
 						</FormControl>
+					)} />
+					<Field name="isAdmin" render={({ field }) => (
+						<FormControlLabel
+							control={
+								<Checkbox
+									checked={field.value}
+									{...field}
+									color="secondary"
+								/>
+							}
+							label="Teamspace Admin"
+						/>
 					)} />
 					<Field render={({ form }) => (
 						<Button
