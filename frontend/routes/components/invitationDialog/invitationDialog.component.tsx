@@ -20,11 +20,15 @@ import Checkbox from '@material-ui/core/Checkbox';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import { Field, Form, Formik } from 'formik';
-import React, { useMemo } from 'react';
+import AddIcon from '@material-ui/icons/AddCircleOutline';
+import { Field, FieldArray, Form, Formik } from 'formik';
+import React from 'react';
 import * as yup from 'yup';
+import { map, omit, values } from 'lodash';
+
 import { MODEL_ROLES_LIST } from '../../../constants/model-permissions';
+import { renderWhenTrue } from '../../../helpers/rendering';
+import { useList } from '../../../hooks';
 import { schema } from '../../../services/validation';
 import { CellSelect } from '../customTable/components/cellSelect/cellSelect.component';
 import { JobItem } from '../jobItem/jobItem.component';
@@ -42,6 +46,7 @@ interface IProps {
 	job?: string;
 	isAdmin?: boolean;
 	jobs: any[];
+	projects: any[];
 }
 
 export const InvitationDialog = (props: IProps) => {
@@ -49,17 +54,66 @@ export const InvitationDialog = (props: IProps) => {
 		console.log('Submit', values);
 	};
 
-	const jobs = useMemo(() => {
-		return props.jobs.map((jobProps, index) => {
-			return (
-				<MenuItem key={index} value={jobProps.name}>
-					<JobItem {...jobProps} />
-				</MenuItem>
-			);
+	const getProjects = (selectedProjects) => {
+		const selectedProjectsIds = map(selectedProjects, '_id');
+		return values(omit(props.projects, selectedProjectsIds)).map(({ _id, name }) => {
+			return { name, value: _id };
 		});
-	}, [props.jobs]);
+	};
 
-	const renderForm = () => (
+	const renderPermissions = (projects = []) => (
+		<FieldArray name="permissions" render={({ remove, push}) => (
+			<>
+				{projects.map(({ project, modelsPermissions }, index) => (
+					<div key={index}>
+						<button
+							type="button"
+							onClick={() => remove(index)}
+						>remove</button>
+						<Field name={`permissions.${index}.project`} render={({ field }) => (
+							<FormControl>
+								<InputLabel shrink htmlFor={`project-${index}`}>Project</InputLabel>
+								<CellSelect
+									{...field}
+									items={getProjects(projects)}
+									placeholder="Select project"
+									displayEmpty
+									inputId={`project-${index}`}
+								/>
+							</FormControl>
+						)} />
+						<Field name={`permissions.${index}.isAdmin`} render={({ field }) => (
+							<FormControlLabel
+								control={
+									<Checkbox
+										checked={field.value}
+										{...field}
+										color="secondary"
+									/>
+								}
+								label="Project Admin"
+							/>
+						)} />
+						{project && (<Field name={`permissions.${index}.modelsPermissions`} render={() => (
+							<PermissionsTable
+								context={PermissionsTableContexts.MODELS}
+								permissions={modelsPermissions}
+								roles={MODEL_ROLES_LIST}
+								onPermissionsChange={this.handlePermissionsChange}
+								rowStateInterceptor={this.hasDisabledPermissions}
+							/>
+						)} />)}
+					</div>
+				))}
+				<Button onClick={() => push({ project: '', isAdmin: false, modelsPermissions: [] })}>
+					<AddIcon />
+					Add project/model permissions
+				</Button>
+			</>
+		)} />
+	);
+
+	const renderForm = ({ values }) => (
 		<Form>
 			<Container className={props.className}>
 				<Field name="email" render={({ field }) => (
@@ -95,15 +149,7 @@ export const InvitationDialog = (props: IProps) => {
 					/>
 				)} />
 
-				<Field name="permissions" render={() => (
-					<PermissionsTable
-						context={PermissionsTableContexts.MODELS}
-						permissions={[]}
-						roles={MODEL_ROLES_LIST}
-						onPermissionsChange={this.handlePermissionsChange}
-						rowStateInterceptor={this.hasDisabledPermissions}
-					/>
-				)} />
+				{renderPermissions(values.permissions)}
 				<Field render={({ form }) => (
 					<Button
 						type="submit"
@@ -122,7 +168,7 @@ export const InvitationDialog = (props: IProps) => {
 		<Formik
 			validationSchema={invitationSchema}
 			onSubmit={handleSubmit}
-			initialValues={{ email: props.email, job: props.job, isAdmin: props.isAdmin }}
+			initialValues={{ email: props.email, job: props.job, isAdmin: props.isAdmin, permissions: [] }}
 			render={renderForm}
 		/>
 	);

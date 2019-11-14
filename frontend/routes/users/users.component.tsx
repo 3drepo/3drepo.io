@@ -18,6 +18,7 @@
 import RemoveCircle from '@material-ui/icons/RemoveCircle';
 import {
 	cond,
+	filter,
 	isEmpty,
 	isEqual,
 	isNumber,
@@ -80,11 +81,13 @@ const getPreparedJobs = (jobs) => {
 interface IProps {
 	users: any[];
 	usersSuggestions: any[];
+	projects: any[];
 	limit: any;
 	jobs: any[];
 	licencesCount: number;
 	invitationsCount: number;
 	userNotExists?: boolean;
+	currentTeamspace?: string;
 	addUser: (user) => void;
 	removeUser: (username) => void;
 	updateJob: (username, job) => void;
@@ -234,7 +237,13 @@ export class Users extends React.PureComponent<IProps, IState> {
 		this.props.showDialog({
 			title: 'Invite user',
 			template: InvitationDialog,
-			data: { email, job, isAdmin, jobs: this.state.jobs, }
+			data: {
+				email,
+				job,
+				isAdmin,
+				jobs: this.state.jobs,
+				projects: filter(this.props.projects, ({ teamspace }) => teamspace === this.props.currentTeamspace)
+			}
 		});
 	}
 

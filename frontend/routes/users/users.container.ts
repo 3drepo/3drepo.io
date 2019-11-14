@@ -22,6 +22,7 @@ import { createStructuredSelector } from 'reselect';
 
 import {
 	selectCollaboratorLimit,
+	selectCurrentTeamspace,
 	selectInvitationsCount,
 	selectLicensesCount,
 	selectUsers,
@@ -33,7 +34,7 @@ import { Users } from './users.component';
 
 import { DialogActions } from '../../modules/dialog';
 import { selectJobs } from '../../modules/jobs';
-import { TeamspacesActions } from '../../modules/teamspaces';
+import { selectProjects, TeamspacesActions } from '../../modules/teamspaces';
 
 const mapStateToProps = createStructuredSelector({
 	usersSuggestions: selectUsersSuggestions,
@@ -43,6 +44,8 @@ const mapStateToProps = createStructuredSelector({
 	licencesCount: selectLicensesCount,
 	invitationsCount: selectInvitationsCount,
 	userNotExists: selectUserNotExists,
+	projects: selectProjects,
+	currentTeamspace: selectCurrentTeamspace
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
