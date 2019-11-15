@@ -29,6 +29,7 @@ import { TableHeadingRadio } from '../customTable/components/tableHeadingRadio/t
 import { CheckboxField, CustomTable, CELL_TYPES } from '../customTable/customTable.component';
 import { UserItem } from '../userItem/userItem.component';
 
+import { ModelItem } from '../modelItem/modelItem.component';
 import {
 	DisabledCheckbox,
 	PermissionsCellContainer
@@ -79,7 +80,6 @@ const SHARED_TABLE_CELLS_PROPS = {
 			flex: null
 		}
 	},
-	CellComponent: UserItem,
 	CellProps: {
 		root: {
 			width: '180px',
@@ -92,16 +92,19 @@ const SHARED_TABLE_CELLS_PROPS = {
 const USERS_PERMISSIONS_TABLE_CELLS = [{
 	name: 'User',
 	...SHARED_TABLE_CELLS_PROPS,
+	CellComponent: UserItem,
 	searchBy: ['firstName', 'lastName', 'user', 'company']
 }];
 
 const MODEL_PERMISSIONS_TABLE_CELLS = [{
 	name: 'Model',
 	...SHARED_TABLE_CELLS_PROPS,
-	searchBy: ['model']
+	CellComponent: ModelItem,
+	searchBy: ['model', 'name']
 }];
 
 interface IProps {
+	className?: string;
 	permissions: any[];
 	roles: any[];
 	context?: string;
@@ -216,26 +219,27 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 	}
 
 	public getUserCell = (userPermissions) => pick(userPermissions, ['firstName', 'lastName', 'company', 'user']);
-	public getModeCell = (modelPermissions) => pick(modelPermissions, ['model']);
+	public getModelCell = (modelPermissions) => pick(modelPermissions, ['model', 'name', 'isFederation']);
 
 	public getTableRows = (permissions = [], roles = [], selectedUsers = []) => {
-		return permissions.map((userPermissions) => {
-			const disabled = this.hasDisabledPermissions(userPermissions);
+		const isUsersContext = this.props.context === PermissionsTableContexts.USERS;
+		return permissions.map((permissionsMap) => {
+			const disabled = this.hasDisabledPermissions(permissionsMap);
 
 			const data = [
-				pick(userPermissions, ['firstName', 'lastName', 'company', 'user']),
+				isUsersContext ? this.getUserCell(permissionsMap) : this.getModelCell(permissionsMap),
 				...roles.map(({ key: requiredValue }) => {
 					return {
-						value: userPermissions.key,
-						checked: requiredValue === userPermissions.key,
+						value: permissionsMap.key,
+						checked: requiredValue === permissionsMap.key,
 						disabled: disabled || requiredValue === MODEL_ROLES_TYPES.ADMINISTRATOR,
-						onChange: this.createPermissionsChangeHandler(userPermissions, requiredValue)
+						onChange: this.createPermissionsChangeHandler(permissionsMap, requiredValue)
 					};
 				})
 			];
 
-			const selected = selectedUsers.some(({ user }) => user === userPermissions.user);
-			return { ...userPermissions, data, selected, disabled };
+			const selected = selectedUsers.some(({ user }) => user === permissionsMap.user);
+			return { ...permissionsMap, data, selected, disabled };
 		});
 	}
 
@@ -297,6 +301,7 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 			<>
 				{ cells.length ? (
 					<CustomTable
+						className={this.props.className}
 						cells={cells}
 						rows={rows}
 						onSelectionChange={onSelectionChange}

@@ -34,7 +34,7 @@ import { Users } from './users.component';
 
 import { DialogActions } from '../../modules/dialog';
 import { selectJobs } from '../../modules/jobs';
-import { selectProjects, TeamspacesActions } from '../../modules/teamspaces';
+import { selectModels, selectProjects, TeamspacesActions } from '../../modules/teamspaces';
 
 const mapStateToProps = createStructuredSelector({
 	usersSuggestions: selectUsersSuggestions,
@@ -45,6 +45,7 @@ const mapStateToProps = createStructuredSelector({
 	invitationsCount: selectInvitationsCount,
 	userNotExists: selectUserNotExists,
 	projects: selectProjects,
+	models: selectModels,
 	currentTeamspace: selectCurrentTeamspace
 });
 

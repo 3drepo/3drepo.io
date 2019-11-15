@@ -169,6 +169,7 @@ const getSearchFields = (cells) => {
 };
 
 interface IProps {
+	className?: string;
 	cells: any[];
 	rows: any[];
 	defaultSort?: number;
@@ -456,7 +457,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { cells, onSelectionChange, rows, checkboxDisabled } = this.props;
+		const { cells, onSelectionChange, rows, checkboxDisabled, className } = this.props;
 		const { processedRows } = this.state;
 		const showCheckbox = Boolean(onSelectionChange);
 		const numberOfSelectedRows = processedRows.filter(({selected}) => selected).length;
@@ -464,7 +465,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		const isIndeterminate = Boolean(numberOfSelectedRows && !selectedAll);
 
 		return (
-			<Container>
+			<Container className={className}>
 				<Head>
 					{
 						showCheckbox ? (

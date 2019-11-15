@@ -18,12 +18,12 @@
 import RemoveCircle from '@material-ui/icons/RemoveCircle';
 import {
 	cond,
-	filter,
 	isEmpty,
 	isEqual,
 	isNumber,
 	matches,
 	pick,
+	pickBy,
 	values
 } from 'lodash';
 import React from 'react';
@@ -82,6 +82,7 @@ interface IProps {
 	users: any[];
 	usersSuggestions: any[];
 	projects: any[];
+	models: any;
 	limit: any;
 	jobs: any[];
 	licencesCount: number;
@@ -242,7 +243,11 @@ export class Users extends React.PureComponent<IProps, IState> {
 				job,
 				isAdmin,
 				jobs: this.state.jobs,
-				projects: filter(this.props.projects, ({ teamspace }) => teamspace === this.props.currentTeamspace)
+				projects: pickBy(this.props.projects, ({ teamspace }) => teamspace === this.props.currentTeamspace),
+				models: this.props.models
+			},
+			DialogProps: {
+				maxWidth: false
 			}
 		});
 	}
@@ -290,8 +295,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 			showDialog({
 				title: 'Invitations',
 				template: Invitations,
-				data: {
-				}
+				data: {}
 			});
 		};
 		return ['(', <PendingInvites key="pending" onClick={onClick}>{invitationsCount} pending</PendingInvites>, ')'];

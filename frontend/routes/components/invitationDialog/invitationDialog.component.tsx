@@ -21,19 +21,25 @@ import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import InputLabel from '@material-ui/core/InputLabel';
 import AddIcon from '@material-ui/icons/AddCircleOutline';
+import RemoveIcon from '@material-ui/icons/RemoveCircleOutline';
 import { Field, FieldArray, Form, Formik } from 'formik';
+import { keyBy, map, omit, pick, values } from 'lodash';
 import React from 'react';
 import * as yup from 'yup';
-import { map, omit, values } from 'lodash';
-
 import { MODEL_ROLES_LIST } from '../../../constants/model-permissions';
-import { renderWhenTrue } from '../../../helpers/rendering';
-import { useList } from '../../../hooks';
 import { schema } from '../../../services/validation';
 import { CellSelect } from '../customTable/components/cellSelect/cellSelect.component';
 import { JobItem } from '../jobItem/jobItem.component';
-import { PermissionsTable, PermissionsTableContexts } from '../permissionsTable/permissionsTable.component';
-import { Container, TextField } from './invitationDialog.styles';
+import { PermissionsTableContexts } from '../permissionsTable/permissionsTable.component';
+import {
+	AddButton,
+	Container,
+	Content,
+	Footer,
+	IconButton,
+	PermissionsTable,
+	TextField
+} from './invitationDialog.styles';
 
 const invitationSchema = yup.object().shape({
 	email: schema.email,
@@ -46,7 +52,8 @@ interface IProps {
 	job?: string;
 	isAdmin?: boolean;
 	jobs: any[];
-	projects: any[];
+	projects: any;
+	models: any;
 }
 
 export const InvitationDialog = (props: IProps) => {
@@ -54,29 +61,50 @@ export const InvitationDialog = (props: IProps) => {
 		console.log('Submit', values);
 	};
 
-	const getProjects = (selectedProjects) => {
-		const selectedProjectsIds = map(selectedProjects, '_id');
-		return values(omit(props.projects, selectedProjectsIds)).map(({ _id, name }) => {
+	const getProjects = (currentProject, selectedProjects) => {
+		const selectedProjectsIds = map(selectedProjects, 'project');
+		const availableProjects = values(omit(props.projects, selectedProjectsIds));
+
+		if (currentProject) {
+			availableProjects.push(props.projects[currentProject]);
+		}
+		return availableProjects.map(({ _id, name }) => {
 			return { name, value: _id };
 		});
 	};
 
+	const getModelsPermissions = (currentProject, currentModelsPermissions) => {
+		const project = props.projects[currentProject];
+		const modelsPermissionsMap = keyBy(currentModelsPermissions, 'model');
+		return values(pick(props.models, project.models)).map(({ name, model, federate }) => ({
+			model,
+			name,
+			isFederation: federate,
+			key: 'undefined',
+			...(modelsPermissionsMap[model] || {})
+		}));
+	};
+
+	const handlePermissionsChange = (name, onChange) => (value) => {
+		onChange({ target: { value, name }});
+	};
+
 	const renderPermissions = (projects = []) => (
-		<FieldArray name="permissions" render={({ remove, push}) => (
+		<FieldArray name="permissions" render={({ remove, push }) => (
 			<>
-				{projects.map(({ project, modelsPermissions }, index) => (
+				{projects.map(({ project, models, isAdmin }, index) => (
 					<div key={index}>
-						<button
-							type="button"
-							onClick={() => remove(index)}
-						>remove</button>
+						<IconButton onClick={() => remove(index)}>
+							<RemoveIcon />
+						</IconButton>
 						<Field name={`permissions.${index}.project`} render={({ field }) => (
 							<FormControl>
 								<InputLabel shrink htmlFor={`project-${index}`}>Project</InputLabel>
 								<CellSelect
 									{...field}
-									items={getProjects(projects)}
+									items={getProjects(project, projects)}
 									placeholder="Select project"
+									disabledPlaceholder
 									displayEmpty
 									inputId={`project-${index}`}
 								/>
@@ -94,21 +122,27 @@ export const InvitationDialog = (props: IProps) => {
 								label="Project Admin"
 							/>
 						)} />
-						{project && (<Field name={`permissions.${index}.modelsPermissions`} render={() => (
-							<PermissionsTable
-								context={PermissionsTableContexts.MODELS}
-								permissions={modelsPermissions}
-								roles={MODEL_ROLES_LIST}
-								onPermissionsChange={this.handlePermissionsChange}
-								rowStateInterceptor={this.hasDisabledPermissions}
-							/>
-						)} />)}
+						{project && !isAdmin && (
+							<Field name={`permissions.${index}.models`} render={({ field }) => (
+								<PermissionsTable
+									modelsNumber={props.projects[project].models.length + 1}
+									context={PermissionsTableContexts.MODELS}
+									permissions={getModelsPermissions(project, field.value)}
+									roles={MODEL_ROLES_LIST}
+									onPermissionsChange={handlePermissionsChange(field.name, field.onChange)}
+								/>
+							)} />
+						)}
 					</div>
 				))}
-				<Button onClick={() => push({ project: '', isAdmin: false, modelsPermissions: [] })}>
-					<AddIcon />
-					Add project/model permissions
-				</Button>
+				{props.projects.length !== projects.length && (
+					<AddButton
+						color="secondary"
+						onClick={() => push({ project: '', isAdmin: false, models: [] })}>
+						<AddIcon color="secondary" />
+						Add project/model permissions
+					</AddButton>
+				)}
 			</>
 		)} />
 	);
@@ -116,50 +150,54 @@ export const InvitationDialog = (props: IProps) => {
 	const renderForm = ({ values }) => (
 		<Form>
 			<Container className={props.className}>
-				<Field name="email" render={({ field }) => (
-					<TextField
-						label="Email"
-						required
-						{...field}
-					/>
-				)} />
-				<Field name="job" render={({ field }) => (
-					<FormControl>
-						<InputLabel shrink htmlFor="job">Job</InputLabel>
-						<CellSelect
+				<Content>
+					<Field name="email" render={({ field }) => (
+						<TextField
+							label="Email"
+							required
 							{...field}
-							items={props.jobs}
-							displayEmpty
-							placeholder="Unassigned"
-							inputId="job"
-							itemTemplate={JobItem}
 						/>
-					</FormControl>
-				)} />
-				<Field name="isAdmin" render={({ field }) => (
-					<FormControlLabel
-						control={
-							<Checkbox
-								checked={field.value}
+					)} />
+					<Field name="job" render={({ field }) => (
+						<FormControl>
+							<InputLabel shrink htmlFor="job">Job</InputLabel>
+							<CellSelect
 								{...field}
-								color="secondary"
+								items={props.jobs}
+								displayEmpty
+								placeholder="Unassigned"
+								inputId="job"
+								itemTemplate={JobItem}
 							/>
-						}
-						label="Teamspace Admin"
-					/>
-				)} />
+						</FormControl>
+					)} />
+					<Field name="isAdmin" render={({ field }) => (
+						<FormControlLabel
+							control={
+								<Checkbox
+									checked={field.value}
+									{...field}
+									color="secondary"
+								/>
+							}
+							label="Teamspace Admin"
+						/>
+					)} />
 
-				{renderPermissions(values.permissions)}
-				<Field render={({ form }) => (
-					<Button
-						type="submit"
-						variant="raised"
-						color="secondary"
-						disabled={!form.isValid || form.isValidating}
-					>
-						Invite
-					</Button>
-				)} />
+					{renderPermissions(values.permissions)}
+				</Content>
+				<Footer>
+					<Field render={({ form }) => (
+						<Button
+							type="submit"
+							variant="raised"
+							color="secondary"
+							disabled={!form.isValid || form.isValidating}
+						>
+							Invite
+						</Button>
+					)} />
+				</Footer>
 			</Container>
 		</Form>
 	);

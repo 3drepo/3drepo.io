@@ -26,6 +26,14 @@ export const fetchInvitations = (teamspace) => {
 };
 
 /**
+ * Create/Update invitations
+ * @param teamspace
+ */
+export const sendInvitation = (teamspace) => {
+	return api.post(`${teamspace}/invitations`);
+};
+
+/**
  * Delete invitation
  * @param teamspace
  */
