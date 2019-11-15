@@ -22,6 +22,19 @@ import ArrowIcon from '@material-ui/icons/ArrowForward';
 import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../styles/colors';
+import OpenInViewerButtonComponent from '../../../components/openInViewerButton/openInViewerButton.container';
+
+export const OpenInViewerButton = styled(OpenInViewerButtonComponent)`
+	&& {
+		display: none;
+		top: -6px;
+		right: -3px;
+
+		&:hover {
+			display: block;
+		}
+	}
+`;
 
 export const MenuItemContainer = styled(MenuItem)`
 	position: relative;
@@ -34,6 +47,10 @@ export const MenuItemContainer = styled(MenuItem)`
 
 		&:hover {
 			background-color: ${(props: any) => props.expired ? COLOR.WARNING : COLOR.GRAY};
+
+			${OpenInViewerButton} {
+				display: block;
+			}
 		}
 	}
 ` as any;
@@ -117,6 +134,7 @@ export const Description = styled.div`
 	line-height: 1.25;
 	margin-top: 3px;
 	color: ${COLOR.BLACK_60};
+	white-space: normal;
 `;
 
 export const RoleIndicator = styled.div`

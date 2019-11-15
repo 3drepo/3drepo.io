@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { IconButton } from '@material-ui/core';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import React from 'react';
 
-import { IconButton } from '@material-ui/core';
+import { Container } from './listNavigation.styles';
 
 interface IProps {
 	className?: string;
@@ -61,14 +62,14 @@ export class ListNavigation extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		return (
-			<>
+			<Container>
 				<IconButton onClick={this.handlePrevItem}>
 					<SkipPreviousIcon />
 				</IconButton>
 				<IconButton onClick={this.handleNextItem}>
 					<SkipNextIcon />
 				</IconButton>
-			</>
+			</Container>
 		);
 	}
 }

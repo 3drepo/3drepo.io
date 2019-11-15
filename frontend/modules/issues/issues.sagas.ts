@@ -78,6 +78,7 @@ function* fetchIssue({teamspace, modelId, issueId}) {
 		const {data} = yield API.getIssue(teamspace, modelId, issueId);
 		data.comments = yield prepareComments(data.comments);
 		data.resources = prepareResources(teamspace, modelId, data.resources);
+
 		yield put(IssuesActions.fetchIssueSuccess(data));
 	} catch (error) {
 		yield put(IssuesActions.fetchIssueFailure());
@@ -107,17 +108,17 @@ const createGroup = (issue, objectInfo, teamspace, model, revision) => {
 	]);
 };
 
-function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting }) {
+function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, ignoreViewer = false }) {
 	try {
 		const myJob = yield select(selectMyJob);
 		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 
-		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
+		const [viewpoint, objectInfo, screenshot, userJob] = !ignoreViewer ? yield all([
 			Viewer.getCurrentViewpoint({ teamspace, model }),
 			Viewer.getObjectsStatus(),
 			issueData.descriptionThumbnail || Viewer.getScreenshot(),
 			myJob
-		]);
+		]) : [{}, null, issueData.descriptionThumbnail || '', myJob];
 
 		viewpoint.hideIfc = ifcSpacesHidden;
 		issueData.rev_id = {
@@ -125,7 +126,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting })
 			rev_id: revision
 		};
 
-		if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
+		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
 			const [highlightedGroup, hiddenGroup] = yield createGroup(issueData, objectInfo, teamspace, model, revision);
 
 			if (highlightedGroup) {
@@ -160,7 +161,11 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting })
 
 		finishSubmitting();
 
-		yield put(IssuesActions.goToIssue(savedIssue));
+		if (!ignoreViewer) {
+			yield put(IssuesActions.goToIssue(savedIssue));
+		} else {
+			yield put(DialogActions.hideDialog());
+		}
 		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
 		yield put(SnackbarActions.show('Issue created'));
 	} catch (error) {
@@ -171,7 +176,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting })
 function* updateIssue({ issueData }) {
 	try {
 		const { _id, rev_id, model, account, position } = yield select(selectActiveIssueDetails);
-		const { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, issueData );
+		const { data: updatedIssue } = yield API.updateIssue(account, model, _id, rev_id, issueData);
 		yield analyticsService.sendEvent(EVENT_CATEGORIES.ISSUE, EVENT_ACTIONS.EDIT);
 
 		const jobs = yield select(selectJobsList);
@@ -183,6 +188,20 @@ function* updateIssue({ issueData }) {
 		yield put(SnackbarActions.show('Issue updated'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'issue', error));
+	}
+}
+
+function* updateBoardIssue({ teamspace, modelId, issueData }) {
+	try {
+		const { _id, ...changedData } = issueData;
+		const { data: updatedIssue } = yield API.updateIssue(teamspace, modelId, _id, null, changedData);
+		const jobs = yield select(selectJobsList);
+		const preparedIssue = prepareIssue(updatedIssue, jobs);
+		preparedIssue.comments = yield prepareComments(preparedIssue.comments);
+		yield put(IssuesActions.saveIssueSuccess(preparedIssue));
+		yield put(SnackbarActions.show('Issue updated'));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('update', 'board issue', error));
 	}
 }
 
@@ -390,7 +409,7 @@ function* focusOnIssue({ issue, revision }) {
 	}
 }
 
-function* setActiveIssue({ issue, revision }) {
+function* setActiveIssue({ issue, revision, ignoreViewer = false }) {
 	try {
 		const activeIssueId = yield select(selectActiveIssueId);
 		const issuesMap = yield select(selectIssuesMap);
@@ -407,7 +426,7 @@ function* setActiveIssue({ issue, revision }) {
 		}
 
 		yield all([
-			put(IssuesActions.focusOnIssue(issue, revision)),
+			!ignoreViewer ? put(IssuesActions.focusOnIssue(issue, revision)) : null,
 			put(IssuesActions.setComponentState({ activeIssue: issue._id, expandDetails: true }))
 		]);
 	} catch (error) {
@@ -716,4 +735,5 @@ export default function* IssuesSaga() {
 	yield takeLatest(IssuesTypes.ATTACH_LINK_RESOURCES, attachLinkResources);
 	yield takeLatest(IssuesTypes.SHOW_MULTIPLE_GROUPS, showMultipleGroups);
 	yield takeLatest(IssuesTypes.GO_TO_ISSUE, goToIssue);
+	yield takeLatest(IssuesTypes.UPDATE_BOARD_ISSUE, updateBoardIssue);
 }

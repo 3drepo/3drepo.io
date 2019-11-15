@@ -15,17 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { canComment } from '../../../../../../helpers/risks';
-import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
-import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
-import { Container } from './riskDetails.styles';
+import { Container, HorizontalView, LogsContainer, LogList, PreviewDetails } from './riskDetails.styles';
 import { RiskDetailsForm } from './riskDetailsForm.component';
 
 interface IProps {
@@ -43,9 +41,11 @@ interface IProps {
 	currentUser: any;
 	modelSettings: any;
 	failedToLoad: boolean;
+	disableViewer?: boolean;
+	horizontal?: boolean;
 	setState: (componentState) => void;
 	fetchRisk: (teamspace, model, riskId) => void;
-	saveRisk: (teamspace, modelId, risk, revision, finishSubmitting) => void;
+	saveRisk: (teamspace, modelId, risk, revision, finishSubmitting, disableViewer) => void;
 	updateRisk: (teamspace, modelId, risk) => void;
 	postComment: (teamspace, modelId, riskData, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, riskData) => void;
@@ -88,6 +88,10 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
+	get isViewerInitialized() {
+		return this.props.viewer.viewer.initialized;
+	}
+
 	public commentRef = React.createRef<any>();
 
 	public renderLogList = renderWhenTrue(() => (
@@ -103,33 +107,44 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderPreview = renderWhenTrue(() => {
-		const { expandDetails } = this.props;
+		const { expandDetails, horizontal, failedToLoad, disableViewer } = this.props;
 		const { comments } = this.riskData;
+		const isRiskWithComments = Boolean((comments && comments.length || horizontal) && !this.isNewRisk);
+		const PreviewWrapper = horizontal && isRiskWithComments ? HorizontalView : Fragment;
+		const renderNotCollapsable = () => {
+			return this.renderLogList(!horizontal && isRiskWithComments);
+		};
 
 		return (
-			<PreviewDetails
-				{...this.riskData}
-				key={this.riskData._id}
-				defaultExpanded={expandDetails}
-				editable={!this.riskData._id}
-				onNameChange={this.handleNameChange}
-				onExpandChange={this.handleExpandChange}
-				renderCollapsable={this.renderDetailsForm}
-				renderNotCollapsable={() => this.renderLogList(comments && !!comments.length && !this.isNewRisk)}
-				handleHeaderClick={() => {
-					if (!this.isNewRisk) { // if its a new issue it shouldnt go to the viewpoint
-						this.setCameraOnViewpoint({viewpoint: this.riskData.viewpoint});
-					}
-				}}
-				scrolled={this.state.scrolled}
-				isNew={this.isNewRisk}
-			/>
+			<PreviewWrapper>
+				<PreviewDetails
+					{...this.riskData}
+					id={this.riskData._id}
+					type="risk"
+					key={this.riskData._id}
+					defaultExpanded={horizontal || expandDetails}
+					editable={!this.riskData._id}
+					onNameChange={this.handleNameChange}
+					onExpandChange={this.handleExpandChange}
+					renderCollapsable={this.renderDetailsForm}
+					renderNotCollapsable={!horizontal ? renderNotCollapsable : null}
+					handleHeaderClick={this.handleHeaderClick}
+					scrolled={this.state.scrolled && !horizontal}
+					isNew={this.isNewRisk}
+					showModelButton={disableViewer && !this.isNewRisk}
+				/>
+				<LogsContainer>
+					{this.renderLogList(horizontal && isRiskWithComments)}
+					{this.renderFooter(horizontal && !failedToLoad)}
+				</LogsContainer>
+			</PreviewWrapper>
 		);
 	});
 
 	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center" padding="0">
 			<NewCommentForm
+				disableViewer={this.props.disableViewer}
 				comment={this.props.newComment.comment}
 				screenshot={this.props.newComment.screenshot}
 				viewpoint={this.props.newComment.viewpoint}
@@ -138,6 +153,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				onSave={this.handleSave}
 				canComment={this.userCanComment()}
 				hideComment={this.isNewRisk}
+				hideScreenshot={this.props.disableViewer}
+				hideUploadButton={!this.props.disableViewer}
 			/>
 		</ViewerPanelFooter>
 	));
@@ -187,6 +204,12 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public handleHeaderClick = () => {
+		if (!this.isNewRisk) { // if its a new issue it shouldnt go to the viewpoint
+			this.setCameraOnViewpoint({ viewpoint: this.riskData.viewpoint });
+		}
+	}
+
 	public handleExpandChange = (event, expanded) => {
 		this.props.setState({ expandDetails: expanded });
 	}
@@ -218,7 +241,8 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				myJob={this.props.myJob}
 				onChangePin={this.props.updateSelectedRiskPin}
 				onSavePin={this.onPositionSave}
-				hasPin={this.riskData.position && this.riskData.position.length}
+				hasPin={!this.props.disableViewer && this.riskData.position && this.riskData.position.length}
+				hidePin={this.props.disableViewer}
 			/>
 		);
 	}
@@ -261,7 +285,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public handleNewScreenshot = async (screenshot) => {
 		const { teamspace, model, viewer } = this.props;
-		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
+		const viewpoint = this.isViewerInitialized ? await viewer.getCurrentViewpoint({ teamspace, model }) : null;
 
 		if (this.isNewRisk) {
 			this.props.setState({ newRisk: {
@@ -298,9 +322,9 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSave = (formValues, finishSubmitting) => {
-		const { teamspace, model, saveRisk, revision } = this.props;
+		const { teamspace, model, saveRisk, revision, disableViewer } = this.props;
 		if (this.isNewRisk) {
-			saveRisk(teamspace, model, this.riskData, revision, finishSubmitting);
+			saveRisk(teamspace, model, this.riskData, revision, finishSubmitting, disableViewer);
 		} else {
 			this.postComment(teamspace, model, formValues, finishSubmitting);
 		}
@@ -314,7 +338,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 	public render() {
-		const { failedToLoad, risk } = this.props;
+		const { failedToLoad, risk, horizontal } = this.props;
 
 		return (
 			<Container>
@@ -325,7 +349,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 					{this.renderFailedState(failedToLoad)}
 					{this.renderPreview(!failedToLoad && risk)}
 				</ViewerPanelContent>
-				{this.renderFooter(!failedToLoad)}
+				{this.renderFooter(!failedToLoad && !horizontal)}
 			</Container>
 		);
 	}

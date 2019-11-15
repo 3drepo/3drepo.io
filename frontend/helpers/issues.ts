@@ -13,16 +13,28 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
-import { ISSUE_COLORS, PRIORITIES, STATUSES, STATUSES_ICONS } from '../constants/issues';
+import fileDialog from 'file-dialog';
+import {
+	ISSUE_COLORS,
+	ISSUE_FILTER_RELATED_FIELDS,
+	ISSUE_PRIORITIES,
+	ISSUE_STATUSES,
+	ISSUES_ACTIONS_MENU,
+	PRIORITIES,
+	STATUSES,
+	STATUSES_ICONS
+} from '../constants/issues';
+import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 
 export const prepareIssue = (issue, jobs = []) => {
 	const preparedIssue = {...issue};
+
 	if (issue.thumbnail) {
-		preparedIssue.thumbnail = issue.thumbnail && issue.thumbnail.length ? getAPIUrl(issue.thumbnail) : '';
+		preparedIssue.thumbnail = issue.thumbnail.length ? getAPIUrl(issue.thumbnail) : '';
 	}
 
 	const descriptionThumbnail = issue.viewpoint && issue.viewpoint.screenshot
@@ -123,4 +135,91 @@ export const canComment = (issueData, userJob, permissions, currentUser) => {
 		canCommentIssue(permissions);
 
 	return ableToComment && isNotClosed;
+};
+
+export const filtersValuesMap = (jobs, topicTypes) => {
+	const jobsList = [...jobs, UNASSIGNED_JOB];
+
+	return {
+		[ISSUE_FILTER_RELATED_FIELDS.STATUS]: getFilterValues(ISSUE_STATUSES),
+		[ISSUE_FILTER_RELATED_FIELDS.CREATED_BY]: getFilterValues(jobs),
+		[ISSUE_FILTER_RELATED_FIELDS.ASSIGNED_TO]: getFilterValues(jobsList),
+		[ISSUE_FILTER_RELATED_FIELDS.PRIORITY]: getFilterValues(ISSUE_PRIORITIES),
+		[ISSUE_FILTER_RELATED_FIELDS.TYPE]: getFilterValues(topicTypes),
+		[ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE]: [{
+			label: 'From',
+			value: {
+				label: 'From',
+				value: 'from',
+				date: null
+			}
+		}, {
+			label: 'To',
+			value: {
+				label: 'To',
+				value: 'to',
+				date: null
+			}
+		}]
+	};
+};
+
+export const getHeaderMenuItems = (
+	teamspace,
+	model,
+	revision,
+	printIssues,
+	downloadIssues,
+	importBCF,
+	exportBCF,
+	toggleSortOrder,
+	toggleShowPins?,
+	showPins?,
+	toggleClosedIssues?,
+	showClosedIssues?,
+) => {
+	const items = [
+		{
+			...ISSUES_ACTIONS_MENU.PRINT,
+			onClick: () => printIssues(teamspace, model)
+		}, {
+			...ISSUES_ACTIONS_MENU.IMPORT_BCF,
+			onClick: () => {
+				fileDialog({ accept: '.zip,.bcfzip,.bcf' }, (files) => {
+					importBCF(teamspace, model, files[0], revision);
+				});
+			}
+		}, {
+			...ISSUES_ACTIONS_MENU.EXPORT_BCF,
+			onClick: () => exportBCF(teamspace, model)
+		}, {
+			...ISSUES_ACTIONS_MENU.DOWNLOAD,
+			onClick: () => downloadIssues(teamspace, model)
+		}, {
+			...ISSUES_ACTIONS_MENU.SORT_BY_DATE,
+			onClick: () => {
+				toggleSortOrder();
+			}
+		}
+	];
+
+	const extraItems = [];
+
+	if (showPins) {
+		extraItems.push({
+			...ISSUES_ACTIONS_MENU.SHOW_PINS,
+			enabled: showPins,
+			onClick: () => toggleShowPins(!showPins)
+		});
+	}
+
+	if (toggleClosedIssues) {
+		extraItems.push({
+			...ISSUES_ACTIONS_MENU.SHOW_CLOSED_ISSUES,
+			enabled: showClosedIssues,
+			onClick: toggleClosedIssues
+		});
+	}
+
+	return [...items, ...extraItems];
 };

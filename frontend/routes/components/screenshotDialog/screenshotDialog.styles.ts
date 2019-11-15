@@ -29,6 +29,27 @@ export const Container = styled.div`
 	justify-content: center;
 `;
 
+export const HiddenCanvas = styled.canvas`
+	position: absolute;
+	z-index: -1;
+`;
+
+export const Canvas = styled.canvas`
+	position: absolute;
+	z-index: 2;
+`;
+
+export const BackgroundImage = styled.img`
+	width: 100%;
+	text-align: center;
+	margin: auto;
+	padding: 0;
+	position: absolute;
+	bottom: 0;
+	top: 0;
+	user-select: none;
+`;
+
 export const Stage = styled(KonvaStage)`
 	position: absolute;
 	left: 0;

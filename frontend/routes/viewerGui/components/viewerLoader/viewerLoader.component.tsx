@@ -22,10 +22,12 @@ import { Container } from './viewerLoader.styles';
 
 const LOADING_VIEWER_TEXT = 'Loading viewer';
 const LOADING_MODEL_TEXT = 'Loading model';
+const LOADING_TREE_TEXT = 'Loading tree ...';
 
 interface IProps {
 	viewer: any;
 	className?: string;
+	isTreeProcessed: boolean;
 }
 
 export const ViewerLoader = (props: IProps) => {
@@ -33,7 +35,18 @@ export const ViewerLoader = (props: IProps) => {
 	const [message, setMessage] = useState('');
 	const [progress, setProgress] = useState(0);
 
-	const messageLabel = useMemo(() => `${message} (${progress}%)`, [message, progress]);
+	const messageLabel = useMemo(() => {
+		const isVisibleUpdated = progress !== 100;
+		if (progress === 0 && message === '') {
+			setIsVisible(!props.isTreeProcessed);
+		} else {
+			setIsVisible(isVisibleUpdated);
+		}
+		if (message === '' && progress === 0 && !props.isTreeProcessed) {
+			return LOADING_TREE_TEXT;
+		}
+		return `${message} (${progress}%)`;
+	}, [message, progress, props.isTreeProcessed]);
 
 	const handleUnmount = () => {
 		props.viewer.off(VIEWER_EVENTS.VIEWER_INIT);
@@ -44,12 +57,10 @@ export const ViewerLoader = (props: IProps) => {
 
 	const setProgressState = (updatedMessageLabel) => (updatedProgress) => {
 		if (updatedProgress !== undefined) {
-			const isVisibleUpdated = updatedProgress !== 1;
 			const percentageProgress = Number((updatedProgress * 100).toFixed(0));
 
 			setMessage(updatedMessageLabel);
 			setProgress(percentageProgress);
-			setIsVisible(isVisibleUpdated);
 		}
 	};
 

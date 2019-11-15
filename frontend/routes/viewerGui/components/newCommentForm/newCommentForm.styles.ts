@@ -66,3 +66,13 @@ export const Actions = styled.div`
 export const ActionsGroup = styled.div`
 	display: flex;
 `;
+
+export const FileUploadContainer = styled.div``;
+
+export const FileUploadInvoker = styled.input.attrs({
+	type: 'file',
+	accept: 'image/*'
+})`
+	position:fixed;
+	top: -200%;
+`;

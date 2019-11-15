@@ -22,7 +22,7 @@ import { Container, Content, ContentWrapper, Title } from './panel.styles';
 interface IProps {
 	className?: string;
 	title?: string | JSX.Element;
-	children: any;
+	children?: any;
 	paperProps?: any;
 	hiddenScrollbars?: boolean;
 }

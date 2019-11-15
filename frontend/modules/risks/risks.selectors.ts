@@ -87,6 +87,11 @@ export const selectFilteredRisks = createSelector(
 	}
 );
 
+export const selectAllFilteredRisks = createSelector(
+	selectRisks, selectSelectedFilters, (risks, selectedFilters) =>
+		searchByFilters(risks, selectedFilters, true)
+);
+
 export const selectShowPins = createSelector(
 	selectComponentState, (state) => state.showPins
 );
