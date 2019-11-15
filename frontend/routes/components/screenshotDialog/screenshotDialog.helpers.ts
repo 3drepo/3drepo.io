@@ -26,7 +26,7 @@ export const MODES = {
 };
 
 export const INITIAL_VALUES = {
-	color: COLOR.PRIMARY_DARK,
+	color: COLOR.RED,
 	brushColor: COLOR.PRIMARY_DARK,
 	brushSize: 5,
 	textSize: 12,

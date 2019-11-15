@@ -16,7 +16,7 @@
  */
 
 import * as React from 'react';
-import { Line, Transformer } from 'react-konva';
+import { Group, Line, Rect, Transformer } from 'react-konva';
 
 interface IProps {
 	element: any;
@@ -25,36 +25,90 @@ interface IProps {
 }
 
 export const DrawnLine = ({ element, isSelected, handleChange }: IProps) => {
-	const { color, isEraser, ...elementProps } = element;
+	const {
+		color, isEraser, draggable, groupX, groupY, rotation, initScaleX, initScaleY, scaleX, scaleY, ...elementProps
+	} = element;
 	const line = React.useRef<any>();
 	const transformer = React.useRef<any>();
+	const rect = React.useRef<any>(null);
+	const group = React.useRef<any>(null);
 
 	React.useEffect(() => {
-		if (isSelected) {
-			transformer.current.setNode(line.current);
+		if (isSelected && transformer.current) {
+			transformer.current.setNode(group.current);
 			transformer.current.getLayer().batchDraw();
 		}
-	}, [isSelected]);
+	}, [transformer.current, isSelected]);
 
-	const handleDragEnd = (e) => {
-		const {x, y, scaleX, scaleY, points, rotation} = e.target.attrs;
-		handleChange({ ...element, points, scaleX, scaleY, rotation, x, y });
+	React.useEffect(() => {
+		if (line.current) {
+			const selfRect = line.current.getSelfRect();
+			const width = line.current.width() || selfRect.width;
+			const height = line.current.height() || selfRect.height;
+			const { x, y } = line.current.getAbsolutePosition();
+
+			rect.current.x(x + selfRect.x);
+			rect.current.y(y + selfRect.y);
+			rect.current.width(width * line.current.scaleX());
+			rect.current.height(height * line.current.scaleY());
+		}
+	}, [line.current]);
+
+	const handleDragEnd = ({ currentTarget }) => {
+		const { x, y } = currentTarget.getAbsolutePosition();
+		handleChange({
+			...element,
+			groupX: x,
+			groupY: y,
+		});
 	};
 
-	const handleTransformEnd = (e) => {
-		const {scaleX, scaleY, rotation, points, x, y} = e.target.attrs;
-		handleChange({ ...element, scaleX, scaleY, points, rotation, x, y });
+	const handleTransformEnd = ({ currentTarget }) => {
+		const { x, y } = currentTarget.getAbsolutePosition();
+		const { attrs } = currentTarget;
+
+		handleChange({
+			...element,
+			groupX: x,
+			groupY: y,
+			rotation: attrs.rotation,
+			scaleX: attrs.scaleX,
+			scaleY: attrs.scaleY,
+		});
 	};
+
+	const additionalGroupProps = ({
+		x: groupX || 0,
+		y: groupY || 0,
+		rotation,
+		scaleX,
+		scaleY,
+	});
+
+	const additionalComponentProps = ({
+		scaleX: initScaleX,
+		scaleY: initScaleY,
+	});
 
 	return (
 		<>
-			<Line
-				ref={line}
-				{...elementProps}
-				onDragEnd={handleDragEnd}
-				onTransformEnd={handleTransformEnd}
-				draggable={isSelected && !isEraser}
-			/>
+			<Group
+					ref={group}
+					{...additionalGroupProps}
+					name={elementProps.name}
+					transformer={transformer}
+					onDragEnd={handleDragEnd}
+					onTransformEnd={handleTransformEnd}
+					draggable={isSelected}
+			>
+				<Rect ref={rect} />
+				<Line
+					ref={line}
+					{...elementProps}
+					{...additionalComponentProps}
+					draggable={isSelected && !isEraser}
+				/>
+			</Group>
 			{(isSelected && !isEraser) && <Transformer ref={transformer} />}
 		</>
 	);
