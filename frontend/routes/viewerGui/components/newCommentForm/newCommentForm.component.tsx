@@ -233,10 +233,14 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	public handleFileUpload = (event) => {
 		const file = event.target.files[0];
 		const reader = new FileReader();
-		const { onTakeScreenshot } = this.props;
+		const { onTakeScreenshot, showScreenshotDialog } = this.props;
 
 		reader.addEventListener('load', () => {
-			onTakeScreenshot(reader.result);
+			showScreenshotDialog({
+				sourceImage: reader.result,
+				onSave: (screenshot) => onTakeScreenshot(screenshot),
+				template: ScreenshotDialog
+			});
 		}, false);
 
 		reader.readAsDataURL(file);
