@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,28 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import api from './';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { UserManagementActions } from '../../../modules/userManagement';
+import { InvitationDialog } from './invitationDialog.component';
 
-/**
- * Get invitations
- * @param teamspace
- */
-export const fetchInvitations = (teamspace) => {
-	return api.get(`${teamspace}/invitations`);
-};
+const mapStateToProps = createStructuredSelector({});
 
-/**
- * Create/Update invitations
- * @param teamspace
- */
-export const sendInvitation = (teamspace, invitation) => {
-	return api.post(`${teamspace}/invitations`, invitation);
-};
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	sendInvitation: UserManagementActions.sendInvitation
+}, dispatch);
 
-/**
- * Delete invitation
- * @param teamspace
- */
-export const removeInvitation = (teamspace, email) => {
-	return api.delete(`${teamspace}/invitations/${email}`);
-};
+export default connect(mapStateToProps, mapDispatchToProps)(InvitationDialog);

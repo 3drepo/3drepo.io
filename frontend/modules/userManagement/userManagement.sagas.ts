@@ -23,7 +23,7 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog/dialog.redux';
 import { JobsActions } from '../jobs';
 import { SnackbarActions } from '../snackbar';
-import { selectModels, selectProjects, selectTeamspacesWithAdminAccess, TeamspacesTypes } from '../teamspaces';
+import { selectProjects, selectTeamspacesWithAdminAccess } from '../teamspaces';
 import {
 	selectCurrentProject,
 	selectCurrentTeamspace,
@@ -82,6 +82,39 @@ export function* addUser({ user }) {
 		} else {
 			yield put(DialogActions.showEndpointErrorDialog('add', 'licence', error));
 		}
+	}
+}
+
+export function* sendInvitation({ email, job, isAdmin, permissions, onFinish }) {
+	try {
+		const projectsMap = yield select(selectProjects);
+
+		const invitation = { email, job } as any;
+		invitation.permissions = {};
+
+		if (isAdmin) {
+			invitation.permissions.teamspace_admin = true;
+		} else {
+			invitation.permissions.projects = permissions.map(({ project, models, isAdmin: isProjectAdmin }) => {
+				const projectPermissions = { project: projectsMap[project].name } as any;
+				if (isProjectAdmin) {
+					projectPermissions.project_admin = true;
+					return projectPermissions;
+				}
+
+				projectPermissions.models = models.map(({ model, key: permission }) => ({
+					model, permission
+				}));
+				return projectPermissions;
+			});
+		}
+
+		const teamspace = yield select(selectCurrentTeamspace);
+		const {data: savedInvitation} = yield API.sendInvitation(teamspace, invitation);
+		onFinish();
+		yield put(UserManagementActions.sendInvitationSuccess(savedInvitation));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('remove', 'invitation', error));
 	}
 }
 
@@ -285,6 +318,7 @@ export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.GET_USERS_SUGGESTIONS, getUsersSuggestions);
 	yield takeLatest(UserManagementTypes.UPDATE_JOB, updateUserJob);
 	yield takeLatest(UserManagementTypes.REMOVE_INVITATION, removeInvitation);
+	yield takeLatest(UserManagementTypes.SEND_INVITATION, sendInvitation);
 
 	// Models
 	yield takeLatest(UserManagementTypes.FETCH_MODELS_PERMISSIONS, fetchModelsPermissions);

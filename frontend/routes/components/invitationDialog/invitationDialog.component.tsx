@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -23,14 +22,15 @@ import InputLabel from '@material-ui/core/InputLabel';
 import AddIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveIcon from '@material-ui/icons/RemoveCircleOutline';
 import { Field, FieldArray, Form, Formik } from 'formik';
-import { keyBy, map, omit, pick, values } from 'lodash';
+import { keyBy, map, omit, pick, uniqBy, values } from 'lodash';
 import React from 'react';
 import * as yup from 'yup';
-import { MODEL_ROLES_LIST } from '../../../constants/model-permissions';
+import { MODEL_ROLES_LIST, MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
 import { schema } from '../../../services/validation';
 import { CellSelect } from '../customTable/components/cellSelect/cellSelect.component';
 import { JobItem } from '../jobItem/jobItem.component';
 import { PermissionsTableContexts } from '../permissionsTable/permissionsTable.component';
+import { SubmitButton } from '../submitButton/submitButton.component';
 import {
 	AddButton,
 	Container,
@@ -38,6 +38,8 @@ import {
 	Footer,
 	IconButton,
 	PermissionsTable,
+	ProjectCheckboxContainer,
+	ProjectConfig,
 	TextField
 } from './invitationDialog.styles';
 
@@ -54,11 +56,17 @@ interface IProps {
 	jobs: any[];
 	projects: any;
 	models: any;
+	handleClose: () => void;
+	sendInvitation: (email, job, isAdmin, permissions, onFinish) => void;
 }
 
 export const InvitationDialog = (props: IProps) => {
-	const handleSubmit = (values) => {
-		console.log('Submit', values);
+	const handleSubmit = (formValues, actions) => {
+		const onFinish = () => {
+			actions.setSubmitting(false);
+			props.handleClose();
+		};
+		props.sendInvitation(formValues.email, formValues.job, formValues.isAdmin, formValues.permissions, onFinish);
 	};
 
 	const getProjects = (currentProject, selectedProjects) => {
@@ -80,48 +88,53 @@ export const InvitationDialog = (props: IProps) => {
 			model,
 			name,
 			isFederation: federate,
-			key: 'undefined',
+			key: MODEL_ROLES_TYPES.UNASSIGNED,
 			...(modelsPermissionsMap[model] || {})
 		}));
 	};
 
-	const handlePermissionsChange = (name, onChange) => (value) => {
+	const handlePermissionsChange = (name, currentPermissions, onChange) => (newPermissions) => {
+		const value = uniqBy([...newPermissions, ...currentPermissions], 'model');
 		onChange({ target: { value, name }});
 	};
 
 	const renderPermissions = (projects = []) => (
 		<FieldArray name="permissions" render={({ remove, push }) => (
 			<>
-				{projects.map(({ project, models, isAdmin }, index) => (
+				{projects.map(({ project, isAdmin }, index) => (
 					<div key={index}>
-						<IconButton onClick={() => remove(index)}>
-							<RemoveIcon />
-						</IconButton>
-						<Field name={`permissions.${index}.project`} render={({ field }) => (
-							<FormControl>
-								<InputLabel shrink htmlFor={`project-${index}`}>Project</InputLabel>
-								<CellSelect
-									{...field}
-									items={getProjects(project, projects)}
-									placeholder="Select project"
-									disabledPlaceholder
-									displayEmpty
-									inputId={`project-${index}`}
-								/>
-							</FormControl>
-						)} />
-						<Field name={`permissions.${index}.isAdmin`} render={({ field }) => (
-							<FormControlLabel
-								control={
-									<Checkbox
-										checked={field.value}
+						<ProjectConfig>
+							<IconButton onClick={() => remove(index)}>
+								<RemoveIcon />
+							</IconButton>
+							<Field name={`permissions.${index}.project`} render={({ field }) => (
+								<FormControl>
+									<InputLabel shrink htmlFor={`project-${index}`}>Project</InputLabel>
+									<CellSelect
 										{...field}
-										color="secondary"
+										items={getProjects(project, projects)}
+										placeholder="Select project"
+										disabledPlaceholder
+										displayEmpty
+										inputId={`project-${index}`}
 									/>
-								}
-								label="Project Admin"
-							/>
-						)} />
+								</FormControl>
+							)} />
+							{project && (
+								<Field name={`permissions.${index}.isAdmin`} render={({ field }) => (
+									<ProjectCheckboxContainer
+										control={
+											<Checkbox
+												checked={field.value}
+												{...field}
+												color="secondary"
+											/>
+										}
+										label="Project Admin"
+									/>
+								)} />
+							)}
+						</ProjectConfig>
 						{project && !isAdmin && (
 							<Field name={`permissions.${index}.models`} render={({ field }) => (
 								<PermissionsTable
@@ -129,13 +142,13 @@ export const InvitationDialog = (props: IProps) => {
 									context={PermissionsTableContexts.MODELS}
 									permissions={getModelsPermissions(project, field.value)}
 									roles={MODEL_ROLES_LIST}
-									onPermissionsChange={handlePermissionsChange(field.name, field.onChange)}
+									onPermissionsChange={handlePermissionsChange(field.name, field.value, field.onChange)}
 								/>
 							)} />
 						)}
 					</div>
 				))}
-				{props.projects.length !== projects.length && (
+				{values(props.projects).length !== projects.length && (
 					<AddButton
 						color="secondary"
 						onClick={() => push({ project: '', isAdmin: false, models: [] })}>
@@ -147,7 +160,7 @@ export const InvitationDialog = (props: IProps) => {
 		)} />
 	);
 
-	const renderForm = ({ values }) => (
+	const renderForm = ({ values: formValues }) => (
 		<Form>
 			<Container className={props.className}>
 				<Content>
@@ -184,19 +197,17 @@ export const InvitationDialog = (props: IProps) => {
 						/>
 					)} />
 
-					{renderPermissions(values.permissions)}
+					{!formValues.isAdmin && renderPermissions(formValues.permissions)}
 				</Content>
 				<Footer>
 					<Field render={({ form }) => (
-						<Button
-							type="submit"
-							variant="raised"
-							color="secondary"
-							disabled={!form.isValid || form.isValidating}
+						<SubmitButton
+							pending={form.isSubmitting}
+							disabled={!form.isValid || form.isValidating || form.isSubmitting}
 						>
 							Invite
-						</Button>
-					)} />
+						</SubmitButton>
+				)} />
 				</Footer>
 			</Container>
 		</Form>

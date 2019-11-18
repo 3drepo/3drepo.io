@@ -48,8 +48,10 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	updateModelsPermissions: ['modelsWithPermissions', 'permissions'],
 	updateModelsPermissionsPre: ['modelsWithPermissions', 'permissions'],
 	updateModelPermissionsSuccess: ['updatedModels', 'permissions'],
+	sendInvitation: ['email', 'job', 'isAdmin', 'permissions', 'onFinish'],
+	removeInvitationSuccess: ['email'],
 	removeInvitation: ['email'],
-	removeInvitationSuccess: ['email']
+	sendInvitationSuccess: ['savedInvitation']
 
 }, { prefix: 'USER_MANAGEMENT/' });
 
@@ -145,6 +147,11 @@ export const removeInvitationSuccess = (state = INITIAL_STATE, { email }) => {
 	const invitations = state.invitations.filter(({inviteEmail}) => {
 		return inviteEmail !== email;
 	});
+	return {...state, invitations};
+};
+
+export const sendInvitationSuccess = (state = INITIAL_STATE, { savedInvitation }) => {
+	const invitations = [...state.invitations.filter(({ email }) => email !== savedInvitation.email), savedInvitation];
 	return {...state, invitations};
 };
 
@@ -256,6 +263,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.GET_USERS_SUGGESTIONS_SUCCESS]: getUsersSuggestionsSuccess,
 	[UserManagementTypes.CLEAR_USERS_SUGGESTIONS]: clearUsersSuggestions,
 	[UserManagementTypes.REMOVE_INVITATION_SUCCESS]: removeInvitationSuccess,
+	[UserManagementTypes.SEND_INVITATION_SUCCESS]: sendInvitationSuccess,
 	[UserManagementTypes.SET_USER_NOT_EXISTS]: setUserNotExists,
 
 	// Project

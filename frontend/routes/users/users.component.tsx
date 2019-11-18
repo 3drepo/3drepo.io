@@ -38,7 +38,7 @@ import {
 	TableButton
 } from '../components/customTable/customTable.component';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
-import { InvitationDialog } from '../components/invitationDialog/invitationDialog.component';
+import InvitationDialog from '../components/invitationDialog/invitationDialog.container';
 import Invitations from '../components/invitations/invitations.container';
 import { InvitationsDialog } from '../components/invitationsDialog/invitationsDialog.component';
 import { JobItem } from '../components/jobItem/jobItem.component';

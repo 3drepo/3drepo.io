@@ -17,8 +17,10 @@
 
 import ButtonBase from '@material-ui/core/Button';
 import IconButtonBase from '@material-ui/core/IconButton';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import TextFieldBase from '@material-ui/core/TextField';
 import styled from 'styled-components';
+import { COLOR } from '../../../styles';
 import { PermissionsTable as PermissionsTableBase } from '../permissionsTable/permissionsTable.component';
 
 export const Container = styled.div`
@@ -35,6 +37,7 @@ export const TextField = styled(TextFieldBase)`
 
 export const Content = styled.div`
 	padding: 25px;
+	padding-bottom: 12px;
 	max-height: 40vh;
 	overflow: auto;
 	display: flex;
@@ -70,15 +73,32 @@ export const IconButton = styled(IconButtonBase)`
 		padding: 5px;
     margin-left: -7px;
     margin-right: 10px;
+		margin-bottom: -2px;
 	}
 `;
 
 export const PermissionsTable = styled(PermissionsTableBase)`
 	&& {
-		height: ${(props: any) => `calc(62px * ${props.modelsNumber})`};
+		height: ${(props: any) => `calc(62px * ${props.modelsNumber} + 22px)`};
 		width: fit-content;
-		margin-left: -20px;
 		margin-top: 15px;
 		margin-bottom: 15px;
+		border: 1px solid ${COLOR.BLACK_6};
+		border-bottom: none;
+    padding: 10px 0;
+		box-sizing: border-box;
+	}
+`;
+
+export const ProjectConfig = styled.div`
+	display: flex;
+	align-items: flex-end;
+	justify-content: flex-start;
+`;
+
+export const ProjectCheckboxContainer = styled(FormControlLabel)`
+	&& {
+		height: 30px;
+    margin-left: 0;
 	}
 `;
