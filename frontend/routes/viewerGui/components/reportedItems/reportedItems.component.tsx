@@ -90,6 +90,7 @@ interface IProps {
 
 interface IState {
 	filteredItems: any[];
+	prevScroll: number;
 }
 
 export class ReportedItems extends React.PureComponent<IProps, IState> {
@@ -117,6 +118,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	}
 	public state = {
 		filteredItems: [],
+		prevScroll: 0
 	};
 
 	public listViewRef = React.createRef<HTMLElement>();
@@ -200,6 +202,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		const showDefaultHiddenItemsChanged = prevProps.showDefaultHiddenItems !== showDefaultHiddenItems;
 		const searchEnabledChange = prevProps.searchEnabled !== searchEnabled;
 		const detailsWasClosed = prevProps.showDetails !== showDetails && !showDetails;
+		const detailsShowing =  prevProps.showDetails !== showDetails && showDetails;
 
 		const changes = {} as IState;
 
@@ -209,33 +212,16 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 		const filteredItems = changes.filteredItems || this.state.filteredItems;
 		if (detailsWasClosed && this.listViewRef.current && this.props.activeItemId && filteredItems.length) {
-			this.scrollToFocusedItem(filteredItems);
+			this.listViewRef.current.scrollTop = this.state.prevScroll;
+		}
+
+		if (this.listViewRef.current) {
+			this.setState({prevScroll: this.listViewRef.current.scrollTop});
 		}
 
 		if (!isEmpty(changes)) {
 			this.setState(changes);
 		}
-	}
-
-	public scrollToFocusedItem = (items) => {
-		if (!this.listViewRef.current) {
-			return;
-		}
-
-		this.listViewRef.current.scrollTop = 0;
-		setTimeout(() => {
-			const activeItemIndex = items.findIndex(({ _id }) => _id === this.props.activeItemId);
-			const element = this.listViewRef.current.children[0].children[activeItemIndex] as HTMLElement;
-			if (element) {
-				const position = activeItemIndex * element.offsetHeight;
-				const maxHeight = this.listViewRef.current.offsetHeight;
-				const isNotVisible = position > maxHeight;
-
-				if (isNotVisible) {
-					this.listViewRef.current.scrollTop = position;
-				}
-			}
-		});
 	}
 
 	public hasPermission = (permission) => {
