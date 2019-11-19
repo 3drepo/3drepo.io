@@ -106,7 +106,6 @@ export const DrawnLine = ({ element, isSelected, handleChange }: IProps) => {
 					ref={line}
 					{...elementProps}
 					{...additionalComponentProps}
-					draggable={isSelected && !isEraser}
 				/>
 			</Group>
 			{(isSelected && !isEraser) && <Transformer ref={transformer} />}

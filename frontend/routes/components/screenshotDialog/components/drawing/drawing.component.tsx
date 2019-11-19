@@ -117,14 +117,12 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		this.props.stage.on('mousemove', this.handleMouseMovePolygon);
 		this.props.stage.on('mouseup', this.handleMouseUpPolygon);
 		this.props.stage.on('mousedown', this.handleMouseDownPolygon);
-		this.props.stage.on('dblclick', this.handleDoubleClickPolygon);
 	}
 
 	public unsubscribeDrawingPolygonEvents = () => {
 		this.props.stage.off('mousemove', this.handleMouseMovePolygon);
 		this.props.stage.off('mouseup', this.handleMouseUpPolygon);
 		this.props.stage.off('mousedown', this.handleMouseDownPolygon);
-		this.props.stage.off('dblclick', this.handleDoubleClickPolygon);
 		this.isAfterPolygonCreated = false;
 	}
 
@@ -270,10 +268,6 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		this.layer.add(this.lastLine);
 	}
 
-	public handleDoubleClickPolygon = () => {
-		this.handlePolygonCreationEnd();
-	}
-
 	public handlePolygonCreationEnd = () => {
 		this.layer.clear();
 		this.layer.clearCache();
@@ -310,15 +304,24 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		this.lastLine.points(newPoints);
 	}
 
+	public drawLineToFirstPoint = () => {
+		const position = this.props.stage.getPointerPosition();
+		const [firstX, firstY] = this.lastLine.points();
+		const newPoints = this.lastLine.points().slice(0, -2);
+
+		this.lastLine.points(newPoints.concat([firstX, firstY]));
+		this.handlePolygonCreationEnd();
+		this.lastPointerPosition = position;
+		this.layer.batchDraw();
+	}
+
 	public drawLine = () => {
 		const position = this.props.stage.getPointerPosition();
+
 		if (this.isDrawingPolygonMode) {
 			if (this.isNearbyFirstPoint()) {
-				const [firstX, firstY] = this.lastLine.points();
-				const newPoints = this.lastLine.points().slice(0, -2);
-
-				this.lastLine.points(newPoints.concat([firstX, firstY]));
-				this.handlePolygonCreationEnd();
+				this.drawLineToFirstPoint();
+				return;
 			} else {
 				this.updateLastLinePoint();
 			}

@@ -61,6 +61,7 @@ interface IProps {
 	areFutureElements: boolean;
 	arePastElements: boolean;
 	mode: string;
+	onClick: () => void;
 	onDrawClick: () => void;
 	onEraseClick: () => void;
 	onTextClick: () => void;
@@ -295,10 +296,10 @@ export class Tools extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { disabled, onCancel } = this.props;
+		const { disabled, onCancel, onClick } = this.props;
 
 		return (
-			<ToolsContainer disabled={disabled}>
+			<ToolsContainer onClick={onClick} disabled={disabled}>
 				{this.renderToolset(!disabled)}
 				<StyledButton onClick={onCancel} color="primary">Cancel</StyledButton>
 				{this.renderSaveButton(!disabled)}

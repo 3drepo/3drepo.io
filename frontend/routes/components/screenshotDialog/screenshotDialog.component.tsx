@@ -80,6 +80,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public layerRef = React.createRef<any>();
 	public imageLayerRef = React.createRef<any>();
 	public drawingLayerRef = React.createRef<any>();
+	public drawingRef = React.createRef<any>();
 	public stageRef = React.createRef<any>();
 
 	public lastImageCanvasWidth = null;
@@ -510,6 +511,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public renderDrawing = () => {
 		return (
 			<Drawing
+				ref={this.drawingRef}
 				height={this.state.stage.height}
 				width={this.state.stage.width}
 				size={this.state.brushSize}
@@ -524,6 +526,12 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				disabled={this.props.disabled}
 			/>
 		);
+	}
+
+	public handleToolsClick = () => {
+		if (this.drawingRef.current) {
+			this.drawingRef.current.drawLineToFirstPoint();
+		}
 	}
 
 	public renderLayers = () => {
@@ -545,6 +553,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public renderTools = () => (
 		<Tools
+			onClick={this.handleToolsClick}
 			size={this.state.brushSize}
 			textSize={this.state.textSize}
 			color={this.state.brushColor}
