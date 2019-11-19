@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button } from '@material-ui/core';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -34,6 +33,7 @@ import { PermissionsTableContexts } from '../permissionsTable/permissionsTable.c
 import { SubmitButton } from '../submitButton/submitButton.component';
 import {
 	AddButton,
+	CancelButton,
 	Container,
 	Content,
 	Footer,
@@ -202,13 +202,13 @@ export const InvitationDialog = (props: IProps) => {
 					{!formValues.isAdmin && renderPermissions(formValues.permissions)}
 				</Content>
 				<Footer>
-					<Button
+					<CancelButton
 						type="button"
 						color="primary"
 						onClick={props.handleClose}
 					>
 						Cancel
-					</Button>
+					</CancelButton>
 					<Field render={({ form }) => (
 						<SubmitButton
 							pending={form.isSubmitting}

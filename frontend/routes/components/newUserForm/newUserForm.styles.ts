@@ -100,9 +100,9 @@ export const UserNotExistsContainer = styled.div`
 const linkStyles = css`
 	color: ${COLOR.PRIMARY_MAIN};
 	border: none;
-  text-decoration: underline;
+	text-decoration: underline;
 	text-align: left;
-  padding: 0;
+	padding: 0;
 	outline: none;
 `;
 

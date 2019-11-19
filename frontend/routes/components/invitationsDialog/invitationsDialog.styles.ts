@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import ButtonBase from '@material-ui/core/Button';
 import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 
@@ -23,7 +24,7 @@ export const Container = styled.div`
 `;
 
 export const List = styled.div`
-	padding: 8px 0 12px 0;
+	padding: 8px 0 12px;
 	max-height: 40vh;
 	overflow: auto;
 	display: flex;
@@ -50,6 +51,10 @@ export const Invitation = styled.div`
 	justify-content: space-between;
 `;
 
-export const Actions = styled.div`
-
+export const CancelButton = styled(ButtonBase)`
+	&& {
+		margin-right: 10px;
+	}
 `;
+
+export const Actions = styled.div``;

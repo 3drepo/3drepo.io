@@ -4,9 +4,9 @@ import { COLOR } from '../../styles';
 export const PendingInvites = styled.button`
 	color: ${COLOR.PRIMARY_MAIN};
 	border: none;
-  text-decoration: underline;
+	text-decoration: underline;
 	text-align: left;
-  padding: 0;
+	padding: 0;
 	outline: none;
 	margin-left: 2px;
 	font-weight: inherit;

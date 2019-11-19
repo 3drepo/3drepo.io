@@ -16,8 +16,8 @@
  */
 
 import ButtonBase from '@material-ui/core/Button';
-import IconButtonBase from '@material-ui/core/IconButton';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import IconButtonBase from '@material-ui/core/IconButton';
 import TextFieldBase from '@material-ui/core/TextField';
 import styled from 'styled-components';
 import { COLOR } from '../../../styles';
@@ -55,12 +55,12 @@ export const Footer = styled.div`
 export const AddButton = styled(ButtonBase)`
 	&& {
 		display: flex;
-    flex: none;
-    flex-direction: row;
-    justify-content: flex-start;
-    width: 300px;
-    margin-left: -10px;
-    padding-left: 8px;
+		flex: none;
+		flex-direction: row;
+		justify-content: flex-start;
+		width: 300px;
+		margin-left: -10px;
+		padding-left: 8px;
 		line-height: 2px;
 
 		svg {
@@ -69,11 +69,17 @@ export const AddButton = styled(ButtonBase)`
 	}
 `;
 
+export const CancelButton = styled(ButtonBase)`
+	&& {
+		margin-right: 10px;
+	}
+`;
+
 export const IconButton = styled(IconButtonBase)`
 	&& {
 		padding: 5px;
-    margin-left: -7px;
-    margin-right: 10px;
+		margin-left: -7px;
+		margin-right: 10px;
 		margin-bottom: -2px;
 	}
 `;
@@ -86,7 +92,7 @@ export const PermissionsTable = styled(PermissionsTableBase)`
 		margin-bottom: 15px;
 		border: 1px solid ${COLOR.BLACK_6};
 		border-bottom: none;
-    padding: 10px 0;
+		padding: 10px 0;
 		box-sizing: border-box;
 	}
 `;
@@ -100,6 +106,6 @@ export const ProjectConfig = styled.div`
 export const ProjectCheckboxContainer = styled(FormControlLabel)`
 	&& {
 		height: 30px;
-    margin-left: 0;
+		margin-left: 0;
 	}
 `;

@@ -22,7 +22,7 @@ import { get } from 'lodash';
 import React from 'react';
 
 import { SmallIconButton } from '../smallIconButon/smallIconButton.component';
-import { Actions, Container, Footer, Invitation, List } from './invitationsDialog.styles';
+import { Actions, CancelButton, Container, Footer, Invitation, List } from './invitationsDialog.styles';
 
 interface IProps {
 	className?: string;
@@ -82,13 +82,13 @@ export const InvitationsDialog = (props: IProps) => {
 		<Container className={props.className}>
 			{renderInvitationsList()}
 			<Footer>
-				<Button
+				<CancelButton
 					type="button"
 					color="primary"
 					onClick={props.handleClose}
 				>
 					Cancel
-				</Button>
+				</CancelButton>
 				<Button
 					type="button"
 					variant="raised"
