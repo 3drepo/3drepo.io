@@ -16,5 +16,39 @@
  */
 
 import styled from 'styled-components';
+import { COLOR } from '../../../styles';
 
-export const Container = styled.div``;
+export const Container = styled.div`
+	width: 400px;
+`;
+
+export const List = styled.div`
+	padding: 8px 0 12px 0;
+	max-height: 40vh;
+	overflow: auto;
+	display: flex;
+	flex-direction: column;
+`;
+
+export const Footer = styled.div`
+	padding: 12px 25px;
+	padding-bottom: 18px;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+`;
+
+export const Invitation = styled.div`
+	width: 100%;
+	border-bottom: 1px solid ${COLOR.BLACK_6};
+	padding: 10px 25px;
+	box-sizing: border-box;
+	font-size: 14px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+`;
+
+export const Actions = styled.div`
+
+`;

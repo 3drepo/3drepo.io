@@ -24,7 +24,7 @@ import {
 	selectInvitations,
 	UserManagementActions
 } from '../../../modules/userManagement';
-import { Invitations } from './invitations.component';
+import { InvitationsDialog } from './invitationsDialog.component';
 
 const mapStateToProps = createStructuredSelector({
 	invitations: selectInvitations
@@ -38,5 +38,5 @@ export default withRouter(
 	connect(
 		mapStateToProps,
 		mapDispatchToProps
-	)(Invitations)
+	)(InvitationsDialog)
 );

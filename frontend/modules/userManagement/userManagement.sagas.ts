@@ -113,6 +113,7 @@ export function* sendInvitation({ email, job, isAdmin, permissions, onFinish }) 
 		const {data: savedInvitation} = yield API.sendInvitation(teamspace, invitation);
 		onFinish();
 		yield put(UserManagementActions.sendInvitationSuccess(savedInvitation));
+		yield put(SnackbarActions.show('Invitation sent'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'invitation', error));
 	}

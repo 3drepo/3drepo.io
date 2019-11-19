@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Button } from '@material-ui/core';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -54,6 +55,7 @@ interface IProps {
 	job?: string;
 	isAdmin?: boolean;
 	jobs: any[];
+	permissions?: any[];
 	projects: any;
 	models: any;
 	handleClose: () => void;
@@ -200,6 +202,13 @@ export const InvitationDialog = (props: IProps) => {
 					{!formValues.isAdmin && renderPermissions(formValues.permissions)}
 				</Content>
 				<Footer>
+					<Button
+						type="button"
+						color="primary"
+						onClick={props.handleClose}
+					>
+						Cancel
+					</Button>
 					<Field render={({ form }) => (
 						<SubmitButton
 							pending={form.isSubmitting}
@@ -217,7 +226,7 @@ export const InvitationDialog = (props: IProps) => {
 		<Formik
 			validationSchema={invitationSchema}
 			onSubmit={handleSubmit}
-			initialValues={{ email: props.email, job: props.job, isAdmin: props.isAdmin, permissions: [] }}
+			initialValues={{ email: props.email, job: props.job, isAdmin: props.isAdmin, permissions: props.permissions }}
 			render={renderForm}
 		/>
 	);

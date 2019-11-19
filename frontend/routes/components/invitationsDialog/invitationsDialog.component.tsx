@@ -15,20 +15,85 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
+import Button from '@material-ui/core/Button';
+import Delete from '@material-ui/icons/Delete';
+import Edit from '@material-ui/icons/Edit';
+import { get } from 'lodash';
+import React from 'react';
 
-import { Container } from './invitationsDialog.styles';
+import { SmallIconButton } from '../smallIconButon/smallIconButton.component';
+import { Actions, Container, Footer, Invitation, List } from './invitationsDialog.styles';
 
 interface IProps {
 	className?: string;
-	email?: string;
-	job?: string;
+	invitations: any[];
+	projects: any[];
+	onInvitationOpen: (email, job, isAdmin, permissions) => void;
+	removeInvitation: (email) => void;
+	handleClose: () => void;
 }
 
 export const InvitationsDialog = (props: IProps) => {
+	const handleInvitationClick = (invitation) => () => {
+		const isAdmin = get(invitation, 'permissions.teamspace_admin', false);
+		const projects = !invitation.permissions || isAdmin
+			? []
+			: invitation.permissions.projects.map(({ project, models, project_admin }) => ({
+					project: props.projects.find(({ name }) => name === project)._id,
+					models,
+					isAdmin: project_admin
+				}));
+
+		props.onInvitationOpen(
+			invitation.email,
+			invitation.job,
+			isAdmin,
+			projects
+		);
+	};
+
+	const handleInvitationRemove = ({ email }) => () => props.removeInvitation(email);
+
+	const renderInvitationsList = () => (
+		<List>
+			{props.invitations.map((invitation) => (
+				<Invitation key={invitation.email}>
+					{invitation.email}
+					<Actions>
+						<SmallIconButton
+							Icon={Edit}
+							onClick={handleInvitationClick(invitation)}
+						/>
+						<SmallIconButton
+							Icon={Delete}
+							onClick={handleInvitationRemove(invitation)}
+						/>
+					</Actions>
+				</Invitation>
+			))}
+		</List>
+	);
+
 	return (
 		<Container className={props.className}>
-			InvitationsDialog component {props.email} {props.job}
+			{renderInvitationsList()}
+			<Footer>
+				<Button
+					type="button"
+					color="primary"
+					onClick={props.handleClose}
+				>
+					Cancel
+				</Button>
+				<Button
+					type="button"
+					variant="raised"
+					color="secondary"
+					onClick={handleInvitationClick({})}
+				>
+					Add
+				</Button>
+			</Footer>
 		</Container>
 	);
 };

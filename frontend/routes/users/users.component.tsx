@@ -18,6 +18,7 @@
 import RemoveCircle from '@material-ui/icons/RemoveCircle';
 import {
 	cond,
+	filter,
 	isEmpty,
 	isEqual,
 	isNumber,
@@ -39,8 +40,7 @@ import {
 } from '../components/customTable/customTable.component';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
 import InvitationDialog from '../components/invitationDialog/invitationDialog.container';
-import Invitations from '../components/invitations/invitations.container';
-import { InvitationsDialog } from '../components/invitationsDialog/invitationsDialog.component';
+import InvitationsDialog from '../components/invitationsDialog/invitationsDialog.container';
 import { JobItem } from '../components/jobItem/jobItem.component';
 import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 import { UserItem } from '../components/userItem/userItem.component';
@@ -234,7 +234,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public handleInvitationOpen = (email, job, isAdmin) => {
+	public handleInvitationOpen = (email, job, isAdmin, permissions = []) => {
 		this.props.showDialog({
 			title: 'Invite user',
 			template: InvitationDialog,
@@ -244,7 +244,8 @@ export class Users extends React.PureComponent<IProps, IState> {
 				isAdmin,
 				jobs: this.state.jobs,
 				projects: pickBy(this.props.projects, ({ teamspace }) => teamspace === this.props.currentTeamspace),
-				models: this.props.models
+				models: this.props.models,
+				permissions,
 			},
 			DialogProps: {
 				maxWidth: false
@@ -294,8 +295,11 @@ export class Users extends React.PureComponent<IProps, IState> {
 			e.stopPropagation();
 			showDialog({
 				title: 'Invitations',
-				template: Invitations,
-				data: {}
+				template: InvitationsDialog,
+				data: {
+					onInvitationOpen: this.handleInvitationOpen,
+					projects: filter(this.props.projects, ({ teamspace }) => teamspace === this.props.currentTeamspace),
+				}
 			});
 		};
 		return ['(', <PendingInvites key="pending" onClick={onClick}>{invitationsCount} pending</PendingInvites>, ')'];
