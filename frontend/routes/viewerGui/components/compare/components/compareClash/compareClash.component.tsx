@@ -86,15 +86,15 @@ export class CompareClash extends React.PureComponent<IProps, any> {
 
 	private renderListItem = (modelProps) => {
 		const { selectedItemsMap } = this.props;
-		const isSelected = selectedItemsMap[modelProps._id];
+		const isSelected = modelProps.baseRevision ? selectedItemsMap[modelProps._id] : false;
 
 		return (
 			<CompareClashItem
 				key={modelProps._id}
 				name={modelProps.name}
-				revisions={modelProps.revisions}
-				baseRevision={modelProps.baseRevision}
+				baseRevision={modelProps.baseRevision || {}}
 				currentRevision={modelProps.targetClashRevision}
+				revisions={modelProps.revisions}
 				selected={isSelected}
 				isTarget={this.props.targetModels[modelProps._id]}
 				onSelectionChange={this.props.handleItemSelect(modelProps)}

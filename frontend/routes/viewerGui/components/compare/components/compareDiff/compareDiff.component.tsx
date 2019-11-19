@@ -82,13 +82,13 @@ export class CompareDiff extends React.PureComponent<IProps, any> {
 
 	private renderListItem = (modelProps) => {
 		const { selectedItemsMap } = this.props;
-		const isSelected = selectedItemsMap[modelProps._id];
+		const isSelected = modelProps.baseRevision ? selectedItemsMap[modelProps._id] : false;
 
 		return (
 			<CompareDiffItem
 				key={modelProps._id}
 				name={modelProps.name}
-				baseRevision={modelProps.baseRevision}
+				baseRevision={modelProps.baseRevision || {}}
 				currentRevision={modelProps.currentRevision}
 				targetDiffRevision={modelProps.targetDiffRevision}
 				revisions={modelProps.revisions}

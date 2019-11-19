@@ -42,7 +42,6 @@ import {
 import { SortAmountDown, SortAmountUp } from '../../../components/fontAwesomeIcon';
 import { Loader } from '../../../components/loader/loader.component';
 import { ViewerPanelButton, ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
-import { EmptyStateInfo } from '../views/views.styles';
 import {
 	CompareContainer,
 	CompareIcon,
@@ -126,12 +125,6 @@ export class Compare extends React.PureComponent<IProps, any> {
 		};
 	}
 
-	public renderEmptyState = renderWhenTrue(() => (
-			<ViewerPanelContent>
-				<EmptyStateInfo>No models that can be compared have been created yet</EmptyStateInfo>
-			</ViewerPanelContent>
-	));
-
 	public renderComparisonLoader = renderWhenTrue(() => (
 		<ComparisonLoader>
 			<Loader content="Loading comparison" />
@@ -161,8 +154,10 @@ export class Compare extends React.PureComponent<IProps, any> {
 		);
 	}
 
-	public renderPanelContent = renderWhenTrue(() => {
+	public render() {
 		const {
+			isPending,
+			compareModels,
 			activeTab,
 			isActive,
 			toggleCompare,
@@ -171,23 +166,27 @@ export class Compare extends React.PureComponent<IProps, any> {
 			isFederation,
 			isAnyTargetClashModel,
 		} = this.props;
-
 		return (
-			<>
+			<CompareContainer
+				Icon={<CompareIcon />}
+				renderActions={this.renderHeaderButtons}
+				pending={isPending}
+				empty={!isPending && !compareModels.length}
+			>
 				<ViewerPanelContent scrollDisabled>
 					<Tabs
-						value={activeTab}
-						indicatorColor="secondary"
-						textColor="primary"
-						fullWidth
-						onChange={this.handleChange}
+							value={activeTab}
+							indicatorColor="secondary"
+							textColor="primary"
+							fullWidth
+							onChange={this.handleChange}
 					>
 						<Tab label={COMPARE_TABS.DIFF} value={DIFF_COMPARE_TYPE} disabled={isCompareProcessed} />
 						<Tab
-							style={{ pointerEvents: 'auto' }}
-							label={this.renderClashTabLabel()}
-							value={CLASH_COMPARE_TYPE}
-							disabled={!isFederation || isCompareProcessed}
+								style={{ pointerEvents: 'auto' }}
+								label={this.renderClashTabLabel()}
+								value={CLASH_COMPARE_TYPE}
+								disabled={!isFederation || isCompareProcessed}
 						/>
 					</Tabs>
 					<TabContent>
@@ -196,36 +195,21 @@ export class Compare extends React.PureComponent<IProps, any> {
 					</TabContent>
 				</ViewerPanelContent>
 				<ViewerPanelFooter
-					alignItems="center"
-					justify="space-between"
+						alignItems="center"
+						justify="space-between"
 				>
 					{this.renderSlider()}
 					<ViewerPanelButton
-						aria-label="Compare"
-						onClick={toggleCompare}
-						color="secondary"
-						variant="fab"
-						disabled={compareDisabled || (!this.isDiffTabActive && !isAnyTargetClashModel)}
-						active={Number(isActive)}
+							aria-label="Compare"
+							onClick={toggleCompare}
+							color="secondary"
+							variant="fab"
+							disabled={compareDisabled || (!this.isDiffTabActive && !isAnyTargetClashModel)}
+							active={Number(isActive)}
 					>
 						<CompareIcon />
 					</ViewerPanelButton>
 				</ViewerPanelFooter>
-			</>
-		);
-	});
-
-	public render() {
-		const { isPending, compareModels } = this.props;
-		return (
-			<CompareContainer
-				Icon={<CompareIcon />}
-				renderActions={this.renderHeaderButtons}
-				pending={isPending}
-				empty={!isPending && !compareModels.length}
-			>
-				{this.renderEmptyState(!compareModels.length)}
-				{this.renderPanelContent(compareModels.length)}
 			</CompareContainer>
 		);
 	}
