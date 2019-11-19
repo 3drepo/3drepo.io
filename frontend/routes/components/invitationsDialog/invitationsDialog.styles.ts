@@ -42,6 +42,7 @@ export const Invitation = styled.div`
 	width: 100%;
 	border-bottom: 1px solid ${COLOR.BLACK_6};
 	padding: 10px 25px;
+	padding-right: 18px;
 	box-sizing: border-box;
 	font-size: 14px;
 	display: flex;
