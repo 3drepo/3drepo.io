@@ -202,7 +202,6 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		const showDefaultHiddenItemsChanged = prevProps.showDefaultHiddenItems !== showDefaultHiddenItems;
 		const searchEnabledChange = prevProps.searchEnabled !== searchEnabled;
 		const detailsWasClosed = prevProps.showDetails !== showDetails && !showDetails;
-		const detailsShowing =  prevProps.showDetails !== showDetails && showDetails;
 
 		const changes = {} as IState;
 
