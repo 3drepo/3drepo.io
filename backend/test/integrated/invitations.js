@@ -19,7 +19,7 @@
 
 const { loginUsers } = require("../helpers/users.js");
 const { expect, AssertionError } = require("chai");
-const { EMAIL_INVALID, JOB_NOT_FOUND, INVALID_PROJECT_NAME,
+const { EMAIL_INVALID, JOB_NOT_FOUND, INVALID_PROJECT_ID,
 	INVALID_MODEL_ID, NOT_AUTHORIZED, INVALID_MODEL_PERMISSION,
 	LICENCE_LIMIT_REACHED } = require("../../response_codes.js");
 
@@ -41,6 +41,8 @@ describe("Invitations ", function () {
 	const account = "teamSpace1";
 	const model = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
 	let agents = {};
+
+	const project1Id = "5bf7df65-f3a8-4337-8016-a63f00000000";
 
 	before(() => loginUsers(usernames, password).then(loggedInAgents => agents = loggedInAgents));
 
@@ -76,13 +78,13 @@ describe("Invitations ", function () {
 	it("sent with a non existen project should fail", function(done) {
 		const email = '19bd030fee094@email.com';
 		const job = 'jobA';
-		const projectPermission = { name: 'nonexistenProject', project_admin: true };
+		const projectPermission = { project: 'nonexistenProject', project_admin: true };
 		const inviteTeamPermission = { teamspace_admin: false, projects: [projectPermission] };
 
 		agents.teamSpace1.post(inviteUrl(account))
 			.send({ email, job, permissions: inviteTeamPermission})
-			.expect(INVALID_PROJECT_NAME.status, (err, res) => {
- 				expect(res.body.message).to.equal(INVALID_PROJECT_NAME.message);
+			.expect(INVALID_PROJECT_ID.status, (err, res) => {
+ 				expect(res.body.message).to.equal(INVALID_PROJECT_ID.message);
 				done();
 			});
 	});
@@ -91,7 +93,7 @@ describe("Invitations ", function () {
 		const email = '19bd030fee094@email.com';
 		const job = 'jobA';
 		const modelsPermissions = [{ model : '1cb3e38c4f7644b', permission: 'collaborator' }]
-		const projectPermission = { project: 'project1', models: modelsPermissions };
+		const projectPermission = { project: project1Id, models: modelsPermissions };
 		const inviteTeamPermission = { teamspace_admin: false, projects: [projectPermission] };
 
 		agents.teamSpace1.post(inviteUrl(account))
@@ -102,7 +104,7 @@ describe("Invitations ", function () {
 			});
 	});
 
-	it("sents with teamspace admin should work for the teamspace admin", function(done) {
+	it("sent with teamspace admin should work for the teamspace admin", function(done) {
 		const inviteEmail = '7e634bae01db4f@mail.com';
 		const inviteJob = 'jobA';
 		const inviteTeamPermission =  { teamspace_admin: true };
@@ -120,10 +122,10 @@ describe("Invitations ", function () {
 	});
 
 
-	it("sents with project admin should work for the teamspace admin", function(done) {
+	it("sent with project admin should work for the teamspace admin", function(done) {
 		const inviteEmail = '93393d28f953@mail.com';
 		const inviteJob = 'jobA';
-		const inviteTeamPermission =  { projects: [{project: 'project1', project_admin: true}] };
+		const inviteTeamPermission =  { projects: [{project: project1Id, project_admin: true}] };
 
 		agents.teamSpace1.post(inviteUrl(account))
 			.send({ email: inviteEmail, job: inviteJob, permissions: inviteTeamPermission})
@@ -134,18 +136,18 @@ describe("Invitations ", function () {
 				expect(permissions.projects).to.be.an('array').and.to.have.length(1);
 
 				const projectPerm = permissions.projects[0];
-				expect(projectPerm.project).to.equal('project1');
+				expect(projectPerm.project).to.equal(project1Id);
 				expect(projectPerm.project_admin).to.equal(true);
 
 				done();
 			});
 	});
 
-	it("sents with admin permission role for models should work for the teamspace admin", function(done) {
+	it("sent with admin permission role for models should work for the teamspace admin", function(done) {
 		const inviteEmail = '48bc8da2f3bc@mail.com';
 		const inviteJob = 'jobA';
 		const modelsPermissions = [{ model : '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', permission: 'collaborator' }];
-		const inviteTeamPermission =  { projects: [{project: 'project1', models: modelsPermissions}] };
+		const inviteTeamPermission =  { projects: [{project: project1Id, models: modelsPermissions}] };
 
 		agents.teamSpace1.post(inviteUrl(account))
 			.send({ email: inviteEmail, job: inviteJob, permissions: inviteTeamPermission})
@@ -161,7 +163,7 @@ describe("Invitations ", function () {
 				expect(projects).to.be.an('array').and.to.have.length(1);
 
 				const {project, models} = projects[0];
-				expect(project).to.equal('project1');
+				expect(project).to.equal(project1Id);
 
 				expect(models).to.be.an('array').and.to.have.length(1);
 				const {model, permission} = models[0];
@@ -176,7 +178,7 @@ describe("Invitations ", function () {
 		const inviteEmail = '4oj1i2393bc@mail.com';
 		const inviteJob = 'jobA';
 		const modelsPermissions = [{ model : '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', permission: 'crazypermission' }];
-		const inviteTeamPermission =  { projects: [{project: 'project1', models: modelsPermissions}] };
+		const inviteTeamPermission =  { projects: [{project: project1Id, models: modelsPermissions}] };
 
 		agents.teamSpace1.post(inviteUrl(account))
 			.send({ email: inviteEmail, job: inviteJob, permissions: inviteTeamPermission})
@@ -234,7 +236,7 @@ describe("Invitations ", function () {
 			projects:
 			[
 				{
-					project: 'project1',
+					project: project1Id,
 					models: [
 						{ model: '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac', permission:'viewer'},
 						{ model: '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', permission:'commenter'},
@@ -283,7 +285,7 @@ describe("Invitations ", function () {
 			projects:
 			[
 				{
-					project: 'project1',
+					project: project1Id,
 					project_admin : true
 				}
 			]

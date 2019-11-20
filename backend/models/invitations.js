@@ -82,12 +82,12 @@ invitations.create = async (email, teamspace, job, permissions = {}) => {
 
 	const projectsPermissions = permissions.projects || [];
 
-	const projectNames = projectsPermissions.map(pr => pr.project);
+	const projectIds = projectsPermissions.map(pr => pr.project);
 
 	const [emailUser, teamspaceJob, projects, teamspaceObject] = await Promise.all([
 		User.findByEmail(email),
 		Job.findByJob(teamspace, job),
-		Project.findByNames(teamspace, projectNames),
+		Project.findByIds(teamspace, projectIds),
 		User.findByUserName(teamspace)
 	]);
 
@@ -99,8 +99,8 @@ invitations.create = async (email, teamspace, job, permissions = {}) => {
 		throw responseCodes.JOB_NOT_FOUND;
 	}
 
-	if (projects.length !== projectNames.length) {
-		throw responseCodes.INVALID_PROJECT_NAME;
+	if (projects.length !== projectIds.length) {
+		throw responseCodes.INVALID_PROJECT_ID;
 	}
 
 	if (!validateModelsPermissions(projectsPermissions)) {
@@ -197,7 +197,7 @@ const applyModelPermissions = (teamspace, invitedUser, modelsPermissions) => asy
 
 const applyProjectPermissions = (teamspace, invitedUser) => async ({ project_admin , project, models}) => {
 	if (project_admin) {
-		await Project.setUserAsProjectAdmin(teamspace, project, invitedUser);
+		await Project.setUserAsProjectAdminById(teamspace, project, invitedUser);
 	} else {
 		const modelsIds = models.map(({model}) => model);
 		const modelsList = await ModelSetting.find({ account: teamspace }, {"_id" : {"$in" : modelsIds}});

@@ -29,8 +29,14 @@
 	const schema = mongoose.Schema({
 		_id: {
 			type: Object,
-			get: utils.uuidToString,
-			set:  utils.stringToUUID
+			get: v => {
+				if(v.id) {
+					return v;
+				}
+
+				return utils.uuidToString(v);
+			},
+			set: utils.stringToUUID
 		},
 		name: { type: String, unique: true},
 		models: [String],
@@ -242,6 +248,10 @@
 		return Project.find({account}, { name: { $in:projectNames } });
 	};
 
+	schema.statics.findByIds = function(account, _ids) {
+		return Project.find({account}, { _id: { $in: _ids.map(utils.stringToUUID) } });
+	};
+
 	schema.statics.populateUsers = function(userList, project) {
 
 		userList.forEach(user => {
@@ -272,6 +282,12 @@
 
 	schema.statics.setUserAsProjectAdmin = async function(teamspace, project, user) {
 		const projectObj = await Project.findOne({ account: teamspace }, {name: project});
+		const projectPermission = { user, permissions: ["admin_project"]};
+		return await projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
+	};
+
+	schema.statics.setUserAsProjectAdminById = async function(teamspace, project, user) {
+		const projectObj = await Project.findOne({ account: teamspace }, {_id: utils.stringToUUID(project)});
 		const projectPermission = { user, permissions: ["admin_project"]};
 		return await projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
 	};
