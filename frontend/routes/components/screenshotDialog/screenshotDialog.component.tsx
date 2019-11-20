@@ -19,6 +19,7 @@ import * as React from 'react';
 import EventListener from 'react-event-listener';
 import { Layer } from 'react-konva';
 
+import { aspectRatio } from '../../../helpers/aspectRatio';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { Drawing } from './components/drawing/drawing.component';
 import { DrawnLine } from './components/drawnLine/drawnLine.component';
@@ -199,13 +200,23 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public scaleStage = (image) => {
-		const imageX = (this.stage.attrs.width - image.attrs.image.naturalWidth) / 2;
+		const { naturalWidth, naturalHeight } = image.attrs.image;
+		const { width : maxWidth, height : maxHeight } = this.stage.attrs;
+		const { scaledWidth, scaledHeight } = aspectRatio(naturalWidth, naturalHeight, maxWidth, maxHeight);
 
-		image.setAttrs({
-			height: this.stage.attrs.height,
-			x: imageX,
-			y: 0
-		});
+		if (naturalWidth < maxWidth && naturalHeight < maxHeight) {
+			image.setAttrs({
+				x: (maxWidth - naturalWidth) / 2,
+				y: (maxHeight - naturalHeight) / 2,
+			});
+		} else {
+			image.setAttrs({
+				width: scaledWidth,
+				height: scaledHeight,
+				y: (maxHeight - scaledHeight) / 2,
+				x: (maxWidth - scaledWidth) / 2,
+			});
+		}
 
 		if (this.lastImageCanvasWidth) {
 			const x = (this.imageLayer.canvas.width - this.lastImageCanvasWidth) / 2;
