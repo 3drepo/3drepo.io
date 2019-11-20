@@ -282,9 +282,11 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.props.handleClose();
 	}
 
-	public handleSave = async () => {
-		const screenshot = await this.stage.toDataURL();
-		this.props.handleResolve(screenshot);
+	public handleSave = () => {
+		this.setState({ selectedObjectName: '' }, async () => {
+			const screenshot = await this.stage.toDataURL();
+			this.props.handleResolve(screenshot);
+		});
 	}
 
 	public setMode = (mode) => {
@@ -529,7 +531,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleToolsClick = () => {
-		if (this.drawingRef.current) {
+		if (this.drawingRef.current && this.state.mode === MODES.POLYGON && this.state.activeShape === SHAPE_TYPES.POLYGON) {
 			this.drawingRef.current.drawLineToFirstPoint();
 		}
 	}
