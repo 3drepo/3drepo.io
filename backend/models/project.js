@@ -24,8 +24,14 @@
 	const ModelFactory = require("./factory/modelFactory");
 	const utils = require("../utils");
 	const _ = require("lodash");
+	const nodeuuid = require("uuid/v1");
 	const ModelSetting = require("./modelSetting");
 	const schema = mongoose.Schema({
+		_id: {
+			type: Object,
+			get: utils.uuidToString,
+			set:  utils.stringToUUID
+		},
 		name: { type: String, unique: true},
 		models: [String],
 		permissions: [{
@@ -39,6 +45,8 @@
 		const regex = "^[^/?=#+]{0,119}[^/?=#+ ]{1}$";
 		return project && project.match(regex);
 	}
+
+	schema.set("toObject", { getters: true });
 
 	schema.pre("save", function checkInvalidName(next) {
 
@@ -77,6 +85,7 @@
 		if(checkProjectNameValid(name)) {
 			const project = Project.createInstance({account});
 			project.name = name;
+			project._id = nodeuuid();
 
 			if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1) {
 				project.permissions = [{
