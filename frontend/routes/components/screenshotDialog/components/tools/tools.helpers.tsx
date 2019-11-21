@@ -1,4 +1,3 @@
-import { concat, range } from 'lodash';
 import * as React from 'react';
 
 import SvgIcon from '@material-ui/core/SvgIcon';
@@ -65,12 +64,12 @@ const POLYGON_ITEM = {
 };
 
 export const SHAPES_MENU = [
-	RECTANGLE_ITEM,
-	TRIANGLE_ITEM,
-	CIRCLE_ITEM,
 	LINE_ITEM,
-	CLOUD_ITEM,
 	ARROW_ITEM,
+	CIRCLE_ITEM,
+	TRIANGLE_ITEM,
+	RECTANGLE_ITEM,
+	CLOUD_ITEM,
 	POLYGON_ITEM,
 ];
 
