@@ -50,7 +50,10 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 	};
 
 	public get currentRevisionName() {
-		return this.props.baseRevision.tag || formatShortDate(this.props.baseRevision.timestamp);
+		if (this.props.baseRevision._id) {
+			return this.props.baseRevision.tag || formatShortDate(this.props.baseRevision.timestamp);
+		}
+		return 'No revision found';
 	}
 
 	public renderRevisionsSettings = renderWhenTrue(() => (
@@ -85,6 +88,7 @@ export class CompareDiffItem extends React.PureComponent<IProps, any> {
 			<Checkbox
 				checked={selected}
 				color="primary"
+				disabled={!this.props.baseRevision._id}
 				onChange={onSelectionChange}
 			/>
 		);

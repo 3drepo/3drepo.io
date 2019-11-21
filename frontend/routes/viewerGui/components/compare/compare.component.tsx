@@ -124,6 +124,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 			renderComparisonLoader: () => this.renderComparisonLoader(this.props.isCompareProcessed)
 		};
 	}
+
 	public renderComparisonLoader = renderWhenTrue(() => (
 		<ComparisonLoader>
 			<Loader content="Loading comparison" />
@@ -155,6 +156,8 @@ export class Compare extends React.PureComponent<IProps, any> {
 
 	public render() {
 		const {
+			isPending,
+			compareModels,
 			activeTab,
 			isActive,
 			toggleCompare,
@@ -163,27 +166,27 @@ export class Compare extends React.PureComponent<IProps, any> {
 			isFederation,
 			isAnyTargetClashModel,
 		} = this.props;
-
 		return (
 			<CompareContainer
 				Icon={<CompareIcon />}
 				renderActions={this.renderHeaderButtons}
-				pending={this.props.isPending}
+				pending={isPending}
+				empty={!isPending && !compareModels.length}
 			>
 				<ViewerPanelContent scrollDisabled>
 					<Tabs
-						value={activeTab}
-						indicatorColor="secondary"
-						textColor="primary"
-						fullWidth
-						onChange={this.handleChange}
+							value={activeTab}
+							indicatorColor="secondary"
+							textColor="primary"
+							fullWidth
+							onChange={this.handleChange}
 					>
 						<Tab label={COMPARE_TABS.DIFF} value={DIFF_COMPARE_TYPE} disabled={isCompareProcessed} />
 						<Tab
-							style={{ pointerEvents: 'auto' }}
-							label={this.renderClashTabLabel()}
-							value={CLASH_COMPARE_TYPE}
-							disabled={!isFederation || isCompareProcessed}
+								style={{ pointerEvents: 'auto' }}
+								label={this.renderClashTabLabel()}
+								value={CLASH_COMPARE_TYPE}
+								disabled={!isFederation || isCompareProcessed}
 						/>
 					</Tabs>
 					<TabContent>
@@ -192,17 +195,17 @@ export class Compare extends React.PureComponent<IProps, any> {
 					</TabContent>
 				</ViewerPanelContent>
 				<ViewerPanelFooter
-					alignItems="center"
-					justify="space-between"
+						alignItems="center"
+						justify="space-between"
 				>
 					{this.renderSlider()}
 					<ViewerPanelButton
-						aria-label="Compare"
-						onClick={toggleCompare}
-						color="secondary"
-						variant="fab"
-						disabled={compareDisabled || (!this.isDiffTabActive && !isAnyTargetClashModel)}
-						active={Number(isActive)}
+							aria-label="Compare"
+							onClick={toggleCompare}
+							color="secondary"
+							variant="fab"
+							disabled={compareDisabled || (!this.isDiffTabActive && !isAnyTargetClashModel)}
+							active={Number(isActive)}
 					>
 						<CompareIcon />
 					</ViewerPanelButton>

@@ -22,7 +22,7 @@ import React from 'react';
 import { BASE_MODEL_TYPE, TARGET_MODEL_TYPE } from '../../../../../../constants/compare';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { RevisionsSelect } from '../revisionsSelect/revisionsSelect.component';
-import { ClashSettings, ClashTypeSwitch, Container, Model, Name } from './compareClashItem.styles';
+import { ClashSettings, ClashTypeSwitch, Container, Model, Name, NoRevisionInfo } from './compareClashItem.styles';
 
 interface IProps {
 	className?: string;
@@ -82,10 +82,15 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 			<Checkbox
 				checked={selected}
 				color="primary"
+				disabled={!this.props.baseRevision._id}
 				onChange={onSelectionChange}
 			/>
 		);
 	}
+
+	private renderNoRevisionInfo = renderWhenTrue(() => (
+			<NoRevisionInfo>No revision found</NoRevisionInfo>
+	));
 
 	private renderData = () => {
 		const { name, selected } = this.props;
@@ -93,14 +98,15 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 			<Model>
 				<Name disabled={!selected}>{name}</Name>
 				<ClashSettings>
-					{this.renderRevisions()}
+					{this.renderRevisions(!!this.props.baseRevision._id)}
+					{this.renderNoRevisionInfo(!this.props.baseRevision._id)}
 					{this.renderTypeSwitch(selected)}
 				</ClashSettings>
 			</Model>
 		);
 	}
 
-	private renderRevisions = () => {
+	private renderRevisions = renderWhenTrue(() => {
 		const { revisions, selected, baseRevision, currentRevision, onRevisionChange } = this.props;
 
 		return (
@@ -112,5 +118,5 @@ export class CompareClashItem extends React.PureComponent<IProps, any> {
 				onChange={onRevisionChange}
 			/>
 		);
-	}
+	});
 }
