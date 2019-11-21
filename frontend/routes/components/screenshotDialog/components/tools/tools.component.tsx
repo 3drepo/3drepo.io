@@ -88,7 +88,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 	public renderToolset = renderWhenTrue(() => {
 		const {
 			size, textSize, color, onDrawClick, onTextClick, onClearClick,
-			onColorChange, onBrushSizeChange, onEraseClick, onTextSizeChange
+			onColorChange, onBrushSizeChange, onEraseClick, onTextSizeChange, onClick
 		} = this.props;
 
 		return (
@@ -132,7 +132,10 @@ export class Tools extends React.PureComponent<IProps, any> {
 								<ShapeMenuButton>
 									<SmallIconButton
 										Icon={ArrowDropDownIcon}
-										onClick={props.onClick}
+										onClick={(e) => {
+											props.onClick(e);
+											onClick();
+										}}
 									/>
 								</ShapeMenuButton>
 							</>

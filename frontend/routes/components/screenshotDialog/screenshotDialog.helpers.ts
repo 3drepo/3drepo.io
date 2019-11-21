@@ -28,8 +28,8 @@ export const MODES = {
 export const INITIAL_VALUES = {
 	color: COLOR.RED,
 	brushColor: COLOR.PRIMARY_DARK,
-	brushSize: 5,
-	textSize: 12,
+	brushSize: 8,
+	textSize: 36,
 	mode: MODES.BRUSH
 };
 
