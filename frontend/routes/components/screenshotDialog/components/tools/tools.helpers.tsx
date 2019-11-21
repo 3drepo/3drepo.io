@@ -85,16 +85,51 @@ const SHAPE_ICONS = {
 
 export const activeShapeIcon = (activeShape) => SHAPE_ICONS[activeShape];
 
-export const BRUSH_SIZES = concat(
-		range(56, 26, -10),
-		range(24, 4, -4),
-		range(7, 0, -1)
-);
+export const BRUSH_SIZES = [
+	{
+		label: 'XL',
+		value: 36
+	},
+	{
+		label: 'L',
+		value: 16
+	},
+	{
+		label: 'M',
+		value: 8
+	},
+	{
+		label: 'S',
+		value: 4
+	},
+	{
+		label: 'XS',
+		value: 1
+	},
+];
 
-export const TEXT_SIZES = concat(
-		range(56, 26, -10),
-		range(24, 4, -4)
-);
+export const TEXT_SIZES = [
+	{
+		label: 'XL',
+		value: 56
+	},
+	{
+		label: 'L',
+		value: 46
+	},
+	{
+		label: 'M',
+		value: 36
+	},
+	{
+		label: 'S',
+		value: 24
+	},
+	{
+		label: 'XS',
+		value: 20
+	},
+];
 
 export const MAX_TOOL_ICON_SIZE = 28;
 export const MIN_BRUSH_ICON_SIZE = 5;

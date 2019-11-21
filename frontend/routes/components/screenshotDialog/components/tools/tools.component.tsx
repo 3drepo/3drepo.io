@@ -238,13 +238,13 @@ export class Tools extends React.PureComponent<IProps, any> {
 			</MenuItem>
 	)
 
-	public renderBrushSizes = () => BRUSH_SIZES.map((size) => (
-		<MenuItem key={size} value={size}>
+	public renderBrushSizes = () => BRUSH_SIZES.map(({ label, value }) => (
+		<MenuItem key={value} value={value}>
 			<IconButton disableRipple>
-				<Badge badgeContent={size} color="primary">
+				<Badge badgeContent={label} color="primary">
 					<DotIcon
 						style={{
-							fontSize: lerp(MIN_BRUSH_ICON_SIZE, MAX_TOOL_ICON_SIZE, size / BRUSH_SIZES[0])
+							fontSize: lerp(MIN_BRUSH_ICON_SIZE, MAX_TOOL_ICON_SIZE, value / BRUSH_SIZES[0].value)
 						}}
 					/>
 				</Badge>
@@ -252,10 +252,10 @@ export class Tools extends React.PureComponent<IProps, any> {
 		</MenuItem>
 	))
 
-	public renderTextSizes = () => TEXT_SIZES.map((size, index) => (
-		<MenuItem key={size} value={size}>
+	public renderTextSizes = () => TEXT_SIZES.map(({ label, value }, index) => (
+		<MenuItem key={value} value={value}>
 			<IconButton disableRipple>
-				<Badge badgeContent={size} color="primary">
+				<Badge badgeContent={label} color="primary">
 					<TextIcon
 						style={{
 							fontSize: lerp(MAX_TOOL_ICON_SIZE, MIN_TEXT_ICON_SIZE, (index + 1) / TEXT_SIZES.length)
