@@ -66,7 +66,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		sourceImage: '',
 		stage: {
 			height: 0,
-			width: 0
+			width: 0,
 		},
 		selectedObjectName: '',
 		textEditable: {
@@ -165,7 +165,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		});
 
 		this.setState({ sourceImage, mode: INITIAL_VALUES.mode }, () => {
-			this.setStageSize();
 			this.stage.addEventListener('click', this.handleStageClick);
 		});
 
@@ -194,28 +193,24 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public handleResize = () => {
-		this.setStageSize();
 		const backgroundImage = this.imageLayer.children[0];
 		this.scaleStage(backgroundImage);
 	}
 
 	public scaleStage = (image) => {
 		const { naturalWidth, naturalHeight } = image.attrs.image;
-		const { width : maxWidth, height : maxHeight } = this.stage.attrs;
+		const maxHeight = this.containerElement.offsetHeight;
+		const maxWidth = this.containerElement.offsetWidth;
 		const { scaledWidth, scaledHeight } = aspectRatio(naturalWidth, naturalHeight, maxWidth, maxHeight);
 
 		if (naturalWidth < maxWidth && naturalHeight < maxHeight) {
-			image.setAttrs({
-				x: (maxWidth - naturalWidth) / 2,
-				y: (maxHeight - naturalHeight) / 2,
-			});
+			this.setState({stage: { height: naturalHeight, width: naturalWidth }});
 		} else {
 			image.setAttrs({
 				width: scaledWidth,
 				height: scaledHeight,
-				y: (maxHeight - scaledHeight) / 2,
-				x: (maxWidth - scaledWidth) / 2,
 			});
+			this.setState({stage: { height: scaledHeight, width: scaledWidth }});
 		}
 
 		if (this.lastImageCanvasWidth) {

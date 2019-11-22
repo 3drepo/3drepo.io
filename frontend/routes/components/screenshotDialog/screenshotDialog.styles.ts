@@ -52,8 +52,6 @@ export const BackgroundImage = styled.img`
 
 export const Stage = styled(KonvaStage)`
 	position: absolute;
-	left: 0;
-	top: 0;
 `;
 
 export const Textarea = styled.textarea`
