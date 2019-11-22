@@ -24,7 +24,7 @@ export const LEVELS = {
 	VERY_HIGH: 4
 };
 
-const LEVELS_LIST = [
+export const LEVELS_LIST = [
 	{ value: LEVELS.UNSET, name: 'UNSET' },
 	{ value: LEVELS.VERY_LOW, name: 'Very Low' },
 	{ value: LEVELS.LOW, name: 'Low' },
@@ -204,7 +204,7 @@ export const RISKS_ACTIONS_MENU = {
 	},
 	SORT_BY_DATE: {
 		label: 'Sort by date',
-		type: ACTIONS_TYPES.SORT,
+		isSorting: true,
 		Icon: {
 			ASC: SortAmountUp,
 			DESC: SortAmountDown

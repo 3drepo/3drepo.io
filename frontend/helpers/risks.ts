@@ -16,13 +16,19 @@
  */
 
 import { get } from 'lodash';
+import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 import {
 	LEVELS,
+	LEVELS_OF_RISK,
+	RISK_CATEGORIES,
 	RISK_CONSEQUENCES,
+	RISK_FILTER_RELATED_FIELDS,
 	RISK_LEVELS,
 	RISK_LEVELS_COLOURS,
 	RISK_LEVELS_ICONS,
-	RISK_LIKELIHOODS
+	RISK_LIKELIHOODS,
+	RISK_MITIGATION_STATUSES,
+	RISKS_ACTIONS_MENU
 } from '../constants/risks';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
@@ -30,8 +36,8 @@ import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 export const prepareRisk = (risk, jobs = []) => {
 	const preparedRisk = {...risk};
 
-	if (preparedRisk.thumbnail) {
-		preparedRisk.thumbnail = getAPIUrl(preparedRisk.thumbnail);
+	if (risk.thumbnail) {
+		preparedRisk.thumbnail = risk.thumbnail.length ? getAPIUrl(risk.thumbnail) : '';
 	}
 
 	const descriptionThumbnail = preparedRisk.viewpoint && preparedRisk.viewpoint.screenshot
@@ -195,4 +201,49 @@ export const canComment = (riskData, userJob, permissions, currentUser) => {
 		canCommentRisk(permissions);
 
 	return ableToComment;
+};
+
+export const filtersValuesMap = (jobs) => {
+	const jobsList = [...jobs, UNASSIGNED_JOB];
+
+	return {
+		[RISK_FILTER_RELATED_FIELDS.CATEGORY]: getFilterValues(RISK_CATEGORIES),
+		[RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS]: getFilterValues(RISK_MITIGATION_STATUSES),
+		[RISK_FILTER_RELATED_FIELDS.CREATED_BY]: getFilterValues(jobs),
+		[RISK_FILTER_RELATED_FIELDS.RISK_OWNER]: getFilterValues(jobsList),
+		[RISK_FILTER_RELATED_FIELDS.RISK_CONSEQUENCE]: getFilterValues(RISK_CONSEQUENCES),
+		[RISK_FILTER_RELATED_FIELDS.RISK_LIKELIHOOD]: getFilterValues(RISK_LIKELIHOODS),
+		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_CONSEQUENCE]: getFilterValues(RISK_CONSEQUENCES),
+		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LIKELIHOOD]: getFilterValues(RISK_LIKELIHOODS),
+		[RISK_FILTER_RELATED_FIELDS.LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
+		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
+		[RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK)
+	};
+};
+
+export const getHeaderMenuItems = (
+		teamspace, model, printRisks, downloadRisks, toggleSortOrder, toggleShowPins?, showPins?
+	) => {
+	const items = [{
+		...RISKS_ACTIONS_MENU.PRINT,
+		onClick: () => printRisks(teamspace, model)
+	}, {
+		...RISKS_ACTIONS_MENU.DOWNLOAD,
+		onClick: () => downloadRisks(teamspace, model)
+	}, {
+		...RISKS_ACTIONS_MENU.SORT_BY_DATE,
+		onClick: () => {
+			toggleSortOrder();
+		}
+	}];
+
+	const togglePinItem = {
+		...RISKS_ACTIONS_MENU.SHOW_PINS,
+		enabled: showPins,
+		onClick: () => toggleShowPins(!showPins)
+	};
+
+	const menuItems = showPins ? [...items, {...togglePinItem}] : [...items];
+
+	return menuItems;
 };

@@ -53,7 +53,6 @@ function* fetchRisks({teamspace, modelId, revision}) {
 	try {
 		const {data} = yield API.getRisks(teamspace, modelId, revision);
 		const jobs = yield select(selectJobsList);
-
 		const preparedRisks = data.map((risk) => prepareRisk(risk, jobs));
 
 		yield put(RisksActions.fetchRisksSuccess(preparedRisks));
@@ -98,22 +97,22 @@ const createGroup = (risk, objectInfo, teamspace, model, revision) => {
 	]);
 };
 
-function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting }) {
+function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ignoreViewer = false  }) {
 	try {
 		const myJob = yield select(selectMyJob);
 		const ifcSpacesHidden = yield select(selectIfcSpacesHidden);
 
-		const [viewpoint, objectInfo, screenshot, userJob] = yield all([
+		const [viewpoint, objectInfo, screenshot, userJob] = !ignoreViewer ? yield all([
 			Viewer.getCurrentViewpoint({ teamspace, model }),
 			Viewer.getObjectsStatus(),
 			riskData.descriptionThumbnail || Viewer.getScreenshot(),
 			myJob
-		]);
+		]) : [{}, null, riskData.descriptionThumbnail || '', myJob];
 
 		viewpoint.hideIfc = ifcSpacesHidden;
 		riskData.rev_id = revision;
 
-		if (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0) {
+		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
 			const [highlightedGroup, hiddenGroup] = yield createGroup(riskData, objectInfo, teamspace, model, revision);
 
 			if (highlightedGroup) {
@@ -147,8 +146,20 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting }) {
 		const preparedRisk = prepareRisk(savedRisk, jobs);
 
 		finishSubmitting();
+
+		if (!ignoreViewer) {
+			yield put(RisksActions.showDetails(revision, preparedRisk._id));
+		} else {
+			yield put(DialogActions.hideDialog());
+		}
+
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
-		yield put(RisksActions.goToRisk(preparedRisk));
+
+		if (!ignoreViewer) {
+			yield put(RisksActions.goToRisk(preparedRisk));
+		} else {
+			yield put(DialogActions.hideDialog());
+		}
 		yield put(SnackbarActions.show('Risk created'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('save', 'risk', error));
@@ -171,6 +182,20 @@ function* updateRisk({ teamspace, modelId, riskData }) {
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'risk', error));
+	}
+}
+
+function* updateBoardRisk({ teamspace, modelId, riskData }) {
+	try {
+		const { _id, ...changedData } = riskData;
+		const { data: updatedRisk } = yield API.updateRisk(teamspace, modelId, _id, null, changedData);
+		const jobs = yield select(selectJobsList);
+		const preparedIssue = prepareRisk(updatedRisk, jobs);
+		preparedIssue.comments = yield prepareComments(preparedIssue.comments);
+		yield put(RisksActions.saveRiskSuccess(preparedIssue));
+		yield put(SnackbarActions.show('Risk updated'));
+	} catch (error) {
+		yield put(DialogActions.showEndpointErrorDialog('update', 'board risk', error));
 	}
 }
 
@@ -357,10 +382,10 @@ function* focusOnRisk({ risk, revision }) {
 	}
 }
 
-function* setActiveRisk({ risk, revision }) {
+function* setActiveRisk({ risk, revision, ignoreViewer = false }) {
 	try {
 		yield all([
-			put(RisksActions.focusOnRisk(risk, revision)),
+			!ignoreViewer ? put(RisksActions.focusOnRisk(risk, revision)) : null,
 			put(RisksActions.setComponentState({ activeRisk: risk._id, expandDetails: true }))
 		]);
 	} catch (error) {
@@ -547,4 +572,5 @@ export default function* RisksSaga() {
 	yield takeLatest(RisksTypes.SET_FILTERS, setFilters);
 	yield takeLatest(RisksTypes.SHOW_MULTIPLE_GROUPS, showMultipleGroups);
 	yield takeLatest(RisksTypes.GO_TO_RISK, goToRisk);
+	yield takeLatest(RisksTypes.UPDATE_BOARD_RISK, updateBoardRisk);
 }

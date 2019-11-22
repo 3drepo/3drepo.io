@@ -20,17 +20,13 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import {
-	selectDialogConfig,
-	selectDialogData,
-	selectIsOpen,
+	selectDialogs,
 	DialogActions
 } from '../../../modules/dialog';
 import { DialogContainer } from './dialogContainer.component';
 
 const mapStateToProps = createStructuredSelector({
-	isOpen: selectIsOpen,
-	config: selectDialogConfig,
-	data: selectDialogData
+	dialogs: selectDialogs
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

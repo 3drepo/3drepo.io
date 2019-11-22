@@ -21,6 +21,8 @@ import { COLOR } from '../../../styles';
 export const Container = styled.div`
 	min-height: 55px;
 	position: relative;
+	background-color: ${COLOR.BLACK_6};
+	overflow: auto;
 
 	&:before {
 		position: absolute;
@@ -37,4 +39,14 @@ export const Container = styled.div`
 
 export const LoaderContainer = styled.div`
 	padding: 10px;
+`;
+
+export const EmptyStateInfo = styled.p`
+	padding: 14px;
+	font-size: 13px;
+	color: ${COLOR.BLACK_60};
+	background-color: ${COLOR.BLACK_6};
+	margin: 25px;
+	border-radius: 6px;
+	text-align: center;
 `;

@@ -35,7 +35,7 @@ export const CompareIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.COMPARE];
 export const CompareContainer = styled(ViewerPanel).attrs({
 	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.COMPARE]
 })`
-	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.COMPARE]}px;
+	min-height: ${((props) => props.empty ? 0 : VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.COMPARE])}px;
 `;
 
 interface ISliderLabel {

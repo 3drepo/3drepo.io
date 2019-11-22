@@ -18,14 +18,8 @@
 import fileDialog from 'file-dialog';
 import React from 'react';
 
-import {
-	ISSUE_FILTER_RELATED_FIELDS,
-	ISSUE_FILTERS,
-	ISSUE_PRIORITIES,
-	ISSUE_STATUSES,
-	ISSUES_ACTIONS_MENU,
-	STATUSES
-} from '../../../../constants/issues';
+import { ISSUE_FILTERS, ISSUES_ACTIONS_MENU, STATUSES } from '../../../../constants/issues';
+import { filtersValuesMap, getHeaderMenuItems } from '../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import IssueDetails from './components/issueDetails/issueDetails.container';
 import { IssuesContainer } from './issues.styles';
@@ -78,43 +72,9 @@ interface IProps {
 	setFilters: (filters) => void;
 }
 
-const UNASSIGNED_JOB = {
-	name: 'Unassigned',
-	value: ''
-};
-
 export class Issues extends React.PureComponent<IProps, any> {
-	get jobsList() {
-		return [...this.props.jobs, UNASSIGNED_JOB];
-	}
-
-	get filtersValuesMap() {
-		return {
-			[ISSUE_FILTER_RELATED_FIELDS.STATUS]: this.getFilterValues(ISSUE_STATUSES),
-			[ISSUE_FILTER_RELATED_FIELDS.CREATED_BY]: this.getFilterValues(this.props.jobs),
-			[ISSUE_FILTER_RELATED_FIELDS.ASSIGNED_TO]: this.getFilterValues(this.jobsList),
-			[ISSUE_FILTER_RELATED_FIELDS.PRIORITY]: this.getFilterValues(ISSUE_PRIORITIES),
-			[ISSUE_FILTER_RELATED_FIELDS.TYPE]: this.getFilterValues(this.props.topicTypes),
-			[ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE]: [{
-				label: 'From',
-				value: {
-					label: 'From',
-					value: 'from',
-					date: null
-				}
-			}, {
-				label: 'To',
-				value: {
-					label: 'To',
-					value: 'to',
-					date: null
-				}
-			}]
-		};
-	}
-
 	get filters() {
-		const filterValuesMap = this.filtersValuesMap;
+		const filterValuesMap = filtersValuesMap(this.props.jobs, this.props.topicTypes);
 		return ISSUE_FILTERS.map((issueFilter) => {
 			issueFilter.values = filterValuesMap[issueFilter.relatedField];
 			return issueFilter;
@@ -130,36 +90,23 @@ export class Issues extends React.PureComponent<IProps, any> {
 			teamspace,
 			model,
 			revision,
+			toggleSortOrder,
 			toggleShowPins,
 			showPins
 		} = this.props;
 
-		return [{
-			...ISSUES_ACTIONS_MENU.PRINT,
-			onClick: () => printIssues(teamspace, model)
-		}, {
-			...ISSUES_ACTIONS_MENU.IMPORT_BCF,
-			onClick: () => {
-				fileDialog({ accept: '.zip,.bcfzip,.bcf' }, (files) => {
-					importBCF(teamspace, model, files[0], revision);
-				});
-			}
-		}, {
-			...ISSUES_ACTIONS_MENU.EXPORT_BCF,
-			onClick: () => exportBCF(teamspace, model)
-		}, {
-			...ISSUES_ACTIONS_MENU.DOWNLOAD,
-			onClick: () => downloadIssues(teamspace, model)
-		}, {
-			...ISSUES_ACTIONS_MENU.SORT_BY_DATE,
-			onClick: () => {
-				this.props.toggleSortOrder();
-			}
-		}, {
-			...ISSUES_ACTIONS_MENU.SHOW_PINS,
-			enabled: this.props.showPins,
-			onClick: () => toggleShowPins(!showPins)
-		}];
+		return getHeaderMenuItems(
+			teamspace,
+			model,
+			revision,
+			printIssues,
+			downloadIssues,
+			importBCF,
+			exportBCF,
+			toggleSortOrder,
+			toggleShowPins,
+			showPins
+		);
 	}
 
 	get toggleSubmodelsMenuItem() {

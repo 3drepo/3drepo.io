@@ -36,7 +36,6 @@ import {
 } from '../../../../modules/issues';
 import { selectJobsList } from '../../../../modules/jobs';
 import { selectSettings, selectTopicTypes } from '../../../../modules/model';
-import { selectQueryParams } from '../../../../modules/router/router.selectors';
 import { Issues } from './issues.component';
 
 const mapStateToProps = createStructuredSelector({

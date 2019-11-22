@@ -16,12 +16,12 @@
  */
 
 import React from 'react';
-import Truncate from 'react-truncate';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
+import { Truncate } from '../../../components/truncate/truncate.component';
 import {
 	Actions,
 	ArrowButton,
@@ -30,6 +30,7 @@ import {
 	Description,
 	MenuItemContainer,
 	Name,
+	OpenInViewerButton,
 	RoleIndicator,
 	StyledArrowIcon,
 	Thumbnail,
@@ -40,6 +41,10 @@ import {
 interface IProps {
 	className?: string;
 	name: string;
+	type?: string;
+	id?: string;
+	teamspace?: string;
+	model?: string;
 	desc?: string;
 	owner?: string;
 	created?: number;
@@ -56,6 +61,7 @@ interface IProps {
 	willBeRemoved?: boolean;
 	panelName?: string;
 	extraInfo?: string;
+	showModelButton?: boolean;
 	onItemClick: (event?) => void;
 	onArrowClick: (event?) => void;
 	renderActions?: () => JSX.Element[];
@@ -75,8 +81,8 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 	));
 
 	public renderNameWithCounter = renderWhenTrue(() =>
-		<Name>{`${this.props.number} ${this.props.name}`}</Name>);
-	public renderName = renderWhenTrue(() => <Name>{this.props.name}</Name>);
+		<Name as="div"><Truncate lines={1}>{`${this.props.number} ${this.props.name}`}</Truncate></Name>);
+	public renderName = renderWhenTrue(() => <Name as="div"><Truncate lines={1}>{this.props.name}</Truncate></Name>);
 	public renderClosedMessage = renderWhenTrue(() => <ActionMessage content="This issue is now closed" />);
 
 	public renderThumbnail = renderWhenTrue(() => (
@@ -98,6 +104,17 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 		<ActionMessage content={`This ${this.props.panelName || 'item'} has been deleted`} />
 	);
 
+	public renderViewModel = renderWhenTrue(() => {
+		const { type, id, teamspace, model } = this.props;
+		return (
+			<OpenInViewerButton
+				teamspace={teamspace}
+				model={model}
+				query={`${type === 'issues' ? 'issueId' : 'riskId'}=${id}`}
+			/>
+		);
+	});
+
 	public render() {
 		const {
 			roleColor,
@@ -114,7 +131,8 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 			className,
 			renderActions,
 			willBeRemoved,
-			willBeClosed
+			willBeClosed,
+			showModelButton
 		} = this.props;
 
 		const shouldRenderActions = renderActions && active;
@@ -136,6 +154,7 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 					<Content>
 						{this.renderNameWithCounter(number)}
 						{this.renderName(!(number))}
+						{this.renderViewModel(showModelButton)}
 
 						<PreviewItemInfo
 							author={owner}

@@ -15,17 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
+import React, { Fragment } from 'react';
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canComment } from '../../../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { LogList } from '../../../../../components/logList/logList.component';
 import NewCommentForm from '../../../newCommentForm/newCommentForm.container';
-import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
 import { Container } from '../../../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelContent, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { EmptyStateInfo } from '../../../views/views.styles';
+import { HorizontalView, LogsContainer, LogList, PreviewDetails } from './issueDetails.styles';
 import { IssueDetailsForm } from './issueDetailsForm.component';
 
 interface IProps {
@@ -43,10 +41,12 @@ interface IProps {
 	currentUser: any;
 	settings: any;
 	failedToLoad: boolean;
+	disableViewer?: boolean;
+	horizontal?: boolean;
 	setState: (componentState) => void;
 	fetchIssue: (teamspace, model, issueId) => void;
 	updateSelectedIssuePin: (position) => void;
-	saveIssue: (teamspace, modelId, issue, revision, finishSubmitting) => void;
+	saveIssue: (teamspace, modelId, issue, revision, finishSubmitting, disableViewer) => void;
 	updateIssue: (teamspace, modelId, issue) => void;
 	postComment: (teamspace, modelId, issueData, finishSubmitting) => void;
 	removeComment: (teamspace, modelId, issueData) => void;
@@ -92,6 +92,10 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		return [...this.props.jobs, UNASSIGNED_JOB];
 	}
 
+	get isViewerInitialized() {
+		return this.props.viewer.viewer.initialized;
+	}
+
 	public commentRef = React.createRef<any>();
 
 	public renderLogList = renderWhenTrue(() => (
@@ -107,33 +111,44 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderPreview = renderWhenTrue(() => {
-		const { expandDetails } = this.props;
+		const { expandDetails, horizontal, failedToLoad, disableViewer } = this.props;
 		const { comments } = this.issueData;
+		const isIssueWithComments = Boolean((comments && comments.length || horizontal) && !this.isNewIssue);
+		const PreviewWrapper = horizontal && isIssueWithComments ? HorizontalView : Fragment;
+		const renderNotCollapsable = () => {
+			return this.renderLogList(!horizontal && isIssueWithComments);
+		};
 
 		return (
-			<PreviewDetails
-				{...this.issueData}
-				key={this.issueData._id}
-				defaultExpanded={expandDetails}
-				editable={!this.issueData._id}
-				onNameChange={this.handleNameChange}
-				onExpandChange={this.handleExpandChange}
-				renderCollapsable={this.renderDetailsForm}
-				renderNotCollapsable={() => this.renderLogList(comments && !!comments.length && !this.isNewIssue)}
-				handleHeaderClick={() => {
-					if (!this.isNewIssue) { // if its a new issue it shouldnt go to the viewpoint
-						this.setCameraOnViewpoint({ viewpoint: this.issueData.viewpoint });
-					}
-				}}
-				scrolled={this.state.scrolled}
-				isNew={this.isNewIssue}
-			/>
+			<PreviewWrapper>
+				<PreviewDetails
+					{...this.issueData}
+					id={this.issueData._id}
+					type="issue"
+					key={this.issueData._id}
+					defaultExpanded={horizontal || expandDetails}
+					editable={!this.issueData._id}
+					onNameChange={this.handleNameChange}
+					onExpandChange={this.handleExpandChange}
+					renderCollapsable={this.renderDetailsForm}
+					renderNotCollapsable={!horizontal ? renderNotCollapsable : null}
+					handleHeaderClick={this.handleHeaderClick}
+					scrolled={this.state.scrolled && !horizontal}
+					isNew={this.isNewIssue}
+					showModelButton={disableViewer && !this.isNewIssue}
+				/>
+				<LogsContainer>
+					{this.renderLogList(horizontal && isIssueWithComments)}
+					{this.renderFooter(horizontal && !failedToLoad)}
+				</LogsContainer>
+			</PreviewWrapper>
 		);
 	});
 
 	public renderFooter = renderWhenTrue(() => (
 		<ViewerPanelFooter alignItems="center" padding="0">
 			<NewCommentForm
+				disableViewer={this.props.disableViewer}
 				comment={this.props.newComment.comment}
 				screenshot={this.props.newComment.screenshot}
 				viewpoint={this.props.newComment.viewpoint}
@@ -142,6 +157,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				onSave={this.handleSave}
 				canComment={this.userCanComment()}
 				hideComment={this.isNewIssue}
+				hideScreenshot={this.props.disableViewer}
+				hideUploadButton={!this.props.disableViewer}
 			/>
 		</ViewerPanelFooter>
 	));
@@ -185,6 +202,12 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	public handleHeaderClick = () => {
+		if (!this.isNewIssue) { // if its a new issue it shouldnt go to the viewpoint
+			this.setCameraOnViewpoint({ viewpoint: this.issueData.viewpoint });
+		}
+	}
+
 	public handleExpandChange = (event, expanded) => {
 		this.props.setState({ expandDetails: expanded });
 	}
@@ -204,7 +227,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderDetailsForm = () => {
-		const {issue, onRemoveResource, showDialog, topicTypes,
+		const { issue, onRemoveResource, showDialog, topicTypes, disableViewer,
 			currentUser, myJob, attachFileResources, attachLinkResources, updateSelectedIssuePin } = this.props;
 
 		return (
@@ -219,7 +242,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				myJob={myJob}
 				onChangePin={updateSelectedIssuePin}
 				onSavePin={this.onPositionSave}
-				hasPin={issue.position && issue.position.length}
+				hasPin={!disableViewer && issue.position && issue.position.length}
+				hidePin={disableViewer}
 				onRemoveResource={onRemoveResource}
 				attachFileResources={attachFileResources}
 				attachLinkResources={attachLinkResources}
@@ -268,7 +292,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 
 	public handleNewScreenshot = async (screenshot) => {
 		const { teamspace, model, viewer } = this.props;
-		const viewpoint = await viewer.getCurrentViewpoint({ teamspace, model });
+		const viewpoint = this.isViewerInitialized ? await viewer.getCurrentViewpoint({ teamspace, model }) : null;
 
 		if (this.isNewIssue) {
 			this.props.setState({
@@ -278,12 +302,16 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				}
 			});
 		} else {
-			this.setCommentData({ screenshot, viewpoint });
+			if (viewpoint) {
+				this.setCommentData({ screenshot, viewpoint });
+			} else {
+				this.setCommentData({ screenshot });
+			}
 		}
 	}
 
 	public postComment = async (teamspace, model, { comment, screenshot }, finishSubmitting) => {
-		const viewpoint = await this.props.viewer.getCurrentViewpoint({ teamspace, model });
+		const viewpoint = this.isViewerInitialized ? await this.props.viewer.getCurrentViewpoint({ teamspace, model }) : null;
 		const issueCommentData = {
 			_id: this.issueData._id,
 			comment,
@@ -297,9 +325,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleSave = (formValues, finishSubmitting) => {
-		const { teamspace, model, saveIssue, revision } = this.props;
+		const { teamspace, model, saveIssue, revision, disableViewer} = this.props;
 		if (this.isNewIssue) {
-			saveIssue(teamspace, model, this.issueData, revision, finishSubmitting);
+			saveIssue(teamspace, model, this.issueData, revision, finishSubmitting, disableViewer);
 		} else {
 			this.postComment(teamspace, model, formValues, finishSubmitting);
 		}
@@ -314,7 +342,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { failedToLoad, issue } = this.props;
+		const { failedToLoad, issue, horizontal } = this.props;
 		return (
 			<Container>
 				<ViewerPanelContent
@@ -324,7 +352,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 					{this.renderFailedState(failedToLoad)}
 					{this.renderPreview(!failedToLoad && issue)}
 				</ViewerPanelContent>
-				{this.renderFooter(!failedToLoad)}
+				{this.renderFooter(!failedToLoad && !horizontal)}
 			</Container>
 		);
 	}
