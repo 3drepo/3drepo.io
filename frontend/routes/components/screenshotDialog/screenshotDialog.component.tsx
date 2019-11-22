@@ -19,6 +19,7 @@ import * as React from 'react';
 import EventListener from 'react-event-listener';
 import { Layer } from 'react-konva';
 
+import { ROUTES } from '../../../constants/routes';
 import { aspectRatio } from '../../../helpers/aspectRatio';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { Drawing } from './components/drawing/drawing.component';
@@ -43,6 +44,7 @@ interface IProps {
 	canvasElements: any[];
 	arePastElements: boolean;
 	areFutureElements: boolean;
+	pathname: string;
 	viewer: any;
 	handleResolve: (screenshot) => void;
 	handleClose: () => void;
@@ -169,8 +171,13 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		});
 
 		document.addEventListener('keydown', this.handleKeyDown);
-		this.props.viewer.pauseRendering();
-		this.clearCanvas();
+		if (this.props.pathname.includes(ROUTES.VIEWER)) {
+			this.props.viewer.pauseRendering();
+		}
+
+		if (this.layer) {
+			this.clearCanvas();
+		}
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
@@ -180,9 +187,15 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public componentWillUnmount() {
-		this.props.viewer.resumeRendering();
+		if (this.props.pathname.includes(ROUTES.VIEWER)) {
+			this.props.viewer.resumeRendering();
+		}
+
 		document.removeEventListener('keydown', this.handleKeyDown);
-		this.clearCanvas();
+
+		if (this.layer) {
+			this.clearCanvas();
+		}
 	}
 
 	public handleStageClick = () => {

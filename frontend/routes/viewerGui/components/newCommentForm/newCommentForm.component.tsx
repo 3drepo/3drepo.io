@@ -30,7 +30,6 @@ import {
 	RISK_CONSEQUENCES,
 	RISK_LIKELIHOODS
 } from '../../../../constants/risks';
-import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Image } from '../../../components/image';
@@ -59,6 +58,7 @@ interface IProps {
 	hideScreenshot?: boolean;
 	hideUploadButton?: boolean;
 	showResidualRiskInput?: boolean;
+	isModelLoaded: boolean;
 	viewer: any;
 	onSave: (commentData, finishSubmitting) => void;
 	onTakeScreenshot: (screenshot) => void;
@@ -107,7 +107,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 			Icon={CameraIcon}
 			label="Take a screenshot"
 			action={this.handleNewScreenshot}
-			disabled={!this.props.canComment}
+			disabled={!this.props.canComment || !this.props.isModelLoaded}
 		/>
 	));
 

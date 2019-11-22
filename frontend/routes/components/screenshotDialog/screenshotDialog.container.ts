@@ -26,12 +26,14 @@ import {
 	selectCanvasElements,
 	CanvasHistoryActions
 } from '../../../modules/canvasHistory';
+import { selectPathname } from '../../../modules/router/router.selectors';
 import { ScreenshotDialog } from './screenshotDialog.component';
 
 const mapStateToProps = createStructuredSelector({
 	canvasElements: selectCanvasElements,
 	arePastElements: selectArePastElements,
-	areFutureElements: selectAreFutureElements
+	areFutureElements: selectAreFutureElements,
+	pathname: selectPathname,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

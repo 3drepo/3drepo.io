@@ -22,10 +22,13 @@ import { createStructuredSelector } from 'reselect';
 import { DialogActions } from '../../../../modules/dialog';
 
 import { MeasureActions } from '../../../../modules/measure';
+import { selectIsModelLoaded } from '../../../../modules/viewerGui';
 import { withViewer } from '../../../../services/viewer/viewer';
 import { NewCommentForm } from './newCommentForm.component';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	isModelLoaded: selectIsModelLoaded,
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showScreenshotDialog: DialogActions.showScreenshotDialog,
