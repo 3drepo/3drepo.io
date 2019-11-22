@@ -598,7 +598,7 @@ router.delete("/risks/:riskId/comments", middlewares.issue.canComment, deleteCom
 router.delete("/risks/", middlewares.issue.canCreate, deleteRisks);
 
 /**
- * @api {post} /:teamspace/:model/risks/:riskId/resources Attach resources to a rosl
+ * @api {post} /:teamspace/:model/risks/:riskId/resources Attach resources to a risk
  * @apiName attachResourceRisk
  * @apiGroup Risk
  * @apiDescription Attaches file or url resources to a risk.
