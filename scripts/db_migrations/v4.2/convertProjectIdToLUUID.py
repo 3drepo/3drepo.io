@@ -14,9 +14,11 @@ connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongo
 db = MongoClient(connString)
 
 def migrateProject(projects, project):
-    projects.delete_one({'_id': project["_id"]})
-    project["_id"] = uuid.UUID(str(project["_id"]).ljust(32,'0'))
-    projects.insert_one(project)
+    _id = project["_id"]
+    if len(str(_id)) < 32:
+        project["_id"] = uuid.UUID(str(_id).ljust(32,'0'))
+        projects.insert_one(project)
+        projects.delete_one({'_id': _id})
 
 def migrateDbProjects(database):
     db = MongoClient(connString)[database]
