@@ -156,20 +156,15 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 		const preparedRisk = prepareRisk(savedRisk, jobs);
 
 		finishSubmitting();
-
-		if (!ignoreViewer) {
-			yield put(RisksActions.showDetails(revision, preparedRisk._id));
-		} else {
-			yield put(DialogActions.hideDialog());
-		}
-
 		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 
 		if (!ignoreViewer) {
+			yield put(RisksActions.showDetails(revision, preparedRisk._id));
 			yield put(RisksActions.goToRisk(preparedRisk));
 		} else {
 			yield put(DialogActions.hideDialog());
 		}
+
 		yield put(SnackbarActions.show('Risk created'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('save', 'risk', error));
