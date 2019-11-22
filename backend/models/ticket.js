@@ -287,11 +287,13 @@ class Ticket {
 	}
 
 	setGroupTicketId(account, model, newTicket) {
-		const updateGroup = function(group_id) {
-			// TODO - Do we need to find group first? Can we just patch?
+		const groupField =  this.groupField;
+
+		const updateGroup = (group_id) => {
+			// TODO - Do we need to find group first? Can we just patch
 			return Group.findByUID({account, model}, utils.uuidToString(group_id), null, utils.uuidToString(newTicket.rev_id)).then((group) => {
 				const ticketIdData = {
-					[this.groupField] :  utils.stringToUUID(newTicket._id)
+					[groupField] :  utils.stringToUUID(newTicket._id)
 				};
 
 				return group.updateAttrs({account, model}, ticketIdData);
@@ -370,8 +372,6 @@ class Ticket {
 			newTicket.viewpoints = [newTicket.viewpoint];
 		}
 
-		await this.setGroupTicketId(account, model, newTicket);
-
 		// Assign rev_id for issue
 		const [history, image] = await Promise.all([
 			History.getHistory({account, model}, branch, newTicket.revId, { _id: 1 }),
@@ -390,6 +390,8 @@ class Ticket {
 				content: image
 			};
 		}
+
+		await this.setGroupTicketId(account, model, newTicket);
 
 		newTicket = this.filterFields(newTicket, ["viewpoint", "revId"]);
 

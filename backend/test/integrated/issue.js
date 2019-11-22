@@ -18,15 +18,17 @@
  */
 
 const request = require("supertest");
-const expect = require("chai").expect;
+const {expect, Assertion } = require("chai");
 const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes.js");
 const async = require("async");
+
 
 describe("Issues", function () {
 
 	let server;
 	let agent;
+	let agent2;
 
 	const username = "issue_username";
 	const username2 = "issue_username2";
@@ -77,6 +79,7 @@ describe("Issues", function () {
 					expect(res.body.username).to.equal(username);
 					done(err);
 				});
+
 		});
 
 	});
@@ -89,7 +92,6 @@ describe("Issues", function () {
 	});
 
 	describe("Creating an issue", function() {
-
 		it("should succeed", function(done) {
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
@@ -184,6 +186,65 @@ describe("Issues", function () {
 			], done);
 
 		});
+
+		it("with group associated should succeed", function(done) {
+			const username3 = 'teamSpace1';
+			const model2 = '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac';
+
+
+			const groupData = {
+				"color":[98,126,184],
+				"objects":[
+					{
+						"account": 'teamSpace1',
+						model: model2,
+						"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}]
+			};
+
+			const issue = Object.assign({"name":"Issue group test"}, baseIssue);
+
+			let issueId;
+			let groupId;
+
+			async.series([
+				function(done) {
+					agent2 = request.agent(server);
+					agent2.post("/login")
+						.send({ username: 'teamSpace1', password })
+						.expect(200, done);
+				},
+				function(done) {
+					agent2.post(`/${username3}/${model2}/revision/master/head/groups/`)
+						.send(groupData)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					issue.viewpoint.highlighted_group_id = groupId
+
+					agent2.post(`/${username3}/${model2}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+
+				function(done) {
+					agent2.get(`/${username3}/${model2}/issues/${issueId}`).expect(200, function(err , res) {
+						expect(res.body.viewpoint.highlighted_group_id).to.equal(groupId);
+						return done(err);
+
+					});
+				}
+			], done);
+
+		});
+
 		it("without name should fail", function(done) {
 
 			const issue = baseIssue;
@@ -1394,7 +1455,6 @@ describe("Issues", function () {
 			});
 
 		});
-
 	});
 
 	describe("BCF", function() {
