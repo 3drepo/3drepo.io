@@ -136,6 +136,8 @@
 
 		SIZE_LIMIT: { message: "Single file size exceeded system limit", status: 400 },
 		INVALID_PROJECT_NAME: { message: "Invalid project name", status: 400 },
+		INVALID_PROJECT_ID: { message: "Invalid project id", status: 400 },
+
 		INVALID_MODEL_NAME: { message: "Invalid model name", status: 400 },
 		INVALID_MODEL_ID: { message: "Invalid model id", status: 400 },
 		INVALID_MODEL_PERMISSION: { message: "Invalid model permission role", status: 400 },

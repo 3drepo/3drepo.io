@@ -99,7 +99,7 @@ router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
  * @apiParam (Request body: Permisssions) {Boolean} [teamspace_admin] Flag indicating if the invited user will become a teamspace administrator. If this flag is true the rest of the permissions are ignored.
  * @apiParam (Request body: Permisssions) {ProjectPermissions[]} [projects]  Permissions for projects and their models.
  *
- * @apiParam (Request body: ProjectPermissions) {String} project The name of the project in which the project permissions will be applied for the invited user.
+ * @apiParam (Request body: ProjectPermissions) {String} project The id of the project in which the project permissions will be applied for the invited user.
  * @apiParam (Request body: ProjectPermissions) {Boolean} [project_admin] Flag indicating if the invited user will become a teamspace administrator. If this flag is true the rest of the permissions are ignored.
  * @apiParam (Request body: ProjectPermissions) {ModelPermissions[]} [models] An array indicating the permissions for the models.
  *
@@ -114,7 +114,7 @@ router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
  *		permissions:{
  *			projects:[
  *				{
- *					project: 'project1',
+ *					project: '5bf7df65-f3a8-4337-8016-a63f00000000',
  *					models: [
  *						{ model: '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac', permission:'viewer'},
  *						{ model: '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', permission:'commenter'},
@@ -146,7 +146,7 @@ router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
  *		permissions:{
  *			projects:[
  *				{
- *					project: 'project1',
+ *					project: '5bf7df65-f3a8-4337-8016-a63f00000000',
  *					models: [
  *						{ model: '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac', permission:'viewer'},
  *						{ model: '00b1fb4d-091d-4f11-8dd6-9deaf71f5ca5', permission:'commenter'},
