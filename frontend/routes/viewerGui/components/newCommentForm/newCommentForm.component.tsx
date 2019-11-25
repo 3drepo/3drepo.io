@@ -220,6 +220,10 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		form.resetForm();
 	}
 
+	resetFileInput = () => {
+		this.fileInputRef.current.value = '';
+	}
+
 	public handleNewScreenshot = () => {
 		const { showScreenshotDialog, onTakeScreenshot, viewer } = this.props;
 
@@ -238,8 +242,12 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		reader.addEventListener('load', () => {
 			showScreenshotDialog({
 				sourceImage: reader.result,
-				onSave: (screenshot) => onTakeScreenshot(screenshot),
-				template: ScreenshotDialog
+				onSave: (screenshot) => {
+					onTakeScreenshot(screenshot);
+					this.resetFileInput();
+				},
+				template: ScreenshotDialog,
+				onCancel: () => this.resetFileInput(),
 			});
 		}, false);
 

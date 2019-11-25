@@ -114,6 +114,7 @@ const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 		title: action.config.title || 'Screenshot',
 		template: action.config.template,
 		onConfirm: action.config.onSave,
+		onCancel: action.config.onCancel,
 		data: {
 			disabled: action.config.disabled,
 			sourceImage: action.config.sourceImage || ''
