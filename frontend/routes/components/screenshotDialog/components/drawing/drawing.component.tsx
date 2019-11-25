@@ -277,6 +277,7 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		if (this.lastLine.attrs.points.length > 6) {
 			this.props.handleNewDrawnLine(this.lastLine, ELEMENT_TYPES.POLYGON);
 		}
+		this.lastLine = {};
 
 		this.isAfterPolygonCreated = true;
 		this.setState({ isCurrentlyDrawn: false });
@@ -305,14 +306,16 @@ export class Drawing extends React.PureComponent <IProps, any> {
 	}
 
 	public drawLineToFirstPoint = () => {
-		const position = this.props.stage.getPointerPosition();
-		const [firstX, firstY] = this.lastLine.points();
-		const newPoints = this.lastLine.points().slice(0, -2);
+		if (Object.keys(this.lastLine).length) {
+			const position = this.props.stage.getPointerPosition();
+			const [firstX, firstY] = this.lastLine.points();
+			const newPoints = this.lastLine.points().slice(0, -2);
 
-		this.lastLine.points(newPoints.concat([firstX, firstY]));
-		this.handlePolygonCreationEnd();
-		this.lastPointerPosition = position;
-		this.layer.batchDraw();
+			this.lastLine.points(newPoints.concat([firstX, firstY]));
+			this.handlePolygonCreationEnd();
+			this.lastPointerPosition = position;
+			this.layer.batchDraw();
+		}
 	}
 
 	public drawLine = () => {
