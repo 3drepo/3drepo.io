@@ -24,8 +24,20 @@
 	const ModelFactory = require("./factory/modelFactory");
 	const utils = require("../utils");
 	const _ = require("lodash");
+	const nodeuuid = require("uuid/v1");
 	const ModelSetting = require("./modelSetting");
 	const schema = mongoose.Schema({
+		_id: {
+			type: Object,
+			get: v => {
+				if(v.id) {
+					return v;
+				}
+
+				return utils.uuidToString(v);
+			},
+			set: utils.stringToUUID
+		},
 		name: { type: String, unique: true},
 		models: [String],
 		permissions: [{
@@ -39,6 +51,8 @@
 		const regex = "^[^/?=#+]{0,119}[^/?=#+ ]{1}$";
 		return project && project.match(regex);
 	}
+
+	schema.set("toObject", { getters: true });
 
 	schema.pre("save", function checkInvalidName(next) {
 
@@ -77,6 +91,7 @@
 		if(checkProjectNameValid(name)) {
 			const project = Project.createInstance({account});
 			project.name = name;
+			project._id = nodeuuid();
 
 			if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1) {
 				project.permissions = [{
@@ -229,6 +244,14 @@
 		});
 	};
 
+	schema.statics.findByNames = function(account, projectNames) {
+		return Project.find({account}, { name: { $in:projectNames } });
+	};
+
+	schema.statics.findByIds = function(account, _ids) {
+		return Project.find({account}, { _id: { $in: _ids.map(utils.stringToUUID) } });
+	};
+
 	schema.statics.populateUsers = function(userList, project) {
 
 		userList.forEach(user => {
@@ -255,6 +278,18 @@
 		const hasProjectPermissions = project && project.permissions.length > 0;
 
 		return hasProjectPermissions && project.permissions[0].permissions.includes(C.PERM_PROJECT_ADMIN);
+	};
+
+	schema.statics.setUserAsProjectAdmin = async function(teamspace, project, user) {
+		const projectObj = await Project.findOne({ account: teamspace }, {name: project});
+		const projectPermission = { user, permissions: ["admin_project"]};
+		return await projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
+	};
+
+	schema.statics.setUserAsProjectAdminById = async function(teamspace, project, user) {
+		const projectObj = await Project.findOne({ account: teamspace }, {_id: utils.stringToUUID(project)});
+		const projectPermission = { user, permissions: ["admin_project"]};
+		return await projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
 	};
 
 	const Project = ModelFactory.createClass(
