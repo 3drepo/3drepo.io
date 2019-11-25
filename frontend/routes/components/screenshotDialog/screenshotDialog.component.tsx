@@ -34,7 +34,7 @@ import { Tools } from './components/tools/tools.component';
 import {
 	getNewDrawnLine, getNewShape, getNewText, getTextStyles, EDITABLE_TEXTAREA_NAME, ELEMENT_TYPES, INITIAL_VALUES, MODES
 } from './screenshotDialog.helpers';
-import { Container, Stage } from './screenshotDialog.styles';
+import { Container, Stage, StageContainer } from './screenshotDialog.styles';
 
 declare const Konva;
 
@@ -626,11 +626,13 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 					target="window"
 					onResize={this.handleResize}
 				/>
-				{this.renderIndicator(!this.props.disabled && this.isDrawingMode && !this.state.selectedObjectName)}
 				{this.renderTools()}
-				<Stage ref={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
-					{this.renderLayers()}
-				</Stage>
+				<StageContainer height={stage.height} width={stage.width}>
+					{this.renderIndicator(!this.props.disabled && this.isDrawingMode && !this.state.selectedObjectName)}
+					<Stage ref={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
+						{this.renderLayers()}
+					</Stage>
+				</StageContainer>
 				{this.renderEditableTextarea(this.state.textEditable.visible)}
 			</Container>
 		);

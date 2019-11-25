@@ -76,3 +76,10 @@ export const TextPlaceholder = styled.span`
 	position: absolute;
 	z-index: 1;
 `;
+
+export const StageContainer = styled.div`
+	position: absolute;
+	overflow: hidden;
+	height: ${(props: any) => `${props.height}px` || 'auto'};
+	width: ${(props: any) => `${props.width}px` || 'auto'};
+`;

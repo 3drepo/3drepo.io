@@ -220,7 +220,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		form.resetForm();
 	}
 
-	resetFileInput = () => {
+	public resetFileInput = () => {
 		this.fileInputRef.current.value = '';
 	}
 
