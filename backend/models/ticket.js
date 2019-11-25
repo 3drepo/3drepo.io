@@ -378,7 +378,7 @@ class Ticket {
 			imagePromise
 		]);
 
-		if (!history && newTicket.revId) {
+		if (!history && (newTicket.revId || (newTicket.viewpoint || {}).highlighted_group_id)) {
 			throw (responseCodes.MODEL_HISTORY_NOT_FOUND);
 		} else if (history) {
 			newTicket.rev_id = history._id;

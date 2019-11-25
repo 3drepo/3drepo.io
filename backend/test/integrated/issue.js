@@ -202,7 +202,7 @@ describe("Issues", function () {
 					}]
 			};
 
-			const issue = Object.assign({"name":"Issue group test"}, baseIssue);
+			const issue = {...baseIssue, "name":"Issue group test"};
 
 			let issueId;
 			let groupId;
@@ -223,7 +223,7 @@ describe("Issues", function () {
 					});
 				},
 				function(done) {
-					issue.viewpoint.highlighted_group_id = groupId
+					issue.viewpoint = { ...issue.viewpoint, highlighted_group_id:groupId};
 
 					agent2.post(`/${username3}/${model2}/issues`)
 						.send(issue)
