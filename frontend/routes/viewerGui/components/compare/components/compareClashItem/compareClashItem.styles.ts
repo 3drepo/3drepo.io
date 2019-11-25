@@ -30,6 +30,10 @@ interface IName {
 	disabled?: boolean;
 }
 
+interface INoRevisionInfo {
+	disabled?: boolean;
+}
+
 interface IClashTypeSwitch {
 	value: string;
 }
@@ -64,6 +68,15 @@ export const ClashSettings = styled.div`
 	justify-content: space-between;
 	height: 20px;
 	margin-top: 6px;
+`;
+
+export const NoRevisionInfo = styled.div<INoRevisionInfo>`
+	color: ${COLOR.BLACK_20};
+	font-size: 14px;
+	width: 142px;
+	display: inline-block;
+	text-overflow: ellipsis;
+	overflow: hidden;
 `;
 
 export const ClashTypeSwitch = styled(ButtonBase)<IClashTypeSwitch>`
