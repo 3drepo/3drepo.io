@@ -21,6 +21,7 @@ def migrateProject(projects, project):
         projects.delete_one({'_id': _id})
 
 def migrateDbProjects(database):
+    print("Migrating... " + database)
     db = MongoClient(connString)[database]
     for project in db.projects.find():
         migrateProject(db.projects, project)
