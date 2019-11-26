@@ -158,7 +158,7 @@ invitations.removeTeamspaceFromInvitation = async (email, teamspace) => {
 		return null;
 	}
 
-	const data =  { _id: email, teamSpaces: result.teamSpaces.filter(teamspaceEntry => teamspaceEntry === teamspace) };
+	const data =  { _id: email, teamSpaces: result.teamSpaces.filter(teamspaceEntry => teamspaceEntry.teamspace !== teamspace) };
 
 	if (data.teamSpaces.length === 0) {
 		await coll.deleteOne({_id: email});
