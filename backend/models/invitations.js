@@ -73,7 +73,13 @@ const cleanPermissions = (permissions) => {
 	return { projects: projectsPermissions};
 };
 
-invitations.create = async (email, teamspace, job, permissions = {}) => {
+const sendInvitationEmail = async (email, username) => {
+	const { customData: {firstName, lastName} } = await User.findByUserName(username);
+	const name = firstName + " " + lastName;
+	Mailer.sendTeamspaceInvitation(email, {name});
+};
+
+invitations.create = async (email, teamspace, job, username, permissions = {}) => {
 	// 1 - find if there is already and invitation with that email
 	// 2 - if there is update the invitation with the new teamspace data
 	// 2.5 - if there is not, create an entry with that email and job/permission
@@ -126,17 +132,18 @@ invitations.create = async (email, teamspace, job, permissions = {}) => {
 		const teamSpaces = result.teamSpaces.filter(entry => entry.name !== teamspace);
 		teamSpaces.push(teamspaceEntry);
 
-		// if its a new teamspace that the user has been invited send an invitation email
-		if (result.teamSpaces.every(t=> t.name !== teamspace)) {
-			Mailer.sendTeamspaceInvitation(email, {teamspace});
-		}
-
 		const invitation = { teamSpaces };
 		await coll.updateOne({_id:email}, { $set: invitation });
+
+		// if its a new teamspace that the user has been invited send an invitation email
+		if (result.teamSpaces.every(t=> t.name !== teamspace)) {
+			await sendInvitationEmail(email, username);
+		}
+
 	} else {
-		Mailer.sendTeamspaceInvitation(email, {teamspace});
 		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
 		await coll.insertOne(invitation);
+		await sendInvitationEmail(email, username);
 	}
 
 	return {email, job, permissions};

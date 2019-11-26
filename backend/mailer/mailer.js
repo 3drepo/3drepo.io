@@ -175,20 +175,14 @@ function sendSubscriptionSuspendedEmail(to, data) {
 }
 
 function sendPaymentErrorEmail(data) {
-
 	const template = require("./templates/paymentError");
 	return sendEmail(template, config.contact.email, data);
 }
 
 function sendTeamspaceInvitation(to, data) {
-
 	data.url = getURL("signup");
 
-	if(!data.url) {
-		return rejectNoUrl("model");
-	}
-
-	const template = require("./templates/invitedToModel");
+	const template = require("./templates/invitedToTeamspace");
 	return sendEmail(template, to, data);
 }
 

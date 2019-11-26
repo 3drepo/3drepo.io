@@ -205,8 +205,9 @@ function getInvitations(req, res, next) {
 function sendInvitation(req, res, next) {
 	const { account } = req.params;
 	const { email, job, permissions } = req.body;
+	const username = req.session.user.username;
 
-	Invitations.create(email, account, job, permissions).then(invitation=> {
+	Invitations.create(email, account, job, username, permissions).then(invitation=> {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, invitation);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
