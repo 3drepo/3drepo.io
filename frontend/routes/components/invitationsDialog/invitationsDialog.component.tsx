@@ -33,7 +33,7 @@ interface IProps {
 	handleClose: () => void;
 }
 
-const getPermissions = (savedPermissions, projectsList) => {
+const getPermissions = (savedPermissions) => {
 	return savedPermissions.map(({ project, models, project_admin }) => ({
 		project,
 		models: project_admin ? [] : models.map(({ model, permission: key}) => ({ model, key })),
@@ -46,7 +46,7 @@ export const InvitationsDialog = (props: IProps) => {
 		const isAdmin = get(invitation, 'permissions.teamspace_admin', false);
 		const projects = !invitation.permissions || isAdmin
 			? []
-			: getPermissions(invitation.permissions.projects, props.projects);
+			: getPermissions(invitation.permissions.projects);
 
 		props.onInvitationOpen(
 			invitation.email,
