@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { pick, take, values } from 'lodash';
+import { pick, values } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
@@ -87,8 +87,6 @@ export function* addUser({ user }) {
 
 export function* sendInvitation({ email, job, isAdmin, permissions, onFinish }) {
 	try {
-		const projectsMap = yield select(selectProjects);
-
 		const invitation = { email, job } as any;
 		invitation.permissions = {};
 
@@ -96,7 +94,7 @@ export function* sendInvitation({ email, job, isAdmin, permissions, onFinish }) 
 			invitation.permissions.teamspace_admin = true;
 		} else {
 			invitation.permissions.projects = permissions.map(({ project, models, isAdmin: isProjectAdmin }) => {
-				const projectPermissions = { project: projectsMap[project].name } as any;
+				const projectPermissions = { project } as any;
 				if (isProjectAdmin) {
 					projectPermissions.project_admin = true;
 					return projectPermissions;

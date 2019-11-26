@@ -35,7 +35,7 @@ interface IProps {
 
 const getPermissions = (savedPermissions, projectsList) => {
 	return savedPermissions.map(({ project, models, project_admin }) => ({
-		project: projectsList.find(({ name }) => name === project)._id,
+		project,
 		models: project_admin ? [] : models.map(({ model, permission: key}) => ({ model, key })),
 		isAdmin: project_admin
 	}));
