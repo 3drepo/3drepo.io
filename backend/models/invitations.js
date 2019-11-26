@@ -129,14 +129,14 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 	const teamspaceEntry = { teamspace, job, permissions };
 
 	if (result) {
-		const teamSpaces = result.teamSpaces.filter(entry => entry.name !== teamspace);
+		const teamSpaces = result.teamSpaces.filter(entry => entry.teamspace !== teamspace);
 		teamSpaces.push(teamspaceEntry);
 
 		const invitation = { teamSpaces };
 		await coll.updateOne({_id:email}, { $set: invitation });
 
 		// if its a new teamspace that the user has been invited send an invitation email
-		if (result.teamSpaces.every(t=> t.name !== teamspace)) {
+		if (result.teamSpaces.every(t=> t.teamspace !== teamspace)) {
 			await sendInvitationEmail(email, username);
 		}
 
