@@ -73,10 +73,12 @@ const cleanPermissions = (permissions) => {
 	return { projects: projectsPermissions};
 };
 
-const sendInvitationEmail = async (email, username) => {
-	const { customData: {firstName, lastName} } = await User.findByUserName(username);
+const sendInvitationEmail = async (email, username, teamspace) => {
+	const { customData: {firstName, lastName, billing} } = await User.findByUserName(username);
 	const name = firstName + " " + lastName;
-	Mailer.sendTeamspaceInvitation(email, {name});
+	const company = ((billing || {}).billingInfo || {}).company || username;
+
+	Mailer.sendTeamspaceInvitation(email, {name, company, teamspace});
 };
 
 invitations.create = async (email, teamspace, job, username, permissions = {}) => {
@@ -137,13 +139,13 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 
 		// if its a new teamspace that the user has been invited send an invitation email
 		if (result.teamSpaces.every(t=> t.teamspace !== teamspace)) {
-			await sendInvitationEmail(email, username);
+			await sendInvitationEmail(email, username, teamspace);
 		}
 
 	} else {
 		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
 		await coll.insertOne(invitation);
-		await sendInvitationEmail(email, username);
+		await sendInvitationEmail(email, username, teamspace);
 	}
 
 	return {email, job, permissions};

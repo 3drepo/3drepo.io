@@ -507,6 +507,9 @@ const html = data => `
 
 }</style></head>
     <body>
+        <!--*|IF:MC_PREVIEW_TEXT|*-->
+        <!--[if !gte mso 9]><!----><span class="mcnPreviewText" style="display:none; font-size:0px; line-height:0px; max-height:0px; max-width:0px; opacity:0; overflow:hidden; visibility:hidden; mso-hide:all;">*|MC_PREVIEW_TEXT|*</span><!--<![endif]-->
+        <!--*|END:IF|*-->
         <center>
             <table align="center" border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="bodyTable">
                 <tr>
@@ -576,7 +579,7 @@ const html = data => `
 
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
 
-                            <span style="color:#808080"><span style="font-size:22px"><strong><span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif">Hello</span></strong></span></span>
+                            <span style="font-size:20px"><span style="color:#808080"><span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif">Hello</span></span></span>
                         </td>
                     </tr>
                 </tbody></table>
@@ -608,7 +611,7 @@ const html = data => `
 
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 150%; text-align: left;">
 
-                            <p style="line-height: 150%; text-align: left;"><span style="color:#888888">We want to let you know that <em>${data.name}</em>&nbsp;has invited you to join their&nbsp;project. Please click on the button&nbsp;below to Sign Up now and start collaborating.</span></p>
+                            <p style="text-align: left; line-height: 150%;"><span style="color:#888888"><em><strong>${data.name}</strong>(${data.company})</em>&nbsp;invites&nbsp;you to join their teamspace <strong><em>${data.teamspace}</em></strong>. Please click on the button&nbsp;below to sign up and start collaborating.</span></p>
 
                         </td>
                     </tr>
@@ -650,7 +653,7 @@ const html = data => `
                     <tbody>
                         <tr>
                             <td align="center" valign="middle" class="mcnButtonContent" style="font-family: Roboto, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 20px; padding: 15px;">
-                                <a class="mcnButton " title="Join the Project" href="${data.url}" target="_blank" style="font-weight: normal;letter-spacing: 2px;line-height: 100%;text-align: center;text-decoration: none;color: #FFFFFF;">Join the Project</a>
+                                <a class="mcnButton " title="Join ${data.teamspace}" href="${data.url}" target="_blank" style="font-weight: normal;letter-spacing: 2px;line-height: 100%;text-align: center;text-decoration: none;color: #FFFFFF;">Join ${data.teamspace}</a>
                             </td>
                         </tr>
                     </tbody>
@@ -661,7 +664,7 @@ const html = data => `
 </table><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnDividerBlock" style="min-width:100%;">
     <tbody class="mcnDividerBlockOuter">
         <tr>
-            <td class="mcnDividerBlockInner" style="min-width: 100%; padding: 10px 18px;">
+            <td class="mcnDividerBlockInner" style="min-width: 100%; padding: 5px 18px;">
                 <table class="mcnDividerContent" border="0" cellpadding="0" cellspacing="0" width="100%" style="min-width: 100%;border-top: 2px none #EAEAEA;">
                     <tbody><tr>
                         <td>
@@ -693,11 +696,39 @@ const html = data => `
 
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 150%; text-align: left;">
 
-                            <span style="color:#888888">If you have any further questions, our support team will be happy to assist you.<br>
-Please, forward your queries to </span><a  href="mailto:support@3drepo.com" target="_blank"><font color="#3452ff">support@3drepo.com</font></a><span style="color:#888888">&nbsp;or visit our </span><a href="https://3drepo.com/support" target="_blank"><font color="#3452ff">support page</font></a><span style="color:#888888">.<br>
-<br>
-All the best,&nbsp;<br>
-<br>
+                            <font color="#888888">For any queries please email&nbsp;</font><a href="mailto:support@3drepo.com" target="_blank"><span style="color:#3452ff">support@3drepo.com</span></a>
+                        </td>
+                    </tr>
+                </tbody></table>
+				<!--[if mso]>
+				</td>
+				<![endif]-->
+
+				<!--[if mso]>
+				</tr>
+				</table>
+				<![endif]-->
+            </td>
+        </tr>
+    </tbody>
+</table><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
+    <tbody class="mcnTextBlockOuter">
+        <tr>
+            <td valign="top" class="mcnTextBlockInner" style="padding-top:9px;">
+              	<!--[if mso]>
+				<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
+				<tr>
+				<![endif]-->
+
+				<!--[if mso]>
+				<td valign="top" width="600" style="width:600px;">
+				<![endif]-->
+                <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
+                    <tbody><tr>
+
+                        <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
+
+                            <span style="color:#888888">All the best,&nbsp;<br>
 3D Repo Team</span>
                         </td>
                     </tr>
