@@ -98,7 +98,7 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 	]);
 
 	if (emailUser) { // If there is already a user registered with that email
-		throw responseCodes.EMAIL_INVALID;
+		throw responseCodes.USER_ALREADY_EXISTS;
 	}
 
 	if (!teamspaceJob) { // If there is no job in that teamspace with the name

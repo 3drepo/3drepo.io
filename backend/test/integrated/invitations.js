@@ -19,7 +19,7 @@
 
 const { loginUsers } = require("../helpers/users.js");
 const { expect, AssertionError } = require("chai");
-const { EMAIL_INVALID, JOB_NOT_FOUND, INVALID_PROJECT_ID,
+const { USER_ALREADY_EXISTS, JOB_NOT_FOUND, INVALID_PROJECT_ID,
 	INVALID_MODEL_ID, NOT_AUTHORIZED, INVALID_MODEL_PERMISSION,
 	LICENCE_LIMIT_REACHED } = require("../../response_codes.js");
 
@@ -55,8 +55,8 @@ describe("Invitations ", function () {
 
 		agents.teamSpace1.post(inviteUrl(account))
 			.send({ email: inviteEmail, job: inviteJob, permissions })
-			.expect(EMAIL_INVALID.status, (err, res) => {
- 				expect(res.body.message).to.equal(EMAIL_INVALID.message);
+			.expect(USER_ALREADY_EXISTS.status, (err, res) => {
+ 				expect(res.body.message).to.equal(USER_ALREADY_EXISTS.message);
 				done();
 			});
 	});
