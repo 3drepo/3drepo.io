@@ -923,6 +923,7 @@ function _createAccounts(roles, userName) {
 								account = accounts.find(_account => _account.account === user.user);
 								if (!account) {
 									account = _makeAccountObject(user.user);
+									account.hasAvatar = !!user.customData.avatar;
 									accounts.push(account);
 								}
 							}
@@ -968,6 +969,7 @@ function _createAccounts(roles, userName) {
 										account = accounts.find(_account => _account.account === user.user);
 										if (!account) {
 											account = _makeAccountObject(user.user);
+											account.hasAvatar = !!user.customData.avatar;
 											accounts.push(account);
 										}
 									}

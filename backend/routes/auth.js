@@ -351,7 +351,7 @@ router.get("/:account.json", middlewares.loggedIn, listInfo);
  * 	"place": "GET /alice/avatar"
  * }
  */
-router.get("/:account/avatar", middlewares.isAccountAdmin, getAvatar);
+router.get("/:account/avatar", middlewares.loggedIn, getAvatar);
 
 /**
  * @api {post} /:user/avatar Upload avatar
