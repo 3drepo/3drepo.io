@@ -5,6 +5,9 @@ export const compareStrings = (string1, string2) => {
 	return (string1 || '').toLowerCase().includes((string2 || '').toLowerCase());
 };
 
+const dateFloor = (date) => new Date(date).setHours(0, 0, 0, 0);
+const dateCeiling = (date) => new Date(date).setHours(23, 59, 59, 999);
+
 export const searchByFilters = (
 		items = [],
 		filters = [],
@@ -65,10 +68,10 @@ export const searchByFilters = (
 						const boundryValue = filter.value.date;
 
 						if (boundryType === 'from') {
-							return itemValue >= boundryValue;
+							return itemValue >= dateFloor(boundryValue);
 						}
 
-						return itemValue <= boundryValue;
+						return itemValue <= dateCeiling(boundryValue);
 					});
 					break;
 			}
