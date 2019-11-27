@@ -158,13 +158,18 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	public async componentDidMount() {
 		const sourceImage = await Promise.resolve(this.props.sourceImage);
 
-		Konva.Image.fromURL(sourceImage, (image) => {
+		const imageObj = new Image();
+		imageObj.onload = () => {
+			const image = new Konva.Image({
+				image: imageObj,
+			});
 			this.scaleStage(image);
 
 			this.imageLayer.add(image);
 			this.imageLayer.batchDraw();
 			this.lastImageCanvasWidth = this.imageLayer.canvas.width;
-		});
+		};
+		imageObj.src = sourceImage;
 
 		this.setState({ sourceImage, mode: INITIAL_VALUES.mode }, () => {
 			this.stage.addEventListener('click', this.handleStageClick);
