@@ -94,6 +94,7 @@
 		FILE_IMPORT_UNSUPPORTED_VERSION: { message: "Unsupported file version", status: 400 },
 		FILE_IMPORT_MAX_NODES_EXCEEDED: { message: "Import failed: Too many objects, consider splitting up the model", status: 400 },
 		FILE_IMPORT_ODA_NOT_SUPPORTED: { message: "DGN/RVT import is currently not supported", status: 400 },
+		FILE_IMPORT_SYNCHRO_NOT_SUPPORTED: { message: "SPM import is currently not supported", status: 400 },
 		FILE_IMPORT_NO_3D_VIEW: { message: "Cannot find a 3D View within the model.", status: 400 },
 		FILE_IMPORT_TIMED_OUT: { message: "Process timed out. Consider splitting up the model", status: 500 },
 
