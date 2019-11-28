@@ -246,8 +246,9 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 					onTakeScreenshot(screenshot);
 					this.resetFileInput();
 				},
-				template: ScreenshotDialog,
 				onCancel: () => this.resetFileInput(),
+				template: ScreenshotDialog,
+				notFullScreen: true,
 			});
 		}, false);
 

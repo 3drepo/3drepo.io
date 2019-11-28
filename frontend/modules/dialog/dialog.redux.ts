@@ -120,7 +120,8 @@ const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 			sourceImage: action.config.sourceImage || ''
 		},
 		DialogProps: {
-			fullScreen: true
+			fullScreen: !action.config.notFullScreen,
+			maxWidth: action.config.notFullScreen ? false : null,
 		}
 	};
 

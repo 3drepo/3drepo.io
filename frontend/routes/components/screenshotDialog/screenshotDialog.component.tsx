@@ -22,6 +22,7 @@ import { Layer } from 'react-konva';
 import { ROUTES } from '../../../constants/routes';
 import { aspectRatio } from '../../../helpers/aspectRatio';
 import { renderWhenTrue } from '../../../helpers/rendering';
+import { viewportSize } from '../../../helpers/viewportSize';
 import { Drawing } from './components/drawing/drawing.component';
 import { DrawnLine } from './components/drawnLine/drawnLine.component';
 import { EditableText } from './components/editableText/editableText.component';
@@ -67,6 +68,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		activeShape: null,
 		sourceImage: '',
 		stage: {
+			height: 0,
+			width: 0,
+		},
+		container: {
 			height: 0,
 			width: 0,
 		},
@@ -215,20 +220,33 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		this.scaleStage(backgroundImage);
 	}
 
+	private updateDialogSizes = ({ height, width }) => {
+		this.setState({
+			container: {
+				height: height >= 300 ? height : 300,
+				width: width >= 800 ? width : 800,
+			},
+			stage: {
+				height,
+				width,
+			}
+		});
+	}
+
 	public scaleStage = (image) => {
 		const { naturalWidth, naturalHeight } = image.attrs.image;
-		const maxHeight = this.containerElement.offsetHeight;
-		const maxWidth = this.containerElement.offsetWidth;
+		const { width: maxWidth, height: maxHeight } = viewportSize();
+
 		const { scaledWidth, scaledHeight } = aspectRatio(naturalWidth, naturalHeight, maxWidth, maxHeight);
 
 		if (naturalWidth < maxWidth && naturalHeight < maxHeight) {
-			this.setState({stage: { height: naturalHeight, width: naturalWidth }});
+			this.updateDialogSizes({ height: naturalHeight, width: naturalWidth });
 		} else {
 			image.setAttrs({
 				width: scaledWidth,
 				height: scaledHeight,
 			});
-			this.setState({stage: { height: scaledHeight, width: scaledWidth }});
+			this.updateDialogSizes({ height: scaledHeight, width: scaledWidth });
 		}
 
 		if (this.lastImageCanvasWidth) {
@@ -623,10 +641,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { stage } = this.state;
+		const { stage, container } = this.state;
 
 		return (
-			<Container ref={this.containerRef}>
+			<Container height={container.height} width={container.width} ref={this.containerRef}>
 				<EventListener
 					target="window"
 					onResize={this.handleResize}

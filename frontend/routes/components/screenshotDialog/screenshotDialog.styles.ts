@@ -20,13 +20,13 @@ import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 
 export const Container = styled.div`
-	height: 100%;
-	width: 100%;
 	position: relative;
 	overflow: hidden;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	height: ${(props: any) => `${props.height}px` || 'auto'};
+	width: ${(props: any) => `${props.width}px` || 'auto'};
 `;
 
 export const HiddenCanvas = styled.canvas`
@@ -78,7 +78,7 @@ export const TextPlaceholder = styled.span`
 `;
 
 export const StageContainer = styled.div`
-	position: absolute;
+	position: relative;
 	overflow: hidden;
 	height: ${(props: any) => `${props.height}px` || 'auto'};
 	width: ${(props: any) => `${props.width}px` || 'auto'};
