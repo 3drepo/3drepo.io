@@ -54,6 +54,10 @@ interface IProps {
 	updateNewRisk: (newRisk) => void;
 	setCameraOnViewpoint: (teamspace, modelId, view) => void;
 	updateSelectedRiskPin: (position) => void;
+	onRemoveResource: (resource) => void;
+	attachFileResources: (files) => void;
+	attachLinkResources: (links) => void;
+	showDialog: (config: any) => void;
 }
 
 interface IState {
@@ -230,6 +234,9 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderDetailsForm = () => {
+		const {risk, onRemoveResource, showDialog,
+			currentUser, myJob, attachFileResources, attachLinkResources, updateSelectedRiskPin } = this.props;
+
 		return (
 			<RiskDetailsForm
 				risk={this.riskData}
@@ -237,12 +244,17 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				onValueChange={this.handleRiskFormSubmit}
 				onSubmit={this.handleRiskFormSubmit}
 				permissions={this.props.modelSettings.permissions}
-				currentUser={this.props.currentUser}
-				myJob={this.props.myJob}
-				onChangePin={this.props.updateSelectedRiskPin}
+				currentUser={currentUser}
+				myJob={myJob}
+				onChangePin={updateSelectedRiskPin}
 				onSavePin={this.onPositionSave}
 				hasPin={!this.props.disableViewer && this.riskData.position && this.riskData.position.length}
 				hidePin={this.props.disableViewer}
+				onRemoveResource={onRemoveResource}
+				attachFileResources={attachFileResources}
+				attachLinkResources={attachLinkResources}
+				showDialog={showDialog}
+				canComment={this.userCanComment}
 			/>
 		);
 	}

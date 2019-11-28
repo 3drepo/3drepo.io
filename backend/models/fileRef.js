@@ -135,38 +135,6 @@ async function insertRefInResources(account, model, user, name, refInfo) {
 	return ref;
 }
 
-async function removeResource(account, model,  resourceId, property, propertyId) {
-	if (!account || !model || !resourceId || !propertyId) {
-		throw ResponseCodes.INVALID_ARGUMENTS;
-	}
-
-	const collName = model + RESOURCES_FILE_REF_EXT;
-	const collection = await DB.getCollection(account, collName);
-	const ref = await collection.findOne({_id: resourceId});
-
-	if (!Array.isArray(ref[property]) || ref[property].indexOf(propertyId) === -1) {
-		throw ResponseCodes.RESOURCE_NOT_ATTACHED;
-	}
-
-	ref[property] = ref[property].filter(entry => entry !== propertyId);
-
-	const refCounts = attachResourceProps.reduce((prev, p) => prev + (ref[p] || []).length, 0);
-
-	if (!refCounts) {
-		if (ref.type !== "http") {
-			await ExternalServices.removeFiles(account, collection, ref.type, [ref.link]);
-		}
-
-		await collection.remove({_id:resourceId});
-	} else {
-		delete ref._id;
-		await collection.update({_id: resourceId}, { $set: ref });
-	}
-
-	ref[property] = [propertyId]; // This is to identify from where this ref has been dettached
-	return ref;
-}
-
 const FileRef = {};
 
 FileRef.getOriginalFile = function(account, model, fileName) {
@@ -227,8 +195,36 @@ FileRef.removeAllFilesFromModel = function(account, model) {
 	return Promise.all(promises);
 };
 
-FileRef.removeResourceFromIssue = async function(account, model, issueId, resourceId) {
-	return await removeResource(account, model, resourceId, ISSUES_RESOURCE_PROP, issueId);
+FileRef.removeResourceFromEntity  = async function(account, model, property, propertyId, resourceId) {
+	if (!account || !model || !resourceId || !propertyId) {
+		throw ResponseCodes.INVALID_ARGUMENTS;
+	}
+
+	const collName = model + RESOURCES_FILE_REF_EXT;
+	const collection = await DB.getCollection(account, collName);
+	const ref = await collection.findOne({_id: resourceId});
+
+	if (!Array.isArray(ref[property]) || ref[property].indexOf(propertyId) === -1) {
+		throw ResponseCodes.RESOURCE_NOT_ATTACHED;
+	}
+
+	ref[property] = ref[property].filter(entry => entry !== propertyId);
+
+	const refCounts = attachResourceProps.reduce((prev, p) => prev + (ref[p] || []).length, 0);
+
+	if (!refCounts) {
+		if (ref.type !== "http") {
+			await ExternalServices.removeFiles(account, collection, ref.type, [ref.link]);
+		}
+
+		await collection.remove({_id:resourceId});
+	} else {
+		delete ref._id;
+		await collection.update({_id: resourceId}, { $set: ref });
+	}
+
+	ref[property] = [propertyId]; // This is to identify from where this ref has been dettached
+	return ref;
 };
 
 FileRef.storeFileAsResource = async function(account, model, user, name, data, extraFields = null) {

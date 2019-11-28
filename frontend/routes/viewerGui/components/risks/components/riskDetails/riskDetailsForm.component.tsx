@@ -34,6 +34,7 @@ import { canChangeAssigned, canChangeBasicProperty, canChangeStatus } from '../.
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Image } from '../../../../../components/image';
+import { Resources } from '../../../../../components/resources/resources.component';
 import { TextField } from '../../../../../components/textField/textField.component';
 import PinButton from '../../../pinButton/pinButton.container';
 import { Container, DescriptionImage, FieldsContainer, FieldsRow, StyledFormControl } from './riskDetails.styles';
@@ -56,6 +57,11 @@ interface IProps {
 	onSavePin: (position) => void;
 	onChangePin: (pin) => void;
 	setFieldValue: (fieldName, fieldValue) => void;
+	onRemoveResource: (resource) => void;
+	attachFileResources: () => void;
+	attachLinkResources: () => void;
+	showDialog: (config: any) => void;
+	canComment: boolean;
 	hasPin: boolean;
 	hidePin?: boolean;
 }
@@ -158,7 +164,9 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { risk, myJob, permissions, currentUser } = this.props;
+		const { risk, myJob, permissions, currentUser, onRemoveResource,
+			attachFileResources, attachLinkResources, showDialog,
+			canComment } = this.props;
 		const newRisk = !risk._id;
 		const canEditRiskStatus = newRisk || canChangeStatus(risk, myJob, permissions, currentUser);
 
@@ -277,6 +285,7 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						</StyledFormControl>
 						{this.renderPinButton(!this.props.hidePin)}
 					</FieldsContainer>
+
 				</FieldsRow>
 
 				<Container>
@@ -365,6 +374,15 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 						/>
 					)} />
 				</Container>
+				{!this.isNewRisk &&
+					<Resources showDialog={showDialog}
+							resources={risk.resources}
+							onSaveFiles={attachFileResources}
+							onSaveLinks={attachLinkResources}
+							onRemoveResource={onRemoveResource}
+							canEdit={canComment}
+					/>
+				}
 			</Form>
 		);
 	}
