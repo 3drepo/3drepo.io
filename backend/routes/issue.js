@@ -801,11 +801,13 @@ router.delete("/issues/:issueId/resources",middlewares.issue.canComment, detachR
 
 function storeIssue(req, res, next) {
 	const data = req.body;
-	data.owner = req.session.user.username;
-	data.sessionId = req.headers[C.HEADER_SOCKET_ID];
-	data.revId = req.params.rid;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	Issue.createIssue({ account: req.params.account, model: req.params.model }, data).then(issue => {
+	data.owner = req.session.user.username;
+	data.revId = req.params.rid;
+	const {account, model} = req.params;
+
+	Issue.create(account, model, data, sessionId).then(issue => {
 		req.dataModel = issue;
 		next();
 	}).catch(err => {
@@ -833,14 +835,12 @@ function updateIssue(req, res, next) {
 
 function listIssues(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = { account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger };
-
-	const branch = req.params.rid ? null : "master";
-	const rid = req.params.rid ? req.params.rid : null;
+	const { account, model, rid } = req.params;
+	const branch = rid ? null : "master";
 	const ids = req.query.ids ? req.query.ids.split(",") : null;
 	const convertCoords = !!req.query.convertCoords;
 
-	Issue.getIssuesList(dbCol, req.session.user.username, branch, rid, ids, req.query.sortBy, convertCoords).then(issues => {
+	Issue.getIssuesList(account, model, branch, rid, ids, req.query.sortBy, convertCoords).then(issues => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -905,12 +905,10 @@ function findIssueById(req, res, next) {
 
 function renderIssuesHTML(req, res, next) {
 	const place = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
-	const rid = req.params.rid;
+	const {account, model, rid} = req.params;
 	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
 
-	Issue.getIssuesReport(account, model, req.session.user.username, rid, ids, res).catch(err => {
+	Issue.getIssuesReport(account, model, rid, ids, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
@@ -968,9 +966,9 @@ function importBCF(req, res, next) {
 
 function getScreenshot(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = { account: req.params.account, model: req.params.model };
+	const {account, model, issueId, vid} = req.params;
 
-	Issue.getScreenshot(dbCol, req.params.issueId, req.params.vid).then(buffer => {
+	Issue.getScreenshot(account, model, issueId, vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
@@ -979,9 +977,9 @@ function getScreenshot(req, res, next) {
 
 function getScreenshotSmall(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = { account: req.params.account, model: req.params.model };
+	const { account, model, issueId, vid } = req.params;
 
-	Issue.getSmallScreenshot(dbCol, req.params.issueId, req.params.vid).then(buffer => {
+	Issue.getSmallScreenshot(account, model, issueId, vid).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
@@ -990,9 +988,9 @@ function getScreenshotSmall(req, res, next) {
 
 function getThumbnail(req, res, next) {
 	const place = utils.APIInfo(req);
-	const dbCol = { account: req.params.account, model: req.params.model };
+	const { account, model, issueId } = req.params;
 
-	Issue.getThumbnail(dbCol, req.params.issueId).then(buffer => {
+	Issue.getThumbnail(account, model, issueId).then(buffer => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, buffer, "png", config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);

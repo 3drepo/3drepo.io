@@ -18,15 +18,17 @@
  */
 
 const request = require("supertest");
-const expect = require("chai").expect;
+const {expect, Assertion } = require("chai");
 const app = require("../../services/api.js").createApp();
 const responseCodes = require("../../response_codes.js");
 const async = require("async");
+
 
 describe("Issues", function () {
 
 	let server;
 	let agent;
+	let agent2;
 
 	const username = "issue_username";
 	const username2 = "issue_username2";
@@ -77,6 +79,7 @@ describe("Issues", function () {
 					expect(res.body.username).to.equal(username);
 					done(err);
 				});
+
 		});
 
 	});
@@ -89,7 +92,6 @@ describe("Issues", function () {
 	});
 
 	describe("Creating an issue", function() {
-
 		it("should succeed", function(done) {
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
@@ -184,6 +186,65 @@ describe("Issues", function () {
 			], done);
 
 		});
+
+		it("with group associated should succeed", function(done) {
+			const username3 = 'teamSpace1';
+			const model2 = '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac';
+
+
+			const groupData = {
+				"color":[98,126,184],
+				"objects":[
+					{
+						"account": 'teamSpace1',
+						model: model2,
+						"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
+					}]
+			};
+
+			const issue = {...baseIssue, "name":"Issue group test"};
+
+			let issueId;
+			let groupId;
+
+			async.series([
+				function(done) {
+					agent2 = request.agent(server);
+					agent2.post("/login")
+						.send({ username: 'teamSpace1', password })
+						.expect(200, done);
+				},
+				function(done) {
+					agent2.post(`/${username3}/${model2}/revision/master/head/groups/`)
+						.send(groupData)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					issue.viewpoint = { ...issue.viewpoint, highlighted_group_id:groupId};
+
+					agent2.post(`/${username3}/${model2}/issues`)
+						.send(issue)
+						.expect(200 , function(err, res) {
+
+							issueId = res.body._id;
+							return done(err);
+						});
+				},
+
+				function(done) {
+					agent2.get(`/${username3}/${model2}/issues/${issueId}`).expect(200, function(err , res) {
+						expect(res.body.viewpoint.highlighted_group_id).to.equal(groupId);
+						return done(err);
+
+					});
+				}
+			], done);
+
+		});
+
 		it("without name should fail", function(done) {
 
 			const issue = baseIssue;
@@ -191,7 +252,7 @@ describe("Issues", function () {
 			agent.post(`/${username}/${model}/issues`)
 				.send(issue)
 				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.ISSUE_NO_NAME.value);
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
@@ -576,8 +637,6 @@ describe("Issues", function () {
 						.send(comment)
 						.expect(200 , (err, res) => {
 							const comment = res.body;
-							console.log(comment);
-							console.log()
 							expect(comment.viewpoint.screenshot).to.exist
 								.and.to.be.not.equal(pngBase64);
 							expect(comment.viewpoint.screenshotSmall).to.exist;
@@ -590,9 +649,6 @@ describe("Issues", function () {
 						.send(data)
 						.expect(200, (err, res) => {
 							const comment = res.body.comments.filter(c=> c.guid == commentId)[0];
-							console.log(comment);
-
-
 							expect(comment.viewpoint.screenshot).to.exist
 								.and.to.be.not.equal(pngBase64);
 							expect(comment.viewpoint.screenshotSmall).to.exist;
@@ -1225,28 +1281,6 @@ describe("Issues", function () {
 
 			});
 
-
-			/*
-			The UI doesnt support this
-
-			it("should succeed", function(done) {
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
-					.send({sealed: true, commentIndex: 0})
-					.expect(200, function(err, res) {
-						done(err);
-					});
-			});
-
-			it("should fail if editing a sealed comment", function(done) {
-				agent.patch(`/${username}/${model}/issues/${issueId}`)
-					.send({comment: "abcd", commentIndex: 0, edit: true})
-					.expect(400, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
-						done(err);
-					});
-			});
-			*/
-
 		});
 
 		describe("and then commenting", function() {
@@ -1317,36 +1351,6 @@ describe("Issues", function () {
 				], done);
 
 			});
-
-
-			/*
-			There is no way of doing this through the ui
-
-			it("should succeed if editing an existing comment", function(done) {
-
-				const comment = { comment: "hello world 2", commentIndex: 0, edit: true };
-
-				async.series([
-					function(done) {
-						agent.patch(`/${username}/${model}/issues/${issueId}`)
-							.send(comment)
-							.expect(200 , done);
-					},
-
-					function(done) {
-						agent.get(`/${username}/${model}/issues/${issueId}`).expect(200, function(err , res) {
-
-							expect(res.body.comments.length).to.equal(1);
-							expect(res.body.comments[0].comment).to.equal(comment.comment);
-							expect(res.body.comments[0].owner).to.equal(username);
-
-							done(err);
-						});
-					}
-				], done);
-
-			});
-			*/
 
 			it("should fail if comment is empty", function(done) {
 
@@ -1426,45 +1430,6 @@ describe("Issues", function () {
 					});
 			});
 
-			// it('should fail if adding a comment', function(done){
-			// 	let comment = { comment: 'hello world' };
-
-			// 	agent.patch(`/${username}/${model}/issues/${issueId}`)
-			// 	.send(comment)
-			// 	.expect(400 , function(err, res){
-
-			// 		expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
-			// 		return done(err);
-
-			// 	});
-			// });
-
-			// it('should fail if removing a comment', function(done){
-			// 	let comment = { commentIndex: 0, delete: true };
-
-			// 	agent.patch(`/${username}/${model}/issues/${issueId}`)
-			// 	.send(comment)
-			// 	.expect(400 , function(err, res){
-
-			// 		expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
-			// 		return done(err);
-
-			// 	});
-			// });
-
-			// it('should fail if editing a comment', function(done){
-			// 	let comment = { comment: 'hello world 2', commentIndex: 0, edit: true };
-
-			// 	agent.patch(`/${username}/${model}/issues/${issueId}`)
-			// 	.send(comment)
-			// 	.expect(400 , function(err, res){
-
-			// 		expect(res.body.value).to.equal(responseCodes.ISSUE_COMMENT_SEALED.value);
-			// 		return done(err);
-
-			// 	});
-			// });
-
 			it("should succeed if reopening", function(done) {
 
 				const open = {  status: "open" };
@@ -1490,7 +1455,6 @@ describe("Issues", function () {
 			});
 
 		});
-
 	});
 
 	describe("BCF", function() {

@@ -60,7 +60,11 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	unsubscribeOnRiskCommentsChanges: RisksActions.unsubscribeOnRiskCommentsChanges,
 	updateNewRisk: RisksActions.updateNewRisk,
 	showScreenshotDialog: DialogActions.showScreenshotDialog,
-	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
+	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint,
+	onRemoveResource: RisksActions.removeResource,
+	attachFileResources: RisksActions.attachFileResources,
+	attachLinkResources: RisksActions.attachLinkResources,
+	showDialog:  DialogActions.showDialog
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(RiskDetails));

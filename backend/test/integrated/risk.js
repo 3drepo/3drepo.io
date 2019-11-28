@@ -87,7 +87,6 @@ describe("Risks", function () {
 	describe("Creating a risk", function() {
 
 		it("should succeed", function(done) {
-
 			const risk = Object.assign({"name":"Risk test"}, baseRisk);
 			const levelOfRisk = (0 === risk.likelihood && 0 === risk.consequence) ? 0 : -1;
 			let riskId;
@@ -174,43 +173,39 @@ describe("Risks", function () {
 		});
 
 		it("without name should fail", function(done) {
-
 			const risk = baseRisk;
 
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.RISK_NO_NAME.value);
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
 
 		it("with invalid risk likelihood should fail", function(done) {
-
 			const risk = Object.assign({}, baseRisk, {"name":"Risk test", "likelihood":"abc"});
 
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.RISK_LIKELIHOOD_INVALID.value);
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
 
 		it("with invalid risk consequence should fail", function(done) {
-
 			const risk = Object.assign({}, baseRisk, {"name":"Risk test", "consequence":"abc"});
 
 			agent.post(`/${username}/${model}/risks`)
 				.send(risk)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.RISK_CONSEQUENCE_INVALID.value);
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
 		});
 
 		it("with invalid mitigation status", function(done) {
-
 			const risk = Object.assign({}, baseRisk, {"name":"Risk test", "mitigation_status":"abc"});
 
 			agent.post(`/${username}/${model}/risks`)
@@ -223,7 +218,7 @@ describe("Risks", function () {
 		it("with pin should succeed and pin info is saved", function(done) {
 
 			const risk = Object.assign({
-				"name":"Risk test",
+				"name": "Risk test",
 				"position": [33.167440465643935, 12.46054749529149, -46.997271893235435]
 			}, baseRisk);
 

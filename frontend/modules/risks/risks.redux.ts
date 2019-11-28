@@ -55,7 +55,13 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	showCloseInfo: ['riskId'],
 	resetComponentState: [],
 	showMultipleGroups: ['risk', 'revision'],
-	updateSelectedRiskPin: ['position']
+	updateSelectedRiskPin: ['position'],
+	removeResource: ['resource'],
+	removeResourceSuccess: ['resource', 'riskId'],
+	attachFileResources: ['files'],
+	attachLinkResources: ['links'],
+	attachResourcesSuccess: ['resources', 'riskId'],
+	updateResourcesSuccess: ['resourcesIds', 'updates', 'riskId' ]
 }, { prefix: 'RISKS/' });
 
 export interface IRisksComponentState {
@@ -125,8 +131,8 @@ export const fetchRisksSuccess = (state = INITIAL_STATE, { risks = [] }) => {
 	};
 };
 
-export const fetchRiskSuccess = (state = INITIAL_STATE, { risk }) => {
-	const risksMap = updateRiskProps(state.risksMap, risk._id, { comments: risk.comments });
+export const fetchRiskSuccess = (state = INITIAL_STATE,  {risk: {_id, comments, resources}}) => {
+	const risksMap = updateRiskProps(state.risksMap, _id, { comments, resources });
 
 	return { ...state, risksMap, componentState: { ...state.componentState, failedToLoad: false } };
 };
@@ -217,6 +223,34 @@ export const resetComponentState = (state = INITIAL_STATE) => {
 	return { ...state, componentState: INITIAL_STATE.componentState };
 };
 
+const removeResourceSuccess =  (state = INITIAL_STATE, { resource, riskId }) => {
+	const resources = state.risksMap[riskId].resources.filter((r) => r._id !== resource._id);
+	const risksMap = updateRiskProps(state.risksMap, riskId, { resources });
+
+	return { ...state, risksMap };
+};
+
+const attachResourcesSuccess = (state = INITIAL_STATE, { resources, riskId }) => {
+	resources = resources.concat(state.risksMap[riskId].resources);
+	const risksMap = updateRiskProps(state.risksMap, riskId, { resources });
+	return { ...state, risksMap};
+};
+
+const updateResourcesSuccess = (state = INITIAL_STATE, { resourcesIds, updates, riskId }) => {
+	const resources = state.risksMap[riskId].resources.map((resource) => {
+		const updateIndex = resourcesIds.indexOf(resource._id);
+
+		if (updateIndex >= 0) {
+			return {...resource, ...updates[updateIndex]};
+		} else {
+			return resource;
+		}
+	});
+
+	const risksMap = updateRiskProps(state.risksMap, riskId, { resources });
+	return { ...state, risksMap};
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.FETCH_RISKS_SUCCESS]: fetchRisksSuccess,
 	[RisksTypes.FETCH_RISK_SUCCESS]: fetchRiskSuccess,
@@ -232,5 +266,8 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
 	[RisksTypes.SHOW_CLOSE_INFO]: showCloseInfo,
 	[RisksTypes.UPDATE_SELECTED_RISK_PIN]: updateSelectedRiskPin,
+	[RisksTypes.REMOVE_RESOURCE_SUCCESS]: removeResourceSuccess,
+	[RisksTypes.ATTACH_RESOURCES_SUCCESS]: attachResourcesSuccess,
+	[RisksTypes.UPDATE_RESOURCES_SUCCESS]: updateResourcesSuccess,
 	[RisksTypes.TOGGLE_SHOW_PINS]: toggleShowPins
 });
