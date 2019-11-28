@@ -18,6 +18,7 @@
 import InputLabel from '@material-ui/core/InputLabel';
 import CameraIcon from '@material-ui/icons/AddAPhoto';
 import AddPhoto from '@material-ui/icons/AddPhotoAlternate';
+import CloseIcon from '@material-ui/icons/Close';
 import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
 import ReportProblemIcon from '@material-ui/icons/ReportProblem';
 import SaveIcon from '@material-ui/icons/Save';
@@ -33,6 +34,7 @@ import {
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Image } from '../../../components/image';
+import { RemoveButtonWrapper } from '../../../components/logList/components/log/log.styles';
 import { ScreenshotDialog } from '../../../components/screenshotDialog';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { FieldsRow, StyledFormControl } from '../risks/components/riskDetails/riskDetails.styles';
@@ -45,7 +47,7 @@ import {
 	FileUploadInvoker,
 	StyledForm,
 	StyledTextField,
-	TextFieldWrapper
+	TextFieldWrapper,
 } from './newCommentForm.styles';
 
 interface IProps {
@@ -150,9 +152,26 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		</TextFieldWrapper>
 	));
 
-	public renderCreatedScreenshot = renderWhenTrue(() =>
-		<Image src={this.state.newScreenshot} className="new-comment" />
-	);
+	public removeImage = (e) => {
+		e.stopPropagation();
+		this.resetFileInput();
+		this.setState({
+			newScreenshot: ''
+		});
+	}
+
+	public renderCreatedScreenshot = renderWhenTrue(() => (
+		<>
+			<RemoveButtonWrapper screenshot>
+				<TooltipButton
+						label="Remove"
+						action={this.removeImage}
+						Icon={CloseIcon}
+				/>
+			</RemoveButtonWrapper>
+			<Image src={this.state.newScreenshot} className="new-comment" />
+		</>
+	));
 
 	public renderResidualRiskFields = renderWhenTrue(() => (
 		<Container>

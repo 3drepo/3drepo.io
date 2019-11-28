@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import { Form } from 'formik';
@@ -24,6 +23,7 @@ import styled from 'styled-components';
 import { COLOR } from '../../../../styles';
 
 export const Container = styled.div`
+	position: relative;
 	background-color: ${COLOR.WHITE};
 	width: 100%;
 	min-height: inherit;
