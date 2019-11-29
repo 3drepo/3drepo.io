@@ -30,7 +30,6 @@ import {
 	MenuContent,
 	MenuIcon,
 	MenuItem,
-	MenuSwitch,
 	MenuText,
 	MenuUser,
 	UserIcon

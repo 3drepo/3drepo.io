@@ -18,7 +18,7 @@
 import React from 'react';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
-import { Loader } from '../../components/loader/loader.component';
+import { Loader } from '../loader/loader.component';
 import { Log } from './components/log/log.component';
 import { Container, EmptyStateInfo, LoaderContainer } from './logList.styles';
 

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,29 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Img from 'react-image';
-import styled, { css } from 'styled-components';
-
-const previewStateStyles = css`
-	cursor: pointer;
-	transition: opacity 200ms ease-in-out;
-
-	&:hover {
-		opacity: 0.8;
-	}
-`;
-
-export const Container = styled.div`
-	cursor: pointer;
-	${(props: any) => props.enablePreview && previewStateStyles};
-	display: ${(props: any) => props.enablePreview ? 'block' : 'flex'};
-` as any;
-
-export const StyledImage = styled(Img)`
-	width: 100%;
-	object-fit: cover;
-
-	.new-comment & {
-		max-height: 150px;
-	}
-` as any;
+export function lerp(start: number, end: number, t: number) {
+	return start * (1 - t) + end * t;
+}

@@ -58,6 +58,7 @@ interface IProps {
 	attachFileResources: (files) => void;
 	attachLinkResources: (links) => void;
 	showDialog: (config: any) => void;
+	showScreenshotDialog: (config: any) => void;
 }
 
 interface IState {
@@ -227,7 +228,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderDetailsForm = () => {
-		const { issue, onRemoveResource, showDialog, topicTypes, disableViewer,
+		const { issue, onRemoveResource, showDialog, topicTypes, disableViewer, showScreenshotDialog,
 			currentUser, myJob, attachFileResources, attachLinkResources, updateSelectedIssuePin } = this.props;
 
 		return (
@@ -248,7 +249,9 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				attachFileResources={attachFileResources}
 				attachLinkResources={attachLinkResources}
 				showDialog={showDialog}
+				showScreenshotDialog={showScreenshotDialog}
 				canComment={this.userCanComment}
+				onThumbnailUpdate={this.handleNewScreenshot}
 			/>
 		);
 	}

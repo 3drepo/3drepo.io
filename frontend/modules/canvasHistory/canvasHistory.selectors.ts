@@ -15,29 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Img from 'react-image';
-import styled, { css } from 'styled-components';
+import { createSelector } from 'reselect';
 
-const previewStateStyles = css`
-	cursor: pointer;
-	transition: opacity 200ms ease-in-out;
+export const selectCanvasHistoryDomain = (state) => ({...state.canvasHistory});
 
-	&:hover {
-		opacity: 0.8;
+export const selectCanvasElements = createSelector(
+	selectCanvasHistoryDomain, (state) => {
+		return state.present.elements;
 	}
-`;
+);
 
-export const Container = styled.div`
-	cursor: pointer;
-	${(props: any) => props.enablePreview && previewStateStyles};
-	display: ${(props: any) => props.enablePreview ? 'block' : 'flex'};
-` as any;
-
-export const StyledImage = styled(Img)`
-	width: 100%;
-	object-fit: cover;
-
-	.new-comment & {
-		max-height: 150px;
+export const selectArePastElements = createSelector(
+	selectCanvasHistoryDomain, (state) => {
+		return state.past.length;
 	}
-` as any;
+);
+
+export const selectAreFutureElements = createSelector(
+	selectCanvasHistoryDomain, (state) => {
+		return state.future.length;
+	}
+);

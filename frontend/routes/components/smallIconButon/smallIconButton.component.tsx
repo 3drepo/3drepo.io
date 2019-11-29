@@ -32,7 +32,7 @@ interface IProps {
 
 export class SmallIconButton extends React.PureComponent<IProps, any> {
 	public static defaultProps = {
-		tooltipPlacement: 'bottom'
+		tooltipPlacement: 'bottom',
 	};
 
 	public renderButtonConditionally = renderWhenTrueOtherwise(() => (

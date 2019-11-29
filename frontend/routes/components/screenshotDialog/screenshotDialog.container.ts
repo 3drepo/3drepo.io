@@ -18,22 +18,32 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { withViewer } from '../../../services/viewer/viewer';
 
-import { DialogActions } from '../../../../modules/dialog';
-
-import { MeasureActions } from '../../../../modules/measure';
-import { selectIsModelLoaded } from '../../../../modules/viewerGui';
-import { withViewer } from '../../../../services/viewer/viewer';
-import { NewCommentForm } from './newCommentForm.component';
+import {
+	selectAreFutureElements,
+	selectArePastElements,
+	selectCanvasElements,
+	CanvasHistoryActions
+} from '../../../modules/canvasHistory';
+import { selectPathname } from '../../../modules/router/router.selectors';
+import { ScreenshotDialog } from './screenshotDialog.component';
 
 const mapStateToProps = createStructuredSelector({
-	isModelLoaded: selectIsModelLoaded,
+	canvasElements: selectCanvasElements,
+	arePastElements: selectArePastElements,
+	areFutureElements: selectAreFutureElements,
+	pathname: selectPathname,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	showScreenshotDialog: DialogActions.showScreenshotDialog,
-	setDisabled: MeasureActions.setDisabled,
-	deactivateMeasure: MeasureActions.deactivateMeasure,
+	addElement: CanvasHistoryActions.add,
+	updateElement: CanvasHistoryActions.update,
+	removeElement: CanvasHistoryActions.remove,
+	undo: CanvasHistoryActions.undo,
+	redo: CanvasHistoryActions.redo,
+	clearHistory: CanvasHistoryActions.clearHistory,
+	initHistory: CanvasHistoryActions.initHistory
 }, dispatch);
 
-export default withViewer(connect(mapStateToProps, mapDispatchToProps)(NewCommentForm));
+export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ScreenshotDialog));
