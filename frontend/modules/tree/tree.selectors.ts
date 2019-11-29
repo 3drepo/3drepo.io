@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { flatten, keys, pick, pickBy, uniq, values } from 'lodash';
+import { flatten, pick, uniq, values } from 'lodash';
 import { createSelector } from 'reselect';
 
 import { NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';

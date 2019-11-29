@@ -29,3 +29,4 @@ export const SortAmountUp = (props) => <FontAwesomeIconComponent {...props} icon
 export const SortAmountDown = (props) => <FontAwesomeIconComponent {...props} icon="sort-amount-down" />;
 export const Helicopter = (props) => <FontAwesomeIconComponent {...props} icon="helicopter" />;
 export const ArrowsAltH = (props) => <FontAwesomeIconComponent {...props} icon="arrows-alt-h" />;
+export const DrawPolygon = (props) => <FontAwesomeIconComponent {...props} icon="draw-polygon" />;

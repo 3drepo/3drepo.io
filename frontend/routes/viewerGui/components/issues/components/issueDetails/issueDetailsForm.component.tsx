@@ -31,6 +31,7 @@ import { CellSelect } from '../../../../../components/customTable/components/cel
 import { DateField } from '../../../../../components/dateField/dateField.component';
 import { Image } from '../../../../../components/image';
 import { Resources } from '../../../../../components/resources/resources.component';
+import { ScreenshotDialog } from '../../../../../components/screenshotDialog';
 import { TextField } from '../../../../../components/textField/textField.component';
 import PinButton from '../../../pinButton/pinButton.container';
 import {
@@ -58,6 +59,8 @@ interface IProps {
 	onRemoveResource: (resource) => void;
 	attachFileResources: () => void;
 	attachLinkResources: () => void;
+	onThumbnailUpdate: () => void;
+	showScreenshotDialog: (config: any) => void;
 	showDialog: (config: any) => void;
 	hidePin?: boolean;
 	hasPin: boolean;
@@ -135,6 +138,23 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		const thisYear = new Date().getFullYear();
 		const format = thisYear === dueDateYear ? formatBase : formatBase + ' YYYY';
 		return format;
+	}
+
+	public handleThumbnailClick = () => {
+		this.props.showScreenshotDialog({
+			sourceImage: this.props.issue.descriptionThumbnail,
+			onSave: this.props.onThumbnailUpdate,
+			template: ScreenshotDialog,
+			notFullScreen: true,
+		});
+	}
+
+	public imageProps = () => {
+		if (this.isNewIssue) {
+			return ({
+				onClick: this.handleThumbnailClick,
+			});
+		}
 	}
 
 	public render() {
@@ -226,6 +246,7 @@ class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
 							<Image
 								src={this.props.issue.descriptionThumbnail}
 								enablePreview
+								{...this.imageProps()}
 							/>
 						</DescriptionImage>
 					)}

@@ -28,9 +28,9 @@ interface IProps {
 	IconProps?: IIconProps;
 	PopoverProps?: any;
 	PaperProps?: any;
+	container?: any;
 	renderButton?: (props) => JSX.Element;
 	renderContent?: (props) => JSX.Element;
-	container?: any;
 }
 
 interface IState {

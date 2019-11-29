@@ -1,10 +1,14 @@
 import { connectRouter } from 'connected-react-router';
 import { combineReducers } from 'redux';
+import undoable from 'redux-undo';
+
+import { CanvasHistoryTypes } from './canvasHistory/canvasHistory.redux';
 
 import { reducer as authReducer } from './auth/auth.redux';
 import { reducer as billingReducer } from './billing/billing.redux';
 import { reducer as bimReducer } from './bim/bim.redux';
 import { reducer as boardReducer } from './board/board.redux';
+import { reducer as canvasHistoryReducer } from './canvasHistory/canvasHistory.redux';
 import { reducer as chatReducer } from './chat/chat.redux';
 import { reducer as compareReducer } from './compare/compare.redux';
 import { reducer as currentUserReducer } from './currentUser/currentUser.redux';
@@ -31,6 +35,12 @@ import { reducer as viewpointsReducer } from './viewpoints/viewpoints.redux';
 export default function createReducer(history) {
 	return combineReducers({
 		router: connectRouter(history),
+		canvasHistory: undoable(canvasHistoryReducer, {
+			undoType: CanvasHistoryTypes.UNDO,
+			redoType: CanvasHistoryTypes.REDO,
+			clearHistoryType: CanvasHistoryTypes.CLEAR_HISTORY,
+			ignoreInitialState: true
+		}),
 		currentUser: currentUserReducer,
 		userManagement: userManagementReducer,
 		dialog: dialogReducer,

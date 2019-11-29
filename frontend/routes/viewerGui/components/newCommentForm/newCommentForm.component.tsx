@@ -18,6 +18,7 @@
 import InputLabel from '@material-ui/core/InputLabel';
 import CameraIcon from '@material-ui/icons/AddAPhoto';
 import AddPhoto from '@material-ui/icons/AddPhotoAlternate';
+import CloseIcon from '@material-ui/icons/Close';
 import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
 import ReportProblemIcon from '@material-ui/icons/ReportProblem';
 import SaveIcon from '@material-ui/icons/Save';
@@ -30,10 +31,11 @@ import {
 	RISK_CONSEQUENCES,
 	RISK_LIKELIHOODS
 } from '../../../../constants/risks';
-import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Image } from '../../../components/image';
+import { RemoveButtonWrapper } from '../../../components/logList/components/log/log.styles';
+import { ScreenshotDialog } from '../../../components/screenshotDialog';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { FieldsRow, StyledFormControl } from '../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
@@ -45,7 +47,7 @@ import {
 	FileUploadInvoker,
 	StyledForm,
 	StyledTextField,
-	TextFieldWrapper
+	TextFieldWrapper,
 } from './newCommentForm.styles';
 
 interface IProps {
@@ -58,6 +60,7 @@ interface IProps {
 	hideScreenshot?: boolean;
 	hideUploadButton?: boolean;
 	showResidualRiskInput?: boolean;
+	isModelLoaded: boolean;
 	viewer: any;
 	onSave: (commentData, finishSubmitting) => void;
 	onTakeScreenshot: (screenshot) => void;
@@ -106,7 +109,7 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 			Icon={CameraIcon}
 			label="Take a screenshot"
 			action={this.handleNewScreenshot}
-			disabled={!this.props.canComment}
+			disabled={!this.props.canComment || !this.props.isModelLoaded}
 		/>
 	));
 
@@ -149,9 +152,38 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		</TextFieldWrapper>
 	));
 
-	public renderCreatedScreenshot = renderWhenTrue(() =>
-		<Image src={this.state.newScreenshot} className="new-comment" />
-	);
+	public removeImage = (e) => {
+		e.stopPropagation();
+		this.resetFileInput();
+		this.props.onTakeScreenshot('');
+	}
+
+	public handleImageClick = () => {
+		this.props.showScreenshotDialog({
+			sourceImage: this.state.newScreenshot,
+			onSave: (screenshot) => {
+				this.props.onTakeScreenshot(screenshot);
+				this.resetFileInput();
+			},
+			template: ScreenshotDialog,
+			notFullScreen: true,
+		});
+	}
+
+	public renderCreatedScreenshot = renderWhenTrue(() => {
+		return (
+				<>
+					<RemoveButtonWrapper screenshot>
+						<TooltipButton
+								label="Remove"
+								action={this.removeImage}
+								Icon={CloseIcon}
+						/>
+					</RemoveButtonWrapper>
+					<Image src={this.state.newScreenshot} onClick={this.handleImageClick} className="new-comment" />
+				</>
+		);
+	});
 
 	public renderResidualRiskFields = renderWhenTrue(() => (
 		<Container>
@@ -219,22 +251,39 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		form.resetForm();
 	}
 
+	public resetFileInput = () => {
+		if (this.fileInputRef.current) {
+			this.fileInputRef.current.value = '';
+		}
+	}
+
 	public handleNewScreenshot = () => {
 		const { showScreenshotDialog, onTakeScreenshot, viewer } = this.props;
 
 		showScreenshotDialog({
 			sourceImage: viewer.getScreenshot(),
-			onSave: (screenshot) => onTakeScreenshot(screenshot)
+			onSave: (screenshot) => onTakeScreenshot(screenshot),
+			template: ScreenshotDialog,
+			notFullScreen: true,
 		});
 	}
 
 	public handleFileUpload = (event) => {
 		const file = event.target.files[0];
 		const reader = new FileReader();
-		const { onTakeScreenshot } = this.props;
+		const { onTakeScreenshot, showScreenshotDialog } = this.props;
 
 		reader.addEventListener('load', () => {
-			onTakeScreenshot(reader.result);
+			showScreenshotDialog({
+				sourceImage: reader.result,
+				onSave: (screenshot) => {
+					onTakeScreenshot(screenshot);
+					this.resetFileInput();
+				},
+				onCancel: () => this.resetFileInput(),
+				template: ScreenshotDialog,
+				notFullScreen: true,
+			});
 		}, false);
 
 		reader.readAsDataURL(file);

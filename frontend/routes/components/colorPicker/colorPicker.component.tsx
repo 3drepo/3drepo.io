@@ -103,6 +103,7 @@ interface IProps {
 	onChange?: (color) => void;
 	disabled?: boolean;
 	disableUnderline?: boolean;
+	disableButtons?: boolean;
 }
 
 interface IState {
@@ -119,7 +120,8 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	public static defaultProps: IProps = {
 		predefinedColors: [],
 		onChange: identity,
-		disabled: false
+		disabled: false,
+		disableButtons: false
 	};
 
 	public state: IState = {
@@ -154,8 +156,29 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		this.handleClose();
 	}
 
+	public renderFooter = () => (
+		<Footer>
+			<StyledButton
+				variant="raised"
+				color="secondary"
+				onClick={this.handleSave}
+			>
+				Save
+			</StyledButton>
+			<StyledButton
+				color="primary"
+				onClick={this.handleClose}
+			>
+				Cancel
+			</StyledButton>
+		</Footer>
+	)
+
 	public componentDidUpdate(prevProps, prevState) {
 		if (prevState.open !== this.state.open && !this.state.open) {
+			if (this.props.disableButtons) {
+				this.props.onChange(this.state.colorHash);
+			}
 			this.handleClose();
 		}
 	}
@@ -318,7 +341,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {value, predefinedColors, disabled} = this.props;
+		const {value, predefinedColors, disabled, disableButtons} = this.props;
 		const {open, pointerLeft, pointerTop, colorHash, hashInput} = this.state;
 
 		return (
@@ -410,21 +433,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 							</FormControl>
 						</Grid>
 					</Grid>
-					<Footer>
-						<StyledButton
-							variant="raised"
-							color="secondary"
-							onClick={this.handleSave}
-						>
-							Save
-						</StyledButton>
-						<StyledButton
-							color="primary"
-							onClick={this.handleClose}
-						>
-							Cancel
-						</StyledButton>
-					</Footer>
+					{!disableButtons && this.renderFooter()}
 				</Panel>
 			</>
 		);

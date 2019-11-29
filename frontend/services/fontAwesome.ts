@@ -1,5 +1,6 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faArrowsAltH } from '@fortawesome/free-solid-svg-icons/faArrowsAltH';
+import { faDrawPolygon } from '@fortawesome/free-solid-svg-icons/faDrawPolygon';
 import { faEraser } from '@fortawesome/free-solid-svg-icons/faEraser';
 import { faEye } from '@fortawesome/free-solid-svg-icons/faEye';
 import { faHandPaper } from '@fortawesome/free-solid-svg-icons/faHandPaper';
@@ -16,3 +17,4 @@ library.add(faSortAmountUp);
 library.add(faSortAmountDown);
 library.add(faHelicopter);
 library.add(faArrowsAltH);
+library.add(faDrawPolygon);

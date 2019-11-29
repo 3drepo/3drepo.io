@@ -15,29 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Img from 'react-image';
-import styled, { css } from 'styled-components';
+export {
+	CanvasHistoryTypes,
+	CanvasHistoryActions
+} from './canvasHistory.redux';
 
-const previewStateStyles = css`
-	cursor: pointer;
-	transition: opacity 200ms ease-in-out;
-
-	&:hover {
-		opacity: 0.8;
-	}
-`;
-
-export const Container = styled.div`
-	cursor: pointer;
-	${(props: any) => props.enablePreview && previewStateStyles};
-	display: ${(props: any) => props.enablePreview ? 'block' : 'flex'};
-` as any;
-
-export const StyledImage = styled(Img)`
-	width: 100%;
-	object-fit: cover;
-
-	.new-comment & {
-		max-height: 150px;
-	}
-` as any;
+export * from './canvasHistory.selectors';

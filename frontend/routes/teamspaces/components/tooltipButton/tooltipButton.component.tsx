@@ -48,23 +48,32 @@ export const TooltipButton = (props: IProps) => {
 	} = props;
 	const iconProps = { color, fontSize: 'small' } as any;
 
+	const renderButton = () => (
+		<StyledIconButton
+			aria-label={label}
+			onClick={onClick || action}
+			disabled={disabled}
+			className={className}
+			active={Number(active)}>
+			<Icon {...iconProps} />
+		</StyledIconButton>
+	);
+
 	return (
-		<Tooltip
-			title={label}
-			disableHoverListener={disabled}
-			placement={placement}
-			disableFocusListener={disableFocusListener}
-		>
-			<span>
-				<StyledIconButton
-					aria-label={label}
-					onClick={onClick || action}
-					disabled={disabled}
-					className={className}
-					active={Number(active)}>
-					<Icon {...iconProps} />
-				</StyledIconButton>
-			</span>
-		</Tooltip>
+		<>
+			{ disabled ?
+				renderButton() :
+					<Tooltip
+							title={label}
+							disableHoverListener={disabled}
+							placement={placement}
+							disableFocusListener={disableFocusListener}
+					>
+					<span>
+						{renderButton()}
+					</span>
+				</Tooltip>
+			}
+		</>
 	);
 };

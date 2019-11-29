@@ -20,7 +20,6 @@ import { get, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
 import * as Dialogs from '../../routes/components/dialogContainer/components';
-import { ScreenshotDialog } from '../../routes/components/screenshotDialog/screenshotDialog.component';
 
 export interface IDialogConfig {
 	id: number;
@@ -113,14 +112,16 @@ const showRevisionsDialog = (state = INITIAL_STATE, action) => {
 const showScreenshotDialog = (state = INITIAL_STATE, action) => {
 	const config = {
 		title: action.config.title || 'Screenshot',
-		template: ScreenshotDialog,
+		template: action.config.template,
 		onConfirm: action.config.onSave,
+		onCancel: action.config.onCancel,
 		data: {
 			disabled: action.config.disabled,
 			sourceImage: action.config.sourceImage || ''
 		},
 		DialogProps: {
-			fullScreen: true
+			fullScreen: !action.config.notFullScreen,
+			maxWidth: action.config.notFullScreen ? false : null,
 		}
 	};
 
