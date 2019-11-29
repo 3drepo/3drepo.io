@@ -39,7 +39,7 @@ interface IProps {
 	newComment: any;
 	myJob: any;
 	currentUser: any;
-	settings: any;
+	permissions: any[];
 	failedToLoad: boolean;
 	disableViewer?: boolean;
 	horizontal?: boolean;
@@ -106,7 +106,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 			isPending={this.props.fetchingDetailsIsPending}
 			removeLog={this.removeComment}
 			teamspace={this.props.teamspace}
-			currentUser={this.props.currentUser.username}
+			currentUser={this.props.currentUser}
 			setCameraOnViewpoint={this.setCameraOnViewpoint}
 		/>
 	));
@@ -228,7 +228,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderDetailsForm = () => {
-		const { issue, onRemoveResource, showDialog, topicTypes, disableViewer, showScreenshotDialog,
+		const { issue, onRemoveResource, showDialog, topicTypes, disableViewer, showScreenshotDialog, permissions,
 			currentUser, myJob, attachFileResources, attachLinkResources, updateSelectedIssuePin } = this.props;
 
 		return (
@@ -237,7 +237,7 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 				jobs={this.jobsList}
 				onValueChange={this.handleIssueFormSubmit}
 				onSubmit={this.handleIssueFormSubmit}
-				permissions={this.props.settings.permissions}
+				permissions={permissions}
 				topicTypes={topicTypes}
 				currentUser={currentUser}
 				myJob={myJob}
@@ -281,8 +281,8 @@ export class IssueDetails extends React.PureComponent<IProps, IState> {
 	}
 
 	public userCanComment() {
-		const { myJob, settings, currentUser } = this.props;
-		return canComment(this.issueData, myJob, settings.permissions, currentUser.username);
+		const { myJob, permissions, currentUser } = this.props;
+		return canComment(this.issueData, myJob, permissions, currentUser);
 	}
 
 	public setCommentData = (commentData = {}) => {
