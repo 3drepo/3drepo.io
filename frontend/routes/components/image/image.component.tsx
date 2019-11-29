@@ -26,13 +26,20 @@ interface IProps {
 	alt?: string;
 	enablePreview?: boolean;
 	showScreenshotDialog: (config) => void;
+	onClick?: () => void;
 }
 
 export class Image extends React.PureComponent<IProps, any> {
 	public handlePreview = () => {
-		const { src, enablePreview, showScreenshotDialog } = this.props;
+		const { src, enablePreview, showScreenshotDialog, onClick } = this.props;
+
+		if (onClick) {
+			onClick();
+			return;
+		}
+
 		if (enablePreview && src) {
-			showScreenshotDialog({ sourceImage: src, disabled: true, template: ScreenshotDialog });
+			showScreenshotDialog({ sourceImage: src, disabled: true, template: ScreenshotDialog, notFullScreen: true, });
 		}
 	}
 

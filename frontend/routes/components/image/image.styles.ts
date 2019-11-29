@@ -28,7 +28,8 @@ const previewStateStyles = css`
 `;
 
 export const Container = styled.div`
-	${(props: any) => props.enablePreview && previewStateStyles}
+	cursor: pointer;
+	${(props: any) => props.enablePreview && previewStateStyles};
 	display: ${(props: any) => props.enablePreview ? 'block' : 'flex'};
 ` as any;
 

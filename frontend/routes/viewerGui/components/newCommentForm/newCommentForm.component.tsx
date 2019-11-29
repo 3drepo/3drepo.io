@@ -155,23 +155,35 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	public removeImage = (e) => {
 		e.stopPropagation();
 		this.resetFileInput();
-		this.setState({
-			newScreenshot: ''
+		this.props.onTakeScreenshot('');
+	}
+
+	public handleImageClick = () => {
+		this.props.showScreenshotDialog({
+			sourceImage: this.state.newScreenshot,
+			onSave: (screenshot) => {
+				this.props.onTakeScreenshot(screenshot);
+				this.resetFileInput();
+			},
+			template: ScreenshotDialog,
+			notFullScreen: true,
 		});
 	}
 
-	public renderCreatedScreenshot = renderWhenTrue(() => (
-		<>
-			<RemoveButtonWrapper screenshot>
-				<TooltipButton
-						label="Remove"
-						action={this.removeImage}
-						Icon={CloseIcon}
-				/>
-			</RemoveButtonWrapper>
-			<Image src={this.state.newScreenshot} className="new-comment" />
-		</>
-	));
+	public renderCreatedScreenshot = renderWhenTrue(() => {
+		return (
+				<>
+					<RemoveButtonWrapper screenshot>
+						<TooltipButton
+								label="Remove"
+								action={this.removeImage}
+								Icon={CloseIcon}
+						/>
+					</RemoveButtonWrapper>
+					<Image src={this.state.newScreenshot} onClick={this.handleImageClick} className="new-comment" />
+				</>
+		);
+	});
 
 	public renderResidualRiskFields = renderWhenTrue(() => (
 		<Container>
@@ -240,7 +252,9 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 	}
 
 	public resetFileInput = () => {
-		this.fileInputRef.current.value = '';
+		if (this.fileInputRef.current) {
+			this.fileInputRef.current.value = '';
+		}
 	}
 
 	public handleNewScreenshot = () => {
@@ -249,7 +263,8 @@ export class NewCommentForm extends React.PureComponent<IProps, IState> {
 		showScreenshotDialog({
 			sourceImage: viewer.getScreenshot(),
 			onSave: (screenshot) => onTakeScreenshot(screenshot),
-			template: ScreenshotDialog
+			template: ScreenshotDialog,
+			notFullScreen: true,
 		});
 	}
 

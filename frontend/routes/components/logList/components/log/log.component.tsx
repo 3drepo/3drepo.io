@@ -22,7 +22,6 @@ import { DATE_TIME_FORMAT } from '../../../../../services/formatting/formatDate'
 import { TooltipButton } from '../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { DateTime } from '../../../dateTime/dateTime.component';
 import DynamicUsername from '../../../dynamicUsername/dynamicUsername.container';
-import { Image } from '../../../image';
 import {
 	Container,
 	Date,

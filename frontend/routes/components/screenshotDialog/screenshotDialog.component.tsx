@@ -23,6 +23,8 @@ import { ROUTES } from '../../../constants/routes';
 import { aspectRatio } from '../../../helpers/aspectRatio';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { viewportSize } from '../../../helpers/viewportSize';
+import { LoaderContainer } from '../../board/board.styles';
+import { Loader } from '../loader/loader.component';
 import { Drawing } from './components/drawing/drawing.component';
 import { DrawnLine } from './components/drawnLine/drawnLine.component';
 import { EditableText } from './components/editableText/editableText.component';
@@ -36,6 +38,10 @@ import {
 	getNewDrawnLine, getNewShape, getNewText, getTextStyles, EDITABLE_TEXTAREA_NAME, ELEMENT_TYPES, INITIAL_VALUES, MODES
 } from './screenshotDialog.helpers';
 import { Container, Stage, StageContainer } from './screenshotDialog.styles';
+
+const MIN_DIALOG_WIDTH = 860;
+const MIN_DIALOG_HEIGHT = 300;
+const INIT_DIALOG_HEIGHT = 600;
 
 declare const Konva;
 
@@ -72,8 +78,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			width: 0,
 		},
 		container: {
-			height: 0,
-			width: 0,
+			height: INIT_DIALOG_HEIGHT,
+			width: MIN_DIALOG_WIDTH,
 		},
 		selectedObjectName: '',
 		textEditable: {
@@ -153,13 +159,6 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		);
 	});
 
-	public setStageSize = () => {
-		const height = this.containerElement.offsetHeight;
-		const width = this.containerElement.offsetWidth;
-		const stage = { height, width };
-		this.setState({ stage });
-	}
-
 	public async componentDidMount() {
 		const sourceImage = await Promise.resolve(this.props.sourceImage);
 
@@ -223,8 +222,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	private updateDialogSizes = ({ height, width }) => {
 		this.setState({
 			container: {
-				height: height >= 300 ? height : 300,
-				width: width >= 800 ? width : 800,
+				height: height >= MIN_DIALOG_HEIGHT ? height : MIN_DIALOG_HEIGHT,
+				width: width >= MIN_DIALOG_WIDTH ? width : MIN_DIALOG_WIDTH,
 			},
 			stage: {
 				height,
@@ -640,6 +639,12 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		};
 	}
 
+	public renderLoader = renderWhenTrue(() => (
+			<LoaderContainer>
+				<Loader size={20} />
+			</LoaderContainer>
+	));
+
 	public render() {
 		const { stage, container } = this.state;
 
@@ -649,7 +654,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 					target="window"
 					onResize={this.handleResize}
 				/>
+
 				{this.renderTools()}
+				{this.renderLoader(!stage.width || !stage.height)}
 				<StageContainer height={stage.height} width={stage.width}>
 					{this.renderIndicator(!this.props.disabled && this.isDrawingMode && !this.state.selectedObjectName)}
 					<Stage ref={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
