@@ -85,6 +85,9 @@ export const StyledArrowIcon = styled(ArrowIcon)`
 
 export const Name = styled(Typography)`
 	&& {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 		line-height: 1;
 	}
 `;
