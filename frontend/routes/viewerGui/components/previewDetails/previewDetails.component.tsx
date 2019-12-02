@@ -79,6 +79,8 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		expanded: false
 	};
 
+	public headerRef = React.createRef<any>();
+
 	public renderNameWithCounter = renderWhenTrue(() => (
 		<Typography paragraph>
 			{`${this.props.number}. ${this.props.name}`}
@@ -150,6 +152,14 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			</>
 		);
 	});
+
+	public get headerHeight() {
+		if (this.headerRef.current) {
+			return this.headerRef.current.getBoundingClientRect().height;
+		}
+
+		return 0;
+	}
 
 	public componentDidMount() {
 		const { editable, defaultExpanded } = this.props;
@@ -229,7 +239,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 					onClick={handleHeaderClick}
 					scrolled={this.props.scrolled ? 1 : 0}
 				>
-					<RoleIndicator color={roleColor} />
+					<RoleIndicator color={roleColor} ref={this.headerRef} />
 					{this.renderNameWithCounter(!editable && number)}
 					{this.renderName(!editable && !number)}
 					{this.renderNameField(editable)}
@@ -237,7 +247,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 				</Summary>
 
 				<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
-					<Details>
+					<Details topMargin={this.headerHeight}>
 						<PreviewItemInfo
 							author={owner}
 							createdAt={created}
