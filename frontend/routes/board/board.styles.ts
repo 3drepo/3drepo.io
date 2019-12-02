@@ -39,7 +39,6 @@ export const BoardContainer = styled.div`
 	.react-trello-board {
 		background-color: initial;
 		height: 100%;
-		padding: 0;
 		padding: 16px 12px;
 		overflow-y: hidden;
 		overflow-x: auto;
