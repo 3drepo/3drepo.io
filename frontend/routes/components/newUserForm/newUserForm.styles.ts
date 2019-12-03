@@ -115,4 +115,5 @@ export const UserNotExistsButton = styled.button`
 export const InvitationModeLink = styled.button`
 	${linkStyles};
 	margin-top: 12px;
+	background-color: transparent;
 `;

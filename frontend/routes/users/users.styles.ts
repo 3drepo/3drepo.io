@@ -10,4 +10,5 @@ export const PendingInvites = styled.button`
 	outline: none;
 	margin-left: 2px;
 	font-weight: inherit;
+	background-color: transparent;
 `;
