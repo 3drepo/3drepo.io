@@ -80,7 +80,11 @@ export const InvitationDialog = (props: IProps) => {
 			actions.setSubmitting(false);
 			props.handleClose();
 		};
-		props.sendInvitation(formValues.email, formValues.job, formValues.isAdmin, formValues.permissions, onFinish);
+
+		const onError = () => {
+			actions.setSubmitting(false);
+		};
+		props.sendInvitation(formValues.email, formValues.job, formValues.isAdmin, formValues.permissions, onFinish, onError);
 	};
 
 	const getProjects = (currentProject, selectedProjects) => {

@@ -85,7 +85,7 @@ export function* addUser({ user }) {
 	}
 }
 
-export function* sendInvitation({ email, job, isAdmin, permissions, onFinish }) {
+export function* sendInvitation({ email, job, isAdmin, permissions, onFinish, onError }) {
 	try {
 		const invitation = { email, job } as any;
 		invitation.permissions = {};
@@ -113,6 +113,7 @@ export function* sendInvitation({ email, job, isAdmin, permissions, onFinish }) 
 		yield put(UserManagementActions.sendInvitationSuccess(savedInvitation));
 		yield put(SnackbarActions.show('Invitation sent'));
 	} catch (error) {
+		onError();
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'invitation', error));
 	}
 }

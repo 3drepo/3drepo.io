@@ -48,7 +48,7 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	updateModelsPermissions: ['modelsWithPermissions', 'permissions'],
 	updateModelsPermissionsPre: ['modelsWithPermissions', 'permissions'],
 	updateModelPermissionsSuccess: ['updatedModels', 'permissions'],
-	sendInvitation: ['email', 'job', 'isAdmin', 'permissions', 'onFinish'],
+	sendInvitation: ['email', 'job', 'isAdmin', 'permissions', 'onFinish', 'onError'],
 	removeInvitationSuccess: ['email'],
 	removeInvitation: ['email'],
 	sendInvitationSuccess: ['savedInvitation']
