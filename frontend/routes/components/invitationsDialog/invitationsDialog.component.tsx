@@ -21,6 +21,8 @@ import Edit from '@material-ui/icons/Edit';
 import { get } from 'lodash';
 import React from 'react';
 
+import { renderWhenTrue } from '../../../helpers/rendering';
+import { EmptyStateInfo } from '../logList/logList.styles';
 import { SmallIconButton } from '../smallIconButon/smallIconButton.component';
 import { Actions, CancelButton, Container, Footer, Invitation, List } from './invitationsDialog.styles';
 
@@ -58,7 +60,13 @@ export const InvitationsDialog = (props: IProps) => {
 
 	const handleInvitationRemove = ({ email }) => () => props.removeInvitation(email);
 
-	const renderInvitationsList = () => (
+	const renderNoInvitationsInfo = renderWhenTrue(() => (
+		<EmptyStateInfo>
+			No invitations
+		</EmptyStateInfo>
+	));
+
+	const renderInvitationsList = renderWhenTrue(() => (
 		<List>
 			{props.invitations.map((invitation) => (
 				<Invitation key={invitation.email}>
@@ -76,11 +84,12 @@ export const InvitationsDialog = (props: IProps) => {
 				</Invitation>
 			))}
 		</List>
-	);
+	));
 
 	return (
 		<Container className={props.className}>
-			{renderInvitationsList()}
+			{renderInvitationsList(!!props.invitations.length)}
+			{renderNoInvitationsInfo(!props.invitations.length)}
 			<Footer>
 				<CancelButton
 					type="button"
