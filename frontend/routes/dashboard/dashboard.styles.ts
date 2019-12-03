@@ -58,6 +58,6 @@ export const Content = styled(Grid)`
 		overflow: hidden;
 		padding-bottom: 5px;
 		padding-right: 5px;
-
+		padding-left: 5px;
 	}
 `;
