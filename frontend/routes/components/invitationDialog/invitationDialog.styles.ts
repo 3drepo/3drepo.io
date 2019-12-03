@@ -24,7 +24,7 @@ import { COLOR } from '../../../styles';
 import { PermissionsTable as PermissionsTableBase } from '../permissionsTable/permissionsTable.component';
 
 export const Container = styled.div`
-	min-width: 40vw;
+	min-width: 782px;
 	display: flex;
 	flex-direction: column;
 `;
@@ -38,7 +38,7 @@ export const TextField = styled(TextFieldBase)`
 export const Content = styled.div`
 	padding: 25px;
 	padding-bottom: 12px;
-	max-height: 40vh;
+	max-height: 80vh;
 	overflow: auto;
 	display: flex;
 	flex-direction: column;
