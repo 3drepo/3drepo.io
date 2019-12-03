@@ -61,14 +61,14 @@ interface IProps {
 	projects: any;
 	models: any;
 	handleClose: () => void;
-	sendInvitation: (email, job, isAdmin, permissions, onFinish) => void;
+	sendInvitation: (email, job, isAdmin, permissions, onFinish, onError) => void;
 }
 
 export const InvitationDialog = (props: IProps) => {
-	const form = useRef(null);
+	const formRef = useRef(null);
 
 	useEffect(() => {
-		const { isValid, validateForm } = form.current;
+		const { isValid, validateForm } = formRef.current;
 
 		if (!isValid && props.email) {
 			validateForm();
@@ -247,7 +247,7 @@ export const InvitationDialog = (props: IProps) => {
 			isInitialValid
 			initialValues={{ email: props.email, job: props.job, isAdmin: props.isAdmin, permissions: props.permissions }}
 			render={renderForm}
-			ref={form}
+			ref={formRef}
 		/>
 	);
 };
