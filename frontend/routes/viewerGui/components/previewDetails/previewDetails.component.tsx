@@ -74,6 +74,8 @@ const ValidationSchema = Yup.object().shape({
 	name: schema.required
 });
 
+const MIN_HEADER_HEIGHT = 38;
+
 export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public state = {
 		expanded: false
@@ -158,10 +160,11 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 
 	public get headerHeight() {
 		if (this.headerRef.current) {
-			return this.headerRef.current.getBoundingClientRect().height;
+			const { height } = this.headerRef.current.getBoundingClientRect();
+			return height >= MIN_HEADER_HEIGHT ? height : MIN_HEADER_HEIGHT;
 		}
 
-		return 0;
+		return MIN_HEADER_HEIGHT;
 	}
 
 	public componentDidMount() {
@@ -250,7 +253,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 				</Summary>
 
 				<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
-					<Details topMargin={this.headerHeight}>
+					<Details margin={this.headerHeight}>
 						<PreviewItemInfo
 							author={owner}
 							createdAt={created}

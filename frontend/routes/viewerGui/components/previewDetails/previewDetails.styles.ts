@@ -52,7 +52,7 @@ export const Details = styled(ExpansionPanelDetails)`
 		flex-direction: column;
 		padding: 0 2px;
 		position: relative;
-		padding-top: ${(props: any) => props.topMargin ? `${props.topMargin + 12}px` : '0px'};
+		padding-top: ${(props: any) => props.margin ? `${props.margin + 12}px` : '0px'};
 	}
 `;
 
