@@ -22,7 +22,7 @@ import * as PanelStyles from '../components/panel/panel.styles';
 
 export const Container = styled(Grid)`
 	&& {
-		padding: 30px 50px 60px;
+		padding: 30px 45px 60px 50px;
 		height: 100%;
 		overflow: hidden;
 		max-height: 100%;
@@ -56,11 +56,8 @@ export const Content = styled(Grid)`
 	&& {
 		flex: 1;
 		overflow: hidden;
-		box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12);
-		border-radius: 4px;
-	}
-
-	${PanelStyles.Container} {
-		box-shadow: none;
+		padding-bottom: 5px;
+		padding-right: 5px;
+		padding-left: 5px;
 	}
 `;
