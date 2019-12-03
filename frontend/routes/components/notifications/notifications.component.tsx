@@ -22,7 +22,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Typography from '@material-ui/core/Typography';
 import Close from '@material-ui/icons/Close';
 import MoreVert from '@material-ui/icons/MoreVert';
-import { groupBy, sortBy, toArray } from 'lodash';
 import React from 'react';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
@@ -35,21 +34,17 @@ import { NotificationsPanel } from './components/panel/panel.component';
 import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.component';
 import { NotificationsIcon, NotificationsList, NotificationWeekHeader } from './notifications.styles';
 
-/**
- * Gets the date of the sunday thats away from the offset .
- * If offsets == 0 is last sunday (if today is sunday returns today)
- * If offset > 0 , the sundays from next week on
- * If offset < 0 , the sundays before the current week
- */
-const getSunday = (offset: number = 0) => {
-	const sunday = new Date();
-	sunday.setDate(sunday.getDate() - sunday.getDay() + offset * 7);
-	sunday.setHours(0, 0, 0, 0);
-	return sunday;
-};
-
 interface IProps {
 	notifications: INotification[];
+	unreadCount: number;
+	thisWeeksNotifications: INotification[];
+	lastWeeksNotifications: INotification[];
+	olderNotifications: INotification[];
+	hasNotificationsThisWeek: boolean;
+	hasNotificationsLastWeek: boolean;
+	hasOlderNotifications: boolean;
+	hasNotificationsUntilLastWeekOnly: boolean;
+	hasOnlyOlderNotifications: boolean;
 	currentUser: any;
 	drawerOpened: boolean;
 	sendGetNotifications: () => void;
@@ -76,11 +71,6 @@ const NotificationButton = ({ unreadCount, onClick }) => (
 
 export class Notifications extends React.PureComponent<IProps, any> {
 	public state = {
-		hasThisWeekNot: false,
-		hasLastWeekNot: false,
-		hasOlderNot: false,
-		unreadCount: 0,
-		groupedByTeamspace: {thisWeek: [] , lastWeek: [] , older: []},
 		open: false,
 		menuElement: null
 	};
@@ -96,14 +86,15 @@ export class Notifications extends React.PureComponent<IProps, any> {
 	private renderEmptyState = renderWhenTrue(() => <NotificationEmptyItem />);
 
 	private renderList = renderWhenTrue(() => {
-		const { hasThisWeekNot, groupedByTeamspace, hasLastWeekNot, hasOlderNot } = this.state;
+		const { hasNotificationsThisWeek, hasNotificationsLastWeek,
+			hasOlderNotifications, thisWeeksNotifications } = this.props;
 		return (
 			<>
 				<NotificationsPanelHeader />
-				{hasThisWeekNot && <NotificationWeekHeader labelLeft="This week" labelRight={this.today} />}
-				{this.renderNotificationsPanel(groupedByTeamspace.thisWeek)}
-				{this.renderLastWeekNotifications(hasLastWeekNot)}
-				{this.renderOlderNotifications(hasOlderNot)}
+				{hasNotificationsThisWeek && <NotificationWeekHeader labelLeft="This week" labelRight={this.today} />}
+				{this.renderNotificationsPanel(thisWeeksNotifications)}
+				{this.renderLastWeekNotifications(hasNotificationsLastWeek)}
+				{this.renderOlderNotifications(hasOlderNotifications)}
 			</>
 		);
 	});
@@ -112,9 +103,9 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		<>
 			<NotificationWeekHeader
 				labelLeft="Last week"
-				labelRight={!this.state.hasThisWeekNot ? this.today : ''}
+				labelRight={this.props.hasNotificationsUntilLastWeekOnly ? this.today : ''}
 			/>
-			{this.renderNotificationsPanel(this.state.groupedByTeamspace.lastWeek)}
+			{this.renderNotificationsPanel(this.props.lastWeeksNotifications)}
 		</>
 	));
 
@@ -122,9 +113,9 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		<>
 			<NotificationWeekHeader
 				labelLeft="more than two weeks ago"
-				labelRight={!this.state.hasThisWeekNot && !this.state.hasLastWeekNot ? this.today : ''}
+				labelRight={this.props.hasOnlyOlderNotifications ? this.today : ''}
 			/>
-			{this.renderNotificationsPanel(this.state.groupedByTeamspace.older)}
+			{this.renderNotificationsPanel(this.props.olderNotifications)}
 		</>
 	));
 
@@ -158,39 +149,8 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		this.props.confirmSendDeleteAllNotifications();
 	}
 
-	public thisWeeksNotifications = (notifications) => {
-		const lastSunday = getSunday().getTime();
-		return notifications.filter((n) => n.timestamp > lastSunday);
-	}
-
-	public lastWeeksNotifications = (notifications) => {
-		const lastSunday = getSunday().getTime();
-		const prevSunday = getSunday(-1).getTime();
-		return notifications.filter((n) => n.timestamp > prevSunday && n.timestamp < lastSunday );
-	}
-
-	public componentDidUpdate(prevProps: IProps) {
-		if (prevProps.notifications !== this.props.notifications && this.props.notifications.length) {
-			const unreadCount = this.props.notifications.filter((n) => !n.read).length;
-			const groupedByTeamspace = { thisWeek: [], lastWeek: [], older: []};
-
-			const thisWeek = this.thisWeeksNotifications(this.props.notifications);
-			const lastWeek = this.lastWeeksNotifications(this.props.notifications);
-			const older = this.moreThanTwoWeeksAgoNotifications(this.props.notifications);
-
-			groupedByTeamspace.thisWeek = this.groupByTeamSpace(thisWeek);
-			groupedByTeamspace.lastWeek = this.groupByTeamSpace(lastWeek);
-			groupedByTeamspace.older = this.groupByTeamSpace(older);
-
-			const hasThisWeekNot = thisWeek.length > 0 ;
-			const hasLastWeekNot = lastWeek.length > 0;
-			const hasOlderNot = older.length > 0;
-			this.setState({unreadCount, groupedByTeamspace, hasThisWeekNot, hasLastWeekNot, hasOlderNot });
-		}
-	}
-
 	public render() {
-		const { unreadCount } = this.state;
+		const { unreadCount } = this.props;
 		return (
 			<>
 				<NotificationButton onClick={this.toggleDrawer} unreadCount={unreadCount}  />
@@ -208,15 +168,6 @@ export class Notifications extends React.PureComponent<IProps, any> {
 				</Drawer>
 			</>
 		);
-	}
-
-	private moreThanTwoWeeksAgoNotifications = (notifications) => {
-		const prevSunday = getSunday(-1).getTime();
-		return notifications.filter((n) => n.timestamp < prevSunday );
-	}
-
-	private groupByTeamSpace = (notifications) => {
-		return toArray(groupBy(sortBy(notifications, 'teamSpace'), 'teamSpace'));
 	}
 
 	private renderRightContent = () => (
