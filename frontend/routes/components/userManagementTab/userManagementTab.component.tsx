@@ -36,7 +36,7 @@ export const UserManagementTab = (props: IProps) => {
 				wrap="nowrap"
 				justify="space-between"
 			>
-				<Content item withHeader={props.withHeader}>{children}</Content>
+				<Content item header={props.withHeader}>{children}</Content>
 				{footerLabel && (<Footer item>{footerLabel}</Footer>)}
 			</Container>
 		</>

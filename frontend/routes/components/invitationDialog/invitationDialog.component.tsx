@@ -46,7 +46,7 @@ import {
 
 const invitationSchema = yup.object().shape({
 	email: schema.email,
-	job: yup.string(),
+	job: schema.required,
 });
 
 interface IProps {
