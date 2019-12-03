@@ -244,20 +244,21 @@ export const ModelGridItem = memo((props: IProps) => {
 
 		if (isFederation) {
 			return [{
-				...ROW_ACTIONS.BOARD,
-				onClick: handleGoToBoard
-			}, {
 				...ROW_ACTIONS.EDIT,
 				onClick: handleFederationEdit
-			}, ...sharedActions];
+			}, {
+				...ROW_ACTIONS.BOARD,
+				onClick: handleGoToBoard
+			},
+				...sharedActions];
 		}
 
 		return [{
-			...ROW_ACTIONS.BOARD,
-			onClick: handleGoToBoard
-		}, {
 			...ROW_ACTIONS.UPLOAD_FILE,
 			onClick: handleUploadModelFile
+		}, {
+			...ROW_ACTIONS.BOARD,
+			onClick: handleGoToBoard
 		}, {
 			...ROW_ACTIONS.REVISIONS,
 			onClick: handleRevisionsClick
