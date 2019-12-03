@@ -100,22 +100,25 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			onSubmit={() => {}}
 		>
 			<StyledForm>
-				<Field name="name" render={({ field, form }) => (
-					<TextField
-					{...field}
-						autoFocus
-						fullWidth
-						placeholder={this.props.isNew ? this.props.name : 'Name'}
-						onChange={this.handleNameChange(field)}
-						error={Boolean(form.errors.name) && !this.props.name}
-						helperText={form.errors.name}
-						inputProps={{
-							maxLength: 120,
-							onFocus: () => this.handleFocusName(field, form),
-							onBlur: () => this.handleBlurName(field, form)
-						}}
-					/>
-				)} />
+				<Field name="name" render={({field, form}) => {
+					const placeholder = this.props.isNew && field.value === '' ? this.props.name : 'Name';
+					return (
+						<TextField
+								{...field}
+								autoFocus
+								fullWidth
+								placeholder={placeholder}
+								onChange={this.handleNameChange(field)}
+								error={Boolean(form.errors.name) && !this.props.name}
+								helperText={form.errors.name}
+								inputProps={{
+									maxLength: 120,
+									onFocus: () => this.handleFocusName(field, form),
+									onBlur: () => this.handleBlurName(field, form)
+								}}
+						/>
+					);
+				}} />
 			</StyledForm>
 		</Formik>
 	));

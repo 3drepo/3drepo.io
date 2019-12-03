@@ -27,7 +27,7 @@ import {
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-import { COLOR } from './../../../../styles/colors';
+import { COLOR } from '../../../../styles';
 
 const SUMMARY_HEIGHT = 64;
 
