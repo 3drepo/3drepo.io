@@ -122,7 +122,12 @@ export class Risks extends React.PureComponent<IProps, any> {
 	}
 
 	public closeDetails = () => {
-		this.props.goToRisk(null);
+		if (this.props.selectedRisk) {
+			this.props.goToRisk(null);
+		}
+		else {
+			this.props.closeDetails();
+		}
 	}
 
 	public handleSelectedIssue() {
