@@ -23,8 +23,10 @@ import AddIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveIcon from '@material-ui/icons/RemoveCircleOutline';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { keyBy, map, omit, pick, uniqBy, values } from 'lodash';
-import React from 'react';
+import { isEmpty } from 'lodash';
+import React, { useEffect, useRef } from 'react';
 import * as yup from 'yup';
+
 import { MODEL_ROLES_LIST, MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
 import { schema } from '../../../services/validation';
 import { CellSelect } from '../customTable/components/cellSelect/cellSelect.component';
@@ -63,6 +65,16 @@ interface IProps {
 }
 
 export const InvitationDialog = (props: IProps) => {
+	const form = useRef(null);
+
+	useEffect(() => {
+		const { isValid, validateForm } = form.current;
+
+		if (!isValid && props.email) {
+			validateForm();
+		}
+	}, []);
+
 	const handleSubmit = (formValues, actions) => {
 		const onFinish = () => {
 			actions.setSubmitting(false);
@@ -166,12 +178,14 @@ export const InvitationDialog = (props: IProps) => {
 		<Form>
 			<Container className={props.className}>
 				<Content>
-					<Field name="email" render={({ field }) => (
-						<TextField
-							label="Email"
-							required
-							{...field}
-						/>
+					<Field name="email" render={({ field, form }) => (
+								<TextField
+										label="Email"
+										required
+										error={form.errors.email}
+										helperText={form.errors.email}
+										{...field}
+								/>
 					)} />
 					<Field name="job" render={({ field }) => (
 						<FormControl>
@@ -212,7 +226,7 @@ export const InvitationDialog = (props: IProps) => {
 					<Field render={({ form }) => (
 						<SubmitButton
 							pending={form.isSubmitting}
-							disabled={!form.isValid || form.isValidating || form.isSubmitting}
+							disabled={!isEmpty(form.errors) || !form.isValid || form.isValidating || form.isSubmitting}
 						>
 							Invite
 						</SubmitButton>
@@ -226,8 +240,10 @@ export const InvitationDialog = (props: IProps) => {
 		<Formik
 			validationSchema={invitationSchema}
 			onSubmit={handleSubmit}
+			isInitialValid
 			initialValues={{ email: props.email, job: props.job, isAdmin: props.isAdmin, permissions: props.permissions }}
 			render={renderForm}
+			ref={form}
 		/>
 	);
 };
