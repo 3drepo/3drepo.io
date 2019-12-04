@@ -1019,6 +1019,41 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Override the alpha value of given object(s)
+	 * If you are setting opacity to 0, use toggleVisibility instead.
+	 * @category Object Highlighting
+	 * @param account - teamspace the meshes resides in
+	 * @param model - model ID the meshes resides in
+	 * @param meshIDs - unique IDs of the meshes to operate on
+	 * @param opacity - opacity (>0 - 1) value to override with
+	 */
+	public static overrideMeshOpacity(account: string, model: string, meshIDs: [string], opacity: number) {
+		const param: any = {};
+		if (account && model) {
+			param.nameSpace = account + '.' + model;
+		}
+		param.ids = meshIDs;
+		param.opacity = opacity;
+		UnityUtil.toUnity('OverrideMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+	}
+
+	/**
+	 * Reset override alpha value of given object(s)
+	 * @category Object Highlighting
+	 * @param account - teamspace the meshes resides in
+	 * @param model - model ID the meshes resides in
+	 * @param meshIDs - unique IDs of the meshes to operate on
+	 */
+	public static resetMeshOpacity(account: string, model: string, meshIDs: [string]) {
+		const param: any = {};
+		if (account && model) {
+			param.nameSpace = account + '.' + model;
+		}
+		param.ids = meshIDs;
+		UnityUtil.toUnity('ResetMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+	}
+
+	/**
 	 * Remove a pin from the viewer
 	 * @category Pins
 	 * @param id - pin identifier
