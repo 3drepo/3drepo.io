@@ -30,7 +30,7 @@ import { Container, Content, Sidebar } from './dashboard.styles';
 
 const MENU_ITEMS = [
 	{
-		title: 'Teamspaces',
+		title: 'Models & Federations',
 		path: ROUTES.TEAMSPACES
 	},
 	{
