@@ -47,7 +47,7 @@ export const HorizontalView = styled.div`
 	${PreviewDetails}, ${LogsContainer} {
 		min-width: 50%;
 		width: 50%;
-		max-height: 60vh;
+		max-height: 75vh;
 		position: relative;
 		overflow: auto;
 	}

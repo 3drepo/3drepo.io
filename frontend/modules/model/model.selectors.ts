@@ -25,6 +25,10 @@ export const selectSettings = createSelector(
 	selectModelDomain, (state) => state.settings
 );
 
+export const selectPermissions = createSelector(
+		selectSettings, (state) => state.permissions
+);
+
 export const selectRevisions = createSelector(
 	selectModelDomain, (state) => state.revisions
 );

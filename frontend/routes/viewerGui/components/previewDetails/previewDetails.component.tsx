@@ -74,10 +74,14 @@ const ValidationSchema = Yup.object().shape({
 	name: schema.required
 });
 
+const MIN_HEADER_HEIGHT = 38;
+
 export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public state = {
 		expanded: false
 	};
+
+	public headerRef = React.createRef<any>();
 
 	public renderNameWithCounter = renderWhenTrue(() => (
 		<Typography paragraph>
@@ -98,22 +102,25 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			onSubmit={() => {}}
 		>
 			<StyledForm>
-				<Field name="name" render={({ field, form }) => (
-					<TextField
-					{...field}
-						autoFocus
-						fullWidth
-						placeholder={this.props.isNew ? this.props.name : 'Name'}
-						onChange={this.handleNameChange(field)}
-						error={Boolean(form.errors.name) && !this.props.name}
-						helperText={form.errors.name}
-						inputProps={{
-							maxLength: 120,
-							onFocus: () => this.handleFocusName(field, form),
-							onBlur: () => this.handleBlurName(field, form)
-						}}
-					/>
-				)} />
+				<Field name="name" render={({field, form}) => {
+					const placeholder = this.props.isNew && field.value === '' ? this.props.name : 'Name';
+					return (
+						<TextField
+								{...field}
+								autoFocus
+								fullWidth
+								placeholder={placeholder}
+								onChange={this.handleNameChange(field)}
+								error={Boolean(form.errors.name) && !this.props.name}
+								helperText={form.errors.name}
+								inputProps={{
+									maxLength: 120,
+									onFocus: () => this.handleFocusName(field, form),
+									onBlur: () => this.handleBlurName(field, form)
+								}}
+						/>
+					);
+				}} />
 			</StyledForm>
 		</Formik>
 	));
@@ -150,6 +157,15 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			</>
 		);
 	});
+
+	public get headerHeight() {
+		if (this.headerRef.current) {
+			const { height } = this.headerRef.current.getBoundingClientRect();
+			return height >= MIN_HEADER_HEIGHT ? height : MIN_HEADER_HEIGHT;
+		}
+
+		return MIN_HEADER_HEIGHT;
+	}
 
 	public componentDidMount() {
 		const { editable, defaultExpanded } = this.props;
@@ -229,7 +245,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 					onClick={handleHeaderClick}
 					scrolled={this.props.scrolled ? 1 : 0}
 				>
-					<RoleIndicator color={roleColor} />
+					<RoleIndicator color={roleColor} ref={this.headerRef} />
 					{this.renderNameWithCounter(!editable && number)}
 					{this.renderName(!editable && !number)}
 					{this.renderNameField(editable)}
@@ -237,7 +253,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 				</Summary>
 
 				<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
-					<Details>
+					<Details margin={this.headerHeight}>
 						<PreviewItemInfo
 							author={owner}
 							createdAt={created}
