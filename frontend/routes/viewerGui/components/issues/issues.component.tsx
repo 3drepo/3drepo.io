@@ -187,7 +187,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 	}
 
 	public closeDetails = () => {
-		if(this.props.selectedIssue) {
+		if (this.props.selectedIssue) {
 			this.props.goToIssue(null);
 		} else {
 			this.props.closeDetails();
