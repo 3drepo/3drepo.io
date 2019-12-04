@@ -116,6 +116,11 @@ export const InvitationDialog = (props: IProps) => {
 		onChange({ target: { value, name }});
 	};
 
+	const handleProjectAdminChange = (field, form, index) => (event) => {
+		field.onChange(event);
+		form.values.permissions[index].models = [];
+	};
+
 	const renderPermissions = (projects = []) => (
 		<FieldArray name="permissions" render={({ remove, push }) => (
 			<>
@@ -139,12 +144,13 @@ export const InvitationDialog = (props: IProps) => {
 								</FormControl>
 							)} />
 							{project && (
-								<Field name={`permissions.${index}.isAdmin`} render={({ field }) => (
+								<Field name={`permissions.${index}.isAdmin`} render={({ field, form }) => (
 									<ProjectCheckboxContainer
 										control={
 											<Checkbox
 												checked={field.value}
 												{...field}
+												onChange={handleProjectAdminChange(field, form, index)}
 												color="secondary"
 											/>
 										}
