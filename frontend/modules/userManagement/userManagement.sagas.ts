@@ -114,7 +114,7 @@ export function* sendInvitation({ email, job, isAdmin, permissions, onFinish, on
 		yield put(SnackbarActions.show('Invitation sent'));
 	} catch (error) {
 		onError();
-		yield put(DialogActions.showEndpointErrorDialog('remove', 'invitation', error));
+		yield put(DialogActions.showEndpointErrorDialog('sent', 'invitation', error));
 	}
 }
 
