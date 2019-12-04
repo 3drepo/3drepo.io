@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { pick, values } from 'lodash';
+import { isEmpty, pick, values } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
@@ -27,8 +27,9 @@ import { selectProjects, selectTeamspacesWithAdminAccess } from '../teamspaces';
 import {
 	selectCurrentProject,
 	selectCurrentTeamspace,
+	selectInvitations,
 	UserManagementActions,
-	UserManagementTypes
+	UserManagementTypes,
 } from '../userManagement';
 
 import {
@@ -108,10 +109,13 @@ export function* sendInvitation({ email, job, isAdmin, permissions, onFinish, on
 		}
 
 		const teamspace = yield select(selectCurrentTeamspace);
-		const {data: savedInvitation} = yield API.sendInvitation(teamspace, invitation);
+		const pendingInvitations = yield select(selectInvitations);
+		const isInvitationNotOnPendingList = isEmpty(pendingInvitations.filter((item) => (item.email === invitation.email)));
+		const actionMessage = isInvitationNotOnPendingList ? 'Invitation sent' : 'Invitation updated';
+		const { data: savedInvitation } = yield API.sendInvitation(teamspace, invitation);
 		onFinish();
 		yield put(UserManagementActions.sendInvitationSuccess(savedInvitation));
-		yield put(SnackbarActions.show('Invitation sent'));
+		yield put(SnackbarActions.show(actionMessage));
 	} catch (error) {
 		onError();
 		yield put(DialogActions.showEndpointErrorDialog('sent', 'invitation', error));
@@ -123,6 +127,7 @@ export function* removeInvitation({ email }) {
 		const teamspace = yield select(selectCurrentTeamspace);
 		yield API.removeInvitation(teamspace, email);
 		yield put(UserManagementActions.removeInvitationSuccess(email));
+		yield put(SnackbarActions.show('Invitation removed'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'invitation', error));
 	}
