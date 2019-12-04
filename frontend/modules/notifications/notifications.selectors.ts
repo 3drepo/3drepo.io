@@ -45,7 +45,7 @@ const selectUngroupedLastWeeksNotifications = createSelector(
 const selectUngroupedOlderNotifications = createSelector(
 	selectNotifications, (notifications) => {
 		const prevSunday = getSunday(-1).getTime();
-		return groupByTeamSpace(notifications.filter((n) => n.timestamp < prevSunday ));
+		return notifications.filter((n) => n.timestamp < prevSunday );
 	}
 );
 
