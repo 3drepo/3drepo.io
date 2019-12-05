@@ -24,6 +24,7 @@ export const MODES = {
 	TEXT: 'text',
 	SHAPE: 'shape',
 	POLYGON: 'polygon',
+	CALLOUT: 'callout',
 };
 
 export const INITIAL_VALUES = {

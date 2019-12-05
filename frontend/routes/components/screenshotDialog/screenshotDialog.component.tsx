@@ -26,6 +26,7 @@ import { viewportSize } from '../../../helpers/viewportSize';
 import { LoaderContainer } from '../../board/board.styles';
 import { Loader } from '../loader/loader.component';
 import { Drawing } from './components/drawing/drawing.component';
+import { DrawingHandler } from './components/drawingHandler/drawingHandler.component';
 import { DrawnLine } from './components/drawnLine/drawnLine.component';
 import { EditableText } from './components/editableText/editableText.component';
 import { Erasing } from './components/erasing/erasing.component';
@@ -331,6 +332,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public setEraserMode = () => this.setMode(MODES.ERASER);
 
+	public setCalloutMode = () => {
+		this.setMode(MODES.CALLOUT);
+	}
+
 	public setShapeMode = (shape) => {
 		if (shape === SHAPE_TYPES.POLYGON) {
 			this.setState({
@@ -545,6 +550,21 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 					</Layer>
 					<Layer ref={this.drawingLayerRef}>
 						{this.renderDrawing()}
+						<DrawingHandler
+							// ref={this.drawingRef}
+							height={this.state.stage.height}
+							width={this.state.stage.width}
+							size={this.state.brushSize}
+							color={this.state.brushColor}
+							mode={this.state.mode}
+							layer={this.drawingLayerRef}
+							stage={this.stage}
+							handleNewDrawnLine={this.addNewDrawnLine}
+							handleNewDrawnShape={this.addNewShape}
+							selected={this.state.selectedObjectName}
+							activeShape={this.state.activeShape}
+							disabled={this.props.disabled}
+						/>
 					</Layer>
 				</>
 			);
@@ -561,6 +581,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			onEraseClick={this.setEraserMode}
 			onTextClick={this.handleToolTextClick}
 			onShapeClick={this.setShapeMode}
+			onCalloutClick={this.setCalloutMode}
 			onClearClick={this.clearCanvas}
 			onBrushSizeChange={this.handleBrushSizeChange}
 			onTextSizeChange={this.handleTextSizeChange}

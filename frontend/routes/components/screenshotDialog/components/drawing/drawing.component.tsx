@@ -58,6 +58,10 @@ export class Drawing extends React.PureComponent <IProps, any> {
 		return this.props.mode === MODES.POLYGON;
 	}
 
+	get isDrawingCalloutMode() {
+		return this.props.mode === MODES.CALLOUT;
+	}
+
 	get layer() {
 		return this.props.layer.current.getLayer();
 	}

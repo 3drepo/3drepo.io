@@ -23,6 +23,7 @@ import BorderColorIcon from '@material-ui/icons/BorderColor';
 import ClearIcon from '@material-ui/icons/Clear';
 import DotIcon from '@material-ui/icons/FiberManualRecord';
 import RedoIcon from '@material-ui/icons/Redo';
+import CalloutIcon from '@material-ui/icons/SpeakerNotesOutlined';
 import TextIcon from '@material-ui/icons/TextFields';
 import UndoIcon from '@material-ui/icons/Undo';
 
@@ -66,6 +67,7 @@ interface IProps {
 	onEraseClick: () => void;
 	onTextClick: () => void;
 	onShapeClick: (shapeName?) => void;
+	onCalloutClick: () => void;
 	onClearClick: () => void;
 	onColorChange: (color) => void;
 	onBrushSizeChange: (size) => void;
@@ -86,7 +88,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 
 	public renderToolset = renderWhenTrue(() => {
 		const {
-			size, textSize, color, onDrawClick, onTextClick, onClearClick,
+			size, textSize, color, onDrawClick, onTextClick, onClearClick, onCalloutClick,
 			onColorChange, onBrushSizeChange, onEraseClick, onTextSizeChange, onClick
 		} = this.props;
 
@@ -144,6 +146,12 @@ export class Tools extends React.PureComponent<IProps, any> {
 					PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 					PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'center' } }}
 					ButtonProps={{ disabled: false }}
+				/>
+				<TooltipButton
+					label="Callout"
+					color={this.getToolColor(MODES.CALLOUT)}
+					action={onCalloutClick}
+					Icon={CalloutIcon}
 				/>
 				<TooltipButton
 					label="Erase"
