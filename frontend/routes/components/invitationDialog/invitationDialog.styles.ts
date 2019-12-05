@@ -25,6 +25,7 @@ import { PermissionsTable as PermissionsTableBase } from '../permissionsTable/pe
 
 export const Container = styled.div`
 	min-width: 782px;
+	max-height: 80vh;
 	display: flex;
 	flex-direction: column;
 `;
@@ -38,7 +39,6 @@ export const TextField = styled(TextFieldBase)`
 export const Content = styled.div`
 	padding: 25px;
 	padding-bottom: 12px;
-	max-height: 80vh;
 	overflow: auto;
 	display: flex;
 	flex-direction: column;

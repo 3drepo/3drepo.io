@@ -248,7 +248,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 				permissions,
 			},
 			DialogProps: {
-				maxWidth: false
+				maxWidth: false,
 			}
 		});
 	}
