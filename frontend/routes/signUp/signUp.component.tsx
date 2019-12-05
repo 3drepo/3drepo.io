@@ -172,7 +172,9 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const {isPending} = this.props;
-		const {email} = queryString.parse(this.props.location.search);
+		const { email: defaultEmail } = queryString.parse(this.props.location.search) || '';
+		const defaultValues = { ...RegistrationInitialValues, email: defaultEmail, emailConfirm: defaultEmail};
+
 		return (
 			<Container
 				container
@@ -183,7 +185,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 					<Panel title="Sign up" hiddenScrollbars>
 						<Headline>Creating a 3D Repo account is free</Headline>
 						<Formik
-							initialValues={RegistrationInitialValues}
+							initialValues={defaultValues}
 							onSubmit={this.handleSubmit}
 							validationSchema={RegistrationSchema}
 							ref={this.form}
@@ -253,7 +255,6 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										<StyledTextField
 											{...DEFAULT_INPUT_PROPS}
 											{...field}
-											value={email || ''}
 											error={Boolean(form.touched.email && form.errors.email)}
 											helperText={form.touched.email && (form.errors.email || '')}
 											label="Email"
@@ -264,7 +265,6 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										<StyledTextField
 											{...DEFAULT_INPUT_PROPS}
 											{...field}
-											value={email || ''}
 											error={Boolean(form.touched.emailConfirm && form.errors.emailConfirm)}
 											helperText={form.touched.emailConfirm && (form.errors.emailConfirm || '')}
 											label="Confirm email"
