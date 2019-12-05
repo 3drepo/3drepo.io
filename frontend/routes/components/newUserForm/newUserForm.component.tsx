@@ -230,7 +230,7 @@ export class NewUserForm extends React.PureComponent<IProps, IState> {
 						</SaveButton>
 					</Grid>
 					<InvitationModeLink onClick={this.openInvitationDialog}>
-						Invite to 3drepo...
+						Invite to 3D Repo...
 					</InvitationModeLink>
 				</Grid>
 			</Container>
