@@ -44,6 +44,8 @@ import {
 	TermLink
 } from './signUp.styles';
 
+import * as queryString from 'query-string';
+
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const PaperPropsStyle = {
@@ -170,7 +172,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const {isPending} = this.props;
-
+		const {email} = queryString.parse(this.props.location.search);
 		return (
 			<Container
 				container
@@ -251,6 +253,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										<StyledTextField
 											{...DEFAULT_INPUT_PROPS}
 											{...field}
+											value={email || ''}
 											error={Boolean(form.touched.email && form.errors.email)}
 											helperText={form.touched.email && (form.errors.email || '')}
 											label="Email"
@@ -261,6 +264,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										<StyledTextField
 											{...DEFAULT_INPUT_PROPS}
 											{...field}
+											value={email || ''}
 											error={Boolean(form.touched.emailConfirm && form.errors.emailConfirm)}
 											helperText={form.touched.emailConfirm && (form.errors.emailConfirm || '')}
 											label="Confirm email"
