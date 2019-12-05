@@ -31,7 +31,7 @@ import { RISK_FILTERS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
 import { filtersValuesMap as issuesFilters, getHeaderMenuItems as getIssueMenuItems } from '../../helpers/issues';
 import { renderWhenTrue } from '../../helpers/rendering';
-import { filtersValuesMap as risksFilters,  getHeaderMenuItems as getRisksMenuItems  } from '../../helpers/risks';
+import { filtersValuesMap as risksFilters, getHeaderMenuItems as getRisksMenuItems  } from '../../helpers/risks';
 import {
 	ISSUE_FILTER_PROPS, ISSUE_FILTER_VALUES, RISK_FILTER_PROPS, RISK_FILTER_VALUES
 } from '../../modules/board/board.constants';

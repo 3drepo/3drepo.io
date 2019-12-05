@@ -25,13 +25,17 @@ export const selectSettings = createSelector(
 	selectModelDomain, (state) => state.settings
 );
 
+export const selectPermissions = createSelector(
+		selectSettings, (state) => state.permissions
+);
+
 export const selectRevisions = createSelector(
 	selectModelDomain, (state) => state.revisions
 );
 
 export const selectCurrentRevision = createSelector(
 	selectRevisions, selectUrlParams, (revisions, params) => {
-		const paramRevision = params.revision ?
+		const paramRevision = (params || {}).revision ?
 			revisions.find((revision) => revision.tag === params.revision ||  revision._id === params.revision)
 			: null;
 

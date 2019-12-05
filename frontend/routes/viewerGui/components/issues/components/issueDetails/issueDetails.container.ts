@@ -18,7 +18,7 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectCurrentUser } from '../../../../../../modules/currentUser';
+import { selectUsername } from '../../../../../../modules/currentUser';
 import { DialogActions } from '../../../../../../modules/dialog';
 import {
 	selectActiveIssueDetails,
@@ -29,7 +29,7 @@ import {
 	IssuesActions
 } from '../../../../../../modules/issues';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
-import { selectSettings, selectTopicTypes } from '../../../../../../modules/model';
+import { selectPermissions, selectTopicTypes } from '../../../../../../modules/model';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { withViewer } from '../../../../../../services/viewer/viewer';
 import { IssueDetails } from './issueDetails.component';
@@ -41,8 +41,8 @@ const mapStateToProps = createStructuredSelector({
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
 	newComment: selectNewComment,
 	myJob: selectMyJob,
-	currentUser: selectCurrentUser,
-	settings: selectSettings,
+	currentUser: selectUsername,
+	permissions: selectPermissions,
 	topicTypes: selectTopicTypes,
 	failedToLoad: selectFailedToLoad
 });

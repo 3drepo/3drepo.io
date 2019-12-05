@@ -81,8 +81,8 @@ export class PreviewListItem extends React.PureComponent<IProps, any> {
 	));
 
 	public renderNameWithCounter = renderWhenTrue(() =>
-		<Name as="div"><Truncate lines={1}>{`${this.props.number} ${this.props.name}`}</Truncate></Name>);
-	public renderName = renderWhenTrue(() => <Name as="div"><Truncate lines={1}>{this.props.name}</Truncate></Name>);
+		<Name as="div">{`${this.props.number} ${this.props.name}`}</Name>);
+	public renderName = renderWhenTrue(() => <Name as="div">{this.props.name}</Name>);
 	public renderClosedMessage = renderWhenTrue(() => <ActionMessage content="This issue is now closed" />);
 
 	public renderThumbnail = renderWhenTrue(() => (

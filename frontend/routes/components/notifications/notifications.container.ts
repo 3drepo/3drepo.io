@@ -21,13 +21,26 @@ import { createStructuredSelector } from 'reselect';
 
 import { withRouter } from 'react-router';
 import { selectCurrentUser } from '../../../modules/currentUser';
-import { selectDrawerOpenState, selectNotifications, NotificationsActions  } from '../../../modules/notifications';
+import { selectDrawerOpenState, selectHasNotificationsLastWeek,
+	selectHasNotificationsThisWeek, selectHasNotificationsUntilLastWeekOnly, selectHasOlderNotifications,
+	selectHasOnlyOlderNotifications, selectLastWeeksNotifications, selectNotifications,
+	selectOlderNotifications, selectThisWeeksNotifications, selectUnreadCount,
+	NotificationsActions } from '../../../modules/notifications';
 import { Notifications } from './notifications.component';
 
 const mapStateToProps = createStructuredSelector({
 	notifications: selectNotifications,
 	currentUser: selectCurrentUser,
-	drawerOpened: selectDrawerOpenState
+	drawerOpened: selectDrawerOpenState,
+	unreadCount: selectUnreadCount,
+	thisWeeksNotifications: selectThisWeeksNotifications,
+	lastWeeksNotifications: selectLastWeeksNotifications,
+	olderNotifications: selectOlderNotifications,
+	hasNotificationsThisWeek: selectHasNotificationsThisWeek,
+	hasNotificationsLastWeek: selectHasNotificationsLastWeek,
+	hasOlderNotifications: selectHasOlderNotifications,
+	hasNotificationsUntilLastWeekOnly: selectHasNotificationsUntilLastWeekOnly,
+	hasOnlyOlderNotifications: selectHasOnlyOlderNotifications
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
