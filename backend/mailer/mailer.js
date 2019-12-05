@@ -175,9 +175,15 @@ function sendSubscriptionSuspendedEmail(to, data) {
 }
 
 function sendPaymentErrorEmail(data) {
-
 	const template = require("./templates/paymentError");
 	return sendEmail(template, config.contact.email, data);
+}
+
+function sendTeamspaceInvitation(to, data) {
+	data.url = getURL("signup");
+
+	const template = require("./templates/invitedToTeamspace");
+	return sendEmail(template, to, data);
 }
 
 function sendModelInvitation(to, data) {
@@ -227,5 +233,6 @@ module.exports = {
 	sendImportError,
 	sendNewUser,
 	sendQueueFailedEmail,
-	sendFileMissingError
+	sendFileMissingError,
+	sendTeamspaceInvitation
 };

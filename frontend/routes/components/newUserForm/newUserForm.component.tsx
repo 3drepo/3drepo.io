@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { ReactNodeArray } from 'react';
 import Autosuggest from 'react-autosuggest';
 
 import Checkbox from '@material-ui/core/Checkbox';
@@ -29,14 +29,25 @@ import Paper from '@material-ui/core/Paper';
 import { JobItem } from '../jobItem/jobItem.component';
 import { UserItem } from '../userItem/userItem.component';
 
+import { renderWhenTrue } from '../../../helpers/rendering';
 import {
-	Container, EmptySelectValue, SaveButton, StyledSelect, StyledTextField, SuggestionsList, Title
+	Container,
+	EmptySelectValue,
+	InvitationModeLink,
+	SaveButton,
+	StyledSelect,
+	StyledTextField,
+	SuggestionsList,
+	Title,
+	UserNotExistsButton,
+	UserNotExistsContainer
 } from './newUserForm.styles';
 
 interface IProps {
-	title: string;
+	title: string | ReactNodeArray;
 	jobs: any[];
 	users: any[];
+	onInvitationOpen: (email, job, isAdmin) => void;
 	onSave: (user) => void;
 	onCancel: () => void;
 	clearSuggestions: () => void;
@@ -47,19 +58,21 @@ interface IState {
 	name: string;
 	job: string;
 	isAdmin: boolean;
+	userNotExists: boolean;
 }
 
-export class NewUserForm extends React.PureComponent<IProps, any> {
+export class NewUserForm extends React.PureComponent<IProps, IState> {
 	public state = {
 		name: '',
 		job: '',
-		isAdmin: false
+		isAdmin: false,
+		userNotExists: false
 	};
 
 	private popperNode = null;
 
 	public handleChange = (field) => (event) => {
-		this.setState({[field]: event.target.value || ''} as any);
+		this.setState({[field]: event.target.value || '', userNotExists: false} as any);
 	}
 
 	public handlePermissionsChange = (event, isAdmin) => {
@@ -78,6 +91,10 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 				</MenuItem>
 			);
 		});
+	}
+
+	public setUserNotExists = (userNotExists) => {
+		this.setState({ userNotExists });
 	}
 
 	public renderInputComponent = (inputProps) => {
@@ -109,6 +126,10 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 		this.props.getUsersSuggestions(value);
 	}
 
+	public openInvitationDialog = () => {
+		this.props.onInvitationOpen(this.state.name, this.state.job, this.state.isAdmin);
+	}
+
 	public renderUserSuggestion = (suggestion, {query, isHighlighted}) => {
 		return (
 			<MenuItem selected={isHighlighted} component="div">
@@ -132,6 +153,13 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 			</Paper>
 		</SuggestionsList>
 	)
+
+	public renderUserNotFoundMessage = renderWhenTrue(() => (
+		<UserNotExistsContainer>
+			User not found.
+			<UserNotExistsButton onClick={this.openInvitationDialog}>Send invitation?</UserNotExistsButton>
+		</UserNotExistsContainer>
+	));
 
 	public render() {
 		const { clearSuggestions, jobs, users, title } = this.props;
@@ -188,19 +216,22 @@ export class NewUserForm extends React.PureComponent<IProps, any> {
 						}
 						label="Add as Teamspace Admin"
 					/>
-
+					{this.renderUserNotFoundMessage(this.state.userNotExists)}
 					<Grid
 						container
 						direction="row">
 						<SaveButton
 							variant="contained"
 							color="secondary"
-							disabled={!this.state.name || !this.state.job || this.state.job.length === 0}
+							disabled={this.state.userNotExists || !this.state.name || !this.state.job || this.state.job.length === 0}
 							aria-label="Save"
 							onClick={this.handleSave}>
 							+ Add user
 						</SaveButton>
 					</Grid>
+					<InvitationModeLink onClick={this.openInvitationDialog}>
+						Invite to 3D Repo...
+					</InvitationModeLink>
 				</Grid>
 			</Container>
 		);

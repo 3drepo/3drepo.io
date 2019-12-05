@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,30 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNodeArray } from 'react';
+import api from './';
 
-import { Container, Content, Footer } from './userManagementTab.styles';
+/**
+ * Get invitations
+ * @param teamspace
+ */
+export const fetchInvitations = (teamspace) => {
+	return api.get(`${teamspace}/invitations`);
+};
 
-interface IProps {
-	children: React.ReactChild;
-	footerLabel?: string | ReactNodeArray;
-	withHeader?: boolean;
-}
+/**
+ * Create/Update invitations
+ * @param teamspace
+ */
+export const sendInvitation = (teamspace, invitation) => {
+	return api.post(`${teamspace}/invitations`, invitation);
+};
 
-export const UserManagementTab = (props: IProps) => {
-	const {footerLabel, children} = props;
-	return (
-		<>
-			<Container
-				container
-				direction="column"
-				alignItems="stretch"
-				wrap="nowrap"
-				justify="space-between"
-			>
-				<Content item header={props.withHeader}>{children}</Content>
-				{footerLabel && (<Footer item>{footerLabel}</Footer>)}
-			</Container>
-		</>
-	);
+/**
+ * Delete invitation
+ * @param teamspace
+ */
+export const removeInvitation = (teamspace, email) => {
+	return api.delete(`${teamspace}/invitations/${email}`);
 };

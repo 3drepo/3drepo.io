@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,38 +16,27 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import {
-	selectCurrentTeamspace,
-	selectIsPending,
-	selectIsTeamspaceAdmin,
+	selectInvitations,
 	UserManagementActions
-} from '../../modules/userManagement';
-import { UserManagement } from './userManagement.component';
-
-import { selectTeamspacesWithAdminAccess } from '../../modules/teamspaces/teamspaces.selectors';
-
-import {
-	selectCurrentTeamspace as selectDefaultTeamspace,
-	selectCurrentUser
-} from '../../modules/currentUser';
-import { TeamspacesActions } from '../../modules/teamspaces';
+} from '../../../modules/userManagement';
+import { InvitationsDialog } from './invitationsDialog.component';
 
 const mapStateToProps = createStructuredSelector({
-	defaultTeamspace: selectDefaultTeamspace,
-	selectedTeamspace: selectCurrentTeamspace,
-	teamspaces: selectTeamspacesWithAdminAccess,
-	isTeamspaceAdmin: selectIsTeamspaceAdmin,
-	isLoadingTeamspace: selectIsPending,
-	currentUser: selectCurrentUser,
+	invitations: selectInvitations
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchTeamspaces: TeamspacesActions.fetchTeamspaces,
-	onTeamspaceChange: UserManagementActions.fetchTeamspaceDetails
+	removeInvitation: UserManagementActions.removeInvitation
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(UserManagement));
+export default withRouter(
+	connect(
+		mapStateToProps,
+		mapDispatchToProps
+	)(InvitationsDialog)
+);

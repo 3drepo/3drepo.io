@@ -15,36 +15,46 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Grid from '@material-ui/core/Grid';
+import ButtonBase from '@material-ui/core/Button';
 import styled from 'styled-components';
-
 import { COLOR } from '../../../styles';
 
-const FOOTER_HEIGHT = 45;
-const FOOTER_HEIGHT_WITH_HEADER = 145;
-
-interface IContent {
-	withHeader: boolean;
-}
-
-export const Container = styled(Grid)`
-	height: 100%;
-	overflow: hidden;
-	background-color: rgba(250, 250, 250, .89);
+export const Container = styled.div`
+	width: 400px;
 `;
 
-export const Content = styled(Grid)<IContent>`
-	max-height: calc(100% - ${(props) => props.header ? FOOTER_HEIGHT_WITH_HEADER : FOOTER_HEIGHT}px);
-	flex: 1;
-`;
-
-export const Footer = styled(Grid)`
-	padding: 16px 24px;
-	font-size: 14px;
-	color: ${COLOR.BLACK_30};
-	border-top: 1px solid ${COLOR.BLACK_6};
-	height: ${FOOTER_HEIGHT}px;
+export const List = styled.div`
+	padding: 8px 0 12px;
+	max-height: 40vh;
+	overflow: auto;
 	display: flex;
-	justify-content: flex-end;
-	align-items: center;
+	flex-direction: column;
 `;
+
+export const Footer = styled.div`
+	padding: 12px 25px;
+	padding-bottom: 18px;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+`;
+
+export const Invitation = styled.div`
+	width: 100%;
+	border-bottom: 1px solid ${COLOR.BLACK_6};
+	padding: 10px 25px;
+	padding-right: 18px;
+	box-sizing: border-box;
+	font-size: 14px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+`;
+
+export const CancelButton = styled(ButtonBase)`
+	&& {
+		margin-right: 10px;
+	}
+`;
+
+export const Actions = styled.div``;
