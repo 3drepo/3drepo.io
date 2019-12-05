@@ -100,6 +100,7 @@ export const UserNotExistsContainer = styled.div`
 const linkStyles = css`
 	color: ${COLOR.PRIMARY_MAIN};
 	border: none;
+	background-color: transparent;
 	text-decoration: underline;
 	text-align: left;
 	padding: 0;
@@ -115,5 +116,4 @@ export const UserNotExistsButton = styled.button`
 export const InvitationModeLink = styled.button`
 	${linkStyles};
 	margin-top: 12px;
-	background-color: transparent;
 `;
