@@ -20,7 +20,7 @@ import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import * as API from '../../services/api';
 import { selectCurrentUser } from '../currentUser';
-import { DialogActions } from '../dialog/dialog.redux';
+import { DialogActions } from '../dialog';
 import { JobsActions } from '../jobs';
 import { SnackbarActions } from '../snackbar';
 import { selectProjects, selectTeamspacesWithAdminAccess } from '../teamspaces';
@@ -28,6 +28,7 @@ import {
 	selectCurrentProject,
 	selectCurrentTeamspace,
 	selectInvitations,
+	selectUserNotExists,
 	UserManagementActions,
 	UserManagementTypes,
 } from '../userManagement';
@@ -71,6 +72,11 @@ export function* fetchTeamspaceDetails({ teamspace }) {
 
 export function* addUser({ user }) {
 	try {
+		const isUserNotExists = yield select(selectUserNotExists);
+		if (isUserNotExists) {
+			yield put(UserManagementActions.setUserNotExists(false));
+		}
+
 		const teamspace = yield select(selectCurrentTeamspace);
 		const { data } = yield API.addUser(teamspace, user);
 		const currentUser = yield select(selectCurrentUser);
