@@ -89,6 +89,7 @@ interface IProps {
 	invitationsCount: number;
 	userNotExists?: boolean;
 	currentTeamspace?: string;
+	selectedTeamspace: string;
 	addUser: (user) => void;
 	removeUser: (username) => void;
 	updateJob: (username, job) => void;
@@ -96,6 +97,7 @@ interface IProps {
 	onUsersSearch: (searchText) => void;
 	clearUsersSuggestions: () => void;
 	showDialog: (config: any) => void;
+	fetchQuotaAndInvitations: (teamspace) => void;
 }
 
 interface IState {
@@ -193,8 +195,8 @@ export class Users extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement)
-			.parentNode;
+		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).parentNode;
+		this.props.fetchQuotaAndInvitations(this.props.selectedTeamspace);
 		const preparedJobs = getPreparedJobs(this.props.jobs);
 
 		this.setState({
@@ -207,6 +209,10 @@ export class Users extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps) {
 		const changes = {} as any;
+
+		if (prevProps.selectedTeamspace !== this.props.selectedTeamspace) {
+			this.props.fetchQuotaAndInvitations(this.props.selectedTeamspace);
+		}
 
 		const jobsChanged = !isEqual(prevProps.jobs, this.props.jobs);
 		if (jobsChanged) {

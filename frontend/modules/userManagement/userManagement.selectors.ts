@@ -16,22 +16,30 @@
  */
 
 import { pick, values } from 'lodash';
+import { matchPath } from 'react-router';
 import { createSelector } from 'reselect';
-import { selectModels as selectModelsMap } from '../teamspaces';
-import { getExtendedModelPermissions, getExtendedProjectPermissions } from './userManagement.helpers';
+import { ROUTES } from '../../constants/routes';
+import { selectCurrentUser } from '../currentUser';
+import { selectLocation } from '../router/router.selectors';
+import { selectModels as selectModelsMap, selectTeamspaces } from '../teamspaces';
+import { getExtendedModelPermissions, getExtendedProjectPermissions, prepareUserData } from './userManagement.helpers';
 
 export const selectUserManagementDomain = (state) => ({ ...state.userManagement });
-
-export const selectUsers = createSelector(
-	selectUserManagementDomain, (state) => state.users
-);
 
 export const selectIsPending = createSelector(
 	selectUserManagementDomain, (state) => state.isPending
 );
 
 export const selectCurrentTeamspace = createSelector(
-	selectUserManagementDomain, (state) => state.selectedTeamspace
+	selectLocation, (location) =>  {
+		const userManagementParams = matchPath(location.pathname, { path: ROUTES.USER_MANAGEMENT_TEAMSPACE });
+		return ((userManagementParams || {}).params || {}).teamspace;
+	}
+);
+
+export const selectUsers = createSelector(
+	selectUserManagementDomain, selectCurrentTeamspace, selectCurrentUser,
+		({users}, teamspace, {username}) => users.map(prepareUserData.bind(null, teamspace, username))
 );
 
 export const selectUsersSuggestions = createSelector(
@@ -73,7 +81,8 @@ export const selectExtendedModelPermissions = createSelector(
 );
 
 export const selectIsTeamspaceAdmin = createSelector(
-	selectUserManagementDomain, (state) => state.isTeamspaceAdmin
+	selectCurrentTeamspace, selectTeamspaces,
+		(currentTeamspace, teamspaces) => Boolean((teamspaces[currentTeamspace] || {}).isAdmin)
 );
 
 export const selectCollaboratorLimit = createSelector(

@@ -1,6 +1,7 @@
 import { first, get } from 'lodash';
 import { MODEL_ROLES_TYPES } from '../../constants/model-permissions';
 import { PROJECT_ROLES_TYPES } from '../../constants/project-permissions';
+import {TEAMSPACE_PERMISSIONS} from '../../constants/teamspace-permissions';
 
 /**
  * Bind model permissions with members data
@@ -49,4 +50,18 @@ export const getExtendedProjectPermissions = (currentUsers = [], project = { per
 		}
 		return extendedPermissions;
 	}, []);
+};
+
+/**
+ * Add additional fields to user data
+ * @param users
+ * @returns
+ */
+export const prepareUserData = (teamspaceName, currentUser, userData): object => {
+	return {
+		...userData,
+		isAdmin: userData.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
+		isOwner: teamspaceName === userData.user,
+		isCurrentUser: currentUser === userData.user
+	};
 };

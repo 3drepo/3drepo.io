@@ -22,11 +22,13 @@ import {TEAMSPACE_PERMISSIONS} from '../../constants/teamspace-permissions';
 import { sortByField } from '../../helpers/sorting';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
-	fetchTeamspaceDetails: ['teamspace'],
-	fetchTeamspaceDetailsSuccess: ['teamspace', 'users', 'invitations', 'currentUser', 'collaboratorLimit'],
+	fetchQuotaAndInvitations: [],
+	fetchQuotaAndInvitationsSuccess: [ 'invitations', 'collaboratorLimit'],
+	fetchTeamspaceUsers: [],
+	fetchTeamspaceUsersSuccess: ['users'],
 	setPendingState: ['isPending'],
 	addUser: ['user'],
-	addUserSuccess: ['user', 'currentUser'],
+	addUserSuccess: ['user'],
 	removeUser: ['username'],
 	removeUserCascade: ['username'],
 	removeUserSuccess: ['username'],
@@ -56,7 +58,6 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 }, { prefix: 'USER_MANAGEMENT/' });
 
 export const INITIAL_STATE = {
-	selectedTeamspace: null,
 	projects: [],
 	permissions: [],
 	models: [],
@@ -77,20 +78,6 @@ export const INITIAL_STATE = {
 };
 
 /**
- * Add additional fields to user data
- * @param users
- * @returns
- */
-const prepareUserData = (teamspaceName, currentUser, userData): object => {
-	return {
-		...userData,
-		isAdmin: userData.permissions.includes(TEAMSPACE_PERMISSIONS.admin.key),
-		isOwner: teamspaceName === userData.user,
-		isCurrentUser: currentUser === userData.user
-	};
-};
-
-/**
  * Bind to users proper permissions` values
  * @param currentUsers
  * @param projectPermissions
@@ -107,21 +94,12 @@ export const setProjectPermissionsToUsers = (state, { projectPermissions }) => {
 	return {...state, users: usersWithPermissions};
 };
 
-export const fetchTeamspaceDetailsSuccess = (state = INITIAL_STATE, action) => {
-	const { teamspace, currentUser, invitations } = action;
-	const users = action.users.map(prepareUserData.bind(null, teamspace.name, currentUser));
+export const fetchQuotaAndInvitationsSuccess = (state = INITIAL_STATE, {invitations, collaboratorLimit}) => {
+	return { ...state, invitations, collaboratorLimit };
+};
 
-	return {
-		...INITIAL_STATE,
-		users,
-		invitations,
-		isPending: false,
-		...pick(teamspace, ['models', 'permissions', 'isAdmin', 'fedModels']),
-		projects: sortByField(teamspace.projects, { order: 'asc', config: { field: 'name' } }),
-		selectedTeamspace: teamspace.account,
-		isTeamspaceAdmin: teamspace.isAdmin,
-		collaboratorLimit: action.collaboratorLimit
-	};
+export const fetchTeamspaceUsersSuccess = (state = INITIAL_STATE, { users }) => {
+	return { ...state, users };
 };
 
 export const setPendingState = (state = INITIAL_STATE, { isPending }) => {
@@ -129,11 +107,7 @@ export const setPendingState = (state = INITIAL_STATE, { isPending }) => {
 };
 
 export const addUserSuccess = (state = INITIAL_STATE, { user, currentUser }) => {
-	const users = [
-		...state.users,
-		prepareUserData(state.selectedTeamspace, currentUser, user)
-	];
-	return {...state, users};
+	return {...state, users: [ ...state.users, user ] };
 };
 
 export const removeUserSuccess = (state = INITIAL_STATE, { username }) => {
@@ -172,11 +146,10 @@ export const updateUserJobSuccess = (state = INITIAL_STATE, { username, job }) =
 	return {...state, users};
 };
 
-export const updatePermissionsSuccess = (state = INITIAL_STATE, { permissions, currentUser }) => {
+export const updatePermissionsSuccess = (state = INITIAL_STATE, { permissions }) => {
 	const users = [...state.users].map((userData) => {
 		if (userData.user === permissions.user) {
-			const newUserData = {...userData, ...permissions};
-			return prepareUserData(state.selectedTeamspace, currentUser, newUserData);
+			return {...userData, ...permissions};
 		}
 
 		return userData;
@@ -254,7 +227,9 @@ export const updateModelPermissionsSuccess = (state = INITIAL_STATE, { updatedMo
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
-	[UserManagementTypes.FETCH_TEAMSPACE_DETAILS_SUCCESS]: fetchTeamspaceDetailsSuccess,
+	[UserManagementTypes.FETCH_QUOTA_AND_INVITATIONS_SUCCESS]: fetchQuotaAndInvitationsSuccess,
+	[UserManagementTypes.FETCH_TEAMSPACE_USERS_SUCCESS]: fetchTeamspaceUsersSuccess,
+
 	[UserManagementTypes.SET_PENDING_STATE]: setPendingState,
 	[UserManagementTypes.ADD_USER_SUCCESS]: addUserSuccess,
 	[UserManagementTypes.REMOVE_USER_SUCCESS]: removeUserSuccess,
