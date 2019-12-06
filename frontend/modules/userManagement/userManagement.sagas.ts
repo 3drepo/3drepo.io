@@ -70,6 +70,7 @@ export function* fetchTeamspaceUsers() {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const {data: users} = yield API.fetchUsers(teamspace);
 		yield put(UserManagementActions.fetchTeamspaceUsersSuccess(users));
+		yield put(UserManagementActions.setPendingState(false));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'teamspace members', error));
 		yield put(UserManagementActions.setPendingState(false));

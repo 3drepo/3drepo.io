@@ -51,7 +51,7 @@ export const selectProjects = createSelector(
 );
 
 export const selectCurrentProject = createSelector(
-	selectUserManagementDomain, (state) => state.currentProject
+	selectCurrentTeamspace, (state) => state.currentProject
 );
 
 export const selectExtendedProjectPermissions = createSelector(
