@@ -34,7 +34,7 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	removeUserSuccess: ['username'],
 	setUserNotExists: ['userNotExists'],
 	setTeamspace: ['teamspace'],
-	updateJob: ['username', 'job'],
+	updateUserJob: ['username', 'job'],
 	updateUserJobSuccess: ['username', 'job'],
 	updatePermissions: ['permissions'],
 	updatePermissionsSuccess: ['permissions', 'currentUser'],

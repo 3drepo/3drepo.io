@@ -335,7 +335,7 @@ export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.REMOVE_USER_CASCADE, removeUserCascade);
 	yield takeLatest(UserManagementTypes.UPDATE_PERMISSIONS, updatePermissions);
 	yield takeLatest(UserManagementTypes.GET_USERS_SUGGESTIONS, getUsersSuggestions);
-	yield takeLatest(UserManagementTypes.UPDATE_JOB, updateUserJob);
+	yield takeLatest(UserManagementTypes.UPDATE_USER_JOB, updateUserJob);
 	yield takeLatest(UserManagementTypes.REMOVE_INVITATION, removeInvitation);
 	yield takeLatest(UserManagementTypes.SEND_INVITATION, sendInvitation);
 

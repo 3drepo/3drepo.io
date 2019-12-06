@@ -92,7 +92,7 @@ interface IProps {
 	selectedTeamspace: string;
 	addUser: (user) => void;
 	removeUser: (username) => void;
-	updateJob: (username, job) => void;
+	updateUserJob: (username, job) => void;
 	updatePermissions: (permissions) => void;
 	onUsersSearch: (searchText) => void;
 	clearUsersSuggestions: () => void;
@@ -148,7 +148,7 @@ export class Users extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleChange = (user, field) => (event, value) => cond([
-		[matches('job'), () => this.props.updateJob(user.user, value)],
+		[matches('job'), () => this.props.updateUserJob(user.user, value)],
 		[matches('permissions'), () => this.onPermissionsChange(user.user, value)]
 	])(field)
 
