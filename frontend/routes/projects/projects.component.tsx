@@ -26,8 +26,8 @@ import { Route } from 'react-router-dom';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
 import { ModelsPermissions } from '../modelsPermissions';
-import { ProjectsPermissions } from '../projectsPermissions';
 import { Container, IconLeft, IconRight, Options, SelectContainer, SwitchButton } from './projects.styles';
+import { ProjectsPermissions } from './projectsPermissions';
 
 export const PERMISSIONS_VIEWS = {
 	PROJECTS: 0,
@@ -41,8 +41,9 @@ interface IProps {
 	location: any;
 	history: any;
 	projects: any[];
-	currentProject: any;
+	project: any;
 	users: any[];
+	selectedProject?: string;
 	onProjectChange?: (project) => void;
 }
 
@@ -52,7 +53,6 @@ interface IState {
 	projectsPermissions: any[];
 	modelsPermissions: any[];
 	selectedModels: any[];
-	selectedProject: string;
 }
 
 export class Projects extends React.PureComponent<IProps, IState> {
@@ -96,9 +96,6 @@ export class Projects extends React.PureComponent<IProps, IState> {
 
 	public onProjectChange = (event, projectName) => {
 		this.updateUrlParams({project: projectName});
-		if (this.props.onProjectChange) {
-			this.props.onProjectChange(projectName);
-		}
 	}
 
 	public getFooterLabel = (currentView) => {
@@ -107,39 +104,15 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const {projects, location} = this.props;
-		const state = {
-			projectsItems: getProjectsItems(projects)
-		} as any;
-
-		const queryParams = queryString.parse(location.search);
-
-		const project = projects.find(({ name }) => name === queryParams.project);
-
-		if (project) {
-			state.selectedProject = queryParams.project;
-			this.onProjectChange(null, queryParams.project);
-		} else {
-			state.selectedProject = '';
+		if (this.props.selectedProject) {
+			this.props.onProjectChange(this.props.selectedProject);
 		}
-		this.setState(state);
 	}
 
-	public componentDidUpdate(prevProps, prevState) {
-		const changes = {} as IState;
-
-		const projectsChanged = !isEqual(prevProps.projects, this.props.projects);
-		if (projectsChanged) {
-			changes.projectsItems = getProjectsItems(this.props.projects);
-		}
-
-		const selectedProjectChanged = this.state.selectedProject !== prevState.selectedProject;
+	public componentDidUpdate(prevProps) {
+		const selectedProjectChanged = this.props.selectedProject !== prevProps.selectedProject;
 		if (selectedProjectChanged && this.props.onProjectChange) {
-			this.props.onProjectChange(this.state.selectedProject);
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
+			this.props.onProjectChange(this.props.selectedProject);
 		}
 	}
 
@@ -151,8 +124,8 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	)
 
 	public render() {
-		const { match } = this.props;
-		const {currentView, selectedProject, projectsItems} = this.state;
+		const { match, projects, selectedProject } = this.props;
+		const { currentView } = this.state;
 		const footerLabel = this.getFooterLabel(currentView);
 		return (
 			<Container>
@@ -170,7 +143,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 										Project
 									</InputLabel>
 									<CellSelect
-										items={projectsItems}
+										items={getProjectsItems(projects)}
 										value={selectedProject}
 										placeholder="Select a project"
 										disabledPlaceholder

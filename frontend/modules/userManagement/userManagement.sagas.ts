@@ -26,9 +26,9 @@ import { SnackbarActions } from '../snackbar';
 import { selectModels, selectProjects, TeamspacesTypes } from '../teamspaces';
 
 import {
-	selectCurrentProject,
 	selectCurrentTeamspace,
 	selectInvitations,
+	selectProject,
 	selectUserNotExists,
 	UserManagementActions,
 	UserManagementTypes,
@@ -233,7 +233,7 @@ export function* fetchProject({ project }) {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const { data: projectData } = yield API.fetchProject(teamspace, project);
 
-		yield put(UserManagementActions.setProject(projectData));
+		yield put(UserManagementActions.fetchProjectSuccess(projectData));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'project permissions', error));
 	}
@@ -242,7 +242,7 @@ export function* fetchProject({ project }) {
 export function* updateProjectPermissions({ permissions }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		const {name} = yield select(selectCurrentProject);
+		const {name} = yield select(selectProject);
 		const project = {name, permissions};
 		yield API.updateProject(teamspace, project.name, project);
 
@@ -278,7 +278,7 @@ export function* fetchModelsPermissions({ models }) {
 
 export function* updateModelsPermissionsPre({ modelsWithPermissions, permissions }) {
 	try {
-		const currentProject = yield select(selectCurrentProject);
+		const currentProject = yield select(selectProject);
 		const permissionlessModels = [];
 		for (let index = 0; index < modelsWithPermissions.length; index++) {
 			const selectedModel = modelsWithPermissions[index];

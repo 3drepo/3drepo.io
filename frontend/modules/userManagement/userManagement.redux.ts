@@ -40,7 +40,7 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	getUsersSuggestionsSuccess: ['suggestions'],
 	clearUsersSuggestions: [],
 	fetchProject: ['project'],
-	setProject: ['project'],
+	fetchProjectSuccess: ['project'],
 	updateProjectPermissions: ['permissions'],
 	updateProjectPermissionsSuccess: ['permissions'],
 	fetchModelsPermissions: ['models'],
@@ -56,17 +56,12 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 }, { prefix: 'USER_MANAGEMENT/' });
 
 export const INITIAL_STATE = {
-	projects: [],
 	models: [],
 	users: [],
 	invitations: [],
 	usersSuggestions: [],
 	isPending: true,
-	currentProject: {
-		permissions: [],
-		modelsPermissions: [],
-		currentModels: []
-	},
+	project: null,
 	userNotExists: false
 };
 
@@ -163,16 +158,14 @@ export const setUserNotExists = (state = INITIAL_STATE, { userNotExists }) => {
 	return {...state, userNotExists};
 };
 
-export const setProject = (state = INITIAL_STATE, { project }) => {
-	const models = get(state.projects.find(({_id}) => project._id === _id), 'models', []);
-	project.models = [...models];
-	return {...state, currentProject: project};
+export const fetchProjectSuccess = (state = INITIAL_STATE, { project }) => {
+	return {...state, project};
 };
 
 export const updateProjectPermissionsSuccess = (state = INITIAL_STATE, { permissions }) => {
-	const currentProject = {...state.currentProject};
+	const project = {...state.project};
 
-	currentProject.permissions = [...currentProject.permissions].map((currentPermissions) => {
+	project.permissions = project.permissions.map((currentPermissions) => {
 		const updatedPermissions = permissions.find(({user}) => currentPermissions.user === user);
 		if (updatedPermissions) {
 			return updatedPermissions;
@@ -180,43 +173,47 @@ export const updateProjectPermissionsSuccess = (state = INITIAL_STATE, { permiss
 		return currentPermissions;
 	});
 
-	return {...state, currentProject};
+	return {...state, project };
 };
 
 export const fetchModelPermissionsSuccess = (state = INITIAL_STATE, { selectedModels }) => {
-	const permissions = selectedModels.length === 1 ? selectedModels[0].permissions : [];
-	const currentProject = {
-		...omit(state.currentProject, ['currentModels']),
-		modelsPermissions: permissions,
-		currentModels: selectedModels
-	};
-	return {...state, currentProject};
+	return state;
+
+	// const permissions = selectedModels.length === 1 ? selectedModels[0].permissions : [];
+	// const currentProject = {
+	// 	...omit(state.currentProject, ['currentModels']),
+	// 	modelsPermissions: permissions,
+	// 	currentModels: selectedModels
+	// };
+	// return {...state, currentProject};
 };
 
 export const updateModelPermissionsSuccess = (state = INITIAL_STATE, { updatedModels, permissions }) => {
-	const currentProject = {
-		...state.currentProject,
-		currentModels: updatedModels
-	};
-	const onlyOneModelWasChanged = updatedModels.length === 1;
+	return state;
 
-	const modelPermissions = currentProject.currentModels[0].permissions.map(({ user, permission }) => {
-		let updatedPermissionKey = onlyOneModelWasChanged ? permission : 'undefined';
-		const updatedPermissionsData = permissions.find((userPermission) => userPermission.user === user);
+	// const currentProject = {
+	// 	...state.currentProject,
+	// 	currentModels: updatedModels
+	// };
+	// const onlyOneModelWasChanged = updatedModels.length === 1;
 
-		if (updatedPermissionsData) {
-			updatedPermissionKey = updatedPermissionsData.key;
-		}
+	// const modelPermissions = currentProject.currentModels[0].permissions.map(({ user, permission }) => {
+	// 	let updatedPermissionKey = onlyOneModelWasChanged ? permission : 'undefined';
+	// 	const updatedPermissionsData = permissions.find((userPermission) => userPermission.user === user);
 
-		return {
-			user,
-			permission: updatedPermissionKey
-		};
-	});
+	// 	if (updatedPermissionsData) {
+	// 		updatedPermissionKey = updatedPermissionsData.key;
+	// 	}
 
-	currentProject.modelsPermissions = modelPermissions;
+	// 	return {
+	// 		user,
+	// 		permission: updatedPermissionKey
+	// 	};
+	// });
 
-	return {...state, currentProject};
+	// currentProject.modelsPermissions = modelPermissions;
+
+	// return {...state, currentProject};
 };
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -236,7 +233,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.SET_USER_NOT_EXISTS]: setUserNotExists,
 
 	// Project
-	[UserManagementTypes.SET_PROJECT]: setProject,
+	[UserManagementTypes.FETCH_PROJECT_SUCCESS]: fetchProjectSuccess,
 	[UserManagementTypes.UPDATE_PROJECT_PERMISSIONS_SUCCESS]: updateProjectPermissionsSuccess,
 
 	// Models

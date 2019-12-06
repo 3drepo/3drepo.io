@@ -29,8 +29,9 @@ export const getExtendedModelPermissions = (currentUsers = [], modelPermissions 
 	});
 };
 
-export const getExtendedProjectPermissions = (currentUsers = [], project = { permissions: [] }) => {
-	return project.permissions.reduce((extendedPermissions, { user, permissions = [] }) => {
+export const getExtendedProjectPermissions = (currentUsers = [], project  ) => {
+	const projectPermissions =  !project ? [] : project.permissions;
+	return projectPermissions.reduce((extendedPermissions, { user, permissions = [] }) => {
 		const userData = currentUsers.find((userDetails) => userDetails.user === user);
 
 		if (userData) {

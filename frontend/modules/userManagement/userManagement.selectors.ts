@@ -16,12 +16,13 @@
  */
 
 import { pick, values } from 'lodash';
+import * as queryString from 'query-string';
 import { matchPath } from 'react-router';
 import { createSelector } from 'reselect';
 import { ROUTES } from '../../constants/routes';
 import { selectCurrentUser } from '../currentUser';
 import { selectLocation } from '../router/router.selectors';
-import { selectModels as selectModelsMap, selectTeamspaces } from '../teamspaces';
+import { selectModels as selectModelsMap, selectProjectsList, selectTeamspaces } from '../teamspaces';
 import { getExtendedModelPermissions, getExtendedProjectPermissions, prepareUserData } from './userManagement.helpers';
 
 export const selectUserManagementDomain = (state) => ({ ...state.userManagement });
@@ -46,38 +47,47 @@ export const selectUsersSuggestions = createSelector(
 	selectUserManagementDomain, (state) => state.usersSuggestions
 );
 
-export const selectProjects = createSelector(
-	selectUserManagementDomain, (state) => state.projects
+export const selectProject = createSelector(
+	selectUserManagementDomain, (state) => state.project
 );
 
-export const selectCurrentProject = createSelector(
-	selectCurrentTeamspace, (state) => state.currentProject
-);
-
-export const selectExtendedProjectPermissions = createSelector(
+export const selectProjectPermissions = createSelector(
 	selectUsers,
-	selectCurrentProject,
+	selectProject,
 	getExtendedProjectPermissions
 );
 
 export const selectModels = createSelector(
 	selectUserManagementDomain, selectModelsMap, (state, modelsMap) => {
-		return values(pick(modelsMap, (state.currentProject.models || [])));
+		return values(pick(modelsMap, (state.models || [])));
 	}
 );
 
-export const selectCurrentModels = createSelector(
-	selectUserManagementDomain, (state) => state.currentProject.currentModels || []
+// export const selectCurrentModels = createSelector(
+// 	selectUserManagementDomain, (state) => state.currentProject.currentModels || []
+// );
+
+// export const selectModelsPermissions = createSelector(
+// 	selectUserManagementDomain, (state) => state.currentProject.modelsPermissions
+// );
+
+// export const selectExtendedModelPermissions = createSelector(
+// 	selectExtendedProjectPermissions,
+// 	selectModelsPermissions,
+// 	getExtendedModelPermissions
+// );
+
+export const selectProjects = createSelector(
+	selectProjectsList, selectCurrentTeamspace,
+		(projects,  currentTeamspace) => projects.filter(({teamspace}) =>  teamspace === currentTeamspace)
 );
 
-export const selectModelsPermissions = createSelector(
-	selectUserManagementDomain, (state) => state.currentProject.modelsPermissions
-);
-
-export const selectExtendedModelPermissions = createSelector(
-	selectExtendedProjectPermissions,
-	selectModelsPermissions,
-	getExtendedModelPermissions
+export const selectUrlQueryProject = createSelector(
+	selectLocation, selectProjects , (location, projects) =>  {
+		const { project} = queryString.parse(location.search);
+		const projectFound = projects.find(({ name }) => name === project);
+		return projectFound ? project : null;
+	}
 );
 
 export const selectIsTeamspaceAdmin = createSelector(

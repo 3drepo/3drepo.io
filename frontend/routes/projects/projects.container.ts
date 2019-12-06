@@ -20,15 +20,17 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import {
-	selectCurrentProject,
+	selectProject,
 	selectProjects,
+	selectUrlQueryProject,
 	UserManagementActions
 } from '../../modules/userManagement';
 import { Projects } from './projects.component';
 
 const mapStateToProps = createStructuredSelector({
 	projects: selectProjects,
-	currentProject: selectCurrentProject
+	project: selectProject,
+	selectedProject: selectUrlQueryProject
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

@@ -17,9 +17,9 @@
 
 import React from 'react';
 
-import { PROJECT_ROLES_LIST } from '../../constants/project-permissions';
-import { PermissionsTable } from '../components/permissionsTable/permissionsTable.component';
-import { TextOverlay } from '../components/textOverlay/textOverlay.component';
+import { PROJECT_ROLES_LIST } from '../../../constants/project-permissions';
+import { PermissionsTable } from '../../components/permissionsTable/permissionsTable.component';
+import { TextOverlay } from '../../components/textOverlay/textOverlay.component';
 import { Container } from './projectsPermissions.styles';
 
 interface IProps {
@@ -29,33 +29,24 @@ interface IProps {
 }
 
 interface IState {
-	currentUser: any;
 	selectedUsers: any[];
 }
 
 export class ProjectsPermissions extends React.PureComponent<IProps, any> {
-	public static getDerivedStateFromProps(nextProps) {
-		return {
-			currentUser: (nextProps.permissions || []).find(({isCurrentUser}) => isCurrentUser)
-		};
-	}
-
 	public state = {
-		currentUser: {},
 		selectedUsers: []
 	};
 
 	public hasDisabledPermissions = (row) => {
-		const {currentUser} = this.state as IState;
 		const passBaseValidation = row.disabled || row.isOwner || row.isAdmin || row.isCurrentUser;
 
 		if (passBaseValidation) {
 			return true;
 		}
 
-		if (!passBaseValidation && row.isProjectAdmin) {
-			return !(currentUser.isAdmin || currentUser.isOwner || currentUser.isProjectAdmin);
-		}
+		// if (!passBaseValidation && row.isProjectAdmin) {
+		// 	return !(currentUser.isAdmin || currentUser.isOwner || currentUser.isProjectAdmin);
+		// }
 
 		return false;
 	}
