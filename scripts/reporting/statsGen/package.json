@@ -1,0 +1,13 @@
+{
+  "name": "3DRepoStatsGen",
+  "version": "1.0.0",
+  "description": "Statistics generator base on a 3D Repo database",
+  "main": "genStats.js",
+  "author": "Carmen Fan",
+  "license": "AGPL3",
+  "private": false,
+  "dependencies": {
+    "dateformat": "^3.0.3",
+    "mongodb": "3.3.5"
+  }
+}
