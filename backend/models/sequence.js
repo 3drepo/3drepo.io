@@ -18,6 +18,7 @@
 
 const db = require("../handler/db");
 const utils = require("../utils");
+const History = require("./history");
 const Task = require("./task");
 
 class Sequence {
@@ -83,12 +84,43 @@ class Sequence {
 	}
 
 	async getList(account, model, branch, revision, cleanResponse = false) {
+		
+		const history = await History.getHistory({account, model}, branch, revision);
+
+		if (!history) {
+			return Promise.reject(responseCodes.INVALID_TAG_NAME);
+		}
+		
 		return db.getCollection(account, model + ".sequences").then(_dbCol => {
-			return _dbCol.find().toArray().then(sequences => {
+			return _dbCol.find({"revId": history._id}).toArray().then(sequences => {
+				let taskPromises = [];
+
 				sequences.forEach((sequence) => {
-					this.clean(sequence);
+					if (cleanResponse) {
+						this.clean(sequence);
+					}
+
+					for (let i = 0; sequence["sequence"] && i < sequence["sequence"].length; i++) {
+						for (let j = 0; sequence["sequence"][i]["tasks"] && j < sequence["sequence"][i]["tasks"].length; j++) {
+							const taskPromise = Task.findByUID(
+								account,
+								model,
+								sequence["sequence"][i]["tasks"][j],
+								cleanResponse
+							);
+
+							taskPromises.push(taskPromise);
+							
+							taskPromise.then((task) => {
+								sequence["sequence"][i]["tasks"][j] = task;
+							});
+						}
+					}
 				});
-				return sequences;
+
+				return Promise.all(taskPromises).then(() => {
+					return sequences;
+				});
 			});
 		});
 	}

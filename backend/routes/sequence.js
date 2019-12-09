@@ -35,7 +35,7 @@ const Sequence = require("../models/sequence");
  */
 
 router.get("/sequences/:sequenceId", middlewares.issue.canView, findSequenceById);
-router.get("/sequences", middlewares.issue.canView, listSequences);
+router.get("/revision/master/head/sequences", middlewares.issue.canView, listSequences);
 router.get("/revision/:rid/sequences", middlewares.issue.canView, listSequences);
 
 function listSequences(req, res, next) {
