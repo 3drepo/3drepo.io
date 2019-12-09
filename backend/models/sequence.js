@@ -26,7 +26,7 @@ const Task = require("./task");
 class Sequence {
 
 	clean(toClean, targetType = "[object String]") {
-		const keys = ["_id", "revId"];
+		const keys = ["_id", "rev_id"];
 
 		keys.forEach((key) => {
 			if (toClean[key] && "[object String]" === targetType) {
@@ -56,7 +56,7 @@ class Sequence {
 		}
 
 		return db.getCollection(account, model + ".sequences").then(_dbCol => {
-			return _dbCol.find({"revId": history._id}).toArray().then(sequences => {
+			return _dbCol.find({"rev_id": history._id}).toArray().then(sequences => {
 				const promises = [];
 
 				sequences.forEach((sequence) => {
