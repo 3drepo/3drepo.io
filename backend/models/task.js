@@ -44,19 +44,25 @@ class Task {
 		return toClean;
 	}
 
-	async findByUID(account, model, taskId, cleanResponse = false) {
-		return db.getCollection(account, model + ".tasks").then((_dbCol) => {
-			return _dbCol.findOne({ _id: utils.stringToUUID(taskId) }).then(task => {
+	async findByIds(account, model, taskIds, cleanResponse = false) {
+		if (!taskIds) {
+			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		}
 
-				if (!task) {
+		taskIds = taskIds.map(id => utils.stringToUUID(id));
+
+		return db.getCollection(account, model + ".tasks").then((_dbCol) => {
+			return _dbCol.find({ _id: { "$in": taskIds } }).toArray().then(tasks => {
+
+				if (!tasks) {
 					return Promise.reject(responseCodes.TASK_NOT_FOUND);
 				}
 
 				if (cleanResponse) {
-					this.clean(task);
+					tasks = tasks.map(task => this.clean(task));
 				}
 
-				return task;
+				return tasks;
 			});
 		});
 	}

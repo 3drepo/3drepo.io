@@ -57,7 +57,7 @@ class Sequence {
 
 		return db.getCollection(account, model + ".sequences").then(_dbCol => {
 			return _dbCol.find({"revId": history._id}).toArray().then(sequences => {
-				const taskPromises = [];
+				const promises = [];
 
 				sequences.forEach((sequence) => {
 					if (cleanResponse) {
@@ -65,24 +65,22 @@ class Sequence {
 					}
 
 					for (let i = 0; sequence["sequence"] && i < sequence["sequence"].length; i++) {
-						for (let j = 0; sequence["sequence"][i]["tasks"] && j < sequence["sequence"][i]["tasks"].length; j++) {
-							const taskPromise = Task.findByUID(
-								account,
-								model,
-								sequence["sequence"][i]["tasks"][j],
-								cleanResponse
-							);
+						const tasksPromise = Task.findByIds(
+							account,
+							model,
+							sequence["sequence"][i]["tasks"],
+							cleanResponse
+						);
 
-							taskPromises.push(taskPromise);
+						promises.push(tasksPromise);
 
-							taskPromise.then((task) => {
-								sequence["sequence"][i]["tasks"][j] = task;
-							});
-						}
+						tasksPromise.then((tasks) => {
+							sequence["sequence"][i]["tasks"] = tasks;
+						});
 					}
 				});
 
-				return Promise.all(taskPromises).then(() => {
+				return Promise.all(promises).then(() => {
 					return sequences;
 				});
 			});
