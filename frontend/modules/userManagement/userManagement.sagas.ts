@@ -23,11 +23,11 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { JobsActions } from '../jobs';
 import { SnackbarActions } from '../snackbar';
-import { selectModels, selectProjects, TeamspacesTypes } from '../teamspaces';
 
 import {
 	selectCurrentTeamspace,
 	selectInvitations,
+	selectIsPending,
 	selectProject,
 	selectUserNotExists,
 	UserManagementActions,
@@ -64,10 +64,35 @@ export function* fetchQuotaAndInvitations() {
 	}
 }
 
+export function *fetchJobsAndColors() {
+	const shouldChangePendingState = !(yield select(selectIsPending));
+
+	if (shouldChangePendingState) {
+		yield put(UserManagementActions.setPendingState(true));
+	}
+
+	const teamspace = yield select(selectCurrentTeamspace);
+
+	yield all([
+		put(JobsActions.fetchJobs(teamspace)),
+		put(JobsActions.fetchJobsColors(teamspace))
+	]);
+
+	if (shouldChangePendingState) {
+		yield put(UserManagementActions.setPendingState(false));
+	}
+}
+
 export function* fetchTeamspaceUsers() {
 	try {
 		yield put(UserManagementActions.setPendingState(true));
 		const teamspace = yield select(selectCurrentTeamspace);
+		if (!teamspace) {
+			yield put(UserManagementActions.fetchTeamspaceUsersSuccess([]));
+			yield put(UserManagementActions.setPendingState(false));
+			return;
+		}
+
 		const {data: users} = yield API.fetchUsers(teamspace);
 		yield put(UserManagementActions.fetchTeamspaceUsersSuccess(users));
 		yield put(UserManagementActions.setPendingState(false));
@@ -230,6 +255,11 @@ export function* getUsersSuggestions({ searchText }) {
 // Projects
 export function* fetchProject({ project }) {
 	try {
+		if (!project) {
+			yield put(UserManagementActions.fetchProjectSuccess(null));
+			return;
+		}
+
 		const teamspace = yield select(selectCurrentTeamspace);
 		const { data: projectData } = yield API.fetchProject(teamspace, project);
 
@@ -330,6 +360,8 @@ export function* updateModelsPermissions({ modelsWithPermissions, permissions })
 export default function* UserManagementSaga() {
 	yield takeLatest(UserManagementTypes.FETCH_QUOTA_AND_INVITATIONS, fetchQuotaAndInvitations);
 	yield takeLatest(UserManagementTypes.FETCH_TEAMSPACE_USERS, fetchTeamspaceUsers);
+
+	yield takeLatest(UserManagementTypes.FETCH_JOBS_AND_COLORS, fetchJobsAndColors);
 
 	yield takeLatest(UserManagementTypes.ADD_USER, addUser);
 	yield takeLatest(UserManagementTypes.REMOVE_USER, removeUser);

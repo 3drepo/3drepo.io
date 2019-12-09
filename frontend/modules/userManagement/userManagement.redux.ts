@@ -45,6 +45,7 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	updateProjectPermissionsSuccess: ['permissions'],
 	fetchModelsPermissions: ['models'],
 	fetchModelPermissionsSuccess: ['models'],
+	fetchJobsAndColors: [],
 	updateModelsPermissions: ['modelsWithPermissions', 'permissions'],
 	updateModelsPermissionsPre: ['modelsWithPermissions', 'permissions'],
 	updateModelPermissionsSuccess: ['updatedModels', 'permissions'],
@@ -167,7 +168,7 @@ export const setUserNotExists = (state = INITIAL_STATE, { userNotExists }) => {
 };
 
 export const fetchProjectSuccess = (state = INITIAL_STATE, { project }) => {
-	return {...state, project, models: []};
+	return {...state, project };
 };
 
 export const updateProjectPermissionsSuccess = (state = INITIAL_STATE, { permissions }) => {

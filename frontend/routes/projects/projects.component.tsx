@@ -104,9 +104,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		if (this.props.selectedProject) {
-			this.props.onProjectChange(this.props.selectedProject);
-		}
+		this.props.onProjectChange(this.props.selectedProject);
 	}
 
 	public componentDidUpdate(prevProps) {

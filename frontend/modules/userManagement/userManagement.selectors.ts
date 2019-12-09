@@ -62,7 +62,14 @@ export const selectProjectPermissions = createSelector(
 );
 
 export const selectSelectedModels = createSelector(
-	selectUserManagementDomain, (state) => state.models || []
+	selectUserManagementDomain, selectProject,
+		(state, project) => {
+			if (!project) {
+				return [];
+			}
+
+			return  (state.models || []).filter((m) => project.models.includes(m.model));
+		}
 );
 
 const  mergeEqualPermissions = (permissionsA, permissionsB: any[]) => {
