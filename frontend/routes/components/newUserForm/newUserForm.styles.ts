@@ -20,9 +20,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Popper from '@material-ui/core/Popper';
 import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-import { COLOR } from '../../../styles';
+import { COLOR, FONT_WEIGHT } from '../../../styles';
 
 export const Title = styled.div`
 	font-size: 14px;
@@ -90,4 +90,30 @@ export const SuggestionsList = styled(Popper)`
 	.react-autosuggest__suggestion > div {
 		flex: 1;
 	}
+`;
+
+export const UserNotExistsContainer = styled.div`
+	color: ${COLOR.RED};
+	font-weight: ${FONT_WEIGHT.BOLD};
+`;
+
+const linkStyles = css`
+	color: ${COLOR.PRIMARY_MAIN};
+	border: none;
+	background-color: transparent;
+	text-decoration: underline;
+	text-align: left;
+	padding: 0;
+	outline: none;
+`;
+
+export const UserNotExistsButton = styled.button`
+	${linkStyles};
+	margin-left: 2px;
+	font-weight: inherit;
+`;
+
+export const InvitationModeLink = styled.button`
+	${linkStyles};
+	margin-top: 12px;
 `;

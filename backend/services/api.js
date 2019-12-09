@@ -105,6 +105,8 @@ module.exports.createApp = function () {
 	app.use("/:account", require("../routes/permissionTemplate"));
 	app.use("/:account", require("../routes/accountPermission"));
 
+	app.use("/:account", require("../routes/invitations"));
+
 	// projects handlers
 	app.use("/:account", require("../routes/project"));
 

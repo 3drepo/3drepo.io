@@ -137,7 +137,11 @@
 
 		SIZE_LIMIT: { message: "Single file size exceeded system limit", status: 400 },
 		INVALID_PROJECT_NAME: { message: "Invalid project name", status: 400 },
+		INVALID_PROJECT_ID: { message: "Invalid project id", status: 400 },
+
 		INVALID_MODEL_NAME: { message: "Invalid model name", status: 400 },
+		INVALID_MODEL_ID: { message: "Invalid model id", status: 400 },
+		INVALID_MODEL_PERMISSION: { message: "Invalid model permission role", status: 400 },
 		EMAIL_INVALID: { message: "Invalid email address", status: 400 },
 		ALREADY_LOGGED_IN: { message: "You are already logged in", status: 400 },
 
@@ -183,6 +187,7 @@
 		USER_IN_COLLABORATOR_LIST: { message: "This user is currently in collaborator list of a model", status: 400 },
 		SUBSCRIPTION_CANNOT_REMOVE_SELF: { message: "You cannot remove yourself", status: 400 },
 		USER_NOT_ASSIGNED_JOB: { message: "Job must be assigned to user", status: 400 },
+		USER_ALREADY_EXISTS: { message: "User already exists", status: 400 },
 
 		PAYMENT_TOKEN_ERROR: { message: "Payment token is invalid", status: 400 },
 		EXECUTE_AGREEMENT_ERROR: { message: "Failed to get payment from PayPal", status: 400 },

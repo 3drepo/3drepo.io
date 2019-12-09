@@ -19,11 +19,9 @@
 
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
-const config = require("../../config");
 const request = require("supertest");
 const IssueHelper =  require("../helpers/issues.js");
 const async = require("async");
-const path = require("path");
 const orderBy = require("lodash").orderBy;
 
 

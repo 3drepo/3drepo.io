@@ -354,7 +354,6 @@
 	}
 
 	function removeTeamMember(req, res, next) {
-
 		const responsePlace = utils.APIInfo(req);
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
