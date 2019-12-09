@@ -17,7 +17,9 @@
 "use strict";
 
 const db = require("../handler/db");
+const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
+
 const History = require("./history");
 const Task = require("./task");
 
@@ -46,16 +48,16 @@ class Sequence {
 	}
 
 	async getList(account, model, branch, revision, cleanResponse = false) {
-		
+
 		const history = await History.getHistory({account, model}, branch, revision);
 
 		if (!history) {
 			return Promise.reject(responseCodes.INVALID_TAG_NAME);
 		}
-		
+
 		return db.getCollection(account, model + ".sequences").then(_dbCol => {
 			return _dbCol.find({"revId": history._id}).toArray().then(sequences => {
-				let taskPromises = [];
+				const taskPromises = [];
 
 				sequences.forEach((sequence) => {
 					if (cleanResponse) {
@@ -72,7 +74,7 @@ class Sequence {
 							);
 
 							taskPromises.push(taskPromise);
-							
+
 							taskPromise.then((task) => {
 								sequence["sequence"][i]["tasks"][j] = task;
 							});

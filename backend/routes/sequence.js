@@ -20,11 +20,8 @@ const express = require("express");
 const router = express.Router({mergeParams: true});
 const middlewares = require("../middlewares/middlewares");
 
-const C = require("../constants");
 const responseCodes = require("../response_codes.js");
-const config = require("../config");
 const utils = require("../utils");
-const multer = require("multer");
 const Sequence = require("../models/sequence");
 
 /**
