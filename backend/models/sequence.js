@@ -45,44 +45,6 @@ class Sequence {
 		return toClean;
 	}
 
-	async findByUID(account, model, sequenceId, cleanResponse = false) {
-		return db.getCollection(account, model + ".sequences").then((_dbCol) => {
-			return _dbCol.findOne({ _id: utils.stringToUUID(sequenceId) }).then(sequence => {
-
-				if (!sequence) {
-					return Promise.reject(responseCodes.SEQUENCE_NOT_FOUND);
-				}
-
-				if (cleanResponse) {
-					this.clean(sequence);
-				}
-
-				let taskPromises = [];
-
-				for (let i = 0; sequence["sequence"] && i < sequence["sequence"].length; i++) {
-					for (let j = 0; sequence["sequence"][i]["tasks"] && j < sequence["sequence"][i]["tasks"].length; j++) {
-						const taskPromise = Task.findByUID(
-							account,
-							model,
-							sequence["sequence"][i]["tasks"][j],
-							cleanResponse
-						);
-
-						taskPromises.push(taskPromise);
-						
-						taskPromise.then((task) => {
-							sequence["sequence"][i]["tasks"][j] = task;
-						});
-					}
-				}
-
-				return Promise.all(taskPromises).then(() => {
-					return sequence;
-				});
-			});
-		});
-	}
-
 	async getList(account, model, branch, revision, cleanResponse = false) {
 		
 		const history = await History.getHistory({account, model}, branch, revision);

@@ -34,7 +34,6 @@ const Sequence = require("../models/sequence");
  * @apiParam {String} model Model ID
  */
 
-router.get("/sequences/:sequenceId", middlewares.issue.canView, findSequenceById);
 router.get("/revision/master/head/sequences", middlewares.issue.canView, listSequences);
 router.get("/revision/:rid/sequences", middlewares.issue.canView, listSequences);
 
@@ -45,18 +44,6 @@ function listSequences(req, res, next) {
 
 	Sequence.getList(account, model, branch, rid, true).then(sequences => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, sequences);
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-}
-
-function findSequenceById(req, res, next) {
-	const params = req.params;
-	const place = utils.APIInfo(req);
-	const {account, model} =  req.params;
-
-	Sequence.findByUID(account, model, params.sequenceId, true).then(sequence => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, sequence);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
