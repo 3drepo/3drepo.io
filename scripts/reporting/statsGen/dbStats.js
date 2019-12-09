@@ -1,6 +1,6 @@
 const fs = require('fs');
 const NewUsersPerMonth = require("./newUsersPerMonth");
-const TeamspaceQuota = require("./teamspaceQuota");
+const Teamspace = require("./teamspaceQuota");
 
 "use strict";
 
@@ -8,7 +8,8 @@ DBStats = {};
 
 const createReports = async(dbConn) => {
 	const newUserFile = await NewUsersPerMonth.createNewUsersReport(dbConn);
-	const tsQuotaFile = await TeamspaceQuota.createTeamspaceQuotaReport(dbConn);
+	let files = await Teamspace.createTeamspaceReport(dbConn);
+
 }
 
 DBStats.createDBReport = async (dbConn) => {
