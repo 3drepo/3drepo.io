@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 // import { between } from '../../../../../helpers/between';
 import { ELEMENT_TYPES, MODES } from '../../screenshotDialog.helpers';
 // import { createDrawnLine, createShape, getDrawFunction } from './drawing.helpers';
@@ -30,29 +30,26 @@ interface IProps {
 	layer: any;
 	stage: any;
 	activeShape: number;
+	activeCalloutShape: number;
 	selected: string;
 	disabled: boolean;
-	handleNewDrawnLine: (line, type?) => void;
-	handleNewDrawnShape: (shape, attrs) => void;
+	handleNewDrawnShape: (shape: number, attrs, updateState?: boolean) => void;
+	handleNewDrawnLine: (line, type?, updateState?: boolean) => void;
+	handleNewText: (position, updateState?: boolean) => () => any;
 }
 
 const COMPONENTS_MAP = {
 	[MODES.CALLOUT]: HandleCalloutDrawing,
 };
 
+const Span = (props) => (<span {...props} />);
+
 export const DrawingHandler = (props: IProps) => {
 	const { mode } = props;
 
-	useEffect(() => {
-
-	}, [mode]);
-
 	const Component = useMemo(() => {
-		return COMPONENTS_MAP[mode] || COMPONENTS_MAP[MODES.CALLOUT];
+		return COMPONENTS_MAP[mode] || null;
 	}, [mode]);
-	
-	console.warn('{...props}:', {...props});
 
-	// return null;
-	return <Component {...props} />;
+	return Component && <Component {...props} />;
 };

@@ -24,7 +24,6 @@ import { COLOR } from '../../../../../styles/colors';
 export const MenuList = styled(List)`
 	background-color: ${COLOR.WHITE};
 	width: 100%;
-	min-width: 160px;
 	max-width: 300px;
 	box-shadow: 0 1px 3px 0 ${COLOR.BLACK_20};
 	border-radius: 2px;

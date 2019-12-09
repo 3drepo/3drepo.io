@@ -75,6 +75,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		fontSize: INITIAL_VALUES.textSize,
 		mode: null,
 		activeShape: null,
+		activeCalloutShape: null,
 		sourceImage: '',
 		stage: {
 			height: 0,
@@ -332,8 +333,16 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 
 	public setEraserMode = () => this.setMode(MODES.ERASER);
 
-	public setCalloutMode = () => {
-		this.setMode(MODES.CALLOUT);
+	public setCalloutMode = (shape) => {
+		const newState = {
+			activeCalloutShape: shape
+		} as any;
+
+		if (this.state.mode !== MODES.CALLOUT) {
+			newState.mode = MODES.CALLOUT;
+		}
+
+		this.setState(newState);
 	}
 
 	public setShapeMode = (shape) => {
@@ -434,28 +443,35 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public addNewText = (position) => {
+	public addNewText = (position, updateState: boolean = true) => {
 		const newText = getNewText(this.state.color, this.state.fontSize, position);
 		const selectedObjectName = newText.name;
 		this.props.addElement(newText);
-		this.setState({ selectedObjectName, mode: MODES.TEXT });
-		document.body.style.cursor = 'crosshair';
+		if (updateState) {
+			this.setState({selectedObjectName, mode: MODES.TEXT});
+			document.body.style.cursor = 'crosshair';
+		} else {
+			return () => this.setState({selectedObjectName, mode: MODES.TEXT});
+		}
 	}
 
-	public addNewDrawnLine = (line, type) => {
+	public addNewDrawnLine = (line, type, updateState: boolean = true) => {
 		if (!this.state.selectedObjectName) {
 			const newLine = getNewDrawnLine(line.attrs, this.state.color, type);
 			const selectedObjectName = this.isErasing ? '' : newLine.name;
 			this.props.addElement(newLine);
-			if (type !== MODES.POLYGON) {
-				this.setState(({ mode }) => ({ selectedObjectName, mode: this.isErasing ? mode : MODES.BRUSH }));
-			} else {
-				this.setState({ selectedObjectName, mode: MODES.POLYGON });
+
+			if (updateState) {
+				if (type !== MODES.POLYGON) {
+					this.setState(({mode}) => ({selectedObjectName, mode: this.isErasing ? mode : MODES.BRUSH}));
+				} else {
+					this.setState({selectedObjectName, mode: MODES.POLYGON});
+				}
 			}
 		}
 	}
 
-	public addNewShape = (figure, { attrs }) => {
+	public addNewShape = (figure, { attrs }, updateState: boolean = true) => {
 		if (!this.state.selectedObjectName) {
 			const correctCircle = figure === SHAPE_TYPES.CIRCLE && attrs.radius > 1;
 			const correctTriangle = figure === SHAPE_TYPES.TRIANGLE && attrs.radius > 1;
@@ -475,7 +491,9 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 				});
 				const selectedObjectName = newShape.name;
 				this.props.addElement(newShape);
-				this.setState({ selectedObjectName });
+				if (updateState) {
+					this.setState({ selectedObjectName });
+				}
 			}
 
 			document.body.style.cursor = 'crosshair';
@@ -554,15 +572,17 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 							// ref={this.drawingRef}
 							height={this.state.stage.height}
 							width={this.state.stage.width}
-							size={this.state.brushSize}
-							color={this.state.brushColor}
+							size={this.state.strokeWidth}
+							color={this.state.color}
 							mode={this.state.mode}
 							layer={this.drawingLayerRef}
 							stage={this.stage}
 							handleNewDrawnLine={this.addNewDrawnLine}
 							handleNewDrawnShape={this.addNewShape}
+							handleNewText={this.addNewText}
 							selected={this.state.selectedObjectName}
 							activeShape={this.state.activeShape}
+							activeCalloutShape={this.state.activeCalloutShape}
 							disabled={this.props.disabled}
 						/>
 					</Layer>
@@ -592,6 +612,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 			disabled={this.props.disabled}
 			mode={this.state.mode}
 			activeShape={this.state.activeShape}
+			activeCalloutShape={this.state.activeCalloutShape}
 			selectedObjectName={this.state.selectedObjectName}
 			arePastElements={this.props.arePastElements}
 			areFutureElements={this.props.areFutureElements}
@@ -623,7 +644,7 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	));
 
 	public render() {
-		const { stage, container } = this.state;
+		const { stage, container, textEditable } = this.state;
 
 		return (
 			<Container height={container.height} width={container.width} ref={this.containerRef}>
@@ -639,8 +660,8 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 					<Stage ref={this.stageRef} height={stage.height} width={stage.width} onMouseDown={this.handleStageMouseDown}>
 						{this.renderLayers()}
 					</Stage>
-					{this.renderEditableTextarea(this.state.textEditable.visible)}
 				</StageContainer>
+				{this.renderEditableTextarea(textEditable.visible)}
 			</Container>
 		);
 	}

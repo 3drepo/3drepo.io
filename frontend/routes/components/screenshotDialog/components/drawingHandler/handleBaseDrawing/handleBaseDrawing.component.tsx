@@ -16,8 +16,9 @@
  */
 
 import * as React from 'react';
+import {getDrawFunction} from '../../drawing/drawing.helpers';
 
-export interface IHandleBaseDrawing {
+export interface IHandleBaseDrawingProps {
 	color: string;
 	size: number;
 	mode: string;
@@ -29,17 +30,25 @@ export interface IHandleBaseDrawing {
 	disabled: boolean;
 }
 
-export class HandleBaseDrawing extends React.PureComponent <IHandleBaseDrawing, any> {
-	public constructor(props) {
-		super(props);
-	}
+export interface IHandleBaseDrawingStates {
+	isCurrentlyDrawn: boolean;
+}
 
-	public initialPointerPosition: any = { x: 0, y: 0 };
-	public lastPointerPosition: any = { x: 0, y: 0 };
+export class HandleBaseDrawing<P, S> extends React.PureComponent<IHandleBaseDrawingProps & P> {
 
 	public state = {
 		isCurrentlyDrawn: false,
 	};
+
+	public constructor(props) {
+		super(props);
+	}
+
+	public activeDrawingShape: number = 0;
+	public initialPointerPosition: any = { x: 0, y: 0 };
+	public lastPointerPosition: any = { x: 0, y: 0 };
+	public lastShape: any = {};
+	public lastLine: any = {};
 
 	public componentDidMount() {
 		if (!this.props.disabled) {
@@ -47,7 +56,7 @@ export class HandleBaseDrawing extends React.PureComponent <IHandleBaseDrawing, 
 		}
 	}
 
-	public componentWillMount() {
+	public componentWillUnmount() {
 		this.unsubscribeDrawingEvents();
 	}
 
@@ -57,8 +66,40 @@ export class HandleBaseDrawing extends React.PureComponent <IHandleBaseDrawing, 
 	public unsubscribeDrawingEvents = () => {
 	}
 
+	get activeShape() {
+		return this.activeDrawingShape;
+	}
+
+	set activeShape(shape: number) {
+		this.activeDrawingShape = shape;
+	}
+
 	get layer() {
 		return this.props.layer.current.getLayer();
+	}
+
+	get pointerPosition() {
+		return this.props.stage.getPointerPosition();
+	}
+
+	public get localPosition() {
+		const position = this.props.stage.getPointerPosition();
+		const currentLayer = this.props.layer.current;
+		return {
+			x: position.x - currentLayer.x(),
+			y: position.y - currentLayer.y()
+		};
+	}
+
+	public updateLastLinePoint = () => {
+		const newPoints = this.lastLine.points().concat([this.localPosition.x, this.localPosition.y]);
+		this.lastLine.points(newPoints);
+	}
+
+	public drawShape = () => {
+		const draw = getDrawFunction(this.activeShape, this.lastShape, this.initialPointerPosition, this.pointerPosition);
+		draw();
+		this.layer.batchDraw();
 	}
 
 	public render() {

@@ -8,6 +8,7 @@ export const SHAPE_TYPES = {
 	CLOUD: 5,
 	ARROW: 6,
 	POLYGON: 7,
+	DOT: 8,
 };
 
 export const SHAPE_COMPONENTS = {

@@ -40,7 +40,7 @@ import { MODES } from '../../screenshotDialog.helpers';
 import { SHAPE_TYPES } from '../shape/shape.constants';
 import {
 	activeShapeIcon,
-	BRUSH_SIZES,
+	BRUSH_SIZES, CALLOUT_SHAPES_MENU,
 	MAX_TOOL_ICON_SIZE,
 	MIN_BRUSH_ICON_SIZE,
 	MIN_TEXT_ICON_SIZE,
@@ -58,6 +58,7 @@ interface IProps {
 	color: string;
 	disabled?: boolean;
 	activeShape: number;
+	activeCalloutShape: number;
 	selectedObjectName: string;
 	areFutureElements: boolean;
 	arePastElements: boolean;
@@ -67,7 +68,7 @@ interface IProps {
 	onEraseClick: () => void;
 	onTextClick: () => void;
 	onShapeClick: (shapeName?) => void;
-	onCalloutClick: () => void;
+	onCalloutClick: (shapeName?) => void;
 	onClearClick: () => void;
 	onColorChange: (color) => void;
 	onBrushSizeChange: (size) => void;
@@ -142,16 +143,43 @@ export class Tools extends React.PureComponent<IProps, any> {
 							</>
 						);
 					}}
-					renderContent={this.renderActionsMenu}
+					renderContent={this.renderShapesMenu}
 					PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 					PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'center' } }}
 					ButtonProps={{ disabled: false }}
 				/>
-				<TooltipButton
-					label="Callout"
-					color={this.getToolColor(MODES.CALLOUT)}
-					action={onCalloutClick}
-					Icon={CalloutIcon}
+				<ButtonMenu
+						renderButton={({ IconProps, Icon, ...props }) => {
+							const ActiveIcon = activeShapeIcon(this.props.activeCalloutShape || SHAPE_TYPES.DOT);
+							return (
+									<>
+										<Tooltip title={'Add callout'}>
+											<IconButton
+													{...props}
+													aria-label="Show callout shapes menu"
+													aria-haspopup="true"
+													color={this.getToolColor(MODES.CALLOUT)}
+													onClick={this.setDefaultCalloutShape}
+											>
+												<ActiveIcon {...IconProps} />
+											</IconButton>
+										</Tooltip>
+										<ShapeMenuButton>
+											<SmallIconButton
+													Icon={ArrowDropDownIcon}
+													onClick={(e) => {
+														props.onClick(e);
+														onClick();
+													}}
+											/>
+										</ShapeMenuButton>
+									</>
+							);
+						}}
+						renderContent={this.renderCalloutShapesMenu}
+						PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+						PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'center' } }}
+						ButtonProps={{ disabled: false }}
 				/>
 				<TooltipButton
 					label="Erase"
@@ -234,8 +262,17 @@ export class Tools extends React.PureComponent<IProps, any> {
 		this.props.onShapeClick(shapeName);
 	}
 
+	public handleCalloutShapeClick = (shapeName, menu, e) => {
+		menu.close(e);
+		this.props.onCalloutClick(shapeName);
+	}
+
 	public setDefaultShape = () => {
 		this.props.onShapeClick(this.props.activeShape || SHAPE_TYPES.RECTANGLE);
+	}
+
+	public setDefaultCalloutShape = () => {
+		this.props.onCalloutClick(this.props.activeCalloutShape || SHAPE_TYPES.DOT);
 	}
 
 	public renderToolMenuItem = (value, content) => (
@@ -287,7 +324,7 @@ export class Tools extends React.PureComponent<IProps, any> {
 		return [MODES.SHAPE, MODES.POLYGON].includes(this.props.mode) ? ACTIVE_COLOR : DEFAULT_COLOR;
 	}
 
-	public renderActionsMenu = (menu) =>  {
+	public renderShapesMenu = (menu) =>  {
 		return(
 			<MenuList>
 				{SHAPES_MENU.map(({ name, Icon }) => (
@@ -295,6 +332,20 @@ export class Tools extends React.PureComponent<IProps, any> {
 						Icon={Icon}
 						key={name}
 						onClick={(e) => this.handleShapeClick(name, menu, e)}
+					/>
+				))}
+			</MenuList>
+		);
+	}
+
+	public renderCalloutShapesMenu = (menu) =>  {
+		return(
+			<MenuList>
+				{CALLOUT_SHAPES_MENU.map(({ name, Icon }) => (
+					<SmallIconButton
+						Icon={Icon}
+						key={name}
+						onClick={(e) => this.handleCalloutShapeClick(name, menu, e)}
 					/>
 				))}
 			</MenuList>
